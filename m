@@ -2,225 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E836CCA480
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 08:44:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4B57C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 11:26:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231165AbiGKIo2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jul 2022 04:44:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51130 "EHLO
+        id S231366AbiGKL0x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 07:26:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43288 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229985AbiGKInv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 04:43:51 -0400
-X-Greylist: delayed 82 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 11 Jul 2022 01:43:30 PDT
-Received: from relay01.th.seeweb.it (relay01.th.seeweb.it [IPv6:2001:4b7a:2000:18::162])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B347C3
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:43:30 -0700 (PDT)
-Received: from [192.168.1.101] (abxi46.neoplus.adsl.tpnet.pl [83.9.2.46])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits))
-        (No client certificate requested)
-        by m-r1.th.seeweb.it (Postfix) with ESMTPSA id 107EA1F53F;
-        Mon, 11 Jul 2022 10:43:28 +0200 (CEST)
-Message-ID: <0004504d-d009-1eb7-d544-5f8a28aa565a@somainline.org>
-Date:   Mon, 11 Jul 2022 10:43:27 +0200
+        with ESMTP id S229838AbiGKL0M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 07:26:12 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36B473DF05
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 04:02:35 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id bf9so8025962lfb.13
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 04:02:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=MeyCZN/nvsiRNNCAAR15uWNXyKxL+fyysaeRMmXtoJA=;
+        b=D4OVU2SdZDl1a2Jmvol1Su2acwSKKhbqYZKZn6/Qc8eT2iND/KO9t9DapzIOJtxYXe
+         Me3ljHAhTzWcyA62SHeecPkZ9BDGif3nIQh/4L6wxXSsOfYRKcaerfZkctH+lPcPcaXR
+         9nwslGSNuJR55nrpcs0QsF89vgcW8SmISLwf7h2vLLq4lkAVjwTUIVYO0/uBy/LsND6c
+         fUnyCOa9fgewXhbnW8EdRaMnWofxJvAWbnpmaDz4VV5KTLCEbsVuj6MgdDHsj0ja4Cm4
+         7iMTtMjKPL9Xg15Ww0kzLHvpVQi9YC6P0O0itH4F7zJK4x/PaxvCYROPFLopO6UyHl1u
+         Htcw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=MeyCZN/nvsiRNNCAAR15uWNXyKxL+fyysaeRMmXtoJA=;
+        b=HcQfxTERIszXl3tsWVz/OcEj6ukVpV1/AY+xlXqPQqMFhQENKImL5nzbRHWxr0damL
+         DUp5i0qISL8Dyc5mD8FZ5cvwHJXeFgCCpHnH/q3ZCZhGzQiH/IkZAyxRZwzIq3tkCMfv
+         UtNa7WNIS+/roGfq8hdfFq4mIUB1Pg3eJb30NxDW0+8c3uLOVkOYkvvW+jBWTCvvDByC
+         Dz+r36EHzXO50YMBWA3njtQFqmep+GeHwzwf+eMRcPz5+ZugXY4mxhEYaOvVzSKpsdIm
+         hk/UfocBaPawwLraGkrUYu3U2o1ndDhL8eG2gw6vSBC8+X1vDOt8vfwjkiBSBBaAS6s9
+         VTqA==
+X-Gm-Message-State: AJIora/c5EveK6eN0HuQyH8AUXILrtl3QaYW8GAKEOp0YyIskPCEyFTu
+        uLvLSQcaAmECvsrs9DnTbNYAqA==
+X-Google-Smtp-Source: AGRyM1vhnNj6aFdiTr/noru4YDiDuSvAcJcPUSJPfEwIMQ9AAASbaicPsvFT+S0lPieRGdaNAEiPLw==
+X-Received: by 2002:a05:6512:3b20:b0:47f:8ca1:bd7 with SMTP id f32-20020a0565123b2000b0047f8ca10bd7mr10686215lfv.105.1657537353492;
+        Mon, 11 Jul 2022 04:02:33 -0700 (PDT)
+Received: from [10.0.0.8] (fwa5cab-55.bb.online.no. [88.92.171.55])
+        by smtp.gmail.com with ESMTPSA id u10-20020ac258ca000000b00478a311d399sm1489609lfo.0.2022.07.11.04.02.31
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 11 Jul 2022 04:02:32 -0700 (PDT)
+Message-ID: <c8f8f5f4-173e-797d-e060-e5eaac7ca822@linaro.org>
+Date:   Mon, 11 Jul 2022 13:02:30 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.11.0
-Subject: Re: [PATCH v2 5/5] ARM: dts: qcom: align SDHCI clocks with DT schema
+Subject: Re: [PATCH] dt-bindings: mmc: Add compatible for MediaTek MT8188
 Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc:     Douglas Anderson <dianders@chromium.org>
-References: <20220711082940.39539-1-krzysztof.kozlowski@linaro.org>
- <20220711082940.39539-6-krzysztof.kozlowski@linaro.org>
-From:   Konrad Dybcio <konrad.dybcio@somainline.org>
-In-Reply-To: <20220711082940.39539-6-krzysztof.kozlowski@linaro.org>
+To:     Johnson Wang <johnson.wang@mediatek.com>, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com
+References: <20220707054710.1396-1-johnson.wang@mediatek.com>
+ <41e17a56-5cb0-8e90-c7ae-a7a56de986d0@linaro.org>
+ <3216ec92952c7d722feaeb76986e0a6a54340646.camel@mediatek.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <3216ec92952c7d722feaeb76986e0a6a54340646.camel@mediatek.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 11.07.2022 10:29, Krzysztof Kozlowski wrote:
-> The DT schema expects clocks iface-core order.  No functional change.
+On 07/07/2022 09:30, Johnson Wang wrote:
+> On Thu, 2022-07-07 at 08:46 +0200, Krzysztof Kozlowski wrote:
+>> On 07/07/2022 07:47, Johnson Wang wrote:
+>>> This commit adds dt-binding documentation of mmc for MediaTek
+>>> MT8188 SoC
+>>> platform.
+>>>
+>>> Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
+>>> ---
+>>>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 3 +++
+>>>  1 file changed, 3 insertions(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>> b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>> index 2a2e9fa8c188..3fbf33ad4f7c 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+>>> @@ -32,6 +32,9 @@ properties:
+>>>        - items:
+>>>            - const: mediatek,mt8186-mmc
+>>>            - const: mediatek,mt8183-mmc
+>>> +      - items:
+>>> +          - const: mediatek,mt8188-mmc
+>>
+>> You duplicate quite a lot. Use enum.
+>>
+>> Best regards,
+>> Krzysztof
 > 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Reviewed-by: Douglas Anderson <dianders@chromium.org>
-> ---
-Reviewed-by: Konrad Dybcio <konrad.dybcio@somainline.org>
-
-Konrad
->  arch/arm/boot/dts/qcom-apq8084.dtsi    | 12 ++++++------
->  arch/arm/boot/dts/qcom-ipq4019.dtsi    |  4 ++--
->  arch/arm/boot/dts/qcom-msm8226.dtsi    | 18 +++++++++---------
->  arch/arm/boot/dts/qcom-msm8974.dtsi    | 18 +++++++++---------
->  arch/arm/boot/dts/qcom-msm8974pro.dtsi |  6 +++---
->  5 files changed, 29 insertions(+), 29 deletions(-)
+> Hi Krzysztof,
 > 
-> diff --git a/arch/arm/boot/dts/qcom-apq8084.dtsi b/arch/arm/boot/dts/qcom-apq8084.dtsi
-> index 45f3cbcf6238..c887ac5cdd7d 100644
-> --- a/arch/arm/boot/dts/qcom-apq8084.dtsi
-> +++ b/arch/arm/boot/dts/qcom-apq8084.dtsi
-> @@ -425,10 +425,10 @@ mmc@f9824900 {
->  			reg-names = "hc", "core";
->  			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> -				 <&gcc GCC_SDCC1_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			status = "disabled";
->  		};
->  
-> @@ -438,10 +438,10 @@ mmc@f98a4900 {
->  			reg-names = "hc", "core";
->  			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> -				 <&gcc GCC_SDCC2_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> +				 <&gcc GCC_SDCC2_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			status = "disabled";
->  		};
->  
-> diff --git a/arch/arm/boot/dts/qcom-ipq4019.dtsi b/arch/arm/boot/dts/qcom-ipq4019.dtsi
-> index 1b98764bab7a..a8a32a5e7e5d 100644
-> --- a/arch/arm/boot/dts/qcom-ipq4019.dtsi
-> +++ b/arch/arm/boot/dts/qcom-ipq4019.dtsi
-> @@ -228,9 +228,9 @@ sdhci: mmc@7824900 {
->  			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>, <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
->  			bus-width = <8>;
-> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>, <&gcc GCC_SDCC1_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>, <&gcc GCC_SDCC1_APPS_CLK>,
->  				 <&gcc GCC_DCD_XO_CLK>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			status = "disabled";
->  		};
->  
-> diff --git a/arch/arm/boot/dts/qcom-msm8226.dtsi b/arch/arm/boot/dts/qcom-msm8226.dtsi
-> index f711463d22dc..9d4223bf8fc1 100644
-> --- a/arch/arm/boot/dts/qcom-msm8226.dtsi
-> +++ b/arch/arm/boot/dts/qcom-msm8226.dtsi
-> @@ -141,10 +141,10 @@ sdhc_1: mmc@f9824900 {
->  			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> -				 <&gcc GCC_SDCC1_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			pinctrl-names = "default";
->  			pinctrl-0 = <&sdhc1_default_state>;
->  			status = "disabled";
-> @@ -157,10 +157,10 @@ sdhc_2: mmc@f98a4900 {
->  			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> -				 <&gcc GCC_SDCC2_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> +				 <&gcc GCC_SDCC2_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			pinctrl-names = "default";
->  			pinctrl-0 = <&sdhc2_default_state>;
->  			status = "disabled";
-> @@ -173,10 +173,10 @@ sdhc_3: mmc@f9864900 {
->  			interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 224 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC3_APPS_CLK>,
-> -				 <&gcc GCC_SDCC3_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC3_AHB_CLK>,
-> +				 <&gcc GCC_SDCC3_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			pinctrl-names = "default";
->  			pinctrl-0 = <&sdhc3_default_state>;
->  			status = "disabled";
-> diff --git a/arch/arm/boot/dts/qcom-msm8974.dtsi b/arch/arm/boot/dts/qcom-msm8974.dtsi
-> index 971eceaef3d1..1f4baa6ac64d 100644
-> --- a/arch/arm/boot/dts/qcom-msm8974.dtsi
-> +++ b/arch/arm/boot/dts/qcom-msm8974.dtsi
-> @@ -443,10 +443,10 @@ sdhc_1: mmc@f9824900 {
->  			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> -				 <&gcc GCC_SDCC1_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +				 <&gcc GCC_SDCC1_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			bus-width = <8>;
->  			non-removable;
->  
-> @@ -460,10 +460,10 @@ sdhc_3: mmc@f9864900 {
->  			interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 224 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC3_APPS_CLK>,
-> -				 <&gcc GCC_SDCC3_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC3_AHB_CLK>,
-> +				 <&gcc GCC_SDCC3_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			bus-width = <4>;
->  
->  			#address-cells = <1>;
-> @@ -479,10 +479,10 @@ sdhc_2: mmc@f98a4900 {
->  			interrupts = <GIC_SPI 125 IRQ_TYPE_LEVEL_HIGH>,
->  				     <GIC_SPI 221 IRQ_TYPE_LEVEL_HIGH>;
->  			interrupt-names = "hc_irq", "pwr_irq";
-> -			clocks = <&gcc GCC_SDCC2_APPS_CLK>,
-> -				 <&gcc GCC_SDCC2_AHB_CLK>,
-> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> +				 <&gcc GCC_SDCC2_APPS_CLK>,
->  				 <&xo_board>;
-> -			clock-names = "core", "iface", "xo";
-> +			clock-names = "iface", "core", "xo";
->  			bus-width = <4>;
->  
->  			#address-cells = <1>;
-> diff --git a/arch/arm/boot/dts/qcom-msm8974pro.dtsi b/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-> index 1e882e16a221..58df6e75ab6d 100644
-> --- a/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-> +++ b/arch/arm/boot/dts/qcom-msm8974pro.dtsi
-> @@ -10,10 +10,10 @@ &gpu {
->  };
->  
->  &sdhc_1 {
-> -	clocks = <&gcc GCC_SDCC1_APPS_CLK>,
-> -		 <&gcc GCC_SDCC1_AHB_CLK>,
-> +	clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-> +		 <&gcc GCC_SDCC1_APPS_CLK>,
->  		 <&xo_board>,
->  		 <&gcc GCC_SDCC1_CDCCAL_FF_CLK>,
->  		 <&gcc GCC_SDCC1_CDCCAL_SLEEP_CLK>;
-> -	clock-names = "core", "iface", "xo", "cal", "sleep";
-> +	clock-names = "iface", "core", "xo", "cal", "sleep";
->  };
+> Thanks for you suggestion.
+> 
+> I will use 'enum' to place this compatible strings.
+> 
+> Just like this:
+> - items:
+>     - enum:
+>         - mediatek,mt8186-mmc
+>         - mediatek,mt8188-mmc
+>         - mediatek,mt8192-mmc
+>         - mediatek,mt8195-mmc
+>     - const: mediatek,mt8183-mmc
+> 
+> Moreover, it seems that missing an "items:" between oneOf and enum in
+> the compatible property.
+> Is my understanding wrong?
+
+I did not propose to remove items, so where are they missing? Not sure
+what you are asking about...
+
+Best regards,
+Krzysztof
