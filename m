@@ -2,241 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35F8BC43334
-	for <linux-mmc@archiver.kernel.org>; Sat,  9 Jul 2022 03:25:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 453A0C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 07:45:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229473AbiGIDZW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 8 Jul 2022 23:25:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54558 "EHLO
+        id S230155AbiGKHpg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 03:45:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229379AbiGIDZU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 8 Jul 2022 23:25:20 -0400
-Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A4036BC26
-        for <linux-mmc@vger.kernel.org>; Fri,  8 Jul 2022 20:25:19 -0700 (PDT)
-Received: by mail-wm1-x32d.google.com with SMTP id bi22-20020a05600c3d9600b003a04de22ab6so216350wmb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 08 Jul 2022 20:25:19 -0700 (PDT)
+        with ESMTP id S229668AbiGKHpf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 03:45:35 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FCCC63B6
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 00:45:33 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id y11so796394lfs.6
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 00:45:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=L+AJ4olJur0SIh9v93JX3tHnYFdqkXXmuUpXgqS3ZXw=;
-        b=evVgWTD9tF18UZC+qn1jEnBZPR8iDU1jtxMF694O/2n6JNxOqd1Nm4O+iNvaF6f836
-         xdxaqsE30kMJF8C9na7AI1/MmjZqrdPKQBlc/OV7ed0g7oyzK3XV/bVarcNQVx2I2TP7
-         8yZtn30oqUOVOHEFBFhIZIzJzISC3+q7jMjZkN69S9CY3pdjfBqi16N5jVd0ZxEfQY26
-         KgN35G2v9TQtF4+/6ZaebQcTBpkXloskptYm2/Zs2TzLAKdC/9rJmno6Kx4Uu9hZ+kR9
-         r/VfpTXjWbjQWAonG6aZBLUSwIr095FbyHFc08rVvQe+tmWUYoxY0vuD4eFQNkIXDw8b
-         i//g==
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=wqIFBf3DN10dow3GoXse21GGYLCZcVsfvhzNfQvO+X4=;
+        b=bhLbh/jndXXNXiXMqF9n8seGfMnoBKK43GGudT+034/0ObNAvJXElA+PkDogw3+zvz
+         pyQjOWzfJ6nNk3z7KpVKqEVBeuQXMlUdEAkDg6rgTp8HbKllExHTod6aqZISDZZbg8Pj
+         w0Wi/owibTrxU/BgAaZ9wf1Ur5T18OlAvmcmAlOJUPdvIwvNivbKjeK4yQdy3UBuIdLZ
+         MKDR4DBhmYmyBL1nbxQAkYge1/TaXEDSe7ty71Ro6K6AwDeMIgejSTwkfxw1PLZgZRA9
+         8O/ba7KaeAKM2zfeq4AUdqc7jGptwKD6OHzc+FyI3VNINdcb6vv2Q6FItsCvH2uabyJ3
+         OryA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=L+AJ4olJur0SIh9v93JX3tHnYFdqkXXmuUpXgqS3ZXw=;
-        b=UHo98F3FzWijzMPfmTEXB3rzDb9HoBsDxJ73DxYIPdZHMSXQKCWPT3ASOeLHhjHCX2
-         ORHO8yta5nnSSGJHLON+Pst/HfMH3vOswVMWyz/E4YoNFWqK9cHrzDw1B0x28dd65cVi
-         45JYEjXUbU7Wg2C/Cy04VIK5F30MIDLs35fL4FiJ6dK5bzRH9qWTsn2ya4F4dwboTQie
-         dAssIE1a3jxaxB5JUwzLi+qwGZuukr96H8ve8o+Z3NNeIUe5Za0uD/ysltGc3UYtdPBc
-         NR1S8OIQgjgutAmCQe1b6LntEYwcp3Ts0jpUELAev4i5vRfxVO9modSP1eA1PM0sLdA3
-         TqWw==
-X-Gm-Message-State: AJIora9E9pjyFWSXS/FaIJRsmhUIShAUp8F+cNEvHecdkkcGawviRdKt
-        BLiF9tiPqt+JqCveqatiNOu8bGOKOwpNvxyNUZapbA==
-X-Google-Smtp-Source: AGRyM1swXGC1sfaXQRy1Xn69Dt8GxfoLuFYMy74dgllMBgXsH8MqmBm3CWHwxaQO0WXjO23yCp57TBd/Ze4MIb/YpdM=
-X-Received: by 2002:a05:600c:4fc8:b0:3a1:99cf:800 with SMTP id
- o8-20020a05600c4fc800b003a199cf0800mr3054967wmq.60.1657337117577; Fri, 08 Jul
- 2022 20:25:17 -0700 (PDT)
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=wqIFBf3DN10dow3GoXse21GGYLCZcVsfvhzNfQvO+X4=;
+        b=LT2Zwa07hT2tNSmEZugtUqL/iedaLMaU4DGT5gCbkQC0XuNXvwbGLkHWfJrKJUYLMf
+         AGIu2Lkf2Bejgjo0P9OpCgBRZqCUliRbU7/R8PlS3hROe4hmPFztPEMkuqmPgqcppLow
+         Fe1+SPTtGrpw1OQXCsIdVjd46W3B1fbeAfjNweun+MJw3Crqyl/EpFC16JSA1Bweu2Oo
+         gwWjFuZvTn8APsKDoc4EWfBTFql3IjtFw/T9H9j+8u6a2uOm6/qnhID1xFhL28i09sVX
+         4wvN2/LJ4tN43kthAZpj2rdZilP1C2e3JjcU472VgeC5cwJK0hoDt7Xe759ebh9AiCUX
+         hxsg==
+X-Gm-Message-State: AJIora+rV3x5GXxTsdHaLBnsdIqMwtbFXpUWibG2lsFVE+TjYvXPZTe1
+        fNrF/pTzRCwkT4gj+cehXUaxlA==
+X-Google-Smtp-Source: AGRyM1vPfEahu4HcbTv/71vdz7MtuUZ4XlDhRbns/Wsz9/D078JYEbthPyLCS1hxYMSuW+6bMIpmsg==
+X-Received: by 2002:a05:6512:31c9:b0:489:e037:31b9 with SMTP id j9-20020a05651231c900b00489e03731b9mr1802467lfe.178.1657525531668;
+        Mon, 11 Jul 2022 00:45:31 -0700 (PDT)
+Received: from [10.0.0.8] (fwa5cab-55.bb.online.no. [88.92.171.55])
+        by smtp.gmail.com with ESMTPSA id r17-20020ac25f91000000b004867a427026sm1401483lfe.40.2022.07.11.00.45.29
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 11 Jul 2022 00:45:31 -0700 (PDT)
+Message-ID: <9fb4beb2-96c3-1bf6-9ee3-5b87b641c234@linaro.org>
+Date:   Mon, 11 Jul 2022 09:45:28 +0200
 MIME-Version: 1.0
-References: <20220625050838.1618469-1-davidgow@google.com> <20220625050838.1618469-2-davidgow@google.com>
- <CAGS_qxrGwVL37AOUWCxwx=qg6YvXCDSSu4p_PSt7_87N3RxJZw@mail.gmail.com>
-In-Reply-To: <CAGS_qxrGwVL37AOUWCxwx=qg6YvXCDSSu4p_PSt7_87N3RxJZw@mail.gmail.com>
-From:   David Gow <davidgow@google.com>
-Date:   Sat, 9 Jul 2022 11:25:06 +0800
-Message-ID: <CABVgOS=AfJ7X5xqEKvXCzQ=UzOWrmR9KBO_TnkQw4Ti3fmKHBw@mail.gmail.com>
-Subject: Re: [PATCH v3 1/5] kunit: unify module and builtin suite definitions
-To:     Daniel Latypov <dlatypov@google.com>
-Cc:     Brendan Higgins <brendanhiggins@google.com>,
-        Luis Chamberlain <mcgrof@kernel.org>,
-        Jeremy Kerr <jk@codeconstruct.com.au>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Andra Paraschiv <andraprs@amazon.com>,
-        Longpeng <longpeng2@huawei.com>,
-        Greg KH <gregkh@linuxfoundation.org>,
-        KUnit Development <kunit-dev@googlegroups.com>,
-        "open list:KERNEL SELFTEST FRAMEWORK" 
-        <linux-kselftest@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        =?UTF-8?B?TWHDrXJhIENhbmFs?= <maira.canal@usp.br>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
-        OpenBMC Maillist <openbmc@lists.ozlabs.org>,
-        linux-usb@vger.kernel.org, linux-modules@vger.kernel.org,
-        Matt Johnston <matt@codeconstruct.com.au>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="0000000000002f754b05e356de29"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH 2/5] dt-bindings: mmc: sdhci-msm: constrain reg-names at
+ least for one variant
+Content-Language: en-US
+To:     Doug Anderson <dianders@chromium.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
+        <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>
+References: <20220707075151.67335-1-krzysztof.kozlowski@linaro.org>
+ <20220707075151.67335-3-krzysztof.kozlowski@linaro.org>
+ <CAD=FV=WFdtx_v3iPaNYDkhBw+fkSRriG0-w1R5vXRCugZPW6Vg@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAD=FV=WFdtx_v3iPaNYDkhBw+fkSRriG0-w1R5vXRCugZPW6Vg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---0000000000002f754b05e356de29
-Content-Type: text/plain; charset="UTF-8"
+On 07/07/2022 16:31, Doug Anderson wrote:
+> Hi,
+> 
+> On Thu, Jul 7, 2022 at 1:04 AM Krzysztof Kozlowski
+> <krzysztof.kozlowski@linaro.org> wrote:
+>>
+>> The entries in arrays must have fixed order, so the bindings and Linux
+>> driver expecting various combinations of 'reg' addresses was never
+>> actually conforming to guidelines.
+>>
+>> Specifically Linux driver always expects 'core' reg entry as second
+>> item, but some DTSes are having there 'cqhci'.
+> 
+> This is a bit misleading and makes it sound like we've got a bug. In
+> truth the Linux driver looks at the compatible string. If it sees any
+> compatible listed as "v5" (or a slight variant of v5 to handle a
+> workaround for sc7180 / sdm845) then it _doesn't_ expect 'core' reg as
+> the second entry. See the variable `mci_removed`. The old bindings
+> ".txt" file also had this to say:
+> 
+>                 For SDCC version 5.0.0, MCI registers are removed from SDCC
+>                 interface and some registers are moved to HC. New compatible
+>                 string is added to support this change - "qcom,sdhci-msm-v5".
 
-On Sat, Jul 9, 2022 at 2:23 AM Daniel Latypov <dlatypov@google.com> wrote:
->
-> On Fri, Jun 24, 2022 at 10:10 PM David Gow <davidgow@google.com> wrote:
-> > diff --git a/include/kunit/test.h b/include/kunit/test.h
-> > index 8ffcd7de9607..54306271cfbf 100644
-> > --- a/include/kunit/test.h
-> > +++ b/include/kunit/test.h
-> > @@ -250,41 +250,8 @@ static inline int kunit_run_all_tests(void)
-> >  }
-> >  #endif /* IS_BUILTIN(CONFIG_KUNIT) */
-> >
-> > -#ifdef MODULE
-> > -/**
-> > - * kunit_test_suites_for_module() - used to register one or more
-> > - *                      &struct kunit_suite with KUnit.
-> > - *
-> > - * @__suites: a statically allocated list of &struct kunit_suite.
-> > - *
-> > - * Registers @__suites with the test framework. See &struct kunit_suite for
-> > - * more information.
-> > - *
-> > - * If a test suite is built-in, module_init() gets translated into
-> > - * an initcall which we don't want as the idea is that for builtins
-> > - * the executor will manage execution.  So ensure we do not define
-> > - * module_{init|exit} functions for the builtin case when registering
-> > - * suites via kunit_test_suites() below.
-> > - */
-> > -#define kunit_test_suites_for_module(__suites)                         \
->
-> Deleting this bit now causes merge conflicts with Shuah's kunit
-> branch, due to https://patchwork.kernel.org/project/linux-kselftest/patch/20220702040959.3232874-3-davidgow@google.com/
-> I.e. We added in a MODULE_INFO(test, "Y") in this to-be-deleted section.
+You're right, thanks, I missed that part.
 
-Nice catch. I've rebased this series on top of the taint stuff:
-https://lore.kernel.org/linux-kselftest/20220709032001.819487-2-davidgow@google.com/T/#u
+> 
+> So I guess that means this is the documentation for all of the
+> combinations you have listed:
+> 
+> * hc only - v5 controller w/out CQE / ICE
+> 
+> * hc + core - v4 controller w/out CQE / ICE
+> 
+> * hc + cqhci - v5 controller w/ CQE and w/out ICE
+> 
+> * hc + cqhci + ice - v5 controller w/ CQE / ICE
+> 
+> * hc + core + cqhci + ice - v4 controller w/ CQE / ICE
+> 
+> Said another way, before v5 the "core" range existed. After v5 it
+> apparently doesn't so there's no way we could have specified it.
+> 
+> You'll notice that one of the options above implies that a v4
+> controller (with "core" specified) can have CQE and ICE. Is this
+> actually true, or was it a misunderstanding in the .txt to .yaml
+> conversion?
+> 
+> If it's true that a v4 controller can have CQE and ICE then your patch
+> is wrong in asserting that v4 controllers have only "hc" and "core".
+> 
+> If a v4 controller _can't_ have CQE and ICE then your patch is right
+> but incomplete. It should also be removing the option:
+>           - const: hc
+>           - const: core
+>           - const: cqhci
+>           - const: ice
+> 
+> I am not intimately familiar with Qualcomm MMC controller history.
+> That being said, the old .txt file said:
+> 
+>         - CQE register map (Optional, CQE support is present on SDHC
+> instance meant
+>                             for eMMC and version v4.2 and above)
+> 
+> To me this implies that a v4 controller could _at least_ have "cqhci".
+> I dunno about "ice". I seem to recall that this was the argument for
+> why the driver had to use reg-names to begin with and why the driver
+> looks for "cqhci" by name.
 
-> Perhaps something like this would be a fix?
 
-Thanks.The rebased version is basically this, but without the #ifdef
-MODULE indirection, as MODULE_INFO() will decay to nothing if MODULE
-is not defined, anyway.
+I checked manual and SDCC v4 already supports CQE. ICE appears at v4.1
+(MSM8996, MSM8953 and some more which do not have dedicated
+compatibles), so the compatibles seems inaccurate. ICE capability can be
+runtime detected, but we still need to provide ICE address space. Anyway
+I don't want to dig too much into SDCC versions, so I'll allow
+hc+core+cqhci+ice.
 
->   #ifdef MODULE
->   #define _kunit_mark_test_module MODULE_INFO(test, "Y")
->   #else
->   #define _kunit_mark_test_module
->   #endif /* MODULE */
->
->   #define __kunit_test_suites(unique_array, unique_suites, ...)
->           \
->           _kunit_mark_test_module;
->           \
->           static struct kunit_suite *unique_array[] = { __VA_ARGS__,
-> NULL };     \
->           static struct kunit_suite **unique_suites
->           \
->           __used __section(".kunit_test_suites") = unique_array
->
->
-> > -       static int __init kunit_test_suites_init(void)                  \
-> > -       {                                                               \
-> > -               return __kunit_test_suites_init(__suites);              \
-> > -       }                                                               \
-> > -       module_init(kunit_test_suites_init);                            \
-> > -                                                                       \
-> > -       static void __exit kunit_test_suites_exit(void)                 \
-> > -       {                                                               \
-> > -               return __kunit_test_suites_exit(__suites);              \
-> > -       }                                                               \
-> > -       module_exit(kunit_test_suites_exit)
-> > -#else
-> > -#define kunit_test_suites_for_module(__suites)
-> > -#endif /* MODULE */
-> > -
-> >  #define __kunit_test_suites(unique_array, unique_suites, ...)                 \
-> >         static struct kunit_suite *unique_array[] = { __VA_ARGS__, NULL };     \
-> > -       kunit_test_suites_for_module(unique_array);                            \
-> >         static struct kunit_suite **unique_suites                              \
-> >         __used __section(".kunit_test_suites") = unique_array
-> >
+Thanks for the feedback, much appreciated!
 
---0000000000002f754b05e356de29
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
 
-MIIPnwYJKoZIhvcNAQcCoIIPkDCCD4wCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGg
-ggz5MIIEtjCCA56gAwIBAgIQeAMYYHb81ngUVR0WyMTzqzANBgkqhkiG9w0BAQsFADBMMSAwHgYD
-VQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UE
-AxMKR2xvYmFsU2lnbjAeFw0yMDA3MjgwMDAwMDBaFw0yOTAzMTgwMDAwMDBaMFQxCzAJBgNVBAYT
-AkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMSowKAYDVQQDEyFHbG9iYWxTaWduIEF0bGFz
-IFIzIFNNSU1FIENBIDIwMjAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvLe9xPU9W
-dpiHLAvX7kFnaFZPuJLey7LYaMO8P/xSngB9IN73mVc7YiLov12Fekdtn5kL8PjmDBEvTYmWsuQS
-6VBo3vdlqqXZ0M9eMkjcKqijrmDRleudEoPDzTumwQ18VB/3I+vbN039HIaRQ5x+NHGiPHVfk6Rx
-c6KAbYceyeqqfuJEcq23vhTdium/Bf5hHqYUhuJwnBQ+dAUcFndUKMJrth6lHeoifkbw2bv81zxJ
-I9cvIy516+oUekqiSFGfzAqByv41OrgLV4fLGCDH3yRh1tj7EtV3l2TngqtrDLUs5R+sWIItPa/4
-AJXB1Q3nGNl2tNjVpcSn0uJ7aFPbAgMBAAGjggGKMIIBhjAOBgNVHQ8BAf8EBAMCAYYwHQYDVR0l
-BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFHzM
-CmjXouseLHIb0c1dlW+N+/JjMB8GA1UdIwQYMBaAFI/wS3+oLkUkrk1Q+mOai97i3Ru8MHsGCCsG
-AQUFBwEBBG8wbTAuBggrBgEFBQcwAYYiaHR0cDovL29jc3AyLmdsb2JhbHNpZ24uY29tL3Jvb3Ry
-MzA7BggrBgEFBQcwAoYvaHR0cDovL3NlY3VyZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvcm9vdC1y
-My5jcnQwNgYDVR0fBC8wLTAroCmgJ4YlaHR0cDovL2NybC5nbG9iYWxzaWduLmNvbS9yb290LXIz
-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
-z/tQRXr3iPeVmZCr7nttMEwGA1UdIARFMEMwQQYJKwYBBAGgMgEoMDQwMgYIKwYBBQUHAgEWJmh0
-dHBzOi8vd3d3Lmdsb2JhbHNpZ24uY29tL3JlcG9zaXRvcnkvMAwGA1UdEwEB/wQCMAAwgZoGCCsG
-AQUFBwEBBIGNMIGKMD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9jYS9n
-c2F0bGFzcjNzbWltZWNhMjAyMDBIBggrBgEFBQcwAoY8aHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
-LmNvbS9jYWNlcnQvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3J0MB8GA1UdIwQYMBaAFHzMCmjXouse
-LHIb0c1dlW+N+/JjMEYGA1UdHwQ/MD0wO6A5oDeGNWh0dHA6Ly9jcmwuZ2xvYmFsc2lnbi5jb20v
-Y2EvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3JsMA0GCSqGSIb3DQEBCwUAA4IBAQAx+EQjLATc/sze
-VoZkH7OLz+/no1+y31x4BQ3wjW7lKfay9DAAVym896b7ECttSo95GEvS7pYMikzud57WypK7Bjpi
-ep8YLarLRDrvyyvBuYtyDrIewkuASHtV1oy5E6QZZe2VOxMm6e2oJnFFjbflot4A08D3SwqDwV0i
-OOYwT0BUtHYR/3903Dmdx5Alq+NDvUHDjozgo0f6oIkwDXT3yBV36utQ/jFisd36C8RD5mM+NFpu
-3aqLXARRbKtxw29ErCwulof2dcAonG7cd5j+gmS84sLhKU+BhL1OQVXnJ5tj7xZ5Ri5I23brcwk0
-lk/gWqfgs3ppT9Xk7zVit9q8MYICajCCAmYCAQEwaDBUMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQ
-R2xvYmFsU2lnbiBudi1zYTEqMCgGA1UEAxMhR2xvYmFsU2lnbiBBdGxhcyBSMyBTTUlNRSBDQSAy
-MDIwAhABh9LgIPnlfMFHR0Die8n7MA0GCWCGSAFlAwQCAQUAoIHUMC8GCSqGSIb3DQEJBDEiBCBl
-JmrHJzQ0vK1xYKaDEDYwR3rzNd2KyrVjy2GQK6mVbzAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcB
-MBwGCSqGSIb3DQEJBTEPFw0yMjA3MDkwMzI1MTdaMGkGCSqGSIb3DQEJDzFcMFowCwYJYIZIAWUD
-BAEqMAsGCWCGSAFlAwQBFjALBglghkgBZQMEAQIwCgYIKoZIhvcNAwcwCwYJKoZIhvcNAQEKMAsG
-CSqGSIb3DQEBBzALBglghkgBZQMEAgEwDQYJKoZIhvcNAQEBBQAEggEAlhD8Y9l2qJpJSHbsezKz
-AoI+Xv+FHHBzuTK2N9hJyGjtt7jFiiPYYf4bGpzIFX/sSTpd0Z7xOXtE5UpyA1lArMmWvWnFshJk
-JaaeTfJqrFEnPBv2QLVKFb+oBSjSFF6SbymFOnqs3v83Wu4ICwP+iZNYqaMSPsv4V4qEbIoUtKm7
-gl8ecAoPtoZRoek0wE49XtF1yCBLS3gKvrcCfpKw0L8ZSKPLssfO4gUakft6tLpi9PG+96CTGK1Z
-wXl8h+QlaYFi/oP83EPkJbc08GIegicX/2Y2q0T7h2v2v6QV7/Xz/jRYTrz1+rbFZ8hjWpZydZRy
-vZ8yWuqbB0qhxbm59Q==
---0000000000002f754b05e356de29--
+Best regards,
+Krzysztof
