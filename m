@@ -2,201 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9089BCCA480
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 14:53:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA68AC43334
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 14:58:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231675AbiGKOxs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jul 2022 10:53:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48806 "EHLO
+        id S229544AbiGKO6Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 10:58:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231836AbiGKOxq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 10:53:46 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E39662125D
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 07:53:43 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id p6so3698208ljc.8
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 07:53:43 -0700 (PDT)
+        with ESMTP id S229900AbiGKO6Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 10:58:24 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73F9372ECB
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 07:58:23 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id y8so6603644eda.3
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 07:58:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=2xrfXrsfhBR+bokEXhKJoTSx+P/5u/go3fRYAk2iNd0=;
-        b=xp/1VM+YnovbgVqn0d8nA+COQSe++ltPEGJkXmkSv/oXaHpjZsbK+OaG97pNpYMpJG
-         jeDmUGabzohC8mT8pxMrCf7XGy8HYkMrLxFYEId98pU0Gs+R3c2UE0U7afcx0yPyWlRd
-         G7+Ivzh42hunlUfGSqrNJbTiYDKLwVBExHApSUiY0jp+khtLdxrNiWZ6yBRL9BvSVG9H
-         E8mRM6VUgJPG/KBg7iWjpKx5zXKDzx5KVBsiN+fw5Pa3fNBMgZtW5ZrnUUD4L1W2pPNl
-         +X4PPgMIMZoyESlrfgQIHm4L3WrMLr1swfIYT/HwmEv8efkdFRoFxSnU/bMM7Ad9xQJy
-         T0kQ==
+        d=chromium.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=JK/h8I3TwzYyU8YTkNwIUL4+D9uJ1XU+DQgA/bhS4DQ=;
+        b=X4wjMIEABz8noT1eAHb/RNu6qhp+hTqzGdaPiYYKviKYRh30CyC85AQZdVus+ckBr3
+         XislwfMrvQ7Q3cEq6Ovn79KBtWs/U5wn6/d1XIJUxXnq0G3p1rp4j+Y1/twzmIQWXY8m
+         v4Q8KmF9dFlq0dtRRxacW0DfVcf/S0JAjxyn8=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=2xrfXrsfhBR+bokEXhKJoTSx+P/5u/go3fRYAk2iNd0=;
-        b=kpLkZZvXPvYhEGuaS4TpFoBBJKQnzohRW5Sdsern1H6/O8OUYQyIuuo8lqRKiiF0f5
-         yCJoxtKTMMS5pFR2LhzM03vcHfW/VZ8uZiKoFJletLL46ZazHXYlpBwghqya+w6CU8pi
-         nHZuZWRm3lN+IQdNsB2S5/ZLOnT56o+WwepYqLTaEfPiKWEDcwtCcPB3ypLq2PdjCctt
-         eRBTWuOKBoq3p4oNlmMaEVZLkhp30CyS2CtD3KOg5iyEYQqw8tpC19lOAu1n6DD7VJ8s
-         U+sEnHwc9/9aK7cKaRsi7OGF5tJkDfsyp6+jEiZK1vedlcMFCJWQtEFFEQjSJ+26ZRJU
-         wvTg==
-X-Gm-Message-State: AJIora92Nae5pnHYjnSrZLFfgHZGAeAxTo4Nd1MOpnDxCL2rF4VpGRz1
-        tnF6Zu4jcCk7uzRhyAMqh/zBPQ==
-X-Google-Smtp-Source: AGRyM1uoWBsGsB4gV4RsG3DmErdXvK4zRJnl8r/uOClUAsfgWjKuVbm+j0ZD4Qa4Xv5lXSuVCQO5wg==
-X-Received: by 2002:a05:651c:1207:b0:25d:4eba:e247 with SMTP id i7-20020a05651c120700b0025d4ebae247mr9773676lja.100.1657551221541;
-        Mon, 11 Jul 2022 07:53:41 -0700 (PDT)
-Received: from [10.0.0.8] (fwa5cab-55.bb.online.no. [88.92.171.55])
-        by smtp.gmail.com with ESMTPSA id y17-20020ac255b1000000b00489c92779f8sm1569616lfg.184.2022.07.11.07.53.39
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=JK/h8I3TwzYyU8YTkNwIUL4+D9uJ1XU+DQgA/bhS4DQ=;
+        b=421mBN59yvyPxF06ooWfJ8Vap1UAcNp3rpWd8XQIwYM9+DbkIxImcSGIN0jweMIqHe
+         xEx3Wi1MuRm+lTZB6P0xg3LAqzA3a/aCy9Ett7lMFYc7pdxBgIP4TdNT2kR5jE9SpLag
+         bmTXZYZ+y3l7cC+TaczhLBjtcn/HQL4OGW63JTuMo18DDKf5RHm3IP00xBOjjYDijPrJ
+         351h05Smonmmc58OG10VPNJSeCJI3ImKQLd6c671pj25vuN2XmqmlR+tdGZ9PXnGJYzo
+         MU2oFQfCP3dm8Kn7bmPS7aCFWOM95X9DWa0E7Xtd3Y0SbXGaLJqzeiW8x0xxtu+yGuky
+         HeAQ==
+X-Gm-Message-State: AJIora8FJ2mOTHmmMwKj1o1+66qetof6ya91YszaSLtg2SK7ZEjov1mw
+        q/7VYSfhxBDHSPUML2zhWuouaSxhmTjoCnaG
+X-Google-Smtp-Source: AGRyM1vni7pOwSsdVGh7lFbX3gyMDg3Ylf+PzObv9W74j0BAV/iafkDnnPSjo8hQfKFdq2mxNjUCEA==
+X-Received: by 2002:a05:6402:51cb:b0:43a:aed1:810d with SMTP id r11-20020a05640251cb00b0043aaed1810dmr23111317edd.281.1657551502087;
+        Mon, 11 Jul 2022 07:58:22 -0700 (PDT)
+Received: from mail-wr1-f48.google.com (mail-wr1-f48.google.com. [209.85.221.48])
+        by smtp.gmail.com with ESMTPSA id o2-20020aa7dd42000000b0043ad162b5e3sm2323435edw.18.2022.07.11.07.58.21
+        for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 11 Jul 2022 07:53:41 -0700 (PDT)
-Message-ID: <f8744ff8-15a0-bf31-c49f-b1bb35ba5cdd@linaro.org>
-Date:   Mon, 11 Jul 2022 16:53:38 +0200
+        Mon, 11 Jul 2022 07:58:21 -0700 (PDT)
+Received: by mail-wr1-f48.google.com with SMTP id b26so7380786wrc.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 07:58:21 -0700 (PDT)
+X-Received: by 2002:adf:fb12:0:b0:20c:79b2:a200 with SMTP id
+ c18-20020adffb12000000b0020c79b2a200mr17662599wrr.617.1657551501186; Mon, 11
+ Jul 2022 07:58:21 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH v2 2/5] dt-bindings: mmc: sdhci-msm: constrain reg-names
- perp variants
-Content-Language: en-US
-To:     Doug Anderson <dianders@chromium.org>
+References: <20220711082709.39102-1-krzysztof.kozlowski@linaro.org> <20220711082709.39102-3-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220711082709.39102-3-krzysztof.kozlowski@linaro.org>
+From:   Doug Anderson <dianders@chromium.org>
+Date:   Mon, 11 Jul 2022 07:58:08 -0700
+X-Gmail-Original-Message-ID: <CAD=FV=Uvc+d8v4UCMLhcEydt-RVf+94NTUWrMgORv8bw0kDNUQ@mail.gmail.com>
+Message-ID: <CAD=FV=Uvc+d8v4UCMLhcEydt-RVf+94NTUWrMgORv8bw0kDNUQ@mail.gmail.com>
+Subject: Re: [PATCH 3/3] arm64: dts: qcom: msm8998: add MSM8998 SDCC specific compatible
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
         Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
         "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
         <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
         linux-arm-msm <linux-arm-msm@vger.kernel.org>
-References: <20220711082940.39539-1-krzysztof.kozlowski@linaro.org>
- <20220711082940.39539-3-krzysztof.kozlowski@linaro.org>
- <CAD=FV=WUCPzzZHAPqoz-vhmcVxzYDxkKQs=+1tLZvsQjWe4q3Q@mail.gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <CAD=FV=WUCPzzZHAPqoz-vhmcVxzYDxkKQs=+1tLZvsQjWe4q3Q@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/07/2022 16:52, Doug Anderson wrote:
-> Hi
-> 
-> On Mon, Jul 11, 2022 at 1:29 AM Krzysztof Kozlowski
-> <krzysztof.kozlowski@linaro.org> wrote:
->>
->> The entries in arrays must have fixed order, so the bindings and Linux
->> driver expecting various combinations of 'reg' addresses was never
->> actually conforming to guidelines.
->>
->> The 'core' reg entry is valid only for SDCC v4 and lower, so disallow it
->> in SDCC v5.  SDCC v4 supports CQE and ICE, so allow them, even though
->> the qcom,sdhci-msm-v4 compatible is used also for earlier SoCs with SDCC
->> v2 or v3, so it is not entirely accurate.
->>
->> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->>
->> ---
->>
->> Changes since v1:
->> 1. Rework the patch based on Doug's feedback.
->> ---
->>  .../devicetree/bindings/mmc/sdhci-msm.yaml    | 61 ++++++++++++-------
->>  1 file changed, 38 insertions(+), 23 deletions(-)
-> 
-> In the ${SUBJECT} I'm not sure what a "perp variant" is. Is that a
-> typo or just a phrase I'm not aware of?
+Hi,
 
-Should be:
-"per variants"
+On Mon, Jul 11, 2022 at 1:27 AM Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
+>
+> Add a MSM8998-specific SDCC compatible, because using only a generic
+> qcom,sdhci-msm-v4 fallback is deprecated.
+>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  arch/arm64/boot/dts/qcom/msm8998.dtsi | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-> 
-> 
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> index fc6e5221985a..2f0fdd65e908 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
->> @@ -49,33 +49,11 @@ properties:
->>
->>    reg:
->>      minItems: 1
->> -    items:
->> -      - description: Host controller register map
->> -      - description: SD Core register map
->> -      - description: CQE register map
->> -      - description: Inline Crypto Engine register map
->> +    maxItems: 4
->>
->>    reg-names:
->>      minItems: 1
->>      maxItems: 4
->> -    oneOf:
->> -      - items:
->> -          - const: hc
->> -      - items:
->> -          - const: hc
->> -          - const: core
->> -      - items:
->> -          - const: hc
->> -          - const: cqhci
->> -      - items:
->> -          - const: hc
->> -          - const: cqhci
->> -          - const: ice
->> -      - items:
->> -          - const: hc
->> -          - const: core
->> -          - const: cqhci
->> -          - const: ice
->>
->>    clocks:
->>      minItems: 3
->> @@ -177,6 +155,43 @@ required:
->>  allOf:
->>    - $ref: mmc-controller.yaml#
->>
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            enum:
->> +              - qcom,sdhci-msm-v4
->> +    then:
->> +      properties:
->> +        reg:
->> +          minItems: 2
->> +          items:
->> +            - description: Host controller register map
->> +            - description: SD Core register map
->> +            - description: CQE register map
->> +            - description: Inline Crypto Engine register map
->> +        reg-names:
->> +          minItems: 2
->> +          items:
->> +            - const: hc
->> +            - const: core
->> +            - const: cqhci
->> +            - const: ice
->> +    else:
->> +      properties:
->> +        reg:
->> +          minItems: 1
->> +          items:
->> +            - description: Host controller register map
->> +            - description: CQE register map
->> +            - description: Inline Crypto Engine register map
->> +        reg-names:
->> +          minItems: 1
->> +          items:
->> +            - const: hc
->> +            - const: cqhci
->> +            - const: ice
-> 
-> Do you need to set "maxItems" here? If you don't then will it inherit
-> the maxItems of 4 from above?
-
-No, items determine the size instead.
-
-
-Best regards,
-Krzysztof
+Reviewed-by: Douglas Anderson <dianders@chromium.org>
