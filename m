@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCE45C433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 08:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6620FCCA47B
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 08:29:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230035AbiGKI3w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jul 2022 04:29:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36166 "EHLO
+        id S230046AbiGKI3z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 04:29:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36224 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230023AbiGKI3v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 04:29:51 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 038D91EEEC
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:49 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id o7so7471771lfq.9
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:49 -0700 (PDT)
+        with ESMTP id S230021AbiGKI3x (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 04:29:53 -0400
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F8891EEC8
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:52 -0700 (PDT)
+Received: by mail-lj1-x231.google.com with SMTP id u14so5339782ljh.2
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=9Wjg2aNHGHhzVH0rmb+gMIgs2nU+ES+Qag4lawsLAuY=;
-        b=c/Rbjb8JN/KOgGFpip1vaIMZXn26IWkkX0JXz22/EBl9+ZOAYplF9CYkYImpgLfBcV
-         fDRCs8bJnNRN44W/bRjxWkMDC8wj4n8dDrAsJ8sTMlxWNDOJj4M5a3sbnHcCRLxYTZsx
-         Os1vRfd2GiFGuyBMtl1QymHDi8I0gJgMJQOuG/hDg7ddp0HtTGcwpHxMhBv8AV/TZ7+q
-         sL0JNmrBNEW4G3pkeeAnxI77sjvF7ZMBq2Yc8gn4N4yPrr3BM8+zbtdQDzyX3oiviyRW
-         LBj/6dVp+f0yR55COkP6UGOQb0Ohm1Hcezmbdaw7afn+HOOn7sJBiKu4ur01JFGH/z/f
-         fBjA==
+        bh=ECmDrApCWmsy6bTxbWAJtF1tb5Jnxl9Hmbc7aLUQ7zs=;
+        b=oc6SX5BfT6fMqrx+BbEtw0q8Ed8qK5l+j90ZAz+9xdJ25Woju5BEhRm4dCPVua7FVY
+         zWs6IgK8XBHs8im6KsI5Vyqx19oKQT09IBwEsEl6PRSIr55fVrCeCLxynNoAoeYozPcI
+         Jx5tCjylNt8VH3Aau7SZX48ZhaZuaAkh/4m/7mDSi8ECJTdDtV6ZyEYBWNOJ58zLl9it
+         TB/IkamP0veGlXRApjAHP7walbdH6sIXa7P+SMwLqal3+PG28PbmFnEgWcfT9wQ/yMfx
+         dNVudd7OMTXTHnZIl8Kqhhz+uFHC6UjFLUkaa401EjeDp7ptx1LD4YAFdhIdDfIJ6yxC
+         lkSg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=9Wjg2aNHGHhzVH0rmb+gMIgs2nU+ES+Qag4lawsLAuY=;
-        b=0EncoS/nxhp8ayJUr/YRd9xBjh1sJQ2fE67HUbkTU6Xj3n/X9p5g+RGkkExiT6cY3u
-         HPFiQ4Oz79rtFlfcQnSE8mXKy98EvQLT2SvwQhY1P7d+K990bjxulK1fgecyjOz9MLIM
-         CXQgGDFn/UC32UcCM/4nCKIBWek705Jzhnt+ET64kz9myiatKtkeQgomR3NufKwQwDdI
-         gS3x1mY52Ra3zZLBu343itbKd2WhOiq04FzbNKA70jxFqGUihKPDf8Ct9CRY4q/MgiZh
-         C7CbsLV1LGG0UB1l5W7lMo01zkESnSb2gWYg3sy7c44uSQf5QXk2BbNRmNhT2geH11YQ
-         m+gQ==
-X-Gm-Message-State: AJIora+gWkz6WfvHXJGgXVCiZsBIc2YWcRmWlpd7m7P1h4G0vN+5WYRU
-        K1vBNS6UyD+dleX/12SbJ/kM+Q==
-X-Google-Smtp-Source: AGRyM1uO1bbEabxaRwKA9Chd6nXooY4Sq5JJgKPq3Ahox5YbG+Av4DlyL2FhtHN6biEjgssju5ZjLw==
-X-Received: by 2002:a05:6512:1320:b0:488:8fcc:e196 with SMTP id x32-20020a056512132000b004888fcce196mr11179813lfu.602.1657528188334;
-        Mon, 11 Jul 2022 01:29:48 -0700 (PDT)
+        bh=ECmDrApCWmsy6bTxbWAJtF1tb5Jnxl9Hmbc7aLUQ7zs=;
+        b=6GdJuC+ZKIqBbN19yfL/bxGorpGppQfUOggeaHcI6hYdCDDRI8+5oteDj39fK31Wla
+         K2k2qRThOv8cPAhtoPF3KaydlfR8J2mtzQFeUkcocGt4BEysLKtBQ99NDhBn2mY6lJug
+         L4cL/L5DQN8itnhWs616HlBylOmARHLTEHJs+6u5w2QWCq0XA4aovRkq1QpO8l4HxsC/
+         5dKdbVySKOeXWCu7AgkhgCpvZ7d8x8EH9dxO9N13nF0yVeP8fJHYW/NyoNKRxPz29vRp
+         0LTwiJws8Ca3eSdxnnvguvKmB+aa3XL1wQToLDQRwVLVoetJN9GPaBJK7UllQ7jefBxt
+         /5vg==
+X-Gm-Message-State: AJIora9cEs3sKPSU+PSr2oL16WvKCFeb/FDCrZe520HBQUHSs5B7vY77
+        srHI2evrMoj9uPC4aSeHTJ3QqQ==
+X-Google-Smtp-Source: AGRyM1uQLnnh/Pu9iJAGaTHhyYJeXAp8YyKuN7dPfR9tj5ox+SHwzeeUfcNoeW4io7jwBOYyPmtzVQ==
+X-Received: by 2002:a05:651c:50f:b0:25d:64a7:d358 with SMTP id o15-20020a05651c050f00b0025d64a7d358mr4895586ljp.523.1657528190568;
+        Mon, 11 Jul 2022 01:29:50 -0700 (PDT)
 Received: from krzk-bin.. (fwa5cab-55.bb.online.no. [88.92.171.55])
-        by smtp.gmail.com with ESMTPSA id u2-20020a05651206c200b00488ab8914b5sm1401504lff.213.2022.07.11.01.29.46
+        by smtp.gmail.com with ESMTPSA id u2-20020a05651206c200b00488ab8914b5sm1401504lff.213.2022.07.11.01.29.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Jul 2022 01:29:47 -0700 (PDT)
+        Mon, 11 Jul 2022 01:29:50 -0700 (PDT)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -59,9 +59,9 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 Cc:     Douglas Anderson <dianders@chromium.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v2 1/5] dt-bindings: mmc: sdhci-msm: fix reg-names entries
-Date:   Mon, 11 Jul 2022 10:29:36 +0200
-Message-Id: <20220711082940.39539-2-krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v2 2/5] dt-bindings: mmc: sdhci-msm: constrain reg-names perp variants
+Date:   Mon, 11 Jul 2022 10:29:37 +0200
+Message-Id: <20220711082940.39539-3-krzysztof.kozlowski@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20220711082940.39539-1-krzysztof.kozlowski@linaro.org>
 References: <20220711082940.39539-1-krzysztof.kozlowski@linaro.org>
@@ -71,57 +71,108 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Bindings before conversion to DT schema expected reg-names without
-"_mem" suffix.  This was used by older DTS files and by the MSM SDHCI
-driver.
+The entries in arrays must have fixed order, so the bindings and Linux
+driver expecting various combinations of 'reg' addresses was never
+actually conforming to guidelines.
 
-Reported-by: Douglas Anderson <dianders@chromium.org>
-Fixes: edfbf8c307ff ("dt-bindings: mmc: sdhci-msm: Fix issues in yaml bindings")
+The 'core' reg entry is valid only for SDCC v4 and lower, so disallow it
+in SDCC v5.  SDCC v4 supports CQE and ICE, so allow them, even though
+the qcom,sdhci-msm-v4 compatible is used also for earlier SoCs with SDCC
+v2 or v3, so it is not entirely accurate.
+
 Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
+
 ---
- .../devicetree/bindings/mmc/sdhci-msm.yaml    | 24 +++++++++----------
- 1 file changed, 12 insertions(+), 12 deletions(-)
+
+Changes since v1:
+1. Rework the patch based on Doug's feedback.
+---
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    | 61 ++++++++++++-------
+ 1 file changed, 38 insertions(+), 23 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index 0853d0c32dc7..fc6e5221985a 100644
+index fc6e5221985a..2f0fdd65e908 100644
 --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
 +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -60,22 +60,22 @@ properties:
+@@ -49,33 +49,11 @@ properties:
+ 
+   reg:
+     minItems: 1
+-    items:
+-      - description: Host controller register map
+-      - description: SD Core register map
+-      - description: CQE register map
+-      - description: Inline Crypto Engine register map
++    maxItems: 4
+ 
+   reg-names:
+     minItems: 1
      maxItems: 4
-     oneOf:
-       - items:
--          - const: hc_mem
-+          - const: hc
-       - items:
--          - const: hc_mem
--          - const: core_mem
-+          - const: hc
-+          - const: core
-       - items:
--          - const: hc_mem
--          - const: cqe_mem
-+          - const: hc
-+          - const: cqhci
-       - items:
--          - const: hc_mem
--          - const: cqe_mem
--          - const: ice_mem
-+          - const: hc
-+          - const: cqhci
-+          - const: ice
-       - items:
--          - const: hc_mem
--          - const: core_mem
--          - const: cqe_mem
--          - const: ice_mem
-+          - const: hc
-+          - const: core
-+          - const: cqhci
-+          - const: ice
+-    oneOf:
+-      - items:
+-          - const: hc
+-      - items:
+-          - const: hc
+-          - const: core
+-      - items:
+-          - const: hc
+-          - const: cqhci
+-      - items:
+-          - const: hc
+-          - const: cqhci
+-          - const: ice
+-      - items:
+-          - const: hc
+-          - const: core
+-          - const: cqhci
+-          - const: ice
  
    clocks:
      minItems: 3
+@@ -177,6 +155,43 @@ required:
+ allOf:
+   - $ref: mmc-controller.yaml#
+ 
++  - if:
++      properties:
++        compatible:
++          contains:
++            enum:
++              - qcom,sdhci-msm-v4
++    then:
++      properties:
++        reg:
++          minItems: 2
++          items:
++            - description: Host controller register map
++            - description: SD Core register map
++            - description: CQE register map
++            - description: Inline Crypto Engine register map
++        reg-names:
++          minItems: 2
++          items:
++            - const: hc
++            - const: core
++            - const: cqhci
++            - const: ice
++    else:
++      properties:
++        reg:
++          minItems: 1
++          items:
++            - description: Host controller register map
++            - description: CQE register map
++            - description: Inline Crypto Engine register map
++        reg-names:
++          minItems: 1
++          items:
++            - const: hc
++            - const: cqhci
++            - const: ice
++
+ unevaluatedProperties: false
+ 
+ examples:
 -- 
 2.34.1
 
