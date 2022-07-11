@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2553EC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 08:27:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 267AFCCA47B
+	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 08:29:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229967AbiGKI1Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jul 2022 04:27:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33400 "EHLO
+        id S230031AbiGKI3v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 04:29:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229964AbiGKI1Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 04:27:24 -0400
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 696931EC59
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:27:22 -0700 (PDT)
-Received: by mail-lj1-x22c.google.com with SMTP id a39so5307259ljq.11
-        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:27:22 -0700 (PDT)
+        with ESMTP id S229952AbiGKI3u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 04:29:50 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E25DC1EEC7
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:47 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id o7so7471619lfq.9
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 01:29:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=4rYTa3JGM6IeieDSa7LDtG3vHNWLhIAb8Q7HiOVEvC8=;
-        b=zinFVnq9fQpbCQuwb8BHCAEowVRjH36LHQTHxp5OnTlr8AXGzG+c4lQBsUvi6dPqVP
-         p+m3H9SksCgQr5AHTzo9OMgGCiP9QJMiffClQ8E1wkLAMyvXguBdqo+wP4AGSHFwY+NA
-         7ee2xPiK/4naKDcwxtsKeiRoiAd2IrE7zQrz0UiAmsICBc+W1ZDj0WkXtp2rW6JGvTau
-         VjiZP1GwjwgiAdNoH1K63Tcp0GYIFlazw041c8HEVOuPOkwNm6P4QTYOjzRbvpGk5moO
-         5x4tq7mb+YJeuGETn92KXLWJvsBjk9g14aPJdGMDHSXQQPqtqqH3w0bdtPOagwpOWhSP
-         ucAg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/jycAZFIZlkVpDgk+m+gRGDDajNp2iCR9akdaBzJOSA=;
+        b=deon5Cf2YEZBPOmXPFKpikGkuFHYoNEjCqLrVo1Zb0qbk/DOPx0nJQxUNBox4tj1Ge
+         BVLPhg7Mglhgkr6sWFVxrfkS99AdxEXCy97GhCTgFzYB1toW0AV1exnllPYI9b/drUUY
+         9Z31kT7jrXEgBQ6+ETUjPOPDvXVk7N7/lP+VI34yXiPzlJN/bIlrzPdIniq9nf2Z1Pst
+         bYyQCj1C7vbMFLBcJeqCtKC6gxcXEgO6G9T5jFy0aVqOYzgeZvIGo5OzYhUyuRmJBuj3
+         iLcWLu8HTxhz6/KFXBUM3gHrC+k/5Xe/V1njJcpBUWU/DAyKOgTzUaYo+gDI4XtPf0wb
+         BW4A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=4rYTa3JGM6IeieDSa7LDtG3vHNWLhIAb8Q7HiOVEvC8=;
-        b=tN4+z/6+xjw3WbU25ZGREVa/YoVNFON0Xjt/j6POGyPgDC70cbRFd8j/QO+MZq1Pi2
-         DnKTfPY8vIHxE+wXVLQpyDPPg6wpu3ZSDhIajgFHNTjyMxuAn/VvxKmPeKrf2HPkmkfb
-         gkTeBnz3ZZIAGPZ2XKUIIGT70bOt19i0mrVOdR9F3HhgF+vcRhaSZxqixiSiHYi2K796
-         172s7JSUZWq6s6xYPaM3cynwL6Zw1jlGKbeh38xxyeku5jsGaJHQlJ5sfag78NR4pr4I
-         7p9158gdHipzfWAvyyMk1IEoM8BQRg6EDVu8Yo0Xayuc0opmoL25W3IZKnvcFEL8dVIN
-         cXPQ==
-X-Gm-Message-State: AJIora/wPG5KdPNunx0uDYW3ww/GnYHhG99WajURNQbBV6OUl2457VOc
-        gKG7OIpvj1FBSjxPdoK+k4IqOg==
-X-Google-Smtp-Source: AGRyM1stMqKlh8JH5aONT4GAIuHzSJe0Ju8dVYUNNWTNDrM2QWxZpOJRQVYJo/uTieqlDxsE/6ILFg==
-X-Received: by 2002:a05:651c:1061:b0:25d:6302:68a2 with SMTP id y1-20020a05651c106100b0025d630268a2mr5368868ljm.212.1657528040761;
-        Mon, 11 Jul 2022 01:27:20 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/jycAZFIZlkVpDgk+m+gRGDDajNp2iCR9akdaBzJOSA=;
+        b=eoPWVcTE05KEc75J3LrSJ1sSF19ULGZIZIMFzai7DRjG81O30V3amBxMOzP/8dpLag
+         4mli5psAJF9A/68IqNNxaQup4j6nFExs4optfdO3IJ0kQLTJjlO/ItnziHchG3Ieluo8
+         p5JTQw/nW9riltj3zXL/Rbiffimq4hJp6On8p6WyNR2PVsQ2Knh664hjPwt0hqng9D3F
+         h6xqBF1Q+Apwsdqb0aLr/mqWes08xzr+4aHEymrpjlzCAX1KKk7HbGcsi8xatNwfREaK
+         83QpB934mZcsORv3Y94s/AXG8wLgUVYhqOaorcJgc4lj/QmOi3vXKHDMxCrpoXPrT/lu
+         HaLw==
+X-Gm-Message-State: AJIora8CSBiCwp5ahpXSLWfx3n+WSsaB4v92wY8iX7w3zs9zicB3QJhA
+        QarHEvcmBTifMaB8JJXVV7W1zA==
+X-Google-Smtp-Source: AGRyM1sz5Ax1f0yFBRJPQzyqUQJhhfc9Hp15pLCPtcQzgCWrtRvZeZvn9CAzo7nC4DWKFCUNn6Mryg==
+X-Received: by 2002:ac2:4e11:0:b0:483:4227:30e with SMTP id e17-20020ac24e11000000b004834227030emr10293528lfr.289.1657528186283;
+        Mon, 11 Jul 2022 01:29:46 -0700 (PDT)
 Received: from krzk-bin.. (fwa5cab-55.bb.online.no. [88.92.171.55])
-        by smtp.gmail.com with ESMTPSA id c30-20020a05651200de00b00473c87152bcsm1408994lfp.127.2022.07.11.01.27.17
+        by smtp.gmail.com with ESMTPSA id u2-20020a05651206c200b00488ab8914b5sm1401504lff.213.2022.07.11.01.29.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Jul 2022 01:27:19 -0700 (PDT)
+        Mon, 11 Jul 2022 01:29:45 -0700 (PDT)
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -54,45 +54,56 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <bjorn.andersson@linaro.org>,
         Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
         Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
 Cc:     Douglas Anderson <dianders@chromium.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 3/3] arm64: dts: qcom: msm8998: add MSM8998 SDCC specific compatible
-Date:   Mon, 11 Jul 2022 10:27:09 +0200
-Message-Id: <20220711082709.39102-3-krzysztof.kozlowski@linaro.org>
+Subject: [PATCH v2 0/5] dt-bindings: mmc: / ARM: qcom: correct reg-names and clock entries
+Date:   Mon, 11 Jul 2022 10:29:35 +0200
+Message-Id: <20220711082940.39539-1-krzysztof.kozlowski@linaro.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220711082709.39102-1-krzysztof.kozlowski@linaro.org>
-References: <20220711082709.39102-1-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a MSM8998-specific SDCC compatible, because using only a generic
-qcom,sdhci-msm-v4 fallback is deprecated.
+Hi,
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
- arch/arm64/boot/dts/qcom/msm8998.dtsi | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+No dependencies.  DT bindings patches are independent from DTS, so they can go
+via separate tree.
 
-diff --git a/arch/arm64/boot/dts/qcom/msm8998.dtsi b/arch/arm64/boot/dts/qcom/msm8998.dtsi
-index 91153a0234f5..c98f36f95f3c 100644
---- a/arch/arm64/boot/dts/qcom/msm8998.dtsi
-+++ b/arch/arm64/boot/dts/qcom/msm8998.dtsi
-@@ -2076,7 +2076,7 @@ qusb2phy: phy@c012000 {
- 		};
- 
- 		sdhc2: mmc@c0a4900 {
--			compatible = "qcom,sdhci-msm-v4";
-+			compatible = "qcom,msm8998-sdhci", "qcom,sdhci-msm-v4";
- 			reg = <0x0c0a4900 0x314>, <0x0c0a4000 0x800>;
- 			reg-names = "hc", "core";
- 
+Changes since v1
+================
+1. Add Rb tags.
+2. Rework reg-names constraints according to Doug's feedback.
+
+Best regards,
+Krzysztof
+
+Krzysztof Kozlowski (5):
+  dt-bindings: mmc: sdhci-msm: fix reg-names entries
+  dt-bindings: mmc: sdhci-msm: constrain reg-names perp variants
+  arm64: dts: qcom: align SDHCI reg-names with DT schema
+  ARM: dts: qcom: align SDHCI reg-names with DT schema
+  ARM: dts: qcom: align SDHCI clocks with DT schema
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    | 61 ++++++++++++-------
+ arch/arm/boot/dts/qcom-apq8084.dtsi           | 16 ++---
+ arch/arm/boot/dts/qcom-ipq4019.dtsi           |  5 +-
+ arch/arm/boot/dts/qcom-msm8226.dtsi           | 24 ++++----
+ arch/arm/boot/dts/qcom-msm8974.dtsi           | 24 ++++----
+ arch/arm/boot/dts/qcom-msm8974pro.dtsi        |  6 +-
+ arch/arm/boot/dts/qcom-sdx65.dtsi             |  2 +-
+ arch/arm64/boot/dts/qcom/ipq8074.dtsi         |  2 +-
+ arch/arm64/boot/dts/qcom/msm8916.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8953.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8994.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8996.dtsi         |  4 +-
+ arch/arm64/boot/dts/qcom/msm8998.dtsi         |  2 +-
+ 13 files changed, 87 insertions(+), 71 deletions(-)
+
 -- 
 2.34.1
 
