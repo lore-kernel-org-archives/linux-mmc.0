@@ -2,78 +2,83 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44842C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 11:09:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85A39CCA47C
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 11:10:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232943AbiGLLJu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Jul 2022 07:09:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54598 "EHLO
+        id S233006AbiGLLJ7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Jul 2022 07:09:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232955AbiGLLJq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 07:09:46 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7469B1851
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:42 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id bu42so13415940lfb.0
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:42 -0700 (PDT)
+        with ESMTP id S232575AbiGLLJt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 07:09:49 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44C21AF76B
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:46 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id n18so11638127lfq.1
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=rJNsmRBN9XMMewM4dixUdOuJWF6NQdfQJFUhCm2GmqE=;
-        b=wwkMQvCzM7u1O0f6k81nmx0LgJi/2k2B5awHdNOzXwYk/WXPTRp1g7UsfWlSei1FCw
-         DCMRI5CdRrIxuT6w4PF5PD3MxQNEsBJlPKszWXTzzBhxfMIhplg7c46yd7T+cKtG/L3d
-         WuQD8l33q5uM4ka1hjFhF/DJLGT8HjiKfSi1Z7Po+87LFeUV3YabPSsOiKYPw1KOL/+o
-         MGA5F+OJc+i1ODAJmH5oV3SECYd1Nd8pfvWsfC9eiqJl+fXVUYRGowxW6K1Ot8ifmmaM
-         8lZb6ZnrQzy97V09cscWiO0R/yjP6XiW0hYV6MI1lgYgkBrrtxTE3ILPYaLln6xpW9LF
-         1leA==
+        bh=8tdpS+5ubtJGGOPxmM+nq8jqWPaOVB3css9TAtAfGOI=;
+        b=dteUqy18Cu6l5q1qpmyWbmh9SYyiDuauhyzK2n+Z2mGTQ4ORfsZunyy6Q+IBXc9Z8p
+         MuFm4eDCr83xxUP9tEjS5YIsh2UsnX3GhgEVF5lrRLpuaqFVxBnWqLfXhnCtmasg01Xi
+         JnXIgsdOWJrXt4cK2vMX7u9QjReHadYuuTBxKApN4Su2/yCB+IjKzXCN11TSQyuoxI84
+         KABZGqlheVrcJ1HJdu+y2S+3VsWwVi+VCRw1y4UtbkXJpDycJ/VO3513W8eg3zpSyFZF
+         pdQ1Ri80+whrgJ0Z1VdfRh2karl6cJzhPzUa9zMviVi0qHSyqjZXlCorlfX8ve1VT0XN
+         7MxQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=rJNsmRBN9XMMewM4dixUdOuJWF6NQdfQJFUhCm2GmqE=;
-        b=K5AlQxerwGiNlTDE6KZ6XkHIO1u5/kKDRDhU41Gt4xe8Gf4lNGVzP0o56OOkERHroL
-         /cvdANy1aGDj/C5KBZ5z1PeYDA+UbeB7UmoWnGTY5p1D/hRxTJl6GT3rCDfttfd3BRve
-         8XGcSFHP4eASoRquOJu1dqjDI0D6wpw3S1lAER3F7zZOeTAA/1C9YEIuYr29fcYOWXuK
-         rgl6ht9KhFW7EfCN1J8qHH/yd1Ov9SV9XHs13oUPBwfDzugUbhK9pyfAlmAcPIZ8Z/H8
-         0ALF+xOK5CvyO8cM6vBCpIHt6bK82BYJunMirvVatgSZPIesA9RXf3n4q2BDENS1oBp3
-         w62w==
-X-Gm-Message-State: AJIora8zt622BpE0QA9Dxr7USYQmuTkz0urVAn8phWUJ8z9pEJCf33Ov
-        d8HAjCMa12YFGFfROIyuZNJxEnfT+CPIO6eIDKe/RA==
-X-Google-Smtp-Source: AGRyM1v/2PBFYkOmy1mrkLPKQE9pT2l7myodsl7AjlP6VNKchqTLPrWqKf6+rysiJ2ZcctYS0zOKOq7bn5YHjyhYi78=
-X-Received: by 2002:a05:6512:2522:b0:489:daa9:467 with SMTP id
- be34-20020a056512252200b00489daa90467mr7514869lfb.71.1657624182307; Tue, 12
- Jul 2022 04:09:42 -0700 (PDT)
+        bh=8tdpS+5ubtJGGOPxmM+nq8jqWPaOVB3css9TAtAfGOI=;
+        b=thA32i01LJAHH2+77LRJZudDgu6Awfzjj36+wWmB2CWg6UAFb2c3J5qJz1oZkSGRrH
+         gjEbIRwbDjUBqfNwwRQuWGnzLpoaRf4H2z1FrEJHAgRp+lf21j54NVVMDG/GQ5LdoFhB
+         6YKDJB2MbwclEvCjiuC+X7Fr13mmXSeegDALtBH4A2ACZwpr9ILVfQIuq0/sDgDMK7Db
+         6IoFYHSufPXW/p3xjjkpy8Vwyk7j0XbK8VfvyOrLTKeUdaiC7Ihb4w3aGQCJVkPup+Es
+         24D0WmEgRMBdZDfXq/zdraTQYE2vs5gLCvMn4TfUGUlQPKB74IjXOzZezZjZRPc8aVT0
+         amjQ==
+X-Gm-Message-State: AJIora9asPJPx7LIFnH7eeviFup98EomDAi2m4o5/qNwaMugZsmAXUhK
+        /c+9aMPvtkgPxH6VwjK2x0f2u3ThSbxPUyRZzAxA8w==
+X-Google-Smtp-Source: AGRyM1uFxb+BdqIl3tBJoT69LzidPBHC05qJXBK5HhG4NGNDzrGe14N2yRhxnWHlCAwRx8kw9OJIiWPSW1zrRwjYsHk=
+X-Received: by 2002:a05:6512:3403:b0:481:60ae:7ebc with SMTP id
+ i3-20020a056512340300b0048160ae7ebcmr15210209lfr.358.1657624185645; Tue, 12
+ Jul 2022 04:09:45 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220625131722.1397-1-wsa@kernel.org>
-In-Reply-To: <20220625131722.1397-1-wsa@kernel.org>
+References: <20220626120342.38851-1-krzysztof.kozlowski@linaro.org> <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220626120342.38851-6-krzysztof.kozlowski@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 12 Jul 2022 13:09:02 +0200
-Message-ID: <CAPDyKFphYtMhFHu0c+WF9hsm7Y9KgjCqKqSZ_uDTY3ddCYZ-7w@mail.gmail.com>
-Subject: Re: [PATCH] mmc: tmio: avoid glitches when resetting
-To:     Wolfram Sang <wsa@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Date:   Tue, 12 Jul 2022 13:09:08 +0200
+Message-ID: <CAPDyKFqvkYEHLMV67an9=1iu0jwewZNA=Mj0Erg30oJ_CEmxMw@mail.gmail.com>
+Subject: Re: [PATCH 5/5] dt-bindings: mmc: samsung,s3c6410-sdhci: convert to dtschema
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 25 Jun 2022 at 15:17, Wolfram Sang <wsa@kernel.org> wrote:
+On Sun, 26 Jun 2022 at 14:03, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> Convert the Samsung SoC SDHCI Controller bindings to DT schema.
 >
-> If we reset because of an error, we need to preserve values for the
-> clock frequency. Otherwise, glitches may be seen on the bus.
+> The original bindings were quite old and incomplete, so add during
+> conversion typical (already used) properties like reg, clocks,
+> interrupts.
 >
-> To achieve that, we introduce a 'preserve' parameter to the reset
-> function and the IP core specific reset callbacks to handle everything
-> accordingly.
+> The bindings were not precising the clocks, although the upstream DTS
+> and Linux driver were expecting bus clocks in certain patterns in any
+> order.  Document the status quo even though it is not a proper approach
+> for bindings.
 >
-> Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-> Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
 Applied for next, thanks!
 
@@ -82,190 +87,137 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/renesas_sdhi_core.c | 29 ++++++++++++++--------------
->  drivers/mmc/host/tmio_mmc.c          |  2 +-
->  drivers/mmc/host/tmio_mmc.h          |  6 +++++-
->  drivers/mmc/host/tmio_mmc_core.c     | 28 +++++++++++++++++++++------
->  4 files changed, 42 insertions(+), 23 deletions(-)
+>  .../bindings/mmc/samsung,s3c6410-sdhci.yaml   | 81 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/samsung-sdhci.txt | 32 --------
+>  2 files changed, 81 insertions(+), 32 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
 >
-> diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-> index 4404ca1f98d8..5fa365d0c7fd 100644
-> --- a/drivers/mmc/host/renesas_sdhi_core.c
-> +++ b/drivers/mmc/host/renesas_sdhi_core.c
-> @@ -49,9 +49,6 @@
->  #define HOST_MODE_GEN3_32BIT   (HOST_MODE_GEN3_WMODE | HOST_MODE_GEN3_BUSWIDTH)
->  #define HOST_MODE_GEN3_64BIT   0
->
-> -#define CTL_SDIF_MODE  0xe6
-> -#define SDIF_MODE_HS400                BIT(0)
+> diff --git a/Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml b/Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
+> new file mode 100644
+> index 000000000000..5d873a60f650
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
+> @@ -0,0 +1,81 @@
+> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/samsung,s3c6410-sdhci.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Samsung SoC SDHCI Controller
+> +
+> +maintainers:
+> +  - Jaehoon Chung <jh80.chung@samsung.com>
+> +  - Krzysztof Kozlowski <krzk@kernel.org>
+> +
+> +properties:
+> +  compatible:
+> +    enum:
+> +      - samsung,s3c6410-sdhci
+> +      - samsung,exynos4210-sdhci
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    minItems: 2
+> +    maxItems: 5
+> +
+> +  clock-names:
+> +    minItems: 2
+> +    items:
+> +      - const: hsmmc
+> +      - pattern: "^mmc_busclk.[0-3]$"
+> +      - pattern: "^mmc_busclk.[0-3]$"
+> +      - pattern: "^mmc_busclk.[0-3]$"
+> +      - pattern: "^mmc_busclk.[0-3]$"
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - interrupts
+> +  - clocks
+> +  - clock-names
+> +
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - samsung,exynos4210-sdhci
+> +    then:
+> +      properties:
+> +        clocks:
+> +          maxItems: 2
+> +        clock-names:
+> +          items:
+> +            - const: hsmmc
+> +            - const: mmc_busclk.2
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/clock/exynos4.h>
+> +    #include <dt-bindings/gpio/gpio.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +
+> +    mmc@12510000 {
+> +        compatible = "samsung,exynos4210-sdhci";
+> +        reg = <0x12510000 0x100>;
+> +        interrupts = <GIC_SPI 73 IRQ_TYPE_LEVEL_HIGH>;
+> +        clocks = <&clock CLK_SDMMC0>, <&clock CLK_SCLK_MMC0>;
+> +        clock-names = "hsmmc", "mmc_busclk.2";
+> +        bus-width = <4>;
+> +        cd-gpios = <&gpx3 4 GPIO_ACTIVE_LOW>;
+> +        pinctrl-0 = <&sd2_clk &sd2_cmd &sd2_bus4 &sdhci2_cd>;
+> +        pinctrl-names = "default";
+> +        vmmc-supply = <&ldo21_reg>;
+> +    };
+> diff --git a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt b/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
+> deleted file mode 100644
+> index 42e0a9afa100..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
+> +++ /dev/null
+> @@ -1,32 +0,0 @@
+> -* Samsung's SDHCI Controller device tree bindings
 > -
->  #define SDHI_VER_GEN2_SDR50    0x490c
->  #define SDHI_VER_RZ_A1         0x820b
->  /* very old datasheets said 0x490c for SDR104, too. They are wrong! */
-> @@ -562,23 +559,25 @@ static void renesas_sdhi_scc_reset(struct tmio_mmc_host *host, struct renesas_sd
->  }
->
->  /* only populated for TMIO_MMC_MIN_RCAR2 */
-> -static void renesas_sdhi_reset(struct tmio_mmc_host *host)
-> +static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
->  {
->         struct renesas_sdhi *priv = host_to_priv(host);
->         int ret;
->         u16 val;
->
-> -       if (priv->rstc) {
-> -               reset_control_reset(priv->rstc);
-> -               /* Unknown why but without polling reset status, it will hang */
-> -               read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-> -                                 false, priv->rstc);
-> -               /* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
-> -               sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
-> -               priv->needs_adjust_hs400 = false;
-> -               renesas_sdhi_set_clock(host, host->clk_cache);
-> -       } else if (priv->scc_ctl) {
-> -               renesas_sdhi_scc_reset(host, priv);
-> +       if (!preserve) {
-> +               if (priv->rstc) {
-> +                       reset_control_reset(priv->rstc);
-> +                       /* Unknown why but without polling reset status, it will hang */
-> +                       read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-> +                                         false, priv->rstc);
-> +                       /* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
-> +                       sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
-> +                       priv->needs_adjust_hs400 = false;
-> +                       renesas_sdhi_set_clock(host, host->clk_cache);
-> +               } else if (priv->scc_ctl) {
-> +                       renesas_sdhi_scc_reset(host, priv);
-> +               }
->         }
->
->         if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
-> diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-> index b55a29c53d9c..53a2ad9a24b8 100644
-> --- a/drivers/mmc/host/tmio_mmc.c
-> +++ b/drivers/mmc/host/tmio_mmc.c
-> @@ -75,7 +75,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
->         tmio_mmc_clk_start(host);
->  }
->
-> -static void tmio_mmc_reset(struct tmio_mmc_host *host)
-> +static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
->  {
->         sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
->         usleep_range(10000, 11000);
-> diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-> index e754bb3f5c32..501613c74406 100644
-> --- a/drivers/mmc/host/tmio_mmc.h
-> +++ b/drivers/mmc/host/tmio_mmc.h
-> @@ -42,6 +42,7 @@
->  #define CTL_DMA_ENABLE 0xd8
->  #define CTL_RESET_SD 0xe0
->  #define CTL_VERSION 0xe2
-> +#define CTL_SDIF_MODE 0xe6 /* only known on R-Car 2+ */
->
->  /* Definitions for values the CTL_STOP_INTERNAL_ACTION register can take */
->  #define TMIO_STOP_STP          BIT(0)
-> @@ -98,6 +99,9 @@
->  /* Definitions for values the CTL_DMA_ENABLE register can take */
->  #define DMA_ENABLE_DMASDRW     BIT(1)
->
-> +/* Definitions for values the CTL_SDIF_MODE register can take */
-> +#define SDIF_MODE_HS400                BIT(0) /* only known on R-Car 2+ */
-> +
->  /* Define some IRQ masks */
->  /* This is the mask used at reset by the chip */
->  #define TMIO_MASK_ALL           0x837f031d
-> @@ -181,7 +185,7 @@ struct tmio_mmc_host {
->         int (*multi_io_quirk)(struct mmc_card *card,
->                               unsigned int direction, int blk_size);
->         int (*write16_hook)(struct tmio_mmc_host *host, int addr);
-> -       void (*reset)(struct tmio_mmc_host *host);
-> +       void (*reset)(struct tmio_mmc_host *host, bool preserve);
->         bool (*check_retune)(struct tmio_mmc_host *host, struct mmc_request *mrq);
->         void (*fixup_request)(struct tmio_mmc_host *host, struct mmc_request *mrq);
->         unsigned int (*get_timeout_cycles)(struct tmio_mmc_host *host);
-> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-> index a5850d83908b..437048bb8027 100644
-> --- a/drivers/mmc/host/tmio_mmc_core.c
-> +++ b/drivers/mmc/host/tmio_mmc_core.c
-> @@ -179,8 +179,17 @@ static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
->         sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
->  }
->
-> -static void tmio_mmc_reset(struct tmio_mmc_host *host)
-> +static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
->  {
-> +       u16 card_opt, clk_ctrl, sdif_mode;
-> +
-> +       if (preserve) {
-> +               card_opt = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
-> +               clk_ctrl = sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL);
-> +               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> +                       sdif_mode = sd_ctrl_read16(host, CTL_SDIF_MODE);
-> +       }
-> +
->         /* FIXME - should we set stop clock reg here */
->         sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
->         usleep_range(10000, 11000);
-> @@ -190,7 +199,7 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->         tmio_mmc_abort_dma(host);
->
->         if (host->reset)
-> -               host->reset(host);
-> +               host->reset(host, preserve);
->
->         sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
->         host->sdcard_irq_mask = host->sdcard_irq_mask_all;
-> @@ -206,6 +215,13 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
->                 sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
->         }
->
-> +       if (preserve) {
-> +               sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, card_opt);
-> +               sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk_ctrl);
-> +               if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> +                       sd_ctrl_write16(host, CTL_SDIF_MODE, sdif_mode);
-> +       }
-> +
->         if (host->mmc->card)
->                 mmc_retune_needed(host->mmc);
->  }
-> @@ -248,7 +264,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
->
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       tmio_mmc_reset(host);
-> +       tmio_mmc_reset(host, true);
->
->         /* Ready for new calls */
->         host->mrq = NULL;
-> @@ -961,7 +977,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 tmio_mmc_power_off(host);
->                 /* For R-Car Gen2+, we need to reset SDHI specific SCC */
->                 if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-> -                       tmio_mmc_reset(host);
-> +                       tmio_mmc_reset(host, false);
->
->                 host->set_clock(host, 0);
->                 break;
-> @@ -1189,7 +1205,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
->                 _host->sdcard_irq_mask_all = TMIO_MASK_ALL;
->
->         _host->set_clock(_host, 0);
-> -       tmio_mmc_reset(_host);
-> +       tmio_mmc_reset(_host, false);
->
->         spin_lock_init(&_host->lock);
->         mutex_init(&_host->ios_lock);
-> @@ -1285,7 +1301,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
->         struct tmio_mmc_host *host = dev_get_drvdata(dev);
->
->         tmio_mmc_clk_enable(host);
-> -       tmio_mmc_reset(host);
-> +       tmio_mmc_reset(host, false);
->
->         if (host->clk_cache)
->                 host->set_clock(host, host->clk_cache);
+> -Samsung's SDHCI controller is used as a connectivity interface with external
+> -MMC, SD and eMMC storage mediums. This file documents differences between the
+> -core mmc properties described by mmc.txt and the properties used by the
+> -Samsung implementation of the SDHCI controller.
+> -
+> -Required SoC Specific Properties:
+> -- compatible: should be one of the following
+> -  - "samsung,s3c6410-sdhci": For controllers compatible with s3c6410 sdhci
+> -    controller.
+> -  - "samsung,exynos4210-sdhci": For controllers compatible with Exynos4 sdhci
+> -    controller.
+> -
+> -Required Board Specific Properties:
+> -- pinctrl-0: Should specify pin control groups used for this controller.
+> -- pinctrl-names: Should contain only one value - "default".
+> -
+> -Example:
+> -       sdhci@12530000 {
+> -               compatible = "samsung,exynos4210-sdhci";
+> -               reg = <0x12530000 0x100>;
+> -               interrupts = <0 75 0>;
+> -               bus-width = <4>;
+> -               cd-gpios = <&gpk2 2 0>;
+> -               pinctrl-names = "default";
+> -               pinctrl-0 = <&sd0_clk &sd0_cmd &sd0_bus4>;
+> -       };
+> -
+> -       Note: This example shows both SoC specific and board specific properties
+> -       in a single device node. The properties can be actually be separated
+> -       into SoC specific node and board specific node.
 > --
-> 2.35.1
+> 2.34.1
 >
