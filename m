@@ -2,70 +2,321 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42C4EC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 11 Jul 2022 23:04:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 85C72C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 00:00:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229848AbiGKXER (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 11 Jul 2022 19:04:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57440 "EHLO
+        id S230006AbiGLAAZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 11 Jul 2022 20:00:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37328 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231916AbiGKXEQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 19:04:16 -0400
-Received: from mail-il1-f179.google.com (mail-il1-f179.google.com [209.85.166.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 392D811172;
-        Mon, 11 Jul 2022 16:04:15 -0700 (PDT)
-Received: by mail-il1-f179.google.com with SMTP id p13so3916139ilq.0;
-        Mon, 11 Jul 2022 16:04:15 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=NbY/7Z18T3rfQ5ngeaYSTuxGg4aJvX0MObLvYqlXd7s=;
-        b=2YrFlpQfi5ozeUCo6EEGtScYkMq3//3l0UwMJj1Z1aGLLfP+p1HB997/2+bSacGfJn
-         Qpl4LrfISD+RcKpG/E9jF+ep2paJUsxM384z20eLQpR+pQ3u7tmJAtOeuNAA2k5vlRab
-         2Kju/JDe0VxpyF32TNYcRW2x7sdIRT9f21dxEd8G91oUXLbVUbgSW1u1yQw2ZyxU6Dex
-         F+oGIdyNZFUdnrwnpwvQZezGXVP7ScnMOpNygof8CgkATe/89RNSsTHJAxlnR06lAebK
-         iOFDWoHOahFxQ3INROUPnHqSCG3Tu+19gVPa4VAxzhNgmBB6LOaqlBAgXtc3RKl/HXh0
-         aplQ==
-X-Gm-Message-State: AJIora9EY9KtCEF489PW4pONJowKwkuxFLHGFKi+D3fmLycZB+5sCNR7
-        clI2qPkWOfuvh+NYDPcuzHdIp89GHA==
-X-Google-Smtp-Source: AGRyM1uMoeWR7PzsRDrBvUEqy0bblpLHVg5sWj7o26/ynW/mXtmz0uMxRbw9bbdMhZS09TsefyKoDQ==
-X-Received: by 2002:a92:cc05:0:b0:2dc:51f5:f6cd with SMTP id s5-20020a92cc05000000b002dc51f5f6cdmr11108584ilp.175.1657580654473;
-        Mon, 11 Jul 2022 16:04:14 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id l9-20020a92d8c9000000b002dc100ab6fdsm3166725ilo.35.2022.07.11.16.04.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 11 Jul 2022 16:04:14 -0700 (PDT)
-Received: (nullmailer pid 434848 invoked by uid 1000);
-        Mon, 11 Jul 2022 23:04:12 -0000
-Date:   Mon, 11 Jul 2022 17:04:12 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Johnson Wang <johnson.wang@mediatek.com>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, ulf.hansson@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, robh+dt@kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com
-Subject: Re: [PATCH v2] dt-bindings: mmc: Add compatible for MediaTek MT8188
-Message-ID: <20220711230412.GA434794-robh@kernel.org>
-References: <20220708114747.13878-1-johnson.wang@mediatek.com>
+        with ESMTP id S229745AbiGLAAY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 11 Jul 2022 20:00:24 -0400
+Received: from mailout1.samsung.com (mailout1.samsung.com [203.254.224.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE70F2C64C
+        for <linux-mmc@vger.kernel.org>; Mon, 11 Jul 2022 17:00:21 -0700 (PDT)
+Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
+        by mailout1.samsung.com (KnoxPortal) with ESMTP id 20220712000019epoutp01e3b6f910f9752aaa31d051c7d5e194f0~A6_IbaWv92061420614epoutp01a
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 00:00:19 +0000 (GMT)
+DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.samsung.com 20220712000019epoutp01e3b6f910f9752aaa31d051c7d5e194f0~A6_IbaWv92061420614epoutp01a
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
+        s=mail20170921; t=1657584019;
+        bh=QbPRAuj/G3AeRRcD3GrylXayae1kNYVlh4RBxNQcYxQ=;
+        h=From:To:Cc:In-Reply-To:Subject:Date:References:From;
+        b=sZHjnFD05TZglR5JEitTIv3qHV1WtU+aoObBam5rDGcKETiNES1yV7eehpmmNVIro
+         qF8xhHM3A7yMLaw68zSoZ6EoJsf3Q+NSxziLxDYz9OtAc/VAMDGG3IqPkD8LrViO7q
+         bGZ+VdSs4JfysTmYwhh4iMCpXZ8VVZM5yb86eWmE=
+Received: from epsnrtp1.localdomain (unknown [182.195.42.162]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTP id
+        20220712000018epcas1p29199332ae4e22f9e620569bc571ceda0~A6_Hp9bjE2903029030epcas1p2u;
+        Tue, 12 Jul 2022 00:00:18 +0000 (GMT)
+Received: from epsmges1p2.samsung.com (unknown [182.195.36.222]) by
+        epsnrtp1.localdomain (Postfix) with ESMTP id 4Lhgqj73LWz4x9Q0; Tue, 12 Jul
+        2022 00:00:17 +0000 (GMT)
+Received: from epcas1p2.samsung.com ( [182.195.41.46]) by
+        epsmges1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        DF.CE.09633.199BCC26; Tue, 12 Jul 2022 09:00:17 +0900 (KST)
+Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
+        epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
+        20220712000017epcas1p2187113f8068be6949afb87cadfa5476c~A6_GvRpD32903029030epcas1p2p;
+        Tue, 12 Jul 2022 00:00:17 +0000 (GMT)
+Received: from epsmgms1p2.samsung.com (unknown [182.195.42.42]) by
+        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
+        20220712000017epsmtrp10140f2470bc8b8b1d01b0160b3bc9ea8~A6_GuG7In1284112841epsmtrp11;
+        Tue, 12 Jul 2022 00:00:17 +0000 (GMT)
+X-AuditID: b6c32a36-8821aa80000025a1-0c-62ccb991caec
+Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
+        epsmgms1p2.samsung.com (Symantec Messaging Gateway) with SMTP id
+        E5.D0.08802.199BCC26; Tue, 12 Jul 2022 09:00:17 +0900 (KST)
+Received: from sh043lee03 (unknown [10.253.101.72]) by epsmtip1.samsung.com
+        (KnoxPortal) with ESMTPA id
+        20220712000017epsmtip11f78405b314f210a48ca07802f8dff76~A6_Gd63rZ2513025130epsmtip1N;
+        Tue, 12 Jul 2022 00:00:17 +0000 (GMT)
+From:   "Seunghui Lee" <sh043.lee@samsung.com>
+To:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <axboe@kernel.dk>,
+        <Avri.Altman@wdc.com>, <shawn.lin@rock-chips.com>,
+        <adrian.hunter@intel.com>
+Cc:     <grant.jung@samsung.com>, <jt77.jang@samsung.com>,
+        <dh0421.hwang@samsung.com>, <junwoo80.lee@samsung.com>,
+        <jangsub.yi@samsung.com>, <cw9316.lee@samsung.com>,
+        <sh8267.baek@samsung.com>, <wkon.kim@samsung.com>,
+        <seunghwan.hyun@samsung.com>
+In-Reply-To: <20220705015729.14455-1-sh043.lee@samsung.com>
+Subject: RE: [PATCH] mmc: use mmc_card_* macro and add it for sd_combo
+Date:   Tue, 12 Jul 2022 09:00:17 +0900
+Message-ID: <013e01d89582$5e8d3830$1ba7a890$@samsung.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220708114747.13878-1-johnson.wang@mediatek.com>
+Content-Transfer-Encoding: 7bit
+X-Mailer: Microsoft Outlook 16.0
+Content-Language: ko
+Thread-Index: AQGsnp/peaG99Yte9Le8RtwF2g9pOAIxCFJ0rcA8XxA=
+X-Brightmail-Tracker: H4sIAAAAAAAAA01Ta0xbZRjOd3o7THGHluEnCOsOIXM4oIXSncJqWGiwUWIg++EddoATipTT
+        pqeYTn+MSFIYIle3YcEEtkmUQVDWcQsryAqlXBRhdAlhyVzYABE3y5DQDbD0dMq/53m/5/ne
+        5/0uKEf4Kz8ULaCNlIEmtTj/ALf71rHYmNq+yRzJk0aCcC6284mVrTk+ce1uNZ9oGDfzCJvL
+        KSA8250CovxGPUL0Lk0KiP7tUoSY7W/iE/bdakD84nTzCNfkGI9YWOzkEY6Od4nrM/9wUzD1
+        lYEVRD07VaxecA3w1duWQa66ytoG1OtdEeqyoS+RDMEHhSc1FJlHGcQUnavLK6Dzlfjbp7NT
+        sxPlEmmMVEGcwMU0WUQpcVV6RkxagdabHRd/SmqLvaUMkmHwuDdOGnTFRkqs0TFGJU7p87R6
+        uT6WIYuYYjo/lqaMSVKJJD7RKzxTqLlj3+HqzyebStvnOCXg77gKEIBCTAarl0e4FeAAKsR6
+        Aex+eIPHEreXVA4hLFkHsGehkvvcMnzZzmEX+gEc3ZwUsGQZwKf1I/w9FR87Dv907/r2CsZs
+        AHoaan0WDuYB8MJsk2BPFYAlw4clA2APi7A0OO7eQfYwF4uCq7frfZpATAErx2Z4LA6Czm8W
+        fTk42GHYs9bEYTOJ4daDVh5bD4aN582+ejCWBHeHmn0pIPYYhTM1SwhrUMHLfZcELBbBPxxW
+        Pw6FK9VmP2ageWfH38AEf6564scJ0L2+7g2Nepsdg539/qM8AvuefgvYDC/BvzYqeXsSiAXC
+        crOQlUTClfut/gSvwKtl85wagFv2TWbZN5ll3zSW/5s1A24bCKH0TFE+xUj18f/dd66uqAv4
+        Xna0vBfUrT2OHQYICoYBRDl4cOCzqfEcYWAeefYzyqDLNhRrKWYYJHrPupYTeihX5/0atDFb
+        KlNIZPJ4GZGgSJDjLwe2XZwghVg+aaQKKUpPGZ77EDQgtARpjhodedbxavuPHw9SDZnzQ1/8
+        9uKt+SM35zvwMdXpIPOa41Fa0m6UKPmrtqtzJlXMQvgd4dlrMtLVdU50qiYtAzd+KOeGhWeN
+        gmy6rOmjrXMnOr5erT+6lJtqChHYCjULjS3aM2+JI1bRqMzvfnrfnnW08b3ulIO2QVdd6EZW
+        QffB8I3I17dfWK+4u5q/+U66Bh+qyIy0TlO0s2Xa1aPoQ40T0/EXHvRXWVtaxYeTQu7Z5idw
+        e/oVR4Pqc4Ho5rKH9+btOsv9OMTkCEA/uTguTZ2i044Hvfb7KU+04YfpQ3228umRCKAscM19
+        /6i0SjmrsN5zj0Rc5+dshreEpYAwnMtoSGk0x8CQ/wKD+zfiYgQAAA==
+X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFtrFIsWRmVeSWpSXmKPExsWy7bCSnO7EnWeSDKb9F7I4+WQNm8XLn1fZ
+        LFbf7WezmHGqjdVi37WT7Ba//q5nt+jYOpnJYsfzM+wWu/42M1lc3jWHzeLI/35Gi3MnP7Fa
+        XDtzgtXizpP1rBbH14ZbbL70jcVBwGPxnpdMHpfPlnrcubaHzePvrP0sHn1bVjF6fN4k59F+
+        oJspgD2KyyYlNSezLLVI3y6BK+P6kX8sBZ3WFc1rrjI3MH7U72Lk5JAQMJE4tOgIcxcjF4eQ
+        wA5GiRW3H7NAJCQlFj96yNbFyAFkC0scPlwMUfOMUeLlx/OsIDVsAjoSbz79ZwVJiAgcY5Ro
+        m7SAHcRhFmhiknjX95QNoqWHUeLazGmMIC2cAtYSzxr2gNnCAm4Spz79YwKxWQRUJV5fmcwO
+        YvMKWEr0nLjECmELSpyc+QTsJGYBbYneh62MELa8xPa3c5ghTlWQ+Pl0GStEXERidmcbWFxE
+        wEri/4EFrBMYhWchGTULyahZSEbNQtK+gJFlFaNkakFxbnpusWGBUV5quV5xYm5xaV66XnJ+
+        7iZGcPRqae1g3LPqg94hRiYOxkOMEhzMSiK8f86eShLiTUmsrEotyo8vKs1JLT7EKM3BoiTO
+        e6HrZLyQQHpiSWp2ampBahFMlomDU6qByfBo0pypm5KWe89mnzdt+fnea85fX6/f23px87vc
+        ad7CJqbHku7vlXSy2PhNd/9RmSfzrP2/FXg89JfyZv7DKB+4+RD/n7UhffqeL/p39sRnFRS/
+        X/b90YfFlQ5fv4tzNr0M+OgUnrbHYH7F/D+8wdnd3xfP57z02+Pq7n9C80U89GeJaXZ/dzGb
+        kvGC8e2FTCUTC5kTSdH+5+768Sgv1/w57UWF9D8OiVj5V2W5q2udP/z+tnp/+3sh3nOicmcs
+        5xg5MzD9fp2/fLlU8UY/pvt3b+mk1lVb3K2tinu7a73WtGXun7NDm64mfNga/UCJ6YjJi//O
+        kU03nslu2VXonBzk8uHDxJWa97NT1klLCCixFGckGmoxFxUnAgDac+64TQMAAA==
+X-CMS-MailID: 20220712000017epcas1p2187113f8068be6949afb87cadfa5476c
+X-Msg-Generator: CA
+Content-Type: text/plain; charset="utf-8"
+X-Sendblock-Type: SVC_REQ_APPROVE
+CMS-TYPE: 101P
+DLP-Filter: Pass
+X-CFilter-Loop: Reflected
+X-CMS-RootMailID: 20220705012516epcas1p2c15e9e9984735c32bcc754ff646ccbf3
+References: <CGME20220705012516epcas1p2c15e9e9984735c32bcc754ff646ccbf3@epcas1p2.samsung.com>
+        <20220705015729.14455-1-sh043.lee@samsung.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 08 Jul 2022 19:47:47 +0800, Johnson Wang wrote:
-> This commit adds dt-binding documentation of mmc for MediaTek MT8188 SoC
-> platform.
+> -----Original Message-----
+> From: Seunghui Lee <sh043.lee@samsung.com>
+> Sent: Tuesday, July 5, 2022 10:57 AM
+> To: ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-
+> kernel@vger.kernel.org; axboe@kernel.dk; Avri.Altman@wdc.com;
+> shawn.lin@rock-chips.com; adrian.hunter@intel.com
+> Cc: grant.jung@samsung.com; jt77.jang@samsung.com;
+> dh0421.hwang@samsung.com; junwoo80.lee@samsung.com; jangsub.yi@samsung.com;
+> cw9316.lee@samsung.com; sh8267.baek@samsung.com; wkon.kim@samsung.com;
+> seunghwan.hyun@samsung.com; Seunghui Lee <sh043.lee@samsung.com>
+> Subject: [PATCH] mmc: use mmc_card_* macro and add it for sd_combo
 > 
-> Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
+> add mmc_card_sd_combo() macro for sd combo type card and use mmc_card_*
+> macro to simplify instead of comparing card->type
+> 
+> Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
 > ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 12 +++++-------
->  1 file changed, 5 insertions(+), 7 deletions(-)
+>  drivers/mmc/core/block.c  |  4 ++--
+>  drivers/mmc/core/bus.c    |  4 ++--
+>  drivers/mmc/core/sd.c     |  2 +-
+>  drivers/mmc/core/sdio.c   | 16 ++++++++--------
+>  drivers/mmc/host/mxcmmc.c |  2 +-
+>  include/linux/mmc/card.h  |  1 +
+>  6 files changed, 15 insertions(+), 14 deletions(-)
 > 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
+> bda6c67ce93f..4d7ae8fc2901 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2987,7 +2987,7 @@ static int mmc_blk_probe(struct mmc_card *card)
+>  	 * Don't enable runtime PM for SD-combo cards here. Leave that
+>  	 * decision to be taken during the SDIO init sequence instead.
+>  	 */
+> -	if (card->type != MMC_TYPE_SD_COMBO) {
+> +	if (!mmc_card_sd_combo(card)) {
+>  		pm_runtime_set_active(&card->dev);
+>  		pm_runtime_enable(&card->dev);
+>  	}
+> @@ -3014,7 +3014,7 @@ static void mmc_blk_remove(struct mmc_card *card)
+>  		mmc_blk_part_switch(card, md->part_type);
+>  		mmc_release_host(card->host);
+>  	}
+> -	if (card->type != MMC_TYPE_SD_COMBO)
+> +	if (!mmc_card_sd_combo(card))
+>  		pm_runtime_disable(&card->dev);
+>  	pm_runtime_put_noidle(&card->dev);
+>  	mmc_blk_remove_req(md);
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c index
+> 58a60afa650b..d8762fa3d5cd 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -85,7 +85,7 @@ mmc_bus_uevent(struct device *dev, struct
+> kobj_uevent_env *env)
+>  			return retval;
+>  	}
+> 
+> -	if (card->type == MMC_TYPE_SDIO || card->type == MMC_TYPE_SD_COMBO)
+> {
+> +	if (mmc_card_sdio(card) || mmc_card_sd_combo(card)) {
+>  		retval = add_uevent_var(env, "SDIO_ID=%04X:%04X",
+>  					card->cis.vendor, card->cis.device);
+>  		if (retval)
+> @@ -107,7 +107,7 @@ mmc_bus_uevent(struct device *dev, struct
+> kobj_uevent_env *env)
+>  	 * SDIO (non-combo) cards are not handled by mmc_block driver and
+> do not
+>  	 * have accessible CID register which used by mmc_card_name()
+> function.
+>  	 */
+> -	if (card->type == MMC_TYPE_SDIO)
+> +	if (mmc_card_sdio(card))
+>  		return 0;
+> 
+>  	retval = add_uevent_var(env, "MMC_NAME=%s", mmc_card_name(card));
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
+> c5f1df6ce4c0..f0186bdf2025 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -793,7 +793,7 @@ static umode_t sd_std_is_visible(struct kobject *kobj,
+> struct attribute *attr,
+>  	     attr == &dev_attr_info2.attr ||
+>  	     attr == &dev_attr_info3.attr ||
+>  	     attr == &dev_attr_info4.attr
+> -	    ) && card->type != MMC_TYPE_SD_COMBO)
+> +	    ) &&!mmc_card_sd_combo(card))
+>  		return 0;
+> 
+>  	return attr->mode;
+> diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c index
+> 25799accf8a0..b589df1c35e0 100644
+> --- a/drivers/mmc/core/sdio.c
+> +++ b/drivers/mmc/core/sdio.c
+> @@ -335,7 +335,7 @@ static int sdio_disable_4bit_bus(struct mmc_card *card)
+> {
+>  	int err;
+> 
+> -	if (card->type == MMC_TYPE_SDIO)
+> +	if (mmc_card_sdio(card))
+>  		goto out;
+> 
+>  	if (!(card->host->caps & MMC_CAP_4_BIT_DATA)) @@ -360,7 +360,7 @@
+> static int sdio_enable_4bit_bus(struct mmc_card *card)
+>  	err = sdio_enable_wide(card);
+>  	if (err <= 0)
+>  		return err;
+> -	if (card->type == MMC_TYPE_SDIO)
+> +	if (mmc_card_sdio(card))
+>  		goto out;
+> 
+>  	if (card->scr.bus_widths & SD_SCR_BUS_WIDTH_4) { @@ -415,7 +415,7
+> @@ static int sdio_enable_hs(struct mmc_card *card)
+>  	int ret;
+> 
+>  	ret = mmc_sdio_switch_hs(card, true);
+> -	if (ret <= 0 || card->type == MMC_TYPE_SDIO)
+> +	if (ret <= 0 || mmc_card_sdio(card))
+>  		return ret;
+> 
+>  	ret = mmc_sd_switch_hs(card);
+> @@ -441,7 +441,7 @@ static unsigned mmc_sdio_get_max_clock(struct mmc_card
+> *card)
+>  		max_dtr = card->cis.max_dtr;
+>  	}
+> 
+> -	if (card->type == MMC_TYPE_SD_COMBO)
+> +	if (mmc_card_sd_combo(card))
+>  		max_dtr = min(max_dtr, mmc_sd_get_max_clock(card));
+> 
+>  	return max_dtr;
+> @@ -689,7 +689,7 @@ static int mmc_sdio_init_card(struct mmc_host *host,
+> u32 ocr,
+>  	    mmc_sd_get_cid(host, ocr & rocr, card->raw_cid, NULL) == 0) {
+>  		card->type = MMC_TYPE_SD_COMBO;
+> 
+> -		if (oldcard && (oldcard->type != MMC_TYPE_SD_COMBO ||
+> +		if (oldcard && (!mmc_card_sd_combo(oldcard) ||
+>  		    memcmp(card->raw_cid, oldcard->raw_cid, sizeof(card-
+> >raw_cid)) != 0)) {
+>  			err = -ENOENT;
+>  			goto mismatch;
+> @@ -697,7 +697,7 @@ static int mmc_sdio_init_card(struct mmc_host *host,
+> u32 ocr,
+>  	} else {
+>  		card->type = MMC_TYPE_SDIO;
+> 
+> -		if (oldcard && oldcard->type != MMC_TYPE_SDIO) {
+> +		if (oldcard && !mmc_card_sdio(oldcard)) {
+>  			err = -ENOENT;
+>  			goto mismatch;
+>  		}
+> @@ -754,7 +754,7 @@ static int mmc_sdio_init_card(struct mmc_host *host,
+> u32 ocr,
+>  	/*
+>  	 * Read CSD, before selecting the card
+>  	 */
+> -	if (!oldcard && card->type == MMC_TYPE_SD_COMBO) {
+> +	if (!oldcard && mmc_card_sd_combo(card)) {
+>  		err = mmc_sd_get_csd(card);
+>  		if (err)
+>  			goto remove;
+> @@ -827,7 +827,7 @@ static int mmc_sdio_init_card(struct mmc_host *host,
+> u32 ocr,
+> 
+>  	mmc_fixup_device(card, sdio_fixup_methods);
+> 
+> -	if (card->type == MMC_TYPE_SD_COMBO) {
+> +	if (mmc_card_sd_combo(card)) {
+>  		err = mmc_sd_setup_card(host, card, oldcard != NULL);
+>  		/* handle as SDIO-only card if memory init failed */
+>  		if (err) {
+> diff --git a/drivers/mmc/host/mxcmmc.c b/drivers/mmc/host/mxcmmc.c index
+> 613f13306433..2cf0413407ea 100644
+> --- a/drivers/mmc/host/mxcmmc.c
+> +++ b/drivers/mmc/host/mxcmmc.c
+> @@ -923,7 +923,7 @@ static void mxcmci_init_card(struct mmc_host *host,
+> struct mmc_card *card)
+>  	 * One way to prevent this is to only allow 1-bit transfers.
+>  	 */
+> 
+> -	if (is_imx31_mmc(mxcmci) && card->type == MMC_TYPE_SDIO)
+> +	if (is_imx31_mmc(mxcmci) && mmc_card_sdio(card))
+>  		host->caps &= ~MMC_CAP_4_BIT_DATA;
+>  	else
+>  		host->caps |= MMC_CAP_4_BIT_DATA;
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h index
+> 37f975875102..156a7b673a28 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -348,5 +348,6 @@ bool mmc_card_is_blockaddr(struct mmc_card *card);
+>  #define mmc_card_mmc(c)		((c)->type == MMC_TYPE_MMC)
+>  #define mmc_card_sd(c)		((c)->type == MMC_TYPE_SD)
+>  #define mmc_card_sdio(c)	((c)->type == MMC_TYPE_SDIO)
+> +#define mmc_card_sd_combo(c)	((c)->type == MMC_TYPE_SD_COMBO)
+> 
+>  #endif /* LINUX_MMC_CARD_H */
+> --
+> 2.29.0
+Please give me any opinion or suggestion about this commit.
+It reduces the length of the line and looks simple.
+When it comes to refactoring, I've tried to add sd_combo macro as well.
 
-Acked-by: Rob Herring <robh@kernel.org>
+
