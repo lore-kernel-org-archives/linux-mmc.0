@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02A86C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 11:09:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC4C1C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 11:09:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232781AbiGLLJc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Jul 2022 07:09:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54198 "EHLO
+        id S232931AbiGLLJl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Jul 2022 07:09:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54432 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232250AbiGLLJa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 07:09:30 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B975AEF7F
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:29 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id e28so9753601lfj.4
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:28 -0700 (PDT)
+        with ESMTP id S232898AbiGLLJg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 07:09:36 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23216B0272
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:34 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id bu42so13415319lfb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:09:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=PDf3BoUtYX3hh7B0z9WYpVo707DKLqfuw9BowOK+j9c=;
-        b=o1CktAttWi56z4qyeYomeZQNWZ2zu53S7mboNDsffxLkrAPHWpaTf+9+6jPQ9Ss9NB
-         UVo7ZLByhKvBYi3hiCW+NY6XmDgH/2v5ccFcIaC3laRWT0Y15NwhczcJhjEqY/fW/cgo
-         VmwqM01HE+FB+nCJfeniETlpyJp0n7qtfEU+tLmqtR6ZRGEOOCifFdUBXEGD//oz8tci
-         PIJiYu1iOmkeLPWN1flkWOFeqgUbBhLe+kdmo/cllBFhBXharxZ3vU94QxdS4FanVnw1
-         nLYzM6Sroa1Yi7d/lBPy9RA3RPtRMWwphpUjEoUR/hJz43Pv6bQA6KWINq625+tqEOd9
-         AvZw==
+        bh=xVQOPlTnuA1yYhPt8Wh3gI7FjQUx1QY7F8FI0tZWYAY=;
+        b=A7XXKjFrCEue0kURaD9nT4FN22E5h3lG+vmU0ZFaKnYQoZhHQeza8pmqyUxUtN84/f
+         VCySaEG5ncb10Gie42hSd1OPPJhNiRor+oTvAhKmeRVql9oPocLIhV1Vq7JqgRzjwAtZ
+         37TGhrhpwUIawgBGjjOwFzn793fln8sLLCvy6ihwGzI7+WX69trd3LhEEwwSlwyfTs54
+         r7Q4RcLrf/pZq4dYH+iSh+fYKmAHSFxL5Jlhm3A+SLbrXndrqGKPojIDFIakbwM2R6QW
+         FJjyw2FyQdBzN5SVOsBHiHW9WunvOLHBhLzSujlp1HGMbjMxrpW/987MYwu2JIDV/6Cv
+         8aww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=PDf3BoUtYX3hh7B0z9WYpVo707DKLqfuw9BowOK+j9c=;
-        b=3YZBIMQ4WiRg0Cn3UMDJ5OBna2fuxFvi0caICKMqlUn0ihCZ5LxGXGFsOXmxcZ+f2u
-         TxDp5vbsfoU1hoMhD4WplQaEdBb/CnoCW8KdA4RPnyoI+GR2w4l/O0xy4wx4jiHzdwaH
-         hrlLXwFEoR0P2SiZ029avm/jyxRvFtJ4GfTQ3ADrcqz+Z/7Jz/kgJfbu75ZEnbxavqI0
-         FuB6MQtBqwZXzBzhKiz0U+jFKTFZ5FYMcRbIOz3h40L6blB+r1M1mBddTDrL3CWcwuQJ
-         a3Ba0E9AHBAhqMBnZy+OfOJ2pKQ1tMYX9TejJU7+ajDZfJIB3tvcgkstkVianNlcf2mI
-         H5QQ==
-X-Gm-Message-State: AJIora8JliE5bA8uYKCLLcdqRgBVy+5tWOlHGQsUtJ2hmxOiicF0E5yj
-        JyT/vMmv6C6AWn9BX0psUQ3+/JmKXOlcZbmzeMMvWHubHDI=
-X-Google-Smtp-Source: AGRyM1vxtHxODOV2BqJv2lSmKEpqsJBWS2XHiKMS+cv6EzKPF5vdgR28up/hA1Q0vsxHvBG4mFKanjJq8mBp4AcyOk8=
-X-Received: by 2002:a05:6512:3d03:b0:47f:7023:2c57 with SMTP id
- d3-20020a0565123d0300b0047f70232c57mr14042987lfv.254.1657624168433; Tue, 12
- Jul 2022 04:09:28 -0700 (PDT)
+        bh=xVQOPlTnuA1yYhPt8Wh3gI7FjQUx1QY7F8FI0tZWYAY=;
+        b=pQmNvEbdOLiafal+FK7XNw7P6atcjQ1DoSFt6wvP4EQ2KOqMVILwO8rrfWt43Egeub
+         WsVtdAH2ugsbC9I0TlhPcF/hM9Hn4Zrp/J6+WkpAe1rpzq4FDPobXR3lWxsUhz485SLF
+         TCPUsmBpLPvWzLV/7LAWM9+O+DnVlTrp/7ehIBTAc9VfCDS/9IDCVaBLzcsWYQ9mklgX
+         qYKNY/A6ImVGU352qjA0hyf/pHd0HS27RgkOKtKKq2aK4AqPBReMQChxzfmcs2P/3OJ6
+         4u7Jh5w0MFThw9b06RudzK5uUfWWW4taAjlupjf9fhgBKDt9DXcxl9yscTTaAz9zf/cN
+         405g==
+X-Gm-Message-State: AJIora98RMMtcd0nwLXn7Fklx4Fw4i3aN2kQk+7P4g4+iyhtnLbozS1h
+        eFWrap9NzzIw9cfv1NEwmfJ5/Xzn9uroF9ZJjsRP5Q==
+X-Google-Smtp-Source: AGRyM1tdIQpFjs4FQN5KurKmOeod20NGBrauxzzr9JmeaXPOXMwNM060XOMcv3FEpzY2zQWVFbLcYiMaf9pn0ReFt88=
+X-Received: by 2002:a05:6512:ad6:b0:481:1a75:44c with SMTP id
+ n22-20020a0565120ad600b004811a75044cmr15165411lfu.167.1657624172374; Tue, 12
+ Jul 2022 04:09:32 -0700 (PDT)
 MIME-Version: 1.0
-References: <cover.1656155715.git.christophe.jaillet@wanadoo.fr> <dbf633c48c24ae6d95f852557e8d8b3bbdef65fe.1656155715.git.christophe.jaillet@wanadoo.fr>
-In-Reply-To: <dbf633c48c24ae6d95f852557e8d8b3bbdef65fe.1656155715.git.christophe.jaillet@wanadoo.fr>
+References: <cover.1656155715.git.christophe.jaillet@wanadoo.fr> <b3b78926569445962ea5c3b6e9102418a9effb88.1656155715.git.christophe.jaillet@wanadoo.fr>
+In-Reply-To: <b3b78926569445962ea5c3b6e9102418a9effb88.1656155715.git.christophe.jaillet@wanadoo.fr>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 12 Jul 2022 13:08:50 +0200
-Message-ID: <CAPDyKFq2QC7PkjfmLcgyG3gDgDHWROwd0X5+tjF3hFCc7xVs1w@mail.gmail.com>
-Subject: Re: [PATCH 1/3] memstick/ms_block: Fix some incorrect memory allocation
+Date:   Tue, 12 Jul 2022 13:08:53 +0200
+Message-ID: <CAPDyKFr2VpKVtFhNYPjy+uXKRNVTXS6LaMoAkv8u9YDeXTnnBQ@mail.gmail.com>
+Subject: Re: [PATCH 2/3] memstick/ms_block: Fix a memory leak
 To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
         Alex Dubov <oakad@yahoo.com>,
@@ -65,14 +65,11 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Sat, 25 Jun 2022 at 14:55, Christophe JAILLET
 <christophe.jaillet@wanadoo.fr> wrote:
 >
-> Some functions of the bitmap API take advantage of the fact that a bitmap
-> is an array of long.
+> 'erased_blocks_bitmap' is never freed. As it is allocated at the same time
+> as 'used_blocks_bitmap', it is likely that it should be freed also at the
+> same time.
 >
-> So, to make sure this assertion is correct, allocate bitmaps with
-> bitmap_zalloc() instead of kzalloc()+hand-computed number of bytes.
->
-> While at it, also use bitmap_free() instead of kfree() to keep the
-> semantic.
+> Add the corresponding bitmap_free() in msb_data_clear().
 >
 > Fixes: 0ab30494bc4f ("memstick: add support for legacy memorysticks")
 > Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
@@ -84,44 +81,20 @@ Uffe
 
 
 > ---
-> I guess that it is not an issue in RL because memory allocation is
-> certainly "rounding" to keep memory alignment.
+> This patch is speculative.
 > ---
->  drivers/memstick/core/ms_block.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
+>  drivers/memstick/core/ms_block.c | 1 +
+>  1 file changed, 1 insertion(+)
 >
 > diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
-> index 3993bdd4b519..f8f151163667 100644
+> index f8f151163667..f8fdf88fb240 100644
 > --- a/drivers/memstick/core/ms_block.c
 > +++ b/drivers/memstick/core/ms_block.c
-> @@ -1341,17 +1341,17 @@ static int msb_ftl_initialize(struct msb_data *msb)
->         msb->zone_count = msb->block_count / MS_BLOCKS_IN_ZONE;
->         msb->logical_block_count = msb->zone_count * 496 - 2;
->
-> -       msb->used_blocks_bitmap = kzalloc(msb->block_count / 8, GFP_KERNEL);
-> -       msb->erased_blocks_bitmap = kzalloc(msb->block_count / 8, GFP_KERNEL);
-> +       msb->used_blocks_bitmap = bitmap_zalloc(msb->block_count, GFP_KERNEL);
-> +       msb->erased_blocks_bitmap = bitmap_zalloc(msb->block_count, GFP_KERNEL);
->         msb->lba_to_pba_table =
->                 kmalloc_array(msb->logical_block_count, sizeof(u16),
->                               GFP_KERNEL);
->
->         if (!msb->used_blocks_bitmap || !msb->lba_to_pba_table ||
->                                                 !msb->erased_blocks_bitmap) {
-> -               kfree(msb->used_blocks_bitmap);
-> +               bitmap_free(msb->used_blocks_bitmap);
-> +               bitmap_free(msb->erased_blocks_bitmap);
->                 kfree(msb->lba_to_pba_table);
-> -               kfree(msb->erased_blocks_bitmap);
->                 return -ENOMEM;
->         }
->
-> @@ -1946,7 +1946,7 @@ static DEFINE_MUTEX(msb_disk_lock); /* protects against races in open/release */
->  static void msb_data_clear(struct msb_data *msb)
+> @@ -1947,6 +1947,7 @@ static void msb_data_clear(struct msb_data *msb)
 >  {
 >         kfree(msb->boot_page);
-> -       kfree(msb->used_blocks_bitmap);
-> +       bitmap_free(msb->used_blocks_bitmap);
+>         bitmap_free(msb->used_blocks_bitmap);
+> +       bitmap_free(msb->erased_blocks_bitmap);
 >         kfree(msb->lba_to_pba_table);
 >         kfree(msb->cache);
 >         msb->card = NULL;
