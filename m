@@ -2,106 +2,121 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D02ECCA480
-	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 11:10:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96E79C43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 12 Jul 2022 12:19:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232741AbiGLLKb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 12 Jul 2022 07:10:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54466 "EHLO
+        id S229873AbiGLMTB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 12 Jul 2022 08:19:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232680AbiGLLKS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 07:10:18 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43E98B027F
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:10:17 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id z25so13369332lfr.2
-        for <linux-mmc@vger.kernel.org>; Tue, 12 Jul 2022 04:10:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=SIxn205KIvmS9VSb5lDf2UBPI0iYaOAaJ1A1MJqqVxk=;
-        b=FNUE2acQhszuFh5gwSVw+Rwn9vCbiz5eeW9tj0ulcEp5CB+CXfZNt8End8wSLExYwg
-         4MO0Xl4cRWRKs5XBHGbmhjPB/i1vtyPNV90bz1iw4x++t5iu24KV5R6FJi7W09ebLp9x
-         S7wFe2tgt8oEN1HIukddBfHCiZO3jZmcu5z3d3BrD2zxyY2u0qHd++sqPDQ+kzN2tovj
-         3q8HBg3/FmHKaEXwYT4Dfqb+TnqK4st+QY5oGz7HEfCyVhDwcVT+XW8TO0xoa0lPVoEs
-         iojT44I21fzo9Uf3MJBs0yP9F1SVii8xWazC9xjcbn2X5a0LWztVRBgtuz01spJQs9uV
-         WKQQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=SIxn205KIvmS9VSb5lDf2UBPI0iYaOAaJ1A1MJqqVxk=;
-        b=tBSun64P+254BkXOWMpD2PS7NgE4GaHKaND2K48h77iuBStis8YBF67naiSNqEADbm
-         GlbRrGOV+PelyhV5nMdBOH3k+pLPFawGKO7X6lXSgWOuskNWt33DhowQm1ceA5HgtKX6
-         +/1bxT9VhgwA01WAQueZcSW+vFQ1VJt8r8spWGVA0uyVlBpZrc4HIe0KA5bIBJ16qEC1
-         WrMjmiEwym4M6r6qZ1MY3Y0OO478EayiuaboxmGrvrb3qeUMmzVc9mHqfee/aOSaJjtP
-         xvdtxiJUpIs5/lPuXPdKCa6pAvgAg7w7z56lVL5k5EHQvBgL6l4cpA+IWUPP5vBKQkaw
-         kb+Q==
-X-Gm-Message-State: AJIora+MTGboHdOnac/H/iJVzHW1V2FugcHgsa017xoqlYAKDw1IQwSi
-        qfRoen0heycXuZqmoftb9Nsp1J0JxsIl2tKmvVxJwQ==
-X-Google-Smtp-Source: AGRyM1tW9I2SNwUkOEFsvNntEhlOoXvMH17jCpZPzFWoPNjDoKFFg72huJu8nMkwl68VqtR7rGwljMo7GbdaofhPCqM=
-X-Received: by 2002:a05:6512:3d03:b0:47f:7023:2c57 with SMTP id
- d3-20020a0565123d0300b0047f70232c57mr14045143lfv.254.1657624215580; Tue, 12
- Jul 2022 04:10:15 -0700 (PDT)
+        with ESMTP id S229572AbiGLMTA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 12 Jul 2022 08:19:00 -0400
+Received: from muru.com (muru.com [72.249.23.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6687013E06;
+        Tue, 12 Jul 2022 05:18:59 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 5881080B5;
+        Tue, 12 Jul 2022 12:13:17 +0000 (UTC)
+Date:   Tue, 12 Jul 2022 15:18:57 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
+        Yegor Yefremov <yegorslists@googlemail.com>,
+        Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v2 1/1] mmc: sdhci-omap: Fix a lockdep warning for PM
+ runtime init
+Message-ID: <Ys1msXeqPipP7J5g@atomide.com>
+References: <20220622051215.34063-1-tony@atomide.com>
+ <CAPDyKFpNBQK3QZk-+5-4YB8=2O3sxwj5-nThd00ayp7FHSjUSA@mail.gmail.com>
+ <YrlKjZHJ37PHy9af@atomide.com>
+ <CAPDyKFqxSuuMtmfqwSojPqfHhv4RDLtRQf+JbOGZJkxVhDDAtQ@mail.gmail.com>
 MIME-Version: 1.0
-References: <20220708114747.13878-1-johnson.wang@mediatek.com>
-In-Reply-To: <20220708114747.13878-1-johnson.wang@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 12 Jul 2022 13:09:39 +0200
-Message-ID: <CAPDyKFqcP69cBEKDx1Uu0BKGOA6s1U+Suiz1KXDXtwn8Qj8kBA@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: Add compatible for MediaTek MT8188
-To:     Johnson Wang <johnson.wang@mediatek.com>
-Cc:     robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFqxSuuMtmfqwSojPqfHhv4RDLtRQf+JbOGZJkxVhDDAtQ@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 8 Jul 2022 at 13:47, Johnson Wang <johnson.wang@mediatek.com> wrote:
->
-> This commit adds dt-binding documentation of mmc for MediaTek MT8188 SoC
-> platform.
->
-> Signed-off-by: Johnson Wang <johnson.wang@mediatek.com>
+* Ulf Hansson <ulf.hansson@linaro.org> [220712 09:52]:
+> On Mon, 27 Jun 2022 at 08:13, Tony Lindgren <tony@atomide.com> wrote:
+> >
+> > * Ulf Hansson <ulf.hansson@linaro.org> [220623 12:55]:
+> > > On Wed, 22 Jun 2022 at 07:12, Tony Lindgren <tony@atomide.com> wrote:
+> > > >
+> > > > We need runtime PM enabled early in probe before sdhci_setup_host() for
+> > > > sdhci_omap_set_capabilities(). But on the first runtime resume we must
+> > > > not call sdhci_runtime_resume_host() as sdhci_setup_host() has not been
+> > > > called yet. Let's check for an initialized controller like we already do
+> > > > for context restore to fix a lockdep warning.
+> > >
+> > > Thanks for explaining the background to the problem. However, looking
+> > > a bit closer I am worried that the error path in ->probe() is broken
+> > > too.
+> > >
+> > > It seems in the error path, at the label "err_rpm_put", there is a
+> > > call to pm_runtime_put_autosuspend(). This doesn't really guarantee
+> > > that the ->runtime_suspend() callback will be invoked, which I guess
+> > > is the assumption, don't you think?
+> >
+> > OK I'll check and send a separate patch for that.
+> >
+> > > That said, I wonder if it would not be easier to convert the ->probe()
+> > > function to make use of pm_runtime_get_noresume() and
+> > > pm_runtime_set_active() instead. In this way the ->probe() function
+> > > becomes responsible of turning on/off the resources "manually" that it
+> > > requires to probe (and when it fails to probe), while we can keep the
+> > > ->runtime_suspend|resume() callbacks simpler.
+> > >
+> > > Did that make sense to you?
+> >
+> > Simpler would be better :) We need to call pm_runtime_get_sync() at some
+> > point though to enable the parent device hierarchy.
+> 
+> Is there a parent device that has runtime PM enabled?
 
-Applied for next, thanks!
+Yes there is the interconnect target module device as the parent with
+runtime PM enabled. So the sdhci-omap driver needs the parent enabled.
 
-Kind regards
-Uffe
+> In other cases, it should be fine to use pm_runtime_set_active()
+> during ->probe().
 
+Yup, this can't be done here though AFAIK. Something needs to enable
+runtime PM for the parent device to have the sdhci registers accessible.
 
-> ---
->  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 12 +++++-------
->  1 file changed, 5 insertions(+), 7 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 2a2e9fa8c188..be366cefffc2 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> @@ -30,13 +30,11 @@ properties:
->            - const: mediatek,mt7623-mmc
->            - const: mediatek,mt2701-mmc
->        - items:
-> -          - const: mediatek,mt8186-mmc
-> -          - const: mediatek,mt8183-mmc
-> -      - items:
-> -          - const: mediatek,mt8192-mmc
-> -          - const: mediatek,mt8183-mmc
-> -      - items:
-> -          - const: mediatek,mt8195-mmc
-> +          - enum:
-> +              - mediatek,mt8186-mmc
-> +              - mediatek,mt8188-mmc
-> +              - mediatek,mt8192-mmc
-> +              - mediatek,mt8195-mmc
->            - const: mediatek,mt8183-mmc
->
->    reg:
-> --
-> 2.18.0
->
+> > Just calling the
+> > sdhci_omap runtime functions is not enough. And we still need to check
+> > for the valid context too. Also I'm not convinced that calling
+> > pm_runtime_get_sync() on the parent device would do the right thing on
+> > old omap3 devices without bigger changes..
+> 
+> I certainly agree. The parent should not be managed directly by the
+> sdhci driver.
+
+OK
+
+> One thing that can be discussed though, is whether
+> pm_runtime_set_active() actually should runtime resume the parent,
+> which would make the behaviour consistent with how suppliers are being
+> treated.
+
+Hmm yeah that's an interesting idea.
+
+> > But maybe you have some better
+> > ideas that I'm not considering.
+> 
+> I can try to draft a patch, if that would help? But, let's finalize
+> the discussion above first (apologize for the delay).
+
+OK. Should we apply the $subject patch to fix the splat meanwhile
+though? Seems like what you're suggesting may take some more discussion
+on the mailing lists.
+
+Regrads,
+
+Tony
