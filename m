@@ -2,103 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A04F7C43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jul 2022 07:46:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A822C43334
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jul 2022 10:54:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231203AbiGMHqI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jul 2022 03:46:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42128 "EHLO
+        id S235375AbiGMKyo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jul 2022 06:54:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47426 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234715AbiGMHqG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2022 03:46:06 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 738C2E5DD8
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 00:46:02 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id d12so17709575lfq.12
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 00:46:02 -0700 (PDT)
+        with ESMTP id S235402AbiGMKyn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2022 06:54:43 -0400
+Received: from mail-il1-x12c.google.com (mail-il1-x12c.google.com [IPv6:2607:f8b0:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC762FF580
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 03:54:41 -0700 (PDT)
+Received: by mail-il1-x12c.google.com with SMTP id k1so6452274ilu.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 03:54:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :references:from:in-reply-to:content-transfer-encoding;
-        bh=xdsL4uRj8N2AqYiew2VoS8gd5og/zBLael5s9bKHgiU=;
-        b=nlsCHVZBTVrHJcbQrLQPeenxcXMIyfBkycxLEYS3E+LrQH8Vlf+vWGZ4gDDQE0gs82
-         IwxPV+F6SsTRRhbK3+gVWIwOXFowBI7gtPpzH40ewW48y9gw6PEILCWsNZQIPUD23Vx7
-         r3IIvU5yiuIH1NMcnziiq68cpWgSnf6nxwNd75J1jjcOlzGqyARD+DzNTcPwhYBQ47xJ
-         L+0VGjY6BEJaVCYukceBTeJf5mZ5aj6MJlqunUQLAKa1wjPLPbGGEXG3+NFpKxESsjgw
-         WIZcpKQH3pJzSskTsMnfF7N8TtVZwbooI9xPxQxze1Qve4JR1FBsTdXMlP2srBWizE3y
-         6dzA==
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=24vatrNQy4mAwOD26diK3DSgxu+qePazInIA4QqKNZk=;
+        b=jfPZqHtoZbCOAxAg1WVYPBaHFTGcLSOGYzT+uhgLdeaz/mz+HHbRWMu5ugQaM3N1/b
+         6WPI8XXLnORiaMuhQNWtbu+lIjiHz1915u6o+Quvz8WBxsOHGMRWVgE3i2Dcj8faF/Kh
+         L0M21NTtlwbhswZlUuy/Xvje11Bc75+yhKHVTPGIuRzMh+IYHyNarfx9yw39ojFTIpq/
+         57RC1cGLmEwFCmo0uFjJiKnHK4CbItqPrfDrPaX5T7q6E2DlG2Ca/fZhzwj3HFJ8lZJO
+         cw1I8PUdk8FlDtecDxAIX5dNiFJliz7AeqlrFu7oswhzOrNgXDrS+ciVlsAlVfhsYr/r
+         U9Mw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=xdsL4uRj8N2AqYiew2VoS8gd5og/zBLael5s9bKHgiU=;
-        b=os9yeGkebdWz1WBGZdY3pgGiIZj6JXGGLpyX3q94vWGu3D0AE8XKVyJA/k2I7tcqxU
-         quI3AaTt8VHUPmjuvK80euGjPg8DWM8QU4mj0FmPEITyVnR7W4WaC2ReAMIdICHY6d/R
-         OgCGhjO2O420S8PIhuCysIyl+Mvqxee5j4G7L1RzGD1bqbZt9nXq1aGoMZXaKXJxdBVw
-         hgnG7Jszpejph7Psd/Jmbt6rM1W7dugWUg0HtojQ1WECdecVUOqEoETm8gW+Yr81rYdp
-         QiPXG5koLCNnOr2PcR/ehTp4y0UfxxRkxAo1i7OZQxqgvE3EnNZ1Yu0vmKTEACuglYLv
-         rTCw==
-X-Gm-Message-State: AJIora+29Xn5s1NOfxanOryBf5O6GBK8FiO+Dg9K5UR4BoQNZKxyUE4p
-        I4Nud0Ve9YKDt1b7SUkOVs6DRQ==
-X-Google-Smtp-Source: AGRyM1t/czwdLZAzX3D/UKHgSfjFx4reEMI+EE3DsJj2uYC4i992h+SkFH62u/yQnGzFHDMcQ/kxDA==
-X-Received: by 2002:a19:6449:0:b0:47f:86b3:f87b with SMTP id b9-20020a196449000000b0047f86b3f87bmr1165219lfj.644.1657698360831;
-        Wed, 13 Jul 2022 00:46:00 -0700 (PDT)
-Received: from [10.0.0.8] (fwa5da9-171.bb.online.no. [88.93.169.171])
-        by smtp.gmail.com with ESMTPSA id bd26-20020a05651c169a00b002557c48cc4csm2842992ljb.95.2022.07.13.00.45.59
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 13 Jul 2022 00:46:00 -0700 (PDT)
-Message-ID: <0405bea5-eef4-6e4a-b78c-b296304eb522@linaro.org>
-Date:   Wed, 13 Jul 2022 09:45:58 +0200
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=24vatrNQy4mAwOD26diK3DSgxu+qePazInIA4QqKNZk=;
+        b=kIsFCJHj1O1ASMCTlnIlTR4wwlNDIBJd9JyyT4/86qqOE31B6K3Y7FfOq4eQnVVTWh
+         /OMNv6ik95oy7KCS7YmMkfWHs3iF84al7gx5mXaGiZTSU0u+LXC2s7RXGUJJ3TZrLgOP
+         wwNyU2wIKk33B5hZq/2vvwTxxZqUpZXD3zg9/GgY7yKEQD/z75gkOw1fBJFNbttj5Dkb
+         aeHGZagysMXxC1ZQoeyahI3V16dSHRNMlsZl9xwxcV87Cym7Moev4EOZHrwYrbSphBZq
+         UaFmBXf9vYh6LnyRE9ZjICCiMNTSZ3mhStBBEkaC7U1t9/GngAZa9eA1c0rdamsDGjUt
+         83fQ==
+X-Gm-Message-State: AJIora/0ixYxueyAJp1ML4yMdHJmBBC7CoXfFlQAsBSy07CbUGSejiK8
+        bDc+Qx05B4ju98avoCDYOg1S17VyWuELgIJhimncpg==
+X-Google-Smtp-Source: AGRyM1v1QI/iq6qY76yqPD/R27P3k4+BLtKUnZOAwoRG74WvRGL2i+kIVVkgi1EoGXhAzXt3jqv8++rgnPFnESaU8Ls=
+X-Received: by 2002:a05:6e02:10d1:b0:2dc:2443:f651 with SMTP id
+ s17-20020a056e0210d100b002dc2443f651mr1492776ilj.172.1657709680990; Wed, 13
+ Jul 2022 03:54:40 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH] Fix potential NULL pointer error in sdhci_calc_sw_timeout
-Content-Language: en-US
-To:     Chanwoo Lee <cw9316.lee@samsung.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org
-References: <CGME20220708070739epcas1p1332ce8a480181e094082b20da290f8fc@epcas1p1.samsung.com>
- <20220708070353.32624-1-cw9316.lee@samsung.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220708070353.32624-1-cw9316.lee@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20220622051215.34063-1-tony@atomide.com> <CAPDyKFpNBQK3QZk-+5-4YB8=2O3sxwj5-nThd00ayp7FHSjUSA@mail.gmail.com>
+ <YrlKjZHJ37PHy9af@atomide.com> <CAPDyKFqxSuuMtmfqwSojPqfHhv4RDLtRQf+JbOGZJkxVhDDAtQ@mail.gmail.com>
+ <Ys1msXeqPipP7J5g@atomide.com>
+In-Reply-To: <Ys1msXeqPipP7J5g@atomide.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 13 Jul 2022 12:54:04 +0200
+Message-ID: <CAPDyKFrT4hR_HYAsA77ea6j7YMvZ4941aXpN28r_GgF5VLMoEw@mail.gmail.com>
+Subject: Re: [PATCH v2 1/1] mmc: sdhci-omap: Fix a lockdep warning for PM
+ runtime init
+To:     Tony Lindgren <tony@atomide.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Chunyan Zhang <zhang.chunyan@linaro.org>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-mmc@vger.kernel.org, linux-omap@vger.kernel.org,
+        Yegor Yefremov <yegorslists@googlemail.com>,
+        Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/07/2022 09:03, Chanwoo Lee wrote:
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
+On Tue, 12 Jul 2022 at 14:18, Tony Lindgren <tony@atomide.com> wrote:
+>
+> * Ulf Hansson <ulf.hansson@linaro.org> [220712 09:52]:
+> > On Mon, 27 Jun 2022 at 08:13, Tony Lindgren <tony@atomide.com> wrote:
+> > >
+> > > * Ulf Hansson <ulf.hansson@linaro.org> [220623 12:55]:
+> > > > On Wed, 22 Jun 2022 at 07:12, Tony Lindgren <tony@atomide.com> wrote:
+> > > > >
+> > > > > We need runtime PM enabled early in probe before sdhci_setup_host() for
+> > > > > sdhci_omap_set_capabilities(). But on the first runtime resume we must
+> > > > > not call sdhci_runtime_resume_host() as sdhci_setup_host() has not been
+> > > > > called yet. Let's check for an initialized controller like we already do
+> > > > > for context restore to fix a lockdep warning.
+> > > >
+> > > > Thanks for explaining the background to the problem. However, looking
+> > > > a bit closer I am worried that the error path in ->probe() is broken
+> > > > too.
+> > > >
+> > > > It seems in the error path, at the label "err_rpm_put", there is a
+> > > > call to pm_runtime_put_autosuspend(). This doesn't really guarantee
+> > > > that the ->runtime_suspend() callback will be invoked, which I guess
+> > > > is the assumption, don't you think?
+> > >
+> > > OK I'll check and send a separate patch for that.
+> > >
+> > > > That said, I wonder if it would not be easier to convert the ->probe()
+> > > > function to make use of pm_runtime_get_noresume() and
+> > > > pm_runtime_set_active() instead. In this way the ->probe() function
+> > > > becomes responsible of turning on/off the resources "manually" that it
+> > > > requires to probe (and when it fails to probe), while we can keep the
+> > > > ->runtime_suspend|resume() callbacks simpler.
+> > > >
+> > > > Did that make sense to you?
+> > >
+> > > Simpler would be better :) We need to call pm_runtime_get_sync() at some
+> > > point though to enable the parent device hierarchy.
+> >
+> > Is there a parent device that has runtime PM enabled?
+>
+> Yes there is the interconnect target module device as the parent with
+> runtime PM enabled. So the sdhci-omap driver needs the parent enabled.
 
-Use subsystem prefix in the subject. git log --oneline --
+I see, thanks for clarifying!
 
-> 
-> In sdhci_cqe_enable(), a NULL value is used as an argument.
-> 
-> * sdhci_set_timeout(host, NULL);
->  -> __sdhci_set_timeout(host, cmd);
->     -> sdhci_calc_sw_timeout(host,cmd)
-> 
-> The current code doesn't have any problems with the 'too_big' variable.
-> -------------------------------------------------------------------------
-> void __sdhci_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-> {
->         bool too_big = false;
->         u8 count = sdhci_calc_timeout(host, cmd, &too_big);
-> 
->         if (too_big &&
->             host->quirks2 & SDHCI_QUIRK2_DISABLE_HW_TIMEOUT) {
->                 sdhci_calc_sw_timeout(host, cmd);
-> }
-> ------------------------------------------------------------------------
-> 
-> However, if the code related to the 'too_big' variable changes
-> a null value may be used in the sdhci_calc_sw_timeout function.
+>
+> > In other cases, it should be fine to use pm_runtime_set_active()
+> > during ->probe().
+>
+> Yup, this can't be done here though AFAIK. Something needs to enable
+> runtime PM for the parent device to have the sdhci registers accessible.
+>
+> > > Just calling the
+> > > sdhci_omap runtime functions is not enough. And we still need to check
+> > > for the valid context too. Also I'm not convinced that calling
+> > > pm_runtime_get_sync() on the parent device would do the right thing on
+> > > old omap3 devices without bigger changes..
+> >
+> > I certainly agree. The parent should not be managed directly by the
+> > sdhci driver.
+>
+> OK
+>
+> > One thing that can be discussed though, is whether
+> > pm_runtime_set_active() actually should runtime resume the parent,
+> > which would make the behaviour consistent with how suppliers are being
+> > treated.
+>
+> Hmm yeah that's an interesting idea.
+>
+> > > But maybe you have some better
+> > > ideas that I'm not considering.
+> >
+> > I can try to draft a patch, if that would help? But, let's finalize
+> > the discussion above first (apologize for the delay).
+>
+> OK. Should we apply the $subject patch to fix the splat meanwhile
+> though? Seems like what you're suggesting may take some more discussion
+> on the mailing lists.
 
-I don't get this part. Did you mean, that if someone changes the source
-code, there will be null pointer? Then the subject is not accurate.
-"Potential NULL ptr" means that it can happen now, in some conditions.
-From what you are saying, it cannot happen, right?
+Yep, that seems like a reasonable way forward. I keep you cced if/when
+I propose something that can replace it.
 
-Best regards,
-Krzysztof
+So I applied the v2 for fixes and by adding a stable tag, thanks!
+
+Kind regards
+Uffe
