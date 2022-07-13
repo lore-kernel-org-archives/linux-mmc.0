@@ -2,63 +2,61 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BB9DC43334
-	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jul 2022 15:58:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AD47CCA479
+	for <linux-mmc@archiver.kernel.org>; Wed, 13 Jul 2022 16:07:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237084AbiGMP6E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 13 Jul 2022 11:58:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34318 "EHLO
+        id S237125AbiGMQHS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 13 Jul 2022 12:07:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43536 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230346AbiGMP6C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2022 11:58:02 -0400
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2452750050
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 08:58:01 -0700 (PDT)
-Received: by mail-ej1-x62a.google.com with SMTP id z23so4083846eju.8
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 08:58:01 -0700 (PDT)
+        with ESMTP id S236581AbiGMQHP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 13 Jul 2022 12:07:15 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B3305070C
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 09:07:13 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id n18so18139701lfq.1
+        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 09:07:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=5/Vj1VhdY5NW6ohPgoVwI8+jslVLxU7aofSuN+zvekk=;
-        b=oUXldJ8ZPFnIrUN6j4zP6t/M60/eQCX1n+2O4QAs8x351TwUOianbZzOD/qVR5Xbc1
-         VgSyE5rPJF83VQ4d0XEI/Dg0M49+YbqXCJDEM1JqYcaQBRedJVat7BoSiFToqHh60rwm
-         6mQxbKhfNx7JevSsNTK0eoU3OPJfhmJvL0syA=
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=f4uaObWWNXPp5U219pPbduTuGgXfEfl6t1YiDSAeW2w=;
+        b=o4WoL0O2zA/fw6V30nknwceTVBp2UJDNwqomXVWrg0aaviu5uaExwNqGI2xn67hVYq
+         yXHuLF7zf96rbDMYFCqATj7ark/i3JiXbla9sEX76ybkkSutPHsOw0j4bdeka+s55ggU
+         ZqbVt9vbe9NGrRPfZeiqej+b5JBb2WSlADyxYITbOD9ysO7q9AbbVEoIbFoOUkOUcV+p
+         mdmHCMUP8Bn4sVWi18Ipb/J3BLeK8bkYUXqRd72FJPn6iYPSBdCo9ZdT1DgvrUm94rFg
+         cG9bbeNrjJ5k1hHs2ND0OtQcHB5ydjReeBmBOght4PHgFSqFwssbLOhyZnzJVpH19D1X
+         NslA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=5/Vj1VhdY5NW6ohPgoVwI8+jslVLxU7aofSuN+zvekk=;
-        b=njhHczZye2CnLT2kJvSQWBrBvBzK2RrS51hN6uQHQTi+mZeSVHoDqh39wOBDLpJ2Qd
-         X9IEECm6qymlHxHIb2GU/Hd0f1IYc8un52BtcFgiyCASTKPNR6O9hCYoV84NqImqYoUK
-         fMqiX9GYPdV8yJ3tVCSbD7HxqoOGOBRBBXaijp0+9yKfnPgCNUT7TaQ4VFi6REYAXawr
-         XzsHbFPsgU70j/XQ4v5bCj4JNFfM5Jj2MrObDsexaWTR8OtLNW71Q3FtNgKKcIsMBaV5
-         RZm4tcL2mTOD6m7KTtTjnOe+Iw8T3RAgHXcl+tdiZnvRl3TVxY/uIwBfPuJgHFVpuPFQ
-         fY5Q==
-X-Gm-Message-State: AJIora+v8PQAmvtxuAzIP1b4kUi0Z5YimKhcsrjoPmQLKUFHe7jD83rG
-        9RmACRNdU8YqHNhUwtvy9ssKDVSFRW2bKyUF
-X-Google-Smtp-Source: AGRyM1uwGLS70Jvlc/IeiLxND+6FKKEnaH8pybpYWnWoaSa0x3k65XHy3IQY0Fh23nlLJxZZVXTJOg==
-X-Received: by 2002:a17:907:d88:b0:72b:1127:33f5 with SMTP id go8-20020a1709070d8800b0072b112733f5mr4184273ejc.725.1657727879474;
-        Wed, 13 Jul 2022 08:57:59 -0700 (PDT)
-Received: from mail-wr1-f44.google.com (mail-wr1-f44.google.com. [209.85.221.44])
-        by smtp.gmail.com with ESMTPSA id v5-20020aa7cd45000000b0043a43fcde13sm8207777edw.13.2022.07.13.08.57.57
-        for <linux-mmc@vger.kernel.org>
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=f4uaObWWNXPp5U219pPbduTuGgXfEfl6t1YiDSAeW2w=;
+        b=KlvcG1Gz4ZL/xRnJ1SDd9IGQ4daIbmNo15GRbBZOGISOwPRZ0FpS+tDiKxzv4kOD/1
+         FpfM7ppwShCd9YT+C98shR6+fs5P1ZNosspRyGOXNXca3ZxEQve5LLnayF4QEBBpmXAi
+         Lj2VEp3T5QCwW+D1t5CO2JMUIY5Ltwu9n/duqjDI+40JEsLGYXZ3qcMhvzYbIsW1BPI7
+         DmUgkrwN5shNXZycYyS3jgrEECNjayQ3d+kkOQV1Yo9ONtbaiVMiWGbDvzZsXB9NDr3L
+         qsM7KTkeqUIiyn22Q0TOihrGziJrgfI+UahJTqR/Ou3GowyqiKRpJcEuCiSHksybuoF3
+         Tqtg==
+X-Gm-Message-State: AJIora81DIZZSZbjsxHYrrHN5XrMmDT+4J2gM+0gp8vZPiXLtoe85f81
+        ijgBg8KsSk406t7xtCZvHEUFTA==
+X-Google-Smtp-Source: AGRyM1uM3uQVqr1DYFsJ8qJmc3t0U98qT2y3kigwqhVCsaVCX1P1CW+6rO7K6Rj7LzHdXwvlKGJ42w==
+X-Received: by 2002:a05:6512:b82:b0:488:6aa6:509b with SMTP id b2-20020a0565120b8200b004886aa6509bmr2480520lfv.637.1657728431936;
+        Wed, 13 Jul 2022 09:07:11 -0700 (PDT)
+Received: from [10.0.0.8] (fwa5da9-171.bb.online.no. [88.93.169.171])
+        by smtp.gmail.com with ESMTPSA id s21-20020a056512315500b00478fe3327aasm2863046lfi.217.2022.07.13.09.07.10
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 13 Jul 2022 08:57:58 -0700 (PDT)
-Received: by mail-wr1-f44.google.com with SMTP id v14so16120897wra.5
-        for <linux-mmc@vger.kernel.org>; Wed, 13 Jul 2022 08:57:57 -0700 (PDT)
-X-Received: by 2002:adf:fb12:0:b0:20c:79b2:a200 with SMTP id
- c18-20020adffb12000000b0020c79b2a200mr4002688wrr.617.1657727877212; Wed, 13
- Jul 2022 08:57:57 -0700 (PDT)
+        Wed, 13 Jul 2022 09:07:11 -0700 (PDT)
+Message-ID: <996a49ea-5fba-3885-09ca-5b9a92b840e7@linaro.org>
+Date:   Wed, 13 Jul 2022 18:07:08 +0200
 MIME-Version: 1.0
-References: <20220712150219.20539-1-krzysztof.kozlowski@linaro.org> <20220712150219.20539-4-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220712150219.20539-4-krzysztof.kozlowski@linaro.org>
-From:   Doug Anderson <dianders@chromium.org>
-Date:   Wed, 13 Jul 2022 08:57:45 -0700
-X-Gmail-Original-Message-ID: <CAD=FV=VPHwkKUjanLtaM+cXdp+VGPExJ_XDe=-O8j=ayGNtnVQ@mail.gmail.com>
-Message-ID: <CAD=FV=VPHwkKUjanLtaM+cXdp+VGPExJ_XDe=-O8j=ayGNtnVQ@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] mmc: sdhci-msm: drop redundant of_device_id entries
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH v2 3/3] mmc: sdhci-msm: drop redundant of_device_id
+ entries
+Content-Language: en-US
+To:     Doug Anderson <dianders@chromium.org>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -71,50 +69,73 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         "open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS" 
         <devicetree@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>,
         linux-arm-msm <linux-arm-msm@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <20220712150219.20539-1-krzysztof.kozlowski@linaro.org>
+ <20220712150219.20539-4-krzysztof.kozlowski@linaro.org>
+ <CAD=FV=VPHwkKUjanLtaM+cXdp+VGPExJ_XDe=-O8j=ayGNtnVQ@mail.gmail.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAD=FV=VPHwkKUjanLtaM+cXdp+VGPExJ_XDe=-O8j=ayGNtnVQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On 13/07/2022 17:57, Doug Anderson wrote:
+> Hi,
+> 
+> On Tue, Jul 12, 2022 at 8:02 AM Krzysztof Kozlowski
+> <krzysztof.kozlowski@linaro.org> wrote:
+>>
+>> This reverts three commits:
+>> 1. Revert "mmc: sdhci-msm: Add compatible string check for sdx65"
+>>    This reverts commit 953706844f0f2fd4dc6984cc010fe6cf51c041f2.
+>>
+>> 2. Revert "mmc: sdhci-msm: Add compatible string check for sm8150"
+>>    This reverts commit 5acd6adb65802cc6f9986be3750179a820580d37.
+>>
+>> 3. Revert "mmc: sdhci-msm: Add SoC specific compatibles"
+>>    This reverts commit 466614a9765c6fb67e1464d0a3f1261db903834b.
+>>
+>> The oldest commit 466614a9765c ("mmc: sdhci-msm: Add SoC specific
+>> compatibles") did not specify what benefits such multiple compatibles
+>> bring, therefore assume there is none.  On the other hand such approach
+>> brings a lot of churn to driver maintenance by expecting commit for
+>> every new compatible, even though it is already covered by the fallback.
+>>
+>> There is really no sense in duplicating of_device_id for each
+>> variant, which is already covered by generic compatible fallback
+>> qcom,sdhci-msm-v4 or qcom,sdhci-msm-v5.
+>>
+>> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> 
+> Personally, I would have taken the extra step and added a comment in
+> the code to prevent someone from doing this again. Maybe like this:
+> 
+> /*
+>  * In the device tree, all boards are required to have _two_ compatible
+>  * strings listed: a SoC-specific one followed by a more generic one.
+>  * Normally we can just rely on the generic string, but we always
+>  * include both so that if we ever find a bug on a specific SoC that
+>  * we need to workaround (like in sdm845/sc7180) that we can quickly
+>  * work around it without any changes to the dts.
+>  */
 
-On Tue, Jul 12, 2022 at 8:02 AM Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
->
-> This reverts three commits:
-> 1. Revert "mmc: sdhci-msm: Add compatible string check for sdx65"
->    This reverts commit 953706844f0f2fd4dc6984cc010fe6cf51c041f2.
->
-> 2. Revert "mmc: sdhci-msm: Add compatible string check for sm8150"
->    This reverts commit 5acd6adb65802cc6f9986be3750179a820580d37.
->
-> 3. Revert "mmc: sdhci-msm: Add SoC specific compatibles"
->    This reverts commit 466614a9765c6fb67e1464d0a3f1261db903834b.
->
-> The oldest commit 466614a9765c ("mmc: sdhci-msm: Add SoC specific
-> compatibles") did not specify what benefits such multiple compatibles
-> bring, therefore assume there is none.  On the other hand such approach
-> brings a lot of churn to driver maintenance by expecting commit for
-> every new compatible, even though it is already covered by the fallback.
->
-> There is really no sense in duplicating of_device_id for each
-> variant, which is already covered by generic compatible fallback
-> qcom,sdhci-msm-v4 or qcom,sdhci-msm-v5.
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+This actually does not instruct the developer not to add new variants to
+the driver, so how about something like:
 
-Personally, I would have taken the extra step and added a comment in
-the code to prevent someone from doing this again. Maybe like this:
+/* Do not add new variants to the driver which are compatible with
+generic ones, unless they need customization. */
+?
 
-/*
- * In the device tree, all boards are required to have _two_ compatible
- * strings listed: a SoC-specific one followed by a more generic one.
- * Normally we can just rely on the generic string, but we always
- * include both so that if we ever find a bug on a specific SoC that
- * we need to workaround (like in sdm845/sc7180) that we can quickly
- * work around it without any changes to the dts.
- */
+The problem is that this applies to several such drivers on several
+platforms (Qualcomm, NXP - these for sure use such pattern), so we would
+be documenting something obvious, IMO.
 
-In any case:
+> 
+> In any case:
+> 
+> Reviewed-by: Douglas Anderson <dianders@chromium.org>
 
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
+
+Best regards,
+Krzysztof
