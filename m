@@ -2,125 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 890D3C43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jul 2022 17:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A91EC433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jul 2022 17:42:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234085AbiGNRfo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jul 2022 13:35:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59936 "EHLO
+        id S238778AbiGNRmR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jul 2022 13:42:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36294 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232478AbiGNRfn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2022 13:35:43 -0400
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 16FD45F10C;
-        Thu, 14 Jul 2022 10:35:42 -0700 (PDT)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 27AFF1D13;
-        Thu, 14 Jul 2022 10:35:42 -0700 (PDT)
-Received: from [10.1.196.40] (e121345-lin.cambridge.arm.com [10.1.196.40])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id AA56E3F70D;
-        Thu, 14 Jul 2022 10:35:40 -0700 (PDT)
-Message-ID: <5ca9bd94-54d9-04f8-0098-a56ffb6f5fe1@arm.com>
-Date:   Thu, 14 Jul 2022 18:35:34 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.1
-Subject: Re: [PATCH v2] arm64: dts: rockchip: Fix SD card init on
- rk3399-nanopi4
-Content-Language: en-GB
-To:     wens@kernel.org,
-        =?UTF-8?Q?Christian_Kohlsch=c3=bctter?= 
-        <christian@kohlschutter.com>
-Cc:     Markus Reichl <m.reichl@fivetechno.de>,
-        =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>
-References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
- <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
- <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
- <590f7a08-a6ca-be54-4254-363343642a52@arm.com>
- <A6B896E5-CD25-4441-B6A5-0BE1FA284B2C@kohlschutter.com>
- <A9634366-A012-43D2-B253-8BB9BF6005C7@kohlschutter.com>
- <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S231150AbiGNRmQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2022 13:42:16 -0400
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 548DE4F695;
+        Thu, 14 Jul 2022 10:42:16 -0700 (PDT)
+Received: by mail-pj1-x1035.google.com with SMTP id b8so3472114pjo.5;
+        Thu, 14 Jul 2022 10:42:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=from:to:cc:subject:date:message-id;
+        bh=7yjL2expcxBKXOQuAJE5MbH5QFMOzJ52MUra63CEevk=;
+        b=DRcAN2xwgo/Uxp6vYzqLufhSw3/fvkjTqPz/ZCng/QQjbjoO5bdGJvVu/Kw+q5rII4
+         xdgJa9QK+/262nHBzbquVQxcPt/wTK7eB1hR2L8BTS7PWlpDq2KpYZ+e0FfRQz+3ig6s
+         HgTQdUEzbV60X0e9VjTRzqofl4POzSN4w0r4UyAnjwVC7LUhqtwMmvk8gESVj7G2Aba0
+         QWemcUlkZrXiEY83A4vXljsSFkxWow1hDBX0azTlPfrM9+E5wHUkJpngB3B7KD0SzNyG
+         EtztQU2WCrLB2w6bSL7sKvQQ/tfJyrQbCP0SDQBfsZ3NM4r+CODdBCwWJvGVd84eu+kt
+         0HCA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id;
+        bh=7yjL2expcxBKXOQuAJE5MbH5QFMOzJ52MUra63CEevk=;
+        b=2NABOSPtx160ZP/d3wLtE416VVB9FuZf6HbGE7bZQ7nbqxSxhD+dek7kdqbOER7CPp
+         LlYvT9EjRqvBrmHez/XfbSGT0iEjGefo8NULnHUjS2SWwPslTwvfaeYju2MZ7M+MB7oj
+         Mg5tZqOdfb2wIjrfs7vf2XYYsfm/n0jW6EKWmZecMYv3OGPXSvDlzDxxNsjfWimOBq2+
+         ms9WMWEKx7Lp0yJpjQ51rZW9rN5hjK8afkbYtiEbVeaNZm9XUwx9Sk62U8gLcYRWgGtN
+         QYuR6MghzPS1niBfhoBS1Gn/4axFY1zgBsuR4a9XQKKRBAba8NIJV2OGJvkQLUf+ggBg
+         dWBQ==
+X-Gm-Message-State: AJIora/eStLVmIRDc/1kusmBRyvoJwhQD0gvMGmiethv+7yj7Vb1rpZj
+        QernCBS70RMFaMteWT6eug4=
+X-Google-Smtp-Source: AGRyM1vw7XtwZtH7FPoxIJ53uJpJ1+HL66UlZ8Xf8qvbh8BcwfgqOCIZmEZcxfoAFotdfAbGihwYRg==
+X-Received: by 2002:a17:90b:4a8b:b0:1ef:fba9:1c0b with SMTP id lp11-20020a17090b4a8b00b001effba91c0bmr17387713pjb.239.1657820535896;
+        Thu, 14 Jul 2022 10:42:15 -0700 (PDT)
+Received: from mail.broadcom.net ([192.19.144.250])
+        by smtp.gmail.com with ESMTPSA id s13-20020a170902b18d00b0016c35b21901sm1734006plr.195.2022.07.14.10.42.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 14 Jul 2022 10:42:15 -0700 (PDT)
+From:   Kamal Dasu <kdasu.kdev@gmail.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org, krzk+dt@kernel.org,
+        alcooperx@gmail.com
+Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com,
+        adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Kamal Dasu <kdasu.kdev@gmail.com>
+Subject: [PATCH] mmc: sdhci-brcmstb: use clk_get_rate(base_clk) in PM resume
+Date:   Thu, 14 Jul 2022 13:41:32 -0400
+Message-Id: <20220714174132.18541-1-kdasu.kdev@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/07/2022 6:02 pm, Chen-Yu Tsai wrote:
-> On Fri, Jul 15, 2022 at 12:27 AM Christian Kohlschütter
-> <christian@kohlschutter.com> wrote:
->>
->> mmc/SD-card initialization may fail on NanoPi r4s with
->> "mmc1: problem reading SD Status register" /
->> "mmc1: error -110 whilst initialising SD card"
->>
->> Moreover, rebooting would also sometimes hang.
->>
->> This is caused by the gpio entry for the vcc3v0-sd regulator;
->> even though it appears to be the correct GPIO pin, the presence
->> of the binding causes these errors.
->>
->> Fix the regulator to drop the gpio binding and add a comment
->> to prevent accidental reintroduction of that entry.
->>
->> Signed-off-by: Christian Kohlschütter <christian@kohlschutter.com>
->> ---
->>   arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi | 2 +-
->>   1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> index 8c0ff6c96e03..d5f8a62e01be 100644
->> --- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> +++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> @@ -67,7 +67,7 @@ vcc1v8_s3: vcc1v8-s3 {
->>          vcc3v0_sd: vcc3v0-sd {
->>                  compatible = "regulator-fixed";
->>                  enable-active-high;
->> -               gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
->> +               // gpio = <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>; // breaks SDHC card support
-> 
-> This change only means that the regulator no longer gets cycled when
-> it probes. It's not a proper fix. You're leaving the kernel without
-> any control over SD card power, and with whatever state the bootloader
-> left the GPIO in. If the bootloader left the GPIO low, then you don't
-> get to use the SD card, ever.
-> 
-> It cycles because of the lack of regulator-boot-on, so the driver
-> requests the GPIO with initial low state, and then drives it
-> high to enable the regulator.
+Use clk_get_rate for base_clk on resume before setting new rate.
+This change ensures that the clock api returns current rate
+and sets the clock to the desired rate and honors CLK_GET_NO_CACHE
+attribute used by clock api.
 
-Hmm, that's a good point - by the time we get to Linux, we should have 
-control over the VCC_SDIO regulator and the I/O domain as well, so a 
-full clean reset should really be no problem :/
+Fixes: 97904a59855c (mmc: sdhci-brcmstb: Add ability to increase max clock rate for 72116b0)
+Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
+---
+ drivers/mmc/host/sdhci-brcmstb.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-The "Tinkerboard problem" I was thinking of is when the SD card is the 
-boot medium, VCC_SDIO stays at 1.8V over a reboot but the I/O domain 
-gets reset back to 3.3V mode, thus cannot see a logic high on any of the 
-I/O lines, thus the boot ROM gives up after failing to detect the card. 
-If we're still able to boot as far as Linux, it's probably a different 
-thing. Apologies for the confusion.
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 28e9cf995c41..aff36a933ebe 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -406,7 +406,14 @@ static int sdhci_brcmstb_resume(struct device *dev)
+ 	ret = sdhci_pltfm_resume(dev);
+ 	if (!ret && priv->base_freq_hz) {
+ 		ret = clk_prepare_enable(priv->base_clk);
+-		if (!ret)
++		/*
++		 * Note: using clk_get_rate() below as clk_get_rate()
++		 * honors CLK_GET_RATE_NOCACHE attribute, but clk_set_rate()
++		 * may do implicit get_rate() calls that do not honor
++		 * CLK_GET_RATE_NOCACHE.
++		 */
++		if (!ret &&
++		    (clk_get_rate(priv->base_clk) != priv->base_freq_hz))
+ 			ret = clk_set_rate(priv->base_clk, priv->base_freq_hz);
+ 	}
+ 
+-- 
+2.17.1
 
->>                  pinctrl-names = "default";
->>                  pinctrl-0 = <&sdmmc0_pwr_h>;
->>                  regulator-always-on;
-> 
-> I think dropping "regulator-always-on" so that Linux can cycle power
-> and properly reset the SD card is the proper fix to the card being
-> stuck in UHS and not responding.
-> 
-> Also, the regulator used is RT9193, according to the schematics. That
-> chip has an enable delay under 50 micro-seconds. If that needs to be
-> modeled, then add regulator-enable-ramp-delay.
-
-Indeed, if it's a slow regulator and we're simply trying to probe the 
-card too soon before its supply voltage has actually stabilised, that 
-sounds entirely plausible, particularly if the failure is only intermittent.
-
-Thanks,
-Robin.
