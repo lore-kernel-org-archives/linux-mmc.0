@@ -2,150 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3784AC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jul 2022 09:11:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06D02C433EF
+	for <linux-mmc@archiver.kernel.org>; Thu, 14 Jul 2022 12:34:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237754AbiGNJLH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 14 Jul 2022 05:11:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32856 "EHLO
+        id S239317AbiGNMeV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 14 Jul 2022 08:34:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237704AbiGNJK7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2022 05:10:59 -0400
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D3A524088
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jul 2022 02:10:57 -0700 (PDT)
-Received: by mail-lj1-x22a.google.com with SMTP id w17so1420244ljh.6
-        for <linux-mmc@vger.kernel.org>; Thu, 14 Jul 2022 02:10:57 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=CZPLNxoOrlBXnnELoaUQZiTp1bpHPpDagke/CdxO/sA=;
-        b=w40AoTU9ec62G6Pl7RJx0BX5Ba8XLiFWwt17SYbTMi6qtaF4sjXjMnIxmV4DKjLlLj
-         nBCnYUUvpJRI/dVKSdA/nQw1+AnLNx2cqk/j/plX8ZpGctfz+BdBPmFov/dM2Av7KvdX
-         xbToaDKOk1/WcU/JRqQbGQS0EY/TJ15+F/9N7pFpbmS18Yh6mlYjd/0x72E+mKSseBUT
-         tjkd3Y4bUKRgJyL0ROSfBdxyPCif1GdeXNq+hkioC0FCayl+QgAf5ghvpSyFoL5qTI3m
-         hHD/A5LGcWJm0nnf3z3BBJVZqhoH1ziR/CBuId+ReckCsAgGKu4040WmwRhvq1SWwRcu
-         L+Aw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=CZPLNxoOrlBXnnELoaUQZiTp1bpHPpDagke/CdxO/sA=;
-        b=U5M/7BbUWiOb5ZjGq4N53roGDY6MlCAIgL2duY8FzDGHR97WwnY5IP361S/L6LVpyS
-         Co1cKasY7BI69qhKtK62/o0TKknLbb2D0VdoYejw+TCAztOZ3n0QqabkxjrMF5zWRd7h
-         bBjsG5D43EJ+bPaWVqOikFxSHGsdhzJzT3EyancUJU0C7COB59VqCFTnLY98yOyLlPdR
-         WuN9nz6gLdYqrhjBUvHsF0ZV3Y8JRcsIR18D4eNKRQQR5bGPTiEJCic/22lhfc2aqrOs
-         hg0m4hVAzBHydS/ngqzUi7RqgZkBx4w9tGrWwJv+LKJJzkG40Qpg+uUHDHLQ+M1TRcNR
-         NwFg==
-X-Gm-Message-State: AJIora9MYpHb9C64wtMAWZHM53rjp+j6ySsOOq8hnBcHIbw4kdx/70HB
-        LnzJ+VPEA86QqAlgvCGbvgBwHg==
-X-Google-Smtp-Source: AGRyM1txAJKSbvRFtUvOJa0mWbsnIAkKGgiWNta1hCJHavlH87N+jCrX8rb96Wx9KKeggeag63bq9A==
-X-Received: by 2002:a2e:8093:0:b0:25d:63ce:4d56 with SMTP id i19-20020a2e8093000000b0025d63ce4d56mr3790440ljg.105.1657789855541;
-        Thu, 14 Jul 2022 02:10:55 -0700 (PDT)
-Received: from krzk-bin.. (fwa5da9-171.bb.online.no. [88.93.169.171])
-        by smtp.gmail.com with ESMTPSA id d8-20020a056512368800b004790ef191e3sm250006lfs.216.2022.07.14.02.10.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 14 Jul 2022 02:10:55 -0700 (PDT)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S239313AbiGNMeU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 14 Jul 2022 08:34:20 -0400
+Received: from relay08.th.seeweb.it (relay08.th.seeweb.it [IPv6:2001:4b7a:2000:18::169])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 209B258840
+        for <linux-mmc@vger.kernel.org>; Thu, 14 Jul 2022 05:34:15 -0700 (PDT)
+Received: from localhost.localdomain (abxj14.neoplus.adsl.tpnet.pl [83.9.3.14])
+        by m-r2.th.seeweb.it (Postfix) with ESMTPA id 3F96240171;
+        Thu, 14 Jul 2022 14:34:13 +0200 (CEST)
+From:   Konrad Dybcio <konrad.dybcio@somainline.org>
+To:     ~postmarketos/upstreaming@lists.sr.ht
+Cc:     martin.botka@somainline.org,
+        angelogioacchino.delregno@somainline.org,
+        marijn.suijten@somainline.org, jamipkettunen@somainline.org,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
         Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Douglas Anderson <dianders@chromium.org>
-Subject: [PATCH v3 3/3] mmc: sdhci-msm: drop redundant of_device_id entries
-Date:   Thu, 14 Jul 2022 11:10:42 +0200
-Message-Id: <20220714091042.22287-4-krzysztof.kozlowski@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220714091042.22287-1-krzysztof.kozlowski@linaro.org>
-References: <20220714091042.22287-1-krzysztof.kozlowski@linaro.org>
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 2/5] dt-bindings: mmc: sdhci-msm: Document the SM8450 compatible
+Date:   Thu, 14 Jul 2022 14:34:03 +0200
+Message-Id: <20220714123406.1919836-2-konrad.dybcio@somainline.org>
+X-Mailer: git-send-email 2.37.0
+In-Reply-To: <20220714123406.1919836-1-konrad.dybcio@somainline.org>
+References: <20220714123406.1919836-1-konrad.dybcio@somainline.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This reverts three commits:
-1. Revert "mmc: sdhci-msm: Add compatible string check for sdx65"
-   This reverts commit 953706844f0f2fd4dc6984cc010fe6cf51c041f2.
+Document the compatible for SDHCI on SM8450.
 
-2. Revert "mmc: sdhci-msm: Add compatible string check for sm8150"
-   This reverts commit 5acd6adb65802cc6f9986be3750179a820580d37.
-
-3. Revert "mmc: sdhci-msm: Add SoC specific compatibles"
-   This reverts commit 466614a9765c6fb67e1464d0a3f1261db903834b.
-
-The oldest commit 466614a9765c ("mmc: sdhci-msm: Add SoC specific
-compatibles") did not specify what benefits such multiple compatibles
-bring, therefore assume there is none.  On the other hand such approach
-brings a lot of churn to driver maintenance by expecting commit for
-every new compatible, even though it is already covered by the fallback.
-
-There is really no sense in duplicating of_device_id for each
-variant, which is already covered by generic compatible fallback
-qcom,sdhci-msm-v4 or qcom,sdhci-msm-v5.
-
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Reviewed-by: Douglas Anderson <dianders@chromium.org>
-
+Signed-off-by: Konrad Dybcio <konrad.dybcio@somainline.org>
 ---
+Changes since v1:
+* Add this forgotten snowflake
 
-Cc: Konrad Dybcio <konrad.dybcio@somainline.org>
-Cc: Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc: Doug Anderson <dianders@chromium.org>
----
- drivers/mmc/host/sdhci-msm.c | 29 ++++-------------------------
- 1 file changed, 4 insertions(+), 25 deletions(-)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index e395411fb6fd..dc2991422a87 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2435,33 +2435,12 @@ static const struct sdhci_msm_variant_info sdm845_sdhci_var = {
- };
- 
- static const struct of_device_id sdhci_msm_dt_match[] = {
--	 /* Following two entries are deprecated (kept only for backward compatibility) */
--	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
--	/* Add entries for sdcc versions less than 5.0 here */
--	{.compatible = "qcom,apq8084-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8226-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8916-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8953-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8974-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8992-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8994-sdhci", .data = &sdhci_msm_mci_var},
--	{.compatible = "qcom,msm8996-sdhci", .data = &sdhci_msm_mci_var},
- 	/*
--	 * Add entries for sdcc version 5.0 here. For SDCC version 5.0.0,
--	 * MCI registers are removed from SDCC interface and some registers
--	 * are moved to HC.
-+	 * Do not add new variants to the driver which are compatible with
-+	 * generic ones, unless they need customization.
- 	 */
--	{.compatible = "qcom,qcs404-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sdx55-sdhci",  .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sdx65-sdhci",  .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sdm630-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sm6125-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sm6350-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sm8150-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sm8250-sdhci", .data = &sdhci_msm_v5_var},
--	{.compatible = "qcom,sc7280-sdhci", .data = &sdhci_msm_v5_var},
--	/* Add entries where soc specific handling is required, here */
-+	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
-+	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
- 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
- 	{},
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index e4236334e748..4b65d0497fd6 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -38,6 +38,7 @@ properties:
+               - qcom,sm6350-sdhci
+               - qcom,sm8150-sdhci
+               - qcom,sm8250-sdhci
++              - qcom,sm8450-sdhci
+           - enum:
+               - qcom,sdhci-msm-v4 # for sdcc versions less than 5.0
+               - qcom,sdhci-msm-v5 # for sdcc version 5.0
 -- 
-2.34.1
+2.37.0
 
