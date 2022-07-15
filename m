@@ -2,211 +2,157 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47779C433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 20:51:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 657CEC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 22:33:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231332AbiGOUv6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jul 2022 16:51:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42070 "EHLO
+        id S231297AbiGOWdf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jul 2022 18:33:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36626 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231286AbiGOUv5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 16:51:57 -0400
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB6A090
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 13:51:55 -0700 (PDT)
-Received: by mail-ej1-x62a.google.com with SMTP id ez10so10917861ejc.13
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 13:51:55 -0700 (PDT)
+        with ESMTP id S230190AbiGOWdd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 18:33:33 -0400
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A20167C80
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 15:33:31 -0700 (PDT)
+Received: by mail-ed1-x52d.google.com with SMTP id v12so7991467edc.10
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 15:33:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
         h=mime-version:subject:from:in-reply-to:date:cc
          :content-transfer-encoding:message-id:references:to;
-        bh=3Vcv+Zqcd+YiC3pv/6ZVpdeh0nqVlQ60ZrMu8iVPCE0=;
-        b=hfpxKr79PIpiVKRB3kbWZcyibR5lAWIyCaYB6tIMOaKXIiUUN5eu2EiH5vEqDMrst1
-         Smt2Kj8v1PmDvq8asPjO2YfgTbZ7sTMbghfSoW2v8jv9p1GdthIBCEJZpncO+tARqtkb
-         DP1Nbp0R6UWAvkWgR66eR4osoAWPmmU/XreUBF3xzjKLPCpJaECgfaInsZOLVOIoXNZi
-         Nxj4R/5uRV0cYoQjj3t56Zu2T97a17XYrvAe/2dqcfLDsk0kpBVEdbEpeBO3hynzrMok
-         8FFV/GgATToM+BYaY4/KwerxRdz+ZObWPp6EooUnWXydrNx49HuGebWTsj7aFvkKkzKr
-         DGXQ==
+        bh=76JC0t9LbhiWqJ9c7y773RaCGcRxX9GUE05Rg0MDK+4=;
+        b=cxaJhA8kubAdEIOHAjA59STazGw/8l7Dig24ByRHAaBT0QSAU20+qVeIba5HSZc6aI
+         bHoQ+oiIzqn4om474i0bxnj9Q6wDJqidq5C4NEKQbR2NGEHm8s+DoN8Yl4QbJQw1eoYb
+         dcvkxRiG3vdQLrAuaB6pMvFS+CXSaV7Vf21i6/B1ihvL1LkqyuJmaf6d9zx39JypZkAU
+         VLj0ax2rZ+DIvbKbwf5u8lQOylKE5dC+e/CVu0htHs0ZR18BEwP3maEnHqw0AMA9k8+Z
+         ktbjbRdQq1X8f04jhkQiEaJTN7wMvgWTo2YMOcXwMHwQgE3G4/oCZBQBKFm8i1qQwR3t
+         t36Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
          :content-transfer-encoding:message-id:references:to;
-        bh=3Vcv+Zqcd+YiC3pv/6ZVpdeh0nqVlQ60ZrMu8iVPCE0=;
-        b=0kiBEHXZsf8Y6umMQz+8X46s+KZ09mc7iFIiQZpO4ir2C2dRcsc3wXKJa5tTys2v/T
-         c+wq74QvguFD+XrEPW7N6kP2cd5Zo4/RdMh7lx9Z2CIatuRtep7hlmff1rIfKm/F+ePO
-         7u31cCEdKyrwKC4oFCzA1G4v4JBTiQEKGefQnwmGRmrQqYGRfcszOKacX+Hpb3feYwGb
-         N45VesYcLOxYV3XGVQoZxNsbvBuZbr9QqtL9HG8oJgo7rtdEatnnhv0btStsZZnWcTvz
-         IK2M8mUyoEXT2zEZjjclz5+DHHYGa43ZGfeStttntWYTp8lGMJlo0y3dFprBB6Qc6XME
-         nHrg==
-X-Gm-Message-State: AJIora9uE11SaEEDPsMgleZLQ+kkZYLpmMI6DY8Ty4IDoQJ3FfXGK5bq
-        uy+XhlDIdtL5yjRhVtt6Z8KAxA==
-X-Google-Smtp-Source: AGRyM1sNJTmw5My6E+UIFPxEEm5NSizCZE5yfStZxt0SI6lvyujXMl0QKBnTWcpM2xTQKS+FnyDkGw==
-X-Received: by 2002:a17:906:2086:b0:715:7983:a277 with SMTP id 6-20020a170906208600b007157983a277mr15317328ejq.386.1657918314254;
-        Fri, 15 Jul 2022 13:51:54 -0700 (PDT)
+        bh=76JC0t9LbhiWqJ9c7y773RaCGcRxX9GUE05Rg0MDK+4=;
+        b=XecIs+qzY15wpReMFhXFs1+RWLV7AxUHx0LDo2T+0DGc+lXMZNDx1afBzOHkhiNQ+9
+         A9i42mSirQu5aw5SDyh0l9FYcF7IzF8dz7v8oYN5dE/5iBW7rsF8sXJGTc8YeUGTpY9P
+         VN4ksiB0pZBoYVUZD9KV7NLjakoPX7MJ7+7Y/alktPBwtrJdQpGa21jV+0jdr/Mi8CVG
+         bIbDocXx63e1rsBWhkCty3hmVCJj1THqP4+TTv2HDgufcCovk/mBDsjkWQtSVdBjAIQK
+         CYaHHy2cWYlinxBhpn5IXNE01/qIQXH1TH3801dzbKxYwDqH/75sQmnOdoK0EzT4RDJl
+         1xrQ==
+X-Gm-Message-State: AJIora/02Ja29pohoHTElmvmIRHU9ChGcVc8zedKq1bB16ZLRqbkAZIX
+        UkFtRMk75Vnr+avWoSHXXV9KLg==
+X-Google-Smtp-Source: AGRyM1t/u2jjmV7/R6F6DGJ3m++32lPifqZ4JkCBXP1dlNz4t2qr0k+nLIeoKlklRBaGwWGalcw2Yg==
+X-Received: by 2002:aa7:c657:0:b0:43a:4a68:bcc5 with SMTP id z23-20020aa7c657000000b0043a4a68bcc5mr22746058edr.337.1657924410165;
+        Fri, 15 Jul 2022 15:33:30 -0700 (PDT)
 Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
-        by smtp.gmail.com with ESMTPSA id wj18-20020a170907051200b0072af92fa086sm2401478ejb.32.2022.07.15.13.51.52
+        by smtp.gmail.com with ESMTPSA id p25-20020a056402155900b0043aa17dc199sm3564771edx.90.2022.07.15.15.33.28
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 15 Jul 2022 13:51:53 -0700 (PDT)
+        Fri, 15 Jul 2022 15:33:29 -0700 (PDT)
 Content-Type: text/plain;
         charset=utf-8
 Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.100.31\))
-Subject: Re: [PATCH] regulator: core: Resolve supply name earlier to prevent
- double-init
+Subject: Re: [PATCH v4] arm64: dts: rockchip: Fix SD card init on
+ rk3399-nanopi4
 From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
         <christian@kohlschutter.com>
-In-Reply-To: <3B4AE882-0C28-41E3-9466-F8E301567627@kohlschutter.com>
-Date:   Fri, 15 Jul 2022 22:51:52 +0200
-Cc:     Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
-        =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+In-Reply-To: <daf3b61c-d886-98eb-0443-de233d742041@arm.com>
+Date:   Sat, 16 Jul 2022 00:33:28 +0200
+Cc:     wens@kernel.org, =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
         Markus Reichl <m.reichl@fivetechno.de>,
         linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
         "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>
 Content-Transfer-Encoding: quoted-printable
-Message-Id: <DFF60E71-B8CF-43C9-B476-9216AFF0463B@kohlschutter.com>
-References: <3B4AE882-0C28-41E3-9466-F8E301567627@kohlschutter.com>
-To:     Liam Girdwood <lgirdwood@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>
+Message-Id: <CDF716FC-F6CF-44A9-84D9-B48C46E6AC2C@kohlschutter.com>
+References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
+ <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
+ <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
+ <590f7a08-a6ca-be54-4254-363343642a52@arm.com>
+ <A6B896E5-CD25-4441-B6A5-0BE1FA284B2C@kohlschutter.com>
+ <A9634366-A012-43D2-B253-8BB9BF6005C7@kohlschutter.com>
+ <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
+ <5ca9bd94-54d9-04f8-0098-a56ffb6f5fe1@arm.com>
+ <502b3fbe-3077-407e-6010-a8cb3ffce7d6@arm.com>
+ <449292CA-CE60-4B90-90F7-295FBFEAB3F8@kohlschutter.com>
+ <73F9AED0-D2A8-4294-B6E1-1B92D2A36529@kohlschutter.com>
+ <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
+ <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
+ <9405b97a-6758-ad4e-ccff-eed072096539@arm.com>
+ <BF7CC548-88C9-4889-8A41-8E99C31EF81C@kohlschutter.com>
+ <daf3b61c-d886-98eb-0443-de233d742041@arm.com>
+To:     Robin Murphy <robin.murphy@arm.com>
 X-Mailer: Apple Mail (2.3696.100.31)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi all,
+> Am 15.07.2022 um 21:38 schrieb Robin Murphy <robin.murphy@arm.com>:
+>=20
+> On 2022-07-15 20:04, Christian Kohlsch=C3=BCtter wrote:
+>> Am 15.07.2022 um 20:57 schrieb Robin Murphy <robin.murphy@arm.com>:
+>>>=20
+>>> On 2022-07-15 19:11, Robin Murphy wrote:
+>>>> On 2022-07-15 18:16, Christian Kohlsch=C3=BCtter wrote:
+>>>>> OK, this took me a while to figure out.
+>>>>>=20
+>>>>> When no undervoltage limit is configured, I can reliably trigger =
+the initialization bug upon boot.
+>>>>> When the limit is set to 3.0V, it rarely occurs, but just after I =
+send the v3 patch, I was able to reproduce...
+>>>> Well this has to be in the running for "weirdest placebo ever"... =
+:/
+>>>> All it actually seems to achieve is printing an error[1] (this is =
+after all a tiny 5-pin fixed-voltage LDO regulator, not an intelligent =
+PMIC), and if that makes an appreciable difference then there has to be =
+some kind of weird timing condition at play. Maybe regulator_register() =
+ends up turning it off and on again rapidly enough that the card sees a =
+voltage brownout and glitches, and adding more delay by printing to the =
+console somewhere in the middle gives it enough time to act as a proper =
+power cycle with no ill effect?
+>>>=20
+>>> ...and apparently the answer is yes, it seems to be doing exactly =
+that (see attached). But seemingly my SD cards don't mind, or maybe my =
+T4 board happens to have more capacitance than Christian's R4S so my =
+voltage dip isn't as bad, or both.
+>>>=20
+>>> So it seems like the solution here might indeed simply be to remove =
+the regulator-always-on which doesn't seem to have any reason to be here =
+anyway. Without that, the enable stays low until the MMC driver probes =
+and claims it, which is then massively longer than the time it takes for =
+VCC3V0_SD to ramp down completely.
+>>>=20
+>>> Robin.
+>> Removing "regulator-always-on" has the effect that the system freezes =
+upon reboot.
+>=20
+> Ah, right (can we fast-forward to a world where everyone has a =
+reliable bootloader in SPI flash or similar?). Is that more glitching, =
+or a firmware bug not resetting the GPIOs to their default state on warm =
+reset, I wonder.
+>=20
+>> There may well be another bug slumbering in the codebase that is =
+circumvented by 1. adding a delay in the code and 2. not turning the =
+regulator off upon shutdown.
+>=20
+> Yes, it seems suboptimal that the regulator core allows this glitch =
+where an always-on regulator which is already on gets turned off at all, =
+but I guess that's its own problem. In the meantime, off-on-delay-us =
+sounds like the most likely property to bandage this locally. I'm seeing =
+a fall time in the order of milliseconds (attached), so we'd probably =
+want a fair chunk of that to be safe.
+>=20
+> Robin.<SDS00003.png>
 
-This is a follow-up patch from my patch on mmc side:
-[PATCH v4] arm64: dts: rockchip: Fix SD card init on rk3399-nanopi4
-=
-https://patchwork.kernel.org/project/linux-rockchip/patch/73F9AED0-D2A8-42=
-94-B6E1-1B92D2A36529@kohlschutter.com/
+I think we have a way where there's no need to pick a delay value that =
+may ultimately not work in all cases.
+Following up with "[PATCH] regulator: core: Resolve supply name earlier =
+to prevent double-init" [1]
 
-Thanks to Robin Murphy's help, we were able to figure out that my NanoPI =
-R4S's SD-Card voltage regulator was initialized twice and that a voltage =
-drop was the reason for the initialization failure.
-Adding an mdelay to the init code, or =E2=80=94 surprisingly =E2=80=94 =
-adding a "regulator-uv-protection-microvolt" declaration had "fixed" the =
-issue in 99/100 tries.
+Thank you so much for helping me getting that far! It would be great if =
+you'd keep following the thread.
 
 Best,
 Christian
 
-from arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi:
-vcc3v0_sd: vcc3v0-sd {
-        compatible =3D "regulator-fixed";
-        enable-active-high;
-        gpio =3D <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
-        pinctrl-names =3D "default";
-        pinctrl-0 =3D <&sdmmc0_pwr_h>;
-        regulator-always-on;
-        regulator-min-microvolt =3D <3000000>;
-        regulator-max-microvolt =3D <3000000>;
-        regulator-name =3D "vcc3v0_sd";
-        vin-supply =3D <&vcc3v3_sys>;
-};                                       =20
-
-> Am 15.07.2022 um 22:32 schrieb Christian Kohlsch=C3=BCtter =
-<christian@kohlschutter.com>:
->=20
-> Previously, an unresolved regulator supply reference upon calling
-> regulator_register on an always-on or boot-on regulator caused
-> set_machine_constraints to be called twice.
->=20
-> This in turn may initialize the regulator twice, leading to voltage
-> glitches that are timing-dependent. A simple, unrelated configuration
-> change may be enough to hide this problem, only to be surfaced by
-> chance.
->=20
-> One such example is the SD-Card voltage regulator in a NanoPI R4S that
-> would not initialize reliably unless the registration flow was just
-> complex enough to allow the regulator to properly reset between calls.
->=20
-> Fix this by re-arranging regulator_register, trying resolve the
-> regulator's supply early enough that set_machine_constraints does not
-> need to be called twice.
->=20
-> Signed-off-by: Christian Kohlsch=C3=BCtter =
-<christian@kohlschutter.com>
-> ---
-> drivers/regulator/core.c | 42 ++++++++++++++++++++++++++--------------
-> 1 file changed, 28 insertions(+), 14 deletions(-)
->=20
-> diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-> index c4d844ffad7a..728840827e9c 100644
-> --- a/drivers/regulator/core.c
-> +++ b/drivers/regulator/core.c
-> @@ -5433,7 +5433,34 @@ regulator_register(const struct regulator_desc =
-*regulator_desc,
-> 	BLOCKING_INIT_NOTIFIER_HEAD(&rdev->notifier);
-> 	INIT_DELAYED_WORK(&rdev->disable_work, regulator_disable_work);
->=20
-> -	/* preform any regulator specific init */
-> +	/* set regulator constraints */
-> +	if (init_data)
-> +		rdev->constraints =3D kmemdup(&init_data->constraints,
-> +					    sizeof(*rdev->constraints),
-> +					    GFP_KERNEL);
-> +	else
-> +		rdev->constraints =3D =
-kzalloc(sizeof(*rdev->constraints),
-> +					    GFP_KERNEL);
-> +
-> +	if (init_data && init_data->supply_regulator)
-> +		rdev->supply_name =3D init_data->supply_regulator;
-> +	else if (regulator_desc->supply_name)
-> +		rdev->supply_name =3D regulator_desc->supply_name;
-> +
-> +	if ((rdev->supply_name && !rdev->supply) && rdev->constraints
-> +		&& (rdev->constraints->always_on || =
-rdev->constraints->boot_on)) {
-> +		/* Try to resolve the name of the supplying regulator =
-here first
-> +		 * so we prevent double-initializing the regulator, =
-which may
-> +		 * cause timing-specific voltage brownouts/glitches that =
-are
-> +		 * hard to debug.
-> +		 */
-> +		ret =3D regulator_resolve_supply(rdev);
-> +		if (ret)
-> +			rdev_dbg(rdev, "unable to resolve supply early: =
-%pe\n",
-> +					 ERR_PTR(ret));
-> +	}
-> +
-> +	/* perform any regulator specific init */
-> 	if (init_data && init_data->regulator_init) {
-> 		ret =3D init_data->regulator_init(rdev->reg_data);
-> 		if (ret < 0)
-> @@ -5459,24 +5486,11 @@ regulator_register(const struct regulator_desc =
-*regulator_desc,
-> 		    (unsigned long) atomic_inc_return(&regulator_no));
-> 	dev_set_drvdata(&rdev->dev, rdev);
->=20
-> -	/* set regulator constraints */
-> -	if (init_data)
-> -		rdev->constraints =3D kmemdup(&init_data->constraints,
-> -					    sizeof(*rdev->constraints),
-> -					    GFP_KERNEL);
-> -	else
-> -		rdev->constraints =3D =
-kzalloc(sizeof(*rdev->constraints),
-> -					    GFP_KERNEL);
-> 	if (!rdev->constraints) {
-> 		ret =3D -ENOMEM;
-> 		goto wash;
-> 	}
->=20
-> -	if (init_data && init_data->supply_regulator)
-> -		rdev->supply_name =3D init_data->supply_regulator;
-> -	else if (regulator_desc->supply_name)
-> -		rdev->supply_name =3D regulator_desc->supply_name;
-> -
-> 	ret =3D set_machine_constraints(rdev);
-> 	if (ret =3D=3D -EPROBE_DEFER) {
-> 		/* Regulator might be in bypass mode and so needs its =
-supply
-> --=20
-> 2.36.1
->=20
+[1] https://www.spinics.net/lists/kernel/msg4440365.html
 
