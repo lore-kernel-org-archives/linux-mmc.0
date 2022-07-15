@@ -2,177 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F4EDC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 17:41:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBC1BC433EF
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 18:11:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229598AbiGORlD convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jul 2022 13:41:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45310 "EHLO
+        id S230110AbiGOSLs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jul 2022 14:11:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39006 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229463AbiGORlB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 13:41:01 -0400
-Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3032A7BE01
-        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 10:41:01 -0700 (PDT)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 299E34634BA;
-        Fri, 15 Jul 2022 18:55:28 +0200 (CEST)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 160C44634AD;
-        Fri, 15 Jul 2022 18:55:28 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.84-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (SBDEEX02.sbitdom.lan [10.149.2.84])
-        by mail3.swissbit.com (Postfix) with ESMTPS;
-        Fri, 15 Jul 2022 18:55:28 +0200 (CEST)
-Received: from sbdeex02.sbitdom.lan (10.149.2.84) by sbdeex02.sbitdom.lan
- (10.149.2.84) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Fri, 15 Jul
- 2022 18:55:27 +0200
-Received: from sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74]) by
- sbdeex02.sbitdom.lan ([fe80::e0eb:ade8:2d90:1f74%8]) with mapi id
- 15.02.1118.009; Fri, 15 Jul 2022 18:55:27 +0200
-From:   Christian Loehle <CLoehle@hyperstone.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>
-Subject: [PATCH] mmc-utils: Add softreset command for issuing CMD0
-Thread-Topic: [PATCH] mmc-utils: Add softreset command for issuing CMD0
-Thread-Index: AdiYa4ilV6urRmNnRce3UkF3rZaOvg==
-Date:   Fri, 15 Jul 2022 16:55:27 +0000
-Message-ID: <1d1b023572934d71ae75bf46c5439ed0@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.153.3.44]
-Content-Type: text/plain;
-        charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229813AbiGOSLr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 14:11:47 -0400
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BAE53564EE;
+        Fri, 15 Jul 2022 11:11:45 -0700 (PDT)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 9FDA212FC;
+        Fri, 15 Jul 2022 11:11:45 -0700 (PDT)
+Received: from [10.57.86.139] (unknown [10.57.86.139])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id E769E3F792;
+        Fri, 15 Jul 2022 11:11:43 -0700 (PDT)
+Message-ID: <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
+Date:   Fri, 15 Jul 2022 19:11:39 +0100
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27018.001
-X-TMASE-Result: 10--5.532100-10.000000
-X-TMASE-MatchedRID: 2wfub8HDRfPyaWDdlFBzB5lQbjWLQqObsXm0OsXi/nXe6dEbvIyrxZKP
-        VSCA9cWVjx5X3FdI4UDmn3xyPJAJoh2P280ZiGmR8IK7yRWPRNEYH39vFLryE54Q+L3BXIWuaqB
-        jsGYT41oXjQchKpIrqptCs4DdnIBwXd2C0i9IY+mF0P4btTlf9ARryDXHx6oXX/yUapWy0lf64E
-        XalNg4NQJSVkTADkn2fyYDewMOrQDkwjHXXC/4IzsAVzN+Ov/sFB93SnvedLt9akUwUiXe/8QNW
-        UILFhRaXfNQHYdxzlLm3j97dEt+7A==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 9106ea64-9009-4590-8061-8012359d1515-0-0-200-0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH v4] arm64: dts: rockchip: Fix SD card init on
+ rk3399-nanopi4
+Content-Language: en-GB
+To:     =?UTF-8?Q?Christian_Kohlsch=c3=bctter?= 
+        <christian@kohlschutter.com>, wens@kernel.org,
+        =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>,
+        Markus Reichl <m.reichl@fivetechno.de>
+Cc:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>
+References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
+ <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
+ <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
+ <590f7a08-a6ca-be54-4254-363343642a52@arm.com>
+ <A6B896E5-CD25-4441-B6A5-0BE1FA284B2C@kohlschutter.com>
+ <A9634366-A012-43D2-B253-8BB9BF6005C7@kohlschutter.com>
+ <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
+ <5ca9bd94-54d9-04f8-0098-a56ffb6f5fe1@arm.com>
+ <502b3fbe-3077-407e-6010-a8cb3ffce7d6@arm.com>
+ <449292CA-CE60-4B90-90F7-295FBFEAB3F8@kohlschutter.com>
+ <73F9AED0-D2A8-4294-B6E1-1B92D2A36529@kohlschutter.com>
+ <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-CMD0 may be used to see if the hardware can handle a UHS card
-that completed the voltage switch. If a UHS card has problems
-coming back up after CMD0 your hardware may not support a hard
-reset properly.
+On 2022-07-15 18:16, Christian Kohlschütter wrote:
+> OK, this took me a while to figure out.
+> 
+> When no undervoltage limit is configured, I can reliably trigger the initialization bug upon boot.
+> When the limit is set to 3.0V, it rarely occurs, but just after I send the v3 patch, I was able to reproduce...
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- mmc.c      |  5 +++++
- mmc.h      |  3 +++
- mmc_cmds.c | 30 ++++++++++++++++++++++++++++++
- mmc_cmds.h |  1 +
- 4 files changed, 39 insertions(+)
+Well this has to be in the running for "weirdest placebo ever"... :/
 
-diff --git a/mmc.c b/mmc.c
-index 6c56387..ba2c883 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -245,6 +245,11 @@ static struct Command commands[] = {
- 		"be 1.",
- 	NULL
- 	},
-+	{ do_soft_reset, -1,
-+	  "softreset", "<device>\n"
-+	  "Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works\n\n",
-+	  NULL
-+	},
- 	{ 0, 0, 0, 0 }
- };
- 
-diff --git a/mmc.h b/mmc.h
-index daff62c..9796d2e 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -21,6 +21,7 @@
- #include <linux/mmc/ioctl.h>
- 
- /* From kernel linux/mmc/mmc.h */
-+#define MMC_GO_IDLE_STATE         0   /* bc                          */
- #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
- #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
- #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
-@@ -226,6 +227,7 @@
- 
- 
- /* From kernel linux/mmc/core.h */
-+#define MMC_RSP_NONE	0			/* no response */
- #define MMC_RSP_PRESENT	(1 << 0)
- #define MMC_RSP_136	(1 << 1)		/* 136 bit response */
- #define MMC_RSP_CRC	(1 << 2)		/* expect valid crc */
-@@ -234,6 +236,7 @@
- 
- #define MMC_CMD_AC	(0 << 5)
- #define MMC_CMD_ADTC	(1 << 5)
-+#define MMC_CMD_BC	(2 << 5)
- 
- #define MMC_RSP_SPI_S1	(1 << 7)		/* one status byte */
- #define MMC_RSP_SPI_BUSY (1 << 10)		/* card may send busy */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 12b7802..c027cfa 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -3039,3 +3039,33 @@ out:
- 	close(dev_fd);
- 	return ret;
- }
-+
-+int do_soft_reset(int nargs, char **argv)
-+{
-+	int fd;
-+	char *device;
-+	struct mmc_ioc_cmd idata;
-+
-+	if (nargs != 2) {
-+		fprintf(stderr, "Usage: mmc status softreset </path/to/mmcblkX>\n");
-+		exit(1);
-+	}
-+
-+	device = argv[1];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open");
-+		exit(1);
-+	}
-+
-+	memset(&idata, 0, sizeof(idata));
-+	idata.opcode = MMC_GO_IDLE_STATE;
-+	idata.flags = MMC_RSP_NONE | MMC_CMD_BC;
-+
-+	/* No need to check for error, it is expected */
-+	ioctl(fd, MMC_IOC_CMD, &idata);
-+	close(fd);
-+
-+	return 0;
-+}
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index 0f7c004..c112a95 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -47,3 +47,4 @@ int do_read_cid(int argc, char **argv);
- int do_read_csd(int argc, char **argv);
- int do_erase(int nargs, char **argv);
- int do_general_cmd_read(int nargs, char **argv);
-+int do_soft_reset(int nargs, char **argv);
--- 
-2.36.1
+All it actually seems to achieve is printing an error[1] (this is after 
+all a tiny 5-pin fixed-voltage LDO regulator, not an intelligent PMIC), 
+and if that makes an appreciable difference then there has to be some 
+kind of weird timing condition at play. Maybe regulator_register() ends 
+up turning it off and on again rapidly enough that the card sees a 
+voltage brownout and glitches, and adding more delay by printing to the 
+console somewhere in the middle gives it enough time to act as a proper 
+power cycle with no ill effect?
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+If you just whack something like an mdelay(500) at around that point in 
+set_machine_constraints(), without the DT property, does it have the 
+same effect?
 
+Robin.
+
+[1] 
+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/regulator/core.c#n1521
+
+>> Am 15.07.2022 um 19:12 schrieb Christian Kohlschütter <christian@kohlschutter.com>:
+>>
+>> mmc/SD-card initialization may fail on NanoPi R4S with
+>> "mmc1: problem reading SD Status register" /
+>> "mmc1: error -110 whilst initialising SD card"
+>> either on cold boot or after a reboot.
+>>
+>> Moreover, the system would also sometimes hang upon reboot.
+>>
+>> This is prevented by setting an explicit undervoltage protection limit
+>> for the SD-card-specific vcc3v0_sd voltage regulator.
+>>
+>> Set the undervoltage protection limit to 2.7V, which is the minimum
+>> permissible SD card operating voltage.
+>>
+>> Signed-off-by: Christian Kohlschütter <christian@kohlschutter.com>
+>> ---
+>> arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi | 4 ++++
+>> 1 file changed, 4 insertions(+)
+>> mode change 100644 => 100755 arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
+>>
+>> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
+>> old mode 100644
+>> new mode 100755
+>> index 8c0ff6c96e03..669c74ce4d13
+>> --- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
+>> +++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
+>> @@ -73,6 +73,10 @@ vcc3v0_sd: vcc3v0-sd {
+>> 		regulator-always-on;
+>> 		regulator-min-microvolt = <3000000>;
+>> 		regulator-max-microvolt = <3000000>;
+>> +
+>> +		// must be configured or SD card may fail to initialize occasionally
+>> +		regulator-uv-protection-microvolt = <2700000>;
+>> +
+>> 		regulator-name = "vcc3v0_sd";
+>> 		vin-supply = <&vcc3v3_sys>;
+>> 	};
+>> -- 
+>> 2.36.1
+> 
