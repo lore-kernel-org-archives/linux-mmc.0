@@ -2,40 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBC1BC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 18:11:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6022BC43334
+	for <linux-mmc@archiver.kernel.org>; Fri, 15 Jul 2022 18:57:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230110AbiGOSLs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 15 Jul 2022 14:11:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39006 "EHLO
+        id S230335AbiGOS5b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 15 Jul 2022 14:57:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229813AbiGOSLr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 14:11:47 -0400
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BAE53564EE;
-        Fri, 15 Jul 2022 11:11:45 -0700 (PDT)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 9FDA212FC;
-        Fri, 15 Jul 2022 11:11:45 -0700 (PDT)
-Received: from [10.57.86.139] (unknown [10.57.86.139])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id E769E3F792;
-        Fri, 15 Jul 2022 11:11:43 -0700 (PDT)
-Message-ID: <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
-Date:   Fri, 15 Jul 2022 19:11:39 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
+        with ESMTP id S229629AbiGOS5a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 15 Jul 2022 14:57:30 -0400
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7470726110
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 11:57:28 -0700 (PDT)
+Received: by mail-ed1-x531.google.com with SMTP id w12so7406226edd.13
+        for <linux-mmc@vger.kernel.org>; Fri, 15 Jul 2022 11:57:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
+        h=mime-version:subject:from:in-reply-to:date:cc
+         :content-transfer-encoding:message-id:references:to;
+        bh=cGwhK/ZtvSr9wwZc7/rNFgjUf04Hq4lw/c5RyLtXhv4=;
+        b=n30FiJMdCmOAUiVxpAmFVASHuizhc6AX2acGIQrmGWi2ITlMu7dy5tY3GAusQZCwUX
+         mClk0//XWWNtoKOlVDp3bevjwUCPlPu6qT58ckogGwW3fiPwV3AnX1JH80Tcv/qvJxbD
+         dd2hnpWUh+kbDnSUzqOnXj71sddyRZYkIlR5uwqBsXNmW8E86IjtsWgCOCj96w7UTJh1
+         ekclrrbo31eDkn55oa2xD7ZY8kZCRduEeNmKBSZ3yK6cNK/PRrM+v1/yUUWmbSW8KzBk
+         1G3I9oE8dPOml71Mav31UBLpfptw3Ree6F9LzjmopmoauGHoWKXK8zG7iMIjoX2r53ev
+         BDow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
+         :content-transfer-encoding:message-id:references:to;
+        bh=cGwhK/ZtvSr9wwZc7/rNFgjUf04Hq4lw/c5RyLtXhv4=;
+        b=8IXkTlGGLYitZQAA8QE5swbPhiSseXH7v3bZZkLQ8mRSJsqHdBhK8DgI16B+TA68QN
+         HE1L12hNZfKHTgfnfvQKLkQToH725J2sESx71fvcpjr4wC9slC7IDOhggFkTJKV5aaha
+         mrBaYUTBzkpy2A5rVtnO/PCAMSUL3hgqHqK9pCo9l8R8GiBZugBseuFz+lh7as745TFO
+         yTHTK18/i0flMXWonOC33Vb6DZ/xq0F10DWrRGFYl711wGKomWazkUyC4zZDYkHuFqr6
+         Qor4yOzZ+/LOwi56H98JFCHbDLVJRD+f5Ngv4AqVD0z4Z7UNSm+OC1lysFPZMYo52ArM
+         X01Q==
+X-Gm-Message-State: AJIora8QdXhi7aCHqR1QvtVdbaajxe4xFemdACS0T66HnqRybMBUety3
+        K6CN8yNHOUHc+0fqAnSfhQ62fTUbsLcMojUh
+X-Google-Smtp-Source: AGRyM1sNSdrb4hPilLYMF0OeyZKR2sc7pz98xPbz2HQO6R2iT7Hy2/VCmJFBU0H7V8xJJER7HTBMcw==
+X-Received: by 2002:a05:6402:40d6:b0:43a:cc69:1db9 with SMTP id z22-20020a05640240d600b0043acc691db9mr20997614edb.380.1657911447021;
+        Fri, 15 Jul 2022 11:57:27 -0700 (PDT)
+Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
+        by smtp.gmail.com with ESMTPSA id o18-20020a170906769200b00726abf9a32bsm2329648ejm.138.2022.07.15.11.57.25
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 15 Jul 2022 11:57:25 -0700 (PDT)
+Content-Type: text/plain;
+        charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.100.31\))
 Subject: Re: [PATCH v4] arm64: dts: rockchip: Fix SD card init on
  rk3399-nanopi4
-Content-Language: en-GB
-To:     =?UTF-8?Q?Christian_Kohlsch=c3=bctter?= 
-        <christian@kohlschutter.com>, wens@kernel.org,
-        =?UTF-8?Q?Heiko_St=c3=bcbner?= <heiko@sntech.de>,
-        Markus Reichl <m.reichl@fivetechno.de>
-Cc:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
+        <christian@kohlschutter.com>
+In-Reply-To: <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
+Date:   Fri, 15 Jul 2022 20:57:24 +0200
+Cc:     wens@kernel.org, =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+        Markus Reichl <m.reichl@fivetechno.de>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
         "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
         linux-kernel <linux-kernel@vger.kernel.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <BEEF9E7B-E8A9-4E33-B53B-72D72F9EA536@kohlschutter.com>
 References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
  <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
  <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
@@ -48,78 +76,72 @@ References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
  <449292CA-CE60-4B90-90F7-295FBFEAB3F8@kohlschutter.com>
  <73F9AED0-D2A8-4294-B6E1-1B92D2A36529@kohlschutter.com>
  <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+ <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
+To:     Robin Murphy <robin.murphy@arm.com>
+X-Mailer: Apple Mail (2.3696.100.31)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2022-07-15 18:16, Christian Kohlschütter wrote:
-> OK, this took me a while to figure out.
-> 
-> When no undervoltage limit is configured, I can reliably trigger the initialization bug upon boot.
-> When the limit is set to 3.0V, it rarely occurs, but just after I send the v3 patch, I was able to reproduce...
-
-Well this has to be in the running for "weirdest placebo ever"... :/
-
-All it actually seems to achieve is printing an error[1] (this is after 
-all a tiny 5-pin fixed-voltage LDO regulator, not an intelligent PMIC), 
-and if that makes an appreciable difference then there has to be some 
-kind of weird timing condition at play. Maybe regulator_register() ends 
-up turning it off and on again rapidly enough that the card sees a 
-voltage brownout and glitches, and adding more delay by printing to the 
-console somewhere in the middle gives it enough time to act as a proper 
+> Am 15.07.2022 um 20:11 schrieb Robin Murphy <robin.murphy@arm.com>:
+>=20
+> On 2022-07-15 18:16, Christian Kohlsch=C3=BCtter wrote:
+>> OK, this took me a while to figure out.
+>> When no undervoltage limit is configured, I can reliably trigger the =
+initialization bug upon boot.
+>> When the limit is set to 3.0V, it rarely occurs, but just after I =
+send the v3 patch, I was able to reproduce...
+>=20
+> Well this has to be in the running for "weirdest placebo ever"... :/
+>=20
+> All it actually seems to achieve is printing an error[1] (this is =
+after all a tiny 5-pin fixed-voltage LDO regulator, not an intelligent =
+PMIC), and if that makes an appreciable difference then there has to be =
+some kind of weird timing condition at play. Maybe regulator_register() =
+ends up turning it off and on again rapidly enough that the card sees a =
+voltage brownout and glitches, and adding more delay by printing to the =
+console somewhere in the middle gives it enough time to act as a proper =
 power cycle with no ill effect?
 
-If you just whack something like an mdelay(500) at around that point in 
-set_machine_constraints(), without the DT property, does it have the 
+That's definitely something between placebo and homeopathy :-)
+
+I can confirm that setting a limit higher than 3.0V still works, which =
+means that the one time incident where it still crashed means that =
+there's indeed a timing issue at play, and adding that undervoltage =
+statement (unlike the ramp-delay configs that I also tried) added just =
+enough of a delay that made it work 99 out of 100 times.
+
+> If you just whack something like an mdelay(500) at around that point =
+in set_machine_constraints(), without the DT property, does it have the =
 same effect?
+Adding a delay for vcc3v0_sd works, which is great! (patch below)
 
-Robin.
+Is there an existing path from device-tree parser to regular/core.c that =
+we can use to specify this delay specifically for this regulator?
+Also, what delay should we choose to make sure it works all the time and =
+not just 99 out of 100 times?
 
-[1] 
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/drivers/regulator/core.c#n1521
+Best,
+Christian
 
->> Am 15.07.2022 um 19:12 schrieb Christian Kohlschütter <christian@kohlschutter.com>:
->>
->> mmc/SD-card initialization may fail on NanoPi R4S with
->> "mmc1: problem reading SD Status register" /
->> "mmc1: error -110 whilst initialising SD card"
->> either on cold boot or after a reboot.
->>
->> Moreover, the system would also sometimes hang upon reboot.
->>
->> This is prevented by setting an explicit undervoltage protection limit
->> for the SD-card-specific vcc3v0_sd voltage regulator.
->>
->> Set the undervoltage protection limit to 2.7V, which is the minimum
->> permissible SD card operating voltage.
->>
->> Signed-off-by: Christian Kohlschütter <christian@kohlschutter.com>
->> ---
->> arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi | 4 ++++
->> 1 file changed, 4 insertions(+)
->> mode change 100644 => 100755 arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->>
->> diff --git a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> old mode 100644
->> new mode 100755
->> index 8c0ff6c96e03..669c74ce4d13
->> --- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> +++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
->> @@ -73,6 +73,10 @@ vcc3v0_sd: vcc3v0-sd {
->> 		regulator-always-on;
->> 		regulator-min-microvolt = <3000000>;
->> 		regulator-max-microvolt = <3000000>;
->> +
->> +		// must be configured or SD card may fail to initialize occasionally
->> +		regulator-uv-protection-microvolt = <2700000>;
->> +
->> 		regulator-name = "vcc3v0_sd";
->> 		vin-supply = <&vcc3v3_sys>;
->> 	};
->> -- 
->> 2.36.1
-> 
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index c4d844ffad7a..0e15ec2548f4 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -1483,6 +1483,11 @@ static int set_machine_constraints(struct =
+regulator_dev *rdev)
+                          "IC does not support requested over voltage =
+limits\n");
+        }
+=20
++if(!strncmp(rdev_get_name(rdev),"vcc3v0_sd",sizeof("vcc3v0_sd"))) {
++       rdev_err(rdev, "DELAY: %s\n", rdev_get_name(rdev));
++       mdelay(500);
++}
++
+        if (rdev->constraints->under_voltage_detection)
+                ret =3D handle_notify_limits(rdev,
+                                           =
+ops->set_under_voltage_protection,
+
+
