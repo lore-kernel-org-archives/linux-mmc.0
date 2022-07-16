@@ -2,37 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 825C3C43334
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 Jul 2022 14:04:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40200C433EF
+	for <linux-mmc@archiver.kernel.org>; Sat, 16 Jul 2022 14:06:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229732AbiGPOE1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 Jul 2022 10:04:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59344 "EHLO
+        id S229679AbiGPOGB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 16 Jul 2022 10:06:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60248 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229499AbiGPOE0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jul 2022 10:04:26 -0400
-Received: from smtpbg.qq.com (biz-43-154-54-12.mail.qq.com [43.154.54.12])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97E4A1AD87;
-        Sat, 16 Jul 2022 07:04:19 -0700 (PDT)
-X-QQ-mid: bizesmtp89t1657980255twldwjal
+        with ESMTP id S230015AbiGPOGA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jul 2022 10:06:00 -0400
+Received: from smtpbg.qq.com (unknown [43.155.67.158])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B37E21B781;
+        Sat, 16 Jul 2022 07:05:55 -0700 (PDT)
+X-QQ-mid: bizesmtp88t1657980351tldjk98c
 Received: from localhost.localdomain ( [182.148.15.157])
         by bizesmtp.qq.com (ESMTP) with 
-        id ; Sat, 16 Jul 2022 22:04:08 +0800 (CST)
+        id ; Sat, 16 Jul 2022 22:05:48 +0800 (CST)
 X-QQ-SSF: 01000000002000B0D000B00A0000000
-X-QQ-FEAT: LE7C6P2vL8Sxi14gZa1VtAgWnFdun8nS9UxUCU9+c71cbT6FzsB1O0EVMzOry
-        5b43Z3srwbLOuR7x7GPHZjvwuAPpk+NF5aqj5yhJiOGa1f1giAJf33wdmDBeIUOleeJ4qQo
-        cV3cwmrYVkp+ab4q94ueFKzUBzaxnwZjzxsJipXRp6w0L4jPNGuEjGCHvAfVofuGPCX4ZDV
-        k2Bmn4ZbEszAn+Wp3ShmF9A/r+LqCytW2AXi8yPkf0CWukQVBTXhmMUTx5GkS8cnz2asW6C
-        G6xKM1S37CZDjxJZJJ2nw5tYfWjHugyIs8w3KrV16Gau15STETWkWq7DDPxf1tuYFccgb2e
-        RW5XlsYLAIsPvKP6K10hrHte2u4Ip8bqbOMkWoMwB0/bBFR9h0FSVH68pvhyl7jpGhQ/rLt
+X-QQ-FEAT: RmQi6iQXyoN26/cwQq3uZowOdDEi6rAJSp/WeAJbi4cM8c9mgfZiP0YyEPny3
+        Ye/WD5OQYyuxbJKO7eW9QusDXcOpeqGOmmONNpBEzQs72Gf1vvtaRx67aImzD1UzbScV0yQ
+        bzT4NFsu9ow3sQcJ+mfCnqMOpg2HHTJNths3OHMWmQgECVow/RXVzcet13mhPOxRTgrjHcq
+        wjjaxUIJtusyPTojkNqsIhTWIEokJXfzMGAsBxjOiBpaU+rPCQT/oOR19Ix+lXo23WNov/G
+        LCSpk6leouBU3ztWqlRfFyq2OjOb9mwRm+rnOaoOuoxqCJ/VcW9ySBcbeXFJVYy4hTOl1u+
+        1JD8RPlubuO71Icdmr5Ecacr/SNelXnQlgmzRMp1TBR3hU/9+JtkI2le9OD1YlXEGyCeI47
 X-QQ-GoodBg: 0
 From:   Jilin Yuan <yuanjilin@cdjrlc.com>
 To:     ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Jilin Yuan <yuanjilin@cdjrlc.com>
 Subject: [PATCH] mmc/core: fix repeated words in comments
-Date:   Sat, 16 Jul 2022 22:04:01 +0800
-Message-Id: <20220716140401.55494-1-yuanjilin@cdjrlc.com>
+Date:   Sat, 16 Jul 2022 22:05:27 +0800
+Message-Id: <20220716140527.56086-1-yuanjilin@cdjrlc.com>
 X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -42,35 +42,25 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
- Delete the redundant word 'it'.
- Delete the redundant word 'in'.
+ Delete the redundant word 'to'.
 
 Signed-off-by: Jilin Yuan <yuanjilin@cdjrlc.com>
 ---
- drivers/mmc/core/core.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/mmc/core/host.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 4b70cbfc6d5d..e4a555a2f202 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -56,7 +56,7 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
- /*
-  * Enabling software CRCs on the data blocks can be a significant (30%)
-  * performance cost, and for other reasons may not always be desired.
-- * So we allow it it to be disabled.
-+ * So we allow it to be disabled.
-  */
- bool use_spi_crc = 1;
- module_param(use_spi_crc, bool, 0);
-@@ -528,7 +528,7 @@ EXPORT_SYMBOL(mmc_cqe_post_req);
-  * @host: MMC host to recover
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 2ed2b4d5e5a5..01f291e3b266 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -269,7 +269,7 @@ EXPORT_SYMBOL(mmc_of_parse_clk_phase);
+  * @host: host whose properties should be parsed.
   *
-  * Recovery consists of stopping CQE, stopping eMMC, discarding the queue in
-- * in eMMC, and discarding the queue in CQE. CQE must call
-+ * eMMC, and discarding the queue in CQE. CQE must call
-  * mmc_cqe_request_done() on all requests. An error is returned if the eMMC
-  * fails to discard its queue.
+  * To keep the rest of the MMC subsystem unaware of whether DT has been
+- * used to to instantiate and configure this host instance or not, we
++ * used to instantiate and configure this host instance or not, we
+  * parse the properties and set respective generic mmc-host flags and
+  * parameters.
   */
 -- 
 2.36.1
