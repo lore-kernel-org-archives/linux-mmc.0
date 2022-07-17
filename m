@@ -2,160 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25EC8C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 16 Jul 2022 19:43:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE971C433EF
+	for <linux-mmc@archiver.kernel.org>; Sun, 17 Jul 2022 11:49:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232583AbiGPTnx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 16 Jul 2022 15:43:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55302 "EHLO
+        id S229896AbiGQLt2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 17 Jul 2022 07:49:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42340 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232585AbiGPTnw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 16 Jul 2022 15:43:52 -0400
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE3157646
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Jul 2022 12:43:49 -0700 (PDT)
-Received: by mail-ej1-x631.google.com with SMTP id tk8so3189258ejc.7
-        for <linux-mmc@vger.kernel.org>; Sat, 16 Jul 2022 12:43:49 -0700 (PDT)
+        with ESMTP id S229542AbiGQLt1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2022 07:49:27 -0400
+Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BE8814D06
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Jul 2022 04:49:26 -0700 (PDT)
+Received: by mail-ed1-x535.google.com with SMTP id m16so11815836edb.11
+        for <linux-mmc@vger.kernel.org>; Sun, 17 Jul 2022 04:49:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
-        h=from:content-transfer-encoding:mime-version:subject:date:references
-         :to:in-reply-to:message-id;
-        bh=H/T5SCRTZnvNt4JlT7zW83Ocmb/ZGFQfFEQNlDPUCI8=;
-        b=n9MXmbtnvdtjnx5J2nrdopHTJx07KpjcmhDzg7sg6Qf5Y4FALt6HjxT8YXyIeYVkmt
-         ufyrYXmuOYn1BpWZfcyYRtOz8/BOA5iemqNLy5SeSaDz26yp0/HgPHwJ5d530GTfovMC
-         l7XyKXc6Ma+vlFjc+SQw1jdgT2mLgpkPRusTZ3H9bGSOkTgCiXtreMkEvGtmcmv9zf3I
-         ti3l8jlLXSNLR34055wrdpBMguTfCMHh+fGGrQ05IbxjyFWlfxYSM5eSUisfmpQUUgeR
-         YQ82luhh7y69WCpF4pMnpTTtvVzAwUgTVi4cwrNFcM46vAhZ1odde3p05bNKm3d0UHGc
-         +f9Q==
+        h=mime-version:subject:from:in-reply-to:date:cc
+         :content-transfer-encoding:message-id:references:to;
+        bh=SC4Y9bQ5Mv3/wN6+CzaaZu23YdaRhhafcPtQU+MEiaw=;
+        b=AgL9bPDO5bHJE2njG5yxdz+bkwVKdHy4FLDnj0NHavCS0Y2RlWaur1CNKXD5QZIgJE
+         yerieaFIbY6jno2f1xE/Z4WqutyJVwAvZh2hc/uRUmZVHOaGeNYHuQ1mq8sp43iavUtF
+         TA42IyhGe0Sn+enezgOLFDAI7KL5WZlZ54H6td8AmTNZCIGRit95xpOLnrOyNVqo5mgf
+         Wc0su6Hm9hCy0yu/S4MJUBdah8eGdmqqkg4KHFGNkggHILhQaPV8RhGfIFDXI69kEYyx
+         3Ti2gkO+97DYiyChZfmxp0EIIrmcOMr4CgReXHQc5WtaYhHH7439fjv+IPcb89uKboSY
+         CaBQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:content-transfer-encoding:mime-version
-         :subject:date:references:to:in-reply-to:message-id;
-        bh=H/T5SCRTZnvNt4JlT7zW83Ocmb/ZGFQfFEQNlDPUCI8=;
-        b=57mrdD17riA7/Foo/VKNasxbueCBo1XA3WaRBDugCmnWQUX0sByzJhubg1mGb2dhZF
-         UR3FEcFR5vHmmLNPtzYCr387esbebb39BIwreW9qNyhXSXQz1SEJq3z1IJD7ucrbUFGC
-         S/T2UKdho1anGriyuiJBixI2UFgcRemngFueVS5AMUz8EqT9+msbKlL3D+5Hq+PzpFl/
-         sOAEG8mFJJPJ7jzoPYsKp5OQjC4YKejUF+1vxGsXms1jZHcSQYezUqBerLnuKOOOiyIB
-         rqMm15XOKrw4fL5zKV10TRszHA1+YjVrRbb0z/n+RtEHXrq0rkJiJTcaiEqnNEUBG5RV
-         xs4Q==
-X-Gm-Message-State: AJIora/D+VWOzOUZudw4g7sGAqeyis1AUftOdg8Xm6qhy0K5MZ3nh5l/
-        fnYi1k0R2HOsACxBU3dO2rfqeg==
-X-Google-Smtp-Source: AGRyM1tfaw6taoKWBs3jjagj6BkI+UEYOKsGCFybdoJ0w7ESh2k81dmaxHS3p8Oue9CB1K3uUXCiaA==
-X-Received: by 2002:a17:906:2da:b0:712:14b:62da with SMTP id 26-20020a17090602da00b00712014b62damr19317613ejk.351.1658000628431;
-        Sat, 16 Jul 2022 12:43:48 -0700 (PDT)
+        h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
+         :content-transfer-encoding:message-id:references:to;
+        bh=SC4Y9bQ5Mv3/wN6+CzaaZu23YdaRhhafcPtQU+MEiaw=;
+        b=gUFctXQO0OQTNo6g60PHJqcfClRzUjbv0pM2rVegbu+OUY/vH96h1QkOXSCAiF6Kbi
+         I/bxbnJLlmQ3Sdnv+EdcILEaoLbAc0xQmJnP4AHy5KiZre4j43dqEuZdbsC/wzlh3rHJ
+         3Q6rDEu3BNCTTjEoAhLdzChAqsE6kfJhqCZOxqguhcFgwYzhZyGlTyF7bb/oVEzDRmoN
+         EQVoymCEDNZUGiDhoUJRIOXYEYSvR+24ZA81P2YNI1dAb2a25Nx0cvtI+gH+mWhJls7G
+         JEn1I2S/1dvOeHWnaduY60KQX96N/8hGDU6MVbfoZ37q02gWTbT8ACcYq0mm+KziNGVH
+         abhA==
+X-Gm-Message-State: AJIora/GqO49lgIyFMweFKyDT7o86j7YW8Lf2b9dePPS3jmK1kOcNzjj
+        F6J5PRNrd6DkvE5DqbZlzR5a0X5wXTi0cG0u
+X-Google-Smtp-Source: AGRyM1ssMaPPSAOo/F08JYKHQwJBKwm9/osf98Fy44RqnhD/F0ZVubn9Z7A5aDc39dIwZwY2xuQfwg==
+X-Received: by 2002:a05:6402:270b:b0:43a:d89e:8c2d with SMTP id y11-20020a056402270b00b0043ad89e8c2dmr30993250edd.413.1658058565125;
+        Sun, 17 Jul 2022 04:49:25 -0700 (PDT)
 Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
-        by smtp.gmail.com with ESMTPSA id q25-20020a1709066ad900b0072b2ef2757csm3489152ejs.180.2022.07.16.12.43.47
+        by smtp.gmail.com with ESMTPSA id qx21-20020a170906fcd500b0072abb95c9f4sm4252027ejb.193.2022.07.17.04.49.24
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Sat, 16 Jul 2022 12:43:47 -0700 (PDT)
-From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
-        <christian@kohlschutter.com>
+        Sun, 17 Jul 2022 04:49:24 -0700 (PDT)
 Content-Type: text/plain;
         charset=utf-8
-Content-Transfer-Encoding: quoted-printable
 Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.100.31\))
-Subject: [PATCH v5] arm64: dts: rockchip: Fix SD card init on rk3399-nanopi4
-Date:   Sat, 16 Jul 2022 21:43:46 +0200
-References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
- <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
- <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
- <590f7a08-a6ca-be54-4254-363343642a52@arm.com>
- <A6B896E5-CD25-4441-B6A5-0BE1FA284B2C@kohlschutter.com>
- <A9634366-A012-43D2-B253-8BB9BF6005C7@kohlschutter.com>
- <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
- <5ca9bd94-54d9-04f8-0098-a56ffb6f5fe1@arm.com>
- <502b3fbe-3077-407e-6010-a8cb3ffce7d6@arm.com>
- <449292CA-CE60-4B90-90F7-295FBFEAB3F8@kohlschutter.com>
- <73F9AED0-D2A8-4294-B6E1-1B92D2A36529@kohlschutter.com>
- <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
- <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
- <9405b97a-6758-ad4e-ccff-eed072096539@arm.com>
- <BF7CC548-88C9-4889-8A41-8E99C31EF81C@kohlschutter.com>
- <daf3b61c-d886-98eb-0443-de233d742041@arm.com>
- <CDF716FC-F6CF-44A9-84D9-B48C46E6AC2C@kohlschutter.com>
- <3912A668-9F73-40FD-8993-5060F632238A@kohlschutter.com>
-To:     Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
+Subject: Re: [PATCH] regulator: core: Fix off-on-delay-us for
+ always-on/boot-on regulators
+From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
+        <christian@kohlschutter.com>
+In-Reply-To: <2B145293-BAAE-40AE-B408-FCFC4A80E46D@kohlschutter.com>
+Date:   Sun, 17 Jul 2022 13:49:23 +0200
+Cc:     Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
         =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
         Markus Reichl <m.reichl@fivetechno.de>,
         linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
         "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>
-In-Reply-To: <3912A668-9F73-40FD-8993-5060F632238A@kohlschutter.com>
-Message-Id: <7E830C9F-BB5D-4EFC-B3F4-1C580E9326A3@kohlschutter.com>
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <96D772F2-16D8-49BD-A438-A827B69DB670@kohlschutter.com>
+References: <E25D6465-6475-42B4-90EB-3D2C3CAF3B20@kohlschuetter.com>
+ <2B145293-BAAE-40AE-B408-FCFC4A80E46D@kohlschutter.com>
+To:     Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>
 X-Mailer: Apple Mail (2.3696.100.31)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-mmc/SD-card initialization may fail on NanoPi R4S with
-"mmc1: problem reading SD Status register" /
-"mmc1: error -110 whilst initialising SD card"
-either on cold boot or after a reboot.
++CC mmc/rockchip folks
 
-Moreover, the system would also sometimes hang upon reboot.
-
-This is caused by vcc3v0-sd's "regulator-always-on", which triggers
-an erroneous double-initialization of the regulator. This causes
-voltage fluctuations that can, depending on timing, prevent the
-SD card from initializing correctly.
-
-Adding some liberal delay via "off-on-delay-us" is ineffective since
-that codepath is skipped as long "regulator-always-on" is set.
-
-Removing "regulator-always-on" alone is not sufficient because that
-would allow the system to set GPIO0_A1 to LOW upon reboot, which may
-cause the system to hang.
-
-In order to allow the system to set GPIO0_A1 to HIGH upon initialization
-but prevent it from changing it back to LOW, this patch increases the
-usage count of vcc3v0-sd from 1 to 2, whereas the additional reference,
-"vcc1v8_s3", is marked as "always-on", causing permanent retention.
-
-As a welcome side-effect, this change allows the SD card voltage to be
-set back to 3.0V upon reboot, allowing bootloaders to use the card right
-away, obsoleting further patching.
-
-Signed-off-by: Christian Kohlsch=C3=BCtter <christian@kohlschutter.com>
----
- arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi | 13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
-
-diff --git a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi =
-b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
-index 8c0ff6c96e03..38507a6e3046 100644
---- a/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
-+++ b/arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi
-@@ -61,7 +61,17 @@ vcc1v8_s3: vcc1v8-s3 {
- 		regulator-min-microvolt =3D <1800000>;
- 		regulator-max-microvolt =3D <1800000>;
- 		regulator-name =3D "vcc1v8_s3";
--		vin-supply =3D <&vcc_1v8>;
-+
-+		/*
-+		 * Workaround to skip setting gpio0 RK_PA1 to LOW upon =
-reboot,
-+		 * which may freeze the system.
-+		 *
-+		 * Adding a reference to vcc3v0_sd increases its =
-num_users
-+		 * count to 2, preventing deactivation since this =
-regulator is
-+		 * marked "always-on".
-+		 */
-+		// vin-supply =3D <&vcc_1v8>; // actual supply
-+		vin-supply =3D <&vcc3v0_sd>;
- 	};
-=20
- 	vcc3v0_sd: vcc3v0-sd {
-@@ -70,7 +80,6 @@ vcc3v0_sd: vcc3v0-sd {
- 		gpio =3D <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
- 		pinctrl-names =3D "default";
- 		pinctrl-0 =3D <&sdmmc0_pwr_h>;
--		regulator-always-on;
- 		regulator-min-microvolt =3D <3000000>;
- 		regulator-max-microvolt =3D <3000000>;
- 		regulator-name =3D "vcc3v0_sd";
---=20
-2.36.1
-
+> Am 17.07.2022 um 13:39 schrieb Christian Kohlsch=C3=BCtter =
+<christian@kohlschutter.com>:
+>=20
+> This is _somewhat_ related to "[PATCH] regulator: core: Fix =
+off-on-delay-us for always-on/boot-on regulators"
+> That other patch is the right solution for my specific problem, and no =
+further fixes are necessary.
+>=20
+> This change fixes an attempted "bandage" solution (adding an =
+"off-on-delay-us") that we had initially tried to no avail.
+> While the cleanup not only reduces complexity, it may also prevent =
+future code changes reintroducing the non-delayed cycling after =
+registration.
+>=20
+> from arch/arm64/boot/dts/rockchip/rk3399-nanopi4.dtsi:
+> vcc3v0_sd: vcc3v0-sd {
+>        compatible =3D "regulator-fixed";
+>        enable-active-high;
+>        gpio =3D <&gpio0 RK_PA1 GPIO_ACTIVE_HIGH>;
+>        pinctrl-names =3D "default";
+>        pinctrl-0 =3D <&sdmmc0_pwr_h>;
+>        regulator-always-on; // prevents setting last_off upon =
+registration
+>        off-on-delay-us =3D <500000>; // would not be honored upon =
+regulator_register
+>        regulator-min-microvolt =3D <3000000>;
+>        regulator-max-microvolt =3D <3000000>;
+>        regulator-name =3D "vcc3v0_sd";
+>        vin-supply =3D <&vcc3v3_sys>;
+> };
+>=20
+>> Am 17.07.2022 um 13:30 schrieb Christian Kohlschuetter =
+<christian@kohlschuetter.com>:
+>>=20
+>> Regulators marked with "regulator-always-on" or "regulator-boot-on"
+>> as well as an "off-on-delay-us", may run into cycling issues that are
+>> hard to detect.
+>>=20
+>> This is caused by the "last_off" state not being initialized in this
+>> case.
+>>=20
+>> Fix the "last_off" initialization by setting it to the current kernel
+>> time upon initialization, regardless of always_on/boot_on state.
+>>=20
+>> Signed-off-by: Christian Kohlsch=C3=BCtter =
+<christian@kohlschutter.com>
+>> ---
+>> drivers/regulator/core.c | 5 +++--
+>> 1 file changed, 3 insertions(+), 2 deletions(-)
+>>=20
+>> diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+>> index c4d844ffad7a..48ed33ad48c8 100644
+>> --- a/drivers/regulator/core.c
+>> +++ b/drivers/regulator/core.c
+>> @@ -1522,6 +1522,9 @@ static int set_machine_constraints(struct =
+regulator_dev *rdev)
+>> 		}
+>> 	}
+>>=20
+>> +	if (rdev->desc->off_on_delay)
+>> +		rdev->last_off =3D ktime_get();
+>> +
+>> 	/* If the constraints say the regulator should be on at this =
+point
+>> 	 * and we have control then make sure it is enabled.
+>> 	 */
+>> @@ -1549,8 +1552,6 @@ static int set_machine_constraints(struct =
+regulator_dev *rdev)
+>>=20
+>> 		if (rdev->constraints->always_on)
+>> 			rdev->use_count++;
+>> -	} else if (rdev->desc->off_on_delay) {
+>> -		rdev->last_off =3D ktime_get();
+>> 	}
+>>=20
+>> 	print_constraints(rdev);
+>> --=20
+>> 2.36.1
+>>=20
+>>=20
+>=20
+>=20
+>=20
+> --=20
+> Dr. Christian Kohlsch=C3=BCtter
+>=20
+>=20
+>=20
 
