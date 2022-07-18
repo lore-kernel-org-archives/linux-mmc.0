@@ -2,381 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CF1CC433EF
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 16:22:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79134C433EF
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 20:59:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234809AbiGRQWG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jul 2022 12:22:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52048 "EHLO
+        id S233480AbiGRU7L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 16:59:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234314AbiGRQWF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 12:22:05 -0400
-Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7098A25C5D
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 09:22:03 -0700 (PDT)
-Received: by mail-lj1-x22e.google.com with SMTP id m9so11577192ljp.9
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 09:22:03 -0700 (PDT)
+        with ESMTP id S236188AbiGRU7I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 16:59:08 -0400
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FF65DEFD
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 13:59:07 -0700 (PDT)
+Received: by mail-ej1-x631.google.com with SMTP id z23so23562966eju.8
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 13:59:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=semihalf.com; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=gnhzl8AV0IevaeOqkOrbzpbXv8n6BNxG2ZRn/9lxH9g=;
-        b=U+kOT7919lLIV5hgAHfLCeFLNWoe6ERaJnxxRw1TKiDC7MfJjIXmpa0xU5m/Uh0rz3
-         EWwrnMUJeT/pTCHGcrSpbzEcZdiZBIeCwILTQ5xumjFEqfwH9nF5GIwUiRR8h5Ov0Qsw
-         OF4YeYQ3CZ9Dls0/dLacIQAuwBWQ+akD0/daipf6WEvqGus8uOy2NF2CK1csD6+1EnNT
-         rbxaBoCiR2MOufFQRuD5JB/P6JsL6vq2awMZRC1kQlsSXbxPjLPFLf8v22CNHig0TUy4
-         9+JRoVprxfJVXducukBoGcjiRFwPmKS8p0mqakiAf+1mfepTzUYHMF30hUvr64IXCuxJ
-         xUQQ==
+        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
+        h=from:content-transfer-encoding:mime-version:subject:date:references
+         :to:in-reply-to:message-id;
+        bh=G4xt1tsCAE5v1aPuO5mOncHkPCmfTeAk54UxkIc2Qmo=;
+        b=aZZxh1rhvlV3iS5yeU8mQplf8hQFrCKIoPgu4ncOEANuQNQ2S1+jZVJSYliXp3IZZ7
+         f4bmNDrHEYEKmqnJ77+sCdX769dLBdO32ogqumghD9tv9lRmIGBQ/3R/975HzecAD1SE
+         IQUdoGRzZCS/brdX93651zSNgJNc0i/wmT8gGL/OwvZ/R8usWYb7M14KTC0Sbc5x0O/H
+         Z7I3DgirWW0Rzsbh5tAfFofYBXmrCUg9ahFQUF35wcMctolakdIc4iRKKRQF3dLixdkw
+         /hsy3QeG0XgwIZD0MLxKIaTHOx8z1hf6dn/SRvezJj2n3xvek+8EYFKm6sPXgeepEgLK
+         StGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=gnhzl8AV0IevaeOqkOrbzpbXv8n6BNxG2ZRn/9lxH9g=;
-        b=3erJrmWTRXxKzcRLHQtbc1UpDZn7mWb/hu1pMup/5csHXFQVvR5Cf98UvzUNVYyEWg
-         GkATozoGv2z4WSTWTSq8oMxdk8r3XbxLdcFH1fyX3/fWfZKLoQlVWcmUmRkG38bFPPII
-         FSXID/3Si5u3R4pNt9NKwhkh9K7t93Gcf+wXm1EXMNc/2PUWqb3zx2j4/yWlOKtenYh4
-         L10qTvOBtk9c7qY6HsUlZ495M3OYxxPUgJbcV3GC4H1j/A9JYZG9i+eBsHFvKillig3Q
-         yebEjBLbgFSx9K2ML0p7gtYTpGjOb4Gv7uRz4maRQ8tbRHP0n9CZq+sYlZS2FsGz3/Rg
-         +m4g==
-X-Gm-Message-State: AJIora+rd2nDq5PMHKiWQOr9NjwNO0ONTrN7JaYhjr4Xhjix1u1r2o+P
-        WCQe/CEBBSnto8WDTlsZvcevvg==
-X-Google-Smtp-Source: AGRyM1u/ldBvC8/9GQl6gU/uzMlWEFWVdqqS2949zozHWxiwR574uX1lG9v35lqzBpUtqOK3A43/kQ==
-X-Received: by 2002:a2e:be8a:0:b0:25d:c49e:fa29 with SMTP id a10-20020a2ebe8a000000b0025dc49efa29mr213513ljr.194.1658161321494;
-        Mon, 18 Jul 2022 09:22:01 -0700 (PDT)
-Received: from [10.43.1.253] ([83.142.187.84])
-        by smtp.gmail.com with ESMTPSA id u1-20020ac258c1000000b0047f943112e3sm2674134lfo.285.2022.07.18.09.21.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 18 Jul 2022 09:21:59 -0700 (PDT)
-Message-ID: <820dff42-67e4-32d2-a72f-9e9bdb70609e@semihalf.com>
-Date:   Mon, 18 Jul 2022 18:21:57 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH v2] PCI/ASPM: Disable ASPM when save/restore PCI state
-Content-Language: en-US
-To:     Victor Ding <victording@google.com>,
-        Bjorn Helgaas <helgaas@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        linux-pci@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
-        linux-mmc@vger.kernel.org, Bjorn Helgaas <bhelgaas@google.com>,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>,
-        Kai-Heng Feng <kai.heng.feng@canonical.com>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        "Saheed O. Bolarinwa" <refactormyself@gmail.com>,
-        Vidya Sagar <vidyas@nvidia.com>,
-        Xiongfeng Wang <wangxiongfeng2@huawei.com>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Grzegorz Jaszczyk <jaz@semihalf.com>,
-        Tomasz Nowicki <tn@semihalf.com>,
-        Zide Chen <zide.chen@intel.com>
-References: <20210311173433.GA2071075@bjorn-Precision-5520>
- <20210726220307.GA647936@bjorn-Precision-5520>
- <CANqTbdb_h_W+8kmh6s56deA8VKn6tO1KDJaS5Yasq5RFLtGUbQ@mail.gmail.com>
-From:   Dmytro Maluka <dmy@semihalf.com>
-In-Reply-To: <CANqTbdb_h_W+8kmh6s56deA8VKn6tO1KDJaS5Yasq5RFLtGUbQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        h=x-gm-message-state:from:content-transfer-encoding:mime-version
+         :subject:date:references:to:in-reply-to:message-id;
+        bh=G4xt1tsCAE5v1aPuO5mOncHkPCmfTeAk54UxkIc2Qmo=;
+        b=TWJkUb1u798mNmv/+UkA7wmNtDV9b4LnfnSjrbhkzUls5aprO9TmsxlTEXa5mBDluW
+         otU5z3ZN2JC9fbwHYFDRgk2/E0pDXDJjFWujg3u0v1aY3D6ARnN/5snVSvj0pSCIsQue
+         nCVvPHzU9i5QiA0BjqwLTYzNRCkIylxMsv9mVJ9jpv7cOTYhJXuCk6UtXepDbc9OCM31
+         htAUZzR+IyCOSuS+7vWCiw0YkEC49hjwCq8cTjUjFv62wYr57rYbQQvZkf27QzDAKSDC
+         Cc8Vhc0q9Rqq2BsGZiS/OE4asSbTtxwb55uT6W7ewDO3LPKGbh0f4rQwjgZXzGL9iVVM
+         y/xA==
+X-Gm-Message-State: AJIora/3FtT7IWGfGhyiAEvBdTzuDA7rTJRZ+DCeyXsx40fnWEdOBOTe
+        SdYT5tAquI4j8zS3ON2oR8/mOEOXedyK7Lwq
+X-Google-Smtp-Source: AGRyM1tVB4vvb5f/bKXAFwDhyy9bAciaV/Gd3r6IsQlbV9u1J3/xCyjaIxTW/riej87bVuuJQTaAPw==
+X-Received: by 2002:a17:907:2c75:b0:72b:3431:2a0a with SMTP id ib21-20020a1709072c7500b0072b34312a0amr27796230ejc.234.1658177945709;
+        Mon, 18 Jul 2022 13:59:05 -0700 (PDT)
+Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
+        by smtp.gmail.com with ESMTPSA id n9-20020a17090695c900b006f3ef214ddesm5814209ejy.68.2022.07.18.13.59.04
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 18 Jul 2022 13:59:04 -0700 (PDT)
+From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
+        <christian@kohlschutter.com>
+Content-Type: text/plain;
+        charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.100.31\))
+Subject: Re: [PATCH v2] arm64: dts: rockchip: rk3399-nanopi4: Fix voltage
+ regulator config
+Date:   Mon, 18 Jul 2022 22:59:03 +0200
+References: <963AF33B-54B7-4172-92D1-E2898E256A7E@kohlschutter.com>
+ <14EE0603-99C5-49AE-BDDB-C22C5B1924E2@kohlschutter.com>
+ <7AFECB02-5A87-43DD-8161-6068720AB8E3@kohlschutter.com>
+To:     Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
+        =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+        Markus Reichl <m.reichl@fivetechno.de>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        Mark Brown <broonie@kernel.org>
+In-Reply-To: <7AFECB02-5A87-43DD-8161-6068720AB8E3@kohlschutter.com>
+Message-Id: <C8ED2EFC-A7D5-418D-A7D9-E1D37B5BECFD@kohlschutter.com>
+X-Mailer: Apple Mail (2.3696.100.31)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Victor and Bjorn,
+Am 18.07.2022 um 14:02 schrieb Christian Kohlsch=C3=BCtter =
+<christian@kohlschutter.com>:
+>>=20
+>> A series of issues exist around the "vcc3v0_sd" voltage regulator =
+that
+>> made it necessary to mark it "always-on".
+>>=20
+>> With the patch "regulator: core: Resolve supply name earlier to =
+prevent
+>> double-init", this option is no longer necessary.
+>> ...
+>=20
+> Walking back on my claim in the commit message that no further patches =
+are needed for the u-boot integration to work.
+> Other than that, the actual patch is unchanged.
 
-On 2/9/22 09:03, Victor Ding wrote:
-> I sincerely apologize that I missed your two emails last year. Please find my
-> comments embedded below.
-> 
-> On Tue, Jul 27, 2021 at 8:03 AM Bjorn Helgaas <helgaas@kernel.org> wrote:
->>
->> On Thu, Mar 11, 2021 at 11:34:33AM -0600, Bjorn Helgaas wrote:
->>> On Thu, Jan 28, 2021 at 03:52:42PM +0000, Victor Ding wrote:
->>>> Certain PCIe devices (e.g. GL9750) have high penalties (e.g. high Port
->>>> T_POWER_ON) when exiting L1 but enter L1 aggressively. As a result,
->>>> such devices enter and exit L1 frequently during pci_save_state and
->>>> pci_restore_state; eventually causing poor suspend/resume performance.
->>>>
->>>> Based on the observation that PCI accesses dominance pci_save_state/
->>>> pci_restore_state plus these accesses are fairly close to each other, the
->>>> actual time the device could stay in low power states is negligible.
->>>> Therefore, the little power-saving benefit from ASPM during suspend/resume
->>>> does not overweight the performance degradation caused by high L1 exit
->>>> penalties.
->>>>
->>>> Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=211187
->>>
->>> Thanks for this!
->>>
->>> This device can tolerate unlimited delay for L1 exit (DevCtl Endpoint
->>> L1 Acceptable Latency is unlimited) and it makes no guarantees about
->>> how fast it can exit L1 (LnkCap L1 Exit Latency is also unlimited), so
->>> I think there's basically no restriction on when it can enter ASPM
->>> L1.0.
->>>
->>> I have a hard time interpreting the L1.2 entry conditions in PCIe
->>> r5.0, sec 5.5.1, but I can believe it enters L1.2 aggressively since
->>> the device says it can tolerate any latencies.
->>>
->>> If L1.2 exit takes 3100us, it could do ~60 L1 exits in 200ms.  I guess
->>> config accesses and code execution can account for some of that, but
->>> still seems like a lot of L1 entries/exits during suspend.  I wouldn't
->>> think we would touch the device that much and that intermittently.
->>>
->>>> Signed-off-by: Victor Ding <victording@google.com>
->>>>
->>>> ---
->>>>
->>>> Changes in v2:
->>>> - Updated commit message to remove unnecessary information
->>>> - Fixed a bug reading wrong register in pcie_save_aspm_control
->>>> - Updated to reuse existing pcie_config_aspm_dev where possible
->>>> - Fixed goto label style
->>>>
->>>>  drivers/pci/pci.c       | 18 +++++++++++++++---
->>>>  drivers/pci/pci.h       |  6 ++++++
->>>>  drivers/pci/pcie/aspm.c | 27 +++++++++++++++++++++++++++
->>>>  include/linux/pci.h     |  1 +
->>>>  4 files changed, 49 insertions(+), 3 deletions(-)
->>>>
->>>> diff --git a/drivers/pci/pci.c b/drivers/pci/pci.c
->>>> index 32011b7b4c04..9ea88953f90b 100644
->>>> --- a/drivers/pci/pci.c
->>>> +++ b/drivers/pci/pci.c
->>>> @@ -1542,6 +1542,10 @@ static void pci_restore_ltr_state(struct pci_dev *dev)
->>>>  int pci_save_state(struct pci_dev *dev)
->>>>  {
->>>>     int i;
->>>> +
->>>> +   pcie_save_aspm_control(dev);
->>>> +   pcie_disable_aspm(dev);
->>>
->>> If I understand this patch correctly, it basically does this:
->>>
->>>     pci_save_state
->>>   +   pcie_save_aspm_control
->>>   +   pcie_disable_aspm
->>>       <save state>
->>>   +   pcie_restore_aspm_control
->>>
->>> The <save state> part is just a bunch of config reads with very little
->>> other code execution.  I'm really surprised that there's enough time
->>> between config reads for the link to go to L1.  I guess you've
->>> verified that this does speed up suspend significantly, but this just
->>> doesn't make sense to me.
->>>
->>> In the bugzilla you say the GL9750 can go to L1.2 after ~4us of
->>> inactivity.  That's enough time for a lot of code execution.  We must
->>> be missing something.  There's so much PCI traffic during save/restore
->>> that it should be easy to match up the analyzer trace with the code.
->>> Can you get any insight into what's going on that way?
-> 
-> Unfortunately I did not and still do not have access to the required analyzers.
-> However, I received an analyzer trace screenshot confirming GL9750 indeed
-> went idle for ~4.2us. (I've attached it to the bugzilla).
-> 
-> I agree that 4us is more than sufficient for a lot of code execution, especially
-> these PCI config space accesses for the same device appear to be fairly
-> close to each other. However, as device resumes occur in parallel and a
-> global mutex is required for each access, these PCI config space accesses
-> from multiple devices are serialized arbitrarily causing accesses from the
-> same device far apart from each other.
-> 
-> The hypothesis came from my observation that PCI config space accesses
-> from different devices in the slow runs were always interleaved, while they
-> were mostly grouped together in the fast runs. To further prove the hypothesis,
-> I added a global lock when save/restore PCI state, forcing the related PCI
-> config space accesses from the same device grouped together, I always got
-> fast runs.
+This change (removing regulator-always-on) doesn't work reliably; please =
+disregard for now.
 
-I also happen to be working with a platform with GL9750 and I can
-confirm Victor's observations and conclusion: PCI config accesses in
-pci_save_state()/pci_restore_state() are so far apart in time because
-they are arbitrarily serialized with PCI config accesses for other
-devices during parallel suspend/resume, since they use the global
-pci_config_lock in pci_conf1_read()/pci_conf1_write().
-
-By the way, there is an easier way to confirm this conclusion: instead
-of adding a global lock around PCI state save/restore as Victor did,
-we can just disable parallel suspend/resume via
-"echo 0 >/sys/power/pm_async".
-
-So it seems we understand what's going on. Can we move forward with
-merging Victor's patch?
-
-While we're at it, I'm also wondering why for the basic PCI config (the
-first 256 bytes) Linux on x86 always uses the legacy 0xCF8/0xCFC method
-instead of MMCFG, even if MMCFG is available. The legacy method is
-inherently non-atomic and does require the global lock, while the MMCFG
-method generally doesn't, so using MMCFG would significantly speed up
-PCI config accesses in high-contention scenarios like the parallel
-suspend/resume.
-
-I've tried the below change which forces using MMCFG for the first 256
-bytes, and indeed, it makes suspend/resume of individual PCI devices
-with pm_async=1 almost as fast as with pm_async=0. In particular, it
-fixes the problem with slow GL9750 suspend/resume even without Victor's
-patch.
-
---- a/arch/x86/pci/common.c
-+++ b/arch/x86/pci/common.c
-@@ -40,20 +40,20 @@ const struct pci_raw_ops *__read_mostly raw_pci_ext_ops;
- int raw_pci_read(unsigned int domain, unsigned int bus, unsigned int devfn,
-                                                int reg, int len, u32 *val)
- {
--       if (domain == 0 && reg < 256 && raw_pci_ops)
--               return raw_pci_ops->read(domain, bus, devfn, reg, len, val);
-        if (raw_pci_ext_ops)
-                return raw_pci_ext_ops->read(domain, bus, devfn, reg, len, val);
-+       if (domain == 0 && reg < 256 && raw_pci_ops)
-+               return raw_pci_ops->read(domain, bus, devfn, reg, len, val);
-        return -EINVAL;
- }
- 
- int raw_pci_write(unsigned int domain, unsigned int bus, unsigned int devfn,
-                                                int reg, int len, u32 val)
- {
--       if (domain == 0 && reg < 256 && raw_pci_ops)
--               return raw_pci_ops->write(domain, bus, devfn, reg, len, val);
-        if (raw_pci_ext_ops)
-                return raw_pci_ext_ops->write(domain, bus, devfn, reg, len, val);
-+       if (domain == 0 && reg < 256 && raw_pci_ops)
-+               return raw_pci_ops->write(domain, bus, devfn, reg, len, val);
-        return -EINVAL;
- }
- 
-
-Sounds good if I submit a patch like this? (I'm not suggesting it
-instead of Victor's patch, rather as a separate improvement.)
-
-Thanks,
-Dmytro
-
-> 
->>
->> I'm dropping this for now, pending a better understanding of what's
->> going on.
->>
->>>>     /* XXX: 100% dword access ok here? */
->>>>     for (i = 0; i < 16; i++) {
->>>>             pci_read_config_dword(dev, i * 4, &dev->saved_config_space[i]);
->>>> @@ -1552,18 +1556,22 @@ int pci_save_state(struct pci_dev *dev)
->>>>
->>>>     i = pci_save_pcie_state(dev);
->>>>     if (i != 0)
->>>> -           return i;
->>>> +           goto exit;
->>>>
->>>>     i = pci_save_pcix_state(dev);
->>>>     if (i != 0)
->>>> -           return i;
->>>> +           goto exit;
->>>>
->>>>     pci_save_ltr_state(dev);
->>>>     pci_save_aspm_l1ss_state(dev);
->>>>     pci_save_dpc_state(dev);
->>>>     pci_save_aer_state(dev);
->>>>     pci_save_ptm_state(dev);
->>>> -   return pci_save_vc_state(dev);
->>>> +   i = pci_save_vc_state(dev);
->>>> +
->>>> +exit:
->>>> +   pcie_restore_aspm_control(dev);
->>>> +   return i;
->>>>  }
->>>>  EXPORT_SYMBOL(pci_save_state);
->>>>
->>>> @@ -1661,6 +1669,8 @@ void pci_restore_state(struct pci_dev *dev)
->>>>     if (!dev->state_saved)
->>>>             return;
->>>>
->>>> +   pcie_disable_aspm(dev);
->>>> +
->>>>     /*
->>>>      * Restore max latencies (in the LTR capability) before enabling
->>>>      * LTR itself (in the PCIe capability).
->>>> @@ -1689,6 +1699,8 @@ void pci_restore_state(struct pci_dev *dev)
->>>>     pci_enable_acs(dev);
->>>>     pci_restore_iov_state(dev);
->>>>
->>>> +   pcie_restore_aspm_control(dev);
->>>> +
->>>>     dev->state_saved = false;
->>>>  }
->>>>  EXPORT_SYMBOL(pci_restore_state);
->>>> diff --git a/drivers/pci/pci.h b/drivers/pci/pci.h
->>>> index a81459159f6d..e074a0cbe73c 100644
->>>> --- a/drivers/pci/pci.h
->>>> +++ b/drivers/pci/pci.h
->>>> @@ -584,6 +584,9 @@ void pcie_aspm_pm_state_change(struct pci_dev *pdev);
->>>>  void pcie_aspm_powersave_config_link(struct pci_dev *pdev);
->>>>  void pci_save_aspm_l1ss_state(struct pci_dev *dev);
->>>>  void pci_restore_aspm_l1ss_state(struct pci_dev *dev);
->>>> +void pcie_save_aspm_control(struct pci_dev *dev);
->>>> +void pcie_restore_aspm_control(struct pci_dev *dev);
->>>> +void pcie_disable_aspm(struct pci_dev *pdev);
->>>>  #else
->>>>  static inline void pcie_aspm_init_link_state(struct pci_dev *pdev) { }
->>>>  static inline void pcie_aspm_exit_link_state(struct pci_dev *pdev) { }
->>>> @@ -591,6 +594,9 @@ static inline void pcie_aspm_pm_state_change(struct pci_dev *pdev) { }
->>>>  static inline void pcie_aspm_powersave_config_link(struct pci_dev *pdev) { }
->>>>  static inline void pci_save_aspm_l1ss_state(struct pci_dev *dev) { }
->>>>  static inline void pci_restore_aspm_l1ss_state(struct pci_dev *dev) { }
->>>> +static inline void pcie_save_aspm_control(struct pci_dev *dev) { }
->>>> +static inline void pcie_restore_aspm_control(struct pci_dev *dev) { }
->>>> +static inline void pcie_disable_aspm(struct pci_dev *pdev) { }
->>>>  #endif
->>>>
->>>>  #ifdef CONFIG_PCIE_ECRC
->>>> diff --git a/drivers/pci/pcie/aspm.c b/drivers/pci/pcie/aspm.c
->>>> index a08e7d6dc248..e1e97db32e8b 100644
->>>> --- a/drivers/pci/pcie/aspm.c
->>>> +++ b/drivers/pci/pcie/aspm.c
->>>> @@ -784,6 +784,33 @@ static void pcie_config_aspm_dev(struct pci_dev *pdev, u32 val)
->>>>                                        PCI_EXP_LNKCTL_ASPMC, val);
->>>>  }
->>>>
->>>> +void pcie_disable_aspm(struct pci_dev *pdev)
->>>> +{
->>>> +   if (!pci_is_pcie(pdev))
->>>> +           return;
->>>> +
->>>> +   pcie_config_aspm_dev(pdev, 0);
->>>> +}
->>>> +
->>>> +void pcie_save_aspm_control(struct pci_dev *pdev)
->>>> +{
->>>> +   u16 lnkctl;
->>>> +
->>>> +   if (!pci_is_pcie(pdev))
->>>> +           return;
->>>> +
->>>> +   pcie_capability_read_word(pdev, PCI_EXP_LNKCTL, &lnkctl);
->>>> +   pdev->saved_aspm_ctl = lnkctl & PCI_EXP_LNKCTL_ASPMC;
->>>> +}
->>>> +
->>>> +void pcie_restore_aspm_control(struct pci_dev *pdev)
->>>> +{
->>>> +   if (!pci_is_pcie(pdev))
->>>> +           return;
->>>> +
->>>> +   pcie_config_aspm_dev(pdev, pdev->saved_aspm_ctl);
->>>> +}
->>>> +
->>>>  static void pcie_config_aspm_link(struct pcie_link_state *link, u32 state)
->>>>  {
->>>>     u32 upstream = 0, dwstream = 0;
->>>> diff --git a/include/linux/pci.h b/include/linux/pci.h
->>>> index b32126d26997..a21bfd6e3f89 100644
->>>> --- a/include/linux/pci.h
->>>> +++ b/include/linux/pci.h
->>>> @@ -387,6 +387,7 @@ struct pci_dev {
->>>>     unsigned int    ltr_path:1;     /* Latency Tolerance Reporting
->>>>                                        supported from root to here */
->>>>     u16             l1ss;           /* L1SS Capability pointer */
->>>> +   u16             saved_aspm_ctl; /* ASPM Control saved at suspend time */
->>>>  #endif
->>>>     unsigned int    eetlp_prefix_path:1;    /* End-to-End TLP Prefix */
->>>>
->>>>
