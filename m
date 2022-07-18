@@ -2,325 +2,261 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94DE5C43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 12:22:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93AD1C43334
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 12:25:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234210AbiGRMWS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jul 2022 08:22:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43594 "EHLO
+        id S233797AbiGRMZP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 08:25:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233600AbiGRMWR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 08:22:17 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 644A224F3F
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 05:22:15 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id u13so19002254lfn.5
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 05:22:15 -0700 (PDT)
+        with ESMTP id S233407AbiGRMZO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 08:25:14 -0400
+Received: from esa5.hgst.iphmx.com (esa5.hgst.iphmx.com [216.71.153.144])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43CEE222
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 05:25:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1658147111; x=1689683111;
+  h=from:to:subject:date:message-id:references:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=p37MpsRfojYhHDKi0MUowrdJ7jjAodxgbCtep32Ijds=;
+  b=Kodt4McHbyA+uay52gzGXVx5Z33S2CrQRt3wnIDJg+CbQ6hU/GbXK9Er
+   nijiHhg5K7opdqBiHIe5ONxgQ75OVvKR2WU6Difwq2fVGiM2B0CsmBtVh
+   RCy1rF305/cVGPfXQRgU6dFUwLthrjhXOTOZq3m9prRb8le1bvSYYty++
+   9IgUKPFsR36xtcJyEtLWFzmsiLS2oU6b86CkZjX/z4u5BqKVu3p6RYUA9
+   tnXTgWHGUKrwkC27w8gaiBwERKkEQ0+/QM+7BqRKcapvWsA4VCMsQwUFo
+   vB/O/xXkTQL+KNyh1nlG+vCVDo+3/be12Os99AsCNh5z+KvPTbuh6EC/j
+   w==;
+X-IronPort-AV: E=Sophos;i="5.92,281,1650902400"; 
+   d="scan'208";a="206043933"
+Received: from mail-dm3nam02lp2041.outbound.protection.outlook.com (HELO NAM02-DM3-obe.outbound.protection.outlook.com) ([104.47.56.41])
+  by ob1.hgst.iphmx.com with ESMTP; 18 Jul 2022 20:24:47 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Pzje+CV7APo5bPIr+iJ6FmLxScbEG4CJCa2k+gkR/IIGzUJSsBRt6TQgsbydDuWnl0SW9YqCc8tAPnV3DZLKvybcSBYI5aG0P7SfOYn6/VCbULSL9AFx6kDAwHNEpaNfzYVrN7EsujZ5mKvpsFrX14kz5jbSkwA/xgXRkj6auTe88hI32F8GSYYGAmK73ujloGhNW2BbkKEUyp4uX8hJaJOePBqKrsAYPxs+k9UZnG3dDPG4M1RRUbK+pxFfgnjOsd2tNSPkAY4/lNQk1cTG48G+RZGzX2pg9ywt22duI27oMSn6k6UNmUT2VWWE3lGKhVOo33NUD8ahnIsM33bP5Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=Uoo6mWDJkNCz4GmdQvTRWEix70OhqwEgvY4ojsTg44U=;
+ b=kJV/Pf6Y585LDouMzyLnwR7sy/vMDHzzlnBNlEQvZdyIThfROkuP6LGoTu+fjJMhea4ggvDsDyNJeYsAdUz3EgWYlBiYSjpqSTFI1dYDt6GeKveGPJcQt7jEX6EVaSLIOgfn4JCWdLZXo2taMC5vG8Fz712xHnFP+N/hwXGiAY/BR0PEjEGZ10p8i2yuIcrGBjthaV7XHwT3CtfKmfT7cDglufzLdoCEkIAc4JT/BMRwX5yE/vjrpYHNG3jjewmbHiDTTO3uur0owDM6gkfSE06rtSbcw82McW+qGd1wc6FrpgoexkIpJ5FKqZ9J8Hjpik9kCQIQSv8jbvyTfaFJ/w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=tDQWVnebHfg0c4wrC26BhJlTXOIzpXwxLZ6MmaHHQaQ=;
-        b=ZfXlyZECFhaTE1MFyFsP82gV8sZfyLMkWniwhgsrLrkyrYdDBuxPhlvU0v9QLBs0Xb
-         TALJiaM0I8pTJUChg9+daQ/h6ZWuIoZr/NdiOTCSHi3JWxcDU+bCi6cTsRK5UUaYmCyy
-         YlldGSpT9y6zl9eQtnFh4ndEPqjjgnHvyWBLeXBA70DzmL23iBzr3z+2V8PwrFjub0ke
-         54CACWyjti0RY8o8FVNw3sUnM9oe+AtwgwuzyS8LMpAnBzkshDyOJA56lQ1SkqE574MX
-         BTyiZxLIx+PmbuAlC2BWxYuIlE5Rv7raFLmx95+2hR+pGwR306UNmC/u6PPRHtGGA6Q5
-         nNIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=tDQWVnebHfg0c4wrC26BhJlTXOIzpXwxLZ6MmaHHQaQ=;
-        b=FSd8tyAOvXOVt767I3hvrD/wwTheKW3UbbmivrNxP16MwOSY2zpfr4syMNM9HFqnLQ
-         A+VwX5xzxISx4HPCHRo8MiTs3oaclaZqRY4ONsYOeDCt0L/NWLYAs5QsAnCTMFVB5o01
-         8ZGmCu8Vby0O/U5/4268K4drCzT/Gk85zMgURR/uB2xCaAtnb42p6aRvLrt785D2OSjH
-         6SCsBHL+vtd+zF7hxIR5bXOJ++jQ6pfrJOoacn8yX15YY/mGSFbys5HsVbj6ys7vhRe4
-         54yUcv6e8bcWezSr5zzyIpz3VrREA7zvKUl6hDyo8Ht6td4cwpaVXt9axflWjwZ676pA
-         tyzw==
-X-Gm-Message-State: AJIora86Z1mcyP8F5PclijSTgVhMf9Zbmeu7jP90sNc1vSdRXQJG0bqI
-        5V2vBUeG0xpoAQeGBjpNdXt8R70Hd8VM32D6cUUQqg==
-X-Google-Smtp-Source: AGRyM1uN/QdzliJ/x2BXEyudDZRn4ZiuQav9WWV3CkFBV87cU3ElLClfj9ORvYC9gRYUyhBkBRXrZMs4Ll/xu45k/8Q=
-X-Received: by 2002:a05:6512:aca:b0:48a:1a70:d0d8 with SMTP id
- n10-20020a0565120aca00b0048a1a70d0d8mr11268659lfu.167.1658146933633; Mon, 18
- Jul 2022 05:22:13 -0700 (PDT)
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=Uoo6mWDJkNCz4GmdQvTRWEix70OhqwEgvY4ojsTg44U=;
+ b=HgXMVRXkZ7V0duMy7xn1DBzk+5otAtW5TqNIScsZeSYg8CJ0dTNOfZrQ+UcWSJcXQe8CKoz2iYNJZcv6IbzdBSDfwkiWXBGDzcE7o7x46wcIIVNx6Sp34gzJwaFF3GjknhNeUb6JhyfK/iqsCG/zHMiI/Bay591fXheL3pih/+U=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ BY5PR04MB6421.namprd04.prod.outlook.com (2603:10b6:a03:1e7::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5438.14; Mon, 18 Jul
+ 2022 12:24:46 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5d26:82d8:6c89:9e31]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::5d26:82d8:6c89:9e31%9]) with mapi id 15.20.5438.023; Mon, 18 Jul 2022
+ 12:24:46 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     Christian Loehle <CLoehle@hyperstone.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH] mmc-utils: Add softreset command for issuing CMD0
+Thread-Topic: [PATCH] mmc-utils: Add softreset command for issuing CMD0
+Thread-Index: AdiaoDZBaBhbwaxFRXm22iF8+GujggAAGung
+Date:   Mon, 18 Jul 2022 12:24:46 +0000
+Message-ID: <DM6PR04MB6575A42E7EFD93C235BD5AA7FC8C9@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <fee2ce51a200442f90bea0668466a2b1@hyperstone.com>
+In-Reply-To: <fee2ce51a200442f90bea0668466a2b1@hyperstone.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-office365-filtering-correlation-id: e795bdc5-cf2d-48ec-8c9d-08da68b88055
+x-ms-traffictypediagnostic: BY5PR04MB6421:EE_
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: CGwLDCVDNg042CjAkIYA50/qcHsZ9kCMhhh/Lc8OFuw0H9OwPaxV/I9p7KrXu8+wBcClhqJDVoIsRHVd3bmh4UulZWXdV564t32uH+vYB9vIBWY8zwXBuEqjjv7v30HG/hgVtCif2RZbXTKV1p52QYp4Mcp9l7FnIPBrepBKOk5DKxeZw8cDpNDuZ9XCW30P2dF30DQsfY/gnj/LAWNHMtvzqU2dU2vytENW5Xn0ivs5+lXbCzs0oXhvR7Z3mZbdMNIld2kUPuBrS+S7i8JG44w/uvDqDyzkfoPw4ZAVvjmGeZh/9d18h6BYaSshX/46Tm3yHAQR3wg8Zdk/29WCgjY7upxpFr2XCumovlKTpQJj5UVIDGESnFLJgfVbx6xOrtTkycsHZ0C40s5Igd7iPYInkU3Jc4+VovYzi+i7uKMVV9tgE2LD8GPJG0JtinGrsDDRNqpA+riR8dJtvh1fhXAMWVG+1p844gHcqwwuzwBgTLYl5mPz/VYpW/6PXEO2dANL1B5ENUSk/TXy2avbEAT+6EystN5XH712HEnG5/ZJ0EKKRv0NVDv2JwV/4zF1cogGUjEJgOAjZUU2NoyAHUE5PsyttT1rycMzpOdNxuWVFC7vkmiGk3u8aJivWl4d66GWgg9FEo101Ysvbl9ayhC/DYCIgVd0TkWG16DXC+FaIVdOxDfmbltzsK1WJtxwl8Kd5l37/U0PPU5JBt4XvEj0wECoQ9aNHzSjG7JZm+rY0w8bw4B8JjAcUQw1VAKC9nG8kuXrAbieQydi+mClgdP1uknEs6xNN9OR9q9Fcubl/UzTNtvae5GvcoEevRY4
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(39860400002)(396003)(376002)(346002)(366004)(136003)(33656002)(86362001)(8936002)(52536014)(38100700002)(8676002)(55016003)(66556008)(66476007)(38070700005)(66446008)(64756008)(66946007)(76116006)(6506007)(110136005)(82960400001)(7696005)(316002)(26005)(83380400001)(41300700001)(9686003)(186003)(478600001)(5660300002)(122000001)(71200400001)(2906002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?dnq6SR7OFtxCJRO5mPzgUkJe5Tc0/Ls48HgMpRMME31Oeff+Knyt8+oyiDc8?=
+ =?us-ascii?Q?TQJZa6VP6cxJfcS+nFGKm5MEbSrTrN1TAx5CYW09N7pxTvH/Q8G2s1KZ8h/x?=
+ =?us-ascii?Q?H4KuNnzUqy0c7VneSllmjPlZTePpH93EQGM+mzrr0Bu3zD12RCqwtXPwT5JY?=
+ =?us-ascii?Q?950miYCgqQHjt+5i10Qmy9wzSiwlCdxM9gRWkGnCF3CJ+RT/0U1qz1yy37wI?=
+ =?us-ascii?Q?ZAPlrGG3ZtUreEJlgEEgGrYhkTX3IzPTZwI7AlKHuVRuSchoFp03Eh+6b+c8?=
+ =?us-ascii?Q?XncjRe4nQARaGlqTUs4+mx6Qy5Z5mPDoiwmarL+ljZDfrxn7BvMxFU6BRyP4?=
+ =?us-ascii?Q?xfNmd+iPryhz3/NIP/TsoPi3nTzEVN8IvAJNc3A8RzOvhPvobi8oA77WzwxM?=
+ =?us-ascii?Q?MvmuChpIO0BOJkWZvvzVD5IE86y4QMzT6zshSMIDrWX32IuwRkTcm5l6DRDF?=
+ =?us-ascii?Q?ZxoMLm4IcjtDbY8Rdta0t8ATuvRSwESFmnDl3Pu44WdXviaXOCDM8Yfyj6Hn?=
+ =?us-ascii?Q?WQPonQnWOnOzmpL1TlMhGs//JgOcWxuHSk4nRyeeOtBjM0OMpQergutg84Oo?=
+ =?us-ascii?Q?K8BcghVpWhqVeiYckAlIyrHfN7CBuDFpNKd1syZuDqO8JVQtKTHHFEYugYYA?=
+ =?us-ascii?Q?BdMRJtV8tRcsaD8iSDvchjon9X/UL5nJFcJIkrSErtcfC+0m5DRkDFJ6M+SU?=
+ =?us-ascii?Q?gJQ1azs/ucPj7WSBMQq87dSez5dQtNdxi6LEogEKbzNnBhtXCSqeOESGztYM?=
+ =?us-ascii?Q?x2B2zC8wytOdqyNjw9M9kstC9rrcm7LNsOkXoZm8Q2ulbtgjmneGpD+yKkvr?=
+ =?us-ascii?Q?TcdJp1SMbnLMQV+ieABu5AdeMnjTsM13QIsdd7TreB1m6NSMXKCydhTBWy6i?=
+ =?us-ascii?Q?O4RXJtLDALtdxnQqYcT6oQohzqwfCE1X3wq2CnqSUM3AzOnyuNsuQl4lzFyu?=
+ =?us-ascii?Q?bV/EfB9LbO899nIMKQ7yRTzDYxt7hFaJHV4ZeHk3Hjnu1CYcI/g+LZT8cNe8?=
+ =?us-ascii?Q?OBBTT4bcy9yN8IADhQmut6Ef2SVFhdfErzO/o762wACbzq7RZx8KesBltJcU?=
+ =?us-ascii?Q?e+Lj52vTcMz0fTd2KovEr+oQp779zFlpkShCPo1wWqQRi7ZmYmCU958Fl4m8?=
+ =?us-ascii?Q?AS5V1HwGxQbS+EPFkgsneMtk8zLdKjf0sq9Hqr5+cqy55mSuZ4G7K7RQVb1F?=
+ =?us-ascii?Q?tH17XRTSzlwzXfXamz3kht2PmoWhUdEtf9s9U3uxYUm9X0e1e0iS5O6GuBkj?=
+ =?us-ascii?Q?p3K2eM6/40SSVBuBTszcHJzUn6ACkC34TyEgYadjQLSAUQFNNsCCv7JGJHxu?=
+ =?us-ascii?Q?LoJH0m53kkrVJR5+0CmZmL/3tZQWBa29Bv62oOy8H13Pb8cQxBllocQkJi+n?=
+ =?us-ascii?Q?JZPFHdp28wgA+c/6AXAAzgVbXilbq+UZMoWHoLzDC0x3odj1XBwbzzOxHg67?=
+ =?us-ascii?Q?HhP8zVrNDzNUaCagt6GpCMaleze5LaPsmRNUKdwGtNFoVKg9ak/+j7m4K0cC?=
+ =?us-ascii?Q?/6r82Swirt28GGZN9sABb+RTLwgtsVhxcUl1SzMnxhkL9pBZfx6rTAQBr0BJ?=
+ =?us-ascii?Q?PKOOo3evo6x3vN1UjC/S8sN14umHPn8AenCNjR4o?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <20220623090445.1401-1-axe.yang@mediatek.com> <20220623090445.1401-4-axe.yang@mediatek.com>
-In-Reply-To: <20220623090445.1401-4-axe.yang@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 18 Jul 2022 14:21:37 +0200
-Message-ID: <CAPDyKFr0gy1sNb=U3j1ErSZm+jcAcvg_jwNmodEs7ip4_LjNZg@mail.gmail.com>
-Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
-To:     Axe Yang <axe.yang@mediatek.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        Yong Mao <yong.mao@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: e795bdc5-cf2d-48ec-8c9d-08da68b88055
+X-MS-Exchange-CrossTenant-originalarrivaltime: 18 Jul 2022 12:24:46.2083
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: jIsfUGnzaNgpg4eGBOVUAlot5YmfcMEXGGnhV9Of19mWAKfCU8qdJJpG35qNYOfwBrDkfcgtH0lsNcgoMPk++A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR04MB6421
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 23 Jun 2022 at 11:05, Axe Yang <axe.yang@mediatek.com> wrote:
->
-> Add support for eint IRQ when MSDC is used as an SDIO host. This
-> feature requires SDIO device support async IRQ function. With this
-> feature, SDIO host can be awakened by SDIO card in suspend state,
-> without additional pin.
->
-> MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> resume, switch GPIO function back to DAT1 mode then turn on clock.
->
-> Some device tree property should be added or modified in MSDC node
-> to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-> this feature depends on asynchronous interrupts, "wakeup-source",
-> "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-> the interrupts list should be extended(the interrupt named with
-> sdio_wakeup):
->         &mmcX {
->                 ...
->                 interrupt-names = "msdc", "sdio_wakeup";
->                 interrupts-extended = <...>,
->                                       <&pio xxx IRQ_TYPE_LEVEL_LOW>;
->                 ...
->                 pinctrl-names = "default", "state_uhs", "state_eint";
->                 ...
->                 pinctrl-2 = <&mmc2_pins_eint>;
->                 ...
->                 cap-sdio-irq;
->                 keep-power-in-suspend;
->                 wakeup-source;
->                 ...
->         };
->
-> Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+Hi,
 
-My apologies for the delay in reviewing this.
+>=20
+> CMD0 may be used to see if the hardware can handle a UHS card
+> that completed the voltage switch. If a UHS card has problems
+> coming back up after CMD0 your hardware may not support a hard
+> reset properly.
+I think it's a useful addition, not just for that reason.
+Specifically to test hw-reset support, I think you should use the GO_PRE_ID=
+LE_STATE option.
 
+>=20
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 > ---
->  drivers/mmc/host/mtk-sd.c | 84 ++++++++++++++++++++++++++++++++++++---
->  1 file changed, 78 insertions(+), 6 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 195dc897188b..f907b96cfd87 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1,6 +1,6 @@
->  // SPDX-License-Identifier: GPL-2.0-only
->  /*
-> - * Copyright (c) 2014-2015 MediaTek Inc.
-> + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
->   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
->   */
->
-> @@ -20,6 +20,7 @@
->  #include <linux/platform_device.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/pm_wakeirq.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/slab.h>
->  #include <linux/spinlock.h>
-> @@ -440,8 +441,10 @@ struct msdc_host {
->         struct pinctrl *pinctrl;
->         struct pinctrl_state *pins_default;
->         struct pinctrl_state *pins_uhs;
-> +       struct pinctrl_state *pins_eint;
->         struct delayed_work req_timeout;
->         int irq;                /* host interrupt */
-> +       int eint_irq;           /* interrupt from sdio device for waking up system */
->         struct reset_control *reset;
->
->         struct clk *src_clk;    /* msdc source clock */
-> @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct msdc_host *host, int enb)
->
->  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
->  {
-> -       unsigned long flags;
->         struct msdc_host *host = mmc_priv(mmc);
-> +       unsigned long flags;
-> +       int ret;
->
->         spin_lock_irqsave(&host->lock, flags);
->         __msdc_enable_sdio_irq(host, enb);
->         spin_unlock_irqrestore(&host->lock, flags);
->
-> -       if (enb)
-> -               pm_runtime_get_noresume(host->dev);
-> -       else
-> -               pm_runtime_put_noidle(host->dev);
-> +       if (mmc_card_enable_async_irq(mmc->card) && host->pins_eint) {
-> +               if (enb) {
-> +                       /*
-> +                        * In dev_pm_set_dedicated_wake_irq_reverse(), eint pin will be set to
-> +                        * GPIO mode. We need to restore it to SDIO DAT1 mode after that.
-> +                        * Since the current pinstate is pins_uhs, to ensure pinctrl select take
-> +                        * affect successfully, we change the pinstate to pins_eint firstly.
-> +                        */
-> +                       pinctrl_select_state(host->pinctrl, host->pins_eint);
-
-I am sorry, but I don't understand what goes on here. Why do you need
-to change the pinctrl setting to "pins_eint" here?
-
-The bellow call to dev_pm_set_dedicated_wake_irq_reverse() doesn't
-change the pinctrl setting as the comment suggests above.
-
-dev_pm_set_dedicated_wake_irq_reverse() will register the wakeirq, but
-more importantly, it should also leave the wakeirq disabled, right?
-
-> +                       ret = dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
-> +
-> +                       if (ret) {
-> +                               dev_err(host->dev, "Failed to register SDIO wakeup irq!\n");
-> +                               host->pins_eint = NULL;
-> +                               pm_runtime_get_noresume(host->dev);
-> +                       } else {
-> +                               dev_dbg(host->dev, "SDIO eint irq: %d!\n", host->eint_irq);
-> +                       }
-> +
-> +                       pinctrl_select_state(host->pinctrl, host->pins_uhs);
-
-According to my comment above, I also don't understand why you need
-this. Why can't you just leave the pinctrl in the "pins_uhs" state?
-
-> +               } else {
-> +                       dev_pm_clear_wake_irq(host->dev);
-> +               }
-> +       } else {
-> +               if (enb) {
-> +                       /* Ensure host->pins_eint is NULL */
-> +                       host->pins_eint = NULL;
-> +                       pm_runtime_get_noresume(host->dev);
-> +               } else {
-> +                       pm_runtime_put_noidle(host->dev);
-> +               }
-> +       }
+>  mmc.c      |  5 +++++
+>  mmc.h      |  3 +++
+>  mmc_cmds.c | 30 ++++++++++++++++++++++++++++++
+>  mmc_cmds.h |  1 +
+>  4 files changed, 39 insertions(+)
+>=20
+> diff --git a/mmc.c b/mmc.c
+> index 6c56387..ba2c883 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -245,6 +245,11 @@ static struct Command commands[] =3D {
+>                 "be 1.",
+>         NULL
+>         },
+> +       { do_soft_reset, -1,
+> +         "softreset", "<device>\n"
+> +         "Issues a CMD0 softreset, e.g. for testing if hardware reset fo=
+r UHS
+> works\n\n",
+> +         NULL
+> +       },
+>         { 0, 0, 0, 0 }
+>  };
+>=20
+> diff --git a/mmc.h b/mmc.h
+> index daff62c..9796d2e 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -21,6 +21,7 @@
+>  #include <linux/mmc/ioctl.h>
+>=20
+>  /* From kernel linux/mmc/mmc.h */
+> +#define MMC_GO_IDLE_STATE         0   /* bc                          */
+>  #define MMC_SWITCH             6       /* ac   [31:0] See below        R=
+1b */
+>  #define MMC_SEND_EXT_CSD       8       /* adtc                         R=
+1  */
+>  #define MMC_SEND_STATUS                13      /* ac   [31:16] RCA      =
+  R1  */
+> @@ -226,6 +227,7 @@
+>=20
+>=20
+>  /* From kernel linux/mmc/core.h */
+> +#define MMC_RSP_NONE   0                       /* no response */
+>  #define MMC_RSP_PRESENT        (1 << 0)
+>  #define MMC_RSP_136    (1 << 1)                /* 136 bit response */
+>  #define MMC_RSP_CRC    (1 << 2)                /* expect valid crc */
+> @@ -234,6 +236,7 @@
+>=20
+>  #define MMC_CMD_AC     (0 << 5)
+>  #define MMC_CMD_ADTC   (1 << 5)
+> +#define MMC_CMD_BC     (2 << 5)
+>=20
+>  #define MMC_RSP_SPI_S1 (1 << 7)                /* one status byte */
+>  #define MMC_RSP_SPI_BUSY (1 << 10)             /* card may send busy */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 12b7802..c027cfa 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -3039,3 +3039,33 @@ out:
+>         close(dev_fd);
+>         return ret;
 >  }
->
->  static irqreturn_t msdc_cmdq_irq(struct msdc_host *host, u32 intsts)
-> @@ -2631,6 +2663,20 @@ static int msdc_drv_probe(struct platform_device *pdev)
->                 goto host_free;
->         }
->
-> +       /* Support for SDIO eint irq ? */
-> +       if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps & MMC_PM_KEEP_POWER)) {
-> +               host->eint_irq = platform_get_irq_byname(pdev, "sdio_wakeup");
-> +               if (host->eint_irq > 0) {
-> +                       host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
-> +                       if (IS_ERR(host->pins_eint)) {
-> +                               dev_err(&pdev->dev, "Cannot find pinctrl eint!\n");
-> +                               host->pins_eint = NULL;
-> +                       } else {
-> +                               device_init_wakeup(&pdev->dev, true);
-> +                       }
-> +               }
+> +
+> +int do_soft_reset(int nargs, char **argv)
+> +{
+> +       int fd;
+> +       char *device;
+> +       struct mmc_ioc_cmd idata;
+> +
+> +       if (nargs !=3D 2) {
+> +               fprintf(stderr, "Usage: mmc status softreset
+> </path/to/mmcblkX>\n");
+> +               exit(1);
 > +       }
 > +
->         msdc_of_property_parse(pdev, host);
->
->         host->dev = &pdev->dev;
-> @@ -2845,6 +2891,13 @@ static int __maybe_unused msdc_runtime_suspend(struct device *dev)
->         struct msdc_host *host = mmc_priv(mmc);
->
->         msdc_save_reg(host);
+> +       device =3D argv[1];
 > +
-> +       if (host->pins_eint) {
-> +               disable_irq(host->irq);
-> +               pinctrl_select_state(host->pinctrl, host->pins_eint);
-> +               if (sdio_irq_claimed(mmc))
-> +                       __msdc_enable_sdio_irq(host, 0);
+> +       fd =3D open(device, O_RDWR);
+> +       if (fd < 0) {
+> +               perror("open");
+> +               exit(1);
 > +       }
-
-This above code isn't entirely correct. Just because you have
-"pins_eint", doesn't mean that you have a wakeirq being registered, as
-that also depends on whether there is an SDIO irq claimed.
-
-So, I think this should rather be:
-
-if (sdio_irq_claimed(mmc)) {
-    if (host->pins_eint) {
-        disable_irq(host->irq);
-        pinctrl_select_state(host->pinctrl, host->pins_eint);
-    }
-
-    __msdc_enable_sdio_irq(host, 0);
-}
-
->         msdc_gate_clock(host);
->         return 0;
->  }
-> @@ -2860,12 +2913,18 @@ static int __maybe_unused msdc_runtime_resume(struct device *dev)
->                 return ret;
->
->         msdc_restore_reg(host);
 > +
-> +       if (host->pins_eint) {
+> +       memset(&idata, 0, sizeof(idata));
+> +       idata.opcode =3D MMC_GO_IDLE_STATE;
+> +       idata.flags =3D MMC_RSP_NONE | MMC_CMD_BC;
+How about adding all 3 flavors of soft-reset: GO_IDLE_STATE, GO_PRE_IDLE_ST=
+ATE, and BOOT_INITIATION.
+There can be 3 different command, that calls the same __soft_reset helper, =
+or whatever.
+What do you think? =20
 
-Similar comment as above. You need to check sdio_irq_claimed() here too.
-
-> +               pinctrl_select_state(host->pinctrl, host->pins_uhs);
-> +               enable_irq(host->irq);
-> +       }
->         return 0;
->  }
->
->  static int __maybe_unused msdc_suspend(struct device *dev)
->  {
->         struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
->         int ret;
->
->         if (mmc->caps2 & MMC_CAP2_CQE) {
-> @@ -2874,11 +2933,24 @@ static int __maybe_unused msdc_suspend(struct device *dev)
->                         return ret;
->         }
->
-> +       /*
-> +        * Bump up runtime PM usage counter otherwise dev->power.needs_force_resume will
-> +        * not be marked as 1, pm_runtime_force_resume() will go out directly.
-> +        */
-> +       if (host->pins_eint)
-
-This works, but can be improved by checking sdio_irq_claimed() too.
-
-> +               pm_runtime_get_noresume(dev);
-> +
->         return pm_runtime_force_suspend(dev);
->  }
->
->  static int __maybe_unused msdc_resume(struct device *dev)
->  {
-> +       struct mmc_host *mmc = dev_get_drvdata(dev);
-> +       struct msdc_host *host = mmc_priv(mmc);
-> +
-> +       if (host->pins_eint)
-> +               pm_runtime_put_noidle(dev);
-
-Ditto.
+Thanks,
+Avri
 
 > +
->         return pm_runtime_force_resume(dev);
->  }
->
+> +       /* No need to check for error, it is expected */
+> +       ioctl(fd, MMC_IOC_CMD, &idata);
+> +       close(fd);
+> +
+> +       return 0;
+> +}
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index 0f7c004..c112a95 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -47,3 +47,4 @@ int do_read_cid(int argc, char **argv);
+>  int do_read_csd(int argc, char **argv);
+>  int do_erase(int nargs, char **argv);
+>  int do_general_cmd_read(int nargs, char **argv);
+> +int do_soft_reset(int nargs, char **argv);
+> --
+> 2.36.1
+>=20
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 
-Kind regards
-Uffe
