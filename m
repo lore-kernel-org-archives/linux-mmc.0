@@ -2,69 +2,79 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6163C43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 13:21:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3CA8CCA487
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 14:50:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234852AbiGRNVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jul 2022 09:21:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47444 "EHLO
+        id S234477AbiGROuw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 10:50:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234212AbiGRNV3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 09:21:29 -0400
-Received: from smtpbg.qq.com (unknown [43.155.67.158])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 234631FCF9;
-        Mon, 18 Jul 2022 06:21:24 -0700 (PDT)
-X-QQ-mid: bizesmtp66t1658150472tcpc2ud5
-Received: from localhost.localdomain ( [171.223.96.21])
-        by bizesmtp.qq.com (ESMTP) with 
-        id ; Mon, 18 Jul 2022 21:21:10 +0800 (CST)
-X-QQ-SSF: 01000000002000E0U000C00A0000020
-X-QQ-FEAT: xqT8U4SkSphsl6ONspj/KF5kVQFD0rPk/8LI/98JCoIYgNVkJtJFEW9rNfW/7
-        ohg/b+4RPLwJDO5R4Ok8UIA7ZtrGRbOpFleyKd/eJGHWv+KMbt1VxLmD84DIthT1B0fEfh6
-        hiSeDpaRkECjyc5yx+LJcGhnkHbRIwu843R4xcEnsTJ7MFs+SCaMjVB6SRyU+B75ZorYaVF
-        /lipVcKNsaHCcUjb8OuK1HWKoKP+BA+D2d7n4ENTdZchYKWTTqsJKrBZ/kKTCkuCozwYr06
-        LQ2vGPl3vC+wdtDSOvR+ucoKQHxHcy7Ocrk2BSXnNzBko6P3dH5ID8DR7cdkrCrvaCDTB3g
-        bvSTYRlDCYnMhRNgrLrkLj+akacpJmJ18VLQ2cbNov1N7c4y3hO7aEzEKSKkZwZr5FTs6E2
-        KdbaFsSvXU/Gce/dtIpaSg==
-X-QQ-GoodBg: 0
-From:   Jason Wang <wangborong@cdjrlc.com>
-To:     ulf.hansson@linaro.org
+        with ESMTP id S233949AbiGROuv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 10:50:51 -0400
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BD9414D08;
+        Mon, 18 Jul 2022 07:50:49 -0700 (PDT)
+Received: by mail-pl1-x629.google.com with SMTP id q5so9227424plr.11;
+        Mon, 18 Jul 2022 07:50:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=vWu6+Y1l1EuPBNVi8wHSs4XnZYKZiVD1hMz9Y5lMF2Q=;
+        b=n2dNzfNjhPdrLUZX5nWmRfEj0l9h//NdNtGNq5oo8OgCTbbXa9VuUTr2OdSeFzH1PS
+         8de0acKvfKfiYlgmnJeBz/etvBuCG44ocqCb4RqaRRxFu05q72Pxcd5AxLb9sFAsfAxV
+         GOhnAkM3ZzlKhYvda86OKhVGzGy9GpNF0dVIVH54dLfgpIuqM1g5BT+JPO/fX/qoMr7X
+         cVKT0aMz8B8aCQJFfCLOdkiTGJjwojpaYiYQCEO4dV8r3psD4TnvzATuJEQu1TE2ZHpp
+         WTckI+vRQAGdy4/wfIXV5CQTYGc0bFDq4dixFmD3ASzx6/GL1fD8hHtEA3355eK3Amcx
+         ZCbw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=vWu6+Y1l1EuPBNVi8wHSs4XnZYKZiVD1hMz9Y5lMF2Q=;
+        b=J1teOosMl9AVlCtGP8dc2e+8UTocg4XeMzcLrWlJbfMtRHUG0cTpIVFQLhTZlaN0YE
+         kB3Whpal4vnewSPhPLwjsA8p1zCfji+RP9xe7sU3HsmwLDt22RFvEaMkr1VMC5iVfLxy
+         hHr/zGYGVPGDvpdPfszIOk/W6see2vYoEXvWzlu8KKkccuo+oExLCCHY6rH77QFXWZY1
+         W0HjU6Yypr7P2C0HaRYstZrgorFV1IrQJNIHfYeCiFZPw1Ja0nCZmMXwvUOVStUO1WQS
+         hL6KOdYterm/tqQ0KbkYfNjPCxI6BugCFo7HIQhvz3tXl0kz/y6iVYTbD+uvL76aBdid
+         tKiQ==
+X-Gm-Message-State: AJIora/8asEneeP813if3KhDWrxwHPQqyzYtYtBkYDSXYNCgN422UrZT
+        rAamq8VRSLIN2z0IQm17vzo=
+X-Google-Smtp-Source: AGRyM1u8uSbXGcl4RxfyVEMJDiMbVqiw+axbZ5aPKidOI2WUuxJG/krmRO0RQGnwGAYXoeV9sS6onQ==
+X-Received: by 2002:a17:90a:fb8d:b0:1ef:8d22:35e with SMTP id cp13-20020a17090afb8d00b001ef8d22035emr37829602pjb.229.1658155848837;
+        Mon, 18 Jul 2022 07:50:48 -0700 (PDT)
+Received: from ?IPV6:2600:8802:b00:4a48:c1c9:5ca7:2a60:8cc5? ([2600:8802:b00:4a48:c1c9:5ca7:2a60:8cc5])
+        by smtp.gmail.com with ESMTPSA id j11-20020a170902690b00b0016bf10203d9sm9585728plk.144.2022.07.18.07.50.47
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 Jul 2022 07:50:48 -0700 (PDT)
+Message-ID: <e09b7a80-7966-4c71-3139-d6b234afc25d@gmail.com>
+Date:   Mon, 18 Jul 2022 07:50:47 -0700
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.0.2
+Subject: Re: [PATCH] mmc: sdhci-bcm-kona: Fix comment typo
+Content-Language: en-US
+To:     Jason Wang <wangborong@cdjrlc.com>, ulf.hansson@linaro.org
 Cc:     adrian.hunter@intel.com, f.fainelli@gmail.com, rjui@broadcom.com,
         sbranden@broadcom.com, bcm-kernel-feedback-list@broadcom.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Jason Wang <wangborong@cdjrlc.com>
-Subject: [PATCH] mmc: sdhci-bcm-kona: Fix comment typo
-Date:   Fri, 15 Jul 2022 13:19:12 +0800
-Message-Id: <20220715051912.31180-1-wangborong@cdjrlc.com>
-X-Mailer: git-send-email 2.35.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:cdjrlc.com:qybglogicsvr:qybglogicsvr6
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20220715051912.31180-1-wangborong@cdjrlc.com>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+In-Reply-To: <20220715051912.31180-1-wangborong@cdjrlc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The double `that' is duplicated in line 171, remove one.
 
-Signed-off-by: Jason Wang <wangborong@cdjrlc.com>
----
- drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-index 61a12f2f7f03..6a93a54fe067 100644
---- a/drivers/mmc/host/sdhci-bcm-kona.c
-+++ b/drivers/mmc/host/sdhci-bcm-kona.c
-@@ -168,7 +168,7 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
- 	/*
- 	 *  JEDEC and SD spec specify supplying 74 continuous clocks to
- 	 * device after power up. With minimum bus (100KHz) that
--	 * that translates to 740us
-+	 * translates to 740us
- 	 */
- 	if (power_mode != MMC_POWER_OFF)
- 		udelay(740);
+On 7/14/2022 10:19 PM, Jason Wang wrote:
+> The double `that' is duplicated in line 171, remove one.
+> 
+> Signed-off-by: Jason Wang <wangborong@cdjrlc.com>
+
+Acked-by: Florian Fainelli <f.fainelli@gmail.com>
 -- 
-2.35.1
-
+Florian
