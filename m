@@ -2,127 +2,178 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B895AC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 00:45:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 762DCC43334
+	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 11:22:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229621AbiGRApR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 17 Jul 2022 20:45:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44158 "EHLO
+        id S233048AbiGRLWW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 07:22:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47468 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229535AbiGRApR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 17 Jul 2022 20:45:17 -0400
-Received: from wout4-smtp.messagingengine.com (wout4-smtp.messagingengine.com [64.147.123.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9248813EB0;
-        Sun, 17 Jul 2022 17:45:14 -0700 (PDT)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.west.internal (Postfix) with ESMTP id 1429F320039A;
-        Sun, 17 Jul 2022 20:45:10 -0400 (EDT)
-Received: from imap50 ([10.202.2.100])
-  by compute3.internal (MEProxy); Sun, 17 Jul 2022 20:45:12 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1658105110; x=1658191510; bh=9eCT8yjok0
-        PcSR4T5HvuxY2Sn6RNMobB+nq9wlqocDU=; b=Txgoqm8L3eOo97F6L2M1hCzzWs
-        eZ1ANe5/eX/M3qB5ZKrWRI4vAfEaOBH54clcBHo9bsRLf+ogW5P3Ni0pLEbuWUfB
-        aaMPf6Nb9tEjDJkvlV0r/B5BGg+w3klBfR+HgltvUZx8+y7/c4gLvnQ5X3wtFQGv
-        1vv6RYDzhWqic+hY/hovn0opbtb/dj3MEzRgtQxzWTlUMJT2czTAfmQSG1hz7e39
-        QwEREcL8+VGzle+hjZJ6tH4Dmq45iqZdaR1W9+XrX0NwZf62FI5OfdiDiEPFVxiq
-        16zax4Moze54MA/lx9l6yJa+ub1r4LAbvMliFPrEGPC+3jQISgZ+THBIp3uw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; t=1658105110; x=1658191510; bh=9eCT8yjok0PcSR4T5HvuxY2Sn6RN
-        MobB+nq9wlqocDU=; b=18tngN32W7+K7CjfUBw8Ftb5OhGZaov/D6q/jVY1lDqI
-        lvOfiOAtDBBreSofiFmQ71gjlWcuIXK5H+fBAk4UQXFJwvGXyt6LxsZ3LAkO7mPi
-        mftuFQK02EhH3pNPSaiNMIPjumnj5SO6L1oI5XW6a6wWAJPmRcfNTxnjUsm2EHQn
-        6hlMXQJT8xskwpajkQ0bLjTgmaMRRrV7t26YVPqKz5S/XntreGCGjUn2S+N0CYp9
-        hkQG11QZtKv+yDHYS8QvkkAg3Z9Hm5SpVmOZ+wN+xsqJfryuZ/rj7qe+iCyhtmXz
-        CZCZNkYQGbHa08hEBWclVHKfz2mY2gh8OpEqvij9vA==
-X-ME-Sender: <xms:Fq3UYvQ1yZLBY26aY3nfTTYnRxIPYyFXwz0EjSDD4LZ8eoxPWggs2Q>
-    <xme:Fq3UYgxNC-OugEvu8FYfILLTXZwUzEdwWWbThul_0lmQQtQT7jV-84lQSCbNj_FSq
-    ZOAOOgm4VoIPMXxVw>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrudekjedggedtucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehn
-    ughrvgifucflvghffhgvrhihfdcuoegrnhgurhgvfiesrghjrdhiugdrrghuqeenucggtf
-    frrghtthgvrhhnpedvvedvieeuteehiefftdfhjeevvdetffevgffhhfeuudffhedvkeef
-    veeiueejleenucffohhmrghinhepkhgvrhhnvghlrdhorhhgnecuvehluhhsthgvrhfuih
-    iivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghnughrvgifsegrjhdrihgurdgr
-    uh
-X-ME-Proxy: <xmx:Fq3UYk3ueDkE8gWGk2gk21Bq1KCHDJERCrXeRatY4ULnUI88ziGRRA>
-    <xmx:Fq3UYvAQdtizsOSm6j5-tjJVvqtctzAO8e5CGZA0gR7VqLfDqEk6dA>
-    <xmx:Fq3UYoiaADdvIc4N8pDf_Z8Z0S3BX5AsBxvAodQAkEX4HmHN6fWBcA>
-    <xmx:Fq3UYtbeYo5nNMmCMWUBTsv0pnBXPWFB01VCpxzTT2NXElz8b4ImqQ>
-Feedback-ID: idfb84289:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 26B5A170007E; Sun, 17 Jul 2022 20:45:10 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-755-g3e1da8b93f-fm-20220708.002-g3e1da8b9
-Mime-Version: 1.0
-Message-Id: <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
-In-Reply-To: <20220715040354.2629856-1-davidgow@google.com>
-References: <20220715040354.2629856-1-davidgow@google.com>
-Date:   Mon, 18 Jul 2022 10:14:48 +0930
-From:   "Andrew Jeffery" <andrew@aj.id.au>
-To:     "David Gow" <davidgow@google.com>,
-        "Brendan Higgins" <brendanhiggins@google.com>,
-        "Daniel Latypov" <dlatypov@google.com>,
-        "Shuah Khan" <skhan@linuxfoundation.org>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Arnd Bergmann" <arnd@arndb.de>
-Cc:     linux-aspeed@lists.ozlabs.org,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
-        "kbuild test robot" <lkp@intel.com>,
-        linux-kselftest@vger.kernel.org,
-        "Sadiya Kazi" <sadiyakazi@google.com>, kunit-dev@googlegroups.com
-Subject: Re: [PATCH] mmc: sdhci-of-aspeed: test: Fix dependencies when KUNIT=m
-Content-Type: text/plain
+        with ESMTP id S230401AbiGRLWW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 07:22:22 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D533620BF2
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 04:22:20 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id u13so18747474lfn.5
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 04:22:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=oeTI+RwmRru9XP0Q22sqm7TVdWVKa/UTndLb9ZOqCbQ=;
+        b=xlDRYghb9P+Qxawaz9xThoiC4sA2mPLY5XTfNF8GfSoZmIZemMpkU8JI3vDBzc9Y8d
+         REAZnmccPo4fY0b3ioPEU0d1f59+oUMTGzNGOPdNEgEwKu6bKrEfEA8Xcabqp5b4Ee2x
+         M5vAF59Zy3Rtnts+n131q1dWW9scnALyc5Q2UWFZpbHoQ3BZOjHWgA/21LEz+aa44CGb
+         w8McOryYs4U0E77spfMvoIBeUS91n5qL+2ZW2mgH1EDFHS6z29sSolXjRD6KS9N/3BQB
+         UIigKmKm2B3MrMc6E0AZij5JOu8gjgrosVNoYwM2jkeN0J0dXNbSWGkmp656hiZ+1aCd
+         9tCg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=oeTI+RwmRru9XP0Q22sqm7TVdWVKa/UTndLb9ZOqCbQ=;
+        b=lF3BFBUT3bLmeY7Ofqim+TV/aGh9Qf8EKDQVRFfLG44oQbUQY9qHuyZ29rLhb8rmUR
+         EfFlO713Cfdx1NoTWNs3pNrvSZCPwK/Gj10uSTYFEKljs+g3+tUanPKMapzYPbfdzU+M
+         RZY0LumdwROVps64Y7E+hooPMOhCoUKHbX/M3Q75Z817kWtNhKO4YUtqoi5AGx/DtkNe
+         tqiupO3qza519D5Hz7JdvqnpYqlx95Mabo+7qoFi0SSQsI8KiqTh3PYktTLOaAdHrj4H
+         QYyaXHBASwaNY75o6oTr+t8HNm+SCPNgYB8x5ZnP8C4J+zu1TiNXNNgZ5eR73l6nF0Lc
+         TGPw==
+X-Gm-Message-State: AJIora+Ah5OQinPnOSG31A6jax+lKwN8UwwwPdBM3w/wPBQgf/g+S9Nt
+        zL6Dtpw1WxCKi7tLPubUrG7kIx/UoNdorh5FBL7fbojrQZzNxw==
+X-Google-Smtp-Source: AGRyM1tKUiN/mJeAnlFdGC/zXXloAJFVDQmSA9hcs9twK/hO+7dWS7jzvVDEBW+s/RRzIqzcFmySCkPHhilXT00l2fM=
+X-Received: by 2002:a05:6512:15a8:b0:489:ed48:24 with SMTP id
+ bp40-20020a05651215a800b00489ed480024mr14017147lfb.184.1658143339164; Mon, 18
+ Jul 2022 04:22:19 -0700 (PDT)
+MIME-Version: 1.0
+References: <1d1b023572934d71ae75bf46c5439ed0@hyperstone.com>
+In-Reply-To: <1d1b023572934d71ae75bf46c5439ed0@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 18 Jul 2022 13:21:43 +0200
+Message-ID: <CAPDyKFq2QEqdP-9PQobHbEtj1e+1DS=j5MOTtVQ+577z85gJ4w@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: Add softreset command for issuing CMD0
+To:     Christian Loehle <CLoehle@hyperstone.com>
+Cc:     Linux MMC List <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, 15 Jul 2022 at 18:55, Christian Loehle <CLoehle@hyperstone.com> wrote:
+>
+> CMD0 may be used to see if the hardware can handle a UHS card
+> that completed the voltage switch. If a UHS card has problems
+> coming back up after CMD0 your hardware may not support a hard
+> reset properly.
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
+Please resend and add Avri Altman <avri.altman@wdc.com> on the to line.
 
-On Fri, 15 Jul 2022, at 13:33, David Gow wrote:
-> While the sdhci-of-aspeed KUnit tests do work when builtin, and do work
-> when KUnit itself is being built as a module, the two together break.
->
-> This is because the KUnit tests (understandably) depend on KUnit, so a
-> built-in test cannot build if KUnit is a module.
->
-> Fix this by adding a dependency on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y),
-> which only excludes this one problematic configuration.
->
-> This was reported on a nasty openrisc-randconfig run by the kernel test
-> robot, though for some reason (compiler optimisations removing the test
-> code?) I wasn't able to reproduce it locally on x86:
-> https://lore.kernel.org/linux-mm/202207140122.fzhlf60k-lkp@intel.com/T/
->
-> Fixes: 291cd54e5b05 ("mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro")
-> Reported-by: kernel test robot <lkp@intel.com>
-> Signed-off-by: David Gow <davidgow@google.com>
+Kind regards
+Uffe
+
 > ---
->  drivers/mmc/host/Kconfig | 1 +
->  1 file changed, 1 insertion(+)
+>  mmc.c      |  5 +++++
+>  mmc.h      |  3 +++
+>  mmc_cmds.c | 30 ++++++++++++++++++++++++++++++
+>  mmc_cmds.h |  1 +
+>  4 files changed, 39 insertions(+)
 >
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 10c563999d3d..e63608834411 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -171,6 +171,7 @@ config MMC_SDHCI_OF_ASPEED
->  config MMC_SDHCI_OF_ASPEED_TEST
->  	bool "Tests for the ASPEED SDHCI driver" if !KUNIT_ALL_TESTS
->  	depends on MMC_SDHCI_OF_ASPEED && KUNIT
-> +	depends on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y)
-
-Should this replace the line above? Isn't it just more constrained?
-
-Regardless, thanks for your work here, the kunit integration with the 
-ASPEED SDHCI driver bothered me a lot when I wrote it.
-
-Andrew
+> diff --git a/mmc.c b/mmc.c
+> index 6c56387..ba2c883 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -245,6 +245,11 @@ static struct Command commands[] = {
+>                 "be 1.",
+>         NULL
+>         },
+> +       { do_soft_reset, -1,
+> +         "softreset", "<device>\n"
+> +         "Issues a CMD0 softreset, e.g. for testing if hardware reset for UHS works\n\n",
+> +         NULL
+> +       },
+>         { 0, 0, 0, 0 }
+>  };
+>
+> diff --git a/mmc.h b/mmc.h
+> index daff62c..9796d2e 100644
+> --- a/mmc.h
+> +++ b/mmc.h
+> @@ -21,6 +21,7 @@
+>  #include <linux/mmc/ioctl.h>
+>
+>  /* From kernel linux/mmc/mmc.h */
+> +#define MMC_GO_IDLE_STATE         0   /* bc                          */
+>  #define MMC_SWITCH             6       /* ac   [31:0] See below        R1b */
+>  #define MMC_SEND_EXT_CSD       8       /* adtc                         R1  */
+>  #define MMC_SEND_STATUS                13      /* ac   [31:16] RCA        R1  */
+> @@ -226,6 +227,7 @@
+>
+>
+>  /* From kernel linux/mmc/core.h */
+> +#define MMC_RSP_NONE   0                       /* no response */
+>  #define MMC_RSP_PRESENT        (1 << 0)
+>  #define MMC_RSP_136    (1 << 1)                /* 136 bit response */
+>  #define MMC_RSP_CRC    (1 << 2)                /* expect valid crc */
+> @@ -234,6 +236,7 @@
+>
+>  #define MMC_CMD_AC     (0 << 5)
+>  #define MMC_CMD_ADTC   (1 << 5)
+> +#define MMC_CMD_BC     (2 << 5)
+>
+>  #define MMC_RSP_SPI_S1 (1 << 7)                /* one status byte */
+>  #define MMC_RSP_SPI_BUSY (1 << 10)             /* card may send busy */
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 12b7802..c027cfa 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -3039,3 +3039,33 @@ out:
+>         close(dev_fd);
+>         return ret;
+>  }
+> +
+> +int do_soft_reset(int nargs, char **argv)
+> +{
+> +       int fd;
+> +       char *device;
+> +       struct mmc_ioc_cmd idata;
+> +
+> +       if (nargs != 2) {
+> +               fprintf(stderr, "Usage: mmc status softreset </path/to/mmcblkX>\n");
+> +               exit(1);
+> +       }
+> +
+> +       device = argv[1];
+> +
+> +       fd = open(device, O_RDWR);
+> +       if (fd < 0) {
+> +               perror("open");
+> +               exit(1);
+> +       }
+> +
+> +       memset(&idata, 0, sizeof(idata));
+> +       idata.opcode = MMC_GO_IDLE_STATE;
+> +       idata.flags = MMC_RSP_NONE | MMC_CMD_BC;
+> +
+> +       /* No need to check for error, it is expected */
+> +       ioctl(fd, MMC_IOC_CMD, &idata);
+> +       close(fd);
+> +
+> +       return 0;
+> +}
+> diff --git a/mmc_cmds.h b/mmc_cmds.h
+> index 0f7c004..c112a95 100644
+> --- a/mmc_cmds.h
+> +++ b/mmc_cmds.h
+> @@ -47,3 +47,4 @@ int do_read_cid(int argc, char **argv);
+>  int do_read_csd(int argc, char **argv);
+>  int do_erase(int nargs, char **argv);
+>  int do_general_cmd_read(int nargs, char **argv);
+> +int do_soft_reset(int nargs, char **argv);
+> --
+> 2.36.1
+>
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+>
