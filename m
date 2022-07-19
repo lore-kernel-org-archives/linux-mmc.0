@@ -2,208 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1753BC433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jul 2022 01:41:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 785FBC43334
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jul 2022 02:25:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229602AbiGSBlv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jul 2022 21:41:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50762 "EHLO
+        id S230166AbiGSCZg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 22:25:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57168 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231986AbiGSBlv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 21:41:51 -0400
-Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0590EE38
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 18:41:49 -0700 (PDT)
-Received: by mail-wr1-x431.google.com with SMTP id a5so19477929wrx.12
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 18:41:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=HZNv/G6i1lCxGnCf0K0ZbnI+eisq9vgGb1jSClBocxg=;
-        b=PN9UkdHrPJNbqbGa5J48TtQvc0wgiRNPqaxVn1QaBqxkFmhBoNrIvlDPqgg/FOX83v
-         5f7kTz5ESyxqT2RN5Y7Pd55tp3UCTzrotBIs8WmfHyLwElciokhN3HtTxMBxRlo0AQW2
-         rVFMOHg51/JNB//2Wk710srDag0J1XfBeP4kxCMPwg4S1+3t8SPknmVoK06XV78phL77
-         Jcu/3JyZ0jpN1DISsF9FsLkg+nTAt6GXXWXg6aqI4li3/j+xD7j88/lm72aeAoxA6CNc
-         Ei/ggZWaJcmeB421GgWoXkjUr36VOwxr4L+Dcuka8JeCHeN2c1ZwPdmj8Lx5yl/gbm8P
-         D1nw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=HZNv/G6i1lCxGnCf0K0ZbnI+eisq9vgGb1jSClBocxg=;
-        b=0AdkVYChgASgu7mkKOxhswtdle/tcD6UpBDAsOv/vnlimvUd85bfUskj2MfiojcJQN
-         N8n5AQf9wp5muiHvWahYnCT4jDAseeiosdhCHXrBPjqqCRrKn+cj3kW9Uy459rJe8sQv
-         QfvlIdD8GNLWG3W8fxQD+DGc0K4t9sTOx6L+ey7SA1nM5KWwEuVKg4mYPaUMmjIM/6ga
-         RWXSKyQReZaX/D8j+YjRPup/dJVMMGjzzhmXcK3jb3UGe4B+l4qzn3X4L52Ws3kB7LQ2
-         nQvlUbJdtRlD1P8an6+ALHgv0tSBkVVfj7hrLTSBiGTa08+5syYI8/ugzc2wXkLi8Mim
-         gakA==
-X-Gm-Message-State: AJIora9t1XAizDmSGXHI8g36qE4Dnnst0+qTfiSCCpHg+jiSZSljQMw7
-        r5ic722yJRa5JIJJXdw1hClKEhtdqh6i+UKVagzV1w==
-X-Google-Smtp-Source: AGRyM1sFBg4zKz4vRUarom3Dl7jIunk18ZUIQ2JBDUoRioOTSf4z9Hog3fUA+UuM/YpxwhbZ5Y3AYJmmVcVphC2eGVM=
-X-Received: by 2002:adf:ed12:0:b0:21e:2ded:6f52 with SMTP id
- a18-20020adfed12000000b0021e2ded6f52mr1370516wro.517.1658194908202; Mon, 18
- Jul 2022 18:41:48 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220715040354.2629856-1-davidgow@google.com> <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
-In-Reply-To: <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
-From:   David Gow <davidgow@google.com>
-Date:   Tue, 19 Jul 2022 09:41:37 +0800
-Message-ID: <CABVgOSnhKMKc0_LvHVYPzL5NVnEuL51nQSm+8bZbjO=Q4seYiw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-aspeed: test: Fix dependencies when KUNIT=m
-To:     Andrew Jeffery <andrew@aj.id.au>
-Cc:     Brendan Higgins <brendanhiggins@google.com>,
-        Daniel Latypov <dlatypov@google.com>,
-        Shuah Khan <skhan@linuxfoundation.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Arnd Bergmann <arnd@arndb.de>,
+        with ESMTP id S233749AbiGSCZf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 22:25:35 -0400
+Received: from wout1-smtp.messagingengine.com (wout1-smtp.messagingengine.com [64.147.123.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03A283B96C;
+        Mon, 18 Jul 2022 19:25:32 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 5B9A63200931;
+        Mon, 18 Jul 2022 22:25:29 -0400 (EDT)
+Received: from imap47 ([10.202.2.97])
+  by compute3.internal (MEProxy); Mon, 18 Jul 2022 22:25:30 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=aj.id.au; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm2; t=1658197528; x=1658283928; bh=wHVY6i+Yaf
+        5t2+yX0N5Kt7nv5hQLK0Oovx2GIklJtSQ=; b=aTpX4sGwPceYAcol+aRJwJRpUW
+        Ws0qvx10J5oXHkpQBZfDd2szjxbRk2gggw7TMmdyEZxsx3aMMiWA3LmZqfsoqYwc
+        0D1pMO8fr4NxKWDrW8iJ0zBkkZG997AGfIqQHvIJ/gwCn6SoAC7QqjiMFEck0LsR
+        8nZxCm2jGaOkk8BX7jZtLBQN2NjBNXF7ukK8Sxwwx/xl68nocPpDYTLFyBDXyR+8
+        OkphJt3JHytQV7K5Ii1rcm4eyO4g5eyat003iLxCIl2u2T/5PJ+gDRunsBAC1Y/o
+        SKlqHVZ+KGl10INkANhcQKpO8hNdosinPTA2bpJg3rZNsoFkJcUj3gs+5NgA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1658197528; x=1658283928; bh=wHVY6i+Yaf5t2+yX0N5Kt7nv5hQL
+        K0Oovx2GIklJtSQ=; b=pS78PrPFoQbxYdgdgAJreVahHS11jVFvWdMb3BTpyocV
+        X5EccwSepuM+WJzfS3iBN65HO1W+WN6fcKN0p12qSfiAf7STxbnlBoBpN/eUXGLa
+        pil03+GUJM18xxStHOjkzhov4l/bA2mvNqojP3OfYEKa9teXyfGu2FCIGtcW59UX
+        9CNCih44OqbAiYxDeFxDZ5IrHC+Al6wun1/71Aj7xjbbOCqiN8jebNOwOe57dP8+
+        O+ial22JAj0ojjIe38t4IFkLdPF7CX1/udxpADBGcVNxk+AJUsUtlJTVKVcHehlb
+        9/JAbF0Uh5XcLUktjmXLVcpPnBXv8DeyxYlR25tIog==
+X-ME-Sender: <xms:GBbWYu8ZyEgtlAK2eauK7jhuhU6lg45oK9G8OEn-VMsP168n6923IA>
+    <xme:GBbWYuvgyTZyN1rcXXx5O1R8Zw234ebXd_yGyrfI9I20mMLD74nrruGNRyhaXQE_S
+    e4dKaKvO-A9wgI2dQ>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrudekledgheelucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehn
+    ughrvgifucflvghffhgvrhihfdcuoegrnhgurhgvfiesrghjrdhiugdrrghuqeenucggtf
+    frrghtthgvrhhnpedvvedvieeuteehiefftdfhjeevvdetffevgffhhfeuudffhedvkeef
+    veeiueejleenucffohhmrghinhepkhgvrhhnvghlrdhorhhgnecuvehluhhsthgvrhfuih
+    iivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprghnughrvgifsegrjhdrihgurdgr
+    uh
+X-ME-Proxy: <xmx:GBbWYkA-DM7EumxPoo2RxEjArKOUfIEpPjB3TzZzDepky_KiOx8uZQ>
+    <xmx:GBbWYmdtB-Mn7Ls71Sur7OJu5nFEJRqEpJs-wIoFsW_5HziqX6uwVw>
+    <xmx:GBbWYjPjq7-YP3O2dQ28a68ufaUcXYd3JFgHKrOBb1GE-g4a_2gLJQ>
+    <xmx:GBbWYkGo7aUd4jAMXTRZUB4fubtAZ7e7JimyaJdRDd_7SapwObWILQ>
+Feedback-ID: idfb84289:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 31304A6007C; Mon, 18 Jul 2022 22:25:28 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-755-g3e1da8b93f-fm-20220708.002-g3e1da8b9
+Mime-Version: 1.0
+Message-Id: <c7ae6f71-d977-49dd-b4a7-db8351b710e8@www.fastmail.com>
+In-Reply-To: <CABVgOSnhKMKc0_LvHVYPzL5NVnEuL51nQSm+8bZbjO=Q4seYiw@mail.gmail.com>
+References: <20220715040354.2629856-1-davidgow@google.com>
+ <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
+ <CABVgOSnhKMKc0_LvHVYPzL5NVnEuL51nQSm+8bZbjO=Q4seYiw@mail.gmail.com>
+Date:   Tue, 19 Jul 2022 11:55:06 +0930
+From:   "Andrew Jeffery" <andrew@aj.id.au>
+To:     "David Gow" <davidgow@google.com>
+Cc:     "Brendan Higgins" <brendanhiggins@google.com>,
+        "Daniel Latypov" <dlatypov@google.com>,
+        "Shuah Khan" <skhan@linuxfoundation.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Arnd Bergmann" <arnd@arndb.de>,
         linux-aspeed <linux-aspeed@lists.ozlabs.org>,
         linux-mmc <linux-mmc@vger.kernel.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        kbuild test robot <lkp@intel.com>,
+        "Linux Kernel Mailing List" <linux-kernel@vger.kernel.org>,
+        "kbuild test robot" <lkp@intel.com>,
         "open list:KERNEL SELFTEST FRAMEWORK" 
         <linux-kselftest@vger.kernel.org>,
-        Sadiya Kazi <sadiyakazi@google.com>,
-        KUnit Development <kunit-dev@googlegroups.com>
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
-        boundary="0000000000007d3edf05e41e969e"
+        "Sadiya Kazi" <sadiyakazi@google.com>,
+        "KUnit Development" <kunit-dev@googlegroups.com>
+Subject: Re: [PATCH] mmc: sdhci-of-aspeed: test: Fix dependencies when KUNIT=m
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---0000000000007d3edf05e41e969e
-Content-Type: text/plain; charset="UTF-8"
 
-On Mon, Jul 18, 2022 at 8:45 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+
+On Tue, 19 Jul 2022, at 11:11, David Gow wrote:
+> On Mon, Jul 18, 2022 at 8:45 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+>>
+>>
+>>
+>> On Fri, 15 Jul 2022, at 13:33, David Gow wrote:
+>> > While the sdhci-of-aspeed KUnit tests do work when builtin, and do work
+>> > when KUnit itself is being built as a module, the two together break.
+>> >
+>> > This is because the KUnit tests (understandably) depend on KUnit, so a
+>> > built-in test cannot build if KUnit is a module.
+>> >
+>> > Fix this by adding a dependency on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y),
+>> > which only excludes this one problematic configuration.
+>> >
+>> > This was reported on a nasty openrisc-randconfig run by the kernel test
+>> > robot, though for some reason (compiler optimisations removing the test
+>> > code?) I wasn't able to reproduce it locally on x86:
+>> > https://lore.kernel.org/linux-mm/202207140122.fzhlf60k-lkp@intel.com/T/
+>> >
+>> > Fixes: 291cd54e5b05 ("mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro")
+>> > Reported-by: kernel test robot <lkp@intel.com>
+>> > Signed-off-by: David Gow <davidgow@google.com>
+>> > ---
+>> >  drivers/mmc/host/Kconfig | 1 +
+>> >  1 file changed, 1 insertion(+)
+>> >
+>> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+>> > index 10c563999d3d..e63608834411 100644
+>> > --- a/drivers/mmc/host/Kconfig
+>> > +++ b/drivers/mmc/host/Kconfig
+>> > @@ -171,6 +171,7 @@ config MMC_SDHCI_OF_ASPEED
+>> >  config MMC_SDHCI_OF_ASPEED_TEST
+>> >       bool "Tests for the ASPEED SDHCI driver" if !KUNIT_ALL_TESTS
+>> >       depends on MMC_SDHCI_OF_ASPEED && KUNIT
+>> > +     depends on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y)
+>>
+>> Should this replace the line above? Isn't it just more constrained?
+>>
 >
->
->
-> On Fri, 15 Jul 2022, at 13:33, David Gow wrote:
-> > While the sdhci-of-aspeed KUnit tests do work when builtin, and do work
-> > when KUnit itself is being built as a module, the two together break.
-> >
-> > This is because the KUnit tests (understandably) depend on KUnit, so a
-> > built-in test cannot build if KUnit is a module.
-> >
-> > Fix this by adding a dependency on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y),
-> > which only excludes this one problematic configuration.
-> >
-> > This was reported on a nasty openrisc-randconfig run by the kernel test
-> > robot, though for some reason (compiler optimisations removing the test
-> > code?) I wasn't able to reproduce it locally on x86:
-> > https://lore.kernel.org/linux-mm/202207140122.fzhlf60k-lkp@intel.com/T/
-> >
-> > Fixes: 291cd54e5b05 ("mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro")
-> > Reported-by: kernel test robot <lkp@intel.com>
-> > Signed-off-by: David Gow <davidgow@google.com>
-> > ---
-> >  drivers/mmc/host/Kconfig | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 10c563999d3d..e63608834411 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -171,6 +171,7 @@ config MMC_SDHCI_OF_ASPEED
-> >  config MMC_SDHCI_OF_ASPEED_TEST
-> >       bool "Tests for the ASPEED SDHCI driver" if !KUNIT_ALL_TESTS
-> >       depends on MMC_SDHCI_OF_ASPEED && KUNIT
-> > +     depends on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y)
->
-> Should this replace the line above? Isn't it just more constrained?
->
+> We need both lines. The first ensures that both KUNIT and
+> MMC_SDHCI_OF_ASPEED are available, and the second just targets the
+> case where KUNIT=m and MMC_SDHCI_OF_ASPEED=y.
+> If we got rid of the first line, we could end up compiling this
+> without KUnit at all (if MMC_SDHCI_OF_ASPEED=m).
 
-We need both lines. The first ensures that both KUNIT and
-MMC_SDHCI_OF_ASPEED are available, and the second just targets the
-case where KUNIT=m and MMC_SDHCI_OF_ASPEED=y.
-If we got rid of the first line, we could end up compiling this
-without KUnit at all (if MMC_SDHCI_OF_ASPEED=m).
+Ah, yes. Fair enough!
 
-> Regardless, thanks for your work here, the kunit integration with the
-> ASPEED SDHCI driver bothered me a lot when I wrote it.
-
-No worries: we're all still figuring out exactly how these sorts of
-tests should interact with modules, so it's been a great real-world
-example for us to experiment with.
-
-Cheers,
--- David
-
---0000000000007d3edf05e41e969e
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIIPnwYJKoZIhvcNAQcCoIIPkDCCD4wCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGg
-ggz5MIIEtjCCA56gAwIBAgIQeAMYYHb81ngUVR0WyMTzqzANBgkqhkiG9w0BAQsFADBMMSAwHgYD
-VQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UE
-AxMKR2xvYmFsU2lnbjAeFw0yMDA3MjgwMDAwMDBaFw0yOTAzMTgwMDAwMDBaMFQxCzAJBgNVBAYT
-AkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMSowKAYDVQQDEyFHbG9iYWxTaWduIEF0bGFz
-IFIzIFNNSU1FIENBIDIwMjAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvLe9xPU9W
-dpiHLAvX7kFnaFZPuJLey7LYaMO8P/xSngB9IN73mVc7YiLov12Fekdtn5kL8PjmDBEvTYmWsuQS
-6VBo3vdlqqXZ0M9eMkjcKqijrmDRleudEoPDzTumwQ18VB/3I+vbN039HIaRQ5x+NHGiPHVfk6Rx
-c6KAbYceyeqqfuJEcq23vhTdium/Bf5hHqYUhuJwnBQ+dAUcFndUKMJrth6lHeoifkbw2bv81zxJ
-I9cvIy516+oUekqiSFGfzAqByv41OrgLV4fLGCDH3yRh1tj7EtV3l2TngqtrDLUs5R+sWIItPa/4
-AJXB1Q3nGNl2tNjVpcSn0uJ7aFPbAgMBAAGjggGKMIIBhjAOBgNVHQ8BAf8EBAMCAYYwHQYDVR0l
-BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFHzM
-CmjXouseLHIb0c1dlW+N+/JjMB8GA1UdIwQYMBaAFI/wS3+oLkUkrk1Q+mOai97i3Ru8MHsGCCsG
-AQUFBwEBBG8wbTAuBggrBgEFBQcwAYYiaHR0cDovL29jc3AyLmdsb2JhbHNpZ24uY29tL3Jvb3Ry
-MzA7BggrBgEFBQcwAoYvaHR0cDovL3NlY3VyZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvcm9vdC1y
-My5jcnQwNgYDVR0fBC8wLTAroCmgJ4YlaHR0cDovL2NybC5nbG9iYWxzaWduLmNvbS9yb290LXIz
-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
-z/tQRXr3iPeVmZCr7nttMEwGA1UdIARFMEMwQQYJKwYBBAGgMgEoMDQwMgYIKwYBBQUHAgEWJmh0
-dHBzOi8vd3d3Lmdsb2JhbHNpZ24uY29tL3JlcG9zaXRvcnkvMAwGA1UdEwEB/wQCMAAwgZoGCCsG
-AQUFBwEBBIGNMIGKMD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9jYS9n
-c2F0bGFzcjNzbWltZWNhMjAyMDBIBggrBgEFBQcwAoY8aHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
-LmNvbS9jYWNlcnQvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3J0MB8GA1UdIwQYMBaAFHzMCmjXouse
-LHIb0c1dlW+N+/JjMEYGA1UdHwQ/MD0wO6A5oDeGNWh0dHA6Ly9jcmwuZ2xvYmFsc2lnbi5jb20v
-Y2EvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3JsMA0GCSqGSIb3DQEBCwUAA4IBAQAx+EQjLATc/sze
-VoZkH7OLz+/no1+y31x4BQ3wjW7lKfay9DAAVym896b7ECttSo95GEvS7pYMikzud57WypK7Bjpi
-ep8YLarLRDrvyyvBuYtyDrIewkuASHtV1oy5E6QZZe2VOxMm6e2oJnFFjbflot4A08D3SwqDwV0i
-OOYwT0BUtHYR/3903Dmdx5Alq+NDvUHDjozgo0f6oIkwDXT3yBV36utQ/jFisd36C8RD5mM+NFpu
-3aqLXARRbKtxw29ErCwulof2dcAonG7cd5j+gmS84sLhKU+BhL1OQVXnJ5tj7xZ5Ri5I23brcwk0
-lk/gWqfgs3ppT9Xk7zVit9q8MYICajCCAmYCAQEwaDBUMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQ
-R2xvYmFsU2lnbiBudi1zYTEqMCgGA1UEAxMhR2xvYmFsU2lnbiBBdGxhcyBSMyBTTUlNRSBDQSAy
-MDIwAhABh9LgIPnlfMFHR0Die8n7MA0GCWCGSAFlAwQCAQUAoIHUMC8GCSqGSIb3DQEJBDEiBCAP
-xlac0XklBJzFE10BsnaUbD4WEKGOA2/exiWVevS0uDAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcB
-MBwGCSqGSIb3DQEJBTEPFw0yMjA3MTkwMTQxNDhaMGkGCSqGSIb3DQEJDzFcMFowCwYJYIZIAWUD
-BAEqMAsGCWCGSAFlAwQBFjALBglghkgBZQMEAQIwCgYIKoZIhvcNAwcwCwYJKoZIhvcNAQEKMAsG
-CSqGSIb3DQEBBzALBglghkgBZQMEAgEwDQYJKoZIhvcNAQEBBQAEggEABBSg6FVt0kFXhOiKfMmb
-cPkigARBA4iie+A9SXbAihn5DovF1EHfSINgOj6ApNDgCm8xM+YW4QL5w1ThYgNwxH4X/VxwxwIl
-Ld9zH7fo5aJvrGM2I0JNs5qC5sRed9grrjy527WsFyzJ4ahpqEvmvQYPuGuURFd2C9EXJHMTfv4B
-EClnZCSXSQjJZGd7AALoJJ5LVv9u4ReAvlqgKOVGB5MVijZuaNKRuIvzHWagmiY5DWZkXhCdERq4
-QRb+J6ubKdHQEJxMfTf6q/xq3abxQAx+nFhZohzLoSULlVSXNghc2UYC0Jri+xV8Sdis2aYd4xsf
-3Uw0GKNmHCeSab0CjQ==
---0000000000007d3edf05e41e969e--
+Acked-by: Andrew Jeffery <andrew@aj.id.au>
