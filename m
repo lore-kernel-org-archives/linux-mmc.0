@@ -2,116 +2,208 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DCFAC43334
-	for <linux-mmc@archiver.kernel.org>; Mon, 18 Jul 2022 21:04:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1753BC433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 19 Jul 2022 01:41:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236233AbiGRVEs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 18 Jul 2022 17:04:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35492 "EHLO
+        id S229602AbiGSBlv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 18 Jul 2022 21:41:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230263AbiGRVEr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 17:04:47 -0400
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38C826597
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 14:04:46 -0700 (PDT)
-Received: by mail-ed1-x532.google.com with SMTP id e15so17036550edj.2
-        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 14:04:46 -0700 (PDT)
+        with ESMTP id S231986AbiGSBlv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 18 Jul 2022 21:41:51 -0400
+Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0590EE38
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 18:41:49 -0700 (PDT)
+Received: by mail-wr1-x431.google.com with SMTP id a5so19477929wrx.12
+        for <linux-mmc@vger.kernel.org>; Mon, 18 Jul 2022 18:41:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
-        h=from:content-transfer-encoding:mime-version:subject:date:references
-         :to:in-reply-to:message-id;
-        bh=lgYxQ6VDW00cU97BocyveA5Xw2LA05J8ZBbZjuEjBbs=;
-        b=ysRZ20nSv1AY8vsUIYaB1KCb7Q30mE3E6K7n7d95wId/RdkNd+qdCO7zLW56+1lhQx
-         FMAM3HJmvHH/obQ6GgmbKtJC5GXi2HgDaNV6K344sLUkdnRiGUnYNHG8msV+0ACStmvf
-         p8Il0CHFw8LAeE8GpBIH6v9wj8AdFvCoamt3z45quczVKBP0WAzHocSWT5duzbo33hoP
-         Xj+nasYNkfyWb2VkRfgNNq5R0v9Y4cUzdKTVhK4HCIhxA1y0eNXu6RRzhwNHhzbEpsVB
-         +QevqZ4FAxbXohECqUjQJWRr/f+73oGlYrgrVKbUFRRNGFl6aBOzivd7IZmAufOh1GMx
-         o6fQ==
+        d=google.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=HZNv/G6i1lCxGnCf0K0ZbnI+eisq9vgGb1jSClBocxg=;
+        b=PN9UkdHrPJNbqbGa5J48TtQvc0wgiRNPqaxVn1QaBqxkFmhBoNrIvlDPqgg/FOX83v
+         5f7kTz5ESyxqT2RN5Y7Pd55tp3UCTzrotBIs8WmfHyLwElciokhN3HtTxMBxRlo0AQW2
+         rVFMOHg51/JNB//2Wk710srDag0J1XfBeP4kxCMPwg4S1+3t8SPknmVoK06XV78phL77
+         Jcu/3JyZ0jpN1DISsF9FsLkg+nTAt6GXXWXg6aqI4li3/j+xD7j88/lm72aeAoxA6CNc
+         Ei/ggZWaJcmeB421GgWoXkjUr36VOwxr4L+Dcuka8JeCHeN2c1ZwPdmj8Lx5yl/gbm8P
+         D1nw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:content-transfer-encoding:mime-version
-         :subject:date:references:to:in-reply-to:message-id;
-        bh=lgYxQ6VDW00cU97BocyveA5Xw2LA05J8ZBbZjuEjBbs=;
-        b=Uqnmcey9vTrQQ0kZHdnHtcgX7uMlmyfS/d5yVH3rEsscAWk4jOrQsbYmxwQMDDpzkl
-         EQAIEsz1dvOaO+G2wLzjDfxSqOeUzyXv71bAjbwsMW0CXEICiomkRggMgCMRtFj9fAZ4
-         OuNquSMZ3hZsMzijF5s0jhVqu32NdqwhUSSVkz7h+JE8s7Y5GibAEem3vtC5I/uEFAp7
-         lcKI369RYqNprw9y8nAbuzHrlZU6Pg2KArdKPfncvGevXU0D8m9DMKKmo9CQbJhkQXv8
-         UsKTnxKkQHPtjp0dNayePyQZyEe+LvEzPSe9KRlXbOz9vObvImxizUj/UyeszZbTRSHd
-         iaqw==
-X-Gm-Message-State: AJIora/SZjpfVnNU6QJhygSzitP+KcQT4nhvoiC+NmPRD7jDVit+UvD3
-        bTeguo1KwCcq0ABLo9iqHAIldQ==
-X-Google-Smtp-Source: AGRyM1uMAGPcbJs10DHZgwCacO7JwWJg0/uGhTxHr3qyP+y4XQdgLemNimWtsQu4TGNXOnTXmYe6Bg==
-X-Received: by 2002:a05:6402:440c:b0:43a:1124:e56a with SMTP id y12-20020a056402440c00b0043a1124e56amr40569237eda.134.1658178284768;
-        Mon, 18 Jul 2022 14:04:44 -0700 (PDT)
-Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
-        by smtp.gmail.com with ESMTPSA id sa42-20020a1709076d2a00b007081282cbd8sm5885440ejc.76.2022.07.18.14.04.43
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 18 Jul 2022 14:04:44 -0700 (PDT)
-From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
-        <christian@kohlschutter.com>
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.100.31\))
-Subject: Re: [PATCH v6] arm64: dts: rockchip: Fix SD card init on
- rk3399-nanopi4
-Date:   Mon, 18 Jul 2022 23:04:43 +0200
-References: <C639AD88-77A1-4485-BAEA-2FF8FC15A844@kohlschutter.com>
- <12878108.O9o76ZdvQC@diego> <103b714c-b07c-f016-1062-84bd94786b22@arm.com>
- <9AF1E75F-5947-49B0-887D-82C426527B99@kohlschutter.com>
- <590f7a08-a6ca-be54-4254-363343642a52@arm.com>
- <A6B896E5-CD25-4441-B6A5-0BE1FA284B2C@kohlschutter.com>
- <A9634366-A012-43D2-B253-8BB9BF6005C7@kohlschutter.com>
- <CAGb2v65Ehbu1wrib2CzF1fDZuD3fHZQDhKfVusyUF9KnxTvi+Q@mail.gmail.com>
- <5ca9bd94-54d9-04f8-0098-a56ffb6f5fe1@arm.com>
- <502b3fbe-3077-407e-6010-a8cb3ffce7d6@arm.com>
- <449292CA-CE60-4B90-90F7-295FBFEAB3F8@kohlschutter.com>
- <73F9AED0-D2A8-4294-B6E1-1B92D2A36529@kohlschutter.com>
- <115AD6A4-021B-4879-BFB5-BC7689A0203E@kohlschutter.com>
- <17a4c6f6-d79c-a7b2-860f-e5944b778f9f@arm.com>
- <9405b97a-6758-ad4e-ccff-eed072096539@arm.com>
- <BF7CC548-88C9-4889-8A41-8E99C31EF81C@kohlschutter.com>
- <daf3b61c-d886-98eb-0443-de233d742041@arm.com>
- <CDF716FC-F6CF-44A9-84D9-B48C46E6AC2C@kohlschutter.com>
- <3912A668-9F73-40FD-8993-5060F632238A@kohlschutter.com>
- <7E830C9F-BB5D-4EFC-B3F4-1C580E9326A3@kohlschutter.com>
- <E5A1A1E7-449F-4161-87B9-7A6CA0CAA42C@kohlschutter.com>
- <C153DF3B-C5F7-42E5-8A86-D9193578C96A@kohlschutter.com>
-To:     Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
-        =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
-        Markus Reichl <m.reichl@fivetechno.de>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>
-In-Reply-To: <C153DF3B-C5F7-42E5-8A86-D9193578C96A@kohlschutter.com>
-Message-Id: <38DFE34C-E4A5-4DBB-AC57-5D92D703B877@kohlschutter.com>
-X-Mailer: Apple Mail (2.3696.100.31)
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=HZNv/G6i1lCxGnCf0K0ZbnI+eisq9vgGb1jSClBocxg=;
+        b=0AdkVYChgASgu7mkKOxhswtdle/tcD6UpBDAsOv/vnlimvUd85bfUskj2MfiojcJQN
+         N8n5AQf9wp5muiHvWahYnCT4jDAseeiosdhCHXrBPjqqCRrKn+cj3kW9Uy459rJe8sQv
+         QfvlIdD8GNLWG3W8fxQD+DGc0K4t9sTOx6L+ey7SA1nM5KWwEuVKg4mYPaUMmjIM/6ga
+         RWXSKyQReZaX/D8j+YjRPup/dJVMMGjzzhmXcK3jb3UGe4B+l4qzn3X4L52Ws3kB7LQ2
+         nQvlUbJdtRlD1P8an6+ALHgv0tSBkVVfj7hrLTSBiGTa08+5syYI8/ugzc2wXkLi8Mim
+         gakA==
+X-Gm-Message-State: AJIora9t1XAizDmSGXHI8g36qE4Dnnst0+qTfiSCCpHg+jiSZSljQMw7
+        r5ic722yJRa5JIJJXdw1hClKEhtdqh6i+UKVagzV1w==
+X-Google-Smtp-Source: AGRyM1sFBg4zKz4vRUarom3Dl7jIunk18ZUIQ2JBDUoRioOTSf4z9Hog3fUA+UuM/YpxwhbZ5Y3AYJmmVcVphC2eGVM=
+X-Received: by 2002:adf:ed12:0:b0:21e:2ded:6f52 with SMTP id
+ a18-20020adfed12000000b0021e2ded6f52mr1370516wro.517.1658194908202; Mon, 18
+ Jul 2022 18:41:48 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220715040354.2629856-1-davidgow@google.com> <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
+In-Reply-To: <38480b33-3b4d-44d4-bb24-6ab199d0c793@www.fastmail.com>
+From:   David Gow <davidgow@google.com>
+Date:   Tue, 19 Jul 2022 09:41:37 +0800
+Message-ID: <CABVgOSnhKMKc0_LvHVYPzL5NVnEuL51nQSm+8bZbjO=Q4seYiw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-aspeed: test: Fix dependencies when KUNIT=m
+To:     Andrew Jeffery <andrew@aj.id.au>
+Cc:     Brendan Higgins <brendanhiggins@google.com>,
+        Daniel Latypov <dlatypov@google.com>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kbuild test robot <lkp@intel.com>,
+        "open list:KERNEL SELFTEST FRAMEWORK" 
+        <linux-kselftest@vger.kernel.org>,
+        Sadiya Kazi <sadiyakazi@google.com>,
+        KUnit Development <kunit-dev@googlegroups.com>
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+        boundary="0000000000007d3edf05e41e969e"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Am 18.07.2022 um 14:05 schrieb Christian Kohlsch=C3=BCtter =
-<christian@kohlschutter.com>:
->=20
->> Am 18.07.2022 um 14:04 schrieb Christian Kohlsch=C3=BCtter =
-<christian@kohlschutter.com>:
->>=20
->> mmc/SD-card initialization may fail on NanoPi R4S with
->> "mmc1: problem reading SD Status register" /
->> "mmc1: error -110 whilst initialising SD card"
->> either on cold boot or after a reboot.
-> ...
-> Walking back on my claim in the commit message that no further patches =
-are needed for the u-boot integration to work.
-> Other than that, the actual patch is unchanged.
+--0000000000007d3edf05e41e969e
+Content-Type: text/plain; charset="UTF-8"
 
-I can no longer verify that the v6 patch actually increases use_count to =
-2.
+On Mon, Jul 18, 2022 at 8:45 AM Andrew Jeffery <andrew@aj.id.au> wrote:
+>
+>
+>
+> On Fri, 15 Jul 2022, at 13:33, David Gow wrote:
+> > While the sdhci-of-aspeed KUnit tests do work when builtin, and do work
+> > when KUnit itself is being built as a module, the two together break.
+> >
+> > This is because the KUnit tests (understandably) depend on KUnit, so a
+> > built-in test cannot build if KUnit is a module.
+> >
+> > Fix this by adding a dependency on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y),
+> > which only excludes this one problematic configuration.
+> >
+> > This was reported on a nasty openrisc-randconfig run by the kernel test
+> > robot, though for some reason (compiler optimisations removing the test
+> > code?) I wasn't able to reproduce it locally on x86:
+> > https://lore.kernel.org/linux-mm/202207140122.fzhlf60k-lkp@intel.com/T/
+> >
+> > Fixes: 291cd54e5b05 ("mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro")
+> > Reported-by: kernel test robot <lkp@intel.com>
+> > Signed-off-by: David Gow <davidgow@google.com>
+> > ---
+> >  drivers/mmc/host/Kconfig | 1 +
+> >  1 file changed, 1 insertion(+)
+> >
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index 10c563999d3d..e63608834411 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -171,6 +171,7 @@ config MMC_SDHCI_OF_ASPEED
+> >  config MMC_SDHCI_OF_ASPEED_TEST
+> >       bool "Tests for the ASPEED SDHCI driver" if !KUNIT_ALL_TESTS
+> >       depends on MMC_SDHCI_OF_ASPEED && KUNIT
+> > +     depends on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y)
+>
+> Should this replace the line above? Isn't it just more constrained?
+>
 
-At this point, I don't have a purely device tree-based fix that works =
-reliably, therefore necessitating the code changes in regulator/core.c.
-If anyone of you knows a way to reliably increase vcc3v0_sd's use_count =
-("cat /sys/kernel/debug/regulator/vcc3v0_sd/use_count") to at least 2, =
-then we can remove the regulator-always-on statement.
+We need both lines. The first ensures that both KUNIT and
+MMC_SDHCI_OF_ASPEED are available, and the second just targets the
+case where KUNIT=m and MMC_SDHCI_OF_ASPEED=y.
+If we got rid of the first line, we could end up compiling this
+without KUnit at all (if MMC_SDHCI_OF_ASPEED=m).
 
+> Regardless, thanks for your work here, the kunit integration with the
+> ASPEED SDHCI driver bothered me a lot when I wrote it.
+
+No worries: we're all still figuring out exactly how these sorts of
+tests should interact with modules, so it's been a great real-world
+example for us to experiment with.
+
+Cheers,
+-- David
+
+--0000000000007d3edf05e41e969e
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
+
+MIIPnwYJKoZIhvcNAQcCoIIPkDCCD4wCAQExDzANBglghkgBZQMEAgEFADALBgkqhkiG9w0BBwGg
+ggz5MIIEtjCCA56gAwIBAgIQeAMYYHb81ngUVR0WyMTzqzANBgkqhkiG9w0BAQsFADBMMSAwHgYD
+VQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMzETMBEGA1UEChMKR2xvYmFsU2lnbjETMBEGA1UE
+AxMKR2xvYmFsU2lnbjAeFw0yMDA3MjgwMDAwMDBaFw0yOTAzMTgwMDAwMDBaMFQxCzAJBgNVBAYT
+AkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMSowKAYDVQQDEyFHbG9iYWxTaWduIEF0bGFz
+IFIzIFNNSU1FIENBIDIwMjAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCvLe9xPU9W
+dpiHLAvX7kFnaFZPuJLey7LYaMO8P/xSngB9IN73mVc7YiLov12Fekdtn5kL8PjmDBEvTYmWsuQS
+6VBo3vdlqqXZ0M9eMkjcKqijrmDRleudEoPDzTumwQ18VB/3I+vbN039HIaRQ5x+NHGiPHVfk6Rx
+c6KAbYceyeqqfuJEcq23vhTdium/Bf5hHqYUhuJwnBQ+dAUcFndUKMJrth6lHeoifkbw2bv81zxJ
+I9cvIy516+oUekqiSFGfzAqByv41OrgLV4fLGCDH3yRh1tj7EtV3l2TngqtrDLUs5R+sWIItPa/4
+AJXB1Q3nGNl2tNjVpcSn0uJ7aFPbAgMBAAGjggGKMIIBhjAOBgNVHQ8BAf8EBAMCAYYwHQYDVR0l
+BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFHzM
+CmjXouseLHIb0c1dlW+N+/JjMB8GA1UdIwQYMBaAFI/wS3+oLkUkrk1Q+mOai97i3Ru8MHsGCCsG
+AQUFBwEBBG8wbTAuBggrBgEFBQcwAYYiaHR0cDovL29jc3AyLmdsb2JhbHNpZ24uY29tL3Jvb3Ry
+MzA7BggrBgEFBQcwAoYvaHR0cDovL3NlY3VyZS5nbG9iYWxzaWduLmNvbS9jYWNlcnQvcm9vdC1y
+My5jcnQwNgYDVR0fBC8wLTAroCmgJ4YlaHR0cDovL2NybC5nbG9iYWxzaWduLmNvbS9yb290LXIz
+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
+z/tQRXr3iPeVmZCr7nttMEwGA1UdIARFMEMwQQYJKwYBBAGgMgEoMDQwMgYIKwYBBQUHAgEWJmh0
+dHBzOi8vd3d3Lmdsb2JhbHNpZ24uY29tL3JlcG9zaXRvcnkvMAwGA1UdEwEB/wQCMAAwgZoGCCsG
+AQUFBwEBBIGNMIGKMD4GCCsGAQUFBzABhjJodHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9jYS9n
+c2F0bGFzcjNzbWltZWNhMjAyMDBIBggrBgEFBQcwAoY8aHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3J0MB8GA1UdIwQYMBaAFHzMCmjXouse
+LHIb0c1dlW+N+/JjMEYGA1UdHwQ/MD0wO6A5oDeGNWh0dHA6Ly9jcmwuZ2xvYmFsc2lnbi5jb20v
+Y2EvZ3NhdGxhc3Izc21pbWVjYTIwMjAuY3JsMA0GCSqGSIb3DQEBCwUAA4IBAQAx+EQjLATc/sze
+VoZkH7OLz+/no1+y31x4BQ3wjW7lKfay9DAAVym896b7ECttSo95GEvS7pYMikzud57WypK7Bjpi
+ep8YLarLRDrvyyvBuYtyDrIewkuASHtV1oy5E6QZZe2VOxMm6e2oJnFFjbflot4A08D3SwqDwV0i
+OOYwT0BUtHYR/3903Dmdx5Alq+NDvUHDjozgo0f6oIkwDXT3yBV36utQ/jFisd36C8RD5mM+NFpu
+3aqLXARRbKtxw29ErCwulof2dcAonG7cd5j+gmS84sLhKU+BhL1OQVXnJ5tj7xZ5Ri5I23brcwk0
+lk/gWqfgs3ppT9Xk7zVit9q8MYICajCCAmYCAQEwaDBUMQswCQYDVQQGEwJCRTEZMBcGA1UEChMQ
+R2xvYmFsU2lnbiBudi1zYTEqMCgGA1UEAxMhR2xvYmFsU2lnbiBBdGxhcyBSMyBTTUlNRSBDQSAy
+MDIwAhABh9LgIPnlfMFHR0Die8n7MA0GCWCGSAFlAwQCAQUAoIHUMC8GCSqGSIb3DQEJBDEiBCAP
+xlac0XklBJzFE10BsnaUbD4WEKGOA2/exiWVevS0uDAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcB
+MBwGCSqGSIb3DQEJBTEPFw0yMjA3MTkwMTQxNDhaMGkGCSqGSIb3DQEJDzFcMFowCwYJYIZIAWUD
+BAEqMAsGCWCGSAFlAwQBFjALBglghkgBZQMEAQIwCgYIKoZIhvcNAwcwCwYJKoZIhvcNAQEKMAsG
+CSqGSIb3DQEBBzALBglghkgBZQMEAgEwDQYJKoZIhvcNAQEBBQAEggEABBSg6FVt0kFXhOiKfMmb
+cPkigARBA4iie+A9SXbAihn5DovF1EHfSINgOj6ApNDgCm8xM+YW4QL5w1ThYgNwxH4X/VxwxwIl
+Ld9zH7fo5aJvrGM2I0JNs5qC5sRed9grrjy527WsFyzJ4ahpqEvmvQYPuGuURFd2C9EXJHMTfv4B
+EClnZCSXSQjJZGd7AALoJJ5LVv9u4ReAvlqgKOVGB5MVijZuaNKRuIvzHWagmiY5DWZkXhCdERq4
+QRb+J6ubKdHQEJxMfTf6q/xq3abxQAx+nFhZohzLoSULlVSXNghc2UYC0Jri+xV8Sdis2aYd4xsf
+3Uw0GKNmHCeSab0CjQ==
+--0000000000007d3edf05e41e969e--
