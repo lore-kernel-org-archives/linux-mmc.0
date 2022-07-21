@@ -2,290 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B951C43334
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jul 2022 10:59:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A863C43334
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jul 2022 15:01:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232802AbiGUK7T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jul 2022 06:59:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53640 "EHLO
+        id S231202AbiGUPBb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jul 2022 11:01:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232695AbiGUK7Q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2022 06:59:16 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 430B782F97
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2022 03:59:15 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id o7so2150807lfq.9
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2022 03:59:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=K/2viF3eSJYOGhNeTSek4Gd41pFBC7ydU9x0OtqaLDY=;
-        b=OW70yuqjDHPsJW/9lYO1PA31vs5SOvxoYPior/meywHg3VVyxkj0hOxB5ygKSOrtKi
-         4qvXcm+yuV8rxe/XaVHqY0tPT4RcjXnJrtZEylmbgN7Rs4kYDYJd/s1WqnB+hUKpeDBz
-         34TUjSU1sSIR6K+ZSSO/WGe7blSSWHHgUeIcaqAuX9GbGESkDBcLQX92REF8Y0xXTUk5
-         wYYr8Vtf5SIk+OfxcnRNy3V1FMg6ha2ULZ0XbSMNTIGxHwS06RKT/pcaJwxm7TBN1fhs
-         6PRKnyZxgzX16CZqHUnJiGl7gALUJXRyItAkLTUMRh0RzoJRWazAiQ/crTSYl5zFaNTs
-         tXqw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=K/2viF3eSJYOGhNeTSek4Gd41pFBC7ydU9x0OtqaLDY=;
-        b=NA6+XGiphboqhOjWZ5G7ha3KHui1Z8lbUSjC2AbYOz47xO3JADWNLetK7roIAoxzIQ
-         /6KT3lblIKRdoqNRbGhIfJSa3uSTfRsM4+i3ep2OcgnXLmBswYYN75CbujkIRD8H21Em
-         8aKknXMMvEhpEQaTZQh87lKL0Ah7DnRC6jlPlCEeVqw0Tb0+wDRPjv4l490o+kLXRqYm
-         stjyjsp6wH3yF6GLMwP2MN9aLoYnLqvZ4UuLnIhJNiu0CsgCnZ/OvaXCoMGJG7WdxCGt
-         al2U/ho/+tashBkn7ERLrsbeFMuMoB/9M1Hrcl3T4JZCFVkwmp8RTUvsPFH3ic4YiWO+
-         Hmhg==
-X-Gm-Message-State: AJIora9KNJQ/cKC/0ENJ1GmaBu97ChPW1dSJmpmZ433LhvBBx72h1BzG
-        r7LT4ton9jUJndqxU8XSdqy4MK1leyKpmBvtKPpZgQ==
-X-Google-Smtp-Source: AGRyM1vnns/WVjmSohd7/CwG0NbC1Ng8QfLmm7xlh/yWlW5y7KvKYM5HkNvdjXOtNeDf1fwcDKsNGrZM7GuNJgZxNZs=
-X-Received: by 2002:a05:6512:32c6:b0:48a:18a1:2d2b with SMTP id
- f6-20020a05651232c600b0048a18a12d2bmr19559138lfg.373.1658401153130; Thu, 21
- Jul 2022 03:59:13 -0700 (PDT)
+        with ESMTP id S229497AbiGUPB2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2022 11:01:28 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BEBF76EB0;
+        Thu, 21 Jul 2022 08:01:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id DD42EB82389;
+        Thu, 21 Jul 2022 15:01:26 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 99C38C3411E;
+        Thu, 21 Jul 2022 15:01:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1658415685;
+        bh=r+lgIJOmDQrLmbvNFgMmdz6shCg1+ntIlt/QGiQZSnA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=knURc9prSyAJJcu+Prn04cRhlzAz9FyZ+WMkURoudpl+P82/twHVzj5qflD5M7WlH
+         OgpAxKUagJh9RC85XUkAgWiFzB0UydlZ2tQKqt+bF7SzaOzKVrk9jc7XYH1Qr7mfWS
+         QgJfF0MAw927/Och684dYc6sb2YTtMFyvtTK6gfMFQ+wcISjjNkirizd0o3j5jx2zY
+         h08xLgJTqjLcSpc+Lwhm4kb5puNz4D8SXv+gjtRUpVfiu/0Irgp6gR/FlMv51gg8Ye
+         J6EC1dlXIqpcEPRiFirXItSBli4fCeo8oMaFuJ07VsyxCYpzRbdLDnEUsCz4dsQ8JM
+         1KqWTXjRf3Iag==
+Date:   Thu, 21 Jul 2022 16:01:17 +0100
+From:   Mark Brown <broonie@kernel.org>
+To:     Christian =?iso-8859-1?Q?Kohlsch=FCtter?= 
+        <christian@kohlschutter.com>
+Cc:     Liam Girdwood <lgirdwood@gmail.com>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>, wens@kernel.org,
+        Heiko =?iso-8859-1?Q?St=FCbner?= <heiko@sntech.de>,
+        Markus Reichl <m.reichl@fivetechno.de>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] regulator: core: Resolve supply name earlier to prevent
+ double-init
+Message-ID: <YtlqPbbBceBmekcV@sirena.org.uk>
+References: <3B4AE882-0C28-41E3-9466-F8E301567627@kohlschutter.com>
 MIME-Version: 1.0
-References: <20220623090445.1401-1-axe.yang@mediatek.com> <20220623090445.1401-4-axe.yang@mediatek.com>
- <CAPDyKFr0gy1sNb=U3j1ErSZm+jcAcvg_jwNmodEs7ip4_LjNZg@mail.gmail.com> <621878fea57e70d56640bf6c50f4b723624060ee.camel@mediatek.com>
-In-Reply-To: <621878fea57e70d56640bf6c50f4b723624060ee.camel@mediatek.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 21 Jul 2022 12:58:36 +0200
-Message-ID: <CAPDyKFrT-45bz6_mbWXTKEe_JKfd+p4ava1RxZD=6CyCdTukOg@mail.gmail.com>
-Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
-To:     Axe Yang <axe.yang@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        Yong Mao <yong.mao@mediatek.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="i0TkaW/gVp5KwYgS"
+Content-Disposition: inline
+In-Reply-To: <3B4AE882-0C28-41E3-9466-F8E301567627@kohlschutter.com>
+X-Cookie: Exercise caution in your daily affairs.
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Linus Walleij
 
-On Tue, 19 Jul 2022 at 12:35, Axe Yang <axe.yang@mediatek.com> wrote:
->
-> On Mon, 2022-07-18 at 14:21 +0200, Ulf Hansson wrote:
-> > On Thu, 23 Jun 2022 at 11:05, Axe Yang <axe.yang@mediatek.com> wrote:
-> > >
-> > > Add support for eint IRQ when MSDC is used as an SDIO host. This
-> > > feature requires SDIO device support async IRQ function. With this
-> > > feature, SDIO host can be awakened by SDIO card in suspend state,
-> > > without additional pin.
-> > >
-> > > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
-> > > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
-> > > resume, switch GPIO function back to DAT1 mode then turn on clock.
-> > >
-> > > Some device tree property should be added or modified in MSDC node
-> > > to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
-> > > this feature depends on asynchronous interrupts, "wakeup-source",
-> > > "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
-> > > the interrupts list should be extended(the interrupt named with
-> > > sdio_wakeup):
-> > >         &mmcX {
-> > >                 ...
-> > >                 interrupt-names = "msdc", "sdio_wakeup";
-> > >                 interrupts-extended = <...>,
-> > >                                       <&pio xxx
-> > > IRQ_TYPE_LEVEL_LOW>;
-> > >                 ...
-> > >                 pinctrl-names = "default", "state_uhs",
-> > > "state_eint";
-> > >                 ...
-> > >                 pinctrl-2 = <&mmc2_pins_eint>;
-> > >                 ...
-> > >                 cap-sdio-irq;
-> > >                 keep-power-in-suspend;
-> > >                 wakeup-source;
-> > >                 ...
-> > >         };
-> > >
-> > > Co-developed-by: Yong Mao <yong.mao@mediatek.com>
-> > > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
-> > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
-> >
-> > My apologies for the delay in reviewing this.
->
-> It is okay. Glad to receive your reply.
->
-> >
-> > > ---
-> > >  drivers/mmc/host/mtk-sd.c | 84
-> > > ++++++++++++++++++++++++++++++++++++---
-> > >  1 file changed, 78 insertions(+), 6 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> > > index 195dc897188b..f907b96cfd87 100644
-> > > --- a/drivers/mmc/host/mtk-sd.c
-> > > +++ b/drivers/mmc/host/mtk-sd.c
-> > > @@ -1,6 +1,6 @@
-> > >  // SPDX-License-Identifier: GPL-2.0-only
-> > >  /*
-> > > - * Copyright (c) 2014-2015 MediaTek Inc.
-> > > + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
-> > >   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
-> > >   */
-> > >
-> > > @@ -20,6 +20,7 @@
-> > >  #include <linux/platform_device.h>
-> > >  #include <linux/pm.h>
-> > >  #include <linux/pm_runtime.h>
-> > > +#include <linux/pm_wakeirq.h>
-> > >  #include <linux/regulator/consumer.h>
-> > >  #include <linux/slab.h>
-> > >  #include <linux/spinlock.h>
-> > > @@ -440,8 +441,10 @@ struct msdc_host {
-> > >         struct pinctrl *pinctrl;
-> > >         struct pinctrl_state *pins_default;
-> > >         struct pinctrl_state *pins_uhs;
-> > > +       struct pinctrl_state *pins_eint;
-> > >         struct delayed_work req_timeout;
-> > >         int irq;                /* host interrupt */
-> > > +       int eint_irq;           /* interrupt from sdio device for
-> > > waking up system */
-> > >         struct reset_control *reset;
-> > >
-> > >         struct clk *src_clk;    /* msdc source clock */
-> > > @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct
-> > > msdc_host *host, int enb)
-> > >
-> > >  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
-> > >  {
-> > > -       unsigned long flags;
-> > >         struct msdc_host *host = mmc_priv(mmc);
-> > > +       unsigned long flags;
-> > > +       int ret;
-> > >
-> > >         spin_lock_irqsave(&host->lock, flags);
-> > >         __msdc_enable_sdio_irq(host, enb);
-> > >         spin_unlock_irqrestore(&host->lock, flags);
-> > >
-> > > -       if (enb)
-> > > -               pm_runtime_get_noresume(host->dev);
-> > > -       else
-> > > -               pm_runtime_put_noidle(host->dev);
-> > > +       if (mmc_card_enable_async_irq(mmc->card) && host-
-> > > >pins_eint) {
-> > > +               if (enb) {
-> > > +                       /*
-> > > +                        * In
-> > > dev_pm_set_dedicated_wake_irq_reverse(), eint pin will be set to
-> > > +                        * GPIO mode. We need to restore it to SDIO
-> > > DAT1 mode after that.
-> > > +                        * Since the current pinstate is pins_uhs,
-> > > to ensure pinctrl select take
-> > > +                        * affect successfully, we change the
-> > > pinstate to pins_eint firstly.
-> > > +                        */
-> > > +                       pinctrl_select_state(host->pinctrl, host-
-> > > >pins_eint);
-> >
-> > I am sorry, but I don't understand what goes on here. Why do you need
-> > to change the pinctrl setting to "pins_eint" here?
-> >
-> > The bellow call to dev_pm_set_dedicated_wake_irq_reverse() doesn't
-> > change the pinctrl setting as the comment suggests above.
-> >
->
-> Actually, the pinctrl setting is changed:
-> In dev_pm_set_dedicated_wake_irq_reverse() -> ... ->
-> request_threaded_irq() -> __setup_irq() -> irq_request_resources() ->
-> mtk_eint_irq_request_resources()-> mtk_xt_set_gpio_as_eint(), the SDIO
-> DAT1 pin will be force reset to GPIO mode:
+--i0TkaW/gVp5KwYgS
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Aha. That looks a bit weird, but I get the problem now.
+On Fri, Jul 15, 2022 at 10:32:16PM +0200, Christian Kohlsch=FCtter wrote:
+> Previously, an unresolved regulator supply reference upon calling
+> regulator_register on an always-on or boot-on regulator caused
+> set_machine_constraints to be called twice.
 
-I have looped in Linus (the pintctrl maintainer) to get his opinion on this.
+One small thing below but otherwise I think this should be fine, however
+since we're very near the merge window I'd rather hold off any apply at
+-rc1, just to give more time for things to get tested.
 
->
-> https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/mediatek/pinctrl-mtk-common-v2.c#L339
->
-> So, I have to call pinctrl_select_state() to restore SDIO DAT1 pin
-> mode(pins_uhs). But pinctrl_select_state() return directly because MSDC
-> driver still wrongly thinks current DAT1 state is SDIO DAT1 mode:
->
-> https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/core.c#L1344
-> , which means I have to call pinctrl_select_state() in pairs: Change
-> pinctrl to another state(pins_eint), then change it back to pins_uhs
-> mode.
+> -	/* set regulator constraints */
+> -	if (init_data)
+> -		rdev->constraints =3D kmemdup(&init_data->constraints,
+> -					    sizeof(*rdev->constraints),
+> -					    GFP_KERNEL);
+> -	else
+> -		rdev->constraints =3D kzalloc(sizeof(*rdev->constraints),
+> -					    GFP_KERNEL);
+>  	if (!rdev->constraints) {
+>  		ret =3D -ENOMEM;
+>  		goto wash;
+>  	}
 
-I see. So a call to pinctrl_select_state("pins_uhs") would not take
-effect, unless we call pinctrl_select_state("pins_eint") first. That
-sounds like the internal state of the pinctrl isn't maintained
-properly.
+The check for allocation failure should get pulled earlier in the
+function along with the allocation, no sense in doing any of the other
+work if we're going to fail.
 
-Let's see what Linus thinks about this.
+--i0TkaW/gVp5KwYgS
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Note that, I am happy to pick the patch as is around this, but I am
-worried we might be doing something at the mmc driver level, which
-should really be managed at the pinctrl layer.
+-----BEGIN PGP SIGNATURE-----
 
->
->
-> > dev_pm_set_dedicated_wake_irq_reverse() will register the wakeirq,
-> > but
-> > more importantly, it should also leave the wakeirq disabled, right?
->
-> Yes. wakeirq will be registered, and disabled. But SDIO DAT1 pin mode
-> will be changed too.
->
-> >
-> > > +                       ret =
-> > > dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
-> > > +
-> > > +                       if (ret) {
-> > > +                               dev_err(host->dev, "Failed to
-> > > register SDIO wakeup irq!\n");
-> > > +                               host->pins_eint = NULL;
-> > > +                               pm_runtime_get_noresume(host->dev);
-> > > +                       } else {
-> > > +                               dev_dbg(host->dev, "SDIO eint irq:
-> > > %d!\n", host->eint_irq);
-> > > +                       }
-> > > +
-> > > +                       pinctrl_select_state(host->pinctrl, host-
-> > > >pins_uhs);
-> >
-> > According to my comment above, I also don't understand why you need
-> > this. Why can't you just leave the pinctrl in the "pins_uhs" state?
-> >
-> I have to call pinctrl_select_state() in pairs.
->
->
-> > > +               } else {
-> > > +                       dev_pm_clear_wake_irq(host->dev);
-> > > +               }
-> > > +       } else {
-> > > +               if (enb) {
-> > > +                       /* Ensure host->pins_eint is NULL */
-> > > +                       host->pins_eint = NULL;
-> > > +                       pm_runtime_get_noresume(host->dev);
-> > > +               } else {
-> > > +                       pm_runtime_put_noidle(host->dev);
-> > > +               }
-> > > +       }
-> > >  }
+iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmLZajwACgkQJNaLcl1U
+h9D6GAf/aKtJVjiaVbiy92RgxmpXa+sxM+nEmIzXqPyiJSiUDTcobnmI2+w7WN2Z
+6h/rewa+Ujgm0CSwmO4fiQLkeGhZZOeYsbkavj2pGeVm33xMfkaST4bvjgywvT55
+5vh93NWHdo59avBtRZegPSjdR8QWQOXLl7bP/6JEKEu91LGfolis1uR7AnDXwsDB
+c53Z1b96y/2VQ62VLavQ1+0E51afB0J3M318ISAky1CEIep8cQ9KyIIwRAQhJgW4
+V1KB/WmbRW6yaDA1Oy29n5gWJQIJBh/bUMHN35axsdfcZSaQoXjz4opKGpiEhefm
+zQpzGfqBoLU6I9sbfDFAKaGIeNiy8A==
+=b4kq
+-----END PGP SIGNATURE-----
 
-[...]
-
-Kind regards
-Uffe
+--i0TkaW/gVp5KwYgS--
