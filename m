@@ -2,259 +2,290 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E251C433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jul 2022 05:26:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B951C43334
+	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jul 2022 10:59:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229952AbiGUF03 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jul 2022 01:26:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59314 "EHLO
+        id S232802AbiGUK7T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 21 Jul 2022 06:59:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53640 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229705AbiGUF02 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2022 01:26:28 -0400
-Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E6F230F4F
-        for <linux-mmc@vger.kernel.org>; Wed, 20 Jul 2022 22:26:25 -0700 (PDT)
-Received: from epcas1p3.samsung.com (unknown [182.195.41.47])
-        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20220721052620epoutp04c6d8ba209bd236c57aa35e75d58ca340~DwOW3_5uH1453014530epoutp04b
-        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2022 05:26:20 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20220721052620epoutp04c6d8ba209bd236c57aa35e75d58ca340~DwOW3_5uH1453014530epoutp04b
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1658381180;
-        bh=y9OZaqd9ptnN5gpSgaj4wyizxw1XFfylOWNK+Rxs/Ww=;
-        h=From:To:Cc:Subject:Date:References:From;
-        b=lv046gS0wLONdMQ7z4slEU5li5FW9JKJr9V3XyS2kEWYWGJH8qiuzFFwT6uSf66Qt
-         8YGljKo7ywBXYZFQyFbNY2ziR6G3qg2zB23mxZYuYptMpPEOC2pGA8i8geijgHtAIO
-         LbCsnRikVmrDyYNBdl+jERN3tmywGQqjzZM0JSPk=
-Received: from epsnrtp3.localdomain (unknown [182.195.42.164]) by
-        epcas1p4.samsung.com (KnoxPortal) with ESMTP id
-        20220721052620epcas1p4dc50f66037f3d765b43666970fbabe2c~DwOWlNwXw0195501955epcas1p47;
-        Thu, 21 Jul 2022 05:26:20 +0000 (GMT)
-Received: from epsmges1p1.samsung.com (unknown [182.195.38.242]) by
-        epsnrtp3.localdomain (Postfix) with ESMTP id 4LpLdm0821z4x9QJ; Thu, 21 Jul
-        2022 05:26:20 +0000 (GMT)
-Received: from epcas1p3.samsung.com ( [182.195.41.47]) by
-        epsmges1p1.samsung.com (Symantec Messaging Gateway) with SMTP id
-        C9.84.09657.A73E8D26; Thu, 21 Jul 2022 14:26:18 +0900 (KST)
-Received: from epsmtrp2.samsung.com (unknown [182.195.40.14]) by
-        epcas1p4.samsung.com (KnoxPortal) with ESMTPA id
-        20220721052617epcas1p48967f8acf113372b2a9fc88cca40b2dc~DwOUDQN070214602146epcas1p4W;
-        Thu, 21 Jul 2022 05:26:17 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-        epsmtrp2.samsung.com (KnoxPortal) with ESMTP id
-        20220721052617epsmtrp2f43f9389af229bff9c8e802053892f0f~DwOUCujU92755127551epsmtrp23;
-        Thu, 21 Jul 2022 05:26:17 +0000 (GMT)
-X-AuditID: b6c32a35-71dff700000025b9-17-62d8e37a2d56
-Received: from epsmtip2.samsung.com ( [182.195.34.31]) by
-        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        74.B4.08905.973E8D26; Thu, 21 Jul 2022 14:26:17 +0900 (KST)
-Received: from localhost.localdomain (unknown [10.253.101.71]) by
-        epsmtip2.samsung.com (KnoxPortal) with ESMTPA id
-        20220721052617epsmtip2f0d6b89240b075a868d2fd27ba53b6be~DwOT2L8tZ0379303793epsmtip23;
-        Thu, 21 Jul 2022 05:26:17 +0000 (GMT)
-From:   Seunghui Lee <sh043.lee@samsung.com>
-To:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        adrian.hunter@intel.com
-Cc:     Seunghui Lee <sh043.lee@samsung.com>,
-        DooHyun Hwang <dh0421.hwang@samsung.com>
-Subject: [PATCH] mmc: sd: Remove the patch that fix signal voltage when
- there is no power cycle
-Date:   Thu, 21 Jul 2022 14:59:24 +0900
-Message-Id: <20220721055924.9043-1-sh043.lee@samsung.com>
-X-Mailer: git-send-email 2.29.0
+        with ESMTP id S232695AbiGUK7Q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2022 06:59:16 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 430B782F97
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2022 03:59:15 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id o7so2150807lfq.9
+        for <linux-mmc@vger.kernel.org>; Thu, 21 Jul 2022 03:59:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=K/2viF3eSJYOGhNeTSek4Gd41pFBC7ydU9x0OtqaLDY=;
+        b=OW70yuqjDHPsJW/9lYO1PA31vs5SOvxoYPior/meywHg3VVyxkj0hOxB5ygKSOrtKi
+         4qvXcm+yuV8rxe/XaVHqY0tPT4RcjXnJrtZEylmbgN7Rs4kYDYJd/s1WqnB+hUKpeDBz
+         34TUjSU1sSIR6K+ZSSO/WGe7blSSWHHgUeIcaqAuX9GbGESkDBcLQX92REF8Y0xXTUk5
+         wYYr8Vtf5SIk+OfxcnRNy3V1FMg6ha2ULZ0XbSMNTIGxHwS06RKT/pcaJwxm7TBN1fhs
+         6PRKnyZxgzX16CZqHUnJiGl7gALUJXRyItAkLTUMRh0RzoJRWazAiQ/crTSYl5zFaNTs
+         tXqw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=K/2viF3eSJYOGhNeTSek4Gd41pFBC7ydU9x0OtqaLDY=;
+        b=NA6+XGiphboqhOjWZ5G7ha3KHui1Z8lbUSjC2AbYOz47xO3JADWNLetK7roIAoxzIQ
+         /6KT3lblIKRdoqNRbGhIfJSa3uSTfRsM4+i3ep2OcgnXLmBswYYN75CbujkIRD8H21Em
+         8aKknXMMvEhpEQaTZQh87lKL0Ah7DnRC6jlPlCEeVqw0Tb0+wDRPjv4l490o+kLXRqYm
+         stjyjsp6wH3yF6GLMwP2MN9aLoYnLqvZ4UuLnIhJNiu0CsgCnZ/OvaXCoMGJG7WdxCGt
+         al2U/ho/+tashBkn7ERLrsbeFMuMoB/9M1Hrcl3T4JZCFVkwmp8RTUvsPFH3ic4YiWO+
+         Hmhg==
+X-Gm-Message-State: AJIora9KNJQ/cKC/0ENJ1GmaBu97ChPW1dSJmpmZ433LhvBBx72h1BzG
+        r7LT4ton9jUJndqxU8XSdqy4MK1leyKpmBvtKPpZgQ==
+X-Google-Smtp-Source: AGRyM1vnns/WVjmSohd7/CwG0NbC1Ng8QfLmm7xlh/yWlW5y7KvKYM5HkNvdjXOtNeDf1fwcDKsNGrZM7GuNJgZxNZs=
+X-Received: by 2002:a05:6512:32c6:b0:48a:18a1:2d2b with SMTP id
+ f6-20020a05651232c600b0048a18a12d2bmr19559138lfg.373.1658401153130; Thu, 21
+ Jul 2022 03:59:13 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFnrHKsWRmVeSWpSXmKPExsWy7bCmvm7V4xtJBnNusVqcfLKGzWLftZPs
-        Fkf+9zNaNP3Zx2JxfG24A6vH4j0vmTzuXNvD5tG3ZRWjx+dNcgEsUdk2GamJKalFCql5yfkp
-        mXnptkrewfHO8aZmBoa6hpYW5koKeYm5qbZKLj4Bum6ZOUBrlRTKEnNKgUIBicXFSvp2NkX5
-        pSWpChn5xSW2SqkFKTkFZgV6xYm5xaV56Xp5qSVWhgYGRqZAhQnZGVu/zmQs+GpVcX71KqYG
-        xt0GXYycHBICJhK3Fy1kArGFBHYwSqz5nNPFyAVkf2KUmLRmPyOE841R4t7lnewwHRfnrmKG
-        SOxllFi8bgc7hPOZUWLR7gOMIFVsAloS0zdtAZsrIhAgsaH7JmsXIwcHs0CIxM1p5SBhYYFE
-        iXu3vjCD2CwCqhJrfr1hBbF5BSwlbm7ZDbVMXuLP/R5miLigxMmZT1hAbGagePPW2WBHSAjs
-        Y5f482sBC0SDi0Tjk+OsELawxKvjW6AGSUl8freXDcIulmj7948Zwq6QONj3Bco2lvj0+TMj
-        xJ2aEut36UOEFSV2/p7LCLGXT+Ld1x6wVyQEeCU62oQgSpQlXj5axgRhS0osab8FNdFD4uaF
-        JcyQ0I2VuDz9PeMERvlZSL6ZheSbWQiLFzAyr2IUSy0ozk1PLTYsMITHaXJ+7iZGcMLTMt3B
-        OPHtB71DjEwcjIcYJTiYlUR4nxZeTxLiTUmsrEotyo8vKs1JLT7EaAoM34nMUqLJ+cCUm1cS
-        b2hiaWBiZmRiYWxpbKYkzrtq2ulEIYH0xJLU7NTUgtQimD4mDk6pBibh+POvzzfdnxheucrh
-        48z4CS1p56UN765bxz/Xg5WrYCNPFOfy6evCpxxiKMxIOfRv3x6u6VxxbCu3GvTUSAoKXby8
-        VVT05YRTUhe7I04d2DZJIdR86gaFjmzxH+K/FB7sPWGcPudM6LeHP/dnJHx56q4oePtVpDan
-        rZAYly7/g9/3FvOKu+1o2VleLjv/8xLfe5orWf1vtf+wy1A5/D6aS3X/+w99pSYC2XNvM4R+
-        OWJu6BG/Z8H5fdpf7i18cYZd9Mz7MzfYPnk8mGZp2r02V3x3kswMw1kzi2fv/pF6sX6WxKL+
-        BZOV44+1nb3QeTnB8sahZx1ZimVRezSeT/8vwpsUNv2sSM8+1emH1tm1KrEUZyQaajEXFScC
-        AInToLIBBAAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprLLMWRmVeSWpSXmKPExsWy7bCSvG7l4xtJBq/2ylmcfLKGzWLftZPs
-        Fkf+9zNaNP3Zx2JxfG24A6vH4j0vmTzuXNvD5tG3ZRWjx+dNcgEsUVw2Kak5mWWpRfp2CVwZ
-        W7/OZCz4alVxfvUqpgbG3QZdjJwcEgImEhfnrmLuYuTiEBLYzShxsucVE0RCUmLxo4dsXYwc
-        QLawxOHDxRA1HxklzjXMZAGpYRPQkpi+aQtYvYhAkMSma4tZQeqZBUIkHj/OAwkLC8RLND79
-        ywxiswioSqz59YYVxOYVsJS4uWU3O8QqeYk/93uYIeKCEidnPgEbzwwUb946m3kCI98sJKlZ
-        SFILGJlWMUqmFhTnpucWGxYY5qWW6xUn5haX5qXrJefnbmIEh6CW5g7G7as+6B1iZOJgPMQo
-        wcGsJML7tPB6khBvSmJlVWpRfnxRaU5q8SFGaQ4WJXHeC10n44UE0hNLUrNTUwtSi2CyTByc
-        Ug1MKz89KhI2l/JINFBfdF13R2zt7qU3NzAXyGTtDz7MLXru+dYiqcQa5x+1Z59M0b9bXTep
-        sejN7m2J+feWvZjpvJLNWTuq9OCbhjLx81859i2bkVs29d6beRe/PtHlMjosf+qmHt+9PV7v
-        FHsv8i6Q23dnQ/cl8Rsnnr57cOziJWPe4rUvbz7K25Nvs5bx1FHhnTNOtdmr/dDcUDGTO+oa
-        x/5zJ94opl98o/j2isiTav4zdsHpOsfifqRP/X6VT+Gbg9PaTdsKXU4d7pr48V8qm79NjOFC
-        lqwzGofPZkxjkzTT2u/Q71y6rOGexXLFwOjiv7UrnnmYbZjvqsmrl/ky9qPyVInG1nN5fLuX
-        Gk3XPqPEUpyRaKjFXFScCAAEZh0FsAIAAA==
-X-CMS-MailID: 20220721052617epcas1p48967f8acf113372b2a9fc88cca40b2dc
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: SVC_REQ_APPROVE
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20220721052617epcas1p48967f8acf113372b2a9fc88cca40b2dc
-References: <CGME20220721052617epcas1p48967f8acf113372b2a9fc88cca40b2dc@epcas1p4.samsung.com>
+References: <20220623090445.1401-1-axe.yang@mediatek.com> <20220623090445.1401-4-axe.yang@mediatek.com>
+ <CAPDyKFr0gy1sNb=U3j1ErSZm+jcAcvg_jwNmodEs7ip4_LjNZg@mail.gmail.com> <621878fea57e70d56640bf6c50f4b723624060ee.camel@mediatek.com>
+In-Reply-To: <621878fea57e70d56640bf6c50f4b723624060ee.camel@mediatek.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 21 Jul 2022 12:58:36 +0200
+Message-ID: <CAPDyKFrT-45bz6_mbWXTKEe_JKfd+p4ava1RxZD=6CyCdTukOg@mail.gmail.com>
+Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup IRQ
+To:     Axe Yang <axe.yang@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Satya Tangirala <satyat@google.com>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Lucas Stach <dev@lynxeye.de>,
+        Eric Biggers <ebiggers@google.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Stephen Boyd <swboyd@chromium.org>,
+        Kiwoong Kim <kwmad.kim@samsung.com>,
+        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
+        angelogioacchino.delregno@collabora.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        Yong Mao <yong.mao@mediatek.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-At first, all error flow of mmc_set_uhs_voltage() has power cycle
-except R1_ERROR and no start_signal_voltage_switch() func pointer.
++ Linus Walleij
 
-There is the performance regression issue of SDR104 SD card from
-the market VOC. Normally, once a SDR104 SD card fails to switch voltage,
-it works HS mode.
-And then it initializes SDR104 mode after system resume or error handling.
+On Tue, 19 Jul 2022 at 12:35, Axe Yang <axe.yang@mediatek.com> wrote:
+>
+> On Mon, 2022-07-18 at 14:21 +0200, Ulf Hansson wrote:
+> > On Thu, 23 Jun 2022 at 11:05, Axe Yang <axe.yang@mediatek.com> wrote:
+> > >
+> > > Add support for eint IRQ when MSDC is used as an SDIO host. This
+> > > feature requires SDIO device support async IRQ function. With this
+> > > feature, SDIO host can be awakened by SDIO card in suspend state,
+> > > without additional pin.
+> > >
+> > > MSDC driver will time-share the SDIO DAT1 pin. During suspend, MSDC
+> > > turn off clock and switch SDIO DAT1 pin to GPIO mode. And during
+> > > resume, switch GPIO function back to DAT1 mode then turn on clock.
+> > >
+> > > Some device tree property should be added or modified in MSDC node
+> > > to support SDIO eint IRQ. Pinctrls "state_eint" is mandatory. Since
+> > > this feature depends on asynchronous interrupts, "wakeup-source",
+> > > "keep-power-in-suspend" and "cap-sdio-irq" flags are necessary, and
+> > > the interrupts list should be extended(the interrupt named with
+> > > sdio_wakeup):
+> > >         &mmcX {
+> > >                 ...
+> > >                 interrupt-names = "msdc", "sdio_wakeup";
+> > >                 interrupts-extended = <...>,
+> > >                                       <&pio xxx
+> > > IRQ_TYPE_LEVEL_LOW>;
+> > >                 ...
+> > >                 pinctrl-names = "default", "state_uhs",
+> > > "state_eint";
+> > >                 ...
+> > >                 pinctrl-2 = <&mmc2_pins_eint>;
+> > >                 ...
+> > >                 cap-sdio-irq;
+> > >                 keep-power-in-suspend;
+> > >                 wakeup-source;
+> > >                 ...
+> > >         };
+> > >
+> > > Co-developed-by: Yong Mao <yong.mao@mediatek.com>
+> > > Signed-off-by: Yong Mao <yong.mao@mediatek.com>
+> > > Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+> >
+> > My apologies for the delay in reviewing this.
+>
+> It is okay. Glad to receive your reply.
+>
+> >
+> > > ---
+> > >  drivers/mmc/host/mtk-sd.c | 84
+> > > ++++++++++++++++++++++++++++++++++++---
+> > >  1 file changed, 78 insertions(+), 6 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> > > index 195dc897188b..f907b96cfd87 100644
+> > > --- a/drivers/mmc/host/mtk-sd.c
+> > > +++ b/drivers/mmc/host/mtk-sd.c
+> > > @@ -1,6 +1,6 @@
+> > >  // SPDX-License-Identifier: GPL-2.0-only
+> > >  /*
+> > > - * Copyright (c) 2014-2015 MediaTek Inc.
+> > > + * Copyright (c) 2014-2015, 2022 MediaTek Inc.
+> > >   * Author: Chaotian.Jing <chaotian.jing@mediatek.com>
+> > >   */
+> > >
+> > > @@ -20,6 +20,7 @@
+> > >  #include <linux/platform_device.h>
+> > >  #include <linux/pm.h>
+> > >  #include <linux/pm_runtime.h>
+> > > +#include <linux/pm_wakeirq.h>
+> > >  #include <linux/regulator/consumer.h>
+> > >  #include <linux/slab.h>
+> > >  #include <linux/spinlock.h>
+> > > @@ -440,8 +441,10 @@ struct msdc_host {
+> > >         struct pinctrl *pinctrl;
+> > >         struct pinctrl_state *pins_default;
+> > >         struct pinctrl_state *pins_uhs;
+> > > +       struct pinctrl_state *pins_eint;
+> > >         struct delayed_work req_timeout;
+> > >         int irq;                /* host interrupt */
+> > > +       int eint_irq;           /* interrupt from sdio device for
+> > > waking up system */
+> > >         struct reset_control *reset;
+> > >
+> > >         struct clk *src_clk;    /* msdc source clock */
+> > > @@ -1520,17 +1523,46 @@ static void __msdc_enable_sdio_irq(struct
+> > > msdc_host *host, int enb)
+> > >
+> > >  static void msdc_enable_sdio_irq(struct mmc_host *mmc, int enb)
+> > >  {
+> > > -       unsigned long flags;
+> > >         struct msdc_host *host = mmc_priv(mmc);
+> > > +       unsigned long flags;
+> > > +       int ret;
+> > >
+> > >         spin_lock_irqsave(&host->lock, flags);
+> > >         __msdc_enable_sdio_irq(host, enb);
+> > >         spin_unlock_irqrestore(&host->lock, flags);
+> > >
+> > > -       if (enb)
+> > > -               pm_runtime_get_noresume(host->dev);
+> > > -       else
+> > > -               pm_runtime_put_noidle(host->dev);
+> > > +       if (mmc_card_enable_async_irq(mmc->card) && host-
+> > > >pins_eint) {
+> > > +               if (enb) {
+> > > +                       /*
+> > > +                        * In
+> > > dev_pm_set_dedicated_wake_irq_reverse(), eint pin will be set to
+> > > +                        * GPIO mode. We need to restore it to SDIO
+> > > DAT1 mode after that.
+> > > +                        * Since the current pinstate is pins_uhs,
+> > > to ensure pinctrl select take
+> > > +                        * affect successfully, we change the
+> > > pinstate to pins_eint firstly.
+> > > +                        */
+> > > +                       pinctrl_select_state(host->pinctrl, host-
+> > > >pins_eint);
+> >
+> > I am sorry, but I don't understand what goes on here. Why do you need
+> > to change the pinctrl setting to "pins_eint" here?
+> >
+> > The bellow call to dev_pm_set_dedicated_wake_irq_reverse() doesn't
+> > change the pinctrl setting as the comment suggests above.
+> >
+>
+> Actually, the pinctrl setting is changed:
+> In dev_pm_set_dedicated_wake_irq_reverse() -> ... ->
+> request_threaded_irq() -> __setup_irq() -> irq_request_resources() ->
+> mtk_eint_irq_request_resources()-> mtk_xt_set_gpio_as_eint(), the SDIO
+> DAT1 pin will be force reset to GPIO mode:
 
-However, with below patch,
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core/sd.c?id=6a11fc47f175c8d87018e89cb58e2d36c66534cb
-Once a SD card does, it initializes SDR25 mode forever
-after system resume or error handling(re-initialized).
-Host updates sd3_bus_mode by calling mmc_read_switch(),
-the value of sd3_bus_mode doesn't set for SDR104, SDR50 and DDR50 mode.
+Aha. That looks a bit weird, but I get the problem now.
 
-So, if host doesn't update sd3_bus_mode,
-the SD card works SDR104 mode after system resume or error-handling.
+I have looped in Linus (the pintctrl maintainer) to get his opinion on this.
 
-Here is an example.
+>
+> https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/mediatek/pinctrl-mtk-common-v2.c#L339
+>
+> So, I have to call pinctrl_select_state() to restore SDIO DAT1 pin
+> mode(pins_uhs). But pinctrl_select_state() return directly because MSDC
+> driver still wrongly thinks current DAT1 state is SDIO DAT1 mode:
+>
+> https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/core.c#L1344
+> , which means I have to call pinctrl_select_state() in pairs: Change
+> pinctrl to another state(pins_eint), then change it back to pins_uhs
+> mode.
 
-AS-IS : test log
-// normal case : sd3_bus_mode = 0x1F, sd_bus_speed = SDR104, clock 208MHz
-[  111.907789] [1:    kworker/1:3:  772] [TEST] mmc_sd_init_card: 1119: caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false, signal_voltage =0x1.
-[  111.907824] [1:    kworker/1:3:  772] [TEST] mmc_sd_init_card: 1149: rocr 0xc1ff8000, S18A, uhs.
-[  111.908707] [1:    kworker/1:3:  772] [TEST] sd_update_bus_speed_mode: caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed = 3, card->ocr = 0x40000.
-[  111.912484] [1:    kworker/1:3:  772] [TEST] sd_set_bus_speed_mode: sd_bus_speed=3, timing=6, uhs_max_dtr=208000000, card->ocr=0x40000.
-// resume : issue occurs : SDcard doesn't release busy for checking 10 times
-[  112.096550] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1040: card->ocr 0x40000.
-[  112.096560] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr 0x40000(pocr 0x40000), retries 10.
-...
-[  114.531129] [5:    kworker/5:2:  207] [TEST] mmc_power_cycle.
-[  114.579500] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr 0x41040000(pocr 0x40000), retries 0.
-[  114.579506] [5:    kworker/5:2:  207] mmc0: Skipping voltage switch
-[  114.757575] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1119: caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false, signal_voltage =0x0.
-[  114.757583] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1128: switch with oldcard.
-[  114.759742] [5:    kworker/5:2:  207] [TEST] mmc_read_switch: sd_switch ret 0, sd3_bus_mode=3.
-// sd3_bus_mode = 0x3 supports HS, SDR25 and SDR12
-[  114.759750] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1157: switch hs.
-// next resume : the SDcard initializes to SDR25(HS) mode(sd_bus_speed = 1) by sd3_bus_mode setting with clk 50MHz
-[  114.968346] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1040: card->ocr 0x40000.
-[  114.968359] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr 0x40000(pocr 0x40000), retries 10.
-[  115.167346] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1119: caps=0x407f020f, sd3_bus_mode=0x3, v18_fixup_failed false, signal_voltage =0x1.
-[  115.167366] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1149: rocr 0xc1ff8000, S18A, uhs.
-[  115.168041] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_uhs_card: before update: caps 0x407f020f, sd3_bus_mode = 3, sd_bus_speed = 3, card->ocr = 0x40000.
-[  115.168051] [5:    kworker/5:2:  207] [TEST] sd_update_bus_speed_mode: caps 0x407f020f, sd3_bus_mode = 3, sd_bus_speed = 1, card->ocr = 0x40000.
-[  115.169176] [5:    kworker/5:2:  207] [TEST] sd_set_bus_speed_mode: sd_bus_speed=1, timing=4, uhs_max_dtr=50000000, card->ocr=0x40000.
+I see. So a call to pinctrl_select_state("pins_uhs") would not take
+effect, unless we call pinctrl_select_state("pins_eint") first. That
+sounds like the internal state of the pinctrl isn't maintained
+properly.
 
-TO-BE : TEST log with this commit
-// resume : issue occurs : SDcard doesn't release busy for checking 10 times
-[ 1843.594805] [4:    kworker/4:5:21512] [TEST] mmc_sd_get_cid: ocr 0x41040000(pocr 0x40000), retries 0.
-[ 1843.594812] [4:    kworker/4:5:21512] mmc0: Skipping voltage switch
-[ 1843.772555] [4:    kworker/4:5:21512] [TEST] mmc_sd_init_card: 1122: caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false, signal_voltage =0x0.
-// no update sd3_bus_mode value
-[ 1843.772563] [4:    kworker/4:5:21512] [TEST] mmc_sd_init_card: 1164: switch hs.
-// next resume : the SDcard initializes to SDR104
-[ 1844.191295] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_card: 1122: caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false, signal_voltage =0x1.
-[ 1844.191315] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_card: 1154: rocr 0xc1ff8000, S18A, uhs.
-[ 1844.192175] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_uhs_card: before update: caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed = 3, card->ocr = 0x40000.
-[ 1844.192187] [5:   kworker/5:93: 2282] [TEST] sd_update_bus_speed_mode: caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed = 3, card->ocr = 0x40000.
-[ 1844.198697] [5:   kworker/5:93: 2282] [TEST] sd_set_bus_speed_mode: sd_bus_speed=3, timing=6, uhs_max_dtr=208000000, card->ocr=0x40000.
+Let's see what Linus thinks about this.
 
-Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
-Tested-by: DooHyun Hwang <dh0421.hwang@samsung.com>
----
- drivers/mmc/core/sd.c | 47 ++-----------------------------------------
- 1 file changed, 2 insertions(+), 45 deletions(-)
+Note that, I am happy to pick the patch as is around this, but I am
+worried we might be doing something at the mmc driver level, which
+should really be managed at the pinctrl layer.
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index cee4c0b59f43..4e3d39956185 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1001,18 +1001,6 @@ unsigned mmc_sd_get_max_clock(struct mmc_card *card)
- 	return max_dtr;
- }
- 
--static bool mmc_sd_card_using_v18(struct mmc_card *card)
--{
--	/*
--	 * According to the SD spec., the Bus Speed Mode (function group 1) bits
--	 * 2 to 4 are zero if the card is initialized at 3.3V signal level. Thus
--	 * they can be used to determine if the card has already switched to
--	 * 1.8V signaling.
--	 */
--	return card->sw_caps.sd3_bus_mode &
--	       (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
--}
--
- static int sd_write_ext_reg(struct mmc_card *card, u8 fno, u8 page, u16 offset,
- 			    u8 reg_data)
- {
-@@ -1400,10 +1388,9 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 	int err;
- 	u32 cid[4];
- 	u32 rocr = 0;
--	bool v18_fixup_failed = false;
- 
- 	WARN_ON(!host->claimed);
--retry:
-+
- 	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
- 	if (err)
- 		return err;
-@@ -1472,36 +1459,6 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 	if (err)
- 		goto free_card;
- 
--	/*
--	 * If the card has not been power cycled, it may still be using 1.8V
--	 * signaling. Detect that situation and try to initialize a UHS-I (1.8V)
--	 * transfer mode.
--	 */
--	if (!v18_fixup_failed && !mmc_host_is_spi(host) && mmc_host_uhs(host) &&
--	    mmc_sd_card_using_v18(card) &&
--	    host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
--		/*
--		 * Re-read switch information in case it has changed since
--		 * oldcard was initialized.
--		 */
--		if (oldcard) {
--			err = mmc_read_switch(card);
--			if (err)
--				goto free_card;
--		}
--		if (mmc_sd_card_using_v18(card)) {
--			if (mmc_host_set_uhs_voltage(host) ||
--			    mmc_sd_init_uhs_card(card)) {
--				v18_fixup_failed = true;
--				mmc_power_cycle(host, ocr);
--				if (!oldcard)
--					mmc_remove_card(card);
--				goto retry;
--			}
--			goto done;
--		}
--	}
--
- 	/* Initialization sequence for UHS-I cards */
- 	if (rocr & SD_ROCR_S18A && mmc_host_uhs(host)) {
- 		err = mmc_sd_init_uhs_card(card);
-@@ -1566,7 +1523,7 @@ static int mmc_sd_init_card(struct mmc_host *host, u32 ocr,
- 		err = -EINVAL;
- 		goto free_card;
- 	}
--done:
-+
- 	host->card = card;
- 	return 0;
- 
--- 
-2.29.0
+>
+>
+> > dev_pm_set_dedicated_wake_irq_reverse() will register the wakeirq,
+> > but
+> > more importantly, it should also leave the wakeirq disabled, right?
+>
+> Yes. wakeirq will be registered, and disabled. But SDIO DAT1 pin mode
+> will be changed too.
+>
+> >
+> > > +                       ret =
+> > > dev_pm_set_dedicated_wake_irq_reverse(host->dev, host->eint_irq);
+> > > +
+> > > +                       if (ret) {
+> > > +                               dev_err(host->dev, "Failed to
+> > > register SDIO wakeup irq!\n");
+> > > +                               host->pins_eint = NULL;
+> > > +                               pm_runtime_get_noresume(host->dev);
+> > > +                       } else {
+> > > +                               dev_dbg(host->dev, "SDIO eint irq:
+> > > %d!\n", host->eint_irq);
+> > > +                       }
+> > > +
+> > > +                       pinctrl_select_state(host->pinctrl, host-
+> > > >pins_uhs);
+> >
+> > According to my comment above, I also don't understand why you need
+> > this. Why can't you just leave the pinctrl in the "pins_uhs" state?
+> >
+> I have to call pinctrl_select_state() in pairs.
+>
+>
+> > > +               } else {
+> > > +                       dev_pm_clear_wake_irq(host->dev);
+> > > +               }
+> > > +       } else {
+> > > +               if (enb) {
+> > > +                       /* Ensure host->pins_eint is NULL */
+> > > +                       host->pins_eint = NULL;
+> > > +                       pm_runtime_get_noresume(host->dev);
+> > > +               } else {
+> > > +                       pm_runtime_put_noidle(host->dev);
+> > > +               }
+> > > +       }
+> > >  }
 
+[...]
+
+Kind regards
+Uffe
