@@ -2,71 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30E3CC433EF
-	for <linux-mmc@archiver.kernel.org>; Thu, 21 Jul 2022 16:30:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DD6DC43334
+	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jul 2022 07:22:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232693AbiGUQac (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 21 Jul 2022 12:30:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35226 "EHLO
+        id S234420AbiGVHW6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 22 Jul 2022 03:22:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231906AbiGUQab (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 21 Jul 2022 12:30:31 -0400
-Received: from smtpbg.qq.com (biz-43-154-54-12.mail.qq.com [43.154.54.12])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6FD8B19C3B;
-        Thu, 21 Jul 2022 09:30:25 -0700 (PDT)
-X-QQ-mid: bizesmtp82t1658420974t9n9vk9y
-Received: from localhost.localdomain ( [171.223.97.251])
-        by bizesmtp.qq.com (ESMTP) with 
-        id ; Fri, 22 Jul 2022 00:29:22 +0800 (CST)
-X-QQ-SSF: 01000000002000F0U000B00A0000000
-X-QQ-FEAT: iKELhlls3Fzi4U23FvR0b8Q1kzjm5J4x3sNvc0t3cb00eYaxfMDwEnbLOnsHY
-        ARzzBdHUJjxcMntmy371ZHfTdCL5uNnAb3gqXorttZ4iwMY3/TVn2yxyY/4c9z2hcDC6H9T
-        00XGrUlkImg6xjqnwvSOHAVZkCEYK8ww/+IWI/5RyNYC6ze9T6iurdXYv97I++5/jHqde8f
-        cpl3qySa7X1MDzqOqzHGCJ8eAy9nTTM4D/C9CttvUCuGSK05My1Cz3YCd4bnxkqBQbKi3wL
-        mbMKuwuVG4adQvablXn0QFOcoN132y/xk8qyfZSP4WTyxQ3QE85WZUbo33rAbOQsW0WworI
-        +z9i7Tf7RQtDb3iTgj/IFVendYzDfrZPRueX77yf6p/Uq7D0pA=
-X-QQ-GoodBg: 0
-From:   Jason Wang <wangborong@cdjrlc.com>
-To:     ulf.hansson@linaro.org
-Cc:     adrian.hunter@intel.com, haibo.chen@nxp.com, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, kishon@ti.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        Jason Wang <wangborong@cdjrlc.com>
-Subject: [PATCH 2/3] mmc: sdhci-esdhc-imx: Fix comment typo
-Date:   Mon, 18 Jul 2022 16:26:49 +0800
-Message-Id: <20220718082650.9784-2-wangborong@cdjrlc.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220718082650.9784-1-wangborong@cdjrlc.com>
-References: <20220718082650.9784-1-wangborong@cdjrlc.com>
+        with ESMTP id S234461AbiGVHW6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2022 03:22:58 -0400
+Received: from mail-m974.mail.163.com (mail-m974.mail.163.com [123.126.97.4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id AC20128717;
+        Fri, 22 Jul 2022 00:22:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=163.com;
+        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=11gbh
+        NoF5cEoLfJC16ejYmefWWlsT9RKa9ERJhQ1ZQ4=; b=fNziiM6eC/CHWmt9WNhkt
+        e/Eo7SEoNlDAbMAo82Ie1GezArKzUjQLi5V9utvekGSSjYJSJwrEu0OUXLlEOfVo
+        CEn5Lp8a5PrdUmjds53fWFN+n8GzrrnJuCs3++kdMS1hVADS6CHNG/EPE7PGYoru
+        FE8bqOJaf81KH6RrK42SVE=
+Received: from localhost.localdomain (unknown [112.97.59.29])
+        by smtp4 (Coremail) with SMTP id HNxpCgC3BIVIUNpiA8ptQA--.19206S2;
+        Fri, 22 Jul 2022 15:22:51 +0800 (CST)
+From:   Slark Xiao <slark_xiao@163.com>
+To:     jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Slark Xiao <slark_xiao@163.com>
+Subject: [PATCH] mmc: dw_mmc: Fix typo 'the the' in comment
+Date:   Fri, 22 Jul 2022 15:22:47 +0800
+Message-Id: <20220722072247.72189-1-slark_xiao@163.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:cdjrlc.com:qybglogicsvr:qybglogicsvr6
+X-CM-TRANSID: HNxpCgC3BIVIUNpiA8ptQA--.19206S2
+X-Coremail-Antispam: 1Uf129KBjvdXoWrZFWUWr1DGryfCryUur4kWFg_yoW3WFX_Kr
+        WrXr97Ww1akF9aqF1xtF1rZFWrtw4rWr4xZr95Kay3W345Zw4fX3WvvrWDJ3s8uFWDAay3
+        uF1rXryfKay5WjkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
+        9fnUUvcSsGvfC2KfnxnUUI43ZEXa7sRuYLyJUUUUU==
+X-Originating-IP: [112.97.59.29]
+X-CM-SenderInfo: xvod2y5b0lt0i6rwjhhfrp/xtbCdQNGZGBbEbvYPgAAsj
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The double `the' is duplicated in the comment, remove one.
+Replace 'the the' with 'the' in the comment.
 
-Signed-off-by: Jason Wang <wangborong@cdjrlc.com>
+Signed-off-by: Slark Xiao <slark_xiao@163.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
+ drivers/mmc/host/dw_mmc.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 55981b0f0b10..e1ada9487a8f 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1454,7 +1454,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
- 		/*
- 		 * On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
- 		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
--		 * the 1st linux configure power/clock for the 2nd Linux.
-+		 * 1st linux configure power/clock for the 2nd Linux.
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 581614196a84..7f00d7d7e35e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1363,7 +1363,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 		 * is just about to roll over.
  		 *
- 		 * When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
- 		 * to destroy the 2nd linux, then restart the 2nd linux, we met SDHCI dump.
+ 		 * We do this whole thing under spinlock and only if the
+-		 * command hasn't already completed (indicating the the irq
++		 * command hasn't already completed (indicating the irq
+ 		 * already ran so we don't want the timeout).
+ 		 */
+ 		spin_lock_irqsave(&host->irq_lock, irqflags);
 -- 
-2.35.1
+2.25.1
 
