@@ -2,67 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A3EAC433EF
-	for <linux-mmc@archiver.kernel.org>; Fri, 22 Jul 2022 20:08:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 045F4CCA489
+	for <linux-mmc@archiver.kernel.org>; Sat, 23 Jul 2022 07:43:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236731AbiGVUIE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 22 Jul 2022 16:08:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34826 "EHLO
+        id S237084AbiGWHnL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 23 Jul 2022 03:43:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54368 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236706AbiGVUIA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 22 Jul 2022 16:08:00 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3554FA8746;
-        Fri, 22 Jul 2022 13:07:59 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 6AFE461FCF;
-        Fri, 22 Jul 2022 20:07:58 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id CC79EC341C6;
-        Fri, 22 Jul 2022 20:07:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1658520477;
-        bh=ohmSvi0K7c/bHcdN+W16xxW1NzHhb+6rgP3yTO0JkHk=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=p320JNphPswO6m8mpoPdiVHmNEWRCzJOqpf2kJsnyjeFnsTv6uQoHx1MVzy8NIhim
-         lnVMkJgflVlPG7gLWOmwQx6LWt/zhlpxu2yHgAAf9B0avFJSt4MREozJRXrwbKfiFS
-         yKYQFpYocUosMMEXJQh5qUuBup4oznGcPdwQ6RHmhQY8Oyxwb85+9gsnGtjyZfgOZy
-         vqTWn/mclzJMFVS3adZcPToBn0a474h9ShstCYcPHCVjhqCgFEv4TPRQIbfYIj2Swb
-         9uOyqtOkgVLUW/nA2mpxcSSpNpn3a1FKLUXk9uYx21k1u2l00do3P8EhpLCCKrDVjy
-         ys82/mkbR1xBg==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id B54D8E451B3;
-        Fri, 22 Jul 2022 20:07:57 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v5.19-rc8
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20220722094737.50886-1-ulf.hansson@linaro.org>
-References: <20220722094737.50886-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20220722094737.50886-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.19-rc6
-X-PR-Tracked-Commit-Id: 51189eb9ddc88851edc42f539a0f9862fd0630c2
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 85029503fc95ea16e0c0856251f5cba750847c85
-Message-Id: <165852047773.15752.15759375835312020414.pr-tracker-bot@kernel.org>
-Date:   Fri, 22 Jul 2022 20:07:57 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S237004AbiGWHnE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Jul 2022 03:43:04 -0400
+Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4225E4F18C;
+        Sat, 23 Jul 2022 00:43:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1658562184; x=1690098184;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=qUq+H1frG1Bumibkq8JeFlN8w10jAIu+y1VymbrL+Os=;
+  b=K9c+lJzr13tlefzSxd4swnVg1rYLFA+cvM7SbAstxFfV2gSg4H/ekuzh
+   93MATC5ZWKzyFaEz5tVnrpPMeyYFYI9mgf4bTZwk2dAYkVxygMGeiBejy
+   3/RVLrcBxGMSFM4kr6OYPMWmGQ3BG2g+LQlF6qVthAd/Z8jjBZRx3spQT
+   mfXLSxHRE8VYejSlQQe8B6bzLa7L/CjMaDOiMhkkNFoZweN1MCTaKczR7
+   w69Nyp80gBL34KihmMpZwXM+yDeLbAFifJwgpaVf+PfH51F8uSIHOqBa2
+   2b0eelnXQL0FaTnp7gUuO0HYUb4w0f81OVQ30cvQlP1OyYGdv2j2P33nr
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10416"; a="267845768"
+X-IronPort-AV: E=Sophos;i="5.93,187,1654585200"; 
+   d="scan'208";a="267845768"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jul 2022 00:43:03 -0700
+X-IronPort-AV: E=Sophos;i="5.93,187,1654585200"; 
+   d="scan'208";a="657493472"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.55.193])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jul 2022 00:43:01 -0700
+Message-ID: <992cc198-6c7c-977a-1af8-56665e939cc9@intel.com>
+Date:   Sat, 23 Jul 2022 10:42:58 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH] mmc: block: Dont report successful writes with errors
+Content-Language: en-US
+To:     Christian Loehle <CLoehle@hyperstone.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        Avri Altman <Avri.Altman@wdc.com>,
+        "andriy.shevchenko@linux.intel.com" 
+        <andriy.shevchenko@linux.intel.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <ca06b94aa48a484d965744e64e17a4ef@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <ca06b94aa48a484d965744e64e17a4ef@hyperstone.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 22 Jul 2022 11:47:37 +0200:
+On 19/07/22 18:34, Christian Loehle wrote:
+> Be as conservative about successful write reporting to the
+> block layer for SPI as with normal SD and MMC.
+> That means on any errors bytes_xfered is ignored and the
+> whole write must be repeated.
+> 
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index f4a1281658db..63d1c05582a9 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1765,8 +1765,12 @@ static bool mmc_blk_status_error(struct request *req, u32 status)
+>  	struct mmc_queue *mq = req->q->queuedata;
+>  	u32 stop_err_bits;
+>  
+> +	/*
+> +	 * Either write timed out during busy and data->error is set
+> +	 * or we actually received a valid R2 and check for error bits.
+> +	 */
+>  	if (mmc_host_is_spi(mq->card->host))
+> -		return false;
+> +		return brq->data.error || !!status;
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.19-rc6
+This function is for checking status, so brq->data.error does not
+belong here.  Also it would be more readable to use a define e.g.
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/85029503fc95ea16e0c0856251f5cba750847c85
+		return status & SPI_R2_ERRORS;
 
-Thank you!
+I think clearing bytes_xfered for SPI brq->data.error should be a
+separate patch, and you would need to explain a bit more for that
+case too.
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+>  
+>  	stop_err_bits = mmc_blk_stop_err_bits(brq);
+>  
+
