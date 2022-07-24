@@ -2,92 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A223C433EF
-	for <linux-mmc@archiver.kernel.org>; Sat, 23 Jul 2022 20:44:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F649C43334
+	for <linux-mmc@archiver.kernel.org>; Sun, 24 Jul 2022 07:21:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238466AbiGWUos (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 23 Jul 2022 16:44:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47086 "EHLO
+        id S230181AbiGXHVy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 24 Jul 2022 03:21:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40690 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237033AbiGWUor (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 23 Jul 2022 16:44:47 -0400
-Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E19631B795
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Jul 2022 13:44:46 -0700 (PDT)
-Received: by mail-pf1-x430.google.com with SMTP id o12so7160344pfp.5
-        for <linux-mmc@vger.kernel.org>; Sat, 23 Jul 2022 13:44:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=edgeble-ai.20210112.gappssmtp.com; s=20210112;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=cnz8KtlLCVShEDXOBH4fLkKrMCVF+oQhhCLrqdUx4uU=;
-        b=AkLPquELdVZFdKsl5L1dqydn2AMRu42dCdVIwYpfYKFAjZUGoISFM8bmWfkNbuCD4O
-         SkRgi5tsKnkWK09/FsQP8cv0Ic1r7KQpzhdUspRlW+JHZqDyAMPrtupMnQbaa7baYu68
-         DXhk6CVlZJxATYd4QPHmEPq1dgrPZM5ctK2hFcpoy9BFbebM2nfQ4b85qmz3S+vqDVwr
-         cdPLKXW0oZdOp0hhPXLHokfErKSL1J1nKD410Jx/oCGLSCo7xISBPtB3C76EUyPX6uAT
-         9TqDsxo6oP9REPqy7+3n1xgfWmJ4RkrNOZNq0rEV7SZFWxQ4fcEHPxAy0FHNIhVPn/P9
-         inww==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=cnz8KtlLCVShEDXOBH4fLkKrMCVF+oQhhCLrqdUx4uU=;
-        b=DIkum3bpS3Y0oFskpWOUl04zoJoLWiyAX8Bcojm4LU1cBiSKekuJHkNDRkm+B32nsY
-         x/1InpGxl5wGWGHhmL9EAjEr2Mj8Gf8HTDjMI9A3mWW3dGNL2Ltb3xgbzyWmMK0oDZOV
-         NFA2Nn+GLWaGReADl/aroaSFHA0bgJ80d96WE/iRgWmBba4BxUasJnZ4FXlB4TyCu0vb
-         0N9gzONyBDwKoTGPU+4wxCnK+lzwJR62sIVHmiR5NAPePoeE431X3DYqWiv3XC95Szs/
-         AAHxCDpO4mFiTULQAs8WrR/gKWdGU42NhOOhrF5TEBWvE547pEyRn4tk5+JDc8dU1Etp
-         zKHg==
-X-Gm-Message-State: AJIora+PpAV/5BLsg+1PCNV9F1rfGYuu9ua0Y3yw/miY7Q8btVVlEHpT
-        zun3V0XO/9ZcxEXj6ssOv8MkLQ==
-X-Google-Smtp-Source: AGRyM1vcjLOLjkuzKVFR3gktiaujZIDm7gd5DyEJi2HmNt2fT3M104n755k3GbXZzTRikp45GJJkYg==
-X-Received: by 2002:a63:8b4b:0:b0:412:96f4:f154 with SMTP id j72-20020a638b4b000000b0041296f4f154mr5061566pge.281.1658609086392;
-        Sat, 23 Jul 2022 13:44:46 -0700 (PDT)
-Received: from localhost.localdomain ([2405:201:c00a:a073:a406:cc30:f4ec:f10a])
-        by smtp.gmail.com with ESMTPSA id u14-20020a170902e80e00b0016a6caacaefsm6187950plg.103.2022.07.23.13.44.40
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 23 Jul 2022 13:44:46 -0700 (PDT)
-From:   Jagan Teki <jagan@edgeble.ai>
-To:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kever Yang <kever.yang@rock-chips.com>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        Jagan Teki <jagan@edgeble.ai>, linux-mmc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH 11/22] dt-bindings: mmc: rockchip-dw-mshc: Document Rockchip RV1126
-Date:   Sun, 24 Jul 2022 02:13:24 +0530
-Message-Id: <20220723204335.750095-12-jagan@edgeble.ai>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220723204335.750095-1-jagan@edgeble.ai>
-References: <20220723204335.750095-1-jagan@edgeble.ai>
+        with ESMTP id S239360AbiGXHVx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 24 Jul 2022 03:21:53 -0400
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E353C18B39;
+        Sun, 24 Jul 2022 00:21:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1658647311; x=1690183311;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=4GmNq+GGcx6lQyvDn2BjOxv6jRLWbFXCskzq4bO9cNs=;
+  b=cNVF31mAHMab4aEs5w+sqKLmvUKDU6BJ86YGLuW2ZS/xJ/aa64l5My8y
+   gA/S+WErvwoO3LcSid+seuna4gV6TeSVMrm7cpNLn+Xfil5NjCvq9sDFt
+   s6ekZfmn6hzvfylRMX+NvruCPCyjl99DHTsaY4ofgBUD488NBbQzD9nZh
+   E0UJa8qG8OUQFpfnvfAaFiJBS5PAnxbVLg/DRqVQdC4kUKeOzuNgL7XFr
+   PDy5OzajLm0FvywNu9xia82gu0e1EoK1hoGrKg2gxVNwaHloIz15ouvRm
+   4TV98wNI/7r2vvx1m1CilFmxjNY7t+6hnToLogpWEvQFQROxUTawzJvdP
+   w==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10417"; a="286281634"
+X-IronPort-AV: E=Sophos;i="5.93,190,1654585200"; 
+   d="scan'208";a="286281634"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Jul 2022 00:21:51 -0700
+X-IronPort-AV: E=Sophos;i="5.93,190,1654585200"; 
+   d="scan'208";a="657737621"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.156])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 24 Jul 2022 00:21:48 -0700
+Message-ID: <69334100-1ba7-50e1-5d0e-83081c2241d7@intel.com>
+Date:   Sun, 24 Jul 2022 10:21:44 +0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH V1 1/1] mmc:sdhci:Fix the SD tuning CMD parameter issue
+ that the SDHCI_TRANSFER_MODE is cleared from read direction to write
+ direction incorrectly
+Content-Language: en-US
+To:     Charl Liu <charl.liu@bayhubtech.com>, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
+        thomas.hu@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
+        shirley.her@bayhubtech.com
+References: <20220720123737.117-1-charl.liu@bayhubtech.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220720123737.117-1-charl.liu@bayhubtech.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a compatible string for Rockchip RV1126 SoC.
+On 20/07/22 15:37, Charl Liu wrote:
+> When cmd->opcode == MMC_SEND_TUNING_BLOCK, the SDHCI_TRANSFER_MODE
+> should also be kept
+> 
+> Signed-off-by: Charl Liu <charl.liu@bayhubtech.com>
+> ---
+> Change in V1:
+> Keeping the SDHCI_TRANSFER_MODE when cmd->opcode == MMC_END_TUNING_
+> BLOCK
+> ---
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 22152029e14c..6a0f6725dadb 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1430,7 +1430,8 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+>  		if (host->quirks2 &
+>  			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
+>  			/* must not clear SDHCI_TRANSFER_MODE when tuning */
+> -			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
+> +			if ((cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
+> +			(cmd->opcode != MMC_SEND_TUNING_BLOCK))
 
-Cc: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Jagan Teki <jagan@edgeble.ai>
----
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
- 1 file changed, 1 insertion(+)
+mmc_op_tuning() could be used here
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index 54fb59820d2b..8d888b435817 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -39,6 +39,7 @@ properties:
-               - rockchip,rk3399-dw-mshc
-               - rockchip,rk3568-dw-mshc
-               - rockchip,rv1108-dw-mshc
-+              - rockchip,rv1126-dw-mshc
-           - const: rockchip,rk3288-dw-mshc
- 
-   reg:
--- 
-2.25.1
+>  				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
+>  		} else {
+>  		/* clear Auto CMD settings for no data CMDs */
 
