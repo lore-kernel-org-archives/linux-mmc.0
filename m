@@ -2,139 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC99AC00140
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 17:37:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D150EC00140
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 19:23:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229826AbiGZRhu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jul 2022 13:37:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60724 "EHLO
+        id S232020AbiGZTXT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jul 2022 15:23:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51868 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229677AbiGZRht (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 13:37:49 -0400
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C5E52AE18;
-        Tue, 26 Jul 2022 10:37:49 -0700 (PDT)
-Received: by mail-pg1-x52f.google.com with SMTP id q16so13733472pgq.6;
-        Tue, 26 Jul 2022 10:37:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=AMZH1Bi4Qy5iLZG3QxNgW8QD2bR06SffT7rLHaWOqfM=;
-        b=pUB6vuPwJAhe15bl2qYv7Xe9gsT4I6NmjqKg30xPjQtUWc4ooZjLa2JJWl4Y7JIF6S
-         EA3DCBgEU/puzXFs6eoPhMIfcTW8PFY8tG+kvdgaDs89e/+V8IdEpGF9BhL81exLirmB
-         7RVdZN4gjHEid05iU3H5JaAjtiCCWvM0RUCSV8fZOb3x3+baVNL1cSKY4/JkBXZ/+bG2
-         aKW+3nXKlUU4CkmL7yGWs3YaSr+IvfdrBzGGTu8VuA5gVlG5vncgKCLz9/Ixeab/+GfG
-         MKrRwysGOF6aOULNabsBAFcjrZw3QDX0CAIbgD+uYCzCbeU5KsfvmGnEcAugvDzanieC
-         2ucQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=AMZH1Bi4Qy5iLZG3QxNgW8QD2bR06SffT7rLHaWOqfM=;
-        b=bFQaIRPpE0lK2WLdx83It1JKjiR3UqDp17cPBOVHi28QvBhI9T4hM5EovYhHTqkgqe
-         YTTu/dkfrTn/ImmX8ndFBYp4y5HqGL8yzKdi9/bP8ooCVrtbIhEz2gLsxbg/pb1Xyr64
-         zRup/w6pQ4k5Br9klak66dZc8HMNydrfPDESF3/F8cR0O9WvMu/CD0AShDncWU0st+By
-         WhFlnujamwxelyJ0+8npdXUtirlcebYSc9RoAI1P7SN/cn9mrdhV2I6wIduk80Tqx9V/
-         jnDyb1vpSMVsCbEZulHOSvTASGDozdQ9Bc8AVK70TtLMw8yq1LzhruI4mHt4QPRMQP6U
-         444A==
-X-Gm-Message-State: AJIora/mR4pRyjE3YWroX6y+RUMHC6rWh4JESGqjBIetSbe8XiSGs7xR
-        VVtuOxXaUVe8x9krWW45K1U=
-X-Google-Smtp-Source: AGRyM1tCFuqPdEnD+0ZwYrW/qrprDDsJmyK/Z1ehMdPDBhBhQx75Qv95gifiNh1V1RoRDQbTPAaVlA==
-X-Received: by 2002:a63:d345:0:b0:419:d863:3c8d with SMTP id u5-20020a63d345000000b00419d8633c8dmr15250987pgi.168.1658857068482;
-        Tue, 26 Jul 2022 10:37:48 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.googlemail.com with ESMTPSA id f17-20020a17090ace1100b001f0f132da9fsm11189030pju.5.2022.07.26.10.37.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 26 Jul 2022 10:37:47 -0700 (PDT)
-Message-ID: <139317dc-15e2-ac63-0e04-295e715a7747@gmail.com>
-Date:   Tue, 26 Jul 2022 10:37:46 -0700
+        with ESMTP id S229379AbiGZTXT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 15:23:19 -0400
+X-Greylist: delayed 450 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 26 Jul 2022 12:23:18 PDT
+Received: from smtp.smtpout.orange.fr (smtp-24.smtpout.orange.fr [80.12.242.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 89F2224F3C
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 12:23:18 -0700 (PDT)
+Received: from pop-os.home ([90.11.190.129])
+        by smtp.orange.fr with ESMTPA
+        id GQ1woX8sPxFTAGQ1woT8pt; Tue, 26 Jul 2022 21:15:46 +0200
+X-ME-Helo: pop-os.home
+X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
+X-ME-Date: Tue, 26 Jul 2022 21:15:46 +0200
+X-ME-IP: 90.11.190.129
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Robert Jarzmik <robert.jarzmik@free.fr>
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH 1/2] mmc: pxamci: Fix an error handling path in pxamci_probe()
+Date:   Tue, 26 Jul 2022 21:15:43 +0200
+Message-Id: <6d75855ad4e2470e9ed99e0df21bc30f0c925a29.1658862932.git.christophe.jaillet@wanadoo.fr>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH] mmc: sdhci-xenon: Fix 2G limitation on AC5 SoC
-Content-Language: en-US
-To:     Vadym Kochan <vadym.kochan@plvision.eu>,
-        Hu Ziji <huziji@marvell.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Elad Nachman <enachman@marvell.com>
-References: <20220726170711.30324-1-vadym.kochan@plvision.eu>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20220726170711.30324-1-vadym.kochan@plvision.eu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/26/22 10:07, Vadym Kochan wrote:
-> From: Elad Nachman <enachman@marvell.com>
-> 
-> There is a limitation on AC5 SoC that mmc controller
-> can't have DMA access over 2G memory.
-> 
-> Signed-off-by: Elad Nachman <enachman@marvell.com>
-> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
-> ---
->  drivers/mmc/host/sdhci-xenon.c | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
-> index 08e838400b52..666d06b58564 100644
-> --- a/drivers/mmc/host/sdhci-xenon.c
-> +++ b/drivers/mmc/host/sdhci-xenon.c
-> @@ -18,6 +18,7 @@
->  #include <linux/of.h>
->  #include <linux/pm.h>
->  #include <linux/pm_runtime.h>
-> +#include <linux/mm.h>
->  
->  #include "sdhci-pltfm.h"
->  #include "sdhci-xenon.h"
-> @@ -422,6 +423,8 @@ static int xenon_probe_params(struct platform_device *pdev)
->  	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->  	u32 sdhc_id, nr_sdhc;
->  	u32 tuning_count;
-> +	struct device_node *np = pdev->dev.of_node;
-> +	struct sysinfo si;
->  
->  	/* Disable HS200 on Armada AP806 */
->  	if (priv->hw_version == XENON_AP806)
-> @@ -450,6 +453,15 @@ static int xenon_probe_params(struct platform_device *pdev)
->  	}
->  	priv->tuning_count = tuning_count;
->  
-> +	si_meminfo(&si);
-> +
-> +	if (of_device_is_compatible(np, "marvell,ac5-sdhci") &&
-> +	    ((si.totalram * si.mem_unit) > 0x80000000 /*2G*/)) {
+The commit in Fixes: has moved some code around without updating gotos to
+the error handling path.
 
-Why not limit the DMA mask of the device and ensure, that bounce buffers get used so you can still do DMA?
+Update it now and release some resources if pxamci_of_init() fails.
 
-Also, you ought to be able to describe that limitation using Device Tree (assuming this is an option) and declaring a dedicated bus node for the SDHCI controller and providing a suitable dma-ranges property, see: arch/arm/boot/dts/bcm2711.dtsi and the 'soc' node for such examples.
+Fixes: fa3a5115469c ("mmc: pxamci: call mmc_of_parse()")
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+---
+ drivers/mmc/host/pxamci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-
-> +		host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
-> +		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
-> +		dev_info(mmc_dev(mmc), "Disabling DMA because of 2GB DMA access limit.\n");
-> +	}
-> +
->  	return xenon_phy_parse_params(dev, host);
->  }
->  
-> @@ -682,6 +694,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
->  	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
->  	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
->  	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
-> +	{ .compatible = "marvell,ac5-sdhci", .data = (void *)XENON_AP806},
->  	{}
->  };
->  MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
-
-
+diff --git a/drivers/mmc/host/pxamci.c b/drivers/mmc/host/pxamci.c
+index 0db9490dc659..37bf362a0ed5 100644
+--- a/drivers/mmc/host/pxamci.c
++++ b/drivers/mmc/host/pxamci.c
+@@ -648,7 +648,7 @@ static int pxamci_probe(struct platform_device *pdev)
+ 
+ 	ret = pxamci_of_init(pdev, mmc);
+ 	if (ret)
+-		return ret;
++		goto out;
+ 
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
 -- 
-Florian
+2.34.1
+
