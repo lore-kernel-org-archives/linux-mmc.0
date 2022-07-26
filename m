@@ -2,117 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC0E3C433EF
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 08:45:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 13222CCA489
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 09:57:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238493AbiGZIpp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jul 2022 04:45:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33036 "EHLO
+        id S238681AbiGZJ5q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jul 2022 05:57:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58410 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237771AbiGZIpn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 04:45:43 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 327C62AE06
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 01:45:42 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id p6-20020a17090a680600b001f2267a1c84so14981783pjj.5
-        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 01:45:41 -0700 (PDT)
+        with ESMTP id S238647AbiGZJ5o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 05:57:44 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 588DF2F671
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 02:57:15 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id m17so19124628wrw.7
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 02:57:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=NyOOkD+eRbzSyetXYFfpw0k4gfFU2yiJ20e/GWk7olk=;
-        b=X7vIiDhSLybQdcdrocjp2PDtEI9FAfSfkt/GXXlm4Zq/NT2ao/naZ1esoCW9iPs4LK
-         SGlmzljGdXxTJjAxwE8hTZYvO3lcpxl/vz51eedoNV3wF7QLgpuk8AxL/mG/0al1EiAf
-         YIACUX/TNOOLxiePT/3J4xQU/fas/m/5SN0cpELonIwUzewB4HMd2AoS5+2URULeUeaP
-         r/4XThUPpUjIqQCm6/vYuLVspxYEWMyU3EvsaDYydWOkEIEhFGwT/RHKrtOFdQZBaGZc
-         9AqERj1aHC/cECI4jGRdcZxd/Q5VCLkxJ81p20pIjVuIOf9SqqVjbeoZO/Ldo7OIWx/e
-         8RAg==
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=iUicZLyBaZmjv2lqx7fW4HMBGqk7G7eOOVk/ONJ/4PI=;
+        b=a9jshOAIwiw5ztp0+n80iX49X5uP9g1fIPLWAKA0Oebli99rLSK1JSwbKX/TWSIEKD
+         O8RAu6x1EuYGsc6oXUYHrmfMJXvk5iAAbsgDFp3wtW13E5HsTmbU8dXiDaDJtMrBEKfo
+         BtLocFdB4gelyGOYkHzTosErUmhiDP8/zjswgy3RH2fFxA6Xdh3CA/yI5iTiW9jbWJ9K
+         oN+oMjKZdsMTijOKOP2BcUYtUHprOqVqAeK+KFkaDem1o5Ff7dUDZtyl1X5TpjYEAD8P
+         dBkE0hdxwnSaGXsfATXn6MSzu2tBqE1Ie2s0Wxg+NyX5ban32/phra4XzX8bj2k4iDT4
+         H/tA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=NyOOkD+eRbzSyetXYFfpw0k4gfFU2yiJ20e/GWk7olk=;
-        b=LpBX/fOAJixOaGfO/+CNYA5Fs4pqEejrZLYaxTdxZuLFmlgkbqh9OeDO2HB0kcwh6N
-         CuMyTs2Z6n4/RG1UsCL/kYZ+9PBBxUXVLisLNVpA41HMxv1pA0Hk6J+N8r2onD/0tOpj
-         UptA3aoLJy1ouI+/0+iUJXIhAk5tG+sdWTXYYELcpGfKZ6Nm/L0HNbKrtV6mILaeAO7t
-         GfafcuofukfsCSf3WvxUJTXSVtrCjDzu+WrEKq7EhtJXXrqJpwqDhP9fhRHCHLQLcSo/
-         9WwdBqHk5Qyk9f+dk3ZM6hlEE2xgs80hvIa8XGUXYGEWREzB7RGxRX7kB+1fW/q+M7ZV
-         vYlQ==
-X-Gm-Message-State: AJIora+hxXUbxfX2xunNIABjtePbIL5g/DzrKwUa+PhwsG4uD/q3IfXI
-        QOCYna9RZvCJ+/PwKJjg4Ke42OnIQCQ4/cFT
-X-Google-Smtp-Source: AGRyM1tImQ0our/59COnOeI0PSnlKWT0efVS/MN9w29JmZjyd9OsYz0Z2+TKak57pzx+1Gq4ZXhjew==
-X-Received: by 2002:a17:90a:4216:b0:1f2:70ed:1116 with SMTP id o22-20020a17090a421600b001f270ed1116mr16168424pjg.89.1658825141232;
-        Tue, 26 Jul 2022 01:45:41 -0700 (PDT)
-Received: from localhost.localdomain ([2401:4900:1f3a:5a45:a9cd:d7dd:fd01:73c0])
-        by smtp.gmail.com with ESMTPSA id d4-20020aa797a4000000b00528c16966casm11450560pfq.174.2022.07.26.01.45.37
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=iUicZLyBaZmjv2lqx7fW4HMBGqk7G7eOOVk/ONJ/4PI=;
+        b=LpWssKvs0u4F8D73sg344No2w3vsH/KsXkXki73L2SwmZ/fWf7cKCSaS96oMTP+dkw
+         TmNAcgoreVWmDtNcTz7O1LXxBZqMBbUBYm/3hd8OCNwcDxLlbPZ9woh+tYMzY0O6ntv0
+         MoJ1QcjQpp5VqS3pBamb98Ye4KGcfndntET26q8aUD3Y4as3gUkTbDFt9EcEnKhzMit/
+         tn3H651ZVJd/vlcnxHOuG4HfBIJZa8nIiPkniQkbe1gz2H7lPdelTgoOp0eOVwPMrp2g
+         WPht1tUiKBuMEk4ijobxMR4Kh0bGZHgao6NEP176vH7Valp+Njk4lEmwLNDaJfT4+Fyu
+         x1VA==
+X-Gm-Message-State: AJIora8CcxN/y582UXvop8cWNV+U0cL2WojtD4t6vFMBwy9cwjNoyrcY
+        KBW70p9yyflOX9SGgkNzS4PfGw==
+X-Google-Smtp-Source: AGRyM1vaVzTyQ5b+nn+RlJ42faxYO14TpuNlzllTL+nY6z4bb/G0nOBbFTz5DJTxQxp7SwpuN92A3g==
+X-Received: by 2002:adf:e84b:0:b0:21e:61cd:647e with SMTP id d11-20020adfe84b000000b0021e61cd647emr10370152wrn.715.1658829433726;
+        Tue, 26 Jul 2022 02:57:13 -0700 (PDT)
+Received: from localhost.localdomain (210.145.15.109.rev.sfr.net. [109.15.145.210])
+        by smtp.googlemail.com with ESMTPSA id t3-20020a1c4603000000b003a2d87aea57sm21170873wma.10.2022.07.26.02.57.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Jul 2022 01:45:40 -0700 (PDT)
-From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
-To:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Cc:     linux-arm-msm@vger.kernel.org, ulf.hansson@linaro.org,
-        robh@kernel.org, bhupesh.sharma@linaro.org,
-        bhupesh.linux@gmail.com, linux-kernel@vger.kernel.org,
-        bjorn.andersson@linaro.org, agross@kernel.org
-Subject: [PATCH v2] dt-bindings: mmc: Set maximum documented operating frequency as 384MHz
-Date:   Tue, 26 Jul 2022 14:15:20 +0530
-Message-Id: <20220726084520.2895454-1-bhupesh.sharma@linaro.org>
-X-Mailer: git-send-email 2.35.3
+        Tue, 26 Jul 2022 02:57:12 -0700 (PDT)
+From:   Amjad Ouled-Ameur <aouledameur@baylibre.com>
+To:     fparent@baylibre.com
+Cc:     broonie@kernel.org, chaotian.jing@mediatek.com,
+        chunfeng.yun@mediatek.com, devicetree@vger.kernel.org,
+        dmaengine@vger.kernel.org, jic23@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org,
+        linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux@roeck-us.net,
+        matthias.bgg@gmail.com, qii.wang@mediatek.com, robh+dt@kernel.org,
+        srinivas.kandagatla@linaro.org, ulf.hansson@linaro.org,
+        vkoul@kernel.org, wim@linux-watchdog.org
+Subject: Re: [PATCH 16/17] arm64: dts: mediatek: add mt8365 device-tree
+Date:   Tue, 26 Jul 2022 11:57:11 +0200
+Message-Id: <20220726095711.708310-1-aouledameur@baylibre.com>
+X-Mailer: git-send-email 2.37.1
+In-Reply-To: <20220531135026.238475-17-fparent@baylibre.com>
+References: <20220531135026.238475-17-fparent@baylibre.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-As Ulf noted in [1], the maximum operating frequency
-documented in the mmc-controller device-tree bindings
-should be updated to the maximum frequency supported
-by the mmc controller(s).
+Hi Fabien,
 
-Without this fix in place, the 'make dtbs_check' reports
-issues with 'max-frequency' value for ipq8074 sdhci node:
+Could you please add CPUIDLE support:
 
-  arch/arm64/boot/dts/qcom/ipq8074-hk01.dtb: mmc@7824900:
-   max-frequency:0:0: 384000000 is greater than the maximum of 200000000
-
-[1]. https://www.spinics.net/lists/kernel/msg4442049.html
-
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-Cc: Rob Herring <robh@kernel.org>
-Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
----
- - v1 can be viewed here: https://lore.kernel.org/linux-arm-msm/20220725180916.2850228-1-bhupesh.sharma@linaro.org/
- - Rebased on linux-next/master
-
- .../devicetree/bindings/mmc/mmc-controller.yaml     | 13 ++++++++++---
- 1 file changed, 10 insertions(+), 3 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-index ff5ce89e5111..802e3ca8be4d 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -88,11 +88,18 @@ properties:
-     default: 1
- 
-   max-frequency:
--    description:
--      Maximum operating frequency of the bus.
-+    description: |
-+      Maximum operating frequency of the bus:
-+        - for eMMC, the maximum supported frequency is 200MHz,
-+        - for SD/SDIO cards the SDR104 mode has a max supported
-+          frequency of 208MHz,
-+        - some mmc host controllers do support a max frequency upto
-+          384MHz.
-+      So, lets keep the maximum supported value here.
+diff --git a/arch/arm64/boot/dts/mediatek/mt8365.dtsi b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
+index 323c814c10cc..1df4075db58f 100644
+--- a/arch/arm64/boot/dts/mediatek/mt8365.dtsi
++++ b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
+@@ -59,6 +59,7 @@ cpu0: cpu@0 {
+ 			clocks = <&mcucfg CLK_MCU_BUS_SEL>,
+ 				 <&apmixedsys CLK_APMIXED_MAINPLL>;
+ 			clock-names = "cpu", "intermediate";
++			cpu-idle-states = <&MCDI_CPU &MCDI_CLUSTER &DPIDLE>;
+ 			operating-points-v2 = <&cluster0_opp>;
+ 			#cooling-cells = <2>;
+ 			enable-method = "psci";
+@@ -72,6 +73,7 @@ cpu1: cpu@1 {
+ 			clocks = <&mcucfg CLK_MCU_BUS_SEL>,
+ 				 <&apmixedsys CLK_APMIXED_MAINPLL>;
+ 			clock-names = "cpu", "intermediate", "armpll";
++			cpu-idle-states = <&MCDI_CPU &MCDI_CLUSTER &DPIDLE>;
+ 			operating-points-v2 = <&cluster0_opp>;
+ 			#cooling-cells = <2>;
+ 			enable-method = "psci";
+@@ -85,6 +87,7 @@ cpu2: cpu@2 {
+ 			clocks = <&mcucfg CLK_MCU_BUS_SEL>,
+ 				 <&apmixedsys CLK_APMIXED_MAINPLL>;
+ 			clock-names = "cpu", "intermediate", "armpll";
++			cpu-idle-states = <&MCDI_CPU &MCDI_CLUSTER &DPIDLE>;
+ 			operating-points-v2 = <&cluster0_opp>;
+ 			#cooling-cells = <2>;
+ 			enable-method = "psci";
+@@ -98,10 +101,42 @@ cpu3: cpu@3 {
+ 			clocks = <&mcucfg CLK_MCU_BUS_SEL>,
+ 				 <&apmixedsys CLK_APMIXED_MAINPLL>;
+ 			clock-names = "cpu", "intermediate", "armpll";
++			cpu-idle-states = <&MCDI_CPU &MCDI_CLUSTER &DPIDLE>;
+ 			operating-points-v2 = <&cluster0_opp>;
+ 			#cooling-cells = <2>;
+ 			enable-method = "psci";
+ 		};
 +
-     $ref: /schemas/types.yaml#/definitions/uint32
-     minimum: 400000
--    maximum: 200000000
-+    maximum: 384000000
++		idle-states {
++			entry-method = "psci";
++
++			MCDI_CPU: mcdi-cpu {
++				compatible = "arm,idle-state";
++				local-timer-stop;
++				arm,psci-suspend-param = <0x00010001>;
++				entry-latency-us = <300>;
++				exit-latency-us = <200>;
++				min-residency-us = <1000>;
++			};
++
++			MCDI_CLUSTER: mcdi-cluster {
++				compatible = "arm,idle-state";
++				local-timer-stop;
++				arm,psci-suspend-param = <0x01010001>;
++				entry-latency-us = <350>;
++				exit-latency-us = <250>;
++				min-residency-us = <1200>;
++			};
++
++			DPIDLE: dpidle {
++				compatible = "arm,idle-state";
++				local-timer-stop;
++				arm,psci-suspend-param = <0x01010004>;
++				entry-latency-us = <300>;
++				exit-latency-us = <800>;
++				min-residency-us = <3300>;
++			};
++		};
+ 	};
  
-   disable-wp:
-     $ref: /schemas/types.yaml#/definitions/flag
--- 
-2.35.3
+ 	cluster0_opp: opp-table-0 {
 
+I have tested it on i350 evk and each idle state is used properly.
+
+Regards,
+Amjad
