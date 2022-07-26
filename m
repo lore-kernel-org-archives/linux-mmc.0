@@ -2,85 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86AD4CCA489
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 08:40:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC0E3C433EF
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 08:45:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238677AbiGZIkV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jul 2022 04:40:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55206 "EHLO
+        id S238493AbiGZIpp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jul 2022 04:45:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238660AbiGZIj6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 04:39:58 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F6E42FFDD;
-        Tue, 26 Jul 2022 01:39:56 -0700 (PDT)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 6CD1B6601B15;
-        Tue, 26 Jul 2022 09:39:53 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1658824794;
-        bh=o8COaf1WnhJ6CshvmVXvwffuBdxhwn1zG6mdYwCYbMM=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=KfouyMIC5PPMPw26mf23O0tIb+iVGaFLkR/kg5SB28fo7Osxl7Accy9z/wZHXYQnk
-         L24vXFgaA/XYKaa3IsxSYyKsnKEgyYL9jTnRyVpsEmVVwA5oULUZF3k2f+dsxmVoow
-         HBzyIv3HeNEtJUR8UjGTME0UWjueCXvKQ8oroEOvbbfZ0PyoX5gm3+Z5dXo/W6lJKE
-         jc5QZ5DOiYEpHd8GC9S77tdmqazQZNWTe4B/UmSfHmwBW7UsgodnHlgD7jQaNzvIT+
-         jQK3EFXz8bj+zPlxYitKVRByCuewBJMP3J8YKoERVUMevT9FBVBhTxotsCXUxbmJ7C
-         K8812Sfxz5JEg==
-Message-ID: <14ddcdb5-cbfc-1215-ffdd-85df8d9d6acb@collabora.com>
-Date:   Tue, 26 Jul 2022 10:39:50 +0200
+        with ESMTP id S237771AbiGZIpn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 04:45:43 -0400
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 327C62AE06
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 01:45:42 -0700 (PDT)
+Received: by mail-pj1-x102f.google.com with SMTP id p6-20020a17090a680600b001f2267a1c84so14981783pjj.5
+        for <linux-mmc@vger.kernel.org>; Tue, 26 Jul 2022 01:45:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NyOOkD+eRbzSyetXYFfpw0k4gfFU2yiJ20e/GWk7olk=;
+        b=X7vIiDhSLybQdcdrocjp2PDtEI9FAfSfkt/GXXlm4Zq/NT2ao/naZ1esoCW9iPs4LK
+         SGlmzljGdXxTJjAxwE8hTZYvO3lcpxl/vz51eedoNV3wF7QLgpuk8AxL/mG/0al1EiAf
+         YIACUX/TNOOLxiePT/3J4xQU/fas/m/5SN0cpELonIwUzewB4HMd2AoS5+2URULeUeaP
+         r/4XThUPpUjIqQCm6/vYuLVspxYEWMyU3EvsaDYydWOkEIEhFGwT/RHKrtOFdQZBaGZc
+         9AqERj1aHC/cECI4jGRdcZxd/Q5VCLkxJ81p20pIjVuIOf9SqqVjbeoZO/Ldo7OIWx/e
+         8RAg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=NyOOkD+eRbzSyetXYFfpw0k4gfFU2yiJ20e/GWk7olk=;
+        b=LpBX/fOAJixOaGfO/+CNYA5Fs4pqEejrZLYaxTdxZuLFmlgkbqh9OeDO2HB0kcwh6N
+         CuMyTs2Z6n4/RG1UsCL/kYZ+9PBBxUXVLisLNVpA41HMxv1pA0Hk6J+N8r2onD/0tOpj
+         UptA3aoLJy1ouI+/0+iUJXIhAk5tG+sdWTXYYELcpGfKZ6Nm/L0HNbKrtV6mILaeAO7t
+         GfafcuofukfsCSf3WvxUJTXSVtrCjDzu+WrEKq7EhtJXXrqJpwqDhP9fhRHCHLQLcSo/
+         9WwdBqHk5Qyk9f+dk3ZM6hlEE2xgs80hvIa8XGUXYGEWREzB7RGxRX7kB+1fW/q+M7ZV
+         vYlQ==
+X-Gm-Message-State: AJIora+hxXUbxfX2xunNIABjtePbIL5g/DzrKwUa+PhwsG4uD/q3IfXI
+        QOCYna9RZvCJ+/PwKJjg4Ke42OnIQCQ4/cFT
+X-Google-Smtp-Source: AGRyM1tImQ0our/59COnOeI0PSnlKWT0efVS/MN9w29JmZjyd9OsYz0Z2+TKak57pzx+1Gq4ZXhjew==
+X-Received: by 2002:a17:90a:4216:b0:1f2:70ed:1116 with SMTP id o22-20020a17090a421600b001f270ed1116mr16168424pjg.89.1658825141232;
+        Tue, 26 Jul 2022 01:45:41 -0700 (PDT)
+Received: from localhost.localdomain ([2401:4900:1f3a:5a45:a9cd:d7dd:fd01:73c0])
+        by smtp.gmail.com with ESMTPSA id d4-20020aa797a4000000b00528c16966casm11450560pfq.174.2022.07.26.01.45.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 26 Jul 2022 01:45:40 -0700 (PDT)
+From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
+To:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Cc:     linux-arm-msm@vger.kernel.org, ulf.hansson@linaro.org,
+        robh@kernel.org, bhupesh.sharma@linaro.org,
+        bhupesh.linux@gmail.com, linux-kernel@vger.kernel.org,
+        bjorn.andersson@linaro.org, agross@kernel.org
+Subject: [PATCH v2] dt-bindings: mmc: Set maximum documented operating frequency as 384MHz
+Date:   Tue, 26 Jul 2022 14:15:20 +0530
+Message-Id: <20220726084520.2895454-1-bhupesh.sharma@linaro.org>
+X-Mailer: git-send-email 2.35.3
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH v14 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
- pinctrls properties
-Content-Language: en-US
-To:     Axe Yang <axe.yang@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
-        Satya Tangirala <satyat@google.com>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Lucas Stach <dev@lynxeye.de>,
-        Eric Biggers <ebiggers@google.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Stephen Boyd <swboyd@chromium.org>,
-        Kiwoong Kim <kwmad.kim@samsung.com>,
-        Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org,
-        Project_Global_Chrome_Upstream_Group@mediatek.com,
-        Rob Herring <robh@kernel.org>
-References: <20220726062842.18846-1-axe.yang@mediatek.com>
- <20220726062842.18846-2-axe.yang@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20220726062842.18846-2-axe.yang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 26/07/22 08:28, Axe Yang ha scritto:
-> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
-> This feature allow SDIO devices alarm asynchronous interrupt to host
-> even when host stop providing clock to SDIO card. An extra wakeup
-> interrupt and pinctrl states for SDIO DAT1 pin state switching are
-> required in this scenario.
-> 
-> Reviewed-by: Rob Herring <robh@kernel.org>
-> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
+As Ulf noted in [1], the maximum operating frequency
+documented in the mmc-controller device-tree bindings
+should be updated to the maximum frequency supported
+by the mmc controller(s).
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Without this fix in place, the 'make dtbs_check' reports
+issues with 'max-frequency' value for ipq8074 sdhci node:
 
-P.S.: R-b tags go after S-o-b tags!
+  arch/arm64/boot/dts/qcom/ipq8074-hk01.dtb: mmc@7824900:
+   max-frequency:0:0: 384000000 is greater than the maximum of 200000000
+
+[1]. https://www.spinics.net/lists/kernel/msg4442049.html
+
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
+Cc: Rob Herring <robh@kernel.org>
+Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
+---
+ - v1 can be viewed here: https://lore.kernel.org/linux-arm-msm/20220725180916.2850228-1-bhupesh.sharma@linaro.org/
+ - Rebased on linux-next/master
+
+ .../devicetree/bindings/mmc/mmc-controller.yaml     | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index ff5ce89e5111..802e3ca8be4d 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -88,11 +88,18 @@ properties:
+     default: 1
+ 
+   max-frequency:
+-    description:
+-      Maximum operating frequency of the bus.
++    description: |
++      Maximum operating frequency of the bus:
++        - for eMMC, the maximum supported frequency is 200MHz,
++        - for SD/SDIO cards the SDR104 mode has a max supported
++          frequency of 208MHz,
++        - some mmc host controllers do support a max frequency upto
++          384MHz.
++      So, lets keep the maximum supported value here.
++
+     $ref: /schemas/types.yaml#/definitions/uint32
+     minimum: 400000
+-    maximum: 200000000
++    maximum: 384000000
+ 
+   disable-wp:
+     $ref: /schemas/types.yaml#/definitions/flag
+-- 
+2.35.3
+
