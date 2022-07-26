@@ -2,155 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD641CCA48C
-	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 07:46:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86AD4CCA489
+	for <linux-mmc@archiver.kernel.org>; Tue, 26 Jul 2022 08:40:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238251AbiGZHqp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 26 Jul 2022 03:46:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36540 "EHLO
+        id S238677AbiGZIkV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 26 Jul 2022 04:40:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55206 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238184AbiGZHqo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 03:46:44 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 726E21EC45;
-        Tue, 26 Jul 2022 00:46:43 -0700 (PDT)
-X-UUID: 9886849c35ce484996f3f0e089e87278-20220726
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.8,REQID:c9437132-4ba2-4ef5-811a-421fe6f21749,OB:0,LO
-        B:0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACT
-        ION:release,TS:45
-X-CID-INFO: VERSION:1.1.8,REQID:c9437132-4ba2-4ef5-811a-421fe6f21749,OB:0,LOB:
-        0,IP:0,URL:0,TC:0,Content:0,EDM:0,RT:0,SF:45,FILE:0,RULE:Release_Ham,ACTIO
-        N:release,TS:45
-X-CID-META: VersionHash:0f94e32,CLOUDID:9f5e84b3-06d2-48ef-b2dd-540836705165,C
-        OID:167e827dc092,Recheck:0,SF:28|17|19|48,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:1,File:nil,QS:nil,BEC:nil,COL:0
-X-UUID: 9886849c35ce484996f3f0e089e87278-20220726
-Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw01.mediatek.com
-        (envelope-from <axe.yang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 533270541; Tue, 26 Jul 2022 15:46:37 +0800
-Received: from mtkcas10.mediatek.inc (172.21.101.39) by
- mtkmbs11n2.mediatek.inc (172.21.101.187) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
- 15.2.792.15; Tue, 26 Jul 2022 15:46:35 +0800
-Received: from mhfsdcap04 (10.17.3.154) by mtkcas10.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.0.1497.2 via Frontend
- Transport; Tue, 26 Jul 2022 15:46:34 +0800
-Message-ID: <aface69bc8eeb0a34805428fa36d13f7909f694d.camel@mediatek.com>
-Subject: Re: [PATCH v13 3/3] mmc: mediatek: add support for SDIO eint wakup
- IRQ
-From:   Axe Yang <axe.yang@mediatek.com>
-To:     Linus Walleij <linus.walleij@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
+        with ESMTP id S238660AbiGZIj6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 26 Jul 2022 04:39:58 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F6E42FFDD;
+        Tue, 26 Jul 2022 01:39:56 -0700 (PDT)
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 6CD1B6601B15;
+        Tue, 26 Jul 2022 09:39:53 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1658824794;
+        bh=o8COaf1WnhJ6CshvmVXvwffuBdxhwn1zG6mdYwCYbMM=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=KfouyMIC5PPMPw26mf23O0tIb+iVGaFLkR/kg5SB28fo7Osxl7Accy9z/wZHXYQnk
+         L24vXFgaA/XYKaa3IsxSYyKsnKEgyYL9jTnRyVpsEmVVwA5oULUZF3k2f+dsxmVoow
+         HBzyIv3HeNEtJUR8UjGTME0UWjueCXvKQ8oroEOvbbfZ0PyoX5gm3+Z5dXo/W6lJKE
+         jc5QZ5DOiYEpHd8GC9S77tdmqazQZNWTe4B/UmSfHmwBW7UsgodnHlgD7jQaNzvIT+
+         jQK3EFXz8bj+zPlxYitKVRByCuewBJMP3J8YKoERVUMevT9FBVBhTxotsCXUxbmJ7C
+         K8812Sfxz5JEg==
+Message-ID: <14ddcdb5-cbfc-1215-ffdd-85df8d9d6acb@collabora.com>
+Date:   Tue, 26 Jul 2022 10:39:50 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH v14 1/3] dt-bindings: mmc: mtk-sd: extend interrupts and
+ pinctrls properties
+Content-Language: en-US
+To:     Axe Yang <axe.yang@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Matthias Brugger <matthias.bgg@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Satya Tangirala <satyat@google.com>,
         Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Lucas Stach <dev@lynxeye.de>,
-        "Eric Biggers" <ebiggers@google.com>,
+        Eric Biggers <ebiggers@google.com>,
         Andrew Jeffery <andrew@aj.id.au>,
-        "Stephen Boyd" <swboyd@chromium.org>,
+        Stephen Boyd <swboyd@chromium.org>,
         Kiwoong Kim <kwmad.kim@samsung.com>,
         Yue Hu <huyue2@yulong.com>, Tian Tao <tiantao6@hisilicon.com>,
-        <angelogioacchino.delregno@collabora.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <Project_Global_Chrome_Upstream_Group@mediatek.com>,
-        Yong Mao <yong.mao@mediatek.com>
-Date:   Tue, 26 Jul 2022 15:46:34 +0800
-In-Reply-To: <CACRpkdZP-FBP8hsBfeMn1M8=VR_cYG+j9GQc9VdV-HjkvSo73w@mail.gmail.com>
-References: <20220623090445.1401-1-axe.yang@mediatek.com>
-         <20220623090445.1401-4-axe.yang@mediatek.com>
-         <CACRpkdZ5G2fMCqvkXANVEmZjNcF4U4mSDzZk6aXbqFjYVN3hcA@mail.gmail.com>
-         <3747f246650622ef65787159af5271a79401a855.camel@mediatek.com>
-         <CACRpkdZP-FBP8hsBfeMn1M8=VR_cYG+j9GQc9VdV-HjkvSo73w@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-X-Mailer: Evolution 3.28.5-0ubuntu0.18.04.2 
-MIME-Version: 1.0
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org,
+        Project_Global_Chrome_Upstream_Group@mediatek.com,
+        Rob Herring <robh@kernel.org>
+References: <20220726062842.18846-1-axe.yang@mediatek.com>
+ <20220726062842.18846-2-axe.yang@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <20220726062842.18846-2-axe.yang@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
-X-MTK:  N
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 2022-07-25 at 14:46 +0200, Linus Walleij wrote:
-> On Mon, Jul 25, 2022 at 11:13 AM Axe Yang <axe.yang@mediatek.com>
-> wrote:
-> > On Fri, 2022-07-22 at 13:21 +0200, Linus Walleij wrote:
-> > > On Thu, Jun 23, 2022 at 11:10 AM Axe Yang <axe.yang@mediatek.com>
-> > > wrote:
-> > SDIO DAT1 pin mode is changed to GPIO mode in
-> > dev_pm_set_dedicated_wake_irq_reverse():
-> > 
-> > 
-https://urldefense.com/v3/__https://elixir.bootlin.com/linux/latest/source/drivers/pinctrl/mediatek/pinctrl-mtk-common-v2.c*L339__;Iw!!CTRNKA9wMg0ARbw!zE3kmi37pZw4HiBNeRipWbi3gbAqrljLVQc5JVz-WP_NaIWTVhXshkakjFNh478e$
-> >  
-> > 
-> > dev_pm_set_dedicated_wake_irq_reverse() -> ...
-> > ->request_threaded_irq()
-> > -> __setup_irq() -> irq_request_resources() ->
-> > mtk_eint_irq_request_resources()-> mtk_xt_set_gpio_as_eint()
+Il 26/07/22 08:28, Axe Yang ha scritto:
+> Extend interrupts and pinctrls for SDIO wakeup interrupt feature.
+> This feature allow SDIO devices alarm asynchronous interrupt to host
+> even when host stop providing clock to SDIO card. An extra wakeup
+> interrupt and pinctrl states for SDIO DAT1 pin state switching are
+> required in this scenario.
 > 
-> This doesn't seem to have much to do with pin control?
-> No pin control functions are called on this execution path,
-> no pin control state is changed, right?
+> Reviewed-by: Rob Herring <robh@kernel.org>
+> Signed-off-by: Axe Yang <axe.yang@mediatek.com>
 
-That's right, no pin control state is changed.
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 
-> 
-> If what you mean is that
-> it happens to poke into the same hardware registers that is
-> mainly a matter of concurrency in the driver, sometimes two
-> abstractions happen to have to poke into the same hardware
-> registers and then it is up to the driver to maintain state for
-> the hardware, this is not a question for the framework.
-> 
-> How is Mediatek developers thinking about this thing in general?
-> You are a few people who developed the driver so certainly
-> you must have some design idea to why irq_request_resources()
-> poke around in these registers? Does it even perform pin
-> control behind the back of the pin control framework?
-
-I see. It is sensible to reset pin function to GPIO mode when trying to
-register the pin to eint mode, and the operation is out of pinctrl
-framework.
-
-Seems like maintain the pin state in driver is the only way to fix the
-pin function conflict.
-
-> 
-> > To restore SDIO DAT1 pin to uhs mode. I have to call
-> > pinctrl_select_state() twice(change pinctrl to another state, then
-> > change back to uhs mode). Ulf worried we might be doing something
-> > at
-> > the mmc driver level, which should really be managed at the pinctrl
-> > layer.
-> > 
-> > Do you have any comment or suggestion on this?
-> 
-> The pin control state transitions are really just finite automata.
-> 
-> Your pin control needs to be different when using wakeup from
-> when being used for SDIO and this is perfectly fine, it's no
-> different from the fact that the regulator and clock might need
-> to be in different states, so I don't quite understand the
-> question?
-
-I see. At first I thought that pinctrl framework should be aware of
-the hidden modification of pin function. But as you said, it is just
-a finite automata. Driver should correct GPIO settings by itself if pin
-state be changed outside pin control state mechanical.
-Sorry for the noise, and thanks for your comment again.
-
-> 
-> 
-Regards,
-Axe
-
+P.S.: R-b tags go after S-o-b tags!
