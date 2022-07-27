@@ -2,85 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADFC2C19F2B
-	for <linux-mmc@archiver.kernel.org>; Wed, 27 Jul 2022 15:04:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1A0FC19F2B
+	for <linux-mmc@archiver.kernel.org>; Wed, 27 Jul 2022 17:13:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234438AbiG0PEL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 27 Jul 2022 11:04:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49168 "EHLO
+        id S238040AbiG0RNt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 27 Jul 2022 13:13:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234418AbiG0PEK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2022 11:04:10 -0400
-Received: from mail-il1-f175.google.com (mail-il1-f175.google.com [209.85.166.175])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B94E2610B;
-        Wed, 27 Jul 2022 08:04:07 -0700 (PDT)
-Received: by mail-il1-f175.google.com with SMTP id d4so8954236ilc.8;
-        Wed, 27 Jul 2022 08:04:07 -0700 (PDT)
+        with ESMTP id S240365AbiG0RNL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 27 Jul 2022 13:13:11 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6018B7646A
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2022 09:42:08 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id q23so14705341lfr.3
+        for <linux-mmc@vger.kernel.org>; Wed, 27 Jul 2022 09:42:08 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=eSPaxO046Ze33lKCriyBi8yHHhzQgKxgn//51vCRfws=;
+        b=AbbhqBv9E178tMhwtsG5r7YM5oszCwrW9k1hW7z+DlAQTz6Lt/6jGLCEB0pJXBYqTb
+         qGGCKjH1dHXi+rkpdvlJp4Gf41vcYJ/fDKD9Pb+DupvIZkF6xiEqz2EjjqyjJw5CxCea
+         vcZYtGeykc+4WHvvwczUw+ZTAOJgAGMZxX75x8adytC0aQbpvCJuroAPPWboUeSG2JgP
+         Sb/VvWX624MEMNeEhO7Kz1ZmX1fiEyXIg80rbAHqyvEy4stbPqAD3DjfypWtQb1h92b4
+         nTxen8Y1UzzFj3pHKbdcwyIQiAjeXXsHqxdz4twV6JzQZoQ+J7ag9BannbCD1kKhcJnT
+         idnQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KlPwwX+x3rg9rXQElmnLKECpClBv23qWzZgIbEFswvo=;
-        b=Ob/XiIUgsHq3TXwat775OZN+Va4tHF+p7YfgiYhvYnSfEOnwvmYI7/WdVJeBFKmGJC
-         SoB8YIhR6D8yiQYgibWLHLAQcbIBbucG1/feUw8v9r/SlDC0Q5wwu8XmXhLhwLwm1vAk
-         jbEdQmN0Ky0tPl2B27cQtOBgFA3wpD/VaXB6TbBxXHAf52Rg/tbDkEGx6GS42WXEeA1Z
-         V5pvxVWDx1ONSuHJsJ8opzB3zMIV69AahASC/s/GeZiOLr6VYnbnIxebkUNhwq481p8Q
-         ppXigNy/lJlcx1fwcKevNG7CviKEO/06cLOAjixzUQoUG7vSAZE7iFm6+Kgp28+IvPJu
-         DPeA==
-X-Gm-Message-State: AJIora+ey1orc5kaGL+OqfqaYRzzsRMRmpv+NcmET2yOmPbHg65ekJ52
-        Tb9/WY95pQ/YQAv8wkeuJzuU0PPZyQ==
-X-Google-Smtp-Source: AGRyM1s7YiS0OYAXjRipdCQQji7SDz0C0IgcATGUQ75SHLDRlX4d+JWly1zn4v3rbGpt6KCvaEqF8w==
-X-Received: by 2002:a05:6e02:152c:b0:2dc:9b02:b590 with SMTP id i12-20020a056e02152c00b002dc9b02b590mr8711790ilu.320.1658934246586;
-        Wed, 27 Jul 2022 08:04:06 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id n11-20020a056e0208eb00b002dcd9ce8316sm6882875ilt.45.2022.07.27.08.04.05
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=eSPaxO046Ze33lKCriyBi8yHHhzQgKxgn//51vCRfws=;
+        b=ykRsY5Fb2VoJTQpIlI075pmi+AejBB6HgjfQyK2Dbt9yyJCvRUVg8gx85S1OAGUAem
+         +da3+AV5YLzMfOtykH9fTsC73t4WDo+MOEqT32Kt5xCKWocxJrIeBBlE6H3Cr3Y1O4y7
+         cPzzw78286zSadZHINnK4eM1yo1uj7COMcfUNgwWljPYcmidlwoDOS5JDWdd9nFpe2+j
+         H3xjnGaSAc2hZ20GH2VqM44xLlbWgfVIyHli9Ozuk9vM/dkSURw26lGThJlFz0RwqJA3
+         fBiMU+zyMx6ubRwrbfaGIMVasCo71zY+91ev4LAFgMJFcM6yU+rrg/iQypXdozyfgK01
+         fMiw==
+X-Gm-Message-State: AJIora+7dQvkscq9HuDG0NJJIa8OcVebppCQYJ2Q820b8151iQBp9xny
+        2PPP8uWt59dP+GCXw9cSMm1X6g==
+X-Google-Smtp-Source: AGRyM1uhBH6wuAdgpcLkgYgpaPQs3mxVcKJnj5iurbEFj6ZPkbZ2ibDfKFQvRyZPsqlhyOim+ut2cA==
+X-Received: by 2002:ac2:4f06:0:b0:489:4a1b:ad7f with SMTP id k6-20020ac24f06000000b004894a1bad7fmr9274231lfr.311.1658940125963;
+        Wed, 27 Jul 2022 09:42:05 -0700 (PDT)
+Received: from krzk-bin.lan (78-26-46-173.network.trollfjord.no. [78.26.46.173])
+        by smtp.gmail.com with ESMTPSA id c1-20020a056512238100b0048a706d9fe5sm3509260lfv.294.2022.07.27.09.42.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 27 Jul 2022 08:04:06 -0700 (PDT)
-Received: (nullmailer pid 2663842 invoked by uid 1000);
-        Wed, 27 Jul 2022 15:04:04 -0000
-Date:   Wed, 27 Jul 2022 09:04:04 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, bjorn.andersson@linaro.org,
-        linux-arm-msm@vger.kernel.org, ulf.hansson@linaro.org,
-        linux-kernel@vger.kernel.org, bhupesh.linux@gmail.com,
-        devicetree@vger.kernel.org, agross@kernel.org
-Subject: Re: [PATCH v2] dt-bindings: mmc: Set maximum documented operating
- frequency as 384MHz
-Message-ID: <20220727150404.GA2663786-robh@kernel.org>
-References: <20220726084520.2895454-1-bhupesh.sharma@linaro.org>
+        Wed, 27 Jul 2022 09:42:05 -0700 (PDT)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH] dt-bindings: mmc: mmc-spi-slot: drop unneeded spi-max-frequency
+Date:   Wed, 27 Jul 2022 18:42:02 +0200
+Message-Id: <20220727164202.385531-1-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220726084520.2895454-1-bhupesh.sharma@linaro.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 26 Jul 2022 14:15:20 +0530, Bhupesh Sharma wrote:
-> As Ulf noted in [1], the maximum operating frequency
-> documented in the mmc-controller device-tree bindings
-> should be updated to the maximum frequency supported
-> by the mmc controller(s).
-> 
-> Without this fix in place, the 'make dtbs_check' reports
-> issues with 'max-frequency' value for ipq8074 sdhci node:
-> 
->   arch/arm64/boot/dts/qcom/ipq8074-hk01.dtb: mmc@7824900:
->    max-frequency:0:0: 384000000 is greater than the maximum of 200000000
-> 
-> [1]. https://www.spinics.net/lists/kernel/msg4442049.html
-> 
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Bjorn Andersson <bjorn.andersson@linaro.org>
-> Cc: Rob Herring <robh@kernel.org>
-> Signed-off-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
-> ---
->  - v1 can be viewed here: https://lore.kernel.org/linux-arm-msm/20220725180916.2850228-1-bhupesh.sharma@linaro.org/
->  - Rebased on linux-next/master
-> 
->  .../devicetree/bindings/mmc/mmc-controller.yaml     | 13 ++++++++++---
->  1 file changed, 10 insertions(+), 3 deletions(-)
-> 
+spi-max-frequency comes from spi-peripheral-props.yaml.
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+index c45b91099325..c0662ce9946d 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+@@ -23,8 +23,6 @@ properties:
+   reg:
+     maxItems: 1
+ 
+-  spi-max-frequency: true
+-
+   interrupts:
+     maxItems: 1
+ 
+-- 
+2.34.1
+
