@@ -2,105 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E1E8C04A68
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Jul 2022 08:01:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D0B43C04A68
+	for <linux-mmc@archiver.kernel.org>; Thu, 28 Jul 2022 15:19:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234911AbiG1IBQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Jul 2022 04:01:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51714 "EHLO
+        id S231682AbiG1PT0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 28 Jul 2022 11:19:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233818AbiG1IBP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2022 04:01:15 -0400
-Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7FE06052A;
-        Thu, 28 Jul 2022 01:01:07 -0700 (PDT)
-X-UUID: 00afaecb19a94d82a2ad66a64a5d3bb0-20220728
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.8,REQID:4a3bf7fe-f541-4f2a-aea3-d2995e46dd07,OB:-327
-        68,LOB:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:-32768,FILE:0,RULE:Relea
-        se_Ham,ACTION:release,TS:-5
-X-CID-INFO: VERSION:1.1.8,REQID:4a3bf7fe-f541-4f2a-aea3-d2995e46dd07,OB:-32768
-        ,LOB:0,IP:0,URL:0,TC:0,Content:-5,EDM:0,RT:0,SF:-32768,FILE:0,RULE:Release
-        _Ham,ACTION:release,TS:-5
-X-CID-META: VersionHash:0f94e32,CLOUDID:564690d0-841b-4e95-ad42-8f86e18f54fc,C
-        OID:nil,Recheck:0,SF:nil,TC:nil,Content:0,EDM:-3,IP:nil,URL:0,File:nil,QS:
-        nil,BEC:nil,COL:0
-X-UUID: 00afaecb19a94d82a2ad66a64a5d3bb0-20220728
-Received: from mtkcas10.mediatek.inc [(172.21.101.39)] by mailgw02.mediatek.com
-        (envelope-from <wenbin.mei@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
-        with ESMTP id 1373914139; Thu, 28 Jul 2022 16:00:55 +0800
-Received: from mtkmbs11n2.mediatek.inc (172.21.101.187) by
- mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
- Thu, 28 Jul 2022 16:00:54 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkmbs11n2.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
- Transport; Thu, 28 Jul 2022 16:00:52 +0800
-From:   Wenbin Mei <wenbin.mei@mediatek.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH] mmc: mtk-sd: Clear interrupts when cqe off/disable
-Date:   Thu, 28 Jul 2022 16:00:48 +0800
-Message-ID: <20220728080048.21336-1-wenbin.mei@mediatek.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S231564AbiG1PT0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2022 11:19:26 -0400
+Received: from mail-il1-f180.google.com (mail-il1-f180.google.com [209.85.166.180])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50C9C4AD7D;
+        Thu, 28 Jul 2022 08:19:25 -0700 (PDT)
+Received: by mail-il1-f180.google.com with SMTP id k10so553695ilo.3;
+        Thu, 28 Jul 2022 08:19:25 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=c32VgeS+HtTYIvfXDR6CWVJsL6lzakGW425ia25EmBU=;
+        b=8H8wnZ+8IQ8QyNxE/1ynEdqzyDCJjd/K6HiSyzXaFLnnUMHNBhm8DUKeTCniK4a+/m
+         RQ6oO4R3zinlYhQPjKUugmonpijv6Rr9QCy8dyUhAJsQzlDQ2u6eyS2zUMZfUkSEbOv4
+         B+nKrm46HZCYVMcT2RDj0JuiwiOP6X9BnSJbXE6n5gXo/70X4oEMPb2puu6YqO1+s9NY
+         1PalpKJtUq8y4G4q71ZTKLlDzWKAekiZYl2NcuUnaN17kbnqpTIdYvXOch9DeQjGoagB
+         stS3HUIikTkbMnFj1dFvjDZ1HBgJDEMW38ucO4b5urewbStteTthcgkDm0hEK+r0/UNA
+         SgWg==
+X-Gm-Message-State: AJIora/didYdZQSDlOft3qD9CL+200/Y105LrTESH/4kSd7m9fxTjuhL
+        lNnrV+FMNdNiKMKyJNsTqTSSLPp8nA==
+X-Google-Smtp-Source: AGRyM1t0K6U1AMwaAS3WdZ+870BTno/oW/sBtQDT/5biP0z8Ii4KyEMGD4IA/0KAseFec7UxIhPmWQ==
+X-Received: by 2002:a05:6e02:1564:b0:2dd:7792:9550 with SMTP id k4-20020a056e02156400b002dd77929550mr6416595ilu.292.1659021564500;
+        Thu, 28 Jul 2022 08:19:24 -0700 (PDT)
+Received: from robh.at.kernel.org ([64.188.179.248])
+        by smtp.gmail.com with ESMTPSA id a15-20020a056638018f00b0034142dad202sm497011jaq.31.2022.07.28.08.19.23
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 28 Jul 2022 08:19:24 -0700 (PDT)
+Received: (nullmailer pid 902859 invoked by uid 1000);
+        Thu, 28 Jul 2022 15:19:23 -0000
+Date:   Thu, 28 Jul 2022 09:19:23 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: mmc-spi-slot: drop unneeded
+ spi-max-frequency
+Message-ID: <20220728151923.GA902761-robh@kernel.org>
+References: <20220727164202.385531-1-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-MTK:  N
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220727164202.385531-1-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently we don't clear MSDC interrupts when cqe off/disable, which led
-to the data complete interrupt will be reserved for the next command.
-If the next command with data transfer after cqe off/disable, we process
-the CMD ready interrupt and trigger DMA start for data, but the data
-complete interrupt is already exists, then SW assume that the data transfer
-is complete, SW will trigger DMA stop, but the data may not be transmitted
-yet or is transmitting, so we may encounter the following error:
-mtk-msdc 11230000.mmc: CMD bus busy detected.
+On Wed, 27 Jul 2022 18:42:02 +0200, Krzysztof Kozlowski wrote:
+> spi-max-frequency comes from spi-peripheral-props.yaml.
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml | 2 --
+>  1 file changed, 2 deletions(-)
+> 
 
-Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
----
- drivers/mmc/host/mtk-sd.c | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 4ff73d1883de..69d78604d1fc 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -2446,6 +2446,9 @@ static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
- 	/* disable busy check */
- 	sdr_clr_bits(host->base + MSDC_PATCH_BIT1, MSDC_PB1_BUSY_CHECK_SEL);
- 
-+	val = readl(host->base + MSDC_INT);
-+	writel(val, host->base + MSDC_INT);
-+
- 	if (recovery) {
- 		sdr_set_field(host->base + MSDC_DMA_CTRL,
- 			      MSDC_DMA_CTRL_STOP, 1);
-@@ -2932,11 +2935,14 @@ static int __maybe_unused msdc_suspend(struct device *dev)
- 	struct mmc_host *mmc = dev_get_drvdata(dev);
- 	struct msdc_host *host = mmc_priv(mmc);
- 	int ret;
-+	u32 val;
- 
- 	if (mmc->caps2 & MMC_CAP2_CQE) {
- 		ret = cqhci_suspend(mmc);
- 		if (ret)
- 			return ret;
-+		val = readl(host->base + MSDC_INT);
-+		writel(val, host->base + MSDC_INT);
- 	}
- 
- 	/*
--- 
-2.25.1
-
+Acked-by: Rob Herring <robh@kernel.org>
