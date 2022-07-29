@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA9EC19F29
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:44:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F0EFC25B0C
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235383AbiG2Ko6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 06:44:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39650 "EHLO
+        id S231706AbiG2KpA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 06:45:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231218AbiG2Ko5 (ORCPT
+        with ESMTP id S234698AbiG2Ko5 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:44:57 -0400
 Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4A1883211;
-        Fri, 29 Jul 2022 03:44:53 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78E8383222;
+        Fri, 29 Jul 2022 03:44:55 -0700 (PDT)
 Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
         (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id AC0A96601B51;
-        Fri, 29 Jul 2022 11:44:50 +0100 (BST)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 2DE3C6601B5B;
+        Fri, 29 Jul 2022 11:44:53 +0100 (BST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1659091491;
-        bh=AQdqE1GO0V3rreFgAXtrSDeQLlxnOolBtnCZSijQhOM=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ejPq8DpUJ8FijUY0HCE1hwqrRnGZkQmBiPhNJ55XL1sQXbHsVMgjGe1BCdP+qI76Y
-         ewXDYk3rAZk5Wvt3URjsXZ527wjn580VKlMj0Cs1nvepNKKXM2MqtWDQyjkKuBvvnQ
-         fePyS983PRiJNWfYwEntuI/T3T5SKEf6UbP1aK2GyDz6hfoY9YpEhlt9K5s10T99fm
-         eXYPUHUdo2yrzYHNodmG/i+SbKZVmShsbXNYfXV+DOCI24usdP7esV8m+7qaDLB1LF
-         mQMUuJ1Hn2RgwUs9pGHW9aAYphmUDslW2I1i2AXz2G1d113krfwj6pWw+pbNdYYHxj
-         nYAo9akqERQxg==
+        s=mail; t=1659091494;
+        bh=FjoMUwROjlB7ASGVOB0J6z6l9OQcUOCW/N0yhWPHg8c=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=JTTLJwKZozKdOax4mnSZj1zRid9azn4xnWvYLuiriwzApy5olMOYbMeRPWujTXxCA
+         j0TWzrjZeqO8NuwizjAbvJMzFDjBd/bd2e7073MobSqCT1Ijo81DgIwW1zTkumyQ3v
+         oTB2esiYJz438D0/6mppzZCJjz5xGbvh8wSkFQMkH8OG9QdIMhy75SXFo6hV1jq5Ka
+         pjX8XXqlXnLmJJnSV3ySOvLOYjju4dHsFw7t/RKtYkHQqNPtk5ccLKuurUe+pS2fOE
+         cZfn9Z+Llto+30h2RpEsTLQyAXUnWkMvijaV9fsX73aRHd7I0pOmUAklkB/giEe0Ts
+         VYnIc74fgHJbw==
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
 To:     robh+dt@kernel.org
@@ -46,52 +46,37 @@ Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
         ~postmarketos/upstreaming@lists.sr.ht
-Subject: [PATCH 0/8] MT6795 Devicetrees and Sony Xperia M5
-Date:   Fri, 29 Jul 2022 12:44:32 +0200
-Message-Id: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 2/8] dt-bindings: mmc: Add compatible for MT6795 Helio X10 SoC
+Date:   Fri, 29 Jul 2022 12:44:34 +0200
+Message-Id: <20220729104441.39177-3-angelogioacchino.delregno@collabora.com>
 X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
+References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This series brings some more support for the MT6795 SoC, as it
-adds support for basic clock controllers (and resets) and all
-of the mtk-sd mmc controllers.
+Add a compatible string for the MT6795 SoC's mtk-sd mmc controllers.
 
-While at it, since now it's possible to get the "first signs of
-life" out of a MT6795 smartphone platform, add a basic devicetree
-for the Sony Xperia M5 (codename "Holly") device as to start
-preparing the ground for a gradual bringup.
+Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-This series depends on [1] my mt6795 clocks series.
-
-P.S.: Thumbs up for the first MediaTek-powered ARM64 smartphone
-      going upstream! :-) :-) :-)
-
-[1]: https://patchwork.kernel.org/project/linux-mediatek/list/?series=662165
-
-AngeloGioacchino Del Regno (8):
-  dt-bindings: dma: mediatek,uart-dma: Add binding for MT6795 SoC
-  dt-bindings: mmc: Add compatible for MT6795 Helio X10 SoC
-  arm64: dts: mediatek: mt6795: Add topckgen, infra, peri clocks/resets
-  arm64: dts: mediatek: mt6795: Replace UART dummy clocks with pericfg
-  arm64: dts: mediatek: mt6795: Add support for APDMA and wire up UART
-    DMAs
-  arm64: dts: mediatek: mt6795: Add support for eMMC/SD/SDIO controllers
-  dt-bindings: arm: mediatek: Add compatible for MT6795 Sony Xperia M5
-  arm64: dts: mediatek: Add support for MT6795 Sony Xperia M5 smartphone
-
- .../devicetree/bindings/arm/mediatek.yaml     |   1 +
- .../bindings/dma/mediatek,uart-dma.yaml       |   1 +
- .../devicetree/bindings/mmc/mtk-sd.yaml       |   1 +
- arch/arm64/boot/dts/mediatek/Makefile         |   1 +
- .../dts/mediatek/mt6795-sony-xperia-m5.dts    |  90 +++++++++++++++
- arch/arm64/boot/dts/mediatek/mt6795.dtsi      | 107 +++++++++++++++++-
- 6 files changed, 197 insertions(+), 4 deletions(-)
- create mode 100644 arch/arm64/boot/dts/mediatek/mt6795-sony-xperia-m5.dts
-
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index be366cefffc2..e1ceefe0ae48 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -20,6 +20,7 @@ properties:
+           - mediatek,mt2701-mmc
+           - mediatek,mt2712-mmc
+           - mediatek,mt6779-mmc
++          - mediatek,mt6795-mmc
+           - mediatek,mt7620-mmc
+           - mediatek,mt7622-mmc
+           - mediatek,mt8135-mmc
 -- 
 2.35.1
 
