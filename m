@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF5D8C25B0F
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E17BC19F2C
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235923AbiG2KpH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 06:45:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39824 "EHLO
+        id S235937AbiG2KpL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 06:45:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40000 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235871AbiG2KpD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:45:03 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5CA483F34;
-        Fri, 29 Jul 2022 03:45:01 -0700 (PDT)
+        with ESMTP id S235839AbiG2KpG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:45:06 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 653B783222;
+        Fri, 29 Jul 2022 03:45:04 -0700 (PDT)
 Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
         (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 805A16601B6A;
-        Fri, 29 Jul 2022 11:44:59 +0100 (BST)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 0CA486601B6D;
+        Fri, 29 Jul 2022 11:45:02 +0100 (BST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1659091500;
+        s=mail; t=1659091503;
         bh=0QqxLKrVrFujWkJ9DfNf1cxn6EG01MDTs5MXelKFVVI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=SzrBYnrYJGRifz/98IYnmb50FiMX0iJ1APYI8Ev83ulPV5S1YgZdl9urEQa+hqsbb
-         d1LGyLGyjbmrMgVT49tTGetbMvtA+Zy8FYqEKW70wuZW1gxpxpO4vEo2CHkbG1gEKS
-         WUqpamW3QzPbfyY/zhbQx4C4Vp5k6bTWCV32XXnr6TT/a3gJW/kUKiqmcW39YeVN8J
-         E6OR36oigizyIVlIxKbMLk5pgAYYg78X6XyoE/fByCty8wOlm7E9QPC68DTu5+6jqU
-         V4pvaBQPukkf8VOAKGrQAXDgKPGt4+YI+P6oBh4VFWKVL34mPADF7VGhOaWv0ngNRr
-         n7ACfawIluOQg==
+        b=iT15RnhyxjpR5pnSE8GfqFPQeCidfxclnzPstf+2HMcwDU+HEh4piDVGsrFFs0G6z
+         ozGBSuXB2g0umlDpsGVJEJi6TPMaFd83jzq1RoEQzJ6NVjIZLTulf5yy/Cg7hty7h4
+         GHAj+MJogHlxXjOgzo01tWd70HybWQysIvjXKbRDXPaP6JLMCm/+doqK5ba0a2Ckw3
+         e2Bq1imDDPkNTXAoUGS+aXAy0ASA4VpxHwVAiXmMoh+kSFTgkD5d5r525AYkW2SdKQ
+         xI9zObLHtfrk03u7CGLsw/NwJCh6ICzAJrwSGm/VjxUh44D+v65v7LznhJAKH9hdZ9
+         AVkcOaCuHP64g==
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
 To:     robh+dt@kernel.org
@@ -46,9 +46,9 @@ Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
         ~postmarketos/upstreaming@lists.sr.ht
-Subject: [PATCH 7/7] arm64: dts: mediatek: Add support for MT6795 Sony Xperia M5 smartphone
-Date:   Fri, 29 Jul 2022 12:44:39 +0200
-Message-Id: <20220729104441.39177-8-angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 8/8] arm64: dts: mediatek: Add support for MT6795 Sony Xperia M5 smartphone
+Date:   Fri, 29 Jul 2022 12:44:41 +0200
+Message-Id: <20220729104441.39177-10-angelogioacchino.delregno@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
 References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
