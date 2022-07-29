@@ -2,68 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0B43C04A68
-	for <linux-mmc@archiver.kernel.org>; Thu, 28 Jul 2022 15:19:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B4C9C00144
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 08:49:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231682AbiG1PT0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 28 Jul 2022 11:19:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33516 "EHLO
+        id S234685AbiG2Itr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 04:49:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231564AbiG1PT0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 28 Jul 2022 11:19:26 -0400
-Received: from mail-il1-f180.google.com (mail-il1-f180.google.com [209.85.166.180])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50C9C4AD7D;
-        Thu, 28 Jul 2022 08:19:25 -0700 (PDT)
-Received: by mail-il1-f180.google.com with SMTP id k10so553695ilo.3;
-        Thu, 28 Jul 2022 08:19:25 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=c32VgeS+HtTYIvfXDR6CWVJsL6lzakGW425ia25EmBU=;
-        b=8H8wnZ+8IQ8QyNxE/1ynEdqzyDCJjd/K6HiSyzXaFLnnUMHNBhm8DUKeTCniK4a+/m
-         RQ6oO4R3zinlYhQPjKUugmonpijv6Rr9QCy8dyUhAJsQzlDQ2u6eyS2zUMZfUkSEbOv4
-         B+nKrm46HZCYVMcT2RDj0JuiwiOP6X9BnSJbXE6n5gXo/70X4oEMPb2puu6YqO1+s9NY
-         1PalpKJtUq8y4G4q71ZTKLlDzWKAekiZYl2NcuUnaN17kbnqpTIdYvXOch9DeQjGoagB
-         stS3HUIikTkbMnFj1dFvjDZ1HBgJDEMW38ucO4b5urewbStteTthcgkDm0hEK+r0/UNA
-         SgWg==
-X-Gm-Message-State: AJIora/didYdZQSDlOft3qD9CL+200/Y105LrTESH/4kSd7m9fxTjuhL
-        lNnrV+FMNdNiKMKyJNsTqTSSLPp8nA==
-X-Google-Smtp-Source: AGRyM1t0K6U1AMwaAS3WdZ+870BTno/oW/sBtQDT/5biP0z8Ii4KyEMGD4IA/0KAseFec7UxIhPmWQ==
-X-Received: by 2002:a05:6e02:1564:b0:2dd:7792:9550 with SMTP id k4-20020a056e02156400b002dd77929550mr6416595ilu.292.1659021564500;
-        Thu, 28 Jul 2022 08:19:24 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id a15-20020a056638018f00b0034142dad202sm497011jaq.31.2022.07.28.08.19.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 28 Jul 2022 08:19:24 -0700 (PDT)
-Received: (nullmailer pid 902859 invoked by uid 1000);
-        Thu, 28 Jul 2022 15:19:23 -0000
-Date:   Thu, 28 Jul 2022 09:19:23 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: mmc-spi-slot: drop unneeded
- spi-max-frequency
-Message-ID: <20220728151923.GA902761-robh@kernel.org>
-References: <20220727164202.385531-1-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S234622AbiG2Itq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 04:49:46 -0400
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CECD677A5D;
+        Fri, 29 Jul 2022 01:49:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1659084585; x=1690620585;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=fKTCNCY3yUBltG+96gLo8Nmj+3drJD5/kMapSzBWqjk=;
+  b=kXcCp2rw+Y/6JzqD0gPg9iwxfxu74rHAE1sM20jA32BtI1OxsM40fgLt
+   +CNQcq0iOtAIRXVHAHUwo1LwUBKqwOLd91G1/2HTRVw7uLbYzwyVH464S
+   qd0hHVfpgvmf5JDDdLrWoNIV1l3/LqDRKCon9sOO5yyR18qIS4evfH+sr
+   6NltFJy26BKRvGPvRDOzcdSIVDxhCKHxrzykVjI1u4l+wYYyldAPQyqNZ
+   uC1TEEqx3/JSNJg7m86GM4p3dyNL489Sn3y/9iys0CRAS1hmae9stKvzq
+   NMAszfY/VjkCipkj1mxbjFzNfKv9JEs3KU/aVDvhnWWxmtaYW/bGB4hVf
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10422"; a="275610155"
+X-IronPort-AV: E=Sophos;i="5.93,200,1654585200"; 
+   d="scan'208";a="275610155"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2022 01:49:44 -0700
+X-IronPort-AV: E=Sophos;i="5.93,200,1654585200"; 
+   d="scan'208";a="629299371"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.142])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2022 01:49:42 -0700
+Message-ID: <c297fc36-5d0e-6c89-af4a-0d63977811c4@intel.com>
+Date:   Fri, 29 Jul 2022 11:49:40 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220727164202.385531-1-krzysztof.kozlowski@linaro.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro:fix some SD cards
+ compatibility issue at ddr50 mode
+Content-Language: en-US
+To:     Chevron Li <chevron.li@bayhubtech.com>, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     shaper.liu@bayhubtech.com, shirley.her@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com
+References: <20220727033123.304-1-chevron.li@bayhubtech.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220727033123.304-1-chevron.li@bayhubtech.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 27 Jul 2022 18:42:02 +0200, Krzysztof Kozlowski wrote:
-> spi-max-frequency comes from spi-peripheral-props.yaml.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml | 2 --
->  1 file changed, 2 deletions(-)
-> 
+On 27/07/22 06:31, Chevron Li wrote:
+> Bayhub chips have better compatibility support for sdr50 than ddr50
 
-Acked-by: Rob Herring <robh@kernel.org>
+Upper case would be better for SDR50 and DDR50
+
+> and both mode have the same R/W performance.
+
+Only if the max frequency is 100 MHz.  Is that always the case?
+
+Perhaps comment on that in the commit message.
+
+> Disable ddr50 mode and use sdr50 instead.
+
+Upper case would be better for SDR50 and DDR50
+
+> 
+> Signed-off-by: Chevron Li<chevron.li@bayhubtech.com>
+
+For neatness, a space before "<" above would be better, and
+also a space after ":" in the subject
+
+> ---
+> Changes on V1:
+> 1.Set quirks2 flag SDHCI_QUIRK2_BROKEN_DDR50 for bayhub chips.
+> 2.Use bayhub hardware input tuning for SDR50 mode instead of standard tuning flow.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 0d4d343dbb77..ad457cd9cbaa 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -317,11 +317,12 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	u32 reg_val;
+>  
+>  	/*
+> -	 * This handler only implements the eMMC tuning that is specific to
+> +	 * This handler implements the hardware tuning that is specific to
+>  	 * this controller.  Fall back to the standard method for other TIMING.
+>  	 */
+>  	if ((host->timing != MMC_TIMING_MMC_HS200) &&
+> -		(host->timing != MMC_TIMING_UHS_SDR104))
+> +		(host->timing != MMC_TIMING_UHS_SDR104) &&
+> +		(host->timing != MMC_TIMING_UHS_SDR50))
+>  		return sdhci_execute_tuning(mmc, opcode);
+>  
+>  	if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
+> @@ -631,6 +632,8 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
+>  		if (reg & 0x1)
+>  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
+>  
+> +		host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
+> +
+>  		sdhci_pci_o2_enable_msi(chip, host);
+>  
+>  		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
+> 
+> base-commit: 68e77ffbfd06ae3ef8f2abf1c3b971383c866983
+
