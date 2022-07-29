@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17F3FC2BBC5
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4524DC25B07
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235875AbiG2KpD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 06:45:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39754 "EHLO
+        id S235803AbiG2KpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 06:45:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235856AbiG2KpB (ORCPT
+        with ESMTP id S235820AbiG2KpB (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:45:01 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B04DC83F19;
-        Fri, 29 Jul 2022 03:45:00 -0700 (PDT)
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2507E83223;
+        Fri, 29 Jul 2022 03:44:57 -0700 (PDT)
 Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
         (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 3BEC66601B69;
-        Fri, 29 Jul 2022 11:44:58 +0100 (BST)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 74E196601B66;
+        Fri, 29 Jul 2022 11:44:54 +0100 (BST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1659091499;
-        bh=FJUOyAwho3bbWQ8PWvLe4wxYoMHlf01l8/jYVjXf2r0=;
+        s=mail; t=1659091495;
+        bh=TA74QxJMdtjbhlYPI6ogd09Z8LzPo3IXxmpuJNWStt8=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=QWzukmMRpP7N16ie/C/7kSNSqJO07cZHNsvoFBDgJhi6Jjb4ih+LGXpW+zMgi6YPm
-         yXEG0q1bVhbdTw4t12e8DySfifvBcCbnizCcFiOC5yi45hG9P4kn9+Y0ENLimm8C53
-         RRLXIpVmXy3Qk73sDFdkiSFB8ADTzIGo+VIasHg9KY7c1npOVBFSh1S3aXIFw8JH9h
-         IcEIV0LLbzCdUtxCUZ4FLuuNywYyPAZ5ep8d8HAwvGd1vG/DvIZDQjxZkxIzQYVv5V
-         nctcrZCXvoNSokM7OGhX4p7WnBHkPA48W3Sng1skXJGNpR4XQmD2IzRZigtGyTjkHg
-         HpxjTnK7IDaNA==
+        b=NAe69YGjki0F5pOABZw7N7isdxhWy81tV+oAU2rC2q+u/l4xSJGwvnjCmz1vPHpIa
+         rA9bMPoiDIqNarvYBSJaH89J5/7EmB1GGp5PqlNLq50/TqwjV0xpb8BgfKuY6lnYX7
+         QdLPz6/pIeqlzMWxyTWaDtxuVu0MzsmP4nz/9vRi2myY3ZeZDiVbTuKvs3f5fMyK6H
+         KyU89Xze+3VjsSa8BIW9kg7xQuXUyKFThy59ej1f6+AlP1SROSzIr0zE2958XJ735E
+         3JaxbkDq67zPK7JOVTSV0OfLEoE1N2VoBDoiRQDT2xAQc7moQV5TLNSlXL7kxh25aF
+         eUcTq7GCvjw+w==
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
 To:     robh+dt@kernel.org
@@ -46,9 +46,9 @@ Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
         ~postmarketos/upstreaming@lists.sr.ht
-Subject: [PATCH 6/8] arm64: dts: mediatek: mt6795: Add support for eMMC/SD/SDIO controllers
-Date:   Fri, 29 Jul 2022 12:44:38 +0200
-Message-Id: <20220729104441.39177-7-angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 3/8] arm64: dts: mediatek: mt6795: Add topckgen, infra, peri clocks/resets
+Date:   Fri, 29 Jul 2022 12:44:35 +0200
+Message-Id: <20220729104441.39177-4-angelogioacchino.delregno@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
 References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
@@ -58,67 +58,45 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add the mmc nodes to support all of the four controllers, used for
-eMMC, SD/MicroSD and SDIO storage.
-All of these controller nodes are left disabled by default, as
-usage is board dependent.
+Add nodes for topckgen, infracfg and pericfg, providing various
+clocks and resets and needed to support basic IPs of this SoC.
 
 Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 ---
- arch/arm64/boot/dts/mediatek/mt6795.dtsi | 41 ++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+ arch/arm64/boot/dts/mediatek/mt6795.dtsi | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/mediatek/mt6795.dtsi b/arch/arm64/boot/dts/mediatek/mt6795.dtsi
-index 687e0ee63503..2548bfcf9755 100644
+index 46f0e54be766..9166d481a366 100644
 --- a/arch/arm64/boot/dts/mediatek/mt6795.dtsi
 +++ b/arch/arm64/boot/dts/mediatek/mt6795.dtsi
-@@ -380,5 +380,46 @@ uart3: serial@11005000 {
- 			dma-names = "tx", "rx";
- 			status = "disabled";
- 		};
-+
-+		mmc0: mmc@11230000 {
-+			compatible = "mediatek,mt6795-mmc", "mediatek,mt8173-mmc";
-+			reg = <0 0x11230000 0 0x1000>;
-+			interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC30_0>,
-+				 <&topckgen CLK_TOP_MSDC50_0_H_SEL>,
-+				 <&topckgen CLK_TOP_MSDC50_0_SEL>;
-+			clock-names = "source", "hclk", "source_cg";
-+			status = "disabled";
+@@ -192,6 +192,26 @@ soc {
+ 		compatible = "simple-bus";
+ 		ranges;
+ 
++		topckgen: syscon@10000000 {
++			compatible = "mediatek,mt6795-topckgen", "syscon";
++			reg = <0 0x10000000 0 0x1000>;
++			#clock-cells = <1>;
 +		};
 +
-+		mmc1: mmc@11240000 {
-+			compatible = "mediatek,mt6795-mmc", "mediatek,mt8173-mmc";
-+			reg = <0 0x11240000 0 0x1000>;
-+			interrupts = <GIC_SPI 80 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC30_1>,
-+				 <&topckgen CLK_TOP_AXI_SEL>;
-+			clock-names = "source", "hclk";
-+			status = "disabled";
++		infracfg: syscon@10001000 {
++			compatible = "mediatek,mt6795-infracfg", "syscon";
++			reg = <0 0x10001000 0 0x1000>;
++			#clock-cells = <1>;
++			#reset-cells = <1>;
 +		};
 +
-+		mmc2: mmc@11250000 {
-+			compatible = "mediatek,mt6795-mmc", "mediatek,mt8173-mmc";
-+			reg = <0 0x11250000 0 0x1000>;
-+			interrupts = <GIC_SPI 81 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC30_2>,
-+				 <&topckgen CLK_TOP_AXI_SEL>;
-+			clock-names = "source", "hclk";
-+			status = "disabled";
++		pericfg: syscon@10003000 {
++			compatible = "mediatek,mt6795-pericfg", "syscon";
++			reg = <0 0x10003000 0 0x1000>;
++			#clock-cells = <1>;
++			#reset-cells = <1>;
 +		};
 +
-+		mmc3: mmc@11260000 {
-+			compatible = "mediatek,mt6795-mmc", "mediatek,mt8173-mmc";
-+			reg = <0 0x11260000 0 0x1000>;
-+			interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_LOW>;
-+			clocks = <&pericfg CLK_PERI_MSDC30_3>,
-+				 <&topckgen CLK_TOP_AXI_SEL>;
-+			clock-names = "source", "hclk";
-+			status = "disabled";
-+		};
- 	};
- };
+ 		pio: pinctrl@10005000 {
+ 			compatible = "mediatek,mt6795-pinctrl";
+ 			reg = <0 0x10005000 0 0x1000>, <0 0x1000b000 0 0x1000>;
 -- 
 2.35.1
 
