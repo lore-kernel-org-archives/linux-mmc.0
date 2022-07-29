@@ -2,111 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0649C00144
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:21:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DC8DC19F2D
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235349AbiG2KVT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 06:21:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46956 "EHLO
+        id S235713AbiG2Ko6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 06:44:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229925AbiG2KVR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:21:17 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DD8F74CD1;
-        Fri, 29 Jul 2022 03:21:16 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1659090076; x=1690626076;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=Yxu2G4VGiPVcwxTHTFYMsriLmADUxTrXB7PoN2zpY4s=;
-  b=FMOrT/uAQ9gYo1OYN6e13DfEqfByalfc7BtGvQDSzrz5pQ1ZFBDQuWbv
-   Ib84QesuM31xg82yYVBgkcy236Z6L7Re6NNMWPXI63tc7cwFhVPsGLUZp
-   FJnzMTV28H1ktuy6IBl4v1ml/ljuiLiZ2iBV2Cox0n7gnb9yq3/U7BWnS
-   +0I/STe+LzubbcHIr1r8LQneQfP+kiwLo48Q+i0KHQ7JqbXvIAkE/EW4+
-   7NPDcPS4DIZT0XjKLfkJ6KSZ1Fp/SrIp4g2Pfscunx7N+rICq5hQjtRbV
-   2bMG0S1mUOCDDvHG9pnME/eb6LlWAEFrL6Hizli04lVSDu8eSPiVivzxW
-   A==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10422"; a="275623948"
-X-IronPort-AV: E=Sophos;i="5.93,201,1654585200"; 
-   d="scan'208";a="275623948"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2022 03:21:15 -0700
-X-IronPort-AV: E=Sophos;i="5.93,201,1654585200"; 
-   d="scan'208";a="660179185"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.46.142])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Jul 2022 03:21:13 -0700
-Message-ID: <ec9422fa-664b-3c40-f5d5-283bca81f099@intel.com>
-Date:   Fri, 29 Jul 2022 13:21:11 +0300
+        with ESMTP id S233101AbiG2Ko5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:44:57 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A40E8321F;
+        Fri, 29 Jul 2022 03:44:54 -0700 (PDT)
+Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id EF54D6601B55;
+        Fri, 29 Jul 2022 11:44:51 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1659091493;
+        bh=g+LcCft8DaAa9BeWpNJbD1ov3XINszU+afPtdnzNVwE=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=UuLkRXbNOEtS+yPogV3R63b1wH6QZVeIf9Fz44BXMMQUk4ChORyyAYVBXhFTrYT+y
+         /x+lY/0lg6luBq6l9rj+BTLNh+X+p7gYS5ehcMwCUaFYK/WE1fGmzBLn8CUTOp1lmM
+         TFCGRVp0IQRJAWpveTh/qg4Spg93s5H5tkqdLcSRrAwAq87JAcrK6uq4xn+c5Tx8Rl
+         ypwKYULbYpFL2Ue+JN9c9bTOxZ0cslT0JndPC0NSeqMfT0HtIt+s9FaVnr75zwbYJs
+         pazkRs4/gFK1wjoQ63V3NFI60nOMUPJ3CQirf8qRRBHEpsA/lycnbyK8PDrhH9ak5j
+         Z4uSN0yqnlPDg==
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+To:     robh+dt@kernel.org
+Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
+        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        matthias.bgg@gmail.com, angelogioacchino.delregno@collabora.com,
+        hsinyi@chromium.org, nfraprado@collabora.com,
+        allen-kh.cheng@mediatek.com, fparent@baylibre.com,
+        sam.shih@mediatek.com, sean.wang@mediatek.com,
+        long.cheng@mediatek.com, wenbin.mei@mediatek.com,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
+        ~postmarketos/upstreaming@lists.sr.ht
+Subject: [PATCH 1/8] dt-bindings: dma: mediatek,uart-dma: Add binding for MT6795 SoC
+Date:   Fri, 29 Jul 2022 12:44:33 +0200
+Message-Id: <20220729104441.39177-2-angelogioacchino.delregno@collabora.com>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
+References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH V2 1/1] mmc: sdhci-pci-o2micro: fix some SD cards
- compatibility issue at DDR50 mode
-Content-Language: en-US
-To:     Chevron Li <chevron.li@bayhubtech.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     shaper.liu@bayhubtech.com, shirley.her@bayhubtech.com,
-        xiaoguang.yu@bayhubtech.com
-References: <20220729100524.387-1-chevron.li@bayhubtech.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220729100524.387-1-chevron.li@bayhubtech.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/07/22 13:05, Chevron Li wrote:
-> Bayhub chips have better compatibility support for SDR50 than DDR50
-> and both mode have the same R/W performance when clock frequency >= 100MHz.
-> Disable DDR50 mode and use SDR50 instead.
-> 
-> Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
+Add mediatek,mt6795-uart-dma to the compatibles list to support
+the MT6795 Helio X10 SoC's UART APDMA.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+---
+ Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-> ---
-> Changes on V1:
-> 1.Set quirks2 flag SDHCI_QUIRK2_BROKEN_DDR50 for bayhub chips.
-> 2.Use bayhub hardware input tuning for SDR50 mode instead of standard tuning flow.
-> 
-> Changes on V2:
-> Update commit format and information.
-> ---
->  drivers/mmc/host/sdhci-pci-o2micro.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index 0d4d343dbb77..ad457cd9cbaa 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -317,11 +317,12 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  	u32 reg_val;
->  
->  	/*
-> -	 * This handler only implements the eMMC tuning that is specific to
-> +	 * This handler implements the hardware tuning that is specific to
->  	 * this controller.  Fall back to the standard method for other TIMING.
->  	 */
->  	if ((host->timing != MMC_TIMING_MMC_HS200) &&
-> -		(host->timing != MMC_TIMING_UHS_SDR104))
-> +		(host->timing != MMC_TIMING_UHS_SDR104) &&
-> +		(host->timing != MMC_TIMING_UHS_SDR50))
->  		return sdhci_execute_tuning(mmc, opcode);
->  
->  	if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> @@ -631,6 +632,8 @@ static int sdhci_pci_o2_probe_slot(struct sdhci_pci_slot *slot)
->  		if (reg & 0x1)
->  			host->quirks |= SDHCI_QUIRK_MULTIBLOCK_READ_ACMD12;
->  
-> +		host->quirks2 |= SDHCI_QUIRK2_BROKEN_DDR50;
-> +
->  		sdhci_pci_o2_enable_msi(chip, host);
->  
->  		if (chip->pdev->device == PCI_DEVICE_ID_O2_SEABIRD0) {
-> 
-> base-commit: 68e77ffbfd06ae3ef8f2abf1c3b971383c866983
+diff --git a/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml b/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
+index 19ea8dcbcbce..9ab4d81ead35 100644
+--- a/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
++++ b/Documentation/devicetree/bindings/dma/mediatek,uart-dma.yaml
+@@ -22,6 +22,7 @@ properties:
+       - items:
+           - enum:
+               - mediatek,mt2712-uart-dma
++              - mediatek,mt6795-uart-dma
+               - mediatek,mt8365-uart-dma
+               - mediatek,mt8516-uart-dma
+           - const: mediatek,mt6577-uart-dma
+-- 
+2.35.1
 
