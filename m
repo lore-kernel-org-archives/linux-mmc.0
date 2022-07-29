@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4524DC25B07
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79B1DC00144
+	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 10:45:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235803AbiG2KpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 06:45:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39728 "EHLO
+        id S235889AbiG2KpG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 29 Jul 2022 06:45:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235820AbiG2KpB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:45:01 -0400
+        with ESMTP id S235355AbiG2KpE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 06:45:04 -0400
 Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2507E83223;
-        Fri, 29 Jul 2022 03:44:57 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56D5183F32;
+        Fri, 29 Jul 2022 03:45:03 -0700 (PDT)
 Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
         (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
         (No client certificate requested)
         (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 74E196601B66;
-        Fri, 29 Jul 2022 11:44:54 +0100 (BST)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id BB4FD6601B71;
+        Fri, 29 Jul 2022 11:45:00 +0100 (BST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1659091495;
-        bh=TA74QxJMdtjbhlYPI6ogd09Z8LzPo3IXxmpuJNWStt8=;
+        s=mail; t=1659091501;
+        bh=KHcQKTlIo6mCV2UKqcNxwuM/2dLWF39lYb6bnCpx53Q=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=NAe69YGjki0F5pOABZw7N7isdxhWy81tV+oAU2rC2q+u/l4xSJGwvnjCmz1vPHpIa
-         rA9bMPoiDIqNarvYBSJaH89J5/7EmB1GGp5PqlNLq50/TqwjV0xpb8BgfKuY6lnYX7
-         QdLPz6/pIeqlzMWxyTWaDtxuVu0MzsmP4nz/9vRi2myY3ZeZDiVbTuKvs3f5fMyK6H
-         KyU89Xze+3VjsSa8BIW9kg7xQuXUyKFThy59ej1f6+AlP1SROSzIr0zE2958XJ735E
-         3JaxbkDq67zPK7JOVTSV0OfLEoE1N2VoBDoiRQDT2xAQc7moQV5TLNSlXL7kxh25aF
-         eUcTq7GCvjw+w==
+        b=gwUT9zuOSrT8H5P4zToiy+Yl6pA2pulVODhkXMqwm+n2Nzs6hwZE28f/4cmrzq6WS
+         ScijsulJB37EnnP7WXkNM7w5t7yYLRHsE/2fB7jE2qanD/8E5xAjfqKd15wYzl2qMv
+         LqWent0iYNsl1AfUsLfcCPmrM+y/nCzMnFQ+e+N/IP1n5zdDmDiFUbITNFQ9prAUxR
+         SoXQFBSlgfMsoFkxZaHfs7PkdO2osJuM9dwrvGGbJAQ5Jlgh3lo8NVVazT38yNQA4d
+         myuTXqnCJMmMA8kjb8Rv4isxk0twfkvYhtThe1rsraIEHM///fvjhSU+CJ5EbO4SOx
+         EdZJRpVOvAPsQ==
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
 To:     robh+dt@kernel.org
@@ -46,9 +46,9 @@ Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
         ~postmarketos/upstreaming@lists.sr.ht
-Subject: [PATCH 3/8] arm64: dts: mediatek: mt6795: Add topckgen, infra, peri clocks/resets
-Date:   Fri, 29 Jul 2022 12:44:35 +0200
-Message-Id: <20220729104441.39177-4-angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 7/8] dt-bindings: arm: mediatek: Add compatible for MT6795 Sony Xperia M5
+Date:   Fri, 29 Jul 2022 12:44:40 +0200
+Message-Id: <20220729104441.39177-9-angelogioacchino.delregno@collabora.com>
 X-Mailer: git-send-email 2.35.1
 In-Reply-To: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
 References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
@@ -58,45 +58,25 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add nodes for topckgen, infracfg and pericfg, providing various
-clocks and resets and needed to support basic IPs of this SoC.
+Add a compatible for the Sony Xperia M5 smartphone.
 
 Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 ---
- arch/arm64/boot/dts/mediatek/mt6795.dtsi | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ Documentation/devicetree/bindings/arm/mediatek.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt6795.dtsi b/arch/arm64/boot/dts/mediatek/mt6795.dtsi
-index 46f0e54be766..9166d481a366 100644
---- a/arch/arm64/boot/dts/mediatek/mt6795.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt6795.dtsi
-@@ -192,6 +192,26 @@ soc {
- 		compatible = "simple-bus";
- 		ranges;
- 
-+		topckgen: syscon@10000000 {
-+			compatible = "mediatek,mt6795-topckgen", "syscon";
-+			reg = <0 0x10000000 0 0x1000>;
-+			#clock-cells = <1>;
-+		};
-+
-+		infracfg: syscon@10001000 {
-+			compatible = "mediatek,mt6795-infracfg", "syscon";
-+			reg = <0 0x10001000 0 0x1000>;
-+			#clock-cells = <1>;
-+			#reset-cells = <1>;
-+		};
-+
-+		pericfg: syscon@10003000 {
-+			compatible = "mediatek,mt6795-pericfg", "syscon";
-+			reg = <0 0x10003000 0 0x1000>;
-+			#clock-cells = <1>;
-+			#reset-cells = <1>;
-+		};
-+
- 		pio: pinctrl@10005000 {
- 			compatible = "mediatek,mt6795-pinctrl";
- 			reg = <0 0x10005000 0 0x1000>, <0 0x1000b000 0 0x1000>;
+diff --git a/Documentation/devicetree/bindings/arm/mediatek.yaml b/Documentation/devicetree/bindings/arm/mediatek.yaml
+index 07c0ea94e850..c162b0df299b 100644
+--- a/Documentation/devicetree/bindings/arm/mediatek.yaml
++++ b/Documentation/devicetree/bindings/arm/mediatek.yaml
+@@ -58,6 +58,7 @@ properties:
+       - items:
+           - enum:
+               - mediatek,mt6795-evb
++              - sony,xperia-m5
+           - const: mediatek,mt6795
+       - items:
+           - enum:
 -- 
 2.35.1
 
