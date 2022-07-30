@@ -2,77 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D01D5C19F2C
-	for <linux-mmc@archiver.kernel.org>; Fri, 29 Jul 2022 23:05:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B66C04A68
+	for <linux-mmc@archiver.kernel.org>; Sat, 30 Jul 2022 08:05:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239637AbiG2XFx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 29 Jul 2022 19:05:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53552 "EHLO
+        id S229835AbiG3IFB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 30 Jul 2022 04:05:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34752 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239638AbiG2XFw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 29 Jul 2022 19:05:52 -0400
-Received: from mail-io1-f52.google.com (mail-io1-f52.google.com [209.85.166.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44588683C2;
-        Fri, 29 Jul 2022 16:05:52 -0700 (PDT)
-Received: by mail-io1-f52.google.com with SMTP id c185so4655703iof.7;
-        Fri, 29 Jul 2022 16:05:52 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=hjKDBui3XbMvdfBvZRSNvz4Y50HGiS8SdRV7n9Sisvk=;
-        b=fpGqANHZE3Dxk/jahYXXp5haq9MtXc2HiXKGHYMtCUp7mxyElW+0uEyn8OPDgUk25s
-         q9xcpTFHrtZkbP7r57M8imf+ls89+futBiN+U08nmTEPTagmDMxpbfHUs+0C5Ot7GlnM
-         8uWjY89B31VYLhk/ejq5R/EG4ykrLvKnwait/gnUjpndEYGyWYepPjACmvbyy6mnSpF4
-         4wxWVjYYyf72cdNkAV6Y+MmMMIv2Pf7C0NDviMCmakHavS/DOncWN9MJCX9uuXxF/c8e
-         yF1xdODC1dQnlyoIf+VhIColtqsv5FdVOkhe5P3WUSSnINuriDnI80nfvCRIfMx6yzkx
-         rzCw==
-X-Gm-Message-State: AJIora+/pbuG5tpHPJHWHLePMDU+BMRhHE1nshs8htHRb8m6X6UG2pSV
-        RD2WcbpjU41VaVEQWoQo0Q==
-X-Google-Smtp-Source: AGRyM1t9O8iQe6oGeaMvWKzV15vZwYX2sfVSpSzsAO1ojnDOjg2jhLPWpDG1bIaXNx1V4sYolB/0Gg==
-X-Received: by 2002:a6b:4019:0:b0:669:3314:ebcb with SMTP id k25-20020a6b4019000000b006693314ebcbmr1870454ioa.197.1659135951515;
-        Fri, 29 Jul 2022 16:05:51 -0700 (PDT)
-Received: from robh.at.kernel.org ([64.188.179.248])
-        by smtp.gmail.com with ESMTPSA id bs19-20020a056638451300b0033ec45fb044sm2227216jab.47.2022.07.29.16.05.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 29 Jul 2022 16:05:50 -0700 (PDT)
-Received: (nullmailer pid 105414 invoked by uid 1000);
-        Fri, 29 Jul 2022 23:05:46 -0000
-Date:   Fri, 29 Jul 2022 17:05:46 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-Cc:     long.cheng@mediatek.com, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, devicetree@vger.kernel.org,
-        nfraprado@collabora.com, ~postmarketos/upstreaming@lists.sr.ht,
-        hsinyi@chromium.org, matthias.bgg@gmail.com, robh+dt@kernel.org,
-        fparent@baylibre.com, linux-kernel@vger.kernel.org,
-        phone-devel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        vkoul@kernel.org, sam.shih@mediatek.com,
-        allen-kh.cheng@mediatek.com, dmaengine@vger.kernel.org,
-        ulf.hansson@linaro.org, wenbin.mei@mediatek.com,
-        sean.wang@mediatek.com, krzysztof.kozlowski+dt@linaro.org,
-        chaotian.jing@mediatek.com
-Subject: Re: [PATCH 7/8] dt-bindings: arm: mediatek: Add compatible for
- MT6795 Sony Xperia M5
-Message-ID: <20220729230546.GA105364-robh@kernel.org>
-References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
- <20220729104441.39177-9-angelogioacchino.delregno@collabora.com>
+        with ESMTP id S229463AbiG3IFA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Jul 2022 04:05:00 -0400
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D853B4A8;
+        Sat, 30 Jul 2022 01:04:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1659168299; x=1690704299;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=i9PZjSKHc8+lT55MmOtDDDgcK8IIEd7ggADGrkaA+sg=;
+  b=AUqg+C6IlAFX8sab3B+f0tkmNPt6RNIVE7h4YZX9WBuTZBKorACKXLkJ
+   4dMr7xk+dq7l0kmWwfB7c9KGrFLL5eKjGDyuLMFHzR10EhwjnVpg6e70d
+   GxtNzRPrW2087kmTk7PMUwiGb52GRomd5+Lj7E/xOpA8PbbxZiiuXwIIv
+   wE40Q8HvlJgMuAQQjreGcvQ9mJNZ13WZv1KSALcnQch12XSHGsWakxo/b
+   2zvzhoPtZCx4IhlGQtsAe7lpoZMM8jHBws45JMfpJsCSpmnioo8D6CIlV
+   /KMkyHAR9M1Qf5L8cep9K6TEEpdJIICinv2U85v3raQ312fxFsBif7Mes
+   g==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10423"; a="287657806"
+X-IronPort-AV: E=Sophos;i="5.93,203,1654585200"; 
+   d="scan'208";a="287657806"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jul 2022 01:04:59 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=Sophos;i="5.93,203,1654585200"; 
+   d="scan'208";a="928998625"
+Received: from lkp-server01.sh.intel.com (HELO e0eace57cfef) ([10.239.97.150])
+  by fmsmga005.fm.intel.com with ESMTP; 30 Jul 2022 01:04:56 -0700
+Received: from kbuild by e0eace57cfef with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1oHhSy-000Ccl-0X;
+        Sat, 30 Jul 2022 08:04:56 +0000
+Date:   Sat, 30 Jul 2022 16:04:42 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Liming Sun <limings@nvidia.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        David Woods <davwoods@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+Cc:     llvm@lists.linux.dev, kbuild-all@lists.01.org,
+        Liming Sun <limings@nvidia.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: add ACPI match data for
+ BlueField-3 SoC
+Message-ID: <202207301544.6K8iGuvp-lkp@intel.com>
+References: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220729104441.39177-9-angelogioacchino.delregno@collabora.com>
+In-Reply-To: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 29 Jul 2022 12:44:40 +0200, AngeloGioacchino Del Regno wrote:
-> Add a compatible for the Sony Xperia M5 smartphone.
-> 
-> Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> ---
->  Documentation/devicetree/bindings/arm/mediatek.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
+Hi Liming,
 
-Acked-by: Rob Herring <robh@kernel.org>
+Thank you for the patch! Perhaps something to improve:
+
+[auto build test WARNING on linus/master]
+[also build test WARNING on ulf-hansson-mmc-mirror/next v5.19-rc8]
+[cannot apply to next-20220728]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
+
+url:    https://github.com/intel-lab-lkp/linux/commits/Liming-Sun/mmc-sdhci-of-dwcmshc-add-ACPI-match-data-for-BlueField-3-SoC/20220729-211808
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 6e2c0490769ef8a95b61304389116ccc85c53e12
+config: riscv-buildonly-randconfig-r002-20220729 (https://download.01.org/0day-ci/archive/20220730/202207301544.6K8iGuvp-lkp@intel.com/config)
+compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project 52cd00cabf479aa7eb6dbb063b7ba41ea57bce9e)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # install riscv cross compiling tool for clang build
+        # apt-get install binutils-riscv64-linux-gnu
+        # https://github.com/intel-lab-lkp/linux/commit/0826c5e41791f253a28b7284805be00108b1f841
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Liming-Sun/mmc-sdhci-of-dwcmshc-add-ACPI-match-data-for-BlueField-3-SoC/20220729-211808
+        git checkout 0826c5e41791f253a28b7284805be00108b1f841
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=riscv SHELL=/bin/bash drivers/mmc/host/
+
+If you fix the issue, kindly add following tag where applicable
+Reported-by: kernel test robot <lkp@intel.com>
+
+All warnings (new ones prefixed by >>):
+
+>> drivers/mmc/host/sdhci-of-dwcmshc.c:282:38: warning: unused variable 'sdhci_dwcmshc_bf3_pdata' [-Wunused-const-variable]
+   static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+                                        ^
+   1 warning generated.
+
+
+vim +/sdhci_dwcmshc_bf3_pdata +282 drivers/mmc/host/sdhci-of-dwcmshc.c
+
+   281	
+ > 282	static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
+   283		.ops = &sdhci_dwcmshc_ops,
+   284		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+   285		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+   286			   SDHCI_QUIRK2_ACMD23_BROKEN,
+   287	};
+   288	
+
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
