@@ -2,117 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B66C04A68
-	for <linux-mmc@archiver.kernel.org>; Sat, 30 Jul 2022 08:05:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06167C00140
+	for <linux-mmc@archiver.kernel.org>; Sun, 31 Jul 2022 17:35:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229835AbiG3IFB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 30 Jul 2022 04:05:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34752 "EHLO
+        id S232207AbiGaRfX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 31 Jul 2022 13:35:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40006 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229463AbiG3IFA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 30 Jul 2022 04:05:00 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D853B4A8;
-        Sat, 30 Jul 2022 01:04:59 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1659168299; x=1690704299;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=i9PZjSKHc8+lT55MmOtDDDgcK8IIEd7ggADGrkaA+sg=;
-  b=AUqg+C6IlAFX8sab3B+f0tkmNPt6RNIVE7h4YZX9WBuTZBKorACKXLkJ
-   4dMr7xk+dq7l0kmWwfB7c9KGrFLL5eKjGDyuLMFHzR10EhwjnVpg6e70d
-   GxtNzRPrW2087kmTk7PMUwiGb52GRomd5+Lj7E/xOpA8PbbxZiiuXwIIv
-   wE40Q8HvlJgMuAQQjreGcvQ9mJNZ13WZv1KSALcnQch12XSHGsWakxo/b
-   2zvzhoPtZCx4IhlGQtsAe7lpoZMM8jHBws45JMfpJsCSpmnioo8D6CIlV
-   /KMkyHAR9M1Qf5L8cep9K6TEEpdJIICinv2U85v3raQ312fxFsBif7Mes
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10423"; a="287657806"
-X-IronPort-AV: E=Sophos;i="5.93,203,1654585200"; 
-   d="scan'208";a="287657806"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Jul 2022 01:04:59 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,203,1654585200"; 
-   d="scan'208";a="928998625"
-Received: from lkp-server01.sh.intel.com (HELO e0eace57cfef) ([10.239.97.150])
-  by fmsmga005.fm.intel.com with ESMTP; 30 Jul 2022 01:04:56 -0700
-Received: from kbuild by e0eace57cfef with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1oHhSy-000Ccl-0X;
-        Sat, 30 Jul 2022 08:04:56 +0000
-Date:   Sat, 30 Jul 2022 16:04:42 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Liming Sun <limings@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        with ESMTP id S231146AbiGaRfV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 31 Jul 2022 13:35:21 -0400
+Received: from smtp.smtpout.orange.fr (smtp03.smtpout.orange.fr [80.12.242.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A37E5589
+        for <linux-mmc@vger.kernel.org>; Sun, 31 Jul 2022 10:35:20 -0700 (PDT)
+Received: from pop-os.home ([90.11.190.129])
+        by smtp.orange.fr with ESMTPA
+        id ICqPojIknQUcTICqPoEmYh; Sun, 31 Jul 2022 19:35:18 +0200
+X-ME-Helo: pop-os.home
+X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
+X-ME-Date: Sun, 31 Jul 2022 19:35:18 +0200
+X-ME-IP: 90.11.190.129
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+To:     Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        David Woods <davwoods@nvidia.com>,
+        Heiko Stuebner <heiko@sntech.de>,
         Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     llvm@lists.linux.dev, kbuild-all@lists.01.org,
-        Liming Sun <limings@nvidia.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v1 1/1] mmc: sdhci-of-dwcmshc: add ACPI match data for
- BlueField-3 SoC
-Message-ID: <202207301544.6K8iGuvp-lkp@intel.com>
-References: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org
+Subject: [PATCH] mmc: dw_mmc-rockchip: Fix the dw_mci_rockchip_remove() function
+Date:   Sun, 31 Jul 2022 19:35:12 +0200
+Message-Id: <bd442556c0094be2c240f070d15ce2061b376c09.1659288898.git.christophe.jaillet@wanadoo.fr>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Liming,
+Having a something_get() function call in a remove function is unusual.
+A something_put() is more likely.
 
-Thank you for the patch! Perhaps something to improve:
+More over the remove() function does not match the error handling of the
+probe().
 
-[auto build test WARNING on linus/master]
-[also build test WARNING on ulf-hansson-mmc-mirror/next v5.19-rc8]
-[cannot apply to next-20220728]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Fix the remove() function to match the error handling path of the probe.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Liming-Sun/mmc-sdhci-of-dwcmshc-add-ACPI-match-data-for-BlueField-3-SoC/20220729-211808
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git 6e2c0490769ef8a95b61304389116ccc85c53e12
-config: riscv-buildonly-randconfig-r002-20220729 (https://download.01.org/0day-ci/archive/20220730/202207301544.6K8iGuvp-lkp@intel.com/config)
-compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project 52cd00cabf479aa7eb6dbb063b7ba41ea57bce9e)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # install riscv cross compiling tool for clang build
-        # apt-get install binutils-riscv64-linux-gnu
-        # https://github.com/intel-lab-lkp/linux/commit/0826c5e41791f253a28b7284805be00108b1f841
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Liming-Sun/mmc-sdhci-of-dwcmshc-add-ACPI-match-data-for-BlueField-3-SoC/20220729-211808
-        git checkout 0826c5e41791f253a28b7284805be00108b1f841
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=riscv SHELL=/bin/bash drivers/mmc/host/
+Fixes: f90142683f04 ("mmc: dw_mmc-rockchip: add runtime PM support")
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+---
+/!\   SPECULATIVE   /!\
 
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
+I have a limited knowledge of the pm_ API.
+However, as said, the error handling path of the probe looks more logical
+to me.
 
-All warnings (new ones prefixed by >>):
+Moreover, some more or less similar code can be found in
+drivers/mmc/host/dw_mmc-exynos.c. This patch also align this rockchip
+driver to the exynos's one.
 
->> drivers/mmc/host/sdhci-of-dwcmshc.c:282:38: warning: unused variable 'sdhci_dwcmshc_bf3_pdata' [-Wunused-const-variable]
-   static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
-                                        ^
-   1 warning generated.
+So review with care.
+---
+ drivers/mmc/host/dw_mmc-rockchip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-vim +/sdhci_dwcmshc_bf3_pdata +282 drivers/mmc/host/sdhci-of-dwcmshc.c
-
-   281	
- > 282	static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
-   283		.ops = &sdhci_dwcmshc_ops,
-   284		.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-   285		.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-   286			   SDHCI_QUIRK2_ACMD23_BROKEN,
-   287	};
-   288	
-
+diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
+index 2a99f15f527f..b5893c738b4a 100644
+--- a/drivers/mmc/host/dw_mmc-rockchip.c
++++ b/drivers/mmc/host/dw_mmc-rockchip.c
+@@ -373,8 +373,8 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
+ 
+ static int dw_mci_rockchip_remove(struct platform_device *pdev)
+ {
+-	pm_runtime_get_sync(&pdev->dev);
+ 	pm_runtime_disable(&pdev->dev);
++	pm_runtime_set_suspended(&pdev->dev);
+ 	pm_runtime_put_noidle(&pdev->dev);
+ 
+ 	dw_mci_pltfm_remove(pdev);
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.34.1
+
