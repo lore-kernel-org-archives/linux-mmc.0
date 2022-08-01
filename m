@@ -2,84 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06167C00140
-	for <linux-mmc@archiver.kernel.org>; Sun, 31 Jul 2022 17:35:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C1F5C282E7
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 Aug 2022 08:15:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232207AbiGaRfX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 31 Jul 2022 13:35:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40006 "EHLO
+        id S229911AbiHAIPI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 1 Aug 2022 04:15:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231146AbiGaRfV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 31 Jul 2022 13:35:21 -0400
-Received: from smtp.smtpout.orange.fr (smtp03.smtpout.orange.fr [80.12.242.125])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A37E5589
-        for <linux-mmc@vger.kernel.org>; Sun, 31 Jul 2022 10:35:20 -0700 (PDT)
-Received: from pop-os.home ([90.11.190.129])
-        by smtp.orange.fr with ESMTPA
-        id ICqPojIknQUcTICqPoEmYh; Sun, 31 Jul 2022 19:35:18 +0200
-X-ME-Helo: pop-os.home
-X-ME-Auth: YWZlNiIxYWMyZDliZWIzOTcwYTEyYzlhMmU3ZiQ1M2U2MzfzZDfyZTMxZTBkMTYyNDBjNDJlZmQ3ZQ==
-X-ME-Date: Sun, 31 Jul 2022 19:35:18 +0200
-X-ME-IP: 90.11.190.129
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-To:     Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiko Stuebner <heiko@sntech.de>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org
-Subject: [PATCH] mmc: dw_mmc-rockchip: Fix the dw_mci_rockchip_remove() function
-Date:   Sun, 31 Jul 2022 19:35:12 +0200
-Message-Id: <bd442556c0094be2c240f070d15ce2061b376c09.1659288898.git.christophe.jaillet@wanadoo.fr>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S229642AbiHAIPH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 1 Aug 2022 04:15:07 -0400
+X-Greylist: delayed 486 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 01 Aug 2022 01:15:07 PDT
+Received: from mail.fadrush.pl (mail.fadrush.pl [54.37.225.211])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3B54E2CC8C
+        for <linux-mmc@vger.kernel.org>; Mon,  1 Aug 2022 01:15:07 -0700 (PDT)
+Received: by mail.fadrush.pl (Postfix, from userid 1002)
+        id 118672254C; Mon,  1 Aug 2022 08:06:34 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=fadrush.pl; s=mail;
+        t=1659341220; bh=bD6j9gIFU6CLTaCGl0Ow9oeIxtirvTfMeNZSfLEZQ+I=;
+        h=Date:From:To:Subject:From;
+        b=K5dgiGfPKQP4dDa+9lhnvSQUd/7SkuuHon6OafGeEOYJ7pEyUh3TPOt/hSJuSkt/m
+         R7+omf72PazxZmxuroJgdptT0RGuU70ft0JYHc4ZjeTQUgUtNGyJfk+Y7g9iVTfuim
+         7ao2tDxW46UMEMonLkHO4trBEkladLeNKcAcSbyUGYHhgCYHA/ZmBUOlCzMXDXVX1f
+         VzY006x59y3sreYs3wHE7yDb3ri+zsX3wWOy9x75l2IQti45s1IGWSKgxpBH4YfoQV
+         HzjMzaX9FXEh1GESy3+wiJxIXenOBslL9td7Jr8u05QgvfokPxZ5K3LflxwXMM5gfG
+         F1Y/muweFAiJw==
+Received: by mail.fadrush.pl for <linux-mmc@vger.kernel.org>; Mon,  1 Aug 2022 08:05:58 GMT
+Message-ID: <20220801064500-0.1.r.58jo.0.amal6ahnoy@fadrush.pl>
+Date:   Mon,  1 Aug 2022 08:05:58 GMT
+From:   "Jakub Olejniczak" <jakub.olejniczak@fadrush.pl>
+To:     <linux-mmc@vger.kernel.org>
+Subject: =?UTF-8?Q?Zwi=C4=99kszenie_p=C5=82ynno=C5=9Bci_finansowej?=
+X-Mailer: mail.fadrush.pl
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Having a something_get() function call in a remove function is unusual.
-A something_put() is more likely.
+Dzie=C5=84 dobry,
 
-More over the remove() function does not match the error handling of the
-probe().
+kontaktuj=C4=99 si=C4=99 z Pa=C5=84stwem, poniewa=C5=BC chcia=C5=82bym za=
+proponowa=C4=87 wygodne rozwi=C4=85zanie, kt=C3=B3re umo=C5=BCliwi Pa=C5=84=
+stwa firmie stabilny rozw=C3=B3j.=20
 
-Fix the remove() function to match the error handling path of the probe.
+Konkurencyjne otoczenie wymaga ci=C4=85g=C5=82ego ulepszania i poszerzeni=
+a oferty, co z kolei wi=C4=85=C5=BCe si=C4=99 z konieczno=C5=9Bci=C4=85 i=
+nwestowania. Brak odpowiedniego kapita=C5=82u powa=C5=BCnie ogranicza tem=
+po rozwoju firmy.
 
-Fixes: f90142683f04 ("mmc: dw_mmc-rockchip: add runtime PM support")
-Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
----
-/!\   SPECULATIVE   /!\
+Od wielu lat z powodzeniem pomagam firmom w uzyskaniu najlepszej formy fi=
+nansowania z banku oraz UE. Mam sta=C5=82ych Klient=C3=B3w, kt=C3=B3rzy n=
+adal ch=C4=99tnie korzystaj=C4=85 z moich us=C5=82ug, a tak=C5=BCe poleca=
+j=C4=85 je innym.
 
-I have a limited knowledge of the pm_ API.
-However, as said, the error handling path of the probe looks more logical
-to me.
+Czy chcieliby Pa=C5=84stwo skorzysta=C4=87 z pomocy wykwalifikowanego i d=
+o=C5=9Bwiadczonego doradcy finansowego?
 
-Moreover, some more or less similar code can be found in
-drivers/mmc/host/dw_mmc-exynos.c. This patch also align this rockchip
-driver to the exynos's one.
 
-So review with care.
----
- drivers/mmc/host/dw_mmc-rockchip.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/dw_mmc-rockchip.c b/drivers/mmc/host/dw_mmc-rockchip.c
-index 2a99f15f527f..b5893c738b4a 100644
---- a/drivers/mmc/host/dw_mmc-rockchip.c
-+++ b/drivers/mmc/host/dw_mmc-rockchip.c
-@@ -373,8 +373,8 @@ static int dw_mci_rockchip_probe(struct platform_device *pdev)
- 
- static int dw_mci_rockchip_remove(struct platform_device *pdev)
- {
--	pm_runtime_get_sync(&pdev->dev);
- 	pm_runtime_disable(&pdev->dev);
-+	pm_runtime_set_suspended(&pdev->dev);
- 	pm_runtime_put_noidle(&pdev->dev);
- 
- 	dw_mci_pltfm_remove(pdev);
--- 
-2.34.1
-
+Pozdrawiam
+Jakub Olejniczak
