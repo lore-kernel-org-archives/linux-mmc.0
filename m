@@ -2,67 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96070C19F28
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 Aug 2022 14:33:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5FF0C19F2C
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 Aug 2022 20:35:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235896AbiHCOdg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 Aug 2022 10:33:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52414 "EHLO
+        id S238784AbiHCUfu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 Aug 2022 16:35:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44956 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233652AbiHCOdf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Aug 2022 10:33:35 -0400
-Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 435F519C1D;
-        Wed,  3 Aug 2022 07:33:35 -0700 (PDT)
-Received: by mail-pg1-x52d.google.com with SMTP id 13so825051pgc.8;
-        Wed, 03 Aug 2022 07:33:35 -0700 (PDT)
+        with ESMTP id S238757AbiHCUfr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 Aug 2022 16:35:47 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 541CB5B7BF
+        for <linux-mmc@vger.kernel.org>; Wed,  3 Aug 2022 13:35:46 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id kb8so18877499ejc.4
+        for <linux-mmc@vger.kernel.org>; Wed, 03 Aug 2022 13:35:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc;
-        bh=JatyaQMvZqRXSjhM9SX5yq+wyykzu0VcX/V1mI7x90M=;
-        b=Z+oHhlo/XD9ocZVdOJ0c+UZb3W11uDME3Qg2tHGTXVHWL4aDTC61JQtsNimBuRJLoN
-         YpDwo6Vbf6pbrA88WEIMwXMDA38XnzjJIu8cxpMbjtpeD2g1D5LJmZqH5yuXqUNklZFL
-         ROzrMa/+1l4gm/wiLEmStEoccMRQtslyNYVDC3Oj3Ayy+ngQGJrkO1XyXXe60AoDoCX3
-         Az4nj0c267sLERFKjdjG5iJSPaG+WSuomTcs+68t2ZL3M/DwUARcn3dKK3xP12FQW0fq
-         v7ZKWjrKiWkoF7Mq7dw/pLOC/dQs6L3tMN6FSV6h1uJZyv3IUlGGZKSw2CNIbpxOuOvl
-         5ebg==
+        d=google.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc;
+        bh=Ut3pi8cayU++0GSGO54GljP1BR6nTHkf4mesrBKLYYA=;
+        b=Ig8uG7D7SQeo3AQ8b8GvGsJyHUlyGNbXrjLnJsGssVXhbRpS9Uhnjw1fcV0EkPhRXO
+         takrvQM5C1AuVQiSbWmBKV/dbWhOzBYicDIuZBssniivGUViQ5aAJk8/5g5+RLJoQ+4u
+         ESp/lyA1Y0abiRNY6EyVarzn1Xw6U+CGh2cuUhvJfgrU1D9fhswRbarZ2jrGdUrVJf84
+         gfEl4QKSLvRePRYhGb5YGqc10Ihrv0FShrARKau4lFvB1u0FUt42chEClh5Vh0L47j3R
+         oDxH/Oibm2MTwlKqCLtbP/hC4/q5G6lWtrmZaafX9cDqJjkX1pzz8kOpdU3mCKJyEE0b
+         +hwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc;
-        bh=JatyaQMvZqRXSjhM9SX5yq+wyykzu0VcX/V1mI7x90M=;
-        b=4vFVANzbrK5EbsoAMOVHj92ZZ//vy5fs8zMWaI8TCzb+zJH3WdCA7l96RUhcwUBpMG
-         JKK3Lauxe8aqBF8PosR3G6GXOcbKlPdSUSr9I2nq+dY4c61xAoWTI6Qqu5svY9cRB5mi
-         ClILHjazZmu8FUcmQkhaU5dxhgJTiJGg4lN0OogeqjRLX7iWVsWgcItC9flYZ8iCBRzH
-         2i/clhXvQ+CVCDUXlMyhGowqN0eC9AvEHH9NrAykznVU0XK3U0zFLFGrwdpKWb8SR4Hz
-         O5AZXFOzTJNFZA4JJBLToUFrt0guEjYwLu6Ft+E7M84lq8y8twcSw+nMQwPrUkon6e/d
-         bf4A==
-X-Gm-Message-State: AJIora98jv86F0NrrO/EVQsoz/x/6Zrx0rQa+RinzKm7+ANw792phIR7
-        0aAVq0Qkb6QucbdSloJmP6mKTBEr490qho58Kqc=
-X-Google-Smtp-Source: AGRyM1vP9Wcav9fDnhpdb+EB0Rimz1tLt2/rBavNmiFZ1ASdoV5B5U3LnQ/1bALs6pU/xjs+eY5A0yif49ONvSG69Ag=
-X-Received: by 2002:a63:2a95:0:b0:41a:27e5:1996 with SMTP id
- q143-20020a632a95000000b0041a27e51996mr21207142pgq.447.1659537214627; Wed, 03
- Aug 2022 07:33:34 -0700 (PDT)
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc;
+        bh=Ut3pi8cayU++0GSGO54GljP1BR6nTHkf4mesrBKLYYA=;
+        b=STbhC0avoOwP0uEOGnXZofUsl3dJirc1eAvo1wm8aBc7nkoNWwvIewjZ/VArKEz6ef
+         wSsYsxDB1JLnVjqAZ6E0IonB7k6Ie4Iw3mCoyRaABZKJHbGhMKNtvm+7ZlpkijmHU5Rk
+         Pn/ytIZSrXnATVB8Dq3MO9AvebqFV7TREI1SsaK2JihXRSNWHh0q23aFblAWVoUeESu7
+         bLCmzmImjWZn+hNKV5kt/zTDPD2Nfm8gjPjzElc9S66qF8QWOIjwQ8g2FYBRYKXm65sD
+         5txI4aakBMtGYF6HXAh3s3plOZVvwPdQeHjBU4Cvs/wU36u/zRDRfjshMn3+bq0mnj+6
+         bUgA==
+X-Gm-Message-State: ACgBeo2van0SUs8zjwwSLUMZkR1AnZu4iEvmFagp8rG3qrGJmSAUILPb
+        eQIhknI438UT8XFfivtbik+3MJQU3oJnwlmcWY6UjA==
+X-Google-Smtp-Source: AA6agR4rci+47W6uIwtnAZ4XTxeilLBmi8neIg2vdL5uiCYrUmfa+mIzMW+SHI5G4zdbCyQxdDEp36YqTxz6Ne0Xmo0=
+X-Received: by 2002:a17:907:9726:b0:730:9e04:f738 with SMTP id
+ jg38-20020a170907972600b007309e04f738mr8431225ejc.631.1659558944675; Wed, 03
+ Aug 2022 13:35:44 -0700 (PDT)
 MIME-Version: 1.0
-From:   Vincent Legoll <vincent.legoll@gmail.com>
-Date:   Wed, 3 Aug 2022 16:33:23 +0200
-Message-ID: <CAEwRq=qe+Frwpe=Zr4n_8A6vjOJnV3noegdnHSN7NTazkKejBA@mail.gmail.com>
-Subject: Re: [PATCH v2] regulator: core: Resolve supply name earlier to
- prevent double-init
-To:     christian@kohlschutter.com
-Cc:     broonie@kernel.org, heiko@sntech.de, lgirdwood@gmail.com,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
-        m.reichl@fivetechno.de, robin.murphy@arm.com, wens@kernel.org
+References: <20220715040354.2629856-1-davidgow@google.com>
+In-Reply-To: <20220715040354.2629856-1-davidgow@google.com>
+From:   Brendan Higgins <brendanhiggins@google.com>
+Date:   Wed, 3 Aug 2022 16:35:33 -0400
+Message-ID: <CAFd5g44h5viRSA_CU=4A0bPyj8yxQ8KgEVHKb=-JZENQwaGEnA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-aspeed: test: Fix dependencies when KUNIT=m
+To:     David Gow <davidgow@google.com>
+Cc:     Daniel Latypov <dlatypov@google.com>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>, kunit-dev@googlegroups.com,
+        linux-kselftest@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, Sadiya Kazi <sadiyakazi@google.com>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kernel test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+On Fri, Jul 15, 2022 at 12:04 AM David Gow <davidgow@google.com> wrote:
+>
+> While the sdhci-of-aspeed KUnit tests do work when builtin, and do work
+> when KUnit itself is being built as a module, the two together break.
+>
+> This is because the KUnit tests (understandably) depend on KUnit, so a
+> built-in test cannot build if KUnit is a module.
+>
+> Fix this by adding a dependency on (MMC_SDHCI_OF_ASPEED=m || KUNIT=y),
+> which only excludes this one problematic configuration.
+>
+> This was reported on a nasty openrisc-randconfig run by the kernel test
+> robot, though for some reason (compiler optimisations removing the test
+> code?) I wasn't able to reproduce it locally on x86:
+> https://lore.kernel.org/linux-mm/202207140122.fzhlf60k-lkp@intel.com/T/
+>
+> Fixes: 291cd54e5b05 ("mmc: sdhci-of-aspeed: test: Use kunit_test_suite() macro")
+> Reported-by: kernel test robot <lkp@intel.com>
+> Signed-off-by: David Gow <davidgow@google.com>
 
-it looks like you left a test for '&& rdev->constraints' in the if after you
-moved the 'if (!rdev->constraints) {' above it.
-
--- 
-Vincent Legoll
+Acked-by: Brendan Higgins <brendanhiggins@google.com>
