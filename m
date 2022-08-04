@@ -2,181 +2,299 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE515C19F2B
-	for <linux-mmc@archiver.kernel.org>; Thu,  4 Aug 2022 10:44:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1A61C19F2B
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 Aug 2022 11:29:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232131AbiHDKog (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 4 Aug 2022 06:44:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38896 "EHLO
+        id S232096AbiHDL3U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 Aug 2022 07:29:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230457AbiHDKoe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Aug 2022 06:44:34 -0400
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B15022AC54
-        for <linux-mmc@vger.kernel.org>; Thu,  4 Aug 2022 03:44:32 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id s11so13380462edd.13
-        for <linux-mmc@vger.kernel.org>; Thu, 04 Aug 2022 03:44:32 -0700 (PDT)
+        with ESMTP id S231308AbiHDL3T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 Aug 2022 07:29:19 -0400
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 003C51F2EE
+        for <linux-mmc@vger.kernel.org>; Thu,  4 Aug 2022 04:29:17 -0700 (PDT)
+Received: by mail-lf1-x132.google.com with SMTP id e15so20336802lfs.0
+        for <linux-mmc@vger.kernel.org>; Thu, 04 Aug 2022 04:29:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
-        h=mime-version:subject:from:in-reply-to:date:cc
-         :content-transfer-encoding:message-id:references:to;
-        bh=N7EQU9MlWTC84hNYcDq54sTO0o6CB2OpePDIIDMkHEg=;
-        b=e0iyDEWH8R0ix9gFWmNDk9YNInINTAfTGWPNXlGZ8OMK+TPX9jji6h0kvB6L+BpDdY
-         RipD+0jXzrAyZ+OkRzyYzvJYfdDPS8GfQ4Xz36S+hcy0arEIC6qFnPyRvyAxjJbwbw9Y
-         BkJhymEuvYgaXbydzpH67xbEm7Winn6br50iX4+zdoRvCpzc+HkMGOvgG1kLnvOxPMHi
-         dJxj+q8sX5Pe7PyQtSycORO1LwgYX+4RhNhyU/2MQzjdkRt+ZvnC5SIQaHEf6ugxMOdp
-         h9dM7HEcF5nu3pivSWyRw++MMLqeCxd+igKMaZ110OpZAoHmFrNoKwsIyT4QPYrhzSa7
-         UMIA==
+        d=linaro.org; s=google;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=5+RR8vD410ieO39VRvqFKwpFSST1YILrNtEQ6x6zAg0=;
+        b=hfFhln88ZYBI8XfQ0iJ8591XcmbqQe84Sst2gtDagDn/7s1Rc6oN56+lPtonqzDtM9
+         1OZNiu+Rf+TtAahjFkLz3Zd6JWdLd8uqTdvuEWaRq2xQxEnviHxDUlqzIrqmk2E3079L
+         D7UIo/moXSKOoZYOSj09BVmMGPwq1u4J4TNlNdy4IbAqcsi6WAgu0/QNZyulMM88tp5e
+         w/SJdYPRE1GxNBteYZQ+IevsgHUEy9ufgpBfaC2kLgGSpgLEHlnBwjm5VHsozgySFrrF
+         ARVugh8VsDr4olNYNXRRejlDr0jhCNUK3hV9zyoNNMTvsaBFIXIcs//lNnCwQ95vIx9C
+         lnHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:subject:from:in-reply-to:date:cc
-         :content-transfer-encoding:message-id:references:to;
-        bh=N7EQU9MlWTC84hNYcDq54sTO0o6CB2OpePDIIDMkHEg=;
-        b=N7PCESou+GpWDsD6EqYdg9JuEAf7L0R0LdvQ/mtRJMpMsjjU5R1vXUtxdnnthcrulh
-         2CpQ83C0gvP4gshlC7PqDNlQpokcUwkbT0rnYhhBFTH0mABPeczQw4tyhzcn+sacrMax
-         tllnB2YPABw5jKY8AWYJeZ6SsYcqQZo1QSkcZOte1/WdEz5TqIfwdfaadZu0kL7Ya6MF
-         UU5+aeWpWOH7tzCtcbBCBZLlf1EveZG2FGQwkQnEpt9E47mpZXaKULTQNDW9F62EUrVk
-         UBycT62JurChdaBRbSszIX5mdHfRBIQ4tUia76oua9arFSLCu8dwh+4SbnTcigkHYTpj
-         8AyA==
-X-Gm-Message-State: ACgBeo3jQ0IlndWNiS7sCyD8rSN27Lb8jWWNGXA8ViOVsspTnyoP/ir5
-        +lMnpeOV9QhXyijqTsYKj3ueEg==
-X-Google-Smtp-Source: AA6agR4I7dWQve6sjghtE3KmTh1uLv4ZCrvLNX0EISZW4vrScpvPY/nB4JDA11L9k5O50hG6G0+Mvg==
-X-Received: by 2002:a05:6402:32a8:b0:43e:5490:295f with SMTP id f40-20020a05640232a800b0043e5490295fmr1365826eda.193.1659609871260;
-        Thu, 04 Aug 2022 03:44:31 -0700 (PDT)
-Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
-        by smtp.gmail.com with ESMTPSA id 17-20020a170906211100b0072b2378027csm220357ejt.26.2022.08.04.03.44.30
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Thu, 04 Aug 2022 03:44:30 -0700 (PDT)
-Content-Type: text/plain;
-        charset=us-ascii
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.120.41.1.1\))
-Subject: [PATCH v3] regulator: core: Resolve supply name earlier to prevent
- double-init
-From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
-        <christian@kohlschutter.com>
-In-Reply-To: <CAEwRq=qe+Frwpe=Zr4n_8A6vjOJnV3noegdnHSN7NTazkKejBA@mail.gmail.com>
-Date:   Thu, 4 Aug 2022 12:44:29 +0200
-Cc:     =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
-        Liam Girdwood <lgirdwood@gmail.com>,
-        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
-        Markus Reichl <m.reichl@fivetechno.de>,
-        Robin Murphy <robin.murphy@arm.com>, wens@kernel.org
-Content-Transfer-Encoding: 7bit
-Message-Id: <EC5FFA28-21D3-4FBB-B188-7DB1C9E1AA9E@kohlschutter.com>
-References: <CAEwRq=qe+Frwpe=Zr4n_8A6vjOJnV3noegdnHSN7NTazkKejBA@mail.gmail.com>
-To:     Vincent Legoll <vincent.legoll@gmail.com>,
-        Mark Brown <broonie@kernel.org>
-X-Mailer: Apple Mail (2.3696.120.41.1.1)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=5+RR8vD410ieO39VRvqFKwpFSST1YILrNtEQ6x6zAg0=;
+        b=QXnCWC6upjmI2ELyh0GRRTwukEPqn1Z0ALG3zBBEyHNRDCYOReyFFdGGru2oRDreeZ
+         RJOhsN4kusQ2cge1SkMnpz91ai5XNEvV8Ne5v/27CWR65XSoF+ZFgl/CvFmeKGZdDqZn
+         KTLKgVKomiC0/FvKbKuM6cvtI1RoHs+7FtzN8FzEetKQKHYPS5QCoJdx8q89whbKwd8v
+         caokx0vTEIvi6dOAUBa/QmdBKUdQBG+iLx2/rfM+Ua5Nt5JCRe4l/ywj/dDFSTvTe7Rs
+         cpEGQo/4QF4d6UZZ6IoH+qLsfUeKZLTxFRaYA7vX/KDmvZT2Z9VKLDUx5xPEVEkBWh7z
+         hPRQ==
+X-Gm-Message-State: ACgBeo19dK562ucmro15OjTDE6/On6TAZuOgEBzt8udr9xJA2/wc393T
+        2CR6JDZKsgrYE9XGg97HfRYgy2YJ5Ly2TA==
+X-Google-Smtp-Source: AA6agR6p3sUCxEH8mLSNiyb11S/MOlHnZBFXFXaKkDE/PgDZ17LbyULL6ji6MqztzUVt1r31xYTcdg==
+X-Received: by 2002:a05:6512:1682:b0:48a:b5df:b917 with SMTP id bu2-20020a056512168200b0048ab5dfb917mr603233lfb.478.1659612556295;
+        Thu, 04 Aug 2022 04:29:16 -0700 (PDT)
+Received: from localhost.localdomain (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id r27-20020a2eb61b000000b0025e4cf9d0c1sm88736ljn.115.2022.08.04.04.29.14
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 04 Aug 2022 04:29:15 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v5.20
+Date:   Thu,  4 Aug 2022 13:29:14 +0200
+Message-Id: <20220804112914.14380-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Previously, an unresolved regulator supply reference upon calling
-regulator_register on an always-on or boot-on regulator caused
-set_machine_constraints to be called twice.
+Hi Linus,
 
-This in turn may initialize the regulator twice, leading to voltage
-glitches that are timing-dependent. A simple, unrelated configuration
-change may be enough to hide this problem, only to be surfaced by
-chance.
+Here's the PR with MMC and MEMSTICK updates for v5.20-rc1. Details about the
+highlights are as usual found in the signed tag.
 
-One such example is the SD-Card voltage regulator in a NanoPI R4S that
-would not initialize reliably unless the registration flow was just
-complex enough to allow the regulator to properly reset between calls.
+Please pull this in!
 
-Fix this by re-arranging regulator_register, trying resolve the
-regulator's supply early enough that set_machine_constraints does not
-need to be called twice.
-
-Signed-off-by: Christian Kohlsch=C3=BCtter <christian@kohlschutter.com>
----
- drivers/regulator/core.c | 51 +++++++++++++++++++++++++---------------
- 1 file changed, 32 insertions(+), 19 deletions(-)
-
-diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-index 398c8d6afd4..5c2b97ea633 100644
---- a/drivers/regulator/core.c
-+++ b/drivers/regulator/core.c
-@@ -5492,7 +5492,38 @@ regulator_register(const struct regulator_desc =
-*regulator_desc,
- 	BLOCKING_INIT_NOTIFIER_HEAD(&rdev->notifier);
- 	INIT_DELAYED_WORK(&rdev->disable_work, regulator_disable_work);
-=20
--	/* preform any regulator specific init */
-+	/* set regulator constraints */
-+	if (init_data)
-+		rdev->constraints =3D kmemdup(&init_data->constraints,
-+					    sizeof(*rdev->constraints),
-+					    GFP_KERNEL);
-+	else
-+		rdev->constraints =3D =
-kzalloc(sizeof(*rdev->constraints),
-+					    GFP_KERNEL);
-+	if (!rdev->constraints) {
-+		ret =3D -ENOMEM;
-+		goto clean;
-+	}
-+
-+	if (init_data && init_data->supply_regulator)
-+		rdev->supply_name =3D init_data->supply_regulator;
-+	else if (regulator_desc->supply_name)
-+		rdev->supply_name =3D regulator_desc->supply_name;
-+
-+	if ((rdev->supply_name && !rdev->supply) && rdev->constraints
-+		&& (rdev->constraints->always_on || =
-rdev->constraints->boot_on)) {
-+		/* Try to resolve the name of the supplying regulator =
-here first
-+		 * so we prevent double-initializing the regulator, =
-which may
-+		 * cause timing-specific voltage brownouts/glitches that =
-are
-+		 * hard to debug.
-+		 */
-+		ret =3D regulator_resolve_supply(rdev);
-+		if (ret)
-+			rdev_dbg(rdev, "unable to resolve supply early: =
-%pe\n",
-+					 ERR_PTR(ret));
-+	}
-+
-+	/* perform any regulator specific init */
- 	if (init_data && init_data->regulator_init) {
- 		ret =3D init_data->regulator_init(rdev->reg_data);
- 		if (ret < 0)
-@@ -5518,24 +5549,6 @@ regulator_register(const struct regulator_desc =
-*regulator_desc,
- 		    (unsigned long) atomic_inc_return(&regulator_no));
- 	dev_set_drvdata(&rdev->dev, rdev);
-=20
--	/* set regulator constraints */
--	if (init_data)
--		rdev->constraints =3D kmemdup(&init_data->constraints,
--					    sizeof(*rdev->constraints),
--					    GFP_KERNEL);
--	else
--		rdev->constraints =3D =
-kzalloc(sizeof(*rdev->constraints),
--					    GFP_KERNEL);
--	if (!rdev->constraints) {
--		ret =3D -ENOMEM;
--		goto wash;
--	}
--
--	if (init_data && init_data->supply_regulator)
--		rdev->supply_name =3D init_data->supply_regulator;
--	else if (regulator_desc->supply_name)
--		rdev->supply_name =3D regulator_desc->supply_name;
--
- 	ret =3D set_machine_constraints(rdev);
- 	if (ret =3D=3D -EPROBE_DEFER) {
- 		/* Regulator might be in bypass mode and so needs its =
-supply
---=20
-2.36.2
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit 51189eb9ddc88851edc42f539a0f9862fd0630c2:
 
+  mmc: sdhci-omap: Fix a lockdep warning for PM runtime init (2022-07-13 12:29:17 +0200)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v5.20
+
+for you to fetch changes up to 527f36f5efa45b6a897190cabf982e2d207887da:
+
+  mmc: mediatek: add support for SDIO eint wakup IRQ (2022-07-26 16:58:32 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Add support for the asynchronous SDIO wakeup interrupts
+ - Skip redundant evaluation of eMMC HS400 caps when no-MMC-cap
+ - Add support to store error stats from host drivers
+ - Extend debugfs to show error stats from host drivers
+ - Add single I/O read support in the recovery path for 4k sector cards
+
+MMC host:
+ - dw_mmc-exynos: Convert corresponding DT bindings to the dtschema
+ - dw_mmc-rockchip: Add support for the Rockchip RV1126 variant
+ - mmc_spi: Convert corresponding DT bindings to the dtschema
+ - mtk-sd: Extend support for interrupts/pinctrls for SDIO low-power mode
+ - mtk-sd: Add support for SDIO wake irqs
+ - mtk-sd: Add support for the Mediatek MT8188 variant
+ - renesas_sdhi: Drop redundant manual tap correction for newer SoCs
+ - renesas_sdhi: Add support for the R-Car S4-8 and generic Gen4 variants
+ - sdhci/cqhci: Add support to capture stats from host errors
+ - sdhci-brcmstb: Add ability to increase max clock rate for SDIO on 72116b0
+ - sdhci-msm: Add support for the MSM8998 and SM8450 variant
+ - sdhci-of-at91: Fixup UHS-I mode by rewriting of MC1R
+ - sdhci-of-dwcmshc: Add support for the Rockchip rk3588 variant
+ - sdhci-of-dwcmshc: Enable reset support for the Rockchip variants
+ - sdhci-pci-gli: Improve I/O read/write performance for GL9763E
+ - sdhci-s3c: Convert corresponding DT bindings to the dtschema
+ - tmio: Avoid glitches when resetting
+
+MEMSTICK core:
+ - A couple of minor fixes and cleanups
+
+----------------------------------------------------------------
+Alexander Stein (1):
+      mmc: core: Do not evaluate HS400 capabilities if bus has no MMC capability
+
+Axe Yang (3):
+      dt-bindings: mmc: mtk-sd: extend interrupts and pinctrls properties
+      mmc: core: Add support for SDIO wakeup interrupt
+      mmc: mediatek: add support for SDIO eint wakup IRQ
+
+Bhupesh Sharma (1):
+      dt-bindings: mmc: sdhci-msm: Fix issues in yaml bindings
+
+ChanWoo Lee (1):
+      mmc: core: Replace with already defined values for readability
+
+Christian Loehle (1):
+      mmc: block: Add single read for 4k sector cards
+
+Christophe JAILLET (3):
+      memstick/ms_block: Fix some incorrect memory allocation
+      memstick/ms_block: Fix a memory leak
+      memstick/ms_block: Use the bitmap API when applicable
+
+Conor Dooley (1):
+      dt-bindings: mmc: convert mmc-spi-slot to yaml
+
+Eugen Hristev (1):
+      mmc: sdhci-of-at91: fix set_uhs_signaling rewriting of MC1R
+
+Fabien Parent (1):
+      mmc: mtk-sd: fix typo
+
+Fabio Estevam (1):
+      mmc: mxcmmc: Silence a clang warning
+
+Jagan Teki (1):
+      dt-bindings: mmc: rockchip-dw-mshc: Document Rockchip RV1126
+
+Jason Lai (1):
+      mmc: host: Improve I/O read/write performance for GL9763E
+
+Johnson Wang (1):
+      dt-bindings: mmc: Add compatible for MediaTek MT8188
+
+Kamal Dasu (3):
+      dt-bindings: mmc: Add Broadcom optional sdio_freq clock
+      mmc: sdhci-brcmstb: Add ability to increase max clock rate for 72116b0
+      mmc: sdhci-brcmstb: use clk_get_rate(base_clk) in PM resume
+
+Konrad Dybcio (1):
+      dt-bindings: mmc: sdhci-msm: Document the SM8450 compatible
+
+Krzysztof Kozlowski (7):
+      dt-bindings: mmc: samsung,exynos-dw-mshc: convert to dtschema
+      dt-bindings: mmc: samsung,exynos-dw-mshc: document Exynos5420 SMU
+      dt-bindings: mmc: samsung,s3c6410-sdhci: convert to dtschema
+      dt-bindings: mmc: sdhci-msm: fix reg-names entries
+      dt-bindings: mmc: sdhci-msm: constrain reg-names per variants
+      dt-bindings: mmc: sdhci-msm: add MSM8998
+      mmc: sdhci-msm: drop redundant of_device_id entries
+
+Lad Prabhakar (2):
+      mmc: renesas_sdhi: Get the reset handle early in the probe
+      mmc: renesas_sdhi: Fix typo's
+
+Liang He (4):
+      mmc: sdhci-of-esdhc: Fixup use of of_find_compatible_node()
+      mmc: core: quirks: Add of_node_put() when breaking out of loop
+      mmc: cavium-octeon: Add of_node_put() when breaking out of loop
+      mmc: cavium-thunderx: Add of_node_put() when breaking out of loop
+
+Miaoqian Lin (1):
+      mmc: sdhci-of-esdhc: Fix refcount leak in esdhc_signal_voltage_switch
+
+Nathan Chancellor (1):
+      mmc: sdhci-brcmstb: Initialize base_clk to NULL in sdhci_brcmstb_probe()
+
+Ren Zhijie (1):
+      mmc: sdhci-pci-gli: Fix build error unused-function
+
+Robert Marko (1):
+      dt-bindings: mmc: sdhci-msm: document resets
+
+Sebastian Reichel (1):
+      mmc: sdhci-of-dwcmshc: rename rk3568 to rk35xx
+
+Seunghui Lee (2):
+      mmc: core: Use mmc_card_* macro and add a new for the sd_combo type
+      mmc: mxcmmc: Use mmc_card_sdio macro
+
+Shaik Sajida Bhanu (5):
+      mmc: core: Capture eMMC and SD card errors
+      mmc: sdhci: Capture eMMC and SD card errors
+      mmc: debugfs: Add debug fs entry for mmc driver
+      mmc: debugfs: Add debug fs error state entry for mmc driver
+      mmc: cqhci: Capture eMMC and SD card errors
+
+Takeshi Saito (1):
+      mmc: renesas_sdhi: newer SoCs don't need manual tap correction
+
+Ulf Hansson (1):
+      mmc: Merge branch fixes into next
+
+Uwe Kleine-König (5):
+      mmc: dw_mmc: exynos: Obviously always return success in remove callback
+      mmc: dw_mmc: hi3789cv200: Obviously always return success in remove callback
+      mmc: dw_mmc: rockchip: Obviously always return success in remove callback
+      mmc: sdhci-of-arasan: Obviously always return success in remove callback
+      mmc: sdhci-st: Obviously always return success in remove callback
+
+Wei Yongjun (1):
+      mmc: debugfs: Fix file release memory leak
+
+Wolfram Sang (5):
+      mmc: renesas_sdhi: add R-Car Gen4 fallback compatibility string
+      dt-bindings: mmc: renesas,sdhi: Document R-Car S4-8 and generic Gen4 support
+      dt-bindings: mmc: renesas,sdhi: R-Car V3U is R-Car Gen4
+      dt-bindings: mmc: renesas,sdhi: Add R-Car Gen4 clock requirements
+      mmc: tmio: avoid glitches when resetting
+
+Xiang wangx (1):
+      mmc: mmci: Fix typo in comment
+
+Yifeng Zhao (2):
+      mmc: sdhci-of-dwcmshc: add reset call back for rockchip Socs
+      mmc: sdhci-of-dwcmshc: add support for rk3588
+
+ .../bindings/mmc/brcm,sdhci-brcmstb.yaml           |  32 +++-
+ .../devicetree/bindings/mmc/exynos-dw-mshc.txt     |  94 ----------
+ .../devicetree/bindings/mmc/mmc-spi-slot.txt       |  29 ----
+ .../devicetree/bindings/mmc/mmc-spi-slot.yaml      |  77 ++++++++
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |  62 ++++++-
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   7 +-
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  |   1 +
+ .../bindings/mmc/samsung,exynos-dw-mshc.yaml       | 160 +++++++++++++++++
+ .../bindings/mmc/samsung,s3c6410-sdhci.yaml        |  81 +++++++++
+ .../devicetree/bindings/mmc/samsung-sdhci.txt      |  32 ----
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |  82 +++++++--
+ drivers/memstick/core/ms_block.c                   |  15 +-
+ drivers/mmc/core/block.c                           |  32 ++--
+ drivers/mmc/core/bus.c                             |   4 +-
+ drivers/mmc/core/core.c                            |  10 +-
+ drivers/mmc/core/debugfs.c                         |  80 +++++++++
+ drivers/mmc/core/host.c                            |   2 +-
+ drivers/mmc/core/quirks.h                          |   4 +-
+ drivers/mmc/core/sd.c                              |   4 +-
+ drivers/mmc/core/sdio.c                            |  30 +++-
+ drivers/mmc/host/cavium-octeon.c                   |   1 +
+ drivers/mmc/host/cavium-thunderx.c                 |   4 +-
+ drivers/mmc/host/cqhci-core.c                      |   9 +-
+ drivers/mmc/host/dw_mmc-exynos.c                   |   4 +-
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              |   4 +-
+ drivers/mmc/host/dw_mmc-rockchip.c                 |   4 +-
+ drivers/mmc/host/mmci.c                            |   2 +-
+ drivers/mmc/host/mtk-sd.c                          |  88 +++++++++-
+ drivers/mmc/host/mxcmmc.c                          |   4 +-
+ drivers/mmc/host/renesas_sdhi.h                    |   1 +
+ drivers/mmc/host/renesas_sdhi_core.c               |  42 +++--
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |  11 +-
+ drivers/mmc/host/sdhci-brcmstb.c                   |  76 +++++++-
+ drivers/mmc/host/sdhci-msm.c                       |  29 +---
+ drivers/mmc/host/sdhci-of-arasan.c                 |   5 +-
+ drivers/mmc/host/sdhci-of-at91.c                   |   9 +-
+ drivers/mmc/host/sdhci-of-dwcmshc.c                | 193 ++++++++++++++++-----
+ drivers/mmc/host/sdhci-of-esdhc.c                  |   7 +-
+ drivers/mmc/host/sdhci-pci-gli.c                   |  34 ++++
+ drivers/mmc/host/sdhci-st.c                        |   5 +-
+ drivers/mmc/host/sdhci.c                           |  59 +++++--
+ drivers/mmc/host/sdhci.h                           |   3 +
+ drivers/mmc/host/tmio_mmc.c                        |   2 +-
+ drivers/mmc/host/tmio_mmc.h                        |   6 +-
+ drivers/mmc/host/tmio_mmc_core.c                   |  28 ++-
+ include/linux/mmc/card.h                           |   9 +-
+ include/linux/mmc/host.h                           |  26 +++
+ include/linux/mmc/mmc.h                            |   6 +
+ include/linux/mmc/sdio.h                           |   5 +
+ 49 files changed, 1152 insertions(+), 362 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/mmc/exynos-dw-mshc.txt
+ delete mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/mmc-spi-slot.yaml
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
+ create mode 100644 Documentation/devicetree/bindings/mmc/samsung,s3c6410-sdhci.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/samsung-sdhci.txt
