@@ -2,102 +2,186 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ACC4C25B0C
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Aug 2022 09:19:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04CD8C00140
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Aug 2022 09:19:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233925AbiHHJS7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Aug 2022 05:18:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55676 "EHLO
+        id S236725AbiHHJTQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Aug 2022 05:19:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241504AbiHHJS6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2022 05:18:58 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCF1313F41
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Aug 2022 02:18:56 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id s9so9153972ljs.6
-        for <linux-mmc@vger.kernel.org>; Mon, 08 Aug 2022 02:18:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=message-id:date:mime-version:user-agent:subject:content-language:to
-         :cc:references:from:in-reply-to:content-transfer-encoding;
-        bh=kgXxmrAF+Qnsh3G9vJiLHv3StfM+xchFUzG/QuzHdIs=;
-        b=hWOntp3Okx/AnzV9tzyG85H0qr1WUkBlFJjZRr3Vf78wLlyO3b/Oo5EE9OEacwDI3F
-         EFfmqE0aEEnnYkSr50Iw647ujQ5T10nOiHO2Idig2cGPB5GjM9H9lF0GHNbpQF+19G26
-         mAD9q5Z94iZSYo+an8vSolD7gXmzudOxjre22t2ppnSyVzyWTNthtt+RmYHtK2qT7+Mu
-         UjrnIsqxPh1hFXygP12oDs8WB9TKv7dbDSVy40jGNjsW2WqZ/tzamKgHxRoxz4VbVLnt
-         A8gquSpnKVERnbRHdVbieiyH3KA/0KhiHJu0BOqZrmfYeAKhwuM3ShOJNwWZxcED9OLh
-         tZag==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
-         :content-language:to:cc:references:from:in-reply-to
-         :content-transfer-encoding;
-        bh=kgXxmrAF+Qnsh3G9vJiLHv3StfM+xchFUzG/QuzHdIs=;
-        b=nq1xu0EfS1CCiHex8cJw8MzzssPYcFZHZu8jaGs+VncGLxY6dEiSAqfDUEbjSbornY
-         VsyXuvrEF7S1EzS/PY/5UvpqSayRiipZ4Abx1C9KcnO2Z8+Q7C3rgUAbESHFXt4W8eug
-         XKMCHrLJewST5o4QdqHZ2Ss3iGGO67qTKxFkWg4BenHsGYxGIEkAAF9d2xyjxBje7hK2
-         JHTElsUzcSLogu9tT1ny2R60IaWzMRDIQU8gYVVh4+WQ14SQ+VKnf2idjofDbHGVbtm9
-         uP51HUUbH62in6NusXI4uWCidjUOWub59JXfz+MkBrCdcewxo4CFBTGQyJy6BstMYWYC
-         XUcA==
-X-Gm-Message-State: ACgBeo0GHYjMIl+yHU2AjDMnpsc3WgRgJokiyieKn7dVyyjvNDx2AXOF
-        Q1a4jucI3HMSZ0+4P3FOzrdEKA==
-X-Google-Smtp-Source: AA6agR6YVF6CbHdahMcx9zQ+eRS778ipAhFVIIKo01J1CFpDRepShWjIyUnmpuNlXa56p0tx61QsrQ==
-X-Received: by 2002:a05:651c:210c:b0:25e:6a39:23ed with SMTP id a12-20020a05651c210c00b0025e6a3923edmr5353015ljq.43.1659950335288;
-        Mon, 08 Aug 2022 02:18:55 -0700 (PDT)
-Received: from [192.168.1.39] ([83.146.140.105])
-        by smtp.gmail.com with ESMTPSA id p26-20020ac246da000000b0048a9d0242afsm1361541lfo.32.2022.08.08.02.18.52
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 08 Aug 2022 02:18:53 -0700 (PDT)
-Message-ID: <33f5b621-af3b-b6a2-5e3d-c01fe40eb5be@linaro.org>
-Date:   Mon, 8 Aug 2022 12:18:51 +0300
+        with ESMTP id S237318AbiHHJTP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2022 05:19:15 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B98C813F53;
+        Mon,  8 Aug 2022 02:19:13 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1659950353; x=1691486353;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=HA7bIRYIO+TXtakNdlXcW8j6uVEalvRdw/+6qADL47w=;
+  b=n4/B3WqVTJF1Fwbvuf9t3oIzV4ChyTc9d02Qa1S+P+1vAc3zL47CX3EM
+   hIqBJ+zLU+yRd8mJJwzKug8J6MnCxiZak/d6KudGj8OaBCxytpj6u96+e
+   DIZcs/qPIcnk7cK8yljUMhp5j5F+MPumr7ThxFnd9xgT/fYjcAJo3fta8
+   7wd0RdD5uzcCQ4CGgp/szKSyiUkHZ54Yv6TzKpPon8kLjpXKIVApCQ4H4
+   fGcI15aMjVBbYuUZ+cPCqOub9PCYIoiSoyvx0vIvi1391EzMkmKZDUh8+
+   rXOq9vOvd3kIE0LrEbHlsdtJzEFHwQT8nCoPrlduMhYfZv1GMXJ/e4ncj
+   Q==;
+X-IronPort-AV: E=McAfee;i="6400,9594,10432"; a="291323020"
+X-IronPort-AV: E=Sophos;i="5.93,222,1654585200"; 
+   d="scan'208";a="291323020"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 02:19:13 -0700
+X-IronPort-AV: E=Sophos;i="5.93,222,1654585200"; 
+   d="scan'208";a="663863103"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.171])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 02:19:10 -0700
+Message-ID: <9a248303-7a27-e90e-76b3-c01a00be4e3d@intel.com>
+Date:   Mon, 8 Aug 2022 12:19:10 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.12.0
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: xenon: Add compatible string for
- Xenon SDHCI on AC5 SoC
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH] mmc: sdhci-xenon: Fix 2G limitation on AC5 SoC
 Content-Language: en-US
 To:     Vadym Kochan <vadym.kochan@plvision.eu>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Elad Nachman <enachman@marvell.com>
-References: <20220806085818.9873-1-vadym.kochan@plvision.eu>
- <20220806085818.9873-2-vadym.kochan@plvision.eu>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220806085818.9873-2-vadym.kochan@plvision.eu>
+        Florian Fainelli <f.fainelli@gmail.com>
+Cc:     Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Elad Nachman <enachman@marvell.com>
+References: <20220726170711.30324-1-vadym.kochan@plvision.eu>
+ <139317dc-15e2-ac63-0e04-295e715a7747@gmail.com>
+ <20220727164532.GA19351@plvision.eu> <20220801093044.GA22721@plvision.eu>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220801093044.GA22721@plvision.eu>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/08/2022 11:58, Vadym Kochan wrote:
-> It indicates the Xenon SDHCI on AC5 SoC so the driver will try to fixup
-> the 2G address space limitation issue.
+On 1/08/22 12:30, Vadym Kochan wrote:
+> Hi Florian,
 > 
-> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
-> ---
->  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+> On Wed, Jul 27, 2022 at 07:45:32PM +0300, Vadym Kochan wrote:
+>> Hi Florian,
+>>
+>> On Tue, Jul 26, 2022 at 10:37:46AM -0700, Florian Fainelli wrote:
+>>> On 7/26/22 10:07, Vadym Kochan wrote:
+>>>> From: Elad Nachman <enachman@marvell.com>
+>>>>
+>>>> There is a limitation on AC5 SoC that mmc controller
+>>>> can't have DMA access over 2G memory.
+>>>>
+>>>> Signed-off-by: Elad Nachman <enachman@marvell.com>
+>>>> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
+>>>> ---
+>>>>  drivers/mmc/host/sdhci-xenon.c | 13 +++++++++++++
+>>>>  1 file changed, 13 insertions(+)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+>>>> index 08e838400b52..666d06b58564 100644
+>>>> --- a/drivers/mmc/host/sdhci-xenon.c
+>>>> +++ b/drivers/mmc/host/sdhci-xenon.c
+>>>> @@ -18,6 +18,7 @@
+>>>>  #include <linux/of.h>
+>>>>  #include <linux/pm.h>
+>>>>  #include <linux/pm_runtime.h>
+>>>> +#include <linux/mm.h>
+>>>>  
+>>>>  #include "sdhci-pltfm.h"
+>>>>  #include "sdhci-xenon.h"
+>>>> @@ -422,6 +423,8 @@ static int xenon_probe_params(struct platform_device *pdev)
+>>>>  	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+>>>>  	u32 sdhc_id, nr_sdhc;
+>>>>  	u32 tuning_count;
+>>>> +	struct device_node *np = pdev->dev.of_node;
+>>>> +	struct sysinfo si;
+>>>>  
+>>>>  	/* Disable HS200 on Armada AP806 */
+>>>>  	if (priv->hw_version == XENON_AP806)
+>>>> @@ -450,6 +453,15 @@ static int xenon_probe_params(struct platform_device *pdev)
+>>>>  	}
+>>>>  	priv->tuning_count = tuning_count;
+>>>>  
+>>>> +	si_meminfo(&si);
+>>>> +
+>>>> +	if (of_device_is_compatible(np, "marvell,ac5-sdhci") &&
+>>>> +	    ((si.totalram * si.mem_unit) > 0x80000000 /*2G*/)) {
+>>>
+>>> Why not limit the DMA mask of the device and ensure, that bounce buffers get used so you can still do DMA?
+>>>
+>>> Also, you ought to be able to describe that limitation using Device Tree (assuming this is an option) and declaring a dedicated bus node for the SDHCI controller and providing a suitable dma-ranges property, see: arch/arm/boot/dts/bcm2711.dtsi and the 'soc' node for such examples.
+>>>
+>>>
+>>
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3ee758886558..17cda847e0a3 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -34,6 +34,9 @@ properties:
->            - const: marvell,armada-3700-sdhci
->            - const: marvell,sdhci-xenon
->  
-> +      - items:
-> +          - const: marvell,ac5-sdhci
+> I could use DMA only in 2 ways:
+> 
+> #1 Use sdhci bounce buffer with SDMA mode
+> 
+>     But there was the issue that SDMA requires that SDHCI v4 mode should
+>     be enabled, and when I enable it via sdhci_enable_v4_mode(host)
+>     then I got error that EXT_CSD can't be recognized.
+> 
+>     But if I comment this line in sdhci.c:
+>     
+>     int sdhci_setup_host(struct sdhci_host *host)
+>     {
+>         ...
+> 
+> 	/* SDMA does not support 64-bit DMA if v4 mode not set */
+> 	if ((host->flags & SDHCI_USE_64_BIT_DMA) && !host->v4_mode) {
+> 		pr_info("XXX SDMA does not support 64-bit DMA if v4 mode not set\n");
+> 		host->flags &= ~SDHCI_USE_SDMA;
+> 	}
+> 
+>        ...
+>     }
+> 
+>     then everything is OK.
+> 
+> #2 Use restricted-dma-pool in device-tree
+> 
+>    But I am not sure if it is good solution compared to #1.
+> 
+> Setting only DMA mask did not help because after some time I got
+> "DMA overflow address" error stack-traces.
 
-These are not items. Should be part of existing enum.
+AFAICT using a DMA mask is the correct way to solve this.  If that
+reveals another issue then that must be resolved also. Can you show
+the stack traces and what kernel they are from?
 
-You missed updating allOf:if:then.
+> 
+>> Do I understand correctly that the swiotlb will be used in case DMA
+>> engine could not map the page in the specified range (limited by dma-ranges or
+>> dma-mask) ?
+>>
+>>>
+>>>> +		host->quirks |= SDHCI_QUIRK_BROKEN_DMA;
+>>>> +		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+>>>> +		dev_info(mmc_dev(mmc), "Disabling DMA because of 2GB DMA access limit.\n");
+>>>> +	}
+>>>> +
+>>>>  	return xenon_phy_parse_params(dev, host);
+>>>>  }
+>>>>  
+>>>> @@ -682,6 +694,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+>>>>  	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
+>>>>  	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
+>>>>  	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
+>>>> +	{ .compatible = "marvell,ac5-sdhci", .data = (void *)XENON_AP806},
+>>>>  	{}
+>>>>  };
+>>>>  MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+>>>
+>>>
+>>> -- 
+>>> Florian
+>>
+>> Thanks,
+>>
+> 
+> Regards,
 
-Best regards,
-Krzysztof
