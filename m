@@ -2,125 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 254A8C00140
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 Aug 2022 08:26:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ACC4C25B0C
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 Aug 2022 09:19:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241876AbiHHI0K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 Aug 2022 04:26:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51408 "EHLO
+        id S233925AbiHHJS7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 Aug 2022 05:18:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55676 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234579AbiHHI0J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2022 04:26:09 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D429013DC3;
-        Mon,  8 Aug 2022 01:26:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1659947168; x=1691483168;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=S7l5bOv75xq9WZMQTHeMEtmjY57N4uEDm/lTmVv1lN0=;
-  b=hvvO9egxTe9xLBWMLJTNNxBREHzjZLwWqFumL99vAbq3qePSmc3hStU0
-   BqqG3XC50U25x4zAYnf+khULNdul1/fzfJrvzXrk55SQbFObUGwFYPkN0
-   EPROOpxJVF77zY1VZfpz+bjwdA8S3WgSyHn1QolsWnmLJzFMWGfsJaOeu
-   vx0ptHwLbn8qSz9g1m7d5461MooCNHixQC7XPlp0/ZKoWJfB7dxRcVBy0
-   TlfDJsFbw1XJdVAaxs/t/+u853O54NX0qhhGk+f4U6B76OdQYKaJj6TLM
-   0wDAyhh6P7kifrMWN+Ep60cnQ+gVJxKq9/eTgcm1MbBA6hYDXqOlMgPfp
-   g==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10432"; a="277467210"
-X-IronPort-AV: E=Sophos;i="5.93,221,1654585200"; 
-   d="scan'208";a="277467210"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 01:26:08 -0700
-X-IronPort-AV: E=Sophos;i="5.93,221,1654585200"; 
-   d="scan'208";a="663843203"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.171])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 01:26:06 -0700
-Message-ID: <2b720211-a472-19ac-a281-9284e9d63e03@intel.com>
-Date:   Mon, 8 Aug 2022 11:26:06 +0300
+        with ESMTP id S241504AbiHHJS6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 Aug 2022 05:18:58 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCF1313F41
+        for <linux-mmc@vger.kernel.org>; Mon,  8 Aug 2022 02:18:56 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id s9so9153972ljs.6
+        for <linux-mmc@vger.kernel.org>; Mon, 08 Aug 2022 02:18:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=message-id:date:mime-version:user-agent:subject:content-language:to
+         :cc:references:from:in-reply-to:content-transfer-encoding;
+        bh=kgXxmrAF+Qnsh3G9vJiLHv3StfM+xchFUzG/QuzHdIs=;
+        b=hWOntp3Okx/AnzV9tzyG85H0qr1WUkBlFJjZRr3Vf78wLlyO3b/Oo5EE9OEacwDI3F
+         EFfmqE0aEEnnYkSr50Iw647ujQ5T10nOiHO2Idig2cGPB5GjM9H9lF0GHNbpQF+19G26
+         mAD9q5Z94iZSYo+an8vSolD7gXmzudOxjre22t2ppnSyVzyWTNthtt+RmYHtK2qT7+Mu
+         UjrnIsqxPh1hFXygP12oDs8WB9TKv7dbDSVy40jGNjsW2WqZ/tzamKgHxRoxz4VbVLnt
+         A8gquSpnKVERnbRHdVbieiyH3KA/0KhiHJu0BOqZrmfYeAKhwuM3ShOJNwWZxcED9OLh
+         tZag==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:message-id:date:mime-version:user-agent:subject
+         :content-language:to:cc:references:from:in-reply-to
+         :content-transfer-encoding;
+        bh=kgXxmrAF+Qnsh3G9vJiLHv3StfM+xchFUzG/QuzHdIs=;
+        b=nq1xu0EfS1CCiHex8cJw8MzzssPYcFZHZu8jaGs+VncGLxY6dEiSAqfDUEbjSbornY
+         VsyXuvrEF7S1EzS/PY/5UvpqSayRiipZ4Abx1C9KcnO2Z8+Q7C3rgUAbESHFXt4W8eug
+         XKMCHrLJewST5o4QdqHZ2Ss3iGGO67qTKxFkWg4BenHsGYxGIEkAAF9d2xyjxBje7hK2
+         JHTElsUzcSLogu9tT1ny2R60IaWzMRDIQU8gYVVh4+WQ14SQ+VKnf2idjofDbHGVbtm9
+         uP51HUUbH62in6NusXI4uWCidjUOWub59JXfz+MkBrCdcewxo4CFBTGQyJy6BstMYWYC
+         XUcA==
+X-Gm-Message-State: ACgBeo0GHYjMIl+yHU2AjDMnpsc3WgRgJokiyieKn7dVyyjvNDx2AXOF
+        Q1a4jucI3HMSZ0+4P3FOzrdEKA==
+X-Google-Smtp-Source: AA6agR6YVF6CbHdahMcx9zQ+eRS778ipAhFVIIKo01J1CFpDRepShWjIyUnmpuNlXa56p0tx61QsrQ==
+X-Received: by 2002:a05:651c:210c:b0:25e:6a39:23ed with SMTP id a12-20020a05651c210c00b0025e6a3923edmr5353015ljq.43.1659950335288;
+        Mon, 08 Aug 2022 02:18:55 -0700 (PDT)
+Received: from [192.168.1.39] ([83.146.140.105])
+        by smtp.gmail.com with ESMTPSA id p26-20020ac246da000000b0048a9d0242afsm1361541lfo.32.2022.08.08.02.18.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 08 Aug 2022 02:18:53 -0700 (PDT)
+Message-ID: <33f5b621-af3b-b6a2-5e3d-c01fe40eb5be@linaro.org>
+Date:   Mon, 8 Aug 2022 12:18:51 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH v2] mmc: sdhci-of-dwcmshc: add ACPI match data for
- BlueField-3 SoC
+ Thunderbird/91.12.0
+Subject: Re: [PATCH 1/3] dt-bindings: mmc: xenon: Add compatible string for
+ Xenon SDHCI on AC5 SoC
 Content-Language: en-US
-To:     Liming Sun <limings@nvidia.com>,
+To:     Vadym Kochan <vadym.kochan@plvision.eu>,
+        Hu Ziji <huziji@marvell.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        David Woods <davwoods@nvidia.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
- <20220807205630.251939-1-limings@nvidia.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220807205630.251939-1-limings@nvidia.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Elad Nachman <enachman@marvell.com>
+References: <20220806085818.9873-1-vadym.kochan@plvision.eu>
+ <20220806085818.9873-2-vadym.kochan@plvision.eu>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220806085818.9873-2-vadym.kochan@plvision.eu>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/08/22 23:56, Liming Sun wrote:
-> Commit 08f3dff799d43 introduces the of_device_get_match_data()
-> checking for some chip but breaks the BlueField-3 firmware which
-> uses ACPI instead. This commit adds the ACPI match data and
-> quirks/quirks2 to re-enable the support of BlueField-3 SoC.
+On 06/08/2022 11:58, Vadym Kochan wrote:
+> It indicates the Xenon SDHCI on AC5 SoC so the driver will try to fixup
+> the 2G address space limitation issue.
 > 
-> Reviewed-by: David Woods <davwoods@nvidia.com>
-> Signed-off-by: Liming Sun <limings@nvidia.com>
-
-Please re-base this patch because it does not apply to
-latest mmc "next" branch.
-
+> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
 > ---
-> v1->v2:
->     Fixes an acpi warning
->     Reported-by: kernel test robot <lkp@intel.com>
-> v1: Initial version.
-> ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 16 ++++++++++++++--
->  1 file changed, 14 insertions(+), 2 deletions(-)
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index bac874ab0b33..a0c73ddaaaa4 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -279,6 +279,15 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
->  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
->  };
+> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> index 3ee758886558..17cda847e0a3 100644
+> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> @@ -34,6 +34,9 @@ properties:
+>            - const: marvell,armada-3700-sdhci
+>            - const: marvell,sdhci-xenon
 >  
-> +#ifdef CONFIG_ACPI
-> +static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
-> +	.ops = &sdhci_dwcmshc_ops,
-> +	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +		   SDHCI_QUIRK2_ACMD23_BROKEN,
-> +};
-> +#endif
-> +
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_rk3568_pdata = {
->  	.ops = &sdhci_dwcmshc_rk3568_ops,
->  	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> @@ -336,7 +345,10 @@ MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
->  
->  #ifdef CONFIG_ACPI
->  static const struct acpi_device_id sdhci_dwcmshc_acpi_ids[] = {
-> -	{ .id = "MLNXBF30" },
-> +	{
-> +		.id = "MLNXBF30",
-> +		.driver_data = (kernel_ulong_t)&sdhci_dwcmshc_bf3_pdata,
-> +	},
->  	{}
->  };
->  #endif
-> @@ -352,7 +364,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->  	int err;
->  	u32 extra;
->  
-> -	pltfm_data = of_device_get_match_data(&pdev->dev);
-> +	pltfm_data = device_get_match_data(&pdev->dev);
->  	if (!pltfm_data) {
->  		dev_err(&pdev->dev, "Error: No device match data found\n");
->  		return -ENODEV;
+> +      - items:
+> +          - const: marvell,ac5-sdhci
 
+These are not items. Should be part of existing enum.
+
+You missed updating allOf:if:then.
+
+Best regards,
+Krzysztof
