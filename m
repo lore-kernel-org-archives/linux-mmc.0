@@ -2,376 +2,162 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68C4FC19F2D
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 Aug 2022 05:36:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C999C19F2D
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 Aug 2022 17:38:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229991AbiHIFgx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 Aug 2022 01:36:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39434 "EHLO
+        id S235615AbiHIRiK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 Aug 2022 13:38:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229976AbiHIFgw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Aug 2022 01:36:52 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D89E10549
-        for <linux-mmc@vger.kernel.org>; Mon,  8 Aug 2022 22:36:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1660023411; x=1691559411;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=0DwA0L6PMiGhjO9gYJmWjDdbZMMRxnbN4YCOUzCE4m8=;
-  b=a2osm4iPVJtLpYaeAA0sYHSeAQhCJsnZaMObpwRHJYcBbuni2bPNeUom
-   mvqcJSVMYLpmFiOirkYcZDnRwvVY/8ZLNOdGdWvHXo5pjIly4kh8sY9KT
-   R9WT8IYhg9mT9ucM+rINLZS2FZ++K2j1veLU0/HaqjbLSsOatFOb7LUAd
-   GqCYfaaGka69PGagiOm7M/M01KN3ssihLUW4aXmI4e0kiz1sNmeuLpm0R
-   DIBpKBeaJsvk+LWH6Ej95bveuXWiATyLSjiOChw82IFSCsQQ9grRQFdyD
-   w+aUuFMscHgmEcH1o/qUZP8BRqzJMaY1sI3cKXZagla/rDy0EddRG45F2
-   w==;
-X-IronPort-AV: E=McAfee;i="6400,9594,10433"; a="288323839"
-X-IronPort-AV: E=Sophos;i="5.93,223,1654585200"; 
-   d="scan'208";a="288323839"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 22:36:51 -0700
-X-IronPort-AV: E=Sophos;i="5.93,223,1654585200"; 
-   d="scan'208";a="664291340"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.48.82])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Aug 2022 22:36:50 -0700
-Message-ID: <45d81e6a-91b9-657d-418b-3ae8b631dd81@intel.com>
-Date:   Tue, 9 Aug 2022 08:36:45 +0300
+        with ESMTP id S245171AbiHIRhx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 Aug 2022 13:37:53 -0400
+Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2087.outbound.protection.outlook.com [40.107.244.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ADA7725C44;
+        Tue,  9 Aug 2022 10:37:52 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=PR1GgLLBqEtPwuPdIU1pf/Cvy/4gFfKGBgE5z7O7XcraN7oB+uSiKdeMgMmzWQp7sDYJeNjLZrzD+1eUzgYVggtR/XjNaJivQVDdg29NZfevVvbxs8PBgmJ+h1anLvZyOeyWUx5WAtrSXF20Z2cIEJ4fTGaeX/nPgXwVQSj8msoS+V4JBwRjmFcm/41ROtFbTHMqUzVO50clu7mxNfHGOXhPnaOQuutLlKDPYO0YHm+6IhOghTXPCD2kZJl6AvnhWXCgvd3IdgstkGDZgNCJow7/M8O6xNjsl0+AVxEkuAZ2Ag7ByQeFkUrD0VQSnBIksK8qVK2wr9A7XFSXU6gR+g==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=qzJRFMG/I3e/ij1SDpeRLB4+GX90SrNyO1YYpWiN3fk=;
+ b=T8sFdjy7eRvtAD+S3DUmjvyWUhkqEhOEKpRrizmZXLzQEVozu3MALsPYQOGL91xV2fKtO0+6QuJavnsdyyBko4DjHjc+XjUIfUjuICWgJJyDF11N+IMZ6jaw4bSllYbWqlZzSihAb4iAXz0tW0whX/xjXxIpaIbKdb/Gsf82V2HBZW09x9nsSXlJ22aKmHCG04m+sAF0SN3kOOhuBU+aAWCPufCtnDwwZfxo5f/oMqX+70l5XHvRbx7SRFiTMOzUq3ZjiUeXPR7YT2bGl+ZpZPTcqVoE6hCsJ3OUDHfuF7l73B9V1SwSs66O8wFgW96BNJ/kBsERd1yZDB4rwnH2NA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 12.22.5.235) smtp.rcpttodomain=vger.kernel.org smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=qzJRFMG/I3e/ij1SDpeRLB4+GX90SrNyO1YYpWiN3fk=;
+ b=ks4LwVa7OHkjcmRgRMBTS3i1QuvNEAv6Zz5uMRah6JXZdWg9N9GxjJg8Ohnmqutu+jc8bmzhPC92lUDFJAyy94YbCvLPQS+vOLrI7X2dz8O3wuydMrUMPwsyiD/w5VBcpHx2gbxXsE9FuKfZ0SWPO9eq+Z5PLvmfaQG6dsXHdz5+CE9eAuE1hi9UxOjoGivxiw5zT9J/irr3qIkidyssp0rFjvzxmxBekNJgwlS91ATHRqj44NUwk/CtLz1V1Mr9zZmls5zWsg1JwX3UKZvTSooUBuXLWPTd14+ObM0f6k4Fc9KwIxOlGjb4k+FwL1niUEBCCrREsKCPvsiEkapiMA==
+Received: from MW4PR04CA0034.namprd04.prod.outlook.com (2603:10b6:303:6a::9)
+ by DM6PR12MB3195.namprd12.prod.outlook.com (2603:10b6:5:183::30) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5504.17; Tue, 9 Aug
+ 2022 17:37:51 +0000
+Received: from CO1NAM11FT005.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:6a:cafe::7a) by MW4PR04CA0034.outlook.office365.com
+ (2603:10b6:303:6a::9) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5504.20 via Frontend
+ Transport; Tue, 9 Aug 2022 17:37:50 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 12.22.5.235)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 12.22.5.235 as permitted sender) receiver=protection.outlook.com;
+ client-ip=12.22.5.235; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (12.22.5.235) by
+ CO1NAM11FT005.mail.protection.outlook.com (10.13.174.147) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384) id
+ 15.20.5504.14 via Frontend Transport; Tue, 9 Aug 2022 17:37:50 +0000
+Received: from rnnvmail201.nvidia.com (10.129.68.8) by DRHQMAIL107.nvidia.com
+ (10.27.9.16) with Microsoft SMTP Server (TLS) id 15.0.1497.32; Tue, 9 Aug
+ 2022 17:37:50 +0000
+Received: from rnnvmail205.nvidia.com (10.129.68.10) by rnnvmail201.nvidia.com
+ (10.129.68.8) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Tue, 9 Aug 2022
+ 10:37:49 -0700
+Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com (10.129.68.10)
+ with Microsoft SMTP Server id 15.2.986.26 via Frontend Transport; Tue, 9 Aug
+ 2022 10:37:48 -0700
+From:   Liming Sun <limings@nvidia.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        David Woods <davwoods@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+CC:     Liming Sun <limings@nvidia.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v3] mmc: sdhci-of-dwcmshc: add ACPI match data for BlueField-3 SoC
+Date:   Tue, 9 Aug 2022 13:37:42 -0400
+Message-ID: <20220809173742.178440-1-limings@nvidia.com>
+X-Mailer: git-send-email 2.30.1
+In-Reply-To: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
+References: <3a50873fdbf69f4a95b931a5d05cade04c1dacd0.1659099154.git.limings@nvidia.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH] mmc: sd: Remove the patch that fix signal voltage when
- there is no power cycle
-Content-Language: en-US
-To:     Seunghui Lee <sh043.lee@samsung.com>, linux-mmc@vger.kernel.org
-Cc:     'DooHyun Hwang' <dh0421.hwang@samsung.com>
-References: <CGME20220721052617epcas1p48967f8acf113372b2a9fc88cca40b2dc@epcas1p4.samsung.com>
- <20220721055924.9043-1-sh043.lee@samsung.com>
- <001901d8a09b$480bfd70$d823f850$@samsung.com>
- <11158c9f-b1a8-20cb-95a2-6c8f7f06c35f@intel.com>
- <000001d8ab00$59393260$0bab9720$@samsung.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <000001d8ab00$59393260$0bab9720$@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-Office365-Filtering-Correlation-Id: 5ec609a5-908c-48e4-0ead-08da7a2de1e3
+X-MS-TrafficTypeDiagnostic: DM6PR12MB3195:EE_
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: qTANLFlib9vOpbbI4GnQxdM4eexQE0IbPSk2fOQnUT5sVcHQfh9K++QpcO6AWvoFd5FvP1prZ6FKUZdQHi7eh7xpYXOaRg8UhES89ljblZV3gMEY3wvZUJ9uXYiTJj8HO6UHDAA/bRuidp839HTqSrRoClMDsy0ha+9YzIg0kCO3RljzBoFifBH3lT/+CcaQD5cOn30nwvmXAWcfFskmW6ENPUMyEau5Sf7jaTFkaDFxDaV+6MyAhHbB5PFFU3NzotkAyTy49KLw4xJ3ZSsKBTGrBRaK4Dc7NHvSF7CWUM0ci5W2lzlNl73vs7kMmEOHhZXL40MuFXfNWcspur8q7pNbzPaII9XeDKC87f8nxFNVOg1JXwaDtg6ElCinqI7k42sMjZn7x7yv7GW+dswUXFy/LnOnRVBOoJn7gfQ//LrlsAAXkosAT9PH7sAwpZkf4bcQarJtLSSnbFSfL7gCYaUeE4irHA3n1iAen7wmUN6KLSs5uELHUpsC/PszKrDs6ik//CU0/qc/bFnD9wyr+f+zIZJScqDjptmqtTZjaaX95WnD/KGO5IqKIg8ukMDFaWUXyTZl809mWZlZgN8k5hHRxl+2M8hEh7X/2rSclXPWrGMet2t9hMpALatiFU1aSLGqVvhvhYEL24911kNltMOzNQV/qZpnjWsFI2B3zlbgAnqRzA+zV09K3tjjmyqgWaDepXqRWOcKQ5i/qq2uFyJQz6uwXeL3fY+AFNvBiNkrHJHbnxpGQkjR7xeL5h7HMJ2Gc4V8IU3gzfG03/vt3UWMfqDVO/ArgmRe8GcABFvMnUsLeLAq6V3fYV5WCDsJWf/PrSoiuvDbUSPViKvE/LBkYoyU3KG9kemAA9GsQYB5guW0JLRTm64FJ0K6DRVz
+X-Forefront-Antispam-Report: CIP:12.22.5.235;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:InfoNoRecords;CAT:NONE;SFS:(13230016)(4636009)(376002)(346002)(39860400002)(396003)(136003)(46966006)(40470700004)(36840700001)(81166007)(356005)(82740400003)(186003)(2616005)(1076003)(426003)(336012)(26005)(47076005)(6666004)(41300700001)(7696005)(110136005)(82310400005)(40480700001)(478600001)(86362001)(36756003)(40460700003)(4326008)(316002)(5660300002)(70206006)(8676002)(54906003)(36860700001)(2906002)(83380400001)(70586007)(8936002)(133343001)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 09 Aug 2022 17:37:50.7123
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5ec609a5-908c-48e4-0ead-08da7a2de1e3
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[12.22.5.235];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT005.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB3195
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 8/08/22 11:24, Seunghui Lee wrote:
->> -----Original Message-----
->> From: Adrian Hunter <adrian.hunter@intel.com>
->> Sent: Tuesday, July 26, 2022 7:57 PM
->> To: Seunghui Lee <sh043.lee@samsung.com>; linux-mmc@vger.kernel.org;
->> adrian.hunter@intel.com
->> Cc: 'DooHyun Hwang' <dh0421.hwang@samsung.com>
->> Subject: Re: [PATCH] mmc: sd: Remove the patch that fix signal voltage
->> when there is no power cycle
->>
->> On 26/07/22 05:56, Seunghui Lee wrote:
->>>> -----Original Message-----
->>>> From: Seunghui Lee <sh043.lee@samsung.com>
->>>> Sent: Thursday, July 21, 2022 2:59 PM
->>>> To: ulf.hansson@linaro.org; linux-mmc@vger.kernel.org;
->>>> adrian.hunter@intel.com
->>>> Cc: Seunghui Lee <sh043.lee@samsung.com>; DooHyun Hwang
->>>> <dh0421.hwang@samsung.com>
->>>> Subject: [PATCH] mmc: sd: Remove the patch that fix signal voltage
->>>> when there is no power cycle
->>>>
->>>> At first, all error flow of mmc_set_uhs_voltage() has power cycle
->>>> except R1_ERROR and no start_signal_voltage_switch() func pointer.
->>>>
->>>> There is the performance regression issue of SDR104 SD card from the
->>>> market VOC. Normally, once a SDR104 SD card fails to switch voltage,
->>>> it works HS mode.
->>>> And then it initializes SDR104 mode after system resume or error
->> handling.
->>>>
->>>> However, with below patch,
->>>> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/co
->>>> mmit/
->>>> drivers/mmc/core/sd.c?id=6a11fc47f175c8d87018e89cb58e2d36c66534cb
->>>> Once a SD card does, it initializes SDR25 mode forever after system
->>>> resume or error handling(re-initialized).
->>>> Host updates sd3_bus_mode by calling mmc_read_switch(), the value of
->>>> sd3_bus_mode doesn't set for SDR104, SDR50 and DDR50 mode.
->>>>
->>>> So, if host doesn't update sd3_bus_mode, the SD card works SDR104
->>>> mode after system resume or error-handling.
->>>>
->>>> Here is an example.
->>>>
->>>> AS-IS : test log
->>>> // normal case : sd3_bus_mode = 0x1F, sd_bus_speed = SDR104, clock
->> 208MHz
->>>> [  111.907789] [1:    kworker/1:3:  772] [TEST] mmc_sd_init_card: 1119:
->>>> caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false,
->>>> signal_voltage =0x1.
->>>> [  111.907824] [1:    kworker/1:3:  772] [TEST] mmc_sd_init_card: 1149:
->> rocr
->>>> 0xc1ff8000, S18A, uhs.
->>>> [  111.908707] [1:    kworker/1:3:  772] [TEST] sd_update_bus_speed_mode:
->>>> caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed = 3, card->ocr =
->>>> 0x40000.
->>>> [  111.912484] [1:    kworker/1:3:  772] [TEST] sd_set_bus_speed_mode:
->>>> sd_bus_speed=3, timing=6, uhs_max_dtr=208000000, card->ocr=0x40000.
->>>> // resume : issue occurs : SDcard doesn't release busy for checking
->>>> 10 times
->>>> [  112.096550] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1040:
->>>> card->ocr 0x40000.
->>>> [  112.096560] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr
->>>> 0x40000(pocr 0x40000), retries 10.
->>>> ...
->>>> [  114.531129] [5:    kworker/5:2:  207] [TEST] mmc_power_cycle.
->>>> [  114.579500] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr
->>>> 0x41040000(pocr 0x40000), retries 0.
->>>> [  114.579506] [5:    kworker/5:2:  207] mmc0: Skipping voltage switch
->>>> [  114.757575] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1119:
->>>> caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false,
->>>> signal_voltage =0x0.
->>>> [  114.757583] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1128:
->>>> switch with oldcard.
->>>> [  114.759742] [5:    kworker/5:2:  207] [TEST] mmc_read_switch:
->> sd_switch
->>>> ret 0, sd3_bus_mode=3.
->>>> // sd3_bus_mode = 0x3 supports HS, SDR25 and SDR12
->>>> [  114.759750] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1157:
->>>> switch hs.
->>>> // next resume : the SDcard initializes to SDR25(HS)
->>>> mode(sd_bus_speed = 1) by sd3_bus_mode setting with clk 50MHz
->>>> [  114.968346] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1040:
->>>> card->ocr 0x40000.
->>>> [  114.968359] [5:    kworker/5:2:  207] [TEST] mmc_sd_get_cid: ocr
->>>> 0x40000(pocr 0x40000), retries 10.
->>>> [  115.167346] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1119:
->>>> caps=0x407f020f, sd3_bus_mode=0x3, v18_fixup_failed false,
->>>> signal_voltage =0x1.
->>>> [  115.167366] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_card: 1149:
->> rocr
->>>> 0xc1ff8000, S18A, uhs.
->>>> [  115.168041] [5:    kworker/5:2:  207] [TEST] mmc_sd_init_uhs_card:
->> before
->>>> update: caps 0x407f020f, sd3_bus_mode = 3, sd_bus_speed = 3,
->>>> card->ocr = 0x40000.
->>>> [  115.168051] [5:    kworker/5:2:  207] [TEST] sd_update_bus_speed_mode:
->>>> caps 0x407f020f, sd3_bus_mode = 3, sd_bus_speed = 1, card->ocr =
->> 0x40000.
->>>> [  115.169176] [5:    kworker/5:2:  207] [TEST] sd_set_bus_speed_mode:
->>>> sd_bus_speed=1, timing=4, uhs_max_dtr=50000000, card->ocr=0x40000.
->>>>
->>>> TO-BE : TEST log with this commit
->>>> // resume : issue occurs : SDcard doesn't release busy for checking
->>>> 10 times
->>>> [ 1843.594805] [4:    kworker/4:5:21512] [TEST] mmc_sd_get_cid: ocr
->>>> 0x41040000(pocr 0x40000), retries 0.
->>>> [ 1843.594812] [4:    kworker/4:5:21512] mmc0: Skipping voltage switch
->>>> [ 1843.772555] [4:    kworker/4:5:21512] [TEST] mmc_sd_init_card: 1122:
->>>> caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false,
->>>> signal_voltage =0x0.
->>>> // no update sd3_bus_mode value
->>>> [ 1843.772563] [4:    kworker/4:5:21512] [TEST] mmc_sd_init_card: 1164:
->>>> switch hs.
->>>> // next resume : the SDcard initializes to SDR104
->>>> [ 1844.191295] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_card: 1122:
->>>> caps=0x407f020f, sd3_bus_mode=0x1f, v18_fixup_failed false,
->>>> signal_voltage =0x1.
->>>> [ 1844.191315] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_card: 1154:
->>>> rocr 0xc1ff8000, S18A, uhs.
->>>> [ 1844.192175] [5:   kworker/5:93: 2282] [TEST] mmc_sd_init_uhs_card:
->>>> before update: caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed =
->>>> 3,
->>>> card->ocr = 0x40000.
->>>> [ 1844.192187] [5:   kworker/5:93: 2282] [TEST]
->> sd_update_bus_speed_mode:
->>>> caps 0x407f020f, sd3_bus_mode = 0x1f, sd_bus_speed = 3, card->ocr =
->>>> 0x40000.
->>>> [ 1844.198697] [5:   kworker/5:93: 2282] [TEST] sd_set_bus_speed_mode:
->>>> sd_bus_speed=3, timing=6, uhs_max_dtr=208000000, card->ocr=0x40000.
->>>>
->>>> Signed-off-by: Seunghui Lee <sh043.lee@samsung.com>
->>>> Tested-by: DooHyun Hwang <dh0421.hwang@samsung.com>
->>>> ---
->>>>  drivers/mmc/core/sd.c | 47
->>>> ++-----------------------------------------
->>>>  1 file changed, 2 insertions(+), 45 deletions(-)
->>>>
->>>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c index
->>>> cee4c0b59f43..4e3d39956185 100644
->>>> --- a/drivers/mmc/core/sd.c
->>>> +++ b/drivers/mmc/core/sd.c
->>>> @@ -1001,18 +1001,6 @@ unsigned mmc_sd_get_max_clock(struct mmc_card
->> *card)
->>>>  	return max_dtr;
->>>>  }
->>>>
->>>> -static bool mmc_sd_card_using_v18(struct mmc_card *card) -{
->>>> -	/*
->>>> -	 * According to the SD spec., the Bus Speed Mode (function group 1)
->>>> bits
->>>> -	 * 2 to 4 are zero if the card is initialized at 3.3V signal level.
->>>> Thus
->>>> -	 * they can be used to determine if the card has already switched
->>>> to
->>>> -	 * 1.8V signaling.
->>>> -	 */
->>>> -	return card->sw_caps.sd3_bus_mode &
->>>> -	       (SD_MODE_UHS_SDR50 | SD_MODE_UHS_SDR104 | SD_MODE_UHS_DDR50);
->>>> -}
->>>> -
->>>>  static int sd_write_ext_reg(struct mmc_card *card, u8 fno, u8 page,
->>>> u16 offset,
->>>>  			    u8 reg_data)
->>>>  {
->>>> @@ -1400,10 +1388,9 @@ static int mmc_sd_init_card(struct mmc_host
->>>> *host,
->>>> u32 ocr,
->>>>  	int err;
->>>>  	u32 cid[4];
->>>>  	u32 rocr = 0;
->>>> -	bool v18_fixup_failed = false;
->>>>
->>>>  	WARN_ON(!host->claimed);
->>>> -retry:
->>>> +
->>>>  	err = mmc_sd_get_cid(host, ocr, cid, &rocr);
->>>>  	if (err)
->>>>  		return err;
->>>> @@ -1472,36 +1459,6 @@ static int mmc_sd_init_card(struct mmc_host
->>>> *host,
->>>> u32 ocr,
->>>>  	if (err)
->>>>  		goto free_card;
->>>>
->>>> -	/*
->>>> -	 * If the card has not been power cycled, it may still be using
->>>> 1.8V
->>>> -	 * signaling. Detect that situation and try to initialize a UHS-I
->>>> (1.8V)
->>>> -	 * transfer mode.
->>>> -	 */
->>>> -	if (!v18_fixup_failed && !mmc_host_is_spi(host) &&
->>>> mmc_host_uhs(host) &&
->>>> -	    mmc_sd_card_using_v18(card) &&
->>>> -	    host->ios.signal_voltage != MMC_SIGNAL_VOLTAGE_180) {
->>>> -		/*
->>>> -		 * Re-read switch information in case it has changed since
->>>> -		 * oldcard was initialized.
->>>> -		 */
->>>> -		if (oldcard) {
->>>> -			err = mmc_read_switch(card);
->>>> -			if (err)
->>>> -				goto free_card;
->>>> -		}
->>>> -		if (mmc_sd_card_using_v18(card)) {
->>>> -			if (mmc_host_set_uhs_voltage(host) ||
->>>> -			    mmc_sd_init_uhs_card(card)) {
->>>> -				v18_fixup_failed = true;
->>>> -				mmc_power_cycle(host, ocr);
->>>> -				if (!oldcard)
->>>> -					mmc_remove_card(card);
->>>> -				goto retry;
->>>> -			}
->>>> -			goto done;
->>>> -		}
->>>> -	}
->>>> -
->>>>  	/* Initialization sequence for UHS-I cards */
->>>>  	if (rocr & SD_ROCR_S18A && mmc_host_uhs(host)) {
->>>>  		err = mmc_sd_init_uhs_card(card);
->>>> @@ -1566,7 +1523,7 @@ static int mmc_sd_init_card(struct mmc_host
->>>> *host,
->>>> u32 ocr,
->>>>  		err = -EINVAL;
->>>>  		goto free_card;
->>>>  	}
->>>> -done:
->>>> +
->>>>  	host->card = card;
->>>>  	return 0;
->>>>
->>>> --
->>>> 2.29.0
->>>
->>> Dear All,
->>>
->>> Please review this commit.
->>
->> I have started to look at it, but my time is limited at the moment.
->>
->> Note the original patch is 5 years old and fixes a real problem, so we
->> don't want to just throw it away.
->>
-> 
-> Dear Mr. hunter,
-> 
-> Could you check this with below patch?
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/core/core.c?id=147186f531ae49c18b7a9091a2c40e83b3d95649
-> 
-> In the mmc_set_uhs_voltaga func(),
-> once it occurs error, it has power_cycle except R1_ERROR with CMD11.
-> So, When mmc_set_uhs_voltage() return error,
-> host and card can't leave 1.8V voltage.
-> 
-> Regards,
-> 
->>>
->>> Once the SDR104 SD card fails to switch voltage, there is no chance to
->>> work SDR104 bus speed again due to update sd3_bus_mode.
->>>
->>> To fix this regression issue, do not update sd3_bus_mode.
->>> And then it has the chance to work SDR104 again.
->>>
->>> AS-IS:
->>> voltage_switch fail -> mmc_read_switch() -> HS mode next system resume
->>> voltage switch success -> SDR25 mode
->>>
->>> TO-BE:
->>> Voltage switch fail -> HS mode
->>> Next system resume
->>> Voltage switch success -> SDR104 mode
->>>
->>> And plus, mmc_set_uhs_voltage() has power_cycle now.
->>> It means that if voltage switch fails, the card initializes 3.3V
->>> signal level.
->>>
->>> Regards,
->>> Seunghui Lee.
->>>
-> 
-> 
+Commit 08f3dff799d43 introduces the of_device_get_match_data()
+checking for some chip but breaks the BlueField-3 firmware which
+uses ACPI instead. This commit adds the ACPI match data and
+quirks/quirks2 to re-enable the support of BlueField-3 SoC.
 
-Does this help?
+Reviewed-by: David Woods <davwoods@nvidia.com>
+Signed-off-by: Liming Sun <limings@nvidia.com>
+---
+v2->v3:
+    Rebase to mmc next
+v1->v2:
+    Fixes an acpi warning
+    Reported-by: kernel test robot <lkp@intel.com>
+v1: Initial version.
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index cee4c0b59f43..1abe8af48bfc 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -949,15 +949,15 @@ int mmc_sd_setup_card(struct mmc_host *host, struct mmc_card *card,
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 4e904850973c..a7343d4bc50e 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -349,6 +349,15 @@ static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
+ 	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+ };
  
- 		/* Erase init depends on CSD and SSR */
- 		mmc_init_erase(card);
--
--		/*
--		 * Fetch switch information from card.
--		 */
--		err = mmc_read_switch(card);
--		if (err)
--			return err;
- 	}
- 
-+	/*
-+	 * Fetch switch information from card.
-+	 */
-+	err = mmc_read_switch(card);
-+	if (err)
-+		return err;
++#ifdef CONFIG_ACPI
++static const struct sdhci_pltfm_data sdhci_dwcmshc_bf3_pdata = {
++	.ops = &sdhci_dwcmshc_ops,
++	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
++	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
++		   SDHCI_QUIRK2_ACMD23_BROKEN,
++};
++#endif
 +
- 	/*
- 	 * For SPI, enable CRC as appropriate.
- 	 * This CRC enable is located AFTER the reading of the
+ static const struct sdhci_pltfm_data sdhci_dwcmshc_rk35xx_pdata = {
+ 	.ops = &sdhci_dwcmshc_rk35xx_ops,
+ 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+@@ -431,7 +440,10 @@ MODULE_DEVICE_TABLE(of, sdhci_dwcmshc_dt_ids);
+ 
+ #ifdef CONFIG_ACPI
+ static const struct acpi_device_id sdhci_dwcmshc_acpi_ids[] = {
+-	{ .id = "MLNXBF30" },
++	{
++		.id = "MLNXBF30",
++		.driver_data = (kernel_ulong_t)&sdhci_dwcmshc_bf3_pdata,
++	},
+ 	{}
+ };
+ #endif
+@@ -447,7 +459,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	int err;
+ 	u32 extra;
+ 
+-	pltfm_data = of_device_get_match_data(&pdev->dev);
++	pltfm_data = device_get_match_data(&pdev->dev);
+ 	if (!pltfm_data) {
+ 		dev_err(&pdev->dev, "Error: No device match data found\n");
+ 		return -ENODEV;
+-- 
+2.30.1
 
