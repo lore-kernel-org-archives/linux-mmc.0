@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AD1EC19F2A
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Aug 2022 20:32:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0784C3F6B0
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 Aug 2022 20:41:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232304AbiHKUcE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Aug 2022 16:32:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35840 "EHLO
+        id S235934AbiHKUlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 Aug 2022 16:41:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46418 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235618AbiHKUcD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2022 16:32:03 -0400
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4ED98A6E1
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:32:01 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id j1so22593456wrw.1
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:32:01 -0700 (PDT)
+        with ESMTP id S235079AbiHKUlN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2022 16:41:13 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 681C664CA
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:41:11 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id h13so22589937wrf.6
+        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:41:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=conchuod.ie; s=google;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc;
-        bh=NRC10trzuqulg2mbWP7/9kZe6SgJG6yhrQ9QCsgz3RY=;
-        b=XCutOpnPVVZAhqOaRWoHNzRAgMQx51l0/PCcMxYRlNOseA+OItbKcHJEKWbm+xLZ6Y
-         1O3hD1vVHJ81uZVSSVt1e3UDPKJkaZS1SChDX43YOC61XGyLqDTk5IUVkJFcPLiLFdL1
-         NvtfvEjj+pgrlyHICggcJiGSX6A7ubcIgUCSEE1VQyG76VLdbUYxgGMB5gpKj2gbwZa/
-         nMdM4F3m7kJ7wIP7spW01DrV0sYRbHjF5mLuvv+GT5xwDiM1dyhYbyp9UzGHRdIB9RiB
-         VOAVcTmrRjcjEY+F5lib/jjC21Rz+7G5QE2/aTsk/g8DKnF3iQxhtkP5+1kBsu2raXJb
-         9bQw==
+        bh=v65TxKsCBooVHdoEozViTk8e8Jlbg0tbZcJ4XTkHA9Q=;
+        b=UUw0P6y4EVVg3hSO5g1xxA0buwiU3NfFunLUxWYXGTc7EdsPQc8SlO1HZ4xr90lqEk
+         +NwqlyVyC0eL8gR2/XPe6/BTLzMaRRUtJDX09W+Sm8OEdXbQGXC9R5+9uwIatHXVl2vN
+         kskdHTXwoc61oZ/GFsoUkRWtUGokNebzDIwnXFzPUvCzYKuUN8GIb1eKhk2sl6Vetaiy
+         oN7UuyTXGZvcYkUyfV7AuxMUi2TrY5nNgyz15XMXWLp/LCPlFODZMqkUQpPsh//bsYsa
+         yIgbS4fdIfZR3Y7zNQI6TxrYHf304TS7ZxBBwFOlTHsTL0enqbNq7wZcPQ/uj8whmx9O
+         IivA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc;
-        bh=NRC10trzuqulg2mbWP7/9kZe6SgJG6yhrQ9QCsgz3RY=;
-        b=FwtgcbwSVS91PdVuj8fD2SfVMR5VfyBFMuhMZVinVlgM/Oyx5givUq5AiLt1pPEOYD
-         +alIrKMZLg53yRKDqD4UoJJNt3L5K8Gdr/AaIF+ftrXWxpjcVsiUUvikdbMZS9sa6X/e
-         rn6Z37FtWQKHs896JWAQJRncd7c+tpTlO/JNtusryYlskdgt2pGj5icjNAipMmrkqMnN
-         93js5hBAl3kuxc6F+awOJ5twUvzfe8We3lppnHsV+fnpXQxqLP9W/nPJ3a+020YChY8S
-         e+WitzKtRO5AJKhpBU5tFHu8UkcbFaug6Ycv4DsQ6bqGTZK9F3+nrMdS9rU1mC8qk4Eg
-         tV0g==
-X-Gm-Message-State: ACgBeo2WDosD2hLyGNnmph1bWIap5QffoHW3T6e94PdfzRqbovuX7hWV
-        GBtrLb/UqUIHr2bmQ8xhKIuxag==
-X-Google-Smtp-Source: AA6agR6GlDpUiPt5PzjH7aZTJbryfnMlgfg7zCpD/CJubC7Re1tH3mrv1P6fO36cNnFdc4wpXfFkbQ==
-X-Received: by 2002:adf:e112:0:b0:21d:7195:3a8d with SMTP id t18-20020adfe112000000b0021d71953a8dmr333222wrz.371.1660249920196;
-        Thu, 11 Aug 2022 13:32:00 -0700 (PDT)
+        bh=v65TxKsCBooVHdoEozViTk8e8Jlbg0tbZcJ4XTkHA9Q=;
+        b=KMd3LCir8dgc4/ml0PbnWn2IX5Z7Xd3wVXNzjr6QdVeArw+ZfnIytmEij973lG/VIN
+         uhm+aQcvFtvV4LCR5r2b7IaULgjg98W69QApbRsS/92jfAHFZc6fy7Uf2EzSp5S8Lu4g
+         rkACjaMu+8gZw0F9MpuYBx9BptpVqaajXRKdLWodbO/f7k/865HmsdiIGEQwQM1HeTY1
+         rChkvkDIvvW3A/eB6qkencyFLB73fEVNYDfprmSaIqy8RcgtIDOCOMttJzKvzLVbe/Ye
+         t6TTVLeUNhldGRZ8XABis0G3j0avoleBanJdiO2MJ2U12SPDacFCLovBHNa1AWLsdXXb
+         YWRw==
+X-Gm-Message-State: ACgBeo1lVgTlFdJC9sAZ2AEaHw5gMa6SPO+6vR/5+SXliTuzAg67GiDB
+        fPCjiJjRw/fNpeyQ/SEhGNTeZx5O4RYAqNxa
+X-Google-Smtp-Source: AA6agR6lpzSQl0I67ePvjSIBO0Obd6xiyVZ5YQEY/ZBqrqs7lEllEDAiTUTW7qGxMjPrmrSfdG2OtQ==
+X-Received: by 2002:a5d:6b12:0:b0:21f:1568:c7e1 with SMTP id v18-20020a5d6b12000000b0021f1568c7e1mr352199wrw.532.1660250469981;
+        Thu, 11 Aug 2022 13:41:09 -0700 (PDT)
 Received: from henark71.. ([109.76.58.63])
-        by smtp.gmail.com with ESMTPSA id n18-20020a05600c4f9200b003a1980d55c4sm8480521wmq.47.2022.08.11.13.31.58
+        by smtp.gmail.com with ESMTPSA id g10-20020a05600c4eca00b003a3199c243bsm11213544wmq.0.2022.08.11.13.41.08
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 11 Aug 2022 13:31:59 -0700 (PDT)
+        Thu, 11 Aug 2022 13:41:09 -0700 (PDT)
 From:   Conor Dooley <mail@conchuod.ie>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -54,11 +54,10 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
         Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-riscv@lists.infradead.org,
         Conor Dooley <conor.dooley@microchip.com>
-Subject: [PATCH] dt-bindings: mmc: cdns: add card-detect-delay property
-Date:   Thu, 11 Aug 2022 21:31:52 +0100
-Message-Id: <20220811203151.179258-1-mail@conchuod.ie>
+Subject: [PATCH] dt-bindings: mmc: cdns: remove Piotr Sroka as a maintainer
+Date:   Thu, 11 Aug 2022 21:40:24 +0100
+Message-Id: <20220811204024.182453-1-mail@conchuod.ie>
 X-Mailer: git-send-email 2.37.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -68,39 +67,28 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Conor Dooley <conor.dooley@microchip.com>
 
-Upgrading dt-schema to v2022.08 brings with it better handling of
-unevaluatedProperties, exposing a previously undetected missing
-property in the cadence sdhci dt-binding:
-arch/riscv/boot/dts/microchip/mpfs-icicle-kit.dtb: mmc@20008000: Unevaluated properties are not allowed ('card-detect-delay' was unexpected)
-        From schema: Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+Mails to Piotr bounce with a :550 5.1.1 User Unknown and the last
+mention of him on lore is the orphaning of Cadence NFC drivers.
+Remove him from the binding too.
 
+Link: https://lore.kernel.org/all/20200510122430.19105-1-miquel.raynal@bootlin.com/
 Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
 ---
-Should this have a fixes tag? If anything, it'd be
-Fixes: 84723eec251d ("dt-bindings: mmc: cdns: document Microchip MPFS MMC/SDHCI controller")
-but idk.
----
- Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 7 +++++++
- 1 file changed, 7 insertions(+)
+ Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-index 4207fed62dfe..99f89eb19356 100644
+index 99f89eb19356..7124e77617c9 100644
 --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
 +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-@@ -112,6 +112,13 @@ properties:
-     minimum: 0
-     maximum: 0x7f
+@@ -8,7 +8,6 @@ title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
  
-+  card-detect-delay:
-+    description:
-+      Delay in milli-seconds before detecting card after card
-+      insert event. The default value is 0.
-+    $ref: /schemas/types.yaml#/definitions/uint32
-+    default: 0
-+
- required:
-   - compatible
-   - reg
+ maintainers:
+   - Masahiro Yamada <yamada.masahiro@socionext.com>
+-  - Piotr Sroka <piotrs@cadence.com>
+ 
+ allOf:
+   - $ref: mmc-controller.yaml
 -- 
 2.37.1
 
