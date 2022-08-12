@@ -2,93 +2,160 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0784C3F6B0
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 Aug 2022 20:41:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4D39C19F2D
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 Aug 2022 08:08:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235934AbiHKUlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 Aug 2022 16:41:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46418 "EHLO
+        id S236987AbiHLIIi convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 Aug 2022 04:08:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235079AbiHKUlN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 Aug 2022 16:41:13 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 681C664CA
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:41:11 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id h13so22589937wrf.6
-        for <linux-mmc@vger.kernel.org>; Thu, 11 Aug 2022 13:41:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=conchuod.ie; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc;
-        bh=v65TxKsCBooVHdoEozViTk8e8Jlbg0tbZcJ4XTkHA9Q=;
-        b=UUw0P6y4EVVg3hSO5g1xxA0buwiU3NfFunLUxWYXGTc7EdsPQc8SlO1HZ4xr90lqEk
-         +NwqlyVyC0eL8gR2/XPe6/BTLzMaRRUtJDX09W+Sm8OEdXbQGXC9R5+9uwIatHXVl2vN
-         kskdHTXwoc61oZ/GFsoUkRWtUGokNebzDIwnXFzPUvCzYKuUN8GIb1eKhk2sl6Vetaiy
-         oN7UuyTXGZvcYkUyfV7AuxMUi2TrY5nNgyz15XMXWLp/LCPlFODZMqkUQpPsh//bsYsa
-         yIgbS4fdIfZR3Y7zNQI6TxrYHf304TS7ZxBBwFOlTHsTL0enqbNq7wZcPQ/uj8whmx9O
-         IivA==
+        with ESMTP id S236899AbiHLIIi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 Aug 2022 04:08:38 -0400
+Received: from mail-qt1-f176.google.com (mail-qt1-f176.google.com [209.85.160.176])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72628A830E;
+        Fri, 12 Aug 2022 01:08:35 -0700 (PDT)
+Received: by mail-qt1-f176.google.com with SMTP id a4so245070qto.10;
+        Fri, 12 Aug 2022 01:08:35 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc;
-        bh=v65TxKsCBooVHdoEozViTk8e8Jlbg0tbZcJ4XTkHA9Q=;
-        b=KMd3LCir8dgc4/ml0PbnWn2IX5Z7Xd3wVXNzjr6QdVeArw+ZfnIytmEij973lG/VIN
-         uhm+aQcvFtvV4LCR5r2b7IaULgjg98W69QApbRsS/92jfAHFZc6fy7Uf2EzSp5S8Lu4g
-         rkACjaMu+8gZw0F9MpuYBx9BptpVqaajXRKdLWodbO/f7k/865HmsdiIGEQwQM1HeTY1
-         rChkvkDIvvW3A/eB6qkencyFLB73fEVNYDfprmSaIqy8RcgtIDOCOMttJzKvzLVbe/Ye
-         t6TTVLeUNhldGRZ8XABis0G3j0avoleBanJdiO2MJ2U12SPDacFCLovBHNa1AWLsdXXb
-         YWRw==
-X-Gm-Message-State: ACgBeo1lVgTlFdJC9sAZ2AEaHw5gMa6SPO+6vR/5+SXliTuzAg67GiDB
-        fPCjiJjRw/fNpeyQ/SEhGNTeZx5O4RYAqNxa
-X-Google-Smtp-Source: AA6agR6lpzSQl0I67ePvjSIBO0Obd6xiyVZ5YQEY/ZBqrqs7lEllEDAiTUTW7qGxMjPrmrSfdG2OtQ==
-X-Received: by 2002:a5d:6b12:0:b0:21f:1568:c7e1 with SMTP id v18-20020a5d6b12000000b0021f1568c7e1mr352199wrw.532.1660250469981;
-        Thu, 11 Aug 2022 13:41:09 -0700 (PDT)
-Received: from henark71.. ([109.76.58.63])
-        by smtp.gmail.com with ESMTPSA id g10-20020a05600c4eca00b003a3199c243bsm11213544wmq.0.2022.08.11.13.41.08
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 11 Aug 2022 13:41:09 -0700 (PDT)
-From:   Conor Dooley <mail@conchuod.ie>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Piotr Sroka <piotrs@cadence.com>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Conor Dooley <conor.dooley@microchip.com>
-Subject: [PATCH] dt-bindings: mmc: cdns: remove Piotr Sroka as a maintainer
-Date:   Thu, 11 Aug 2022 21:40:24 +0100
-Message-Id: <20220811204024.182453-1-mail@conchuod.ie>
-X-Mailer: git-send-email 2.37.1
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc;
+        bh=Nfjn6VbuIp0pl/q9REwTChp9DU/5iKx5Kue3uNgaktM=;
+        b=snNemg6WMAImdLec7ag85jaV6YzQLk8qA4XTd4EHrdn0Qz4k4Xr9zc0zMZw6MguRxh
+         /52eHF/LaE28UQz0wWxwifILLyOsRPKvAwr8i8weAcx59OV6Iyx+EScg/BAidw908nfo
+         QlxhOEJAhbaZIWZkfkS1iyXCqUvwhQbXD3XT6dZSgWHI3rcF2B3aE6iJIBkTb9YJLV2+
+         I3kkjgboqxFeuBw0ueQj1PgB/RhwZUGzrUaeytWKgVpcOZAmHNP9+Ep6LybnLEuWeB9B
+         uB0lDACW3ulA2eZdVxbuiudplBTNJ/F79Jd0gbXpXxaEg18Et1RccoRWSXkQzSRQyj3n
+         kvQA==
+X-Gm-Message-State: ACgBeo0Jj0L4kb3eF8TOCJcqBv55CnnLXxt794SW+gaDEqN7gdaJ982X
+        kq2MXEFZRU77QHa1BlqmoKrrMRr66moqjQ==
+X-Google-Smtp-Source: AA6agR4SmLNGtNIRczd/JhI/E5330Ls2b+5yO9UbmSuJdbY3YClwLYTDsKuNoeQVha0Mm4+rcyovAw==
+X-Received: by 2002:ac8:7f0e:0:b0:31f:402f:1b89 with SMTP id f14-20020ac87f0e000000b0031f402f1b89mr2559367qtk.590.1660291714430;
+        Fri, 12 Aug 2022 01:08:34 -0700 (PDT)
+Received: from mail-yb1-f178.google.com (mail-yb1-f178.google.com. [209.85.219.178])
+        by smtp.gmail.com with ESMTPSA id j2-20020a05620a410200b006b958c34bf1sm1333560qko.10.2022.08.12.01.08.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 12 Aug 2022 01:08:33 -0700 (PDT)
+Received: by mail-yb1-f178.google.com with SMTP id 123so363806ybv.7;
+        Fri, 12 Aug 2022 01:08:32 -0700 (PDT)
+X-Received: by 2002:a25:da0b:0:b0:67a:7fb6:8ae with SMTP id
+ n11-20020a25da0b000000b0067a7fb608aemr2557291ybf.89.1660291712387; Fri, 12
+ Aug 2022 01:08:32 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220709032001.819487-1-davidgow@google.com> <20220709032001.819487-2-davidgow@google.com>
+ <CAMuHMdUdvGyMFyDSX3cSGDz9x3Q0+z1e0nQB5cB0GFazyPcK3A@mail.gmail.com> <CABVgOSk_Y-eEoqH1xbbXfK5TN3P188JFeuZn3ZgV59Bs3Ds4Hg@mail.gmail.com>
+In-Reply-To: <CABVgOSk_Y-eEoqH1xbbXfK5TN3P188JFeuZn3ZgV59Bs3Ds4Hg@mail.gmail.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 12 Aug 2022 10:08:21 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdW-v7Ovcx8+3XALK_cS8OxODVP5nDVT8n44q_9C=C+C2Q@mail.gmail.com>
+Message-ID: <CAMuHMdW-v7Ovcx8+3XALK_cS8OxODVP5nDVT8n44q_9C=C+C2Q@mail.gmail.com>
+Subject: Re: [PATCH v4 1/5] kunit: unify module and builtin suite definitions
+To:     David Gow <davidgow@google.com>
+Cc:     Jeremy Kerr <jk@codeconstruct.com.au>,
+        Brendan Higgins <brendanhiggins@google.com>,
+        Luis Chamberlain <mcgrof@kernel.org>,
+        Daniel Latypov <dlatypov@google.com>,
+        Shuah Khan <skhan@linuxfoundation.org>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Andra Paraschiv <andraprs@amazon.com>,
+        Longpeng <longpeng2@huawei.com>,
+        Greg KH <gregkh@linuxfoundation.org>,
+        KUnit Development <kunit-dev@googlegroups.com>,
+        "open list:KERNEL SELFTEST FRAMEWORK" 
+        <linux-kselftest@vger.kernel.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        =?UTF-8?B?TWHDrXJhIENhbmFs?= <maira.canal@usp.br>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        linux-aspeed <linux-aspeed@lists.ozlabs.org>,
+        OpenBMC Maillist <openbmc@lists.ozlabs.org>,
+        USB list <linux-usb@vger.kernel.org>,
+        linux-modules@vger.kernel.org,
+        Matt Johnston <matt@codeconstruct.com.au>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Conor Dooley <conor.dooley@microchip.com>
+Hi David,
 
-Mails to Piotr bounce with a :550 5.1.1 User Unknown and the last
-mention of him on lore is the orphaning of Cadence NFC drivers.
-Remove him from the binding too.
+On Thu, Aug 11, 2022 at 6:56 PM David Gow <davidgow@google.com> wrote:
+> On Thu, Aug 11, 2022 at 9:49 PM Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> > On Sat, Jul 9, 2022 at 5:21 AM David Gow <davidgow@google.com> wrote:
+> > > From: Jeremy Kerr <jk@codeconstruct.com.au>
+> > >
+> > > Currently, KUnit runs built-in tests and tests loaded from modules
+> > > differently. For built-in tests, the kunit_test_suite{,s}() macro adds a
+> > > list of suites in the .kunit_test_suites linker section. However, for
+> > > kernel modules, a module_init() function is used to run the test suites.
+> > >
+> > > This causes problems if tests are included in a module which already
+> > > defines module_init/exit_module functions, as they'll conflict with the
+> > > kunit-provided ones.
+> > >
+> > > This change removes the kunit-defined module inits, and instead parses
+> > > the kunit tests from their own section in the module. After module init,
+> > > we call __kunit_test_suites_init() on the contents of that section,
+> > > which prepares and runs the suite.
+> > >
+> > > This essentially unifies the module- and non-module kunit init formats.
+> > >
+> > > Tested-by: Maíra Canal <maira.canal@usp.br>
+> > > Reviewed-by: Brendan Higgins <brendanhiggins@google.com>
+> > > Signed-off-by: Jeremy Kerr <jk@codeconstruct.com.au>
+> > > Signed-off-by: Daniel Latypov <dlatypov@google.com>
+> > > Signed-off-by: David Gow <davidgow@google.com>
+> >
+> > Thanks for your patch, which is now commit 3d6e44623841c8b8 ("kunit:
+> > unify module and builtin suite definitions") upstream.
+> >
+> > Since this commit, modular kunit tests are no longer run at all.
+> >
+> > Before:
+> >
+> >     # insmod lib/kunit/kunit.ko
+> >     # insmod lib/test_hash.ko
+> >     test_hash: loading test module taints kernel.
+> >         # Subtest: hash
+> >         1..2
+> >         ok 1 - test_string_or
+> >         ok 2 - test_hash_or
+> >     # hash: pass:2 fail:0 skip:0 total:2
+> >     # Totals: pass:2 fail:0 skip:0 total:2
+> >     ok 1 - hash
+> >
+> > After:
+> >
+> >     # insmod lib/kunit/kunit.ko
+> >     # insmod lib/test_hash.ko
+> >     test_hash: loading test module taints kernel.
+> >
+> > The actual test code (and test init code, if it exists) is not run.
+> >
+> > Reverting commits e5857d396f35e59e ("kunit: flatten kunit_suite***
+> > to kunit_suite** in .kunit_test_suites") and 3d6e44623841c8b8 ("kunit:
+> > unify module and builtin suite definitions") fixes the issue.
+>
+> Thanks Geert,
+>
+> This is a known issue. There's a patch to fix it here, which just
+> missed the pull request:
+> https://patchwork.kernel.org/project/linux-kselftest/patch/20220713005221.1926290-1-davidgow@google.com/
+>
+> We'll try to get it merged as soon as possible.
 
-Link: https://lore.kernel.org/all/20200510122430.19105-1-miquel.raynal@bootlin.com/
-Signed-off-by: Conor Dooley <conor.dooley@microchip.com>
----
- Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 1 -
- 1 file changed, 1 deletion(-)
+Thanks for the pointer. I can confirm it fixes the issue, so I provided
+my Tb tag.
 
-diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-index 99f89eb19356..7124e77617c9 100644
---- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-@@ -8,7 +8,6 @@ title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
- 
- maintainers:
-   - Masahiro Yamada <yamada.masahiro@socionext.com>
--  - Piotr Sroka <piotrs@cadence.com>
- 
- allOf:
-   - $ref: mmc-controller.yaml
--- 
-2.37.1
+Gr{oetje,eeting}s,
 
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
