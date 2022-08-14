@@ -2,258 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEC9AC25B06
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 Aug 2022 15:45:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BB80C25B06
+	for <linux-mmc@archiver.kernel.org>; Sun, 14 Aug 2022 17:57:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241349AbiHNPpJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 Aug 2022 11:45:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38726 "EHLO
+        id S231538AbiHNR5B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 Aug 2022 13:57:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44126 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241383AbiHNPnz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Aug 2022 11:43:55 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41BF72BEB;
-        Sun, 14 Aug 2022 08:33:54 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 488D6B80B4D;
-        Sun, 14 Aug 2022 15:33:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F1F77C433D6;
-        Sun, 14 Aug 2022 15:33:49 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1660491231;
-        bh=9QOTeBaCZwzn8tL1XYxhiVwIRrb0vg0D0Yjvo3r0d2I=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IgEgGmdJOgc9uOKklxf24vkIR0D5dPUkxWNEvuQCtHUv0VvTKy7KQ08d90lRzBQQa
-         h0pEC2rmRgujQRpeWLHiMQUXgBgtFKl8X/v/BpiYieTeTZtAPa9kCE8vbXuDE0TN5J
-         UWVj9ebB36xv4fbDyV0sj4Wsy6gcA79S0Gc7dqaazZB1KChdHPR+HMjtdw9rIlCVRo
-         iKxHC9VClncwRo+eGKgybqf31DvNw6nbXwf8/Mh7Vl2r/r/Oiz6knM+CubPckqmyKs
-         HvXZOEmwGqjGwmDO2IHyvHg0dxzIAijZxS5EGm+JAe/oeRp9aUpxW4Ogzrw55E6moF
-         UPxTBUc2gaFFQ==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+        with ESMTP id S229520AbiHNR5A (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 Aug 2022 13:57:00 -0400
+Received: from wout4-smtp.messagingengine.com (wout4-smtp.messagingengine.com [64.147.123.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2D0022518;
+        Sun, 14 Aug 2022 10:56:59 -0700 (PDT)
+Received: from compute5.internal (compute5.nyi.internal [10.202.2.45])
+        by mailout.west.internal (Postfix) with ESMTP id 5DB11320046F;
+        Sun, 14 Aug 2022 13:56:58 -0400 (EDT)
+Received: from mailfrontend2 ([10.202.2.163])
+  by compute5.internal (MEProxy); Sun, 14 Aug 2022 13:56:59 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=sholland.org; h=
+        cc:cc:content-transfer-encoding:content-type:date:date:from:from
+        :in-reply-to:in-reply-to:message-id:mime-version:references
+        :reply-to:sender:subject:subject:to:to; s=fm2; t=1660499817; x=
+        1660586217; bh=+e13GbezqOI4ArqJrTYXTju73ASowLwd6TUNF4QfnPQ=; b=B
+        PkH8n1qtJvm7VBJNwGkObUaA3PFcMM77RrZ6op6aSV9KOPeqJC+Sb21geMOM2Boc
+        K2Dl0bTkg9V/UcugvwnVvEUna+DZZIqZwJ/BYlw5zBHciLkVTp6mzmcJrkLRThSW
+        eZmGPLO5FhU8gNSf0kzZruQR0wxQpo/MEoxSo9JnXkTlCBDAsNngCz/q7uatpsg3
+        frwPBrU6dmJ4aBNggKdqnYZQ8DZvkiGh0JJWKvLqVSRek9RGygPGmLRbaMcnWM7J
+        aVV1rZAORqO9IK1fgSBMF1Ftfu8YsPCyJLp6728AvtlCvfg5p+4R12ldHUpX3bMf
+        +H9qImtd7ZvnZNXlNfFkQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-transfer-encoding
+        :content-type:date:date:feedback-id:feedback-id:from:from
+        :in-reply-to:in-reply-to:message-id:mime-version:references
+        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
+        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1660499817; x=
+        1660586217; bh=+e13GbezqOI4ArqJrTYXTju73ASowLwd6TUNF4QfnPQ=; b=l
+        zNvG/n0ryQT6vV6bSKCVKUem94QzKI42QIDJP2oprfcWgKtncyFIsgh7giDPZ3fR
+        x9A7P43CzW+PuFTMi5Bj8pZDefIe1/jh4Mriax3Y7fptDSgOYICaguovNKVzxovg
+        aEd6nH1gFC+kDQjOufxnhgYkcSWaR0g7pXWEazevuAtcs8TuEwuN17hu0ulg0bKy
+        X5rcmGWe9dauHT+yPNclsFMVd85+mjwCgdv0XOSjeQb1255njOa2N2s7AEIIonF6
+        5WwB+ir/4jZ+OVTTuGgW4mZFko/BmagNaiEEb/o+6s4uVUxwUbrtrgPVuis+wGfD
+        lzhb+VLOY1GE/CTY5BX7Q==
+X-ME-Sender: <xms:aTf5YlCceVzlG7Nsk3WXMAxncTsmZ5nnp2cr3aPYEJHoM2cF8tw4MQ>
+    <xme:aTf5YjiK7WNM82edrYeZjYOGp6OHeIDFUUFc8xrzlK7Keu4oOB0BzhM3RpgnrJsJV
+    99W6y-YmVbHd86Hyw>
+X-ME-Received: <xmr:aTf5YgmCUunsdngiZ6q6abdz_ok4WmLUvNlTsYJnRb-AXVtBblFPskVcmV05Nqm7AC2n5AE1MvaURhUa6i0ucIsuIj-61Fq40LeX1XJgHytE-B7gDIIW6MpzNA>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrvdehtddguddulecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpefuvfevfhfhkffffgggjggtgfesthekredttdefjeenucfhrhhomhepufgr
+    mhhuvghlucfjohhllhgrnhguuceoshgrmhhuvghlsehshhholhhlrghnugdrohhrgheqne
+    cuggftrfgrthhtvghrnheptdevhfehhefgvdekteffleduueduheduuedvtdevleelkeev
+    vdeuvdeihfekueehnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilh
+    hfrhhomhepshgrmhhuvghlsehshhholhhlrghnugdrohhrgh
+X-ME-Proxy: <xmx:aTf5YvzfJGxuCJA4a2WtKkdP2053pbcegSjLphhVa4R6Iu3NeDG0Fw>
+    <xmx:aTf5YqSKg20QO7BF5XZZk9-Jz_a1oUcoTAiFNOK_MQzo_7B-OLUXDQ>
+    <xmx:aTf5Yib8p1fq5fQiH91wUNBgWm2HQDbobr2Wbkg7-l87JOKTCGtOBg>
+    <xmx:aTf5YtH-uWbo2IIzOcNmFwo5jSdo9i2BLK8319d0Sa76gsy6EYlKNw>
+Feedback-ID: i0ad843c9:Fastmail
+Received: by mail.messagingengine.com (Postfix) with ESMTPA; Sun,
+ 14 Aug 2022 13:56:57 -0400 (EDT)
+Subject: Re: [PATCH] mmc: sunxi-mmc: Fix clock refcount imbalance during
+ unbind
+To:     =?UTF-8?Q?Jernej_=c5=a0krabec?= <jernej.skrabec@gmail.com>,
+        Chen-Yu Tsai <wens@csie.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, p.zabel@pengutronix.de,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.15 27/46] mmc: tmio: avoid glitches when resetting
-Date:   Sun, 14 Aug 2022 11:32:28 -0400
-Message-Id: <20220814153247.2378312-27-sashal@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20220814153247.2378312-1-sashal@kernel.org>
-References: <20220814153247.2378312-1-sashal@kernel.org>
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     Andre Przywara <andre.przywara@arm.com>,
+        Maxime Ripard <maxime@cerno.tech>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-sunxi@lists.linux.dev
+References: <20220810022509.43743-1-samuel@sholland.org>
+ <21565294.EfDdHjke4D@jernej-laptop>
+From:   Samuel Holland <samuel@sholland.org>
+Message-ID: <0f40b1cf-1f5d-41b6-04bb-0566f18cd91e@sholland.org>
+Date:   Sun, 14 Aug 2022 12:56:56 -0500
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.6.0
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
+In-Reply-To: <21565294.EfDdHjke4D@jernej-laptop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+On 8/14/22 3:22 AM, Jernej Škrabec wrote:
+> Dne sreda, 10. avgust 2022 ob 04:25:09 CEST je Samuel Holland napisal(a):
+>> If the controller is suspended by runtime PM, the clock is already
+>> disabled, so do not try to disable it again during removal. Use
+>> pm_runtime_disable() to flush any pending runtime PM transitions.
+>>
+>> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
+>> Signed-off-by: Samuel Holland <samuel@sholland.org>
+> 
+> Did you get any warnings for unbalanced disable calls?
 
-[ Upstream commit 2e586f8a5b0ed4a525014a692923ac96f6647816 ]
+Yes, I got warnings while I was doing unbind/bind cycles to force the SDIO WiFi
+driver to reload.
 
-If we reset because of an error, we need to preserve values for the
-clock frequency. Otherwise, glitches may be seen on the bus.
+Regards,
+Samuel
 
-To achieve that, we introduce a 'preserve' parameter to the reset
-function and the IP core specific reset callbacks to handle everything
-accordingly.
-
-Reported-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Link: https://lore.kernel.org/r/20220625131722.1397-1-wsa@kernel.org
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/renesas_sdhi_core.c | 29 ++++++++++++++--------------
- drivers/mmc/host/tmio_mmc.c          |  2 +-
- drivers/mmc/host/tmio_mmc.h          |  6 +++++-
- drivers/mmc/host/tmio_mmc_core.c     | 28 +++++++++++++++++++++------
- 4 files changed, 42 insertions(+), 23 deletions(-)
-
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index ae689bf54686..bbbd512785da 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -51,9 +51,6 @@
- #define HOST_MODE_GEN3_32BIT	(HOST_MODE_GEN3_WMODE | HOST_MODE_GEN3_BUSWIDTH)
- #define HOST_MODE_GEN3_64BIT	0
- 
--#define CTL_SDIF_MODE	0xe6
--#define SDIF_MODE_HS400		BIT(0)
--
- #define SDHI_VER_GEN2_SDR50	0x490c
- #define SDHI_VER_RZ_A1		0x820b
- /* very old datasheets said 0x490c for SDR104, too. They are wrong! */
-@@ -550,23 +547,25 @@ static void renesas_sdhi_scc_reset(struct tmio_mmc_host *host, struct renesas_sd
- }
- 
- /* only populated for TMIO_MMC_MIN_RCAR2 */
--static void renesas_sdhi_reset(struct tmio_mmc_host *host)
-+static void renesas_sdhi_reset(struct tmio_mmc_host *host, bool preserve)
- {
- 	struct renesas_sdhi *priv = host_to_priv(host);
- 	int ret;
- 	u16 val;
- 
--	if (priv->rstc) {
--		reset_control_reset(priv->rstc);
--		/* Unknown why but without polling reset status, it will hang */
--		read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
--				  false, priv->rstc);
--		/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
--		sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
--		priv->needs_adjust_hs400 = false;
--		renesas_sdhi_set_clock(host, host->clk_cache);
--	} else if (priv->scc_ctl) {
--		renesas_sdhi_scc_reset(host, priv);
-+	if (!preserve) {
-+		if (priv->rstc) {
-+			reset_control_reset(priv->rstc);
-+			/* Unknown why but without polling reset status, it will hang */
-+			read_poll_timeout(reset_control_status, ret, ret == 0, 1, 100,
-+					  false, priv->rstc);
-+			/* At least SDHI_VER_GEN2_SDR50 needs manual release of reset */
-+			sd_ctrl_write16(host, CTL_RESET_SD, 0x0001);
-+			priv->needs_adjust_hs400 = false;
-+			renesas_sdhi_set_clock(host, host->clk_cache);
-+		} else if (priv->scc_ctl) {
-+			renesas_sdhi_scc_reset(host, priv);
-+		}
- 	}
- 
- 	if (sd_ctrl_read16(host, CTL_VERSION) >= SDHI_VER_GEN3_SD) {
-diff --git a/drivers/mmc/host/tmio_mmc.c b/drivers/mmc/host/tmio_mmc.c
-index b55a29c53d9c..53a2ad9a24b8 100644
---- a/drivers/mmc/host/tmio_mmc.c
-+++ b/drivers/mmc/host/tmio_mmc.c
-@@ -75,7 +75,7 @@ static void tmio_mmc_set_clock(struct tmio_mmc_host *host,
- 	tmio_mmc_clk_start(host);
- }
- 
--static void tmio_mmc_reset(struct tmio_mmc_host *host)
-+static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
- {
- 	sd_ctrl_write16(host, CTL_RESET_SDIO, 0x0000);
- 	usleep_range(10000, 11000);
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index f936aad945ce..da63193dd45b 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -42,6 +42,7 @@
- #define CTL_DMA_ENABLE 0xd8
- #define CTL_RESET_SD 0xe0
- #define CTL_VERSION 0xe2
-+#define CTL_SDIF_MODE 0xe6 /* only known on R-Car 2+ */
- 
- /* Definitions for values the CTL_STOP_INTERNAL_ACTION register can take */
- #define TMIO_STOP_STP		BIT(0)
-@@ -98,6 +99,9 @@
- /* Definitions for values the CTL_DMA_ENABLE register can take */
- #define DMA_ENABLE_DMASDRW	BIT(1)
- 
-+/* Definitions for values the CTL_SDIF_MODE register can take */
-+#define SDIF_MODE_HS400		BIT(0) /* only known on R-Car 2+ */
-+
- /* Define some IRQ masks */
- /* This is the mask used at reset by the chip */
- #define TMIO_MASK_ALL           0x837f031d
-@@ -181,7 +185,7 @@ struct tmio_mmc_host {
- 	int (*multi_io_quirk)(struct mmc_card *card,
- 			      unsigned int direction, int blk_size);
- 	int (*write16_hook)(struct tmio_mmc_host *host, int addr);
--	void (*reset)(struct tmio_mmc_host *host);
-+	void (*reset)(struct tmio_mmc_host *host, bool preserve);
- 	bool (*check_retune)(struct tmio_mmc_host *host, struct mmc_request *mrq);
- 	void (*fixup_request)(struct tmio_mmc_host *host, struct mmc_request *mrq);
- 	unsigned int (*get_timeout_cycles)(struct tmio_mmc_host *host);
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index a5850d83908b..437048bb8027 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -179,8 +179,17 @@ static void tmio_mmc_set_bus_width(struct tmio_mmc_host *host,
- 	sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, reg);
- }
- 
--static void tmio_mmc_reset(struct tmio_mmc_host *host)
-+static void tmio_mmc_reset(struct tmio_mmc_host *host, bool preserve)
- {
-+	u16 card_opt, clk_ctrl, sdif_mode;
-+
-+	if (preserve) {
-+		card_opt = sd_ctrl_read16(host, CTL_SD_MEM_CARD_OPT);
-+		clk_ctrl = sd_ctrl_read16(host, CTL_SD_CARD_CLK_CTL);
-+		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-+			sdif_mode = sd_ctrl_read16(host, CTL_SDIF_MODE);
-+	}
-+
- 	/* FIXME - should we set stop clock reg here */
- 	sd_ctrl_write16(host, CTL_RESET_SD, 0x0000);
- 	usleep_range(10000, 11000);
-@@ -190,7 +199,7 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
- 	tmio_mmc_abort_dma(host);
- 
- 	if (host->reset)
--		host->reset(host);
-+		host->reset(host, preserve);
- 
- 	sd_ctrl_write32_as_16_and_16(host, CTL_IRQ_MASK, host->sdcard_irq_mask_all);
- 	host->sdcard_irq_mask = host->sdcard_irq_mask_all;
-@@ -206,6 +215,13 @@ static void tmio_mmc_reset(struct tmio_mmc_host *host)
- 		sd_ctrl_write16(host, CTL_TRANSACTION_CTL, 0x0001);
- 	}
- 
-+	if (preserve) {
-+		sd_ctrl_write16(host, CTL_SD_MEM_CARD_OPT, card_opt);
-+		sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, clk_ctrl);
-+		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
-+			sd_ctrl_write16(host, CTL_SDIF_MODE, sdif_mode);
-+	}
-+
- 	if (host->mmc->card)
- 		mmc_retune_needed(host->mmc);
- }
-@@ -248,7 +264,7 @@ static void tmio_mmc_reset_work(struct work_struct *work)
- 
- 	spin_unlock_irqrestore(&host->lock, flags);
- 
--	tmio_mmc_reset(host);
-+	tmio_mmc_reset(host, true);
- 
- 	/* Ready for new calls */
- 	host->mrq = NULL;
-@@ -961,7 +977,7 @@ static void tmio_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		tmio_mmc_power_off(host);
- 		/* For R-Car Gen2+, we need to reset SDHI specific SCC */
- 		if (host->pdata->flags & TMIO_MMC_MIN_RCAR2)
--			tmio_mmc_reset(host);
-+			tmio_mmc_reset(host, false);
- 
- 		host->set_clock(host, 0);
- 		break;
-@@ -1189,7 +1205,7 @@ int tmio_mmc_host_probe(struct tmio_mmc_host *_host)
- 		_host->sdcard_irq_mask_all = TMIO_MASK_ALL;
- 
- 	_host->set_clock(_host, 0);
--	tmio_mmc_reset(_host);
-+	tmio_mmc_reset(_host, false);
- 
- 	spin_lock_init(&_host->lock);
- 	mutex_init(&_host->ios_lock);
-@@ -1285,7 +1301,7 @@ int tmio_mmc_host_runtime_resume(struct device *dev)
- 	struct tmio_mmc_host *host = dev_get_drvdata(dev);
- 
- 	tmio_mmc_clk_enable(host);
--	tmio_mmc_reset(host);
-+	tmio_mmc_reset(host, false);
- 
- 	if (host->clk_cache)
- 		host->set_clock(host, host->clk_cache);
--- 
-2.35.1
+> Anyway:
+> Acked-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+> 
+> Best regards,
+> Jernej
+> 
+> 
 
