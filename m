@@ -2,70 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83BCBC00140
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 12:12:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43CC9C00140
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 13:11:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229605AbiHOMML (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Aug 2022 08:12:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54552 "EHLO
+        id S231407AbiHONLo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Aug 2022 09:11:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242006AbiHOMMC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 08:12:02 -0400
-Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10FF924BEC
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Aug 2022 05:12:00 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1660565520; x=1692101520;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=j429PhL3j+oRwsBAA+mRMj3ry7XSa/Ll7lA/CZzBIF0=;
-  b=T9LZwGjzzrVJle4204JLgzfMo6qjDs/fW+6EjQUn2eyk873ABkuQpT1a
-   6suDB/3WS95cREj+Wx7T9nsd0WXcpvlNPPGpuohVgVMwSUOU1TJ7Z6TTF
-   LdxWkVa3KkUAwfI3qtZHRzpw7FfhSviYDHQwDQt5XJkgP4/G8bol7/WNL
-   yYbLKixF2moHvOtjmrluhwJeSo/ZcspBmVQhAwgulWNlW8vuNNF2eFhWa
-   IdvtHrmD5A/ZINzieBie6fG7L//J4d0yPXifyaytB5yJGkZYhmS+aozyF
-   lHgPhYMJ5NlzEDypOMH5NUjZ+q0hcAXH2HsRfXYhnlC2u0CGknaMBW23D
-   g==;
-X-IronPort-AV: E=Sophos;i="5.93,238,1654531200"; 
-   d="scan'208";a="313005407"
-Received: from mail-mw2nam10lp2107.outbound.protection.outlook.com (HELO NAM10-MW2-obe.outbound.protection.outlook.com) ([104.47.55.107])
-  by ob1.hgst.iphmx.com with ESMTP; 15 Aug 2022 20:11:59 +0800
+        with ESMTP id S229816AbiHONLn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 09:11:43 -0400
+Received: from EUR04-HE1-obe.outbound.protection.outlook.com (mail-eopbgr70093.outbound.protection.outlook.com [40.107.7.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87C2212D3E
+        for <linux-mmc@vger.kernel.org>; Mon, 15 Aug 2022 06:11:38 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bs1CeOw2N1AwzHPWoRlKTZ86jRRiMTB3kk0jD4TyRUB4gt3rMRiXX2Vd3d8wGe9OQpOK4CVvk1S/cDw+CM58LolNWlS2JN4xRhMR42+fN5MUXFzl5A7wbcVq0ZmdEVum6/X41QpNCXoKxTd0y/zhHpj3q5tPb7ziuPhj14NHve+gpAhNCj6z0PQA10xdnynF2DhsEfKFBU7xyVb0cLEyJfIM4f7icIsVF5u/8H+Rg17lYdXjlYckl08O1dNiL1sH64hMtquHSOHJDkbN9Saxc8btXSsoYzITPmnvWXph7fFOO17yQLqfMTgai/6rtFyPj+YNLv5uG55EvRIYB64acA==
+ b=ZFQ62CZL0+pBSdNcTzLcin/VVEAeVGIjhyofPjZfWw9VXU+D+qUUwWlvzTT5gBMKAEHdPIEqoe0VjKYRj0YnPZWwgNYQWys/kAFzn8xHri77g/J9wa8ZYr2r2r0YvRNhihrOSuYqN3o44G7qIg5kBMx47f7V+lZ1zhQegKAACPNpg3bEamAW8RXS7Gtnz5ZlNtSA/6jJ7Wt4acMzqd2yGxVJLDMZNnNoDOJnSQ2fjEc0ZKHEH6dYYBdjzREhfQF4UzCdG6DW2Obptihmt/97vUu/Q3bc1RENldoxQ+CSrwgXnfsU4NX0qWauuGgcoOQdRC3Cw5rsqChUOockYz0kAQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=DW2LLbcH/+N2pCIeYPQI7Iv9JxvbaAAf8YbUdwn3sVw=;
- b=JZ6vu2W7USlb+zvCmFaqGpzsMNJaLmc8SYLmUdgKPBkmR8WRZJdNdJkYLsJQQZp+/kU8DrljGhFj9rGcKNQnC++kuoqzJ77Mc5UQTHTbQiLhcj+hs0FdJL0Hg0OW9hbMtIHOabHKqItFBqdvW4xCY9wym5TkowdP6GF2wxkdkZBlICFsOOmDivbCwOsG9yJDI47X27zC84v+g2+bGy0FQhKvQ39gODoC9lnrNyKCQOW+FEb4ygGp+lLKb+VaINNBZQgbgqzaKB/MkOaz3WhPYj89UNjBDPdjXaZgvR9bHHMj6qN1tR8bJDbkPfIffjyjVQU/VVtnRq4RY1kmO8c2vA==
+ bh=A5TsGA/ZpdOpzVvQSaFuXXzSMf4mA2sp86aMEu2NZ8g=;
+ b=CdFqKs4IWnFxRYMI2hTjzQdQ2S15YSGClWCtQA9DGBr4jv33xFe9fE/RaqXO69ZbbO2FtDmm6bRFVE8ezbuOXvaf3+V6yWD/IfAywmz11Wf8M+X79q+x6u7t1qVqGIJSgri2Y4+InCwOFMfp1QNZm4L9sTKTbEPD21poS6eMTTzF/XF8HiVhHrT3QPgPOllKEPZq9BrZY6zM2oiK01Ky41crO1smcLUslOv/mUAjkNtU1bNyNlpjPSumNQbHcaVEc2MSjheZBrHZP76vP+MVAO/YmQI+4BUkI2X2xgA712oOALG18NXW5/rgGXHnL8Vj4Esolu32FDGfjo/3mIOzBQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
+ dkim=pass header.d=nokia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
+ s=selector1-nokia-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=DW2LLbcH/+N2pCIeYPQI7Iv9JxvbaAAf8YbUdwn3sVw=;
- b=a4Me3ZDfFMOG3kb0m8oHDXbenQGuUpldJH5rgN+U8rL3pRLI1jPCTTjBC5s3v2p4PJghRGAnPur5g8c+7ZAtmBcY8VCj80LT3+WvAa9HL1ZoAe7l8Tw+U711kIPwL+VIrrc6vdT3DKNXlzrkfgIveVruiN0OR550fWYtVCqevmc=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- DM5PR04MB1147.namprd04.prod.outlook.com (2603:10b6:3:a6::23) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5504.14; Mon, 15 Aug 2022 12:11:57 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::5d26:82d8:6c89:9e31]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::5d26:82d8:6c89:9e31%9]) with mapi id 15.20.5525.010; Mon, 15 Aug 2022
- 12:11:56 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>,
+ bh=A5TsGA/ZpdOpzVvQSaFuXXzSMf4mA2sp86aMEu2NZ8g=;
+ b=yDuPBHkCZ+0Kq+QQ/yzywqJMu9NRrLtPIWkeXeSV8ckmdxhjPOpIGn3R51ocCBouU4IzkRkhd+IVJkt3iLG8Ri29fyyGeWMW3r4/t/xiU8887nGispszOAhNnGJaUIOJ//Nf0OrFBTWB0/X047Q9jn+389k2K3Ki7x4TxHdKKaM=
+Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
+ (2603:10a6:203:4e::11) by AM6PR07MB5413.eurprd07.prod.outlook.com
+ (2603:10a6:20b:82::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5546.14; Mon, 15 Aug
+ 2022 13:11:33 +0000
+Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
+ ([fe80::542a:5d98:f0f4:3640]) by AM5PR0701MB2964.eurprd07.prod.outlook.com
+ ([fe80::542a:5d98:f0f4:3640%7]) with mapi id 15.20.5546.014; Mon, 15 Aug 2022
+ 13:11:33 +0000
+From:   "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        =?iso-8859-2?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
         "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>,
         "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
 Subject: RE: [PATCH] mmc-utils: correct and clean up the file handling
 Thread-Topic: [PATCH] mmc-utils: correct and clean up the file handling
-Thread-Index: AdiK+e63vfHiFbPsQZCmC+FOzGq/7QAPwi0AABQpUuABmc8nMAACAULgAlKINPAAMpvpoAUetmXQAAXdPWA=
-Date:   Mon, 15 Aug 2022 12:11:56 +0000
-Message-ID: <DM6PR04MB65756EA45A10629F2EA8A870FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
+Thread-Index: AdiK+e63vfHiFbPsQZCmC+FOzGq/7QAPwi0AABQpUuABmc8nMAACAULgAlKINPAAMpvpoAUetmXQAAXdPWAAAhdXwA==
+Date:   Mon, 15 Aug 2022 13:11:33 +0000
+Message-ID: <AM5PR0701MB2964D0B47A64F62402ECC43BEF689@AM5PR0701MB2964.eurprd07.prod.outlook.com>
 References: <AM5PR0701MB2964A49C4E5EEA8905926120EFB89@AM5PR0701MB2964.eurprd07.prod.outlook.com>
  <DM6PR04MB6575A3FE605E0AE1C92B4EB1FCB89@DM6PR04MB6575.namprd04.prod.outlook.com>
  <AM5PR0701MB2964B04050F05216BDFC638AEFBB9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
@@ -74,271 +58,174 @@ References: <AM5PR0701MB2964A49C4E5EEA8905926120EFB89@AM5PR0701MB2964.eurprd07.p
  <AM5PR0701MB29641DB9207CDDD1DB273075EF8F9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
  <DM6PR04MB65759D709D6C45AFD03EB4B1FC8E9@DM6PR04MB6575.namprd04.prod.outlook.com>
  <AM5PR0701MB296429322BA0EEB2CE0B23FBEF689@AM5PR0701MB2964.eurprd07.prod.outlook.com>
-In-Reply-To: <AM5PR0701MB296429322BA0EEB2CE0B23FBEF689@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB65756EA45A10629F2EA8A870FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB65756EA45A10629F2EA8A870FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
+ header.d=none;dmarc=none action=none header.from=nokia.com;
 x-ms-publictraffictype: Email
-x-ms-office365-filtering-correlation-id: 85cc6a5a-78d8-4371-174f-08da7eb7593c
-x-ms-traffictypediagnostic: DM5PR04MB1147:EE_
-wdcipoutbound: EOP-TRUE
+x-ms-office365-filtering-correlation-id: 8e9ec43f-7700-4dfe-aa81-08da7ebfad47
+x-ms-traffictypediagnostic: AM6PR07MB5413:EE_
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 5YC9KvCaEH8hFXHNilgnhvsKEBFh8lOb4PtPRTsxwycwlx7jpkZTFsCtV1CFR/u5y+bFCh4k/q3hi+1DoZMIaPR8CAdkE/fvvu88tIFpBHaMdJsHShpHhO9H0L/3o2XHGECPsHltdt8VCIsxR7F/FIn7DVtIoMUCmOu+k/B5HBUmHw0VQoKz2j2Ra0GhAn+nF0VtEqIWKfQZREFBBqeTB+NuVkLOF5yynN1tBTlOMLv3KslUo8m6KrZfzslFvQnHhsdYVaUzpCMqzzqa0Jghge7SinWE1ecN4vt1RFXze1WBxHIgWCaMe0dVxi+V9HlXBGVmppiPRXZYFcbA7VhDaazG7a/WsDJ4AU1oqpzWyW9tZvDfG2DLZmdOPDJQnndq8MQ+6fIdLSPbWnvsXoXiSocpdpP8/pNExj7gJxApm7RlH0bEbn/hnPS1hUzpCA46ssWyBOEwePPVTqbuNAJADvM+Lzm3OLa9f+hO1oomdmTrbid9Z0eSXKlkfa6f+pkhKO9y9gQjSlclDaVGGIGbwLuMfA0Svg3a0mLPljBs9HJ5h++H2Af033ALIrAzThezXaUNWBfYlnQJEdGBSeu4bLeQFZ4Vcq2pxLBkg1Esob7QhTLjuyVtN2wUtS0Jfvzxf6QyiI0nfmNAe3Ds/o5Jm3fS19webadeGUSOzOBb1/2OyEnRqmxWD7fnHUU3m2nJX7jnRW9O6uOeTtW67+C0TpAy3EVxxciCvem8Jk8YGHG+xsDQaQCWv4rdgMpv45KQA1K2TVqgQiLC47zwRDdHGnz3wRhbnhO3NL3Rk25tERk9f0KgV0J0k2QCqMMPeAOW
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(346002)(366004)(39860400002)(136003)(396003)(376002)(33656002)(9686003)(26005)(83380400001)(71200400001)(478600001)(186003)(66476007)(66446008)(64756008)(8936002)(4326008)(110136005)(316002)(54906003)(66556008)(66946007)(8676002)(76116006)(82960400001)(5660300002)(2906002)(55016003)(41300700001)(7696005)(38100700002)(6506007)(52536014)(86362001)(38070700005)(122000001);DIR:OUT;SFP:1102;
+x-microsoft-antispam-message-info: CnQW4fTB4EfrB8ksEkQO92Lpgy8EcM7dQ48cYATsBr0fhse/gvgMFJmb0rdLy4GRJFROsRInwXbvrWUvLsHYhqhju3khUPoUbzU0cipDTXlOMppPtH6QIusYCMTB0cEvH6mU1l6912PcYJ5v+fstOom552vckVLNJ7TKveNxfFhd+xb5iXHV+d5xoXtEWQZ1VkD9k8vnTZMD702EgChiS3oSnLg+RC1la2nABffkwPcyNajcqDkUINOUfD+298LbyNQBK6BFstBSBT0rNd3LNolXx6MbMLKbZ3fvQchv+8lsm2mCaGKrdTaghX3UediIOmqFIftLKFpZzXHMhBRu7xUMxDlhmEUkkCk81OyR9WfCK6TbBZ6/cvCY9Fd7Zlbb0QyOT1ogMtrCsPH0wjTV/gBcUlehQJMg66bqgZw7gNqn7VSYrsHH+YIFW6jJDi+zbqehEYF1HLPvjdlB4KHzIrR404TD9YqIvSYaX//MLG3fkasDGZF9ZCCW13ImC9eGSoZB9xenPtRHuOYfaMMyVTcac44aCsVU/4F2F3dqeB0Jywc5Y1dBlOjusMs1HrLCyXuDJyaOeyHp6VJ3tUhi7TzPSG1Odz003vTrruqaBMKHrCFfV9RQCi3Yvau1gyYtuyxUwpjKcGxZVAzt2Kk1oFWASNEBh68NwT8OVV08+bCWnnIf5J471O8NskETauw7bwzk35DJCrxpqsFYfUt8y5BYI+E7iJgFaNGNhyQUjJGVdOKK3OMwzfKh8PTJTO/uYMN6pBK7g36HDPNsqoKkhkeij5KV4gi2qx5AFgY6szv68SakJzkHvKFlWbEEKD2O
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM5PR0701MB2964.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(136003)(366004)(376002)(346002)(39860400002)(396003)(6506007)(9686003)(26005)(478600001)(186003)(7696005)(41300700001)(316002)(54906003)(110136005)(8676002)(8936002)(76116006)(66446008)(4326008)(66556008)(64756008)(83380400001)(66476007)(66946007)(2906002)(55016003)(107886003)(38070700005)(52536014)(5660300002)(71200400001)(38100700002)(33656002)(86362001)(122000001)(82960400001);DIR:OUT;SFP:1102;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?iso-8859-2?Q?Omcs5aiktbfBlN2oPPCdHRIfxVDwZcjXiA0+voG78NzFntJdl/FYk6+4xl?=
- =?iso-8859-2?Q?r39do0ACSj1ZKbIHgjtWNPwtQl2FSY5GACNHYuuIm8ZadBRgPLqY1z0rnb?=
- =?iso-8859-2?Q?zH8uOG0rgSQB3GNyS0XWuQFHPwFdcctTUjqiw6rWdJI/QRg0L6547mdE/e?=
- =?iso-8859-2?Q?V50azmdvjxfo32B0488v2laOHIBUjd20iZzgpyjI+HOMf3qgC44HPk8GJp?=
- =?iso-8859-2?Q?LFvd0OgVQJV2EWnoV6hRaOoDYvjrEaxr4waCWeff+YvsG+8xPHvFWC4WuB?=
- =?iso-8859-2?Q?ry0vMJ7VnxydpqVbsuWxm9MnKiA8ly709MAYYAh4AePioXI6tG/mBUjIUO?=
- =?iso-8859-2?Q?sX/8G/wg1V1+59PG9WUifHjSLkuMqWEqYNmpnnEiQ49xAWN6U2ZcKgBh0N?=
- =?iso-8859-2?Q?/smCXyS4lRZIseaiZRKSFlxrXUfd1Zh3vxa9zWPfHaawJF77Ir/4h9uDYN?=
- =?iso-8859-2?Q?zmb+rT77qqCrqP28WCyyS+9pX0Q4kEr2H3NfqOzcDxcjenPzVa5/xqeHGW?=
- =?iso-8859-2?Q?UJd1Ik3RHlzkysJlWgSUyC9HoXdY27Ll8Aiw+Xj95LsKbfX/MRMaYS/GmC?=
- =?iso-8859-2?Q?si9xiMXJeJAUm5OWbKLEMhKlxTOyewVKEauopbJq/Ei3IjkMWZNrpuIniQ?=
- =?iso-8859-2?Q?07uSHKwkA0p8SRVuJyCNWjCdtA6VpCuUzG8XEugh8WTdHeOmImbwa/CjuH?=
- =?iso-8859-2?Q?vnrZTDSqarpy0Dlkyl95JmB9Z48N0uJ5TET4WXuJc0IhtItIXad+g7AE4y?=
- =?iso-8859-2?Q?sIgGcQEkwHYGGR7/Jn4a3zPuKAMD/VTjKcSwgv+TMw8rOPktZs8OjxVR9c?=
- =?iso-8859-2?Q?l5ZxGBLJBpzHEnX8bHNO5b5Pwe77kUvlQwU3jnhSwef4aqxj4Lph+mBynS?=
- =?iso-8859-2?Q?8BR+0tv14OYWfb8v9mVmcsakc03tQMvHvcMGu0HHr7ymXM7naMJ9CtOcVs?=
- =?iso-8859-2?Q?zP9QpqSDG6kUXk8VKag5TQmWCb7XO08jZ8izkdRlMs41IX71CfEWMsHmpA?=
- =?iso-8859-2?Q?eqeSevXMjFCqGUlY3byMM5m6Yz0hsbpGPdUakM6vOznbGrTialQWQIt3Qn?=
- =?iso-8859-2?Q?8LWzYJdqv4/rD2FtgkY9kjS7nMZTuw+vcp/QYo3K26e8oeDM1EtKpZwfd6?=
- =?iso-8859-2?Q?UMsYQAvChvmxsj9HmUtjKg/J4DVnKvboOMKSuopD2Arm5ieheCLv/pR3Zb?=
- =?iso-8859-2?Q?nH5bYIExVxgkZq1WXuBA1gifETfgQMKcWKdyGoyIMx1n1vcCGR77/y5qkA?=
- =?iso-8859-2?Q?VPtQdnMzoHiYkajQn68Vdm1pDFmJdQoIvwFePuiLgOv28ytStwpHPtDGhp?=
- =?iso-8859-2?Q?pEveSEY5MJCMZ14FVvP0QQHVAxEac7WGeT7fan0LjN2LW7FOqh2agROqVZ?=
- =?iso-8859-2?Q?xRJ1j62BGHZDV6TbtvIsV1fAYwFctUJwvDtn2ajX7D2fnaKQRsIGeCxkc2?=
- =?iso-8859-2?Q?j4JTQdMG3ghuKmEOwMMgqkky7UoPY6wRWgUiI/9GhU7Bgr1A+GNu+WzqHY?=
- =?iso-8859-2?Q?Q0WilKW85YOU+zxJK2I6kD0+tu0m9Gi8Q/oSTAOqf7ovLbKkgyOXITfDII?=
- =?iso-8859-2?Q?86vgNfBO5VY6ET7lpttP9bDpkpR4uH+J2NKFR4NSz9hjmwGf9hnmXuKCc/?=
- =?iso-8859-2?Q?xuRit1z6de7n+kBsxf8KAoJuSeChM+XIi9?=
-Content-Type: text/plain; charset="iso-8859-2"
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?UxH+8vWT8OWmlJKzMIGm6uO27WE8LJFrOL+doZ2dFX+1t/ja8r3onvuc3a?=
+ =?iso-8859-1?Q?/My0sFB5Nl0s7+RrQwx5hqTdlJOGEYWgd/KTj5VO8APPNDrRboBguIlPOC?=
+ =?iso-8859-1?Q?2fb7tLUdJyq6LKmuwPt6s86ioEtvyk5he9EqYd9mLypIH2uUsE/gmdJ4wC?=
+ =?iso-8859-1?Q?YKWjvRjZlKVYpDWyrWLn0DILsn1TrlX69oblqdqcKx6YTGxVAs2ejpH0RU?=
+ =?iso-8859-1?Q?94d0yxbb0LXbBRnEyDdUmiD0O31Xtt8ZD/C78D8t0xwjH42kLRW6GfV5cW?=
+ =?iso-8859-1?Q?cMnsMy5uODYj/7qCGppAMUCz185Scay0d9ruQb8ihCb78iSn1Fqu6fHsmR?=
+ =?iso-8859-1?Q?AnoPxMKrT0bIhHw7hY9bZ66cYetIDPFiOkk/KijTec2k3+xsjexYBO5xZK?=
+ =?iso-8859-1?Q?YtkzpwwucrEOT4JzmtNWb6WjTmwK3Ah0pgs9H5t1YUKLbuSsmpUvmb4WnZ?=
+ =?iso-8859-1?Q?TxU96AXv4qHFigPMNj2Gur6G5iHDSyYZWeX7fYH5AB7iz+nsY8Ih7Hga0N?=
+ =?iso-8859-1?Q?+bsvqzEHmiMXDOLeU6RQeFKzgPN+AouWG8aQgTiDzeKcnSKySHskrO1LEl?=
+ =?iso-8859-1?Q?aZA/pnbyGWk32pygGwQCipWA9my6X1Fy3Fo72NCNmoiDhAPqJ8EppWAfVh?=
+ =?iso-8859-1?Q?jj3y9Yxw0YLG1HYaaIJi7dKwK5CHTyYPi0rhhxkDUWlWIufNIHi6EuZh2D?=
+ =?iso-8859-1?Q?r/ojhpWIgUXEHLU4x+m2AkLlhXycZI5vciivlYjaQ18q6AwCL4TJOekjAU?=
+ =?iso-8859-1?Q?ipggNo2Uvnie0auAPD/BPRvpyCTQUyvKdjCjVfrunM6ZL2r58VKRp/6UUq?=
+ =?iso-8859-1?Q?bIeDIr/8h+BjBJYdJKO87bjEG1hsYMWnJLPpdj4YHSYHDTTT1eKtUHwAgH?=
+ =?iso-8859-1?Q?GcvagMlh462EzctZ7ug3mnmuQ+Agvd8cQthVwC7g5hPyCvGLSIFniCo7Hf?=
+ =?iso-8859-1?Q?cWRY9tCU69PIiwqGZfCpz2vRcHpG+/OVDhn7/4LPtR653kbH5bOUYvLkHa?=
+ =?iso-8859-1?Q?RAjp4z/KnJAPbTRlQvZ8sNyYp3LWF4CWtOZIp/++4dYOF8Qxq06yk640WB?=
+ =?iso-8859-1?Q?f1zrx1PYzae49ffHLv9L+VLF4RjSyrfTYQOaGiQYLIeJQheyFMnmpQA9fa?=
+ =?iso-8859-1?Q?ULTiVAKahGxQtrQXD3JEAPwMRn69WAK443f4Vv2+qtCionjWnm0t3pdBrz?=
+ =?iso-8859-1?Q?K838Ie5z9Zmpc3kl5zI4XpdAiK2Etdd/a5aRDKxFmIJpJB6mbZ1nGIUCZk?=
+ =?iso-8859-1?Q?I8giv+vSDSnh4/9q3g4vjnmULkVIraaXwI1muueg9qH7NMDwUfs17S5HAO?=
+ =?iso-8859-1?Q?y3yUSdJoajwmy2XPF2zOLlcAb9Ie0Ol1/lkO4vn3JW0HJnhXNk2wv0SGU5?=
+ =?iso-8859-1?Q?Hw49u3gI5JfN/DGguH6olllZG4dsm5tLcHyNtkqrWioAadnSp8KWJtM+if?=
+ =?iso-8859-1?Q?dnIsmpMfcf+blkjEdt58g205ghjJ/yw/mysv/4rXNxHYXH9JqXJW0mJQsC?=
+ =?iso-8859-1?Q?aahuWryxsPYUrGMEltxHyqgUkMBsvBbbze7e6M3JQzAjWVHd9R492R7pnm?=
+ =?iso-8859-1?Q?l5g4pcM6wdBuW7/zEQqR/ba6+YKCVEUEf9h7GgXsQLkkv0E+z06mxB17AP?=
+ =?iso-8859-1?Q?Lq37dlZkuNVM9MKSGQ2HMEQP1g0amAc9b4?=
+Content-Type: text/plain; charset="iso-8859-1"
 Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: =?iso-8859-2?Q?dRldkgugJRkqk6mDZuFsg1y51/NhJMoxRKWgjyXfuUIRXuxnY4ztV7ZzGP?=
- =?iso-8859-2?Q?w6wxPd1Znwk7NaNKXkI0zc156XBPchO250li0lTPS1oCANOffQMj5hrAkQ?=
- =?iso-8859-2?Q?YQP76qkPrJ27JzlPCPUqLgHddM3qxPhcIjuH4IA2U9qRl/T2v2IMQ9WP/l?=
- =?iso-8859-2?Q?19GNAqngK49r5/9IOvgMpx7p4tRJT2QyxT62VYk00tP72yYJ+I0bV9+0Kp?=
- =?iso-8859-2?Q?MZ6UEDij3+9/7S/Zdr0rp8cJUy8u6rHB4CBq6vp9WlSYr5rEd3G1jA9G7t?=
- =?iso-8859-2?Q?5pjx/ZT6lxhnj3rJ72OL6PC7ZBM8zPvvtfgkWGythYop2cw/mbTTq68VWx?=
- =?iso-8859-2?Q?kpdm6ELPsWPNrFozS4x6ch3AzFfl87vtjPX3szgOxZXVgugWbpzuaDiVwJ?=
- =?iso-8859-2?Q?7eJPzk1wJeoI8X+9hSPYWjdGp5fBjR/lVagHYmJ0WrW1ju5NR6mhFl8zb6?=
- =?iso-8859-2?Q?zqNJI1PF9HHSA6Eoih59tbhvALhu9UitpexWm2ih4eSNq++WLFcCdEsNmg?=
- =?iso-8859-2?Q?R99Qf3HUQebdyo5ygmqa2v6bq+WIo9K68rzAk8KEeTNmt35JIxM+tGb8vH?=
- =?iso-8859-2?Q?Z2IK7CIq5KZag2VasVWvdz0DG1JNWTRuO15UYoxN8xh3K2atsVTmJeb6+r?=
- =?iso-8859-2?Q?syYCCE/8TRfSqPW4gKkPp8oz495mwpadkvAzEQAIcI+yuE5RJ/xn+kZFtC?=
- =?iso-8859-2?Q?4LrYiT011q26N7TGGX2NQ0TuVtB5MyQDrNkAp+WQnLbzk3/8Ku6aTZoICf?=
- =?iso-8859-2?Q?jHoDhyN12ERBs8UcCVRQYk/oZJRLnbFyricERiEDRRCGGz3YoPk2VTqFE6?=
- =?iso-8859-2?Q?lgCQhviTHXDgKn0NzO09x2zDDbFvnwU9tR5h+wkXAx7kpXooAzbSuFdc9w?=
- =?iso-8859-2?Q?hId59CJ79i/UUh/Pp699GC0Yf+KojOMcI/+hv7bjn+6u0Ad4/thIcu41ju?=
- =?iso-8859-2?Q?SmG3fxEzfrwsTkMcWR9ytxHjDGxCs+K6Le7saqamxb7xlibTszQ3wAVL7I?=
- =?iso-8859-2?Q?9O5+fJrhlH4cs77Wc=3D?=
-X-OriginatorOrg: wdc.com
+X-OriginatorOrg: nokia.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 85cc6a5a-78d8-4371-174f-08da7eb7593c
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Aug 2022 12:11:56.7102
+X-MS-Exchange-CrossTenant-AuthSource: AM5PR0701MB2964.eurprd07.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8e9ec43f-7700-4dfe-aa81-08da7ebfad47
+X-MS-Exchange-CrossTenant-originalarrivaltime: 15 Aug 2022 13:11:33.7043
  (UTC)
 X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-id: 5d471751-9675-428d-917b-70f44f9630b0
 X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: QbxlynJXkeh08EldP5ivyuJcj+Hp6LKf92a+zaFvEOe2+wRaQLTirk/1HRWsotxAafO0IB/PuN/CjmppJhUz/w==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM5PR04MB1147
+X-MS-Exchange-CrossTenant-userprincipalname: uyq06gNNA5K4Lo5mUAqW4g1MYbtlJQTmhddLxQOPadcHNA58ahRmoCCZEOSCbFK0o0yl2b8UhXAmQaZ8Tv9bcg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM6PR07MB5413
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-> Hi everyone,
->=20
-> Comments are in-line bellow.
->=20
-> >Bruni hi,
-> >Thank you for your patch.
-> >
-> >> Hi everyone,
-> >>
-> >> Here is the rebased patch.
-> >>
-> >> Add the check if the whole firmware was loaded.
-> >> Cleaned up the leftovers of handling the file in chunks.
-> >>
-> >> Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
-> >>
-> >> ---
-> >>  mmc_cmds.c | 67
-> >> +++++++++++++++++++++++++++---------------------------
-> >>  1 file changed, 33 insertions(+), 34 deletions(-)
-> >>
-> >> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> >> index 8d7910e..d017b64 100644
-> >> --- a/mmc_cmds.c
-> >> +++ b/mmc_cmds.c
-> >> @@ -2812,7 +2812,6 @@ int do_ffu(int nargs, char **argv)
-> >>         __u8 *buf =3D NULL;
-> >>         __u32 arg;
-> >>         off_t fw_size;
-> >> -       ssize_t chunk_size;
-> >>         char *device;
-> >>         struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
-> >>
-> >> @@ -2926,45 +2925,45 @@ int do_ffu(int nargs, char **argv)
-> >>         multi_cmd->cmds[3].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B |
-> >> MMC_CMD_AC;
-> >>         multi_cmd->cmds[3].write_flag =3D 1;
-> >>
-> >> -do_retry:
-> >> -       /* read firmware chunk */
-> >> +       /* read firmware */
-> >>         lseek(img_fd, 0, SEEK_SET);
-> >> -       chunk_size =3D read(img_fd, buf, fw_size);
-> >> +       if (read(img_fd, buf, fw_size) !=3D fw_size) {
-> >> +               fprintf(stderr, "Could not read the whole firmware fil=
-e\n");
-> >> +               ret =3D -ENOSPC;
-> >No space left?
-> >
-> Here I would propose to use perror instead of fprintf - something like:
->         perror("Could not read the firmware file: ");
-> This will also propagate the errno from read.
-Agreed.
+Hi everyone,
+As said, here is the reworked patch.
 
->=20
-> >> +               goto out;
-> >> +       }
-> >>
-> >> -       if (chunk_size > 0) {
-> >> -               /* send ioctl with multi-cmd */
-> >> -               ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-> >> +do_retry:
-> >> +       /* send ioctl with multi-cmd */
-> >> +       ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-> >>
-> >> -               if (ret) {
-> >> -                       perror("Multi-cmd ioctl");
-> >> -                       /* In case multi-cmd ioctl failed before exiti=
-ng from ffu
-> mode */
-> >> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]=
-);
-> >> -                       goto out;
-> >> -               }
-> >> +       if (ret) {
-> >> +               perror("Multi-cmd ioctl");
-> >> +               /* In case multi-cmd ioctl failed before exiting from =
-ffu mode */
-> >> +               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
-> >> +               goto out;
-> >> +       }
-> >Why do we need this hack?
-> >Why would the last command is prone to fail?
-> >If there is no good reason - Lets remove this hack - as a 2nd patch in t=
-his
-> series.
-> If I assume correctly you refer to repetition of third command after a fa=
-ilure.
-> This was left as-is since I understood that first and second command can =
-fail,
-> but the device
-> should not remain in upgrade mode in case of failure.
-OK.
 
->=20
-> >
-> >>
-> >> -               ret =3D read_extcsd(dev_fd, ext_csd);
-> >> -               if (ret) {
-> >> -                       fprintf(stderr, "Could not read EXT_CSD from %=
-s\n",
-> device);
-> >> -                       goto out;
-> >> -               }
-> >> +       ret =3D read_extcsd(dev_fd, ext_csd);
-> >> +       if (ret) {
-> >> +               fprintf(stderr, "Could not read EXT_CSD from %s\n", de=
-vice);
-> >> +               goto out;
-> >> +       }
-> >>
-> >> -               /* Test if we need to restart the download */
-> >> -               sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
-> >> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] =
-<< 8 |
-> >> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] =
-<< 16 |
-> >> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] =
-<< 24;
-> >> -               /* By spec, host should re-start download from the fir=
-st sector if
-> >> sect_done is 0 */
-> >> -               if (sect_done =3D=3D 0) {
-> >> -                       if (retry > 0) {
-> >> -                               retry--;
-> >> -                               fprintf(stderr, "Programming failed. R=
-etrying... (%d)\n",
-> >> retry);
-> >> -                               goto do_retry;
-> >> -                       }
-> >> -                       fprintf(stderr, "Programming failed! Aborting.=
-..\n");
-> >> -                       goto out;
-> >> -               } else {
-> >> -                       fprintf(stderr, "Programmed %d/%jd bytes\r", s=
-ect_done *
-> >> sect_size, (intmax_t)fw_size);
-> >> +       /* Test if we need to restart the download */
-> >> +       sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
-> >> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
-> >> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
-> >> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
-> >> +       /* By spec, host should re-start download from the first
-> >> + sector if
-> >> sect_done is 0 */
-> >Can we use here be32toh or get_unaligned_be32 or something instead?
-> Tried to look into it - none of the functions fit the need, input must be=
- an
-> int.
-> Best I can offer is to write a macro - something along the lines:
->         #define le32toh_array(p) (p | *(&p+1) << 8 | *(&p+2) << 16 | *(&p=
-+3) <<
-> 24 )
->         sect_done =3D
-> le32toh_array(ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0]);
-Then better leave it as it is
+Add the check if the whole firmware was loaded.
+Cleaned up the leftovers of handling the file in chunks.
 
-Thanks,
-Avri
+Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
+---
+ mmc_cmds.c | 66 ++++++++++++++++++++++++++----------------------------
+ 1 file changed, 32 insertions(+), 34 deletions(-)
 
->=20
-> >
-> >> +       if (sect_done =3D=3D 0) {
-> >> +               if (retry > 0) {
-> >If (retry--)
-> Agreed - will be done in v2.
->=20
-> >
-> >> +                       retry--;
-> >> +                       fprintf(stderr, "Programming failed. Retrying.=
-.. (%d)\n",
-> retry);
-> >> +                       goto do_retry;
-> >>                 }
-> >> +               fprintf(stderr, "Programming failed! Aborting...\n");
-> >> +               goto out;
-> >>         }
-> >>
-> >>         if ((sect_done * sect_size) =3D=3D fw_size) {
-> >>
-> >> Best regards,
-> >> Bruno Mati=E6
-> >
-> >Thanks,
-> >Avri
-> >
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 70480df..7d37e93 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2812,7 +2812,6 @@ int do_ffu(int nargs, char **argv)
+ 	__u8 *buf =3D NULL;
+ 	__u32 arg;
+ 	off_t fw_size;
+-	ssize_t chunk_size;
+ 	char *device;
+ 	struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+ 	__u32 blocks =3D 1;
+@@ -2925,45 +2924,44 @@ int do_ffu(int nargs, char **argv)
+ 	multi_cmd->cmds[3].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+ 	multi_cmd->cmds[3].write_flag =3D 1;
+=20
+-do_retry:
+-	/* read firmware chunk */
++	/* read firmware */
+ 	lseek(img_fd, 0, SEEK_SET);
+-	chunk_size =3D read(img_fd, buf, fw_size);
++	if (read(img_fd, buf, fw_size) !=3D fw_size) {
++		perror("Could not read the firmware file: ");
++		ret =3D -ENOSPC;
++		goto out;
++	}
+=20
+-	if (chunk_size > 0) {
+-		/* send ioctl with multi-cmd */
+-		ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
++do_retry:
++	/* send ioctl with multi-cmd */
++	ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+=20
+-		if (ret) {
+-			perror("Multi-cmd ioctl");
+-			/* In case multi-cmd ioctl failed before exiting from ffu mode */
+-			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+-			goto out;
+-		}
++	if (ret) {
++		perror("Multi-cmd ioctl");
++		/* In case multi-cmd ioctl failed before exiting from ffu mode */
++		ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
++		goto out;
++	}
+=20
+-		ret =3D read_extcsd(dev_fd, ext_csd);
+-		if (ret) {
+-			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
+-			goto out;
+-		}
++	ret =3D read_extcsd(dev_fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		goto out;
++	}
+=20
+-		/* Test if we need to restart the download */
+-		sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+-				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
+-				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
+-				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
+-		/* By spec, host should re-start download from the first sector if sect_=
+done is 0 */
+-		if (sect_done =3D=3D 0) {
+-			if (retry > 0) {
+-				retry--;
+-				fprintf(stderr, "Programming failed. Retrying... (%d)\n", retry);
+-				goto do_retry;
+-			}
+-			fprintf(stderr, "Programming failed! Aborting...\n");
+-			goto out;
+-		} else {
+-			fprintf(stderr, "Programmed %d/%jd bytes\r", sect_done * sect_size, (in=
+tmax_t)fw_size);
++	/* Test if we need to restart the download */
++	sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
++			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
++			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
++			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
++	/* By spec, host should re-start download from the first sector if sect_d=
+one is 0 */
++	if (sect_done =3D=3D 0) {
++		if (retry--) {
++			fprintf(stderr, "Programming failed. Retrying... (%d)\n", retry);
++			goto do_retry;
+ 		}
++		fprintf(stderr, "Programming failed! Aborting...\n");
++		goto out;
+ 	}
+=20
+ 	if ((sect_done * sect_size) =3D=3D fw_size) {
+--=20
+2.29.0
+
