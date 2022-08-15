@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D7E2BC32765
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 10:13:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AA56C00140
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 10:13:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242181AbiHOKM7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Aug 2022 06:12:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60398 "EHLO
+        id S242322AbiHOKNA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Aug 2022 06:13:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60176 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242421AbiHOKMq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 06:12:46 -0400
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28CD618B15;
-        Mon, 15 Aug 2022 03:12:45 -0700 (PDT)
-Received: by mail-lf1-x12b.google.com with SMTP id e15so10065931lfs.0;
-        Mon, 15 Aug 2022 03:12:45 -0700 (PDT)
+        with ESMTP id S231904AbiHOKMy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 06:12:54 -0400
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D258618E24;
+        Mon, 15 Aug 2022 03:12:52 -0700 (PDT)
+Received: by mail-lf1-x143.google.com with SMTP id u3so10001036lfk.8;
+        Mon, 15 Aug 2022 03:12:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc;
-        bh=0aiK8oEVUknjQ/kFKM1Zoa7em7h8jPtDacZ1gsZezrs=;
-        b=HWo1DgSkxhAANSjcWUOA0TiwznpZBpDvJCSJ7MjjR4jNaQQsaI1nJqZH6RPmtTNcUS
-         PHEnklUIGr/0mptrSiTImNt4rMpRbXxv6WZ+fiwxpHBCP5HR7IDjLWBXGElqJMLxzcvY
-         MoohSf5bqWRdzJptVhym4klsBeZXbkpvt1phXR9vzKHbn+lqKBBW/PaUO3dif4L49XFk
-         3sueV0Hask46IHCv4HxlQzuDfVmJq06iq9osAUxyK+2pv6A4sl6x7Gyj/i/c995Ut7/Y
-         T+3pMkdKK2sAlGhKGk/A1+cPv3/scbJJbFD2I1fM51MjdZkw5tq4brVKzDL5lp7lEq78
-         Q+Sw==
+        bh=w89xCg2DJrJPW8V3cF8x8hrEYxnShDOQLITDiKSZkEc=;
+        b=l8Tlvfgc1cMV2pOl5lWM7OjERWMTwmI2EVvQtbojA0fdn/02tWADFLrtYt/18s3Nww
+         gGORT2ZOnkDGu+TH9asBMAxin9e52D6YJANNxYRH0M6B9snyXCf3HxxR2LF07Kl+tuXh
+         3EZFYVELNnbgsEqj/h8Amy/xbvpyAZXo4Gv7DTZjDOyG0tSfzpJJgVY/in+eiNmaBVW0
+         z6IJB48OWG4DqKh/O9nC9fafTFvO1h5x1IjzfY7fFnFaCaVTuJ3XUYtX2S8PD4g95JuL
+         X0zFLf731ntq/hsByoYcLcaMYXHdC0LhP0z0QQASpCRCPZuJDkrJ0nVbEoWjIQiypnOy
+         HBMQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc;
-        bh=0aiK8oEVUknjQ/kFKM1Zoa7em7h8jPtDacZ1gsZezrs=;
-        b=8OUIjAf9Y22V08X3jjEhM6E4T7Issl2/5sAnsa9IOPv0Y0aVWw9bXbZ7s+0tQe4II2
-         IyUj0nc4DvypDN4eNJ8bGzXky6mjQRBmPsXfQrk8Uqv6rYGLq3szZEMbwjz3Egs9nb/u
-         icbks5Un57TjxLSNpd1cwQ90v025cR0U1TDv5EHfzMrNDicE+xPmU+s6iz5VrF3AGM5R
-         QUKNbJnfu/8G0FWwXfYiG47VdBcXobrRX2as/phSyIZhqaWYIOmLwQs4CQHXpbkhZuUS
-         FFPAM7hX6SKnOGbZazt7y+PTlU2VbRrNZd4DZiObkaNuJpfUgw3QpPGsLiww+ctxZMva
-         PaXA==
-X-Gm-Message-State: ACgBeo2aXyzg34rbQflPw0KATg280MHdj//EOl2SpbNGMqL238mwxBv7
-        Fq+AErfSYXoBrEI/W/Lh3et9bAwLzb4=
-X-Google-Smtp-Source: AA6agR7KF39lbkfwH+fJnTC4y2+jJqk2OXiZ7h/3q79X/zqHE9z1CvaR4+vorBEsi8CYQNY1FxLa1Q==
-X-Received: by 2002:a05:6512:398c:b0:48b:a1e6:c631 with SMTP id j12-20020a056512398c00b0048ba1e6c631mr5171565lfu.229.1660558363510;
-        Mon, 15 Aug 2022 03:12:43 -0700 (PDT)
+        bh=w89xCg2DJrJPW8V3cF8x8hrEYxnShDOQLITDiKSZkEc=;
+        b=dKjUayhDhcQ9isnzkf1GF+NlRFWDtO0aKI5jshowHBdn8oWR3/t2udwpDyDeTxC2qA
+         f35882cK93o7gWIz428i9IVOA69U+cwCW0st9zzgN1iGa90e0iO6wJBqqCcWds4vQWLc
+         hxeELfHSX4HC95TKveQFhXhyukLmqDrMmma3+GbALBMvKQdt7S8GVhsRiKTXisEHs2Ag
+         aWmnK206V3UCb/+MN9tu3vIbT2AiTZLVQtlj7XCYqBiOGvJy05DRacmbt9AM8zf7fr4F
+         1TFOMbDeng7fvAocjMlaKyj4VNWIEiWmIn+VLtc/2WYTONG1IluhMCX/ZVAX/KF2PgZq
+         XORQ==
+X-Gm-Message-State: ACgBeo0+JgfVvjwYLf4W66d8ivrUJ2xFLn+i8K9V9bql55wvEucWjwTY
+        I1fs7gC0Pqo4q8sM1YqD7uRNEbEEmZ0=
+X-Google-Smtp-Source: AA6agR4Y8c+05pNlzgn0h0JNXaPAWlMLUxPgeJJDPHNrCo75V+e7HeobYI4nZTSut+hiM8h0MSCJqA==
+X-Received: by 2002:a19:4f56:0:b0:48b:205f:91a9 with SMTP id a22-20020a194f56000000b0048b205f91a9mr5157474lfk.543.1660558371054;
+        Mon, 15 Aug 2022 03:12:51 -0700 (PDT)
 Received: from localhost.localdomain (admv234.neoplus.adsl.tpnet.pl. [79.185.51.234])
-        by smtp.gmail.com with ESMTPSA id 18-20020ac25f52000000b0048b1ba4d2a4sm1047264lfz.265.2022.08.15.03.12.41
+        by smtp.gmail.com with ESMTPSA id 18-20020ac25f52000000b0048b1ba4d2a4sm1047264lfz.265.2022.08.15.03.12.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 15 Aug 2022 03:12:43 -0700 (PDT)
+        Mon, 15 Aug 2022 03:12:50 -0700 (PDT)
 From:   Adam Skladowski <a39.skl@gmail.com>
 Cc:     phone-devel@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
         Adam Skladowski <a39.skl@gmail.com>,
@@ -71,10 +71,11 @@ Cc:     phone-devel@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
         linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Subject: [PATCH 5/7] dt-bindings: arm-smmu: Add compatible for Qualcomm SM6115
-Date:   Mon, 15 Aug 2022 12:09:43 +0200
-Message-Id: <20220815100952.23795-6-a39.skl@gmail.com>
+        Sibi Sankar <sibis@codeaurora.org>,
+        Adam Skladowski <a_skl39@protonmail.com>
+Subject: [PATCH 7/7] dt-bindings: firmware: document Qualcomm SM6115 SCM
+Date:   Mon, 15 Aug 2022 12:09:45 +0200
+Message-Id: <20220815100952.23795-8-a39.skl@gmail.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20220815100952.23795-1-a39.skl@gmail.com>
 References: <20220815100952.23795-1-a39.skl@gmail.com>
@@ -85,26 +86,25 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add compatible for the Qualcomm SM6115 platform to the ARM SMMU
-DeviceTree binding.
+Document the compatible for Qualcomm  SM6115 SCM.
 
 Signed-off-by: Adam Skladowski <a39.skl@gmail.com>
 ---
- Documentation/devicetree/bindings/iommu/arm,smmu.yaml | 1 +
+ Documentation/devicetree/bindings/firmware/qcom,scm.txt | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/iommu/arm,smmu.yaml b/Documentation/devicetree/bindings/iommu/arm,smmu.yaml
-index 9066e6df1ba1..71f8f638a1f8 100644
---- a/Documentation/devicetree/bindings/iommu/arm,smmu.yaml
-+++ b/Documentation/devicetree/bindings/iommu/arm,smmu.yaml
-@@ -41,6 +41,7 @@ properties:
-               - qcom,sdm845-smmu-500
-               - qcom,sdx55-smmu-500
-               - qcom,sdx65-smmu-500
-+              - qcom,sm6115-smmu-500
-               - qcom,sm6350-smmu-500
-               - qcom,sm6375-smmu-500
-               - qcom,sm8150-smmu-500
+diff --git a/Documentation/devicetree/bindings/firmware/qcom,scm.txt b/Documentation/devicetree/bindings/firmware/qcom,scm.txt
+index b3f702cbed87..f6b95d86efc6 100644
+--- a/Documentation/devicetree/bindings/firmware/qcom,scm.txt
++++ b/Documentation/devicetree/bindings/firmware/qcom,scm.txt
+@@ -26,6 +26,7 @@ Required properties:
+  * "qcom,scm-qcs404"
+  * "qcom,scm-sc7180"
+  * "qcom,scm-sc7280"
++ * "qcom,scm-sm6115"
+  * "qcom,scm-sm6125"
+  * "qcom,scm-sdm845"
+  * "qcom,scm-sdx55"
 -- 
 2.25.1
 
