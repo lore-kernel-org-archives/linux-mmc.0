@@ -2,105 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D67F2C25B0E
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 10:12:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80D75C28B2B
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 Aug 2022 10:12:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231663AbiHOKMW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 Aug 2022 06:12:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59776 "EHLO
+        id S233188AbiHOKMy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 Aug 2022 06:12:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60460 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231470AbiHOKMB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 06:12:01 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFF59140ED
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Aug 2022 03:11:59 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id x19so10008400lfq.7
-        for <linux-mmc@vger.kernel.org>; Mon, 15 Aug 2022 03:11:59 -0700 (PDT)
+        with ESMTP id S242390AbiHOKMl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 Aug 2022 06:12:41 -0400
+Received: from mail-lj1-x241.google.com (mail-lj1-x241.google.com [IPv6:2a00:1450:4864:20::241])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF70714D36;
+        Mon, 15 Aug 2022 03:12:37 -0700 (PDT)
+Received: by mail-lj1-x241.google.com with SMTP id y23so7153023ljh.12;
+        Mon, 15 Aug 2022 03:12:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc;
-        bh=Gmr17YBDbHMvM932wEH6jhfSWFYGcnH6MbBcnQ/BW6g=;
-        b=Ueh3RcrS+ZQZs8802jLuUeirUvPqjjFabWZ7YC0GkNrk5wxz+RpctVMgDZUGE+s6fn
-         hpVH1scGxoKykqcH0g2XO3Bvxpb0D5nhO9zQx8Q+h4a6biDYR3A9bXXQs81Qo3quX8Ff
-         I1axUXE4r/QhzDG5ELaF3MySkcDdUmIctOE80MSkhTk781Fr35lLe2NswQNwmanGqXID
-         qYDTgxrM3jJoj3tz9YRrl8HwLBF61Sb0Pe6KSUD0kt74T1+k/CkAevXqHBD62dAe6Ls8
-         herGn9gG0BqtVG0JFaJLmaLjV1ozeMS7EbnwWcVlgmpvOwquABXx5qHaFBnS06tGsFNp
-         o6xQ==
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc;
+        bh=fYQsm9UdRD9rnFhcYGRNbb5PGnoO8X04eE31X6T9EuY=;
+        b=VD2DdiifLjGal1AJ5jTkkihLDv9UxDue4ZQIRS7YAxyyXc0QZkA7QUbtVsIS/7/R+f
+         FFxJzx4S+AfRDlqTHdSo6++qHa/FK751Vj0yYY3IC255+Fes+aytf9Oz0ff6uCyBScYp
+         r87nIamuWoyNFm6I91B7ji73uhy0/I9ScU3vSiAEA+OqfYbXLqoZLPoOGAL7MN4+0dGk
+         +wDaiXmS/OmJX4YtrXP+9wfxVrFsSEE1REIaR4+uXpmik8Uf/zCX7gg6l7+T29POIV+f
+         hkEJ9EMl2QJmSiIgBPKzzOuf7GUv4igoZyBfq4i0pfn3t9J8h0MTxj8IxW71FOvhdueh
+         wJ1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc;
-        bh=Gmr17YBDbHMvM932wEH6jhfSWFYGcnH6MbBcnQ/BW6g=;
-        b=bmIxS4TuUu13xeSXgAtRyGSVgErYhvVqr+YnVwSkm8dpLnctEb1m1Ft/FF4eiITvAK
-         tyNObr6aPXSUGPzXiVKHRGM9xcC/YD8TLIoUsM2XMS5tjtb3nzP/I1Y1umaunnNFdraZ
-         BJY7wbLgfEwmOjRSKqiqUJgz9JOnWyax4X/n0FQYJyufHbcFVlH8wpPSUXn5Kd6kodv/
-         +BO95ynscKNo1xIsQbP62003v0mwdUl0AAhKcEeUwTfc1Di65Qu0RvvL51561FD/w4xl
-         GrkvmqIfoz9wyB6NtQzGKmD6Jsye4gl4TOMEG9oLfM+S2XcXrU7cX3DnCpTG+4DL+2tZ
-         uqtw==
-X-Gm-Message-State: ACgBeo3E5HV07yNb05cYgCFN2qHfaRczblXuABLMN2IOfsswdbC+KhAV
-        Yr+/i2y5YvAgAhabNXN0DyFSBwxHuLWjLfuKxxdlnw==
-X-Google-Smtp-Source: AA6agR4C2IO/xQv/D2+AAUs0oCi5pATmLAwL9uiqdJ6839Bh59m6MRIwTdVE+PNLo/Hib6+NITjoDGusDIjIzbLy27k=
-X-Received: by 2002:a05:6512:2306:b0:48b:2905:21a8 with SMTP id
- o6-20020a056512230600b0048b290521a8mr5795536lfu.167.1660558318027; Mon, 15
- Aug 2022 03:11:58 -0700 (PDT)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc;
+        bh=fYQsm9UdRD9rnFhcYGRNbb5PGnoO8X04eE31X6T9EuY=;
+        b=1Fzr+/6S6neBlxV9OXySvoho5cMHJhKweEE42kchPj0jsXKnnj20ETNXsA0a63DVx8
+         T13s4QoomXQcfRdRTT0YvmYuHbX03oakUU1AtXNhE43LOUUwZimnO9KyFSNGv8pCgp6B
+         cWBmXw4GjWYZ+Toww0X9dAJoe/W05e3KU/tltqozzHplBbSmgyGY2i3qbYhrG2WC+wLY
+         /cJSixhhjtaN25A6QlIZseYXwremt8pb8QZKb6izYb4s7q1ENrTCxsXDHJMMZwnC+KeV
+         fUkL7EMeIPMVpQv75MZbEXomDhSmKmcgo0SAIlpBiOhh/OwYPm6IlS/0F5xxbqz72a81
+         NQIA==
+X-Gm-Message-State: ACgBeo2fBJDwp/nSZUUYMu4ywTQ/SpBTXM5FN79RLHw698jc/7k0oTcA
+        2Spo4YwxqX+aqAA/k+gEjppvp0thDGU=
+X-Google-Smtp-Source: AA6agR7w0kwVxCBmcmTnLXYnt44uoSZ39GekewNXMNQ2SP1VnQiEqRTXU/4xvIbJ7zFBAO3sq8xJLQ==
+X-Received: by 2002:a2e:8954:0:b0:25e:42f7:5ba6 with SMTP id b20-20020a2e8954000000b0025e42f75ba6mr4765880ljk.213.1660558356089;
+        Mon, 15 Aug 2022 03:12:36 -0700 (PDT)
+Received: from localhost.localdomain (admv234.neoplus.adsl.tpnet.pl. [79.185.51.234])
+        by smtp.gmail.com with ESMTPSA id 18-20020ac25f52000000b0048b1ba4d2a4sm1047264lfz.265.2022.08.15.03.12.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 15 Aug 2022 03:12:35 -0700 (PDT)
+From:   Adam Skladowski <a39.skl@gmail.com>
+Cc:     phone-devel@vger.kernel.org, ~postmarketos/upstreaming@lists.sr.ht,
+        Adam Skladowski <a39.skl@gmail.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Joerg Roedel <joro@8bytes.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Sai Prakash Ranjan <quic_saipraka@quicinc.com>,
+        Loic Poulain <loic.poulain@linaro.org>,
+        Emma Anholt <emma@anholt.net>,
+        Rob Clark <robdclark@chromium.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-arm-msm@vger.kernel.org, dmaengine@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, iommu@lists.linux.dev,
+        linux-mmc@vger.kernel.org, linux-pm@vger.kernel.org,
+        Stephen Boyd <swboyd@chromium.org>,
+        Sibi Sankar <sibis@codeaurora.org>
+Subject: [PATCH 3/7] dt-bindings: mmc: sdhci-msm: Document the SM6115 compatible
+Date:   Mon, 15 Aug 2022 12:09:41 +0200
+Message-Id: <20220815100952.23795-4-a39.skl@gmail.com>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220815100952.23795-1-a39.skl@gmail.com>
+References: <20220815100952.23795-1-a39.skl@gmail.com>
 MIME-Version: 1.0
-References: <20220810022509.43743-1-samuel@sholland.org>
-In-Reply-To: <20220810022509.43743-1-samuel@sholland.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 15 Aug 2022 12:11:20 +0200
-Message-ID: <CAPDyKFqg0BUbpQwKvZxuMrqoiwBKzZxbgP-e=50yLpKRhQ+zPw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sunxi-mmc: Fix clock refcount imbalance during unbind
-To:     Samuel Holland <samuel@sholland.org>
-Cc:     Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Andre Przywara <andre.przywara@arm.com>,
-        Maxime Ripard <maxime@cerno.tech>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-sunxi@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 10 Aug 2022 at 04:25, Samuel Holland <samuel@sholland.org> wrote:
->
-> If the controller is suspended by runtime PM, the clock is already
-> disabled, so do not try to disable it again during removal. Use
-> pm_runtime_disable() to flush any pending runtime PM transitions.
->
-> Fixes: 9a8e1e8cc2c0 ("mmc: sunxi: Add runtime_pm support")
-> Signed-off-by: Samuel Holland <samuel@sholland.org>
-> ---
->
->  drivers/mmc/host/sunxi-mmc.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/host/sunxi-mmc.c b/drivers/mmc/host/sunxi-mmc.c
-> index b16e12e62e72..3db9f32d6a7b 100644
-> --- a/drivers/mmc/host/sunxi-mmc.c
-> +++ b/drivers/mmc/host/sunxi-mmc.c
-> @@ -1492,9 +1492,11 @@ static int sunxi_mmc_remove(struct platform_device *pdev)
->         struct sunxi_mmc_host *host = mmc_priv(mmc);
->
->         mmc_remove_host(mmc);
-> -       pm_runtime_force_suspend(&pdev->dev);
-> -       disable_irq(host->irq);
-> -       sunxi_mmc_disable(host);
+Document the compatible for SDHCI on SM6115.
 
-Perhaps a better option than the below, would just be to drop the
-above calls to disable_irq() and sunxi_mmc_disable(), as that is
-already managed through the call to pm_runtime_force_suspend().
+Signed-off-by: Adam Skladowski <a39.skl@gmail.com>
+---
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-> +       pm_runtime_disable(&pdev->dev);
-> +       if (!pm_runtime_status_suspended(&pdev->dev)) {
-> +               disable_irq(host->irq);
-> +               sunxi_mmc_disable(host);
-> +       }
->         dma_free_coherent(&pdev->dev, PAGE_SIZE, host->sg_cpu, host->sg_dma);
->         mmc_free_host(mmc);
->
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index fc0e81c2066c..a792fa5574a0 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -41,6 +41,7 @@ properties:
+               - qcom,sdm845-sdhci
+               - qcom,sdx55-sdhci
+               - qcom,sdx65-sdhci
++              - qcom,sm6115-sdhci
+               - qcom,sm6125-sdhci
+               - qcom,sm6350-sdhci
+               - qcom,sm8150-sdhci
+-- 
+2.25.1
 
-Kind regards
-Uffe
