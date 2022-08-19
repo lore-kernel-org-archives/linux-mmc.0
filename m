@@ -2,109 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A007C32771
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 14:39:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46A2EC32771
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 14:50:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1349584AbiHSOjO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Aug 2022 10:39:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45978 "EHLO
+        id S1349579AbiHSOuX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Aug 2022 10:50:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1349581AbiHSOjK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 10:39:10 -0400
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A35606D9E6
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:39:08 -0700 (PDT)
-Received: by mail-lf1-x135.google.com with SMTP id l1so5868071lfk.8
-        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:39:08 -0700 (PDT)
+        with ESMTP id S1349209AbiHSOuX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 10:50:23 -0400
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BAA0EE6B0
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:50:22 -0700 (PDT)
+Received: by mail-lj1-x234.google.com with SMTP id v10so4726111ljh.9
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:50:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc;
-        bh=KFMtFtZySA4bvpQNARX7HTQqtQoy7c9hAyHo75MNDrc=;
-        b=tFKOpJghYdQzwgphRpBrhjwGCF3+e81YHAqmbInJ7EwZjj7nGg2QBi7wWaHfE10E9n
-         lGxFxV7YIENSDpredOvjEX526Sdq8W7XNSxMpBMQ5LQNTwgmrud5W6Yry0CTygfODRy6
-         8MskW7KBtv/LIHCB6kp9k7mkYtbUxWk/4/BChWRG9nTbi5ULmikcrJvKAQr2eQhjske4
-         LN1PnWjpPyOSLGjvkvA4V5jN1WcEJh+CneSHUzuwUc3JHNpR6mMbYz9ya2D6Ev5H5uk+
-         xP6VH/MIUShEFbskMRYkOkr0d9UYuShmAjQCLRsfyf7N/JeoE0RuC/JoJJGUbqrmEKpu
-         l7Sw==
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc;
+        bh=1FWqXs5Wx4+ii9O0yTd+UOY7aeTlUNQo9eTTQ/Pwdds=;
+        b=poRali4aA0RFjxnsLM4MDdbP8SK0CzFqhbyi6jGdr+yyiY2sWoSF98X5g46gY1fbfo
+         VoliPo0+7dxiqlUQ4TVosiPcNExGO3oLOAtVdCuhxWZ3BOiglKLATjhS1U16rEEMynSO
+         eWH1iHe6mzbhYOTMI2CWDDm9qYie5ITwuPZFeKciadE2U+x+0zd0jD+mblc3/+qd8ZVU
+         eakvGmGXhDJ3DA7KAoG5o259GfxxBKFRNxlQ7nOAq1QF6et44ReEEF9w1tEY1+d2IoWV
+         JPijZ1bmNDtrp3XXW5m5sgEiY3W91TT2VYKI7vINCYQqynI4wEIwT57dyzX39Hix8RSA
+         y74A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc;
-        bh=KFMtFtZySA4bvpQNARX7HTQqtQoy7c9hAyHo75MNDrc=;
-        b=wW1+uRdAUwvM6enbe6ZF7d3GSyo/GafXQKeTkrtFBaeWaJrZLDXg/GZkGanIenYk4b
-         2VqHQuFAcoEfJlwIf7qtl+nuC8DTw/YpJTlG58r3Yy6sSSrga3P+yVSkRe1fYLT4nQ98
-         UUpS7Bx2zqcK+PMdKfLLc5vNkKKkN2DCYw6hYT+Don2Q7cYZ5sT/kco2gU2p/yM2WSZm
-         cbU+ZF8Lf8M9vR56e+6yO7ThMCozjHm/nOlI3VAShApqa0I6urtiEhXKiVEl2XBSWhLG
-         Szr1cLN8O46uo/eZ1ZDknuPj9BrIBFLXZV5Gb6nF5atSD9CD+qA6JhcK9w9FzkuBv9nH
-         QIsQ==
-X-Gm-Message-State: ACgBeo2xwuHsF4FBmu7FU8zjHNLQa4vsDKrPwj1Bn+LpmxkBK7Ca7vNN
-        +KAJ+bRn1oIsC8XcmNl/xdtghg==
-X-Google-Smtp-Source: AA6agR4Q1EbYcr4V84vNs+4a4X0At1d5fXgXRHjAm9c4PQOGI0y1GqQpYfoot5t3al3m32CAs6CvCw==
-X-Received: by 2002:a05:6512:280e:b0:48b:132:c420 with SMTP id cf14-20020a056512280e00b0048b0132c420mr2459974lfb.542.1660919946889;
-        Fri, 19 Aug 2022 07:39:06 -0700 (PDT)
-Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id u7-20020a2e8447000000b002618fbebbbcsm639836ljh.47.2022.08.19.07.39.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 19 Aug 2022 07:39:06 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.0-rc2
-Date:   Fri, 19 Aug 2022 16:39:05 +0200
-Message-Id: <20220819143905.8090-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc;
+        bh=1FWqXs5Wx4+ii9O0yTd+UOY7aeTlUNQo9eTTQ/Pwdds=;
+        b=4ZH9Rzj0T+jnHN5XDs8Y9AWy8vL/XWZxgSoKUm3hyzd8QcKz/kJ64Q84+Tc/DIQGg2
+         PCfZjspQxRipsFwKKF9dGi1I1IQlNbtCeamFuf3PzyLMtqj/xybH1HiaJPLejPDTMiFe
+         Ud+xEfmhOnXpeIfv58XzMHCfbwZdYhSBgO6bLVsPCYuu9u/CTY5nd8ia4D1EXdDZFJqV
+         mX/mNA4U9MUgywZhmN1jZwZD5cro2W005liAwLLIP2tI64bj3ZSe9vRDHBha5p9T+wRS
+         57w+0pBWSW0Ej3Dj27IzescsbK00wDbfdNlFpKkGLys6QJZVDqrTx0/frXVxXkQeHvyo
+         +1ag==
+X-Gm-Message-State: ACgBeo282+cnDNUa7GuJbFLFW41PU07NQYJXQ/N8bhCZvA91A6xCkIso
+        dYqOt/SchIfBR5XrBJvRYAizwaWRE/QoQq5hwyQ+Pg==
+X-Google-Smtp-Source: AA6agR7XJ8a3HtJDoNBCaaLBYEfMgT4vAkCc1/WPMfnv+63vIloLV5zzdxlcjGHLjdaR4WDsbzkARFw/43qVs6xgTm0=
+X-Received: by 2002:a2e:a409:0:b0:25e:724a:f788 with SMTP id
+ p9-20020a2ea409000000b0025e724af788mr2135653ljn.300.1660920620344; Fri, 19
+ Aug 2022 07:50:20 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220815073321.63382-1-adrian.hunter@intel.com>
+In-Reply-To: <20220815073321.63382-1-adrian.hunter@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 19 Aug 2022 16:49:43 +0200
+Message-ID: <CAPDyKFovPD_VdZqedzF8AX6i0DHFk0O2=6FcsRwxvYTwzfeZiQ@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: sd: Fix inconsistent sd3_bus_mode with failed
+ voltage switch
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        Seunghui Lee <sh043.lee@samsung.com>,
+        DooHyun Hwang <dh0421.hwang@samsung.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Mon, 15 Aug 2022 at 09:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> Hi
+>
+> Here are 2 SD card fixes prompted by the following email thread:
+>
+>         https://lore.kernel.org/linux-mmc/20220721055924.9043-1-sh043.lee@samsung.com/T/#u
+>
+>
+> Adrian Hunter (2):
+>       mmc: sd: Fix 1.8V workaround branch
+>       mmc: sd: Fix inconsistent sd3_bus_mode with failed voltage switch
+>
+>  drivers/mmc/core/sd.c | 46 ++++++++++++++++++----------------------------
+>  1 file changed, 18 insertions(+), 28 deletions(-)
+>
+>
 
-Here's a PR with a couple of MMC fixes intended for v6.0-rc2. Details about the
-highlights are as usual found in the signed tag.
-
-Please pull this in!
+Applied for fixes and by adding stable tags to both the patches, thanks!
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit 568035b01cfb107af8d2e4bd2fb9aea22cf5b868:
-
-  Linux 6.0-rc1 (2022-08-14 15:50:18 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.0-rc1
-
-for you to fetch changes up to a0753ef66c34c1739580219dca664eda648164b7:
-
-  mmc: sdhci-of-dwcmshc: Re-enable support for the BlueField-3 SoC (2022-08-15 19:31:04 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - meson-gx: Fix error handling in ->probe()
- - mtk-sd: Fix a command problem when using cqe off/disable
- - pxamci: Fix error handling in ->probe()
- - sdhci-of-dwcmshc: Fix broken support for the BlueField-3 variant
-
-----------------------------------------------------------------
-Christophe JAILLET (3):
-      mmc: pxamci: Fix an error handling path in pxamci_probe()
-      mmc: pxamci: Fix another error handling path in pxamci_probe()
-      mmc: meson-gx: Fix an error handling path in meson_mmc_probe()
-
-Liming Sun (1):
-      mmc: sdhci-of-dwcmshc: Re-enable support for the BlueField-3 SoC
-
-Wenbin Mei (1):
-      mmc: mtk-sd: Clear interrupts when cqe off/disable
-
- drivers/mmc/host/meson-gx-mmc.c     |  6 ++++--
- drivers/mmc/host/mtk-sd.c           |  6 ++++++
- drivers/mmc/host/pxamci.c           |  4 ++--
- drivers/mmc/host/sdhci-of-dwcmshc.c | 16 ++++++++++++++--
- 4 files changed, 26 insertions(+), 6 deletions(-)
+Uffe
