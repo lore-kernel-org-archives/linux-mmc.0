@@ -2,94 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF4FDC25B0E
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 06:09:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A007C32771
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 14:39:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1346798AbiHSGJ4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Aug 2022 02:09:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42076 "EHLO
+        id S1349584AbiHSOjO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Aug 2022 10:39:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1346639AbiHSGJD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 02:09:03 -0400
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E266CC9
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Aug 2022 23:08:33 -0700 (PDT)
-Received: by mail-ej1-x62f.google.com with SMTP id i14so6977969ejg.6
-        for <linux-mmc@vger.kernel.org>; Thu, 18 Aug 2022 23:08:33 -0700 (PDT)
+        with ESMTP id S1349581AbiHSOjK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 10:39:10 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A35606D9E6
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:39:08 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id l1so5868071lfk.8
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 07:39:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc;
-        bh=aWxibmll6dw/pqOCoi7TR4UJQijH/2FtimkTNrGyezk=;
-        b=BvBSOSyw3iiv7zGvCap/WbdDf/oN0NTZE0qS3IMD0KNzeUdTvihvlvLMuuYitRZvE/
-         m91mX5BcHAzQzmFlYJ9XOMgeaKGEidyXAmrwZyN9tu4ux2wrV78lw/hrcbiXneJuZZEs
-         cFVDStud4vcr2LzM4HQ3TqvwE4yXd75WYW32FPgqBEgFhe+MbOcln3OEbaJdLxL3OpmG
-         yz4pjFzomcWQWZrGSR928lMeJDqYKk7nzXFR1WwiTdcleoICgdZczEbk4dE3ByCZ3W52
-         ZPE7HrzuhjQWRDJh6F1NgSQal4hinjGHUmETkoVL7jQYlECrig3h4g0k89jbgWMEWaBH
-         njDQ==
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc;
+        bh=KFMtFtZySA4bvpQNARX7HTQqtQoy7c9hAyHo75MNDrc=;
+        b=tFKOpJghYdQzwgphRpBrhjwGCF3+e81YHAqmbInJ7EwZjj7nGg2QBi7wWaHfE10E9n
+         lGxFxV7YIENSDpredOvjEX526Sdq8W7XNSxMpBMQ5LQNTwgmrud5W6Yry0CTygfODRy6
+         8MskW7KBtv/LIHCB6kp9k7mkYtbUxWk/4/BChWRG9nTbi5ULmikcrJvKAQr2eQhjske4
+         LN1PnWjpPyOSLGjvkvA4V5jN1WcEJh+CneSHUzuwUc3JHNpR6mMbYz9ya2D6Ev5H5uk+
+         xP6VH/MIUShEFbskMRYkOkr0d9UYuShmAjQCLRsfyf7N/JeoE0RuC/JoJJGUbqrmEKpu
+         l7Sw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc;
-        bh=aWxibmll6dw/pqOCoi7TR4UJQijH/2FtimkTNrGyezk=;
-        b=M2sewxlP7NKGvrP1FihQWw4AAHJkef6+U2adVmQx0jemVet/9BY95XL9SqpGz2Lpzc
-         rMsL7QnmpOBIG2pB2SmttL8zhlZMCHp4kSJpNY3HxTWBG6+8scVnFZDZ9v5lyhBVY6p3
-         Eb4djFRonx0e1dWoCPwXFpRrVRWc/NBE1tlH4guuRh9H8KrhFveLaPXSMtOBoxkDndfT
-         QLHenscGXwccTTo+wAK6mT9l0rh7Zid05I05KMEcec30AKCJbB7NAgwWQrH4XfwjNiIY
-         p6I7ykSIWkGNQmdT3DZMMTrE/6e1lgTHKJEaMmAltKUpfnbjqZLe4YrQXt5AJ0pt7wR+
-         WzrQ==
-X-Gm-Message-State: ACgBeo3F2r51DbP+nHWwZBQqxSJlK8Y+nlagpJDOgs7tAuxCFZWtO0FH
-        BmvBWVAYZ87sIWNNqgVM+yVsKA==
-X-Google-Smtp-Source: AA6agR4Iy4mG3WSo/+iV+l4otLH2sa6d2rwaJAQsAE1Z1Nuy5iTIHXL0YtgWK+Uf3LeX6Gm0YwCa4Q==
-X-Received: by 2002:a17:907:1c26:b0:730:960f:118 with SMTP id nc38-20020a1709071c2600b00730960f0118mr3868462ejc.650.1660889311411;
-        Thu, 18 Aug 2022 23:08:31 -0700 (PDT)
-Received: from lb02065.fritz.box ([2001:9e8:143b:fd00:5207:8c7f:747a:b80d])
-        by smtp.gmail.com with ESMTPSA id y14-20020a1709063a8e00b0073a644ef803sm1809660ejd.101.2022.08.18.23.08.30
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc;
+        bh=KFMtFtZySA4bvpQNARX7HTQqtQoy7c9hAyHo75MNDrc=;
+        b=wW1+uRdAUwvM6enbe6ZF7d3GSyo/GafXQKeTkrtFBaeWaJrZLDXg/GZkGanIenYk4b
+         2VqHQuFAcoEfJlwIf7qtl+nuC8DTw/YpJTlG58r3Yy6sSSrga3P+yVSkRe1fYLT4nQ98
+         UUpS7Bx2zqcK+PMdKfLLc5vNkKKkN2DCYw6hYT+Don2Q7cYZ5sT/kco2gU2p/yM2WSZm
+         cbU+ZF8Lf8M9vR56e+6yO7ThMCozjHm/nOlI3VAShApqa0I6urtiEhXKiVEl2XBSWhLG
+         Szr1cLN8O46uo/eZ1ZDknuPj9BrIBFLXZV5Gb6nF5atSD9CD+qA6JhcK9w9FzkuBv9nH
+         QIsQ==
+X-Gm-Message-State: ACgBeo2xwuHsF4FBmu7FU8zjHNLQa4vsDKrPwj1Bn+LpmxkBK7Ca7vNN
+        +KAJ+bRn1oIsC8XcmNl/xdtghg==
+X-Google-Smtp-Source: AA6agR4Q1EbYcr4V84vNs+4a4X0At1d5fXgXRHjAm9c4PQOGI0y1GqQpYfoot5t3al3m32CAs6CvCw==
+X-Received: by 2002:a05:6512:280e:b0:48b:132:c420 with SMTP id cf14-20020a056512280e00b0048b0132c420mr2459974lfb.542.1660919946889;
+        Fri, 19 Aug 2022 07:39:06 -0700 (PDT)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id u7-20020a2e8447000000b002618fbebbbcsm639836ljh.47.2022.08.19.07.39.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 Aug 2022 23:08:30 -0700 (PDT)
-From:   Jack Wang <jinpu.wang@ionos.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     Paul Cercueil <paul@crapouillou.net>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: [PATCH v1 18/19] mmc: jz4740_mmc: Fix error check for dma_map_sg
-Date:   Fri, 19 Aug 2022 08:08:00 +0200
-Message-Id: <20220819060801.10443-19-jinpu.wang@ionos.com>
+        Fri, 19 Aug 2022 07:39:06 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.0-rc2
+Date:   Fri, 19 Aug 2022 16:39:05 +0200
+Message-Id: <20220819143905.8090-1-ulf.hansson@linaro.org>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20220819060801.10443-1-jinpu.wang@ionos.com>
-References: <20220819060801.10443-1-jinpu.wang@ionos.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-dma_map_sg return 0 on error.
+Hi Linus,
 
-Cc: Paul Cercueil <paul@crapouillou.net>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: linux-mips@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org
+Here's a PR with a couple of MMC fixes intended for v6.0-rc2. Details about the
+highlights are as usual found in the signed tag.
 
-Signed-off-by: Jack Wang <jinpu.wang@ionos.com>
----
- drivers/mmc/host/jz4740_mmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Please pull this in!
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index b1d563b2ed1b..666600055b06 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -308,7 +308,7 @@ static int jz4740_mmc_prepare_dma_data(struct jz4740_mmc_host *host,
- 			data->sg_len,
- 			dir);
- 
--	if (sg_count <= 0) {
-+	if (!sg_count) {
- 		dev_err(mmc_dev(host->mmc),
- 			"Failed to map scatterlist for DMA operation\n");
- 		return -EINVAL;
--- 
-2.34.1
+Kind regards
+Ulf Hansson
 
+
+The following changes since commit 568035b01cfb107af8d2e4bd2fb9aea22cf5b868:
+
+  Linux 6.0-rc1 (2022-08-14 15:50:18 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.0-rc1
+
+for you to fetch changes up to a0753ef66c34c1739580219dca664eda648164b7:
+
+  mmc: sdhci-of-dwcmshc: Re-enable support for the BlueField-3 SoC (2022-08-15 19:31:04 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - meson-gx: Fix error handling in ->probe()
+ - mtk-sd: Fix a command problem when using cqe off/disable
+ - pxamci: Fix error handling in ->probe()
+ - sdhci-of-dwcmshc: Fix broken support for the BlueField-3 variant
+
+----------------------------------------------------------------
+Christophe JAILLET (3):
+      mmc: pxamci: Fix an error handling path in pxamci_probe()
+      mmc: pxamci: Fix another error handling path in pxamci_probe()
+      mmc: meson-gx: Fix an error handling path in meson_mmc_probe()
+
+Liming Sun (1):
+      mmc: sdhci-of-dwcmshc: Re-enable support for the BlueField-3 SoC
+
+Wenbin Mei (1):
+      mmc: mtk-sd: Clear interrupts when cqe off/disable
+
+ drivers/mmc/host/meson-gx-mmc.c     |  6 ++++--
+ drivers/mmc/host/mtk-sd.c           |  6 ++++++
+ drivers/mmc/host/pxamci.c           |  4 ++--
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 16 ++++++++++++++--
+ 4 files changed, 26 insertions(+), 6 deletions(-)
