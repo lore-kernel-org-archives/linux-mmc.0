@@ -2,90 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A0D2C32772
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 19:08:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 792E1C32772
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 Aug 2022 21:11:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1351104AbiHSTIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 Aug 2022 15:08:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44202 "EHLO
+        id S1352222AbiHSVLA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 Aug 2022 17:11:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51586 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1351089AbiHSTI2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 15:08:28 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73EB532AA9;
-        Fri, 19 Aug 2022 12:08:25 -0700 (PDT)
-Received: from fllv0035.itg.ti.com ([10.64.41.0])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 27JJ7ZR4090751;
-        Fri, 19 Aug 2022 14:07:35 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1660936055;
-        bh=u9P/5Oz+onGjKnverq4DWRIAD3ByWF1SyU5y0haCG5c=;
-        h=From:To:CC:Subject:Date;
-        b=OU120/eiD1tFkJStijVybhM3IjU8LE4xI31Dz7a1nKhKJI8C3ScfNp41BCV21tjHm
-         RS/iTeHk/aqCSLpGyCvyzTn4dcV9HPSQ6uh22Mg9tHeXV6gg2JH5sNra3eSZKrf8an
-         Bpj9i6KKbd++ir6hozvaxL4mDIRLnIOrCzlDiIsA=
-Received: from DFLE104.ent.ti.com (dfle104.ent.ti.com [10.64.6.25])
-        by fllv0035.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 27JJ7ZVP123338
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 19 Aug 2022 14:07:35 -0500
-Received: from DFLE111.ent.ti.com (10.64.6.32) by DFLE104.ent.ti.com
- (10.64.6.25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6; Fri, 19
- Aug 2022 14:07:35 -0500
-Received: from fllv0039.itg.ti.com (10.64.41.19) by DFLE111.ent.ti.com
- (10.64.6.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6 via
- Frontend Transport; Fri, 19 Aug 2022 14:07:35 -0500
-Received: from LT5CD112GSQZ.ent.ti.com (ileax41-snat.itg.ti.com [10.172.224.153])
-        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 27JJ7T2s051038;
-        Fri, 19 Aug 2022 14:07:30 -0500
-From:   Apurva Nandan <a-nandan@ti.com>
-To:     Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
-        Santosh Shilimkar <ssantosh@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Marc Zyngier <maz@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-CC:     Apurva Nandan <a-nandan@ti.com>, Hari Nagalla <hnagalla@ti.com>
-Subject: [PATCH 0/3] Fix ti,sci-inta/intr and mmc dtbs_check warnings for TI K3 platforms
-Date:   Sat, 20 Aug 2022 00:37:26 +0530
-Message-ID: <20220819190729.32358-1-a-nandan@ti.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S1348895AbiHSVKq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 Aug 2022 17:10:46 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8787EE095B
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 14:10:45 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id s11so7032309edd.13
+        for <linux-mmc@vger.kernel.org>; Fri, 19 Aug 2022 14:10:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:subject:content-language:cc:to:from
+         :user-agent:mime-version:date:message-id:from:to:cc;
+        bh=NBYnEE+ZcGcA5nR0OncsdiejmoJcs4SXrksqg8rn0TE=;
+        b=EiyN8qkZuhsNuDJ+RsVJv9zoP1v86cPewj3dCCdAj0WYbrTz3IirRHornfoKHN2EX1
+         RblJRqealF3qlKnPECTIwKWZZ/zDWPFp3ltvIqug1U99zKehBLyIfmijWjGfsoKf/rlr
+         PwCNSiAbveAo1fecac9NSaBqZ0DR5MX51x3PMTOl+LVh4E2UISSLNP694xM6XfZBtlVu
+         jfBiCPlbCjMBKKvsRB5VJFePvicx5pS0XrEWAl61WlC9Np9Fxn/0tiehNp+8gWSOV25i
+         m0Kgl4NlEDFPmR4XnHYZNzeV57bqLO+Hp6BTcwZO/4YrlDwH8F1Jx7p1Q1pJbuaiSneT
+         76FA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:subject:content-language:cc:to:from
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc;
+        bh=NBYnEE+ZcGcA5nR0OncsdiejmoJcs4SXrksqg8rn0TE=;
+        b=ijEcpvNnmsdlNn7U5v6kFEIwCH4ld5ny2tRFQaShwzJgefpr6Yg/tZeOSKFKKAO7sY
+         BxPknbLRKFJUgKwU+3W/F7DhKt2c/zz4UhVjubVhGw6ij1Xk4wfjoGJYj3taMzHr4PzE
+         MyQ2vsHQQnvACyo6fon14SIWgPSP52AmV64sCMFMDhvaGrzYZ42vuoNtkEF+VYTtNOpF
+         SqR3KtLeUCo+I+rd3nddfFdaua8gW6jcf/bm3i9qcjJbNzxAMAdTU6a1PWHVHkwJFlyX
+         loags4UB5WjFlgaHnJWUDIYq279+TDuShhdFgST9V6w+5+4qHnDAA0l8/4/lVScOVj4Q
+         GFbA==
+X-Gm-Message-State: ACgBeo3LBS7+dwOUorFVZofpXSh8JtLUG6BQJ04VPD4TL7aM8sMM2cxl
+        if+g2CIgY+Z/KmBqol3Y3YCN7vHQ+4g=
+X-Google-Smtp-Source: AA6agR4VpzpXQDagnJncbtzN+KhdcC2/IhTNEsoqKtJlpg0z+zwnqYF71XvfVTe656IzmITn63iZjw==
+X-Received: by 2002:a05:6402:10cc:b0:446:491f:d6dd with SMTP id p12-20020a05640210cc00b00446491fd6ddmr3105505edu.360.1660943443774;
+        Fri, 19 Aug 2022 14:10:43 -0700 (PDT)
+Received: from ?IPV6:2a01:c23:c5ac:3600:6819:de7b:5db7:493? (dynamic-2a01-0c23-c5ac-3600-6819-de7b-5db7-0493.c23.pool.telefonica.de. [2a01:c23:c5ac:3600:6819:de7b:5db7:493])
+        by smtp.googlemail.com with ESMTPSA id r10-20020a17090609ca00b007317ad372c0sm2785649eje.20.2022.08.19.14.10.41
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 19 Aug 2022 14:10:42 -0700 (PDT)
+Message-ID: <b94b7f5b-1095-33a5-b1a0-20a6e2281bce@gmail.com>
+Date:   Fri, 19 Aug 2022 23:10:34 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.12.0
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
+Content-Language: en-US
+Subject: [PATCH v2 0/2] mmc: meson-gx: add SDIO interrupt support
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This series fixes the following warnings common across all TI K3
-platforms:
+Add SDIO interrupt support. Successfully tested on a S905X4-based
+system (V3 register layout) with a BRCM4334 SDIO wifi module
+(brcmfmac driver). The implementation also considers the potential
+race discussed in [0].
 
-k3-j721e-common-proc-board.dtb: interrupt-controller@33d00000: Unevaluated properties are not allowed ('#interrupt-cells' was unexpected)
-From schema: linux/Documentation/devicetree/bindings/interrupt-controller/ti,sci-inta.yaml
+[0] https://lore.kernel.org/linux-arm-kernel/CAPDyKFoJDhjLkajBHgW3zHasvYYri77NQoDpiW-BpKgkdjtOyg@mail.gmail.com/
 
-k3-j721s2-common-proc-board.dtb: mmc@4f80000: Unevaluated properties are not allowed ('dma-coherent' was unexpected)
-From schema: linux/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+v2:
+- use new SDIO interrupt API
 
-k3-j721s2-common-proc-board.dtb: interrupt-controller@310e0000: Unevaluated properties are not allowed ('reg' was unexpected)
-From schema: linux/Documentation/devicetree/bindings/interrupt-controller/ti,sci-intr.yaml
+Heiner Kallweit (2):
+  mmc: meson-gx: adjust and revive constant IRQ_EN_MASK
+  mmc: meson-gx: add SDIO interrupt support
 
-Apurva Nandan (3):
-  dt-bindings: irqchip: ti, sci-intr/inta: Fix warning
-    '#interrupt-cells' was unexpected
-  dt-bindings: mmc: Fix 'dma-coherent' was unexpected
-  dt-bindings: interrupt-controller: Fix 'reg' was unexpected
-
- .../devicetree/bindings/interrupt-controller/ti,sci-inta.yaml  | 3 +++
- .../devicetree/bindings/interrupt-controller/ti,sci-intr.yaml  | 3 +++
- Documentation/devicetree/bindings/mmc/sdhci-am654.yaml         | 3 +++
- 3 files changed, 9 insertions(+)
+ drivers/mmc/host/meson-gx-mmc.c | 90 ++++++++++++++++++++++++++-------
+ 1 file changed, 71 insertions(+), 19 deletions(-)
 
 -- 
-2.17.1
+2.37.2
 
