@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8186C25B08
-	for <linux-mmc@archiver.kernel.org>; Sat, 20 Aug 2022 19:59:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D25E8C25B08
+	for <linux-mmc@archiver.kernel.org>; Sat, 20 Aug 2022 19:59:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233510AbiHTT7B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 20 Aug 2022 15:59:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47606 "EHLO
+        id S233894AbiHTT7F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 20 Aug 2022 15:59:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47056 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231792AbiHTT6t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Aug 2022 15:58:49 -0400
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79FF431373
-        for <linux-mmc@vger.kernel.org>; Sat, 20 Aug 2022 12:58:45 -0700 (PDT)
-Received: by mail-pj1-x1032.google.com with SMTP id t2-20020a17090a4e4200b001f21572f3a4so7842611pjl.0
-        for <linux-mmc@vger.kernel.org>; Sat, 20 Aug 2022 12:58:45 -0700 (PDT)
+        with ESMTP id S232782AbiHTT6x (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 20 Aug 2022 15:58:53 -0400
+Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34437326E1
+        for <linux-mmc@vger.kernel.org>; Sat, 20 Aug 2022 12:58:48 -0700 (PDT)
+Received: by mail-pf1-x430.google.com with SMTP id p125so7053569pfp.2
+        for <linux-mmc@vger.kernel.org>; Sat, 20 Aug 2022 12:58:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
          :cc;
-        bh=QEv/uHric1e3HRAJnfhfMt3L6vkUM+PkMKQG6mAbLXU=;
-        b=1oJM9XCmpE1/WL/MDvVdAQ1P+MNr3+GJa+IaNzNGsHW/kPt91F119KXksUinQ8mDcQ
-         ilVJg2PMxhvaHot80wyDv/2OMkzKYGUVzuhEsQQ0b+8DITCykxbcK3tzKqe03V9+8Egb
-         FBAZunO2e20vSlfRaPwpH1XTVd2rm1xVRgIdUmuXjByhWSQVjhOExdTv6H5XeaEXQ4ic
-         ymlp+cpfrm9AVz33V8Dew2QiAcsvaOIMG7tcAa6O2s56QYkzpyNI/WXliT9F/oV3ITNu
-         gTHNeBDsZPzUk9WCSxgvVTVysz1Ydya+mIitQ3GNrXujNjWS/TZ0v9PfXtPo1bWq3kPw
-         5EHA==
+        bh=jQxqJRMDZJaQoBVA5zc0nS90T27LyxE0WQ7RiUL+5/8=;
+        b=lVm13wXfoqOK0P3bQudLyy/ZUTjxwI51VH7FwKO1pHhDjXGCNyQ+NO8tVV/5w+LOJE
+         dSRm0PxdWGmRubhjOT9/BrvnAWszZTu55w1b2YHghHlN2YZMRSV3G6opjlv+L5SdWLq0
+         tOirAnisHMz9Y4lncQW0DIcgyIEk6KtD5KzxVLUv+aROuIrRIiwg8HlfHdFMsTEQz2BM
+         dIPbQbB1X5YR6jgFjRctS0GlDrG0beEZAKew6+Epd+xhDW1Ci8LmzFheQYg30koO1a/4
+         0JBBMZproFdQzdRcuhSrHXu+m3jGtYlrznMY25qwBa2e8MLTYVrdQW1ueKhcG6s8fPP0
+         3I8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=references:in-reply-to:message-id:date:subject:cc:to:from
          :x-gm-message-state:from:to:cc;
-        bh=QEv/uHric1e3HRAJnfhfMt3L6vkUM+PkMKQG6mAbLXU=;
-        b=xBIKWcJVp7Y113Vhziq29Z3+ToNGP8QEeBEycA2f/a/nrv0DWcA3IIm36fcz+r6sN+
-         c3MBS8IwoZJVjoP+UwfDT6uaVZvbqzH1hLRtidOALz9pFL2tiWjfjPgBvmVU92vwWZRS
-         IbdgU78O3DcrZ1yByTtnNmbABuy9F6E7cr3ey1ACF7tYiT0LbqZtIzO0wdIP9Co2r/fu
-         Z2mf9abPthW44AYAsio2Gxhd0n9QnhmWIHZgyWUHhHQLmAn2SINeBUe4kfOwdC9e2wQZ
-         ptA+Kqmrr0KiKzrA619a8nVvd9SajzkVu61DokSKAkzrAKDyndeTseF7mUzTJ8YVuBF/
-         O2YA==
-X-Gm-Message-State: ACgBeo1+FG2k12mbhbBDSvmoCj2Pf9JeCoZiFE/X2VuLzRNRryGx1ui6
-        lydBBeJeLJkyBrngK+DJU7DgIw==
-X-Google-Smtp-Source: AA6agR49HGO4HDdHFsRa+yopa0vFpMTXKbksBACq1mLjCWen6UwbrgPQvlcpf5CXkJ6u3JLyhqgFjw==
-X-Received: by 2002:a17:902:f548:b0:172:655d:97ad with SMTP id h8-20020a170902f54800b00172655d97admr13027530plf.37.1661025525074;
-        Sat, 20 Aug 2022 12:58:45 -0700 (PDT)
+        bh=jQxqJRMDZJaQoBVA5zc0nS90T27LyxE0WQ7RiUL+5/8=;
+        b=nhlu/uM8Whd7OyJ1IQXAUORxlzh22l88XN2wBRTo5J5AjElndizC/4Ebn/K9fQvtWC
+         nRzxlbUzpaeC3UxeGriHDFu6Ngs1GwEDigGEzQpTMs+Q+egiyya9JcBwSHIGb95EREGh
+         NuxRKUKg0rgg6n0OmxOCIaHtvn1emIbfV9aa6eutjizexNUnuod9j8K2y9nlpEJ+emfI
+         arLS7jvr5C7b0X3UEVHQJ8BJmjS/yH9vnaw1Zj3A6C7ftsixpsV85x40rj6/cDp+gbhz
+         IfOJIsF0UUN8cc4JPgVb8P0VTS+6QQgsIIvFY89DqENxn6hkpQGYlrVXPPoB7U5X5mtd
+         BS4Q==
+X-Gm-Message-State: ACgBeo3jwNFaPBIyr6Ph5Hwos5jXkTgs4ScBsy1yoKrcqmR7PAGCU8zh
+        sFwnJTRgMeW1M8+fyIngs3uURw==
+X-Google-Smtp-Source: AA6agR6V+W12g3z/SCutMu3xdVCV0zPyZftrloynOKYKb3GKOxs7BHoPTGP/IfXxUhhiUtX/rmdk7w==
+X-Received: by 2002:a63:77ce:0:b0:429:f679:2335 with SMTP id s197-20020a6377ce000000b00429f6792335mr11080510pgc.327.1661025527490;
+        Sat, 20 Aug 2022 12:58:47 -0700 (PDT)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id u66-20020a626045000000b005363bc65bb1sm2316794pfb.91.2022.08.20.12.58.42
+        by smtp.gmail.com with ESMTPSA id u66-20020a626045000000b005363bc65bb1sm2316794pfb.91.2022.08.20.12.58.45
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 20 Aug 2022 12:58:44 -0700 (PDT)
+        Sat, 20 Aug 2022 12:58:47 -0700 (PDT)
 From:   Brad Larson <brad@pensando.io>
 To:     linux-arm-kernel@lists.infradead.org
 Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
@@ -61,9 +61,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
         suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
         ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: [PATCH v6 12/17] spi: dw: Add support for AMD Pensando Elba SoC
-Date:   Sat, 20 Aug 2022 12:57:45 -0700
-Message-Id: <20220820195750.70861-13-brad@pensando.io>
+Subject: [PATCH v6 13/17] mmc: sdhci-cadence: Enable device specific override of writel()
+Date:   Sat, 20 Aug 2022 12:57:46 -0700
+Message-Id: <20220820195750.70861-14-brad@pensando.io>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220820195750.70861-1-brad@pensando.io>
 References: <20220820195750.70861-1-brad@pensando.io>
@@ -73,119 +73,87 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Brad Larson <blarson@amd.com>
 
-The AMD Pensando Elba SoC includes a DW apb_ssi v4 controller
-with device specific chip-select control.  The Elba SoC
-provides four chip-selects where the native DW IP supports
-two chip-selects.  The Elba DW_SPI instance has two native
-CS signals that are always overridden.
+SoCs with device specific Cadence implementation, such as setting
+byte-enables before the write, need to override writel().  Add a
+callback where the default is writel() for all existing chips.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- drivers/spi/spi-dw-mmio.c | 77 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 77 insertions(+)
+ drivers/mmc/host/sdhci-cadence.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
-index 26c40ea6dd12..36b8c5e10bb3 100644
---- a/drivers/spi/spi-dw-mmio.c
-+++ b/drivers/spi/spi-dw-mmio.c
-@@ -53,6 +53,24 @@ struct dw_spi_mscc {
- 	void __iomem        *spi_mst; /* Not sparx5 */
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 6f2de54a5987..708d4297f241 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -67,6 +67,7 @@ struct sdhci_cdns_phy_param {
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
+ 	bool enhanced_strobe;
++	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+ 	unsigned int nr_phy_params;
+ 	struct sdhci_cdns_phy_param phy_params[];
+ };
+@@ -90,6 +91,12 @@ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+ 	{ "cdns,phy-dll-delay-strobe", SDHCI_CDNS_PHY_DLY_STROBE, },
  };
  
-+struct dw_spi_elba {
-+	struct regmap *syscon;
-+};
++static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
++			       void __iomem *reg)
++{
++	writel(val, reg);
++}
 +
-+/*
-+ * Elba SoC does not use ssi, pin override is used for cs 0,1 and
-+ * gpios for cs 2,3 as defined in the device tree.
-+ *
-+ * cs:  |       1               0
-+ * bit: |---3-------2-------1-------0
-+ *      |  cs1   cs1_ovr   cs0   cs0_ovr
-+ */
-+#define ELBA_SPICS_REG			0x2468
-+#define ELBA_SPICS_SHIFT(cs)		(2 * (cs))
-+#define ELBA_SPICS_MASK(cs)		(0x3 << ELBA_SPICS_SHIFT(cs))
-+#define ELBA_SPICS_SET(cs, val)	\
-+			((((val) << 1) | 0x1) << ELBA_SPICS_SHIFT(cs))
-+
- /*
-  * The Designware SPI controller (referred to as master in the documentation)
-  * automatically deasserts chip select when the tx fifo is empty. The chip
-@@ -237,6 +255,64 @@ static int dw_spi_canaan_k210_init(struct platform_device *pdev,
- 	return 0;
+ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 				    u8 addr, u8 data)
+ {
+@@ -104,17 +111,17 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 
+ 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+ 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	tmp |= SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
+ 	if (ret)
+ 		return ret;
+ 
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+ 				 0, 10);
+@@ -191,7 +198,7 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
+ 	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+ 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
+ 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
+-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++	priv->priv_writel(priv, tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
  }
  
-+static void dw_spi_elba_override_cs(struct dw_spi_elba *dwselba, int cs, int enable)
-+{
-+	regmap_update_bits(dwselba->syscon, ELBA_SPICS_REG, ELBA_SPICS_MASK(cs),
-+			   ELBA_SPICS_SET(cs, enable));
-+}
-+
-+static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
-+{
-+	struct dw_spi *dws = spi_master_get_devdata(spi->master);
-+	struct dw_spi_mmio *dwsmmio = container_of(dws, struct dw_spi_mmio, dws);
-+	struct dw_spi_elba *dwselba = dwsmmio->priv;
-+	u8 cs;
-+
-+	cs = spi->chip_select;
-+	if (cs < 2)
-+		dw_spi_elba_override_cs(dwselba, spi->chip_select, enable);
-+
-+	/*
-+	 * The DW SPI controller needs a native CS bit selected to start
-+	 * the serial engine.
-+	 */
-+	spi->chip_select = 0;
-+	dw_spi_set_cs(spi, enable);
-+	spi->chip_select = cs;
-+}
-+
-+static int dw_spi_elba_init(struct platform_device *pdev,
-+			    struct dw_spi_mmio *dwsmmio)
-+{
-+	const char *syscon_name = "amd,pensando-elba-syscon";
-+	struct device_node *np = pdev->dev.of_node;
-+	struct device_node *node;
-+	struct dw_spi_elba *dwselba;
-+	struct regmap *regmap;
-+
-+	node = of_parse_phandle(np, syscon_name, 0);
-+	if (!node) {
-+		dev_err(&pdev->dev, "failed to find %s\n", syscon_name);
-+		return -ENODEV;
-+	}
-+
-+	regmap = syscon_node_to_regmap(node);
-+	if (IS_ERR(regmap)) {
-+		dev_err(&pdev->dev, "syscon regmap lookup failed\n");
-+		return PTR_ERR(regmap);
-+	}
-+
-+	dwselba = devm_kzalloc(&pdev->dev, sizeof(*dwselba), GFP_KERNEL);
-+	if (!dwselba)
-+		return -ENOMEM;
-+
-+	dwselba->syscon = regmap;
-+	dwsmmio->priv = dwselba;
-+	dwsmmio->dws.set_cs = dw_spi_elba_set_cs;
-+
-+	return 0;
-+}
-+
- static int dw_spi_mmio_probe(struct platform_device *pdev)
- {
- 	int (*init_func)(struct platform_device *pdev,
-@@ -352,6 +428,7 @@ static const struct of_device_id dw_spi_mmio_of_match[] = {
- 	{ .compatible = "intel,thunderbay-ssi", .data = dw_spi_intel_init},
- 	{ .compatible = "microchip,sparx5-spi", dw_spi_mscc_sparx5_init},
- 	{ .compatible = "canaan,k210-spi", dw_spi_canaan_k210_init},
-+	{ .compatible = "amd,pensando-elba-spi", .data = dw_spi_elba_init},
- 	{ /* end of table */}
- };
- MODULE_DEVICE_TABLE(of, dw_spi_mmio_of_match);
+ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+@@ -223,7 +230,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	 */
+ 	for (i = 0; i < 2; i++) {
+ 		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+-		writel(tmp, reg);
++		priv->priv_writel(priv, tmp, reg);
+ 
+ 		ret = readl_poll_timeout(reg, tmp,
+ 					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
+@@ -386,6 +393,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	priv->nr_phy_params = nr_phy_params;
+ 	priv->hrs_addr = host->ioaddr;
+ 	priv->enhanced_strobe = false;
++	priv->priv_writel = cdns_writel;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
 -- 
 2.17.1
 
