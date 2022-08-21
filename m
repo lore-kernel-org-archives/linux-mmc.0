@@ -2,75 +2,125 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C54AC00140
-	for <linux-mmc@archiver.kernel.org>; Sun, 21 Aug 2022 06:17:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5F09C32772
+	for <linux-mmc@archiver.kernel.org>; Sun, 21 Aug 2022 17:50:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229459AbiHUGR5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 21 Aug 2022 02:17:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44516 "EHLO
+        id S229690AbiHURt7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 21 Aug 2022 13:49:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39256 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229441AbiHUGR4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Aug 2022 02:17:56 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10E9420F6A;
-        Sat, 20 Aug 2022 23:17:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=5GHQ8lsVBIhq+oelqV2y6+nyZwMa9j4Xf+XLM5s2Zb0=; b=F5FpUK1WANEgjo+iDNQ2Mh29GI
-        FmHm6mXPXNLIsJFejBP0Asx3X787+4h3/8U8EcPWduLPve964t+OH/AiY3qNChCcVvIddsTGzMwfY
-        2h0sWUiikHF2Fy1eH79ET3Gz8v8Na+DFwZ677VPQ4/9rhKnBJF7Zfxw8nur6utLKAimrJlmZ6etfU
-        BC/JM4GuFCFazyE9zJp/R5/48wVKAT75ib0Dbo3e3fCIMhwbOx9UV9PJQlne5jn88r6mgEOunx0il
-        sAik/mt2tAFTaiPKdpX0+PK8U4NFm2jIPsL1uYJCl65BYU+5pRyBUmS6DNjPudgNJwslKlOmtoD9d
-        LWyBwysA==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1oPeHI-006gRs-I3; Sun, 21 Aug 2022 06:17:44 +0000
-Date:   Sat, 20 Aug 2022 23:17:44 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Vadym Kochan <vadym.kochan@plvision.eu>
-Cc:     Robin Murphy <robin.murphy@arm.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Christoph Hellwig <hch@infradead.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Elad Nachman <enachman@marvell.com>, iommu@lists.linux.dev,
-        Mickey Rachamim <mickeyr@marvell.com>
-Subject: Re: [PATCH] mmc: sdhci-xenon: Fix 2G limitation on AC5 SoC
-Message-ID: <YwHOCHmKaf7yfgOD@infradead.org>
-References: <20220808095237.GA15939@plvision.eu>
- <6c94411c-4847-526c-d929-c9523aa65c11@intel.com>
- <20220808122652.GA6599@plvision.eu>
- <3f96b382-aede-1f52-33cb-5f95715bdf59@intel.com>
- <3d16ebad-ea6c-555e-2481-ca5fb08a6c66@arm.com>
- <20220816205129.GA6438@plvision.eu>
- <94888b3b-8f54-367d-c6b4-5ebfeeafe4c4@arm.com>
- <20220817160730.GA17202@plvision.eu>
- <80d2538c-bac4-cc4f-85ae-352fcf86321d@arm.com>
- <20220818120740.GA21548@plvision.eu>
+        with ESMTP id S229505AbiHURt7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Aug 2022 13:49:59 -0400
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 69B4E17E12;
+        Sun, 21 Aug 2022 10:49:57 -0700 (PDT)
+Received: by mail-lj1-x231.google.com with SMTP id by6so8736137ljb.11;
+        Sun, 21 Aug 2022 10:49:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc;
+        bh=tLYVuxhekI0KOsYotvxE+Kgdxmejr6Xy78RrCK136Ao=;
+        b=oFF8NIShAZGvRV2blwmNfW/ZfonWvnbfYd5ttHgVfxlJH6iDdup4z8m9/npa/6vSmu
+         PkF0Sf29ni0+dDIljlFW65naz2m1EWvXC6LEbXRtJkv7szHQtGC4pz5JFESptki7pcXj
+         zIUQZ5ch5KOhi8f0oNZacmI5cvEmF4UWAdfJ+7GUCfltwF9c4L9fSDROSRpl5rslrn+b
+         m+jMA6b0v5xdEYzuumkSjone5KJ04xNuIFW79CgdKzQmtppD/nkWARhFKIDCKaCy5Ln6
+         qMKCkjOlNDRFRXxJzLFanT6CdefFpPjxZgMGn2x/lyvU7ggMynruHMktDb/iQ6KlVVow
+         83Hg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
+        bh=tLYVuxhekI0KOsYotvxE+Kgdxmejr6Xy78RrCK136Ao=;
+        b=jnYYWLAGwj/+NfrFhJIUrEajy2tSC0r38oHdZBrNRSgZWvPe7gZHqTjVkuhwxKQ2xE
+         6wIXbNBsDTleq0VL9Kul1TsRSMAFFkhRXjj10i/3g5ne2Yydrto58pin9zVCLy3x3231
+         Dlv6+sauOJldBkYch/dEs1kb5ltcdvQzqaiFcMeZz7kJvbnaDV0os0L0kMQ1dNdOmjKh
+         gtrrHA2Omxzo3cZIAGCwgcAU7niNHVd6RQdi1E/pcmEI9Tz67mnU+tHDS7p1rsicDyx/
+         75SqnMgNQGmH3P43yojg4skF2PTKS/DdKeKFTo8BjGQVCLdkFrTxqnC2D85fSqiSrxIE
+         Ts3Q==
+X-Gm-Message-State: ACgBeo165gOGFvjXwGYYaLmRJHpBW6GFoXyosesAOwB4vhCs9Y+Fff4x
+        CL7f/jeU6E4mOoJixFxuahI=
+X-Google-Smtp-Source: AA6agR5nAeNcHicAEyCie+REXBxjdJ7/RIcmfUJ9DJKrrL6dDfIqKBDFw3Wt+K8jDdCjcY3ghVxC0w==
+X-Received: by 2002:a05:651c:546:b0:25f:dd42:5d08 with SMTP id q6-20020a05651c054600b0025fdd425d08mr5051330ljp.239.1661104195766;
+        Sun, 21 Aug 2022 10:49:55 -0700 (PDT)
+Received: from mobilestation ([95.79.140.178])
+        by smtp.gmail.com with ESMTPSA id c15-20020a19e34f000000b00490b5f09973sm1568893lfk.92.2022.08.21.10.49.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 21 Aug 2022 10:49:55 -0700 (PDT)
+Date:   Sun, 21 Aug 2022 20:49:52 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <brad@pensando.io>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        blarson@amd.com, brijeshkumar.singh@amd.com,
+        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
+Subject: Re: [PATCH v6 04/17] dt-bindings: spi: dw: Add AMD Pensando Elba SoC
+ SPI Controller bindings
+Message-ID: <20220821174952.5i5pfftxt53dmqv3@mobilestation>
+References: <20220820195750.70861-1-brad@pensando.io>
+ <20220820195750.70861-5-brad@pensando.io>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220818120740.GA21548@plvision.eu>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+In-Reply-To: <20220820195750.70861-5-brad@pensando.io>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Aug 18, 2022 at 03:07:40PM +0300, Vadym Kochan wrote:
-> It works with the following changes:
+On Sat, Aug 20, 2022 at 12:57:37PM -0700, Brad Larson wrote:
+> From: Brad Larson <blarson@amd.com>
 > 
->     #1 dma-ranges = <0x0 0x0 0x2 0x0 0x0 0x80000000>;
+> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
 > 
->     #3 swiotlb="force"
+> Signed-off-by: Brad Larson <blarson@amd.com>
+> ---
+>  .../devicetree/bindings/spi/snps,dw-apb-ssi.yaml      | 11 +++++++++++
+>  1 file changed, 11 insertions(+)
 > 
-> Is it OK to force the memory allocation from the start for the swiotlb ?
+> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> index 37c3c272407d..403d6416f7ac 100644
+> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> @@ -37,6 +37,15 @@ allOf:
+>      else:
+>        required:
+>          - interrupts
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            enum:
+> +              - amd,pensando-elba-spi
+> +    then:
+> +      required:
+> +        - amd,pensando-elba-syscon
 
-It should be ok, but isn't really optimal.
+Please add the "amd,pensando-elba-syscon" property definition as I
+asked here:
+https://lore.kernel.org/lkml/20220704131810.kabkuy6e4qmhfm3n@mobilestation/
 
-I wonder if we should just allow DT to specify the swiotlb buffer
-location.  Basically have yet another RESERVEDMEM_OF_DECLARE variant
-for it, which shouldn't be all that much work except for figuring
-out the interaction with the various kernel command line options.
+-Sergey
+
+>  
+>  properties:
+>    compatible:
+> @@ -75,6 +84,8 @@ properties:
+>                - renesas,r9a06g032-spi # RZ/N1D
+>                - renesas,r9a06g033-spi # RZ/N1S
+>            - const: renesas,rzn1-spi   # RZ/N1
+> +      - description: AMD Pensando Elba SoC SPI Controller
+> +        const: amd,pensando-elba-spi
+>  
+>    reg:
+>      minItems: 1
+> -- 
+> 2.17.1
+> 
