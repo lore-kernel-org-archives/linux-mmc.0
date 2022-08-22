@@ -2,97 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 59F2EC32772
-	for <linux-mmc@archiver.kernel.org>; Sun, 21 Aug 2022 20:21:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64778C32792
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 05:16:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231690AbiHUUVh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 21 Aug 2022 16:21:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45118 "EHLO
+        id S229737AbiHVFQJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 01:16:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231687AbiHUUVg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 21 Aug 2022 16:21:36 -0400
-Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF4531AF33;
-        Sun, 21 Aug 2022 13:21:34 -0700 (PDT)
-Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-11c9af8dd3eso10353665fac.10;
-        Sun, 21 Aug 2022 13:21:34 -0700 (PDT)
+        with ESMTP id S232127AbiHVFQI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 01:16:08 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24D17252B9
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Aug 2022 22:16:06 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id t5so12341203edc.11
+        for <linux-mmc@vger.kernel.org>; Sun, 21 Aug 2022 22:16:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=ionos.com; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc;
+        bh=9XRquiKtczGZrdHPEqA6WSyvm81oF4bOEAQ+13HYerQ=;
+        b=SAiIxcHb4kUDUc3VEa2ho1tzuxThoNNZY/1Uy6ob5cxWpDMAgeWid7qhh1JGHzMGbM
+         adHSfp3pJPdwumkTe334GAsPu2EKY2zVf0ZgMGTJDuJ3SrI6UEqh91/qCHuGRXQw1snv
+         /1e79EhM6MjTf5SwV0uMLfQFrJ1HoFYfZpqvevvweqdEzjyYFlZtmV/EJfgjhfVj3EUi
+         0XsC/T4XkSWokdnUY+/CPOVzfVcr8ThORv6pb4680aMO7Op76cXl+fqJrMS3ioeO09hy
+         SzOT7E/D2WeM6kDvgcsmWkGn1PHym4wj8/UETx7DyE0Kmsc+CgU2T07R9NxHLpKuhXhA
+         8OYA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=message-id:date:subject:references:in-reply-to:cc:to:from
-         :x-gm-message-state:from:to:cc;
-        bh=kHR/6wmfR6fjHyTF56Wxh26tOWvFD1gj0BvoOySyPBs=;
-        b=AyK/y6TOie4meC28b9u+7gIlG8XUxbqaxvMtTq2WJC/MHuf1riyeEMGb75GatSt6Zf
-         O0TkW0kRtZf5CmYkh/rLQr23DBUPd27x0d/HriZ/RQp7eKD35fMTpDYnd41hR6ogZymV
-         r5uM6X3gqennRMasZKESsEJmvRH6MZs7hbmKLFyMLrhtPh1ONxauOK3mLpG2NqoP9IDL
-         skG9SeL1fnqjjgfZb+A55C4yUFI3Ab7HXQ2EuHyPxumr2BJlPxSLxNRF552w+QP7Lk88
-         X7Mn7wtHD06g1YcStaDfDPpjU2Yg9G0dBj1Rt3IMMIsIseTLomcdQUzWP2Hmv8qVe6aZ
-         /Vsg==
-X-Gm-Message-State: ACgBeo0nmW/AC0RoNfnVbYDMq+lRU/6dZB+7gH+U4i7RgQXU3N4tIWzj
-        C0LTxablTtDedFQtpERN9w==
-X-Google-Smtp-Source: AA6agR4dNBn7HCgLqySmVeHObrD9TKjx/Hf7tziNj/L0DLNZaljbG2Smhz4+E3PbOq86WWLQXNaLBQ==
-X-Received: by 2002:a05:6870:3282:b0:11d:10ad:a85d with SMTP id q2-20020a056870328200b0011d10ada85dmr3090979oac.181.1661113294253;
-        Sun, 21 Aug 2022 13:21:34 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id m3-20020a0568301e6300b00636d6571ff7sm2529660otr.70.2022.08.21.13.21.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Aug 2022 13:21:33 -0700 (PDT)
-Received: (nullmailer pid 1729154 invoked by uid 1000);
-        Sun, 21 Aug 2022 20:21:26 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-kernel@vger.kernel.org, yamada.masahiro@socionext.com,
-        fancer.lancer@gmail.com, krzk@kernel.org, piotrs@cadence.com,
-        devicetree@vger.kernel.org, samuel@sholland.org,
-        catalin.marinas@arm.com, gsomlo@gmail.com, lee.jones@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, arnd@arndb.de,
-        linux-mmc@vger.kernel.org, suravee.suthikulpanit@amd.com,
-        gerg@linux-m68k.org, thomas.lendacky@amd.com, will@kernel.org,
-        linux-arm-kernel@lists.infradead.org, broonie@kernel.org,
-        p.yadav@ti.com, brijeshkumar.singh@amd.com, blarson@amd.com,
-        adrian.hunter@intel.com, p.zabel@pengutronix.de,
-        andy.shevchenko@gmail.com, ulf.hansson@linaro.org,
-        alcooperx@gmail.com, rdunlap@infradead.org, robh+dt@kernel.org
-In-Reply-To: <20220820195750.70861-8-brad@pensando.io>
-References: <20220820195750.70861-1-brad@pensando.io> <20220820195750.70861-8-brad@pensando.io>
-Subject: Re: [PATCH v6 07/17] dt-bindings: reset: amd,pensando-elbasr-reset: Add AMD Pensando SR Reset Controller bindings
-Date:   Sun, 21 Aug 2022 15:21:26 -0500
-Message-Id: <1661113286.952331.1729150.nullmailer@robh.at.kernel.org>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc;
+        bh=9XRquiKtczGZrdHPEqA6WSyvm81oF4bOEAQ+13HYerQ=;
+        b=YFNGlmLfbNgNkBF0R+XfD/jy5ydocUsyzuRcOpgH0qf/2u/EcQoAi/LDT6NmNdBrVl
+         FwsCmYOsRqxy9OWyTD5O9OS/gRobat0sMUY1wHaxWvJdVllHeUa4MWhFnp9qU8f5otQW
+         TA94CNZXQFevrt1XnjnLE4xP9/8tIeW87c3xwR9s64AC7mLLgqEYwao/LJ6aQHzBxN84
+         lskFJZeyk3GTfDFDWP4eV7hjD2fTPnBGpzx0jW1TEqpZgY5t/ss11OdNYIx6oK8w0+C9
+         qfeGY1putj3H4afsG+chJH3cPUh0BnDVbpCdwIWaXBmBnRnpBtbGk1SGb6g+hp5ZshxK
+         K8ug==
+X-Gm-Message-State: ACgBeo2+010CPzr5cgfzavyXTShO4w+C3CoquF7pkQUKUxIwbsKMi5J3
+        1MzE3gWFcLAa+ZVvIvC0vohmZCvutljIoatrgbImMg==
+X-Google-Smtp-Source: AA6agR6LybaPwlMMl65wRvlyq8H6WWQJz/BQN9DIdJiuMLxwbfIvJqdASIjHGPhvc2W10vBYnlWtHxkr+SF+OLGyRk4=
+X-Received: by 2002:a05:6402:42d3:b0:435:2c49:313d with SMTP id
+ i19-20020a05640242d300b004352c49313dmr14569874edc.86.1661145364525; Sun, 21
+ Aug 2022 22:16:04 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220819060801.10443-1-jinpu.wang@ionos.com> <20220819060801.10443-18-jinpu.wang@ionos.com>
+ <CAFBinCCbjF_mkV+EaOtC0g_YbtX9TzBEN5fRJ_MiPaie5hxCwQ@mail.gmail.com>
+In-Reply-To: <CAFBinCCbjF_mkV+EaOtC0g_YbtX9TzBEN5fRJ_MiPaie5hxCwQ@mail.gmail.com>
+From:   Jinpu Wang <jinpu.wang@ionos.com>
+Date:   Mon, 22 Aug 2022 07:15:53 +0200
+Message-ID: <CAMGffEnmGPDyuPPhWN0vyTMOtCHzfOo-Je=dVJ6ed7494ekKgw@mail.gmail.com>
+Subject: Re: [PATCH v1 17/19] mmc: meson-mx-sdhc: Fix error check for dma_map_sg
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 20 Aug 2022 12:57:40 -0700, Brad Larson wrote:
-> From: Brad Larson <blarson@amd.com>
-> 
-> Document bindings for AMD Pensando Elba SR Reset Controller
-> 
-> Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
->  .../reset/amd,pensando-elbasr-reset.yaml      | 57 +++++++++++++++++++
->  1 file changed, 57 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.yaml
-> 
-
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
-
-yamllint warnings/errors:
-
-dtschema/dtc warnings/errors:
-Documentation/devicetree/bindings/reset/amd,pensando-elbasr-reset.example.dtb:0:0: /example-0/spi/spi@0: failed to match any schema with compatible: ['amd,pensando-elbasr']
-
-doc reference errors (make refcheckdocs):
-
-See https://patchwork.ozlabs.org/patch/
-
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
-
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
-
-pip3 install dtschema --upgrade
-
-Please check and re-submit.
-
+Hi Martin,
+On Sat, Aug 20, 2022 at 7:26 PM Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> Hello Jack,
+>
+> first of all: thank you for this patch!
+welcome.
+>
+> On Fri, Aug 19, 2022 at 8:08 AM Jack Wang <jinpu.wang@ionos.com> wrote:
+> [...]
+> > @@ -388,7 +388,7 @@ static int meson_mx_sdhc_map_dma(struct mmc_host *mmc, struct mmc_request *mrq)
+> >
+> >         dma_len = dma_map_sg(mmc_dev(mmc), data->sg, data->sg_len,
+> Does it also make sense to change the type of the dma_len variable
+> from (signed) int to "unsigned int" (a few lines above)?
+I double checked, it seems a good idea, I will do it in v2.
+>
+>
+> Best regards,
+> Martin
+Thx!
