@@ -2,85 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7273AC3F6B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 19:15:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 911B7C32772
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 19:16:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238398AbiHVTPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Aug 2022 15:15:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44044 "EHLO
+        id S237382AbiHVTQk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 15:16:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45974 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238332AbiHVTOx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 15:14:53 -0400
-Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0ACD2F381;
-        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
-Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-11c896b879bso14076782fac.3;
-        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
+        with ESMTP id S238853AbiHVTQ3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 15:16:29 -0400
+Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9650922523;
+        Mon, 22 Aug 2022 12:16:28 -0700 (PDT)
+Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-11d2dcc31dbso5944973fac.7;
+        Mon, 22 Aug 2022 12:16:28 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=+9mYtYRdtFYJ0G4uhdbdFfotHF7Sh4Tm00IctJc4L4s=;
-        b=PDvyOTd4ewNzUM1BUZaKm/vj5dItr+56cU6UuzIE5XGvD7WOAgNbwz67E8qlXhHbuM
-         fSXg3p/+lBXmhyX8P91qdrx4+glo0TBcl2M6WV+M0BkNLt6L+Fj87z1tthju+WHVBK1L
-         utKaIHZf4lPeRyvZNLPmKESVnwwIUq8RM2t2BZ8y/hLxYBSEveUrqEyD6BGwxvr3peoG
-         bJTdMxJUjnePlzlVx86amAbdLgVk5lyffMqRrfqZGS7U+k569uqpd/b28lAjofic59S0
-         8mxznaKb3dJrDGrKnW2CfXJNRQHyoovSGa9WjyDWRLEDfgIuwUPAr6UzWSSHdpZsweFe
-         mUgA==
-X-Gm-Message-State: ACgBeo032mSJaADijtwIUhNcr5Hqnr3s6I9sHtKEM0AGOT1mI7NuNwSw
-        +Y/0REdVgndj1//aKA4Jaw==
-X-Google-Smtp-Source: AA6agR5oYMphkHrwtR9ftlAb0utmEIuJpCmM4Twje7fpd6P2+GKlfXYkStDRhzqW/KE83WCop63FmA==
-X-Received: by 2002:a05:6870:6193:b0:11d:3674:69e3 with SMTP id a19-20020a056870619300b0011d367469e3mr3957587oah.83.1661195686011;
-        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
+        bh=gMA4pmvbAIzu8POkA7NjNp6+LJSojIReqzmKNcU93h8=;
+        b=gnRVCAhrdOjArYj7mpz8FX8ZEwS5FoNWLYHGsFN40go0Y31Ye6bxfZ2oSsA0Axi4MM
+         43jLTS3CMtRNMUGKmYvs8K2Ul3CgmjmT2VVEcTTDqkLcKv75or7uX7eSbdC0hL0Z/v7F
+         KvwN46GKlj/mQvdFaxGLNE3HVEbs3b89JFPy3sp/7et8i14HUbybcPtU8Yz1B+BOv9SE
+         K/djv4hylhN4bvTHGcZdPgwsxRn9tvvAdziSPVc0Tn2g1mmcJv6j/gl01b8QpQGZR5Pc
+         y5XtTDo3Yx2F8zPlH5Sr8Fx7E7rlL0sEO++1YAp1fC1fP7zlz20xdLDcgivz46ONSENV
+         98QA==
+X-Gm-Message-State: ACgBeo2OPrGFi1SYEu1YvrdvRQuNa528tFSXbEYW+f+nU+t7wHMzd0hW
+        O7vRT0mOz2epDUclJcLRFw==
+X-Google-Smtp-Source: AA6agR6CXNkeEGo+jWOdyhpnUOchEq69vi/hvM4iiGR1AphweacC5SrahLzHduTgXO4s0b1KnVEQrg==
+X-Received: by 2002:a05:6870:1787:b0:11c:eb96:7748 with SMTP id r7-20020a056870178700b0011ceb967748mr6707396oae.63.1661195787861;
+        Mon, 22 Aug 2022 12:16:27 -0700 (PDT)
 Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g203-20020aca39d4000000b00342d18cc2fdsm2731970oia.53.2022.08.22.12.14.44
+        by smtp.gmail.com with ESMTPSA id t2-20020a056808158200b00344a22e71a9sm2746134oiw.9.2022.08.22.12.16.27
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 Aug 2022 12:14:45 -0700 (PDT)
-Received: (nullmailer pid 248067 invoked by uid 1000);
-        Mon, 22 Aug 2022 19:14:43 -0000
-Date:   Mon, 22 Aug 2022 14:14:43 -0500
+        Mon, 22 Aug 2022 12:16:27 -0700 (PDT)
+Received: (nullmailer pid 260673 invoked by uid 1000);
+        Mon, 22 Aug 2022 19:16:26 -0000
+Date:   Mon, 22 Aug 2022 14:16:26 -0500
 From:   Rob Herring <robh@kernel.org>
 To:     Apurva Nandan <a-nandan@ti.com>
-Cc:     Santosh Shilimkar <ssantosh@kernel.org>,
-        linux-kernel@vger.kernel.org, Nishanth Menon <nm@ti.com>,
-        linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+Cc:     linux-arm-kernel@lists.infradead.org, Nishanth Menon <nm@ti.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        devicetree@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
         Tero Kristo <kristo@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Marc Zyngier <maz@kernel.org>, Hari Nagalla <hnagalla@ti.com>,
-        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: Re: [PATCH 1/3] dt-bindings: irqchip: ti,sci-inta: Fix warning
- '#interrupt-cells' was unexpected
-Message-ID: <20220822191443.GA247988-robh@kernel.org>
+        Marc Zyngier <maz@kernel.org>, linux-mmc@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>, linux-kernel@vger.kernel.org,
+        Hari Nagalla <hnagalla@ti.com>
+Subject: Re: [PATCH 2/3] dt-bindings: mmc: Fix 'dma-coherent' was unexpected
+Message-ID: <20220822191626.GA260589-robh@kernel.org>
 References: <20220819190729.32358-1-a-nandan@ti.com>
- <20220819190729.32358-2-a-nandan@ti.com>
+ <20220819190729.32358-3-a-nandan@ti.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20220819190729.32358-2-a-nandan@ti.com>
+In-Reply-To: <20220819190729.32358-3-a-nandan@ti.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 20 Aug 2022 00:37:27 +0530, Apurva Nandan wrote:
-> #interrupt-cells = <0> property is required in device tree for
-> ti,sci-inta nodes, or else we will have following warning when building
-> device tree files with W=2 warning level.
-> 
-> arch/arm64/boot/dts/ti/k3-j721e-main.dtsi:147.51-156.5: Warning (interrupt_provider): /bus@100000/main-navss/interrupt-controller@33d00000: Missing #interrupt-cells in interrupt provider
-> 
-> And further, #interrupt-cells is required to be in yaml bindings as well
-> to prevent following schema warnings:
-> 
-> k3-j721e-common-proc-board.dtb: interrupt-controller@33d00000: Unevaluated properties are not allowed ('#interrupt-cells' was unexpected)
-> From schema: linux/Documentation/devicetree/bindings/interrupt-controller/ti,sci-inta.yaml
-> 
-> Add #interrupt-cells property in ti,sci-inta.yaml
+On Sat, 20 Aug 2022 00:37:28 +0530, Apurva Nandan wrote:
+> dma-coherent is mentioned in almost all TI K3 platform mmc
+> nodes. Fix warning generated due to its missing match in
+> yaml schema.
 > 
 > Signed-off-by: Apurva Nandan <a-nandan@ti.com>
 > ---
->  .../devicetree/bindings/interrupt-controller/ti,sci-inta.yaml  | 3 +++
+>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 3 +++
 >  1 file changed, 3 insertions(+)
 > 
 
