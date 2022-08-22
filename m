@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64CF5C3F6B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 18:19:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8183C3F6B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 18:22:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237194AbiHVSTf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Aug 2022 14:19:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42760 "EHLO
+        id S237412AbiHVSWn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 14:22:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234147AbiHVSTe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 14:19:34 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13F9D43E70
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:19:32 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id l1so15907557lfk.8
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:19:32 -0700 (PDT)
+        with ESMTP id S237413AbiHVSWm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 14:22:42 -0400
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD868474FD
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:22:33 -0700 (PDT)
+Received: by mail-lj1-x22a.google.com with SMTP id w23so6271672ljj.7
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:22:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc;
-        bh=IUUq+zBZLLg7nojFWalzeoFMBrQ1c6+AbxuzsjXnnkg=;
-        b=qwv6CgAI+Xx/7UTpw6T/ZwxnK4PJa+dbt690i+fuM/1sif7ZADV/O9QXCEJRlnKjZE
-         Ru3jeVaAfUzF7cF34EncOm3b6aFamhkKhhbZVgtwmURwlLh9YyNsAUphwo08z8XJt49e
-         Z5LgmPb66CsA24nrNJN9alP/0l7nQyZII/eRhuQheF6Vod3YIeBhxfDPDKReQL8CZePc
-         NwOulHDWQMcwsM2rvkoCfNu4RsQsAYfxVI7j/fejE4eZen/g3YIXTyFDo4UOv5XcJakH
-         lT2L0ox1+PS016xsibOIxwnTk8AKkWPHlEs+8ZabMrvevqIeLvPMJ1CDPgKAuuSB8NRd
-         y10w==
+        bh=W5y5XX8f1s39d+qb+Ap4JPBqkkKGvwJEJMCAPr9uk5M=;
+        b=k28PldqGUnjNILcrlYE1sV3gSoayM8/qsaLXeWPeCWUewLucdlyVkOSpUSErZsylX8
+         Ga/kflW5Bzm154IEoc3dlTPd6a0XacXlurXQMJs0+qld3bwC4iOuomPhrL9rtgLYFNJl
+         fOOf8+mcr8MiZqkJCHZ1UqxucL15GP3bS/if9N0mEmrPHRoshehyEag8QiIS+Z1QKe57
+         YvI6Ae7zVCaEkU3VQ0pnQ1bIvUhYe96MPS5PQCuBDVarzZg9feXk3rQeNbsA7y5z2dJY
+         Pd67KqIAElwTiNAq59eYBLNQxSeWsJeSp03b8EssoOWRwx1uWot+BD/iQKJoxHtwHlXR
+         Uy7w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc;
-        bh=IUUq+zBZLLg7nojFWalzeoFMBrQ1c6+AbxuzsjXnnkg=;
-        b=N+fxCM69KbDxHO/Xu860W5Q8fdk6pO5umvc8kdbgPuTPnR9iK/PkAx89rAywEMOh2P
-         OPzstLnZXdj8pZhmGpjYajQYzKEcnaT4VKQc1ik16ZfGV2/TtKbnGTxwXF7txNnDSFEi
-         x9Jlt7aNXmMhf7ia55rvDSW6ItLIiQUiRzDJboDxbVjHt6DNvAR44L9IrNoTg73k8xA1
-         v4VeIYL/dhBFAQXZvjspzr91qhU19CodeBHfIvU3+ICsi6ALx21jT14LsPl2dz4d1cnz
-         4AlvrpyeAIOU/S5xp1KviySfM21W9K8RCe5RL2B78+MswfTwcZmURj272GEhtaM9uzrx
-         DTGw==
-X-Gm-Message-State: ACgBeo2hwerMiId8EwQTk+8v0Gv+uqxDJiSdZtTiV0CNLvrQAxTQNl6g
-        KMgMl8Ayir2ZFYgOqFahWwlV/G+xr3+WoDzf
-X-Google-Smtp-Source: AA6agR4NQSLOz5tBwgjn8bV1QR7qbJBs3EDjgJIHcoMa/jKzn+hSicxXOXpcYEVPQ7N2K9pjbl2zkg==
-X-Received: by 2002:ac2:4d45:0:b0:492:d8a2:de61 with SMTP id 5-20020ac24d45000000b00492d8a2de61mr4449767lfp.313.1661192371259;
-        Mon, 22 Aug 2022 11:19:31 -0700 (PDT)
+        bh=W5y5XX8f1s39d+qb+Ap4JPBqkkKGvwJEJMCAPr9uk5M=;
+        b=jGXqJ4QOHXOQaw6zcJJ4ADk9WCGmI+wWvxy5w6FsWyTcivmRZ4iTLDbozftxCEsJi+
+         llq1XEQfG10dq55etbPuV1OMrwOaVl6iG/dZTdVfklNgLDB3rfI2jzrt3fKahjk1At7H
+         Dyk2fvFfyXdLrgjkrYsdeDt1mfNdt4WyDn2KmRhfD6PJu1fNvST+EwISGn9eyyGKtTlv
+         TAfrt6Gc5NkXkoFDOM0Q20Cgfrlm/fzLxhxQjxJ9KoTKt+7M8hKy5O/VrZ7YcPqQmEnf
+         zPcJ34fHvp35cCyUBLPfvTw2osu5VqcfeSt27oJuOsGj3Ee2l8tKSh24hHGx0tW4fIwR
+         v/aw==
+X-Gm-Message-State: ACgBeo08AfUy+c7GIU1GoGu2BhH0kTLlF83XGf375q/i9apLVEJtYcd/
+        IJ9JHPa3tRlEg07MxmMZHQBWlg==
+X-Google-Smtp-Source: AA6agR5GStlxeysuHFO7ASxExehsD+K7KqUYnLgzhe2iyPjejimLMZ1FC3zwPQVm1/hU/axz0aIOQg==
+X-Received: by 2002:a05:651c:88e:b0:261:b5e5:8622 with SMTP id d14-20020a05651c088e00b00261b5e58622mr5327485ljq.99.1661192552112;
+        Mon, 22 Aug 2022 11:22:32 -0700 (PDT)
 Received: from [192.168.0.11] (89-27-92-210.bb.dnainternet.fi. [89.27.92.210])
-        by smtp.gmail.com with ESMTPSA id t5-20020a195f05000000b00491734dcb89sm2028163lfb.196.2022.08.22.11.19.29
+        by smtp.gmail.com with ESMTPSA id a4-20020a05651c210400b00261c30d71e5sm1243004ljq.67.2022.08.22.11.22.30
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 22 Aug 2022 11:19:30 -0700 (PDT)
-Message-ID: <ff2e2037-b1c6-8c0c-a0b1-41986522a2c8@linaro.org>
-Date:   Mon, 22 Aug 2022 21:19:29 +0300
+        Mon, 22 Aug 2022 11:22:31 -0700 (PDT)
+Message-ID: <f5561edc-f2fc-05c6-8f24-e0b362989302@linaro.org>
+Date:   Mon, 22 Aug 2022 21:22:29 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Thunderbird/91.12.0
-Subject: Re: [PATCH v6 04/17] dt-bindings: spi: dw: Add AMD Pensando Elba SoC
- SPI Controller bindings
+Subject: Re: [PATCH v6 03/17] dt-bindings: spi: cdns: Add compatible for AMD
+ Pensando Elba SoC
 Content-Language: en-US
 To:     Brad Larson <brad@pensando.io>,
         linux-arm-kernel@lists.infradead.org
@@ -72,9 +72,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
         devicetree@vger.kernel.org
 References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-5-brad@pensando.io>
+ <20220820195750.70861-4-brad@pensando.io>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220820195750.70861-5-brad@pensando.io>
+In-Reply-To: <20220820195750.70861-4-brad@pensando.io>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -84,47 +84,19 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 20/08/2022 22:57, Brad Larson wrote:
 > From: Brad Larson <blarson@amd.com>
 > 
-> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
+> Document the cadence qspi controller compatible for AMD Pensando
+> Elba SoC boards.  The Elba qspi fifo size is 1024.
 > 
 > Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
->  .../devicetree/bindings/spi/snps,dw-apb-ssi.yaml      | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> index 37c3c272407d..403d6416f7ac 100644
-> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> @@ -37,6 +37,15 @@ allOf:
->      else:
->        required:
->          - interrupts
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            enum:
-> +              - amd,pensando-elba-spi
-> +    then:
-> +      required:
-> +        - amd,pensando-elba-syscon
 
-There is no such property. You cannot make it required without first
-defining it.
+Please add Acked-by/Reviewed-by tags when posting new versions. However,
+there's no need to repost patches *only* to add the tags. The upstream
+maintainer will do that for acks received on the version they apply.
 
->  
->  properties:
->    compatible:
-> @@ -75,6 +84,8 @@ properties:
->                - renesas,r9a06g032-spi # RZ/N1D
->                - renesas,r9a06g033-spi # RZ/N1S
->            - const: renesas,rzn1-spi   # RZ/N1
-> +      - description: AMD Pensando Elba SoC SPI Controller
-> +        const: amd,pensando-elba-spi
+https://elixir.bootlin.com/linux/v5.17/source/Documentation/process/submitting-patches.rst#L540
 
-Don't add stuff at the end, but in some logical (usually alphabetical)
-place. The order is already broken as everyone likes to add stuff in
-conflict-style, so just add it before baikal, for example.
+If a tag was not added on purpose, please state why and what changed.
+
 
 
 Best regards,
