@@ -2,211 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4ED7C28D13
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 14:25:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52827C3F6B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 18:16:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235459AbiHVOZ4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Aug 2022 10:25:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46406 "EHLO
+        id S235322AbiHVSQE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 14:16:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38216 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235427AbiHVOZu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 10:25:50 -0400
-Received: from mail-oa1-f45.google.com (mail-oa1-f45.google.com [209.85.160.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 215432C12A;
-        Mon, 22 Aug 2022 07:25:47 -0700 (PDT)
-Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-11c896b879bso13055504fac.3;
-        Mon, 22 Aug 2022 07:25:47 -0700 (PDT)
+        with ESMTP id S231622AbiHVSQD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 14:16:03 -0400
+Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27EC23123A
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:16:02 -0700 (PDT)
+Received: by mail-lj1-x22a.google.com with SMTP id l23so348274lji.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:16:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc;
+        bh=wRS+T3KmeWtDMHibn7SUSx56KdkCFBSVRzTzNOlIYvE=;
+        b=TKv+sar4EH50ev5KJbn799H0JoeL61TWAgFK+UhEWVjp//WwMhLBnj3fD3/SPnHbra
+         vq0XXWB0PpPXfLxaL7nJ6doFmB60qwPJS23DDQ/J+gxoarN9Aed8sAzeJ9bzb2HHQLKJ
+         MQgxonNOu1R4qSbj3aRlP9LW6pDERqVWeDXm+LElstzsoXeincMHaIbMuAyBFOteNamF
+         f4UvVZq7TUJhB7upUzPfAvj5kGmcKw7IPvrnc9Fs1T9EzQHFd4bHLO7PcSplJYwIA+g3
+         Q0KFIEm3cnRaxKnq0R+fiCM/HpW3Q6trQG1Dic6JebXA7eEXp2Maxye4/8w4UcbZG/4I
+         E2SA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
-        bh=G07Tw8w3fntNDsB/UndMxA49LO4X204k9G0o50Lw9wE=;
-        b=WC9XJSUmM3rIdvKbKxApVLRyXeFJvTjl4krDlhFTaIrhIJGO+j38sXtPqYm8UszgEA
-         fWrL35ZUM6ygDlr+D96w+bzjRtqa5o8T5t2MZeqCXig12aVXCXEBLJvmVpc3bfGxCH0o
-         57ipYs0ciRC6id2gG0nq8k87sYCoqubCIxGYKNBstAyvhWArpKplP7j0mqUm3ZpE0KsD
-         5TDE2PJQuM9l9IdMTzmsFz08oL4OfwJkKwngH6h2ISuWRa1Q3UqO7IGrGvum2zHe9NFq
-         TanJ+m/ylwWtFvN+J+w81bLMHisQj9vTri2kzJ+DlHrRv2UfMQqHUElB6FePL5Pny3RB
-         TejA==
-X-Gm-Message-State: ACgBeo0vXfc+HnyuSx08httA1tSreoOsB9p8QZwVuWK5Gw4rlOJdD87+
-        IJfXj4W1LOkxSxxykK921w==
-X-Google-Smtp-Source: AA6agR6a4Kk4I8rLJiBa/DQhIiR5/9u2/276l0A4HWxrkhm0udbG9IZa6W4vgzg+U5wH5Jv2z/yYtA==
-X-Received: by 2002:a05:6870:ea83:b0:fe:365f:cb9d with SMTP id s3-20020a056870ea8300b000fe365fcb9dmr10123648oap.98.1661178345983;
-        Mon, 22 Aug 2022 07:25:45 -0700 (PDT)
-Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id em29-20020a0568705b9d00b0010e81e27b99sm2962640oab.17.2022.08.22.07.25.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 Aug 2022 07:25:45 -0700 (PDT)
-Received: (nullmailer pid 3821949 invoked by uid 1000);
-        Mon, 22 Aug 2022 14:25:44 -0000
-Date:   Mon, 22 Aug 2022 09:25:44 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <brad@pensando.io>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, adrian.hunter@intel.com,
-        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
-        blarson@amd.com, brijeshkumar.singh@amd.com,
-        catalin.marinas@arm.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        samuel@sholland.org, fancer.lancer@gmail.com,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v6 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
-Message-ID: <20220822142544.GA3770388-robh@kernel.org>
-References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-7-brad@pensando.io>
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc;
+        bh=wRS+T3KmeWtDMHibn7SUSx56KdkCFBSVRzTzNOlIYvE=;
+        b=CGiww6U6GBY2UQTvqz4lpqcz1CE9VQuOI9048LSWpk0vkpOEb67VpLreMaDPgle7U7
+         /6vPnvfEnzxI3XzxB5pCFteMeipWXDNly9AvQrZji4oLcbBc12kfoMeLl22gX+YkOCPX
+         8vAXAKJoiHwzIK9Ii/jMgPeQ28qDpDN14v2TasChlyyB9y7ZgnuRpk/Uwkh63xzFTO94
+         A9At9C7hZS87DkePE+1r8eyBPYzAwPvGn6eJpmhiTm1NPjmn9a7kSI08OKTh4lDRjLYg
+         z3NDXRTvDLwDMbIKPCySj4yEhehYase7AgUi210s0RohCaJfoi7CpPyQvlPcjm+LWYQA
+         NxrA==
+X-Gm-Message-State: ACgBeo0VOaQTsuJSFN6jsf5jbxCtKj1soDIvoj/NNdEFbQWcu01CK51w
+        +6T34UfJCgiNpFE334TQrRIRMQ==
+X-Google-Smtp-Source: AA6agR48ehK8nASmJ0ZqCbE+OJgnmQy0c10s7hR825BciR0gnqGL5AUtzzcz1b1wHGck1h8ZjvY4mQ==
+X-Received: by 2002:a05:651c:17a7:b0:261:c0b1:574b with SMTP id bn39-20020a05651c17a700b00261c0b1574bmr4434271ljb.40.1661192160505;
+        Mon, 22 Aug 2022 11:16:00 -0700 (PDT)
+Received: from [192.168.0.11] (89-27-92-210.bb.dnainternet.fi. [89.27.92.210])
+        by smtp.gmail.com with ESMTPSA id d11-20020a19384b000000b0048b0975ac7asm2028703lfj.151.2022.08.22.11.15.58
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 22 Aug 2022 11:15:59 -0700 (PDT)
+Message-ID: <9501750a-e382-e4ab-cf96-d1fc6ba1c6e5@linaro.org>
+Date:   Mon, 22 Aug 2022 21:15:58 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220820195750.70861-7-brad@pensando.io>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.12.0
+Subject: Re: [PATCH v6 01/17] dt-bindings: arm: add AMD Pensando boards
+Content-Language: en-US
+To:     Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        broonie@kernel.org, yamada.masahiro@socionext.com,
+        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20220820195750.70861-1-brad@pensando.io>
+ <20220820195750.70861-2-brad@pensando.io>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220820195750.70861-2-brad@pensando.io>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Aug 20, 2022 at 12:57:39PM -0700, Brad Larson wrote:
+On 20/08/2022 22:57, Brad Larson wrote:
 > From: Brad Larson <blarson@amd.com>
 > 
-> Add support for the AMD Pensando Elba SoC System Resource chip
-> using the SPI interface.  The Elba SR is a Multi-function Device
-> supporting device register access using CS0, smbus interface for
-> FRU and board peripherals using CS1, dual Lattice I2C masters for
-> transceiver management using CS2, and CS3 for flash access.
-> 
-> Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
->  .../bindings/mfd/amd,pensando-elbasr.yaml     | 97 +++++++++++++++++++
->  1 file changed, 97 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> new file mode 100644
-> index 000000000000..ded347c3352c
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> @@ -0,0 +1,97 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mfd/amd,pensando-elbasr.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: AMD Pensando Elba SoC Resource Controller bindings
-> +
-> +description: |
-> +  AMD Pensando Elba SoC Resource Controller is a set of
-> +  miscellaneous control/status registers accessed on CS0,
-> +  a designware i2c master/slave on CS1, a Lattice rd1173
-> +  dual i2c master on CS2, and flash on CS3.  The /dev interfaces
-> +  created are /dev/pensr0.<CS>.  Hardware reset of the eMMC
+> Document the compatible for AMD Pensando Elba SoC boards.
 
-/dev is a Linux thing and not relevant for the bindings.
+Didn't you get here tags?
 
-> +  is implemented by a sub-device reset-controller which accesses
-> +  a CS0 control register.
-> +
-> +maintainers:
-> +  - Brad Larson <blarson@amd.com>
-> +
-> +properties:
-> +  compatible:
-> +    items:
-> +      - enum:
-> +          - amd,pensando-elbasr
-> +
-> +  spi-max-frequency:
-> +    description: Maximum SPI frequency of the device in Hz.
+Please add Acked-by/Reviewed-by tags when posting new versions. However,
+there's no need to repost patches *only* to add the tags. The upstream
+maintainer will do that for acks received on the version they apply.
 
-No need for generic descriptions of common properties.
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  '#address-cells':
-> +    const: 1
-> +
-> +  '#size-cells':
-> +    const: 0
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - spi-max-frequency
-> +
-> +patternProperties:
-> +  '^reset-controller@[a-f0-9]+$':
-> +    $ref: /schemas/reset/amd,pensando-elbasr-reset.yaml
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +
-> +    spi {
-> +        #address-cells = <1>;
-> +        #size-cells = <0>;
-> +        num-cs = <4>;
-> +
-> +        sysc: system-controller@0 {
-> +            compatible = "amd,pensando-elbasr";
-> +            reg = <0>;
-> +            #address-cells = <1>;
-> +            #size-cells = <0>;
-> +            spi-max-frequency = <12000000>;
-> +
-> +            rstc: reset-controller@0 {
-> +                compatible = "amd,pensando-elbasr-reset";
-> +                reg = <0>;
+https://elixir.bootlin.com/linux/v5.17/source/Documentation/process/submitting-patches.rst#L540
 
-What does 0 represent here? A register address within 'elbasr' device?
+If a tag was not added on purpose, please state why and what changed.
 
-Why do you need a child node for this? Are there other sub-devices and 
-your binding is incomplete? Just put '#reset-cells' in the parent.
-
-> +                #reset-cells = <1>;
-> +            };
-> +        };
-> +
-> +        i2c1: i2c@1 {
-> +            compatible = "amd,pensando-elbasr";
-
-You can't reuse the same compatible to represent different things.
-
-
-> +            reg = <1>;
-> +            spi-max-frequency = <12000000>;
-> +        };
-> +
-> +        i2c2: i2c@2 {
-> +            compatible = "amd,pensando-elbasr";
-
-As this is a Lattice RD1173, I would expect a compatible based on that.
-
-
-> +            reg = <2>;
-> +            spi-max-frequency = <12000000>;
-> +            interrupt-parent = <&porta>;
-> +            interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-> +        };
-> +
-> +        flash@3 {
-> +            compatible = "amd,pensando-elbasr";
-
-Isn't this a flash device?
-
-> +            reg = <3>;
-> +            spi-max-frequency = <12000000>;
-> +        };
-> +    };
-> +
-> +...
-> -- 
-> 2.17.1
-> 
-> 
+Best regards,
+Krzysztof
