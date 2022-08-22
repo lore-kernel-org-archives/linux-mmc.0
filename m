@@ -2,101 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D292FC3F6B0
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 18:24:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7273AC3F6B0
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 19:15:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237045AbiHVSYN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Aug 2022 14:24:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49130 "EHLO
+        id S238398AbiHVTPQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 15:15:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237420AbiHVSYF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 14:24:05 -0400
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B96D61C928
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:24:01 -0700 (PDT)
-Received: by mail-lf1-x130.google.com with SMTP id be9so8513712lfb.12
-        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 11:24:01 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc;
-        bh=YUkvI1ao2/nZxDR/89eZVr7JU17ee6mwpioKOX/GLZY=;
-        b=HMioaNJm47OPAgL2VVemQ/2Eh8rwyzmTnehI+gSZsKON0/Ef92tGqc/kO4FOnxLWaz
-         nTgPQ9Fb3VCTZZfFGr59o/4dZLg9WLSQrgGgvCnWy/sqDk5Xh3Sznulj2UB7gmyP4yNB
-         3OcmfFOQ0D7OcPj+MqWYKsMotG8eXQ0PhGpVEchXDC/QkBINwWSiaE7bjoGyWEzO0qs2
-         weXEuVzxB2GdIasi9mZp7XX2x1LLViIX3WsUctS+E4Eyczf2wp8FGw8vEdLNdErpwJxH
-         kdH6CXK/QKB/5hE+6oivPTJxqtULEBZmyJPrL2NXAyi8PzQkvyKv7EWNwgq5WIGeX00R
-         9RpA==
+        with ESMTP id S238332AbiHVTOx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 15:14:53 -0400
+Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0ACD2F381;
+        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
+Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-11c896b879bso14076782fac.3;
+        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc;
-        bh=YUkvI1ao2/nZxDR/89eZVr7JU17ee6mwpioKOX/GLZY=;
-        b=8CfitoKtWz5gS5ZYEo/9vxniI9HSyMJ4mLUuWA/+asrITGGISv3U0KDydVVdD2EadH
-         ADXWkyIeboN+C9WHsWKfB1/+SJb5hJFEerPDb97e4WZNeTvUFN1Wv6F2oOFJ3vtz+h5L
-         NmdogVafLXDTIruPApQq5cXTbYfwVtFVBW3UVJRGQzCwsyjPoCdHwLI48jG62Mutny64
-         W4ePEPuDDKyQjHRHFzrVhIjisCLMxFQoMP/9yRA0ThuAzAn2Hrpc0BKsIVrXgT5FEZOs
-         KUxGSo9M/HRib4gT7Z3m47G6NdGMyf7zyO9PrNp7jxkt39Ug1eronQhft4blDh+FQ99j
-         hGPA==
-X-Gm-Message-State: ACgBeo0iTCJJzCZ9Xlci1kpOqujP+PRkWMTkIfVTHKQvrTuqtFkVHOxS
-        Yh8fCkx3w2YnOUFoJrO2YdoWQQ==
-X-Google-Smtp-Source: AA6agR4uFLXZY0ERbKcHpfiocsUDUUbWcub0EKPrxynySnRHxbQNoNycvPcmDV3IZvEETskrA5XK1w==
-X-Received: by 2002:a05:6512:260f:b0:492:8e9f:c647 with SMTP id bt15-20020a056512260f00b004928e9fc647mr6944753lfb.443.1661192640110;
-        Mon, 22 Aug 2022 11:24:00 -0700 (PDT)
-Received: from [192.168.0.11] (89-27-92-210.bb.dnainternet.fi. [89.27.92.210])
-        by smtp.gmail.com with ESMTPSA id g13-20020ac24d8d000000b0048af92aed6bsm1440151lfe.175.2022.08.22.11.23.58
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 22 Aug 2022 11:23:59 -0700 (PDT)
-Message-ID: <565960af-2c16-b066-c846-78fcce73c070@linaro.org>
-Date:   Mon, 22 Aug 2022 21:23:57 +0300
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc;
+        bh=+9mYtYRdtFYJ0G4uhdbdFfotHF7Sh4Tm00IctJc4L4s=;
+        b=PDvyOTd4ewNzUM1BUZaKm/vj5dItr+56cU6UuzIE5XGvD7WOAgNbwz67E8qlXhHbuM
+         fSXg3p/+lBXmhyX8P91qdrx4+glo0TBcl2M6WV+M0BkNLt6L+Fj87z1tthju+WHVBK1L
+         utKaIHZf4lPeRyvZNLPmKESVnwwIUq8RM2t2BZ8y/hLxYBSEveUrqEyD6BGwxvr3peoG
+         bJTdMxJUjnePlzlVx86amAbdLgVk5lyffMqRrfqZGS7U+k569uqpd/b28lAjofic59S0
+         8mxznaKb3dJrDGrKnW2CfXJNRQHyoovSGa9WjyDWRLEDfgIuwUPAr6UzWSSHdpZsweFe
+         mUgA==
+X-Gm-Message-State: ACgBeo032mSJaADijtwIUhNcr5Hqnr3s6I9sHtKEM0AGOT1mI7NuNwSw
+        +Y/0REdVgndj1//aKA4Jaw==
+X-Google-Smtp-Source: AA6agR5oYMphkHrwtR9ftlAb0utmEIuJpCmM4Twje7fpd6P2+GKlfXYkStDRhzqW/KE83WCop63FmA==
+X-Received: by 2002:a05:6870:6193:b0:11d:3674:69e3 with SMTP id a19-20020a056870619300b0011d367469e3mr3957587oah.83.1661195686011;
+        Mon, 22 Aug 2022 12:14:46 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id g203-20020aca39d4000000b00342d18cc2fdsm2731970oia.53.2022.08.22.12.14.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 22 Aug 2022 12:14:45 -0700 (PDT)
+Received: (nullmailer pid 248067 invoked by uid 1000);
+        Mon, 22 Aug 2022 19:14:43 -0000
+Date:   Mon, 22 Aug 2022 14:14:43 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Apurva Nandan <a-nandan@ti.com>
+Cc:     Santosh Shilimkar <ssantosh@kernel.org>,
+        linux-kernel@vger.kernel.org, Nishanth Menon <nm@ti.com>,
+        linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+        Tero Kristo <kristo@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Marc Zyngier <maz@kernel.org>, Hari Nagalla <hnagalla@ti.com>,
+        Rob Herring <robh+dt@kernel.org>, linux-mmc@vger.kernel.org,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: Re: [PATCH 1/3] dt-bindings: irqchip: ti,sci-inta: Fix warning
+ '#interrupt-cells' was unexpected
+Message-ID: <20220822191443.GA247988-robh@kernel.org>
+References: <20220819190729.32358-1-a-nandan@ti.com>
+ <20220819190729.32358-2-a-nandan@ti.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.12.0
-Subject: Re: [PATCH v6 05/17] dt-bindings: mfd: syscon: Add
- amd,pensando-elba-syscon compatible
-Content-Language: en-US
-To:     Brad Larson <brad@pensando.io>,
-        linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
-        broonie@kernel.org, yamada.masahiro@socionext.com,
-        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
-        devicetree@vger.kernel.org
-References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-6-brad@pensando.io>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220820195750.70861-6-brad@pensando.io>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20220819190729.32358-2-a-nandan@ti.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/08/2022 22:57, Brad Larson wrote:
-> From: Brad Larson <blarson@amd.com>
+On Sat, 20 Aug 2022 00:37:27 +0530, Apurva Nandan wrote:
+> #interrupt-cells = <0> property is required in device tree for
+> ti,sci-inta nodes, or else we will have following warning when building
+> device tree files with W=2 warning level.
 > 
-> Add the AMD Pensando Elba SoC system registers compatible.
+> arch/arm64/boot/dts/ti/k3-j721e-main.dtsi:147.51-156.5: Warning (interrupt_provider): /bus@100000/main-navss/interrupt-controller@33d00000: Missing #interrupt-cells in interrupt provider
 > 
-> Signed-off-by: Brad Larson <blarson@amd.com>
+> And further, #interrupt-cells is required to be in yaml bindings as well
+> to prevent following schema warnings:
+> 
+> k3-j721e-common-proc-board.dtb: interrupt-controller@33d00000: Unevaluated properties are not allowed ('#interrupt-cells' was unexpected)
+> From schema: linux/Documentation/devicetree/bindings/interrupt-controller/ti,sci-inta.yaml
+> 
+> Add #interrupt-cells property in ti,sci-inta.yaml
+> 
+> Signed-off-by: Apurva Nandan <a-nandan@ti.com>
+> ---
+>  .../devicetree/bindings/interrupt-controller/ti,sci-inta.yaml  | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
 
-Please add Acked-by/Reviewed-by tags when posting new versions. However,
-there's no need to repost patches *only* to add the tags. The upstream
-maintainer will do that for acks received on the version they apply.
-
-https://elixir.bootlin.com/linux/v5.17/source/Documentation/process/submitting-patches.rst#L540
-
-If a tag was not added on purpose, please state why and what changed.
-
-
-
-Best regards,
-Krzysztof
+Acked-by: Rob Herring <robh@kernel.org>
