@@ -2,87 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64778C32792
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 05:16:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C87CC28D13
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 Aug 2022 07:04:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229737AbiHVFQJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 Aug 2022 01:16:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50924 "EHLO
+        id S231469AbiHVHEd convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 Aug 2022 03:04:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232127AbiHVFQI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 01:16:08 -0400
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24D17252B9
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Aug 2022 22:16:06 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id t5so12341203edc.11
-        for <linux-mmc@vger.kernel.org>; Sun, 21 Aug 2022 22:16:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=ionos.com; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc;
-        bh=9XRquiKtczGZrdHPEqA6WSyvm81oF4bOEAQ+13HYerQ=;
-        b=SAiIxcHb4kUDUc3VEa2ho1tzuxThoNNZY/1Uy6ob5cxWpDMAgeWid7qhh1JGHzMGbM
-         adHSfp3pJPdwumkTe334GAsPu2EKY2zVf0ZgMGTJDuJ3SrI6UEqh91/qCHuGRXQw1snv
-         /1e79EhM6MjTf5SwV0uMLfQFrJ1HoFYfZpqvevvweqdEzjyYFlZtmV/EJfgjhfVj3EUi
-         0XsC/T4XkSWokdnUY+/CPOVzfVcr8ThORv6pb4680aMO7Op76cXl+fqJrMS3ioeO09hy
-         SzOT7E/D2WeM6kDvgcsmWkGn1PHym4wj8/UETx7DyE0Kmsc+CgU2T07R9NxHLpKuhXhA
-         8OYA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc;
-        bh=9XRquiKtczGZrdHPEqA6WSyvm81oF4bOEAQ+13HYerQ=;
-        b=YFNGlmLfbNgNkBF0R+XfD/jy5ydocUsyzuRcOpgH0qf/2u/EcQoAi/LDT6NmNdBrVl
-         FwsCmYOsRqxy9OWyTD5O9OS/gRobat0sMUY1wHaxWvJdVllHeUa4MWhFnp9qU8f5otQW
-         TA94CNZXQFevrt1XnjnLE4xP9/8tIeW87c3xwR9s64AC7mLLgqEYwao/LJ6aQHzBxN84
-         lskFJZeyk3GTfDFDWP4eV7hjD2fTPnBGpzx0jW1TEqpZgY5t/ss11OdNYIx6oK8w0+C9
-         qfeGY1putj3H4afsG+chJH3cPUh0BnDVbpCdwIWaXBmBnRnpBtbGk1SGb6g+hp5ZshxK
-         K8ug==
-X-Gm-Message-State: ACgBeo2+010CPzr5cgfzavyXTShO4w+C3CoquF7pkQUKUxIwbsKMi5J3
-        1MzE3gWFcLAa+ZVvIvC0vohmZCvutljIoatrgbImMg==
-X-Google-Smtp-Source: AA6agR6LybaPwlMMl65wRvlyq8H6WWQJz/BQN9DIdJiuMLxwbfIvJqdASIjHGPhvc2W10vBYnlWtHxkr+SF+OLGyRk4=
-X-Received: by 2002:a05:6402:42d3:b0:435:2c49:313d with SMTP id
- i19-20020a05640242d300b004352c49313dmr14569874edc.86.1661145364525; Sun, 21
- Aug 2022 22:16:04 -0700 (PDT)
-MIME-Version: 1.0
-References: <20220819060801.10443-1-jinpu.wang@ionos.com> <20220819060801.10443-18-jinpu.wang@ionos.com>
- <CAFBinCCbjF_mkV+EaOtC0g_YbtX9TzBEN5fRJ_MiPaie5hxCwQ@mail.gmail.com>
-In-Reply-To: <CAFBinCCbjF_mkV+EaOtC0g_YbtX9TzBEN5fRJ_MiPaie5hxCwQ@mail.gmail.com>
-From:   Jinpu Wang <jinpu.wang@ionos.com>
-Date:   Mon, 22 Aug 2022 07:15:53 +0200
-Message-ID: <CAMGffEnmGPDyuPPhWN0vyTMOtCHzfOo-Je=dVJ6ed7494ekKgw@mail.gmail.com>
-Subject: Re: [PATCH v1 17/19] mmc: meson-mx-sdhc: Fix error check for dma_map_sg
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org
+        with ESMTP id S229840AbiHVHEc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 Aug 2022 03:04:32 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99079BE11
+        for <linux-mmc@vger.kernel.org>; Mon, 22 Aug 2022 00:04:22 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1oQ1T7-0002ow-Hs; Mon, 22 Aug 2022 09:03:29 +0200
+Received: from [2a0a:edc0:0:900:1d::4e] (helo=lupine)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1oQ1T1-001Flh-DM; Mon, 22 Aug 2022 09:03:23 +0200
+Received: from pza by lupine with local (Exim 4.94.2)
+        (envelope-from <p.zabel@pengutronix.de>)
+        id 1oQ1T0-0002CG-NV; Mon, 22 Aug 2022 09:03:22 +0200
+Message-ID: <e4f16bcd11db29869c08f920d2bd9480fcdc076d.camel@pengutronix.de>
+Subject: Re: [PATCH v6 17/17] mmc: sdhci-cadence: Support mmc hardware reset
+From:   Philipp Zabel <p.zabel@pengutronix.de>
+To:     Brad Larson <brad@pensando.io>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        broonie@kernel.org, yamada.masahiro@socionext.com,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        ulf.hansson@linaro.org, will@kernel.org, devicetree@vger.kernel.org
+Date:   Mon, 22 Aug 2022 09:03:22 +0200
+In-Reply-To: <20220820195750.70861-18-brad@pensando.io>
+References: <20220820195750.70861-1-brad@pensando.io>
+         <20220820195750.70861-18-brad@pensando.io>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+User-Agent: Evolution 3.38.3-1 
+MIME-Version: 1.0
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: p.zabel@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Martin,
-On Sat, Aug 20, 2022 at 7:26 PM Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
->
-> Hello Jack,
->
-> first of all: thank you for this patch!
-welcome.
->
-> On Fri, Aug 19, 2022 at 8:08 AM Jack Wang <jinpu.wang@ionos.com> wrote:
-> [...]
-> > @@ -388,7 +388,7 @@ static int meson_mx_sdhc_map_dma(struct mmc_host *mmc, struct mmc_request *mrq)
-> >
-> >         dma_len = dma_map_sg(mmc_dev(mmc), data->sg, data->sg_len,
-> Does it also make sense to change the type of the dma_len variable
-> from (signed) int to "unsigned int" (a few lines above)?
-I double checked, it seems a good idea, I will do it in v2.
->
->
-> Best regards,
-> Martin
-Thx!
+Hi Brad,
+
+On Sa, 2022-08-20 at 12:57 -0700, Brad Larson wrote:
+[...]
+> +static void sdhci_mmc_hw_reset(struct mmc_host *mmc)
+> +{
+> +	struct sdhci_host *host = mmc_priv(mmc);
+> +	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
+> +
+> +	dev_info(mmc_dev(host->mmc), "emmc hardware reset\n");
+> +
+> +	reset_control_assert(priv->rst_hw);
+> +	/* For eMMC, minimum is 1us but give it 9us for good measure */
+> +	udelay(9);
+
+At a glance, this seems excessive. Is there a reason 9 us is better
+than, say, 2 or 3?
+
+[...]
+> @@ -520,6 +538,17 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  	if (ret)
+>  		goto free;
+>  
+> 
+> 
+> 
+> +	if (host->mmc->caps & MMC_CAP_HW_RESET) {
+> +		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, "hw");
+
+This should be described in cdns,sdhci.yaml first.
+
+regards
+Philipp
