@@ -2,276 +2,179 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 042A4ECAA2C
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 Aug 2022 19:56:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E3CCECAAA2
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 Aug 2022 21:29:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232114AbiHYT4g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 Aug 2022 15:56:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59288 "EHLO
+        id S232270AbiHYV3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 Aug 2022 17:29:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45508 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234643AbiHYT4c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2022 15:56:32 -0400
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30A6171983
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2022 12:56:31 -0700 (PDT)
-Received: by mail-ej1-x632.google.com with SMTP id gb36so41549765ejc.10
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2022 12:56:31 -0700 (PDT)
+        with ESMTP id S230181AbiHYV3D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 Aug 2022 17:29:03 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87CBCBD2A7
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2022 14:29:02 -0700 (PDT)
+Received: by mail-ej1-x62f.google.com with SMTP id w19so42003060ejc.7
+        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2022 14:29:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc;
-        bh=8ps/qML9omF5+FvNRyrrWAK6UGFnmN6YM3mUqF1S6qQ=;
-        b=XfWaZoxp0rYT1YgXXpKB3OJ4zOGdcOsiR8LcxeNZgAwjzGS2bhU7ogiaN3fKp2dVD9
-         ntUJBp9UZhlisZ2AS+3vz7ZJgEAA/kBogaMgTUA6cVZdfStYQM8rotFJ0wMEUBMR70OO
-         otWPyO0XRrd8SHNPI1k2DD7fVarG5SkhabZrkxbDjKx/HDErwOHxRjH9m6+TAFHjIRhE
-         aqyQcXdTi5cUDzWpxdV1BqeXQ0UZOmJM/88JNEcznTLgbR6sKgdHsyH1PSjGCduoi0YU
-         LK+1WVexuTdvXvSqBTb+VcWRZH6+gcqYZCPKmftAylGiW0PF/mFwNI+1rj0sxEWKWk8h
-         9cdg==
+        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc;
+        bh=N6mUWstz7/GZuk8gVUfvEQxNLjPXVK6ZWWrfepRR/oY=;
+        b=k0unfdejZ8bzDfqcBi8X9NzklJS1acMebUScpkGBo9g16789OB1GCNn6Bya5nZPSPo
+         8ln8lsJ1FPjb6o0Ts3km1bIq/RbLVmaxVqNHDS6Nl+pwFtaZb8WwGAC1rOfuHtRLqz1M
+         jgiZvsufPrj1vTdzNMBL2eXTPqG5QSQ6v/GS7XKOFoZGiqPrBdeLIrWNVTekjT4lH2pK
+         ADdjLBJ7s0q7wj9BPikRpPKdEZ7Nml4F9I/OYh5EE01Jdeq0iLdZrVHh8jUyPL3tTPMb
+         RN4092020qR4TIhamwDouAV32zeWrNhR/WCK50Dk6sHq7ry8v10+Cz9txvdBWvXyRVpR
+         TgLg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc;
-        bh=8ps/qML9omF5+FvNRyrrWAK6UGFnmN6YM3mUqF1S6qQ=;
-        b=fUqYiMVjeFVWOGAzSDCbJSgi2iAjBy7LX9Ul44IOuqn6H771bWNDO/rsDQc/tK3/c7
-         akvWIXnMsEqnHySC/Xn8NDqlQCMR2/djFJNVezPvurNdNKToipKj6dXhGdWf+O+z1ZmW
-         hSbFEVLzRZ21Bh3JK7VqbGa0dS2pzqLqfuaT0xjS9otM7va6phyizJsq/lJOsD/6XmMP
-         W6CG4EhkNZkriIDL79f/IfHqPZYl16NHi14BIk7Dv6HLPbUwYt1N4jcQ/oCZNQzqe8AH
-         /DYIvi7+tKI5acWUh7I67/dzzLGsjwN9iUz6RfXWW4+8RIDlS06VGZEVyiU2DqZLtjrB
-         MtHA==
-X-Gm-Message-State: ACgBeo1wSpMkuigIWohQPKsAImDe0J8r6t8r8DUtCrN4sXnmL/+GkS7G
-        Nuxmt6/79nYHmh116bUUI/M=
-X-Google-Smtp-Source: AA6agR5wzMUDaddLzqQnpriQbiaTexMy7eiBE0l6EjNKUZ32xqk0cNOfxplBHK/F3U0J5fDhb4A9Ng==
-X-Received: by 2002:a17:907:2816:b0:73d:7af2:37f5 with SMTP id eb22-20020a170907281600b0073d7af237f5mr3533538ejc.588.1661457389738;
-        Thu, 25 Aug 2022 12:56:29 -0700 (PDT)
-Received: from ?IPV6:2a01:c22:72a6:5f00:b844:7c7d:e964:bb65? (dynamic-2a01-0c22-72a6-5f00-b844-7c7d-e964-bb65.c22.pool.telefonica.de. [2a01:c22:72a6:5f00:b844:7c7d:e964:bb65])
-        by smtp.googlemail.com with ESMTPSA id gx6-20020a1709068a4600b0073dc691063dsm19362ejc.192.2022.08.25.12.56.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 25 Aug 2022 12:56:29 -0700 (PDT)
-Message-ID: <27bffe3c-e579-3581-95e8-2587733487d2@gmail.com>
-Date:   Thu, 25 Aug 2022 21:56:19 +0200
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc;
+        bh=N6mUWstz7/GZuk8gVUfvEQxNLjPXVK6ZWWrfepRR/oY=;
+        b=WgYrLyVUhYJcmZkdadour963Z4qUkbj67C2KCLfuMXvt0wFSfEWSReawZArBKl7tjF
+         OWne/EvzeJdNgNxfD0Lqsrl9NeQUYgshlwIMqoxMIV5vBpTY2J5UkJc30bIBTK4K0Ul8
+         eLevTk3Bj2Gh/4rRGBjXsgvbutmCiA7mBdgNIENE2jcczeQHuIFSLJpHLVKfvqwmM+LU
+         C6eoHcntDcCqE7rkwb9KsNGtXeISHm0hcSyW7bqcXu2jRMZ0BfSQKfivpGUB66ubl07Q
+         vtDFB6/u9e80rVYKOtc2+LCT5cXp4Yu0WoxaOdPtKmmy9RVQ9TsliJexSOVZVs31lAAg
+         c/zg==
+X-Gm-Message-State: ACgBeo1i1uF1nf+G0DaIzv/rDNgIB49RexM5MXuenTaTC9ksrU4UL/t5
+        +7B1FSI+KdO+T9U2PtQuf5ZmFw==
+X-Google-Smtp-Source: AA6agR7TX2aV9XD+2pGdV3PwuC/Ru2piDDPY6M5k/pGiZPU0dAkIycRF0jCmSlC3S8345ugq0AJE2Q==
+X-Received: by 2002:a17:907:a06e:b0:73e:ab7e:67be with SMTP id ia14-20020a170907a06e00b0073eab7e67bemr282659ejc.20.1661462941021;
+        Thu, 25 Aug 2022 14:29:01 -0700 (PDT)
+Received: from p330.kohl.home (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
+        by smtp.gmail.com with ESMTPSA id g1-20020a170906538100b007308bebce51sm95062ejo.171.2022.08.25.14.28.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 25 Aug 2022 14:29:00 -0700 (PDT)
+From:   =?UTF-8?q?Christian=20Kohlsch=C3=BCtter?= 
+        <christian@kohlschutter.com>
+To:     broonie@kernel.org, m.szyprowski@samsung.com
+Cc:     christian@kohlschutter.com, heiko@sntech.de, lgirdwood@gmail.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
+        m.reichl@fivetechno.de, robin.murphy@arm.com,
+        vincent.legoll@gmail.com, wens@kernel.org
+Subject: [PATCH v5] regulator: core: Resolve supply name earlier to prevent double-init
+Date:   Thu, 25 Aug 2022 21:28:42 +0000
+Message-Id: <20220825212842.7176-1-christian@kohlschutter.com>
+X-Mailer: git-send-email 2.36.2
+In-Reply-To: <932DEB17-70FB-4416-80B3-C48A7C31848F@kohlschutter.com>
+References: <932DEB17-70FB-4416-80B3-C48A7C31848F@kohlschutter.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.0
-Subject: [PATCH v3 2/2] mmc: meson-gx: add SDIO interrupt support
-Content-Language: en-US
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
-References: <72459a46-fd20-60d8-a7e7-076d8f321816@gmail.com>
-In-Reply-To: <72459a46-fd20-60d8-a7e7-076d8f321816@gmail.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add SDIO interrupt support. Successfully tested on a S905X4-based
-system (V3 register layout) with a BRCM4334 SDIO wifi module
-(brcmfmac driver).
+Previously, an unresolved regulator supply reference upon calling
+regulator_register on an always-on or boot-on regulator caused
+set_machine_constraints to be called twice.
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
-v2:
-- use new SDIO IRQ API
-v3:
-- don't duplicate checking mmc->sdio_irq_pending
-  Device works fine w/o it.
----
- drivers/mmc/host/meson-gx-mmc.c | 70 ++++++++++++++++++++++++++++-----
- 1 file changed, 60 insertions(+), 10 deletions(-)
+This in turn may initialize the regulator twice, leading to voltage
+glitches that are timing-dependent. A simple, unrelated configuration
+change may be enough to hide this problem, only to be surfaced by
+chance.
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 9a4da2544..b6afaccf7 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -41,14 +41,17 @@
- #define   CLK_V2_TX_DELAY_MASK GENMASK(19, 16)
- #define   CLK_V2_RX_DELAY_MASK GENMASK(23, 20)
- #define   CLK_V2_ALWAYS_ON BIT(24)
-+#define   CLK_V2_IRQ_SDIO_SLEEP BIT(25)
+One such example is the SD-Card voltage regulator in a NanoPI R4S that
+would not initialize reliably unless the registration flow was just
+complex enough to allow the regulator to properly reset between calls.
+
+Fix this by re-arranging regulator_register, trying resolve the
+regulator's supply early enough that set_machine_constraints does not
+need to be called twice.
+
+Signed-off-by: Christian Kohlschütter <christian@kohlschutter.com>
+---
+ drivers/regulator/core.c | 58 ++++++++++++++++++++++++----------------
+ 1 file changed, 35 insertions(+), 23 deletions(-)
+
+diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
+index 77f60eef960..2ff0ab2730f 100644
+--- a/drivers/regulator/core.c
++++ b/drivers/regulator/core.c
+@@ -5391,6 +5391,7 @@ regulator_register(const struct regulator_desc *regulator_desc,
+ 	bool dangling_of_gpiod = false;
+ 	struct device *dev;
+ 	int ret, i;
++	bool resolved_early = false;
  
- #define   CLK_V3_TX_DELAY_MASK GENMASK(21, 16)
- #define   CLK_V3_RX_DELAY_MASK GENMASK(27, 22)
- #define   CLK_V3_ALWAYS_ON BIT(28)
-+#define   CLK_V3_IRQ_SDIO_SLEEP BIT(29)
+ 	if (cfg == NULL)
+ 		return ERR_PTR(-EINVAL);
+@@ -5494,24 +5495,10 @@ regulator_register(const struct regulator_desc *regulator_desc,
+ 	BLOCKING_INIT_NOTIFIER_HEAD(&rdev->notifier);
+ 	INIT_DELAYED_WORK(&rdev->disable_work, regulator_disable_work);
  
- #define   CLK_TX_DELAY_MASK(h)		(h->data->tx_delay_mask)
- #define   CLK_RX_DELAY_MASK(h)		(h->data->rx_delay_mask)
- #define   CLK_ALWAYS_ON(h)		(h->data->always_on)
-+#define   CLK_IRQ_SDIO_SLEEP(h)		(h->data->irq_sdio_sleep)
- 
- #define SD_EMMC_DELAY 0x4
- #define SD_EMMC_ADJUST 0x8
-@@ -135,6 +138,7 @@ struct meson_mmc_data {
- 	unsigned int rx_delay_mask;
- 	unsigned int always_on;
- 	unsigned int adjust;
-+	unsigned int irq_sdio_sleep;
- };
- 
- struct sd_emmc_desc {
-@@ -174,6 +178,7 @@ struct meson_host {
- 	bool vqmmc_enabled;
- 	bool needs_pre_post_req;
- 
-+	spinlock_t lock;
- };
- 
- #define CMD_CFG_LENGTH_MASK GENMASK(8, 0)
-@@ -430,6 +435,7 @@ static int meson_mmc_clk_init(struct meson_host *host)
- 	clk_reg |= FIELD_PREP(CLK_CORE_PHASE_MASK, CLK_PHASE_180);
- 	clk_reg |= FIELD_PREP(CLK_TX_PHASE_MASK, CLK_PHASE_0);
- 	clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, CLK_PHASE_0);
-+	clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
- 	writel(clk_reg, host->regs + SD_EMMC_CLOCK);
- 
- 	/* get the mux parents */
-@@ -934,32 +940,54 @@ static void meson_mmc_read_resp(struct mmc_host *mmc, struct mmc_command *cmd)
- 	}
- }
- 
-+static void __meson_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct meson_host *host = mmc_priv(mmc);
-+	u32 reg_irqen = IRQ_EN_MASK;
-+
-+	if (enable)
-+		reg_irqen |= IRQ_SDIO;
-+	writel(reg_irqen, host->regs + SD_EMMC_IRQ_EN);
-+}
-+
- static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- {
- 	struct meson_host *host = dev_id;
- 	struct mmc_command *cmd;
--	struct mmc_data *data;
- 	u32 status, raw_status;
- 	irqreturn_t ret = IRQ_NONE;
- 
- 	raw_status = readl(host->regs + SD_EMMC_STATUS);
--	status = raw_status & IRQ_EN_MASK;
-+	status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
- 
- 	if (!status) {
- 		dev_dbg(host->dev,
- 			"Unexpected IRQ! irq_en 0x%08lx - status 0x%08x\n",
--			 IRQ_EN_MASK, raw_status);
-+			 IRQ_EN_MASK | IRQ_SDIO, raw_status);
- 		return IRQ_NONE;
- 	}
- 
--	if (WARN_ON(!host) || WARN_ON(!host->cmd))
-+	if (WARN_ON(!host))
- 		return IRQ_NONE;
- 
- 	/* ack all raised interrupts */
- 	writel(status, host->regs + SD_EMMC_STATUS);
- 
- 	cmd = host->cmd;
--	data = cmd->data;
-+
-+	if (status & IRQ_SDIO) {
-+		spin_lock(&host->lock);
-+		__meson_mmc_enable_sdio_irq(host->mmc, 0);
-+		sdio_signal_irq(host->mmc);
-+		spin_unlock(&host->lock);
-+		status &= ~IRQ_SDIO;
-+		if (!status)
-+			return IRQ_HANDLED;
-+	}
-+
-+	if (WARN_ON(!cmd))
-+		return IRQ_NONE;
-+
- 	cmd->error = 0;
- 	if (status & IRQ_CRC_ERR) {
- 		dev_dbg(host->dev, "CRC Error - status 0x%08x\n", status);
-@@ -977,12 +1005,9 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
- 
- 	meson_mmc_read_resp(host->mmc, cmd);
- 
--	if (status & IRQ_SDIO) {
--		dev_dbg(host->dev, "IRQ: SDIO TODO.\n");
--		ret = IRQ_HANDLED;
+-	/* preform any regulator specific init */
+-	if (init_data && init_data->regulator_init) {
+-		ret = init_data->regulator_init(rdev->reg_data);
+-		if (ret < 0)
+-			goto clean;
 -	}
 -
- 	if (status & (IRQ_END_OF_CHAIN | IRQ_RESP_STATUS)) {
-+		struct mmc_data *data = cmd->data;
-+
- 		if (data && !cmd->error)
- 			data->bytes_xfered = data->blksz * data->blocks;
- 		if (meson_mmc_bounce_buf_read(data) ||
-@@ -1125,6 +1150,21 @@ static int meson_mmc_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 	return -EINVAL;
- }
+-	if (config->ena_gpiod) {
+-		ret = regulator_ena_gpio_request(rdev, config);
+-		if (ret != 0) {
+-			rdev_err(rdev, "Failed to request enable GPIO: %pe\n",
+-				 ERR_PTR(ret));
+-			goto clean;
+-		}
+-		/* The regulator core took over the GPIO descriptor */
+-		dangling_cfg_gpiod = false;
+-		dangling_of_gpiod = false;
+-	}
++	if (init_data && init_data->supply_regulator)
++		rdev->supply_name = init_data->supply_regulator;
++	else if (regulator_desc->supply_name)
++		rdev->supply_name = regulator_desc->supply_name;
  
-+static void meson_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
-+{
-+	struct meson_host *host = mmc_priv(mmc);
-+	unsigned long flags;
-+
-+	spin_lock_irqsave(&host->lock, flags);
-+	__meson_mmc_enable_sdio_irq(mmc, enable);
-+	spin_unlock_irqrestore(&host->lock, flags);
-+}
-+
-+static void meson_mmc_ack_sdio_irq(struct mmc_host *mmc)
-+{
-+	meson_mmc_enable_sdio_irq(mmc, 1);
-+}
-+
- static const struct mmc_host_ops meson_mmc_ops = {
- 	.request	= meson_mmc_request,
- 	.set_ios	= meson_mmc_set_ios,
-@@ -1134,6 +1174,8 @@ static const struct mmc_host_ops meson_mmc_ops = {
- 	.execute_tuning = meson_mmc_resampling_tuning,
- 	.card_busy	= meson_mmc_card_busy,
- 	.start_signal_voltage_switch = meson_mmc_voltage_switch,
-+	.enable_sdio_irq = meson_mmc_enable_sdio_irq,
-+	.ack_sdio_irq	= meson_mmc_ack_sdio_irq,
- };
+ 	/* register with sysfs */
+ 	rdev->dev.class = &regulator_class;
+@@ -5533,13 +5520,38 @@ regulator_register(const struct regulator_desc *regulator_desc,
+ 		goto wash;
+ 	}
  
- static int meson_mmc_probe(struct platform_device *pdev)
-@@ -1237,7 +1279,13 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (ret)
- 		goto err_init_clk;
- 
-+	spin_lock_init(&host->lock);
+-	if (init_data && init_data->supply_regulator)
+-		rdev->supply_name = init_data->supply_regulator;
+-	else if (regulator_desc->supply_name)
+-		rdev->supply_name = regulator_desc->supply_name;
++	if ((rdev->supply_name && !rdev->supply) &&
++		(rdev->constraints->always_on ||
++		 rdev->constraints->boot_on)) {
++		ret = regulator_resolve_supply(rdev);
++		if (ret != 0)
++			rdev_dbg(rdev, "Unable to resolve supply early: %pe\n",
++				 ERR_PTR(ret));
 +
- 	mmc->caps |= MMC_CAP_CMD23;
++		resolved_early = true;
++	}
 +
-+	if (mmc->caps & MMC_CAP_SDIO_IRQ)
-+		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
++	/* perform any regulator specific init */
++	if (init_data && init_data->regulator_init) {
++		ret = init_data->regulator_init(rdev->reg_data);
++		if (ret < 0)
++			goto wash;
++	}
 +
- 	if (host->dram_access_quirk) {
- 		/* Limit segments to 1 due to low available sram memory */
- 		mmc->max_segs = 1;
-@@ -1328,6 +1376,7 @@ static const struct meson_mmc_data meson_gx_data = {
- 	.rx_delay_mask	= CLK_V2_RX_DELAY_MASK,
- 	.always_on	= CLK_V2_ALWAYS_ON,
- 	.adjust		= SD_EMMC_ADJUST,
-+	.irq_sdio_sleep	= CLK_V2_IRQ_SDIO_SLEEP,
- };
++	if (config->ena_gpiod) {
++		ret = regulator_ena_gpio_request(rdev, config);
++		if (ret != 0) {
++			rdev_err(rdev, "Failed to request enable GPIO: %pe\n",
++					 ERR_PTR(ret));
++			goto wash;
++		}
++		/* The regulator core took over the GPIO descriptor */
++		dangling_cfg_gpiod = false;
++		dangling_of_gpiod = false;
++	}
  
- static const struct meson_mmc_data meson_axg_data = {
-@@ -1335,6 +1384,7 @@ static const struct meson_mmc_data meson_axg_data = {
- 	.rx_delay_mask	= CLK_V3_RX_DELAY_MASK,
- 	.always_on	= CLK_V3_ALWAYS_ON,
- 	.adjust		= SD_EMMC_V3_ADJUST,
-+	.irq_sdio_sleep	= CLK_V3_IRQ_SDIO_SLEEP,
- };
- 
- static const struct of_device_id meson_mmc_of_match[] = {
+ 	ret = set_machine_constraints(rdev);
+-	if (ret == -EPROBE_DEFER) {
++	if (ret == -EPROBE_DEFER && !resolved_early) {
+ 		/* Regulator might be in bypass mode and so needs its supply
+ 		 * to set the constraints
+ 		 */
 -- 
-2.37.2
-
+2.36.2
 
