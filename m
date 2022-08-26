@@ -2,101 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5C88ECAAD8
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Aug 2022 09:17:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B19CCECAAD2
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Aug 2022 09:17:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245695AbiHZJRY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Aug 2022 05:17:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42070 "EHLO
+        id S1343550AbiHZJR3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Aug 2022 05:17:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1343492AbiHZJRW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2022 05:17:22 -0400
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 269A1D741A
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:21 -0700 (PDT)
-Received: by mail-lj1-x22b.google.com with SMTP id q18so979486ljg.12
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:20 -0700 (PDT)
+        with ESMTP id S1343515AbiHZJR1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2022 05:17:27 -0400
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A9C8D7426
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:24 -0700 (PDT)
+Received: by mail-lj1-x22c.google.com with SMTP id n24so974826ljc.13
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc;
-        bh=yxr0Qd86necJLeODbFUrhjcBFjoAd3uXBhNlcIXoPwA=;
-        b=T7Nuduru6zJHRRXE+O8aAOqpJYu7JZcaH8MVxpYFVbyhndtPkIWJ+PXUeeIWWQ+urc
-         VXnj9BHHuJGwEaDUvuKjwZEDfGlQCL2w7tPSa2NhRK9pY+AyHNtlzjkPe0D/Gwd2lSjg
-         8TS7/EjK9t3tV5j8SHh8FjT2jAoMz9eEqqcNIfNot9ScBM3WzyPBlM8L65FKCodry4qC
-         TghT2eXyYDQsjIYiAP5yg2Phv4/EPNGdGPEaxI1QWM1p5PQgECuCRvevWkGAuQM8uhWb
-         m3cJHKCgtr20++kuCJl8t5ViDAcYBEKBRNMhBCMbucwVq8YMmCclALI7BhxPbUccj/Ru
-         yiJA==
+        bh=+BpRNGOnD2t6/Nb0ClGZalYmfiUntM7FnRymqB3IYUo=;
+        b=zACeJX5EEz8JcYCvT1zsZkiIDCs04ymBFmkGyal0zemqEkc8vb01qLChnBWk01rg/u
+         H6SDxQdCQcFEX/xxhNM0WjtbHqbS97W9UMvfH7FrR4p5IpwSayJPWImbtPF19Fnix8+N
+         QpdbKFs07jtmCScNZyeIrONgS+PKcXB/I3DxDPavFtZKAIYY55BvZ2CWa/RH1l2mWO1A
+         VGkaIgWdNDfpvya40UhxuIuUeGntS8mJFQ8IeAOyr54x/sdAp1eX1ULDOKkEsw9nw1lE
+         KT686+Z5/TDYopyxgFX1Tnew5OUEO6FOp6S1xN5WnKYPNhi0CjvjfWInbSIxane+cw+A
+         f69g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc;
-        bh=yxr0Qd86necJLeODbFUrhjcBFjoAd3uXBhNlcIXoPwA=;
-        b=duLvK67iVDyv1lpy7xqXcjfvlSuVys3KvFG3hmPOphPn9DngL0iSL1qUl/PKe/LFgL
-         0aZ2b/h/jVG7VRkccaAAaBA2Cf8B5ayolR2IyCrCQauEOSEJAF4uOByMglBxFjRdSCev
-         7Dos3jrs41jWLRna/jv4wz3Rym6ByYqP5Zbo6FCeQ0osqUtukCVeKjpTfg5bKxjKyRWj
-         EY0fRqogr90Oih3tu4SmpOutJ5Cqququ9/0wO5rgHj2MFF7WAMulf/omqvGR3J9Ojn82
-         1S8uSS9FiLLHHtElwMafkQmdlNgbr51lYVi4eT+3O5qNy0GCDmnMtj1w084zU54ZgJcm
-         8rlA==
-X-Gm-Message-State: ACgBeo1/qVrhHMk2ImstKrVcGabGRS3ke0QeBz94akbrqtnNqMT2fE6B
-        1ywarOpSWt/7mUrVt0FhrsUWI/LI5LO68XMKZqgy/Q==
-X-Google-Smtp-Source: AA6agR4FQXQ7vnpLnj3X7fRAmWQuLdRJrDKoAbK/JRm6muzl7lWnOItItBR6YENWPhKATqMHJ9UhBRsW+dG2laoBPbA=
-X-Received: by 2002:a2e:884c:0:b0:261:ca69:6023 with SMTP id
- z12-20020a2e884c000000b00261ca696023mr1925180ljj.300.1661505439069; Fri, 26
- Aug 2022 02:17:19 -0700 (PDT)
+        bh=+BpRNGOnD2t6/Nb0ClGZalYmfiUntM7FnRymqB3IYUo=;
+        b=Jhoac3wn8rnCE6kNujZ54jw6lkvi6TNOgNP4KKOWGxwysEm2tP3OCfG/wrTu3pmMwX
+         pKBkTBeLJe9oE5YbflU0/3+CBhv9z4QFdyG9rZVENicILGqFdHtn/K+MotxTvvVv5JjR
+         FCeA0M15Xh9XBF8zVqGqjHwzb9lwbCjbIIyb+J65zdhXKFT1YAI3/uwcWJeoDMtsilr2
+         RXfu2hsz//O1z8qa0BlxXLNIGRvedRsGuOPqw1mhTuHEtUqMqYEenaEVEebJ5ob/qphy
+         3DCKFdBR51UAheNVQx2VwCP/UM8c4DNVQcgSBSDs2MjBDgnGYIFPGTAr3K0G7OpyYsJX
+         ZRjg==
+X-Gm-Message-State: ACgBeo1odbP9p2cEpqhCNFeuHP0MatHHnQIljH3za0DKy26Uv81rOh9t
+        +AhAGB3DNSvv+Yur2pysO0jSb3yV+OYA7HklZ3OJ+fz6YiI=
+X-Google-Smtp-Source: AA6agR6r5i2Hp+b8Ll2uDys6t2rL9DioJI1dX49d9LHXzAak4CyXmbsxeSUVF5OVOEei9kMCe4EswKqFXarggYiho5E=
+X-Received: by 2002:a2e:92ce:0:b0:261:e39e:2c1d with SMTP id
+ k14-20020a2e92ce000000b00261e39e2c1dmr2008130ljh.273.1661505442384; Fri, 26
+ Aug 2022 02:17:22 -0700 (PDT)
 MIME-Version: 1.0
-References: <21d99886d07fa7fcbec74992657dabad98c935c4.1661412818.git.christophe.jaillet@wanadoo.fr>
-In-Reply-To: <21d99886d07fa7fcbec74992657dabad98c935c4.1661412818.git.christophe.jaillet@wanadoo.fr>
+References: <20220825074008.33349-1-jinpu.wang@ionos.com>
+In-Reply-To: <20220825074008.33349-1-jinpu.wang@ionos.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 26 Aug 2022 11:16:42 +0200
-Message-ID: <CAPDyKFqF+gFD8dw7swZ5pu6jf6kt7xkXHs8BHYSQ1Ue2e8eRsw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: au1xmmc: Fix an error handling path in au1xmmc_probe()
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Manuel Lauss <manuel.lauss@gmail.com>,
-        Ralf Baechle <ralf@linux-mips.org>,
-        linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        linux-mmc@vger.kernel.org
+Date:   Fri, 26 Aug 2022 11:16:45 +0200
+Message-ID: <CAPDyKFqgraY5DWiUxPSYfiGLj6KGa3-hhP6+c9R3aMQHz51k4w@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: Fix dma_map_sg error check
+To:     Jack Wang <jinpu.wang@ionos.com>
+Cc:     linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 25 Aug 2022 at 09:34, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
+On Thu, 25 Aug 2022 at 09:40, Jack Wang <jinpu.wang@ionos.com> wrote:
 >
-> If clk_prepare_enable() fails, there is no point in calling
-> clk_disable_unprepare() in the error handling path.
+> Hi, all,
 >
-> Move the out_clk label at the right place.
+> While working on a bugfix on RTRS[1], I noticed there are quite a few other
+> drivers have the same problem, due to the fact dma_map_sg return 0 on error,
+> not like most of the cases, return negative value for error.
 >
-> Fixes: b6507596dfd6 ("MIPS: Alchemy: au1xmmc: use clk framework")
-> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+> I "grep -A 5 dma_map_sg' in kernel tree, and audit/fix the one I feel is buggy,
+> hence this patchset. As suggested by Christoph Hellwig, I now send the patches per
+> subsystem, this is for mmc subsystem.
+>
+> Thanks!
+>
+> [1] https://lore.kernel.org/linux-rdma/20220818105355.110344-1-haris.iqbal@ionos.com/T/#t
+>
+> Jack Wang (2):
+>   mmc: meson-mx-sdhc: Fix error check for dma_map_sg
+>   mmc: jz4740_mmc: Fix error check for dma_map_sg
+>
+>  drivers/mmc/host/jz4740_mmc.c        | 4 ++--
+>  drivers/mmc/host/meson-mx-sdhc-mmc.c | 4 ++--
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+>
 
-Applied for next, thanks!
+The series, applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/au1xmmc.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/au1xmmc.c b/drivers/mmc/host/au1xmmc.c
-> index a9a0837153d8..c88b039dc9fb 100644
-> --- a/drivers/mmc/host/au1xmmc.c
-> +++ b/drivers/mmc/host/au1xmmc.c
-> @@ -1097,8 +1097,9 @@ static int au1xmmc_probe(struct platform_device *pdev)
->         if (host->platdata && host->platdata->cd_setup &&
->             !(mmc->caps & MMC_CAP_NEEDS_POLL))
->                 host->platdata->cd_setup(mmc, 0);
-> -out_clk:
-> +
->         clk_disable_unprepare(host->clk);
-> +out_clk:
->         clk_put(host->clk);
->  out_irq:
->         free_irq(host->irq, host);
-> --
-> 2.34.1
->
