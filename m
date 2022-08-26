@@ -2,231 +2,102 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F275ECAAD2
-	for <linux-mmc@archiver.kernel.org>; Fri, 26 Aug 2022 05:55:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27CC2ECAAA3
+	for <linux-mmc@archiver.kernel.org>; Fri, 26 Aug 2022 09:17:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235591AbiHZFz1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 26 Aug 2022 01:55:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32892 "EHLO
+        id S245682AbiHZJRU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 26 Aug 2022 05:17:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S243519AbiHZFzY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2022 01:55:24 -0400
-Received: from mailout2.w1.samsung.com (mailout2.w1.samsung.com [210.118.77.12])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B15CBC2E94
-        for <linux-mmc@vger.kernel.org>; Thu, 25 Aug 2022 22:55:20 -0700 (PDT)
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-        by mailout2.w1.samsung.com (KnoxPortal) with ESMTP id 20220826055515euoutp028c9851661974cea2e9674d46698628ba~Oz14c3H4e2903229032euoutp02l
-        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 05:55:15 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout2.w1.samsung.com 20220826055515euoutp028c9851661974cea2e9674d46698628ba~Oz14c3H4e2903229032euoutp02l
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1661493315;
-        bh=4GR+Vs8QxIsviDnv/eHU0Cv9vVsxhNm7ixoKU4xAS80=;
-        h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-        b=Zf6hsL880TB1WiPYRRi0NPHFBgh6CyFJSCB5cLv+o8EOIOdy5e61qD4njuI8PqIUj
-         W6g2cYOr/wKxF87lgMhXvmJhQanEYFOjTliMDm7X+11DUuw7aZTu3iKCuhTnpIcH39
-         Qg0AZOTSLjZLVqWvW6zbJUvibRDRRHn2Xnx6hiaM=
-Received: from eusmges2new.samsung.com (unknown [203.254.199.244]) by
-        eucas1p2.samsung.com (KnoxPortal) with ESMTP id
-        20220826055515eucas1p2e249e3f805b9bbfacb3312ec4bea94f4~Oz14CcxdO3203532035eucas1p2-;
-        Fri, 26 Aug 2022 05:55:15 +0000 (GMT)
-Received: from eucas1p2.samsung.com ( [182.198.249.207]) by
-        eusmges2new.samsung.com (EUCPMTA) with SMTP id 00.77.07817.34068036; Fri, 26
-        Aug 2022 06:55:15 +0100 (BST)
-Received: from eusmtrp1.samsung.com (unknown [182.198.249.138]) by
-        eucas1p1.samsung.com (KnoxPortal) with ESMTPA id
-        20220826055514eucas1p10f990886cf7333dd48f11465b37104f2~Oz13opndR2865128651eucas1p1s;
-        Fri, 26 Aug 2022 05:55:14 +0000 (GMT)
-Received: from eusmgms1.samsung.com (unknown [182.198.249.179]) by
-        eusmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20220826055514eusmtrp1c40a980356df2f2b59ddcbd1b8ccabf9~Oz13nFY3n1173811738eusmtrp1i;
-        Fri, 26 Aug 2022 05:55:14 +0000 (GMT)
-X-AuditID: cbfec7f4-893ff70000011e89-06-63086043b9e6
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-        eusmgms1.samsung.com (EUCPMTA) with SMTP id 6E.A4.07473.24068036; Fri, 26
-        Aug 2022 06:55:14 +0100 (BST)
-Received: from [106.210.134.192] (unknown [106.210.134.192]) by
-        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-        20220826055514eusmtip208eb058064faf5c98c6ef6ed80075a06~Oz12_HYdT2757327573eusmtip2H;
-        Fri, 26 Aug 2022 05:55:14 +0000 (GMT)
-Message-ID: <367f1076-0eec-85bd-577e-d9302e461d00@samsung.com>
-Date:   Fri, 26 Aug 2022 07:55:13 +0200
+        with ESMTP id S245688AbiHZJRT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 26 Aug 2022 05:17:19 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65C40D741A
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:17 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id bq23so1212175lfb.7
+        for <linux-mmc@vger.kernel.org>; Fri, 26 Aug 2022 02:17:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc;
+        bh=kWwbtT/54FyUEO6wWPpRIwL8GLUA5z0zpRQ+oeLgI4Q=;
+        b=uJjezohYlWYNbj23GA51zYTVzXsn8I7264i22VBOIJep8GJraT5Hxo5M2oUcFlo9t8
+         miozsWwpM3suEEtBt/XymJNCw64FRkiKlXgLuk+td0iSoBnLuR3IjxKDuSMEg1oOIAx2
+         YaYjoRrDhOf1VkNfbMKgnBkwWrze5ZOktyz2+9aItoZaAoCq3E50LjaR4Vd7q3llBgek
+         uymRe4/ctK+sj5GKuRojGTMF93WUrWkgQ+kaPtPbme2aSJoAJvPusqJ8rkCY3JZDJVRD
+         mD23zRydF7fb5y61iBYTCxjfz2nhqt9YuXXWADe6g2P+GZhJGHmj6S8qeAZ9UvB/QttY
+         masg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc;
+        bh=kWwbtT/54FyUEO6wWPpRIwL8GLUA5z0zpRQ+oeLgI4Q=;
+        b=j6EjXHKkoAH8/osSiEfNH3QCl0y5tqGpdyIn6CPcwECtOF9iGRKkaHf1BFICvM7Ht7
+         XC0D9IF/6UB3cHysEp57GEcz4WG+Camj+eKU/vggvQ10OZE+MLxjqGAqtunsX3aHvdOf
+         SplD5w6f8Zbus0sOuK3ZPQP9wAXskmzVZOVdvyO9vUU+EkvRI2vpomXIhkjcXbDoZrB7
+         SrSUXHsJoBTh9nTZF+PY3bdweb7j5BfYyzJ8PItFd64AjCy/6Hy9BHSrzKPHkjycEku7
+         ECiu/rsoAxtn3IvidPCIzaQMZbrrRZV0tEcn8Ft/WByZVLwuo7DTSkf4s0Z88IIXKj1X
+         vOIg==
+X-Gm-Message-State: ACgBeo17FSycySzy3CIxlr/Qvhbxp0O9g2/f5CYzAUwMvNc7YaLYq1JM
+        sGosDbygAM9GGoASwmfKD4X6yTX4Nukbm3ywP+J3HQ==
+X-Google-Smtp-Source: AA6agR6c3bAZ3/2TopOviym18sXnze1yRcZBfeJcwIh55DYHGT4eqQP86GgpcX4QIr2GKajCvRrr7MX6kWdrKaBnJ2o=
+X-Received: by 2002:a05:6512:6ca:b0:492:ef21:c085 with SMTP id
+ u10-20020a05651206ca00b00492ef21c085mr2340299lff.71.1661505435752; Fri, 26
+ Aug 2022 02:17:15 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0)
-        Gecko/20100101 Thunderbird/91.12.0
-Subject: Re: [PATCH v5] regulator: core: Resolve supply name earlier to
- prevent double-init
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_Kohlsch=c3=bctter?= 
-        <christian@kohlschutter.com>, broonie@kernel.org
-Cc:     heiko@sntech.de, lgirdwood@gmail.com,
+References: <20220819190729.32358-1-a-nandan@ti.com> <20220819190729.32358-3-a-nandan@ti.com>
+In-Reply-To: <20220819190729.32358-3-a-nandan@ti.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 26 Aug 2022 11:16:38 +0200
+Message-ID: <CAPDyKFpn+3MUA-Vp9cnY8a=rpg0kLQk0_c5+4=FgF0FbW7mxLg@mail.gmail.com>
+Subject: Re: [PATCH 2/3] dt-bindings: mmc: Fix 'dma-coherent' was unexpected
+To:     Apurva Nandan <a-nandan@ti.com>
+Cc:     Nishanth Menon <nm@ti.com>, Tero Kristo <kristo@kernel.org>,
+        Santosh Shilimkar <ssantosh@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-rockchip@lists.infradead.org,
-        m.reichl@fivetechno.de, robin.murphy@arm.com,
-        vincent.legoll@gmail.com, wens@kernel.org
-From:   Marek Szyprowski <m.szyprowski@samsung.com>
-In-Reply-To: <20220825212842.7176-1-christian@kohlschutter.com>
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA02Se1BMcRTH/e7dvd2Wa24rOvLIXOTZJq+5XnmbNcYMpiaTQTvbnYp2l91K
-        DBOiIVopxPZaNIMmlqXHxh/tpt3JoxBpEkmNVLO0GCFZ7d7Qf99zzuc75zGHxMUWoS8Zo4zj
-        1EpZLEOIBCXWH7UBKyNI+ayCWiF7tqWNYEst7QTrfNclZL89P4axxtZ6IVtXnkOw952nEPv5
-        rRNnO+5/R6y5u03I2q6/J1hd7kti2TBpUV4RkjY2JUlNutceUmPhcUKakVmOSW8XJElL6/Nw
-        6Rfj+A1kuGhxJBcbk8CpA4MjRNE5xXZ8l3lC4ukiA3EQ9Y1ORZ4k0HNBW/UTS0UiUkxfRdBl
-        1wv54CsCU8YLzEWJ6S8I0pyBfx31Tz8iHrqCoLO3huADB4JGaybuoig6GNIPNXi4tICeDId/
-        5GJ83guqL7QJXHokLYf3zstuZgS9FbJaygmXxmkfaGzLd/Pe9DYo672Euxrg9EkMrO12d4Gg
-        gyDVnuo2eNJLofhVBcab/SC5ONttADrLEzpeO3B+7lXw6/wFxOsR0Gm748HrsfAw82T/RGS/
-        VkHf+Tl8OhHqu4oGrIugqeYn4UJwehoYygcusRwaHjQPOIdDg92Ln2A4ZJRk4XyagmMpYp72
-        B53txr+e5ifP8HTE6AYdRTdoed2gXXT/++qRoBD5cPEaRRSnma3k9kg0MoUmXhklkasURtT/
-        Zg9/276WoSudDokFYSSyICBxxptaaBXIxVSkbO8+Tq3aro6P5TQWNIYUMD6UPOamTExHyeK4
-        nRy3i1P/rWKkp+9BbE+l8qg5MHDK7ujHmtVU0sa+2UueKV7sn8hkaakTdfbwdduubazs0War
-        ysLSLg4tmzWuVDU5H6/2M1X8DtLXdZ3ZnGadn0Me+GB89PTjvem+t7jrPX4hptGUNWWRT3Kh
-        /6cdZ8I3GbwIm/cp7dDmsIIEbOobld4m0ZuStQ3tFaFTs7lzZ9cLQ9fbmf3Dwj26cw0BuQuO
-        RFhMU0y9ce3yGkdI8IIV92Ycj7yY10F1s3OZLV496sX+5vkJa/c9QjM6qwJq/UW2d62KURl2
-        PC1xJtO87O48hE1YU52zNX/745TWIYlEbciklrxRBU3NnGiz49IcSXaV4a66ZHzYvNg3laGM
-        QBMtC5qOqzWyP1I/rDfVAwAA
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFrrBIsWRmVeSWpSXmKPExsVy+t/xe7pOCRzJBhtnalpMffiEzWL7oeds
-        Fv8fvWa1+Halg8li0+NrrBaXd81hszjyv5/R4tOD/8wWL4/8YLQ4+OEJq8Xxtc/YLGbNvc7m
-        wOOxZt4aRo9bd+o9ds66y+6xaVUnm8ekybuYPDYvqffYfm0es8fnTXIBHFF6NkX5pSWpChn5
-        xSW2StGGFkZ6hpYWekYmlnqGxuaxVkamSvp2NimpOZllqUX6dgl6GXO2vmUuOKhQMXHNerYG
-        xr+SXYycHBICJhLXLr5j7GLk4hASWMoocWzhXSaIhIzEyWkNrBC2sMSfa11sEEXvGSV2nPnF
-        DpLgFbCTmNB4A8xmEVCVaPo5lwkiLihxcuYTFhBbVCBZYsGhpWC2sECsxPSHu9hAbGYBcYlb
-        T+aD1YsIxEncvbYUbAGzQA+TxJQvR1ggtp1hlLh8bjYzSBWbgKFE19susG5OAXuJrbcPMEFM
-        MpPo2trFCGHLSzRvnc08gVFoFpJDZiFZOAtJyywkLQsYWVYxiqSWFuem5xYb6hUn5haX5qXr
-        JefnbmIERvG2Yz8372Cc9+qj3iFGJg7GQ4wSHMxKIrxWx1iShXhTEiurUovy44tKc1KLDzGa
-        AkNjIrOUaHI+MI3klcQbmhmYGpqYWRqYWpoZK4nzehZ0JAoJpCeWpGanphakFsH0MXFwSjUw
-        Kf0+mb82PVs6w7t0y+vJm4w7eNLZD+3O+XUm48ydggun3t2cJvDhMjer5Rm15KQXN4Wv1Csv
-        VE69L9dguMhgnUH13r5FQgwyfhkT7Td8L9RUqjcKuObMczVIYkLnsbIfUR3Pf/u+9n+48S4j
-        7xqV6YXqU8TZVp5V+beBY8/JiXbtDx7K9gXW3/lvfDPoqRlPXvGjslN/mfTiemstK1cdzT62
-        /7/68aAvCX5/pZ4fabIvsOg4fDzg7NvG0o2Llu458Mwol+lLruys4tnuVj/KmyXP/GiKt1GZ
-        H7z+/YnAicvmTnBflp1a9tWTUfzPdv/Vx7dO+irgzX6x/pXLh/tyd1cJ2eybzNB1J86t9NQM
-        RyWW4oxEQy3mouJEAA3MeHxrAwAA
-X-CMS-MailID: 20220826055514eucas1p10f990886cf7333dd48f11465b37104f2
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20220825212905eucas1p139591652111adb8af44f30c0a2fbfe8e
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20220825212905eucas1p139591652111adb8af44f30c0a2fbfe8e
-References: <932DEB17-70FB-4416-80B3-C48A7C31848F@kohlschutter.com>
-        <CGME20220825212905eucas1p139591652111adb8af44f30c0a2fbfe8e@eucas1p1.samsung.com>
-        <20220825212842.7176-1-christian@kohlschutter.com>
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Hari Nagalla <hnagalla@ti.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 25.08.2022 23:28, Christian Kohlschütter wrote:
-> Previously, an unresolved regulator supply reference upon calling
-> regulator_register on an always-on or boot-on regulator caused
-> set_machine_constraints to be called twice.
+On Fri, 19 Aug 2022 at 21:07, Apurva Nandan <a-nandan@ti.com> wrote:
 >
-> This in turn may initialize the regulator twice, leading to voltage
-> glitches that are timing-dependent. A simple, unrelated configuration
-> change may be enough to hide this problem, only to be surfaced by
-> chance.
+> dma-coherent is mentioned in almost all TI K3 platform mmc
+> nodes. Fix warning generated due to its missing match in
+> yaml schema.
 >
-> One such example is the SD-Card voltage regulator in a NanoPI R4S that
-> would not initialize reliably unless the registration flow was just
-> complex enough to allow the regulator to properly reset between calls.
->
-> Fix this by re-arranging regulator_register, trying resolve the
-> regulator's supply early enough that set_machine_constraints does not
-> need to be called twice.
->
-> Signed-off-by: Christian Kohlschütter <christian@kohlschutter.com>
+> Signed-off-by: Apurva Nandan <a-nandan@ti.com>
 
-Tested-by: Marek Szyprowski <m.szyprowski@samsung.com>
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
 
 > ---
->   drivers/regulator/core.c | 58 ++++++++++++++++++++++++----------------
->   1 file changed, 35 insertions(+), 23 deletions(-)
+>  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/regulator/core.c b/drivers/regulator/core.c
-> index 77f60eef960..2ff0ab2730f 100644
-> --- a/drivers/regulator/core.c
-> +++ b/drivers/regulator/core.c
-> @@ -5391,6 +5391,7 @@ regulator_register(const struct regulator_desc *regulator_desc,
->   	bool dangling_of_gpiod = false;
->   	struct device *dev;
->   	int ret, i;
-> +	bool resolved_early = false;
->   
->   	if (cfg == NULL)
->   		return ERR_PTR(-EINVAL);
-> @@ -5494,24 +5495,10 @@ regulator_register(const struct regulator_desc *regulator_desc,
->   	BLOCKING_INIT_NOTIFIER_HEAD(&rdev->notifier);
->   	INIT_DELAYED_WORK(&rdev->disable_work, regulator_disable_work);
->   
-> -	/* preform any regulator specific init */
-> -	if (init_data && init_data->regulator_init) {
-> -		ret = init_data->regulator_init(rdev->reg_data);
-> -		if (ret < 0)
-> -			goto clean;
-> -	}
-> -
-> -	if (config->ena_gpiod) {
-> -		ret = regulator_ena_gpio_request(rdev, config);
-> -		if (ret != 0) {
-> -			rdev_err(rdev, "Failed to request enable GPIO: %pe\n",
-> -				 ERR_PTR(ret));
-> -			goto clean;
-> -		}
-> -		/* The regulator core took over the GPIO descriptor */
-> -		dangling_cfg_gpiod = false;
-> -		dangling_of_gpiod = false;
-> -	}
-> +	if (init_data && init_data->supply_regulator)
-> +		rdev->supply_name = init_data->supply_regulator;
-> +	else if (regulator_desc->supply_name)
-> +		rdev->supply_name = regulator_desc->supply_name;
->   
->   	/* register with sysfs */
->   	rdev->dev.class = &regulator_class;
-> @@ -5533,13 +5520,38 @@ regulator_register(const struct regulator_desc *regulator_desc,
->   		goto wash;
->   	}
->   
-> -	if (init_data && init_data->supply_regulator)
-> -		rdev->supply_name = init_data->supply_regulator;
-> -	else if (regulator_desc->supply_name)
-> -		rdev->supply_name = regulator_desc->supply_name;
-> +	if ((rdev->supply_name && !rdev->supply) &&
-> +		(rdev->constraints->always_on ||
-> +		 rdev->constraints->boot_on)) {
-> +		ret = regulator_resolve_supply(rdev);
-> +		if (ret != 0)
-> +			rdev_dbg(rdev, "Unable to resolve supply early: %pe\n",
-> +				 ERR_PTR(ret));
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> index 0ab07759b472..ea9121fb188d 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-am654.yaml
+> @@ -51,6 +51,9 @@ properties:
+>
+>    sdhci-caps-mask: true
+>
+> +  dma-coherent:
+> +    type: boolean
 > +
-> +		resolved_early = true;
-> +	}
-> +
-> +	/* perform any regulator specific init */
-> +	if (init_data && init_data->regulator_init) {
-> +		ret = init_data->regulator_init(rdev->reg_data);
-> +		if (ret < 0)
-> +			goto wash;
-> +	}
-> +
-> +	if (config->ena_gpiod) {
-> +		ret = regulator_ena_gpio_request(rdev, config);
-> +		if (ret != 0) {
-> +			rdev_err(rdev, "Failed to request enable GPIO: %pe\n",
-> +					 ERR_PTR(ret));
-> +			goto wash;
-> +		}
-> +		/* The regulator core took over the GPIO descriptor */
-> +		dangling_cfg_gpiod = false;
-> +		dangling_of_gpiod = false;
-> +	}
->   
->   	ret = set_machine_constraints(rdev);
-> -	if (ret == -EPROBE_DEFER) {
-> +	if (ret == -EPROBE_DEFER && !resolved_early) {
->   		/* Regulator might be in bypass mode and so needs its supply
->   		 * to set the constraints
->   		 */
-
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
-
+>    # PHY output tap delays:
+>    # Used to delay the data valid window and align it to the sampling clock.
+>    # Binding needs to be provided for each supported speed mode otherwise the
+> --
+> 2.17.1
+>
