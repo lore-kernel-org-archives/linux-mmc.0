@@ -2,101 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC606ECAAD5
-	for <linux-mmc@archiver.kernel.org>; Sat, 27 Aug 2022 20:05:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41C94ECAAD5
+	for <linux-mmc@archiver.kernel.org>; Sat, 27 Aug 2022 20:40:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229584AbiH0UFx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 27 Aug 2022 16:05:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37380 "EHLO
+        id S231326AbiH0Ukh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 27 Aug 2022 16:40:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229462AbiH0UFw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2022 16:05:52 -0400
-Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D010474F1
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Aug 2022 13:05:51 -0700 (PDT)
-Received: by mail-pl1-x636.google.com with SMTP id f24so1744424plr.1
-        for <linux-mmc@vger.kernel.org>; Sat, 27 Aug 2022 13:05:51 -0700 (PDT)
+        with ESMTP id S231528AbiH0Ukg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 27 Aug 2022 16:40:36 -0400
+Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0CA513F65;
+        Sat, 27 Aug 2022 13:40:34 -0700 (PDT)
+Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-33da3a391d8so113308517b3.2;
+        Sat, 27 Aug 2022 13:40:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :from:to:cc;
-        bh=ADQPZHg3QwYPfT4wduph8wBYMiEMQoZJzpTw2u3Edmw=;
-        b=WKyJ419VIwn7Q8wMCHQ1QrR++WttZ+PVvBaJVQX56LPhEyjt5236T7Zl03us8UHFs1
-         3Qe7sE7eragqYRSNCE5UBHT3QCZH7Thyxqzj1ugjW65bGfPYb5JvWoQnJytRPwE90jyV
-         WGtKaCECq1nXt/JKZf3F4JySwc+gpjXcECvaaZvXAracG9I2dbJrDZhVC44hi8gHF110
-         Nw0BtfnmpSYthcEKlpVpeXIWWbsUgOvmpfgwNhbj5U1L/ta70JIyfscan+1iCnUqUhe1
-         ZFXlTX+7UMd7raGyeYK3CgYHrWQJGnmr9Cq1ozJmIMxY874XvU1zLI9DATXdUvO5DWtK
-         8+jw==
+        d=googlemail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc;
+        bh=a43bxgCVH3rA1FTnedAN3yus3ZoDoZPFWJOVyvSBDyo=;
+        b=U7D7wNpxLoHE3MMbr+rI8SpJ5EBQd8lJ2Qj+mIFKdbfeOdxnXoDeLwUbl2b4QUe+S3
+         6qeGAtj9bzKy66OVlDB64sVwXIkovbAiv68z7+HKvQv52WzbTME5yv/aL8KjAfMcnarw
+         tCIExGvqCdJ9Hm7RC6RgV7AL1K41VL9Lp7Go4XDdarhrxlPOn803lG6AUoha5fz09s+X
+         ndB0akjXH+LF1mCdO9NvI2ubHbre/7rbvrExPB916v2FiTQvY+hLaUGrQb7zGncLDZuy
+         plUlRbv61ClFMYaFx09nRMqWdx6X5DJOWkiazYNCuHvxsqDFL8eDACvdkpHpy16YP2E9
+         aMrg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-disposition:mime-version:message-id:subject:to:from:date
-         :x-gm-message-state:from:to:cc;
-        bh=ADQPZHg3QwYPfT4wduph8wBYMiEMQoZJzpTw2u3Edmw=;
-        b=xeH+AF8CGvhqpFvcG1yzr5gejW0PwA6HIiziTvCHNJklbWTaHrrHaLk5m6QhGBkmYO
-         g5zqFxq4TOKyK9nX+5nkC6Vr+W5o7JJlFnl69usqgwBNcsy8kOpMFq8D3ahL+9lfZmH1
-         gz3ima5fjqveT5e+xVeG++hkIWvLOec1/HwT0DCraDG3DOqarfylz+s8lGLy4yvAkmMm
-         hpL6gUDo1XpBxJD0i2OzAtwvPTz7uhWYtsi5h+9mUeCqGZ+WX2qKe8ukuQGKOYcUazcT
-         2bm18y+CVMQpQ/I0WWwkVZLXG2hGNfXPoft2xZ5AV8TU+Ri6G+ZAZqDcaMHn8qP3Hir4
-         G8GA==
-X-Gm-Message-State: ACgBeo2teO2l4vWudBxje/t2FzckUNHzdBIiosI9t0nebD2dW0jnv9ln
-        17xTEjTLBsoI6em5g4slaic=
-X-Google-Smtp-Source: AA6agR4GKef5Mf5Rhd/bsIhkp3PXen6Ot4K+43kYGZNaoNBg7jFRQv3zbynSi4EFjGQtz/zbzWV2NQ==
-X-Received: by 2002:a17:90b:17ce:b0:1f4:d068:5722 with SMTP id me14-20020a17090b17ce00b001f4d0685722mr10599441pjb.28.1661630749876;
-        Sat, 27 Aug 2022 13:05:49 -0700 (PDT)
-Received: from x1 ([2601:1c2:1002:ab0:5155:d5df:1020:5344])
-        by smtp.gmail.com with ESMTPSA id z75-20020a63334e000000b0041a67913d5bsm3496678pgz.71.2022.08.27.13.05.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 27 Aug 2022 13:05:48 -0700 (PDT)
-Date:   Sat, 27 Aug 2022 13:07:16 -0700
-From:   Drew Fustini <pdp7pdp7@gmail.com>
-To:     Jisheng Zhang <jszhang@kernel.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Sebastian Reichel <sebastian.reichel@collabora.com>,
-        linux-mmc@vger.kernel.org
-Subject: Designware MSHC: dw_mmc versus sdhci-of-dwcmshc?
-Message-ID: <Ywp5dA3iQLZu/+2d@x1>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc;
+        bh=a43bxgCVH3rA1FTnedAN3yus3ZoDoZPFWJOVyvSBDyo=;
+        b=34JoI6DyYmZSisjOWDaQAVwkMGj9U0GXj1KuGY3q+wMhq/TPVTQeivYMJP/acIH2Bg
+         47Za8CXpDhdgDSfNVesvA9Yy1KBGfG38QSANAYknMYif+GU+3uykpJLR1CxfueDLzvTH
+         snNPE1SyJLQgCL9f55F51whukGEDxlATchL9Vo47TStIisKNM7DCapDyNgX8hPT5iEQI
+         g4Q7Aa+w6RaVE5bSATKUX+Jk1RNZJlj84Ggfn/EeDAZz1ULnoTMQmvmlopXRv8sOlCh0
+         ZQ6SS3R+CHdvNUbym17Xnyu5Zzbsm8f8NbQ/kLXYwnDCle5T2o688UqdcIoIPUwvdmCx
+         nyew==
+X-Gm-Message-State: ACgBeo0p4cVFXI2DrLyBWjVYm496NaF1lp/3k4a4nVH0pI1PgVqwEoX5
+        bi6UO0SRJxtOLgh5S9X/edh9Hsn/MxvQvgswex4=
+X-Google-Smtp-Source: AA6agR5W9bwOSWdZq6cApJvjXHDjxg1Q8AUtHvo++rxzP731ZIP5KAqE0qiM2Zw5UhXJ8VrNApYaMwOgM6p3G7fCHNo=
+X-Received: by 2002:a81:d543:0:b0:325:2240:ce5 with SMTP id
+ l3-20020a81d543000000b0032522400ce5mr4751398ywj.210.1661632833757; Sat, 27
+ Aug 2022 13:40:33 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20220825074008.33349-1-jinpu.wang@ionos.com> <20220825074008.33349-2-jinpu.wang@ionos.com>
+In-Reply-To: <20220825074008.33349-2-jinpu.wang@ionos.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Sat, 27 Aug 2022 22:40:23 +0200
+Message-ID: <CAFBinCBZkGZcrR5Aue5N+=zTM2MAj3w=ox1Vu1+Od5BK39PGTw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: meson-mx-sdhc: Fix error check for dma_map_sg
+To:     Jack Wang <jinpu.wang@ionos.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello, I am bringing up Linux on an SoC which has Synopsys "DesignWare
-Cores Mobile Storage Host Controller (Cryptographic)" IP configured to
-support an eMMC 5.0 device (IS21ES08G) on the bring-up board. I am
-trying to figure out why there are two seemingly similar drivers,
-dw_mmc and sdhci-of-dwmshc, in drivers/mmc/host for Synopsys
-DesignWare host controller IP. I am hoping someone might be able to
-give me some insight into the history of these drivers.
+On Thu, Aug 25, 2022 at 9:40 AM Jack Wang <jinpu.wang@ionos.com> wrote:
+>
+> dma_map_sg return 0 on error, also change the type for dma_len
+> from int to unsigned int.
+>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Neil Armstrong <narmstrong@baylibre.com>
+> Cc: Kevin Hilman <khilman@baylibre.com>
+> Cc: Jerome Brunet <jbrunet@baylibre.com>
+> Cc: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-kernel@lists.infradead.org
+> Cc: linux-amlogic@lists.infradead.org
+> Cc: linux-kernel@vger.kernel.org
+>
+> Signed-off-by: Jack Wang <jinpu.wang@ionos.com>
+Thank you for this patch! It's:
+Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
-I have found the following:
 
-- dw_mmc.c is a "DW Multimedia Card Interface driver"
-- created back in 2011 with f95f3850f7a9 ("mmc: dw_mmc: Add Synopsys
-DesignWare mmc host driver.")
-- CONFIG_MMC_DW  refers to it as "Synopsys DesignWare Memory Card
-Interface" with description of "Synopsys DesignWare Mobile Storage IP
-block, this provides host support for SD and MMC interfaces, in both
-PIO, internal DMA mode and external DMA mode"
-- "snps,dw-mshc" compatible supported in dw_mmc-pltfm.c and
-synopsys-dw-mshc.yaml binding refers to it as "Synopsys Designware
-Mobile Storage Host Controller"
-
-- sdhci-of-dwcmshc.c is a "SDHCI platform driver for Synopsys DWC MSHC"
-- created more recently in 2018 with e438cf49b305 ("mmc:
-sdhci-of-dwcmshc: add SDHCI OF Synopsys DWC MSHC driver")
-- CONFIG_MMC_SDHCI_OF_DWCMSHC refers to it as "SDHCI OF support for
-the Synopsys DWC MSHC" with description of "Synopsys DesignWare Cores
-Mobile Storage Controller support."
-- the driver supports "snps,dwcmshc-sdhci" compatible and the
-snps,dwcmshc-sdhci.yaml binding describes it as "Synopsys Designware
-Mobile Storage Host Controller"
-
-I would greatly appreciate any advice anyone may have on which driver
-might be the best fit.
-
-Thank you,
-Drew
+Best regards,
+Martin
