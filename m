@@ -2,273 +2,368 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37CA3C38145
-	for <linux-mmc@archiver.kernel.org>; Tue,  6 Sep 2022 10:15:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0204ECAAD5
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Sep 2022 13:17:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233253AbiIFKO6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 6 Sep 2022 06:14:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47676 "EHLO
+        id S234277AbiIFNRo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Sep 2022 09:17:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233398AbiIFKO5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Sep 2022 06:14:57 -0400
-Received: from EUR03-AM7-obe.outbound.protection.outlook.com (mail-am7eur03on2110.outbound.protection.outlook.com [40.107.105.110])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA6C817581
-        for <linux-mmc@vger.kernel.org>; Tue,  6 Sep 2022 03:14:54 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=HTJUQs7eImD68AyB8yjG9M9lZ1rMPyt/hBBtWXuQYeyJ4JmWt3QLvB+NaA/EWvFcphy/nwa5Cc8zv8uzlBMlwmpkasAjasRrxqnBE8U6u4jQx10YmglusyBVu6JJwgokC3lBM+LatgukZZ0GUTRLysiYRZpFHxr2Ha0uoimE8+OWX8tr2Xu3Q7BoDFMcbdNGjccNMKGHjyamMxdAQpDliFagGOHFyFnHUVudDDg0hZ3N1qRov82R4onq3MdSXHmd9tRqy9YT1mGiiRPb6+NGvx3FgUP8zGn0aXrnK0CCRJgomR2kuPvXRwPS60RHxDWuoUF3HdwFw1XyVWm4/nZopw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=w8HKUWiJTqPaBa8al+PCsqdmLry/ZgcBOidwXJRj4jU=;
- b=QVGcc3mtzvHFd9rIzmgL9j8F1Bf+QDg/gSkexf6TQgZlt9N1aHs5MwzDZG+rJ+Za9zx05JuK7OlZr3t794r110AvzE7/Xe2quPMW8eNbsk/ALWQ4rnkan0EqbbHMq2+gMzmLopySgItPuBBf/ouc87V4nKWh5VDKUxbDpNYsKNhmQ5jjqKUO4e+UMeHEbnoM+cAki5ertNr9xYiNffxXqkGZAoJw0biB4enAR2iTscQlqSyK/viRn2L03golle6cGTU/adUEQfOicSlXbjMF1UZRjL/+Q7+P6VPn5GpIDVwALMXRcP6kky+rePrGfQqZPqU14xMkONQ1eSetZCEv4A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
- dkim=pass header.d=nokia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
- s=selector1-nokia-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=w8HKUWiJTqPaBa8al+PCsqdmLry/ZgcBOidwXJRj4jU=;
- b=kIoiJVOGhoPg/MGW8sZzDiYfvCu2YWdLYk1k4VNoarS6pZ2UduD8vdtnkKt/B2ZcAWGhiYipVMpnJ4nSYsvsB/sdVcWHQ+y6WcZlPbH4VPDIMqI8ImQXia9RMf+zaVDw6kMOgY3LGKkxAQLkmo4Wx9rKg67iNAHRI7yDLhK0fDM=
-Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
- (2603:10a6:203:4e::11) by VI1PR07MB4015.eurprd07.prod.outlook.com
- (2603:10a6:803:39::26) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.11; Tue, 6 Sep
- 2022 10:14:50 +0000
-Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
- ([fe80::542a:5d98:f0f4:3640]) by AM5PR0701MB2964.eurprd07.prod.outlook.com
- ([fe80::542a:5d98:f0f4:3640%7]) with mapi id 15.20.5612.012; Tue, 6 Sep 2022
- 10:14:44 +0000
-From:   "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Avri Altman <Avri.Altman@wdc.com>,
+        with ESMTP id S232901AbiIFNRo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Sep 2022 09:17:44 -0400
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA3B34F1A2
+        for <linux-mmc@vger.kernel.org>; Tue,  6 Sep 2022 06:17:40 -0700 (PDT)
+Received: by mail-lj1-x232.google.com with SMTP id bn9so12263387ljb.6
+        for <linux-mmc@vger.kernel.org>; Tue, 06 Sep 2022 06:17:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date;
+        bh=NjjiMWYTfCWH2yJ3WnECLPMruZQskJDNuTBvvpsronc=;
+        b=s6tvtVUk8QyJRLKxgEYIWdX5pnoTQWFuQrawWSgyB5P8USxkjRH8B4utaS1QjK5P5U
+         50QhWxf+fkydi9dDzq+tnYSrwHaDajqFoZpoUXzq3AD+ZKyuap1z/ChQcV2Nij4fTUOw
+         Zr0d+pa8AljKKQjgLo41+etzSjdOJRGKL2rEw/1YeqUO2RCt2W5hhDW4OevRXwU6veLv
+         M1j7Ged49EYg+ccmOcIwxVUKMhNuFHzZddSjpxlW3yKAG3V+2GQsx+gdgZXOw1onzt+3
+         6c9/OSwxJjf676u7YtttT2eLJ9b4eDpE3KSeZTHw+cQRFmgiGAxVZwcCgQvXH0VkdGKb
+         3Luw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=NjjiMWYTfCWH2yJ3WnECLPMruZQskJDNuTBvvpsronc=;
+        b=0IFb9I0atSwagv596pvMIUWgcnpgsDvURxCaMxK3hycvse+0O1cUUFCRItmxTN/AgC
+         jTA7yFfl9YxoL4b92LQZFxvS9LbFTkVluXjoG8WW4qZcELLGGm+Ga6LFcQWjk3ibh/AI
+         Ozz98vfcIcVQOOR+FuNGAGJOUQ+J75k5t+GgqqSGCSyfBnxPLAUmmy/h9ku1S/wHdCFo
+         tI04ChR5Jdd4ACb/gzy0Ufs+RuAsypGnYa675/TneFSKx3UyyaXqhde/SRoRpBfUAc9W
+         /TUv9OLvIhOko4afPgL6uxT0ZqMo9jw6Zqodr+Mhd564Qlnz45xf5yg05/8lInghYozC
+         jx5A==
+X-Gm-Message-State: ACgBeo3nMSPImdr8yzk+RL7p02hLulrnzAsiAhWlfhnPExqUa1k/jsAb
+        EoTIXyfv+C6EvoQbTJgROG6uHaIuRfdgJESjQG24aoaNXdHutQ==
+X-Google-Smtp-Source: AA6agR6I2TYIQpjb4sWc+ZSWANU3mAivNIO38xwnf3sEaEIU/74TyyzPBbvrW/8kzvd6nm+pFbpHr7Ffkq2MRxliwpw=
+X-Received: by 2002:a2e:bf0a:0:b0:26a:b64a:7b84 with SMTP id
+ c10-20020a2ebf0a000000b0026ab64a7b84mr702573ljr.367.1662470259058; Tue, 06
+ Sep 2022 06:17:39 -0700 (PDT)
+MIME-Version: 1.0
+References: <AM5PR0701MB29649D655F1BB8F2156300E2EF7E9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+In-Reply-To: <AM5PR0701MB29649D655F1BB8F2156300E2EF7E9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 6 Sep 2022 15:17:03 +0200
+Message-ID: <CAPDyKFrZWi31sKVmeUs_xkyM1ZCo=suo-61Y_ccBvMb1hL3h2g@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc-utils: correct and clean up the file handling
+To:     "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>,
+        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
         "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>,
         "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
-Subject: RE: [PATCH v2] mmc-utils: correct and clean up the file handling
-Thread-Topic: [PATCH v2] mmc-utils: correct and clean up the file handling
-Thread-Index: AdjB2XU9gUyV8Jz7S6KzzdFddt0bHg==
-Date:   Tue, 6 Sep 2022 10:14:44 +0000
-Message-ID: <AM5PR0701MB29649D655F1BB8F2156300E2EF7E9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nokia.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: AM5PR0701MB2964:EE_|VI1PR07MB4015:EE_
-x-ms-office365-filtering-correlation-id: 5373d3ec-aa29-405d-4bfd-08da8ff09f07
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: s0e0ZU+LCD2Xl2TaBUmLaptPmEHmfKdwBrTyheIGzlT79SU/gVwP9xosN8HKd98OhQWGdX0LDmSMVjndOd4RJzqaSPGMiG9UKD6N5XeTKy72dc5+ceYx+s8+j9W/nuAU0SnzWL+8XhMGmjHI3CuSTH8JwsCPJkMnGbzysAODXRAetD2ow1TJCU+8uuIItiEvQtdVOTRNaWnB/xKzytEHTZT9DBCJRdbfI1mAXRUBBFgw3vmk3DhRtybsVuqRtEOZXVvw1e1KQGa0cg6glhGva0TCza+pKYLeQi8bC9r01rTLEemUHg80yO8G69btqLyw04q/O1Gx9/zEoo5OoPgpdlqteG8jj0nv//8DH4uSe7rVgVAWmBrkdANvzKrLBNBFhZ0ZZ+CtoARMOt3nCHUls6lL8pjUa75Uta5dfo/orWlmFGfdvq5lcVODVYXlwzURyGdkdMFrAm/gSTWe8fygY7ayQGT5La0LdXI1/m4wIsmMbO6mGXhEYD9SoZXVIZGIbmVE341wAnlM1AjPKrewfCUHcU54IjPRgSMZ855vfyXrekmU16uOtWfBxy0BDzzd7H1EmwlyLtkAhAnwcD/6128GMa9OQjWYydSXieSF3FLIIlhANdkf6fzllF/06oWS1/i9t1ENY23b7kwFCcmun382ammvOeV7FTGKSLGnU19ilEy3N+NgLUtU4l1eRfZyYS5kfTrTbrt98T7EmBbzv6CJq0hVuhamMa8ATvFgGdXTRYXU/LyFZpD9Po5iD55HN0JXV50SMkBXW/jj7E5uMn/JV70jzouAhDu+6S0XHunFYEjPEi9a4hfQmXltSSE6kLcY3yqNIww3CZrEqviRpgpNzsTRoUi4RYbrWX49LVs=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM5PR0701MB2964.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(346002)(366004)(39860400002)(376002)(136003)(396003)(478600001)(82960400001)(38070700005)(38100700002)(122000001)(4326008)(64756008)(55016003)(76116006)(66946007)(66556008)(66476007)(8676002)(66446008)(54906003)(6916009)(316002)(26005)(2906002)(8936002)(9686003)(52536014)(5660300002)(53546011)(83380400001)(71200400001)(107886003)(7696005)(41300700001)(186003)(966005)(6506007)(86362001)(33656002);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?M2M0ZThsaXlkQXA2RDRiWUJyY1ZMc2JuR2U4Y2JaV21HNnYxVVhFTUgvTmxR?=
- =?utf-8?B?eG5pZ05PRzRIaEUyR0ZLRWxrd2pBZHEwVHNzckRkN1ByL3VlcDNkd3dyK2Ra?=
- =?utf-8?B?L3VDcDh1SDhSeERqbG1PZVM4cFcwZm5JUkcyZk56QVJKc2lyWFd3MkFSL29G?=
- =?utf-8?B?TDJOTDA1dnFVWDJXRTN1RitVeWQvejZjZytoRWh3d3ZwMHBsYmVlSmtQQUlh?=
- =?utf-8?B?NDRsTUxTUlZQazZxeGJXME1kcUZEd2FJNkcxeFRodDFJYU1uS252V25BeHZD?=
- =?utf-8?B?RUxCdzNnbVRxbXRBRjRtZnlkR1FNYVJNUDh3eFJkd3h1M1lldEk5TzZmT1VM?=
- =?utf-8?B?TkV6TWN6VFQ0dkgrdG1PenYvWlFjOXZkeG5RMXh1TURSSUVBajQ3NjJIamFy?=
- =?utf-8?B?c2Z0WGs5bFhZRGl6ZjZMc1BlbTFheW1uM2JXdGFVTzlaaWMyaFQ0N2NzSzA4?=
- =?utf-8?B?MTBpcHYvNUVZaXNCZTYraHdDQzdjczZORU1HVEVwQWw4aDRiSWpwM2oySWR2?=
- =?utf-8?B?TFdTWlI4b0lIUmh3RDRMOTZEMFpZUWJ6U0REQkNOdEdaNWphMU5US1FweFZJ?=
- =?utf-8?B?Rngyck5iNENxWE82ZWZ2MlhVS3lveFF4SUNXRndlQnUwcW9jVEpvRDI0SUsx?=
- =?utf-8?B?SVBPVlR0WDJQc3JNeDVJTjl0T3VNMzZGM011cXFlV05nS0Evc2xsLzNKVTlz?=
- =?utf-8?B?dkljNHFnYk5zR00xODdhK0pmR01SbkZzSGdEanBUdU5Sc0dVL0M1Y2Zuakda?=
- =?utf-8?B?Y29pK2pQeHd5WWN4aWtaTFMxdWdZYVhxYzJoaHEzMnRNNVk0Y3k0dHFXUWRL?=
- =?utf-8?B?K2ZheUwvdWE5citVZFJNS1pjMER6c0E3WnBlR2x3Rm1rNk03ZWxINEc1QXBM?=
- =?utf-8?B?UmJvaHhUaWRpRm0vMlpRRzJBYlVnaUIxalcvenI4cTl0RmVOcDJyNWd2dkE1?=
- =?utf-8?B?U2l3em5iWUM5bWZRVXNsM1JJeDFUQUNEcGhrdllhZGZ5Q2tUdHd2c1AzTyto?=
- =?utf-8?B?bDZEbFREOVZnT3BUNEV0cGJldTFmdSt0bGxUT3lpTDRaZCtVMWJPMytLd1RM?=
- =?utf-8?B?aG5qYTgrSnRQbGVDa0JUU1IzMUZvM1pab1ozSE9HRnFxZm0wdW5mbDZoU3Zl?=
- =?utf-8?B?bUl1SzZkN0ZLOEM4dTZJYUZmSFZESGUrMW81R3pCNGxTNDZkNTg4YTYveHIz?=
- =?utf-8?B?amJ3UWdTNzkvaEs1eDgvbUtOSWlpNnZ5d3E2VnlGTVJENkdST01vZm1LQjRv?=
- =?utf-8?B?YndVQzNCd3NnQko0aSs1T3FneGk0OHNJdW8vUVJnYjMwei8xVmJuSVZUSTVD?=
- =?utf-8?B?ZG9ZZ0RYaDExS2VGaFZzbllnVDE0U01BNG1MVTNZN1drRXFSUTZ3SGVIV0My?=
- =?utf-8?B?cHBlcVJVU0VFTXl3RXgxUUtJVnhlZC94NFJzcFpzdnJScUxTZGlJS2tkQkRx?=
- =?utf-8?B?UVFLUnJZUUxLNHlJZUxzUDZzOEMzd3piMVdpc2dZa1g5c3ZiaHRUbHVMaG5E?=
- =?utf-8?B?UmZIQmF0SHRXY0R1L2tUOTEwRytPNGdneko5UW15S1NDUnpzN2NZTExoWWN1?=
- =?utf-8?B?ckJVMkNqM0tneUtIUW5haDQ5amg4RUtnaFVuVC9RbDk3YlVOckpXc2VWdjly?=
- =?utf-8?B?T3E0c1lzSVJyZlluUFpwNDh3VnRXNWtMeEZyYWZIUFNHOS9Ud2lFRTBsVFVY?=
- =?utf-8?B?Y1RROHk3K0RXQmNtcW1vRzJFSGF5VzU1dmhrMEp2SHZjYmRzZ3ptNHYxQURs?=
- =?utf-8?B?THcvUGw0SVR5dm1mbWRSQm5scnVVVExjelNPdmhiNmo5dWdra2x1bUZhQys2?=
- =?utf-8?B?ZjkxYTc4S3RPUHJnNG5kMDloV0NmSkg4cDJYTno3VGZnTlgyWkdTSDhnQzBp?=
- =?utf-8?B?Y2hGK3lqU0t0RlVZSnhnQzNVbU9VOHJGaklUcHA3OFJZYk9UeFM0cDlXU3dC?=
- =?utf-8?B?UUdlMGljOURSdlpsYW1DbnhMb1JWdzBla29UTFRRYnJpQXdlRXg3ZWJONFFl?=
- =?utf-8?B?R25RTEtXVXBFL0JJbFNZeDcydzFnRm5TQ2FWUFpyN1Nya21ZanNaUDJseWd4?=
- =?utf-8?B?Q2hqU0xnOHJCNUZiWlQrQThGQ0JsQ2hqT0Y2R2kzUytYeG9tUGJ5L1ViL2tq?=
- =?utf-8?Q?5UxWlkWnBsBunw0T5lZeuk9mG?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-OriginatorOrg: nokia.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: VI1PR07MB4015
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SGkgZXZlcnlvbmUsDQoNClByZXZpb3VzIHBhdGNoIGRpZCBwYXNzIHRoZSBjaGVja3MgYW5kIGFw
-cGxpZWQgdG8gdGhlIHJlcG9zaXRvcnksIGJ1dCBzaW5jZSBJIHVzZSB5b2N0byBhcyBteSBkZXZl
-bG9wbWVudCBlbnZpcm9ubWVudCANCnRoZSB3YXJuaW5ncyBhYm91dCBodW5rIG9mZnNldHMgd2Vy
-ZSBpZ25vcmVkLg0KSSBoYXZlIG5vdyByZS1yb2xsZWQgcGF0Y2ggb24gdG9wIG9mIGEgY2xlYW4g
-bW1jLXV0aWxzIHJlcG9zaXRvcnkgLSBjaGFuZ2VzIGFyZSB0aGUgc2FtZS4NCkhvcGVmdWxseSB0
-aGlzIHdpbGwgYmUgb2sgbm93Lg0KDQpCZXN0IHJlZ2FyZHMsDQpCcnVubyBNYXRpxIcNCg0KLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0NCg0KQWRkIHRoZSBjaGVjayBpZiB0
-aGUgd2hvbGUgZmlybXdhcmUgd2FzIGxvYWRlZC4NCkNsZWFuZWQgdXAgdGhlIGxlZnRvdmVycyBv
-ZiBoYW5kbGluZyB0aGUgZmlsZSBpbiBjaHVua3MuDQoNClNpZ25lZC1vZmYtYnk6IEJydW5vIE1h
-dGljIDxicnVuby5tYXRpY0Bub2tpYS5jb20+DQotLS0NCiBtbWNfY21kcy5jIHwgNjYgKysrKysr
-KysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQogMSBmaWxl
-IGNoYW5nZWQsIDMyIGluc2VydGlvbnMoKyksIDM0IGRlbGV0aW9ucygtKQ0KDQpkaWZmIC0tZ2l0
-IGEvbW1jX2NtZHMuYyBiL21tY19jbWRzLmMNCmluZGV4IDEyYjc4MDIuLmVmMWQ4YzYgMTAwNjQ0
-DQotLS0gYS9tbWNfY21kcy5jDQorKysgYi9tbWNfY21kcy5jDQpAQCAtMjc2NSw3ICsyNzY1LDYg
-QEAgaW50IGRvX2ZmdShpbnQgbmFyZ3MsIGNoYXIgKiphcmd2KQ0KIAlfX3U4ICpidWYgPSBOVUxM
-Ow0KIAlfX3UzMiBhcmc7DQogCW9mZl90IGZ3X3NpemU7DQotCXNzaXplX3QgY2h1bmtfc2l6ZTsN
-CiAJY2hhciAqZGV2aWNlOw0KIAlzdHJ1Y3QgbW1jX2lvY19tdWx0aV9jbWQgKm11bHRpX2NtZCA9
-IE5VTEw7DQogDQpAQCAtMjg3OSw0NSArMjg3OCw0NCBAQCBpbnQgZG9fZmZ1KGludCBuYXJncywg
-Y2hhciAqKmFyZ3YpDQogCW11bHRpX2NtZC0+Y21kc1szXS5mbGFncyA9IE1NQ19SU1BfU1BJX1Ix
-QiB8IE1NQ19SU1BfUjFCIHwgTU1DX0NNRF9BQzsNCiAJbXVsdGlfY21kLT5jbWRzWzNdLndyaXRl
-X2ZsYWcgPSAxOw0KIA0KLWRvX3JldHJ5Og0KLQkvKiByZWFkIGZpcm13YXJlIGNodW5rICovDQor
-CS8qIHJlYWQgZmlybXdhcmUgKi8NCiAJbHNlZWsoaW1nX2ZkLCAwLCBTRUVLX1NFVCk7DQotCWNo
-dW5rX3NpemUgPSByZWFkKGltZ19mZCwgYnVmLCBmd19zaXplKTsNCisJaWYgKHJlYWQoaW1nX2Zk
-LCBidWYsIGZ3X3NpemUpICE9IGZ3X3NpemUpIHsNCisJCXBlcnJvcigiQ291bGQgbm90IHJlYWQg
-dGhlIGZpcm13YXJlIGZpbGU6ICIpOw0KKwkJcmV0ID0gLUVOT1NQQzsNCisJCWdvdG8gb3V0Ow0K
-Kwl9DQogDQotCWlmIChjaHVua19zaXplID4gMCkgew0KLQkJLyogc2VuZCBpb2N0bCB3aXRoIG11
-bHRpLWNtZCAqLw0KLQkJcmV0ID0gaW9jdGwoZGV2X2ZkLCBNTUNfSU9DX01VTFRJX0NNRCwgbXVs
-dGlfY21kKTsNCitkb19yZXRyeToNCisJLyogc2VuZCBpb2N0bCB3aXRoIG11bHRpLWNtZCAqLw0K
-KwlyZXQgPSBpb2N0bChkZXZfZmQsIE1NQ19JT0NfTVVMVElfQ01ELCBtdWx0aV9jbWQpOw0KIA0K
-LQkJaWYgKHJldCkgew0KLQkJCXBlcnJvcigiTXVsdGktY21kIGlvY3RsIik7DQotCQkJLyogSW4g
-Y2FzZSBtdWx0aS1jbWQgaW9jdGwgZmFpbGVkIGJlZm9yZSBleGl0aW5nIGZyb20gZmZ1IG1vZGUg
-Ki8NCi0JCQlpb2N0bChkZXZfZmQsIE1NQ19JT0NfQ01ELCAmbXVsdGlfY21kLT5jbWRzWzNdKTsN
-Ci0JCQlnb3RvIG91dDsNCi0JCX0NCisJaWYgKHJldCkgew0KKwkJcGVycm9yKCJNdWx0aS1jbWQg
-aW9jdGwiKTsNCisJCS8qIEluIGNhc2UgbXVsdGktY21kIGlvY3RsIGZhaWxlZCBiZWZvcmUgZXhp
-dGluZyBmcm9tIGZmdSBtb2RlICovDQorCQlpb2N0bChkZXZfZmQsIE1NQ19JT0NfQ01ELCAmbXVs
-dGlfY21kLT5jbWRzWzNdKTsNCisJCWdvdG8gb3V0Ow0KKwl9DQogDQotCQlyZXQgPSByZWFkX2V4
-dGNzZChkZXZfZmQsIGV4dF9jc2QpOw0KLQkJaWYgKHJldCkgew0KLQkJCWZwcmludGYoc3RkZXJy
-LCAiQ291bGQgbm90IHJlYWQgRVhUX0NTRCBmcm9tICVzXG4iLCBkZXZpY2UpOw0KLQkJCWdvdG8g
-b3V0Ow0KLQkJfQ0KKwlyZXQgPSByZWFkX2V4dGNzZChkZXZfZmQsIGV4dF9jc2QpOw0KKwlpZiAo
-cmV0KSB7DQorCQlmcHJpbnRmKHN0ZGVyciwgIkNvdWxkIG5vdCByZWFkIEVYVF9DU0QgZnJvbSAl
-c1xuIiwgZGV2aWNlKTsNCisJCWdvdG8gb3V0Ow0KKwl9DQogDQotCQkvKiBUZXN0IGlmIHdlIG5l
-ZWQgdG8gcmVzdGFydCB0aGUgZG93bmxvYWQgKi8NCi0JCXNlY3RfZG9uZSA9IGV4dF9jc2RbRVhU
-X0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMF0gfA0KLQkJCQlleHRfY3NkW0VYVF9DU0RfTlVNX09G
-X0ZXX1NFQ19QUk9HXzFdIDw8IDggfA0KLQkJCQlleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NF
-Q19QUk9HXzJdIDw8IDE2IHwNCi0JCQkJZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJP
-R18zXSA8PCAyNDsNCi0JCS8qIEJ5IHNwZWMsIGhvc3Qgc2hvdWxkIHJlLXN0YXJ0IGRvd25sb2Fk
-IGZyb20gdGhlIGZpcnN0IHNlY3RvciBpZiBzZWN0X2RvbmUgaXMgMCAqLw0KLQkJaWYgKHNlY3Rf
-ZG9uZSA9PSAwKSB7DQotCQkJaWYgKHJldHJ5ID4gMCkgew0KLQkJCQlyZXRyeS0tOw0KLQkJCQlm
-cHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZC4gUmV0cnlpbmcuLi4gKCVkKVxuIiwg
-cmV0cnkpOw0KLQkJCQlnb3RvIGRvX3JldHJ5Ow0KLQkJCX0NCi0JCQlmcHJpbnRmKHN0ZGVyciwg
-IlByb2dyYW1taW5nIGZhaWxlZCEgQWJvcnRpbmcuLi5cbiIpOw0KLQkJCWdvdG8gb3V0Ow0KLQkJ
-fSBlbHNlIHsNCi0JCQlmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1tZWQgJWQvJWpkIGJ5dGVzXHIi
-LCBzZWN0X2RvbmUgKiBzZWN0X3NpemUsIChpbnRtYXhfdClmd19zaXplKTsNCisJLyogVGVzdCBp
-ZiB3ZSBuZWVkIHRvIHJlc3RhcnQgdGhlIGRvd25sb2FkICovDQorCXNlY3RfZG9uZSA9IGV4dF9j
-c2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMF0gfA0KKwkJCWV4dF9jc2RbRVhUX0NTRF9O
-VU1fT0ZfRldfU0VDX1BST0dfMV0gPDwgOCB8DQorCQkJZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9G
-V19TRUNfUFJPR18yXSA8PCAxNiB8DQorCQkJZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNf
-UFJPR18zXSA8PCAyNDsNCisJLyogQnkgc3BlYywgaG9zdCBzaG91bGQgcmUtc3RhcnQgZG93bmxv
-YWQgZnJvbSB0aGUgZmlyc3Qgc2VjdG9yIGlmIHNlY3RfZG9uZSBpcyAwICovDQorCWlmIChzZWN0
-X2RvbmUgPT0gMCkgew0KKwkJaWYgKHJldHJ5LS0pIHsNCisJCQlmcHJpbnRmKHN0ZGVyciwgIlBy
-b2dyYW1taW5nIGZhaWxlZC4gUmV0cnlpbmcuLi4gKCVkKVxuIiwgcmV0cnkpOw0KKwkJCWdvdG8g
-ZG9fcmV0cnk7DQogCQl9DQorCQlmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZCEg
-QWJvcnRpbmcuLi5cbiIpOw0KKwkJZ290byBvdXQ7DQogCX0NCiANCiAJaWYgKChzZWN0X2RvbmUg
-KiBzZWN0X3NpemUpID09IGZ3X3NpemUpIHsNCi0tIA0KMi4yOS4wDQoNCi0tLS0tT3JpZ2luYWwg
-TWVzc2FnZS0tLS0tDQpGcm9tOiBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4g
-DQpTZW50OiBUdWVzZGF5LCBTZXB0ZW1iZXIgNiwgMjAyMiAxMDoyOSBBTQ0KVG86IE1hdGljLCBC
-cnVubyAoTm9raWEgLSBERS9VbG0pIDxicnVuby5tYXRpY0Bub2tpYS5jb20+DQpDYzogQXZyaSBB
-bHRtYW4gPEF2cmkuQWx0bWFuQHdkYy5jb20+OyBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBD
-aHJpc3RpYW4gTMO2aGxlIDxDTG9laGxlQGh5cGVyc3RvbmUuY29tPjsgUm9zc2xlciwgSmFrb2Ig
-KE5va2lhIC0gREUvVWxtKSA8amFrb2Iucm9zc2xlckBub2tpYS5jb20+OyBIZWlub25lbiwgQWFy
-bmUgKE5va2lhIC0gRkkvRXNwb28pIDxhYXJuZS5oZWlub25lbkBub2tpYS5jb20+DQpTdWJqZWN0
-OiBSZTogW1BBVENIXSBtbWMtdXRpbHM6IGNvcnJlY3QgYW5kIGNsZWFuIHVwIHRoZSBmaWxlIGhh
-bmRsaW5nDQoNCk9uIE1vbiwgMTUgQXVnIDIwMjIgYXQgMTU6MTEsIE1hdGljLCBCcnVubyAoTm9r
-aWEgLSBERS9VbG0pIDxicnVuby5tYXRpY0Bub2tpYS5jb20+IHdyb3RlOg0KPg0KPiBIaSBldmVy
-eW9uZSwNCj4gQXMgc2FpZCwgaGVyZSBpcyB0aGUgcmV3b3JrZWQgcGF0Y2guDQo+DQo+DQo+IEFk
-ZCB0aGUgY2hlY2sgaWYgdGhlIHdob2xlIGZpcm13YXJlIHdhcyBsb2FkZWQuDQo+IENsZWFuZWQg
-dXAgdGhlIGxlZnRvdmVycyBvZiBoYW5kbGluZyB0aGUgZmlsZSBpbiBjaHVua3MuDQo+DQo+IFNp
-Z25lZC1vZmYtYnk6IEJydW5vIE1hdGljIDxicnVuby5tYXRpY0Bub2tpYS5jb20+DQoNCkhpIEJy
-dW5vLA0KDQpVbmZvcnR1bmF0ZWx5LCBJIHdhcyBub3QgYWJsZSB0byBhcHBseSB0aGlzIHBhdGNo
-Lg0KDQokc3ViamVjdCBwYXRjaCB3YXMgbm90IGFjY2VwdGVkIGJ5IHRoZSBtbWMgcGF0Y2h3b3Jr
-IFsxXSwgd2hpY2ggSSBhbSB1c2luZyB0byBtYW5hZ2UgdGhlIHBhdGNoZXMuIFBsZWFzZSBtYWtl
-IHN1cmUgdG8gY29uZm9ybSB0byB0aGUgcHJvY2VzcyBvZiBzdWJtaXR0aW5nIHBhdGNoZXMgWzJd
-IGFuZCBydW4gc2NyaXB0cy9jaGVja3BhdGNoLnBsIGJlZm9yZSByZS1zdWJtaXR0aW5nLg0KDQpL
-aW5kIHJlZ2FyZHMNClVmZmUNCg0KWzFdDQpodHRwczovL3BhdGNod29yay5rZXJuZWwub3JnL3By
-b2plY3QvbGludXgtbW1jL2xpc3QvDQpbMl0NCmh0dHBzOi8vd3d3Lmtlcm5lbC5vcmcvZG9jL2h0
-bWwvbGF0ZXN0L3Byb2Nlc3Mvc3VibWl0dGluZy1wYXRjaGVzLmh0bWwNCg0KPiAtLS0NCj4gIG1t
-Y19jbWRzLmMgfCA2NiANCj4gKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tDQo+ICAxIGZpbGUgY2hhbmdlZCwgMzIgaW5zZXJ0aW9ucygrKSwgMzQg
-ZGVsZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9tbWNfY21kcy5jIGIvbW1jX2NtZHMuYw0K
-PiBpbmRleCA3MDQ4MGRmLi43ZDM3ZTkzIDEwMDY0NA0KPiAtLS0gYS9tbWNfY21kcy5jDQo+ICsr
-KyBiL21tY19jbWRzLmMNCj4gQEAgLTI4MTIsNyArMjgxMiw2IEBAIGludCBkb19mZnUoaW50IG5h
-cmdzLCBjaGFyICoqYXJndikNCj4gICAgICAgICBfX3U4ICpidWYgPSBOVUxMOw0KPiAgICAgICAg
-IF9fdTMyIGFyZzsNCj4gICAgICAgICBvZmZfdCBmd19zaXplOw0KPiAtICAgICAgIHNzaXplX3Qg
-Y2h1bmtfc2l6ZTsNCj4gICAgICAgICBjaGFyICpkZXZpY2U7DQo+ICAgICAgICAgc3RydWN0IG1t
-Y19pb2NfbXVsdGlfY21kICptdWx0aV9jbWQgPSBOVUxMOw0KPiAgICAgICAgIF9fdTMyIGJsb2Nr
-cyA9IDE7DQo+IEBAIC0yOTI1LDQ1ICsyOTI0LDQ0IEBAIGludCBkb19mZnUoaW50IG5hcmdzLCBj
-aGFyICoqYXJndikNCj4gICAgICAgICBtdWx0aV9jbWQtPmNtZHNbM10uZmxhZ3MgPSBNTUNfUlNQ
-X1NQSV9SMUIgfCBNTUNfUlNQX1IxQiB8IE1NQ19DTURfQUM7DQo+ICAgICAgICAgbXVsdGlfY21k
-LT5jbWRzWzNdLndyaXRlX2ZsYWcgPSAxOw0KPg0KPiAtZG9fcmV0cnk6DQo+IC0gICAgICAgLyog
-cmVhZCBmaXJtd2FyZSBjaHVuayAqLw0KPiArICAgICAgIC8qIHJlYWQgZmlybXdhcmUgKi8NCj4g
-ICAgICAgICBsc2VlayhpbWdfZmQsIDAsIFNFRUtfU0VUKTsNCj4gLSAgICAgICBjaHVua19zaXpl
-ID0gcmVhZChpbWdfZmQsIGJ1ZiwgZndfc2l6ZSk7DQo+ICsgICAgICAgaWYgKHJlYWQoaW1nX2Zk
-LCBidWYsIGZ3X3NpemUpICE9IGZ3X3NpemUpIHsNCj4gKyAgICAgICAgICAgICAgIHBlcnJvcigi
-Q291bGQgbm90IHJlYWQgdGhlIGZpcm13YXJlIGZpbGU6ICIpOw0KPiArICAgICAgICAgICAgICAg
-cmV0ID0gLUVOT1NQQzsNCj4gKyAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0KPiArICAgICAgIH0N
-Cj4NCj4gLSAgICAgICBpZiAoY2h1bmtfc2l6ZSA+IDApIHsNCj4gLSAgICAgICAgICAgICAgIC8q
-IHNlbmQgaW9jdGwgd2l0aCBtdWx0aS1jbWQgKi8NCj4gLSAgICAgICAgICAgICAgIHJldCA9IGlv
-Y3RsKGRldl9mZCwgTU1DX0lPQ19NVUxUSV9DTUQsIG11bHRpX2NtZCk7DQo+ICtkb19yZXRyeToN
-Cj4gKyAgICAgICAvKiBzZW5kIGlvY3RsIHdpdGggbXVsdGktY21kICovDQo+ICsgICAgICAgcmV0
-ID0gaW9jdGwoZGV2X2ZkLCBNTUNfSU9DX01VTFRJX0NNRCwgbXVsdGlfY21kKTsNCj4NCj4gLSAg
-ICAgICAgICAgICAgIGlmIChyZXQpIHsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgcGVycm9y
-KCJNdWx0aS1jbWQgaW9jdGwiKTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgLyogSW4gY2Fz
-ZSBtdWx0aS1jbWQgaW9jdGwgZmFpbGVkIGJlZm9yZSBleGl0aW5nIGZyb20gZmZ1IG1vZGUgKi8N
-Cj4gLSAgICAgICAgICAgICAgICAgICAgICAgaW9jdGwoZGV2X2ZkLCBNTUNfSU9DX0NNRCwgJm11
-bHRpX2NtZC0+Y21kc1szXSk7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGdvdG8gb3V0Ow0K
-PiAtICAgICAgICAgICAgICAgfQ0KPiArICAgICAgIGlmIChyZXQpIHsNCj4gKyAgICAgICAgICAg
-ICAgIHBlcnJvcigiTXVsdGktY21kIGlvY3RsIik7DQo+ICsgICAgICAgICAgICAgICAvKiBJbiBj
-YXNlIG11bHRpLWNtZCBpb2N0bCBmYWlsZWQgYmVmb3JlIGV4aXRpbmcgZnJvbSBmZnUgbW9kZSAq
-Lw0KPiArICAgICAgICAgICAgICAgaW9jdGwoZGV2X2ZkLCBNTUNfSU9DX0NNRCwgJm11bHRpX2Nt
-ZC0+Y21kc1szXSk7DQo+ICsgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gKyAgICAgICB9DQo+
-DQo+IC0gICAgICAgICAgICAgICByZXQgPSByZWFkX2V4dGNzZChkZXZfZmQsIGV4dF9jc2QpOw0K
-PiAtICAgICAgICAgICAgICAgaWYgKHJldCkgew0KPiAtICAgICAgICAgICAgICAgICAgICAgICBm
-cHJpbnRmKHN0ZGVyciwgIkNvdWxkIG5vdCByZWFkIEVYVF9DU0QgZnJvbSAlc1xuIiwgZGV2aWNl
-KTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+IC0gICAgICAgICAgICAg
-ICB9DQo+ICsgICAgICAgcmV0ID0gcmVhZF9leHRjc2QoZGV2X2ZkLCBleHRfY3NkKTsNCj4gKyAg
-ICAgICBpZiAocmV0KSB7DQo+ICsgICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIkNvdWxk
-IG5vdCByZWFkIEVYVF9DU0QgZnJvbSAlc1xuIiwgZGV2aWNlKTsNCj4gKyAgICAgICAgICAgICAg
-IGdvdG8gb3V0Ow0KPiArICAgICAgIH0NCj4NCj4gLSAgICAgICAgICAgICAgIC8qIFRlc3QgaWYg
-d2UgbmVlZCB0byByZXN0YXJ0IHRoZSBkb3dubG9hZCAqLw0KPiAtICAgICAgICAgICAgICAgc2Vj
-dF9kb25lID0gZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPR18wXSB8DQo+IC0gICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNf
-UFJPR18xXSA8PCA4IHwNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBleHRfY3Nk
-W0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzJdIDw8IDE2IHwNCj4gLSAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzNdIDw8
-IDI0Ow0KPiAtICAgICAgICAgICAgICAgLyogQnkgc3BlYywgaG9zdCBzaG91bGQgcmUtc3RhcnQg
-ZG93bmxvYWQgZnJvbSB0aGUgZmlyc3Qgc2VjdG9yIGlmIHNlY3RfZG9uZSBpcyAwICovDQo+IC0g
-ICAgICAgICAgICAgICBpZiAoc2VjdF9kb25lID09IDApIHsNCj4gLSAgICAgICAgICAgICAgICAg
-ICAgICAgaWYgKHJldHJ5ID4gMCkgew0KPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-IHJldHJ5LS07DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZnByaW50ZihzdGRl
-cnIsICJQcm9ncmFtbWluZyBmYWlsZWQuIFJldHJ5aW5nLi4uICglZClcbiIsIHJldHJ5KTsNCj4g
-LSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIGRvX3JldHJ5Ow0KPiAtICAgICAg
-ICAgICAgICAgICAgICAgICB9DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYoc3Rk
-ZXJyLCAiUHJvZ3JhbW1pbmcgZmFpbGVkISBBYm9ydGluZy4uLlxuIik7DQo+IC0gICAgICAgICAg
-ICAgICAgICAgICAgIGdvdG8gb3V0Ow0KPiAtICAgICAgICAgICAgICAgfSBlbHNlIHsNCj4gLSAg
-ICAgICAgICAgICAgICAgICAgICAgZnByaW50ZihzdGRlcnIsICJQcm9ncmFtbWVkICVkLyVqZCBi
-eXRlc1xyIiwgc2VjdF9kb25lICogc2VjdF9zaXplLCAoaW50bWF4X3QpZndfc2l6ZSk7DQo+ICsg
-ICAgICAgLyogVGVzdCBpZiB3ZSBuZWVkIHRvIHJlc3RhcnQgdGhlIGRvd25sb2FkICovDQo+ICsg
-ICAgICAgc2VjdF9kb25lID0gZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPR18wXSB8
-DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VD
-X1BST0dfMV0gPDwgOCB8DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGV4dF9jc2RbRVhUX0NT
-RF9OVU1fT0ZfRldfU0VDX1BST0dfMl0gPDwgMTYgfA0KPiArICAgICAgICAgICAgICAgICAgICAg
-ICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzNdIDw8IDI0Ow0KPiArICAgICAg
-IC8qIEJ5IHNwZWMsIGhvc3Qgc2hvdWxkIHJlLXN0YXJ0IGRvd25sb2FkIGZyb20gdGhlIGZpcnN0
-IHNlY3RvciBpZiBzZWN0X2RvbmUgaXMgMCAqLw0KPiArICAgICAgIGlmIChzZWN0X2RvbmUgPT0g
-MCkgew0KPiArICAgICAgICAgICAgICAgaWYgKHJldHJ5LS0pIHsNCj4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgZnByaW50ZihzdGRlcnIsICJQcm9ncmFtbWluZyBmYWlsZWQuIFJldHJ5aW5nLi4u
-ICglZClcbiIsIHJldHJ5KTsNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgZ290byBkb19yZXRy
-eTsNCj4gICAgICAgICAgICAgICAgIH0NCj4gKyAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJy
-LCAiUHJvZ3JhbW1pbmcgZmFpbGVkISBBYm9ydGluZy4uLlxuIik7DQo+ICsgICAgICAgICAgICAg
-ICBnb3RvIG91dDsNCj4gICAgICAgICB9DQo+DQo+ICAgICAgICAgaWYgKChzZWN0X2RvbmUgKiBz
-ZWN0X3NpemUpID09IGZ3X3NpemUpIHsNCj4gLS0NCj4gMi4yOS4wDQo+DQo=
+On Tue, 6 Sept 2022 at 12:14, Matic, Bruno (Nokia - DE/Ulm)
+<bruno.matic@nokia.com> wrote:
+>
+> Hi everyone,
+>
+> Previous patch did pass the checks and applied to the repository, but sin=
+ce I use yocto as my development environment
+> the warnings about hunk offsets were ignored.
+> I have now re-rolled patch on top of a clean mmc-utils repository - chang=
+es are the same.
+> Hopefully this will be ok now.
+
+Sorry, but no this isn't much better it seems. From the guide [1],
+there are a couple of important steps that you need to follow. Please
+have a closer look.
+
+1) Format the patch according to the "canonical patch format" with
+"git format-patch".
+2. Run ./scripts/checkpatch.pl (the script is available in kernel code
+tree) on the formatted patch - and fix the potential warnings/errors.
+3) Submit your patch as plain text with git send-email.
+
+Hope this helps!
+
+Kind regards
+Uffe
+
+[1]
+https://www.kernel.org/doc/html/latest/process/submitting-patches.html
+
+>
+> Best regards,
+> Bruno Mati=C4=87
+>
+> -------------------------------------------------------------------------=
+----------------------
+>
+> Add the check if the whole firmware was loaded.
+> Cleaned up the leftovers of handling the file in chunks.
+>
+> Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
+> ---
+>  mmc_cmds.c | 66 ++++++++++++++++++++++++++----------------------------
+>  1 file changed, 32 insertions(+), 34 deletions(-)
+>
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 12b7802..ef1d8c6 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2765,7 +2765,6 @@ int do_ffu(int nargs, char **argv)
+>         __u8 *buf =3D NULL;
+>         __u32 arg;
+>         off_t fw_size;
+> -       ssize_t chunk_size;
+>         char *device;
+>         struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+>
+> @@ -2879,45 +2878,44 @@ int do_ffu(int nargs, char **argv)
+>         multi_cmd->cmds[3].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_=
+CMD_AC;
+>         multi_cmd->cmds[3].write_flag =3D 1;
+>
+> -do_retry:
+> -       /* read firmware chunk */
+> +       /* read firmware */
+>         lseek(img_fd, 0, SEEK_SET);
+> -       chunk_size =3D read(img_fd, buf, fw_size);
+> +       if (read(img_fd, buf, fw_size) !=3D fw_size) {
+> +               perror("Could not read the firmware file: ");
+> +               ret =3D -ENOSPC;
+> +               goto out;
+> +       }
+>
+> -       if (chunk_size > 0) {
+> -               /* send ioctl with multi-cmd */
+> -               ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +do_retry:
+> +       /* send ioctl with multi-cmd */
+> +       ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+>
+> -               if (ret) {
+> -                       perror("Multi-cmd ioctl");
+> -                       /* In case multi-cmd ioctl failed before exiting =
+from ffu mode */
+> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> -                       goto out;
+> -               }
+> +       if (ret) {
+> +               perror("Multi-cmd ioctl");
+> +               /* In case multi-cmd ioctl failed before exiting from ffu=
+ mode */
+> +               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> +               goto out;
+> +       }
+>
+> -               ret =3D read_extcsd(dev_fd, ext_csd);
+> -               if (ret) {
+> -                       fprintf(stderr, "Could not read EXT_CSD from %s\n=
+", device);
+> -                       goto out;
+> -               }
+> +       ret =3D read_extcsd(dev_fd, ext_csd);
+> +       if (ret) {
+> +               fprintf(stderr, "Could not read EXT_CSD from %s\n", devic=
+e);
+> +               goto out;
+> +       }
+>
+> -               /* Test if we need to restart the download */
+> -               sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << =
+8 |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << =
+16 |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << =
+24;
+> -               /* By spec, host should re-start download from the first =
+sector if sect_done is 0 */
+> -               if (sect_done =3D=3D 0) {
+> -                       if (retry > 0) {
+> -                               retry--;
+> -                               fprintf(stderr, "Programming failed. Retr=
+ying... (%d)\n", retry);
+> -                               goto do_retry;
+> -                       }
+> -                       fprintf(stderr, "Programming failed! Aborting...\=
+n");
+> -                       goto out;
+> -               } else {
+> -                       fprintf(stderr, "Programmed %d/%jd bytes\r", sect=
+_done * sect_size, (intmax_t)fw_size);
+> +       /* Test if we need to restart the download */
+> +       sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
+> +       /* By spec, host should re-start download from the first sector i=
+f sect_done is 0 */
+> +       if (sect_done =3D=3D 0) {
+> +               if (retry--) {
+> +                       fprintf(stderr, "Programming failed. Retrying... =
+(%d)\n", retry);
+> +                       goto do_retry;
+>                 }
+> +               fprintf(stderr, "Programming failed! Aborting...\n");
+> +               goto out;
+>         }
+>
+>         if ((sect_done * sect_size) =3D=3D fw_size) {
+> --
+> 2.29.0
+>
+> -----Original Message-----
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Sent: Tuesday, September 6, 2022 10:29 AM
+> To: Matic, Bruno (Nokia - DE/Ulm) <bruno.matic@nokia.com>
+> Cc: Avri Altman <Avri.Altman@wdc.com>; linux-mmc@vger.kernel.org; Christi=
+an L=C3=B6hle <CLoehle@hyperstone.com>; Rossler, Jakob (Nokia - DE/Ulm) <ja=
+kob.rossler@nokia.com>; Heinonen, Aarne (Nokia - FI/Espoo) <aarne.heinonen@=
+nokia.com>
+> Subject: Re: [PATCH] mmc-utils: correct and clean up the file handling
+>
+> On Mon, 15 Aug 2022 at 15:11, Matic, Bruno (Nokia - DE/Ulm) <bruno.matic@=
+nokia.com> wrote:
+> >
+> > Hi everyone,
+> > As said, here is the reworked patch.
+> >
+> >
+> > Add the check if the whole firmware was loaded.
+> > Cleaned up the leftovers of handling the file in chunks.
+> >
+> > Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
+>
+> Hi Bruno,
+>
+> Unfortunately, I was not able to apply this patch.
+>
+> $subject patch was not accepted by the mmc patchwork [1], which I am usin=
+g to manage the patches. Please make sure to conform to the process of subm=
+itting patches [2] and run scripts/checkpatch.pl before re-submitting.
+>
+> Kind regards
+> Uffe
+>
+> [1]
+> https://patchwork.kernel.org/project/linux-mmc/list/
+> [2]
+> https://www.kernel.org/doc/html/latest/process/submitting-patches.html
+>
+> > ---
+> >  mmc_cmds.c | 66
+> > ++++++++++++++++++++++++++----------------------------
+> >  1 file changed, 32 insertions(+), 34 deletions(-)
+> >
+> > diff --git a/mmc_cmds.c b/mmc_cmds.c
+> > index 70480df..7d37e93 100644
+> > --- a/mmc_cmds.c
+> > +++ b/mmc_cmds.c
+> > @@ -2812,7 +2812,6 @@ int do_ffu(int nargs, char **argv)
+> >         __u8 *buf =3D NULL;
+> >         __u32 arg;
+> >         off_t fw_size;
+> > -       ssize_t chunk_size;
+> >         char *device;
+> >         struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+> >         __u32 blocks =3D 1;
+> > @@ -2925,45 +2924,44 @@ int do_ffu(int nargs, char **argv)
+> >         multi_cmd->cmds[3].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MM=
+C_CMD_AC;
+> >         multi_cmd->cmds[3].write_flag =3D 1;
+> >
+> > -do_retry:
+> > -       /* read firmware chunk */
+> > +       /* read firmware */
+> >         lseek(img_fd, 0, SEEK_SET);
+> > -       chunk_size =3D read(img_fd, buf, fw_size);
+> > +       if (read(img_fd, buf, fw_size) !=3D fw_size) {
+> > +               perror("Could not read the firmware file: ");
+> > +               ret =3D -ENOSPC;
+> > +               goto out;
+> > +       }
+> >
+> > -       if (chunk_size > 0) {
+> > -               /* send ioctl with multi-cmd */
+> > -               ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> > +do_retry:
+> > +       /* send ioctl with multi-cmd */
+> > +       ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> >
+> > -               if (ret) {
+> > -                       perror("Multi-cmd ioctl");
+> > -                       /* In case multi-cmd ioctl failed before exitin=
+g from ffu mode */
+> > -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3])=
+;
+> > -                       goto out;
+> > -               }
+> > +       if (ret) {
+> > +               perror("Multi-cmd ioctl");
+> > +               /* In case multi-cmd ioctl failed before exiting from f=
+fu mode */
+> > +               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> > +               goto out;
+> > +       }
+> >
+> > -               ret =3D read_extcsd(dev_fd, ext_csd);
+> > -               if (ret) {
+> > -                       fprintf(stderr, "Could not read EXT_CSD from %s=
+\n", device);
+> > -                       goto out;
+> > -               }
+> > +       ret =3D read_extcsd(dev_fd, ext_csd);
+> > +       if (ret) {
+> > +               fprintf(stderr, "Could not read EXT_CSD from %s\n", dev=
+ice);
+> > +               goto out;
+> > +       }
+> >
+> > -               /* Test if we need to restart the download */
+> > -               sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> > -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] <=
+< 8 |
+> > -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] <=
+< 16 |
+> > -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] <=
+< 24;
+> > -               /* By spec, host should re-start download from the firs=
+t sector if sect_done is 0 */
+> > -               if (sect_done =3D=3D 0) {
+> > -                       if (retry > 0) {
+> > -                               retry--;
+> > -                               fprintf(stderr, "Programming failed. Re=
+trying... (%d)\n", retry);
+> > -                               goto do_retry;
+> > -                       }
+> > -                       fprintf(stderr, "Programming failed! Aborting..=
+.\n");
+> > -                       goto out;
+> > -               } else {
+> > -                       fprintf(stderr, "Programmed %d/%jd bytes\r", se=
+ct_done * sect_size, (intmax_t)fw_size);
+> > +       /* Test if we need to restart the download */
+> > +       sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
+> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
+> > +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
+> > +       /* By spec, host should re-start download from the first sector=
+ if sect_done is 0 */
+> > +       if (sect_done =3D=3D 0) {
+> > +               if (retry--) {
+> > +                       fprintf(stderr, "Programming failed. Retrying..=
+. (%d)\n", retry);
+> > +                       goto do_retry;
+> >                 }
+> > +               fprintf(stderr, "Programming failed! Aborting...\n");
+> > +               goto out;
+> >         }
+> >
+> >         if ((sect_done * sect_size) =3D=3D fw_size) {
+> > --
+> > 2.29.0
+> >
