@@ -2,579 +2,264 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7510DECAAD5
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Sep 2022 14:11:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84BBCECAAA1
+	for <linux-mmc@archiver.kernel.org>; Tue,  6 Sep 2022 07:57:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237966AbiIEOLC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Sep 2022 10:11:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58712 "EHLO
+        id S238386AbiIFH5R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 6 Sep 2022 03:57:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35024 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237618AbiIEOLA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Sep 2022 10:11:00 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CD4529826
-        for <linux-mmc@vger.kernel.org>; Mon,  5 Sep 2022 07:10:58 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id w8so13255943lft.12
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Sep 2022 07:10:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=miiXUh9DQ+9qeFDUPgGUqMPd1aCcaXXBEiiUKPHd0Gg=;
-        b=Mb//nflmO5nD3GweNzcAfgWJfqqqaU5Jc9TO2LzHx7G02VKO8wEvaE5Z1A+ZI+vaTa
-         +L+qRy6cOMNlSGv+gUObIxpCjwyf8fIZ3+/uc6dMCrHBA3ywsk5MP1zS5ZA2FTQux7N1
-         m/Ur/mm9Sdcm6jtsMvdXp1nvggpMR3Je0vkLS1Te8WTi1CaXh4japTVwRrVvNZgkaSam
-         dVmXVR/m3KpBMXtqEzq1OWNuKy0MmoJbcR1OydHloyNLNxBco9uaQKYtzPgJ1k8snBru
-         DEHsxZBAoo73t8LXDvaqo3dUqWRyCNGXsoo24c4KMvxvC19QXnx2+pUmnlfknXuSGFVv
-         npuQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=miiXUh9DQ+9qeFDUPgGUqMPd1aCcaXXBEiiUKPHd0Gg=;
-        b=m8iwSiYzVgABTVo8Y2qVZPtBjrOKqlnuoCdv2/VIZL41GW2sgd9kPlRmiDIsBDpQrF
-         eCrP91E0IdpcYdw/EVVCnp9szsmsaQcewPSg9aNNUBpJKDmjJ8cj4YDASTLWHE3+kSvg
-         lL4ux60sjh9eXm09zrBXyj+39sk1nfoBUjQwSqy7sSGsFFU3wwG2eKOu/BaOiA0niigd
-         IBBFjqoS5iCIKPIT6FK29eQxIFMc/bylNT2ZtRkL8AQPwiCdYnGVn/WXz0IN/s6bkb6g
-         fPfB80eP9pwAeTxhr+57e63QqrCd2PdW8KnTt12Q1H2zp2BeeleDWTfUYr25UrP8SU6w
-         8YYw==
-X-Gm-Message-State: ACgBeo0xgPUQmfUYeJo6JUICycrFVDX+OoA1StG+hsTZs0i48Q1eoYfg
-        T5lZp/uf9xs6MwIutwhzhuBPlv3DP3VJ9rocLaRu5g==
-X-Google-Smtp-Source: AA6agR40GZ56VM7jazs6Q3+/b1JiDI3uxtySu2Qtf+Y987i3iWpIxYi0gOmU7DMVNKscdQpcX5jsr4xt8vnaEDy7CYM=
-X-Received: by 2002:a05:6512:2a8a:b0:494:8746:bfb4 with SMTP id
- dt10-20020a0565122a8a00b004948746bfb4mr9353569lfb.233.1662387056381; Mon, 05
- Sep 2022 07:10:56 -0700 (PDT)
+        with ESMTP id S238646AbiIFH5M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 6 Sep 2022 03:57:12 -0400
+Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-eopbgr80103.outbound.protection.outlook.com [40.107.8.103])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13B8871704
+        for <linux-mmc@vger.kernel.org>; Tue,  6 Sep 2022 00:57:09 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=O86wWG5ToFiZVOw/3IquZ9nsT+tLJc0n7wm7cUWmKqBsiIXtGMx/CJjdQcV9kfoZ7awrgVGvtk3kAhfHz6mb+FHsjmxVhUBoBDwadARZECbFyfS8odjb8pmG1EaCGVUHtVUt4lSwGy/6kHKfk64/tY5M9gA4t5TnEjXHv3df1kBBmDZ6b5b5+Q1duzW0+DnuOI9Pz+U314/JZNERXvbwpwMYMILUnh8tpPchx/D5PdYBb4NQ+f8t+cJ7uk/h2c3jthS+h9rxK3cqsRznSaS364P7fb8nhQPIiOME+nNamTzA29onOJx0J9eoEtK+33mT81PeG1DDIdvCr2nykJICeA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=v1+tLR+NyNTlNF0imk3C/29IYdYhpm/zzjye1L+iaGg=;
+ b=e+c3Ob0EmR2A6HY0WczMX5gGGUgEgclvaW57KFf374RgTdoyzwq+Hbl3RmvXsv28LgZM3O4YzGfgLYFBEM37QtLYCvy5E0bM4wt+s+eBh/C6oW+5ZUMyrudz5DLDGwcWL+dPF07VdgFFWFFBDvEYDsFd349E/OaEEw2beG3HIiW8WHjRmDkj7Tm7skz57lZ2ARRXqYjQPFQquR+S2wiQjlQAdY/jkWaArrmCSWh5DEebHxQQedDKSvEYVXFmsIOBaHSmM5bTE50RcnwWm/Fz2BhnQgKAHQjjO8pzZn8ZxUR+uxJwmEkBozqQITMmn6DpLIUD28r9/BJud/miVaCcJg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
+ dkim=pass header.d=nokia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
+ s=selector1-nokia-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=v1+tLR+NyNTlNF0imk3C/29IYdYhpm/zzjye1L+iaGg=;
+ b=i9tYJdFRoVkhPn2UEuu4rRAQ0sEL6soqWnVPrYa8wYg9bjcph3WPLOsJELQd1oGg9JJJbaxO06LfAu2r6uQy0r0jWttiL+jQ0nQgv337bteoVUfEZBh935N5s1brsebxdX9EbQJkIFo7qDE5hWUil1S1Iwro8WcE5xvmExhylh0=
+Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
+ (2603:10a6:203:4e::11) by DBBPR07MB7627.eurprd07.prod.outlook.com
+ (2603:10a6:10:1e8::17) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.12; Tue, 6 Sep
+ 2022 07:57:07 +0000
+Received: from AM5PR0701MB2964.eurprd07.prod.outlook.com
+ ([fe80::542a:5d98:f0f4:3640]) by AM5PR0701MB2964.eurprd07.prod.outlook.com
+ ([fe80::542a:5d98:f0f4:3640%7]) with mapi id 15.20.5612.012; Tue, 6 Sep 2022
+ 07:57:07 +0000
+From:   "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
+To:     Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     Ulf Hansson <ulf.hansson@linaro.org>,
+        =?iso-8859-2?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
+        "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>,
+        "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
+Subject: RE: [PATCH] mmc-utils: correct and clean up the file handling
+Thread-Topic: [PATCH] mmc-utils: correct and clean up the file handling
+Thread-Index: AdiK+e63vfHiFbPsQZCmC+FOzGq/7QAPwi0AABQpUuABmc8nMAACAULgAlKINPAAMpvpoAUetmXQAAXdPWAAAhdXwAAFcYuABEITekA=
+Date:   Tue, 6 Sep 2022 07:57:06 +0000
+Message-ID: <AM5PR0701MB296476E9ECCB3979A93EB4F0EF7E9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+References: <AM5PR0701MB2964A49C4E5EEA8905926120EFB89@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB6575A3FE605E0AE1C92B4EB1FCB89@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <AM5PR0701MB2964B04050F05216BDFC638AEFBB9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <AM5PR0701MB2964D76967437E61EF42731DEF839@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB65750D9A332093DBA5B30BDAFC839@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <AM5PR0701MB29641DB9207CDDD1DB273075EF8F9@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB65759D709D6C45AFD03EB4B1FC8E9@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <AM5PR0701MB296429322BA0EEB2CE0B23FBEF689@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB65756EA45A10629F2EA8A870FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <AM5PR0701MB2964D0B47A64F62402ECC43BEF689@AM5PR0701MB2964.eurprd07.prod.outlook.com>
+ <DM6PR04MB6575A94E6D218F2272AF0659FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB6575A94E6D218F2272AF0659FC689@DM6PR04MB6575.namprd04.prod.outlook.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nokia.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: AM5PR0701MB2964:EE_|DBBPR07MB7627:EE_
+x-ms-office365-filtering-correlation-id: 340d50f6-460a-4e68-2535-08da8fdd64e4
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: FNeT9blHwnFLSRtdHMPLw+amGc45mUbcXzoY16xfqHTSA71wxKrBEBEY2hWOtCMBsLI5aQFcr2Cze9Nv7YjdXIkw8qWs3+qMk6xrKl++uoX3aAvsMD+KFD3l2p8p/dBpHhVG5qXlU4DMgQmlJj7+k1iwcwKRTKI3dklEcJ91VwkZU4eYcu2yVlirOD7sLMROltae1HYpW/IS/LBsz53eDlI9qIiQ0Rr4mBzMeRXTOx3YYq88JFF34HYONsP44U+iXIHBcukFw0ryJvU0TW050YaaGTuObYE6PYJcj5mL+VALTS0iny5i/47U09yCC+SvTp8+miGMKidw5uZR5zcW/gb616vbpqkBx4tWbyUTyOQkYfacjQB9vXmH2f4lmxWu28IPz2cjHWjJcP2jlIFlvfB5Z06C1hwhdZ9RfIz3evkdEnQD6XPJAwAHJmG7tFE+9iFTTl7S2EslADkrPA2qunKWEOR4dtWawAVk76AnX6Pu/K7zOj4KPoxuQesj6SYKC1z7coUE75PMSePc2DFxdurzvlBJYN3jam3eLbUdIObx74czdFRX/Hi+UQn8CkoSeGetZp3s7JW/sNn4KKrfar9I5a1Qx5sTjlUz17wrGa2Wvs+MUsHNss8xiyyNMlC3rJtPw9FJESFM31alcRMsXSNhdCo+6GCmuJTkHLHr+glSp5lF5aroprMEpIjU9f1WMs1tXe3NvwWWYuLACv5Sef4EcTd7c7R3s5czHl0+4OEgB6uCHjbU7WJ5FOGo6t342mtizfD6z44LIBqhMtqRbA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:AM5PR0701MB2964.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230016)(4636009)(346002)(39860400002)(366004)(136003)(376002)(396003)(8936002)(52536014)(186003)(83380400001)(9686003)(54906003)(2906002)(55016003)(5660300002)(41300700001)(26005)(53546011)(86362001)(33656002)(107886003)(71200400001)(6506007)(7696005)(478600001)(38070700005)(82960400001)(76116006)(4326008)(66946007)(8676002)(64756008)(66446008)(66476007)(66556008)(316002)(110136005)(122000001)(38100700002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-2?Q?g4YYR201MgA94kj9GygEjkMhpXwqsDFaiJWZozcg0GYOvA6jRse4v3LgEq?=
+ =?iso-8859-2?Q?P6VsJcKrdO75xJqD1XfShAPq3VWQAeKtL+dj97j6CbMD8m1zSPmNYKwsgJ?=
+ =?iso-8859-2?Q?STC/UItw57niwKJtNE20yDhvvcAgkhpIGZahWBaXUL4cfMUP4PwM3KqDss?=
+ =?iso-8859-2?Q?p5NLGLmo2x6PZdZPGQGCLXR/k11xWIE6TZVLtmBKBIIUdLy4nvOrpssD6p?=
+ =?iso-8859-2?Q?7JjuDkg+3qpSFdWPAIbEApuPB22YDAhovcygIUEbzKLpoKWQzQQ8dHBO+Q?=
+ =?iso-8859-2?Q?9xvaPyQjJa99VZmrwveOe6oUrvaXZ0UQ68XzzoBKRhMwNitngl2EB4fVAV?=
+ =?iso-8859-2?Q?zBnzk1Cwv3cpyzxqTUqBQ3aB6ChsCj2QyD5ORMM4fr1MmehlMacY8W9zEu?=
+ =?iso-8859-2?Q?cX9D+I9kHF0TxI0uNWPiIjv5zrZISZ19MNA4XMT/gscyaJDSFpQaYIK/Ux?=
+ =?iso-8859-2?Q?4G2IBCbj3ka6faO8Dc/SqLe/ffalj5chEtBNN9q8uUSOXxeUfn+CuK8bYc?=
+ =?iso-8859-2?Q?xyEYLwNn6AqvdvE/oh0mHcK87ikSbCq6afYntuyHU94EuZKLaogrQp31M+?=
+ =?iso-8859-2?Q?45SFwYcpGgdmr4kvAsj9D/lg/Yq3vnnpVwG+ORDgcu4XJYFH/Iqnt91hnI?=
+ =?iso-8859-2?Q?6+yGqtApfj38p1Ag3iKYkLWhTtYLc8P1XzJUQsOSj3ihubV2D3eRn/HgiC?=
+ =?iso-8859-2?Q?nGiamfGEycyLXB7tjMUk3STgJkURQgRU/nc+YQ4tBeMZYlzrN6ywQi4Z4W?=
+ =?iso-8859-2?Q?+HIoKHI+gp8LrpaYvXBO91eJb6gEvctc/kLAvGr0WgG29tP858APeX5Mqd?=
+ =?iso-8859-2?Q?Rp5RW+pL/w6QAyyw12q3MUGlifCkB77dHBdehC2lnGzFJTvraOENBR42tx?=
+ =?iso-8859-2?Q?HTjd+cPUMBYqye9Hxqm3ZoBpVuIq+Hq0bGxsMVctgyQMHcA8zv3ZqCzllq?=
+ =?iso-8859-2?Q?bc7kioRw4a5tw0HYucirB1ah5g7koDLuWP5X+6xsjmYXD3k4XIEt9CzTU0?=
+ =?iso-8859-2?Q?R6UlQHi4XBDk5EPlONQDfjuWfikv9AlnBWw/Xh2Dy7wTEzJEenn3CKoc35?=
+ =?iso-8859-2?Q?ZR9t2mNq+aMUup0VChhbnbAPbl9N8DJk0Cl11HMGo+vhMgBG0yVjwaMWf/?=
+ =?iso-8859-2?Q?ByNE7hVmfDff5BMwNxpuD4jBPS+XNuaBFrd/tgw3APi2Ns/9FI9QYM2yQg?=
+ =?iso-8859-2?Q?6rnuwLjr6uy97We0zfH0MENuVMc7fG56oVWjSd8CBe8oSpkCRwZ3BrtyFO?=
+ =?iso-8859-2?Q?yMdsWy4ShiUFrmzN0wBkrdbO3rJ/o94XZt1pID0NT3JOjy7ekZ06fjAldR?=
+ =?iso-8859-2?Q?mWKz3xgE/DrjCogfv5Gql6mlaLWsmpWBuEGq/Zatwya/NKVKPLEbVgTjqc?=
+ =?iso-8859-2?Q?QScnMNGhPJRRJaJjRykVsP5BeGhxWr9LfXgJI3RGDgF68QGTjk0oLUmM0Y?=
+ =?iso-8859-2?Q?YRPuND8ybkPsSAZPXWclusiZ3XV+R7wzF3YWvR6I/fiwDKO2NuUws7vgaK?=
+ =?iso-8859-2?Q?agZ6fIsWWYBiQBKaPYsU8C9yr0VTbT742ZIA9XRfzgJTTi+wAMTs1HQr+z?=
+ =?iso-8859-2?Q?e5AUMlGxQuW6M8KlLrXCvxee7O/wnXntfXpGtdv/yplHeV03V7tRMPcrQR?=
+ =?iso-8859-2?Q?UOsZZdZEq1cN4IBOX/bGl7TtR8VQyzJh9S?=
+Content-Type: text/plain; charset="iso-8859-2"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-References: <cover.1662302950.git.tonyhuang.sunplus@gmail.com> <792626f8c01d91a12506762a3380ba8c8c150012.1662302950.git.tonyhuang.sunplus@gmail.com>
-In-Reply-To: <792626f8c01d91a12506762a3380ba8c8c150012.1662302950.git.tonyhuang.sunplus@gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 5 Sep 2022 16:10:19 +0200
-Message-ID: <CAPDyKFoVgySg0FKw67JS_azWtCcU8hkDNuf8NiaZPUav3QW0Lg@mail.gmail.com>
-Subject: Re: [PATCH v9 2/2] mmc: Add mmc driver for Sunplus SP7021
-To:     Tony Huang <tonyhuang.sunplus@gmail.com>
-Cc:     robh+dt@kernel.org, krzk+dt@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        tony.huang@sunplus.com, wells.lu@sunplus.com
-Content-Type: text/plain; charset="UTF-8"
+X-OriginatorOrg: nokia.com
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DBBPR07MB7627
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 4 Sept 2022 at 18:02, Tony Huang <tonyhuang.sunplus@gmail.com> wrote:
->
-> This is a patch for mmc driver for Sunplus SP7021 SOC.
-> Supports eMMC 4.41 DDR 104MB/s speed mode.
->
-> Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
+Will keep it in mind.
+
+Best regards,
+Bruno Mati=E6
+
+-----Original Message-----
+From: Avri Altman <Avri.Altman@wdc.com>=20
+Sent: Monday, August 15, 2022 5:52 PM
+To: Matic, Bruno (Nokia - DE/Ulm) <bruno.matic@nokia.com>; linux-mmc@vger.k=
+ernel.org
+Cc: Ulf Hansson <ulf.hansson@linaro.org>; Christian L=F6hle <CLoehle@hypers=
+tone.com>; Rossler, Jakob (Nokia - DE/Ulm) <jakob.rossler@nokia.com>; Heino=
+nen, Aarne (Nokia - FI/Espoo) <aarne.heinonen@nokia.com>
+Subject: RE: [PATCH] mmc-utils: correct and clean up the file handling
+
+>=20
+> Hi everyone,
+> As said, here is the reworked patch.
+>=20
+>=20
+> Add the check if the whole firmware was loaded.
+> Cleaned up the leftovers of handling the file in chunks.
+>=20
+> Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
+Reviewed-by: Avri Altman <avri.altman@wdc.com>
+
+Please try in the future to properly mark your spins ( -v option of format-=
+patch) - would be easier to follow.
+
+Thanks,
+Avri=20
+
 > ---
-> Changes in v5:
->  - Addressed comments from Krzysztof.
->  - Remove the relevant sdcard code.
->  - Submit the emmc code only.
->
-> Changes in v6:
->  - Addressed comments from Arnd.
->  - Use SYSTEM_SLEEP_PM_OPS instead of SET_SYSTEM_SLEEP_PM_OPS.
->  - Use RUNTIME_PM_OPS instead of SET_RUNTIME_PM_OPS.
->  - Remove #ifdef check.
->  - Fixed mutex lock and unlock imbalance issue.
->
-> Changes in v7:
->  - Addressed comments from kernel test robot.
->  - Remove unused vairable.
->  - Add previous prototype.
->  - Addressed make error and warning in kernel 5.18-rc1.
->
-> Changes in v8:
->  - Addressed comments from Uffe.
->
-> Changes in v9:
->  - Addressed comments from Uffe.
->
->  MAINTAINERS                    |   1 +
->  drivers/mmc/host/Kconfig       |   9 +
->  drivers/mmc/host/Makefile      |   1 +
->  drivers/mmc/host/sunplus-mmc.c | 964 +++++++++++++++++++++++++++++++++++++++++
->  4 files changed, 975 insertions(+)
->  create mode 100644 drivers/mmc/host/sunplus-mmc.c
->
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index cdd809a..2439234 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -18874,6 +18874,7 @@ M:      Tony Huang <tonyhuang.sunplus@gmail.com>
->  M:     Li-hao Kuo <lhjeff911@gmail.com>
->  S:     Maintained
->  F:     Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
-> +F:     drivers/mmc/host/sunplus-mmc.c
->
->  SUNPLUS OCOTP DRIVER
->  M:     Vincent Shih <vincent.sunplus@gmail.com>
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index af6c3c3..d99ee3b 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -14,6 +14,15 @@ config MMC_DEBUG
->           added host drivers please don't invent their private macro for
->           debugging.
->
-> +config MMC_SUNPLUS
-> +       tristate "Sunplus SP7021 MMC Controller"
-> +       depends on ARCH_SUNPLUS || COMPILE_TEST
-> +       help
-> +         If you say yes here, you will get support for eMMC host interface
-> +         on Sunplus SoCs.
-> +
-> +         If unsure, say N
-> +
->  config MMC_ARMMMCI
->         tristate "ARM AMBA Multimedia Card Interface support"
->         depends on ARM_AMBA
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4e4ceb3..ba0c6d0 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -97,6 +97,7 @@ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)       += sdhci-pic32.o
->  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)                += sdhci-brcmstb.o
->  obj-$(CONFIG_MMC_SDHCI_OMAP)           += sdhci-omap.o
->  obj-$(CONFIG_MMC_SDHCI_SPRD)           += sdhci-sprd.o
-> +obj-$(CONFIG_MMC_SUNPLUS)              += sunplus-mmc.o
->  obj-$(CONFIG_MMC_CQHCI)                        += cqhci.o
->  cqhci-y                                        += cqhci-core.o
->  cqhci-$(CONFIG_MMC_CRYPTO)             += cqhci-crypto.o
-> diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
-> new file mode 100644
-> index 0000000..5032678
-> --- /dev/null
-> +++ b/drivers/mmc/host/sunplus-mmc.c
-> @@ -0,0 +1,964 @@
-> +// SPDX-License-Identifier: GPL-2.0-only
-> +/*
-> + * Copyright (c) Sunplus Inc.
-> + * Author: Tony Huang <tonyhuang.sunplus@gmail.com>
-> + * Author: Li-hao Kuo <lhjeff911@gmail.com>
-> + */
-> +
-> +#include <linux/bitfield.h>
-> +#include <linux/clk.h>
-> +#include <linux/delay.h>
-> +#include <linux/dma-mapping.h>
-> +#include <linux/interrupt.h>
-> +#include <linux/iopoll.h>
-> +#include <linux/mmc/core.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/mmc/sdio.h>
-> +#include <linux/mmc/slot-gpio.h>
-> +#include <linux/module.h>
-> +#include <linux/of.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/pm.h>
-> +#include <linux/pm_runtime.h>
-> +#include <linux/reset.h>
-> +
-> +#define SPMMC_MIN_CLK                  400000
-> +#define SPMMC_MAX_CLK                  52000000
-> +#define SPMMC_MAX_BLK_COUNT            65536
-> +#define SPMMC_MAX_TUNABLE_DLY  7
-> +
-> +#define SPMMC_CARD_MEDIATYPE_SRCDST_REG 0x0000
-> +#define SPMMC_MEDIA_TYPE               GENMASK(2, 0)
-> +#define SPMMC_DMA_SOURCE               GENMASK(6, 4)
-> +#define SPMMC_DMA_DESTINATION          GENMASK(10, 8)
-> +#define SPMMC_MEDIA_NONE       0
-> +#define SPMMC_MEDIA_SD         6
-> +#define SPMMC_MEDIA_MS         7
-> +
-> +#define SPMMC_SDRAM_SECTOR_0_SIZE_REG  0x0008
-> +#define SPMMC_DMA_BASE_ADDR_REG                0x000C
-> +#define SPMMC_HW_DMA_CTRL_REG          0x0010
-> +#define SPMMC_HW_DMA_RST       BIT(9)
-> +#define SPMMC_DMAIDLE          BIT(10)
-> +
-> +#define SPMMC_MAX_DMA_MEMORY_SECTORS   8
-> +
-> +#define SPMMC_SDRAM_SECTOR_1_ADDR_REG 0x0018
-> +
-> +#define SPMMC_SD_INT_REG       0x0088
-> +#define SPMMC_SDINT_SDCMPEN    BIT(0)
-> +#define SPMMC_SDINT_SDCMP      BIT(1)
-> +#define SPMMC_SDINT_SDCMPCLR   BIT(2)
-> +#define SPMMC_SDINT_SDIOEN     BIT(3)
-> +#define SPMMC_SDINT_SDIO       BIT(4)
-> +#define SPMMC_SDINT_SDIOCLR    BIT(5)
-> +
-> +#define SPMMC_SD_PAGE_NUM_REG  0x008C
-> +
-> +#define SPMMC_SD_CONFIG0_REG   0x0090
-> +#define SPMMC_SD_PIO_MODE      BIT(0)
-> +#define SPMMC_SD_DDR_MODE      BIT(1)
-> +#define SPMMC_SD_LEN_MODE      BIT(2)
-> +#define SPMMC_SD_TRANS_MODE    GENMASK(5, 4)
-> +#define SPMMC_SD_AUTO_RESPONSE BIT(6)
-> +#define SPMMC_SD_CMD_DUMMY     BIT(7)
-> +#define SPMMC_SD_RSP_CHK_EN    BIT(8)
-> +#define SPMMC_SDIO_MODE                BIT(9)
-> +#define SPMMC_SD_MMC_MODE      BIT(10)
-> +#define SPMMC_SD_DATA_WD       BIT(11)
-> +#define SPMMC_RX4_EN           BIT(14)
-> +#define SPMMC_SD_RSP_TYPE      BIT(15)
-> +#define SPMMC_MMC8_EN          BIT(18)
-> +#define SPMMC_CLOCK_DIVISION   GENMASK(31, 20)
-> +
-> +#define SPMMC_SDIO_CTRL_REG            0x0094
-> +#define SPMMC_INT_MULTI_TRIG           BIT(6)
-> +
-> +#define SPMMC_SD_RST_REG               0x0098
-> +#define SPMMC_SD_CTRL_REG              0x009C
-> +#define SPMMC_NEW_COMMAND_TRIGGER      BIT(0)
-> +#define SPMMC_DUMMY_CLOCK_TRIGGER      BIT(1)
-> +
-> +#define SPMMC_SD_STATUS_REG                                            0x00A0
-> +#define SPMMC_SDSTATUS_DUMMY_READY                             BIT(0)
-> +#define SPMMC_SDSTATUS_RSP_BUF_FULL                            BIT(1)
-> +#define SPMMC_SDSTATUS_TX_DATA_BUF_EMPTY               BIT(2)
-> +#define SPMMC_SDSTATUS_RX_DATA_BUF_FULL                        BIT(3)
-> +#define SPMMC_SDSTATUS_CMD_PIN_STATUS                  BIT(4)
-> +#define SPMMC_SDSTATUS_DAT0_PIN_STATUS                 BIT(5)
-> +#define SPMMC_SDSTATUS_RSP_TIMEOUT                             BIT(6)
-> +#define SPMMC_SDSTATUS_CARD_CRC_CHECK_TIMEOUT  BIT(7)
-> +#define SPMMC_SDSTATUS_STB_TIMEOUT                             BIT(8)
-> +#define SPMMC_SDSTATUS_RSP_CRC7_ERROR                  BIT(9)
-> +#define SPMMC_SDSTATUS_CRC_TOKEN_CHECK_ERROR   BIT(10)
-> +#define SPMMC_SDSTATUS_RDATA_CRC16_ERROR               BIT(11)
-> +#define SPMMC_SDSTATUS_SUSPEND_STATE_READY             BIT(12)
-> +#define SPMMC_SDSTATUS_BUSY_CYCLE                              BIT(13)
-> +#define SPMMC_SDSTATUS_DAT1_PIN_STATUS                 BIT(14)
-> +#define SPMMC_SDSTATUS_SD_SENSE_STATUS                 BIT(15)
-> +#define SPMMC_SDSTATUS_BOOT_ACK_TIMEOUT                        BIT(16)
-> +#define SPMMC_SDSTATUS_BOOT_DATA_TIMEOUT               BIT(17)
-> +#define SPMMC_SDSTATUS_BOOT_ACK_ERROR                  BIT(18)
-> +
-> +#define SPMMC_SD_STATE_REG             0x00A4
-> +#define SPMMC_CRCTOKEN_CHECK_RESULT    GENMASK(6, 4)
-> +#define SPMMC_SDSTATE_ERROR            BIT(13)
-> +#define SPMMC_SDSTATE_FINISH   BIT(14)
-> +
-> +#define SPMMC_SD_HW_STATE_REG          0x00A8
-> +#define SPMMC_SD_BLOCKSIZE_REG         0x00AC
-> +
-> +#define SPMMC_SD_CONFIG1_REG           0x00B0
-> +#define SPMMC_TX_DUMMY_NUM             GENMASK(8, 0)
-> +#define SPMMC_SD_HIGH_SPEED_EN         BIT(31)
-> +
-> +#define SPMMC_SD_TIMING_CONFIG0_REG 0x00B4
-> +#define SPMMC_SD_CLOCK_DELAY   GENMASK(2, 0)
-> +#define SPMMC_SD_WRITE_DATA_DELAY      GENMASK(6, 4)
-> +#define SPMMC_SD_WRITE_COMMAND_DELAY   GENMASK(10, 8)
-> +#define SPMMC_SD_READ_RESPONSE_DELAY   GENMASK(14, 12)
-> +#define SPMMC_SD_READ_DATA_DELAY       GENMASK(18, 16)
-> +#define SPMMC_SD_READ_CRC_DELAY        GENMASK(22, 20)
-> +
-> +#define SPMMC_SD_PIODATATX_REG         0x00BC
-> +#define SPMMC_SD_PIODATARX_REG         0x00C0
-> +#define SPMMC_SD_CMDBUF0_3_REG         0x00C4
-> +#define SPMMC_SD_CMDBUF4_REG           0x00C8
-> +#define SPMMC_SD_RSPBUF0_3_REG         0x00CC
-> +#define SPMMC_SD_RSPBUF4_5_REG         0x00D0
-> +
-> +#define SPMMC_MAX_RETRIES (8 * 8)
-> +
-> +struct spmmc_tuning_info {
-> +       int enable_tuning;
-> +       int need_tuning;
-> +       int retried; /* how many times has been retried */
-> +       u32 rd_crc_dly:3;
-> +       u32 rd_dat_dly:3;
-> +       u32 rd_rsp_dly:3;
-> +       u32 wr_cmd_dly:3;
-> +       u32 wr_dat_dly:3;
-> +       u32 clk_dly:3;
-> +};
-> +
-> +#define SPMMC_DMA_MODE 0
-> +#define        SPMMC_PIO_MODE 1
-> +
-> +struct spmmc_host {
-> +       void __iomem *base;
-> +       struct clk *clk;
-> +       struct reset_control *rstc;
-> +       spinlock_t lock; /* Prevent races with irq handler */
-> +       struct mutex mrq_lock; /* protect spmmc_set_ios() context and spmmc_request() */
-> +       struct mmc_host *mmc;
-> +       struct mmc_request *mrq; /* current mrq */
-> +       int irq;
-> +       int power_state; /* current power state: off/up/on */
-> +       int ddr_enabled;
-
-By looking at how this variable is being used (in
-spmmc_set_bus_timing()), there is no need to store this in the struct
-spmmc_host, right?
-
-Please, go through the other variables here too, to make sure the
-similar pattern isn't repeated.
-
-> +       int signal_voltage;
-> +       int dmapio_mode;
-> +       struct sg_mapping_iter sg_miter; /* for pio mode to access sglist */
-> +       struct spmmc_tuning_info tuning_info;
-> +};
-> +
-> +/*
-> + * wait for transaction done, return -1 if error.
-> + */
-
-This comment isn't correct anymore. I suggest just dropping it.
-
-> +static inline int spmmc_wait_finish(struct spmmc_host *host)
-> +{
-> +       u32 val = 0;
-> +       int ret;
-> +
-> +       ret = readl_poll_timeout_atomic(host->base + SPMMC_SD_STATE_REG, val,
-> +                                       (val & SPMMC_SDSTATE_FINISH), 1, 50000);
-> +
-> +       if (ret == -ETIMEDOUT)
-> +               return -ETIMEDOUT;
-> +       else
-> +               return 0;
-
-This looks unnecessarily complicated, to me.
-readl_poll_timeout_atomic() returns 0 on success or -ETIMEDOUT on
-failure, thus we can just do the below instead:
-
-return readl_poll_timeout_atomic(host->base + SPMMC_SD_STATE_REG, val,
-(val & SPMMC_SDSTATE_FINISH), 1, 50000);
-
-Moreover, it looks like spmmc_wait_finish() isn't being called from
-atomic context, so I think it would be better to use
-readl_poll_timeout() instead. And finally, please make the timeout
-values defined as constant values.
-
-> +}
-> +
-> +static inline int spmmc_wait_sdstatus(struct spmmc_host *host, unsigned int status_bit)
-> +{
-> +       u32 val = 0;
-> +       int ret;
-> +
-> +       ret = readl_poll_timeout_atomic(host->base + SPMMC_SD_STATUS_REG, val,
-> +                                       (val & status_bit), 1, 50000);
-> +
-> +       if (ret == -ETIMEDOUT)
-> +               return -ETIMEDOUT;
-> +       else
-> +               return 0;
-
-Similar comments as above, except that this seems to need the *atomic() version.
-
-> +}
-> +
-> +#define spmmc_wait_rspbuf_full(host) spmmc_wait_sdstatus(host, SPMMC_SDSTATUS_RSP_BUF_FULL)
-> +#define spmmc_wait_rxbuf_full(host) spmmc_wait_sdstatus(host, SPMMC_SDSTATUS_RX_DATA_BUF_FULL)
-> +#define spmmc_wait_txbuf_empty(host) spmmc_wait_sdstatus(host, SPMMC_SDSTATUS_TX_DATA_BUF_EMPTY)
-> +
-
-[...]
-
-> +static void spmmc_sw_reset(struct spmmc_host *host)
-> +{
-> +       u32 value;
-> +
-> +       /*
-> +        * Must reset dma operation first, or it will
-> +        * be stuck on sd_state == 0x1c00 because of
-> +        * a controller software reset bug
-> +        */
-> +       value = readl(host->base + SPMMC_HW_DMA_CTRL_REG);
-> +       value |= SPMMC_DMAIDLE;
-> +       writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
-> +       value &= ~SPMMC_DMAIDLE;
-> +       writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
-> +       value = readl(host->base + SPMMC_HW_DMA_CTRL_REG);
-> +       value |= SPMMC_HW_DMA_RST;
-> +       writel(value, host->base + SPMMC_HW_DMA_CTRL_REG);
-> +       writel(0x7, host->base + SPMMC_SD_RST_REG);
-> +       while (readl(host->base + SPMMC_SD_HW_STATE_REG) & BIT(6))
-> +               ;
-
-This looks like it's better done with the readl_poll_timeout_atomic().
-
-Sorry, that I didn't notice this during the last time I reviewed this.
-
-[...]
-
-> +static void spmmc_send_stop_cmd(struct spmmc_host *host)
-
-Looks like this function is unused now (which is good), please drop it.
-
-> +{
-> +       struct mmc_command stop = {};
-> +       u32 value;
-> +
-> +       stop.opcode = MMC_STOP_TRANSMISSION;
-> +       stop.arg = 0;
-> +       stop.flags = MMC_RSP_R1B;
-> +       spmmc_prepare_cmd(host, &stop);
-> +       value = readl(host->base + SPMMC_SD_INT_REG);
-> +       value &= ~SPMMC_SDINT_SDCMPEN;
-> +       value |= FIELD_PREP(SPMMC_SDINT_SDCMPEN, 0);
-> +       writel(value, host->base + SPMMC_SD_INT_REG);
-> +       spmmc_trigger_transaction(host);
-> +       spmmc_wait_finish(host);
-> +}
-
-[...]
-
-> +
-> +/* Interrupt Service Routine */
-> +static irqreturn_t spmmc_irq(int irq, void *dev_id)
-> +{
-> +       struct spmmc_host *host = dev_id;
-> +       u32 value = readl(host->base + SPMMC_SD_INT_REG);
-> +
-> +       spin_lock(&host->lock);
-> +       if ((value & SPMMC_SDINT_SDCMP) && (value & SPMMC_SDINT_SDCMPEN)) {
-> +               value &= ~SPMMC_SDINT_SDCMPEN;
-> +               value |= SPMMC_SDINT_SDCMPCLR;
-> +               writel(value, host->base + SPMMC_SD_INT_REG);
-> +               spmmc_finish_request(host, host->mrq);
-
-I am not quite sure I understand how this is intended to work. So,
-spmmc_finish_request() is being called to complete the request....
-
-In some cases the spin_lock (host->lock) is being used to protect the
-host->mrq, while in other cases the mutex (host->mrq_lock) is used.
-This looks weird to me, but I may be wrong. Perhaps you can elaborate
-why this is done like this?
-
-In my opinion, it looks like we should be able to convert into using
-solely a spin_lock. From non-atomic context, we then need to use
-spin_lock_irqsave/spin_unlock |irqrestore() to protect the needed
-parts.
-
-We may also consider to use IRQF_ONESHOT when requesting the irq with
-devm_request_threaded_irq(), as it looks like it may help to simplify
-the locking code.
-
+>  mmc_cmds.c | 66=20
+> ++++++++++++++++++++++++++----------------------------
+>  1 file changed, 32 insertions(+), 34 deletions(-)
+>=20
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 70480df..7d37e93 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -2812,7 +2812,6 @@ int do_ffu(int nargs, char **argv)
+>         __u8 *buf =3D NULL;
+>         __u32 arg;
+>         off_t fw_size;
+> -       ssize_t chunk_size;
+>         char *device;
+>         struct mmc_ioc_multi_cmd *multi_cmd =3D NULL;
+>         __u32 blocks =3D 1;
+> @@ -2925,45 +2924,44 @@ int do_ffu(int nargs, char **argv)
+>         multi_cmd->cmds[3].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B |=20
+> MMC_CMD_AC;
+>         multi_cmd->cmds[3].write_flag =3D 1;
+>=20
+> -do_retry:
+> -       /* read firmware chunk */
+> +       /* read firmware */
+>         lseek(img_fd, 0, SEEK_SET);
+> -       chunk_size =3D read(img_fd, buf, fw_size);
+> +       if (read(img_fd, buf, fw_size) !=3D fw_size) {
+> +               perror("Could not read the firmware file: ");
+> +               ret =3D -ENOSPC;
+> +               goto out;
 > +       }
-> +       spin_unlock(&host->lock);
-> +
-> +       return IRQ_HANDLED;
-> +}
-> +
-> +static void spmmc_request(struct mmc_host *mmc, struct mmc_request *mrq)
-> +{
-> +       struct spmmc_host *host = mmc_priv(mmc);
-> +       struct mmc_data *data;
-> +       struct mmc_command *cmd;
-> +
-> +       mutex_lock(&host->mrq_lock);
-
-As stated above, here it's the mutex that's being used. In this case,
-I also don't think it's clear what the mutex is really protecting?
-
-Note that the mmc core also manages a specific host lock. This enables
-the mmc core to serialize calls into the host (via the host ops
-callbacks). In principle, this means that host ops can't be invoked in
-parallel with each other.
-
-> +       host->mrq = mrq;
-> +       data = mrq->data;
-> +       cmd = mrq->cmd;
-> +
-> +       spmmc_prepare_cmd(host, cmd);
-> +       /* we need manually read response R2. */
-> +       if (cmd->flags & MMC_RSP_136) {
-> +               spmmc_trigger_transaction(host);
-> +               spmmc_get_rsp(host, cmd);
-> +               spmmc_wait_finish(host);
-> +               spmmc_check_error(host, mrq);
-> +               host->mrq = NULL;
-> +               mmc_request_done(host->mmc, mrq);
-> +       } else {
-> +               if (data)
-> +                       spmmc_prepare_data(host, data);
-> +
-> +               if (host->dmapio_mode == SPMMC_PIO_MODE && data) {
-> +                       u32 value;
-> +                       /* pio data transfer do not use interrupt */
-> +                       value = readl(host->base + SPMMC_SD_INT_REG);
-> +                       value &= ~SPMMC_SDINT_SDCMPEN;
-> +                       writel(value, host->base + SPMMC_SD_INT_REG);
-> +                       spmmc_trigger_transaction(host);
-> +                       spmmc_xfer_data_pio(host, data);
-> +                       spmmc_wait_finish(host);
-> +                       spmmc_finish_request(host, mrq);
-> +               } else {
-> +                       spmmc_trigger_transaction(host);
-> +                       spmmc_wait_finish(host);
-> +                       spmmc_finish_request(host, mrq);
-> +               }
+>=20
+> -       if (chunk_size > 0) {
+> -               /* send ioctl with multi-cmd */
+> -               ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+> +do_retry:
+> +       /* send ioctl with multi-cmd */
+> +       ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+>=20
+> -               if (ret) {
+> -                       perror("Multi-cmd ioctl");
+> -                       /* In case multi-cmd ioctl failed before exiting =
+from ffu mode
+> */
+> -                       ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> -                       goto out;
+> -               }
+> +       if (ret) {
+> +               perror("Multi-cmd ioctl");
+> +               /* In case multi-cmd ioctl failed before exiting from ffu=
+ mode */
+> +               ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+> +               goto out;
 > +       }
-> +       mutex_unlock(&host->mrq_lock);
-> +}
-> +
-> +static void spmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> +{
-> +       struct spmmc_host *host = (struct spmmc_host *)mmc_priv(mmc);
-> +
-> +       mutex_lock(&host->mrq_lock);
+>=20
+> -               ret =3D read_extcsd(dev_fd, ext_csd);
+> -               if (ret) {
+> -                       fprintf(stderr, "Could not read EXT_CSD from %s\n=
+", device);
+> -                       goto out;
+> -               }
+> +       ret =3D read_extcsd(dev_fd, ext_csd);
+> +       if (ret) {
+> +               fprintf(stderr, "Could not read EXT_CSD from %s\n", devic=
+e);
+> +               goto out;
+> +       }
+>=20
+> -               /* Test if we need to restart the download */
+> -               sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << =
+8 |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << =
+16 |
+> -                               ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << =
+24;
+> -               /* By spec, host should re-start download from the first =
+sector if
+> sect_done is 0 */
+> -               if (sect_done =3D=3D 0) {
+> -                       if (retry > 0) {
+> -                               retry--;
+> -                               fprintf(stderr, "Programming failed. Retr=
+ying... (%d)\n",
+> retry);
+> -                               goto do_retry;
+> -                       }
+> -                       fprintf(stderr, "Programming failed! Aborting...\=
+n");
+> -                       goto out;
+> -               } else {
+> -                       fprintf(stderr, "Programmed %d/%jd bytes\r", sect=
+_done *
+> sect_size, (intmax_t)fw_size);
+> +       /* Test if we need to restart the download */
+> +       sect_done =3D ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
+> +                       ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
+> +       /* By spec, host should re-start download from the first=20
+> + sector if
+> sect_done is 0 */
+> +       if (sect_done =3D=3D 0) {
+> +               if (retry--) {
+> +                       fprintf(stderr, "Programming failed. Retrying... =
+(%d)\n", retry);
+> +                       goto do_retry;
+>                 }
+> +               fprintf(stderr, "Programming failed! Aborting...\n");
+> +               goto out;
+>         }
+>=20
+>         if ((sect_done * sect_size) =3D=3D fw_size) {
+> --
+> 2.29.0
 
-Again, it's not really clear to me what is being protected with the
-mutex here. Can you elaborate?
-
-> +       spmmc_set_bus_clk(host, ios->clock);
-> +       spmmc_set_bus_timing(host, ios->timing);
-> +       spmmc_set_bus_width(host, ios->bus_width);
-> +       /* ensure mode is correct, because we might have hw reset the controller */
-> +       spmmc_set_sdmmc_mode(host);
-> +       mutex_unlock(&host->mrq_lock);
-> +}
-
-[...]
-
-> +
-> +static irqreturn_t spmmc_func_finish_req(int irq, void *dev_id)
-> +{
-> +       struct spmmc_host *host = dev_id;
-> +
-> +       spin_lock(&host->lock);
-
-This is non-atomic context, so using spin_lock() here is wrong. It may
-cause deadlocks, if the IRQ is triggered at this point, as it would
-mean that the hard IRQ handler would be stuck waiting for the same
-spin_lock to be released.
-
-We use spin_lock_irqsave() to protect this from happening.
-
-> +       spmmc_finish_request(host, host->mrq);
-> +       spin_unlock(&host->lock);
-> +
-> +       return IRQ_HANDLED;
-> +}
-
-[...]
-
-> +static int spmmc_drv_remove(struct platform_device *dev)
-> +{
-> +       struct spmmc_host *host = platform_get_drvdata(dev);
-> +
-> +       mmc_remove_host(host->mmc);
-> +       pm_runtime_get_sync(&dev->dev);
-> +       clk_disable_unprepare(host->clk);
-> +       pm_runtime_put_noidle(&dev->dev);
-
-You need a pm_runtime_disable() here too.
-
-> +       platform_set_drvdata(dev, NULL);
-> +       mmc_free_host(host->mmc);
-> +
-> +       return 0;
-> +}
-> +
-
-[...]
-
-Kind regards
-Uffe
