@@ -2,213 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5095C38145
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Sep 2022 11:27:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E13DFC54EE9
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Sep 2022 12:34:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229782AbiIHL1o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Sep 2022 07:27:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53286 "EHLO
+        id S231546AbiIHMej (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Sep 2022 08:34:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230435AbiIHL1m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2022 07:27:42 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0B7CA74C3
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Sep 2022 04:27:40 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id x14so11832574lfu.10
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Sep 2022 04:27:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date;
-        bh=324YOR1PCE5dxnfUe+4PTVGnNqdGB/dqbwqSI126RKw=;
-        b=HIusbxjg7mCcRMNTgl0EfDiXnbFO00WdSVelUTAXDKbB9M5VKM2G7r/Y0jcCya2mGn
-         qqiEjhbH3WXJhKGAAdbGEDWQzqRT08EOT9Y6L/Q98mJUC15uAGWuS93vD8NOO6BvZMPJ
-         NDcp7XF6ja02fuZmDA8r18s6bQp4NvQ2Moy09fL74N9GmPrAyS75u8Yj8jOHP44KTswx
-         4OKI8yTCEMk0Vh+uXSFWyYvN/pY9OBkywbmf9lPGN0VPBzSyrOJeWDDbV3zf1om7k1tM
-         8gRb/kqno9r0qRbXNDnsgINZS7UvJ1mjIYK+eJ070Hb9ulejj2x0lahnZon/trepLJhT
-         YxKg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=324YOR1PCE5dxnfUe+4PTVGnNqdGB/dqbwqSI126RKw=;
-        b=JKTM/6MCDyyMsvFnQdl9n+YmFB+/tK0K2UBLdhYXZjt7Oy380IJc1/d3kR/1tNIdwZ
-         AQ9aKfQITMSCe5R+SRJnIe7+/ypqrp+UsNZsfRs24sRwT8F03Cazalw93fQt+h3JuOlt
-         GJpm2yDK7xBApWbD2cu8TU3+J8hvuoL6zO0dOWVGVizDIIBNHFqu10taz8c3YeA6q7Z7
-         Ab3UorDxXvuyvMci7GXkcoq6X6r1buGQCsZ31IuObP0FOOGrWp82vxuvuOwIsTjxSv+s
-         2phcp4NThq/hJxxVthsmfc/2Y0wE8OoYD0fFhw96yzw5q1zYlFsPses1dybmEW5T8Zzu
-         QcAA==
-X-Gm-Message-State: ACgBeo3XIg4LGo0IZWvsI1XzM9DIUFytrWV6R6SLzACdqp2dkgdath78
-        4ccGWtsadgifwKR0Q9k+A5pE+A==
-X-Google-Smtp-Source: AA6agR46Zf2WKBxWQRhQ7sD8FP2Zo1esjq2RpMjqXiPjsdcreHxsvLc6q0MI2ehXSwhtMy+lHbbb6Q==
-X-Received: by 2002:a05:6512:2307:b0:494:6afd:7b2 with SMTP id o7-20020a056512230700b004946afd07b2mr2713816lfu.559.1662636459128;
-        Thu, 08 Sep 2022 04:27:39 -0700 (PDT)
-Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id c14-20020a056512324e00b00491734dcb89sm2989667lfr.196.2022.09.08.04.27.37
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 08 Sep 2022 04:27:38 -0700 (PDT)
-Message-ID: <0852ffa5-9996-0f42-c5a8-d1fe9d39887e@linaro.org>
-Date:   Thu, 8 Sep 2022 13:27:36 +0200
+        with ESMTP id S231844AbiIHMeV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Sep 2022 08:34:21 -0400
+Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.155.67.158])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47DD2E293C;
+        Thu,  8 Sep 2022 05:34:05 -0700 (PDT)
+X-QQ-mid: bizesmtp91t1662640441tjm6b0jb
+Received: from localhost.localdomain ( [182.148.14.0])
+        by bizesmtp.qq.com (ESMTP) with 
+        id ; Thu, 08 Sep 2022 20:34:00 +0800 (CST)
+X-QQ-SSF: 0100000000200090C000B00A0000000
+X-QQ-FEAT: MoHL2FAY+uGtpeNhM1wt8GjkgmQCMDxhlvA6/rU7HOYkZIS+PibvUkF3GPX37
+        CJWqP/cf7eIJSkSUznUVfgeV7ePMN7cTPTL3cm2JfOBD8KDBflFYY30gNhg/M03w+AgtdEM
+        MGrOBXf166HFqHRhmcc0e9Dtl0+ZOOERQTD/e876ANcx5Bte90NNWgFLaNvXVCbqcz+GuVb
+        T4mB3C68ESJJX1ZZttOuOE0PvcKoiAmfGMrBdIIC9Kpcd5cYfdkIhR2wHUq7hmgL3H1TOR5
+        OPt8FAR19cILu6oXSiQUkji7JN6a0EKCl+wWUWDcHMSIbUFQ/ADQaIEBcqQlV2mXrzuZPQ8
+        Z7r+KZEG0rFtegAVQ0JfW5plxcPKOH44AZzgjwGfK/EISSt99I=
+X-QQ-GoodBg: 0
+From:   wangjianli <wangjianli@cdjrlc.com>
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        wangjianli <wangjianli@cdjrlc.com>
+Subject: [PATCH] mmc/core: fix repeated words in comments
+Date:   Thu,  8 Sep 2022 20:33:53 +0800
+Message-Id: <20220908123353.17745-1-wangjianli@cdjrlc.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.0
-Subject: Re: [PATCH v6 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
-Content-Language: en-US
-To:     "Larson, Bradley" <Bradley.Larson@amd.com>,
-        Rob Herring <robh@kernel.org>
-Cc:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "alcooperx@gmail.com" <alcooperx@gmail.com>,
-        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "gsomlo@gmail.com" <gsomlo@gmail.com>,
-        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "piotrs@cadence.com" <piotrs@cadence.com>,
-        "p.yadav@ti.com" <p.yadav@ti.com>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>,
-        "samuel@sholland.org" <samuel@sholland.org>,
-        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
-        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
-        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "will@kernel.org" <will@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-7-brad@pensando.io>
- <20220822142544.GA3770388-robh@kernel.org>
- <554f33b4-d235-5516-e8ff-5bf80d63a9b9@amd.com>
- <936c5623-07b9-c49d-e113-fc056a4eb9bc@linaro.org>
- <b064ed4c-d5a7-614f-008e-61ff2ac27f88@amd.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <b064ed4c-d5a7-614f-008e-61ff2ac27f88@amd.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:cdjrlc.com:qybglogicsvr:qybglogicsvr7
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/09/2022 22:37, Larson, Bradley wrote:
-> On 9/1/22 12:20 AM, Krzysztof Kozlowski wrote:
->> On 01/09/2022 02:01, Larson, Bradley wrote:
->>>>> +  is implemented by a sub-device reset-controller which accesses
->>>>> +  a CS0 control register.
->>>>> +
->>>>> +maintainers:
->>>>> +  - Brad Larson <blarson@amd.com>
->>>>> +
->>>>> +properties:
->>>>> +  compatible:
->>>>> +    items:
->>>>> +      - enum:
->>>>> +          - amd,pensando-elbasr
->>>>> +
->>>>> +  spi-max-frequency:
->>>>> +    description: Maximum SPI frequency of the device in Hz.
->>>> No need for generic descriptions of common properties.
->>> Changed to "spi-max-frequency: true" and moved to end of properties.
->> Then you should rather reference spi-peripheral-props just like other
->> SPI devices.
-> 
-> 
-> Will look at this dependent on the result of below
-> 
-> 
->>>>> +
->>>>> +  reg:
->>>>> +    maxItems: 1
->>>>> +
->>>>> +  '#address-cells':
->>>>> +    const: 1
->>>>> +
->>>>> +  '#size-cells':
->>>>> +    const: 0
->>>>> +
->>>>> +  interrupts:
->>>>> +    maxItems: 1
->>>>> +
->>>>> +required:
->>>>> +  - compatible
->>>>> +  - reg
->>>>> +  - spi-max-frequency
->>>>> +
->>>>> +patternProperties:
->>>>> +  '^reset-controller@[a-f0-9]+$':
->>>>> +    $ref: /schemas/reset/amd,pensando-elbasr-reset.yaml
->>>>> +
->>>>> +additionalProperties: false
->>>>> +
->>>>> +examples:
->>>>> +  - |
->>>>> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
->>>>> +
->>>>> +    spi {
->>>>> +        #address-cells = <1>;
->>>>> +        #size-cells = <0>;
->>>>> +        num-cs = <4>;
->>>>> +
->>>>> +        sysc: system-controller@0 {
->>>>> +            compatible = "amd,pensando-elbasr";
->>>>> +            reg = <0>;
->>>>> +            #address-cells = <1>;
->>>>> +            #size-cells = <0>;
->>>>> +            spi-max-frequency = <12000000>;
->>>>> +
->>>>> +            rstc: reset-controller@0 {
->>>>> +                compatible = "amd,pensando-elbasr-reset";
->>>>> +                reg = <0>;
->>>> What does 0 represent here? A register address within 'elbasr' device?
->>> Removed, I recall a check threw a warning or error without reg.
->>>
->>>> Why do you need a child node for this? Are there other sub-devices and
->>>> your binding is incomplete? Just put '#reset-cells' in the parent.
->>> Without a reset-controller node and booting the function
->>> __of_reset_control_get(...) fails to find a match in the list here
->> That's not actually the answer to the question. There was no concerns
->> whether you need or not reset controller. The question was why do you
->> need a child device instead of elbasr being the reset controller.
->>
->> Your answer does not cover this at all, so again - why do you need a
->> child for this?
->>
-> 
-> If the parent becomes a reset-controller compatible with
-> "amd,pensando-elbasr-reset" then the /dev node will not be created
+Delete the redundant word 'in'.
 
-Why /dev node will not be created? How bindings affect having or not
-having something in /dev ?
+Signed-off-by: wangjianli <wangjianli@cdjrlc.com>
+---
+ drivers/mmc/core/core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> as there is no match to "amd,pensando-elbasr" for cs0.  For cs0 internal
-> to linux the reset-controller manages one register bit to hardware reset
-> the mmc device.  A userspace application opens the device node to manage
-> transceiver leds, system leds, reporting temps to host, other reset
-> controls, etc.  Looking at future requirements there likely will be other
-> child devices.
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index ef53a2578824..5a82bc42d358 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -528,7 +528,7 @@ EXPORT_SYMBOL(mmc_cqe_post_req);
+  * @host: MMC host to recover
+  *
+  * Recovery consists of stopping CQE, stopping eMMC, discarding the queue in
+- * in eMMC, and discarding the queue in CQE. CQE must call
++ * eMMC, and discarding the queue in CQE. CQE must call
+  * mmc_cqe_request_done() on all requests. An error is returned if the eMMC
+  * fails to discard its queue.
+  */
+-- 
+2.36.1
 
-You mean "amd,pensando-elbasr" will instantiate some more devices? Why
-you cannot add the binding for them now? This is actually important
-because earlier we agreed you remove unit address from children.
-
-> 
-> Going down this path with one compatible should reset-elbasr.c just be
-> deleted and fold it into the parent driver pensando-elbasr.c? Then I
-> wonder if it even belongs in drivers/mfd and should just be modified
-> and put in drivers/spi.
-
-How is it related to bindings?
-
-Best regards,
-Krzysztof
