@@ -2,190 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C426ECAAD3
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Sep 2022 11:03:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F8AEC6FA8A
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Sep 2022 22:01:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229495AbiIILDo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Sep 2022 07:03:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56240 "EHLO
+        id S230459AbiIIWBF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Sep 2022 18:01:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229490AbiIILDn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2022 07:03:43 -0400
-Received: from EUR03-DBA-obe.outbound.protection.outlook.com (mail-dbaeur03on2123.outbound.protection.outlook.com [40.107.104.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4445175B4
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Sep 2022 04:03:41 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=kBN2sdCn/LPOvNznds4ZmbrdM5y6fw0qcuE31GI+0iiXJAda02uOeeV3SodgFwPR61iKg3E+8nB7aVMnn21DsAZavYsYntYAPXBzGdJ8x5cVugNGwKknC46dcx2lvDw8OpFdBBcE9dwwdsgfU5z63x0hao5z4voIJUTWBBKHZ8cNdGoCyI9KRWMXuacMEIcRk4AOQAXZ5MqIGTGHT3U9r94mpNJmHGqxD5EPbosYOr03wKxd47J+Mbsy/f4W44IN2a5lSEfccaKFGbIm6nmBEHhDFtb3kztl4P10aj1L2a+KTkKKDW8JpNKVizqVlOuT7r4mMDtS7ZQnAy3fKCyiUw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zAtzIKLAzWdroIsy2lm/4Per8bpDz14qqKb1vvvqeEY=;
- b=KMykuo7RoTlTGzo861K0RaHP26Q/hI8kUrT43F/Oojyp93D8RfwP3y3tPLA/kkYmONrGySJ0AaxbmAOrNyr8WUahlx6elsGxU5DtX/o2mwJfJTyAGOAh2AiVA6ONEl/ppMUwgJrurd9NCaGp8w5ZJwFS76WX4raNihlAS1Kj5w1GkAMfpeLT+bxGrREC3Fff2nOSOYBd1lMWCQKXWNz46Z/5czncrX+D2zk2h2UW4Alp0hND3R1k2piegGkYKc2AqNZusyDImaGBy9JuUK0tcydBhA2i7PSAfvB25f6zd5+4m82ubmbUYVVpOhwb6bobhW1F6LH0K9D149AvCCu0bw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 131.228.6.101) smtp.rcpttodomain=wdc.com smtp.mailfrom=nokia.com; dmarc=pass
- (p=none sp=none pct=100) action=none header.from=nokia.com; dkim=none
- (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
- s=selector1-nokia-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zAtzIKLAzWdroIsy2lm/4Per8bpDz14qqKb1vvvqeEY=;
- b=HqZ6hm2RXOH3qXyJtYDCMRFonz5qVY3ssNdOzZLX/dJEP/HSL57Jm8FpsPlUeVbrNhIGugJIB0wsVv9PSltLwxKdSH6W/psezOXi2MH1gU38M3zeas36ttYvQczBhvgrmIXGQUmTGprTKhT1WyvAAGbOL6GOIBxKOdpJpPjS5AY=
-Received: from AS8PR04CA0005.eurprd04.prod.outlook.com (2603:10a6:20b:310::10)
- by DB7PR07MB5078.eurprd07.prod.outlook.com (2603:10a6:10:5b::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.19; Fri, 9 Sep
- 2022 11:03:39 +0000
-Received: from VE1EUR03FT015.eop-EUR03.prod.protection.outlook.com
- (2603:10a6:20b:310:cafe::78) by AS8PR04CA0005.outlook.office365.com
- (2603:10a6:20b:310::10) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.19 via Frontend
- Transport; Fri, 9 Sep 2022 11:03:39 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 131.228.6.101)
- smtp.mailfrom=nokia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nokia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nokia.com designates
- 131.228.6.101 as permitted sender) receiver=protection.outlook.com;
- client-ip=131.228.6.101; helo=fr712usmtp1.zeu.alcatel-lucent.com; pr=C
-Received: from fr712usmtp1.zeu.alcatel-lucent.com (131.228.6.101) by
- VE1EUR03FT015.mail.protection.outlook.com (10.152.18.176) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5612.13 via Frontend Transport; Fri, 9 Sep 2022 11:03:38 +0000
-Received: from ulegcphtsw6.emea.nsn-net.net (ulegcphtsw6.emea.nsn-net.net [10.151.74.187])
-        by fr712usmtp1.zeu.alcatel-lucent.com (GMO) with ESMTP id 289B3ZO7001101;
-        Fri, 9 Sep 2022 11:03:36 GMT
-Received: by ulegcphtsw6.emea.nsn-net.net (Postfix, from userid 62095846)
-        id 800F4821; Fri,  9 Sep 2022 13:03:35 +0200 (CEST)
-From:   Bruno Matic <bruno.matic@nokia.com>
-To:     ulf.hansson@linaro.org, avri.altman@wdc.com
-Cc:     linux-mmc@vger.kernel.org, CLoehle@hyperstone.com,
-        jakob.rossler@nokia.com, aarne.heinonen@nokia.com,
-        Bruno Matic <bruno.matic@nokia.com>
-Subject: [PATCH v3] mmc-utils: correct and clean up the file handling
-Date:   Fri,  9 Sep 2022 13:03:22 +0200
-Message-Id: <20220909110322.25141-1-bruno.matic@nokia.com>
-X-Mailer: git-send-email 2.29.0
+        with ESMTP id S229751AbiIIWBE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Sep 2022 18:01:04 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3E3C144969;
+        Fri,  9 Sep 2022 15:01:03 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id lc7so7229945ejb.0;
+        Fri, 09 Sep 2022 15:01:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:content-language:cc:to:subject:from
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date;
+        bh=BKCyjdc9y8jyZoNI0vZvSlCBXggxKRCrFRR6O6ctF+w=;
+        b=iOMkKAyZEmwtbu4LUS927kV1V1ohVFL8tTMhjnHGf51srGxC3EyXBFcD6yL09+ncjj
+         qID+niTIpLJob8iV0ZpTosx/Lzal4h1bYKDwO5KuaKeho+EF6hhtb9T1o8JcysOCc/uI
+         nFN01b3iKP6X8eLEWsg4jBzVF8ksHYEOmxX+ochFPe02jgedQZLnjUrssAEBbG6ADase
+         SuUohINaiD96DNsEpr05A4i9zSR6E9An+kHuRgE5TuWS7MSJc57ZgscY7ZrwVbqiEpNY
+         4U9dgQY/8ywa7hMaLhHTpdQ3OhewmIJG/lrcR2gDWZZ0NM/ASt1mJJOTrAvrIIsHjUHE
+         WZzg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:content-language:cc:to:subject:from
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date;
+        bh=BKCyjdc9y8jyZoNI0vZvSlCBXggxKRCrFRR6O6ctF+w=;
+        b=Mvr+LFirTPd2uS6wLGknlf8o4PO3lJrgV+wdy/QzsrRdfAJTbvxb6rT5fVedvGMmPD
+         eVhL97ECekS+8DKlB5PdmJOGZ5jbml+mZAyud9UIxh2Uvi/Mx07gQJWKcmPeJvfoZZf2
+         xIqs26aVahpcV/halK3wt+yIUyvJGvclBanSdKsJK8HMSOn9oiGlDO1P1PL/3boTfhjI
+         5K+NogwVK6vi2VXvWz6buhdfDU4MOMuaXCpI1VdIrt2r3Kv5TJGgSKkzRWOrE3gXNApf
+         pv0ndem86hqP2UBsLq5iyR1/KpfksKIS7DW6qbD+cONjn8xgHp7Zx8klkK1Y9Walq68O
+         urZg==
+X-Gm-Message-State: ACgBeo3UIQ2E1AkB2d7BSA8btHpvaQVh4+mOcMcVkIUdKhUMzIiCf+ED
+        12jcH8L0JAB7onh8ixByW10=
+X-Google-Smtp-Source: AA6agR503tkKhQAd5Imgm4BPLKzov2ax/W4FLtg+tbq9EVWiAyuvxJRq+pRJaeUnfeqG3X9/MdTZ8Q==
+X-Received: by 2002:a17:907:6d05:b0:73d:8092:91ea with SMTP id sa5-20020a1709076d0500b0073d809291eamr11258913ejc.280.1662760862538;
+        Fri, 09 Sep 2022 15:01:02 -0700 (PDT)
+Received: from [192.168.2.1] (81-204-249-205.fixed.kpn.net. [81.204.249.205])
+        by smtp.gmail.com with ESMTPSA id kx25-20020a170907775900b0073d70df6e56sm797592ejc.138.2022.09.09.15.01.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 09 Sep 2022 15:01:02 -0700 (PDT)
+Message-ID: <3ed145c6-f400-ee75-ccac-894b0a0d15d2@gmail.com>
+Date:   Sat, 10 Sep 2022 00:01:00 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: VE1EUR03FT015:EE_|DB7PR07MB5078:EE_
-Content-Type: text/plain
-X-MS-Office365-Filtering-Correlation-Id: c6bcde1b-7410-4284-9e95-08da9252f305
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: yKfr/GWPJulnOku/bZ5z0SRle8iMmw+Kj4n6PhKB4x55nqIbppbQpOs2t5cuhZSiqeTW/w4ZLW2FetsLFEUUkiGvSzNco/BfEwIaqknxpuC+msG6BD6uBnWh3xjnwg+W1LAHS/7LcSD2OVXYnmTdeAxWAKI+gdrZqAArk2gbAIRPOTUCDJDgSxOtGY853QUd4eiVzkgmnZHqtzMaqz5hlkdLM5KoLKyQUwaEOL/3s4HLQsffxAsTGBnFMDPsS2qVWKSPgB7HXmgLFdYehDwkQNN3rhe7rKbyrBoB62eVtNpeHcGnjFCcyHCK5ge2Je84hHxj2un/kdugqXUFdd79V/n7UmMiwETUX6qfDmhJGnr2J8wgL+TKe9zOu+6xnOw2lDxJihTQUQDyzRc5PoWwCG282ps23yH1VAX7J1p76LBJqyQuYoDbrXx/F0Lc4cELdHA5B0QKWqI+qifuG8z8ARAFGK4iSgIYO7TcWZ13Iu5DiuaBhN80BTiwWM1fJ9mFNQjLL1rZAe6ubRCn+tggmFefceZ+mMSbxUvAxf3qa5guA6F/6F5Peyoahndv9ChaO2EHPkbrZCtpYMZKFFu+8loDsgPFHgqdOpWQiigTa8ZpNz3phJmu8PBEjFd81xXUU5MX0XKLn57UcXNEhuxnhpWGSkzhOLvc1J9RjEqSooDJEDBPDT8n5EmULwkJRfUmGzsjD7PkoZ5Gvk0jr3mbey4ZkU299QGbcghCn6eGLXtnPkTdI0Y6yqX21D/iKJqs/DoxPTZivmAKTVIjVZv2HHnLipUtEaXJhsXVp+kGYKc=
-X-Forefront-Antispam-Report: CIP:131.228.6.101;CTRY:FI;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:fr712usmtp1.zeu.alcatel-lucent.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230016)(4636009)(396003)(39860400002)(136003)(376002)(346002)(40470700004)(46966006)(36840700001)(82960400001)(2616005)(186003)(336012)(1076003)(26005)(6266002)(82740400003)(44832011)(8936002)(36860700001)(4326008)(2906002)(70206006)(82310400005)(70586007)(8676002)(36756003)(5660300002)(86362001)(42186006)(356005)(107886003)(81166007)(40480700001)(41300700001)(6666004)(47076005)(316002)(40460700003)(478600001)(83380400001)(36900700001);DIR:OUT;SFP:1102;
-X-OriginatorOrg: nokia.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB7PR07MB5078
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.13.0
+From:   Johan Jonker <jbx6244@gmail.com>
+Subject: [PATCH v1 00/11] Add more Rockchip rk3128 compatible strings
+To:     kever.yang@rock-chips.com
+Cc:     sjg@chromium.org, philipp.tomsich@vrull.eu, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, heiko@sntech.de,
+        ulf.hansson@linaro.org, miquel.raynal@bootlin.com, richard@nod.at,
+        vigneshr@ti.com, kishon@ti.com, vkoul@kernel.org,
+        thierry.reding@gmail.com, u.kleine-koenig@pengutronix.de,
+        gregkh@linuxfoundation.org, broonie@kernel.org,
+        wim@linux-watchdog.org, linux@roeck-us.net,
+        zhangqing@rock-chips.com, jamie@jamieiles.com,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-phy@lists.infradead.org,
+        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-watchdog@vger.kernel.org
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add the check if the whole firmware was loaded.
-Cleaned up the leftovers of handling the file in chunks.
+Mainline U-boot has some support for legacy Rockchip SoC rk3128.
+The rk3128.dtsi file is in need for some upgrading.
+To verify the nodes more Rockchip rk3128 compatible strings are needed.
 
-Changes in v3:
-  - checked and formated the patch
-Changes in v2:
-  - use perror to propagate the error on file read
+Not tested with hardware.
+No intent to port drivers or dts files to Linux for now without physical board.
+So pure for the bindings. 
 
-Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
-Reviewed-by: Avri Altman <avri.altman@wdc.com>
----
- mmc_cmds.c | 66 ++++++++++++++++++++++++++----------------------------
- 1 file changed, 32 insertions(+), 34 deletions(-)
+https://lore.kernel.org/u-boot/421195e1-472c-f337-e87a-b0b6d520b808@gmail.com/T/#u
 
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 12b7802..ef1d8c6 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2765,7 +2765,6 @@ int do_ffu(int nargs, char **argv)
- 	__u8 *buf = NULL;
- 	__u32 arg;
- 	off_t fw_size;
--	ssize_t chunk_size;
- 	char *device;
- 	struct mmc_ioc_multi_cmd *multi_cmd = NULL;
- 
-@@ -2879,45 +2878,44 @@ int do_ffu(int nargs, char **argv)
- 	multi_cmd->cmds[3].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
- 	multi_cmd->cmds[3].write_flag = 1;
- 
--do_retry:
--	/* read firmware chunk */
-+	/* read firmware */
- 	lseek(img_fd, 0, SEEK_SET);
--	chunk_size = read(img_fd, buf, fw_size);
-+	if (read(img_fd, buf, fw_size) != fw_size) {
-+		perror("Could not read the firmware file: ");
-+		ret = -ENOSPC;
-+		goto out;
-+	}
- 
--	if (chunk_size > 0) {
--		/* send ioctl with multi-cmd */
--		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-+do_retry:
-+	/* send ioctl with multi-cmd */
-+	ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
- 
--		if (ret) {
--			perror("Multi-cmd ioctl");
--			/* In case multi-cmd ioctl failed before exiting from ffu mode */
--			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
--			goto out;
--		}
-+	if (ret) {
-+		perror("Multi-cmd ioctl");
-+		/* In case multi-cmd ioctl failed before exiting from ffu mode */
-+		ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
-+		goto out;
-+	}
- 
--		ret = read_extcsd(dev_fd, ext_csd);
--		if (ret) {
--			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
--			goto out;
--		}
-+	ret = read_extcsd(dev_fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		goto out;
-+	}
- 
--		/* Test if we need to restart the download */
--		sect_done = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
--				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
--				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
--				ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
--		/* By spec, host should re-start download from the first sector if sect_done is 0 */
--		if (sect_done == 0) {
--			if (retry > 0) {
--				retry--;
--				fprintf(stderr, "Programming failed. Retrying... (%d)\n", retry);
--				goto do_retry;
--			}
--			fprintf(stderr, "Programming failed! Aborting...\n");
--			goto out;
--		} else {
--			fprintf(stderr, "Programmed %d/%jd bytes\r", sect_done * sect_size, (intmax_t)fw_size);
-+	/* Test if we need to restart the download */
-+	sect_done = ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_0] |
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_1] << 8 |
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_2] << 16 |
-+			ext_csd[EXT_CSD_NUM_OF_FW_SEC_PROG_3] << 24;
-+	/* By spec, host should re-start download from the first sector if sect_done is 0 */
-+	if (sect_done == 0) {
-+		if (retry--) {
-+			fprintf(stderr, "Programming failed. Retrying... (%d)\n", retry);
-+			goto do_retry;
- 		}
-+		fprintf(stderr, "Programming failed! Aborting...\n");
-+		goto out;
- 	}
- 
- 	if ((sect_done * sect_size) == fw_size) {
+Johan Jonker (11):
+  dt-bindings: serial: rockchip: add rockchip,rk3128-uart
+  dt-bindings: i2c: rockchip: add rockchip,rk3128-i2c
+  dt-bindings: pwm: rockchip: add rockchip,rk3128-pwm
+  dt-bindings: mmc: rockchip: add rockchip,rk3128-dw-mshc
+  dt-bindings: spi: rockchip: add rockchip,rk3128-spi
+  dt-bindings: usb: dwc2: rockchip: add rockchip,rk3128-usb
+  dt-bindings: watchdog: rockchip: add rockchip,rk3128-wdt
+  dt-bindings: arm: rockchip: pmu: add rockchip,rk3128-pmu
+  dt-bindings: phy: phy-rockchip-inno-usb2: add rockchip,rk3128-usb2phy
+  dt-bindings: soc: rockchip: grf: add rockchip,rk3128-grf
+  dt-bindings: mtd: rockchip: add rockchip,rk3128-nfc
+
+ Documentation/devicetree/bindings/arm/rockchip/pmu.yaml       | 2 ++
+ Documentation/devicetree/bindings/i2c/i2c-rk3x.yaml           | 1 +
+ Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml   | 1 +
+ .../devicetree/bindings/mtd/rockchip,nand-controller.yaml     | 4 +++-
+ .../devicetree/bindings/phy/phy-rockchip-inno-usb2.yaml       | 1 +
+ Documentation/devicetree/bindings/pwm/pwm-rockchip.yaml       | 1 +
+ .../devicetree/bindings/serial/snps-dw-apb-uart.yaml          | 1 +
+ Documentation/devicetree/bindings/soc/rockchip/grf.yaml       | 2 ++
+ Documentation/devicetree/bindings/spi/spi-rockchip.yaml       | 1 +
+ Documentation/devicetree/bindings/usb/dwc2.yaml               | 1 +
+ Documentation/devicetree/bindings/watchdog/snps,dw-wdt.yaml   | 1 +
+ 11 files changed, 15 insertions(+), 1 deletion(-)
+
 -- 
-2.29.0
+2.20.1
 
