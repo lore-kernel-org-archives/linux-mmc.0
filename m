@@ -2,187 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A90FDC54EE9
-	for <linux-mmc@archiver.kernel.org>; Sun, 11 Sep 2022 18:34:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77C27ECAAD5
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Sep 2022 08:37:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229540AbiIKSeW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 11 Sep 2022 14:34:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51954 "EHLO
+        id S230147AbiILIhO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Sep 2022 04:37:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229544AbiIKSeV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 11 Sep 2022 14:34:21 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B1E426AC8;
-        Sun, 11 Sep 2022 11:34:20 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id m15so11403320lfl.9;
-        Sun, 11 Sep 2022 11:34:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date:from:to
-         :cc:subject:date;
-        bh=Ow5gpV22zk0pMK0ScwSlmlMMm3s/uGPn53BIogCYbGI=;
-        b=HA4X3gBrywaOJ7axHIuNEEIzDaODMRXkILQY3Kcr2vD+tr3G/rPjtmmdfGgC2dRU0K
-         LuOMj1o+HyWsiG2k/bcChsM9JVeHFsB9wA+n9fCV++tHb5Ohu41VNK/O5iMTRAMasZ/O
-         FjCHHv28tCIyFFqFYXU9qhpKSMKBFsGTS4VzucQ9RyzCxOYIFvmQOLAAGjQGbm9nRAOX
-         G7YS5m7M3SUA0ydxoltj79DYdVnbXc+vxiXmWBIEJTITVOnKUCYI3qbQXD4I7tFeOURs
-         WyI2aBRv63xGhttPIXmcwsNQSrghNTINZ318CKGhzB4zFMsTYD/IF4/SnFq//HEo831O
-         +hkQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=Ow5gpV22zk0pMK0ScwSlmlMMm3s/uGPn53BIogCYbGI=;
-        b=tkB+Yp6zgDxtb8GGb4nuBJBH9QrjQLlMgwdz6BAGhOKF3eEhBxSpagurBn3uNEOmNm
-         Bx8OWnVxPq/yl6+hQMNApq1lA6FGgaR7/fhNuzItXiRVhcDqowhdw37GHgm6cEvkGblM
-         x+tH0paLhi2ThLIkS2w6KFeHu3O5WmYUtLbeRHlh0RM6udsl3P7fPh6XSFsfc8+5Ptmo
-         ZGo/POA8bHUjw1LECNyUGCBtFfhLU9qhgx5OMura6jyL1eld7hQ+xcuTFZVr7TL8aMNQ
-         coHpMFWTtAtpQDIYZMijqsDUkL/5ntxuQsYNOy/CSx0YCW4pw67UZIzO49rLaYJfQrJF
-         iy2Q==
-X-Gm-Message-State: ACgBeo0bqQazLLqiMqtQIxznEYJ38/DEy1+uko30zO6BfolKYC+4nQRz
-        QvpLcUOD6r6KbagGpgEtjAo=
-X-Google-Smtp-Source: AA6agR6LKdDmr9mhSA/I0pJjCwsmNI//1gZT2puMU9F6WGm72PlfNLgLOAnzTEcBTwI/9Kn1qsldMA==
-X-Received: by 2002:a05:6512:33d5:b0:49a:d2dc:e1e3 with SMTP id d21-20020a05651233d500b0049ad2dce1e3mr360799lfg.628.1662921258876;
-        Sun, 11 Sep 2022 11:34:18 -0700 (PDT)
-Received: from mobilestation ([95.79.140.178])
-        by smtp.gmail.com with ESMTPSA id q16-20020ac25290000000b00496997176f9sm694356lfm.46.2022.09.11.11.34.17
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 11 Sep 2022 11:34:18 -0700 (PDT)
-Date:   Sun, 11 Sep 2022 21:34:15 +0300
-From:   Serge Semin <fancer.lancer@gmail.com>
-To:     "Larson, Bradley" <Bradley.Larson@amd.com>
-Cc:     Brad Larson <brad@pensando.io>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "alcooperx@gmail.com" <alcooperx@gmail.com>,
-        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "gsomlo@gmail.com" <gsomlo@gmail.com>,
-        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
-        "krzk@kernel.org" <krzk@kernel.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "piotrs@cadence.com" <piotrs@cadence.com>,
-        "p.yadav@ti.com" <p.yadav@ti.com>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "samuel@sholland.org" <samuel@sholland.org>,
-        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
-        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "will@kernel.org" <will@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-Subject: Re: [PATCH v6 04/17] dt-bindings: spi: dw: Add AMD Pensando Elba SoC
- SPI Controller bindings
-Message-ID: <20220911183415.ufeasmm3uev7wqx4@mobilestation>
-References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-5-brad@pensando.io>
- <20220821174952.5i5pfftxt53dmqv3@mobilestation>
- <0c2ac76e-45ff-b5a1-f33a-177eea04c17d@amd.com>
+        with ESMTP id S229544AbiILIgz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Sep 2022 04:36:55 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1982C36DD3
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Sep 2022 01:36:08 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1oXeuO-0003qU-HH; Mon, 12 Sep 2022 10:35:12 +0200
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1oXeuK-000GV0-Lc; Mon, 12 Sep 2022 10:35:07 +0200
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1oXeuI-000L6p-Kj; Mon, 12 Sep 2022 10:35:06 +0200
+Date:   Mon, 12 Sep 2022 10:35:06 +0200
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Johan Jonker <jbx6244@gmail.com>
+Cc:     kever.yang@rock-chips.com, sjg@chromium.org,
+        philipp.tomsich@vrull.eu, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, heiko@sntech.de,
+        ulf.hansson@linaro.org, miquel.raynal@bootlin.com, richard@nod.at,
+        vigneshr@ti.com, kishon@ti.com, vkoul@kernel.org,
+        thierry.reding@gmail.com, gregkh@linuxfoundation.org,
+        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
+        zhangqing@rock-chips.com, jamie@jamieiles.com,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-phy@lists.infradead.org,
+        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-watchdog@vger.kernel.org
+Subject: Re: [PATCH v1 03/11] dt-bindings: pwm: rockchip: add
+ rockchip,rk3128-pwm
+Message-ID: <20220912083506.js4zyou7kdphrs7m@pengutronix.de>
+References: <20220909212543.17428-1-jbx6244@gmail.com>
+ <f5dd0ee4-d97e-d878-ffde-c06e9b233e38@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="tqnrn4kzd6owce4p"
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <0c2ac76e-45ff-b5a1-f33a-177eea04c17d@amd.com>
+In-Reply-To: <f5dd0ee4-d97e-d878-ffde-c06e9b233e38@gmail.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Aug 31, 2022 at 06:28:46PM +0000, Larson, Bradley wrote:
-> On 8/21/22 10:49 AM, Serge Semin wrote:
-> > On Sat, Aug 20, 2022 at 12:57:37PM -0700, Brad Larson wrote:
-> >> From: Brad Larson <blarson@amd.com>
-> >>
-> >> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
-> >>
-> >> Signed-off-by: Brad Larson <blarson@amd.com>
-> >> ---
-> >>   .../devicetree/bindings/spi/snps,dw-apb-ssi.yaml      | 11 +++++++++++
-> >>   1 file changed, 11 insertions(+)
-> >>
-> >> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> >> index 37c3c272407d..403d6416f7ac 100644
-> >> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> >> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> >> @@ -37,6 +37,15 @@ allOf:
-> >>       else:
-> >>         required:
-> >>           - interrupts
-> >> +  - if:
-> >> +      properties:
-> >> +        compatible:
-> >> +          contains:
-> >> +            enum:
-> >> +              - amd,pensando-elba-spi
-> >> +    then:
-> >> +      required:
-> >> +        - amd,pensando-elba-syscon
-> > Please add the "amd,pensando-elba-syscon" property definition as I
-> > asked here:
-> > https://nam11.safelinks.protection.outlook.com/?url=https%3A%2F%2Flore.kernel.org%2Flkml%2F20220704131810.kabkuy6e4qmhfm3n%40mobilestation%2F&amp;data=05%7C01%7Cbradley.larson%40amd.com%7C1c4f822c81424048873508da839d90fc%7C3dd8961fe4884e608e11a82d994e183d%7C0%7C0%7C637967010019245894%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C3000%7C%7C%7C&amp;sdata=xl9OU9P9QK3wLHc25hQZK393ylULd41qc4HB2Zt%2F0BQ%3D&amp;reserved=0
-> 
 
-> Proposing this addition:
-> 
-> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-> @@ -148,6 +148,15 @@ properties:
->         of the designware controller, and the upper limit is also subject to
->         controller configuration.
-> 
-> +  amd,pensando-elba-syscon:
-> +    $ref: "/schemas/types.yaml#/definitions/phandle-array"
-> +    maxItems: 1
-> +    description:
-> +      A phandle to syscon used to access the spi chip-select override 
-> register.
-> +    items:
-> +      - items:
-> +        - description: phandle to the syscon node
-> +
+--tqnrn4kzd6owce4p
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-No. What Krzysztof and I asked was to add the property definition
-into the allOf: [ if ...,  ] statement. Please read more carefully my
-last comment:
-https://lore.kernel.org/lkml/20220704131810.kabkuy6e4qmhfm3n@mobilestation/
-The definition is supposed to look like this:
+Hello,
 
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: amd,pensando-elba-spi
-> +    then:
-  +      properties:
-  +        amd,pensando-elba-syscon
-  +          $ref: /schemas/types.yaml#/definitions/phandle
-  +          description: AMD Pensando Elba SoC system controller
-> +      required:
-> +        - amd,pensando-elba-syscon
+On Sat, Sep 10, 2022 at 12:02:22AM +0200, Johan Jonker wrote:
+> Add rockchip,rk3128-pwm compatible string.
+>=20
+> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 
-* Please also note that I've replaced "enum:" with "const:" in the if
-statement above.
+Considering the problems pointed out by Rob as orthogonal to this
+change:
 
-The difference with what you suggested is that my version is
-applicable for the Pensando ELBA SPI controller only, while your
-update will cause applying the "amd,pensando-elba-syscon" property
-constraints for all DW SSI controllers which isn't what we would want.
+Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
 
--Sergey
+Best regards
+Uwe
 
->   patternProperties:
->     "^.*@[0-9a-f]+$":
->       type: object
-> 
-> Regards,
-> Brad
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+
+--tqnrn4kzd6owce4p
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmMe7zcACgkQwfwUeK3K
+7AlZYwf/ffseGIKL3qdR1ObyfIb5V+iGVTp/SdYtO08mrURjLUEo+B+syZnhYPKY
+WaIox8KDLDXTTzG+l8SOyJN/eVX56XZFaFzqNKpscD60wLFga+ccFaNKGJtk7knG
+NvhVkaLBCMShPPlR6KT4mcKOmSBnZcge7q+h4oVQ5fgstpl2uOPQJPrIrZ+B+k8v
+36gKyh5sYqGHe+uP6mIyiO8yuPztWwFfCILv5MV99qgCPftl3L8IgyvK2vI6wO50
+ymfHbqlS8nxTODgi5iTI0PFMn0YJII1d2xwguOheFXUzRYuU/n3wft1Krdnwcdm2
+fMeJle5erwYQ8Z6/F8F+XCMTdI83dA==
+=6TOs
+-----END PGP SIGNATURE-----
+
+--tqnrn4kzd6owce4p--
