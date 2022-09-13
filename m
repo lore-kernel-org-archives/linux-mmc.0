@@ -2,108 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E84FC54EE9
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Sep 2022 06:34:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D311BC6FA8A
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Sep 2022 14:06:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230396AbiIMGed (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Sep 2022 02:34:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51876 "EHLO
+        id S232439AbiIMOGC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Sep 2022 10:06:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49858 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230387AbiIMGec (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2022 02:34:32 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8058D59;
-        Mon, 12 Sep 2022 23:34:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663050870; x=1694586870;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=QYfnTDZixDt2VYVpTtju9Z1vn0nYiKFeDuEb4i2ER9c=;
-  b=PRltevjz3e9o/AR9/CP8zzVYi/eNTe3uy7nYK906S9GFKx7RRdAqcZZF
-   3TpsSLBcrssUGIePx7Icw72NZUyNSHbzzZh2dkOHQc6JvSuWRoRs+17qW
-   VW3EgKA8qdStFZf5HGjQKHECnaufRhHHMhKEEFUSPxRxfPQen6lup8H3d
-   mj6TovuCcX3lb9SpKgG2Efmmly6us6wZccRzvHgPPIzI8SjBPbh6XDRV/
-   C4bICTgjZ1zRLlLhvqB3sV6+/JHNsQ4OHXB6wso5FHNFggzW75i+KrQmI
-   4e3V7Z0x/jowlQNZ5iH5aleHV2tUTLR1rBrUYVRB/9hFAM2L8vnXeLpZF
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10468"; a="384348528"
-X-IronPort-AV: E=Sophos;i="5.93,312,1654585200"; 
-   d="scan'208";a="384348528"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2022 23:34:30 -0700
-X-IronPort-AV: E=Sophos;i="5.93,312,1654585200"; 
-   d="scan'208";a="678426598"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.98])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Sep 2022 23:34:28 -0700
-Message-ID: <925b6e37-051f-927c-350a-cd767d88d72b@intel.com>
-Date:   Tue, 13 Sep 2022 09:34:24 +0300
+        with ESMTP id S232411AbiIMOFy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Sep 2022 10:05:54 -0400
+Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 038571C127;
+        Tue, 13 Sep 2022 07:05:52 -0700 (PDT)
+Received: by mail-oo1-f50.google.com with SMTP id w39-20020a4a97aa000000b0044dfa1ddc67so1952747ooi.6;
+        Tue, 13 Sep 2022 07:05:51 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date;
+        bh=gUoMuqH8RQNLf6TD5ZgHBTjgUa9ZzQ80Xl0NxTsaRAQ=;
+        b=atlBAHFy5pXU5vu/FMKYD5xMcXZAvVe+4JOqgOWDp0mnko8v3jEdh4zxfnyufDdVg4
+         fQSsLQu1Ub54q3gePuLMKBsBm+/SxRlNNSMkdFerrY1m6SUOqU08GFGQVxp3oCLX02Z/
+         UMz8gTiMyKApaCMQAD+uRgddhIecikQPGw4MtYPIZr1ZLFAfarZMDpnJS9GC/KbSQAFa
+         JlufXp8IkqgQ3kWExDBZWP4gymgvbNTMiM9yk9zjmg6UjLbEhBGDTtuRP5VhnY0neV5G
+         PmqnkENH9bO5++xzkjZY2bqInAM+fzAOSqrjyvPOo1kKVGD5x0ShyQDF9H2kkooCyJr3
+         cPzA==
+X-Gm-Message-State: ACgBeo1vsi/waodI0BM1NqWhLqSdFMaZtoD2gPM9cbEy36p3z6V8Ctvl
+        TJmUR9tUwJ8z737u2tftLg==
+X-Google-Smtp-Source: AA6agR6RrtTNw9L8FzOsi4f1dPwDybzh223SP/qImE6imeHr6gssP4vZDFglDT81BonBYIffpKUqWw==
+X-Received: by 2002:a4a:b04e:0:b0:472:912a:63c9 with SMTP id g14-20020a4ab04e000000b00472912a63c9mr8418280oon.87.1663077951213;
+        Tue, 13 Sep 2022 07:05:51 -0700 (PDT)
+Received: from robh.at.kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id k6-20020a056870818600b0010d7242b623sm7045343oae.21.2022.09.13.07.05.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 13 Sep 2022 07:05:50 -0700 (PDT)
+Received: (nullmailer pid 3591626 invoked by uid 1000);
+        Tue, 13 Sep 2022 14:05:49 -0000
+Date:   Tue, 13 Sep 2022 09:05:49 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Johan Jonker <jbx6244@gmail.com>
+Cc:     philipp.tomsich@vrull.eu, linux-kernel@vger.kernel.org,
+        sjg@chromium.org, heiko@sntech.de, thierry.reding@gmail.com,
+        vigneshr@ti.com, linux-rockchip@lists.infradead.org,
+        linux-mmc@vger.kernel.org, gregkh@linuxfoundation.org,
+        linux@roeck-us.net, u.kleine-koenig@pengutronix.de, kishon@ti.com,
+        robh+dt@kernel.org, miquel.raynal@bootlin.com, jamie@jamieiles.com,
+        wim@linux-watchdog.org, broonie@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, zhangqing@rock-chips.com,
+        linux-watchdog@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-pwm@vger.kernel.org, vkoul@kernel.org, richard@nod.at,
+        linux-mtd@lists.infradead.org, linux-phy@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org, ulf.hansson@linaro.org,
+        kever.yang@rock-chips.com
+Subject: Re: [PATCH v1 01/11] dt-bindings: serial: rockchip: add
+ rockchip,rk3128-uart
+Message-ID: <20220913140549.GA3591205-robh@kernel.org>
+References: <20220909212543.17428-1-jbx6244@gmail.com>
+ <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH] mmc: sdhci-pci-core: Disable cqe for ASUS 1100FK family
- devices
-Content-Language: en-US
-To:     Patrick Thompson <ptf@google.com>,
-        Linux MMC development <linux-mmc@vger.kernel.org>
-Cc:     Sangwhan Moon <sxm@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-References: <20220912212847.1337868-1-ptf@google.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220912212847.1337868-1-ptf@google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/09/22 00:28, Patrick Thompson wrote:
-> From: ptf <ptf@google.com>
+On Sat, 10 Sep 2022 00:01:28 +0200, Johan Jonker wrote:
+> Add rockchip,rk3128-uart compatible string.
 > 
-> The CQE implementation for the eMMC in the ASUS 1100FK family of devices
-> is broken. This causes installations to fail and thus we are disabling
-> CQE for this family of devices.
-> 
-> Signed-off-by: Patrick Thompson <ptf@google.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
+> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 > ---
+>  Documentation/devicetree/bindings/serial/snps-dw-apb-uart.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> Hello,
-> 
-> I was hoping to get some advice on adapting this patch to target the
-> eMMC directly instead of a family of laptops. One idea is to use the
-> PCI-id of the controller (in this case [8086:4dc4]). Would that make
-> sense? Is there someone with more knowledge on the subject that could
-> confirm that the [8086:4dc4] device doesn't have a working CQE?
 
-In these cases the issue is suspected to be BIOS. Best solution is to
-disable CQE.
-
-> 
-> Thank you,
-> Patrick
-> 
-> 
->  drivers/mmc/host/sdhci-pci-core.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 622b7de96c7f..3ba0250559e7 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -890,7 +890,8 @@ static bool glk_broken_cqhci(struct sdhci_pci_slot *slot)
->  {
->  	return slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_GLK_EMMC &&
->  	       (dmi_match(DMI_BIOS_VENDOR, "LENOVO") ||
-> -		dmi_match(DMI_SYS_VENDOR, "IRBIS"));
-> +		dmi_match(DMI_SYS_VENDOR, "IRBIS") ||
-> +		dmi_match(DMI_PRODUCT_FAMILY, "ASUS BR1100FKA"));
->  }
->  
->  static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
-
+Acked-by: Rob Herring <robh@kernel.org>
