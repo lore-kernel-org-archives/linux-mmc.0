@@ -2,64 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD60C6FA8A
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 08:53:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CA7AECAAD8
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 09:56:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229547AbiINIxH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 04:53:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58700 "EHLO
+        id S230519AbiINJ4w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 05:56:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229503AbiINIxG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 04:53:06 -0400
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78EB45F7F6;
-        Wed, 14 Sep 2022 01:53:04 -0700 (PDT)
-Received: from [89.101.193.68] (helo=phil.sntech)
-        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <heiko@sntech.de>)
-        id 1oYO8L-0004ae-5u; Wed, 14 Sep 2022 10:52:37 +0200
-From:   Heiko Stuebner <heiko@sntech.de>
-To:     Johan Jonker <jbx6244@gmail.com>, kever.yang@rock-chips.com
-Cc:     Heiko Stuebner <heiko@sntech.de>,
-        linux-rockchip@lists.infradead.org, vkoul@kernel.org,
-        vigneshr@ti.com, linux@roeck-us.net, ulf.hansson@linaro.org,
-        devicetree@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        u.kleine-koenig@pengutronix.de, linux-mtd@lists.infradead.org,
-        zhangqing@rock-chips.com, linux-pwm@vger.kernel.org,
-        jamie@jamieiles.com, krzysztof.kozlowski+dt@linaro.org,
-        linux-spi@vger.kernel.org, gregkh@linuxfoundation.org,
-        thierry.reding@gmail.com, sjg@chromium.org,
-        philipp.tomsich@vrull.eu, kishon@ti.com, richard@nod.at,
-        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
-        robh+dt@kernel.org, linux-mmc@vger.kernel.org, broonie@kernel.org,
-        wim@linux-watchdog.org, linux-serial@vger.kernel.org,
-        miquel.raynal@bootlin.com
-Subject: Re: (subset) [PATCH v1 01/11] dt-bindings: serial: rockchip: add rockchip,rk3128-uart
-Date:   Wed, 14 Sep 2022 10:52:33 +0200
-Message-Id: <166314554237.197444.11513118217413767473.b4-ty@sntech.de>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
-References: <20220909212543.17428-1-jbx6244@gmail.com> <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
+        with ESMTP id S230091AbiINJ4v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 05:56:51 -0400
+Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2060.outbound.protection.outlook.com [40.107.223.60])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A72FC33;
+        Wed, 14 Sep 2022 02:56:50 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=E6WMPM8tshymWAgrZRW+Jyt6gztcEgRw8BkeZWB9NErRZEHOAHEmm6Tnny8F5/T8RKJHl/iTLytNDDh6TBeOIJ/z8qfBqO7M0CTSxXwCYMq23WUx+SpmYJFjKAqTOCoQbRZqQUg9Cpi/GMjgUDPAc1wVnAULIdozBj6jeSysSI8mL9XAWk+hH4+jxtnzAUa9YvxeLs2lKVll0x5hL9xLV0iMLhwbQh0p4eI97CB1kz+zpX3deQ5SGCNIbRxkzwke2HtQRM5kZCsmiDIFeVaoo+h0pkpksS7HOEVlNXt8UNtCKLR88l2exJCA4tNZksd0jH7YMKIru+m1KB77pXkTYg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=d7eSoDIQs+BITe4ZITRsdI1l2XWfLwFq00VTUmSpQ28=;
+ b=jcGIklpDq8ARSbnYyYM1KAbiuyCSNMKvGZhvwXrYBDVFLwkQFI90n0Tq7NNcW+3SQX1pDVj6xaYbSqqgYHPQbxJ76kKlqQneX0MbwlTQInvy3MW0WYL8t2eCX1Lb9s/BoyqpsQtRpV+ufKn7IX4ZoMiBrW77QgE4cEFJXOaW/vOUk07BU8iZnQmXyy2nrOSFySZgER7cDeaXxDdluHaPyKDhIdtWeDkm8wYdulQSz2AghEiYLD5pYnXweQqQIihR5WfVsgpJpzRXk3r1UE2mOnjdB+5bO2DeL/jOIlF2x5V+xRzbTPCm6kFo5e+XUvZFzK0byWAYljK+BuDz6vZGTQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.117.161) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=d7eSoDIQs+BITe4ZITRsdI1l2XWfLwFq00VTUmSpQ28=;
+ b=crD5B4f1TBLdU/YsucHcrzv59C52XyJY+ELgXt7+3j9Qp6rL5oh9x0q34yAbef27WnE+FCgYABf1jV5eZ/xXGsTkQWInEoVvxWHdGo2vjOMmI25EHroAljle4FBoBDIpL+6unqB1d3ONma4+fsIjpzk2CWME+OT+ZfsoRD1AQbMoqel/DcocyBNZ0T6BIHy14DKAhYBJndnk1u4Fejsn3eQR8LpmLG+PDtfBaM8imYuCkOs04UHDkk2trddLL+jVSig3DlpKYw1pf4COh6N9PnD9kMYkt3WP1PGOzolsKe0hzC2guI4XoduBakwrpvZf0dw6mRDVYsFwu+iPf14Q5g==
+Received: from MW4PR03CA0068.namprd03.prod.outlook.com (2603:10b6:303:b6::13)
+ by CH0PR12MB5108.namprd12.prod.outlook.com (2603:10b6:610:bf::6) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.14; Wed, 14 Sep
+ 2022 09:56:49 +0000
+Received: from CO1NAM11FT107.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:b6:cafe::8) by MW4PR03CA0068.outlook.office365.com
+ (2603:10b6:303:b6::13) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5612.22 via Frontend
+ Transport; Wed, 14 Sep 2022 09:56:48 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.161)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.117.161 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.117.161; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.117.161) by
+ CO1NAM11FT107.mail.protection.outlook.com (10.13.175.97) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5632.12 via Frontend Transport; Wed, 14 Sep 2022 09:56:48 +0000
+Received: from rnnvmail205.nvidia.com (10.129.68.10) by mail.nvidia.com
+ (10.129.200.67) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Wed, 14 Sep
+ 2022 02:56:33 -0700
+Received: from rnnvmail201.nvidia.com (10.129.68.8) by rnnvmail205.nvidia.com
+ (10.129.68.10) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.29; Wed, 14 Sep
+ 2022 02:56:33 -0700
+Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
+ (10.129.68.8) with Microsoft SMTP Server id 15.2.986.29 via Frontend
+ Transport; Wed, 14 Sep 2022 02:56:30 -0700
+From:   Prathamesh Shete <pshete@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC:     <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
+        <kyarlagadda@nvidia.com>
+Subject: [PATCH v2 1/4] mmc: sdhci-tegra: Separate T19x and T23x SoC data
+Date:   Wed, 14 Sep 2022 15:26:25 +0530
+Message-ID: <20220914095628.26093-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT107:EE_|CH0PR12MB5108:EE_
+X-MS-Office365-Filtering-Correlation-Id: cf231c77-1de6-4266-a9d5-08da9637708e
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: mkGQE8Aem8RORblhTspbc/bAi1nf87+Z/0uwiyHBPfjyNb0560dsGAKZ3vwyCvONA9KpuSPWTbOZMReUwObjkA6P2Y1SJsVoCGMaomodZ6PcaH4FyL54PLp4f4CIJfV0CGJlWJDmUuE4x33kcz1pJ1Nz+WHSN9Gf8tCGVKh4J8cioxRjgTYg0pdxC1CNe7Vdwq82m2w0uKE1jrtDCDp6a5DlnMplprIHNLZ1zbdyBXo2EF87ueqqI76oi1YJ7uXyw7NwbgTBJWyndH8L3M3rWTEi7+1tRH3jXrfSRXCx/gOX1eEi/RLrl5TzxvOr8gfVUmOkZMhVqFS/Yhu+O12bwgCWPmvMkaBA7anEemhSAqtBlbszpHa/vjCIpWcEisJuCQwVaaZLHNyq7k0pzDjvWQIISlkL9eWys/drNQ/Hl5uLjn1ghXo6jeUg72WhhHPT0EQYDOkfLs1uURnEcFb90Hol3eb7vh2WwIMbAYxM5BdGytOEPGHL+i7KZdft7BVs+Y2aDF7cUn7BfMQ6ZMiTO68SO5J5HOXguc0L+iVE9ZbMgXT5LIM0hjVPFlCV3cOzNQElEQe5IHHL9L4XjMKLBnOE3nICVCScDhxZyJbgkXiMwz/Kcf/v18xfcJSnOONxLLNcX2CXhYMfMQ9F174BOOt4YZbVCPLRjwsbnC8RoKUEcu6qYJYwIG2SgKPJZ6VClnbqeY9ZFqMKu1CX+6Y19hAg9N9EGC6/fV6mvjE4iHr1eB2YQ4JZerKbuLmFpyY0q7zonPHF3AnBYMarCUV7Bg==
+X-Forefront-Antispam-Report: CIP:216.228.117.161;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(136003)(39860400002)(396003)(346002)(376002)(451199015)(46966006)(36840700001)(40470700004)(5660300002)(4326008)(36860700001)(8936002)(40460700003)(40480700001)(1076003)(82310400005)(2616005)(6666004)(107886003)(2906002)(8676002)(356005)(36756003)(47076005)(426003)(7636003)(82740400003)(316002)(336012)(41300700001)(70586007)(86362001)(54906003)(70206006)(186003)(110136005)(478600001)(26005)(7696005);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 14 Sep 2022 09:56:48.0549
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: cf231c77-1de6-4266-a9d5-08da9637708e
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.161];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT107.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR12MB5108
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 10 Sep 2022 00:01:28 +0200, Johan Jonker wrote:
-> Add rockchip,rk3128-uart compatible string.
+Create new SoC data structure for T23x platforms.
 
-Applied, thanks!
+StreamID programming is one of the additional feature
+added in Tegra234 and later chips
 
-[08/11] dt-bindings: arm: rockchip: pmu: add rockchip,rk3128-pmu
-        commit: 9c2f4521344f3b14fa0be050100ef726edc36cbc
-[10/11] dt-bindings: soc: rockchip: grf: add rockchip,rk3128-grf
-        commit: adc4f190260a6c004f950992d8c9ee3aec8da38b
+Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-Best regards,
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 2d2d8260c681..a6c5bbae77b4 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1556,7 +1556,21 @@ static const struct sdhci_tegra_soc_data soc_data_tegra194 = {
+ 	.max_tap_delay = 139,
+ };
+ 
++static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
++	.pdata = &sdhci_tegra186_pdata,
++	.dma_mask = DMA_BIT_MASK(39),
++	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
++		    NVQUIRK_HAS_PADCALIB |
++		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
++		    NVQUIRK_ENABLE_SDR50 |
++		    NVQUIRK_ENABLE_SDR104 |
++		    NVQUIRK_HAS_TMCLK,
++	.min_tap_delay = 95,
++	.max_tap_delay = 111,
++};
++
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra234-sdhci", .data = &soc_data_tegra234 },
+ 	{ .compatible = "nvidia,tegra194-sdhci", .data = &soc_data_tegra194 },
+ 	{ .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
+ 	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
 -- 
-Heiko Stuebner <heiko@sntech.de>
+2.17.1
+
