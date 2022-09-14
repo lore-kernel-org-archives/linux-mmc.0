@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1136ECAAD8
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 10:40:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8703C6FA8A
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 12:11:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229582AbiINKkM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 06:40:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51654 "EHLO
+        id S230016AbiINMLw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 08:11:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45888 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbiINKkL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 06:40:11 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 894CE58097;
-        Wed, 14 Sep 2022 03:40:10 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id sb3so4052481ejb.9;
-        Wed, 14 Sep 2022 03:40:10 -0700 (PDT)
+        with ESMTP id S230085AbiINMLk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 08:11:40 -0400
+Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 711FB2B614;
+        Wed, 14 Sep 2022 05:11:38 -0700 (PDT)
+Received: by mail-qt1-x82c.google.com with SMTP id g12so10539074qts.1;
+        Wed, 14 Sep 2022 05:11:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:from:to:cc:subject:date;
-        bh=2q8cWxTdOT7NEjEAm48iQBXKuIhQLyWS2hOWoDR0iTY=;
-        b=DylVZ1TI5IYuSNnbh4HQypPHh3hxW8yETwHZ7tK0BXws5BOr1VdvOaNfaqTqAZzeSy
-         iVZLHCZ4IDW5C99L/FnrJjiKqfLCxjLpBeQ2XX/4MiU2z5adY+JbdVnrjcSrrGmjyQxC
-         1GX5lUGb/rcLVVkxep8ENB2iUhltpSeabSGZfHSelMzRhNFw0Eqxd3QgJ4meRdDu80BY
-         UvvqwtY6zFX79xh2/VKWStJjJV8PdxE3T/E23TtdBmw1oumC8GyThADXG6uRMU3nmh6U
-         FBowGk/gAa2xiyOQTjWmnQw71ItLgiUnzdIyEiGYwryC2WrB+jCu8OLyVqyKUnx/kgDg
-         MXoQ==
+        bh=MWI6ksoWEvGKKGInpG97Zb5wVLWjuPxRovchnQ7RsgA=;
+        b=kKP1Lk1I30g6xZ2cNiXfYOWOWBlE+p5AeJfoBRIwMIBA04jPu/gv84KCYkzhD/BQal
+         nI3yBzoXUKpNbIy8q+aEC7zBN6hKtocA6vZh0449ujR6MecPYj+fhEsMiSOhAQokmlZM
+         pmaX5I2Jqb1otNacfAoe7kGFCvD9L7Ui8D43W4lLpOcQt+qYe5ZXuehC/GyMAfweJhCO
+         0Dv4E5dddaeYsNHj5+rJmGvKl9Zbzq2lbhiWxcJeKhN5pgZTWkfdY4vlxbIrFVXEfKgx
+         Y+9g0a8bEXndjzbqy06qtqPBvKpjwps1ykZwZ62RsF9rlyDJRFG7ltivdijnmuMCPEvo
+         wrUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
          :subject:date;
-        bh=2q8cWxTdOT7NEjEAm48iQBXKuIhQLyWS2hOWoDR0iTY=;
-        b=XLLZ3Bl6QTy26NtT5rDNm9zH8C28hfCXaYorQlUuhbtxMvx2iT7VzeE1hCb1sP3+mo
-         Nubh5yJPfgl9sORQkIozSw+OdEwZrSjJaA/0jTeM76Ft9l8/PHYAe2+J5msk8DkKCUZf
-         +Le+aEMsRJH4YHe8CE5g+NM3uB/pWFSsf3NoMLp198AN6kXZ7+3nrleQ/wtkNw0fXkpH
-         D1mBUThJ6gr2xS7tTUE35t0MRJm2db0oa7UGd/pCeqgdcCj+xm3Ho5gmFcLWljgdOfPo
-         x/XtwZ63v4RljcntZsF+NucD7YJ3+TRTAwUYuXNTNPwjYTzJCEAwBi6g/ppce7cIqok+
-         2tsw==
-X-Gm-Message-State: ACgBeo008waOuOqMR0qK34PIQhOtj0UWCC2jMe0veiMky/On+guORIf0
-        kq99px3DbmdR1cMsa/jTA4w=
-X-Google-Smtp-Source: AA6agR548FPwc28DxYS445PZ5foFlZ/dWDKKUyLcm97KljK1vuY6/Kce2cqT8VdhjBo499zB+vRNZg==
-X-Received: by 2002:a17:907:2cf6:b0:77b:2dd9:7cd7 with SMTP id hz22-20020a1709072cf600b0077b2dd97cd7mr13428182ejc.334.1663152009082;
-        Wed, 14 Sep 2022 03:40:09 -0700 (PDT)
+        bh=MWI6ksoWEvGKKGInpG97Zb5wVLWjuPxRovchnQ7RsgA=;
+        b=CZ7kooO7GQgCgwgzIjanQhxVj7wgkZ8RElvCjU+57UbdItOQUHvQ4EwAasw9v/6+OI
+         oLFcuKNvZfJAz81EYiakvhinKWktFPb0tvS2f7GMar77LRG56Pfd9lGK6MvmG8REOikY
+         tapU9m2m7Bq+31u8MwsrVgEKFJHnFVVYl1eJD+Cl38g3+1jAeHQPlxyfihT2gZxrYXVb
+         WB4gE96H6U6jaJjMkkPEJjXHdnSu/JDPqS+n6+6UM0DGKH4foO7tq/dFQq/MQHmPN8zj
+         S6mc3VswZJEeO1uhHi50vCbjFDdAl/ZyOgW/tvVL02ayzELS8Gw+Ib26bOHaBqRFh9eo
+         RoIw==
+X-Gm-Message-State: ACgBeo0UzQ9/kDFXP2Yhllz9FbXY0MCIexOv0QipHRwOm3g8IkwJczI8
+        hL06X0sQDMs4aRyMqASn/f8=
+X-Google-Smtp-Source: AA6agR7veKDRhklijiXZjy8uqnbrvyeEqF5YFSFrdTNbG4I1dhQW7MDwZdPQfJqdTGvN+H86r/gtkQ==
+X-Received: by 2002:a05:622a:1304:b0:35c:b77b:73b6 with SMTP id v4-20020a05622a130400b0035cb77b73b6mr4669413qtk.498.1663157496528;
+        Wed, 14 Sep 2022 05:11:36 -0700 (PDT)
 Received: from orome (p200300e41f12c800f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f12:c800:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id s16-20020a1709064d9000b00772eb5e9f51sm7262675eju.118.2022.09.14.03.40.07
+        by smtp.gmail.com with ESMTPSA id j26-20020ac874da000000b0035a70a25651sm1432429qtr.55.2022.09.14.05.11.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Sep 2022 03:40:07 -0700 (PDT)
-Date:   Wed, 14 Sep 2022 12:40:05 +0200
+        Wed, 14 Sep 2022 05:11:35 -0700 (PDT)
+Date:   Wed, 14 Sep 2022 14:11:31 +0200
 From:   Thierry Reding <thierry.reding@gmail.com>
 To:     Prathamesh Shete <pshete@nvidia.com>
 Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
@@ -56,101 +56,217 @@ Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
         linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
         linux-kernel@vger.kernel.org, anrao@nvidia.com,
         smangipudi@nvidia.com, kyarlagadda@nvidia.com
-Subject: Re: [PATCH v2 1/4] mmc: sdhci-tegra: Separate T19x and T23x SoC data
-Message-ID: <YyGvhT4bvNb55kZK@orome>
+Subject: Re: [PATCH v2 2/4] mmc: sdhci-tegra: Add support to program MC
+ streamID
+Message-ID: <YyHE86HI43lPcQQr@orome>
 References: <20220914095628.26093-1-pshete@nvidia.com>
+ <20220914095628.26093-2-pshete@nvidia.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="bPE/XjzJQ2fi1dxO"
+        protocol="application/pgp-signature"; boundary="d9HozaUaSmPczMoU"
 Content-Disposition: inline
-In-Reply-To: <20220914095628.26093-1-pshete@nvidia.com>
+In-Reply-To: <20220914095628.26093-2-pshete@nvidia.com>
 User-Agent: Mutt/2.2.7 (2022-08-07)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---bPE/XjzJQ2fi1dxO
+--d9HozaUaSmPczMoU
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 14, 2022 at 03:26:25PM +0530, Prathamesh Shete wrote:
-> Create new SoC data structure for T23x platforms.
+On Wed, Sep 14, 2022 at 03:26:26PM +0530, Prathamesh Shete wrote:
+> As per T23x MSS IAS SMMU clients are supposed
 
-Can you please use consistent spelling of Tegra194 and Tegra234 here and
-in the subject? That makes it a bit easier to search for things.
+This reference isn't useful because this document is not available
+publicly. If this information exists in the TRM, then make a reference
+to that, otherwise just leave out the reference and keep the rest of the
+comment.
 
-> StreamID programming is one of the additional feature
-> added in Tegra234 and later chips
+> to program streamid from their respective address spaces instead of MC
 
-That's a bit confusing because this patch doesn't do anything with
-stream ID programming. Perhaps defer that comment to when it becomes
-relevant?
+s/streamid/stream ID/ to match the ARM SMMU spelling.
 
-Thierry
+> override
+> Define NVQUIRK_PROGRAM_MC_STREAMID and use it to program SMMU streamid
+> from the SDMMC client address space
+
+Maybe make this all look more like one big paragraph. Right now it looks
+fragments of sentences thrown together and is difficult to read.
 
 >=20
-> Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
 > Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
->  1 file changed, 14 insertions(+)
+>  drivers/mmc/host/sdhci-tegra.c | 33 +++++++++++++++++++++++++++++++++
+>  1 file changed, 33 insertions(+)
 >=20
 > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
 a.c
-> index 2d2d8260c681..a6c5bbae77b4 100644
+> index a6c5bbae77b4..b66b0cc51497 100644
 > --- a/drivers/mmc/host/sdhci-tegra.c
 > +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1556,7 +1556,21 @@ static const struct sdhci_tegra_soc_data soc_data_=
-tegra194 =3D {
->  	.max_tap_delay =3D 139,
+> @@ -25,6 +25,7 @@
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/gpio/consumer.h>
+>  #include <linux/ktime.h>
+> +#include <linux/iommu.h>
+> =20
+>  #include <soc/tegra/common.h>
+> =20
+> @@ -94,6 +95,8 @@
+>  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
+>  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
+> =20
+> +#define SDHCI_TEGRA_CIF2AXI_CTRL_0			0x1fc
+> +
+>  #define NVQUIRK_FORCE_SDHCI_SPEC_200			BIT(0)
+>  #define NVQUIRK_ENABLE_BLOCK_GAP_DET			BIT(1)
+>  #define NVQUIRK_ENABLE_SDHCI_SPEC_300			BIT(2)
+> @@ -121,6 +124,7 @@
+>  #define NVQUIRK_HAS_TMCLK				BIT(10)
+> =20
+>  #define NVQUIRK_HAS_ANDROID_GPT_SECTOR			BIT(11)
+> +#define NVQUIRK_PROGRAM_MC_STREAMID			BIT(17)
+
+Why is this called "program MC stream ID"? What's programmed is the SMMU
+stream ID, right? Perhaps just leave out that MC_ prefix altogether
+since there's no ambiguity with any other quirk to begin with.
+
+Also, why skip from bit 11 (of the GPT sector quirk) to bit 17? Can we
+not use bit 12 as the next one?
+
+> =20
+>  /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+>  #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
+> @@ -177,6 +181,7 @@ struct sdhci_tegra {
+>  	bool enable_hwcq;
+>  	unsigned long curr_clk_rate;
+>  	u8 tuned_tap_delay;
+> +	u32 streamid;
 >  };
 > =20
-> +static const struct sdhci_tegra_soc_data soc_data_tegra234 =3D {
-> +	.pdata =3D &sdhci_tegra186_pdata,
-> +	.dma_mask =3D DMA_BIT_MASK(39),
-> +	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
-> +		    NVQUIRK_HAS_PADCALIB |
-> +		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
-> +		    NVQUIRK_ENABLE_SDR50 |
-> +		    NVQUIRK_ENABLE_SDR104 |
-> +		    NVQUIRK_HAS_TMCLK,
-> +	.min_tap_delay =3D 95,
-> +	.max_tap_delay =3D 111,
-> +};
+>  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> @@ -1564,6 +1569,7 @@ static const struct sdhci_tegra_soc_data soc_data_t=
+egra234 =3D {
+>  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>  		    NVQUIRK_ENABLE_SDR50 |
+>  		    NVQUIRK_ENABLE_SDR104 |
+> +		    NVQUIRK_PROGRAM_MC_STREAMID |
+>  		    NVQUIRK_HAS_TMCLK,
+>  	.min_tap_delay =3D 95,
+>  	.max_tap_delay =3D 111,
+> @@ -1637,6 +1643,7 @@ static int sdhci_tegra_probe(struct platform_device=
+ *pdev)
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_tegra *tegra_host;
+>  	struct clk *clk;
+> +	struct iommu_fwspec *fwspec;
+
+The above is largely sorted in reverse christmas tree order, so this one
+sticks out a bit. Maybe put it before the clk declaration. Not usually a
+big deal, really, but since you're going to touch this anyway, may as
+well touch that up.
+
+>  	int rc;
+> =20
+>  	soc_data =3D of_device_get_match_data(&pdev->dev);
+> @@ -1775,6 +1782,23 @@ static int sdhci_tegra_probe(struct platform_devic=
+e *pdev)
+>  	if (rc)
+>  		goto err_add_host;
+> =20
+> +	/* Program MC streamID for DMA transfers */
+> +	if (soc_data->nvquirks & NVQUIRK_PROGRAM_MC_STREAMID) {
+> +		fwspec =3D dev_iommu_fwspec_get(&pdev->dev);
+> +		if (fwspec =3D=3D NULL) {
+> +			rc =3D -ENODEV;
+> +			dev_err(mmc_dev(host->mmc),
+> +				"failed to get MC streamid: %d\n",
+> +				rc);
+> +			goto err_rst_get;
+
+Do we really want to make this fatal? What if somebody really wants to
+not put the SD/MMC controllers behind an IOMMU? It's quite unlikely to
+happen, but it's technically possible.
+
+Also, there was a brief time where the DTS files didn't have any iommus
+properties, so if somebody were to use a DTS from that era and a kernel
+with this patch applied, they'd end up with non-functional SD/MMC.
+Again, that's very unlikely to happen, but it could, if for example this
+patch ends up being back-ported or something like that.
+
+I think it's safe (and easier) to ignore this case. Perhaps if you
+really want people to use SD/MMC you may want to add a warning here
+instead. But even that shouldn't be necessary. If the stream ID is not
+programmed as required, the SMMU should fault and give people the hint
+that they need to fix this.
+
+> +		} else {
+> +			tegra_host->streamid =3D fwspec->ids[0] & 0xffff;
+> +			tegra_sdhci_writel(host, tegra_host->streamid |
+> +						(tegra_host->streamid << 8),
+> +						SDHCI_TEGRA_CIF2AXI_CTRL_0);
+
+Perhaps define macros for the read/write stream ID fields in this
+register? Otherwise it might be confusing why you're writing the value
+twice.
+
+Thierry
+
+> +		}
+> +	}
 > +
->  static const struct of_device_id sdhci_tegra_dt_match[] =3D {
-> +	{ .compatible =3D "nvidia,tegra234-sdhci", .data =3D &soc_data_tegra234=
- },
->  	{ .compatible =3D "nvidia,tegra194-sdhci", .data =3D &soc_data_tegra194=
- },
->  	{ .compatible =3D "nvidia,tegra186-sdhci", .data =3D &soc_data_tegra186=
- },
->  	{ .compatible =3D "nvidia,tegra210-sdhci", .data =3D &soc_data_tegra210=
- },
+>  	return 0;
+> =20
+>  err_add_host:
+> @@ -1861,6 +1885,8 @@ static int sdhci_tegra_suspend(struct device *dev)
+>  static int sdhci_tegra_resume(struct device *dev)
+>  {
+>  	struct sdhci_host *host =3D dev_get_drvdata(dev);
+> +	struct sdhci_pltfm_host *pltfm_host =3D sdhci_priv(host);
+> +	struct sdhci_tegra *tegra_host =3D sdhci_pltfm_priv(pltfm_host);
+>  	int ret;
+> =20
+>  	ret =3D mmc_gpio_set_cd_wake(host->mmc, false);
+> @@ -1871,6 +1897,13 @@ static int sdhci_tegra_resume(struct device *dev)
+>  	if (ret)
+>  		return ret;
+> =20
+> +	/* Re-program MC streamID for DMA transfers */
+> +	if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_MC_STREAMID) {
+> +		tegra_sdhci_writel(host, tegra_host->streamid |
+> +					(tegra_host->streamid << 8),
+> +					SDHCI_TEGRA_CIF2AXI_CTRL_0);
+> +	}
+> +
+>  	ret =3D sdhci_resume_host(host);
+>  	if (ret)
+>  		goto disable_clk;
 > --=20
 > 2.17.1
 >=20
 
---bPE/XjzJQ2fi1dxO
+--d9HozaUaSmPczMoU
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhr4MACgkQ3SOs138+
-s6GIBQ//RafadWYDI+Sx2L96z9hC8zerwG/M9qu5ohqQc2Mt3pb1XzUE/lPdT/d9
-rXcsOe/1YBz7KJsKnVOSCHt+paplUHTnLsZvyZPAaNsjxWD38s5bARMoVfOPJMRq
-355bNDdYfZwmIdGGsMSu8Kf4CXXM2ASkhgztJwu/2mLOROJmV9jujYho6n8T+9tE
-emNKSQeGQPnsjrTJkVY53cfGO9OAV8s9l1k5AbDwhE2Atw8bV8PWNsCyR+0shY3S
-w26o5sCUoVKXs5mGCg4uQzY90bG0e1/R3PH8yxBj1+1aTGudeadsdn/6i+KqUFoV
-LQUfV7eILj8Fv7wk+yFfIk8Qn66MyE9omR7s4ArV/IUOQAe4VoJWYiOCji5c1WyN
-ozMAMZfnU6iKr5tb+FhBpwrsez3lCQ7LKM7CyYDkMGm0pIxBU+zQQDsP6SCkohAK
-y5iEOXID+ww180/aB3sVNjKSNookWaR9Nffp/h96ySFzELK6PhSxOtEMKrCqDoji
-wU8flrhVJYzwtzNcUh81OqYKnoOU8RU755eIpxGHZHehX8No5dZV3fNN9gCTHLeA
-aPudvlmrX3uXzBrp5S0iGzxTLeA470ruC8wHczh0xu31mvsGjGMj8SSI+vEffkUa
-+1hymqH51i/B3UlblSaSIeOng5CRBpXrd3uOt/nLZ+vdjaPC68I=
-=dWyL
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhxPAACgkQ3SOs138+
+s6FXtA/+L8oY9D7fdk1/CjyE/Jid9EeiLyvZ7cYDG+G5LFimtkkaw21W3gWQ1aaS
+U6t9QkEywezcEaUmSKEThgLFE6fOmMZkfk6NQ3J801VGz469AQmNJIXjLAZ0spZW
+BKWFisX7q2FnHhu/+ajTEnIQlg8z8VgDvFLmbiiRw4fphkKiuditoll55YbGXHCL
+4/5UuqTN6k3dTXdFwFH8h6p99IQCbzJXYLkfINAR5vXpiS6TALIrlXO91omiBl37
+9Zh1TJsgspTQML+4n2+nAhaJWwcNUO+dDVmkmVcH3XruWzMlZb81xeCcYm/tWyVS
+5f51HlrPwSmtwExz4Wmu/ntRyb4Pen1Zx7EeaxO4RecpwI8ZHfCM/WCcWGOVApiW
+n9fO84USa0UsZC57S0No07U54A+1DFqcsAop0thS0fVpYzf1bkQWz2YVXmGpJ+h/
+n8Ydch9HcYyKLR2Nhe94raFoc3ESCiA2l4vMec7fCjdp9acspC9fi+7lKhFrQjA+
+H+Ve0gRw8wCf7vweAJSOljYL7WDnbRo/uSJ762oDzIFlJoa7hY4N5Oc6F3H0/bPL
+gSc8slZDsf7eC7ySWAWr+7lNv7CeBiD/NJmCU3u0+l26XPqyYTrkoqy9uqfzlWeb
+m3Bv05ZP6VcKenJcuu/1wCyhn+hNPtky6QME0ojEvLcrChyyApE=
+=Cinl
 -----END PGP SIGNATURE-----
 
---bPE/XjzJQ2fi1dxO--
+--d9HozaUaSmPczMoU--
