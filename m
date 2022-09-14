@@ -2,140 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B4583C6FA82
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 12:24:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4679ECAAD3
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 13:27:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229717AbiINMYN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 08:24:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35606 "EHLO
+        id S229664AbiINN13 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 09:27:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbiINMYM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 08:24:12 -0400
-Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7411A804AC;
-        Wed, 14 Sep 2022 05:24:11 -0700 (PDT)
-Received: by mail-wm1-x32d.google.com with SMTP id l8so6085174wmi.2;
-        Wed, 14 Sep 2022 05:24:11 -0700 (PDT)
+        with ESMTP id S229636AbiINN10 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 09:27:26 -0400
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C5626F250
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 06:27:23 -0700 (PDT)
+Received: by mail-wr1-x42f.google.com with SMTP id c11so25688215wrp.11
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 06:27:23 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date;
-        bh=wBt4MJoWl/XDT9vy+Q1AkMM9o2ZOPWW9WHkHGa3sxhY=;
-        b=nWOFaA7ZwGlz54U+SMdBLHOLHi6dnpfbv8fIqYBxxOW7NbDJXlYLquPSy48OUCdZt1
-         Dv7sX4p+Y4QIr2EcuR/JksuUoWXbrhJuLvyqAC8j4HQNSDCnc2ZfmaXODU+e0eW/uL1i
-         uGaNnEZ3fBAvKzPqCnnUuglAHi5HCBa3J9Bed/b5v2WWx8Um0xORLaVCUSlalMEj5+YQ
-         H5anYejOx5PZUlxiDCsIxrB0Gj9lJ6akBja5oGxX4u4zBPoh5x1cPARYspxuGKB+9zha
-         5MwGqvab7xw90HlTnebqvoWf2IlVXD+VyxvOCrtnVogECUnV53Vz+hBspF7s6jUmNUXz
-         UIHg==
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date;
+        bh=8KUXcLjtkVihtg11T3oMt0vYyGo5xNo18xehwjt6aQM=;
+        b=d0YJHn4cl28LBNrFF2Jacudh0DH+lp8gvP4kqahW8yoym8X30qfMq9xOV1VrDFMtLL
+         +Qp5qIAsAYCUzQDPvkkNOBJrG3yiouopMdMBUZAYieEoHCSdl4k0DjgkcKYf8pCqg/69
+         OFnkAafaqoXnKOXKpwfSJDJE3HXsAZC5CYh5j8AzL3TwM/WksIx65zOSFThNRAXC57jO
+         qOeZnadSPmxZ3bhrA68xOCUcERLU+r9NvOqlY6Mf61VUvqmTyoqL8b31yQRP7JLoGe0X
+         fk9NM5uN8BY4HiK2qqyj1tLYHLhlwBtFunBY3cSzJRlZfq2vroy/vrIO7I6l1Ccc0Fy7
+         onFw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=wBt4MJoWl/XDT9vy+Q1AkMM9o2ZOPWW9WHkHGa3sxhY=;
-        b=QH7uOMhuAInBqXsYk4luszCPOGQdeyFUANLPBEQHCJdid4k/MabQvUblFoEbFBEe1y
-         Sqok6Wgcio1ZRheOJpMTqSsmHcH41KHAxpEZebzLpOmQjT31Dkak+Xz0cIsRKW6GVYrj
-         MhbL2PPS/pgj5UIuA9JkBJYCfOpMQ2Lw7mfFNOiwRomUAXGbJqN1LNyYaaZrEPKWKAG+
-         XsMnDcvVjS7FQvjvvTuC092tj5rW0utgRToahebbfEeujVHf3+2VxP4C+kEjIO9Fsfgm
-         zCqPZK7kvn7HVRByQRPUYHytuzDc2WW0Pc07m2GbVKGP6Jo79+JIgEVa+XGup+IEVkOp
-         2KAg==
-X-Gm-Message-State: ACgBeo106QJTEJinW7gI70zqHJEpDFzt/MWoqtBn5+D0XwocNbn48wUf
-        /YcPL3+FoyyDql5CKKn9QFF28nXREwI=
-X-Google-Smtp-Source: AA6agR5lupUogktVVOUvlWGaHhyOnVIxvwSjXlBRX6nCtOvIt8osQVcYYAWHrnhszVIBSsLTEhP5ZQ==
-X-Received: by 2002:a05:600c:3d0e:b0:3b4:9bd1:10be with SMTP id bh14-20020a05600c3d0e00b003b49bd110bemr2854372wmb.101.1663158249798;
-        Wed, 14 Sep 2022 05:24:09 -0700 (PDT)
-Received: from orome (p200300e41f12c800f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f12:c800:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id q5-20020adff945000000b00228692033dcsm13236893wrr.91.2022.09.14.05.24.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Sep 2022 05:24:08 -0700 (PDT)
-Date:   Wed, 14 Sep 2022 14:24:06 +0200
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Prathamesh Shete <pshete@nvidia.com>
-Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        jonathanh@nvidia.com, p.zabel@pengutronix.de,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, anrao@nvidia.com,
-        smangipudi@nvidia.com, kyarlagadda@nvidia.com
-Subject: Re: [PATCH v2 4/4] mmc: sdhci-tegra: Use actual clock rate for SW
- tuning correction
-Message-ID: <YyHH5i3Hon/QRxLF@orome>
-References: <20220914095628.26093-1-pshete@nvidia.com>
- <20220914095628.26093-4-pshete@nvidia.com>
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=8KUXcLjtkVihtg11T3oMt0vYyGo5xNo18xehwjt6aQM=;
+        b=MVbuib73x+ev4X6YUU9y4XQxghYflYNk7fv8xeUIji64wEHA3B4Q8fhTuz9VNr6mJ1
+         2U/2q8XGZoKK9JSWoK1Yfjm0uFTTDA1BlRF+5koTUSRMYwlHkFmKI1wvBnXNa0yRs5FQ
+         Mcsgyh1bAXVT1pvMWyk3uOQ7ryuYInjyTPkQYhBu2YVbFyHxE88S0wsQtGIDVOttSojD
+         ilHy4jJ5SilrYrow85U/InqMDLkZlcRb80zeNrEh1phiB7QiKvbZAEnPRvIGQzQm6hYU
+         tyNoQ8dZ/wA6FrzWYXbmYYvbY/mTquQFWw8GZZiol1LfZL1TdGd7ggUz/TffkbDAduG2
+         9nhg==
+X-Gm-Message-State: ACgBeo32QAgaSRBVmw3rjg52R8O8RYPlfNLUPekjGy8Rn0yCqKXVUmiE
+        Hn2mlv/+I3oLiKvc4r5x3dzmDw==
+X-Google-Smtp-Source: AA6agR6TPMPPsLlhAtiQsyA/yLJqtqEhq4K5gfSRuANSt5F79zP1ztVc47OyVeBgOoCioZNHWtccbw==
+X-Received: by 2002:a5d:6986:0:b0:228:60f9:b013 with SMTP id g6-20020a5d6986000000b0022860f9b013mr20518582wru.102.1663162041670;
+        Wed, 14 Sep 2022 06:27:21 -0700 (PDT)
+Received: from [192.168.0.20] (210.145.15.109.rev.sfr.net. [109.15.145.210])
+        by smtp.gmail.com with ESMTPSA id v8-20020a05600c12c800b003a844885f88sm16243456wmd.22.2022.09.14.06.27.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 14 Sep 2022 06:27:21 -0700 (PDT)
+Message-ID: <bfce8af1-8826-be59-437f-0982c14f6d24@baylibre.com>
+Date:   Wed, 14 Sep 2022 15:27:19 +0200
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="zOKpBxCMi8Uq2OO3"
-Content-Disposition: inline
-In-Reply-To: <20220914095628.26093-4-pshete@nvidia.com>
-User-Agent: Mutt/2.2.7 (2022-08-07)
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.13.0
+Subject: Re: [PATCH 16/17] arm64: dts: mediatek: add mt8365 device-tree
+Content-Language: en-US
+From:   Amjad Ouled-Ameur <aouledameur@baylibre.com>
+To:     fparent@baylibre.com
+Cc:     broonie@kernel.org, chaotian.jing@mediatek.com,
+        chunfeng.yun@mediatek.com, devicetree@vger.kernel.org,
+        dmaengine@vger.kernel.org, jic23@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org,
+        linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-phy@lists.infradead.org, linux-serial@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux@roeck-us.net,
+        matthias.bgg@gmail.com, qii.wang@mediatek.com, robh+dt@kernel.org,
+        srinivas.kandagatla@linaro.org, ulf.hansson@linaro.org,
+        vkoul@kernel.org, wim@linux-watchdog.org
+References: <20220531135026.238475-17-fparent@baylibre.com>
+ <20220720131257.530168-1-aouledameur@baylibre.com>
+In-Reply-To: <20220720131257.530168-1-aouledameur@baylibre.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Fabien,
 
---zOKpBxCMi8Uq2OO3
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 7/20/22 15:12, Amjad Ouled-Ameur wrote:
+> Hi Fabien,
+>
+>> +		tzts4: tzts4-thermal {
+>> +			polling-delay-passive = <0>;
+>> +			polling-delay = <0>;
+>> +			thermal-sensors = <&thermal 4>;
+>> +			trips {};
+>> +			cooling-maps {};
+>> +		};
+> AFAIK mt8365 has only 3 thermal sensors, therefore tzts4 should not be
+> added.
 
-On Wed, Sep 14, 2022 at 03:26:28PM +0530, Prathamesh Shete wrote:
-> Ensure tegra_host member "curr_clk_rate" holds the actual clock rate
-> instead of requested clock rate for proper use during tuning correction
-> algorithm.
+I discussed this further with MediaTek. tzts1, tzts2, tzts3 and tzts4 
+are used
 
-Ideally there shouldn't be a deviation between host_clk and the actual
-clock rate that was set. Perhaps it'd be good to provide a bit more
-information on what the deviation can be and when that happens, as well
-as what the consequences are. That would make it a bit more obvious why
-this fix is needed.
+for test-purpose only. Since they do not have trip points, thermal core 
+wouldn't
 
-Thierry
+register them anyway. Thus, I think we should remove them altogether. Only
 
->=20
-> Fixes: ea8fc5953e8b ("mmc: tegra: update hw tuning process")
->=20
-> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->=20
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
-a.c
-> index 7d16dc41fe91..42b018d4ebc3 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -778,7 +778,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *=
-host, unsigned int clock)
->  		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
->  			host_clk, err);
-> =20
-> -	tegra_host->curr_clk_rate =3D host_clk;
-> +	tegra_host->curr_clk_rate =3D clk_get_rate(pltfm_host->clk);
->  	if (tegra_host->ddr_signaling)
->  		host->max_clk =3D host_clk;
->  	else
-> --=20
-> 2.17.1
->=20
+cpu_thermal zone is relevant and should remain.
 
---zOKpBxCMi8Uq2OO3
-Content-Type: application/pgp-signature; name="signature.asc"
 
------BEGIN PGP SIGNATURE-----
+Regards,
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhx+YACgkQ3SOs138+
-s6HfBxAAnPdKARLXzcEwbcSdBGD3yO9uo9oEcuzg73LbgObCNv59HF6nhTNxXW+S
-qZ2zUtF0sGpTkWFgMCW1BepxdMe5VrsrDLPJizMVALY+bOvDamzpFOz68gRd/g7B
-lJaRRWhpTbnZmYuk6M7u9NHRTkwFfbgbruRscwfEjAV2dFYBAPatYLd0OS+cqhyC
-137ug/6Dtftt4qtd3Wva6EnxHf14HOI/DlrvsnnQr1BLYxYR5lExIvViJmqlKT9N
-2ALPizSJPovNoQdUU76+VJrY+4Q2edqTV+26KIiVUdnsbFznmZos5Gfi92tCXi+K
-atf4Cch3S6eUKjEFcJUGLWPwOvr2wCwl6J+5Tt+pr9YNZX7Sa5A2ftYf8g3IGr+l
-iWI5RUNXoAWdcG7Xq4ut/dJblSXj+al527q4Cnt8hkTmadMyWRJanIBjuyTcF3hD
-3h4oVnaAF2aS9hmGvt/3B9YdEucXk3OPLva7lZTMype95/E5BvQNZswMTTSHPr65
-4zVIetLfStlYtzTAp3sDmgtksmRz3Ksn9amp0pJGuFcLMw6VXKBiAcWPtHQ4epH5
-ID/Kbv/zOIIWbOnFcXAsEN5A+EB7bQR1tP/MvGTITaD+0rZMSatbkSBmp6y2yyFM
-1U7h12sAuo2gi3jHGBw9cCkX3uZv8mjJCAEU1w3Lhsi/eASM8oc=
-=RpCl
------END PGP SIGNATURE-----
+Amjad
 
---zOKpBxCMi8Uq2OO3--
+> Regards,
+> Amjad
