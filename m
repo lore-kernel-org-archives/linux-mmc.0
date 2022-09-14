@@ -2,113 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D4679ECAAD3
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 13:27:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C68CC6FA82
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 14:02:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229664AbiINN13 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 09:27:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39072 "EHLO
+        id S229734AbiINOCo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 10:02:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229636AbiINN10 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 09:27:26 -0400
-Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C5626F250
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 06:27:23 -0700 (PDT)
-Received: by mail-wr1-x42f.google.com with SMTP id c11so25688215wrp.11
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 06:27:23 -0700 (PDT)
+        with ESMTP id S229996AbiINOCC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 10:02:02 -0400
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 573C2792C4
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:17 -0700 (PDT)
+Received: by mail-lj1-x22f.google.com with SMTP id j13so3652843ljh.4
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date;
-        bh=8KUXcLjtkVihtg11T3oMt0vYyGo5xNo18xehwjt6aQM=;
-        b=d0YJHn4cl28LBNrFF2Jacudh0DH+lp8gvP4kqahW8yoym8X30qfMq9xOV1VrDFMtLL
-         +Qp5qIAsAYCUzQDPvkkNOBJrG3yiouopMdMBUZAYieEoHCSdl4k0DjgkcKYf8pCqg/69
-         OFnkAafaqoXnKOXKpwfSJDJE3HXsAZC5CYh5j8AzL3TwM/WksIx65zOSFThNRAXC57jO
-         qOeZnadSPmxZ3bhrA68xOCUcERLU+r9NvOqlY6Mf61VUvqmTyoqL8b31yQRP7JLoGe0X
-         fk9NM5uN8BY4HiK2qqyj1tLYHLhlwBtFunBY3cSzJRlZfq2vroy/vrIO7I6l1Ccc0Fy7
-         onFw==
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=4I1nWuKw3OANLT7/DYo/zylVSp6G+u/GpJfP6xzHR3E=;
+        b=brLbhteVZvljyIvgq/BZuRLdaBrU3dauTxDoV0afpm3D8G8eC+PzDhihujize4u5bY
+         xgox21O6n2RkerLtHPJSxFlI9Ypd4EaaCMtXQ7yq5LZNyMV3rxWn43mV+DL93secxJ35
+         4Mo/5OnJiR6EUaDKMTG+vYej6lxDoTN17UAF7qfMYvtkuVe2JYPn54zshCzOug6c4hnm
+         0PMtdZptGI+KTwKQPmr17gsklS46PN+JxnAiFa0Kz1YXmHRDDEHnUiBiga5Vbxp6gH4i
+         w0hl0XbK0nFJOe2yMuLg3FVQgvh34lleAXvP2oQC+kW2m8mmi10ye76Qq7J6zmCtULXy
+         wI1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=8KUXcLjtkVihtg11T3oMt0vYyGo5xNo18xehwjt6aQM=;
-        b=MVbuib73x+ev4X6YUU9y4XQxghYflYNk7fv8xeUIji64wEHA3B4Q8fhTuz9VNr6mJ1
-         2U/2q8XGZoKK9JSWoK1Yfjm0uFTTDA1BlRF+5koTUSRMYwlHkFmKI1wvBnXNa0yRs5FQ
-         Mcsgyh1bAXVT1pvMWyk3uOQ7ryuYInjyTPkQYhBu2YVbFyHxE88S0wsQtGIDVOttSojD
-         ilHy4jJ5SilrYrow85U/InqMDLkZlcRb80zeNrEh1phiB7QiKvbZAEnPRvIGQzQm6hYU
-         tyNoQ8dZ/wA6FrzWYXbmYYvbY/mTquQFWw8GZZiol1LfZL1TdGd7ggUz/TffkbDAduG2
-         9nhg==
-X-Gm-Message-State: ACgBeo32QAgaSRBVmw3rjg52R8O8RYPlfNLUPekjGy8Rn0yCqKXVUmiE
-        Hn2mlv/+I3oLiKvc4r5x3dzmDw==
-X-Google-Smtp-Source: AA6agR6TPMPPsLlhAtiQsyA/yLJqtqEhq4K5gfSRuANSt5F79zP1ztVc47OyVeBgOoCioZNHWtccbw==
-X-Received: by 2002:a5d:6986:0:b0:228:60f9:b013 with SMTP id g6-20020a5d6986000000b0022860f9b013mr20518582wru.102.1663162041670;
-        Wed, 14 Sep 2022 06:27:21 -0700 (PDT)
-Received: from [192.168.0.20] (210.145.15.109.rev.sfr.net. [109.15.145.210])
-        by smtp.gmail.com with ESMTPSA id v8-20020a05600c12c800b003a844885f88sm16243456wmd.22.2022.09.14.06.27.20
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 14 Sep 2022 06:27:21 -0700 (PDT)
-Message-ID: <bfce8af1-8826-be59-437f-0982c14f6d24@baylibre.com>
-Date:   Wed, 14 Sep 2022 15:27:19 +0200
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=4I1nWuKw3OANLT7/DYo/zylVSp6G+u/GpJfP6xzHR3E=;
+        b=qgacWWLgh5Ffu+IOTJpY4SrCgnTJNRXsFkJHHLbVwVaNWPXVDwXU1GCu9JT86di3wb
+         jLy1jw9r5s+YF9lphR4YufxdDYOKmrwPkiNpUqusOIG7/PZprCh/FlzKSDgnlYa5ZOFv
+         LGjNVEmkAEmG4aKt/lPtMp011ovbjfFdZY0InFEM8aRMJwUP2KZXRX5KsRGl5dKsIguS
+         QNJy+C+1vl6DiJkBtwOfEleMKXB641tpJ4NMvZsZPBNabdV6fULqZK/5mWcUIDMGGBfa
+         rPRBXPlog6YPppJnZssbsxHdb1yNf8+fCKyzFSpz1YAhN1IqPPVnq0eEmbAmawCjo4Jg
+         aWjw==
+X-Gm-Message-State: ACgBeo0lMC7/BdySHf5homV1CQoVCcVl6us3N5rDnlJ1DMGjAJ/U8tCc
+        dfjeaB0gUgNXpLcKnqDSzFgRkdXLetDoNBv3zDAf8g==
+X-Google-Smtp-Source: AA6agR6JkJbCqyE2gTrtp6CclhDjtY75sWE4XsKvRX/lZhn/DSwVZZASJB/yTmhXGA6tUkOdrnfrqI0qNyYf9XVzF8k=
+X-Received: by 2002:a05:651c:214:b0:26a:b03b:9e0c with SMTP id
+ y20-20020a05651c021400b0026ab03b9e0cmr10198201ljn.463.1663164075540; Wed, 14
+ Sep 2022 07:01:15 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.0
-Subject: Re: [PATCH 16/17] arm64: dts: mediatek: add mt8365 device-tree
-Content-Language: en-US
-From:   Amjad Ouled-Ameur <aouledameur@baylibre.com>
-To:     fparent@baylibre.com
-Cc:     broonie@kernel.org, chaotian.jing@mediatek.com,
-        chunfeng.yun@mediatek.com, devicetree@vger.kernel.org,
-        dmaengine@vger.kernel.org, jic23@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org,
-        linux-arm-kernel@lists.infradead.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-phy@lists.infradead.org, linux-serial@vger.kernel.org,
+References: <20220909212543.17428-1-jbx6244@gmail.com> <f2cb42c8-3664-a2d5-074d-5c9a10c693e8@gmail.com>
+In-Reply-To: <f2cb42c8-3664-a2d5-074d-5c9a10c693e8@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 14 Sep 2022 16:00:38 +0200
+Message-ID: <CAPDyKFrF5Tn9a_hqp7mrp14YCrcX4LV6Y5qNxOz2ZSRJJuMmCA@mail.gmail.com>
+Subject: Re: [PATCH v1 04/11] dt-bindings: mmc: rockchip: add rockchip,rk3128-dw-mshc
+To:     Johan Jonker <jbx6244@gmail.com>
+Cc:     kever.yang@rock-chips.com, sjg@chromium.org,
+        philipp.tomsich@vrull.eu, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, heiko@sntech.de,
+        miquel.raynal@bootlin.com, richard@nod.at, vigneshr@ti.com,
+        kishon@ti.com, vkoul@kernel.org, thierry.reding@gmail.com,
+        u.kleine-koenig@pengutronix.de, gregkh@linuxfoundation.org,
+        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
+        zhangqing@rock-chips.com, jamie@jamieiles.com,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-phy@lists.infradead.org,
+        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
         linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux@roeck-us.net,
-        matthias.bgg@gmail.com, qii.wang@mediatek.com, robh+dt@kernel.org,
-        srinivas.kandagatla@linaro.org, ulf.hansson@linaro.org,
-        vkoul@kernel.org, wim@linux-watchdog.org
-References: <20220531135026.238475-17-fparent@baylibre.com>
- <20220720131257.530168-1-aouledameur@baylibre.com>
-In-Reply-To: <20220720131257.530168-1-aouledameur@baylibre.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        linux-watchdog@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Fabien,
-
-On 7/20/22 15:12, Amjad Ouled-Ameur wrote:
-> Hi Fabien,
+On Sat, 10 Sept 2022 at 00:02, Johan Jonker <jbx6244@gmail.com> wrote:
 >
->> +		tzts4: tzts4-thermal {
->> +			polling-delay-passive = <0>;
->> +			polling-delay = <0>;
->> +			thermal-sensors = <&thermal 4>;
->> +			trips {};
->> +			cooling-maps {};
->> +		};
-> AFAIK mt8365 has only 3 thermal sensors, therefore tzts4 should not be
-> added.
+> Add rockchip,rk3128-dw-mshc compatible string.
+>
+> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
 
-I discussed this further with MediaTek. tzts1, tzts2, tzts3 and tzts4 
-are used
+Applied for next, thanks!
 
-for test-purpose only. Since they do not have trip points, thermal core 
-wouldn't
-
-register them anyway. Thus, I think we should remove them altogether. Only
-
-cpu_thermal zone is relevant and should remain.
+Kind regards
+Uffe
 
 
-Regards,
-
-Amjad
-
-> Regards,
-> Amjad
+> ---
+>  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> index bad28bc74..95f59a5e3 100644
+> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
+> @@ -32,6 +32,7 @@ properties:
+>                - rockchip,px30-dw-mshc
+>                - rockchip,rk1808-dw-mshc
+>                - rockchip,rk3036-dw-mshc
+> +              - rockchip,rk3128-dw-mshc
+>                - rockchip,rk3228-dw-mshc
+>                - rockchip,rk3308-dw-mshc
+>                - rockchip,rk3328-dw-mshc
+> --
+> 2.20.1
+>
