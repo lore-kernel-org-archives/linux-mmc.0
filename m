@@ -2,104 +2,135 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36A5AC6FA8A
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 14:02:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 465A5ECAAD3
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 14:03:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229456AbiINOCx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 10:02:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51182 "EHLO
+        id S229535AbiINODH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 10:03:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229691AbiINOCR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 10:02:17 -0400
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F240C12D23
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:31 -0700 (PDT)
-Received: by mail-lf1-x12f.google.com with SMTP id f9so24634035lfr.3
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:31 -0700 (PDT)
+        with ESMTP id S229523AbiINOCa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 10:02:30 -0400
+Received: from mail-lj1-x22d.google.com (mail-lj1-x22d.google.com [IPv6:2a00:1450:4864:20::22d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D24879EED
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:43 -0700 (PDT)
+Received: by mail-lj1-x22d.google.com with SMTP id h3so9976206lja.1
+        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 07:01:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date;
-        bh=CQjeMfDwFntWQm9a05PkWbLPryxYJltoZlwh5tZAobU=;
-        b=p/ixekQ7dm+pVuUqal2iNjjPgvi7AVWgQI/uKNZ6DBRcW8zFtM/K4ZQCdLq1nN3NjE
-         wCUGP04upvlanW3RG7PcQKWcGH9y3knnoB3dPW5HkHQN+EIcllL+vFL10yQyjX4yX8Lw
-         o+N26Fk/JksE42yxl4ZVhBXuz660cSG3bO84GWc/sZDtqLWVwqhOnhPqTKCpxGfxzj96
-         cs+ucS5RrIxrJ8PR46tGBac/XbLONdX6grwiNilK/0zn4Mb0AXJPt0TyKkPNKPUHEe1s
-         4Ix8khEtmCNRWUwqQR6diomyghIy2d8qO0iUoQqfkAFTiq2Fh0a0GNWYtCuOdNCB30Gr
-         GkKA==
+        bh=FZgMr2uzHswuhD90JcA7j6LsjWrwsLINoMF2i9AWFAI=;
+        b=TwFugg/x9Y9KEkWOKgfpfOMHXawb6srXFkN9JOCbdXdgiPSH/AKsujToFEWKceyVEc
+         3wh/psBAa7L6uSt24bMEQTLoC9mRjKF4VS/VKGnM/FayZtETN4jDwYnPuY+etAiFB4kA
+         94OuivN8XE0EiUYstNCUXs/T4g1cc8EyJpz1sWMhk0RCBcAsvFAEna/UsrlgKpQ31gqh
+         V1fbAQLEe9hb0q1UhN2nn83rE/+e2pt1xWOPWfsWvsR3mFGN/J0XWKt5l4QZD9d8d2HO
+         aG4dkpkUzpvoHoSTFS86Ik43LUZi7ySt9lXutBVEvpAxnwNt02BxHAkpAvelIHfZk5ZK
+         461w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=CQjeMfDwFntWQm9a05PkWbLPryxYJltoZlwh5tZAobU=;
-        b=YwH6bTtCTyiyeVqoxXwmZP4wYCwEwp6N5/SRLouET2KpaHZprEYO81ECsDWEwUy5kU
-         qX/pV0g7lf/nBjBLeE783WlVDHBBqOAw771s4jX7OBAVRQjPO8LW/c/Ep3o1bp+A92YO
-         UK6BXVoXaRF1soGTbPHZbpRzeE6kW4kWvZhESCooS2l/vUcsAFdiqdePqVISLM2RfL/F
-         7A2lYSD0DdyRQj3+S7nA/W2XTFRovNeICnYWHQKjwuHwc7kyYwoI0d3XAv6VP6sZQxHg
-         iK4WAyAZQT6yK/FplasxgXTHO32LtLG1cpOPadhVi8C8kAbpbQvEZzhDlAOVMcyUCSAY
-         nFLw==
-X-Gm-Message-State: ACgBeo0+C1VnsSkpLHdMsMcFhtON6Iv3K4ENU1wOI9YwY4zyiWGJgEqW
-        YZVpQ+CcAlXv3zz3HMXiJxFzIdv72UKOOYzjXW98oA==
-X-Google-Smtp-Source: AA6agR6WyXBDRFbuI65gA1rXLh/luIbvyPLMNXN5XHAxLKNXhlzA+yGIFDQRTOBeyxgqkUpliZ5dXOpmMTTxMc+MmNc=
-X-Received: by 2002:a05:6512:280d:b0:498:fd40:51d4 with SMTP id
- cf13-20020a056512280d00b00498fd4051d4mr9246731lfb.167.1663164091519; Wed, 14
- Sep 2022 07:01:31 -0700 (PDT)
+        bh=FZgMr2uzHswuhD90JcA7j6LsjWrwsLINoMF2i9AWFAI=;
+        b=2T/UtCZuY9v6cy82YpmsIKATWoOsU8WMPZ6bd2bln05iDMHz5VAWRfE6VsjUyJLBdz
+         Se/KYk6SW+BctDeI0T4MDqfQXTFxtfTkzKPgqObiOtumje/Tr7LrPNNuX24pglViXckf
+         mmZAQjINxvrDZcFlkuT5eOX9aS6eTQL72UJijsbd614IxMWkfWSWjRXgRFWW2zyixUM7
+         fXcBvaQgfWmsGKp4JWFGag/uestzhe7ehYa6ywEJkJjF4WTbtHVSN/jdGCDKcZ16INqg
+         63Q/Xne4Z8kHICHlUY2+mJK9Abi54SKTDhDfjwfF2ueu6ZDhIs2EzOEZIebFKY7HyX9u
+         NGlQ==
+X-Gm-Message-State: ACgBeo2UXtsjx9hrlohzAt87nRSRlRfVEzoFIwqdwjrbMVohgVZL51mI
+        D3lZ6KwJ0zRMJ3z7Ot2Re1cKP7tjBpP3fEbB0Z8aRrF8njUi6w==
+X-Google-Smtp-Source: AA6agR72DHzRxrpk/pmx6gNR+tjez0f6IOWZ7mAjiJYnMyi8AVoBOw3RcuPfX5lTmG4JUxDPv2IabRUwdGYeJ4mXReI=
+X-Received: by 2002:a05:651c:214:b0:26a:b03b:9e0c with SMTP id
+ y20-20020a05651c021400b0026ab03b9e0cmr10198794ljn.463.1663164099573; Wed, 14
+ Sep 2022 07:01:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220907035847.13783-1-wenchao.chen666@gmail.com>
-In-Reply-To: <20220907035847.13783-1-wenchao.chen666@gmail.com>
+References: <20220907205753.1577434-1-saproj@gmail.com>
+In-Reply-To: <20220907205753.1577434-1-saproj@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 14 Sep 2022 16:00:54 +0200
-Message-ID: <CAPDyKFpZN7=K2pTS2b0jsDp=uTVjTsQV+27e=rkGs_gMHfb97w@mail.gmail.com>
-Subject: Re: [PATCH Vx 5/5] mmc: sdhci: Fix host->cmd is null
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zhang.lyra@gmail.com,
-        lzx.stg@gmail.com
+Date:   Wed, 14 Sep 2022 16:01:02 +0200
+Message-ID: <CAPDyKFrdsGm4mN+e3OVMEePwk63bt1T0AVQdh0YRxg=AJECA2Q@mail.gmail.com>
+Subject: Re: [PATCH] mmc: moxart: fix 4-bit bus width, remove 8-bit bus width
+To:     Sergei Antonov <saproj@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, Jonas Jensen <jonas.jensen@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 7 Sept 2022 at 06:00, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
+On Wed, 7 Sept 2022 at 22:58, Sergei Antonov <saproj@gmail.com> wrote:
 >
-> From: Wenchao Chen <wenchao.chen@unisoc.com>
+> According to the datasheet:
+> https://bitbucket.org/Kasreyn/mkrom-uc7112lx/src/master/documents/FIC8120_DS_v1.2.pdf
+> , page 377
+> 4-bit bus width is turned on by bit 2 of the Bus Width Register, so
+> the current bitmask is wrong:
+>  define BUS_WIDTH_4            BIT(1)
+> BIT(1) does not work and BIT(2) works. It was verified on real MOXA
+> hardware with FTSDC010 controller revision 1_6_0.
 >
-> When data crc occurs, the kernel will panic because host->cmd is null.
+> The corrected value of BUS_WIDTH_4 mask collides with:
+>  define BUS_WIDTH_8            BIT(2)
+> No evidence of 8-bit bus width mode is found in the datasheet. Remove
+> code dealing with 8-bit bus width.
 >
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> Fixes: 1b66e94e6b99 ("mmc: moxart: Add MOXA ART SD/MMC driver")
+> Signed-off-by: Sergei Antonov <saproj@gmail.com>
+> Cc: Jonas Jensen <jonas.jensen@gmail.com>
 
-Applied for fixes, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
+>  drivers/mmc/host/moxart-mmc.c | 17 +++--------------
+>  1 file changed, 3 insertions(+), 14 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7689ffe..2511728 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3928,7 +3928,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index b6eb75f4bbfc..dfc3ffd5b1f8 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -111,8 +111,8 @@
+>  #define CLK_DIV_MASK           0x7f
 >
->         if (intmask & (SDHCI_INT_INDEX | SDHCI_INT_END_BIT | SDHCI_INT_CRC)) {
->                 *cmd_error = -EILSEQ;
-> -               if (!mmc_op_tuning(host->cmd->opcode))
-> +               if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
->                         sdhci_err_stats_inc(host, CMD_CRC);
->         } else if (intmask & SDHCI_INT_TIMEOUT) {
->                 *cmd_error = -ETIMEDOUT;
-> @@ -3938,7 +3938,7 @@ bool sdhci_cqe_irq(struct sdhci_host *host, u32 intmask, int *cmd_error,
+>  /* REG_BUS_WIDTH */
+> -#define BUS_WIDTH_8            BIT(2)
+> -#define BUS_WIDTH_4            BIT(1)
+> +#define BUS_WIDTH_4_SUPPORT    BIT(3)
+> +#define BUS_WIDTH_4            BIT(2)
+>  #define BUS_WIDTH_1            BIT(0)
 >
->         if (intmask & (SDHCI_INT_DATA_END_BIT | SDHCI_INT_DATA_CRC)) {
->                 *data_error = -EILSEQ;
-> -               if (!mmc_op_tuning(host->cmd->opcode))
-> +               if (!mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND))))
->                         sdhci_err_stats_inc(host, DAT_CRC);
->         } else if (intmask & SDHCI_INT_DATA_TIMEOUT) {
->                 *data_error = -ETIMEDOUT;
+>  #define MMC_VDD_360            23
+> @@ -524,9 +524,6 @@ static void moxart_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>         case MMC_BUS_WIDTH_4:
+>                 writel(BUS_WIDTH_4, host->base + REG_BUS_WIDTH);
+>                 break;
+> -       case MMC_BUS_WIDTH_8:
+> -               writel(BUS_WIDTH_8, host->base + REG_BUS_WIDTH);
+> -               break;
+>         default:
+>                 writel(BUS_WIDTH_1, host->base + REG_BUS_WIDTH);
+>                 break;
+> @@ -651,16 +648,8 @@ static int moxart_probe(struct platform_device *pdev)
+>                 dmaengine_slave_config(host->dma_chan_rx, &cfg);
+>         }
+>
+> -       switch ((readl(host->base + REG_BUS_WIDTH) >> 3) & 3) {
+> -       case 1:
+> +       if (readl(host->base + REG_BUS_WIDTH) & BUS_WIDTH_4_SUPPORT)
+>                 mmc->caps |= MMC_CAP_4_BIT_DATA;
+> -               break;
+> -       case 2:
+> -               mmc->caps |= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA;
+> -               break;
+> -       default:
+> -               break;
+> -       }
+>
+>         writel(0, host->base + REG_INTERRUPT_MASK);
+>
 > --
-> 2.7.4
+> 2.34.1
 >
