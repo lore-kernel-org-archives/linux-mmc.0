@@ -2,139 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55896ECAAD3
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 10:37:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1136ECAAD8
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 10:40:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229800AbiINKhr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 06:37:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48072 "EHLO
+        id S229582AbiINKkM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 06:40:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229938AbiINKhp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 06:37:45 -0400
-X-Greylist: delayed 1288 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 14 Sep 2022 03:37:44 PDT
-Received: from gateway22.websitewelcome.com (gateway22.websitewelcome.com [192.185.47.79])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20C96786EC
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 03:37:44 -0700 (PDT)
-Received: from cm12.websitewelcome.com (cm12.websitewelcome.com [100.42.49.8])
-        by gateway22.websitewelcome.com (Postfix) with ESMTP id 79E22A043
-        for <linux-mmc@vger.kernel.org>; Wed, 14 Sep 2022 05:16:15 -0500 (CDT)
-Received: from 162-215-252-169.unifiedlayer.com ([208.91.199.152])
-        by cmsmtp with SMTP
-        id YPRGo6LYT9ULXYPRHoth0m; Wed, 14 Sep 2022 05:16:15 -0500
-X-Authority-Reason: nr=8
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=roeck-us.net; s=default; h=In-Reply-To:Content-Type:MIME-Version:References
-        :Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:Content-Transfer-Encoding
-        :Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-        Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=Ul6eVI37l13eLM15PAoxmkjLJvaiHfKifA3ANt/jytc=; b=yi8CDq3WzuP0JN3sC/xEQbLdhf
-        W5drxDnVRsCGWSopxdVjfxkA2Dti42jmLxePmHXxmCrD73DaISl+FQgyXxiLYWyv8yp5BQPYn9v9/
-        Qwm1ecs/5ASLAxN+NiH8YRa4D9M0hFFrdJ+H8mumshC1HZ+WI87JBFKwhqHt3zQNc5oEZ+Vk3Zk8+
-        ah674OXIai/OIA3dHusaUF/8MwswerqdADbzDsp3RGTHHqoypUp/6RHpQGG02crd7Lpr+nZFFUxv8
-        W70XgJw/XKANujc/tMGn8UcQs2EueRM02x5T6uv4EM2Xs3w/a1WBT7QNm1LppsJG+MYjtvwLxfCCi
-        I66aRkuQ==;
-Received: from 108-223-40-66.lightspeed.sntcca.sbcglobal.net ([108.223.40.66]:39700 helo=localhost)
-        by bh-25.webhostbox.net with esmtpsa  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.95)
-        (envelope-from <linux@roeck-us.net>)
-        id 1oYPRG-003xUn-8u;
-        Wed, 14 Sep 2022 10:16:14 +0000
-Date:   Wed, 14 Sep 2022 03:16:08 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Brian Norris <briannorris@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, stable@vger.kernel.org,
-        Arindam Nath <arindam.nath@amd.com>,
-        Chris Ball <cjb@laptop.org>,
-        Philip Rakity <prakity@marvell.com>,
-        Zhangfei Gao <zhangfei.gao@marvell.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] mmd: core: Terminate infinite loop in SD-UHS voltage
- switch
-Message-ID: <20220914101608.GA1325043@roeck-us.net>
-References: <20220914014010.2076169-1-briannorris@chromium.org>
+        with ESMTP id S229449AbiINKkL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 06:40:11 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 894CE58097;
+        Wed, 14 Sep 2022 03:40:10 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id sb3so4052481ejb.9;
+        Wed, 14 Sep 2022 03:40:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date;
+        bh=2q8cWxTdOT7NEjEAm48iQBXKuIhQLyWS2hOWoDR0iTY=;
+        b=DylVZ1TI5IYuSNnbh4HQypPHh3hxW8yETwHZ7tK0BXws5BOr1VdvOaNfaqTqAZzeSy
+         iVZLHCZ4IDW5C99L/FnrJjiKqfLCxjLpBeQ2XX/4MiU2z5adY+JbdVnrjcSrrGmjyQxC
+         1GX5lUGb/rcLVVkxep8ENB2iUhltpSeabSGZfHSelMzRhNFw0Eqxd3QgJ4meRdDu80BY
+         UvvqwtY6zFX79xh2/VKWStJjJV8PdxE3T/E23TtdBmw1oumC8GyThADXG6uRMU3nmh6U
+         FBowGk/gAa2xiyOQTjWmnQw71ItLgiUnzdIyEiGYwryC2WrB+jCu8OLyVqyKUnx/kgDg
+         MXoQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=2q8cWxTdOT7NEjEAm48iQBXKuIhQLyWS2hOWoDR0iTY=;
+        b=XLLZ3Bl6QTy26NtT5rDNm9zH8C28hfCXaYorQlUuhbtxMvx2iT7VzeE1hCb1sP3+mo
+         Nubh5yJPfgl9sORQkIozSw+OdEwZrSjJaA/0jTeM76Ft9l8/PHYAe2+J5msk8DkKCUZf
+         +Le+aEMsRJH4YHe8CE5g+NM3uB/pWFSsf3NoMLp198AN6kXZ7+3nrleQ/wtkNw0fXkpH
+         D1mBUThJ6gr2xS7tTUE35t0MRJm2db0oa7UGd/pCeqgdcCj+xm3Ho5gmFcLWljgdOfPo
+         x/XtwZ63v4RljcntZsF+NucD7YJ3+TRTAwUYuXNTNPwjYTzJCEAwBi6g/ppce7cIqok+
+         2tsw==
+X-Gm-Message-State: ACgBeo008waOuOqMR0qK34PIQhOtj0UWCC2jMe0veiMky/On+guORIf0
+        kq99px3DbmdR1cMsa/jTA4w=
+X-Google-Smtp-Source: AA6agR548FPwc28DxYS445PZ5foFlZ/dWDKKUyLcm97KljK1vuY6/Kce2cqT8VdhjBo499zB+vRNZg==
+X-Received: by 2002:a17:907:2cf6:b0:77b:2dd9:7cd7 with SMTP id hz22-20020a1709072cf600b0077b2dd97cd7mr13428182ejc.334.1663152009082;
+        Wed, 14 Sep 2022 03:40:09 -0700 (PDT)
+Received: from orome (p200300e41f12c800f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f12:c800:f22f:74ff:fe1f:3a53])
+        by smtp.gmail.com with ESMTPSA id s16-20020a1709064d9000b00772eb5e9f51sm7262675eju.118.2022.09.14.03.40.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 14 Sep 2022 03:40:07 -0700 (PDT)
+Date:   Wed, 14 Sep 2022 12:40:05 +0200
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Prathamesh Shete <pshete@nvidia.com>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        jonathanh@nvidia.com, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-kernel@vger.kernel.org, anrao@nvidia.com,
+        smangipudi@nvidia.com, kyarlagadda@nvidia.com
+Subject: Re: [PATCH v2 1/4] mmc: sdhci-tegra: Separate T19x and T23x SoC data
+Message-ID: <YyGvhT4bvNb55kZK@orome>
+References: <20220914095628.26093-1-pshete@nvidia.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="bPE/XjzJQ2fi1dxO"
 Content-Disposition: inline
-In-Reply-To: <20220914014010.2076169-1-briannorris@chromium.org>
-X-AntiAbuse: This header was added to track abuse, please include it with any abuse report
-X-AntiAbuse: Primary Hostname - bh-25.webhostbox.net
-X-AntiAbuse: Original Domain - vger.kernel.org
-X-AntiAbuse: Originator/Caller UID/GID - [47 12] / [47 12]
-X-AntiAbuse: Sender Address Domain - roeck-us.net
-X-BWhitelist: no
-X-Source-IP: 108.223.40.66
-X-Source-L: No
-X-Exim-ID: 1oYPRG-003xUn-8u
-X-Source: 
-X-Source-Args: 
-X-Source-Dir: 
-X-Source-Sender: 108-223-40-66.lightspeed.sntcca.sbcglobal.net (localhost) [108.223.40.66]:39700
-X-Source-Auth: guenter@roeck-us.net
-X-Email-Count: 10
-X-Source-Cap: cm9lY2s7YWN0aXZzdG07YmgtMjUud2ViaG9zdGJveC5uZXQ=
-X-Local-Domain: yes
+In-Reply-To: <20220914095628.26093-1-pshete@nvidia.com>
+User-Agent: Mutt/2.2.7 (2022-08-07)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 13, 2022 at 06:40:10PM -0700, Brian Norris wrote:
-> This loop intends to retry a max of 10 times, with some implicit
-> termination based on the SD_{R,}OCR_S18A bit. Unfortunately, the
-> termination condition depends on the value reported by the SD card
-> (*rocr), which may or may not correctly reflect what we asked it to do.
-> 
-> Needless to say, it's not wise to rely on the card doing what we expect;
-> we should at least terminate the loop regardless. So, check both the
-> input and output values, so we ensure we will terminate regardless of
-> the SD card behavior.
-> 
-> Note that SDIO learned a similar retry loop in commit 0797e5f1453b
-> ("mmc: core: Fixup signal voltage switch"), but that used the 'ocr'
-> result, and so the current pre-terminating condition looks like:
-> 
->     rocr & ocr & R4_18V_PRESENT
-> 
-> (i.e., it doesn't have the same bug.)
-> 
-> This addresses a number of crash reports seen on ChromeOS that look
-> like the following:
-> 
->     ... // lots of repeated: ...
->     <4>[13142.846061] mmc1: Skipping voltage switch
->     <4>[13143.406087] mmc1: Skipping voltage switch
->     <4>[13143.964724] mmc1: Skipping voltage switch
->     <4>[13144.526089] mmc1: Skipping voltage switch
->     <4>[13145.086088] mmc1: Skipping voltage switch
->     <4>[13145.645941] mmc1: Skipping voltage switch
->     <3>[13146.153969] INFO: task halt:30352 blocked for more than 122 seconds.
->     ...
-> 
-> Fixes: f2119df6b764 mmc: sd: add support for signal voltage switch procedure
-> Cc: <stable@vger.kernel.org>
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+--bPE/XjzJQ2fi1dxO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
+On Wed, Sep 14, 2022 at 03:26:25PM +0530, Prathamesh Shete wrote:
+> Create new SoC data structure for T23x platforms.
+
+Can you please use consistent spelling of Tegra194 and Tegra234 here and
+in the subject? That makes it a bit easier to search for things.
+
+> StreamID programming is one of the additional feature
+> added in Tegra234 and later chips
+
+That's a bit confusing because this patch doesn't do anything with
+stream ID programming. Perhaps defer that comment to when it becomes
+relevant?
+
+Thierry
+
+>=20
+> Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
 > ---
-> 
->  drivers/mmc/core/sd.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 06aa62ce0ed1..3662bf5320ce 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -870,7 +870,8 @@ int mmc_sd_get_cid(struct mmc_host *host, u32 ocr, u32 *cid, u32 *rocr)
->  	 * the CCS bit is set as well. We deliberately deviate from the spec in
->  	 * regards to this, which allows UHS-I to be supported for SDSC cards.
->  	 */
-> -	if (!mmc_host_is_spi(host) && rocr && (*rocr & SD_ROCR_S18A)) {
-> +	if (!mmc_host_is_spi(host) && (ocr & SD_OCR_S18R) &&
-> +	    rocr && (*rocr & SD_ROCR_S18A)) {
->  		err = mmc_set_uhs_voltage(host, pocr);
->  		if (err == -EAGAIN) {
->  			retries--;
-> -- 
-> 2.37.2.789.g6183377224-goog
-> 
+>  drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
+>=20
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
+a.c
+> index 2d2d8260c681..a6c5bbae77b4 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -1556,7 +1556,21 @@ static const struct sdhci_tegra_soc_data soc_data_=
+tegra194 =3D {
+>  	.max_tap_delay =3D 139,
+>  };
+> =20
+> +static const struct sdhci_tegra_soc_data soc_data_tegra234 =3D {
+> +	.pdata =3D &sdhci_tegra186_pdata,
+> +	.dma_mask =3D DMA_BIT_MASK(39),
+> +	.nvquirks =3D NVQUIRK_NEEDS_PAD_CONTROL |
+> +		    NVQUIRK_HAS_PADCALIB |
+> +		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+> +		    NVQUIRK_ENABLE_SDR50 |
+> +		    NVQUIRK_ENABLE_SDR104 |
+> +		    NVQUIRK_HAS_TMCLK,
+> +	.min_tap_delay =3D 95,
+> +	.max_tap_delay =3D 111,
+> +};
+> +
+>  static const struct of_device_id sdhci_tegra_dt_match[] =3D {
+> +	{ .compatible =3D "nvidia,tegra234-sdhci", .data =3D &soc_data_tegra234=
+ },
+>  	{ .compatible =3D "nvidia,tegra194-sdhci", .data =3D &soc_data_tegra194=
+ },
+>  	{ .compatible =3D "nvidia,tegra186-sdhci", .data =3D &soc_data_tegra186=
+ },
+>  	{ .compatible =3D "nvidia,tegra210-sdhci", .data =3D &soc_data_tegra210=
+ },
+> --=20
+> 2.17.1
+>=20
+
+--bPE/XjzJQ2fi1dxO
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhr4MACgkQ3SOs138+
+s6GIBQ//RafadWYDI+Sx2L96z9hC8zerwG/M9qu5ohqQc2Mt3pb1XzUE/lPdT/d9
+rXcsOe/1YBz7KJsKnVOSCHt+paplUHTnLsZvyZPAaNsjxWD38s5bARMoVfOPJMRq
+355bNDdYfZwmIdGGsMSu8Kf4CXXM2ASkhgztJwu/2mLOROJmV9jujYho6n8T+9tE
+emNKSQeGQPnsjrTJkVY53cfGO9OAV8s9l1k5AbDwhE2Atw8bV8PWNsCyR+0shY3S
+w26o5sCUoVKXs5mGCg4uQzY90bG0e1/R3PH8yxBj1+1aTGudeadsdn/6i+KqUFoV
+LQUfV7eILj8Fv7wk+yFfIk8Qn66MyE9omR7s4ArV/IUOQAe4VoJWYiOCji5c1WyN
+ozMAMZfnU6iKr5tb+FhBpwrsez3lCQ7LKM7CyYDkMGm0pIxBU+zQQDsP6SCkohAK
+y5iEOXID+ww180/aB3sVNjKSNookWaR9Nffp/h96ySFzELK6PhSxOtEMKrCqDoji
+wU8flrhVJYzwtzNcUh81OqYKnoOU8RU755eIpxGHZHehX8No5dZV3fNN9gCTHLeA
+aPudvlmrX3uXzBrp5S0iGzxTLeA470ruC8wHczh0xu31mvsGjGMj8SSI+vEffkUa
++1hymqH51i/B3UlblSaSIeOng5CRBpXrd3uOt/nLZ+vdjaPC68I=
+=dWyL
+-----END PGP SIGNATURE-----
+
+--bPE/XjzJQ2fi1dxO--
