@@ -2,188 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 701ADECAAD3
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 12:20:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B4583C6FA82
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 12:24:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229687AbiINMUz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 08:20:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33246 "EHLO
+        id S229717AbiINMYN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 08:24:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbiINMUx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 08:20:53 -0400
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81397804AC;
-        Wed, 14 Sep 2022 05:20:52 -0700 (PDT)
-Received: by mail-ej1-x633.google.com with SMTP id bj12so34199281ejb.13;
-        Wed, 14 Sep 2022 05:20:52 -0700 (PDT)
+        with ESMTP id S229520AbiINMYM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 08:24:12 -0400
+Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7411A804AC;
+        Wed, 14 Sep 2022 05:24:11 -0700 (PDT)
+Received: by mail-wm1-x32d.google.com with SMTP id l8so6085174wmi.2;
+        Wed, 14 Sep 2022 05:24:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:from:to:cc:subject:date;
-        bh=oPmXBjkVR3jE2EKfb211i3vsy5sbXpB5DgfIDb0tj7U=;
-        b=fR/cqUuBqqOc8TphBSFtc3hHnZNuhg58rhdXRrfTwtnvBgMtMCj5mEuh/8j2MHGzqz
-         6Sd4JYOI3gtUVdBYhUBbbsgW5X1IuFqA6PeO8pBZxo/cSgVtyZjOHh87BiiiQp4Aa3mh
-         qJm57TRP02IfwG5SAsS/UDRuFQn4KmLj04D83DhzICyuMiMkqVn5o17bYeXoDtN3BQbO
-         qfYt2rlC2VboJnQPJGbraaP6gcUzILd0Kv0/6hpQu6fXrnIa5g10T1Qme3XKFgdG3bwO
-         E1uAkwvrlifAOqcEMwyLkfbjHaNvgTdRB8UpoVIF0g7S79bUDbKuU7YSxAkSyHTNcbAy
-         lPxg==
+        bh=wBt4MJoWl/XDT9vy+Q1AkMM9o2ZOPWW9WHkHGa3sxhY=;
+        b=nWOFaA7ZwGlz54U+SMdBLHOLHi6dnpfbv8fIqYBxxOW7NbDJXlYLquPSy48OUCdZt1
+         Dv7sX4p+Y4QIr2EcuR/JksuUoWXbrhJuLvyqAC8j4HQNSDCnc2ZfmaXODU+e0eW/uL1i
+         uGaNnEZ3fBAvKzPqCnnUuglAHi5HCBa3J9Bed/b5v2WWx8Um0xORLaVCUSlalMEj5+YQ
+         H5anYejOx5PZUlxiDCsIxrB0Gj9lJ6akBja5oGxX4u4zBPoh5x1cPARYspxuGKB+9zha
+         5MwGqvab7xw90HlTnebqvoWf2IlVXD+VyxvOCrtnVogECUnV53Vz+hBspF7s6jUmNUXz
+         UIHg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=user-agent:in-reply-to:content-disposition:mime-version:references
          :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
          :subject:date;
-        bh=oPmXBjkVR3jE2EKfb211i3vsy5sbXpB5DgfIDb0tj7U=;
-        b=4RWqT1GG+EoeewEkbaGQObIfHe+fyZgzLAYxlE0hZFNtmLltxx/AEcoNh4TZtbTaVi
-         Ffg6CadIcRs1Z64SPEV6fNPuHcu65C4DOL1TIui+VCaKe9dDF8b/loHUqjugM4X0g5Go
-         pPNpNLXYIsNP0Ha8XDMrbE5BRprZw6kdQ2gScc1GRs9cZ10QfO85PUhEgrujj/Edjjaf
-         lCFsYe9+gQwcw8b4kfzJc1SxEYEJ3GNH8RzopIwfhp2bsqkLnf5BRn6ndAQ1+izrf4Fc
-         XdKi7vdmjnXQisQ3pk2ZCq2JuI48Ty6gAftDg4647spU6Dxm1Hts437bpxUJDSMVTfFT
-         pYMA==
-X-Gm-Message-State: ACgBeo2ORzGkQ2MHJOqI7JHXEfbyOtR6+twnHSOnBKZrimMttE6XOK1v
-        UR7kEhdCSF8VBF8FMpgiw8273/okupQ=
-X-Google-Smtp-Source: AA6agR6z3Uir2hCPnfxXK3HGcvKxjRYUkQv1BVTr+MYipNcOlS7Fw44xh6LkHTzoSoyulqrS0vJtvA==
-X-Received: by 2002:a17:907:2bf4:b0:76f:1053:6e4 with SMTP id gv52-20020a1709072bf400b0076f105306e4mr25328320ejc.443.1663158050780;
-        Wed, 14 Sep 2022 05:20:50 -0700 (PDT)
+        bh=wBt4MJoWl/XDT9vy+Q1AkMM9o2ZOPWW9WHkHGa3sxhY=;
+        b=QH7uOMhuAInBqXsYk4luszCPOGQdeyFUANLPBEQHCJdid4k/MabQvUblFoEbFBEe1y
+         Sqok6Wgcio1ZRheOJpMTqSsmHcH41KHAxpEZebzLpOmQjT31Dkak+Xz0cIsRKW6GVYrj
+         MhbL2PPS/pgj5UIuA9JkBJYCfOpMQ2Lw7mfFNOiwRomUAXGbJqN1LNyYaaZrEPKWKAG+
+         XsMnDcvVjS7FQvjvvTuC092tj5rW0utgRToahebbfEeujVHf3+2VxP4C+kEjIO9Fsfgm
+         zCqPZK7kvn7HVRByQRPUYHytuzDc2WW0Pc07m2GbVKGP6Jo79+JIgEVa+XGup+IEVkOp
+         2KAg==
+X-Gm-Message-State: ACgBeo106QJTEJinW7gI70zqHJEpDFzt/MWoqtBn5+D0XwocNbn48wUf
+        /YcPL3+FoyyDql5CKKn9QFF28nXREwI=
+X-Google-Smtp-Source: AA6agR5lupUogktVVOUvlWGaHhyOnVIxvwSjXlBRX6nCtOvIt8osQVcYYAWHrnhszVIBSsLTEhP5ZQ==
+X-Received: by 2002:a05:600c:3d0e:b0:3b4:9bd1:10be with SMTP id bh14-20020a05600c3d0e00b003b49bd110bemr2854372wmb.101.1663158249798;
+        Wed, 14 Sep 2022 05:24:09 -0700 (PDT)
 Received: from orome (p200300e41f12c800f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f12:c800:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id kx25-20020a170907775900b0073d70df6e56sm7491803ejc.138.2022.09.14.05.20.49
+        by smtp.gmail.com with ESMTPSA id q5-20020adff945000000b00228692033dcsm13236893wrr.91.2022.09.14.05.24.07
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 14 Sep 2022 05:20:49 -0700 (PDT)
-Date:   Wed, 14 Sep 2022 14:20:48 +0200
+        Wed, 14 Sep 2022 05:24:08 -0700 (PDT)
+Date:   Wed, 14 Sep 2022 14:24:06 +0200
 From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Prathamesh Shete <pshete@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     ulf.hansson@linaro.org, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
-        anrao@nvidia.com, smangipudi@nvidia.com, kyarlagadda@nvidia.com
-Subject: Re: [PATCH v2 3/4] mmc: sdhci-tegra: Issue CMD and DAT resets
- together
-Message-ID: <YyHHIPbXnLiPe/vn@orome>
+To:     Prathamesh Shete <pshete@nvidia.com>
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        jonathanh@nvidia.com, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-kernel@vger.kernel.org, anrao@nvidia.com,
+        smangipudi@nvidia.com, kyarlagadda@nvidia.com
+Subject: Re: [PATCH v2 4/4] mmc: sdhci-tegra: Use actual clock rate for SW
+ tuning correction
+Message-ID: <YyHH5i3Hon/QRxLF@orome>
 References: <20220914095628.26093-1-pshete@nvidia.com>
- <20220914095628.26093-3-pshete@nvidia.com>
+ <20220914095628.26093-4-pshete@nvidia.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="mT7gJ1KoGt/nhYUh"
+        protocol="application/pgp-signature"; boundary="zOKpBxCMi8Uq2OO3"
 Content-Disposition: inline
-In-Reply-To: <20220914095628.26093-3-pshete@nvidia.com>
+In-Reply-To: <20220914095628.26093-4-pshete@nvidia.com>
 User-Agent: Mutt/2.2.7 (2022-08-07)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---mT7gJ1KoGt/nhYUh
+--zOKpBxCMi8Uq2OO3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Wed, Sep 14, 2022 at 03:26:27PM +0530, Prathamesh Shete wrote:
-> In case of error condition to avoid system crash
-> Tegra SDMMC controller requires CMD and DAT resets
-> issued together.
+On Wed, Sep 14, 2022 at 03:26:28PM +0530, Prathamesh Shete wrote:
+> Ensure tegra_host member "curr_clk_rate" holds the actual clock rate
+> instead of requested clock rate for proper use during tuning correction
+> algorithm.
 
-It might be worth specifying exactly what "system crash" means. Does
-this always happen (i.e. do we have a problem right now?) or are there
-specific circumstances that cause the crash.
+Ideally there shouldn't be a deviation between host_clk and the actual
+clock rate that was set. Perhaps it'd be good to provide a bit more
+information on what the deviation can be and when that happens, as well
+as what the consequences are. That would make it a bit more obvious why
+this fix is needed.
 
-> This is applicable to Tegra186 and later chips.
+Thierry
+
+>=20
+> Fixes: ea8fc5953e8b ("mmc: tegra: update hw tuning process")
 >=20
 > Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
 > Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
 > ---
->  drivers/mmc/host/sdhci-tegra.c |  3 ++-
->  drivers/mmc/host/sdhci.c       | 11 ++++++++---
->  drivers/mmc/host/sdhci.h       |  2 ++
->  3 files changed, 12 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/sdhci-tegra.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >=20
 > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegr=
 a.c
-> index b66b0cc51497..7d16dc41fe91 100644
+> index 7d16dc41fe91..42b018d4ebc3 100644
 > --- a/drivers/mmc/host/sdhci-tegra.c
 > +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -1530,7 +1530,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186=
-_pdata =3D {
->  		  SDHCI_QUIRK_NO_HISPD_BIT |
->  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
->  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> -	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> +	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> +		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
->  	.ops  =3D &tegra186_sdhci_ops,
->  };
+> @@ -778,7 +778,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *=
+host, unsigned int clock)
+>  		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
+>  			host_clk, err);
 > =20
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 7689ffec5ad1..289fa8ae4866 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3063,9 +3063,14 @@ static bool sdhci_request_done(struct sdhci_host *=
-host)
->  		 * Spec says we should do both at the same time, but Ricoh
->  		 * controllers do not like that.
->  		 */
-
-The comment above seems to indicate that the current behavior (i.e.
-splitting the CMD and DATA resets) is actually the quirk, so I wonder if
-this perhaps should be reversed? I suppose it could be difficult to
-track down the exact controllers that need the separate resets, but this
-might be worth doing. It's possible that other controllers might run
-into the same issue that we are if they work strictly to the spec.
-
-Adrian, any ideas on how much of this is just cargo-culted? Do we play
-it safe and do the "double workaround" or do we want to attempt to
-rectify this by adding a Ricoh-specific quirk?
-
-Thierry
-
-> -		sdhci_do_reset(host, SDHCI_RESET_CMD);
-> -		sdhci_do_reset(host, SDHCI_RESET_DATA);
-> -
-> +		if (host->quirks2 &
-> +			SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER) {
-> +			sdhci_do_reset(host, SDHCI_RESET_CMD |
-> +					SDHCI_RESET_DATA);
-> +		} else {
-> +			sdhci_do_reset(host, SDHCI_RESET_CMD);
-> +			sdhci_do_reset(host, SDHCI_RESET_DATA);
-> +		}
->  		host->pending_reset =3D false;
->  	}
-> =20
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index 95a08f09df30..8045308f7859 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -480,6 +480,8 @@ struct sdhci_host {
->   * block count.
->   */
->  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
-> +/* Issue CMD and DATA reset together */
-> +#define SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER      (1<<19)
-> =20
->  	int irq;		/* Device IRQ */
->  	void __iomem *ioaddr;	/* Mapped address */
+> -	tegra_host->curr_clk_rate =3D host_clk;
+> +	tegra_host->curr_clk_rate =3D clk_get_rate(pltfm_host->clk);
+>  	if (tegra_host->ddr_signaling)
+>  		host->max_clk =3D host_clk;
+>  	else
 > --=20
 > 2.17.1
 >=20
 
---mT7gJ1KoGt/nhYUh
+--zOKpBxCMi8Uq2OO3
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhxyAACgkQ3SOs138+
-s6ELcA//U86GSK/3O35fsKz+/8+HpCYKUHVhHdDMGPFUb1alnivbByn7wdER8kcK
-mL8e1VCMsg966yXExj5zRPZmFwLlYAnjFOiYdiYN2hJDYovqF7QBoSv7FQWfB6FN
-cD9XiSUnYuiwesdPLDME1ny5zdpmp5Zh+OrVl5WOU39Yby7J//cRDq0Pu44Z0o5g
-CxMXZL4XQ+l0fsw+Dokq66tyGMRZspG5O3rSxdP5Yv2cpxJ6X5SUl7f4jnbEPS+Z
-KTRGiLuPLMTejecRC9icZLSY6cArIOBzFTatju7aQ8dSabN2KjgKR+kyumV9WAJU
-JyF8AusM9x8+c+ObRqtFajvQJzEmXDv2qMlyJK0/Zl4y7rsiFVGbGSSfzGg2sLGU
-H0xKye2HNZ5RIa4pMj/IZsySgIWugixS0mUJZe9ztN46qxIM6xvm/Y25nHmT2Xm0
-G2c9POaDDz23bK48kq8APuaEYGsBtL9dDs1zzlASpT5fpI9nlFhpqv/qEA43j/ZP
-5zHxJQGkEgbBQg3lMgfKGWJMcJrWvRlIfUyo7vKLHmBe94hz2wH9IA+x+9jf6KKi
-AtD8GR4Ukqydm6pYBOmGYGRpwJLIwzSD56rlzT2Sqxv8M2bA8SEXrewPdUnBjI+S
-IeveP/e+831I+WCrN+NXMglGFilUdPMwm1dmYXqn8NNwQ40qHyU=
-=GGJ2
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMhx+YACgkQ3SOs138+
+s6HfBxAAnPdKARLXzcEwbcSdBGD3yO9uo9oEcuzg73LbgObCNv59HF6nhTNxXW+S
+qZ2zUtF0sGpTkWFgMCW1BepxdMe5VrsrDLPJizMVALY+bOvDamzpFOz68gRd/g7B
+lJaRRWhpTbnZmYuk6M7u9NHRTkwFfbgbruRscwfEjAV2dFYBAPatYLd0OS+cqhyC
+137ug/6Dtftt4qtd3Wva6EnxHf14HOI/DlrvsnnQr1BLYxYR5lExIvViJmqlKT9N
+2ALPizSJPovNoQdUU76+VJrY+4Q2edqTV+26KIiVUdnsbFznmZos5Gfi92tCXi+K
+atf4Cch3S6eUKjEFcJUGLWPwOvr2wCwl6J+5Tt+pr9YNZX7Sa5A2ftYf8g3IGr+l
+iWI5RUNXoAWdcG7Xq4ut/dJblSXj+al527q4Cnt8hkTmadMyWRJanIBjuyTcF3hD
+3h4oVnaAF2aS9hmGvt/3B9YdEucXk3OPLva7lZTMype95/E5BvQNZswMTTSHPr65
+4zVIetLfStlYtzTAp3sDmgtksmRz3Ksn9amp0pJGuFcLMw6VXKBiAcWPtHQ4epH5
+ID/Kbv/zOIIWbOnFcXAsEN5A+EB7bQR1tP/MvGTITaD+0rZMSatbkSBmp6y2yyFM
+1U7h12sAuo2gi3jHGBw9cCkX3uZv8mjJCAEU1w3Lhsi/eASM8oc=
+=RpCl
 -----END PGP SIGNATURE-----
 
---mT7gJ1KoGt/nhYUh--
+--zOKpBxCMi8Uq2OO3--
