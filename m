@@ -2,96 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 594C4ECAAD3
-	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 06:37:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD60C6FA8A
+	for <linux-mmc@archiver.kernel.org>; Wed, 14 Sep 2022 08:53:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230049AbiINGhS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 14 Sep 2022 02:37:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53900 "EHLO
+        id S229547AbiINIxH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 14 Sep 2022 04:53:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58700 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229760AbiINGhS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 02:37:18 -0400
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BF303D5B3;
-        Tue, 13 Sep 2022 23:37:17 -0700 (PDT)
-Received: by mail-pf1-x42d.google.com with SMTP id 9so2852259pfz.12;
-        Tue, 13 Sep 2022 23:37:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date;
-        bh=UxjaxV6o3A1Me2CC2IL94ZaOteKvRdGDVyUfYdgY54A=;
-        b=fk0bfsYF5GORsHtfgl3ajACU6dihG3ei5WqS6drL44t7255nRLpMuUK0D79EgWfJgP
-         9NI+jIZY5FzK7Qa+UphPvKQW4PZY8inC3L5HLsZHT9Lfi9E99GgL3+FUsu+AdZ8xCrDi
-         sbbYd/okGZn6YeKlQLNDy7YrlpsEfDS0ppezsqX9WFuaQbisvHjgBNTw57UpENf04tdM
-         OZ9xDl5GssM+Y+dENOyS4bvhcNiDFTEB3d8i5h3LYBiwY/2P9fi9A+R5obNNH9nSoXJj
-         Qh78wp/h/v0r1e2Y85B/x7oiWz7RIxZ1CwPwqTqZzOtHl+3zi7INCvLcM7Ucw/cWmZc3
-         Wraw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=UxjaxV6o3A1Me2CC2IL94ZaOteKvRdGDVyUfYdgY54A=;
-        b=IZg2tS1b96VVvNNjGikbyyaRzp8Hb7C042XhkieSAt2N24pu46sLav00d3G7H9faoj
-         9lWQdJeclMH84ziH+CObcwAZOJZaEuhQsNRjF4q2bNOEj9VSYs7nI79k1NfTMmAX3iLy
-         /34EdwRYYvS4Jx3NWe4FnPCanRMAexj9gG10lXbdWPWUH1XxlnsZ96TKjV3OpZrDKeRl
-         f4SGQ2OslURTS2cPTZuTQZj5WftJKKv/02g2bADYuXr1fNFWjov2Ui7TnYKVxDAHTvYa
-         z6/c0MasO+hcsT2BmQbM5TaIeb1P+G8WzXLFnV/P/P8rfPsHIAqd6x+PFk0TTXRrwDgz
-         BMUQ==
-X-Gm-Message-State: ACgBeo2E8FXXLDFONTJ7bt5qTgBuZNgP4RVnofgb8mLi0DiqtUrkOb//
-        bZZUZFL/EG7WJidAUbOEhxc=
-X-Google-Smtp-Source: AA6agR7bFqJ1KLPIvWO8zbweBd/wcrXJKtBfAodqUSV1dd/sLpgsnRPYOAARV2gn+FxooCd4gz8gyQ==
-X-Received: by 2002:a05:6a00:2290:b0:541:f19:5197 with SMTP id f16-20020a056a00229000b005410f195197mr22004954pfe.42.1663137436900;
-        Tue, 13 Sep 2022 23:37:16 -0700 (PDT)
-Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
-        by smtp.gmail.com with ESMTPSA id b23-20020a63d317000000b00429c5270710sm9055783pgg.1.2022.09.13.23.37.12
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Sep 2022 23:37:16 -0700 (PDT)
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        megoo.tang@gmail.com, lzx.stg@gmail.com
-Subject: [PATCH] mmc: sdhci-sprd: Fix the limitation of div
-Date:   Wed, 14 Sep 2022 14:37:02 +0800
-Message-Id: <20220914063702.20283-1-wenchao.chen666@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S229503AbiINIxG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 14 Sep 2022 04:53:06 -0400
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78EB45F7F6;
+        Wed, 14 Sep 2022 01:53:04 -0700 (PDT)
+Received: from [89.101.193.68] (helo=phil.sntech)
+        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <heiko@sntech.de>)
+        id 1oYO8L-0004ae-5u; Wed, 14 Sep 2022 10:52:37 +0200
+From:   Heiko Stuebner <heiko@sntech.de>
+To:     Johan Jonker <jbx6244@gmail.com>, kever.yang@rock-chips.com
+Cc:     Heiko Stuebner <heiko@sntech.de>,
+        linux-rockchip@lists.infradead.org, vkoul@kernel.org,
+        vigneshr@ti.com, linux@roeck-us.net, ulf.hansson@linaro.org,
+        devicetree@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-watchdog@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        u.kleine-koenig@pengutronix.de, linux-mtd@lists.infradead.org,
+        zhangqing@rock-chips.com, linux-pwm@vger.kernel.org,
+        jamie@jamieiles.com, krzysztof.kozlowski+dt@linaro.org,
+        linux-spi@vger.kernel.org, gregkh@linuxfoundation.org,
+        thierry.reding@gmail.com, sjg@chromium.org,
+        philipp.tomsich@vrull.eu, kishon@ti.com, richard@nod.at,
+        linux-kernel@vger.kernel.org, linux-i2c@vger.kernel.org,
+        robh+dt@kernel.org, linux-mmc@vger.kernel.org, broonie@kernel.org,
+        wim@linux-watchdog.org, linux-serial@vger.kernel.org,
+        miquel.raynal@bootlin.com
+Subject: Re: (subset) [PATCH v1 01/11] dt-bindings: serial: rockchip: add rockchip,rk3128-uart
+Date:   Wed, 14 Sep 2022 10:52:33 +0200
+Message-Id: <166314554237.197444.11513118217413767473.b4-ty@sntech.de>
+X-Mailer: git-send-email 2.35.1
+In-Reply-To: <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
+References: <20220909212543.17428-1-jbx6244@gmail.com> <4f283231-2ed4-202b-0c23-157bce0841ee@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wenchao Chen <wenchao.chen@unisoc.com>
+On Sat, 10 Sep 2022 00:01:28 +0200, Johan Jonker wrote:
+> Add rockchip,rk3128-uart compatible string.
 
-Because the bit field size of the divider coefficient register is 1023, it is
-limited before returning the value.
+Applied, thanks!
 
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
----
- drivers/mmc/host/sdhci-sprd.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+[08/11] dt-bindings: arm: rockchip: pmu: add rockchip,rk3128-pmu
+        commit: 9c2f4521344f3b14fa0be050100ef726edc36cbc
+[10/11] dt-bindings: soc: rockchip: grf: add rockchip,rk3128-grf
+        commit: adc4f190260a6c004f950992d8c9ee3aec8da38b
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index f33e9349e4e6..46c55ab4884c 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -205,14 +205,14 @@ static inline u32 sdhci_sprd_calc_div(u32 base_clk, u32 clk)
- 	if ((base_clk / div) > (clk * 2))
- 		div++;
- 
--	if (div > SDHCI_SPRD_CLK_MAX_DIV)
--		div = SDHCI_SPRD_CLK_MAX_DIV;
--
- 	if (div % 2)
- 		div = (div + 1) / 2;
- 	else
- 		div = div / 2;
- 
-+	if (div > SDHCI_SPRD_CLK_MAX_DIV)
-+		div = SDHCI_SPRD_CLK_MAX_DIV;
-+
- 	return div;
- }
- 
+Best regards,
 -- 
-2.17.1
-
+Heiko Stuebner <heiko@sntech.de>
