@@ -2,168 +2,230 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4CD5ECAAD3
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Sep 2022 10:56:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5022BECAAD3
+	for <linux-mmc@archiver.kernel.org>; Thu, 15 Sep 2022 12:10:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229460AbiIOK4k (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Sep 2022 06:56:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42636 "EHLO
+        id S230240AbiIOMKS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 15 Sep 2022 08:10:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbiIOK4j (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2022 06:56:39 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C70AE8B98D;
-        Thu, 15 Sep 2022 03:56:38 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id b35so26391485edf.0;
-        Thu, 15 Sep 2022 03:56:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date;
-        bh=5KfyDy+cMltzrSXMQTDHvnQXo4AcAbZvGBQ9NxOtQFc=;
-        b=AsYOEwQia6PYiexHLTq69+7G8ccRW0Zz8rL96hdUGLxBzCYuiDE2quPlqGlOfzqGrv
-         nyEeojDUXIfr8IjUIzGK7ahQvMnXx/aEmpuHZIsUOFR1UEB+tJT/Y6Z3W8UCIPoeysjN
-         XaLJ/Hi+GW7ByJe7IJDwbEjZCSHSjqCJrW2ZScZzfekNPs3pkPSuNzHy2K4/fHUlamxD
-         nE/HuzELjZQYOSFrG/J/BOPfENM9BnrLicbO/rHrU01OAQ/oN6GKNLg8l4vIP3E0Kk2c
-         CsdwACh1dssRLH8aA9mnBtmpvyUxrWHBoBC56ArL3azPWsFo8xSYFMKg72ft6CJTU4sC
-         ZejQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=5KfyDy+cMltzrSXMQTDHvnQXo4AcAbZvGBQ9NxOtQFc=;
-        b=g7V5NTSA1pZ3CIR8lJWXTZWgylmlQkR2eYbbIAKm4A34lnwgzEVN6DsSciZGJmR8MS
-         3uu+OkSth5dxdprqsMMi8bzN40A+ZULlHVkigmarSiaXc+yEe5tyGihgUy5pPb7Y9Y7d
-         0L8lTfxOnzVQGddJTVTjzQ2fg+CgAQO4Uky71IN+Nywgud8hx/rQRIHb7YCTBlr5WXkv
-         Eb8umV5E0SlFTPfUx7IJi21wbv2Ec1niS0f5ITzXk9XO0TboX7q8GJNeR1OW2ngv9tOD
-         jt+1am8wakeRF4m25xlbaLgJrcCHG3web40aBoyo0w8JSYR/DZjrstH3HkGiHpVlabxb
-         WYNg==
-X-Gm-Message-State: ACgBeo1rcQujfSx7ocn/nk3hPa6N7b57+sDF0xOK7uxIkBxqkr2zezQL
-        hJqwsIU4etr4TUnyc+cAk4s=
-X-Google-Smtp-Source: AA6agR4CVty/vhiihIZJn8i7Xt94qfHqC+VgWaV+RjG4OH/6cDTSG9doydf26HmUn7BJHsM/rOT7yQ==
-X-Received: by 2002:a05:6402:1a4f:b0:44e:f731:f7d5 with SMTP id bf15-20020a0564021a4f00b0044ef731f7d5mr33619590edb.357.1663239397202;
-        Thu, 15 Sep 2022 03:56:37 -0700 (PDT)
-Received: from orome (p200300e41f12c800f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f12:c800:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id b13-20020aa7c90d000000b0044eda621b08sm11769888edt.54.2022.09.15.03.56.35
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 15 Sep 2022 03:56:36 -0700 (PDT)
-Date:   Thu, 15 Sep 2022 12:56:34 +0200
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Prathamesh Shete <pshete@nvidia.com>
-Cc:     ulf.hansson@linaro.org, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
-        anrao@nvidia.com, smangipudi@nvidia.com, kyarlagadda@nvidia.com
-Subject: Re: [PATCH v2 3/4] mmc: sdhci-tegra: Issue CMD and DAT resets
- together
-Message-ID: <YyME4i8oMI2omd0v@orome>
-References: <20220914095628.26093-1-pshete@nvidia.com>
- <20220914095628.26093-3-pshete@nvidia.com>
- <YyHHIPbXnLiPe/vn@orome>
- <05686061-e17e-fcd6-e570-a9ae159cb51c@intel.com>
+        with ESMTP id S230287AbiIOMJ7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2022 08:09:59 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3169E1403F;
+        Thu, 15 Sep 2022 05:09:45 -0700 (PDT)
+Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 2EF626601FC1;
+        Thu, 15 Sep 2022 13:09:28 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1663243768;
+        bh=b73S+v63Xy5BcQgYOj0NF2u+G+p7Y8haQ0o9DBpBNoo=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=D6nmdEHXzI73VmsbQxijOWkBdeBWwRT6BWYcbtc7uZfmH+Dg2SyWaHUWIwt33jVb5
+         LrG06HM4uz7HdNcYMKBowQwLwOXMF+QqKmHNGECNSvJr2kWulQkDIwf4KTadEE5KP6
+         qEJxdrNCWvEoClcYWrE5NOeFqT6h697HfAbH8VkJLg/rTRLxJ8NpL9KYSr/gR/J2Yl
+         Jfq65yKhp47fxkZdDScoSFCJl+GLFa7b+Hu2b1ScctDBurR+9VxXRsNgYs/OX9ht/p
+         09HVSGChBj5WmjlDzhS/dyOfykyRYsNQtOqD4hROUAcXx1pFRCulox0qkZzz81wqIl
+         Zuwgh6TO18V4g==
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+To:     chaotian.jing@mediatek.com
+Cc:     ulf.hansson@linaro.org, matthias.bgg@gmail.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 1/2] mmc: mtk-sd: Reorder of_device_id and platform data by name
+Date:   Thu, 15 Sep 2022 14:09:22 +0200
+Message-Id: <20220915120923.86038-2-angelogioacchino.delregno@collabora.com>
+X-Mailer: git-send-email 2.37.2
+In-Reply-To: <20220915120923.86038-1-angelogioacchino.delregno@collabora.com>
+References: <20220915120923.86038-1-angelogioacchino.delregno@collabora.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="WEzO1g9FGLaY/old"
-Content-Disposition: inline
-In-Reply-To: <05686061-e17e-fcd6-e570-a9ae159cb51c@intel.com>
-User-Agent: Mutt/2.2.7 (2022-08-07)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Both of_device_id compatible strings and platform data were partially
+ordered by name. Fix the ordering.
 
---WEzO1g9FGLaY/old
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This commit brings no functional changes.
 
-On Wed, Sep 14, 2022 at 09:21:07PM +0300, Adrian Hunter wrote:
-> On 14/09/22 15:20, Thierry Reding wrote:
-> > On Wed, Sep 14, 2022 at 03:26:27PM +0530, Prathamesh Shete wrote:
-> >> In case of error condition to avoid system crash
-> >> Tegra SDMMC controller requires CMD and DAT resets
-> >> issued together.
-> >=20
-> > It might be worth specifying exactly what "system crash" means. Does
-> > this always happen (i.e. do we have a problem right now?) or are there
-> > specific circumstances that cause the crash.
-> >=20
-> >> This is applicable to Tegra186 and later chips.
-> >>
-> >> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-> >> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-> >> ---
-> >>  drivers/mmc/host/sdhci-tegra.c |  3 ++-
-> >>  drivers/mmc/host/sdhci.c       | 11 ++++++++---
-> >>  drivers/mmc/host/sdhci.h       |  2 ++
-> >>  3 files changed, 12 insertions(+), 4 deletions(-)
-> >>
-> >> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-t=
-egra.c
-> >> index b66b0cc51497..7d16dc41fe91 100644
-> >> --- a/drivers/mmc/host/sdhci-tegra.c
-> >> +++ b/drivers/mmc/host/sdhci-tegra.c
-> >> @@ -1530,7 +1530,8 @@ static const struct sdhci_pltfm_data sdhci_tegra=
-186_pdata =3D {
-> >>  		  SDHCI_QUIRK_NO_HISPD_BIT |
-> >>  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
-> >>  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
-> >> -	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> >> +	.quirks2 =3D SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-> >> +		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
-> >>  	.ops  =3D &tegra186_sdhci_ops,
-> >>  };
-> >> =20
-> >> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> >> index 7689ffec5ad1..289fa8ae4866 100644
-> >> --- a/drivers/mmc/host/sdhci.c
-> >> +++ b/drivers/mmc/host/sdhci.c
-> >> @@ -3063,9 +3063,14 @@ static bool sdhci_request_done(struct sdhci_hos=
-t *host)
-> >>  		 * Spec says we should do both at the same time, but Ricoh
-> >>  		 * controllers do not like that.
-> >>  		 */
-> >=20
-> > The comment above seems to indicate that the current behavior (i.e.
-> > splitting the CMD and DATA resets) is actually the quirk, so I wonder if
-> > this perhaps should be reversed? I suppose it could be difficult to
-> > track down the exact controllers that need the separate resets, but this
-> > might be worth doing. It's possible that other controllers might run
-> > into the same issue that we are if they work strictly to the spec.
-> >=20
-> > Adrian, any ideas on how much of this is just cargo-culted? Do we play
-> > it safe and do the "double workaround" or do we want to attempt to
-> > rectify this by adding a Ricoh-specific quirk?
->=20
-> It is a good question, but it has been that way for a very long time,
-> and the spec tends to document them separately anyway, so it doesn't
-> seem there is much reason to change.
+Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+---
+ drivers/mmc/host/mtk-sd.c | 99 ++++++++++++++++++++-------------------
+ 1 file changed, 50 insertions(+), 49 deletions(-)
 
-Fair enough. Prathamesh, perhaps revise the comment above as part of
-this patch because with the change below it now sounds a bit confusing.
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index 69d78604d1fc..572eb5d48813 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -474,33 +474,20 @@ struct msdc_host {
+ 	struct cqhci_host *cq_host;
+ };
+ 
+-static const struct mtk_mmc_compatible mt8135_compat = {
+-	.clk_div_bits = 8,
++static const struct mtk_mmc_compatible mt2701_compat = {
++	.clk_div_bits = 12,
+ 	.recheck_sdio_irq = true,
+ 	.hs400_tune = false,
+-	.pad_tune_reg = MSDC_PAD_TUNE,
+-	.async_fifo = false,
+-	.data_tune = false,
+-	.busy_check = false,
+-	.stop_clk_fix = false,
+-	.enhance_rx = false,
+-	.support_64g = false,
+-};
+-
+-static const struct mtk_mmc_compatible mt8173_compat = {
+-	.clk_div_bits = 8,
+-	.recheck_sdio_irq = true,
+-	.hs400_tune = true,
+-	.pad_tune_reg = MSDC_PAD_TUNE,
+-	.async_fifo = false,
+-	.data_tune = false,
++	.pad_tune_reg = MSDC_PAD_TUNE0,
++	.async_fifo = true,
++	.data_tune = true,
+ 	.busy_check = false,
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+ 	.support_64g = false,
+ };
+ 
+-static const struct mtk_mmc_compatible mt8183_compat = {
++static const struct mtk_mmc_compatible mt2712_compat = {
+ 	.clk_div_bits = 12,
+ 	.recheck_sdio_irq = false,
+ 	.hs400_tune = false,
+@@ -513,20 +500,7 @@ static const struct mtk_mmc_compatible mt8183_compat = {
+ 	.support_64g = true,
+ };
+ 
+-static const struct mtk_mmc_compatible mt2701_compat = {
+-	.clk_div_bits = 12,
+-	.recheck_sdio_irq = true,
+-	.hs400_tune = false,
+-	.pad_tune_reg = MSDC_PAD_TUNE0,
+-	.async_fifo = true,
+-	.data_tune = true,
+-	.busy_check = false,
+-	.stop_clk_fix = false,
+-	.enhance_rx = false,
+-	.support_64g = false,
+-};
+-
+-static const struct mtk_mmc_compatible mt2712_compat = {
++static const struct mtk_mmc_compatible mt6779_compat = {
+ 	.clk_div_bits = 12,
+ 	.recheck_sdio_irq = false,
+ 	.hs400_tune = false,
+@@ -539,6 +513,19 @@ static const struct mtk_mmc_compatible mt2712_compat = {
+ 	.support_64g = true,
+ };
+ 
++static const struct mtk_mmc_compatible mt7620_compat = {
++	.clk_div_bits = 8,
++	.recheck_sdio_irq = true,
++	.hs400_tune = false,
++	.pad_tune_reg = MSDC_PAD_TUNE,
++	.async_fifo = false,
++	.data_tune = false,
++	.busy_check = false,
++	.stop_clk_fix = false,
++	.enhance_rx = false,
++	.use_internal_cd = true,
++};
++
+ static const struct mtk_mmc_compatible mt7622_compat = {
+ 	.clk_div_bits = 12,
+ 	.recheck_sdio_irq = true,
+@@ -552,31 +539,33 @@ static const struct mtk_mmc_compatible mt7622_compat = {
+ 	.support_64g = false,
+ };
+ 
+-static const struct mtk_mmc_compatible mt8516_compat = {
+-	.clk_div_bits = 12,
++static const struct mtk_mmc_compatible mt8135_compat = {
++	.clk_div_bits = 8,
+ 	.recheck_sdio_irq = true,
+ 	.hs400_tune = false,
+-	.pad_tune_reg = MSDC_PAD_TUNE0,
+-	.async_fifo = true,
+-	.data_tune = true,
+-	.busy_check = true,
+-	.stop_clk_fix = true,
++	.pad_tune_reg = MSDC_PAD_TUNE,
++	.async_fifo = false,
++	.data_tune = false,
++	.busy_check = false,
++	.stop_clk_fix = false,
++	.enhance_rx = false,
++	.support_64g = false,
+ };
+ 
+-static const struct mtk_mmc_compatible mt7620_compat = {
++static const struct mtk_mmc_compatible mt8173_compat = {
+ 	.clk_div_bits = 8,
+ 	.recheck_sdio_irq = true,
+-	.hs400_tune = false,
++	.hs400_tune = true,
+ 	.pad_tune_reg = MSDC_PAD_TUNE,
+ 	.async_fifo = false,
+ 	.data_tune = false,
+ 	.busy_check = false,
+ 	.stop_clk_fix = false,
+ 	.enhance_rx = false,
+-	.use_internal_cd = true,
++	.support_64g = false,
+ };
+ 
+-static const struct mtk_mmc_compatible mt6779_compat = {
++static const struct mtk_mmc_compatible mt8183_compat = {
+ 	.clk_div_bits = 12,
+ 	.recheck_sdio_irq = false,
+ 	.hs400_tune = false,
+@@ -589,16 +578,28 @@ static const struct mtk_mmc_compatible mt6779_compat = {
+ 	.support_64g = true,
+ };
+ 
++static const struct mtk_mmc_compatible mt8516_compat = {
++	.clk_div_bits = 12,
++	.recheck_sdio_irq = true,
++	.hs400_tune = false,
++	.pad_tune_reg = MSDC_PAD_TUNE0,
++	.async_fifo = true,
++	.data_tune = true,
++	.busy_check = true,
++	.stop_clk_fix = true,
++};
++
+ static const struct of_device_id msdc_of_ids[] = {
+-	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+-	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+-	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
+ 	{ .compatible = "mediatek,mt2701-mmc", .data = &mt2701_compat},
+ 	{ .compatible = "mediatek,mt2712-mmc", .data = &mt2712_compat},
++	{ .compatible = "mediatek,mt6779-mmc", .data = &mt6779_compat},
++	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
+ 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
++	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
++	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
++	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
+ 	{ .compatible = "mediatek,mt8516-mmc", .data = &mt8516_compat},
+-	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
+-	{ .compatible = "mediatek,mt6779-mmc", .data = &mt6779_compat},
++
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(of, msdc_of_ids);
+-- 
+2.37.2
 
-Thierry
-
---WEzO1g9FGLaY/old
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmMjBOAACgkQ3SOs138+
-s6GyHw//d83O3LVe/vcFhw6+YjW5uoA0K9XOIvJvi0F6ERJ3IwZjc5zi7hvq5m9J
-XcPgtFLEIy5d9mND5201hatBGCus1vcdTGG14Epc3aNGTSjMjD7j2KXm4oO1eqKf
-5ScMobQEd2YSXzPZUqj3dYKkJO9tRgmG6cEXwaX8rv/QJZ4d/YBwUf+eOUdEIpVL
-zktakeuQUx0NsjAQJyj2425wXto6hcwUNXa8DPDGRRz9jg7ridZEbsY/8NYiVHW/
-hhyZ5rSxcdCrQ7Qp+Kbg/ZaiVJOVyhEcCpSaAccWRpsqayf7JO7ADWYXu4q0iofH
-mTA9yOhwkqn7vE6SgqKfjOBxhCUnmviWMXEWh+Xcysqp5LHuZ4jrdbTQpAWq1HV+
-Z4DsxzlivkcVXGW6ci+SMP75IxYwUpAoIJTPOgmNrJ78TNmp7VUkl6qvahv8awMS
-IChD0hJdL0YXzVkPjolspEG55X2B5cM79RYQfEJIl1r3lNoyebdbJ17Y6BZHxzV7
-yRCIYAOKiEG415U8HMFTd7wGhZI6pFIWoUmAAnDEOpLj0LgqbpAVuc6L+oXiqw5O
-0fYoQa35cL1wlCHG9Mf3W7M2RXdzdiRwhopT5B7YGzUJNOCdfXqZxmukTCBYpkS9
-SBClYkAqgz7CghNT4apqGc7N5AtukBaECDqIh8zbj7+1puQjewE=
-=dNuj
------END PGP SIGNATURE-----
-
---WEzO1g9FGLaY/old--
