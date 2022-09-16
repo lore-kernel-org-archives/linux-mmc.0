@@ -2,286 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EDD5EC6FA91
-	for <linux-mmc@archiver.kernel.org>; Thu, 15 Sep 2022 20:21:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F7D4C54EE9
+	for <linux-mmc@archiver.kernel.org>; Fri, 16 Sep 2022 09:05:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229644AbiIOUVu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 15 Sep 2022 16:21:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40548 "EHLO
+        id S231215AbiIPJFr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 16 Sep 2022 05:05:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229624AbiIOUVt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 15 Sep 2022 16:21:49 -0400
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0EABF5FAC8;
-        Thu, 15 Sep 2022 13:21:48 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663273308; x=1694809308;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=vtpUHguAKafT6MIJU3D9kCLnwfOZK7+XR5i4gGc43qk=;
-  b=X7g6sCOMV1tcBwc81WMLAaFqS1zEp7wWXSy+Zcat2DIz2TRzSF1xdS7K
-   UN0E+GjQd5IUud15Fkx2Y5GVE7j7dyviHuvtIbSXgOogBU2QeMZqWgGOg
-   JLY7mvZ+r3cCKPrw2TXSKzH06riJirmms7iulcr0J5qclLjQ70UeSmwiz
-   iYKikg5O7ri+bWg21UuN9g0DSxz8qsho5B31dpzvHntv3UyGjjGu2pfmp
-   TSxbeZ2fDn2sCkJnCFrVCXwnfnA/c6xZ7TACGUdK2EtRfmo7imYzuxpFL
-   Mn1lHP36nuTNyCFL9wdYsVQ81G1AvPlwfrRHRk4ncbVhUYzFxwcERRAv6
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10471"; a="278558591"
-X-IronPort-AV: E=Sophos;i="5.93,319,1654585200"; 
-   d="scan'208";a="278558591"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Sep 2022 13:21:47 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=Sophos;i="5.93,319,1654585200"; 
-   d="scan'208";a="568576780"
-Received: from lkp-server02.sh.intel.com (HELO 41300c7200ea) ([10.239.97.151])
-  by orsmga003.jf.intel.com with ESMTP; 15 Sep 2022 13:21:44 -0700
-Received: from kbuild by 41300c7200ea with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1oYvMl-0000xf-1W;
-        Thu, 15 Sep 2022 20:21:43 +0000
-Date:   Fri, 16 Sep 2022 04:21:00 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Prathamesh Shete <pshete@nvidia.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, p.zabel@pengutronix.de,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     llvm@lists.linux.dev, kbuild-all@lists.01.org, anrao@nvidia.com,
-        smangipudi@nvidia.com, pshete@nvidia.com, kyarlagadda@nvidia.com
-Subject: Re: [PATCH v2 2/4] mmc: sdhci-tegra: Add support to program MC
- streamID
-Message-ID: <202209160420.bcAdUgK2-lkp@intel.com>
-References: <20220914095628.26093-2-pshete@nvidia.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20220914095628.26093-2-pshete@nvidia.com>
+        with ESMTP id S231235AbiIPJFb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Sep 2022 05:05:31 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E27C042AF5;
+        Fri, 16 Sep 2022 02:05:24 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id m10-20020a17090a730a00b001fa986fd8eeso25060908pjk.0;
+        Fri, 16 Sep 2022 02:05:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date;
+        bh=5wYXv6h7BUTAj8YeKCpjQqh7oaJRQeKblQeCSUvyikQ=;
+        b=EUN/NHGt3Mccz0AbBsC8hxf3inBxme2QlOnQ2P5bILE13SiFOf7meRU9cq7UrKq4Rj
+         fM9olyHd+rRUHQ6/QCu+7pJ/tBfVHD7Vtqv4XD9Vj9K8VtKBvwCResRAGq3jFimObsAG
+         dtLZj9QE/aqX6ZC0Rfpzv+dkRCuIhGwP6PnNHn6CLUIXvt5QnggSbiybUz9RymVGIW6A
+         eKA0Cg/NA1CoBnuQ76+bk4eX7EzVLJpFIEc9QC6J3wjJALqAogoVxeG7hwgsxMQ4vQvS
+         LYtLJ53a0m/d43Xvtt9yG1rDFQ7BiIcDzBYkOudqCB5ed9WhqD/eE0jfTiFbmgPfV7jK
+         hbIQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=5wYXv6h7BUTAj8YeKCpjQqh7oaJRQeKblQeCSUvyikQ=;
+        b=gBRK88KnRN3U7yZx2r+zRKq04voUVEWNWa3IM1MCradnizaA+vVsJ1X0/sFHsXb26C
+         ARZK3un3pLyljnLKOu7EplI1Zju/24mmbWi+IaH5oUdRHyiYzemKgMej5FSmAuXKnLps
+         IJK1pf+CTCYlL1tX5c6UqGoED36XByT1dn+hr/1OT9advU2+3H+deXuXzbjjbceeI0Ni
+         cTsOm/ewJgLWfgkfYAmC621lrQd1Qfika4C6isSlk0685iTjkzgnmexPPrAuANZBDT3Y
+         CuIcbQ2xRr3Cnkh3663LGx9YORGH1PDAj3GRtjE6hJ8aWePP+yts7OWejpuZ6GBmZ5DO
+         Wvww==
+X-Gm-Message-State: ACrzQf3H5a9+ttDpkWO+97xWkdafMp7xynrJbcAkUKk8xNA9n5x92SAM
+        jae+HSuQvTEACSfqFIH3I7tC03g7WiX+DoHI
+X-Google-Smtp-Source: AMsMyM6H/2aV0B3INZdMtVh48Aif6NHYNzGOygq2RMU/EOjuxSDOrCdbaTm4AZ+GDJFwOOaNrrOiyQ==
+X-Received: by 2002:a17:902:d589:b0:174:63e0:5a5c with SMTP id k9-20020a170902d58900b0017463e05a5cmr3787591plh.5.1663319124386;
+        Fri, 16 Sep 2022 02:05:24 -0700 (PDT)
+Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
+        by smtp.gmail.com with ESMTPSA id c3-20020a170903234300b001780a528540sm14536580plh.93.2022.09.16.02.05.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 16 Sep 2022 02:05:23 -0700 (PDT)
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        megoo.tang@gmail.com, lzx.stg@gmail.com
+Subject: [PATCH] mmc: host: Fix data stomping during mmc recovery
+Date:   Fri, 16 Sep 2022 17:05:06 +0800
+Message-Id: <20220916090506.10662-1-wenchao.chen666@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Prathamesh,
+From: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Thank you for the patch! Yet something to improve:
+The block device uses multiple queues to access emmc. There will be up to 3
+requests in the hsq of the host. The current code will check whether there
+is a request doing recovery before entering the queue, but it will not check
+whether there is a request when the lock is issued. The request is in recovery
+mode. If there is a request in recovery, then a read and write request is
+initiated at this time, and the conflict between the request and the recovery
+request will cause the data to be trampled.
 
-[auto build test ERROR on tegra/for-next]
-[also build test ERROR on linus/master v6.0-rc5 next-20220915]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+---
+ drivers/mmc/host/mmc_hsq.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Prathamesh-Shete/mmc-sdhci-tegra-Separate-T19x-and-T23x-SoC-data/20220914-175832
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/tegra/linux.git for-next
-config: hexagon-randconfig-r045-20220915 (https://download.01.org/0day-ci/archive/20220916/202209160420.bcAdUgK2-lkp@intel.com/config)
-compiler: clang version 16.0.0 (https://github.com/llvm/llvm-project 791a7ae1ba3efd6bca96338e10ffde557ba83920)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/9817941f43bffe4de367526928377b9723068fb5
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Prathamesh-Shete/mmc-sdhci-tegra-Separate-T19x-and-T23x-SoC-data/20220914-175832
-        git checkout 9817941f43bffe4de367526928377b9723068fb5
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=hexagon SHELL=/bin/bash drivers/mmc/host/
-
-If you fix the issue, kindly add following tag where applicable
-Reported-by: kernel test robot <lkp@intel.com>
-
-All errors (new ones prefixed by >>):
-
->> drivers/mmc/host/sdhci-tegra.c:1795:35: error: no member named 'ids' in 'struct iommu_fwspec'
-                           tegra_host->streamid = fwspec->ids[0] & 0xffff;
-                                                  ~~~~~~  ^
-   1 error generated.
-
-
-vim +1795 drivers/mmc/host/sdhci-tegra.c
-
-  1638	
-  1639	static int sdhci_tegra_probe(struct platform_device *pdev)
-  1640	{
-  1641		const struct sdhci_tegra_soc_data *soc_data;
-  1642		struct sdhci_host *host;
-  1643		struct sdhci_pltfm_host *pltfm_host;
-  1644		struct sdhci_tegra *tegra_host;
-  1645		struct clk *clk;
-  1646		struct iommu_fwspec *fwspec;
-  1647		int rc;
-  1648	
-  1649		soc_data = of_device_get_match_data(&pdev->dev);
-  1650		if (!soc_data)
-  1651			return -EINVAL;
-  1652	
-  1653		host = sdhci_pltfm_init(pdev, soc_data->pdata, sizeof(*tegra_host));
-  1654		if (IS_ERR(host))
-  1655			return PTR_ERR(host);
-  1656		pltfm_host = sdhci_priv(host);
-  1657	
-  1658		tegra_host = sdhci_pltfm_priv(pltfm_host);
-  1659		tegra_host->ddr_signaling = false;
-  1660		tegra_host->pad_calib_required = false;
-  1661		tegra_host->pad_control_available = false;
-  1662		tegra_host->soc_data = soc_data;
-  1663	
-  1664		if (soc_data->nvquirks & NVQUIRK_HAS_ANDROID_GPT_SECTOR)
-  1665			host->mmc->caps2 |= MMC_CAP2_ALT_GPT_TEGRA;
-  1666	
-  1667		if (soc_data->nvquirks & NVQUIRK_NEEDS_PAD_CONTROL) {
-  1668			rc = tegra_sdhci_init_pinctrl_info(&pdev->dev, tegra_host);
-  1669			if (rc == 0)
-  1670				host->mmc_host_ops.start_signal_voltage_switch =
-  1671					sdhci_tegra_start_signal_voltage_switch;
-  1672		}
-  1673	
-  1674		/* Hook to periodically rerun pad calibration */
-  1675		if (soc_data->nvquirks & NVQUIRK_HAS_PADCALIB)
-  1676			host->mmc_host_ops.request = tegra_sdhci_request;
-  1677	
-  1678		host->mmc_host_ops.hs400_enhanced_strobe =
-  1679				tegra_sdhci_hs400_enhanced_strobe;
-  1680	
-  1681		if (!host->ops->platform_execute_tuning)
-  1682			host->mmc_host_ops.execute_tuning =
-  1683					tegra_sdhci_execute_hw_tuning;
-  1684	
-  1685		rc = mmc_of_parse(host->mmc);
-  1686		if (rc)
-  1687			goto err_parse_dt;
-  1688	
-  1689		if (tegra_host->soc_data->nvquirks & NVQUIRK_ENABLE_DDR50)
-  1690			host->mmc->caps |= MMC_CAP_1_8V_DDR;
-  1691	
-  1692		/* HW busy detection is supported, but R1B responses are required. */
-  1693		host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY | MMC_CAP_NEED_RSP_BUSY;
-  1694	
-  1695		/* GPIO CD can be set as a wakeup source */
-  1696		host->mmc->caps |= MMC_CAP_CD_WAKE;
-  1697	
-  1698		tegra_sdhci_parse_dt(host);
-  1699	
-  1700		tegra_host->power_gpio = devm_gpiod_get_optional(&pdev->dev, "power",
-  1701								 GPIOD_OUT_HIGH);
-  1702		if (IS_ERR(tegra_host->power_gpio)) {
-  1703			rc = PTR_ERR(tegra_host->power_gpio);
-  1704			goto err_power_req;
-  1705		}
-  1706	
-  1707		/*
-  1708		 * Tegra210 has a separate SDMMC_LEGACY_TM clock used for host
-  1709		 * timeout clock and SW can choose TMCLK or SDCLK for hardware
-  1710		 * data timeout through the bit USE_TMCLK_FOR_DATA_TIMEOUT of
-  1711		 * the register SDHCI_TEGRA_VENDOR_SYS_SW_CTRL.
-  1712		 *
-  1713		 * USE_TMCLK_FOR_DATA_TIMEOUT bit default is set to 1 and SDMMC uses
-  1714		 * 12Mhz TMCLK which is advertised in host capability register.
-  1715		 * With TMCLK of 12Mhz provides maximum data timeout period that can
-  1716		 * be achieved is 11s better than using SDCLK for data timeout.
-  1717		 *
-  1718		 * So, TMCLK is set to 12Mhz and kept enabled all the time on SoC's
-  1719		 * supporting separate TMCLK.
-  1720		 */
-  1721	
-  1722		if (soc_data->nvquirks & NVQUIRK_HAS_TMCLK) {
-  1723			clk = devm_clk_get(&pdev->dev, "tmclk");
-  1724			if (IS_ERR(clk)) {
-  1725				rc = PTR_ERR(clk);
-  1726				if (rc == -EPROBE_DEFER)
-  1727					goto err_power_req;
-  1728	
-  1729				dev_warn(&pdev->dev, "failed to get tmclk: %d\n", rc);
-  1730				clk = NULL;
-  1731			}
-  1732	
-  1733			clk_set_rate(clk, 12000000);
-  1734			rc = clk_prepare_enable(clk);
-  1735			if (rc) {
-  1736				dev_err(&pdev->dev,
-  1737					"failed to enable tmclk: %d\n", rc);
-  1738				goto err_power_req;
-  1739			}
-  1740	
-  1741			tegra_host->tmclk = clk;
-  1742		}
-  1743	
-  1744		clk = devm_clk_get(mmc_dev(host->mmc), NULL);
-  1745		if (IS_ERR(clk)) {
-  1746			rc = dev_err_probe(&pdev->dev, PTR_ERR(clk),
-  1747					   "failed to get clock\n");
-  1748			goto err_clk_get;
-  1749		}
-  1750		pltfm_host->clk = clk;
-  1751	
-  1752		tegra_host->rst = devm_reset_control_get_exclusive(&pdev->dev,
-  1753								   "sdhci");
-  1754		if (IS_ERR(tegra_host->rst)) {
-  1755			rc = PTR_ERR(tegra_host->rst);
-  1756			dev_err(&pdev->dev, "failed to get reset control: %d\n", rc);
-  1757			goto err_rst_get;
-  1758		}
-  1759	
-  1760		rc = devm_tegra_core_dev_init_opp_table_common(&pdev->dev);
-  1761		if (rc)
-  1762			goto err_rst_get;
-  1763	
-  1764		pm_runtime_enable(&pdev->dev);
-  1765		rc = pm_runtime_resume_and_get(&pdev->dev);
-  1766		if (rc)
-  1767			goto err_pm_get;
-  1768	
-  1769		rc = reset_control_assert(tegra_host->rst);
-  1770		if (rc)
-  1771			goto err_rst_assert;
-  1772	
-  1773		usleep_range(2000, 4000);
-  1774	
-  1775		rc = reset_control_deassert(tegra_host->rst);
-  1776		if (rc)
-  1777			goto err_rst_assert;
-  1778	
-  1779		usleep_range(2000, 4000);
-  1780	
-  1781		rc = sdhci_tegra_add_host(host);
-  1782		if (rc)
-  1783			goto err_add_host;
-  1784	
-  1785		/* Program MC streamID for DMA transfers */
-  1786		if (soc_data->nvquirks & NVQUIRK_PROGRAM_MC_STREAMID) {
-  1787			fwspec = dev_iommu_fwspec_get(&pdev->dev);
-  1788			if (fwspec == NULL) {
-  1789				rc = -ENODEV;
-  1790				dev_err(mmc_dev(host->mmc),
-  1791					"failed to get MC streamid: %d\n",
-  1792					rc);
-  1793				goto err_rst_get;
-  1794			} else {
-> 1795				tegra_host->streamid = fwspec->ids[0] & 0xffff;
-  1796				tegra_sdhci_writel(host, tegra_host->streamid |
-  1797							(tegra_host->streamid << 8),
-  1798							SDHCI_TEGRA_CIF2AXI_CTRL_0);
-  1799			}
-  1800		}
-  1801	
-  1802		return 0;
-  1803	
-  1804	err_add_host:
-  1805		reset_control_assert(tegra_host->rst);
-  1806	err_rst_assert:
-  1807		pm_runtime_put_sync_suspend(&pdev->dev);
-  1808	err_pm_get:
-  1809		pm_runtime_disable(&pdev->dev);
-  1810	err_rst_get:
-  1811	err_clk_get:
-  1812		clk_disable_unprepare(tegra_host->tmclk);
-  1813	err_power_req:
-  1814	err_parse_dt:
-  1815		sdhci_pltfm_free(pdev);
-  1816		return rc;
-  1817	}
-  1818	
-
+diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+index a5e05ed0fda3..9d35453e7371 100644
+--- a/drivers/mmc/host/mmc_hsq.c
++++ b/drivers/mmc/host/mmc_hsq.c
+@@ -34,7 +34,7 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+ 	spin_lock_irqsave(&hsq->lock, flags);
+ 
+ 	/* Make sure we are not already running a request now */
+-	if (hsq->mrq) {
++	if (hsq->mrq || hsq->recovery_halt) {
+ 		spin_unlock_irqrestore(&hsq->lock, flags);
+ 		return;
+ 	}
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.17.1
+
