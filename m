@@ -2,209 +2,238 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 361F6ECAAA1
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Sep 2022 16:35:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D84BDECAAA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Sep 2022 17:23:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229685AbiISQfa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Sep 2022 12:35:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39364 "EHLO
+        id S230370AbiISRXY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Sep 2022 13:23:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229720AbiISQf2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2022 12:35:28 -0400
-Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2117.outbound.protection.outlook.com [40.107.22.117])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AC9726561
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2022 09:35:26 -0700 (PDT)
+        with ESMTP id S229617AbiISRXY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2022 13:23:24 -0400
+Received: from EUR01-DB5-obe.outbound.protection.outlook.com (mail-eopbgr150137.outbound.protection.outlook.com [40.107.15.137])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E310A3A4B3
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2022 10:23:22 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=MW1+1ZBkqI2njAV7OXsUdcG8rRQ/MKZefsMA+iiU0Xh26PoY+8p7FDM2Y+GGwnM88GKZgtOwgH8giGdFaUztyxxXYvLqTxPhdh+8F9Qk5Wl2S1yL21OsNu1BP2orLWWDh8e63Wcl8ADHdyJFdgfMdPpxDRu8262ShniwFambQiuztPCvL9kFtertMPWtiAk8i2vP8cDHzZfmE0hCwyRBU+eoDGpFmU2yhBkLNeqG4Hyw5Sf0V+PXf6LpEzOf46LdqNmbuIdWWg4GrjkHO3KvV/Korf6Uu/sYB8qCnuKEeKybxmAdysLaMNDiWTWSSE5S0idTno9do63LirqifSDAbA==
+ b=R3QRWzKiHES3j368wRQ8G0q6AVCKG1MsBB4ylegAn4A3w4l8xpBmSUS3uwr0QN/h37njbBzfbOjsUbsit0RsiH1fYeXhUwMe33Ay6SZgWcPqxyG8e2jNZbbFU0QNhgm1tSdvO76pIId9yoHNF+yhHjfuN7AH7W4arP9iEkCHyyEiD+Y5tc4rT49MZprnGuXq8fKpPeaLfUHQ+h/554gyhWbFmNLp23frB5JQzbW4Q7U1Xi8nzBpjThV+f4EnMEOXF0IY36XFNCKO/+XkVmshzSB3AkVE07vFK5FihRDmFoO4R0Ni8OrG8zy4EF8/Rw/4i3Aqsa/O1H6qrp5aMsK5CQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F+qMe+8yubn6aG/2vr01v50CJ1MAWTU5gF0Ef+gnPTo=;
- b=KWbDQDr4f4yxuUsI7O2M2+6T6L8k4OMZDwg5D+Xwka9428TUB1jSj0T21A1uN4vzEXY1w65TQGlMvDyFTZgVLxFytZ/IEdLCTGEIt9c20nzmSKPcfhvy1OnoY3OKf89SlarwsXjgaJWo5lGbATz5Es88fBjcYrBVdvhz4UIiBQR5KbaB7Wap6ih+KrYcbERihl54C3SBrM7iUsUBbSAfcIUAITE121Z5+97RUD3mlIo+kFQ0lohYoFNcR17oLSjY/VLUcg6R5HUcJ/lgqHbUXZnPpe2oXvkSyZHrxy20J8zGl++TUepX1msTQlFTH9cLpLeUUBWqyTn8NWSz78iM9A==
+ bh=NRHHuU5xC23xWemfI0jA9+NhgVbGuULb4eqVHXJa3BE=;
+ b=jSaBOVYpc67omYe/JhiLOUh/kNVeezpwxdNB9ecKWQhd0H99JvKaO78zvKRirlwoQdeYDpUjyNWyy9dQwY6SxA6iEgI2OjFPwj6LXe+VV2oniY9duA9he4ugqoNKztmabZQ4/uN1812uN1xu1/z92V5e4FJa9zYsWKx7STDm4X90WLfw2QingLjEWM9Nsf397+T0Eu3EoVORdCBqcZ7vFJI/LSMxewtB0FscYD86kXi3brNLlm4U0rS9SgHypn+5biQmchW6kfOk+rCqgV53gpSVL74jFDPdQiedPayqGthHQla3ZtwOKRbouNK65fAgSOGyz9sO8uE2IKFAQGvEkg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
  dkim=pass header.d=nokia.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
  s=selector1-nokia-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F+qMe+8yubn6aG/2vr01v50CJ1MAWTU5gF0Ef+gnPTo=;
- b=Zwecj7PRmF1zNzkRNTZDuHgBU/RyZGCq9giL27ZFvWZ1ZoQeSc2yTzil/KFRt8QATQuCWNGnDUe7UH7Bn7FVxjH97RNDaNUM215t9EPab/qoZtiLHmRCFuDNsp2xXlH6bJfqwfe1HB/SWcP8GwBFQKKoyya/GDpKKlam+YWIGRU=
-Received: from DB6PR0701MB2792.eurprd07.prod.outlook.com (2603:10a6:4:22::21)
- by AM8PR07MB8138.eurprd07.prod.outlook.com (2603:10a6:20b:36d::17) with
+ bh=NRHHuU5xC23xWemfI0jA9+NhgVbGuULb4eqVHXJa3BE=;
+ b=ODCiIQMr/mVS4CB6yxef2B4w8Sl34lh/RZ0rgT3OlgrR7rQ883+d6HoWJF7W7fOzIN/lOvMnuUX310R//4o7l5owK1I8ObES6p2mPHt+PKomNmJDciqY5T5ICmB8OuZb8VXeLC+OXExMY+jiFR+7MoejzD79KcNYdP//Tw0O3iM=
+Received: from HE1PR0702MB3610.eurprd07.prod.outlook.com (2603:10a6:7:7f::27)
+ by DB9PR07MB8499.eurprd07.prod.outlook.com (2603:10a6:10:36c::9) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.14; Mon, 19 Sep
- 2022 16:35:24 +0000
-Received: from DB6PR0701MB2792.eurprd07.prod.outlook.com
- ([fe80::c9e6:6793:61c2:a9c3]) by DB6PR0701MB2792.eurprd07.prod.outlook.com
- ([fe80::c9e6:6793:61c2:a9c3%2]) with mapi id 15.20.5654.014; Mon, 19 Sep 2022
- 16:35:24 +0000
-From:   "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+ 2022 17:23:20 +0000
+Received: from HE1PR0702MB3610.eurprd07.prod.outlook.com
+ ([fe80::9bb7:bf55:ae2d:bee3]) by HE1PR0702MB3610.eurprd07.prod.outlook.com
+ ([fe80::9bb7:bf55:ae2d:bee3%6]) with mapi id 15.20.5654.011; Mon, 19 Sep 2022
+ 17:23:19 +0000
+From:   "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
+To:     "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>,
         "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
-CC:     "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
-        "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
-Subject: RE: [PATCH v3] mmc-utils: correct and clean up the file handling
-Thread-Topic: [PATCH v3] mmc-utils: correct and clean up the file handling
-Thread-Index: AQHYxDvQ/ozpOhLReEWfUeP0ukVX0K3m2A+AgAArD0A=
-Date:   Mon, 19 Sep 2022 16:35:23 +0000
-Message-ID: <DB6PR0701MB2792CE2696EE990FE0398767F24D9@DB6PR0701MB2792.eurprd07.prod.outlook.com>
-References: <20220909110322.25141-1-bruno.matic@nokia.com>
- <CAPDyKFqqQYMvWCpd8kLv+qWo71zbz0UgxuzrVEfxev9migsSxQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFqqQYMvWCpd8kLv+qWo71zbz0UgxuzrVEfxev9migsSxQ@mail.gmail.com>
-Accept-Language: de-DE, en-US
+Subject: RE: [PATCH] mmc-utils: correct ffu in case of unsupported
+  MODE_OPERATION_CODES
+Thread-Topic: [PATCH] mmc-utils: correct ffu in case of unsupported
+  MODE_OPERATION_CODES
+Thread-Index: AQHYzEOPJ/2/a6osnE6M+VZvdb9TLa3m/25w
+Date:   Mon, 19 Sep 2022 17:23:19 +0000
+Message-ID: <HE1PR0702MB3610EC6EF02982BCD66E0DB5804D9@HE1PR0702MB3610.eurprd07.prod.outlook.com>
+References: <20220919161852.28072-1-bruno.matic@nokia.com>
+In-Reply-To: <20220919161852.28072-1-bruno.matic@nokia.com>
+Accept-Language: fi-FI, en-GB, en-US
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 authentication-results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nokia.com;
 x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DB6PR0701MB2792:EE_|AM8PR07MB8138:EE_
-x-ms-office365-filtering-correlation-id: debd3daa-edf9-4fdc-cf52-08da9a5cf384
+x-ms-traffictypediagnostic: HE1PR0702MB3610:EE_|DB9PR07MB8499:EE_
+x-ms-office365-filtering-correlation-id: 5d784ab8-9d2f-41ff-96bf-08da9a63a5a2
 x-ms-exchange-senderadcheck: 1
 x-ms-exchange-antispam-relay: 0
 x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: 0+SXk+blYihTja8F7BvOpqoIDBi00ZQeYGU+UZzOY+nctm43htM+QBTWUd/+whVMy9SkTHIu0BuzegXzT1dEGtJRwylYDOA71jas3X1nOHe5L3RXFeS9WSzBUU0bVUGTY5u2GpCucjX0zA3C0Zop/xRnhFBti0IzTRCOcSn1ybheh2pwGr72C8eew44UoMIWizgTt/zKEHn7UIVf7I0VN6mYfoT+oiUXhW7TJnPZ1cvNW6if/2hM+crxTrZyN00otxnJveB8Qsy7FRkaFF11rMxtdfn6ReF8VNP+1S2RtXo+PdgbNXv4qdhNI4Z4WZdY68cevWLzkzqKGp8LKvJ+KBLWUU2ftflEQA2g7FVdU1T0o9Ri9uChljMpBphJ+R46ze9uOYd9jTGZA9axIyEOoLkmY1BJjltk5y4m5ftiaxvLYWF7vjCseN6L1LQSu2JAaDbpivNx3Ez09kCtOx2kIpzOp0DvT6VFTer9TE1VK9UIYz3q30d8E+Vj3NgKnrnpaMDMfBtIl5yEuwUvnIK45qvuGNIhelAuyAuYBkX/aEES1Gh73Sa2MUxUQdm+VVXeZhLmYGKV6KHOFZKcp0siwQ6Q64XDaXAhiV2HRXTByHPmFb7OL2+yzBqDkP42whJnjpgf+MA+AfTBfXqX+OgZ9lCv7uWn2o8RZ02X3Hgc2i0Eie0msnZ8my2QHqctrgcoUHLYsprWyCgEM+bc4lMmG4BT0IMVa6/hrpC0cnHCm+6/8prkQrQD2Apk4xK8MIiPecgTdbgR2MZOpJx05HgZC/OJqhQq2mMOO+qewKZ0cXk=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0701MB2792.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(346002)(39860400002)(136003)(376002)(396003)(366004)(451199015)(33656002)(55016003)(478600001)(6636002)(316002)(84970400001)(5660300002)(41300700001)(38070700005)(82960400001)(122000001)(186003)(83380400001)(86362001)(38100700002)(71200400001)(110136005)(53546011)(6506007)(54906003)(9686003)(7696005)(107886003)(76116006)(66946007)(66476007)(52536014)(64756008)(66446008)(8936002)(2906002)(4326008)(66556008)(8676002);DIR:OUT;SFP:1102;
+x-microsoft-antispam-message-info: RL0Rp7qcL2a51Z6jiMTiTSbVKQ2844V4Ez0uOXCSbrkLCG/S4cJyRQe/MRxThu6l88vSB+Q2FQulBZy/bcn12T/qb+bLXuXlxo2VsXqEea6D6kxx2NRN9EaeYV62fniQXVCzieC3u7Q+0FOFsdIepPcrJIrMDZ/Ws8XnCLqYEPU2Mv6TV4mDa2DyJErsqf2oDg6zb1leT4Azs9hV1zUrZ3CDAnaHpfuaApnnfdQfd0J71O6B9a2YC2atulE3gTD6SIwY3okU8FLX1uNgVPVgQZpVSKbRMzTX++CTk8a7p+S8xuRbJyurcqQyFoL8sdN34LVV0gzjLCJ++tgQqIldzf5lKFzwo4XYpT9XelQ2o9GgPIYj4MwTAIvDqVswbn6rcNwxsnW3xCwn31rDjmIfI7q5JlOGMKWmDTd5Bg2mqo9iMnr4U6PWrsoEqZj6YLLY93tYZHj/TkZlK0Cva4pb47hl8oKu0tqQQJJB5N6TmdktCp/KQHEpaGL9L05kGIh6Q4rg74dGe7T7G4usPnpaayOat7grluLDjIUvHja/uMgUaJ+RHl3eBuE8Y8X4AR1wk+IrWdrWBy8zWC76b2HISEgSSmWhEhebmsOrLAgqNYjQzQVY3IDX9YT18natXhDuTEZjGxIXvDl8Qv1mMBO9JEVtmW+QYwme5kuED8P7+tXcNtFwoVwV89qkkPHkHWeXLx+ZzSwNuNw/rg9oqcw9SlzJLBq+vGduF8o9+iLaxu1K6O70kCCt60k0d7N4XmjCiz5uU9GCav2VrlVQv3B7vA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:HE1PR0702MB3610.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(136003)(396003)(376002)(39860400002)(366004)(346002)(451199015)(38100700002)(122000001)(86362001)(33656002)(83380400001)(82960400001)(38070700005)(186003)(2906002)(7696005)(9686003)(6506007)(55016003)(478600001)(41300700001)(71200400001)(26005)(53546011)(107886003)(5660300002)(54906003)(110136005)(52536014)(8936002)(316002)(8676002)(4326008)(76116006)(64756008)(66946007)(66556008)(66446008)(66476007);DIR:OUT;SFP:1102;
 x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?dnZMME1NVEMrYTJHTWRHODBqLzYrTzJJZkxRMEhZd29GNmdCOFYvWUJQbmZk?=
- =?utf-8?B?R1Q2MWJ6TWhYY0R6T1BQQlJ4UmYvblJEb1hWZ09wU0VwV1c0UEVhMDhTa0l4?=
- =?utf-8?B?OW5VVTg1c2xXUmZkOTRBb0VycVhIbVppWG1yN3NYMEJCR0FKUmg5L1ZXMURw?=
- =?utf-8?B?aFRpTXhHcFRoQjVzaVFqZ3ZpSTdJcTkwMGRNMFFlMm01MlBtdldXTmlhZ3hU?=
- =?utf-8?B?TGVhNmR2ZllXdGcxUlNjK3NPUjQxWEdhSWJlUkZTVjZEeTFmV0J1ZVB0TnRD?=
- =?utf-8?B?aTc4MThUVFBGMmNwNm9BazR0eDJGaFFiU0F3MkhQSktTbWZ6ZFlPeDQyQldk?=
- =?utf-8?B?N09CWTdqZkY5RXIydDVhSTc0RU8wNUxWTWpSY285OU13RkxjVFJ0NlRBVDBT?=
- =?utf-8?B?KzdMTW95cFNwSGhBYzRVS3pyZ0QrYmtuaEFWY2lQMGNtQit6KzhSaVFHbGNJ?=
- =?utf-8?B?TGdNZ0lqYzd2M0ZqRHNIbWo2dE11QU9WMXppcW1md1N6WmJ5YU8rbHQ4QUF3?=
- =?utf-8?B?Y3UvY1I1dDI1TmxmeGxhcEUwQ2wzV0VCMDNvaG45aXNMaUJyTkh6ZmlPZEs2?=
- =?utf-8?B?L29PNlZmNnhUMW5CZDZMSTlSWU4zajFLbXVRUk5aQUp0SURSSGhhRHF5THBQ?=
- =?utf-8?B?bWRwUHdPRkN4b3BwV0s4N3pXYXB0b0tlMnpIK25FYzR5eWJxY0xEWHBtKzlZ?=
- =?utf-8?B?RXo3eFpiejV1Mjh6dmJYRVdtMjZGeEhuYlNtVFBKYjBqbEptQXo5dW9RbXFF?=
- =?utf-8?B?MWF5RlNKeU1sazU4SERnMDREcVBLUy9UQVlKY0RJUmV1bC8zQW9nWUdvWmVS?=
- =?utf-8?B?OGovVXYxWFR2L01QNFV6alJBNysxUm9yRFNUR3B2Zk9vYkx0Z3UxN1gxeHhy?=
- =?utf-8?B?UEVpMWRvM29jemVqdFFremJqTVNpN0RqSTB3TE5tdXZTMFdVbko1K0tOamxF?=
- =?utf-8?B?WnZWMGZWK2l2QW5mbCtvcFlWT0Fzck9vblVVMDd2M1F3NDYvMzVXcjlsdXNq?=
- =?utf-8?B?dVVyTmx6SmRMeDZIZ1FmNUQ1T2xRNkx1TXlQcStyYXRaUW5FSGdqMlo2b0JH?=
- =?utf-8?B?eTlUNjg5YXJnYzhvRWNpUmhlY0UzZmZzRkFxVElnTUZCSlVqRmM2d1hGOGto?=
- =?utf-8?B?ZTVNY252bW0zL0lDYWtEYXEwa2s5dkducUI5U3ZMMXptNUEzWlhhcS9wTTE0?=
- =?utf-8?B?OXR3K3A3UFFqckRRUDJ1MHZkc1l2elZMY0RiMlhFUzBTYnNwdUxuQ2wxUkdj?=
- =?utf-8?B?NC9JTGdIaE10cWtWRkZxYndYbmhISjFLOFVmMUtJdGp1TncyOVlLR0FEelVE?=
- =?utf-8?B?a3U4d1UxWVVHY2pTOW9SK28rY2M0ZE14eUhPTmJlVEptRWFoZ0FnbWw4L3Zp?=
- =?utf-8?B?ZzdXTnZVcjhFcXk2S2VlUGR5dHRjbjBjVkt3RC94THJXZnNpcGRzbzFVUHJI?=
- =?utf-8?B?K2pIRFgrQU1vTkJiekIrY2J6MVJBa2hCYStScWk3Z1NwTFhHRkdxRXdKT2RE?=
- =?utf-8?B?OWxGQTlJT2lUaGlHajBpZkVRVDc4YUY1eFNVRjd6SUExcFhXb2txdk44Z3Jm?=
- =?utf-8?B?emJmd1dzeXRvdkpBNDh5Y1JTUmczQ0gzQ1lXL0RFL2czVEtBWWVCNHJRSERt?=
- =?utf-8?B?RHpOcTlFeEdpa1U0UTdwOWxwMjZNWXBQcUd1TkM2U1g4UFBmMW92NUhlUVlL?=
- =?utf-8?B?d1ZmMVVCYk1EeWZFR1cyWDVUVWV4NVp3ODVYSEZMaWVjeXhGNWREc0UzSUhG?=
- =?utf-8?B?OUpLU2FnU2NYdFNic0NKMnpVZW9MTEw3WlIyV0g2ZjVDOFdvQTdVejNOaE9h?=
- =?utf-8?B?OElNZDRKT05BcXY2RDJSL21QWURYV2pwZlVUak0vS0REQ2M0SEtQTU43K05h?=
- =?utf-8?B?TXc3VU5maHV5R2Q3Nnpoejlmb0hqMXRzY2J0L0tIaWFQRCtBSTFrdWw3Tk0x?=
- =?utf-8?B?d3gxTk1mcDZ5dEtFMUtReHRvQkRsTUc3aFR1czFlQkdmZW9PT2dSV0w4dkpl?=
- =?utf-8?B?Vkp6WTE4UkdWMHJtdUtxMkZuUm5DUmo0ZVN1dGpnNjJOSEZzUzJCLytaZTVr?=
- =?utf-8?B?aVBFT2VPRjV1eWo4bFpMd1loamdtK0ZxbzJ0TjBDcURrRFN6a1dJdWxqdS9T?=
- =?utf-8?B?V3Y3a0NPbFhLVitxT1hsMUtTTmIrQ2FDTTJyZEdURUhFZjNzU1hXRURuUDQ0?=
- =?utf-8?Q?qqxcQHlQ/QLlHsUEPIUkvTMjZQtfqwf2u/mmEPuYNCNw?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?JBFC0rhVBGB4piNO5Li+OkUD1OXxpvK+4XYH16xcwAo4yLkye/52jGr3EEqV?=
+ =?us-ascii?Q?Z4d4nvXHSU02m0M08Sz1dnNb5OkVYt19CyoJcsGlh4feCtXJVGEiSQoosZNW?=
+ =?us-ascii?Q?RWNY3S70OUvcuYzgxA1j4HfmXsISZzaxudYV9ql21F4tF7C8HbvgHYf9K9h1?=
+ =?us-ascii?Q?eWyysSgeMTcNlCPgXsdZpImIfFpHky4xeq4UPrdoe3yH+Pv3DGFIfls5mR68?=
+ =?us-ascii?Q?cOh42oPDIHoIzDW9uevpQbyRBiDwhDznqzfoZwX7b4OagNAlQX5JcSMf6JuA?=
+ =?us-ascii?Q?QxqTAa8GuBXSX51xHTlQd0poLiksMnOHA9QXESLhLB3q5rsgD1rE6D+Bb93j?=
+ =?us-ascii?Q?PQ+clFOiSBuLbqkodKBY1pHOmMEqQ7t/oT68zYZ79xYe06R6aLL23VkMqxwe?=
+ =?us-ascii?Q?8tVFAmERkajbjNxpadjJ5KAHR+pZ5HXZGV6uVqCOGQqtzRNT1gISt/aWPLKt?=
+ =?us-ascii?Q?l5yDrzCVywG76JsRUfyJJTtc3z0hrDihiDun+jzf634tM2sJ0n+AFZymo09H?=
+ =?us-ascii?Q?w1hxADduENpjNcNQcW+IPsPkwqy4IIf3zoMogO/lwyEY0OMC8S3/7jDSZE8Z?=
+ =?us-ascii?Q?I7jooazpqFw9BEw0Orw3YvOWESUfnNwUdXhMZqthUGdzkjsXNlCRwJtWha4K?=
+ =?us-ascii?Q?PI84rmaYP0GpKGyVYtF5k2bC6V0c34qs1zk5nbUxedNqVNiY1ePphTWCu1bg?=
+ =?us-ascii?Q?/tS4dlQiimsepsNQ02JcBRXo2JLP/WpZs9r8/st8lMlFzw2jHgJ/13X+XiNQ?=
+ =?us-ascii?Q?hpFzkSmpA/kpGUADg10VVSOKqilWmUk4N4t4NYmein5ABP6vFwei3RZ8jW7z?=
+ =?us-ascii?Q?A0xATlZlVEfZj1ELPUi/gVmpvKuQQz4ntaeGeeNzwPHmkCMy1H80AqWXWz6j?=
+ =?us-ascii?Q?Q7WCuNfGvHC0Q3NZ8bbkVHW9nnS3zIjP0iHzZ+9k88w4/PAVYNq0zs71fP8T?=
+ =?us-ascii?Q?qLTfPcSijPxqkMTKpzW3CyJLtvtlns6PQY/43Y/i5uDNI+pJuWtLwFvno2FB?=
+ =?us-ascii?Q?9/Iwf+QKtwmJYeB7wwm2JQM8wkiWl7aRJlTA2kD4zy9mYiy938/IGUmAWV8b?=
+ =?us-ascii?Q?g5K0Vme7iIzWrhxsZ0Mci3UPEPxZL38/K+/vpEMNo1dm8FlSMtBRz0bALeSO?=
+ =?us-ascii?Q?SjgHrlIVHvMUlRKbT1dCZriQA/g1C1jFwuq80npHpIJJfwz5qHZWwBoA7DTB?=
+ =?us-ascii?Q?PQoJJOfpfFYeFXnP2Gqeknu2uknhtIVn9zkawZW/IpGeho5mxsxf146oqiAc?=
+ =?us-ascii?Q?cNuZjjcNg7CPh5z1g4sGn6MxRkFbvW6CXIl+pcKua9oaZlZ95uOj3yRAk+dr?=
+ =?us-ascii?Q?gNxIhMP1Zm5Bhk4RQhAKi36unpP7NJpbMQltJdOHQQkD2MvMnO1VHjZudpLg?=
+ =?us-ascii?Q?bquCrupkFvSumt01kDpm+GYR+C42KW8oaCwSuhlanG7oqeS0/hDErO+1AJRx?=
+ =?us-ascii?Q?4DJR/0TjLROiid5Qad68tn4Rtve/sm1yKvGWbgq5x5QRKqCq5HQnJ/he02i2?=
+ =?us-ascii?Q?1cWO31LDE7EJsB6Vka7qE2kOsGH9rUCRuJ9tBTAdk3NgQG5979iaTOxdOw3o?=
+ =?us-ascii?Q?vDXw8f2CurS/tUeWIivl+imtOreTSRWuVr6Lt5pp?=
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
 X-OriginatorOrg: nokia.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM8PR07MB8138
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DB9PR07MB8499
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-VGVzdGVkLWJ5OiBSb3NzbGVyLCBKYWtvYiAoTm9raWEgLSBERS9VbG0pIDxqYWtvYi5yb3NzbGVy
-QG5va2lhLmNvbT4NCg0KQmVzdCByZWdhcmRzDQpKYWtvYg0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
-Z2UtLS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+IA0KU2Vu
-dDogTW9uZGF5LCBTZXB0ZW1iZXIgMTksIDIwMjIgNDowMSBQTQ0KVG86IE1hdGljLCBCcnVubyAo
-Tm9raWEgLSBERS9VbG0pIDxicnVuby5tYXRpY0Bub2tpYS5jb20+DQpDYzogYXZyaS5hbHRtYW5A
-d2RjLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQ0xvZWhsZUBoeXBlcnN0b25lLmNv
-bTsgUm9zc2xlciwgSmFrb2IgKE5va2lhIC0gREUvVWxtKSA8amFrb2Iucm9zc2xlckBub2tpYS5j
-b20+OyBIZWlub25lbiwgQWFybmUgKE5va2lhIC0gRkkvRXNwb28pIDxhYXJuZS5oZWlub25lbkBu
-b2tpYS5jb20+DQpTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWMtdXRpbHM6IGNvcnJlY3QgYW5k
-IGNsZWFuIHVwIHRoZSBmaWxlIGhhbmRsaW5nDQoNCk9uIEZyaSwgOSBTZXB0IDIwMjIgYXQgMTM6
-MDMsIEJydW5vIE1hdGljIDxicnVuby5tYXRpY0Bub2tpYS5jb20+IHdyb3RlOg0KPg0KPiBBZGQg
-dGhlIGNoZWNrIGlmIHRoZSB3aG9sZSBmaXJtd2FyZSB3YXMgbG9hZGVkLg0KPiBDbGVhbmVkIHVw
-IHRoZSBsZWZ0b3ZlcnMgb2YgaGFuZGxpbmcgdGhlIGZpbGUgaW4gY2h1bmtzLg0KPg0KPiBDaGFu
-Z2VzIGluIHYzOg0KPiAgIC0gY2hlY2tlZCBhbmQgZm9ybWF0ZWQgdGhlIHBhdGNoDQo+IENoYW5n
-ZXMgaW4gdjI6DQo+ICAgLSB1c2UgcGVycm9yIHRvIHByb3BhZ2F0ZSB0aGUgZXJyb3Igb24gZmls
-ZSByZWFkDQo+DQo+IFNpZ25lZC1vZmYtYnk6IEJydW5vIE1hdGljIDxicnVuby5tYXRpY0Bub2tp
-YS5jb20+DQo+IFJldmlld2VkLWJ5OiBBdnJpIEFsdG1hbiA8YXZyaS5hbHRtYW5Ad2RjLmNvbT4N
-Cg0KQXBwbGllZCB0byBnaXQua2VybmVsLm9yZy9wdWIvc2NtLy91dGlscy9tbWMvbW1jLXV0aWxz
-LmdpdCBtYXN0ZXIsIHRoYW5rcyENCg0KS2luZCByZWdhcmRzDQpVZmZlDQoNCj4gLS0tDQo+ICBt
-bWNfY21kcy5jIHwgNjYgKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tDQo+ICAxIGZpbGUgY2hhbmdlZCwgMzIgaW5zZXJ0aW9ucygrKSwgMzQgZGVs
-ZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9tbWNfY21kcy5jIGIvbW1jX2NtZHMuYw0KPiBp
-bmRleCAxMmI3ODAyLi5lZjFkOGM2IDEwMDY0NA0KPiAtLS0gYS9tbWNfY21kcy5jDQo+ICsrKyBi
-L21tY19jbWRzLmMNCj4gQEAgLTI3NjUsNyArMjc2NSw2IEBAIGludCBkb19mZnUoaW50IG5hcmdz
-LCBjaGFyICoqYXJndikNCj4gICAgICAgICBfX3U4ICpidWYgPSBOVUxMOw0KPiAgICAgICAgIF9f
-dTMyIGFyZzsNCj4gICAgICAgICBvZmZfdCBmd19zaXplOw0KPiAtICAgICAgIHNzaXplX3QgY2h1
-bmtfc2l6ZTsNCj4gICAgICAgICBjaGFyICpkZXZpY2U7DQo+ICAgICAgICAgc3RydWN0IG1tY19p
-b2NfbXVsdGlfY21kICptdWx0aV9jbWQgPSBOVUxMOw0KPg0KPiBAQCAtMjg3OSw0NSArMjg3OCw0
-NCBAQCBpbnQgZG9fZmZ1KGludCBuYXJncywgY2hhciAqKmFyZ3YpDQo+ICAgICAgICAgbXVsdGlf
-Y21kLT5jbWRzWzNdLmZsYWdzID0gTU1DX1JTUF9TUElfUjFCIHwgTU1DX1JTUF9SMUIgfCBNTUNf
-Q01EX0FDOw0KPiAgICAgICAgIG11bHRpX2NtZC0+Y21kc1szXS53cml0ZV9mbGFnID0gMTsNCj4N
-Cj4gLWRvX3JldHJ5Og0KPiAtICAgICAgIC8qIHJlYWQgZmlybXdhcmUgY2h1bmsgKi8NCj4gKyAg
-ICAgICAvKiByZWFkIGZpcm13YXJlICovDQo+ICAgICAgICAgbHNlZWsoaW1nX2ZkLCAwLCBTRUVL
-X1NFVCk7DQo+IC0gICAgICAgY2h1bmtfc2l6ZSA9IHJlYWQoaW1nX2ZkLCBidWYsIGZ3X3NpemUp
-Ow0KPiArICAgICAgIGlmIChyZWFkKGltZ19mZCwgYnVmLCBmd19zaXplKSAhPSBmd19zaXplKSB7
-DQo+ICsgICAgICAgICAgICAgICBwZXJyb3IoIkNvdWxkIG5vdCByZWFkIHRoZSBmaXJtd2FyZSBm
-aWxlOiAiKTsNCj4gKyAgICAgICAgICAgICAgIHJldCA9IC1FTk9TUEM7DQo+ICsgICAgICAgICAg
-ICAgICBnb3RvIG91dDsNCj4gKyAgICAgICB9DQo+DQo+IC0gICAgICAgaWYgKGNodW5rX3NpemUg
-PiAwKSB7DQo+IC0gICAgICAgICAgICAgICAvKiBzZW5kIGlvY3RsIHdpdGggbXVsdGktY21kICov
-DQo+IC0gICAgICAgICAgICAgICByZXQgPSBpb2N0bChkZXZfZmQsIE1NQ19JT0NfTVVMVElfQ01E
-LCBtdWx0aV9jbWQpOw0KPiArZG9fcmV0cnk6DQo+ICsgICAgICAgLyogc2VuZCBpb2N0bCB3aXRo
-IG11bHRpLWNtZCAqLw0KPiArICAgICAgIHJldCA9IGlvY3RsKGRldl9mZCwgTU1DX0lPQ19NVUxU
-SV9DTUQsIG11bHRpX2NtZCk7DQo+DQo+IC0gICAgICAgICAgICAgICBpZiAocmV0KSB7DQo+IC0g
-ICAgICAgICAgICAgICAgICAgICAgIHBlcnJvcigiTXVsdGktY21kIGlvY3RsIik7DQo+IC0gICAg
-ICAgICAgICAgICAgICAgICAgIC8qIEluIGNhc2UgbXVsdGktY21kIGlvY3RsIGZhaWxlZCBiZWZv
-cmUgZXhpdGluZyBmcm9tIGZmdSBtb2RlICovDQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGlv
-Y3RsKGRldl9mZCwgTU1DX0lPQ19DTUQsICZtdWx0aV9jbWQtPmNtZHNbM10pOw0KPiAtICAgICAg
-ICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gLSAgICAgICAgICAgICAgIH0NCj4gKyAgICAg
-ICBpZiAocmV0KSB7DQo+ICsgICAgICAgICAgICAgICBwZXJyb3IoIk11bHRpLWNtZCBpb2N0bCIp
-Ow0KPiArICAgICAgICAgICAgICAgLyogSW4gY2FzZSBtdWx0aS1jbWQgaW9jdGwgZmFpbGVkIGJl
-Zm9yZSBleGl0aW5nIGZyb20gZmZ1IG1vZGUgKi8NCj4gKyAgICAgICAgICAgICAgIGlvY3RsKGRl
-dl9mZCwgTU1DX0lPQ19DTUQsICZtdWx0aV9jbWQtPmNtZHNbM10pOw0KPiArICAgICAgICAgICAg
-ICAgZ290byBvdXQ7DQo+ICsgICAgICAgfQ0KPg0KPiAtICAgICAgICAgICAgICAgcmV0ID0gcmVh
-ZF9leHRjc2QoZGV2X2ZkLCBleHRfY3NkKTsNCj4gLSAgICAgICAgICAgICAgIGlmIChyZXQpIHsN
-Cj4gLSAgICAgICAgICAgICAgICAgICAgICAgZnByaW50ZihzdGRlcnIsICJDb3VsZCBub3QgcmVh
-ZCBFWFRfQ1NEIGZyb20gJXNcbiIsIGRldmljZSk7DQo+IC0gICAgICAgICAgICAgICAgICAgICAg
-IGdvdG8gb3V0Ow0KPiAtICAgICAgICAgICAgICAgfQ0KPiArICAgICAgIHJldCA9IHJlYWRfZXh0
-Y3NkKGRldl9mZCwgZXh0X2NzZCk7DQo+ICsgICAgICAgaWYgKHJldCkgew0KPiArICAgICAgICAg
-ICAgICAgZnByaW50ZihzdGRlcnIsICJDb3VsZCBub3QgcmVhZCBFWFRfQ1NEIGZyb20gJXNcbiIs
-IGRldmljZSk7DQo+ICsgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gKyAgICAgICB9DQo+DQo+
-IC0gICAgICAgICAgICAgICAvKiBUZXN0IGlmIHdlIG5lZWQgdG8gcmVzdGFydCB0aGUgZG93bmxv
-YWQgKi8NCj4gLSAgICAgICAgICAgICAgIHNlY3RfZG9uZSA9IGV4dF9jc2RbRVhUX0NTRF9OVU1f
-T0ZfRldfU0VDX1BST0dfMF0gfA0KPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGV4
-dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMV0gPDwgOCB8DQo+IC0gICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPR18y
-XSA8PCAxNiB8DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRf
-Q1NEX05VTV9PRl9GV19TRUNfUFJPR18zXSA8PCAyNDsNCj4gLSAgICAgICAgICAgICAgIC8qIEJ5
-IHNwZWMsIGhvc3Qgc2hvdWxkIHJlLXN0YXJ0IGRvd25sb2FkIGZyb20gdGhlIGZpcnN0IHNlY3Rv
-ciBpZiBzZWN0X2RvbmUgaXMgMCAqLw0KPiAtICAgICAgICAgICAgICAgaWYgKHNlY3RfZG9uZSA9
-PSAwKSB7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGlmIChyZXRyeSA+IDApIHsNCj4gLSAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXRyeS0tOw0KPiAtICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiUHJvZ3JhbW1pbmcgZmFpbGVkLiBSZXRy
-eWluZy4uLiAoJWQpXG4iLCByZXRyeSk7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgZ290byBkb19yZXRyeTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiAtICAgICAg
-ICAgICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZCEgQWJv
-cnRpbmcuLi5cbiIpOw0KPiAtICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gLSAg
-ICAgICAgICAgICAgIH0gZWxzZSB7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYo
-c3RkZXJyLCAiUHJvZ3JhbW1lZCAlZC8lamQgYnl0ZXNcciIsIHNlY3RfZG9uZSAqIHNlY3Rfc2l6
-ZSwgKGludG1heF90KWZ3X3NpemUpOw0KPiArICAgICAgIC8qIFRlc3QgaWYgd2UgbmVlZCB0byBy
-ZXN0YXJ0IHRoZSBkb3dubG9hZCAqLw0KPiArICAgICAgIHNlY3RfZG9uZSA9IGV4dF9jc2RbRVhU
-X0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMF0gfA0KPiArICAgICAgICAgICAgICAgICAgICAgICBl
-eHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzFdIDw8IDggfA0KPiArICAgICAgICAg
-ICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzJdIDw8IDE2
-IHwNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19T
-RUNfUFJPR18zXSA8PCAyNDsNCj4gKyAgICAgICAvKiBCeSBzcGVjLCBob3N0IHNob3VsZCByZS1z
-dGFydCBkb3dubG9hZCBmcm9tIHRoZSBmaXJzdCBzZWN0b3IgaWYgc2VjdF9kb25lIGlzIDAgKi8N
-Cj4gKyAgICAgICBpZiAoc2VjdF9kb25lID09IDApIHsNCj4gKyAgICAgICAgICAgICAgIGlmIChy
-ZXRyeS0tKSB7DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiUHJv
-Z3JhbW1pbmcgZmFpbGVkLiBSZXRyeWluZy4uLiAoJWQpXG4iLCByZXRyeSk7DQo+ICsgICAgICAg
-ICAgICAgICAgICAgICAgIGdvdG8gZG9fcmV0cnk7DQo+ICAgICAgICAgICAgICAgICB9DQo+ICsg
-ICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZCEgQWJvcnRp
-bmcuLi5cbiIpOw0KPiArICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+ICAgICAgICAgfQ0KPg0K
-PiAgICAgICAgIGlmICgoc2VjdF9kb25lICogc2VjdF9zaXplKSA9PSBmd19zaXplKSB7DQo+IC0t
-DQo+IDIuMjkuMA0KPg0K
+Adding detail to the description, the functionality of patch from Bruno is =
+described in JESD84-B51A, Chapter 6.6.18, especially in 6th paragraph.
+--
+Aarne Heinonen
+
+-----Original Message-----
+From: Bruno Matic <bruno.matic@nokia.com>=20
+Sent: Monday, September 19, 2022 7:19 PM
+To: linux-mmc@vger.kernel.org
+Cc: ulf.hansson@linaro.org; avri.altman@wdc.com; Rossler, Jakob (Nokia - DE=
+/Ulm) <jakob.rossler@nokia.com>; Heinonen, Aarne (Nokia - FI/Espoo) <aarne.=
+heinonen@nokia.com>; Matic, Bruno (Nokia - DE/Ulm) <bruno.matic@nokia.com>
+Subject: [PATCH] mmc-utils: correct ffu in case of unsupported MODE_OPERATI=
+ON_CODES
+
+Move up the return in case MODE_OPERATION_CODES is not supported.
+According to the specification when MODE_OPERATION_CODES is not supported n=
+o checks should be done against NUM_OF_FW_SEC_PROG.
+
+Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
+---
+ mmc_cmds.c | 82 ++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 42 insertions(+), 40 deletions(-)
+
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index ef1d8c6..81fdc7e 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -2897,6 +2897,13 @@ do_retry:
+ 		goto out;
+ 	}
+=20
++	/* check mode operation for ffu install*/
++	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
++		fprintf(stderr, "Please reboot to complete firmware installation on %s\n=
+", device);
++		ret =3D 0;
++		goto out;
++	}
++
+ 	ret =3D read_extcsd(dev_fd, ext_csd);
+ 	if (ret) {
+ 		fprintf(stderr, "Could not read EXT_CSD from %s\n", device); @@ -2927,49=
+ +2934,44 @@ do_retry:
+ 		goto out;
+ 	}
+=20
+-	/* check mode operation for ffu install*/
+-	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
+-		fprintf(stderr, "Please reboot to complete firmware installation on %s\n=
+", device);
+-	} else {
+-		fprintf(stderr, "Installing firmware on %s...\n", device);
+-		/* Re-enter ffu mode and install the firmware */
+-		multi_cmd->num_of_cmds =3D 2;
+-
+-		/* set ext_csd to install mode */
+-		multi_cmd->cmds[1].opcode =3D MMC_SWITCH;
+-		multi_cmd->cmds[1].blksz =3D 0;
+-		multi_cmd->cmds[1].blocks =3D 0;
+-		multi_cmd->cmds[1].arg =3D (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
+-				(EXT_CSD_MODE_OPERATION_CODES << 16) |
+-				(EXT_CSD_FFU_INSTALL << 8) |
+-				EXT_CSD_CMD_SET_NORMAL;
+-		multi_cmd->cmds[1].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+-		multi_cmd->cmds[1].write_flag =3D 1;
+-
+-		/* send ioctl with multi-cmd */
+-		ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
++	fprintf(stderr, "Installing firmware on %s...\n", device);
++	/* Re-enter ffu mode and install the firmware */
++	multi_cmd->num_of_cmds =3D 2;
+=20
+-		if (ret) {
+-			perror("Multi-cmd ioctl failed setting install mode");
+-			/* In case multi-cmd ioctl failed before exiting from ffu mode */
+-			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
+-			goto out;
+-		}
++	/* set ext_csd to install mode */
++	multi_cmd->cmds[1].opcode =3D MMC_SWITCH;
++	multi_cmd->cmds[1].blksz =3D 0;
++	multi_cmd->cmds[1].blocks =3D 0;
++	multi_cmd->cmds[1].arg =3D (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
++			(EXT_CSD_MODE_OPERATION_CODES << 16) |
++			(EXT_CSD_FFU_INSTALL << 8) |
++			EXT_CSD_CMD_SET_NORMAL;
++	multi_cmd->cmds[1].flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
++	multi_cmd->cmds[1].write_flag =3D 1;
+=20
+-		ret =3D read_extcsd(dev_fd, ext_csd);
+-		if (ret) {
+-			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
+-			goto out;
+-		}
++	/* send ioctl with multi-cmd */
++	ret =3D ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
+=20
+-		/* return status */
+-		ret =3D ext_csd[EXT_CSD_FFU_STATUS];
+-		if (ret) {
+-			fprintf(stderr, "%s: error %d during FFU install:\n", device, ret);
+-			goto out;
+-		} else {
+-			fprintf(stderr, "FFU finished successfully\n");
+-		}
++	if (ret) {
++		perror("Multi-cmd ioctl failed setting install mode");
++		/* In case multi-cmd ioctl failed before exiting from ffu mode */
++		ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
++		goto out;
++	}
++
++	ret =3D read_extcsd(dev_fd, ext_csd);
++	if (ret) {
++		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
++		goto out;
++	}
++
++	/* return status */
++	ret =3D ext_csd[EXT_CSD_FFU_STATUS];
++	if (ret) {
++		fprintf(stderr, "%s: error %d during FFU install:\n", device, ret);
++		goto out;
++	} else {
++		fprintf(stderr, "FFU finished successfully\n");
+ 	}
+=20
+ out:
+--
+2.29.0
+
