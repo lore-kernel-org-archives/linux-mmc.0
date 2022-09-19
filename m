@@ -2,198 +2,209 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40D42C54EE9
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Sep 2022 16:19:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 361F6ECAAA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Sep 2022 16:35:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229778AbiISQTX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Sep 2022 12:19:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47802 "EHLO
+        id S229685AbiISQfa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Sep 2022 12:35:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229706AbiISQTT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2022 12:19:19 -0400
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-eopbgr80109.outbound.protection.outlook.com [40.107.8.109])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A2AE2983A
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2022 09:19:17 -0700 (PDT)
+        with ESMTP id S229720AbiISQf2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Sep 2022 12:35:28 -0400
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2117.outbound.protection.outlook.com [40.107.22.117])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AC9726561
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2022 09:35:26 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=XhyRVwt0NsieUL/dSsyCn2TocNoUud7z8JWRlhSP4fWo9BM/sb3kIiUs2dqBZGumJ4jvYYllFI+FRGS9SWHqMQ2SYnNlZbpMP5hVk2/0k+bcspJiZfjqXmTSwe2TO8PRM79CJHrGAdXIFSovRrLSnSU6YexNfHYY97Dwg52sLGF9VL9ZpKf1yG4QFkiqbuQDqPm1h/IpAX+i11L1mbTeEpJeKd+h3gHxUABFDCBRcEV09eL4O1e33XS3xkexmMu1ngtpdyYAqa9y/w6bljBfXqT1lX8FBNBoRBP9aYhj0o4onOSkPsyj9vmTy3q276Q4OQbyPMTUg9FV0X11EwTXxg==
+ b=MW1+1ZBkqI2njAV7OXsUdcG8rRQ/MKZefsMA+iiU0Xh26PoY+8p7FDM2Y+GGwnM88GKZgtOwgH8giGdFaUztyxxXYvLqTxPhdh+8F9Qk5Wl2S1yL21OsNu1BP2orLWWDh8e63Wcl8ADHdyJFdgfMdPpxDRu8262ShniwFambQiuztPCvL9kFtertMPWtiAk8i2vP8cDHzZfmE0hCwyRBU+eoDGpFmU2yhBkLNeqG4Hyw5Sf0V+PXf6LpEzOf46LdqNmbuIdWWg4GrjkHO3KvV/Korf6Uu/sYB8qCnuKEeKybxmAdysLaMNDiWTWSSE5S0idTno9do63LirqifSDAbA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=tvY6juesECMYl9+SZFThj+PyDgXSLGZdDCSkVjlH9cM=;
- b=D3v/ohmPl+W4hR7Sss/qN/jYkxDU96SdFT6FjqGHa5ice+5soDPec5grTomRT5JcLWAQHgZrxxusxKHyyI0Yx9xoej2cP0TqRYeh+5afwcAV13vYb+QlflA6yKL/+e19+eRDm1qa9AAnjRbsyGO5QM37vfLwxVENSz8EUTK/WFRu/mnl6b6Ax3byCBVZFpEFb3Sf6jxF09ue1WLNf/pskEkT9Dm9r6iT27FJEtq0RIcqP104Zd0vuup7XOHM8F0OH7R2YGrm9P1IxrgIYT8kP/+dgOSRt5cDpWssE5jWd9bfako/MzOVKKHLSCTMWQLXf/EP7FtB8zDzb4exE/9MOQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 131.228.6.100) smtp.rcpttodomain=wdc.com smtp.mailfrom=nokia.com; dmarc=pass
- (p=none sp=none pct=100) action=none header.from=nokia.com; dkim=none
- (message not signed); arc=none
+ bh=F+qMe+8yubn6aG/2vr01v50CJ1MAWTU5gF0Ef+gnPTo=;
+ b=KWbDQDr4f4yxuUsI7O2M2+6T6L8k4OMZDwg5D+Xwka9428TUB1jSj0T21A1uN4vzEXY1w65TQGlMvDyFTZgVLxFytZ/IEdLCTGEIt9c20nzmSKPcfhvy1OnoY3OKf89SlarwsXjgaJWo5lGbATz5Es88fBjcYrBVdvhz4UIiBQR5KbaB7Wap6ih+KrYcbERihl54C3SBrM7iUsUBbSAfcIUAITE121Z5+97RUD3mlIo+kFQ0lohYoFNcR17oLSjY/VLUcg6R5HUcJ/lgqHbUXZnPpe2oXvkSyZHrxy20J8zGl++TUepX1msTQlFTH9cLpLeUUBWqyTn8NWSz78iM9A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nokia.com; dmarc=pass action=none header.from=nokia.com;
+ dkim=pass header.d=nokia.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nokia.onmicrosoft.com;
  s=selector1-nokia-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=tvY6juesECMYl9+SZFThj+PyDgXSLGZdDCSkVjlH9cM=;
- b=l4G2GIWsV4v3jDwT8i2CVYVK+2DTULllhOPqJUbNlGsjngkHrnLUODMWrLadGC5lqqnyO/0KERQbZg3nxOoIvg61qj0PjWx0z6flcDJ6cm50+K6NzqbaD+N/4X+tfxG31JAuZlGaAW3GyDDVEG6BK3E12yoqX4jfjZiUzvayjNQ=
-Received: from AM6PR05CA0027.eurprd05.prod.outlook.com (2603:10a6:20b:2e::40)
- by PR3PR07MB8226.eurprd07.prod.outlook.com (2603:10a6:102:179::22) with
+ bh=F+qMe+8yubn6aG/2vr01v50CJ1MAWTU5gF0Ef+gnPTo=;
+ b=Zwecj7PRmF1zNzkRNTZDuHgBU/RyZGCq9giL27ZFvWZ1ZoQeSc2yTzil/KFRt8QATQuCWNGnDUe7UH7Bn7FVxjH97RNDaNUM215t9EPab/qoZtiLHmRCFuDNsp2xXlH6bJfqwfe1HB/SWcP8GwBFQKKoyya/GDpKKlam+YWIGRU=
+Received: from DB6PR0701MB2792.eurprd07.prod.outlook.com (2603:10a6:4:22::21)
+ by AM8PR07MB8138.eurprd07.prod.outlook.com (2603:10a6:20b:36d::17) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.14; Mon, 19 Sep
- 2022 16:19:15 +0000
-Received: from AM7EUR03FT009.eop-EUR03.prod.protection.outlook.com
- (2603:10a6:20b:2e:cafe::43) by AM6PR05CA0027.outlook.office365.com
- (2603:10a6:20b:2e::40) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5632.21 via Frontend
- Transport; Mon, 19 Sep 2022 16:19:14 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 131.228.6.100)
- smtp.mailfrom=nokia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nokia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nokia.com designates
- 131.228.6.100 as permitted sender) receiver=protection.outlook.com;
- client-ip=131.228.6.100; helo=fr711usmtp2.zeu.alcatel-lucent.com; pr=C
-Received: from fr711usmtp2.zeu.alcatel-lucent.com (131.228.6.100) by
- AM7EUR03FT009.mail.protection.outlook.com (100.127.140.130) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5632.12 via Frontend Transport; Mon, 19 Sep 2022 16:19:14 +0000
-Received: from ulegcphtsw6.emea.nsn-net.net (ulegcphtsw6.emea.nsn-net.net [10.151.74.187])
-        by fr711usmtp2.zeu.alcatel-lucent.com (GMO) with ESMTP id 28JGJDpI018669;
-        Mon, 19 Sep 2022 16:19:13 GMT
-Received: by ulegcphtsw6.emea.nsn-net.net (Postfix, from userid 62095846)
-        id 015E5833; Mon, 19 Sep 2022 18:19:12 +0200 (CEST)
-From:   Bruno Matic <bruno.matic@nokia.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, avri.altman@wdc.com,
-        jakob.rossler@nokia.com, aarne.heinonen@nokia.com,
-        Bruno Matic <bruno.matic@nokia.com>
-Subject: [PATCH] mmc-utils: correct ffu in case of unsupported  MODE_OPERATION_CODES
-Date:   Mon, 19 Sep 2022 18:18:52 +0200
-Message-Id: <20220919161852.28072-1-bruno.matic@nokia.com>
-X-Mailer: git-send-email 2.29.0
+ 2022 16:35:24 +0000
+Received: from DB6PR0701MB2792.eurprd07.prod.outlook.com
+ ([fe80::c9e6:6793:61c2:a9c3]) by DB6PR0701MB2792.eurprd07.prod.outlook.com
+ ([fe80::c9e6:6793:61c2:a9c3%2]) with mapi id 15.20.5654.014; Mon, 19 Sep 2022
+ 16:35:24 +0000
+From:   "Rossler, Jakob (Nokia - DE/Ulm)" <jakob.rossler@nokia.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "Matic, Bruno (Nokia - DE/Ulm)" <bruno.matic@nokia.com>
+CC:     "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
+        "Heinonen, Aarne (Nokia - FI/Espoo)" <aarne.heinonen@nokia.com>
+Subject: RE: [PATCH v3] mmc-utils: correct and clean up the file handling
+Thread-Topic: [PATCH v3] mmc-utils: correct and clean up the file handling
+Thread-Index: AQHYxDvQ/ozpOhLReEWfUeP0ukVX0K3m2A+AgAArD0A=
+Date:   Mon, 19 Sep 2022 16:35:23 +0000
+Message-ID: <DB6PR0701MB2792CE2696EE990FE0398767F24D9@DB6PR0701MB2792.eurprd07.prod.outlook.com>
+References: <20220909110322.25141-1-bruno.matic@nokia.com>
+ <CAPDyKFqqQYMvWCpd8kLv+qWo71zbz0UgxuzrVEfxev9migsSxQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFqqQYMvWCpd8kLv+qWo71zbz0UgxuzrVEfxev9migsSxQ@mail.gmail.com>
+Accept-Language: de-DE, en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nokia.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DB6PR0701MB2792:EE_|AM8PR07MB8138:EE_
+x-ms-office365-filtering-correlation-id: debd3daa-edf9-4fdc-cf52-08da9a5cf384
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: 0+SXk+blYihTja8F7BvOpqoIDBi00ZQeYGU+UZzOY+nctm43htM+QBTWUd/+whVMy9SkTHIu0BuzegXzT1dEGtJRwylYDOA71jas3X1nOHe5L3RXFeS9WSzBUU0bVUGTY5u2GpCucjX0zA3C0Zop/xRnhFBti0IzTRCOcSn1ybheh2pwGr72C8eew44UoMIWizgTt/zKEHn7UIVf7I0VN6mYfoT+oiUXhW7TJnPZ1cvNW6if/2hM+crxTrZyN00otxnJveB8Qsy7FRkaFF11rMxtdfn6ReF8VNP+1S2RtXo+PdgbNXv4qdhNI4Z4WZdY68cevWLzkzqKGp8LKvJ+KBLWUU2ftflEQA2g7FVdU1T0o9Ri9uChljMpBphJ+R46ze9uOYd9jTGZA9axIyEOoLkmY1BJjltk5y4m5ftiaxvLYWF7vjCseN6L1LQSu2JAaDbpivNx3Ez09kCtOx2kIpzOp0DvT6VFTer9TE1VK9UIYz3q30d8E+Vj3NgKnrnpaMDMfBtIl5yEuwUvnIK45qvuGNIhelAuyAuYBkX/aEES1Gh73Sa2MUxUQdm+VVXeZhLmYGKV6KHOFZKcp0siwQ6Q64XDaXAhiV2HRXTByHPmFb7OL2+yzBqDkP42whJnjpgf+MA+AfTBfXqX+OgZ9lCv7uWn2o8RZ02X3Hgc2i0Eie0msnZ8my2QHqctrgcoUHLYsprWyCgEM+bc4lMmG4BT0IMVa6/hrpC0cnHCm+6/8prkQrQD2Apk4xK8MIiPecgTdbgR2MZOpJx05HgZC/OJqhQq2mMOO+qewKZ0cXk=
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB6PR0701MB2792.eurprd07.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(346002)(39860400002)(136003)(376002)(396003)(366004)(451199015)(33656002)(55016003)(478600001)(6636002)(316002)(84970400001)(5660300002)(41300700001)(38070700005)(82960400001)(122000001)(186003)(83380400001)(86362001)(38100700002)(71200400001)(110136005)(53546011)(6506007)(54906003)(9686003)(7696005)(107886003)(76116006)(66946007)(66476007)(52536014)(64756008)(66446008)(8936002)(2906002)(4326008)(66556008)(8676002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?dnZMME1NVEMrYTJHTWRHODBqLzYrTzJJZkxRMEhZd29GNmdCOFYvWUJQbmZk?=
+ =?utf-8?B?R1Q2MWJ6TWhYY0R6T1BQQlJ4UmYvblJEb1hWZ09wU0VwV1c0UEVhMDhTa0l4?=
+ =?utf-8?B?OW5VVTg1c2xXUmZkOTRBb0VycVhIbVppWG1yN3NYMEJCR0FKUmg5L1ZXMURw?=
+ =?utf-8?B?aFRpTXhHcFRoQjVzaVFqZ3ZpSTdJcTkwMGRNMFFlMm01MlBtdldXTmlhZ3hU?=
+ =?utf-8?B?TGVhNmR2ZllXdGcxUlNjK3NPUjQxWEdhSWJlUkZTVjZEeTFmV0J1ZVB0TnRD?=
+ =?utf-8?B?aTc4MThUVFBGMmNwNm9BazR0eDJGaFFiU0F3MkhQSktTbWZ6ZFlPeDQyQldk?=
+ =?utf-8?B?N09CWTdqZkY5RXIydDVhSTc0RU8wNUxWTWpSY285OU13RkxjVFJ0NlRBVDBT?=
+ =?utf-8?B?KzdMTW95cFNwSGhBYzRVS3pyZ0QrYmtuaEFWY2lQMGNtQit6KzhSaVFHbGNJ?=
+ =?utf-8?B?TGdNZ0lqYzd2M0ZqRHNIbWo2dE11QU9WMXppcW1md1N6WmJ5YU8rbHQ4QUF3?=
+ =?utf-8?B?Y3UvY1I1dDI1TmxmeGxhcEUwQ2wzV0VCMDNvaG45aXNMaUJyTkh6ZmlPZEs2?=
+ =?utf-8?B?L29PNlZmNnhUMW5CZDZMSTlSWU4zajFLbXVRUk5aQUp0SURSSGhhRHF5THBQ?=
+ =?utf-8?B?bWRwUHdPRkN4b3BwV0s4N3pXYXB0b0tlMnpIK25FYzR5eWJxY0xEWHBtKzlZ?=
+ =?utf-8?B?RXo3eFpiejV1Mjh6dmJYRVdtMjZGeEhuYlNtVFBKYjBqbEptQXo5dW9RbXFF?=
+ =?utf-8?B?MWF5RlNKeU1sazU4SERnMDREcVBLUy9UQVlKY0RJUmV1bC8zQW9nWUdvWmVS?=
+ =?utf-8?B?OGovVXYxWFR2L01QNFV6alJBNysxUm9yRFNUR3B2Zk9vYkx0Z3UxN1gxeHhy?=
+ =?utf-8?B?UEVpMWRvM29jemVqdFFremJqTVNpN0RqSTB3TE5tdXZTMFdVbko1K0tOamxF?=
+ =?utf-8?B?WnZWMGZWK2l2QW5mbCtvcFlWT0Fzck9vblVVMDd2M1F3NDYvMzVXcjlsdXNq?=
+ =?utf-8?B?dVVyTmx6SmRMeDZIZ1FmNUQ1T2xRNkx1TXlQcStyYXRaUW5FSGdqMlo2b0JH?=
+ =?utf-8?B?eTlUNjg5YXJnYzhvRWNpUmhlY0UzZmZzRkFxVElnTUZCSlVqRmM2d1hGOGto?=
+ =?utf-8?B?ZTVNY252bW0zL0lDYWtEYXEwa2s5dkducUI5U3ZMMXptNUEzWlhhcS9wTTE0?=
+ =?utf-8?B?OXR3K3A3UFFqckRRUDJ1MHZkc1l2elZMY0RiMlhFUzBTYnNwdUxuQ2wxUkdj?=
+ =?utf-8?B?NC9JTGdIaE10cWtWRkZxYndYbmhISjFLOFVmMUtJdGp1TncyOVlLR0FEelVE?=
+ =?utf-8?B?a3U4d1UxWVVHY2pTOW9SK28rY2M0ZE14eUhPTmJlVEptRWFoZ0FnbWw4L3Zp?=
+ =?utf-8?B?ZzdXTnZVcjhFcXk2S2VlUGR5dHRjbjBjVkt3RC94THJXZnNpcGRzbzFVUHJI?=
+ =?utf-8?B?K2pIRFgrQU1vTkJiekIrY2J6MVJBa2hCYStScWk3Z1NwTFhHRkdxRXdKT2RE?=
+ =?utf-8?B?OWxGQTlJT2lUaGlHajBpZkVRVDc4YUY1eFNVRjd6SUExcFhXb2txdk44Z3Jm?=
+ =?utf-8?B?emJmd1dzeXRvdkpBNDh5Y1JTUmczQ0gzQ1lXL0RFL2czVEtBWWVCNHJRSERt?=
+ =?utf-8?B?RHpOcTlFeEdpa1U0UTdwOWxwMjZNWXBQcUd1TkM2U1g4UFBmMW92NUhlUVlL?=
+ =?utf-8?B?d1ZmMVVCYk1EeWZFR1cyWDVUVWV4NVp3ODVYSEZMaWVjeXhGNWREc0UzSUhG?=
+ =?utf-8?B?OUpLU2FnU2NYdFNic0NKMnpVZW9MTEw3WlIyV0g2ZjVDOFdvQTdVejNOaE9h?=
+ =?utf-8?B?OElNZDRKT05BcXY2RDJSL21QWURYV2pwZlVUak0vS0REQ2M0SEtQTU43K05h?=
+ =?utf-8?B?TXc3VU5maHV5R2Q3Nnpoejlmb0hqMXRzY2J0L0tIaWFQRCtBSTFrdWw3Tk0x?=
+ =?utf-8?B?d3gxTk1mcDZ5dEtFMUtReHRvQkRsTUc3aFR1czFlQkdmZW9PT2dSV0w4dkpl?=
+ =?utf-8?B?Vkp6WTE4UkdWMHJtdUtxMkZuUm5DUmo0ZVN1dGpnNjJOSEZzUzJCLytaZTVr?=
+ =?utf-8?B?aVBFT2VPRjV1eWo4bFpMd1loamdtK0ZxbzJ0TjBDcURrRFN6a1dJdWxqdS9T?=
+ =?utf-8?B?V3Y3a0NPbFhLVitxT1hsMUtTTmIrQ2FDTTJyZEdURUhFZjNzU1hXRURuUDQ0?=
+ =?utf-8?Q?qqxcQHlQ/QLlHsUEPIUkvTMjZQtfqwf2u/mmEPuYNCNw?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: AM7EUR03FT009:EE_|PR3PR07MB8226:EE_
-Content-Type: text/plain
-X-MS-Office365-Filtering-Correlation-Id: f634d123-5c54-427d-b5c2-08da9a5ab1d7
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: VNptr9xnV6LMrWdCgvAWuDW3OajgZKyLWpMGQUCpPkg/KqUgF15QWl+YOMtq2vCaaaxIsgC6xeJ8XaACvumt0iTjKuwW4g8Pfik8iCb7uYtaE7gUrFGqKxc0MSXffoQKF365+vmiKoPqVlvFQ+XI4sQ/ym6EehhOxnL5Tt2/IQtbEp6aXWq74HYAP2xEouwC0NvYG9Iv/FQLVg6/zRIh7UfnIFxA+wIXhNjnf4nVPbZbLa28dZb+sDbdzDUKqNWpZlxSCV1HhHt1ClA9KjHGm8jKl7QcC+vzp4IScLmvJe9kh/ABaBN3OWPjCUPmhV1owGCibXSkdpCEsSiFWLIHbKAgYVO4X2hHTA0ZIEMY6SZ02O+NaZHymHMP9RgrjeAZQeSwaxUUZqeedFkAMAevW8zdPMMkKyU+ZOW7cEhFVIbOk7YL70OrfmSfEftTXAyrGxDuPwg/F5plQSbFQPdMky6UfUgGPmL1UIkHAGbEntAuuEc0eg3oUd+IsVtAb5cyelCxlFhe+fpgFpZxYafjW9DtGHYDBKuYDcZQ9RdnvrXjRyUQoEvUQbTTDCUCD2Sgk1X4jewFR/TF+yN2oHVPhENoLcnX9cGztPqKplmA7FKkjNmVg/QINiUTGJpwQfp9iqfUx0zkqXh6qrf7tNS0Du7LaX0Z1x2jlvXXWKgguBT5cGP+icd2tviop4QskLK1Xd7C54lHQ0jKRC9Xollf2piz8Fox9NJWTyF7J7C6ljS1hQpYmW5z7KWBTyXIcpWg8NTwmNmxHD2mhkk7K/f5/YI6TmfNmIhBV13kqMhSmQzXCx2io/kyacbbidKJvD2H7nEQnRkEZ6TqRUDoOOf6PdGldoDqcXL9zAQ0CdNaGYA=
-X-Forefront-Antispam-Report: CIP:131.228.6.100;CTRY:FI;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:fr711usmtp2.zeu.alcatel-lucent.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(346002)(376002)(136003)(39860400002)(396003)(451199015)(40470700004)(46966006)(36840700001)(36756003)(107886003)(316002)(6916009)(82740400003)(82960400001)(2906002)(36860700001)(8676002)(4326008)(70206006)(70586007)(2616005)(186003)(336012)(47076005)(1076003)(478600001)(86362001)(40460700003)(40480700001)(42186006)(6666004)(83380400001)(6266002)(81166007)(26005)(82310400005)(356005)(5660300002)(41300700001)(8936002)(44832011)(36900700001);DIR:OUT;SFP:1102;
 X-OriginatorOrg: nokia.com
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PR3PR07MB8226
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM8PR07MB8138
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Move up the return in case MODE_OPERATION_CODES is not supported.
-According to the specification when MODE_OPERATION_CODES is not
-supported no checks should be done against NUM_OF_FW_SEC_PROG.
-
-Signed-off-by: Bruno Matic <bruno.matic@nokia.com>
----
- mmc_cmds.c | 82 ++++++++++++++++++++++++++++--------------------------
- 1 file changed, 42 insertions(+), 40 deletions(-)
-
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index ef1d8c6..81fdc7e 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2897,6 +2897,13 @@ do_retry:
- 		goto out;
- 	}
- 
-+	/* check mode operation for ffu install*/
-+	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
-+		fprintf(stderr, "Please reboot to complete firmware installation on %s\n", device);
-+		ret = 0;
-+		goto out;
-+	}
-+
- 	ret = read_extcsd(dev_fd, ext_csd);
- 	if (ret) {
- 		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-@@ -2927,49 +2934,44 @@ do_retry:
- 		goto out;
- 	}
- 
--	/* check mode operation for ffu install*/
--	if (!ext_csd[EXT_CSD_FFU_FEATURES]) {
--		fprintf(stderr, "Please reboot to complete firmware installation on %s\n", device);
--	} else {
--		fprintf(stderr, "Installing firmware on %s...\n", device);
--		/* Re-enter ffu mode and install the firmware */
--		multi_cmd->num_of_cmds = 2;
--
--		/* set ext_csd to install mode */
--		multi_cmd->cmds[1].opcode = MMC_SWITCH;
--		multi_cmd->cmds[1].blksz = 0;
--		multi_cmd->cmds[1].blocks = 0;
--		multi_cmd->cmds[1].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
--				(EXT_CSD_MODE_OPERATION_CODES << 16) |
--				(EXT_CSD_FFU_INSTALL << 8) |
--				EXT_CSD_CMD_SET_NORMAL;
--		multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
--		multi_cmd->cmds[1].write_flag = 1;
--
--		/* send ioctl with multi-cmd */
--		ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
-+	fprintf(stderr, "Installing firmware on %s...\n", device);
-+	/* Re-enter ffu mode and install the firmware */
-+	multi_cmd->num_of_cmds = 2;
- 
--		if (ret) {
--			perror("Multi-cmd ioctl failed setting install mode");
--			/* In case multi-cmd ioctl failed before exiting from ffu mode */
--			ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
--			goto out;
--		}
-+	/* set ext_csd to install mode */
-+	multi_cmd->cmds[1].opcode = MMC_SWITCH;
-+	multi_cmd->cmds[1].blksz = 0;
-+	multi_cmd->cmds[1].blocks = 0;
-+	multi_cmd->cmds[1].arg = (MMC_SWITCH_MODE_WRITE_BYTE << 24) |
-+			(EXT_CSD_MODE_OPERATION_CODES << 16) |
-+			(EXT_CSD_FFU_INSTALL << 8) |
-+			EXT_CSD_CMD_SET_NORMAL;
-+	multi_cmd->cmds[1].flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-+	multi_cmd->cmds[1].write_flag = 1;
- 
--		ret = read_extcsd(dev_fd, ext_csd);
--		if (ret) {
--			fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
--			goto out;
--		}
-+	/* send ioctl with multi-cmd */
-+	ret = ioctl(dev_fd, MMC_IOC_MULTI_CMD, multi_cmd);
- 
--		/* return status */
--		ret = ext_csd[EXT_CSD_FFU_STATUS];
--		if (ret) {
--			fprintf(stderr, "%s: error %d during FFU install:\n", device, ret);
--			goto out;
--		} else {
--			fprintf(stderr, "FFU finished successfully\n");
--		}
-+	if (ret) {
-+		perror("Multi-cmd ioctl failed setting install mode");
-+		/* In case multi-cmd ioctl failed before exiting from ffu mode */
-+		ioctl(dev_fd, MMC_IOC_CMD, &multi_cmd->cmds[3]);
-+		goto out;
-+	}
-+
-+	ret = read_extcsd(dev_fd, ext_csd);
-+	if (ret) {
-+		fprintf(stderr, "Could not read EXT_CSD from %s\n", device);
-+		goto out;
-+	}
-+
-+	/* return status */
-+	ret = ext_csd[EXT_CSD_FFU_STATUS];
-+	if (ret) {
-+		fprintf(stderr, "%s: error %d during FFU install:\n", device, ret);
-+		goto out;
-+	} else {
-+		fprintf(stderr, "FFU finished successfully\n");
- 	}
- 
- out:
--- 
-2.29.0
-
+VGVzdGVkLWJ5OiBSb3NzbGVyLCBKYWtvYiAoTm9raWEgLSBERS9VbG0pIDxqYWtvYi5yb3NzbGVy
+QG5va2lhLmNvbT4NCg0KQmVzdCByZWdhcmRzDQpKYWtvYg0KDQotLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KRnJvbTogVWxmIEhhbnNzb24gPHVsZi5oYW5zc29uQGxpbmFyby5vcmc+IA0KU2Vu
+dDogTW9uZGF5LCBTZXB0ZW1iZXIgMTksIDIwMjIgNDowMSBQTQ0KVG86IE1hdGljLCBCcnVubyAo
+Tm9raWEgLSBERS9VbG0pIDxicnVuby5tYXRpY0Bub2tpYS5jb20+DQpDYzogYXZyaS5hbHRtYW5A
+d2RjLmNvbTsgbGludXgtbW1jQHZnZXIua2VybmVsLm9yZzsgQ0xvZWhsZUBoeXBlcnN0b25lLmNv
+bTsgUm9zc2xlciwgSmFrb2IgKE5va2lhIC0gREUvVWxtKSA8amFrb2Iucm9zc2xlckBub2tpYS5j
+b20+OyBIZWlub25lbiwgQWFybmUgKE5va2lhIC0gRkkvRXNwb28pIDxhYXJuZS5oZWlub25lbkBu
+b2tpYS5jb20+DQpTdWJqZWN0OiBSZTogW1BBVENIIHYzXSBtbWMtdXRpbHM6IGNvcnJlY3QgYW5k
+IGNsZWFuIHVwIHRoZSBmaWxlIGhhbmRsaW5nDQoNCk9uIEZyaSwgOSBTZXB0IDIwMjIgYXQgMTM6
+MDMsIEJydW5vIE1hdGljIDxicnVuby5tYXRpY0Bub2tpYS5jb20+IHdyb3RlOg0KPg0KPiBBZGQg
+dGhlIGNoZWNrIGlmIHRoZSB3aG9sZSBmaXJtd2FyZSB3YXMgbG9hZGVkLg0KPiBDbGVhbmVkIHVw
+IHRoZSBsZWZ0b3ZlcnMgb2YgaGFuZGxpbmcgdGhlIGZpbGUgaW4gY2h1bmtzLg0KPg0KPiBDaGFu
+Z2VzIGluIHYzOg0KPiAgIC0gY2hlY2tlZCBhbmQgZm9ybWF0ZWQgdGhlIHBhdGNoDQo+IENoYW5n
+ZXMgaW4gdjI6DQo+ICAgLSB1c2UgcGVycm9yIHRvIHByb3BhZ2F0ZSB0aGUgZXJyb3Igb24gZmls
+ZSByZWFkDQo+DQo+IFNpZ25lZC1vZmYtYnk6IEJydW5vIE1hdGljIDxicnVuby5tYXRpY0Bub2tp
+YS5jb20+DQo+IFJldmlld2VkLWJ5OiBBdnJpIEFsdG1hbiA8YXZyaS5hbHRtYW5Ad2RjLmNvbT4N
+Cg0KQXBwbGllZCB0byBnaXQua2VybmVsLm9yZy9wdWIvc2NtLy91dGlscy9tbWMvbW1jLXV0aWxz
+LmdpdCBtYXN0ZXIsIHRoYW5rcyENCg0KS2luZCByZWdhcmRzDQpVZmZlDQoNCj4gLS0tDQo+ICBt
+bWNfY21kcy5jIHwgNjYgKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tDQo+ICAxIGZpbGUgY2hhbmdlZCwgMzIgaW5zZXJ0aW9ucygrKSwgMzQgZGVs
+ZXRpb25zKC0pDQo+DQo+IGRpZmYgLS1naXQgYS9tbWNfY21kcy5jIGIvbW1jX2NtZHMuYw0KPiBp
+bmRleCAxMmI3ODAyLi5lZjFkOGM2IDEwMDY0NA0KPiAtLS0gYS9tbWNfY21kcy5jDQo+ICsrKyBi
+L21tY19jbWRzLmMNCj4gQEAgLTI3NjUsNyArMjc2NSw2IEBAIGludCBkb19mZnUoaW50IG5hcmdz
+LCBjaGFyICoqYXJndikNCj4gICAgICAgICBfX3U4ICpidWYgPSBOVUxMOw0KPiAgICAgICAgIF9f
+dTMyIGFyZzsNCj4gICAgICAgICBvZmZfdCBmd19zaXplOw0KPiAtICAgICAgIHNzaXplX3QgY2h1
+bmtfc2l6ZTsNCj4gICAgICAgICBjaGFyICpkZXZpY2U7DQo+ICAgICAgICAgc3RydWN0IG1tY19p
+b2NfbXVsdGlfY21kICptdWx0aV9jbWQgPSBOVUxMOw0KPg0KPiBAQCAtMjg3OSw0NSArMjg3OCw0
+NCBAQCBpbnQgZG9fZmZ1KGludCBuYXJncywgY2hhciAqKmFyZ3YpDQo+ICAgICAgICAgbXVsdGlf
+Y21kLT5jbWRzWzNdLmZsYWdzID0gTU1DX1JTUF9TUElfUjFCIHwgTU1DX1JTUF9SMUIgfCBNTUNf
+Q01EX0FDOw0KPiAgICAgICAgIG11bHRpX2NtZC0+Y21kc1szXS53cml0ZV9mbGFnID0gMTsNCj4N
+Cj4gLWRvX3JldHJ5Og0KPiAtICAgICAgIC8qIHJlYWQgZmlybXdhcmUgY2h1bmsgKi8NCj4gKyAg
+ICAgICAvKiByZWFkIGZpcm13YXJlICovDQo+ICAgICAgICAgbHNlZWsoaW1nX2ZkLCAwLCBTRUVL
+X1NFVCk7DQo+IC0gICAgICAgY2h1bmtfc2l6ZSA9IHJlYWQoaW1nX2ZkLCBidWYsIGZ3X3NpemUp
+Ow0KPiArICAgICAgIGlmIChyZWFkKGltZ19mZCwgYnVmLCBmd19zaXplKSAhPSBmd19zaXplKSB7
+DQo+ICsgICAgICAgICAgICAgICBwZXJyb3IoIkNvdWxkIG5vdCByZWFkIHRoZSBmaXJtd2FyZSBm
+aWxlOiAiKTsNCj4gKyAgICAgICAgICAgICAgIHJldCA9IC1FTk9TUEM7DQo+ICsgICAgICAgICAg
+ICAgICBnb3RvIG91dDsNCj4gKyAgICAgICB9DQo+DQo+IC0gICAgICAgaWYgKGNodW5rX3NpemUg
+PiAwKSB7DQo+IC0gICAgICAgICAgICAgICAvKiBzZW5kIGlvY3RsIHdpdGggbXVsdGktY21kICov
+DQo+IC0gICAgICAgICAgICAgICByZXQgPSBpb2N0bChkZXZfZmQsIE1NQ19JT0NfTVVMVElfQ01E
+LCBtdWx0aV9jbWQpOw0KPiArZG9fcmV0cnk6DQo+ICsgICAgICAgLyogc2VuZCBpb2N0bCB3aXRo
+IG11bHRpLWNtZCAqLw0KPiArICAgICAgIHJldCA9IGlvY3RsKGRldl9mZCwgTU1DX0lPQ19NVUxU
+SV9DTUQsIG11bHRpX2NtZCk7DQo+DQo+IC0gICAgICAgICAgICAgICBpZiAocmV0KSB7DQo+IC0g
+ICAgICAgICAgICAgICAgICAgICAgIHBlcnJvcigiTXVsdGktY21kIGlvY3RsIik7DQo+IC0gICAg
+ICAgICAgICAgICAgICAgICAgIC8qIEluIGNhc2UgbXVsdGktY21kIGlvY3RsIGZhaWxlZCBiZWZv
+cmUgZXhpdGluZyBmcm9tIGZmdSBtb2RlICovDQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGlv
+Y3RsKGRldl9mZCwgTU1DX0lPQ19DTUQsICZtdWx0aV9jbWQtPmNtZHNbM10pOw0KPiAtICAgICAg
+ICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gLSAgICAgICAgICAgICAgIH0NCj4gKyAgICAg
+ICBpZiAocmV0KSB7DQo+ICsgICAgICAgICAgICAgICBwZXJyb3IoIk11bHRpLWNtZCBpb2N0bCIp
+Ow0KPiArICAgICAgICAgICAgICAgLyogSW4gY2FzZSBtdWx0aS1jbWQgaW9jdGwgZmFpbGVkIGJl
+Zm9yZSBleGl0aW5nIGZyb20gZmZ1IG1vZGUgKi8NCj4gKyAgICAgICAgICAgICAgIGlvY3RsKGRl
+dl9mZCwgTU1DX0lPQ19DTUQsICZtdWx0aV9jbWQtPmNtZHNbM10pOw0KPiArICAgICAgICAgICAg
+ICAgZ290byBvdXQ7DQo+ICsgICAgICAgfQ0KPg0KPiAtICAgICAgICAgICAgICAgcmV0ID0gcmVh
+ZF9leHRjc2QoZGV2X2ZkLCBleHRfY3NkKTsNCj4gLSAgICAgICAgICAgICAgIGlmIChyZXQpIHsN
+Cj4gLSAgICAgICAgICAgICAgICAgICAgICAgZnByaW50ZihzdGRlcnIsICJDb3VsZCBub3QgcmVh
+ZCBFWFRfQ1NEIGZyb20gJXNcbiIsIGRldmljZSk7DQo+IC0gICAgICAgICAgICAgICAgICAgICAg
+IGdvdG8gb3V0Ow0KPiAtICAgICAgICAgICAgICAgfQ0KPiArICAgICAgIHJldCA9IHJlYWRfZXh0
+Y3NkKGRldl9mZCwgZXh0X2NzZCk7DQo+ICsgICAgICAgaWYgKHJldCkgew0KPiArICAgICAgICAg
+ICAgICAgZnByaW50ZihzdGRlcnIsICJDb3VsZCBub3QgcmVhZCBFWFRfQ1NEIGZyb20gJXNcbiIs
+IGRldmljZSk7DQo+ICsgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gKyAgICAgICB9DQo+DQo+
+IC0gICAgICAgICAgICAgICAvKiBUZXN0IGlmIHdlIG5lZWQgdG8gcmVzdGFydCB0aGUgZG93bmxv
+YWQgKi8NCj4gLSAgICAgICAgICAgICAgIHNlY3RfZG9uZSA9IGV4dF9jc2RbRVhUX0NTRF9OVU1f
+T0ZfRldfU0VDX1BST0dfMF0gfA0KPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGV4
+dF9jc2RbRVhUX0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMV0gPDwgOCB8DQo+IC0gICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19TRUNfUFJPR18y
+XSA8PCAxNiB8DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRf
+Q1NEX05VTV9PRl9GV19TRUNfUFJPR18zXSA8PCAyNDsNCj4gLSAgICAgICAgICAgICAgIC8qIEJ5
+IHNwZWMsIGhvc3Qgc2hvdWxkIHJlLXN0YXJ0IGRvd25sb2FkIGZyb20gdGhlIGZpcnN0IHNlY3Rv
+ciBpZiBzZWN0X2RvbmUgaXMgMCAqLw0KPiAtICAgICAgICAgICAgICAgaWYgKHNlY3RfZG9uZSA9
+PSAwKSB7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGlmIChyZXRyeSA+IDApIHsNCj4gLSAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXRyeS0tOw0KPiAtICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiUHJvZ3JhbW1pbmcgZmFpbGVkLiBSZXRy
+eWluZy4uLiAoJWQpXG4iLCByZXRyeSk7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgZ290byBkb19yZXRyeTsNCj4gLSAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiAtICAgICAg
+ICAgICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZCEgQWJv
+cnRpbmcuLi5cbiIpOw0KPiAtICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gLSAg
+ICAgICAgICAgICAgIH0gZWxzZSB7DQo+IC0gICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYo
+c3RkZXJyLCAiUHJvZ3JhbW1lZCAlZC8lamQgYnl0ZXNcciIsIHNlY3RfZG9uZSAqIHNlY3Rfc2l6
+ZSwgKGludG1heF90KWZ3X3NpemUpOw0KPiArICAgICAgIC8qIFRlc3QgaWYgd2UgbmVlZCB0byBy
+ZXN0YXJ0IHRoZSBkb3dubG9hZCAqLw0KPiArICAgICAgIHNlY3RfZG9uZSA9IGV4dF9jc2RbRVhU
+X0NTRF9OVU1fT0ZfRldfU0VDX1BST0dfMF0gfA0KPiArICAgICAgICAgICAgICAgICAgICAgICBl
+eHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzFdIDw8IDggfA0KPiArICAgICAgICAg
+ICAgICAgICAgICAgICBleHRfY3NkW0VYVF9DU0RfTlVNX09GX0ZXX1NFQ19QUk9HXzJdIDw8IDE2
+IHwNCj4gKyAgICAgICAgICAgICAgICAgICAgICAgZXh0X2NzZFtFWFRfQ1NEX05VTV9PRl9GV19T
+RUNfUFJPR18zXSA8PCAyNDsNCj4gKyAgICAgICAvKiBCeSBzcGVjLCBob3N0IHNob3VsZCByZS1z
+dGFydCBkb3dubG9hZCBmcm9tIHRoZSBmaXJzdCBzZWN0b3IgaWYgc2VjdF9kb25lIGlzIDAgKi8N
+Cj4gKyAgICAgICBpZiAoc2VjdF9kb25lID09IDApIHsNCj4gKyAgICAgICAgICAgICAgIGlmIChy
+ZXRyeS0tKSB7DQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGZwcmludGYoc3RkZXJyLCAiUHJv
+Z3JhbW1pbmcgZmFpbGVkLiBSZXRyeWluZy4uLiAoJWQpXG4iLCByZXRyeSk7DQo+ICsgICAgICAg
+ICAgICAgICAgICAgICAgIGdvdG8gZG9fcmV0cnk7DQo+ICAgICAgICAgICAgICAgICB9DQo+ICsg
+ICAgICAgICAgICAgICBmcHJpbnRmKHN0ZGVyciwgIlByb2dyYW1taW5nIGZhaWxlZCEgQWJvcnRp
+bmcuLi5cbiIpOw0KPiArICAgICAgICAgICAgICAgZ290byBvdXQ7DQo+ICAgICAgICAgfQ0KPg0K
+PiAgICAgICAgIGlmICgoc2VjdF9kb25lICogc2VjdF9zaXplKSA9PSBmd19zaXplKSB7DQo+IC0t
+DQo+IDIuMjkuMA0KPg0K
