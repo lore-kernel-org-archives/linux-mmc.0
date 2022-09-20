@@ -2,64 +2,65 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F295BC54EE9
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Sep 2022 12:38:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35EEEC54EE9
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Sep 2022 12:38:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230173AbiITMio (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Sep 2022 08:38:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58394 "EHLO
+        id S231142AbiITMiq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Sep 2022 08:38:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231285AbiITMik (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2022 08:38:40 -0400
-Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2065.outbound.protection.outlook.com [40.107.94.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18C0975391;
-        Tue, 20 Sep 2022 05:38:38 -0700 (PDT)
+        with ESMTP id S229609AbiITMim (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2022 08:38:42 -0400
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2072.outbound.protection.outlook.com [40.107.94.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC5016BD42;
+        Tue, 20 Sep 2022 05:38:41 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=WSeHCJH+zYpS/KS8tFq+ESSXoN89uI7iv6uRGuyrHS8OsINxmrE/SRdgTvy9or60gerd7EENIYIvj3WTe5M+swyx2g+sGg0roKSjuGoJEQQKg4z5AFQ/lOmPiO0vXk4ArIubBxMRY3UTcPIt5y+gjy/XoWMJ2I/y58zQ2cz1rMHDwsxD1LbbinX2K1BJIG9NrZpz1Um63k07sSU19oRKlsy7LYBvuOztZok8aMrwsL9DHGHknpW23dByVa8uE8HNFh0nCejEgyFEwK0AVZovr9NE4Vo4FWcbuJqK/QEBPtdqOlgjm8ljJ2XwivOubIPXN2/2YAlYwknv7dvXsth1mQ==
+ b=hEkQ4PCLJWR8sRGTUpUPdRV/+SuyTifBuqUf6Fao2G6uyJRlV+kWeAig7jzliuTCN0fr29RXvkOT9/gEZXXjfg0++FPDBrnwjACGYwVA5ZbpuHKbnexdPkRjZsmVVr3ufWWeDWPugGrGqmg/STm/+mqPC+gQuh9DnZvg/qgE8RNEMZrz7hS54266JEUP4jFN2IDSoeEh9ykKodlWmJEOi3swrtnhgN8Qqp094/nDYmwrdgxxBfNeZsDWViUfwQN2RyKHBzOD23Y9GozGGv7hl1RDqQt2jAlrODTk4g4oqJvcMUCoRDp0o3aYg769jyc6GU0AY+UV/aUl4Mfg8dDWEQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WbHzK1weJseQqzFVF23W4aXub+Q3tmeUopiOz2KuIGQ=;
- b=fWCktuiLcDDUkmmZpV9wFwfDfJnLXnycFN0Bjs6c5TjXM/CqjL3IARC2MJalboVYpgVnHqh26P05wO0xPy4t8noZTCGAcEJtZP1VXKAFyJxoflNGHnT83/GSuYrlNWrHiBxbb6G8DljLfpDZb+1808TfpAqaEfoFy+S9x1XRdqGgNmH+wxP2/OmwPlcq/SMaiY16NrMhAq5xR0qL0eI45Ob1OG1M76dRikB1gntfSYqqNCwxU6mjFxMLyKaUGs2Na+y4j6gNpE/lWTj1rnoxyn13WhcDQGVUFNqvXVVwLTsh7cJZNb2rrqYFRbgB3hPFVYM4rctY0IsEMTsaB3XuAA==
+ bh=y+NpXzTkwuFbgmA+L1IHzsiZPSnfF0Q3uYE+MZUe/m0=;
+ b=bqCd/J5ap23n6I1fybPnSBCBSzunbkrtbOqFUzmmVF/mUtZfshzNDdFpesOFRTcOqELBwOh9k/8tHZJjNazg2O9f38B+anI1fFCtUovsBdn9+KoahP0rBQBbZfK25ASz9qpz9+zgi9cMzeH7GAHT7tMt6M44PfhbXobj7OeALLimAwm+jiF0kJqOJsSO6egtydc9zOvRTF0o3rGDh9W5R8Ce/cGcvWFbwNcgAcUrt1D5VpEGvl94iEgb621aSkXTxnD0XH/i+vVe2byHdB75OHKgfCIQ22OEX1uc0it6Co99MD9mE+qsNrifrBpfSyKepMEFgqm0Y7cIyHJ+kmSemg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.117.161) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ 216.228.117.160) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
  dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
  dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=WbHzK1weJseQqzFVF23W4aXub+Q3tmeUopiOz2KuIGQ=;
- b=m0tkOzjC11UIwsX8qnK0twLDvjWkznZ790fDCk+OMRA8/5SkIPDPFPd/6kau/YhzNljeYjWJZBEK0OqtXfJWqYhfYgITmM7XPkVA1mO7WboJ4BUgN6kWUHjQNoTxxyioynTQrXj6VUIiH+xyL/fOsG3MrGOJisRp+p7LIz8J3U+1UlZ1iXBi1wPyBbnRP3PZrBDTIXUt4dHbcOPXpNzBvdE/Cbw+z6xf8LUiH2OO3009CGfAu6keg6NUZi0C8OfCRIuqSjlaCm2X3jvGW1qOqCnLHKn2A2+XSG8AW0epjJgubjrDBPD/+IHw3ydXNJcd+9ck/Tt7ZJPqOhyOE9bnhg==
-Received: from DM6PR06CA0073.namprd06.prod.outlook.com (2603:10b6:5:336::6) by
- SA0PR12MB4381.namprd12.prod.outlook.com (2603:10b6:806:70::14) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5654.14; Tue, 20 Sep 2022 12:38:36 +0000
-Received: from DM6NAM11FT020.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:336:cafe::f9) by DM6PR06CA0073.outlook.office365.com
- (2603:10b6:5:336::6) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5632.21 via Frontend
- Transport; Tue, 20 Sep 2022 12:38:36 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.161)
+ bh=y+NpXzTkwuFbgmA+L1IHzsiZPSnfF0Q3uYE+MZUe/m0=;
+ b=ertJj6LTIfWgjBLLPhzf27TPpvI0YXhCUqJPcw236NigMwbAciFyP8w8fCjUyN/X2Bq40DsmfSNP0Kb6eJKHaxUhPunET56SL6n5CchV3LjzLQ6gjgJdTXhc07UarjtEVyA2vx6MhOOe357dnpPKKj8At6/bbu+S8qrzfmVvcpmzmReyYI31yR03SlEk5NNaJap3r9HZxwxZV4MmJXmfZaTaEOBBcdsfGqjJqmklUY0JOQfVw193lHT091+n8vl1/2ehLaMXX253kS0R78qKDstVGV6LQozmfRlignsn4alZ4DrqcTmRrpUW6UZpSvJ2MsaZkvFV1ncSio+xk7JWww==
+Received: from SJ0PR13CA0112.namprd13.prod.outlook.com (2603:10b6:a03:2c5::27)
+ by MW3PR12MB4378.namprd12.prod.outlook.com (2603:10b6:303:52::7) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5632.21; Tue, 20 Sep
+ 2022 12:38:40 +0000
+Received: from CO1PEPF00001A63.namprd05.prod.outlook.com
+ (2603:10b6:a03:2c5:cafe::a8) by SJ0PR13CA0112.outlook.office365.com
+ (2603:10b6:a03:2c5::27) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.14 via Frontend
+ Transport; Tue, 20 Sep 2022 12:38:39 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.160)
  smtp.mailfrom=nvidia.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=nvidia.com;
 Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.117.161 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.117.161; helo=mail.nvidia.com; pr=C
-Received: from mail.nvidia.com (216.228.117.161) by
- DM6NAM11FT020.mail.protection.outlook.com (10.13.172.224) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5632.12 via Frontend Transport; Tue, 20 Sep 2022 12:38:36 +0000
+ 216.228.117.160 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.117.160; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.117.160) by
+ CO1PEPF00001A63.mail.protection.outlook.com (10.167.241.10) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5654.11 via Frontend Transport; Tue, 20 Sep 2022 12:38:38 +0000
 Received: from rnnvmail203.nvidia.com (10.129.68.9) by mail.nvidia.com
- (10.129.200.67) with Microsoft SMTP Server (version=TLS1_2,
+ (10.129.200.66) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Tue, 20 Sep
- 2022 05:38:09 -0700
+ 2022 05:38:02 -0700
 Received: from rnnvmail201.nvidia.com (10.129.68.8) by rnnvmail203.nvidia.com
  (10.129.68.9) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.29; Tue, 20 Sep
- 2022 05:38:09 -0700
+ 2022 05:38:01 -0700
 Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
  (10.129.68.8) with Microsoft SMTP Server id 15.2.986.29 via Frontend
- Transport; Tue, 20 Sep 2022 05:38:06 -0700
+ Transport; Tue, 20 Sep 2022 05:37:58 -0700
 From:   Prathamesh Shete <pshete@nvidia.com>
 To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
         <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
@@ -67,9 +68,9 @@ To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
         <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
 CC:     <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
         <kyarlagadda@nvidia.com>
-Subject: [PATCH v3 4/4] mmc: sdhci-tegra: Use actual clock rate for SW tuning correction
-Date:   Tue, 20 Sep 2022 18:07:52 +0530
-Message-ID: <20220920123752.21027-4-pshete@nvidia.com>
+Subject: [PATCH v3 2/4]  mmc: sdhci-tegra: Add support to program MC stream ID
+Date:   Tue, 20 Sep 2022 18:07:50 +0530
+Message-ID: <20220920123752.21027-2-pshete@nvidia.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20220920123752.21027-1-pshete@nvidia.com>
 References: <20220920123752.21027-1-pshete@nvidia.com>
@@ -77,57 +78,147 @@ MIME-Version: 1.0
 Content-Type: text/plain
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT020:EE_|SA0PR12MB4381:EE_
-X-MS-Office365-Filtering-Correlation-Id: f898e7cd-5295-43f6-d406-08da9b050986
+X-MS-TrafficTypeDiagnostic: CO1PEPF00001A63:EE_|MW3PR12MB4378:EE_
+X-MS-Office365-Filtering-Correlation-Id: e9ea4991-6099-42fc-2f3c-08da9b050af3
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 3Cv7KUDiLCeDKc4zz/EWSmZ5WYZaFFUtLQvMssoo4SC/t97kr2WIPlwbbx1cOn9BXVnCQC59JqzcIA0Tp9ZZxreObfZwu2FRIL3oVghuKhibRhwi3CItvIRtM1o4Gi+XU1uTqiUNu2jhBeIdn1z0gv+YtO6qRwLo34kHDN8AfU/3t6dHyOfoFojtKfbRtLQeCiZoja39KAls6eExDgwXN4oZnQZpxDPs+r3BI+raHa6e7Fm9t8lJ9AJMT0GVUbUH2LIhyshhD5hTr+OUpRK3EA0LeC3PwsHaDcZGvFC/GwuxoERk9yHau1zDgC7aTM3jv2BvTmt8DR7aP51gLgd85tFKhGxZeE63quO8UggdZoAbFa2xquzRwukcXDUFUsdJHodDljivkui1k0sn2ankozJ/7VLjrepwIhKgZAFuGMY+KGLXDgeqx10k9MLa/wpkNI7N2CtC7lxFrsTZ8PQWE/2/o+BN0Le73C0eRidz8Pw67It2G2umBNRnLr+3P2Fi3wp3Yc5Qdv9QWDjtlghqyrsK42N4X/pk2sxsOYe0Oi4YyPHYMTZzQr4wgeQx2po3BDZsftCy4s98XktZUP66PAufS1zA1dVpKXwTwfVHo+22z6fznajMXywZ01TxlVbyjIDsd5qVCBbQqhO3OQ4TtVW/9CeDHnQAq8pSPVzhObLdTQlCnmtcUq/R1sUgEoHPGMW0tt3PqxPPfGuqQmEo4QkkUC/8A84aay8hztFhzSWFjS6nvcnykBKowJKsOcvSrzxW0aINZpLifxoRP1dz1Q==
-X-Forefront-Antispam-Report: CIP:216.228.117.161;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(39860400002)(396003)(136003)(376002)(346002)(451199015)(46966006)(36840700001)(40470700004)(7696005)(86362001)(41300700001)(4326008)(8676002)(107886003)(6666004)(8936002)(356005)(82310400005)(7636003)(26005)(478600001)(40460700003)(36756003)(70206006)(70586007)(54906003)(110136005)(316002)(186003)(1076003)(2616005)(2906002)(47076005)(426003)(83380400001)(336012)(40480700001)(5660300002)(82740400003)(36860700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: ya4F77tp+9AK0BcKpZ+cogUZO9O4G5Ktajzg0EN0q2H31BWfDSkwo4vacdc/gTKtzkDwOD0y8AsGMl6N0Zfn+cBFH45QM55Pd66hOF+LRY2e8Chq5hHJCzL4Xr6hoc1PgocZA+6nWUhN7AJTADa1LEv/qXpEzbgwdlX8aFY1x/juo87jy4Wi48FtSoajj1MDAC7xf5aTuaPTsveBTVxbp+XiK4fx6wKmRCNn6B353Y1RT8gf+DNmUyQS0nE6EEwUwSUZnfeUQZvSzqufUAld/BItWjX56QgswgNALIgFbPn+lVLWnTAtkVm4j416ei3PgGFky9OJbtEnkoAwC/OaYg9wuFzwR5cspsla7AgJ63m6aZJxiljlMwcMYmw5JOLYFPDmSpp2nK4rrlTKOXhnygZx/KS8ZSZMbbsSD98rXxWP5ExDVL6Y2vd5IN+aBuZvgsCguM0yhBcm4V78Uf7TDHfSJ1ECUhUKPeEWRcqCxGw2HC48czAkOuS4Vdg8QFIv5r9lgq3iOZVIpfIybnNYDt/ONX69FKpuEJf8lys6DzEO9RbW80ePPzk3AI7lniZBoNCMxLcXD6XFYSjaPXd102vnnbRywFtElwvs7bGfHhgoCAPBds56s0F04AItQYlVjZHyN90LydCXM3F2yOLQXbIy6B8FjoITUREyikWne5WorfBfcxCwIqWHaGFDE8npdWq6qKrsdJ12NK1W77AvB077mRso4qu4c09WvBTID+Yjmq2Jzpfn6OyC6ld4rwXmzYAZCHMvmIv0KwxAfmry7g==
+X-Forefront-Antispam-Report: CIP:216.228.117.160;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge1.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(396003)(136003)(376002)(39860400002)(346002)(451199015)(40470700004)(46966006)(36840700001)(8676002)(82310400005)(36860700001)(82740400003)(40460700003)(356005)(36756003)(86362001)(2906002)(5660300002)(478600001)(7636003)(70206006)(40480700001)(4326008)(70586007)(8936002)(47076005)(54906003)(316002)(110136005)(186003)(1076003)(83380400001)(336012)(41300700001)(6666004)(107886003)(2616005)(7696005)(26005)(426003);DIR:OUT;SFP:1101;
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Sep 2022 12:38:36.1913
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 20 Sep 2022 12:38:38.6260
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: f898e7cd-5295-43f6-d406-08da9b050986
+X-MS-Exchange-CrossTenant-Network-Message-Id: e9ea4991-6099-42fc-2f3c-08da9b050af3
 X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.161];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT020.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.160];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1PEPF00001A63.namprd05.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4381
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW3PR12MB4378
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ensure tegra_host member "curr_clk_rate" holds the actual clock rate
-instead of requested clock rate for proper use during tuning correction
-algorithm. Actual clk rate may not be the same as the requested clk
-frequency depending on the parent clock source set. Tuning correction
-algorithm depends on certain parameters which are sensitive to current
-clk rate. If the host clk is selected instead of the actual clock rate,
-tuning correction algorithm may end up applying invalid correction,
-which could result in errors
-
-Fixes: ea8fc5953e8b ("mmc: tegra: update hw tuning process")
+SMMU clients are supposed to program stream ID from
+their respective address spaces instead of MC override.
+Define NVQUIRK_PROGRAM_STREAMID and use it to program
+SMMU stream ID from the SDMMC client address space.
 
 Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
 Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
 ---
- drivers/mmc/host/sdhci-tegra.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-tegra.c | 35 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 58449e010a9b..10f6df070456 100644
+index a6c5bbae77b4..4d32b5bfc424 100644
 --- a/drivers/mmc/host/sdhci-tegra.c
 +++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -780,7 +780,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
- 			host_clk, err);
+@@ -25,6 +25,7 @@
+ #include <linux/mmc/slot-gpio.h>
+ #include <linux/gpio/consumer.h>
+ #include <linux/ktime.h>
++#include <linux/iommu.h>
  
--	tegra_host->curr_clk_rate = host_clk;
-+	tegra_host->curr_clk_rate = clk_get_rate(pltfm_host->clk);
- 	if (tegra_host->ddr_signaling)
- 		host->max_clk = host_clk;
- 	else
+ #include <soc/tegra/common.h>
+ 
+@@ -94,6 +95,8 @@
+ #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
+ #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
+ 
++#define SDHCI_TEGRA_CIF2AXI_CTRL_0			0x1fc
++
+ #define NVQUIRK_FORCE_SDHCI_SPEC_200			BIT(0)
+ #define NVQUIRK_ENABLE_BLOCK_GAP_DET			BIT(1)
+ #define NVQUIRK_ENABLE_SDHCI_SPEC_300			BIT(2)
+@@ -121,6 +124,7 @@
+ #define NVQUIRK_HAS_TMCLK				BIT(10)
+ 
+ #define NVQUIRK_HAS_ANDROID_GPT_SECTOR			BIT(11)
++#define NVQUIRK_PROGRAM_STREAMID			BIT(12)
+ 
+ /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+ #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
+@@ -128,6 +132,8 @@
+ #define SDHCI_TEGRA_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
+ 					 SDHCI_TRNS_BLK_CNT_EN | \
+ 					 SDHCI_TRNS_DMA)
++#define SDHCI_TEGRA_STREAMID_MASK			0xff
++#define SDHCI_TEGRA_WRITE_STREAMID_SHIFT		0x8
+ 
+ struct sdhci_tegra_soc_data {
+ 	const struct sdhci_pltfm_data *pdata;
+@@ -177,6 +183,7 @@ struct sdhci_tegra {
+ 	bool enable_hwcq;
+ 	unsigned long curr_clk_rate;
+ 	u8 tuned_tap_delay;
++	u32 streamid;
+ };
+ 
+ static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+@@ -1564,6 +1571,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
+ 		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+ 		    NVQUIRK_ENABLE_SDR50 |
+ 		    NVQUIRK_ENABLE_SDR104 |
++		    NVQUIRK_PROGRAM_STREAMID |
+ 		    NVQUIRK_HAS_TMCLK,
+ 	.min_tap_delay = 95,
+ 	.max_tap_delay = 111,
+@@ -1636,6 +1644,7 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct sdhci_tegra *tegra_host;
++	struct iommu_fwspec *fwspec;
+ 	struct clk *clk;
+ 	int rc;
+ 
+@@ -1775,6 +1784,23 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+ 	if (rc)
+ 		goto err_add_host;
+ 
++	/* Program MC streamID for DMA transfers */
++	if (soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
++		fwspec = dev_iommu_fwspec_get(&pdev->dev);
++		if (fwspec == NULL) {
++			dev_warn(mmc_dev(host->mmc),
++				"iommu fwspec is NULL, continue without stream ID\n");
++		} else {
++			tegra_host->streamid = fwspec->ids[0] & 0xffff;
++			tegra_sdhci_writel(host, (tegra_host->streamid &
++						SDHCI_TEGRA_STREAMID_MASK) |
++						((tegra_host->streamid <<
++						SDHCI_TEGRA_WRITE_STREAMID_SHIFT)
++						& SDHCI_TEGRA_STREAMID_MASK),
++						SDHCI_TEGRA_CIF2AXI_CTRL_0);
++		}
++	}
++
+ 	return 0;
+ 
+ err_add_host:
+@@ -1861,6 +1887,8 @@ static int sdhci_tegra_suspend(struct device *dev)
+ static int sdhci_tegra_resume(struct device *dev)
+ {
+ 	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+ 	int ret;
+ 
+ 	ret = mmc_gpio_set_cd_wake(host->mmc, false);
+@@ -1871,6 +1899,13 @@ static int sdhci_tegra_resume(struct device *dev)
+ 	if (ret)
+ 		return ret;
+ 
++	/* Re-program MC streamID for DMA transfers */
++	if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
++		tegra_sdhci_writel(host, tegra_host->streamid |
++					(tegra_host->streamid << 8),
++					SDHCI_TEGRA_CIF2AXI_CTRL_0);
++	}
++
+ 	ret = sdhci_resume_host(host);
+ 	if (ret)
+ 		goto disable_clk;
 -- 
 2.17.1
 
