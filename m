@@ -2,104 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A45F9C6FA91
-	for <linux-mmc@archiver.kernel.org>; Tue, 20 Sep 2022 06:22:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D937ECAAD8
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Sep 2022 06:46:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229824AbiITGWk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 20 Sep 2022 02:22:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55810 "EHLO
+        id S230219AbiITGq4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 20 Sep 2022 02:46:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39456 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229596AbiITGWi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2022 02:22:38 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F3F05D127
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Sep 2022 23:22:37 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1oaWds-0002p0-9V; Tue, 20 Sep 2022 08:22:00 +0200
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1oaWdm-001o8d-IJ; Tue, 20 Sep 2022 08:21:53 +0200
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1oaWdk-0028nS-97; Tue, 20 Sep 2022 08:21:52 +0200
-Date:   Tue, 20 Sep 2022 08:21:49 +0200
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Johan Jonker <jbx6244@gmail.com>
-Cc:     kever.yang@rock-chips.com, sjg@chromium.org,
-        philipp.tomsich@vrull.eu, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, heiko@sntech.de,
-        ulf.hansson@linaro.org, miquel.raynal@bootlin.com, richard@nod.at,
-        vigneshr@ti.com, kishon@ti.com, vkoul@kernel.org,
-        thierry.reding@gmail.com, gregkh@linuxfoundation.org,
-        broonie@kernel.org, wim@linux-watchdog.org, linux@roeck-us.net,
-        zhangqing@rock-chips.com, jamie@jamieiles.com,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-phy@lists.infradead.org,
-        linux-pwm@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [PATCH v1 03/11] dt-bindings: pwm: rockchip: add
- rockchip,rk3128-pwm
-Message-ID: <20220920062149.o6gdhsh7bk5rl4ah@pengutronix.de>
-References: <20220909212543.17428-1-jbx6244@gmail.com>
- <f5dd0ee4-d97e-d878-ffde-c06e9b233e38@gmail.com>
+        with ESMTP id S230262AbiITGqy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 20 Sep 2022 02:46:54 -0400
+Received: from mail-pf1-x431.google.com (mail-pf1-x431.google.com [IPv6:2607:f8b0:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAD5853D3B;
+        Mon, 19 Sep 2022 23:46:53 -0700 (PDT)
+Received: by mail-pf1-x431.google.com with SMTP id 9so1814816pfz.12;
+        Mon, 19 Sep 2022 23:46:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date;
+        bh=vkTFnfbmIR3qwyo/CUT31Fe4BhBU2kMVaByFkU7+mmo=;
+        b=Xpyb/ZLXc5x/of0UagrB8IiP1JVm37WZ/NYb4yLemjk2zKq4uRxPv0IHxE1RYxJXJE
+         +j1D6K+XKnf7ua+ux06ZzsJlsZEsdc8g9F5Sa8lNL6M2nAMQ6udh3P3/PBk9H7N3jLwb
+         zAKlEz9pD2jIfM8nVifW6oov+38+hIEKHrcP4XpETGe44E887hFoB9EbAGr//6HQb/lm
+         ZUctankBwUxFvUikhxMNJi7XRwqWtOfiC1BZ3EuLT/XZwlo4HU5yfh+6FxRDKs5ycDOG
+         Qttn7ETgosa5Cq3hkL+PRjE+SQ1am8kN4CdZ7TVrg0z7FKEwreNXQ42r+cBkzFUHXFGZ
+         9lMg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date;
+        bh=vkTFnfbmIR3qwyo/CUT31Fe4BhBU2kMVaByFkU7+mmo=;
+        b=m6Lo+PLdYcuIKrogQBYKuoulAgjM2MhM5Y+K4Y2yVz9osCERlTTq5vEBEWSwRNi78W
+         2qhfnSbGNOoDngYiAlS4zeoD+t3nphV7t+AQpatXk5kOU8h0ZZCWHlINBtTRu8gAz/Zo
+         06QsB0hqnXF9E2KJoV5IawCPkbVV4S82RUNCX2IneIg0VjFivCNvQ/n+DADBO1TeoK1K
+         aXagB8aBK1gsvIebfHNzJEL34p6knuQxy1uSxdkKtpVivlxVvuAoNDp+gsMDrgarl8U+
+         3zPgvj7R1e/67iNRtcSsjexGatLujYZ+TkwZNyJhhDImxeibs2UK5afdkaWuXV3PO0jP
+         8S+A==
+X-Gm-Message-State: ACrzQf2Xz1tn+nm6vcaWvaBpaSX+kr6HHIrDzbDGKcbn1e71UCiTW8Vv
+        hjCxrq5yruW3PuLAhctxlUyeYHraomU=
+X-Google-Smtp-Source: AMsMyM7tpo4/lpe8xbYYLCxTjK6FI4HdBFZsdF60Z4Xv5/Vv1yyQxc6Dt8+lkFx1ALem2zZVSTQ5fw==
+X-Received: by 2002:a63:5d18:0:b0:439:61d0:7487 with SMTP id r24-20020a635d18000000b0043961d07487mr18828899pgb.268.1663656412876;
+        Mon, 19 Sep 2022 23:46:52 -0700 (PDT)
+Received: from localhost.localdomain ([193.203.214.57])
+        by smtp.gmail.com with ESMTPSA id cv20-20020a17090afd1400b001fb1de10a4dsm610572pjb.33.2022.09.19.23.46.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 19 Sep 2022 23:46:52 -0700 (PDT)
+From:   cgel.zte@gmail.com
+X-Google-Original-From: ye.xingchen@zte.com.cn
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ye xingchen <ye.xingchen@zte.com.cn>,
+        Zeal Robot <zealci@zte.com.cn>
+Subject: [PATCH linux-next] mmc: rtsx_usb_sdmmc: Remove the unneeded result variable
+Date:   Tue, 20 Sep 2022 06:46:48 +0000
+Message-Id: <20220920064648.215375-1-ye.xingchen@zte.com.cn>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="kd7xret2mae2a4ju"
-Content-Disposition: inline
-In-Reply-To: <f5dd0ee4-d97e-d878-ffde-c06e9b233e38@gmail.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: ye xingchen <ye.xingchen@zte.com.cn>
 
---kd7xret2mae2a4ju
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Return the value rtsx_usb_send_cmd() directly instead of storing it in
+another redundant variable.
 
-Hello,
+Reported-by: Zeal Robot <zealci@zte.com.cn>
+Signed-off-by: ye xingchen <ye.xingchen@zte.com.cn>
+---
+ drivers/mmc/host/rtsx_usb_sdmmc.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-On Sat, Sep 10, 2022 at 12:02:22AM +0200, Johan Jonker wrote:
-> Add rockchip,rk3128-pwm compatible string.
->=20
-> Signed-off-by: Johan Jonker <jbx6244@gmail.com>
-
-Acked-by: Uwe Kleine-K=F6nig <u.kleine-koenig@pengutronix.de>
-
-Is the expectation that this goes in via PWM, or together with the other
-patches via the rockchip maintainers?
-
-Best regards
-Uwe
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---kd7xret2mae2a4ju
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAmMpW/oACgkQwfwUeK3K
-7Ak6lQf+JJwJnr0ZyiY3Or6brzs797WF7GXUAFlXmkUFkhGzHm5kW2EBe5r0eYXK
-6JDJ9MIUXRJvfRMXB0q1REypyJTbfcS78DyhtcyYM89rpXqxBp76jgDUf9Rs2H+z
-fwUffgfMkkQk6ojMNmH6zeOALRizKrYFAmvWQAWndiOJLNeOAtcDF5PnfM+i2xer
-mPTOt7VjkfcG8CKYIp12F7V/aizP9olhrAvGVZKk+bkLNUfSGmkqQcYCaHr7xDaj
-aXtjRhrJzjBtQrq55OSMM5moBXnlWsTQGRxSeNpQO3wHAIbLadUooB4E717L9fut
-q4vUk4zN179x3cEVOMDAV6ZtGl0BIQ==
-=pI/x
------END PGP SIGNATURE-----
-
---kd7xret2mae2a4ju--
+diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
+index 5fe4528e296e..5798aee06653 100644
+--- a/drivers/mmc/host/rtsx_usb_sdmmc.c
++++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
+@@ -1042,7 +1042,6 @@ static int sd_set_timing(struct rtsx_usb_sdmmc *host,
+ 		unsigned char timing, bool *ddr_mode)
+ {
+ 	struct rtsx_ucr *ucr = host->ucr;
+-	int err;
+ 
+ 	*ddr_mode = false;
+ 
+@@ -1097,9 +1096,7 @@ static int sd_set_timing(struct rtsx_usb_sdmmc *host,
+ 		break;
+ 	}
+ 
+-	err = rtsx_usb_send_cmd(ucr, MODE_C, 100);
+-
+-	return err;
++	return rtsx_usb_send_cmd(ucr, MODE_C, 100);
+ }
+ 
+ static void sdmmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+-- 
+2.25.1
