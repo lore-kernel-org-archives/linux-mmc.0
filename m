@@ -2,172 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D662DC6FA8E
-	for <linux-mmc@archiver.kernel.org>; Wed, 21 Sep 2022 10:32:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 630AAC6FA8E
+	for <linux-mmc@archiver.kernel.org>; Wed, 21 Sep 2022 11:13:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230149AbiIUKcc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 21 Sep 2022 06:32:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37538 "EHLO
+        id S230012AbiIULNg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 21 Sep 2022 07:13:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230121AbiIUKcc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2022 06:32:32 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 127E290C69
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2022 03:32:30 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id y5so9160606wrh.3
-        for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2022 03:32:29 -0700 (PDT)
+        with ESMTP id S230036AbiIULNc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 21 Sep 2022 07:13:32 -0400
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B0538B2E2
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2022 04:13:30 -0700 (PDT)
+Received: by mail-lj1-x22c.google.com with SMTP id j24so6048042lja.4
+        for <linux-mmc@vger.kernel.org>; Wed, 21 Sep 2022 04:13:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=Y5JLfg2pqC8RO5BhkI7jAQbg+r/DxfqgDVqU4h6u7qU=;
-        b=VvVajjqwBX64U8dWjJylZ09tBwKNaRtldtI6/LawRnc+pvREeiKaO4a7YZFT0sp9cR
-         I+R4z/V8h6JmfCSQSdZ7eojsyb51qS5g/a4EnDjUyqmxY1xQnXSlmH9Kw9pV16vPFsVe
-         2VMUpH5wnsxVZ96c8+QJcFsGJvyO8AI2hk8IxWWqcLWqktM+gIA/+PPRVQ7q7qwwM7xO
-         UKHIYgi07SNTxHtluFN93UpOsHN/dyFZ85OSoEpXRHh5QH6Tg86AjiC+hkUWWFnGK+aK
-         K6BXJ1QiDoG9WHBqSbPDv0MFi71ipCZk2DsroaKdlfxaQiK2QHCV6ZdAVbrMDyTirm1a
-         AnmQ==
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date;
+        bh=lfPaDvZl0fHH6rn8puMVcoMiT+eeT0X1tsZ/B7VR2+Y=;
+        b=G2+xdwC9HD2+kvdQGyPDiSqAq0a5ql/RG4RhF64ckQhU1iswOGuKQJlXFRlkhbgwPn
+         g26rB73GOqzN+HTCOFRhXfbUl4Vhc04oLQ1DdTwxEIVfyG0vB/aZ9DAb+9fJTp8CdzgX
+         fynLnGBNGODUtSo+2FA45rGELhmHidrkr6HDWPhCX6hO6bkz+K1/cMOkqK2/+80+TMKe
+         tqrZ5UplpDMshglktJZ8nKVIOv8ahj5zw4bWMq7WLEc0iMoV4On8gBmtipsSY7vFa3CJ
+         l0pbURYWfgEXX+OEOcUrknTyIPqkPQs9AFyLFswyuQenWnAL9oTeEAADyRzfjTYH7a+4
+         6lgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=Y5JLfg2pqC8RO5BhkI7jAQbg+r/DxfqgDVqU4h6u7qU=;
-        b=6Jy4YdajSg48vE5zN9LeOeOSFq2voyjruw86LAXNX+oHF5o4AJmrag0Yz0aM3h560l
-         DoI4sFx+8uzn/GQkjMk4mPIEH4ZqEfahGGddPJ7oRR0Ky9PN8/jhWdeCHN8XtNgJkMXN
-         /el3VH0uyL5Nwlcr1dwHw4TZoGeeenUv3eehVGd98Ro11oHP0WUBXxxjqBAGV/qfRhCv
-         Tx73IBm7C4RK8JO8qnUWvj1Q4xlznT/ip8Xxha91bhB5sDZBEiN5aKbeuvOn8CFNaI0M
-         uXL5xxVHC6M7Uy9Gzh4Rp6fStmVFExLdYYtqcvIaKuek5oj5tNhsDTWpKWQODCX3GazJ
-         dkgg==
-X-Gm-Message-State: ACrzQf326hKY0ywgDJfEll2hZgZmkWytQhN8QgsSeF4LKG3EVrvewerb
-        TMqp1MYE9wZZ+ooF7fzxbFCU01Xg5Mi5ZxjSTTAOBw==
-X-Google-Smtp-Source: AMsMyM7lHyvT1H8bURac3iIYrn13yuUKAIkzFQ4nOhI5AgXVWL4DVuEm7D0a6h73h9bVGNRdmhbtDIv9kGo19eXSZZ0=
-X-Received: by 2002:a05:6000:81e:b0:228:a17f:92f0 with SMTP id
- bt30-20020a056000081e00b00228a17f92f0mr17216767wrb.31.1663756348493; Wed, 21
- Sep 2022 03:32:28 -0700 (PDT)
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=lfPaDvZl0fHH6rn8puMVcoMiT+eeT0X1tsZ/B7VR2+Y=;
+        b=t3PpVBxT95fb0xeGtWAx798TCiBM+Rkzno1Y2DjxOwqyMcOVIduprl82UUCJZolbfl
+         AD7jKKj3VJEPrXhXB7CNpOCufCLs3y/p/rThToysVD+bJssZp6cR9HYbhxRgg8P3KJyg
+         bMMe3oPKEPo4AJIhTo2BgBBH3ygCOWlX24OSXwO5l7dKNR93S/XYq58hVIP4V92gAjoK
+         p/UfR2HRFMKvzTiPjNfa6RkNu4QPsuug12pU5i9OgE7uD5dgFKEtZeMDcVNROuaXkjQZ
+         6KS5MXlYey2v3BB9pvu0+L3+Nm2kIQCQR3jhoDwbkNeLTcBOSPtp0Go/blV0+F2ZCUY8
+         jbEQ==
+X-Gm-Message-State: ACrzQf2n+/gryjfVoJKWt0em3JEkdsJXUZiM+jEfKVOvFFGhOmT7otrs
+        jXqJk46AcWttlrtJB9qZ8arNNw==
+X-Google-Smtp-Source: AMsMyM6919xzTTe6YBgZrcwGlc/Z99NkHRzObKYS0ULfa5sASVNawEef9+XwoL8PP257YyWbRC8gJA==
+X-Received: by 2002:a2e:7314:0:b0:26a:ca18:60eb with SMTP id o20-20020a2e7314000000b0026aca1860ebmr8008812ljc.69.1663758808438;
+        Wed, 21 Sep 2022 04:13:28 -0700 (PDT)
+Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.gmail.com with ESMTPSA id s16-20020a056512215000b0049493c14b17sm381439lfr.181.2022.09.21.04.13.27
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 21 Sep 2022 04:13:27 -0700 (PDT)
+Message-ID: <74c9c011-b0db-c838-e9bb-d732361ff799@linaro.org>
+Date:   Wed, 21 Sep 2022 13:13:26 +0200
 MIME-Version: 1.0
-References: <20220919181309.286611-1-dinguyen@kernel.org> <20220919181309.286611-2-dinguyen@kernel.org>
- <CAPDyKFoB7Z6kDOBd9rVLXU5yRQK7d5A-ut5CRroepbAfQpuByw@mail.gmail.com>
- <50c7d35b-f395-6421-1422-56e30a580318@kernel.org> <07c118cb-4daf-8e82-2969-1cff072ec52a@linaro.org>
-In-Reply-To: <07c118cb-4daf-8e82-2969-1cff072ec52a@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 21 Sep 2022 12:31:50 +0200
-Message-ID: <CAPDyKFoQJsf4EAoQRO9hoKWug+QTX2Hw1ukFqhr0sNQCCwR8Bg@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
-To:     Dinh Nguyen <dinguyen@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH 2/2] mmc: dw_mmc-pltfm: socfpga: add method to configure
+ clk-phase
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Dinh Nguyen <dinguyen@kernel.org>
 Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
         krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+References: <20220919181309.286611-1-dinguyen@kernel.org>
+ <20220919181309.286611-2-dinguyen@kernel.org>
+ <CAPDyKFoB7Z6kDOBd9rVLXU5yRQK7d5A-ut5CRroepbAfQpuByw@mail.gmail.com>
+ <50c7d35b-f395-6421-1422-56e30a580318@kernel.org>
+ <07c118cb-4daf-8e82-2969-1cff072ec52a@linaro.org>
+ <CAPDyKFoQJsf4EAoQRO9hoKWug+QTX2Hw1ukFqhr0sNQCCwR8Bg@mail.gmail.com>
+Content-Language: en-US
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAPDyKFoQJsf4EAoQRO9hoKWug+QTX2Hw1ukFqhr0sNQCCwR8Bg@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 20 Sept 2022 at 17:19, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
->
-> On 20/09/2022 15:24, Dinh Nguyen wrote:
-> >
-> > Hi Ulf,
-> >
-> > Thanks for the review!
-> >
-> > On 9/20/22 07:17, Ulf Hansson wrote:
-> >> On Mon, 19 Sept 2022 at 20:13, Dinh Nguyen <dinguyen@kernel.org> wrote:
-> >>>
-> >>> The clock-phase settings for the SDMMC controller in the SoCFPGA
-> >>> Strarix10/Agilex/N5X platforms reside in a register in the System
-> >>> Manager. Add a method to access that register through the syscon
-> >>> interface.
-> >>>
-> >>> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
-> >>> ---
-> >>>   drivers/mmc/host/dw_mmc-pltfm.c | 68 ++++++++++++++++++++++++++++++++-
-> >>>   1 file changed, 67 insertions(+), 1 deletion(-)
-> >>>
-> >>> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> >>> index 9901208be797..9e3237c18a9d 100644
-> >>> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> >>> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> >>> @@ -17,10 +17,15 @@
-> >>>   #include <linux/mmc/host.h>
-> >>>   #include <linux/mmc/mmc.h>
-> >>>   #include <linux/of.h>
-> >>> +#include <linux/mfd/altera-sysmgr.h>
-> >>> +#include <linux/regmap.h>
-> >>>
-> >>>   #include "dw_mmc.h"
-> >>>   #include "dw_mmc-pltfm.h"
-> >>>
-> >>> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
-> >>> +       ((((smplsel) & 0x7) << 4) | (((drvsel) & 0x7) << 0))
-> >>> +
-> >>>   int dw_mci_pltfm_register(struct platform_device *pdev,
-> >>>                            const struct dw_mci_drv_data *drv_data)
-> >>>   {
-> >>> @@ -62,9 +67,70 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
-> >>>   };
-> >>>   EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
-> >>>
-> >>> +static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-> >>> +{
-> >>> +       struct device_node *np = host->dev->of_node;
-> >>> +       struct regmap *sys_mgr_base_addr;
-> >>> +       u32 clk_phase[2] = {0}, reg_offset;
-> >>> +       int i, rc, hs_timing;
-> >>> +
-> >>> +       rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
-> >>
-> >> This needs to be documented through updated DT bindings.
-> >
-> > Ok, but it looks like clk-phase-sd-hs is already documented in
-> > Documentation/devicetree/bindings/mmc/mmc-controller.yaml
->
-> Not in next-20220919.
+On 21/09/2022 12:31, Ulf Hansson wrote:
+>> Not in next-20220919.
+> 
+> Dinh is right!
+> 
+> It seems like both me and Krzysztof missed the already documented
+> binding. Probably because the property is named like below and that I
+> did "git grep clk-phase-sd" :-)
+> 
+> "^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
 
-Dinh is right!
+Too much trust in git grep. Thanks for finding it.
 
-It seems like both me and Krzysztof missed the already documented
-binding. Probably because the property is named like below and that I
-did "git grep clk-phase-sd" :-)
+> 
+>>
+>>>
+>>> Should I create a specific documentation just for
+>>> "altr,socfpga-dw-mshc" and document "clk-phase-sd-hs"?
+>>
+>> All properties must be documented.
+> 
+> Yes, but as stated above, we should be okay in this case.
+> 
+>>
+>>>
+>>>>
+>>>>> +       if (rc) {
+>>>>> +               sys_mgr_base_addr =
+>>>>> +                       altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
+>>>>
+>>>> DT bindings?
+>>>
+>>> "altr,sysmgr-syscon" has already been documented in
+>>> Documentation/devicetree/bindings/net/socfpga-dwmac.txt
+>>
+>> This is not documentation of nodes you are changing here and in patch 1.
+>>
+>> You linked altr,socfpga-stmmac and here you have altr,socfpga-dw-mshc...
+> 
+> Right.
+> 
+> I guess an option is to convert
+> Documentation/devicetree/bindings/net/socfpga-dwmac.txt into the yaml
+> based format and then reference that binding from
+> synopsys-dw-mshc-common.yaml?
 
-"^clk-phase-(legacy|sd-hs|mmc-(hs|hs[24]00|ddr52)|uhs-(sdr(12|25|50|104)|ddr50))$":
+I did not look much inside, but isn't them entirely different devices
+(net vs mmc)? If they are different, then such vendor-custom property
+needs to appear in each bindings. The same as we have for other
+syscon-like properties.
 
->
-> >
-> > Should I create a specific documentation just for
-> > "altr,socfpga-dw-mshc" and document "clk-phase-sd-hs"?
->
-> All properties must be documented.
+Best regards,
+Krzysztof
 
-Yes, but as stated above, we should be okay in this case.
-
->
-> >
-> >>
-> >>> +       if (rc) {
-> >>> +               sys_mgr_base_addr =
-> >>> +                       altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
-> >>
-> >> DT bindings?
-> >
-> > "altr,sysmgr-syscon" has already been documented in
-> > Documentation/devicetree/bindings/net/socfpga-dwmac.txt
->
-> This is not documentation of nodes you are changing here and in patch 1.
->
-> You linked altr,socfpga-stmmac and here you have altr,socfpga-dw-mshc...
-
-Right.
-
-I guess an option is to convert
-Documentation/devicetree/bindings/net/socfpga-dwmac.txt into the yaml
-based format and then reference that binding from
-synopsys-dw-mshc-common.yaml?
-
->
-> Best regards,
-> Krzysztof
-
-Kind regards
-Uffe
