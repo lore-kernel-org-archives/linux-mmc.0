@@ -2,77 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF7CECAAD8
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Sep 2022 19:06:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82164C54EE9
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Sep 2022 22:03:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231913AbiIVTGv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Sep 2022 15:06:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48232 "EHLO
+        id S229841AbiIVWDT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Sep 2022 18:03:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42746 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229901AbiIVTGu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2022 15:06:50 -0400
-Received: from smtp.smtpout.orange.fr (smtp05.smtpout.orange.fr [80.12.242.127])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9284CEBBEB
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2022 12:06:48 -0700 (PDT)
-Received: from pop-os.home ([90.11.190.129])
-        by smtp.orange.fr with ESMTPA
-        id bRWzoFS7XOizNbRWzoX4NW; Thu, 22 Sep 2022 21:06:46 +0200
-X-ME-Helo: pop-os.home
-X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Thu, 22 Sep 2022 21:06:46 +0200
-X-ME-IP: 90.11.190.129
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-To:     ulf.hansson@linaro.org, cjb@laptop.org, dan.carpenter@oracle.com
-Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Subject: [PATCH v2] mmc: wmt-sdmmc: Fix an error handling path in wmt_mci_probe()
-Date:   Thu, 22 Sep 2022 21:06:40 +0200
-Message-Id: <53fc6ffa5d1c428fefeae7d313cf4a669c3a1e98.1663873255.git.christophe.jaillet@wanadoo.fr>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S229519AbiIVWDS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2022 18:03:18 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67163F1624;
+        Thu, 22 Sep 2022 15:03:17 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 046B362373;
+        Thu, 22 Sep 2022 22:03:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88875C433D7;
+        Thu, 22 Sep 2022 22:03:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1663884196;
+        bh=y+77KBXZol4WBiZ164SK0oly/RSyy8n+02CZZWHAZXY=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=bDc+79A02Ji2hLuNgXu4bjqixhtEOIRNk2WBjICG+v3bPDMTHYBUegz4jBl9NluV+
+         750UjKD787VVGPN0SpdrN6SYgQYrpxqfdUdYkqrSCU1NwCZWmsKlpA3NAn87EpuxDX
+         LPj9CewSqk2gHUNKm3xzmTPR1n+YtBwv5Og5ASIyzAP0gIqMZOvAOK37n99zqz/FCb
+         qk6CyDnyOJl/SNeFAYgdtbq7V5xZ72FudPh6naRDSoFZYa2qAlnWSwc40LnODKFHBf
+         +isAhO/IpKoOprjnoo54oGM7NJtzmL+3v19gZZ39RmEyBN+Ioqj3YZNmmGWK7l7QXh
+         AnP42YNomu34w==
+From:   Dinh Nguyen <dinguyen@kernel.org>
+To:     jh80.chung@samsung.com
+Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Subject: [PATCHv2 1/3] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
+Date:   Thu, 22 Sep 2022 17:03:06 -0500
+Message-Id: <20220922220308.609422-2-dinguyen@kernel.org>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220922220308.609422-1-dinguyen@kernel.org>
+References: <20220922220308.609422-1-dinguyen@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-A dma_free_coherent() call is missing in the error handling path of the
-probe, as already done in the remove function.
+Document the optional "altr,sysmgr-syscon" binding that is used to
+access the System Manager register that controls the SDMMC clock
+phase.
 
-Fixes: 3a96dff0f828 ("mmc: SD/MMC Host Controller for Wondermedia WM8505/WM8650")
-Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
 ---
-Changes since v1:
-  * Add and use the (ugly named) 'fail5_and_a_half' label   [Dan Carpenter <dan.carpenter@oracle.com>]
-
-v1: https://lore.kernel.org/all/bf2e2e69226b20d173cce66287f59488fd47474b.1646588375.git.christophe.jaillet@wanadoo.fr/
+v2: added
 ---
- drivers/mmc/host/wmt-sdmmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.yaml    | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 163ac9df8cca..9b5c503e3a3f 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -846,7 +846,7 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	if (IS_ERR(priv->clk_sdmmc)) {
- 		dev_err(&pdev->dev, "Error getting clock\n");
- 		ret = PTR_ERR(priv->clk_sdmmc);
--		goto fail5;
-+		goto fail5_and_a_half;
- 	}
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+index ae6d6fca79e2..aece6a337262 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+@@ -38,6 +38,18 @@ properties:
+       - const: biu
+       - const: ciu
  
- 	ret = clk_prepare_enable(priv->clk_sdmmc);
-@@ -863,6 +863,9 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	return 0;
- fail6:
- 	clk_put(priv->clk_sdmmc);
-+fail5_and_a_half:
-+	dma_free_coherent(&pdev->dev, mmc->max_blk_count * 16,
-+			  priv->dma_desc_buffer, priv->dma_desc_device_addr);
- fail5:
- 	free_irq(dma_irq, priv);
- fail4:
++  altr,sysmgr-syscon:
++    $ref: /schemas/types.yaml#/definitions/phandle-array
++    items:
++      - items:
++          - description: phandle to the sysmgr node
++          - description: register offset that controls the SDMMC clock phase
++    description:
++      Contains the phandle to System Manager block that contains
++      the SDMMC clock-phase control register. The first value is the pointer
++      to the sysmgr and the 2nd value is the register offset for the SDMMC
++      clock phase register.
++
+ required:
+   - compatible
+   - reg
 -- 
-2.34.1
+2.25.1
 
