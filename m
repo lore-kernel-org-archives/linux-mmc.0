@@ -2,127 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3B50C6FA8B
-	for <linux-mmc@archiver.kernel.org>; Thu, 22 Sep 2022 08:20:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2078CC6FA92
+	for <linux-mmc@archiver.kernel.org>; Thu, 22 Sep 2022 08:55:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230028AbiIVIUu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Sep 2022 04:20:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38316 "EHLO
+        id S230474AbiIVIzf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Sep 2022 04:55:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230036AbiIVIUo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2022 04:20:44 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD527CC8FF;
-        Thu, 22 Sep 2022 01:20:38 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1663834838; x=1695370838;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=yld6IQ6mlYNH0Gl6RjlZ1Fs+6PQmDlHxoH3TMWnnYl8=;
-  b=kXwrjCn7LhsLFBvp1BOrpsW2rkpU2Jg36AFpXB4l//jq6iJ2AjG5hmnW
-   d8uIDo/PyTkTzvdQfjBo64ZQs4YMLRRLQoss17kRDHXCyCLjFnL2rQs6O
-   t8hwFyD3gupeM3b4aSU/6kNKSMoJgQuWjw+kK696lTKf9HdWW34J/qzZu
-   glQBg5HkrIcO/OwitXohMHYQT4GczBnVFwR/z2ldWZkhEPTJFGiCCS9z/
-   aa5OC55sfjdbfspb55a7Gjs1IDxXy4oGRLeeh6oA8+CaNNyqyC6I7HadQ
-   BNJU+/WP5MGWiqWnR9GKr6UJvqU/1Czhe7byzxWXKA964vNXWvcKhwhaz
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10477"; a="386524286"
-X-IronPort-AV: E=Sophos;i="5.93,335,1654585200"; 
-   d="scan'208";a="386524286"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Sep 2022 01:20:37 -0700
-X-IronPort-AV: E=Sophos;i="5.93,335,1654585200"; 
-   d="scan'208";a="570875460"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.59.41])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 22 Sep 2022 01:20:35 -0700
-Message-ID: <12b21bad-4f7b-ebc9-b896-20ec8a88c105@intel.com>
-Date:   Thu, 22 Sep 2022 11:20:32 +0300
+        with ESMTP id S230472AbiIVIzU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2022 04:55:20 -0400
+Received: from relmlie5.idc.renesas.com (relmlor1.renesas.com [210.160.252.171])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EBDC45D0FA;
+        Thu, 22 Sep 2022 01:55:18 -0700 (PDT)
+X-IronPort-AV: E=Sophos;i="5.93,335,1654527600"; 
+   d="scan'208";a="133644041"
+Received: from unknown (HELO relmlir6.idc.renesas.com) ([10.200.68.152])
+  by relmlie5.idc.renesas.com with ESMTP; 22 Sep 2022 17:55:17 +0900
+Received: from localhost.localdomain (unknown [10.226.92.171])
+        by relmlir6.idc.renesas.com (Postfix) with ESMTP id 82E0242218F5;
+        Thu, 22 Sep 2022 17:55:14 +0900 (JST)
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
+Date:   Thu, 22 Sep 2022 09:55:11 +0100
+Message-Id: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH v2] mmc: sdhci-pci-core: Disable ES for ASUS BIOS on
- Jasper Lake
-Content-Language: en-US
-To:     Patrick Thompson <ptf@google.com>,
-        Linux MMC Development <linux-mmc@vger.kernel.org>
-Cc:     Sangwhan Moon <sxm@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-References: <20220919204651.1517899-1-ptf@google.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220919204651.1517899-1-ptf@google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/09/22 23:46, Patrick Thompson wrote:
-> Enhanced Strobe (ES) does not work correctly on the ASUS 1100 series of
-> devices. Jasper Lake eMMCs (pci_id 8086:4dc4) are supposed to support
-> ES. There are also two system families under the series, thus this is
-> being scoped to the ASUS BIOS.
-> 
-> The failing ES prevents the installer from writing to disk. Falling back
-> to HS400 without ES fixes the issue.
-> 
-> Signed-off-by: Patrick Thompson <ptf@google.com>
+Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
+with a lower clock rate compared to a higher one.
+For eg:- (533333333 Hz / 4 * 4 = 533333332 Hz < 533333333 Hz).
 
-Presumably needs a fixes tag i.e.
+This patch fixes this issue by adding a margin of (1/1024) higher to
+the clock rate.
 
-Fixes: 315e3bd7ac19 ("mmc: sdhci-pci: Add support for Intel JSL")
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+---
+v2->v3:
+ * Renamed the variable new_clock_margin->new_upper_limit in renesas_sdhi_clk_
+   update()
+ * Moved setting of new_upper_limit outside for loop.
+ * Updated the comment section to mention the rounding errors and merged with
+   existing comment out side the for loop.
+ * Updated commit description. 
+v1->v2:
+ * Add a comment explaining why margin is needed and set it to
+   that particular value.
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
-> 
-> ---
-> 
-> Changes in v2:
-> V1->V2:
-> * Only disable ES instead of CQE in its entirety.
-> * Target Jasper Lake (JSL)
-> * Target ASUS BIOS instead of specific system family
-> 
->  drivers/mmc/host/sdhci-pci-core.c | 16 +++++++++++++---
->  1 file changed, 13 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 622b7de96c7f..42406f76f65c 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -893,6 +893,12 @@ static bool glk_broken_cqhci(struct sdhci_pci_slot *slot)
->  		dmi_match(DMI_SYS_VENDOR, "IRBIS"));
->  }
->  
-> +static bool jsl_broken_hs400es(struct sdhci_pci_slot *slot)
-> +{
-> +	return slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_JSL_EMMC &&
-> +			dmi_match(DMI_BIOS_VENDOR, "ASUSTeK COMPUTER INC.");
-> +}
-> +
->  static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
->  {
->  	int ret = byt_emmc_probe_slot(slot);
-> @@ -901,9 +907,13 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
->  		slot->host->mmc->caps2 |= MMC_CAP2_CQE;
->  
->  	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
-> -		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
-> -		slot->host->mmc_host_ops.hs400_enhanced_strobe =
-> -						intel_hs400_enhanced_strobe;
-> +		if (jsl_broken_hs400es(slot)) {
-> +			slot->host->mmc->caps2 |= MMC_CAP2_HS400;
-
-HS400 capability is already selected by SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400
-so this is not needed here.
-
-> +		} else {
-> +			slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
-> +			slot->host->mmc_host_ops.hs400_enhanced_strobe =
-> +							intel_hs400_enhanced_strobe;
-> +		}
->  		slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
->  	}
->  
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 6edbf5c161ab..45ec15ece1f5 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -128,6 +128,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	struct clk *ref_clk = priv->clk;
+ 	unsigned int freq, diff, best_freq = 0, diff_min = ~0;
+ 	unsigned int new_clock, clkh_shift = 0;
++	unsigned int new_upper_limit;
+ 	int i;
+ 
+ 	/*
+@@ -153,10 +154,15 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	 * greater than, new_clock.  As we can divide by 1 << i for
+ 	 * any i in [0, 9] we want the input clock to be as close as
+ 	 * possible, but no greater than, new_clock << i.
++	 *
++	 * To fix rounding errors, eg:- (533333333 Hz / 4 * 4 = 533333332 Hz <
++	 * 533333333 Hz) add an upper limit of 1/1024 rate higher to the clock
++	 * rate.
+ 	 */
++	new_upper_limit = (new_clock << i) + ((new_clock << i) >> 10);
+ 	for (i = min(9, ilog2(UINT_MAX / new_clock)); i >= 0; i--) {
+ 		freq = clk_round_rate(ref_clk, new_clock << i);
+-		if (freq > (new_clock << i)) {
++		if (freq > new_upper_limit) {
+ 			/* Too fast; look for a slightly slower option */
+ 			freq = clk_round_rate(ref_clk, (new_clock << i) / 4 * 3);
+ 			if (freq > (new_clock << i))
+@@ -181,6 +187,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+ 				   unsigned int new_clock)
+ {
++	unsigned int clk_margin;
+ 	u32 clk = 0, clock;
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+@@ -194,7 +201,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+ 	host->mmc->actual_clock = renesas_sdhi_clk_update(host, new_clock);
+ 	clock = host->mmc->actual_clock / 512;
+ 
+-	for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
++	/*
++	 * Add a margin of 1/1024 rate higher to the clock rate in order
++	 * to avoid clk variable setting a value of 0 due to the margin
++	 * provided for actual_clock in renesas_sdhi_clk_update().
++	 */
++	clk_margin = new_clock >> 10;
++	for (clk = 0x80000080; new_clock + clk_margin >= (clock << 1); clk >>= 1)
+ 		clock <<= 1;
+ 
+ 	/* 1/1 clock is option */
+-- 
+2.25.1
 
