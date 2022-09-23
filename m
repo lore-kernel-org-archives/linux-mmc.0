@@ -2,59 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82F59C6FA82
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 09:38:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EE87C6FA82
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 09:40:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230053AbiIWJi5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Sep 2022 05:38:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58446 "EHLO
+        id S231954AbiIWJkx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Sep 2022 05:40:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231823AbiIWJgo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 05:36:44 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88922130734
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 02:36:36 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id s6so18900380lfo.7
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 02:36:36 -0700 (PDT)
+        with ESMTP id S232038AbiIWJiv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 05:38:51 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDEEDF1879
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 02:38:34 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id z25so18944982lfr.2
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 02:38:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date;
-        bh=Xk/gVSD+vh+ZIMZ668aPcrLeqKvYBTNu+pH41Yvodbs=;
-        b=w6qsAtyDvzfYLjuytNvGRMRGffrsg1AzWw+qbxj38wsYfKQwJysXQs5hCLn2eHVIRk
-         foPRA9oaOImr85M33qb79Sc9SusuIezsM24OHXmX9x+1U2/nf8Bv1+JOxvqNv9+NtPHa
-         V1BnReibKMtYjt8bdpdR8s+M4ypCt+8F29clW7bWC57bOGgGJNL1sFA314cTD+hwGRLP
-         1G6CpGAtxkoDwkB3FMmaQbER87vUriJjJ5F7SthhqBfewvcV9CAV3tqEFK5dMRf7E6dC
-         PhPPr/2yTPvl0Cgg14CNaBZS6HtsUhDSk0LL4EF6CvDH//tjUGbGzvZPxK0LnAwge0mp
-         kfwg==
+        bh=kUkKnSToWBiAp7jFJoJfzt/vyDxgquAmqUaAVPpyLJo=;
+        b=o8tltaqBCnETP2nIc7yxtqe2HACJeknkObRZc8S2S1AYjjxb0AJ14zw2/jaalhEFqj
+         sRAYv4Q+8L1lDh8qcnY5bxF0nsBUOnoN5viGa7/VrgBGOojkC2388NkhOB6SZtyuB52u
+         OkicU7Q3xZqS36+ZRHWpUUeHzWIPhVSbpar1k9bziM5SRSXc2KrKTj9sTRHz/uECDVRd
+         y58JrHvDMhbl5035Ls49F95QFXJ3auOINZp5lSGfZMAacCeYnZneaVXOWZTivPzwKqkp
+         wpAzPdEkMWlx7raEbhWmdrwuJjh1M0dJS+6cHB8WUfGjrtgJljFeUTfHSJHXdwK45aiE
+         8k5w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date;
-        bh=Xk/gVSD+vh+ZIMZ668aPcrLeqKvYBTNu+pH41Yvodbs=;
-        b=s8ER6h64vOdpNdh7SbZiQpwYo+3jauTY+AAi88fcLhRUosXLtUYfnDGL3S9UP64MrF
-         udd24U6GaNFyfxrQot93IrUkOlztVbzRrEkxOg2SUzYIMHHXjgwqqmauD+eCEMJccyJJ
-         EB0DqgQ/xP0+kcI3S21d/AnATdUcZv5ZBxwfrcS0IhaFg4h4Orywy2nd6dW7aVKijVcW
-         nd1+7WAzifHEXK3tChPg3lQaPr/UgvSS//yOnlmTUvInslMoVC62Xam5fRiQdeiVPzY3
-         RgguSfBjJFPvDjT9Lw4jsp6uuiUJA+czctsFq43dExYMeYbgleRD/zg3LkL/K9XoTJTq
-         u0tw==
-X-Gm-Message-State: ACrzQf3Ax35aDL7BQVmwBfY1QGxUvYQTFczJ6SAnMLrQzcyL68bt5gF4
-        SVxI9GZhw6PF32/wYWd93Rypww==
-X-Google-Smtp-Source: AMsMyM7DCwqOOF05tz5ECggjiBhUrW1d5GfU9JtCsxNXLRnRftZCPCfgd5hWlAyLwbU/NBRTD7XhJA==
-X-Received: by 2002:a05:6512:31e:b0:49f:9ee1:e5c8 with SMTP id t30-20020a056512031e00b0049f9ee1e5c8mr3066650lfp.299.1663925794937;
-        Fri, 23 Sep 2022 02:36:34 -0700 (PDT)
+        bh=kUkKnSToWBiAp7jFJoJfzt/vyDxgquAmqUaAVPpyLJo=;
+        b=qz+f4WI6gsgoUOCqrmCv/T973YHhEaDX2QEPpAoiyO0cJPgcWiynli2EPwzz4sR8GF
+         Qb1DMSFilZLtTLZAj5D/AreZ5gbGz1JOjPrDMSJ/Nojn72Mer51/QJAm2dfNSouUlHnb
+         NZF1KBP6kCKNDoFIfEfAT1IYtbs4c8oUhewGrA6iwWmuueYznoW0pBS9Me7FOPVbdTUi
+         n2GfqBLNLCuzTPu48EHmJBUOQsmABJufnEQT82YPfNYvZWZzF30gDzdykHuAP6OwhCRX
+         BylNmENmVwXYS/yEYld2D7tM9TKkmboyCXmhnX++YgwcPTe9NHlL/wMRZXE07I7wD6OD
+         hcLQ==
+X-Gm-Message-State: ACrzQf1tTGgdxeYlwCFJkg7uU6oTms8xuyrd5s5OFF1gLpBWFsiZlAQb
+        bZkV3O0rU4861NzvmGyPz6OB7A==
+X-Google-Smtp-Source: AMsMyM6PSJE5Ve/XZ7OKQb0FHJiZgYISJoAOwRQqG4fNfNeQ7YdMKUWmDEjNEJJRm3W+kEo7ChCOeA==
+X-Received: by 2002:ac2:4c50:0:b0:49a:3768:da81 with SMTP id o16-20020ac24c50000000b0049a3768da81mr2750254lfk.247.1663925913003;
+        Fri, 23 Sep 2022 02:38:33 -0700 (PDT)
 Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id by40-20020a05651c1a2800b0026c446918acsm1281161ljb.134.2022.09.23.02.36.34
+        by smtp.gmail.com with ESMTPSA id x15-20020a19e00f000000b00498fc3d4d15sm1363465lfg.190.2022.09.23.02.38.32
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 23 Sep 2022 02:36:34 -0700 (PDT)
-Message-ID: <ecc5ac31-5573-3d50-0186-0622bfeaceb0@linaro.org>
-Date:   Fri, 23 Sep 2022 11:36:33 +0200
+        Fri, 23 Sep 2022 02:38:32 -0700 (PDT)
+Message-ID: <e9860dfc-061d-4ab4-c7e3-d0b062cb9eda@linaro.org>
+Date:   Fri, 23 Sep 2022 11:38:31 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.2.2
-Subject: Re: [PATCH 1/2] dt-bindings: mmc: sdhci-msm: add sdm670 compatible
+Subject: Re: [PATCH 2/2] mmc: sdhci-msm: add compatible string check for
+ sdm670
 Content-Language: en-US
 To:     Richard Acayan <mailingradian@gmail.com>,
         linux-arm-msm@vger.kernel.org
@@ -68,9 +69,9 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 References: <20220923014322.33620-1-mailingradian@gmail.com>
- <20220923014322.33620-2-mailingradian@gmail.com>
+ <20220923014322.33620-3-mailingradian@gmail.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220923014322.33620-2-mailingradian@gmail.com>
+In-Reply-To: <20220923014322.33620-3-mailingradian@gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -78,13 +79,34 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 23/09/2022 03:43, Richard Acayan wrote:
-> The Snapdragon 670 supports eMMC with an SDHCI controller. Add the
-> appropriate compatible to the documentation.
+> The Snapdragon 670 has the same quirk as Snapdragon 845 (needing to
+> restore the dll config). Add a compatible string check to detect the need
+> for this.
 > 
 > Signed-off-by: Richard Acayan <mailingradian@gmail.com>
+> ---
+>  drivers/mmc/host/sdhci-msm.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
+> index dc2991422a87..3a091a387ecb 100644
+> --- a/drivers/mmc/host/sdhci-msm.c
+> +++ b/drivers/mmc/host/sdhci-msm.c
+> @@ -2441,6 +2441,7 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
+>  	 */
+>  	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
+>  	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
+> +	{.compatible = "qcom,sdm670-sdhci", .data = &sdm845_sdhci_var},
+>  	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
+>  	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
 
+Probably we should make them a family of compatible devices, because the
+list grows. For three items:
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+If you want to add fourth, I propose to make it a family.
+
 
 Best regards,
 Krzysztof
