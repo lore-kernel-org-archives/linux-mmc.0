@@ -2,134 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5015C6FA82
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 14:39:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1286C04A95
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 17:03:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231918AbiIWOj0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Sep 2022 10:39:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56704 "EHLO
+        id S230431AbiIWRDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Sep 2022 13:03:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229963AbiIWOjY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 10:39:24 -0400
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B6F2143284
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 07:39:22 -0700 (PDT)
-Received: by mail-ej1-x62e.google.com with SMTP id sd10so1176606ejc.2
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 07:39:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=fairphone.com; s=fair;
-        h=in-reply-to:references:cc:to:from:subject:message-id:date
-         :content-transfer-encoding:mime-version:from:to:cc:subject:date;
-        bh=S5eZN2svmhOfsW6VEcUb5Ry7O5bFBRCb5lC2tn/7Tfo=;
-        b=gkzAlIt/hpKoRZEZLqhfZ8OysZ9L7bILUx3sexHwwb/6XDB+pCPacUz+MJjhWKhuR8
-         03WIYD6q3het0x2eUZOaFt4+8DLRxhO61dji69+3Me4MLavSly0qeRo0vqetAht869ok
-         ifG9Ps6irane6AxqQ0QfJg90uACXU5trZG5FNLfEzHAvnDR/7MbC/Fiy3LIbWwjANhiM
-         E2UJl7+e5iXNxOJG9pVXNlrbpNeiZUe/b5JBc4Ah587wHR6LrqOEcMd85sSJX+AHXzVH
-         ylFVisJVdx3w/VxoxI7/ouKWTh3F9lVB7kokwRSC1DxQ36BVKR9k3+145PxEiaip0TUB
-         rnCA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:references:cc:to:from:subject:message-id:date
-         :content-transfer-encoding:mime-version:x-gm-message-state:from:to
-         :cc:subject:date;
-        bh=S5eZN2svmhOfsW6VEcUb5Ry7O5bFBRCb5lC2tn/7Tfo=;
-        b=MUooXJlLru0TQGHnuV4dqHO/yt6ocxdVxFVy171y0i3sYaCKDWlP0I3wyVcVYx2aq+
-         QUXFGMXRFEikCYdYv7JUMmMJLjP9T+KdLwUDe+/ldFrbjS6+Tw/F7ZWLcU/PXKT6j43A
-         KczY6D0I1cPh2QUJXgY6bPEaSKbedUriEgxMqMM3/uRhzCki8/kbXYW5rsHWjR/gXk7s
-         zAcvJ4y6BZ0RcAHnVQNFksPKbylfpet9VIH0Dmf3JklVC4L8XUtzMb51xKAfo/uohWIx
-         bI+bbtfd+Invj8aRlQj0wfWyqUwJdJlyQBjwmGMt+k9EJlokUUusruM0BDlTqxFFqFJ0
-         gwwg==
-X-Gm-Message-State: ACrzQf2yu20+VfR+zmbYXppTtjHhWOokFd2biZNbDKy8uklkB1wWImme
-        dkXB2+/XQITS/K3zm+z9sd2obA==
-X-Google-Smtp-Source: AMsMyM5/0fjixHZUeDGkqTbJZktQlwbIg9e75ri3yi5AJ6I4VwtQ3bwL9pzvfhAltPu40POCkTiVNg==
-X-Received: by 2002:a17:906:8469:b0:781:fc76:fbd7 with SMTP id hx9-20020a170906846900b00781fc76fbd7mr7457238ejc.486.1663943960828;
-        Fri, 23 Sep 2022 07:39:20 -0700 (PDT)
-Received: from localhost (144-178-202-138.static.ef-service.nl. [144.178.202.138])
-        by smtp.gmail.com with ESMTPSA id j2-20020a17090623e200b0078197a9421csm4117653ejg.85.2022.09.23.07.39.19
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 23 Sep 2022 07:39:20 -0700 (PDT)
-Mime-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset=UTF-8
-Date:   Fri, 23 Sep 2022 16:39:18 +0200
-Message-Id: <CN3UWLRBLVPF.VV4AX2X9TS34@otso>
-Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
-From:   "Luca Weiss" <luca.weiss@fairphone.com>
-To:     "Dmitry Baryshkov" <dmitry.baryshkov@linaro.org>,
-        "Andy Gross" <agross@kernel.org>,
-        "Bjorn Andersson" <bjorn.andersson@linaro.org>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Marcel Holtmann" <marcel@holtmann.org>,
-        "Johan Hedberg" <johan.hedberg@gmail.com>,
-        "Luiz Augusto von Dentz" <luiz.dentz@gmail.com>,
-        "Kalle Valo" <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        "Jakub Kicinski" <kuba@kernel.org>,
-        "Stanimir Varbanov" <svarbanov@mm-sol.com>
-Cc:     <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-bluetooth@vger.kernel.org>,
-        <ath10k@lists.infradead.org>, <linux-wireless@vger.kernel.org>,
-        <netdev@vger.kernel.org>
-X-Mailer: aerc 0.12.0
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
-In-Reply-To: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+        with ESMTP id S229525AbiIWRDC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 13:03:02 -0400
+Received: from smtp.smtpout.orange.fr (smtp08.smtpout.orange.fr [80.12.242.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 194A11280DA
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 10:03:01 -0700 (PDT)
+Received: from [192.168.1.18] ([86.243.100.34])
+        by smtp.orange.fr with ESMTPA
+        id bm4loSg0Hg7y2bm4loVquQ; Fri, 23 Sep 2022 19:02:59 +0200
+X-ME-Helo: [192.168.1.18]
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Fri, 23 Sep 2022 19:02:59 +0200
+X-ME-IP: 86.243.100.34
+Message-ID: <a66b0aa5-28d7-a3bb-cbee-bb2021a98ff8@wanadoo.fr>
+Date:   Fri, 23 Sep 2022 19:02:54 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH linux-next] memstick/ms_block: fix the spelling mistakes
+Content-Language: en-US
+To:     cgel.zte@gmail.com, ulf.hansson@linaro.org
+Cc:     maximlevitsky@gmail.com, oakad@yahoo.com, axboe@kernel.dk,
+        hare@suse.de, mcgrof@kernel.org, arnd@arndb.de,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        ye xingchen <ye.xingchen@zte.com.cn>
+References: <20220923085601.239691-1-ye.xingchen@zte.com.cn>
+From:   Marion & Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+In-Reply-To: <20220923085601.239691-1-ye.xingchen@zte.com.cn>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Dmitry,
 
-On Wed Oct 6, 2021 at 5:53 AM CEST, Dmitry Baryshkov wrote:
-> This is a proposed power sequencer subsystem. This is a
-> generification of the MMC pwrseq code. The subsystem tries to abstract
-> the idea of complex power-up/power-down/reset of the devices.
+Le 23/09/2022 à 10:56, cgel.zte@gmail.com a écrit :
+> From: ye xingchen <ye.xingchen@zte.com.cn>
 >
-> The primary set of devices that promted me to create this patchset is
-> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> or serial + SDIO interfaces (older generations) or on serial+PCIe (newer
-> generations).  They require a set of external voltage regulators to be
-> powered on and (some of them) have separate WiFi and Bluetooth enable
-> GPIOs.
+> fix spelling mistake "sucessfuly_written" -> "successfully_written"
+> "sucessfuly_read" -> "successfully_read"
 >
-> The major drawback for now is the lack of proper PCIe integration
-> At this moment support for PCIe is hacked up to be able to test the
-> PCIe part of qca6390. Proper PCIe support would require automatically
-> powering up the devices before the scan basing on the proper device
-> structure in the device tree. This two last patches are noted as WIP and
-> are included into the patchset for the purpose of testing WiFi on newer
-> chips (like qca6390/qca6391).
-
-What's the status of this series? With this I have gotten Bluetooth to
-somewhat work on sm7225-fairphone-fp4, which is using WCN3990/WCN3988.
-
-Is there another solution with a different patch series that could make
-it work also?
-
-The latest I could find regarding some new Bluetooth thing is the
-following email from June 2022, but nothing seems to have happened since
-then.
-https://lore.kernel.org/linux-arm-msm/SJ0PR02MB7135746D204F13550E9BAE77F8B2=
-9@SJ0PR02MB7135.namprd02.prod.outlook.com/
-
-Regards
-Luca
-
+> Signed-off-by: ye xingchen <ye.xingchen@zte.com.cn>
+> ---
+>   drivers/memstick/core/ms_block.c | 14 +++++++-------
+>   1 file changed, 7 insertions(+), 7 deletions(-)
 >
-> Changes since RFC v2:
->  - Add documentation for the pwrseq code. Document data structures,
->    macros and exported functions.
->  - Export of_pwrseq_xlate_onecell()
->  - Add separate pwrseq_set_drvdata() function to follow the typical API
->    design
->  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
->  - Moved code to handle old mmc-pwrseq binding to the MMC patch
->  - Split of_pwrseq_xlate_onecell() support to a separate patch
->
-> Changes since RFC v1:
->  - Provider pwrseq fallback support
->  - Implement fallback support in pwrseq_qca.
->  - Mmove susclk handling to pwrseq_qca.
->  - Significantly simplify hci_qca.c changes, by dropping all legacy
->    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
->    parts of the chip.
+> diff --git a/drivers/memstick/core/ms_block.c b/drivers/memstick/core/ms_block.c
+> index ba8414519515..c6b92a777cc8 100644
+> --- a/drivers/memstick/core/ms_block.c
+> +++ b/drivers/memstick/core/ms_block.c
+> @@ -1809,11 +1809,11 @@ static int msb_init_card(struct memstick_dev *card)
+>   }
+>   
+>   static int msb_do_write_request(struct msb_data *msb, int lba,
+> -	int page, struct scatterlist *sg, size_t len, int *sucessfuly_written)
+> +	int page, struct scatterlist *sg, size_t len, int *successfully_written)
 
+Hi,
+
+not related to this patch itself, but 'len' is a size_t here and an int 
+below.
+And these 'len' parameters both come from blk_rq_bytes() which returns 
+an "unsigned int"
+
+I guess that if the type was used consistently, it would be better.
+(My own preference goes to size_t)
+
+>   {
+>   	int error = 0;
+>   	off_t offset = 0;
+> -	*sucessfuly_written = 0;
+> +	*successfully_written = 0;
+>   
+>   	while (offset < len) {
+>   		if (page == 0 && len - offset >= msb->block_size) {
+> @@ -1827,7 +1827,7 @@ static int msb_do_write_request(struct msb_data *msb, int lba,
+>   				return error;
+>   
+>   			offset += msb->block_size;
+> -			*sucessfuly_written += msb->block_size;
+> +			*successfully_written += msb->block_size;
+>   			lba++;
+>   			continue;
+>   		}
+> @@ -1837,7 +1837,7 @@ static int msb_do_write_request(struct msb_data *msb, int lba,
+>   			return error;
+>   
+>   		offset += msb->page_size;
+> -		*sucessfuly_written += msb->page_size;
+> +		*successfully_written += msb->page_size;
+>   
+>   		page++;
+>   		if (page == msb->pages_in_block) {
+> @@ -1849,11 +1849,11 @@ static int msb_do_write_request(struct msb_data *msb, int lba,
+>   }
+>   
+>   static int msb_do_read_request(struct msb_data *msb, int lba,
+> -		int page, struct scatterlist *sg, int len, int *sucessfuly_read)
+> +		int page, struct scatterlist *sg, int len, int *successfully_read)
+
+Here.
+
+>   {
+>   	int error = 0;
+>   	int offset = 0;
+> -	*sucessfuly_read = 0;
+> +	*successfully_read = 0;
+>   
+>   	while (offset < len) {
+>   
+> @@ -1862,7 +1862,7 @@ static int msb_do_read_request(struct msb_data *msb, int lba,
+>   			return error;
+>   
+>   		offset += msb->page_size;
+> -		*sucessfuly_read += msb->page_size;
+> +		*successfully_read += msb->page_size;
+>   
+>   		page++;
+>   		if (page == msb->pages_in_block) {
