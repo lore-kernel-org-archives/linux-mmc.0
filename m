@@ -2,84 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54ED4ECAAD8
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 05:07:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36961C6FA82
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 06:50:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229678AbiIWFHN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Sep 2022 01:07:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40438 "EHLO
+        id S229785AbiIWGu2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Sep 2022 02:50:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229449AbiIWFHL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 01:07:11 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B69612645B
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2022 22:07:10 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id z25so18059360lfr.2
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2022 22:07:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=6SRopPv1VZUvrQ8nf2qs0INKVyUhQiNiZRamaiV44Kc=;
-        b=y2bx1FkhdrEL9PegBuK2kr8kg8dU6GdxgTleR8K4gD8didfEtmZM5fQg0OKcWaihPD
-         uGylENtXvfkvXdELuIslpbK21VvUbqYbkRYyN3RlIQuYVr+5xB29/4R2JlC4WxLwXNpw
-         8AVgjptIxf8Vkd8s4pZ4BPMePbGwfn0pj2wVyTIJfh+S01zReY3+V4X7Nz0QKjSaospp
-         al6YG+/Oe+fv7BwfFQNQ1zsluRAbJ7rSwyQBtQiuNexAQdNRFwhuYmsol9EHEZ6+EsNv
-         DSjQxPxZ72NEhVKoT/gPsbITRuwL2V+ypjMkgi/fSkbCQRdo2x3VRC4+bx9fBZ1EI0Rc
-         ZC2g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=6SRopPv1VZUvrQ8nf2qs0INKVyUhQiNiZRamaiV44Kc=;
-        b=L8wUiZtTHQ6c1SS6fS9v0Vstc/Ivs49OFPdvLUDFzkn/dtgGB+Ddm742pVgVEWRqFk
-         e1NvcoAbHDixZn64sdGj+wZCSY+J3BDjdfRMlcLfJ19CFox7YGbl4jwsUomBt7cLdr6K
-         qEwqJutQ7RWyceMaFFTYfmkB1DnBcuVaZzIGZ+QSnMw1CjEzckr1pBzKOp6BCH/M7TEG
-         cAUxif1Ipon4Q4SP/G9vUT2xvvC1ujsUtv48457WzlK39sECfBcGK+sn4o3RylTkrZEt
-         ezNasC5ZZT31ly6GIfTFDB/lQGxtdgbw9+1Mh8I/YmUDBDKDSMsggC0sKlhLvsLcYloU
-         ekYg==
-X-Gm-Message-State: ACrzQf3Kl4rM1pHjmSS1MFh0rlLrA6ADocvmyewoNO3QrGq4JwcL+2s2
-        k8YpB0cX7uoO+nlHjXSK0qrhoPeSdDYS/bw/flj7qA==
-X-Google-Smtp-Source: AMsMyM7jhzaPESmCoeuAYSF4rA4Td92S4N4Zl0cAlLTH/fuwv6ofca88CLG5+LcoidVcs60EetMpwTZfk9KrPd66smg=
-X-Received: by 2002:a05:6512:a8f:b0:49f:4c33:4473 with SMTP id
- m15-20020a0565120a8f00b0049f4c334473mr2427418lfu.125.1663909628798; Thu, 22
- Sep 2022 22:07:08 -0700 (PDT)
+        with ESMTP id S229657AbiIWGu1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 02:50:27 -0400
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 407511181C8;
+        Thu, 22 Sep 2022 23:50:25 -0700 (PDT)
+Received: from fllv0034.itg.ti.com ([10.64.40.246])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 28N6oK94072900;
+        Fri, 23 Sep 2022 01:50:20 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1663915820;
+        bh=6QIVtrn9JTu7sNxwfqOYqvv3q8bxYNWI4ye9ltUKYy0=;
+        h=From:To:CC:Subject:Date;
+        b=VKsoIzTlivKOtvZ/15QdsD+KCQl3GWrBdlvx/tXXGwTL6wgx06AnwI7AxWNzN6Lcg
+         WyvtfKn5b7oT5Vm/DdVMenieLKEQiTHnVZNmHVJQo+978Sf0qxytRm4eDvntZY065v
+         2UOknDhDTJLo5Wd7w8npUcOcsYH/elZNmbTWYij8=
+Received: from DLEE106.ent.ti.com (dlee106.ent.ti.com [157.170.170.36])
+        by fllv0034.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 28N6oKlJ122143
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 23 Sep 2022 01:50:20 -0500
+Received: from DLEE108.ent.ti.com (157.170.170.38) by DLEE106.ent.ti.com
+ (157.170.170.36) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6; Fri, 23
+ Sep 2022 01:50:20 -0500
+Received: from fllv0039.itg.ti.com (10.64.41.19) by DLEE108.ent.ti.com
+ (157.170.170.38) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.6 via
+ Frontend Transport; Fri, 23 Sep 2022 01:50:20 -0500
+Received: from a0393678ub.dal.design.ti.com (ileaxei01-snat.itg.ti.com [10.180.69.5])
+        by fllv0039.itg.ti.com (8.15.2/8.15.2) with ESMTP id 28N6oHmO006470;
+        Fri, 23 Sep 2022 01:50:18 -0500
+From:   Kishon Vijay Abraham I <kishon@ti.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-omap@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Kishon Vijay Abraham I <kishon@ti.com>
+Subject: [PATCH] MAINTAINERS: Add Vignesh as maintainer of TI SDHCI OMAP DRIVER
+Date:   Fri, 23 Sep 2022 12:20:05 +0530
+Message-ID: <20220923065005.20062-1-kishon@ti.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-References: <20220923014322.33620-1-mailingradian@gmail.com>
-In-Reply-To: <20220923014322.33620-1-mailingradian@gmail.com>
-From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Date:   Fri, 23 Sep 2022 10:36:56 +0530
-Message-ID: <CAH=2NtzDpa6mySzitzWC+W_dkApeC=irHfM1OhFiFS70mWOZ_Q@mail.gmail.com>
-Subject: Re: [PATCH 0/2] SDM670 SDHCI support
-To:     Richard Acayan <mailingradian@gmail.com>
-Cc:     linux-arm-msm@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 23 Sept 2022 at 07:13, Richard Acayan <mailingradian@gmail.com> wrote:
->
-> This adds the compatible string for SDHCI on the Qualcomm Snapdragon 670.
-> As I noted before, I think it's fine to include something like this
-> before the initial device tree because it is trivial.
->
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  drivers/mmc/host/sdhci-msm.c                         | 1 +
->  2 files changed, 2 insertions(+)
+Add Vignesh Raghavendra as maintainer of TI SDHCI OMAP DRIVER.
 
-With the assumption that the initial dts would be available for
-upstream review soon (as we need to see actual user before integrating
-such driver changes) - for the series:
+Cc: Vignesh Raghavendra <vigneshr@ti.com>
+Signed-off-by: Kishon Vijay Abraham I <kishon@ti.com>
+---
+ MAINTAINERS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Reviewed-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
+diff --git a/MAINTAINERS b/MAINTAINERS
+index c368f5aa7429..ffad3f1dfe9c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -18302,7 +18302,7 @@ S:	Maintained
+ F:	drivers/mmc/host/sdhci-spear.c
+ 
+ SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) TI OMAP DRIVER
+-M:	Kishon Vijay Abraham I <kishon@ti.com>
++M:	Vignesh Raghavendra <vigneshr@ti.com>
+ L:	linux-mmc@vger.kernel.org
+ S:	Maintained
+ F:	drivers/mmc/host/sdhci-omap.c
+-- 
+2.17.1
 
-Thanks.
