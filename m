@@ -2,97 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1ECEC6FA95
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 01:43:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54ED4ECAAD8
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 05:07:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231771AbiIWBnt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Sep 2022 21:43:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44090 "EHLO
+        id S229678AbiIWFHN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Sep 2022 01:07:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231799AbiIWBns (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Sep 2022 21:43:48 -0400
-Received: from mail-io1-xd2b.google.com (mail-io1-xd2b.google.com [IPv6:2607:f8b0:4864:20::d2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CC8FD827D;
-        Thu, 22 Sep 2022 18:43:45 -0700 (PDT)
-Received: by mail-io1-xd2b.google.com with SMTP id b23so9260165iof.2;
-        Thu, 22 Sep 2022 18:43:45 -0700 (PDT)
+        with ESMTP id S229449AbiIWFHL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 01:07:11 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B69612645B
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2022 22:07:10 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id z25so18059360lfr.2
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Sep 2022 22:07:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date;
-        bh=uZmP6cRO+2tkjn9k8/NCTzUaoPITyxk1HEeB04T7EQg=;
-        b=RsfmeuH6YVdUXS77gOIXlafLDL9LXZnA66gxD0cRM221sYoEZwx/Lu7/5EMZbH22T/
-         5CxyDaIaDVZUabjQRo0FiY/y0o5An+kjb60WLeRDpFygsNVa8l/FFflGXIAs4FR+41vi
-         wdcudhzZPHomFVcHUCYV2GLqH/p5h9WCru9asKmm/RPGi8FmoRUnviQYAN5dyjJsPC/y
-         udQV0crkNOacTlhec723ytUPPokv7DPucwLM4stlBBl+zNOLLaQ2f6laNSAq970wBrff
-         VpNwy3yxqifaRgA54oX+TIStBTPAyqI3AlVWeaaxoM1zLxdqpCNd6mYSy1E7v8Q4N4XP
-         sP7Q==
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=6SRopPv1VZUvrQ8nf2qs0INKVyUhQiNiZRamaiV44Kc=;
+        b=y2bx1FkhdrEL9PegBuK2kr8kg8dU6GdxgTleR8K4gD8didfEtmZM5fQg0OKcWaihPD
+         uGylENtXvfkvXdELuIslpbK21VvUbqYbkRYyN3RlIQuYVr+5xB29/4R2JlC4WxLwXNpw
+         8AVgjptIxf8Vkd8s4pZ4BPMePbGwfn0pj2wVyTIJfh+S01zReY3+V4X7Nz0QKjSaospp
+         al6YG+/Oe+fv7BwfFQNQ1zsluRAbJ7rSwyQBtQiuNexAQdNRFwhuYmsol9EHEZ6+EsNv
+         DSjQxPxZ72NEhVKoT/gPsbITRuwL2V+ypjMkgi/fSkbCQRdo2x3VRC4+bx9fBZ1EI0Rc
+         ZC2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date;
-        bh=uZmP6cRO+2tkjn9k8/NCTzUaoPITyxk1HEeB04T7EQg=;
-        b=D/UyI01WviK9Upfh+xakSGI4iNJ4f/yik7aP05ZETeglDg7kNQrJWUDXd1WYY2/xYb
-         +IvYykiZsyFK/TJeljIJp6zH12NkDd5pPwgODjSMJWbl0tMEtuqIQV8rEk3f/WljQ/b0
-         R6JV3vKV6Iz9wWoAwIud8j1sOhQ61WyAjIahCiFrnBFhzr8HuLayZHzAlM/m2pW2OyTh
-         MQEpv2kRB21DHyQGQlK7GhfhLBrTTbKg7riK8VrmjndHsh3ucOI2reNHq5ORMBF+Xuro
-         TKyQY2AABjforBMco5Qohzus9Y6g4UryMkiJgK5zYSVvbZ0YDDci9CEsmDeRhxXp89BP
-         Kq2Q==
-X-Gm-Message-State: ACrzQf3phTYWgPTKjec331TGn1BLvie6Sf7pCEeFlN2waMd4j3M5YxWA
-        KDDce1sUVigQ1Lh6gK1ggbIyQb/t5Yw=
-X-Google-Smtp-Source: AMsMyM5J021qo6Aq6Z5vh71aUCHz2b6nMQv28SqbpA0turgOM7YTLLOl+tNXu0blxVprm8Zl1w3UtA==
-X-Received: by 2002:a05:6638:150c:b0:35a:f7a9:c3d8 with SMTP id b12-20020a056638150c00b0035af7a9c3d8mr3662216jat.38.1663897424417;
-        Thu, 22 Sep 2022 18:43:44 -0700 (PDT)
-Received: from localhost ([2607:fea8:a2e2:2d00::1e16])
-        by smtp.gmail.com with UTF8SMTPSA id q24-20020a02b058000000b003566d1abeabsm2847507jah.5.2022.09.22.18.43.42
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 22 Sep 2022 18:43:43 -0700 (PDT)
-From:   Richard Acayan <mailingradian@gmail.com>
-To:     linux-arm-msm@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=6SRopPv1VZUvrQ8nf2qs0INKVyUhQiNiZRamaiV44Kc=;
+        b=L8wUiZtTHQ6c1SS6fS9v0Vstc/Ivs49OFPdvLUDFzkn/dtgGB+Ddm742pVgVEWRqFk
+         e1NvcoAbHDixZn64sdGj+wZCSY+J3BDjdfRMlcLfJ19CFox7YGbl4jwsUomBt7cLdr6K
+         qEwqJutQ7RWyceMaFFTYfmkB1DnBcuVaZzIGZ+QSnMw1CjEzckr1pBzKOp6BCH/M7TEG
+         cAUxif1Ipon4Q4SP/G9vUT2xvvC1ujsUtv48457WzlK39sECfBcGK+sn4o3RylTkrZEt
+         ezNasC5ZZT31ly6GIfTFDB/lQGxtdgbw9+1Mh8I/YmUDBDKDSMsggC0sKlhLvsLcYloU
+         ekYg==
+X-Gm-Message-State: ACrzQf3Kl4rM1pHjmSS1MFh0rlLrA6ADocvmyewoNO3QrGq4JwcL+2s2
+        k8YpB0cX7uoO+nlHjXSK0qrhoPeSdDYS/bw/flj7qA==
+X-Google-Smtp-Source: AMsMyM7jhzaPESmCoeuAYSF4rA4Td92S4N4Zl0cAlLTH/fuwv6ofca88CLG5+LcoidVcs60EetMpwTZfk9KrPd66smg=
+X-Received: by 2002:a05:6512:a8f:b0:49f:4c33:4473 with SMTP id
+ m15-20020a0565120a8f00b0049f4c334473mr2427418lfu.125.1663909628798; Thu, 22
+ Sep 2022 22:07:08 -0700 (PDT)
+MIME-Version: 1.0
+References: <20220923014322.33620-1-mailingradian@gmail.com>
+In-Reply-To: <20220923014322.33620-1-mailingradian@gmail.com>
+From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
+Date:   Fri, 23 Sep 2022 10:36:56 +0530
+Message-ID: <CAH=2NtzDpa6mySzitzWC+W_dkApeC=irHfM1OhFiFS70mWOZ_Q@mail.gmail.com>
+Subject: Re: [PATCH 0/2] SDM670 SDHCI support
+To:     Richard Acayan <mailingradian@gmail.com>
+Cc:     linux-arm-msm@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
         Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Richard Acayan <mailingradian@gmail.com>
-Subject: [PATCH 2/2] mmc: sdhci-msm: add compatible string check for sdm670
-Date:   Thu, 22 Sep 2022 21:43:22 -0400
-Message-Id: <20220923014322.33620-3-mailingradian@gmail.com>
-X-Mailer: git-send-email 2.37.3
-In-Reply-To: <20220923014322.33620-1-mailingradian@gmail.com>
-References: <20220923014322.33620-1-mailingradian@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Snapdragon 670 has the same quirk as Snapdragon 845 (needing to
-restore the dll config). Add a compatible string check to detect the need
-for this.
+On Fri, 23 Sept 2022 at 07:13, Richard Acayan <mailingradian@gmail.com> wrote:
+>
+> This adds the compatible string for SDHCI on the Qualcomm Snapdragon 670.
+> As I noted before, I think it's fine to include something like this
+> before the initial device tree because it is trivial.
+>
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  drivers/mmc/host/sdhci-msm.c                         | 1 +
+>  2 files changed, 2 insertions(+)
 
-Signed-off-by: Richard Acayan <mailingradian@gmail.com>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
+With the assumption that the initial dts would be available for
+upstream review soon (as we need to see actual user before integrating
+such driver changes) - for the series:
 
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index dc2991422a87..3a091a387ecb 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2441,6 +2441,7 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
- 	 */
- 	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
- 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
-+	{.compatible = "qcom,sdm670-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
- 	{},
--- 
-2.37.3
+Reviewed-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
 
+Thanks.
