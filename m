@@ -2,138 +2,134 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3CC5C6FA82
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 13:57:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5015C6FA82
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 14:39:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229496AbiIWN5P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Sep 2022 09:57:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51470 "EHLO
+        id S231918AbiIWOj0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 23 Sep 2022 10:39:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229953AbiIWN4y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 09:56:54 -0400
-Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A15413D1F5;
-        Fri, 23 Sep 2022 06:56:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1663941411; x=1695477411;
-  h=from:to:cc:subject:date:message-id;
-  bh=rSlGfTKQBVCzTe5a81XRRo+bRydyGLI/yUxd5mqmvHM=;
-  b=cJEHkKnyHZ0Tw05+Evpy3QKv4WTcfAeQ/NKeOc/fXwYvFCnWRhSUeSnY
-   vKdfRZ7P/jeb08NV+RDIaZfU2uBTi07yXK+EfbNQcBBdaXzZ308ci4eUO
-   onNwmVa3TS3/gcyqBnji060SknB8aQDGvGDkeIGWMFvQ38OhzoEJ9NdWk
-   onari8Jx5rftJRZRLhvl/PBHW4OtIzBw5jqnd+MchNEui4SYfpP//qYbI
-   rniyEcAGAEEEAvBbuZlqyu3f53xuIQYGXOk6wLOuRj3Uns+POyf5rA7Y3
-   5zNu/RwdII1earnJML4bTBTrt2FlSwkoilmjXPsM7NdtUsZ1nGPtaoRkK
-   w==;
-X-IronPort-AV: E=Sophos;i="5.93,339,1654531200"; 
-   d="scan'208";a="217299539"
-Received: from h199-255-45-14.hgst.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 23 Sep 2022 21:56:50 +0800
-IronPort-SDR: LYGHiP5PwOG+geeY94GH8F4ojP7mCFpJg32+2W1lTMUtGkOWpskvXcoN4xF93HPGw6Av57G+H6
- k3AhsGPkeLAI4mA39c8wl54qm9fr7xbLHkhDzps2q4bE4bW2T9/crmZg3yIIWTx+nbidKLBqCR
- voPAh3xCLyo8M4uM0ZiQN+qHjhmgZt2L8iT3XLFdhlYi3lg9muwP8lJ4o5PPoEMHVBW7YVvCw+
- GgxhTyGNNIJCaHqulo6x9l8xp1nxyOEeeU4fQo2/hkRc/W5bPfev3p0gZZVcrR3TH3TxCcKgSY
- JQ5CgEj/mADVy0dWUtksV8iV
-Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 23 Sep 2022 06:16:53 -0700
-IronPort-SDR: AVatPTWYIqGWnR+dL9eT17aaUvAMRMzp9wQJuefWl6aZRvOBh2dUGO7WAoF5th/2m8HCevLpjh
- J9s9ZuOLM8l91QeiHOdpZMDHpxRR444QyelYk3XdbyrRt+/oLVZkZUzn3aoEv/WNQGVXbte8Py
- p8Lfk/Ugf0vOaUmANUv65XMlesekwz35rwUi0usI56/VkKdiSM6BNr4d6dpnfz7Y65cLkeST6M
- rLnVL4RdWGxDJDyRmxspqY9PXsFF6qZKzCe7ClqtJsmLp0LH+5poEHfSMERr1M3sOf4rqy61U5
- auc=
-WDCIronportException: Internal
-Received: from 5cg1421gqg.ad.shared (HELO BXYGM33.ad.shared) ([10.225.33.87])
-  by uls-op-cesaip01.wdc.com with ESMTP; 23 Sep 2022 06:56:48 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH] mmc: core: SD: Add BROKEN-SD-DISCARD quirk
-Date:   Fri, 23 Sep 2022 16:56:17 +0300
-Message-Id: <20220923135617.46-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S229963AbiIWOjY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 10:39:24 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B6F2143284
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 07:39:22 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id sd10so1176606ejc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 07:39:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=fairphone.com; s=fair;
+        h=in-reply-to:references:cc:to:from:subject:message-id:date
+         :content-transfer-encoding:mime-version:from:to:cc:subject:date;
+        bh=S5eZN2svmhOfsW6VEcUb5Ry7O5bFBRCb5lC2tn/7Tfo=;
+        b=gkzAlIt/hpKoRZEZLqhfZ8OysZ9L7bILUx3sexHwwb/6XDB+pCPacUz+MJjhWKhuR8
+         03WIYD6q3het0x2eUZOaFt4+8DLRxhO61dji69+3Me4MLavSly0qeRo0vqetAht869ok
+         ifG9Ps6irane6AxqQ0QfJg90uACXU5trZG5FNLfEzHAvnDR/7MbC/Fiy3LIbWwjANhiM
+         E2UJl7+e5iXNxOJG9pVXNlrbpNeiZUe/b5JBc4Ah587wHR6LrqOEcMd85sSJX+AHXzVH
+         ylFVisJVdx3w/VxoxI7/ouKWTh3F9lVB7kokwRSC1DxQ36BVKR9k3+145PxEiaip0TUB
+         rnCA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:references:cc:to:from:subject:message-id:date
+         :content-transfer-encoding:mime-version:x-gm-message-state:from:to
+         :cc:subject:date;
+        bh=S5eZN2svmhOfsW6VEcUb5Ry7O5bFBRCb5lC2tn/7Tfo=;
+        b=MUooXJlLru0TQGHnuV4dqHO/yt6ocxdVxFVy171y0i3sYaCKDWlP0I3wyVcVYx2aq+
+         QUXFGMXRFEikCYdYv7JUMmMJLjP9T+KdLwUDe+/ldFrbjS6+Tw/F7ZWLcU/PXKT6j43A
+         KczY6D0I1cPh2QUJXgY6bPEaSKbedUriEgxMqMM3/uRhzCki8/kbXYW5rsHWjR/gXk7s
+         zAcvJ4y6BZ0RcAHnVQNFksPKbylfpet9VIH0Dmf3JklVC4L8XUtzMb51xKAfo/uohWIx
+         bI+bbtfd+Invj8aRlQj0wfWyqUwJdJlyQBjwmGMt+k9EJlokUUusruM0BDlTqxFFqFJ0
+         gwwg==
+X-Gm-Message-State: ACrzQf2yu20+VfR+zmbYXppTtjHhWOokFd2biZNbDKy8uklkB1wWImme
+        dkXB2+/XQITS/K3zm+z9sd2obA==
+X-Google-Smtp-Source: AMsMyM5/0fjixHZUeDGkqTbJZktQlwbIg9e75ri3yi5AJ6I4VwtQ3bwL9pzvfhAltPu40POCkTiVNg==
+X-Received: by 2002:a17:906:8469:b0:781:fc76:fbd7 with SMTP id hx9-20020a170906846900b00781fc76fbd7mr7457238ejc.486.1663943960828;
+        Fri, 23 Sep 2022 07:39:20 -0700 (PDT)
+Received: from localhost (144-178-202-138.static.ef-service.nl. [144.178.202.138])
+        by smtp.gmail.com with ESMTPSA id j2-20020a17090623e200b0078197a9421csm4117653ejg.85.2022.09.23.07.39.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 23 Sep 2022 07:39:20 -0700 (PDT)
+Mime-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=UTF-8
+Date:   Fri, 23 Sep 2022 16:39:18 +0200
+Message-Id: <CN3UWLRBLVPF.VV4AX2X9TS34@otso>
+Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
+From:   "Luca Weiss" <luca.weiss@fairphone.com>
+To:     "Dmitry Baryshkov" <dmitry.baryshkov@linaro.org>,
+        "Andy Gross" <agross@kernel.org>,
+        "Bjorn Andersson" <bjorn.andersson@linaro.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Marcel Holtmann" <marcel@holtmann.org>,
+        "Johan Hedberg" <johan.hedberg@gmail.com>,
+        "Luiz Augusto von Dentz" <luiz.dentz@gmail.com>,
+        "Kalle Valo" <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        "Jakub Kicinski" <kuba@kernel.org>,
+        "Stanimir Varbanov" <svarbanov@mm-sol.com>
+Cc:     <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-bluetooth@vger.kernel.org>,
+        <ath10k@lists.infradead.org>, <linux-wireless@vger.kernel.org>,
+        <netdev@vger.kernel.org>
+X-Mailer: aerc 0.12.0
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+In-Reply-To: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some SD-cards that are SDA-6.0 compliant reports they supports discard
-while they actually don't.  This might cause mk2fs to fail while trying
-to format the card and revert it to a read-only mode.
+Hi Dmitry,
 
-While at it, add SD MID for SANDISK. This is because eMMC MID is assign
-by JEDEC and SD MID is assigned by SD 3c-LLC.
+On Wed Oct 6, 2021 at 5:53 AM CEST, Dmitry Baryshkov wrote:
+> This is a proposed power sequencer subsystem. This is a
+> generification of the MMC pwrseq code. The subsystem tries to abstract
+> the idea of complex power-up/power-down/reset of the devices.
+>
+> The primary set of devices that promted me to create this patchset is
+> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+> or serial + SDIO interfaces (older generations) or on serial+PCIe (newer
+> generations).  They require a set of external voltage regulators to be
+> powered on and (some of them) have separate WiFi and Bluetooth enable
+> GPIOs.
+>
+> The major drawback for now is the lack of proper PCIe integration
+> At this moment support for PCIe is hacked up to be able to test the
+> PCIe part of qca6390. Proper PCIe support would require automatically
+> powering up the devices before the scan basing on the proper device
+> structure in the device tree. This two last patches are noted as WIP and
+> are included into the patchset for the purpose of testing WiFi on newer
+> chips (like qca6390/qca6391).
 
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- drivers/mmc/core/block.c  | 6 +++++-
- drivers/mmc/core/card.h   | 1 +
- drivers/mmc/core/quirks.h | 6 ++++++
- include/linux/mmc/card.h  | 1 +
- 4 files changed, 13 insertions(+), 1 deletion(-)
+What's the status of this series? With this I have gotten Bluetooth to
+somewhat work on sm7225-fairphone-fp4, which is using WCN3990/WCN3988.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ce89611a136e..a31dc915c5ec 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -1140,8 +1140,12 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
- {
- 	struct mmc_blk_data *md = mq->blkdata;
- 	struct mmc_card *card = md->queue.card;
-+	unsigned int arg = card->erase_arg;
- 
--	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
-+	if (mmc_card_sd(card) && (card->quirks & MMC_QUIRK_BROKEN_SD_DISCARD))
-+		arg = SD_ERASE_ARG;
-+
-+	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, arg);
- }
- 
- static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
-diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-index 99045e138ba4..881432309b46 100644
---- a/drivers/mmc/core/card.h
-+++ b/drivers/mmc/core/card.h
-@@ -73,6 +73,7 @@ struct mmc_fixup {
- #define EXT_CSD_REV_ANY (-1u)
- 
- #define CID_MANFID_SANDISK      0x2
-+#define CID_MANFID_SANDISK_SD   0x3
- #define CID_MANFID_ATP          0x9
- #define CID_MANFID_TOSHIBA      0x11
- #define CID_MANFID_MICRON       0x13
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index be4393988086..29b9497936df 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -100,6 +100,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
-+	/*
-+	 * Some SD cards reports discard support while they don't
-+	 */
-+	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
-+		  MMC_QUIRK_BROKEN_SD_DISCARD),
-+
- 	END_FIXUP
- };
- 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 8a30de08e913..c726ea781255 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -293,6 +293,7 @@ struct mmc_card {
- #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
- #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
- #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
-+#define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
- 
- 	bool			reenable_cmdq;	/* Re-enable Command Queue */
- 
--- 
-2.17.1
+Is there another solution with a different patch series that could make
+it work also?
+
+The latest I could find regarding some new Bluetooth thing is the
+following email from June 2022, but nothing seems to have happened since
+then.
+https://lore.kernel.org/linux-arm-msm/SJ0PR02MB7135746D204F13550E9BAE77F8B2=
+9@SJ0PR02MB7135.namprd02.prod.outlook.com/
+
+Regards
+Luca
+
+>
+> Changes since RFC v2:
+>  - Add documentation for the pwrseq code. Document data structures,
+>    macros and exported functions.
+>  - Export of_pwrseq_xlate_onecell()
+>  - Add separate pwrseq_set_drvdata() function to follow the typical API
+>    design
+>  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
+>  - Moved code to handle old mmc-pwrseq binding to the MMC patch
+>  - Split of_pwrseq_xlate_onecell() support to a separate patch
+>
+> Changes since RFC v1:
+>  - Provider pwrseq fallback support
+>  - Implement fallback support in pwrseq_qca.
+>  - Mmove susclk handling to pwrseq_qca.
+>  - Significantly simplify hci_qca.c changes, by dropping all legacy
+>    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
+>    parts of the chip.
 
