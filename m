@@ -2,164 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B655C07E9D
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Sep 2022 17:52:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0D00C6FA83
+	for <linux-mmc@archiver.kernel.org>; Sat, 24 Sep 2022 10:18:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232431AbiIWRwy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 23 Sep 2022 13:52:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50552 "EHLO
+        id S231199AbiIXKSx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 24 Sep 2022 06:18:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231340AbiIWRwx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 23 Sep 2022 13:52:53 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 024C712E439
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 10:52:52 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id u18so1420435lfo.8
-        for <linux-mmc@vger.kernel.org>; Fri, 23 Sep 2022 10:52:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date;
-        bh=WLQdaK0gT7iFIkMGG2NMmKLaRu6A337CioiY0oTqO2E=;
-        b=dUkWHMuMmDgAf2vkZVtzFOS+JLlED/B066IP5RzSUvCf/2aFRmvtM05vuUDsDVXzlJ
-         APKFud9ZtMhWd0Lt/ChVvQPkV+5K+U1/elv6+PXCzEbBXow5JjQR6WvLeBAJ29A7ZsTA
-         m9SNpoDkcYwUcsb/r65zOSs8UfWWWpY6hyxx02uL8+/loZH2OvCr4h91vQ4z1tbvuOs7
-         s/nl7DxGezKkrsj4GdRq5A3t21wdRiQioiLtSPxSRru/gpKfwM6sDyQTfK+FeQay9S4B
-         6DKJII8QMc5UxXkCQy5Orkj4wlGQbOraDlPEgWcKk/v0w0u7x2JGqzKpvxNyUNVEitmX
-         ZN3w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=WLQdaK0gT7iFIkMGG2NMmKLaRu6A337CioiY0oTqO2E=;
-        b=M0NaxOnTR0m7yJePR809cm1ifDjt58ZNz3OMQ6nR55Qq+Kc7WrUZsfmJaNhooJbkLe
-         8C9CUjNfimVR2YcEkAGgSm9+VvYIGWinShDoTIlQq/dN2+QVsXaWJ5Gnz27T3txMKK1v
-         m8CDFTyJqD9daRuQN9B7RCrbgCwenHXlaPfPtjmPGbnmqiluJsBvosbQNPsjeRqRCIW6
-         YrgkAVpOTTTa9KSRhExwJzDsPfSmrAZ+r1PRUq9zwOEZDI8kFW2XKAlSIyDtFWqpfvB7
-         HtZrZsDGJiOAbD2/CSumaDMObU0ZheSNnw635IHwbcQW4HV6A1N29nHiusKQ0vf1R2Wz
-         D3ow==
-X-Gm-Message-State: ACrzQf1Rb94HcimbrvxUZyNFiPZsTPhqOnPZy2gjviWlGR0ROBgJbFhO
-        GHbQLpjgK4mcqxyHKL/p9a1Wpw==
-X-Google-Smtp-Source: AMsMyM59xNDc63uKxqgHdn3zrL6X9DlwBW8qQ1eHQUJLbaKFVW8Qca/GcAlOeB3NAoyilxmKWNYGZA==
-X-Received: by 2002:a05:6512:1114:b0:49f:d13e:25b6 with SMTP id l20-20020a056512111400b0049fd13e25b6mr3855353lfg.483.1663955570345;
-        Fri, 23 Sep 2022 10:52:50 -0700 (PDT)
-Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id c8-20020a05651200c800b0049a0832ffc9sm1542596lfp.211.2022.09.23.10.52.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 23 Sep 2022 10:52:49 -0700 (PDT)
-Message-ID: <c9c11931-7193-ebee-51f0-df863dd7377b@linaro.org>
-Date:   Fri, 23 Sep 2022 19:52:49 +0200
+        with ESMTP id S233804AbiIXKSp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Sep 2022 06:18:45 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68999115F54
+        for <linux-mmc@vger.kernel.org>; Sat, 24 Sep 2022 03:18:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=40+cVYHRDPfCh3D9aUZHJ9S9JKpS
+        9w9OZ7EXw3pdl2c=; b=qKMHN0tgG9ouM7BPiAB+511eYKOeQOckMp8Atc/iWWGW
+        p7rWzRRikLGKoDuOgattda9Cn7GmOe20pU7FpsWibY933Yaru1W2p6nQgnvJ/oRW
+        0+turlLy31XVAfrkD9pKu3qbpX+LPODEHd9VajC4jbhlpbLoJI3mhDXI+i0hl9w=
+Received: (qmail 2393394 invoked from network); 24 Sep 2022 12:18:29 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 24 Sep 2022 12:18:29 +0200
+X-UD-Smtp-Session: l3s3148p1@NzRlnWnpZgtZzIsq
+Date:   Sat, 24 Sep 2022 12:18:24 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Biju Das <biju.das.jz@bp.renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
+Message-ID: <Yy7ZcJ8h2VCtUDnW@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.0
-Subject: Re: [PATCHv2 3/3] mmc: dw_mmc-pltfm: socfpga: add method to configure
- clk-phase
-Content-Language: en-US
-To:     Dinh Nguyen <dinguyen@kernel.org>, jh80.chung@samsung.com
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-References: <20220922220308.609422-1-dinguyen@kernel.org>
- <20220922220308.609422-4-dinguyen@kernel.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20220922220308.609422-4-dinguyen@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="MBTWagKiUV+jT0FE"
+Content-Disposition: inline
+In-Reply-To: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/09/2022 00:03, Dinh Nguyen wrote:
-> The clock-phase settings for the SDMMC controller in the SoCFPGA
-> Strarix10/Agilex/N5X platforms reside in a register in the System
-> Manager. Add a method to access that register through the syscon
-> interface.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
-> ---
-> v2: simplify clk-phase calculations
-> ---
->  drivers/mmc/host/dw_mmc-pltfm.c | 41 ++++++++++++++++++++++++++++++++-
->  1 file changed, 40 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 9901208be797..5d64984d382f 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -17,10 +17,16 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/of.h>
-> +#include <linux/mfd/altera-sysmgr.h>
-> +#include <linux/regmap.h>
->  
->  #include "dw_mmc.h"
->  #include "dw_mmc-pltfm.h"
->  
-> +#define SOCFPGA_DW_MMC_CLK_PHASE_STEP	45
-> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
-> +	((((smplsel) & 0x7) << 4) | (((drvsel) & 0x7) << 0))
-> +
->  int dw_mci_pltfm_register(struct platform_device *pdev,
->  			  const struct dw_mci_drv_data *drv_data)
->  {
-> @@ -62,9 +68,42 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
->  };
->  EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
->  
-> +static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-> +{
-> +	struct device_node *np = host->dev->of_node;
-> +	struct regmap *sys_mgr_base_addr;
-> +	u32 clk_phase[2] = {0}, reg_offset;
-> +	int i, rc, hs_timing;
-> +
-> +	rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
-> +	if (rc) {
-> +		sys_mgr_base_addr =
-> +			altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
 
-I don't see the reason why this is conditional. Just creates unnecessary
-indentation.
+--MBTWagKiUV+jT0FE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> +		if (IS_ERR(sys_mgr_base_addr)) {
-> +			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
-> +			return 1;
-> +		}
-> +	} else
-> +		return 1;
+Hi,
 
-Why not -ERRNO (or rc)?
+> v2->v3:
+>  * Renamed the variable new_clock_margin->new_upper_limit in renesas_sdhi=
+_clk_
+>    update()
+>  * Moved setting of new_upper_limit outside for loop.
+>  * Updated the comment section to mention the rounding errors and merged =
+with
+>    existing comment out side the for loop.
+>  * Updated commit description.=20
 
-> +
-> +	of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
-> +
-> +	for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
-> +		clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
-> +
-> +	hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
-> +	regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
-> +
-> +	return 0;
-> +}
-> +
-> +static const struct dw_mci_drv_data socfpga_drv_data = {
-> +	.init		= dw_mci_socfpga_priv_init,
-> +};
-> +
->  static const struct of_device_id dw_mci_pltfm_match[] = {
->  	{ .compatible = "snps,dw-mshc", },
-> -	{ .compatible = "altr,socfpga-dw-mshc", },
-> +	{ .compatible = "altr,socfpga-dw-mshc", .data =&socfpga_drv_data, },
+I really like the new variable names.
 
-Missing space before &
+> +	 * To fix rounding errors, eg:- (533333333 Hz / 4 * 4 =3D 533333332 Hz <
 
->  	{ .compatible = "img,pistachio-dw-mshc", },
->  	{},
->  };
+(What is the '-' after 'eg:' for?)
 
-Best regards,
-Krzysztof
+> +	 * 533333333 Hz) add an upper limit of 1/1024 rate higher to the clock
+> +	 * rate.
 
+I know Geert suggesgted this. I think, however, this description is too
+short. It should be mentioned IMHO that this rounding error can lead to
+the selection of a clock which is way off (the 400MHz one). I liked this
+example from v2. Geert, what do you say?
+
+Happy hacking,
+
+   Wolfram
+
+
+--MBTWagKiUV+jT0FE
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmMu2WwACgkQFA3kzBSg
+KbapiA//QnMg7cERiiTFzgJY+MDZ1wjdcRrnVqaizrcmHf2FpGndKBVXNS5oc+Ll
+d6Aw08LEELwMymV3R9uaUOSCkjE0ZvPfPcP8do5SAorhUUw2WVrxK57qra+eST/P
+GYQenruzaFCKJECN7Cqud1vSdzBuxT/ddZivvDOJLeGaQH70xkWy9aaUwvK1+49c
+KDZ+Zd78g9lGkQtibtz2xk3Lgv2NcXkGmyTMfLCG0x2nl77CKZHXc2JiAdKRSGPl
+BzDNuuoe8fHXgz3EicVVTpkL0tXLr1JaklZHH21JB9Rf/VxiH+mCJ6iSI7YEPOEQ
+1C4iOzYWJlFCnyEfSQhSncoDayzqQP8QLH2axj+/56O8a3+SZN9l5vFGXlVdYvMc
+y1BuDw7Mzdz85M4PF869k3TQXBKqcABdJbx/N09k3vOP/+tjHSpnoCdTD/HrXthc
+3R8atAxzyqBOvb2brx/xAQj6776ziZEdyNPWoeDNxJXuvJmitsxJWCg/sk0B4epg
+c1bdnbE+SpJaNg85bcIjwvl2/mDscvSqwnLW/r8c7UC0HViJLjycV29yJpr8DWX9
+DiXQPKI0OZ75O2nBBNPtWsyL82b0tNa2msZK0E7zWLnowlzzLtjRPrbp+Rn4+i33
+WNxy6aWzgJugEjq9Ig7vQHuTz5pNCddLoAgPtcmxGc8ltxZGtMs=
+=zDRQ
+-----END PGP SIGNATURE-----
+
+--MBTWagKiUV+jT0FE--
