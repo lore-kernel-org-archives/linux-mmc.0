@@ -2,28 +2,28 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0D00C6FA83
-	for <linux-mmc@archiver.kernel.org>; Sat, 24 Sep 2022 10:18:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73611C54EE9
+	for <linux-mmc@archiver.kernel.org>; Sun, 25 Sep 2022 16:51:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231199AbiIXKSx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 24 Sep 2022 06:18:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60876 "EHLO
+        id S231146AbiIYQvn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 25 Sep 2022 12:51:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43040 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233804AbiIXKSp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 24 Sep 2022 06:18:45 -0400
+        with ESMTP id S232925AbiIYQvm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Sep 2022 12:51:42 -0400
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68999115F54
-        for <linux-mmc@vger.kernel.org>; Sat, 24 Sep 2022 03:18:33 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD3C72AE3F
+        for <linux-mmc@vger.kernel.org>; Sun, 25 Sep 2022 09:51:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
         date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=40+cVYHRDPfCh3D9aUZHJ9S9JKpS
-        9w9OZ7EXw3pdl2c=; b=qKMHN0tgG9ouM7BPiAB+511eYKOeQOckMp8Atc/iWWGW
-        p7rWzRRikLGKoDuOgattda9Cn7GmOe20pU7FpsWibY933Yaru1W2p6nQgnvJ/oRW
-        0+turlLy31XVAfrkD9pKu3qbpX+LPODEHd9VajC4jbhlpbLoJI3mhDXI+i0hl9w=
-Received: (qmail 2393394 invoked from network); 24 Sep 2022 12:18:29 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 24 Sep 2022 12:18:29 +0200
-X-UD-Smtp-Session: l3s3148p1@NzRlnWnpZgtZzIsq
-Date:   Sat, 24 Sep 2022 12:18:24 +0200
+        :content-type:in-reply-to; s=k1; bh=0/SayAR2Qaa2UiizKpwpYD1tX6Va
+        vvab8ubmFHADsII=; b=I4sO9xmw7bExNaAo8WDstODHd+KGuzTHFdMpM0vJuTwI
+        HC/qiX0uz0KIvr7gy2iP0LEGgcE4Ex4/Vwsq/GpziVLJvkIEa/sp+RbSLDxu3llk
+        G5Pb24nxhlqoP6X9V35t5Ho92f4+nKo2zFy1KZMeBTnrxnN2Kd77jY/H/ON/PD4=
+Received: (qmail 2799727 invoked from network); 25 Sep 2022 18:51:37 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 25 Sep 2022 18:51:37 +0200
+X-UD-Smtp-Session: l3s3148p1@Zuw8OYPpTakucp+f
+Date:   Sun, 25 Sep 2022 18:51:33 +0200
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     Biju Das <biju.das.jz@bp.renesas.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
@@ -33,7 +33,7 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
         Biju Das <biju.das@bp.renesas.com>,
         Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
 Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
-Message-ID: <Yy7ZcJ8h2VCtUDnW@shikoro>
+Message-ID: <YzCHFZnhrMWPkyIQ@shikoro>
 Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Biju Das <biju.das.jz@bp.renesas.com>,
         Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
@@ -45,7 +45,7 @@ Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
 References: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
 MIME-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="MBTWagKiUV+jT0FE"
+        protocol="application/pgp-signature"; boundary="9skzrXcAghHfXw+m"
 Content-Disposition: inline
 In-Reply-To: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
@@ -53,60 +53,46 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
---MBTWagKiUV+jT0FE
+--9skzrXcAghHfXw+m
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-Hi,
+On Thu, Sep 22, 2022 at 09:55:11AM +0100, Biju Das wrote:
+> Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
+> with a lower clock rate compared to a higher one.
+> For eg:- (533333333 Hz / 4 * 4 =3D 533333332 Hz < 533333333 Hz).
+>=20
+> This patch fixes this issue by adding a margin of (1/1024) higher to
+> the clock rate.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-> v2->v3:
->  * Renamed the variable new_clock_margin->new_upper_limit in renesas_sdhi=
-_clk_
->    update()
->  * Moved setting of new_upper_limit outside for loop.
->  * Updated the comment section to mention the rounding errors and merged =
-with
->    existing comment out side the for loop.
->  * Updated commit description.=20
+Despite the discussion about the comments, the patch does not change any
+clock selection on my R-Car M3-N based Salvator-XS, both for eMMC and
+some SD cards. So:
 
-I really like the new variable names.
-
-> +	 * To fix rounding errors, eg:- (533333333 Hz / 4 * 4 =3D 533333332 Hz <
-
-(What is the '-' after 'eg:' for?)
-
-> +	 * 533333333 Hz) add an upper limit of 1/1024 rate higher to the clock
-> +	 * rate.
-
-I know Geert suggesgted this. I think, however, this description is too
-short. It should be mentioned IMHO that this rounding error can lead to
-the selection of a clock which is way off (the 400MHz one). I liked this
-example from v2. Geert, what do you say?
-
-Happy hacking,
-
-   Wolfram
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
 
---MBTWagKiUV+jT0FE
+--9skzrXcAghHfXw+m
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmMu2WwACgkQFA3kzBSg
-KbapiA//QnMg7cERiiTFzgJY+MDZ1wjdcRrnVqaizrcmHf2FpGndKBVXNS5oc+Ll
-d6Aw08LEELwMymV3R9uaUOSCkjE0ZvPfPcP8do5SAorhUUw2WVrxK57qra+eST/P
-GYQenruzaFCKJECN7Cqud1vSdzBuxT/ddZivvDOJLeGaQH70xkWy9aaUwvK1+49c
-KDZ+Zd78g9lGkQtibtz2xk3Lgv2NcXkGmyTMfLCG0x2nl77CKZHXc2JiAdKRSGPl
-BzDNuuoe8fHXgz3EicVVTpkL0tXLr1JaklZHH21JB9Rf/VxiH+mCJ6iSI7YEPOEQ
-1C4iOzYWJlFCnyEfSQhSncoDayzqQP8QLH2axj+/56O8a3+SZN9l5vFGXlVdYvMc
-y1BuDw7Mzdz85M4PF869k3TQXBKqcABdJbx/N09k3vOP/+tjHSpnoCdTD/HrXthc
-3R8atAxzyqBOvb2brx/xAQj6776ziZEdyNPWoeDNxJXuvJmitsxJWCg/sk0B4epg
-c1bdnbE+SpJaNg85bcIjwvl2/mDscvSqwnLW/r8c7UC0HViJLjycV29yJpr8DWX9
-DiXQPKI0OZ75O2nBBNPtWsyL82b0tNa2msZK0E7zWLnowlzzLtjRPrbp+Rn4+i33
-WNxy6aWzgJugEjq9Ig7vQHuTz5pNCddLoAgPtcmxGc8ltxZGtMs=
-=zDRQ
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmMwhxEACgkQFA3kzBSg
+KbavWQ//X9r1neCIY56WputHXI7KqkHvMYXYBjBSHNr6wBxEL1iluer9Ov5EuBlD
+izIu0YU2Rj/blFD7a696kksBfNAb3Q1JkwKGNINfGhLHRtNimolJzAlRDqbqfBFn
+gTRFzvKbIVFG6zhmULr8TJ37OcwtSrYzoMv5I6hBLIYQKadK3SeX1j2alhl3KT0t
+6XMAfnkXX0hOe4znEbEH8niCPqw92k2nW9VJ1VZrvvPvLUyiURNb+Idh9N/8HywE
+6bQKYbfKnrmEJfVyAoGsaaYJ5173Jw63Dfz18+zzIpokBMWr9PyoANTqM9AdpAhI
+iTBKRjw1vKrMAQ88WdJtdDApMOlW8VuH0opKDvuK5fSFzva721tlY0QMY7sQvCbs
+X/7Gc5SBg7vVBtdXgsHyzLUc48kXEZCDMlKk1VeOiagMcBYMq6z41SPss5Lfhjc4
+tzUT331l8/tk2cUT5GPShnoS8s9grq39vIhG/gaFULu56/RZVMkLerJ9xy3kjQD8
+bserhjvIbHFNq261k03zBVR5RYJTKC+lnehw/YNjPKcZV5/0pD85jiYxuWH1QCOI
+wRg1Q6txf0gSc0ApvlLteovzTYpqUBHlB/QT+1eT/gy/IkJb8tlNQYe5Bj7ATW2u
+wG4Cg0HRaFcrNXdHs5W2wIzLmMjBkOfw9hKaCseY+ZQo953b/P4=
+=p4ot
 -----END PGP SIGNATURE-----
 
---MBTWagKiUV+jT0FE--
+--9skzrXcAghHfXw+m--
