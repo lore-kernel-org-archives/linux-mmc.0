@@ -2,166 +2,139 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 310DEC6FA82
-	for <linux-mmc@archiver.kernel.org>; Sun, 25 Sep 2022 17:06:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CF409C07E9D
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Sep 2022 09:49:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229539AbiIYRGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 25 Sep 2022 13:06:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57560 "EHLO
+        id S233569AbiIZJtk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Sep 2022 05:49:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60450 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230219AbiIYRGp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 25 Sep 2022 13:06:45 -0400
-Received: from JPN01-OS0-obe.outbound.protection.outlook.com (mail-os0jpn01on2107.outbound.protection.outlook.com [40.107.113.107])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 792E52A727;
-        Sun, 25 Sep 2022 10:06:43 -0700 (PDT)
+        with ESMTP id S234055AbiIZJt3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Sep 2022 05:49:29 -0400
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2059.outbound.protection.outlook.com [40.107.92.59])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45F28113F;
+        Mon, 26 Sep 2022 02:49:28 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=jGlXh1ytA2ZJ1VRYaWqwzedfj009BIOlkulR05m/lvjmJEP3mgi9vXy72CbPKdEhzHj+lNudKaEiGwBxOLd9kuzBFHl18Pk8MBBwwX+yYxTkHJ+Ox0/GC7wsOECFaXweuYvK64BIsnbpt+JZ04d395wE/yGKDTnC7LcYtuosLw5I4MXzQ9rYOAACfGTpuZ7v+k7OltJprqnkUcDPWiSidONo4RUdHg52GJfJy5z+AADmTTlIp+hAQ4GAXYURVjpjE3f8J0cP6SmrJzEIVWVfw6VoexBeLE92SVh2PewmqVyxmYpPe7GP3UP8wkrI3yEbkYdGVsjtsLCRvU33KmHDtg==
+ b=RrHsU9LOv2rIrMXN7sWQrh23bmoI5TFGWLQlDam5xLHkxZK6jTaOuGjzFB/DBbziQR9XEOz1hgYzvOzptjaEpV/dwPwOo+BCvw47avC4KR6g2yZQxUIf53jMv/yrrCvUeRUwjxS0wwJaR50Tr+UVA5iKAfywLsMt6svxfgeRe3j97ArjjUBgAQFqHWeW4n/rzjMhCUTzji9NmvPU4mOtyaGDMHQpqXC/fxjdsom5hofQrYIfJ2JC/JoAsQvYAhEMfxKZZZI6UN5IOK2d1zRVQIydUxfyvqoB/h4rDsSUNg1GBqjhg6USA2VZXWCKt8u75QbQlfWCLuOFrdNFnPyD0A==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=CZDgT9Hfh4RpMqH1kYDEQzTeDby+j2tozeAuv0xaOPs=;
- b=koPjbSpzvFcxI0CFOG2UwoRCN7lRbtUyhN2B2vppPiKet/aoagJo2mEXVs1vxJuwwuIjrv777vxMaHbwvOjvrgfeivdohdf8t1DIoYB5RK0rhvgzNw5NCkAfr7c+wAi8UmEu8bXWOCT00Vm2FodDCubN9GxN4UGpsDZWZ2YzomxusNw2pkUTrsQ0cV/5fR76RNZr43AncfcwNqkcKIhNO5wbb/sB/GJJ1g6AjfuPs7TvcY/7etOJSTc0UmMsptWZXI80XtnsnSiI31hdzpfjK+TD71tImucBEU/BWYhr1QqXehr4m2S3UQVQDwp0UXNS1BcMN69Z3HA8elvHyw2efQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=bp.renesas.com; dmarc=pass action=none
- header.from=bp.renesas.com; dkim=pass header.d=bp.renesas.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bp.renesas.com;
- s=selector1;
+ bh=Yt2SFqLcav+hZ/lBpn/7PhfyM9sb1S7Ki7Fjfdb/ozI=;
+ b=C2H1LOGwsbxWYVnSE7Cd6T+nU9zjtyB9V34EBxUlQ4IjG/9oQGLqF5coLKlE24tFBB5nJNqIurezsgMRUl3m5b+ez6lTHU3Enyy4FnXzbHzhebyxEuOFHlL34R9c0Crr9Es+UmL/BUpGhAgzu0fjfbAjOars6nUpR8fgeoEBPLXguJhI6u9GI1HBxc3bU8rL15kV9vnDrUFBT3JJqR9zbmgv1Fau2zoDwB1U6BV+FUruG8UOl6FGs3V/aoiXfGjRPbB0cTv7u7pKAKRful8s7eeVLEI2Mc9abwYui5HqfmsB+8cbztYanixaZZbJkPpewGzU1/BlVEgnW9W4hRWfig==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.117.160) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=CZDgT9Hfh4RpMqH1kYDEQzTeDby+j2tozeAuv0xaOPs=;
- b=VlvIK4CZwuCtJaL1xr+cVZLpaw6kXYGAa6FBmArmYMZ6NasHjm+TXWf4SenS+/f6WJzuiDFxdTtvL5JkZrC1iMtCdpHQzY6vxK9xhDknKLNFuNoajZ5Q1AENNH8AfewQ/03W4sTOpuMz6KmDGvf/Nlv4I11JLcis1kyxZz97lrw=
-Received: from TYCPR01MB5933.jpnprd01.prod.outlook.com (2603:1096:400:47::11)
- by TYYPR01MB7710.jpnprd01.prod.outlook.com (2603:1096:400:11a::10) with
+ bh=Yt2SFqLcav+hZ/lBpn/7PhfyM9sb1S7Ki7Fjfdb/ozI=;
+ b=THZH5t+ILN39/Iyt4qsj6h5Y8UuHxgN9VplvNdEgwhARf4/ybQsbBfWqylsGuQ8OtmCecBQgz2IquCbLXgj2bRzsd5UiTuE67+B+NmdO9EJRM3sdQI0PqOGVCY056iCFGeqLYNIXb/y0KS8XMnidhwxbLizMRwuGE0uC5/dej3ULRneRAO/88w73TXgT4Snt2xDU0FoE4L7JkaC3kPjk7Qm7j4vj2A5stDZKc9KijD6OJCgX1mafpp4SmQIdGB9bdm+6PAuJHCVY5I4MYa9V8MNTPYwLWfKNcJYl0HMW417jbtwgk3quR7Unt/79y/G9J+xh3xt+HOvPj9qFN3K3Mg==
+Received: from BN9PR03CA0584.namprd03.prod.outlook.com (2603:10b6:408:10d::19)
+ by DM6PR12MB4403.namprd12.prod.outlook.com (2603:10b6:5:2ab::24) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.25; Sun, 25 Sep
- 2022 17:06:41 +0000
-Received: from TYCPR01MB5933.jpnprd01.prod.outlook.com
- ([fe80::7c12:d63c:a151:92bc]) by TYCPR01MB5933.jpnprd01.prod.outlook.com
- ([fe80::7c12:d63c:a151:92bc%9]) with mapi id 15.20.5654.024; Sun, 25 Sep 2022
- 17:06:39 +0000
-From:   Biju Das <biju.das.jz@bp.renesas.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: RE: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
-Thread-Topic: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
-Thread-Index: AQHYzmEL8L/KEMB8n02YNi6lLAt7563uYTMAgAIBePA=
-Date:   Sun, 25 Sep 2022 17:06:39 +0000
-Message-ID: <TYCPR01MB5933319E9510B176644D2BC986539@TYCPR01MB5933.jpnprd01.prod.outlook.com>
-References: <20220922085511.1078256-1-biju.das.jz@bp.renesas.com>
- <Yy7ZcJ8h2VCtUDnW@shikoro>
-In-Reply-To: <Yy7ZcJ8h2VCtUDnW@shikoro>
-Accept-Language: en-GB, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=bp.renesas.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: TYCPR01MB5933:EE_|TYYPR01MB7710:EE_
-x-ms-office365-filtering-correlation-id: 19e4952e-84ed-414c-80d6-08da9f185030
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: yqfsQ9RuudB92/BesgKDgg0Q6x4XBA5oFaUQ1gcw30Ajp7UYDEDGliilYcs8/p/SHtlYkZSc/Ev0cX9jQz8qnw6D7Xs5OIV7RH1Ks9ZuqzklRWK9E+NYAj4hBJ9xnY9L/vRXv1NeCYchcDlw4pXR9hFguR7IcGZ8FbSPaBLtfSIpVFniTfY/KOZRVB4LNTHTysmmufe1SPWLpXYtj5CTXN1DCgrgc3j7PcbrJWmhuj5AWvWjI1PwP4uWGuZLjTVDVzeLnwVZ6oEK7eSryh9ShSeCuK6EfxOPX6GLjIMVpCVy/YXbHEYyGu0lifb3+J7HsCVNSuTjdMJMzughvQebpuaS+ToezEebTmYbz3e/qs4HXs5/y/RH8m/eLTxFH0IO5rY8uWDhT+H0rcKc3Qd/ybRLozx1/BGltsm3t6R6faBkhgBUD2Nrctu77sdKQAyudstULRg/QjFds9oQWxk+ZHbJyb6TR6NMLIzxo91+L0MMund1sESw17DV/ME1E/tjhdzohoN+xxcXfingsgPcqCBg+/1LoqOcj7ELxN1ea8ISUcfW0K3aYkWQXPDBcxhWIrgWVlklfkGxtAjJpNwXpdbLa0PqRGUcvRq32k5LhCRX3R91xdx/SBOtdsLGM1aWUJhCssNdoJtIcDoZalAkRjxsDrxSSnTukn0kJgjXWY+oOott6Q3I0EjQd/aTiNUGWd1kqIUmCHABx6i0AG/2jlc2jyJ+F+1tlHNlSt/kA9bwnfLzNjT5ajl/T4Zo2/7x1ssYumznwc7H/XrD4qYOaQ==
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:TYCPR01MB5933.jpnprd01.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(376002)(346002)(39860400002)(136003)(366004)(451199015)(26005)(9686003)(5660300002)(6506007)(8936002)(52536014)(7696005)(41300700001)(107886003)(38100700002)(33656002)(83380400001)(122000001)(186003)(38070700005)(2906002)(55016003)(54906003)(86362001)(76116006)(66946007)(66446008)(64756008)(66476007)(316002)(4326008)(8676002)(71200400001)(478600001)(66556008);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?us-ascii?Q?DqbkoqGOIWASyYwCG33Sc7KEen2l6WTto8LJgXqVzj7IMFB1HaZIWBldondQ?=
- =?us-ascii?Q?jKxDpjR1i+3FBXeI7vSDcNrdHS/POhGfGf/+OXXzgyxcsUxAmHXS+hMr0EyE?=
- =?us-ascii?Q?aU0aqT1jssQL6Y1Q7xcundSQkQ9FQKzWQRRABad7PsE7pv6mjMNdUlVcP7C/?=
- =?us-ascii?Q?Xu++mQgEQ4az86mRc65K1K3CXEqjF3yIE17iQurTahqK407MT5zARh51FXUS?=
- =?us-ascii?Q?bDGJBE0T/a4l9cPlaLFJgKhhHLGTPFOrtgZ8aNyidT7cSzYeOdrA184Aqu19?=
- =?us-ascii?Q?ILdxtJCs2Ofx4+upRAIkZeUPzf2/TGFvi0cUcaXGs7q+b9Fql98GijXjiCui?=
- =?us-ascii?Q?5Ac3xVlsOQalyBMscIJtCwGm7Gjg/l2Km9ykp9SCYuYE3hs+pEKm2op2SZDu?=
- =?us-ascii?Q?y83jW3nZxv5aYODCItk89a/nFIHN5twCmywEu4F6hIVKOWhzBPBsWuYW6J2T?=
- =?us-ascii?Q?451XUpgEIudymPgB7w4nsk0QDI78n55VJnd221EgeHQ/LTLf0qP+vjV25OCE?=
- =?us-ascii?Q?xDJbne/smCXGkqwqEEvFXGJtpmF3ckozc7PtF1ePegsH7XDQmSaNhThNmDfJ?=
- =?us-ascii?Q?+8DzwM4pdbvYDR7pY/QZVMeUJN2CFTROac/MEpsT+LysIvdKMnoYGj5k/OvD?=
- =?us-ascii?Q?bR52DVeq7ZCyOcYY55pv7WtYiPKT9GoKuuyUUuAzQuXrBuyIYRI5jXw5Jldu?=
- =?us-ascii?Q?Vl+/i2y5TLcFrc0BACNcD7zFlpuj+L9px/f2stGh9CCm2n+5H7IXuVoY+2MR?=
- =?us-ascii?Q?A/e86M2BPGpeE6+bN48BuzU9ueFzyPolinD6N92agwnphEM9hoMGrQ30RhFB?=
- =?us-ascii?Q?pSpQP3OzuUXEZplrB30agV8mJtaWYD+iONZKy6q/vDBMYThtERCyrPut0RmP?=
- =?us-ascii?Q?FGiNizdXjh5pxblMh6NFbh0rv2U/8b/fA3FP7i/t0rfsATWpap8GfAuOH1OO?=
- =?us-ascii?Q?XMyO5kZgW6yb8+eU/6JIAiNAavxfh+irO6rJyR7Rr2EO4D8hSmHyPHJjviuB?=
- =?us-ascii?Q?VAnzxNvQeTFrJ2+GChVtQRxj1LHxfNyI4e15V4ZE/ZcD7u0N/Iz13i6i3L9U?=
- =?us-ascii?Q?cG2ZEe3jd8YEdXsqNPAOB7nlP/kLQ6OhXE9pauF3Qof0nG0zYth2h4NntD2/?=
- =?us-ascii?Q?1U0kEDXk5wmO7ORbiy0+bwwS7g1DEa6L9qIr4iDQ5/GyLY2xVsUHZg5lH4am?=
- =?us-ascii?Q?bayS1bWJsRw9ixQVuvr7fi2J9YCK6T2ZutgmHJrXU5idqJuq3XYb75AYO90V?=
- =?us-ascii?Q?vyNHlvLiR6RsMnEBSl8aBMhDmmR4fNP3ozyzhMwhSZ3+Jf1RqjhTygRLfWx1?=
- =?us-ascii?Q?QVOTcyarvw8aeaZbTTXOhnLQCDRk1/0SF02gBZjk/LKJMNxHnfzVWjLktAHt?=
- =?us-ascii?Q?kq3gtSkkmvp8fHvoswfMm9zOcUmvE0/PmAqN/oIIKBGegneya9tnVeRmcagR?=
- =?us-ascii?Q?4xLZPWs4ca791GneT9RcwA6cxA1ZtnsRzwTs/myjK7J+6Hl24aDRQuou9Htc?=
- =?us-ascii?Q?tX8p9s2pV3Aud6mo0ASUoIFBDw/PQKcMykTh89V/hCHiTeltt03QT0n62CM3?=
- =?us-ascii?Q?1xSCKeUfxTZYLw2ND5DIHCjEPsEqaakFH/I8D57X?=
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.26; Mon, 26 Sep
+ 2022 09:49:26 +0000
+Received: from BN8NAM11FT073.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:10d:cafe::82) by BN9PR03CA0584.outlook.office365.com
+ (2603:10b6:408:10d::19) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.26 via Frontend
+ Transport; Mon, 26 Sep 2022 09:49:26 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.160)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.117.160 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.117.160; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.117.160) by
+ BN8NAM11FT073.mail.protection.outlook.com (10.13.177.231) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5654.14 via Frontend Transport; Mon, 26 Sep 2022 09:49:25 +0000
+Received: from rnnvmail204.nvidia.com (10.129.68.6) by mail.nvidia.com
+ (10.129.200.66) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Mon, 26 Sep
+ 2022 02:49:11 -0700
+Received: from rnnvmail203.nvidia.com (10.129.68.9) by rnnvmail204.nvidia.com
+ (10.129.68.6) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.29; Mon, 26 Sep
+ 2022 02:49:11 -0700
+Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
+ (10.129.68.9) with Microsoft SMTP Server id 15.2.986.29 via Frontend
+ Transport; Mon, 26 Sep 2022 02:49:08 -0700
+From:   Prathamesh Shete <pshete@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC:     <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
+        <kyarlagadda@nvidia.com>
+Subject: [PATCH v3 1/4] mmc: sdhci-tegra: Separate Tegra194 and Tegra234 SoC data
+Date:   Mon, 26 Sep 2022 15:19:03 +0530
+Message-ID: <20220926094906.14537-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-X-OriginatorOrg: bp.renesas.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: TYCPR01MB5933.jpnprd01.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 19e4952e-84ed-414c-80d6-08da9f185030
-X-MS-Exchange-CrossTenant-originalarrivaltime: 25 Sep 2022 17:06:39.9421
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN8NAM11FT073:EE_|DM6PR12MB4403:EE_
+X-MS-Office365-Filtering-Correlation-Id: 5a964afb-f445-40a7-14b1-08da9fa465dc
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: b+dfj5W3YBdHqJvPC6Pj2gf5eHr+EvUX3fUfbMQCcULXcA/nzxBqUmkvdwppGfq/GTpHI0pzMHlCfiwWkXSpfzr5D+AaR+vJi5zKwLeiYGxCQ1x5GoG7YAWJfpdwyy1AR3vcXO4F4hwn+0MD5sC+VvamiluR4Z8Mk80A3LdkixoBH04dFQBDO5lYxUgiMnKAGS9pNYrwt+HfDs7V9vXYTL8KCLW3+UPJ/0QrBr5A64qUELABENDI+zuN+YdwEv3VrMYyndbG5Ng5+ijZeJFGYiy3PGwS03op5XWqiQArVqgHgwuqApVgRIP6xqB1mh55ruHjiWX2ffGbHVZaqRwcg+WVHnl76BFCli4/giBlRkZLUuqP11Y3MbG0lZuH5vNKqeE+nNW7KCRsXkpZ3ZooIDC4FkIZVI9JniB32eedbIye89FO7YbuLaCDjO7XHxuxRNKwA3x0V7UlW+UrBcWKnqdKmV10zvg/2dWpGxEPAP0Z+7hf6LhgN3GhZdbaN1H8l3dv8o481iMWV/aPYPs9JnkOs5W+LECBWSkHjx/WwumFsFoo7yK1HhqOW8b2ZKlrA4SwOVaFdc/uFlHCY+4dw9SeVa3u71yTnnNYcIdJAgoZDzsrquIyZ5Vjfn9WJjNbAc0ySZLDXB8PJL5y0Cz8MhcMfUReXA5t3kBSt7liCQY73UEDT4Ss8zL+8HzmvVKsy8aG6gXVaXoPTRsFqmNvZJmk+fQBPR9jFhRMd/iL1EAUW5PQgzV6UCyx/fQrmIR1AjZJ+3AKWVQ3o/WTWpb1DQ==
+X-Forefront-Antispam-Report: CIP:216.228.117.160;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge1.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(39860400002)(136003)(346002)(451199015)(40470700004)(36840700001)(46966006)(82310400005)(40460700003)(36860700001)(36756003)(356005)(7636003)(82740400003)(86362001)(2906002)(5660300002)(478600001)(4326008)(8676002)(70206006)(70586007)(54906003)(316002)(110136005)(8936002)(186003)(1076003)(336012)(83380400001)(47076005)(40480700001)(41300700001)(107886003)(6666004)(426003)(7696005)(2616005)(26005);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Sep 2022 09:49:25.6690
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 53d82571-da19-47e4-9cb4-625a166a4a2a
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: zZGVXUlJVeJv6IfrQntopdB4QHAjlPn9t21r6LqZQAMAcO7mGiPjCs1nJGLcV36HlvJ1J7oQKrXw1eFElbLKCxsysaUYpHtp0/9+r1GsGu4=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYYPR01MB7710
+X-MS-Exchange-CrossTenant-Network-Message-Id: 5a964afb-f445-40a7-14b1-08da9fa465dc
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.160];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT073.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4403
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+Create new SoC data structure for Tegra234 platforms.
+Additional features, tap value configurations are added/
+updated for Tegra234 platform hence separate Tegra194 and
+Tegra234 SoC data.
 
-Thanks for the feedback.
+Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-> Subject: Re: [PATCH v3] mmc: renesas_sdhi: Fix rounding errors
->=20
-> Hi,
->=20
-> > v2->v3:
-> >  * Renamed the variable new_clock_margin->new_upper_limit in
-> renesas_sdhi_clk_
-> >    update()
-> >  * Moved setting of new_upper_limit outside for loop.
-> >  * Updated the comment section to mention the rounding errors and
-> merged with
-> >    existing comment out side the for loop.
-> >  * Updated commit description.
->=20
-> I really like the new variable names.
->=20
-> > +	 * To fix rounding errors, eg:- (533333333 Hz / 4 * 4 =3D 533333332
-> Hz
-> > +<
->=20
-> (What is the '-' after 'eg:' for?)
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 2d2d8260c681..a6c5bbae77b4 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1556,7 +1556,21 @@ static const struct sdhci_tegra_soc_data soc_data_tegra194 = {
+ 	.max_tap_delay = 139,
+ };
+ 
++static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
++	.pdata = &sdhci_tegra186_pdata,
++	.dma_mask = DMA_BIT_MASK(39),
++	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
++		    NVQUIRK_HAS_PADCALIB |
++		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
++		    NVQUIRK_ENABLE_SDR50 |
++		    NVQUIRK_ENABLE_SDR104 |
++		    NVQUIRK_HAS_TMCLK,
++	.min_tap_delay = 95,
++	.max_tap_delay = 111,
++};
++
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra234-sdhci", .data = &soc_data_tegra234 },
+ 	{ .compatible = "nvidia,tegra194-sdhci", .data = &soc_data_tegra194 },
+ 	{ .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
+ 	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
+-- 
+2.17.1
 
-Regarding 'eg:-', I got this habit from school days. On exams, I usually
-write for eg:- to provide some examples.
-
-OK, Will remove '-' after 'eg:'.
-
->=20
-> > +	 * 533333333 Hz) add an upper limit of 1/1024 rate higher to the
-> clock
-> > +	 * rate.
->=20
-> I know Geert suggesgted this. I think, however, this description is
-> too short. It should be mentioned IMHO that this rounding error can
-> lead to the selection of a clock which is way off (the 400MHz one). I
-> liked this example from v2. Geert, what do you say?
-
-Yes, I can put back the real example from v2, if that is useful.
-533MHz->400 MHz is a big jump due to this rounding error and it has
-impacted the performance.
-
-Waiting for Geert's feedback.
-
-Cheers,
-Biju
