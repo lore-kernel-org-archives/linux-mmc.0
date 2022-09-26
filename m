@@ -2,83 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 907D0C07E9D
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Sep 2022 17:32:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E2DAC6FA82
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Sep 2022 17:42:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230478AbiIZRcx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Sep 2022 13:32:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36168 "EHLO
+        id S230516AbiIZRm5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Sep 2022 13:42:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41214 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230477AbiIZRc3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Sep 2022 13:32:29 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE9A81822CC;
-        Mon, 26 Sep 2022 09:50:09 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5D388B80B72;
-        Mon, 26 Sep 2022 16:49:51 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 24C7AC433C1;
-        Mon, 26 Sep 2022 16:49:46 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664210989;
-        bh=1c5Fiy+fkune816aVwNMAtlbMdamxliwtVQD1QR541I=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=Q9wmOkOry7vvnnNujle0YG1Rqjsp4YNyE5klrWU5Uzak/F3L3zILU7QNdYPI5EiY3
-         gS+HAvGjMbhz5pQKwdFl++v9tXzRLsRKQuwP6RovFqGd0y1CVb42nyWNkunNKzYun9
-         LVemAzvPiRsOHkTIVdxjO8FA2Q5vLru3UoQCzEMpHElgVxkj9ZbNjIcjpWxRJ4Rirw
-         8r7q4HWU18SR9IvFK1RiZ2t8G4hQzumviTEvH+ZnmjR603YGfG6J2oW/N2ijrBEQV0
-         i4VXf92cX08/fEYowYiOa6YwgjosypWGkDF7zKTu7U5Z5y3z9iQZZQM8YACmlSYMGo
-         Bof2Vd1ICeeng==
-Message-ID: <d8706eb0-6e1c-22ae-a88b-ea183e6bcede@kernel.org>
-Date:   Mon, 26 Sep 2022 11:49:43 -0500
+        with ESMTP id S231126AbiIZRmZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Sep 2022 13:42:25 -0400
+Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id B7732399C6;
+        Mon, 26 Sep 2022 10:10:08 -0700 (PDT)
+X-IronPort-AV: E=Sophos;i="5.93,346,1654527600"; 
+   d="scan'208";a="136218120"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie6.idc.renesas.com with ESMTP; 27 Sep 2022 02:10:07 +0900
+Received: from localhost.localdomain (unknown [10.226.92.133])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 0889E400547B;
+        Tue, 27 Sep 2022 02:10:04 +0900 (JST)
+From:   Biju Das <biju.das.jz@bp.renesas.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: [PATCH v4] mmc: renesas_sdhi: Fix rounding errors
+Date:   Mon, 26 Sep 2022 18:10:02 +0100
+Message-Id: <20220926171002.62352-1-biju.das.jz@bp.renesas.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCHv3 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        jh80.chung@samsung.com
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-References: <20220926140932.820050-1-dinguyen@kernel.org>
- <f4d29a38-c195-43f7-4837-43a6176a0a58@linaro.org>
-From:   Dinh Nguyen <dinguyen@kernel.org>
-In-Reply-To: <f4d29a38-c195-43f7-4837-43a6176a0a58@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
+with a lower clock rate compared to a higher one.
+For eg: The rounding error (533333333 Hz / 4 * 4 = 533333332 Hz < 5333333
+33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
 
+This patch fixes this issue by adding a margin of (1/1024) higher to
+the clock rate.
 
-On 9/26/22 10:35, Krzysztof Kozlowski wrote:
-> On 26/09/2022 16:09, Dinh Nguyen wrote:
->> +allOf:
->> +  - $ref: "synopsys-dw-mshc-common.yaml#"
->> +
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const:
->> +              - altr,socfpga-dw-mshc
->> +    then:
->> +      required:
->> +        - altr,sysmgr-syscon
-> 
-> else:
->    properties:
->      altr,sysmgr-syscon: false
-> and then you will probably see the warnings leading to error in syntax
-> (const is not an array)...
-> 
+Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+v3->v4:
+ * Added Tested-by tag from Wolfram.
+ * Updated commit description and code comment with real example.
+v2->v3:
+ * Renamed the variable new_clock_margin->new_upper_limit in renesas_sdhi_clk_
+   update()
+ * Moved setting of new_upper_limit outside for loop.
+ * Updated the comment section to mention the rounding errors and merged with
+   existing comment out side the for loop.
+ * Updated commit description. 
+v1->v2:
+ * Add a comment explaining why margin is needed and set it to
+   that particular value.
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
 
-Hmm, okay. I ran dt_binding_check and did not see the warning. I'll 
-check it again.
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index 6edbf5c161ab..d1b8130ee37f 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -128,6 +128,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	struct clk *ref_clk = priv->clk;
+ 	unsigned int freq, diff, best_freq = 0, diff_min = ~0;
+ 	unsigned int new_clock, clkh_shift = 0;
++	unsigned int new_upper_limit;
+ 	int i;
+ 
+ 	/*
+@@ -153,10 +154,17 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ 	 * greater than, new_clock.  As we can divide by 1 << i for
+ 	 * any i in [0, 9] we want the input clock to be as close as
+ 	 * possible, but no greater than, new_clock << i.
++	 *
++	 * Add an upper limit of 1/1024 rate higher to the clock rate to fix
++	 * clk rate jumping to lower rate due to rounding error (eg: RZ/G2L has
++	 * 3 clk sources 533.333333 MHz, 400 MHz and 266.666666 MHz. The request
++	 * for 533.333333 MHz will selects a slower 400 MHz due to rounding
++	 * error (533333333 Hz / 4 * 4 = 533333332 Hz < 533333333 Hz)).
+ 	 */
++	new_upper_limit = (new_clock << i) + ((new_clock << i) >> 10);
+ 	for (i = min(9, ilog2(UINT_MAX / new_clock)); i >= 0; i--) {
+ 		freq = clk_round_rate(ref_clk, new_clock << i);
+-		if (freq > (new_clock << i)) {
++		if (freq > new_upper_limit) {
+ 			/* Too fast; look for a slightly slower option */
+ 			freq = clk_round_rate(ref_clk, (new_clock << i) / 4 * 3);
+ 			if (freq > (new_clock << i))
+@@ -181,6 +189,7 @@ static unsigned int renesas_sdhi_clk_update(struct tmio_mmc_host *host,
+ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+ 				   unsigned int new_clock)
+ {
++	unsigned int clk_margin;
+ 	u32 clk = 0, clock;
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, ~CLK_CTL_SCLKEN &
+@@ -194,7 +203,13 @@ static void renesas_sdhi_set_clock(struct tmio_mmc_host *host,
+ 	host->mmc->actual_clock = renesas_sdhi_clk_update(host, new_clock);
+ 	clock = host->mmc->actual_clock / 512;
+ 
+-	for (clk = 0x80000080; new_clock >= (clock << 1); clk >>= 1)
++	/*
++	 * Add a margin of 1/1024 rate higher to the clock rate in order
++	 * to avoid clk variable setting a value of 0 due to the margin
++	 * provided for actual_clock in renesas_sdhi_clk_update().
++	 */
++	clk_margin = new_clock >> 10;
++	for (clk = 0x80000080; new_clock + clk_margin >= (clock << 1); clk >>= 1)
+ 		clock <<= 1;
+ 
+ 	/* 1/1 clock is option */
+-- 
+2.25.1
 
-Dinh
