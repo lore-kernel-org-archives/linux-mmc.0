@@ -2,91 +2,219 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 15E5FC54EE9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 12:20:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 912F8C6FA83
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 12:45:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230343AbiI0MU5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 08:20:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37640 "EHLO
+        id S230430AbiI0Mpz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Sep 2022 08:45:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230404AbiI0MU0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 08:20:26 -0400
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07E5112E40C
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Sep 2022 05:19:11 -0700 (PDT)
-Received: by mail-ej1-x62f.google.com with SMTP id lh5so20253189ejb.10
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Sep 2022 05:19:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=0ZK1eijlfuB75W2R5VMV3jU4dLlENKu7GQ8sbTsnldo=;
-        b=AssFJQ50nKYv9yXu5A0ATQRovpLXsd174gZnDiKQQK3Uxr82lwlViEkQ8hhOLcnedu
-         QJSy8EE8GBOibVWRJ7PDOY6sOLhOG0FSB2/xbsGTRbs7BezNc2QNmksjXwSqvcRZJPwm
-         srl+gGbXWj+qHX2h+3wUAClvyzrHWs51LC3VDL8kFPFHH7p65GOcWaHQTycA/VVxj5K7
-         ZkIRtgZJ9yy6160sQVOFeAYxdhZnKdRINmchwd5KlKmz+M48+ZZdYaW1q7JrHRmC41/0
-         wMCjuyvifCkYikZFk/uFiJL3CXCZEt8tbf5OMhxyh/r+WPRgtXIHGAOB6UnlUoSfjj1q
-         fnLg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=0ZK1eijlfuB75W2R5VMV3jU4dLlENKu7GQ8sbTsnldo=;
-        b=IINx5397XmE4rV3u5KiBqs3n3+TKdIc4wOkFiNNnvBGWqxFVcWC7RE88eJN97sZm3Q
-         KjXNsqYKbOaf/NM074TSjnkLDY7Q7IwPDu/UulfJtAIgpQAF95eymkwAios6GhlpZ13v
-         0V54/4258/jpgmnD1oJHcUa57cP3R/fRKBm0QAoKGM9rzuQvL3TmQRhwnFHAxngSMVnX
-         0YL52RZt4Hc/bDDlaDWSL18yEHpASbEXCt1ne8cpSqj76a103Yldz59kvLG36RLB8zOd
-         w51IoSjRrYjE496t7A7EnRTwykMn4aCbgrHJGoguDSRDuqJZiRnJ4QtoYUYDIFx6Vliw
-         yAMw==
-X-Gm-Message-State: ACrzQf27buPdz6k8BItxbBg+av8cZ3JAd9qcvby153yxoU+kxI6tsi/V
-        9g8xvBBrx3DHo2xKb96MUEVN71sXmlJA1E2cYiAVew==
-X-Google-Smtp-Source: AMsMyM4DBYJmlp+aMpC8DVQo7RHtEZBA4GNatpgLZtI9iqTDVOWQDaV5gCeqqOh4C6ZJbQPRD5NTCS6UK/7FcGYWGVo=
-X-Received: by 2002:a17:906:58c8:b0:6fe:91d5:18d2 with SMTP id
- e8-20020a17090658c800b006fe91d518d2mr23079321ejs.190.1664281149918; Tue, 27
- Sep 2022 05:19:09 -0700 (PDT)
+        with ESMTP id S230055AbiI0Mpy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 08:45:54 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 254B51406F7;
+        Tue, 27 Sep 2022 05:45:53 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1664282753; x=1695818753;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=4sq1AHyWFyOqVpjRETvsq1ss7KGQ2KV4EhyDYN3JmJg=;
+  b=I7yjHeho+za68gzOwraRmsxbgUx2YpejdX8V+q8S2tYNMVCmqWhO+LMp
+   XRHbpru5G+uQV1WlnrhWjqABEqDNdh83KwfghtlBJrJCaL6rPTFG7vb54
+   TtTzsykrzPnA5FObh8SVPcryoOAtI0S8ytxVV9Y6o1+MUpSuh67k5pDve
+   oE2nsGat0d2HgDnVbqDq9XAFfKOnbsDcRpRRwvwJxdpHj+hBTOMYcn98r
+   bLN6xYAwfwszE1VdjbCiEieGXI7YkNPoslMGRAdgnAxx2Kqbw7PaO4w16
+   N343ydjGmDdwKHdfXTRieo/8feyegJ/BsrpTjpRK4JITqGw5b9U54zEAT
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="363143665"
+X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
+   d="scan'208";a="363143665"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:45:52 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="763863509"
+X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
+   d="scan'208";a="763863509"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.200])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:45:49 -0700
+Message-ID: <a5c231e8-f28a-e692-5961-58e6838711ed@intel.com>
+Date:   Tue, 27 Sep 2022 15:45:44 +0300
 MIME-Version: 1.0
-References: <20220927104138.5924-1-marex@denx.de>
-In-Reply-To: <20220927104138.5924-1-marex@denx.de>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 27 Sep 2022 14:18:58 +0200
-Message-ID: <CACRpkdaA=3QU+_HQkK6RSe4qQJ28O4BbtT6jHuKeVjKqaqLJaQ@mail.gmail.com>
-Subject: Re: [PATCH v2] dt-bindings: mmc: arm,pl18x: Document interrupt-names property
-To:     Marek Vasut <marex@denx.de>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH v5 2/3] mmc: sdhci-tegra: Add support to program MC stream
+ ID
+Content-Language: en-US
+To:     Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
+        thierry.reding@gmail.com, jonathanh@nvidia.com,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     anrao@nvidia.com, smangipudi@nvidia.com, kyarlagadda@nvidia.com
+References: <df68846a-2a09-ef98-6823-d536d99ccb61@intel.com>
+ <20220927111314.32229-1-pshete@nvidia.com>
+ <20220927111314.32229-2-pshete@nvidia.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220927111314.32229-2-pshete@nvidia.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Sep 27, 2022 at 12:41 PM Marek Vasut <marex@denx.de> wrote:
+On 27/09/22 14:13, Prathamesh Shete wrote:
+> SMMU clients are supposed to program stream ID from
+> their respective address spaces instead of MC override.
+> Define NVQUIRK_PROGRAM_STREAMID and use it to program
+> SMMU stream ID from the SDMMC client address space.
+> 
+> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 47 ++++++++++++++++++++++++++++++++++
+>  1 file changed, 47 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index a6c5bbae77b4..46f37cc26dbb 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -25,6 +25,9 @@
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/gpio/consumer.h>
+>  #include <linux/ktime.h>
+> +#ifdef CONFIG_IOMMU_API
+> +#include <linux/iommu.h>
+> +#endif
+>  
+>  #include <soc/tegra/common.h>
+>  
+> @@ -94,6 +97,8 @@
+>  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
+>  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
+>  
+> +#define SDHCI_TEGRA_CIF2AXI_CTRL_0			0x1fc
+> +
+>  #define NVQUIRK_FORCE_SDHCI_SPEC_200			BIT(0)
+>  #define NVQUIRK_ENABLE_BLOCK_GAP_DET			BIT(1)
+>  #define NVQUIRK_ENABLE_SDHCI_SPEC_300			BIT(2)
+> @@ -121,6 +126,7 @@
+>  #define NVQUIRK_HAS_TMCLK				BIT(10)
+>  
+>  #define NVQUIRK_HAS_ANDROID_GPT_SECTOR			BIT(11)
+> +#define NVQUIRK_PROGRAM_STREAMID			BIT(12)
+>  
+>  /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+>  #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
+> @@ -128,6 +134,8 @@
+>  #define SDHCI_TEGRA_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
+>  					 SDHCI_TRNS_BLK_CNT_EN | \
+>  					 SDHCI_TRNS_DMA)
+> +#define SDHCI_TEGRA_STREAMID_MASK			0xff
+> +#define SDHCI_TEGRA_WRITE_STREAMID_SHIFT		0x8
+>  
+>  struct sdhci_tegra_soc_data {
+>  	const struct sdhci_pltfm_data *pdata;
+> @@ -177,6 +185,9 @@ struct sdhci_tegra {
+>  	bool enable_hwcq;
+>  	unsigned long curr_clk_rate;
+>  	u8 tuned_tap_delay;
+> +#ifdef CONFIG_IOMMU_API
+> +	u32 streamid;
+> +#endif
+>  };
+>  
+>  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> @@ -1564,6 +1575,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
+>  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>  		    NVQUIRK_ENABLE_SDR50 |
+>  		    NVQUIRK_ENABLE_SDR104 |
+> +		    NVQUIRK_PROGRAM_STREAMID |
+>  		    NVQUIRK_HAS_TMCLK,
+>  	.min_tap_delay = 95,
+>  	.max_tap_delay = 111,
+> @@ -1636,6 +1648,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  	struct sdhci_host *host;
+>  	struct sdhci_pltfm_host *pltfm_host;
+>  	struct sdhci_tegra *tegra_host;
+> +#ifdef CONFIG_IOMMU_API
+> +	struct iommu_fwspec *fwspec;
+> +#endif
 
-> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-> @@ -99,6 +99,9 @@ properties:
->      minItems: 1
->      maxItems: 2
->
-> +  interrupt-names:
-> +    const: cmd_irq
+Move this below
 
-This hardware come in variants with one or two IRQs.
+>  	struct clk *clk;
+>  	int rc;
+>  
+> @@ -1775,6 +1790,25 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>  	if (rc)
+>  		goto err_add_host;
+>  
+> +	/* Program MC streamID for DMA transfers */
+> +#ifdef CONFIG_IOMMU_API
+> +	if (soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
 
-Either two: "cmd_irq", "data_irq"
+Can put it here
 
-Or one combined IRQ (logic OR between those two!)
-I don't know what that should be called, perhaps
-"cmd_data_irq".
+		struct iommu_fwspec *fwspec;
 
-Since all DTS:es then have to be patched an alternative
-is as Arnd says to just delete the names. We should however
-at the very least patch the bindings description: for the IRQs
-to make the above situation clear.
 
-Yours,
-Linus Walleij
+> +		fwspec = dev_iommu_fwspec_get(&pdev->dev);
+> +		if (fwspec == NULL) {
+> +			dev_warn(mmc_dev(host->mmc),
+> +				"iommu fwspec is NULL, continue without stream ID\n");
+> +		} else {
+> +			tegra_host->streamid = fwspec->ids[0] & 0xffff;
+> +			tegra_sdhci_writel(host, (tegra_host->streamid &
+> +						SDHCI_TEGRA_STREAMID_MASK) |
+> +						((tegra_host->streamid <<
+> +						SDHCI_TEGRA_WRITE_STREAMID_SHIFT)
+> +						& SDHCI_TEGRA_STREAMID_MASK),
+> +						SDHCI_TEGRA_CIF2AXI_CTRL_0);
+
+This is hard to read.  Maybe use GENMASK and FIELD_PREP, or if the bytes
+need swapping, one of the byte swapping macros.
+
+Also, isn't this always zero ?
+
+	((tegra_host->streamid << SDHCI_TEGRA_WRITE_STREAMID_SHIFT) & SDHCI_TEGRA_STREAMID_MASK),
+
+
+> +		}
+> +	}
+> +#endif
+> +
+>  	return 0;
+>  
+>  err_add_host:
+> @@ -1861,6 +1895,10 @@ static int sdhci_tegra_suspend(struct device *dev)
+>  static int sdhci_tegra_resume(struct device *dev)
+>  {
+>  	struct sdhci_host *host = dev_get_drvdata(dev);
+> +#ifdef CONFIG_IOMMU_API
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> +#endif
+>  	int ret;
+>  
+>  	ret = mmc_gpio_set_cd_wake(host->mmc, false);
+> @@ -1871,6 +1909,15 @@ static int sdhci_tegra_resume(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>  
+> +	/* Re-program MC streamID for DMA transfers */
+> +#ifdef CONFIG_IOMMU_API
+> +	if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
+> +		tegra_sdhci_writel(host, tegra_host->streamid |
+> +					(tegra_host->streamid << 8),
+
+This looks like it ought to be the same calculation as above ?
+
+> +					SDHCI_TEGRA_CIF2AXI_CTRL_0);
+> +	}
+> +#endif
+> +
+>  	ret = sdhci_resume_host(host);
+>  	if (ret)
+>  		goto disable_clk;
+
