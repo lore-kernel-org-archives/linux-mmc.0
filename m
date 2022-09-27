@@ -2,85 +2,93 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E9E8C54EE9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 19:18:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56CAFC6FA82
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 22:05:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230419AbiI0TS0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 15:18:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55868 "EHLO
+        id S231809AbiI0WFg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Sep 2022 18:05:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230321AbiI0TSY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 15:18:24 -0400
-Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D46EE6A25;
-        Tue, 27 Sep 2022 12:18:24 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        with ESMTP id S230338AbiI0WFd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 18:05:33 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 81624EEEBC;
+        Tue, 27 Sep 2022 15:05:23 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id E6F1A8484A;
-        Tue, 27 Sep 2022 21:18:21 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1664306302;
-        bh=GFpQwFEx3noZVoS5mRJOXFzgRizwUIEKjcVMTs2bkIE=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=UFBn+o5paRCzQKy0pNoXs+Fz5zCpMY7ZseNrLXQ7XvxncKHpzHTi9wVnqfsDPPpEM
-         iiLBQINqVMpBxuTtlyjy+9qLm8tHPkwxumXcAgVAfTru2Ab15hbDUeoJhR/wBT2TeE
-         6F6aFh0tH/EvRi8UB6WpOrCosk5yuKhq7kXE4HXzChVWs4uonBx8ox62UW1DNwLtQE
-         ezN06zipi06UbQUJzXByx5/kCSVimF0C3anPUXuoS7KGyK6/3P8HVD6dkrxnztus3I
-         gvgAjnPcZM29gbLhAvgeUkoEAYepongMzWaeX9+xEmDZv+cY8sh/XnBqcb8UH+BWlU
-         tBKTDfCAda6PA==
-Message-ID: <cdda3cb1-5772-88f7-aafc-d4ecf51fd050@denx.de>
-Date:   Tue, 27 Sep 2022 21:18:21 +0200
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 53EDB61BF5;
+        Tue, 27 Sep 2022 22:05:22 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AFA08C4314B;
+        Tue, 27 Sep 2022 22:05:21 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1664316321;
+        bh=PT9L3gVgvk+NtjJTnya/r6tVxlGqzoJ1UQygKoxMIbE=;
+        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
+        b=TZJUughhtGRTj3Ms19FBBZKRRiVI8m7qZFPhF2r0zmZBT6eHGpDxptxfOOoecBESs
+         Pj4RgZTmYkKaGTcUO+kwa2trqrV2d7+rb0qd5jy6iqtqa6GM2x5eQ7rHStLaI7iTat
+         zLHonFAx2CNuYPIBar7d1cUUIkZklP9yAtDhSHlepFnR7v2GN1+0pDiVuWKiwUG5Sj
+         DN5IionQuJ10iE/0ZnzRJ2iz0IBU/s0q7jDdRVT6dPQSb0PLe019oY/+NeGhr+dYE3
+         wzj5l1u2115qsFMGjo7tYUSe/KW1p1WwIQHScJCYKdRmyRcd89c67/RCldWegBQo+K
+         upcNrw6qLCISw==
+Received: by mail-vs1-f46.google.com with SMTP id j7so11000943vsr.13;
+        Tue, 27 Sep 2022 15:05:21 -0700 (PDT)
+X-Gm-Message-State: ACrzQf3Ud60dw6d3l2Tf0goh6qKGRC5ZKPL0bU5bhdsEiVvf+AzVMCOV
+        JXR54jOCloTl51YJXsY8sKXN8RV/ukm+kuHH2w==
+X-Google-Smtp-Source: AMsMyM5W0GcaSRnIx3xT9MsFQVa6C2yfhAclAga6IA7giEMLVq64/7bTyJ3c/aHSQjJl4sv7pPyEo2cpR5IcHdxPt7k=
+X-Received: by 2002:a67:c18a:0:b0:398:4c72:cafb with SMTP id
+ h10-20020a67c18a000000b003984c72cafbmr11756375vsj.53.1664316320606; Tue, 27
+ Sep 2022 15:05:20 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.2.2
-Subject: Re: [PATCH v2] dt-bindings: mmc: arm,pl18x: Document interrupt-names
- property
-Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com
-References: <20220927104138.5924-1-marex@denx.de>
- <CACRpkdaA=3QU+_HQkK6RSe4qQJ28O4BbtT6jHuKeVjKqaqLJaQ@mail.gmail.com>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <CACRpkdaA=3QU+_HQkK6RSe4qQJ28O4BbtT6jHuKeVjKqaqLJaQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
-X-Virus-Status: Clean
+References: <20220926140932.820050-1-dinguyen@kernel.org> <f4d29a38-c195-43f7-4837-43a6176a0a58@linaro.org>
+ <d8706eb0-6e1c-22ae-a88b-ea183e6bcede@kernel.org>
+In-Reply-To: <d8706eb0-6e1c-22ae-a88b-ea183e6bcede@kernel.org>
+From:   Rob Herring <robh+dt@kernel.org>
+Date:   Tue, 27 Sep 2022 17:05:09 -0500
+X-Gmail-Original-Message-ID: <CAL_Jsq+ty4HShTWhQ+NTOWRWjNTw1=Z6YO-co6_BhDXPuU+5Yg@mail.gmail.com>
+Message-ID: <CAL_Jsq+ty4HShTWhQ+NTOWRWjNTw1=Z6YO-co6_BhDXPuU+5Yg@mail.gmail.com>
+Subject: Re: [PATCHv3 1/3] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
+To:     Dinh Nguyen <dinguyen@kernel.org>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        jh80.chung@samsung.com, ulf.hansson@linaro.org,
+        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/27/22 14:18, Linus Walleij wrote:
-> On Tue, Sep 27, 2022 at 12:41 PM Marek Vasut <marex@denx.de> wrote:
-> 
->> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
->> @@ -99,6 +99,9 @@ properties:
->>       minItems: 1
->>       maxItems: 2
->>
->> +  interrupt-names:
->> +    const: cmd_irq
-> 
-> This hardware come in variants with one or two IRQs.
-> 
-> Either two: "cmd_irq", "data_irq"
-> 
-> Or one combined IRQ (logic OR between those two!)
-> I don't know what that should be called, perhaps
-> "cmd_data_irq".
-> 
-> Since all DTS:es then have to be patched an alternative
-> is as Arnd says to just delete the names. We should however
-> at the very least patch the bindings description: for the IRQs
-> to make the above situation clear.
+On Mon, Sep 26, 2022 at 11:49 AM Dinh Nguyen <dinguyen@kernel.org> wrote:
+>
+>
+>
+> On 9/26/22 10:35, Krzysztof Kozlowski wrote:
+> > On 26/09/2022 16:09, Dinh Nguyen wrote:
+> >> +allOf:
+> >> +  - $ref: "synopsys-dw-mshc-common.yaml#"
+> >> +
+> >> +  - if:
+> >> +      properties:
+> >> +        compatible:
+> >> +          contains:
+> >> +            const:
+> >> +              - altr,socfpga-dw-mshc
+> >> +    then:
+> >> +      required:
+> >> +        - altr,sysmgr-syscon
+> >
+> > else:
+> >    properties:
+> >      altr,sysmgr-syscon: false
+> > and then you will probably see the warnings leading to error in syntax
+> > (const is not an array)...
+> >
+>
+> Hmm, okay. I ran dt_binding_check and did not see the warning. I'll
+> check it again.
 
-Done, bindings updated and stm32/qcom DTs cleaned up.
+Indeed, it does not warn. An array is allowed here as you could have a
+constant array value. Expect a warning soon though, as I'm working on
+adding one.
+
+Rob
