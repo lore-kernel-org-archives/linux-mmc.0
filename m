@@ -2,135 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32C51C6FA92
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 10:10:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD0F7C6FA92
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 10:23:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231849AbiI0KKh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 06:10:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39304 "EHLO
+        id S230454AbiI0KXw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Sep 2022 06:23:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231761AbiI0KKY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 06:10:24 -0400
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2041.outbound.protection.outlook.com [40.107.237.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9F039F768;
-        Tue, 27 Sep 2022 03:10:23 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=jRj0oJUw6FgpjYEgPfRQL+fzeVtHMU+acGzNAEAT685jMnUJrKXuV115X+29VuulESlRxmx28ggviSqTRFIoCWivK3OIgeZhrGaTtKONhiJ+KXSoGYwLs68jn+vjxxU4rC8uixSC3PFhUc6XM4ySSMuLhZ7oSgyJq+byQVpjnyHKupM1bDUauJA+snuveyZFQQ4wUeBpAXt/r5a+Wr1GXw0pP179BJ9Ytw5vfU3DY/7Kdhss4oIPAT4Qj9U5HlSmIv40ta5cTldTC33leb8+jivyItgFOSsDdZUFtqz0jWZkbXTDJOVb3ksQ6paCQBCbqRXNBFVjq2LOXMJ7/50gew==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=WrH7mXv8Qhft7UcA4wqYTG7iWuUTiv6yT0sZS4USblM=;
- b=NtUL/Qh9rY2RutNrcikVD/e0W/2l4z0xvvtm9wMB74H8MaHooN9bbG+iIFMjKodZYQFEUoRXRzncnllSk+WVHj7Owi+pNvWpHnJVQJpMf3RQ4vQM54mosxZnGykmNH+KN7XwG9P6EzSYWYMewxSkTcr3i+VUd00tEbT69govj7t7VhG2UPnCOFAF2Gm4pf+zQCJRSF1YgcUFg1TIc/EBbIDcUl14jnqyMFOcSICBNYaHUaOlk5AFQl41vYUuPr5sAT1SbVX3QQCxXEZ4fFfAkeOQykafG7WK45P1oTrMdxuBLnBzK/tISYFVsHkOrAUUYltBs9BrDxJmgEDi5HhnLQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.117.161) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
- dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=WrH7mXv8Qhft7UcA4wqYTG7iWuUTiv6yT0sZS4USblM=;
- b=rUG4r9PI7w9zk05dqBhNflg6lPuKGe5+t+5GRrTLDV0VAfSy2ADRk/s3SkGmuPuW15+Gy4QANxcXyWSl9SKIgQWm11swHYb/+yTWQD9GqXAKLRWJOu4PQQhHmK5VOwZnAmkpV9VAMVyOLlgs3c/2l2o4Ea6DxrCs65wRqEuw6wQc35FW/wpeV8LnCcb7cxCfw133UKpho0jjyocNrpm7o5N1aNmv1wAhQYonSSQRPlc/9oFka+tkG/wJcLk7K140OdudRtu5DM42PMptaX9+dkn15tTgRHpilexQoy0YSxEsOSwAc8sGm5qzqCWFGZ2CBf8P6zFgJk1cI9FGQDtn4g==
-Received: from DM6PR06CA0068.namprd06.prod.outlook.com (2603:10b6:5:54::45) by
- BN9PR12MB5367.namprd12.prod.outlook.com (2603:10b6:408:104::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.26; Tue, 27 Sep
- 2022 10:10:21 +0000
-Received: from DM6NAM11FT092.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:54:cafe::41) by DM6PR06CA0068.outlook.office365.com
- (2603:10b6:5:54::45) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.26 via Frontend
- Transport; Tue, 27 Sep 2022 10:10:21 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.161)
- smtp.mailfrom=nvidia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nvidia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.117.161 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.117.161; helo=mail.nvidia.com; pr=C
-Received: from mail.nvidia.com (216.228.117.161) by
- DM6NAM11FT092.mail.protection.outlook.com (10.13.173.44) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5654.14 via Frontend Transport; Tue, 27 Sep 2022 10:10:21 +0000
-Received: from rnnvmail202.nvidia.com (10.129.68.7) by mail.nvidia.com
- (10.129.200.67) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Tue, 27 Sep
- 2022 03:10:04 -0700
-Received: from rnnvmail201.nvidia.com (10.129.68.8) by rnnvmail202.nvidia.com
- (10.129.68.7) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.29; Tue, 27 Sep
- 2022 03:10:04 -0700
-Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
- (10.129.68.8) with Microsoft SMTP Server id 15.2.986.29 via Frontend
- Transport; Tue, 27 Sep 2022 03:10:00 -0700
-From:   Prathamesh Shete <pshete@nvidia.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
-        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
-        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
-CC:     <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
-        <kyarlagadda@nvidia.com>
-Subject: [PATCH v4 4/4] mmc: sdhci-tegra: Use actual clock rate for SW tuning correction
-Date:   Tue, 27 Sep 2022 15:39:46 +0530
-Message-ID: <20220927100946.19482-4-pshete@nvidia.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20220927100946.19482-1-pshete@nvidia.com>
+        with ESMTP id S230374AbiI0KXu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 06:23:50 -0400
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A41D2D33E8;
+        Tue, 27 Sep 2022 03:23:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1664274229; x=1695810229;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Ofx1Bmq4kGC4d7mEXYqs/xwy7YNmj9WK6n97eV1vIn4=;
+  b=HJwwmOWrBwCa7dOYwXMOyhudlZI5PSCcQAGjEAknvqiMGGKIdhYUUJpS
+   AUwZ1nzyrPUVbjs84MQfHNkVTjde+SROzgB6WFZ9Wyb/rFtGEnZzgsPsO
+   lPmPl9cVii13bnryda1rLNB+xwLIrfAkdpMhg1OdQwg7nQITXqo3a1vBd
+   SuIzAWSE8WUDy78tOIwG936qkRVEhMeiS2RkSu2TLFT2xnipd8RJNOrI7
+   2C0ERvA8GY3WH4QDyOayYFONGwq0VDSBxcHa1og1BKTZ3zP+g3FMsjf2z
+   +jhXf9UZ6QznEBZwXPyCemtG75oAQf6vPT3iXod1b1MdfkjWunwz65KZO
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10482"; a="280999870"
+X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
+   d="scan'208";a="280999870"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 03:23:48 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10482"; a="623709159"
+X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
+   d="scan'208";a="623709159"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.200])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 03:23:45 -0700
+Message-ID: <df68846a-2a09-ef98-6823-d536d99ccb61@intel.com>
+Date:   Tue, 27 Sep 2022 13:23:41 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Firefox/91.0 Thunderbird/91.11.0
+Subject: Re: [PATCH v4 3/4] mmc: sdhci-tegra: Issue CMD and DAT resets
+ together
+Content-Language: en-US
+To:     Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
+        thierry.reding@gmail.com, jonathanh@nvidia.com,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc:     anrao@nvidia.com, smangipudi@nvidia.com, kyarlagadda@nvidia.com
 References: <91f09a39-57fa-06a9-6e9e-b3e768d9e26a@intel.com>
  <20220927100946.19482-1-pshete@nvidia.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT092:EE_|BN9PR12MB5367:EE_
-X-MS-Office365-Filtering-Correlation-Id: b9b0e0b1-4081-4c16-2901-08daa0707c9a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: KKAcEm6CbfdoXb0mHf+mPyY/pEzxaBemcYspj1xBLnCOiffy7yRoTegF7sU3Qq0DDAJ2spuAAOgwTx/txrTfP70M0AiyRCNIZo2yKrUGua8MuP6hDey1NknhXnJWknDYGXeVSrL3+nL52+EGaL6Um5OWTtVyAeSoNZVOasFV0xMyM4MeMtiZdMY225WuF8sOoBJXzXaX41gdjRZG+CjjsKR017lIGrBcWwgMlHb83ZLzKmmxKF0bJkM99Y81NmaEElY/LCLnDMmzt7JMooMj2qqeoQC98cHnb/Kn4CWI6mDEEDzFKf34XoKbh9vzbUb+AOExqIQlBrZMOpDNdEdvjvfoXLv3nSeizjsJNbEnPRGiOLcwGAuh2a3ZvH1v4HPkvRJA7ij0n7gWY1xOzhu0todEGm2tYoaDeQlxbKVM789qpFnq5M/lvkzAk46UO50hQKKKXUcD8o76QXJs5K9MbQQouXQYHJrFOTse4UNKyBCKuQtPqcx9VQhWV6FiNhmoorX6ixeps9oM5/nR6qYXG96rQ+kK8jRvkKamoq2kdpDHRN55pxhWf79zn7hpS7A/sUN7DkV0MYFVFl/i8XTF7r8xzVrEVg0bRfGEh8td6cAggpPz+Eg0nELlpNNarOH0NTrvjisruKObGE0EaFQHd45ZW2PoeEomw76lzCcKeGfaowHPwXTxywuNX6b8KVrrQS88HgsTs/XQWXaeCbSa8UYxQRdHBcevYct6jg1e3oYw41zpcmbI1prwnvSyqHk95PicpxtgcmNxLIu4hUGUSA==
-X-Forefront-Antispam-Report: CIP:216.228.117.161;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(376002)(136003)(346002)(39860400002)(396003)(451199015)(46966006)(40470700004)(36840700001)(82740400003)(356005)(2906002)(54906003)(110136005)(316002)(426003)(40480700001)(5660300002)(7636003)(40460700003)(8676002)(8936002)(36756003)(86362001)(4326008)(41300700001)(70206006)(70586007)(26005)(186003)(47076005)(82310400005)(2616005)(1076003)(336012)(107886003)(6666004)(478600001)(7696005)(36860700001)(83380400001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Sep 2022 10:10:21.2199
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: b9b0e0b1-4081-4c16-2901-08daa0707c9a
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.161];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT092.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BN9PR12MB5367
+ <20220927100946.19482-3-pshete@nvidia.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20220927100946.19482-3-pshete@nvidia.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ensure tegra_host member "curr_clk_rate" holds the actual clock rate
-instead of requested clock rate for proper use during tuning correction
-algorithm. Actual clk rate may not be the same as the requested clk
-frequency depending on the parent clock source set. Tuning correction
-algorithm depends on certain parameters which are sensitive to current
-clk rate. If the host clk is selected instead of the actual clock rate,
-tuning correction algorithm may end up applying invalid correction,
-which could result in errors
+On 27/09/22 13:09, Prathamesh Shete wrote:
+> In case of error condition to avoid system crash
+> Tegra SDMMC controller requires CMD and DAT resets
+> issued together. SDHCI controller FSM goes into
+> bad state due to rapid SD card hot-plug event.
+> Issuing reset on the CMD FSM before DATA FSM results
+> in kernel panic, hence add support to issue CMD and
+> DAT resets together.
+> This is applicable to Tegra186 and later chips.
+> 
+> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 3 ++-
+>  drivers/mmc/host/sdhci.c       | 8 +++++++-
+>  drivers/mmc/host/sdhci.h       | 2 ++
+>  3 files changed, 11 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 46f37cc26dbb..61dc5ee0726d 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -1536,7 +1536,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+>  		  SDHCI_QUIRK_NO_HISPD_BIT |
+>  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
+>  	.ops  = &tegra186_sdhci_ops,
+>  };
+>  
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2b5dda521b0e..5123ec3fc74a 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -266,12 +266,14 @@ enum sdhci_reset_reason {
+>  	SDHCI_RESET_FOR_TUNING_ABORT,
+>  	SDHCI_RESET_FOR_CARD_REMOVED,
+>  	SDHCI_RESET_FOR_CQE_RECOVERY,
+> +	SDHCI_RESET_FOR_CMD_DAT_TOGETHER,
+>  };
+>  
+>  static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)
+>  {
+>  	switch (reason) {
+>  	case SDHCI_RESET_FOR_INIT:
+> +	case SDHCI_RESET_FOR_CMD_DAT_TOGETHER:
+>  		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+>  		break;
+>  	case SDHCI_RESET_FOR_REQUEST_ERROR:
+> @@ -3084,7 +3086,11 @@ static bool sdhci_request_done(struct sdhci_host *host)
+>  			/* This is to force an update */
+>  			host->ops->set_clock(host, host->clock);
+>  
+> -		sdhci_reset_for(host, REQUEST_ERROR);
+> +		if (host->quirks2 &
+> +			SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER)
+> +			sdhci_reset_for(host, CMD_DAT_TOGETHER);
+> +		else
+> +			sdhci_reset_for(host, REQUEST_ERROR);
 
-Fixes: ea8fc5953e8b ("mmc: tegra: update hw tuning process")
+This is what I am trying to avoid because it is inconsistent.
+Consider:
+ - why is the quirk needed for some REQUEST_ERRORs but not others?
+ - or why is the quirk not needed for all CMD / DAT resets?
 
-Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-tegra.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+So, I was expecting the quirk to be applied in sdhci_reset_for_reason()
+not here.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 61dc5ee0726d..8285b979391d 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -784,7 +784,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
- 		dev_err(dev, "failed to set clk rate to %luHz: %d\n",
- 			host_clk, err);
- 
--	tegra_host->curr_clk_rate = host_clk;
-+	tegra_host->curr_clk_rate = clk_get_rate(pltfm_host->clk);
- 	if (tegra_host->ddr_signaling)
- 		host->max_clk = host_clk;
- 	else
--- 
-2.17.1
+>  
+>  		host->pending_reset = false;
+>  	}
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d750c464bd1e..6a5766774b05 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -478,6 +478,8 @@ struct sdhci_host {
+>   * block count.
+>   */
+>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
+> +/* Issue CMD and DATA reset together */
+> +#define SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER	(1<<19)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
 
