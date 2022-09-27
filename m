@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 912F8C6FA83
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 12:45:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E067AC6FA8E
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 12:49:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230430AbiI0Mpz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 08:45:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54878 "EHLO
+        id S231709AbiI0MtP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Sep 2022 08:49:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58578 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230055AbiI0Mpy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 08:45:54 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 254B51406F7;
-        Tue, 27 Sep 2022 05:45:53 -0700 (PDT)
+        with ESMTP id S231126AbiI0MtO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 08:49:14 -0400
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8549F161CD0;
+        Tue, 27 Sep 2022 05:49:13 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1664282753; x=1695818753;
+  t=1664282953; x=1695818953;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=4sq1AHyWFyOqVpjRETvsq1ss7KGQ2KV4EhyDYN3JmJg=;
-  b=I7yjHeho+za68gzOwraRmsxbgUx2YpejdX8V+q8S2tYNMVCmqWhO+LMp
-   XRHbpru5G+uQV1WlnrhWjqABEqDNdh83KwfghtlBJrJCaL6rPTFG7vb54
-   TtTzsykrzPnA5FObh8SVPcryoOAtI0S8ytxVV9Y6o1+MUpSuh67k5pDve
-   oE2nsGat0d2HgDnVbqDq9XAFfKOnbsDcRpRRwvwJxdpHj+hBTOMYcn98r
-   bLN6xYAwfwszE1VdjbCiEieGXI7YkNPoslMGRAdgnAxx2Kqbw7PaO4w16
-   N343ydjGmDdwKHdfXTRieo/8feyegJ/BsrpTjpRK4JITqGw5b9U54zEAT
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="363143665"
+  bh=twC8J74oF5U4VjbrKchulu7kV1CD0jt7Ue2RhLxOFbM=;
+  b=Yp6MfISXoztMGe/zd6lxfp+QrzUH7hIpWsjUeu0VQV4Wf+zrNPy37I3d
+   y5ggwXh6QzSfBcWUSp/NxkKze/XF4SMhohDroO86M/z9+KnLNJG98L1L5
+   YHA3RfvcN76sQLhMmGT4lqDeqPTuwLVGEhXtfCQJKTorLFJHJcvnOJu8c
+   t6YHIFzWAivQxKq3vEHXmizdhmRL5ij5kmGD07ynZFI//Ldm9Z+LTxw2Z
+   uWgb7cSJ/X2WES8qOS01H5sWAsvW5FQ2NuJ1y8i1BOS04uZK8M+uehDpl
+   egqWFWbl3mQFePmo+eaadJvHidOKrHPgNuEuysxwHcVNnhXkGeFhVb+CB
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="300026346"
 X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
-   d="scan'208";a="363143665"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:45:52 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="763863509"
+   d="scan'208";a="300026346"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:49:13 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10483"; a="683976885"
 X-IronPort-AV: E=Sophos;i="5.93,349,1654585200"; 
-   d="scan'208";a="763863509"
+   d="scan'208";a="683976885"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.200])
-  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:45:49 -0700
-Message-ID: <a5c231e8-f28a-e692-5961-58e6838711ed@intel.com>
-Date:   Tue, 27 Sep 2022 15:45:44 +0300
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 27 Sep 2022 05:49:06 -0700
+Message-ID: <b0343411-4514-37a2-3417-ecdd383046ce@intel.com>
+Date:   Tue, 27 Sep 2022 15:49:01 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
  Firefox/91.0 Thunderbird/91.11.0
-Subject: Re: [PATCH v5 2/3] mmc: sdhci-tegra: Add support to program MC stream
- ID
+Subject: Re: [PATCH v5 3/3] mmc: sdhci-tegra: Issue CMD and DAT resets
+ together
 Content-Language: en-US
 To:     Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
         thierry.reding@gmail.com, jonathanh@nvidia.com,
@@ -52,11 +52,11 @@ To:     Prathamesh Shete <pshete@nvidia.com>, ulf.hansson@linaro.org,
 Cc:     anrao@nvidia.com, smangipudi@nvidia.com, kyarlagadda@nvidia.com
 References: <df68846a-2a09-ef98-6823-d536d99ccb61@intel.com>
  <20220927111314.32229-1-pshete@nvidia.com>
- <20220927111314.32229-2-pshete@nvidia.com>
+ <20220927111314.32229-3-pshete@nvidia.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20220927111314.32229-2-pshete@nvidia.com>
+In-Reply-To: <20220927111314.32229-3-pshete@nvidia.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -64,157 +64,67 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 27/09/22 14:13, Prathamesh Shete wrote:
-> SMMU clients are supposed to program stream ID from
-> their respective address spaces instead of MC override.
-> Define NVQUIRK_PROGRAM_STREAMID and use it to program
-> SMMU stream ID from the SDMMC client address space.
+> In case of error condition to avoid system crash
+> Tegra SDMMC controller requires CMD and DAT resets
+> issued together. SDHCI controller FSM goes into
+> bad state due to rapid SD card hot-plug event.
+> Issuing reset on the CMD FSM before DATA FSM results
+> in kernel panic, hence add support to issue CMD and
+> DAT resets together.
+> This is applicable to Tegra186 and later chips.
 > 
 > Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
 > Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 47 ++++++++++++++++++++++++++++++++++
->  1 file changed, 47 insertions(+)
+>  drivers/mmc/host/sdhci-tegra.c | 3 ++-
+>  drivers/mmc/host/sdhci.c       | 5 +++++
+>  drivers/mmc/host/sdhci.h       | 2 ++
+>  3 files changed, 9 insertions(+), 1 deletion(-)
 > 
 > diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index a6c5bbae77b4..46f37cc26dbb 100644
+> index 46f37cc26dbb..61dc5ee0726d 100644
 > --- a/drivers/mmc/host/sdhci-tegra.c
 > +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -25,6 +25,9 @@
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/gpio/consumer.h>
->  #include <linux/ktime.h>
-> +#ifdef CONFIG_IOMMU_API
-> +#include <linux/iommu.h>
-> +#endif
->  
->  #include <soc/tegra/common.h>
->  
-> @@ -94,6 +97,8 @@
->  #define SDHCI_TEGRA_AUTO_CAL_STATUS			0x1ec
->  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE			BIT(31)
->  
-> +#define SDHCI_TEGRA_CIF2AXI_CTRL_0			0x1fc
-> +
->  #define NVQUIRK_FORCE_SDHCI_SPEC_200			BIT(0)
->  #define NVQUIRK_ENABLE_BLOCK_GAP_DET			BIT(1)
->  #define NVQUIRK_ENABLE_SDHCI_SPEC_300			BIT(2)
-> @@ -121,6 +126,7 @@
->  #define NVQUIRK_HAS_TMCLK				BIT(10)
->  
->  #define NVQUIRK_HAS_ANDROID_GPT_SECTOR			BIT(11)
-> +#define NVQUIRK_PROGRAM_STREAMID			BIT(12)
->  
->  /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
->  #define SDHCI_TEGRA_CQE_BASE_ADDR			0xF000
-> @@ -128,6 +134,8 @@
->  #define SDHCI_TEGRA_CQE_TRNS_MODE	(SDHCI_TRNS_MULTI | \
->  					 SDHCI_TRNS_BLK_CNT_EN | \
->  					 SDHCI_TRNS_DMA)
-> +#define SDHCI_TEGRA_STREAMID_MASK			0xff
-> +#define SDHCI_TEGRA_WRITE_STREAMID_SHIFT		0x8
->  
->  struct sdhci_tegra_soc_data {
->  	const struct sdhci_pltfm_data *pdata;
-> @@ -177,6 +185,9 @@ struct sdhci_tegra {
->  	bool enable_hwcq;
->  	unsigned long curr_clk_rate;
->  	u8 tuned_tap_delay;
-> +#ifdef CONFIG_IOMMU_API
-> +	u32 streamid;
-> +#endif
+> @@ -1536,7 +1536,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
+>  		  SDHCI_QUIRK_NO_HISPD_BIT |
+>  		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
+>  		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
+> -	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
+>  	.ops  = &tegra186_sdhci_ops,
 >  };
 >  
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -1564,6 +1575,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
->  		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
->  		    NVQUIRK_ENABLE_SDR50 |
->  		    NVQUIRK_ENABLE_SDR104 |
-> +		    NVQUIRK_PROGRAM_STREAMID |
->  		    NVQUIRK_HAS_TMCLK,
->  	.min_tap_delay = 95,
->  	.max_tap_delay = 111,
-> @@ -1636,6 +1648,9 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	struct sdhci_host *host;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct sdhci_tegra *tegra_host;
-> +#ifdef CONFIG_IOMMU_API
-> +	struct iommu_fwspec *fwspec;
-> +#endif
-
-Move this below
-
->  	struct clk *clk;
->  	int rc;
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 2b5dda521b0e..8512a69f1aae 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -270,6 +270,11 @@ enum sdhci_reset_reason {
 >  
-> @@ -1775,6 +1790,25 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->  	if (rc)
->  		goto err_add_host;
->  
-> +	/* Program MC streamID for DMA transfers */
-> +#ifdef CONFIG_IOMMU_API
-> +	if (soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
-
-Can put it here
-
-		struct iommu_fwspec *fwspec;
-
-
-> +		fwspec = dev_iommu_fwspec_get(&pdev->dev);
-> +		if (fwspec == NULL) {
-> +			dev_warn(mmc_dev(host->mmc),
-> +				"iommu fwspec is NULL, continue without stream ID\n");
-> +		} else {
-> +			tegra_host->streamid = fwspec->ids[0] & 0xffff;
-> +			tegra_sdhci_writel(host, (tegra_host->streamid &
-> +						SDHCI_TEGRA_STREAMID_MASK) |
-> +						((tegra_host->streamid <<
-> +						SDHCI_TEGRA_WRITE_STREAMID_SHIFT)
-> +						& SDHCI_TEGRA_STREAMID_MASK),
-> +						SDHCI_TEGRA_CIF2AXI_CTRL_0);
-
-This is hard to read.  Maybe use GENMASK and FIELD_PREP, or if the bytes
-need swapping, one of the byte swapping macros.
-
-Also, isn't this always zero ?
-
-	((tegra_host->streamid << SDHCI_TEGRA_WRITE_STREAMID_SHIFT) & SDHCI_TEGRA_STREAMID_MASK),
-
-
-> +		}
-> +	}
-> +#endif
-> +
->  	return 0;
->  
->  err_add_host:
-> @@ -1861,6 +1895,10 @@ static int sdhci_tegra_suspend(struct device *dev)
->  static int sdhci_tegra_resume(struct device *dev)
+>  static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)
 >  {
->  	struct sdhci_host *host = dev_get_drvdata(dev);
-> +#ifdef CONFIG_IOMMU_API
-> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> +#endif
->  	int ret;
->  
->  	ret = mmc_gpio_set_cd_wake(host->mmc, false);
-> @@ -1871,6 +1909,15 @@ static int sdhci_tegra_resume(struct device *dev)
->  	if (ret)
->  		return ret;
->  
-> +	/* Re-program MC streamID for DMA transfers */
-> +#ifdef CONFIG_IOMMU_API
-> +	if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
-> +		tegra_sdhci_writel(host, tegra_host->streamid |
-> +					(tegra_host->streamid << 8),
-
-This looks like it ought to be the same calculation as above ?
-
-> +					SDHCI_TEGRA_CIF2AXI_CTRL_0);
+> +	if (host->quirks2 &
+> +		SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER) {
+> +		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> +		return;
 > +	}
-> +#endif
-> +
->  	ret = sdhci_resume_host(host);
->  	if (ret)
->  		goto disable_clk;
+>  	switch (reason) {
+>  	case SDHCI_RESET_FOR_INIT:
+>  		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index d750c464bd1e..6a5766774b05 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -478,6 +478,8 @@ struct sdhci_host {
+>   * block count.
+>   */
+>  #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
+> +/* Issue CMD and DATA reset together */
+> +#define SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER	(1<<19)
+>  
+>  	int irq;		/* Device IRQ */
+>  	void __iomem *ioaddr;	/* Mapped address */
 
