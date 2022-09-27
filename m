@@ -2,92 +2,128 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6ABDC07E9D
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Sep 2022 20:47:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF305C32771
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 02:04:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229933AbiIZUrO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Sep 2022 16:47:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55450 "EHLO
+        id S229529AbiI0CEm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Sep 2022 22:04:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229458AbiIZUrN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Sep 2022 16:47:13 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD930A6C6A;
-        Mon, 26 Sep 2022 13:47:12 -0700 (PDT)
-Received: from tr.lan (ip-86-49-12-201.bb.vodafone.cz [86.49.12.201])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 53BDD84DD8;
-        Mon, 26 Sep 2022 22:47:11 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1664225231;
-        bh=Gh2QjyUkmiO32DGRxcQU3CNv4FWYd0POTeXHUuz2q9g=;
-        h=From:To:Cc:Subject:Date:From;
-        b=t5KJDNYcctXGFOFHbpTuM+U+VjLWiHWXWoyN7rSklPOp/oZhg9XNl4WW86i7vBxOo
-         +PYNC7NxHUDictsAAFIaqmIXRf/OLl9SkorzokomPaHbThlUZ3J0QZAY00A6IORpge
-         FxqEPSRWIXaat87zD2ri3KDzuIGXKb1jxwl8kqno52zGN+IM2yxbBT5i89uudGJGA1
-         q3vdzrZwHdiTnAq6Pps4yi6zWpg2TuIkNukUym6+l2K4o0hTN8AB/oexO5TQi/9i/U
-         a1ffqmrzmIFRmfa4RpT0w0ryZ12ral5ZR/+7JW8eYm1vDK1eBWgSACNw5kLiEK6KZF
-         us2/mFAU3C+AQ==
-From:   Marek Vasut <marex@denx.de>
-To:     linux-arm-kernel@lists.infradead.org
-Cc:     Marek Vasut <marex@denx.de>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com
-Subject: [PATCH] dt-bindings: mmc: arm,pl18x: Document interrupt-names property
-Date:   Mon, 26 Sep 2022 22:47:08 +0200
-Message-Id: <20220926204708.381741-1-marex@denx.de>
-X-Mailer: git-send-email 2.35.1
+        with ESMTP id S230009AbiI0CEj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Sep 2022 22:04:39 -0400
+Received: from APC01-TYZ-obe.outbound.protection.outlook.com (mail-tyzapc01on2119.outbound.protection.outlook.com [40.107.117.119])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EABB3192A4;
+        Mon, 26 Sep 2022 19:04:36 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=D9pNLvK9xd4bc50P2ru1dBTI/qtaJdye5DCZhVjth/RRd+Lquo19FHIvHI72xHKRL7H8JsU0+ejhI6jCN0eVnQH4Ig3Nz8IjSlmCixsJpTyN/4Cb4pQCCZYDbhJYBhmyFDyIdth/ODEYiwQW8GAthfRpLN0+BpgoS78RAL+Lx2l12kHl0guX6OSsidzJLQ0UYwy3NL16Fmsv+3Nyo0efP7JxFzLz9Z2xC+p/e2yr/9kFzfFeaj6yr8Of+rdix3xI9MCzT2EIu5R2xt2eyX9kdW2L5uqmNtbAm9mYN4IduOwD0worubsXYJ3cxNKVHFRE7SX7s9rPPVhMHorZDOodKA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=NgdjSBSr5KgI8JrdSOWfgzPiEFHXHP52KocBJ8BR3FY=;
+ b=dXKEjB2Px/ykgXZehh0V+xctOei0wo6m8lCeQ/x8Gfk0yYgJLyKJ50yVOeGkiheS6ka+/BdETYt/IROL8LEsR9Et+kkJVmfV0qoGt14Nr75NAfZk6PwDVh0iyfqu2Lpe17slnl40y+iYw81v3uSfGBYGhFVWkHeKif2KCx6k9bwQpA5xZdzg1OCuyzL1BBoe04Ff/wPKTdtv2vOWEzLkwqZ9SUrLXhOM3f/nvivFdICmAw9LnomtR+0op7L3DMeefo2MkiPqRBwWr0uW4Vm7aaeBxUPeQ86GISQ5P56ueVo080p1I5rk5ErZrml10GxsLPIUj5XzQm6Q98vF+wdYPg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 103.192.253.182) smtp.rcpttodomain=linaro.org smtp.mailfrom=zeku.com;
+ dmarc=pass (p=none sp=none pct=100) action=none header.from=zeku.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zeku.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=NgdjSBSr5KgI8JrdSOWfgzPiEFHXHP52KocBJ8BR3FY=;
+ b=BBxPn1RcIAGfG304yRKhnup1yxTLyl00v9pk9eTwYXw2hlb8oELNFec4nm+BwZKnb4vQawgxWjWMH/PUC85T++PgztZLZE6/vGLp2Fo7pCODYOhdrhoCSDEoXepNy7zwjgNlWXT2aLFgv8aTdeYeDGHqy5bVyTsVtwH/6QkIPwHpjtfpLdx4U6WZlr89wP3kz4gmt5O1qbdwN0kfRSYG3Ila8wExXaohzKyn+78kAcqY4z7NnRlY+PNzWyVbXup2IKgGfbgY2r3dzj7m3AOgNGWNWAQ/YDpQzSDeOLDXuACD3fht6CTj1eThPLjqD96BQ5WvJnPBWqYfgoXlQX6YFQ==
+Received: from PS2PR02CA0070.apcprd02.prod.outlook.com (2603:1096:300:5a::34)
+ by TY0PR02MB5576.apcprd02.prod.outlook.com (2603:1096:400:1b8::12) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.24; Tue, 27 Sep
+ 2022 02:04:34 +0000
+Received: from PSAAPC01FT042.eop-APC01.prod.protection.outlook.com
+ (2603:1096:300:5a:cafe::83) by PS2PR02CA0070.outlook.office365.com
+ (2603:1096:300:5a::34) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5654.25 via Frontend
+ Transport; Tue, 27 Sep 2022 02:04:34 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 103.192.253.182)
+ smtp.mailfrom=zeku.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=zeku.com;
+Received-SPF: Pass (protection.outlook.com: domain of zeku.com designates
+ 103.192.253.182 as permitted sender) receiver=protection.outlook.com;
+ client-ip=103.192.253.182; helo=sh-exhtc2.internal.zeku.com; pr=C
+Received: from sh-exhtc2.internal.zeku.com (103.192.253.182) by
+ PSAAPC01FT042.mail.protection.outlook.com (10.13.38.161) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.5654.14 via Frontend Transport; Tue, 27 Sep 2022 02:04:33 +0000
+Received: from sh-exhtc1.internal.zeku.com (10.123.21.105) by
+ sh-exhtc2.internal.zeku.com (10.123.21.106) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.12; Tue, 27 Sep 2022 10:04:32 +0800
+Received: from localhost.localdomain (10.123.154.19) by
+ sh-exhtc1.internal.zeku.com (10.123.21.105) with Microsoft SMTP Server id
+ 15.1.2375.12 via Frontend Transport; Tue, 27 Sep 2022 10:04:32 +0800
+From:   Weizhao Ouyang <ouyangweizhao@zeku.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        John Wang <wangdayu@zeku.com>,
+        Sergey Shtylyov <s.shtylyov@omp.ru>,
+        Matthew Ma <mahongwei@zeku.com>,
+        "Weizhao Ouyang" <ouyangweizhao@zeku.com>,
+        Pierre Ossman <drzeus@drzeus.cx>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: sdio: fix kernel panic when remove non-standard SDIO card
+Date:   Tue, 27 Sep 2022 10:01:58 +0800
+Message-ID: <20220927020158.1218469-1-ouyangweizhao@zeku.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PSAAPC01FT042:EE_|TY0PR02MB5576:EE_
+X-MS-Office365-Filtering-Correlation-Id: 1e47c2eb-8079-4c03-0d0d-08daa02c9f3f
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: 27/ma2m3JcJ0kXyXUZR2J+6oQKzZWz90HCYhPDFilVQiQI7Li4cbIchmItD6Di8rzhg2XchmEW6V1JMCuS+Seuew5W5sb1Rk3DVQGmCVnmDSxfcIzQpzUDjYQyjt6ErHXbYcFW5Zxx66Vp/wOb6+A0/+KJyzXY/SkhMdvl2gCzajqeNtKYQN0EX8DU+zJ4hKXZWAghm9g0Sj9RE4eZWGnjoKADfE0hwbXStNaZ4W+4AQgmrcczSSMsQ7F4DbgT4DgX3cO3gZirKgTeQp25iFfpEtI5GzYQsyotoOvzmdAWX7V7irPP6gJOFcrrS91VHbdeWrDI/Zvszl4ufPFopgMBQhayF8CMeX8liFhmMbOCGTZVannj2X3c6FFlEBprfVIH49lMoh6Ly6NKj5xOas0opuWzO1iKSrZqansb26p0bS38kb7vpL2ge8uvBPwHp6fWJFJU2i5b9z+rO4GKNF4TUuQf0IOPlSEYwbnbuB6sT9STD1FgdyOHfNpk5BgjsHONaChSv2tICM/qv7vBoLtSzA1UC+tMvVGiLIUOX+ZKTU4/+xkrmrLInzR7Ea7OT5dy5ESOw2P5SRlfc6Sd3bh7Uo0WU4nvNP41qnQhSooZrg9i9zddPUqhNXD+CqEYRAZ1Kgj58TzZInqnARMZa6veb/T2Fi8Lx9Ep1EENR4YtW2Ws60Kp97ND6HOgjEWYThoulZchBc0M7PN1wnsdGH8DiL+hRmhYgKoQAg+CXh01TsdakHOHE3/aRwjtfoQIhHukNuZ4w0hH75r9yOYYhwmg==
+X-Forefront-Antispam-Report: CIP:103.192.253.182;CTRY:CN;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:sh-exhtc2.internal.zeku.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(346002)(376002)(136003)(396003)(39850400004)(451199015)(36840700001)(46966006)(186003)(110136005)(70206006)(70586007)(81166007)(40480700001)(36756003)(356005)(8676002)(478600001)(4326008)(82310400005)(36860700001)(336012)(426003)(83380400001)(316002)(36906005)(8936002)(47076005)(1076003)(54906003)(26005)(86362001)(82740400003)(41300700001)(2616005)(2906002)(6666004)(5660300002)(36900700001);DIR:OUT;SFP:1102;
+X-OriginatorOrg: zeku.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Sep 2022 02:04:33.5811
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 1e47c2eb-8079-4c03-0d0d-08daa02c9f3f
+X-MS-Exchange-CrossTenant-Id: 171aedba-f024-43df-bc82-290d40e185ac
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=171aedba-f024-43df-bc82-290d40e185ac;Ip=[103.192.253.182];Helo=[sh-exhtc2.internal.zeku.com]
+X-MS-Exchange-CrossTenant-AuthSource: PSAAPC01FT042.eop-APC01.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TY0PR02MB5576
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document interrupt-names property with "event" and "error" interrupt names.
-This fixes dtbs_check warnings when building current Linux DTs:
+From: Matthew Ma <mahongwei@zeku.com>
 
-"
-arch/arm/boot/dts/stm32mp153c-dhcom-drc02.dtb: mmc@58007000: Unevaluated properties are not allowed ('interrupt-names' was unexpected)
-"
+SDIO tuple is only allocated for standard SDIO card, especially it
+causes memory corruption issues when the non-standard SDIO card has
+removed since the card device's reference counter does not increase for
+it at sdio_init_func(), but all SDIO card device reference counter has
+decreased at sdio_release_func().
 
-Signed-off-by: Marek Vasut <marex@denx.de>
+Fixes: 1a632f8cdc33 ("sdio: split up common and function CIS parsing")
+Signed-off-by: Matthew Ma <mahongwei@zeku.com>
+Reviewed-by: Weizhao Ouyang <ouyangweizhao@zeku.com>
+Reviewed-by: John Wang <wangdayu@zeku.com>
 ---
-Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
-Cc: Linus Walleij <linus.walleij@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Yann Gautier <yann.gautier@foss.st.com>
-Cc: devicetree@vger.kernel.org
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-stm32@st-md-mailman.stormreply.com
-To: linux-arm-kernel@lists.infradead.org
----
- Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/core/sdio_bus.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-index 1e69a5a42439b..5f7eae8d57ab9 100644
---- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
-@@ -99,6 +99,9 @@ properties:
-     minItems: 1
-     maxItems: 2
+diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+index c6268c38c69e..babf21a0adeb 100644
+--- a/drivers/mmc/core/sdio_bus.c
++++ b/drivers/mmc/core/sdio_bus.c
+@@ -291,7 +291,8 @@ static void sdio_release_func(struct device *dev)
+ {
+	struct sdio_func *func = dev_to_sdio_func(dev);
  
-+  interrupt-names:
-+    const: cmd_irq
-+
-   st,sig-dir-dat0:
-     $ref: /schemas/types.yaml#/definitions/flag
-     description: ST Micro-specific property, bus signal direction pins used for
+-	sdio_free_func_cis(func);
++	if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
++		sdio_free_func_cis(func);
+ 
+	kfree(func->info);
+	kfree(func->tmpbuf);
 -- 
-2.35.1
+2.25.1
 
