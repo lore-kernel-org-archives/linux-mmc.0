@@ -2,85 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9851C54EE9
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 08:43:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F137C54EE9
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Sep 2022 08:45:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231551AbiI0Inj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 04:43:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39230 "EHLO
+        id S229603AbiI0Ipy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Sep 2022 04:45:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230445AbiI0Ina (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 04:43:30 -0400
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C5A0753AC;
-        Tue, 27 Sep 2022 01:43:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1664268209; x=1695804209;
-  h=from:to:cc:subject:date:message-id;
-  bh=mqeu4ctTSeKJelOAi5YhFsLv9gvO0DIIHlFPu3E7yxI=;
-  b=aZEkeCpaOGSMDb3hFfx56hm1EU+pCP+xHOMD7foUFRu9KoN3ZNBp1NPA
-   Gl8YwVISyBbPcC1knFEDMR9OuBvNTbCNUczSEbJTTQNAtp8mpI121ke+m
-   fmOeSeKjL9c/ImC9+cdVa9wx1K3873N7/nqGhpwpvkP/hrGN7TqxiVVle
-   xcieEV2M0896yGW4xKyMKsiSQ54CLwHbSDj62di1vTv404Jrv2ltUonXA
-   aGQsO4lD1Uwxpg9gXvQ13XIbujPhazqERn2a2L9dVMIoxeUVGG6OaSn0A
-   pvKwgBCRnY16uogNHZ75Pnn0X6iQDG2uKcW7Lq3oVhk68iA3B/DNWAzLC
-   w==;
-X-IronPort-AV: E=Sophos;i="5.93,348,1654531200"; 
-   d="scan'208";a="210729605"
-Received: from uls-op-cesaip01.wdc.com (HELO uls-op-cesaep01.wdc.com) ([199.255.45.14])
-  by ob1.hgst.iphmx.com with ESMTP; 27 Sep 2022 16:43:28 +0800
-IronPort-SDR: U9jzNy2Awnu3HW1UsJbMbMW8jjpwIKjPGXQ9v6UTKnuGy2PfcIQWM0KIjHnaML91HugetxFPoD
- iK5RQKm234dQ+Vfigr4dtBJIb5WtpBNo9nu6cY+EdNHFPn/pkXvY+1JvBsVDocH+HMbAdaN14G
- 20Tx/UZckrJnXO2/kcrP/5sCZjvQsrA+ZZJGtK0cGTpfbdmy+pxJUNDuYD+txlZrjwssc5ir1t
- M6MXjr4c5DYJCHjSgGkegHRDMZHtARY7xhJB1QAjej1H8dvXI3g6tddfOTtmvpkNoSO2iojYqm
- bsIKSKedpsSSWgo5mnbLxxTE
-Received: from uls-op-cesaip02.wdc.com ([10.248.3.37])
-  by uls-op-cesaep01.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 27 Sep 2022 01:03:25 -0700
-IronPort-SDR: 0vd5/xxHBlzNYt5Zapx1gzVhtYB7gn97fV6XvbnQEfjP58/T2W9SPGw3eRw90k+zcsUnBit80G
- Hi9dYwTuoRuZelhwDov2d5P4FcoSgiUkjIwQO96IBDzmrkn5WstL3il0a1RQSFmwUaxNlQzTEM
- zl9UXyezcOlS0i4HubN3YFAzp6uDOTA+SWut5s4eL9Nic6W3mH+0rctW3crwQ2TyRcQTAEKKET
- qg3DqKUzvILLc30RCqQbPDH/hVr+C0MMwkW0TkoluCbr7lnOQcY+d+mFvv34vgeQmWEA1z9Krv
- yno=
-WDCIronportException: Internal
-Received: from 5cg1421gqg.ad.shared (HELO BXYGM33.ad.shared) ([10.225.33.87])
-  by uls-op-cesaip02.wdc.com with ESMTP; 27 Sep 2022 01:43:25 -0700
-From:   Avri Altman <avri.altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
-Cc:     Mark Kanczak <Markk@us.atpinc.com>, linux-kernel@vger.kernel.org,
-        Avri Altman <avri.altman@wdc.com>
-Subject: [PATCH] mmc-utils: Fix a typo for ATP mid
-Date:   Tue, 27 Sep 2022 11:43:17 +0300
-Message-Id: <20220927084317.138-1-avri.altman@wdc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S231406AbiI0Ipx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 04:45:53 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFB6443E47;
+        Tue, 27 Sep 2022 01:45:51 -0700 (PDT)
+Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 28R61EEc011790;
+        Tue, 27 Sep 2022 10:45:35 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=Dyznb/HDuNwOefV0uJggIqu+fF7WsNix9IVaqdVthls=;
+ b=KibQCYQoc6G6DQbxAArpZi7N+/JZRmPGy347Orel25+TXOjFsLlL6i0xrdudJpQ3gfdC
+ 1yIldoSVwlukkVRyuR+DypIqMzQ1g8kYOZeTrsvlck5NoD5D14nFoyVBcu2JhkPHWs4q
+ Yet/A0kWiRmndB8Jar9Kt0lGq76OrveL/K5lnPpr47eIJmu0nPrqcRCWF2gYUUOCNHjY
+ qQSkTKMGV11W2Qh+amAGUo8qX1hvvadHMKpunoG8YR9oF9GgEqJSrurRaswI+3BnhimF
+ Fc6vdOKrpI8eGMpLp8Vw8H5kCb05l3QljhMPYILlBE5x+pE3VFeq/1fXnNgaQ7ciwpZQ 7Q== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3jss82827j-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 27 Sep 2022 10:45:35 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 55F3F100034;
+        Tue, 27 Sep 2022 10:45:35 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 504A7216EF0;
+        Tue, 27 Sep 2022 10:45:35 +0200 (CEST)
+Received: from [10.201.20.201] (10.75.127.123) by SHFDAG1NODE2.st.com
+ (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2375.31; Tue, 27 Sep
+ 2022 10:45:32 +0200
+Message-ID: <3f21cc73-c190-7855-b1c6-722098b5fa22@foss.st.com>
+Date:   Tue, 27 Sep 2022 10:45:31 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.11.0
+Subject: Re: [PATCH] dt-bindings: mmc: arm,pl18x: Document interrupt-names
+ property
+Content-Language: en-US
+To:     Marek Vasut <marex@denx.de>, <linux-arm-kernel@lists.infradead.org>
+CC:     Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20220926204708.381741-1-marex@denx.de>
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <20220926204708.381741-1-marex@denx.de>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.75.127.123]
+X-ClientProxiedBy: GPXDAG2NODE4.st.com (10.75.127.68) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.528,FMLib:17.11.122.1
+ definitions=2022-09-27_02,2022-09-22_02,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Manufacturer id 0x44 is assign to ATP by 3c-LLC, and not to SanDisk.
-mmc-utils inherited this typo when lsmmc got merged into it.
+On 9/26/22 22:47, Marek Vasut wrote:
 
-fixes: 4af1749d2350 (mmc-utils: Merge the lsmmc tool into mmc-utils)
+Hi Marek,
 
-Reported-by: Mark Kanczak <Markk@us.atpinc.com>
-Signed-off-by: Avri Altman <avri.altman@wdc.com>
----
- lsmmc.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Document interrupt-names property with "event" and "error" interrupt names.
+Minor: this looks like a wrong copy/paste, the interrupt name is cmd_irq 
+here.
 
-diff --git a/lsmmc.c b/lsmmc.c
-index 05d59e8..55da3aa 100644
---- a/lsmmc.c
-+++ b/lsmmc.c
-@@ -237,7 +237,7 @@ struct ids_database database[] = {
- 	{
- 		.type = "mmc",
- 		.id = 0x44,
--		.manufacturer = "SanDisk",
-+		.manufacturer = "ATP",
- 	},
- 	{
- 		.type = "mmc",
--- 
-2.17.1
+Other than that, you can add my:
+Reviewed-by: Yann Gautier <yann.gautier@foss.st.com>
+
+
+Best regards,
+Yann
+
+> This fixes dtbs_check warnings when building current Linux DTs:
+> 
+> "
+> arch/arm/boot/dts/stm32mp153c-dhcom-drc02.dtb: mmc@58007000: Unevaluated properties are not allowed ('interrupt-names' was unexpected)
+> "
+> 
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> ---
+> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Yann Gautier <yann.gautier@foss.st.com>
+> Cc: devicetree@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> To: linux-arm-kernel@lists.infradead.org
+> ---
+>   Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 3 +++
+>   1 file changed, 3 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> index 1e69a5a42439b..5f7eae8d57ab9 100644
+> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
+> @@ -99,6 +99,9 @@ properties:
+>       minItems: 1
+>       maxItems: 2
+>   
+> +  interrupt-names:
+> +    const: cmd_irq
+> +
+>     st,sig-dir-dat0:
+>       $ref: /schemas/types.yaml#/definitions/flag
+>       description: ST Micro-specific property, bus signal direction pins used for
 
