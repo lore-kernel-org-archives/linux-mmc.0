@@ -2,130 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B661C6FA92
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 16:54:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FAB5C32771
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 17:17:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234053AbiI1Qyf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Sep 2022 12:54:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46916 "EHLO
+        id S234308AbiI1RQ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Sep 2022 13:16:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34592 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233790AbiI1Qyc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 12:54:32 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39C2EB4A3;
-        Wed, 28 Sep 2022 09:54:31 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 031BEB82175;
-        Wed, 28 Sep 2022 16:54:30 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F034FC433C1;
-        Wed, 28 Sep 2022 16:54:27 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664384068;
-        bh=qNsNf0Y2IMdPzUUe1aoueCoe35u/MaerMo6JhdAxXAM=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=jQ4SzL1vxYt+e6BS4E+9GtIMqVSfoW9eKXqvSTjJ+PJfD1i+FFVxIh5Cw87tLIJZ0
-         QylpSyLwvLNVkO4BqZ2h8XvKAZ92UaTpxgCwQWK/oIxRx0j5F0dTQs/MMM0Mx2Z63Z
-         gtlj6atMXTKdkZV7/9BkSfTNcqsd9yKteZVH+YI220PA8ZzRCwUlp9ZpkouiIYFcTK
-         L8ri+a5wNzUcWaXrkCX6JmecZH3o9sWrXHlCA1ogWB4mwA+WSseC47LvPLkhjx37dl
-         N9oiTQ50vHxESW2FgSnTArsoVQxKAF7N23KFKBivH95oU/yJahW3c00sxRJ2/cH7sG
-         Rq0ZcnuJyRqXA==
-From:   Dinh Nguyen <dinguyen@kernel.org>
-To:     jh80.chung@samsung.com
-Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
+        with ESMTP id S234491AbiI1RQg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 13:16:36 -0400
+Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17F9AEEB60
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 10:15:56 -0700 (PDT)
+Received: by mail-lf1-x12c.google.com with SMTP id u18so21331827lfo.8
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 10:15:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date;
+        bh=yvPLxoKxASU1oV0ydqT/WaUJJZ+f2nyTFfImwwyybhM=;
+        b=gZyEjk+n32pMC2gI++dHQxgG17ROlFc/Rvb3c+K/AU/nl1uoFy1H+qW8pkv5UpGjat
+         yRPMAize2tCACO120SCUKuMSbs91+q47z684UJUN+g7du2TnFk9W/GJrlxKFg5i7gavZ
+         qiIrM2WqXYGW4dJhFlcDFKrOzX1DyoV3Auae5yQUg+F/gYwv5bgnxnjCn5WEk4O595Wo
+         ft6MEtg6k0x2ScwiLtw269gdKeVxZkYWxChZnCKuP7JVU+lNz7gZD5zFdPP6oXMSguDb
+         uNsqKomugM/GpErZEuvJnUIKZWjI7md5ngpT9GaGkzSlZ/t1qSRNoOtOxejjFG3uo1Sj
+         Zv8Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=yvPLxoKxASU1oV0ydqT/WaUJJZ+f2nyTFfImwwyybhM=;
+        b=7QYhZ3e0zJS6b9k+mJFaHVVvunqlGJnX7vQsrpTdt1tzhtRDkh50NQQp3bFHayaAGz
+         iWMuRBJoYZI97ap0/9eDjbhTkli9EtR6yXjJ5rdL4IAveZ9O8tYZtIJ73bf6hZ/YfVLO
+         GSEzCI39aVhVZ3YNq78TLegiobhDt8/fNJt1nTx6S+4mtsY+fyh2Ecw6dMPF+z3dEE+c
+         8XXB9Vn51EAIFsqW9Tm/vET/1dJIfKZDTc6tjeRBLBWw/U68oRxuR8mmqwwelusZfYB5
+         ZjZYSeVlqIJaoE188cRfayx5hUqJOxeacz65MrAOkjL0F/ccgIzqaGjvGZw0V3tkftau
+         9FGA==
+X-Gm-Message-State: ACrzQf1N9K0CimNe3nf5uOPKkPR2W6c60INxUUdrNU/KJWjotNNmWA46
+        Zoxe42I2cckQSkbEE9m7BYxgtA==
+X-Google-Smtp-Source: AMsMyM6CMlioEhHvKg/S6bggNWBpvr4jWCPRIj3BoalVJONNliyV8cxuDdIf4DcvQdjpOTg7fZti5g==
+X-Received: by 2002:a05:6512:401f:b0:49e:ea65:cd49 with SMTP id br31-20020a056512401f00b0049eea65cd49mr13368705lfb.419.1664385353790;
+        Wed, 28 Sep 2022 10:15:53 -0700 (PDT)
+Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.gmail.com with ESMTPSA id q6-20020a2eb4a6000000b00264b292232asm476672ljm.63.2022.09.28.10.15.52
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 28 Sep 2022 10:15:52 -0700 (PDT)
+Message-ID: <ef396764-af53-8e5a-5203-f3e103bbb7a3@linaro.org>
+Date:   Wed, 28 Sep 2022 19:15:51 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.0
+Subject: Re: [PATCHv4 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
+ "altr,sysmgr-syscon"
+Content-Language: en-US
+To:     Dinh Nguyen <dinguyen@kernel.org>, jh80.chung@samsung.com
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
         krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Subject: [PATCHv4 2/3] arm64: dts: socfpga: Add clk-phase-sd-hs property to the sdmmc node
-Date:   Wed, 28 Sep 2022 11:54:19 -0500
-Message-Id: <20220928165420.1212284-2-dinguyen@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20220928165420.1212284-1-dinguyen@kernel.org>
 References: <20220928165420.1212284-1-dinguyen@kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20220928165420.1212284-1-dinguyen@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The sdmmc controller's CIU(Card Interface Unit) clock's phase can be
-adjusted through the register in the system manager. Add the binding
-"altr,sysmgr-syscon" to the SDMMC node for the driver to access the
-system manager. Add the "clk-phase-sd-hs" property in the SDMMC node to
-designate the smpsel and drvsel properties for the CIU clock.
+On 28/09/2022 18:54, Dinh Nguyen wrote:
+> Document the optional "altr,sysmgr-syscon" binding that is used to
+> access the System Manager register that controls the SDMMC clock
+> phase.
+> 
+> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> ---
 
-Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
----
-v4: no change
-v3: removed unnecessary property in "altr,sysmgr-syscon"
----
- arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi      | 1 +
- arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts | 1 +
- arch/arm64/boot/dts/intel/socfpga_agilex.dtsi          | 1 +
- arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dts     | 1 +
- arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts        | 1 +
- 5 files changed, 5 insertions(+)
+Thank you for your patch. There is something to discuss/improve.
 
-diff --git a/arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi b/arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi
-index 14c220d87807..ff2906672deb 100644
---- a/arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi
-+++ b/arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi
-@@ -309,6 +309,7 @@ mmc: mmc@ff808000 {
- 				 <&clkmgr STRATIX10_SDMMC_CLK>;
- 			clock-names = "biu", "ciu";
- 			iommus = <&smmu 5>;
-+			altr,sysmgr-syscon = <&sysmgr 0x28>;
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts b/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-index 48424e459f12..19e7284b4cd5 100644
---- a/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-+++ b/arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts
-@@ -105,6 +105,7 @@ &mmc {
- 	cap-mmc-highspeed;
- 	broken-cd;
- 	bus-width = <4>;
-+	clk-phase-sd-hs = <0>, <135>;
- };
- 
- &osc1 {
-diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex.dtsi b/arch/arm64/boot/dts/intel/socfpga_agilex.dtsi
-index 7bbec8aafa62..3f694d6fc338 100644
---- a/arch/arm64/boot/dts/intel/socfpga_agilex.dtsi
-+++ b/arch/arm64/boot/dts/intel/socfpga_agilex.dtsi
-@@ -313,6 +313,7 @@ mmc: mmc@ff808000 {
- 				 <&clkmgr AGILEX_SDMMC_CLK>;
- 			clock-names = "biu", "ciu";
- 			iommus = <&smmu 5>;
-+			altr,sysmgr-syscon = <&sysmgr 0x28>;
- 			status = "disabled";
- 		};
- 
-diff --git a/arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dts
-index 26cd3c121757..07c3f8876613 100644
---- a/arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dts
-+++ b/arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dts
-@@ -83,6 +83,7 @@ &mmc {
- 	cap-sd-highspeed;
- 	broken-cd;
- 	bus-width = <4>;
-+	clk-phase-sd-hs = <0>, <135>;
- };
- 
- &osc1 {
-diff --git a/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts b/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-index 62c66e52b656..08c088571270 100644
---- a/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-+++ b/arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dts
-@@ -74,6 +74,7 @@ &mmc {
- 	cap-sd-highspeed;
- 	broken-cd;
- 	bus-width = <4>;
-+	clk-phase-sd-hs = <0>, <135>;
- };
- 
- &osc1 {
--- 
-2.25.1
+> +
+> +allOf:
+> +  - $ref: "synopsys-dw-mshc-common.yaml#"
+> +
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const:
+> +              - altr,socfpga-dw-mshc
+
+It still should not be an array, even if there is no warning.
+
+> +    then:
+> +      required:
+> +        - altr,sysmgr-syscon
+> +    else:
+> +      properties:
+> +        altr,sysmgr-syscon: false
+
+Best regards,
+Krzysztof
 
