@@ -2,124 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8D1CC32771
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 08:46:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73B02C32771
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 09:58:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233630AbiI1Ip7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Sep 2022 04:45:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46366 "EHLO
+        id S229678AbiI1J6I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Sep 2022 05:58:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233632AbiI1Ipg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 04:45:36 -0400
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9900CF483
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 01:41:56 -0700 (PDT)
-Received: by mail-lj1-x231.google.com with SMTP id l12so13545600ljg.9
-        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 01:41:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date;
-        bh=jk2vF+C/PYJ42SVsy2QF4XFOq1DXTDUxrUF6AO/yW7U=;
-        b=lIKu1EN4OWGnM29CBNLA/1X5h0xICvCoscT2+T3tqTuVA0oosZaKkDXXbXgK2G+hTT
-         Lplar5z1FJKfA8KKnOED+Jr5NR3U35+8AZgUcrDnvzcQdZxVP1cG6EV05mQTQCbFhbWy
-         kWrNLrpwnPASththyluide+4rr4kvwf/Iaez+0gy+NefskY7qLK6PhQ8WLJ/vAQVMc77
-         wwug436n03vnt5g34HBt5lm/p4uEH7fcTEGqwN1L2/SRSz5VDsWVc5Lcyc8B69egFzLX
-         r5HxTrvzxOjAE/FnVpG/O2fncLKWzq68RdoQo0WjXHySq322PlI1RFFFNdGGILuCRkJ6
-         TIPA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date;
-        bh=jk2vF+C/PYJ42SVsy2QF4XFOq1DXTDUxrUF6AO/yW7U=;
-        b=vybZsQCWzQYEIkoTvza5hstFKZz2+K1Fo6UPOuyusCiOPAEZunWGaUMjtFDMZtHILY
-         cWW+HNmZYKFzMD3iVnP+LgKKtzqnuEkLc6pjGmfK4dYCMmHMI+qzUF9xq2Nn2f9kiCs1
-         KnLvCEurUu28EA+wW47z9AjbWAMFbBVXdnVSmxeEK4bwBsRjysZ9YxKcT4bENIvhJhX6
-         VAMcRwTCycRqDFVMVvydbz53Cm0YfaQj+cC9D3AnT8hm3qjP7pAFf9+I8SM7ImSToWJp
-         rloIK0CWopAw2X8ovkb8YQzzNxf7Mh0sRebnmiCKweG/ottNvlPp5NpxNaRkwEj7err0
-         O5nQ==
-X-Gm-Message-State: ACrzQf1l54OWTBZ/rxTKJx7OvtVUyhEPS+n6wq/Jmq3x8SgQCK5aq3yw
-        SfDabzoj172FLRZMzTbhWB4tWg==
-X-Google-Smtp-Source: AMsMyM49M8Msk9MQDgBkWE2CZgxPSt7DVLA4PMayk1HvSFFNzGKmGNAXijvzGcsxcOz4KAHx8nVaCQ==
-X-Received: by 2002:a2e:7309:0:b0:26c:3db7:8fe2 with SMTP id o9-20020a2e7309000000b0026c3db78fe2mr10859978ljc.387.1664354515092;
-        Wed, 28 Sep 2022 01:41:55 -0700 (PDT)
-Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id c6-20020a056512074600b004948b667d95sm409700lfs.265.2022.09.28.01.41.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 28 Sep 2022 01:41:54 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Sudeep Holla <sudeep.holla@arm.com>,
-        Cristian Marussi <cristian.marussi@arm.com>,
-        linux-arm-kernel@lists.infradead.org
-Subject: [GIT PULL] MMC + ARM_SCMI fixes for v6.0-rc8
-Date:   Wed, 28 Sep 2022 10:41:52 +0200
-Message-Id: <20220928084152.245040-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S231759AbiI1J6E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 05:58:04 -0400
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5032138C;
+        Wed, 28 Sep 2022 02:58:03 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1664359083; x=1695895083;
+  h=from:to:cc:subject:date:message-id;
+  bh=UvFxLRpsRpkF+7Lng/OJg8E0Da3LP+hPhxQx7w68Mqg=;
+  b=OEagP1hsG44lQSKr9nDWkITOhJkN928bj7cZwF7LawBiXZFp+uydRLJk
+   LIwQu6SxQOB7njR2Svb4Ka5U1bfPYVtK42WgqI3aqKqVP6bs1eHP2wOb/
+   eaUWVfLvTnPmZd/SRKZU1xUS+opyKpnNQI+MHSkPy5XW9mdFOKkCAUct5
+   AuuBAaeckakpHYPmtqhYKQ+RNeJjM2s1iUWGToWmexHLI9edDH542otoD
+   E1LICINw22Q5gGKJ+fihiIEWzfx2DtorNFsX6KvDeWsYInOC7jp86AZLV
+   cCK9SCYF76K0Gf/bXxlM+5Q3+8HJRYpCPiODRUmwXmy9xa9ZlQ6bSEAtj
+   g==;
+X-IronPort-AV: E=Sophos;i="5.93,351,1654531200"; 
+   d="scan'208";a="316758252"
+Received: from uls-op-cesaip02.wdc.com (HELO uls-op-cesaep02.wdc.com) ([199.255.45.15])
+  by ob1.hgst.iphmx.com with ESMTP; 28 Sep 2022 17:58:02 +0800
+IronPort-SDR: FcV5PZkDMSkuvx3kVlQ2tuXqDRhR3rNdHlAONXd+nCnDDP5azYPAFTXck4eUOiQtafdmfzfeZV
+ ySAsS9aP7GvCCOR4nUEqCaEJAtodZRDfllfcrAmALbRwXwAmhkfqaYiDz2IT4LlOgOZ03lIIzm
+ y+5I+3Sws12uSVKxXhuC3ErW9lq2uy1MOOKO9gXu8YfCPFjvPg0QXWFLhjpXaxAsxGyiCD/t1A
+ 9bG5RqtLe05g5EgtzQfs+hBaTPRf1zvFWRR/ljrJo/Aw/zSltZ3xUBSxgSLsRjwTfd6uqvCB+Q
+ tzuKSTtz0DCnG9lnzvPJ8sOB
+Received: from uls-op-cesaip01.wdc.com ([10.248.3.36])
+  by uls-op-cesaep02.wdc.com with ESMTP/TLS/ECDHE-RSA-AES128-GCM-SHA256; 28 Sep 2022 02:12:26 -0700
+IronPort-SDR: sOZSnNwSW/4+x8Cf4w53/oBDXXiIFrsMinZyiY8Un4QobTlvDW86u9dnh5VokjegmetrZ/EWeO
+ YGaYEOldP+yiCjdKQjC1KkaOvaqibt2YR2PIGZl/MObSufEXyGv5ALhjwKubpapwIZLektJNyM
+ rT+5CxmInTBclzGMTr8uL83Ys0Ibf4nBT34rxK1AYvckUFazbiSrzWptwEkj/EcJsTWWN4PD+D
+ xCWXCIujNwOZfD1KqLAvperiQxpgt+ugNqe583AzGEf/m7mHRp2CoZShUfGKkbAuzba4E32ruT
+ 82s=
+WDCIronportException: Internal
+Received: from bxygm33.ad.shared ([10.45.30.255])
+  by uls-op-cesaip01.wdc.com with ESMTP; 28 Sep 2022 02:57:58 -0700
+From:   Avri Altman <avri.altman@wdc.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-kernel@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
+Subject: [PATCH v2] mmc: core: SD: Add BROKEN-SD-DISCARD quirk
+Date:   Wed, 28 Sep 2022 12:57:44 +0300
+Message-Id: <20220928095744.16455-1-avri.altman@wdc.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+v1 -> v2:
+ - Address Ulf's suggestions
 
-Here's a PR with a couple of MMC fixes intended for v6.0-rc8. This time there is
-also a fix for the ARM SCMI firmware driver, which has been acked by Sudeep
-Holla, the maintainer.
+Some SD-cards that are SDA-6.0 compliant reports they supports discard
+while they actually don't.  This might cause mk2fs to fail while trying
+to format the card and revert it to a read-only mode.
 
-As usual, more details about the highlights are found in the signed tag.
+While at it, add SD MID for SANDISK. This is because eMMC MID is assign
+by JEDEC and SD MID is assigned by SD 3c-LLC.
 
-Please pull this in!
+Signed-off-by: Avri Altman <avri.altman@wdc.com>
+---
+ drivers/mmc/core/block.c  | 6 +++++-
+ drivers/mmc/core/card.h   | 6 ++++++
+ drivers/mmc/core/quirks.h | 6 ++++++
+ include/linux/mmc/card.h  | 1 +
+ 4 files changed, 18 insertions(+), 1 deletion(-)
 
-Kind regards
-Ulf Hansson
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ce89611a136e..54cd009aee50 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -1140,8 +1140,12 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+ {
+ 	struct mmc_blk_data *md = mq->blkdata;
+ 	struct mmc_card *card = md->queue.card;
++	unsigned int arg = card->erase_arg;
+ 
+-	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
++	if (mmc_card_broken_sd_discard(card))
++		arg = SD_ERASE_ARG;
++
++	mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, arg);
+ }
+ 
+ static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index 99045e138ba4..cfdd1ff40b86 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -73,6 +73,7 @@ struct mmc_fixup {
+ #define EXT_CSD_REV_ANY (-1u)
+ 
+ #define CID_MANFID_SANDISK      0x2
++#define CID_MANFID_SANDISK_SD   0x3
+ #define CID_MANFID_ATP          0x9
+ #define CID_MANFID_TOSHIBA      0x11
+ #define CID_MANFID_MICRON       0x13
+@@ -258,4 +259,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BROKEN_HPI;
+ }
+ 
++static inline int mmc_card_broken_sd_discard(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_BROKEN_SD_DISCARD;
++}
++
+ #endif
+diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+index be4393988086..29b9497936df 100644
+--- a/drivers/mmc/core/quirks.h
++++ b/drivers/mmc/core/quirks.h
+@@ -100,6 +100,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+ 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+ 		  MMC_QUIRK_TRIM_BROKEN),
+ 
++	/*
++	 * Some SD cards reports discard support while they don't
++	 */
++	MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
++		  MMC_QUIRK_BROKEN_SD_DISCARD),
++
+ 	END_FIXUP
+ };
+ 
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 8a30de08e913..c726ea781255 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -293,6 +293,7 @@ struct mmc_card {
+ #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
+ #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+ #define MMC_QUIRK_BROKEN_HPI	(1<<13)		/* Disable broken HPI support */
++#define MMC_QUIRK_BROKEN_SD_DISCARD	(1<<14)	/* Disable broken SD discard support */
+ 
+ 	bool			reenable_cmdq;	/* Re-enable Command Queue */
+ 
+-- 
+2.17.1
 
-
-The following changes since commit 80e78fcce86de0288793a0ef0f6acf37656ee4cf:
-
-  Linux 6.0-rc5 (2022-09-11 16:22:01 -0400)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.0-rc5
-
-for you to fetch changes up to e7afa79a3b35a27a046a2139f8b20bd6b98155c2:
-
-  mmc: hsq: Fix data stomping during mmc recovery (2022-09-27 12:38:29 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Terminate infinite loop in SD-UHS voltage switch
-
-MMC host:
- - hsq: Fix kernel crash in the recovery path
- - moxart: Fix bus width configurations
- - sdhci: Fix kernel panic for cqe irq
-
-ARM_SCMI:
- - Fixup clock management by reverting "firmware: arm_scmi: Add clock
-   management to the SCMI power domain"
-
-----------------------------------------------------------------
-Brian Norris (1):
-      mmc: core: Terminate infinite loop in SD-UHS voltage switch
-
-Sergei Antonov (1):
-      mmc: moxart: fix 4-bit bus width and remove 8-bit bus width
-
-Ulf Hansson (1):
-      Revert "firmware: arm_scmi: Add clock management to the SCMI power domain"
-
-Wenchao Chen (2):
-      mmc: sdhci: Fix host->cmd is null
-      mmc: hsq: Fix data stomping during mmc recovery
-
- drivers/firmware/arm_scmi/scmi_pm_domain.c | 26 --------------------------
- drivers/mmc/core/sd.c                      |  3 ++-
- drivers/mmc/host/mmc_hsq.c                 |  2 +-
- drivers/mmc/host/moxart-mmc.c              | 17 +++--------------
- drivers/mmc/host/sdhci.c                   |  4 ++--
- 5 files changed, 8 insertions(+), 44 deletions(-)
