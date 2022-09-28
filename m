@@ -2,113 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E705C54EE9
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 16:54:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE77AC04A95
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 16:54:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232691AbiI1Qyc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Sep 2022 12:54:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46836 "EHLO
+        id S233980AbiI1Qye (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Sep 2022 12:54:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232494AbiI1Qyb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 12:54:31 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D928E9CF5;
+        with ESMTP id S233629AbiI1Qyc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 12:54:32 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7472E9CF9;
         Wed, 28 Sep 2022 09:54:30 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 18517B82174;
-        Wed, 28 Sep 2022 16:54:29 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E75D5C433D6;
-        Wed, 28 Sep 2022 16:54:26 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7A9E161F36;
+        Wed, 28 Sep 2022 16:54:30 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 27337C4347C;
+        Wed, 28 Sep 2022 16:54:28 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664384067;
-        bh=9ieKrZ0kEy9+GmqajkIGyMGgIizGgDSihdd1eBCLfJU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=Y7z7TnxCeygSgevrUVEukmqOLSpLUkC2fprjDa0Gp2NgRAfQnwV4qOkI5gGr/Ui3P
-         u4r8fUdI3SYKtVch0OWVPy6XuiQZrKrvv3aI4kh3dnoo31RWF0WvEwrtpdTa2gdx5Z
-         tw4idgOSBMy53VUsatFFlHfMvbGShQOCGm9mWgiQ1HVAnBkSm0gjUCoeS8YABnM8ek
-         ICId8KI+ZgbswShVfDggedJ53HYdwt41zJx+Mkm9BhUWV8NOx0Z6aez4CNMl9ZGEIV
-         4ZDTlYJcDK/SBBsBZo4wHdyI8LmVHGxPPBYrxPzH5EkmMDgssgSMlKd3CGw+VlQ8Ex
-         yTYoqt+r9vrjA==
+        s=k20201202; t=1664384069;
+        bh=BBz/NXdoZV1TV+SIB15IvaK4u6KO1qaqTj6gqSkO6lQ=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=fc4R1bcqHRG1Weyi+mYHHzG+sOzjXZBbMvi/Pnv8oOuyoTFMpT2Y47OPtZqTdZELj
+         p12oRUJnM3UcMWdwagRMkVZyMJ9cdKPNN1XE6QYc2e+dgB1Il6MiVWomTqae3/Xshh
+         p9u43QvzBAPu7miaKXe0QZytZQT47IY0I0sgrnxT+jQF8aaL96SwK65XmwoPTkGNTH
+         F42uYaSyJtgsqaQIN7/RgeHSd7HvVPraHsx+RU09+//vJGrMoh3jw1IxVstdiCF1Jg
+         O8jVxF/mHr5VqeYCwUkxdhNwdanlIC1yLu4xHV9cnIBP7fgjUPWDxIy0fXDOBNOqfQ
+         g9gnNLxHwlnJA==
 From:   Dinh Nguyen <dinguyen@kernel.org>
 To:     jh80.chung@samsung.com
 Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
         krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-Subject: [PATCHv4 1/3] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
-Date:   Wed, 28 Sep 2022 11:54:18 -0500
-Message-Id: <20220928165420.1212284-1-dinguyen@kernel.org>
+Subject: [PATCHv4 3/3] mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
+Date:   Wed, 28 Sep 2022 11:54:20 -0500
+Message-Id: <20220928165420.1212284-3-dinguyen@kernel.org>
 X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20220928165420.1212284-1-dinguyen@kernel.org>
+References: <20220928165420.1212284-1-dinguyen@kernel.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the optional "altr,sysmgr-syscon" binding that is used to
-access the System Manager register that controls the SDMMC clock
-phase.
+The clock-phase settings for the SDMMC controller in the SoCFPGA
+Strarix10/Agilex/N5X platforms reside in a register in the System
+Manager. Add a method to access that register through the syscon
+interface.
 
 Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
 ---
-v4: add else statement
-v3: document that the "altr,sysmgr-syscon" binding is only applicable to
-    "altr,socfpga-dw-mshc"
-v2: document "altr,sysmgr-syscon" in the MMC section
+v4: no change
+v3: add space before &socfpga_drv_data
+v2: simplify clk-phase calculations
 ---
- .../bindings/mmc/synopsys-dw-mshc.yaml        | 31 +++++++++++++++++--
- 1 file changed, 28 insertions(+), 3 deletions(-)
+ drivers/mmc/host/dw_mmc-pltfm.c | 41 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 40 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-index ae6d6fca79e2..b73324273464 100644
---- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-@@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 9901208be797..0f07fa6d0150 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -17,10 +17,16 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
++#include <linux/mfd/altera-sysmgr.h>
++#include <linux/regmap.h>
  
- title: Synopsys Designware Mobile Storage Host Controller Binding
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
  
--allOf:
--  - $ref: "synopsys-dw-mshc-common.yaml#"
--
- maintainers:
-   - Ulf Hansson <ulf.hansson@linaro.org>
- 
-@@ -38,6 +35,34 @@ properties:
-       - const: biu
-       - const: ciu
- 
-+  altr,sysmgr-syscon:
-+    $ref: /schemas/types.yaml#/definitions/phandle-array
-+    items:
-+      - items:
-+          - description: phandle to the sysmgr node
-+          - description: register offset that controls the SDMMC clock phase
-+    description:
-+      Contains the phandle to System Manager block that contains
-+      the SDMMC clock-phase control register. The first value is the pointer
-+      to the sysmgr and the 2nd value is the register offset for the SDMMC
-+      clock phase register.
++#define SOCFPGA_DW_MMC_CLK_PHASE_STEP	45
++#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
++	((((smplsel) & 0x7) << 4) | (((drvsel) & 0x7) << 0))
 +
-+allOf:
-+  - $ref: "synopsys-dw-mshc-common.yaml#"
+ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 			  const struct dw_mci_drv_data *drv_data)
+ {
+@@ -62,9 +68,42 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
+ };
+ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+ 
++static int dw_mci_socfpga_priv_init(struct dw_mci *host)
++{
++	struct device_node *np = host->dev->of_node;
++	struct regmap *sys_mgr_base_addr;
++	u32 clk_phase[2] = {0}, reg_offset;
++	int i, rc, hs_timing;
 +
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const:
-+              - altr,socfpga-dw-mshc
-+    then:
-+      required:
-+        - altr,sysmgr-syscon
-+    else:
-+      properties:
-+        altr,sysmgr-syscon: false
++	rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
++	if (rc) {
++		sys_mgr_base_addr =
++			altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
++		if (IS_ERR(sys_mgr_base_addr)) {
++			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
++			return 1;
++		}
++	} else
++		return 1;
 +
- required:
-   - compatible
-   - reg
++	of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
++
++	for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
++		clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
++
++	hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
++	regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
++
++	return 0;
++}
++
++static const struct dw_mci_drv_data socfpga_drv_data = {
++	.init		= dw_mci_socfpga_priv_init,
++};
++
+ static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	{ .compatible = "snps,dw-mshc", },
+-	{ .compatible = "altr,socfpga-dw-mshc", },
++	{ .compatible = "altr,socfpga-dw-mshc", .data = &socfpga_drv_data, },
+ 	{ .compatible = "img,pistachio-dw-mshc", },
+ 	{},
+ };
 -- 
 2.25.1
 
