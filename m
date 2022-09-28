@@ -2,265 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4A67C54EE9
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 02:54:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9B5DC04A95
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Sep 2022 08:12:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232917AbiI1Cy2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Sep 2022 22:54:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57434 "EHLO
+        id S231714AbiI1IMU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Sep 2022 04:12:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232902AbiI1Cy1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Sep 2022 22:54:27 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 311B21BCAFF;
-        Tue, 27 Sep 2022 19:54:26 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 889E461940;
-        Wed, 28 Sep 2022 02:54:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 14D7BC433C1;
-        Wed, 28 Sep 2022 02:54:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664333664;
-        bh=eccnPEsVI/nH1CUcrbHa5Df+aFQ1BtqOCkP1lMAnNYw=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=h1DgvfOOLclk3O06J9AIxjv8MFTjTspiaGvXjxqn4FV57F6QyQStC4W3dm3sNKKHs
-         Cb1JQCMvyxT/ULT/J8iS+wnajJYlpg0Dqhd+l1hyS+K+eYcNn+oIU4hzUAwHHs5OXG
-         5dhUmWKcm7aZjSLMIAQKHMkGdSxBZRzZqPLqjAP32IqkN+Y6nO+cBjFoK2jO8zGD4c
-         vKuR7XOWEboyzqgNkHF3berwb0Zwi0HdPux/745cyA3pyS24Qe2i8scMCyYHx3f1xI
-         EQVl9LKroY7lEqrbElDcZ/PX4OujtHXn+gyffVHrMFerXfQSqmUjoaYaeL33qVSPQL
-         ScfycXDXdl0KQ==
-Message-ID: <9f4ef7ff-7b62-c0a2-6be4-dd51992acae1@kernel.org>
-Date:   Tue, 27 Sep 2022 21:54:22 -0500
+        with ESMTP id S233954AbiI1IMR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Sep 2022 04:12:17 -0400
+Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C86747FFA8
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 01:12:15 -0700 (PDT)
+Received: by mail-pl1-x62f.google.com with SMTP id w10so11153108pll.11
+        for <linux-mmc@vger.kernel.org>; Wed, 28 Sep 2022 01:12:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=gPL+sDNRWPDOVqDV7eYVovApSlIMvj73WWnHgoRmIyM=;
+        b=Zb3uk5IXYG4EiRgO/ssRDfN4IW4e7ucYOn56uUxrggZSlAzAeVBJFz6qac0m3Q8m5v
+         F52L9rn3S/B2uK1n1AZ2bstRik3JV5doaTbwkGfskaY38+Z0JX/gWL0LMt9Cit5q9XA/
+         NzmCm1OEpreADNW8nv3xAWS895dAANLH5+nJHvdmGZBulLSbwM+c3zqPg6Jz+iSGpF5J
+         VMcu1YHvQGNa4aQZp7OyXZVLF/H0mO3wrTfUlrYiQh8eRbYQLUutlhVb+b1WKqqfYOBk
+         BSg+7rN/w/dXT2VDm4B2te6skOuJkluv2O/UVsdbxTZd75RwhCv5Ni0qVZqUKgVEtPEQ
+         GAUg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=gPL+sDNRWPDOVqDV7eYVovApSlIMvj73WWnHgoRmIyM=;
+        b=OWjTLG7J49lzWyTqSM5av/wgAjf5JPTwxx/CVqNqamH0+/kWHTK1MISmPWQI8G6/ly
+         udkRgZjvNHliw8YOWstUkJrNwoJvGFtty8hvHS8JDCpjZH0qfFW53KkO914OkAuFSqiB
+         IUdsntauAhwPSWYfTNteZEPcimF907RsGGAWPdxJTLQFL5dErS8HKsAetFEJ34xvQqS+
+         RGgCInzPNWEVoTUDMaawpOoY1qx3Azf6F0owV18mK75sD5uOlyYABsEppW1HpLo9K94I
+         7r2veUdbhthqTm1+zTbHTE4UEDO12ij/twK18LxfYB9aKH+/kHGPRvUukA98LBo6O8Ce
+         3LmA==
+X-Gm-Message-State: ACrzQf3qHQ9JeEaaX0VJpZ1Z/QphtvPdgegCCB7gRhhOTeByAQKlgIA4
+        IIfUO7gbBfPMBKvN6Pzz3WSjUzQkYcyoNoFVOf7nmA==
+X-Google-Smtp-Source: AMsMyM5QH27T71AWUGxWh2gqOZ09ud9ESJvZi5kqmN0DWXrc1VXUQvDX71Ds52OzjTqZQM05yEexJPRmDs6RPzxpEKc=
+X-Received: by 2002:a17:90b:1b06:b0:202:cce0:2148 with SMTP id
+ nu6-20020a17090b1b0600b00202cce02148mr9278323pjb.84.1664352734971; Wed, 28
+ Sep 2022 01:12:14 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCHv3 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Content-Language: en-US
-To:     Rob Herring <robh@kernel.org>
-Cc:     krzysztof.kozlowski+dt@linaro.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
-        jh80.chung@samsung.com, linux-mmc@vger.kernel.org,
-        robh+dt@kernel.org
-References: <20220926140932.820050-1-dinguyen@kernel.org>
- <1664289558.354045.943214.nullmailer@robh.at.kernel.org>
-From:   Dinh Nguyen <dinguyen@kernel.org>
-In-Reply-To: <1664289558.354045.943214.nullmailer@robh.at.kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20220926192022.85660-1-adrian.hunter@intel.com>
+ <20220926192022.85660-4-adrian.hunter@intel.com> <YzMVJQVWVX0Htweb@orome>
+In-Reply-To: <YzMVJQVWVX0Htweb@orome>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 28 Sep 2022 10:11:38 +0200
+Message-ID: <CAPDyKFpM8hSj82OPdScbMhUEEybp_SG0AvTbdLykhiJ=97BGpw@mail.gmail.com>
+Subject: Re: [PATCH 3/4] mmc: sdhci: Get rid of SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, pshete@nvidia.com,
+        jonathanh@nvidia.com, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, anrao@nvidia.com, smangipudi@nvidia.com,
+        kyarlagadda@nvidia.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+On Tue, 27 Sept 2022 at 17:22, Thierry Reding <thierry.reding@gmail.com> wrote:
+>
+> On Mon, Sep 26, 2022 at 10:20:21PM +0300, Adrian Hunter wrote:
+> > SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS is used by only ENE controllers but can
+> > be replaced by driver code.
+> >
+> > Amend the ENE code to hook the ->set_ios() mmc host operation and do the
+> > reset there.
+> >
+> > Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> > ---
+> >  drivers/mmc/host/sdhci-pci-core.c | 23 ++++++++++++++++++++++-
+> >  drivers/mmc/host/sdhci.c          |  8 --------
+> >  drivers/mmc/host/sdhci.h          |  2 --
+> >  3 files changed, 22 insertions(+), 11 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> > index ed53276f6ad9..63613b3d648f 100644
+> > --- a/drivers/mmc/host/sdhci-pci-core.c
+> > +++ b/drivers/mmc/host/sdhci-pci-core.c
+> > @@ -297,6 +297,27 @@ static const struct sdhci_pci_fixes sdhci_ricoh_mmc = {
+> >                         SDHCI_QUIRK_MISSING_CAPS
+> >  };
+> >
+> > +static void ene_714_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +{
+> > +     struct sdhci_host *host = mmc_priv(mmc);
+> > +
+> > +     sdhci_set_ios(mmc, ios);
+> > +
+> > +     /*
+> > +      * Some (ENE) controllers misbehave on some ios operations,
+>
+> Nice rewording that you snuck in there. =)
 
-On 9/27/22 09:39, Rob Herring wrote:
-> On Mon, 26 Sep 2022 09:09:30 -0500, Dinh Nguyen wrote:
->> Document the optional "altr,sysmgr-syscon" binding that is used to 
->> access the System Manager register that controls the SDMMC clock 
->> phase.
->> 
->> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org> --- v3: document
->> that the "altr,sysmgr-syscon" binding is only applicable to 
->> "altr,socfpga-dw-mshc" v2: document "altr,sysmgr-syscon" in the MMC
->> section --- .../bindings/mmc/synopsys-dw-mshc.yaml        | 28
->> +++++++++++++++++-- 1 file changed, 25 insertions(+), 3
->> deletions(-)
->> 
-> 
-> Running 'make dtbs_check' with the schema in this patch gives the 
-> following warnings. Consider if they are expected or the schema is 
-> incorrect. These may not be new warnings.
-> 
-> Note that it is not yet a requirement to have 0 warnings for
-> dtbs_check. This will change in the future.
-> 
-> Full log is available here: https://patchwork.ozlabs.org/patch/
-> 
-> 
-> dwmmc0@ff704000: $nodename:0: 'dwmmc0@ff704000' does not match
-> '^mmc(@.*)?$' arch/arm/boot/dts/socfpga_arria5_socdk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb 
-> arch/arm/boot/dts/socfpga_vt.dtb
-> 
-> dwmmc0@ff704000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'broken-cd', 'bus-width',
-> 'cap-mmc-highspeed', 'cap-sd-highspeed', 'cd-gpios', 'fifo-depth',
-> 'resets', 'vmmc-supply', 'vqmmc-supply' were unexpected) 
-> arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
-> 
-> dwmmc0@ff704000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'broken-cd', 'bus-width',
-> 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets',
-> 'vmmc-supply', 'vqmmc-supply' were unexpected) 
-> arch/arm/boot/dts/socfpga_arria5_socdk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
-> 
-> dwmmc0@ff704000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'broken-cd', 'bus-width',
-> 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were
-> unexpected) arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb 
-> arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb 
-> arch/arm/boot/dts/socfpga_vt.dtb
-> 
-> dwmmc0@ff808000: $nodename:0: 'dwmmc0@ff808000' does not match
-> '^mmc(@.*)?$' arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb 
-> arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb 
-> arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb 
-> arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
-> 
-> dwmmc0@ff808000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'broken-cd', 'bus-width',
-> 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were
-> unexpected) arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
-> 
-> dwmmc0@ff808000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'broken-cd', 'bus-width',
-> 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected) 
-> arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
-> 
-> dwmmc0@ff808000: Unevaluated properties are not allowed
-> ('#address-cells', '#size-cells', 'fifo-depth', 'resets' were
-> unexpected) arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb 
-> arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
-> 
-> mmc@ff808000: Unevaluated properties are not allowed
-> ('altr,dw-mshc-ciu-div', 'altr,dw-mshc-sdr-timing', 'iommus' were
-> unexpected) arch/arm64/boot/dts/altera/socfpga_stratix10_swvp.dtb
-> 
-> mmc@ff808000: Unevaluated properties are not allowed ('iommus' was
-> unexpected) arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dtb 
-> arch/arm64/boot/dts/altera/socfpga_stratix10_socdk_nand.dtb 
-> arch/arm64/boot/dts/intel/socfpga_agilex_n6000.dtb 
-> arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dtb 
-> arch/arm64/boot/dts/intel/socfpga_agilex_socdk_nand.dtb 
-> arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dtb
-> 
-> mmcsd@40004000: $nodename:0: 'mmcsd@40004000' does not match
-> '^mmc(@.*)?$' arch/arm/boot/dts/lpc4337-ciaa.dtb 
-> arch/arm/boot/dts/lpc4350-hitex-eval.dtb 
-> arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb 
-> arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-> 
-> mmcsd@40004000: clock-names:0: 'biu' was expected 
-> arch/arm/boot/dts/lpc4337-ciaa.dtb 
-> arch/arm/boot/dts/lpc4350-hitex-eval.dtb 
-> arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb 
-> arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-> 
-> mmcsd@40004000: clock-names:1: 'ciu' was expected 
-> arch/arm/boot/dts/lpc4337-ciaa.dtb 
-> arch/arm/boot/dts/lpc4350-hitex-eval.dtb 
-> arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb 
-> arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-> 
-> mmcsd@40004000: Unevaluated properties are not allowed ('bus-width',
-> 'clock-names', 'resets', 'vmmc-supply' were unexpected) 
-> arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb 
-> arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-> 
-> mmcsd@40004000: Unevaluated properties are not allowed
-> ('clock-names', 'resets' were unexpected) 
-> arch/arm/boot/dts/lpc4337-ciaa.dtb 
-> arch/arm/boot/dts/lpc4350-hitex-eval.dtb
-> 
+:-)
 
-Hmm, I see these warnings on the standard v6.0-rc1 and 
-linux-next(next-20220923), but with this patch applied I don't see any 
-warnings regarding MMC.
+>
+> I just realized, after going through the patches that Ulf has already
+> applied this, but FWIW, the series:
+>
+> Reviewed-by: Thierry Reding <treding@nvidia.com>
 
+No problem, I will add your tag to the series. Thanks for reviewing!
 
-DTC     arch/arm/boot/dts/socfpga_arria5_socdk.dtb
-   DTC     arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
-   DTC     arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
-   DTC     arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
-   CHECK   arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
-   CHECK   arch/arm/boot/dts/socfpga_arria5_socdk.dtb
-   CHECK   arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
-   CHECK   arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-pmu@ff111000: 'reg' does not match any of the regexes: 'pinctrl-[0-9]+'
-         From schema:
-/home/dinguyen/linux_dev/linux/Documentation/devicetree/bindings/arm/pmu.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-soc: amba: {'compatible': ['simple-bus'], '#address-cells': [[1]],
-'#size-cells': [[1]], 'ranges': True, 'pdma@ffda1000': {'compatible':
-['arm,pl330', 'arm,primecell'], 'reg': [[4292481024, 4096]],
-'interrupts': [[0, 83, 4], [0, 84, 4], [0, 85, 4], [0, 86, 4], [0, 87,
-4], [0, 88, 4], [0, 89, 4], [0, 90, 4], [0, 91, 4]], '#dma-cells':
-[[1]], 'clocks': [[5]], 'clock-names': ['apb_pclk'], 'resets': [[6, 48],
-[6, 53]], 'reset-names': ['dma', 'dma-ocp'], 'phandle': [[34]]}} should
-not be valid under {'type': 'object'}
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-soc: base_fpga_region: {'#address-cells': [[1]], '#size-cells': [[1]],
-'compatible': ['fpga-region'], 'fpga-mgr': [[7]]} should not be valid
-under {'type': 'object'}
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-soc: stmmac-axi-config: {'snps,wr_osr_lmt': [[15]], 'snps,rd_osr_lmt':
-[[15]], 'snps,blen': [[0, 0, 0, 0, 16, 0, 0]], 'phandle': [[30]]} should
-not be valid under {'type': 'object'}
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-soc: eccmgr: {'compatible': ['altr,socfpga-a10-ecc-manager'],
-'altr,sysmgr-syscon': [[28]], '#address-cells': [[1]], '#size-cells':
-[[1]], 'interrupts': [[0, 2, 4], [0, 0, 4]], 'interrupt-controller':
-True, '#interrupt-cells': [[2]], 'ranges': True, 'sdramedac':
-{'compatible': ['altr,sdram-edac-a10'], 'altr,sdr-syscon': [[39]],
-'interrupts': [[17, 4], [49, 4]]}, 'l2-ecc@ffd06010': {'compatible':
-['altr,socfpga-a10-l2-ecc'], 'reg': [[4291846160, 4]], 'interrupts':
-[[0, 4], [32, 4]]}, 'ocram-ecc@ff8c3000': {'compatible':
-['altr,socfpga-a10-ocram-ecc'], 'reg': [[4287377408, 1024]],
-'interrupts': [[1, 4], [33, 4]]}, 'emac0-rx-ecc@ff8c0800':
-{'compatible': ['altr,socfpga-eth-mac-ecc'], 'reg': [[4287367168,
-1024]], 'altr,ecc-parent': [[40]], 'interrupts': [[4, 4], [36, 4]]},
-'emac0-tx-ecc@ff8c0c00': {'compatible': ['altr,socfpga-eth-mac-ecc'],
-'reg': [[4287368192, 1024]], 'altr,ecc-parent': [[40]], 'interrupts':
-[[5, 4], [37, 4]]}, 'sdmmca-ecc@ff8c2c00': {'compatible':
-['altr,socfpga-sdmmc-ecc'], 'reg': [[4287376384, 1024]],
-'altr,ecc-parent': [[41]], 'interrupts': [[15, 4], [47, 4], [16, 4],
-[48, 4]]}, 'dma-ecc@ff8c8000': {'compatible': ['altr,socfpga-dma-ecc'],
-'reg': [[4287397888, 1024]], 'altr,ecc-parent': [[34]], 'interrupts':
-[[10, 4], [42, 4]]}, 'usb0-ecc@ff8c8800': {'compatible':
-['altr,socfpga-usb-ecc'], 'reg': [[4287399936, 1024]],
-'altr,ecc-parent': [[42]], 'interrupts': [[2, 4], [34, 4]]}} should not
-be valid under {'type': 'object'}
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-soc: usbphy: {'#phy-cells': [[0]], 'compatible': ['usb-nop-xceiv'],
-'status': ['okay'], 'phandle': [[47]]} should not be valid under
-{'type': 'object'}
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-amba: $nodename:0: 'amba' does not match
-'^([a-z][a-z0-9\\-]+-bus|bus|soc|axi|ahb|apb)(@[0-9a-f]+)?$'
-         From schema:
-/home/dinguyen/.local/lib/python3.8/site-packages/dtschema/schemas/simple-bus.yaml
-/home/dinguyen/linux_dev/linux/arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb:
-pdma@ffda1000: $nodename:0: 'pdma@ffda1000' does not match
-'^dma-controller(@.*)?$'
-         From schema:
-/home/dinguyen/linux_dev/linux/Documentation/devicetree/bindings/dma/arm,pl330.yaml
-
-
-
-Dinh
+Kind regards
+Uffe
