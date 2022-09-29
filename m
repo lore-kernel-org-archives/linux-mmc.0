@@ -2,155 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2FD6C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 11:21:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0330DC433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 12:42:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235078AbiI2LVJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Sep 2022 07:21:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53818 "EHLO
+        id S234807AbiI2MmG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Sep 2022 08:42:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235062AbiI2LVI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 07:21:08 -0400
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F13D6115BC9
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2022 04:21:05 -0700 (PDT)
-Received: by mail-pl1-x62c.google.com with SMTP id y20so997105plb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2022 04:21:05 -0700 (PDT)
+        with ESMTP id S232166AbiI2MmF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 08:42:05 -0400
+Received: from mail-pf1-x436.google.com (mail-pf1-x436.google.com [IPv6:2607:f8b0:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4131A15E452
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2022 05:42:03 -0700 (PDT)
+Received: by mail-pf1-x436.google.com with SMTP id e68so1353549pfe.1
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2022 05:42:03 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=sCaynwcp4f26Qsuas0gm084M63BBFBWC/hIFRDkk3Uw=;
-        b=tegmkaiPhW3cNmFDnub5MjTxArl0I20BRME+tLmlGxvQMKqNELC4Lu0bz+FdmpapSG
-         +6LU34q2RN17fs/xdyQaxIobLucq+S4NEAoF3PPkmOcwY+7o/4d+mnFK7Merc18/aND3
-         J2dHhtSk5ULfx1fCST65ll60SPlMrxErT/AKm6jcOC5Ye7TZdSqbpDBZjWel0BjD5xnI
-         4GsuK+xI+zyKEAARB3ktNSqOOCYfzHXV20YDfI6W3+/Xr47YJLOCS2bg5G05aTdNJk/v
-         C/qfztBwtKKt3oI566phuyGXKMY6wzYdNsZq3vaUEzgVbjnh9HAM1PMdoq31Z+S/UJb3
-         M5pQ==
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date;
+        bh=SwmTmZM4cNqpS1jNdiXo9u+cxg65tRQ/3yvkU0CfYPE=;
+        b=ZOYDj1n4QUXianLwU4/ysFeg33aNMmR5ebPyRpKQ5YcZfU3W07+B2J8Vnafxrcjz8/
+         jTyMGvoJzXQhgziPk7y1CgO/h058aO1EXsZ13F+QVBueuPjL+DLYmokPy3M08vDOTjrd
+         0fRw9k8IBIUswHZ18DYfkPVi/lbEAXot7wqkIds65OzVMurZ9eayxUbRMqd9ZFYBB2Gu
+         wIdi8BFZLN5yTtjHXvvfzn0GZBNZjml0DC3kEHjnQT+o95MyYP15S5j7w+i++JBS3UWH
+         NjUozmSjXL9HsePwqWc2jzyP1LJbiFQmveJfyHzB5kUvItQKtg+6rqok60sr8uuvDxJr
+         qCPA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=sCaynwcp4f26Qsuas0gm084M63BBFBWC/hIFRDkk3Uw=;
-        b=y3z5Itw09JpUrLtjNYV/kLFDgx6AwxcV0g/SoarVtmgu1pzlg5EmyUvMN2EZOusw5N
-         NXeAQJSlfN+NurDnFYlcCn6n3Bpxpz5cW3Q+G5UvcChn4DWzTLZsGNDtkIz8QmCCVEYc
-         nWn2bnpboihuZAA5izGl8KolOHiKdpD6OmoJNVRKqq4/GK4qsTjHeUBzsjqb2MlhE9ze
-         2GBZ9xjTYilFarRZ5Wk2wNzlfRYwGacGwkX4/N8sLJFR/7kb23eooho1rKPz8Crit+Wl
-         oaC+7NHRmbvzEW0MEYbDC9C6dviSQccsjZN8b/FocMa44xg8gC8klyTbqkfkBfr0JKb8
-         WG6g==
-X-Gm-Message-State: ACrzQf1v57bWurHlVUGIOIj2qIhrY0y67d87gdLdjSfVcfDZR1XuYaJP
-        DJZxx1zUvWU7yFnXj4fb4Kic6+pHhpSgZ3RM8N/Y8Q==
-X-Google-Smtp-Source: AMsMyM7PjjksYIL3HcmPj9LulM/zObjITKi55mnpApJWRDOIQBM+olQxhw0R6qsZVsb6XY5E4dAqRQBy4y7gVobhsvg=
-X-Received: by 2002:a17:90a:aa96:b0:205:bb67:a85f with SMTP id
- l22-20020a17090aaa9600b00205bb67a85fmr3169404pjq.202.1664450465517; Thu, 29
- Sep 2022 04:21:05 -0700 (PDT)
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date;
+        bh=SwmTmZM4cNqpS1jNdiXo9u+cxg65tRQ/3yvkU0CfYPE=;
+        b=NjG54GKEg/ExuiYKy2vERoQzU67AfRAOmjy+jVDZSg/k9j8cCiKX3CISD5r+KOZfCM
+         gGG4OH8DMabeM2zqI+K7UMjP44aLOtq82VuXfov6Cn1P+j6llHgc08YNCsfx8OnbxDO+
+         rqnVYwobtCseG9oNnRZBm/F8p/7ulX7aHwX/gjaqFyH+dq+E+4T5LdOS9cEJ5iOoZIUa
+         x37gGeEq20uJkHyetOlcG4VjzCLK9xVbHAQmQG8zwBejphr+nYxWjIFg914gU2Gmqfur
+         jl9UihIJm0CJUUI+f4hIXFRKR+yGRROB9oNGTOHgvIrlglfW+bf2KYo7BD+Aec6+mLFy
+         +Rig==
+X-Gm-Message-State: ACrzQf18vXx/mjnAZXk/VniJQIjoeugbuYXLvmzlQlTgpDS5B7Woyqup
+        VrM2NwhkSe3lweUH3o0c2AcLDy11Q3UJy3WZSRRZYg==
+X-Google-Smtp-Source: AMsMyM5ZUb/2lWBCbsRRgg01oLCxyggEUP2L940cOJ4h0BKo9I4kzuXh3iyLffRgpIqyDbOXNi5nXm5cDl5aVMj2UYE=
+X-Received: by 2002:a05:6a00:24c2:b0:52e:7181:a8a0 with SMTP id
+ d2-20020a056a0024c200b0052e7181a8a0mr3331978pfv.57.1664455322742; Thu, 29 Sep
+ 2022 05:42:02 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220928165420.1212284-1-dinguyen@kernel.org> <20220928165420.1212284-3-dinguyen@kernel.org>
-In-Reply-To: <20220928165420.1212284-3-dinguyen@kernel.org>
+References: <21f604139a9a4675b9ed49292839dcfb@horizon.ai> <dd8d212c48944cb4ba3b58af2efe3723@horizon.ai>
+In-Reply-To: <dd8d212c48944cb4ba3b58af2efe3723@horizon.ai>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 29 Sep 2022 13:20:28 +0200
-Message-ID: <CAPDyKFpF3rxYiHVeDyUCirciQKzrOJjPayZFQkFCoX6JXf8P1Q@mail.gmail.com>
-Subject: Re: [PATCHv4 3/3] mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
-To:     Dinh Nguyen <dinguyen@kernel.org>
-Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+Date:   Thu, 29 Sep 2022 14:41:26 +0200
+Message-ID: <CAPDyKFo_izPD7z-GmSEZ_8H_AX+KiVuLqN7JcD2Kdjjuukk-7g@mail.gmail.com>
+Subject: Re: [PATCH RFC stable 4.14 1/1] mmc: core: fix hung task caused by
+ race condition on context_info
+To:     "dinggao.pan" <dinggao.pan@horizon.ai>
+Cc:     "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
+        "tglx@linutronix.de" <tglx@linutronix.de>,
+        "rostedt@goodmis.org" <rostedt@goodmis.org>,
+        "ming.yu" <ming.yu@horizon.ai>,
+        "yunqian.wang" <yunqian.wang@horizon.ai>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-rt-users@vger.kernel.org" <linux-rt-users@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 28 Sept 2022 at 18:54, Dinh Nguyen <dinguyen@kernel.org> wrote:
+On Mon, 5 Sept 2022 at 08:22, dinggao.pan <dinggao.pan@horizon.ai> wrote:
 >
-> The clock-phase settings for the SDMMC controller in the SoCFPGA
-> Strarix10/Agilex/N5X platforms reside in a register in the System
-> Manager. Add a method to access that register through the syscon
-> interface.
+> Hi,
+> After applying rt patches to our 4.14 kernel and enabling preempt-rt, we =
+met a hung task during boot caused by race condition on context_info stored=
+ in struct mmc_host.
+> From our investigation, context_info should not be changed by threads tha=
+t have not claimed the host, hence the following fix.
 >
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
-> ---
-> v4: no change
-> v3: add space before &socfpga_drv_data
-> v2: simplify clk-phase calculations
-> ---
->  drivers/mmc/host/dw_mmc-pltfm.c | 41 ++++++++++++++++++++++++++++++++-
->  1 file changed, 40 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
-> index 9901208be797..0f07fa6d0150 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -17,10 +17,16 @@
->  #include <linux/mmc/host.h>
->  #include <linux/mmc/mmc.h>
->  #include <linux/of.h>
-> +#include <linux/mfd/altera-sysmgr.h>
-> +#include <linux/regmap.h>
->
->  #include "dw_mmc.h"
->  #include "dw_mmc-pltfm.h"
->
-> +#define SOCFPGA_DW_MMC_CLK_PHASE_STEP  45
-> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel) \
-> +       ((((smplsel) & 0x7) << 4) | (((drvsel) & 0x7) << 0))
-> +
->  int dw_mci_pltfm_register(struct platform_device *pdev,
->                           const struct dw_mci_drv_data *drv_data)
->  {
-> @@ -62,9 +68,42 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
->  };
->  EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
->
-> +static int dw_mci_socfpga_priv_init(struct dw_mci *host)
-> +{
-> +       struct device_node *np = host->dev->of_node;
-> +       struct regmap *sys_mgr_base_addr;
-> +       u32 clk_phase[2] = {0}, reg_offset;
-> +       int i, rc, hs_timing;
-> +
-> +       rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
-> +       if (rc) {
+> Any comments are much appreciated.
+> Dinggao Pan
 
-This looks wrong, as rc may contain a negative error code,when there
-is no clk-phase-sd-hs property found.
+Hi Dinggao,
 
-Instead, we probably want to check "if (rc < 0)" here instead, then
-bail out, but without breaking backwards compatibility.
+Apologize for the delay.
 
-> +               sys_mgr_base_addr =
-> +                       altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
-> +               if (IS_ERR(sys_mgr_base_addr)) {
-> +                       pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
-> +                       return 1;
-> +               }
-> +       } else
-> +               return 1;
-> +
-> +       of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
-> +
-> +       for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
-> +               clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
-> +
-> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
-> +       regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
-> +
-> +       return 0;
-> +}
-> +
-> +static const struct dw_mci_drv_data socfpga_drv_data = {
-> +       .init           = dw_mci_socfpga_priv_init,
-> +};
-> +
->  static const struct of_device_id dw_mci_pltfm_match[] = {
->         { .compatible = "snps,dw-mshc", },
-> -       { .compatible = "altr,socfpga-dw-mshc", },
-> +       { .compatible = "altr,socfpga-dw-mshc", .data = &socfpga_drv_data, },
->         { .compatible = "img,pistachio-dw-mshc", },
->         {},
->  };
-> --
-> 2.25.1
->
+The 4.14 kernel is too old for me to be able to comment. In
+particular, the mmc block layer moved to blk-mq in v4.16, which means
+the path you are investigating doesn't exist any more, sorry.
 
 Kind regards
 Uffe
+
+>
+> From: "Dinggao Pan" <mailto:dinggao.pan@horizon.ai>
+>
+> =E3=80=80=E3=80=80A race condition happens under following circumstances:
+>     (mmc_thread1)               |              (mmc_thread2)
+>     mmc_issue_rq(req1)          |
+>       > qcnt++ for req1         |
+>         host handling req1      |
+>     mmc_queue_thread(req=3Dnull)  |
+>       > enter queue thread      |
+>         again, fetches blk req  |
+>         (return null), sets     |
+>         is_waiting_last_req 1   |  mmc_request_fn(req1) -> set is_new_req=
+ 1
+>                                 |                   and wake_up wait_queu=
+e
+>     mmc_issue_rq(req2)          |   > mmc_thread2 tries to claim host
+>       > **qcnt++ for req2**     |
+>       mmc_finalize_req(req2)    |
+>         > should wait for req1  |
+>           done but req2 return  |
+>           MMC_BLK_NEW_REQ       |
+>           due to is_new_req     |
+>           already set to 1      |
+>                                 |
+>                                 |
+>     req1 done                   |
+>       > qcnt-- for req1         |
+>     mmc_issue_rq(req3)          |
+>       > qcnt++ for req3         |
+> req2 is not handled but qcnt is already added(noted by **),
+> thus mmc_thread1 will never release host, causing mmc_threads
+> except thread1 to hung. Fix race by moving wake_up to the front of
+> context_info update.
+>
+> Reviewed By: Yunqian Wang <mailto:yunqian.wang@horizon.ai>
+> Signed-off-by: Dinggao Pan <mailto:dinggao.pan@horizon.ai>
+> Signed-off-by: Ming Yu <mailto:ming.yu@horizon.ai>
+> ---
+> drivers/mmc/core/queue.c | 7 +++++--
+> 1 file changed, 5 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index 0a4e77a5b..58318c102 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -107,6 +107,11 @@ static void mmc_request_fn(struct request_queue *q)
+>                return;
+>       }
+>
+> +      if (mq->asleep) {
+> +               wake_up_process(mq->thread);
+> +               return;
+> +      }
+> +
+>       cntx =3D &mq->card->host->context_info;
+>
+>       if (cntx->is_waiting_last_req) {
+> @@ -114,8 +119,6 @@ static void mmc_request_fn(struct request_queue *q)
+>                wake_up_interruptible(&cntx->wait);
+>       }
+>
+> -       if (mq->asleep)
+> -                wake_up_process(mq->thread);
+> }
+>
+> static struct scatterlist *mmc_alloc_sg(int sg_len, gfp_t gfp)
+> --
+> 2.36.1
