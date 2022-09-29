@@ -2,133 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7AA3DC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 15:18:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35249C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 16:40:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235539AbiI2PSa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Sep 2022 11:18:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39506 "EHLO
+        id S235723AbiI2QkQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Sep 2022 12:40:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235605AbiI2PS3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 11:18:29 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05A1A14F805;
-        Thu, 29 Sep 2022 08:18:28 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S235726AbiI2QkK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 12:40:10 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2D6B1BEB2
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Sep 2022 09:40:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1664469605;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=L6vXI1WS0UxzQeZpA4OgRrRLeEgBfGYudqcjKdjRj7M=;
+        b=VrAvyMGxeWyasDyZsqAZAFUxR9cpbaEQPHGEeMvIUJeejO3SxFB1+Vp+v5Kyc2vDBgG0Ou
+        Y84ItDW9w1/WXXe+FtbYPOvYWCeBRcjDOqCp3oQhMFZy2tqnPKNa+UuHgHrbyBgLqkFffY
+        CqZ4OxIXOtigM3irHomewhZBr3mAQdE=
+Received: from mimecast-mx02.redhat.com (mimecast-mx02.redhat.com
+ [66.187.233.88]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-582-6I3q8TJ0Pm2bKTmHsCLDzQ-1; Thu, 29 Sep 2022 12:40:00 -0400
+X-MC-Unique: 6I3q8TJ0Pm2bKTmHsCLDzQ-1
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id B6B64B824B7;
-        Thu, 29 Sep 2022 15:18:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1235C433C1;
-        Thu, 29 Sep 2022 15:18:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664464705;
-        bh=yGsaOq9kyzvgGji/8EN1OKXb4Lsu/CQzHqSAuKNquJU=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=rlop4KQiRbV4FLf3OtbnMhWNrGyei2AYFTiwHCsZCysnV2HV0hIg09ZsBiP7eWedX
-         KJjhFhhMQNfaqSQBQqqp6+hKBJqmw9ejR3tlSdILRiof25BoPkfVO7p7qd2auPI0pk
-         kISeVPEr/gW+N6LZ/UmetUeWt3hddSlb9cmkmmDLtq+qGbDyALCCoIe8mCRLLHaJhS
-         KtOVzBnqpd5pP8wAxUaSQSQnrzLA2wHow/qMxqG8QOC4onC2VARuGrk9Q35QE0Y4l1
-         iRIRx5OvqAJB4swQr/dkxE4kJwwfu56CwLhSd3nLcHu54TDA9ZIL6vhc5rYDX0BgkT
-         NnE2UMgyMBwTg==
-Message-ID: <76b5195a-a11c-0c75-b3dd-36aa78c58397@kernel.org>
-Date:   Thu, 29 Sep 2022 10:18:23 -0500
+        by mimecast-mx02.redhat.com (Postfix) with ESMTPS id 9C5FB85A5B6;
+        Thu, 29 Sep 2022 16:39:59 +0000 (UTC)
+Received: from localhost (unknown [10.22.11.90])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id F310F1731B;
+        Thu, 29 Sep 2022 16:39:58 +0000 (UTC)
+Date:   Thu, 29 Sep 2022 13:39:57 -0300
+From:   "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     "dinggao.pan" <dinggao.pan@horizon.ai>,
+        "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
+        "tglx@linutronix.de" <tglx@linutronix.de>,
+        "rostedt@goodmis.org" <rostedt@goodmis.org>,
+        "ming.yu" <ming.yu@horizon.ai>,
+        "yunqian.wang" <yunqian.wang@horizon.ai>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-rt-users@vger.kernel.org" <linux-rt-users@vger.kernel.org>
+Subject: Re: [PATCH RFC stable 4.14 1/1] mmc: core: fix hung task caused by
+ race condition on context_info
+Message-ID: <YzXKXQOw5FtNmy/J@uudg.org>
+References: <21f604139a9a4675b9ed49292839dcfb@horizon.ai>
+ <dd8d212c48944cb4ba3b58af2efe3723@horizon.ai>
+ <CAPDyKFo_izPD7z-GmSEZ_8H_AX+KiVuLqN7JcD2Kdjjuukk-7g@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCHv4 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-References: <20220928165420.1212284-1-dinguyen@kernel.org>
- <CAPDyKFp5oPuOz9A=37pRTvq7JPtJRdduEgmU9g+eUm0K=dZjUg@mail.gmail.com>
- <20cbd2a2-752e-8537-4cbd-6665ef9afd69@kernel.org>
- <bd024e66-25bb-0463-b346-b110c1b46681@linaro.org>
-From:   Dinh Nguyen <dinguyen@kernel.org>
-In-Reply-To: <bd024e66-25bb-0463-b346-b110c1b46681@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <CAPDyKFo_izPD7z-GmSEZ_8H_AX+KiVuLqN7JcD2Kdjjuukk-7g@mail.gmail.com>
+X-Scanned-By: MIMEDefang 3.1 on 10.11.54.5
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 9/29/22 09:38, Krzysztof Kozlowski wrote:
-> On 29/09/2022 16:20, Dinh Nguyen wrote:
->>>
->>> So this change will not be backwards compatible with existing DTBs. I
->>> noticed that patch2 updates the DTS files for the arm64 platforms, but
->>> there seems to be some arm32 platforms too. Isn't this going to be a
->>> problem?
->>>
->>
->> The arm32 platforms makes the clk-phase adjustment through the clock
->> driver. There was a discussion when I originally submitted the support
->> for the arm32 platforms, and we landed on going through the clock driver
->> instead of using the MMC driver. The updates to the arm32 platforms can
->> be done after this patch series.
+On Thu, Sep 29, 2022 at 02:41:26PM +0200, Ulf Hansson wrote:
+> On Mon, 5 Sept 2022 at 08:22, dinggao.pan <dinggao.pan@horizon.ai> wrote:
+> >
+> > Hi,
+> > After applying rt patches to our 4.14 kernel and enabling preempt-rt, we met a hung task during boot caused by race condition on context_info stored in struct mmc_host.
+> > From our investigation, context_info should not be changed by threads that have not claimed the host, hence the following fix.
+> >
+> > Any comments are much appreciated.
+> > Dinggao Pan
 > 
-> How the update "can be done after"? Didn't you break all boards in- and
-> out-of-tree?
+> Hi Dinggao,
 > 
+> Apologize for the delay.
+> 
+> The 4.14 kernel is too old for me to be able to comment. In
+> particular, the mmc block layer moved to blk-mq in v4.16, which means
+> the path you are investigating doesn't exist any more, sorry.
 
-I don't think so! At least, I don't see how, for the arm32 boards, here 
-are the dts entry for setting the clock-phase:
+And the new code has the queue operations protected by a spinlock
+(queue_lock), which I believe is necessary to fix the issue reported
+here.
 
-sdmmc_clk: sdmmc_clk {
-	#clock-cells = <0>;
-	compatible = "altr,socfpga-gate-clk";
-	clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>,<&per_nand_mmc_clk>;
-	clk-gate = <0xa0 8>;
-	clk-phase = <0 135>;   <-----
-};
-
-sdmmc_clk_divided: sdmmc_clk_divided {
-	#clock-cells = <0>;
-	compatible = "altr,socfpga-gate-clk";
-	clocks = <&sdmmc_clk>;
-	clk-gate = <0xa0 8>;
-	fixed-divider = <4>;
-	};
-
-...
-mmc: dwmmc0@ff704000 {
-	compatible = "altr,socfpga-dw-mshc";
-	reg = <0xff704000 0x1000>;
-	interrupts = <0 139 4>;
-	fifo-depth = <0x400>;
-	#address-cells = <1>;
-	#size-cells = <0>;
-	clocks = <&l4_mp_clk>, <&sdmmc_clk_divided>;
-	clock-names = "biu", "ciu";
-	resets = <&rst SDMMC_RESET>;
-	status = "disabled";
-	};
-
-
-So the setting for the clk-phase is done in the clock driver, 
-(drivers/clk/socfpga/clk-gate.c). This has been done many years now, 
-before the clk-phase-hs-sd concept was added to the sdmmc driver.
-
-When I originally submitted the patches for the ARM64 clock driver 
-support, I forgot to add the clk-phase support for the SD controller. 
-Now that I realized we needed it, the concept to set the clk-phase is in 
-the SD driver, thus I'm just adding the support for arm64.
-
-The arm32 support does not change in any way, so I don't see how it will 
-break it.
-
-I can update the arm32 support with the same function in patch3 after 
-this series. Because updating the arm32 will require me to remove the 
-support in the clock driver, thus, I want to break it out.
-
-Dinh
-
-
-
+Luis
+ 
+> Kind regards
+> Uffe
+> 
+> >
+> > From: "Dinggao Pan" <mailto:dinggao.pan@horizon.ai>
+> >
+> > 　　A race condition happens under following circumstances:
+> >     (mmc_thread1)               |              (mmc_thread2)
+> >     mmc_issue_rq(req1)          |
+> >       > qcnt++ for req1         |
+> >         host handling req1      |
+> >     mmc_queue_thread(req=null)  |
+> >       > enter queue thread      |
+> >         again, fetches blk req  |
+> >         (return null), sets     |
+> >         is_waiting_last_req 1   |  mmc_request_fn(req1) -> set is_new_req 1
+> >                                 |                   and wake_up wait_queue
+> >     mmc_issue_rq(req2)          |   > mmc_thread2 tries to claim host
+> >       > **qcnt++ for req2**     |
+> >       mmc_finalize_req(req2)    |
+> >         > should wait for req1  |
+> >           done but req2 return  |
+> >           MMC_BLK_NEW_REQ       |
+> >           due to is_new_req     |
+> >           already set to 1      |
+> >                                 |
+> >                                 |
+> >     req1 done                   |
+> >       > qcnt-- for req1         |
+> >     mmc_issue_rq(req3)          |
+> >       > qcnt++ for req3         |
+> > req2 is not handled but qcnt is already added(noted by **),
+> > thus mmc_thread1 will never release host, causing mmc_threads
+> > except thread1 to hung. Fix race by moving wake_up to the front of
+> > context_info update.
+> >
+> > Reviewed By: Yunqian Wang <mailto:yunqian.wang@horizon.ai>
+> > Signed-off-by: Dinggao Pan <mailto:dinggao.pan@horizon.ai>
+> > Signed-off-by: Ming Yu <mailto:ming.yu@horizon.ai>
+> > ---
+> > drivers/mmc/core/queue.c | 7 +++++--
+> > 1 file changed, 5 insertions(+), 2 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> > index 0a4e77a5b..58318c102 100644
+> > --- a/drivers/mmc/core/queue.c
+> > +++ b/drivers/mmc/core/queue.c
+> > @@ -107,6 +107,11 @@ static void mmc_request_fn(struct request_queue *q)
+> >                return;
+> >       }
+> >
+> > +      if (mq->asleep) {
+> > +               wake_up_process(mq->thread);
+> > +               return;
+> > +      }
+> > +
+> >       cntx = &mq->card->host->context_info;
+> >
+> >       if (cntx->is_waiting_last_req) {
+> > @@ -114,8 +119,6 @@ static void mmc_request_fn(struct request_queue *q)
+> >                wake_up_interruptible(&cntx->wait);
+> >       }
+> >
+> > -       if (mq->asleep)
+> > -                wake_up_process(mq->thread);
+> > }
+> >
+> > static struct scatterlist *mmc_alloc_sg(int sg_len, gfp_t gfp)
+> > --
+> > 2.36.1
+> 
+---end quoted text---
 
