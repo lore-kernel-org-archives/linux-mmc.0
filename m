@@ -2,132 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29584C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 14:20:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ED47C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Sep 2022 14:24:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235634AbiI2OU3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Sep 2022 10:20:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42514 "EHLO
+        id S234284AbiI2OYz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Sep 2022 10:24:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53598 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235195AbiI2OU2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 10:20:28 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1127744544;
-        Thu, 29 Sep 2022 07:20:27 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9CECC614CC;
-        Thu, 29 Sep 2022 14:20:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4C9A6C433C1;
-        Thu, 29 Sep 2022 14:20:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1664461226;
-        bh=vHV9ImbyC1bX1fA+Ugz63RxnLDORL34uu/WNC/spHOg=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=AxjqOYxXs+PwXi0Pxsa4LAhY5mTPyg9cbMtd52i2rrYVVHy20+aOst0NUJh5fl3uq
-         nsUTZsyojwrI57ufwayF6wyj3Dk3zfgjCe5xmpCqgo5gcnisaL7crsV6o527zbYTas
-         TVtCqLFtRFz+jzf95wuhOG25c2BCd/ZS5vGCn+Ar8TQpq3TOAH4J1sM578e5vQ415i
-         EfuM1j738QugC4KHR0tZxb0LBZmZ/G8Eg6CoDunQCDeDttgczkkcW20l47TWkj2nXA
-         y5tRYQfYlubGR70F7VVXBZdWQ7gfr0sPFmL17bdmdQqyjD7EaVbpp/TP266qZz8b5b
-         3rwTsJUeOqfKA==
-Message-ID: <20cbd2a2-752e-8537-4cbd-6665ef9afd69@kernel.org>
-Date:   Thu, 29 Sep 2022 09:20:23 -0500
+        with ESMTP id S231620AbiI2OYx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Sep 2022 10:24:53 -0400
+Received: from galois.linutronix.de (Galois.linutronix.de [193.142.43.55])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3C2A1A071;
+        Thu, 29 Sep 2022 07:24:52 -0700 (PDT)
+Date:   Thu, 29 Sep 2022 16:24:50 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020; t=1664461491;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Xsnz1CPyHg7fip2P3ukxoL3NjBLtoXu7CInHbewXJRY=;
+        b=KynjMfTsthMMkazZIoXqMMlyUpykKSLtTKB61F+QM3Y2du1qSNAMgbl+AKQPbG2Jl8Fxt0
+        2RD7NfYg/pXqJ0Gyn05o8XfmO7d44J4eHD5or1AYSpAKgcQo9EilB1NNm8DgeNteIn8i6c
+        cw9YWElVvMS5BRxIw5jIG/UKb3KfhrV8lwFnFAs0DUaXmoUbHqKmG4/t/TqLZObV2bZelw
+        74OOogbQ4g6o7JI3+BTXuMhi3iU5V7QTb6fTJncTfgzektRIUrUn3pmxxdjMXew8YTd9t7
+        Ld1GZCBGm+bXNS12W3KbZ6AiGrlUh7aVHJ9HrI4jpF7qFjMcaqXeqljn9hCu+Q==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020e; t=1664461491;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=Xsnz1CPyHg7fip2P3ukxoL3NjBLtoXu7CInHbewXJRY=;
+        b=7f4uxMMSNzHHZMB6f8cbpHG4Wcok74vNJG+t896bZPakpyjo60hNoEezrPRRYkBv9KKbFg
+        r3hvTJ1v4oVp6DDQ==
+From:   "bigeasy@linutronix.de" <bigeasy@linutronix.de>
+To:     Steven Rostedt <rostedt@goodmis.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "dinggao.pan" <dinggao.pan@horizon.ai>,
+        "tglx@linutronix.de" <tglx@linutronix.de>,
+        "ming.yu" <ming.yu@horizon.ai>,
+        "yunqian.wang" <yunqian.wang@horizon.ai>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-rt-users@vger.kernel.org" <linux-rt-users@vger.kernel.org>,
+        "Luis Claudio R. Goncalves" <lgoncalv@redhat.com>
+Subject: Re: [PATCH RFC stable 4.14 1/1] mmc: core: fix hung task caused by
+ race condition on context_info
+Message-ID: <YzWqsm9sRv0f6fTy@linutronix.de>
+References: <21f604139a9a4675b9ed49292839dcfb@horizon.ai>
+ <dd8d212c48944cb4ba3b58af2efe3723@horizon.ai>
+ <CAPDyKFo_izPD7z-GmSEZ_8H_AX+KiVuLqN7JcD2Kdjjuukk-7g@mail.gmail.com>
+ <20220929100750.172e53d4@gandalf.local.home>
+ <20220929101349.25c835db@gandalf.local.home>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCHv4 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
-References: <20220928165420.1212284-1-dinguyen@kernel.org>
- <CAPDyKFp5oPuOz9A=37pRTvq7JPtJRdduEgmU9g+eUm0K=dZjUg@mail.gmail.com>
-From:   Dinh Nguyen <dinguyen@kernel.org>
-In-Reply-To: <CAPDyKFp5oPuOz9A=37pRTvq7JPtJRdduEgmU9g+eUm0K=dZjUg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20220929101349.25c835db@gandalf.local.home>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 2022-09-29 10:13:49 [-0400], Steven Rostedt wrote:
+> It appears that I have an old email address for Luis, and it bounced.
+> Updated with his redhat one.
 
+It would be to know if this affects mainline. If not, does it affect
+4.14 or just 4.14-RT. If it is not limited to RT then it should be sent
+-stable once we know how it is fixed mainline.
 
-On 9/29/22 04:24, Ulf Hansson wrote:
-> On Wed, 28 Sept 2022 at 18:54, Dinh Nguyen <dinguyen@kernel.org> wrote:
->>
->> Document the optional "altr,sysmgr-syscon" binding that is used to
->> access the System Manager register that controls the SDMMC clock
->> phase.
->>
->> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
->> ---
->> v4: add else statement
->> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->>      "altr,socfpga-dw-mshc"
->> v2: document "altr,sysmgr-syscon" in the MMC section
->> ---
->>   .../bindings/mmc/synopsys-dw-mshc.yaml        | 31 +++++++++++++++++--
->>   1 file changed, 28 insertions(+), 3 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> index ae6d6fca79e2..b73324273464 100644
->> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->>
->>   title: Synopsys Designware Mobile Storage Host Controller Binding
->>
->> -allOf:
->> -  - $ref: "synopsys-dw-mshc-common.yaml#"
->> -
->>   maintainers:
->>     - Ulf Hansson <ulf.hansson@linaro.org>
->>
->> @@ -38,6 +35,34 @@ properties:
->>         - const: biu
->>         - const: ciu
->>
->> +  altr,sysmgr-syscon:
->> +    $ref: /schemas/types.yaml#/definitions/phandle-array
->> +    items:
->> +      - items:
->> +          - description: phandle to the sysmgr node
->> +          - description: register offset that controls the SDMMC clock phase
->> +    description:
->> +      Contains the phandle to System Manager block that contains
->> +      the SDMMC clock-phase control register. The first value is the pointer
->> +      to the sysmgr and the 2nd value is the register offset for the SDMMC
->> +      clock phase register.
->> +
->> +allOf:
->> +  - $ref: "synopsys-dw-mshc-common.yaml#"
->> +
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const:
->> +              - altr,socfpga-dw-mshc
->> +    then:
->> +      required:
->> +        - altr,sysmgr-syscon
->> +    else:
->> +      properties:
->> +        altr,sysmgr-syscon: false
-> 
-> So this change will not be backwards compatible with existing DTBs. I
-> noticed that patch2 updates the DTS files for the arm64 platforms, but
-> there seems to be some arm32 platforms too. Isn't this going to be a
-> problem?
-> 
+> -- Steve
 
-The arm32 platforms makes the clk-phase adjustment through the clock 
-driver. There was a discussion when I originally submitted the support 
-for the arm32 platforms, and we landed on going through the clock driver 
-instead of using the MMC driver. The updates to the arm32 platforms can 
-be done after this patch series.
-
-Dinh
+Sebastian
