@@ -2,105 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 70F4EC43217
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 03:09:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5476C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 06:42:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232907AbiJADJD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Sep 2022 23:09:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44876 "EHLO
+        id S229458AbiJAGmU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 1 Oct 2022 02:42:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232371AbiJADHo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2022 23:07:44 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50822E318C;
-        Fri, 30 Sep 2022 20:07:00 -0700 (PDT)
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 2912puFL012021;
-        Sat, 1 Oct 2022 03:06:57 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=qcppdkim1;
- bh=IjK9zVJOXKYgoA3dvxjM9g3vnQSeUVYSH6OEJu8iyz0=;
- b=MILBwbajVmUSTqxZinz3/BNELiqw4gPHEfUb0LwmiazAtKA7fRMS9sCdLLiYtqEBjp2+
- ZA6SjZCvQ+UG6MrpZR4kf86QblOTpz72CBaH0GvnL8yDNKd/GUc19skch8k9L3ZNINq4
- BG4LxNJgsO7ZcqO58GNk9Vz9cJj5D3Gp8uJIsZdb7hJ7cIFpJ3C9FAJFqKosN2mGVIWa
- jYQljorEEBTXgzNB9U6iRuQx76bEGZ56UBv3FWNgMEXSxDU8PXvBigBuF9JPS98z5jNT
- nI31euigKndFEbipCCYANZHuuJCxnSxSuonpAynZhrIrIi9RJ2WPVRTDileC6nGXv5CC WQ== 
-Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3jwkee47qx-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 01 Oct 2022 03:06:57 +0000
-Received: from nasanex01b.na.qualcomm.com (nasanex01b.na.qualcomm.com [10.46.141.250])
-        by NASANPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 29136uiH004990
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Sat, 1 Oct 2022 03:06:56 GMT
-Received: from hu-molvera-sd.qualcomm.com (10.80.80.8) by
- nasanex01b.na.qualcomm.com (10.46.141.250) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.29; Fri, 30 Sep 2022 20:06:55 -0700
-From:   Melody Olvera <quic_molvera@quicinc.com>
-To:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Melody Olvera <quic_molvera@quicinc.com>
-Subject: [PATCH 5/5] soc: qcom: socinfo: Add QDU1000/QRU1000 and variant IDs
-Date:   Fri, 30 Sep 2022 20:06:41 -0700
-Message-ID: <20221001030641.29354-6-quic_molvera@quicinc.com>
-X-Mailer: git-send-email 2.37.3
-In-Reply-To: <20221001030641.29354-1-quic_molvera@quicinc.com>
-References: <20221001030641.29354-1-quic_molvera@quicinc.com>
+        with ESMTP id S229436AbiJAGmS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 02:42:18 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38B42186026
+        for <linux-mmc@vger.kernel.org>; Fri, 30 Sep 2022 23:42:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=/89nnS4Ca4Z9ELgqt6mLiZHkrrWq
+        x7Z0teg6BVDd2Dg=; b=JvPC392QlBSi6u+Y/oDGSjAp0tE5XEU0r6v12zPZfH1T
+        Lw5USGODj87CWvU2H+4/L3xLOVNF2mRQayOJ1QQJdrTSEEe2GYfRs3CRkhZAjHok
+        a1jK2pXEAAPgFx4pkFqnX7liGlJParavvDX2ipUge7P55m+zBnrZ6i1oaA6p/Ks=
+Received: (qmail 858644 invoked from network); 1 Oct 2022 08:42:12 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 1 Oct 2022 08:42:12 +0200
+X-UD-Smtp-Session: l3s3148p1@C2QGafPp18kucrO7
+Date:   Sat, 1 Oct 2022 08:42:11 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
+Message-ID: <YzfhQ9gFgGbCafid@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
+ <CAMuHMdU+0Umi1RiLxdR5MCV2FZvi7a9HuS8EFJtx7JksQBP4eg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nasanex01b.na.qualcomm.com (10.46.141.250)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 1LpebKUp_PBJd4M8bemCWfsgUCaIP8OP
-X-Proofpoint-ORIG-GUID: 1LpebKUp_PBJd4M8bemCWfsgUCaIP8OP
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.528,FMLib:17.11.122.1
- definitions=2022-10-01_02,2022-09-29_03,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 adultscore=0
- bulkscore=0 phishscore=0 mlxlogscore=979 spamscore=0 suspectscore=0
- impostorscore=0 lowpriorityscore=0 malwarescore=0 priorityscore=1501
- clxscore=1015 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2209130000 definitions=main-2210010016
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="LhyXKQm22sMbRxbp"
+Content-Disposition: inline
+In-Reply-To: <CAMuHMdU+0Umi1RiLxdR5MCV2FZvi7a9HuS8EFJtx7JksQBP4eg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add soc IDs for QDU1000 and QRU1000 and their variants.
 
-Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
----
- drivers/soc/qcom/socinfo.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+--LhyXKQm22sMbRxbp
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/soc/qcom/socinfo.c b/drivers/soc/qcom/socinfo.c
-index 4554fb8655d3..d10942b1b9a7 100644
---- a/drivers/soc/qcom/socinfo.c
-+++ b/drivers/soc/qcom/socinfo.c
-@@ -334,6 +334,12 @@ static const struct soc_id soc_id[] = {
- 	{ 482, "SM8450" },
- 	{ 487, "SC7280" },
- 	{ 495, "SC7180P" },
-+	{ 539, "QRU1000" },
-+	{ 545, "QDU1000" },
-+	{ 587, "QDU1010" },
-+	{ 588, "QRU1032" },
-+	{ 589, "QRU1052" },
-+	{ 590, "QRU1062" },
- };
- 
- static const char *socinfo_machine(struct device *dev, unsigned int id)
--- 
-2.37.3
+On Fri, Sep 30, 2022 at 11:09:07AM +0200, Geert Uytterhoeven wrote:
+> On Wed, Sep 28, 2022 at 1:08 PM Biju Das <biju.das.jz@bp.renesas.com> wro=
+te:
+> > Due to clk rounding errors on RZ/G2L platforms, it selects a clock sour=
+ce
+> > with a lower clock rate compared to a higher one.
+> > For eg: The rounding error (533333333 Hz / 4 * 4 =3D 533333332 Hz < 533=
+3333
+> > 33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
+> >
+> > This patch fixes this issue by adding a margin of (1/1024) higher to
+> > the clock rate.
+> >
+> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> > ---
+> > v4->v5:
+> >  * Moved upper limit calculation inside the for loop as it caused
+> >    regression on R-Car M2-W board.
+> >  * Removed Rb tag from Wolfram as there is some new changes.
+>=20
+> Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+>=20
+> Still works fine on R-Car Gen2/Gen3, so:
+> Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
 
+I'll test this patch on Monday.
+
+
+--LhyXKQm22sMbRxbp
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmM34UAACgkQFA3kzBSg
+KbbDsRAAmvX22ffiiTnFr1/d7ZhmEeffxj5M63kbRDb8RkkURGBAWkAkQaJG9blt
+rKu0ueXSKCrxjVQu2ezMtFTednwwwXAMEIbjwkHEpnNLub3ZJcNzzfQaTfFGavI7
+4u1xdUHUPM4+t4KaSHCRHOqUMxF3Aieru2EHfMY6yCyaFnuecb9lfXxmz9dmjqbt
+0+74tTdJLZPiTDfA0BL1m3+njPfgNyB5gNfe0295cYOaxNuG3z7wVf4s+QQVhkPo
+oxIoDNwRc7zjSPKQDwo56FhwXIZVj9lYtPWjLGt7NQUC5tHXsQD0t2oHPXIgaS6I
+UT8dICrcXWe2DyYHi8H/QI+NzhhB96Ozl0jelMAWXKwKDDDzc3yKDi8NVZG0u6Ki
+C4h91v3+xHJDECv2q8kQpRBf4Dav3d9qQu1haGeEWpjQiQP38fJgrZEyxvlapfZ7
+RJ5tpQy7AO/Rhr3eNod+CG3e2guaBtDspSiYN62hROJLTVDXcME35L1TUzDRAr6C
+9SVq+AUh+BrSQaE7nnpdQE7Z3Lo6AY7JNacAOlYvZCmBImau6Epi6Q2FSCanMicC
+9cruWLYLw5RLLkKqrgV/2HKVJ8qyUMQ1bRZPoWwEtvAqoolfRsyXeo8eQWo97wXt
+ODby7q6Cp5d7MVwarylbEWjTEs6QZIJvNGQoLeMwFkrd54+/B9o=
+=h/pB
+-----END PGP SIGNATURE-----
+
+--LhyXKQm22sMbRxbp--
