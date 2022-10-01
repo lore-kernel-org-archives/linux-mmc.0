@@ -2,60 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E260C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 09:28:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B052C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 09:34:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229459AbiJAJ2p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 1 Oct 2022 05:28:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37302 "EHLO
+        id S229537AbiJAJeS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 1 Oct 2022 05:34:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229574AbiJAJ2o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 05:28:44 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BA4052440
-        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 02:28:42 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id j16so10226769lfg.1
-        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 02:28:42 -0700 (PDT)
+        with ESMTP id S229544AbiJAJeR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 05:34:17 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6F955FF42
+        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 02:34:15 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id o7so2957730lfk.7
+        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 02:34:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date;
-        bh=YdPHxxrsTu8LYdCepcG9y1MKQ3OdnJI3POPrADnpEgg=;
-        b=xg9mTtvdWNdexWck3qcrU0/mLGdrcl5gP6TF4vNz0rshUYG/ZOsbQhM6Xe6c7SdJBi
-         gEWMs8H11WZEuiF0B/XuMr4mSWNJ7dr3muhSLqcj5FBA+Kg8hX0PP80D2bZvnbBGebQ3
-         2SQphnKAhNjHLkl8eTbJk0PqSx+Y7E5UOpc1VrO38FjdX42lTXdxVgNwJysT4iH8DhHY
-         1thM47N5sjqDvVtaDcnv68xR5u+jljMpJqtpKPang3zKc6ZoDjXhGdJTMvO8c/z2un+u
-         WUmPhHESK1ZwieclZqS2JGqzAzJJiSTpET9OT80RJtjeA/Hvw6/7SCOONfOTK/EMODYV
-         MGeQ==
+        bh=P7Jq51tyMHoeZHrZDGPWEeNBcJqEDxElbAOOSKcyPOM=;
+        b=T42LMASoIsUMext9gElFhOnDWe1SP63HoZqV2Wp8sZsAGHiwShbJlCELgEt3h0qonJ
+         GnBJEvXzb4NZwcRlQiZc9JYufsBCCD6Km86P9keyYHcIEoIt8Dx/jYOXTZJ60gmLa0AZ
+         7nhT1CtyP+UejXCYWM0ubN1E8ynbSx2QADzpQevnHLX+KfpYB/GMySuDqFyxOZj+BUyG
+         mjUZIlbiAWUdNmjjRvJeUXmDHT1mQfael/Mi3kg21O8fVRDnXgl4pyki+W9Z5R8wtlsF
+         E6lEppVmZSKCASRLtm1LEb1CfCUsznexkuqnrmJ8kl7z0CJpIl/Ohq0jYKDyEvI8UJit
+         D4qg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date;
-        bh=YdPHxxrsTu8LYdCepcG9y1MKQ3OdnJI3POPrADnpEgg=;
-        b=a3H2aiYrtoDABwObSCsRTxEsVCe4gwTsAzDVSlKOWdGa4/yGLCi2mIAZdFw2x3bV2q
-         ONsTWw+8KOCaJht/9FaK7GqlvewUIBRS36ygiGMX2LS0t1Susuh+9BD3n1VlpC5z33IQ
-         FqKGc1wkUWACMamwPNptPGAvF4HG5qnk2C4+yKuc7HPFhnYSeiTfM30nkp9yuQ0ze6cZ
-         66hi5nrCcnn9gtdjwfpKlZJH6s49FuW8erRQtdSky3kcKyTthntAA122/GRJDgBVUvz1
-         xCS+zAAG43H6YZi60E/s3orrra/0Z6ySEZepMlrfxOccZ1ijsoAMyScXLuMhSbZeIs+4
-         qOpg==
-X-Gm-Message-State: ACrzQf0dx8//hnaHNkPyQpfmAiQbpI+GllorQZHcl2Zg+A4u4E7kd77g
-        /nfOlPct9pZCozq/b2ajXFDcqQ==
-X-Google-Smtp-Source: AMsMyM73dNZllJJbkaOeh+4CRO/HvU5rKn/jqqmuBTDx1I1F+c+bifIfykTSjnGeLIepliZ7wpFGRA==
-X-Received: by 2002:ac2:4f03:0:b0:495:ec98:bcac with SMTP id k3-20020ac24f03000000b00495ec98bcacmr4452776lfr.339.1664616520531;
-        Sat, 01 Oct 2022 02:28:40 -0700 (PDT)
+        bh=P7Jq51tyMHoeZHrZDGPWEeNBcJqEDxElbAOOSKcyPOM=;
+        b=sYPuMlCWAdglClJZNxvXs7dHQd7znudkPu6b7EkJYmEdOO4yiksR2SHLi4qVqkY7Hq
+         Ar5zrBsw0UUtI7Y8wtFW0/SYGQ2d2fE7K1HJBYJBjpmMB+rLPBOK0Cz0Vv8jlBMMfkR7
+         Lpc5Rrtf+hTxMx0d5DC5kXSOFCKcnk9QaeFcbyvWrqocqSsqTsbSoHQkyiMywnEbNuGn
+         dByl6geVxXqrjg50/Hb57q0QLTIRzScZLlJLEZq1kwCw6OMF50RLj5qzf7nRRggIxQiI
+         aa6lpqdqbMcPi8ENsvBR4ohoHlLZbgmMzEyN6C4s0oh7iwrZQdOVvKJNa1Snv6T3jhgM
+         slZA==
+X-Gm-Message-State: ACrzQf2wWyqaiO4u0qp+ZiZqXANwLwZtbtWw/u8aulpLLex0UUFkdwQs
+        QRD6QO7GJygqRpunSDCkgvnfwA==
+X-Google-Smtp-Source: AMsMyM5CTnn56Q/hGDGaxBj6XigCif4H2Aa5nvxOQrL6400LmJ5o9jklu/Dp+noLYDYBQw4mPy4X3A==
+X-Received: by 2002:ac2:442d:0:b0:4a2:23e2:cf59 with SMTP id w13-20020ac2442d000000b004a223e2cf59mr687844lfl.650.1664616853741;
+        Sat, 01 Oct 2022 02:34:13 -0700 (PDT)
 Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id a5-20020a2eb545000000b0026c687f9f7bsm361292ljn.107.2022.10.01.02.28.39
+        by smtp.gmail.com with ESMTPSA id g22-20020a19e056000000b004a0232613desm702729lfj.205.2022.10.01.02.34.12
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 01 Oct 2022 02:28:40 -0700 (PDT)
-Message-ID: <874940fc-3975-172d-b5a6-6ff7e510047a@linaro.org>
-Date:   Sat, 1 Oct 2022 11:28:38 +0200
+        Sat, 01 Oct 2022 02:34:13 -0700 (PDT)
+Message-ID: <084e6f2f-0976-85c8-e27c-b5ed7722d396@linaro.org>
+Date:   Sat, 1 Oct 2022 11:34:12 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.3.0
-Subject: Re: [PATCH 5/5] soc: qcom: socinfo: Add QDU1000/QRU1000 and variant
- IDs
+Subject: Re: [PATCH 0/5] Add misc support for QDU1000/QRU1000 SoCs
 Content-Language: en-US
 To:     Melody Olvera <quic_molvera@quicinc.com>,
         Andy Gross <agross@kernel.org>,
@@ -68,9 +67,8 @@ Cc:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 References: <20221001030641.29354-1-quic_molvera@quicinc.com>
- <20221001030641.29354-6-quic_molvera@quicinc.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221001030641.29354-6-quic_molvera@quicinc.com>
+In-Reply-To: <20221001030641.29354-1-quic_molvera@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -78,33 +76,17 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 01/10/2022 05:06, Melody Olvera wrote:
-> Add soc IDs for QDU1000 and QRU1000 and their variants.
+> This series firmware, SoC, rpmpd, tz-log, and mmc bindings as well as
+> pmic, rpmpd, and socinfo support for QDU1000 and QRU1000 SoCs.
 > 
-> Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
-> ---
->  drivers/soc/qcom/socinfo.c | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/drivers/soc/qcom/socinfo.c b/drivers/soc/qcom/socinfo.c
-> index 4554fb8655d3..d10942b1b9a7 100644
-> --- a/drivers/soc/qcom/socinfo.c
-> +++ b/drivers/soc/qcom/socinfo.c
-> @@ -334,6 +334,12 @@ static const struct soc_id soc_id[] = {
->  	{ 482, "SM8450" },
->  	{ 487, "SC7280" },
->  	{ 495, "SC7180P" },
-> +	{ 539, "QRU1000" },
-> +	{ 545, "QDU1000" },
-> +	{ 587, "QDU1010" },
-> +	{ 588, "QRU1032" },
-> +	{ 589, "QRU1052" },
-> +	{ 590, "QRU1062" },
+> This patchset is based off of [1] and [2] YAML conversion patches.
 
-Rebase on this patch:
-https://patchwork.kernel.org/project/linux-arm-msm/patch/20220830065744.161163-3-krzysztof.kozlowski@linaro.org/
+All of your patchsets were sent to wrong Bjorn's address. This means
+either you based on mainline (which is reasonable but for some reason
+address was not fixed in mainline...) or on some older linux-next.
 
-It is quite discouraging that it could not be merged through that entire
-time...
+I propose to rebase on recent linux-next, so you will get proper Bjorn's
+email.
 
 Best regards,
 Krzysztof
