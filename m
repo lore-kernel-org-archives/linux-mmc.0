@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72E66C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 09:25:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF3B2C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 09:26:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229672AbiJAJZz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 1 Oct 2022 05:25:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59336 "EHLO
+        id S229550AbiJAJ0l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 1 Oct 2022 05:26:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33768 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229648AbiJAJZy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 05:25:54 -0400
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BDEB40BE3
-        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 02:25:52 -0700 (PDT)
-Received: by mail-lj1-x22c.google.com with SMTP id bs18so5511788ljb.1
-        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 02:25:52 -0700 (PDT)
+        with ESMTP id S229648AbiJAJ0h (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 05:26:37 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C250923F1
+        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 02:26:34 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id z4so10215698lft.2
+        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 02:26:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date;
-        bh=zDKG4xvaTROTTwvu1n5jojrvui3PrTe86kZ7nDAgig0=;
-        b=Hc5YObQXfvDHWU48NuQC+7/kgVe5mXh4LNq+HcBKh7ANpEGdWwljCCfga5Yb9COYag
-         JYq8OJUKaRJZyjsh0v45jrgcr7acCT0jk8nx9LZvAoxUi1wxUuulAd5viSS0INTyv9G0
-         xE4iBhIFiT1bqck597wQjvUxi/bNwSrgJPHpK7q+gvQepGl0YoeWZCGO6LnjOabFnbD+
-         iULEiMw+oI0vJuHjCCvZkFMOIlHseOjdAIIBAI5MxLK1/tugIlXNxhSSmeEOh5nRAK6V
-         mTpnqnRDi2lIi9DEjdVDhK9b7XI9pFWtPQ/MefVfDqOoHKdrWbNj+Z7YQ6egLsH/Tsnr
-         ytxg==
+        bh=vYycpIjt46roj/JmgTgurQfrwVP3W22UYGGnXE1tY3E=;
+        b=xjbww+8JVXBC5dEg7aBR/GlzgU+v7kFpqVmmmpfjItWXk4lsAP/8mAauFvV8LK+SG8
+         sydEdmSLYAQSN5CcuBaBAwk5jsA5XcWdgmrR3uY6Wz62G0wdHPst8YOnSF7nFMB7DMtV
+         UD2iA7oYoewGHx8nqisEKBTeukYcNH2HyNMLqcpB/M4VlsgTWzG8dtJ4AuHNIQy5bZiw
+         9MRAKx2G/WrJuISEnMOiOGNFp+IwJBqLPdDOPfCx7U5j+lvXQwFUHtdtK6R6NexEwgMp
+         xflNAvRnemPLlX8jJLl+X2+Y7cQqB3v+eI/JLNRQOQ0FAIt+W2m/xW97Ntongatgatwx
+         LWpA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date;
-        bh=zDKG4xvaTROTTwvu1n5jojrvui3PrTe86kZ7nDAgig0=;
-        b=oTDDrHBM53bMtJq5WTEtFJLUA6uVb3Sjw+R+LeF58/rIbD0ces0Fd2K8BggnFyD/c3
-         1/Dkmm1/3HvhkxuLqRh2NEUovbhAycG+Pt2P/golIUtpDJWtCBIrAFls7l4KY+lW59BW
-         WthBos/A6PeCwy5sagrA/EbATMdYgIwaq/Kn3Q0vhwrF2EC18E4E/fWOmGbm/qsKJeyb
-         5r+gMEyJ8w6dvK4Ma0Hx7orGvZPcrayiffmYwmD8Vse2vHuS7OhS4KQjPEBciIcSOBMo
-         TkIVa19DZxpenSD5Wl+M2TdH4FYGwbb+cECJckmba2a6yqw8C7KGB3CiJHrGmsCvX0d6
-         z1sA==
-X-Gm-Message-State: ACrzQf0BvZxvfKixjf8ODdeVIVXg8WyNqaVDtFljKVBsPAxOr0XNW2wk
-        wYuk6mABIRNzf3nI8cvC/6XEpy/deQBQzA==
-X-Google-Smtp-Source: AMsMyM6L0UreN90dNJ8WzYrRKQf6N9NmkMMy/Q1cI2aGdCdQT6mXeu+XgtWmscSuRQJZKmh0Pp+sjw==
-X-Received: by 2002:a2e:bd0e:0:b0:268:c03b:cf56 with SMTP id n14-20020a2ebd0e000000b00268c03bcf56mr4015713ljq.393.1664616350834;
-        Sat, 01 Oct 2022 02:25:50 -0700 (PDT)
+        bh=vYycpIjt46roj/JmgTgurQfrwVP3W22UYGGnXE1tY3E=;
+        b=HOSjHEIirCwNn1f5cKwBURXgITvzNvZLG2qfdVRYY7bI5/ubOGP2KFF/MRTT5JLsJR
+         z+YFjOYOm7NY4p4J95E+XRctfFknXOmH4xQE78O9fkFfuU7CvLsO4q1MJ4ytqhupfek7
+         djl4RhON16CiknZTFa0+IPuZsjEGog3nVUpJM0+JU6hI4wc6Qx+y+sVXNB8+lN8gwZ8m
+         6ubKU7s4dzWfoW2GOlE6haEGCu7i77ACja1aJijgth+gG2QRw7HJ7Oqodw8ksoAqAvRQ
+         9uqob5BDRj0CiTqsWaa8nmpCdLBB1TNxlI39giybdAPtEVw/LUbCz34EqNn1xavFv4Ln
+         9tKQ==
+X-Gm-Message-State: ACrzQf1WzxnWDE9I8Sc71vVelaC9MLakeI++PVG+ISj6wsrgHDuwGgT6
+        9647zdj3mbO+P/ztiGiqya1BFA==
+X-Google-Smtp-Source: AMsMyM6nB5tjy77rODhilMPVMTsAivmhxLCM04oeuE9gx5AX5/w6eGObHidEOsuR00XKa9oauDjGmw==
+X-Received: by 2002:a05:6512:2286:b0:49e:eb:ea19 with SMTP id f6-20020a056512228600b0049e00ebea19mr4744520lfu.645.1664616392017;
+        Sat, 01 Oct 2022 02:26:32 -0700 (PDT)
 Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id i8-20020a056512318800b004a05402c5c3sm705576lfe.93.2022.10.01.02.25.49
+        by smtp.gmail.com with ESMTPSA id x4-20020ac25dc4000000b0049313f77755sm697924lfq.213.2022.10.01.02.26.31
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 01 Oct 2022 02:25:50 -0700 (PDT)
-Message-ID: <09f5d364-320e-9ecc-2c2b-68066c61f802@linaro.org>
-Date:   Sat, 1 Oct 2022 11:25:49 +0200
+        Sat, 01 Oct 2022 02:26:31 -0700 (PDT)
+Message-ID: <59d306a6-989a-ecf8-0262-7562d110bf0e@linaro.org>
+Date:   Sat, 1 Oct 2022 11:26:30 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.3.0
-Subject: Re: [PATCH 1/5] dt-bindings: firmware: scm: Add QDU1000/QRU1000
- compatibles
+Subject: Re: [PATCH 2/5] dt-bindings: arm: qcom: Document QDU1000/QRU1000 SoCs
+ and boards
 Content-Language: en-US
 To:     Melody Olvera <quic_molvera@quicinc.com>,
         Andy Gross <agross@kernel.org>,
@@ -68,9 +68,9 @@ Cc:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 References: <20221001030641.29354-1-quic_molvera@quicinc.com>
- <20221001030641.29354-2-quic_molvera@quicinc.com>
+ <20221001030641.29354-3-quic_molvera@quicinc.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221001030641.29354-2-quic_molvera@quicinc.com>
+In-Reply-To: <20221001030641.29354-3-quic_molvera@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -78,32 +78,64 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 01/10/2022 05:06, Melody Olvera wrote:
-> Add compatibles for scm driver for QDU1000 and QRU1000 platforms.
+> Document the QDU1000 and QRU1000 SoC bindings and the boards that use
+> them.
 > 
 > Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
 > ---
->  Documentation/devicetree/bindings/firmware/qcom,scm.yaml | 2 ++
->  1 file changed, 2 insertions(+)
+>  Documentation/devicetree/bindings/arm/qcom.yaml | 16 ++++++++++++++++
+
+This patch goes with DT.
+
+>  1 file changed, 16 insertions(+)
 > 
-> diff --git a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
-> index c5b76c9f7ad0..b47a5dda3c3e 100644
-> --- a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
-> +++ b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
-> @@ -51,6 +51,8 @@ properties:
->            - qcom,scm-sm8250
->            - qcom,scm-sm8350
->            - qcom,scm-sm8450
-> +          - qcom,scm-qdu1000
-> +          - qcom,scm-qru1000
-
-Items should be ordered alphabetically.
-
->            - qcom,scm-qcs404
->        - const: qcom,scm
-
-Patch is incomplete. Missing changes for allOf.
-
+> diff --git a/Documentation/devicetree/bindings/arm/qcom.yaml b/Documentation/devicetree/bindings/arm/qcom.yaml
+> index fb1d00bcc847..1cfd92f4ab5d 100644
+> --- a/Documentation/devicetree/bindings/arm/qcom.yaml
+> +++ b/Documentation/devicetree/bindings/arm/qcom.yaml
+> @@ -61,6 +61,8 @@ description: |
+>          sm8250
+>          sm8350
+>          sm8450
+> +        qdu1000
+> +        qru1000
 >  
+>    The 'board' element must be one of the following strings:
+>  
+> @@ -76,6 +78,7 @@ description: |
+>          mtp
+>          qrd
+>          sbc
+> +        x100
+>  
+>    The 'soc_version' and 'board_version' elements take the form of v<Major>.<Minor>
+>    where the minor number may be omitted when it's zero, i.e.  v1.0 is the same
+> @@ -718,6 +721,19 @@ properties:
+>                - qcom,sm8450-qrd
+>            - const: qcom,sm8450
+>  
+> +      - description: Qualcomm Technologies, Inc. Distributed Unit 1000 platform
+> +          - items:
+> +              - enum:
+> +                  - qcom,qdu1000-idp
+> +                  - qcom,qdu1000-x100
+> +              - const: qcom,qdu1000
+
+Wrong order - you put it in some odd place.
+
+> +
+> +      - description: Qualcomm Technologies, Inc. Radio Unit 1000 platform
+> +          - items:
+> +              - enum:
+> +                  -qcom,qru1000-idp
+
+Missing space.
+
+> +              - const: qcom,qru1000
+> +
+>  additionalProperties: true
+>  
+>  ...
 
 Best regards,
 Krzysztof
