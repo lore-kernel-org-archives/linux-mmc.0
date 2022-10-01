@@ -2,91 +2,165 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B052C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 09:34:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5162EC433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 10:06:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229537AbiJAJeS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 1 Oct 2022 05:34:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52946 "EHLO
+        id S229583AbiJAKGS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 1 Oct 2022 06:06:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229544AbiJAJeR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 05:34:17 -0400
-Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6F955FF42
-        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 02:34:15 -0700 (PDT)
-Received: by mail-lf1-x134.google.com with SMTP id o7so2957730lfk.7
-        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 02:34:15 -0700 (PDT)
+        with ESMTP id S229461AbiJAKGR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 06:06:17 -0400
+Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C026126AD4
+        for <linux-mmc@vger.kernel.org>; Sat,  1 Oct 2022 03:06:14 -0700 (PDT)
+Received: by mail-lf1-x12e.google.com with SMTP id d42so10340897lfv.0
+        for <linux-mmc@vger.kernel.org>; Sat, 01 Oct 2022 03:06:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date;
-        bh=P7Jq51tyMHoeZHrZDGPWEeNBcJqEDxElbAOOSKcyPOM=;
-        b=T42LMASoIsUMext9gElFhOnDWe1SP63HoZqV2Wp8sZsAGHiwShbJlCELgEt3h0qonJ
-         GnBJEvXzb4NZwcRlQiZc9JYufsBCCD6Km86P9keyYHcIEoIt8Dx/jYOXTZJ60gmLa0AZ
-         7nhT1CtyP+UejXCYWM0ubN1E8ynbSx2QADzpQevnHLX+KfpYB/GMySuDqFyxOZj+BUyG
-         mjUZIlbiAWUdNmjjRvJeUXmDHT1mQfael/Mi3kg21O8fVRDnXgl4pyki+W9Z5R8wtlsF
-         E6lEppVmZSKCASRLtm1LEb1CfCUsznexkuqnrmJ8kl7z0CJpIl/Ohq0jYKDyEvI8UJit
-         D4qg==
+        bh=JdYvlqF5E77ETGsiA3+iUVd/M7BniVM0ttBqGKQmW/g=;
+        b=cm2DPW+cKfk1EdEZh3iq/2iqecYirZEhqgCi2lGiBe7QUqCgd8QeCso7EWeuymDOE8
+         5qJGqBSDWlyJYG0aELHtS9PXMPiw1pSnwE2lGqdNt4f6Y0iGDVHf1n/mTZHpNC7G1vNU
+         R0dRWUpo3BNX55fvpctYeuXJ59TXG8NcCqDv7qJMzXsun4YV20yNQJOaJ2tMgW3fiV6M
+         sjAHCGPGLVNWwnORr+0Cg0QwG81dfo0JHRznCcDu1+IOuy0kIemaq1Wfz+OH9jcOKPTV
+         8ImslYg59ja2TxlIuUGosk6OB50ohAzZZlFGj9/DXmS9iTf3ZQDgfFhHVH85YJC8QOmB
+         6Zag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date;
-        bh=P7Jq51tyMHoeZHrZDGPWEeNBcJqEDxElbAOOSKcyPOM=;
-        b=sYPuMlCWAdglClJZNxvXs7dHQd7znudkPu6b7EkJYmEdOO4yiksR2SHLi4qVqkY7Hq
-         Ar5zrBsw0UUtI7Y8wtFW0/SYGQ2d2fE7K1HJBYJBjpmMB+rLPBOK0Cz0Vv8jlBMMfkR7
-         Lpc5Rrtf+hTxMx0d5DC5kXSOFCKcnk9QaeFcbyvWrqocqSsqTsbSoHQkyiMywnEbNuGn
-         dByl6geVxXqrjg50/Hb57q0QLTIRzScZLlJLEZq1kwCw6OMF50RLj5qzf7nRRggIxQiI
-         aa6lpqdqbMcPi8ENsvBR4ohoHlLZbgmMzEyN6C4s0oh7iwrZQdOVvKJNa1Snv6T3jhgM
-         slZA==
-X-Gm-Message-State: ACrzQf2wWyqaiO4u0qp+ZiZqXANwLwZtbtWw/u8aulpLLex0UUFkdwQs
-        QRD6QO7GJygqRpunSDCkgvnfwA==
-X-Google-Smtp-Source: AMsMyM5CTnn56Q/hGDGaxBj6XigCif4H2Aa5nvxOQrL6400LmJ5o9jklu/Dp+noLYDYBQw4mPy4X3A==
-X-Received: by 2002:ac2:442d:0:b0:4a2:23e2:cf59 with SMTP id w13-20020ac2442d000000b004a223e2cf59mr687844lfl.650.1664616853741;
-        Sat, 01 Oct 2022 02:34:13 -0700 (PDT)
+        bh=JdYvlqF5E77ETGsiA3+iUVd/M7BniVM0ttBqGKQmW/g=;
+        b=nC7jlOA4wnxUs2owGt3iPj2v2sAHVWsl/wWmn+zlfQLJdjFkaU9/FtRdSLuBgzs97e
+         jscK3Ktptq2uJcDuK52Kv13BOVUHn9tRRrhisVRCdv5ZXHBdO/mSslCzJqShQhIkYbow
+         3MGOrmnjE43Z6pIbaSY+Vs2q3z4H8Pgu0S1Sx+z82nfN1FxscrguFITbTPiOR9/zN9NB
+         Dz40JWcJtKZVdE66OHomKta0aOtFhKHpzzNwzEStuL8ViC3Up15LBnVWXnYMj5++E00z
+         KM3aLlhbGUoQioVtdYUdghKjUYr+aNwsn0fmUhkoOYo0Fi1vJyXDYhGCE8+5ntQnyx+w
+         YFLQ==
+X-Gm-Message-State: ACrzQf0hf0agdHzSmukQTQ2GceHex3WjNZteA8dMjR9nllz0ZA6kiZht
+        3ybTPMxxmX1o/sNuIttan8OBp1s2U/jT0w==
+X-Google-Smtp-Source: AMsMyM45A6R0pQsdtCOvYDNxlkvuWYbEn7IGIapPLGQF9tCCYOF4+X4vI5Q9/ELGCAp7Mny8hQ8j8Q==
+X-Received: by 2002:a05:6512:3d07:b0:498:f201:5679 with SMTP id d7-20020a0565123d0700b00498f2015679mr5098811lfv.161.1664618773150;
+        Sat, 01 Oct 2022 03:06:13 -0700 (PDT)
 Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id g22-20020a19e056000000b004a0232613desm702729lfj.205.2022.10.01.02.34.12
+        by smtp.gmail.com with ESMTPSA id o12-20020a056512230c00b0049a5a59aa68sm720497lfu.10.2022.10.01.03.06.12
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 01 Oct 2022 02:34:13 -0700 (PDT)
-Message-ID: <084e6f2f-0976-85c8-e27c-b5ed7722d396@linaro.org>
-Date:   Sat, 1 Oct 2022 11:34:12 +0200
+        Sat, 01 Oct 2022 03:06:12 -0700 (PDT)
+Message-ID: <a12831f1-c9ab-357f-f7c9-f04310fbfe72@linaro.org>
+Date:   Sat, 1 Oct 2022 12:06:11 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.3.0
-Subject: Re: [PATCH 0/5] Add misc support for QDU1000/QRU1000 SoCs
+Subject: Re: [PATCHv4 1/3] dt-bindings: mmc: synopsys-dw-mshc: document
+ "altr,sysmgr-syscon"
 Content-Language: en-US
-To:     Melody Olvera <quic_molvera@quicinc.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+To:     Dinh Nguyen <dinguyen@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20221001030641.29354-1-quic_molvera@quicinc.com>
+Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+References: <20220928165420.1212284-1-dinguyen@kernel.org>
+ <CAPDyKFp5oPuOz9A=37pRTvq7JPtJRdduEgmU9g+eUm0K=dZjUg@mail.gmail.com>
+ <20cbd2a2-752e-8537-4cbd-6665ef9afd69@kernel.org>
+ <bd024e66-25bb-0463-b346-b110c1b46681@linaro.org>
+ <76b5195a-a11c-0c75-b3dd-36aa78c58397@kernel.org>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221001030641.29354-1-quic_molvera@quicinc.com>
+In-Reply-To: <76b5195a-a11c-0c75-b3dd-36aa78c58397@kernel.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/10/2022 05:06, Melody Olvera wrote:
-> This series firmware, SoC, rpmpd, tz-log, and mmc bindings as well as
-> pmic, rpmpd, and socinfo support for QDU1000 and QRU1000 SoCs.
+On 29/09/2022 17:18, Dinh Nguyen wrote:
 > 
-> This patchset is based off of [1] and [2] YAML conversion patches.
+> 
+> On 9/29/22 09:38, Krzysztof Kozlowski wrote:
+>> On 29/09/2022 16:20, Dinh Nguyen wrote:
+>>>>
+>>>> So this change will not be backwards compatible with existing DTBs. I
+>>>> noticed that patch2 updates the DTS files for the arm64 platforms, but
+>>>> there seems to be some arm32 platforms too. Isn't this going to be a
+>>>> problem?
+>>>>
+>>>
+>>> The arm32 platforms makes the clk-phase adjustment through the clock
+>>> driver. There was a discussion when I originally submitted the support
+>>> for the arm32 platforms, and we landed on going through the clock driver
+>>> instead of using the MMC driver. The updates to the arm32 platforms can
+>>> be done after this patch series.
+>>
+>> How the update "can be done after"? Didn't you break all boards in- and
+>> out-of-tree?
+>>
+> 
+> I don't think so! At least, I don't see how, for the arm32 boards, here 
+> are the dts entry for setting the clock-phase:
+> 
+> sdmmc_clk: sdmmc_clk {
+> 	#clock-cells = <0>;
+> 	compatible = "altr,socfpga-gate-clk";
+> 	clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>,<&per_nand_mmc_clk>;
+> 	clk-gate = <0xa0 8>;
+> 	clk-phase = <0 135>;   <-----
 
-All of your patchsets were sent to wrong Bjorn's address. This means
-either you based on mainline (which is reasonable but for some reason
-address was not fixed in mainline...) or on some older linux-next.
+It's different node...
 
-I propose to rebase on recent linux-next, so you will get proper Bjorn's
-email.
+> };
+> 
+> sdmmc_clk_divided: sdmmc_clk_divided {
+> 	#clock-cells = <0>;
+> 	compatible = "altr,socfpga-gate-clk";
+> 	clocks = <&sdmmc_clk>;
+> 	clk-gate = <0xa0 8>;
+> 	fixed-divider = <4>;
+> 	};
+> 
+> ...
+> mmc: dwmmc0@ff704000 {
+> 	compatible = "altr,socfpga-dw-mshc";
+> 	reg = <0xff704000 0x1000>;
+> 	interrupts = <0 139 4>;
+> 	fifo-depth = <0x400>;
+> 	#address-cells = <1>;
+> 	#size-cells = <0>;
+> 	clocks = <&l4_mp_clk>, <&sdmmc_clk_divided>;
+> 	clock-names = "biu", "ciu";
+> 	resets = <&rst SDMMC_RESET>;
+> 	status = "disabled";
+
+And this one does not have clk-phase-sd-hs
+
+> 	};
+> 
+> 
+> So the setting for the clk-phase is done in the clock driver, 
+> (drivers/clk/socfpga/clk-gate.c). This has been done many years now, 
+> before the clk-phase-hs-sd concept was added to the sdmmc driver.
+
+Yes and the driver now requires clk-phase-sd-hs or altr,sysmgr-syscon
+which is not present in DTS.
+
+> 
+> When I originally submitted the patches for the ARM64 clock driver 
+> support, I forgot to add the clk-phase support for the SD controller. 
+> Now that I realized we needed it, the concept to set the clk-phase is in 
+> the SD driver, thus I'm just adding the support for arm64.
+> 
+> The arm32 support does not change in any way, so I don't see how it will 
+> break it.
+
+Isn't your driver returning ERRNO for all existing DTS (so without patch
+#2) and for all out of tree DTS?
+
+> 
+> I can update the arm32 support with the same function in patch3 after 
+> this series. Because updating the arm32 will require me to remove the 
+> support in the clock driver, thus, I want to break it out.
+
 
 Best regards,
 Krzysztof
