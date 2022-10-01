@@ -2,94 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77501C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Sep 2022 09:09:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D88A8C43217
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 03:08:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231158AbiI3JJX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 30 Sep 2022 05:09:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48106 "EHLO
+        id S232839AbiJADIv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Sep 2022 23:08:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45268 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231165AbiI3JJV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2022 05:09:21 -0400
-Received: from mail-qk1-f180.google.com (mail-qk1-f180.google.com [209.85.222.180])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49908B7EF;
-        Fri, 30 Sep 2022 02:09:21 -0700 (PDT)
-Received: by mail-qk1-f180.google.com with SMTP id u28so2426529qku.2;
-        Fri, 30 Sep 2022 02:09:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=kV6B9e3C/pAo7AcuiwNZqIcKqfAsPDnilgjS0AwmIPM=;
-        b=NR2xt2db4N3jgtH2NQVhuXnAqe4hDnOEjteY1ahrK3g8+mQGO2+spFdyiG2jYjD66j
-         ScpNxNx/iC02EYh5I2+y1pvvc2FpR/+6lVr6nGGumvHKLknhd5VJDkI7D+F6nCwUVUhd
-         OwZemUGv3ONJuZKxIQHKGN3G27Dqfa0jyQ/NMQXT7C9/GUm1JbKb5/bKcXzyDnJuvfBu
-         /z/gpz2Pqe8iO60U/vrPMLFviSY8IS+OymWmFTgHjomoNo7uh0EFQFilaFWYwbkZrZtl
-         fAVdNzI5OUlpoAIGljbp55w8/yPFjceTci2eyUnoI15JtLmyl58lquvnCzVA69roXfNy
-         HmXQ==
-X-Gm-Message-State: ACrzQf3PYUBYgoACp6f02g9ueWJgRvnUyvM9x7aZ5d/GabP8NrR3FcDC
-        +mcizPFidCIUxbJ7gYegFswRJvEjnp94rg==
-X-Google-Smtp-Source: AMsMyM7g8VABViK08vwPtrocxWEWz28bOd2zrslWLSssWpE1BXKVMyij0kDe1mT4Lcsi18gTQGofmQ==
-X-Received: by 2002:a05:620a:2807:b0:6cf:cb30:8ff5 with SMTP id f7-20020a05620a280700b006cfcb308ff5mr5189818qkp.206.1664528959921;
-        Fri, 30 Sep 2022 02:09:19 -0700 (PDT)
-Received: from mail-yb1-f174.google.com (mail-yb1-f174.google.com. [209.85.219.174])
-        by smtp.gmail.com with ESMTPSA id i19-20020a05620a249300b006b5e296452csm2165157qkn.54.2022.09.30.02.09.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 30 Sep 2022 02:09:19 -0700 (PDT)
-Received: by mail-yb1-f174.google.com with SMTP id 203so4527776ybc.10;
-        Fri, 30 Sep 2022 02:09:18 -0700 (PDT)
-X-Received: by 2002:a25:ae57:0:b0:6bc:d5f6:148d with SMTP id
- g23-20020a25ae57000000b006bcd5f6148dmr5130990ybe.36.1664528958734; Fri, 30
- Sep 2022 02:09:18 -0700 (PDT)
+        with ESMTP id S231995AbiJADHe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Sep 2022 23:07:34 -0400
+Received: from alexa-out-sd-02.qualcomm.com (alexa-out-sd-02.qualcomm.com [199.106.114.39])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D70EDD369;
+        Fri, 30 Sep 2022 20:06:55 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=quicinc.com; i=@quicinc.com; q=dns/txt; s=qcdkim;
+  t=1664593615; x=1696129615;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=iLCePLTgRgbU/r17ZHJ6lUcxCV5u5XaeBS8QDUGthu4=;
+  b=RAwg76Qnpa1L2+243ERwXaRN/jNm82KwCqmg9vhY9Y0sQrSYkUWxLWYM
+   l3jZavJvnExID9o3YAIV32iAqsUwqZUi8b1BvYRIZxLfLmi7yDh4s0M8K
+   M5xtBGRL6TFVEeti4N9nbimtul5LYYq9p9l2wVeFqO/ZzEM9XTKch+ve8
+   w=;
+Received: from unknown (HELO ironmsg04-sd.qualcomm.com) ([10.53.140.144])
+  by alexa-out-sd-02.qualcomm.com with ESMTP; 30 Sep 2022 20:06:54 -0700
+X-QCInternal: smtphost
+Received: from nasanex01b.na.qualcomm.com ([10.46.141.250])
+  by ironmsg04-sd.qualcomm.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Sep 2022 20:06:54 -0700
+Received: from hu-molvera-sd.qualcomm.com (10.80.80.8) by
+ nasanex01b.na.qualcomm.com (10.46.141.250) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.29; Fri, 30 Sep 2022 20:06:54 -0700
+From:   Melody Olvera <quic_molvera@quicinc.com>
+To:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        <linux-arm-msm@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Melody Olvera <quic_molvera@quicinc.com>
+Subject: [PATCH 1/5] dt-bindings: firmware: scm: Add QDU1000/QRU1000 compatibles
+Date:   Fri, 30 Sep 2022 20:06:37 -0700
+Message-ID: <20221001030641.29354-2-quic_molvera@quicinc.com>
+X-Mailer: git-send-email 2.37.3
+In-Reply-To: <20221001030641.29354-1-quic_molvera@quicinc.com>
+References: <20221001030641.29354-1-quic_molvera@quicinc.com>
 MIME-Version: 1.0
-References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
-In-Reply-To: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 30 Sep 2022 11:09:07 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdU+0Umi1RiLxdR5MCV2FZvi7a9HuS8EFJtx7JksQBP4eg@mail.gmail.com>
-Message-ID: <CAMuHMdU+0Umi1RiLxdR5MCV2FZvi7a9HuS8EFJtx7JksQBP4eg@mail.gmail.com>
-Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nasanex01b.na.qualcomm.com (10.46.141.250)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Sep 28, 2022 at 1:08 PM Biju Das <biju.das.jz@bp.renesas.com> wrote:
-> Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
-> with a lower clock rate compared to a higher one.
-> For eg: The rounding error (533333333 Hz / 4 * 4 = 533333332 Hz < 5333333
-> 33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
->
-> This patch fixes this issue by adding a margin of (1/1024) higher to
-> the clock rate.
->
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
-> ---
-> v4->v5:
->  * Moved upper limit calculation inside the for loop as it caused
->    regression on R-Car M2-W board.
->  * Removed Rb tag from Wolfram as there is some new changes.
+Add compatibles for scm driver for QDU1000 and QRU1000 platforms.
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
+---
+ Documentation/devicetree/bindings/firmware/qcom,scm.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
 
-Still works fine on R-Car Gen2/Gen3, so:
-Tested-by: Geert Uytterhoeven <geert+renesas@glider.be>
+diff --git a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
+index c5b76c9f7ad0..b47a5dda3c3e 100644
+--- a/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
++++ b/Documentation/devicetree/bindings/firmware/qcom,scm.yaml
+@@ -51,6 +51,8 @@ properties:
+           - qcom,scm-sm8250
+           - qcom,scm-sm8350
+           - qcom,scm-sm8450
++          - qcom,scm-qdu1000
++          - qcom,scm-qru1000
+           - qcom,scm-qcs404
+       - const: qcom,scm
+ 
+-- 
+2.37.3
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
