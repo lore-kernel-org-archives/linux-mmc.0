@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9560C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 21:48:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39525C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 21:49:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229826AbiJCVsd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Oct 2022 17:48:33 -0400
+        id S230092AbiJCVtI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Oct 2022 17:49:08 -0400
 Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230102AbiJCVsA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 17:48:00 -0400
-Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F28F28E25
-        for <linux-mmc@vger.kernel.org>; Mon,  3 Oct 2022 14:46:58 -0700 (PDT)
-Received: by mail-ed1-x529.google.com with SMTP id y100so15880423ede.6
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Oct 2022 14:46:58 -0700 (PDT)
+        with ESMTP id S230034AbiJCVsc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 17:48:32 -0400
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CD202AE13
+        for <linux-mmc@vger.kernel.org>; Mon,  3 Oct 2022 14:47:16 -0700 (PDT)
+Received: by mail-ej1-x632.google.com with SMTP id lc7so25020575ejb.0
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Oct 2022 14:47:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date;
         bh=zAYgLaSnCGfa8SU+NH6gwotTtGoSsucybfqj2dUgdAM=;
-        b=RVCHdxanJVyFUUSS93q51N8+I1tKBI9oAEVRe7ilmYWZ9MVp144gXBv1kYTZdfHXIo
-         9lc93g5a6zAwnxi+IvV2eQNDN8yVYIRsARw/tGeVX/FTGHISN76GQUHSB3tL9GTLt00u
-         eaJXvON2TmHWt2QX/iHVvDkb5d9bfrmez1YjXEUlbBiEdj27TfLdfIFFL5y6gpQ+HB9g
-         6Kokd8mvIrOqXQULEHmMy46RbGcqbunOiWoiW2Wx86hYFaA4BXH7JGY8TsdecRAaO+fZ
-         zdlQsot4zbqHoFw4uG+RwUovIZPv27RaBx1HSDOxt7kpH+qPCULMl4xg+lh8TgQkDJci
-         hOqw==
+        b=YlWmmsM7lTJJGalVIwZ9dwi8cj/06pB914EX3vdbkQ3SAmGQFMmvAyIvLc21049fjQ
+         Fq4dKUjUbDjZniZlY+L9WcljP/jjGnSu+cSYmxose2/WpSOLsoawP4Xcl7VZ6ORwWEoF
+         C3Bm+q2lDDpi+O+luWwuJNztaWEEKEUIqvOTlR2FGWc+GjaEqy8Tf+PD1fH2Bksm1u1N
+         kNOMMRVretuRpg00tiGhLEiW9PJpMer6GqP1jMFj7UytD2kTeRekHkkcIZziOMcQqgpK
+         /cL+BT1r1aDm9dKSjGNFD7mE3FO/0nSJLXHCOmup6GEsWJoWrrZ6zmx0lM1ACD0HX4uP
+         iPgw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date;
         bh=zAYgLaSnCGfa8SU+NH6gwotTtGoSsucybfqj2dUgdAM=;
-        b=cWHQYpFxXXHBDEFdkgDXze7+/QTJd274sq2f6Fr4FSadSqZFvD0o7eF5zayXkt6qC/
-         c+yqua6L4hl+mY0AN4PS5AZncqi2J/8uKpjBMoayOxxDrLF5cYIOS0ZPiDZHIwUTYcqz
-         zhXGG2bYXYbyQ0ySh+QEgcDgSW5ZFvt8I7wJCYQwhGNbxOqKLT24SN0SUVd9hOToVfvy
-         2EqPDc1e1B7Z6umXMXiUKn6WrgHDWWMqpwsu25uxzaMd9js+XvQEiL5jlG73mNklbRy4
-         j9d7fYNGf6LzSgOKx5LQoscsxtYm60FJFKlIL57pwSb4MQSve0dPEdBvHB7MgTNCcTnu
-         w3LA==
-X-Gm-Message-State: ACrzQf2c2pPu1cgFythVvsjkQBXxEylnWgH9U+J9s4WHHhN7gRwyWyjd
-        kS1jq9Nmgme8DPjjJ3yP1Uxht0RV5qUQHaSTfI293w==
-X-Google-Smtp-Source: AMsMyM5UrjbvOzcq6FmvgXykvlePJByBD7ZIVQlTnIbpQrim0/itLwb6Rh67og69RE+wWbcGISW74QVzBjgoCyQJcgw=
-X-Received: by 2002:a05:6402:2690:b0:452:3a85:8b28 with SMTP id
- w16-20020a056402269000b004523a858b28mr20040077edd.158.1664833616720; Mon, 03
- Oct 2022 14:46:56 -0700 (PDT)
+        b=n8inplPpbPTzGj54MJrwniGTx30O0LsY77ajHBooJnLdI1BGira3XgioKehrYEEtHe
+         XQef/Ofy/gwLuDv+Yx73RWIJzWsnvdfUidJKmuHfBwEuV8oYW8PLvluBKpNFT0EMokbl
+         EkBUT9oA1wg177UtdifLhygjJD43Hxk3husXhhirUgoFXzh2lk1mM0Qrz6e+Y3wI2oz5
+         BYBZnS5VSr4aMu+VQMWt3/j0zOe6+XqecSKrT25ocrfXsfhKJzsauuIdq1aN3CBMWDk2
+         ZU/XUqF8JHZgWcw0Ign2rBQVWK5TTUA5sP+etqITpPMSRI99Eq7HmW59Y2OQCAtDLel0
+         2Weg==
+X-Gm-Message-State: ACrzQf2PiCNGmRklMW60o8VZ7YIaucIUiUVS+3FG+oVqfQDwcs3M5Tfi
+        jE3sKTts2NrT+2A8p+AeJ06mkYcj0rdLS0uAp4ZPbg==
+X-Google-Smtp-Source: AMsMyM6hJR0vYBEC7jTZoz6vd6S+i+o5RvWHLL1I4lSo6pa/Vl3uXej9EsG3CXyFZAW/4PjitKY0liOJGmvl0h0VKM0=
+X-Received: by 2002:a17:906:8a46:b0:781:71fc:d23f with SMTP id
+ gx6-20020a1709068a4600b0078171fcd23fmr16909585ejc.500.1664833634721; Mon, 03
+ Oct 2022 14:47:14 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220927191736.299702-1-marex@denx.de> <20220927191736.299702-2-marex@denx.de>
-In-Reply-To: <20220927191736.299702-2-marex@denx.de>
+References: <20220927191736.299702-1-marex@denx.de> <20220927191736.299702-3-marex@denx.de>
+In-Reply-To: <20220927191736.299702-3-marex@denx.de>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 3 Oct 2022 23:46:45 +0200
-Message-ID: <CACRpkdZRq0oOXfn0-SHG5Rv0=f_Lb=-+Yy0ST_tY9+JPqxwV6Q@mail.gmail.com>
-Subject: Re: [PATCH 2/3] ARM: dts: qcom: Drop MMCI interrupt-names
+Date:   Mon, 3 Oct 2022 23:47:03 +0200
+Message-ID: <CACRpkdZwaHJUd4DEOiKXQ96x3UJfQSCz0oxr5d0QpBCnvEydYA@mail.gmail.com>
+Subject: Re: [PATCH 3/3] ARM: dts: stm32: Drop MMCI interrupt-names
 To:     Marek Vasut <marex@denx.de>
 Cc:     linux-arm-kernel@lists.infradead.org,
         Alexandre Torgue <alexandre.torgue@foss.st.com>,
