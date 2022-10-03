@@ -2,100 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9252C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 17:29:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9560C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 21:48:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229514AbiJCR3i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Oct 2022 13:29:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40608 "EHLO
+        id S229826AbiJCVsd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Oct 2022 17:48:33 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229539AbiJCR3Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 13:29:25 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6798F1B9FA
-        for <linux-mmc@vger.kernel.org>; Mon,  3 Oct 2022 10:29:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        date:from:to:cc:subject:message-id:references:mime-version
-        :content-type:in-reply-to; s=k1; bh=8s10QBliY2YKx7clxzAsnQl15RY8
-        ul01qKGWYOlcg3w=; b=q1kxFlAjDeYA12ytoFPJX5Oj/MEsfMWyyS1oOlUmWeqp
-        8ln0yJ4huHAhpRXdUxRoLd5jKNHNcH2uikqTEESN3Ocdj+y9wN2nCaFuit4vWgZj
-        yUPkjQKiHDXQ2U6LrFR3yzkNkhyIKZbAynRHhTbs+9iW8v7jQuMLnGNSn1rmJEs=
-Received: (qmail 251076 invoked from network); 3 Oct 2022 19:29:18 +0200
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Oct 2022 19:29:18 +0200
-X-UD-Smtp-Session: l3s3148p1@rWfsriTqjKgucrTJ
-Date:   Mon, 3 Oct 2022 19:29:17 +0200
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
-Message-ID: <Yzsb7SCkNDyCghLg@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
-References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
+        with ESMTP id S230102AbiJCVsA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 17:48:00 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F28F28E25
+        for <linux-mmc@vger.kernel.org>; Mon,  3 Oct 2022 14:46:58 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id y100so15880423ede.6
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Oct 2022 14:46:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=zAYgLaSnCGfa8SU+NH6gwotTtGoSsucybfqj2dUgdAM=;
+        b=RVCHdxanJVyFUUSS93q51N8+I1tKBI9oAEVRe7ilmYWZ9MVp144gXBv1kYTZdfHXIo
+         9lc93g5a6zAwnxi+IvV2eQNDN8yVYIRsARw/tGeVX/FTGHISN76GQUHSB3tL9GTLt00u
+         eaJXvON2TmHWt2QX/iHVvDkb5d9bfrmez1YjXEUlbBiEdj27TfLdfIFFL5y6gpQ+HB9g
+         6Kokd8mvIrOqXQULEHmMy46RbGcqbunOiWoiW2Wx86hYFaA4BXH7JGY8TsdecRAaO+fZ
+         zdlQsot4zbqHoFw4uG+RwUovIZPv27RaBx1HSDOxt7kpH+qPCULMl4xg+lh8TgQkDJci
+         hOqw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=zAYgLaSnCGfa8SU+NH6gwotTtGoSsucybfqj2dUgdAM=;
+        b=cWHQYpFxXXHBDEFdkgDXze7+/QTJd274sq2f6Fr4FSadSqZFvD0o7eF5zayXkt6qC/
+         c+yqua6L4hl+mY0AN4PS5AZncqi2J/8uKpjBMoayOxxDrLF5cYIOS0ZPiDZHIwUTYcqz
+         zhXGG2bYXYbyQ0ySh+QEgcDgSW5ZFvt8I7wJCYQwhGNbxOqKLT24SN0SUVd9hOToVfvy
+         2EqPDc1e1B7Z6umXMXiUKn6WrgHDWWMqpwsu25uxzaMd9js+XvQEiL5jlG73mNklbRy4
+         j9d7fYNGf6LzSgOKx5LQoscsxtYm60FJFKlIL57pwSb4MQSve0dPEdBvHB7MgTNCcTnu
+         w3LA==
+X-Gm-Message-State: ACrzQf2c2pPu1cgFythVvsjkQBXxEylnWgH9U+J9s4WHHhN7gRwyWyjd
+        kS1jq9Nmgme8DPjjJ3yP1Uxht0RV5qUQHaSTfI293w==
+X-Google-Smtp-Source: AMsMyM5UrjbvOzcq6FmvgXykvlePJByBD7ZIVQlTnIbpQrim0/itLwb6Rh67og69RE+wWbcGISW74QVzBjgoCyQJcgw=
+X-Received: by 2002:a05:6402:2690:b0:452:3a85:8b28 with SMTP id
+ w16-20020a056402269000b004523a858b28mr20040077edd.158.1664833616720; Mon, 03
+ Oct 2022 14:46:56 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="/67QyQbFSIL0lf1y"
-Content-Disposition: inline
-In-Reply-To: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
+References: <20220927191736.299702-1-marex@denx.de> <20220927191736.299702-2-marex@denx.de>
+In-Reply-To: <20220927191736.299702-2-marex@denx.de>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Mon, 3 Oct 2022 23:46:45 +0200
+Message-ID: <CACRpkdZRq0oOXfn0-SHG5Rv0=f_Lb=-+Yy0ST_tY9+JPqxwV6Q@mail.gmail.com>
+Subject: Re: [PATCH 2/3] ARM: dts: qcom: Drop MMCI interrupt-names
+To:     Marek Vasut <marex@denx.de>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Tue, Sep 27, 2022 at 9:17 PM Marek Vasut <marex@denx.de> wrote:
 
---/67QyQbFSIL0lf1y
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+> The pl18x MMCI driver does not use the interrupt-names property,
+> the binding document has been updated to recommend this property
+> be unused, remove it.
+>
+> Signed-off-by: Marek Vasut <marex@denx.de>
 
-On Wed, Sep 28, 2022 at 12:07:55PM +0100, Biju Das wrote:
-> Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
-> with a lower clock rate compared to a higher one.
-> For eg: The rounding error (533333333 Hz / 4 * 4 =3D 533333332 Hz < 53333=
-33
-> 33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
->=20
-> This patch fixes this issue by adding a margin of (1/1024) higher to
-> the clock rate.
->=20
-> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Can only test on Gen3 currently, but clock settings are the same there.
-
-Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-
-Thanks!
-
-
---/67QyQbFSIL0lf1y
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmM7G+kACgkQFA3kzBSg
-KbbDJA//aUxtASX9Zo2yVdoxOzqHJbXUyoby1lEPTir2HV3YXnCIUrwaCmyrgUrY
-Jrn7zZlmnahYVILy7piMn96rQFiVPt6hZXajj/g4jeMIlRafokvKTvj1KFxtiEoe
-slOM+1T+aFpjIg0EbBr0k/c0NlPmWR5MgLHEomFFzgN8vex3p4JJnUzb0T5uHf79
-gV4u1R3ohW8N0v/nVKhtbGjNnn5aoLyonuyclDQ1I1zpu8uP8/esYAqzj/PLAHdk
-J/BHhN1iavY4spnHhOObzWKKk3nGljwCUtcUkknqdCYgbOwd6ln7ga4+lNOACIX0
-KWOAX+gccpvoz9qVCMinxbEkbkEZxh5GH+wT+u4KDZRlBq+khuh1hEgC2pDGwkMw
-QNLKXgp87NN0NhLpQpBe26VNCqWh3AWCNnCH3ZHgu8wijox/X5lmsxpX+yYerAnz
-h46CUyxNYOMCyybgLBlcXRGVe9DKthVNfOjhaXBM0cBe1nEhR6FGNmn/L0ceuVis
-hx3XdRM65mb7v4IB/2ZtKcB+cfV5bijqGxqdmlxoDedtDqvQYtDBg/xWS2VHvBpD
-uRbHq4uF17PBl1QcjuKlHnfz1T2A+PpM83e5Jqqe4Q63qCJnLdHDThRVqaBAN50c
-OEr5GRNMnHsUYAV1ItyrGTj+OMoYOsHHUiesaI2hMncs9P5Gd2E=
-=gBT4
------END PGP SIGNATURE-----
-
---/67QyQbFSIL0lf1y--
+Yours,
+Linus Walleij
