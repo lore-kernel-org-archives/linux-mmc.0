@@ -2,98 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 392C9C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 13:25:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C9252C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 17:29:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbiJCNZG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Oct 2022 09:25:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56220 "EHLO
+        id S229514AbiJCR3i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Oct 2022 13:29:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40608 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230063AbiJCNZD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 09:25:03 -0400
-Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC6E620BC6;
-        Mon,  3 Oct 2022 06:24:57 -0700 (PDT)
-Received: by mail-oo1-f50.google.com with SMTP id c22-20020a4a4f16000000b00474a44441c8so6736492oob.7;
-        Mon, 03 Oct 2022 06:24:57 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=date:subject:message-id:references:in-reply-to:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date;
-        bh=4o9FP01Wkr4A9XE1+7DHtHpJ4sgE+1LxGHWKgV35Jek=;
-        b=4WkZhRzJ3+mEZU069vYs4uf8pLpvaRwiUszS1CXFdggXeARy7VsA/AOexcaft4GP8z
-         Ia0pZfHJUng/ac5Ebjkbpg/kYIlYsOkswDU4YigTZ9VKJRAWDkc9FGMnI+cGjcKwtC3s
-         oMtBsQbrKwTkUnNy8z9wtdFsvAdyVfF9f28udht/nZCUbQIc1GJ8CcAoB6Xx3edHurlC
-         4LHnjWGJLZwu2o2IdqZwa1YCi5EeDpd86DzoArF1WIXJdh4+z3EhiD2fUlySmMXkagZh
-         nyAfE6SeAZXgLlfb9LYsiNzYHi9I7FqBddVLyZOC0l9DnHL/2avAPrxRjah/RWd9cvgC
-         Hitg==
-X-Gm-Message-State: ACrzQf2pvcL8iKblCjiIrNfc2HiA6mhrmIjNc/btbrB2AI+exza7tn6w
-        GRbBmt4E0w2TfLAmYQtZNNKZrsrhMg==
-X-Google-Smtp-Source: AMsMyM69T2VOp2Bi+KS3zdLXeZhG51kRLAqo/gqlkrKU4t/wfW5DmgV3hQhlVm5QLlq4rntBlR7eJw==
-X-Received: by 2002:a05:6830:612:b0:655:de80:d048 with SMTP id w18-20020a056830061200b00655de80d048mr8202765oti.168.1664803496323;
-        Mon, 03 Oct 2022 06:24:56 -0700 (PDT)
-Received: from macbook.herring.priv (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id o64-20020aca4143000000b00342ded07a75sm2445443oia.18.2022.10.03.06.24.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 03 Oct 2022 06:24:56 -0700 (PDT)
-Received: (nullmailer pid 1863805 invoked by uid 1000);
-        Mon, 03 Oct 2022 13:24:48 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Melody Olvera <quic_molvera@quicinc.com>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Stephen Boyd <sboyd@kernel.org>, linux-mmc@vger.kernel.org,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
-        Andy Gross <agross@kernel.org>, linux-kernel@vger.kernel.org
-In-Reply-To: <20221001030641.29354-3-quic_molvera@quicinc.com>
-References: <20221001030641.29354-1-quic_molvera@quicinc.com> <20221001030641.29354-3-quic_molvera@quicinc.com>
-Message-Id: <166479587535.1659013.8594790600534201114.robh@kernel.org>
-Subject: Re: [PATCH 2/5] dt-bindings: arm: qcom: Document QDU1000/QRU1000 SoCs and boards
-Date:   Mon, 03 Oct 2022 08:24:48 -0500
+        with ESMTP id S229539AbiJCR3Z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 13:29:25 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6798F1B9FA
+        for <linux-mmc@vger.kernel.org>; Mon,  3 Oct 2022 10:29:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=8s10QBliY2YKx7clxzAsnQl15RY8
+        ul01qKGWYOlcg3w=; b=q1kxFlAjDeYA12ytoFPJX5Oj/MEsfMWyyS1oOlUmWeqp
+        8ln0yJ4huHAhpRXdUxRoLd5jKNHNcH2uikqTEESN3Ocdj+y9wN2nCaFuit4vWgZj
+        yUPkjQKiHDXQ2U6LrFR3yzkNkhyIKZbAynRHhTbs+9iW8v7jQuMLnGNSn1rmJEs=
+Received: (qmail 251076 invoked from network); 3 Oct 2022 19:29:18 +0200
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 3 Oct 2022 19:29:18 +0200
+X-UD-Smtp-Session: l3s3148p1@rWfsriTqjKgucrTJ
+Date:   Mon, 3 Oct 2022 19:29:17 +0200
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Biju Das <biju.das.jz@bp.renesas.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
+Message-ID: <Yzsb7SCkNDyCghLg@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Biju Das <biju.das.jz@bp.renesas.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>
+References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="/67QyQbFSIL0lf1y"
+Content-Disposition: inline
+In-Reply-To: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 30 Sep 2022 20:06:38 -0700, Melody Olvera wrote:
-> Document the QDU1000 and QRU1000 SoC bindings and the boards that use
-> them.
-> 
-> Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
-> ---
->  Documentation/devicetree/bindings/arm/qcom.yaml | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+--/67QyQbFSIL0lf1y
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-yamllint warnings/errors:
-./Documentation/devicetree/bindings/arm/qcom.yaml:725:18: [error] syntax error: mapping values are not allowed here (syntax)
+On Wed, Sep 28, 2022 at 12:07:55PM +0100, Biju Das wrote:
+> Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
+> with a lower clock rate compared to a higher one.
+> For eg: The rounding error (533333333 Hz / 4 * 4 =3D 533333332 Hz < 53333=
+33
+> 33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
+>=20
+> This patch fixes this issue by adding a margin of (1/1024) higher to
+> the clock rate.
+>=20
+> Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
 
-dtschema/dtc warnings/errors:
-make[1]: *** Deleting file 'Documentation/devicetree/bindings/arm/qcom.example.dts'
-Documentation/devicetree/bindings/arm/qcom.yaml:725:18: mapping values are not allowed in this context
-make[1]: *** [Documentation/devicetree/bindings/Makefile:26: Documentation/devicetree/bindings/arm/qcom.example.dts] Error 1
-make[1]: *** Waiting for unfinished jobs....
-./Documentation/devicetree/bindings/arm/qcom.yaml:725:18: mapping values are not allowed in this context
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/arm/qcom.yaml: ignoring, error parsing file
-make: *** [Makefile:1420: dt_binding_check] Error 2
+Can only test on Gen3 currently, but clock settings are the same there.
 
-doc reference errors (make refcheckdocs):
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-See https://patchwork.ozlabs.org/patch/
+Thanks!
 
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+--/67QyQbFSIL0lf1y
+Content-Type: application/pgp-signature; name="signature.asc"
 
-pip3 install dtschema --upgrade
+-----BEGIN PGP SIGNATURE-----
 
-Please check and re-submit.
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmM7G+kACgkQFA3kzBSg
+KbbDJA//aUxtASX9Zo2yVdoxOzqHJbXUyoby1lEPTir2HV3YXnCIUrwaCmyrgUrY
+Jrn7zZlmnahYVILy7piMn96rQFiVPt6hZXajj/g4jeMIlRafokvKTvj1KFxtiEoe
+slOM+1T+aFpjIg0EbBr0k/c0NlPmWR5MgLHEomFFzgN8vex3p4JJnUzb0T5uHf79
+gV4u1R3ohW8N0v/nVKhtbGjNnn5aoLyonuyclDQ1I1zpu8uP8/esYAqzj/PLAHdk
+J/BHhN1iavY4spnHhOObzWKKk3nGljwCUtcUkknqdCYgbOwd6ln7ga4+lNOACIX0
+KWOAX+gccpvoz9qVCMinxbEkbkEZxh5GH+wT+u4KDZRlBq+khuh1hEgC2pDGwkMw
+QNLKXgp87NN0NhLpQpBe26VNCqWh3AWCNnCH3ZHgu8wijox/X5lmsxpX+yYerAnz
+h46CUyxNYOMCyybgLBlcXRGVe9DKthVNfOjhaXBM0cBe1nEhR6FGNmn/L0ceuVis
+hx3XdRM65mb7v4IB/2ZtKcB+cfV5bijqGxqdmlxoDedtDqvQYtDBg/xWS2VHvBpD
+uRbHq4uF17PBl1QcjuKlHnfz1T2A+PpM83e5Jqqe4Q63qCJnLdHDThRVqaBAN50c
+OEr5GRNMnHsUYAV1ItyrGTj+OMoYOsHHUiesaI2hMncs9P5Gd2E=
+=gBT4
+-----END PGP SIGNATURE-----
 
+--/67QyQbFSIL0lf1y--
