@@ -2,88 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB1DBC4332F
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Oct 2022 11:57:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 392C9C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Oct 2022 13:25:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229547AbiJAL5c (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 1 Oct 2022 07:57:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46942 "EHLO
+        id S229469AbiJCNZG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Oct 2022 09:25:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56220 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229441AbiJAL5b (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Oct 2022 07:57:31 -0400
-Received: from mail-qk1-f175.google.com (mail-qk1-f175.google.com [209.85.222.175])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E2364685A;
-        Sat,  1 Oct 2022 04:57:30 -0700 (PDT)
-Received: by mail-qk1-f175.google.com with SMTP id c19so4285712qkm.7;
-        Sat, 01 Oct 2022 04:57:30 -0700 (PDT)
+        with ESMTP id S230063AbiJCNZD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Oct 2022 09:25:03 -0400
+Received: from mail-oo1-f50.google.com (mail-oo1-f50.google.com [209.85.161.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC6E620BC6;
+        Mon,  3 Oct 2022 06:24:57 -0700 (PDT)
+Received: by mail-oo1-f50.google.com with SMTP id c22-20020a4a4f16000000b00474a44441c8so6736492oob.7;
+        Mon, 03 Oct 2022 06:24:57 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=62D0rqi30UQUrcakW1nOwlPhZq9m8nFtqYru3j5v0TE=;
-        b=V3f3gB7kGpKzrhvMQcHd535dP7tvRc9aOz+ZoT31BpZN7dq5xPGwBJwtUgBR+woBS2
-         zn59EpzXNe/mEg992Bm4LOBZm4ODC+HuHmA6vnlgn7qTDbOhLIaQ1sG3gYPwnfPVRR2o
-         E7TA+15l2TXuQ5buqHUqpsaBn5Oku4U/126aT9WJaarAMVf9UtkO+iZc45pQbT+gXBqX
-         BnhqV+sy+pN/NXch21bgyqoxznuxMM25rNXCPsSFhLmNfdLQO3mC3Z9U8fyT7eAcm/VG
-         SxTiL4zVLa+bdg1PXHra55c5THbDgDV/9CksI6xY1rrzXwv2XYLoK9xbTwQq17+27KM3
-         hxAA==
-X-Gm-Message-State: ACrzQf1klJ6fC6WK1QiJAUWHdscgXe+2eoVSIrFCQcz082PUBwdWn1g0
-        rKuVyH2Yd3JDTcu5BjvP2rjGcdQhF7R6tA==
-X-Google-Smtp-Source: AMsMyM6RcqJUoRkAzvyqZ3qCsiQLNEHc+aC7LGW5dyKB/cW9zD2upHlqlhDfEDsRRMn9J1iWU5zA9A==
-X-Received: by 2002:a05:620a:254e:b0:6c7:855c:6eb with SMTP id s14-20020a05620a254e00b006c7855c06ebmr9487840qko.39.1664625449169;
-        Sat, 01 Oct 2022 04:57:29 -0700 (PDT)
-Received: from mail-yw1-f178.google.com (mail-yw1-f178.google.com. [209.85.128.178])
-        by smtp.gmail.com with ESMTPSA id q25-20020a37f719000000b006cf14cc6740sm1303110qkj.70.2022.10.01.04.57.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 01 Oct 2022 04:57:28 -0700 (PDT)
-Received: by mail-yw1-f178.google.com with SMTP id 00721157ae682-3321c2a8d4cso67410697b3.5;
-        Sat, 01 Oct 2022 04:57:28 -0700 (PDT)
-X-Received: by 2002:a81:9c49:0:b0:34a:de:97b8 with SMTP id n9-20020a819c49000000b0034a00de97b8mr12018686ywa.384.1664625448335;
- Sat, 01 Oct 2022 04:57:28 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAMuHMdX_fQU5khvcOK-fuZoYArJpjT0057WGQ=t1=Ehf8+piqA@mail.gmail.com>
- <YzfhrXt2gj+J+WVw@shikoro>
-In-Reply-To: <YzfhrXt2gj+J+WVw@shikoro>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Sat, 1 Oct 2022 13:57:16 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdXuZd_9L4=yzjO0tDP_2dM5EcTvp8J1fBtEAWZ16kLVxA@mail.gmail.com>
-Message-ID: <CAMuHMdXuZd_9L4=yzjO0tDP_2dM5EcTvp8J1fBtEAWZ16kLVxA@mail.gmail.com>
-Subject: Re: sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware
- interrupt (CMD19)
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     Linux MMC List <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date;
+        bh=4o9FP01Wkr4A9XE1+7DHtHpJ4sgE+1LxGHWKgV35Jek=;
+        b=4WkZhRzJ3+mEZU069vYs4uf8pLpvaRwiUszS1CXFdggXeARy7VsA/AOexcaft4GP8z
+         Ia0pZfHJUng/ac5Ebjkbpg/kYIlYsOkswDU4YigTZ9VKJRAWDkc9FGMnI+cGjcKwtC3s
+         oMtBsQbrKwTkUnNy8z9wtdFsvAdyVfF9f28udht/nZCUbQIc1GJ8CcAoB6Xx3edHurlC
+         4LHnjWGJLZwu2o2IdqZwa1YCi5EeDpd86DzoArF1WIXJdh4+z3EhiD2fUlySmMXkagZh
+         nyAfE6SeAZXgLlfb9LYsiNzYHi9I7FqBddVLyZOC0l9DnHL/2avAPrxRjah/RWd9cvgC
+         Hitg==
+X-Gm-Message-State: ACrzQf2pvcL8iKblCjiIrNfc2HiA6mhrmIjNc/btbrB2AI+exza7tn6w
+        GRbBmt4E0w2TfLAmYQtZNNKZrsrhMg==
+X-Google-Smtp-Source: AMsMyM69T2VOp2Bi+KS3zdLXeZhG51kRLAqo/gqlkrKU4t/wfW5DmgV3hQhlVm5QLlq4rntBlR7eJw==
+X-Received: by 2002:a05:6830:612:b0:655:de80:d048 with SMTP id w18-20020a056830061200b00655de80d048mr8202765oti.168.1664803496323;
+        Mon, 03 Oct 2022 06:24:56 -0700 (PDT)
+Received: from macbook.herring.priv (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id o64-20020aca4143000000b00342ded07a75sm2445443oia.18.2022.10.03.06.24.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 03 Oct 2022 06:24:56 -0700 (PDT)
+Received: (nullmailer pid 1863805 invoked by uid 1000);
+        Mon, 03 Oct 2022 13:24:48 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Melody Olvera <quic_molvera@quicinc.com>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Stephen Boyd <sboyd@kernel.org>, linux-mmc@vger.kernel.org,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Andy Gross <agross@kernel.org>, linux-kernel@vger.kernel.org
+In-Reply-To: <20221001030641.29354-3-quic_molvera@quicinc.com>
+References: <20221001030641.29354-1-quic_molvera@quicinc.com> <20221001030641.29354-3-quic_molvera@quicinc.com>
+Message-Id: <166479587535.1659013.8594790600534201114.robh@kernel.org>
+Subject: Re: [PATCH 2/5] dt-bindings: arm: qcom: Document QDU1000/QRU1000 SoCs and boards
+Date:   Mon, 03 Oct 2022 08:24:48 -0500
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Wolfram,
+On Fri, 30 Sep 2022 20:06:38 -0700, Melody Olvera wrote:
+> Document the QDU1000 and QRU1000 SoC bindings and the boards that use
+> them.
+> 
+> Signed-off-by: Melody Olvera <quic_molvera@quicinc.com>
+> ---
+>  Documentation/devicetree/bindings/arm/qcom.yaml | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
 
-On Sat, Oct 1, 2022 at 8:44 AM Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
-> On Fri, Sep 30, 2022 at 10:53:55AM +0200, Geert Uytterhoeven wrote:
-> > When an SD-card is inserted on Koelsch (R-Car M2-W), I see:
-> >
-> >     sh_mobile_sdhi ee100000.mmc: timeout waiting for hardware interrupt (CMD19)
->
-> Is this a regression? If so, since when? I seem to recall this is
-> "expected" on Gen2, we ensured that it retries gracefully and
-> successfuly.
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
-No, this is not a (recent) regression. I reported it before.
+yamllint warnings/errors:
+./Documentation/devicetree/bindings/arm/qcom.yaml:725:18: [error] syntax error: mapping values are not allowed here (syntax)
 
-The "EEXIST, overlapping mappings aren't supported" was also
-reported before.
-Thanks!
+dtschema/dtc warnings/errors:
+make[1]: *** Deleting file 'Documentation/devicetree/bindings/arm/qcom.example.dts'
+Documentation/devicetree/bindings/arm/qcom.yaml:725:18: mapping values are not allowed in this context
+make[1]: *** [Documentation/devicetree/bindings/Makefile:26: Documentation/devicetree/bindings/arm/qcom.example.dts] Error 1
+make[1]: *** Waiting for unfinished jobs....
+./Documentation/devicetree/bindings/arm/qcom.yaml:725:18: mapping values are not allowed in this context
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/arm/qcom.yaml: ignoring, error parsing file
+make: *** [Makefile:1420: dt_binding_check] Error 2
 
-Gr{oetje,eeting}s,
+doc reference errors (make refcheckdocs):
 
-                        Geert
+See https://patchwork.ozlabs.org/patch/
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+This check can fail if there are any dependencies. The base for a patch
+series is generally the most recent rc1.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit.
+
