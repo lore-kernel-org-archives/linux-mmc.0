@@ -2,39 +2,39 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB52DC433F5
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 13:10:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52D7EC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 13:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229846AbiJDNKy convert rfc822-to-8bit (ORCPT
+        id S229724AbiJDNRH convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Oct 2022 09:10:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42232 "EHLO
+        Tue, 4 Oct 2022 09:17:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51066 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229922AbiJDNKx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 09:10:53 -0400
-X-Greylist: delayed 896 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 04 Oct 2022 06:10:48 PDT
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D291E30566;
-        Tue,  4 Oct 2022 06:10:47 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 537653A1676;
-        Tue,  4 Oct 2022 14:42:08 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 41F963A1674;
-        Tue,  4 Oct 2022 14:42:08 +0200 (CEST)
+        with ESMTP id S229549AbiJDNRF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 09:17:05 -0400
+X-Greylist: delayed 110 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 04 Oct 2022 06:17:03 PDT
+Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32D63CE1C;
+        Tue,  4 Oct 2022 06:17:03 -0700 (PDT)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id CFCEF122EF2;
+        Tue,  4 Oct 2022 15:13:37 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id BC817121656;
+        Tue,  4 Oct 2022 15:13:37 +0200 (CEST)
 X-TM-AS-ERS: 10.149.2.42-127.5.254.253
 X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
 X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Tue,  4 Oct 2022 14:42:08 +0200 (CEST)
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Tue,  4 Oct 2022 15:13:37 +0200 (CEST)
 Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
  (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Tue, 4 Oct 2022
- 14:42:07 +0200
+ 15:13:37 +0200
 Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
  sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Tue, 4 Oct 2022 14:42:07 +0200
+ 15.02.1118.009; Tue, 4 Oct 2022 15:13:37 +0200
 From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
 To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -42,11 +42,11 @@ To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
         =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
 CC:     Avri Altman <Avri.Altman@wdc.com>
-Subject: [PATCH] mmc: core: fix race of queue reset and card removal
-Thread-Topic: [PATCH] mmc: core: fix race of queue reset and card removal
-Thread-Index: AdjX7pQAAXK3jl/fRweqH3RcJ0C5Tg==
-Date:   Tue, 4 Oct 2022 12:42:07 +0000
-Message-ID: <d3897c967cd5482f8778264708012f43@hyperstone.com>
+Subject: [PATCHv2] mmc: core: fix race of queue reset and card removal
+Thread-Topic: [PATCHv2] mmc: core: fix race of queue reset and card removal
+Thread-Index: AdjX8vnmWSO+H9o1T5SYJhJVtR/27g==
+Date:   Tue, 4 Oct 2022 13:13:37 +0000
+Message-ID: <1a5810475d7a475db5e4e5130b8f455c@hyperstone.com>
 Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
@@ -57,23 +57,23 @@ Content-Type: text/plain;
 Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
 X-TMASE-Version: DDEI-5.1-9.0.1002-27180.007
-X-TMASE-Result: 10-0.267200-10.000000
-X-TMASE-MatchedRID: TMsvcu6/L5fHO8eAxCOj9rPx3rO+jk2QjQqhmdnoX5dMaCZ02+qSX4tT
-        cyhwXShWJZGqld0As16DafVceO5yDDuBsKLHO7oUQfSOYOlxKYtuchTq5J5u9I5V1ACIyZtn0Jd
-        D7IAHCPstvxURWeLekABhIGPXvkFGa1Tt4wRPVa11e7Xbb6Im2kEe5VjFzwNbty9mj1urE9LoKE
-        r2irJf5CL637QCIVpi8vc3EUpCmrXJXrzb/C9WHM69emDs42dd9avse85ISVq4GyTmeN+AbHFMo
-        acuvgWq4vM1YF6AJbZb5RAbMTLWdQtuKBGekqUpI/NGWt0UYPDjpLYD4/xwr6JquHGdA0eRx4qQ
-        HCgWCo021NMxQkX+1SHWPYzouJUy
+X-TMASE-Result: 10-0.159000-10.000000
+X-TMASE-MatchedRID: c/HXCguHooHHO8eAxCOj9kWX0DfhVamwlDt5PQMgj03vJ+necCyol4Te
+        S/fAJYca64gVMSyFkqGgn8D0FKnRMnu1uaPPJqaTb/oIJuUAIuGhHrZE2+S86250UDlJBBSG6o5
+        I451FHlrikijHhTPGhr8XuxXOmvfVGuBJ8vuzj3TEOJqSsn5KmX607foZgOWyL31P64kiV5GVXa
+        q+dLJR5I8eV9xXSOFA5p98cjyQCaIdj9vNGYhpkYknvYO5kHScmSLeIgEDej9hR1Y/uhfqyAfNh
+        shqWR17u+x0bnFoGVtLr93H7JUMY6+/EguYor8cEzQnFLEeMUmtIWznhjjBtfoLR4+zsDTt9Ss5
+        ONHRGPVJ9lFoyn4d4Eyje3fniTllhdb0hpovfB/TKd+aCVkf2Q==
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 81e16eb8-1450-46e5-99c7-5fe40e500faf-0-0-200-0
+X-TMASE-XGENCLOUD: 3fbec7fb-0878-4c8a-914d-62d3aab157e9-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 If a recovery is active and the card is removed do not
-try to switch back partitions. Furthermore do not remove
-queue card pointer as it is not sychronized with recovery.
+try to switch back partitions. Furthermore do not reference
+mq->card which might be NULLed in the meantime.
 
 This has been observed with recovery active with CQE.
 [ 1083.510578] Unable to handle kernel NULL pointer dereference at virtual address 000000000000038c
@@ -160,8 +160,8 @@ This has been observed with recovery active with CQE.
 Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 ---
  drivers/mmc/core/block.c | 4 ++--
- drivers/mmc/core/queue.c | 2 --
- 2 files changed, 2 insertions(+), 4 deletions(-)
+ drivers/mmc/core/queue.c | 5 +++--
+ 2 files changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
 index ce89611a136e..0cd3a7065629 100644
@@ -179,18 +179,30 @@ index ce89611a136e..0cd3a7065629 100644
  			dev_get_drvdata(&host->card->dev);
  		int part_err;
 diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index fefaa901b50f..bfd201a5d245 100644
+index fefaa901b50f..6931fa082ea7 100644
 --- a/drivers/mmc/core/queue.c
 +++ b/drivers/mmc/core/queue.c
-@@ -501,8 +501,6 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	 * still be queued at this point. Flush it.
- 	 */
- 	flush_work(&mq->complete_work);
--
--	mq->card = NULL;
- }
+@@ -137,9 +137,10 @@ static void mmc_mq_recovery_handler(struct work_struct *work)
+ 	struct mmc_queue *mq = container_of(work, struct mmc_queue,
+ 					    recovery_work);
+ 	struct request_queue *q = mq->queue;
++	struct mmc_card *card = mq->card;
+ 	struct mmc_host *host = mq->card->host;
  
- /*
+-	mmc_get_card(mq->card, &mq->ctx);
++	mmc_get_card(card, &mq->ctx);
+ 
+ 	mq->in_recovery = true;
+ 
+@@ -157,7 +158,7 @@ static void mmc_mq_recovery_handler(struct work_struct *work)
+ 	if (host->hsq_enabled)
+ 		host->cqe_ops->cqe_recovery_finish(host);
+ 
+-	mmc_put_card(mq->card, &mq->ctx);
++	mmc_put_card(card, &mq->ctx);
+ 
+ 	blk_mq_run_hw_queues(q, true);
+ }
 -- 
 2.37.3
 
