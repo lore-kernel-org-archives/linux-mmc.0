@@ -2,166 +2,202 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D338C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 13:20:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2155C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 14:18:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229854AbiJDNUy convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Oct 2022 09:20:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52070 "EHLO
+        id S229643AbiJDOSw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Oct 2022 10:18:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229795AbiJDNUR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 09:20:17 -0400
-Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D05CA13D07;
-        Tue,  4 Oct 2022 06:20:11 -0700 (PDT)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id C4037462EE6;
-        Tue,  4 Oct 2022 15:15:09 +0200 (CEST)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id B0C21460CCE;
-        Tue,  4 Oct 2022 15:15:09 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail3.swissbit.com (Postfix) with ESMTPS;
-        Tue,  4 Oct 2022 15:15:09 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Tue, 4 Oct 2022
- 15:15:06 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Tue, 4 Oct 2022 15:15:06 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     Avri Altman <Avri.Altman@wdc.com>
-Subject: RE: [PATCHv2] mmc: core: fix race of queue reset and card removal
-Thread-Topic: [PATCHv2] mmc: core: fix race of queue reset and card removal
-Thread-Index: AdjX8vnmWSO+H9o1T5SYJhJVtR/27gAAAvCw
-Date:   Tue, 4 Oct 2022 13:15:06 +0000
-Message-ID: <e844eb3f4b1c4f1a94e235501294afaa@hyperstone.com>
-References: <1a5810475d7a475db5e4e5130b8f455c@hyperstone.com>
-In-Reply-To: <1a5810475d7a475db5e4e5130b8f455c@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.153.3.46]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229669AbiJDOSt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 10:18:49 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDE1F53D10
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Oct 2022 07:18:46 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id s20so5677221lfi.11
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Oct 2022 07:18:46 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date;
+        bh=KgLIe0cYSRWlADheGH++0zaQKi6qB0jS+V4zMC7YCR0=;
+        b=VbnvpS3CKThdRZ2rQFdyRJcqF7y4Di9XEYQ+qmX81cBhHKqgMrvB7TXVr/dQYyOwBt
+         HhvwvJd19EkMltur69gbMc043rcQ6Wn99gDK04PbrUCJit+/eMJwImVaegvsszWKbdPV
+         ZW0+oq8yA3C4uVpgM8xA5AmRO2Tlq6++HeHIaXqlKgR6UAHHvdfh7TmCi+xQ5rZzOl3X
+         ZJf8pdVMy0qeyrvsIRd+GlJK00sJ0wrgrQkooib+DmF0VcLpivrusKph2NQhtd2V2FO9
+         GQKs6Em4Afra5SiEoVFZMEZtAgsVhRj3cYtLxp6P3FYSajQSjXJiA7P2avp7ve+8gMN9
+         ztKA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date;
+        bh=KgLIe0cYSRWlADheGH++0zaQKi6qB0jS+V4zMC7YCR0=;
+        b=fqtZIyj7hgeqWbaHXsBMbxAo6ehffZ+ZXMx0MMCMu6LGFV+OT3Ec4uPC7t1mWrLMwB
+         zb8bbm1WieRniBF5Ms5t5ixtseSi7UKbRgUGg14crPSeyQCILGfUWKNpjtPb3QjseB96
+         0n/EiKVWCMMilyS9P0kbClciSE9hTndSXjzvKG84zQV4lVtqKqPlo1DbNEMAN+zJk1P0
+         yoqzSDsWWvqUm10iHItfHrzbkyzUszgXEgiGCF9IQhTMwoxQwaay5TNZNrwzt10aWhz9
+         Ng8vm/a3WDnG17emY66j9/qCedDKdkcF5qCD9KBrGBDHNZU0F88BuDwX7v1GCCMlgxVA
+         D7uw==
+X-Gm-Message-State: ACrzQf3y/9wmoEznSZffAcMzjJM81yDiB3I8qjCUS9v6oQgfHj54RzKV
+        zuqGG1ZJkHfiPb4GeqBP/VZmpSUkHNDUmw==
+X-Google-Smtp-Source: AMsMyM6dc8nAtOvBYKJvplBqKN5ixeu6YRJm+3I2ts+Kkn08BxNV/9ES56vSY2WsPGj0x1BRy/W1fw==
+X-Received: by 2002:a05:6512:31d1:b0:499:fa38:3d7b with SMTP id j17-20020a05651231d100b00499fa383d7bmr8968446lfe.544.1664893125163;
+        Tue, 04 Oct 2022 07:18:45 -0700 (PDT)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id bz22-20020a05651c0c9600b0025ebaef9570sm1283596ljb.40.2022.10.04.07.18.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Oct 2022 07:18:44 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC updates for v6.1
+Date:   Tue,  4 Oct 2022 16:18:43 +0200
+Message-Id: <20221004141843.6607-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27180.007
-X-TMASE-Result: 10--7.586600-10.000000
-X-TMASE-MatchedRID: xIhOSkOSohXUL3YCMmnG4qk29rFswht+ZR+OFNkbtdrL584GsPTBR4/x
-        1Ofbpz/fRt/dc/AJIZpkEJo9iTruXzmpL9mXE1+sHmtCXih7f9MxXH/dlhvLv60GJL2EV5pMxnU
-        Xzyseixws96UccUHPK6hA84ZhaH5VMeIPuyyqyWyt3STmfbGX2dDEMPvvoocvIiqlmO0FgHumYO
-        EKv2cEUZdhlAAXYT7MazVjfNhqisEwKOw87rpd8Qzi9ePw0R3QOA3W7N7dBgnfUY2boz4kpEIjI
-        p4EpSqC6V+wThLTbQu12HagvbwDji/7QU2czuUNA9lly13c/gFHyz3bB5kG5zQM0/COoudwiE9R
-        qXHGrIdAYdLFXr37Pi6ara/v51AdD7lLiXNUhrOeAiCmPx4NwGNn8XPiALIbGzlkwm0NFqgXeuQ
-        CqIxleSAHAopEd76vx/5oftUh0TxWJoZHAnYjDjvYzElUipWsPBzW0U0cb8iiIr06VegyOA==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: NULL-NULL-7-0-1
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-I guess treat both versions more like RFCs.
-V1 seems a bit nicer, v2 avoids the dangling mq->card, which I don't see an issue with but am easily convinced otherwise.
-Both fix the issue for me.
+Hi Linus,
 
------Original Message-----
-From: Christian Löhle <CLoehle@hyperstone.com> 
-Sent: Dienstag, 4. Oktober 2022 15:14
-To: ulf.hansson@linaro.org; Adrian Hunter <adrian.hunter@intel.com>; Linux MMC List <linux-mmc@vger.kernel.org>; linux-kernel@vger.kernel.org; Christian Löhle <CLoehle@hyperstone.com>
-Cc: Avri Altman <Avri.Altman@wdc.com>
-Subject: [PATCHv2] mmc: core: fix race of queue reset and card removal
+Here's the PR with the MMC updates for v6.1-rc1. Details about the highlights
+are as usual found in the signed tag.
 
-If a recovery is active and the card is removed do not try to switch back partitions. Furthermore do not reference
-mq->card which might be NULLed in the meantime.
+Please pull this in!
 
-This has been observed with recovery active with CQE.
-[ 1083.510578] Unable to handle kernel NULL pointer dereference at virtual address 000000000000038c [ 1083.511362] Mem abort info:
-[ 1083.511626]   ESR = 0x96000004
-[ 1083.511912]   EC = 0x25: DABT (current EL), IL = 32 bits
-[ 1083.512395]   SET = 0, FnV = 0
-[ 1083.512681]   EA = 0, S1PTW = 0
-[ 1083.512973]   FSC = 0x04: level 0 translation fault
-[ 1083.513417] Data abort info:
-[ 1083.513686]   ISV = 0, ISS = 0x00000004
-[ 1083.514039]   CM = 0, WnR = 0
-[ 1083.514318] user pgtable: 4k pages, 48-bit VAs, pgdp=000000000a4c3000 [ 1083.514899] [000000000000038c] pgd=0000000000000000, p4d=0000000000000000 [ 1083.515854] Internal error: Oops: 96000004 [#1] SMP
-[ 1083.516295] CPU: 0 PID: 153 Comm: kworker/0:2 Tainted: G        W         5.18.12-g925ff1d10c99-dirty #7
-[ 1083.517127] Hardware name: Pine64 RockPro64 v2.1 (DT) [ 1083.517574] Workqueue: events mmc_mq_recovery_handler [ 1083.518032] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--) [ 1083.518645] pc : mmc_blk_reset+0x60/0x1ac [ 1083.519004] lr : mmc_blk_reset+0x38/0x1ac [ 1083.519361] sp : ffff8000100b3cd0 [ 1083.519654] x29: ffff8000100b3cd0 x28: 0000000000000000 x27: 0000000000000000 [ 1083.520288] x26: ffff80000b0ba000 x25: ffff0000f6e74805 x24: ffff000004c2fdc0 [ 1083.520922] x23: ffff000014950000 x22: ffff000004c2fc18 x21: ffff00000a33c000 [ 1083.521556] x20: 00000000ffffff85 x19: ffff000004c2fc00 x18: ffffffffffffffff [ 1083.522189] x17: ffff80000cd9b200 x16: ffff80000cd9b190 x15: 0000000000000006 [ 1083.522823] x14: 0000000000000000 x13: ffff80000b0c28f0 x12: 0000000000001707 [ 1083.523457] x11: 00000000000007ad x10: ffff80000c6c28f0 x9 : ffff80000b0c28f0 [ 1083.524090] x8 : 00000000fffbffff x7 : 0000000000000001 x6 : 0000000000000000 [ 1083.524723] x5 : 0000000000000000 x4 : ffff0000f6e62d30 x3 : 0000000000000000 [ 1083.525357] x2 : 0000000000000000 x1 : ffff00000b6e0000 x0 : 0000000000000000 [ 1083.525990] Call trace:
-[ 1083.526209]  mmc_blk_reset+0x60/0x1ac [ 1083.526536]  mmc_blk_cqe_recovery+0x8c/0xd0 [ 1083.526908]  mmc_mq_recovery_handler+0xc4/0xd0 [ 1083.527303]  process_one_work+0x23c/0x3fc [ 1083.527663]  worker_thread+0x74/0x420 [ 1083.527990]  kthread+0xec/0xf0 [ 1083.528264]  ret_from_fork+0x10/0x20 [ 1083.528587] Code: d50323bf d65f03c0 f94352a0 f9404000 (b9438c01) [ 1083.529126] ---[ end trace 0000000000000000 ]---
+Kind regards
+Ulf Hansson
 
-[ 1431.677970] Unable to handle kernel NULL pointer dereference at virtual address 0000000000000000 [ 1431.678753] Mem abort info:
-[ 1431.679017]   ESR = 0x96000004
-[ 1431.679303]   EC = 0x25: DABT (current EL), IL = 32 bits
-[ 1431.679786]   SET = 0, FnV = 0
-[ 1431.680072]   EA = 0, S1PTW = 0
-[ 1431.680366]   FSC = 0x04: level 0 translation fault
-[ 1431.680810] Data abort info:
-[ 1431.681080]   ISV = 0, ISS = 0x00000004
-[ 1431.681432]   CM = 0, WnR = 0
-[ 1431.681712] user pgtable: 4k pages, 48-bit VAs, pgdp=000000000bb98000 [ 1431.682390] [0000000000000000] pgd=0000000000000000, p4d=0000000000000000 [ 1431.683393] Internal error: Oops: 96000004 [#1] SMP [ 1431.683841] CPU: 0 PID: 19948 Comm: kworker/0:2 Not tainted 5.18.12-gf65532578f32-dirty #16 [ 1431.684576] Hardware name: Pine64 RockPro64 v2.1 (DT) [ 1431.685024] Workqueue: events mmc_mq_recovery_handler [ 1431.685487] pstate: 60000005 (nZCv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--) [ 1431.686100] pc : mmc_put_card+0x38/0x110 [ 1431.686453] lr : mmc_mq_recovery_handler+0x98/0xd0 [ 1431.686879] sp : ffff800015813cf0 [ 1431.687173] x29: ffff800015813cf0 x28: 0000000000000000 x27: 0000000000000000 [ 1431.687807] x26: ffff80000b0ba000 x25: ffff0000f6e74805 x24: ffff000013bd65c0 [ 1431.688441] x23: ffff000013b96120 x22: ffff000013bd6418 x21: 0000000000000000 [ 1431.689075] x20: ffff800008ed1c70 x19: ffff8000091767d8 x18: ffffffffffffffff [ 1431.689709] x17: 31335b1b6d375b1b x16: 6d305b1b47554245 x15: 0000000000000006 [ 1431.690343] x14: 0000000000000000 x13: 0000000000000000 x12: 0000000000000000 [ 1431.690976] x11: ffff000013bd6570 x10: 0000000000000001 x9 : ffff80000ea69228 [ 1431.691611] x8 : ffff80000df892c8 x7 : 0000000000000000 x6 : 0000000000000001 [ 1431.692245] x5 : 0000000000000001 x4 : 0000000000000002 x3 : ffff80000e6feac8 [ 1431.692879] x2 : 000000000000036e x1 : ffff800008ed1c70 x0 : 0000000000000000 [ 1431.693513] Call trace:
-[ 1431.693732]  mmc_put_card+0x38/0x110
-[ 1431.694055]  mmc_mq_recovery_handler+0x98/0xd0 [ 1431.694452]  process_one_work+0x23c/0x3fc [ 1431.694812]  worker_thread+0x74/0x420 [ 1431.695139]  kthread+0xec/0xf0 [ 1431.695414]  ret_from_fork+0x10/0x20 [ 1431.695738] Code: f9001bf7 aa0103f6 aa0003f5 aa1403e1 (f9400017) [ 1431.696278] ---[ end trace 0000000000000000 ]---
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/block.c | 4 ++--
- drivers/mmc/core/queue.c | 5 +++--
- 2 files changed, 5 insertions(+), 4 deletions(-)
+The following changes since commit e7afa79a3b35a27a046a2139f8b20bd6b98155c2:
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index ce89611a136e..0cd3a7065629 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -997,8 +997,8 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
- 
- 	md->reset_done |= type;
- 	err = mmc_hw_reset(host->card);
--	/* Ensure we switch back to the correct partition */
--	if (err) {
-+	/* Ensure we switch back to the correct partition on successful reset */
-+	if (!err) {
- 		struct mmc_blk_data *main_md =
- 			dev_get_drvdata(&host->card->dev);
- 		int part_err;
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c index fefaa901b50f..6931fa082ea7 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -137,9 +137,10 @@ static void mmc_mq_recovery_handler(struct work_struct *work)
- 	struct mmc_queue *mq = container_of(work, struct mmc_queue,
- 					    recovery_work);
- 	struct request_queue *q = mq->queue;
-+	struct mmc_card *card = mq->card;
- 	struct mmc_host *host = mq->card->host;
- 
--	mmc_get_card(mq->card, &mq->ctx);
-+	mmc_get_card(card, &mq->ctx);
- 
- 	mq->in_recovery = true;
- 
-@@ -157,7 +158,7 @@ static void mmc_mq_recovery_handler(struct work_struct *work)
- 	if (host->hsq_enabled)
- 		host->cqe_ops->cqe_recovery_finish(host);
- 
--	mmc_put_card(mq->card, &mq->ctx);
-+	mmc_put_card(card, &mq->ctx);
- 
- 	blk_mq_run_hw_queues(q, true);
- }
---
-2.37.3
+  mmc: hsq: Fix data stomping during mmc recovery (2022-09-27 12:38:29 +0200)
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+are available in the Git repository at:
 
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1
+
+for you to fetch changes up to 178422c27badb8eee5edfae3f6cc3048cc140364:
+
+  mmc: Merge branch fixes into next (2022-09-28 10:09:29 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - dt-bindings: Increase maximum supported frequency to 384MHz
+ - dw_mmc-rockchip: Add support for the rk3128 variant
+ - meson-gx: Add support for SDIO interrupts
+ - mtk-sd: Add support for MT6795 Helio X10 variant
+ - sdhci: Improve the code by centralizing the CMD/DATA reset handling
+ - sdhci-msm: Add support for the sdm670 variant
+ - sdhci-msm: Add support for the sm6115 variant
+ - sdhci-omap: Make Vignesh replace Kishon as the maintainer
+ - sdhci-pci-o2micro: Disable fragile support for DDR50 in favor of SDR50
+ - sdhci-sprd: Fix clock divider limitation
+
+----------------------------------------------------------------
+Adam Skladowski (1):
+      dt-bindings: mmc: sdhci-msm: Document the SM6115 compatible
+
+Adrian Hunter (5):
+      mmc: sdhci: Update MAINTAINERS Maintained -> Supported
+      mmc: sdhci: Separate out sdhci_reset_for_all()
+      mmc: sdhci: Remove misleading comment about resets
+      mmc: sdhci: Get rid of SDHCI_QUIRK_RESET_CMD_DATA_ON_IOS
+      mmc: sdhci: Centralize CMD and DATA reset handling
+
+AngeloGioacchino Del Regno (3):
+      dt-bindings: mmc: Add compatible for MT6795 Helio X10 SoC
+      mmc: mtk-sd: Reorder of_device_id and platform data by name
+      mmc: mtk-sd: Add support for MT6795 Helio X10
+
+Apurva Nandan (1):
+      dt-bindings: mmc: Fix 'dma-coherent' was unexpected
+
+Bhupesh Sharma (1):
+      dt-bindings: mmc: Set maximum documented operating frequency as 384MHz
+
+Chevron Li (1):
+      mmc: sdhci-pci-o2micro: fix some SD cards compatibility issue at DDR50 mode
+
+Christophe JAILLET (2):
+      mmc: au1xmmc: Fix an error handling path in au1xmmc_probe()
+      mmc: wmt-sdmmc: Fix an error handling path in wmt_mci_probe()
+
+Conor Dooley (1):
+      dt-bindings: mmc: cdns: remove Piotr Sroka as a maintainer
+
+Heiner Kallweit (3):
+      mmc: core: Switch to basic workqueue API for sdio_irq_work
+      mmc: meson-gx: adjust and re-use constant IRQ_EN_MASK
+      mmc: meson-gx: add SDIO interrupt support
+
+Iskren Chernev (1):
+      dt-bindings: mmc: sdhci-msm: Add pinctrl-1 property
+
+Jack Wang (2):
+      mmc: meson-mx-sdhc: Fix error check for dma_map_sg
+      mmc: jz4740_mmc: Fix error check for dma_map_sg
+
+Johan Jonker (1):
+      dt-bindings: mmc: rockchip: add rockchip,rk3128-dw-mshc
+
+Kishon Vijay Abraham I (1):
+      MAINTAINERS: Add Vignesh as maintainer of TI SDHCI OMAP DRIVER
+
+Krzysztof Kozlowski (1):
+      dt-bindings: mmc: mmc-spi-slot: drop unneeded spi-max-frequency
+
+Lad Prabhakar (1):
+      dt-bindings: mmc: renesas,sdhi: Add iommus property
+
+Peter Robinson (1):
+      mmc: sdhci-of-aspeed: Add dependency on ARCH_ASPEED
+
+Richard Acayan (2):
+      dt-bindings: mmc: sdhci-msm: add sdm670 compatible
+      mmc: sdhci-msm: add compatible string check for sdm670
+
+Ulf Hansson (3):
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+      mmc: Merge branch fixes into next
+
+Wenchao Chen (1):
+      mmc: sdhci-sprd: Fix the limitation of div
+
+ye xingchen (2):
+      mmc: sdhci_am654: Remove the unneeded result variable
+      mmc: rtsx_usb_sdmmc: Remove the unneeded result variable
+
+ .../devicetree/bindings/mmc/cdns,sdhci.yaml        |   1 -
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |  13 ++-
+ .../devicetree/bindings/mmc/mmc-spi-slot.yaml      |   2 -
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |   1 +
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |   3 +
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  |   1 +
+ .../devicetree/bindings/mmc/sdhci-am654.yaml       |   3 +
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |   6 ++
+ MAINTAINERS                                        |   6 +-
+ drivers/mmc/core/host.c                            |   2 +-
+ drivers/mmc/core/sdio.c                            |   4 +-
+ drivers/mmc/core/sdio_irq.c                        |   4 +-
+ drivers/mmc/host/Kconfig                           |   1 +
+ drivers/mmc/host/au1xmmc.c                         |   3 +-
+ drivers/mmc/host/jz4740_mmc.c                      |   4 +-
+ drivers/mmc/host/meson-gx-mmc.c                    |  84 ++++++++++++----
+ drivers/mmc/host/meson-mx-sdhc-mmc.c               |   4 +-
+ drivers/mmc/host/mtk-sd.c                          | 109 ++++++++++++---------
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |   5 +-
+ drivers/mmc/host/sdhci-msm.c                       |   1 +
+ drivers/mmc/host/sdhci-pci-core.c                  |  23 ++++-
+ drivers/mmc/host/sdhci-pci-o2micro.c               |   7 +-
+ drivers/mmc/host/sdhci-sprd.c                      |   6 +-
+ drivers/mmc/host/sdhci.c                           |  84 +++++++++-------
+ drivers/mmc/host/sdhci.h                           |   2 -
+ drivers/mmc/host/sdhci_am654.c                     |   5 +-
+ drivers/mmc/host/wmt-sdmmc.c                       |   5 +-
+ include/linux/mmc/host.h                           |   2 +-
+ 28 files changed, 255 insertions(+), 136 deletions(-)
