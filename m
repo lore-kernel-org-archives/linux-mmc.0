@@ -2,88 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEFFDC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 08:20:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E731C433F5
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Oct 2022 11:29:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230056AbiJDIUQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Oct 2022 04:20:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47594 "EHLO
+        id S229783AbiJDL3N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Oct 2022 07:29:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60872 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230155AbiJDIUI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 04:20:08 -0400
-Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F31913CD3;
-        Tue,  4 Oct 2022 01:20:02 -0700 (PDT)
-Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 294851E5012977;
-        Tue, 4 Oct 2022 10:19:39 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=RGlnY99SKoqR8Oi3HpFzr664x5CihlKiyQmU/IL6+O8=;
- b=PnPSN3lvDAbiU1wm/wT2tdWxmayC6ooDic/xbppcGaIb4Z8V5waWcIQHtAQrST7q8OkI
- T1gBjWbdPj7/D/Wmla7fcIe0ufpGuXiiZhnU1IrLirO7aPexazmAlWODDvWlkTPJFVH7
- BqNBchWGkNcw9/rlJUyoHa50HHNhIZdAX+1VKJo1miiqNe4kPu+stvjhxQJCelrkYcb7
- P4dXwtua2/UpooMmPNMDfNw75f4b89TOSBoejsJqBzXIUdcoqUPcT/g5R6YiOupfwP7U
- 5Uf+VsRmQysCkgMP9V+FhUtYz462v0tRSUKY9ggRatUKulDYW1Z9RG1ggoUnx1v4VnAy vw== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3jxcw1xgpe-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 04 Oct 2022 10:19:39 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 3FC0D10002A;
-        Tue,  4 Oct 2022 10:19:34 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 3445F2171EA;
-        Tue,  4 Oct 2022 10:19:34 +0200 (CEST)
-Received: from [10.201.20.201] (10.75.127.46) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2375.31; Tue, 4 Oct
- 2022 10:19:30 +0200
-Message-ID: <ba9af49a-b5a3-230c-5313-3940ae9f1703@foss.st.com>
-Date:   Tue, 4 Oct 2022 10:19:30 +0200
+        with ESMTP id S229771AbiJDL3M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Oct 2022 07:29:12 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E12E433A3C
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Oct 2022 04:29:10 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id x1-20020a17090ab00100b001fda21bbc90so18319085pjq.3
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Oct 2022 04:29:10 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date;
+        bh=fYmF0v6edG3jotaZJ/G1Q7T6WIGmDDAg4ZH0RyU9M/E=;
+        b=n+BJXHd8FTNb7IKnwVLJVeaZSPg3EuxhAfb8egQy3Rwd4S2sjtmvWIyUrgVRp5F35d
+         RZx3BuRDhJ2dRO/6aC9Z5ibCMJseN6EqTLRisfFNFAgiBaqXy2uCd2wCya2X5tVWe85g
+         +IWykzZpQWdfbRomHgMWBUa/j9kgwXlPWGC+uLeh8X9CGjnb0ifMIdy1IGD6y1Pj0Zs1
+         v9Dx9QFTxsw86i4/sfkc72TOCXURtDg5ajxHL6TCkcPkVcnGzsCXLqRj3AueATaTXz5V
+         1JA4cWonPtw4OE/YaPwUKfx9ggtQWm88NssA7pNZcawixwvE2hQ1ZiLrpuUQtxIzxsGd
+         TjfQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date;
+        bh=fYmF0v6edG3jotaZJ/G1Q7T6WIGmDDAg4ZH0RyU9M/E=;
+        b=3VlvxWQAVtHFdOvRfu2F8HnPHDKndep2Z5kxfM0hqW93n3ewK7FNFeLGDcbpeSjrmm
+         Zehq0yCvanC9pBnTjcGJgvVqnoqo+93oNYW0p2EBOWd+iaDC5bqLU0VJyku8kx1YICx6
+         VCh/mtVzbWe1a0nzZKwl1KwIJK+PDli+Qlbh7f/uXpXwdpFrwHECJ44J1/7C8tFw+1MZ
+         BaQnZXiXQp8msIg2hTWrIEvrAgTOaU9QN8P2q7WvS7qGZPBa8U9wJeP2m92yITMUXeFJ
+         7vTUnNEi4tISaLLr4feXnWPaRNmbObjBRX3dvgFCjKuNk/8gLKIImgcVXYXeiXgSI66v
+         ihkQ==
+X-Gm-Message-State: ACrzQf0Q/tPygQkn8n934bEmibeeIbgYf4brLVEXhRfNf4FL+oIAzQDv
+        mJeKZoWo2ptgLi8iBQJ5t2KzQh46yJhA8LvH4puJZP6oeHo=
+X-Google-Smtp-Source: AMsMyM6q8Slt5TIHDFbD1QSXjpu9RB4PmI/iJfGAhD/f6guF1RkBnr9COEAj/tWlF0VVDrmXIXhZOWIlQ4fSloLLej4=
+X-Received: by 2002:a17:903:246:b0:179:96b5:1ad2 with SMTP id
+ j6-20020a170903024600b0017996b51ad2mr26111032plh.37.1664882949585; Tue, 04
+ Oct 2022 04:29:09 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.11.0
-Subject: Re: [PATCH 3/3] ARM: dts: stm32: Drop MMCI interrupt-names
-Content-Language: en-US
-To:     Marek Vasut <marex@denx.de>, <linux-arm-kernel@lists.infradead.org>
-CC:     Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>,
-        <linux-stm32@st-md-mailman.stormreply.com>
-References: <20220927191736.299702-1-marex@denx.de>
- <20220927191736.299702-3-marex@denx.de>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <20220927191736.299702-3-marex@denx.de>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.75.127.46]
-X-ClientProxiedBy: SFHDAG2NODE3.st.com (10.75.127.6) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.528,FMLib:17.11.122.1
- definitions=2022-10-04_02,2022-09-29_03,2022-06-22_01
+References: <20220928095744.16455-1-avri.altman@wdc.com> <DM6PR04MB65758C73ABC2DD731167158BFC5B9@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB65758C73ABC2DD731167158BFC5B9@DM6PR04MB6575.namprd04.prod.outlook.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 4 Oct 2022 13:28:32 +0200
+Message-ID: <CAPDyKFqC8FskROQQbCqx5zHS8e4ci4OmekTHE+gFTR6SzUH4Ow@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: SD: Add BROKEN-SD-DISCARD quirk
+To:     Avri Altman <Avri.Altman@wdc.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/27/22 21:17, Marek Vasut wrote:
-> The pl18x MMCI driver does not use the interrupt-names property,
-> the binding document has been updated to recommend this property
-> be unused, remove it.
-> 
-> Signed-off-by: Marek Vasut <marex@denx.de>
+On Tue, 4 Oct 2022 at 00:01, Avri Altman <Avri.Altman@wdc.com> wrote:
+>
+> Ulf hi,
+> I would appreciate if you could take a 2nd look at this,
+> So it would make it to 6.1.
 
-Reviewed-by: Yann Gautier <yann.gautier@foss.st.com>
+I am preparing the pull request for v6.1-rc1, so this won't be part of that.
+
+Although, we can still queue this as a fix for v6.1-rc2 - and we
+should also tag this for stable kernels, right!?
+
+>
+> Thanks,
+> Avri
+>
+
+Kind regards
+Uffe
 
 
-Best regards,
-Yann
+> > v1 -> v2:
+> >  - Address Ulf's suggestions
+> >
+> > Some SD-cards that are SDA-6.0 compliant reports they supports discard
+> > while they actually don't.  This might cause mk2fs to fail while trying
+> > to format the card and revert it to a read-only mode.
+> >
+> > While at it, add SD MID for SANDISK. This is because eMMC MID is assign
+> > by JEDEC and SD MID is assigned by SD 3c-LLC.
+> >
+> > Signed-off-by: Avri Altman <avri.altman@wdc.com>
+> > ---
+> >  drivers/mmc/core/block.c  | 6 +++++-
+> >  drivers/mmc/core/card.h   | 6 ++++++
+> >  drivers/mmc/core/quirks.h | 6 ++++++
+> >  include/linux/mmc/card.h  | 1 +
+> >  4 files changed, 18 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index ce89611a136e..54cd009aee50 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -1140,8 +1140,12 @@ static void mmc_blk_issue_discard_rq(struct
+> > mmc_queue *mq, struct request *req)
+> >  {
+> >       struct mmc_blk_data *md = mq->blkdata;
+> >       struct mmc_card *card = md->queue.card;
+> > +     unsigned int arg = card->erase_arg;
+> >
+> > -     mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card-
+> > >erase_arg);
+> > +     if (mmc_card_broken_sd_discard(card))
+> > +             arg = SD_ERASE_ARG;
+> > +
+> > +     mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, arg);
+> >  }
+> >
+> >  static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+> > diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> > index 99045e138ba4..cfdd1ff40b86 100644
+> > --- a/drivers/mmc/core/card.h
+> > +++ b/drivers/mmc/core/card.h
+> > @@ -73,6 +73,7 @@ struct mmc_fixup {
+> >  #define EXT_CSD_REV_ANY (-1u)
+> >
+> >  #define CID_MANFID_SANDISK      0x2
+> > +#define CID_MANFID_SANDISK_SD   0x3
+> >  #define CID_MANFID_ATP          0x9
+> >  #define CID_MANFID_TOSHIBA      0x11
+> >  #define CID_MANFID_MICRON       0x13
+> > @@ -258,4 +259,9 @@ static inline int mmc_card_broken_hpi(const struct
+> > mmc_card *c)
+> >       return c->quirks & MMC_QUIRK_BROKEN_HPI;
+> >  }
+> >
+> > +static inline int mmc_card_broken_sd_discard(const struct mmc_card *c)
+> > +{
+> > +     return c->quirks & MMC_QUIRK_BROKEN_SD_DISCARD;
+> > +}
+> > +
+> >  #endif
+> > diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> > index be4393988086..29b9497936df 100644
+> > --- a/drivers/mmc/core/quirks.h
+> > +++ b/drivers/mmc/core/quirks.h
+> > @@ -100,6 +100,12 @@ static const struct mmc_fixup __maybe_unused
+> > mmc_blk_fixups[] = {
+> >       MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY,
+> > add_quirk_mmc,
+> >                 MMC_QUIRK_TRIM_BROKEN),
+> >
+> > +     /*
+> > +      * Some SD cards reports discard support while they don't
+> > +      */
+> > +     MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344,
+> > add_quirk_sd,
+> > +               MMC_QUIRK_BROKEN_SD_DISCARD),
+> > +
+> >       END_FIXUP
+> >  };
+> >
+> > diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> > index 8a30de08e913..c726ea781255 100644
+> > --- a/include/linux/mmc/card.h
+> > +++ b/include/linux/mmc/card.h
+> > @@ -293,6 +293,7 @@ struct mmc_card {
+> >  #define MMC_QUIRK_BROKEN_IRQ_POLLING (1<<11) /* Polling
+> > SDIO_CCCR_INTx could create a fake interrupt */
+> >  #define MMC_QUIRK_TRIM_BROKEN        (1<<12)         /* Skip trim */
+> >  #define MMC_QUIRK_BROKEN_HPI (1<<13)         /* Disable broken HPI
+> > support */
+> > +#define MMC_QUIRK_BROKEN_SD_DISCARD  (1<<14) /* Disable broken SD
+> > discard support */
+> >
+> >       bool                    reenable_cmdq;  /* Re-enable Command Queue
+> > */
+> >
+> > --
+> > 2.17.1
+>
