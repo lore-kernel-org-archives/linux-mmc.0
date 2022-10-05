@@ -2,155 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6133C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Oct 2022 09:48:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2885BC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Oct 2022 10:20:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229680AbiJEJsP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Oct 2022 05:48:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35162 "EHLO
+        id S229550AbiJEKUO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Oct 2022 06:20:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229762AbiJEJsN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2022 05:48:13 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E5226E8A4
-        for <linux-mmc@vger.kernel.org>; Wed,  5 Oct 2022 02:48:11 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id e11-20020a17090a77cb00b00205edbfd646so1148017pjs.1
-        for <linux-mmc@vger.kernel.org>; Wed, 05 Oct 2022 02:48:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=uAiOjs73GnPtRWDKlCBYpOmHeG3ElDSPTXYVbLmJn3Y=;
-        b=dh/s9gbrJ1NP2il6j7m7392rb5m/0olUhLw6ywfYrwbm+b05mgthbXGVeHCne6faSe
-         nEB8FWIww9/Mh3TPJYBTwQxHk9YQhBfOYEWSgISGS3x2V+1PSzpPW0fGwHCNvRUrDmsC
-         V4LPjNBP1ZNWd2lWycmQ+cVlk2hOYpk0wbD3BQW90ktRdTfHVQoOGdzFfsVLA+UV8P0L
-         yaYjHeb70WMgWdHpn0iX5L8LgNN78O1ThcYXr+GHqSaFRNBAWLFYqLr8IpSUK6wbVOaM
-         BO7XUtm7Hdl6sqI52mxM7YweUuOKwjFV07IZc9k6gah2y9PsEzpdZlxqQ3TbFVT9xR+n
-         gOow==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=uAiOjs73GnPtRWDKlCBYpOmHeG3ElDSPTXYVbLmJn3Y=;
-        b=ayva1IYkELPnaI0fIgLiiTtB5esICBiHp469BfVF8ieK9qpK1/t4hBvaX0AT3c3By2
-         7jJ6G0FSeFPvxRlrhGBdzX8jd9QQIe1FVTVt68CsDUazPrmgWYuQhNwObF4kmZ0QlmOU
-         EGtQfyCJg/kZwQGgCKJcuIaieTR6fL47RbkMuFOM+3GJmGSb2Inz14fV4HcYbBmB2DkR
-         pAwVWZLR5af6nKs19Hz+ZrRW97/TFU6rj5kUlZDgaUpNjqYbvROnsLN/qpdv8oIImMBT
-         UrcT0sJs050QgunVWUfJlCv7NU+VFaIQHOHrL3CleAXeQ4G5qah/j70h0MBAxPuKYT2n
-         /LAA==
-X-Gm-Message-State: ACrzQf2g7EfSgYo1NtYbSVgTN1IdCRrrBVYzBwNiSSpysusH9Tc4pXp5
-        6uauTHACz5VW3hhwD+OJiL4d7dE0MA9K2ZjyN5gy4g==
-X-Google-Smtp-Source: AMsMyM6eqXlNc1atZOkkKgiG1yV3Y78Coz+AbzCXphLyt0GPdUFcokJxxEDnXeFGnrVe0bHv3fHf9rWqZFSPgK8TTJI=
-X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
- mw7-20020a17090b4d0700b001ef521cf051mr4350723pjb.164.1664963290949; Wed, 05
- Oct 2022 02:48:10 -0700 (PDT)
+        with ESMTP id S229593AbiJEKUM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Oct 2022 06:20:12 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB7902BE0F
+        for <linux-mmc@vger.kernel.org>; Wed,  5 Oct 2022 03:20:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1664965211; x=1696501211;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=scSpjR0Pvyv7oXdaR1nPAmZwR9CVGbolNzaHC5kzmHY=;
+  b=cyMj8zorexVHbWu9XaSRUana5unqJE/B7YPpVo5GxuZrqaxk06XUkOOO
+   21r0SEvSWTFWtg60nKvcK1ZA5Lr07VII2cqBk+ZxpVFbe0YZJq+Qx3lwc
+   kdORWRiuoQlL+Au6c5YrYkGMs5+uhsr+WTa/lpFpi40PiAN++Aa5QdZOJ
+   2EiMtf1Wwf6jhB+sGwKOrChstA3o8io8xcRvJ+Vw3NlSGXSeTQTvdp/Y9
+   7f/r4g65mu6sSyd87gK5y4R97D+vwfATpxQoE1nByQyQAIlPQo3GavACe
+   CsJAm1Jf7MQLEUdHVf3JAVQRL7nfUsENgcWh5jbXO7QCMq5zW+tbfvTGG
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10490"; a="304110405"
+X-IronPort-AV: E=Sophos;i="5.95,159,1661842800"; 
+   d="scan'208";a="304110405"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2022 03:20:11 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10490"; a="728605902"
+X-IronPort-AV: E=Sophos;i="5.95,159,1661842800"; 
+   d="scan'208";a="728605902"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.59.192])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Oct 2022 03:20:09 -0700
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Stefan Wahren <stefan.wahren@i2se.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH 00/14] mmc: Replace kmap_atomic() with kmap_local_page()
+Date:   Wed,  5 Oct 2022 13:19:37 +0300
+Message-Id: <20221005101951.3165-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20221005032257.80681-1-kch@nvidia.com> <20221005032257.80681-2-kch@nvidia.com>
- <6fee2d7a-7fd1-73ee-2911-87a4ed3e8769@opensource.wdc.com>
-In-Reply-To: <6fee2d7a-7fd1-73ee-2911-87a4ed3e8769@opensource.wdc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 5 Oct 2022 11:47:34 +0200
-Message-ID: <CAPDyKFpBpiydQn+=24CqtaH_qa3tQfN2gQSiUrHCjnLSuy4=Kg@mail.gmail.com>
-Subject: Re: [RFC PATCH 01/21] block: add and use init tagset helper
-To:     Chaitanya Kulkarni <kch@nvidia.com>,
-        Damien Le Moal <damien.lemoal@opensource.wdc.com>
-Cc:     linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-omap@vger.kernel.org, linux-remoteproc@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-        linux-scsi@vger.kernel.org, axboe@kernel.dk, efremov@linux.com,
-        josef@toxicpanda.com, idryomov@gmail.com,
-        dongsheng.yang@easystack.cn, haris.iqbal@ionos.com,
-        jinpu.wang@ionos.com, mst@redhat.com, jasowang@redhat.com,
-        pbonzini@redhat.com, stefanha@redhat.com, ohad@wizery.com,
-        andersson@kernel.org, baolin.wang@linux.alibaba.com,
-        richard@nod.at, miquel.raynal@bootlin.com, vigneshr@ti.com,
-        marcan@marcan.st, sven@svenpeter.dev, alyssa@rosenzweig.io,
-        kbusch@kernel.org, hch@lst.de, sagi@grimberg.me, sth@linux.ibm.com,
-        hoeppner@linux.ibm.com, hca@linux.ibm.com, gor@linux.ibm.com,
-        agordeev@linux.ibm.com, borntraeger@linux.ibm.com,
-        svens@linux.ibm.com, jejb@linux.ibm.com,
-        martin.petersen@oracle.com, hare@suse.de, bhelgaas@google.com,
-        john.garry@huawei.com, mcgrof@kernel.org,
-        christophe.jaillet@wanadoo.fr, vaibhavgupta40@gmail.com,
-        wsa+renesas@sang-engineering.com, johannes.thumshirn@wdc.com,
-        bvanassche@acm.org, ming.lei@redhat.com,
-        shinichiro.kawasaki@wdc.com, vincent.fu@samsung.com,
-        christoph.boehmwalder@linbit.com, joel@jms.id.au,
-        vincent.whitchurch@axis.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org, asahi@lists.linux.dev
-Content-Type: text/plain; charset="UTF-8"
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 5 Oct 2022 at 07:11, Damien Le Moal
-<damien.lemoal@opensource.wdc.com> wrote:
->
-> On 10/5/22 12:22, Chaitanya Kulkarni wrote:
-> > Add and use the helper to initialize the common fields of the tag_set
-> > such as blk_mq_ops, number of h/w queues, queue depth, command size,
-> > numa_node, timeout, BLK_MQ_F_XXX flags, driver data. This initialization
-> > is spread all over the block drivers. This avoids the code repetation of
-> > the inialization code of the tag set in current block drivers and any
->
-> s/inialization/initialization
-> s/repetation/repetition
->
-> > future ones.
-> >
-> > Signed-off-by: Chaitanya Kulkarni <kch@nvidia.com>
-> > ---
-> >  block/blk-mq.c                | 20 ++++++++++++++++++++
-> >  drivers/block/null_blk/main.c | 10 +++-------
-> >  include/linux/blk-mq.h        |  5 +++++
-> >  3 files changed, 28 insertions(+), 7 deletions(-)
-> >
-> > diff --git a/block/blk-mq.c b/block/blk-mq.c
-> > index 8070b6c10e8d..e3a8dd81bbe2 100644
-> > --- a/block/blk-mq.c
-> > +++ b/block/blk-mq.c
-> > @@ -4341,6 +4341,26 @@ static int blk_mq_alloc_tag_set_tags(struct blk_mq_tag_set *set,
-> >       return blk_mq_realloc_tag_set_tags(set, 0, new_nr_hw_queues);
-> >  }
-> >
-> > +void blk_mq_init_tag_set(struct blk_mq_tag_set *set,
-> > +             const struct blk_mq_ops *ops, unsigned int nr_hw_queues,
-> > +             unsigned int queue_depth, unsigned int cmd_size, int numa_node,
-> > +             unsigned int timeout, unsigned int flags, void *driver_data)
->
-> That is an awful lot of arguments... I would be tempted to say pack all
-> these into a struct but then that would kind of negate this patchset goal.
-> Using a function with that many arguments will be error prone, and hard to
-> review... Not a fan.
+Hi
 
-I completely agree.
+Here are patches primarily aimed at replacing kmap_atomic() with
+kmap_local_page().
 
-But there is also another problem going down this route. If/when we
-realize that there is another parameter needed in the blk_mq_tag_set.
-Today that's quite easy to add (assuming the parameter can be
-optional), without changing the blk_mq_init_tag_set() interface.
+kmap_local_page() is equivalent to kmap_atomic() except that it does not
+disable page faults or preemption. Where possible kmap_local_page() is
+preferred to kmap_atomic() - refer kernel highmem documentation.
 
->
-> > +{
-> > +     if (!set)
-> > +             return;
-> > +
-> > +     set->ops = ops;
-> > +     set->nr_hw_queues = nr_hw_queues;
-> > +     set->queue_depth = queue_depth;
-> > +     set->cmd_size = cmd_size;
-> > +     set->numa_node = numa_node;
-> > +     set->timeout = timeout;
-> > +     set->flags = flags;
-> > +     set->driver_data = driver_data;
-> > +}
-> > +
->
+In these cases, there is no need to disable page faults or preemption, so
+kmap_atomic() is replaced with kmap_local_page(), and, correspondingly,
+kunmap_atomic() with kunmap_local().
 
-[...]
+That work raised the question of why local_irq_{save,restore}() was being
+used with k[un]map_atomic().  It turns out to be for legacy reasons that
+have gone away.
 
-Kind regards
-Uffe
+A long time ago the kmap_atomic API required a slot to be provided which
+risked the possibility that other code might use the same slot at the
+same time. Disabling interrupts prevented the possibility of an interrupt
+handler doing that. However, that went away with
+commit 3e4d3af501cc ("mm: stack based kmap_atomic()").
+
+The work is mostly divided into separate patches, to enable separate review
+for driver reviewers and to enable separate reverts if necessary.
+
+
+Adrian Hunter (14):
+      mmc: sdhci: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: sdhci: Remove local_irq_{save,restore}() around sg_miter_{next,stop}()
+      mmc: sdhci: Replace kmap_atomic() with kmap_local_page()
+      mmc: bcm2835: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: bcm2835: Remove local_irq_{save,restore}() around sg_miter_{next,stop}()
+      mmc: bcm2835: Replace kmap_atomic() with kmap_local_page()
+      mmc: mmc_test: Remove local_irq_{save,restore}() around sg_copy_{from,to}_buffer()
+      mmc: tifm_sd: Remove local_irq_{save,restore}() around tifm_sd_transfer_data()
+      mmc: tifm_sd: Remove local_irq_{save,restore}() around tifm_sd_bounce_block()
+      mmc: tifm_sd: Replace kmap_atomic() with kmap_local_page()
+      mmc: tmio_mmc_core: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: tmio_mmc_core: Replace kmap_atomic() with kmap_local_page()
+      mmc: au1xmmc: Replace kmap_atomic() with kmap_local_page()
+      mmc: wbsd: Replace kmap_atomic() with kmap_local_page()
+
+ drivers/mmc/core/mmc_test.c              |  5 -----
+ drivers/mmc/host/au1xmmc.c               |  8 ++++----
+ drivers/mmc/host/bcm2835.c               | 12 ++----------
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c |  5 ++---
+ drivers/mmc/host/sdhci.c                 | 30 ++++++++----------------------
+ drivers/mmc/host/tifm_sd.c               | 28 ++++++++++------------------
+ drivers/mmc/host/tmio_mmc.h              | 11 ++++-------
+ drivers/mmc/host/tmio_mmc_core.c         | 10 ++++------
+ drivers/mmc/host/wbsd.c                  | 10 +++++-----
+ 9 files changed, 39 insertions(+), 80 deletions(-)
+
+
+Regards
+Adrian
