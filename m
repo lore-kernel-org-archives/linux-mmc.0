@@ -2,248 +2,142 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C151C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 13:01:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C994C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 13:07:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230216AbiJFNBs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Oct 2022 09:01:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43884 "EHLO
+        id S231165AbiJFNHH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Oct 2022 09:07:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230133AbiJFNBn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 09:01:43 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2C8E8A1FC;
-        Thu,  6 Oct 2022 06:01:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665061302; x=1696597302;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Ru6CnBvVhIEhYJCAeuuxpRt9HHeJLOxAuoa9BjBuh8k=;
-  b=AGWKWrAmNTte351h2k1feYl2fEi8rMwITVCJk7pNUXa1Ng0fQ3b2azOq
-   uKuvJLxK0mA9Tqu3UQrxcvZhNBZH7+ufyXr/eCl51aK2E+6alzDUNMpev
-   Nal/AmQePVXxf51aw66W9WRCAYm+XU/TtJLHLlzK0fLBMpvOkNSKnYU6a
-   G0RPB2YNDasi333P00LsC+HLiCjUDiLmBkQrJ9Dt5KAHtZ7QeMOcScwI0
-   yVVxu3xrA0z8zp+mB6pCuwFd+t1IPnDGoJrgOtk/mfFAE1KbrDX96OsuA
-   Q6dzk7SPLhjyK1/yFBt+FIYuNforlaW4X0SnFFSBR/uzfXEGd3cKuEo3f
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10491"; a="283804515"
-X-IronPort-AV: E=Sophos;i="5.95,163,1661842800"; 
-   d="scan'208";a="283804515"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2022 06:01:41 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10491"; a="767139765"
-X-IronPort-AV: E=Sophos;i="5.95,163,1661842800"; 
-   d="scan'208";a="767139765"
-Received: from smile.fi.intel.com ([10.237.72.54])
-  by fmsmga001.fm.intel.com with ESMTP; 06 Oct 2022 06:01:22 -0700
-Received: from andy by smile.fi.intel.com with local (Exim 4.96)
-        (envelope-from <andriy.shevchenko@linux.intel.com>)
-        id 1ogQUx-0039Oq-2J;
-        Thu, 06 Oct 2022 16:01:11 +0300
-Date:   Thu, 6 Oct 2022 16:01:11 +0300
-From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     Jan Kara <jack@suse.cz>, Andrew Lunn <andrew@lunn.ch>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        dri-devel@lists.freedesktop.org,
-        Andrii Nakryiko <andrii@kernel.org>,
-        Hans Verkuil <hverkuil@xs4all.nl>, linux-sctp@vger.kernel.org,
-        "Md . Haris Iqbal" <haris.iqbal@ionos.com>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Andy Gospodarek <andy@greyhouse.net>,
-        Sergey Matyukevich <geomatsi@gmail.com>,
-        Rohit Maheshwari <rohitm@chelsio.com>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        ceph-devel@vger.kernel.org,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        Jozsef Kadlecsik <kadlec@netfilter.org>,
-        Nilesh Javali <njavali@marvell.com>,
-        Jean-Paul Roubelat <jpr@f6fbb.org>,
-        Dick Kennedy <dick.kennedy@broadcom.com>,
-        Jay Vosburgh <j.vosburgh@gmail.com>,
-        Potnuri Bharat Teja <bharat@chelsio.com>,
-        Vinay Kumar Yadav <vinay.yadav@chelsio.com>,
-        linux-nfs@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>,
-        Igor Mitsyanko <imitsyanko@quantenna.com>,
-        Andy Lutomirski <luto@kernel.org>, linux-hams@vger.kernel.org,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Trond Myklebust <trond.myklebust@hammerspace.com>,
-        linux-raid@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-usb@vger.kernel.org,
-        Michael Chan <michael.chan@broadcom.com>,
-        linux-kernel@vger.kernel.org, Varun Prakash <varun@chelsio.com>,
-        Chuck Lever <chuck.lever@oracle.com>,
-        netfilter-devel@vger.kernel.org,
-        Masami Hiramatsu <mhiramat@kernel.org>,
-        Jiri Olsa <jolsa@kernel.org>, Jan Kara <jack@suse.com>,
-        linux-fsdevel@vger.kernel.org,
-        Lars Ellenberg <lars.ellenberg@linbit.com>,
-        linux-media@vger.kernel.org,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        Sharvari Harisangam <sharvari.harisangam@nxp.com>,
-        linux-fbdev@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-mmc@vger.kernel.org,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        Song Liu <song@kernel.org>, Eric Dumazet <edumazet@google.com>,
-        target-devel@vger.kernel.org, John Stultz <jstultz@google.com>,
-        Stanislav Fomichev <sdf@google.com>,
-        Gregory Greenman <gregory.greenman@intel.com>,
-        drbd-dev@lists.linbit.com, dev@openvswitch.org,
-        Leon Romanovsky <leon@kernel.org>,
-        Helge Deller <deller@gmx.de>, Hugh Dickins <hughd@google.com>,
-        James Smart <james.smart@broadcom.com>,
-        Anil S Keshavamurthy <anil.s.keshavamurthy@intel.com>,
-        Pravin B Shelar <pshelar@ovn.org>,
-        Julian Anastasov <ja@ssi.bg>, coreteam@netfilter.org,
-        Veaceslav Falico <vfalico@gmail.com>,
-        Yonghong Song <yhs@fb.com>,
-        Namjae Jeon <linkinjeon@kernel.org>,
-        linux-crypto@vger.kernel.org,
-        Santosh Shilimkar <santosh.shilimkar@oracle.com>,
-        Ganapathi Bhat <ganapathi017@gmail.com>,
-        linux-actions@lists.infradead.org,
-        Simon Horman <horms@verge.net.au>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Mika Westerberg <mika.westerberg@linux.intel.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
-        Hao Luo <haoluo@google.com>, Theodore Ts'o <tytso@mit.edu>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Dennis Dalessandro <dennis.dalessandro@cornelisnetworks.com>,
-        Florian Westphal <fw@strlen.de>,
-        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
-        Jon Maloy <jmaloy@redhat.com>,
-        Vlad Yasevich <vyasevich@gmail.com>,
-        Anna Schumaker <anna@kernel.org>,
-        Yehezkel Bernat <YehezkelShB@gmail.com>,
-        Haoyue Xu <xuhaoyue1@hisilicon.com>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        linux-wireless@vger.kernel.org,
-        Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>,
-        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
-        linux-nvme@lists.infradead.org,
-        Michal Januszewski <spock@gentoo.org>,
-        linux-mtd@lists.infradead.org, kasan-dev@googlegroups.com,
-        Cong Wang <xiyou.wangcong@gmail.com>,
-        Thomas Sailer <t.sailer@alumni.ethz.ch>,
-        Ajay Singh <ajay.kathat@microchip.com>,
-        Xiubo Li <xiubli@redhat.com>, Sagi Grimberg <sagi@grimberg.me>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Jonathan Corbet <corbet@lwn.net>, linux-rdma@vger.kernel.org,
-        lvs-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        "Naveen N . Rao" <naveen.n.rao@linux.ibm.com>,
-        Ilya Dryomov <idryomov@gmail.com>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Pablo Neira Ayuso <pablo@netfilter.org>,
-        Marco Elver <elver@google.com>,
-        Kees Cook <keescook@chromium.org>,
-        Yury Norov <yury.norov@gmail.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Jamal Hadi Salim <jhs@mojatatu.com>,
-        KP Singh <kpsingh@kernel.org>, Borislav Petkov <bp@alien8.de>,
-        Keith Busch <kbusch@kernel.org>,
-        Dan Williams <dan.j.williams@intel.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Arend van Spriel <aspriel@gmail.com>,
-        linux-ext4@vger.kernel.org,
-        Wenpeng Liang <liangwenpeng@huawei.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Xinming Hu <huxinming820@gmail.com>,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Jeff Layton <jlayton@kernel.org>, linux-xfs@vger.kernel.org,
-        netdev@vger.kernel.org, Ying Xue <ying.xue@windriver.com>,
-        Manish Rangankar <mrangankar@marvell.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Toke =?iso-8859-1?Q?H=F8iland-J=F8rgensen?= <toke@toke.dk>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Amitkumar Karwar <amitkarwar@gmail.com>, linux-mm@kvack.org,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Ayush Sawal <ayush.sawal@chelsio.com>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Jiri Pirko <jiri@resnulli.us>,
-        linux-f2fs-devel@lists.sourceforge.net,
-        Jack Wang <jinpu.wang@ionos.com>,
-        Steffen Klassert <steffen.klassert@secunet.com>,
-        rds-devel@oss.oracle.com, Herbert Xu <herbert@gondor.apana.org.au>,
-        linux-scsi@vger.kernel.org, dccp@vger.kernel.org,
-        Richard Weinberger <richard@nod.at>,
-        Russell King <linux@armlinux.org.uk>,
-        Jason Gunthorpe <jgg@ziepe.ca>,
-        SHA-cyfmac-dev-list@infineon.com, Ingo Molnar <mingo@redhat.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        John Fastabend <john.fastabend@gmail.com>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Michael Jamet <michael.jamet@intel.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Akinobu Mita <akinobu.mita@gmail.com>,
-        linux-block@vger.kernel.org, dmaengine@vger.kernel.org,
-        Hannes Reinecke <hare@suse.de>,
-        Dmitry Vyukov <dvyukov@google.com>,
-        Jens Axboe <axboe@kernel.dk>, cake@lists.bufferbloat.net,
-        brcm80211-dev-list.pdl@broadcom.com,
-        Yishai Hadas <yishaih@nvidia.com>,
-        Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>,
-        linuxppc-dev@lists.ozlabs.org, David Ahern <dsahern@kernel.org>,
-        Philipp Reisner <philipp.reisner@linbit.com>,
-        Stephen Hemminger <stephen@networkplumber.org>,
-        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>, Vinod Koul <vkoul@kernel.org>,
-        tipc-discussion@lists.sourceforge.net, Thomas Graf <tgraf@suug.ch>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Sungjong Seo <sj1557.seo@samsung.com>,
-        Martin KaFai Lau <martin.lau@linux.dev>
-Subject: Re: [f2fs-dev] [PATCH v1 3/5] treewide: use get_random_u32() when
- possible
-Message-ID: <Yz7Rl7BXamKQhRzH@smile.fi.intel.com>
-References: <20221005214844.2699-1-Jason@zx2c4.com>
- <20221005214844.2699-4-Jason@zx2c4.com>
- <20221006084331.4bdktc2zlvbaszym@quack3>
- <Yz7LCyIAHC6l5mG9@zx2c4.com>
+        with ESMTP id S230458AbiJFNGz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 09:06:55 -0400
+Received: from NAM02-DM3-obe.outbound.protection.outlook.com (mail-dm3nam02on2042.outbound.protection.outlook.com [40.107.95.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B572A5734;
+        Thu,  6 Oct 2022 06:06:53 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=lDw4Dcg5n6DRQIXott2G/RIPbn3Eq3klEqkxmmy3MlWmjbJebQj9Z7KCWgVO3Jty7Le8UsIRcmo3Plt2tCxgXrzQVDrvUjg6niHfMvzm1EFHj0YkMaaKaYAR2U3zRh2lAnlXTHoFGar8lej52wbsHCevPvuhXbw+vYotaU5efIUlGYobap9Jaff3Gfgl5GQXRV/YyGejeiVWizdmmGmQnmtszAFrogAkapRPGB0/wz0lxgoRPSBZoAuW/+hCutNxEWNzsPkz8d+L33Ouhh8dhH662/vmymNpz5tOzgbNUh0J8AuSg1uStJGpgkxlOQ1xtl6uxQUEcRhvwIxvmQMtdw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ySAXZuQxT+OaejFFBcyvnzs7QYtblFhBELXJC0YqmDY=;
+ b=lBZLT4W3LOlmDoksTok5J9ZB/rTBxxjSEZ7z3jLTatl/knKsRo92yUlpzHhSJBPUJPrXFox0WQav2s+icWp8f5GJH8zXRcOiNl7YXi8jwfzcvKMipCRgAR7ukXQLZSS1m+BLsm06CJaDS27kzr3QQS9bF73sukE+wCiHb3c/7CxelMmHRoD1UNR5+yFyFOifG4+/n/Ke3C6dmOSV40zw+BjKsE0hh799ZII9jAzrWr6Zdv9UAyRP5hPc/mEvrRCzGV7usnaEubqImNoyLK+l8CHlBOdOlySxbRlgGSbfk1jNz856Bomq0iOl0DUvTo+BJ1qkUOm/ta4232bKVoub7Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.117.161) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ySAXZuQxT+OaejFFBcyvnzs7QYtblFhBELXJC0YqmDY=;
+ b=Sr+UCXaOIAwB7GO2RyvReK268Mgn1V/8NB5X9/Goxpq8pqPqcWFNIOfZP4A7VWV4lCpMtpWwa0OlMloMyzUOVJ3cbiAjmnKVq85AHgK2lcWU727b6MK7WOF0MwVHFBDC1zywz1Sc9p8ig+yo+cqlq/ANuulG8JO+WSbr7GNoxulZdA2qZkf21rwboTQr6RcEzY1pm/CpFu9wOgTgpDmu5mQZMP6elmHXAGHKmn66p+BtGb7eK+CDqyqQ+eC36PabuLcWkMH8W1mBirSSB6K99e/+4RViu38Yt1QDFbrj/ZRU3F67EaQDzChjsrDEVvhpqdJiuigX9dQsRqD7MeDptA==
+Received: from MW3PR05CA0011.namprd05.prod.outlook.com (2603:10b6:303:2b::16)
+ by PH7PR12MB6665.namprd12.prod.outlook.com (2603:10b6:510:1a7::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5676.24; Thu, 6 Oct
+ 2022 13:06:51 +0000
+Received: from CO1NAM11FT027.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:2b:cafe::9d) by MW3PR05CA0011.outlook.office365.com
+ (2603:10b6:303:2b::16) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5709.7 via Frontend
+ Transport; Thu, 6 Oct 2022 13:06:50 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.161)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.117.161 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.117.161; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.117.161) by
+ CO1NAM11FT027.mail.protection.outlook.com (10.13.174.224) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5709.10 via Frontend Transport; Thu, 6 Oct 2022 13:06:50 +0000
+Received: from rnnvmail201.nvidia.com (10.129.68.8) by mail.nvidia.com
+ (10.129.200.67) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Thu, 6 Oct 2022
+ 06:06:28 -0700
+Received: from rnnvmail204.nvidia.com (10.129.68.6) by rnnvmail201.nvidia.com
+ (10.129.68.8) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.29; Thu, 6 Oct 2022
+ 06:06:27 -0700
+Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
+ (10.129.68.6) with Microsoft SMTP Server id 15.2.986.29 via Frontend
+ Transport; Thu, 6 Oct 2022 06:06:24 -0700
+From:   Prathamesh Shete <pshete@nvidia.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <thierry.reding@gmail.com>, <jonathanh@nvidia.com>,
+        <p.zabel@pengutronix.de>, <linux-mmc@vger.kernel.org>,
+        <linux-tegra@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+CC:     <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
+        <kyarlagadda@nvidia.com>
+Subject: [PATCH v7 1/4] mmc: sdhci-tegra: Separate Tegra194 and Tegra234 SoC data
+Date:   Thu, 6 Oct 2022 18:36:19 +0530
+Message-ID: <20221006130622.22900-1-pshete@nvidia.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <Yz6zfrVq9cP/wrJb@orome>
+References: <Yz6zfrVq9cP/wrJb@orome>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Yz7LCyIAHC6l5mG9@zx2c4.com>
-Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT027:EE_|PH7PR12MB6665:EE_
+X-MS-Office365-Filtering-Correlation-Id: ace4b991-020e-4661-868f-08daa79ba225
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: dlIx2B8+ypxAjI8FrWfp6eLGltb4WwMIzbUJV/rH79Cz6QlxHdfi8cQHMxrAZQw+eeSDzBMsDiyMB8ZUc59QjEjzep6PakQGkyLW0LEDpboqyzjUF8vnZSdRvUZGL+P3PInGfImQiO5GM3oaJp+z9AvE6PVI1eFFNjwTRDYHQ3ReOyN1nZ+G/trpe2JXNsSg9brgQzo8atImM5YuvJC30ozKhn3xcBigKpYbHyP7ifo7BVQIana9nzW2flCTcmV165Fjo4J1ttrrAdafcTxqvpt7gTEcduMkS6OhhSMIFuDfJ6czUx9P89xkdYXAx0GYbeoVSRjTDfFpM2XecgsytkQRtVPYvcKC+9nLO5So96VMJVbgLIiviqrD0ngOj3QF4r4OAAa1h59DHOyRQJBMV6CGISMM2i63CR4foHJJntrRC6QRQyTpHNA/sY8xwx+BqEb0f4WLwgIGypgf6nUSPKf+7z70+XD0fq2Txex7UvX+MHGzHkhU1iMex2JQ1lqBEN8aH4qJbqmeWB/+kkf+aJqaK783zgakqEZgMCcCictwYUajS8Rz6/Zm2PTu0A19be5iVJIetNSBsVwTOXNusGR/HIWESP5p2gCuwlutIkOMLg+frOBpqqP/ThUKP5T/hf35UvB7mbalblVRSrm0vetHCzaLsPDJFKe8sQRGaAOv6hSTsuipNF5R4qG53qBphT2hiw8TOjfgMHbHJ3LFxxVUnrTPLeRRNHZmXGALDJOmV5462zDs/xfuC2UL40iTsuoi3zPDYIZkUhFW14WQeQ==
+X-Forefront-Antispam-Report: CIP:216.228.117.161;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(136003)(39860400002)(346002)(376002)(396003)(451199015)(36840700001)(40470700004)(46966006)(5660300002)(186003)(110136005)(426003)(356005)(54906003)(1076003)(86362001)(336012)(26005)(316002)(2906002)(40480700001)(4326008)(83380400001)(70206006)(8936002)(70586007)(7636003)(40460700003)(47076005)(36756003)(2616005)(82740400003)(8676002)(82310400005)(41300700001)(36860700001)(7696005)(107886003)(6666004)(478600001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Oct 2022 13:06:50.6609
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: ace4b991-020e-4661-868f-08daa79ba225
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.161];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT027.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB6665
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 06, 2022 at 06:33:15AM -0600, Jason A. Donenfeld wrote:
-> On Thu, Oct 06, 2022 at 10:43:31AM +0200, Jan Kara wrote:
+Create new SoC data structure for Tegra234 platforms.
+Additional features, tap value configurations are added/
+updated for Tegra234 platform hence separate Tegra194 and
+Tegra234 SoC data.
 
-...
+Signed-off-by: Aniruddha Tvs Rao <anrao@nvidia.com>
+Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Thierry Reding <treding@nvidia.com>
+---
+ drivers/mmc/host/sdhci-tegra.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-> > The code here is effectively doing the
-> > 
-> > 	parent_group = prandom_u32_max(ngroups);
-> > 
-> > Similarly here we can use prandom_u32_max(ngroups) like:
-> > 
-> > 		if (qstr) {
-> > 			...
-> > 			parent_group = hinfo.hash % ngroups;
-> > 		} else
-> > 			parent_group = prandom_u32_max(ngroups);
-> 
-> Nice catch. I'll move these to patch #1.
-
-I believe coccinelle is able to handle this kind of code as well, so Kees'
-proposal to use it seems more plausible since it's less error prone and more
-flexible / powerful.
-
+diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+index 2d2d8260c681..a6c5bbae77b4 100644
+--- a/drivers/mmc/host/sdhci-tegra.c
++++ b/drivers/mmc/host/sdhci-tegra.c
+@@ -1556,7 +1556,21 @@ static const struct sdhci_tegra_soc_data soc_data_tegra194 = {
+ 	.max_tap_delay = 139,
+ };
+ 
++static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
++	.pdata = &sdhci_tegra186_pdata,
++	.dma_mask = DMA_BIT_MASK(39),
++	.nvquirks = NVQUIRK_NEEDS_PAD_CONTROL |
++		    NVQUIRK_HAS_PADCALIB |
++		    NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
++		    NVQUIRK_ENABLE_SDR50 |
++		    NVQUIRK_ENABLE_SDR104 |
++		    NVQUIRK_HAS_TMCLK,
++	.min_tap_delay = 95,
++	.max_tap_delay = 111,
++};
++
+ static const struct of_device_id sdhci_tegra_dt_match[] = {
++	{ .compatible = "nvidia,tegra234-sdhci", .data = &soc_data_tegra234 },
+ 	{ .compatible = "nvidia,tegra194-sdhci", .data = &soc_data_tegra194 },
+ 	{ .compatible = "nvidia,tegra186-sdhci", .data = &soc_data_tegra186 },
+ 	{ .compatible = "nvidia,tegra210-sdhci", .data = &soc_data_tegra210 },
 -- 
-With Best Regards,
-Andy Shevchenko
-
+2.17.1
 
