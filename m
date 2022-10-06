@@ -2,163 +2,248 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91550C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 11:56:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C151C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 13:01:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230163AbiJFL4m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Oct 2022 07:56:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56492 "EHLO
+        id S230216AbiJFNBs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Oct 2022 09:01:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43884 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230088AbiJFL4m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 07:56:42 -0400
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B2ED9DDA7
-        for <linux-mmc@vger.kernel.org>; Thu,  6 Oct 2022 04:56:41 -0700 (PDT)
-Received: by mail-pj1-x1033.google.com with SMTP id n18-20020a17090ade9200b0020b0012097cso1703390pjv.0
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Oct 2022 04:56:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date;
-        bh=8YdW5ZQbSsoCbC8A2Cj5s8heroqHeLv0q4xh8hgvQKE=;
-        b=PFRG+MxDk09uWfW10TE42OouXuAgJ+hLSfoWdWy+xe9ybDy8K65C6RCvP+r8DCbXoZ
-         KPSZRzBYrgH+y8lCGbq3yoeVqsC5t8DL1MHXL7oDASaukWc4+XEpFXLeY/e452wwCwAq
-         Ri/qypTiazjFlyhkEFUeOwhcFZztfY3Dn3Hjbevki8G7SnqKG/qUQyGx1CoS1VZscsFm
-         +rKSm+kcwGggA6TyB/vFNL9E6p0APcCdeiJyDZaaWy6FOp0UFCY6Tbk5gm0REJCuQ68a
-         IDFr5Di020IpKwq17rkicTGX2XKuhC1abunNJkFoiD7kHEV5MJi1EnqIPmhXcQGZXH8G
-         dYEQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=8YdW5ZQbSsoCbC8A2Cj5s8heroqHeLv0q4xh8hgvQKE=;
-        b=vEoI63mcKV87Te7stj+UD4woonFmxWx+fjgbVB2xia2VVE+GhtKOmHspV+5AJSN71N
-         Q1G9pbV5QPJMiKLNQfcY2kW5Jl0J4j50TGN65RnSVj/u72fislNnCPU9302FJmPbDDKK
-         tJPzT7MPBkT64OjO+yMvOuTAk6VutWeia9JI4fa4SNof1qvIB3FcpmO6NtK1zfAFzyV5
-         9qalKmF6mh9IDmOd5T6k1PEDQ3y/l6HOcDZtq95psoYvBok0o9emy5EsfzabfqUkQa47
-         GrgSsAfQY/gQIo3xb5AnsGQZfyTRAtdYnIyy9+ZdDd4mBekN5O6wlRC3jFNv4RIy7IrA
-         kgFw==
-X-Gm-Message-State: ACrzQf36KbtvskkaKI5tJKp9rZ+KOx0HxyeL50YIbdp+Nqas249cosrq
-        A6G2EfHlpSlbUj9jlg9U4b36/ExV3WurqeuCStxbE8A98kE=
-X-Google-Smtp-Source: AMsMyM6jv6u+JSiYTlBvUO4GayIy7bQOiKh4B35gs8ljPy9X6RIwXKXpDd+O5WfQNtcvyhTl0S8k8z62SwoWDz6x9is=
-X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
- mw7-20020a17090b4d0700b001ef521cf051mr10525380pjb.164.1665057400668; Thu, 06
- Oct 2022 04:56:40 -0700 (PDT)
+        with ESMTP id S230133AbiJFNBn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 09:01:43 -0400
+Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2C8E8A1FC;
+        Thu,  6 Oct 2022 06:01:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1665061302; x=1696597302;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=Ru6CnBvVhIEhYJCAeuuxpRt9HHeJLOxAuoa9BjBuh8k=;
+  b=AGWKWrAmNTte351h2k1feYl2fEi8rMwITVCJk7pNUXa1Ng0fQ3b2azOq
+   uKuvJLxK0mA9Tqu3UQrxcvZhNBZH7+ufyXr/eCl51aK2E+6alzDUNMpev
+   Nal/AmQePVXxf51aw66W9WRCAYm+XU/TtJLHLlzK0fLBMpvOkNSKnYU6a
+   G0RPB2YNDasi333P00LsC+HLiCjUDiLmBkQrJ9Dt5KAHtZ7QeMOcScwI0
+   yVVxu3xrA0z8zp+mB6pCuwFd+t1IPnDGoJrgOtk/mfFAE1KbrDX96OsuA
+   Q6dzk7SPLhjyK1/yFBt+FIYuNforlaW4X0SnFFSBR/uzfXEGd3cKuEo3f
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10491"; a="283804515"
+X-IronPort-AV: E=Sophos;i="5.95,163,1661842800"; 
+   d="scan'208";a="283804515"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 06 Oct 2022 06:01:41 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10491"; a="767139765"
+X-IronPort-AV: E=Sophos;i="5.95,163,1661842800"; 
+   d="scan'208";a="767139765"
+Received: from smile.fi.intel.com ([10.237.72.54])
+  by fmsmga001.fm.intel.com with ESMTP; 06 Oct 2022 06:01:22 -0700
+Received: from andy by smile.fi.intel.com with local (Exim 4.96)
+        (envelope-from <andriy.shevchenko@linux.intel.com>)
+        id 1ogQUx-0039Oq-2J;
+        Thu, 06 Oct 2022 16:01:11 +0300
+Date:   Thu, 6 Oct 2022 16:01:11 +0300
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc:     Jan Kara <jack@suse.cz>, Andrew Lunn <andrew@lunn.ch>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        dri-devel@lists.freedesktop.org,
+        Andrii Nakryiko <andrii@kernel.org>,
+        Hans Verkuil <hverkuil@xs4all.nl>, linux-sctp@vger.kernel.org,
+        "Md . Haris Iqbal" <haris.iqbal@ionos.com>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Christoph Hellwig <hch@lst.de>,
+        Andy Gospodarek <andy@greyhouse.net>,
+        Sergey Matyukevich <geomatsi@gmail.com>,
+        Rohit Maheshwari <rohitm@chelsio.com>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        ceph-devel@vger.kernel.org,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Jozsef Kadlecsik <kadlec@netfilter.org>,
+        Nilesh Javali <njavali@marvell.com>,
+        Jean-Paul Roubelat <jpr@f6fbb.org>,
+        Dick Kennedy <dick.kennedy@broadcom.com>,
+        Jay Vosburgh <j.vosburgh@gmail.com>,
+        Potnuri Bharat Teja <bharat@chelsio.com>,
+        Vinay Kumar Yadav <vinay.yadav@chelsio.com>,
+        linux-nfs@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>,
+        Igor Mitsyanko <imitsyanko@quantenna.com>,
+        Andy Lutomirski <luto@kernel.org>, linux-hams@vger.kernel.org,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Trond Myklebust <trond.myklebust@hammerspace.com>,
+        linux-raid@vger.kernel.org, Neil Horman <nhorman@tuxdriver.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-usb@vger.kernel.org,
+        Michael Chan <michael.chan@broadcom.com>,
+        linux-kernel@vger.kernel.org, Varun Prakash <varun@chelsio.com>,
+        Chuck Lever <chuck.lever@oracle.com>,
+        netfilter-devel@vger.kernel.org,
+        Masami Hiramatsu <mhiramat@kernel.org>,
+        Jiri Olsa <jolsa@kernel.org>, Jan Kara <jack@suse.com>,
+        linux-fsdevel@vger.kernel.org,
+        Lars Ellenberg <lars.ellenberg@linbit.com>,
+        linux-media@vger.kernel.org,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        Sharvari Harisangam <sharvari.harisangam@nxp.com>,
+        linux-fbdev@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        Song Liu <song@kernel.org>, Eric Dumazet <edumazet@google.com>,
+        target-devel@vger.kernel.org, John Stultz <jstultz@google.com>,
+        Stanislav Fomichev <sdf@google.com>,
+        Gregory Greenman <gregory.greenman@intel.com>,
+        drbd-dev@lists.linbit.com, dev@openvswitch.org,
+        Leon Romanovsky <leon@kernel.org>,
+        Helge Deller <deller@gmx.de>, Hugh Dickins <hughd@google.com>,
+        James Smart <james.smart@broadcom.com>,
+        Anil S Keshavamurthy <anil.s.keshavamurthy@intel.com>,
+        Pravin B Shelar <pshelar@ovn.org>,
+        Julian Anastasov <ja@ssi.bg>, coreteam@netfilter.org,
+        Veaceslav Falico <vfalico@gmail.com>,
+        Yonghong Song <yhs@fb.com>,
+        Namjae Jeon <linkinjeon@kernel.org>,
+        linux-crypto@vger.kernel.org,
+        Santosh Shilimkar <santosh.shilimkar@oracle.com>,
+        Ganapathi Bhat <ganapathi017@gmail.com>,
+        linux-actions@lists.infradead.org,
+        Simon Horman <horms@verge.net.au>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Mika Westerberg <mika.westerberg@linux.intel.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>,
+        Hao Luo <haoluo@google.com>, Theodore Ts'o <tytso@mit.edu>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Dennis Dalessandro <dennis.dalessandro@cornelisnetworks.com>,
+        Florian Westphal <fw@strlen.de>,
+        Andreas =?iso-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        Jon Maloy <jmaloy@redhat.com>,
+        Vlad Yasevich <vyasevich@gmail.com>,
+        Anna Schumaker <anna@kernel.org>,
+        Yehezkel Bernat <YehezkelShB@gmail.com>,
+        Haoyue Xu <xuhaoyue1@hisilicon.com>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        linux-wireless@vger.kernel.org,
+        Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>,
+        Rasmus Villemoes <linux@rasmusvillemoes.dk>,
+        linux-nvme@lists.infradead.org,
+        Michal Januszewski <spock@gentoo.org>,
+        linux-mtd@lists.infradead.org, kasan-dev@googlegroups.com,
+        Cong Wang <xiyou.wangcong@gmail.com>,
+        Thomas Sailer <t.sailer@alumni.ethz.ch>,
+        Ajay Singh <ajay.kathat@microchip.com>,
+        Xiubo Li <xiubli@redhat.com>, Sagi Grimberg <sagi@grimberg.me>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Jonathan Corbet <corbet@lwn.net>, linux-rdma@vger.kernel.org,
+        lvs-devel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        "Naveen N . Rao" <naveen.n.rao@linux.ibm.com>,
+        Ilya Dryomov <idryomov@gmail.com>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Pablo Neira Ayuso <pablo@netfilter.org>,
+        Marco Elver <elver@google.com>,
+        Kees Cook <keescook@chromium.org>,
+        Yury Norov <yury.norov@gmail.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        Jamal Hadi Salim <jhs@mojatatu.com>,
+        KP Singh <kpsingh@kernel.org>, Borislav Petkov <bp@alien8.de>,
+        Keith Busch <kbusch@kernel.org>,
+        Dan Williams <dan.j.williams@intel.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Arend van Spriel <aspriel@gmail.com>,
+        linux-ext4@vger.kernel.org,
+        Wenpeng Liang <liangwenpeng@huawei.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Xinming Hu <huxinming820@gmail.com>,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Jeff Layton <jlayton@kernel.org>, linux-xfs@vger.kernel.org,
+        netdev@vger.kernel.org, Ying Xue <ying.xue@windriver.com>,
+        Manish Rangankar <mrangankar@marvell.com>,
+        "David S . Miller" <davem@davemloft.net>,
+        Toke =?iso-8859-1?Q?H=F8iland-J=F8rgensen?= <toke@toke.dk>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Amitkumar Karwar <amitkarwar@gmail.com>, linux-mm@kvack.org,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Ayush Sawal <ayush.sawal@chelsio.com>,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Jiri Pirko <jiri@resnulli.us>,
+        linux-f2fs-devel@lists.sourceforge.net,
+        Jack Wang <jinpu.wang@ionos.com>,
+        Steffen Klassert <steffen.klassert@secunet.com>,
+        rds-devel@oss.oracle.com, Herbert Xu <herbert@gondor.apana.org.au>,
+        linux-scsi@vger.kernel.org, dccp@vger.kernel.org,
+        Richard Weinberger <richard@nod.at>,
+        Russell King <linux@armlinux.org.uk>,
+        Jason Gunthorpe <jgg@ziepe.ca>,
+        SHA-cyfmac-dev-list@infineon.com, Ingo Molnar <mingo@redhat.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        John Fastabend <john.fastabend@gmail.com>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Michael Jamet <michael.jamet@intel.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Akinobu Mita <akinobu.mita@gmail.com>,
+        linux-block@vger.kernel.org, dmaengine@vger.kernel.org,
+        Hannes Reinecke <hare@suse.de>,
+        Dmitry Vyukov <dvyukov@google.com>,
+        Jens Axboe <axboe@kernel.dk>, cake@lists.bufferbloat.net,
+        brcm80211-dev-list.pdl@broadcom.com,
+        Yishai Hadas <yishaih@nvidia.com>,
+        Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>,
+        linuxppc-dev@lists.ozlabs.org, David Ahern <dsahern@kernel.org>,
+        Philipp Reisner <philipp.reisner@linbit.com>,
+        Stephen Hemminger <stephen@networkplumber.org>,
+        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>, Vinod Koul <vkoul@kernel.org>,
+        tipc-discussion@lists.sourceforge.net, Thomas Graf <tgraf@suug.ch>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Sungjong Seo <sj1557.seo@samsung.com>,
+        Martin KaFai Lau <martin.lau@linux.dev>
+Subject: Re: [f2fs-dev] [PATCH v1 3/5] treewide: use get_random_u32() when
+ possible
+Message-ID: <Yz7Rl7BXamKQhRzH@smile.fi.intel.com>
+References: <20221005214844.2699-1-Jason@zx2c4.com>
+ <20221005214844.2699-4-Jason@zx2c4.com>
+ <20221006084331.4bdktc2zlvbaszym@quack3>
+ <Yz7LCyIAHC6l5mG9@zx2c4.com>
 MIME-Version: 1.0
-References: <20220928095744.16455-1-avri.altman@wdc.com>
-In-Reply-To: <20220928095744.16455-1-avri.altman@wdc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 6 Oct 2022 13:56:04 +0200
-Message-ID: <CAPDyKFp4fUJAaad4Onao68xefrHojF_kd716ipnFJjxrfDv32Q@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: SD: Add BROKEN-SD-DISCARD quirk
-To:     Avri Altman <avri.altman@wdc.com>
-Cc:     linux-mmc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Yz7LCyIAHC6l5mG9@zx2c4.com>
+Organization: Intel Finland Oy - BIC 0357606-4 - Westendinkatu 7, 02160 Espoo
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 28 Sept 2022 at 11:58, Avri Altman <avri.altman@wdc.com> wrote:
->
-> v1 -> v2:
->  - Address Ulf's suggestions
->
-> Some SD-cards that are SDA-6.0 compliant reports they supports discard
-> while they actually don't.  This might cause mk2fs to fail while trying
-> to format the card and revert it to a read-only mode.
->
-> While at it, add SD MID for SANDISK. This is because eMMC MID is assign
-> by JEDEC and SD MID is assigned by SD 3c-LLC.
->
-> Signed-off-by: Avri Altman <avri.altman@wdc.com>
+On Thu, Oct 06, 2022 at 06:33:15AM -0600, Jason A. Donenfeld wrote:
+> On Thu, Oct 06, 2022 at 10:43:31AM +0200, Jan Kara wrote:
 
-Applied for fixes and by adding a stable tag, thanks!
+...
 
-Kind regards
-Uffe
+> > The code here is effectively doing the
+> > 
+> > 	parent_group = prandom_u32_max(ngroups);
+> > 
+> > Similarly here we can use prandom_u32_max(ngroups) like:
+> > 
+> > 		if (qstr) {
+> > 			...
+> > 			parent_group = hinfo.hash % ngroups;
+> > 		} else
+> > 			parent_group = prandom_u32_max(ngroups);
+> 
+> Nice catch. I'll move these to patch #1.
+
+I believe coccinelle is able to handle this kind of code as well, so Kees'
+proposal to use it seems more plausible since it's less error prone and more
+flexible / powerful.
+
+-- 
+With Best Regards,
+Andy Shevchenko
 
 
-> ---
->  drivers/mmc/core/block.c  | 6 +++++-
->  drivers/mmc/core/card.h   | 6 ++++++
->  drivers/mmc/core/quirks.h | 6 ++++++
->  include/linux/mmc/card.h  | 1 +
->  4 files changed, 18 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ce89611a136e..54cd009aee50 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1140,8 +1140,12 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
->  {
->         struct mmc_blk_data *md = mq->blkdata;
->         struct mmc_card *card = md->queue.card;
-> +       unsigned int arg = card->erase_arg;
->
-> -       mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
-> +       if (mmc_card_broken_sd_discard(card))
-> +               arg = SD_ERASE_ARG;
-> +
-> +       mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, arg);
->  }
->
->  static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
-> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
-> index 99045e138ba4..cfdd1ff40b86 100644
-> --- a/drivers/mmc/core/card.h
-> +++ b/drivers/mmc/core/card.h
-> @@ -73,6 +73,7 @@ struct mmc_fixup {
->  #define EXT_CSD_REV_ANY (-1u)
->
->  #define CID_MANFID_SANDISK      0x2
-> +#define CID_MANFID_SANDISK_SD   0x3
->  #define CID_MANFID_ATP          0x9
->  #define CID_MANFID_TOSHIBA      0x11
->  #define CID_MANFID_MICRON       0x13
-> @@ -258,4 +259,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
->         return c->quirks & MMC_QUIRK_BROKEN_HPI;
->  }
->
-> +static inline int mmc_card_broken_sd_discard(const struct mmc_card *c)
-> +{
-> +       return c->quirks & MMC_QUIRK_BROKEN_SD_DISCARD;
-> +}
-> +
->  #endif
-> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-> index be4393988086..29b9497936df 100644
-> --- a/drivers/mmc/core/quirks.h
-> +++ b/drivers/mmc/core/quirks.h
-> @@ -100,6 +100,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
->         MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
->                   MMC_QUIRK_TRIM_BROKEN),
->
-> +       /*
-> +        * Some SD cards reports discard support while they don't
-> +        */
-> +       MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
-> +                 MMC_QUIRK_BROKEN_SD_DISCARD),
-> +
->         END_FIXUP
->  };
->
-> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-> index 8a30de08e913..c726ea781255 100644
-> --- a/include/linux/mmc/card.h
-> +++ b/include/linux/mmc/card.h
-> @@ -293,6 +293,7 @@ struct mmc_card {
->  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
->  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
->  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
-> +#define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
->
->         bool                    reenable_cmdq;  /* Re-enable Command Queue */
->
-> --
-> 2.17.1
->
