@@ -2,112 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD250C43217
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 13:32:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6576DC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 13:38:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231534AbiJFNcz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Oct 2022 09:32:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46426 "EHLO
+        id S231552AbiJFNi4 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Oct 2022 09:38:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231481AbiJFNcu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 09:32:50 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9A505FC1;
-        Thu,  6 Oct 2022 06:32:27 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 47EBD619B3;
-        Thu,  6 Oct 2022 13:31:15 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8D819C433C1;
-        Thu,  6 Oct 2022 13:31:13 +0000 (UTC)
-Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="dCt1XlLR"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1665063067;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=19y9yEzpIVCdXeybhvKA7dJEvUCmehig1gThjjfIZlg=;
-        b=dCt1XlLRhK46o65EhJYBSpRmYOT4n7MeVXGzqEAmpcGdWyuxeH5sPJp8L+8s50v59qatMG
-        Pop9Q+fWN3pqL5OpRxJVaBL/44G7A5DyWYXHpzYYf1aO4M481jtYlUZ2z2P2gTZK51QEX3
-        xI04TaxnmVtdtVX+upl/OVmNZ34Lghg=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 07574342 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
-        Thu, 6 Oct 2022 13:31:07 +0000 (UTC)
-Received: by mail-ua1-f49.google.com with SMTP id p89so623802uap.12;
-        Thu, 06 Oct 2022 06:31:05 -0700 (PDT)
-X-Gm-Message-State: ACrzQf39I0aG5QvIzUh/9qcHBEF1elKF+vF9hNH7v2anSGfBoAICV2EV
-        ngllvXKIEIB5FbGUv+zfb/ab2TbIsHShqQy6ySY=
-X-Google-Smtp-Source: AMsMyM5LOcwlCqLDJ8Sdf5AH9P6p8LW9hstCcin8XnWJVl2TEMHnjzVUue7OZJku+oxVakLrWA9vu3wGp+73FInbltY=
-X-Received: by 2002:ab0:70b9:0:b0:3d7:84d8:35ae with SMTP id
- q25-20020ab070b9000000b003d784d835aemr2699257ual.24.1665063063460; Thu, 06
- Oct 2022 06:31:03 -0700 (PDT)
+        with ESMTP id S231680AbiJFNix (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 09:38:53 -0400
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B528AC382;
+        Thu,  6 Oct 2022 06:38:47 -0700 (PDT)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 0413F3A170F;
+        Thu,  6 Oct 2022 15:38:45 +0200 (CEST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id DC1FE3A1625;
+        Thu,  6 Oct 2022 15:38:44 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Thu,  6 Oct 2022 15:38:44 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 6 Oct 2022
+ 15:38:40 +0200
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Thu, 6 Oct 2022 15:38:40 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+Subject: [PATCH 1/2] mmc: block: Remove error check of hw_reset on reset
+Thread-Topic: [PATCH 1/2] mmc: block: Remove error check of hw_reset on reset
+Thread-Index: AdjZiMURb3moNmapTDOMC5quWhQ63Q==
+Date:   Thu, 6 Oct 2022 13:38:40 +0000
+Message-ID: <cc0d807fbd2f4001adef8728f957c696@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.46]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-References: <20221006132510.23374-1-Jason@zx2c4.com>
-In-Reply-To: <20221006132510.23374-1-Jason@zx2c4.com>
-From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-Date:   Thu, 6 Oct 2022 07:30:52 -0600
-X-Gmail-Original-Message-ID: <CAHmME9pXuGKNsm3cCOMLSOMJoX2XJnHffpiF_rr32mW2ozShhw@mail.gmail.com>
-Message-ID: <CAHmME9pXuGKNsm3cCOMLSOMJoX2XJnHffpiF_rr32mW2ozShhw@mail.gmail.com>
-Subject: Re: [PATCH v2 0/5] treewide cleanup of random integer usage
-To:     linux-kernel@vger.kernel.org, patches@lists.linux.dev
-Cc:     Andreas Noever <andreas.noever@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Borislav Petkov <bp@alien8.de>,
-        =?UTF-8?Q?Christoph_B=C3=B6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Dave Airlie <airlied@redhat.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Florian Westphal <fw@strlen.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Hugh Dickins <hughd@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
-        Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Jozsef Kadlecsik <kadlec@netfilter.org>,
-        KP Singh <kpsingh@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Marco Elver <elver@google.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Pablo Neira Ayuso <pablo@netfilter.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        "Theodore Ts'o" <tytso@mit.edu>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Thomas Graf <tgraf@suug.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Yury Norov <yury.norov@gmail.com>,
-        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
-        kernel-janitors@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mm@kvack.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-nvme@lists.infradead.org,
-        linux-rdma@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-wireless@vger.kernel.org, netdev@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-TMASE-Version: DDEI-5.1-9.0.1002-27184.007
+X-TMASE-Result: 10-4.612300-10.000000
+X-TMASE-MatchedRID: h20DFeLkM89gljMcj2tyXt5x7RpGJf1a0U0UWSZVhAriKUaoIhea7dAY
+        WUo4HSIkSrqDabEvLXFgvuOVbAf7tqGGOyqBK41vEXjPIvKd74BMkOX0UoduuTQM0/COoudwiE9
+        RqXHGrIfTnPJMGpZGuwR2KsmNWZajcgDifvL5MeqeAiCmPx4NwItuikALUpnGpuP9zg477pEqtq
+        5d3cxkNfAxRSAc0OEN9v+NNOVSdf8awsaFNipvKlkxhpwN50f7hfSmVWfOpMhaMOUu/TgNueVvw
+        BMCJ5qI
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: f14a20e7-1d43-420b-aaa1-e96bb1c30d59-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 6, 2022 at 7:25 AM Jason A. Donenfeld <Jason@zx2c4.com> wrote:
-> This is a five part treewide cleanup of random integer handling.
-> [...]
-> Please take a look!
+Before switching back to the right partition in mmc_blk_reset
+there used to be a check if hw_reset was even supported.
+This return value was removed, so there is no reason to check.
 
-I should add that this patchset probably appears bigger than it
-already is, due in part to that wall of motivational text. Keep in
-mind, though, that the whole thing is only "305 insertions(+), 342
-deletions(-)", so it should be conventionally reviewable.
+Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
+Cc: stable@vger.kernel.org
 
-Jason
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ drivers/mmc/core/block.c | 24 ++++++++++--------------
+ 1 file changed, 10 insertions(+), 14 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ce89611a136e..8531f92fd0cb 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -991,6 +991,8 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			 int type)
+ {
+ 	int err;
++	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
++	int part_err;
+ 
+ 	if (md->reset_done & type)
+ 		return -EEXIST;
+@@ -998,20 +1000,14 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 	md->reset_done |= type;
+ 	err = mmc_hw_reset(host->card);
+ 	/* Ensure we switch back to the correct partition */
+-	if (err) {
+-		struct mmc_blk_data *main_md =
+-			dev_get_drvdata(&host->card->dev);
+-		int part_err;
+-
+-		main_md->part_curr = main_md->part_type;
+-		part_err = mmc_blk_part_switch(host->card, md->part_type);
+-		if (part_err) {
+-			/*
+-			 * We have failed to get back into the correct
+-			 * partition, so we need to abort the whole request.
+-			 */
+-			return -ENODEV;
+-		}
++	main_md->part_curr = main_md->part_type;
++	part_err = mmc_blk_part_switch(host->card, md->part_type);
++	if (part_err) {
++		/*
++		 * We have failed to get back into the correct
++		 * partition, so we need to abort the whole request.
++		 */
++		return -ENODEV;
+ 	}
+ 	return err;
+ }
+-- 
+2.37.3
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
