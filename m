@@ -2,92 +2,163 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B985C433F5
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 11:50:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 91550C433F5
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Oct 2022 11:56:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229611AbiJFLt7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Oct 2022 07:49:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46992 "EHLO
+        id S230163AbiJFL4m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Oct 2022 07:56:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229491AbiJFLt6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 07:49:58 -0400
-Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1101412760
-        for <linux-mmc@vger.kernel.org>; Thu,  6 Oct 2022 04:49:57 -0700 (PDT)
-Received: by mail-pg1-x533.google.com with SMTP id 195so1711130pga.1
-        for <linux-mmc@vger.kernel.org>; Thu, 06 Oct 2022 04:49:57 -0700 (PDT)
+        with ESMTP id S230088AbiJFL4m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Oct 2022 07:56:42 -0400
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B2ED9DDA7
+        for <linux-mmc@vger.kernel.org>; Thu,  6 Oct 2022 04:56:41 -0700 (PDT)
+Received: by mail-pj1-x1033.google.com with SMTP id n18-20020a17090ade9200b0020b0012097cso1703390pjv.0
+        for <linux-mmc@vger.kernel.org>; Thu, 06 Oct 2022 04:56:41 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date;
-        bh=OnZpre1fe4k7jZ/K9xnlhZVO9qKp7dPiAt23c+rWMmM=;
-        b=paCFS2xZCUvLUB1huClE6sRhJuXH155SJp4YI21E5aR5POLpyBOXU1mEDWCVSDxBsB
-         xfRtuKL/qcoweozoBe/3kh89cg7le/IXJPnl69WjT7sH4W0MxfWlxHzBsL7B7C4naY0m
-         7KzWbYxqTZoQEQp+fJ4QZd/sf9WU03is2x/zT0JEyno5eUUpenC6Xfyaj2OjHk1WQQRE
-         ss78yFs267zTkqIpCVjYPxVqI+sTB1lynZAWWLrF84eabBuGoL8H/TC9zW2/PA+5OwU7
-         CUq0npWz5jnx99V03oIwyqHuLui7yuzEK5U54aAnkYbOkwj069uK+MJWypPB+kVIU1Qf
-         sVkA==
+        bh=8YdW5ZQbSsoCbC8A2Cj5s8heroqHeLv0q4xh8hgvQKE=;
+        b=PFRG+MxDk09uWfW10TE42OouXuAgJ+hLSfoWdWy+xe9ybDy8K65C6RCvP+r8DCbXoZ
+         KPSZRzBYrgH+y8lCGbq3yoeVqsC5t8DL1MHXL7oDASaukWc4+XEpFXLeY/e452wwCwAq
+         Ri/qypTiazjFlyhkEFUeOwhcFZztfY3Dn3Hjbevki8G7SnqKG/qUQyGx1CoS1VZscsFm
+         +rKSm+kcwGggA6TyB/vFNL9E6p0APcCdeiJyDZaaWy6FOp0UFCY6Tbk5gm0REJCuQ68a
+         IDFr5Di020IpKwq17rkicTGX2XKuhC1abunNJkFoiD7kHEV5MJi1EnqIPmhXcQGZXH8G
+         dYEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=OnZpre1fe4k7jZ/K9xnlhZVO9qKp7dPiAt23c+rWMmM=;
-        b=jMzGtlDmi9e/eRIXOy3ItRBL6m5BAU4cuTAmGwgsBormeVukL4dbgUFEkWegJWbxA9
-         Vt2g++Vf+NYjm1W8U1VOgt83dVE6YBYomPkTb50LjGpjDAM5aYtDNFAD20l++GmE0xhy
-         XATZCOx3bf4wFTZY/g2E6ixkTxqu8i72XAKmd76szf38fMQ3/QuwTtdkviaxkOGf4rSl
-         dPRr0nZQxsAOL3Spk3wEIva6Z1vNlofrXJDc9yc4aprtcSmEI7qafh4xhuAU0BstADm1
-         WXhW1z4t3o0UKktV7AleZuuPg/EHIP7JW2QYy02bS+yvX2CJ2jPioBTzLDMKDpE3pkVH
-         S6Jg==
-X-Gm-Message-State: ACrzQf3WWJr18eSZ/Qic7h+ThD8ARNgO7Jk3dA+9PYgl+78+/Uz/wu1J
-        7/Y5z+U3k1NIh5apFJMJzCeC4Np8KznqTasgP4nuSA==
-X-Google-Smtp-Source: AMsMyM7Pth7yTTas9qoN6G4DZOwAq2stRcCFIdgoSylzf+V/c/1AdNocJRSuLP8F1ZgnaTnkNmV+dB081JB75EpQyTc=
-X-Received: by 2002:a63:e617:0:b0:435:144e:4482 with SMTP id
- g23-20020a63e617000000b00435144e4482mr4315878pgh.434.1665056996606; Thu, 06
- Oct 2022 04:49:56 -0700 (PDT)
+        bh=8YdW5ZQbSsoCbC8A2Cj5s8heroqHeLv0q4xh8hgvQKE=;
+        b=vEoI63mcKV87Te7stj+UD4woonFmxWx+fjgbVB2xia2VVE+GhtKOmHspV+5AJSN71N
+         Q1G9pbV5QPJMiKLNQfcY2kW5Jl0J4j50TGN65RnSVj/u72fislNnCPU9302FJmPbDDKK
+         tJPzT7MPBkT64OjO+yMvOuTAk6VutWeia9JI4fa4SNof1qvIB3FcpmO6NtK1zfAFzyV5
+         9qalKmF6mh9IDmOd5T6k1PEDQ3y/l6HOcDZtq95psoYvBok0o9emy5EsfzabfqUkQa47
+         GrgSsAfQY/gQIo3xb5AnsGQZfyTRAtdYnIyy9+ZdDd4mBekN5O6wlRC3jFNv4RIy7IrA
+         kgFw==
+X-Gm-Message-State: ACrzQf36KbtvskkaKI5tJKp9rZ+KOx0HxyeL50YIbdp+Nqas249cosrq
+        A6G2EfHlpSlbUj9jlg9U4b36/ExV3WurqeuCStxbE8A98kE=
+X-Google-Smtp-Source: AMsMyM6jv6u+JSiYTlBvUO4GayIy7bQOiKh4B35gs8ljPy9X6RIwXKXpDd+O5WfQNtcvyhTl0S8k8z62SwoWDz6x9is=
+X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
+ mw7-20020a17090b4d0700b001ef521cf051mr10525380pjb.164.1665057400668; Thu, 06
+ Oct 2022 04:56:40 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com> <Yzsb7SCkNDyCghLg@shikoro>
-In-Reply-To: <Yzsb7SCkNDyCghLg@shikoro>
+References: <20220928095744.16455-1-avri.altman@wdc.com>
+In-Reply-To: <20220928095744.16455-1-avri.altman@wdc.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 6 Oct 2022 13:49:19 +0200
-Message-ID: <CAPDyKFpkfr9Rtrz6DF1zYxEypTYqyJyRsTyxHToBJu+1AFB+Hg@mail.gmail.com>
-Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Biju Das <biju.das.jz@bp.renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>
-Cc:     Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <chris.paterson2@renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org
+Date:   Thu, 6 Oct 2022 13:56:04 +0200
+Message-ID: <CAPDyKFp4fUJAaad4Onao68xefrHojF_kd716ipnFJjxrfDv32Q@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: SD: Add BROKEN-SD-DISCARD quirk
+To:     Avri Altman <avri.altman@wdc.com>
+Cc:     linux-mmc@vger.kernel.org,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 3 Oct 2022 at 19:29, Wolfram Sang
-<wsa+renesas@sang-engineering.com> wrote:
+On Wed, 28 Sept 2022 at 11:58, Avri Altman <avri.altman@wdc.com> wrote:
 >
-> On Wed, Sep 28, 2022 at 12:07:55PM +0100, Biju Das wrote:
-> > Due to clk rounding errors on RZ/G2L platforms, it selects a clock source
-> > with a lower clock rate compared to a higher one.
-> > For eg: The rounding error (533333333 Hz / 4 * 4 = 533333332 Hz < 5333333
-> > 33 Hz) selects a clk source of 400 MHz instead of 533.333333 MHz.
-> >
-> > This patch fixes this issue by adding a margin of (1/1024) higher to
-> > the clock rate.
-> >
-> > Signed-off-by: Biju Das <biju.das.jz@bp.renesas.com>
+> v1 -> v2:
+>  - Address Ulf's suggestions
 >
-> Can only test on Gen3 currently, but clock settings are the same there.
+> Some SD-cards that are SDA-6.0 compliant reports they supports discard
+> while they actually don't.  This might cause mk2fs to fail while trying
+> to format the card and revert it to a read-only mode.
 >
-> Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-> Tested-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+> While at it, add SD MID for SANDISK. This is because eMMC MID is assign
+> by JEDEC and SD MID is assigned by SD 3c-LLC.
 >
-> Thanks!
->
+> Signed-off-by: Avri Altman <avri.altman@wdc.com>
 
-Can someone tell me, if there is a corresponding fixes tag we could use here?
-
-Or is this just a general bugfix that we should tag for stable?
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/core/block.c  | 6 +++++-
+>  drivers/mmc/core/card.h   | 6 ++++++
+>  drivers/mmc/core/quirks.h | 6 ++++++
+>  include/linux/mmc/card.h  | 1 +
+>  4 files changed, 18 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ce89611a136e..54cd009aee50 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -1140,8 +1140,12 @@ static void mmc_blk_issue_discard_rq(struct mmc_queue *mq, struct request *req)
+>  {
+>         struct mmc_blk_data *md = mq->blkdata;
+>         struct mmc_card *card = md->queue.card;
+> +       unsigned int arg = card->erase_arg;
+>
+> -       mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, card->erase_arg);
+> +       if (mmc_card_broken_sd_discard(card))
+> +               arg = SD_ERASE_ARG;
+> +
+> +       mmc_blk_issue_erase_rq(mq, req, MMC_BLK_DISCARD, arg);
+>  }
+>
+>  static void mmc_blk_issue_secdiscard_rq(struct mmc_queue *mq,
+> diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+> index 99045e138ba4..cfdd1ff40b86 100644
+> --- a/drivers/mmc/core/card.h
+> +++ b/drivers/mmc/core/card.h
+> @@ -73,6 +73,7 @@ struct mmc_fixup {
+>  #define EXT_CSD_REV_ANY (-1u)
+>
+>  #define CID_MANFID_SANDISK      0x2
+> +#define CID_MANFID_SANDISK_SD   0x3
+>  #define CID_MANFID_ATP          0x9
+>  #define CID_MANFID_TOSHIBA      0x11
+>  #define CID_MANFID_MICRON       0x13
+> @@ -258,4 +259,9 @@ static inline int mmc_card_broken_hpi(const struct mmc_card *c)
+>         return c->quirks & MMC_QUIRK_BROKEN_HPI;
+>  }
+>
+> +static inline int mmc_card_broken_sd_discard(const struct mmc_card *c)
+> +{
+> +       return c->quirks & MMC_QUIRK_BROKEN_SD_DISCARD;
+> +}
+> +
+>  #endif
+> diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
+> index be4393988086..29b9497936df 100644
+> --- a/drivers/mmc/core/quirks.h
+> +++ b/drivers/mmc/core/quirks.h
+> @@ -100,6 +100,12 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
+>         MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
+>                   MMC_QUIRK_TRIM_BROKEN),
+>
+> +       /*
+> +        * Some SD cards reports discard support while they don't
+> +        */
+> +       MMC_FIXUP(CID_NAME_ANY, CID_MANFID_SANDISK_SD, 0x5344, add_quirk_sd,
+> +                 MMC_QUIRK_BROKEN_SD_DISCARD),
+> +
+>         END_FIXUP
+>  };
+>
+> diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+> index 8a30de08e913..c726ea781255 100644
+> --- a/include/linux/mmc/card.h
+> +++ b/include/linux/mmc/card.h
+> @@ -293,6 +293,7 @@ struct mmc_card {
+>  #define MMC_QUIRK_BROKEN_IRQ_POLLING   (1<<11) /* Polling SDIO_CCCR_INTx could create a fake interrupt */
+>  #define MMC_QUIRK_TRIM_BROKEN  (1<<12)         /* Skip trim */
+>  #define MMC_QUIRK_BROKEN_HPI   (1<<13)         /* Disable broken HPI support */
+> +#define MMC_QUIRK_BROKEN_SD_DISCARD    (1<<14) /* Disable broken SD discard support */
+>
+>         bool                    reenable_cmdq;  /* Re-enable Command Queue */
+>
+> --
+> 2.17.1
+>
