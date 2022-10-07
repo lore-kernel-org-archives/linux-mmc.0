@@ -2,105 +2,208 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EAB4BC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:43:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D97ACC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:53:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229758AbiJGPn4 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 11:43:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35066 "EHLO
+        id S229715AbiJGPxT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 11:53:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54520 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229785AbiJGPnz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:43:55 -0400
-Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 901DAD73D2;
-        Fri,  7 Oct 2022 08:43:54 -0700 (PDT)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id D48DF12328B;
-        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id C5BCA122E4A;
-        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Fri, 7 Oct 2022
- 17:43:52 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Fri, 7 Oct 2022 17:43:52 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
-Thread-Topic: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
-Thread-Index: AdjaY4mpUK63rShYSiuVsWPm2cpIvA==
-Date:   Fri, 7 Oct 2022 15:43:52 +0000
-Message-ID: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.22]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229688AbiJGPxS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:53:18 -0400
+Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A30AD77E8
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 08:53:16 -0700 (PDT)
+Received: by mail-lj1-x233.google.com with SMTP id a25so182719ljk.0
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 08:53:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Ke80GF96XIn5dnJKIcuCkBMxiAcfiTBdb+oRsJGr3GY=;
+        b=XAA47aQG1XFomJxq7ypgUxXnVpvGgm9AhLskN22erxqeylEByrxSAVRMorIMMMiFWw
+         EpN+riIF0QrsH0N/Xq8P1BMGm5nEnj1fGTYAY+tOh3JkczzpaB0UTaJjpWToieHrZ1xB
+         S+ZCS7hln7rO6CYTftV85r8s791Xmy/hebogxhWO04HCFCQkbqEptRkME1cd79OvMLco
+         liIFRNYUPB9oNhPxqtQhhRM246KIYH7uyITbhfkp2qz0WZB6DI1r0EqCd6D/jlLhjgUc
+         v4EqlWiyi9ClJKA6OvvPnRznxDHm+Ch/9Vxn+gIZ1VcQIhD9zXjN7BhC2Klk5CnDE4jY
+         unkw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Ke80GF96XIn5dnJKIcuCkBMxiAcfiTBdb+oRsJGr3GY=;
+        b=FWcrXaBsejUcyXcQo5xTggn5bbSAP7ybfsfAzJ7WjRnoBgJOr2YdG2JBxkmuvaDoyC
+         N2Gdj3y9LaTFXnsItC/l8AJoH2EUPFfn4lvzPXLYji7SlMHfmWUfarLopTFLs9Y0/ECc
+         qkmA3U4jd5ZHNHD1Wjc0mJW90H7tRBEe8dCRCMHkSVk+0Dp2WNxBDSi531VzMEv6Pi0a
+         5oyYuOCOS2P6XTQZ7/df33/rDOkAj8oPTLN3GrP360qncyj1/0idbGyzoRztiUa7ZinO
+         F+uguYE9ALHfDuF2qiPDXf9Sv0OdMKpYapT9wLhAZoXHYqwrRrhk/+GZEuooWDgQxGyf
+         c1ig==
+X-Gm-Message-State: ACrzQf3QvWcZBFXexKMj9ihFzV2sm/3/KbKsYflQU7qgo0POE5QgrPxY
+        FvSClRVIS7SavU23EtnPUI9Lzg==
+X-Google-Smtp-Source: AMsMyM4bSnybE3WOr1MN+mIV7WG4biaIIqbIpy7mKbpcu2nqBicmv2kL5rtSTMvg8au/AHy1C1Mx5A==
+X-Received: by 2002:a2e:7211:0:b0:26d:fea5:c7e3 with SMTP id n17-20020a2e7211000000b0026dfea5c7e3mr1860778ljc.101.1665157994928;
+        Fri, 07 Oct 2022 08:53:14 -0700 (PDT)
+Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.gmail.com with ESMTPSA id d12-20020ac244cc000000b00497ad8e6d07sm334078lfm.222.2022.10.07.08.53.12
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 07 Oct 2022 08:53:14 -0700 (PDT)
+Message-ID: <530a4682-c7d8-d4e1-8050-bc2baa0a1877@linaro.org>
+Date:   Fri, 7 Oct 2022 17:53:12 +0200
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27188.000
-X-TMASE-Result: 10--3.999400-10.000000
-X-TMASE-MatchedRID: mIinBA9F1pwt1HmDlgaHMkrOO5m0+0gE9LMB0hXFSejAuQ0xDMaXkH4q
-        tYI9sRE/o5C9bTTxaUZasG44azv9echFlF8jsIKhEhGH3CRdKUVqYquCrLrVwq0ke9m+oOm00c8
-        aNDRHFani8zVgXoAltnS4vQrt84k3IAcCikR3vq+mz1UsKPZv+AN9GFoDz2U6okUd4RWzj9V36u
-        Ku+GTRipRRD7VMDAIa
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 06cddc11-3c48-4b79-a805-7e64a9b8e299-0-0-200-0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.1
+Subject: Re: [PATCH v6 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
+ Pensando Elba System Resource chip
+Content-Language: en-US
+To:     "Larson, Bradley" <Bradley.Larson@amd.com>,
+        Rob Herring <robh@kernel.org>
+Cc:     "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "alcooperx@gmail.com" <alcooperx@gmail.com>,
+        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
+        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
+        "gsomlo@gmail.com" <gsomlo@gmail.com>,
+        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
+        "krzysztof.kozlowski+dt@linaro.org" 
+        <krzysztof.kozlowski+dt@linaro.org>,
+        "lee.jones@linaro.org" <lee.jones@linaro.org>,
+        "broonie@kernel.org" <broonie@kernel.org>,
+        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "piotrs@cadence.com" <piotrs@cadence.com>,
+        "p.yadav@ti.com" <p.yadav@ti.com>,
+        "rdunlap@infradead.org" <rdunlap@infradead.org>,
+        "samuel@sholland.org" <samuel@sholland.org>,
+        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
+        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
+        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "will@kernel.org" <will@kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+References: <20220820195750.70861-1-brad@pensando.io>
+ <20220820195750.70861-7-brad@pensando.io>
+ <20220822142544.GA3770388-robh@kernel.org>
+ <554f33b4-d235-5516-e8ff-5bf80d63a9b9@amd.com>
+ <936c5623-07b9-c49d-e113-fc056a4eb9bc@linaro.org>
+ <b064ed4c-d5a7-614f-008e-61ff2ac27f88@amd.com>
+ <0852ffa5-9996-0f42-c5a8-d1fe9d39887e@linaro.org>
+ <9a98d026-7f70-a69b-64de-c77419888e42@amd.com>
+ <9e006307-f7c7-c68a-e5c3-d0d0b2807d87@linaro.org>
+ <8ce3ee59-bc37-ea97-c94d-b6f4f9c28751@amd.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <8ce3ee59-bc37-ea97-c94d-b6f4f9c28751@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-To prevent any recovery work running after the queue cleanup cancel it.
-Any recovery running post-cleanup dereferenced mq->card as NULL
-and was not meaningful to begin with.
+On 30/09/2022 00:50, Larson, Bradley wrote:
+> On 9/16/22 2:56 AM, Krzysztof Kozlowski wrote:
+>> Caution: This message originated from an External Source. Use proper caution when opening attachments, clicking links, or responding.
+>>
+>>
+>> On 13/09/2022 22:57, Larson, Bradley wrote:
+>>> On 9/8/22 4:27 AM, Krzysztof Kozlowski wrote:
+>>>> On 01/09/2022 22:37, Larson, Bradley wrote:
+>>>>> On 9/1/22 12:20 AM, Krzysztof Kozlowski wrote:
+>>>>>> On 01/09/2022 02:01, Larson, Bradley wrote:
+>>>>>>
+>> Wait, can we skip the driver entirely? I am not reviewing your driver 
+>> and what it creates under /dev. 
+> 
+> Yes, see precise answer requested below.
+> 
+>>> In comparision, the pensando device is also on the other end of spi,
+>>> four chip selects with /dev created for each for userspace control,
+>>> and one child device on cs0 for hw reset emmc that the Linux block
+>>> layer controls (single bit managed only by kernel).
+>>>
+>>> Pensando:
+>>> &spi0 {
+>>>           num-cs = <4>;
+>>>           cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
+>>>                      <&porta 7 GPIO_ACTIVE_LOW>;
+>>>           status = "okay";
+>>>           system-controller@0 {
+>>>                   compatible = "amd,pensando-elbasr";
+>>>                   reg = <0>;
+>>>                   #address-cells = <1>;
+>>>                   #size-cells = <0>;
+>>>                   spi-max-frequency = <12000000>;
+>>>
+>>>                   rstc: reset-controller {
+>>>                           compatible = "amd,pensando-elbasr-reset";
+>>>                           #reset-cells = <1>;
+>>>                   };
+>>>           };
+>>>
+>>>           system-controller@1 {
+>>>                   compatible = "amd,pensando-elbasr";
+>>>                   reg = <1>;
+>>>                   spi-max-frequency = <12000000>;
+>>>           };
+>>>
+>>>           system-controller@2 {
+>>>                   compatible = "amd,pensando-elbasr";
+>>>                   reg = <2>;
+>>>                   spi-max-frequency = <12000000>;
+>>>                   interrupt-parent = <&porta>;
+>>>                   interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+>>>           };
+>>>
+>>>           system-controller@3 {
+>>>                   compatible = "amd,pensando-elbasr";
+>>>                   reg = <3>;
+>>>                   spi-max-frequency = <12000000>;
+>>>           };
+>>> };
+>> You replied with quite a response of which 90% is unrelated talk about 
+>> driver. Please be specific. We talk here only about hardware.
+>> Your last DTS might be the answer, but you never explicitly wrote 
+>> it... So let's check if I understand it correctly. Only some of elbasr 
+>> block contain reset control?
+> 
+> Yes, only the elbasr block accessed on CS0 provides reset control.  The 
+> other 3 blocks don't have any reset control and never will.
 
-Cc: stable@vger.kernel.org
+I see, that could explain the subnode. However:
+1. You still do not use any resources in the subnode (it does not have
+any in DT).
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
--v2: Use cancel instead of flush
+2. Your driver instantiates subdevice not based on existing of subnode
+or characteristics of a device (e.g. compatible), but on hard-coded
+chip-select line. The reset driver directly takes parent's regmap - no
+other resources.
 
- drivers/mmc/core/queue.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+Therefore this does not look like dedicated piece of hardware and should
+be just part of parent node.
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index fefaa901b50f..86be55d7cf55 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -493,6 +493,13 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
- 	if (blk_queue_quiesced(q))
- 		blk_mq_unquiesce_queue(q);
- 
-+	/*
-+	 * If the recovery completes the last (and only remaining) request in
-+	 * the queue, and the card has been removed, we could end up here with
-+	 * the recovery not quite finished yet, so cancel it.
-+	 */
-+	cancel_work_sync(&mq->recovery_work);
-+
- 	blk_mq_free_tag_set(&mq->tag_set);
- 
- 	/*
--- 
-2.37.3
+> 
+>> This however does not answer my questions before.... You keep ignoring 
+>> them. So please answer yes or no: "Are there other sub-devices?"
+> 
+> No
+> 
+>> " and your binding is incomplete?"
+> 
+> No
+> 
+>> and a new question: "Is reset block (amd,pensando-elbasr-reset) 
+>> re-usable so it will appear in different device (not in 
+>> amd,pensando-elbasr)?"
+> 
+> No its not re-usable
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+So squash it with parent node.
+
+Best regards,
+Krzysztof
 
