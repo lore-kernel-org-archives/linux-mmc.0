@@ -2,208 +2,241 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D97ACC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:53:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71E1AC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 17:13:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229715AbiJGPxT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 11:53:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54520 "EHLO
+        id S229636AbiJGRNK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 13:13:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56562 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229688AbiJGPxS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:53:18 -0400
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A30AD77E8
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 08:53:16 -0700 (PDT)
-Received: by mail-lj1-x233.google.com with SMTP id a25so182719ljk.0
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 08:53:16 -0700 (PDT)
+        with ESMTP id S229679AbiJGRNI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 13:13:08 -0400
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3A94D77F4
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 10:12:45 -0700 (PDT)
+Received: by mail-pj1-x1035.google.com with SMTP id pq16so4951065pjb.2
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 10:12:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Ke80GF96XIn5dnJKIcuCkBMxiAcfiTBdb+oRsJGr3GY=;
-        b=XAA47aQG1XFomJxq7ypgUxXnVpvGgm9AhLskN22erxqeylEByrxSAVRMorIMMMiFWw
-         EpN+riIF0QrsH0N/Xq8P1BMGm5nEnj1fGTYAY+tOh3JkczzpaB0UTaJjpWToieHrZ1xB
-         S+ZCS7hln7rO6CYTftV85r8s791Xmy/hebogxhWO04HCFCQkbqEptRkME1cd79OvMLco
-         liIFRNYUPB9oNhPxqtQhhRM246KIYH7uyITbhfkp2qz0WZB6DI1r0EqCd6D/jlLhjgUc
-         v4EqlWiyi9ClJKA6OvvPnRznxDHm+Ch/9Vxn+gIZ1VcQIhD9zXjN7BhC2Klk5CnDE4jY
-         unkw==
+        d=chromium.org; s=google;
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=r+ar3rF5Nifj4ZH0w5BLPJvorwhCPz9FpYPvkQg1fFY=;
+        b=lnyLGuYmjS75CgXIYPygwDolRfcdA6yOcav2EBBasADUNmB+X4q/LGyG3GplPLKF4D
+         kbVVCg/8bBMxcfD9rLKmUEYYLhbyeB5zPm6ZDbYMckDnSVVJGqQeX6zA9l/IbMFC0x6e
+         tEj8qeloPyDPz0HyArmtPjFAzjrVIlk8ES+6Y=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
+        h=in-reply-to:content-transfer-encoding:content-disposition
+         :mime-version:references:message-id:subject:cc:to:from:date
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Ke80GF96XIn5dnJKIcuCkBMxiAcfiTBdb+oRsJGr3GY=;
-        b=FWcrXaBsejUcyXcQo5xTggn5bbSAP7ybfsfAzJ7WjRnoBgJOr2YdG2JBxkmuvaDoyC
-         N2Gdj3y9LaTFXnsItC/l8AJoH2EUPFfn4lvzPXLYji7SlMHfmWUfarLopTFLs9Y0/ECc
-         qkmA3U4jd5ZHNHD1Wjc0mJW90H7tRBEe8dCRCMHkSVk+0Dp2WNxBDSi531VzMEv6Pi0a
-         5oyYuOCOS2P6XTQZ7/df33/rDOkAj8oPTLN3GrP360qncyj1/0idbGyzoRztiUa7ZinO
-         F+uguYE9ALHfDuF2qiPDXf9Sv0OdMKpYapT9wLhAZoXHYqwrRrhk/+GZEuooWDgQxGyf
-         c1ig==
-X-Gm-Message-State: ACrzQf3QvWcZBFXexKMj9ihFzV2sm/3/KbKsYflQU7qgo0POE5QgrPxY
-        FvSClRVIS7SavU23EtnPUI9Lzg==
-X-Google-Smtp-Source: AMsMyM4bSnybE3WOr1MN+mIV7WG4biaIIqbIpy7mKbpcu2nqBicmv2kL5rtSTMvg8au/AHy1C1Mx5A==
-X-Received: by 2002:a2e:7211:0:b0:26d:fea5:c7e3 with SMTP id n17-20020a2e7211000000b0026dfea5c7e3mr1860778ljc.101.1665157994928;
-        Fri, 07 Oct 2022 08:53:14 -0700 (PDT)
-Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
-        by smtp.gmail.com with ESMTPSA id d12-20020ac244cc000000b00497ad8e6d07sm334078lfm.222.2022.10.07.08.53.12
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Oct 2022 08:53:14 -0700 (PDT)
-Message-ID: <530a4682-c7d8-d4e1-8050-bc2baa0a1877@linaro.org>
-Date:   Fri, 7 Oct 2022 17:53:12 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.1
-Subject: Re: [PATCH v6 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
-Content-Language: en-US
-To:     "Larson, Bradley" <Bradley.Larson@amd.com>,
-        Rob Herring <robh@kernel.org>
-Cc:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
+        bh=r+ar3rF5Nifj4ZH0w5BLPJvorwhCPz9FpYPvkQg1fFY=;
+        b=HkXP7aVRKSCC7N+dilf+XyufPvNVvTiIlb9v2wVnY314Ur7gEdiefbUlHiItTwe2Hw
+         arhiVVIK10EoU4KxRWX7rv4KyOSF/KXRDZrN8o4fzDVSMQycrnVcmhi6v2mIbzbAInkS
+         9nuBxNcGlYO1dYt+HhX+QcQpqq+o4yJPbApY1doaDSZVk7hpk4bY0JFWFqVIKxgBE/ct
+         ltlRYJDu/FroJRL840lXryl5vwlzDj+DB2r8ipKg/Jka/FvVAFePQCiuljyZ1PX0EhvG
+         PJ9CdU2mZ1ZHHYNXyoB+zXpzHm8FtSVp1M+1VUKZHQ/utsUBcWzV5W3ekeqw1NTTnjLH
+         huNw==
+X-Gm-Message-State: ACrzQf3s4s0KFLDcBjCCNeJHUNur44cEqonBK6Yf0rCyhexfO7xItRnF
+        ASi6IAVBggu2YTJZ5MnOkOgzEg==
+X-Google-Smtp-Source: AMsMyM5FdSz2fuOhnh7+TfKkWyevTFzVNHatDVk0F2miilQc1NJEc103WmEytUatslzSlAWFEVnJrw==
+X-Received: by 2002:a17:902:f707:b0:17f:8541:c04b with SMTP id h7-20020a170902f70700b0017f8541c04bmr6026417plo.98.1665162764769;
+        Fri, 07 Oct 2022 10:12:44 -0700 (PDT)
+Received: from www.outflux.net (smtp.outflux.net. [198.145.64.163])
+        by smtp.gmail.com with ESMTPSA id q13-20020aa7842d000000b0056234327070sm1944049pfn.95.2022.10.07.10.12.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Oct 2022 10:12:43 -0700 (PDT)
+Date:   Fri, 7 Oct 2022 10:12:42 -0700
+From:   Kees Cook <keescook@chromium.org>
+To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc:     Christophe Leroy <christophe.leroy@csgroup.eu>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "patches@lists.linux.dev" <patches@lists.linux.dev>,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Dave Airlie <airlied@redhat.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Florian Westphal <fw@strlen.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Helge Deller <deller@gmx.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Huacai Chen <chenhuacai@kernel.org>,
+        Hugh Dickins <hughd@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
+        Jens Axboe <axboe@kernel.dk>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Jozsef Kadlecsik <kadlec@netfilter.org>,
+        KP Singh <kpsingh@kernel.org>, Marco Elver <elver@google.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Pablo Neira Ayuso <pablo@netfilter.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Richard Weinberger <richard@nod.at>,
+        Russell King <linux@armlinux.org.uk>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Thomas Graf <tgraf@suug.ch>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
+        Yury Norov <yury.norov@gmail.com>,
+        "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>,
+        "kasan-dev@googlegroups.com" <kasan-dev@googlegroups.com>,
+        "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>,
+        "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>,
+        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
+        "linux-media@vger.kernel.org" <linux-media@vger.kernel.org>,
+        "linux-mips@vger.kernel.org" <linux-mips@vger.kernel.org>,
+        "linux-mm@kvack.org" <linux-mm@kvack.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "alcooperx@gmail.com" <alcooperx@gmail.com>,
-        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "gsomlo@gmail.com" <gsomlo@gmail.com>,
-        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "piotrs@cadence.com" <piotrs@cadence.com>,
-        "p.yadav@ti.com" <p.yadav@ti.com>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>,
-        "samuel@sholland.org" <samuel@sholland.org>,
-        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
-        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
-        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "will@kernel.org" <will@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-References: <20220820195750.70861-1-brad@pensando.io>
- <20220820195750.70861-7-brad@pensando.io>
- <20220822142544.GA3770388-robh@kernel.org>
- <554f33b4-d235-5516-e8ff-5bf80d63a9b9@amd.com>
- <936c5623-07b9-c49d-e113-fc056a4eb9bc@linaro.org>
- <b064ed4c-d5a7-614f-008e-61ff2ac27f88@amd.com>
- <0852ffa5-9996-0f42-c5a8-d1fe9d39887e@linaro.org>
- <9a98d026-7f70-a69b-64de-c77419888e42@amd.com>
- <9e006307-f7c7-c68a-e5c3-d0d0b2807d87@linaro.org>
- <8ce3ee59-bc37-ea97-c94d-b6f4f9c28751@amd.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <8ce3ee59-bc37-ea97-c94d-b6f4f9c28751@amd.com>
-Content-Type: text/plain; charset=UTF-8
+        "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>,
+        "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>,
+        "linux-parisc@vger.kernel.org" <linux-parisc@vger.kernel.org>,
+        "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>,
+        "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>,
+        "linux-um@lists.infradead.org" <linux-um@lists.infradead.org>,
+        "linux-usb@vger.kernel.org" <linux-usb@vger.kernel.org>,
+        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>,
+        "loongarch@lists.linux.dev" <loongarch@lists.linux.dev>,
+        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
+        "sparclinux@vger.kernel.org" <sparclinux@vger.kernel.org>,
+        "x86@kernel.org" <x86@kernel.org>,
+        Toke =?iso-8859-1?Q?H=F8iland-J=F8rgensen?= <toke@toke.dk>,
+        Chuck Lever <chuck.lever@oracle.com>, Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH v3 3/5] treewide: use get_random_u32() when possible
+Message-ID: <202210071010.52C672FA9@keescook>
+References: <20221006165346.73159-1-Jason@zx2c4.com>
+ <20221006165346.73159-4-Jason@zx2c4.com>
+ <848ed24c-13ef-6c38-fd13-639b33809194@csgroup.eu>
+ <CAHmME9raQ4E00r9r8NyWJ17iSXE_KniTG0onCNAfMmfcGar1eg@mail.gmail.com>
+ <f10fcfbf-2da6-cf2d-6027-fbf8b52803e9@csgroup.eu>
+ <6396875c-146a-acf5-dd9e-7f93ba1b4bc3@csgroup.eu>
+ <CAHmME9pE4saqnwxhsAwt-xegYGjsavPOGnHCbZhUXD7kaJ+GAA@mail.gmail.com>
+ <501b0fc3-6c67-657f-781e-25ee0283bc2e@csgroup.eu>
+ <Y0Ayvov/KQmrIwTS@zx2c4.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <Y0Ayvov/KQmrIwTS@zx2c4.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/09/2022 00:50, Larson, Bradley wrote:
-> On 9/16/22 2:56 AM, Krzysztof Kozlowski wrote:
->> Caution: This message originated from an External Source. Use proper caution when opening attachments, clicking links, or responding.
->>
->>
->> On 13/09/2022 22:57, Larson, Bradley wrote:
->>> On 9/8/22 4:27 AM, Krzysztof Kozlowski wrote:
->>>> On 01/09/2022 22:37, Larson, Bradley wrote:
->>>>> On 9/1/22 12:20 AM, Krzysztof Kozlowski wrote:
->>>>>> On 01/09/2022 02:01, Larson, Bradley wrote:
->>>>>>
->> Wait, can we skip the driver entirely? I am not reviewing your driver 
->> and what it creates under /dev. 
+On Fri, Oct 07, 2022 at 08:07:58AM -0600, Jason A. Donenfeld wrote:
+> On Fri, Oct 07, 2022 at 04:57:24AM +0000, Christophe Leroy wrote:
+> > 
+> > 
+> > Le 07/10/2022 à 01:36, Jason A. Donenfeld a écrit :
+> > > On 10/6/22, Christophe Leroy <christophe.leroy@csgroup.eu> wrote:
+> > >>
+> > >>
+> > >> Le 06/10/2022 à 19:31, Christophe Leroy a écrit :
+> > >>>
+> > >>>
+> > >>> Le 06/10/2022 à 19:24, Jason A. Donenfeld a écrit :
+> > >>>> Hi Christophe,
+> > >>>>
+> > >>>> On Thu, Oct 6, 2022 at 11:21 AM Christophe Leroy
+> > >>>> <christophe.leroy@csgroup.eu> wrote:
+> > >>>>> Le 06/10/2022 à 18:53, Jason A. Donenfeld a écrit :
+> > >>>>>> The prandom_u32() function has been a deprecated inline wrapper around
+> > >>>>>> get_random_u32() for several releases now, and compiles down to the
+> > >>>>>> exact same code. Replace the deprecated wrapper with a direct call to
+> > >>>>>> the real function. The same also applies to get_random_int(), which is
+> > >>>>>> just a wrapper around get_random_u32().
+> > >>>>>>
+> > >>>>>> Reviewed-by: Kees Cook <keescook@chromium.org>
+> > >>>>>> Acked-by: Toke Høiland-Jørgensen <toke@toke.dk> # for sch_cake
+> > >>>>>> Acked-by: Chuck Lever <chuck.lever@oracle.com> # for nfsd
+> > >>>>>> Reviewed-by: Jan Kara <jack@suse.cz> # for ext4
+> > >>>>>> Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+> > >>>>>> ---
+> > >>>>>
+> > >>>>>> diff --git a/arch/powerpc/kernel/process.c
+> > >>>>>> b/arch/powerpc/kernel/process.c
+> > >>>>>> index 0fbda89cd1bb..9c4c15afbbe8 100644
+> > >>>>>> --- a/arch/powerpc/kernel/process.c
+> > >>>>>> +++ b/arch/powerpc/kernel/process.c
+> > >>>>>> @@ -2308,6 +2308,6 @@ void notrace __ppc64_runlatch_off(void)
+> > >>>>>>     unsigned long arch_align_stack(unsigned long sp)
+> > >>>>>>     {
+> > >>>>>>         if (!(current->personality & ADDR_NO_RANDOMIZE) &&
+> > >>>>>> randomize_va_space)
+> > >>>>>> -             sp -= get_random_int() & ~PAGE_MASK;
+> > >>>>>> +             sp -= get_random_u32() & ~PAGE_MASK;
+> > >>>>>>         return sp & ~0xf;
+> > >>>>>
+> > >>>>> Isn't that a candidate for prandom_u32_max() ?
+> > >>>>>
+> > >>>>> Note that sp is deemed to be 16 bytes aligned at all time.
+> > >>>>
+> > >>>> Yes, probably. It seemed non-trivial to think about, so I didn't. But
+> > >>>> let's see here... maybe it's not too bad:
+> > >>>>
+> > >>>> If PAGE_MASK is always ~(PAGE_SIZE-1), then ~PAGE_MASK is
+> > >>>> (PAGE_SIZE-1), so prandom_u32_max(PAGE_SIZE) should yield the same
+> > >>>> thing? Is that accurate? And holds across platforms (this comes up a
+> > >>>> few places)? If so, I'll do that for a v4.
+> > >>>>
+> > >>>
+> > >>> On powerpc it is always (from arch/powerpc/include/asm/page.h) :
+> > >>>
+> > >>> /*
+> > >>>    * Subtle: (1 << PAGE_SHIFT) is an int, not an unsigned long. So if we
+> > >>>    * assign PAGE_MASK to a larger type it gets extended the way we want
+> > >>>    * (i.e. with 1s in the high bits)
+> > >>>    */
+> > >>> #define PAGE_MASK      (~((1 << PAGE_SHIFT) - 1))
+> > >>>
+> > >>> #define PAGE_SIZE        (1UL << PAGE_SHIFT)
+> > >>>
+> > >>>
+> > >>> So it would work I guess.
+> > >>
+> > >> But taking into account that sp must remain 16 bytes aligned, would it
+> > >> be better to do something like ?
+> > >>
+> > >> 	sp -= prandom_u32_max(PAGE_SIZE >> 4) << 4;
+> > >>
+> > >> 	return sp;
+> > > 
+> > > Does this assume that sp is already aligned at the beginning of the
+> > > function? I'd assume from the function's name that this isn't the
+> > > case?
+> > 
+> > Ah you are right, I overlooked it.
 > 
-> Yes, see precise answer requested below.
-> 
->>> In comparision, the pensando device is also on the other end of spi,
->>> four chip selects with /dev created for each for userspace control,
->>> and one child device on cs0 for hw reset emmc that the Linux block
->>> layer controls (single bit managed only by kernel).
->>>
->>> Pensando:
->>> &spi0 {
->>>           num-cs = <4>;
->>>           cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
->>>                      <&porta 7 GPIO_ACTIVE_LOW>;
->>>           status = "okay";
->>>           system-controller@0 {
->>>                   compatible = "amd,pensando-elbasr";
->>>                   reg = <0>;
->>>                   #address-cells = <1>;
->>>                   #size-cells = <0>;
->>>                   spi-max-frequency = <12000000>;
->>>
->>>                   rstc: reset-controller {
->>>                           compatible = "amd,pensando-elbasr-reset";
->>>                           #reset-cells = <1>;
->>>                   };
->>>           };
->>>
->>>           system-controller@1 {
->>>                   compatible = "amd,pensando-elbasr";
->>>                   reg = <1>;
->>>                   spi-max-frequency = <12000000>;
->>>           };
->>>
->>>           system-controller@2 {
->>>                   compatible = "amd,pensando-elbasr";
->>>                   reg = <2>;
->>>                   spi-max-frequency = <12000000>;
->>>                   interrupt-parent = <&porta>;
->>>                   interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
->>>           };
->>>
->>>           system-controller@3 {
->>>                   compatible = "amd,pensando-elbasr";
->>>                   reg = <3>;
->>>                   spi-max-frequency = <12000000>;
->>>           };
->>> };
->> You replied with quite a response of which 90% is unrelated talk about 
->> driver. Please be specific. We talk here only about hardware.
->> Your last DTS might be the answer, but you never explicitly wrote 
->> it... So let's check if I understand it correctly. Only some of elbasr 
->> block contain reset control?
-> 
-> Yes, only the elbasr block accessed on CS0 provides reset control.Â  The 
-> other 3 blocks don't have any reset control and never will.
+> So I think to stay on the safe side, I'm going to go with
+> `prandom_u32_max(PAGE_SIZE)`. Sound good?
 
-I see, that could explain the subnode. However:
-1. You still do not use any resources in the subnode (it does not have
-any in DT).
+Given these kinds of less mechanical changes, it may make sense to split
+these from the "trivial" conversions in a treewide patch. The chance of
+needing a revert from the simple 1:1 conversions is much lower than the
+need to revert by-hand changes.
 
-2. Your driver instantiates subdevice not based on existing of subnode
-or characteristics of a device (e.g. compatible), but on hard-coded
-chip-select line. The reset driver directly takes parent's regmap - no
-other resources.
+The Cocci script I suggested in my v1 review gets 80% of the first
+patch, for example.
 
-Therefore this does not look like dedicated piece of hardware and should
-be just part of parent node.
-
-> 
->> This however does not answer my questions before.... You keep ignoring 
->> them. So please answer yes or no: "Are there other sub-devices?"
-> 
-> No
-> 
->> " and your binding is incomplete?"
-> 
-> No
-> 
->> and a new question: "Is reset block (amd,pensando-elbasr-reset) 
->> re-usable so it will appear in different device (not in 
->> amd,pensando-elbasr)?"
-> 
-> No its not re-usable
-
-So squash it with parent node.
-
-Best regards,
-Krzysztof
-
+-- 
+Kees Cook
