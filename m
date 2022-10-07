@@ -2,122 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91EF5C41535
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 09:26:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 444DEC433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 13:06:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229555AbiJGJ0Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 05:26:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59550 "EHLO
+        id S229469AbiJGNGh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 09:06:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229559AbiJGJ0M (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 05:26:12 -0400
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B844F2513;
-        Fri,  7 Oct 2022 02:26:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665134771; x=1696670771;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=YIsvu8HuZoKfT0WBNxjXL2VasbVdSxWppe8Gs3rIq6U=;
-  b=lgV+Escms5zyViBvmedV3BHNjjb3FjjYj3Vz3SzYv4k0JXq+4hjSlm7Z
-   r4wxpTH0Ri9xpOMDvtHwj7d93ePr3ndqye1fjavDVQQ+SETk4itjJWcSm
-   wa8rwMZIT/8eJXO8VmESYry5dyAie8TXc4x4yNV3pM5aWwoQPO3bkgpkS
-   5FwlBOd0Tn2PaEuo4c362qsQW98fTFbIC1/XD4vUU2g+dv369hvJQlOyO
-   kia5cm/CgIT7PszSeLeDt+YUCfvMLXWgB9lh/d1JZONjtIsUmsVYuIlsY
-   aADoUXeW7RL6U688rIGXycyhSIPVhJPCvgocB1YG8oOBtTC77bqJsmGC+
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10492"; a="302414297"
-X-IronPort-AV: E=Sophos;i="5.95,166,1661842800"; 
-   d="scan'208";a="302414297"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Oct 2022 02:26:10 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10492"; a="658277156"
-X-IronPort-AV: E=Sophos;i="5.95,166,1661842800"; 
-   d="scan'208";a="658277156"
-Received: from black.fi.intel.com ([10.237.72.28])
-  by orsmga001.jf.intel.com with ESMTP; 07 Oct 2022 02:26:03 -0700
-Received: by black.fi.intel.com (Postfix, from userid 1001)
-        id 6645E17E; Fri,  7 Oct 2022 12:26:23 +0300 (EEST)
-Date:   Fri, 7 Oct 2022 12:26:23 +0300
-From:   Mika Westerberg <mika.westerberg@linux.intel.com>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph B??hmwalder <christoph.boehmwalder@linbit.com>,
-        Christoph Hellwig <hch@lst.de>,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Dave Airlie <airlied@redhat.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Florian Westphal <fw@strlen.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Helge Deller <deller@gmx.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Huacai Chen <chenhuacai@kernel.org>,
-        Hugh Dickins <hughd@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
-        Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Jozsef Kadlecsik <kadlec@netfilter.org>,
-        KP Singh <kpsingh@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Marco Elver <elver@google.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Pablo Neira Ayuso <pablo@netfilter.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Richard Weinberger <richard@nod.at>,
-        Russell King <linux@armlinux.org.uk>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Thomas Graf <tgraf@suug.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
-        Yury Norov <yury.norov@gmail.com>,
-        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
-        kernel-janitors@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-mm@kvack.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        loongarch@lists.linux.dev, netdev@vger.kernel.org,
-        sparclinux@vger.kernel.org, x86@kernel.org,
-        Toke H??iland-J??rgensen <toke@toke.dk>,
-        Chuck Lever <chuck.lever@oracle.com>, Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH v3 3/5] treewide: use get_random_u32() when possible
-Message-ID: <Yz/wv0sqBR+J+jy+@black.fi.intel.com>
-References: <20221006165346.73159-1-Jason@zx2c4.com>
- <20221006165346.73159-4-Jason@zx2c4.com>
+        with ESMTP id S229509AbiJGNGg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 09:06:36 -0400
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44B63C90E1
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 06:06:35 -0700 (PDT)
+Received: by mail-pg1-x533.google.com with SMTP id s206so4643391pgs.3
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 06:06:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=L+43/3kVmg+p0ZcrIutD7soToeLt75gKyvKftIXwuQM=;
+        b=MMItm/KHcYIuEHKofG7TqERR/uBgZrV+dMXPEImmiUIGfdJUSWE6arVGFUQejv3Juq
+         +TmSWp4oLXVYERQWggvLB56hUgLpa10/CNthXnYqbAvL+qUXTXVgUoro3VyXCc8Nuu1G
+         udo/4pBxClWMBvxGBx9hRGe44YqgpqCcdSdW7WCP/ARYL6dRfw+x0G2VUi4Zvx/X6+G/
+         KT7aJH14eny+pe3SugMtM94voUMP/GnJdhaJGrnlKZyD1nRhl3FA1RxDiHmV0J2Txmg8
+         5aTfw/fDpveiyaGFk93kgaHT7+cdwOOudVzGRDXjkjiyaqvvkzbkZmyvxwgkJlbaNLGP
+         AH8g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=L+43/3kVmg+p0ZcrIutD7soToeLt75gKyvKftIXwuQM=;
+        b=0BXf7HYlGb+rgE1nSKytTem9xL2LBIVPoqBq480Tr/4bIDV53nnPXZQQdj9Dbix3Ta
+         OZvP9DMDpAYXhRcaBRrpH3DxbRRV8HlzSgCWWzncpJmabeoa0lotNW4Vjhg4GXu0w4QQ
+         zGoe9DCjfrFHHtxxIk3/mIb8CkXK0mt/TkdxpHDjityeMO8cvZHGR5xpRbkya6NLeHyY
+         g7BAzecwm9cc6FEDP2EB40mlB1i+uuMNT/LDRTWvgYtB6oWj81i+Xqdnb6lpvJHXGJtf
+         v3VgS5fao6J+EuyMKPxuCvJLGjrw18sLsju7SMvhxVJs9Bt8KvYf5dSZibDKZc8dd5wK
+         OiBw==
+X-Gm-Message-State: ACrzQf31fymx6MjI7py8YquhAJRNmPmby6purY1JUk1qIX78yw3gPun1
+        Y9mdx+XweInwlWw93XjylWu5JGXb0vh+mfQoZKWHXA==
+X-Google-Smtp-Source: AMsMyM5TRUSbtI2WM9EMCH1IPwq1jrFcd6+1f4s/3V5O2kRDaK+r3Yq7Af/vyH1PbUMJd+F2l6YUFvUr8B47svNEwQc=
+X-Received: by 2002:a63:90c1:0:b0:450:75b5:29fe with SMTP id
+ a184-20020a6390c1000000b0045075b529femr4361488pge.541.1665147994580; Fri, 07
+ Oct 2022 06:06:34 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221006165346.73159-4-Jason@zx2c4.com>
+References: <cc0d807fbd2f4001adef8728f957c696@hyperstone.com>
+In-Reply-To: <cc0d807fbd2f4001adef8728f957c696@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 7 Oct 2022 15:05:57 +0200
+Message-ID: <CAPDyKFpvsDoLherwwyR5f7oJ0Fdwu6HV0MLgX+DrHkXkQrwbLQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: block: Remove error check of hw_reset on reset
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 06, 2022 at 10:53:44AM -0600, Jason A. Donenfeld wrote:
->  drivers/thunderbolt/xdomain.c                  |  2 +-
+On Thu, 6 Oct 2022 at 15:38, Christian L=C3=B6hle <CLoehle@hyperstone.com> =
+wrote:
+>
+> Before switching back to the right partition in mmc_blk_reset
+> there used to be a check if hw_reset was even supported.
+> This return value was removed, so there is no reason to check.
+>
+> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|s=
+w_reset()")
+> Cc: stable@vger.kernel.org
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c | 24 ++++++++++--------------
+>  1 file changed, 10 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ce89611a136e..8531f92fd0cb 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -991,6 +991,8 @@ static int mmc_blk_reset(struct mmc_blk_data *md, str=
+uct mmc_host *host,
+>                          int type)
+>  {
+>         int err;
+> +       struct mmc_blk_data *main_md =3D dev_get_drvdata(&host->card->dev=
+);
+> +       int part_err;
+>
+>         if (md->reset_done & type)
+>                 return -EEXIST;
+> @@ -998,20 +1000,14 @@ static int mmc_blk_reset(struct mmc_blk_data *md, =
+struct mmc_host *host,
+>         md->reset_done |=3D type;
+>         err =3D mmc_hw_reset(host->card);
+>         /* Ensure we switch back to the correct partition */
+> -       if (err) {
+> -               struct mmc_blk_data *main_md =3D
+> -                       dev_get_drvdata(&host->card->dev);
+> -               int part_err;
+> -
+> -               main_md->part_curr =3D main_md->part_type;
+> -               part_err =3D mmc_blk_part_switch(host->card, md->part_typ=
+e);
+> -               if (part_err) {
+> -                       /*
+> -                        * We have failed to get back into the correct
+> -                        * partition, so we need to abort the whole reque=
+st.
+> -                        */
+> -                       return -ENODEV;
+> -               }
 
-Acked-by: Mika Westerberg <mika.westerberg@linux.intel.com>
+Yes, this is certainly restoring the behaviour and fixing a bug. Thanks!
+
+However, I do wonder about what's the point of trying to switch back
+to the correct partition if the mmc_hw_reset() failed (returned a
+negative error code). It looks like that shouldn't matter, if the
+reset failed we are screwed anyway, right?
+
+> +       main_md->part_curr =3D main_md->part_type;
+> +       part_err =3D mmc_blk_part_switch(host->card, md->part_type);
+> +       if (part_err) {
+> +               /*
+> +                * We have failed to get back into the correct
+> +                * partition, so we need to abort the whole request.
+> +                */
+> +               return -ENODEV;
+>         }
+>         return err;
+>  }
+
+Kind regards
+Uffe
