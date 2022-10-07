@@ -2,82 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D45E4C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:00:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4A7C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:42:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229452AbiJGPAV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 11:00:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43664 "EHLO
+        id S229709AbiJGPmT convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 11:42:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229539AbiJGPAT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:00:19 -0400
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB2AF12D3A;
-        Fri,  7 Oct 2022 08:00:15 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 685993A175B;
-        Fri,  7 Oct 2022 17:00:13 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 588CD3A1756;
-        Fri,  7 Oct 2022 17:00:13 +0200 (CEST)
+        with ESMTP id S229516AbiJGPmS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:42:18 -0400
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7D21D01A2;
+        Fri,  7 Oct 2022 08:42:17 -0700 (PDT)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 1C5E4463458;
+        Fri,  7 Oct 2022 17:42:16 +0200 (CEST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 0B01F463256;
+        Fri,  7 Oct 2022 17:42:16 +0200 (CEST)
 X-TM-AS-ERS: 10.149.2.42-127.5.254.253
 X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
 X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Fri,  7 Oct 2022 17:00:13 +0200 (CEST)
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Fri,  7 Oct 2022 17:42:15 +0200 (CEST)
 Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
  (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Fri, 7 Oct 2022
- 17:00:12 +0200
+ 17:42:14 +0200
 Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
  sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Fri, 7 Oct 2022 17:00:09 +0200
-From:   =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
+ 15.02.1118.009; Fri, 7 Oct 2022 17:42:14 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH 1/2] mmc: block: Remove error check of hw_reset on reset
-Thread-Topic: [PATCH 1/2] mmc: block: Remove error check of hw_reset on reset
-Thread-Index: AdjZiMURb3moNmapTDOMC5quWhQ63QAtAFmAAAf8AIA=
-Date:   Fri, 7 Oct 2022 15:00:09 +0000
-Message-ID: <8d6277a6c1c8414a924908085e36ca26@hyperstone.com>
-References: <cc0d807fbd2f4001adef8728f957c696@hyperstone.com>
- <CAPDyKFpvsDoLherwwyR5f7oJ0Fdwu6HV0MLgX+DrHkXkQrwbLQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFpvsDoLherwwyR5f7oJ0Fdwu6HV0MLgX+DrHkXkQrwbLQ@mail.gmail.com>
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+Subject: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
+Thread-Topic: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on
+ reset
+Thread-Index: AdjaYu5u2TzZtJoER6CJQ4u+nZWuhA==
+Date:   Fri, 7 Oct 2022 15:42:14 +0000
+Message-ID: <003d34d1643242488b533dc14f69830f@hyperstone.com>
 Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 x-originating-ip: [10.242.2.22]
 Content-Type: text/plain;
-        charset="utf-8"
-Content-Transfer-Encoding: base64
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
 X-TMASE-Version: DDEI-5.1-9.0.1002-27188.000
-X-TMASE-Result: 10--7.203000-10.000000
-X-TMASE-MatchedRID: BFQSNthdAqLUL3YCMmnG4vHkpkyUphL9kYC3rjkUXRIO+Vu0Lo01HwYQ
-        A2yc++RYpqXAH7H2REn+UMZCE8h83zF/ZjNXMgkjBe3KRVyu+k1kwkcTpSH1opsoi2XrUn/J+ZL
-        5o+vRV7wDpAZ2/B/BlndkDsyT8WoOavP8b9lJtWr6C0ePs7A07RQEL0GGu6SDY9hTeCVAf4BudH
-        BuiX/oYBeQR30Ut74RqrR89ANDRzY=
+X-TMASE-Result: 10-3.773200-10.000000
+X-TMASE-MatchedRID: h20DFeLkM89gljMcj2tyXt5x7RpGJf1a0U0UWSZVhAriKUaoIhea7dAY
+        WUo4HSIkSrqDabEvLXFgvuOVbAf7tqGGOyqBK41vEXjPIvKd74BMkOX0UoduuTQM0/COoudwiE9
+        RqXHGrIfTnPJMGpZGuwR2KsmNWZajcgDifvL5MerknMSTG9lH+H0tCKdnhB58nFK7VE/xL0n6C0
+        ePs7A07YVH0dq7wY7up8Odl1VwpCRVHBEXgVCD3X9wMOUU04+ZQZwX4iVDtYdcNPORB/oDOt3+6
+        HdnF6ie
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 883a19fc-630e-46c5-97c3-da13a4be1491-0-0-200-0
+X-TMASE-XGENCLOUD: db260ff9-9ee1-4b08-ba8e-86aa9f4d7280-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiBZZXMsIHRoaXMgaXMgY2VydGFpbmx5IHJlc3RvcmluZyB0aGUgYmVoYXZpb3VyIGFuZCBmaXhp
-bmcgYSBidWcuIFRoYW5rcyENCj4gDQo+IEhvd2V2ZXIsIEkgZG8gd29uZGVyIGFib3V0IHdoYXQn
-cyB0aGUgcG9pbnQgb2YgdHJ5aW5nIHRvIHN3aXRjaCBiYWNrIHRvIHRoZSBjb3JyZWN0IHBhcnRp
-dGlvbiBpZiB0aGUgbW1jX2h3X3Jlc2V0KCkgPiBmYWlsZWQgKHJldHVybmVkIGEgbmVnYXRpdmUg
-ZXJyb3IgY29kZSkuIEl0IGxvb2tzIGxpa2UgdGhhdCBzaG91bGRuJ3QgbWF0dGVyLCBpZiB0aGUg
-cmVzZXQgZmFpbGVkIHdlIGFyZSBzY3Jld2VkIGFueXdheSwgPiByaWdodD8NCg0KSSBhZ3JlZSB3
-aXRoIHlvdSwgdGhlIG9ubHkgcmVhc29uIGZvciBpdCBpcyB0byBrZWVwIGJlaGF2aW9yIGluIGxp
-bmUgd2l0aCBlcnIgIT0gLUVPUE5PVFNVUFAsDQpGb3IgdGhlIGNhc2UgdGhhdCBuZWl0aGVyIG9m
-IHlvdSByZW1lbWJlcnMgdGhlIG9yaWdpbmFsIGludGVudCwgSSdsbCBzZW5kIGEgdjIuDQoNClJl
-Z2FyZHMsDQpDaHJpc3RpYW4NCg0KSHlwZXJzdG9uZSBHbWJIIHwgUmVpY2hlbmF1c3RyLiAzOWEg
-IHwgNzg0NjcgS29uc3RhbnoKTWFuYWdpbmcgRGlyZWN0b3I6IERyLiBKYW4gUGV0ZXIgQmVybnMu
-CkNvbW1lcmNpYWwgcmVnaXN0ZXIgb2YgbG9jYWwgY291cnRzOiBGcmVpYnVyZyBIUkIzODE3ODI=
+Before switching back to the right partition in mmc_blk_reset
+there used to be a check if hw_reset was even supported.
+This return value was removed, so there is no reason to check.
+
+Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
+Cc: stable@vger.kernel.org
+
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+-v2: Do not attempt to switch partitions if reset failed
+
+ drivers/mmc/core/block.c | 28 +++++++++++++---------------
+ 1 file changed, 13 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ce89611a136e..8db72cba2bbe 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -991,29 +991,27 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			 int type)
+ {
+ 	int err;
++	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
++	int part_err;
+ 
+ 	if (md->reset_done & type)
+ 		return -EEXIST;
+ 
+ 	md->reset_done |= type;
+ 	err = mmc_hw_reset(host->card);
++	if (err)
++		return err;
+ 	/* Ensure we switch back to the correct partition */
+-	if (err) {
+-		struct mmc_blk_data *main_md =
+-			dev_get_drvdata(&host->card->dev);
+-		int part_err;
+-
+-		main_md->part_curr = main_md->part_type;
+-		part_err = mmc_blk_part_switch(host->card, md->part_type);
+-		if (part_err) {
+-			/*
+-			 * We have failed to get back into the correct
+-			 * partition, so we need to abort the whole request.
+-			 */
+-			return -ENODEV;
+-		}
++	main_md->part_curr = main_md->part_type;
++	part_err = mmc_blk_part_switch(host->card, md->part_type);
++	if (part_err) {
++		/*
++		 * We have failed to get back into the correct
++		 * partition, so we need to abort the whole request.
++		 */
++		return -ENODEV;
+ 	}
+-	return err;
++	return 0;
+ }
+ 
+ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+-- 
+2.37.3
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
