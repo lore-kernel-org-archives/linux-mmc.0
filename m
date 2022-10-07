@@ -2,99 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 818DCC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 08:58:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D830C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 09:05:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229680AbiJGI6I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 04:58:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38678 "EHLO
+        id S229618AbiJGJF1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 05:05:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51196 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229581AbiJGI6H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 04:58:07 -0400
-Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 764F8D0CF3
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 01:58:05 -0700 (PDT)
-Received: by mail-pj1-x102c.google.com with SMTP id l1-20020a17090a72c100b0020a6949a66aso4207101pjk.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 01:58:05 -0700 (PDT)
+        with ESMTP id S229582AbiJGJF0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 05:05:26 -0400
+Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4AA679F77A
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 02:05:24 -0700 (PDT)
+Received: by mail-pf1-x435.google.com with SMTP id i6so4402758pfb.2
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 02:05:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date;
-        bh=YlOA1ajfEjIreDWiK3PXxp/clko/mhMc0BPVeuvrVKk=;
-        b=lIxmb3rQ+YeVSlfpT0wR7Zf/QIz9jo2frkBn0Xe5WONGs/re2ir9B7xWRjolnSmcI+
-         5WjrtSD4IeL8tYaunK/UO0JXtUAO4bLMUVMPOmWFepEzljp50a9K5/8dSUmfMAHi/RBr
-         G80Cmvw3K6L7jw7f0eV3+07LlqDNfLzNOm1awA1BBE8/Qzqf2cOS+auyGqE/EtYEGiwt
-         cnwh9Yhpk4A/fAj36Xk2MBomeYOysVEHNSNE51ZKjAhPzz2K7Sd1KhrtsFiU8FRAkKI+
-         jxcDnThl9cteBUkkVQs6kyu5SNRVjsqEcpCjzE5L6NsgfRDvoAfOaYre1ewHyQHVqla7
-         a5Zw==
+        bh=vuJolKOvcivD/aX91qIw8K+wkQRzYxb0y/y1JZ9OmnA=;
+        b=VMucyp3eulkyWa4RtK33D5vsDdmOx3E/5uQASe5XFyBc7QvZuu4g64YGeCqYMhawug
+         ME5vfLEOBdt/XKVL8wVkuDE0oFZbAQwP1yBezOGvcHfUUWAXoZUtdeQTinVJRWT8pCSX
+         /GQQTFltv2Fz0fYnMAFq+wXoKyHXcGOaSHDeZkEVGFAbRVSINJ0J3YUAn095cpTI71jq
+         I4MyfBFjeLyhtN6o94yh6V4lAm0CFLs2jb89EqQ0UAfNd4Hr1mQBZEpajmt+8hM+Qcij
+         1onKQgdMymLVLwl5nOK/TMAuX7f2MFxxZNu0Axk64TsudUs+UCQpjwwzuzJw63xlzX+p
+         sVgQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date;
-        bh=YlOA1ajfEjIreDWiK3PXxp/clko/mhMc0BPVeuvrVKk=;
-        b=Te94wnKzF78XYH5RuGVfUBvtrVFr9oXM4j9WhyWU3Ck2yWJSHV6nBrn0RMrRjdVZDl
-         LTznMrj4bt76m4Z4XPB9MVktcbPeXYh5mPG2YXXQSy7dUUhjXfzCDIo9aV06Ioqj4aZz
-         3TI7wUlZVrPq4jyLJ03fP2MePdneIShDYGvGRxy2bLhngIHCKE87SN8ou7eOin3R1oKC
-         Dw++F64LI9BEnG+S+rJ85C1G9ktnkqe0rKEB+kRnLEDWJ3jSS6kPnOg2gq1OT1sES8UA
-         3BSa5bgOq+/mqBdTUw1m0NgrRuHvFm74D5u/h7k3pLMQBR+cMOh9Uyw9WHaOG6sKgpwi
-         6zJA==
-X-Gm-Message-State: ACrzQf1+ilxc6pxEwya/JCsUatGt3Aqwx2jArZKW2/VQtCEM4RPz3WJr
-        XShRZ5Iru5TK/I/X/H4qmuLBID+NrquA6e+v0U/tgm/Qg5o=
-X-Google-Smtp-Source: AMsMyM7Pfm6aZcJS1S3WOES8NOOW4/G8hU+6EnlQpuwBrvyqVzTF2vQ6zv7O7GW4LhTWk1b1dD8s/g7ppJU4OuNpcxA=
-X-Received: by 2002:a17:90b:1b06:b0:202:cce0:2148 with SMTP id
- nu6-20020a17090b1b0600b00202cce02148mr15386629pjb.84.1665133084980; Fri, 07
- Oct 2022 01:58:04 -0700 (PDT)
+        bh=vuJolKOvcivD/aX91qIw8K+wkQRzYxb0y/y1JZ9OmnA=;
+        b=sOKO7JcMGGuHeykDjziDvMzaiyJz+OrHAEX7TJ8YiWjsht6iDmRAj4u1bWoWiBcQG7
+         OimZp2Q3FKUb9GbR89OI7OBHFoS6tekGsT7ozBhsBvmITFRZZe0FXaDOJBAm/kC9doJV
+         N41jNpQNdPmIzBY8M3T7/e7/EVlIZi3yfsTu9qICgoQtAqzsaikFZzqlEeV3GuD51Vvn
+         K2beEYPZ7K/p0rXj3qYYDLlMm4DhB98L1EnyCjUnoT1sXYXTuQKLtIYdJt5IRPjKcyEy
+         i4Q9Hj7lA5bmmaxRbZlyyhGTqSTD7RDXN2P6fCw9EhILajOaR41FZ8wauVbw4FWfZleM
+         PkJw==
+X-Gm-Message-State: ACrzQf3DPV6vs1Vd94mlBmxl1C2qPw97kp0quNFEe8XeFytJ7cUl8T+n
+        SWD6uj0tdENYXrPSSO3VIZSs+ptsyb0tbI1zRsgoXA==
+X-Google-Smtp-Source: AMsMyM64mfUZgwPaHuURYaWD48vnFONQ5XCe+zQV5qK4djTsOG42Yp4NYuS7nB7GGU3nnFAZ+lm7I/aSnkyo1ewOiMg=
+X-Received: by 2002:a63:90c1:0:b0:450:75b5:29fe with SMTP id
+ a184-20020a6390c1000000b0045075b529femr3514159pge.541.1665133523790; Fri, 07
+ Oct 2022 02:05:23 -0700 (PDT)
 MIME-Version: 1.0
-References: <20220928110755.849275-1-biju.das.jz@bp.renesas.com>
- <Yzsb7SCkNDyCghLg@shikoro> <CAPDyKFpkfr9Rtrz6DF1zYxEypTYqyJyRsTyxHToBJu+1AFB+Hg@mail.gmail.com>
- <Yz71AT6MbgrTPP6X@shikoro> <OS0PR01MB592243C904D5BD74BD9B2C2D865C9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
-In-Reply-To: <OS0PR01MB592243C904D5BD74BD9B2C2D865C9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
+References: <Yz6zfrVq9cP/wrJb@orome> <20221006130622.22900-1-pshete@nvidia.com>
+ <20221006130622.22900-4-pshete@nvidia.com>
+In-Reply-To: <20221006130622.22900-4-pshete@nvidia.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 7 Oct 2022 10:57:28 +0200
-Message-ID: <CAPDyKFr25JGGw-bW8F+7=4h6Obssks_016dcVZD7phA2Hih=Kw@mail.gmail.com>
-Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
-To:     Biju Das <biju.das.jz@bp.renesas.com>
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Prabhakar Mahadev Lad <prabhakar.mahadev-lad.rj@bp.renesas.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-renesas-soc@vger.kernel.org" 
-        <linux-renesas-soc@vger.kernel.org>
+Date:   Fri, 7 Oct 2022 11:04:47 +0200
+Message-ID: <CAPDyKFq5mocPRZO97=f0TiNsgXntT+R9+XRK94MTvFPUBF4tig@mail.gmail.com>
+Subject: Re: [PATCH v7 4/4] mmc: sdhci-tegra: Use actual clock rate for SW
+ tuning correction
+To:     Prathamesh Shete <pshete@nvidia.com>
+Cc:     adrian.hunter@intel.com, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-kernel@vger.kernel.org, anrao@nvidia.com,
+        smangipudi@nvidia.com, kyarlagadda@nvidia.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 6 Oct 2022 at 18:07, Biju Das <biju.das.jz@bp.renesas.com> wrote:
+On Thu, 6 Oct 2022 at 15:07, Prathamesh Shete <pshete@nvidia.com> wrote:
 >
-> Hi Wolfram Sang & Ulf Hansson,
+> Ensure tegra_host member "curr_clk_rate" holds the actual clock rate
+> instead of requested clock rate for proper use during tuning correction
+> algorithm. Actual clk rate may not be the same as the requested clk
+> frequency depending on the parent clock source set. Tuning correction
+> algorithm depends on certain parameters which are sensitive to current
+> clk rate. If the host clk is selected instead of the actual clock rate,
+> tuning correction algorithm may end up applying invalid correction,
+> which could result in errors
 >
-> > Subject: Re: [PATCH v5] mmc: renesas_sdhi: Fix rounding errors
-> >
-> >
-> > > Or is this just a general bugfix that we should tag for stable?
-> >
-> > I'd think this because I assume there is no commit causing the
-> > rounding errors. But maybe Biju has something to add?
+> Fixes: ea8fc5953e8b ("mmc: tegra: update hw tuning process")
 >
-> There is rounding error present since commit [1], but no HW at that time to
-> introduce the error. Then we added RZ/G2L support and we started seeing this
-> issue after [2].
->
-> So may be treat this an enhancement patch or fixes to [1] or [2]
+> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Acked-by: Thierry Reding <treding@nvidia.com>
 
-Alright, I have added a fixes tag [1] and a stable tag - and applied
-it for fixes, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/mmc/host/renesas_sdhi_core.c?h=v6.0&id=bb6d3fa98a418b071c5f735e75558604f5f4af66
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/drivers/clk/renesas/r9a07g044-cpg.c?h=v6.0&id=b289cdecc7c3e25e001cde260c882e4d9a8b0772
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 3663c5d0efe0..ccbb26a66284 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -783,7 +783,7 @@ static void tegra_sdhci_set_clock(struct sdhci_host *host, unsigned int clock)
+>                 dev_err(dev, "failed to set clk rate to %luHz: %d\n",
+>                         host_clk, err);
 >
-> Cheers,
-> Biju
+> -       tegra_host->curr_clk_rate = host_clk;
+> +       tegra_host->curr_clk_rate = clk_get_rate(pltfm_host->clk);
+>         if (tegra_host->ddr_signaling)
+>                 host->max_clk = host_clk;
+>         else
+> --
+> 2.17.1
 >
