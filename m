@@ -2,90 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BE4EC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 18:26:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61F03C433F5
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 19:40:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229491AbiJGS0d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 14:26:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49288 "EHLO
+        id S230000AbiJGTkh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Oct 2022 15:40:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229482AbiJGS0c (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 14:26:32 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A38AC7050;
-        Fri,  7 Oct 2022 11:26:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=IudIrA3q3WpPWuZzZUKujefONUnAfceTWjlveYaPvio=; b=y3TnHRe5LU2pfTWpYrKhFoSYbh
-        jboFN1RMi5CjIniehZGNTOJpkF2sr617jJ4vb6Ib6lSQpyC0ek2+SlWngTW1ubM41ZOvqG9t87RGe
-        LZXDSjCQvYJpbTl+VRQpi8LkTLFVyXqr+kFALUeMkSNjyvXp3VTfiu6Hin9S6c12kBhwJdLbNbYn4
-        4szHif4ftpjkLWks7RWt2NtkOf4pQQWV+FmMEugetSNijqYdLE8QwTu09Ycl6RznABM1+qPym5ADr
-        Od764RzqJQFgxId6v9nZqSWYrZBx/EX1oe/ZXXPNJJb8O2jtIyGdk61SSE07/zRW76XLArhkeRZ+1
-        ZC4+w/vg==;
-Received: from mcgrof by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1ogs33-00A41Z-Ot; Fri, 07 Oct 2022 18:26:13 +0000
-Date:   Fri, 7 Oct 2022 11:26:13 -0700
-From:   Luis Chamberlain <mcgrof@kernel.org>
-To:     Chaitanya Kulkarni <kch@nvidia.com>
-Cc:     linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-omap@vger.kernel.org, linux-remoteproc@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
-        linux-scsi@vger.kernel.org, axboe@kernel.dk, efremov@linux.com,
-        josef@toxicpanda.com, idryomov@gmail.com,
-        dongsheng.yang@easystack.cn, haris.iqbal@ionos.com,
-        jinpu.wang@ionos.com, mst@redhat.com, jasowang@redhat.com,
-        pbonzini@redhat.com, stefanha@redhat.com, ohad@wizery.com,
-        andersson@kernel.org, baolin.wang@linux.alibaba.com,
-        ulf.hansson@linaro.org, richard@nod.at, miquel.raynal@bootlin.com,
-        vigneshr@ti.com, marcan@marcan.st, sven@svenpeter.dev,
-        alyssa@rosenzweig.io, kbusch@kernel.org, hch@lst.de,
-        sagi@grimberg.me, sth@linux.ibm.com, hoeppner@linux.ibm.com,
-        hca@linux.ibm.com, gor@linux.ibm.com, agordeev@linux.ibm.com,
-        borntraeger@linux.ibm.com, svens@linux.ibm.com, jejb@linux.ibm.com,
-        martin.petersen@oracle.com, hare@suse.de, bhelgaas@google.com,
-        john.garry@huawei.com, christophe.jaillet@wanadoo.fr,
-        vaibhavgupta40@gmail.com, wsa+renesas@sang-engineering.com,
-        damien.lemoal@opensource.wdc.com, johannes.thumshirn@wdc.com,
-        bvanassche@acm.org, ming.lei@redhat.com,
-        shinichiro.kawasaki@wdc.com, vincent.fu@samsung.com,
-        christoph.boehmwalder@linbit.com, joel@jms.id.au,
-        vincent.whitchurch@axis.com, nbd@other.debian.org,
-        ceph-devel@vger.kernel.org,
-        virtualization@lists.linux-foundation.org, asahi@lists.linux.dev
-Subject: Re: [RFC PATCH 00/21] block: add and use init tagset helper
-Message-ID: <Y0BvRaVO0iUVmHgB@bombadil.infradead.org>
-References: <20221005032257.80681-1-kch@nvidia.com>
+        with ESMTP id S230272AbiJGTkX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 15:40:23 -0400
+Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC3FD6249
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Oct 2022 12:40:21 -0700 (PDT)
+Received: by mail-pj1-x1029.google.com with SMTP id lx7so5282617pjb.0
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Oct 2022 12:40:21 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=nxYOj2DA6xvjYpi+XjW859HEQbWAzDqivFYp1R8d9jI=;
+        b=JSokHwDczc1aciacWSkMTqECkqX12cgHLtkdL/XH+82v+aKZu5/QzJZ0ecFwGkIDRf
+         Z02cviv/Imk+Sr+WfKeaA1j46Qwitv8//H6u+2lhrJ+wTSk/Q9SG0uCTQKn/WieUA1bl
+         5aHFKXM21gFCcUJfrFtMuiGVnEX2ReCe1zZcVgAJh5odzpNfeoHARxNS828KG8RkAq6L
+         qBnyw1Po+eQCCrrudcC22x5oBN7sTXN7VxF0qvJsS7Hf4AflJE+rEO5MLC1sXWJ/XAC3
+         Yt7Dc6nVwAIh1KAhf9azIkRQJmNvjSXuldj7n2i7RWPeJIBvUCs2PEBG4zbN8VTvj5a2
+         0J4Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=nxYOj2DA6xvjYpi+XjW859HEQbWAzDqivFYp1R8d9jI=;
+        b=FbjgV+C2udn10TOCeAg7YhGiqzphy6t1SUbrjHVbAwJk6c8kvkpECLGaSpUk+fSLgV
+         ydTrP75yk2yYvS6NwyEjyWYKCTsvf6tZHxIt+6Pl4779HIgO/Mz4ETLn+xbkWy8lxsdA
+         2wqjenwbTDX0+CrzAQYlc0ezPyMSl2/qzLyyM3RuidgixV1/8zlhex6NLm+yKkmy9LYZ
+         U24l3jS1Yrc5pBhr17tZ34PMSywf1y9EcQ2as+zpxGrHYtcK35xEjb3l8CM7GNke3g5w
+         nPmaJ2Hq5CJX7QOCm5SggXNQ9quBzOQLsKRKfT4ZmW/gqvZfGTOxIjN5EhsulqnViF14
+         v2cw==
+X-Gm-Message-State: ACrzQf31e8QdRfvBiy9MH0prKstl92aQvCeYuOnSmXnYePzcTVF2MKET
+        kE6Ems+GuDCS5eJpPYsHVis5Ug==
+X-Google-Smtp-Source: AMsMyM4MuAQY/zX9CazcfpxFTzbqh5ZWzm+gsv6RigMXmdLqaTceG4IiqZbKufitBzYcJnpVRQQE2w==
+X-Received: by 2002:a17:90b:2705:b0:20a:b4fa:f624 with SMTP id px5-20020a17090b270500b0020ab4faf624mr6996007pjb.124.1665171620206;
+        Fri, 07 Oct 2022 12:40:20 -0700 (PDT)
+Received: from [192.168.1.136] ([198.8.77.157])
+        by smtp.gmail.com with ESMTPSA id d18-20020a170903231200b00176e6f553efsm169643plh.84.2022.10.07.12.40.18
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 07 Oct 2022 12:40:19 -0700 (PDT)
+Message-ID: <2a79929c-ece3-3d5d-db6c-414ec22b381e@kernel.dk>
+Date:   Fri, 7 Oct 2022 13:40:18 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221005032257.80681-1-kch@nvidia.com>
-Sender: Luis Chamberlain <mcgrof@infradead.org>
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.1
+Subject: Re: [RFC PATCH 01/21] block: add and use init tagset helper
+Content-Language: en-US
+To:     Bart Van Assche <bvanassche@acm.org>,
+        Chaitanya Kulkarni <chaitanyak@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Damien Le Moal <damien.lemoal@opensource.wdc.com>
+Cc:     "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>,
+        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>
+References: <20221005032257.80681-1-kch@nvidia.com>
+ <20221005032257.80681-2-kch@nvidia.com>
+ <6fee2d7a-7fd1-73ee-2911-87a4ed3e8769@opensource.wdc.com>
+ <CAPDyKFpBpiydQn+=24CqtaH_qa3tQfN2gQSiUrHCjnLSuy4=Kg@mail.gmail.com>
+ <e0ea0b0a-5077-de37-046f-62902aca93b6@acm.org>
+ <a7e4fe12-64f2-3164-d675-26310ac07c9e@nvidia.com>
+ <7e9ce6b2-70c8-cf85-95ab-de09090db64d@nvidia.com>
+ <51f62009-777f-8958-8d28-b29e64bbff09@acm.org>
+From:   Jens Axboe <axboe@kernel.dk>
+In-Reply-To: <51f62009-777f-8958-8d28-b29e64bbff09@acm.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 04, 2022 at 08:22:36PM -0700, Chaitanya Kulkarni wrote:
-> Hi,
+On 10/6/22 12:40 PM, Bart Van Assche wrote:
+> On 10/6/22 11:13, Chaitanya Kulkarni wrote:
+>> I will trim down the argument list with the most common arguments
+>> and keep it to max 4-5 mandatory arguments identical to what we
+>> have done this for blk_next_bio() and bio_alloc_bioset() [1]
+>> where mandatory arguments are part of the initialization API
+>> than repeating the code all the in the tree, that creates
+>> maintenance work of treewide patches.
+>>
+>> Also, instead of doing tree wide change in series I'll start small
+>> and gradually add more patches over time.
+>>
+>> This definitely adds a more value to the code where code is not
+>> repeated for mandatory arguments, which are way less than 9.
 > 
-> Add and use the helper to initialize the common fields of the tag_set
-> such as blk_mq_ops, number of h/w queues, queue depth, command size,
-> numa_node, timeout, BLK_MQ_F_XXX flags, driver data. This initialization
-> is spread all over the block drivers. This avoids repetation of
-> inialization code of the tag set in current block drivers and any future
-> ones.
-> 
-> P.S. I'm aware of the EXPORT_SYMBOL_GPL() checkpatch warn just to make
-> get some feedback to so I can remove the RFC tag.
-> 
+> Hmm ... I'm not convinced that the approach outlined above will result
+> in a valuable patch series. I think my objections also apply to the
+> approach outlined above.
 
-*If* there were commonalities at init and these could be broken up into
-common groups, each having their own set of calls, then we simplify and
-can abstract these. I say this without doing a complete review of the
-removals, but if there really isn't much of commonalities I tend to
-agree with Bart that open coding this is better.
+I would have to agree, I don't think this series buys us anything
+really, and in several ways it actually makes it worse or creates more
+of a maintenance problem going forward.
 
-  Luis
+-- 
+Jens Axboe
+
+
