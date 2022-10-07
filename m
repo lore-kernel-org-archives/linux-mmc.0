@@ -2,50 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4A7C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:42:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAB4BC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Oct 2022 15:43:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229709AbiJGPmT convert rfc822-to-8bit (ORCPT
+        id S229758AbiJGPn4 convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Oct 2022 11:42:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33298 "EHLO
+        Fri, 7 Oct 2022 11:43:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35066 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229516AbiJGPmS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:42:18 -0400
-Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7D21D01A2;
-        Fri,  7 Oct 2022 08:42:17 -0700 (PDT)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 1C5E4463458;
-        Fri,  7 Oct 2022 17:42:16 +0200 (CEST)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 0B01F463256;
-        Fri,  7 Oct 2022 17:42:16 +0200 (CEST)
+        with ESMTP id S229785AbiJGPnz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Oct 2022 11:43:55 -0400
+Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 901DAD73D2;
+        Fri,  7 Oct 2022 08:43:54 -0700 (PDT)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id D48DF12328B;
+        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id C5BCA122E4A;
+        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
 X-TM-AS-ERS: 10.149.2.42-127.5.254.253
 X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
 X-DDEI-TLS-USAGE: Used
 Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail3.swissbit.com (Postfix) with ESMTPS;
-        Fri,  7 Oct 2022 17:42:15 +0200 (CEST)
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Fri,  7 Oct 2022 17:43:52 +0200 (CEST)
 Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
  (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Fri, 7 Oct 2022
- 17:42:14 +0200
+ 17:43:52 +0200
 Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
  sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Fri, 7 Oct 2022 17:42:14 +0200
+ 15.02.1118.009; Fri, 7 Oct 2022 17:43:52 +0200
 From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-Subject: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
-Thread-Topic: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on
- reset
-Thread-Index: AdjaYu5u2TzZtJoER6CJQ4u+nZWuhA==
-Date:   Fri, 7 Oct 2022 15:42:14 +0000
-Message-ID: <003d34d1643242488b533dc14f69830f@hyperstone.com>
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
+Thread-Topic: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
+Thread-Index: AdjaY4mpUK63rShYSiuVsWPm2cpIvA==
+Date:   Fri, 7 Oct 2022 15:43:52 +0000
+Message-ID: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
 Accept-Language: en-US, de-DE
 Content-Language: en-US
 X-MS-Has-Attach: 
@@ -56,80 +54,49 @@ Content-Type: text/plain;
 Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
 X-TMASE-Version: DDEI-5.1-9.0.1002-27188.000
-X-TMASE-Result: 10-3.773200-10.000000
-X-TMASE-MatchedRID: h20DFeLkM89gljMcj2tyXt5x7RpGJf1a0U0UWSZVhAriKUaoIhea7dAY
-        WUo4HSIkSrqDabEvLXFgvuOVbAf7tqGGOyqBK41vEXjPIvKd74BMkOX0UoduuTQM0/COoudwiE9
-        RqXHGrIfTnPJMGpZGuwR2KsmNWZajcgDifvL5MerknMSTG9lH+H0tCKdnhB58nFK7VE/xL0n6C0
-        ePs7A07YVH0dq7wY7up8Odl1VwpCRVHBEXgVCD3X9wMOUU04+ZQZwX4iVDtYdcNPORB/oDOt3+6
-        HdnF6ie
+X-TMASE-Result: 10--3.999400-10.000000
+X-TMASE-MatchedRID: mIinBA9F1pwt1HmDlgaHMkrOO5m0+0gE9LMB0hXFSejAuQ0xDMaXkH4q
+        tYI9sRE/o5C9bTTxaUZasG44azv9echFlF8jsIKhEhGH3CRdKUVqYquCrLrVwq0ke9m+oOm00c8
+        aNDRHFani8zVgXoAltnS4vQrt84k3IAcCikR3vq+mz1UsKPZv+AN9GFoDz2U6okUd4RWzj9V36u
+        Ku+GTRipRRD7VMDAIa
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: db260ff9-9ee1-4b08-ba8e-86aa9f4d7280-0-0-200-0
+X-TMASE-XGENCLOUD: 06cddc11-3c48-4b79-a805-7e64a9b8e299-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Before switching back to the right partition in mmc_blk_reset
-there used to be a check if hw_reset was even supported.
-This return value was removed, so there is no reason to check.
+To prevent any recovery work running after the queue cleanup cancel it.
+Any recovery running post-cleanup dereferenced mq->card as NULL
+and was not meaningful to begin with.
 
-Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
 Cc: stable@vger.kernel.org
 
 Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 ---
--v2: Do not attempt to switch partitions if reset failed
+-v2: Use cancel instead of flush
 
- drivers/mmc/core/block.c | 28 +++++++++++++---------------
- 1 file changed, 13 insertions(+), 15 deletions(-)
+ drivers/mmc/core/queue.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ce89611a136e..8db72cba2bbe 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -991,29 +991,27 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
- 			 int type)
- {
- 	int err;
-+	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
-+	int part_err;
+diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+index fefaa901b50f..86be55d7cf55 100644
+--- a/drivers/mmc/core/queue.c
++++ b/drivers/mmc/core/queue.c
+@@ -493,6 +493,13 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+ 	if (blk_queue_quiesced(q))
+ 		blk_mq_unquiesce_queue(q);
  
- 	if (md->reset_done & type)
- 		return -EEXIST;
++	/*
++	 * If the recovery completes the last (and only remaining) request in
++	 * the queue, and the card has been removed, we could end up here with
++	 * the recovery not quite finished yet, so cancel it.
++	 */
++	cancel_work_sync(&mq->recovery_work);
++
+ 	blk_mq_free_tag_set(&mq->tag_set);
  
- 	md->reset_done |= type;
- 	err = mmc_hw_reset(host->card);
-+	if (err)
-+		return err;
- 	/* Ensure we switch back to the correct partition */
--	if (err) {
--		struct mmc_blk_data *main_md =
--			dev_get_drvdata(&host->card->dev);
--		int part_err;
--
--		main_md->part_curr = main_md->part_type;
--		part_err = mmc_blk_part_switch(host->card, md->part_type);
--		if (part_err) {
--			/*
--			 * We have failed to get back into the correct
--			 * partition, so we need to abort the whole request.
--			 */
--			return -ENODEV;
--		}
-+	main_md->part_curr = main_md->part_type;
-+	part_err = mmc_blk_part_switch(host->card, md->part_type);
-+	if (part_err) {
-+		/*
-+		 * We have failed to get back into the correct
-+		 * partition, so we need to abort the whole request.
-+		 */
-+		return -ENODEV;
- 	}
--	return err;
-+	return 0;
- }
- 
- static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+ 	/*
 -- 
 2.37.3
 
