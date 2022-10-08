@@ -2,33 +2,34 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DA55C433F5
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 17:04:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16FF2C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 17:05:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229470AbiJHRER (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Oct 2022 13:04:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39418 "EHLO
+        id S229531AbiJHRFj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Oct 2022 13:05:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229502AbiJHREQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 13:04:16 -0400
-Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9634345F7B
-        for <linux-mmc@vger.kernel.org>; Sat,  8 Oct 2022 10:04:15 -0700 (PDT)
+        with ESMTP id S229502AbiJHRFi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 13:05:38 -0400
+Received: from mxout1.routing.net (mxout1.routing.net [IPv6:2a03:2900:1:a::a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67F6A2EF1E
+        for <linux-mmc@vger.kernel.org>; Sat,  8 Oct 2022 10:05:37 -0700 (PDT)
 Received: from mxbox4.masterlogin.de (unknown [192.168.10.79])
-        by mxout2.routing.net (Postfix) with ESMTP id 697236045F;
-        Sat,  8 Oct 2022 16:56:31 +0000 (UTC)
+        by mxout1.routing.net (Postfix) with ESMTP id EC62640111;
+        Sat,  8 Oct 2022 16:56:32 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1665248191;
+        s=20200217; t=1665248193;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=05laW2U2aanX1BnyvNjeBV2y8hpKydG+cBolNRJxwCM=;
-        b=vqT4Hf95SJowAj4HZsWr9ud9xmbd7UHIfIQ615bWtpsYUSzYjYiRO4zOTHNGzLq5TiqoiH
-        wTDgh2Kp6fkquj8gKwQkIoPHrGYFWTXmYWP6+6KVr8Qa6hp5IwmdeyP61LxNUjgfAIyODK
-        VxRZ2a/pIm/u35nhx2FvJN2SaYZz5jY=
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=PxYWFX8wCCX5TIRd759yMnx9+aLLuhcGAlrlR4XDq00=;
+        b=wlqox1OxxXXKN4y1VQOL06YBn/nBSQur9WYOzYOoOuTHQMMRA/SAcOgDgGU3/gdiVYrfEa
+        JOWQqswxM5HZYH9YOrIYC103WToXXstWKZVf6lgyGymyPeFQEEGSowu3xQLInqMOQNydbg
+        Anew5fK/zQUDrpUClkhRTcFMyfdOX/0=
 Received: from frank-G5.. (fttx-pool-217.61.149.60.bambit.de [217.61.149.60])
-        by mxbox4.masterlogin.de (Postfix) with ESMTPSA id 86A5F80098;
-        Sat,  8 Oct 2022 16:56:30 +0000 (UTC)
+        by mxbox4.masterlogin.de (Postfix) with ESMTPSA id 39A7680098;
+        Sat,  8 Oct 2022 16:56:32 +0000 (UTC)
 From:   Frank Wunderlich <linux@fw-web.de>
 To:     linux-mediatek@lists.infradead.org
 Cc:     Frank Wunderlich <frank-w@public-files.de>,
@@ -39,31 +40,44 @@ Cc:     Frank Wunderlich <frank-w@public-files.de>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         Wenbin Mei <wenbin.mei@mediatek.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 0/2] Add mmc-support for mt7986
-Date:   Sat,  8 Oct 2022 18:56:25 +0200
-Message-Id: <20221008165627.114782-1-linux@fw-web.de>
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Sam Shih <sam.shih@mediatek.com>
+Subject: [PATCH 1/2] dt-bindings: mmc: Add compatible for Mediatek MT7986
+Date:   Sat,  8 Oct 2022 18:56:26 +0200
+Message-Id: <20221008165627.114782-2-linux@fw-web.de>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221008165627.114782-1-linux@fw-web.de>
+References: <20221008165627.114782-1-linux@fw-web.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Mail-ID: 58070d61-a93b-4ada-813c-c801ba3c1945
+X-Mail-ID: f541c1fc-30e9-4eac-a260-8ab51a93bbef
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Frank Wunderlich <frank-w@public-files.de>
+From: Sam Shih <sam.shih@mediatek.com>
 
-This small series adds dt-binding and driver change for supporting
-mmc-controller of mt7986.
+This commit adds dt-binding documentation of mmc for Mediatek MT7986 SoC
+Platform.
 
-Sam Shih (2):
-  dt-bindings: mmc: Add compatible for Mediatek MT7986
-  mmc: mediatek: add support for MT7986 SoC
+Signed-off-by: Sam Shih <sam.shih@mediatek.com>
+Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+---
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml |  1 +
- drivers/mmc/host/mtk-sd.c                         | 14 ++++++++++++++
- 2 files changed, 15 insertions(+)
-
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index d8e1e2e9adf2..3cbf0208f1b4 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -23,6 +23,7 @@ properties:
+           - mediatek,mt6795-mmc
+           - mediatek,mt7620-mmc
+           - mediatek,mt7622-mmc
++          - mediatek,mt7986-mmc
+           - mediatek,mt8135-mmc
+           - mediatek,mt8173-mmc
+           - mediatek,mt8183-mmc
 -- 
 2.34.1
 
