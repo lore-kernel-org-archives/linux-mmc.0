@@ -2,135 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83125C433F5
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 08:38:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 200D1C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 11:31:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229686AbiJHIiM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Oct 2022 04:38:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59268 "EHLO
+        id S229450AbiJHLbp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Oct 2022 07:31:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229487AbiJHIiL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 04:38:11 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7BB05508E;
-        Sat,  8 Oct 2022 01:38:10 -0700 (PDT)
+        with ESMTP id S229484AbiJHLbp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 07:31:45 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3499474E1;
+        Sat,  8 Oct 2022 04:31:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665218290; x=1696754290;
+  t=1665228703; x=1696764703;
   h=message-id:date:mime-version:subject:to:references:from:
    in-reply-to:content-transfer-encoding;
-  bh=4jhk6v/26l2pithB16nJEOXMjX0ZrUns1Vdr5Wp3S+k=;
-  b=JVBL9IksyU+csg5aUHOokhwd/C6UErFqRD9IicxaBpayS4KZqB/zMGo5
-   ydzPgsPJ0DyMwkupUgP7TNuT2ADWq7HGJx3/81PHCenqTMvYoMA5fvjgd
-   zFZnMdnfIfGRJJJCAV91cEXI2l+854MgZ42fSSTzHDvFNCCYKYOz3VElu
-   oPy0OCQUszJB3h8cQE/LKhWeDkb5KJV8qsX4bKFIVo4t+xrxfXYof6n1c
-   WWO0OKJkSr5nP3QOLY3tOb9vY2UmLs4RDzKjyrpDBl7xL7NbG+cB1gklm
-   shUY/y9iuKsUXhLYnChTzXUEllY5wE8fH/Ve6qC5+s0WYXxVPf1FI8c/Y
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="390214030"
+  bh=LDOZuPnvdyIIP2zXcLvST+qrGac6FUwAPpwT3ykbwdY=;
+  b=QSDyYpHgJQHk1cvhYR3jxHFSf+MKUqHrp7rCA+UQd7IDpSqrPx1LIDVT
+   SLjzkrJkeaxHXqPbM03HhA6FTDC2A7L3de83kjXWBL0Wm+FDj9iT03nFZ
+   4YSI3jw3C9ybaxWBcl2aQwR4qq1DoqOHRIqsYS4XhjbpAsKBchnHA3/V8
+   EgregvBZBdqXNqeHJiaNGyKlDUP+mpAUYELew64rZfLJPd2pegAqAKRKA
+   PqtU6S1iMnT75rb3rQnaR3xGdpwi/9WDBJWsCUBvzThFDLhCB7u8KXqt0
+   J0Pb521reSdSG36lagGJvTJHfR4Wjh0KZqiG+nA4jeDGEJFvfWt2XD/l+
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="365877808"
 X-IronPort-AV: E=Sophos;i="5.95,169,1661842800"; 
-   d="scan'208";a="390214030"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 01:38:10 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="603151841"
+   d="scan'208";a="365877808"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 04:31:43 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="694099300"
 X-IronPort-AV: E=Sophos;i="5.95,169,1661842800"; 
-   d="scan'208";a="603151841"
+   d="scan'208";a="694099300"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.77])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 01:38:08 -0700
-Message-ID: <e6acc89d-7d17-62ee-d67a-b78b1cdcd085@intel.com>
-Date:   Sat, 8 Oct 2022 11:38:04 +0300
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 04:31:41 -0700
+Message-ID: <490cdc50-737a-ff64-f21a-23dd59153cbc@intel.com>
+Date:   Sat, 8 Oct 2022 14:31:34 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.2.2
-Subject: Re: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
+Subject: Re: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
+Content-Language: en-US
 To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Linux MMC List <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <003d34d1643242488b533dc14f69830f@hyperstone.com>
-Content-Language: en-US
+References: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <003d34d1643242488b533dc14f69830f@hyperstone.com>
+In-Reply-To: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/10/22 18:42, Christian Löhle wrote:
-> Before switching back to the right partition in mmc_blk_reset
-> there used to be a check if hw_reset was even supported.
-> This return value was removed, so there is no reason to check.
+On 7/10/22 18:43, Christian Löhle wrote:
+> To prevent any recovery work running after the queue cleanup cancel it.
+> Any recovery running post-cleanup dereferenced mq->card as NULL
+> and was not meaningful to begin with.
 > 
-> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
 > Cc: stable@vger.kernel.org
 > 
 > Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
-> -v2: Do not attempt to switch partitions if reset failed
+> -v2: Use cancel instead of flush
 > 
->  drivers/mmc/core/block.c | 28 +++++++++++++---------------
->  1 file changed, 13 insertions(+), 15 deletions(-)
+>  drivers/mmc/core/queue.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 > 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index ce89611a136e..8db72cba2bbe 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -991,29 +991,27 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
->  			 int type)
->  {
->  	int err;
-> +	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
-> +	int part_err;
+> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
+> index fefaa901b50f..86be55d7cf55 100644
+> --- a/drivers/mmc/core/queue.c
+> +++ b/drivers/mmc/core/queue.c
+> @@ -493,6 +493,13 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
+>  	if (blk_queue_quiesced(q))
+>  		blk_mq_unquiesce_queue(q);
 >  
->  	if (md->reset_done & type)
->  		return -EEXIST;
+> +	/*
+> +	 * If the recovery completes the last (and only remaining) request in
+> +	 * the queue, and the card has been removed, we could end up here with
+> +	 * the recovery not quite finished yet, so cancel it.
+> +	 */
+> +	cancel_work_sync(&mq->recovery_work);
+> +
+>  	blk_mq_free_tag_set(&mq->tag_set);
 >  
->  	md->reset_done |= type;
->  	err = mmc_hw_reset(host->card);
-> +	if (err)
-> +		return err;
-
-This could be a potential source of data corruption.
-
-There is no guarantee that a subsequent I/O will fail just because
-the reset failed.  Reading / writing the wrong partition would be
-disastrous, so we should always try to get back to the correct
-partition.
-
-I haven't looked at the possibility of just flagging the partition
-as invalid - need to be sure any subsequent I/O attempts still go
-through a path that switches the partition.
-
->  	/* Ensure we switch back to the correct partition */
-> -	if (err) {
-> -		struct mmc_blk_data *main_md =
-> -			dev_get_drvdata(&host->card->dev);
-> -		int part_err;
-> -
-> -		main_md->part_curr = main_md->part_type;
-> -		part_err = mmc_blk_part_switch(host->card, md->part_type);
-> -		if (part_err) {
-> -			/*
-> -			 * We have failed to get back into the correct
-> -			 * partition, so we need to abort the whole request.
-> -			 */
-> -			return -ENODEV;
-> -		}
-> +	main_md->part_curr = main_md->part_type;
-> +	part_err = mmc_blk_part_switch(host->card, md->part_type);
-> +	if (part_err) {
-> +		/*
-> +		 * We have failed to get back into the correct
-> +		 * partition, so we need to abort the whole request.
-> +		 */
-> +		return -ENODEV;
->  	}
-> -	return err;
-> +	return 0;
->  }
->  
->  static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+>  	/*
 
