@@ -2,113 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 549D8C41535
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 15:37:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17907C433F5
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 17:04:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229770AbiJHPhi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Oct 2022 11:37:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56922 "EHLO
+        id S229459AbiJHREA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Oct 2022 13:04:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39370 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229494AbiJHPhh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 11:37:37 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6310B3F1EE;
-        Sat,  8 Oct 2022 08:37:36 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B0D2C60A0F;
-        Sat,  8 Oct 2022 15:37:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6325DC433D6;
-        Sat,  8 Oct 2022 15:37:33 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1665243455;
-        bh=iZs4LS2c78mWTK7VP9rYv0Gd7Qjrrk7FRFLOtLI7jIE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=lpPo/FwsRx8A1pEIFq0YgzBE1yJUA/ftclR7pjjmkm3BCTs9ykaCaGipjTgZ2RrqF
-         G0/1Rl4a9+kU2ICW186Oe5J0xg7g1U3glZrfVWobe1UK+MUIqWbN273i1QVNGsmeQ9
-         ddRoAQjkMz3vc5+dmmxBpuMuIV8SZkRQZD25nr8M=
-Date:   Sat, 8 Oct 2022 17:38:15 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Dave Airlie <airlied@redhat.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Florian Westphal <fw@strlen.de>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Helge Deller <deller@gmx.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Huacai Chen <chenhuacai@kernel.org>,
-        Hugh Dickins <hughd@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
-        Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Jozsef Kadlecsik <kadlec@netfilter.org>,
-        KP Singh <kpsingh@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Marco Elver <elver@google.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Pablo Neira Ayuso <pablo@netfilter.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Richard Weinberger <richard@nod.at>,
-        Russell King <linux@armlinux.org.uk>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Thomas Graf <tgraf@suug.ch>,
+        with ESMTP id S229481AbiJHREA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 13:04:00 -0400
+X-Greylist: delayed 445 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 08 Oct 2022 10:03:58 PDT
+Received: from mxout4.routing.net (mxout4.routing.net [IPv6:2a03:2900:1:a::9])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B16B45F7E
+        for <linux-mmc@vger.kernel.org>; Sat,  8 Oct 2022 10:03:58 -0700 (PDT)
+Received: from mxbox4.masterlogin.de (unknown [192.168.10.79])
+        by mxout4.routing.net (Postfix) with ESMTP id 156D310094F;
+        Sat,  8 Oct 2022 16:56:35 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1665248195;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=9YIiUZlTrjdPAMVHM7klpVqQezdSDroJaCTYC5nvEj0=;
+        b=km4yddHkV4sqnpW12lvMpNkYt0xlfCd/XoPJkbX2q5TzkkJ15fP0GURXfYijVVwgWvcFqM
+        J7lkGHlJzS9GlSneVrjbcFOb63GQGMrOLBkFUop/w/ijXHNC8YBaMnqZNRqqIgSZFbcXbx
+        vzZ8mV1EmsEEeu0Zuqz5ZJ08ksUE5ag=
+Received: from frank-G5.. (fttx-pool-217.61.149.60.bambit.de [217.61.149.60])
+        by mxbox4.masterlogin.de (Postfix) with ESMTPSA id 5DE3E80098;
+        Sat,  8 Oct 2022 16:56:34 +0000 (UTC)
+From:   Frank Wunderlich <linux@fw-web.de>
+To:     linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
-        Yury Norov <yury.norov@gmail.com>,
-        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
-        kernel-janitors@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-mm@kvack.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        loongarch@lists.linux.dev, netdev@vger.kernel.org,
-        sparclinux@vger.kernel.org, x86@kernel.org
-Subject: Re: [PATCH v5 0/7] treewide cleanup of random integer usage
-Message-ID: <Y0GZZ71Ugh9Ev99R@kroah.com>
-References: <20221008055359.286426-1-Jason@zx2c4.com>
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Sam Shih <sam.shih@mediatek.com>
+Subject: [PATCH 2/2] mmc: mediatek: add support for MT7986 SoC
+Date:   Sat,  8 Oct 2022 18:56:27 +0200
+Message-Id: <20221008165627.114782-3-linux@fw-web.de>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221008165627.114782-1-linux@fw-web.de>
+References: <20221008165627.114782-1-linux@fw-web.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221008055359.286426-1-Jason@zx2c4.com>
+Content-Transfer-Encoding: 8bit
+X-Mail-ID: 8ce3f27c-43c1-411d-b25c-a3173c96a672
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 07, 2022 at 11:53:52PM -0600, Jason A. Donenfeld wrote:
-> Changes v4->v5:
-> - Coccinelle is now used for as much mechanical aspects as possible,
->   with mechanical parts split off from non-mechanical parts. This should
->   drastically reduce the amount of code that needs to be reviewed
->   carefully. Each commit mentions now if it was done by hand or is
->   mechanical.
+From: Sam Shih <sam.shih@mediatek.com>
 
-All look good to me, thanks for the cleanups.
+Adding mt7986 own characteristics and of_device_id to have support
+of MT7986 SoC.
 
-Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Sam Shih <sam.shih@mediatek.com>
+Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+---
+ drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+index df941438aef5..3f7f3a1e0df8 100644
+--- a/drivers/mmc/host/mtk-sd.c
++++ b/drivers/mmc/host/mtk-sd.c
+@@ -552,6 +552,19 @@ static const struct mtk_mmc_compatible mt7622_compat = {
+ 	.support_64g = false,
+ };
+ 
++static const struct mtk_mmc_compatible mt7986_compat = {
++	.clk_div_bits = 12,
++	.recheck_sdio_irq = true,
++	.hs400_tune = false,
++	.pad_tune_reg = MSDC_PAD_TUNE0,
++	.async_fifo = true,
++	.data_tune = true,
++	.busy_check = true,
++	.stop_clk_fix = true,
++	.enhance_rx = true,
++	.support_64g = true,
++};
++
+ static const struct mtk_mmc_compatible mt8135_compat = {
+ 	.clk_div_bits = 8,
+ 	.recheck_sdio_irq = true,
+@@ -609,6 +622,7 @@ static const struct of_device_id msdc_of_ids[] = {
+ 	{ .compatible = "mediatek,mt6795-mmc", .data = &mt6795_compat},
+ 	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
+ 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
++	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
+ 	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
+ 	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
+ 	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
+-- 
+2.34.1
+
