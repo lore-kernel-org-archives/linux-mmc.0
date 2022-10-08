@@ -2,96 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 200D1C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 11:31:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 549D8C41535
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Oct 2022 15:37:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229450AbiJHLbp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Oct 2022 07:31:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49680 "EHLO
+        id S229770AbiJHPhi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Oct 2022 11:37:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229484AbiJHLbp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 07:31:45 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3499474E1;
-        Sat,  8 Oct 2022 04:31:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665228703; x=1696764703;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=LDOZuPnvdyIIP2zXcLvST+qrGac6FUwAPpwT3ykbwdY=;
-  b=QSDyYpHgJQHk1cvhYR3jxHFSf+MKUqHrp7rCA+UQd7IDpSqrPx1LIDVT
-   SLjzkrJkeaxHXqPbM03HhA6FTDC2A7L3de83kjXWBL0Wm+FDj9iT03nFZ
-   4YSI3jw3C9ybaxWBcl2aQwR4qq1DoqOHRIqsYS4XhjbpAsKBchnHA3/V8
-   EgregvBZBdqXNqeHJiaNGyKlDUP+mpAUYELew64rZfLJPd2pegAqAKRKA
-   PqtU6S1iMnT75rb3rQnaR3xGdpwi/9WDBJWsCUBvzThFDLhCB7u8KXqt0
-   J0Pb521reSdSG36lagGJvTJHfR4Wjh0KZqiG+nA4jeDGEJFvfWt2XD/l+
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="365877808"
-X-IronPort-AV: E=Sophos;i="5.95,169,1661842800"; 
-   d="scan'208";a="365877808"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 04:31:43 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10493"; a="694099300"
-X-IronPort-AV: E=Sophos;i="5.95,169,1661842800"; 
-   d="scan'208";a="694099300"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.77])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Oct 2022 04:31:41 -0700
-Message-ID: <490cdc50-737a-ff64-f21a-23dd59153cbc@intel.com>
-Date:   Sat, 8 Oct 2022 14:31:34 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.2.2
-Subject: Re: [PATCHv2 2/2] mmc: queue: Cancel recovery work on cleanup
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        with ESMTP id S229494AbiJHPhh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Oct 2022 11:37:37 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6310B3F1EE;
+        Sat,  8 Oct 2022 08:37:36 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id B0D2C60A0F;
+        Sat,  8 Oct 2022 15:37:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6325DC433D6;
+        Sat,  8 Oct 2022 15:37:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1665243455;
+        bh=iZs4LS2c78mWTK7VP9rYv0Gd7Qjrrk7FRFLOtLI7jIE=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=lpPo/FwsRx8A1pEIFq0YgzBE1yJUA/ftclR7pjjmkm3BCTs9ykaCaGipjTgZ2RrqF
+         G0/1Rl4a9+kU2ICW186Oe5J0xg7g1U3glZrfVWobe1UK+MUIqWbN273i1QVNGsmeQ9
+         ddRoAQjkMz3vc5+dmmxBpuMuIV8SZkRQZD25nr8M=
+Date:   Sat, 8 Oct 2022 17:38:15 +0200
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Dave Airlie <airlied@redhat.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Florian Westphal <fw@strlen.de>,
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Helge Deller <deller@gmx.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Huacai Chen <chenhuacai@kernel.org>,
+        Hugh Dickins <hughd@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
+        Jens Axboe <axboe@kernel.dk>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Jozsef Kadlecsik <kadlec@netfilter.org>,
+        KP Singh <kpsingh@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Marco Elver <elver@google.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Pablo Neira Ayuso <pablo@netfilter.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Richard Weinberger <richard@nod.at>,
+        Russell King <linux@armlinux.org.uk>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Thomas Graf <tgraf@suug.ch>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <c865c0c9789d428494b67b820a78923e@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
+        Yury Norov <yury.norov@gmail.com>,
+        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
+        kernel-janitors@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mm@kvack.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        loongarch@lists.linux.dev, netdev@vger.kernel.org,
+        sparclinux@vger.kernel.org, x86@kernel.org
+Subject: Re: [PATCH v5 0/7] treewide cleanup of random integer usage
+Message-ID: <Y0GZZ71Ugh9Ev99R@kroah.com>
+References: <20221008055359.286426-1-Jason@zx2c4.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221008055359.286426-1-Jason@zx2c4.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/10/22 18:43, Christian Löhle wrote:
-> To prevent any recovery work running after the queue cleanup cancel it.
-> Any recovery running post-cleanup dereferenced mq->card as NULL
-> and was not meaningful to begin with.
-> 
-> Cc: stable@vger.kernel.org
-> 
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+On Fri, Oct 07, 2022 at 11:53:52PM -0600, Jason A. Donenfeld wrote:
+> Changes v4->v5:
+> - Coccinelle is now used for as much mechanical aspects as possible,
+>   with mechanical parts split off from non-mechanical parts. This should
+>   drastically reduce the amount of code that needs to be reviewed
+>   carefully. Each commit mentions now if it was done by hand or is
+>   mechanical.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+All look good to me, thanks for the cleanups.
 
-> ---
-> -v2: Use cancel instead of flush
-> 
->  drivers/mmc/core/queue.c | 7 +++++++
->  1 file changed, 7 insertions(+)
-> 
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index fefaa901b50f..86be55d7cf55 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -493,6 +493,13 @@ void mmc_cleanup_queue(struct mmc_queue *mq)
->  	if (blk_queue_quiesced(q))
->  		blk_mq_unquiesce_queue(q);
->  
-> +	/*
-> +	 * If the recovery completes the last (and only remaining) request in
-> +	 * the queue, and the card has been removed, we could end up here with
-> +	 * the recovery not quite finished yet, so cancel it.
-> +	 */
-> +	cancel_work_sync(&mq->recovery_work);
-> +
->  	blk_mq_free_tag_set(&mq->tag_set);
->  
->  	/*
-
+Reviewed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
