@@ -2,88 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91A62C352AA
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 00:25:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31680C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 07:55:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232493AbiJJAZp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 9 Oct 2022 20:25:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35980 "EHLO
+        id S231278AbiJJHzQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Oct 2022 03:55:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232370AbiJJAW6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Oct 2022 20:22:58 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21D33178A4;
-        Sun,  9 Oct 2022 16:56:50 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id AD62C60DD1;
-        Sun,  9 Oct 2022 23:56:49 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4C1DC43470;
-        Sun,  9 Oct 2022 23:56:47 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1665359809;
-        bh=mUdPkcinbaaDmr2EIH5eTUOcBG9ba61MG0Xo4Gj1jWg=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=GtUOlOsHjzXm9s5XB3toQrBf7ybnVE1PiBpm2FKfHcSAT5APrs4I7zyVqU/5OogOm
-         s5VYJKWYAzIRxYLAmv9stft2b94GkQvksvu8/hF6MDALzYmeoYJ/7TKjJRTTNO5mkl
-         gIc8z0HouqOspftqn8UFDcyJsNhbl4zlp+xKZkNWHOY2rhXTsxrqYdqnpLLJYr5M7Y
-         LbBRSdFs8aMuVmsQU1vVt2an+C6rL7DXqWPtpN/JFHUmszilRLoV8tvYtV3ZHF/tOY
-         2ezMm7ZD3o/dLcgT54PHB68EN5c4I4Bj3YF4BHCxpPYHCy68cauaVBTr3bHAj3onOV
-         3LaW0boZmrZjw==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Richard Acayan <mailingradian@gmail.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, adrian.hunter@intel.com,
-        agross@kernel.org, andersson@kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 19/22] mmc: sdhci-msm: add compatible string check for sdm670
-Date:   Sun,  9 Oct 2022 19:55:37 -0400
-Message-Id: <20221009235540.1231640-19-sashal@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221009235540.1231640-1-sashal@kernel.org>
-References: <20221009235540.1231640-1-sashal@kernel.org>
+        with ESMTP id S229596AbiJJHzP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 03:55:15 -0400
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD4031DA70;
+        Mon, 10 Oct 2022 00:55:12 -0700 (PDT)
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 21BA768AA6; Mon, 10 Oct 2022 09:55:05 +0200 (CEST)
+Date:   Mon, 10 Oct 2022 09:55:04 +0200
+From:   Christoph Hellwig <hch@lst.de>
+To:     Luis Chamberlain <mcgrof@kernel.org>
+Cc:     Chaitanya Kulkarni <kch@nvidia.com>, linux-block@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
+        linux-remoteproc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-nvme@lists.infradead.org, linux-s390@vger.kernel.org,
+        linux-scsi@vger.kernel.org, axboe@kernel.dk, efremov@linux.com,
+        josef@toxicpanda.com, idryomov@gmail.com,
+        dongsheng.yang@easystack.cn, haris.iqbal@ionos.com,
+        jinpu.wang@ionos.com, mst@redhat.com, jasowang@redhat.com,
+        pbonzini@redhat.com, stefanha@redhat.com, ohad@wizery.com,
+        andersson@kernel.org, baolin.wang@linux.alibaba.com,
+        ulf.hansson@linaro.org, richard@nod.at, miquel.raynal@bootlin.com,
+        vigneshr@ti.com, marcan@marcan.st, sven@svenpeter.dev,
+        alyssa@rosenzweig.io, kbusch@kernel.org, hch@lst.de,
+        sagi@grimberg.me, sth@linux.ibm.com, hoeppner@linux.ibm.com,
+        hca@linux.ibm.com, gor@linux.ibm.com, agordeev@linux.ibm.com,
+        borntraeger@linux.ibm.com, svens@linux.ibm.com, jejb@linux.ibm.com,
+        martin.petersen@oracle.com, hare@suse.de, bhelgaas@google.com,
+        john.garry@huawei.com, christophe.jaillet@wanadoo.fr,
+        vaibhavgupta40@gmail.com, wsa+renesas@sang-engineering.com,
+        damien.lemoal@opensource.wdc.com, johannes.thumshirn@wdc.com,
+        bvanassche@acm.org, ming.lei@redhat.com,
+        shinichiro.kawasaki@wdc.com, vincent.fu@samsung.com,
+        christoph.boehmwalder@linbit.com, joel@jms.id.au,
+        vincent.whitchurch@axis.com, nbd@other.debian.org,
+        ceph-devel@vger.kernel.org,
+        virtualization@lists.linux-foundation.org, asahi@lists.linux.dev
+Subject: Re: [RFC PATCH 00/21] block: add and use init tagset helper
+Message-ID: <20221010075504.GA21272@lst.de>
+References: <20221005032257.80681-1-kch@nvidia.com> <Y0BvRaVO0iUVmHgB@bombadil.infradead.org>
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <Y0BvRaVO0iUVmHgB@bombadil.infradead.org>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Richard Acayan <mailingradian@gmail.com>
+On Fri, Oct 07, 2022 at 11:26:13AM -0700, Luis Chamberlain wrote:
+> *If* there were commonalities at init and these could be broken up into
+> common groups, each having their own set of calls, then we simplify and
+> can abstract these. I say this without doing a complete review of the
+> removals, but if there really isn't much of commonalities I tend to
+> agree with Bart that open coding this is better.
 
-[ Upstream commit 4de95950d970c71a9e82a24573bb7a44fd95baa1 ]
-
-The Snapdragon 670 has the same quirk as Snapdragon 845 (needing to
-restore the dll config). Add a compatible string check to detect the need
-for this.
-
-Signed-off-by: Richard Acayan <mailingradian@gmail.com>
-Reviewed-by: Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Link: https://lore.kernel.org/r/20220923014322.33620-3-mailingradian@gmail.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
----
- drivers/mmc/host/sdhci-msm.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 192cb8b20b47..ad2e73f9a58f 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2182,6 +2182,7 @@ static const struct sdhci_msm_variant_info sm8250_sdhci_var = {
- static const struct of_device_id sdhci_msm_dt_match[] = {
- 	{.compatible = "qcom,sdhci-msm-v4", .data = &sdhci_msm_mci_var},
- 	{.compatible = "qcom,sdhci-msm-v5", .data = &sdhci_msm_v5_var},
-+	{.compatible = "qcom,sdm670-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sdm845-sdhci", .data = &sdm845_sdhci_var},
- 	{.compatible = "qcom,sm8250-sdhci", .data = &sm8250_sdhci_var},
- 	{.compatible = "qcom,sc7180-sdhci", .data = &sdm845_sdhci_var},
--- 
-2.35.1
-
+The commonality is that there are various required or optional
+fields to fill out.  I actually have a WIP series to make the tag_set
+dynamically allocated and refcounted to fix some long standing life time
+issues.  That creates a new alloc helper that will take a few mandatory
+arguments and would heavily clash with this series.
