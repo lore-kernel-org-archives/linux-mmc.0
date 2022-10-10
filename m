@@ -2,87 +2,125 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A63A4C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 10:38:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B8A8C433F5
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 12:36:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231971AbiJJKiM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Oct 2022 06:38:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50078 "EHLO
+        id S230073AbiJJMgO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Oct 2022 08:36:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231953AbiJJKiG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 06:38:06 -0400
-Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF3A95C9E6
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Oct 2022 03:38:03 -0700 (PDT)
-Received: by mail-qt1-x82b.google.com with SMTP id bb5so870292qtb.11
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Oct 2022 03:38:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=oLRVHcDP2n3/T7u+DLZw38Iwf+Q2v9rJvcCuBMIDabA=;
-        b=f9Qda9xTp4bHsuGvwL9zsZmqtYzvNGczwpochsMYKN3ONXezZwSJ3YBDB1VbOmjW2B
-         aejJft8F7FPKDb/VxlIFFbkOuVyuzmLX330Vc8PC+H63qEFrJjJlgS7/6e8OKi5SQEni
-         i8+4ffqImNiBniTGY/3rvcR5xM2qiwznx2iWsFBnglSfYJuQRJ8yx4tsfMC0RkPegeYm
-         nf4KTKgkICkyouSEPp3x1Y2et13uPQxHGC4MkEryS2mvqFljHMKIvbOq+StNnK4Beu+D
-         txstZNziYEBdJDhrRX4VB0oDpDzDvlidT3NgG2jFcXPgsOhCJP4x1JE3/DsZgIfRRH0d
-         nv8A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=oLRVHcDP2n3/T7u+DLZw38Iwf+Q2v9rJvcCuBMIDabA=;
-        b=su3wvnwWOygK4DJWi/D8WRvfblj0V0YGNQCIZCPQToZd+JJF0Jtb4g+JeAJF9fX7YE
-         wcQEIMVnaRgnIBVnhMuS+pV2ho6zPFonswoEoSRo4xwtA3NnUKiHoTwcG7DBxjeHWtcN
-         /b9jnusQ6urmLbhMDfA5bFk/09c7kCXxqpwRyvsHzLkEs+efIz+UmflBOhkAkubnl14r
-         0PWpiFPe0VmQJz4rmQV8rE9v4GyMJA6bqNN/370FIzA0NRN6g25z+tby430FJLO5VeeF
-         jZn7q3StfH2hScsiPjIYFqYQdHTH5wLtRqMJ6M1N16tITPVuH7JO2TafQKsulV46mFcA
-         NUrw==
-X-Gm-Message-State: ACrzQf1v6GQOCSQ1tjpukoXwQw3QnZhUka4aH28JsU4x06i6VB13o8uI
-        Ze0qLrFZ532btTwKEdTKlisiCw==
-X-Google-Smtp-Source: AMsMyM7qDRzB5OaEeCZNoAzPYyh1IDm+Q8NlP4KpMd6imNLo7nGADIy0b581X8htTnLSKFNiWf9GcA==
-X-Received: by 2002:a05:622a:1a1b:b0:39a:f20d:b277 with SMTP id f27-20020a05622a1a1b00b0039af20db277mr1326519qtb.204.1665398282927;
-        Mon, 10 Oct 2022 03:38:02 -0700 (PDT)
-Received: from [192.168.1.57] (cpe-72-225-192-120.nyc.res.rr.com. [72.225.192.120])
-        by smtp.gmail.com with ESMTPSA id h10-20020a05620a284a00b006e2a1999263sm9777314qkp.62.2022.10.10.03.38.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 10 Oct 2022 03:38:02 -0700 (PDT)
-Message-ID: <756def2a-f1b0-2900-61e6-f2cfe4c69e85@linaro.org>
-Date:   Mon, 10 Oct 2022 06:35:51 -0400
+        with ESMTP id S229946AbiJJMgN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 08:36:13 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98FDC3FA18;
+        Mon, 10 Oct 2022 05:36:12 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1665405372; x=1696941372;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=4+frokLrfq+rbpCITnmGE0GdTX2LnzeDU7bHK2xfiR0=;
+  b=bT4baR/WqK3J1kRc3plAsGJCvo5nHn3dQYecVV0chxuvJpaPZySXvD9G
+   blsdpoNtnODbcoA8ty/VFd5ovq/tTNt2x2b50rPdAh8Nl26rbZ66Owe3y
+   octhbqNY9yGe6GvTBw5Axy79sq7NhuIjK1hVoreAdDomqf0qYFDMdBx0H
+   oSkkIz/4mOJ8aUNGQTArDIX72AegFAR/MF3eKiFTmufqTT+LS5XnAT4gA
+   zQJdNCoFGmwdU60WZmCvDNKJXiUTA+AiAx45eyZeyT0YkD/vbpYkw5PF3
+   I+cXX6GfDxtco4uS4gfxJkmpkhsxWhIYDiOd1q7V34Pow9MLUtySy1ZbD
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="305808966"
+X-IronPort-AV: E=Sophos;i="5.95,173,1661842800"; 
+   d="scan'208";a="305808966"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2022 05:36:12 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="954901439"
+X-IronPort-AV: E=Sophos;i="5.95,173,1661842800"; 
+   d="scan'208";a="954901439"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.180])
+  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2022 05:36:10 -0700
+Message-ID: <59847aad-6339-9a06-f743-257a4bc4229a@intel.com>
+Date:   Mon, 10 Oct 2022 15:36:05 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.1
-Subject: Re: [PATCH] dt-binding: mmc: fsl-imx-esdhc: update i.MX8DXL
- compatible
+ Firefox/102.0 Thunderbird/102.2.2
+Subject: Re: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
 Content-Language: en-US
-To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de
-Cc:     kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Peng Fan <peng.fan@nxp.com>
-References: <20221010101138.295332-1-peng.fan@oss.nxp.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221010101138.295332-1-peng.fan@oss.nxp.com>
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <003d34d1643242488b533dc14f69830f@hyperstone.com>
+ <e6acc89d-7d17-62ee-d67a-b78b1cdcd085@intel.com>
+ <27343e2a17d1481f9a62d710480bc041@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <27343e2a17d1481f9a62d710480bc041@hyperstone.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/10/2022 06:11, Peng Fan (OSS) wrote:
-> From: Peng Fan <peng.fan@nxp.com>
+On 10/10/22 11:08, Christian Löhle wrote:
 > 
-> i.MX8DXL is compatible with i.MX8QXP, so update binding doc.
+>>
+>> -----Original Message-----
+>> From: Adrian Hunter <adrian.hunter@intel.com> 
+>> Sent: Samstag, 8. Oktober 2022 10:38
+>> To: Christian Löhle <CLoehle@hyperstone.com>; Ulf Hansson <ulf.hansson@linaro.org>; Linux MMC List <linux-mmc@vger.kernel.org>; linux-kernel@vger.kernel.org
+>> Subject: Re: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
+>>
+>> On 7/10/22 18:42, Christian Löhle wrote:
+>>> Before switching back to the right partition in mmc_blk_reset there 
+>>> used to be a check if hw_reset was even supported.
+>>> This return value was removed, so there is no reason to check.
+>>>
+>>> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in 
+>>> mmc_hw|sw_reset()")
+>>> Cc: stable@vger.kernel.org
+>>>
+>>> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+>>> ---
+>>> -v2: Do not attempt to switch partitions if reset failed
+>>>
+>>>  drivers/mmc/core/block.c | 28 +++++++++++++---------------
+>>>  1 file changed, 13 insertions(+), 15 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index 
+>>> ce89611a136e..8db72cba2bbe 100644
+>>> --- a/drivers/mmc/core/block.c
+>>> +++ b/drivers/mmc/core/block.c
+>>> @@ -991,29 +991,27 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+>>>  			 int type)
+>>>  {
+>>>  	int err;
+>>> +	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
+>>> +	int part_err;
+>>>  
+>>>  	if (md->reset_done & type)
+>>>  		return -EEXIST;
+>>>  
+>>>  	md->reset_done |= type;
+>>>  	err = mmc_hw_reset(host->card);
+>>> +	if (err)
+>>> +		return err;
+>>
+>> This could be a potential source of data corruption.
+>>
+>> There is no guarantee that a subsequent I/O will fail just because the reset failed.  Reading / writing the wrong partition would be disastrous, so we should always try to get back to the correct partition.
+>>
+>> I haven't looked at the possibility of just flagging the partition as invalid - need to be sure any subsequent I/O attempts still go through a path that switches the partition.
 > 
-> Signed-off-by: Peng Fan <peng.fan@nxp.com>
+> I can see where youre coming from, but similarly a failing mmc_blk_part_switch doesn't imply all subsequent IO will fail.
+> Flagging the partition as invalid can be seen as rendering the system to a potentially useless state, which is a bit overboard for e.g. one CRC7 failure on the switch.
 
+I wasn't clear sorry.  I meant setting main_md->part_curr to a value
+that doesn't match any partition, thereby forcing the next I/O to
+switch partition first.
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Not sure yet what the ideal behavior is, but either way I would go with v1 1/2 and v2 2/2 for now? That already fixes imo the most relevant potential data corruptions. (successful reset -> no switch)
+> Then we can come up with a a good handling for mmc_blk_reset or even around mmc_blk_part_switch.
+> Or what do you suggest?
 
-Best regards,
-Krzysztof
+What about what I just described above.
 
