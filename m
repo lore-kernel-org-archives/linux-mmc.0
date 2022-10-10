@@ -2,125 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B8A8C433F5
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 12:36:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1A27C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Oct 2022 13:01:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230073AbiJJMgO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Oct 2022 08:36:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40080 "EHLO
+        id S229565AbiJJNB4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Oct 2022 09:01:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229946AbiJJMgN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 08:36:13 -0400
-Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98FDC3FA18;
-        Mon, 10 Oct 2022 05:36:12 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665405372; x=1696941372;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=4+frokLrfq+rbpCITnmGE0GdTX2LnzeDU7bHK2xfiR0=;
-  b=bT4baR/WqK3J1kRc3plAsGJCvo5nHn3dQYecVV0chxuvJpaPZySXvD9G
-   blsdpoNtnODbcoA8ty/VFd5ovq/tTNt2x2b50rPdAh8Nl26rbZ66Owe3y
-   octhbqNY9yGe6GvTBw5Axy79sq7NhuIjK1hVoreAdDomqf0qYFDMdBx0H
-   oSkkIz/4mOJ8aUNGQTArDIX72AegFAR/MF3eKiFTmufqTT+LS5XnAT4gA
-   zQJdNCoFGmwdU60WZmCvDNKJXiUTA+AiAx45eyZeyT0YkD/vbpYkw5PF3
-   I+cXX6GfDxtco4uS4gfxJkmpkhsxWhIYDiOd1q7V34Pow9MLUtySy1ZbD
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="305808966"
-X-IronPort-AV: E=Sophos;i="5.95,173,1661842800"; 
-   d="scan'208";a="305808966"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2022 05:36:12 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="954901439"
-X-IronPort-AV: E=Sophos;i="5.95,173,1661842800"; 
-   d="scan'208";a="954901439"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.180])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Oct 2022 05:36:10 -0700
-Message-ID: <59847aad-6339-9a06-f743-257a4bc4229a@intel.com>
-Date:   Mon, 10 Oct 2022 15:36:05 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.2.2
-Subject: Re: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        with ESMTP id S229492AbiJJNBz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 09:01:55 -0400
+Received: from mail-oi1-f175.google.com (mail-oi1-f175.google.com [209.85.167.175])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 025FC558EB;
+        Mon, 10 Oct 2022 06:01:55 -0700 (PDT)
+Received: by mail-oi1-f175.google.com with SMTP id m130so12608650oif.6;
+        Mon, 10 Oct 2022 06:01:54 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=jfVkBTG8SNv9Tulxii1+DdNRE/eocOHXxVG3G/nIC5M=;
+        b=IZe+ZYIWwmKXuLgRe/bjrnVuoLh89Hr7/571/WYRAF0dJxN/el0lmRcQllJVl8r/UI
+         wtz1CqOIYKED99R/+FFXtelfVt6LzEo52RqI16lZgjr3Wlf07fhDUn1QnJW5tEg1sBzj
+         h7uOfVQLA2g4qWJcuOTPgLvWCpNFmcd1bz78CzJbg7ZXtPtIxEfg0nbG0X/lgIQe7Dls
+         rnry4ATxHsDgTBUDKw8OfC7vWKvdfnUrGogVnN4t/vzky0fqszbaUgSt69strmdtu5wM
+         ytmj9SDlFWtU1XBofIoWXNPTM3spcYJS2aOFXd5/0sHsEu4lpkML5gaG55qeRYXrFa1P
+         ijdw==
+X-Gm-Message-State: ACrzQf3Ziq1qKfl2hzhukuPlMfVnuuXJ+/zMoAJvvKsZeIM839zlSkIY
+        7ug7kQ4YoJ5JHn7vnKnvWw==
+X-Google-Smtp-Source: AMsMyM5lgFvJ9fLliV+V4FcCSGJENE49rAo3hL62foOpnMFIQYg3mQbq65Qw1Gm/4qIDH33vBplIxw==
+X-Received: by 2002:a05:6808:2118:b0:350:3c8e:404d with SMTP id r24-20020a056808211800b003503c8e404dmr9122517oiw.227.1665406914045;
+        Mon, 10 Oct 2022 06:01:54 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id w1-20020a9d6381000000b006339b36127dsm4803925otk.3.2022.10.10.06.01.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Oct 2022 06:01:52 -0700 (PDT)
+Received: (nullmailer pid 480632 invoked by uid 1000);
+        Mon, 10 Oct 2022 13:01:53 -0000
+Date:   Mon, 10 Oct 2022 08:01:53 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Frank Wunderlich <linux@fw-web.de>
+Cc:     devicetree@vger.kernel.org, Sam Shih <sam.shih@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-References: <003d34d1643242488b533dc14f69830f@hyperstone.com>
- <e6acc89d-7d17-62ee-d67a-b78b1cdcd085@intel.com>
- <27343e2a17d1481f9a62d710480bc041@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <27343e2a17d1481f9a62d710480bc041@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Frank Wunderlich <frank-w@public-files.de>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Rob Herring <robh+dt@kernel.org>
+Subject: Re: [PATCH 1/2] dt-bindings: mmc: Add compatible for Mediatek MT7986
+Message-ID: <166540691329.480578.14649778257492089320.robh@kernel.org>
+References: <20221008165627.114782-1-linux@fw-web.de>
+ <20221008165627.114782-2-linux@fw-web.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221008165627.114782-2-linux@fw-web.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/10/22 11:08, Christian Löhle wrote:
+On Sat, 08 Oct 2022 18:56:26 +0200, Frank Wunderlich wrote:
+> From: Sam Shih <sam.shih@mediatek.com>
 > 
->>
->> -----Original Message-----
->> From: Adrian Hunter <adrian.hunter@intel.com> 
->> Sent: Samstag, 8. Oktober 2022 10:38
->> To: Christian Löhle <CLoehle@hyperstone.com>; Ulf Hansson <ulf.hansson@linaro.org>; Linux MMC List <linux-mmc@vger.kernel.org>; linux-kernel@vger.kernel.org
->> Subject: Re: [PATCHv2 1/2] mmc: block: Remove error check of hw_reset on reset
->>
->> On 7/10/22 18:42, Christian Löhle wrote:
->>> Before switching back to the right partition in mmc_blk_reset there 
->>> used to be a check if hw_reset was even supported.
->>> This return value was removed, so there is no reason to check.
->>>
->>> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in 
->>> mmc_hw|sw_reset()")
->>> Cc: stable@vger.kernel.org
->>>
->>> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
->>> ---
->>> -v2: Do not attempt to switch partitions if reset failed
->>>
->>>  drivers/mmc/core/block.c | 28 +++++++++++++---------------
->>>  1 file changed, 13 insertions(+), 15 deletions(-)
->>>
->>> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index 
->>> ce89611a136e..8db72cba2bbe 100644
->>> --- a/drivers/mmc/core/block.c
->>> +++ b/drivers/mmc/core/block.c
->>> @@ -991,29 +991,27 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
->>>  			 int type)
->>>  {
->>>  	int err;
->>> +	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
->>> +	int part_err;
->>>  
->>>  	if (md->reset_done & type)
->>>  		return -EEXIST;
->>>  
->>>  	md->reset_done |= type;
->>>  	err = mmc_hw_reset(host->card);
->>> +	if (err)
->>> +		return err;
->>
->> This could be a potential source of data corruption.
->>
->> There is no guarantee that a subsequent I/O will fail just because the reset failed.  Reading / writing the wrong partition would be disastrous, so we should always try to get back to the correct partition.
->>
->> I haven't looked at the possibility of just flagging the partition as invalid - need to be sure any subsequent I/O attempts still go through a path that switches the partition.
+> This commit adds dt-binding documentation of mmc for Mediatek MT7986 SoC
+> Platform.
 > 
-> I can see where youre coming from, but similarly a failing mmc_blk_part_switch doesn't imply all subsequent IO will fail.
-> Flagging the partition as invalid can be seen as rendering the system to a potentially useless state, which is a bit overboard for e.g. one CRC7 failure on the switch.
+> Signed-off-by: Sam Shih <sam.shih@mediatek.com>
+> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+> 
 
-I wasn't clear sorry.  I meant setting main_md->part_curr to a value
-that doesn't match any partition, thereby forcing the next I/O to
-switch partition first.
-
-> Not sure yet what the ideal behavior is, but either way I would go with v1 1/2 and v2 2/2 for now? That already fixes imo the most relevant potential data corruptions. (successful reset -> no switch)
-> Then we can come up with a a good handling for mmc_blk_reset or even around mmc_blk_part_switch.
-> Or what do you suggest?
-
-What about what I just described above.
-
+Acked-by: Rob Herring <robh@kernel.org>
