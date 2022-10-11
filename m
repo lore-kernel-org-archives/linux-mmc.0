@@ -2,146 +2,215 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4264BC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 08:48:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50D4EC433F5
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 09:59:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229595AbiJKIsR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Oct 2022 04:48:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50314 "EHLO
+        id S229716AbiJKJ7f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Oct 2022 05:59:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229673AbiJKIsQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 04:48:16 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 804CE58B76;
-        Tue, 11 Oct 2022 01:48:15 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1665478095; x=1697014095;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=QtPL0c22PULNLT4h8YrIaeDVBt8AgGleM3RozmCDUZ8=;
-  b=VSpFpCF92NPhB+gYYZtyUoa1mJcgVwDM9kN3czW7zNP8Oa7te8LyCDfo
-   p/xU7xu+vXrz7t7xjmUeFdQzv0mygkaQ3YdPdcNKkeKU627nvIZyRQVO5
-   fcQomEQBQo573mmtIPO+JKl1wM3vuNmZLCF9O4jmblSk8wHhPJ6LQjben
-   O/5vY+pN/hZqFw9jUJ/b5z1G9dYC9mswo8LHWsVf1uimmAjKKbbQjdfAm
-   Dd+YyrgJTRtxf1OH4saAypBtGoRwIU9KpsCkuCcXVI/fIiBLU7vUhuwRo
-   Mm7W/Ci/5KBR/qmYQGOcI2Yn1WN9bxX3sYSHN+p4OYewA8LUcwmFK5AKt
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="302058024"
-X-IronPort-AV: E=Sophos;i="5.95,175,1661842800"; 
-   d="scan'208";a="302058024"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Oct 2022 01:48:15 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="768720754"
-X-IronPort-AV: E=Sophos;i="5.95,175,1661842800"; 
-   d="scan'208";a="768720754"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.214])
-  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Oct 2022 01:48:12 -0700
-Message-ID: <e98b85ce-c382-09ca-a819-ab7c581158e4@intel.com>
-Date:   Tue, 11 Oct 2022 11:48:07 +0300
+        with ESMTP id S229677AbiJKJ7e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 05:59:34 -0400
+Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 406E55467E
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Oct 2022 02:59:33 -0700 (PDT)
+Received: by mail-pl1-x62f.google.com with SMTP id c24so12760005plo.3
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Oct 2022 02:59:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=1fXIF1ijmUUQRNRT6RqsO+cCak4LIbfujlHnLa3spbE=;
+        b=TOU4554m4mknJa8WO5FSKYj1BXHhRBxih0kfHM5fKTH8ifPjvdf58jUWMz0uYZbsOi
+         b/g06HHxN8XKncuX9uoCTh6FwSUsSaLTXJZ4gEth1RQEdjPo2tQtQmwHqlPjW1tTr/da
+         VyX96sSoSCz9yMGN5ljUdZFYUWj2EJ/dOmbEAKWdOb/BsJ7/7IWoMeQM8II/OkEUmoXF
+         E772xvdESGaeOKYbIzlMTwzLtnFqB6gjV8ay25u8DItdEs6jBUDhwOYbyWOjlgfsqmpe
+         QeC0kI5Qvv0ZodMxrb8IceSlZ/quXEVMZVKAXOYud+EcV1QbOU97s+dIVgARGzsrJfU/
+         WNSg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=1fXIF1ijmUUQRNRT6RqsO+cCak4LIbfujlHnLa3spbE=;
+        b=nZnSEseguVhy1T0KCDFbXZJDBU5R2mWVqKD4AYtNz0G14zJ+zVGkl6KV3HG/uoPBtv
+         FqcJgs9FUa+lmYt0BtyKgSF0r9YDqirAx5BftTUAPjvrN2WTs83bR5OfNp73rRasBjMU
+         n9/WWfWJHtE/XbloejVcLSQh2uzu1hoxkjxU8ix8oQyzQR2vgbwDbz3QuE1m2o3gWkVa
+         WitrH5NmKC7MJkdij+JOBCwY/LGLA2co83/V/syWEQX9FWb25rTIT7uGvncUHFZK/Eee
+         N02weF/eMHBHg4MV4MQqst+DEq3uyXCIr7QW20SoX1M0L/XSAQsZ5f5bRIaFlmmNxIEl
+         godg==
+X-Gm-Message-State: ACrzQf2vjwaPCK7Kn+zs/JP5FU2lJaDIR/17jQzhKibOwpbpDVp4TEyK
+        PnS0TXQm9SMxUDSVIonnewloGrjJIB6ujaq6k/fUqA==
+X-Google-Smtp-Source: AMsMyM4rzQOVkVBtuVL7hnZkW9ofbYaogPcAQggjCSqL7tNLB01YTOQhg6IvJt6qfr6wbifv3YiXITiyFfiePq0Z374=
+X-Received: by 2002:a17:90a:7b8c:b0:20b:1f3b:f6fd with SMTP id
+ z12-20020a17090a7b8c00b0020b1f3bf6fdmr25515588pjc.202.1665482372756; Tue, 11
+ Oct 2022 02:59:32 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.2.2
-Subject: Re: [PATCH] mmc: sdhci-sprd: Fix minimum clock limit
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     ulf.hansson@linaro.org, orsonzhai@gmail.com,
-        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        megoo.tang@gmail.com, lzx.stg@gmail.com
-References: <20221011063043.11074-1-wenchao.chen666@gmail.com>
- <beae901e-0fcd-c4ae-8a6e-a1a4357078da@intel.com>
- <CA+Da2qwe96J_EyJCG04UX5GBEsoU0mckWktPyTrZARk-XHAo0w@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CA+Da2qwe96J_EyJCG04UX5GBEsoU0mckWktPyTrZARk-XHAo0w@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <Yz6zfrVq9cP/wrJb@orome> <20221006130622.22900-1-pshete@nvidia.com>
+ <20221006130622.22900-2-pshete@nvidia.com>
+In-Reply-To: <20221006130622.22900-2-pshete@nvidia.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 11 Oct 2022 11:58:56 +0200
+Message-ID: <CAPDyKFr_Yi2EgrBUzsORnM4mOkf25WR8+7_dfF2h4XzRDPm9-w@mail.gmail.com>
+Subject: Re: [PATCH v7 2/4] mmc: sdhci-tegra: Add support to program MC stream ID
+To:     Prathamesh Shete <pshete@nvidia.com>
+Cc:     adrian.hunter@intel.com, thierry.reding@gmail.com,
+        jonathanh@nvidia.com, p.zabel@pengutronix.de,
+        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
+        linux-kernel@vger.kernel.org, anrao@nvidia.com,
+        smangipudi@nvidia.com, kyarlagadda@nvidia.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/10/22 11:40, Wenchao Chen wrote:
-> On Tue, Oct 11, 2022 at 2:45 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>
->> On 11/10/22 09:30, Wenchao Chen wrote:
->>> From: Wenchao Chen <wenchao.chen@unisoc.com>
->>>
->>> The minimum clock supported by SPRD Host is 100000.
->>
->> Commit messages are better if they say why a change
->> is being made.
->>
->> This begs the question, was there a problem with 400 kHz?
->> Are there cases that benefit from this change?
->> Should it have a fixes tag,cc stable?
->>
-> 
-> Code show as below:
-> static struct sdhci_ops sdhci_sprd_ops = {
-> ...
-> .get_min_clock = sdhci_sprd_get_min_clock,
-> ...
-> };
-> 
-> int sdhci_setup_host(struct sdhci_host *host)
-> {
-> ...
-> if (host->ops->get_min_clock)
-> mmc->f_min = host->ops->get_min_clock(host);
-> ...
-> }
-> 
-> static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
-> void mmc_rescan(struct work_struct *work)
-> {
-> ...
-> for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-> unsigned int freq = freqs[i];
-> if (freq > host->f_max) {
-> if (i + 1 < ARRAY_SIZE(freqs))
-> continue;
-> freq = host->f_max;
-> }
-> if (!mmc_rescan_try_freq(host, max(freq, host->f_min)))
-> break;
-> if (freqs[i] <= host->f_min) // If you start at 100K, you will try
-> 400K, 300K, 200K, 100K.
-> break;
-> }
-> ...
-> }
-> 
-> Our controller supports 100K. During the test, it was found that mmc_rescan
-> failed to scan the card at 400K, and did not try 300K, 200K, and 100K. After
-> modifying the minimum clock limit to 100K, the card scan was successful.
+On Thu, 6 Oct 2022 at 15:07, Prathamesh Shete <pshete@nvidia.com> wrote:
+>
+> SMMU clients are supposed to program stream ID from
+> their respective address spaces instead of MC override.
+> Define NVQUIRK_PROGRAM_STREAMID and use it to program
+> SMMU stream ID from the SDMMC client address space.
+>
+> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
+> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Acked-by: Thierry Reding <treding@nvidia.com>
+> ---
+>  drivers/mmc/host/sdhci-tegra.c | 53 ++++++++++++++++++++++++++++++++++
+>  1 file changed, 53 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index a6c5bbae77b4..e88294a6912d 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -25,6 +25,10 @@
+>  #include <linux/mmc/slot-gpio.h>
+>  #include <linux/gpio/consumer.h>
+>  #include <linux/ktime.h>
+> +#ifdef CONFIG_IOMMU_API
+> +#include <linux/iommu.h>
+> +#include <linux/bitops.h>
+> +#endif
+>
+>  #include <soc/tegra/common.h>
+>
+> @@ -94,6 +98,8 @@
+>  #define SDHCI_TEGRA_AUTO_CAL_STATUS                    0x1ec
+>  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE                    BIT(31)
+>
+> +#define SDHCI_TEGRA_CIF2AXI_CTRL_0                     0x1fc
+> +
+>  #define NVQUIRK_FORCE_SDHCI_SPEC_200                   BIT(0)
+>  #define NVQUIRK_ENABLE_BLOCK_GAP_DET                   BIT(1)
+>  #define NVQUIRK_ENABLE_SDHCI_SPEC_300                  BIT(2)
+> @@ -121,6 +127,7 @@
+>  #define NVQUIRK_HAS_TMCLK                              BIT(10)
+>
+>  #define NVQUIRK_HAS_ANDROID_GPT_SECTOR                 BIT(11)
+> +#define NVQUIRK_PROGRAM_STREAMID                       BIT(12)
+>
+>  /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
+>  #define SDHCI_TEGRA_CQE_BASE_ADDR                      0xF000
+> @@ -177,6 +184,9 @@ struct sdhci_tegra {
+>         bool enable_hwcq;
+>         unsigned long curr_clk_rate;
+>         u8 tuned_tap_delay;
+> +#ifdef CONFIG_IOMMU_API
 
-Please add those last 3 lines to the commit message, then you can add:
+I would rather avoid these kinds of "#ifdef" micro optimizations.
+Please just add the streamid without the #ifdef.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> +       u32 streamid;
+> +#endif
+>  };
+>
+>  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
+> @@ -1564,6 +1574,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
+>                     NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
+>                     NVQUIRK_ENABLE_SDR50 |
+>                     NVQUIRK_ENABLE_SDR104 |
+> +                   NVQUIRK_PROGRAM_STREAMID |
+>                     NVQUIRK_HAS_TMCLK,
+>         .min_tap_delay = 95,
+>         .max_tap_delay = 111,
+> @@ -1775,6 +1786,25 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
+>         if (rc)
+>                 goto err_add_host;
+>
+> +       /* Program MC streamID for DMA transfers */
+> +#ifdef CONFIG_IOMMU_API
 
-Also please consider adding a Fixes: tag.
+Again, please drop the #ifdefs here.
 
-> 
->>>
->>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
->>> ---
->>>  drivers/mmc/host/sdhci-sprd.c | 2 +-
->>>  1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
->>> index 46c55ab4884c..b92a408f138d 100644
->>> --- a/drivers/mmc/host/sdhci-sprd.c
->>> +++ b/drivers/mmc/host/sdhci-sprd.c
->>> @@ -309,7 +309,7 @@ static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
->>>
->>>  static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
->>>  {
->>> -     return 400000;
->>> +     return 100000;
->>>  }
->>>
->>>  static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
->>
+We already have stub functions for dev_iommu_fwspec_get() in case
+CONFIG_IOMMU_API is unset.
 
+> +       if (soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
+> +               struct iommu_fwspec *fwspec;
+> +
+> +               fwspec = dev_iommu_fwspec_get(&pdev->dev);
+> +               if (fwspec == NULL) {
+> +                       dev_warn(mmc_dev(host->mmc),
+> +                               "iommu fwspec is NULL, continue without stream ID\n");
+> +               } else {
+> +                       tegra_host->streamid = fwspec->ids[0] & 0xff;
+> +                       tegra_sdhci_writel(host, tegra_host->streamid |
+> +                                               FIELD_PREP(GENMASK(15, 8),
+> +                                               tegra_host->streamid),
+> +                                               SDHCI_TEGRA_CIF2AXI_CTRL_0);
+> +               }
+> +       }
+> +#endif
+> +
+>         return 0;
+>
+>  err_add_host:
+> @@ -1861,6 +1891,10 @@ static int sdhci_tegra_suspend(struct device *dev)
+>  static int sdhci_tegra_resume(struct device *dev)
+>  {
+>         struct sdhci_host *host = dev_get_drvdata(dev);
+> +#ifdef CONFIG_IOMMU_API
+
+Ditto.
+
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
+> +#endif
+>         int ret;
+>
+>         ret = mmc_gpio_set_cd_wake(host->mmc, false);
+> @@ -1871,6 +1905,25 @@ static int sdhci_tegra_resume(struct device *dev)
+>         if (ret)
+>                 return ret;
+>
+> +       /* Re-program MC streamID for DMA transfers */
+> +#ifdef CONFIG_IOMMU_API
+
+Ditto.
+
+> +       if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
+> +               struct iommu_fwspec *fwspec;
+> +
+> +               fwspec = dev_iommu_fwspec_get(dev);
+> +               if (fwspec == NULL) {
+> +                       dev_warn(mmc_dev(host->mmc),
+> +                               "iommu fwspec is NULL, continue without stream ID\n");
+> +               } else {
+> +                       tegra_host->streamid = fwspec->ids[0] & 0xff;
+> +                       tegra_sdhci_writel(host, tegra_host->streamid |
+> +                                               FIELD_PREP(GENMASK(15, 8),
+> +                                               tegra_host->streamid),
+> +                                               SDHCI_TEGRA_CIF2AXI_CTRL_0);
+> +               }
+> +       }
+> +#endif
+> +
+>         ret = sdhci_resume_host(host);
+>         if (ret)
+>                 goto disable_clk;
+> --
+> 2.17.1
+>
+
+Kind regards
+Uffe
