@@ -2,146 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49B86C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 03:00:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 29F19C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 06:30:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229446AbiJKDAb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Oct 2022 23:00:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35666 "EHLO
+        id S229803AbiJKGax (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Oct 2022 02:30:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229481AbiJKDA1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Oct 2022 23:00:27 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8939C51425;
-        Mon, 10 Oct 2022 20:00:25 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C52046108C;
-        Tue, 11 Oct 2022 03:00:24 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 207E1C433D6;
-        Tue, 11 Oct 2022 03:00:18 +0000 (UTC)
-Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="HINC5krz"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1665457216;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=Qirw48xc/tsq9oJ9bN2wDgpC7gkOILHLI1FFvZKjy0g=;
-        b=HINC5krzVlg2RfBkI+DN4TfkkfdILG81+nGbG6H3ymULtvrDJBAAPyivNN5Ks6xLTRDgBj
-        St0npOJIqnMiQJAEsME6hn8HSGUVr7vaSgTvTLlUyVWoppp8tjC9zJyq6/W2qkBuApVnBr
-        cXYoav/TXzo4IDNClYviVzHvX/Qex3Y=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 0a7ccddd (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
-        Tue, 11 Oct 2022 03:00:16 +0000 (UTC)
-Date:   Mon, 10 Oct 2022 21:00:08 -0600
-From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-To:     "Elliott, Robert (Servers)" <elliott@hpe.com>
-Cc:     "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "patches@lists.linux.dev" <patches@lists.linux.dev>,
-        Andreas Noever <andreas.noever@gmail.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Borislav Petkov <bp@alien8.de>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Christoph =?utf-8?Q?B=C3=B6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
-        Christophe Leroy <christophe.leroy@csgroup.eu>,
-        Daniel Borkmann <daniel@iogearbox.net>,
-        Dave Airlie <airlied@redhat.com>,
-        Dave Hansen <dave.hansen@linux.intel.com>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Florian Westphal <fw@strlen.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        "H . Peter Anvin" <hpa@zytor.com>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Helge Deller <deller@gmx.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Huacai Chen <chenhuacai@kernel.org>,
-        Hugh Dickins <hughd@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
-        Jens Axboe <axboe@kernel.dk>,
-        Johannes Berg <johannes@sipsolutions.net>,
-        Jonathan Corbet <corbet@lwn.net>,
-        Jozsef Kadlecsik <kadlec@netfilter.org>,
-        KP Singh <kpsingh@kernel.org>,
-        Kees Cook <keescook@chromium.org>,
-        Marco Elver <elver@google.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Pablo Neira Ayuso <pablo@netfilter.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Peter Zijlstra <peterz@infradead.org>,
-        Richard Weinberger <richard@nod.at>,
-        Russell King <linux@armlinux.org.uk>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Thomas Graf <tgraf@suug.ch>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
-        Yury Norov <yury.norov@gmail.com>,
-        "dri-devel@lists.freedesktop.org" <dri-devel@lists.freedesktop.org>,
-        "kasan-dev@googlegroups.com" <kasan-dev@googlegroups.com>,
-        "kernel-janitors@vger.kernel.org" <kernel-janitors@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-crypto@vger.kernel.org" <linux-crypto@vger.kernel.org>,
-        "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>,
-        "linux-fsdevel@vger.kernel.org" <linux-fsdevel@vger.kernel.org>,
-        "linux-media@vger.kernel.org" <linux-media@vger.kernel.org>,
-        "linux-mips@vger.kernel.org" <linux-mips@vger.kernel.org>,
-        "linux-mm@kvack.org" <linux-mm@kvack.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-mtd@lists.infradead.org" <linux-mtd@lists.infradead.org>,
-        "linux-nvme@lists.infradead.org" <linux-nvme@lists.infradead.org>,
-        "linux-parisc@vger.kernel.org" <linux-parisc@vger.kernel.org>,
-        "linux-rdma@vger.kernel.org" <linux-rdma@vger.kernel.org>,
-        "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>,
-        "linux-um@lists.infradead.org" <linux-um@lists.infradead.org>,
-        "linux-usb@vger.kernel.org" <linux-usb@vger.kernel.org>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>,
-        "loongarch@lists.linux.dev" <loongarch@lists.linux.dev>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "sparclinux@vger.kernel.org" <sparclinux@vger.kernel.org>,
-        "x86@kernel.org" <x86@kernel.org>,
-        Toke =?utf-8?Q?H=C3=B8iland-J=C3=B8rgensen?= <toke@toke.dk>
-Subject: Re: [PATCH v6 3/7] treewide: use get_random_{u8,u16}() when
- possible, part 1
-Message-ID: <Y0TcOH/BDfg5c1gj@zx2c4.com>
-References: <20221010230613.1076905-1-Jason@zx2c4.com>
- <20221010230613.1076905-4-Jason@zx2c4.com>
- <MW5PR84MB18421AC962BE140DDEB58A8BAB239@MW5PR84MB1842.NAMPRD84.PROD.OUTLOOK.COM>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <MW5PR84MB18421AC962BE140DDEB58A8BAB239@MW5PR84MB1842.NAMPRD84.PROD.OUTLOOK.COM>
+        with ESMTP id S229477AbiJKGaw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 02:30:52 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F13DFACF;
+        Mon, 10 Oct 2022 23:30:51 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id i7-20020a17090a65c700b0020ad9666a86so15100223pjs.0;
+        Mon, 10 Oct 2022 23:30:51 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=q6UtDTfgFsScPFwM9ThkOEZaeBo79ZpfsnwoNicUbs0=;
+        b=MZwiGYYcJBV3L+vUZdlbsY47foIqgnLFMYz0M7jMl31jIxPRcmfqP1fcdDY7dlEx4p
+         6gydKHnNfK4FaNOlzu0VJ24kAW4Jj9bAD+h+/UupOmCwKykyC2Bxq5+JI+fr8CTwyI8g
+         9tjlCR/t+uFD7TTsEklgqOxvjny8gP/B5yxFIMO5uD+5JOZkM6hnAqHhzYuDAGcbcUyc
+         zo9dFFkSpW238SzUmcfu2bnjZkPiL8PIZReNHw6pYjxyE+/Dj4cgs7FzzSGF8uOvhG8l
+         nZ0AJ4JqA0akcjZnK9NHEgvQDp81BaiJc+wiYUN3DCnqdPgAxYBAIerlvfWyBeASVwv6
+         Pxog==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=q6UtDTfgFsScPFwM9ThkOEZaeBo79ZpfsnwoNicUbs0=;
+        b=4PoCmcKrvMqtNp9Yj1YwmmPLqGOwFhk2bziQztIEKvMYXwfI9t87w4FRTq6vLsrcI5
+         aX6KeVMzve659LbmGsAGaSoZq6wGDvO0TjMqDiN5Y3QQPCwJLIIA8ZKdVrqGr2sdKrpG
+         /xNrp+ESoJJSc4uaVttzDC5hTvtll2WR/5NDBcK4G1Ax/tqqUS4pQkA+rcDkOs8DN+z7
+         CANG+eR9zYa6+cdcZV5Gu9uYUkT1YCgugzb9Ib21kLsfrin0gyPLPEDTK4d1W1N5rhs9
+         91Ua5kLza92hkXEUKka16wOwZ/u8eJW8PmUc494NuRxOE1KkESicHfItUfDNBtZ8W1HP
+         gMEQ==
+X-Gm-Message-State: ACrzQf1p/RW6/nSpRjkl0uIVAMhZOFKfZZr96NUJDpouOspMmPKsNzZa
+        q8JP/UYRMuU1wucc4SMCssc=
+X-Google-Smtp-Source: AMsMyM6UPGGuYpMTkXQsECnqXsylOwk/pfeTfcQnyjHJYCdIzecHGfTkWhwpYa7XQm2Sfl4U9oxRXg==
+X-Received: by 2002:a17:902:f647:b0:183:cb8d:40a0 with SMTP id m7-20020a170902f64700b00183cb8d40a0mr1075546plg.18.1665469850890;
+        Mon, 10 Oct 2022 23:30:50 -0700 (PDT)
+Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
+        by smtp.gmail.com with ESMTPSA id i16-20020a17090332d000b00174c235e1fdsm4096307plr.199.2022.10.10.23.30.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 10 Oct 2022 23:30:50 -0700 (PDT)
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        megoo.tang@gmail.com, lzx.stg@gmail.com
+Subject: [PATCH] mmc: sdhci-sprd: Fix minimum clock limit
+Date:   Tue, 11 Oct 2022 14:30:43 +0800
+Message-Id: <20221011063043.11074-1-wenchao.chen666@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 11, 2022 at 01:18:40AM +0000, Elliott, Robert (Servers) wrote:
-> 
-> > diff --git a/crypto/testmgr.c b/crypto/testmgr.c
-> ...
-> > @@ -944,7 +944,7 @@ static void generate_random_bytes(u8 *buf, size_t count)
-> >  	default:
-> >  		/* Fully random bytes */
-> >  		for (i = 0; i < count; i++)
-> > -			buf[i] = (u8)prandom_u32();
-> > +			buf[i] = get_random_u8();
-> 
-> Should that whole for loop be replaced with this?
->     get_random_bytes(buf, count);
+From: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Wow, that's kind of grotesque. Yea, it certainly should. But that's
-beyond the scope of this patchset. I'll send a follow-up patch just for
-this case to Herbert after this cleanup lands, though.
+The minimum clock supported by SPRD Host is 100000.
 
-Jason
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+---
+ drivers/mmc/host/sdhci-sprd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 46c55ab4884c..b92a408f138d 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -309,7 +309,7 @@ static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
+ 
+ static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
+ {
+-	return 400000;
++	return 100000;
+ }
+ 
+ static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
+-- 
+2.17.1
+
