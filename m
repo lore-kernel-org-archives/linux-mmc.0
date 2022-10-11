@@ -2,112 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E4FFC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 14:41:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C00C5C4167E
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 23:02:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229833AbiJKOlg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Oct 2022 10:41:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45942 "EHLO
+        id S229633AbiJKXCC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Oct 2022 19:02:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41736 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229818AbiJKOlf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 10:41:35 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E6C1476C7
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Oct 2022 07:41:33 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id o9-20020a17090a0a0900b0020ad4e758b3so13383459pjo.4
-        for <linux-mmc@vger.kernel.org>; Tue, 11 Oct 2022 07:41:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=VPSVqJz387vGX+lndeFLaz7/WMZ4XtC2ycr+jawg9P8=;
-        b=mQnj4MjlGH8JCAAKVdx0ZM4mg4T+VBUJRL1PF6iiHzJBxFr7gaFI1MpVEsVgPsuw/P
-         hkjU5CuHkatbpL/GBc7u4h2oboAuZ/HnHZOgB0SsRZdd4w+s8fidpVdRbpcdLfBajMGv
-         MdeQkF2mLL055Eu+mvcH58OX4RUeW0WeqJwjGUVTUufON/NUkj2HIzXDve9c2A+3iXZE
-         w93AH+to+qUjIxZ7+DszdS5Imwhd24yyIZsHl7qpm66gZ7KRn/sGzg/cuYiUc9IH7zY/
-         +WlPZ1rRezDZVP1y/gpY2mUALMUCzCYUd4/8JwnOQ5yBgcLfBv0Uo6qhXcp+7GKttqC3
-         LR/Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=VPSVqJz387vGX+lndeFLaz7/WMZ4XtC2ycr+jawg9P8=;
-        b=mX6fHAcZuaWVtPyqFNf7avMTCsZmyr8BoD6HlsyQgC9x5O1CeOyx/6ogZNKjYjH5E4
-         BwxhckctffOZJ9tOftS1iMSWDx1YtwFeHOFhSmzQGS4aSQVNj4/XVcOLk/TKZTOemmtb
-         yiIe32fnoeU1ca2+GxPSEVqYnpjcgKovNRWcoKpQCrgKV9kff1DeoW0CZSql3d2ZJ3NJ
-         AgKtufn4JNikF2YMK4mVx95/hUmuxurFOofVMeurlT3sB1xO+6wGEOM73pnGKCE5/ULG
-         ifp7gUThlUqnnoDjXcYwn5vOFpnS4sza16XhqBwTQo4EcfeO2pC6w9C4qZ5c2wXaty/d
-         3tOA==
-X-Gm-Message-State: ACrzQf2aGW/89A+lpCI6RuV9mJLHNSr71gP0chj4aw6sOLublJOjatJu
-        +Xf9Dlq4FI6clfOESY8BnoKykfyfx8koIZ0SChNdMA==
-X-Google-Smtp-Source: AMsMyM4iNccU33s454RSlugRql+oKFO3lYmpS0Trlj7q84EoU85aKPx1FToEHnR68k8DGSjMQQESeTqT3eI/n20M4f0=
-X-Received: by 2002:a17:902:d714:b0:17f:5813:1df4 with SMTP id
- w20-20020a170902d71400b0017f58131df4mr25485853ply.148.1665499292988; Tue, 11
- Oct 2022 07:41:32 -0700 (PDT)
+        with ESMTP id S229616AbiJKXB5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 19:01:57 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59A9B95E63;
+        Tue, 11 Oct 2022 16:01:54 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 5E2E8B817F6;
+        Tue, 11 Oct 2022 23:01:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9723CC433D6;
+        Tue, 11 Oct 2022 23:01:45 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1665529308;
+        bh=gCI+X2WOw4l6GrJak35sDaAf8gDE0fXgutS5wo82m0c=;
+        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
+        b=AJFptayVxOqteJVOLykn7hUdHTEFBSFYdPDnURZs6EbQ5lnc5EDwMPEWLIY2Zkc6k
+         ToDJ69GFb03nJ1ZHa3Bu1XZh90AT8husNifCGxqExcBTtq73zRbzdbLGz1yV1PS0BR
+         YgADbRNTz4kaxl1FPtL5h69IOLIEA3uAgLFu6LoZOj6vAhrzGGJogNzed4iTNoQ9kU
+         RplOVmj/pT0WrloWUBcPNyJldLUtdrL9BReJJkpTFUke93m8zD4dIphjguaBr6M6BU
+         xC/9Fc6Zmo9mtTlbNcRQZT+mur3mj5hpEnCkCHrxZUfVSrUfpxEhWQqxTOA+fraPtq
+         COtQHCYR1WDtw==
+Date:   Tue, 11 Oct 2022 16:01:44 -0700
+From:   Jakub Kicinski <kuba@kernel.org>
+To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
+        Andreas Noever <andreas.noever@gmail.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        Borislav Petkov <bp@alien8.de>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Christoph =?UTF-8?B?QsO2aG13YWxkZXI=?= 
+        <christoph.boehmwalder@linbit.com>, Christoph Hellwig <hch@lst.de>,
+        Christophe Leroy <christophe.leroy@csgroup.eu>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Dave Airlie <airlied@redhat.com>,
+        Dave Hansen <dave.hansen@linux.intel.com>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Florian Westphal <fw@strlen.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        "H . Peter Anvin" <hpa@zytor.com>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Helge Deller <deller@gmx.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Huacai Chen <chenhuacai@kernel.org>,
+        Hugh Dickins <hughd@google.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        Jan Kara <jack@suse.com>, Jason Gunthorpe <jgg@ziepe.ca>,
+        Jens Axboe <axboe@kernel.dk>,
+        Johannes Berg <johannes@sipsolutions.net>,
+        Jonathan Corbet <corbet@lwn.net>,
+        Jozsef Kadlecsik <kadlec@netfilter.org>,
+        KP Singh <kpsingh@kernel.org>,
+        Kees Cook <keescook@chromium.org>,
+        Marco Elver <elver@google.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Pablo Neira Ayuso <pablo@netfilter.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Peter Zijlstra <peterz@infradead.org>,
+        Richard Weinberger <richard@nod.at>,
+        Russell King <linux@armlinux.org.uk>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Thomas Graf <tgraf@suug.ch>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        WANG Xuerui <kernel@xen0n.name>, Will Deacon <will@kernel.org>,
+        Yury Norov <yury.norov@gmail.com>,
+        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
+        kernel-janitors@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mm@kvack.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        loongarch@lists.linux.dev, netdev@vger.kernel.org,
+        sparclinux@vger.kernel.org, x86@kernel.org
+Subject: Re: [PATCH v6 0/7] treewide cleanup of random integer usage
+Message-ID: <20221011160144.1c0dc2af@kernel.org>
+In-Reply-To: <20221010230613.1076905-1-Jason@zx2c4.com>
+References: <20221010230613.1076905-1-Jason@zx2c4.com>
 MIME-Version: 1.0
-References: <20220927020158.1218469-1-ouyangweizhao@zeku.com>
-In-Reply-To: <20220927020158.1218469-1-ouyangweizhao@zeku.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 11 Oct 2022 16:40:56 +0200
-Message-ID: <CAPDyKFrmg+Q-+-dgOrHFYFf0JKB08pXB-b4MEkYmzE_8zW4s3Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdio: fix kernel panic when remove non-standard SDIO card
-To:     Weizhao Ouyang <ouyangweizhao@zeku.com>
-Cc:     John Wang <wangdayu@zeku.com>, Sergey Shtylyov <s.shtylyov@omp.ru>,
-        Matthew Ma <mahongwei@zeku.com>,
-        Pierre Ossman <drzeus@drzeus.cx>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 27 Sept 2022 at 04:04, Weizhao Ouyang <ouyangweizhao@zeku.com> wrote:
->
-> From: Matthew Ma <mahongwei@zeku.com>
->
-> SDIO tuple is only allocated for standard SDIO card, especially it
-> causes memory corruption issues when the non-standard SDIO card has
-> removed since the card device's reference counter does not increase for
-> it at sdio_init_func(), but all SDIO card device reference counter has
-> decreased at sdio_release_func().
->
-> Fixes: 1a632f8cdc33 ("sdio: split up common and function CIS parsing")
-> Signed-off-by: Matthew Ma <mahongwei@zeku.com>
-> Reviewed-by: Weizhao Ouyang <ouyangweizhao@zeku.com>
-> Reviewed-by: John Wang <wangdayu@zeku.com>
+On Mon, 10 Oct 2022 17:06:06 -0600 Jason A. Donenfeld wrote:
+> - If you want a secure or an insecure random u64, use get_random_u64().
+> - If you want a secure or an insecure random u32, use get_random_u32().
+>   * The old function prandom_u32() has been deprecated for a while now
+>     and is just a wrapper around get_random_u32(). Same for
+>     get_random_int().
+> - If you want a secure or an insecure random u16, use get_random_u16().
+> - If you want a secure or an insecure random u8, use get_random_u8().
+> - If you want secure or insecure random bytes, use get_random_bytes().
+>   * The old function prandom_bytes() has been deprecated for a while now
+>     and has long been a wrapper around get_random_bytes().
+> - If you want a non-uniform random u32, u16, or u8 bounded by a certain
+>   open interval maximum, use prandom_u32_max().
+>   * I say "non-uniform", because it doesn't do any rejection sampling or
+>     divisions. Hence, it stays within the prandom_* namespace.
 
-Apologize for the delay!
-
-Wow, that's a very old bug you fixed! However, it looks like the fixed
-commit should be changed to 6f51be3d37df ("sdio: allow non-standard
-SDIO cards").
-
-I tried to apply the patch, but the patch format seems to be corrupt.
-Did you use git format-patch and did run ./scripts/checkpatch.pl on
-it?
-
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/sdio_bus.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> index c6268c38c69e..babf21a0adeb 100644
-> --- a/drivers/mmc/core/sdio_bus.c
-> +++ b/drivers/mmc/core/sdio_bus.c
-> @@ -291,7 +291,8 @@ static void sdio_release_func(struct device *dev)
->  {
->         struct sdio_func *func = dev_to_sdio_func(dev);
->
-> -       sdio_free_func_cis(func);
-> +       if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
-> +               sdio_free_func_cis(func);
->
->         kfree(func->info);
->         kfree(func->tmpbuf);
-> --
-> 2.25.1
->
+Acked-by: Jakub Kicinski <kuba@kernel.org>
