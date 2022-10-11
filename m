@@ -2,137 +2,146 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4EA00C433F5
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 08:40:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4264BC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Oct 2022 08:48:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229717AbiJKIke (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Oct 2022 04:40:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36202 "EHLO
+        id S229595AbiJKIsR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Oct 2022 04:48:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50314 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229607AbiJKIkc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 04:40:32 -0400
-Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4813A4C629;
-        Tue, 11 Oct 2022 01:40:30 -0700 (PDT)
-Received: by mail-pl1-x62d.google.com with SMTP id f23so12583688plr.6;
-        Tue, 11 Oct 2022 01:40:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=stD9RetreA6pMH+h5I7/aCirn6VqDL5duR4zBb4PDuU=;
-        b=gLxZrUtsS/AJ3LkHGuuw1XWpmk1r9cM0/Z6lImO3WPV+dSTjEgH/dCAK7kVffOhB8n
-         L+J1l2CQX908ATwS9pHCVRBddQI1QKvZiHsf5g7mlDPc9U0GSCZTA5X/viGg5Xak/TKv
-         Bmp009OneeNAwj1bec6kFL/1d0vV1CZgDPwYLvZb6bmyJNi7B4fYAWRlWjDvyqqzY/Rb
-         ToPQDoLf3pogzIKHZk64131CibRGIQLKUchypMSU0rNXZa9nZvVYbRLPTU6AaKBUa0ge
-         reCQbayKWa/YNC9t4q2M06L/k8Ra4DB/7zfwV/qTenhd8vTfynMzMX4178o6bRgb6WKY
-         SPtg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=stD9RetreA6pMH+h5I7/aCirn6VqDL5duR4zBb4PDuU=;
-        b=vmQxCqEv+AZyok0WjL02HCNk+aOawD9xgWRAcvnMyI6tcdzkmuZoDO1g+fvhygQvUS
-         6Oa1dM46eoC6E5hjLR3AA9SKZzTEpMo7f+SXBRpVO/0Phn5ESWLP/Jaf+vpAd5JibG+6
-         6h3vip5MjznTR0/tkwzMNNUkzF6YP/vrwp5gJiBPbA/8k/bMVOIUl22wajn+zTZZzrcG
-         p4+btXQ/BDQj7KDNIdJhN3Go3zGmr6GFinDo9zm0kD4hqpnNYVrNQCrGf/UECt4GgeCt
-         q+/kYkd2jrReSxVCNz0cU9e/Rv9bq8cPuvv2VFrXjQLIRfzfYrUgpzWb68PkvSJltX+4
-         6kPw==
-X-Gm-Message-State: ACrzQf2QjQEVcBCmKGyZJuFUi9Cs9ydc0DI1MfoYN9yAqqF+Kl5ZukFo
-        WjdnwE4R7UDITPCo+sjIqjaqXdZcJ3e4Kf6NYvo=
-X-Google-Smtp-Source: AMsMyM6g1HZaYMcm+/efklZexQujvE7zaamnKJB9hHvEyDGF6nyu7k7gzF5xJUIwOCYyq4f4lDmew/s6r8BtTuedGXI=
-X-Received: by 2002:a17:902:9a49:b0:17a:6662:9334 with SMTP id
- x9-20020a1709029a4900b0017a66629334mr22529280plv.63.1665477630463; Tue, 11
- Oct 2022 01:40:30 -0700 (PDT)
+        with ESMTP id S229673AbiJKIsQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Oct 2022 04:48:16 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 804CE58B76;
+        Tue, 11 Oct 2022 01:48:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1665478095; x=1697014095;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=QtPL0c22PULNLT4h8YrIaeDVBt8AgGleM3RozmCDUZ8=;
+  b=VSpFpCF92NPhB+gYYZtyUoa1mJcgVwDM9kN3czW7zNP8Oa7te8LyCDfo
+   p/xU7xu+vXrz7t7xjmUeFdQzv0mygkaQ3YdPdcNKkeKU627nvIZyRQVO5
+   fcQomEQBQo573mmtIPO+JKl1wM3vuNmZLCF9O4jmblSk8wHhPJ6LQjben
+   O/5vY+pN/hZqFw9jUJ/b5z1G9dYC9mswo8LHWsVf1uimmAjKKbbQjdfAm
+   Dd+YyrgJTRtxf1OH4saAypBtGoRwIU9KpsCkuCcXVI/fIiBLU7vUhuwRo
+   Mm7W/Ci/5KBR/qmYQGOcI2Yn1WN9bxX3sYSHN+p4OYewA8LUcwmFK5AKt
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="302058024"
+X-IronPort-AV: E=Sophos;i="5.95,175,1661842800"; 
+   d="scan'208";a="302058024"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Oct 2022 01:48:15 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10496"; a="768720754"
+X-IronPort-AV: E=Sophos;i="5.95,175,1661842800"; 
+   d="scan'208";a="768720754"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.62.214])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Oct 2022 01:48:12 -0700
+Message-ID: <e98b85ce-c382-09ca-a819-ab7c581158e4@intel.com>
+Date:   Tue, 11 Oct 2022 11:48:07 +0300
 MIME-Version: 1.0
-References: <20221011063043.11074-1-wenchao.chen666@gmail.com> <beae901e-0fcd-c4ae-8a6e-a1a4357078da@intel.com>
-In-Reply-To: <beae901e-0fcd-c4ae-8a6e-a1a4357078da@intel.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Tue, 11 Oct 2022 16:40:19 +0800
-Message-ID: <CA+Da2qwe96J_EyJCG04UX5GBEsoU0mckWktPyTrZARk-XHAo0w@mail.gmail.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.2.2
 Subject: Re: [PATCH] mmc: sdhci-sprd: Fix minimum clock limit
-To:     Adrian Hunter <adrian.hunter@intel.com>
+Content-Language: en-US
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
 Cc:     ulf.hansson@linaro.org, orsonzhai@gmail.com,
         baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         megoo.tang@gmail.com, lzx.stg@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+References: <20221011063043.11074-1-wenchao.chen666@gmail.com>
+ <beae901e-0fcd-c4ae-8a6e-a1a4357078da@intel.com>
+ <CA+Da2qwe96J_EyJCG04UX5GBEsoU0mckWktPyTrZARk-XHAo0w@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CA+Da2qwe96J_EyJCG04UX5GBEsoU0mckWktPyTrZARk-XHAo0w@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 11, 2022 at 2:45 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 11/10/22 09:30, Wenchao Chen wrote:
-> > From: Wenchao Chen <wenchao.chen@unisoc.com>
-> >
-> > The minimum clock supported by SPRD Host is 100000.
->
-> Commit messages are better if they say why a change
-> is being made.
->
-> This begs the question, was there a problem with 400 kHz?
-> Are there cases that benefit from this change?
-> Should it have a fixes tag,cc stable?
->
+On 11/10/22 11:40, Wenchao Chen wrote:
+> On Tue, Oct 11, 2022 at 2:45 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 11/10/22 09:30, Wenchao Chen wrote:
+>>> From: Wenchao Chen <wenchao.chen@unisoc.com>
+>>>
+>>> The minimum clock supported by SPRD Host is 100000.
+>>
+>> Commit messages are better if they say why a change
+>> is being made.
+>>
+>> This begs the question, was there a problem with 400 kHz?
+>> Are there cases that benefit from this change?
+>> Should it have a fixes tag,cc stable?
+>>
+> 
+> Code show as below:
+> static struct sdhci_ops sdhci_sprd_ops = {
+> ...
+> .get_min_clock = sdhci_sprd_get_min_clock,
+> ...
+> };
+> 
+> int sdhci_setup_host(struct sdhci_host *host)
+> {
+> ...
+> if (host->ops->get_min_clock)
+> mmc->f_min = host->ops->get_min_clock(host);
+> ...
+> }
+> 
+> static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
+> void mmc_rescan(struct work_struct *work)
+> {
+> ...
+> for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+> unsigned int freq = freqs[i];
+> if (freq > host->f_max) {
+> if (i + 1 < ARRAY_SIZE(freqs))
+> continue;
+> freq = host->f_max;
+> }
+> if (!mmc_rescan_try_freq(host, max(freq, host->f_min)))
+> break;
+> if (freqs[i] <= host->f_min) // If you start at 100K, you will try
+> 400K, 300K, 200K, 100K.
+> break;
+> }
+> ...
+> }
+> 
+> Our controller supports 100K. During the test, it was found that mmc_rescan
+> failed to scan the card at 400K, and did not try 300K, 200K, and 100K. After
+> modifying the minimum clock limit to 100K, the card scan was successful.
 
-Code show as below:
-static struct sdhci_ops sdhci_sprd_ops = {
-...
-.get_min_clock = sdhci_sprd_get_min_clock,
-...
-};
+Please add those last 3 lines to the commit message, then you can add:
 
-int sdhci_setup_host(struct sdhci_host *host)
-{
-...
-if (host->ops->get_min_clock)
-mmc->f_min = host->ops->get_min_clock(host);
-...
-}
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
-void mmc_rescan(struct work_struct *work)
-{
-...
-for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-unsigned int freq = freqs[i];
-if (freq > host->f_max) {
-if (i + 1 < ARRAY_SIZE(freqs))
-continue;
-freq = host->f_max;
-}
-if (!mmc_rescan_try_freq(host, max(freq, host->f_min)))
-break;
-if (freqs[i] <= host->f_min) // If you start at 100K, you will try
-400K, 300K, 200K, 100K.
-break;
-}
-...
-}
+Also please consider adding a Fixes: tag.
 
-Our controller supports 100K. During the test, it was found that mmc_rescan
-failed to scan the card at 400K, and did not try 300K, 200K, and 100K. After
-modifying the minimum clock limit to 100K, the card scan was successful.
+> 
+>>>
+>>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+>>> ---
+>>>  drivers/mmc/host/sdhci-sprd.c | 2 +-
+>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+>>> index 46c55ab4884c..b92a408f138d 100644
+>>> --- a/drivers/mmc/host/sdhci-sprd.c
+>>> +++ b/drivers/mmc/host/sdhci-sprd.c
+>>> @@ -309,7 +309,7 @@ static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
+>>>
+>>>  static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
+>>>  {
+>>> -     return 400000;
+>>> +     return 100000;
+>>>  }
+>>>
+>>>  static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
+>>
 
-> >
-> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> > ---
-> >  drivers/mmc/host/sdhci-sprd.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> > index 46c55ab4884c..b92a408f138d 100644
-> > --- a/drivers/mmc/host/sdhci-sprd.c
-> > +++ b/drivers/mmc/host/sdhci-sprd.c
-> > @@ -309,7 +309,7 @@ static unsigned int sdhci_sprd_get_max_clock(struct sdhci_host *host)
-> >
-> >  static unsigned int sdhci_sprd_get_min_clock(struct sdhci_host *host)
-> >  {
-> > -     return 400000;
-> > +     return 100000;
-> >  }
-> >
-> >  static void sdhci_sprd_set_uhs_signaling(struct sdhci_host *host,
->
