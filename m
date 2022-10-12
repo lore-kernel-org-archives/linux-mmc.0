@@ -2,101 +2,177 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B04EEC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 13:25:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 523E3C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 18:38:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229660AbiJLNZ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Oct 2022 09:25:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54616 "EHLO
+        id S229793AbiJLSiG convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Oct 2022 14:38:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229604AbiJLNZ5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 09:25:57 -0400
-Received: from mail-qk1-f174.google.com (mail-qk1-f174.google.com [209.85.222.174])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18835BB064;
-        Wed, 12 Oct 2022 06:25:50 -0700 (PDT)
-Received: by mail-qk1-f174.google.com with SMTP id 8so2939630qka.1;
-        Wed, 12 Oct 2022 06:25:50 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=OYKvj3GVd5Tg+NDlIwQQt8ZJzcXS92tatY/+DrOpNx0=;
-        b=KrQOKqI4omqX9KwgG0d35aQQPfUYQfu4psZM3xxYp8iNWUe4FHq+c4Sfrc+WJpDQOw
-         JfjzcNpIMo2h1cfvAK6409T1si8CMr79MogOtfhbz6zP/8pfFps7rd/JIzm/ZYRxCKBK
-         NvyoP+EExP++/tb8Mw4mHRczCTHPd8ZE7bZ71DEjKIVl38bPaMrf4pOV5KI4RKEXoAZ4
-         RnRtPGLfEjDpb12FvrUOQe2lCU3nbrCFzQC+sBnZiDD1PuGkMrNhjx0Nf0RWoXN9bSow
-         Lr8KWZFfftzxjTSkFnWV8RkyfQdYdO0C6kko2ZDnLLXtp8NjkxoyNUMEP0NaK5H/fXJ0
-         VQyA==
-X-Gm-Message-State: ACrzQf3GQ/4RhRyIq/tOtw7uno45Kaq0LiGQn66KeekvOfEoLgQeXcVN
-        Ei8RZhXFiQMWEl0FrcZiVIIMfLvBvOFz+g==
-X-Google-Smtp-Source: AMsMyM5JYC344l9EsauacZWTiz5vALdpOPusV5XZAsjANwQx+toYpgioYa42VdS5gNlDAZAznY5Y+Q==
-X-Received: by 2002:a05:620a:12d5:b0:6ee:9a95:8c72 with SMTP id e21-20020a05620a12d500b006ee9a958c72mr1552530qkl.362.1665581149655;
-        Wed, 12 Oct 2022 06:25:49 -0700 (PDT)
-Received: from mail-yw1-f177.google.com (mail-yw1-f177.google.com. [209.85.128.177])
-        by smtp.gmail.com with ESMTPSA id h19-20020a05620a245300b006ccc96c78easm16053213qkn.134.2022.10.12.06.25.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 12 Oct 2022 06:25:49 -0700 (PDT)
-Received: by mail-yw1-f177.google.com with SMTP id 00721157ae682-354c7abf786so155804027b3.0;
-        Wed, 12 Oct 2022 06:25:48 -0700 (PDT)
-X-Received: by 2002:a81:5a57:0:b0:353:6de6:3263 with SMTP id
- o84-20020a815a57000000b003536de63263mr26251333ywb.358.1665581148424; Wed, 12
- Oct 2022 06:25:48 -0700 (PDT)
-MIME-Version: 1.0
-References: <7ee7fdb6a46fc9f0e50c2b803ede6b4b2fdfa450.1665558324.git.geert+renesas@glider.be>
- <166558066055.1938423.17466826000089973236.robh@kernel.org>
-In-Reply-To: <166558066055.1938423.17466826000089973236.robh@kernel.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 12 Oct 2022 15:25:36 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWg=G0NfFARtixMWTdPuQFYMy7f+JJTr420+shXRYD8=A@mail.gmail.com>
-Message-ID: <CAMuHMdWg=G0NfFARtixMWTdPuQFYMy7f+JJTr420+shXRYD8=A@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car V4H support
-To:     Rob Herring <robh@kernel.org>
-Cc:     linux-renesas-soc@vger.kernel.org, linux-mmc@vger.kernel.org,
+        with ESMTP id S229885AbiJLSiF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 14:38:05 -0400
+Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 190896F546;
+        Wed, 12 Oct 2022 11:38:04 -0700 (PDT)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 1294F122F07;
+        Wed, 12 Oct 2022 20:38:02 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id E898C122EDD;
+        Wed, 12 Oct 2022 20:38:01 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Wed, 12 Oct 2022 20:38:01 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Wed, 12 Oct
+ 2022 20:38:01 +0200
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Wed, 12 Oct 2022 20:37:58 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Content-Type: text/plain; charset="UTF-8"
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: [PATCHv4 1/2] mmc: block: Remove error check of hw_reset on reset
+Thread-Topic: [PATCHv4 1/2] mmc: block: Remove error check of hw_reset on
+ reset
+Thread-Index: Adjeaabz7a/Vp/YESbKGERCtIHQ41g==
+Date:   Wed, 12 Oct 2022 18:37:58 +0000
+Message-ID: <f7757a12fb204b8584dacc04e67fdd1c@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.242.2.2]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27198.001
+X-TMASE-Result: 10-0.521300-10.000000
+X-TMASE-MatchedRID: dc8Jy61QoRpgljMcj2tyXt5x7RpGJf1a4SkIdSwphgahLh9e7qvSIg2V
+        4b0zHULvGgn/HW4MjTmKoat5I/Uj/worSvYb1VTuKsurITpSv+M2LwvzxRX0gMC5DTEMxpeQfiq
+        1gj2xET9dBLSzNqCHg1o4rfBbwEORvvHAd28bGMe5x7uAXGEprfWr7HvOSElar4YC4lUEmf2Ypu
+        G7kpoKR5p6VbtqvFM0+WatSktubmiel3N+gDvB54knvYO5kHScNUSduuqYHDuZtziFUn+D+UzAk
+        Vmkw08mi/rJKndm3e8gE0bHoPl2Aq+/EguYor8cEzQnFLEeMUndB/CxWTRRu/558CedkGIvqcoA
+        hihTwvhT9DdstK6naoyidLLBmKNP4BqxW0NCo8420zviUk4+fiXH6tsKNnAM
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 29804778-e865-4b84-b688-f2a6fce2c007-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob(ot),
+Before switching back to the right partition in mmc_blk_reset there used
+to be a check if hw_reset was even supported. This return value
+was removed, so there is no reason to check. Furthermore ensure
+part_curr is not falsely set to a valid value on reset or
+partition switch error.
 
-On Wed, Oct 12, 2022 at 3:19 PM Rob Herring <robh@kernel.org> wrote:
-> On Wed, 12 Oct 2022 09:05:56 +0200, Geert Uytterhoeven wrote:
-> > Document support for the SD Card/MMC Interface on the Renesas R-Car V4H
-> > (R8A779G0) SoC.
-> >
-> > Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
-> > ---
-> >  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
->
-> Running 'make dtbs_check' with the schema in this patch gives the
-> following warnings. Consider if they are expected or the schema is
-> incorrect. These may not be new warnings.
->
-> Note that it is not yet a requirement to have 0 warnings for dtbs_check.
-> This will change in the future.
->
-> Full log is available here: https://patchwork.ozlabs.org/patch/
->
->
-> mmc@ee100000: Unevaluated properties are not allowed ('iommus' was unexpected)
+As part of this change the code paths of mmc_blk_reset calls were checked
+to ensure no commands are issued after a failed mmc_blk_reset directly
+without going through the block layer.
 
-JFYI, your tree is missing commit 1de7307270f5f203 ("dt-bindings: mmc:
-renesas,sdhi: Add iommus property") in linus/master.
+Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
+Cc: stable@vger.kernel.org
 
-Gr{oetje,eeting}s,
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+-v4: Only partition switch if necessary and fix one mmc_blk_reset call
+-v3: Ensure invalid part_curr on error
+-v2: Do not attempt to switch partitions if reset failed
 
-                        Geert
+ drivers/mmc/core/block.c | 42 ++++++++++++++++++++++++----------------
+ 1 file changed, 25 insertions(+), 17 deletions(-)
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index ce89611a136e..2619cc47b97c 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -134,6 +134,7 @@ struct mmc_blk_data {
+ 	 * track of the current selected device partition.
+ 	 */
+ 	unsigned int	part_curr;
++#define MMC_BLK_PART_INVALID	UINT_MAX	/* Unknown partition active */
+ 	int	area_type;
+ 
+ 	/* debugfs files (only in main mmc_blk_data) */
+@@ -987,33 +988,39 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
+ 	return ms;
+ }
+ 
++/*
++ * Attempts to reset the card and get back to the requested partition.
++ * Therefore any error here must result in cancelling the block layer
++ * request, it must not be reattempted without going through the mmc_blk
++ * partition sanity checks.
++ */
+ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+ 			 int type)
+ {
+ 	int err;
++	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
+ 
+ 	if (md->reset_done & type)
+ 		return -EEXIST;
+ 
+ 	md->reset_done |= type;
+ 	err = mmc_hw_reset(host->card);
++	/*
++	 * A successful reset will leave the card in the main partition, but
++	 * upon failure it might not be, so set it to MMC_BLK_PART_INVALID
++	 * in that case.
++	 */
++	main_md->part_curr = err ? MMC_BLK_PART_INVALID : main_md->part_type;
++	if (err)
++		return err;
+ 	/* Ensure we switch back to the correct partition */
+-	if (err) {
+-		struct mmc_blk_data *main_md =
+-			dev_get_drvdata(&host->card->dev);
+-		int part_err;
+-
+-		main_md->part_curr = main_md->part_type;
+-		part_err = mmc_blk_part_switch(host->card, md->part_type);
+-		if (part_err) {
+-			/*
+-			 * We have failed to get back into the correct
+-			 * partition, so we need to abort the whole request.
+-			 */
+-			return -ENODEV;
+-		}
+-	}
+-	return err;
++	if (mmc_blk_part_switch(host->card, md->part_type))
++		/*
++		 * We have failed to get back into the correct
++		 * partition, so we need to abort the whole request.
++		 */
++		return -ENODEV;
++	return 0;
+ }
+ 
+ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+@@ -1868,7 +1875,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+ 
+ 	/* Reset before last retry */
+ 	if (mqrq->retries + 1 == MMC_MAX_RETRIES)
+-		mmc_blk_reset(md, card->host, type);
++		if (mmc_blk_reset(md, card->host, type))
++			return;
+ 
+ 	/* Command errors fail fast, so use all MMC_MAX_RETRIES */
+ 	if (brq->sbc.error || brq->cmd.error)
+-- 
+2.37.3
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
