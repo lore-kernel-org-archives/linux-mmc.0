@@ -2,67 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E796C43219
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 07:06:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CD26C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 10:10:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229484AbiJLHGF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Oct 2022 03:06:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48142 "EHLO
+        id S229468AbiJLKKP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Oct 2022 06:10:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229527AbiJLHGD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 03:06:03 -0400
-Received: from baptiste.telenet-ops.be (baptiste.telenet-ops.be [IPv6:2a02:1800:120:4::f00:13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5548061729
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Oct 2022 00:06:02 -0700 (PDT)
-Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed50:3da6:62e6:8ab0:ff90])
-        by baptiste.telenet-ops.be with bizsmtp
-        id Wv602800H32x5mf01v60XN; Wed, 12 Oct 2022 09:06:00 +0200
-Received: from rox.of.borg ([192.168.97.57])
-        by ramsan.of.borg with esmtps  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1oiVoW-001Lqu-3p; Wed, 12 Oct 2022 09:06:00 +0200
-Received: from geert by rox.of.borg with local (Exim 4.93)
-        (envelope-from <geert@linux-m68k.org>)
-        id 1oiVoV-006ju5-JU; Wed, 12 Oct 2022 09:05:59 +0200
-From:   Geert Uytterhoeven <geert+renesas@glider.be>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org,
-        Geert Uytterhoeven <geert+renesas@glider.be>
-Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Document R-Car V4H support
-Date:   Wed, 12 Oct 2022 09:05:56 +0200
-Message-Id: <7ee7fdb6a46fc9f0e50c2b803ede6b4b2fdfa450.1665558324.git.geert+renesas@glider.be>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S229533AbiJLKKJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 06:10:09 -0400
+Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 517592E9E0
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Oct 2022 03:10:06 -0700 (PDT)
+Received: by mail-pf1-x430.google.com with SMTP id d10so16059001pfh.6
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Oct 2022 03:10:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=/Ldwvi/6+WpjkFB34Wr6wWsgreWRXiHPDgevaXrBBZI=;
+        b=RaFpALgtowsu6Bkd9rKpn7h03KNbXqbnKGe0rAl8lZDuXRbNU6nnjMu4wDilW9vTy+
+         y1JjbuaObbzQbyEWIsKNhBUuCgOQreVFgmSVsAkSGxspgskSVKcj+f9y+7rhEO3vC0a+
+         NyRz1QPjlaF7hsaugq/ujebXPNJFSPiDXvEmVFYPUCo9R253n3oWavycY9HKF1FcXbOB
+         /FnW4qirR0PPLbQzXouQF9+X/RkLXexkrn8Q/sVis5M8DbL0pc2JNWGTHDVv4rdXPa5o
+         12UbiA2JnHNU4q5Z0+z6jweUiceFrqawiJQbyMGY5+7LfO9FaqZvpBjoBGoqfla9FY05
+         en1g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=/Ldwvi/6+WpjkFB34Wr6wWsgreWRXiHPDgevaXrBBZI=;
+        b=H1+JkOAgEIsQHI3bcl98p6OH+62yBq4e3K0K/1TQn5ccso5sN0M38zOPpz642gswt9
+         n6ziAbU+AhU77O2u2eIT6G3MGckUyB1LpQwSolQD1ta8Ajo1rnQzSmQLsutpkz156HaE
+         5kdRzU9lygaocCvJncb/YB5KOftEEydDw7aZ3bVMRKDQ+zLOtFIsFZ7d2oxKnrGp0yQX
+         cPV45LwhhTTlW7FwTsJSI0HmhCKHXuMEyHFaE2/g23tFnc2y5exq0UWcXWyhcw9XoQho
+         PNf5/epK9X3+M/hKCuTUGo/0BJOMOdrkfUSNR0EKYVCNMNuUHLM5BPHFT/b129P27Ko9
+         DFBg==
+X-Gm-Message-State: ACrzQf16Lhe/q6JWsuDlMXncJcp4aDmfxTGqx6yuMe8yqn0axkhQBncF
+        8W9EBdmbY6aRt8qLAlijkgiv3YSMtmFw5mFknilLtiFHt1+sqA==
+X-Google-Smtp-Source: AMsMyM5oK7jjHhPEPgQH7kLlzd58EEB42gbebUVhWGMNvpnL46vX8hb4YJRA8SkZ+eCwTdRvv0AioottysFC+9cOS7o=
+X-Received: by 2002:a05:6a00:181c:b0:563:2c6c:2a7a with SMTP id
+ y28-20020a056a00181c00b005632c6c2a7amr18816296pfa.28.1665569405415; Wed, 12
+ Oct 2022 03:10:05 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <67f722b4bfe84b01bbbf37258a278a68@zeku.com>
+In-Reply-To: <67f722b4bfe84b01bbbf37258a278a68@zeku.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 12 Oct 2022 12:09:27 +0200
+Message-ID: <CAPDyKFpfm2i2u3BKCxFEA=qZ8GiOOryhHYKNt_yyMA51sxSLJw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdio: fix kernel panic when remove non-standard SDIO card
+To:     =?UTF-8?B?5qyn6Ziz54Kc6ZKKKFdlaXpoYW8gT3V5YW5nKQ==?= 
+        <ouyangweizhao@zeku.com>
+Cc:     =?UTF-8?B?546L5aSn5a6HKEpvaG4gV2FuZyk=?= <wangdayu@zeku.com>,
+        Sergey Shtylyov <s.shtylyov@omp.ru>,
+        =?UTF-8?B?6ams5a6P5LyfKE1hdHRoZXcgTWEp?= <mahongwei@zeku.com>,
+        Pierre Ossman <drzeus@drzeus.cx>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document support for the SD Card/MMC Interface on the Renesas R-Car V4H
-(R8A779G0) SoC.
+On Wed, 12 Oct 2022 at 03:50, =E6=AC=A7=E9=98=B3=E7=82=9C=E9=92=8A(Weizhao =
+Ouyang)
+<ouyangweizhao@zeku.com> wrote:
+>
+> 2022=E5=B9=B410=E6=9C=8811=E6=97=A5 22:41, Ulf Hansson <ulf.hansson@linar=
+o.org> wrote:
+> >
+> > On Tue, 27 Sept 2022 at 04:04, Weizhao Ouyang <ouyangweizhao@zeku.com>
+> > wrote:
+> > >
+> > > From: Matthew Ma <mahongwei@zeku.com>
+> > >
+> > > SDIO tuple is only allocated for standard SDIO card, especially it
+> > > causes memory corruption issues when the non-standard SDIO card has
+> > > removed since the card device's reference counter does not increase f=
+or
+> > > it at sdio_init_func(), but all SDIO card device reference counter ha=
+s
+> > > decreased at sdio_release_func().
+> > >
+> > > Fixes: 1a632f8cdc33 ("sdio: split up common and function CIS parsing"=
+)
+> > > Signed-off-by: Matthew Ma <mahongwei@zeku.com>
+> > > Reviewed-by: Weizhao Ouyang <ouyangweizhao@zeku.com>
+> > > Reviewed-by: John Wang <wangdayu@zeku.com>
+> >
+> > Apologize for the delay!
+> >
+> > Wow, that's a very old bug you fixed! However, it looks like the fixed
+> > commit should be changed to 6f51be3d37df ("sdio: allow non-standard
+> > SDIO cards").
+>
+> Thanks, I messed the tag.
+>
+> >
+> > I tried to apply the patch, but the patch format seems to be corrupt.
+> > Did you use git format-patch and did run ./scripts/checkpatch.pl on
+> > it?
+> >
+>
+> Yeah I used checkpatch.pl with strict mode to check this patch, and it
+> has no obvious style problems. What's the format error you got?
 
-Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
----
- Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ERROR: patch seems to be corrupt (line wrapped?)
+#130: FILE: drivers/mmc/core/sdio_bus.c:291:
+struct sdio_func *func =3D dev_to_sdio_func(dev);
 
-diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-index 0424b06cb6551e00..7bfb10c6256602e2 100644
---- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-+++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-@@ -64,6 +64,7 @@ properties:
-           - enum:
-               - renesas,sdhi-r8a779a0  # R-Car V3U
-               - renesas,sdhi-r8a779f0  # R-Car S4-8
-+              - renesas,sdhi-r8a779g0  # R-Car V4H
-           - const: renesas,rcar-gen4-sdhi # R-Car Gen4
- 
-   reg:
--- 
-2.25.1
+total: 1 errors, 0 warnings, 9 lines checked
 
+If you haven't read the submitting-patches guidelines [1], I strongly
+recommend you to have a look.
+For example, it explains why you should use git send-email, if you
+aren't doing that already.
+
+Kind regards
+Uffe
+
+[1]
+https://www.kernel.org/doc/html/v6.0/process/submitting-patches.html
