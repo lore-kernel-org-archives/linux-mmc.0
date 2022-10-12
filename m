@@ -2,128 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2166CC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 19:03:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B0EA0C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Oct 2022 19:26:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229933AbiJLTDz convert rfc822-to-8bit (ORCPT
+        id S229843AbiJLT0f convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Oct 2022 15:03:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56000 "EHLO
+        Wed, 12 Oct 2022 15:26:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229533AbiJLTDu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 15:03:50 -0400
-Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC18923E7
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Oct 2022 12:03:49 -0700 (PDT)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id EBACC123630;
-        Wed, 12 Oct 2022 21:03:47 +0200 (CEST)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id DBE5512117D;
-        Wed, 12 Oct 2022 21:03:47 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Wed, 12 Oct 2022 21:03:47 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Wed, 12 Oct
- 2022 21:03:47 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Wed, 12 Oct 2022 21:03:47 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Avri Altman <Avri.Altman@wdc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>
-Subject: [PATCHv2 2/2] mmc-utils: Allow for custom sanitize timeout
-Thread-Topic: [PATCHv2 2/2] mmc-utils: Allow for custom sanitize timeout
-Thread-Index: AdjebT+JHTIs+xD6T9C4QGSkcmZAKg==
-Date:   Wed, 12 Oct 2022 19:03:47 +0000
-Message-ID: <19c0abf89a5d4f039cd02f2c14272077@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.2]
-Content-Type: text/plain;
-        charset="iso-8859-1"
+        with ESMTP id S229748AbiJLT0b (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Oct 2022 15:26:31 -0400
+Received: from relay.hostedemail.com (smtprelay0011.hostedemail.com [216.40.44.11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45A9910251A;
+        Wed, 12 Oct 2022 12:26:30 -0700 (PDT)
+Received: from omf12.hostedemail.com (a10.router.float.18 [10.200.18.1])
+        by unirelay01.hostedemail.com (Postfix) with ESMTP id 2096E1C6C41;
+        Wed, 12 Oct 2022 19:17:09 +0000 (UTC)
+Received: from [HIDDEN] (Authenticated sender: joe@perches.com) by omf12.hostedemail.com (Postfix) with ESMTPA id AB9FC17;
+        Wed, 12 Oct 2022 19:16:43 +0000 (UTC)
+Message-ID: <f8ad3ba44d28dec1a5f7626b82c5e9c2aeefa729.camel@perches.com>
+Subject: Re: [PATCH v1 3/5] treewide: use get_random_u32() when possible
+From:   Joe Perches <joe@perches.com>
+To:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        linux-kernel@vger.kernel.org
+Cc:     brcm80211-dev-list.pdl@broadcom.com, cake@lists.bufferbloat.net,
+        ceph-devel@vger.kernel.org, coreteam@netfilter.org,
+        dccp@vger.kernel.org, dev@openvswitch.org,
+        dmaengine@vger.kernel.org, drbd-dev@lists.linbit.com,
+        dri-devel@lists.freedesktop.org, kasan-dev@googlegroups.com,
+        linux-actions@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net,
+        linux-fbdev@vger.kernel.org, linux-fsdevel@vger.kernel.org,
+        linux-hams@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mm@kvack.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-nfs@vger.kernel.org,
+        linux-nvme@lists.infradead.org, linux-raid@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-scsi@vger.kernel.org,
+        linux-sctp@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-usb@vger.kernel.org, linux-wireless@vger.kernel.org,
+        linux-xfs@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        lvs-devel@vger.kernel.org, netdev@vger.kernel.org,
+        netfilter-devel@vger.kernel.org, rds-devel@oss.oracle.com,
+        SHA-cyfmac-dev-list@infineon.com, target-devel@vger.kernel.org,
+        tipc-discussion@lists.sourceforge.net
+Date:   Wed, 12 Oct 2022 12:16:53 -0700
+In-Reply-To: <20221005214844.2699-4-Jason@zx2c4.com>
+References: <20221005214844.2699-1-Jason@zx2c4.com>
+         <20221005214844.2699-4-Jason@zx2c4.com>
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 8BIT
+User-Agent: Evolution 3.44.4 (3.44.4-2.fc36) 
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27198.002
-X-TMASE-Result: 10-3.377300-10.000000
-X-TMASE-MatchedRID: BFQSNthdAqJINlHl+WuFyhqkhv3OdF4DrzD8YrC59vxGQgIVrmBL5OqO
-        SOOdRR5ajx5X3FdI4UDmn3xyPJAJoh2P280ZiGmR8IK7yRWPRNEYH39vFLryE9MvYZEcBz1xvnV
-        hS/vsz71qWLOxXAxgglX71r5lUalZaDAi8sBNMoELbigRnpKlKSPzRlrdFGDwoGZb8eEdLinTfd
-        TQuY4l9gXgWc6fGv+coXoY5THXtkuVgoAo1GD2rQ==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 3e576fdd-a53e-413c-ae71-d9bf6aae2199-0-0-200-0
+X-Stat-Signature: c3d78nppyrywoyngway5d943fw3wwtdu
+X-Rspamd-Server: rspamout03
+X-Rspamd-Queue-Id: AB9FC17
+X-Session-Marker: 6A6F6540706572636865732E636F6D
+X-Session-ID: U2FsdGVkX1/Qw27OeRP8/mQW0Su38d7rwhSo1NO9QCw=
+X-HE-Tag: 1665602203-428634
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some cards with certain preconditioning require a higher timeout
-when sanitizing. Let the user set the maximum timeout.
+On Wed, 2022-10-05 at 23:48 +0200, Jason A. Donenfeld wrote:
+> The prandom_u32() function has been a deprecated inline wrapper around
+> get_random_u32() for several releases now, and compiles down to the
+> exact same code. Replace the deprecated wrapper with a direct call to
+> the real function.
+[]
+> diff --git a/drivers/infiniband/hw/cxgb4/cm.c b/drivers/infiniband/hw/cxgb4/cm.c
+[]
+> @@ -734,7 +734,7 @@ static int send_connect(struct c4iw_ep *ep)
+>  				   &ep->com.remote_addr;
+>  	int ret;
+>  	enum chip_type adapter_type = ep->com.dev->rdev.lldi.adapter_type;
+> -	u32 isn = (prandom_u32() & ~7UL) - 1;
+> +	u32 isn = (get_random_u32() & ~7UL) - 1;
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- mmc.c      |  2 +-
- mmc_cmds.c | 11 +++++++----
- 2 files changed, 8 insertions(+), 5 deletions(-)
+trivia:
 
-diff --git a/mmc.c b/mmc.c
-index 6c56387..2344879 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -150,7 +150,7 @@ static struct Command commands[] = {
- 	  NULL
- 	},
- 	{ do_sanitize, -1,
--	  "sanitize", "<device>\n"
-+	  "sanitize", "[timeout_ms] <device>\n"
- 		"Send Sanitize command to the <device>.\nThis will delete the unmapped memory region of the device.",
- 	  NULL
- 	},
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 8bc7a56..8546a3f 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -2007,12 +2007,16 @@ int do_sanitize(int nargs, char **argv)
- {
- 	int fd, ret;
- 	char *device;
-+	unsigned int timeout = SWITCH_TIMEOUT_MS;
- 
--	if (nargs != 2) {
--		fprintf(stderr, "Usage: mmc sanitize </path/to/mmcblkX>\n");
-+	if (nargs != 2 && nargs != 3) {
-+		fprintf(stderr, "Usage: mmc sanitize [timeout_in_ms] </path/to/mmcblkX>\n");
- 		exit(1);
- 	}
- 
-+	if (nargs == 3)
-+		timeout = strtol(argv[2], NULL, 10);
-+
- 	device = argv[1];
- 
- 	fd = open(device, O_RDWR);
-@@ -2021,8 +2025,7 @@ int do_sanitize(int nargs, char **argv)
- 		exit(1);
- 	}
- 
--	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1,
--			SWITCH_TIMEOUT_MS);
-+	ret = write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1, timeout);
- 	if (ret) {
- 		fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
- 			1, EXT_CSD_SANITIZE_START, device);
--- 
-2.37.3
+There are somewhat odd size mismatches here.
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+I had to think a tiny bit if random() returned a value from 0 to 7
+and was promoted to a 64 bit value then truncated to 32 bit.
+
+Perhaps these would be clearer as ~7U and not ~7UL
+
+>  	struct net_device *netdev;
+>  	u64 params;
+>  
+> @@ -2469,7 +2469,7 @@ static int accept_cr(struct c4iw_ep *ep, struct sk_buff *skb,
+>  	}
+>  
+>  	if (!is_t4(adapter_type)) {
+> -		u32 isn = (prandom_u32() & ~7UL) - 1;
+> +		u32 isn = (get_random_u32() & ~7UL) - 1;
+
+etc...
+
+drivers/infiniband/hw/cxgb4/cm.c:	u32 isn = (prandom_u32() & ~7UL) - 1;
+drivers/infiniband/hw/cxgb4/cm.c:		u32 isn = (prandom_u32() & ~7UL) - 1;
+drivers/net/ethernet/chelsio/inline_crypto/chtls/chtls_cm.c:	rpl5->iss = cpu_to_be32((prandom_u32() & ~7UL) - 1);
+drivers/scsi/cxgbi/cxgb4i/cxgb4i.c:		u32 isn = (prandom_u32() & ~7UL) - 1;
+drivers/scsi/cxgbi/cxgb4i/cxgb4i.c:		u32 isn = (prandom_u32() & ~7UL) - 1;
+drivers/target/iscsi/cxgbit/cxgbit_cm.c:	rpl5->iss = cpu_to_be32((prandom_u32() & ~7UL) - 1);
 
