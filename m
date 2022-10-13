@@ -2,64 +2,174 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4379C43219
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 10:17:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A11A8C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 10:38:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229734AbiJMKRE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 06:17:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40894 "EHLO
+        id S229657AbiJMKi3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 06:38:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46682 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229618AbiJMKRD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 06:17:03 -0400
-Received: from Chamillionaire.breakpoint.cc (Chamillionaire.breakpoint.cc [IPv6:2a0a:51c0:0:12e:520::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED085F6C22;
-        Thu, 13 Oct 2022 03:17:00 -0700 (PDT)
-Received: from fw by Chamillionaire.breakpoint.cc with local (Exim 4.92)
-        (envelope-from <fw@strlen.de>)
-        id 1oivGV-00028B-QF; Thu, 13 Oct 2022 12:16:35 +0200
-Date:   Thu, 13 Oct 2022 12:16:35 +0200
-From:   Florian Westphal <fw@strlen.de>
-To:     Rolf Eike Beer <eike-kernel@sf-tec.de>
-Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
-        "Jason A. Donenfeld" <Jason@zx2c4.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Florian Westphal <fw@strlen.de>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Thomas Graf <tgraf@suug.ch>, kasan-dev@googlegroups.com,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        kernel-janitors@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mips@vger.kernel.org, linux-mm@kvack.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
-        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
-        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
-        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        loongarch@lists.linux.dev, netdev@vger.kernel.org,
-        sparclinux@vger.kernel.org, x86@kernel.org
-Subject: Re: [PATCH v6 5/7] treewide: use get_random_u32() when possible
-Message-ID: <20221013101635.GB11818@breakpoint.cc>
-References: <20221010230613.1076905-1-Jason@zx2c4.com>
- <20221010230613.1076905-6-Jason@zx2c4.com>
- <3026360.ZldQQBzMgz@eto.sf-tec.de>
+        with ESMTP id S229511AbiJMKi2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 06:38:28 -0400
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0E88B4896;
+        Thu, 13 Oct 2022 03:38:27 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1665657507; x=1697193507;
+  h=message-id:date:mime-version:subject:to:references:from:
+   in-reply-to:content-transfer-encoding;
+  bh=IzNnOVImM+1fHY13HeqIWVw+VzRpQTJn1OFafJ899zM=;
+  b=LIubZcBqCqlR6jzWcHvrJwgja+310C5IWwjvQeQxluaHuSITFDx56mYL
+   VferrgZ2k4zq/6Fu5ncYD4sy+4yxBlaO14XgrwLJkQUN9mpQmHCMpfj4K
+   CO9v6e2Q+nSIFIgjvQMzfUJnXgfV0cg3Vin+nbS/IOWTWj5g3vkYOH2DO
+   rCdDxxIBLIGYFvoprupcO9TUg5nP1JYXNMAZlvQRXMns7LA4UyCDFuYpo
+   37vdL1LB8TMDRv8HuTTWg5a/AZNbFV5T4JCw0xFsjJlM6Cd+g0SBnvUDU
+   thA764+xqW/pav+nBxenkAurubsB5Y0iaddRrnuC2qfR7DGxyxi4tP7Gm
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10498"; a="369211924"
+X-IronPort-AV: E=Sophos;i="5.95,180,1661842800"; 
+   d="scan'208";a="369211924"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Oct 2022 03:38:27 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10498"; a="578181130"
+X-IronPort-AV: E=Sophos;i="5.95,180,1661842800"; 
+   d="scan'208";a="578181130"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.49.151])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Oct 2022 03:37:59 -0700
+Message-ID: <95b225c0-13a0-46dc-281f-1ff8493cc116@intel.com>
+Date:   Thu, 13 Oct 2022 13:37:55 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <3026360.ZldQQBzMgz@eto.sf-tec.de>
-User-Agent: Mutt/1.10.1 (2018-07-13)
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.2.2
+Subject: Re: [PATCHv4 1/2] mmc: block: Remove error check of hw_reset on reset
+Content-Language: en-US
+To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+References: <f7757a12fb204b8584dacc04e67fdd1c@hyperstone.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <f7757a12fb204b8584dacc04e67fdd1c@hyperstone.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Rolf Eike Beer <eike-kernel@sf-tec.de> wrote:
-> Florian, can you comment and maybe fix it?
+On 12/10/22 21:37, Christian Löhle wrote:
+> Before switching back to the right partition in mmc_blk_reset there used
+> to be a check if hw_reset was even supported. This return value
+> was removed, so there is no reason to check. Furthermore ensure
+> part_curr is not falsely set to a valid value on reset or
+> partition switch error.
+> 
+> As part of this change the code paths of mmc_blk_reset calls were checked
+> to ensure no commands are issued after a failed mmc_blk_reset directly
+> without going through the block layer.
+> 
+> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
+> Cc: stable@vger.kernel.org
+> 
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-Can't comment, do not remember -- this was 5 years ago.
+One minor comment, otherwise:
 
-> Or you wanted to move the variable before the loop and keep the random state
-> between the loops and only reseed when all '1' bits have been consumed.
+Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Probably.  No clue, best to NOT change it to not block Jasons series and
-then just simplify this and remove all the useless shifts.
+> ---
+> -v4: Only partition switch if necessary and fix one mmc_blk_reset call
+> -v3: Ensure invalid part_curr on error
+> -v2: Do not attempt to switch partitions if reset failed
+> 
+>  drivers/mmc/core/block.c | 42 ++++++++++++++++++++++++----------------
+>  1 file changed, 25 insertions(+), 17 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index ce89611a136e..2619cc47b97c 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -134,6 +134,7 @@ struct mmc_blk_data {
+>  	 * track of the current selected device partition.
+>  	 */
+>  	unsigned int	part_curr;
+> +#define MMC_BLK_PART_INVALID	UINT_MAX	/* Unknown partition active */
+>  	int	area_type;
+>  
+>  	/* debugfs files (only in main mmc_blk_data) */
+> @@ -987,33 +988,39 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
+>  	return ms;
+>  }
+>  
+> +/*
+> + * Attempts to reset the card and get back to the requested partition.
+> + * Therefore any error here must result in cancelling the block layer
+> + * request, it must not be reattempted without going through the mmc_blk
+> + * partition sanity checks.
+> + */
+>  static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
+>  			 int type)
+>  {
+>  	int err;
+> +	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
+>  
+>  	if (md->reset_done & type)
+>  		return -EEXIST;
+>  
+>  	md->reset_done |= type;
+>  	err = mmc_hw_reset(host->card);
+> +	/*
+> +	 * A successful reset will leave the card in the main partition, but
+> +	 * upon failure it might not be, so set it to MMC_BLK_PART_INVALID
+> +	 * in that case.
+> +	 */
+> +	main_md->part_curr = err ? MMC_BLK_PART_INVALID : main_md->part_type;
+> +	if (err)
+> +		return err;
+>  	/* Ensure we switch back to the correct partition */
+> -	if (err) {
+> -		struct mmc_blk_data *main_md =
+> -			dev_get_drvdata(&host->card->dev);
+> -		int part_err;
+> -
+> -		main_md->part_curr = main_md->part_type;
+> -		part_err = mmc_blk_part_switch(host->card, md->part_type);
+> -		if (part_err) {
+> -			/*
+> -			 * We have failed to get back into the correct
+> -			 * partition, so we need to abort the whole request.
+> -			 */
+> -			return -ENODEV;
+> -		}
+> -	}
+> -	return err;
+> +	if (mmc_blk_part_switch(host->card, md->part_type))
+> +		/*
+> +		 * We have failed to get back into the correct
+> +		 * partition, so we need to abort the whole request.
+> +		 */
+> +		return -ENODEV;
+> +	return 0;
+>  }
+>  
+>  static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
+> @@ -1868,7 +1875,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+>  
+>  	/* Reset before last retry */
+>  	if (mqrq->retries + 1 == MMC_MAX_RETRIES)
+> -		mmc_blk_reset(md, card->host, type);
+> +		if (mmc_blk_reset(md, card->host, type))
+
+Kernel style is to avoid nested "if" statements, so it should be like this:
+
+  	if (mqrq->retries + 1 == MMC_MAX_RETRIES &&
+	    mmc_blk_reset(md, card->host, type)
+		return;
+
+> +			return;
+>  
+>  	/* Command errors fail fast, so use all MMC_MAX_RETRIES */
+>  	if (brq->sbc.error || brq->cmd.error)
+
