@@ -2,67 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39E6CC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 19:26:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1792DC43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 19:50:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229713AbiJMT00 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 15:26:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41656 "EHLO
+        id S229826AbiJMTu0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 15:50:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33982 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229710AbiJMT0X (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 15:26:23 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29958169CF6;
-        Thu, 13 Oct 2022 12:26:20 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id B3AD96192A;
-        Thu, 13 Oct 2022 19:26:19 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 24DD6C433D6;
-        Thu, 13 Oct 2022 19:26:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1665689179;
-        bh=lwGzG0oEcBObcEcj2FxpGauILqpL4l6Rv8mzKpv7xnA=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=dkQmi9r308dySXnuAN5UPJC3oaoZ5UGL686MVoUMTOWova1PBtytR+GLYrHC9Cz2V
-         l1u0BvWY4gNv1veDaW8Uf1a2qYrMXQSHCZW5VxiS1EbPa2IjIJ0ehU4HKdPHMnxU9O
-         oLGYjMt1Uv31vLJ/bPwM/Fkcujyo33NbJqY5ZsJ2D7at6bxSnkPxalKTNq7eqrS9SA
-         8iFc0TDg87xdo3a2sk2Mdh3MUqIfhKWN7LK2J2aEAi34l/Q5oYQLxK1Y7onXaVe4tt
-         HEYV805pBPLc3FPpy5N604aclPKs0OJ+LOa7IOkumh8VkbinA00JRehxTsa7lC6Pbn
-         ZFWnMGiChi4Wg==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 14494E29F31;
-        Thu, 13 Oct 2022 19:26:19 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.1-rc1
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20221013141334.511005-1-ulf.hansson@linaro.org>
-References: <20221013141334.511005-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20221013141334.511005-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-2
-X-PR-Tracked-Commit-Id: 6e141772e6465f937458b35ddcfd0a981b6f5280
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 098179413d07392ad8c52c7c7605d3d3886ef569
-Message-Id: <166568917907.4575.361847867125208088.pr-tracker-bot@kernel.org>
-Date:   Thu, 13 Oct 2022 19:26:19 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S229828AbiJMTuX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 15:50:23 -0400
+Received: from mail-il1-x133.google.com (mail-il1-x133.google.com [IPv6:2607:f8b0:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A59C461711
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 12:50:17 -0700 (PDT)
+Received: by mail-il1-x133.google.com with SMTP id u10so1515946ilm.5
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 12:50:17 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=WJtUgMyknP4m6ys7U3PstctWgnf/qk6Z7L91/ntX78Y=;
+        b=WwkyeeUjwcHXf2Vy1OXp7GfUN1jTId+7Svgh+SNa0GwV2l4+49ATkI9Y+pXz3w4dZZ
+         bKI1zGvMjRq0Hu9tRXndWR2X84VisTSzl32ySRyuVa5936+YEcBi7pcTvYyVOMa0PAo3
+         PGBGwYeWRwafPuJGf8JxofTX1gUQENo4G/MYI=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=WJtUgMyknP4m6ys7U3PstctWgnf/qk6Z7L91/ntX78Y=;
+        b=GGCaCfMpQeljbmbvBJlD9P8xsSwnHH2qN1jIK836BfFYoiFCVME9mYzu/fN/c1HWQ2
+         7Wod9zkXobnLsi2FUJ+0ZGUixuV0DqHx1t0CN2NvKORm2n6Mcm5+21mb6SsByAfLESE5
+         3trZ91WqeBx0KA8NWGnpQJ0OHc1LxutpuE79iyhiUlzSq1U1/EtpIW+H3l5OgBfYMQFD
+         HRvWy2hXzrqmE7bSUKCSb7AlSs+aq/Zl9KHHaIUAiiKtQkaHAxQOdPQbx24i22uP5xnA
+         ssRsFeg1N2fxECxToaEbqC/5UazkKVKlqXfOV8vQLoxDMNvdof/gryyCBRfoGtnAv31m
+         n5MQ==
+X-Gm-Message-State: ACrzQf1CETHXPH6B943EABkDzUixfyEIMOPw3/3TAviAPTIMQkxxv/yR
+        IL4uDeh4cNxWsQwrBtoU6FeMww==
+X-Google-Smtp-Source: AMsMyM7lvMIch7u+CSSvr4aiO2Kb9grrpoWlHGADoAvjJtjDhqNPId/axnO4uvfzhHRdAFDnCZvtVw==
+X-Received: by 2002:a05:6e02:1bc4:b0:2fc:2d47:9abf with SMTP id x4-20020a056e021bc400b002fc2d479abfmr809263ilv.246.1665690617052;
+        Thu, 13 Oct 2022 12:50:17 -0700 (PDT)
+Received: from localhost (30.23.70.34.bc.googleusercontent.com. [34.70.23.30])
+        by smtp.gmail.com with UTF8SMTPSA id q27-20020a02b05b000000b00363c852c779sm308754jah.61.2022.10.13.12.50.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 13 Oct 2022 12:50:16 -0700 (PDT)
+Date:   Thu, 13 Oct 2022 19:50:13 +0000
+From:   Matthias Kaehlcke <mka@chromium.org>
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
+Message-ID: <Y0hr9XTGAg8Q6K6y@google.com>
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Thu, 13 Oct 2022 16:13:34 +0200:
+Hi Dmitry,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-2
+Do you still plan to refresh this series?
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/098179413d07392ad8c52c7c7605d3d3886ef569
+I know there have been multiple attempts to get something similar
+landed in the past 10 year or so. Your series didn't seem to get
+much pushback from maintainers, might be worth sending a refresh :)
 
-Thank you!
+Thanks
 
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Matthias
+
+On Wed, Oct 06, 2021 at 06:53:52AM +0300, Dmitry Baryshkov wrote:
+> This is a proposed power sequencer subsystem. This is a
+> generification of the MMC pwrseq code. The subsystem tries to abstract
+> the idea of complex power-up/power-down/reset of the devices.
+> 
+> The primary set of devices that promted me to create this patchset is
+> the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+> or serial + SDIO interfaces (older generations) or on serial+PCIe (newer
+> generations).  They require a set of external voltage regulators to be
+> powered on and (some of them) have separate WiFi and Bluetooth enable
+> GPIOs.
+> 
+> The major drawback for now is the lack of proper PCIe integration
+> At this moment support for PCIe is hacked up to be able to test the
+> PCIe part of qca6390. Proper PCIe support would require automatically
+> powering up the devices before the scan basing on the proper device
+> structure in the device tree. This two last patches are noted as WIP and
+> are included into the patchset for the purpose of testing WiFi on newer
+> chips (like qca6390/qca6391).
+> 
+> Changes since RFC v2:
+>  - Add documentation for the pwrseq code. Document data structures,
+>    macros and exported functions.
+>  - Export of_pwrseq_xlate_onecell()
+>  - Add separate pwrseq_set_drvdata() function to follow the typical API
+>    design
+>  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
+>  - Moved code to handle old mmc-pwrseq binding to the MMC patch
+>  - Split of_pwrseq_xlate_onecell() support to a separate patch
+> 
+> Changes since RFC v1:
+>  - Provider pwrseq fallback support
+>  - Implement fallback support in pwrseq_qca.
+>  - Mmove susclk handling to pwrseq_qca.
+>  - Significantly simplify hci_qca.c changes, by dropping all legacy
+>    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
+>    parts of the chip.
+> 
+> 
+> 
+> 
+> _______________________________________________
+> ath10k mailing list
+> ath10k@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/ath10k
