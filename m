@@ -2,74 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BE47C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 20:31:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBC09C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 21:00:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229899AbiJMUbp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 16:31:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51418 "EHLO
+        id S229934AbiJMVAZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 17:00:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229764AbiJMUbo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 16:31:44 -0400
-Received: from mail-oa1-f52.google.com (mail-oa1-f52.google.com [209.85.160.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C375160851;
-        Thu, 13 Oct 2022 13:31:41 -0700 (PDT)
-Received: by mail-oa1-f52.google.com with SMTP id 586e51a60fabf-134072c15c1so3686402fac.2;
-        Thu, 13 Oct 2022 13:31:41 -0700 (PDT)
+        with ESMTP id S229744AbiJMVAY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 17:00:24 -0400
+Received: from mail-yw1-x1149.google.com (mail-yw1-x1149.google.com [IPv6:2607:f8b0:4864:20::1149])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67D275E31F
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 14:00:23 -0700 (PDT)
+Received: by mail-yw1-x1149.google.com with SMTP id 00721157ae682-35076702654so27573747b3.17
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 14:00:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=google.com; s=20210112;
+        h=cc:to:from:subject:message-id:mime-version:date:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=/bUd8aKPH80AhGjW+++xUOpyDvX0kb5YuI9G+Oh1VW8=;
+        b=Ump8uOis3JBmRWnAOLZHobNzJx2Li8xG9bd9NKtG4i6CMt5Rh1Yd7lTxDszAvk3Edd
+         QZYdxBYgtg3/d4Zy/sQLh7uUzkzpqBf68G19QKg6grUhU7380+5lmV6MP7YR0xw6KNY9
+         fIHuavZYQc9f45UNc+JTrLvMG7qBR8m5mX8tgDy2lt7MQim3VmDXXQQuHk8T84G6FVQH
+         ecc+Axgs04dVYxO4xc5iQYGii4BJ3uGa0NrgCNs4OxdBvzdAlGwaQQ6htxXGNaqznGPZ
+         JZxRey1d0IeHMLiw+uC06q6sYFAXbm33JLYbMzZbA0VpIKJ5oM72FdKlknkqUscOT/Zi
+         W9LA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GL6Lqe/Om1hnuXQMKSZr9Ct2LX6fKcwCs8dF7JbScbc=;
-        b=fkTod943YiSVmgt//pYCNfb9rXkchSpH9M6/T4+f1zmi/BaxzYn5GnJBrgSvk+LQeL
-         SphdInndKdJpiw/H5wjaJhu1g0tN3qZVaLZFNS8uDRAtoKuODI2WFKk9FeAXm/e6gDQb
-         yKLv0fHoucWJ6AqUrrijC8Afh8ECHJ61cNdfvzSub/l/PXrmQIkTbGxc30/jGFgKspcA
-         12e1EY48fHTjUIYxb7OQyAnTwnB8tHcb85pjME7GIFmXy4Ro6Lq3N+VXIJ7tPbKEWMKo
-         RtWj4kSUHgTygKEsbpEUB9F7DJwzPobOTj9v1/QEVQPjB+w0ve1rZ2hMx90ztIQFV+II
-         LkJA==
-X-Gm-Message-State: ACrzQf0zElHeegOAf5cjic4QjX6pu4DAN52Yi2ULZ7iXqX5n8v8VSdaV
-        28+CfY6Nf6TXke3ds/XAvA==
-X-Google-Smtp-Source: AMsMyM62pNn5W6z4ChVz5v6D/sR5XjDArsIytxlLRWy932CttCZuViD9XmE/M0qo+YwzSmkEt/xbIw==
-X-Received: by 2002:a05:6871:b2b:b0:132:40e6:9d50 with SMTP id fq43-20020a0568710b2b00b0013240e69d50mr840811oab.157.1665693100217;
-        Thu, 13 Oct 2022 13:31:40 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id l75-20020a9d1b51000000b00660d73c8bdesm389283otl.50.2022.10.13.13.31.38
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 13 Oct 2022 13:31:39 -0700 (PDT)
-Received: (nullmailer pid 180063 invoked by uid 1000);
-        Thu, 13 Oct 2022 20:31:39 -0000
-Date:   Thu, 13 Oct 2022 15:31:39 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Matt Ranostay <mranostay@ti.com>
-Cc:     ulf.hansson@linaro.org, krzysztof.kozlowski+dt@linaro.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-am654: add ti,itap-del-sel-ddr50
- to schema
-Message-ID: <20221013203139.GA178344-robh@kernel.org>
-References: <20221013024021.121104-1-mranostay@ti.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221013024021.121104-1-mranostay@ti.com>
+        h=cc:to:from:subject:message-id:mime-version:date:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=/bUd8aKPH80AhGjW+++xUOpyDvX0kb5YuI9G+Oh1VW8=;
+        b=lxbfbfHvbdp11oiERSv5ee1xop9tXEH+YGwhljWxoRfycR4QydQBUCCtfcwajcWoeE
+         jEEFGx2c5cJKjZsa/9qZHSjBamKJ5MFd0hxh1vtPhpuqUyhQZhRB/jyagBVuHYmQLMU4
+         dQpWeGdwvqsavXZQwfspE6o4+nwsmtGJ7tIN/Nu8oRbCIlghYH+CUyeEtNxYHqaO24os
+         fqjgu2BTXvV0eehy2VEwCli+0cxXb7TphVW3Zd9BMlIdwDekH8QJHrJp18vaW4WP54Or
+         yZwspvscBbSaJoNsWHCpuW4vIIDTnKX2HKuJMN21yKxCjA0L40jflnI4RFEo9gIdk77o
+         8SBQ==
+X-Gm-Message-State: ACrzQf2FwOBewsuESZpamoU3Ui5FMgH7HwF/+IdDsqozBzvJ4RGpCp5I
+        P3zvb5Z8BUIScZ7Aqf9Ww5r1MMvLBSCNxFhiEsf4gr/xY4QreQawTs0eh4eLC1m4rP1k/xhA+tN
+        YcTqGN8sfr1k+mWaN9Sw/x7f/EFv5nXFGcVaXoSjkkcA5fQ0k/x+dUITi6g==
+X-Google-Smtp-Source: AMsMyM5rjCOZkY2UjSc3mVAWtSHXgFM6Tx/9iDX/1by0I51wPhLztvW5wIcgFsgGa3/iHoq07ZtMxHc=
+X-Received: from ptf16.nyc.corp.google.com ([2620:0:1003:314:397e:65e9:dc1c:f5cd])
+ (user=ptf job=sendgmr) by 2002:a25:254a:0:b0:6bc:d8a1:939c with SMTP id
+ l71-20020a25254a000000b006bcd8a1939cmr1782359ybl.438.1665694822583; Thu, 13
+ Oct 2022 14:00:22 -0700 (PDT)
+Date:   Thu, 13 Oct 2022 17:00:17 -0400
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.38.0.413.g74048e4d9e-goog
+Message-ID: <20221013210017.3751025-1-ptf@google.com>
+Subject: [PATCH v3] mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
+From:   Patrick Thompson <ptf@google.com>
+To:     Linux MMC Development <linux-mmc@vger.kernel.org>
+Cc:     Sangwhan Moon <sxm@google.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Patrick Thompson <ptf@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 12, 2022 at 07:40:21PM -0700, Matt Ranostay wrote:
-> Add missing ti,itap-del-sel-ddr50 property to schema to clear up the
-> following warnings.
-> 
-> mmc@4fb0000: Unevaluated properties are not allowed ('ti,itap-del-sel-ddr50' was unexpected)
+Enhanced Strobe (ES) does not work correctly on the ASUS 1100 series of
+devices. Jasper Lake eMMCs (pci_id 8086:4dc4) are supposed to support
+ES. There are also two system families under the series, thus this is
+being scoped to the ASUS BIOS.
 
-Not the only missing property, so I'm curious why not fixing them all?
+The failing ES prevents the installer from writing to disk. Falling back
+to HS400 without ES fixes the issue.
 
-> 
-> Signed-off-by: Matt Ranostay <mranostay@ti.com>
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-am654.yaml | 6 ++++++
->  1 file changed, 6 insertions(+)
+Signed-off-by: Patrick Thompson <ptf@google.com>
 
-In any case, one is better than none.
+Fixes: 315e3bd7ac19 ("mmc: sdhci-pci: Add support for Intel JSL")
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+---
+
+Changes in v3:
+* Remove redundant MMC_CAP2_HS400 selection
+
+Changes in v2:
+* Only disable ES instead of CQE in its entirety.
+* Target Jasper Lake (JSL)
+* Target ASUS BIOS instead of specific system family
+
+ drivers/mmc/host/sdhci-pci-core.c | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index 169b84761041..34ea1acbb3cc 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -914,6 +914,12 @@ static bool glk_broken_cqhci(struct sdhci_pci_slot *slot)
+ 		dmi_match(DMI_SYS_VENDOR, "IRBIS"));
+ }
+ 
++static bool jsl_broken_hs400es(struct sdhci_pci_slot *slot)
++{
++	return slot->chip->pdev->device == PCI_DEVICE_ID_INTEL_JSL_EMMC &&
++			dmi_match(DMI_BIOS_VENDOR, "ASUSTeK COMPUTER INC.");
++}
++
+ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ {
+ 	int ret = byt_emmc_probe_slot(slot);
+@@ -922,9 +928,11 @@ static int glk_emmc_probe_slot(struct sdhci_pci_slot *slot)
+ 		slot->host->mmc->caps2 |= MMC_CAP2_CQE;
+ 
+ 	if (slot->chip->pdev->device != PCI_DEVICE_ID_INTEL_GLK_EMMC) {
+-		slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+-		slot->host->mmc_host_ops.hs400_enhanced_strobe =
+-						intel_hs400_enhanced_strobe;
++		if (!jsl_broken_hs400es(slot)) {
++			slot->host->mmc->caps2 |= MMC_CAP2_HS400_ES;
++			slot->host->mmc_host_ops.hs400_enhanced_strobe =
++							intel_hs400_enhanced_strobe;
++		}
+ 		slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+ 	}
+ 
+-- 
+2.38.0.413.g74048e4d9e-goog
+
