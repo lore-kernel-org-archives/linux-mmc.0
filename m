@@ -2,148 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCD38C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 13:44:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 595A7C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 14:02:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229709AbiJMNn7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 09:43:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41156 "EHLO
+        id S229773AbiJMOCE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 10:02:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56434 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229862AbiJMNn7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 09:43:59 -0400
+        with ESMTP id S229831AbiJMOCD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 10:02:03 -0400
 Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 804A0115C38
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 06:43:57 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id cl1so1931831pjb.1
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 06:43:57 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC1A92701
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:01:26 -0700 (PDT)
+Received: by mail-pj1-x102d.google.com with SMTP id 70so2052357pjo.4
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:01:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=O81+P58FUqUzFvyhgNRSmI+OPkunmpM/swl0Z9C3YBg=;
-        b=ioli8x3yHwDJN+q9To8poYslymiA7VxYi3Vcv85dQquOoUzOU/2j0K+Kf2Xm4ZZtNR
-         8D6d8etpktGLMcSegOxQ44t05jwy4RhL4K99PLeSJpPLfdkHrIf9LD6351WljHQnGt0C
-         MFhidHsfCw0XJue8oOiAO1lu1DLfkCyKZP1fY/yVSJGCOH6lHoTbZ0REtbExaDkOXotk
-         8cGVtPC/Ezmyv76OCZUKrUSk9u6URw5Souuv0wjyM8Sfbqiz0YANIlD7tFRizm4pbCdL
-         2Fzb70j48sC4xtdTi8rOIuniTFGudO7T6CZkoZsht9vosfI1Wfxuxm42VrBHx7SKQlEa
-         5gtw==
+        bh=EcdlK7Vr/NBxA2l1p86K0/Xpr5oeds229RhFU2676lM=;
+        b=Z1/OTmQTgg5MeW7bFHC7ch+cisfd5L/kG4vLHsHa+J2XbdVcGLSLbPdVD7aU+GTOWy
+         9IIBF2hecp4l1I1H3ZOM8c2eauZB0IxTf66Wamhv3bnvjunJlhdMPMGg7+ImKG7cy+lp
+         naI4cZeaos+x949bSLDuxEdRJXVpOY90RDQXZAMZ0ek6ql5BgcNMH0C29zRP6mim/XRv
+         k6edvFlARO/3MFXTeEcFb4uxgf92VLSy45D/o1AlEo3IAkkbDsheQcr8yPIvWpbWXmpM
+         +QiO6jjcpjbTBxjI+BvLXWKMhvIsBezvjCn3M8ZMPmLEMk09l8NWKU3cZ7GT8UH4ksPG
+         NqaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=O81+P58FUqUzFvyhgNRSmI+OPkunmpM/swl0Z9C3YBg=;
-        b=779wD7UmOmwlSQFPGAe74YGhKui3TK8MzZZuxnE+Mx5RGt+ch2sU42xgin1x8yK64b
-         6pVRYrTOuhrZnOW8HU4IlsqVAZDSboLUJr5eL2ZY8klskJRaonsbuAyW/QpUATWXs01B
-         c+pdObzLsj726dgDFvYtwbDFrMbMLcN7r/lzOH/sA2TTTlLuu5MMYcyqgCfS7TFf/pOq
-         LNM9aTdss07bbMYqTzhDVL6PVdsLT5hLxINCKbRadjcXnfcsLzKZ8dI/IXzybsFQa1iU
-         Inx1PaGhSwWydqORsFsYrb5TanM68aJV4ilV+P5iznXJJNGve7ZBlKYtEZgYwbotOflV
-         AB2A==
-X-Gm-Message-State: ACrzQf3h5vh5kyafc6+N4ekvt/1f5EQ1O+V+cUvZG5YKijKpqBcWMKgk
-        FfdMHvv/LXa7SyAUlcHiwtq5srRM4DElVPnAy2huPmX8PjY5nw==
-X-Google-Smtp-Source: AMsMyM5iw0c63ZR4dpISN3UmFSzHp5mi5fer3iRlq8DDZ7XJmTyUQktu+UCO6+i1ktquI1thkVrEtWSlAnxyQ9zbA20=
+        bh=EcdlK7Vr/NBxA2l1p86K0/Xpr5oeds229RhFU2676lM=;
+        b=fANT7GMNe0Cixzl1HWTmDTZuFEU53z2sUr7yuzw67H8ex8PjJgkno16uQv+QWlkbo5
+         HYTsPaGpc1HZ83dDw8CS0gkyoXJx64U5TU1yGbqEsMqFBq0Vy5mp5EIAy1YOvhJfPPIS
+         LwPCgrH+mg7z3HquqMyVfkwK6xTETTwPOeic0uYt6LWPfVljGfM/K8FdGn0PvUlr1EHD
+         ULyWpyKaRoJVAKclLWopa3YCcMaKxjTF+NWglOYrQ1PZEEccAPW7p1+JUJ/X9VOUSDw2
+         rM5O59hfdCslmJl7RJMj+R2s/IqXl0+3IohLnRHEIcFxiDzMhfCk8Wd52P6VCEztu5SF
+         F0yA==
+X-Gm-Message-State: ACrzQf2aH0u6fiDnHQ+PxbD+IUhYGRB5edd6ndVw/9pf+vVGvAtvxO/6
+        ICv0tNHlR6bVzYpFs7JgvZOZdYa8skvl4dHNhgAQIA==
+X-Google-Smtp-Source: AMsMyM7YlOYDM85JmxAy9tj6ehh+qlCTrMlQaBt9+S+9SzzxnYa0Fpc2f2gjt68nTOWdRF8mgGhJf7g+FbchCfLCr0Q=
 X-Received: by 2002:a17:90a:7b8c:b0:20b:1f3b:f6fd with SMTP id
- z12-20020a17090a7b8c00b0020b1f3bf6fdmr11160768pjc.202.1665668635466; Thu, 13
- Oct 2022 06:43:55 -0700 (PDT)
+ z12-20020a17090a7b8c00b0020b1f3bf6fdmr34293pjc.202.1665669560510; Thu, 13 Oct
+ 2022 06:59:20 -0700 (PDT)
 MIME-Version: 1.0
-References: <Yz6zfrVq9cP/wrJb@orome> <20221006130622.22900-1-pshete@nvidia.com>
- <20221006130622.22900-2-pshete@nvidia.com> <CAPDyKFr_Yi2EgrBUzsORnM4mOkf25WR8+7_dfF2h4XzRDPm9-w@mail.gmail.com>
- <DM5PR12MB2406610AB26183BACB19EED6B7239@DM5PR12MB2406.namprd12.prod.outlook.com>
- <CAPDyKFqn2jMVQ5BAOZPFx2OOyMRQvsQ1E7mGAQp82x5+v6aSGQ@mail.gmail.com> <DM5PR12MB2406405CE44A7606B5A28203B7259@DM5PR12MB2406.namprd12.prod.outlook.com>
-In-Reply-To: <DM5PR12MB2406405CE44A7606B5A28203B7259@DM5PR12MB2406.namprd12.prod.outlook.com>
+References: <20221013093248.2220802-1-s.hauer@pengutronix.de> <20221013094451.GH6702@pengutronix.de>
+In-Reply-To: <20221013094451.GH6702@pengutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 13 Oct 2022 15:43:18 +0200
-Message-ID: <CAPDyKFq5hNTdwT7CMvsxG=_5u+xvG2k3-PfbGhAbHfHbGqK81w@mail.gmail.com>
-Subject: Re: [PATCH v7 2/4] mmc: sdhci-tegra: Add support to program MC stream ID
-To:     Prathamesh Shete <pshete@nvidia.com>
-Cc:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "thierry.reding@gmail.com" <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Suresh Mangipudi <smangipudi@nvidia.com>,
-        Krishna Yarlagadda <kyarlagadda@nvidia.com>
+Date:   Thu, 13 Oct 2022 15:58:44 +0200
+Message-ID: <CAPDyKFpYDSS04bbWC4AKv-O+tEwdeqWNWrENGo-j2nWOcaQWzw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on
+ 8bit bus
+To:     Sascha Hauer <s.hauer@pengutronix.de>
+Cc:     linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        NXP Linux Team <linux-imx@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 13 Oct 2022 at 08:33, Prathamesh Shete <pshete@nvidia.com> wrote:
+On Thu, 13 Oct 2022 at 11:44, Sascha Hauer <s.hauer@pengutronix.de> wrote:
 >
-> Hi Ulf,
+> On Thu, Oct 13, 2022 at 11:32:48AM +0200, Sascha Hauer wrote:
+> > The core issues the warning "drop HS400 support since no 8-bit bus" when
+> > one of the ESDHC_FLAG_HS400* flags is set on a non 8bit capable host. To
+> > avoid this warning set these flags only on hosts that actually can do
+> > 8bit, i.e. have bus-width = <8> set in the device tree.
+> >
+> > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
+> > ---
+> >  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
+> >  1 file changed, 8 insertions(+), 6 deletions(-)
 >
-> >> In that case, perhaps we can add a "depends on IOMMU_API" in the Kconfig
-> >> instead? Or is the tegra driver used on platforms where IOMMU_API could be
-> >> unset?
-> Yes it can/will work with IOMMU disabled so its not recommended to add a "depends on" condition in Kconfig.
-
-Alright, in that case it looks to me that there are two other options
-to move forward.
-
-1) Add proper definitions of the struct iommu_fwspec in
-include/linux/iommu.h even when CONFIG_IOMMU_API is unset. In a way it
-seems a bit silly to me, to have the iommu stubs around, unless those
-can be used for cases like this, right!?
-
-2) Move the code within the "ifdef CONFIG_IOMMU_API" sections into
-separate functions - and add stubs for these functions too. In this
-way the functions can be called, independently of whether
-CONFIG_IOMMU_API is set/unse, which would make the code in
-drivers/mmc/host/sdhci-tegra.c cleaner and thus easier to maintain.
-
-
+> Forgot to pass --notes to git send email, so adding this here:
 >
-> Thanks
-> Prathamesh
->
-> > -----Original Message-----
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > Sent: Tuesday, October 11, 2022 6:04 PM
-> > To: Prathamesh Shete <pshete@nvidia.com>
-> > Cc: adrian.hunter@intel.com; thierry.reding@gmail.com; Jonathan Hunter
-> > <jonathanh@nvidia.com>; p.zabel@pengutronix.de; linux-
-> > mmc@vger.kernel.org; linux-tegra@vger.kernel.org; linux-
-> > kernel@vger.kernel.org; Aniruddha Tvs Rao <anrao@nvidia.com>; Suresh
-> > Mangipudi <smangipudi@nvidia.com>; Krishna Yarlagadda
-> > <kyarlagadda@nvidia.com>
-> > Subject: Re: [PATCH v7 2/4] mmc: sdhci-tegra: Add support to program MC
-> > stream ID
-> >
-> > External email: Use caution opening links or attachments
-> >
-> >
-> > On Tue, 11 Oct 2022 at 13:44, Prathamesh Shete <pshete@nvidia.com> wrote:
-> > >
-> > > Hi Ulf
-> > >
-> > > The initial patches were without the #ifdef. #ifdef is being added as per review
-> > comments and kernel robot errors.
-> > > Following error was detected by kernel robot
-> > > >>
-> > > All errors (new ones prefixed by >>):
-> > >
-> > >    drivers/mmc/host/sdhci-tegra.c: In function 'sdhci_tegra_probe':
-> > > >> drivers/mmc/host/sdhci-tegra.c:1794:54: error: 'struct iommu_fwspec' has
-> > no member named 'ids'
-> > >     1794 |                         tegra_host->streamid = fwspec->ids[0] & 0xffff;
-> > >          |                                                      ^~
-> > >
-> > >
-> > > vim +1794 drivers/mmc/host/sdhci-tegra.c
-> > > >>
-> > > Adrian also pointed out this issue so to address these issues #ifdef
-> > > was added
-> >
-> > I see!
-> >
-> > In that case, perhaps we can add a "depends on IOMMU_API" in the Kconfig
-> > instead? Or is the tegra driver used on platforms where IOMMU_API could be
-> > unset?
-> >
-> > [...]
+> An alternative approach would be to just lower the warning message
+> to debug level. In the end it's nice from the core to take the load
+> from the drivers, if only the core wouldn't complain about it.
+
+So I don't recall why we picked the warning level, but maybe the idea
+was that it should become clear that it's the wrong configuration.
+
+On the other hand, that works well with the debug level too. So, why
+not do both $subject patch and what you propose here?
 
 Kind regards
 Uffe
