@@ -2,156 +2,517 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AF77C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 06:40:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CCCEAC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 08:19:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229700AbiJMGkR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 02:40:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55730 "EHLO
+        id S229546AbiJMITp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 04:19:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49458 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229680AbiJMGkP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 02:40:15 -0400
-Received: from EUR01-DB5-obe.outbound.protection.outlook.com (mail-eopbgr150100.outbound.protection.outlook.com [40.107.15.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2149047BAC;
-        Wed, 12 Oct 2022 23:40:09 -0700 (PDT)
+        with ESMTP id S229717AbiJMITo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 04:19:44 -0400
+Received: from esa2.hgst.iphmx.com (esa2.hgst.iphmx.com [68.232.143.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6F332AA
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 01:19:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1665649176; x=1697185176;
+  h=from:to:subject:date:message-id:references:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=uJRKSiZCTSqGvk2k5hXhMFoX111jnQ6o6Oc82CT8fgE=;
+  b=jL9LikEpXGyafzqHyX533TDVssJtyZ7bzW21o5cu/OoA0U58lFUWpSLl
+   IAMvpsxMB7Nlb+d8hGF0281K0aJY5S3yjGZXvwx+rhqb80DxYnQLkhBFF
+   GPkbMQI3XhJUS/2T01QU6vHyF50dMcWxkj3RTmHRhXShB4tqqqIk3cZLu
+   GVoYvMxFFnNXuNa8ENjfY+LboHg8XIcunyYkOBmqGwT8mN5h0t3Uzw/6D
+   +hGvSuZmu82TNhPTnqkYj9nOPmiMXMhAnquXxYNR5dAL7kzXJBVut4ZkA
+   mw21T85oFYYbLDKN60j3C6s2DGuprk79SpZq4mGLzBtCJMqH9zcSAr6ok
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.95,180,1661788800"; 
+   d="scan'208";a="317985233"
+Received: from mail-dm6nam04lp2047.outbound.protection.outlook.com (HELO NAM04-DM6-obe.outbound.protection.outlook.com) ([104.47.73.47])
+  by ob1.hgst.iphmx.com with ESMTP; 13 Oct 2022 16:19:35 +0800
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=oLFhoJ7hob/mSMwMHKVPtj8PIJLqqTQFQ1dWYLknrbNoRxbckkfcP8UVzZ00W3zOHl5HRVdR1+6Je22JskUcDwarh8BTD8LoBaRB3+Q7it67k0GN6Bs8tBcjFRQipKNqgDDEHv3Qtgg3A24dYhCPfNbECwF9npewTR6w74fVOtLtsWVqMEI9UbWXRidW+DS7GUfV4PGBoLJEOQIqETBTzYOJztiE/5P6nnNlwDNsXMAoN6E1VAVEFxHVYCAxlKE/GVuhE30h+bQtJToKkDy0BijjUifix82xR+PqntOu59CIRONxJ3J0pYmOPlDr02KgoLZXKXrol5h9hJ09kUBxXA==
+ b=jfVRgJAcqLyM5W6G+oarmc0M1Pa2iRN8N6iPOx08BFViWXMyNWK3DnA4ZWi/xav37WJ8qnHWNYaacNjzDCD1/4tAnS2oHzRnGaqcgaDBgAila+5fpn1Qn089ogNaQCN9ewEc0aP5HOzcn0+QG3DEj5YA9IoHnbCW7amaVBJSLAroXWTE4boxPr9ZLWawJ168abPSqDoZynpt6ucqAPzwgkWWc9bpzl6lsK8Bfw2P6iYIPgfYLfl6Sr35KXw8VK8f4/PMy25gEjey+9TovbPB/xL1LORekvHloaRjGDzcFjpSGJem/VXRDW018XSn9mVj3rEsZaxrgL4aVYne+f0q8Q==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=irguFIaDaA8Fhcf7eK+h98j3V+k//G0f+/mQwRfNAXw=;
- b=bKEtgiILq2/c9e5TIBrp8uYRKuOWbErpQ+uZM799y0aKxIZP+8bwdBO6mc/Oo7tZtozhJhmfVe5STI06ese57x+CXlPvofEElwK5ZISbsD7DuSbNoHi4V2cnd/tB5sErqlASQw+JTvZK5QbvZNjgq7wrb7ehv4RMcus/X++Fll8SlTSug7qZ141LEJdEeh5/Cm2j78ZfbqvDkpfjhmnxhZsoW5oCA/rPm4KENbU1Ob2/Y6saxMc/LXMaC/rV34A34dqhQ6CxuFXieRj1Q8ZPyP5R6G17HO+2K8U3s6RoR/F3/4qvWZVSnAKsdNhT25CwrT6FkR+tZDibPOEwGnyZ0Q==
+ bh=Sf4XW7xOTO460awDjTQRLOCFJp9q/jAdYabLxfNTmW0=;
+ b=E06+3MzpNxVzzFQ/VEG8AF6qUoFJi0Obo8RXfiTMU+RAJ7+rJrfREByV0lvxXgn9+7lK6TrQDKhrGR/0ITeLUtmcxWV/GEUM3iazCBcseyjSKJvRVSAVKyEkTDqiawse92P0wvWU9bNoN+k5ISUV49rPNIA0Xp7iQueXGnPDEgyvcQ2+seo9AVqvHnMICVVLsxXqbitIFYoxM0QO1UeVSf9SQ1pCecfxSlP+303Tsrx6uK2UL0S6c9FY9wDCeA3yjL7K5qVa6euN4d8pPG5sizLmmfqczH/ycyMLyvX+ZxLUfe/LbZEcK+WGFxeCWv9Cf0zH12mraFTU5quIKgfgCQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=plvision.eu; dmarc=pass action=none header.from=plvision.eu;
- dkim=pass header.d=plvision.eu; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plvision.eu;
- s=selector2;
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=irguFIaDaA8Fhcf7eK+h98j3V+k//G0f+/mQwRfNAXw=;
- b=mr/uSKY1yH7tEGdbupEvJ1M7zGUpdbM7NV6mmQFvkAksbH6idLBE74wmvzd73xZq4YO/UpVJ4rWW8KL7qY34be9xj4USpaXrI5mWiHxR7haTRsiTyF+e2chPrImwvXGTTJkHe4cm6UGcmnJMdp8SN6Zijgin5kRfu0RQlG7oAf4=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=plvision.eu;
-Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM (2603:10a6:802:38::26)
- by DBAP190MB0887.EURP190.PROD.OUTLOOK.COM (2603:10a6:10:1ae::19) with
+ bh=Sf4XW7xOTO460awDjTQRLOCFJp9q/jAdYabLxfNTmW0=;
+ b=IZvviZPwVApNlPaL5A+pRRuw+RQfG+Ury03OdUo1Mh/nh2AuHJV4F6LvHYKfHX9aEMHaHADC9wQLLO5lp/lhMa0JsSvfyNh4TmCp2SB5MUqJfl7dsynm7Ndz9eVtPSonFk3nG3SCTE9FFUMYaKpI//P6zwbv6cZE0A0Ga0fg2PA=
+Received: from BL0PR04MB6564.namprd04.prod.outlook.com (2603:10b6:208:17d::11)
+ by BYAPR04MB4725.namprd04.prod.outlook.com (2603:10b6:a03:59::28) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5723.26; Thu, 13 Oct
- 2022 06:40:05 +0000
-Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
- ([fe80::96d:7759:a68d:c5d9]) by VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
- ([fe80::96d:7759:a68d:c5d9%7]) with mapi id 15.20.5723.026; Thu, 13 Oct 2022
- 06:40:04 +0000
-Date:   Thu, 13 Oct 2022 09:40:00 +0300
-From:   Vadym Kochan <vadym.kochan@plvision.eu>
-Subject: Re: [PATCH] mmc: sdhci-xenon: Fix 2G limitation on AC5 SoC
-To:     Robin Murphy <robin.murphy@arm.com>,
-        Christoph Hellwig <hch@infradead.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Hu Ziji <huziji@marvell.com>,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5709.15; Thu, 13 Oct
+ 2022 08:19:33 +0000
+Received: from BL0PR04MB6564.namprd04.prod.outlook.com
+ ([fe80::152f:249a:afc7:d6d1]) by BL0PR04MB6564.namprd04.prod.outlook.com
+ ([fe80::152f:249a:afc7:d6d1%9]) with mapi id 15.20.5709.019; Thu, 13 Oct 2022
+ 08:19:33 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Elad Nachman <enachman@marvell.com>, iommu@lists.linux.dev,
-        Mickey Rachamim <mickeyr@marvell.com>
-In-Reply-To: <3b88438d-1bb0-e980-b4db-1f8663dc6042@arm.com>
-References: <20220808095237.GA15939@plvision.eu>
-        <6c94411c-4847-526c-d929-c9523aa65c11@intel.com>
-        <20220808122652.GA6599@plvision.eu>
-        <3f96b382-aede-1f52-33cb-5f95715bdf59@intel.com>
-        <3d16ebad-ea6c-555e-2481-ca5fb08a6c66@arm.com>
-        <20220816205129.GA6438@plvision.eu>
-        <94888b3b-8f54-367d-c6b4-5ebfeeafe4c4@arm.com>
-        <20220817160730.GA17202@plvision.eu>
-        <80d2538c-bac4-cc4f-85ae-352fcf86321d@arm.com>
-        <20220818120740.GA21548@plvision.eu> <YwHOCHmKaf7yfgOD@infradead.org>
-        <3b88438d-1bb0-e980-b4db-1f8663dc6042@arm.com>
-Content-Type: text/plain
-X-ClientProxiedBy: CWLP265CA0423.GBRP265.PROD.OUTLOOK.COM
- (2603:10a6:400:1d7::9) To VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
- (2603:10a6:802:38::26)
-Message-ID: <VI1P190MB031779C030CAED8026D53D1895259@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
+        Linux MMC List <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCHv2 1/2] mmc-utils: Refactor switch to allow custom timeout
+Thread-Topic: [PATCHv2 1/2] mmc-utils: Refactor switch to allow custom timeout
+Thread-Index: AdjebSjVc+AEAThvQj+uqrbmgvcwAQAZ3tvQ
+Date:   Thu, 13 Oct 2022 08:19:32 +0000
+Message-ID: <BL0PR04MB6564149CA860570CA546E51FFC259@BL0PR04MB6564.namprd04.prod.outlook.com>
+References: <4152c899b638429fb5ec1fb93009b42b@hyperstone.com>
+In-Reply-To: <4152c899b638429fb5ec1fb93009b42b@hyperstone.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: BL0PR04MB6564:EE_|BYAPR04MB4725:EE_
+x-ms-office365-filtering-correlation-id: 82566129-f2e9-4792-b6da-08daacf3a87d
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: Y1bcqzGVtDKXvBfCTwmbO5hM7lHjvrOO9KmPw8cCfA1wBA4VGi1BB/h/OsBjDkCcY1xkb766CKTky/syKNQVzbHvRAlWCROUGC2CWl2WPuCTBqy7D1JQMeDDsaHqg/NtXhH25k43WK8mTd1tfIpZh6pw1MBBaB7b9fyZXbfUt7xhhQAyq8pep8sDChv7GN4ob+Q+1j6wGaJAckuF2cYuu7aHBJtiOGL4clpD3/Uu50lDdFkR0rBqZFHsuPrCHvGiYsOGwi84qajyaQckKQOUaHQgfprkRe+VkZ3oLi9YenXQsZ9jH4RT7tuSA6IVLzVvN+TWjvTNaaNq11HrBYgwPkJRtQeLsYlZBsSSTYEySGNWgdI1Y2pNLjFCxIxueflBb0Aapr121CDsTpJXZOgDE5OdOaECI7h/V6VmSHgotdeZB0YTtHcTJ+IXywzoVqGBd2EwJkRS3n9vKhWScK3rIDgVSwuJN1MFpyZ0RjTKeXCJUhTBy8vY5HDF7tsXTmSh4ACijsZYHDNl5DjcLHsFi6uYO/P58XWcIt9SjKAVMLOz60zz7E5GwUaTjC5VBvXPkAdYPP3sc8t/VmHpwlkVpqJu8k6v36+8DwoiuvgCmIRzqovSsBBaK1NQD4LypG8iWWzJyGMfS5SJMb4t+L+uiFt6QXqNDWypvi1jg3KHuGI70I+Vi+22SYLGiwR0NwMFuJ1gMgGV/FXcG6NgdFSTRe2iLwEqYog8wNt1/Z5vDQqTjP/AjK3gsbHG/I6eOhq0KMJSHqWu6P7dS89f+Oouaw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BL0PR04MB6564.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(366004)(39860400002)(346002)(396003)(376002)(136003)(451199015)(86362001)(8936002)(26005)(9686003)(5660300002)(66556008)(41300700001)(76116006)(6506007)(7696005)(8676002)(66476007)(64756008)(30864003)(83380400001)(316002)(186003)(55016003)(66946007)(66446008)(2906002)(33656002)(52536014)(38070700005)(110136005)(71200400001)(478600001)(38100700002)(82960400001)(122000001);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?/4GPZfEQF8eRmHa5BWSagV8GIig01ozgZ4ButMDjAegJN47tBOoQRl/4Nu?=
+ =?iso-8859-1?Q?yNR3f1m6tINBDQkIF4LCeoUaPhWEgPrbVM9sH9zn6zXb1zrNHKAqillMB2?=
+ =?iso-8859-1?Q?HBxxet8maJ/5rei39e8nPyxBkGq5GdQIxHI4ove9ojiv8x66p2IUm0IxPo?=
+ =?iso-8859-1?Q?ycxo/QJfQpPCXg+zkIe471BoPyfYjz2Fexp0ZbJLvWWs9DUWaK6Mqquuns?=
+ =?iso-8859-1?Q?jWWOLSIULR9kTv0TH6OAo4FoQOLG61yqAwnZYVjI5OWykQ9p9rkX05vL4o?=
+ =?iso-8859-1?Q?SlWeYytF5XZ217R92kPbQIjQg7luHdqs2osjBmDLOptB38WAZJmuqcmJW1?=
+ =?iso-8859-1?Q?s9IH756fdchAJ29TM4C0fhb+QY3X8/+0AodqAuPpx6jJ+OUv62z0v+UByx?=
+ =?iso-8859-1?Q?8n8UYd6mMi6s/W3BU3hBimhJY0lHWgA9moh+MIMjzeqvC0WwzQbn0PLznw?=
+ =?iso-8859-1?Q?i5gFABPNj+EYRI+/J7L6Pu5XPfEnOrgkRl0Wga2CvwvQ3BPAMV3d+g2t29?=
+ =?iso-8859-1?Q?2dxKet5nY35Wlp4d1wpFT2x240XFNUySa56xk9ScZmZCLEdZKOxe/VotO9?=
+ =?iso-8859-1?Q?4NktzZ7+laSrsxi4lFWdUIc4e2D5mWjyBCm/PJB/+KhS85xAmSq+FF0hi0?=
+ =?iso-8859-1?Q?2ZeR5QY7r2pBqQZFZf9Mh1FP+anjx33FyzrArGRthxfx7IXugGVwroFq7Z?=
+ =?iso-8859-1?Q?HfBkIabuadMi/klDcJyahJWFRLacwHPbl127NDGzmmaUcFTEu7mluxkY0L?=
+ =?iso-8859-1?Q?h0TQiqehPO/Lh0jYQPvoVanOJrkszOs7gCLOwVHp2lsepomKrsdXO9h96K?=
+ =?iso-8859-1?Q?PbCE5hSNuHd/dOacl+xHtTEUm5s0lboFugXD+j7B37xzYmY/XYoAtJf9lY?=
+ =?iso-8859-1?Q?tek2gjlgQa7JoG+zeWM92PLb1sVoLW2wcvjqhDCa2o1ePSk7OMNLYralAe?=
+ =?iso-8859-1?Q?pw6QDM8iDq4z7TeNCWuLhWqiDTaVQTDw2yVg9CRIwWx7AZP+3tO5Rufl2p?=
+ =?iso-8859-1?Q?VEZq1fo9JaDrpbEfJU6VSzaJf4Rkj/5Qw9SzghYWH3CNfTvksn+ETiK0ll?=
+ =?iso-8859-1?Q?qysN9iB8CmzM2gIrv/qt48OtwHmMlMGNjnlUwkd1519RAOQEfn0U6lsnX9?=
+ =?iso-8859-1?Q?Jxb+jmRorCDMCghWZ54QT7Qz3m6ZZfj/0g3N+f1L6eFHxFsp77G4g0WEIJ?=
+ =?iso-8859-1?Q?kJuBXNIcfhL4Q5OE0WAmdYsurihF+26Yli8FbJlffShIfN8ir+qxaJJGVI?=
+ =?iso-8859-1?Q?W9a0LfZwXuH4WiczyOZQ8U4peJ5chVL+XJAXguGq0JzQhYV7KaBhfBtbt1?=
+ =?iso-8859-1?Q?MnNlFyPb48THcjDLTNWQlpE5RLylPfngWtJ58k5KqhKd2A4bgVfPVZ7wcN?=
+ =?iso-8859-1?Q?uP0iwJNOMxv2Njz0N7yz5J5WpvLiLvgRhrutJiZ4AqXPebPpKF9NlcOX7R?=
+ =?iso-8859-1?Q?kkTHWzdispWDVI5O+FuB538m1wfiD2UNNkcQZDGKFZMFspAowazBHguSba?=
+ =?iso-8859-1?Q?N+PUx4w0WicoKK9QYVNNTWm4Dc3Fd98aN58u/gpnpIJWXvHfFAvPJY0N2C?=
+ =?iso-8859-1?Q?KjNlzYFyjkl0NGK6fSB9DJRH5TbVoxsPMaQSRN+LhFuQxgGc9HN4u3QPdz?=
+ =?iso-8859-1?Q?U1Iw4XnhTbd7j4ox+Gjcphh8d7zdd+noDL?=
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: VI1P190MB0317:EE_|DBAP190MB0887:EE_
-X-MS-Office365-Filtering-Correlation-Id: f9658f76-1a9c-4875-488a-08daace5c299
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: yJjxBMhW6EkBOCB6r+1MzfNF8f+Fspo9PC7ziQmaWOXmkGuzc3n633SBBKMF8PbDVgovV7LzWgs6f9vtOkrmCeZqeCB/0nnLqYib37R4eKJiiZ/2VGhDviK6JQeQxrUH3wYTne9vkW07dJEKoeYF+ZzgK2Zke48tvgRMiiiNd02XdxkGL1MUESAN3rMBh8gx6iBRCqtHDen8ZBGohbeJ9aM6H5wPjwi7NPimwQUg476r5qKGBCH7qQelikJiOdmRmgzMRjq2PDSKAuI9wvF/nAkLcjHDTYOUhP1c5TRnKwKhvKv20lj3nJTRLNroWLRdqi3Jy1OHRCsUa9o0KhP4BfUnEZjKvxP5Y/l3m1vFnxy1GZEvi9m2mU02YVJAJeXxivKYPeUcrqcggolToYQAVNtu1t7viE/5MNxRyThCgemSk7gyns/+xSM3YVFpxXYbOD2a98uoNKv8AZRoXLSDYv7fpBFBPrS9go0MeFhwRJ/EwCMLsNrF9eyUE/T7zcfJBxhbb3+5cV3RIwEzPEvDCO+M6bHD7iKkuZijRJWi7jov69lTPBBbJxLYXid7mZ6fRrPfZVWdDMMvbLpatfOXszhx8s121fzBssn1SuXCDKEgrg0dvGbfWldCY1su41f9v4AzNbPgyy/XLVUwXolHrqqYsl2CvWcVr3lh1OBExuDU0WYEkX2g+GmDMHKeVcsJU1crvApqv5hu0UD+LQclgS4ggD1kXjOyGA44K3E8P7gmQhevzAfjjvXbdTyXXIA4
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1P190MB0317.EURP190.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230022)(4636009)(346002)(136003)(366004)(396003)(39830400003)(376002)(451199015)(186003)(9686003)(26005)(52116002)(53546011)(55016003)(2906002)(86362001)(52536014)(316002)(33656002)(110136005)(8936002)(54906003)(41300700001)(66556008)(66476007)(66946007)(8676002)(4326008)(6666004)(38100700002)(38350700002)(7696005)(6506007)(478600001)(7416002)(5660300002)(44832011)(83380400001);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?2FB8CsdlukcVsX1zyNqU3+HmAM4mJThuYPjfSC71DRBBKn8yJVNRKJpLxlrP?=
- =?us-ascii?Q?E027pJuUNe93CI0T4np6irzAkBudiqrJveL3cPjHZiqi7uTs+dTcAFDXMjXb?=
- =?us-ascii?Q?ws4sNKz5Q0rs6JpdvapaNjcBaqy7wrOLo08W/UzxVh0Eu7BIUhrEKRR5L6BF?=
- =?us-ascii?Q?VYKioLkWvBlaoD/cMUezBekIAroo6SE5TqaooHFQY+yH024q10roKD6LnEDW?=
- =?us-ascii?Q?5KKye9QJV01iLBFz9zByPqH76nd49fOET5mAA/bkIVEeMv/CF0zS0otgv2n4?=
- =?us-ascii?Q?v/gPG8JaL8ra1gnE8x0VPJSdTF7O/OnfSjQ3z9zb+pGy/eKtIoG2SJHhSm9w?=
- =?us-ascii?Q?JhyCw0rZBktf+H27U7BXSRzw3Z6yLCIr4yZgTymBj/wODnj9o9cun4G+XgzE?=
- =?us-ascii?Q?xy3b/H5iHKwQsPS4vBwF1gl2tTfZaQB+HT6bLy316h+fFILk14Xs5SQzeaS2?=
- =?us-ascii?Q?NtqJZZtna4i6KZcujsHdyNtAPDX6jKf/+rvbN4BWtDhYbI4mKaYuVtSM8Zm9?=
- =?us-ascii?Q?/j6g7aqsgrl34aN/Fou7rRWcqvcKK7KB3Rk7mvvOZh4ZfPc8+HyC8besmj0I?=
- =?us-ascii?Q?ZqkxwaaxK61+vg5wzd6y6q4FAzd9gsNG7Bx7teq49vR55A62FIfNDr/p5Nxl?=
- =?us-ascii?Q?keI5qZAux8FGDI0jEQKYznyYEJxBI7LHS1MoDsRqJIkKYyGb3/04bUzRcpoN?=
- =?us-ascii?Q?2t/EodnOzpW0xufQ0KdtOmiQk8lu0pJj8T99lzHA6JF/AIZ5CpKq5OCiY5Vf?=
- =?us-ascii?Q?EknkJj0O3wGHVezBKkP6pbDjtOME7f6g8qVw1FFk2ap9cUpJ4KS2a/rEbqQI?=
- =?us-ascii?Q?vjwe9lKL2wK9PAFKA6blhfV11/sRtVR4SkHvCduzFFAfZsSYMKgCEroMeo05?=
- =?us-ascii?Q?9q1u2zyc0zbRnm4OYdWSD23FhGqqkZe8ZY95UIvVKRM8Rw0ax6CEevtQ4deY?=
- =?us-ascii?Q?diDLE0MtzuIIyMnC3AuR7lGRqzRYA+rN+I7eRGQS6drWpJVYVr5Q62ZgSh4f?=
- =?us-ascii?Q?RLLUpcYlN82UkpsMox2o/OKJPN/v5SicWUsJr6YwFyuunEEuA2QyLO5StBxR?=
- =?us-ascii?Q?w7Vc+GVpPhwclPgiPpC1qGWsS1esYeVCCdfHfO8jW/Db3ZI3ChED9N9wm2cc?=
- =?us-ascii?Q?Ti0soFr/PCZy1vpjwVPDjwVEoZotFSi98nF+MeDmV7Fa4EJ1aVVSEddffEBn?=
- =?us-ascii?Q?bMCnlmp5Yu3BTEyzmGhjLNpU/kVzDcLnxFKN/Ytwdd2JVB4qnO0eKPHTdaXZ?=
- =?us-ascii?Q?Fg70xtVmQsmBZJi4yqbcbLdSwxD2kSH0Og0hue00CWUuY/B4B/r8IgpUMGaE?=
- =?us-ascii?Q?93brp/3LCMg1YoZId+lPYRgvo+kVIjA5UgJQum4SF1h84khTMMj4CoSZrumy?=
- =?us-ascii?Q?heUnNoNtGUDWn4CyTd++nbNXi/p2gPXM5IwnQaSH38rcFlgM8TunIdjQo7SW?=
- =?us-ascii?Q?VG/9Kx3weUdIcDHv7DiZ7+RIfEarYiftuzw+mxUzGVipwYrizj+pJMIKdZdZ?=
- =?us-ascii?Q?BQr6hvJmiGiqRgxDDvX7J8ufpHK/la1EMco4mgjADtkCXRHyOSJ/8Er93Bl7?=
- =?us-ascii?Q?Jspw1RmHwNehlb5Z+aRsM+cQ+cQ5Rk2xFd34zjLRLi4glM7AdFyZEXWwtZOp?=
- =?us-ascii?Q?dA=3D=3D?=
-X-OriginatorOrg: plvision.eu
-X-MS-Exchange-CrossTenant-Network-Message-Id: f9658f76-1a9c-4875-488a-08daace5c299
-X-MS-Exchange-CrossTenant-AuthSource: VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
+X-OriginatorOrg: wdc.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Oct 2022 06:40:04.8659
+X-MS-Exchange-CrossTenant-AuthSource: BL0PR04MB6564.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 82566129-f2e9-4792-b6da-08daacf3a87d
+X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Oct 2022 08:19:32.9563
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 03707b74-30f3-46b6-a0e0-ff0a7438c9c4
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: OR2CkkrtVX8pZ/AaAOLHAqmaMZQneHWBZTpy4yZMeW+jl5SHevwgPihDW6rQu3yXB3ublZyHW9LpMLbum7wEo3Ddb4rRUbpTl6F+lCmHo/c=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DBAP190MB0887
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 4qUMkE8lmtfi7tJyy+yLTq6qHySIfqOwBJDGuvGe5UrgtLUWvh5706wzVRsD4CMXbpE5Yw43mlczGYoIBXIu2A==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR04MB4725
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Robin,
+=20
+> Certain commands require a longer switch timeout.
+> Refactor accordingly to allow e.g. for future sanitize change.
+>=20
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  mmc_cmds.c | 83 +++++++++++++++++++++++++++++++++++-------------------
+>  1 file changed, 54 insertions(+), 29 deletions(-)
+>=20
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index 2957aa9..8bc7a56 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -54,6 +54,8 @@
+>  #define WPTYPE_PWRON 2
+>  #define WPTYPE_PERM 3
+>=20
+> +#define SWITCH_TIMEOUT_MS (10 * 1000)
+Why 10 seconds?
+Maybe add comment or at least explain in your commit log.
 
-On Mon, 22 Aug 2022 11:06:43 +0100, Robin Murphy <robin.murphy@arm.com> wrote:
-> On 2022-08-21 07:17, Christoph Hellwig wrote:
-> > On Thu, Aug 18, 2022 at 03:07:40PM +0300, Vadym Kochan wrote:
-> >> It works with the following changes:
-> >>
-> >>      #1 dma-ranges = <0x0 0x0 0x2 0x0 0x0 0x80000000>;
-> >>
-> >>      #3 swiotlb="force"
-> >>
-> >> Is it OK to force the memory allocation from the start for the swiotlb ?
-> > 
-> > It should be ok, but isn't really optimal.
-> > 
-> > I wonder if we should just allow DT to specify the swiotlb buffer
-> > location.  Basically have yet another RESERVEDMEM_OF_DECLARE variant
-> > for it, which shouldn't be all that much work except for figuring
-> > out the interaction with the various kernel command line options.
-> 
-> We already have all the information we need in the DT (and ACPI), the 
-> arm64 init code just needs to do a better job of interpreting it 
-> properly. I'll see what I can come up with once I've finished what I'm 
-> currently tied up in.
-> 
-> Thanks,
-> Robin.
+> +
+>=20
+>  int read_extcsd(int fd, __u8 *ext_csd)
+>  {
+> @@ -76,7 +78,7 @@ int read_extcsd(int fd, __u8 *ext_csd)
+>         return ret;
+>  }
+>=20
+> -int write_extcsd_value(int fd, __u8 index, __u8 value)
+> +int write_extcsd_value(int fd, __u8 index, __u8 value, unsigned int
+> +timeout_ms)
+>  {
+>         int ret =3D 0;
+>         struct mmc_ioc_cmd idata;
+> @@ -89,6 +91,7 @@ int write_extcsd_value(int fd, __u8 index, __u8 value)
+>                         (value << 8) |
+>                         EXT_CSD_CMD_SET_NORMAL;
+>         idata.flags =3D MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
+> +       idata.cmd_timeout_ms =3D timeout_ms;
+If cmd_timeout_ms not set, mmc_sanitize will use 240s - MMC_SANITIZE_TIMEOU=
+T_MS.
+I thought that you need more time, or did I get it wrong?
 
-Sorry to disturb you, I just 'd like to know if you have
-some ideas to share or patches to test ?
+Also, I am uncomfortable that you are setting this value for all other comm=
+ands.
 
-Thank you!
+Thanks,
+Avri
+>=20
+>         ret =3D ioctl(fd, MMC_IOC_CMD, &idata);
+>         if (ret)
+> @@ -341,7 +344,8 @@ int do_writeprotect_boot_set(int nargs, char **argv)
+>         value |=3D permanent ? EXT_CSD_BOOT_WP_B_PERM_WP_EN
+>                            : EXT_CSD_BOOT_WP_B_PWR_WP_EN;
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_BOOT_WP, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_BOOT_WP, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", @@ -508,7 +512,8 @@ int
+> do_writeprotect_user_set(int nargs, char **argv)
+>                         break;
+>                 }
+>                 if (user_wp !=3D ext_csd[EXT_CSD_USER_WP]) {
+> -                       ret =3D write_extcsd_value(fd, EXT_CSD_USER_WP, u=
+ser_wp);
+> +                       ret =3D write_extcsd_value(fd, EXT_CSD_USER_WP, u=
+ser_wp,
+> +                                       SWITCH_TIMEOUT_MS);
+>                         if (ret) {
+>                                 fprintf(stderr, "Error setting EXT_CSD\n"=
+);
+>                                 exit(1); @@ -526,7 +531,7 @@ int
+> do_writeprotect_user_set(int nargs, char **argv)
+>         }
+>         if (wptype !=3D WPTYPE_NONE) {
+>                 ret =3D write_extcsd_value(fd, EXT_CSD_USER_WP,
+> -                                       ext_csd[EXT_CSD_USER_WP]);
+> +                               ext_csd[EXT_CSD_USER_WP],
+> + SWITCH_TIMEOUT_MS);
+>                 if (ret) {
+>                         fprintf(stderr, "Error restoring EXT_CSD\n");
+>                         exit(1);
+> @@ -571,7 +576,8 @@ int do_disable_512B_emulation(int nargs, char **argv)
+>=20
+>         if (native_sector_size && !data_sector_size &&
+>            (wr_rel_param & EN_REL_WR)) {
+> -               ret =3D write_extcsd_value(fd, EXT_CSD_USE_NATIVE_SECTOR,=
+ 1);
+> +               ret =3D write_extcsd_value(fd, EXT_CSD_USE_NATIVE_SECTOR,=
+ 1,
+> +                               SWITCH_TIMEOUT_MS);
+>=20
+>                 if (ret) {
+>                         fprintf(stderr, "Could not write 0x%02x to EXT_CS=
+D[%d] in %s\n",
+> @@ -650,7 +656,8 @@ int do_write_boot_en(int nargs, char **argv)
+>         else
+>                 value &=3D ~EXT_CSD_PART_CONFIG_ACC_ACK;
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_PART_CONFIG, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_PART_CONFIG, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", @@ -720,7 +727,8 @@ int
+> do_boot_bus_conditions_set(int nargs, char **argv)
+>         printf("Changing ext_csd[BOOT_BUS_CONDITIONS] from 0x%02x to
+> 0x%02x\n",
+>                 ext_csd[EXT_CSD_BOOT_BUS_CONDITIONS], value);
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_BOOT_BUS_CONDITIONS, value=
+);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_BOOT_BUS_CONDITIONS, value=
+,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", @@ -771,7 +779,8 @@ int do=
+_hwreset(int
+> value, int nargs, char **argv)
+>                 exit(1);
+>         }
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_RST_N_FUNCTION, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_RST_N_FUNCTION, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr,
+>                         "Could not write 0x%02x to EXT_CSD[%d] in %s\n", =
+@@ -825,9
+> +834,11 @@ int do_write_bkops_en(int nargs, char **argv)
+>                         fprintf(stderr, "%s doesn't support AUTO_EN in th=
+e BKOPS_EN
+> register\n", device);
+>                         exit(1);
+>                 }
+> -               ret =3D write_extcsd_value(fd, EXT_CSD_BKOPS_EN,
+> BKOPS_AUTO_ENABLE);
+> +               ret =3D write_extcsd_value(fd, EXT_CSD_BKOPS_EN,
+> BKOPS_AUTO_ENABLE,
+> +                               SWITCH_TIMEOUT_MS);
+>         } else if (strcmp(en_type, "manual") =3D=3D 0) {
+> -               ret =3D write_extcsd_value(fd, EXT_CSD_BKOPS_EN,
+> BKOPS_MAN_ENABLE);
+> +               ret =3D write_extcsd_value(fd, EXT_CSD_BKOPS_EN,
+> BKOPS_MAN_ENABLE,
+> +                               SWITCH_TIMEOUT_MS);
+>         } else {
+>                 fprintf(stderr, "%s invalid mode for BKOPS_EN requested: =
+%s. Valid
+> options: auto or manual\n", en_type, device);
+>                 exit(1);
+> @@ -1002,7 +1013,8 @@ int set_partitioning_setting_completed(int dry_run,
+> const char * const device,
+>         }
+>=20
+>         fprintf(stderr, "setting OTP PARTITION_SETTING_COMPLETED!\n");
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITION_SETTING_COMPLETE=
+D,
+> 0x1);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITION_SETTING_COMPLETE=
+D,
+> 0x1,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x1 to "
+>                         "EXT_CSD[%d] in %s\n", @@ -1188,7 +1200,8 @@ int
+> do_create_gp_partition(int nargs, char **argv)
+>         gp_size_mult =3D (length_kib + align/2l) / align;
+>=20
+>         /* set EXT_CSD_ERASE_GROUP_DEF bit 0 */
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ERASE_GROUP_DEF, 0x1);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ERASE_GROUP_DEF, 0x1,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x1 to EXT_CSD[%d] in %s=
+\n",
+>                         EXT_CSD_ERASE_GROUP_DEF, device); @@ -1197,7 +121=
+0,7 @@
+> int do_create_gp_partition(int nargs, char **argv)
+>=20
+>         value =3D (gp_size_mult >> 16) & 0xff;
+>         address =3D EXT_CSD_GP_SIZE_MULT_1_2 + (partition - 1) * 3;
+> -       ret =3D write_extcsd_value(fd, address, value);
+> +       ret =3D write_extcsd_value(fd, address, value, SWITCH_TIMEOUT_MS)=
+;
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in=
+ %s\n",
+>                         value, address, device); @@ -1205,7 +1218,7 @@ in=
+t
+> do_create_gp_partition(int nargs, char **argv)
+>         }
+>         value =3D (gp_size_mult >> 8) & 0xff;
+>         address =3D EXT_CSD_GP_SIZE_MULT_1_1 + (partition - 1) * 3;
+> -       ret =3D write_extcsd_value(fd, address, value);
+> +       ret =3D write_extcsd_value(fd, address, value, SWITCH_TIMEOUT_MS)=
+;
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in=
+ %s\n",
+>                         value, address, device); @@ -1213,7 +1226,7 @@ in=
+t
+> do_create_gp_partition(int nargs, char **argv)
+>         }
+>         value =3D gp_size_mult & 0xff;
+>         address =3D EXT_CSD_GP_SIZE_MULT_1_0 + (partition - 1) * 3;
+> -       ret =3D write_extcsd_value(fd, address, value);
+> +       ret =3D write_extcsd_value(fd, address, value, SWITCH_TIMEOUT_MS)=
+;
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in=
+ %s\n",
+>                         value, address, device); @@ -1226,7 +1239,8 @@ in=
+t
+> do_create_gp_partition(int nargs, char **argv)
+>         else
+>                 value &=3D ~(1 << partition);
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITIONS_ATTRIBUTE, valu=
+e);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITIONS_ATTRIBUTE, valu=
+e,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write EXT_CSD_ENH_%x to EXT_CS=
+D[%d] in
+> %s\n",
+>                         partition, EXT_CSD_PARTITIONS_ATTRIBUTE, device);=
+ @@ -1240,7
+> +1254,7 @@ int do_create_gp_partition(int nargs, char **argv)
+>         else
+>                 value &=3D (0xF << (4 * ((partition % 2))));
+>=20
+> -       ret =3D write_extcsd_value(fd, address, value);
+> +       ret =3D write_extcsd_value(fd, address, value, SWITCH_TIMEOUT_MS)=
+;
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%x to EXT_CSD[%d] in %=
+s\n",
+>                         value, address, device); @@ -1317,7 +1331,8 @@ in=
+t
+> do_enh_area_set(int nargs, char **argv)
+>         enh_start_addr *=3D align;
+>=20
+>         /* set EXT_CSD_ERASE_GROUP_DEF bit 0 */
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ERASE_GROUP_DEF, 0x1);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ERASE_GROUP_DEF, 0x1,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x1 to "
+>                         "EXT_CSD[%d] in %s\n", @@ -1327,7 +1342,8 @@ int
+> do_enh_area_set(int nargs, char **argv)
+>=20
+>         /* write to ENH_START_ADDR and ENH_SIZE_MULT and
+> PARTITIONS_ATTRIBUTE's ENH_USR bit */
+>         value =3D (enh_start_addr >> 24) & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_3, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_3, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1335,7 +1351,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D (enh_start_addr >> 16) & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_2, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_2, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1343,7 +1360,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D (enh_start_addr >> 8) & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_1, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_1, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1351,7 +1369,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D enh_start_addr & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_0, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_START_ADDR_0, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1360,7 +1379,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>         }
+>=20
+>         value =3D (enh_size_mult >> 16) & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_2, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_2, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1368,7 +1388,7 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D (enh_size_mult >> 8) & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_1, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_1, value,
+> + SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1376,7 +1396,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D enh_size_mult & 0xff;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_0, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_ENH_SIZE_MULT_0, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to "
+>                         "EXT_CSD[%d] in %s\n", value, @@ -1384,7 +1405,8 =
+@@ int
+> do_enh_area_set(int nargs, char **argv)
+>                 exit(1);
+>         }
+>         value =3D ext_csd[EXT_CSD_PARTITIONS_ATTRIBUTE] | EXT_CSD_ENH_USR=
+;
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITIONS_ATTRIBUTE, valu=
+e);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_PARTITIONS_ATTRIBUTE, valu=
+e,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write EXT_CSD_ENH_USR to "
+>                         "EXT_CSD[%d] in %s\n", @@ -1455,7 +1477,8 @@ int
+> do_write_reliability_set(int nargs, char **argv)
+>         }
+>=20
+>         value =3D ext_csd[EXT_CSD_WR_REL_SET] | (1<<partition);
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_WR_REL_SET, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_WR_REL_SET, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in=
+ %s\n",
+>                                 value, EXT_CSD_WR_REL_SET, device); @@ -1=
+998,7 +2021,8
+> @@ int do_sanitize(int nargs, char **argv)
+>                 exit(1);
+>         }
+>=20
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_SANITIZE_START, 1,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr, "Could not write 0x%02x to EXT_CSD[%d] in=
+ %s\n",
+>                         1, EXT_CSD_SANITIZE_START, device); @@ -2587,7 +2=
+611,8 @@
+> int do_cache_ctrl(int value, int nargs, char **argv)
+>                         device);
+>                 exit(1);
+>         }
+> -       ret =3D write_extcsd_value(fd, EXT_CSD_CACHE_CTRL, value);
+> +       ret =3D write_extcsd_value(fd, EXT_CSD_CACHE_CTRL, value,
+> +                       SWITCH_TIMEOUT_MS);
+>         if (ret) {
+>                 fprintf(stderr,
+>                         "Could not write 0x%02x to EXT_CSD[%d] in %s\n",
+> --
+> 2.37.3
+>=20
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz Managing Director: =
+Dr.
+> Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 
