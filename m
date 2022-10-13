@@ -2,91 +2,116 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 595A7C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 14:02:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD769C43219
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 14:13:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229773AbiJMOCE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 10:02:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56434 "EHLO
+        id S230111AbiJMONv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 10:13:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229831AbiJMOCD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 10:02:03 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC1A92701
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:01:26 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id 70so2052357pjo.4
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:01:26 -0700 (PDT)
+        with ESMTP id S230019AbiJMONt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 10:13:49 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AF5050B8F
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:13:38 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id g1so2665182lfu.12
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 07:13:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=EcdlK7Vr/NBxA2l1p86K0/Xpr5oeds229RhFU2676lM=;
-        b=Z1/OTmQTgg5MeW7bFHC7ch+cisfd5L/kG4vLHsHa+J2XbdVcGLSLbPdVD7aU+GTOWy
-         9IIBF2hecp4l1I1H3ZOM8c2eauZB0IxTf66Wamhv3bnvjunJlhdMPMGg7+ImKG7cy+lp
-         naI4cZeaos+x949bSLDuxEdRJXVpOY90RDQXZAMZ0ek6ql5BgcNMH0C29zRP6mim/XRv
-         k6edvFlARO/3MFXTeEcFb4uxgf92VLSy45D/o1AlEo3IAkkbDsheQcr8yPIvWpbWXmpM
-         +QiO6jjcpjbTBxjI+BvLXWKMhvIsBezvjCn3M8ZMPmLEMk09l8NWKU3cZ7GT8UH4ksPG
-         NqaA==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=s4+2YBnku99YzzIsQ7nejlO8E//x75qWW99ifL1XicY=;
+        b=b756TPkB0v/sj7TeR9iEobafqj/mqe52e96i9Uo4mVUlEpArfd3BFuonxZdSWTfQwm
+         1WbF7BJanZBo+0xFo2kaxw4PUr9Hzzns1PquChY53JCehRqvqQab4lBFlVZKm7onlC5i
+         tKVyN4e0Rz3ATQwuUPC8yZg42ChnA0e5o0xi1RalBsvWPHtwQJezxoXAa9jCK/U4UwLt
+         CwoKouPo4uMFNvcIMYFjTb+DpQO5BkYc985o4jnfY/NSFwVL4iVMJsa5DJXgf1X5x0ZW
+         ZVBols6++HXNbvWG0hMn8vA+21XBafFyQwOOw0g/DYOd3HNfKxzrmRLCmrADNQ25bXG+
+         kd0A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=EcdlK7Vr/NBxA2l1p86K0/Xpr5oeds229RhFU2676lM=;
-        b=fANT7GMNe0Cixzl1HWTmDTZuFEU53z2sUr7yuzw67H8ex8PjJgkno16uQv+QWlkbo5
-         HYTsPaGpc1HZ83dDw8CS0gkyoXJx64U5TU1yGbqEsMqFBq0Vy5mp5EIAy1YOvhJfPPIS
-         LwPCgrH+mg7z3HquqMyVfkwK6xTETTwPOeic0uYt6LWPfVljGfM/K8FdGn0PvUlr1EHD
-         ULyWpyKaRoJVAKclLWopa3YCcMaKxjTF+NWglOYrQ1PZEEccAPW7p1+JUJ/X9VOUSDw2
-         rM5O59hfdCslmJl7RJMj+R2s/IqXl0+3IohLnRHEIcFxiDzMhfCk8Wd52P6VCEztu5SF
-         F0yA==
-X-Gm-Message-State: ACrzQf2aH0u6fiDnHQ+PxbD+IUhYGRB5edd6ndVw/9pf+vVGvAtvxO/6
-        ICv0tNHlR6bVzYpFs7JgvZOZdYa8skvl4dHNhgAQIA==
-X-Google-Smtp-Source: AMsMyM7YlOYDM85JmxAy9tj6ehh+qlCTrMlQaBt9+S+9SzzxnYa0Fpc2f2gjt68nTOWdRF8mgGhJf7g+FbchCfLCr0Q=
-X-Received: by 2002:a17:90a:7b8c:b0:20b:1f3b:f6fd with SMTP id
- z12-20020a17090a7b8c00b0020b1f3bf6fdmr34293pjc.202.1665669560510; Thu, 13 Oct
- 2022 06:59:20 -0700 (PDT)
-MIME-Version: 1.0
-References: <20221013093248.2220802-1-s.hauer@pengutronix.de> <20221013094451.GH6702@pengutronix.de>
-In-Reply-To: <20221013094451.GH6702@pengutronix.de>
+        bh=s4+2YBnku99YzzIsQ7nejlO8E//x75qWW99ifL1XicY=;
+        b=3RbHprbiBmvcj2lc1KMkov2LnhQTudzhDOoagbUsjWB890n6z6mNviYqrt6E9FDL8O
+         JjVPDmySp/qqSMvZtKExCwE98ZA0scZvJVuMmZpSbOr/dwX1goLAnwQ8JJXfCzd1pqHe
+         n/z81+Fgdp0AZLQwjNrzEw9D1ffTTGgRsJLgonYUcHzHQK3EM08D33syRfVc15nS/Glr
+         Q4BmIsjKi8SJXd7vNDd5lc1xre2MsgFZUQvzSBqV+QhhCfc7z5RmP7TYU5lA5v6rwQnh
+         zNn0N1/czJmAuZvIlyQmGaggYDraDERsF2H/hHBTy7ouPa4NmKSRX/X/AjhwG72Tswpx
+         lz1Q==
+X-Gm-Message-State: ACrzQf1c1lxx/sH8S+PA76ivtEW9HFiZTxfAnJL21eVZgXSlWpFqXOO5
+        P510J4q/uU1/NM2UEzuGpUFoXg==
+X-Google-Smtp-Source: AMsMyM6Pwh1Vdyx2Zh+wARiDcb8ZqJ7C5Df2hJuUaCeicB0JWCCxDRazlI+TpOb8KVWbyRSGKH9N9A==
+X-Received: by 2002:a05:6512:2256:b0:4a2:7e9a:576d with SMTP id i22-20020a056512225600b004a27e9a576dmr12571054lfu.58.1665670416386;
+        Thu, 13 Oct 2022 07:13:36 -0700 (PDT)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id v5-20020ac258e5000000b0049473593f2csm415121lfo.182.2022.10.13.07.13.35
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 13 Oct 2022 07:13:35 -0700 (PDT)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 13 Oct 2022 15:58:44 +0200
-Message-ID: <CAPDyKFpYDSS04bbWC4AKv-O+tEwdeqWNWrENGo-j2nWOcaQWzw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on
- 8bit bus
-To:     Sascha Hauer <s.hauer@pengutronix.de>
-Cc:     linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        NXP Linux Team <linux-imx@nxp.com>
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.1-rc1
+Date:   Thu, 13 Oct 2022 16:13:34 +0200
+Message-Id: <20221013141334.511005-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 13 Oct 2022 at 11:44, Sascha Hauer <s.hauer@pengutronix.de> wrote:
->
-> On Thu, Oct 13, 2022 at 11:32:48AM +0200, Sascha Hauer wrote:
-> > The core issues the warning "drop HS400 support since no 8-bit bus" when
-> > one of the ESDHC_FLAG_HS400* flags is set on a non 8bit capable host. To
-> > avoid this warning set these flags only on hosts that actually can do
-> > 8bit, i.e. have bus-width = <8> set in the device tree.
-> >
-> > Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
-> > ---
-> >  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
-> >  1 file changed, 8 insertions(+), 6 deletions(-)
->
-> Forgot to pass --notes to git send email, so adding this here:
->
-> An alternative approach would be to just lower the warning message
-> to debug level. In the end it's nice from the core to take the load
-> from the drivers, if only the core wouldn't complain about it.
+Hi Linus,
 
-So I don't recall why we picked the warning level, but maybe the idea
-was that it should become clear that it's the wrong configuration.
+Here's a PR with a couple of MMC fixes intended for v6.1-rc1. Details about the
+highlights are as usual found in the signed tag.
 
-On the other hand, that works well with the debug level too. So, why
-not do both $subject patch and what you propose here?
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
+
+
+The following changes since commit 833477fce7a14d43ae4c07f8ddc32fa5119471a2:
+
+  Merge tag 'sound-6.1-rc1' of git://git.kernel.org/pub/scm/linux/kernel/git/tiwai/sound (2022-10-05 12:02:07 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-2
+
+for you to fetch changes up to 6e141772e6465f937458b35ddcfd0a981b6f5280:
+
+  mmc: sdhci-sprd: Fix minimum clock limit (2022-10-11 15:48:51 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Add SD card quirk for broken discard
+
+MMC host:
+ - renesas_sdhi: Fix clock rounding errors
+ - sdhci-sprd: Fix minimum clock limit to detect cards
+ - sdhci-tegra: Use actual clock rate for SW tuning correction
+
+----------------------------------------------------------------
+Avri Altman (1):
+      mmc: core: Add SD card quirk for broken discard
+
+Biju Das (1):
+      mmc: renesas_sdhi: Fix rounding errors
+
+Prathamesh Shete (1):
+      mmc: sdhci-tegra: Use actual clock rate for SW tuning correction
+
+Wenchao Chen (1):
+      mmc: sdhci-sprd: Fix minimum clock limit
+
+ drivers/mmc/core/block.c             |  6 +++++-
+ drivers/mmc/core/card.h              |  6 ++++++
+ drivers/mmc/core/quirks.h            |  6 ++++++
+ drivers/mmc/host/renesas_sdhi_core.c | 21 ++++++++++++++++++---
+ drivers/mmc/host/sdhci-sprd.c        |  2 +-
+ drivers/mmc/host/sdhci-tegra.c       |  2 +-
+ include/linux/mmc/card.h             |  1 +
+ 7 files changed, 38 insertions(+), 6 deletions(-)
