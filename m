@@ -2,181 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0B1CC433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 11:16:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ADA7C43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Oct 2022 11:40:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229519AbiJMLQn convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Oct 2022 07:16:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39754 "EHLO
+        id S229796AbiJMLkz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Oct 2022 07:40:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34262 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229513AbiJMLQm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 07:16:42 -0400
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3B85120044;
-        Thu, 13 Oct 2022 04:16:40 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 906243A1924;
-        Thu, 13 Oct 2022 13:16:38 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 745233A17F5;
-        Thu, 13 Oct 2022 13:16:38 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Thu, 13 Oct 2022 13:16:38 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 13 Oct
- 2022 13:16:37 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Thu, 13 Oct 2022 13:16:37 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Linux MMC List <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>
-Subject: [PATCHv5 1/2] mmc: block: Remove error check of hw_reset on reset
-Thread-Topic: [PATCHv5 1/2] mmc: block: Remove error check of hw_reset on
- reset
-Thread-Index: Adje8+ttHfHV80CJTqaaNKWQWqaf3w==
-Date:   Thu, 13 Oct 2022 11:16:37 +0000
-Message-ID: <e91be6199d04414a91e20611c81bfe1d@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.2]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229722AbiJMLky (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Oct 2022 07:40:54 -0400
+Received: from mail.sf-mail.de (mail.sf-mail.de [IPv6:2a01:4f8:1c17:6fae:616d:6c69:616d:6c69])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E2BFB0B28
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Oct 2022 04:40:51 -0700 (PDT)
+Received: (qmail 12515 invoked from network); 13 Oct 2022 11:40:25 -0000
+Received: from p200300cf070ada0076d435fffeb7be92.dip0.t-ipconnect.de ([2003:cf:70a:da00:76d4:35ff:feb7:be92]:49034 HELO eto.sf-tec.de) (auth=eike@sf-mail.de)
+        by mail.sf-mail.de (Qsmtpd 0.38dev) with (TLS_AES_256_GCM_SHA384 encrypted) ESMTPSA
+        for <fw@strlen.de>; Thu, 13 Oct 2022 13:40:25 +0200
+From:   Rolf Eike Beer <eike-kernel@sf-tec.de>
+To:     Florian Westphal <fw@strlen.de>
+Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
+        "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Florian Westphal <fw@strlen.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Thomas Graf <tgraf@suug.ch>, kasan-dev@googlegroups.com,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        kernel-janitors@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-block@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-doc@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mm@kvack.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-nvme@lists.infradead.org, linux-parisc@vger.kernel.org,
+        linux-rdma@vger.kernel.org, linux-s390@vger.kernel.org,
+        linux-um@lists.infradead.org, linux-usb@vger.kernel.org,
+        linux-wireless@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        loongarch@lists.linux.dev, netdev@vger.kernel.org,
+        sparclinux@vger.kernel.org, x86@kernel.org
+Subject: Re: [PATCH v6 5/7] treewide: use get_random_u32() when possible
+Date:   Thu, 13 Oct 2022 13:40:40 +0200
+Message-ID: <11986571.xaOnivgMc4@eto.sf-tec.de>
+In-Reply-To: <20221013101635.GB11818@breakpoint.cc>
+References: <20221010230613.1076905-1-Jason@zx2c4.com> <3026360.ZldQQBzMgz@eto.sf-tec.de> <20221013101635.GB11818@breakpoint.cc>
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27198.007
-X-TMASE-Result: 10-0.521300-10.000000
-X-TMASE-MatchedRID: dc8Jy61QoRpgljMcj2tyXt5x7RpGJf1a4SkIdSwphgahLh9e7qvSIg2V
-        4b0zHULvGgn/HW4MjTmKoat5I/Uj/worSvYb1VTuKsurITpSv+M2LwvzxRX0gMC5DTEMxpeQfiq
-        1gj2xET9dBLSzNqCHg1o4rfBbwEORvvHAd28bGMe5x7uAXGEprfWr7HvOSElar4YC4lUEmf2Ypu
-        G7kpoKR5p6VbtqvFM0+WatSktubmiel3N+gDvB54knvYO5kHScNUSduuqYHDuZtziFUn+D+UzAk
-        Vmkw08mi/rJKndm3e8gE0bHoPl2Aq+/EguYor8cEzQnFLEeMUndB/CxWTRRu/558CedkGIvqcoA
-        hihTwviYPPIGKI9LSplNS0wJuvcSHXU/7YOpZJDHQadHeF1BN7liudJTCnnh
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 836db844-50eb-4e6e-9298-7b44347260d8-0-0-200-0
+Content-Type: multipart/signed; boundary="nextPart22512332.f9tG50R4rC"; micalg="pgp-sha1"; protocol="application/pgp-signature"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Before switching back to the right partition in mmc_blk_reset there used
-to be a check if hw_reset was even supported. This return value
-was removed, so there is no reason to check. Furthermore ensure
-part_curr is not falsely set to a valid value on reset or
-partition switch error.
+--nextPart22512332.f9tG50R4rC
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"; protected-headers="v1"
+From: Rolf Eike Beer <eike-kernel@sf-tec.de>
+To: Florian Westphal <fw@strlen.de>
+Date: Thu, 13 Oct 2022 13:40:40 +0200
+Message-ID: <11986571.xaOnivgMc4@eto.sf-tec.de>
+In-Reply-To: <20221013101635.GB11818@breakpoint.cc>
+MIME-Version: 1.0
 
-As part of this change the code paths of mmc_blk_reset calls were checked
-to ensure no commands are issued after a failed mmc_blk_reset directly
-without going through the block layer.
+Am Donnerstag, 13. Oktober 2022, 12:16:35 CEST schrieb Florian Westphal:
+> Rolf Eike Beer <eike-kernel@sf-tec.de> wrote:
+> > Florian, can you comment and maybe fix it?
+> 
+> Can't comment, do not remember -- this was 5 years ago.
+> 
+> > Or you wanted to move the variable before the loop and keep the random
+> > state between the loops and only reseed when all '1' bits have been
+> > consumed.
+> Probably.  No clue, best to NOT change it to not block Jasons series and
+> then just simplify this and remove all the useless shifts.
 
-Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
-Cc: stable@vger.kernel.org
+Sure. Jason, just in case you are going to do a v7 this could move to u8 then.
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
----
--v5: Remove nested if
--v4: Only partition switch if necessary and fix one mmc_blk_reset call
--v3: Ensure invalid part_curr on error
--v2: Do not attempt to switch partitions if reset failed
+--nextPart22512332.f9tG50R4rC
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part.
+Content-Transfer-Encoding: 7Bit
 
- drivers/mmc/core/block.c | 44 ++++++++++++++++++++++++----------------
- 1 file changed, 26 insertions(+), 18 deletions(-)
+-----BEGIN PGP SIGNATURE-----
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index ce89611a136e..0be7ab6ce1c8 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -134,6 +134,7 @@ struct mmc_blk_data {
- 	 * track of the current selected device partition.
- 	 */
- 	unsigned int	part_curr;
-+#define MMC_BLK_PART_INVALID	UINT_MAX	/* Unknown partition active */
- 	int	area_type;
- 
- 	/* debugfs files (only in main mmc_blk_data) */
-@@ -987,33 +988,39 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
- 	return ms;
- }
- 
-+/*
-+ * Attempts to reset the card and get back to the requested partition.
-+ * Therefore any error here must result in cancelling the block layer
-+ * request, it must not be reattempted without going through the mmc_blk
-+ * partition sanity checks.
-+ */
- static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
- 			 int type)
- {
- 	int err;
-+	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
- 
- 	if (md->reset_done & type)
- 		return -EEXIST;
- 
- 	md->reset_done |= type;
- 	err = mmc_hw_reset(host->card);
-+	/*
-+	 * A successful reset will leave the card in the main partition, but
-+	 * upon failure it might not be, so set it to MMC_BLK_PART_INVALID
-+	 * in that case.
-+	 */
-+	main_md->part_curr = err ? MMC_BLK_PART_INVALID : main_md->part_type;
-+	if (err)
-+		return err;
- 	/* Ensure we switch back to the correct partition */
--	if (err) {
--		struct mmc_blk_data *main_md =
--			dev_get_drvdata(&host->card->dev);
--		int part_err;
--
--		main_md->part_curr = main_md->part_type;
--		part_err = mmc_blk_part_switch(host->card, md->part_type);
--		if (part_err) {
--			/*
--			 * We have failed to get back into the correct
--			 * partition, so we need to abort the whole request.
--			 */
--			return -ENODEV;
--		}
--	}
--	return err;
-+	if (mmc_blk_part_switch(host->card, md->part_type))
-+		/*
-+		 * We have failed to get back into the correct
-+		 * partition, so we need to abort the whole request.
-+		 */
-+		return -ENODEV;
-+	return 0;
- }
- 
- static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
-@@ -1867,8 +1874,9 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
- 		return;
- 
- 	/* Reset before last retry */
--	if (mqrq->retries + 1 == MMC_MAX_RETRIES)
--		mmc_blk_reset(md, card->host, type);
-+	if (mqrq->retries + 1 == MMC_MAX_RETRIES &&
-+	    mmc_blk_reset(md, card->host, type))
-+		return;
- 
- 	/* Command errors fail fast, so use all MMC_MAX_RETRIES */
- 	if (brq->sbc.error || brq->cmd.error)
--- 
-2.37.3
+iF0EABECAB0WIQSaYVDeqwKa3fTXNeNcpIk+abn8TgUCY0f5OAAKCRBcpIk+abn8
+TncNAKCia3h4AG/9IzqybWbLcwE6uVgTqACfRr3dPUK8JMrKIqGzYOiL96isZhg=
+=zppL
+-----END PGP SIGNATURE-----
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+--nextPart22512332.f9tG50R4rC--
+
+
 
