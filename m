@@ -2,96 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A4D77C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 14:07:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C61CC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 14:08:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230328AbiJNOHs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Oct 2022 10:07:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38222 "EHLO
+        id S230090AbiJNOIJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Oct 2022 10:08:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230329AbiJNOHh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 10:07:37 -0400
-Received: from mail-oa1-f47.google.com (mail-oa1-f47.google.com [209.85.160.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0933E9861;
-        Fri, 14 Oct 2022 07:07:22 -0700 (PDT)
-Received: by mail-oa1-f47.google.com with SMTP id 586e51a60fabf-136b5dd6655so5977462fac.3;
-        Fri, 14 Oct 2022 07:07:22 -0700 (PDT)
+        with ESMTP id S230063AbiJNOIH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 10:08:07 -0400
+Received: from mail-pf1-x431.google.com (mail-pf1-x431.google.com [IPv6:2607:f8b0:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B0BE1B94F7
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Oct 2022 07:08:00 -0700 (PDT)
+Received: by mail-pf1-x431.google.com with SMTP id h13so5008527pfr.7
+        for <linux-mmc@vger.kernel.org>; Fri, 14 Oct 2022 07:08:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=K2EQvstEBpVzulukiDjicIgwirC72gNP9LNt4rNxmPE=;
+        b=Z7PboRkvydycfIogQPEG8ZBTlVuiZvQ4kq4ZMG/IKssN4lxkgEIrg4v3b3LkSveIk8
+         cLm1mrOrh22a3L4OzxbIXCIlnfAUZy2vntcX6QitAW8LvoQGBjKearphhpZu7L48450x
+         K5WIm36LQfhiPbhTZHNJP235ari3DwcCzO0oO/7wqlQ0b2iysEL2a2tfYVxF4F/yu9yZ
+         Y+NJgV9RbWq6KGMEYpojZYLibkvZed4M9aUiDAQGLAjeDLQEcvY3DO7M3ATyYNDBguw7
+         fCBrWb1RIaBvp08RYpIU96mWwmqHtaj9SAfcVligDQoPDP09eMhMSF26irKQsKGK7+bO
+         mXHA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=1yyAUCq/XeIgOsn5nW4H0/zi1fPyOR16Z+9WtLfC5Vo=;
-        b=rNpt59+czNjUAMgtv68cTmSl/wefLYRt6MyUZkOpWXXKu1iEKR/oMJHaJKqsrQ5fsL
-         UM0Q4ZLZXT1/yefmSXx3udS5q24PuZwAGfVZKqX6Roy1ldSiACThz57E0TYNkh9qLZSY
-         /tWOpPwOCguVCcdrjRcqwOX5u1B/ItrYT1sqNnkIHW+IUOQSWXtKRpMa3lNrozQUGRWc
-         drEhQxQImciiw5S8+5bV9EJGesZo9Q2oEvP39uPP+Y6EJ7QbboBoRhShdO5T36TuWTkO
-         j/h0DFEqtxvws/L/YmucVSoagOuTf1QKrSMDfmL2SZdm1BLYjeVRrYHLFoCVAJ5bbx0o
-         mskA==
-X-Gm-Message-State: ACrzQf3bPjB3Wnt7QXuVEWTn39hrTQLXKTOlcpPv1VX2UiI1UJvt8IHC
-        qHOdkTz3etWH18TZv0tBJg==
-X-Google-Smtp-Source: AMsMyM6o1zHniDWcovTDfOXfFp60qv41U2PCX8VKv1wcpj7BcPxz5mirIT0ybjjPvkw0bJE1KDZhwA==
-X-Received: by 2002:a05:6870:5585:b0:136:8a4d:f131 with SMTP id n5-20020a056870558500b001368a4df131mr8796172oao.239.1665756434519;
-        Fri, 14 Oct 2022 07:07:14 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id v3-20020a0568301bc300b00661a05691fasm1182394ota.79.2022.10.14.07.07.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 14 Oct 2022 07:07:14 -0700 (PDT)
-Received: (nullmailer pid 1857839 invoked by uid 1000);
-        Fri, 14 Oct 2022 14:07:14 -0000
-Date:   Fri, 14 Oct 2022 09:07:14 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Marek Vasut <marex@denx.de>
-Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-arm-msm@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
-        Andy Gross <agross@kernel.org>
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: arm,pl18x: Document
- interrupt-names is ignored
-Message-ID: <166575643424.1857656.14810437673054950633.robh@kernel.org>
-References: <20221013221242.218808-1-marex@denx.de>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=K2EQvstEBpVzulukiDjicIgwirC72gNP9LNt4rNxmPE=;
+        b=xllSwb52IRov8p34Q94ObrQZSHBwiq8yxB376rQ5S3UuX+R5zS9MiR6yA6EmSlryKQ
+         Qbb65P/JJE1+b/8w6de8QzSHOy5rI4K11OkBMSIy2fy2IG29vCHl4oBkmt7vuQXjvZuU
+         02oYKVm17ENeinMBdbQSmepD/KMor0PBQNyz9y3ZC4f2qymq31Q7DzDhsFxiiNjNoPhG
+         D7mZ/4kFnRog8ns2BtgIYVpT4wnw8QQjoI1HJbTs+tDwg+xKOG4ZKFzG5CeiK0Ej3t+y
+         P5KImrE5Un3FBlLDfYbYPGbdNFapPq1w9XgGLurHSpusVyWp3Nzy9fb1aFBXNkziVyl5
+         XTcg==
+X-Gm-Message-State: ACrzQf1J6JZXrbM/GdaNdB9BGO3GG9mIQo0RuvcYF9Zibj21iQjZzYaj
+        ATsJpuZu6YSVGctRjzUsY1bn1ZRT4HOMuMBeIW/xJX5QnAo=
+X-Google-Smtp-Source: AMsMyM77MpaOG0LccCm9++0Kgg5jg+t2ffbK79s3rBfjvCgaLZLhK21Ui5/eOwWYoDRI1XWxW5zoXlzJhrFnFTyGpqU=
+X-Received: by 2002:a63:1612:0:b0:461:4180:d88b with SMTP id
+ w18-20020a631612000000b004614180d88bmr4843237pgl.434.1665756479079; Fri, 14
+ Oct 2022 07:07:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221013221242.218808-1-marex@denx.de>
+References: <20221013093248.2220802-1-s.hauer@pengutronix.de>
+In-Reply-To: <20221013093248.2220802-1-s.hauer@pengutronix.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 14 Oct 2022 16:07:22 +0200
+Message-ID: <CAPDyKFo=aLtaqnYpnU2kMpVNDU6Hct36R_fgbYD_fGEsZDkVSA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on
+ 8bit bus
+To:     Sascha Hauer <s.hauer@pengutronix.de>
+Cc:     linux-mmc@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        NXP Linux Team <linux-imx@nxp.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 14 Oct 2022 00:12:40 +0200, Marek Vasut wrote:
-> Due to inconsistency of existing DTs regarding the content of this IP
-> interrupt-names DT property, document this such that interrupt-names
-> is not used by this IP bindings.
-> 
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> ---
-> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
-> Cc: Andy Gross <agross@kernel.org>
-> Cc: Bjorn Andersson <andersson@kernel.org>
-> Cc: Konrad Dybcio <konrad.dybcio@somainline.org>
-> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-> Cc: Linus Walleij <linus.walleij@linaro.org>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Yann Gautier <yann.gautier@foss.st.com>
-> Cc: devicetree@vger.kernel.org
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-arm-msm@vger.kernel.org
-> Cc: linux-stm32@st-md-mailman.stormreply.com
-> To: linux-arm-kernel@lists.infradead.org
-> ---
-> V2: Add deprecated:false to interrupts: description
-> ---
->  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
+On Thu, 13 Oct 2022 at 11:32, Sascha Hauer <s.hauer@pengutronix.de> wrote:
+>
+> The core issues the warning "drop HS400 support since no 8-bit bus" when
+> one of the ESDHC_FLAG_HS400* flags is set on a non 8bit capable host. To
+> avoid this warning set these flags only on hosts that actually can do
+> 8bit, i.e. have bus-width = <8> set in the device tree.
+>
+> Signed-off-by: Sascha Hauer <s.hauer@pengutronix.de>
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+I added a fixes tag, see below.
+Fixes: 029e2476f9e6 ("mmc: sdhci-esdhc-imx: add HS400_ES support for i.MX8QXP")
+
+I haven't tried if the patch applies on stable kernels beyond that
+commit, but if not, it should be a trivial conflict to resolve.
+
+So, I applied this for fixes and by adding a stable tag, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++++------
+>  1 file changed, 8 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 3f4eb49afa025..003534b78493b 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1663,6 +1663,10 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>                 host->mmc_host_ops.execute_tuning = usdhc_execute_tuning;
+>         }
+>
+> +       err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+> +       if (err)
+> +               goto disable_ahb_clk;
+> +
+>         if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+>                 sdhci_esdhc_ops.platform_execute_tuning =
+>                                         esdhc_executing_tuning;
+> @@ -1670,13 +1674,15 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+>                 host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+>
+> -       if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+> +       if (host->caps & MMC_CAP_8_BIT_DATA &&
+> +           imx_data->socdata->flags & ESDHC_FLAG_HS400)
+>                 host->mmc->caps2 |= MMC_CAP2_HS400;
+>
+>         if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
+>                 host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
+>
+> -       if (imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+> +       if (host->caps & MMC_CAP_8_BIT_DATA &&
+> +           imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+>                 host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+>                 host->mmc_host_ops.hs400_enhanced_strobe =
+>                                         esdhc_hs400_enhanced_strobe;
+> @@ -1698,10 +1704,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>                         goto disable_ahb_clk;
+>         }
+>
+> -       err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+> -       if (err)
+> -               goto disable_ahb_clk;
+> -
+>         sdhci_esdhc_imx_hwinit(host);
+>
+>         err = sdhci_add_host(host);
+> --
+> 2.30.2
+>
