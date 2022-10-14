@@ -2,193 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C01FDC43217
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 13:38:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4D77C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 14:07:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229715AbiJNNi4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Oct 2022 09:38:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50476 "EHLO
+        id S230328AbiJNOHs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Oct 2022 10:07:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229703AbiJNNiz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 09:38:55 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D12541CF54B
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Oct 2022 06:38:53 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id l1so4727788pld.13
-        for <linux-mmc@vger.kernel.org>; Fri, 14 Oct 2022 06:38:53 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=fim10Nn883YUuRB2/zDNHur11GszoVSITqSX1+3i+0g=;
-        b=bs7c64n6kbvSh5qiJsiElDDFXFU1VVybCgFb6Lkt0knUuNLMmDDQFoAba8s7bOm6tc
-         HBXZ/k7XqDvFn2taimFdCCw35vtrJ9cnU7Puqc0NbAtrEgInxi065txtnd+a7zfNDhXq
-         JFHULWlzRvUFdZ0jjry0MNw0WXPeyDvMdMPDvU0AATLo/3264KC8HPBp2XDrkrmz+/Ts
-         +VdbQAPDxQmrp0qPpfy4tcSx63LcXOHZDC/L5Y0L9yTNozWxGouAqNF/SDPtBzH0wrin
-         kZqojhBj0upDKWISx1YKO8Oi4480ftPuz86dG+hJF+deJEqIxjH2S9K1NFADuSOt0Evn
-         Be/Q==
+        with ESMTP id S230329AbiJNOHh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 10:07:37 -0400
+Received: from mail-oa1-f47.google.com (mail-oa1-f47.google.com [209.85.160.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0933E9861;
+        Fri, 14 Oct 2022 07:07:22 -0700 (PDT)
+Received: by mail-oa1-f47.google.com with SMTP id 586e51a60fabf-136b5dd6655so5977462fac.3;
+        Fri, 14 Oct 2022 07:07:22 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=fim10Nn883YUuRB2/zDNHur11GszoVSITqSX1+3i+0g=;
-        b=JO+pVMBdwCPEHj61UtwSWwxDCztQhApAdSW9HwEvvH6pvGqmC6mGWzJ8UNKfBXW6Fa
-         BoC2Iqtp9y7w+7ENKpQAK+hsfz5TRUmbDlt+K5NY2yYmU1knkiVZW6wTd5S+t9PXaiU+
-         qn4upzJHeXWDT2MWrkDGfEu97jRUZk6Rq4LWWow91fIPxxtQWkL2u9L4LyNjS8dRXiK7
-         f0poeFkZL2T4ZT9SH97QDNNyqc48IoEwxxthJsSm/gFsJjgKQAF2w+I2ZzB87hjcnCSF
-         ACEGq5gTf/a6/MKeCxf5MR5PXde3GH2hdZoTPD8dYQeai8tLr74U5w5t6YPyG41nnKj/
-         ABHA==
-X-Gm-Message-State: ACrzQf2dyNUwK6g/NCs1Sj0ZpM9Od0eMjSUZKpvvUCf/fUfNYzEqilxR
-        DNMpmmv4yeVQMV440X/vgMFDQq3uf69YZxy6kyeBMA==
-X-Google-Smtp-Source: AMsMyM6IyYAWSgGy7Wfh5gYeg/kE2f9/kZGqWyNKDL/n4TD+JNio2ZbU9nxwvu6gC+RdB+bq8FYZptK2XTDEibOl1Hc=
-X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
- mw7-20020a17090b4d0700b001ef521cf051mr17878182pjb.164.1665754733353; Fri, 14
- Oct 2022 06:38:53 -0700 (PDT)
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=1yyAUCq/XeIgOsn5nW4H0/zi1fPyOR16Z+9WtLfC5Vo=;
+        b=rNpt59+czNjUAMgtv68cTmSl/wefLYRt6MyUZkOpWXXKu1iEKR/oMJHaJKqsrQ5fsL
+         UM0Q4ZLZXT1/yefmSXx3udS5q24PuZwAGfVZKqX6Roy1ldSiACThz57E0TYNkh9qLZSY
+         /tWOpPwOCguVCcdrjRcqwOX5u1B/ItrYT1sqNnkIHW+IUOQSWXtKRpMa3lNrozQUGRWc
+         drEhQxQImciiw5S8+5bV9EJGesZo9Q2oEvP39uPP+Y6EJ7QbboBoRhShdO5T36TuWTkO
+         j/h0DFEqtxvws/L/YmucVSoagOuTf1QKrSMDfmL2SZdm1BLYjeVRrYHLFoCVAJ5bbx0o
+         mskA==
+X-Gm-Message-State: ACrzQf3bPjB3Wnt7QXuVEWTn39hrTQLXKTOlcpPv1VX2UiI1UJvt8IHC
+        qHOdkTz3etWH18TZv0tBJg==
+X-Google-Smtp-Source: AMsMyM6o1zHniDWcovTDfOXfFp60qv41U2PCX8VKv1wcpj7BcPxz5mirIT0ybjjPvkw0bJE1KDZhwA==
+X-Received: by 2002:a05:6870:5585:b0:136:8a4d:f131 with SMTP id n5-20020a056870558500b001368a4df131mr8796172oao.239.1665756434519;
+        Fri, 14 Oct 2022 07:07:14 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id v3-20020a0568301bc300b00661a05691fasm1182394ota.79.2022.10.14.07.07.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Oct 2022 07:07:14 -0700 (PDT)
+Received: (nullmailer pid 1857839 invoked by uid 1000);
+        Fri, 14 Oct 2022 14:07:14 -0000
+Date:   Fri, 14 Oct 2022 09:07:14 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Marek Vasut <marex@denx.de>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-msm@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        Andy Gross <agross@kernel.org>
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: arm,pl18x: Document
+ interrupt-names is ignored
+Message-ID: <166575643424.1857656.14810437673054950633.robh@kernel.org>
+References: <20221013221242.218808-1-marex@denx.de>
 MIME-Version: 1.0
-References: <CAPDyKFq5hNTdwT7CMvsxG=_5u+xvG2k3-PfbGhAbHfHbGqK81w@mail.gmail.com>
- <20221014072456.28953-1-pshete@nvidia.com> <20221014072456.28953-2-pshete@nvidia.com>
-In-Reply-To: <20221014072456.28953-2-pshete@nvidia.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 14 Oct 2022 15:38:16 +0200
-Message-ID: <CAPDyKFoJS8oewB71Swo2dBsfG3qsBf+fWbWn3rfL8Acdh0zqKQ@mail.gmail.com>
-Subject: Re: [PATCH v8 2/3] mmc: sdhci-tegra: Add support to program MC stream ID
-To:     Prathamesh Shete <pshete@nvidia.com>
-Cc:     adrian.hunter@intel.com, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, p.zabel@pengutronix.de,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, anrao@nvidia.com,
-        smangipudi@nvidia.com, kyarlagadda@nvidia.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221013221242.218808-1-marex@denx.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 14 Oct 2022 at 09:25, Prathamesh Shete <pshete@nvidia.com> wrote:
->
-> SMMU clients are supposed to program stream ID from
-> their respective address spaces instead of MC override.
-> Define NVQUIRK_PROGRAM_STREAMID and use it to program
-> SMMU stream ID from the SDMMC client address space.
->
-> Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-> Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-> Acked-by: Thierry Reding <treding@nvidia.com>
+On Fri, 14 Oct 2022 00:12:40 +0200, Marek Vasut wrote:
+> Due to inconsistency of existing DTs regarding the content of this IP
+> interrupt-names DT property, document this such that interrupt-names
+> is not used by this IP bindings.
+> 
+> Signed-off-by: Marek Vasut <marex@denx.de>
 > ---
->  drivers/mmc/host/sdhci-tegra.c | 42 ++++++++++++++++++++++++++++++++++
->  1 file changed, 42 insertions(+)
->
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index a6c5bbae77b4..0cd7c3f7e6f4 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -25,6 +25,10 @@
->  #include <linux/mmc/slot-gpio.h>
->  #include <linux/gpio/consumer.h>
->  #include <linux/ktime.h>
-> +#ifdef CONFIG_IOMMU_API
+> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
+> Cc: Andy Gross <agross@kernel.org>
+> Cc: Bjorn Andersson <andersson@kernel.org>
+> Cc: Konrad Dybcio <konrad.dybcio@somainline.org>
+> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Yann Gautier <yann.gautier@foss.st.com>
+> Cc: devicetree@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-msm@vger.kernel.org
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> To: linux-arm-kernel@lists.infradead.org
+> ---
+> V2: Add deprecated:false to interrupts: description
+> ---
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
 
-This ifdef can be removed, the compiler should sort this out for us.
-
-> +#include <linux/iommu.h>
-> +#include <linux/bitops.h>
-> +#endif
->
->  #include <soc/tegra/common.h>
->
-> @@ -94,6 +98,8 @@
->  #define SDHCI_TEGRA_AUTO_CAL_STATUS                    0x1ec
->  #define SDHCI_TEGRA_AUTO_CAL_ACTIVE                    BIT(31)
->
-> +#define SDHCI_TEGRA_CIF2AXI_CTRL_0                     0x1fc
-> +
->  #define NVQUIRK_FORCE_SDHCI_SPEC_200                   BIT(0)
->  #define NVQUIRK_ENABLE_BLOCK_GAP_DET                   BIT(1)
->  #define NVQUIRK_ENABLE_SDHCI_SPEC_300                  BIT(2)
-> @@ -121,6 +127,7 @@
->  #define NVQUIRK_HAS_TMCLK                              BIT(10)
->
->  #define NVQUIRK_HAS_ANDROID_GPT_SECTOR                 BIT(11)
-> +#define NVQUIRK_PROGRAM_STREAMID                       BIT(12)
->
->  /* SDMMC CQE Base Address for Tegra Host Ver 4.1 and Higher */
->  #define SDHCI_TEGRA_CQE_BASE_ADDR                      0xF000
-> @@ -177,6 +184,9 @@ struct sdhci_tegra {
->         bool enable_hwcq;
->         unsigned long curr_clk_rate;
->         u8 tuned_tap_delay;
-> +#ifdef CONFIG_IOMMU_API
-> +       u32 streamid;
-> +#endif
->  };
->
->  static u16 tegra_sdhci_readw(struct sdhci_host *host, int reg)
-> @@ -1564,6 +1574,7 @@ static const struct sdhci_tegra_soc_data soc_data_tegra234 = {
->                     NVQUIRK_DIS_CARD_CLK_CONFIG_TAP |
->                     NVQUIRK_ENABLE_SDR50 |
->                     NVQUIRK_ENABLE_SDR104 |
-> +                   NVQUIRK_PROGRAM_STREAMID |
->                     NVQUIRK_HAS_TMCLK,
->         .min_tap_delay = 95,
->         .max_tap_delay = 111,
-> @@ -1630,6 +1641,33 @@ static int sdhci_tegra_add_host(struct sdhci_host *host)
->         return ret;
->  }
->
-> +/* Program MC streamID for DMA transfers */
-> +#ifdef CONFIG_IOMMU_API
-> +static void program_stream_id(struct device *dev)
-> +{
-> +       struct sdhci_host *host = dev_get_drvdata(dev);
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +       struct sdhci_tegra *tegra_host = sdhci_pltfm_priv(pltfm_host);
-> +       struct iommu_fwspec *fwspec;
-> +
-> +       if (tegra_host->soc_data->nvquirks & NVQUIRK_PROGRAM_STREAMID) {
-> +               fwspec = dev_iommu_fwspec_get(dev);
-> +               if (!fwspec) {
-> +                       dev_warn(mmc_dev(host->mmc),
-> +                               "iommu fwspec is NULL, continue without stream ID\n");
-> +               } else {
-> +                       tegra_host->streamid = fwspec->ids[0] & 0xff;
-> +                       tegra_sdhci_writel(host, tegra_host->streamid |
-> +                                               FIELD_PREP(GENMASK(15, 8),
-> +                                               tegra_host->streamid),
-> +                                               SDHCI_TEGRA_CIF2AXI_CTRL_0);
-> +               }
-> +       }
-> +}
-> +#else
-> +static void program_stream_id(struct device *dev) { }
-> +#endif
-> +
->  static int sdhci_tegra_probe(struct platform_device *pdev)
->  {
->         const struct sdhci_tegra_soc_data *soc_data;
-> @@ -1775,6 +1813,8 @@ static int sdhci_tegra_probe(struct platform_device *pdev)
->         if (rc)
->                 goto err_add_host;
->
-> +       program_stream_id(&pdev->dev);
-> +
->         return 0;
->
->  err_add_host:
-> @@ -1871,6 +1911,8 @@ static int sdhci_tegra_resume(struct device *dev)
->         if (ret)
->                 return ret;
->
-> +       program_stream_id(dev);
-> +
->         ret = sdhci_resume_host(host);
->         if (ret)
->                 goto disable_clk;
-> --
-> 2.17.1
->
-
-Other than the minor nitpick, this looks good to me!
-
-Kind regards
-Uffe
+Reviewed-by: Rob Herring <robh@kernel.org>
