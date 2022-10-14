@@ -2,110 +2,131 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94D01C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 16:02:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B186C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Oct 2022 16:02:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230251AbiJNQCj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Oct 2022 12:02:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39964 "EHLO
+        id S230185AbiJNQCq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Oct 2022 12:02:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230185AbiJNQCj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 12:02:39 -0400
-Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2502416C236;
-        Fri, 14 Oct 2022 09:02:36 -0700 (PDT)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id A66A884EAE;
-        Fri, 14 Oct 2022 18:02:33 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1665763354;
-        bh=4QZY273rix2KU23137Kv6VjVkJSrnJrmjDRIoYoYYMI=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=hWNVIJPGsrCRwR0WpFHKNKj1NHtk5ccMqxWWiNRrgKXUT/Z5ZlpAEbvPP8h/uU+rZ
-         xS+gpESJycu/qQScIi6lakYTAxOwiKfVeRl/idv+TDqFluSVhufczlWLZCaPdmFJ2/
-         nM5TowIHkdvQpHyhQjDtdU/16nyR53JfEFGWT5FBAQYVXaUi7TVmjmvzynf4xsxrOG
-         cVr5zY1cUbaK1BVYFbbhuM0WQ5rOBkNgeWg8yAf4ajII6pUb3ecdY1jR4GsLgb+h+D
-         Bn0Nnfr/MdwQyVYMX5qCGUDXTGb/v4pAnTc8TNb6QfcsxHQuLnkXG2vIhbW3ZheVbw
-         2Wqt27xGUaD+g==
-Message-ID: <09cb3000-14c4-e94f-70e8-36e0ef8ce3fc@denx.de>
-Date:   Fri, 14 Oct 2022 18:02:33 +0200
+        with ESMTP id S229862AbiJNQCo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Oct 2022 12:02:44 -0400
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 051E7170DCE;
+        Fri, 14 Oct 2022 09:02:41 -0700 (PDT)
+Received: by mail-pg1-x52c.google.com with SMTP id r18so4648119pgr.12;
+        Fri, 14 Oct 2022 09:02:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-language:content-transfer-encoding:in-reply-to:mime-version
+         :user-agent:date:message-id:from:references:cc:to:subject:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=H8fJfHvYAQbBybgPIV/n4kd8GOI783ZQEyi/eOMq5GY=;
+        b=Zcz9IhwCnYwdA+qIaz0MjYOe34M7oylCuv6vnSYNBVxtbBGxGlLV1Mjs6OdmulZS3S
+         pcXlxBzedaLWaKCYX7W3xXTRvya26NxPKm6SWlQa7pgvZjOVoSKymdDXLqJSlTKCOLry
+         1BF7u7TOymECGb0YNNNavAjNZU8+iQkk95Vn9rj1WXVql7MMv4QEBprGB//0wJP3CzuF
+         BghP2X41ss1rzMHb6yXiveaTXSMBFyjO799dWJeZE3lmGuWd+T2H/ujf/BVuRMV3Oox6
+         bNEqTGaG1xlqtOg3qI7pxn1/QkzY1JmSjxIdWfcfJld+0jjo8lTW0hY8qUzvQ6zRP+EC
+         zDQw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-language:content-transfer-encoding:in-reply-to:mime-version
+         :user-agent:date:message-id:from:references:cc:to:subject
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=H8fJfHvYAQbBybgPIV/n4kd8GOI783ZQEyi/eOMq5GY=;
+        b=NKCOL3A4i075S3N6un37XBuDoElD31MGsrnuhqUbTqXiAlVzRG6KtR2x1E1OaF6AA+
+         5Xe2r1a61gitlLPsMyrj8ikd0HwSDcytrFFfYLKdiClCBVPIyGhiw0Y8BF2p+N/W+Z9t
+         aHlhqcIAgagUfpZ70etlIsP5Hlsv3mzHTt2Xu/IqdfBFEIGKhm31RlVJ1aWzhBjPSapv
+         QAC3YO2f1ChFlg+at7PfaJPs2KdHTkILtaYu/R/BvOUb0mmYA+jPSheIZG1SGxl6MM3o
+         D+hzrGBPzUH5VvP1ZN0ijhDJphk/3wEKS59X/OZ3C4UEyinNtm6GigjEhdkJyQey0NgT
+         JQpQ==
+X-Gm-Message-State: ACrzQf0wtamY3j5lsJxrKfMB+0BIYVDDLLZcjCHYvZHX7RN01FhHlWJH
+        ZxAnj6hJt7u72tgBeH3MoOHGSWLs594oZY5kcmE=
+X-Google-Smtp-Source: AMsMyM6GxPJci+3+9F2G4UktwQP7QTs/gJ3JC952aTk4ahQO5QYiBctRN2VjqtoUAUaGCPiAc4V99g==
+X-Received: by 2002:a05:6a00:80e:b0:563:4ad2:9d39 with SMTP id m14-20020a056a00080e00b005634ad29d39mr5870781pfk.66.1665763360653;
+        Fri, 14 Oct 2022 09:02:40 -0700 (PDT)
+Received: from 192.168.0.102 ([2400:9ce0:1267:8cd7:7f1f:f80c:3b70:1976])
+        by smtp.gmail.com with ESMTPSA id y68-20020a626447000000b005624b4bd738sm1886144pfb.156.2022.10.14.09.02.37
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 14 Oct 2022 09:02:40 -0700 (PDT)
+Subject: Re: [PATCH v2] mmc: sdio: fix kernel panic when remove non-standard
+ SDIO card
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Weizhao Ouyang <ouyangweizhao@zeku.com>
+Cc:     Matthew Ma <mahongwei@zeku.com>,
+        Sergey Shtylyov <s.shtylyov@omp.ru>,
+        John Wang <wangdayu@zeku.com>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Grazvydas Ignotas <notasas@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20221014034951.2300386-1-ouyangweizhao@zeku.com>
+ <CAPDyKFrpCGzOcRpHANt4cjJuELn2EVStQM15a2=ofYus=Jn_oA@mail.gmail.com>
+From:   Weizhao Ouyang <o451686892@gmail.com>
+Message-ID: <1bdf5762-4761-7441-0145-8179bb917781@gmail.com>
+Date:   Sat, 15 Oct 2022 00:02:35 +0800
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
+ Gecko/20100101 Thunderbird/78.13.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.2
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: arm,pl18x: Document
- interrupt-names is ignored
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-arm-kernel@lists.infradead.org
-Cc:     Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Yann Gautier <yann.gautier@foss.st.com>,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-msm@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com
-References: <20221013221242.218808-1-marex@denx.de>
- <cc7289ac-b75a-62e3-4b58-fc018715c068@linaro.org>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <cc7289ac-b75a-62e3-4b58-fc018715c068@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+In-Reply-To: <CAPDyKFrpCGzOcRpHANt4cjJuELn2EVStQM15a2=ofYus=Jn_oA@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Language: en-US
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/14/22 18:01, Krzysztof Kozlowski wrote:
-> On 13/10/2022 18:12, Marek Vasut wrote:
->> Due to inconsistency of existing DTs regarding the content of this IP
->> interrupt-names DT property, document this such that interrupt-names
->> is not used by this IP bindings.
->>
->> Signed-off-by: Marek Vasut <marex@denx.de>
->> ---
->> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
->> Cc: Andy Gross <agross@kernel.org>
->> Cc: Bjorn Andersson <andersson@kernel.org>
->> Cc: Konrad Dybcio <konrad.dybcio@somainline.org>
->> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
->> Cc: Linus Walleij <linus.walleij@linaro.org>
->> Cc: Rob Herring <robh+dt@kernel.org>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: Yann Gautier <yann.gautier@foss.st.com>
->> Cc: devicetree@vger.kernel.org
->> Cc: linux-mmc@vger.kernel.org
->> Cc: linux-arm-msm@vger.kernel.org
->> Cc: linux-stm32@st-md-mailman.stormreply.com
->> To: linux-arm-kernel@lists.infradead.org
->> ---
->> V2: Add deprecated:false to interrupts: description
->> ---
->>   Documentation/devicetree/bindings/mmc/arm,pl18x.yaml | 4 +++-
->>   1 file changed, 3 insertions(+), 1 deletion(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
->> index 1e69a5a42439b..1c96da04f0e53 100644
->> --- a/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/arm,pl18x.yaml
->> @@ -95,7 +95,9 @@ properties:
->>         PIO (polled I/O) interrupt and occurs when the FIFO needs to be
->>         emptied as part of a bulk read from the card. Some variants have these
->>         two interrupts wired into the same line (logic OR) and in that case
->> -      only one interrupt may be provided.
->> +      only one interrupt may be provided. The interrupt-names property is
->> +      not used due to inconsistency of existing DTs regarding its content.
->> +    deprecated: false
-> 
-> Why do you add deprecated false? All properties are not deprecated by
-> default. Did any other referenced schema make it deprecated?
 
-Rob asked me to add it in V1 .
+On 10/14/22 22:07, Ulf Hansson wrote:
+> On Fri, 14 Oct 2022 at 05:50, Weizhao Ouyang <ouyangweizhao@zeku.com> wrote:
+>> From: Weizhao Ouyang <o451686892@gmail.com>
+>>
+>> From: Matthew Ma <mahongwei@zeku.com>
+>>
+>> SDIO tuple is only allocated for standard SDIO card, especially it
+>> causes memory corruption issues when the non-standard SDIO card has
+>> removed since the card device's reference counter does not increase for
+>> it at sdio_init_func(), but all SDIO card device reference counter has
+>> decreased at sdio_release_func().
+>>
+>> Fixes: 6f51be3d37df ("sdio: allow non-standard SDIO cards")
+>> Signed-off-by: Matthew Ma <mahongwei@zeku.com>
+>> Reviewed-by: Weizhao Ouyang <ouyangweizhao@zeku.com>
+>> Reviewed-by: John Wang <wangdayu@zeku.com>
+> If I understand correctly, Matthew Ma <mahongwei@zeku.com> should be
+> the author of the patch?
+>
+> Assuming I am correct, I have amended the patch and changed that,
+> please tell me if I should change that.
+
+Yeah you are correct, thanks for the reply!
+
+> So, I applied this for fixes and by adding a stable tag, thanks!
+>
+> Kind regards
+> Uffe
+>
+>
+>> ---
+>> Changes in v2:
+>> -- update Fixes tag
+>>
+>>  drivers/mmc/core/sdio_bus.c | 3 ++-
+>>  1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+>> index c6268c38c69e..babf21a0adeb 100644
+>> --- a/drivers/mmc/core/sdio_bus.c
+>> +++ b/drivers/mmc/core/sdio_bus.c
+>> @@ -291,7 +291,8 @@ static void sdio_release_func(struct device *dev)
+>>  {
+>>         struct sdio_func *func = dev_to_sdio_func(dev);
+>>
+>> -       sdio_free_func_cis(func);
+>> +       if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
+>> +               sdio_free_func_cis(func);
+>>
+>>         kfree(func->info);
+>>         kfree(func->tmpbuf);
+>> --
+>> 2.25.1
+>>
