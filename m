@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2DFCC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 09:14:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 307B6C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 09:15:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231164AbiJQJOx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Oct 2022 05:14:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33186 "EHLO
+        id S231305AbiJQJO7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Oct 2022 05:14:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34328 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231163AbiJQJOB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 05:14:01 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E5694F184;
-        Mon, 17 Oct 2022 02:13:23 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id c24so10197389pls.9;
-        Mon, 17 Oct 2022 02:13:23 -0700 (PDT)
+        with ESMTP id S231194AbiJQJOC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 05:14:02 -0400
+Received: from mail-pf1-x42f.google.com (mail-pf1-x42f.google.com [IPv6:2607:f8b0:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 710D84CA22;
+        Mon, 17 Oct 2022 02:13:30 -0700 (PDT)
+Received: by mail-pf1-x42f.google.com with SMTP id m6so10565737pfb.0;
+        Mon, 17 Oct 2022 02:13:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=FlEORPHGXzxv44xyQoYwE+VyJB+0P99hwxAci/rfmuQ=;
-        b=JJa3+An1YKZPwvgwqCBMpwHnO+29pqTfXC3Q83G+n/93npi6xwJKQsAygzOeAfpLbJ
-         8HXUuBTP3StBXAd7XvRwGCd+5OIdmgTgYt71d8nhwANHSf65RF4WMPm/Ue4FK6N6QXeu
-         etsOcZDK/H54PSjYf67HT0iWKBGVuPyw81xzhat5qNGOUWN5FxIvRdn9yumw5rpzSWan
-         gIztkEA6NxvKc4xA7OslS32zMmshnN+FVbX/G3c9CIK15hD1Hf1a/wg0bWmY5FovJ/hP
-         c/ARbFfGtHkiz3aDUbDbJdcPo9h0tXQKwe/pCrAp17kkM7Kc35VKac8592CRMLFahomq
-         Kkqg==
+        bh=+HwnNcHzfM/xxQ8Jc+59AjKb99BR1HhaEozFHr56zf4=;
+        b=WRQVBXWvrvje4YgapPZ5rFGu547dh0vShqh1cJHzvQnVeGnVBx2pl0eABvMwDbCgJ7
+         wY4FMJChxEYorx7OrayveMV7RdUSdyphctaSDyYKoAl/Q4J3GhEvHdsRZngUDHFaOKH7
+         S0EwsWdyBYxML2eixdO9BUf8/iZlO9RLIppuYH4FTT4W7J8aG9QzJxTJxgAZ69IzpI6T
+         1pzU8whP4kf9hHTF1wZgpp5VaOCwmhVUp9WET6k1zUxSnD8orOB4JtFOWtBz60ejhaWd
+         3V3EQ0sCdFw6ss1wJDcHdQXTZD10uI1mcaN4CdDCve6g0eKWonI4d+kkcHeh0fh88AsR
+         50sg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=FlEORPHGXzxv44xyQoYwE+VyJB+0P99hwxAci/rfmuQ=;
-        b=L/oS1r8eO6UQpQ0BxuR1c017UNqacdKDsaxS3SY4bRHQ6MVbRHHm19NVmhJqU0hTF6
-         /EGoW0vefsiLC5Q92smLjWLo/0n46Ie+G1G2/4to7froZfvXpUftRl0r/HUWIY7FdngA
-         4GE5XIcbnSXAIVcB2xMvtckR9J3n3gC+vzsAbgZTZjETFK43yS4JntzwLLgq9S2mUarl
-         oyqn2YW4T1AU4OQzDPJbNk5qLiWWPfNrnePZIK7fQ1WkJHXaPtmJZ+5gbLBC5qi9ZWRl
-         VeATDYIuuBsZTKAeisPNCELLe7LuVBYFbl5wuzAY9bp/m9RGIUhpns+osr/4uN7bJuyT
-         CNGA==
-X-Gm-Message-State: ACrzQf2H6oxA4EADk3pcs8Y4lgiCLZuT+Hondy6WrOS/zBzE/u6y0Js+
-        +hhH/uIrL7kNcwXwhmHJwdM=
-X-Google-Smtp-Source: AMsMyM4EzpiiKWxQNFXn6Gun2haOAd+LmIvUnLdgkLpgkqkaIxooXWIP7ooRDBr8IbZxBN2nkg7RkA==
-X-Received: by 2002:a17:90a:1785:b0:20a:6162:2b6a with SMTP id q5-20020a17090a178500b0020a61622b6amr12469731pja.180.1665997998126;
-        Mon, 17 Oct 2022 02:13:18 -0700 (PDT)
+        bh=+HwnNcHzfM/xxQ8Jc+59AjKb99BR1HhaEozFHr56zf4=;
+        b=E+RItTn6eCjLiPoWaQ2sTXkZJ2iaMSOC8TSMPKjTpulKu0ONwKw9fy2scGI2Cu5GKs
+         2RI/un+IkpS5R9IeqcvQtFpgga1yeE3UaD7sd5ZPOYG1MNWL2kXfBjsabJFFVTU+PqCZ
+         tHnVm/B1mBIVLMTliKFWL2mc9qGzX9r+GqAo2ciyskibFOjzGxP3Av3IPlk/jOuj8WTi
+         bl8U6/OIo16pXzP7EzKuTNbv8lt90CkCtYe5pNSxBxybVtwHC5dcT/4ozxCK/MBNtsu/
+         VwW2Dv8jK6scJAhjNKm6f1chKRvjLzPb5yG0iWWfbW0Yn9OLKF107IECfx1rzhSXTCea
+         uFlg==
+X-Gm-Message-State: ACrzQf0nBfo23OTdhR11IVHWYz8s4/6RwXWn9o2YGz1OibFfFGEjRneR
+        UcX9bht7y1uXA2BnThQNBY4=
+X-Google-Smtp-Source: AMsMyM7Cm87vG3OTS14N24dIk/S7NRVH7Gje6SiOmYT4KsXre4OGmoBJ/RRHDXXPwnRusGi8/YC6zw==
+X-Received: by 2002:a62:1684:0:b0:554:cade:6970 with SMTP id 126-20020a621684000000b00554cade6970mr11673547pfw.11.1665998008627;
+        Mon, 17 Oct 2022 02:13:28 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e258-8c34-4ca3-4989-34c1-7890.emome-ip6.hinet.net. [2001:b400:e258:8c34:4ca3:4989:34c1:7890])
-        by smtp.gmail.com with ESMTPSA id t22-20020a170902b21600b0017f75bc7a61sm6091996plr.166.2022.10.17.02.13.14
+        by smtp.gmail.com with ESMTPSA id t22-20020a170902b21600b0017f75bc7a61sm6091996plr.166.2022.10.17.02.13.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Oct 2022 02:13:17 -0700 (PDT)
+        Mon, 17 Oct 2022 02:13:28 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
@@ -57,9 +57,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
         dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Subject: [PATCH V5 22/26] mmc: sdhci-uhs2: add pre-detect_init hook
-Date:   Mon, 17 Oct 2022 17:11:49 +0800
-Message-Id: <20221017091153.454873-23-victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V5 25/26] mmc: sdhci-pci: add UHS-II support framework
+Date:   Mon, 17 Oct 2022 17:11:52 +0800
+Message-Id: <20221017091153.454873-26-victor.shih@genesyslogic.com.tw>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221017091153.454873-1-victor.shih@genesyslogic.com.tw>
 References: <20221017091153.454873-1-victor.shih@genesyslogic.com.tw>
@@ -69,45 +69,80 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <Victor.Shih@genesyslogic.com.tw>
+From: AKASHI Takahiro <takahiro.akashi@linaro.org>
 
-This "pre" hook for detect_init(), uhs2_pre_detect_init, will be required
-to enable UHS-II support, at least, on GL9755.
+This patch prepares for adding UHS-II support at a specific UHS-II
+capable sdhci-pci controller, GL9755 for now.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
- drivers/mmc/host/sdhci-uhs2.c | 3 +++
- drivers/mmc/host/sdhci.h      | 1 +
- 2 files changed, 4 insertions(+)
+ drivers/mmc/host/sdhci-pci-core.c | 16 +++++++++++++++-
+ drivers/mmc/host/sdhci-pci.h      |  3 +++
+ 2 files changed, 18 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 8e547b672574..88decfba1880 100644
---- a/drivers/mmc/host/sdhci-uhs2.c
-+++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -1570,6 +1570,9 @@ static int sdhci_uhs2_do_detect_init(struct mmc_host *mmc)
+diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+index a187379ad204..bf6d579aa992 100644
+--- a/drivers/mmc/host/sdhci-pci-core.c
++++ b/drivers/mmc/host/sdhci-pci-core.c
+@@ -39,6 +39,7 @@
  
- 	DBG("%s: begin UHS2 init.\n", __func__);
+ #include "sdhci.h"
+ #include "sdhci-pci.h"
++#include "sdhci-uhs2.h"
  
-+	if (host->ops && host->ops->uhs2_pre_detect_init)
-+		host->ops->uhs2_pre_detect_init(host);
+ static void sdhci_pci_hw_reset(struct sdhci_host *host);
+ 
+@@ -2130,7 +2131,10 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+ 	if (scratch == (u32)-1)
+ 		dead = 1;
+ 
+-	sdhci_remove_host(slot->host, dead);
++	if (slot->chip->fixes && slot->chip->fixes->remove_host)
++		slot->chip->fixes->remove_host(slot, dead);
++	else
++		sdhci_remove_host(slot->host, dead);
+ 
+ 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
+ 		slot->chip->fixes->remove_slot(slot, dead);
+@@ -2138,6 +2142,16 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
+ 	sdhci_free_host(slot->host);
+ }
+ 
++int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot)
++{
++	return sdhci_uhs2_add_host(slot->host);
++}
 +
- 	if (sdhci_uhs2_interface_detect(host)) {
- 		pr_warn("%s: cannot detect UHS2 interface.\n",
- 			mmc_hostname(host->mmc));
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index bc4be80bf0af..943701aef22a 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -745,6 +745,7 @@ struct sdhci_ops {
- 				struct mmc_request *mrq);
- 	void    (*dump_vendor_regs)(struct sdhci_host *host);
- 	void	(*dump_uhs2_regs)(struct sdhci_host *host);
-+	void    (*uhs2_pre_detect_init)(struct sdhci_host *host);
- };
++void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead)
++{
++	sdhci_uhs2_remove_host(slot->host, dead);
++}
++
+ static void sdhci_pci_runtime_pm_allow(struct device *dev)
+ {
+ 	pm_suspend_ignore_children(dev, 1);
+diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+index 3661a224fb04..7f4a981c0e63 100644
+--- a/drivers/mmc/host/sdhci-pci.h
++++ b/drivers/mmc/host/sdhci-pci.h
+@@ -140,6 +140,7 @@ struct sdhci_pci_fixes {
+ 	int			(*probe_slot) (struct sdhci_pci_slot *);
+ 	int			(*add_host) (struct sdhci_pci_slot *);
+ 	void			(*remove_slot) (struct sdhci_pci_slot *, int);
++	void			(*remove_host) (struct sdhci_pci_slot *, int);
  
- #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+ #ifdef CONFIG_PM_SLEEP
+ 	int			(*suspend) (struct sdhci_pci_chip *);
+@@ -184,6 +185,8 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
+ 	return (void *)slot->private;
+ }
+ 
++int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot);
++void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead);
+ #ifdef CONFIG_PM_SLEEP
+ int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+ #endif
 -- 
 2.25.1
 
