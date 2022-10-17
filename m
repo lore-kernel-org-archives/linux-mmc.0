@@ -2,269 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 314FAC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 09:15:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D753C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 11:32:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229900AbiJQJPa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Oct 2022 05:15:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33216 "EHLO
+        id S229597AbiJQLc2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Oct 2022 07:32:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231165AbiJQJNO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 05:13:14 -0400
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7C5F4C638;
-        Mon, 17 Oct 2022 02:12:52 -0700 (PDT)
-Received: by mail-pf1-x42d.google.com with SMTP id p14so10531578pfq.5;
-        Mon, 17 Oct 2022 02:12:52 -0700 (PDT)
+        with ESMTP id S229774AbiJQLcM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 07:32:12 -0400
+Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 655B1FCC
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2022 04:32:11 -0700 (PDT)
+Received: by mail-pl1-x62e.google.com with SMTP id c24so10481560pls.9
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2022 04:32:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=cBtBje6jwxU6FZyo8pZG+tr7pQu93ik7L6cy2pElzBc=;
-        b=UxnETf7MYzw7P6abezqdTGQS5YZFycb+b52bdAKmN5xRNfjZs/l/cCgb1ivMwq2flM
-         jjtf3GABSfMXd/Q2DM63NHfk9wwRbQ1jSQXXXZc+cQjcSVcJ8DO7jFc6pcNh2XEtcWKG
-         UI+M4SMCGZp65QIKx4m5j3BmPF4+sWLlIrKXoNCdal20+8OadRHtnLTfcrchRgevZSHi
-         HR4BQxVtR0xglRUwU9lkiS9ehGCeS90Dmvd4YYlt6EISU6GDjOAkYcRwGGjlqweiEcxU
-         66vL3RhKVK1kPpkmY6yoe1TA+VOUtahjX+6soXHZB1djuCJlsRsolV0OEZUpShaxdKv1
-         UowA==
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=A+DqsVsSZrwGiPK8Q8THaG2zSj86jXl6NIBsYIk40YE=;
+        b=URgmXOm5FC+6Mrnz3vxmTVUGBDFZRGHJvY6R+7B6fr1cXLop7vkyhRjhJdlnQPmQ0Y
+         akIQE1g4xHhpBnkUdqtKnFwEfB+ceU9K9JGvHhIK2AcXBk2acFlCf/+2/i3AEZFocpD0
+         LGFQGi4TNkB8rhrvaxQaiMq+zZty/yEjbKfm0cbKAJn5ozmEP0C8On6GVocBJ++NRZfJ
+         myAb51XVai67ZbwCYiYWgsuo5hdAsNEwLu40zJrk6g2aZeh/jdWVTP31QLHG0OHentyj
+         CmjXJ90fNILGmXYApdAaDk/Ab6KElYPicnJU+HDbQlQT1taDQFZtVinJIkdAd/NoH8ia
+         6k2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=cBtBje6jwxU6FZyo8pZG+tr7pQu93ik7L6cy2pElzBc=;
-        b=UlMiFOkcEp6wiVJX7gWl7w//9YyxK/f6DcFq15FcKD84VZdbmH2W9CZnIENZ0wiOtw
-         MyBtQpaOt2dRqW1TgqeGPZD9yhoyCOmratSB2t0GXVK77H5rP0VpzYXv131on1DHChdU
-         Zz2IfI4dyaWlANbLbHnRGWOXT6t4ZkcAQLdnIpaZuNu42GyJc1yap1k7mAioi99UOs0w
-         MdWSTHzUwQPzIj0llWGw/VwJk2Nm4GBhuy3x4z5/TTfTc4oN2EGHG4XHqoQsvf0uLuSa
-         Rg0lnMOL+eh80QWYIS+ouS89QMnX5/SeDcXRzo2Z+5JVvlQZNH2PRYobuAX0X1NL7sy+
-         vZaw==
-X-Gm-Message-State: ACrzQf0CdwOI1gYJjFV0vSKp2CT5o2BT2yIhIQvZYZV7P28+a9KULM2p
-        xnSIE0twdu5AmCGx76rVcQA=
-X-Google-Smtp-Source: AMsMyM4Ty+zSrlbvfx4ZqEptYlAqoLaNpTgDtPvjKcTY0WGpeN3Ja0zjdSY/6M8AMUMlrghFkQSMDg==
-X-Received: by 2002:a63:187:0:b0:43b:cf3c:c64d with SMTP id 129-20020a630187000000b0043bcf3cc64dmr9895772pgb.359.1665997963702;
-        Mon, 17 Oct 2022 02:12:43 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e258-8c34-4ca3-4989-34c1-7890.emome-ip6.hinet.net. [2001:b400:e258:8c34:4ca3:4989:34c1:7890])
-        by smtp.gmail.com with ESMTPSA id t22-20020a170902b21600b0017f75bc7a61sm6091996plr.166.2022.10.17.02.12.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Oct 2022 02:12:43 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Subject: [PATCH V5 11/26] mmc: sdhci-uhs2: add reset function and uhs2_mode function
-Date:   Mon, 17 Oct 2022 17:11:38 +0800
-Message-Id: <20221017091153.454873-12-victor.shih@genesyslogic.com.tw>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221017091153.454873-1-victor.shih@genesyslogic.com.tw>
-References: <20221017091153.454873-1-victor.shih@genesyslogic.com.tw>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=A+DqsVsSZrwGiPK8Q8THaG2zSj86jXl6NIBsYIk40YE=;
+        b=yR6nfuLpaBkf19Z0kKYy1vlX+R8Wdx6rXltlxomFEHM64oRyPTQmdjThEXUlgbK7Os
+         kzE/ArCZmNaVwFrlZzwKQs4DjsNtV1ln5aOGi/hC1VjnIRy405a4vQYrkDQGiVRTYtzS
+         k47zo9CCHWbniBbkMxobEXlg5tHuv/6QKnZPYq+FEsQFGfVI06EAgA+Tdu2FBzLjt00R
+         6X8A13eELKpezqOBK9HYg7MRaXysKHQcrisV0slRq5a7zFzG78pQlo+guya1thNO9vXi
+         RTKg31MaEYFnqhf0pTYMSliWtDwltlu6ghslvZFESzIvNjzRHeEXB7NzSqT5199r/bNX
+         wXFg==
+X-Gm-Message-State: ACrzQf0+I2SVj8DDHMai5jiK0tNx6a1ICtk4qaF88/V4T10qLu7PN7GK
+        Dx7wzBusR9aHbbQzDitGdHn/pLZaEN45hi4cyP0Gsw==
+X-Google-Smtp-Source: AMsMyM4NHP2fiS/biJxWwM6ZSFpdw17ng4fjn9CGlQQ+77X63DlCAKVeXrQwju9xe+DOhH7ZEaWc8gkwVHCGaa9O+KI=
+X-Received: by 2002:a17:90a:7b8c:b0:20b:1f3b:f6fd with SMTP id
+ z12-20020a17090a7b8c00b0020b1f3bf6fdmr13088890pjc.202.1666006330858; Mon, 17
+ Oct 2022 04:32:10 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20221014114601.15594-1-victor.shih@genesyslogic.com.tw>
+In-Reply-To: <20221014114601.15594-1-victor.shih@genesyslogic.com.tw>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 17 Oct 2022 13:31:33 +0200
+Message-ID: <CAPDyKFr4je2WhF8oQW1CpQD+2dRZhn+5JB0bLqHjLDTOiao58g@mail.gmail.com>
+Subject: Re: [PATCH V5 00/26] Add support UHS-II for GL9755
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sdhci_uhs2_reset() does a UHS-II specific reset operation.
+Hi Victor,
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
----
- drivers/mmc/host/sdhci-pci-core.c |  1 +
- drivers/mmc/host/sdhci-pci-gli.c  |  1 +
- drivers/mmc/host/sdhci-uhs2.c     | 68 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h     |  3 ++
- drivers/mmc/host/sdhci.c          |  3 +-
- drivers/mmc/host/sdhci.h          | 14 +++++++
- 6 files changed, 89 insertions(+), 1 deletion(-)
+On Fri, 14 Oct 2022 at 13:47, Victor Shih <victorshihgli@gmail.com> wrote:
+>
+> Summary
+> =======
+> These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+>
+> About UHS-II, roughly deal with the following three parts:
+> 1) A UHS-II detection and initialization:
+> - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Sequence
+>   [2]).
+> - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence[2]).
+> - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include Section
+>   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting Register
+>   Setup Sequence.
+>
+> 2) Send Legacy SD command through SD-TRAN
+> - Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy SD
+>   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 Packet
+>   Types and Format Overview[3]).
+> - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
+>   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
+>
+> 3) UHS-II Interrupt
+> - Except for UHS-II error interrupts, most interrupts share the original
+>   interrupt registers.
+>
+> Patch structure
+> ===============
+> patch#1-#6:  for core
+> patch#7-#25: for sdhci
+> patch#26:    for GL9755
+>
+> Changes in v5 (Oct. 14, 2022)
+> * rebased to linux-v6.0.
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 622b7de96c7f..a187379ad204 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1926,6 +1926,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
- 	.reset		= sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
-+	.uhs2_reset		= sdhci_uhs2_reset,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 4d509f656188..607cf69f45d0 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1097,6 +1097,7 @@ static const struct sdhci_ops sdhci_gl9755_ops = {
- 	.reset			= sdhci_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.voltage_switch		= sdhci_gli_voltage_switch,
-+	.uhs2_reset		= sdhci_uhs2_reset,
- };
- 
- const struct sdhci_pci_fixes sdhci_gl9755 = {
-diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 08905ed081fb..0e82f98d1967 100644
---- a/drivers/mmc/host/sdhci-uhs2.c
-+++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -10,6 +10,7 @@
-  *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
-  */
- 
-+#include <linux/delay.h>
- #include <linux/module.h>
- 
- #include "sdhci.h"
-@@ -49,6 +50,73 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
- }
- EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
- 
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Low level functions                                                       *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+bool sdhci_uhs2_mode(struct sdhci_host *host)
-+{
-+	if ((host->mmc->caps2 & MMC_CAP2_SD_UHS2) &&
-+	    (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
-+		(host->version >= SDHCI_SPEC_400) &&
-+		(host->mmc->flags & MMC_UHS2_SUPPORT)))
-+		return true;
-+	else
-+		return false;
-+}
-+
-+/**
-+ * sdhci_uhs2_reset - invoke SW reset
-+ * @host: SDHCI host
-+ * @mask: Control mask
-+ *
-+ * Invoke SW reset, depending on a bit in @mask and wait for completion.
-+ */
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
-+{
-+	unsigned long timeout;
-+	u32 val;
-+
-+	if (!(sdhci_uhs2_mode(host))) {
-+		/**
-+		 * u8  mask for legacy.
-+		 * u16 mask for uhs-2.
-+		 */
-+		u8 u8_mask;
-+
-+		u8_mask = (mask & 0xFF);
-+		sdhci_reset(host, u8_mask);
-+
-+		return;
-+	}
-+
-+	sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
-+
-+	if (mask & SDHCI_UHS2_SW_RESET_FULL) {
-+		host->clock = 0;
-+		/* Reset-all turns off SD Bus Power */
-+		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
-+			sdhci_runtime_pm_bus_off(host);
-+	}
-+
-+	/* Wait max 100 ms */
-+	timeout = 10000;
-+
-+	/* hw clears the bit when it's done */
-+	if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
-+				     timeout, true, host, SDHCI_UHS2_SW_RESET)) {
-+		pr_err("%s: %s: Reset 0x%x never completed.\n",
-+					       __func__, mmc_hostname(host->mmc), (int)mask);
-+		pr_err("%s: clean reset bit\n",
-+					       mmc_hostname(host->mmc));
-+		sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
-+		return;
-+	}
-+}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
-+
- /*****************************************************************************\
-  *                                                                           *
-  * Driver init/exit                                                          *
-diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index afdb05d6056b..31776dcca5cf 100644
---- a/drivers/mmc/host/sdhci-uhs2.h
-+++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -11,6 +11,7 @@
- #define __SDHCI_UHS2_H
- 
- #include <linux/bits.h>
-+#include <linux/iopoll.h>
- 
- /*
-  * UHS-II Controller registers
-@@ -210,5 +211,7 @@
- struct sdhci_host;
- 
- void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-+bool sdhci_uhs2_mode(struct sdhci_host *host);
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
- 
- #endif /* __SDHCI_UHS2_H */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 4434838475bf..ab7ea55d9864 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -194,13 +194,14 @@ static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- 	pm_runtime_get_noresume(mmc_dev(host->mmc));
- }
- 
--static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
-+void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
- {
- 	if (!host->bus_on)
- 		return;
- 	host->bus_on = false;
- 	pm_runtime_put_noidle(mmc_dev(host->mmc));
- }
-+EXPORT_SYMBOL_GPL(sdhci_runtime_pm_bus_off);
- 
- void sdhci_reset(struct sdhci_host *host, u8 mask)
- {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index 64c2d7e78e29..3787ffe61c78 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -717,6 +717,19 @@ struct sdhci_ops {
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
- 	void		(*reset)(struct sdhci_host *host, u8 mask);
-+	/**
-+	 * The sdhci_uhs2_reset callback is to implement for reset
-+	 * @host: SDHCI host
-+	 * @mask: Control mask
-+	 *
-+	 * Invoke reset, depending on a bit in @mask and wait for completion.
-+	 * SD mode				UHS-II mode
-+	 * SDHCI_RESET_ALL		SDHCI_UHS2_SW_RESET_FULL
-+	 * SDHCI_RESET_CMD		SDHCI_RESET_CMD
-+	 * SDHCI_RESET_DATA		SDHCI_UHS2_SW_RESET_SD
-+	 *
-+	 **/
-+	void (*uhs2_reset)(struct sdhci_host *host, u16 mask);
- 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
- 	void	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
- 	void	(*hw_reset)(struct sdhci_host *host);
-@@ -839,6 +852,7 @@ static inline void sdhci_read_caps(struct sdhci_host *host)
- 	__sdhci_read_caps(host, NULL, NULL, NULL);
- }
- 
-+void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
- u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
- 		   unsigned int *actual_clock);
- void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
--- 
-2.25.1
+You sent a v5 on Oct 14 and then this one (v5 again) today. Why? What
+is the difference?
 
+Moreover, as v6.1-rc1 is now available, my next branch will be based
+on that. Can you please rebase the series on top of my next branch -
+or at least use the latest available "rc", when you test and submit?
+
+> * according to the guidance and overall architecture provided
+>   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
+>   UHS-2 Core function based on the patches of the [V4,0/6]
+>   Preparations to support SD UHS-II cards[5].
+> * according to the guidance and comments provided by
+>   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
+>   the UHS-2 Host function based on the patches of the
+>   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
+> * implement the necessary function to let the UHS-2 Core/Host
+>   work properly.
+> * fix most of checkpatch warnings/errors
+>
+> Reference
+> =========
+> [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
+> [2] SD Host Controller Simplified Specification 4.20
+> [3] UHS-II Simplified Addendum 1.02
+> [4] https://patchwork.kernel.org/project/linux-mmc/cover/20201106022726.19831-1-takahiro.akashi@linaro.org/
+> [5] https://patchwork.kernel.org/project/linux-mmc/cover/20220418115833.10738-1-jasonlai.genesyslogic@gmail.com/
+
+Another general question, I assume you intend to move this forward
+instead of Jason Lai, right?
+
+Kind regards
+Uffe
