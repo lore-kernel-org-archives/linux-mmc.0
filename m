@@ -2,148 +2,79 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 112B8C43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 14:11:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9CF7C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 14:20:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230249AbiJQOLb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Oct 2022 10:11:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45728 "EHLO
+        id S229884AbiJQOUW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Oct 2022 10:20:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37580 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230079AbiJQOL3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 10:11:29 -0400
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 832A257BEB;
-        Mon, 17 Oct 2022 07:11:27 -0700 (PDT)
-Received: by mail-ej1-x633.google.com with SMTP id k2so25236231ejr.2;
-        Mon, 17 Oct 2022 07:11:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=wc4vhu3cj7ob5Y0sdul0MVZXyT2m9YP+8Qo/4ifVpWs=;
-        b=gxdD1NB9+4TZqPOstQjfh2IOQoJQ4GXNBKGNF2IeU1ZsIyAN97PghiyFeJH0se2Boy
-         fc1kN47+MUZKEAkGx7/cAIV+x1SlO9jiUtZEv4cBn8iaesre/Vh4/v0GHNlp3hiiw5ev
-         CmqIjVHlD9zUtck6BtNckzBrXx5uRfRVL7LjxhME5cc1rJcDLK3RjfK20C7eIFYYhqKV
-         SM/XyTa2x/kOwI3+dnPQ9KuPHa2URB8dQqXc8I7c/R/Z9iV/IWiC9F/d0xfS8QOol3zC
-         EPCBXvOvR+yrN73dadAb10KO0P54yg7CVHnSs5nNQjX4PNWK3od4TuhzPBNljkqedZOd
-         a+pA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wc4vhu3cj7ob5Y0sdul0MVZXyT2m9YP+8Qo/4ifVpWs=;
-        b=4toSJD4pXK/LM3GxOXv8ktN2uMAKiUpNF3c1LcffwbQxsxVd8iPOPuOr/25Rphi7D9
-         7mxwpx3sR09r5lMQYKXjHgMF4uk7kPsokzACTv83qBjsA9okvOyq3z6aKlJ2QS8BbDra
-         vvQ005sIDFQ+ZzFHHGu1cil8Mwh6k83GXsRroWzw7uw6xZ1Xtd0rD4KdGzmCCOJ6qITa
-         trfVKbuJvKZe8uZMzSSyJ8qMlbW827vCdD6hi5OoHvpvZYmM7LpqNVROjoAH/U622IVS
-         Ln7ykDKWPBJY9LCcOrjGgSBA0xHtGWytEiBGAZnZlD8TQ2G7rebzTnQiwc1ZZqgS6DHe
-         9jrw==
-X-Gm-Message-State: ACrzQf2V8qCkqxQ/MfGDjJkPIONxzcRzAg6wW4g/yct0p4BHAPaMu/LV
-        6zPs6DAYV8dLmHOcNVQK794=
-X-Google-Smtp-Source: AMsMyM4y6Ve+vTWBpgAifoQzvsVeFbJBwIEnSCHCwtM8mCeMeDXljEtdl7teviAk5kN9Im79G96oxw==
-X-Received: by 2002:a17:907:6d9a:b0:78d:f864:de0e with SMTP id sb26-20020a1709076d9a00b0078df864de0emr9112609ejc.26.1666015885968;
-        Mon, 17 Oct 2022 07:11:25 -0700 (PDT)
-Received: from orome (p200300e41f201d00f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f20:1d00:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id 23-20020a170906311700b00771cb506149sm6236307ejx.59.2022.10.17.07.11.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 17 Oct 2022 07:11:24 -0700 (PDT)
-Date:   Mon, 17 Oct 2022 16:11:22 +0200
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Prathamesh Shete <pshete@nvidia.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Aniruddha Tvs Rao <anrao@nvidia.com>,
-        Suresh Mangipudi <smangipudi@nvidia.com>,
-        Krishna Yarlagadda <kyarlagadda@nvidia.com>
-Subject: Re: [PATCH v7 2/4] mmc: sdhci-tegra: Add support to program MC
- stream ID
-Message-ID: <Y01iiqtNA9xek46S@orome>
-References: <Yz6zfrVq9cP/wrJb@orome>
- <20221006130622.22900-1-pshete@nvidia.com>
- <20221006130622.22900-2-pshete@nvidia.com>
- <CAPDyKFr_Yi2EgrBUzsORnM4mOkf25WR8+7_dfF2h4XzRDPm9-w@mail.gmail.com>
- <DM5PR12MB2406610AB26183BACB19EED6B7239@DM5PR12MB2406.namprd12.prod.outlook.com>
- <CAPDyKFqn2jMVQ5BAOZPFx2OOyMRQvsQ1E7mGAQp82x5+v6aSGQ@mail.gmail.com>
- <DM5PR12MB2406405CE44A7606B5A28203B7259@DM5PR12MB2406.namprd12.prod.outlook.com>
- <CAPDyKFq5hNTdwT7CMvsxG=_5u+xvG2k3-PfbGhAbHfHbGqK81w@mail.gmail.com>
+        with ESMTP id S230180AbiJQOUV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 10:20:21 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4AF35A825;
+        Mon, 17 Oct 2022 07:20:14 -0700 (PDT)
+X-UUID: 46a7cbab5bdd4a2a8d1b9a504833891f-20221017
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=9nM+HJkIZYFDdoIM0Yw1SMU/i8YQxRIRZyTgOy4hyyU=;
+        b=ROd+uF908endJGyK+g1D0dHapZNUj9TACl6FN9I6P94plGkK5K3XH9Xc/Sex6CMbVuAqyiIEBFGfCHmPjf708GQ8yCisO2no4VeJaTddsQPDDKRwLL/UWxrCEclz5/iF2Ay5q1yVVSM/+UXxviq1CW/ROYJWoCDbwGY109aSoos=;
+X-CID-UNFAMILIAR: 1
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.11,REQID:38ec97d0-15d3-4fa4-9130-42fe32c258f8,IP:0,U
+        RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:100,FILE:0,BULK:0,RULE:Release_Ham,ACTI
+        ON:release,TS:95
+X-CID-INFO: VERSION:1.1.11,REQID:38ec97d0-15d3-4fa4-9130-42fe32c258f8,IP:0,URL
+        :0,TC:0,Content:-5,EDM:0,RT:0,SF:100,FILE:0,BULK:0,RULE:Spam_GS981B3D,ACTI
+        ON:quarantine,TS:95
+X-CID-META: VersionHash:39a5ff1,CLOUDID:bcd70aa4-ebb2-41a8-a87c-97702aaf2e20,B
+        ulkID:221017222011XYZ374TR,BulkQuantity:0,Recheck:0,SF:38|28|16|19|48,TC:n
+        il,Content:0,EDM:-3,IP:nil,URL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0
+X-UUID: 46a7cbab5bdd4a2a8d1b9a504833891f-20221017
+Received: from mtkmbs10n1.mediatek.inc [(172.21.101.34)] by mailgw02.mediatek.com
+        (envelope-from <mengqi.zhang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
+        with ESMTP id 400136033; Mon, 17 Oct 2022 22:20:11 +0800
+Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
+ mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.792.3;
+ Mon, 17 Oct 2022 22:20:10 +0800
+Received: from localhost.localdomain (10.17.3.154) by mtkmbs11n1.mediatek.inc
+ (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
+ Transport; Mon, 17 Oct 2022 22:20:09 +0800
+From:   Mengqi Zhang <mengqi.zhang@mediatek.com>
+To:     <chaotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-mediatek@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH 0/2] MediaTek eMMC inline encryption support
+Date:   Mon, 17 Oct 2022 22:20:05 +0800
+Message-ID: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="bW1/UntuZ/Dpz/dP"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFq5hNTdwT7CMvsxG=_5u+xvG2k3-PfbGhAbHfHbGqK81w@mail.gmail.com>
-User-Agent: Mutt/2.2.7 (2022-08-07)
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hello,
 
---bW1/UntuZ/Dpz/dP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Mediatek eMMC hardware IP has Inline Crypto Engine (ICE), we support inline encryption now.
 
-On Thu, Oct 13, 2022 at 03:43:18PM +0200, Ulf Hansson wrote:
-> On Thu, 13 Oct 2022 at 08:33, Prathamesh Shete <pshete@nvidia.com> wrote:
-> >
-> > Hi Ulf,
-> >
-> > >> In that case, perhaps we can add a "depends on IOMMU_API" in the Kco=
-nfig
-> > >> instead? Or is the tegra driver used on platforms where IOMMU_API co=
-uld be
-> > >> unset?
-> > Yes it can/will work with IOMMU disabled so its not recommended to add =
-a "depends on" condition in Kconfig.
->=20
-> Alright, in that case it looks to me that there are two other options
-> to move forward.
->=20
-> 1) Add proper definitions of the struct iommu_fwspec in
-> include/linux/iommu.h even when CONFIG_IOMMU_API is unset. In a way it
-> seems a bit silly to me, to have the iommu stubs around, unless those
-> can be used for cases like this, right!?
+This patchset supports Mediatek eMMC inline encryption which meets the upcoming version of the eMMC specification such as v5.1 or v5.2.
 
-I recall that I had proposed a patch for this a long time ago:
+Patch 1, add crypto clock control flow in mtk-sd driver, patch 2, document the device tree description about crypto clock.
 
-	https://lore.kernel.org/all/20191209120005.2254786-3-thierry.reding@gmail.=
-com/
 
-Given that Joerg had acked it at the time, I think the only reason why
-it never ended up getting merged is because the rest of the series did
-not get enough traction. I wonder if I should peel it out of the series
-and propose it separately.
+Mengqi Zhang (2):
+  mmc: mtk-sd: add Inline Crypto Engine support
+  dt-bingdings: mmc: Mediatek: add ICE clock
 
-I agree it doesn't make any sense to have the stubs to allow compilation
-and then break compilation because users of the stubs will end up
-wanting to dereference the structure.
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml |  4 ++++
+ drivers/mmc/host/mtk-sd.c                         | 12 ++++++++++++
+ 2 files changed, 16 insertions(+)
 
-Thierry
 
---bW1/UntuZ/Dpz/dP
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmNNYocACgkQ3SOs138+
-s6Ealw/+N+g3kvb61CMuasUT4REnY/0pdkX6PG+sIPl74h/vEy4RQONsMSIF60At
-vT5lx44ULGJq6Hi76D4A2OaZqGwezVI8lhdMPPzajE6LgH+VgnqaXbZzcSu1C0n9
-jGRyRvg0xcikfl8leufXlIPY4vew2i6OHaGX9kOOrpfuHyQPEf0qYGPRPtdOPHg6
-nxkUuOSxT2wSVxByOystb2Idao31IaN+dHk9Yds/OfLi5a3eXicJTfcV2Ashpktx
-91k7ZbPIXrYpB0TxhkqlsQGTC2tqaoR2vXAYB2MfGlz7FTuFXeyV7Xk8zaHvgMRg
-jfqqsqwXyzltIk5MY4ErJk8c1XZLRO6q3iepi4xSU0wb59Sjmcb7klZP5scPJC6H
-fHha2s6BZoLzw584a7O5RvjDK5GOGcMYDxmEGz5mb+ZKLsHdG24sdV2F46/qJU5c
-iRNZhlYV7PNCJmSxMFoOozA63v7YKR4RYQfBJSKHGSinTK+QJ2Cqm3EsRbCrBQgt
-u4AigcYY+T+pMd+L9HfYb0nxPYjViqa0FEtvv8fDua89MVVtGlQ+trHec4licmNF
-NNj87vkJpFe8uJYIWbsNAI6s1d6G/tGdcW85v11KFsBbJX/+HJawDSJXVj1ZF4m8
-fRRI7PcXMrKBlKhCAPfYz5057boPT+Gh64gTH1Lv2HQz7TCYvTE=
-=FnaY
------END PGP SIGNATURE-----
-
---bW1/UntuZ/Dpz/dP--
