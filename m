@@ -2,91 +2,79 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A673C4167B
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 14:20:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99622C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Oct 2022 23:56:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230328AbiJQOU0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Oct 2022 10:20:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37630 "EHLO
+        id S230267AbiJQX4W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Oct 2022 19:56:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36114 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230314AbiJQOUY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 10:20:24 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1083F5B7B9;
-        Mon, 17 Oct 2022 07:20:21 -0700 (PDT)
-X-UUID: 9cac9a65c168484abf404c38ca669c74-20221017
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Type:Content-Transfer-Encoding:MIME-Version:References:In-Reply-To:Message-ID:Date:Subject:CC:To:From; bh=SCTfi8EohP0/f/dHHu5qpABoBPiRJzFOeNfn7nLzrEY=;
-        b=ChQ48xbwQoffs2pVw5xsHQB1p2ZiyK7ymxsB2HU7eyz88Z0n1Nq5mp2NL6SJEK3CgdsUISZBnbGEctTjBg2oCDkR6mCmrRxklFgHU9ATCibStazGWULRldx2itReRLk6to58gKtL0PmwdFA38BAH+yvhcYE7dvcqF+Ke7+HjRZk=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.11,REQID:a10657d5-d32c-45a8-bcb4-074bd6056c53,IP:0,U
-        RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-        :release,TS:-5
-X-CID-META: VersionHash:39a5ff1,CLOUDID:18d80aa4-ebb2-41a8-a87c-97702aaf2e20,B
-        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0
-X-UUID: 9cac9a65c168484abf404c38ca669c74-20221017
-Received: from mtkmbs10n2.mediatek.inc [(172.21.101.183)] by mailgw01.mediatek.com
-        (envelope-from <mengqi.zhang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 1120127280; Mon, 17 Oct 2022 22:20:15 +0800
-Received: from mtkmbs11n1.mediatek.inc (172.21.101.186) by
- mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.792.15; Mon, 17 Oct 2022 22:20:14 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkmbs11n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
- Transport; Mon, 17 Oct 2022 22:20:13 +0800
-From:   Mengqi Zhang <mengqi.zhang@mediatek.com>
-To:     <chaotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        Mengqi Zhang <mengqi.zhang@mediatek.com>
-Subject: [PATCH 2/2] dt-bingdings: mmc: Mediatek: add ICE clock
-Date:   Mon, 17 Oct 2022 22:20:07 +0800
-Message-ID: <20221017142007.5408-3-mengqi.zhang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
-References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
+        with ESMTP id S230120AbiJQX4L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Oct 2022 19:56:11 -0400
+Received: from smtpcmd0641.aruba.it (smtpcmd0641.aruba.it [62.149.156.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 285B27E02B
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Oct 2022 16:56:06 -0700 (PDT)
+Received: from localhost.localdomain ([146.241.87.206])
+        by Aruba Outgoing Smtp  with ESMTPSA
+        id kZxkoIDsHJpY4kZxloMdtH; Tue, 18 Oct 2022 01:56:05 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
+        t=1666050965; bh=ASdoZ49/eBN4z0vuWYdhxmygfqGvGO4gQmCrBmTGXXw=;
+        h=From:To:Subject:Date:MIME-Version;
+        b=bLivJUDKVqRo5A0YFaILlBLK3hI4GMlzR9+5MOK7UNcEjIiu5wNQz2dPyK+DnIBZO
+         ugBrk8VvjfGhnD5qGuwu0PIorWUoLcuAeAcGjwFJDxx3geylI0NmORveU3BaqFLvyi
+         h7zG5EA+VSe0W/QNOWavqo+kpzblkBsgzgZXaK+mLsfKd+ynXk5MD30fiiOXh2yyhG
+         9GPHMx+ldVbeiFwNknTcMurEgUxMkydYgdTTwcycT92Qt8E2pIseOur+g4UDZZAGU/
+         DDWOG3GnJhcuZADof6jW0z5ydBGfCipJ9JH+6PJKJ6QeCSOQp0YRgvGRTCmGvEjUOU
+         luarMiz1Y0rJQ==
+From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
+To:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Cc:     Stephen Boyd <sboyd@kernel.org>, Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Giulio Benetti <giulio.benetti@benettiengineering.com>
+Subject: [PATCH 3/5] mmc: sdhci-esdhc-imx: improve imxrt1050 data
+Date:   Tue, 18 Oct 2022 01:56:00 +0200
+Message-Id: <20221017235602.86250-3-giulio.benetti@benettiengineering.com>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
+References: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+X-CMAE-Envelope: MS4xfPrn7ntQdoekybvwfhFyO67CFnqXTpbenwSu5crc4XKZ5ExrFtLgKub6vuPX7iwmOxEApIB8wqcmul4VKipnrJ27OwlZeUrE7KmNoEviAUNFWy5I+1jK
+ Er10ZCTFieqmKEHNcDB6Ng7qMSpyAFxg7ipKt/VcvJolwBx6RX8S+M39hOOc/VOvYWnecqGjNzK/kVcPY7JZifJTtYIWPnYAARwEY58+xTp/XQvKvyTSFB1Z
+ C6UfaD7j4D19FwrNcGCHX8XhVIyVugL4O+RAAdaMEbh0+fJZoac2gSx1NlaWbiZ0GahmGCYIP4Ef8QqEsEFQjxYu/YKQCY+GHHY5/pq4+U1hGkFOaVRTtlTO
+ 76N/gnGQVpL9VPF1n4+10sQCFizSAjUPk//MMKeog7rVul0qYBwEpbOcjfEdXAqD7GKRmoQlasBn9eNPFXU4SDIgx2ED23AbFRi7yN7afF1dJDEWDsehoKq6
+ 5hm0KOOkD4snEZOezBo0yu/wvojYXOX7oST69pEwuYUGzCrQgBGb2mMAqzvcrQzCVF/Va8oAv3VfNQWwQvrhCOBmx1SGBgA6grB4179aeZWCL8gwLON7c5MZ
+ TY0=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the binding for crypto clock of the Inline Crypto Engine
-of Mediatek SoCs.
+i.MXRT1050 usdhc is not affected by ESDHC_FLAG_ERR004536 so let's remove
+it. It supports ESDHC_FLAG_STD_TUNING and ESDHC_FLAG_HAVE_CAP1 so let's add
+them.
 
-Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
 ---
- Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index d8e1e2e9adf2..f93d686e2911 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -57,6 +57,7 @@ properties:
-       - description: peripheral bus clock gate (required for MT8192).
-       - description: AXI bus clock gate (required for MT8192).
-       - description: AHB bus clock gate (required for MT8192).
-+      - description: crypto clock used for data encrypt/decrypt (optional).
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 55981b0f0b10..4bc0a2914a95 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -306,7 +306,8 @@ static struct esdhc_soc_data usdhc_imx7ulp_data = {
+ 			| ESDHC_FLAG_STATE_LOST_IN_LPMODE,
+ };
+ static struct esdhc_soc_data usdhc_imxrt1050_data = {
+-	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_HS200 | ESDHC_FLAG_ERR004536,
++	.flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
++			| ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200,
+ };
  
-   clock-names:
-     minItems: 2
-@@ -69,6 +70,7 @@ properties:
-       - const: pclk_cg
-       - const: axi_cg
-       - const: ahb_cg
-+      - const: crypto
- 
-   interrupts:
-     description:
+ static struct esdhc_soc_data usdhc_imx8qxp_data = {
 -- 
-2.25.1
+2.34.1
 
