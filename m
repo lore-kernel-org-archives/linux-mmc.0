@@ -2,120 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBEDC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 19:07:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36915C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 22:36:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229691AbiJRTHA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 15:07:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33524 "EHLO
+        id S229736AbiJRWgG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 18:36:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39902 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229936AbiJRTG4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 15:06:56 -0400
-Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D80B86E8B4
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 12:06:55 -0700 (PDT)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.west.internal (Postfix) with ESMTP id 15C8F32000CC;
-        Tue, 18 Oct 2022 15:06:55 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute3.internal (MEProxy); Tue, 18 Oct 2022 15:06:55 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1666120014; x=1666206414; bh=ogx1Ik9GsH
-        a565kB6576zAyqipkHSWO5bk1YRoygIFk=; b=BLNROm0aaldug8M7ZS0wvabS95
-        zxWgO4Huz3pQoEC8SzixWLqUao1N7Wv0v4wNOSyT7ZA/tkxrhj1XxQjALmNS22rm
-        UTG92cvOHkiJclMQbPEgV8LC4XxnLxfsyx5sbNR5DLX+K/Eb4lathpQnI70uXshF
-        BjsWPCzN+nOumyYnVX3uznNA2LnVCvIzT+TjFdNwqCSz7nv0don4vQnFr1FFWnqL
-        IyfwGm2qP/WyQJbWt/SX6ocTCRyIE7mUppDkNv1mpCNZUigNDkLS21uHwegj3tYJ
-        mToVgXHY+E2YPF18fE19ZhmRE09PLJVBmWtzI5BGHMdbPP+1+0VUf/mvTi1Q==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; t=1666120014; x=1666206414; bh=ogx1Ik9GsHa565kB6576zAyqipkH
-        SWO5bk1YRoygIFk=; b=IL4Wzif5/oMlyHpK8Bj35eHgi0ATjowNnVsL2REBzDU6
-        Y4vGhZ/Hks06shTBU6C9ejzWD/ArUoPmVIpvgIpshZ8KcGU6SFjj9Wy6jAI+H8Js
-        mWFI3UBKIL0aiqFT9Ac1py60hLUkkJLAwFWVO5wQLM/meeOtzhix5XxIyop6ceiQ
-        2qyfJv1LSoY1noy1qWWULTPoyBeHKSnbWOZ7PQgBsq/0f7NsVZArs/AIdHLS56Q0
-        y5rVI1l2necdyYvc3Q1TRrYMcSb7k4pEv+C87+pEEaqItDeignRQBs4iuaUN/HDU
-        598BGNQMi95v1QNbxeczRWzSDNuOhtqlNs4yx5KYMA==
-X-ME-Sender: <xms:TvlOY3iE7fcCgFNd7VhUzUja27JyKQuAw44Fy0VXEmpTBti7N_x3dQ>
-    <xme:TvlOY0BTu2uxkRUi8qnsP-x98KGMj_e1TEj_51F-jgr8BnmIeOPscF3pasmMv8ziB
-    okXLxvOr6xqQp3FbPY>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrfeelvddguddtfecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
-    enucfjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdet
-    rhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrg
-    htthgvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedt
-    keetffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    grrhhnugesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:TvlOY3FK7mEb6mPmC0YCL9hbEBu9t5YDnMfLD1Nhe7yc-0VK0MpquA>
-    <xmx:TvlOY0SkZqz14Q0Gj8kGHpMFRfeRn_YzFnrtybM9qsP5F-ornu9mZQ>
-    <xmx:TvlOY0zNPEJDO7Dr0XXqyT07RKZCKFfiuX_ELvW22H2WUdcgJ-qGnQ>
-    <xmx:TvlOY_-3H-r0oGSJ_-s3KStq83Oa78sbQr4Vq393qdZ_XMKlUM6aRA>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 52E1EB60086; Tue, 18 Oct 2022 15:06:54 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
-Mime-Version: 1.0
-Message-Id: <a577dfcf-5a0a-4568-8f6d-872a8324dfcc@app.fastmail.com>
-In-Reply-To: <20221018133800.10636-1-firas.ashkar@savoirfairelinux.com>
-References: <20221018133800.10636-1-firas.ashkar@savoirfairelinux.com>
-Date:   Tue, 18 Oct 2022 21:06:34 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Firas Ashkar" <firas.ashkar@savoirfairelinux.com>,
-        alex@digriz.org.uk, "Ulf Hansson" <ulf.hansson@linaro.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH] mmc: add TS7800 FPGA based MMC controller driver
-Content-Type: text/plain
+        with ESMTP id S229612AbiJRWgF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 18:36:05 -0400
+Received: from smtpcmd0986.aruba.it (smtpcmd0986.aruba.it [62.149.156.86])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D0E0FD03A6
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 15:36:02 -0700 (PDT)
+Received: from [192.168.50.220] ([146.241.87.206])
+        by Aruba Outgoing Smtp  with ESMTPSA
+        id kvBoovvaFaWj1kvBooEOsQ; Wed, 19 Oct 2022 00:36:01 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
+        t=1666132561; bh=luzvlvgLF0QVUwO0gT+OoCdQWZnYIwCJYht0pOjIZ3U=;
+        h=Date:MIME-Version:Subject:To:From:Content-Type;
+        b=dSUdRnUFi0Crty2pYHbqT/DSo4YUVoudW7NGYNWRPptQ30prDF4Ez61lAul/r/fkJ
+         GC5EJhNKQwRMchylAa0XX2Bq63Jhyj1n3uI2H1wj/2HcCflMHet7N0hIzC8sLh5K1a
+         +QixalwmxG2+EwDw6OFGoXStRtXobeohoJeyFsV49caURRoJemHUn9+XhgZ69sF+fC
+         FMqzn2cRohNqN8MIwbEuq/v+nxRRrBgRrOlnmM5YirOTF3IFSoXBSQ/fLiMyFpZddq
+         3eu7pAHjGK+kTcuDn5vuTFPOUD40hIMPbbYKDMzzFfZLjj19PIIc5gbCbBBtRoolyV
+         2NaThyRjN/a1g==
+Message-ID: <ac5c75e0-2921-84ef-90c3-93e526358d7c@benettiengineering.com>
+Date:   Wed, 19 Oct 2022 00:36:00 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.3
+Subject: Re: [PATCH 1/5] clk: imx: imxrt1050: fix IMXRT1050_CLK_LCDIF_APB
+ offsets
+Content-Language: en-US
+To:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Cc:     Stephen Boyd <sboyd@kernel.org>, Haibo Chen <haibo.chen@nxp.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jesse T <mr.bossman075@gmail.com>
+References: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
+From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
+In-Reply-To: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4xfOrIqwcb7/+eOP2FY7EKspVzfwUbtM756/UiDbnbjXc52sKwXx1avxmGQAPGFy7tsJypcnBnEyow6xb7ccR38m69Kt67ZKk+OE1RyIbFR8IELk59oCPu
+ s51DqBg+n0VRDLG0SeI+/qmyT60QBmYWgkvxza+soxLIsEc0BMqM+QE1LmajxHiDbhpvwDaQUnWUO8DuM6dDvz8E5NHpcva0fvnDrp52WhykFnQBsQgsYhhR
+ cNeYfrFdxRiSO7uk+d6zTYq0Yhzp8OS7n9wgVPheVzPX65nvtqcuNWcbcZBSkAsBzaz1aBwCrL719VglAJLsDKsEoOQBM/4go3sT64ssMKvybYcetGrp2VDV
+ biQy0DpKM16tWe00D6WOkYyQpJFV3U3vkmgA2f0j9wpB1HNPd1n1faONXfz+spZ4i4t0gAPqi/tHOHb4Keb2MGwIxg5GNGFZ+M1gUE533fpNJ8gHP14TSY+k
+ jJSOfMbm8nOc4GCyTK8I5vIcZjYt+VsiLm41Sn5mPvMIkkKfUrvFeBKZHtRLezAJglFDTKxQazOF3Q4h2fbwrCKYlAWqs0WLWdmZLQ==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Oct 18, 2022, at 15:38, Firas Ashkar wrote:
-> add standard mmc/host controller driver for TS-7800v1, instead of the
-> original block based 'tssdcore' driver provided by EmbeddedTS linux-2.6.x
-> code base.
+Hi Jesse,
 
-I'm looking at this driver since Marc pointed me to your
-work on the platform and I noticed this post as well.
-Not doing a full review, but I'm still pointing out a few
-issue that caught my eye.
+On 18/10/22 01:55, Giulio Benetti wrote:
+> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+> ---
+>   drivers/clk/imx/clk-imxrt1050.c | 2 +-
+>   1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/clk/imx/clk-imxrt1050.c b/drivers/clk/imx/clk-imxrt1050.c
+> index 9539d35588ee..26108e9f7e67 100644
+> --- a/drivers/clk/imx/clk-imxrt1050.c
+> +++ b/drivers/clk/imx/clk-imxrt1050.c
+> @@ -140,7 +140,7 @@ static int imxrt1050_clocks_probe(struct platform_device *pdev)
+>   	hws[IMXRT1050_CLK_USDHC1] = imx_clk_hw_gate2("usdhc1", "usdhc1_podf", ccm_base + 0x80, 2);
+>   	hws[IMXRT1050_CLK_USDHC2] = imx_clk_hw_gate2("usdhc2", "usdhc2_podf", ccm_base + 0x80, 4);
+>   	hws[IMXRT1050_CLK_LPUART1] = imx_clk_hw_gate2("lpuart1", "lpuart_podf", ccm_base + 0x7c, 24);
+> -	hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x74, 10);
+> +	hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x70, 28);
+>   	hws[IMXRT1050_CLK_DMA] = imx_clk_hw_gate("dma", "ipg", ccm_base + 0x7C, 6);
+>   	hws[IMXRT1050_CLK_DMA_MUX] = imx_clk_hw_gate("dmamux0", "ipg", ccm_base + 0x7C, 7);
+>   	imx_check_clk_hws(hws, IMXRT1050_CLK_END);
 
-> +
-> +#define DRIVER_NAME "ts7800v1_sdmmc"
+I've forgotten to add you in Cc, can you please take a look at it?
+You've written the driver so you maybe can give me a feedback.
+Same for patch 2/5
 
-Maybe drop this macro and just use the string directly.
+Thank you very much!
 
-> +
-> +	if (IS_ERR_OR_NULL(pslot->rw_dma_buf)) {
-> +		dev_warn(mmc_dev(ts_sdmmc_host->mmc_host),
-> +			 "%s|%d - Error, No allocated DMA read buffer %ld\n",
-> +			 __func__, __LINE__, PTR_ERR(pslot->rw_dma_buf));
-> +		*data_error = ret = -ENOMEM;
-> +		goto done;
-> +	}
-> +
-> +	dat0_sent_crc16_buf = kzalloc(sizeof(u16), GFP_KERNEL);
-> +	if (IS_ERR_OR_NULL(dat0_sent_crc16_buf)) {
-
-You should never need IS_ERR_OR_NULL, as all interfaces
-in the kernel are supposed to either return an error code
-or return NULL on error. Please fix the error handling
-for this throughout the driver.
-
-> + spin_lock_bh(&ts_sdmmc_host->bh_lock);
-
-I'm a bit confused by your locking. Why do you use
-spin_lock_bh() instead of a normal spin_lock() or
-a spin_lock_irq()? I don't see any use of softirqs
-(typically tasklets and timers) in this driver, so
-disabling softirqs in the critical section should
-not change anything.
-
-     Arnd
+Best regards
+-- 
+Giulio Benetti
+CEO/CTO@Benetti Engineering sas
