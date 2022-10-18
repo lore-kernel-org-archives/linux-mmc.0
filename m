@@ -2,60 +2,51 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F6F3C43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 14:26:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A79E1C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 16:13:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230510AbiJRO0a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 10:26:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38122 "EHLO
+        id S230261AbiJRQNp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 12:13:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56032 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229926AbiJRO03 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 10:26:29 -0400
-Received: from mail-oa1-x2e.google.com (mail-oa1-x2e.google.com [IPv6:2001:4860:4864:20::2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03A719AFB6;
-        Tue, 18 Oct 2022 07:26:29 -0700 (PDT)
-Received: by mail-oa1-x2e.google.com with SMTP id 586e51a60fabf-1322fa1cf6fso16984598fac.6;
-        Tue, 18 Oct 2022 07:26:28 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=jJB9ivUqw3F+dMYrKLA2kwqlgOk9VKugArobXTWH0xM=;
-        b=L7Jnyc2vNK5H0lbnIYCoMnh2Ayt17o/YaKYgom65gGlLoYBMY+m3BZHaZkdILOw69b
-         axjCooFq80igazhwWKQcegfs5v4Zh2BozBPLB4yBTU/77PT53mZmBIO801dl2FhMVr1z
-         omb59hrEJEHA/5V4/e5T27e0kqJXnLGXQqioQu9yfUlZ05kJazPzW4G3yIlZ12KwsyZK
-         LE1zjYsLGDtGSGrWnfEqesXN9BVAf25LI15CdG6IbvUV95pJZFWFNAiejXE+i/qzySMW
-         FvY30ZdJoWrPCsmVSMhP+BoWxzkoUV1uhHmMWJPkrwwiKlayUDfYVnn4Wt81pB1ho87V
-         /KQA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=jJB9ivUqw3F+dMYrKLA2kwqlgOk9VKugArobXTWH0xM=;
-        b=ww7gTPLZZ3BSql5huwNLxEkR70vS7fNhE1Efrxh2CNfZyJMz742KduUd+hapRWck7E
-         nccBIgGleATLHrv/v3A5YX8E/lsEPeAZwwgBUzN/iVo1wpUVvGX6gAWAS2v7cLTs6GUU
-         TZ51dZ/+Ls3bAKOnfLz5eQD7BMRnfkg27bxAHjX+bCOZ4j493D/DVykVDFoZJr+YLS7Z
-         iMtjm2c73qf6UwgTFgiWQ/kU5IZP8OtbTMIAGLepxCXH2XpxmuijNdQwtia5XG4rKh11
-         pv4pGOcjdBn/hmONuqPbsKiPVz7yT0c24AdQeY8p77nvrsNg/TYDn+MaioWQwEBTsB6l
-         iT/g==
-X-Gm-Message-State: ACrzQf2G2Fc+ZkzYxZ9dtw0afJp++pUKJCvidypjfsV+8oepAsr6gnAk
-        yAHeCc4K1gOdmwxYhL5iDQ8=
-X-Google-Smtp-Source: AMsMyM687VtwhmvJxsI0F4ocYwDeCWuGUtCIdxOONuH0brQ9jluRqc8MEXTf9MzlCQMW6ndhpayNdw==
-X-Received: by 2002:a05:6870:2189:b0:132:b270:2107 with SMTP id l9-20020a056870218900b00132b2702107mr1661427oae.55.1666103188199;
-        Tue, 18 Oct 2022 07:26:28 -0700 (PDT)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id 23-20020aca2117000000b00354efb5be11sm5533568oiz.15.2022.10.18.07.26.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Oct 2022 07:26:27 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Tue, 18 Oct 2022 07:26:26 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Brian Norris <briannorris@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        with ESMTP id S229698AbiJRQNo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 12:13:44 -0400
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D70779E0F4;
+        Tue, 18 Oct 2022 09:13:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1666109623; x=1697645623;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=ezRUfgf//9t3TKkvzi/6tZ+wan0th4HSbw4jvbk3WPM=;
+  b=U3cbkxf6W1vJRh3JUS6JqezjIXoKPdAPhWMr6CKFYTgJCsflVWG9NEyl
+   pGY/6YWf3H2k3nWw+a9d1sLrAzdGMgXLhs4vUZfpzxRfpKh+8kLixG8V/
+   VWvveIUNc761YIAc0A7eRZP8/a92w95o9hWEn0iNkWfJi0NHFZhtM6UUF
+   yMvabtJ6cOdUWmvJdYPrkwYOIvahMu6QyU0DiPCL1X6sJTd/be0dGhphJ
+   U1RRSGgVFVw++i+javf3x3MJGLC0H1KCZno3NuKINWc5vvhkYd9HVxO/l
+   p0kXCtG1bDkoGtjhTT1NXxM3FoP+OW6/uZZWzMf0yeOVTrK4QSrxMaHCa
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="304892739"
+X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
+   d="scan'208";a="304892739"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 09:13:40 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="803822798"
+X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
+   d="scan'208";a="803822798"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.208])
+  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 09:13:33 -0700
+Message-ID: <e7816e4a-8558-0de0-e25f-d10abd0ef1c3@intel.com>
+Date:   Tue, 18 Oct 2022 19:13:28 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.4.0
+Subject: Re: [PATCH 1/5] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
+Content-Language: en-US
+To:     Brian Norris <briannorris@chromium.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
         Shawn Guo <shawnguo@kernel.org>,
         Fabio Estevam <festevam@gmail.com>,
         Faiz Abbas <faiz_abbas@ti.com>,
@@ -73,19 +64,19 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         linux-arm-kernel@lists.infradead.org,
         Broadcom internal kernel review list 
         <bcm-kernel-feedback-list@broadcom.com>, stable@vger.kernel.org
-Subject: Re: [PATCH 1/5] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
-Message-ID: <20221018142626.GA2096645@roeck-us.net>
 References: <20221018035724.2061127-1-briannorris@chromium.org>
  <20221017205610.1.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 In-Reply-To: <20221017205610.1.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 17, 2022 at 08:57:20PM -0700, Brian Norris wrote:
+On 18/10/22 06:57, Brian Norris wrote:
 > SDHCI_RESET_ALL resets will reset the hardware CQE state, but we aren't
 > tracking that properly in software. When out of sync, we may trigger
 > various timeouts.
@@ -110,13 +101,14 @@ On Mon, Oct 17, 2022 at 08:57:20PM -0700, Brian Norris wrote:
 > controller. Also, move around the DT/caps handling, because
 > sdhci_setup_host() performs resets before we've initialized CQHCI. This
 > is the pattern followed in other SDHCI/CQHCI drivers.
+
+Did you consider just checking host->mmc->cqe_private like
+sdhci_cqhci_reset() ?
+
 > 
 > Fixes: 84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
 > Cc: <stable@vger.kernel.org>
 > Signed-off-by: Brian Norris <briannorris@chromium.org>
-
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
-
 > ---
 > 
 >  drivers/mmc/host/sdhci-of-arasan.c | 17 +++++++++++------
@@ -173,6 +165,4 @@ Reviewed-by: Guenter Roeck <linux@roeck-us.net>
 >  	if (ret)
 >  		goto err_add_host;
 >  
-> -- 
-> 2.38.0.413.g74048e4d9e-goog
-> 
+
