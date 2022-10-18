@@ -2,117 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A017C43217
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 17:59:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5FD25C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 18:29:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230117AbiJRR7Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 13:59:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44738 "EHLO
+        id S230044AbiJRS3N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 14:29:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229894AbiJRR7P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 13:59:15 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB22C62E3;
-        Tue, 18 Oct 2022 10:59:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666115951; x=1697651951;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=qG3pPWLpSbglp5R801rTaLLX0yFYxAOeAh4l6wso68g=;
-  b=d+BsUjGZz8Ow/a2qjz6nqsp1b2WUj2XCbyhujrYo1wAEpzT/2sT1kA/n
-   cB5qI5UmsO2tO9wTbHpGaIfalRY2Ym8zhzu1xhtxakOppk6jSv00omQ6J
-   dUzc6+ChP19lVPx5Kq05dfS4R7/g5CtR0q5HIn0tKwqM3+cd/EqN8nFpI
-   MurG8W8sVE5gEK5Ivdw+/+G79tPexK+Jsy/BlShfnGOaPLAh61KR+DVMZ
-   Qg6mxqUD6xcBi90dObS7R795f3vQdlJbIoh40L/YV503LQiopoVy0SKir
-   4m0qzJ9/u1WbaVmIEDNcGHmzk+avbMNHLF9nPOfrFCZx0mpb5eX+R/6I0
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="368214487"
-X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
-   d="scan'208";a="368214487"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 10:58:54 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="874017001"
-X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
-   d="scan'208";a="874017001"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.208])
-  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 10:58:49 -0700
-Message-ID: <1953691e-4179-92c3-efa9-f10ccd3cad00@intel.com>
-Date:   Tue, 18 Oct 2022 20:58:44 +0300
+        with ESMTP id S229981AbiJRS3H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 14:29:07 -0400
+Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AED66792C2
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 11:29:06 -0700 (PDT)
+Received: by mail-qk1-x72b.google.com with SMTP id x13so9215721qkg.11
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 11:29:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Jf71w/kMAtLTuZpw+aeynxFbJonRYosXdM0sN0F9YJQ=;
+        b=QyPtio5WxIjCn0zb+wjna2OySfw2zIuGY3eeBmkvLgsfLTvwctfMJVZB2v95/HPEjG
+         W/LzBAjV7nX5q6D6mL2vXB9CwWc35oUIbragvzLNU2vBhPn0HQMAXTeIOPg9WKdKbcj0
+         oRvf72Vpd6pIkGIsOe4Nk11/QqMfBFl5IRjl5qnV6xLDQ9WYhqCtAVO6YWTPfYa2gFcf
+         wqFEzpDL89d8RZ/IjCHCC6fAnFN4xyxb7vQbY2vloC81sFeyAZWHHFq7g6wqOjHucsWJ
+         JzBwV7nPLTdeMJVBK6GvWgsUOvghhC4kEYesz8jNDvMMMLvCLzsoU5S6HglApZ8IPcMB
+         JP4w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Jf71w/kMAtLTuZpw+aeynxFbJonRYosXdM0sN0F9YJQ=;
+        b=AFC4TzsW/AdwOnmXYK+zWwngOqZJlPHEYWKBTQcwU0o1j1WDlDzuRvwW4Y4SEX8R6O
+         wb+gRk2Ez5P4kxTh7n+YqZiRFpoyqcHI6A+uUg3EnCQZjRx25PYiY2BJa3EAFkXjGa2u
+         BHGv7CGmREYOCDxKNvsc+HmpFyO76YB2z1BexUT07LrdjPH8n5joqN1QHUHFrCQxh11a
+         jZ6AyVzIj4K/WOQnmsLvWRs/X0fGN1wjkZwbev61OyeYg6L4Rbmaa7T6LFXK0RAruOdD
+         5tzY8u2pJHWY5opi6cFECUtgRhJMBVyEvTjDcLkQX85t+W7BM2IYkxF5RBszMAVRhxxS
+         rP8A==
+X-Gm-Message-State: ACrzQf1ssq/BBk5o2DGorlgo9eQbQ9fUzbkPUWMm1EuuAQgWXdPJKKoD
+        p7SZs+yTnTH6yYZKNoRKB8Swrw==
+X-Google-Smtp-Source: AMsMyM6Ka5CO8JW+udIuW1pTo+oi3POKxDhOQ2etdGB19wypOpdxMZP7SqrspYTEsdDdzY/4x5HGTg==
+X-Received: by 2002:a05:620a:1452:b0:6ec:3f82:522b with SMTP id i18-20020a05620a145200b006ec3f82522bmr2719440qkl.402.1666117745901;
+        Tue, 18 Oct 2022 11:29:05 -0700 (PDT)
+Received: from [192.168.10.124] (pool-72-83-177-149.washdc.east.verizon.net. [72.83.177.149])
+        by smtp.gmail.com with ESMTPSA id y4-20020a37e304000000b006b5cc25535fsm2699092qki.99.2022.10.18.11.29.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 18 Oct 2022 11:29:04 -0700 (PDT)
+Message-ID: <5d87f1c3-1c73-054b-dca1-9f52939e187d@linaro.org>
+Date:   Tue, 18 Oct 2022 14:29:03 -0400
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH 1/5] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
+ Thunderbird/102.4.0
+Subject: Re: [PATCH 2/2] dt-bingdings: mmc: Mediatek: add ICE clock
 Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-kernel@vger.kernel.org,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
+To:     Mengqi Zhang <mengqi.zhang@mediatek.com>,
+        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        matthias.bgg@gmail.com, wenbin.mei@mediatek.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>, stable@vger.kernel.org
-References: <20221018035724.2061127-1-briannorris@chromium.org>
- <20221017205610.1.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
- <e7816e4a-8558-0de0-e25f-d10abd0ef1c3@intel.com>
- <Y07bgNd7KbLDttsq@google.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <Y07bgNd7KbLDttsq@google.com>
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
+ <20221017142007.5408-3-mengqi.zhang@mediatek.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221017142007.5408-3-mengqi.zhang@mediatek.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/10/22 19:59, Brian Norris wrote:
-> Hi Adrian,
-> 
-> On Tue, Oct 18, 2022 at 07:13:28PM +0300, Adrian Hunter wrote:
->> On 18/10/22 06:57, Brian Norris wrote:
->>> So like these other patches, deactivate CQHCI when resetting the
->>> controller. Also, move around the DT/caps handling, because
->>> sdhci_setup_host() performs resets before we've initialized CQHCI. This
->>> is the pattern followed in other SDHCI/CQHCI drivers.
->>
->> Did you consider just checking host->mmc->cqe_private like
->> sdhci_cqhci_reset() ?
-> 
-> I did not, although I am doing so now.
-> 
-> My first thought is that this feels a bit too private. Is the host
-> driver supposed to be memorizing the details of the CQHCI layer?
+On 17/10/2022 10:20, Mengqi Zhang wrote:
+> Document the binding for crypto clock of the Inline Crypto Engine
+> of Mediatek SoCs.
 
-Some drivers need to access CQHCI registers and get the reference
-to cqhci_host from cqe_private, so that is already accepted.
+This does not match the patch contents at all.
 
 > 
-> But on the plus side, that would remove some contortions needed here
-> (and also in sdhci-brcmstb.c).
-> 
-> Here's another option I previously considered: teaching
-> cqhci_deactivate() to check cqe_private itself. That would have the same
-> benefits, while keeping the private details in cqhci-core.c. How do you
-> like that?
+> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+> ---
+>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
 
-I don't mind either way.
-
-> 
-> (Tiny downside: cqhci-core.c got its rename in v5.12, so backporting
-> this to -stable would get slightly more difficult.)
-> 
-> Brian
+Best regards,
+Krzysztof
 
