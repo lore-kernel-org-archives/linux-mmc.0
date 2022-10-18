@@ -2,100 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C9513C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 18:30:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBEDC433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 19:07:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229719AbiJRSaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 14:30:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58076 "EHLO
+        id S229691AbiJRTHA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 15:07:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230097AbiJRSaO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 14:30:14 -0400
-Received: from mail-qk1-x729.google.com (mail-qk1-x729.google.com [IPv6:2607:f8b0:4864:20::729])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B91E67B2B0
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 11:30:06 -0700 (PDT)
-Received: by mail-qk1-x729.google.com with SMTP id o22so9226063qkl.8
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 11:30:05 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=BK5yk15LkKfIrAj2R6RMYbj0RdizV7gUhlXw7YTHuck=;
-        b=S8z7ViILNWv6pSSoxpuj/F/EYGFfWIFaN7il1DWvpL18xqGZcNZUAQfdS1OoechpTt
-         sK1h7Hg6LerSvf+o6QdYAXBqi796Yvaz+JeibS5CoyetsXV42bOX8mqWETc9k96d+N5L
-         Xxx7R9SCKEijUzuvOg+SUMer/s9EUFXzrFH87JB14uQpyoXoYGwkDx6mburJYJ3BTCXx
-         s5XCERItoFaBUGwLV/CSTYRVJHPl4ET9rJbCDstnJco4kAacYirsKbJRviRK2kwo9ytt
-         OEX6IrVCI9Jhjh6fAqr8LHlGezBmkX+p2TVL4mYXjve0evSn1s+FOvo9kKpb87LUg7/S
-         Z0Tg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=BK5yk15LkKfIrAj2R6RMYbj0RdizV7gUhlXw7YTHuck=;
-        b=X5PHPVIRYis+3I/nsSjgiNnNa7U82RpG1GyV0xkFe2LnaMHxJ8wbme0CJlWuT4B6Q7
-         wOELp40Y6IfKDA+RAhP1t8NOSoFoNWBt0+VjsQKy61rnSW7xlPnFH7HhbQTAcuvOoj8T
-         15GHwuMkITB9doZ1Po6DM6+Wnexpjmq4l4Xf4h2pGyab9jEGnJU/8RsSOR9NPRnrA1xO
-         rMF8zwb1TjH6EufTw8BLowUcNR2XH27zmwbOs/m65YX90JPKC5WG6J8PGV+jWH10zFWO
-         tnqJyTmSbLgViSm746D6jdMAS7kciwD+u/DI/Lxo4nTviJNwK95WY9dXTBHnya6MDU/f
-         Ptow==
-X-Gm-Message-State: ACrzQf2EQgKk0PDy5q87BG7XoVcGHmvTgrV/As0rrO8NrQpu7CDEpa6k
-        m7sH+6qc929YwI4NcZJdDfROwg==
-X-Google-Smtp-Source: AMsMyM4kK8z6bP4sSqyzi35kzNH1G8VJ027Py0bbB36RNpqYcPKjKDrRGf2YgUcA/R6HCsTR+aiB9A==
-X-Received: by 2002:a05:620a:4548:b0:6ee:deba:2795 with SMTP id u8-20020a05620a454800b006eedeba2795mr2837278qkp.621.1666117804589;
-        Tue, 18 Oct 2022 11:30:04 -0700 (PDT)
-Received: from [192.168.10.124] (pool-72-83-177-149.washdc.east.verizon.net. [72.83.177.149])
-        by smtp.gmail.com with ESMTPSA id cf17-20020a05622a401100b0039c7b9522ecsm2405829qtb.35.2022.10.18.11.30.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 18 Oct 2022 11:30:03 -0700 (PDT)
-Message-ID: <8a418360-400f-ff00-4230-865af883f17d@linaro.org>
-Date:   Tue, 18 Oct 2022 14:30:02 -0400
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.0
-Subject: Re: [PATCH 2/2] dt-bingdings: mmc: Mediatek: add ICE clock
-Content-Language: en-US
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Mengqi Zhang <mengqi.zhang@mediatek.com>,
-        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        matthias.bgg@gmail.com, wenbin.mei@mediatek.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
- <20221017142007.5408-3-mengqi.zhang@mediatek.com>
- <5d87f1c3-1c73-054b-dca1-9f52939e187d@linaro.org>
-In-Reply-To: <5d87f1c3-1c73-054b-dca1-9f52939e187d@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S229936AbiJRTG4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 15:06:56 -0400
+Received: from wout3-smtp.messagingengine.com (wout3-smtp.messagingengine.com [64.147.123.19])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D80B86E8B4
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 12:06:55 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 15C8F32000CC;
+        Tue, 18 Oct 2022 15:06:55 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Tue, 18 Oct 2022 15:06:55 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm2; t=1666120014; x=1666206414; bh=ogx1Ik9GsH
+        a565kB6576zAyqipkHSWO5bk1YRoygIFk=; b=BLNROm0aaldug8M7ZS0wvabS95
+        zxWgO4Huz3pQoEC8SzixWLqUao1N7Wv0v4wNOSyT7ZA/tkxrhj1XxQjALmNS22rm
+        UTG92cvOHkiJclMQbPEgV8LC4XxnLxfsyx5sbNR5DLX+K/Eb4lathpQnI70uXshF
+        BjsWPCzN+nOumyYnVX3uznNA2LnVCvIzT+TjFdNwqCSz7nv0don4vQnFr1FFWnqL
+        IyfwGm2qP/WyQJbWt/SX6ocTCRyIE7mUppDkNv1mpCNZUigNDkLS21uHwegj3tYJ
+        mToVgXHY+E2YPF18fE19ZhmRE09PLJVBmWtzI5BGHMdbPP+1+0VUf/mvTi1Q==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1666120014; x=1666206414; bh=ogx1Ik9GsHa565kB6576zAyqipkH
+        SWO5bk1YRoygIFk=; b=IL4Wzif5/oMlyHpK8Bj35eHgi0ATjowNnVsL2REBzDU6
+        Y4vGhZ/Hks06shTBU6C9ejzWD/ArUoPmVIpvgIpshZ8KcGU6SFjj9Wy6jAI+H8Js
+        mWFI3UBKIL0aiqFT9Ac1py60hLUkkJLAwFWVO5wQLM/meeOtzhix5XxIyop6ceiQ
+        2qyfJv1LSoY1noy1qWWULTPoyBeHKSnbWOZ7PQgBsq/0f7NsVZArs/AIdHLS56Q0
+        y5rVI1l2necdyYvc3Q1TRrYMcSb7k4pEv+C87+pEEaqItDeignRQBs4iuaUN/HDU
+        598BGNQMi95v1QNbxeczRWzSDNuOhtqlNs4yx5KYMA==
+X-ME-Sender: <xms:TvlOY3iE7fcCgFNd7VhUzUja27JyKQuAw44Fy0VXEmpTBti7N_x3dQ>
+    <xme:TvlOY0BTu2uxkRUi8qnsP-x98KGMj_e1TEj_51F-jgr8BnmIeOPscF3pasmMv8ziB
+    okXLxvOr6xqQp3FbPY>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrfeelvddguddtfecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdet
+    rhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrg
+    htthgvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedt
+    keetffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhhnugesrghrnhgusgdruggv
+X-ME-Proxy: <xmx:TvlOY3FK7mEb6mPmC0YCL9hbEBu9t5YDnMfLD1Nhe7yc-0VK0MpquA>
+    <xmx:TvlOY0SkZqz14Q0Gj8kGHpMFRfeRn_YzFnrtybM9qsP5F-ornu9mZQ>
+    <xmx:TvlOY0zNPEJDO7Dr0XXqyT07RKZCKFfiuX_ELvW22H2WUdcgJ-qGnQ>
+    <xmx:TvlOY_-3H-r0oGSJ_-s3KStq83Oa78sbQr4Vq393qdZ_XMKlUM6aRA>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 52E1EB60086; Tue, 18 Oct 2022 15:06:54 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
+Mime-Version: 1.0
+Message-Id: <a577dfcf-5a0a-4568-8f6d-872a8324dfcc@app.fastmail.com>
+In-Reply-To: <20221018133800.10636-1-firas.ashkar@savoirfairelinux.com>
+References: <20221018133800.10636-1-firas.ashkar@savoirfairelinux.com>
+Date:   Tue, 18 Oct 2022 21:06:34 +0200
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Firas Ashkar" <firas.ashkar@savoirfairelinux.com>,
+        alex@digriz.org.uk, "Ulf Hansson" <ulf.hansson@linaro.org>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH] mmc: add TS7800 FPGA based MMC controller driver
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/10/2022 14:29, Krzysztof Kozlowski wrote:
-> On 17/10/2022 10:20, Mengqi Zhang wrote:
->> Document the binding for crypto clock of the Inline Crypto Engine
->> of Mediatek SoCs.
-> > This does not match the patch contents at all.
+On Tue, Oct 18, 2022, at 15:38, Firas Ashkar wrote:
+> add standard mmc/host controller driver for TS-7800v1, instead of the
+> original block based 'tssdcore' driver provided by EmbeddedTS linux-2.6.x
+> code base.
 
-Ah, my bad, I read "crypto block", not clock, so it matches. :)
+I'm looking at this driver since Marc pointed me to your
+work on the platform and I noticed this post as well.
+Not doing a full review, but I'm still pointing out a few
+issue that caught my eye.
 
-However you are not documenting a binding for it. You are adding
-optional clock.
+> +
+> +#define DRIVER_NAME "ts7800v1_sdmmc"
 
-> 
->>
->> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
->> ---
->>  Documentation/devicetree/bindings/mmc/mtk-sd.yaml | 2 ++
->>  1 file changed, 2 insertions(+)
-> 
-> Best regards,
-> Krzysztof
-> 
+Maybe drop this macro and just use the string directly.
 
-Best regards,
-Krzysztof
+> +
+> +	if (IS_ERR_OR_NULL(pslot->rw_dma_buf)) {
+> +		dev_warn(mmc_dev(ts_sdmmc_host->mmc_host),
+> +			 "%s|%d - Error, No allocated DMA read buffer %ld\n",
+> +			 __func__, __LINE__, PTR_ERR(pslot->rw_dma_buf));
+> +		*data_error = ret = -ENOMEM;
+> +		goto done;
+> +	}
+> +
+> +	dat0_sent_crc16_buf = kzalloc(sizeof(u16), GFP_KERNEL);
+> +	if (IS_ERR_OR_NULL(dat0_sent_crc16_buf)) {
 
+You should never need IS_ERR_OR_NULL, as all interfaces
+in the kernel are supposed to either return an error code
+or return NULL on error. Please fix the error handling
+for this throughout the driver.
+
+> + spin_lock_bh(&ts_sdmmc_host->bh_lock);
+
+I'm a bit confused by your locking. Why do you use
+spin_lock_bh() instead of a normal spin_lock() or
+a spin_lock_irq()? I don't see any use of softirqs
+(typically tasklets and timers) in this driver, so
+disabling softirqs in the critical section should
+not change anything.
+
+     Arnd
