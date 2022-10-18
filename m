@@ -2,78 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D769C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 17:20:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B72DC43219
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 17:29:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229921AbiJRRUT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 13:20:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38022 "EHLO
+        id S229846AbiJRR3f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 13:29:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230009AbiJRRUL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 13:20:11 -0400
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96DBD73C28
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 10:20:10 -0700 (PDT)
-Received: by mail-pj1-x102e.google.com with SMTP id x31-20020a17090a38a200b0020d2afec803so14625487pjb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 10:20:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=XHPcUIWFSjmCV4qi48lU7COtP6Gp8n3SproDlkYY/tc=;
-        b=oAhCsLVT8kS6toOsQxW5bakcPdgds0iYsuOGq2BM2mxndVKtWtX/CkfrGOETFTGdHV
-         Z/zBE6Oe1V5/Vj537iM4aee7/XQQMXOwUQ/CTyn8MUpavryXgByEBXKwwXy1pdPOn0UQ
-         hvUkp/RuLmW6d7occ5JM169v2gUAAYDLrdzvpB3C3L8jtAOtIFHYJ6fI1jbSGKJaAdww
-         5RD3g34NKRf6V1xkH7m26gnTf4irTDSrIctE6WUp0rmCE4jiUylVNDMeDZ3PLSMkdqG1
-         xpPIXdGW7UiVz+vpX3qXvKjesvvEnaNFZGXGTGJwfW8y6J1qHNH0AvwFuiWD4nv5yQS7
-         DV6Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=XHPcUIWFSjmCV4qi48lU7COtP6Gp8n3SproDlkYY/tc=;
-        b=1ldQJISYzf8NGGekdhpUkw2TqMpvjlczAo5QbKnjcxpEDjMsjdNORGzYqi/qxlJ1PP
-         1gtDfYR2Wf1aaSGmAfwmTIN0K771zCyhJbEH3DPL26G6EYq91ClAQ6RM76y+vT+xwS2s
-         Hyi4yfGNQ+cuA+h+JaPSf8f0earchjnMgwzyCXmyCbgJU2dB5S9nR3k99++KIlrDb0be
-         6vJ5kuJUdlh4tuHMPFtFFn8FE3VmccdUOpXm9QSHeqSnq3w51M/CKvNRcRmQvLrzbEhw
-         rTyQbG6b8p+QSIpDF1ePUX3m3J3o9nd6Jcv9CxcE9E60yaWdoX16Azpb9KX93tgIQOgQ
-         Ql+A==
-X-Gm-Message-State: ACrzQf0ABd9r8wcCoMMSzoM8PSjnBOzskPz6+3cyWPpNBtPkhCGBf5hI
-        vSRcpSZXMn+ToYxOoL9sofRhHTitL/Kr3jAjCnTwXJYIWUc=
-X-Google-Smtp-Source: AMsMyM6zlbGjVJpsFxZ3KPIHjJil7uwjq4LgpftUNZ0vscPjLIj+OFWiOVnihGc5c+rDHyg7O/oYAcy9ucLZqH6GcHc=
-X-Received: by 2002:a17:902:7b91:b0:185:4548:3a96 with SMTP id
- w17-20020a1709027b9100b0018545483a96mr4049358pll.130.1666113610084; Tue, 18
- Oct 2022 10:20:10 -0700 (PDT)
+        with ESMTP id S229685AbiJRR3e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 13:29:34 -0400
+Received: from smtpcmd0987.aruba.it (smtpcmd0987.aruba.it [62.149.156.87])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BAD722AFD
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 10:29:31 -0700 (PDT)
+Received: from [192.168.50.220] ([146.241.87.206])
+        by Aruba Outgoing Smtp  with ESMTPSA
+        id kqP9orvJLaWj1kqPAoCbei; Tue, 18 Oct 2022 19:29:29 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
+        t=1666114169; bh=2R1Qx2v5j+cUhKJyPReXeVM3kkRyNKVJuTVaauBdp9A=;
+        h=Date:MIME-Version:Subject:To:From:Content-Type;
+        b=JI8QiS5clsPeOZ5Z35oTXgw7oDw+y5B8RIJGwZD91qzm4CEX8dkaysJCHn6TICCxK
+         gq//3IPx6dHZM1R9cr5N7U9oAufIXWpzabRrBxz721YhQ8PQiLgMQ8FSLjPgP2OSWK
+         +DGBKtFgutA4A7IGvQL9mwJTcSsad8oB2ZvckT2LYqr65dZD7IXGANsZptU3rZxWc9
+         mvdd1eSo7XjgIHjSAerDUyU52zrF4bACYvoQoOSNuL1LHYj3ztyHtLVdF41X96mpbJ
+         KsPuxZbRQWfTrx/7TeMEyRY5uwuV0GwljDufLHWAtA/1ISmrb6kJE6nC8WwEEJOX+0
+         a233rxHKTZDyQ==
+Message-ID: <de1957b5-ef9c-1f78-d2e6-b97a6f678b26@benettiengineering.com>
+Date:   Tue, 18 Oct 2022 19:29:27 +0200
 MIME-Version: 1.0
-References: <CAOMZO5DCbC6MK=O1t20nLNKf2Oipf-Ar1TkHU+o9Bvpr0JRtxQ@mail.gmail.com>
- <VI1PR04MB40163FEB8AEC32F55E51931890D69@VI1PR04MB4016.eurprd04.prod.outlook.com>
- <CAOMZO5Dmk_OWTZGEafTZO451Zo6W8UMUJAZguW85y0b2BmCpWA@mail.gmail.com> <CAOMZO5CYvbd3uTKxq6suyn5H0yNU1R7tsgbawNdwjEbKgdt6bg@mail.gmail.com>
-In-Reply-To: <CAOMZO5CYvbd3uTKxq6suyn5H0yNU1R7tsgbawNdwjEbKgdt6bg@mail.gmail.com>
-From:   Fabio Estevam <festevam@gmail.com>
-Date:   Tue, 18 Oct 2022 14:20:01 -0300
-Message-ID: <CAOMZO5C-5M8y=V1L6Qdqymhb-1oOpBszFwuWCxedUJ1oO7=ADw@mail.gmail.com>
-Subject: Re: imx7d: Timeout waiting for hardware interrupt.
-To:     Bough Chen <haibo.chen@nxp.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.3
+Subject: Re: [PATCH 4/5] ARM: dts: imxrt1050: remove mmc max-frequency
+ property
+To:     Bough Chen <haibo.chen@nxp.com>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Cc:     Stephen Boyd <sboyd@kernel.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Sebastian Reichel <sebastian.reichel@collabora.com>,
-        Martin Fuzzey <martin.fuzzey@flowbird.group>
-Content-Type: text/plain; charset="UTF-8"
+        Ulf Hansson <ulf.hansson@linaro.org>
+References: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
+ <20221017235602.86250-4-giulio.benetti@benettiengineering.com>
+ <DB7PR04MB40100794ED12BA4224CD6B1B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
+Content-Language: en-US
+From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
+In-Reply-To: <DB7PR04MB40100794ED12BA4224CD6B1B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-CMAE-Envelope: MS4xfEYXM2XHTtUBYOG3z6wAwj/H7EJCvinaFe/k/4O7VAg8rd3dOA3DFPlrEFst6KA5MxSfopjrt38ZI2rC8DZYHIxoExerTUxu2ika8uAbdR6Xfv94SZXH
+ xIRquoGlNPWaD5lhn6BEi9RXtMASMeO2ZxZtiBzjGH0QThzIAYqAGDleWQ1t9G7MBRyOeNk7ABRxflYHfiRh6qZ84TLpdIlAZSIGfMO3ieSojW+vs/xpPB+x
+ HonI+o/3AyiSxhG9hKj88qv9Y5+sfHRpvNBH2RjHRltsVWeUnMsXAIz8Qxc6CXbJ2/eqmJJiroXa+0b9miT7jRAszV2bjiq8vzpItyQsltdbiNsX/loe4hQh
+ Ft4gceRDDjV/TCVo0QfUC0FbKIgKZl0lmLe/vEXOsF/FwMYOS6e40ZukyxIRV457CjEmYckIpMCv21W/6uU1kd3ztqcHESdVyntFWT3DQFHmXfDadNiYzH93
+ gx5PiG5j44buLfV09vegssOEAKRwaZy1H7HPQVxkMtxVtOEDT8zbdFLkQw0=
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Bough,
+Hi Haibo,
 
-On Tue, Oct 18, 2022 at 9:29 AM Fabio Estevam <festevam@gmail.com> wrote:
+On 18/10/22 05:01, Bough Chen wrote:
+>> -----Original Message-----
+>> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
+>> Sent: 2022年10月18日 7:56
+>> To: devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+>> linux-kernel@vger.kernel.org; linux-clk@vger.kernel.org;
+>> linux-mmc@vger.kernel.org
+>> Cc: Stephen Boyd <sboyd@kernel.org>; Bough Chen <haibo.chen@nxp.com>;
+>> Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
+>> <ulf.hansson@linaro.org>; Giulio Benetti
+>> <giulio.benetti@benettiengineering.com>
+>> Subject: [PATCH 4/5] ARM: dts: imxrt1050: remove mmc max-frequency
+>> property
+>>
+>> According to i.MXRT1050 Reference Manual usdhc supports up to 208Mhz clock
+> 
+> Please double check this. As I know, the i.MXRT1050 and i.MX6/7/8/9 series use the same usdhc IP, maybe include some small difference.
+> For the usdhc in i.MX6/7/8/9, I confirmed with IC team, the card clock output from usdhc can't be upper than 
+200MHz, otherwise maybe meet some stable related issue.
 
-> Would you have any other suggestions as to why this timeout happens?
+Thanks for poiting, I've double checked and you're right. RM states 
+208Mhz but DS states 200Mhz and it makes sense because of HS200.
 
-Do you know if the following i.MX8M erratum applies to the imx7d as well?
+> So here I think should change to like this:
+>   max-frequency = <200000000>;
 
-e11232: USDHC: uSDHC setting requirement for IPG_CLK and AHB_BUS clocks
-https://www.nxp.com/docs/en/errata/IMX8MDQLQ_1N14W.pdf
+Ok, I'll send a V2 for this. I wait for other comments on the other 
+patches for a bit before.
 
-Thanks
+Best regards
+-- 
+Giulio Benetti
+CEO/CTO@Benetti Engineering sas
+
+> 
+> Best Regards
+> Haibo Chen
+> 
+> 
+>> so let's remove max-frequency property in the .dtsi base file and in case add
+>> that property in the board specific .dts file for a specific device connected to it.
+>>
+>> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
+>> ---
+>>   arch/arm/boot/dts/imxrt1050.dtsi | 1 -
+>>   1 file changed, 1 deletion(-)
+>>
+>> diff --git a/arch/arm/boot/dts/imxrt1050.dtsi
+>> b/arch/arm/boot/dts/imxrt1050.dtsi
+>> index 114465e4dde6..0b44cc4ce6ad 100644
+>> --- a/arch/arm/boot/dts/imxrt1050.dtsi
+>> +++ b/arch/arm/boot/dts/imxrt1050.dtsi
+>> @@ -93,7 +93,6 @@ usdhc1: mmc@402c0000 {
+>>   			bus-width = <4>;
+>>   			fsl,wp-controller;
+>>   			no-1-8-v;
+>> -			max-frequency = <4000000>;
+>>   			fsl,tuning-start-tap = <20>;
+>>   			fsl,tuning-step = <2>;
+>>   			status = "disabled";
+>> --
+>> 2.34.1
+> 
+
