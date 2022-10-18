@@ -2,127 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B72DC43219
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 17:29:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A017C43217
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 17:59:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229846AbiJRR3f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 13:29:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52278 "EHLO
+        id S230117AbiJRR7Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 13:59:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229685AbiJRR3e (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 13:29:34 -0400
-Received: from smtpcmd0987.aruba.it (smtpcmd0987.aruba.it [62.149.156.87])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BAD722AFD
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 10:29:31 -0700 (PDT)
-Received: from [192.168.50.220] ([146.241.87.206])
-        by Aruba Outgoing Smtp  with ESMTPSA
-        id kqP9orvJLaWj1kqPAoCbei; Tue, 18 Oct 2022 19:29:29 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
-        t=1666114169; bh=2R1Qx2v5j+cUhKJyPReXeVM3kkRyNKVJuTVaauBdp9A=;
-        h=Date:MIME-Version:Subject:To:From:Content-Type;
-        b=JI8QiS5clsPeOZ5Z35oTXgw7oDw+y5B8RIJGwZD91qzm4CEX8dkaysJCHn6TICCxK
-         gq//3IPx6dHZM1R9cr5N7U9oAufIXWpzabRrBxz721YhQ8PQiLgMQ8FSLjPgP2OSWK
-         +DGBKtFgutA4A7IGvQL9mwJTcSsad8oB2ZvckT2LYqr65dZD7IXGANsZptU3rZxWc9
-         mvdd1eSo7XjgIHjSAerDUyU52zrF4bACYvoQoOSNuL1LHYj3ztyHtLVdF41X96mpbJ
-         KsPuxZbRQWfTrx/7TeMEyRY5uwuV0GwljDufLHWAtA/1ISmrb6kJE6nC8WwEEJOX+0
-         a233rxHKTZDyQ==
-Message-ID: <de1957b5-ef9c-1f78-d2e6-b97a6f678b26@benettiengineering.com>
-Date:   Tue, 18 Oct 2022 19:29:27 +0200
+        with ESMTP id S229894AbiJRR7P (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 13:59:15 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB22C62E3;
+        Tue, 18 Oct 2022 10:59:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1666115951; x=1697651951;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=qG3pPWLpSbglp5R801rTaLLX0yFYxAOeAh4l6wso68g=;
+  b=d+BsUjGZz8Ow/a2qjz6nqsp1b2WUj2XCbyhujrYo1wAEpzT/2sT1kA/n
+   cB5qI5UmsO2tO9wTbHpGaIfalRY2Ym8zhzu1xhtxakOppk6jSv00omQ6J
+   dUzc6+ChP19lVPx5Kq05dfS4R7/g5CtR0q5HIn0tKwqM3+cd/EqN8nFpI
+   MurG8W8sVE5gEK5Ivdw+/+G79tPexK+Jsy/BlShfnGOaPLAh61KR+DVMZ
+   Qg6mxqUD6xcBi90dObS7R795f3vQdlJbIoh40L/YV503LQiopoVy0SKir
+   4m0qzJ9/u1WbaVmIEDNcGHmzk+avbMNHLF9nPOfrFCZx0mpb5eX+R/6I0
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="368214487"
+X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
+   d="scan'208";a="368214487"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 10:58:54 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10504"; a="874017001"
+X-IronPort-AV: E=Sophos;i="5.95,193,1661842800"; 
+   d="scan'208";a="874017001"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.51.208])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Oct 2022 10:58:49 -0700
+Message-ID: <1953691e-4179-92c3-efa9-f10ccd3cad00@intel.com>
+Date:   Tue, 18 Oct 2022 20:58:44 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 4/5] ARM: dts: imxrt1050: remove mmc max-frequency
- property
-To:     Bough Chen <haibo.chen@nxp.com>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-clk@vger.kernel.org" <linux-clk@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     Stephen Boyd <sboyd@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-References: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
- <20221017235602.86250-4-giulio.benetti@benettiengineering.com>
- <DB7PR04MB40100794ED12BA4224CD6B1B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
+ Firefox/102.0 Thunderbird/102.4.0
+Subject: Re: [PATCH 1/5] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
 Content-Language: en-US
-From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
-In-Reply-To: <DB7PR04MB40100794ED12BA4224CD6B1B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-CMAE-Envelope: MS4xfEYXM2XHTtUBYOG3z6wAwj/H7EJCvinaFe/k/4O7VAg8rd3dOA3DFPlrEFst6KA5MxSfopjrt38ZI2rC8DZYHIxoExerTUxu2ika8uAbdR6Xfv94SZXH
- xIRquoGlNPWaD5lhn6BEi9RXtMASMeO2ZxZtiBzjGH0QThzIAYqAGDleWQ1t9G7MBRyOeNk7ABRxflYHfiRh6qZ84TLpdIlAZSIGfMO3ieSojW+vs/xpPB+x
- HonI+o/3AyiSxhG9hKj88qv9Y5+sfHRpvNBH2RjHRltsVWeUnMsXAIz8Qxc6CXbJ2/eqmJJiroXa+0b9miT7jRAszV2bjiq8vzpItyQsltdbiNsX/loe4hQh
- Ft4gceRDDjV/TCVo0QfUC0FbKIgKZl0lmLe/vEXOsF/FwMYOS6e40ZukyxIRV457CjEmYckIpMCv21W/6uU1kd3ztqcHESdVyntFWT3DQFHmXfDadNiYzH93
- gx5PiG5j44buLfV09vegssOEAKRwaZy1H7HPQVxkMtxVtOEDT8zbdFLkQw0=
+To:     Brian Norris <briannorris@chromium.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Al Cooper <alcooperx@gmail.com>, linux-mmc@vger.kernel.org,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-kernel@vger.kernel.org,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        linux-arm-kernel@lists.infradead.org,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>, stable@vger.kernel.org
+References: <20221018035724.2061127-1-briannorris@chromium.org>
+ <20221017205610.1.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
+ <e7816e4a-8558-0de0-e25f-d10abd0ef1c3@intel.com>
+ <Y07bgNd7KbLDttsq@google.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <Y07bgNd7KbLDttsq@google.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Haibo,
-
-On 18/10/22 05:01, Bough Chen wrote:
->> -----Original Message-----
->> From: Giulio Benetti <giulio.benetti@benettiengineering.com>
->> Sent: 2022年10月18日 7:56
->> To: devicetree@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
->> linux-kernel@vger.kernel.org; linux-clk@vger.kernel.org;
->> linux-mmc@vger.kernel.org
->> Cc: Stephen Boyd <sboyd@kernel.org>; Bough Chen <haibo.chen@nxp.com>;
->> Adrian Hunter <adrian.hunter@intel.com>; Ulf Hansson
->> <ulf.hansson@linaro.org>; Giulio Benetti
->> <giulio.benetti@benettiengineering.com>
->> Subject: [PATCH 4/5] ARM: dts: imxrt1050: remove mmc max-frequency
->> property
+On 18/10/22 19:59, Brian Norris wrote:
+> Hi Adrian,
+> 
+> On Tue, Oct 18, 2022 at 07:13:28PM +0300, Adrian Hunter wrote:
+>> On 18/10/22 06:57, Brian Norris wrote:
+>>> So like these other patches, deactivate CQHCI when resetting the
+>>> controller. Also, move around the DT/caps handling, because
+>>> sdhci_setup_host() performs resets before we've initialized CQHCI. This
+>>> is the pattern followed in other SDHCI/CQHCI drivers.
 >>
->> According to i.MXRT1050 Reference Manual usdhc supports up to 208Mhz clock
+>> Did you consider just checking host->mmc->cqe_private like
+>> sdhci_cqhci_reset() ?
 > 
-> Please double check this. As I know, the i.MXRT1050 and i.MX6/7/8/9 series use the same usdhc IP, maybe include some small difference.
-> For the usdhc in i.MX6/7/8/9, I confirmed with IC team, the card clock output from usdhc can't be upper than 
-200MHz, otherwise maybe meet some stable related issue.
+> I did not, although I am doing so now.
+> 
+> My first thought is that this feels a bit too private. Is the host
+> driver supposed to be memorizing the details of the CQHCI layer?
 
-Thanks for poiting, I've double checked and you're right. RM states 
-208Mhz but DS states 200Mhz and it makes sense because of HS200.
-
-> So here I think should change to like this:
->   max-frequency = <200000000>;
-
-Ok, I'll send a V2 for this. I wait for other comments on the other 
-patches for a bit before.
-
-Best regards
--- 
-Giulio Benetti
-CEO/CTO@Benetti Engineering sas
+Some drivers need to access CQHCI registers and get the reference
+to cqhci_host from cqe_private, so that is already accepted.
 
 > 
-> Best Regards
-> Haibo Chen
+> But on the plus side, that would remove some contortions needed here
+> (and also in sdhci-brcmstb.c).
 > 
+> Here's another option I previously considered: teaching
+> cqhci_deactivate() to check cqe_private itself. That would have the same
+> benefits, while keeping the private details in cqhci-core.c. How do you
+> like that?
+
+I don't mind either way.
+
 > 
->> so let's remove max-frequency property in the .dtsi base file and in case add
->> that property in the board specific .dts file for a specific device connected to it.
->>
->> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
->> ---
->>   arch/arm/boot/dts/imxrt1050.dtsi | 1 -
->>   1 file changed, 1 deletion(-)
->>
->> diff --git a/arch/arm/boot/dts/imxrt1050.dtsi
->> b/arch/arm/boot/dts/imxrt1050.dtsi
->> index 114465e4dde6..0b44cc4ce6ad 100644
->> --- a/arch/arm/boot/dts/imxrt1050.dtsi
->> +++ b/arch/arm/boot/dts/imxrt1050.dtsi
->> @@ -93,7 +93,6 @@ usdhc1: mmc@402c0000 {
->>   			bus-width = <4>;
->>   			fsl,wp-controller;
->>   			no-1-8-v;
->> -			max-frequency = <4000000>;
->>   			fsl,tuning-start-tap = <20>;
->>   			fsl,tuning-step = <2>;
->>   			status = "disabled";
->> --
->> 2.34.1
+> (Tiny downside: cqhci-core.c got its rename in v5.12, so backporting
+> this to -stable would get slightly more difficult.)
 > 
+> Brian
 
