@@ -2,68 +2,120 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36FCAC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 09:50:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD48C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 10:11:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230144AbiJRJuk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 05:50:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47140 "EHLO
+        id S229882AbiJRKLw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 06:11:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229587AbiJRJui (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 05:50:38 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9835F1F9CF;
-        Tue, 18 Oct 2022 02:50:35 -0700 (PDT)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id BB3EF6602338;
-        Tue, 18 Oct 2022 10:50:33 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1666086634;
-        bh=17Z7x8NyEJQfidNufMuX1DWKMuBHWGn2t5LFggJCdkE=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=dfeGQIdBHiAwc4rmubqnJsJHdhDu2IKbM1J5vqwC+7wl0qv99FF+W+K+KS/mDlju6
-         5I82QwuM1i/L5sPMcq96hBfy/rna78EVC2ynb7LQRYVwUli6BlP+biQdf6SFVZ0lWr
-         yijeNysQFjTKKONzBpCaXFzsRn+9fhM68xmKk11s+C8e2hXm9IIIqeTbBVy9yO/1R1
-         /KMaiWZpq0dpgY5P14Rw3yjU8rL9k6akijG75JQn9wGr3QJZEXewuNLcb5x2d/6lGz
-         NjyDL6oADEaqfdo+mFBFnXAxnMFEtG/nyIby05LiXsHpD8nhR0whLh49cIlZ0+UvI/
-         +DMqiOVGI8swg==
-Message-ID: <92af9496-b622-9234-d89c-d478b4c77d62@collabora.com>
-Date:   Tue, 18 Oct 2022 11:50:31 +0200
+        with ESMTP id S229775AbiJRKLj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 06:11:39 -0400
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21187B40F9
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 03:11:25 -0700 (PDT)
+Received: by mail-pj1-x1033.google.com with SMTP id h12so13587402pjk.0
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 03:11:25 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=8WpYzOa826Iyeq0rj8VqK68EqVr20+z94AeHdF+Yt20=;
+        b=Sja8RkHx4gQjSl0OjtjmUkise0ojhiB9wwHt8Kw6UirlICEBeZ5JI/n4i1oIsg/cSa
+         y/R9LdyG6ogIoj+pnhS1ugG8/zJ5HmJAc+tJJj7rtZKnxmYqlIzhIAEDdTDdwozIDGld
+         KoIy3XWiug83v6Pnz957hZldLZkTb5lGnw1PmItfO/mgNALGlIaXGYQSRihC0RAOpJzU
+         A0vfkfIQlRNROgp0uWXa8j7CAgOn5am4jzGzyBwmrMDU5AVwnFcPaIkPTZciy+I/QROy
+         Vc4Bt5IwawHNSHBzLsyfWzNrvo54Ni9BJO8KY3oIJVvZIwLVNrGLLoEgPtimeYz5i3fE
+         K7uw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=8WpYzOa826Iyeq0rj8VqK68EqVr20+z94AeHdF+Yt20=;
+        b=rioPewVQSNE8aufFfqpSddAKXr8WZa0Hb411JaqJmxFvl7KC9CJ/8iy1cOWI8w3O4A
+         rb3cKJ+n8gQD27qkTK1a4SfWXKsbKv50HaWD1yYFLCF3FXPdXq9bsoYyVwLeruJgD2Qp
+         l0t/qX3X+8+TgHOvAUtNkEGol4eYsJMbKiiw0l48+s6s04DipAo6+EN6k1nNQ1tYbhSu
+         d85m6yAtlChKqOmbKi4X8rDyz3oY2n9hgbWtSVTF8xt7yawhzGvPIivDgZGeCK5M8QsB
+         OUuSyTStSV/uhPBx5v7J3NkZ+oerWNT4Ln9uzKbJO4LVE1ylqekCLF9otWZae+cety4L
+         OCmw==
+X-Gm-Message-State: ACrzQf3J3i62xPy3d8Vx7OnhbWOTfOjfDDso4LrLYMEQYB+3PU/phg5x
+        S/Y/UZgOmLbR84wJ2TeT9s5xW18cuC5pmc3AHuH+Nw==
+X-Google-Smtp-Source: AMsMyM7EsMGthu8LAY5nazIGfe0IpnBLTNbV7nYgfFBT5wBP/EYa6YzTp8oTzkZ21fWchS16COEFkk2BgK2TDlrfAnI=
+X-Received: by 2002:a17:90a:7b8c:b0:20b:1f3b:f6fd with SMTP id
+ z12-20020a17090a7b8c00b0020b1f3bf6fdmr2713134pjc.202.1666087879190; Tue, 18
+ Oct 2022 03:11:19 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 2/2] dt-bingdings: mmc: Mediatek: add ICE clock
-Content-Language: en-US
-To:     Mengqi Zhang <mengqi.zhang@mediatek.com>,
-        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        matthias.bgg@gmail.com, wenbin.mei@mediatek.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
- <20221017142007.5408-3-mengqi.zhang@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20221017142007.5408-3-mengqi.zhang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <Yz6zfrVq9cP/wrJb@orome> <20221006130622.22900-1-pshete@nvidia.com>
+ <20221006130622.22900-2-pshete@nvidia.com> <CAPDyKFr_Yi2EgrBUzsORnM4mOkf25WR8+7_dfF2h4XzRDPm9-w@mail.gmail.com>
+ <DM5PR12MB2406610AB26183BACB19EED6B7239@DM5PR12MB2406.namprd12.prod.outlook.com>
+ <CAPDyKFqn2jMVQ5BAOZPFx2OOyMRQvsQ1E7mGAQp82x5+v6aSGQ@mail.gmail.com>
+ <DM5PR12MB2406405CE44A7606B5A28203B7259@DM5PR12MB2406.namprd12.prod.outlook.com>
+ <CAPDyKFq5hNTdwT7CMvsxG=_5u+xvG2k3-PfbGhAbHfHbGqK81w@mail.gmail.com> <Y01iiqtNA9xek46S@orome>
+In-Reply-To: <Y01iiqtNA9xek46S@orome>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 18 Oct 2022 12:10:42 +0200
+Message-ID: <CAPDyKFqUy2MoBAqTPhOKoAY0tJYT_parXTFEq-JNLvAo7FQq1g@mail.gmail.com>
+Subject: Re: [PATCH v7 2/4] mmc: sdhci-tegra: Add support to program MC stream ID
+To:     Thierry Reding <thierry.reding@gmail.com>
+Cc:     Prathamesh Shete <pshete@nvidia.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Aniruddha Tvs Rao <anrao@nvidia.com>,
+        Suresh Mangipudi <smangipudi@nvidia.com>,
+        Krishna Yarlagadda <kyarlagadda@nvidia.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 17/10/22 16:20, Mengqi Zhang ha scritto:
-> Document the binding for crypto clock of the Inline Crypto Engine
-> of Mediatek SoCs.
-> 
-> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+On Mon, 17 Oct 2022 at 16:11, Thierry Reding <thierry.reding@gmail.com> wrote:
+>
+> On Thu, Oct 13, 2022 at 03:43:18PM +0200, Ulf Hansson wrote:
+> > On Thu, 13 Oct 2022 at 08:33, Prathamesh Shete <pshete@nvidia.com> wrote:
+> > >
+> > > Hi Ulf,
+> > >
+> > > >> In that case, perhaps we can add a "depends on IOMMU_API" in the Kconfig
+> > > >> instead? Or is the tegra driver used on platforms where IOMMU_API could be
+> > > >> unset?
+> > > Yes it can/will work with IOMMU disabled so its not recommended to add a "depends on" condition in Kconfig.
+> >
+> > Alright, in that case it looks to me that there are two other options
+> > to move forward.
+> >
+> > 1) Add proper definitions of the struct iommu_fwspec in
+> > include/linux/iommu.h even when CONFIG_IOMMU_API is unset. In a way it
+> > seems a bit silly to me, to have the iommu stubs around, unless those
+> > can be used for cases like this, right!?
+>
+> I recall that I had proposed a patch for this a long time ago:
+>
+>         https://lore.kernel.org/all/20191209120005.2254786-3-thierry.reding@gmail.com/
 
-Looks good, but please fix the typo in the commit title.
+That looks exactly what we would need!
 
-Regards,
-Angelo
+>
+> Given that Joerg had acked it at the time, I think the only reason why
+> it never ended up getting merged is because the rest of the series did
+> not get enough traction. I wonder if I should peel it out of the series
+> and propose it separately.
 
+Yes, please.
+
+>
+> I agree it doesn't make any sense to have the stubs to allow compilation
+> and then break compilation because users of the stubs will end up
+> wanting to dereference the structure.
+
+Thanks for sharing your thoughts around this!
+
+If you submit a new version of the old patch, I would certainly give
+it my blessing.
+
+Kind regards
+Uffe
