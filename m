@@ -2,116 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29A4AC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 15:34:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D2D3C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 15:54:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230085AbiJSPeW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 11:34:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34364 "EHLO
+        id S230348AbiJSPy2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 11:54:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232072AbiJSPdw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 11:33:52 -0400
-Received: from smtp1.axis.com (smtp1.axis.com [195.60.68.17])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C07B4155DBB;
-        Wed, 19 Oct 2022 08:28:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=axis.com; q=dns/txt; s=axis-central1; t=1666193322;
-  x=1697729322;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=hCTTTOmWPuE1nWOozcq8XqfrXalZRdh/62SN0Hq9k/w=;
-  b=IoyWvcE3I23IrYGwjXMnrIcRZqADX9mVwWFm21pzRNtbiqO+boTXR9FE
-   vjm/MioM/teU5PLVosGqge+6VShQIi5e8nsgF9zFtzdkj06z54Mg0JzTq
-   cpB4AEJXTebz7cxTZbHkiLx5fhW/M4MhZnKy49gXQNwdzgcWw+cYHExb4
-   wjAYufjf3wA2TcSPgqjj/Lmc8nRtj3jhxGHRZuZuOoHFWYh3w/PVkFTpL
-   eA87mS463WvwzICfNEmyWwEtMX+Obyelk1s1Kq8Fg2O7nOLtCx57VSZ5L
-   H3MQXx0z9d4wSIBAC+JTRUq1RRsLMQ6+IO/mdAwkP3NrCpPLZhOyi8fjP
-   g==;
-Date:   Wed, 19 Oct 2022 17:07:27 +0200
-From:   Vincent Whitchurch <vincent.whitchurch@axis.com>
-To:     Jon Hunter <jonathanh@nvidia.com>
-CC:     Ulf Hansson <ulf.hansson@linaro.org>, kernel <kernel@axis.com>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "tytso@mit.edu" <tytso@mit.edu>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Prathamesh Shete <pshete@nvidia.com>,
-        "linux-tegra@vger.kernel.org" <linux-tegra@vger.kernel.org>
-Subject: Re: [PATCH] mmc: core: support zeroout using TRIM
-Message-ID: <Y1ASr6zpqobEbFmG@axis.com>
-References: <20220429152118.3617303-1-vincent.whitchurch@axis.com>
- <3c75ca82-f889-a346-a031-2c417c57e2b0@nvidia.com>
+        with ESMTP id S232604AbiJSPx5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 11:53:57 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 272A619609E
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 08:51:30 -0700 (PDT)
+Received: from pps.filterd (m0241204.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 29JB56qd002837;
+        Wed, 19 Oct 2022 17:50:32 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : from : subject : to : cc : content-type :
+ content-transfer-encoding; s=selector1;
+ bh=hcsgfZruIUMtPb87GdqNr9FruKdkFdUJU5pKd1jKqQA=;
+ b=ei+ageqL8Ep8Z71mQwIXqLBCXnT1wmboKpGhUApUcfpim3yGNjZn7XoWgA8RkYef8Jpm
+ grMVZPj4uJAkju3d6bOkbQ6o4mLs9gIaeEsW5nByaVQhchk5gXyWoyMNLpKAzYE4LeVG
+ W3THLJvcuf1OY76F1mTg0SoVPZfODyoPzJ629Rx5iFdu/6p7B8Y0v1ZojvhbHcI/0Ntr
+ 4nL47Lhb9IbxcAJqqAjeN8YPloyLoWIgnBY56rTfsSOeG/+L7FtgMcaqAuuoSdG1X2vH
+ ZxLRCMn5BOxQHn5mwr/DuWe4PheXodhDCKLbd4yqFHFkCDZCM5hh66g9QHXV19Za7UC+ dA== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3k94sdhd8d-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 19 Oct 2022 17:50:32 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 696B210002A;
+        Wed, 19 Oct 2022 17:50:27 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 088CC233001;
+        Wed, 19 Oct 2022 17:50:27 +0200 (CEST)
+Received: from [10.201.20.201] (10.201.20.201) by SHFDAG1NODE2.st.com
+ (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Wed, 19 Oct
+ 2022 17:50:26 +0200
+Message-ID: <972a1ea1-7431-21fe-c8af-027c4271f6a2@foss.st.com>
+Date:   Wed, 19 Oct 2022 17:50:25 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <3c75ca82-f889-a346-a031-2c417c57e2b0@nvidia.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Content-Language: en-US
+From:   Yann Gautier <yann.gautier@foss.st.com>
+Subject: Issue with an SD-card switching to high speed
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <christophe.kerello@foss.st.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.201.20.201]
+X-ClientProxiedBy: EQNCAS1NODE3.st.com (10.75.129.80) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2022-10-19_09,2022-10-19_04,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 19, 2022 at 04:54:12PM +0200, Jon Hunter wrote:
-> [    4.168317] mmc0: Command Queue Engine enabled
-> [    4.176723] mmc0: new HS400 Enhanced strobe MMC card at address 0001
-> [    4.189609] mmcblk0: mmc0:0001 HBG4a2 29.1 GiB
-> [    4.207660] mmc0: running CQE recovery
-> [    4.215332]  mmcblk0: p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20 p21 p22 p23 p24 p25 p26 p27 p28 p29 p30 p31 p32 p33 p34 p35 p36 p37 p38 p39 p40 p41 p42
-> [    4.249403] mmcblk0boot0: mmc0:0001 HBG4a2 8.00 MiB
-> [    4.255457] mmcblk0boot1: mmc0:0001 HBG4a2 8.00 MiB
-> [    4.262063] mmcblk0rpmb: mmc0:0001 HBG4a2 4.00 MiB, chardev (511:0)
-> ...
-> [    9.034384] ------------[ cut here ]------------
-> [    9.038985] WARNING: CPU: 4 PID: 199 at /mlt/kernel/drivers/mmc/core/block.c:2379 mmc_blk_mq_issue_rq+0x370/0x820
-> [    9.049100] Modules linked in: ip_tables x_tables ipv6
-> [    9.054180] CPU: 4 PID: 199 Comm: kworker/4:1H Not tainted 6.1.0-rc1-00025-gaae703b02f92 #1
-> [    9.062399] Hardware name: NVIDIA Jetson AGX Xavier Developer Kit (DT)
-> [    9.068821] Workqueue: kblockd blk_mq_run_work_fn
-> [    9.073464] pstate: 20400009 (nzCv daif +PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-> [    9.080318] pc : mmc_blk_mq_issue_rq+0x370/0x820
-> [    9.084872] lr : mmc_blk_mq_issue_rq+0x70/0x820
-> [    9.089382] sp : ffff80000b5b3ad0
-> [    9.092643] x29: ffff80000b5b3ad0 x28: ffff00008467a288 x27: 0000000000000014
-> [    9.099733] x26: ffff000082d49000 x25: ffff00008467a240 x24: ffff0000802acad8
-> [    9.106758] x23: ffff0000802aca10 x22: ffff0000802aca00 x21: 0000000000000000
-> [    9.113810] x20: ffff000080fa0800 x19: ffff800009824000 x18: 0000000000000080
-> [    9.120858] x17: 0000000000000000 x16: f8ffffffffffffff x15: 000000000000029a
-> [    9.127918] x14: 0000000000000000 x13: 0000000000002000 x12: 0000000000000000
-> [    9.134980] x11: 0000000106d66000 x10: 0000000000000001 x9 : 0000000000000002
-> [    9.142066] x8 : 0000000000000009 x7 : ffff000084650118 x6 : 00000000000000ff
-> [    9.149171] x5 : ffff000084650000 x4 : 0000000000403082 x3 : ffffffffffffca4a
-> [    9.156240] x2 : 0000000000000000 x1 : 00000000ffffffe7 x0 : 0000000000000009
-> [    9.163276] Call trace:
-> [    9.165737]  mmc_blk_mq_issue_rq+0x370/0x820
-> [    9.169993]  mmc_mq_queue_rq+0x134/0x270
-> [    9.173900]  blk_mq_dispatch_rq_list+0x14c/0x8d8
-> [    9.178500]  blk_mq_do_dispatch_sched+0x330/0x348
-> [    9.183169]  __blk_mq_sched_dispatch_requests+0xd4/0x170
-> [    9.188440]  blk_mq_sched_dispatch_requests+0x34/0x70
-> [    9.193456]  __blk_mq_run_hw_queue+0x58/0xb0
-> [    9.197666]  blk_mq_run_work_fn+0x20/0x28
-> [    9.201673]  process_one_work+0x1e0/0x348
-> [    9.205672]  worker_thread+0x48/0x410
-> [    9.209326]  kthread+0xf4/0x110
-> [    9.212462]  ret_from_fork+0x10/0x20
-> [    9.216025] ---[ end trace 0000000000000000 ]---
-> [    9.220899] I/O error, dev mmcblk0, sector 12624 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> [   11.500035] I/O error, dev mmcblk0, sector 16720 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> [   13.804317] I/O error, dev mmcblk0, sector 20816 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> [   16.104063] I/O error, dev mmcblk0, sector 24912 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
-> 
-> 
-> Reverting this makes the issue go away. Please let me know if you have any thoughts on this.
+Hi Ulf (and mailing-list),
 
-Could you please test if the below change fixes it?  Thank you.
+I've an SD-card on a STM32MP157F-DK2 board that cannot switch to 
+high-speed mode:
+"mmc0: Problem switching card into high-speed mode!"
 
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index fefaa901b50f..3661ba0bbc87 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -48,6 +48,7 @@ static enum mmc_issue_type mmc_cqe_issue_type(struct mmc_host *host,
- 	case REQ_OP_DRV_OUT:
- 	case REQ_OP_DISCARD:
- 	case REQ_OP_SECURE_ERASE:
-+	case REQ_OP_WRITE_ZEROES:
- 		return MMC_ISSUE_SYNC;
- 	case REQ_OP_FLUSH:
- 		return mmc_cqe_can_dcmd(host) ? MMC_ISSUE_DCMD : MMC_ISSUE_SYNC;
+On this board, it is not possible to switch to UHS modes.
+And there is no power cycle done in kernel.
+
+When checking the differences when I add full-pwr-cycle in DT, I see 
+that the OCR we ask the card is different:
+0x300000 (MMC_VDD_32_33 | MMC_VDD_33_34) vs 0x200000 (MMC_VDD_33_34).
+
+If I add this missing MMC_VDD_32_33 voltage range (without power cycle), 
+then the card can switch to high-speed.
+
+Checking where this is done in the framework, I've seen something that 
+could correct my issue in mmc_select_voltage():
+
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 368f10405e13..bcd8fa81f78b 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1132,7 +1132,7 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
+                 mmc_power_cycle(host, ocr);
+         } else {
+                 bit = fls(ocr) - 1;
+-               ocr &= 3 << bit;
++               ocr &= 3 << (bit - 1);
+                 if (bit != host->ios.vdd)
+                         dev_warn(mmc_dev(host), "exceeding card's 
+volts\n");
+         }
+
+The ocr given to mmc_select_voltage() is 0x300000.
+fls(ocr) = 22, bit = 21, 3 << bit = 0x600000.
+With the &= operator, we then have only 0x200000 and have removed 
+MMC_VDD_32_33 mode.
+The architecture is an Armv7, I hope that the fls() has the same 
+behavior on other architectures.
+
+But as this function is also used for eMMC and SDIO, this could have 
+impacts I've not seen.
+
+
+Maybe the issue is just with this SD-card, that doesn't properly handle 
+the range MMC_VDD_33_34 alone, and it could be out of spec.
+
+I then have 3 possibilities:
+- stop using this type of card if it is out-of-specs
+- add full-pwr-cycle in this board's DT, but I'll have issues with other 
+boards that really cannot do power cycle
+- push the proposed patch in mmc_select_voltage()
+
+
+What's your opinion?
+
+
+
+Best regards,
+Yann
