@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F6B3C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:33:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14EACC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:33:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229907AbiJSLdW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 07:33:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50574 "EHLO
+        id S231802AbiJSLdn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 07:33:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232005AbiJSLcw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:32:52 -0400
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B736DEE3;
-        Wed, 19 Oct 2022 04:09:28 -0700 (PDT)
-Received: by mail-pj1-x1033.google.com with SMTP id t10-20020a17090a4e4a00b0020af4bcae10so16441666pjl.3;
-        Wed, 19 Oct 2022 04:09:27 -0700 (PDT)
+        with ESMTP id S232059AbiJSLdQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:33:16 -0400
+Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFAA88305F;
+        Wed, 19 Oct 2022 04:09:54 -0700 (PDT)
+Received: by mail-pj1-x102b.google.com with SMTP id t12-20020a17090a3b4c00b0020b04251529so16435539pjf.5;
+        Wed, 19 Oct 2022 04:09:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=xPy/Wu6p2dLpXSb6DKO5GwTstFivHbrMcCqV9r5eHbw=;
-        b=p8L7V1IxRik3vHXKSuqwxP4WjcBko1v0ELWI41KoUMqPcCbR7/ypGxybSu38DSPbQM
-         WjFN9rPmZOh7Jg3445WQPWTujSR6YsmxMfxsc/2jchrMKnFygf/rlVmFru55zbAG5JqB
-         t5z3Z9Z+8qV1DGgD/Ljm4F0GMPoo4k4mSryaMWCZxXE/uZy32/oUbL5leFbPIk65YJ/I
-         DIx14rsjvp3j8xS9GqUdheJnFaedmQNPXnF9vemqlPAtZD8M7fdiQ1aExZVmPwkTWcbI
-         pJyHWmZtgWVHp6mju1C8pCaJEyZga8Mlgwj7vlwaG7o62gNkwv1d4+QBu705kvxP9vHN
-         YpWQ==
+        bh=PTXOWmjLDmmd0AthIyoirfTIKVO51onpGqfIS2mHoBI=;
+        b=o01ykx0o1Uau/DvacEVzay+sQisMbr+3E4LrPwBMPTBHNUK4YkC5zpihdyUtqS+iFG
+         Kf2wNnLTvzcG/UDPdKyn6w0oAamUa2Uo3sdYTjEDOZW7psheNyvoKFIyr6G2bJ6ywcuE
+         uOCZeV6RUL5umefz72sBmguQ+KLac1u0l3lK3fjtH+AioIVXZ2p8LRIi4qvSUVDynbd+
+         tpMDDSzPRdVtV/ESOaKYG3TFLciCgfHMTIi4gWbm1CG8qYdaHRbe6Ww3w//+ahntdodI
+         lAAkyZ0e5BF3UeT7tjnSJ8iEG0CSPyQPiKyWPWyWLhPWG3EQvo1aXKAzJR81pg7uIg44
+         e/Eg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=xPy/Wu6p2dLpXSb6DKO5GwTstFivHbrMcCqV9r5eHbw=;
-        b=v1TXtvVKlT0Uy0XWPBsqgbp7xHrcSZC1Oty45h1o09k7U3LNACkFeOKIGoUBgZKZ/N
-         KQvqApCjhl42NCNQ+P71b2GZpIRF8c/79x0KbG6Nnl9gwGZVheuVi/hT+sXINzsNdk1s
-         wINB39oa1vSvWi9xrKcSvPF4nFlxaR8xFMZ9sJJYmbypMQ/tyL7KqM2fDRwflFxKta8r
-         zeIKAFvvE1NN9gofds3wQR6gwzPuEyL+w7NMrvGKLOjoVSIjnvAIhDu+8HgY0KZcFAbB
-         FHAy7my6D7TFzzB1u9xSjhI0EPCjYm3rCx4WXEJ+QOhXJ0mT4lWHYhLV8xfi0036Liny
-         +VKw==
-X-Gm-Message-State: ACrzQf1GX+q6V7Wb4yBycB3b/VqDcgGUUWmbjv6MUj8p17LZ7GCv6jS2
-        /3F1NHoMFD32TDZvjM3DR/s=
-X-Google-Smtp-Source: AMsMyM6M5J3f2ooU5c8yYkzhBqb8Y1Hmm53DPUe0Kk1vvh1yK8MNY23kw6BLgRbeS3Ib1OGZ215byQ==
-X-Received: by 2002:a17:90b:3804:b0:20d:4e77:373a with SMTP id mq4-20020a17090b380400b0020d4e77373amr44915411pjb.212.1666177650806;
-        Wed, 19 Oct 2022 04:07:30 -0700 (PDT)
+        bh=PTXOWmjLDmmd0AthIyoirfTIKVO51onpGqfIS2mHoBI=;
+        b=aT23C+f0/TdLCmbeRR6TBBcHSF33i0flp4Uqq3yzXeCgBEIRwCE3f1SaRtfRfsa//o
+         8lWNfgU0I2unjBo9oA3G15Y/Nq43b9shawo4QwVFLYWdLJcSwadZwlHT2ExYXif4b1cQ
+         /Lt0BpgJvvI2g8vrwlkWM0nFPd+92Hlvncf6rymDhyB8b0r6Tm7c9+Z3TleSk2TCMbGw
+         /fUlb3GAJBs+SaKCI/TjJ6od8wEhJ7HZ50NCCwg5+Q8RvDB6vlVRthvMU2nIB8SLcoay
+         ggLwD3KhMy3RiNDE9OZZAEm3nT/G+KEB9yNe42KaD0oLX0Kro85PmIg/DZAneScJoZ3d
+         bFuQ==
+X-Gm-Message-State: ACrzQf04uyIcJBNRW3sbh5Ej74niVzpd4yQ2ZfoChCjQ2e1Ws7dlDTUE
+        0yR5XksaZyaEy4sqJkTBdto=
+X-Google-Smtp-Source: AMsMyM5kXFjPWyFzKNI305oBPjqPqncVM9X1ODqQMP8fhIYDHVrI8M25gR+z934LSq+I0nuuc1hTCA==
+X-Received: by 2002:a17:902:d486:b0:181:33f0:f60b with SMTP id c6-20020a170902d48600b0018133f0f60bmr7979575plg.174.1666177669450;
+        Wed, 19 Oct 2022 04:07:49 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e258-8c34-821b-9613-557f-bd8d.emome-ip6.hinet.net. [2001:b400:e258:8c34:821b:9613:557f:bd8d])
-        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.07.27
+        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.07.46
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 04:07:30 -0700 (PDT)
+        Wed, 19 Oct 2022 04:07:49 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
@@ -57,9 +57,9 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
         dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
         Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Subject: [PATCH V5 11/26] mmc: sdhci-uhs2: add reset function and uhs2_mode function
-Date:   Wed, 19 Oct 2022 19:06:32 +0800
-Message-Id: <20221019110647.11076-12-victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V5 17/26] mmc: sdhci-uhs2: add clock operations
+Date:   Wed, 19 Oct 2022 19:06:38 +0800
+Message-Id: <20221019110647.11076-18-victor.shih@genesyslogic.com.tw>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
 References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
@@ -69,202 +69,76 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Sdhci_uhs2_reset() does a UHS-II specific reset operation.
+This is a sdhci version of mmc's uhs2_[enable|disable]_clk operations.
 
 Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
- drivers/mmc/host/sdhci-pci-core.c |  1 +
- drivers/mmc/host/sdhci-pci-gli.c  |  1 +
- drivers/mmc/host/sdhci-uhs2.c     | 68 +++++++++++++++++++++++++++++++
- drivers/mmc/host/sdhci-uhs2.h     |  3 ++
- drivers/mmc/host/sdhci.c          |  3 +-
- drivers/mmc/host/sdhci.h          | 14 +++++++
- 6 files changed, 89 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci-uhs2.c | 36 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 34ea1acbb3cc..cba5bba994b8 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -1955,6 +1955,7 @@ static const struct sdhci_ops sdhci_pci_ops = {
- 	.reset		= sdhci_reset,
- 	.set_uhs_signaling = sdhci_set_uhs_signaling,
- 	.hw_reset		= sdhci_pci_hw_reset,
-+	.uhs2_reset		= sdhci_uhs2_reset,
- };
- 
- /*****************************************************************************\
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 4d509f656188..607cf69f45d0 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -1097,6 +1097,7 @@ static const struct sdhci_ops sdhci_gl9755_ops = {
- 	.reset			= sdhci_reset,
- 	.set_uhs_signaling	= sdhci_set_uhs_signaling,
- 	.voltage_switch		= sdhci_gli_voltage_switch,
-+	.uhs2_reset		= sdhci_uhs2_reset,
- };
- 
- const struct sdhci_pci_fixes sdhci_gl9755 = {
 diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-index 08905ed081fb..0e82f98d1967 100644
+index 9ceae552c323..afaca5d96938 100644
 --- a/drivers/mmc/host/sdhci-uhs2.c
 +++ b/drivers/mmc/host/sdhci-uhs2.c
-@@ -10,6 +10,7 @@
-  *  Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+@@ -11,6 +11,7 @@
   */
  
-+#include <linux/delay.h>
+ #include <linux/delay.h>
++#include <linux/ktime.h>
  #include <linux/module.h>
  
  #include "sdhci.h"
-@@ -49,6 +50,73 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host)
+@@ -403,6 +404,37 @@ int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	return 0;
  }
- EXPORT_SYMBOL_GPL(sdhci_uhs2_dump_regs);
  
-+/*****************************************************************************\
-+ *                                                                           *
-+ * Low level functions                                                       *
-+ *                                                                           *
-+\*****************************************************************************/
-+
-+bool sdhci_uhs2_mode(struct sdhci_host *host)
++static int sdhci_uhs2_disable_clk(struct mmc_host *mmc)
 +{
-+	if ((host->mmc->caps2 & MMC_CAP2_SD_UHS2) &&
-+	    (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2) &&
-+		(host->version >= SDHCI_SPEC_400) &&
-+		(host->mmc->flags & MMC_UHS2_SUPPORT)))
-+		return true;
-+	else
-+		return false;
++	struct sdhci_host *host = mmc_priv(mmc);
++	u16 clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++
++	clk &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
++
++	return 0;
 +}
 +
-+/**
-+ * sdhci_uhs2_reset - invoke SW reset
-+ * @host: SDHCI host
-+ * @mask: Control mask
-+ *
-+ * Invoke SW reset, depending on a bit in @mask and wait for completion.
-+ */
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask)
++static int sdhci_uhs2_enable_clk(struct mmc_host *mmc)
 +{
-+	unsigned long timeout;
++	struct sdhci_host *host = mmc_priv(mmc);
++	u16 clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
 +	u32 val;
++	/* 20ms */
++	int timeout_us = 20000;
 +
-+	if (!(sdhci_uhs2_mode(host))) {
-+		/**
-+		 * u8  mask for legacy.
-+		 * u16 mask for uhs-2.
-+		 */
-+		u8 u8_mask;
++	clk |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
 +
-+		u8_mask = (mask & 0xFF);
-+		sdhci_reset(host, u8_mask);
-+
-+		return;
++	if (read_poll_timeout_atomic(sdhci_readw, val, (val & SDHCI_CLOCK_INT_STABLE),
++				     10, timeout_us, true, host, SDHCI_CLOCK_CONTROL)) {
++		pr_err("%s: Internal clock never stabilised.\n", mmc_hostname(host->mmc));
++		sdhci_dumpregs(host);
++		return 1;
 +	}
-+
-+	sdhci_writew(host, mask, SDHCI_UHS2_SW_RESET);
-+
-+	if (mask & SDHCI_UHS2_SW_RESET_FULL) {
-+		host->clock = 0;
-+		/* Reset-all turns off SD Bus Power */
-+		if (host->quirks2 & SDHCI_QUIRK2_CARD_ON_NEEDS_BUS_ON)
-+			sdhci_runtime_pm_bus_off(host);
-+	}
-+
-+	/* Wait max 100 ms */
-+	timeout = 10000;
-+
-+	/* hw clears the bit when it's done */
-+	if (read_poll_timeout_atomic(sdhci_readw, val, !(val & mask), 10,
-+				     timeout, true, host, SDHCI_UHS2_SW_RESET)) {
-+		pr_err("%s: %s: Reset 0x%x never completed.\n",
-+					       __func__, mmc_hostname(host->mmc), (int)mask);
-+		pr_err("%s: clean reset bit\n",
-+					       mmc_hostname(host->mmc));
-+		sdhci_writeb(host, 0, SDHCI_UHS2_SW_RESET);
-+		return;
-+	}
++	return 0;
 +}
-+EXPORT_SYMBOL_GPL(sdhci_uhs2_reset);
 +
  /*****************************************************************************\
   *                                                                           *
   * Driver init/exit                                                          *
-diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-index afdb05d6056b..31776dcca5cf 100644
---- a/drivers/mmc/host/sdhci-uhs2.h
-+++ b/drivers/mmc/host/sdhci-uhs2.h
-@@ -11,6 +11,7 @@
- #define __SDHCI_UHS2_H
+@@ -560,6 +592,10 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
  
- #include <linux/bits.h>
-+#include <linux/iopoll.h>
+ 	if (!host->mmc_host_ops.uhs2_detect_init)
+ 		host->mmc_host_ops.uhs2_detect_init = sdhci_uhs2_do_detect_init;
++	if (!host->mmc_host_ops.uhs2_disable_clk)
++		host->mmc_host_ops.uhs2_disable_clk = sdhci_uhs2_disable_clk;
++	if (!host->mmc_host_ops.uhs2_enable_clk)
++		host->mmc_host_ops.uhs2_enable_clk = sdhci_uhs2_enable_clk;
  
- /*
-  * UHS-II Controller registers
-@@ -210,5 +211,7 @@
- struct sdhci_host;
- 
- void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-+bool sdhci_uhs2_mode(struct sdhci_host *host);
-+void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
- 
- #endif /* __SDHCI_UHS2_H */
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2cdd183c8ada..bd017c59a020 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -194,13 +194,14 @@ static void sdhci_runtime_pm_bus_on(struct sdhci_host *host)
- 	pm_runtime_get_noresume(mmc_dev(host->mmc));
+ 	return 0;
  }
- 
--static void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
-+void sdhci_runtime_pm_bus_off(struct sdhci_host *host)
- {
- 	if (!host->bus_on)
- 		return;
- 	host->bus_on = false;
- 	pm_runtime_put_noidle(mmc_dev(host->mmc));
- }
-+EXPORT_SYMBOL_GPL(sdhci_runtime_pm_bus_off);
- 
- void sdhci_reset(struct sdhci_host *host, u8 mask)
- {
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index bbed850241d4..28716105da61 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -715,6 +715,19 @@ struct sdhci_ops {
- 					     u8 power_mode);
- 	unsigned int    (*get_ro)(struct sdhci_host *host);
- 	void		(*reset)(struct sdhci_host *host, u8 mask);
-+	/**
-+	 * The sdhci_uhs2_reset callback is to implement for reset
-+	 * @host: SDHCI host
-+	 * @mask: Control mask
-+	 *
-+	 * Invoke reset, depending on a bit in @mask and wait for completion.
-+	 * SD mode				UHS-II mode
-+	 * SDHCI_RESET_ALL		SDHCI_UHS2_SW_RESET_FULL
-+	 * SDHCI_RESET_CMD		SDHCI_RESET_CMD
-+	 * SDHCI_RESET_DATA		SDHCI_UHS2_SW_RESET_SD
-+	 *
-+	 **/
-+	void (*uhs2_reset)(struct sdhci_host *host, u16 mask);
- 	int	(*platform_execute_tuning)(struct sdhci_host *host, u32 opcode);
- 	void	(*set_uhs_signaling)(struct sdhci_host *host, unsigned int uhs);
- 	void	(*hw_reset)(struct sdhci_host *host);
-@@ -837,6 +850,7 @@ static inline void sdhci_read_caps(struct sdhci_host *host)
- 	__sdhci_read_caps(host, NULL, NULL, NULL);
- }
- 
-+void sdhci_runtime_pm_bus_off(struct sdhci_host *host);
- u16 sdhci_calc_clk(struct sdhci_host *host, unsigned int clock,
- 		   unsigned int *actual_clock);
- void sdhci_set_clock(struct sdhci_host *host, unsigned int clock);
 -- 
 2.25.1
 
