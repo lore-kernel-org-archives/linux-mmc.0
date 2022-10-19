@@ -2,25 +2,24 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD9A3C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 21:21:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 090E3C43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 21:21:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230261AbiJSVVG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 17:21:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59002 "EHLO
+        id S231634AbiJSVV3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 17:21:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59450 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229803AbiJSVVF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 17:21:05 -0400
-X-Greylist: delayed 450 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 19 Oct 2022 14:21:03 PDT
+        with ESMTP id S231309AbiJSVV0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 17:21:26 -0400
 Received: from smtp.smtpout.orange.fr (smtp-26.smtpout.orange.fr [80.12.242.26])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 99C4F189C2E
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 14:21:03 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id BA8AB18B499
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 14:21:23 -0700 (PDT)
 Received: from sopl295.home ([109.220.248.156])
         by smtp.orange.fr with ESMTPA
-        id lGNMo1N0Kg7y2lGNMocFLS; Wed, 19 Oct 2022 23:13:31 +0200
+        id lGNoo1NB2g7y2lGNpocFOd; Wed, 19 Oct 2022 23:13:51 +0200
 X-ME-Helo: sopl295.home
 X-ME-Auth: amFyem1pay5yb2JlcnRAb3JhbmdlLmZy
-X-ME-Date: Wed, 19 Oct 2022 23:13:31 +0200
+X-ME-Date: Wed, 19 Oct 2022 23:13:51 +0200
 X-ME-IP: 109.220.248.156
 From:   Robert Jarzmik <jarzmik.robert@orange.fr>
 To:     Arnd Bergmann <arnd@kernel.org>
@@ -49,13 +48,13 @@ Cc:     linux-arm-kernel@lists.infradead.org,
         linux-usb@vger.kernel.org, dri-devel@lists.freedesktop.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
 Subject: Re: [PATCH 00/30] ARM: pxa: remove all unused boards&drivers
-References: <20221019161831.3864786-1-arnd@kernel.org>
-X-URL:  http://belgarath.falguerolles.org/
-Date:   Wed, 19 Oct 2022 23:13:20 +0200
 In-Reply-To: <20221019161831.3864786-1-arnd@kernel.org> (Arnd Bergmann's
         message of "Wed, 19 Oct 2022 18:17:53 +0200")
-Message-ID: <m2sfjjh5zj.fsf@sopl295.home>
+References: <20221019161831.3864786-1-arnd@kernel.org>
 User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/28.1 (darwin)
+X-URL:  http://belgarath.falguerolles.org/
+Date:   Wed, 19 Oct 2022 23:13:48 +0200
+Message-ID: <m2r0z3h5yr.fsf@sopl295.home>
 MIME-Version: 1.0
 Content-Type: text/plain
 Precedence: bulk
