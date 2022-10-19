@@ -2,63 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C920AC4167D
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:41:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B8A8C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:41:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230426AbiJSLko (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 07:40:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36074 "EHLO
+        id S229777AbiJSLlP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 07:41:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231473AbiJSLj6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:39:58 -0400
-Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28D0A18F900;
-        Wed, 19 Oct 2022 04:18:52 -0700 (PDT)
-Received: by mail-vs1-xe31.google.com with SMTP id h29so17338104vsq.9;
-        Wed, 19 Oct 2022 04:18:51 -0700 (PDT)
+        with ESMTP id S230070AbiJSLkf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:40:35 -0400
+Received: from mail-io1-xd2a.google.com (mail-io1-xd2a.google.com [IPv6:2607:f8b0:4864:20::d2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D491190E70;
+        Wed, 19 Oct 2022 04:19:17 -0700 (PDT)
+Received: by mail-io1-xd2a.google.com with SMTP id p16so14130344iod.6;
+        Wed, 19 Oct 2022 04:19:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=UDCR3c+tNDbZrokHvRQ/NhZey5IRS6vX40mc//O1vsw=;
-        b=et+yga9tXynRDKZpAPp7Ku8jquDwA7degXwIFN9gRqnq4WMb19nvvcT2JbIK1RdLNi
-         3WaTE037JThN9KHa9C/X3mUIkMxGtQvZjT70Q8iu2un7GVtVDaiY8rPxMgRWu/OPi7ro
-         VfLatbLwx4/1ITHHlfXFrj5jyN1SbKHj2GovS52fg84l0wFBqIWfqDBZu4xxog7sQUVF
-         UBxf588gY1IKUPDXnn/ue9MzJGT0cLsUBwgxUhhtbAnowiyORYJ9krOBy8/t2e6M9YuU
-         D0d9jee/EgQr7Fc1cQvGoAKZ7sfp3tVTvwHibuNy7k8VKbneunHDFt6QSoMh8EpvvTqd
-         GEwg==
+        bh=TBATHdsu+1DFFYFLNamsFBm0gLgpIqWR/ES5VI78TuE=;
+        b=TjC3TT6yUIEInaWAu0VXiCWeelBPyX6Ntw87iqvrST4vAqRXgKWA14dDGX6V9uqlqa
+         smVpmGPvZF1sjc5ttrQ+tYxY7h2ZKQqSJIdZl2F68l45Wsm9eRdxmCsEOoDk8Re5O1Xd
+         8dt+jaroy2ayvAxshi9y26AIfufOYQA2y710SbxNoiCPOcFTtRsrFhGQIsoWqXU9LCte
+         sWWEuQfjriQiRES/2zC+NkFpSV+ZdF9hlw9PwVQWyd6KGgRVZdRRWZeVDv/XBjJXIlVV
+         cQaIOhymPn767rYzd1fxfIE+VuffDMPwaoVTWypO+K28w4fzu7LDs4GSNwQI5qUae+r1
+         NSWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=UDCR3c+tNDbZrokHvRQ/NhZey5IRS6vX40mc//O1vsw=;
-        b=b4CbNrpwwS/5oTIItBcAiLqpfXTtL+JQk6yzAOWgZKhWLbeBYJrIzTnyUpDiZolXHI
-         /VuRq1uqVKk8rzFEILM0HA43rkfwgKAQVnD1a1IUJ6OHGYBsBA1hEq3tZw/2F3FldcPT
-         SEoWJ3H/iPYjDzlgTHk/ANZDG6pAKKNzQ8gBFoblylKhBVgzF6CPUIZKkYL5BoBm7fAI
-         R31p5Tos6959ISwNJ6sTdYJ39Xrxat6V9uCixWqE/2GdbFamRWePEHszJ9AGDSe+pn7k
-         sVcUyghz3U+fNBQ+VjuDdA35n9guZa9H8bdpMO2oYiMvt41HoRnXk5VqiKY2Lw+Nc4gl
-         N/0w==
-X-Gm-Message-State: ACrzQf2Bds2m8PZzHiAmydaEqguuaI6hdoCUHvdRYcPdCabzEArIxmNJ
-        Ch826T/wFePiQoYVtgY/hABWjYyhDU8=
-X-Google-Smtp-Source: AMsMyM55tO8Pf0U+CSDawvZX9OyDkZnj/hPc/Bgqi2r4dzYJGlJNE5BPkxlpgXRJBnaNitZVmBsJew==
-X-Received: by 2002:a17:902:9690:b0:17a:4cf:edeb with SMTP id n16-20020a170902969000b0017a04cfedebmr7810972plp.129.1666177622034;
-        Wed, 19 Oct 2022 04:07:02 -0700 (PDT)
+        bh=TBATHdsu+1DFFYFLNamsFBm0gLgpIqWR/ES5VI78TuE=;
+        b=byCjRdfEE02oOyaXdsKschVUaUJlZvehckruoGkaXsuDuZXfRlSv96or541plw7AMY
+         2SUGrsJVYZO7Vs+yeTJ9j7la2c4wNqGtwi5JXY4/LQAL1Unt0yMbvRd3grK6BjTxa2De
+         wSQxGEXDE4DMq90vW6jSkrT7QJhRoSFnnZF0iWwBQ3ccRNZGEymVLpIcblX/d1MI+NMv
+         pE/CoDIchRoVSCkuys5HsmbCsziptRgV157xnDoJqaiSqK+2iwRqPd0wgMhVsvxmMZQA
+         jjaOsQ3zSwqsI344SFZFRC/uToHbmf0YHutZG3yADnBRV5pNo8uYwhdUNM4N9dFo+dEz
+         wAiw==
+X-Gm-Message-State: ACrzQf2BAEYfVIVcrXq2Z45uxWy8MN2M0fyE7zJPNijua2QXebAaUWjN
+        TDtY08710pNWzis0cgRTKT1FPFkHHT0=
+X-Google-Smtp-Source: AMsMyM6uBM4khl7AbTSRIt8YlgCOzMVLN/AEUX5U63VLQqrERmIm+tvsE4WBVhC9L2Cew0UhZznIKQ==
+X-Received: by 2002:a63:f103:0:b0:439:398f:80f8 with SMTP id f3-20020a63f103000000b00439398f80f8mr6675571pgi.494.1666177678528;
+        Wed, 19 Oct 2022 04:07:58 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e258-8c34-821b-9613-557f-bd8d.emome-ip6.hinet.net. [2001:b400:e258:8c34:821b:9613:557f:bd8d])
-        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.06.59
+        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.07.55
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 04:07:01 -0700 (PDT)
+        Wed, 19 Oct 2022 04:07:58 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V5 02/26] mmc: core: Prepare to support SD UHS-II cards
-Date:   Wed, 19 Oct 2022 19:06:23 +0800
-Message-Id: <20221019110647.11076-3-victor.shih@genesyslogic.com.tw>
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Subject: [PATCH V5 20/26] mmc: sdhci-uhs2: add irq() and others
+Date:   Wed, 19 Oct 2022 19:06:41 +0800
+Message-Id: <20221019110647.11076-21-victor.shih@genesyslogic.com.tw>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
 References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
@@ -68,493 +69,482 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Ulf Hansson <ulf.hansson@linaro.org>
+This is a UHS-II version of sdhci's request() operation.
+It handles UHS-II related command interrupts and errors.
 
-Updates in V4:
- - Re-based, updated a comment and removed white-space.
- - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
-
-Update in previous version:
-The SD UHS-II interface was introduced to the SD spec v4.00 several years
-ago. The interface is fundamentally different from an electrical and a
-protocol point of view, comparing to the legacy SD interface.
-
-However, the legacy SD protocol is supported through a specific transport
-layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows the
-SD card to be managed in a very similar way as a legacy SD card, hence a
-lot of code can be re-used to support these new types of cards through the
-mmc subsystem.
-
-Moreover, an SD card that supports the UHS-II interface shall also be
-backwards compatible with the legacy SD interface, which allows a UHS-II
-card to be inserted into a legacy slot. As a matter of fact, this is
-already supported by mmc subsystem as of today.
-
-To prepare to add support for UHS-II, this change puts the basic foundation
-in the mmc core in place, allowing it to be more easily reviewed before
-subsequent changes implements the actual support.
-
-Basically, the approach here adds a new UHS-II bus_ops type and adds a
-separate initialization path for the UHS-II card. The intent is to avoid us
-from sprinkling the legacy initialization path, but also to simplify
-implementation of the UHS-II specific bits.
-
-At this point, there is only one new host ops added to manage the various
-ios settings needed for UHS-II. Additional host ops that are needed, are
-being added from subsequent changes.
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
- drivers/mmc/core/Makefile  |   2 +-
- drivers/mmc/core/core.c    |  17 ++-
- drivers/mmc/core/core.h    |   1 +
- drivers/mmc/core/sd_uhs2.c | 289 +++++++++++++++++++++++++++++++++++++
- include/linux/mmc/card.h   |   7 +
- include/linux/mmc/host.h   |  19 +++
- 6 files changed, 333 insertions(+), 2 deletions(-)
- create mode 100644 drivers/mmc/core/sd_uhs2.c
+ drivers/mmc/host/sdhci-uhs2.c | 237 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-uhs2.h |   3 +
+ drivers/mmc/host/sdhci.c      | 106 ++++++++-------
+ drivers/mmc/host/sdhci.h      |   5 +
+ 4 files changed, 304 insertions(+), 47 deletions(-)
 
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 6a907736cd7a..15b067e8b0d1 100644
---- a/drivers/mmc/core/Makefile
-+++ b/drivers/mmc/core/Makefile
-@@ -7,7 +7,7 @@ obj-$(CONFIG_MMC)		+= mmc_core.o
- mmc_core-y			:= core.o bus.o host.o \
- 				   mmc.o mmc_ops.o sd.o sd_ops.o \
- 				   sdio.o sdio_ops.o sdio_bus.o \
--				   sdio_cis.o sdio_io.o sdio_irq.o \
-+				   sdio_cis.o sdio_io.o sdio_irq.o sd_uhs2.o\
- 				   slot-gpio.o regulator.o
- mmc_core-$(CONFIG_OF)		+= pwrseq.o
- obj-$(CONFIG_PWRSEQ_SIMPLE)	+= pwrseq_simple.o
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 95fa8fb1d45f..8818a20571f7 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2234,6 +2234,18 @@ void mmc_rescan(struct work_struct *work)
- 		goto out;
- 	}
+diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+index 41b089ccc200..883e18d849ad 100644
+--- a/drivers/mmc/host/sdhci-uhs2.c
++++ b/drivers/mmc/host/sdhci-uhs2.c
+@@ -11,6 +11,7 @@
+  */
  
-+	/*
-+	 * Ideally we should favor initialization of legacy SD cards and defer
-+	 * UHS-II enumeration. However, it seems like cards doesn't reliably
-+	 * announce their support for UHS-II in the response to the ACMD41,
-+	 * while initializing the legacy SD interface. Therefore, let's start
-+	 * with UHS-II for now.
-+	 */
-+	if (!mmc_attach_sd_uhs2(host)) {
-+		mmc_release_host(host);
-+		goto out;
-+	}
-+
- 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
- 		unsigned int freq = freqs[i];
- 		if (freq > host->f_max) {
-@@ -2261,10 +2273,13 @@ void mmc_rescan(struct work_struct *work)
- 
- void mmc_start_host(struct mmc_host *host)
+ #include <linux/delay.h>
++#include <linux/dmaengine.h>
+ #include <linux/ktime.h>
+ #include <linux/module.h>
+ #include <linux/mmc/mmc.h>
+@@ -582,6 +583,12 @@ static inline void sdhci_external_dma_pre_transfer(struct sdhci_host *host,
+ 						   struct mmc_command *cmd)
  {
-+	bool power_up = !(host->caps2 &
-+			 (MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_SD_UHS2));
+ }
 +
- 	host->f_init = max(min(freqs[0], host->f_max), host->f_min);
- 	host->rescan_disable = 0;
++static inline struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host,
++							  struct mmc_data *data)
++{
++	return NULL;
++}
+ #endif /* CONFIG_MMC_SDHCI_EXTERNAL_DMA */
  
--	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
-+	if (power_up) {
- 		mmc_claim_host(host);
- 		mmc_power_up(host, host->ocr_avail);
- 		mmc_release_host(host);
-diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
-index f5f3f623ea49..2d80afc95e58 100644
---- a/drivers/mmc/core/core.h
-+++ b/drivers/mmc/core/core.h
-@@ -81,6 +81,7 @@ int mmc_detect_card_removed(struct mmc_host *host);
- int mmc_attach_mmc(struct mmc_host *host);
- int mmc_attach_sd(struct mmc_host *host);
- int mmc_attach_sdio(struct mmc_host *host);
-+int mmc_attach_sd_uhs2(struct mmc_host *host);
+ static void sdhci_uhs2_finish_data(struct sdhci_host *host)
+@@ -940,6 +947,236 @@ static void sdhci_uhs2_finish_command(struct sdhci_host *host)
+ 		__sdhci_finish_mrq(host, cmd->mrq);
+ }
  
- /* Module parameters */
- extern bool use_spi_crc;
-diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
-new file mode 100644
-index 000000000000..800957f74632
---- /dev/null
-+++ b/drivers/mmc/core/sd_uhs2.c
-@@ -0,0 +1,289 @@
-+// SPDX-License-Identifier: GPL-2.0-only
-+/*
-+ * Copyright (C) 2021 Linaro Ltd
-+ *
-+ * Author: Ulf Hansson <ulf.hansson@linaro.org>
-+ *
-+ * Support for SD UHS-II cards
-+ */
-+#include <linux/err.h>
++/*****************************************************************************\
++ *                                                                           *
++ * Request done                                                              *
++ *                                                                           *
++\*****************************************************************************/
 +
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/card.h>
-+
-+#include "core.h"
-+#include "bus.h"
-+#include "sd.h"
-+#include "mmc_ops.h"
-+
-+static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
-+
-+static int sd_uhs2_set_ios(struct mmc_host *host)
++static bool sdhci_uhs2_request_done(struct sdhci_host *host)
 +{
-+	struct mmc_ios *ios = &host->ios;
++	unsigned long flags;
++	struct mmc_request *mrq;
++	int i;
 +
-+	return host->ops->uhs2_set_ios(host, ios);
-+}
++	/* FIXME: UHS2_INITIALIZED, instead? */
++	if (!(host->mmc->flags & MMC_UHS2_SUPPORT))
++		return sdhci_request_done(host);
 +
-+static int sd_uhs2_power_up(struct mmc_host *host)
-+{
-+	host->ios.vdd = fls(host->ocr_avail) - 1;
-+	host->ios.clock = host->f_init;
-+	host->ios.timing = MMC_TIMING_SD_UHS2;
-+	host->ios.power_mode = MMC_POWER_UP;
++	spin_lock_irqsave(&host->lock, flags);
 +
-+	return sd_uhs2_set_ios(host);
-+}
-+
-+static void sd_uhs2_power_off(struct mmc_host *host)
-+{
-+	host->ios.vdd = 0;
-+	host->ios.clock = 0;
-+	host->ios.timing = MMC_TIMING_LEGACY;
-+	host->ios.power_mode = MMC_POWER_OFF;
-+
-+	sd_uhs2_set_ios(host);
-+}
-+
-+/*
-+ * Run the phy initialization sequence, which mainly relies on the UHS-II host
-+ * to check that we reach the expected electrical state, between the host and
-+ * the card.
-+ */
-+static int sd_uhs2_phy_init(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Do the early initialization of the card, by sending the device init broadcast
-+ * command and wait for the process to be completed.
-+ */
-+static int sd_uhs2_dev_init(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Run the enumeration process by sending the enumerate command to the card.
-+ * Note that, we currently support only the point to point connection, which
-+ * means only one card can be attached per host/slot.
-+ */
-+static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Read the UHS-II configuration registers (CFG_REG) of the card, by sending it
-+ * commands and by parsing the responses. Store a copy of the relevant data in
-+ * card->uhs2_config.
-+ */
-+static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Based on the card's and host's UHS-II capabilities, let's update the
-+ * configuration of the card and the host. This may also include to move to a
-+ * greater speed range/mode. Depending on the updated configuration, we may need
-+ * to do a soft reset of the card via sending it a GO_DORMANT_STATE command.
-+ *
-+ * In the final step, let's check if the card signals "config completion", which
-+ * indicates that the card has moved from config state into active state.
-+ */
-+static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Initialize the UHS-II card through the SD-TRAN transport layer. This enables
-+ * commands/requests to be backwards compatible through the legacy SD protocol.
-+ * UHS-II cards has a specific power limit specified for VDD1/VDD2, that should
-+ * be set through a legacy CMD6. Note that, the power limit that becomes set,
-+ * survives a soft reset through the GO_DORMANT_STATE command.
-+ */
-+static int sd_uhs2_legacy_init(struct mmc_host *host, struct mmc_card *card)
-+{
-+	return 0;
-+}
-+
-+/*
-+ * Allocate the data structure for the mmc_card and run the UHS-II specific
-+ * initialization sequence.
-+ */
-+static int sd_uhs2_init_card(struct mmc_host *host)
-+{
-+	struct mmc_card *card;
-+	u32 node_id;
-+	int err;
-+
-+	err = sd_uhs2_dev_init(host);
-+	if (err)
-+		return err;
-+
-+	err = sd_uhs2_enum(host, &node_id);
-+	if (err)
-+		return err;
-+
-+	card = mmc_alloc_card(host, &sd_type);
-+	if (IS_ERR(card))
-+		return PTR_ERR(card);
-+
-+	card->uhs2_config.node_id = node_id;
-+	card->type = MMC_TYPE_SD;
-+
-+	err = sd_uhs2_config_read(host, card);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_config_write(host, card);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_legacy_init(host, card);
-+	if (err)
-+		goto err;
-+
-+	host->card = card;
-+	return 0;
-+
-+err:
-+	mmc_remove_card(card);
-+	return err;
-+}
-+
-+static void sd_uhs2_remove(struct mmc_host *host)
-+{
-+	mmc_remove_card(host->card);
-+	host->card = NULL;
-+}
-+
-+static int sd_uhs2_alive(struct mmc_host *host)
-+{
-+	return mmc_send_status(host->card, NULL);
-+}
-+
-+static void sd_uhs2_detect(struct mmc_host *host)
-+{
-+	int err;
-+
-+	mmc_get_card(host->card, NULL);
-+	err = _mmc_detect_card_removed(host);
-+	mmc_put_card(host->card, NULL);
-+
-+	if (err) {
-+		sd_uhs2_remove(host);
-+
-+		mmc_claim_host(host);
-+		mmc_detach_bus(host);
-+		sd_uhs2_power_off(host);
-+		mmc_release_host(host);
-+	}
-+}
-+
-+static int sd_uhs2_suspend(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_resume(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_runtime_suspend(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_runtime_resume(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_shutdown(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static int sd_uhs2_hw_reset(struct mmc_host *host)
-+{
-+	return 0;
-+}
-+
-+static const struct mmc_bus_ops sd_uhs2_ops = {
-+	.remove = sd_uhs2_remove,
-+	.alive = sd_uhs2_alive,
-+	.detect = sd_uhs2_detect,
-+	.suspend = sd_uhs2_suspend,
-+	.resume = sd_uhs2_resume,
-+	.runtime_suspend = sd_uhs2_runtime_suspend,
-+	.runtime_resume = sd_uhs2_runtime_resume,
-+	.shutdown = sd_uhs2_shutdown,
-+	.hw_reset = sd_uhs2_hw_reset,
-+};
-+
-+static int sd_uhs2_attach(struct mmc_host *host)
-+{
-+	int err;
-+
-+	err = sd_uhs2_power_up(host);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_phy_init(host);
-+	if (err)
-+		goto err;
-+
-+	err = sd_uhs2_init_card(host);
-+	if (err)
-+		goto err;
-+
-+	mmc_attach_bus(host, &sd_uhs2_ops);
-+
-+	mmc_release_host(host);
-+
-+	err = mmc_add_card(host->card);
-+	if (err)
-+		goto remove_card;
-+
-+	mmc_claim_host(host);
-+	return 0;
-+
-+remove_card:
-+	mmc_remove_card(host->card);
-+	host->card = NULL;
-+	mmc_claim_host(host);
-+	mmc_detach_bus(host);
-+err:
-+	sd_uhs2_power_off(host);
-+	return err;
-+}
-+
-+int mmc_attach_sd_uhs2(struct mmc_host *host)
-+{
-+	int i, err = 0;
-+
-+	if (!(host->caps2 & MMC_CAP2_SD_UHS2))
-+		return -EOPNOTSUPP;
-+
-+	/* Turn off the legacy SD interface before trying with UHS-II. */
-+	mmc_power_off(host);
-+
-+	/*
-+	 * Start UHS-II initialization at 52MHz and possibly make a retry at
-+	 * 26MHz according to the spec. It's required that the host driver
-+	 * validates ios->clock, to set a rate within the correct range.
-+	 */
-+	for (i = 0; i < ARRAY_SIZE(sd_uhs2_freqs); i++) {
-+		host->f_init = sd_uhs2_freqs[i];
-+		err = sd_uhs2_attach(host);
-+		if (!err)
++	for (i = 0; i < SDHCI_MAX_MRQS; i++) {
++		mrq = host->mrqs_done[i];
++		if (mrq)
 +			break;
 +	}
 +
-+	return err;
-+}
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index c726ea781255..4a42f31b7bb0 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -211,6 +211,11 @@ struct sd_ext_reg {
- #define SD_EXT_PERF_CMD_QUEUE	(1<<4)
- };
- 
-+struct sd_uhs2_config {
-+	u32			node_id;
-+	/* TODO: Extend with more register configs. */
-+};
++	if (!mrq) {
++		spin_unlock_irqrestore(&host->lock, flags);
++		return true;
++	}
 +
- struct sdio_cccr {
- 	unsigned int		sdio_vsn;
- 	unsigned int		sd_vsn;
-@@ -317,6 +322,8 @@ struct mmc_card {
- 	struct sd_ext_reg	ext_power;	/* SD extension reg for PM */
- 	struct sd_ext_reg	ext_perf;	/* SD extension reg for PERF */
- 
-+	struct sd_uhs2_config	uhs2_config;	/* SD UHS-II config */
-+
- 	unsigned int		sdio_funcs;	/* number of SDIO functions */
- 	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
- 	struct sdio_cccr	cccr;		/* common card info */
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8fdd3cf971a3..150d10d5e6f8 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -63,6 +63,7 @@ struct mmc_ios {
- #define MMC_TIMING_MMC_HS400	10
- #define MMC_TIMING_SD_EXP	11
- #define MMC_TIMING_SD_EXP_1_2V	12
-+#define MMC_TIMING_SD_UHS2	13
- 
- 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
- 
-@@ -91,6 +92,10 @@ struct mmc_clk_phase_map {
- 	struct mmc_clk_phase phase[MMC_NUM_CLK_PHASES];
- };
- 
-+struct sd_uhs2_caps {
-+	/* TODO: Add UHS-II capabilities for the host. */
-+};
-+
- struct mmc_host;
- 
- enum mmc_err_stat {
-@@ -145,6 +150,17 @@ struct mmc_host_ops {
- 	 */
- 	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
- 
 +	/*
-+	 * The uhs2_set_ios callback is mandatory to implement for hosts that
-+	 * supports the SD UHS-II interface (MMC_CAP2_SD_UHS2), while the
-+	 * callback is unused for the other cases. Note that, the struct
-+	 * mmc_ios is being re-used for this as well.
-+	 *
-+	 * Expected return values for the uhs2_set_ios callback are a negative
-+	 * errno in case of a failure or zero for success.
++	 * Always unmap the data buffers if they were mapped by
++	 * sdhci_prepare_data() whenever we finish with a request.
++	 * This avoids leaking DMA mappings on error.
 +	 */
-+	int	(*uhs2_set_ios)(struct mmc_host *host, struct mmc_ios *ios);
++	if (host->flags & SDHCI_REQ_USE_DMA) {
++		struct mmc_data *data = mrq->data;
 +
- 	/*
- 	 * Return values for the get_ro callback should be:
- 	 *   0 for a read/write card
-@@ -396,6 +412,7 @@ struct mmc_host {
- 				 MMC_CAP2_HS200_1_2V_SDR)
- #define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
- #define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
-+#define MMC_CAP2_SD_UHS2	(1 << 9)	/* SD UHS-II support */
- #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
- #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
- #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
-@@ -422,6 +439,8 @@ struct mmc_host {
++		if (host->use_external_dma && data &&
++		    (mrq->cmd->error || data->error)) {
++			struct dma_chan *chan = sdhci_external_dma_channel(host, data);
++
++			host->mrqs_done[i] = NULL;
++			spin_unlock_irqrestore(&host->lock, flags);
++			dmaengine_terminate_sync(chan);
++			spin_lock_irqsave(&host->lock, flags);
++			sdhci_set_mrq_done(host, mrq);
++		}
++
++		sdhci_request_done_dma(host, mrq);
++	}
++
++	/*
++	 * The controller needs a reset of internal state machines
++	 * upon error conditions.
++	 */
++	if (sdhci_needs_reset(host, mrq)) {
++		/*
++		 * Do not finish until command and data lines are available for
++		 * reset. Note there can only be one other mrq, so it cannot
++		 * also be in mrqs_done, otherwise host->cmd and host->data_cmd
++		 * would both be null.
++		 */
++		if (host->cmd || host->data_cmd) {
++			spin_unlock_irqrestore(&host->lock, flags);
++			return true;
++		}
++
++		/* Some controllers need this kick or reset won't work here */
++		if (host->quirks & SDHCI_QUIRK_CLOCK_BEFORE_RESET)
++			/* This is to force an update */
++			host->ops->set_clock(host, host->clock);
++
++		host->ops->uhs2_reset(host, SDHCI_UHS2_SW_RESET_SD);
++		host->pending_reset = false;
++	}
++
++	host->mrqs_done[i] = NULL;
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	if (host->ops->request_done)
++		host->ops->request_done(host, mrq);
++	else
++		mmc_request_done(host->mmc, mrq);
++
++	return false;
++}
++
++static void sdhci_uhs2_complete_work(struct work_struct *work)
++{
++	struct sdhci_host *host = container_of(work, struct sdhci_host,
++					       complete_work);
++
++	while (!sdhci_uhs2_request_done(host))
++		;
++}
++
++/*****************************************************************************\
++ *                                                                           *
++ * Interrupt handling                                                        *
++ *                                                                           *
++\*****************************************************************************/
++
++static void __sdhci_uhs2_irq(struct sdhci_host *host, u32 uhs2mask)
++{
++	struct mmc_command *cmd = host->cmd;
++
++	DBG("*** %s got UHS2 error interrupt: 0x%08x\n",
++	    mmc_hostname(host->mmc), uhs2mask);
++
++	if (uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_CMD_MASK) {
++		if (!host->cmd) {
++			pr_err("%s: Got cmd interrupt 0x%08x but no cmd.\n",
++			       mmc_hostname(host->mmc),
++			       (unsigned int)uhs2mask);
++			sdhci_dumpregs(host);
++			return;
++		}
++		host->cmd->error = -EILSEQ;
++		if (uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_RES_TIMEOUT)
++			host->cmd->error = -ETIMEDOUT;
++	}
++
++	if (uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_DATA_MASK) {
++		if (!host->data) {
++			pr_err("%s: Got data interrupt 0x%08x but no data.\n",
++			       mmc_hostname(host->mmc),
++			       (unsigned int)uhs2mask);
++			sdhci_dumpregs(host);
++			return;
++		}
++
++		if (uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_DEADLOCK_TIMEOUT) {
++			pr_err("%s: Got deadlock timeout interrupt 0x%08x\n",
++			       mmc_hostname(host->mmc),
++			       (unsigned int)uhs2mask);
++			host->data->error = -ETIMEDOUT;
++		} else if (uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_ADMA) {
++			pr_err("%s: ADMA error = 0x %x\n",
++			       mmc_hostname(host->mmc),
++			       sdhci_readb(host, SDHCI_ADMA_ERROR));
++			host->data->error = -EIO;
++		} else {
++			host->data->error = -EILSEQ;
++		}
++	}
++
++	if (host->data && host->data->error)
++		sdhci_uhs2_finish_data(host);
++	else
++		sdhci_finish_mrq(host, cmd->mrq);
++}
++
++u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask)
++{
++	u32 mask = intmask, uhs2mask;
++
++	if (!(host->mmc->flags & MMC_UHS2_SUPPORT))
++		goto out;
++
++	if (intmask & SDHCI_INT_ERROR) {
++		uhs2mask = sdhci_readl(host, SDHCI_UHS2_ERR_INT_STATUS);
++		if (!(uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_MASK))
++			goto cmd_irq;
++
++		/* Clear error interrupts */
++		sdhci_writel(host, uhs2mask & SDHCI_UHS2_ERR_INT_STATUS_MASK,
++			     SDHCI_UHS2_ERR_INT_STATUS);
++
++		/* Handle error interrupts */
++		__sdhci_uhs2_irq(host, uhs2mask);
++
++		/* Caller, shdci_irq(), doesn't have to care UHS-2 errors */
++		intmask &= ~SDHCI_INT_ERROR;
++		mask &= SDHCI_INT_ERROR;
++	}
++
++cmd_irq:
++	if (intmask & SDHCI_INT_CMD_MASK) {
++		/* Clear command interrupt */
++		sdhci_writel(host, intmask & SDHCI_INT_CMD_MASK, SDHCI_INT_STATUS);
++
++		/* Handle command interrupt */
++		if (intmask & SDHCI_INT_RESPONSE)
++			sdhci_uhs2_finish_command(host);
++
++		/* Caller, shdci_irq(), doesn't have to care UHS-2 command */
++		intmask &= ~SDHCI_INT_CMD_MASK;
++		mask &= SDHCI_INT_CMD_MASK;
++	}
++
++	/* Clear already-handled interrupts. */
++	sdhci_writel(host, mask, SDHCI_INT_STATUS);
++
++out:
++	return intmask;
++}
++EXPORT_SYMBOL_GPL(sdhci_uhs2_irq);
++
++static irqreturn_t sdhci_uhs2_thread_irq(int irq, void *dev_id)
++{
++	struct sdhci_host *host = dev_id;
++	struct mmc_command *cmd;
++	unsigned long flags;
++	u32 isr;
++
++	while (!sdhci_uhs2_request_done(host))
++		;
++
++	spin_lock_irqsave(&host->lock, flags);
++
++	isr = host->thread_isr;
++	host->thread_isr = 0;
++
++	cmd = host->deferred_cmd;
++	if (cmd && !sdhci_uhs2_send_command_retry(host, cmd, flags))
++		sdhci_finish_mrq(host, cmd->mrq);
++
++	spin_unlock_irqrestore(&host->lock, flags);
++
++	if (isr & (SDHCI_INT_CARD_INSERT | SDHCI_INT_CARD_REMOVE)) {
++		struct mmc_host *mmc = host->mmc;
++
++		mmc->ops->card_event(mmc);
++		mmc_detect_change(mmc, msecs_to_jiffies(200));
++	}
++
++	return IRQ_HANDLED;
++}
++
+ void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ {
+ 	struct sdhci_host *host = mmc_priv(mmc);
+diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+index 23368448ccd4..d32a8602d045 100644
+--- a/drivers/mmc/host/sdhci-uhs2.h
++++ b/drivers/mmc/host/sdhci-uhs2.h
+@@ -217,5 +217,8 @@ void sdhci_uhs2_set_power(struct sdhci_host *host, unsigned char mode,
+ 			  unsigned short vdd);
+ void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
+ void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
++void sdhci_uhs2_request(struct mmc_host *mmc, struct mmc_request *mrq);
++int sdhci_uhs2_request_atomic(struct mmc_host *mmc, struct mmc_request *mrq);
++u32 sdhci_uhs2_irq(struct sdhci_host *host, u32 intmask);
+ 
+ #endif /* __SDHCI_UHS2_H */
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 407169468927..e44ede049559 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -1268,11 +1268,12 @@ static int sdhci_external_dma_init(struct sdhci_host *host)
+ 	return ret;
+ }
+ 
+-static struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host,
+-						   struct mmc_data *data)
++struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host,
++					    struct mmc_data *data)
+ {
+ 	return data->flags & MMC_DATA_WRITE ? host->tx_chan : host->rx_chan;
+ }
++EXPORT_SYMBOL_GPL(sdhci_external_dma_channel);
+ 
+ int sdhci_external_dma_setup(struct sdhci_host *host, struct mmc_command *cmd)
+ {
+@@ -1522,7 +1523,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
+ 	sdhci_writew(host, mode, SDHCI_TRANSFER_MODE);
+ }
+ 
+-static bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)
++bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)
+ {
+ 	return (!(host->flags & SDHCI_DEVICE_DEAD) &&
+ 		((mrq->cmd && mrq->cmd->error) ||
+@@ -1530,8 +1531,9 @@ static bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq)
+ 		 (mrq->data && mrq->data->stop && mrq->data->stop->error) ||
+ 		 (host->quirks & SDHCI_QUIRK_RESET_AFTER_REQUEST)));
+ }
++EXPORT_SYMBOL_GPL(sdhci_needs_reset);
+ 
+-static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
++void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
+ {
+ 	int i;
+ 
+@@ -1551,6 +1553,7 @@ static void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq)
+ 
+ 	WARN_ON(i >= SDHCI_MAX_MRQS);
+ }
++EXPORT_SYMBOL_GPL(sdhci_set_mrq_done);
+ 
+ void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
+ {
+@@ -3103,7 +3106,56 @@ static const struct mmc_host_ops sdhci_ops = {
+  *                                                                           *
+ \*****************************************************************************/
+ 
+-static bool sdhci_request_done(struct sdhci_host *host)
++void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_request *mrq)
++{
++	struct mmc_data *data = mrq->data;
++
++	if (data && data->host_cookie == COOKIE_MAPPED) {
++		if (host->bounce_buffer) {
++			/*
++			 * On reads, copy the bounced data into the
++			 * sglist
++			 */
++			if (mmc_get_dma_dir(data) == DMA_FROM_DEVICE) {
++				unsigned int length = data->bytes_xfered;
++
++				if (length > host->bounce_buffer_size) {
++					pr_err("%s: bounce buffer is %u bytes but DMA claims to have transferred %u bytes\n",
++					       mmc_hostname(host->mmc),
++					       host->bounce_buffer_size,
++					       data->bytes_xfered);
++					/* Cap it down and continue */
++					length = host->bounce_buffer_size;
++				}
++				dma_sync_single_for_cpu(
++					host->mmc->parent,
++					host->bounce_addr,
++					host->bounce_buffer_size,
++					DMA_FROM_DEVICE);
++				sg_copy_from_buffer(data->sg,
++					data->sg_len,
++					host->bounce_buffer,
++					length);
++			} else {
++				/* No copying, just switch ownership */
++				dma_sync_single_for_cpu(
++					host->mmc->parent,
++					host->bounce_addr,
++					host->bounce_buffer_size,
++					mmc_get_dma_dir(data));
++			}
++		} else {
++			/* Unmap the raw data */
++			dma_unmap_sg(mmc_dev(host->mmc), data->sg,
++				     data->sg_len,
++				     mmc_get_dma_dir(data));
++		}
++		data->host_cookie = COOKIE_UNMAPPED;
++	}
++}
++EXPORT_SYMBOL_GPL(sdhci_request_done_dma);
++
++bool sdhci_request_done(struct sdhci_host *host)
+ {
+ 	unsigned long flags;
+ 	struct mmc_request *mrq;
+@@ -3167,48 +3219,7 @@ static bool sdhci_request_done(struct sdhci_host *host)
+ 			sdhci_set_mrq_done(host, mrq);
+ 		}
+ 
+-		if (data && data->host_cookie == COOKIE_MAPPED) {
+-			if (host->bounce_buffer) {
+-				/*
+-				 * On reads, copy the bounced data into the
+-				 * sglist
+-				 */
+-				if (mmc_get_dma_dir(data) == DMA_FROM_DEVICE) {
+-					unsigned int length = data->bytes_xfered;
+-
+-					if (length > host->bounce_buffer_size) {
+-						pr_err("%s: bounce buffer is %u bytes but DMA claims to have transferred %u bytes\n",
+-						       mmc_hostname(host->mmc),
+-						       host->bounce_buffer_size,
+-						       data->bytes_xfered);
+-						/* Cap it down and continue */
+-						length = host->bounce_buffer_size;
+-					}
+-					dma_sync_single_for_cpu(
+-						mmc_dev(host->mmc),
+-						host->bounce_addr,
+-						host->bounce_buffer_size,
+-						DMA_FROM_DEVICE);
+-					sg_copy_from_buffer(data->sg,
+-						data->sg_len,
+-						host->bounce_buffer,
+-						length);
+-				} else {
+-					/* No copying, just switch ownership */
+-					dma_sync_single_for_cpu(
+-						mmc_dev(host->mmc),
+-						host->bounce_addr,
+-						host->bounce_buffer_size,
+-						mmc_get_dma_dir(data));
+-				}
+-			} else {
+-				/* Unmap the raw data */
+-				dma_unmap_sg(mmc_dev(host->mmc), data->sg,
+-					     data->sg_len,
+-					     mmc_get_dma_dir(data));
+-			}
+-			data->host_cookie = COOKIE_UNMAPPED;
+-		}
++		sdhci_request_done_dma(host, mrq);
+ 	}
+ 
+ 	host->mrqs_done[i] = NULL;
+@@ -3222,6 +3233,7 @@ static bool sdhci_request_done(struct sdhci_host *host)
+ 
+ 	return false;
+ }
++EXPORT_SYMBOL_GPL(sdhci_request_done);
+ 
+ static void sdhci_complete_work(struct work_struct *work)
+ {
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index 1a9924e7972d..49de8fdbd7a3 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -861,8 +861,11 @@ int sdhci_external_dma_setup(struct sdhci_host *host, struct mmc_command *cmd);
+ void sdhci_external_dma_release(struct sdhci_host *host);
+ void __sdhci_external_dma_prepare_data(struct sdhci_host *host, struct mmc_command *cmd);
+ void sdhci_external_dma_pre_transfer(struct sdhci_host *host, struct mmc_command *cmd);
++struct dma_chan *sdhci_external_dma_channel(struct sdhci_host *host, struct mmc_data *data);
  #endif
- #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+ bool sdhci_manual_cmd23(struct sdhci_host *host, struct mmc_request *mrq);
++bool sdhci_needs_reset(struct sdhci_host *host, struct mmc_request *mrq);
++void sdhci_set_mrq_done(struct sdhci_host *host, struct mmc_request *mrq);
+ void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
+ void sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq);
+ void __sdhci_finish_data_common(struct sdhci_host *host);
+@@ -895,6 +898,8 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+ int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+ 				      struct mmc_ios *ios);
+ void sdhci_enable_sdio_irq(struct mmc_host *mmc, int enable);
++void sdhci_request_done_dma(struct sdhci_host *host, struct mmc_request *mrq);
++bool sdhci_request_done(struct sdhci_host *host);
+ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
+ 			   dma_addr_t addr, int len, unsigned int cmd);
  
-+	struct sd_uhs2_caps	uhs2_caps;	/* Host UHS-II capabilities */
-+
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
- 
- 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 -- 
 2.25.1
 
