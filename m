@@ -2,135 +2,168 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79914C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 06:03:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5216DC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:30:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229972AbiJSGDm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 02:03:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40524 "EHLO
+        id S231638AbiJSLa0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 07:30:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55816 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229945AbiJSGDg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 02:03:36 -0400
-Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A62985C363
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 23:03:34 -0700 (PDT)
-Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-35711e5a5ceso157912877b3.13
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 23:03:34 -0700 (PDT)
+        with ESMTP id S231730AbiJSLaE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:30:04 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13ED33471D;
+        Wed, 19 Oct 2022 04:04:33 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id r14so24679105edc.7;
+        Wed, 19 Oct 2022 04:04:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=s5DB7EnWinUCVvHnFkWiifLYJ7ZYVSrywNKSXQZJdFI=;
-        b=zVYtNmW6565ZCEXxTkDChTvQvHXVZBJgGadsGALKU3QKMGV7PrXldFeksaQiPFFwos
-         gOa5LHUXC9ENeji5ixZomlslrjXs7gRNn5sa4/rC/7oX9vcohhS7XlO8sDMJLXWscr+q
-         bF06XsYuYWzUbcYRDjzfQO7njw5hC0lUkvvqRBtzHG+VCf+kO0dojSk2HwepiWXgSYBP
-         78G6I41n+j4b5oQ86dSQb0agTuBmkZQLAXpLW2ShZuHRDidswcSNmuHVA4Q/JlRHChj1
-         CVLKFFo1MbwWbp2VHMZdc2bMjhHGPyCYYpL8L1H7itzUSN66IyZ5++j9CAcdb550Y7AK
-         nt/A==
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=+eMipZbj71SJyfQMN6L0nZo9wGi1DpZIoWLYb2uUqmQ=;
+        b=mvbStkFmdY13OoP6CfpTga5QNfbJ1VpTopjbNIiSHfJ0xenylbFj2bTPQt91W/ELDZ
+         C2Xr6DqnYXK2MjCBw8S7GYjiGmPqpBukyGoZopxdr7vI7qyMB8Gvw1VzcP81Nm890zGk
+         73cxNQSkI+dO4VhKBGcgsX3UwADNYL9aHp8mow6M0twnuXVNRIRPMzZHJgfHnlab7992
+         vFL18p/Zeqswk/Wk6GzisbCKlxr9QAY8w2wYdOI36jt9HEqKU7CpV2rdbHSVrxxIvyMU
+         sxa2GGERvu9vz6F/8WStEteb18ImQC5ZC6nCu6PPEC8zLygWoW+QwOF2JdZoVikTidf1
+         l34A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=s5DB7EnWinUCVvHnFkWiifLYJ7ZYVSrywNKSXQZJdFI=;
-        b=2bf8zXVRLhgBKmCz8ulzpmrjJcgdJUHyWqC/1uWDIExxh6yWzd2EykJCfLc87kfrLh
-         66e4SjvOTNfN64n2qlMfcLdRVN3FT8AwqSoaJWkbhu15+DKhMClKx5N/ImSoW8a7rmC3
-         /o3RhQEh7UsA0S/zpxEwR7DYnUz0UggfLVJ7il+IFAQUC4Gdur5dRWkpMFJHfrBC4HhU
-         pVKcNE53rzq6RQpCmXdDjMq9WhkstYB/SKDUFKKSGrzqsov0EtZ81X62bs0RQ2jSpwHN
-         0+aQieaEySi0Vht2nyCYilcjGQsObMXD9ey1jA1I95UghrWTWQWk6dUdCRGS4NgqBgoR
-         rDJg==
-X-Gm-Message-State: ACrzQf3j5k2+ipx2UXX7g1nTfEW6Vcv82jtsUJycvcnwopysUhLcaD5m
-        PbEQBlVyTDmKGHO/Imi9pK9v2hq2RCfamYFi4Qw2bA==
-X-Google-Smtp-Source: AMsMyM6pJW+QkixNplXOsyqax6puLF7anBgDILMTra0UqNAILCFqM+RlWPnUCA7ntqHj/xXFKBs5j8LsVWWer2PZbHY=
-X-Received: by 2002:a81:4881:0:b0:361:5080:91fe with SMTP id
- v123-20020a814881000000b00361508091femr5409889ywa.485.1666159413839; Tue, 18
- Oct 2022 23:03:33 -0700 (PDT)
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=+eMipZbj71SJyfQMN6L0nZo9wGi1DpZIoWLYb2uUqmQ=;
+        b=vIHCIlNRVsJAFBztHXRTtDP5m+tLc4Z9rhPEw1bcKbTuAko5E/xbl2AddYao10/zDb
+         9WG8Ox8R+GDWzQ0gCKw0tBqCIolFzuLfKmCIdyi3kIOkV53BzFppTYjUc0Iy+cF4kBK5
+         HuYQWMFzttXTCeyE+CSb8YfhLWELs1nX2yHPuWcE0FQS7feQBMBNs0hf1Bc9m8xhM0DE
+         caMqePrqakpzBetdgpDqRB2u4uqiGFSmMZFYA0AuRML9QsMgtEiMtjryDnoUtnBPTx1Q
+         6IyG8y7uAdIkIzMbA296CVNIZDfVs3iIV9BCDkA7aDMLc3VC0fyXWJ1TL6RABzORknuQ
+         XJDg==
+X-Gm-Message-State: ACrzQf1GebWiXxdOczhwaB37OEvotW21JOUMUoit9XcAGWERwrTSK02x
+        P4ocFocK4jCbntXVLMtKlR1ZVWYPHXKXTpnMHSw=
+X-Google-Smtp-Source: AMsMyM6HMAzAjbn7itQW+UWK4dinjv82ntmdwV5hnfObluMJyEWkMPPNR4rBCnf4nIeyVMHU5xLKrjmJ20KA9OvkQvg=
+X-Received: by 2002:a50:fb0f:0:b0:458:df03:c3aa with SMTP id
+ d15-20020a50fb0f000000b00458df03c3aamr6717480edq.83.1666177375029; Wed, 19
+ Oct 2022 04:02:55 -0700 (PDT)
 MIME-Version: 1.0
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org> <Y0hr9XTGAg8Q6K6y@google.com>
-In-Reply-To: <Y0hr9XTGAg8Q6K6y@google.com>
-From:   Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Date:   Wed, 19 Oct 2022 09:03:22 +0300
-Message-ID: <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
-Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
-To:     Matthias Kaehlcke <mka@chromium.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
+References: <20221014114601.15594-1-victor.shih@genesyslogic.com.tw> <CAPDyKFr4je2WhF8oQW1CpQD+2dRZhn+5JB0bLqHjLDTOiao58g@mail.gmail.com>
+In-Reply-To: <CAPDyKFr4je2WhF8oQW1CpQD+2dRZhn+5JB0bLqHjLDTOiao58g@mail.gmail.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Wed, 19 Oct 2022 19:02:42 +0800
+Message-ID: <CAK00qKD3XqnwSkc3rDQ67zMizPLo3Qt8in4S-GNXAvuNcMsY-g@mail.gmail.com>
+Subject: Re: [PATCH V5 00/26] Add support UHS-II for GL9755
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ho,
+Hi, Ulf
 
-On Thu, 13 Oct 2022 at 22:50, Matthias Kaehlcke <mka@chromium.org> wrote:
-> Do you still plan to refresh this series?
+Ulf Hansson <ulf.hansson@linaro.org> =E6=96=BC 2022=E5=B9=B410=E6=9C=8817=
+=E6=97=A5 =E9=80=B1=E4=B8=80 =E6=99=9A=E4=B8=8A7:32=E5=AF=AB=E9=81=93=EF=BC=
+=9A
+
 >
-> I know there have been multiple attempts to get something similar
-> landed in the past 10 year or so. Your series didn't seem to get
-> much pushback from maintainers, might be worth sending a refresh :)
+> Hi Victor,
+>
+> On Fri, 14 Oct 2022 at 13:47, Victor Shih <victorshihgli@gmail.com> wrote=
+:
+> >
+> > Summary
+> > =3D=3D=3D=3D=3D=3D=3D
+> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Se=
+quence
+> >   [2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence=
+[2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include=
+ Section
+> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting R=
+egister
+> >   Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Leg=
+acy SD
+> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 P=
+acket
+> >   Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-=
+II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2])=
+.
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the origina=
+l
+> >   interrupt registers.
+> >
+> > Patch structure
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > patch#1-#6:  for core
+> > patch#7-#25: for sdhci
+> > patch#26:    for GL9755
+> >
+> > Changes in v5 (Oct. 14, 2022)
+> > * rebased to linux-v6.0.
+>
+> You sent a v5 on Oct 14 and then this one (v5 again) today. Why? What
+> is the difference?
 
-Yes, I hope to return to it eventually. I just had no time for it lately.
+I left out two files in the October 14th edition, so I added it back
+in the October 17th edition, but I forgot to change the date of the
+cover-letter.
 
-> On Wed, Oct 06, 2021 at 06:53:52AM +0300, Dmitry Baryshkov wrote:
-> > This is a proposed power sequencer subsystem. This is a
-> > generification of the MMC pwrseq code. The subsystem tries to abstract
-> > the idea of complex power-up/power-down/reset of the devices.
-> >
-> > The primary set of devices that promted me to create this patchset is
-> > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> > or serial + SDIO interfaces (older generations) or on serial+PCIe (newer
-> > generations).  They require a set of external voltage regulators to be
-> > powered on and (some of them) have separate WiFi and Bluetooth enable
-> > GPIOs.
-> >
-> > The major drawback for now is the lack of proper PCIe integration
-> > At this moment support for PCIe is hacked up to be able to test the
-> > PCIe part of qca6390. Proper PCIe support would require automatically
-> > powering up the devices before the scan basing on the proper device
-> > structure in the device tree. This two last patches are noted as WIP and
-> > are included into the patchset for the purpose of testing WiFi on newer
-> > chips (like qca6390/qca6391).
-> >
-> > Changes since RFC v2:
-> >  - Add documentation for the pwrseq code. Document data structures,
-> >    macros and exported functions.
-> >  - Export of_pwrseq_xlate_onecell()
-> >  - Add separate pwrseq_set_drvdata() function to follow the typical API
-> >    design
-> >  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
-> >  - Moved code to handle old mmc-pwrseq binding to the MMC patch
-> >  - Split of_pwrseq_xlate_onecell() support to a separate patch
-> >
-> > Changes since RFC v1:
-> >  - Provider pwrseq fallback support
-> >  - Implement fallback support in pwrseq_qca.
-> >  - Mmove susclk handling to pwrseq_qca.
-> >  - Significantly simplify hci_qca.c changes, by dropping all legacy
-> >    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
-> >    parts of the chip.
-> >
-> >
-> >
-> >
-> > _______________________________________________
-> > ath10k mailing list
-> > ath10k@lists.infradead.org
-> > http://lists.infradead.org/mailman/listinfo/ath10k
+>
+> Moreover, as v6.1-rc1 is now available, my next branch will be based
+> on that. Can you please rebase the series on top of my next branch -
+> or at least use the latest available "rc", when you test and submit?
 
+Ok, I will follow your advice.
+I will rebase to the linux-v6.1-rc1 in your next branch.
 
+>
+> > * according to the guidance and overall architecture provided
+> >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
+> >   UHS-2 Core function based on the patches of the [V4,0/6]
+> >   Preparations to support SD UHS-II cards[5].
+> > * according to the guidance and comments provided by
+> >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
+> >   the UHS-2 Host function based on the patches of the
+> >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
+> > * implement the necessary function to let the UHS-2 Core/Host
+> >   work properly.
+> > * fix most of checkpatch warnings/errors
+> >
+> > Reference
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
+> > [2] SD Host Controller Simplified Specification 4.20
+> > [3] UHS-II Simplified Addendum 1.02
+> > [4] https://patchwork.kernel.org/project/linux-mmc/cover/20201106022726=
+.19831-1-takahiro.akashi@linaro.org/
+> > [5] https://patchwork.kernel.org/project/linux-mmc/cover/20220418115833=
+.10738-1-jasonlai.genesyslogic@gmail.com/
+>
+> Another general question, I assume you intend to move this forward
+> instead of Jason Lai, right?
 
--- 
-With best wishes
-Dmitry
+Yes. Please let me know if I have any mistakes.
+
+>
+> Kind regards
+> Uffe
+
+Thanks, Victor Shih
