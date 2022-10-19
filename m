@@ -2,116 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 670AAC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 19:31:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD9A3C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 21:21:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230474AbiJSTbD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 15:31:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43904 "EHLO
+        id S230261AbiJSVVG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 17:21:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230267AbiJSTbC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 15:31:02 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C197689821;
-        Wed, 19 Oct 2022 12:31:01 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5D94961846;
-        Wed, 19 Oct 2022 19:31:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 29522C433C1;
-        Wed, 19 Oct 2022 19:30:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666207860;
-        bh=lxqUO53FTMvnN5iVWeV2mFzjN5pKJ/WSgIlyQR50yL0=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=sDfN20lFFoN3iMd2jYr9NaoAv8Ue1YUJhG0Mu3KYeqax98nUawQCjrhOrBUWFJo1T
-         sk2CDGFquDA1zYisqL/zhh53aa3atOCiiQjiUGvjdtt4Y0dqvEaTJWTJGFf2QOaQry
-         NnMfgBSymaXoxzI/c+HzRO2FqJPzhht5/IgcKD3UEx/uA4QBwBA4r+N10RvXSQOUjM
-         EscP3Iu9Yj7V3BRtQ94CzGSF9vOslMIHMFEW9uCzBgsNSZa+R+LKE9FadKQIyay2+O
-         e4IrH+zfa9FYKvoSQc/Z0hIdAJeSAj195yCaQfXaeCpunY+q8DJe2LsGbDsuocCRtH
-         79CVV8SlsbD5A==
-Date:   Wed, 19 Oct 2022 21:30:57 +0200
-From:   Wolfram Sang <wsa@kernel.org>
+        with ESMTP id S229803AbiJSVVF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 17:21:05 -0400
+X-Greylist: delayed 450 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 19 Oct 2022 14:21:03 PDT
+Received: from smtp.smtpout.orange.fr (smtp-26.smtpout.orange.fr [80.12.242.26])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 99C4F189C2E
+        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 14:21:03 -0700 (PDT)
+Received: from sopl295.home ([109.220.248.156])
+        by smtp.orange.fr with ESMTPA
+        id lGNMo1N0Kg7y2lGNMocFLS; Wed, 19 Oct 2022 23:13:31 +0200
+X-ME-Helo: sopl295.home
+X-ME-Auth: amFyem1pay5yb2JlcnRAb3JhbmdlLmZy
+X-ME-Date: Wed, 19 Oct 2022 23:13:31 +0200
+X-ME-IP: 109.220.248.156
+From:   Robert Jarzmik <jarzmik.robert@orange.fr>
 To:     Arnd Bergmann <arnd@kernel.org>
 Cc:     linux-arm-kernel@lists.infradead.org,
-        Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org,
-        Arnd Bergmann <arnd@arndb.de>, linux-omap@vger.kernel.org,
-        Lee Jones <lee@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-usb@vger.kernel.org
-Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
-Message-ID: <Y1BQcTerTBNXRBfu@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
-        Arnd Bergmann <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org,
-        Arnd Bergmann <arnd@arndb.de>, linux-omap@vger.kernel.org,
-        Lee Jones <lee@kernel.org>, Ulf Hansson <ulf.hansson@linaro.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-i2c@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-usb@vger.kernel.org
-References: <20221019144119.3848027-1-arnd@kernel.org>
- <20221019150410.3851944-1-arnd@kernel.org>
- <20221019150410.3851944-13-arnd@kernel.org>
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        stern@rowland.harvard.edu, alexandre.belloni@bootlin.com,
+        brgl@bgdev.pl, damien.lemoal@opensource.wdc.com,
+        dmitry.torokhov@gmail.com, linux@dominikbrodowski.net,
+        balbi@kernel.org, gregkh@linuxfoundation.org, deller@gmx.de,
+        perex@perex.cz, jingoohan1@gmail.com, lee@kernel.org,
+        kernel@wantstofly.org, lgirdwood@gmail.com,
+        linus.walleij@linaro.org, marek.vasut@gmail.com,
+        broonie@kernel.org, mkpetch@internode.on.net,
+        miquel.raynal@bootlin.com, lost.distance@yahoo.com,
+        philipp.zabel@gmail.com, linux@armlinux.org.uk, sre@kernel.org,
+        slapin@ossfans.org, s.shtylyov@omp.ru, sudipm.mukherjee@gmail.com,
+        tiwai@suse.com, ulf.hansson@linaro.org, vigneshr@ti.com,
+        viresh.kumar@linaro.org, wsa+renesas@sang-engineering.com,
+        linux-pm@vger.kernel.org, linux-ide@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-input@vger.kernel.org,
+        patches@opensource.cirrus.com, linux-leds@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-rtc@vger.kernel.org,
+        linux-usb@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org
+Subject: Re: [PATCH 00/30] ARM: pxa: remove all unused boards&drivers
+References: <20221019161831.3864786-1-arnd@kernel.org>
+X-URL:  http://belgarath.falguerolles.org/
+Date:   Wed, 19 Oct 2022 23:13:20 +0200
+In-Reply-To: <20221019161831.3864786-1-arnd@kernel.org> (Arnd Bergmann's
+        message of "Wed, 19 Oct 2022 18:17:53 +0200")
+Message-ID: <m2sfjjh5zj.fsf@sopl295.home>
+User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/28.1 (darwin)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="GlgBPxotGBFrEguU"
-Content-Disposition: inline
-In-Reply-To: <20221019150410.3851944-13-arnd@kernel.org>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Arnd Bergmann <arnd@kernel.org> writes:
 
---GlgBPxotGBFrEguU
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Wed, Oct 19, 2022 at 05:03:35PM +0200, Arnd Bergmann wrote:
 > From: Arnd Bergmann <arnd@arndb.de>
->=20
-> All board support that was marked as 'unused' earlier can
-> now be removed, leaving the five machines that that still
-> had someone using them in 2022, or that are supported in
-> qemu.
->=20
-> Cc: Aaro Koskinen <aaro.koskinen@iki.fi>
-> Cc: Janusz Krzysztofik <jmkrzyszt@gmail.com>
-> Cc: Tony Lindgren <tony@atomide.com>
-> Cc: linux-omap@vger.kernel.org
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+...zip...
 
-Acked-by: Wolfram Sang <wsa@kernel.org>
+> A good number of drivers become impossible to select after this, so
+> each of these also get dropped. I'm including the driver patches in the
+> series here and can either merge them through the soc tree, or they
+> can get picked up by the individual subsystem maintainers. Since both
+> the platform and the drivers get removed, the order should not matter.
+This part is a bit ... bothering.
+I at least identified these :
+>  delete mode 100644 drivers/input/touchscreen/wm9705.c
+>  delete mode 100644 drivers/input/touchscreen/wm9712.c
+>  delete mode 100644 drivers/input/touchscreen/wm9713.c
+>  delete mode 100644 drivers/input/touchscreen/wm97xx-core.c
+>  delete mode 100644 drivers/mfd/wm97xx-core.c
+>  delete mode 100644 sound/ac97/bus.c
+>  delete mode 100644 sound/ac97/codec.c
+>  delete mode 100644 sound/ac97/snd_ac97_compat.c
 
+For the existing platforms working with devicetree support (mioa701 for
+example), the wm9713 was properly used, providing both sound support and input
+touchscreen.
+So was the a97 part, providing a framework to make the wm9713 work.
 
---GlgBPxotGBFrEguU
-Content-Type: application/pgp-signature; name="signature.asc"
+So I'm wondering how the choice to chop these drivers was done, and it is
+necessary to remove them. If so, maybe pxa support in the kernel should be
+removed all together, as people playing with it loose part of the working DT
+platforms they had.
 
------BEGIN PGP SIGNATURE-----
+As for the removal of defconfigs and arch-pxa, sure, this was PXA's destiny.
 
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmNQUHEACgkQFA3kzBSg
-KbbYdw//QXhm8BHTPd6JLEkbUsO6b7c71ADV97GkHPEhFYPDntiQuCq5RylfRwvD
-MzZAW2/386H1R2Ll4zYM5Zz15/SWt0AoCzQkXJyunIGBGnsWjBCuDPYbMEj+sMtW
-rdfbj10dmVHPqKmTPwl0sgawyvj7PxYF/pOUgCLIkYAhxcU+i0cm5aWa5hVZvTDt
-FhPnTRIKhhENOqJPFfZAg1VtCmc8QhjaqEGcoyZeEjOLqJL1boaLFLEC73oRWCMU
-6z4AFDeLksergb7wY9XxQnxgyeHS1jJadSQWuGgUfSi+OntWO7dGEywv878WwMAr
-c/XPgzqBIJX9P9lo/uJgcMUx5vPpLgSExfrqF9Pz8A5umWQCNnbK0dP8I6RNTS8j
-YwyTnitP3vmHVcW18VUS8Qyt90pBQix5f1nLBocsavLcCucgYXKZ0zeI3fBOVG4D
-Yr34Svz3RTKP/AZ8s1PMC3V00pdpzFEWwbTku3NT0nAChVcfseMzjYxBd6y4M/2t
-+gAkVlSK6zkCEwXZIXrWIub+3ubjPG539yItu/EmVIS52FrzokFo2i0bgQyPcfGn
-YBe6FZ/IuAz5hTKgctlBQ6RG/lbuZYcs6LwYIbQEIU8Mw0vayaYsrA6Hg/ePQSvD
-/jyH5WnL9WFH6LsbO40MQRmU/8NzRWt9lbUJqCs5/yTIlK2x99Y=
-=NdiZ
------END PGP SIGNATURE-----
+Cheers.
 
---GlgBPxotGBFrEguU--
+--
+Robert
+
+PS: If this mail is sent twice, sorry in advance, my mailer is a bad mood
+lately.
