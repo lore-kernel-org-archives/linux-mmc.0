@@ -2,168 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5216DC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:30:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B3BAC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:32:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231638AbiJSLa0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 07:30:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55816 "EHLO
+        id S231878AbiJSLcv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 07:32:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47546 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231730AbiJSLaE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:30:04 -0400
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13ED33471D;
-        Wed, 19 Oct 2022 04:04:33 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id r14so24679105edc.7;
-        Wed, 19 Oct 2022 04:04:33 -0700 (PDT)
+        with ESMTP id S230384AbiJSLcf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:32:35 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56F181BB94A;
+        Wed, 19 Oct 2022 04:08:49 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id h2so9558909plb.2;
+        Wed, 19 Oct 2022 04:08:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=+eMipZbj71SJyfQMN6L0nZo9wGi1DpZIoWLYb2uUqmQ=;
-        b=mvbStkFmdY13OoP6CfpTga5QNfbJ1VpTopjbNIiSHfJ0xenylbFj2bTPQt91W/ELDZ
-         C2Xr6DqnYXK2MjCBw8S7GYjiGmPqpBukyGoZopxdr7vI7qyMB8Gvw1VzcP81Nm890zGk
-         73cxNQSkI+dO4VhKBGcgsX3UwADNYL9aHp8mow6M0twnuXVNRIRPMzZHJgfHnlab7992
-         vFL18p/Zeqswk/Wk6GzisbCKlxr9QAY8w2wYdOI36jt9HEqKU7CpV2rdbHSVrxxIvyMU
-         sxa2GGERvu9vz6F/8WStEteb18ImQC5ZC6nCu6PPEC8zLygWoW+QwOF2JdZoVikTidf1
-         l34A==
+        bh=x0jM/mUgD0JOQwQmZNoiPwNFGZczmcozFW6ZNuUqVKE=;
+        b=qVt1Rs8rcWdXExyvaRr9F805wEuRAdpZb1glKhjuw9qbyZODXMk9ZTzPCUPtpq3H2k
+         XWRcPkMX3B+SNM5u5WfoDlOQsOrom4Fn22YA/LpPEITtRLrVz3oVHzgq2DtTNymNncwg
+         TAzXENliIo/JN+/uyrLTwR6JfLE9kbpFo9bS0qtYs8qcuXvSwyPRILSYulvbmsFCLJ0T
+         XzSx4hxujM6itO9TnFVmW0YpbaFRpoIkhCLtGmlIaACznPJ+aaesk631i4DSA5qOVEVB
+         69VakORCGFlN/GuU4Wd6bcXgg3Oxx/2eNig88QLTZe/kULFTpaW3nH8TcYAOW1LIvjhI
+         /KLw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=+eMipZbj71SJyfQMN6L0nZo9wGi1DpZIoWLYb2uUqmQ=;
-        b=vIHCIlNRVsJAFBztHXRTtDP5m+tLc4Z9rhPEw1bcKbTuAko5E/xbl2AddYao10/zDb
-         9WG8Ox8R+GDWzQ0gCKw0tBqCIolFzuLfKmCIdyi3kIOkV53BzFppTYjUc0Iy+cF4kBK5
-         HuYQWMFzttXTCeyE+CSb8YfhLWELs1nX2yHPuWcE0FQS7feQBMBNs0hf1Bc9m8xhM0DE
-         caMqePrqakpzBetdgpDqRB2u4uqiGFSmMZFYA0AuRML9QsMgtEiMtjryDnoUtnBPTx1Q
-         6IyG8y7uAdIkIzMbA296CVNIZDfVs3iIV9BCDkA7aDMLc3VC0fyXWJ1TL6RABzORknuQ
-         XJDg==
-X-Gm-Message-State: ACrzQf1GebWiXxdOczhwaB37OEvotW21JOUMUoit9XcAGWERwrTSK02x
-        P4ocFocK4jCbntXVLMtKlR1ZVWYPHXKXTpnMHSw=
-X-Google-Smtp-Source: AMsMyM6HMAzAjbn7itQW+UWK4dinjv82ntmdwV5hnfObluMJyEWkMPPNR4rBCnf4nIeyVMHU5xLKrjmJ20KA9OvkQvg=
-X-Received: by 2002:a50:fb0f:0:b0:458:df03:c3aa with SMTP id
- d15-20020a50fb0f000000b00458df03c3aamr6717480edq.83.1666177375029; Wed, 19
- Oct 2022 04:02:55 -0700 (PDT)
-MIME-Version: 1.0
-References: <20221014114601.15594-1-victor.shih@genesyslogic.com.tw> <CAPDyKFr4je2WhF8oQW1CpQD+2dRZhn+5JB0bLqHjLDTOiao58g@mail.gmail.com>
-In-Reply-To: <CAPDyKFr4je2WhF8oQW1CpQD+2dRZhn+5JB0bLqHjLDTOiao58g@mail.gmail.com>
+        bh=x0jM/mUgD0JOQwQmZNoiPwNFGZczmcozFW6ZNuUqVKE=;
+        b=AOGXYTr6ZS6BAXjTjH+kCh6s00mOKi2d2MQaU4QBMiNoXShkyEnJLTtiYUbdww3qov
+         V0HOEQEpiDWnzw6fRhkYBPTNeK+g/jeRJJpm6dZ2DCgYge41jgmFsEm0zbwiND6c8eeW
+         KSkDLKnuhUcIR3wTNTaCXJUaEabY/jMDlLj4oDPgEMeRFeDl06DvLUE+x7LkYPf+QaMA
+         ZEtbwNYWrCxqmGOh9Wtz8kRonrVz6iA+mSVJnmyKHtBiL7ibZ1qvmHgcAfVBzXsyoGIX
+         Cdjts9CrXMGtJUynK1Z0SUc7AdeLbtXFfbbhrLgjgke89Aom12bq4wUbYqME3OkAtTFr
+         qJdQ==
+X-Gm-Message-State: ACrzQf1oQXvu5GpXVVwUPilbvrUARGtFM/bxCixh4E5jUsuAmeojV8eI
+        h0cmXVwLugPtYx2gNsffuR8=
+X-Google-Smtp-Source: AMsMyM67naJ6SV8zUx4iz93Fs9P9bWuVp+kVYWWlVnbi+KuZepmzArnZy05QBrIU46P0iVCjo0/WhQ==
+X-Received: by 2002:a17:90a:8c97:b0:20d:a1a2:bfda with SMTP id b23-20020a17090a8c9700b0020da1a2bfdamr9122300pjo.234.1666177619120;
+        Wed, 19 Oct 2022 04:06:59 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e258-8c34-821b-9613-557f-bd8d.emome-ip6.hinet.net. [2001:b400:e258:8c34:821b:9613:557f:bd8d])
+        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.06.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 19 Oct 2022 04:06:58 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Wed, 19 Oct 2022 19:02:42 +0800
-Message-ID: <CAK00qKD3XqnwSkc3rDQ67zMizPLo3Qt8in4S-GNXAvuNcMsY-g@mail.gmail.com>
-Subject: Re: [PATCH V5 00/26] Add support UHS-II for GL9755
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V5 01/26] mmc: core: Cleanup printing of speed mode at card insertion
+Date:   Wed, 19 Oct 2022 19:06:22 +0800
+Message-Id: <20221019110647.11076-2-victor.shih@genesyslogic.com.tw>
+X-Mailer: git-send-email 2.25.1
+In-Reply-To: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
+References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Ulf
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-Ulf Hansson <ulf.hansson@linaro.org> =E6=96=BC 2022=E5=B9=B410=E6=9C=8817=
-=E6=97=A5 =E9=80=B1=E4=B8=80 =E6=99=9A=E4=B8=8A7:32=E5=AF=AB=E9=81=93=EF=BC=
-=9A
+The current print of the bus speed mode in mmc_add_card() has grown over
+the years and is now difficult to parse. Let's clean up the code and also
+take the opportunity to properly announce "DDR" for eMMCs as
+"high speed DDR", which is according to the eMMC spec.
 
->
-> Hi Victor,
->
-> On Fri, 14 Oct 2022 at 13:47, Victor Shih <victorshihgli@gmail.com> wrote=
-:
-> >
-> > Summary
-> > =3D=3D=3D=3D=3D=3D=3D
-> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> >
-> > About UHS-II, roughly deal with the following three parts:
-> > 1) A UHS-II detection and initialization:
-> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Se=
-quence
-> >   [2]).
-> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence=
-[2]).
-> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include=
- Section
-> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting R=
-egister
-> >   Setup Sequence.
-> >
-> > 2) Send Legacy SD command through SD-TRAN
-> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Leg=
-acy SD
-> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 P=
-acket
-> >   Types and Format Overview[3]).
-> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-=
-II
-> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2])=
-.
-> >
-> > 3) UHS-II Interrupt
-> > - Except for UHS-II error interrupts, most interrupts share the origina=
-l
-> >   interrupt registers.
-> >
-> > Patch structure
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > patch#1-#6:  for core
-> > patch#7-#25: for sdhci
-> > patch#26:    for GL9755
-> >
-> > Changes in v5 (Oct. 14, 2022)
-> > * rebased to linux-v6.0.
->
-> You sent a v5 on Oct 14 and then this one (v5 again) today. Why? What
-> is the difference?
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/bus.c | 36 ++++++++++++++++++++----------------
+ 1 file changed, 20 insertions(+), 16 deletions(-)
 
-I left out two files in the October 14th edition, so I added it back
-in the October 17th edition, but I forgot to change the date of the
-cover-letter.
+diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+index d8762fa3d5cd..088ec34299c8 100644
+--- a/drivers/mmc/core/bus.c
++++ b/drivers/mmc/core/bus.c
+@@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+ {
+ 	int ret;
+ 	const char *type;
++	const char *speed_mode = "";
+ 	const char *uhs_bus_speed_mode = "";
+ 	static const char *const uhs_speeds[] = {
+ 		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+@@ -337,27 +338,30 @@ int mmc_add_card(struct mmc_card *card)
+ 		break;
+ 	}
+ 
++	if (mmc_card_hs(card))
++		speed_mode = "high speed ";
++	else if (mmc_card_uhs(card))
++		speed_mode = "ultra high speed ";
++	else if	(mmc_card_ddr52(card))
++		speed_mode = "high speed DDR ";
++	else if (mmc_card_hs200(card))
++		speed_mode = "HS200 ";
++	else if (mmc_card_hs400es(card))
++		speed_mode = "HS400 Enhanced strobe ";
++	else if (mmc_card_hs400(card))
++		speed_mode = "HS400 ";
++
+ 	if (mmc_card_uhs(card) &&
+ 		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+ 		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+ 
+-	if (mmc_host_is_spi(card->host)) {
+-		pr_info("%s: new %s%s%s card on SPI\n",
+-			mmc_hostname(card->host),
+-			mmc_card_hs(card) ? "high speed " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
+-			type);
+-	} else {
+-		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+-			mmc_hostname(card->host),
+-			mmc_card_uhs(card) ? "ultra high speed " :
+-			(mmc_card_hs(card) ? "high speed " : ""),
+-			mmc_card_hs400(card) ? "HS400 " :
+-			(mmc_card_hs200(card) ? "HS200 " : ""),
+-			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+-			mmc_card_ddr52(card) ? "DDR " : "",
++	if (mmc_host_is_spi(card->host))
++		pr_info("%s: new %s%s card on SPI\n",
++			mmc_hostname(card->host), speed_mode, type);
++	else
++		pr_info("%s: new %s%s%s card at address %04x\n",
++			mmc_hostname(card->host), speed_mode,
+ 			uhs_bus_speed_mode, type, card->rca);
+-	}
+ 
+ #ifdef CONFIG_DEBUG_FS
+ 	mmc_add_card_debugfs(card);
+-- 
+2.25.1
 
->
-> Moreover, as v6.1-rc1 is now available, my next branch will be based
-> on that. Can you please rebase the series on top of my next branch -
-> or at least use the latest available "rc", when you test and submit?
-
-Ok, I will follow your advice.
-I will rebase to the linux-v6.1-rc1 in your next branch.
-
->
-> > * according to the guidance and overall architecture provided
-> >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
-> >   UHS-2 Core function based on the patches of the [V4,0/6]
-> >   Preparations to support SD UHS-II cards[5].
-> > * according to the guidance and comments provided by
-> >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
-> >   the UHS-2 Host function based on the patches of the
-> >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
-> > * implement the necessary function to let the UHS-2 Core/Host
-> >   work properly.
-> > * fix most of checkpatch warnings/errors
-> >
-> > Reference
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
-> > [2] SD Host Controller Simplified Specification 4.20
-> > [3] UHS-II Simplified Addendum 1.02
-> > [4] https://patchwork.kernel.org/project/linux-mmc/cover/20201106022726=
-.19831-1-takahiro.akashi@linaro.org/
-> > [5] https://patchwork.kernel.org/project/linux-mmc/cover/20220418115833=
-.10738-1-jasonlai.genesyslogic@gmail.com/
->
-> Another general question, I assume you intend to move this forward
-> instead of Jason Lai, right?
-
-Yes. Please let me know if I have any mistakes.
-
->
-> Kind regards
-> Uffe
-
-Thanks, Victor Shih
