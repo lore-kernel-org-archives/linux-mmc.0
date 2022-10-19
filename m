@@ -2,88 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36915C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Oct 2022 22:36:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82C6CC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 02:09:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229736AbiJRWgG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Oct 2022 18:36:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39902 "EHLO
+        id S229891AbiJSCJr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Oct 2022 22:09:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44406 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229612AbiJRWgF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 18:36:05 -0400
-Received: from smtpcmd0986.aruba.it (smtpcmd0986.aruba.it [62.149.156.86])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id D0E0FD03A6
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Oct 2022 15:36:02 -0700 (PDT)
-Received: from [192.168.50.220] ([146.241.87.206])
-        by Aruba Outgoing Smtp  with ESMTPSA
-        id kvBoovvaFaWj1kvBooEOsQ; Wed, 19 Oct 2022 00:36:01 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=aruba.it; s=a1;
-        t=1666132561; bh=luzvlvgLF0QVUwO0gT+OoCdQWZnYIwCJYht0pOjIZ3U=;
-        h=Date:MIME-Version:Subject:To:From:Content-Type;
-        b=dSUdRnUFi0Crty2pYHbqT/DSo4YUVoudW7NGYNWRPptQ30prDF4Ez61lAul/r/fkJ
-         GC5EJhNKQwRMchylAa0XX2Bq63Jhyj1n3uI2H1wj/2HcCflMHet7N0hIzC8sLh5K1a
-         +QixalwmxG2+EwDw6OFGoXStRtXobeohoJeyFsV49caURRoJemHUn9+XhgZ69sF+fC
-         FMqzn2cRohNqN8MIwbEuq/v+nxRRrBgRrOlnmM5YirOTF3IFSoXBSQ/fLiMyFpZddq
-         3eu7pAHjGK+kTcuDn5vuTFPOUD40hIMPbbYKDMzzFfZLjj19PIIc5gbCbBBtRoolyV
-         2NaThyRjN/a1g==
-Message-ID: <ac5c75e0-2921-84ef-90c3-93e526358d7c@benettiengineering.com>
-Date:   Wed, 19 Oct 2022 00:36:00 +0200
+        with ESMTP id S229489AbiJSCJp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Oct 2022 22:09:45 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1492711C39;
+        Tue, 18 Oct 2022 19:09:44 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id f37so25739342lfv.8;
+        Tue, 18 Oct 2022 19:09:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=mmCTinY52KbZt+uBCZCpAheaWizV9m369exbq9S3d4w=;
+        b=gdhqay8/dHKxwC9B0+Gq2upmNvuQpQSoFmlmmE6+AFnD+6LDujmGDOaSiIfwlW/e9f
+         jZXa9ll//JxZiv1dCr3f4mBDKd1tvYyYKTptL+zw/bWIK+Lj7OKD7XmA+2IRb2Kztnjp
+         9kMSFj8E/6XjCisAG0CBckFcHdh8+F8NzIA/hzrtQm4454pigZoUWuNnj0mp+PE+am2I
+         9/gb67w4ubBF6oEEcXlduBuKwRjawHKPjgC+uIUYoSVbCSLhdxhPuSWr6dQf+lJ+5BTA
+         E+mPIec7tXOhtvZgF7VSMWYu/ZWHIUqn49515hgyUqL3laRu7YLLAzRl5rgrYXNNdyw4
+         OJDA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=mmCTinY52KbZt+uBCZCpAheaWizV9m369exbq9S3d4w=;
+        b=XrdwkJKoiyy+33wYvqj7l4JeQBdLqVBLPYbd7uMu14dxy/smFvU3fuG4kKjf9RRyQU
+         GDNpBxIx4Bfa4EBJWjTg+YiOnNyNZMY74yfL0dNQAqB1Qlmt3oLjarrxVKebKclwjYcu
+         XK1K7LOnrURI9+4ljf5vK0V/Re7ZIdRj0IX/YTJlRQr1OVr5NvqHAxyN6zcPGe7XNDIC
+         XglVkFzxvxlZY8S8SgM29rAZ7SznGFxD8vQEfdEH38JEj49sUOfJBUi86B9jotAsKhQI
+         dVibDkY7VikaQPuAiiKBG2TE468QUsW/O3S0n/peaEVdsx9XPkf5mSRbqhvzi7v/QOLk
+         hNXg==
+X-Gm-Message-State: ACrzQf3Q7k7YSzBNYpBVx/3Fy9xLosYJXAPyP+SPmeGfnddsyP97/hSq
+        rsL8JF2ay/itZ4lPUU1lsuRKsDCrSqaNjfGMRCM=
+X-Google-Smtp-Source: AMsMyM4tf12B5v3IjC3VTEM+aiTPw1NUqKiGuQkPbINKNLy/Y112LaJmzi7Czca/tEztlgUJvdBL83PykKVM24Fwa5c=
+X-Received: by 2002:a05:6512:1586:b0:498:fa29:35ec with SMTP id
+ bp6-20020a056512158600b00498fa2935ecmr2084247lfb.641.1666145382080; Tue, 18
+ Oct 2022 19:09:42 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 1/5] clk: imx: imxrt1050: fix IMXRT1050_CLK_LCDIF_APB
- offsets
-Content-Language: en-US
-To:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Cc:     Stephen Boyd <sboyd@kernel.org>, Haibo Chen <haibo.chen@nxp.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jesse T <mr.bossman075@gmail.com>
-References: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
-From:   Giulio Benetti <giulio.benetti@benettiengineering.com>
-In-Reply-To: <20221017235602.86250-1-giulio.benetti@benettiengineering.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4xfOrIqwcb7/+eOP2FY7EKspVzfwUbtM756/UiDbnbjXc52sKwXx1avxmGQAPGFy7tsJypcnBnEyow6xb7ccR38m69Kt67ZKk+OE1RyIbFR8IELk59oCPu
- s51DqBg+n0VRDLG0SeI+/qmyT60QBmYWgkvxza+soxLIsEc0BMqM+QE1LmajxHiDbhpvwDaQUnWUO8DuM6dDvz8E5NHpcva0fvnDrp52WhykFnQBsQgsYhhR
- cNeYfrFdxRiSO7uk+d6zTYq0Yhzp8OS7n9wgVPheVzPX65nvtqcuNWcbcZBSkAsBzaz1aBwCrL719VglAJLsDKsEoOQBM/4go3sT64ssMKvybYcetGrp2VDV
- biQy0DpKM16tWe00D6WOkYyQpJFV3U3vkmgA2f0j9wpB1HNPd1n1faONXfz+spZ4i4t0gAPqi/tHOHb4Keb2MGwIxg5GNGFZ+M1gUE533fpNJ8gHP14TSY+k
- jJSOfMbm8nOc4GCyTK8I5vIcZjYt+VsiLm41Sn5mPvMIkkKfUrvFeBKZHtRLezAJglFDTKxQazOF3Q4h2fbwrCKYlAWqs0WLWdmZLQ==
+References: <cover.1665931914.git.tonyhuang.sunplus@gmail.com>
+ <039075b210d78d2f4fdeb66b6826b8d2c2836088.1665931914.git.tonyhuang.sunplus@gmail.com>
+ <f8f803a8-ee36-4f32-8920-1fcf6b2265d1@app.fastmail.com>
+In-Reply-To: <f8f803a8-ee36-4f32-8920-1fcf6b2265d1@app.fastmail.com>
+From:   =?UTF-8?B?6buD5oe35Y6a?= <tonyhuang.sunplus@gmail.com>
+Date:   Wed, 19 Oct 2022 10:10:48 +0800
+Message-ID: <CAHpW4oTqQxzXZ_LReA8cBBANyVg1n25KxLnjdyv6dLkPkPq+nA@mail.gmail.com>
+Subject: Re: [PATCH v10 2/2] mmc: Add mmc driver for Sunplus SP7021
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, krzk+dt@kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        wells.lu@sunplus.com, Tony Huang <tony.huang@sunplus.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Jesse,
+Dear Arnd, Ulf:
 
-On 18/10/22 01:55, Giulio Benetti wrote:
-> Signed-off-by: Giulio Benetti <giulio.benetti@benettiengineering.com>
-> ---
->   drivers/clk/imx/clk-imxrt1050.c | 2 +-
->   1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/clk/imx/clk-imxrt1050.c b/drivers/clk/imx/clk-imxrt1050.c
-> index 9539d35588ee..26108e9f7e67 100644
-> --- a/drivers/clk/imx/clk-imxrt1050.c
-> +++ b/drivers/clk/imx/clk-imxrt1050.c
-> @@ -140,7 +140,7 @@ static int imxrt1050_clocks_probe(struct platform_device *pdev)
->   	hws[IMXRT1050_CLK_USDHC1] = imx_clk_hw_gate2("usdhc1", "usdhc1_podf", ccm_base + 0x80, 2);
->   	hws[IMXRT1050_CLK_USDHC2] = imx_clk_hw_gate2("usdhc2", "usdhc2_podf", ccm_base + 0x80, 4);
->   	hws[IMXRT1050_CLK_LPUART1] = imx_clk_hw_gate2("lpuart1", "lpuart_podf", ccm_base + 0x7c, 24);
-> -	hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x74, 10);
-> +	hws[IMXRT1050_CLK_LCDIF_APB] = imx_clk_hw_gate2("lcdif", "lcdif_podf", ccm_base + 0x70, 28);
->   	hws[IMXRT1050_CLK_DMA] = imx_clk_hw_gate("dma", "ipg", ccm_base + 0x7C, 6);
->   	hws[IMXRT1050_CLK_DMA_MUX] = imx_clk_hw_gate("dmamux0", "ipg", ccm_base + 0x7C, 7);
->   	imx_check_clk_hws(hws, IMXRT1050_CLK_END);
+Arnd Bergmann <arnd@arndb.de> =E6=96=BC 2022=E5=B9=B410=E6=9C=8817=E6=97=A5=
+ =E9=80=B1=E4=B8=80 =E4=B8=8B=E5=8D=883:25=E5=AF=AB=E9=81=93=EF=BC=9A
+>
+> On Sun, Oct 16, 2022, at 5:48 PM, Tony Huang wrote:
+> > This is a patch for mmc driver for Sunplus SP7021 SOC.
+> > Supports eMMC 4.41 DDR 104MB/s speed mode.
+> >
+> > Signed-off-by: Tony Huang <tonyhuang.sunplus@gmail.com>
+>
+> Looks ok to me me overall.
+>
+> Acked-by: Arnd Bergmann <arnd@arndb.de>
+>
+> Just one more thing I noticed:
+>
+> > +#define SPMMC_TIMEOUT                        500000
+> ...
+> > +static inline int spmmc_wait_finish(struct spmmc_host *host)
+> > +{
+> > +     u32 state;
+> > +
+> > +     return readl_poll_timeout_atomic(host->base + SPMMC_SD_STATE_REG,
+> > state,
+> > +                                     (state & SPMMC_SDSTATE_FINISH), 1=
+, SPMMC_TIMEOUT);
+> > +}
+> > +
+> > +static inline int spmmc_wait_sdstatus(struct spmmc_host *host,
+> > unsigned int status_bit)
+> > +{
+> > +     u32 status;
+> > +
+> > +     return readl_poll_timeout_atomic(host->base + SPMMC_SD_STATUS_REG=
+,
+> > status,
+> > +                                     (status & status_bit), 1, SPMMC_T=
+IMEOUT);
+> > +}
+>
+> 500ms seems like an awfully long time for a busy-wait, I wonder if this
+> could be improved in some way. Is this always called from atomic context?
+>
+> If not, any callers from non-atomic context could use
+> readl_poll_timeout() instead, or maybe there could be a shorter
+> timeout in atomic context, with a fallback to a non-atomic
+> workqueue if that times out, so only the MMC access will stall but
+> not the entire system.
 
-I've forgotten to add you in Cc, can you please take a look at it?
-You've written the driver so you maybe can give me a feedback.
-Same for patch 2/5
+OK, I would use real_poll_timeout() instead.
+Because I see "BUG: scheduling while atomic" issue before.
+I have solved this problem.
 
-Thank you very much!
-
-Best regards
--- 
-Giulio Benetti
-CEO/CTO@Benetti Engineering sas
+>
+> The same problem does appear to be in dw_mmc.c and mtk-sd.c but not
+> in sdhci*.c, so I don't know if this is avoidable.
+>
+>      Arnd
