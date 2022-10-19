@@ -2,110 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED02DC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 21:56:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14EB2C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 21:59:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229819AbiJSV4x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 17:56:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60760 "EHLO
+        id S229760AbiJSV7u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 17:59:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229491AbiJSV4w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 17:56:52 -0400
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F034F13B502
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 14:56:51 -0700 (PDT)
-Received: by mail-pl1-x62a.google.com with SMTP id k9so18090545pll.11
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 14:56:51 -0700 (PDT)
+        with ESMTP id S229491AbiJSV7s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 17:59:48 -0400
+Received: from mail-qk1-x72f.google.com (mail-qk1-x72f.google.com [IPv6:2607:f8b0:4864:20::72f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6476580E83;
+        Wed, 19 Oct 2022 14:59:46 -0700 (PDT)
+Received: by mail-qk1-x72f.google.com with SMTP id 8so11687611qka.1;
+        Wed, 19 Oct 2022 14:59:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=y2aRiLyWvRUlvRE5N2MJoq49Gk7v0uQF4nuK/XgZXeI=;
-        b=j5cM3oTJaW15wbf1WDQR3SG+HiIfE1NeKieuBFlF7niQeo5PlkEIsOSBaAY03P6xZP
-         ETODBU7scJhRAAluN542ojdhne1x/nh1U/HMr82A9r6wuZfSoRE3n+5RQ0yOG+/q8KEc
-         4NrTwpgxy1Ua18JHIzBXlJzTeWF8b2JARfIVo=
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=S9HkPFgZD/C2W2q2J74fWT1vMIg6k3iAnDkNlkeaCaI=;
+        b=d0/Jg79vTpn0Od8mLqQ1vDbdKv5Uq65BUw4uyVcnj01ko3ChA7seFgaLFijzP2eAYS
+         vvYlvSMlFs3sC210alNTmYCU2y9CrATSQmsW6i04t9Z4J1hxfECsEQJdAQBR2DOA80Hx
+         BeeZiK0ciO5lyIBBxkB4vKxdBwhyYpvE6nfcpwkZyeaRH9EGsZpk4WbzhYV29QB7ZlOL
+         2POFDDz+blYRx4V5kqshhg2Cx3hFgDxx7j1UDYAFFFPLVJfrKFxKtGMKIyHDnCP7JnUg
+         OHX+iwQtx8qFiyvjK9VdlFJoKmGLMKWlqtl38/i3JDXuBA7LU187DGLaXWAkl1HxRbEN
+         ulcQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=y2aRiLyWvRUlvRE5N2MJoq49Gk7v0uQF4nuK/XgZXeI=;
-        b=d24wB2GFIWRGakR8WWi9zj6dCTUGOzethgu2rZ2VW2ZBrYh/4hhWoteeSMBxlBNvV0
-         bnmpHQqgvboPwTxlYMuAfa3qERbMTltWteE0jrqQopzEWNWt/yzdgKfSnBhw9xZ/4tFM
-         19WGB0LCWNv2GUBYMI/VPpn27gNiBFwtb9Zjj7Jw19aIZc5hhD1kHUOWeSUGW7O1vaTS
-         bNg2ucXVUPI6L3y3Etr4moZj+5NBOpvwyaL7r5Ib79iEc+YmmCE56b5nGOEXGsk9Wh7N
-         LXICixO/EK2JSciIGgWvX4czF+AX+TT9J3Pwgugq6hWa0xdxEkdejb4R7CWzxce4EN/w
-         6yRA==
-X-Gm-Message-State: ACrzQf2aS7zaT7ryb/L3mwR4fttBOschspo2QM/8GYjmQEbVkmXEUzIB
-        IJdjdakTKs0kJ4ojWvz/lISqGw==
-X-Google-Smtp-Source: AMsMyM6ZnXir4B36pdQVeqzQ6UMoGGdhfhXA7wKzmHS2lucDmHeECMGKp4r+5S3L3wGAnnQEh559Xw==
-X-Received: by 2002:a17:90a:aa8f:b0:210:bec0:bde with SMTP id l15-20020a17090aaa8f00b00210bec00bdemr2814613pjq.109.1666216611530;
-        Wed, 19 Oct 2022 14:56:51 -0700 (PDT)
-Received: from google.com ([2620:15c:9d:2:57b7:1f0e:44d1:f252])
-        by smtp.gmail.com with ESMTPSA id s6-20020a625e06000000b00562bc93f1c9sm11793504pfb.213.2022.10.19.14.56.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 14:56:51 -0700 (PDT)
-Date:   Wed, 19 Oct 2022 14:56:48 -0700
-From:   Brian Norris <briannorris@chromium.org>
-To:     Bough Chen <haibo.chen@nxp.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=S9HkPFgZD/C2W2q2J74fWT1vMIg6k3iAnDkNlkeaCaI=;
+        b=jqU0N/32Vk0/VbIPJgGEN/ybAEmCLsQ1+SntV1sGIko5EhIxAUUjw//6pzsiQGm9s3
+         176CcE2HVfQp+MIGyvxUb8N4Sht88t4RzrKmNeJWEIzRle8HaxIOSOGrS4fP0iR/gH5G
+         MMTS0hVBF8szVqxMXEKed4ZvQhE8gH+h/Tw5xccz9ikrXl+D0LbPNbyKv/uHZYPobcgJ
+         sA6ofn8aN+fBLIET9pM7FndkbqFlD4YQ281SZOziTeoDlV598kW2CvYPR3RkS7SWxOZj
+         rPKYTivM4w2u8Kg8inrV7ZGq0x0TVq1jIqetCm+FHCYRHXqgU+C/suO7KiaoDFM4WRCt
+         n9kw==
+X-Gm-Message-State: ACrzQf00uqPFEYRITfMvnQnXjH2ZXA+IXpAF4e8aGkLJzoRayM7WBrcY
+        H2mwvz22Q9TVj130ZsMU7gq/ZtQ8KhUqjA==
+X-Google-Smtp-Source: AMsMyM4jByfHrPBUyeIqq0Qdns+pbJVRQWlZYTS7DpZ3AEO71aKNRFhor87zBQBcuFuYvQdFACRdvA==
+X-Received: by 2002:a37:4454:0:b0:6e7:9bd0:bf53 with SMTP id r81-20020a374454000000b006e79bd0bf53mr7260058qka.616.1666216785297;
+        Wed, 19 Oct 2022 14:59:45 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.googlemail.com with ESMTPSA id t14-20020a05620a450e00b006ce580c2663sm5896681qkp.35.2022.10.19.14.59.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 19 Oct 2022 14:59:44 -0700 (PDT)
+Message-ID: <14efb3e6-96cf-f42e-16aa-c45001ec632e@gmail.com>
+Date:   Wed, 19 Oct 2022 14:59:39 -0700
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH v2 2/7] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for
+ CQHCI
+Content-Language: en-US
+To:     Brian Norris <briannorris@chromium.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>,
         Shawn Guo <shawnguo@kernel.org>,
         Fabio Estevam <festevam@gmail.com>,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        dl-linux-imx <linux-imx@nxp.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
+        Haibo Chen <haibo.chen@nxp.com>,
         Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>
-Subject: Re: [PATCH 3/5] mms: sdhci-esdhc-imx: Fix SDHCI_RESET_ALL for CQHCI
-Message-ID: <Y1ByoA3MreJTp2my@google.com>
-References: <20221018035724.2061127-1-briannorris@chromium.org>
- <20221017205610.3.I7d01f9ad11bacdc9213dee61b7918982aea39115@changeid>
- <DB7PR04MB40107D412EC0DA5517E6CC4B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <DB7PR04MB40107D412EC0DA5517E6CC4B90289@DB7PR04MB4010.eurprd04.prod.outlook.com>
+        <bcm-kernel-feedback-list@broadcom.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Faiz Abbas <faiz_abbas@ti.com>, linux-mmc@vger.kernel.org,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        linux-arm-kernel@lists.infradead.org,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        linux-kernel@vger.kernel.org,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>, stable@vger.kernel.org
+References: <20221019215440.277643-1-briannorris@chromium.org>
+ <20221019145246.v2.2.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+In-Reply-To: <20221019145246.v2.2.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Tue, Oct 18, 2022 at 07:22:04AM +0000, Bough Chen wrote:
-> > -----Original Message-----
-> > From: Brian Norris <briannorris@chromium.org>
-> > --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> > +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> > @@ -1288,6 +1288,13 @@ static void esdhc_set_uhs_signaling(struct
-> > sdhci_host *host, unsigned timing)
-> > 
-> >  static void esdhc_reset(struct sdhci_host *host, u8 mask)  {
-> > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> > +	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-> > +
-> > +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL)
-> > &&
-> > +	    imx_data->socdata->flags & ESDHC_FLAG_CQHCI)
+On 10/19/22 14:54, Brian Norris wrote:
+> SDHCI_RESET_ALL resets will reset the hardware CQE state, but we aren't
+> tracking that properly in software. When out of sync, we may trigger
+> various timeouts.
 > 
-> I think we can remove the condition " imx_data->socdata->flags & ESDHC_FLAG_CQHCI" here.
-> According to code logic, host->mmc->caps2 & MMC_CAP2_CQE means it already contain imx_data->socdata->flags & ESDHC_FLAG_CQHCI
+> It's not typical to perform resets while CQE is enabled, but one
+> particular case I hit commonly enough: mmc_suspend() -> mmc_power_off().
+> Typically we will eventually deactivate CQE (cqhci_suspend() ->
+> cqhci_deactivate()), but that's not guaranteed -- in particular, if
+> we perform a partial (e.g., interrupted) system suspend.
+> 
+> The same bug was already found and fixed for two other drivers, in v5.7
+> and v5.9:
+> 
+> 5cf583f1fb9c mmc: sdhci-msm: Deactivate CQE during SDHC reset
+> df57d73276b8 mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel GLK-based controllers
+> 
+> The latter is especially prescient, saying "other drivers using CQHCI
+> might benefit from a similar change, if they also have CQHCI reset by
+> SDHCI_RESET_ALL."
+> 
+> So like these other patches, deactivate CQHCI when resetting the
+> controller.
+> 
+> Fixes: 84362d79f436 ("mmc: sdhci-of-arasan: Add CQHCI support for arasan,sdhci-5.1")
+> Cc: <stable@vger.kernel.org>
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
+> ---
+> 
+> Changes in v2:
+>   - Rely on cqhci_deactivate() to safely handle (ignore)
+>     not-yet-initialized CQE support
+> 
+>   drivers/mmc/host/sdhci-of-arasan.c | 3 +++
+>   1 file changed, 3 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 3997cad1f793..b30f0d6baf5b 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -366,6 +366,9 @@ static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
+>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>   	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
+>   
+> +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
+> +		cqhci_deactivate(host->mmc);
+> +
+>   	sdhci_reset(host, mask);
 
-I don't know why I had this in the first place. Maybe just to be
-double-sure that caps flags aren't getting set elsewhere (e.g., by the
-core)? But you're right, and I've dropped this in v2.
+Cannot this be absorbed by sdhci_reset() that all of these drivers 
+appear to be utilizing since you have access to the host and the mask to 
+make that decision?
+-- 
+Florian
 
-Thanks,
-Brian
