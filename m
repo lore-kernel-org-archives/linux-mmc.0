@@ -2,64 +2,63 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8B7FC4321E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C920AC4167D
 	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 11:41:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230441AbiJSLkq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 07:40:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39578 "EHLO
+        id S230426AbiJSLko (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 07:40:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231543AbiJSLkB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:40:01 -0400
-Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 132B118F92D;
-        Wed, 19 Oct 2022 04:19:01 -0700 (PDT)
-Received: by mail-pg1-x52a.google.com with SMTP id r18so15932724pgr.12;
-        Wed, 19 Oct 2022 04:19:01 -0700 (PDT)
+        with ESMTP id S231473AbiJSLj6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 07:39:58 -0400
+Received: from mail-vs1-xe31.google.com (mail-vs1-xe31.google.com [IPv6:2607:f8b0:4864:20::e31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28D0A18F900;
+        Wed, 19 Oct 2022 04:18:52 -0700 (PDT)
+Received: by mail-vs1-xe31.google.com with SMTP id h29so17338104vsq.9;
+        Wed, 19 Oct 2022 04:18:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=L7vTXUCSVB8WaxXxfowVg3ydYwbzeeLuBtbfvf7PMP4=;
-        b=OLybpdZyU0Io65GEoTVTfEq6tmXymEsV2mKNsJPW4Tf4vyi8X2MBi1aahinNjnN3GP
-         gbhN125qsTIgmNRp0p2RevPfYVFxJY2EV/pzIWfh6jmBSclJup3MHXnoHo7+8knoCvMj
-         u+LRB/KGpyHOYDQqvKiI/MPw2RXFBXZP7PqOSb02Ti0rrWuXqUtgZb3mRLQ4WRUWp3vO
-         CPep9hE6uGMR+boo4DH+/H+DcdJVqVfxCq+KoSp+B4e3l+bEzD9OBB1MGCLmXYikZaMs
-         93VZnznECclNTOlX0TW+OdJa+B8wl7qNlKYUIydCY1jTd2ENSXtvs0LBeRJEOcKcfBjO
-         VA4w==
+        bh=UDCR3c+tNDbZrokHvRQ/NhZey5IRS6vX40mc//O1vsw=;
+        b=et+yga9tXynRDKZpAPp7Ku8jquDwA7degXwIFN9gRqnq4WMb19nvvcT2JbIK1RdLNi
+         3WaTE037JThN9KHa9C/X3mUIkMxGtQvZjT70Q8iu2un7GVtVDaiY8rPxMgRWu/OPi7ro
+         VfLatbLwx4/1ITHHlfXFrj5jyN1SbKHj2GovS52fg84l0wFBqIWfqDBZu4xxog7sQUVF
+         UBxf588gY1IKUPDXnn/ue9MzJGT0cLsUBwgxUhhtbAnowiyORYJ9krOBy8/t2e6M9YuU
+         D0d9jee/EgQr7Fc1cQvGoAKZ7sfp3tVTvwHibuNy7k8VKbneunHDFt6QSoMh8EpvvTqd
+         GEwg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=L7vTXUCSVB8WaxXxfowVg3ydYwbzeeLuBtbfvf7PMP4=;
-        b=mHAB3NWx1VOAYZpQEN9Xbj0xUzhUyWWlqZel8n1g2459QPDV+iyqDsbpCd+fzwrF85
-         04NGe0A43pOakSo/d6gL7IhvZuaSkwn3KkgDAdzfXCBWPUiAcioicXX9tQa2A53em/5t
-         03i5m1a/Es9lvQF2x49G5CRaXDHNuSi1jHoGL3UcB91x0FtoxpO1vYFScabtuyRAefxm
-         GlLu+kGi0zIa21r7dH/oPEp0sJIbVr+JJBqhwa3JYDwmFSN/I/RDFPqqxkC4c8do5n8x
-         Ph4z6TlNuGcQLVPojEFIqen4QHKZ3x8pNaogGr5wBRyIJDfpiGOzf8LTLgktXFURcvcr
-         /A2Q==
-X-Gm-Message-State: ACrzQf2x4ryl2y5gQhd68nHxvwSXdwm/ygoIN8Uyhi5uzvFPMHh7gaT4
-        01OPx8tJDRPYc7FfoPVufPEZ5M5Kzhk=
-X-Google-Smtp-Source: AMsMyM4eF+r3CBzqIA9w8igeLZGGXLJ67BsSR00fCJjW96+w8po+Tut/eIrdGPvJ9Gnye70b8U2A/g==
-X-Received: by 2002:a63:5643:0:b0:44d:b691:1da1 with SMTP id g3-20020a635643000000b0044db6911da1mr6909923pgm.450.1666177693585;
-        Wed, 19 Oct 2022 04:08:13 -0700 (PDT)
+        bh=UDCR3c+tNDbZrokHvRQ/NhZey5IRS6vX40mc//O1vsw=;
+        b=b4CbNrpwwS/5oTIItBcAiLqpfXTtL+JQk6yzAOWgZKhWLbeBYJrIzTnyUpDiZolXHI
+         /VuRq1uqVKk8rzFEILM0HA43rkfwgKAQVnD1a1IUJ6OHGYBsBA1hEq3tZw/2F3FldcPT
+         SEoWJ3H/iPYjDzlgTHk/ANZDG6pAKKNzQ8gBFoblylKhBVgzF6CPUIZKkYL5BoBm7fAI
+         R31p5Tos6959ISwNJ6sTdYJ39Xrxat6V9uCixWqE/2GdbFamRWePEHszJ9AGDSe+pn7k
+         sVcUyghz3U+fNBQ+VjuDdA35n9guZa9H8bdpMO2oYiMvt41HoRnXk5VqiKY2Lw+Nc4gl
+         N/0w==
+X-Gm-Message-State: ACrzQf2Bds2m8PZzHiAmydaEqguuaI6hdoCUHvdRYcPdCabzEArIxmNJ
+        Ch826T/wFePiQoYVtgY/hABWjYyhDU8=
+X-Google-Smtp-Source: AMsMyM55tO8Pf0U+CSDawvZX9OyDkZnj/hPc/Bgqi2r4dzYJGlJNE5BPkxlpgXRJBnaNitZVmBsJew==
+X-Received: by 2002:a17:902:9690:b0:17a:4cf:edeb with SMTP id n16-20020a170902969000b0017a04cfedebmr7810972plp.129.1666177622034;
+        Wed, 19 Oct 2022 04:07:02 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e258-8c34-821b-9613-557f-bd8d.emome-ip6.hinet.net. [2001:b400:e258:8c34:821b:9613:557f:bd8d])
-        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.08.11
+        by smtp.gmail.com with ESMTPSA id cc11-20020a17090af10b00b0020dc318a43esm8696225pjb.25.2022.10.19.04.06.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 04:08:13 -0700 (PDT)
+        Wed, 19 Oct 2022 04:07:01 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Subject: [PATCH V5 25/26] mmc: sdhci-pci: add UHS-II support framework
-Date:   Wed, 19 Oct 2022 19:06:46 +0800
-Message-Id: <20221019110647.11076-26-victor.shih@genesyslogic.com.tw>
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V5 02/26] mmc: core: Prepare to support SD UHS-II cards
+Date:   Wed, 19 Oct 2022 19:06:23 +0800
+Message-Id: <20221019110647.11076-3-victor.shih@genesyslogic.com.tw>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
 References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
@@ -69,80 +68,493 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: AKASHI Takahiro <takahiro.akashi@linaro.org>
+From: Ulf Hansson <ulf.hansson@linaro.org>
 
-This patch prepares for adding UHS-II support at a specific UHS-II
-capable sdhci-pci controller, GL9755 for now.
+Updates in V4:
+ - Re-based, updated a comment and removed white-space.
+ - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Update in previous version:
+The SD UHS-II interface was introduced to the SD spec v4.00 several years
+ago. The interface is fundamentally different from an electrical and a
+protocol point of view, comparing to the legacy SD interface.
+
+However, the legacy SD protocol is supported through a specific transport
+layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows the
+SD card to be managed in a very similar way as a legacy SD card, hence a
+lot of code can be re-used to support these new types of cards through the
+mmc subsystem.
+
+Moreover, an SD card that supports the UHS-II interface shall also be
+backwards compatible with the legacy SD interface, which allows a UHS-II
+card to be inserted into a legacy slot. As a matter of fact, this is
+already supported by mmc subsystem as of today.
+
+To prepare to add support for UHS-II, this change puts the basic foundation
+in the mmc core in place, allowing it to be more easily reviewed before
+subsequent changes implements the actual support.
+
+Basically, the approach here adds a new UHS-II bus_ops type and adds a
+separate initialization path for the UHS-II card. The intent is to avoid us
+from sprinkling the legacy initialization path, but also to simplify
+implementation of the UHS-II specific bits.
+
+At this point, there is only one new host ops added to manage the various
+ios settings needed for UHS-II. Additional host ops that are needed, are
+being added from subsequent changes.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 ---
- drivers/mmc/host/sdhci-pci-core.c | 16 +++++++++++++++-
- drivers/mmc/host/sdhci-pci.h      |  3 +++
- 2 files changed, 18 insertions(+), 1 deletion(-)
+ drivers/mmc/core/Makefile  |   2 +-
+ drivers/mmc/core/core.c    |  17 ++-
+ drivers/mmc/core/core.h    |   1 +
+ drivers/mmc/core/sd_uhs2.c | 289 +++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h   |   7 +
+ include/linux/mmc/host.h   |  19 +++
+ 6 files changed, 333 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/mmc/core/sd_uhs2.c
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index cba5bba994b8..e0523a775a1d 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -39,6 +39,7 @@
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
+index 6a907736cd7a..15b067e8b0d1 100644
+--- a/drivers/mmc/core/Makefile
++++ b/drivers/mmc/core/Makefile
+@@ -7,7 +7,7 @@ obj-$(CONFIG_MMC)		+= mmc_core.o
+ mmc_core-y			:= core.o bus.o host.o \
+ 				   mmc.o mmc_ops.o sd.o sd_ops.o \
+ 				   sdio.o sdio_ops.o sdio_bus.o \
+-				   sdio_cis.o sdio_io.o sdio_irq.o \
++				   sdio_cis.o sdio_io.o sdio_irq.o sd_uhs2.o\
+ 				   slot-gpio.o regulator.o
+ mmc_core-$(CONFIG_OF)		+= pwrseq.o
+ obj-$(CONFIG_PWRSEQ_SIMPLE)	+= pwrseq_simple.o
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 95fa8fb1d45f..8818a20571f7 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2234,6 +2234,18 @@ void mmc_rescan(struct work_struct *work)
+ 		goto out;
+ 	}
  
- #include "sdhci.h"
- #include "sdhci-pci.h"
-+#include "sdhci-uhs2.h"
- 
- static void sdhci_pci_hw_reset(struct sdhci_host *host);
- 
-@@ -2159,7 +2160,10 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	if (scratch == (u32)-1)
- 		dead = 1;
- 
--	sdhci_remove_host(slot->host, dead);
-+	if (slot->chip->fixes && slot->chip->fixes->remove_host)
-+		slot->chip->fixes->remove_host(slot, dead);
-+	else
-+		sdhci_remove_host(slot->host, dead);
- 
- 	if (slot->chip->fixes && slot->chip->fixes->remove_slot)
- 		slot->chip->fixes->remove_slot(slot, dead);
-@@ -2167,6 +2171,16 @@ static void sdhci_pci_remove_slot(struct sdhci_pci_slot *slot)
- 	sdhci_free_host(slot->host);
- }
- 
-+int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot)
-+{
-+	return sdhci_uhs2_add_host(slot->host);
-+}
++	/*
++	 * Ideally we should favor initialization of legacy SD cards and defer
++	 * UHS-II enumeration. However, it seems like cards doesn't reliably
++	 * announce their support for UHS-II in the response to the ACMD41,
++	 * while initializing the legacy SD interface. Therefore, let's start
++	 * with UHS-II for now.
++	 */
++	if (!mmc_attach_sd_uhs2(host)) {
++		mmc_release_host(host);
++		goto out;
++	}
 +
-+void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead)
-+{
-+	sdhci_uhs2_remove_host(slot->host, dead);
-+}
-+
- static void sdhci_pci_runtime_pm_allow(struct device *dev)
+ 	for (i = 0; i < ARRAY_SIZE(freqs); i++) {
+ 		unsigned int freq = freqs[i];
+ 		if (freq > host->f_max) {
+@@ -2261,10 +2273,13 @@ void mmc_rescan(struct work_struct *work)
+ 
+ void mmc_start_host(struct mmc_host *host)
  {
- 	pm_suspend_ignore_children(dev, 1);
-diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-index 3661a224fb04..7f4a981c0e63 100644
---- a/drivers/mmc/host/sdhci-pci.h
-+++ b/drivers/mmc/host/sdhci-pci.h
-@@ -140,6 +140,7 @@ struct sdhci_pci_fixes {
- 	int			(*probe_slot) (struct sdhci_pci_slot *);
- 	int			(*add_host) (struct sdhci_pci_slot *);
- 	void			(*remove_slot) (struct sdhci_pci_slot *, int);
-+	void			(*remove_host) (struct sdhci_pci_slot *, int);
++	bool power_up = !(host->caps2 &
++			 (MMC_CAP2_NO_PRESCAN_POWERUP | MMC_CAP2_SD_UHS2));
++
+ 	host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+ 	host->rescan_disable = 0;
  
- #ifdef CONFIG_PM_SLEEP
- 	int			(*suspend) (struct sdhci_pci_chip *);
-@@ -184,6 +185,8 @@ static inline void *sdhci_pci_priv(struct sdhci_pci_slot *slot)
- 	return (void *)slot->private;
- }
+-	if (!(host->caps2 & MMC_CAP2_NO_PRESCAN_POWERUP)) {
++	if (power_up) {
+ 		mmc_claim_host(host);
+ 		mmc_power_up(host, host->ocr_avail);
+ 		mmc_release_host(host);
+diff --git a/drivers/mmc/core/core.h b/drivers/mmc/core/core.h
+index f5f3f623ea49..2d80afc95e58 100644
+--- a/drivers/mmc/core/core.h
++++ b/drivers/mmc/core/core.h
+@@ -81,6 +81,7 @@ int mmc_detect_card_removed(struct mmc_host *host);
+ int mmc_attach_mmc(struct mmc_host *host);
+ int mmc_attach_sd(struct mmc_host *host);
+ int mmc_attach_sdio(struct mmc_host *host);
++int mmc_attach_sd_uhs2(struct mmc_host *host);
  
-+int sdhci_pci_uhs2_add_host(struct sdhci_pci_slot *slot);
-+void sdhci_pci_uhs2_remove_host(struct sdhci_pci_slot *slot, int dead);
- #ifdef CONFIG_PM_SLEEP
- int sdhci_pci_resume_host(struct sdhci_pci_chip *chip);
+ /* Module parameters */
+ extern bool use_spi_crc;
+diff --git a/drivers/mmc/core/sd_uhs2.c b/drivers/mmc/core/sd_uhs2.c
+new file mode 100644
+index 000000000000..800957f74632
+--- /dev/null
++++ b/drivers/mmc/core/sd_uhs2.c
+@@ -0,0 +1,289 @@
++// SPDX-License-Identifier: GPL-2.0-only
++/*
++ * Copyright (C) 2021 Linaro Ltd
++ *
++ * Author: Ulf Hansson <ulf.hansson@linaro.org>
++ *
++ * Support for SD UHS-II cards
++ */
++#include <linux/err.h>
++
++#include <linux/mmc/host.h>
++#include <linux/mmc/card.h>
++
++#include "core.h"
++#include "bus.h"
++#include "sd.h"
++#include "mmc_ops.h"
++
++static const unsigned int sd_uhs2_freqs[] = { 52000000, 26000000 };
++
++static int sd_uhs2_set_ios(struct mmc_host *host)
++{
++	struct mmc_ios *ios = &host->ios;
++
++	return host->ops->uhs2_set_ios(host, ios);
++}
++
++static int sd_uhs2_power_up(struct mmc_host *host)
++{
++	host->ios.vdd = fls(host->ocr_avail) - 1;
++	host->ios.clock = host->f_init;
++	host->ios.timing = MMC_TIMING_SD_UHS2;
++	host->ios.power_mode = MMC_POWER_UP;
++
++	return sd_uhs2_set_ios(host);
++}
++
++static void sd_uhs2_power_off(struct mmc_host *host)
++{
++	host->ios.vdd = 0;
++	host->ios.clock = 0;
++	host->ios.timing = MMC_TIMING_LEGACY;
++	host->ios.power_mode = MMC_POWER_OFF;
++
++	sd_uhs2_set_ios(host);
++}
++
++/*
++ * Run the phy initialization sequence, which mainly relies on the UHS-II host
++ * to check that we reach the expected electrical state, between the host and
++ * the card.
++ */
++static int sd_uhs2_phy_init(struct mmc_host *host)
++{
++	return 0;
++}
++
++/*
++ * Do the early initialization of the card, by sending the device init broadcast
++ * command and wait for the process to be completed.
++ */
++static int sd_uhs2_dev_init(struct mmc_host *host)
++{
++	return 0;
++}
++
++/*
++ * Run the enumeration process by sending the enumerate command to the card.
++ * Note that, we currently support only the point to point connection, which
++ * means only one card can be attached per host/slot.
++ */
++static int sd_uhs2_enum(struct mmc_host *host, u32 *node_id)
++{
++	return 0;
++}
++
++/*
++ * Read the UHS-II configuration registers (CFG_REG) of the card, by sending it
++ * commands and by parsing the responses. Store a copy of the relevant data in
++ * card->uhs2_config.
++ */
++static int sd_uhs2_config_read(struct mmc_host *host, struct mmc_card *card)
++{
++	return 0;
++}
++
++/*
++ * Based on the card's and host's UHS-II capabilities, let's update the
++ * configuration of the card and the host. This may also include to move to a
++ * greater speed range/mode. Depending on the updated configuration, we may need
++ * to do a soft reset of the card via sending it a GO_DORMANT_STATE command.
++ *
++ * In the final step, let's check if the card signals "config completion", which
++ * indicates that the card has moved from config state into active state.
++ */
++static int sd_uhs2_config_write(struct mmc_host *host, struct mmc_card *card)
++{
++	return 0;
++}
++
++/*
++ * Initialize the UHS-II card through the SD-TRAN transport layer. This enables
++ * commands/requests to be backwards compatible through the legacy SD protocol.
++ * UHS-II cards has a specific power limit specified for VDD1/VDD2, that should
++ * be set through a legacy CMD6. Note that, the power limit that becomes set,
++ * survives a soft reset through the GO_DORMANT_STATE command.
++ */
++static int sd_uhs2_legacy_init(struct mmc_host *host, struct mmc_card *card)
++{
++	return 0;
++}
++
++/*
++ * Allocate the data structure for the mmc_card and run the UHS-II specific
++ * initialization sequence.
++ */
++static int sd_uhs2_init_card(struct mmc_host *host)
++{
++	struct mmc_card *card;
++	u32 node_id;
++	int err;
++
++	err = sd_uhs2_dev_init(host);
++	if (err)
++		return err;
++
++	err = sd_uhs2_enum(host, &node_id);
++	if (err)
++		return err;
++
++	card = mmc_alloc_card(host, &sd_type);
++	if (IS_ERR(card))
++		return PTR_ERR(card);
++
++	card->uhs2_config.node_id = node_id;
++	card->type = MMC_TYPE_SD;
++
++	err = sd_uhs2_config_read(host, card);
++	if (err)
++		goto err;
++
++	err = sd_uhs2_config_write(host, card);
++	if (err)
++		goto err;
++
++	err = sd_uhs2_legacy_init(host, card);
++	if (err)
++		goto err;
++
++	host->card = card;
++	return 0;
++
++err:
++	mmc_remove_card(card);
++	return err;
++}
++
++static void sd_uhs2_remove(struct mmc_host *host)
++{
++	mmc_remove_card(host->card);
++	host->card = NULL;
++}
++
++static int sd_uhs2_alive(struct mmc_host *host)
++{
++	return mmc_send_status(host->card, NULL);
++}
++
++static void sd_uhs2_detect(struct mmc_host *host)
++{
++	int err;
++
++	mmc_get_card(host->card, NULL);
++	err = _mmc_detect_card_removed(host);
++	mmc_put_card(host->card, NULL);
++
++	if (err) {
++		sd_uhs2_remove(host);
++
++		mmc_claim_host(host);
++		mmc_detach_bus(host);
++		sd_uhs2_power_off(host);
++		mmc_release_host(host);
++	}
++}
++
++static int sd_uhs2_suspend(struct mmc_host *host)
++{
++	return 0;
++}
++
++static int sd_uhs2_resume(struct mmc_host *host)
++{
++	return 0;
++}
++
++static int sd_uhs2_runtime_suspend(struct mmc_host *host)
++{
++	return 0;
++}
++
++static int sd_uhs2_runtime_resume(struct mmc_host *host)
++{
++	return 0;
++}
++
++static int sd_uhs2_shutdown(struct mmc_host *host)
++{
++	return 0;
++}
++
++static int sd_uhs2_hw_reset(struct mmc_host *host)
++{
++	return 0;
++}
++
++static const struct mmc_bus_ops sd_uhs2_ops = {
++	.remove = sd_uhs2_remove,
++	.alive = sd_uhs2_alive,
++	.detect = sd_uhs2_detect,
++	.suspend = sd_uhs2_suspend,
++	.resume = sd_uhs2_resume,
++	.runtime_suspend = sd_uhs2_runtime_suspend,
++	.runtime_resume = sd_uhs2_runtime_resume,
++	.shutdown = sd_uhs2_shutdown,
++	.hw_reset = sd_uhs2_hw_reset,
++};
++
++static int sd_uhs2_attach(struct mmc_host *host)
++{
++	int err;
++
++	err = sd_uhs2_power_up(host);
++	if (err)
++		goto err;
++
++	err = sd_uhs2_phy_init(host);
++	if (err)
++		goto err;
++
++	err = sd_uhs2_init_card(host);
++	if (err)
++		goto err;
++
++	mmc_attach_bus(host, &sd_uhs2_ops);
++
++	mmc_release_host(host);
++
++	err = mmc_add_card(host->card);
++	if (err)
++		goto remove_card;
++
++	mmc_claim_host(host);
++	return 0;
++
++remove_card:
++	mmc_remove_card(host->card);
++	host->card = NULL;
++	mmc_claim_host(host);
++	mmc_detach_bus(host);
++err:
++	sd_uhs2_power_off(host);
++	return err;
++}
++
++int mmc_attach_sd_uhs2(struct mmc_host *host)
++{
++	int i, err = 0;
++
++	if (!(host->caps2 & MMC_CAP2_SD_UHS2))
++		return -EOPNOTSUPP;
++
++	/* Turn off the legacy SD interface before trying with UHS-II. */
++	mmc_power_off(host);
++
++	/*
++	 * Start UHS-II initialization at 52MHz and possibly make a retry at
++	 * 26MHz according to the spec. It's required that the host driver
++	 * validates ios->clock, to set a rate within the correct range.
++	 */
++	for (i = 0; i < ARRAY_SIZE(sd_uhs2_freqs); i++) {
++		host->f_init = sd_uhs2_freqs[i];
++		err = sd_uhs2_attach(host);
++		if (!err)
++			break;
++	}
++
++	return err;
++}
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index c726ea781255..4a42f31b7bb0 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -211,6 +211,11 @@ struct sd_ext_reg {
+ #define SD_EXT_PERF_CMD_QUEUE	(1<<4)
+ };
+ 
++struct sd_uhs2_config {
++	u32			node_id;
++	/* TODO: Extend with more register configs. */
++};
++
+ struct sdio_cccr {
+ 	unsigned int		sdio_vsn;
+ 	unsigned int		sd_vsn;
+@@ -317,6 +322,8 @@ struct mmc_card {
+ 	struct sd_ext_reg	ext_power;	/* SD extension reg for PM */
+ 	struct sd_ext_reg	ext_perf;	/* SD extension reg for PERF */
+ 
++	struct sd_uhs2_config	uhs2_config;	/* SD UHS-II config */
++
+ 	unsigned int		sdio_funcs;	/* number of SDIO functions */
+ 	atomic_t		sdio_funcs_probed; /* number of probed SDIO funcs */
+ 	struct sdio_cccr	cccr;		/* common card info */
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8fdd3cf971a3..150d10d5e6f8 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -63,6 +63,7 @@ struct mmc_ios {
+ #define MMC_TIMING_MMC_HS400	10
+ #define MMC_TIMING_SD_EXP	11
+ #define MMC_TIMING_SD_EXP_1_2V	12
++#define MMC_TIMING_SD_UHS2	13
+ 
+ 	unsigned char	signal_voltage;		/* signalling voltage (1.8V or 3.3V) */
+ 
+@@ -91,6 +92,10 @@ struct mmc_clk_phase_map {
+ 	struct mmc_clk_phase phase[MMC_NUM_CLK_PHASES];
+ };
+ 
++struct sd_uhs2_caps {
++	/* TODO: Add UHS-II capabilities for the host. */
++};
++
+ struct mmc_host;
+ 
+ enum mmc_err_stat {
+@@ -145,6 +150,17 @@ struct mmc_host_ops {
+ 	 */
+ 	void	(*set_ios)(struct mmc_host *host, struct mmc_ios *ios);
+ 
++	/*
++	 * The uhs2_set_ios callback is mandatory to implement for hosts that
++	 * supports the SD UHS-II interface (MMC_CAP2_SD_UHS2), while the
++	 * callback is unused for the other cases. Note that, the struct
++	 * mmc_ios is being re-used for this as well.
++	 *
++	 * Expected return values for the uhs2_set_ios callback are a negative
++	 * errno in case of a failure or zero for success.
++	 */
++	int	(*uhs2_set_ios)(struct mmc_host *host, struct mmc_ios *ios);
++
+ 	/*
+ 	 * Return values for the get_ro callback should be:
+ 	 *   0 for a read/write card
+@@ -396,6 +412,7 @@ struct mmc_host {
+ 				 MMC_CAP2_HS200_1_2V_SDR)
+ #define MMC_CAP2_SD_EXP		(1 << 7)	/* SD express via PCIe */
+ #define MMC_CAP2_SD_EXP_1_2V	(1 << 8)	/* SD express 1.2V */
++#define MMC_CAP2_SD_UHS2	(1 << 9)	/* SD UHS-II support */
+ #define MMC_CAP2_CD_ACTIVE_HIGH	(1 << 10)	/* Card-detect signal active high */
+ #define MMC_CAP2_RO_ACTIVE_HIGH	(1 << 11)	/* Write-protect signal active high */
+ #define MMC_CAP2_NO_PRESCAN_POWERUP (1 << 14)	/* Don't power up before scan */
+@@ -422,6 +439,8 @@ struct mmc_host {
  #endif
+ #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
+ 
++	struct sd_uhs2_caps	uhs2_caps;	/* Host UHS-II capabilities */
++
+ 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
+ 
+ 	mmc_pm_flag_t		pm_caps;	/* supported pm features */
 -- 
 2.25.1
 
