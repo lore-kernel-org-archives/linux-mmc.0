@@ -2,125 +2,183 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D691C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 22:19:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0301C43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 23:32:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231363AbiJSWT2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 18:19:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51964 "EHLO
+        id S231642AbiJSXcC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 19:32:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231394AbiJSWT1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 18:19:27 -0400
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 360DFB1DE
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 15:19:24 -0700 (PDT)
-Received: by mail-pj1-x1035.google.com with SMTP id x1-20020a17090ab00100b001fda21bbc90so1490370pjq.3
-        for <linux-mmc@vger.kernel.org>; Wed, 19 Oct 2022 15:19:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZaGv7LlJBdgHofmM5ORri4ochUXzvI+2qUpKqb/vueI=;
-        b=XPXW0AcauLG0R9ecSLc8KU3XGw73i+SHfDt8loROSQA6cTZ5b9EowD9Wn/KEgzCYVM
-         O+03dmnQNBXaDLT3Y7U2d6SG4dgsB/7nJwvHYw97536Qclx3ik8mriTR1G4zV1244QIn
-         KcXdlV+SOBPKJCSbTBZgkU6c5qlVP/oGs7aec=
+        with ESMTP id S230467AbiJSXb5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 19:31:57 -0400
+Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 759A7170DD6;
+        Wed, 19 Oct 2022 16:31:56 -0700 (PDT)
+Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-1322fa1cf6fso22584854fac.6;
+        Wed, 19 Oct 2022 16:31:56 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ZaGv7LlJBdgHofmM5ORri4ochUXzvI+2qUpKqb/vueI=;
-        b=u1FM/lEv4Ht3J7AR/jLrd6lUBU7ZvDpf1Q6iWUkFgLfL8fqke+sZuLhOpXFS14UmhR
-         YJcgerFZcljKhIdagnUJOsz64hGyr2M5RvU/EPYPSGjFJop6aBi5WxmZy0dp7iHGhxp7
-         1IbmvyvoL7fpowBLc3Ij1nulmuD8GqEzarC/0Gv8DFsnw0wUnFKma7vA1q8TlwjDEAHt
-         4ZteNhRtT02ZdA+OS83u3bme+LgZRgCUfrJyF3aJIDd6otla45US8J5idIGAJe9hivro
-         IFbA7AriZ4NBKrGwjDszi3QO/GqBmCDAGbJcskruBzIWhMK2BBiudWqXBhF61dHOvkRO
-         FoVA==
-X-Gm-Message-State: ACrzQf3qi9nsQ0QEn6vDqMO/HCvdOc52HoAsSgaEFv96k6jdWOSnjao4
-        2L9HmH0eS6Z9sMGuUkR7VlAyX2+/CODFeg==
-X-Google-Smtp-Source: AMsMyM6m0qybDJCJSqtG9j3D5wrv8KHuP86ID2eiErDwVgap0Kq2QZsnamY56NRwNhc9lqyG+NYllg==
-X-Received: by 2002:a17:90a:9381:b0:20a:79b7:766a with SMTP id q1-20020a17090a938100b0020a79b7766amr48854405pjo.33.1666217963650;
-        Wed, 19 Oct 2022 15:19:23 -0700 (PDT)
-Received: from google.com ([2620:15c:9d:2:57b7:1f0e:44d1:f252])
-        by smtp.gmail.com with ESMTPSA id n12-20020a170902d2cc00b00172897952a0sm11458401plc.283.2022.10.19.15.19.22
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=9AIp9bMJCr5Y+vVCCDJA4f0wPlmi8lCrHSWYwE065mg=;
+        b=uRj/zRxpP6QRekC7MgZt7r+Z/36KqL0eB1qideNSWgeNnZCJIbLg0n9WGF9R3NSe5z
+         t8rQO7phQ7YmmjZBEMSgXqWAuaVBFDG4JkacEFO1naym1Pwg1Csj5+9dWQUwlGoaKxGT
+         1Ia/lF2OYNPubC2wQ9quoJsz4bSIo5DBfSRNWq/4kKUARpjO+j2kevumpCntKy6mF1Q3
+         5VrK4xn5VERzkRMiVS2L2ubvooXeHvLVqIxdhprTbtcnpo/hl3bsz0Pw5x3P7lMv81+D
+         FFrSWgvIfWKGEXVWLhgO94jPDUEUgeCwJmUFHqb9bZgF+zMnuEG1XOheHLnmezw8ysUT
+         2Mrg==
+X-Gm-Message-State: ACrzQf1PSWhRbWx4B82DxHK5LHagUB0ycXWcDdogyjan/0ICIeM80DtL
+        1FoLJ9KsNUfB9JNvPPuFQw==
+X-Google-Smtp-Source: AMsMyM5bf2O1XCXcTT+EBxdNCZPqKq/zfFpFZLmILpaWROke+ZLdE9yyGbpPQwHfxM5CCj/Csptsuw==
+X-Received: by 2002:a05:6871:90:b0:136:b9e8:a024 with SMTP id u16-20020a056871009000b00136b9e8a024mr22611816oaa.60.1666222315586;
+        Wed, 19 Oct 2022 16:31:55 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id b133-20020aca348b000000b0035494c1202csm7235963oia.42.2022.10.19.16.31.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 15:19:23 -0700 (PDT)
-Date:   Wed, 19 Oct 2022 15:19:20 -0700
-From:   Brian Norris <briannorris@chromium.org>
-To:     Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Faiz Abbas <faiz_abbas@ti.com>, linux-mmc@vger.kernel.org,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        linux-arm-kernel@lists.infradead.org,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        linux-kernel@vger.kernel.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>, stable@vger.kernel.org
-Subject: Re: [PATCH v2 2/7] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for
- CQHCI
-Message-ID: <Y1B36AnqJtolGQEP@google.com>
-References: <20221019215440.277643-1-briannorris@chromium.org>
- <20221019145246.v2.2.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
- <14efb3e6-96cf-f42e-16aa-c45001ec632e@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <14efb3e6-96cf-f42e-16aa-c45001ec632e@gmail.com>
+        Wed, 19 Oct 2022 16:31:54 -0700 (PDT)
+Received: (nullmailer pid 19946 invoked by uid 1000);
+        Wed, 19 Oct 2022 23:31:53 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Dinh Nguyen <dinguyen@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        devicetree@vger.kernel.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, jh80.chung@samsung.com,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
+In-Reply-To: <20221019170657.68014-2-dinguyen@kernel.org>
+References: <20221019170657.68014-1-dinguyen@kernel.org> <20221019170657.68014-2-dinguyen@kernel.org>
+Message-Id: <166622207591.14373.6525811988033372211.robh@kernel.org>
+Subject: Re: [PATCHv5 1/6] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
+Date:   Wed, 19 Oct 2022 18:31:53 -0500
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 19, 2022 at 02:59:39PM -0700, Florian Fainelli wrote:
-> On 10/19/22 14:54, Brian Norris wrote:
-> > The same bug was already found and fixed for two other drivers, in v5.7
-> > and v5.9:
-> > 
-> > 5cf583f1fb9c mmc: sdhci-msm: Deactivate CQE during SDHC reset
-> > df57d73276b8 mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel GLK-based controllers
-> > 
-> > The latter is especially prescient, saying "other drivers using CQHCI
-> > might benefit from a similar change, if they also have CQHCI reset by
-> > SDHCI_RESET_ALL."
-
-> > --- a/drivers/mmc/host/sdhci-of-arasan.c
-> > +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> > @@ -366,6 +366,9 @@ static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
-> >   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> >   	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
-> > +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
-> > +		cqhci_deactivate(host->mmc);
-> > +
-> >   	sdhci_reset(host, mask);
+On Wed, 19 Oct 2022 12:06:52 -0500, Dinh Nguyen wrote:
+> Document the optional "altr,sysmgr-syscon" binding that is used to
+> access the System Manager register that controls the SDMMC clock
+> phase.
 > 
-> Cannot this be absorbed by sdhci_reset() that all of these drivers appear to
-> be utilizing since you have access to the host and the mask to make that
-> decision?
+> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> ---
+> v5: document reg shift
+> v4: add else statement
+> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
+>     "altr,socfpga-dw-mshc"
+> v2: document "altr,sysmgr-syscon" in the MMC section
+> ---
+>  .../bindings/mmc/synopsys-dw-mshc.yaml        | 32 +++++++++++++++++--
+>  1 file changed, 29 insertions(+), 3 deletions(-)
+> 
 
-It potentially could.
+Running 'make dtbs_check' with the schema in this patch gives the
+following warnings. Consider if they are expected or the schema is
+incorrect. These may not be new warnings.
 
-I don't know if this is a specified SDHCI behavior that really belongs
-in the common helper, or if this is just a commonly-shared behavior. Per
-the comments I quote above ("if they also have CQHCI reset by
-SDHCI_RESET_ALL"), I chose to leave that as an implementation-specific
-behavior.
+Note that it is not yet a requirement to have 0 warnings for dtbs_check.
+This will change in the future.
 
-I suppose it's not all that harmful to do this even if some SDHCI
-controller doesn't have the same behavior/quirk.
+Full log is available here: https://patchwork.ozlabs.org/patch/
 
-I guess I also don't know if any SDHCI controllers will support command
-queueing (MMC_CAP2_CQE) via somethings *besides* CQHCI. I see
-CQE support in sdhci-sprd.c without CQHCI, although that driver doesn't
-set MMC_CAP2_CQE.
 
-Brian
+dwmmc0@ff704000: $nodename:0: 'dwmmc0@ff704000' does not match '^mmc(@.*)?$'
+	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb
+	arch/arm/boot/dts/socfpga_vt.dtb
+
+dwmmc0@ff704000: 'altr,sysmgr-syscon' is a required property
+	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+
+dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'cd-gpios', 'fifo-depth', 'resets', 'vmmc-supply', 'vqmmc-supply' were unexpected)
+	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+
+dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets', 'vmmc-supply', 'vqmmc-supply' were unexpected)
+	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+
+dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
+	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
+	arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb
+	arch/arm/boot/dts/socfpga_vt.dtb
+
+dwmmc0@ff808000: $nodename:0: 'dwmmc0@ff808000' does not match '^mmc(@.*)?$'
+	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
+	arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
+	arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
+	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+
+dwmmc0@ff808000: 'altr,sysmgr-syscon' is a required property
+	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
+	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+
+dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
+	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+
+dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
+	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
+
+dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'fifo-depth', 'resets' were unexpected)
+	arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
+	arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
+
+mmc@ff808000: 'altr,sysmgr-syscon' is a required property
+	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dtb
+	arch/arm64/boot/dts/altera/socfpga_stratix10_swvp.dtb
+	arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dtb
+	arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dtb
+
+mmc@ff808000: Unevaluated properties are not allowed ('altr,dw-mshc-ciu-div', 'altr,dw-mshc-sdr-timing', 'iommus' were unexpected)
+	arch/arm64/boot/dts/altera/socfpga_stratix10_swvp.dtb
+
+mmc@ff808000: Unevaluated properties are not allowed ('iommus' was unexpected)
+	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dtb
+	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk_nand.dtb
+	arch/arm64/boot/dts/intel/socfpga_agilex_n6000.dtb
+	arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dtb
+	arch/arm64/boot/dts/intel/socfpga_agilex_socdk_nand.dtb
+	arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dtb
+
+mmcsd@40004000: $nodename:0: 'mmcsd@40004000' does not match '^mmc(@.*)?$'
+	arch/arm/boot/dts/lpc4337-ciaa.dtb
+	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
+	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
+	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
+
+mmcsd@40004000: clock-names:0: 'biu' was expected
+	arch/arm/boot/dts/lpc4337-ciaa.dtb
+	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
+	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
+	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
+
+mmcsd@40004000: clock-names:1: 'ciu' was expected
+	arch/arm/boot/dts/lpc4337-ciaa.dtb
+	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
+	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
+	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
+
+mmcsd@40004000: Unevaluated properties are not allowed ('bus-width', 'clock-names', 'resets', 'vmmc-supply' were unexpected)
+	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
+	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
+
+mmcsd@40004000: Unevaluated properties are not allowed ('clock-names', 'resets' were unexpected)
+	arch/arm/boot/dts/lpc4337-ciaa.dtb
+	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
+
