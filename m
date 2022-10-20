@@ -2,112 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E4048C43217
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 18:20:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5EFC43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 19:35:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230040AbiJTSUW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 14:20:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38468 "EHLO
+        id S229941AbiJTTfZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 15:35:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229948AbiJTSUV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 14:20:21 -0400
-Received: from mail-qk1-x72e.google.com (mail-qk1-x72e.google.com [IPv6:2607:f8b0:4864:20::72e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8E89F037F
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 11:20:19 -0700 (PDT)
-Received: by mail-qk1-x72e.google.com with SMTP id o2so463543qkk.10
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 11:20:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=vfRqvICwFOrLHDo6+IXFWjGDmS/WdT8jBtA79yR0Wyc=;
-        b=RnpwSu+KDOp0ZqfM1F6m8caLR9vvpt4m+OzCNdCSddvc4eP3GbifY0n0thFN/VBRKB
-         h3OI4VAUhvKoEmnNENnGlbaE6Sz19B5ITzgbvpXT61u4nw5pNlWrZACa9C4gWjWVjVEg
-         VZ83c0aSRjm9HB6k4n7M8DR5JeMBys96HXLRvnJMD79Sgi4js8z9yXbaeeOS97FzOC47
-         mkMjVYYWQFbOSqzRzO3mJL7nwwXPD/8et1quMd2oSZDxTcrcxrUh0arU5L0D7KH0Xor9
-         RXF/1BO1WA/qLt6vfwCYRY4GEFG5jWnCxKXXhggi7JmN4aS6PyrWbDw8SAsETJgQ2K3v
-         qNJg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vfRqvICwFOrLHDo6+IXFWjGDmS/WdT8jBtA79yR0Wyc=;
-        b=BM6DwfYEmW3iZ2Jpf4KFOR7LA6Sf5OwjmTUbAVrZm9KqZLp3b/IjS3amDyzcJiIqqv
-         Tzsm09KluP8g/8NmW2gxLk5z81eTVVr+MJxwluLmMehQVgO6wBfSOWeFZnuXJWFljzeA
-         2jte3sJxOW1DJIC1g5Ye4YtZM1vEt8/IppjMfGVvOu53CJNaZ9Ig8XF8b21t6ofd7TKG
-         W6ggyYr+f5nYMZQmv/OzUYPAO/bvLvZmDy692JeyyHuNUZioAbaPMn5fLMN6h+4ssiTk
-         R/zSvkV+kMAdkmZvvEWapLRP8mG62lseAhABZ3A7BSz2v2SbAke34JC1CnsBohlDyZDt
-         Z1CQ==
-X-Gm-Message-State: ACrzQf3dVniHwzlutH2YS2VbRvGE6oGMQ+W1yiFWzRJ/dL1T4HmOXKrC
-        NXhUT71axXZlmAW/CPLjwCJohg==
-X-Google-Smtp-Source: AMsMyM4PlzDbHD1dIL5dUIXCQJz0wfI6IwENSHLqeWgeyo6sB2dd5Ccvzmp43BYMOwtZyFPcxznJbw==
-X-Received: by 2002:a05:620a:254e:b0:6c9:cc85:c41a with SMTP id s14-20020a05620a254e00b006c9cc85c41amr10515136qko.260.1666290017554;
-        Thu, 20 Oct 2022 11:20:17 -0700 (PDT)
-Received: from [192.168.10.124] (pool-72-83-177-149.washdc.east.verizon.net. [72.83.177.149])
-        by smtp.gmail.com with ESMTPSA id h24-20020ac85158000000b00304fe5247bfsm6443656qtn.36.2022.10.20.11.20.15
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 20 Oct 2022 11:20:16 -0700 (PDT)
-Message-ID: <bc0a9297-7adb-7cdb-e5ee-1d6e80eddb04@linaro.org>
-Date:   Thu, 20 Oct 2022 14:20:07 -0400
+        with ESMTP id S229576AbiJTTfW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 15:35:22 -0400
+Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E610159D44;
+        Thu, 20 Oct 2022 12:35:21 -0700 (PDT)
+Received: from t60.musicnaut.iki.fi (85-76-8-144-nat.elisa-mobile.fi [85.76.8.144])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id CE44D1B001A3;
+        Thu, 20 Oct 2022 22:35:12 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
+        t=1666294513;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=iDvU3Oc2f/QHiT2VDqeJIzu0pLTa7SFrJfK0tw4pkR4=;
+        b=CtXAPho/8wXRfk+qDJKIoC6KYH+1stwwfLzjVRMs0F+xM+grEwFCOEnyHRY+ycw0phLrqA
+        dmxyo/lUkHIoc+6F7XZdm8QtRdpHYiq7POVNvy1hDDl8kZiaVzMRDVzCEvk5FKlLNJxM5Z
+        mIuzt6KGgMCHzIT9QAism4yT1QbepNWk+y8d8m1PE8h++XvCco1QZhPAh8kq+Eo6ZTq5+d
+        cxUaNZ5CDcDg2Jy6l0M31unoiNvCZ5XNaWr90DnEvhNeNZt53FaJvXJjRNgRz6OkolDyPR
+        gBA5Yui/EzWoDAsho3j99NrX8ZZvV0QVIX9keqeXgnlPd9S1ycI/FSQDcseG6A==
+Date:   Thu, 20 Oct 2022 22:35:11 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Arnd Bergmann <arnd@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        Lee Jones <lee@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Felipe Balbi <balbi@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-i2c@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
+Message-ID: <20221020193511.GB3019@t60.musicnaut.iki.fi>
+References: <20221019144119.3848027-1-arnd@kernel.org>
+ <20221019150410.3851944-1-arnd@kernel.org>
+ <20221019150410.3851944-13-arnd@kernel.org>
+ <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
+ <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.0
-Subject: Re: [PATCHv5 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Content-Language: en-US
-To:     Dinh Nguyen <dinguyen@kernel.org>, jh80.chung@samsung.com
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20221019170657.68014-1-dinguyen@kernel.org>
- <20221019170657.68014-2-dinguyen@kernel.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221019170657.68014-2-dinguyen@kernel.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=lahtoruutu; t=1666294513;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=iDvU3Oc2f/QHiT2VDqeJIzu0pLTa7SFrJfK0tw4pkR4=;
+        b=rrXIBB6/cLwcvSTbEB1/WW+rnYGa9ozsO5IdoYj3F2Tc0TW94d0WCRxZw+oVInIGIuGmi/
+        Fn4crbmRrkd4rYxH/6t7yq6momM+CRZGi2uizH4Ur7IhP2jvLxH9tzSSU/1YRI21RewhwQ
+        aHMqhLrunMNefiRfte6YeX06eLw0mN7NJzgJQG/q7JdfNeSWW1EdkdYVm+QNayDOuaibS5
+        v7WxJeHeg7FweWu51kNUvacMvxxr3ieXXGjBqJSqhy0ebzHA4EaI8qVdJxzFimETZn2/7E
+        sm3qW1quOEJkBeo0d6IoFMMDJddWkChnaFOjuljaoPOeWchojPLOM/uZrLpgAA==
+ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1666294513; a=rsa-sha256;
+        cv=none;
+        b=WUmMZDsubTKiseV7lrBxLDtKPP7bk5IK0PgUldYgmWXY9HIxdL6tqW3Z9paPz9wsGxxw/7
+        qiZq7tRSmcBLf1iSebg5+iozzfUSRLJJyBKYAC99IzxzRlCx007xRt2Gh+o2HxKEAuuK+0
+        c5vr7CRlti+oE9AvJOYIWhHO914VDrnfwuQZ3KsinukOg5gKGADyJD8nzLi3lwK+qqXCD/
+        wEi5VAbEF3fP8wtz7LdjIY8ps9E81YQ2gfzJUgwLWjpJsLuSqeRJRYYR8IAJcKtSSON30O
+        R7UGOfwvglPEdSBo1w8IgrWN3B20dElKAOe5hN5vH1XDL9eAOTRF/kJnZijzTw==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/10/2022 13:06, Dinh Nguyen wrote:
+Hi,
 
-Thank you for your patch. There is something to discuss/improve.
+On Thu, Oct 20, 2022 at 09:11:11AM +0200, Arnd Bergmann wrote:
+> On Wed, Oct 19, 2022, at 19:15, Aaro Koskinen wrote:
+> > On Wed, Oct 19, 2022 at 05:03:35PM +0200, Arnd Bergmann wrote:
+> >> All board support that was marked as 'unused' earlier can
+> >> now be removed, leaving the five machines that that still
+> >> had someone using them in 2022, or that are supported in
+> >> qemu.
+> > [...]
+> >>  config OMAP_OSK_MISTRAL
+> >>  	bool "Mistral QVGA board Support"
+> >>  	depends on MACH_OMAP_OSK
+> >> -	depends on UNUSED_BOARD_FILES
+> >>  	help
+> >>  	  The OSK supports an optional add-on board with a Quarter-VGA
+> >>  	  touchscreen, PDA-ish buttons, a resume button, bicolor LED,
+> >>  	  and camera connector.  Say Y here if you have this board.
+> >
+> > Shouldn't this go away as well?
+> 
+> No, this one was incorrectly annotated, it's not actually
+> a board but it's an option for the OSK board that is not
+> getting removed. I considered making a separate patch
+> for removing the dependency, but that didn't seem worth it.
 
-> -allOf:
-> -  - $ref: "synopsys-dw-mshc-common.yaml#"
-> -
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
->  
-> @@ -38,6 +35,35 @@ properties:
->        - const: biu
->        - const: ciu
->  
-> +  altr,sysmgr-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
-> +      - items:
-> +          - description: phandle to the sysmgr node
-> +          - description: register offset that controls the SDMMC clock phase
-> +          - description: register shift for the smplsel(drive in) setting
-> +    description:
-> +      Contains the phandle to System Manager block that contains
-> +      the SDMMC clock-phase control register. The first value is the pointer
-> +      to the sysmgr, the 2nd value is the register offset for the SDMMC
-> +      clock phase register, and the 3rd value is the bit shift for the
-> +      smplsel(drive in) setting.
-> +
-> +allOf:
-> +  - $ref: "synopsys-dw-mshc-common.yaml#"
+OK. For the record, I don't think anyone has this add-on board anymore,
+and it has probably never been tested with the mainline kernel, so
+it's likely in the "dead code" category... Maybe it could be changed to
+"BROKEN", then the related OSK LCD panel stuff could be deleted later
+on too.
 
-If there is going to be resend, please drop quotes here.
-
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-Best regards,
-Krzysztof
-
+A.
