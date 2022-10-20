@@ -2,183 +2,150 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0301C43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 19 Oct 2022 23:32:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7AF9C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 02:45:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231642AbiJSXcC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 19:32:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50424 "EHLO
+        id S229921AbiJTCpv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 22:45:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58464 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230467AbiJSXb5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 19:31:57 -0400
-Received: from mail-oa1-f41.google.com (mail-oa1-f41.google.com [209.85.160.41])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 759A7170DD6;
-        Wed, 19 Oct 2022 16:31:56 -0700 (PDT)
-Received: by mail-oa1-f41.google.com with SMTP id 586e51a60fabf-1322fa1cf6fso22584854fac.6;
-        Wed, 19 Oct 2022 16:31:56 -0700 (PDT)
+        with ESMTP id S229731AbiJTCpu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 22:45:50 -0400
+Received: from mail-oa1-x32.google.com (mail-oa1-x32.google.com [IPv6:2001:4860:4864:20::32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE6B04361D;
+        Wed, 19 Oct 2022 19:45:49 -0700 (PDT)
+Received: by mail-oa1-x32.google.com with SMTP id 586e51a60fabf-13af2d12469so343466fac.13;
+        Wed, 19 Oct 2022 19:45:49 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=0Cq+099au1fcIZkEuYX8fyyY/A6S9ZGFUDhQxD4wNUM=;
+        b=lSldbcAWPhA/wXSb/o6zEJ+EhogaGACATRZgbSCtFGuMbC/ndba8gJbtw9kCWk8/Ck
+         XtNK7nW0mL/k0I68ZgGPVuVaw5kjHNvc2MYgrGXVaTJxUYU/gD9oTDGJLnSaReTwFzdc
+         kPmZGaJbkbkjNubHkjnr6Dy9nI6rBA9L52CZLnt7pZjaaJLYjHbepQ8LxELgGvcYZadW
+         8MNoeVjvmw7GnvrpPVcRrw2ajbCYs5CiLnXnhG/mnrRJfu/OOH2iqVJJSkvhRuM8PO6C
+         TkEftRdOe2mK1lvi/RhteXv0Bi90dOmeCpePCu+T4bvrGowWkMKdsZGQK52X2scNbW5u
+         1TwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=date:subject:message-id:references:in-reply-to:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=9AIp9bMJCr5Y+vVCCDJA4f0wPlmi8lCrHSWYwE065mg=;
-        b=uRj/zRxpP6QRekC7MgZt7r+Z/36KqL0eB1qideNSWgeNnZCJIbLg0n9WGF9R3NSe5z
-         t8rQO7phQ7YmmjZBEMSgXqWAuaVBFDG4JkacEFO1naym1Pwg1Csj5+9dWQUwlGoaKxGT
-         1Ia/lF2OYNPubC2wQ9quoJsz4bSIo5DBfSRNWq/4kKUARpjO+j2kevumpCntKy6mF1Q3
-         5VrK4xn5VERzkRMiVS2L2ubvooXeHvLVqIxdhprTbtcnpo/hl3bsz0Pw5x3P7lMv81+D
-         FFrSWgvIfWKGEXVWLhgO94jPDUEUgeCwJmUFHqb9bZgF+zMnuEG1XOheHLnmezw8ysUT
-         2Mrg==
-X-Gm-Message-State: ACrzQf1PSWhRbWx4B82DxHK5LHagUB0ycXWcDdogyjan/0ICIeM80DtL
-        1FoLJ9KsNUfB9JNvPPuFQw==
-X-Google-Smtp-Source: AMsMyM5bf2O1XCXcTT+EBxdNCZPqKq/zfFpFZLmILpaWROke+ZLdE9yyGbpPQwHfxM5CCj/Csptsuw==
-X-Received: by 2002:a05:6871:90:b0:136:b9e8:a024 with SMTP id u16-20020a056871009000b00136b9e8a024mr22611816oaa.60.1666222315586;
-        Wed, 19 Oct 2022 16:31:55 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id b133-20020aca348b000000b0035494c1202csm7235963oia.42.2022.10.19.16.31.54
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=0Cq+099au1fcIZkEuYX8fyyY/A6S9ZGFUDhQxD4wNUM=;
+        b=Xo3LTJk8DV7udbrPTdkKcNCo3p6ewp1/3S/HkK1u7LYvVUPYbCggU7xTMU33vAHH/p
+         KKMVY9aXfptHWNTcrAbRC1aTIQmnV5wgrFWaLGGiPLcd5NjyfuKmRPkvMl1YQkFx2rEq
+         kve0Zdlf1YMQ3a4l88/NXpLs8ao3MsJegC+5Q5z/8ns9flFaxr/6J7ykN0ZPu77qKe7k
+         sUr2KuUsK1AcEgFAnQAb87dhmg7PPS6kCLmUtrojcoCaiiAKuIFO8bTJf0Ey12pDq97n
+         HXtFGjAwVb4GVYJw7Y2X53l7HWRLNkjXNEkrGfPYTbI2Xa26crO9oOs/lbhPwh0cLCUN
+         A7qg==
+X-Gm-Message-State: ACrzQf0hePY+kHE6L2j96plVPBDFZhhCdHmdAQJ60VaTBiCbcOCNxxCL
+        OEyvM6MIzLb/uLvnqSyAHJOI76Q0j8UdyA==
+X-Google-Smtp-Source: AMsMyM4P5p3sSnu7XTPKLwvTl/t67AYBSqAa/3Mf4OpKDUxDSZ+8fkxi0XJtwpMU3u08s4UIyQEpow==
+X-Received: by 2002:a17:90a:b118:b0:20d:65f4:fde9 with SMTP id z24-20020a17090ab11800b0020d65f4fde9mr47029210pjq.184.1666233938800;
+        Wed, 19 Oct 2022 19:45:38 -0700 (PDT)
+Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
+        by smtp.gmail.com with ESMTPSA id 33-20020a630d61000000b004351358f056sm10546364pgn.85.2022.10.19.19.45.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 16:31:54 -0700 (PDT)
-Received: (nullmailer pid 19946 invoked by uid 1000);
-        Wed, 19 Oct 2022 23:31:53 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Dinh Nguyen <dinguyen@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
-        devicetree@vger.kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, jh80.chung@samsung.com,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
-In-Reply-To: <20221019170657.68014-2-dinguyen@kernel.org>
-References: <20221019170657.68014-1-dinguyen@kernel.org> <20221019170657.68014-2-dinguyen@kernel.org>
-Message-Id: <166622207591.14373.6525811988033372211.robh@kernel.org>
-Subject: Re: [PATCHv5 1/6] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
-Date:   Wed, 19 Oct 2022 18:31:53 -0500
+        Wed, 19 Oct 2022 19:45:38 -0700 (PDT)
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+To:     ulf.hansson@linaro.org
+Cc:     axboe@kernel.dk, avri.altman@wdc.com, adrian.hunter@intel.com,
+        kch@nvidia.com, CLoehle@hyperstone.com,
+        vincent.whitchurch@axis.com, bigeasy@linutronix.de,
+        s.shtylyov@omp.ru, michael@allwinnertech.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        megoo.tang@gmail.com, lzx.stg@gmail.com
+Subject: [PATCH] mmc: block: Support Host to control FUA.
+Date:   Thu, 20 Oct 2022 10:45:29 +0800
+Message-Id: <20221020024529.25227-1-wenchao.chen666@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 19 Oct 2022 12:06:52 -0500, Dinh Nguyen wrote:
-> Document the optional "altr,sysmgr-syscon" binding that is used to
-> access the System Manager register that controls the SDMMC clock
-> phase.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
-> ---
-> v5: document reg shift
-> v4: add else statement
-> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->     "altr,socfpga-dw-mshc"
-> v2: document "altr,sysmgr-syscon" in the MMC section
-> ---
->  .../bindings/mmc/synopsys-dw-mshc.yaml        | 32 +++++++++++++++++--
->  1 file changed, 29 insertions(+), 3 deletions(-)
-> 
+From: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Running 'make dtbs_check' with the schema in this patch gives the
-following warnings. Consider if they are expected or the schema is
-incorrect. These may not be new warnings.
+This patch introduces host->fua_disable for MMC host controller.
+The host can turn off FUA to improve performance.
 
-Note that it is not yet a requirement to have 0 warnings for dtbs_check.
-This will change in the future.
+1. fua_disable = 1
+/sys/block/mmcblk0/queue # cat fua 0
+I tested 5 times for each case and output a average speed.
 
-Full log is available here: https://patchwork.ozlabs.org/patch/
+1) Sequential read:
+Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
+Average speed: 265.74MiB/s
 
+2) Random read:
+Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
+Average speed: 98.81MiB/s
 
-dwmmc0@ff704000: $nodename:0: 'dwmmc0@ff704000' does not match '^mmc(@.*)?$'
-	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb
-	arch/arm/boot/dts/socfpga_vt.dtb
+3) Sequential write:
+Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
+Average speed: 200.5MiB/s
 
-dwmmc0@ff704000: 'altr,sysmgr-syscon' is a required property
-	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+4) Random write:
+Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
+Average speed: 70.32MiB/s
 
-dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'cd-gpios', 'fifo-depth', 'resets', 'vmmc-supply', 'vqmmc-supply' were unexpected)
-	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+2. fua_disable = 0 (default 0)
+/sys/block/mmcblk0/queue # cat fua 1
+I tested 5 times for each case and output a average speed.
 
-dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets', 'vmmc-supply', 'vqmmc-supply' were unexpected)
-	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+1) Sequential read:
+Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
+Average speed: 257.86MiB/s
 
-dwmmc0@ff704000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
-	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
-	arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb
-	arch/arm/boot/dts/socfpga_vt.dtb
+2) Random read:
+Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
+Average speed: 100.2MiB/s
 
-dwmmc0@ff808000: $nodename:0: 'dwmmc0@ff808000' does not match '^mmc(@.*)?$'
-	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
-	arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
-	arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
-	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+3) Sequential write:
+Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
+Average speed: 149.48MiB/s
 
-dwmmc0@ff808000: 'altr,sysmgr-syscon' is a required property
-	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
-	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+4) Random write:
+Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
+Average speed: 12.68MiB/s
 
-dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-mmc-highspeed', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
-	arch/arm/boot/dts/socfpga_arria10_socdk_sdmmc.dtb
+According to the above data, disable FUA (fua_disable = 1) improves the
+performance. Therefore, it is recommended to support the host to control
+FUA.
 
-dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'broken-cd', 'bus-width', 'cap-sd-highspeed', 'fifo-depth', 'resets' were unexpected)
-	arch/arm/boot/dts/socfpga_arria10_chameleonv3.dtb
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+---
+ drivers/mmc/core/block.c | 3 ++-
+ include/linux/mmc/host.h | 3 +++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-dwmmc0@ff808000: Unevaluated properties are not allowed ('#address-cells', '#size-cells', 'fifo-depth', 'resets' were unexpected)
-	arch/arm/boot/dts/socfpga_arria10_socdk_nand.dtb
-	arch/arm/boot/dts/socfpga_arria10_socdk_qspi.dtb
-
-mmc@ff808000: 'altr,sysmgr-syscon' is a required property
-	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dtb
-	arch/arm64/boot/dts/altera/socfpga_stratix10_swvp.dtb
-	arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dtb
-	arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dtb
-
-mmc@ff808000: Unevaluated properties are not allowed ('altr,dw-mshc-ciu-div', 'altr,dw-mshc-sdr-timing', 'iommus' were unexpected)
-	arch/arm64/boot/dts/altera/socfpga_stratix10_swvp.dtb
-
-mmc@ff808000: Unevaluated properties are not allowed ('iommus' was unexpected)
-	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dtb
-	arch/arm64/boot/dts/altera/socfpga_stratix10_socdk_nand.dtb
-	arch/arm64/boot/dts/intel/socfpga_agilex_n6000.dtb
-	arch/arm64/boot/dts/intel/socfpga_agilex_socdk.dtb
-	arch/arm64/boot/dts/intel/socfpga_agilex_socdk_nand.dtb
-	arch/arm64/boot/dts/intel/socfpga_n5x_socdk.dtb
-
-mmcsd@40004000: $nodename:0: 'mmcsd@40004000' does not match '^mmc(@.*)?$'
-	arch/arm/boot/dts/lpc4337-ciaa.dtb
-	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
-	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
-	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-
-mmcsd@40004000: clock-names:0: 'biu' was expected
-	arch/arm/boot/dts/lpc4337-ciaa.dtb
-	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
-	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
-	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-
-mmcsd@40004000: clock-names:1: 'ciu' was expected
-	arch/arm/boot/dts/lpc4337-ciaa.dtb
-	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
-	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
-	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-
-mmcsd@40004000: Unevaluated properties are not allowed ('bus-width', 'clock-names', 'resets', 'vmmc-supply' were unexpected)
-	arch/arm/boot/dts/lpc4357-ea4357-devkit.dtb
-	arch/arm/boot/dts/lpc4357-myd-lpc4357.dtb
-
-mmcsd@40004000: Unevaluated properties are not allowed ('clock-names', 'resets' were unexpected)
-	arch/arm/boot/dts/lpc4337-ciaa.dtb
-	arch/arm/boot/dts/lpc4350-hitex-eval.dtb
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 54cd009aee50..333e819e077a 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2490,7 +2490,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+ 	     card->ext_csd.rel_sectors)) {
+ 		md->flags |= MMC_BLK_REL_WR;
+-		fua_enabled = true;
++		if (!card->host->fua_disable)
++			fua_enabled = true;
+ 		cache_enabled = true;
+ 	}
+ 	if (mmc_cache_enabled(card->host))
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8fdd3cf971a3..16a5bee3eeae 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -517,6 +517,9 @@ struct mmc_host {
+ 	struct blk_crypto_profile crypto_profile;
+ #endif
+ 
++	/* Host FUA support */
++	bool			fua_disable;
++
+ 	/* Host Software Queue support */
+ 	bool			hsq_enabled;
+ 
+-- 
+2.17.1
 
