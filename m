@@ -2,149 +2,118 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DFA18C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 06:29:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5259FC43217
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 07:11:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229619AbiJTG3Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 02:29:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57966 "EHLO
+        id S230078AbiJTHLg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 03:11:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229604AbiJTG3Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 02:29:24 -0400
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0CD223E;
-        Wed, 19 Oct 2022 23:29:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666247360; x=1697783360;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ZCZxqxkxlhv4qXWNtnj/k+0pRzItxdl7yKBQyZzESDw=;
-  b=dE9qVrQdeA7rs/O8hwJyzshJpOCh/NcAUUnUOM+hpBfgjQpJ3f/VYonj
-   3/ryuiiGXzj8WAw6LSF3cd/fmfZGrCTKhzf5dGZvdrzWDFOq1InLpdKsQ
-   ex25cJ8oB1jRtAoBZ64VE0gtJKBE+QpIBzklZ2lazbItt2YGDhIGXTf03
-   XjcycY0MG3yHAuiMZYVHjDAsPROr/X8GT1Jx0VVUawvSTTPTYgD6e+L2V
-   +Amy4L8+PkFZcVjwuiR25cJSzUrU/Ypbgwi9G4oCqo2/o1V91poFDHjWU
-   1PZkE9bo0t+50TtEjxIGgXlYozvoi75Yw+lYuyHhv+An2ePn5K5kd/Tdb
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10505"; a="370831246"
-X-IronPort-AV: E=Sophos;i="5.95,198,1661842800"; 
-   d="scan'208";a="370831246"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2022 23:29:19 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10505"; a="607479841"
-X-IronPort-AV: E=Sophos;i="5.95,198,1661842800"; 
-   d="scan'208";a="607479841"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.25])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Oct 2022 23:29:14 -0700
-Message-ID: <5f1adbf7-b477-914e-0a07-5c76532e85cd@intel.com>
-Date:   Thu, 20 Oct 2022 09:29:10 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH v2 2/7] mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for
- CQHCI
-Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
-        Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Faiz Abbas <faiz_abbas@ti.com>, linux-mmc@vger.kernel.org,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        linux-arm-kernel@lists.infradead.org,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        linux-kernel@vger.kernel.org,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>, stable@vger.kernel.org
-References: <20221019215440.277643-1-briannorris@chromium.org>
- <20221019145246.v2.2.I29f6a2189e84e35ad89c1833793dca9e36c64297@changeid>
- <14efb3e6-96cf-f42e-16aa-c45001ec632e@gmail.com>
- <Y1B36AnqJtolGQEP@google.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <Y1B36AnqJtolGQEP@google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S230060AbiJTHLf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 03:11:35 -0400
+Received: from out5-smtp.messagingengine.com (out5-smtp.messagingengine.com [66.111.4.29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CA65153814;
+        Thu, 20 Oct 2022 00:11:33 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.nyi.internal (Postfix) with ESMTP id 39D925C0118;
+        Thu, 20 Oct 2022 03:11:32 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Thu, 20 Oct 2022 03:11:32 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm2; t=1666249892; x=1666336292; bh=VKnxMFhTQ2
+        bD9dGwCnO8mk5gYoCFAkEbzjlFbm9rovY=; b=mx0RguBAra0abQu7M4Y1+MUi33
+        KMNn/vZOiCggNhPBxxFZUy2NzCTRt5cfJi6DqRtGr0aU8kyjB0FuCWdRE1ESSVfO
+        sIFWbYRFVHB+W0CzZqepqCpzSWp1QUBRE8IEt1rnmVnhXu1i1lVReTstddxV6b8O
+        mnXzD7xtSvK91uJ3//4bI5OJDkxANxoYGFvZEBO+ozuHvP/Jfc9yHUqhQfuaKKyL
+        MTdJkm9dzDJGKelIfVHqklogaMsblFo0pnIQi+ajn//A85+RCtzTt+vTTBEY4rzx
+        XPT6s1r2QRz8Qyh+sjpqXq+mV4rIoew/aoTklNlH8vDPJEqKjY8naO6n9RZg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1666249892; x=1666336292; bh=VKnxMFhTQ2bD9dGwCnO8mk5gYoCF
+        AkEbzjlFbm9rovY=; b=CIlSjHmAXwsx/YWjLQ/Wzj/EjQQQxjDG1krSeXGRKQ0l
+        BSSuMXZWkLWWl7uwBhn/gjcYkKWK6/rvHTI7T5FHSHCD971EEB6UplprIf90tSFm
+        WNnkRj3o+wv3B1uGjGFuBsulNxGuYML4VylSUo8WeMzmheUc5pnoEcIDBtPvdkmA
+        H73zV8CAS27N2P8LoV1SaKHIweN+ah5O7VHk9yXVWs04Fb9GpTqiiGBkklghLxDP
+        wremdM+FfvBpDZLpyTSo/OrDw4lajm+h4MQzyeEXgpyb+MLq0V6V5xN+rivG6bY0
+        MJDWUFiUsxltMj2RO6z2zxsEU51kdKDnfHl4LsMM8A==
+X-ME-Sender: <xms:o_RQY-ZLJTRzMXsItyMbHQlmCV04T7mk8EY3alVsMM_cMrwQdVSm2A>
+    <xme:o_RQYxYREGqXTgQVjaqvE0I02peT7IFLWfJRdxD6hF03QwzitqrVZlUg6yJ16IM2U
+    jfrYF4erALQtkFXX2w>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrfeelhedguddujecutefuodetggdotefrod
+    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
+    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
+    enucfjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdet
+    rhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrg
+    htthgvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedt
+    keetffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhhnugesrghrnhgusgdruggv
+X-ME-Proxy: <xmx:o_RQY49i2WOHU2ZiybVKJPOyczK_wN43XuENDHBGLcGzpojd6SVoTQ>
+    <xmx:o_RQYwrd0vSjaZX8pHoF2YxiJMRG2qB6V3yzlszB_e4pPqDNXA74Bg>
+    <xmx:o_RQY5rd2l0cCOIvWxxOLlYhaVvDMXoXGOvG6_UDlyPiJcNBXWEQnw>
+    <xmx:pPRQY6Tmh5Y_tereJiQL4ZAD0PAJQTUsYaXFKet4i3vvMsv2uSsTJA>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 588A1B60086; Thu, 20 Oct 2022 03:11:31 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
+Mime-Version: 1.0
+Message-Id: <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
+In-Reply-To: <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
+References: <20221019144119.3848027-1-arnd@kernel.org>
+ <20221019150410.3851944-1-arnd@kernel.org>
+ <20221019150410.3851944-13-arnd@kernel.org>
+ <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
+Date:   Thu, 20 Oct 2022 09:11:11 +0200
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Aaro Koskinen" <aaro.koskinen@iki.fi>,
+        "Arnd Bergmann" <arnd@kernel.org>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        "Janusz Krzysztofik" <jmkrzyszt@gmail.com>,
+        "Tony Lindgren" <tony@atomide.com>, linux-kernel@vger.kernel.org,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        "Lee Jones" <lee@kernel.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Felipe Balbi" <balbi@kernel.org>,
+        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
+        linux-i2c@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 20/10/22 01:19, Brian Norris wrote:
-> On Wed, Oct 19, 2022 at 02:59:39PM -0700, Florian Fainelli wrote:
->> On 10/19/22 14:54, Brian Norris wrote:
->>> The same bug was already found and fixed for two other drivers, in v5.7
->>> and v5.9:
->>>
->>> 5cf583f1fb9c mmc: sdhci-msm: Deactivate CQE during SDHC reset
->>> df57d73276b8 mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for Intel GLK-based controllers
->>>
->>> The latter is especially prescient, saying "other drivers using CQHCI
->>> might benefit from a similar change, if they also have CQHCI reset by
->>> SDHCI_RESET_ALL."
-> 
->>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>> @@ -366,6 +366,9 @@ static void sdhci_arasan_reset(struct sdhci_host *host, u8 mask)
->>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>   	struct sdhci_arasan_data *sdhci_arasan = sdhci_pltfm_priv(pltfm_host);
->>> +	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
->>> +		cqhci_deactivate(host->mmc);
->>> +
->>>   	sdhci_reset(host, mask);
->>
->> Cannot this be absorbed by sdhci_reset() that all of these drivers appear to
->> be utilizing since you have access to the host and the mask to make that
->> decision?
-> 
-> It potentially could.
-> 
-> I don't know if this is a specified SDHCI behavior that really belongs
-> in the common helper, or if this is just a commonly-shared behavior. Per
-> the comments I quote above ("if they also have CQHCI reset by
-> SDHCI_RESET_ALL"), I chose to leave that as an implementation-specific
-> behavior.
-> 
-> I suppose it's not all that harmful to do this even if some SDHCI
-> controller doesn't have the same behavior/quirk.
-> 
-> I guess I also don't know if any SDHCI controllers will support command
-> queueing (MMC_CAP2_CQE) via somethings *besides* CQHCI. I see
-> CQE support in sdhci-sprd.c without CQHCI, although that driver doesn't
-> set MMC_CAP2_CQE.
+On Wed, Oct 19, 2022, at 19:15, Aaro Koskinen wrote:
+> Hi,
+>
+> On Wed, Oct 19, 2022 at 05:03:35PM +0200, Arnd Bergmann wrote:
+>> From: Arnd Bergmann <arnd@arndb.de>
+>> 
+>> All board support that was marked as 'unused' earlier can
+>> now be removed, leaving the five machines that that still
+>> had someone using them in 2022, or that are supported in
+>> qemu.
+> [...]
+>>  config OMAP_OSK_MISTRAL
+>>  	bool "Mistral QVGA board Support"
+>>  	depends on MACH_OMAP_OSK
+>> -	depends on UNUSED_BOARD_FILES
+>>  	help
+>>  	  The OSK supports an optional add-on board with a Quarter-VGA
+>>  	  touchscreen, PDA-ish buttons, a resume button, bicolor LED,
+>>  	  and camera connector.  Say Y here if you have this board.
+>
+> Shouldn't this go away as well?
 
-SDHCI and CQHCI are separate modules and are not dependent, so they cannot
-call into each other directly (and should not).  A new CQE API would be
-needed in mmc_cqe_ops e.g. (*cqe_notify_reset)(struct mmc_host *host),
-and wrapped in mmc/host.h:
+No, this one was incorrectly annotated, it's not actually
+a board but it's an option for the OSK board that is not
+getting removed. I considered making a separate patch
+for removing the dependency, but that didn't seem worth it.
 
-static inline void mmc_cqe_notify_reset(struct mmc_host *host)
-{
-	if (host->cqe_ops->cqe_notify_reset)
-		host->cqe_ops->cqe_notify_reset(host);
-}
-
-Alternatively, you could make a new module for SDHCI/CQHCI helper functions,
-although in this case there is so little code it could be static inline and
-added in a new include file instead, say sdhci-cqhci.h e.g.
-
-#include "cqhci.h"
-#include "sdhci.h"
-
-static inline void sdhci_cqhci_reset(struct sdhci_host *host, u8 mask)
-{
-	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
-	    host->mmc->cqe_private)
-		cqhci_deactivate(host->mmc);
-	sdhci_reset(host, mask);
-}
-
+    Arnd
