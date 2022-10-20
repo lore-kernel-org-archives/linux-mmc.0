@@ -2,117 +2,124 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E5EFC43217
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 19:35:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA6CBC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 23:02:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229941AbiJTTfZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 15:35:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54442 "EHLO
+        id S230099AbiJTXCb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 19:02:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229576AbiJTTfW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 15:35:22 -0400
-Received: from lahtoruutu.iki.fi (lahtoruutu.iki.fi [IPv6:2a0b:5c81:1c1::37])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E610159D44;
-        Thu, 20 Oct 2022 12:35:21 -0700 (PDT)
-Received: from t60.musicnaut.iki.fi (85-76-8-144-nat.elisa-mobile.fi [85.76.8.144])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        (Authenticated sender: aaro.koskinen)
-        by lahtoruutu.iki.fi (Postfix) with ESMTPSA id CE44D1B001A3;
-        Thu, 20 Oct 2022 22:35:12 +0300 (EEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=lahtoruutu;
-        t=1666294513;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=iDvU3Oc2f/QHiT2VDqeJIzu0pLTa7SFrJfK0tw4pkR4=;
-        b=CtXAPho/8wXRfk+qDJKIoC6KYH+1stwwfLzjVRMs0F+xM+grEwFCOEnyHRY+ycw0phLrqA
-        dmxyo/lUkHIoc+6F7XZdm8QtRdpHYiq7POVNvy1hDDl8kZiaVzMRDVzCEvk5FKlLNJxM5Z
-        mIuzt6KGgMCHzIT9QAism4yT1QbepNWk+y8d8m1PE8h++XvCco1QZhPAh8kq+Eo6ZTq5+d
-        cxUaNZ5CDcDg2Jy6l0M31unoiNvCZ5XNaWr90DnEvhNeNZt53FaJvXJjRNgRz6OkolDyPR
-        gBA5Yui/EzWoDAsho3j99NrX8ZZvV0QVIX9keqeXgnlPd9S1ycI/FSQDcseG6A==
-Date:   Thu, 20 Oct 2022 22:35:11 +0300
-From:   Aaro Koskinen <aaro.koskinen@iki.fi>
-To:     Arnd Bergmann <arnd@arndb.de>
-Cc:     Arnd Bergmann <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>, linux-kernel@vger.kernel.org,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        Lee Jones <lee@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Felipe Balbi <balbi@kernel.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-i2c@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-usb@vger.kernel.org
-Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
-Message-ID: <20221020193511.GB3019@t60.musicnaut.iki.fi>
-References: <20221019144119.3848027-1-arnd@kernel.org>
- <20221019150410.3851944-1-arnd@kernel.org>
- <20221019150410.3851944-13-arnd@kernel.org>
- <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
- <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
+        with ESMTP id S230102AbiJTXCP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 19:02:15 -0400
+Received: from mail-oi1-f169.google.com (mail-oi1-f169.google.com [209.85.167.169])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2CABD22EC8A;
+        Thu, 20 Oct 2022 16:01:52 -0700 (PDT)
+Received: by mail-oi1-f169.google.com with SMTP id y72so1346668oia.3;
+        Thu, 20 Oct 2022 16:01:52 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9vKR6Ubf6NLut4evrO2911luI/V0iLPIfihaRv6pSUQ=;
+        b=jc9+o5pVBuKvVqiqzSgmYKFFr3A4zp8et/1CVYxJJm10EOe3bcAUR15UFAqJ158VMG
+         tfqMEkZCvjbx54Eb0iTuOt5jKHH/jy2MCPsyf7MA3MohIXZ9BtUPTaEmFbyCtaf834UO
+         YkfRkBstU1AvPDSJ5yd6twohGYQ5ikDk8Glm0FqAe9NNepWDuJSsThoIuJ8q42cX86Li
+         SfYDIsG2+Z/5IMHCTp8TRzZG2wfX+YotvmbaAY9TAir+QlSeM+3dw3xKIoygZ420MGQ/
+         X7bI+4mDu7tkZt6a9BEE25kjthL0fpZ3lbsze+yaGyzN7b59ZDbAaUUT1eFXiw9qORcI
+         XBaw==
+X-Gm-Message-State: ACrzQf0OuEa9H/4Ygwna3X190cFewlST1DnSm0EEWqBvvQ1/SMjfpFGS
+        lvTgYnByLXqbkNmCA5iL8A==
+X-Google-Smtp-Source: AMsMyM6WL6nqyQzSAS6vpGVeeJq/qC6laTr8Ta6Umw0ZOh8KuscLrjdmPHtIMgkBeB2488ZYBELfLw==
+X-Received: by 2002:a05:6808:1986:b0:355:3525:8fb with SMTP id bj6-20020a056808198600b00355352508fbmr8630049oib.3.1666306911273;
+        Thu, 20 Oct 2022 16:01:51 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id x3-20020a4ac583000000b00476989d42ebsm8050817oop.8.2022.10.20.16.01.49
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 20 Oct 2022 16:01:50 -0700 (PDT)
+Received: (nullmailer pid 1969510 invoked by uid 1000);
+        Thu, 20 Oct 2022 23:01:51 -0000
+Date:   Thu, 20 Oct 2022 18:01:51 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Dinh Nguyen <dinguyen@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        devicetree@vger.kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, jh80.chung@samsung.com,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
+Subject: Re: [PATCHv5 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
+ "altr,sysmgr-syscon"
+Message-ID: <20221020230151.GA1957503-robh@kernel.org>
+References: <20221019170657.68014-1-dinguyen@kernel.org>
+ <20221019170657.68014-2-dinguyen@kernel.org>
+ <166622207591.14373.6525811988033372211.robh@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
-ARC-Authentication-Results: i=1;
-        ORIGINATING;
-        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
-        s=lahtoruutu; t=1666294513;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=iDvU3Oc2f/QHiT2VDqeJIzu0pLTa7SFrJfK0tw4pkR4=;
-        b=rrXIBB6/cLwcvSTbEB1/WW+rnYGa9ozsO5IdoYj3F2Tc0TW94d0WCRxZw+oVInIGIuGmi/
-        Fn4crbmRrkd4rYxH/6t7yq6momM+CRZGi2uizH4Ur7IhP2jvLxH9tzSSU/1YRI21RewhwQ
-        aHMqhLrunMNefiRfte6YeX06eLw0mN7NJzgJQG/q7JdfNeSWW1EdkdYVm+QNayDOuaibS5
-        v7WxJeHeg7FweWu51kNUvacMvxxr3ieXXGjBqJSqhy0ebzHA4EaI8qVdJxzFimETZn2/7E
-        sm3qW1quOEJkBeo0d6IoFMMDJddWkChnaFOjuljaoPOeWchojPLOM/uZrLpgAA==
-ARC-Seal: i=1; s=lahtoruutu; d=iki.fi; t=1666294513; a=rsa-sha256;
-        cv=none;
-        b=WUmMZDsubTKiseV7lrBxLDtKPP7bk5IK0PgUldYgmWXY9HIxdL6tqW3Z9paPz9wsGxxw/7
-        qiZq7tRSmcBLf1iSebg5+iozzfUSRLJJyBKYAC99IzxzRlCx007xRt2Gh+o2HxKEAuuK+0
-        c5vr7CRlti+oE9AvJOYIWhHO914VDrnfwuQZ3KsinukOg5gKGADyJD8nzLi3lwK+qqXCD/
-        wEi5VAbEF3fP8wtz7LdjIY8ps9E81YQ2gfzJUgwLWjpJsLuSqeRJRYYR8IAJcKtSSON30O
-        R7UGOfwvglPEdSBo1w8IgrWN3B20dElKAOe5hN5vH1XDL9eAOTRF/kJnZijzTw==
+In-Reply-To: <166622207591.14373.6525811988033372211.robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-On Thu, Oct 20, 2022 at 09:11:11AM +0200, Arnd Bergmann wrote:
-> On Wed, Oct 19, 2022, at 19:15, Aaro Koskinen wrote:
-> > On Wed, Oct 19, 2022 at 05:03:35PM +0200, Arnd Bergmann wrote:
-> >> All board support that was marked as 'unused' earlier can
-> >> now be removed, leaving the five machines that that still
-> >> had someone using them in 2022, or that are supported in
-> >> qemu.
-> > [...]
-> >>  config OMAP_OSK_MISTRAL
-> >>  	bool "Mistral QVGA board Support"
-> >>  	depends on MACH_OMAP_OSK
-> >> -	depends on UNUSED_BOARD_FILES
-> >>  	help
-> >>  	  The OSK supports an optional add-on board with a Quarter-VGA
-> >>  	  touchscreen, PDA-ish buttons, a resume button, bicolor LED,
-> >>  	  and camera connector.  Say Y here if you have this board.
-> >
-> > Shouldn't this go away as well?
+On Wed, Oct 19, 2022 at 06:31:53PM -0500, Rob Herring wrote:
+> On Wed, 19 Oct 2022 12:06:52 -0500, Dinh Nguyen wrote:
+> > Document the optional "altr,sysmgr-syscon" binding that is used to
+> > access the System Manager register that controls the SDMMC clock
+> > phase.
+> > 
+> > Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> > ---
+> > v5: document reg shift
+> > v4: add else statement
+> > v3: document that the "altr,sysmgr-syscon" binding is only applicable to
+> >     "altr,socfpga-dw-mshc"
+> > v2: document "altr,sysmgr-syscon" in the MMC section
+> > ---
+> >  .../bindings/mmc/synopsys-dw-mshc.yaml        | 32 +++++++++++++++++--
+> >  1 file changed, 29 insertions(+), 3 deletions(-)
+> > 
 > 
-> No, this one was incorrectly annotated, it's not actually
-> a board but it's an option for the OSK board that is not
-> getting removed. I considered making a separate patch
-> for removing the dependency, but that didn't seem worth it.
+> Running 'make dtbs_check' with the schema in this patch gives the
+> following warnings. Consider if they are expected or the schema is
+> incorrect. These may not be new warnings.
+> 
+> Note that it is not yet a requirement to have 0 warnings for dtbs_check.
+> This will change in the future.
+> 
+> Full log is available here: https://patchwork.ozlabs.org/patch/
+> 
+> 
+> dwmmc0@ff704000: $nodename:0: 'dwmmc0@ff704000' does not match '^mmc(@.*)?$'
 
-OK. For the record, I don't think anyone has this add-on board anymore,
-and it has probably never been tested with the mainline kernel, so
-it's likely in the "dead code" category... Maybe it could be changed to
-"BROKEN", then the related OSK LCD panel stuff could be deleted later
-on too.
+Not necessary for this series, but it would be nice if existing warnings 
+were fixed before adding new things. Especially since most of the  
+warnings on this common bindings are all socfpga. It may become 
+required at some point, not just nice.
 
-A.
+The node name is the cause of most/all the unevaluated property 
+warnings.
+
+> 	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_vining_fpga.dtb
+> 	arch/arm/boot/dts/socfpga_vt.dtb
+> 
+> dwmmc0@ff704000: 'altr,sysmgr-syscon' is a required property
+> 	arch/arm/boot/dts/socfpga_arria5_socdk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_chameleon96.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_de0_nano_soc.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_mcvevk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_socdk.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_sockit.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_socrates.dtb
+> 	arch/arm/boot/dts/socfpga_cyclone5_sodia.dtb
+
+I thought it was optional? New required properties are a possible ABI 
+break.
+
+Rob
