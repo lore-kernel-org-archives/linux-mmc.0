@@ -2,144 +2,241 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B50B2C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 08:04:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17943C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 10:37:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbiJTIE4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 04:04:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38818 "EHLO
+        id S230177AbiJTKhU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 06:37:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230126AbiJTIEy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 04:04:54 -0400
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BFD24D157;
-        Thu, 20 Oct 2022 01:04:47 -0700 (PDT)
-Received: by mail-pg1-x534.google.com with SMTP id e129so18524926pgc.9;
-        Thu, 20 Oct 2022 01:04:47 -0700 (PDT)
+        with ESMTP id S230055AbiJTKhT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 06:37:19 -0400
+Received: from mail-pl1-x62b.google.com (mail-pl1-x62b.google.com [IPv6:2607:f8b0:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54B911BB955
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 03:37:18 -0700 (PDT)
+Received: by mail-pl1-x62b.google.com with SMTP id z20so19890367plb.10
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 03:37:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=yPKQF1womnv+Nz41FwdqMwP49IwpAg65M5ovOMXDQH0=;
-        b=M0jMZM3VsUbFKjPZx7179s28DNJraI6tuTwAIp3S8+33iH1YL88vH7BVGAFmqnpb0X
-         gLFPzWF2wsThgYb+7HGBCiYrL5UuSDDfhbRMeLeaFUornkZEtHjzLlborihppHjZSwxr
-         PnhRoUThXobtWWpsjR4moxemKzVPka5sGW0RL+927ydHzkJXJEBlDzT1k0I9Uh9frEze
-         ft3q04YBXYZjtB4HRgQ68K+7hD5k5tHMA81jfXkfNEY4wWnw4NOmolXKZ99eTVwWl1QW
-         rnyHUO/8lrK9xgjlmY580LImTCIEklY/7hDvszUHVLZz/LXiqhneMOzFRu2Y6qyfhJsO
-         Rqzw==
+        bh=z+za2fWWq/FJfBBcjb1tNCF1EGnC+USIRnJnBiSfyRA=;
+        b=RJQT7TgwV++5Ot4Nh7q0NzY/MddbMV6I3iMYmbOTLicsiPprYBf9SXEASdusOc3JD9
+         Bq8ZWEdg/ieIwC1dJIxWxMSbqbRlC16StndYYYmVcmAzAaqzLkvrXHT+nSsV1wZEdQ5g
+         T9rUoBuHv5pYYIkH8lJHrW96XDeumj3gP+5tbj8KW7l0TPEr3ZAWy50QTbxZ+woONXdv
+         BBu5ZOBXWB68uj0jDc82zuSpzmmynLszsY71I/FKZzrVkFeg2r2kFSa3QSKpNWCtUGyP
+         e4Ngk7mY9DLO2GucHKo78zGi0r7Fy0beDm3nr+3mERMZQ6C95iZnul83ZYlhZJArV7LF
+         3aEw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=yPKQF1womnv+Nz41FwdqMwP49IwpAg65M5ovOMXDQH0=;
-        b=vt1mBZhV0iBRk2K2T7eYqMH06evGm21M9yk3tqoYdZwc+aq79XDOGTaSE3FBqK7Hcu
-         tzMH+1KTp5uKZ3Crrk4UFmNLRXf9BxyVyMYjTNFaV6VYthA6rit6EWXE7u+5f5yRh6Tq
-         0ANOvGIMXegtJQRC2Xqi/4WSjXMt4ki4ROlqThNIxYKsMQy4Uz2OajMLV56qkW7vS0vj
-         OuB5QdB1OlK68iN9Y8tfDfkcpUugbEu3FItrvzDS46KGVL8XTCWRAClupO38wIFYsjQg
-         BOvz5JmKu7GvMzgkSzLiCUd1bAHHIRzaJvTsJi9rEJ3Zz+4stUejCSjVqUXfTOeS/uUU
-         H7RA==
-X-Gm-Message-State: ACrzQf0b12OcggXOSfX+HwxDOfCFQ1Qpva9wuDBM3GuWIRhUTqMdIdXp
-        07ogvOZNz7WLtopgzroSbO5nSg1VvTEP8YZLhKODgotnYqUGQQ==
-X-Google-Smtp-Source: AMsMyM7pNDWXpWvbEQnMBK6UgBUO5q2Q4JmBBZ0GbEtZfaKo69/TRRq9MrkaBCapIJrumfcdPbxUtHf8e48y1PK97Kw=
-X-Received: by 2002:a63:6b44:0:b0:46a:fa55:b6a0 with SMTP id
- g65-20020a636b44000000b0046afa55b6a0mr10787569pgc.614.1666253086969; Thu, 20
- Oct 2022 01:04:46 -0700 (PDT)
+        bh=z+za2fWWq/FJfBBcjb1tNCF1EGnC+USIRnJnBiSfyRA=;
+        b=p7AkpfMQcZehXGiZY9HDqW16Dvwj45ftyPpi/Aw379S6VFeLc/r/4y7+tZffK+CH/9
+         +2DrzMCO6GswBrBwTPeAEUCyEw8z7jyu9TM2zjaI4NtVvhvnYQkJPE+1apc611hggOV6
+         ypwM0FTidLEPIqyZhsp2MlUQCn1FMnFbqXFDYCa4RVdWiDox1qpDzcXFiWqG5ccE6sH3
+         jGtSjhSLtCbf79Qb8e44sAdgAQR5iSyle0UlVpP0oxZGFwei4XkdpNg0zdJ+3IeupE4s
+         tsbslPVLv8mVjQYb8Yo4e8CssZBDEG2QQFfX2DerF/S0c0wD5T6650WmK/c/U0rW7hlb
+         1Dzg==
+X-Gm-Message-State: ACrzQf2IqgrVZZaF0DNNmyq4HEAeYZRmKSvGQqDpBCWhWmFkcRtqbWgt
+        kkrfsLMaJ9aeaCBBDzFDWaStMf+50RkriK9SgrdAbQ==
+X-Google-Smtp-Source: AMsMyM4vJmc5X/03l+yCR183PiNOSqzELcttxJqqAeZ/GGB1DpS6wVWm/BZ366OVPUfHGbfq64PodwhC/laJR//QTP4=
+X-Received: by 2002:a17:903:246:b0:179:96b5:1ad2 with SMTP id
+ j6-20020a170903024600b0017996b51ad2mr13160960plh.37.1666262237829; Thu, 20
+ Oct 2022 03:37:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20221020024529.25227-1-wenchao.chen666@gmail.com> <b9ca56af-cb06-4fb1-d5d8-7426629dfe2b@nvidia.com>
-In-Reply-To: <b9ca56af-cb06-4fb1-d5d8-7426629dfe2b@nvidia.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Thu, 20 Oct 2022 16:04:35 +0800
-Message-ID: <CA+Da2qx_BzD0JN+O848CWTBdRmmG4NObnodyX=w3NpjODSHuAg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: block: Support Host to control FUA.
-To:     Chaitanya Kulkarni <chaitanyak@nvidia.com>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "axboe@kernel.dk" <axboe@kernel.dk>,
-        "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
-        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>,
-        "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
-        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
-        "michael@allwinnertech.com" <michael@allwinnertech.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "megoo.tang@gmail.com" <megoo.tang@gmail.com>,
-        "lzx.stg@gmail.com" <lzx.stg@gmail.com>
+References: <20221019144119.3848027-1-arnd@kernel.org> <20221019150410.3851944-1-arnd@kernel.org>
+ <20221019150410.3851944-3-arnd@kernel.org>
+In-Reply-To: <20221019150410.3851944-3-arnd@kernel.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 20 Oct 2022 12:36:40 +0200
+Message-ID: <CAPDyKFr67mHzKG9GmSzLrgidjvXw_aHTx8aRfher4-wZzBr1hA@mail.gmail.com>
+Subject: Re: [PATCH 03/17] mmc: remove cns3xxx driver
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        Krzysztof Halasa <khalasa@piap.pl>, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 20, 2022 at 11:07 AM Chaitanya Kulkarni
-<chaitanyak@nvidia.com> wrote:
+On Wed, 19 Oct 2022 at 17:06, Arnd Bergmann <arnd@kernel.org> wrote:
 >
-> On 10/19/22 19:45, Wenchao Chen wrote:
-> > From: Wenchao Chen <wenchao.chen@unisoc.com>
-> >
-> > This patch introduces host->fua_disable for MMC host controller.
-> > The host can turn off FUA to improve performance.
-> >
-> > 1. fua_disable = 1
-> > /sys/block/mmcblk0/queue # cat fua 0
-> > I tested 5 times for each case and output a average speed.
-> >
-> > 1) Sequential read:
-> > Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
-> > Average speed: 265.74MiB/s
-> >
-> > 2) Random read:
-> > Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
-> > Average speed: 98.81MiB/s
-> >
-> > 3) Sequential write:
-> > Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
-> > Average speed: 200.5MiB/s
-> >
-> > 4) Random write:
-> > Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
-> > Average speed: 70.32MiB/s
-> >
-> > 2. fua_disable = 0 (default 0)
-> > /sys/block/mmcblk0/queue # cat fua 1
-> > I tested 5 times for each case and output a average speed.
-> >
-> > 1) Sequential read:
-> > Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
-> > Average speed: 257.86MiB/s
-> >
-> > 2) Random read:
-> > Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
-> > Average speed: 100.2MiB/s
-> >
-> > 3) Sequential write:
-> > Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
-> > Average speed: 149.48MiB/s
-> >
-> > 4) Random write:
-> > Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
-> > Average speed: 12.68MiB/s
-> >
-> > According to the above data, disable FUA (fua_disable = 1) improves the
-> > performance. Therefore, it is recommended to support the host to control
-> > FUA.
-> >
-> > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> From: Arnd Bergmann <arnd@arndb.de>
 >
-> Based on the data provided seems it does increase the performance.
-> Perhaps it is worth mentioning the reason behind the performance
-> increase and other side effects of doing so ?
+> The cns3xxx platform is gone, so this driver is now orphaned.
+>
+> Cc: Krzysztof Halasa <khalasa@piap.pl>
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 
-We suspect it will affect the progressive power-down test, but after a week
-of testing, turning off FUA did not affect this test.
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
->
-> Also, it is usually helpful to mention performance increase in the
-> % in the commit log so you can move verbose log (like above) into
-> the cover-letter for documentation purpose, this is based on
-> the feedback I got, unless maintainer(s) prefers is this way :).
->
-> -ck
->
+Kind regards
+Uffe
 
-Thank you very much for your suggestion, I will update it in the next version.
+> ---
+>  drivers/mmc/host/Kconfig         |  11 ---
+>  drivers/mmc/host/Makefile        |   1 -
+>  drivers/mmc/host/sdhci-cns3xxx.c | 113 -------------------------------
+>  3 files changed, 125 deletions(-)
+>  delete mode 100644 drivers/mmc/host/sdhci-cns3xxx.c
+>
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index f324daadaf70..1c5b1c48a230 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -253,17 +253,6 @@ config MMC_SDHCI_CADENCE
+>
+>           If unsure, say N.
+>
+> -config MMC_SDHCI_CNS3XXX
+> -       tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
+> -       depends on ARCH_CNS3XXX || COMPILE_TEST
+> -       depends on MMC_SDHCI_PLTFM
+> -       help
+> -         This selects the SDHCI support for CNS3xxx System-on-Chip devices.
+> -
+> -         If you have a controller with this interface, say Y or M here.
+> -
+> -         If unsure, say N.
+> -
+>  config MMC_SDHCI_ESDHC_MCF
+>         tristate "SDHCI support for the Freescale eSDHC ColdFire controller"
+>         depends on M5441x
+> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> index 4e4ceb32c4b4..7bea77c28b7e 100644
+> --- a/drivers/mmc/host/Makefile
+> +++ b/drivers/mmc/host/Makefile
+> @@ -77,7 +77,6 @@ obj-$(CONFIG_MMC_REALTEK_USB) += rtsx_usb_sdmmc.o
+>
+>  obj-$(CONFIG_MMC_SDHCI_PLTFM)          += sdhci-pltfm.o
+>  obj-$(CONFIG_MMC_SDHCI_CADENCE)                += sdhci-cadence.o
+> -obj-$(CONFIG_MMC_SDHCI_CNS3XXX)                += sdhci-cns3xxx.o
+>  obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
+>  obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)      += sdhci-esdhc-imx.o
+>  obj-$(CONFIG_MMC_SDHCI_DOVE)           += sdhci-dove.o
+> diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
+> deleted file mode 100644
+> index 2a29c7a4f308..000000000000
+> --- a/drivers/mmc/host/sdhci-cns3xxx.c
+> +++ /dev/null
+> @@ -1,113 +0,0 @@
+> -// SPDX-License-Identifier: GPL-2.0-only
+> -/*
+> - * SDHCI support for CNS3xxx SoC
+> - *
+> - * Copyright 2008 Cavium Networks
+> - * Copyright 2010 MontaVista Software, LLC.
+> - *
+> - * Authors: Scott Shu
+> - *         Anton Vorontsov <avorontsov@mvista.com>
+> - */
+> -
+> -#include <linux/delay.h>
+> -#include <linux/device.h>
+> -#include <linux/mmc/host.h>
+> -#include <linux/module.h>
+> -#include "sdhci-pltfm.h"
+> -
+> -static unsigned int sdhci_cns3xxx_get_max_clk(struct sdhci_host *host)
+> -{
+> -       return 150000000;
+> -}
+> -
+> -static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
+> -{
+> -       struct device *dev = mmc_dev(host->mmc);
+> -       int div = 1;
+> -       u16 clk;
+> -       unsigned long timeout;
+> -
+> -       host->mmc->actual_clock = 0;
+> -
+> -       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> -
+> -       if (clock == 0)
+> -               return;
+> -
+> -       while (host->max_clk / div > clock) {
+> -               /*
+> -                * On CNS3xxx divider grows linearly up to 4, and then
+> -                * exponentially up to 256.
+> -                */
+> -               if (div < 4)
+> -                       div += 1;
+> -               else if (div < 256)
+> -                       div *= 2;
+> -               else
+> -                       break;
+> -       }
+> -
+> -       dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
+> -               clock, host->max_clk / div);
+> -
+> -       /* Divide by 3 is special. */
+> -       if (div != 3)
+> -               div >>= 1;
+> -
+> -       clk = div << SDHCI_DIVIDER_SHIFT;
+> -       clk |= SDHCI_CLOCK_INT_EN;
+> -       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> -
+> -       timeout = 20;
+> -       while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
+> -                       & SDHCI_CLOCK_INT_STABLE)) {
+> -               if (timeout == 0) {
+> -                       dev_warn(dev, "clock is unstable");
+> -                       break;
+> -               }
+> -               timeout--;
+> -               mdelay(1);
+> -       }
+> -
+> -       clk |= SDHCI_CLOCK_CARD_EN;
+> -       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
+> -}
+> -
+> -static const struct sdhci_ops sdhci_cns3xxx_ops = {
+> -       .get_max_clock  = sdhci_cns3xxx_get_max_clk,
+> -       .set_clock      = sdhci_cns3xxx_set_clock,
+> -       .set_bus_width  = sdhci_set_bus_width,
+> -       .reset          = sdhci_reset,
+> -       .set_uhs_signaling = sdhci_set_uhs_signaling,
+> -};
+> -
+> -static const struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
+> -       .ops = &sdhci_cns3xxx_ops,
+> -       .quirks = SDHCI_QUIRK_BROKEN_DMA |
+> -                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> -                 SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
+> -                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+> -                 SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
+> -};
+> -
+> -static int sdhci_cns3xxx_probe(struct platform_device *pdev)
+> -{
+> -       return sdhci_pltfm_register(pdev, &sdhci_cns3xxx_pdata, 0);
+> -}
+> -
+> -static struct platform_driver sdhci_cns3xxx_driver = {
+> -       .driver         = {
+> -               .name   = "sdhci-cns3xxx",
+> -               .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> -               .pm     = &sdhci_pltfm_pmops,
+> -       },
+> -       .probe          = sdhci_cns3xxx_probe,
+> -       .remove         = sdhci_pltfm_unregister,
+> -};
+> -
+> -module_platform_driver(sdhci_cns3xxx_driver);
+> -
+> -MODULE_DESCRIPTION("SDHCI driver for CNS3xxx");
+> -MODULE_AUTHOR("Scott Shu, "
+> -             "Anton Vorontsov <avorontsov@mvista.com>");
+> -MODULE_LICENSE("GPL v2");
+> --
+> 2.29.2
+>
