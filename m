@@ -2,241 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 17943C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 10:37:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92D2CC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 11:33:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230177AbiJTKhU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 06:37:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59666 "EHLO
+        id S229670AbiJTLdV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 07:33:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230055AbiJTKhT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 06:37:19 -0400
-Received: from mail-pl1-x62b.google.com (mail-pl1-x62b.google.com [IPv6:2607:f8b0:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54B911BB955
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 03:37:18 -0700 (PDT)
-Received: by mail-pl1-x62b.google.com with SMTP id z20so19890367plb.10
-        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 03:37:18 -0700 (PDT)
+        with ESMTP id S229509AbiJTLdU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 07:33:20 -0400
+Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78D8E1DA362
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 04:33:18 -0700 (PDT)
+Received: by mail-pg1-x52a.google.com with SMTP id u71so18968637pgd.2
+        for <linux-mmc@vger.kernel.org>; Thu, 20 Oct 2022 04:33:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=z+za2fWWq/FJfBBcjb1tNCF1EGnC+USIRnJnBiSfyRA=;
-        b=RJQT7TgwV++5Ot4Nh7q0NzY/MddbMV6I3iMYmbOTLicsiPprYBf9SXEASdusOc3JD9
-         Bq8ZWEdg/ieIwC1dJIxWxMSbqbRlC16StndYYYmVcmAzAaqzLkvrXHT+nSsV1wZEdQ5g
-         T9rUoBuHv5pYYIkH8lJHrW96XDeumj3gP+5tbj8KW7l0TPEr3ZAWy50QTbxZ+woONXdv
-         BBu5ZOBXWB68uj0jDc82zuSpzmmynLszsY71I/FKZzrVkFeg2r2kFSa3QSKpNWCtUGyP
-         e4Ngk7mY9DLO2GucHKo78zGi0r7Fy0beDm3nr+3mERMZQ6C95iZnul83ZYlhZJArV7LF
-         3aEw==
+        bh=tYdfoIPqY+T234/NdafPtOqHMoflIkl5egaJuABTq4w=;
+        b=HtmcYdKiTzYM/L6QSAXCk8GBNXg9RCotQXIaq0FXQWN3I53f/salEcpH1a5O6lPzW1
+         W7e60lHutJpOqv2sZt9QwhKetUufuFicL4eT+nnL3ygQIh08JasTRNXb2ap+escpk/m4
+         RQSFlAAzIWjcyH37Ui/cSJgrs1q/eohLE3mZonCbeyALD2Z3s07LWh9S9L+QE55lFeqn
+         GSFd/kaU3Qa1Lyufjz4KjraC1UIf/OcrA+I27+PzXwEb8YPL5oVuft7ZboaY/Tq5QZ5R
+         b8m9tRYmn7GnX+rRE5dRurhoeNtyPK9+0KFXdegorAC8NTFtczzOEhkLxAOIADgWZbgT
+         TVDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=z+za2fWWq/FJfBBcjb1tNCF1EGnC+USIRnJnBiSfyRA=;
-        b=p7AkpfMQcZehXGiZY9HDqW16Dvwj45ftyPpi/Aw379S6VFeLc/r/4y7+tZffK+CH/9
-         +2DrzMCO6GswBrBwTPeAEUCyEw8z7jyu9TM2zjaI4NtVvhvnYQkJPE+1apc611hggOV6
-         ypwM0FTidLEPIqyZhsp2MlUQCn1FMnFbqXFDYCa4RVdWiDox1qpDzcXFiWqG5ccE6sH3
-         jGtSjhSLtCbf79Qb8e44sAdgAQR5iSyle0UlVpP0oxZGFwei4XkdpNg0zdJ+3IeupE4s
-         tsbslPVLv8mVjQYb8Yo4e8CssZBDEG2QQFfX2DerF/S0c0wD5T6650WmK/c/U0rW7hlb
-         1Dzg==
-X-Gm-Message-State: ACrzQf2IqgrVZZaF0DNNmyq4HEAeYZRmKSvGQqDpBCWhWmFkcRtqbWgt
-        kkrfsLMaJ9aeaCBBDzFDWaStMf+50RkriK9SgrdAbQ==
-X-Google-Smtp-Source: AMsMyM4vJmc5X/03l+yCR183PiNOSqzELcttxJqqAeZ/GGB1DpS6wVWm/BZ366OVPUfHGbfq64PodwhC/laJR//QTP4=
-X-Received: by 2002:a17:903:246:b0:179:96b5:1ad2 with SMTP id
- j6-20020a170903024600b0017996b51ad2mr13160960plh.37.1666262237829; Thu, 20
- Oct 2022 03:37:17 -0700 (PDT)
+        bh=tYdfoIPqY+T234/NdafPtOqHMoflIkl5egaJuABTq4w=;
+        b=ryfjw8iOfmv7kDbisWJoAllA17pHGomOptEbzp8sm0tvaktAzn7BvSsfutNwDywY8X
+         xahrL3TPSOJn1sGLU6/VU/qqa4r1EvuG47Y0NDabc+lK79Dh5A7C6ZVVUv40lH/jDrWS
+         BuZj+KqIeTyIXAJKePpUBS4Zhoo2AZqik6QtNIsoN4i9byMTNflMwZxwCIfh+euyid9h
+         f0/mQolV6CwLOekalUbj8DXpCI0/xG2pL1jzCiWDqjRDyLXsOs2GHKO8CQS4DDPA4r6i
+         QFh24hePDwj8PEA2L8GHwDn3DTIYggmBBI/jucdpK/2XX9Dgw8N7KNBU5aWR2NFCumpk
+         T76g==
+X-Gm-Message-State: ACrzQf27CXPZJDipSmSmwZIEPHHjacsmj/U83XzUOF+1UAd5sPis/VI7
+        4QKyge/qfc4EUdPg9BP7rhUio++WD2GYvIQORzFa+A==
+X-Google-Smtp-Source: AMsMyM5MIHc0qsAb61gidhpKGvqVl1pHORPz4Rzt+toUefYZ4KkBzzJf1VnnId2YIqlBwsFGypdatSc41rTgXK/D4CA=
+X-Received: by 2002:a05:6a00:181c:b0:563:2c6c:2a7a with SMTP id
+ y28-20020a056a00181c00b005632c6c2a7amr13553427pfa.28.1666265597933; Thu, 20
+ Oct 2022 04:33:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20221019144119.3848027-1-arnd@kernel.org> <20221019150410.3851944-1-arnd@kernel.org>
- <20221019150410.3851944-3-arnd@kernel.org>
-In-Reply-To: <20221019150410.3851944-3-arnd@kernel.org>
+References: <20221018105149.820062-1-thierry.reding@gmail.com>
+In-Reply-To: <20221018105149.820062-1-thierry.reding@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 20 Oct 2022 12:36:40 +0200
-Message-ID: <CAPDyKFr67mHzKG9GmSzLrgidjvXw_aHTx8aRfher4-wZzBr1hA@mail.gmail.com>
-Subject: Re: [PATCH 03/17] mmc: remove cns3xxx driver
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-kernel@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Krzysztof Halasa <khalasa@piap.pl>, linux-mmc@vger.kernel.org
+Date:   Thu, 20 Oct 2022 13:32:41 +0200
+Message-ID: <CAPDyKFopppohLJ7ptnQxpBHzMLh2SZObarQRC0bJyTwE=nky4w@mail.gmail.com>
+Subject: Re: [PATCH] iommu: Always define struct iommu_fwspec
+To:     Joerg Roedel <joro@8bytes.org>,
+        Thierry Reding <thierry.reding@gmail.com>
+Cc:     Will Deacon <will@kernel.org>, Robin Murphy <robin.murphy@arm.com>,
+        iommu@lists.linux.dev, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 19 Oct 2022 at 17:06, Arnd Bergmann <arnd@kernel.org> wrote:
+On Tue, 18 Oct 2022 at 12:51, Thierry Reding <thierry.reding@gmail.com> wrote:
 >
-> From: Arnd Bergmann <arnd@arndb.de>
+> From: Thierry Reding <treding@nvidia.com>
 >
-> The cns3xxx platform is gone, so this driver is now orphaned.
+> In order to fully make use of the !IOMMU_API stub functions, make the
+> struct iommu_fwspec always available so that users of the stubs can keep
+> using the structure's internals without causing compile failures.
 >
-> Cc: Krzysztof Halasa <khalasa@piap.pl>
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Thierry Reding <treding@nvidia.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+
+> ---
+> Hi Joerg,
+>
+> this is a rebased patch extracted from an ancient series that never
+> ended up getting applied:
+>
+>         https://lore.kernel.org/all/20191209120005.2254786-3-thierry.reding@gmail.com/
+>
+> You had already acked this particular patch, so maybe you can pick this
+> up. I've seen at least two discussions where this was brought up again,
+> so I figured it'd be worth sending this out again because it can help
+> remove a number of #ifdef blocks throughout the kernel.
+
+Yes, this would certainly help to improve the code. To me, it looks
+like the current stub functions, like dev_iommu_fwspec_get() for
+example, aren't really useful without $subject patch.
+
+Note that, I have a pending patch for mmc that would benefit from
+this. To prevent me from delaying that, an easy way forward, assuming
+there are no objections of course, would be to send this for 6.1-rc.
+
+>
+>  include/linux/iommu.h | 39 +++++++++++++++++++--------------------
+>  1 file changed, 19 insertions(+), 20 deletions(-)
+>
+> diff --git a/include/linux/iommu.h b/include/linux/iommu.h
+> index a325532aeab5..e3295c45d18f 100644
+> --- a/include/linux/iommu.h
+> +++ b/include/linux/iommu.h
+> @@ -173,6 +173,25 @@ enum iommu_dev_features {
+>
+>  #define IOMMU_PASID_INVALID    (-1U)
+>
+> +/**
+> + * struct iommu_fwspec - per-device IOMMU instance data
+> + * @ops: ops for this device's IOMMU
+> + * @iommu_fwnode: firmware handle for this device's IOMMU
+> + * @flags: IOMMU_FWSPEC_* flags
+> + * @num_ids: number of associated device IDs
+> + * @ids: IDs which this device may present to the IOMMU
+> + */
+> +struct iommu_fwspec {
+> +       const struct iommu_ops  *ops;
+> +       struct fwnode_handle    *iommu_fwnode;
+> +       u32                     flags;
+> +       unsigned int            num_ids;
+> +       u32                     ids[];
+> +};
+> +
+> +/* ATS is supported */
+> +#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> +
+>  #ifdef CONFIG_IOMMU_API
+>
+>  /**
+> @@ -598,25 +617,6 @@ extern struct iommu_group *generic_device_group(struct device *dev);
+>  /* FSL-MC device grouping function */
+>  struct iommu_group *fsl_mc_device_group(struct device *dev);
+>
+> -/**
+> - * struct iommu_fwspec - per-device IOMMU instance data
+> - * @ops: ops for this device's IOMMU
+> - * @iommu_fwnode: firmware handle for this device's IOMMU
+> - * @flags: IOMMU_FWSPEC_* flags
+> - * @num_ids: number of associated device IDs
+> - * @ids: IDs which this device may present to the IOMMU
+> - */
+> -struct iommu_fwspec {
+> -       const struct iommu_ops  *ops;
+> -       struct fwnode_handle    *iommu_fwnode;
+> -       u32                     flags;
+> -       unsigned int            num_ids;
+> -       u32                     ids[];
+> -};
+> -
+> -/* ATS is supported */
+> -#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> -
+>  /**
+>   * struct iommu_sva - handle to a device-mm bond
+>   */
+> @@ -680,7 +680,6 @@ bool iommu_group_dma_owner_claimed(struct iommu_group *group);
+>
+>  struct iommu_ops {};
+>  struct iommu_group {};
+> -struct iommu_fwspec {};
+>  struct iommu_device {};
+>  struct iommu_fault_param {};
+>  struct iommu_iotlb_gather {};
+> --
+> 2.37.3
+>
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/Kconfig         |  11 ---
->  drivers/mmc/host/Makefile        |   1 -
->  drivers/mmc/host/sdhci-cns3xxx.c | 113 -------------------------------
->  3 files changed, 125 deletions(-)
->  delete mode 100644 drivers/mmc/host/sdhci-cns3xxx.c
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index f324daadaf70..1c5b1c48a230 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -253,17 +253,6 @@ config MMC_SDHCI_CADENCE
->
->           If unsure, say N.
->
-> -config MMC_SDHCI_CNS3XXX
-> -       tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
-> -       depends on ARCH_CNS3XXX || COMPILE_TEST
-> -       depends on MMC_SDHCI_PLTFM
-> -       help
-> -         This selects the SDHCI support for CNS3xxx System-on-Chip devices.
-> -
-> -         If you have a controller with this interface, say Y or M here.
-> -
-> -         If unsure, say N.
-> -
->  config MMC_SDHCI_ESDHC_MCF
->         tristate "SDHCI support for the Freescale eSDHC ColdFire controller"
->         depends on M5441x
-> diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-> index 4e4ceb32c4b4..7bea77c28b7e 100644
-> --- a/drivers/mmc/host/Makefile
-> +++ b/drivers/mmc/host/Makefile
-> @@ -77,7 +77,6 @@ obj-$(CONFIG_MMC_REALTEK_USB) += rtsx_usb_sdmmc.o
->
->  obj-$(CONFIG_MMC_SDHCI_PLTFM)          += sdhci-pltfm.o
->  obj-$(CONFIG_MMC_SDHCI_CADENCE)                += sdhci-cadence.o
-> -obj-$(CONFIG_MMC_SDHCI_CNS3XXX)                += sdhci-cns3xxx.o
->  obj-$(CONFIG_MMC_SDHCI_ESDHC_MCF)       += sdhci-esdhc-mcf.o
->  obj-$(CONFIG_MMC_SDHCI_ESDHC_IMX)      += sdhci-esdhc-imx.o
->  obj-$(CONFIG_MMC_SDHCI_DOVE)           += sdhci-dove.o
-> diff --git a/drivers/mmc/host/sdhci-cns3xxx.c b/drivers/mmc/host/sdhci-cns3xxx.c
-> deleted file mode 100644
-> index 2a29c7a4f308..000000000000
-> --- a/drivers/mmc/host/sdhci-cns3xxx.c
-> +++ /dev/null
-> @@ -1,113 +0,0 @@
-> -// SPDX-License-Identifier: GPL-2.0-only
-> -/*
-> - * SDHCI support for CNS3xxx SoC
-> - *
-> - * Copyright 2008 Cavium Networks
-> - * Copyright 2010 MontaVista Software, LLC.
-> - *
-> - * Authors: Scott Shu
-> - *         Anton Vorontsov <avorontsov@mvista.com>
-> - */
-> -
-> -#include <linux/delay.h>
-> -#include <linux/device.h>
-> -#include <linux/mmc/host.h>
-> -#include <linux/module.h>
-> -#include "sdhci-pltfm.h"
-> -
-> -static unsigned int sdhci_cns3xxx_get_max_clk(struct sdhci_host *host)
-> -{
-> -       return 150000000;
-> -}
-> -
-> -static void sdhci_cns3xxx_set_clock(struct sdhci_host *host, unsigned int clock)
-> -{
-> -       struct device *dev = mmc_dev(host->mmc);
-> -       int div = 1;
-> -       u16 clk;
-> -       unsigned long timeout;
-> -
-> -       host->mmc->actual_clock = 0;
-> -
-> -       sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
-> -
-> -       if (clock == 0)
-> -               return;
-> -
-> -       while (host->max_clk / div > clock) {
-> -               /*
-> -                * On CNS3xxx divider grows linearly up to 4, and then
-> -                * exponentially up to 256.
-> -                */
-> -               if (div < 4)
-> -                       div += 1;
-> -               else if (div < 256)
-> -                       div *= 2;
-> -               else
-> -                       break;
-> -       }
-> -
-> -       dev_dbg(dev, "desired SD clock: %d, actual: %d\n",
-> -               clock, host->max_clk / div);
-> -
-> -       /* Divide by 3 is special. */
-> -       if (div != 3)
-> -               div >>= 1;
-> -
-> -       clk = div << SDHCI_DIVIDER_SHIFT;
-> -       clk |= SDHCI_CLOCK_INT_EN;
-> -       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> -
-> -       timeout = 20;
-> -       while (!((clk = sdhci_readw(host, SDHCI_CLOCK_CONTROL))
-> -                       & SDHCI_CLOCK_INT_STABLE)) {
-> -               if (timeout == 0) {
-> -                       dev_warn(dev, "clock is unstable");
-> -                       break;
-> -               }
-> -               timeout--;
-> -               mdelay(1);
-> -       }
-> -
-> -       clk |= SDHCI_CLOCK_CARD_EN;
-> -       sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-> -}
-> -
-> -static const struct sdhci_ops sdhci_cns3xxx_ops = {
-> -       .get_max_clock  = sdhci_cns3xxx_get_max_clk,
-> -       .set_clock      = sdhci_cns3xxx_set_clock,
-> -       .set_bus_width  = sdhci_set_bus_width,
-> -       .reset          = sdhci_reset,
-> -       .set_uhs_signaling = sdhci_set_uhs_signaling,
-> -};
-> -
-> -static const struct sdhci_pltfm_data sdhci_cns3xxx_pdata = {
-> -       .ops = &sdhci_cns3xxx_ops,
-> -       .quirks = SDHCI_QUIRK_BROKEN_DMA |
-> -                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
-> -                 SDHCI_QUIRK_INVERTED_WRITE_PROTECT |
-> -                 SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-> -                 SDHCI_QUIRK_BROKEN_TIMEOUT_VAL,
-> -};
-> -
-> -static int sdhci_cns3xxx_probe(struct platform_device *pdev)
-> -{
-> -       return sdhci_pltfm_register(pdev, &sdhci_cns3xxx_pdata, 0);
-> -}
-> -
-> -static struct platform_driver sdhci_cns3xxx_driver = {
-> -       .driver         = {
-> -               .name   = "sdhci-cns3xxx",
-> -               .probe_type = PROBE_PREFER_ASYNCHRONOUS,
-> -               .pm     = &sdhci_pltfm_pmops,
-> -       },
-> -       .probe          = sdhci_cns3xxx_probe,
-> -       .remove         = sdhci_pltfm_unregister,
-> -};
-> -
-> -module_platform_driver(sdhci_cns3xxx_driver);
-> -
-> -MODULE_DESCRIPTION("SDHCI driver for CNS3xxx");
-> -MODULE_AUTHOR("Scott Shu, "
-> -             "Anton Vorontsov <avorontsov@mvista.com>");
-> -MODULE_LICENSE("GPL v2");
-> --
-> 2.29.2
->
