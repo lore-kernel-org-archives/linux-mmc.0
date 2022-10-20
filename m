@@ -2,131 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D404C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 14:43:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96DF1C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 14:45:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229932AbiJTOnB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 10:43:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35270 "EHLO
+        id S230239AbiJTOpH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 10:45:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40472 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229972AbiJTOm7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 10:42:59 -0400
-Received: from mail.savoirfairelinux.com (mail.savoirfairelinux.com [208.88.110.44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58169159974;
-        Thu, 20 Oct 2022 07:42:53 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by mail.savoirfairelinux.com (Postfix) with ESMTP id 5C8199C062D;
-        Thu, 20 Oct 2022 10:42:51 -0400 (EDT)
-Received: from mail.savoirfairelinux.com ([127.0.0.1])
-        by localhost (mail.savoirfairelinux.com [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id 09Qn1BFO0JbC; Thu, 20 Oct 2022 10:42:50 -0400 (EDT)
-Received: from localhost (localhost [127.0.0.1])
-        by mail.savoirfairelinux.com (Postfix) with ESMTP id C28599C066D;
-        Thu, 20 Oct 2022 10:42:50 -0400 (EDT)
-DKIM-Filter: OpenDKIM Filter v2.10.3 mail.savoirfairelinux.com C28599C066D
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=savoirfairelinux.com; s=DFC430D2-D198-11EC-948E-34200CB392D2;
-        t=1666276970; bh=312VwPoO9EN6ems018dwBc7eHCw2XRv7lNPATT84L6U=;
-        h=Message-ID:From:To:Date:MIME-Version;
-        b=pvZBKw1SMFL5/bl/2AFwJ3RcQpXpSgrd7hh7fQwalweyqDY5GcaltUVTpMwpvB8kI
-         U3MbgW+y9CMCqSw2ZFZ7sP3byKy+eNqWzU4SWhFzS7KqKOhTShz+LbHtaf3EB3S4rk
-         vGdyQZ8xeMek6EE5DbkCOtZJCawOCsuAcONJgDysEyJV/FbBLkb0CsQxL+xpP6/FO4
-         iSd+xwMNNuFpZHygpNdOvk74RluD+OTA9lCzoSj8EGfAyH6Tzu3S3uAhGcwmOGCRai
-         fCTvQJLhydWsno37T0nhwWAsY4rrJQRaXM84IecUhoDp8qRH2WDPXwAKjVtAMBohJq
-         MwqGNeNtxYRnA==
-X-Virus-Scanned: amavisd-new at mail.savoirfairelinux.com
-Received: from mail.savoirfairelinux.com ([127.0.0.1])
-        by localhost (mail.savoirfairelinux.com [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id 5wD4LvTvv3NF; Thu, 20 Oct 2022 10:42:50 -0400 (EDT)
-Received: from [192.168.48.98] (unknown [192.168.51.254])
-        by mail.savoirfairelinux.com (Postfix) with ESMTPSA id 92AB79C062D;
-        Thu, 20 Oct 2022 10:42:50 -0400 (EDT)
-Message-ID: <0f29aa0297d6fc5daa86f81925754c1f6d3f679c.camel@savoirfairelinux.com>
-Subject: Re: [PATCH] mmc: add TS7800 FPGA based MMC controller driver
-From:   firas ashkar <firas.ashkar@savoirfairelinux.com>
-To:     Arnd Bergmann <arnd@arndb.de>, alex@digriz.org.uk,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>
-Date:   Thu, 20 Oct 2022 10:42:50 -0400
-In-Reply-To: <a577dfcf-5a0a-4568-8f6d-872a8324dfcc@app.fastmail.com>
+        with ESMTP id S230249AbiJTOpC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 10:45:02 -0400
+Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 52B5FA5700;
+        Thu, 20 Oct 2022 07:44:55 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 7587132008FC;
+        Thu, 20 Oct 2022 10:44:52 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Thu, 20 Oct 2022 10:44:52 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm2; t=1666277092; x=1666363492; bh=XOzeuPW2Qi
+        ixpmZ2B6KTbuBWjAk7F4JwVSLfTWQZDNg=; b=wM+Q8gXUrHCWLCViwZYO05VfRi
+        4xa1M1EZWWz9hleo5goER29t2I4OGeSGsBXi+eTTXFFS+aYSWHRoIMSm24gSwdTX
+        efcXhFeohUWTthOfbOXo3XdlhYXeZ5byABmOitDhzwGk3qxKra+IwfkvEVc0u28v
+        I8PEFjfOMPvb43M1Faspt8yzEAkSWgp5P6QVJSaFbDj6Ez6SiaH9f5EIBFrz3m7b
+        VQM8NH9dq0d2tp8UT8n/k/oWIZ/rRExJNp4aSrMCBNdtGo1P9sBoKLa58gPJ3qdF
+        63lJuzvj4VkoNlF8c+Zix2rDoJ+Luy6u3ARufhu8LqLOLN4i+wEeQ67jNP2Q==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1666277092; x=1666363492; bh=XOzeuPW2QiixpmZ2B6KTbuBWjAk7
+        F4JwVSLfTWQZDNg=; b=CiVUC37ZiOnHfYOBUKFULR6rrg2C8rSwK3cwurnx7WPO
+        SqzarpayTFTtIIxOQLvyvXAlT5HYUuOfXHv16wxDsKaxlh9ZRF6TsCD7DiBiPEo5
+        S+piUdtwlz9BczvT8eDDapiTq+0AwZUgRQaGhnhX5HAuHwresz2fg13c1lCvf3yz
+        9M+3vOkiKuafq/tV6eXUN0PaEcyMCYCC/76tXe2tnu2lksUJ53nZ/eZQyP1xJuHB
+        WjvOUbt/SLG4+UjplBAsmGgCQ7zwoQSrNx+JiZ1SmWPBTlNYP5ZeR33Z45vAVlLO
+        9d/FLEFBSBgMzucUUuojBNki3ryH/O7BLkFv4Waneg==
+X-ME-Sender: <xms:415RY6tmrYaacvPfoKGnXNMPTlnlow_gkNSqkTDuClFpQyGDMfLzTw>
+    <xme:415RY_d0rFnr69p-qJw2AkV0vnuz9muqBT6kh30vZZTKTAWPDhIVMsyv1z_v1XiaK
+    bMYIdA7mgON7fHRm5Q>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrfeeliedgjeelucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:415RY1wPmByBBRXqYhiOJyqyP3wLtQRowAz8HFPbrHBE3wbfL9yXVg>
+    <xmx:415RY1OePgC_TuhO0xdoKhZKq3OHmFni1na-aEiPCSVU1PqruCzrBg>
+    <xmx:415RY6-_r4d_mcBO3eqU_FGbcNXxUP3BM6F6rlBatpi6UeklbNVzlA>
+    <xmx:5F5RYxafd92hLUatBzWC59HkhTe4n7YA9PMMRB_n5Sa2XYIM3PFYyg>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id CDCAEB60086; Thu, 20 Oct 2022 10:44:51 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
+Mime-Version: 1.0
+Message-Id: <ef23d179-15fa-4ad9-8ddc-ccad7790f8d0@app.fastmail.com>
+In-Reply-To: <0f29aa0297d6fc5daa86f81925754c1f6d3f679c.camel@savoirfairelinux.com>
 References: <20221018133800.10636-1-firas.ashkar@savoirfairelinux.com>
-         <a577dfcf-5a0a-4568-8f6d-872a8324dfcc@app.fastmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-User-Agent: Evolution 3.44.1-0ubuntu1 
-MIME-Version: 1.0
+ <a577dfcf-5a0a-4568-8f6d-872a8324dfcc@app.fastmail.com>
+ <0f29aa0297d6fc5daa86f81925754c1f6d3f679c.camel@savoirfairelinux.com>
+Date:   Thu, 20 Oct 2022 16:44:31 +0200
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Firas Ashkar" <firas.ashkar@savoirfairelinux.com>,
+        alex@digriz.org.uk, "Ulf Hansson" <ulf.hansson@linaro.org>
+Cc:     linux-arm-kernel@lists.infradead.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH] mmc: add TS7800 FPGA based MMC controller driver
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-thank you for the comments, pls check below for replies and acks=20
---=20
-Firas Ashkar
-Developpeur Syst=C3=A8me Embarqu=C3=A9
+On Thu, Oct 20, 2022, at 16:42, firas ashkar wrote:
+>> 
+>> > +
+>> > +#define DRIVER_NAME "ts7800v1_sdmmc"
+>> 
+>> Maybe drop this macro and just use the string directly.
+> This define macro used in multiple locations
 
-savoirfairelinux.com | Montr=C3=A9al, Qu=C3=A9bec
+Yes, exactly that is the problem. Other drivers use the
+same macro name, so it's very hard to grep for the actual
+string.
 
-T=C3=A9l.: +1 514 276 5468 ext. 118
-
-
-On Tue, 2022-10-18 at 21:06 +0200, Arnd Bergmann wrote:
-> On Tue, Oct 18, 2022, at 15:38, Firas Ashkar wrote:
-> > add standard mmc/host controller driver for TS-7800v1, instead of
-> > the
-> > original block based 'tssdcore' driver provided by EmbeddedTS
-> > linux-2.6.x
-> > code base.
->=20
-> I'm looking at this driver since Marc pointed me to your
-> work on the platform and I noticed this post as well.
-> Not doing a full review, but I'm still pointing out a few
-> issue that caught my eye.
->=20
-> > +
-> > +#define DRIVER_NAME "ts7800v1_sdmmc"
->=20
-> Maybe drop this macro and just use the string directly.
-This define macro used in multiple locations
->=20
-> > +
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (IS_ERR_OR_NULL(pslot->rw=
-_dma_buf)) {
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0dev_warn(mmc_dev(ts_sdmmc_host->mmc_host),
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 "%s|%=
-d - Error, No allocated DMA read
-> > buffer %ld\n",
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 __fun=
-c__, __LINE__, PTR_ERR(pslot-
-> > >rw_dma_buf));
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0*data_error =3D ret =3D -ENOMEM;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0goto done;
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
-> > +
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0dat0_sent_crc16_buf =3D kzal=
-loc(sizeof(u16), GFP_KERNEL);
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (IS_ERR_OR_NULL(dat0_sent=
-_crc16_buf)) {
->=20
-> You should never need IS_ERR_OR_NULL, as all interfaces
-> in the kernel are supposed to either return an error code
-> or return NULL on error. Please fix the error handling
-> for this throughout the driver.
-ack
->=20
-> > + spin_lock_bh(&ts_sdmmc_host->bh_lock);
->=20
-> I'm a bit confused by your locking. Why do you use
-> spin_lock_bh() instead of a normal spin_lock() or
-> a spin_lock_irq()? I don't see any use of softirqs
-> (typically tasklets and timers) in this driver, so
-> disabling softirqs in the critical section should
-> not change anything.
-ack
->=20
-> =C2=A0=C2=A0=C2=A0=C2=A0 Arnd
+    Arnd
