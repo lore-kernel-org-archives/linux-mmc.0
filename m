@@ -2,150 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7AF9C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 02:45:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25C6FC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 03:07:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229921AbiJTCpv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 19 Oct 2022 22:45:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58464 "EHLO
+        id S230017AbiJTDHX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 19 Oct 2022 23:07:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39838 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229731AbiJTCpu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 22:45:50 -0400
-Received: from mail-oa1-x32.google.com (mail-oa1-x32.google.com [IPv6:2001:4860:4864:20::32])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE6B04361D;
-        Wed, 19 Oct 2022 19:45:49 -0700 (PDT)
-Received: by mail-oa1-x32.google.com with SMTP id 586e51a60fabf-13af2d12469so343466fac.13;
-        Wed, 19 Oct 2022 19:45:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0Cq+099au1fcIZkEuYX8fyyY/A6S9ZGFUDhQxD4wNUM=;
-        b=lSldbcAWPhA/wXSb/o6zEJ+EhogaGACATRZgbSCtFGuMbC/ndba8gJbtw9kCWk8/Ck
-         XtNK7nW0mL/k0I68ZgGPVuVaw5kjHNvc2MYgrGXVaTJxUYU/gD9oTDGJLnSaReTwFzdc
-         kPmZGaJbkbkjNubHkjnr6Dy9nI6rBA9L52CZLnt7pZjaaJLYjHbepQ8LxELgGvcYZadW
-         8MNoeVjvmw7GnvrpPVcRrw2ajbCYs5CiLnXnhG/mnrRJfu/OOH2iqVJJSkvhRuM8PO6C
-         TkEftRdOe2mK1lvi/RhteXv0Bi90dOmeCpePCu+T4bvrGowWkMKdsZGQK52X2scNbW5u
-         1TwA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=0Cq+099au1fcIZkEuYX8fyyY/A6S9ZGFUDhQxD4wNUM=;
-        b=Xo3LTJk8DV7udbrPTdkKcNCo3p6ewp1/3S/HkK1u7LYvVUPYbCggU7xTMU33vAHH/p
-         KKMVY9aXfptHWNTcrAbRC1aTIQmnV5wgrFWaLGGiPLcd5NjyfuKmRPkvMl1YQkFx2rEq
-         kve0Zdlf1YMQ3a4l88/NXpLs8ao3MsJegC+5Q5z/8ns9flFaxr/6J7ykN0ZPu77qKe7k
-         sUr2KuUsK1AcEgFAnQAb87dhmg7PPS6kCLmUtrojcoCaiiAKuIFO8bTJf0Ey12pDq97n
-         HXtFGjAwVb4GVYJw7Y2X53l7HWRLNkjXNEkrGfPYTbI2Xa26crO9oOs/lbhPwh0cLCUN
-         A7qg==
-X-Gm-Message-State: ACrzQf0hePY+kHE6L2j96plVPBDFZhhCdHmdAQJ60VaTBiCbcOCNxxCL
-        OEyvM6MIzLb/uLvnqSyAHJOI76Q0j8UdyA==
-X-Google-Smtp-Source: AMsMyM4P5p3sSnu7XTPKLwvTl/t67AYBSqAa/3Mf4OpKDUxDSZ+8fkxi0XJtwpMU3u08s4UIyQEpow==
-X-Received: by 2002:a17:90a:b118:b0:20d:65f4:fde9 with SMTP id z24-20020a17090ab11800b0020d65f4fde9mr47029210pjq.184.1666233938800;
-        Wed, 19 Oct 2022 19:45:38 -0700 (PDT)
-Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
-        by smtp.gmail.com with ESMTPSA id 33-20020a630d61000000b004351358f056sm10546364pgn.85.2022.10.19.19.45.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 19 Oct 2022 19:45:38 -0700 (PDT)
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-To:     ulf.hansson@linaro.org
-Cc:     axboe@kernel.dk, avri.altman@wdc.com, adrian.hunter@intel.com,
-        kch@nvidia.com, CLoehle@hyperstone.com,
-        vincent.whitchurch@axis.com, bigeasy@linutronix.de,
-        s.shtylyov@omp.ru, michael@allwinnertech.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        megoo.tang@gmail.com, lzx.stg@gmail.com
-Subject: [PATCH] mmc: block: Support Host to control FUA.
-Date:   Thu, 20 Oct 2022 10:45:29 +0800
-Message-Id: <20221020024529.25227-1-wenchao.chen666@gmail.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S229663AbiJTDHV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 19 Oct 2022 23:07:21 -0400
+Received: from NAM11-BN8-obe.outbound.protection.outlook.com (mail-bn8nam11on2041.outbound.protection.outlook.com [40.107.236.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E78D81BBEFC;
+        Wed, 19 Oct 2022 20:07:19 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=kS+TXJoxDKVjEJ6KRvvMN72V/oyZVrr9WoyKZfLHUkZsMJaKM2TrowTwZafCwbuQ7kboduaByMGIphXtbX5gZQAyCkptD4LHbeyN/2QkAYbDQwL2mrXUaG5LrcJPlILiN/6MtES18HEx2EZ4QEF1kAxFZzRPrTw2pENWqFjNG1dYTpmdRSZQ177pDbEy3iLPEv0zY35AW90WLzmUV1w9i0m3F/33lhNocD8qfZnSaTs4xDrpBHZPbjndRMtsfzhYtUwEzVZLzEdnMT5+48U5T2FyWO//q+DMQnq4nS4mla0+YYQOsT4qlHujpCTcoO7Fhuj1Cu0qoiTjt61OvUL8sg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=enrcx9HbAYHNIyRAEcWaOdLf1z2oy1IttrDKXgKsRLo=;
+ b=Wh4UslBfTtW6TwTNK7nSkMncu8nxOlXc6r7LQZctpSQjwtSuz2RgbulDyHbEQrA/qQQ7bv1TdTldvjn9F7uJ4mGyyk3+KtOWfFu128jeoENmDLYdAeIl6RVQjkep6AyjoInUzFgNI0r7/lF4T0cEqJee8/vWmpKfX+dMBWyWDhr/URq3aPFV+jFMaSX7pTpl2xeM2FoXU6HjzHgvf+5lNvm5UNvdRQuGwVX17eGf6967ayo0soL2xUE3DtgmsKzSwYpb7HUMedg2MS8pzE0dAjEga9h0PDDvP50hXfvrkPorOVP8unljip/uvg0zaT0bAyAdD2hrMubQwdqbCxbO7w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
+ dkim=pass header.d=nvidia.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=enrcx9HbAYHNIyRAEcWaOdLf1z2oy1IttrDKXgKsRLo=;
+ b=dhJiMbIODjg5VnetXDwRomqjASninblvIF/YDxEnjZbO+tUq8+NBUI7rMiElTZPuIoJ3WIoZ/PMgN7s1jSSlaxHbJznTEz8DDJpXbR9NlANHi3jyReH9z8nsPzwm+x4jZZPBbjoGr0qlleZrmnPEJB3a8reRGE+1fOg460BhZBAFLRKU9Hgff1gApuQhwbugRmF+kXZbyA5RLVKI+ABnJIzSekW5Qd6v+07TQwQvc6di4iforWwEJTRrzm7+QrXS6t+KJ6Cz0VT5qIB7I/HHNT5yDMI9Ki+GiqlYHCplqyvJjBqJNFSwabtg4ZgfNzrQfhpcZwQHtBjYmLvWCOmIUg==
+Received: from MW2PR12MB4667.namprd12.prod.outlook.com (2603:10b6:302:12::28)
+ by DM4PR12MB6352.namprd12.prod.outlook.com (2603:10b6:8:a0::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5723.35; Thu, 20 Oct
+ 2022 03:07:17 +0000
+Received: from MW2PR12MB4667.namprd12.prod.outlook.com
+ ([fe80::1402:a17a:71c1:25a3]) by MW2PR12MB4667.namprd12.prod.outlook.com
+ ([fe80::1402:a17a:71c1:25a3%7]) with mapi id 15.20.5723.033; Thu, 20 Oct 2022
+ 03:07:17 +0000
+From:   Chaitanya Kulkarni <chaitanyak@nvidia.com>
+To:     Wenchao Chen <wenchao.chen666@gmail.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+CC:     "axboe@kernel.dk" <axboe@kernel.dk>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        Chaitanya Kulkarni <chaitanyak@nvidia.com>,
+        "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
+        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>,
+        "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "michael@allwinnertech.com" <michael@allwinnertech.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "megoo.tang@gmail.com" <megoo.tang@gmail.com>,
+        "lzx.stg@gmail.com" <lzx.stg@gmail.com>
+Subject: Re: [PATCH] mmc: block: Support Host to control FUA.
+Thread-Topic: [PATCH] mmc: block: Support Host to control FUA.
+Thread-Index: AQHY5C4R+Pr0dLPpxEm18CnIRRxcXK4WmcKA
+Date:   Thu, 20 Oct 2022 03:07:17 +0000
+Message-ID: <b9ca56af-cb06-4fb1-d5d8-7426629dfe2b@nvidia.com>
+References: <20221020024529.25227-1-wenchao.chen666@gmail.com>
+In-Reply-To: <20221020024529.25227-1-wenchao.chen666@gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
+ Thunderbird/91.9.0
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nvidia.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: MW2PR12MB4667:EE_|DM4PR12MB6352:EE_
+x-ms-office365-filtering-correlation-id: 95572e1c-3811-4a4c-9866-08dab2483255
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: fmnRACJvb9ohN8p9fXu0tczp99RzJLHzKgQPfN6qgDXaK88iN08faitzUjxzBwjFIj9XqUtwsQgzQAJtOr/N738lxIkFqsoEwk/NHcWJC3ec9fTkwq+UkazhOapa2FaQ1J8Raece73+M53T3xTsR8n5JsLvqWHeyJSHf+M+eSLxTXQ/bP6syL4yywsSjNB1LmXvBP9rvVj9zxfJpcO1RNXAJK+pF5OniEvKiPImv2Sw37jU2t6xEdNycHsOe9JU0n5UAnNxFeWThW9Kum9ScQGyG+Caamy2SrUA4LYx9BnOf/GuNx5inNxgUDyUtXjDw6gc3f2Y2vAz1f1+wZoDRjrIQHo9AFK9yuDaHU5kiFH4wWSRwIgn+6t6jlHaujmCA3GRYzOzx7jAcOHaMmkYnZR4/yW+t0JtqNEB23aPH4UBBnXOsaA8q6yMvf8uMEt6kkWdzFDHpXvNTQIquxWRsDtC3+nla9traR4WkfXyFJPFA158sjWZZb5AB7Cu1PI5FBjDyj8uH8Hb+v8SFTGr03wRCRkZkEqRMfdDIvTPKbcaRaWufM1ZonfX65aB9JMiaw2Lyw7FmvzrN3yTPH73iLI6OPZmNQ0NmUE2oCCMmaVpRiWsqDfB7Zwxb0B1ztGH63700wAIxUnh8hIso0eIegjDSp4hwDRSw8MjaMeI0NgQl7jizIZdClkL7Tcp5zcrxs28NVLOi3aeSa2LVyrMFY2u394RqJLVbfDVfOxgaqIdPsk3BQEm6I0mtpTau0ce0dldG0f9zj1h0H1UDyINOVVGGItatX3FPFTuVoj3BsHKo7myjt56jitlN0PiDhzFIKbCUgCE2iFQG/tLpI2p81A==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MW2PR12MB4667.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(366004)(346002)(39860400002)(136003)(376002)(396003)(451199015)(36756003)(31696002)(86362001)(31686004)(38070700005)(122000001)(38100700002)(2906002)(83380400001)(7416002)(5660300002)(6512007)(186003)(53546011)(2616005)(6506007)(54906003)(478600001)(6486002)(316002)(110136005)(4326008)(76116006)(66946007)(91956017)(66556008)(66476007)(66446008)(64756008)(8676002)(41300700001)(8936002)(71200400001)(43740500002)(45980500001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?WHF6eGcwQldiaGdMSWFBY2tNZUc0NzZxaTM0UjNDSERrbmhCZi8zeU53dWxZ?=
+ =?utf-8?B?aG5aVUtnOXEybmpETzV0T3VVZmU3VjJJcDNRYjhZcmpjK2dwRFc2R3d4R1o5?=
+ =?utf-8?B?RWlnT2N4U1JDZmpGOTBjLzFFN2tBcVEzRVJhZEJ5U2IrVkhyVmE1KzZPditV?=
+ =?utf-8?B?TkpaMVh0cXB3eUdOQXhnUlppVkN2M1Rtc3ZxNnpYT1hjTFZ3UHFSR3A0ekY3?=
+ =?utf-8?B?bnRqaEIvWmlJZHdueTVQY1FVeEc4dml6aGxlMTA5Z1RlN0s4QlRzVHMvRjFZ?=
+ =?utf-8?B?cWZxbFFYYWNUSDM4NWlYWnhlekRFTFkzUmFmb2tSbVZQcjQxMU5pSFNpNnhv?=
+ =?utf-8?B?aisrNTB0bVJBcXBIZFU3U1U0VloxL2tVSlVZWjFIaDVhYzM3aHVoR1A0N1V1?=
+ =?utf-8?B?bys5SXpMRXhDYTdXSWpkNi9BbWs0QllZOHUyc0NJSHNGaHU3MzVuUWt4dGZQ?=
+ =?utf-8?B?eDF5dE9ubmlsSG5LZkpSTEhpZ3VMSlU3TWFkWm9mQk5UR2cwZEdTTzhSYU92?=
+ =?utf-8?B?WWJab0x1b1J4ZUNnbjhOTjBKdEthUFkvSEVlbStsV3lqMlJYTmVGaFdVZHhS?=
+ =?utf-8?B?VXU3NHI2UFhGeXIxREh1Vmg0enF2am9ndzRpL2ZXN01LQzZocU11bVdGcWN2?=
+ =?utf-8?B?czhIbitZODR2M0hSNFVmYVZ0TUh4WDRRZTdFOUVLNGJpUkhXbktxdjdhMGlB?=
+ =?utf-8?B?UnBHdHpKRFNLR0prTVZNMnUxVWpELzlPaUsxWXo0RVJMN2hJR1NIRnhSb1RD?=
+ =?utf-8?B?ZHM5VHdycm1XMGtLZiszQVY2VnRmTzFrbWhXeitHVzdzZDJtMU1VVTY4azR0?=
+ =?utf-8?B?WWxPV0Y3Y3RQUVcxYTVUNFlYSmJDNU5uc0c5eUN4S1FjL1VLZUdYOTZlZHlO?=
+ =?utf-8?B?czhIT2daL3BZY3JDQ0NyMFRiMmd4bnE4cUVzZ1VPczIwVXdxYkVjbXd3cHV3?=
+ =?utf-8?B?UDB4ZlFtR0xkKzVOaVFZcS8rK3IzOHRBM0ZxR3V5L2FlZWdtU3FDZ0JGRWhy?=
+ =?utf-8?B?QnZQdzJ1YVFwMmN2dCtnaklaTGJ5Q2JvT2poZzFHRTN6MkVzZHFDTnV3VC80?=
+ =?utf-8?B?Wm50VS9JQUozOEcvS2lFWlRCVU4wMHZFNUIwcXptRnc0MHFaREdBSXRNTzND?=
+ =?utf-8?B?aEFWdVErS0tacXRibXd1UDU5bWlmVUlGclVIVXhhclh6OHpVS3lIYVh2MjNG?=
+ =?utf-8?B?bWEzSG9HaDJzdFJqZWg3YTdtckhIQ2x5ZEc0d0ZoRzZSSzlQa1p1TkxHZkho?=
+ =?utf-8?B?OURTdWpQWXNuQS9XazN4NmswNW5yZHVXTXRiMk13dzZpV0VkWDF4d1FLUXIy?=
+ =?utf-8?B?M1g4QXJ1ZERIdjgvZmJ1RUpEQk1rOGJGa2ZTQjNrUHNpRjRkWmRPZUJnSFJN?=
+ =?utf-8?B?djl1dFFyajhsUU1HbGFySDhNQnVFSnZhenMwYXFlRG9BK1ZaeUY4ZHo0VHBI?=
+ =?utf-8?B?VjZYMTdiMkFzOVMxM2JCMklkRVI0UDFEU2xSb0E5ek1GVUI4YVVTUWpuZVd6?=
+ =?utf-8?B?TzI5L2szR0ZpeGk4RFY1VS9mYmJlQW8yZlZsU2pXcjh4YU9mdWlVTGhydXBo?=
+ =?utf-8?B?bFhRSit6WHpkdFFIRTlGaGQvd2lDdXhkd3p0RHlkZ3p0R0Rxak81T1JXK2dV?=
+ =?utf-8?B?a29DUG01MTJoWEllRUVObnMwTW1QR2V0MlNZSE5ZdmllN05ONHUwSjJManVF?=
+ =?utf-8?B?MERHNFN2RzllR3ErcStxdmdzbDg2Zklac2h4QURJRnQ4TTFoeGlBQWhYWFE0?=
+ =?utf-8?B?RnJJR0RKRlFXMEJaR3VuUlBQWmhNVGErN3BuR2dTNldTenJObEpST3QzMFNK?=
+ =?utf-8?B?WmxHeFMzci8vSE94WEFFQWc4dlM2Qi9BaDNPdUlCK3NEUUdzZ3ZIczRnZ0VK?=
+ =?utf-8?B?em16cWpKL0VPaElTZytIcTRHQWdIeFRDNkt5a2FCY3FHUVJsczhIZzFBYzQv?=
+ =?utf-8?B?TkpVck1pK3JWeEs1aVBiZmZBbSs1ZkFMWXJDSXZLcGxVY3hrZzljcm9MTXhB?=
+ =?utf-8?B?a1JFZythcnJqNzI2KzhxMGg5NDFIQTljRXZ2SGxoNEIzY3ZLWXdJTmZnbEZY?=
+ =?utf-8?B?OFh2VVl1ZkNLUHV2TFBONHNPNkVKejFPMFJINzh1aVZ1SlhNN0M1VkNteno3?=
+ =?utf-8?B?TTBRbGJobHNWdEtEaWtSY24vSzF5dzBVdTNoMGRlaGV0SmJTcmhCWnpRL1dJ?=
+ =?utf-8?Q?NkxEcKnJBzVvn+bCLQveztsX+iyttFbGNJ3pDQrWtQbH?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <A2EA9DE94B61D34A8C9BF2DE1FA4D8DE@namprd12.prod.outlook.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: MW2PR12MB4667.namprd12.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 95572e1c-3811-4a4c-9866-08dab2483255
+X-MS-Exchange-CrossTenant-originalarrivaltime: 20 Oct 2022 03:07:17.7737
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: /q1M+KbUOeC8jR8AFjw9UCBkX5vVjgYDgo/5TF4eMDNbELl6h0sanX6tyfMbv+X0reOH05FH3mJGTFhi+M17Nw==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB6352
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wenchao Chen <wenchao.chen@unisoc.com>
-
-This patch introduces host->fua_disable for MMC host controller.
-The host can turn off FUA to improve performance.
-
-1. fua_disable = 1
-/sys/block/mmcblk0/queue # cat fua 0
-I tested 5 times for each case and output a average speed.
-
-1) Sequential read:
-Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
-Average speed: 265.74MiB/s
-
-2) Random read:
-Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
-Average speed: 98.81MiB/s
-
-3) Sequential write:
-Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
-Average speed: 200.5MiB/s
-
-4) Random write:
-Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
-Average speed: 70.32MiB/s
-
-2. fua_disable = 0 (default 0)
-/sys/block/mmcblk0/queue # cat fua 1
-I tested 5 times for each case and output a average speed.
-
-1) Sequential read:
-Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
-Average speed: 257.86MiB/s
-
-2) Random read:
-Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
-Average speed: 100.2MiB/s
-
-3) Sequential write:
-Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
-Average speed: 149.48MiB/s
-
-4) Random write:
-Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
-Average speed: 12.68MiB/s
-
-According to the above data, disable FUA (fua_disable = 1) improves the
-performance. Therefore, it is recommended to support the host to control
-FUA.
-
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
----
- drivers/mmc/core/block.c | 3 ++-
- include/linux/mmc/host.h | 3 +++
- 2 files changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 54cd009aee50..333e819e077a 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2490,7 +2490,8 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
- 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
- 	     card->ext_csd.rel_sectors)) {
- 		md->flags |= MMC_BLK_REL_WR;
--		fua_enabled = true;
-+		if (!card->host->fua_disable)
-+			fua_enabled = true;
- 		cache_enabled = true;
- 	}
- 	if (mmc_cache_enabled(card->host))
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8fdd3cf971a3..16a5bee3eeae 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -517,6 +517,9 @@ struct mmc_host {
- 	struct blk_crypto_profile crypto_profile;
- #endif
- 
-+	/* Host FUA support */
-+	bool			fua_disable;
-+
- 	/* Host Software Queue support */
- 	bool			hsq_enabled;
- 
--- 
-2.17.1
-
+T24gMTAvMTkvMjIgMTk6NDUsIFdlbmNoYW8gQ2hlbiB3cm90ZToNCj4gRnJvbTogV2VuY2hhbyBD
+aGVuIDx3ZW5jaGFvLmNoZW5AdW5pc29jLmNvbT4NCj4gDQo+IFRoaXMgcGF0Y2ggaW50cm9kdWNl
+cyBob3N0LT5mdWFfZGlzYWJsZSBmb3IgTU1DIGhvc3QgY29udHJvbGxlci4NCj4gVGhlIGhvc3Qg
+Y2FuIHR1cm4gb2ZmIEZVQSB0byBpbXByb3ZlIHBlcmZvcm1hbmNlLg0KPiANCj4gMS4gZnVhX2Rp
+c2FibGUgPSAxDQo+IC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZSAjIGNhdCBmdWEgMA0KPiBJIHRl
+c3RlZCA1IHRpbWVzIGZvciBlYWNoIGNhc2UgYW5kIG91dHB1dCBhIGF2ZXJhZ2Ugc3BlZWQuDQo+
+IA0KPiAxKSBTZXF1ZW50aWFsIHJlYWQ6DQo+IFNwZWVkOiAyNjYuOE1pQi9zLCAyNjUuMU1pQi9z
+LCAyNjIuOU1pQi9zLCAyNjguN01pQi9zLCAyNjUuMk1pQi9zDQo+IEF2ZXJhZ2Ugc3BlZWQ6IDI2
+NS43NE1pQi9zDQo+IA0KPiAyKSBSYW5kb20gcmVhZDoNCj4gU3BlZWQ6IDk4Ljc1TWlCL3MsIDk4
+LjdNaUIvcywgOTguNU1pQi9zLCA5OS40TWlCL3MsIDk4LjdNaUIvcw0KPiBBdmVyYWdlIHNwZWVk
+OiA5OC44MU1pQi9zDQo+IA0KPiAzKSBTZXF1ZW50aWFsIHdyaXRlOg0KPiBTcGVlZDogMTk5Ljk0
+TWlCL3MsIDE5OS4xTWlCL3MsIDIwNS41TWlCL3MsIDIwNi41TWlCL3MsIDE5MS41TWlCL3MNCj4g
+QXZlcmFnZSBzcGVlZDogMjAwLjVNaUIvcw0KPiANCj4gNCkgUmFuZG9tIHdyaXRlOg0KPiBTcGVl
+ZDogNjguNk1pQi9zLCA3MS44TWlCL3MsIDc3LjFNaUIvcywgNjQuOE1pQi9zLCA2OS4zTWlCL3MN
+Cj4gQXZlcmFnZSBzcGVlZDogNzAuMzJNaUIvcw0KPiANCj4gMi4gZnVhX2Rpc2FibGUgPSAwIChk
+ZWZhdWx0IDApDQo+IC9zeXMvYmxvY2svbW1jYmxrMC9xdWV1ZSAjIGNhdCBmdWEgMQ0KPiBJIHRl
+c3RlZCA1IHRpbWVzIGZvciBlYWNoIGNhc2UgYW5kIG91dHB1dCBhIGF2ZXJhZ2Ugc3BlZWQuDQo+
+IA0KPiAxKSBTZXF1ZW50aWFsIHJlYWQ6DQo+IFNwZWVkOiAyNTkuM01pQi9zLCAyNTguOE1pQi9z
+LCAyNTguMk1pQi9zLCAyNTkuNU1pQi9zLCAyNTMuNU1pQi9zDQo+IEF2ZXJhZ2Ugc3BlZWQ6IDI1
+Ny44Nk1pQi9zDQo+IA0KPiAyKSBSYW5kb20gcmVhZDoNCj4gU3BlZWQ6IDk4LjlNaUIvcywgMTAx
+TWlCL3MsIDEwMU1pQi9zLCA5OU1pQi9zLCAxMDEuMU1pQi9zDQo+IEF2ZXJhZ2Ugc3BlZWQ6IDEw
+MC4yTWlCL3MNCj4gDQo+IDMpIFNlcXVlbnRpYWwgd3JpdGU6DQo+IFNwZWVkOiAxNTMuN01pQi9z
+LCAxNDYuMk1pQi9zLCAxNTEuMk1pQi9zLCAxNDguOE1pQi9zLCAxNDcuNU1pQi9zDQo+IEF2ZXJh
+Z2Ugc3BlZWQ6IDE0OS40OE1pQi9zDQo+IA0KPiA0KSBSYW5kb20gd3JpdGU6DQo+IFNwZWVkOiAx
+Mi45TWlCL3MsIDEyLjNNaUIvcywgMTIuNk1pQi9zLCAxMi44TWlCL3MsIDEyLjhNaUIvcw0KPiBB
+dmVyYWdlIHNwZWVkOiAxMi42OE1pQi9zDQo+IA0KPiBBY2NvcmRpbmcgdG8gdGhlIGFib3ZlIGRh
+dGEsIGRpc2FibGUgRlVBIChmdWFfZGlzYWJsZSA9IDEpIGltcHJvdmVzIHRoZQ0KPiBwZXJmb3Jt
+YW5jZS4gVGhlcmVmb3JlLCBpdCBpcyByZWNvbW1lbmRlZCB0byBzdXBwb3J0IHRoZSBob3N0IHRv
+IGNvbnRyb2wNCj4gRlVBLg0KPiANCj4gU2lnbmVkLW9mZi1ieTogV2VuY2hhbyBDaGVuIDx3ZW5j
+aGFvLmNoZW5AdW5pc29jLmNvbT4NCg0KQmFzZWQgb24gdGhlIGRhdGEgcHJvdmlkZWQgc2VlbXMg
+aXQgZG9lcyBpbmNyZWFzZSB0aGUgcGVyZm9ybWFuY2UuDQpQZXJoYXBzIGl0IGlzIHdvcnRoIG1l
+bnRpb25pbmcgdGhlIHJlYXNvbiBiZWhpbmQgdGhlIHBlcmZvcm1hbmNlDQppbmNyZWFzZSBhbmQg
+b3RoZXIgc2lkZSBlZmZlY3RzIG9mIGRvaW5nIHNvID8NCg0KQWxzbywgaXQgaXMgdXN1YWxseSBo
+ZWxwZnVsIHRvIG1lbnRpb24gcGVyZm9ybWFuY2UgaW5jcmVhc2UgaW4gdGhlDQolIGluIHRoZSBj
+b21taXQgbG9nIHNvIHlvdSBjYW4gbW92ZSB2ZXJib3NlIGxvZyAobGlrZSBhYm92ZSkgaW50bw0K
+dGhlIGNvdmVyLWxldHRlciBmb3IgZG9jdW1lbnRhdGlvbiBwdXJwb3NlLCB0aGlzIGlzIGJhc2Vk
+IG9uDQp0aGUgZmVlZGJhY2sgSSBnb3QsIHVubGVzcyBtYWludGFpbmVyKHMpIHByZWZlcnMgaXMg
+dGhpcyB3YXkgOikuDQoNCi1jaw0KDQo=
