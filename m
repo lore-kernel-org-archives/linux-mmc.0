@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC0A5C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 08:00:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B50B2C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 20 Oct 2022 08:04:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229959AbiJTIAV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 20 Oct 2022 04:00:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53966 "EHLO
+        id S229945AbiJTIE4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 20 Oct 2022 04:04:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38818 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231194AbiJTIAJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 04:00:09 -0400
-Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C75913B9B7;
-        Thu, 20 Oct 2022 00:59:59 -0700 (PDT)
-Received: by mail-pl1-x62e.google.com with SMTP id c24so19582023pls.9;
-        Thu, 20 Oct 2022 00:59:59 -0700 (PDT)
+        with ESMTP id S230126AbiJTIEy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 20 Oct 2022 04:04:54 -0400
+Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BFD24D157;
+        Thu, 20 Oct 2022 01:04:47 -0700 (PDT)
+Received: by mail-pg1-x534.google.com with SMTP id e129so18524926pgc.9;
+        Thu, 20 Oct 2022 01:04:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=m0JeBN7iCUk6q5jQRpN/rZt1LaJzoUAVMeSbf0WL1SE=;
-        b=Wfrqsu9VOmpoP8iwnJkiaek2AXhF6PNbi6rWD6xS8/FCoT8EKjLpMBXaz2ABs0BA2+
-         Wk5wLYtxWnxhMsaTosHne2pC7ur5sR4GUGOWHFgYXXK0HGsd3xnetwQM2U2AckGQTmIF
-         N+wZvQnM/o0BGg+/vHAF+ZTicHOuRBQ9m0Ouf+r/PR6DxzJybb4mXLm4BjjGcKJStPYI
-         YoVX7kIU17SVLmU3Z5nP+2rPo5ZZK9H7F9itfBoS76JP9sx8QlSmbZ7BQeTXgU53s57z
-         O8zMoR+7B2MNQFA/TW+CPP3jtKCTs+X/IS8H7qov4Teq71TX+ZTuYBLKCgNaDzYj5CDq
-         Nw2Q==
+        bh=yPKQF1womnv+Nz41FwdqMwP49IwpAg65M5ovOMXDQH0=;
+        b=M0jMZM3VsUbFKjPZx7179s28DNJraI6tuTwAIp3S8+33iH1YL88vH7BVGAFmqnpb0X
+         gLFPzWF2wsThgYb+7HGBCiYrL5UuSDDfhbRMeLeaFUornkZEtHjzLlborihppHjZSwxr
+         PnhRoUThXobtWWpsjR4moxemKzVPka5sGW0RL+927ydHzkJXJEBlDzT1k0I9Uh9frEze
+         ft3q04YBXYZjtB4HRgQ68K+7hD5k5tHMA81jfXkfNEY4wWnw4NOmolXKZ99eTVwWl1QW
+         rnyHUO/8lrK9xgjlmY580LImTCIEklY/7hDvszUHVLZz/LXiqhneMOzFRu2Y6qyfhJsO
+         Rqzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=m0JeBN7iCUk6q5jQRpN/rZt1LaJzoUAVMeSbf0WL1SE=;
-        b=Te8bQZ+i9j1mSzDfQqwB534xckcvOGPbqKsaqF781Njh2noAk7sp0P9bm1oF+I8olK
-         ARHhlUuhmtoesE0mecc7KCDyVkIV7Dlx7rNyTkHds/q3EnM7EtzycLXOWHWHw8uisHWn
-         k4ZitEFMMAZoP72axmsQgSDKjBqkbuADF5AjOeF3lm0y7NR2raPxZccSrj+QeeTSi0OX
-         le3F+YuBenj1NZQM6+aIw6J4t7xgBQnHOC0r0Lhk7HR8NCWCYiUNj758tJPGdQK2/E4I
-         vZEJi8st+01ygdDvKKzsQFOtyKdFOHabpoK6jSQ+Gfl69+WnPjgXqrHc4QyTP545QzSq
-         0r/g==
-X-Gm-Message-State: ACrzQf2dAOGvEFhdaMTbcv8A5YhGcxAeoDc1R+CESfT1kuhO0UiUbIf0
-        Mne8upqV2DIUb4rZaIJ5AWFTGoXIocqkPpRZHFY=
-X-Google-Smtp-Source: AMsMyM6UZswHEmp54Pt+aaGlMrzuIVZcJjU0NPz0CXtMUf0TcvGPnU5mXpJIKKg07XpUm5df+4IyscyYQta1KWwAMFc=
-X-Received: by 2002:a17:902:e5c9:b0:186:4f8a:d6a with SMTP id
- u9-20020a170902e5c900b001864f8a0d6amr10289295plf.150.1666252781166; Thu, 20
- Oct 2022 00:59:41 -0700 (PDT)
+        bh=yPKQF1womnv+Nz41FwdqMwP49IwpAg65M5ovOMXDQH0=;
+        b=vt1mBZhV0iBRk2K2T7eYqMH06evGm21M9yk3tqoYdZwc+aq79XDOGTaSE3FBqK7Hcu
+         tzMH+1KTp5uKZ3Crrk4UFmNLRXf9BxyVyMYjTNFaV6VYthA6rit6EWXE7u+5f5yRh6Tq
+         0ANOvGIMXegtJQRC2Xqi/4WSjXMt4ki4ROlqThNIxYKsMQy4Uz2OajMLV56qkW7vS0vj
+         OuB5QdB1OlK68iN9Y8tfDfkcpUugbEu3FItrvzDS46KGVL8XTCWRAClupO38wIFYsjQg
+         BOvz5JmKu7GvMzgkSzLiCUd1bAHHIRzaJvTsJi9rEJ3Zz+4stUejCSjVqUXfTOeS/uUU
+         H7RA==
+X-Gm-Message-State: ACrzQf0b12OcggXOSfX+HwxDOfCFQ1Qpva9wuDBM3GuWIRhUTqMdIdXp
+        07ogvOZNz7WLtopgzroSbO5nSg1VvTEP8YZLhKODgotnYqUGQQ==
+X-Google-Smtp-Source: AMsMyM7pNDWXpWvbEQnMBK6UgBUO5q2Q4JmBBZ0GbEtZfaKo69/TRRq9MrkaBCapIJrumfcdPbxUtHf8e48y1PK97Kw=
+X-Received: by 2002:a63:6b44:0:b0:46a:fa55:b6a0 with SMTP id
+ g65-20020a636b44000000b0046afa55b6a0mr10787569pgc.614.1666253086969; Thu, 20
+ Oct 2022 01:04:46 -0700 (PDT)
 MIME-Version: 1.0
-References: <20221020024529.25227-1-wenchao.chen666@gmail.com> <DM6PR04MB6575C38931D2BB4A560A355BFC2A9@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB6575C38931D2BB4A560A355BFC2A9@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <20221020024529.25227-1-wenchao.chen666@gmail.com> <b9ca56af-cb06-4fb1-d5d8-7426629dfe2b@nvidia.com>
+In-Reply-To: <b9ca56af-cb06-4fb1-d5d8-7426629dfe2b@nvidia.com>
 From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Thu, 20 Oct 2022 15:59:19 +0800
-Message-ID: <CA+Da2qwKRCNhz78tVOaUaTfLiPN1b-ycOZ2_X_N7D8ZeACRQRg@mail.gmail.com>
+Date:   Thu, 20 Oct 2022 16:04:35 +0800
+Message-ID: <CA+Da2qx_BzD0JN+O848CWTBdRmmG4NObnodyX=w3NpjODSHuAg@mail.gmail.com>
 Subject: Re: [PATCH] mmc: block: Support Host to control FUA.
-To:     Avri Altman <Avri.Altman@wdc.com>
+To:     Chaitanya Kulkarni <chaitanyak@nvidia.com>
 Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "axboe@kernel.dk" <axboe@kernel.dk>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
         "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "kch@nvidia.com" <kch@nvidia.com>,
         "CLoehle@hyperstone.com" <CLoehle@hyperstone.com>,
         "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>,
         "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
@@ -71,59 +71,75 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 20, 2022 at 3:44 PM Avri Altman <Avri.Altman@wdc.com> wrote:
+On Thu, Oct 20, 2022 at 11:07 AM Chaitanya Kulkarni
+<chaitanyak@nvidia.com> wrote:
 >
+> On 10/19/22 19:45, Wenchao Chen wrote:
+> > From: Wenchao Chen <wenchao.chen@unisoc.com>
+> >
+> > This patch introduces host->fua_disable for MMC host controller.
+> > The host can turn off FUA to improve performance.
+> >
+> > 1. fua_disable = 1
+> > /sys/block/mmcblk0/queue # cat fua 0
+> > I tested 5 times for each case and output a average speed.
+> >
+> > 1) Sequential read:
+> > Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
+> > Average speed: 265.74MiB/s
+> >
+> > 2) Random read:
+> > Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
+> > Average speed: 98.81MiB/s
+> >
+> > 3) Sequential write:
+> > Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
+> > Average speed: 200.5MiB/s
+> >
+> > 4) Random write:
+> > Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
+> > Average speed: 70.32MiB/s
+> >
+> > 2. fua_disable = 0 (default 0)
+> > /sys/block/mmcblk0/queue # cat fua 1
+> > I tested 5 times for each case and output a average speed.
+> >
+> > 1) Sequential read:
+> > Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
+> > Average speed: 257.86MiB/s
+> >
+> > 2) Random read:
+> > Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
+> > Average speed: 100.2MiB/s
+> >
+> > 3) Sequential write:
+> > Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
+> > Average speed: 149.48MiB/s
+> >
+> > 4) Random write:
+> > Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
+> > Average speed: 12.68MiB/s
+> >
 > > According to the above data, disable FUA (fua_disable = 1) improves the
 > > performance. Therefore, it is recommended to support the host to control
 > > FUA.
 > >
 > > Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> > ---
-> >  drivers/mmc/core/block.c | 3 ++-
-> >  include/linux/mmc/host.h | 3 +++
-> >  2 files changed, 5 insertions(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index
-> > 54cd009aee50..333e819e077a 100644
-> > --- a/drivers/mmc/core/block.c
-> > +++ b/drivers/mmc/core/block.c
-> > @@ -2490,7 +2490,8 @@ static struct mmc_blk_data
-> > *mmc_blk_alloc_req(struct mmc_card *card,
-> >             ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
-> >              card->ext_csd.rel_sectors)) {
-> >                 md->flags |= MMC_BLK_REL_WR;
-> > -               fua_enabled = true;
-> > +               if (!card->host->fua_disable)
-> > +                       fua_enabled = true;
-> Where are you allowing to set fua_disable?
-> And then I would expect you to call blk_queue_flag_set to set QUEUE_FLAG_FUA.
 >
-> Thanks,
-> Avri
-Hi Avri
-We will implement sdhci_sprd_probe in sdhci-sprd.c host->fua_disable = true;
-Because sdhci_sprd_probe is before mmc_blk_alloc_req, calling blk_queue_flag_set
-directly will also be updated.
+> Based on the data provided seems it does increase the performance.
+> Perhaps it is worth mentioning the reason behind the performance
+> increase and other side effects of doing so ?
 
-Thanks,
-Wenchao
+We suspect it will affect the progressive power-down test, but after a week
+of testing, turning off FUA did not affect this test.
+
 >
-> >                 cache_enabled = true;
-> >         }
-> >         if (mmc_cache_enabled(card->host)) diff --git
-> > a/include/linux/mmc/host.h b/include/linux/mmc/host.h index
-> > 8fdd3cf971a3..16a5bee3eeae 100644
-> > --- a/include/linux/mmc/host.h
-> > +++ b/include/linux/mmc/host.h
-> > @@ -517,6 +517,9 @@ struct mmc_host {
-> >         struct blk_crypto_profile crypto_profile;  #endif
-> >
-> > +       /* Host FUA support */
-> > +       bool                    fua_disable;
-> > +
-> >         /* Host Software Queue support */
-> >         bool                    hsq_enabled;
-> >
-> > --
-> > 2.17.1
+> Also, it is usually helpful to mention performance increase in the
+> % in the commit log so you can move verbose log (like above) into
+> the cover-letter for documentation purpose, this is based on
+> the feedback I got, unless maintainer(s) prefers is this way :).
 >
+> -ck
+>
+
+Thank you very much for your suggestion, I will update it in the next version.
