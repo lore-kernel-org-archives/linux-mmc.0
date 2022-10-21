@@ -2,136 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CF02C43219
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Oct 2022 06:52:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34722C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Oct 2022 07:30:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230052AbiJUGwg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Oct 2022 02:52:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47732 "EHLO
+        id S229867AbiJUHap (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Oct 2022 03:30:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60492 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230106AbiJUGwe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 02:52:34 -0400
-Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 729BD22E8DE;
-        Thu, 20 Oct 2022 23:52:32 -0700 (PDT)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.nyi.internal (Postfix) with ESMTP id 6C5815C007F;
-        Fri, 21 Oct 2022 02:52:31 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute3.internal (MEProxy); Fri, 21 Oct 2022 02:52:31 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1666335151; x=1666421551; bh=asFMH01gIy
-        FuLLt84XhpsavdGbikk/Zr70yYHFNA5r4=; b=tmmE+zyWqZsaV1HNHXmexsKCRZ
-        cTGaKpie3Ix8/C9msO3j7jjW6V++ZSgrCc/D8wECWflD2w77EVwUT4ZDJI4/qcDa
-        AE+VHQAznpHOe3oxin/wy0H7Jo04+zv8pXMIZDRqNYKa7QklC3Cl0vigmK7m0AEx
-        jx4A+td7c0SMHEJZVt6BhAUTnDzWRhZ9MfDQtZxrfpDQrShjDhD3SXdwd+IKTxAI
-        ZlRdzDXxtI9oe5QhZuvE6Vh3SgZNQgA+Thl0nO742KhzJJmNXR4asTqNJtVzEXKw
-        nLbhugd9XR3xVQIgR9sNyfKv+DM6ICYPVRj+7tuFLcBrlxWvHEZtTmiUJv3A==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; t=1666335151; x=1666421551; bh=asFMH01gIyFuLLt84XhpsavdGbik
-        k/Zr70yYHFNA5r4=; b=kCOatloKYNVOBJC3olA9k9hCbIwlxdKz89aA/Z58vRei
-        9lF6wbuChyuHTmzK1sc/5zb1M9ITUeNuFi1Qnmt8Ylcp3S8LtMToKa47i81KnVUn
-        pKaYJSDOMcqY5XM1uIM8a19oVoZvqIfhzU1X2pRzpCooHtDS9LFbVzR7GEcdGtHL
-        AklcoevJjyfziK/7t/uavCUXSXqEEVMLG/OrSxEbgY3S5JVdkTlRp0Z4RJitL/+e
-        0ERI0xWyGGrXd2+d5YSKUTWnNw4Arew5r/fl7dC/5kvsW4oQj/ac1iCAQLFRY1/q
-        XMZ34TsU+xO6zNgCM1pN8wwV1egVuBvELVnsf+ph8Q==
-X-ME-Sender: <xms:rkFSY7b52o4SSS29ii51024C6Tx9E3noQFHWuRk6VKm_aOR-UZKzQA>
-    <xme:rkFSY6byU9_2HIcQmGIOp1DUsd0lSnFXIvrb605VOlHM0RkwJGbTS-mIbt6ZO5aIY
-    0gt_IjGFwCVawZFB94>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrfeeljedgudduhecutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
-    enucfjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdet
-    rhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrg
-    htthgvrhhnpeevhfffledtgeehfeffhfdtgedvheejtdfgkeeuvefgudffteettdekkeeu
-    feehudenucffohhmrghinhepkhgvrhhnvghlrdhorhhgnecuvehluhhsthgvrhfuihiivg
-    eptdenucfrrghrrghmpehmrghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:rkFSY9_MJx9tKvhvQ5lwCt0Zb3IV3YOYY3pCycDfPWnv71sUpdgg3w>
-    <xmx:rkFSYxoBeoqaIgsY93umf4TjZTfSZAS5scg5cHiLigOO9T8BZHkFJw>
-    <xmx:rkFSY2qYK18DaISpgzqWb_yvcq_kGLQgKvWFftU45cRPvZmabuJJrQ>
-    <xmx:r0FSYzQVLjlAZPdjc9KdCUd8H-_UiL5nj-YrhWIpq4YNRLBe_QmjzA>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id A2DA1B60086; Fri, 21 Oct 2022 02:52:30 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
-Mime-Version: 1.0
-Message-Id: <de36ec6b-2e7c-48eb-9682-f60d8e4011da@app.fastmail.com>
-In-Reply-To: <20221020193511.GB3019@t60.musicnaut.iki.fi>
-References: <20221019144119.3848027-1-arnd@kernel.org>
- <20221019150410.3851944-1-arnd@kernel.org>
- <20221019150410.3851944-13-arnd@kernel.org>
- <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
- <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
- <20221020193511.GB3019@t60.musicnaut.iki.fi>
-Date:   Fri, 21 Oct 2022 08:52:10 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Aaro Koskinen" <aaro.koskinen@iki.fi>
-Cc:     "Arnd Bergmann" <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        "Janusz Krzysztofik" <jmkrzyszt@gmail.com>,
-        "Tony Lindgren" <tony@atomide.com>, linux-kernel@vger.kernel.org,
-        Linux-OMAP <linux-omap@vger.kernel.org>,
-        "Lee Jones" <lee@kernel.org>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Felipe Balbi" <balbi@kernel.org>,
-        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
-        linux-i2c@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-usb@vger.kernel.org
-Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
-Content-Type: text/plain
+        with ESMTP id S229849AbiJUHao (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 03:30:44 -0400
+Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FF923B704;
+        Fri, 21 Oct 2022 00:30:43 -0700 (PDT)
+Received: by mail-pf1-x42e.google.com with SMTP id h13so1823674pfr.7;
+        Fri, 21 Oct 2022 00:30:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=FWybCkNqc7BOIlhGtPQ8GIKC3VKRfzSYLOuETquJ7MQ=;
+        b=U0yBPLAdkBv+Vxw5j7hfc4m2f/ZQWy2xecE2yMlGvLa4lkwPKKJQEZJkHKLDtlyCsq
+         n+lNpkOANQPYyfjPPw/Anx7BbZE/dhzIUJqRXy3EEVYkby7CPDAoYvnL8ogyUA2BxWVN
+         tUXY3jxFwjeNhJtWImPNrYXX/BqxHdov6WtUe7WbySC1VYf1xhm7/aVYU4zsc+GhNB1P
+         LYfMF2uXYKsm91HF0y0/0UB43gZHzXmAAD7Kk0nh1DpPmmerC2ieIyK0WYZAdIVH/kZ4
+         ZNlPmOvkZCO62SVP95oWUFIUSSFKgjRLwOM0+VQc9rC8u1f638WqiM9DHoBu+U/E78VI
+         MVNg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=FWybCkNqc7BOIlhGtPQ8GIKC3VKRfzSYLOuETquJ7MQ=;
+        b=iHDySUZ662l62dDa5pL9J82Clx+XEaR5F/RGYlbcZ+18deRTCaUIEpb1omjmyC65IK
+         bIbuA6R9LPgbsn22ZCfNHpQP3AKfXtmb5pvJlcTcuKe1Ky7ecMOP2sk/38rHKh0UvSqm
+         FlDgLm+iDDxg67kMzyEavDmrdWjyqHYO+121+fWO4sRFnk9TbgI4zwM7JP+InJRyNhhl
+         3CSoF3i0pICuGW1TtHK1dhNthIWozRIv6XeXrq9Y9m74aUp4DLT5p3czofSe2l7W+r86
+         /uoxbl04HjULuHH3rcLitvr7URpWwCvrlPhMYU1er0/L/oGTub6Jt9hW/1adwLN/a7z/
+         O4ew==
+X-Gm-Message-State: ACrzQf1reopul9mKuj2mSv9ikueDRhX789p/KIU+tJHG/uNAFg9IZE+q
+        uEto9zQxNZqe2w4dS1xMVNw=
+X-Google-Smtp-Source: AMsMyM73G6Q2SaNJoUiHw2hoARKPg/E1k+q3CQV5u3vkvt14y1Kou7aj21uKkgoNRUNckiglMVdw4w==
+X-Received: by 2002:a05:6a00:4396:b0:563:6fd7:9c98 with SMTP id bt22-20020a056a00439600b005636fd79c98mr18284870pfb.13.1666337443014;
+        Fri, 21 Oct 2022 00:30:43 -0700 (PDT)
+Received: from xm06403pcu.spreadtrum.com ([117.18.48.102])
+        by smtp.gmail.com with ESMTPSA id d4-20020a62f804000000b005628a30a500sm14531929pfh.41.2022.10.21.00.30.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 21 Oct 2022 00:30:42 -0700 (PDT)
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com, axboe@kernel.dk, avri.altman@wdc.com,
+        kch@nvidia.com
+Cc:     CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
+        bigeasy@linutronix.de, s.shtylyov@omp.ru,
+        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
+        lzx.stg@gmail.com
+Subject: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+Date:   Fri, 21 Oct 2022 15:30:23 +0800
+Message-Id: <20221021073025.18831-1-wenchao.chen666@gmail.com>
+X-Mailer: git-send-email 2.17.1
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Oct 20, 2022, at 21:35, Aaro Koskinen wrote:
-> On Thu, Oct 20, 2022 at 09:11:11AM +0200, Arnd Bergmann wrote:
->> On Wed, Oct 19, 2022, at 19:15, Aaro Koskinen wrote:
->> > On Wed, Oct 19, 2022 at 05:03:35PM +0200, Arnd Bergmann wrote:
->> >> All board support that was marked as 'unused' earlier can
->> >> now be removed, leaving the five machines that that still
->> >> had someone using them in 2022, or that are supported in
->> >> qemu.
->> > [...]
->> >>  config OMAP_OSK_MISTRAL
->> >>  	bool "Mistral QVGA board Support"
->> >>  	depends on MACH_OMAP_OSK
->> >> -	depends on UNUSED_BOARD_FILES
->> >>  	help
->> >>  	  The OSK supports an optional add-on board with a Quarter-VGA
->> >>  	  touchscreen, PDA-ish buttons, a resume button, bicolor LED,
->> >>  	  and camera connector.  Say Y here if you have this board.
->> >
->> > Shouldn't this go away as well?
->> 
->> No, this one was incorrectly annotated, it's not actually
->> a board but it's an option for the OSK board that is not
->> getting removed. I considered making a separate patch
->> for removing the dependency, but that didn't seem worth it.
->
-> OK. For the record, I don't think anyone has this add-on board anymore,
-> and it has probably never been tested with the mainline kernel, so
-> it's likely in the "dead code" category... Maybe it could be changed to
-> "BROKEN", then the related OSK LCD panel stuff could be deleted later
-> on too.
+From: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Ok, good to know. I left it in place for now because Tony originally
-listed it as a likely used machine along with NOKIA770 and
-AMS_DELTA [1], but I don't have anyone listed specifically as a
-user for it.
+Summary
+=======
+These patches[1] supports the host to turn off FUA.
 
-It's not too late to revisit this list if you think it helps to
-get rid of it. I can see that drivers/mtd/tps65010.c and
-drivers/pcmcia/omap_cf.c become orphaned without it and can
-probably get removed as well then.
+About FUA, roughly deal with the following two parts:
+1) FUA(Forced Unit Access):
+- The REQ_FUA flag can be OR ed into the r/w flags of a bio submitted from the
+  filesystem and will make sure that I/O completion for this request is only
+  signaled after the data has been committed to non-volatile storage.
 
-      Arnd
+2) In emmc, FUA is represented as Reliable write. code show as below:
+static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+		int recovery_mode, bool *do_rel_wr_p, bool *do_data_tag_p)
+{
+	...
+	/*
+	 * Reliable writes are used to implement Forced Unit Access and
+	 * are supported only on MMCs.
+	 */
+	do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+			rq_data_dir(req) == WRITE &&
+			(md->flags & MMC_BLK_REL_WR);
+	...
+}
 
-[1] https://lore.kernel.org/linux-arm-kernel/20220721150320.GA9385@macbook.musicnaut.iki.fi/
+Patch structure
+===============
+patch#1:  for block
+patch#2:  for sdhci-sprd
+
+Tests
+=====
+Ran 'AndroBench' to evaluate the performance:
+1. fua_disable = 1
+/sys/block/mmcblk0/queue # cat fua 0
+I tested 5 times for each case and output a average speed.
+
+1) Sequential read:
+Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
+Average speed: 265.74MiB/s
+
+2) Random read:
+Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
+Average speed: 98.81MiB/s
+
+3) Sequential write:
+Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
+Average speed: 200.5MiB/s
+
+4) Random write:
+Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
+Average speed: 70.32MiB/s
+
+2. fua_disable = 0 (default 0)
+/sys/block/mmcblk0/queue # cat fua 1
+I tested 5 times for each case and output a average speed.
+	
+1) Sequential read:
+Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
+Average speed: 257.86MiB/s
+	
+2) Random read:
+Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
+Average speed: 100.2MiB/s
+	
+3) Sequential write:
+Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
+Average speed: 149.48MiB/s
+	
+4) Random write:
+Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
+Average speed: 12.68MiB/s
+	
+According to the above data, disable FUA (fua_disable = 1) improves the
+performance:
+1)Sequential read improved by 3%.
+2)Random read were down 1%.
+3)Sequential write improved by 34%.
+4)Random write improved by 454%.
+Therefore, it is recommended to support the host to control FUA.
+	
+Reference
+=========
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/block/writeback_cache_control.rst
+[2] Embedded Multi-Media Card (e•MMC) Electrical Standard (5.1)''
+
+Wenchao Chen (2):
+  mmc: block: Support Host to control FUA
+  mmc: sdhci-sprd: enable fua_disable for SPRDSDHCI
+
+ drivers/mmc/core/block.c      | 3 ++-
+ drivers/mmc/host/sdhci-sprd.c | 2 ++
+ include/linux/mmc/host.h      | 3 +++
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+
+-- 
+2.17.1
+
