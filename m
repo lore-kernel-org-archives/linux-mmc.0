@@ -2,186 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C7ECC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Oct 2022 15:51:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 572E5FA373D
+	for <linux-mmc@archiver.kernel.org>; Fri, 21 Oct 2022 16:10:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230071AbiJUPvJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Oct 2022 11:51:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43580 "EHLO
+        id S229815AbiJUQKW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Oct 2022 12:10:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229697AbiJUPvD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 11:51:03 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4771817F291;
-        Fri, 21 Oct 2022 08:50:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666367460; x=1697903460;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=arY4EvxAT/KvXp/JPvYXdDFVIm3QFZ803U2WXf8eouw=;
-  b=mjoM7Ko25VVgIsTbYKrIF7uepSKa+p3ZXUfJDMPM7/rkdwLSCwuTA5Hm
-   Ao6nD3PzFZVtmZzWvqGP5k82bTU1WjlwIkw0fEHB8X5YdsL6twsv4e8BR
-   DyKzZxx28DbYqYw7NydP2BEHbYGMSEaSGrBdZJ6a7Fpe/hYxnvJtfAiz2
-   1cvMctVsFXNbAhsrf6952PBzBjoS06LmO+I4tWtTz4BHiIgKb1YLd1hsT
-   5ctMFfogNp4FzO1LkmMoWIdRW4qdUyNGvB55XY9clqFvndqhiaYsuKw9s
-   hMbWlw9gTLWBtSjyACa3BCIkFBni1zsrz+oWIMm1TiEs4/3XNnOuoei/L
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10507"; a="393334481"
-X-IronPort-AV: E=Sophos;i="5.95,202,1661842800"; 
-   d="scan'208";a="393334481"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Oct 2022 08:50:54 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10507"; a="608425439"
-X-IronPort-AV: E=Sophos;i="5.95,202,1661842800"; 
-   d="scan'208";a="608425439"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.134])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Oct 2022 08:50:49 -0700
-Message-ID: <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com>
-Date:   Fri, 21 Oct 2022 18:50:39 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>, ulf.hansson@linaro.org,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com, axboe@kernel.dk, avri.altman@wdc.com,
-        kch@nvidia.com
-Cc:     CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
-        bigeasy@linutronix.de, s.shtylyov@omp.ru,
-        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
-        lzx.stg@gmail.com
+        with ESMTP id S230285AbiJUQKS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 12:10:18 -0400
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55675165CA6;
+        Fri, 21 Oct 2022 09:10:13 -0700 (PDT)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 93FD04633A7;
+        Fri, 21 Oct 2022 18:10:11 +0200 (CEST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 7C3504631AE;
+        Fri, 21 Oct 2022 18:10:11 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Fri, 21 Oct 2022 18:10:11 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Fri, 21 Oct
+ 2022 18:10:10 +0200
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Fri, 21 Oct 2022 18:10:08 +0200
+From:   =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>
+To:     Wenchao Chen <wenchao.chen666@gmail.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "orsonzhai@gmail.com" <orsonzhai@gmail.com>,
+        "baolin.wang@linux.alibaba.com" <baolin.wang@linux.alibaba.com>,
+        "zhang.lyra@gmail.com" <zhang.lyra@gmail.com>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "kch@nvidia.com" <kch@nvidia.com>
+CC:     "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>,
+        "bigeasy@linutronix.de" <bigeasy@linutronix.de>,
+        "s.shtylyov@omp.ru" <s.shtylyov@omp.ru>,
+        "michael@allwinnertech.com" <michael@allwinnertech.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "megoo.tang@gmail.com" <megoo.tang@gmail.com>,
+        "lzx.stg@gmail.com" <lzx.stg@gmail.com>
+Subject: RE: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+Thread-Topic: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+Thread-Index: AQHY5R8I87uqfAJat0yZdVamAN6Uba4ZAlSQ
+Date:   Fri, 21 Oct 2022 16:10:07 +0000
+Message-ID: <e7858446b9604b59b8270f181a1410ef@hyperstone.com>
 References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
 In-Reply-To: <20221021073025.18831-1-wenchao.chen666@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.242.2.76]
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27216.000
+X-TMASE-Result: 10--10.591400-10.000000
+X-TMASE-MatchedRID: Nail4dlEBNHUL3YCMmnG4vHkpkyUphL9ueYYfrL8B1Ln3ZLCt3rRSSsJ
+        qmSIRx2Q7XjA6blEVJXAzwkq/B1Z+vn/om5XE6y/kCThXPqsqiufmd9HsjZ0UyIIO0VwKeOL2d8
+        mtRIRsUMJmCLdmoamzw7Nx1vGlbMkP06ke90qDvM8o3fwIs8rQfG6GRFYrbYYnKRrn2xogKgeGj
+        HdJVjPPmGCtTPv37bCIH34uYa62rLX54Vmcx7RYNEJQUcCarUjEDnDEqNPdurJVWdgKXnqZBst5
+        gVpV7Hm4QRvjxz49tFvqzs520ADYJUt7uIUdjPePPov5T+l6PH4h+uI7dxXxMfASe7knCttN4J9
+        ozUlDtYqOEcWPDbR6ZGTpe1iiCJq0u+wqOGzSV1WdFebWIc3VsRB0bsfrpPIfiAqrjYtFiS0hbR
+        lFnj1McGkBnzIck0G/J45eTpJn0vT8VYasfn3/H7cGd19dSFd
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: d4159ce0-62e5-4921-8414-8c75e7c0fa47-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/10/22 10:30, Wenchao Chen wrote:
-> From: Wenchao Chen <wenchao.chen@unisoc.com>
-> 
-> Summary
-> =======
-> These patches[1] supports the host to turn off FUA.
-> 
-> About FUA, roughly deal with the following two parts:
-> 1) FUA(Forced Unit Access):
-> - The REQ_FUA flag can be OR ed into the r/w flags of a bio submitted from the
->   filesystem and will make sure that I/O completion for this request is only
->   signaled after the data has been committed to non-volatile storage.
-> 
-> 2) In emmc, FUA is represented as Reliable write. code show as below:
-> static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
-> 		int recovery_mode, bool *do_rel_wr_p, bool *do_data_tag_p)
-> {
-> 	...
-> 	/*
-> 	 * Reliable writes are used to implement Forced Unit Access and
-> 	 * are supported only on MMCs.
-> 	 */
-> 	do_rel_wr = (req->cmd_flags & REQ_FUA) &&
-> 			rq_data_dir(req) == WRITE &&
-> 			(md->flags & MMC_BLK_REL_WR);
-> 	...
-> }
-> 
-> Patch structure
-> ===============
-> patch#1:  for block
-> patch#2:  for sdhci-sprd
-> 
-> Tests
-> =====
-> Ran 'AndroBench' to evaluate the performance:
-
-It would be good to have more details e.g.
-What file system? What block size?  What journal size?
-What file size? What record size?
-
-> 1. fua_disable = 1
-> /sys/block/mmcblk0/queue # cat fua 0
-> I tested 5 times for each case and output a average speed.
-> 
-> 1) Sequential read:
-> Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
-> Average speed: 265.74MiB/s
-> 
-> 2) Random read:
-> Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
-> Average speed: 98.81MiB/s
-> 
-> 3) Sequential write:
-> Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
-> Average speed: 200.5MiB/s
-> 
-> 4) Random write:
-> Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
-> Average speed: 70.32MiB/s
-> 
-> 2. fua_disable = 0 (default 0)
-> /sys/block/mmcblk0/queue # cat fua 1
-> I tested 5 times for each case and output a average speed.
-> 	
-> 1) Sequential read:
-> Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
-> Average speed: 257.86MiB/s
-> 	
-> 2) Random read:
-> Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
-> Average speed: 100.2MiB/s
-> 	
-> 3) Sequential write:
-> Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
-> Average speed: 149.48MiB/s
-> 	
-> 4) Random write:
-> Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
-> Average speed: 12.68MiB/s
-
-Is every write being sync'ed of just sync at the end?
-
-> 	
-> According to the above data, disable FUA (fua_disable = 1) improves the
-> performance:
-> 1)Sequential read improved by 3%.
-> 2)Random read were down 1%.
-
-FUA should not affect reads.  If it is, you may want to investigate how.
-
-> 3)Sequential write improved by 34%.
-> 4)Random write improved by 454%.
-> Therefore, it is recommended to support the host to control FUA.
-> 	
-> Reference
-> =========
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/block/writeback_cache_control.rst
-> [2] Embedded Multi-Media Card (e•MMC) Electrical Standard (5.1)''
-
-You do not seem to have considered data integrity.
-
-Regular disks are assumed to provide atomic sector writes.  That is, a sector has either the old data or the new data, but not some corrupt mixture.
-
-mmc does not have that assumption, which is presumably why Reliable Write has been used instead.  Although that idea appears to have been thrown away for devices with no cache by commit 08ebf903af57 ("mmc: core: Fixup support for writeback-cache for eMMC and SD").
-
-File systems can use FUA to mark a successful journal flush.  Whether or not getting a torn sector at that point will corrupt the file system recovery is presumably file system specific, and maybe specific to file system options e.g. the use of checksums.
-
-It may well be that a file system can survive a torn sector at that point, or that user space would prefer to take the risk in order to get better performance.  In either of those cases, it is not really a decision for the host controller driver.
-
-> 
-> Wenchao Chen (2):
->   mmc: block: Support Host to control FUA
->   mmc: sdhci-sprd: enable fua_disable for SPRDSDHCI
-> 
->  drivers/mmc/core/block.c      | 3 ++-
->  drivers/mmc/host/sdhci-sprd.c | 2 ++
->  include/linux/mmc/host.h      | 3 +++
->  3 files changed, 7 insertions(+), 1 deletion(-)
-> 
+PiBUaGVzZSBwYXRjaGVzWzFdIHN1cHBvcnRzIHRoZSBob3N0IHRvIHR1cm4gb2ZmIEZVQS4NCj4g
+DQo+IEFib3V0IEZVQSwgcm91Z2hseSBkZWFsIHdpdGggdGhlIGZvbGxvd2luZyB0d28gcGFydHM6
+DQo+IDEpIEZVQShGb3JjZWQgVW5pdCBBY2Nlc3MpOg0KPiAtIFRoZSBSRVFfRlVBIGZsYWcgY2Fu
+IGJlIE9SIGVkIGludG8gdGhlIHIvdyBmbGFncyBvZiBhIGJpbyBzdWJtaXR0ZWQgZnJvbSB0aGUN
+Cj4gICBmaWxlc3lzdGVtIGFuZCB3aWxsIG1ha2Ugc3VyZSB0aGF0IEkvTyBjb21wbGV0aW9uIGZv
+ciB0aGlzIHJlcXVlc3QgaXMgb25seQ0KPiAgIHNpZ25hbGVkIGFmdGVyIHRoZSBkYXRhIGhhcyBi
+ZWVuIGNvbW1pdHRlZCB0byBub24tdm9sYXRpbGUgc3RvcmFnZS4NCj4gDQo+IDIpIEluIGVtbWMs
+IEZVQSBpcyByZXByZXNlbnRlZCBhcyBSZWxpYWJsZSB3cml0ZS4gY29kZSBzaG93IGFzIGJlbG93
+Og0KPiBzdGF0aWMgdm9pZCBtbWNfYmxrX2RhdGFfcHJlcChzdHJ1Y3QgbW1jX3F1ZXVlICptcSwg
+c3RydWN0IG1tY19xdWV1ZV9yZXEgKm1xcnEsDQo+IAkJaW50IHJlY292ZXJ5X21vZGUsIGJvb2wg
+KmRvX3JlbF93cl9wLCBib29sICpkb19kYXRhX3RhZ19wKSB7DQo+IAkuLi4NCj4gCS8qDQo+IAkg
+KiBSZWxpYWJsZSB3cml0ZXMgYXJlIHVzZWQgdG8gaW1wbGVtZW50IEZvcmNlZCBVbml0IEFjY2Vz
+cyBhbmQNCj4gCSAqIGFyZSBzdXBwb3J0ZWQgb25seSBvbiBNTUNzLg0KPiAJICovDQo+IAlkb19y
+ZWxfd3IgPSAocmVxLT5jbWRfZmxhZ3MgJiBSRVFfRlVBKSAmJg0KPiAJCQlycV9kYXRhX2Rpcihy
+ZXEpID09IFdSSVRFICYmDQo+IAkJCShtZC0+ZmxhZ3MgJiBNTUNfQkxLX1JFTF9XUik7DQo+IAku
+Li4NCj4gfQ0KDQpTbyByZWxpYWJsZSB3cml0ZXMgYXJlIG9ubHkgaXNzZWQgd2hlbiBGVUEgZmxh
+ZyBpcyBzZXQsIHNvIGFzIGl0IHNob3VsZCBiZT8NCg0KPiANCj4gUGF0Y2ggc3RydWN0dXJlDQo+
+ID09PT09PT09PT09PT09PQ0KPiBwYXRjaCMxOiAgZm9yIGJsb2NrDQo+IHBhdGNoIzI6ICBmb3Ig
+c2RoY2ktc3ByZA0KPiANCj4gVGVzdHMNCj4gPT09PT0NCj4gUmFuICdBbmRyb0JlbmNoJyB0byBl
+dmFsdWF0ZSB0aGUgcGVyZm9ybWFuY2U6DQo+IDEuIGZ1YV9kaXNhYmxlID0gMQ0KPiAvc3lzL2Js
+b2NrL21tY2JsazAvcXVldWUgIyBjYXQgZnVhIDANCj4gSSB0ZXN0ZWQgNSB0aW1lcyBmb3IgZWFj
+aCBjYXNlIGFuZCBvdXRwdXQgYSBhdmVyYWdlIHNwZWVkLg0KPiANCj4gMSkgU2VxdWVudGlhbCBy
+ZWFkOg0KPiBTcGVlZDogMjY2LjhNaUIvcywgMjY1LjFNaUIvcywgMjYyLjlNaUIvcywgMjY4LjdN
+aUIvcywgMjY1LjJNaUIvcyBBdmVyYWdlIHNwZWVkOiAyNjUuNzRNaUIvcw0KPiANCj4gMikgUmFu
+ZG9tIHJlYWQ6DQo+IFNwZWVkOiA5OC43NU1pQi9zLCA5OC43TWlCL3MsIDk4LjVNaUIvcywgOTku
+NE1pQi9zLCA5OC43TWlCL3MgQXZlcmFnZSBzcGVlZDogOTguODFNaUIvcw0KPiANCj4gMykgU2Vx
+dWVudGlhbCB3cml0ZToNCj4gU3BlZWQ6IDE5OS45NE1pQi9zLCAxOTkuMU1pQi9zLCAyMDUuNU1p
+Qi9zLCAyMDYuNU1pQi9zLCAxOTEuNU1pQi9zIEF2ZXJhZ2Ugc3BlZWQ6IDIwMC41TWlCL3MNCj4g
+DQo+IDQpIFJhbmRvbSB3cml0ZToNCj4gU3BlZWQ6IDY4LjZNaUIvcywgNzEuOE1pQi9zLCA3Ny4x
+TWlCL3MsIDY0LjhNaUIvcywgNjkuM01pQi9zIEF2ZXJhZ2Ugc3BlZWQ6IDcwLjMyTWlCL3MNCj4g
+DQoNClVubGVzcyB0aGVyZSBpcyBzb21ldGhpbmcgc3BlY2lhbCAvIHdyb25nIHdpdGggc2RoY2kt
+c3ByZCAodW5saWtlbHk/IEl0cyBqdXN0IGEgZmxhZykgb3IgeW91ciBlTU1DIChtYXliZSBtb3Jl
+IGxpa2VseT8pDQp0aGVuIElkIGV4cGVjdCB0aGlzIG9yIHNpbWlsYXIgcGVyZm9ybWFuY2UgZGVn
+cmFkYXRpb24gZm9yIGFueSBob3N0IGNvbnRyb2xsZXIgYW5kIGVNTUMuDQpJIGNhbiByZWRvIHNv
+bWUgbWVhc3VyZW1lbnQgaWYgeW91IHByb3ZpZGUgeW91ciB3b3JrbG9hZC4NCkJ1dCBJJ2Qgc2F5
+IGlmIHlvdSBkb27igJl0IHdhbnQgdG8gcGF5IHRoZSBwcmljZSBvZiByZWxpYWJsZSB3cml0ZSB0
+aGVuIG1ha2Ugc3VyZSB0byBub3QgaXNzdWUgdGhlbSwgYnkgbm90IGlzc3VpbmcNCkZVQT8NCk1h
+eWJlIEknbSBtaXN1bmRlcnN0YW5kaW5nLCBidXQgd2h5IHdvdWxkIHRoZSBob3N0IGNvbnRyb2xs
+ZXIgZHJpdmVyIGNvbnRyb2wgRlVBPw0KDQo+IDIuIGZ1YV9kaXNhYmxlID0gMCAoZGVmYXVsdCAw
+KQ0KPiAvc3lzL2Jsb2NrL21tY2JsazAvcXVldWUgIyBjYXQgZnVhIDENCj4gSSB0ZXN0ZWQgNSB0
+aW1lcyBmb3IgZWFjaCBjYXNlIGFuZCBvdXRwdXQgYSBhdmVyYWdlIHNwZWVkLg0KPiAJDQo+IDEp
+IFNlcXVlbnRpYWwgcmVhZDoNCj4gU3BlZWQ6IDI1OS4zTWlCL3MsIDI1OC44TWlCL3MsIDI1OC4y
+TWlCL3MsIDI1OS41TWlCL3MsIDI1My41TWlCL3MgQXZlcmFnZSBzcGVlZDogMjU3Ljg2TWlCL3MN
+Cj4gCQ0KPiAyKSBSYW5kb20gcmVhZDoNCj4gU3BlZWQ6IDk4LjlNaUIvcywgMTAxTWlCL3MsIDEw
+MU1pQi9zLCA5OU1pQi9zLCAxMDEuMU1pQi9zIEF2ZXJhZ2Ugc3BlZWQ6IDEwMC4yTWlCL3MNCj4g
+CQ0KPiAzKSBTZXF1ZW50aWFsIHdyaXRlOg0KPiBTcGVlZDogMTUzLjdNaUIvcywgMTQ2LjJNaUIv
+cywgMTUxLjJNaUIvcywgMTQ4LjhNaUIvcywgMTQ3LjVNaUIvcyBBdmVyYWdlIHNwZWVkOiAxNDku
+NDhNaUIvcw0KPiAJDQo+IDQpIFJhbmRvbSB3cml0ZToNCj4gU3BlZWQ6IDEyLjlNaUIvcywgMTIu
+M01pQi9zLCAxMi42TWlCL3MsIDEyLjhNaUIvcywgMTIuOE1pQi9zIEF2ZXJhZ2Ugc3BlZWQ6IDEy
+LjY4TWlCL3MNCj4gCQ0KPiBBY2NvcmRpbmcgdG8gdGhlIGFib3ZlIGRhdGEsIGRpc2FibGUgRlVB
+IChmdWFfZGlzYWJsZSA9IDEpIGltcHJvdmVzIHRoZQ0KPiBwZXJmb3JtYW5jZToNCj4gMSlTZXF1
+ZW50aWFsIHJlYWQgaW1wcm92ZWQgYnkgMyUuDQo+IDIpUmFuZG9tIHJlYWQgd2VyZSBkb3duIDEl
+Lg0KPiAzKVNlcXVlbnRpYWwgd3JpdGUgaW1wcm92ZWQgYnkgMzQlLg0KPiA0KVJhbmRvbSB3cml0
+ZSBpbXByb3ZlZCBieSA0NTQlLg0KPiBUaGVyZWZvcmUsIGl0IGlzIHJlY29tbWVuZGVkIHRvIHN1
+cHBvcnQgdGhlIGhvc3QgdG8gY29udHJvbCBGVUEuDQo+IAkNCj4NCg0KSHlwZXJzdG9uZSBHbWJI
+IHwgUmVpY2hlbmF1c3RyLiAzOWEgIHwgNzg0NjcgS29uc3RhbnoKTWFuYWdpbmcgRGlyZWN0b3I6
+IERyLiBKYW4gUGV0ZXIgQmVybnMuCkNvbW1lcmNpYWwgcmVnaXN0ZXIgb2YgbG9jYWwgY291cnRz
+OiBGcmVpYnVyZyBIUkIzODE3ODI=
 
