@@ -2,37 +2,38 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B7A7C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:24:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C29DC433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:26:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229788AbiJVGYr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 02:24:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36462 "EHLO
+        id S229999AbiJVG0C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 02:26:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45408 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229993AbiJVGYl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:24:41 -0400
+        with ESMTP id S229645AbiJVG0B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:26:01 -0400
 Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.154.221.58])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5090613E23;
-        Fri, 21 Oct 2022 23:24:29 -0700 (PDT)
-X-QQ-mid: bizesmtp86t1666419834taocg6ff
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22A9753D0D;
+        Fri, 21 Oct 2022 23:25:57 -0700 (PDT)
+X-QQ-mid: bizesmtp72t1666419912t74p8onm
 Received: from localhost.localdomain ( [182.148.15.254])
         by bizesmtp.qq.com (ESMTP) with 
-        id ; Sat, 22 Oct 2022 14:23:53 +0800 (CST)
+        id ; Sat, 22 Oct 2022 14:25:11 +0800 (CST)
 X-QQ-SSF: 01000000000000C0E000000A0000000
-X-QQ-FEAT: bYR630AeiPhWrwSGaTTmu3qISqfqb8Ua5Fw4FHrBoH/F4Hltm6HkpMl5pdE7z
-        lKUgthhTNu+XXOkgTfE66h9zRPVGDSyBYw2pxItba40tgrTtaXwm1Qk7TZ1wR2pzsWodQeX
-        dW3XOIPy5z65s7A59IdThcyGFEmpT52jSvyYm6dPshMi4cQqiSK/Rc50W1U36qCBfYpjFVU
-        rX/CzKLTFn2W+7dwlJCOKMKVJtyLZbnPy22A219fGZgotxsHQ3AayD5eSJ6YT9ppXkeOLmI
-        gv+ILvBYw5psx+mzzzVVkCbb/UejKmcZ6dR2BohiQ7lj/D08VuHI197Q6vYZhFry040Iw94
-        MgndXcIK3D26ZHD86Sx7xzm4K6VxQPNp93t0Fm5yViYXrNCrPk=
+X-QQ-FEAT: mhDoKBI5A3AQlZDgB68EtJtI5NGdpLJIjOkqQLnGDk55RI7W4oHe+gcAFl935
+        5PrlmlKpBlYbgb2tY4BLr4Gt9gBsdXkvcij6uGgcQbJk3MOkEh9Dw4NfK1r2Btxngz+skDk
+        bqA8TWdSly+HQd9x8gwF7L+qzyJwlFzze0vwx6AvhDScnlufbQVozClcO8cc8iuJ3HiRFoS
+        FTA3XLAg7eySuRa9a5L/6DSwPoj1rCl8ISbPHfzCOaEnAufFT8XqK977UJzCpqGG1kUP9Yj
+        4LmPFz1Y7iyFFRHoEDb+CDciTQ5ur0L+dS+l3a+HpbDhioPHfHyU1qOKQaPEfMsjRR07YJA
+        Hpco87AuKOamGmHdx62zOs62bT2Gi5XyZRjhFIHFmz5A2Sr8AnBoNAgGFunBw==
 X-QQ-GoodBg: 0
 From:   wangjianli <wangjianli@cdjrlc.com>
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        wangjianli <wangjianli@cdjrlc.com>
+To:     adrian.hunter@intel.com, haibo.chen@nxp.com,
+        ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de
+Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, wangjianli <wangjianli@cdjrlc.com>
 Subject: [PATCH] mmc/host: fix repeated words in comments
-Date:   Sat, 22 Oct 2022 14:23:31 +0800
-Message-Id: <20221022062331.11395-1-wangjianli@cdjrlc.com>
+Date:   Sat, 22 Oct 2022 14:25:05 +0800
+Message-Id: <20221022062505.13155-1-wangjianli@cdjrlc.com>
 X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -46,22 +47,22 @@ Delete the redundant word 'the'.
 
 Signed-off-by: wangjianli <wangjianli@cdjrlc.com>
 ---
- drivers/mmc/host/sdhci-acpi.c | 2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-index c0350e9c03f3..93fe6e5a5f9f 100644
---- a/drivers/mmc/host/sdhci-acpi.c
-+++ b/drivers/mmc/host/sdhci-acpi.c
-@@ -648,7 +648,7 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
- 	 *       in reading a garbage value and using the wrong presets.
- 	 *
- 	 *       Since HS400 and HS200 presets must be identical, we could
--	 *       instead use the the SDR104 preset register.
-+	 *       instead use the SDR104 preset register.
- 	 *
- 	 *    If the above issues are resolved we could remove this quirk for
- 	 *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 55981b0f0b10..004f84764fb7 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1453,7 +1453,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+ 
+ 		/*
+ 		 * On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
+-		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
++		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let
+ 		 * the 1st linux configure power/clock for the 2nd Linux.
+ 		 *
+ 		 * When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
 -- 
 2.36.1
 
