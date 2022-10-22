@@ -2,112 +2,246 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF56FC04A95
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 16:06:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FD0DECDFA1
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 16:28:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229721AbiJVQGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 12:06:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57170 "EHLO
+        id S229449AbiJVQ2m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 12:28:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56072 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229576AbiJVQGr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 12:06:47 -0400
-Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AFE113CCF
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:06:44 -0700 (PDT)
-Received: by mail-qt1-x82b.google.com with SMTP id a24so3403231qto.10
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:06:44 -0700 (PDT)
+        with ESMTP id S229787AbiJVQ2i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 12:28:38 -0400
+Received: from mail-oi1-x229.google.com (mail-oi1-x229.google.com [IPv6:2607:f8b0:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73D9713A7CA
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:28:36 -0700 (PDT)
+Received: by mail-oi1-x229.google.com with SMTP id j188so6590898oih.4
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:28:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=nzT+VEmkUStYx/oFKUyBVeLL6CJC5Ebv5tGgGJ3EThk=;
-        b=Rd1hH2t7awphQ+KCcp28rqZhH0W/+YoolhPWBzFlzaVzem1NtFymXj9IbmcfKrtxOE
-         mwluJy+ONLIEOOcEUVz1AsVeeUW81r2nLNrSZo2PTZKuA70eC6DU7ZtWFVCvQaN0n2EJ
-         XNawpYjH23MoC/f/ID18S7MILGG2aRc3N+Ln0ZdChio7g1VfWZV3i1493pydGFb7Ut91
-         j76UklR5tmvzbORApFcZj2pfhhCWBoSlDrcYkHj8kmJAjm5MuyA/IS0CHVaU15KekWV5
-         EM87cLIapgiTHD4InSBhCrine1p64V7/4jWqpAGOwpoj3u7sGi5KiQ+dnnR1DgL4KGVp
-         abgA==
+        bh=g3ny+yXpYDqLgCl1b12wzlahRflhVPiMY2auk8rtU9A=;
+        b=JdjPExc59m1e2oyhgLWsKrEbhHJUNp3rx52BD3ksxMWuy2Y1q7cAjERfKDTFb7ojf+
+         uaCYqxoqvwfrVXiIBjI84aWy6Sb40M8dHHH/+mUOK8VZE7S82aY5TuBFED5NMOFMDTCh
+         bO046RFT+6uIrWK3ZwYENkB1OFrPnT3ybrPqGL0CoPW6cNZO4JjLRqCZXaDGQVv6ywQA
+         tuhKYVpWFXvMEreOiG7/EueX1PZ5hgMNMuYNJXKn4KSSIMqZB9nFHLoR/WWDyAujYcFQ
+         vKjHyg73LewI90SjFaL3MMwYb3wx4oCLsjiCZ/mbF5pSl6tE60R/SWOLJHpnjw1Mj10w
+         hiCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=nzT+VEmkUStYx/oFKUyBVeLL6CJC5Ebv5tGgGJ3EThk=;
-        b=LLv62ZjUwtJTLClQyrzBB4L70n+yW8W7R3C0PiThxwvcttprgZ8DTtvuP31EPIDVb/
-         yhTBUngOpPHipyRmI8LbitS8ybm5Dw4QchNOoDrH7MIyuqh5DZCWMNSx36CIRNQ0Buwm
-         udASv7LhBapddImVHchRtjyq2INgepVqhZGp4HG1mZtH+ycOcqXZ0or9wStLOzF3Ep4v
-         IzBueqXNfnk9KU2jPV9PXhrAQBdQbfcQNK2A8TqZjOPvLDJQ2w1GM3xY/s/SUqLUTbgR
-         KyWnY4w/Utk3zV0VIPHoh6NT9icDoncGezDG1aFVM1k0SL8zwn6SeY7SjMipBwjJeLMO
-         /FRw==
-X-Gm-Message-State: ACrzQf3N3Ip+CerGMf5ASS5HVenA1izUTIiQ926CbCJd8o7qf0ZYLdWs
-        IiDwAEAplBem1g7Ffg/GSqR2grt5jouEAA==
-X-Google-Smtp-Source: AMsMyM4ZO0osqdPxtj3efWReeGdbuhf5GKNX407YtHct5K3PumdbLfs8ZZUzCHhQOMpPIkHQE1x2jg==
-X-Received: by 2002:ac8:5b44:0:b0:39c:d6ad:cce6 with SMTP id n4-20020ac85b44000000b0039cd6adcce6mr20939846qtw.113.1666454803298;
-        Sat, 22 Oct 2022 09:06:43 -0700 (PDT)
+        bh=g3ny+yXpYDqLgCl1b12wzlahRflhVPiMY2auk8rtU9A=;
+        b=hRTNGIth5HTYFTP7IaDjmSisK6J8FfqsWvVb1mewN/SjnshFLtDGTYiSxLjdtsjqL5
+         CphhmVou7VFOWoRIuVlJcNKqNa6fMdmm2lwO0gfsoL2oWx9fJfDzNoqV9RWRIcvlvaLC
+         h26qx+HX7XJByuvfKRIDqz6Uq/0NLIMEvJ+LmRXjC4dPUMmgQtjb2GDeNP0TLjq2XAg6
+         moDRtdC2O1FXaMlwrU3HDBShCyCPe2pT6olagF7nCH2PeNNEDjcupnTLIV5baGnRidMS
+         +z80wQPkLezqlPjH+mDnLLvPTQ1cmeU9zzNkCigsTK6gtCT1M9R8gRazhWvHhCS0C7Fs
+         ZrAQ==
+X-Gm-Message-State: ACrzQf3Cw0qRgpn+GYGkNXkKDAAjYIJBLMG6XQ24N8ykVD/aSWJ/XB/4
+        2hJj1DE/Vd5CmvVvGtq+ZGKYfw==
+X-Google-Smtp-Source: AMsMyM634zWdX9U8U9UebN4uP0I0NHWWXs08sHj/vn8eEv9h2ANg8MGdNdngwgd9cwKtD9sU/cL1zg==
+X-Received: by 2002:aca:c143:0:b0:355:4f9a:78a0 with SMTP id r64-20020acac143000000b003554f9a78a0mr11757740oif.245.1666456115751;
+        Sat, 22 Oct 2022 09:28:35 -0700 (PDT)
 Received: from [10.203.8.70] ([205.153.95.177])
-        by smtp.gmail.com with ESMTPSA id bm34-20020a05620a19a200b006ce1bfbd603sm11410372qkb.124.2022.10.22.09.06.41
+        by smtp.gmail.com with ESMTPSA id d8-20020a056870960800b00127fbb7afffsm11282161oaq.5.2022.10.22.09.28.33
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 22 Oct 2022 09:06:42 -0700 (PDT)
-Message-ID: <df256d16-e0c6-4e9a-9579-f7d9d1436670@linaro.org>
-Date:   Sat, 22 Oct 2022 12:06:40 -0400
+        Sat, 22 Oct 2022 09:28:35 -0700 (PDT)
+Message-ID: <1a1ab959-8c0b-90f8-347f-9809fe4b23d7@linaro.org>
+Date:   Sat, 22 Oct 2022 12:28:31 -0400
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.4.0
-Subject: Re: [PATCH 1/1] dt-bindings: mmc: sdhci-of-dwcmhsc: Add reset support
+Subject: Re: [PATCH v2 3/5] dt-bindings: mmc: mtk-sd: Set clocks based on
+ compatible
 Content-Language: en-US
-To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
+To:     Frank Wunderlich <linux@fw-web.de>,
+        linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        kernel@collabora.com
-References: <20221021171654.87071-1-sebastian.reichel@collabora.com>
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        =?UTF-8?B?TsOtY29sYXMgRi4gUi4gQS4gUHJhZG8=?= 
+        <nfraprado@collabora.com>
+References: <20221022090530.16265-1-linux@fw-web.de>
+ <20221022090530.16265-4-linux@fw-web.de>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221021171654.87071-1-sebastian.reichel@collabora.com>
+In-Reply-To: <20221022090530.16265-4-linux@fw-web.de>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/10/2022 13:16, Sebastian Reichel wrote:
-> Properly describe reset related properties in the binding.
+On 22/10/2022 05:05, Frank Wunderlich wrote:
+> From: Nícolas F. R. A. Prado <nfraprado@collabora.com>
 > 
-> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+> The binding was describing a single clock list for all platforms, but
+> that's not really suitable: mt2712 requires an extra 'bus_clk' on some
+> of its controllers, while mt8192 requires four different extra clocks.
+> The rest of the platforms can share the same 3 clocks, with the third
+> being optional as it's not present on all platforms.
+
+It was also wrong...
+
+> 
+> Move the clock definitions inside if blocks that match on the
+> compatibles. In practice this gets rid of dtbs_check warnings on mt8192,
+> since the 'bus_clk' clock from mt2712 is no longer expected on this
+> platform.
+> 
+> Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
+> Signed-off-by: Nícolas F. R. A. Prado <nfraprado@collabora.com>
+> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 > ---
->  .../devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml  | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 111 +++++++++++++-----
+>  1 file changed, 81 insertions(+), 30 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> index 71f8e726d641..162c1a4abf3c 100644
-> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
-> @@ -45,6 +45,18 @@ properties:
->        - const: block
->        - const: timer
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 3cbf0208f1b4..c7bcf0c3dd5d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -10,9 +10,6 @@ maintainers:
+>    - Chaotian Jing <chaotian.jing@mediatek.com>
+>    - Wenbin Mei <wenbin.mei@mediatek.com>
 >  
-> +  resets:
-> +    minItems: 5
+> -allOf:
+> -  - $ref: mmc-controller.yaml#
+> -
+>  properties:
+>    compatible:
+>      oneOf:
+> @@ -49,27 +46,11 @@ properties:
+>      description:
+>        Should contain phandle for the clock feeding the MMC controller.
+>      minItems: 2
+> -    items:
+> -      - description: source clock (required).
+> -      - description: HCLK which used for host (required).
+> -      - description: independent source clock gate (required for MT2712).
+> -      - description: bus clock used for internal register access (required for MT2712 MSDC0/3).
+> -      - description: msdc subsys clock gate (required for MT8192).
+> -      - description: peripheral bus clock gate (required for MT8192).
+> -      - description: AXI bus clock gate (required for MT8192).
+> -      - description: AHB bus clock gate (required for MT8192).
+> +    maxItems: 7
 
-No need for minItems, drop.
+Confusing to see 8 clocks replaced by 7, but I guess this is problem of
+old bindings.
+>  
+>    clock-names:
+>      minItems: 2
+> -    items:
+> -      - const: source
+> -      - const: hclk
+> -      - const: source_cg
+> -      - const: bus_clk
+> -      - const: sys_cg
+> -      - const: pclk_cg
+> -      - const: axi_cg
+> -      - const: ahb_cg
+> +    maxItems: 7
+>  
+>    interrupts:
+>      description:
+> @@ -191,15 +172,85 @@ required:
+>    - vmmc-supply
+>    - vqmmc-supply
+>  
+> -if:
+> -  properties:
+> -    compatible:
+> -      contains:
+> -        const: mediatek,mt8183-mmc
+> -then:
+> -  properties:
+> -    reg:
+> -      minItems: 2
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: mediatek,mt8183-mmc
+> +    then:
+> +      properties:
+> +        reg:
+> +          minItems: 2
 
-> +    maxItems: 5
-> +
-> +  reset-names:
-> +    items:
-> +      - const: core
-> +      - const: bus
-> +      - const: axi
-> +      - const: block
-> +      - const: timer
-> +
+Blank line
 
-The reset names have exactly the same names as clocks. Are these
-responsible for some blocks on the device? Seems so... but I want to be
-sure it wasn't copy-paste :)
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: mediatek,mt8192-mmc
+> +    then:
+> +      properties:
+> +        clocks:
+> +          items:
+> +            - description: source clock
+> +            - description: HCLK which used for host
+> +            - description: independent source clock gate
+> +            - description: msdc subsys clock gate
+> +            - description: peripheral bus clock gate
+> +            - description: AXI bus clock gate
+> +            - description: AHB bus clock gate
+> +        clock-names:
+> +          items:
+> +            - const: source
+> +            - const: hclk
+> +            - const: source_cg
+> +            - const: sys_cg
+> +            - const: pclk_cg
+> +            - const: axi_cg
+> +            - const: ahb_cg
 
+Blank line
+
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: mediatek,mt2712-mmc
+> +    then:
+> +      properties:
+> +        clocks:
+> +          minItems: 3
+> +          items:
+> +            - description: source clock
+> +            - description: HCLK which used for host
+> +            - description: independent source clock gate
+> +            - description: bus clock used for internal register access (required for MSDC0/3).
+> +        clock-names:
+> +          minItems: 3
+> +          items:
+> +            - const: source
+> +            - const: hclk
+> +            - const: source_cg
+> +            - const: bus_clk
+
+Blank line
+
+> +  - if:
+> +      not:
+
+Can you not use negation, but list applicable compatibles? It would be
+easier to read, I think
+
+> +        properties:
+> +          compatible:
+> +            contains:
+> +              enum:
+> +                - mediatek,mt2712-mmc
+> +                - mediatek,mt8192-mmc
 Best regards,
 Krzysztof
 
