@@ -2,91 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EE16FA3742
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:03:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 729A8C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:22:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229877AbiJVGD2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 02:03:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41058 "EHLO
+        id S229460AbiJVGW4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 02:22:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229520AbiJVGD1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:03:27 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6238E2B3AEE;
-        Fri, 21 Oct 2022 23:03:26 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E98CB601C6;
-        Sat, 22 Oct 2022 06:03:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E12E6C433C1;
-        Sat, 22 Oct 2022 06:03:23 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666418605;
-        bh=tCXdIEe/bRuPmuD8DZJI7sITbkxpBfee1t0FtUrlE1s=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=LGS4FPjZ0GenPE80Ht65ggEck6bgj5dMaBGUbmI1p5KIioZcU/U0B3w+tI1Dn25rx
-         llIng6acUhVuJ/HM4vaBISzwQ0bzbS9XtQmJ0Vcv4gBrkA4Yvn+Z2n4iaDXSOr93lP
-         6kE0ELPCFel8IWbq2XeR8VABeZZKCK5yTtr8p63JXPEROgpP0teOCA5RybzOekIHey
-         WO01JaNbJ4vidygloxS7RXdQaKTXIlWeMJqqphRYpzZR07P/w8/CEUZljrbdPYJwK0
-         sq4K9MbjRVh/iSW4OILqP9q7FbHb8Bp51AV9w0kHCsF0BcDX0ybnQzP/gy7AmQZBK5
-         pdal5+51PPfEA==
-Date:   Fri, 21 Oct 2022 23:03:22 -0700
-From:   Jakub Kicinski <kuba@kernel.org>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     linux-kernel@vger.kernel.org, Kees Cook <keescook@chromium.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Christoph =?UTF-8?B?QsO2aG13YWxkZXI=?= 
-        <christoph.boehmwalder@linbit.com>,
-        Jani Nikula <jani.nikula@linux.intel.com>,
-        Jason Gunthorpe <jgg@nvidia.com>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Richard Weinberger <richard@nod.at>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        SeongJae Park <sj@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org
-Subject: Re: [PATCH v1 0/5] convert tree to
- get_random_u32_{below,above,between}()
-Message-ID: <20221021230322.00dd045c@kernel.org>
-In-Reply-To: <Y1OD2tdVwQsydSNV@zx2c4.com>
-References: <20221022014403.3881893-1-Jason@zx2c4.com>
-        <20221021205522.6b56fd24@kernel.org>
-        <Y1NwJJOIB4gI5G11@zx2c4.com>
-        <20221021223242.05df0a5b@kernel.org>
-        <Y1OD2tdVwQsydSNV@zx2c4.com>
+        with ESMTP id S229661AbiJVGWz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:22:55 -0400
+Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.155.67.158])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0335D242CAF;
+        Fri, 21 Oct 2022 23:22:50 -0700 (PDT)
+X-QQ-mid: bizesmtp79t1666419765t0w816vz
+Received: from localhost.localdomain ( [182.148.15.254])
+        by bizesmtp.qq.com (ESMTP) with 
+        id ; Sat, 22 Oct 2022 14:22:44 +0800 (CST)
+X-QQ-SSF: 01000000000000C0E000000A0000000
+X-QQ-FEAT: acNVAc66Bsw5l5oW+aZveYyqqh8IIWEBaYX8s2ZMUPD+BYkoC/xJfywW+/33l
+        c2Y0ov+AliUjwL4kU7y3EniKVRR6ZlHyFe4M/dnE4ahKY+22yfI0Z5ObHH6962h5A4/a698
+        ADfmj+iDPVQykuneMxeVNFoCd3YRpFCqMU4I8QnD7Uq8iP5/cU/p/RqwZlgZ2TCrgh/xvOX
+        FGT6c6BARQgJzjivo1cyQb5wro1+/zNtbxaifOy2YK4TMEoWrRpb/ShmxYlb+6mr3BshcOK
+        vdh8yzv+JGIQFQcCZH/iVlsb7DKJJmZwImA84IAPQ4S0hddBFUFC9LyO2ETc6ImofysOfp4
+        sni9GstTvEO9C/LC1JLJHvEs3X5QhehOfDgtwudD0cthNmey8Y=
+X-QQ-GoodBg: 0
+From:   wangjianli <wangjianli@cdjrlc.com>
+To:     jh80.chung@samsung.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        wangjianli <wangjianli@cdjrlc.com>
+Subject: [PATCH] mmc/host: fix repeated words in comments
+Date:   Sat, 22 Oct 2022 14:22:37 +0800
+Message-Id: <20221022062237.10333-1-wangjianli@cdjrlc.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-QQ-SENDSIZE: 520
+Feedback-ID: bizesmtp:cdjrlc.com:qybglogicsvr:qybglogicsvr7
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 22 Oct 2022 07:47:06 +0200 Jason A. Donenfeld wrote:
-> On Fri, Oct 21, 2022 at 10:32:42PM -0700, Jakub Kicinski wrote:
-> > But whatever. I mean - hopefully there aren't any conflicts in the ~50
-> > networking files you touch. I just wish that people didn't pipe up with
-> > the tree wide changes right after the merge window. Feels like the
-> > worst possible timing.  
-> 
-> Oh, if the timing is what makes this especially worrisome, I have
-> no qualms about rebasing much later, and reposting this series then.
-> I'll do that.
+Delete the redundant word 'the'.
 
-Cool, thanks! I promise to not be grumpy if you repost around rc6 :)
+Signed-off-by: wangjianli <wangjianli@cdjrlc.com>
+---
+ drivers/mmc/host/dw_mmc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
+index 581614196a84..7f00d7d7e35e 100644
+--- a/drivers/mmc/host/dw_mmc.c
++++ b/drivers/mmc/host/dw_mmc.c
+@@ -1363,7 +1363,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
+ 		 * is just about to roll over.
+ 		 *
+ 		 * We do this whole thing under spinlock and only if the
+-		 * command hasn't already completed (indicating the the irq
++		 * command hasn't already completed (indicating the irq
+ 		 * already ran so we don't want the timeout).
+ 		 */
+ 		spin_lock_irqsave(&host->irq_lock, irqflags);
+-- 
+2.36.1
+
