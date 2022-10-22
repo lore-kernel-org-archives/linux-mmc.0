@@ -2,34 +2,33 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BFF9C04A95
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 09:56:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E9874FA3740
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 10:14:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230078AbiJVJ4C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 05:56:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49002 "EHLO
+        id S230222AbiJVKOb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 06:14:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229960AbiJVJzm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 05:55:42 -0400
-Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D045301011;
-        Sat, 22 Oct 2022 02:09:00 -0700 (PDT)
+        with ESMTP id S230335AbiJVKOF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 06:14:05 -0400
+Received: from mxout3.routing.net (mxout3.routing.net [IPv6:2a03:2900:1:a::8])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46363317B3C;
+        Sat, 22 Oct 2022 02:31:37 -0700 (PDT)
 Received: from mxbox1.masterlogin.de (unknown [192.168.10.88])
-        by mxout2.routing.net (Postfix) with ESMTP id D415F60406;
-        Sat, 22 Oct 2022 09:05:39 +0000 (UTC)
+        by mxout3.routing.net (Postfix) with ESMTP id D818E605AA;
+        Sat, 22 Oct 2022 09:05:36 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1666429540;
+        s=20200217; t=1666429537;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=m0tnr5ZD8EC2va1ebYMWM4ouc4PlgDpshSSnTTqC0Pw=;
-        b=f+HX7AxOXEhU94NT54g1eTsKTgL8+mTIqD19sYWf20al3RSAFUn21Mx2RcajqwH32XrP6b
-        5YqPpo+x07Bh84CtjH5ZXFDqvKjPEY+heOBWqDbcLDOAD2oYvv48NfQaZdKMTg6KAsjxoH
-        54eUbHWjL/shbQElje5vXKU3W/VAtck=
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=5u/+U3WMoQOALWqYdkq+g/H0rCbuuXYSAnM9TAS61+s=;
+        b=DUsU397IVw2enhP8d7YRHxAuzAHL12nlD+bX3frXXHde7f1AVIA2yoMKBemaRsIuXw8F+M
+        Mz28YQ1804U+l6zrfnxUzrLLjNaFznEa38wjwVdiRyWXw6Gzl024h7H7m9QVT6IeD1B8nc
+        8M8aCAf2UqInZ9RztMHRIHmdkRJXmcw=
 Received: from frank-G5.. (fttx-pool-80.245.73.148.bambit.de [80.245.73.148])
-        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id 1964C405AF;
-        Sat, 22 Oct 2022 09:05:39 +0000 (UTC)
+        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id DD7F5405AF;
+        Sat, 22 Oct 2022 09:05:35 +0000 (UTC)
 From:   Frank Wunderlich <linux@fw-web.de>
 To:     linux-mediatek@lists.infradead.org
 Cc:     Frank Wunderlich <frank-w@public-files.de>,
@@ -41,46 +40,50 @@ Cc:     Frank Wunderlich <frank-w@public-files.de>,
         Wenbin Mei <wenbin.mei@mediatek.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v2 4/5] arm64: dts: mediatek: mt2712e: swap last 2 clocks to match binding
-Date:   Sat, 22 Oct 2022 11:05:29 +0200
-Message-Id: <20221022090530.16265-5-linux@fw-web.de>
+Subject: [PATCH v2 0/5] Add mmc-support for mt7986
+Date:   Sat, 22 Oct 2022 11:05:25 +0200
+Message-Id: <20221022090530.16265-1-linux@fw-web.de>
 X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20221022090530.16265-1-linux@fw-web.de>
-References: <20221022090530.16265-1-linux@fw-web.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-X-Mail-ID: da3b6cee-fbd9-477b-9dcb-927f929ae418
+X-Mail-ID: 3d4a4418-e83c-4c0f-bb27-e18e2915e9b8
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Frank Wunderlich <frank-w@public-files.de>
 
-First 3 clocks for mt2712 need to be "source", "hclk", "source_cg"
-so swap last 2 of mmc0 to match the binding.
+I've noticed the mtk-sd binding needs a bit more work get into a more
+clean state.
 
-Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
----
- arch/arm64/boot/dts/mediatek/mt2712e.dtsi | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+There are 2 properties missing that maybe need to be added later or
+dropped from devicetrees:
+drv-type (which is used in mt8183-kukui.dtsi and set to <2>)
+and
+r_smpl (used in mt7622-rfb1.dts and mt7622-bananapi-bpi-r64.dts, both
+times set to <1>)
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt2712e.dtsi b/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
-index e6d7453e56e0..9dc0794fcd2e 100644
---- a/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
-@@ -766,9 +766,9 @@ mmc0: mmc@11230000 {
- 		interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_LOW>;
- 		clocks = <&pericfg CLK_PERI_MSDC30_0>,
- 			 <&pericfg CLK_PERI_MSDC50_0_HCLK_EN>,
--			 <&pericfg CLK_PERI_MSDC30_0_QTR_EN>,
--			 <&pericfg CLK_PERI_MSDC50_0_EN>;
--		clock-names = "source", "hclk", "bus_clk", "source_cg";
-+			 <&pericfg CLK_PERI_MSDC50_0_EN>,
-+			 <&pericfg CLK_PERI_MSDC30_0_QTR_EN>;
-+		clock-names = "source", "hclk", "source_cg", "bus_clk";
- 		status = "disabled";
- 	};
- 
+i don't know their function and boundaries and i do not find them in
+driver. I guess they are added by accident, but before removing them i
+want to fix the other problems.
+
+Frank Wunderlich (2):
+  arm64: dts: mediatek: mt2712e: swap last 2 clocks to match binding
+  dt-bindings: mmc: mtk-sd: add mt7986
+
+Nícolas F. R. A. Prado (1):
+  dt-bindings: mmc: mtk-sd: Set clocks based on compatible
+
+Sam Shih (2):
+  dt-bindings: mmc: Add compatible for Mediatek MT7986
+  mmc: mediatek: add support for MT7986 SoC
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 140 ++++++++++++++----
+ arch/arm64/boot/dts/mediatek/mt2712e.dtsi     |   6 +-
+ drivers/mmc/host/mtk-sd.c                     |  14 ++
+ 3 files changed, 127 insertions(+), 33 deletions(-)
+
 -- 
 2.34.1
 
