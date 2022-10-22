@@ -2,34 +2,34 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7F55C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 10:44:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0691BC433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 10:44:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230270AbiJVKoa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 06:44:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45938 "EHLO
+        id S229718AbiJVKog (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 06:44:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231161AbiJVKoP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 06:44:15 -0400
+        with ESMTP id S230013AbiJVKoS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 06:44:18 -0400
 Received: from mxout1.routing.net (mxout1.routing.net [IPv6:2a03:2900:1:a::a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C260318AE6;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA22F31BF49;
         Sat, 22 Oct 2022 03:01:50 -0700 (PDT)
 Received: from mxbox1.masterlogin.de (unknown [192.168.10.88])
-        by mxout1.routing.net (Postfix) with ESMTP id 633D23FE7B;
-        Sat, 22 Oct 2022 09:05:38 +0000 (UTC)
+        by mxout1.routing.net (Postfix) with ESMTP id 8AA8A41A25;
+        Sat, 22 Oct 2022 09:05:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1666429538;
+        s=20200217; t=1666429540;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=9YIiUZlTrjdPAMVHM7klpVqQezdSDroJaCTYC5nvEj0=;
-        b=lHgZAK25MZU9KEAKj69t9BDdXuWpdeF4092Cc0t/isPenPxhZInA9DSsR6N1xogTdJe1q9
-        s+kpaGBNnPDIRN/MA1mSma3kdpCOKr1e9JXQL9B1RlRaE5Xq/G4lfyz/cV7OhXmUFzsQ8K
-        d0i/pGO/stnONSn1LmzAiAcjbdTb2z4=
+        bh=uwE9fx2tS9oduVfTIs9Hd6/Fb9a+3JIsjdgPxEZuCWk=;
+        b=G1xnd0RAP2vFdUQcNsw9U+lz+xRBas2yonC7dKl/xdx4sQpNoL0h2wCEjl4zSw/hjbN97h
+        XqXubJCBuU3O8GVbLOnfbLZ8regoUcyCtf/Iinridt3NAixHPzUNZHPfCHH4313o5u5VVv
+        IXlpKKROuQzbWa7VeD+offVODzc0hm8=
 Received: from frank-G5.. (fttx-pool-80.245.73.148.bambit.de [80.245.73.148])
-        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id 98940405AF;
-        Sat, 22 Oct 2022 09:05:37 +0000 (UTC)
+        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id CB46C40690;
+        Sat, 22 Oct 2022 09:05:39 +0000 (UTC)
 From:   Frank Wunderlich <linux@fw-web.de>
 To:     linux-mediatek@lists.infradead.org
 Cc:     Frank Wunderlich <frank-w@public-files.de>,
@@ -40,64 +40,77 @@ Cc:     Frank Wunderlich <frank-w@public-files.de>,
         Matthias Brugger <matthias.bgg@gmail.com>,
         Wenbin Mei <wenbin.mei@mediatek.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Sam Shih <sam.shih@mediatek.com>
-Subject: [PATCH v2 2/5] mmc: mediatek: add support for MT7986 SoC
-Date:   Sat, 22 Oct 2022 11:05:27 +0200
-Message-Id: <20221022090530.16265-3-linux@fw-web.de>
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2 5/5] dt-bindings: mmc: mtk-sd: add mt7986
+Date:   Sat, 22 Oct 2022 11:05:30 +0200
+Message-Id: <20221022090530.16265-6-linux@fw-web.de>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20221022090530.16265-1-linux@fw-web.de>
 References: <20221022090530.16265-1-linux@fw-web.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Mail-ID: beee7ae5-5b66-4462-bddd-cc2fb99e2c29
+X-Mail-ID: 2ff8b4a6-6a4a-400a-8436-ce86973b8370
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sam Shih <sam.shih@mediatek.com>
+From: Frank Wunderlich <frank-w@public-files.de>
 
-Adding mt7986 own characteristics and of_device_id to have support
-of MT7986 SoC.
+Add SoC specific section for defining clock configuration.
 
-Signed-off-by: Sam Shih <sam.shih@mediatek.com>
+Add compatible in "not" section to avoid override the settings again.
+
 Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 ---
- drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 28 +++++++++++++++++++
+ 1 file changed, 28 insertions(+)
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index df941438aef5..3f7f3a1e0df8 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -552,6 +552,19 @@ static const struct mtk_mmc_compatible mt7622_compat = {
- 	.support_64g = false,
- };
- 
-+static const struct mtk_mmc_compatible mt7986_compat = {
-+	.clk_div_bits = 12,
-+	.recheck_sdio_irq = true,
-+	.hs400_tune = false,
-+	.pad_tune_reg = MSDC_PAD_TUNE0,
-+	.async_fifo = true,
-+	.data_tune = true,
-+	.busy_check = true,
-+	.stop_clk_fix = true,
-+	.enhance_rx = true,
-+	.support_64g = true,
-+};
-+
- static const struct mtk_mmc_compatible mt8135_compat = {
- 	.clk_div_bits = 8,
- 	.recheck_sdio_irq = true,
-@@ -609,6 +622,7 @@ static const struct of_device_id msdc_of_ids[] = {
- 	{ .compatible = "mediatek,mt6795-mmc", .data = &mt6795_compat},
- 	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
- 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
-+	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
- 	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
- 	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
- 	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
+diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+index c7bcf0c3dd5d..9df63c461f1f 100644
+--- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -229,6 +229,33 @@ allOf:
+             - const: hclk
+             - const: source_cg
+             - const: bus_clk
++  - if:
++      properties:
++        compatible:
++          contains:
++            enum:
++              - mediatek,mt7986-mmc
++    then:
++      properties:
++        assigned-clock-parents:
++          maxItems: 2
++        assigned-clocks:
++          maxItems: 2
++        clocks:
++          minItems: 3
++          items:
++            - description: source clock
++            - description: HCLK which used for host
++            - description: independent source clock gate
++            - description: bus clock used for internal register access
++            - description: msdc subsys clock gate
++        clock-names:
++          minItems: 3
++          items:
++            - const: source
++            - const: hclk
++            - const: axi_cg
++            - const: ahb_cg
+   - if:
+       not:
+         properties:
+@@ -237,6 +264,7 @@ allOf:
+               enum:
+                 - mediatek,mt2712-mmc
+                 - mediatek,mt8192-mmc
++                - mediatek,mt7986-mmc
+     then:
+       properties:
+         clocks:
 -- 
 2.34.1
 
