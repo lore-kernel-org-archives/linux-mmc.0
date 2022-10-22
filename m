@@ -2,37 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 729A8C433FE
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:22:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B7A7C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:24:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229460AbiJVGW4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 02:22:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34612 "EHLO
+        id S229788AbiJVGYr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 02:24:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36462 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229661AbiJVGWz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:22:55 -0400
-Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.155.67.158])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0335D242CAF;
-        Fri, 21 Oct 2022 23:22:50 -0700 (PDT)
-X-QQ-mid: bizesmtp79t1666419765t0w816vz
+        with ESMTP id S229993AbiJVGYl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:24:41 -0400
+Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.154.221.58])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5090613E23;
+        Fri, 21 Oct 2022 23:24:29 -0700 (PDT)
+X-QQ-mid: bizesmtp86t1666419834taocg6ff
 Received: from localhost.localdomain ( [182.148.15.254])
         by bizesmtp.qq.com (ESMTP) with 
-        id ; Sat, 22 Oct 2022 14:22:44 +0800 (CST)
+        id ; Sat, 22 Oct 2022 14:23:53 +0800 (CST)
 X-QQ-SSF: 01000000000000C0E000000A0000000
-X-QQ-FEAT: acNVAc66Bsw5l5oW+aZveYyqqh8IIWEBaYX8s2ZMUPD+BYkoC/xJfywW+/33l
-        c2Y0ov+AliUjwL4kU7y3EniKVRR6ZlHyFe4M/dnE4ahKY+22yfI0Z5ObHH6962h5A4/a698
-        ADfmj+iDPVQykuneMxeVNFoCd3YRpFCqMU4I8QnD7Uq8iP5/cU/p/RqwZlgZ2TCrgh/xvOX
-        FGT6c6BARQgJzjivo1cyQb5wro1+/zNtbxaifOy2YK4TMEoWrRpb/ShmxYlb+6mr3BshcOK
-        vdh8yzv+JGIQFQcCZH/iVlsb7DKJJmZwImA84IAPQ4S0hddBFUFC9LyO2ETc6ImofysOfp4
-        sni9GstTvEO9C/LC1JLJHvEs3X5QhehOfDgtwudD0cthNmey8Y=
+X-QQ-FEAT: bYR630AeiPhWrwSGaTTmu3qISqfqb8Ua5Fw4FHrBoH/F4Hltm6HkpMl5pdE7z
+        lKUgthhTNu+XXOkgTfE66h9zRPVGDSyBYw2pxItba40tgrTtaXwm1Qk7TZ1wR2pzsWodQeX
+        dW3XOIPy5z65s7A59IdThcyGFEmpT52jSvyYm6dPshMi4cQqiSK/Rc50W1U36qCBfYpjFVU
+        rX/CzKLTFn2W+7dwlJCOKMKVJtyLZbnPy22A219fGZgotxsHQ3AayD5eSJ6YT9ppXkeOLmI
+        gv+ILvBYw5psx+mzzzVVkCbb/UejKmcZ6dR2BohiQ7lj/D08VuHI197Q6vYZhFry040Iw94
+        MgndXcIK3D26ZHD86Sx7xzm4K6VxQPNp93t0Fm5yViYXrNCrPk=
 X-QQ-GoodBg: 0
 From:   wangjianli <wangjianli@cdjrlc.com>
-To:     jh80.chung@samsung.com, ulf.hansson@linaro.org
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         wangjianli <wangjianli@cdjrlc.com>
 Subject: [PATCH] mmc/host: fix repeated words in comments
-Date:   Sat, 22 Oct 2022 14:22:37 +0800
-Message-Id: <20221022062237.10333-1-wangjianli@cdjrlc.com>
+Date:   Sat, 22 Oct 2022 14:23:31 +0800
+Message-Id: <20221022062331.11395-1-wangjianli@cdjrlc.com>
 X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -46,22 +46,22 @@ Delete the redundant word 'the'.
 
 Signed-off-by: wangjianli <wangjianli@cdjrlc.com>
 ---
- drivers/mmc/host/dw_mmc.c | 2 +-
+ drivers/mmc/host/sdhci-acpi.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index 581614196a84..7f00d7d7e35e 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -1363,7 +1363,7 @@ static void __dw_mci_start_request(struct dw_mci *host,
- 		 * is just about to roll over.
- 		 *
- 		 * We do this whole thing under spinlock and only if the
--		 * command hasn't already completed (indicating the the irq
-+		 * command hasn't already completed (indicating the irq
- 		 * already ran so we don't want the timeout).
- 		 */
- 		spin_lock_irqsave(&host->irq_lock, irqflags);
+diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
+index c0350e9c03f3..93fe6e5a5f9f 100644
+--- a/drivers/mmc/host/sdhci-acpi.c
++++ b/drivers/mmc/host/sdhci-acpi.c
+@@ -648,7 +648,7 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
+ 	 *       in reading a garbage value and using the wrong presets.
+ 	 *
+ 	 *       Since HS400 and HS200 presets must be identical, we could
+-	 *       instead use the the SDR104 preset register.
++	 *       instead use the SDR104 preset register.
+ 	 *
+ 	 *    If the above issues are resolved we could remove this quirk for
+ 	 *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
 -- 
 2.36.1
 
