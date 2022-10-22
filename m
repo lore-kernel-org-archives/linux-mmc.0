@@ -2,67 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C29DC433FE
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 06:26:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BFF9C04A95
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 09:56:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229999AbiJVG0C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 02:26:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45408 "EHLO
+        id S230078AbiJVJ4C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 05:56:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229645AbiJVG0B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 02:26:01 -0400
-Received: from bg4.exmail.qq.com (bg4.exmail.qq.com [43.154.221.58])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22A9753D0D;
-        Fri, 21 Oct 2022 23:25:57 -0700 (PDT)
-X-QQ-mid: bizesmtp72t1666419912t74p8onm
-Received: from localhost.localdomain ( [182.148.15.254])
-        by bizesmtp.qq.com (ESMTP) with 
-        id ; Sat, 22 Oct 2022 14:25:11 +0800 (CST)
-X-QQ-SSF: 01000000000000C0E000000A0000000
-X-QQ-FEAT: mhDoKBI5A3AQlZDgB68EtJtI5NGdpLJIjOkqQLnGDk55RI7W4oHe+gcAFl935
-        5PrlmlKpBlYbgb2tY4BLr4Gt9gBsdXkvcij6uGgcQbJk3MOkEh9Dw4NfK1r2Btxngz+skDk
-        bqA8TWdSly+HQd9x8gwF7L+qzyJwlFzze0vwx6AvhDScnlufbQVozClcO8cc8iuJ3HiRFoS
-        FTA3XLAg7eySuRa9a5L/6DSwPoj1rCl8ISbPHfzCOaEnAufFT8XqK977UJzCpqGG1kUP9Yj
-        4LmPFz1Y7iyFFRHoEDb+CDciTQ5ur0L+dS+l3a+HpbDhioPHfHyU1qOKQaPEfMsjRR07YJA
-        Hpco87AuKOamGmHdx62zOs62bT2Gi5XyZRjhFIHFmz5A2Sr8AnBoNAgGFunBw==
-X-QQ-GoodBg: 0
-From:   wangjianli <wangjianli@cdjrlc.com>
-To:     adrian.hunter@intel.com, haibo.chen@nxp.com,
-        ulf.hansson@linaro.org, shawnguo@kernel.org, s.hauer@pengutronix.de
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, wangjianli <wangjianli@cdjrlc.com>
-Subject: [PATCH] mmc/host: fix repeated words in comments
-Date:   Sat, 22 Oct 2022 14:25:05 +0800
-Message-Id: <20221022062505.13155-1-wangjianli@cdjrlc.com>
-X-Mailer: git-send-email 2.36.1
+        with ESMTP id S229960AbiJVJzm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 05:55:42 -0400
+Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D045301011;
+        Sat, 22 Oct 2022 02:09:00 -0700 (PDT)
+Received: from mxbox1.masterlogin.de (unknown [192.168.10.88])
+        by mxout2.routing.net (Postfix) with ESMTP id D415F60406;
+        Sat, 22 Oct 2022 09:05:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1666429540;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=m0tnr5ZD8EC2va1ebYMWM4ouc4PlgDpshSSnTTqC0Pw=;
+        b=f+HX7AxOXEhU94NT54g1eTsKTgL8+mTIqD19sYWf20al3RSAFUn21Mx2RcajqwH32XrP6b
+        5YqPpo+x07Bh84CtjH5ZXFDqvKjPEY+heOBWqDbcLDOAD2oYvv48NfQaZdKMTg6KAsjxoH
+        54eUbHWjL/shbQElje5vXKU3W/VAtck=
+Received: from frank-G5.. (fttx-pool-80.245.73.148.bambit.de [80.245.73.148])
+        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id 1964C405AF;
+        Sat, 22 Oct 2022 09:05:39 +0000 (UTC)
+From:   Frank Wunderlich <linux@fw-web.de>
+To:     linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2 4/5] arm64: dts: mediatek: mt2712e: swap last 2 clocks to match binding
+Date:   Sat, 22 Oct 2022 11:05:29 +0200
+Message-Id: <20221022090530.16265-5-linux@fw-web.de>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221022090530.16265-1-linux@fw-web.de>
+References: <20221022090530.16265-1-linux@fw-web.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-QQ-SENDSIZE: 520
-Feedback-ID: bizesmtp:cdjrlc.com:qybglogicsvr:qybglogicsvr7
+X-Mail-ID: da3b6cee-fbd9-477b-9dcb-927f929ae418
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Delete the redundant word 'the'.
+From: Frank Wunderlich <frank-w@public-files.de>
 
-Signed-off-by: wangjianli <wangjianli@cdjrlc.com>
+First 3 clocks for mt2712 need to be "source", "hclk", "source_cg"
+so swap last 2 of mmc0 to match the binding.
+
+Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm64/boot/dts/mediatek/mt2712e.dtsi | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 55981b0f0b10..004f84764fb7 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1453,7 +1453,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+diff --git a/arch/arm64/boot/dts/mediatek/mt2712e.dtsi b/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
+index e6d7453e56e0..9dc0794fcd2e 100644
+--- a/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
++++ b/arch/arm64/boot/dts/mediatek/mt2712e.dtsi
+@@ -766,9 +766,9 @@ mmc0: mmc@11230000 {
+ 		interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_LOW>;
+ 		clocks = <&pericfg CLK_PERI_MSDC30_0>,
+ 			 <&pericfg CLK_PERI_MSDC50_0_HCLK_EN>,
+-			 <&pericfg CLK_PERI_MSDC30_0_QTR_EN>,
+-			 <&pericfg CLK_PERI_MSDC50_0_EN>;
+-		clock-names = "source", "hclk", "bus_clk", "source_cg";
++			 <&pericfg CLK_PERI_MSDC50_0_EN>,
++			 <&pericfg CLK_PERI_MSDC30_0_QTR_EN>;
++		clock-names = "source", "hclk", "source_cg", "bus_clk";
+ 		status = "disabled";
+ 	};
  
- 		/*
- 		 * On i.MX8MM, we are running Dual Linux OS, with 1st Linux using SD Card
--		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let the
-+		 * as rootfs storage, 2nd Linux using eMMC as rootfs storage. We let
- 		 * the 1st linux configure power/clock for the 2nd Linux.
- 		 *
- 		 * When the 2nd Linux is booting into rootfs stage, we let the 1st Linux
 -- 
-2.36.1
+2.34.1
 
