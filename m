@@ -2,108 +2,111 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 483F0ECDFA1
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 15:19:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF56FC04A95
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 16:06:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229776AbiJVPTA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 11:19:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42570 "EHLO
+        id S229721AbiJVQGs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 12:06:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57170 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229631AbiJVPS7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 11:18:59 -0400
-Received: from mail-oa1-x34.google.com (mail-oa1-x34.google.com [IPv6:2001:4860:4864:20::34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6B3A6BD7F
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 08:18:55 -0700 (PDT)
-Received: by mail-oa1-x34.google.com with SMTP id 586e51a60fabf-13b103a3e5dso7122393fac.2
-        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 08:18:55 -0700 (PDT)
+        with ESMTP id S229576AbiJVQGr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 12:06:47 -0400
+Received: from mail-qt1-x82b.google.com (mail-qt1-x82b.google.com [IPv6:2607:f8b0:4864:20::82b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AFE113CCF
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:06:44 -0700 (PDT)
+Received: by mail-qt1-x82b.google.com with SMTP id a24so3403231qto.10
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 09:06:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=gz0LxUsOUlJDcIAW5bPu+WDjpQGro2FyWxGKpu7r8bo=;
-        b=gWrs34NeTJPV2fQ1MVoQY+zpFojHR3D/A6fVxaEOoPyaG1lz86TK/RINtSik3ihs6m
-         epr6PhFlnoD33CCeTfWoNQCRee99kzlwRupaR937A3VU5HU4OTIvs/zluF82SMnywl6D
-         HdEJ7m7PbwxapFaNOFa9ppWW4y91iGtKkwoLpnocgDPBTYKE8ItremNKc8YrHhceRIZp
-         h3VMtehI1AqTwZwEWQcTgFOjDVRQQngjmAnbv2gz4Ef/Bbck+zcB6GCOTs8PKUKrqPeL
-         49sPdfcCEYUyqTEphtRdJczJc984b2NmTshEFvs/XiFALWDOPilFuaMHYm7NR6Fhz+qX
-         X9nQ==
+        bh=nzT+VEmkUStYx/oFKUyBVeLL6CJC5Ebv5tGgGJ3EThk=;
+        b=Rd1hH2t7awphQ+KCcp28rqZhH0W/+YoolhPWBzFlzaVzem1NtFymXj9IbmcfKrtxOE
+         mwluJy+ONLIEOOcEUVz1AsVeeUW81r2nLNrSZo2PTZKuA70eC6DU7ZtWFVCvQaN0n2EJ
+         XNawpYjH23MoC/f/ID18S7MILGG2aRc3N+Ln0ZdChio7g1VfWZV3i1493pydGFb7Ut91
+         j76UklR5tmvzbORApFcZj2pfhhCWBoSlDrcYkHj8kmJAjm5MuyA/IS0CHVaU15KekWV5
+         EM87cLIapgiTHD4InSBhCrine1p64V7/4jWqpAGOwpoj3u7sGi5KiQ+dnnR1DgL4KGVp
+         abgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=gz0LxUsOUlJDcIAW5bPu+WDjpQGro2FyWxGKpu7r8bo=;
-        b=wnWLeWvF+wFPGceh6trD7YdNKoEAViUZSo50M98JWTxCVeA1x0XfsYDZZXLwI4cLxE
-         Mu/sB4XXkjoV8VNoFESDGHr0+rr48Nl3VedEt1DOwh9MRbqVar/GmxJ2G1bDIWYZWtK7
-         gaguHrMXe1GifEuxqXkOVjQ5mZ4tdDYXBVZBz4FZcKvgACdzKRd5KNgtOy6C9re7Itis
-         FTvFNm7lx3bK9CyGttlj75T++iQXhVK/0V1lkQsVdccxrBf4jYafzn1Yg821uNx9KDUF
-         SIYgo8N75/iPNTfZgf9X/14beFxTPHSwf5DLE220LvBFNFEzSMTIvENG8yHJrXfqUisn
-         mHAQ==
-X-Gm-Message-State: ACrzQf0pAjhL/cr/Vj7t0YzH42+tNF1fGqcGBOEi4Ef+1qUNIm3l6kcj
-        wZIockbo+iiKaBELV2/61PVTNQ==
-X-Google-Smtp-Source: AMsMyM4Ums0et6AQMZox+xdB7Wz2plUu78klbaMd0EOzV1OnnwGbhhl8/BymyNDqbBFL+Y+cBT/t0g==
-X-Received: by 2002:a05:6870:f288:b0:131:de71:3eb6 with SMTP id u8-20020a056870f28800b00131de713eb6mr31239483oap.63.1666451935002;
-        Sat, 22 Oct 2022 08:18:55 -0700 (PDT)
+        bh=nzT+VEmkUStYx/oFKUyBVeLL6CJC5Ebv5tGgGJ3EThk=;
+        b=LLv62ZjUwtJTLClQyrzBB4L70n+yW8W7R3C0PiThxwvcttprgZ8DTtvuP31EPIDVb/
+         yhTBUngOpPHipyRmI8LbitS8ybm5Dw4QchNOoDrH7MIyuqh5DZCWMNSx36CIRNQ0Buwm
+         udASv7LhBapddImVHchRtjyq2INgepVqhZGp4HG1mZtH+ycOcqXZ0or9wStLOzF3Ep4v
+         IzBueqXNfnk9KU2jPV9PXhrAQBdQbfcQNK2A8TqZjOPvLDJQ2w1GM3xY/s/SUqLUTbgR
+         KyWnY4w/Utk3zV0VIPHoh6NT9icDoncGezDG1aFVM1k0SL8zwn6SeY7SjMipBwjJeLMO
+         /FRw==
+X-Gm-Message-State: ACrzQf3N3Ip+CerGMf5ASS5HVenA1izUTIiQ926CbCJd8o7qf0ZYLdWs
+        IiDwAEAplBem1g7Ffg/GSqR2grt5jouEAA==
+X-Google-Smtp-Source: AMsMyM4ZO0osqdPxtj3efWReeGdbuhf5GKNX407YtHct5K3PumdbLfs8ZZUzCHhQOMpPIkHQE1x2jg==
+X-Received: by 2002:ac8:5b44:0:b0:39c:d6ad:cce6 with SMTP id n4-20020ac85b44000000b0039cd6adcce6mr20939846qtw.113.1666454803298;
+        Sat, 22 Oct 2022 09:06:43 -0700 (PDT)
 Received: from [10.203.8.70] ([205.153.95.177])
-        by smtp.gmail.com with ESMTPSA id v5-20020a056870310500b00136c20b1c59sm11538284oaa.43.2022.10.22.08.18.50
+        by smtp.gmail.com with ESMTPSA id bm34-20020a05620a19a200b006ce1bfbd603sm11410372qkb.124.2022.10.22.09.06.41
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 22 Oct 2022 08:18:54 -0700 (PDT)
-Message-ID: <e7ace68a-98e5-63c8-7dd7-a35d0eba1c6e@linaro.org>
-Date:   Sat, 22 Oct 2022 11:18:49 -0400
+        Sat, 22 Oct 2022 09:06:42 -0700 (PDT)
+Message-ID: <df256d16-e0c6-4e9a-9579-f7d9d1436670@linaro.org>
+Date:   Sat, 22 Oct 2022 12:06:40 -0400
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.4.0
-Subject: Re: [PATCH 00/21] ARM: s3c: clean out obsolete platforms
-To:     Arnd Bergmann <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
-        Simtec Linux Team <linux@simtec.co.uk>,
-        Arnd Bergmann <arnd@arndb.de>, linux-doc@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org, devicetree@vger.kernel.org,
-        patches@opensource.cirrus.com,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-pm@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-watchdog@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-pwm@vger.kernel.org
-References: <20221021202254.4142411-1-arnd@kernel.org>
+Subject: Re: [PATCH 1/1] dt-bindings: mmc: sdhci-of-dwcmhsc: Add reset support
 Content-Language: en-US
+To:     Sebastian Reichel <sebastian.reichel@collabora.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
+        kernel@collabora.com
+References: <20221021171654.87071-1-sebastian.reichel@collabora.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221021202254.4142411-1-arnd@kernel.org>
+In-Reply-To: <20221021171654.87071-1-sebastian.reichel@collabora.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/10/2022 16:22, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
+On 21/10/2022 13:16, Sebastian Reichel wrote:
+> Properly describe reset related properties in the binding.
 > 
-> The s3c24xx platform was marked as deprecated a while ago,
-> and for the s3c64xx platform, we marked all except one legacy
-> board file as unused.
+> Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+> ---
+>  .../devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml  | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
 > 
-> This series removes all of those, leaving only s3c64xx support
-> for DT based boots as well as the cragg6410 board file.
-> 
-> About half of the s3c specific drivers were only used on
-> the now removed machines, so these drivers can be retired
-> as well. I can either merge the driver removal patches through
-> the soc tree along with the board file patches, or subsystem
-> maintainers can pick them up into their own trees, whichever
-> they prefer.
+> diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> index 71f8e726d641..162c1a4abf3c 100644
+> --- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+> @@ -45,6 +45,18 @@ properties:
+>        - const: block
+>        - const: timer
+>  
+> +  resets:
+> +    minItems: 5
 
-Just to be sure - do you expect me to ack the series, or rather as usual
-pick them up?
+No need for minItems, drop.
 
+> +    maxItems: 5
+> +
+> +  reset-names:
+> +    items:
+> +      - const: core
+> +      - const: bus
+> +      - const: axi
+> +      - const: block
+> +      - const: timer
+> +
+
+The reset names have exactly the same names as clocks. Are these
+responsible for some blocks on the device? Seems so... but I want to be
+sure it wasn't copy-paste :)
 
 Best regards,
 Krzysztof
