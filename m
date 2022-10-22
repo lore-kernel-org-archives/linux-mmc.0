@@ -2,152 +2,127 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D6F5FA3741
-	for <linux-mmc@archiver.kernel.org>; Fri, 21 Oct 2022 22:33:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15706C433FE
+	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 01:44:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229974AbiJUWdc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 21 Oct 2022 18:33:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45206 "EHLO
+        id S230041AbiJVBol (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 21 Oct 2022 21:44:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56776 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229959AbiJUWda (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 18:33:30 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B81592AD314;
-        Fri, 21 Oct 2022 15:33:29 -0700 (PDT)
+        with ESMTP id S229945AbiJVBoh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 21 Oct 2022 21:44:37 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86A933204F;
+        Fri, 21 Oct 2022 18:44:35 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 69253B82CBE;
-        Fri, 21 Oct 2022 22:33:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4070CC433C1;
-        Fri, 21 Oct 2022 22:33:26 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666391607;
-        bh=g5SUbc3dxCone79caS0M2AEu5MpWd5JFL171Tn/U2d4=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=YtT4bLoLT3AdAlNhZAuWY10vexMQTJrTFgGjHybRvOmmgqCsx8pKtm0zVkueeQbLC
-         K1m/sojgD3EMuFX/rcQI58EnKk68AVJNtO9JiMKs/6ZwTgDRov4jmgc2ydvStn23ag
-         GvR7y/2LAlBe2M1nuLAhW5vkosztclzcGnUgYIgwqC81NmFmc1up42azXQpER9T20A
-         CLWBmZzb96celcpPnCzalJVcG3hOZMKp8B00T3IhYbMWjwpGhvoTMm1M/b4lZzePg3
-         YQlPgGhd1URgg6MqJfR9Yeai00VsTcYaYL1I9dJTOVXHN4hE0/5hMAK8/MoHnqxz4X
-         OUGBYYU9we38Q==
-Date:   Sat, 22 Oct 2022 00:33:18 +0200
-From:   Wolfram Sang <wsa@kernel.org>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
-        Simtec Linux Team <linux@simtec.co.uk>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Sylwester Nawrocki <sylvester.nawrocki@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Tomasz Figa <tomasz.figa@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 227AE61FB1;
+        Sat, 22 Oct 2022 01:44:35 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8FC1BC43143;
+        Sat, 22 Oct 2022 01:44:31 +0000 (UTC)
+Authentication-Results: smtp.kernel.org;
+        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="GMIwnwq1"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
+        t=1666403063;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=pgAGvtfWFBepSErNnmOiCogblep8pK7WSNMDWQtrNSg=;
+        b=GMIwnwq1awcpUW/3bcqRLII9Ls9FFpGfdnmMIcvGbiEtdgTfYCtyHBxD9yKHQ7iLoU7MWe
+        oedm6GH5CEx+hIfF88+NdonBLSB3Qlk4BllZXEvDgVRGj4TJT9CbyQxCoDz8OaY8tqxGTj
+        zGaJgSvm0ym+4US4UBRtlbzQYNmOeTE=
+Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id e102b3b6 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
+        Sat, 22 Oct 2022 01:44:23 +0000 (UTC)
+From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Kees Cook <keescook@chromium.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org
-Subject: Re: [PATCH 02/21] ARM: s3c: remove s3c24xx specific hacks
-Message-ID: <Y1MeLqsE2fggyhzU@shikoro>
-Mail-Followup-To: Wolfram Sang <wsa@kernel.org>,
-        Arnd Bergmann <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
-        Simtec Linux Team <linux@simtec.co.uk>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Sylwester Nawrocki <sylvester.nawrocki@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        =?UTF-8?q?Christoph=20B=C3=B6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>,
+        Jani Nikula <jani.nikula@linux.intel.com>,
+        Jason Gunthorpe <jgg@nvidia.com>,
+        Sakari Ailus <sakari.ailus@linux.intel.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Theodore Ts'o <tytso@mit.edu>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
         Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Tomasz Figa <tomasz.figa@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Stephen Boyd <sboyd@kernel.org>, linux-samsung-soc@vger.kernel.org,
-        linux-i2c@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-mtd@lists.infradead.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20221021202254.4142411-1-arnd@kernel.org>
- <20221021203329.4143397-2-arnd@kernel.org>
+        "Darrick J . Wong" <djwong@kernel.org>,
+        SeongJae Park <sj@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
+        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org
+Subject: [PATCH v1 3/5] random: add helpers for random numbers with given floor or range
+Date:   Fri, 21 Oct 2022 21:44:01 -0400
+Message-Id: <20221022014403.3881893-4-Jason@zx2c4.com>
+In-Reply-To: <20221022014403.3881893-1-Jason@zx2c4.com>
+References: <20221022014403.3881893-1-Jason@zx2c4.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="q4IaRr9rlP9eixcE"
-Content-Disposition: inline
-In-Reply-To: <20221021203329.4143397-2-arnd@kernel.org>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Now that we have get_random_u32_below(), it's trivial to make inline
+helpers to compute get_random_u32_above() and get_random_u32_between(),
+which will help clean up open coded loops and manual computations
+throughout the tree.
 
---q4IaRr9rlP9eixcE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+---
+ include/linux/random.h | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
-On Fri, Oct 21, 2022 at 10:27:35PM +0200, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
->=20
-> A number of device drivers reference CONFIG_ARM_S3C24XX_CPUFREQ or
-> similar symbols that are no longer available with the platform gone,
-> though the drivers themselves are still used on newer platforms,
-> so remove these hacks.
->=20
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+diff --git a/include/linux/random.h b/include/linux/random.h
+index 3a82c0a8bc46..92188a74e50e 100644
+--- a/include/linux/random.h
++++ b/include/linux/random.h
+@@ -91,6 +91,30 @@ static inline u32 get_random_u32_below(u32 ceil)
+ 	}
+ }
+ 
++/*
++ * Returns a random integer in the interval (floor, U32_MAX], with uniform
++ * distribution, suitable for all uses. Fastest when floor is a constant, but
++ * still fast for variable floor as well.
++ */
++static inline u32 get_random_u32_above(u32 floor)
++{
++	BUILD_BUG_ON_MSG(__builtin_constant_p(floor) && floor == U32_MAX,
++			 "get_random_u32_above() must take floor < U32_MAX");
++	return floor + 1 + get_random_u32_below(U32_MAX - floor);
++}
++
++/*
++ * Returns a random integer in the interval [floor, ceil), with uniform
++ * distribution, suitable for all uses. Fastest when floor and ceil are
++ * constant, but still fast for variable floor and ceil as well.
++ */
++static inline u32 get_random_u32_between(u32 floor, u32 ceil)
++{
++	BUILD_BUG_ON_MSG(__builtin_constant_p(floor) && __builtin_constant_p(ceil) &&
++			 floor >= ceil, "get_random_u32_above() must take floor < ceil");
++	return floor + get_random_u32_below(ceil - floor);
++}
++
+ /*
+  * On 64-bit architectures, protect against non-terminated C string overflows
+  * by zeroing out the first byte of the canary; this leaves 56 bits of entropy.
+-- 
+2.38.1
 
-Acked-by: Wolfram Sang <wsa@kernel.org> # for I2C
-
-
---q4IaRr9rlP9eixcE
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmNTHioACgkQFA3kzBSg
-KbYeNA/9HlDxIncjyh8NS2x57Q58pKmrahP7tNy2sriAnglRPdeXjkmitx/PDnHg
-bIozZCPd20DhLP05iEjhC03Z+mkJJjnjo+rhRpAKX8NlI1+pvJXTmfxiAvwkIU3b
-Ra+7NbDwBKiltZo/jJ7QNRjr6bWyZCLx3/0VIEx/ILC+ukZen1jdsJhdPD1/X1b3
-RiA8N9L3oPIcLmesbdb1HDiF5iD5C+2baALIuBeZ9xXwF8uFSsFpq4Qn1/HgpJFu
-AP6+2ksTWEj7H6ARmXOA/u6frOxsWH1kahCSTBB0dtX0gSarueTzo0FxEQsyhkAx
-dgtZB9qGsy7A92ya7u69s+VLgXQyEH3C+JOBW8Ww+faoCz2nk3VFqWjwKy8kqCil
-wgbEHv9oPuQDtlP2lw9ApUxfTkWIWp3v1EfZ7dALMcfSyMjh+kGcYntEhMlD1u3V
-lZrp9wbt5yJoIZ18mFHHbaiVCdcEjwn5fvLHSQ2znhLiyBT6pbWcC7Is5xb2hiF7
-Rl6+VuLynCXX36g/7J8hFkwcKZIa7x95++ksHb908o4tjNKX+6oYSKdbYW1gUhxJ
-yUNJs6W+HsoC0DFOWt71wex8PgRwG3HGkxBKDkd5dmLDcUYlLA9xENa6fH5MVdHI
-37v4yvkdM8L5yq07lG/mJkHC7C/7+kdZ/ahDQsSuIdcAoV1dIPc=
-=za7Y
------END PGP SIGNATURE-----
-
---q4IaRr9rlP9eixcE--
