@@ -2,34 +2,34 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62B8CFA373F
-	for <linux-mmc@archiver.kernel.org>; Sun, 23 Oct 2022 09:13:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76DC9FA3740
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Oct 2022 09:13:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230139AbiJWJNV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 23 Oct 2022 05:13:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34710 "EHLO
+        id S229695AbiJWJNW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 23 Oct 2022 05:13:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230071AbiJWJNS (ORCPT
+        with ESMTP id S230122AbiJWJNS (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sun, 23 Oct 2022 05:13:18 -0400
 Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9768F72ECD;
-        Sun, 23 Oct 2022 02:13:13 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2B4D72B6F;
+        Sun, 23 Oct 2022 02:13:14 -0700 (PDT)
 Received: from mxbox2.masterlogin.de (unknown [192.168.10.89])
-        by mxout2.routing.net (Postfix) with ESMTP id 60D6F5FC39;
-        Sun, 23 Oct 2022 09:13:11 +0000 (UTC)
+        by mxout2.routing.net (Postfix) with ESMTP id 5364E5FC8D;
+        Sun, 23 Oct 2022 09:13:13 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1666516391;
+        s=20200217; t=1666516393;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:
          content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=JDj+3jeCqCcaeTvzPHxQEqBQy4Ab6T3C2f1XrCtCwA0=;
-        b=RRfjCUWBMEhto+cDXh0RUPXtNVen8lXp88tVQwu6h24gptDD1yaCcNVtbB8T848DAIUhTV
-        B1/eptn3ZnNVIox+5zG0liRrlT0YaSrSTX1pI1WV1JlWTglLK53ziBE+T/6+UgTi/0aPnw
-        VuVOp2/t8fquuWpyMa2jtIfXeyPyEjk=
+        bh=rMnfisK/hDmrrndbTYh3V3/FJiHDh0xeFPqPbDK9Zow=;
+        b=PvXRtWEpFgfA+IwYUQ2o11RUnU29TFuqvg+urs1OUFP2irCuwHx3Jkd/OuhQu32tYYpvKb
+        2uP2vdShx1vofS2/c6XbmcAIx2XeLZNpoHWtDNm8m7CqSwKZzXpx8skwyFy0gTeARiPobU
+        Gomb1bW/IWyqTxBPbh1u7C7CJ0DVcMw=
 Received: from frank-G5.. (fttx-pool-80.245.79.234.bambit.de [80.245.79.234])
-        by mxbox2.masterlogin.de (Postfix) with ESMTPSA id 9FC6010031F;
-        Sun, 23 Oct 2022 09:13:10 +0000 (UTC)
+        by mxbox2.masterlogin.de (Postfix) with ESMTPSA id 9DDD310009F;
+        Sun, 23 Oct 2022 09:13:12 +0000 (UTC)
 From:   Frank Wunderlich <linux@fw-web.de>
 To:     linux-mediatek@lists.infradead.org
 Cc:     Frank Wunderlich <frank-w@public-files.de>,
@@ -41,67 +41,53 @@ Cc:     Frank Wunderlich <frank-w@public-files.de>,
         Wenbin Mei <wenbin.mei@mediatek.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
-Date:   Sun, 23 Oct 2022 11:12:43 +0200
-Message-Id: <20221023091247.70586-4-linux@fw-web.de>
+Subject: [PATCH v3 6/7] arm64: dts: mt7622: drop r_smpl property from mmc node
+Date:   Sun, 23 Oct 2022 11:12:46 +0200
+Message-Id: <20221023091247.70586-7-linux@fw-web.de>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20221023091247.70586-1-linux@fw-web.de>
 References: <20221023091247.70586-1-linux@fw-web.de>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-X-Mail-ID: 1f513a30-b000-40b2-a634-bdc6344441f7
+X-Mail-ID: ce718442-cd9d-45b0-806f-f5631c844f6e
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Frank Wunderlich <frank-w@public-files.de>
 
-Add SoC specific section for defining clock configuration.
+This property is not defined in binding and driver.
 
 Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
-
 ---
-v3:
-- drop assigned-clocks/assigned-clock-parents
-- fix clock description
----
- .../devicetree/bindings/mmc/mtk-sd.yaml       | 23 +++++++++++++++++++
- 1 file changed, 23 insertions(+)
+ arch/arm64/boot/dts/mediatek/mt7622-bananapi-bpi-r64.dts | 1 -
+ arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts             | 1 -
+ 2 files changed, 2 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index 31bb6dc329d2..17b346a60e4c 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -228,6 +228,29 @@ allOf:
-             - const: source_cg
-             - const: bus_clk
- 
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            enum:
-+              - mediatek,mt7986-mmc
-+    then:
-+      properties:
-+        clocks:
-+          minItems: 3
-+          items:
-+            - description: source clock
-+            - description: HCLK which used for host
-+            - description: AXI bus clock gate
-+            - description: AHB bus clock gate
-+        clock-names:
-+          minItems: 3
-+          items:
-+            - const: source
-+            - const: hclk
-+            - const: axi_cg
-+            - const: ahb_cg
-+
-   - if:
-       properties:
-         compatible:
+diff --git a/arch/arm64/boot/dts/mediatek/mt7622-bananapi-bpi-r64.dts b/arch/arm64/boot/dts/mediatek/mt7622-bananapi-bpi-r64.dts
+index d3f9eab2b784..af3fe61e4093 100644
+--- a/arch/arm64/boot/dts/mediatek/mt7622-bananapi-bpi-r64.dts
++++ b/arch/arm64/boot/dts/mediatek/mt7622-bananapi-bpi-r64.dts
+@@ -235,7 +235,6 @@ &mmc1 {
+ 	bus-width = <4>;
+ 	max-frequency = <50000000>;
+ 	cap-sd-highspeed;
+-	r_smpl = <1>;
+ 	cd-gpios = <&pio 81 GPIO_ACTIVE_LOW>;
+ 	vmmc-supply = <&reg_3p3v>;
+ 	vqmmc-supply = <&reg_3p3v>;
+diff --git a/arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts b/arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts
+index 36722cabe626..b74e774c6eba 100644
+--- a/arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts
++++ b/arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts
+@@ -208,7 +208,6 @@ &mmc1 {
+ 	bus-width = <4>;
+ 	max-frequency = <50000000>;
+ 	cap-sd-highspeed;
+-	r_smpl = <1>;
+ 	cd-gpios = <&pio 81 GPIO_ACTIVE_LOW>;
+ 	vmmc-supply = <&reg_3p3v>;
+ 	vqmmc-supply = <&reg_3p3v>;
 -- 
 2.34.1
 
