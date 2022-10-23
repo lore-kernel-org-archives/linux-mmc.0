@@ -2,123 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F8E4FA3749
-	for <linux-mmc@archiver.kernel.org>; Sat, 22 Oct 2022 19:48:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E99EC04A95
+	for <linux-mmc@archiver.kernel.org>; Sun, 23 Oct 2022 02:12:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229941AbiJVTsx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 22 Oct 2022 15:48:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41718 "EHLO
+        id S229728AbiJWCMp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 22 Oct 2022 22:12:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229847AbiJVTsq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 15:48:46 -0400
-Received: from new1-smtp.messagingengine.com (new1-smtp.messagingengine.com [66.111.4.221])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6F5412D80A;
-        Sat, 22 Oct 2022 12:48:44 -0700 (PDT)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailnew.nyi.internal (Postfix) with ESMTP id 6AD1458012A;
-        Sat, 22 Oct 2022 15:48:41 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute3.internal (MEProxy); Sat, 22 Oct 2022 15:48:41 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1666468121; x=1666475321; bh=UGS1Mg1RbR
-        rjg7l/C4uODk6tRvKSFxQmBze4CDiRUok=; b=R769R20cvAUvCJzdLxBnDkwPBp
-        EbTpyCnh90ePwkW/W271GgnujcaxKPNlKUZTD1QiMzbOX6UUmX5GBGQy5YnoG3Hz
-        7bIbm4GGSebbV6RK2kBgjxCEhVjRMxNaLgKsw+7i5e4f4W2C2HsQFTmKv8S+gZdE
-        jcEJHfdX99rjFuuQuzOPTEkJYLvC3gJ1f7jx+9U6cwktdP6NSfqNvxTgarEWxD1c
-        GFRrikCndHmtZnFVFspin0GH0nBuno9DFl/vX1YEuWJJ1DmabcJBI+QgW+pFl13L
-        PUlTUh21czWS+IFSiTNJyGJ4p7ipLzCb7UJepNPQ1EVgfsLevgq5To41FFEw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; t=1666468121; x=1666475321; bh=UGS1Mg1RbRrjg7l/C4uODk6tRvKS
-        FxQmBze4CDiRUok=; b=DZdlxJQ1/OPf/Y6KDYWPfdC+mu56NzIOlbXghWxjCj9D
-        9CPMuzFO6wSIpYXaVVKO5ogBmtK5zrRUpai6gPg5qF7aq51p1Tf8zgVV+aEGQIpg
-        Le7lvLJR+05feR3Q+7owk4RsmE3rzpsqGg/UOGa7xGgp5BzvreC3G8OxhZ0WzoTZ
-        kHVkLu1P+KTSJm4dYCrODRLVTVeSHwuFqAuyI9eyO0UD5B3tL3/NipBn2AFumQvr
-        +xjvFjLrJEOmbNOFedB+o0knlGPPR7li0EwNxPvDXhDL0DJhj4plmQqEZJg8uEWZ
-        ljUtVQj8llXCVqwnpTmY8Mpk0y+FjFMyLlNEuZEfiA==
-X-ME-Sender: <xms:GElUY9vt3ItviEp5AJXQjYcX0YyV47YTITTgtkGjjNw0aSie0vzYkg>
-    <xme:GElUY2cknoJTeDpYvjbC4RFS-FtPGbyfFDbbyjNFIChdDqrc0xYFVavFYI99vu8kl
-    0KtHqNspAg1e6vBhwY>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrgedttddgudegtdcutefuodetggdotefrod
-    ftvfcurfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfgh
-    necuuegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmd
-    enucfjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdet
-    rhhnugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrg
-    htthgvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedt
-    keetffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
-    grrhhnugesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:GElUYwxiXoqPMILm1SZ_32__qu1Q5l_zrlV4KYN9jBrAlex9SwSKIg>
-    <xmx:GElUY0PzOcbbrTlSQkCZ5j1lrS1Cnv1p6FZXhLQlA1lHQyiDXRQGng>
-    <xmx:GElUY9-JQg9pRkXJG00aarf_3pC2T4jG_plPdMl-YxzKsRcEtsxZ9g>
-    <xmx:GUlUYyKFp-5FR5wwM3xl6nutJeKlKU0pfMGHX_pxDvaIG8i-amMB_w>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 90C24B60086; Sat, 22 Oct 2022 15:48:40 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
-Mime-Version: 1.0
-Message-Id: <7c4531b8-a296-4ea3-9564-b094704d10b2@app.fastmail.com>
-In-Reply-To: <e7ace68a-98e5-63c8-7dd7-a35d0eba1c6e@linaro.org>
-References: <20221021202254.4142411-1-arnd@kernel.org>
- <e7ace68a-98e5-63c8-7dd7-a35d0eba1c6e@linaro.org>
-Date:   Sat, 22 Oct 2022 21:48:19 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>,
-        "Arnd Bergmann" <arnd@kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, "Ben Dooks" <ben-linux@fluff.org>,
-        "Simtec Linux Team" <linux@simtec.co.uk>,
-        linux-doc@vger.kernel.org, linux-samsung-soc@vger.kernel.org,
-        devicetree@vger.kernel.org, patches@opensource.cirrus.com,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-pm@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-mtd@lists.infradead.org,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-watchdog@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-pwm@vger.kernel.org
-Subject: Re: [PATCH 00/21] ARM: s3c: clean out obsolete platforms
-Content-Type: text/plain
+        with ESMTP id S229793AbiJWCMl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 22 Oct 2022 22:12:41 -0400
+X-Greylist: delayed 222 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 22 Oct 2022 19:12:39 PDT
+Received: from 014.lax.mailroute.net (014.lax.mailroute.net [199.89.1.17])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5FB97F273
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 19:12:39 -0700 (PDT)
+Received: from 003.lax.mailroute.net (relayout.lax.mailroute.net [199.89.1.119])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by 014.lax.mailroute.net (Postfix) with ESMTPS id 4Mw1pf07Dmz3Gxsr
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Oct 2022 02:08:58 +0000 (UTC)
+Received: from localhost (003.lax.mailroute.net [127.0.0.1])
+        by 003.lax.mailroute.net (Postfix) with ESMTP id 4Mw1pd268Hz1spkm
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Oct 2022 02:08:57 +0000 (UTC)
+X-Virus-Scanned: by MailRoute
+Received: from 003.lax.mailroute.net ([199.89.1.6])
+        by localhost (003.lax [127.0.0.1]) (mroute_mailscanner, port 10026)
+        with LMTP id qMsbIZZgxjjB for <linux-mmc@vger.kernel.org>;
+        Sun, 23 Oct 2022 02:08:56 +0000 (UTC)
+Received: from mail-pg1-f199.google.com (mail-pg1-f199.google.com [209.85.215.199])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by 003.lax.mailroute.net (Postfix) with ESMTPS id 4Mw1pc1PTZz1spkf
+        for <linux-mmc@vger.kernel.org>; Sun, 23 Oct 2022 02:08:56 +0000 (UTC)
+Received: by mail-pg1-f199.google.com with SMTP id x16-20020a63b210000000b0045f5c1e18d0so2958248pge.0
+        for <linux-mmc@vger.kernel.org>; Sat, 22 Oct 2022 19:08:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=sladewatkins.net; s=googled;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=4buRFRGWnnlKIHql0Q3qqpGLkPRxc7dJGxBLjsZx+7k=;
+        b=gHDPNqOQBs68kFLX07Qc8yCj+HUCAxaB2KUMqDN7ASOV8uQ9lPx4i8APW46VkpBG6y
+         jrMT3BGjO3M7bIbA7Igyry5dJaTXwM3w2e+054BMLvtnc2r47Hb1JrV5LIvnilCchuch
+         Ld8U/3+GXwNZjDXn9lq7aB7uSXMrRdXw9zLrfXl3+6w1wsIrql82s2wD6TjqXuAtLck4
+         dgEF1OtrWhs1aLBo2PJsaIp1/oiBRQoKF1eEM1G9Oqx3nsHsBkZ09Ps0Xms435XnSMo4
+         bIrmfgJYwSUefDKoByjxBJRC2XeCs7vyVjujK0BbtzTqgVLX8Eynzh7gcQ98nRg0xTDC
+         jCnw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4buRFRGWnnlKIHql0Q3qqpGLkPRxc7dJGxBLjsZx+7k=;
+        b=KaCEpmWcivkXJqkcYXjvnt0aFtYAw04rmRwiS6BprcvUZQiLstC9p1+tigaDtGim7K
+         N+0KyVNGgfL6yYPnekxE7tk88N2PUT9IwiC0k/G9ulG96O0+qPg2dpn9lhtYwgkPP3Lr
+         UIYCMnzSlKHIFHxrFLXZ3aZMjyLE9ViHMsF/WFFMCEyuG5WYJahmqQJt85og8K7mzBPZ
+         JIitywMxYPiySTMpJ2Ocl3l/1OF+5jUKKhGvSXQ9j0MRkSxE/qZLVop6GPstdITPVDY8
+         QA+h77A59+vRHGWtPdXj6CV10KfGN4Yx9QCinoTFds8LmGifvxwJuDNXVZj+r6gEwfCl
+         XT3Q==
+X-Gm-Message-State: ACrzQf1gTG7B5uYT3H5Pnj4W7+jYnNHsAr8Nv5b1qbIG8C0A/aTKJLW9
+        WwBTsT8lPSrY5XYQSzZ3jljLjqfFCdBBa9fQ6Jy9B7kyxyqHOK0PzA2rhyWICCv1pz1U6wxwyFE
+        Qt4y4mhRX+cWKsUdTy1uJpmhWh3qiRuREj8WCB4XtvBoaKWMGsxM=
+X-Received: by 2002:a17:90b:4b0c:b0:20d:233f:5dea with SMTP id lx12-20020a17090b4b0c00b0020d233f5deamr30474214pjb.241.1666490934611;
+        Sat, 22 Oct 2022 19:08:54 -0700 (PDT)
+X-Google-Smtp-Source: AMsMyM618i2VOUVwKcFjPt4cd8TCwTQ441RgVBvlLk5fztFUDwWKpFQQG4F3JkRMo7mgCqUcHtS4duAgAhoJKaUeWv8=
+X-Received: by 2002:a17:90b:4b0c:b0:20d:233f:5dea with SMTP id
+ lx12-20020a17090b4b0c00b0020d233f5deamr30474187pjb.241.1666490934285; Sat, 22
+ Oct 2022 19:08:54 -0700 (PDT)
+MIME-Version: 1.0
+References: <Y1PydJnbL/9CRFFn@sol.ermione.com>
+In-Reply-To: <Y1PydJnbL/9CRFFn@sol.ermione.com>
+From:   Slade Watkins <srw@sladewatkins.net>
+Date:   Sat, 22 Oct 2022 22:08:43 -0400
+Message-ID: <CA+pv=HNmYsh_y1+so_p=MNePNyV-A-FQ-iX2ivvSWDuyYcPnSQ@mail.gmail.com>
+Subject: Re: mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
+To:     Andrea Baldoni <erm25d019@ermione.com>
+Cc:     Patrick Thompson <ptf@google.com>, linux-kernel@vger.kernel.org,
+        linux-acpi@vger.kernel.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Oct 22, 2022, at 17:18, Krzysztof Kozlowski wrote:
-> On 21/10/2022 16:22, Arnd Bergmann wrote:
->> From: Arnd Bergmann <arnd@arndb.de>
->> 
->> The s3c24xx platform was marked as deprecated a while ago,
->> and for the s3c64xx platform, we marked all except one legacy
->> board file as unused.
->> 
->> This series removes all of those, leaving only s3c64xx support
->> for DT based boots as well as the cragg6410 board file.
->> 
->> About half of the s3c specific drivers were only used on
->> the now removed machines, so these drivers can be retired
->> as well. I can either merge the driver removal patches through
->> the soc tree along with the board file patches, or subsystem
->> maintainers can pick them up into their own trees, whichever
->> they prefer.
+On Sat, Oct 22, 2022 at 8:36 PM Andrea Baldoni <erm25d019@ermione.com> wrote:
 >
-> Just to be sure - do you expect me to ack the series, or rather as usual
-> pick them up?
+> Hello.
+> I am not subscribed to the list so please CC to my address.
+>
+> I recently bought a new ASUS Laptop E210KA-GJ059WS with
+>
+> 00:1a.0 SD Host controller: Intel Corporation Device 4dc4 (rev 01) (prog-if 01)
+>         Subsystem: ASUSTeK Computer Inc. Device 1842
+>         Flags: bus master, fast devsel, latency 0, IRQ 16, IOMMU group 7
+>         Memory at 6001129000 (64-bit, non-prefetchable) [size=4K]
+>         Capabilities: [80] Power Management version 3
+>         Capabilities: [90] Vendor Specific Information: Len=14 <?>
+>         Kernel driver in use: sdhci-pci
+>
+> I tried to install Linux (vanilla kernel 5.19.4) and found that the internal
+> 128GB eMMC SSD was unuseable, unable to make a filesystem on it, dmesg shown
+>
+> mmc0: running CQE recovery
+> and
+> mmc0: cqhci: timeout for tag 0
+> followed by register dump
+>
+> (unfortunately I don't have the exact log now).
+>
+> I found the patch to drivers/mmc/host/sdhci-pci-core.c posted by
+> Patrick Thompson date Thu, 13 Oct 2022 17:00:17 -0400, and applied it,
+> but the only way to make the eMMC work was to disable
+> CQE in its entirety by commenting
 
-I think in this case it is easier if I pick them up with your
-Ack along with the other platforms I posted, as there are
-some minor conflicts between Makefile/Kconfig changes where
-I remove adjacent lines.
+This one I assume?[1]
 
-       Arnd
+>
+> slot->host->mmc->caps2 |= MMC_CAP2_CQE;
+> and
+> slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+>
+> If someone would like me to do any targeted test to be able to solve the
+> issue better, I will be happy to do it.
+>
+> At the moment I am also searching how to get the touchpad to work, I would
+> appreciate any hint and/or a contact with someone who has experience on
+> this.
+>
+> I think the relevant device should be this one, but it doesn't show in
+> /proc/bus/input/devices.
+>
+> P: /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
+> E: DEVPATH=/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
+> E: ID_VENDOR_FROM_DATABASE=Asuscom Network Inc
+> E: MODALIAS=acpi:ASUE1409:PNP0C50:
+> E: SUBSYSTEM=acpi
+> E: USEC_INITIALIZED=10378637
+>
+> Thank you.
+>
+> Best regards,
+> Andrea Baldoni
+
+Also looping in +acpi and mmc lists, +Patrick Thompson here.
+
+[1] https://lore.kernel.org/linux-mmc/20221013210017.3751025-1-ptf@google.com/
+
+Best,
+-srw
