@@ -2,99 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF42CFA373F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 18:36:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 667ECFA3742
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 18:48:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230425AbiJXSgi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 14:36:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35546 "EHLO
+        id S232797AbiJXSsR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 14:48:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40166 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230426AbiJXSgQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 14:36:16 -0400
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68908564F6
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 10:18:08 -0700 (PDT)
-Received: by mail-pl1-x634.google.com with SMTP id d24so9012176pls.4
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 10:18:07 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wQlo3EGPItBuzHrQYdhs7siuCNxgTb6N4tdeGMEYPmg=;
-        b=r6BcM5bPHTx+CZ/xITZDNypxRIKxZAhLLtBF9eGUnGF1EEXcMJBiAEppYxIg5nU974
-         ufMdIzQaInTisbMym8yR1/G79VLjdpTZXN3uqdinOCCypznM3Z3dQz4u9AN2Ckm8o4tS
-         Zb6aXTkzjHnydvU7PL8D6+mUAHNTzOSClsD/kNwrLV6XSFXct/rStsHywYRK0xFhLVPI
-         ACj6e7nZS3MpTO2liPnN7jGztHYLJoY6XmlD3XCwVCDwptwxa0ulyTP6b8PbOPVhzaLv
-         FuPhNbLwOf5alEo2FJ4n2LvpduSHZpqLJeGWohSjzV0KQu+cQg4UP2FZPa7EN55D1k75
-         Xyfw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=wQlo3EGPItBuzHrQYdhs7siuCNxgTb6N4tdeGMEYPmg=;
-        b=3hA3zCRsc8o3QmbDBoGHDIH3F/vkBMeQac0ipP1olfjoGAVUpmeebn1HcuUZ205HTG
-         c4SNFV9JkKwAJ7xvqxo3Il8ogOnE2QgFt65+TWwU4TEmM5PmWkjOapYGq1b+PgS5Sg+7
-         Ll6NKxurDdpBO/cDgKpFnrmOeuaCUVwil9JsbsH60IUZbRfKOGEKBlRrzJnaO5+sU6DR
-         g75/u88gOpq25jy2XkQBNXIRzMTlOkkASUPuM7lLrMgJvQnVUPkqtd1PzeIMzYb+Plrs
-         unvKy8qUXjd6fJxbs8hPd5hZJAEfPYPgST0BxGr9WhCOO/NPgs5+4XAZWpzJrf/zYZJU
-         CGww==
-X-Gm-Message-State: ACrzQf1j0QDGgoA+IGktqqOr1saNkS64nM9zCnv9feRqixsNM4FNrRzN
-        ojhsgUw/EIY7WF2n6yfwcZZgm8XRj6jU6TEluIH+1w==
-X-Google-Smtp-Source: AMsMyM5WBBFAAfIn9WtDfPDuABCV54WS+zJkcHcW88tzTpF+YchV1WG7oz2KmjlVBqKiRg5LDZYniE/BxUHJidZRrJc=
-X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
- mw7-20020a17090b4d0700b001ef521cf051mr77094132pjb.164.1666631783789; Mon, 24
- Oct 2022 10:16:23 -0700 (PDT)
+        with ESMTP id S231582AbiJXSrj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 14:47:39 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 481E33C8D6;
+        Mon, 24 Oct 2022 10:29:05 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 350BB614CA;
+        Mon, 24 Oct 2022 16:43:23 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 495C4C433D7;
+        Mon, 24 Oct 2022 16:43:19 +0000 (UTC)
+Authentication-Results: smtp.kernel.org;
+        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="R/LWqL0H"
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
+        t=1666629797;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=jVwnCaFZdOk86y5jBEGAHVTaPFA8qqxydDorS9HQrxk=;
+        b=R/LWqL0HmERHhgI7BdwcGOaB3Q8XsPIH6B/Gdo3HJUMIuT9hwUE+2aIfUs7T5AhOI79Jt6
+        d8ngYNFZKfkYsUwIv2qdXPqC/aoaC88pmme7vJsjJeVfqbHgYDfmh3RufMLuzpN+0qp8US
+        fVJyhkYuwNudc5bRrrZ+Jls0DQkggGI=
+Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 885087f8 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
+        Mon, 24 Oct 2022 16:43:17 +0000 (UTC)
+Date:   Mon, 24 Oct 2022 18:43:09 +0200
+From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
+To:     Theodore Ts'o <tytso@mit.edu>
+Cc:     Jakub Kicinski <kuba@kernel.org>, linux-kernel@vger.kernel.org,
+        Kees Cook <keescook@chromium.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Catalin Marinas <catalin.marinas@arm.com>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Heiko Carstens <hca@linux.ibm.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        Christoph =?utf-8?Q?B=C3=B6hmwalder?= 
+        <christoph.boehmwalder@linbit.com>,
+        Jani Nikula <jani.nikula@linux.intel.com>,
+        Jason Gunthorpe <jgg@nvidia.com>,
+        Sakari Ailus <sakari.ailus@linux.intel.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Andreas Dilger <adilger.kernel@dilger.ca>,
+        Jaegeuk Kim <jaegeuk@kernel.org>,
+        Richard Weinberger <richard@nod.at>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        SeongJae Park <sj@kernel.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Andrew Morton <akpm@linux-foundation.org>,
+        Michael Ellerman <mpe@ellerman.id.au>,
+        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
+        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
+        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org
+Subject: Re: [PATCH v1 0/5] convert tree to
+ get_random_u32_{below,above,between}()
+Message-ID: <Y1bAnU4pCczkw5j8@zx2c4.com>
+References: <20221022014403.3881893-1-Jason@zx2c4.com>
+ <20221021205522.6b56fd24@kernel.org>
+ <Y1NwJJOIB4gI5G11@zx2c4.com>
+ <20221021223242.05df0a5b@kernel.org>
+ <Y1OD2tdVwQsydSNV@zx2c4.com>
+ <20221021230322.00dd045c@kernel.org>
+ <Y1WtAZfciG1z2CC7@mit.edu>
 MIME-Version: 1.0
-References: <20221020130123.4033218-1-vincent.whitchurch@axis.com>
-In-Reply-To: <20221020130123.4033218-1-vincent.whitchurch@axis.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 24 Oct 2022 19:15:46 +0200
-Message-ID: <CAPDyKFrMHA-AgHbAoFTiGru=JPbWYeggCJFnOCyzRLLg-19Fng@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Fix WRITE_ZEROES CQE handling
-To:     Vincent Whitchurch <vincent.whitchurch@axis.com>
-Cc:     kernel@axis.com, Jon Hunter <jonathanh@nvidia.com>,
-        Avri Altman <Avri.Altman@wdc.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <Y1WtAZfciG1z2CC7@mit.edu>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 20 Oct 2022 at 15:01, Vincent Whitchurch
-<vincent.whitchurch@axis.com> wrote:
->
-> WRITE_ZEROES requests use TRIM, so mark them as needing to be issued
-> synchronously even when a CQE is being used.  Without this,
-> mmc_blk_mq_issue_rq() triggers a WARN_ON_ONCE() and fails the request
-> since we don't have any handling for issuing this asynchronously.
->
-> Fixes: f7b6fc327327 ("mmc: core: Support zeroout using TRIM for eMMC")
-> Reported-by: Jon Hunter <jonathanh@nvidia.com>
-> Tested-by: Jon Hunter <jonathanh@nvidia.com>
-> Signed-off-by: Vincent Whitchurch <vincent.whitchurch@axis.com>
+On Sun, Oct 23, 2022 at 05:07:13PM -0400, Theodore Ts'o wrote:
+> On Fri, Oct 21, 2022 at 11:03:22PM -0700, Jakub Kicinski wrote:
+> > On Sat, 22 Oct 2022 07:47:06 +0200 Jason A. Donenfeld wrote:
+> > > On Fri, Oct 21, 2022 at 10:32:42PM -0700, Jakub Kicinski wrote:
+> > > > But whatever. I mean - hopefully there aren't any conflicts in the ~50
+> > > > networking files you touch. I just wish that people didn't pipe up with
+> > > > the tree wide changes right after the merge window. Feels like the
+> > > > worst possible timing.  
+> > > 
+> > > Oh, if the timing is what makes this especially worrisome, I have
+> > > no qualms about rebasing much later, and reposting this series then.
+> > > I'll do that.
+> > 
+> > Cool, thanks! I promise to not be grumpy if you repost around rc6 :)
+> 
+> One way of making things less painful for the stable branch and for
+> the upstream branch is to *add* new helpers instead of playing
+> replacement games like s/prandom_u32_max/get_random_u32_below/.  This
+> is what causes the patch conflict problems.
+> 
+> One advantage of at least adding the new functions to the stable
+> branches, even if we don't do the wholesale replacement, is that it
 
-Applied for fixes and by adding a stable tag, thanks!
+That's a good idea. I'll also save the removal commit, anyhow, for a
+separate thing at the end of 6.2 rc1, so that -next doesn't have issues
+either.  That's how things wound up going down for the first tranche of
+these, and that worked well.
 
-Kind regards
-Uffe
-
-> ---
->  drivers/mmc/core/queue.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-> index fefaa901b50f..3661ba0bbc87 100644
-> --- a/drivers/mmc/core/queue.c
-> +++ b/drivers/mmc/core/queue.c
-> @@ -48,6 +48,7 @@ static enum mmc_issue_type mmc_cqe_issue_type(struct mmc_host *host,
->         case REQ_OP_DRV_OUT:
->         case REQ_OP_DISCARD:
->         case REQ_OP_SECURE_ERASE:
-> +       case REQ_OP_WRITE_ZEROES:
->                 return MMC_ISSUE_SYNC;
->         case REQ_OP_FLUSH:
->                 return mmc_cqe_can_dcmd(host) ? MMC_ISSUE_DCMD : MMC_ISSUE_SYNC;
-> --
-> 2.28.0
->
+Jason
