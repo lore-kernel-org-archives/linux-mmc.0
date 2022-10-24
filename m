@@ -2,169 +2,144 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92C88FA3742
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 18:03:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35D7BFA373F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 18:10:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232375AbiJXSDj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 14:03:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41486 "EHLO
+        id S230175AbiJXSKC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 14:10:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55582 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231778AbiJXSDA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 14:03:00 -0400
-Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on20629.outbound.protection.outlook.com [IPv6:2a01:111:f400:7e8a::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 202A81EAEA;
-        Mon, 24 Oct 2022 09:43:48 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ICDCvE1cGkaXDQ9dNdHygCGl4wXrKwHA0jssd1Q+yj9q9rko3Xdq3hK8c+NnDEw80iFQto06X96PtoqyEvChaUtzx4hY4VjvYJVoqMVnc4TqIU6c0Wl6+pMJFmX9eQUf9kslVG/Oqj06MJwZm/jW0FAyWmsiPSnuYW0G+x88AjzTrz5+V/owsC9OjsTUNjPw0OBS9RI8JPyG3THCMuIAyxLWiWLDoDwGY85Z2dBm+WgXevnwzARYHI1nbrnGjO7mBZjhmp635XJXnPkKAYLWo0+N6WqXs4ekOtYjMM5nR2movnDgpkewiV2lspqgtmAvCV0uTRZd7QL/K3W8qyIOGQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=k55sh9OjiE0ha8dqN/6u+9zcSFi0E1S4KdYJWOmTGq8=;
- b=k1paNC2UDXZMoacm7GoSMrLfWXRPnBrZO5Q4Jk3t165ZzZtKli8L+lv9l5QWkdcms59XwAC5VlnukykOwWUFbzke1CkP0XeC9yqDIbgV0qtlupU1tjqHOaaDugRvHTi9Z+KecqkSj7Hp8FbBYaRZGyW2HnXgRpgylPfVJvc0FvEioYtoWKCursbETUrCfkhwkJZGDJeryfCu9i4IN0xQypz2kWexGpZOV7c8sCtxw4WDs17nF4KdaCFUf2uMOJruQxrraK+tX/2ufj9TVwE2fPKn5bzlU4dbigndJOdnRA6hw/DT3Q6dIOcu9Z/YD88IzLftPixXU1z0xTOath/fGQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nvidia.com; dmarc=pass action=none header.from=nvidia.com;
- dkim=pass header.d=nvidia.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=k55sh9OjiE0ha8dqN/6u+9zcSFi0E1S4KdYJWOmTGq8=;
- b=kjj/r5Ny18+6u+JodYtWt44+A382Ma2Tku8hOID+C4vwVY7XqI7GVjiFyQ7qZKLPyR/fgT7fRQrsiN8M96MHIwfsINw1ue0f7OZ+8vBgHm4XpdYJBNoPt41bAxcYoVXrdtboiz5D9NLgnw2wnEMdQRn9UEGJY9PUy5Ejlm0Z7tvo2uzX0xObF+FGnGy9bsvhHy5VsCkzq6pU+1xOaXkf1FfMxfmMHCDYhzqDHbHAhshL1g7y9Ioo50uSD/rCK9IRHRyGm0s9P5p1vk9UGQoEdDtRiiqCfehbLFxvjaViN+W8jPgyAL+byR08oCcerfYBfOibHAO5NBYFrT0tfsJ9mQ==
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nvidia.com;
-Received: from LV2PR12MB5869.namprd12.prod.outlook.com (2603:10b6:408:176::16)
- by MN2PR12MB4238.namprd12.prod.outlook.com (2603:10b6:208:199::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5746.23; Mon, 24 Oct
- 2022 16:37:13 +0000
-Received: from LV2PR12MB5869.namprd12.prod.outlook.com
- ([fe80::7a81:a4e4:bb9c:d1de]) by LV2PR12MB5869.namprd12.prod.outlook.com
- ([fe80::7a81:a4e4:bb9c:d1de%6]) with mapi id 15.20.5746.021; Mon, 24 Oct 2022
- 16:37:13 +0000
-Date:   Mon, 24 Oct 2022 13:37:12 -0300
-From:   Jason Gunthorpe <jgg@nvidia.com>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     linux-kernel@vger.kernel.org, Kees Cook <keescook@chromium.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Christoph =?utf-8?Q?B=C3=B6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>,
-        Jani Nikula <jani.nikula@linux.intel.com>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Richard Weinberger <richard@nod.at>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        SeongJae Park <sj@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org
-Subject: Re: [PATCH v1 0/5] convert tree to
- get_random_u32_{below,above,between}()
-Message-ID: <Y1a/OAJdW+dERHiR@nvidia.com>
-References: <20221022014403.3881893-1-Jason@zx2c4.com>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221022014403.3881893-1-Jason@zx2c4.com>
-X-ClientProxiedBy: MN2PR01CA0009.prod.exchangelabs.com (2603:10b6:208:10c::22)
- To LV2PR12MB5869.namprd12.prod.outlook.com (2603:10b6:408:176::16)
+        with ESMTP id S233516AbiJXSJX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 14:09:23 -0400
+Received: from mail-qt1-x82a.google.com (mail-qt1-x82a.google.com [IPv6:2607:f8b0:4864:20::82a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EB801C20A3
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 09:51:18 -0700 (PDT)
+Received: by mail-qt1-x82a.google.com with SMTP id f22so5953631qto.3
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 09:51:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=IUL2O9wbBAu6ztSDG3ElgZvx99nzcRnOeYgEYBuGPRA=;
+        b=EEmIXtqXupNZGMQusrGu9cSwDxciaaGSv2LhhL0tX6byMmK28IsBk8c6ClWRq6lYkA
+         5+dolwExw1XyN7N2ZUnUo6goPkhL7uOXaTIp+47CzWhPnD5qROzOOFZav4k7YHRwqMEH
+         FUMPtqxOPxGTW4BVMVkUU5EW2Xr8k2N+TpV67Fm2aVZNsQK2YGa5ARYpVK2ZvjpFSstW
+         5LGsb9+H93HpawF9AoNVTC4rjX5VhkPFm7zaO/rvKQjhCs45phjNvhnsoAZmagQcq/C/
+         HnRdp7bCxBKgaIB0yVFB18J5KwAXnMljceuUkDgw1IMXcatnvOp8r7QAReZIeerM+SnW
+         dxVQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=IUL2O9wbBAu6ztSDG3ElgZvx99nzcRnOeYgEYBuGPRA=;
+        b=pAMSFFglsjxBGd1/nqr0/wGViFJ1MdB1MbMEFgWBqDLyaXC3a+/UjrrGChE/lDvmP/
+         K/OkRrW/dTaRS6h2WYRoyIi4QqKpgZ7+P1kAIdvF5nMxJddazv0AY/eB91htLXlXiTX4
+         goM3S+pF41oQMEu3zfXNGLusKt4d/rpCpIB/zJn3DFfFx2j5N1vb5g+Zn5jjbrG4vf/E
+         7+qtjBvuqsLY7Jilye1gh8uZDM8yF7nJu9NaTz/K/wF4bqjgVP3QwjGDOQAwFIRDMAlG
+         VhIChkUZWrHFGSBXItkvTb1lwD3TVNJvdC4+ZTFKGcW/XpDO4TaX6veiV83YkAu4Ne7G
+         RCjw==
+X-Gm-Message-State: ACrzQf2y56w970IDnmQupfM0FVeCSY5TTJK6sXKiDGD6p1fmiV7p/ySG
+        aG7DfR0AB9/YKiKPWeuSTvaxkg==
+X-Google-Smtp-Source: AMsMyM57TE1ja12+inLNwlTcq5BSzAd/+4nM91OaJJGzUPwVHrd3YNRlGWdmd5z78YjGbtZPGpbilw==
+X-Received: by 2002:ac8:5c11:0:b0:39c:fd77:336d with SMTP id i17-20020ac85c11000000b0039cfd77336dmr24199445qti.479.1666630114992;
+        Mon, 24 Oct 2022 09:48:34 -0700 (PDT)
+Received: from [192.168.1.8] ([64.57.193.93])
+        by smtp.gmail.com with ESMTPSA id q8-20020a37f708000000b006ce0733caebsm279848qkj.14.2022.10.24.09.48.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 24 Oct 2022 09:48:34 -0700 (PDT)
+Message-ID: <0b9d7768-3f30-c084-9a14-f439cd49d643@linaro.org>
+Date:   Mon, 24 Oct 2022 12:48:32 -0400
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: LV2PR12MB5869:EE_|MN2PR12MB4238:EE_
-X-MS-Office365-Filtering-Correlation-Id: 0fec61a3-506b-441f-0275-08dab5de00ff
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: EKf80sMrg5IUycWDwhzQGsqhRuRUNEo7co2x6wOatZpaB8t5SUjUHbjAzEr6sRorBvJGsd0/tcT09UpbrAJwcfNhYs/Jg5UoK3Jjoql0TRL1veT7dcI0rexcOtjQYU3c/PD586SfWLxsB8Qu4nrKs+amImQbAeOUnBw/xvaeBbsp819ObeGXW7RI8M5GCpbHipLB+bcZ2n7vo6ylspnISqWqRSjnnLcfbdirJAvcAWn1ijXq6fDiyGByuG31c/K3EBhQXKsv0PaaXjpw6WEimArqnEB4l5DezcFtAt1IHo9N2KF2UkNO7sE9JqcSt4KYZ0kKCslN4fmsF7a8PwpGRZ9gVxDLM7CeqF/JUdTgZcNjtNGogOtecNmLyHwXVD3Ds0lFHcSvpaSHe0XgkhK1MWz4ccGI4dC+r884Rl+W2TJVObYMgqkzkLoXCHJhQXY97m1ikA4hgZs0qvEgSPOUk8Flujc8ZakU95c0DL5zpCoSvqTvSHZEnJPlTYkGrelVPhoLhmLmMA2cr9tSlWcDfkAwBt2sxC09sjlXvRsx9sk502zBfEPjQe4hBEWImrRmfPTjdNKhMhbMXKZi+1sUpv4FTF/0F+TpkkUjJOXmAn2AIEGCDpfvxRSpcm6+V4wuVkaDazIw9R91Y8i0S3a3xNJ2wAD/SH4xrwI4lBKgw/000+OmPzXYst4AReTcXzGFIOGbziklkPp1hdsq1ntvJQ==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:LV2PR12MB5869.namprd12.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(39860400002)(376002)(346002)(136003)(396003)(366004)(451199015)(6486002)(478600001)(54906003)(316002)(7406005)(7416002)(66946007)(66556008)(66476007)(6506007)(8676002)(4326008)(41300700001)(6916009)(5660300002)(8936002)(26005)(36756003)(6512007)(38100700002)(83380400001)(2906002)(2616005)(186003)(86362001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?zV0ZvoIw8ElUdZSnE+53L7/s2Lw9Z0tCRY0pU4bjiONBEzMp//3qKb0bLgnT?=
- =?us-ascii?Q?luu646/cUA9wc8DJrSUGSGSkQB26guhodVON6cVMCUvYlPRSW4x+OrHc/AxZ?=
- =?us-ascii?Q?oNsxW+M+ZMFX9queecYkKl+Ho63dc2uIgb69s8faH+iDEyhnjNwZbp8QGI2z?=
- =?us-ascii?Q?WgAqd631DcIyDFUXxhewccmoWHUSxDdi1Z+NOprNHh56Hmccktkqu3K6LWBx?=
- =?us-ascii?Q?+35gJGUx0jrdX7omox7zE1Xtz5AarWKcQaVPV7qVLlBYX9c5P0y6QF/nao3N?=
- =?us-ascii?Q?BnP3pESNyEYS0FLK1l2XQ56MX2od6gRR7X3Fm4dZ10f2KLq1zTtuc61j4DV0?=
- =?us-ascii?Q?r7uf6ibUMK6KzxVlT4D3KLyOU925+dYqAsAOMOJoJ0yKqF4NHNJX+iN3fYD+?=
- =?us-ascii?Q?v/46CX0UTN9qbIs56xryLjUUtuJ4vNBdyxehJQ3msa70AyJTiE1sz+oEZYPV?=
- =?us-ascii?Q?b59iLoLm/BJkK4CBoKWP9/m1sWdPlHm4wA8zbLJ3ozQGAeDfoTZLEDnDre8b?=
- =?us-ascii?Q?CP3hwpxXpNd72XfNV0nMNyuSprnMyNCz8Ohi82MTNRoZMEUwsQiLqDeHGHuY?=
- =?us-ascii?Q?Jv4Ej/l3j2LVb8sFkoIQFvr45H7/SxqCd9PbkMiWx+p5/0yXk2seEYWRpA0M?=
- =?us-ascii?Q?ymi6OQ2p7MGVsyzLULIzz88eZT6UL8sQQIL3t5uGQZRwbhVWEUd7BG4LLDtw?=
- =?us-ascii?Q?SHn8bqfc163LfRlRmaveJCPELg0Au+5kM5Ux9zdU+80DYqSqbq6lTQPSY2BS?=
- =?us-ascii?Q?QV03v8PYp0RIbmagf5svpXc5w8UyWvXjPzC03jKKRnxCFHq7zDqSeMo85j62?=
- =?us-ascii?Q?vDMafIvempx1LImdNG+k6axHCPNkmdg3DB1FOprpdrFVgixQaPKd+L2LaKoY?=
- =?us-ascii?Q?pjqSHVnI1N/yST1NU4ZFh2BJ2yyqzzjSyGqj1blCMSzhlSlRJ3jf4uUCLGjK?=
- =?us-ascii?Q?x4wTgxuaG3fFRIRu/eSONbfIm84e8MXCt7sLfdvhQe10hk5Y5YT5gH81iPht?=
- =?us-ascii?Q?pmXR9NgmWM1Qglk2IqHrWyZvxpHqNWBvwA0CFYq9FIw/T9UvyLi447sXp0Fh?=
- =?us-ascii?Q?b/bIpp5pd+n4crt+I95W4IHQh6JsJz2EMyKKdrgUaJSlYWwIJbAOtpVCbwtt?=
- =?us-ascii?Q?NsMsCcHOLciSOTGO9tnG7k+JncjFoxOzCVPN8Vj7xa05uiEv9DML2obLP4Om?=
- =?us-ascii?Q?aNyrOjBMv3zOWG2Wb95mppM1PTQLvsf5DNN6+71IUwwPknrG+FdlrDKVimTh?=
- =?us-ascii?Q?JMb+HrGacxL3LV/0gjxOLL4xxKbn3GaYUYrIMoa4Ue+/Q6YAFPDJu1FdVcjo?=
- =?us-ascii?Q?ExfLabg1a/zAkF9Jexm/xdjR4ksawnbO6kvQKUqSQG0RpdktHcyd639dXpMf?=
- =?us-ascii?Q?LL3A0FFsCUXAhaCcQUYtIZ2oSzbyI6tt4yqq8SNDFbKx7AKKhk+6moaEx1E+?=
- =?us-ascii?Q?zWC7/maV8irSk1XSAVhM4XjpUu8WrZNwCo17MZlXrE6Kf4nSlQ00CQe2Rz5/?=
- =?us-ascii?Q?VyvZa1RqT/m42NrbvbnR17eddDyaXxk5KEbu37rw1QWQYgb/Gzfcj+wkGu4r?=
- =?us-ascii?Q?FAa7n4+VgqzXYzfguXg=3D?=
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 0fec61a3-506b-441f-0275-08dab5de00ff
-X-MS-Exchange-CrossTenant-AuthSource: LV2PR12MB5869.namprd12.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Oct 2022 16:37:13.3550
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: M08JolLSTvc/mpUbbK/5pFVHM/zVSM/eOfwLc7op140A/TyaKEMEkxMK7/WMGLcq
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4238
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.0
+Subject: Re: Aw: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
+Content-Language: en-US
+To:     Frank Wunderlich <frank-w@public-files.de>
+Cc:     Frank Wunderlich <linux@fw-web.de>,
+        linux-mediatek@lists.infradead.org,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20221023091247.70586-1-linux@fw-web.de>
+ <20221023091247.70586-4-linux@fw-web.de>
+ <a0121e0a-9f62-8630-45c5-d32eaa91d46f@linaro.org>
+ <trinity-95441a68-0025-49de-8c73-9730fb9cec42-1666623320110@3c-app-gmx-bap55>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <trinity-95441a68-0025-49de-8c73-9730fb9cec42-1666623320110@3c-app-gmx-bap55>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 21, 2022 at 09:43:58PM -0400, Jason A. Donenfeld wrote:
-> Hey everyone,
+On 24/10/2022 10:55, Frank Wunderlich wrote:
+> Hi
 > 
-> Here's the second and final tranche of tree-wide conversions to get
-> random integer handling a bit tamer. It's predominantly another
-> Coccinelle-based patchset.
+>> Gesendet: Sonntag, 23. Oktober 2022 um 14:56 Uhr
+>> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
+>> An: "Frank Wunderlich" <linux@fw-web.de>, linux-mediatek@lists.infradead.org
+>> Cc: "Frank Wunderlich" <frank-w@public-files.de>, "Chaotian Jing" <chaotian.jing@mediatek.com>, "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herring" <robh+dt@kernel.org>, "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>, "Matthias Brugger" <matthias.bgg@gmail.com>, "Wenbin Mei" <wenbin.mei@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+>> Betreff: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
+>>
+>> On 23/10/2022 05:12, Frank Wunderlich wrote:
+>>> From: Frank Wunderlich <frank-w@public-files.de>
+>>>
+>>> Add SoC specific section for defining clock configuration.
+>>>
+>>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+>>
+>>
+>> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 > 
-> First we s/prandom_u32_max/get_random_u32_below/, since the former is
-> just a deprecated alias for the latter. Then in the next commit we can
-> remove prandom_u32_max all together. I'm quite happy about finally being
-> able to do that. It means that prandom.h is now only for deterministic and 
-> repeatable randomness, not non-deterministic/cryptographic randomness.
-> That line is no longer blurred.
+> Hi,
 > 
-> Then, in order to clean up a bunch of inefficient patterns, we introduce
-> two trivial static inline helper functions built on top of
-> get_random_u32_below: get_random_u32_above and get_random_u32_between.
-> These are pretty straight forward to use and understand. Then the final
-> two patches convert some gnarly open-coded number juggling to use these
-> helpers.
+> got another config from mtk which requires changing binding a bit
 > 
-> I've used Coccinelle for all the treewide patches, so hopefully review
-> is rather uneventful. I didn't accept all of the changes that Coccinelle
-> proposed, though, as these tend to be somewhat context-specific. I erred
-> on the side of just going with the most obvious cases, at least this
-> time through. And then we can address more complicated cases through
-> actual maintainer trees.
+>                        clocks = <&topckgen CLK_TOP_EMMC_416M_SEL>,
+>                                 <&infracfg CLK_INFRA_MSDC_HCK_CK>,
+>                                 <&infracfg CLK_INFRA_MSDC_CK>,
+>                                 <&infracfg CLK_INFRA_MSDC_133M_CK>,
+>                                  <&infracfg CLK_INFRA_MSDC_66M_CK>;
+>                        clock-names = "source", "hclk", "source_cg", "bus_clk",
+>                                      "sys_cg";
+> in binding:
 > 
-> Since get_random_u32_below() sits in my random.git tree, these patches
-> too will flow through that same tree.
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> @@ -241,15 +241,17 @@ allOf:
+>            items:
+>              - description: source clock
+>              - description: HCLK which used for host
+> -            - description: AXI bus clock gate
+> -            - description: AHB bus clock gate
+> +            - description: independent source clock gate
+> +            - description: bus clock used for internal register access (required for MSDC0/3).
+> +            - description: msdc subsys clock gate
+>          clock-names:
+>            minItems: 3
+>            items:
+>              - const: source
+>              - const: hclk
+> -            - const: axi_cg
+> -            - const: ahb_cg
+> +            - const: "source_cg"
+> +            - const: "bus_clk"
+> +            - const: "sys_cg"
 > 
-For drivers/infiniband
+> will send an updated v4...old version was working but i should use the new one.
+> 
+> @Krzysztof can i take your RB here or should i leave it as Patch was changed?
 
-Reviewed-by: Jason Gunthorpe <jgg@nvidia.com>
+Please drop my tag, so I will re-review it.
 
-Jason
+Thanks!
+
+Best regards,
+Krzysztof
+
