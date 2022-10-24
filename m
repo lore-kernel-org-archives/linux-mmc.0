@@ -2,116 +2,148 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F2BA7FA3748
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 14:30:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3101FA373F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 17:23:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236212AbiJXOag (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 10:30:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56216 "EHLO
+        id S231939AbiJXRXs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 13:23:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40890 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234904AbiJXO2v (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 10:28:51 -0400
-Received: from mail-oa1-f42.google.com (mail-oa1-f42.google.com [209.85.160.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2ED92D73C2;
-        Mon, 24 Oct 2022 06:02:17 -0700 (PDT)
-Received: by mail-oa1-f42.google.com with SMTP id 586e51a60fabf-13b23e29e36so10999254fac.8;
-        Mon, 24 Oct 2022 06:02:16 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=p+x9joGdXdBFLPPxN1p6d7/jrm+b1E7zu0ZikUl9XbM=;
-        b=kN4xIs/QEGJ+oT9qrn2OjPi/N6FcvGH6BvACP76blbVF103TXYi+7qEU5tINWQ+OJz
-         dApYzrcvxoO2ZIXOFTxb7h3JgOvX67e53Ux9I2wwMvKPIJrbpeDZZobSiNgXQhwqMaF/
-         R3ztR06WTPRqxKei/NzyOWyK9tZuNZ0Cm15uInIPmFb7tUxRSre+3lm52uo1EfezpHK9
-         o9VNCRaweqKifLKL/48NiILy3trNo3072uYGiXhEVisoQwGcZ30ghYt4hAv1vlMBiN/X
-         ltLvQXpHTYGfKkWtuOvorD19U4Zbzkwzp6qZaLG5THbYH133b9fRVRaPubb8xH2WHVbL
-         oPdg==
-X-Gm-Message-State: ACrzQf3i7XkzH7UpZj1xKGIMrADeoCGwSUDmJj0hXhqGuTa4oC2Svjr2
-        vms3XoPp+qtUCiVrBxssV68CXNLJaw==
-X-Google-Smtp-Source: AMsMyM4RB1x55W7tWXLqKMCfn9+yNGKoyP28eeDXqoWuK46CSg7FurAIxSSG6961lNUtLuCZU2W88g==
-X-Received: by 2002:a05:6870:e9a8:b0:133:223f:49a1 with SMTP id r40-20020a056870e9a800b00133223f49a1mr38235091oao.114.1666616434841;
-        Mon, 24 Oct 2022 06:00:34 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g20-20020a056870c15400b0012796e8033dsm2716705oad.57.2022.10.24.06.00.33
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 24 Oct 2022 06:00:34 -0700 (PDT)
-Received: (nullmailer pid 1652638 invoked by uid 1000);
-        Mon, 24 Oct 2022 13:00:35 -0000
-Date:   Mon, 24 Oct 2022 08:00:35 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
-        Simtec Linux Team <linux@simtec.co.uk>,
-        Arnd Bergmann <arnd@arndb.de>, linux-doc@vger.kernel.org,
-        linux-samsung-soc@vger.kernel.org, devicetree@vger.kernel.org,
-        patches@opensource.cirrus.com,
-        linux-stm32@st-md-mailman.stormreply.com,
-        linux-ide@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-pm@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-hwmon@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org,
-        linux-spi@vger.kernel.org, linux-serial@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-fbdev@vger.kernel.org,
-        dri-devel@lists.freedesktop.org, linux-watchdog@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-pwm@vger.kernel.org
-Subject: Re: [PATCH 00/21] ARM: s3c: clean out obsolete platforms
-Message-ID: <20221024130035.GA1645003-robh@kernel.org>
-References: <20221021202254.4142411-1-arnd@kernel.org>
+        with ESMTP id S231960AbiJXRXR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 13:23:17 -0400
+Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF7DF9DDA7;
+        Mon, 24 Oct 2022 08:58:39 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1666626968;
+        bh=38vTFzrZKf3FVvekYXAM+9K/QQ7KdRjbBzJUpJt6VgA=;
+        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
+        b=GHipPWegnSsSMUsQisbWiaRtJD9PHUgzMX2cbNuQPrEQxKEzWbrdXUdzHyma2Dv2b
+         lEGOzp2Up1OONWonVr9MTVaXE4qCMKKc3S3XChw9B4SHAQcQmx2pEh4Vy7qgOJR7nA
+         3vXxV9MFrxQEs+UnHgKVrkZFaL4UD2NIYQOLnef8=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [80.245.75.40] ([80.245.75.40]) by web-mail.gmx.net
+ (3c-app-gmx-bap55.server.lan [172.19.172.125]) (via HTTP); Mon, 24 Oct 2022
+ 16:55:20 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221021202254.4142411-1-arnd@kernel.org>
+Message-ID: <trinity-95441a68-0025-49de-8c73-9730fb9cec42-1666623320110@3c-app-gmx-bap55>
+From:   Frank Wunderlich <frank-w@public-files.de>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Frank Wunderlich <linux@fw-web.de>,
+        linux-mediatek@lists.infradead.org,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Aw: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
+Content-Type: text/plain; charset=UTF-8
+Date:   Mon, 24 Oct 2022 16:55:20 +0200
+Importance: normal
+Sensitivity: Normal
+In-Reply-To: <a0121e0a-9f62-8630-45c5-d32eaa91d46f@linaro.org>
+References: <20221023091247.70586-1-linux@fw-web.de>
+ <20221023091247.70586-4-linux@fw-web.de>
+ <a0121e0a-9f62-8630-45c5-d32eaa91d46f@linaro.org>
+X-UI-Message-Type: mail
+X-Priority: 3
+X-Provags-ID: V03:K1:IcIPaVgbRpByh7zwpXh4z9zY0VuCVJ0BaE6por2d9gpyO8zxW3t1fgd81QSE28VxLcD1u
+ HkBl2H0ZLbUdRlcLxl9izmQuyB026eQFlnKdge9hDQBmNNJnN8hcAkNsaGap/6Ipdg280JwgdDsv
+ z0t7GEoaowPjoBCs4a4gZcMVfxgSeFNFJukhgYCAxPgYN1LH4nZyf2rnyPbMZ6c6aSjVCcSVlIC/
+ qeP+pr3BIEib7wR8/YVe/RFL/biv5BgnYFn/FDdVNvwui01qtL3tn/LD6zhyh13fQLNf0LEYBhQ4
+ VA=
+X-UI-Out-Filterresults: notjunk:1;V03:K0:ARJ9dboFzH4=:xEplBRIg61P9GDoxzDcos4
+ nyw8DtuIVlBW56G4hBBvxf8ZvCqTTuYFbALZIIOegC4rIrSywPAUk2oi9XzD5jzvbvF5Jratn
+ 22/DW+q1ZmGyCBP70hCDbVwPTmdKbcOYCtPxYNKqKGFtyFVa5hQvtwI6Va7ZnZCXlRd1UbTvg
+ PBdsHNvJH+3+l+89Y6A1dyKi29z4DSnpEAF0w8GbuLuJzDDYILP3R3jT8QBF57J++5YR2wZrs
+ DGzKdKUP3jYC3JZONj1a/+jJfavdO4MNLGQmzpCJs01j9WO5JmEXdo425xhZVEppauE1bXhzY
+ LL26KEyB/SjURdt8ZNzKIqx+vkbtc2OrdB3VmNBC1gYMdTAzy9HPofA5s4gORgXnQJPKruF+z
+ xZECcyg6BscsbsvOs7gMcJfavs+43hGhPPl0WFTzK2ZymnOKNcJOZxe4sZYljW1smrlRhygO9
+ BbysSr3Ge9qKAoviOEfQadA+xHw1+zPVA3mD8EyfJkn9LuelS6Z49AWnnsDr3uoEoQ41B7uFW
+ RT5Q3Z8DYjCdNVz2ctpcu4U+8sZIIvC+jRQkusRg4lbqdexAqXFTznlzhi50v3ium78+8U1UU
+ /BFSP3xx7/uz/Tujift/rdM4BUCRA3m8NLjT5Q3LtzW44akTh4Ijcgp8Cpjf0qlO/6wZznoD7
+ CRdssc0DROYejVlLG9WOnk1vEN1ggxOwvbxyb6VufeSHSAsy/r3M0w7r2jxFiXM07Fzy8XGyv
+ /lMTMxKhsu30p/4ixzIz0K98xH+tgMhHdIamSHe7Jdnq2F49iqjKXPvgRwVNA6D4N8pSU+Pel
+ JvGrpNls3T3KdszmaiOPB5ghHQWYIVmGXmp+N57GHBXNFDaLOuK6Oaa30M04ddNJQ0NA+Ro81
+ 7Hu1Ys7FNc/qCoYEuOA6IQvgASLonGDLCILvH2zLFcJGOHgRw6edLcDiYHkfrPK9ALF/IgYVr
+ pgRCKVV6TZ30RG+Z4Ilce0NbMqmDwDR+lhC51W+AYKj/DWH3FY3hsPJTBjd04xZ1wtU55F2qN
+ KG3LKUroZxbs1nvA3XgI/3TWbYBotyev3FQssH5WW6FWj+vbVWP4ymMW1CHrDHSjCnawita6Y
+ rKdtv9b4DjbiHwSHXLH/KyRLtYmrkU900Zj2c+W6cpc7n7UW44lryvDt/UmsRQZLo6YQz3pWw
+ DuFb3hCofEJvRjDTWePTqpTYiAg9b13QhJDo18HaQLEDZLr9aFD3xsna79IWrtGXMdtG0p3J3
+ ENF6+RoLG3zhviIOjx++hg3TB0XOFCl2mziFxPQ4tb9WC/eUuBYxVxLg8YU6esLRPyZ2GTHTo
+ Z0ZU/dMX
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Oct 21, 2022 at 10:22:28PM +0200, Arnd Bergmann wrote:
-> From: Arnd Bergmann <arnd@arndb.de>
-> 
-> The s3c24xx platform was marked as deprecated a while ago,
-> and for the s3c64xx platform, we marked all except one legacy
-> board file as unused.
-> 
-> This series removes all of those, leaving only s3c64xx support
-> for DT based boots as well as the cragg6410 board file.
-> 
-> About half of the s3c specific drivers were only used on
-> the now removed machines, so these drivers can be retired
-> as well. I can either merge the driver removal patches through
-> the soc tree along with the board file patches, or subsystem
-> maintainers can pick them up into their own trees, whichever
-> they prefer.
+Hi
 
-[...]
+> Gesendet: Sonntag, 23. Oktober 2022 um 14:56 Uhr
+> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
+> An: "Frank Wunderlich" <linux@fw-web.de>, linux-mediatek@lists.infradead=
+.org
+> Cc: "Frank Wunderlich" <frank-w@public-files.de>, "Chaotian Jing" <chaot=
+ian.jing@mediatek.com>, "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herri=
+ng" <robh+dt@kernel.org>, "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@li=
+naro.org>, "Matthias Brugger" <matthias.bgg@gmail.com>, "Wenbin Mei" <wenb=
+in.mei@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.or=
+g, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+> Betreff: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
+>
+> On 23/10/2022 05:12, Frank Wunderlich wrote:
+> > From: Frank Wunderlich <frank-w@public-files.de>
+> >
+> > Add SoC specific section for defining clock configuration.
+> >
+> > Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+>
+>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
->  Documentation/arm/index.rst                   |    1 -
->  Documentation/arm/samsung-s3c24xx/cpufreq.rst |   77 -
->  .../arm/samsung-s3c24xx/eb2410itx.rst         |   59 -
->  Documentation/arm/samsung-s3c24xx/gpio.rst    |  172 --
->  Documentation/arm/samsung-s3c24xx/h1940.rst   |   41 -
->  Documentation/arm/samsung-s3c24xx/index.rst   |   20 -
->  Documentation/arm/samsung-s3c24xx/nand.rst    |   30 -
->  .../arm/samsung-s3c24xx/overview.rst          |  311 ---
->  Documentation/arm/samsung-s3c24xx/s3c2412.rst |  121 -
->  Documentation/arm/samsung-s3c24xx/s3c2413.rst |   22 -
->  .../arm/samsung-s3c24xx/smdk2440.rst          |   57 -
->  Documentation/arm/samsung-s3c24xx/suspend.rst |  137 --
->  .../arm/samsung-s3c24xx/usb-host.rst          |   91 -
->  Documentation/arm/samsung/overview.rst        |   13 -
+Hi,
 
-What about?:
+got another config from mtk which requires changing binding a bit
 
-Documentation/devicetree/bindings/clock/samsung,s3c2410-clock.txt
-Documentation/devicetree/bindings/interrupt-controller/samsung,s3c24xx-irq.txt
-Documentation/devicetree/bindings/mmc/samsung,s3cmci.txt
-Documentation/devicetree/bindings/mtd/samsung-s3c2410.txt
-Documentation/devicetree/bindings/usb/s3c2410-usb.txt
+                       clocks =3D <&topckgen CLK_TOP_EMMC_416M_SEL>,
+                                <&infracfg CLK_INFRA_MSDC_HCK_CK>,
+                                <&infracfg CLK_INFRA_MSDC_CK>,
+                                <&infracfg CLK_INFRA_MSDC_133M_CK>,
+                                 <&infracfg CLK_INFRA_MSDC_66M_CK>;
+                       clock-names =3D "source", "hclk", "source_cg", "bus=
+_clk",
+                                     "sys_cg";
+in binding:
 
-Rob
++++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+@@ -241,15 +241,17 @@ allOf:
+           items:
+             - description: source clock
+             - description: HCLK which used for host
+-            - description: AXI bus clock gate
+-            - description: AHB bus clock gate
++            - description: independent source clock gate
++            - description: bus clock used for internal register access (r=
+equired for MSDC0/3).
++            - description: msdc subsys clock gate
+         clock-names:
+           minItems: 3
+           items:
+             - const: source
+             - const: hclk
+-            - const: axi_cg
+-            - const: ahb_cg
++            - const: "source_cg"
++            - const: "bus_clk"
++            - const: "sys_cg"
+
+will send an updated v4...old version was working but i should use the new=
+ one.
+
+@Krzysztof can i take your RB here or should i leave it as Patch was chang=
+ed?
+
+regards Frank
