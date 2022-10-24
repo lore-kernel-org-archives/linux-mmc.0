@@ -2,94 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2D09C67871
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 19:33:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C4D0DFA3740
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 19:36:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230006AbiJXTdz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 15:33:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60654 "EHLO
+        id S233364AbiJXTgb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 15:36:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43356 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233185AbiJXTdk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 15:33:40 -0400
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61DF483F0B
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 11:04:22 -0700 (PDT)
-Received: by mail-pj1-x1033.google.com with SMTP id h14so8673329pjv.4
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 11:04:22 -0700 (PDT)
+        with ESMTP id S233375AbiJXTgC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 15:36:02 -0400
+Received: from mail-qk1-x731.google.com (mail-qk1-x731.google.com [IPv6:2607:f8b0:4864:20::731])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB1AB20B109;
+        Mon, 24 Oct 2022 11:06:38 -0700 (PDT)
+Received: by mail-qk1-x731.google.com with SMTP id z30so6533639qkz.13;
+        Mon, 24 Oct 2022 11:06:38 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=f8aY9RhMEKsObZDgKD/q+Hql9XXZRTy7bmu7NkRdyns=;
-        b=iQQmWu8syBAiJbc13i3aS6QnytKsJEaYdBF8x6Uym2shHqm8CQ2r9LEIuDpoIfqPjf
-         KrDNgvRmpt7WA8T7uwSijwEKgECbq+6jJQz2URihTNRjzroBKEVaZ3HSFO4nE4LrBgIP
-         RiiduUKMCc5lvsojnZ5q5PAHQrbw+EbbSgUd8=
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=8uZ3VwfktP6MlXqcTSmXnIQiEYTG6oe41z15jnyDxAg=;
+        b=hUQNLA+Bt+iC3EXWYW6u4ZiXQN+8gSkbnmx8T2s8gwIyjYMlb9xie2OOJHwqqdlE6g
+         TPMX8YiSGrjcgbVnTCnFsXG5p9TyBfNZW9cG8k8CcqbzN2bmQnheWRACOBZ/d0Ypyji3
+         rAeT3VRnZNw4YbeuVXZ3vEOKtNVMeNwXu/MjHy95n+2bxkdGNTOtyJszmv75cO39QUVX
+         3tMEuxZT7eSOq8Es/EwqZssEHzAuhydL/i7aK2CmAmpvk3RmjxlZZXCchdX4A7oDcSBj
+         OT7wE6byf63cJL5bI9VHwdG17EIHCSUqDNg2p48fauR7p1cAjQNOcc/NytgEWglrxAdz
+         RDuQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=f8aY9RhMEKsObZDgKD/q+Hql9XXZRTy7bmu7NkRdyns=;
-        b=C+Bzgiq24XhamO09/G/TQICAYJe+Zzj4dMkviJeRGc3SaUudhWJ8gCDpZYwvmvLnOY
-         nnGLXesGPDrUB3ZSxWV04enLOpnzDOr7SCoLQRqb5MUO6jfISyTRwTnlS/Gs9aZGR9v+
-         j+CQnzmK1mZJylaP9EuJzPOkX+ZWIpRwi1XwTQQRRPnIj1pHVOjFi75pbPz/+l6Ulzsy
-         SgQfu5PXp2mFOXUczqVsTQdwRCQ/PNbfzgPUpU3VuyDoIujxFnZPbpuRqvNpO+9jK7HF
-         o0jgGgqACbwIx+4I4iexY1bHCGFderN8V5R4kYK20v5a3r3iii8u1r8JdAZNC8GAhKTB
-         eCbQ==
-X-Gm-Message-State: ACrzQf2Wqm62HIMUzZLgOmnqNOpTHqk9jccApbLxmAZF8Shf79Xtnoiv
-        9XHB0sS1fdoIuzk9XQTn0KI6gQ==
-X-Google-Smtp-Source: AMsMyM5c5rtHNqdOi+VIejih9i8mvW87u/6WeAxFVUvCupTrqKYzULyIM4Uo0EPKPQtq7UHBo1IcEw==
-X-Received: by 2002:a17:903:2c7:b0:186:9862:d16c with SMTP id s7-20020a17090302c700b001869862d16cmr10686729plk.133.1666634585822;
-        Mon, 24 Oct 2022 11:03:05 -0700 (PDT)
-Received: from localhost ([2620:15c:9d:2:808b:e2f6:edcf:ccb0])
-        by smtp.gmail.com with UTF8SMTPSA id q14-20020a170902f78e00b0017fe9b038fdsm57986pln.14.2022.10.24.11.03.04
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=8uZ3VwfktP6MlXqcTSmXnIQiEYTG6oe41z15jnyDxAg=;
+        b=bUP25NxnLhhgdkAEChATBRfSvbrFj+ptOJAywytSQ8l1vQfyP3dXWWybikCuk3DzqU
+         i3WF41K8z/odAVa8QowcLt6aT1NhAvu+eVb2uc/QivF3FHB4dQjYXbC+OIu9r+2j31VF
+         SBHOa90obRFXG71PYCOlTFPUkELB5EmAX5Q1bbp5vta9m3pP3I6HiemJgTxop1dT8ndV
+         fywFPkaaOq+I4QB6RRgKVkB/EFKXZZusJUhFJhbzNlEJv8INeCJPcqiE06LiylGpInko
+         nUm0+Q6gVo9kh1rkpngkKj9685txVp5aCuMfnGqOVNdUKqocIS8DFV9b1askCBLRn/Fr
+         rUPg==
+X-Gm-Message-State: ACrzQf2ddP56skGqBg9VG0k5XKDMnXCdC/2qXJqiQV8QZ7B2VyAyoRTV
+        QWHBIO2MJSaQDIELVpp4WG4=
+X-Google-Smtp-Source: AMsMyM6VD3e4iOCRwH+WEfJk7Le9i9P05UDL6cK9G/xPqVkJKTVIOyBY4IzI1tu67LqNtF/xB4eU0A==
+X-Received: by 2002:a05:620a:24d5:b0:6ee:d4bb:e5ba with SMTP id m21-20020a05620a24d500b006eed4bbe5bamr23818286qkn.457.1666634695655;
+        Mon, 24 Oct 2022 11:04:55 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.googlemail.com with ESMTPSA id e10-20020a05622a110a00b0039cb9ef50b5sm335003qty.26.2022.10.24.11.04.45
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 24 Oct 2022 11:03:05 -0700 (PDT)
-From:   Brian Norris <briannorris@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     YueHaibing <yuehaibing@huawei.com>, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Brian Norris <briannorris@chromium.org>
-Subject: [PATCH] mmc: sdhci_am654: 'select', not 'depends' REGMAP_MMIO
-Date:   Mon, 24 Oct 2022 11:02:59 -0700
-Message-Id: <20221024180300.2292208-1-briannorris@chromium.org>
-X-Mailer: git-send-email 2.38.0.135.g90850a2211-goog
+        Mon, 24 Oct 2022 11:04:55 -0700 (PDT)
+Message-ID: <9e15ffc5-fda9-b2c2-97f1-866c51bde113@gmail.com>
+Date:   Mon, 24 Oct 2022 11:04:42 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH v3 3/7] mmc: sdhci-brcmstb: Fix SDHCI_RESET_ALL for CQHCI
+Content-Language: en-US
+To:     Brian Norris <briannorris@chromium.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org,
+        Al Cooper <alcooperx@gmail.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Andy Gross <agross@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Faiz Abbas <faiz_abbas@ti.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>
+References: <20221024175501.2265400-1-briannorris@chromium.org>
+ <20221024105229.v3.3.I6a715feab6d01f760455865e968ecf0d85036018@changeid>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+In-Reply-To: <20221024105229.v3.3.I6a715feab6d01f760455865e968ecf0d85036018@changeid>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-REGMAP_MMIO is not user-configurable, so we can only satisfy this
-dependency by enabling some other Kconfig symbol that properly 'select's
-it.
+On 10/24/22 10:54, Brian Norris wrote:
+>   [[ NOTE: this is completely untested by the author, but included solely
+>      because, as noted in commit df57d73276b8 ("mmc: sdhci-pci: Fix
+>      SDHCI_RESET_ALL for CQHCI for Intel GLK-based controllers"), "other
+>      drivers using CQHCI might benefit from a similar change, if they
+>      also have CQHCI reset by SDHCI_RESET_ALL." We've now seen the same
+>      bug on at least MSM, Arasan, and Intel hardware. ]]
+> 
+> SDHCI_RESET_ALL resets will reset the hardware CQE state, but we aren't
+> tracking that properly in software. When out of sync, we may trigger
+> various timeouts.
+> 
+> It's not typical to perform resets while CQE is enabled, but this may
+> occur in some suspend or error recovery scenarios.
+> 
+> Include this fix by way of the new sdhci_and_cqhci_reset() helper.
+> 
+> Fixes: d46ba2d17f90 ("mmc: sdhci-brcmstb: Add support for Command Queuing (CQE)")
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-Use select like everybody else.
-
-Noticed when trying to enable this driver for compile testing.
-
-Fixes: 59592cc1f593 ("mmc: sdhci_am654: Add dependency on MMC_SDHCI_AM654")
-Signed-off-by: Brian Norris <briannorris@chromium.org>
----
-
- drivers/mmc/host/Kconfig | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f324daadaf70..fb1062a6394c 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1075,9 +1075,10 @@ config MMC_SDHCI_OMAP
- 
- config MMC_SDHCI_AM654
- 	tristate "Support for the SDHCI Controller in TI's AM654 SOCs"
--	depends on MMC_SDHCI_PLTFM && OF && REGMAP_MMIO
-+	depends on MMC_SDHCI_PLTFM && OF
- 	select MMC_SDHCI_IO_ACCESSORS
- 	select MMC_CQHCI
-+	select REGMAP_MMIO
- 	help
- 	  This selects the Secure Digital Host Controller Interface (SDHCI)
- 	  support present in TI's AM654 SOCs. The controller supports
+Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
 -- 
-2.38.0.135.g90850a2211-goog
+Florian
 
