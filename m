@@ -2,228 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF52CC67871
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 22:43:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E68C38A2D
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 23:24:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231880AbiJXWnI convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 18:43:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45306 "EHLO
+        id S231297AbiJXXX5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 19:23:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60288 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230214AbiJXWmn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 18:42:43 -0400
-Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7499168E63
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 14:05:14 -0700 (PDT)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 6FA74122F3A;
-        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 5FA16121965;
-        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Mon, 24 Oct
- 2022 19:35:21 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Mon, 24 Oct 2022 19:35:21 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "avri.altman@wdc.com" <avri.altman@wdc.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: [PATCH] mmc-utils: Implement alternative boot operation
-Thread-Topic: [PATCH] mmc-utils: Implement alternative boot operation
-Thread-Index: AdjnzoBSTaQo1pFFRXi0S56OT7wLqg==
-Date:   Mon, 24 Oct 2022 17:35:20 +0000
-Message-ID: <d4ac7077d94743ed91c1b2b81fc5e164@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.2]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S231344AbiJXXXh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 19:23:37 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0119B17F2A8;
+        Mon, 24 Oct 2022 14:44:40 -0700 (PDT)
+Received: from notapiano (unknown [194.36.25.51])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: nfraprado)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 7737B6602392;
+        Mon, 24 Oct 2022 17:43:58 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1666629840;
+        bh=4kWtLxHplFOS10HqVPq+7P3+dYq5PouJzYToXkZX4Kw=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=RxnUpi1bDW82nmb44+goLMrowb5Wd9tioPQl7b/kkrgLASz3MA/H6Mfcrk1OWg9p0
+         kfT8CZT2IAaA5LedmtnGE+nyDEFDU9GMgEWulgV6pIC5lxMp8S63ZLYECm16UV3Vtl
+         nmLjvBik0WwkbtjEKwi76XMOYyUlFA6ToQyYFUkrlAnhl3B+7dRnMg/uoTO/8+tPtG
+         ueksg4mems9ce5/g7amf9L164rpyDn32FV4nTDlaf2rB1rdxE8SRYh1PpvbtovXUdP
+         0SXlzUsXOMhX+5Pbbfufsxf0NrisgDUYMQmSL0nog1TSoBOmBHnV7ANsQ9bvHiY72g
+         s9ZX7RViGNyLQ==
+Date:   Mon, 24 Oct 2022 12:43:53 -0400
+From:   =?utf-8?B?TsOtY29sYXMgRi4gUi4gQS4=?= Prado 
+        <nfraprado@collabora.com>
+To:     Frank Wunderlich <linux@fw-web.de>
+Cc:     linux-mediatek@lists.infradead.org,
+        Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v3 2/7] dt-bindings: mmc: mtk-sd: Set clocks based on
+ compatible
+Message-ID: <20221024164353.jzvx4ea442e4vahj@notapiano>
+References: <20221023091247.70586-1-linux@fw-web.de>
+ <20221023091247.70586-3-linux@fw-web.de>
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27222.001
-X-TMASE-Result: 10--1.662500-10.000000
-X-TMASE-MatchedRID: 0aps3uOmWi69nTq7rJdwXKekGZXOwUBuUrr7Qc5WhKjAuQ0xDMaXkMAo
-        6b+EBkLgf146W0iUu2sZ6AKZ5CDJjqy/oBy0PY8JSs47mbT7SARMVCcj56k8hrt/YafNBu9cK2g
-        uGsQ9MyGiZ+sr4QQVHv0bVLkspps25zIAscb9v20dahq+rGDn//NkoMDX+kiuVC4aflv2vZk8TF
-        M4WP/swQUTHiQ6ysBCqhlEJaSjYZAkGC0QjFSfgUXBhxFdFgcQI64EUz6lBaheCiaGE+TES6PFj
-        JEFr+olIoOsWgr8s12OhzOa6g8Krfbha8Hd4q3059NgCK88uwJ42ANm+ZWMGE/7CniSRUbZadl/
-        dNKPyns=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 0ba29e83-2a3f-4d17-9256-bb156984212e-0-0-200-0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <20221023091247.70586-3-linux@fw-web.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Implements the alternative boot operation for eMMCs.
-Note the limitations of the help.
+Hi,
 
-This is mostly useful for testing purposes if you set
-up the boot partition configuration correctly.
+thank you for picking this up.
 
-Usage:
-$ sudo dd if=/dev/mmcblk2boot0 of=bootdatammcblk count=2
-2+0 records in
-2+0 records out
-1024 bytes (1.0 kB, 1.0 KiB) copied, 0.00482308 s, 212 kB/s
+On Sun, Oct 23, 2022 at 11:12:42AM +0200, Frank Wunderlich wrote:
+> From: Nícolas F. R. A. Prado <nfraprado@collabora.com>
+> 
+> The binding was describing a single clock list for all platforms, but
+> that's not really suitable:
+> 
+> Most platforms using at least 2 clocks (source, hclk), some of them
+> a third "source_cg". Mt2712 requires an extra 'bus_clk' on some of
+> its controllers, while mt8192 requires 8 clocks.
+> 
+> Move the clock definitions inside if blocks that match on the
+> compatibles.
+> 
+> I used Patch from Nícolas F. R. A. Prado and modified it to not using
+> "not" statement.
+> 
+> Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
+> Signed-off-by: Nícolas F. R. A. Prado <nfraprado@collabora.com>
+> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+> 
+> ---
+> v2:
+> - add this patch
+> v3:
+> - add blank lines and change "not" to matchlist
+> - reorder entries - make generic first then order alphanumeric
+> - rewrite commit description
+> - drop soc-specific mt8183 - constraints were also set for it above
 
-$ sudo ./mmc boot_operation bootdata 2 /dev/mmcblk2
+This is wrong, see below.
 
-$ diff -s bootdata bootdatammcblk
-Files bootdata and bootdatammcblk are identical
+> ---
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 113 +++++++++++++-----
+>  1 file changed, 83 insertions(+), 30 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> index 3cbf0208f1b4..31bb6dc329d2 100644
+> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
+[..]
+>  
+> -if:
+> -  properties:
+> -    compatible:
+> -      contains:
+> -        const: mediatek,mt8183-mmc
+> -then:
+> -  properties:
+> -    reg:
+> -      minItems: 2
 
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- mmc.c      | 12 +++++++++
- mmc.h      |  1 +
- mmc_cmds.c | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- mmc_cmds.h |  1 +
- 4 files changed, 90 insertions(+)
+You can't drop this. Nodes with the mt8183 compatible should keep requiring two
+reg values. It's not covered by the branch below.
 
-diff --git a/mmc.c b/mmc.c
-index 170ee39..f328585 100644
---- a/mmc.c
-+++ b/mmc.c
-@@ -255,6 +255,18 @@ static struct Command commands[] = {
- 	  "Issues a CMD0 GO_PRE_IDLE",
- 	  NULL
- 	},
-+	{ do_alt_boot_op, -1,
-+	  "boot_operation", "<boot_data_file> <boot_blocks> <device>\n"
-+	  "Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.\n\n"
-+	  "Note some limitations\n:"
-+	  "1. The boot operation must be configured, e.g. for legacy speed:\n"
-+	  "mmc-utils bootbus set single_backward retain x8 /dev/mmcblk2\n"
-+	  "mmc-utils bootpart enable 1 0 /dev/mmcblk2\n"
-+	  "2. The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).\n"
-+	  "3. Most hosts cannot do transfers of the typical size of the boot partition, adjust <boot_blocks> accordingly.\n"
-+	  "4. The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.\n",
-+	  NULL
-+	},
- 	{ 0, 0, 0, 0 }
- };
- 
-diff --git a/mmc.h b/mmc.h
-index 6511dbc..98fad16 100644
---- a/mmc.h
-+++ b/mmc.h
-@@ -24,6 +24,7 @@
- #define MMC_GO_IDLE_STATE         0   /* bc                          */
- #define MMC_GO_IDLE_STATE_ARG		0x0
- #define MMC_GO_PRE_IDLE_STATE_ARG	0xF0F0F0F0
-+#define MMC_BOOT_INITIATION_ARG		0xFFFFFFFA
- #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
- #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
- #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
-diff --git a/mmc_cmds.c b/mmc_cmds.c
-index 3db17e1..1da61d4 100644
---- a/mmc_cmds.c
-+++ b/mmc_cmds.c
-@@ -3101,3 +3101,79 @@ int do_preidle(int nargs, char **argv)
- 
- 	return 0;
- }
-+
-+int do_alt_boot_op(int nargs, char **argv)
-+{
-+	int fd, ret, boot_data_fd;
-+	char *device, *boot_data_file;
-+	struct mmc_ioc_multi_cmd *mioc;
-+	__u8 ext_csd[512];
-+	__u8 *boot_buf;
-+	unsigned int boot_blocks, ext_csd_boot_size;
-+
-+	if (nargs != 4) {
-+		fprintf(stderr, "Usage: mmc boot_op <boot_data_file> <boot_blocks> </path/to/mmcblkX>\n");
-+		exit(1);
-+	}
-+	boot_data_file = argv[1];
-+	boot_blocks = strtol(argv[2], NULL, 10);
-+	device = argv[3];
-+
-+	fd = open(device, O_RDWR);
-+	if (fd < 0) {
-+		perror("open device");
-+		exit(1);
-+	}
-+	boot_data_fd = open(boot_data_file, O_WRONLY | O_CREAT, 0644);
-+	if (boot_data_fd < 0) {
-+		perror("open boot data file");
-+		exit(1);
-+	}
-+
-+	ret = read_extcsd(fd, ext_csd);
-+	if (ret) {
-+		perror("read extcsd");
-+		exit(1);
-+	}
-+	ext_csd_boot_size = ext_csd[226] * 128 * 1024;
-+	if (boot_blocks * 512 > ext_csd_boot_size) {
-+		perror("Requested boot size bigger than boot partition");
-+		exit(1);
-+	}
-+
-+	boot_buf = calloc(1, sizeof(__u8) * boot_blocks * 512);
-+	mioc = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
-+			   2 * sizeof(struct mmc_ioc_cmd));
-+	if (!mioc || !boot_buf) {
-+		perror("Failed to allocate memory");
-+		return -ENOMEM;
-+	}
-+
-+	mioc->num_of_cmds = 2;
-+	mioc->cmds[0].opcode = MMC_GO_IDLE_STATE;
-+	mioc->cmds[0].arg = MMC_GO_PRE_IDLE_STATE_ARG;
-+	mioc->cmds[0].flags = MMC_RSP_NONE | MMC_CMD_AC;
-+	mioc->cmds[0].write_flag = 0;
-+
-+	mioc->cmds[1].opcode = MMC_GO_IDLE_STATE;
-+	mioc->cmds[1].arg = MMC_BOOT_INITIATION_ARG;
-+	mioc->cmds[1].flags = MMC_RSP_NONE | MMC_CMD_ADTC;
-+	mioc->cmds[1].write_flag = 0;
-+	mioc->cmds[1].blksz = 512;
-+	mioc->cmds[1].blocks = boot_blocks;
-+	/* Access time of boot part differs wildly, spec mandates 1s */
-+	mioc->cmds[1].data_timeout_ns = 2 * 1000 * 1000 * 1000;
-+	mmc_ioc_cmd_set_data(mioc->cmds[1], boot_buf);
-+
-+	ret = ioctl(fd, MMC_IOC_MULTI_CMD, mioc);
-+	if (ret)
-+		perror("multi-cmd ioctl error %d\n", ret);
-+	close(fd);
-+
-+	ret = DO_IO(write, boot_data_fd, boot_buf, boot_blocks * 512);
-+	if (ret < 0) {
-+		perror("Write error\n");
-+		exit(1);
-+	}
-+	return 0;
-+}
-diff --git a/mmc_cmds.h b/mmc_cmds.h
-index faab362..5f2bef1 100644
---- a/mmc_cmds.h
-+++ b/mmc_cmds.h
-@@ -49,3 +49,4 @@ int do_erase(int nargs, char **argv);
- int do_general_cmd_read(int nargs, char **argv);
- int do_softreset(int nargs, char **argv);
- int do_preidle(int nargs, char **argv);
-+int do_alt_boot_op(int nargs, char **argv);
--- 
-2.37.3
+Thanks,
+Nícolas
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
-
+> +allOf:
+> +  - $ref: mmc-controller.yaml#
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          enum:
+> +            - mediatek,mt2701-mmc
+> +            - mediatek,mt6779-mmc
+> +            - mediatek,mt6795-mmc
+> +            - mediatek,mt7620-mmc
+> +            - mediatek,mt7622-mmc
+> +            - mediatek,mt7623-mmc
+> +            - mediatek,mt8135-mmc
+> +            - mediatek,mt8173-mmc
+> +            - mediatek,mt8183-mmc
+> +            - mediatek,mt8186-mmc
+> +            - mediatek,mt8188-mmc
+> +            - mediatek,mt8195-mmc
+> +            - mediatek,mt8516-mmc
+> +    then:
+> +      properties:
+> +        clocks:
+> +          minItems: 2
+> +          items:
+> +            - description: source clock
+> +            - description: HCLK which used for host
+> +            - description: independent source clock gate
+> +        clock-names:
+> +          minItems: 2
+> +          items:
+> +            - const: source
+> +            - const: hclk
+> +            - const: source_cg
+> +
+[..]
