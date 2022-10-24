@@ -2,97 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 03484C67871
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 19:56:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BAF6C67871
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 20:03:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233868AbiJXT43 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 15:56:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57814 "EHLO
+        id S230241AbiJXUDl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 16:03:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233881AbiJXTze (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 15:55:34 -0400
-Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40EC3ABD66
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 11:19:10 -0700 (PDT)
-Received: by mail-pf1-x434.google.com with SMTP id g62so5638530pfb.10
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 11:19:10 -0700 (PDT)
+        with ESMTP id S231979AbiJXUDM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 16:03:12 -0400
+Received: from mail-qv1-f42.google.com (mail-qv1-f42.google.com [209.85.219.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C0A72EF19;
+        Mon, 24 Oct 2022 11:24:32 -0700 (PDT)
+Received: by mail-qv1-f42.google.com with SMTP id x13so5545898qvn.6;
+        Mon, 24 Oct 2022 11:24:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=RuKI5bp1FsoKhoX8KTyHPCH/WRbZz2nZbg0xRSkPhiI=;
-        b=SAsToB0UY7YN+KrCipRGgiZP1WEESaE1EbzE7YzlXSzfhgOGP7hTTSg70BQopQlwi4
-         j6h90asxgIpL99oGuXu0An6MsIVKP7y3kYBRMbpgPIkwHCNSuKEyr/f2IfqU+GjkaXGD
-         EsPAgBL8w1tviNqPYB0W0zyrCBlgiS3nxM18o=
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=mq5s7oy0Tla8MTN8FSmLqY4U2A2/0B/wrWqKIioZAzY=;
+        b=gC0l5ACd97J3Bb3ZayP0I2BJMxirqhSqm5wN3UtL1Vw3vYVFMfn2gUyL6pMJfW4DYH
+         3RC7wOv2C+0jUtdJ/F+Ht3zSxpN3i5/kPEJ+/jQjATIl39BPxDJk/eKNEjPGZefEhWeI
+         lcz34IP5K7KcfJylLQr0O76AyYqoPgneKt6b58B+lwym5fxcQ0eYnmmywJwjF58fRGHU
+         Gt5w0fQmawFkAU9q0l9Qo06kPOF9WDiEMmr7rXlFWZHGh7vVeB27CxgjXz74UzCaLWnw
+         Lk+xv979WNLbHj1zHp5tToWdz1kIz0fTmGjAPQweY/e0wuPb7mMDk36qKbULV6B1X5Tk
+         Gi2w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=RuKI5bp1FsoKhoX8KTyHPCH/WRbZz2nZbg0xRSkPhiI=;
-        b=c0pIkhMRWmDOKG4PHyyfsxdmVkz0ogfkSNckQGCCoqN+Z3mDpSirzLEwyFiy9FtERd
-         /1PM3y7PvpYbZZA9UBpNI7OF0J2vW+835KSZaWzPY0txkDm4/NQdv9K8ELurIh6R5Pck
-         mxfV8JtUpMLyfOzpOprYFDa8VHf262TMihfoJdq/KE5f+3ILdXktG6i93s1zxE6+umSu
-         xPwnvjWdAzv2Zdn8OnXNFVtUTiprXr0su0i+Yu6JrS9E35u62kB77dSBv33McLseHAhs
-         2zFFafPrPRJUn/R26NJkATMqVFSmDiIly2xUfvLm0Q3q3skA8qzn7AeLZ9knRsA1fAS/
-         X+Wg==
-X-Gm-Message-State: ACrzQf2MW7LXGG9HXrfcgBXxWeDzt0rmYa6agn5SL1vpXr82IUOIWIky
-        w7ZXagNwrYaHWo3/R0Q0n4mL/Q==
-X-Google-Smtp-Source: AMsMyM7xgKD8kYLElBTTogulLA2Q1qFTwpJDSgq2Zx98nTCDWRpU4D0HA+WUrBGwpTveEjwvBfE3NQ==
-X-Received: by 2002:a63:581b:0:b0:464:a9a6:571b with SMTP id m27-20020a63581b000000b00464a9a6571bmr6774778pgb.560.1666635501718;
-        Mon, 24 Oct 2022 11:18:21 -0700 (PDT)
-Received: from localhost ([2620:15c:9d:2:808b:e2f6:edcf:ccb0])
-        by smtp.gmail.com with UTF8SMTPSA id a18-20020a170902b59200b00186b1bfbe79sm60642pls.66.2022.10.24.11.18.20
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=mq5s7oy0Tla8MTN8FSmLqY4U2A2/0B/wrWqKIioZAzY=;
+        b=GNO/Iw23G3pJaCAgaj1NbPJGvhZAkK4ptHToXrRpp20XzjuRQd3u8P+sInqoYHy+Mm
+         MqiZ2wM5M0HYf1Tu9dN3NJg3Ff2nHUZduYktbCPHb73FOZR5f5q2t9OoDIvR1dgoawHg
+         SPFbIE0ZCB3xDCBe85IChRENm1WQXwa1wR/pUYCrJW5akE3N32LGK6oFm5YnN5AMLkcg
+         drJ4NAxidXcd7n0cUhCz6MuWO/lkGZA7FGddvuk065Ddg2mFYbCIcnfffB+WAilbWZ+o
+         TM0CkwtEeb/nQTBDfLsKY7j6VQIQuqu0LPpIHS2htVa+lOlO3dLDnt8J0WB1LIk4WRYP
+         u+6g==
+X-Gm-Message-State: ACrzQf1kdi2NH8GxgIObwSIBSCgJukl714CwjPLegUCyFCtirhnRM2No
+        +4+Qun+B+xk1rUZDlGHn/mY=
+X-Google-Smtp-Source: AMsMyM5sOf5+LqlBIgt4nCoYtOuBfyHj2ZmO1oA3G5LYnMe8N977VJTuHd1rOteffA19Q5l1MkVjVA==
+X-Received: by 2002:a05:6214:29c9:b0:4b3:fcfe:3731 with SMTP id gh9-20020a05621429c900b004b3fcfe3731mr28607115qvb.29.1666635759856;
+        Mon, 24 Oct 2022 11:22:39 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.googlemail.com with ESMTPSA id f14-20020a05620a280e00b006eec09eed39sm441937qkp.40.2022.10.24.11.22.36
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 24 Oct 2022 11:18:21 -0700 (PDT)
-From:   Brian Norris <briannorris@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Mon, 24 Oct 2022 11:22:39 -0700 (PDT)
+Message-ID: <3a74affc-8e17-5d84-5a65-3948dd3a624b@gmail.com>
+Date:   Mon, 24 Oct 2022 11:22:33 -0700
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Allow building with COMPILE_TEST
+Content-Language: en-US
+To:     Brian Norris <briannorris@chromium.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Florian Fainelli <f.fainelli@gmail.com>
 Cc:     Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org,
         Adrian Hunter <adrian.hunter@intel.com>,
         linux-arm-kernel@lists.infradead.org,
         Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>
-Subject: [PATCH] mmc: sdhci-brcmstb: Allow building with COMPILE_TEST
-Date:   Mon, 24 Oct 2022 11:17:59 -0700
-Message-Id: <20221024181759.2355583-1-briannorris@chromium.org>
-X-Mailer: git-send-email 2.38.0.135.g90850a2211-goog
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org
+References: <20221024181759.2355583-1-briannorris@chromium.org>
+From:   Florian Fainelli <f.fainelli@gmail.com>
+In-Reply-To: <20221024181759.2355583-1-briannorris@chromium.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This driver is pretty simple, and it can be useful to build it (for
-validation purposes) without BMIPS or ARCH_BRCMSTB.
+On 10/24/22 11:17, Brian Norris wrote:
+> This driver is pretty simple, and it can be useful to build it (for
+> validation purposes) without BMIPS or ARCH_BRCMSTB.
+> 
+> It technically depends on CONFIG_OF to do anything useful at runtime,
+> but it still works out OK for compile-testing using the !OF stubs.
+> 
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-It technically depends on CONFIG_OF to do anything useful at runtime,
-but it still works out OK for compile-testing using the !OF stubs.
+Acked-by: Florian Fainelli <f.fainelli@gmail.com>
 
-Signed-off-by: Brian Norris <briannorris@chromium.org>
----
-
- drivers/mmc/host/Kconfig | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index f324daadaf70..453fba8d2d9d 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -1040,10 +1040,10 @@ config MMC_SDHCI_MICROCHIP_PIC32
- 
- config MMC_SDHCI_BRCMSTB
- 	tristate "Broadcom SDIO/SD/MMC support"
--	depends on ARCH_BRCMSTB || BMIPS_GENERIC
-+	depends on ARCH_BRCMSTB || BMIPS_GENERIC || COMPILE_TEST
- 	depends on MMC_SDHCI_PLTFM
- 	select MMC_CQHCI
--	default y
-+	default ARCH_BRCMSTB || BMIPS_GENERIC
- 	help
- 	  This selects support for the SDIO/SD/MMC Host Controller on
- 	  Broadcom STB SoCs.
+Yeah, really no reason not to let you build it, thanks Brian!
 -- 
-2.38.0.135.g90850a2211-goog
+Florian
 
