@@ -2,148 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3101FA373F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 17:23:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC581C38A2D
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 17:29:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231939AbiJXRXs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 13:23:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40890 "EHLO
+        id S233216AbiJXR3l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 13:29:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231960AbiJXRXR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 13:23:17 -0400
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF7DF9DDA7;
-        Mon, 24 Oct 2022 08:58:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
-        s=badeba3b8450; t=1666626968;
-        bh=38vTFzrZKf3FVvekYXAM+9K/QQ7KdRjbBzJUpJt6VgA=;
-        h=X-UI-Sender-Class:From:To:Cc:Subject:Date:In-Reply-To:References;
-        b=GHipPWegnSsSMUsQisbWiaRtJD9PHUgzMX2cbNuQPrEQxKEzWbrdXUdzHyma2Dv2b
-         lEGOzp2Up1OONWonVr9MTVaXE4qCMKKc3S3XChw9B4SHAQcQmx2pEh4Vy7qgOJR7nA
-         3vXxV9MFrxQEs+UnHgKVrkZFaL4UD2NIYQOLnef8=
-X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
-Received: from [80.245.75.40] ([80.245.75.40]) by web-mail.gmx.net
- (3c-app-gmx-bap55.server.lan [172.19.172.125]) (via HTTP); Mon, 24 Oct 2022
- 16:55:20 +0200
-MIME-Version: 1.0
-Message-ID: <trinity-95441a68-0025-49de-8c73-9730fb9cec42-1666623320110@3c-app-gmx-bap55>
-From:   Frank Wunderlich <frank-w@public-files.de>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Frank Wunderlich <linux@fw-web.de>,
-        linux-mediatek@lists.infradead.org,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Aw: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
-Content-Type: text/plain; charset=UTF-8
-Date:   Mon, 24 Oct 2022 16:55:20 +0200
-Importance: normal
-Sensitivity: Normal
-In-Reply-To: <a0121e0a-9f62-8630-45c5-d32eaa91d46f@linaro.org>
-References: <20221023091247.70586-1-linux@fw-web.de>
- <20221023091247.70586-4-linux@fw-web.de>
- <a0121e0a-9f62-8630-45c5-d32eaa91d46f@linaro.org>
-X-UI-Message-Type: mail
-X-Priority: 3
-X-Provags-ID: V03:K1:IcIPaVgbRpByh7zwpXh4z9zY0VuCVJ0BaE6por2d9gpyO8zxW3t1fgd81QSE28VxLcD1u
- HkBl2H0ZLbUdRlcLxl9izmQuyB026eQFlnKdge9hDQBmNNJnN8hcAkNsaGap/6Ipdg280JwgdDsv
- z0t7GEoaowPjoBCs4a4gZcMVfxgSeFNFJukhgYCAxPgYN1LH4nZyf2rnyPbMZ6c6aSjVCcSVlIC/
- qeP+pr3BIEib7wR8/YVe/RFL/biv5BgnYFn/FDdVNvwui01qtL3tn/LD6zhyh13fQLNf0LEYBhQ4
- VA=
-X-UI-Out-Filterresults: notjunk:1;V03:K0:ARJ9dboFzH4=:xEplBRIg61P9GDoxzDcos4
- nyw8DtuIVlBW56G4hBBvxf8ZvCqTTuYFbALZIIOegC4rIrSywPAUk2oi9XzD5jzvbvF5Jratn
- 22/DW+q1ZmGyCBP70hCDbVwPTmdKbcOYCtPxYNKqKGFtyFVa5hQvtwI6Va7ZnZCXlRd1UbTvg
- PBdsHNvJH+3+l+89Y6A1dyKi29z4DSnpEAF0w8GbuLuJzDDYILP3R3jT8QBF57J++5YR2wZrs
- DGzKdKUP3jYC3JZONj1a/+jJfavdO4MNLGQmzpCJs01j9WO5JmEXdo425xhZVEppauE1bXhzY
- LL26KEyB/SjURdt8ZNzKIqx+vkbtc2OrdB3VmNBC1gYMdTAzy9HPofA5s4gORgXnQJPKruF+z
- xZECcyg6BscsbsvOs7gMcJfavs+43hGhPPl0WFTzK2ZymnOKNcJOZxe4sZYljW1smrlRhygO9
- BbysSr3Ge9qKAoviOEfQadA+xHw1+zPVA3mD8EyfJkn9LuelS6Z49AWnnsDr3uoEoQ41B7uFW
- RT5Q3Z8DYjCdNVz2ctpcu4U+8sZIIvC+jRQkusRg4lbqdexAqXFTznlzhi50v3ium78+8U1UU
- /BFSP3xx7/uz/Tujift/rdM4BUCRA3m8NLjT5Q3LtzW44akTh4Ijcgp8Cpjf0qlO/6wZznoD7
- CRdssc0DROYejVlLG9WOnk1vEN1ggxOwvbxyb6VufeSHSAsy/r3M0w7r2jxFiXM07Fzy8XGyv
- /lMTMxKhsu30p/4ixzIz0K98xH+tgMhHdIamSHe7Jdnq2F49iqjKXPvgRwVNA6D4N8pSU+Pel
- JvGrpNls3T3KdszmaiOPB5ghHQWYIVmGXmp+N57GHBXNFDaLOuK6Oaa30M04ddNJQ0NA+Ro81
- 7Hu1Ys7FNc/qCoYEuOA6IQvgASLonGDLCILvH2zLFcJGOHgRw6edLcDiYHkfrPK9ALF/IgYVr
- pgRCKVV6TZ30RG+Z4Ilce0NbMqmDwDR+lhC51W+AYKj/DWH3FY3hsPJTBjd04xZ1wtU55F2qN
- KG3LKUroZxbs1nvA3XgI/3TWbYBotyev3FQssH5WW6FWj+vbVWP4ymMW1CHrDHSjCnawita6Y
- rKdtv9b4DjbiHwSHXLH/KyRLtYmrkU900Zj2c+W6cpc7n7UW44lryvDt/UmsRQZLo6YQz3pWw
- DuFb3hCofEJvRjDTWePTqpTYiAg9b13QhJDo18HaQLEDZLr9aFD3xsna79IWrtGXMdtG0p3J3
- ENF6+RoLG3zhviIOjx++hg3TB0XOFCl2mziFxPQ4tb9WC/eUuBYxVxLg8YU6esLRPyZ2GTHTo
- Z0ZU/dMX
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S234412AbiJXR3E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 13:29:04 -0400
+Received: from wout1-smtp.messagingengine.com (wout1-smtp.messagingengine.com [64.147.123.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42C8D76570;
+        Mon, 24 Oct 2022 09:05:04 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id F1F3D320076F;
+        Mon, 24 Oct 2022 12:02:34 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Mon, 24 Oct 2022 12:02:36 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm2; t=1666627354; x=1666713754; bh=icgj1uEJtY
+        GqD+reQlzk/FX1027W4qJc11yfxx1nfMc=; b=nRqqed7n0WSU2HtMrYyagXLHLM
+        gLuRmUsCVCXHU/RLF4lT4ap4gp3ey/2LEHxivyi5fv2nZDTdshlQufjb1RZA3MXa
+        1q1ZPNRLIHhr6DShmhfTc+mVqVkkNpGShcQR4X3aBM5sJunyHZDlv/tqX3P5l4Kv
+        HjwBSCGZ9Zbj6GDvsWhZv/tOHYACYXUc/pIdVzV2jveqTpgPiua9laO4x81yf0s6
+        SHGJggjidU/tdKwliTWYSzbubdcBwVDK9sPIgWE2w3StxY8qRrll+r5VW/z+vuCf
+        VfU4TNwL9t8EFM7v1wYPWtHTPtWE287kCy22qRfVNXomPevpgrjfnO56cAzw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1666627354; x=1666713754; bh=icgj1uEJtYGqD+reQlzk/FX1027W
+        4qJc11yfxx1nfMc=; b=PERaMDbQvT7LbZ1a44RxhBL1rnm0QUbi4YhIxyinUgVQ
+        VXa7OY7rg3UTa9/TBEnbY2F7TGP46qkeD+QTpl8kt71ZWZVh1flQDrBLwGx8RFVK
+        UZ4M6o2dFUe/Ei7xqf/bBXsvVgVV5chRJrBIv++ipQy9aNizf5FPRqxSLDV09U2u
+        YN+gn+WGr476zEeKpP9UsVECaN3c3QEMhL0tk0dDPlpBHn6JfEBeiSNdhkJxkeyf
+        OGv16/YbD9atIm/yyRQyAg2O0YorodyU5PUOjLsDxOsvw801u2yA8NgfyI9EJuAQ
+        5T9y6Y78j5SWRhm3SEC46xJQyJNjx0pmX+K0LAWTYA==
+X-ME-Sender: <xms:GbdWYwZpHEjlXgYqJ_RgZXrgHK2kX7V8gCxtAhZZYyQbEEEzL5bbiQ>
+    <xme:GbdWY7Y38odImXBlQ8YBzr0UKl5tIPWyxybTq4kvIJv6RT0btfgzSp9_zhLUReWLi
+    N5RIvLINv4gRlM1mNI>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvfedrgedtgedgleduucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:GbdWY6-UV6cQpRp_iU48UVeoa2XEV97G3-x1rFcVP2uAFBqoqr2X7g>
+    <xmx:GbdWY6r0Fgi5TFudIfOQEkT3ZmkOaVzfQ8_NS71kZRc5hO_UCykcag>
+    <xmx:GbdWY7qskkY867NII9Da03ZLdV2vK5OXmJQ1hf6nPQLC_JoGY51WYA>
+    <xmx:GrdWY0Q_PzX2yUhax7ARpo-QVtdDbdYzf6mICseHbVsx2DBy5z6wyQ>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 9D0F2B60086; Mon, 24 Oct 2022 12:02:33 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1047-g9e4af4ada4-fm-20221005.001-g9e4af4ad
+Mime-Version: 1.0
+Message-Id: <aa4195a9-f6be-4600-82df-8b5d1035ebd5@app.fastmail.com>
+In-Reply-To: <Y1YnT+/ZdoglcdS4@atomide.com>
+References: <20221019144119.3848027-1-arnd@kernel.org>
+ <20221019150410.3851944-1-arnd@kernel.org>
+ <20221019150410.3851944-13-arnd@kernel.org>
+ <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
+ <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
+ <20221020193511.GB3019@t60.musicnaut.iki.fi>
+ <de36ec6b-2e7c-48eb-9682-f60d8e4011da@app.fastmail.com>
+ <20221021111101.GC3019@t60.musicnaut.iki.fi> <Y1YnT+/ZdoglcdS4@atomide.com>
+Date:   Mon, 24 Oct 2022 18:02:13 +0200
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Tony Lindgren" <tony@atomide.com>,
+        "Aaro Koskinen" <aaro.koskinen@iki.fi>
+Cc:     "Arnd Bergmann" <arnd@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        "Janusz Krzysztofik" <jmkrzyszt@gmail.com>,
+        linux-kernel@vger.kernel.org,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        "Lee Jones" <lee@kernel.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Felipe Balbi" <balbi@kernel.org>,
+        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
+        linux-i2c@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi
+On Mon, Oct 24, 2022, at 07:49, Tony Lindgren wrote:
+> * Aaro Koskinen <aaro.koskinen@iki.fi> [221021 11:02]:
+>> I was only referring to this Mistral add-on board and related display
+>> drivers.
+>> 
+>> The main OSK board support is still needed and used.
 
-> Gesendet: Sonntag, 23. Oktober 2022 um 14:56 Uhr
-> Von: "Krzysztof Kozlowski" <krzysztof.kozlowski@linaro.org>
-> An: "Frank Wunderlich" <linux@fw-web.de>, linux-mediatek@lists.infradead=
-.org
-> Cc: "Frank Wunderlich" <frank-w@public-files.de>, "Chaotian Jing" <chaot=
-ian.jing@mediatek.com>, "Ulf Hansson" <ulf.hansson@linaro.org>, "Rob Herri=
-ng" <robh+dt@kernel.org>, "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@li=
-naro.org>, "Matthias Brugger" <matthias.bgg@gmail.com>, "Wenbin Mei" <wenb=
-in.mei@mediatek.com>, linux-mmc@vger.kernel.org, devicetree@vger.kernel.or=
-g, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-> Betreff: Re: [PATCH v3 3/7] dt-bindings: mmc: mtk-sd: add mt7986
->
-> On 23/10/2022 05:12, Frank Wunderlich wrote:
-> > From: Frank Wunderlich <frank-w@public-files.de>
-> >
-> > Add SoC specific section for defining clock configuration.
-> >
-> > Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
->
->
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Ok, got it.
 
-Hi,
+> I'm pretty sure I have that display, but I was booting my OSK in a
+> rack anyways so I rarely saw the LCD in use. No objections from me
+> for removing the LCD support for OSK if nobody is using it.
 
-got another config from mtk which requires changing binding a bit
+I was going to leave Mistral in, thinking it's just a device definition,
+but upon closer look I found that this is a somewhat annoyingly
+written part that hardcodes GPIO numbers in unusual ways, so I'm
+adding a patch to remove it now.
 
-                       clocks =3D <&topckgen CLK_TOP_EMMC_416M_SEL>,
-                                <&infracfg CLK_INFRA_MSDC_HCK_CK>,
-                                <&infracfg CLK_INFRA_MSDC_CK>,
-                                <&infracfg CLK_INFRA_MSDC_133M_CK>,
-                                 <&infracfg CLK_INFRA_MSDC_66M_CK>;
-                       clock-names =3D "source", "hclk", "source_cg", "bus=
-_clk",
-                                     "sys_cg";
-in binding:
-
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -241,15 +241,17 @@ allOf:
-           items:
-             - description: source clock
-             - description: HCLK which used for host
--            - description: AXI bus clock gate
--            - description: AHB bus clock gate
-+            - description: independent source clock gate
-+            - description: bus clock used for internal register access (r=
-equired for MSDC0/3).
-+            - description: msdc subsys clock gate
-         clock-names:
-           minItems: 3
-           items:
-             - const: source
-             - const: hclk
--            - const: axi_cg
--            - const: ahb_cg
-+            - const: "source_cg"
-+            - const: "bus_clk"
-+            - const: "sys_cg"
-
-will send an updated v4...old version was working but i should use the new=
- one.
-
-@Krzysztof can i take your RB here or should i leave it as Patch was chang=
-ed?
-
-regards Frank
+     Arnd
