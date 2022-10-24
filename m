@@ -2,94 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E14AC38A2D
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 07:55:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 719BFECDFA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 08:36:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230016AbiJXHzW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 03:55:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47288 "EHLO
+        id S230098AbiJXIgl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 04:36:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229536AbiJXHzU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 03:55:20 -0400
-Received: from relay5-d.mail.gandi.net (relay5-d.mail.gandi.net [217.70.183.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A9C93B735;
-        Mon, 24 Oct 2022 00:55:14 -0700 (PDT)
-Received: (Authenticated sender: miquel.raynal@bootlin.com)
-        by mail.gandi.net (Postfix) with ESMTPSA id BC1EF1C000E;
-        Mon, 24 Oct 2022 07:55:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=bootlin.com; s=gm1;
-        t=1666598113;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=v+DtEIbWCTrMoEhxqNZp5xO+0p2o8LDxYvX/bSafQhA=;
-        b=EKvNS6u8jnjegmr7GDNhG+HxpDM+Wj8+KWSwkrOzg4G/WtiE/ROOrbblmt3pAjrvfgueMZ
-        jNTxNy9LBLmzrpAyINZWgaV33dHQsxd2oSo/1LGCIw3PJwc8S4Gp1tPDIZwDQizaBcpvvY
-        S3ztUWTpqBY/bKIMXiZzkz2tMvCnNm3MdwXcvuQA9cOxsDUOftYKyK5T8gE5BZQRipHKSD
-        MEoTEyocU8KUQ2bKMtZt6sK6di8sKvOZGKxCEN0+nn2aWJyMv0pJI2PBN9TXXCi3sZ5UiY
-        Jci8bOiL/oSTvMdSx5T2vTxAVT3MDnq5GdNYYMuKfU1RrQ0HaA8QlN4H7V8uHw==
-Date:   Mon, 24 Oct 2022 09:55:07 +0200
-From:   Miquel Raynal <miquel.raynal@bootlin.com>
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
-        Simtec Linux Team <linux@simtec.co.uk>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Lars-Peter Clausen <lars@metafoo.de>,
-        Sylwester Nawrocki <sylvester.nawrocki@gmail.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Richard Weinberger <richard@nod.at>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Tomasz Figa <tomasz.figa@gmail.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Chanwoo Choi <cw00.choi@samsung.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-iio@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org
-Subject: Re: [PATCH 02/21] ARM: s3c: remove s3c24xx specific hacks
-Message-ID: <20221024095507.302687f8@xps-13>
-In-Reply-To: <20221021203329.4143397-2-arnd@kernel.org>
-References: <20221021202254.4142411-1-arnd@kernel.org>
-        <20221021203329.4143397-2-arnd@kernel.org>
-Organization: Bootlin
-X-Mailer: Claws Mail 4.0.0 (GTK+ 3.24.33; x86_64-pc-linux-gnu)
+        with ESMTP id S229933AbiJXIgk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 04:36:40 -0400
+Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 239B860500;
+        Mon, 24 Oct 2022 01:36:31 -0700 (PDT)
+Received: from pps.filterd (m0046661.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 29O7WQx4032750;
+        Mon, 24 Oct 2022 10:36:09 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=ykLzKEUdSBnu1ViK9+reJrmjgCeEvaT2J8wFmcU66mw=;
+ b=Gf6OqbX16TFbFtVfgRbUsDbwegpzBhH1L/tt/zaHjcyhrq5Bn4SoXgmWFdAah8+KgDCN
+ 0zH0KSNYDpjx7jDsz8iEyL+RHxj+oCfXh9qworc5xGSpz0LuIIcvLoxIcnK7ouzemHjs
+ oNz+UihDjw44keA0K6ZlBcEBPxDyqtTZxyKtiqLL9kDCOGgdfaK5aJFQ5UtWVo6OFzSi
+ if6wcB+bznYTwnyHeGjOcM/IHYT0DmUCGnCJWeVuqyBQjmGiGdYZ1Yc3WF5+yMYqdX/q
+ NFyFnw/SXS/M4cya56pMm4b/fUU2Mzh46B/2EJJn6xxl3RpG0yA7c5Ma8HH6VHnVQ0jh 3g== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3kc7dk1vyg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 24 Oct 2022 10:36:09 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 62E6310002A;
+        Mon, 24 Oct 2022 10:36:03 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node1.st.com [10.75.129.69])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 439F5216ECE;
+        Mon, 24 Oct 2022 10:36:03 +0200 (CEST)
+Received: from [10.201.21.93] (10.201.21.93) by SHFDAG1NODE1.st.com
+ (10.75.129.69) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Mon, 24 Oct
+ 2022 10:36:01 +0200
+Message-ID: <776917d2-bb09-1175-1457-dc929e871e5f@foss.st.com>
+Date:   Mon, 24 Oct 2022 10:36:00 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH v2 3/3] ARM: dts: stm32: Drop MMCI interrupt-names
+Content-Language: en-US
+To:     Marek Vasut <marex@denx.de>, <linux-arm-kernel@lists.infradead.org>
+CC:     Linus Walleij <linus.walleij@linaro.org>,
+        Yann Gautier <yann.gautier@foss.st.com>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20221013221242.218808-1-marex@denx.de>
+ <20221013221242.218808-3-marex@denx.de>
+From:   Alexandre TORGUE <alexandre.torgue@foss.st.com>
+In-Reply-To: <20221013221242.218808-3-marex@denx.de>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.201.21.93]
+X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE1.st.com
+ (10.75.129.69)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2022-10-24_02,2022-10-21_01,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Arnd,
+On 10/14/22 00:12, Marek Vasut wrote:
+> The pl18x MMCI driver does not use the interrupt-names property,
+> the binding document has been updated to recommend this property
+> be unused, remove it.
+> 
+> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> Reviewed-by: Yann Gautier <yann.gautier@foss.st.com>
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> ---
+> Cc: Alexandre Torgue <alexandre.torgue@foss.st.com>
+> Cc: Andy Gross <agross@kernel.org>
+> Cc: Bjorn Andersson <andersson@kernel.org>
+> Cc: Konrad Dybcio <konrad.dybcio@somainline.org>
+> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+> Cc: Linus Walleij <linus.walleij@linaro.org>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Yann Gautier <yann.gautier@foss.st.com>
+> Cc: devicetree@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-arm-msm@vger.kernel.org
+> Cc: linux-stm32@st-md-mailman.stormreply.com
+> To: linux-arm-kernel@lists.infradead.org
+> ---
+> V2: Add RB from Linus and Yann
+> ---
+>   arch/arm/boot/dts/stm32h743.dtsi  | 2 --
+>   arch/arm/boot/dts/stm32mp131.dtsi | 2 --
+>   arch/arm/boot/dts/stm32mp151.dtsi | 3 ---
+>   3 files changed, 7 deletions(-)
+> 
 
-arnd@kernel.org wrote on Fri, 21 Oct 2022 22:27:35 +0200:
+Applied on stm32-next.
 
-> From: Arnd Bergmann <arnd@arndb.de>
->=20
-> A number of device drivers reference CONFIG_ARM_S3C24XX_CPUFREQ or
-> similar symbols that are no longer available with the platform gone,
-> though the drivers themselves are still used on newer platforms,
-> so remove these hacks.
->=20
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Cheers
+Alex
 
-Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
-
-Thanks,
-Miqu=C3=A8l
