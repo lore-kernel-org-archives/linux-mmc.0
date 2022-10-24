@@ -2,131 +2,228 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31EC7FA3740
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 20:49:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF52CC67871
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 22:43:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233015AbiJXUtr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 16:49:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34238 "EHLO
+        id S231880AbiJXWnI convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Oct 2022 18:43:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45306 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235321AbiJXUtO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 16:49:14 -0400
-Received: from mxout3.routing.net (mxout3.routing.net [IPv6:2a03:2900:1:a::8])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E03BF2B4160;
-        Mon, 24 Oct 2022 11:56:30 -0700 (PDT)
-Received: from mxbox4.masterlogin.de (unknown [192.168.10.79])
-        by mxout3.routing.net (Postfix) with ESMTP id E5FBF62179;
-        Mon, 24 Oct 2022 18:42:41 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1666636962;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=5eN1nKoPXuoCK7Gl3+FMCs35j1iBuKnWx40bT8XwGo8=;
-        b=DKp3owzY4XDL0mekK+h8sxv0vm1jog+pcq3JAPdytguMVom3skwnsN7RNZOuua8ih3SNdC
-        yipXSLIYHtQKTOusPa4XVFSmSipZLGZGQQJnSAOaAAY0eNkHjJeqvDnnTRfkPv61TJa3QA
-        wS7yc+nZ/PHp8DUk3hn2+4o01DjMIgI=
-Received: from [127.0.0.1] (fttx-pool-80.245.75.40.bambit.de [80.245.75.40])
-        by mxbox4.masterlogin.de (Postfix) with ESMTPSA id DB82C803C9;
-        Mon, 24 Oct 2022 18:42:40 +0000 (UTC)
-Date:   Mon, 24 Oct 2022 20:42:36 +0200
-From:   Frank Wunderlich <linux@fw-web.de>
-To:     =?ISO-8859-1?Q?N=EDcolas_F=2E_R=2E_A=2E_Prado?= 
-        <nfraprado@collabora.com>
-CC:     linux-mediatek@lists.infradead.org,
-        Frank Wunderlich <frank-w@public-files.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: =?US-ASCII?Q?Re=3A_=5BPATCH_v3_2/7=5D_dt-bindings=3A_mmc=3A_?= =?US-ASCII?Q?mtk-sd=3A_Set_clocks_based_on_compatible?=
-User-Agent: K-9 Mail for Android
-In-Reply-To: <20221024164353.jzvx4ea442e4vahj@notapiano>
-References: <20221023091247.70586-1-linux@fw-web.de> <20221023091247.70586-3-linux@fw-web.de> <20221024164353.jzvx4ea442e4vahj@notapiano>
-Message-ID: <9940F0A3-9834-4614-A838-2E15BEABAC94@fw-web.de>
-MIME-Version: 1.0
+        with ESMTP id S230214AbiJXWmn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 18:42:43 -0400
+Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7499168E63
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Oct 2022 14:05:14 -0700 (PDT)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 6FA74122F3A;
+        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
+Received: from mail4.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 5FA16121965;
+        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail4.swissbit.com (Postfix) with ESMTPS;
+        Mon, 24 Oct 2022 19:35:24 +0200 (CEST)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Mon, 24 Oct
+ 2022 19:35:21 +0200
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Mon, 24 Oct 2022 19:35:21 +0200
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "avri.altman@wdc.com" <avri.altman@wdc.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: [PATCH] mmc-utils: Implement alternative boot operation
+Thread-Topic: [PATCH] mmc-utils: Implement alternative boot operation
+Thread-Index: AdjnzoBSTaQo1pFFRXi0S56OT7wLqg==
+Date:   Mon, 24 Oct 2022 17:35:20 +0000
+Message-ID: <d4ac7077d94743ed91c1b2b81fc5e164@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.242.2.2]
 Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-X-Mail-ID: 579f50de-c9e1-4760-9af4-fc1bfa646ae7
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27222.001
+X-TMASE-Result: 10--1.662500-10.000000
+X-TMASE-MatchedRID: 0aps3uOmWi69nTq7rJdwXKekGZXOwUBuUrr7Qc5WhKjAuQ0xDMaXkMAo
+        6b+EBkLgf146W0iUu2sZ6AKZ5CDJjqy/oBy0PY8JSs47mbT7SARMVCcj56k8hrt/YafNBu9cK2g
+        uGsQ9MyGiZ+sr4QQVHv0bVLkspps25zIAscb9v20dahq+rGDn//NkoMDX+kiuVC4aflv2vZk8TF
+        M4WP/swQUTHiQ6ysBCqhlEJaSjYZAkGC0QjFSfgUXBhxFdFgcQI64EUz6lBaheCiaGE+TES6PFj
+        JEFr+olIoOsWgr8s12OhzOa6g8Krfbha8Hd4q3059NgCK88uwJ42ANm+ZWMGE/7CniSRUbZadl/
+        dNKPyns=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 0ba29e83-2a3f-4d17-9256-bb156984212e-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Am 24=2E Oktober 2022 18:43:53 MESZ schrieb "N=C3=ADcolas F=2E R=2E A=2E Pr=
-ado" <nfraprado@collabora=2Ecom>:
->Hi,
->
->thank you for picking this up=2E
->
->On Sun, Oct 23, 2022 at 11:12:42AM +0200, Frank Wunderlich wrote:
->> From: N=C3=ADcolas F=2E R=2E A=2E Prado <nfraprado@collabora=2Ecom>
->>=20
->> The binding was describing a single clock list for all platforms, but
->> that's not really suitable:
->>=20
->> Most platforms using at least 2 clocks (source, hclk), some of them
->> a third "source_cg"=2E Mt2712 requires an extra 'bus_clk' on some of
->> its controllers, while mt8192 requires 8 clocks=2E
->>=20
->> Move the clock definitions inside if blocks that match on the
->> compatibles=2E
->>=20
->> I used Patch from N=C3=ADcolas F=2E R=2E A=2E Prado and modified it to =
-not using
->> "not" statement=2E
->>=20
->> Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
->> Signed-off-by: N=C3=ADcolas F=2E R=2E A=2E Prado <nfraprado@collabora=
-=2Ecom>
->> Signed-off-by: Frank Wunderlich <frank-w@public-files=2Ede>
->>=20
->> ---
->> v2:
->> - add this patch
->> v3:
->> - add blank lines and change "not" to matchlist
->> - reorder entries - make generic first then order alphanumeric
->> - rewrite commit description
->> - drop soc-specific mt8183 - constraints were also set for it above
->
->This is wrong, see below=2E
+Implements the alternative boot operation for eMMCs.
+Note the limitations of the help.
 
-You are right,will fix in v4
+This is mostly useful for testing purposes if you set
+up the boot partition configuration correctly.
 
->> ---
->>  =2E=2E=2E/devicetree/bindings/mmc/mtk-sd=2Eyaml       | 113 ++++++++++=
-+++-----
->>  1 file changed, 83 insertions(+), 30 deletions(-)
->>=20
->> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml b/Docu=
-mentation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->> index 3cbf0208f1b4=2E=2E31bb6dc329d2 100644
->> --- a/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd=2Eyaml
->[=2E=2E]
->> =20
->> -if:
->> -  properties:
->> -    compatible:
->> -      contains:
->> -        const: mediatek,mt8183-mmc
->> -then:
->> -  properties:
->> -    reg:
->> -      minItems: 2
->
->You can't drop this=2E Nodes with the mt8183 compatible should keep requi=
-ring two
->reg values=2E It's not covered by the branch below=2E
->
->Thanks,
->N=C3=ADcolas
+Usage:
+$ sudo dd if=/dev/mmcblk2boot0 of=bootdatammcblk count=2
+2+0 records in
+2+0 records out
+1024 bytes (1.0 kB, 1.0 KiB) copied, 0.00482308 s, 212 kB/s
 
+$ sudo ./mmc boot_operation bootdata 2 /dev/mmcblk2
 
-regards Frank
+$ diff -s bootdata bootdatammcblk
+Files bootdata and bootdatammcblk are identical
+
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ mmc.c      | 12 +++++++++
+ mmc.h      |  1 +
+ mmc_cmds.c | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ mmc_cmds.h |  1 +
+ 4 files changed, 90 insertions(+)
+
+diff --git a/mmc.c b/mmc.c
+index 170ee39..f328585 100644
+--- a/mmc.c
++++ b/mmc.c
+@@ -255,6 +255,18 @@ static struct Command commands[] = {
+ 	  "Issues a CMD0 GO_PRE_IDLE",
+ 	  NULL
+ 	},
++	{ do_alt_boot_op, -1,
++	  "boot_operation", "<boot_data_file> <boot_blocks> <device>\n"
++	  "Does the alternative boot operation and writes the specified starting blocks of boot data into the requested file.\n\n"
++	  "Note some limitations\n:"
++	  "1. The boot operation must be configured, e.g. for legacy speed:\n"
++	  "mmc-utils bootbus set single_backward retain x8 /dev/mmcblk2\n"
++	  "mmc-utils bootpart enable 1 0 /dev/mmcblk2\n"
++	  "2. The MMC must currently be running at the bus mode that is configured for the boot operation (HS200 and HS400 not supported at all).\n"
++	  "3. Most hosts cannot do transfers of the typical size of the boot partition, adjust <boot_blocks> accordingly.\n"
++	  "4. The MMC will perform a soft reset, if your system cannot handle that do not use the boot operation from mmc-utils.\n",
++	  NULL
++	},
+ 	{ 0, 0, 0, 0 }
+ };
+ 
+diff --git a/mmc.h b/mmc.h
+index 6511dbc..98fad16 100644
+--- a/mmc.h
++++ b/mmc.h
+@@ -24,6 +24,7 @@
+ #define MMC_GO_IDLE_STATE         0   /* bc                          */
+ #define MMC_GO_IDLE_STATE_ARG		0x0
+ #define MMC_GO_PRE_IDLE_STATE_ARG	0xF0F0F0F0
++#define MMC_BOOT_INITIATION_ARG		0xFFFFFFFA
+ #define MMC_SWITCH		6	/* ac	[31:0] See below	R1b */
+ #define MMC_SEND_EXT_CSD	8	/* adtc				R1  */
+ #define MMC_SEND_STATUS		13	/* ac   [31:16] RCA        R1  */
+diff --git a/mmc_cmds.c b/mmc_cmds.c
+index 3db17e1..1da61d4 100644
+--- a/mmc_cmds.c
++++ b/mmc_cmds.c
+@@ -3101,3 +3101,79 @@ int do_preidle(int nargs, char **argv)
+ 
+ 	return 0;
+ }
++
++int do_alt_boot_op(int nargs, char **argv)
++{
++	int fd, ret, boot_data_fd;
++	char *device, *boot_data_file;
++	struct mmc_ioc_multi_cmd *mioc;
++	__u8 ext_csd[512];
++	__u8 *boot_buf;
++	unsigned int boot_blocks, ext_csd_boot_size;
++
++	if (nargs != 4) {
++		fprintf(stderr, "Usage: mmc boot_op <boot_data_file> <boot_blocks> </path/to/mmcblkX>\n");
++		exit(1);
++	}
++	boot_data_file = argv[1];
++	boot_blocks = strtol(argv[2], NULL, 10);
++	device = argv[3];
++
++	fd = open(device, O_RDWR);
++	if (fd < 0) {
++		perror("open device");
++		exit(1);
++	}
++	boot_data_fd = open(boot_data_file, O_WRONLY | O_CREAT, 0644);
++	if (boot_data_fd < 0) {
++		perror("open boot data file");
++		exit(1);
++	}
++
++	ret = read_extcsd(fd, ext_csd);
++	if (ret) {
++		perror("read extcsd");
++		exit(1);
++	}
++	ext_csd_boot_size = ext_csd[226] * 128 * 1024;
++	if (boot_blocks * 512 > ext_csd_boot_size) {
++		perror("Requested boot size bigger than boot partition");
++		exit(1);
++	}
++
++	boot_buf = calloc(1, sizeof(__u8) * boot_blocks * 512);
++	mioc = calloc(1, sizeof(struct mmc_ioc_multi_cmd) +
++			   2 * sizeof(struct mmc_ioc_cmd));
++	if (!mioc || !boot_buf) {
++		perror("Failed to allocate memory");
++		return -ENOMEM;
++	}
++
++	mioc->num_of_cmds = 2;
++	mioc->cmds[0].opcode = MMC_GO_IDLE_STATE;
++	mioc->cmds[0].arg = MMC_GO_PRE_IDLE_STATE_ARG;
++	mioc->cmds[0].flags = MMC_RSP_NONE | MMC_CMD_AC;
++	mioc->cmds[0].write_flag = 0;
++
++	mioc->cmds[1].opcode = MMC_GO_IDLE_STATE;
++	mioc->cmds[1].arg = MMC_BOOT_INITIATION_ARG;
++	mioc->cmds[1].flags = MMC_RSP_NONE | MMC_CMD_ADTC;
++	mioc->cmds[1].write_flag = 0;
++	mioc->cmds[1].blksz = 512;
++	mioc->cmds[1].blocks = boot_blocks;
++	/* Access time of boot part differs wildly, spec mandates 1s */
++	mioc->cmds[1].data_timeout_ns = 2 * 1000 * 1000 * 1000;
++	mmc_ioc_cmd_set_data(mioc->cmds[1], boot_buf);
++
++	ret = ioctl(fd, MMC_IOC_MULTI_CMD, mioc);
++	if (ret)
++		perror("multi-cmd ioctl error %d\n", ret);
++	close(fd);
++
++	ret = DO_IO(write, boot_data_fd, boot_buf, boot_blocks * 512);
++	if (ret < 0) {
++		perror("Write error\n");
++		exit(1);
++	}
++	return 0;
++}
+diff --git a/mmc_cmds.h b/mmc_cmds.h
+index faab362..5f2bef1 100644
+--- a/mmc_cmds.h
++++ b/mmc_cmds.h
+@@ -49,3 +49,4 @@ int do_erase(int nargs, char **argv);
+ int do_general_cmd_read(int nargs, char **argv);
+ int do_softreset(int nargs, char **argv);
+ int do_preidle(int nargs, char **argv);
++int do_alt_boot_op(int nargs, char **argv);
+-- 
+2.37.3
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
