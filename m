@@ -2,48 +2,47 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7519DC04A95
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 13:10:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 67179C04A95
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 13:11:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232494AbiJYNKk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Oct 2022 09:10:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59510 "EHLO
+        id S231240AbiJYNK6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 09:10:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232207AbiJYNKf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 09:10:35 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C37F13B948;
-        Tue, 25 Oct 2022 06:10:18 -0700 (PDT)
+        with ESMTP id S232620AbiJYNKq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 09:10:46 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55E8926AC9;
+        Tue, 25 Oct 2022 06:10:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666703418; x=1698239418;
+  t=1666703437; x=1698239437;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=NuDZQcUV4SojqIqkjTfI5hZYdLjn5tWqxMSX/pgURoY=;
-  b=Kx16FdV7PAH7fEcYldedpHL/vVhFl45wLB2s6mycbtXPovOkqca1rxP/
-   3yn/6hRw6EjebftbKVuGkiXILfr353zNnBgCEbuWjHhdLTUbJJMRRBXsp
-   T4420ngBY2AJc/8FqEw067dEAEDI0u7geZ+Nf2aNTuGn1GQ1DhywOoLl8
-   Jcfo/YYQWGsDsuzGo6oSGJq7FDIpLyPbUde9EiqEtvwlheHCAu25nZJ0J
-   28eQIDm/5jF6DH3g4AffNdAu7RBCDNd8xFVzTjRIcitnmXrlZf62ei/Kc
-   trea1Hka5zLSuvQHJLho72SxAdS9bb9W03ssHTBN2xCtekFQuDFrH5MF3
+  bh=IrpzDl6B3inCI4opbm0aajB2ZUkQjMkiT3FQzvFiIjk=;
+  b=fE8cw9oIofeKJARelaV42ipMQKphDW6iXUS+08FIZdHl6K2Im+9VF1xJ
+   paHtnnK5kjvxoYiALCGw2D/8Vb+yhFKzpfmULesVL5hGSRjNyh2CZ41Zz
+   uYd3VvQA69iwnxEnwWAGtFp3A9zP1krbA6L+MiupSNnRDlENU7qRR3Zrv
+   EYPwRN1sbdgHnsIdbroxcB4ZLmqoLUnD/Q5XNxAGdKEHDA16BFkYxxs7x
+   iZGeTK9aoWS8vTflYVc0O1YO0kQEjM76000p+Tmy+IMeN6qA6BYBwCQ3f
+   g1SM3vWuBBjujRd0isnKYlz1sAJx9knd9uNBdngdIhBjfTD2X8H6/bGic
    A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="295071032"
+X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="305280693"
 X-IronPort-AV: E=Sophos;i="5.95,212,1661842800"; 
-   d="scan'208";a="295071032"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:10:18 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="626415253"
+   d="scan'208";a="305280693"
+Received: from orsmga006.jf.intel.com ([10.7.209.51])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:10:37 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="609564812"
 X-IronPort-AV: E=Sophos;i="5.95,212,1661842800"; 
-   d="scan'208";a="626415253"
+   d="scan'208";a="609564812"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.236])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:10:12 -0700
-Message-ID: <4ddc5ec2-0a76-5017-3d46-8864a7818342@intel.com>
-Date:   Tue, 25 Oct 2022 16:10:08 +0300
+  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:10:30 -0700
+Message-ID: <dc787f32-a59c-db5e-37da-3659ae265380@intel.com>
+Date:   Tue, 25 Oct 2022 16:10:26 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH v3 4/7] mms: sdhci-esdhc-imx: Fix SDHCI_RESET_ALL for
- CQHCI
+Subject: Re: [PATCH v3 5/7] mmc: sdhci-tegra: Fix SDHCI_RESET_ALL for CQHCI
 Content-Language: en-US
 To:     Brian Norris <briannorris@chromium.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
@@ -68,11 +67,11 @@ Cc:     Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org,
         Faiz Abbas <faiz_abbas@ti.com>,
         Jonathan Hunter <jonathanh@nvidia.com>
 References: <20221024175501.2265400-1-briannorris@chromium.org>
- <20221024105229.v3.4.I7d01f9ad11bacdc9213dee61b7918982aea39115@changeid>
+ <20221024105229.v3.5.I418c9eaaf754880fcd2698113e8c3ef821a944d7@changeid>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221024105229.v3.4.I7d01f9ad11bacdc9213dee61b7918982aea39115@changeid>
+In-Reply-To: <20221024105229.v3.5.I418c9eaaf754880fcd2698113e8c3ef821a944d7@changeid>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -96,9 +95,8 @@ On 24/10/22 20:54, Brian Norris wrote:
 > 
 > Include this fix by way of the new sdhci_and_cqhci_reset() helper.
 > 
-> Fixes: bb6e358169bf ("mmc: sdhci-esdhc-imx: add CMDQ support")
+> Fixes: 3c4019f97978 ("mmc: tegra: HW Command Queue Support for Tegra SDMMC")
 > Signed-off-by: Brian Norris <briannorris@chromium.org>
-> Reviewed-by: Haibo Chen <haibo.chen@nxp.com>
 
 This patch is dependent on "mmc: cqhci: Provide
 helper for resetting both SDHCI and CQHCI".  Best point that out
@@ -112,33 +110,32 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 > 
 > Changes in v3:
 >  - Use new SDHCI+CQHCI helper
->  - Add Reviewed-by
 > 
 > Changes in v2:
->  - Drop unnecessary ESDHC_FLAG_CQHCI check
+>  - Drop unnecessary 'enable_hwcq' check
 > 
->  drivers/mmc/host/sdhci-esdhc-imx.c | 3 ++-
+>  drivers/mmc/host/sdhci-tegra.c | 3 ++-
 >  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 55981b0f0b10..b297c3c360eb 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -25,6 +25,7 @@
->  #include <linux/of_device.h>
->  #include <linux/pinctrl/consumer.h>
->  #include <linux/pm_runtime.h>
+> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
+> index 413925bce0ca..c71000a07656 100644
+> --- a/drivers/mmc/host/sdhci-tegra.c
+> +++ b/drivers/mmc/host/sdhci-tegra.c
+> @@ -28,6 +28,7 @@
+>  
+>  #include <soc/tegra/common.h>
+>  
 > +#include "sdhci-cqhci.h"
 >  #include "sdhci-pltfm.h"
->  #include "sdhci-esdhc.h"
 >  #include "cqhci.h"
-> @@ -1288,7 +1289,7 @@ static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
 >  
->  static void esdhc_reset(struct sdhci_host *host, u8 mask)
->  {
+> @@ -367,7 +368,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
+>  	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
+>  	u32 misc_ctrl, clk_ctrl, pad_ctrl;
+>  
 > -	sdhci_reset(host, mask);
 > +	sdhci_and_cqhci_reset(host, mask);
 >  
->  	sdhci_writel(host, host->ier, SDHCI_INT_ENABLE);
->  	sdhci_writel(host, host->ier, SDHCI_SIGNAL_ENABLE);
+>  	if (!(mask & SDHCI_RESET_ALL))
+>  		return;
 
