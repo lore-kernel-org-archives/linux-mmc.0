@@ -2,214 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4CA43C04A95
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 13:11:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E2DECC38A2D
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 13:30:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232628AbiJYNL2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Oct 2022 09:11:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33100 "EHLO
+        id S231249AbiJYNaH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 09:30:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232506AbiJYNLK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 09:11:10 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 665204D15F;
-        Tue, 25 Oct 2022 06:11:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666703468; x=1698239468;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=a/qqwi8m/snqSKRNwfW4yQIJyJ9DkUuatXc42ShFjNo=;
-  b=A07LLRK43gQA5KuOU72nAZ43ZNd7gwhggFSTbsdBhdgOFr02ULzMWcl7
-   iUDid+zDtduP3p8rZ2JmGJtEwC/I5H8zB9xo58oebZtXfnCJwWpBtu4hi
-   Dq9x2WlD/6TjlmjRNL2vzHEFzRugsj9hN7JPoyCAWlces5Pil2TLw6H9j
-   ryIBbjnJLNVWqH0FdU6wVWn0FNVTpkEuBAoAN9J5LooaXm5XuSck1e3HU
-   uup4gqx9Nq2oPxpETaQ4y8YM1SLAdc/VcTzmk/7xh9SMqV2AL6g7dCYeC
-   +dqYf+n9BHIn4UV06HRbHxuaQkuvDW8Y1RR+fLLwsyGno5JHtVxjYnAV9
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="288064935"
-X-IronPort-AV: E=Sophos;i="5.95,212,1661842800"; 
-   d="scan'208";a="288064935"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:11:07 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="609564925"
-X-IronPort-AV: E=Sophos;i="5.95,212,1661842800"; 
-   d="scan'208";a="609564925"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.236])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 06:11:00 -0700
-Message-ID: <85ed639e-4f87-d57e-ceca-60b8eca4f8b3@intel.com>
-Date:   Tue, 25 Oct 2022 16:10:56 +0300
+        with ESMTP id S230057AbiJYNaG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 09:30:06 -0400
+Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88AB2DB764;
+        Tue, 25 Oct 2022 06:30:00 -0700 (PDT)
+Received: from mxbox1.masterlogin.de (unknown [192.168.10.88])
+        by mxout2.routing.net (Postfix) with ESMTP id A184A618F6;
+        Tue, 25 Oct 2022 13:29:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1666704598;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=jolFtewM3ztHIyphgDnA9u4uYdrtd/Xjhj1chDEywEE=;
+        b=P3XbA1ThmmAoxE/xeQoCzcpqoy6L1VS36LoJhcmfdpwy3+Bv82Tw1hjiOWpe0oMLOTfrtb
+        pyAF+e2zINxK8LSW+l5z2G9/Yt7GWEKt4rnCZTm0u13XiqSIaNdmjPc3rjcIQVzNPcc1Wk
+        MudKwFrbrp0M9zLboLGFfJ6XEcecbhM=
+Received: from frank-G5.. (fttx-pool-217.61.152.57.bambit.de [217.61.152.57])
+        by mxbox1.masterlogin.de (Postfix) with ESMTPSA id 9ABE240112;
+        Tue, 25 Oct 2022 13:29:57 +0000 (UTC)
+From:   Frank Wunderlich <linux@fw-web.de>
+To:     linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Sam Shih <Sam.Shih@mediatek.com>
+Subject: [PATCH v5 0/6] Add mmc-support for mt7986
+Date:   Tue, 25 Oct 2022 15:29:47 +0200
+Message-Id: <20221025132953.81286-1-linux@fw-web.de>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH v3 7/7] mmc: sdhci-*: Convert drivers to new
- sdhci_and_cqhci_reset()
-Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Shawn Lin <shawn.lin@rock-chips.com>, linux-mmc@vger.kernel.org,
-        Al Cooper <alcooperx@gmail.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>
-References: <20221024175501.2265400-1-briannorris@chromium.org>
- <20221024105229.v3.7.Ia91f031f5f770af7bd2ff3e28b398f277606d970@changeid>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221024105229.v3.7.Ia91f031f5f770af7bd2ff3e28b398f277606d970@changeid>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-Mail-ID: 1f7902d6-bcfd-4759-8bc0-01e5fc8a140d
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/10/22 20:55, Brian Norris wrote:
-> An earlier patch ("mmc: cqhci: Provide helper for resetting both SDHCI
-> and CQHCI") does these operations for us.
-> 
-> I keep these as a separate patch, since the earlier patch is a
-> prerequisite to some important bugfixes that need to be backported via
-> linux-stable.
-> 
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
+From: Frank Wunderlich <frank-w@public-files.de>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+I've noticed the mtk-sd binding needs a bit more work get into a more
+clean state.
 
+There are 2 properties missing that maybe need to be added later or
+dropped from devicetrees:
+drv-type (which is used in mt8183-kukui.dtsi and set to <2>)
+and
+r_smpl (used in mt7622-rfb1.dts and mt7622-bananapi-bpi-r64.dts, both
+times set to <1>)
 
-> ---
-> 
-> Changes in v3:
->  - Rewrite to new helper, patch sdhci-msm too
-> 
-> Changes in v2:
->  - Factor out ->cqe_private helpers
-> 
->  drivers/mmc/host/sdhci-msm.c      | 10 ++--------
->  drivers/mmc/host/sdhci-pci-core.c | 11 ++---------
->  drivers/mmc/host/sdhci-pci-gli.c  | 11 ++---------
->  3 files changed, 6 insertions(+), 26 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 3a091a387ecb..03f76384ab3f 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -19,6 +19,7 @@
->  #include <linux/pinctrl/consumer.h>
->  #include <linux/reset.h>
->  
-> +#include "sdhci-cqhci.h"
->  #include "sdhci-pltfm.h"
->  #include "cqhci.h"
->  
-> @@ -2304,13 +2305,6 @@ static void sdhci_msm_set_regulator_caps(struct sdhci_msm_host *msm_host)
->  	pr_debug("%s: supported caps: 0x%08x\n", mmc_hostname(mmc), caps);
->  }
->  
-> -static void sdhci_msm_reset(struct sdhci_host *host, u8 mask)
-> -{
-> -	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL))
-> -		cqhci_deactivate(host->mmc);
-> -	sdhci_reset(host, mask);
-> -}
-> -
->  static int sdhci_msm_register_vreg(struct sdhci_msm_host *msm_host)
->  {
->  	int ret;
-> @@ -2450,7 +2444,7 @@ static const struct of_device_id sdhci_msm_dt_match[] = {
->  MODULE_DEVICE_TABLE(of, sdhci_msm_dt_match);
->  
->  static const struct sdhci_ops sdhci_msm_ops = {
-> -	.reset = sdhci_msm_reset,
-> +	.reset = sdhci_and_cqhci_reset,
->  	.set_clock = sdhci_msm_set_clock,
->  	.get_min_clock = sdhci_msm_get_min_clock,
->  	.get_max_clock = sdhci_msm_get_max_clock,
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-> index 169b84761041..cc039155b5c7 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -38,6 +38,7 @@
->  #include "cqhci.h"
->  
->  #include "sdhci.h"
-> +#include "sdhci-cqhci.h"
->  #include "sdhci-pci.h"
->  
->  static void sdhci_pci_hw_reset(struct sdhci_host *host);
-> @@ -234,14 +235,6 @@ static void sdhci_pci_dumpregs(struct mmc_host *mmc)
->  	sdhci_dumpregs(mmc_priv(mmc));
->  }
->  
-> -static void sdhci_cqhci_reset(struct sdhci_host *host, u8 mask)
-> -{
-> -	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
-> -	    host->mmc->cqe_private)
-> -		cqhci_deactivate(host->mmc);
-> -	sdhci_reset(host, mask);
-> -}
-> -
->  /*****************************************************************************\
->   *                                                                           *
->   * Hardware specific quirk handling                                          *
-> @@ -703,7 +696,7 @@ static const struct sdhci_ops sdhci_intel_glk_ops = {
->  	.set_power		= sdhci_intel_set_power,
->  	.enable_dma		= sdhci_pci_enable_dma,
->  	.set_bus_width		= sdhci_set_bus_width,
-> -	.reset			= sdhci_cqhci_reset,
-> +	.reset			= sdhci_and_cqhci_reset,
->  	.set_uhs_signaling	= sdhci_intel_set_uhs_signaling,
->  	.hw_reset		= sdhci_pci_hw_reset,
->  	.irq			= sdhci_cqhci_irq,
-> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-> index 4d509f656188..633a8ee8f8c5 100644
-> --- a/drivers/mmc/host/sdhci-pci-gli.c
-> +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -15,6 +15,7 @@
->  #include <linux/of.h>
->  #include <linux/iopoll.h>
->  #include "sdhci.h"
-> +#include "sdhci-cqhci.h"
->  #include "sdhci-pci.h"
->  #include "cqhci.h"
->  
-> @@ -922,14 +923,6 @@ static int gl9763e_add_host(struct sdhci_pci_slot *slot)
->  	return ret;
->  }
->  
-> -static void sdhci_gl9763e_reset(struct sdhci_host *host, u8 mask)
-> -{
-> -	if ((host->mmc->caps2 & MMC_CAP2_CQE) && (mask & SDHCI_RESET_ALL) &&
-> -	    host->mmc->cqe_private)
-> -		cqhci_deactivate(host->mmc);
-> -	sdhci_reset(host, mask);
-> -}
-> -
->  static void gli_set_gl9763e(struct sdhci_pci_slot *slot)
->  {
->  	struct pci_dev *pdev = slot->chip->pdev;
-> @@ -1136,7 +1129,7 @@ static const struct sdhci_ops sdhci_gl9763e_ops = {
->  	.set_clock		= sdhci_set_clock,
->  	.enable_dma		= sdhci_pci_enable_dma,
->  	.set_bus_width		= sdhci_set_bus_width,
-> -	.reset			= sdhci_gl9763e_reset,
-> +	.reset			= sdhci_and_cqhci_reset,
->  	.set_uhs_signaling	= sdhci_set_gl9763e_signaling,
->  	.voltage_switch		= sdhci_gli_voltage_switch,
->  	.irq                    = sdhci_gl9763e_cqhci_irq,
+i don't know their function and boundaries and i do not find them in
+driver. I guess they are added by accident, so i removing them in the
+patches 5+6.
+
+v2:
+- add compatible based binding
+v3:
+- solve "not" statement in binding and reorder if statements,drop mt8183
+- added patches removing invalid properties (not in driver)
+v4:
+- squashed part 1 (compatible) and 3 (SoC specific clock config)
+- new mt7986 clock bindings based on info from mtk
+- re-add mt8183 reg boundary
+v5:
+- add fixes-tags to Patches 4+5 and reviewed-by to 6
+- drop quotes from mt7986 clock-names from patch 2
+
+Frank Wunderlich (3):
+  arm64: dts: mediatek: mt2712e: swap last 2 clocks to match binding
+  arm64: dts: mt8183: drop drv-type from mmc-node
+  arm64: dts: mt7622: drop r_smpl property from mmc node
+
+Nícolas F. R. A. Prado (1):
+  dt-bindings: mmc: mtk-sd: Set clocks based on compatible
+
+Sam Shih (2):
+  dt-bindings: mmc: Add support for Mediatek MT7986
+  mmc: mediatek: add support for MT7986 SoC
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 149 ++++++++++++++----
+ arch/arm64/boot/dts/mediatek/mt2712e.dtsi     |   6 +-
+ .../dts/mediatek/mt7622-bananapi-bpi-r64.dts  |   1 -
+ arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts  |   1 -
+ .../arm64/boot/dts/mediatek/mt8183-kukui.dtsi |   1 -
+ drivers/mmc/host/mtk-sd.c                     |  14 ++
+ 6 files changed, 136 insertions(+), 36 deletions(-)
+
+-- 
+2.34.1
 
