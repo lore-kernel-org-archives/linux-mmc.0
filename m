@@ -2,41 +2,36 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2E68C38A2D
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Oct 2022 23:24:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 792D9C04A95
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 07:42:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231297AbiJXXX5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Oct 2022 19:23:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60288 "EHLO
+        id S231939AbiJYHmt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 03:42:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231344AbiJXXXh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Oct 2022 19:23:37 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0119B17F2A8;
-        Mon, 24 Oct 2022 14:44:40 -0700 (PDT)
-Received: from notapiano (unknown [194.36.25.51])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange ECDHE (P-256) server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        (Authenticated sender: nfraprado)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 7737B6602392;
-        Mon, 24 Oct 2022 17:43:58 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1666629840;
-        bh=4kWtLxHplFOS10HqVPq+7P3+dYq5PouJzYToXkZX4Kw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=RxnUpi1bDW82nmb44+goLMrowb5Wd9tioPQl7b/kkrgLASz3MA/H6Mfcrk1OWg9p0
-         kfT8CZT2IAaA5LedmtnGE+nyDEFDU9GMgEWulgV6pIC5lxMp8S63ZLYECm16UV3Vtl
-         nmLjvBik0WwkbtjEKwi76XMOYyUlFA6ToQyYFUkrlAnhl3B+7dRnMg/uoTO/8+tPtG
-         ueksg4mems9ce5/g7amf9L164rpyDn32FV4nTDlaf2rB1rdxE8SRYh1PpvbtovXUdP
-         0SXlzUsXOMhX+5Pbbfufsxf0NrisgDUYMQmSL0nog1TSoBOmBHnV7ANsQ9bvHiY72g
-         s9ZX7RViGNyLQ==
-Date:   Mon, 24 Oct 2022 12:43:53 -0400
-From:   =?utf-8?B?TsOtY29sYXMgRi4gUi4gQS4=?= Prado 
-        <nfraprado@collabora.com>
-To:     Frank Wunderlich <linux@fw-web.de>
-Cc:     linux-mediatek@lists.infradead.org,
-        Frank Wunderlich <frank-w@public-files.de>,
+        with ESMTP id S231951AbiJYHmq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 03:42:46 -0400
+Received: from mxout1.routing.net (mxout1.routing.net [IPv6:2a03:2900:1:a::a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EAC5415627F;
+        Tue, 25 Oct 2022 00:42:44 -0700 (PDT)
+Received: from mxbox3.masterlogin.de (unknown [192.168.10.78])
+        by mxout1.routing.net (Postfix) with ESMTP id 7CE83403E1;
+        Tue, 25 Oct 2022 07:42:42 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1666683762;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=f/hGfrwnMhOVRX7cm/mY3k2KPSFfRkFZFxpavcHfejc=;
+        b=Nm/E7WnAuZ3Ps2L3++5tumhrmHVB9IaL7vb907rsL9ohxuu9pGBSxWmEcIwlev12m0d/6s
+        y5i6EfsULUw+5Y/eQlZ42fDSZE6tpCoc9yLJ97+UesUgGwNfE0cfPMFHfQruDPnCWd/0kB
+        H/qlv9cSsLp9el50IDdsVJsMb2aoIhY=
+Received: from frank-G5.. (fttx-pool-217.61.152.57.bambit.de [217.61.152.57])
+        by mxbox3.masterlogin.de (Postfix) with ESMTPSA id 55801360310;
+        Tue, 25 Oct 2022 07:42:41 +0000 (UTC)
+From:   Frank Wunderlich <linux@fw-web.de>
+To:     linux-mediatek@lists.infradead.org
+Cc:     Frank Wunderlich <frank-w@public-files.de>,
         Chaotian Jing <chaotian.jing@mediatek.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -44,114 +39,66 @@ Cc:     linux-mediatek@lists.infradead.org,
         Matthias Brugger <matthias.bgg@gmail.com>,
         Wenbin Mei <wenbin.mei@mediatek.com>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3 2/7] dt-bindings: mmc: mtk-sd: Set clocks based on
- compatible
-Message-ID: <20221024164353.jzvx4ea442e4vahj@notapiano>
-References: <20221023091247.70586-1-linux@fw-web.de>
- <20221023091247.70586-3-linux@fw-web.de>
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Sam Shih <Sam.Shih@mediatek.com>
+Subject: [PATCH v4 0/6] Add mmc-support for mt7986
+Date:   Tue, 25 Oct 2022 09:42:32 +0200
+Message-Id: <20221025074238.18136-1-linux@fw-web.de>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20221023091247.70586-3-linux@fw-web.de>
+X-Mail-ID: d27fab61-19f8-4c93-835c-c4d13b36beb1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+From: Frank Wunderlich <frank-w@public-files.de>
 
-thank you for picking this up.
+I've noticed the mtk-sd binding needs a bit more work get into a more
+clean state.
 
-On Sun, Oct 23, 2022 at 11:12:42AM +0200, Frank Wunderlich wrote:
-> From: Nícolas F. R. A. Prado <nfraprado@collabora.com>
-> 
-> The binding was describing a single clock list for all platforms, but
-> that's not really suitable:
-> 
-> Most platforms using at least 2 clocks (source, hclk), some of them
-> a third "source_cg". Mt2712 requires an extra 'bus_clk' on some of
-> its controllers, while mt8192 requires 8 clocks.
-> 
-> Move the clock definitions inside if blocks that match on the
-> compatibles.
-> 
-> I used Patch from Nícolas F. R. A. Prado and modified it to not using
-> "not" statement.
-> 
-> Fixes: 59a23395d8aa ("dt-bindings: mmc: Add support for MT8192 SoC")
-> Signed-off-by: Nícolas F. R. A. Prado <nfraprado@collabora.com>
-> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
-> 
-> ---
-> v2:
-> - add this patch
-> v3:
-> - add blank lines and change "not" to matchlist
-> - reorder entries - make generic first then order alphanumeric
-> - rewrite commit description
-> - drop soc-specific mt8183 - constraints were also set for it above
+There are 2 properties missing that maybe need to be added later or
+dropped from devicetrees:
+drv-type (which is used in mt8183-kukui.dtsi and set to <2>)
+and
+r_smpl (used in mt7622-rfb1.dts and mt7622-bananapi-bpi-r64.dts, both
+times set to <1>)
 
-This is wrong, see below.
+i don't know their function and boundaries and i do not find them in
+driver. I guess they are added by accident, so i removing them in the
+patches 5+6.
 
-> ---
->  .../devicetree/bindings/mmc/mtk-sd.yaml       | 113 +++++++++++++-----
->  1 file changed, 83 insertions(+), 30 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> index 3cbf0208f1b4..31bb6dc329d2 100644
-> --- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-[..]
->  
-> -if:
-> -  properties:
-> -    compatible:
-> -      contains:
-> -        const: mediatek,mt8183-mmc
-> -then:
-> -  properties:
-> -    reg:
-> -      minItems: 2
+v2:
+- add compatible based binding
+v3:
+- solve "not" statement in binding and reorder if statements,drop mt8183
+- added patches removing invalid properties (not in driver)
+v4:
+- squashed part 1 (compatible) and 3 (SoC specific clock config)
+- new mt7986 clock bindings based on info from mtk
+- re-add mt8183 reg boundary
 
-You can't drop this. Nodes with the mt8183 compatible should keep requiring two
-reg values. It's not covered by the branch below.
+Frank Wunderlich (3):
+  arm64: dts: mediatek: mt2712e: swap last 2 clocks to match binding
+  arm64: dts: mt8183: drop drv-type from mmc-node
+  arm64: dts: mt7622: drop r_smpl property from mmc node
 
-Thanks,
-Nícolas
+NÃ­colas F. R. A. Prado (1):
+  dt-bindings: mmc: mtk-sd: Set clocks based on compatible
 
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          enum:
-> +            - mediatek,mt2701-mmc
-> +            - mediatek,mt6779-mmc
-> +            - mediatek,mt6795-mmc
-> +            - mediatek,mt7620-mmc
-> +            - mediatek,mt7622-mmc
-> +            - mediatek,mt7623-mmc
-> +            - mediatek,mt8135-mmc
-> +            - mediatek,mt8173-mmc
-> +            - mediatek,mt8183-mmc
-> +            - mediatek,mt8186-mmc
-> +            - mediatek,mt8188-mmc
-> +            - mediatek,mt8195-mmc
-> +            - mediatek,mt8516-mmc
-> +    then:
-> +      properties:
-> +        clocks:
-> +          minItems: 2
-> +          items:
-> +            - description: source clock
-> +            - description: HCLK which used for host
-> +            - description: independent source clock gate
-> +        clock-names:
-> +          minItems: 2
-> +          items:
-> +            - const: source
-> +            - const: hclk
-> +            - const: source_cg
-> +
-[..]
+Sam Shih (2):
+  dt-bindings: mmc: Add support for Mediatek MT7986
+  mmc: mediatek: add support for MT7986 SoC
+
+ .../devicetree/bindings/mmc/mtk-sd.yaml       | 149 ++++++++++++++----
+ arch/arm64/boot/dts/mediatek/mt2712e.dtsi     |   6 +-
+ .../dts/mediatek/mt7622-bananapi-bpi-r64.dts  |   1 -
+ arch/arm64/boot/dts/mediatek/mt7622-rfb1.dts  |   1 -
+ .../arm64/boot/dts/mediatek/mt8183-kukui.dtsi |   1 -
+ drivers/mmc/host/mtk-sd.c                     |  14 ++
+ 6 files changed, 136 insertions(+), 36 deletions(-)
+
+-- 
+2.34.1
+
