@@ -2,97 +2,80 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AA222C38A2D
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 11:08:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0816C04A95
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 11:33:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230522AbiJYLIp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Oct 2022 07:08:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51746 "EHLO
+        id S231414AbiJYLdR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 07:33:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231244AbiJYLIo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 07:08:44 -0400
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C645E189520;
-        Tue, 25 Oct 2022 04:08:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666696123; x=1698232123;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=pMfcDWmEvv6uwFR85xXT/GMoLUi2ugbCSFtAe8+1dKs=;
-  b=jGcmf+9BfxH58yN4P28htn587XvvFQwUvUryrT9xUd+uuSVvbEsDMxNo
-   27RBw4j8eFdgjgrxP/1Wzll0ZNDx+dPDoWdPbRmQdXUQfIvanrtZCOr5R
-   /0MIwgRzn2jiD/LF32vcciRHFvzdooEjnA1p9hbFMI7cXwutdeC/pBcsV
-   WToBJpNMdItR2582XZyWxhAstTKIwv8pxO2rRRGN71QzXV81l2WqU1jeI
-   Q0TDjn7tAE6pejtUa/puD4YAWfSO3geK72qMmzDqiaw3RNN3PMFj+XrUa
-   BpgjHSGDnV0ddk62O+PReCwbGkhbc4WtL5p1GJq+XNxeFLUxVkP1gH8zF
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="308740065"
-X-IronPort-AV: E=Sophos;i="5.95,211,1661842800"; 
-   d="scan'208";a="308740065"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 04:08:43 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10510"; a="664871795"
-X-IronPort-AV: E=Sophos;i="5.95,211,1661842800"; 
-   d="scan'208";a="664871795"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.236])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 04:08:40 -0700
-Message-ID: <8a1549d5-7407-7e47-5fbe-bcb9ca953cda@intel.com>
-Date:   Tue, 25 Oct 2022 14:08:36 +0300
+        with ESMTP id S229949AbiJYLdQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 07:33:16 -0400
+Received: from mxout1.routing.net (mxout1.routing.net [IPv6:2a03:2900:1:a::a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B5B8A8E78F;
+        Tue, 25 Oct 2022 04:33:01 -0700 (PDT)
+Received: from mxbox4.masterlogin.de (unknown [192.168.10.79])
+        by mxout1.routing.net (Postfix) with ESMTP id EF5E141BCA;
+        Tue, 25 Oct 2022 11:32:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
+        s=20200217; t=1666697579;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=i/pjUimprXAN5aGuHop15W9q66+usPs8I5yURjMHny8=;
+        b=pKnBbJgB7C26LzjLyROErl6S/TeGybPxmxQYDff76htpo5Ihk2iqRV/iOnLfVJO9PyjFwO
+        mlSIdEpGaFQivp/0IVoNFDEfgXq06ccpEWl89NwmRcAtFWIr2QWBI70nOA/y6exqnoOCNy
+        z/MOv8TECpFBK5ICX15P2onIYpZ+Q1g=
+Received: from webmail.hosting.de (unknown [134.0.26.148])
+        by mxbox4.masterlogin.de (Postfix) with ESMTPA id 2F75F80098;
+        Tue, 25 Oct 2022 11:32:58 +0000 (UTC)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Allow building with COMPILE_TEST
-Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
+Date:   Tue, 25 Oct 2022 13:32:58 +0200
+From:   "Frank Wunderlich (linux)" <linux@fw-web.de>
+To:     AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Cc:     linux-mediatek@lists.infradead.org, devicetree@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Sam Shih <Sam.Shih@mediatek.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
         linux-arm-kernel@lists.infradead.org,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>, linux-mmc@vger.kernel.org
-References: <20221024181759.2355583-1-briannorris@chromium.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221024181759.2355583-1-briannorris@chromium.org>
-Content-Type: text/plain; charset=UTF-8
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+Subject: Re: [PATCH v4 5/6] arm64: dts: mt7622: drop r_smpl property from mmc
+ node
+In-Reply-To: <2bc75b20-9469-e7e3-24e3-cc80ab9b8a8e@collabora.com>
+References: <20221025074238.18136-1-linux@fw-web.de>
+ <20221025074238.18136-6-linux@fw-web.de>
+ <2bc75b20-9469-e7e3-24e3-cc80ab9b8a8e@collabora.com>
+User-Agent: Roundcube Webmail/1.4.13
+Message-ID: <842341a170221d072b188e1e919865c8@fw-web.de>
+X-Sender: linux@fw-web.de
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
 Content-Transfer-Encoding: 7bit
+X-Mail-ID: b3f94e45-d4d2-47a5-9be4-8caefd74f635
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/10/22 21:17, Brian Norris wrote:
-> This driver is pretty simple, and it can be useful to build it (for
-> validation purposes) without BMIPS or ARCH_BRCMSTB.
+Am 2022-10-25 12:52, schrieb AngeloGioacchino Del Regno:
+> Il 25/10/22 09:42, Frank Wunderlich ha scritto:
+>> From: Frank Wunderlich <frank-w@public-files.de>
+>> 
+>> This property is not defined in binding and driver.
+>> 
+>> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 > 
-> It technically depends on CONFIG_OF to do anything useful at runtime,
-> but it still works out OK for compile-testing using the !OF stubs.
-> 
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
+> Fixes tag please.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+as 2 boards were touched (i guess r64 was copy from rfb), i have 2 
+commits found
+adding this property.
 
-> ---
-> 
->  drivers/mmc/host/Kconfig | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index f324daadaf70..453fba8d2d9d 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -1040,10 +1040,10 @@ config MMC_SDHCI_MICROCHIP_PIC32
->  
->  config MMC_SDHCI_BRCMSTB
->  	tristate "Broadcom SDIO/SD/MMC support"
-> -	depends on ARCH_BRCMSTB || BMIPS_GENERIC
-> +	depends on ARCH_BRCMSTB || BMIPS_GENERIC || COMPILE_TEST
->  	depends on MMC_SDHCI_PLTFM
->  	select MMC_CQHCI
-> -	default y
-> +	default ARCH_BRCMSTB || BMIPS_GENERIC
->  	help
->  	  This selects support for the SDIO/SD/MMC Host Controller on
->  	  Broadcom STB SoCs.
+Fixes: 2c002a3049f7 ("arm64: dts: mt7622: add mmc related device nodes")
+Fixes: 0b6286dd96c0 ("arm64: dts: mt7622: add bananapi BPI-R64 board")
 
+regards Frank
