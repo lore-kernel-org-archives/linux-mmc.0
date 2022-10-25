@@ -2,103 +2,78 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 750F9FA373E
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 07:43:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27BF8C38A2D
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 08:08:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232052AbiJYHnN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Oct 2022 03:43:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39434 "EHLO
+        id S231519AbiJYII2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 04:08:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59300 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231985AbiJYHmy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 03:42:54 -0400
-Received: from mxout2.routing.net (mxout2.routing.net [IPv6:2a03:2900:1:a::b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8810215B302;
-        Tue, 25 Oct 2022 00:42:49 -0700 (PDT)
-Received: from mxbox3.masterlogin.de (unknown [192.168.10.78])
-        by mxout2.routing.net (Postfix) with ESMTP id 368D96050E;
-        Tue, 25 Oct 2022 07:42:48 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=mailerdienst.de;
-        s=20200217; t=1666683768;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=9YIiUZlTrjdPAMVHM7klpVqQezdSDroJaCTYC5nvEj0=;
-        b=jjN/qTIWkHOJVJ7PLMaZt76lgdWzdRJfbGiWQBZdFB0eS8q6aObyaaf1zHwfzxl/f0YuWL
-        rEjAcxTdKxCMrs9CDg8hMrwGBo5/uTuS1WcvjF+L8LmSXN1B1EzhrpcuwLjij4YUkM2cME
-        3YVnp8HK28SNNMifWjrjPeUDj+lUd5o=
-Received: from frank-G5.. (fttx-pool-217.61.152.57.bambit.de [217.61.152.57])
-        by mxbox3.masterlogin.de (Postfix) with ESMTPSA id 3EF9B360310;
-        Tue, 25 Oct 2022 07:42:47 +0000 (UTC)
-From:   Frank Wunderlich <linux@fw-web.de>
-To:     linux-mediatek@lists.infradead.org
-Cc:     Frank Wunderlich <frank-w@public-files.de>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+        with ESMTP id S229864AbiJYII1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 04:08:27 -0400
+Received: from muru.com (muru.com [72.249.23.125])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E52D4159A03;
+        Tue, 25 Oct 2022 01:08:26 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by muru.com (Postfix) with ESMTPS id 4E1ED80B0;
+        Tue, 25 Oct 2022 07:59:10 +0000 (UTC)
+Date:   Tue, 25 Oct 2022 11:08:25 +0300
+From:   Tony Lindgren <tony@atomide.com>
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Arnd Bergmann <arnd@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        linux-kernel@vger.kernel.org,
+        Linux-OMAP <linux-omap@vger.kernel.org>,
+        Lee Jones <lee@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Sam Shih <Sam.Shih@mediatek.com>,
-        Sam Shih <sam.shih@mediatek.com>
-Subject: [PATCH v4 6/6] mmc: mediatek: add support for MT7986 SoC
-Date:   Tue, 25 Oct 2022 09:42:38 +0200
-Message-Id: <20221025074238.18136-7-linux@fw-web.de>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20221025074238.18136-1-linux@fw-web.de>
-References: <20221025074238.18136-1-linux@fw-web.de>
+        Felipe Balbi <balbi@kernel.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-i2c@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH 13/17] ARM: omap1: remove unused board files
+Message-ID: <Y1eZebwZTrPx+j5l@atomide.com>
+References: <20221019144119.3848027-1-arnd@kernel.org>
+ <20221019150410.3851944-1-arnd@kernel.org>
+ <20221019150410.3851944-13-arnd@kernel.org>
+ <20221019171541.GA41568@darkstar.musicnaut.iki.fi>
+ <1b632df1-7e3c-456d-8629-dc36efd9fe15@app.fastmail.com>
+ <20221020193511.GB3019@t60.musicnaut.iki.fi>
+ <de36ec6b-2e7c-48eb-9682-f60d8e4011da@app.fastmail.com>
+ <20221021111101.GC3019@t60.musicnaut.iki.fi>
+ <Y1YnT+/ZdoglcdS4@atomide.com>
+ <aa4195a9-f6be-4600-82df-8b5d1035ebd5@app.fastmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Mail-ID: 698909de-f190-41ca-b759-7c49a09373a3
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <aa4195a9-f6be-4600-82df-8b5d1035ebd5@app.fastmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Sam Shih <sam.shih@mediatek.com>
+* Arnd Bergmann <arnd@arndb.de> [221024 15:53]:
+> On Mon, Oct 24, 2022, at 07:49, Tony Lindgren wrote:
+> > * Aaro Koskinen <aaro.koskinen@iki.fi> [221021 11:02]:
+> >> I was only referring to this Mistral add-on board and related display
+> >> drivers.
+> >> 
+> >> The main OSK board support is still needed and used.
+> 
+> Ok, got it.
+> 
+> > I'm pretty sure I have that display, but I was booting my OSK in a
+> > rack anyways so I rarely saw the LCD in use. No objections from me
+> > for removing the LCD support for OSK if nobody is using it.
+> 
+> I was going to leave Mistral in, thinking it's just a device definition,
+> but upon closer look I found that this is a somewhat annoyingly
+> written part that hardcodes GPIO numbers in unusual ways, so I'm
+> adding a patch to remove it now.
 
-Adding mt7986 own characteristics and of_device_id to have support
-of MT7986 SoC.
+OK sounds good to me.
 
-Signed-off-by: Sam Shih <sam.shih@mediatek.com>
-Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
----
- drivers/mmc/host/mtk-sd.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+Thanks,
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index df941438aef5..3f7f3a1e0df8 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -552,6 +552,19 @@ static const struct mtk_mmc_compatible mt7622_compat = {
- 	.support_64g = false,
- };
- 
-+static const struct mtk_mmc_compatible mt7986_compat = {
-+	.clk_div_bits = 12,
-+	.recheck_sdio_irq = true,
-+	.hs400_tune = false,
-+	.pad_tune_reg = MSDC_PAD_TUNE0,
-+	.async_fifo = true,
-+	.data_tune = true,
-+	.busy_check = true,
-+	.stop_clk_fix = true,
-+	.enhance_rx = true,
-+	.support_64g = true,
-+};
-+
- static const struct mtk_mmc_compatible mt8135_compat = {
- 	.clk_div_bits = 8,
- 	.recheck_sdio_irq = true,
-@@ -609,6 +622,7 @@ static const struct of_device_id msdc_of_ids[] = {
- 	{ .compatible = "mediatek,mt6795-mmc", .data = &mt6795_compat},
- 	{ .compatible = "mediatek,mt7620-mmc", .data = &mt7620_compat},
- 	{ .compatible = "mediatek,mt7622-mmc", .data = &mt7622_compat},
-+	{ .compatible = "mediatek,mt7986-mmc", .data = &mt7986_compat},
- 	{ .compatible = "mediatek,mt8135-mmc", .data = &mt8135_compat},
- 	{ .compatible = "mediatek,mt8173-mmc", .data = &mt8173_compat},
- 	{ .compatible = "mediatek,mt8183-mmc", .data = &mt8183_compat},
--- 
-2.34.1
-
+Tony
