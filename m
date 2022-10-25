@@ -2,137 +2,175 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F02F4C38A2D
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 17:38:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F78EC38A2D
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Oct 2022 19:15:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231937AbiJYRiL convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Oct 2022 13:38:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37056 "EHLO
+        id S231681AbiJYTPS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Oct 2022 15:15:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231864AbiJYRiK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 13:38:10 -0400
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EC38168E5E
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Oct 2022 10:38:09 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id B54D33A1C7C;
-        Tue, 25 Oct 2022 19:38:07 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 9C8FF3A1B64;
-        Tue, 25 Oct 2022 19:38:07 +0200 (CEST)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Tue, 25 Oct 2022 19:38:07 +0200 (CEST)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Tue, 25 Oct
- 2022 19:38:04 +0200
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Tue, 25 Oct 2022 19:38:04 +0200
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Avri Altman <Avri.Altman@wdc.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: [PATCH] mmc-utils: Implement alternative boot operation
-Thread-Topic: [PATCH] mmc-utils: Implement alternative boot operation
-Thread-Index: AdjnzoBSTaQo1pFFRXi0S56OT7wLqgAjLvCgAAfAMnAABrwyUAAAfFQw
-Date:   Tue, 25 Oct 2022 17:38:04 +0000
-Message-ID: <64e67da72db8434390b0af6843d22594@hyperstone.com>
-References: <d4ac7077d94743ed91c1b2b81fc5e164@hyperstone.com>
- <DM6PR04MB6575BC99A106EE2D430CA9BAFC319@DM6PR04MB6575.namprd04.prod.outlook.com>
- <ae6767a4abef41cd9068c467947646c9@hyperstone.com>
- <DM6PR04MB65750C59F17F38ADDBEE04BCFC319@DM6PR04MB6575.namprd04.prod.outlook.com>
-In-Reply-To: <DM6PR04MB65750C59F17F38ADDBEE04BCFC319@DM6PR04MB6575.namprd04.prod.outlook.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.4]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S232334AbiJYTPQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Oct 2022 15:15:16 -0400
+Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B539554657
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Oct 2022 12:15:09 -0700 (PDT)
+Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 26BD784BD2;
+        Tue, 25 Oct 2022 21:15:07 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1666725307;
+        bh=JwqENMpsL1totjuMyWpG/HaTiUhw65sVoibQe9WK7Jo=;
+        h=From:To:Cc:Subject:Date:From;
+        b=hPQ9Czju7JFuMK3FOi9hvzI+Xjk4Fx4eRoJkuQIIr1GTXdZ3hdEps1BCWJgbzhTuP
+         Wz/UJ9hj1CmERLu8hoEZPAAjDynGJPhm7wvZY5WQvr4gXtaELfHCMnO6HbHgoT5b9m
+         W6TSBCPHJrfA2Ynl+VizvFuSMX8LWzJ3w7K21Lc0+4rgnUCj1lrQO9LTo5J9cMWuQR
+         p3GWzJ/Z5pY+x4V/O73HQgnJWaIp2uiNgCAE3F8iFp0p9Y9L/k5luMBM09nvIp6Uj7
+         eGELSlCkp78N4Dx3bji8KOkmTHVsUu+iwQ/YPNHMf5AZJd2MO0DMpLdkEKolPCqELb
+         M1hAG1yTtvOGQ==
+From:   Marek Vasut <marex@denx.de>
+To:     linux-mmc@vger.kernel.org
+Cc:     Marek Vasut <marex@denx.de>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org
+Subject: [PATCH] mmc: sdhci-of-arasan: Override SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
+Date:   Tue, 25 Oct 2022 21:15:00 +0200
+Message-Id: <20221025191500.149167-1-marex@denx.de>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27224.000
-X-TMASE-Result: 10--10.542100-10.000000
-X-TMASE-MatchedRID: HrJsCrYHOqPUL3YCMmnG4vHkpkyUphL9TSz0JdEAJbTfrYpxwT811np+
-        IbIki7utkr/FYOe3Hfr9G1S5LKabNucyALHG/b9tOGTV4fFD6yBBHuVYxc8DW3d17Y6gGqDCy6q
-        Xk+lFx6AEVysBKV6MSMlFHUxfb4Q2J90IW74n84gqIkSpQVZGCFjPBrQ2+ZXRvFpm3N9d3pzo/d
-        jn8BEuv2xCljrZBgLL1nGv09E/7kdg6I8YW3kk8eadXXcOleEbHA5wH3/21xFxGu6rjxUqUOHTr
-        DSrqn2sYKoqOlygJb+80fHCLcecAhAadQrAiXryZAV3hs6etPocQnDpQ6FX01vi32gNfHZCNGJ/
-        slKtg6om4nUHcG7gkOxwNpAK+CWP5blhnExvtoqJJ72DuZB0nBNwWv2dBrmkCuSPuSVW5+52vU1
-        LiOVYEXeO6Bj0fYm8/Sj/WnCM/LNoMCLywE0ygVZ0V5tYhzdWxEHRux+uk8h+ICquNi0WJOgN/1
-        l9/7dg4lMM2V8nP4ZFexHsqnMYi1ymrYsGkpLcftwZ3X11IV0=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: d2c2b0ff-3204-4f3a-8ab3-ef20005d05d5-0-0-200-0
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
->> >> +         "Note some limitations\n:"
->> >> +         "1. The boot operation must be configured, e.g. for legacy speed:\n"
->> >> +         "mmc-utils bootbus set single_backward retain x8 /dev/mmcblk2\n"
->> >> +         "mmc-utils bootpart enable 1 0 /dev/mmcblk2\n"
->> >> +         "2. The MMC must currently be running at the bus mode 
->> >> + that is
->> >> configured for the boot operation (HS200 and HS400 not supported at
->> all).\n"
->> >> +         "3. Most hosts cannot do transfers of the typical size of 
->> >> + the boot partition,
->> >> adjust <boot_blocks> accordingly.\n"
->> > A redundant arg?
->> > Since blksz is 512, Maybe just set it to be ext_csd[226] * 256?
->> 
->> As the help above explains this will not work on most hosts.
->> Limitations of maximum transfers of like 512K to a couple MB are very 
->> common.
->> One could just read the max, but I found it less misleading that way.
-> But isn't the mmc_blk_ioctl_copy_from_user impose a hard MMC_IOC_MAX_BYTES limit?
-> So you won't be able to read more than 512K anyway?
+On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
 
-You're right, I changed that locally and missed it.
+https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+Absolute Address  0x00FF160040 (SD0)
+Reset Value       0x280737EC6481
 
->> >> +       mioc->num_of_cmds = 2;
->> >> +       mioc->cmds[0].opcode = MMC_GO_IDLE_STATE;
->> >> +       mioc->cmds[0].arg = MMC_GO_PRE_IDLE_STATE_ARG;
->> >> +       mioc->cmds[0].flags = MMC_RSP_NONE | MMC_CMD_AC;
->> >> +       mioc->cmds[0].write_flag = 0;
->> >> +
->> >> +       mioc->cmds[1].opcode = MMC_GO_IDLE_STATE;
->> >> +       mioc->cmds[1].arg = MMC_BOOT_INITIATION_ARG;
->> >> +       mioc->cmds[1].flags = MMC_RSP_NONE | MMC_CMD_ADTC;
->> >> +       mioc->cmds[1].write_flag = 0;
->> >> +       mioc->cmds[1].blksz = 512;
->> >> +       mioc->cmds[1].blocks = boot_blocks;
->> >> +       /* Access time of boot part differs wildly, spec mandates 1s */
->> >> +       mioc->cmds[1].data_timeout_ns = 2 * 1000 * 1000 * 1000;
->> >> +       mmc_ioc_cmd_set_data(mioc->cmds[1], boot_buf);
->> > Don't you get "010" prior to the boot content?
->> > Most cards have their EXT_CSD_PART_CONFIG_ACC_ACK bit set.
->> > So you need to eliminate it from the boot file?
->> > But your compare show that the files are identical - how so?
->> 
->> By configuring the card to not send BOOT ACK.
->> With it enabled there is unfortunately no way to get the transfer 
->> through from userspace.
->> (The host will sample part of the ACK, CRC wont match and so on)
-> This doesn't seems to be a reasonable requirement from the average user - e.g. validation & field application engineers who address eMMC issues as well, but mostly other embedded flash protocols - ufs & others.
+really reads 0x200737EC6481 . The interesting part is the
+top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+makes the SDHCI core disable retuning timer.
 
-Is it? I mean usually they configure the boot partition, too and mmc-utils gives them all they need with:
-e.g. mmc-utils bootpart enable 1 0 /dev/mmcblkX
-But yeah, if this is too much of a limitation to be considered useful then this patch is not worth pursuing as pretending the boot operation is a normal block transfer for ioctl and the host driver only works with boot ack off.
-Anything with boot ack on cannot be done from userspace and not even host-controller-agnostic, i.e. would need its own host_ops call, which is a bit overkill for testing / debugging purposes I'd say.
+Fix this up here by explicitly setting tuning_count to 8
+as it should be, otherwise an eMMC might fail in various
+thermal conditions
 
-Regards,
-Christian
+Note that the diff is best shown with -w option, this makes it
+visible what happened with !sdhci_arasan->has_cqe conditional,
+which is placed between sdhci_setup_host() and __sdhci_add_host()
+calls. Since sdhci_add_host() is also a sequence of these two
+calls and host->tuning_count must be overriden before calling
+__sdhci_add_host(), call the two calls separately and do all
+the adjustments between them in either case.
 
+Signed-off-by: Marek Vasut <marex@denx.de>
+---
+Cc: Michal Simek <michal.simek@xilinx.com>
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org
+To: linux-mmc@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 57 ++++++++++++++++++++----------
+ 1 file changed, 38 insertions(+), 19 deletions(-)
 
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 3997cad1f793d..465498f2a7c0f 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -1521,37 +1521,56 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+ 	return 0;
+ }
+ 
+-static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
++static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan,
++				 struct device *dev)
+ {
+ 	struct sdhci_host *host = sdhci_arasan->host;
+ 	struct cqhci_host *cq_host;
+ 	bool dma64;
+ 	int ret;
+ 
+-	if (!sdhci_arasan->has_cqe)
+-		return sdhci_add_host(host);
+-
+ 	ret = sdhci_setup_host(host);
+ 	if (ret)
+ 		return ret;
+ 
+-	cq_host = devm_kzalloc(host->mmc->parent,
+-			       sizeof(*cq_host), GFP_KERNEL);
+-	if (!cq_host) {
+-		ret = -ENOMEM;
+-		goto cleanup;
+-	}
++	/*
++	 * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
++	 *
++	 * https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
++	 * Absolute Address  0x00FF160040 (SD0)
++	 * Reset Value	     0x280737EC6481
++	 *
++	 * really reads 0x200737EC6481 . The interesting part is the
++	 * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
++	 * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
++	 * makes the SDHCI core disable retuning timer.
++	 *
++	 * Fix this up here by explicitly setting tuning_count to 8
++	 * as it should be, otherwise an eMMC might fail in various
++	 * thermal conditions.
++	 */
++	if (of_device_is_compatible(dev->of_node, "xlnx,zynqmp-8.9a"))
++		host->tuning_count = 1 << (8 - 1);
++
++	if (sdhci_arasan->has_cqe) {
++		cq_host = devm_kzalloc(host->mmc->parent,
++				       sizeof(*cq_host), GFP_KERNEL);
++		if (!cq_host) {
++			ret = -ENOMEM;
++			goto cleanup;
++		}
+ 
+-	cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
+-	cq_host->ops = &sdhci_arasan_cqhci_ops;
++		cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
++		cq_host->ops = &sdhci_arasan_cqhci_ops;
+ 
+-	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+-	if (dma64)
+-		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
++		dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
++		if (dma64)
++			cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+ 
+-	ret = cqhci_init(cq_host, host->mmc, dma64);
+-	if (ret)
+-		goto cleanup;
++		ret = cqhci_init(cq_host, host->mmc, dma64);
++		if (ret)
++			goto cleanup;
++	}
+ 
+ 	ret = __sdhci_add_host(host);
+ 	if (ret)
+@@ -1711,7 +1730,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 			host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+ 	}
+ 
+-	ret = sdhci_arasan_add_host(sdhci_arasan);
++	ret = sdhci_arasan_add_host(sdhci_arasan, &pdev->dev);
+ 	if (ret)
+ 		goto err_add_host;
+ 
+-- 
+2.35.1
 
