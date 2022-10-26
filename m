@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1675FA3742
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:43:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CA27FA3745
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:43:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235063AbiJZTni (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 15:43:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42280 "EHLO
+        id S234352AbiJZTnf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 15:43:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40738 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235056AbiJZTnA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:43:00 -0400
-Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE3D5CD5E2
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
-Received: by mail-pl1-x62d.google.com with SMTP id g24so10195587plq.3
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
+        with ESMTP id S235079AbiJZTms (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:42:48 -0400
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8755FE91D
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:34 -0700 (PDT)
+Received: by mail-pj1-x1032.google.com with SMTP id z5-20020a17090a8b8500b00210a3a2364fso4360178pjn.0
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=uFvAy1Yx9bF2vsbUT1HqGJtHQU9f7u8fB33iw92Qf8Q=;
-        b=oKBbVUwj0ewG2ZP2F3fTEFFC5mwv4W+c9kZCqjl7JXd4iDbGJEY0AoQ8UYLEbFN5Ra
-         0x7RjJ30MNig+oRb1brPsUeEwBwRiuFhggpgiWrCKI86pV0GVPWln+FXhDLy0iIYorOi
-         D2M5OJERgyDjOH1XHcjM7eR7XT3klUoE64Go4=
+        bh=OP/jpiXLlD32ihmuaQEisQ+o2cyp9ywlsHpK/BoVXYw=;
+        b=jIbj4VPfhvDYQIKBdqCPB7rCCl8cb8N0uMtORU/8idM1msip0PJNFW8t1Tsq6UghFQ
+         1NVt00V8DqN9+0rdST/hMLOLcAixEjGcC4+0AJtX6OPzOYc7mVA+cH/cYq9oKQY+vYPR
+         Cr8pF7qUMSS4oL2KezQ3wAEovOTMTkvDVNa2s=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=uFvAy1Yx9bF2vsbUT1HqGJtHQU9f7u8fB33iw92Qf8Q=;
-        b=NhFLs+XXb5gZjDaSpnW6y1Rn6UakRRD1947VS9g4leqf4I2mu/A/jPz/ics6APNwKk
-         K3oEorI6Ytdbtt7O+ebHbCq9M2ee06ovBzoiwSxh3/iFyZJqxn4XSNRqnceaehmxOq1v
-         2nUO32ORnrXlvjxauEx8s+K39Ird2WGj70tIF77j/O5YJkfp7m+IhW/9TgIN5pMTJn18
-         YhirF7StKSVsS8No3wod41ywoxldKdklOG2ukhsnxgchc2WdgH1B1MXtdTFtvH4n9aRm
-         lhxBh6mVZkynji3hijVmtCqu6VF2TKXv7p+zaO/24ZMT/Nsf49kWYA/W1DO4c6tE1LRf
-         WOzg==
-X-Gm-Message-State: ACrzQf1qWnHBug5ceCAQNhektqrDGvEYrbTb5epojpqTIo4D9cUF3zgD
-        jx8tQUXyt5PPKOR5vwEi+CKa5g==
-X-Google-Smtp-Source: AMsMyM6/nAg3Qf2+rzXxGPfXINpJPMqGo03+LmGleFJ+vpTt0n0E2kkRProcj1N0J8vVNAWQ1Pjecg==
-X-Received: by 2002:a17:90b:4a02:b0:213:63e7:d0b1 with SMTP id kk2-20020a17090b4a0200b0021363e7d0b1mr2659334pjb.208.1666813362670;
-        Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
+        bh=OP/jpiXLlD32ihmuaQEisQ+o2cyp9ywlsHpK/BoVXYw=;
+        b=LoWwCMURkKlOYsxrp4tgGL/wUVSLi61DQPJnQbxib/2OnIswfCQ8ZIQqXRT+d9WkYX
+         VtGXQvE1ecGZIdqBPo6ZlDUSU3P+q6DLt6xGKuC0YytZiabY02Lk2BSWckcHhftgsGAt
+         mTGskHBt9ZYF4GFWJhNoTNJfOqpOwPIShoz/mzaulJq19ehI/ZdQC7FE7njGnH6cwSHO
+         MO+nlncB2XVJDiHkIRKmdN3s8LGIhsPiXyBpUWWT+pXy8ePwf1SLjktZ+aPo2zFvW0Mw
+         12EGuG/k1aIKCvjWlQv8mJqam7ZzuC6Zbu99vUCcQt6NdMt9E+6hreSbS0iJukqp+D+x
+         IJjA==
+X-Gm-Message-State: ACrzQf2xnU2mY859jJq0Gaan8zkcH9UsUfmC6JEB86RjMfSqPRg31ezw
+        zDl3YJQ5ZjoG/FfUczJyR9bTnQ==
+X-Google-Smtp-Source: AMsMyM4Bs+rRHohZ2DACI+XW7RSFhufaX5l272kIQlvmDvY/No85n14oIKITViZzWTWJOu4fUf7wTw==
+X-Received: by 2002:a17:902:b18d:b0:186:9bb5:a92 with SMTP id s13-20020a170902b18d00b001869bb50a92mr20552157plr.11.1666813354356;
+        Wed, 26 Oct 2022 12:42:34 -0700 (PDT)
 Received: from localhost ([2620:15c:9d:2:c9e3:74f3:6b2b:135])
-        by smtp.gmail.com with UTF8SMTPSA id p5-20020a17090ac00500b0020ae09e9724sm1424933pjt.53.2022.10.26.12.42.40
+        by smtp.gmail.com with UTF8SMTPSA id e21-20020a635015000000b004582e25a595sm3151642pgb.41.2022.10.26.12.42.32
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
+        Wed, 26 Oct 2022 12:42:33 -0700 (PDT)
 From:   Brian Norris <briannorris@chromium.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
@@ -71,9 +71,9 @@ Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
         Haibo Chen <haibo.chen@nxp.com>,
         Sowjanya Komatineni <skomatineni@nvidia.com>,
         Brian Norris <briannorris@chromium.org>
-Subject: [PATCH v4 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
-Date:   Wed, 26 Oct 2022 12:42:08 -0700
-Message-Id: <20221026124150.v4.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
+Subject: [PATCH v4 3/7] mmc: sdhci-brcmstb: Fix SDHCI_RESET_ALL for CQHCI
+Date:   Wed, 26 Oct 2022 12:42:05 -0700
+Message-Id: <20221026124150.v4.3.I6a715feab6d01f760455865e968ecf0d85036018@changeid>
 X-Mailer: git-send-email 2.38.0.135.g90850a2211-goog
 In-Reply-To: <20221026194209.3758834-1-briannorris@chromium.org>
 References: <20221026194209.3758834-1-briannorris@chromium.org>
@@ -99,64 +99,58 @@ occur in some suspend or error recovery scenarios.
 
 Include this fix by way of the new sdhci_and_cqhci_reset() helper.
 
+I only patch the bcm7216 variant even though others potentially *could*
+provide the 'supports-cqe' property (and thus enable CQHCI), because
+d46ba2d17f90 ("mmc: sdhci-brcmstb: Add support for Command Queuing
+(CQE)") and some Broadcom folks confirm that only the 7216 variant
+actually supports it.
+
 This patch depends on (and should not compile without) the patch
 entitled "mmc: cqhci: Provide helper for resetting both SDHCI and
 CQHCI".
 
-Fixes: f545702b74f9 ("mmc: sdhci_am654: Add Support for Command Queuing Engine to J721E")
+Fixes: d46ba2d17f90 ("mmc: sdhci-brcmstb: Add support for Command Queuing (CQE)")
 Signed-off-by: Brian Norris <briannorris@chromium.org>
+Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 
 Changes in v4:
- - Also fix sdhci_am654_ops, sdhci_j721e_8bit_ops
- - Add dependency notes
- - Drop bouncing Faiz Abbas <faiz_abbas@ti.com> address
+ - Improve commit notes
+ - Add Adrian's Ack
+ - Add Florian's Reviewed-by
 
 Changes in v3:
  - Use new SDHCI+CQHCI helper
 
- drivers/mmc/host/sdhci_am654.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+Changes in v2:
+ - Rely on cqhci_deactivate() to handle NULL cqe_private, instead of
+   moving around CQE capability flags
 
-diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
-index 8f1023480e12..c2333c7acac9 100644
---- a/drivers/mmc/host/sdhci_am654.c
-+++ b/drivers/mmc/host/sdhci_am654.c
-@@ -15,6 +15,7 @@
- #include <linux/sys_soc.h>
+ drivers/mmc/host/sdhci-brcmstb.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index aff36a933ebe..55d8bd232695 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -12,6 +12,7 @@
+ #include <linux/bitops.h>
+ #include <linux/delay.h>
  
- #include "cqhci.h"
 +#include "sdhci-cqhci.h"
  #include "sdhci-pltfm.h"
+ #include "cqhci.h"
  
- /* CTL_CFG Registers */
-@@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+@@ -55,7 +56,7 @@ static void brcmstb_reset(struct sdhci_host *host, u8 mask)
  	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
- 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+ 	struct sdhci_brcmstb_priv *priv = sdhci_pltfm_priv(pltfm_host);
  
 -	sdhci_reset(host, mask);
 +	sdhci_and_cqhci_reset(host, mask);
  
- 	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
- 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
-@@ -464,7 +465,7 @@ static struct sdhci_ops sdhci_am654_ops = {
- 	.set_clock = sdhci_am654_set_clock,
- 	.write_b = sdhci_am654_write_b,
- 	.irq = sdhci_am654_cqhci_irq,
--	.reset = sdhci_reset,
-+	.reset = sdhci_and_cqhci_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_am654_pdata = {
-@@ -494,7 +495,7 @@ static struct sdhci_ops sdhci_j721e_8bit_ops = {
- 	.set_clock = sdhci_am654_set_clock,
- 	.write_b = sdhci_am654_write_b,
- 	.irq = sdhci_am654_cqhci_irq,
--	.reset = sdhci_reset,
-+	.reset = sdhci_and_cqhci_reset,
- };
- 
- static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
+ 	/* Reset will clear this, so re-enable it */
+ 	if (priv->flags & BRCMSTB_PRIV_FLAGS_GATE_CLOCK)
 -- 
 2.38.0.135.g90850a2211-goog
 
