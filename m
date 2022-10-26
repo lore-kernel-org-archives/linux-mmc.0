@@ -2,149 +2,192 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6FFBC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 05:37:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0DFFC38A2D
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 06:07:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231597AbiJZFhC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 01:37:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45442 "EHLO
+        id S232654AbiJZGHU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 02:07:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232954AbiJZFhB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 01:37:01 -0400
+        with ESMTP id S230090AbiJZGHT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 02:07:19 -0400
 Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3949AA367;
-        Tue, 25 Oct 2022 22:37:00 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 500DD792C2
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Oct 2022 23:07:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1666762620; x=1698298620;
+  t=1666764438; x=1698300438;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=11SS/CZdUJPAXR40E/mqXfwrhgxwSRXMWxOyR2uE4/k=;
-  b=gOww/MH8rPLAbc3EMqAZvTlQYKvEPTGoU3J7Hs7McenDsNfCUbvWTXtO
-   VBvFuQarzMuivAAaLBikAPhI81UPmZ8Ui12iR40X3Ib9f9Z1STuYh5KRv
-   RmqHQ3CsX1yxVDQ+gq/Rkb4c/cYtVjE4dduqvPjirGfxYUB9S/5HfJXZd
-   ExRzexxhe9ElowvmNxz8iwrQLw158+SLDCHK29uzRiYJYl1eFENu5t/z1
-   vxSZBT0/yb1m3iJWDss+9wj9bTTUsJsuoauWgW3cIAZgEo0rpVXdPQtrW
-   hBUJnR0YMe7D6TKrayjd1HB10GqBIX8eiEuadSUZZSmw+K8YHXyjyvP+2
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10511"; a="372074095"
+  bh=fSvbQ/LTaoHXibh2SbylLDlfvYZCefpnx+B77fZvxV4=;
+  b=e1UxsrggGnkPhJy8H0UP+nM0XoFIpLeCkGgMOpzMnY1DWVIpoyd+kUAq
+   NSlz3kEyJwmonTrtBcRSt7HpupXaut3Vx55Sq4hER3O62vJMpJayjSlZ5
+   ZBxRvg/lF5d+Om86H3eposvUee7odAP3NUEtGkdlv5GjgUcO+6gD++GDD
+   hMYHg5QDyQhMFKipehkvlQVI2hsmcW1Ti45LrpsBBVJ7QJEnoed+FLbtO
+   ShLFyXj2tyTL4IEi5sd7ZBg0PffafB/DCOg3D4gZIqbUnAEdxeANnfkQa
+   gYq1uI1S3uhZtgr/T21eS+kF/KwPDltSw26lHbH+L81rsqs3P6rTsb8HH
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10511"; a="372078345"
 X-IronPort-AV: E=Sophos;i="5.95,213,1661842800"; 
-   d="scan'208";a="372074095"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 22:36:59 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10511"; a="609830410"
+   d="scan'208";a="372078345"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 23:07:17 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10511"; a="721132810"
 X-IronPort-AV: E=Sophos;i="5.95,213,1661842800"; 
-   d="scan'208";a="609830410"
+   d="scan'208";a="721132810"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.127])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 22:36:53 -0700
-Message-ID: <7db0a98e-36c8-afee-5b0d-16b836ac8de0@intel.com>
-Date:   Wed, 26 Oct 2022 08:36:48 +0300
+  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Oct 2022 23:07:15 -0700
+Message-ID: <2b523371-7eeb-25f2-8879-76bbf028f4bb@intel.com>
+Date:   Wed, 26 Oct 2022 09:07:10 +0300
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.4.0
-Subject: Re: [PATCH v3 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
-To:     Brian Norris <briannorris@chromium.org>,
-        Florian Fainelli <f.fainelli@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, Al Cooper <alcooperx@gmail.com>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
-        Andy Gross <agross@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Faiz Abbas <faiz_abbas@ti.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>
-References: <20221024175501.2265400-1-briannorris@chromium.org>
- <20221024105229.v3.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
- <5b91c0eb-52aa-8431-c286-81b7feae84ce@intel.com>
- <Y1hY57vkkOhybwE1@google.com>
- <6268199c-78ca-8f55-0377-c14bb0299443@gmail.com>
- <Y1higmSUMLsxvXyq@google.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
+ SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
 Content-Language: en-US
+To:     Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
+Cc:     Michal Simek <michal.simek@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org
+References: <20221025191500.149167-1-marex@denx.de>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <Y1higmSUMLsxvXyq@google.com>
+In-Reply-To: <20221025191500.149167-1-marex@denx.de>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/10/22 01:26, Brian Norris wrote:
-> On Tue, Oct 25, 2022 at 02:53:46PM -0700, Florian Fainelli wrote:
->> On 10/25/22 14:45, Brian Norris wrote:
->>> On Tue, Oct 25, 2022 at 04:10:44PM +0300, Adrian Hunter wrote:
->>>> On 24/10/22 20:55, Brian Norris wrote:
->>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->>>>> index 8f1023480e12..6a282c7a221e 100644
->>>>> --- a/drivers/mmc/host/sdhci_am654.c
->>>>> +++ b/drivers/mmc/host/sdhci_am654.c
->>>
->>>>> @@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
->>>>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>>>> -	sdhci_reset(host, mask);
->>>>> +	sdhci_and_cqhci_reset(host, mask);
->>>>>   	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
->>>>>   		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->>>>
->>>> What about sdhci_reset in sdhci_am654_ops ?
->>>
->>> Oops, I think you caught a big fallacy in some of my patches: I assumed
->>> there was a single reset() implementation in a given driver (an unwise
->>> assumption, I realize). I see at least sdhci-brcmstb.c also has several
->>> variant ops that call sdhci_reset(), and I should probably convert them
->>> too.
-
-I checked and found only sdhci_am654_ops
-
->>
->> You got it right for sdhci-brcmstb.c because "supports-cqe" which gates the
->> enabling of CQE can only be found with the "brcm,bcm7216-sdhci" compatible
->> which implies using brcmstb_reset().
+On 25/10/22 22:15, Marek Vasut wrote:
+> On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
 > 
-> I don't see any in-tree device trees for these chips (which is OK), and
-> that's not what the Documentation/ says, and AFAICT nothing in the
-> driver is limiting other variants from specifying the "supports-cqe"
-> flag in their (out-of-tree) device tree. The closest thing I see is that
-> an *example* in brcm,sdhci-brcmstb.yaml shows "supports-cqe" only on
-> brcm,bcm7216-sdhci -- but an example is not a binding agreement. Am I
-> missing something?
-
-It was mentioned in the patch from the Fixes tag.
-
+> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+> Absolute Address  0x00FF160040 (SD0)
+> Reset Value       0x280737EC6481
 > 
-> Now of course, you probably know behind the scenes that there are no
-> other sdhci-brcmstb-relevant controllers that "support cqe", but AFAICT
-> I have no way of knowing that a priori. The driver and bindings give
-> (too much?) flexibility.
+> really reads 0x200737EC6481 . The interesting part is the
+> top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+> missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+> makes the SDHCI core disable retuning timer.
 > 
-> Poking around, I think the only other one I might have missed would be
-> gl9763e in sdhci-pci-gli.c. That also calls cqhci_init() but is
-> otherwise relying on the default sdhci_pci_ops. So I'd either have to
+> Fix this up here by explicitly setting tuning_count to 8
+> as it should be, otherwise an eMMC might fail in various
+> thermal conditions
+> 
+> Note that the diff is best shown with -w option, this makes it
+> visible what happened with !sdhci_arasan->has_cqe conditional,
+> which is placed between sdhci_setup_host() and __sdhci_add_host()
+> calls. Since sdhci_add_host() is also a sequence of these two
+> calls and host->tuning_count must be overriden before calling
 
-It uses sdhci_gl9763e_ops not the default sdhci_pci_ops.  It looks OK
-to me.
+overriden -> overridden
 
-> change the common sdhci_pci_ops, or else start a new copy/paste/modify
-> 'struct sdhci_ops' for it... This really does start to get messy when
-> poking around on drivers I can't test. As in, it shouldn't be harmful
-> to change most sdhci_reset() to sdhci_and_cqhci_reset() (as long as they
-> aren't using some other CQE implementation), but the more invasive it
-> gets (say, rewriting a bunch of other ops), the easier it is to get
-> something wrong.
+> __sdhci_add_host(), call the two calls separately and do all
+> the adjustments between them in either case.
+> 
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> ---
+> Cc: Michal Simek <michal.simek@xilinx.com>
+> Cc: Adrian Hunter <adrian.hunter@intel.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: linux-arm-kernel@lists.infradead.org
+> To: linux-mmc@vger.kernel.org
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 57 ++++++++++++++++++++----------
+>  1 file changed, 38 insertions(+), 19 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 3997cad1f793d..465498f2a7c0f 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -1521,37 +1521,56 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+>  	return 0;
+>  }
+>  
+> -static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
+> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan,
+> +				 struct device *dev)
+>  {
+>  	struct sdhci_host *host = sdhci_arasan->host;
+>  	struct cqhci_host *cq_host;
+>  	bool dma64;
+>  	int ret;
+>  
+> -	if (!sdhci_arasan->has_cqe)
+> -		return sdhci_add_host(host);
+> -
+>  	ret = sdhci_setup_host(host);
+>  	if (ret)
+>  		return ret;
+>  
+> -	cq_host = devm_kzalloc(host->mmc->parent,
+> -			       sizeof(*cq_host), GFP_KERNEL);
+> -	if (!cq_host) {
+> -		ret = -ENOMEM;
+> -		goto cleanup;
+> -	}
+> +	/*
+> +	 * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
+> +	 *
+> +	 * https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+> +	 * Absolute Address  0x00FF160040 (SD0)
+> +	 * Reset Value	     0x280737EC6481
+> +	 *
+> +	 * really reads 0x200737EC6481 . The interesting part is the
+> +	 * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+> +	 * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+> +	 * makes the SDHCI core disable retuning timer.
 
-AFAICS it was just sdhci_am654_ops
+Are you aware that caps can be changed in DT via "sdhci-caps" and
+"sdhci-caps-mask" ?
+
+> +	 *
+> +	 * Fix this up here by explicitly setting tuning_count to 8
+> +	 * as it should be, otherwise an eMMC might fail in various
+> +	 * thermal conditions.
+> +	 */
+> +	if (of_device_is_compatible(dev->of_node, "xlnx,zynqmp-8.9a"))
+> +		host->tuning_count = 1 << (8 - 1);
+> +
+> +	if (sdhci_arasan->has_cqe) {
+> +		cq_host = devm_kzalloc(host->mmc->parent,
+> +				       sizeof(*cq_host), GFP_KERNEL);
+> +		if (!cq_host) {
+> +			ret = -ENOMEM;
+> +			goto cleanup;
+> +		}
+>  
+> -	cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
+> -	cq_host->ops = &sdhci_arasan_cqhci_ops;
+> +		cq_host->mmio = host->ioaddr + SDHCI_ARASAN_CQE_BASE_ADDR;
+> +		cq_host->ops = &sdhci_arasan_cqhci_ops;
+>  
+> -	dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> -	if (dma64)
+> -		cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+> +		dma64 = host->flags & SDHCI_USE_64_BIT_DMA;
+> +		if (dma64)
+> +			cq_host->caps |= CQHCI_TASK_DESC_SZ_128;
+>  
+> -	ret = cqhci_init(cq_host, host->mmc, dma64);
+> -	if (ret)
+> -		goto cleanup;
+> +		ret = cqhci_init(cq_host, host->mmc, dma64);
+> +		if (ret)
+> +			goto cleanup;
+> +	}
+>  
+>  	ret = __sdhci_add_host(host);
+>  	if (ret)
+> @@ -1711,7 +1730,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  			host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+>  	}
+>  
+> -	ret = sdhci_arasan_add_host(sdhci_arasan);
+> +	ret = sdhci_arasan_add_host(sdhci_arasan, &pdev->dev);
+>  	if (ret)
+>  		goto err_add_host;
+>  
 
