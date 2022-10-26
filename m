@@ -2,148 +2,170 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E37E8C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 14:39:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E614EFA373E
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 18:18:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232842AbiJZOjY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 10:39:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56984 "EHLO
+        id S233932AbiJZSSr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 14:18:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233569AbiJZOjX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 10:39:23 -0400
-Received: from mx07-00178001.pphosted.com (mx08-00178001.pphosted.com [91.207.212.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4D7DB7F7F
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 07:39:22 -0700 (PDT)
-Received: from pps.filterd (m0046660.ppops.net [127.0.0.1])
-        by mx07-00178001.pphosted.com (8.17.1.5/8.17.1.5) with ESMTP id 29QCV3gc020233;
-        Wed, 26 Oct 2022 16:39:20 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=selector1;
- bh=xjV4zaXSi3O2VhDk3xNQfFNuMKu+DRubg1cXcw/xIvQ=;
- b=EQSuFaLL1fY2xZZpfJOXPJgYY6Jsc742iWtF04sa719V0CJpHJHqCORXf7U8QJ8Sw52q
- gQdpgI4hd7fXdRWesKotMuevGlC/u+/8tuQFhTkjTOMwAXOhtDMXKVv2J/yXPf0skcQs
- uY+LpYPm9mGfGymbyRGFXZox+6uFQFU//3JQTv4je/E5Oefln2MBKFSin3PMA4QWScDS
- SPiM0B7U8Lfy8YtmjGwvY5Syahkud4CkqSDrOrAFpue0nYusKl3LFVSk6pD0ounjnBC9
- YNSNONvJ+PqeveJgMyQ753ehQhEEr8OrbnILJ4hX87kby5/Pv3zsimMSi7Haf9NMVY4m gQ== 
-Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
-        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3kebqttvg8-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 26 Oct 2022 16:39:20 +0200
-Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
-        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 3F79010002A;
-        Wed, 26 Oct 2022 16:39:17 +0200 (CEST)
-Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
-        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 3AA2F22F7AE;
-        Wed, 26 Oct 2022 16:39:17 +0200 (CEST)
-Received: from [10.201.20.201] (10.201.20.201) by SHFDAG1NODE2.st.com
- (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Wed, 26 Oct
- 2022 16:39:14 +0200
-Message-ID: <db0d75a2-83d9-d752-47b7-8452b9ec945d@foss.st.com>
-Date:   Wed, 26 Oct 2022 16:39:13 +0200
+        with ESMTP id S233821AbiJZSSn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 14:18:43 -0400
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51947C2C8B
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 11:18:41 -0700 (PDT)
+Received: by mail-pj1-x102f.google.com with SMTP id b11so8710543pjp.2
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 11:18:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=chromium.org; s=google;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=YP8jpqbbIYZxZWSoeoFbOkeJPwCMijsPk6P/JiUcvP4=;
+        b=GdEZnBhNeLS3QFsCKyyIKFOJSw4RhzT4wX54Iz+TZXK6p5hKwk6YFm/wOebhWl/ger
+         Tx7QNrcB6aJx5HErg/rVYPyyRaPtZWnn6eeqLyv5aVOlfuvztFMYltiBrcvlnc/ztjAD
+         XOufFWlUHHnz+mNy0Q/K2qZXWkeQF4dMfvAq4=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=YP8jpqbbIYZxZWSoeoFbOkeJPwCMijsPk6P/JiUcvP4=;
+        b=j14cWI54iSrkcsZPiO5nlwV/llaYAPBLnBgQs3xkRJennxj4HNRgXY0B1N98hfYs76
+         2jBR5OgAcf4/3gVRQugGnYm3ci0zpquA3max9p3AIBoq7oGD0BBdQlWEkVIjtdv9Ela3
+         VP1OsF0EMB3pE/jILLUVJIHHo6ehll585se96qpIl/zttOvuS72oVA+QHzqN8ICIICAn
+         GNmhIew/7sXZBSULBCq6UUd5DZcJvwl2H4DLQ7fIgmnMBehRzYhc1dRTP+TMFxgX7fSJ
+         NHFMjVpsXUBCfzGziZUN6+uRvPWTSbCYD0GTxY9qZm59cYiWSEvruvWwL6MmqiKZblp7
+         n0nQ==
+X-Gm-Message-State: ACrzQf19TSFcNPFvU1ArCEL5c/E+BDJVxAznqlGigX1NFjphvRp82gbO
+        fAPQ903u845QWqLiPnjQbVryTg==
+X-Google-Smtp-Source: AMsMyM6dLJd6E7h/F0+/aOt92HNYIp4+1kEGsJEox48TAdqkhmOa0QYlOyAryLYM348bQd5wCsctDg==
+X-Received: by 2002:a17:90b:3887:b0:213:566a:1417 with SMTP id mu7-20020a17090b388700b00213566a1417mr4549636pjb.225.1666808320852;
+        Wed, 26 Oct 2022 11:18:40 -0700 (PDT)
+Received: from google.com ([2620:15c:9d:2:c9e3:74f3:6b2b:135])
+        by smtp.gmail.com with ESMTPSA id f15-20020a170902ce8f00b00186a2444a43sm3223958plg.27.2022.10.26.11.18.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Oct 2022 11:18:40 -0700 (PDT)
+Date:   Wed, 26 Oct 2022 11:18:37 -0700
+From:   Brian Norris <briannorris@chromium.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org, Al Cooper <alcooperx@gmail.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Andy Gross <agross@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Jonathan Hunter <jonathanh@nvidia.com>
+Subject: Re: [PATCH v3 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
+Message-ID: <Y1l5/U3WnbDIIMOj@google.com>
+References: <20221024175501.2265400-1-briannorris@chromium.org>
+ <20221024105229.v3.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
+ <5b91c0eb-52aa-8431-c286-81b7feae84ce@intel.com>
+ <Y1hY57vkkOhybwE1@google.com>
+ <6268199c-78ca-8f55-0377-c14bb0299443@gmail.com>
+ <Y1higmSUMLsxvXyq@google.com>
+ <7db0a98e-36c8-afee-5b0d-16b836ac8de0@intel.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.2.2
-Subject: Re: Issue with an SD-card switching to high speed
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <christophe.kerello@foss.st.com>
-References: <972a1ea1-7431-21fe-c8af-027c4271f6a2@foss.st.com>
- <CAPDyKFqaJea9MA9KwkkuQt7YcUj5LCw46yeTKyomx1bCRnUzoA@mail.gmail.com>
-From:   Yann Gautier <yann.gautier@foss.st.com>
-In-Reply-To: <CAPDyKFqaJea9MA9KwkkuQt7YcUj5LCw46yeTKyomx1bCRnUzoA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.201.20.201]
-X-ClientProxiedBy: EQNCAS1NODE4.st.com (10.75.129.82) To SHFDAG1NODE2.st.com
- (10.75.129.70)
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
- definitions=2022-10-26_06,2022-10-26_01,2022-06-22_01
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <7db0a98e-36c8-afee-5b0d-16b836ac8de0@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/26/22 16:16, Ulf Hansson wrote:
-> On Wed, 19 Oct 2022 at 17:50, Yann Gautier <yann.gautier@foss.st.com> wrote:
->>
->> Hi Ulf (and mailing-list),
->>
->> I've an SD-card on a STM32MP157F-DK2 board that cannot switch to
->> high-speed mode:
->> "mmc0: Problem switching card into high-speed mode!"
->>
->> On this board, it is not possible to switch to UHS modes.
->> And there is no power cycle done in kernel.
->>
->> When checking the differences when I add full-pwr-cycle in DT, I see
->> that the OCR we ask the card is different:
->> 0x300000 (MMC_VDD_32_33 | MMC_VDD_33_34) vs 0x200000 (MMC_VDD_33_34).
->>
->> If I add this missing MMC_VDD_32_33 voltage range (without power cycle),
->> then the card can switch to high-speed.
->>
->> Checking where this is done in the framework, I've seen something that
->> could correct my issue in mmc_select_voltage():
->>
->> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
->> index 368f10405e13..bcd8fa81f78b 100644
->> --- a/drivers/mmc/core/core.c
->> +++ b/drivers/mmc/core/core.c
->> @@ -1132,7 +1132,7 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
->>                   mmc_power_cycle(host, ocr);
->>           } else {
->>                   bit = fls(ocr) - 1;
->> -               ocr &= 3 << bit;
->> +               ocr &= 3 << (bit - 1);
-> 
-> To me, this looks like you may be fixing a very old bug. Unless I am
-> wrong, it seems like the current code might as well have been:
-> 
-> ocr &= 1 << bit;
-> 
-> The upper bit that the '3' is trying to allow to be set, can in fact
-> never be set, because we have already done "ocr &= host->ocr_avail" a
-> few lines above.
-> 
-> 
->>                   if (bit != host->ios.vdd)
->>                           dev_warn(mmc_dev(host), "exceeding card's
->> volts\n");
->>           }
->>
->> The ocr given to mmc_select_voltage() is 0x300000.
->> fls(ocr) = 22, bit = 21, 3 << bit = 0x600000.
->> With the &= operator, we then have only 0x200000 and have removed
->> MMC_VDD_32_33 mode.
->> The architecture is an Armv7, I hope that the fls() has the same
->> behavior on other architectures.
->>
->> But as this function is also used for eMMC and SDIO, this could have
->> impacts I've not seen.
->>
->>
->> Maybe the issue is just with this SD-card, that doesn't properly handle
->> the range MMC_VDD_33_34 alone, and it could be out of spec.
->>
->> I then have 3 possibilities:
->> - stop using this type of card if it is out-of-specs
->> - add full-pwr-cycle in this board's DT, but I'll have issues with other
->> boards that really cannot do power cycle
->> - push the proposed patch in mmc_select_voltage()
-> 
-> Yes, please - so we can discuss it better.
-> 
-> Also, please try to add a relevant comment in the code too, so it
-> becomes a bit more obvious of what goes on.
-> 
-> Kind regards
-> Uffe
+Hi Adrian,
 
-Thanks Ulf,
+On Wed, Oct 26, 2022 at 08:36:48AM +0300, Adrian Hunter wrote:
+> On 26/10/22 01:26, Brian Norris wrote:
+> > On Tue, Oct 25, 2022 at 02:53:46PM -0700, Florian Fainelli wrote:
+> >> On 10/25/22 14:45, Brian Norris wrote:
+> >>> On Tue, Oct 25, 2022 at 04:10:44PM +0300, Adrian Hunter wrote:
+> >>>> On 24/10/22 20:55, Brian Norris wrote:
+> >>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> >>>>> index 8f1023480e12..6a282c7a221e 100644
+> >>>>> --- a/drivers/mmc/host/sdhci_am654.c
+> >>>>> +++ b/drivers/mmc/host/sdhci_am654.c
+> >>>
+> >>>>> @@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+> >>>>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> >>>>>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+> >>>>> -	sdhci_reset(host, mask);
+> >>>>> +	sdhci_and_cqhci_reset(host, mask);
+> >>>>>   	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
+> >>>>>   		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+> >>>>
+> >>>> What about sdhci_reset in sdhci_am654_ops ?
+> >>>
+> >>> Oops, I think you caught a big fallacy in some of my patches: I assumed
+> >>> there was a single reset() implementation in a given driver (an unwise
+> >>> assumption, I realize). I see at least sdhci-brcmstb.c also has several
+> >>> variant ops that call sdhci_reset(), and I should probably convert them
+> >>> too.
+> 
+> I checked and found only sdhci_am654_ops
 
-I'll send the patch in the coming days, with the required comments.
+And...how about sdhci_j721e_8bit_ops in that same driver?
 
-Best regards,
-Yann
+> >> You got it right for sdhci-brcmstb.c because "supports-cqe" which gates the
+> >> enabling of CQE can only be found with the "brcm,bcm7216-sdhci" compatible
+> >> which implies using brcmstb_reset().
+> > 
+> > I don't see any in-tree device trees for these chips (which is OK), and
+> > that's not what the Documentation/ says, and AFAICT nothing in the
+> > driver is limiting other variants from specifying the "supports-cqe"
+> > flag in their (out-of-tree) device tree. The closest thing I see is that
+> > an *example* in brcm,sdhci-brcmstb.yaml shows "supports-cqe" only on
+> > brcm,bcm7216-sdhci -- but an example is not a binding agreement. Am I
+> > missing something?
+> 
+> It was mentioned in the patch from the Fixes tag.
+
+OK, good note. If I don't patch the other seemingly-unaffected variants
+in brcmstb, I'll at least update the commit message, since the code
+doesn't tell me they're unaffected.
+
+> > Now of course, you probably know behind the scenes that there are no
+> > other sdhci-brcmstb-relevant controllers that "support cqe", but AFAICT
+> > I have no way of knowing that a priori. The driver and bindings give
+> > (too much?) flexibility.
+> > 
+> > Poking around, I think the only other one I might have missed would be
+> > gl9763e in sdhci-pci-gli.c. That also calls cqhci_init() but is
+> > otherwise relying on the default sdhci_pci_ops. So I'd either have to
+> 
+> It uses sdhci_gl9763e_ops not the default sdhci_pci_ops.  It looks OK
+> to me.
+
+Ugh, of course you're right. I think I'm mixing up past history and
+stuff I'm trying to patch now. I *am* patching gl9763e already in this
+series, but simply as a refactor, and not any additional bugfix.
+
+> > change the common sdhci_pci_ops, or else start a new copy/paste/modify
+> > 'struct sdhci_ops' for it... This really does start to get messy when
+> > poking around on drivers I can't test. As in, it shouldn't be harmful
+> > to change most sdhci_reset() to sdhci_and_cqhci_reset() (as long as they
+> > aren't using some other CQE implementation), but the more invasive it
+> > gets (say, rewriting a bunch of other ops), the easier it is to get
+> > something wrong.
+> 
+> AFAICS it was just sdhci_am654_ops
+
+Agreed it's less to change than I thought. But I think you (and I) also
+missed sdhci_j721e_8bit_ops.
+
+Assuming I'm not totally off-base yet again...v4 is coming sooner or
+later.
+
+Brian
