@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD6EEECDFA1
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:43:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1675FA3742
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:43:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234905AbiJZTng (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 15:43:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41150 "EHLO
+        id S235063AbiJZTni (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 15:43:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235100AbiJZTm6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:42:58 -0400
+        with ESMTP id S235056AbiJZTnA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:43:00 -0400
 Received: from mail-pl1-x62d.google.com (mail-pl1-x62d.google.com [IPv6:2607:f8b0:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20782108245
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:40 -0700 (PDT)
-Received: by mail-pl1-x62d.google.com with SMTP id j12so15198284plj.5
-        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:40 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE3D5CD5E2
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
+Received: by mail-pl1-x62d.google.com with SMTP id g24so10195587plq.3
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=chromium.org; s=google;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Fb+b4UKJ1KFBJbCRol+gACElv5iiq7jjhJ1g0l5c5FA=;
-        b=hRt2H2uD+wLrwvXTK0JSNIPjW4+1oJFPvSJZ/fA6Of0/Bd3NncRF9lJd0QMEKb+jA8
-         tR2cfNMTkEpSuxO3w7B2BEY2iyQbOuw+XK/X0lgSDBOl61Htz/8xEX99DGyD3PlhAnxi
-         zZ4KPXpdzi29DuB1ShNOgGOtr7Wl5nabY+T1U=
+        bh=uFvAy1Yx9bF2vsbUT1HqGJtHQU9f7u8fB33iw92Qf8Q=;
+        b=oKBbVUwj0ewG2ZP2F3fTEFFC5mwv4W+c9kZCqjl7JXd4iDbGJEY0AoQ8UYLEbFN5Ra
+         0x7RjJ30MNig+oRb1brPsUeEwBwRiuFhggpgiWrCKI86pV0GVPWln+FXhDLy0iIYorOi
+         D2M5OJERgyDjOH1XHcjM7eR7XT3klUoE64Go4=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Fb+b4UKJ1KFBJbCRol+gACElv5iiq7jjhJ1g0l5c5FA=;
-        b=IePqCSmxxSp1Li7RIfkWbkumZlXxTBS7aA9s59a09l2xhRUjzgry9533XKVvhO3AtG
-         zjeeeaXeSf2Yt2CvOG13ziDy/6aaIYYaDpdZ6eWqZ4TSa2fjsPIB+DcgEqarqOMtMjAc
-         Zq9+FGk6AdmepDpLAFfUGBdjuzz7Ta2PNxtH4KRUy0/W7FE8BaKJLIy54TvLhGgLPdL6
-         JaLMu8PKkjbQbdV2nNJ8M9MfY91EOS6DymDzAd3dofnnkiV0BqvHmyKDp5Y7RUHmkVJg
-         Gc926qZc3HaJafeAOKwdyAPe9EOWijs3CrB6ZUKi/reVuWTZtGbwv3kWP+IgZisv5Vqf
-         O+/w==
-X-Gm-Message-State: ACrzQf0JkMOiu2Gx66QEix+LDSC69To9NKxLOemc0j5WfiD/l507/iMS
-        8RDlkiBNUN8BVV8LrMCbZC6D+Q==
-X-Google-Smtp-Source: AMsMyM5EYvlE+qWcSFNr/Wmi9gu+0BErDUUQgt96JMzf6TmlgWUsQfqorUCkgXi+8DbCGGYaF8Lu4g==
-X-Received: by 2002:a17:90a:428e:b0:205:d5fe:e0b3 with SMTP id p14-20020a17090a428e00b00205d5fee0b3mr5870742pjg.33.1666813359968;
-        Wed, 26 Oct 2022 12:42:39 -0700 (PDT)
+        bh=uFvAy1Yx9bF2vsbUT1HqGJtHQU9f7u8fB33iw92Qf8Q=;
+        b=NhFLs+XXb5gZjDaSpnW6y1Rn6UakRRD1947VS9g4leqf4I2mu/A/jPz/ics6APNwKk
+         K3oEorI6Ytdbtt7O+ebHbCq9M2ee06ovBzoiwSxh3/iFyZJqxn4XSNRqnceaehmxOq1v
+         2nUO32ORnrXlvjxauEx8s+K39Ird2WGj70tIF77j/O5YJkfp7m+IhW/9TgIN5pMTJn18
+         YhirF7StKSVsS8No3wod41ywoxldKdklOG2ukhsnxgchc2WdgH1B1MXtdTFtvH4n9aRm
+         lhxBh6mVZkynji3hijVmtCqu6VF2TKXv7p+zaO/24ZMT/Nsf49kWYA/W1DO4c6tE1LRf
+         WOzg==
+X-Gm-Message-State: ACrzQf1qWnHBug5ceCAQNhektqrDGvEYrbTb5epojpqTIo4D9cUF3zgD
+        jx8tQUXyt5PPKOR5vwEi+CKa5g==
+X-Google-Smtp-Source: AMsMyM6/nAg3Qf2+rzXxGPfXINpJPMqGo03+LmGleFJ+vpTt0n0E2kkRProcj1N0J8vVNAWQ1Pjecg==
+X-Received: by 2002:a17:90b:4a02:b0:213:63e7:d0b1 with SMTP id kk2-20020a17090b4a0200b0021363e7d0b1mr2659334pjb.208.1666813362670;
+        Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
 Received: from localhost ([2620:15c:9d:2:c9e3:74f3:6b2b:135])
-        by smtp.gmail.com with UTF8SMTPSA id e10-20020a170902784a00b001811a197797sm3242401pln.194.2022.10.26.12.42.38
+        by smtp.gmail.com with UTF8SMTPSA id p5-20020a17090ac00500b0020ae09e9724sm1424933pjt.53.2022.10.26.12.42.40
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 26 Oct 2022 12:42:39 -0700 (PDT)
+        Wed, 26 Oct 2022 12:42:42 -0700 (PDT)
 From:   Brian Norris <briannorris@chromium.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
@@ -71,9 +71,9 @@ Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
         Haibo Chen <haibo.chen@nxp.com>,
         Sowjanya Komatineni <skomatineni@nvidia.com>,
         Brian Norris <briannorris@chromium.org>
-Subject: [PATCH v4 5/7] mmc: sdhci-tegra: Fix SDHCI_RESET_ALL for CQHCI
-Date:   Wed, 26 Oct 2022 12:42:07 -0700
-Message-Id: <20221026124150.v4.5.I418c9eaaf754880fcd2698113e8c3ef821a944d7@changeid>
+Subject: [PATCH v4 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
+Date:   Wed, 26 Oct 2022 12:42:08 -0700
+Message-Id: <20221026124150.v4.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
 X-Mailer: git-send-email 2.38.0.135.g90850a2211-goog
 In-Reply-To: <20221026194209.3758834-1-briannorris@chromium.org>
 References: <20221026194209.3758834-1-briannorris@chromium.org>
@@ -103,45 +103,60 @@ This patch depends on (and should not compile without) the patch
 entitled "mmc: cqhci: Provide helper for resetting both SDHCI and
 CQHCI".
 
-Fixes: 3c4019f97978 ("mmc: tegra: HW Command Queue Support for Tegra SDMMC")
+Fixes: f545702b74f9 ("mmc: sdhci_am654: Add Support for Command Queuing Engine to J721E")
 Signed-off-by: Brian Norris <briannorris@chromium.org>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
 
 Changes in v4:
+ - Also fix sdhci_am654_ops, sdhci_j721e_8bit_ops
  - Add dependency notes
- - Add Adrian's Ack
+ - Drop bouncing Faiz Abbas <faiz_abbas@ti.com> address
 
 Changes in v3:
  - Use new SDHCI+CQHCI helper
 
-Changes in v2:
- - Drop unnecessary 'enable_hwcq' check
+ drivers/mmc/host/sdhci_am654.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
- drivers/mmc/host/sdhci-tegra.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
-
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index 413925bce0ca..c71000a07656 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -28,6 +28,7 @@
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 8f1023480e12..c2333c7acac9 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -15,6 +15,7 @@
+ #include <linux/sys_soc.h>
  
- #include <soc/tegra/common.h>
- 
+ #include "cqhci.h"
 +#include "sdhci-cqhci.h"
  #include "sdhci-pltfm.h"
- #include "cqhci.h"
  
-@@ -367,7 +368,7 @@ static void tegra_sdhci_reset(struct sdhci_host *host, u8 mask)
- 	const struct sdhci_tegra_soc_data *soc_data = tegra_host->soc_data;
- 	u32 misc_ctrl, clk_ctrl, pad_ctrl;
+ /* CTL_CFG Registers */
+@@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+ 	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
  
 -	sdhci_reset(host, mask);
 +	sdhci_and_cqhci_reset(host, mask);
  
- 	if (!(mask & SDHCI_RESET_ALL))
- 		return;
+ 	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
+ 		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+@@ -464,7 +465,7 @@ static struct sdhci_ops sdhci_am654_ops = {
+ 	.set_clock = sdhci_am654_set_clock,
+ 	.write_b = sdhci_am654_write_b,
+ 	.irq = sdhci_am654_cqhci_irq,
+-	.reset = sdhci_reset,
++	.reset = sdhci_and_cqhci_reset,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_am654_pdata = {
+@@ -494,7 +495,7 @@ static struct sdhci_ops sdhci_j721e_8bit_ops = {
+ 	.set_clock = sdhci_am654_set_clock,
+ 	.write_b = sdhci_am654_write_b,
+ 	.irq = sdhci_am654_cqhci_irq,
+-	.reset = sdhci_reset,
++	.reset = sdhci_and_cqhci_reset,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_j721e_8bit_pdata = {
 -- 
 2.38.0.135.g90850a2211-goog
 
