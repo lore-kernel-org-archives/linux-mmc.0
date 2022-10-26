@@ -2,122 +2,129 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 522FDC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:45:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 391E8C38A2D
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 20:50:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235146AbiJZTpy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 15:45:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41334 "EHLO
+        id S234604AbiJZUu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 16:50:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234623AbiJZTp1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:45:27 -0400
-Received: from mail-qk1-x736.google.com (mail-qk1-x736.google.com [IPv6:2607:f8b0:4864:20::736])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 591BABDF;
-        Wed, 26 Oct 2022 12:44:25 -0700 (PDT)
-Received: by mail-qk1-x736.google.com with SMTP id o2so11459413qkk.10;
-        Wed, 26 Oct 2022 12:44:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=dnvZiw2WHlbiV6rtq4uxOyMMllagNobakugUz2ZgehE=;
-        b=o6Lyliz+cHj5CwoPEbDKB5//UBUnW5mETMUBebJXJiEcENviQqX8xprlIJpOuseBo9
-         LphgGvnhNQazWO44sHY++gjF94Q8D9BXhaNnAkmY8Sx6bpY6QVrVWKXBUN6wIuM+O8MY
-         GOnFjyZIMSt2rVHxTdSMxwtmvEN/r0PDfrNEaRmXZYNZ4QVuEJ53mZSm+8yvLT3mORcT
-         zeJ3dJvaT428pxmoAIUG1ezkc5JvCIfhk49d03KtTW3IQikeIGjhy97IHtR2m8wJnz7i
-         LLjhwEd/bhc6ygcI0B8PZNCSACzBDyLfO6BWGqbvbylrqcllSBF0hQGtHkN8sehDYsqR
-         NsBQ==
+        with ESMTP id S234615AbiJZUuY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 16:50:24 -0400
+Received: from mail-oi1-f173.google.com (mail-oi1-f173.google.com [209.85.167.173])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C74A0631F9;
+        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
+Received: by mail-oi1-f173.google.com with SMTP id g10so20306870oif.10;
+        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=dnvZiw2WHlbiV6rtq4uxOyMMllagNobakugUz2ZgehE=;
-        b=DKAriCawDZ0odVcemslwxRZZ97OVEcgfdI7Tv6TkVI0BdPRg4tXnITX/3ov5WDmwz0
-         WLL0L9RSJJElh9YL0RwnjBRm+D78Wqf/R8JoCxFZlvCJtze0gqnerCvMKVB4v1ZQMMRl
-         orH71RIc6JWxEHMuZ242/yk/bHAXjejps/QQdGzEaCF478qwIKL4zWda4HnIUfsHQWIS
-         pVM6nYcV8RqA4erC9v1OxFLGVJNsdo33U+OsrYJK9CPoHstE0kbsyGH0+SGO47Gu3AZr
-         wpbkAIGowj3DtDIPV9oLhT7u04OHBh7QOOXKO1MPO6ymTd5J1ZR2Ek1o6zXnyYvi+IL/
-         p+7w==
-X-Gm-Message-State: ACrzQf1docAmf1fAttxT9y7ts7tCVyNe1WkWSTGZXGs0DFo/q72SyV+W
-        wp31QxoVgS3EwLekE+5XcAw=
-X-Google-Smtp-Source: AMsMyM5mlLuhBFfErgRaoGdE6r5zGqEHLx9kZ0sXPdssBtYw01bbc46PqQnsEQZBs+w+E3qFai3HGg==
-X-Received: by 2002:a05:620a:1367:b0:6ee:c35c:fa46 with SMTP id d7-20020a05620a136700b006eec35cfa46mr31727298qkl.169.1666813464393;
-        Wed, 26 Oct 2022 12:44:24 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.googlemail.com with ESMTPSA id j15-20020a05620a288f00b006f9c2be0b4bsm661541qkp.135.2022.10.26.12.44.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 26 Oct 2022 12:44:23 -0700 (PDT)
-Message-ID: <84028e30-22c1-10bf-f444-d3ac8429a003@gmail.com>
-Date:   Wed, 26 Oct 2022 12:44:14 -0700
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HykrIfDGj0Emwb0ltWiGLZGl2PcTl3HkdAqnWg1OeHs=;
+        b=gyJn1LwtZnto6T6KX5woSq3gTSjAP8sei/VgtHJkcCAoA6dcXE33Gu9quK/nmCyhJj
+         WqWRNLBppkVn22akepRle2YdQIU9adqSvpTPApbpT/cjitrjtNJUo67D9rjQ/zKRziFH
+         /BOVYYtzK3Gvl0bHP1WTWnOBsfHfZSxoD1rkQBGBeC8hzs3WvXoQmdrZGL2NgF9Z6dn/
+         kiP/Adatjt0gjfzN3C9Cf5phsYqUJpKGtP1BuzrwjozBOoAGpioy8uisSaMJJBrS4nyQ
+         sahlNsDBD2zPAwXhjIlv8/ibuAdzfNno4ekCTE0GjnletwO5sBEHxAz7HzTi1Gu6VA99
+         N26Q==
+X-Gm-Message-State: ACrzQf2V3B4R4WvIOAPrmSa1DG7AEZ+qMQz2l27qXkDcZ4gbriE0B2ZQ
+        6zHhEpsmDcQ+Ms4029L5Rg==
+X-Google-Smtp-Source: AMsMyM6KS8E4GJgpsN95NTujJva07W8KKKeA3reyNOFR2b1fz7WjG1LUzrKyh0h31G0KPSeL8vLmTg==
+X-Received: by 2002:aca:c155:0:b0:355:1aa6:d7ad with SMTP id r82-20020acac155000000b003551aa6d7admr3004216oif.0.1666817421025;
+        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id z3-20020a4ad583000000b00480816a5b8csm1268377oos.18.2022.10.26.13.50.20
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 26 Oct 2022 13:50:20 -0700 (PDT)
+Received: (nullmailer pid 1294279 invoked by uid 1000);
+        Wed, 26 Oct 2022 20:50:22 -0000
+Date:   Wed, 26 Oct 2022 15:50:22 -0500
+From:   Rob Herring <robh@kernel.org>
+To:     Dinh Nguyen <dinguyen@kernel.org>
+Cc:     jh80.chung@samsung.com, ulf.hansson@linaro.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-clk@vger.kernel.org
+Subject: Re: [PATCHv6 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
+ "altr,sysmgr-syscon"
+Message-ID: <20221026205022.GA1291041-robh@kernel.org>
+References: <20221026141631.696863-1-dinguyen@kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.2.2
-Subject: Re: [PATCH v4 1/7] mmc: cqhci: Provide helper for resetting both
- SDHCI and CQHCI
-Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-arm-msm@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Andy Gross <agross@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-kernel@vger.kernel.org,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Al Cooper <alcooperx@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
-        stable@vger.kernel.org
-References: <20221026194209.3758834-1-briannorris@chromium.org>
- <20221026124150.v4.1.Ie85faa09432bfe1b0890d8c24ff95e17f3097317@changeid>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20221026124150.v4.1.Ie85faa09432bfe1b0890d8c24ff95e17f3097317@changeid>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221026141631.696863-1-dinguyen@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/26/22 12:42, Brian Norris wrote:
-> Several SDHCI drivers need to deactivate command queueing in their reset
-> hook (see sdhci_cqhci_reset() / sdhci-pci-core.c, for example), and
-> several more are coming.
+On Wed, Oct 26, 2022 at 09:16:26AM -0500, Dinh Nguyen wrote:
+> Document the optional "altr,sysmgr-syscon" binding that is used to
+> access the System Manager register that controls the SDMMC clock
+> phase.
 > 
-> Those reset implementations have some small subtleties (e.g., ordering
-> of initialization of SDHCI vs. CQHCI might leave us resetting with a
-> NULL ->cqe_private), and are often identical across different host
-> drivers.
+> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> ---
+> v6: make "altr,sysmgr-syscon" optional
+> v5: document reg shift
+> v4: add else statement
+> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
+>     "altr,socfpga-dw-mshc"
+> v2: document "altr,sysmgr-syscon" in the MMC section
+> ---
+>  .../bindings/mmc/synopsys-dw-mshc.yaml        | 23 ++++++++++++++++---
+>  1 file changed, 20 insertions(+), 3 deletions(-)
 > 
-> We also don't want to force a dependency between SDHCI and CQHCI, or
-> vice versa; non-SDHCI drivers use CQHCI, and SDHCI drivers might support
-> command queueing through some other means.
-> 
-> So, implement a small helper, to avoid repeating the same mistakes in
-> different drivers. Simply stick it in a header, because it's so small it
-> doesn't deserve its own module right now, and inlining to each driver is
-> pretty reasonable.
-> 
-> This is marked for -stable, as it is an important prerequisite patch for
-> several SDHCI controller bugfixes that follow.
-> 
-> Cc: <stable@vger.kernel.org>
-> Signed-off-by: Brian Norris <briannorris@chromium.org>
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> index ae6d6fca79e2..0e2024eb9018 100644
+> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+>  title: Synopsys Designware Mobile Storage Host Controller Binding
+>  
+> -allOf:
+> -  - $ref: "synopsys-dw-mshc-common.yaml#"
+> -
+>  maintainers:
+>    - Ulf Hansson <ulf.hansson@linaro.org>
+>  
+> @@ -38,6 +35,26 @@ properties:
+>        - const: biu
+>        - const: ciu
+>  
+> +allOf:
+> +  - $ref: synopsys-dw-mshc-common.yaml#
+> +
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: altr,socfpga-dw-mshc
+> +    then:
+> +      properties:
+> +        altr,sysmgr-syscon:
+> +          $ref: /schemas/types.yaml#/definitions/phandle-array
+> +          items:
+> +            - description: phandle to the sysmgr node
+> +            - description: register offset that controls the SDMMC clock phase
+> +            - description: register shift for the smplsel(drive in) setting
 
-Reviewed-by: Florian Fainelli <f.fainelli@gmail.com>
--- 
-Florian
+This goes in the top-level. Use if/then schema to add constraints, not 
+define properties.
 
+> +    else:
+
+Then you'll need to negate the if:  if: { not: { properties: ... }}
+
+> +      properties:
+> +        altr,sysmgr-syscon: false
+> +
+>  required:
+>    - compatible
+>    - reg
+> -- 
+> 2.25.1
+> 
+> 
