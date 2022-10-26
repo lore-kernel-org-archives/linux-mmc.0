@@ -2,151 +2,141 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6B65C38A2D
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 18:23:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBD1C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 19:43:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234002AbiJZSXS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 14:23:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42412 "EHLO
+        id S235101AbiJZTm7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 26 Oct 2022 15:42:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42178 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234003AbiJZSXQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 14:23:16 -0400
-Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A2BBD57F9;
-        Wed, 26 Oct 2022 11:23:15 -0700 (PDT)
-Received: by mail-qv1-xf2b.google.com with SMTP id j6so7824920qvn.12;
-        Wed, 26 Oct 2022 11:23:14 -0700 (PDT)
+        with ESMTP id S235104AbiJZTmm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 15:42:42 -0400
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9B28CBFFE
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:26 -0700 (PDT)
+Received: by mail-pl1-x62c.google.com with SMTP id c2so6995890plz.11
+        for <linux-mmc@vger.kernel.org>; Wed, 26 Oct 2022 12:42:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=Tg+9/4eCkiPnCycaFmooFOheaPBBecDg4xw3IxvGrY8=;
-        b=ejQEDS8BuqARAzYv3Xubkx7aSNMxMJg9UyPT9PAn+yrjhbIwJ1iuY6J0xJzdWdqB3r
-         rvXDTbSTArKUm7hGivw6XEe8hvjFMYPN9e3ZG/7evEZTaH0BfpBC159AX2XXLBnRwZdi
-         HRq420vW/DSc/WCn1CjAunYphWghDdCyj1Fc3FljER37m1HvU5L0A2IBdUFUEuXfEeCx
-         anPhOcc//RDoWp+ialFp2lp8h2VBNiNmu+IrTIKkcE6ct/PbqqI9W87+ik0vUC3GZ/Bd
-         Z3POlQzZWPV2h0FUqNaxLnE1eE+S6OsvWSQYIAi8TaCqEa7OlJH5/nSfGwyiaujukhZO
-         vFaQ==
+        d=chromium.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=8kvE/d8310xZl2YgDA7SStCHTp5iEbyeEE+ffhvPBuQ=;
+        b=RSMDkrX2V+zcNpiTdQ1wkxMpY0MkQFoEcr10UQqRUSMpHme9v3lNADkdRSrpPn0qMo
+         ytXgpJn02JU+LhXiBVYIKj85cYxlt/zdYcwXEpnSUh3jfgjqTM7jTU8rFpcab/FhqSN+
+         WJ99JXJJGfIpl62F+5NGC2M2ztPtpVbHBEp+Q=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Tg+9/4eCkiPnCycaFmooFOheaPBBecDg4xw3IxvGrY8=;
-        b=MjXPR7SPkptclB96NKBInSItM3afhhotGjHMY7lvjsV4czMQwdHPSaphP+NUYRA1Sx
-         sd4lmM6CpN6QrdxiD0UiwXQBQJfro6rFDCnEhQ457u9fQXIhkdtvTImcz+p02w+490i/
-         gGZixqcEJMD8P+t5F7ve1i1zKBoXRedSzT3FyY6t/pvQ5Ef8TcfK/1DY+ItMSG1pGRdB
-         Bxsweg8aJEUYe1D2tyajIZMANai2KXZRxTz5tKkgnqAWPfJd1vd3D5NfbfxCxZWItMra
-         27R3+m7pR0y8ZwZo1TFs+ftlW6x77Wfs1dR3zsYXTjolD6bwlNUTLG2aWXS7AMCkSKqo
-         7srw==
-X-Gm-Message-State: ACrzQf0LReKlAlEO+X64Pd0VfZWTaqrBicPOeX9WBYn8hcepfFKsv+GA
-        Q5yG9eWxELO7JV9CieoEVQ0TwV6bcItCCg==
-X-Google-Smtp-Source: AMsMyM5OjuJW0rwmarqJHZHRPNNT4+PhxtKPG3yGVNuHc1WPUKJ9jBmSSNSiXwDtiyZH6i65FQbK4A==
-X-Received: by 2002:a05:6214:2306:b0:473:f77a:85a7 with SMTP id gc6-20020a056214230600b00473f77a85a7mr37185205qvb.106.1666808594005;
-        Wed, 26 Oct 2022 11:23:14 -0700 (PDT)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.googlemail.com with ESMTPSA id v14-20020a05620a0f0e00b006cfc1d827cbsm4429353qkl.9.2022.10.26.11.23.05
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=8kvE/d8310xZl2YgDA7SStCHTp5iEbyeEE+ffhvPBuQ=;
+        b=wmDyenJoxHUlr2QhEAxnm1LV7N+bRyGoOs0GSd0gV+4gTNQo/b28fOn+4urM+yCtsX
+         4pSn5HVqTnk3ZBXLCN+PpJYf7Xdkta+x0fHJr8xLIxfyIEEyQfq8UFUTNs+F7ezMhxcv
+         cywDUQh69olEbBQqw1dW94U1oIbQxIxC0uB6o/Wg8STVLUMg0TDnUPntctVJ5A2Rmzgq
+         ADCTOjafW5NdzZ0VIvL5VNILDnT+hrmuVo6C3zZXllNLjs9IN8AUJMd1vVr11BgLLe4n
+         e6pW/D2ghpuL3PQanTyJ9vHWumuBWfK6mDj2lPjQVjHqTIK0eP6+ZiP64TNv532hssvl
+         qDSw==
+X-Gm-Message-State: ACrzQf32OkbgSMFhBbSHZUQlLTBJHn+BvW0KfLxed3IbbKI7/w+5/y0Q
+        vtVjBm3ym2HkPrf7Osk8bdGV+g==
+X-Google-Smtp-Source: AMsMyM6hZj9GDeltOVu0pxtCH5Ge/4TwElCv/M6SAFnmN6j13C5wankmCzTWxSILJ+5vGUOoy3PfIg==
+X-Received: by 2002:a17:90b:4a04:b0:213:587b:204e with SMTP id kk4-20020a17090b4a0400b00213587b204emr4770856pjb.98.1666813346142;
+        Wed, 26 Oct 2022 12:42:26 -0700 (PDT)
+Received: from localhost ([2620:15c:9d:2:c9e3:74f3:6b2b:135])
+        by smtp.gmail.com with UTF8SMTPSA id mn22-20020a17090b189600b0020d24ea4400sm1441113pjb.38.2022.10.26.12.42.24
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 26 Oct 2022 11:23:13 -0700 (PDT)
-Message-ID: <d5a6cd9f-4f1e-5d54-ebd4-e48f73268153@gmail.com>
-Date:   Wed, 26 Oct 2022 11:23:02 -0700
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.2.2
-Subject: Re: [PATCH v3 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
-Content-Language: en-US
-To:     Brian Norris <briannorris@chromium.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Wed, 26 Oct 2022 12:42:25 -0700 (PDT)
+From:   Brian Norris <briannorris@chromium.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
         Shawn Lin <shawn.lin@rock-chips.com>,
-        linux-mmc@vger.kernel.org, Al Cooper <alcooperx@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
         Bjorn Andersson <andersson@kernel.org>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-arm-msm@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
         Broadcom internal kernel review list 
         <bcm-kernel-feedback-list@broadcom.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
         Andy Gross <agross@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Jonathan Hunter <jonathanh@nvidia.com>
-References: <20221024175501.2265400-1-briannorris@chromium.org>
- <20221024105229.v3.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
- <5b91c0eb-52aa-8431-c286-81b7feae84ce@intel.com>
- <Y1hY57vkkOhybwE1@google.com>
- <6268199c-78ca-8f55-0377-c14bb0299443@gmail.com>
- <Y1higmSUMLsxvXyq@google.com>
- <7db0a98e-36c8-afee-5b0d-16b836ac8de0@intel.com>
- <Y1l5/U3WnbDIIMOj@google.com>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <Y1l5/U3WnbDIIMOj@google.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-kernel@vger.kernel.org,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        Al Cooper <alcooperx@gmail.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Brian Norris <briannorris@chromium.org>
+Subject: [PATCH v4 0/7] mmc: sdhci controllers: Fix SDHCI_RESET_ALL for CQHCI
+Date:   Wed, 26 Oct 2022 12:42:02 -0700
+Message-Id: <20221026194209.3758834-1-briannorris@chromium.org>
+X-Mailer: git-send-email 2.38.0.135.g90850a2211-goog
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10/26/22 11:18, Brian Norris wrote:
-> Hi Adrian,
-> 
-> On Wed, Oct 26, 2022 at 08:36:48AM +0300, Adrian Hunter wrote:
->> On 26/10/22 01:26, Brian Norris wrote:
->>> On Tue, Oct 25, 2022 at 02:53:46PM -0700, Florian Fainelli wrote:
->>>> On 10/25/22 14:45, Brian Norris wrote:
->>>>> On Tue, Oct 25, 2022 at 04:10:44PM +0300, Adrian Hunter wrote:
->>>>>> On 24/10/22 20:55, Brian Norris wrote:
->>>>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
->>>>>>> index 8f1023480e12..6a282c7a221e 100644
->>>>>>> --- a/drivers/mmc/host/sdhci_am654.c
->>>>>>> +++ b/drivers/mmc/host/sdhci_am654.c
->>>>>
->>>>>>> @@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
->>>>>>>    	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>>>    	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
->>>>>>> -	sdhci_reset(host, mask);
->>>>>>> +	sdhci_and_cqhci_reset(host, mask);
->>>>>>>    	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
->>>>>>>    		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
->>>>>>
->>>>>> What about sdhci_reset in sdhci_am654_ops ?
->>>>>
->>>>> Oops, I think you caught a big fallacy in some of my patches: I assumed
->>>>> there was a single reset() implementation in a given driver (an unwise
->>>>> assumption, I realize). I see at least sdhci-brcmstb.c also has several
->>>>> variant ops that call sdhci_reset(), and I should probably convert them
->>>>> too.
->>
->> I checked and found only sdhci_am654_ops
-> 
-> And...how about sdhci_j721e_8bit_ops in that same driver?
-> 
->>>> You got it right for sdhci-brcmstb.c because "supports-cqe" which gates the
->>>> enabling of CQE can only be found with the "brcm,bcm7216-sdhci" compatible
->>>> which implies using brcmstb_reset().
->>>
->>> I don't see any in-tree device trees for these chips (which is OK), and
->>> that's not what the Documentation/ says, and AFAICT nothing in the
->>> driver is limiting other variants from specifying the "supports-cqe"
->>> flag in their (out-of-tree) device tree. The closest thing I see is that
->>> an *example* in brcm,sdhci-brcmstb.yaml shows "supports-cqe" only on
->>> brcm,bcm7216-sdhci -- but an example is not a binding agreement. Am I
->>> missing something?
->>
->> It was mentioned in the patch from the Fixes tag.
-> 
-> OK, good note. If I don't patch the other seemingly-unaffected variants
-> in brcmstb, I'll at least update the commit message, since the code
-> doesn't tell me they're unaffected.
+This is a series of identical fixes for several SDHCI host
+drivers. Patch #2 (for sdhci-of-arasan; plus its dependency in patch #1)
+is the only one I've tested, and I wrote it due to a bug described
+there.
 
-You can mention in the commit message that they are unaffected and quote 
-me on that if you feel like this needs to be explicitly said.
+I then noticed that several other drivers do the same thing, and that
+commit df57d73276b8 ("mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for
+Intel GLK-based controllers") points out the likely-repeated bug. So the
+fix is now factored into a separate sdhci_and_cqhci_reset() helper,
+and it's likely that most/all drivers that support a combo SDHCI/CQHCI
+controller will want to use it.
+
+Thus, I include additional patches (compile-tested only) that apply this
+helper/fix to the other drivers which call cqhci_init() but not
+cqhci_deactivate(). They contain appropriate disclaimers and the
+relevant parties are CC'd. I would suggest only merging them if you get
+some kind of ACK from people familiar with the relevant hardware.
+
+Notably, I do *not* patch drivers/mmc/host/mtk-sd.c although it uses
+CQHCI, because it doesn't seem to be an SDHCI-based controller, and so
+even if it has a similar bug, it's not clear to me how to patch it.
+
+- Brian
+
+Changes in v4:
+ - Improve for-stable cherry-picking notes
+ - Add Adrian's Ack
+ - Also fix sdhci_am654_ops, sdhci_j721e_8bit_ops
+
+Changes in v3:
+ - Refactor to a "SDHCI and CQHCI" helper -- sdhci_and_cqhci_reset()
+
+Changes in v2:
+ - Rely on cqhci_deactivate() to safely handle (ignore)
+   not-yet-initialized CQE support
+
+Brian Norris (7):
+  mmc: cqhci: Provide helper for resetting both SDHCI and CQHCI
+  mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
+  mmc: sdhci-brcmstb: Fix SDHCI_RESET_ALL for CQHCI
+  mms: sdhci-esdhc-imx: Fix SDHCI_RESET_ALL for CQHCI
+  mmc: sdhci-tegra: Fix SDHCI_RESET_ALL for CQHCI
+  mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
+  mmc: sdhci-*: Convert drivers to new sdhci_and_cqhci_reset()
+
+ drivers/mmc/host/sdhci-brcmstb.c   |  3 ++-
+ drivers/mmc/host/sdhci-cqhci.h     | 24 ++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-esdhc-imx.c |  3 ++-
+ drivers/mmc/host/sdhci-msm.c       | 10 ++--------
+ drivers/mmc/host/sdhci-of-arasan.c |  3 ++-
+ drivers/mmc/host/sdhci-pci-core.c  | 11 ++---------
+ drivers/mmc/host/sdhci-pci-gli.c   | 11 ++---------
+ drivers/mmc/host/sdhci-tegra.c     |  3 ++-
+ drivers/mmc/host/sdhci_am654.c     |  7 ++++---
+ 9 files changed, 42 insertions(+), 33 deletions(-)
+ create mode 100644 drivers/mmc/host/sdhci-cqhci.h
+
 -- 
-Florian
+2.38.0.135.g90850a2211-goog
 
