@@ -2,205 +2,192 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CDDDFFA373E
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Oct 2022 10:02:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD0FCECAAA1
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Oct 2022 12:08:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235164AbiJ0KCQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Oct 2022 06:02:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46710 "EHLO
+        id S235569AbiJ0MIc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Oct 2022 08:08:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235171AbiJ0KB5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2022 06:01:57 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 365A345F48;
-        Thu, 27 Oct 2022 03:01:21 -0700 (PDT)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 21AAC66028CF;
-        Thu, 27 Oct 2022 11:01:19 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1666864880;
-        bh=AB1aP9kwM/VwRRkN+/wjhOvonTMwp6saazq/+FJtpWc=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=nRjRmmzVvgQJpr/h0Tp/P1Qf9rpckVNTKqkO+iB9FyWrDTZGi3veSqviqNneNshhP
-         W0BMm5lonVgi70d0R38IoxZJKZRDXXsyoeQ5MGmG0m+X4ovpN1eE/CjGIQX1o4aP3g
-         b2souJy9giA0QrMaZH0kXbny4gyuFBE17CX8yFLvc3yrWesoauIbndfHnZOjS+b2N0
-         QCruCMKZ4rdlvzW3+ix9e9OVePdHvcTAQbodDLoJ9bwYZ2/lg3ppdaYeMS1MrqCuS0
-         4QaCOjwyBbbjH3LDyh15SKpdLjKDqOJcH8OMsPwm2DVankGQJTDsE8fwcvJujlvMgr
-         cypZa0SBjqEFw==
-Message-ID: <3b09d15a-2cc2-c485-5045-820ccd5863c3@collabora.com>
-Date:   Thu, 27 Oct 2022 12:01:16 +0200
+        with ESMTP id S235475AbiJ0MIb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2022 08:08:31 -0400
+Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0671EACBB
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2022 05:08:28 -0700 (PDT)
+Received: by mail-pj1-x102a.google.com with SMTP id l22-20020a17090a3f1600b00212fbbcfb78so6078797pjc.3
+        for <linux-mmc@vger.kernel.org>; Thu, 27 Oct 2022 05:08:28 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=IRokpQrD/Xpoqhga6/IEwT5hyf0pX7PAPi9ZKJUnr7Q=;
+        b=JMScpzWl6emAup2u57Oz+x3Eu9xexeIgrXPigRBphDYLS17++q/iVRPSo68AKI+7HU
+         EfgGCjwU2Ux3cCL9UySpAo/NxqVFWjixbOmUZjZRvpAG8PUsbi26QqIcLHUvm3Dc+7Mu
+         tokABmH2890D/GOamLjXSHM6MQEKCFUb9JrhYTFPoO508RlLtXbGQkazNjCbw+V1FAaz
+         jm7qwXWgp9XoEvQ1BhPMwaBoBCc0GoDPc/Y4bzrIJIjKIRBFDj1aODTZM6Wohggdbqva
+         fsDS+dbhf8nPvt9M108QYnZr1E89+0CPxGqxOM6YJu8w8tq4K30L3TMD36h5vh2ysifk
+         ET6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=IRokpQrD/Xpoqhga6/IEwT5hyf0pX7PAPi9ZKJUnr7Q=;
+        b=nEz6tUPRD4kPZ44kuv9R/1DifmyWzMy9EWl4Q5AoFhPNE5awziANtZEyn7qzL5QFyJ
+         l9qJ4++RHcIZjK91Rij4PZW6q4BGQ5vBQm9W4UJwEiooUQevKQ417GxqVx+dH6OeJ7C5
+         BGMtWJ1u3YO9NkKpCxc2gAdJcjC0Y5gCPXhlw0jT6A1yPDgtyZF0PWpKEiLU0xum12/J
+         GdoNnXoz2A0K2lT98+o6QQALtvJ/QMS2GWqaF17fqRZgYGnwneZ2UXY3o21tdENt+wR8
+         uR/GcuoaRKS2aw8X3z8zbqh1manr3ZBhi9BNJoPoLpfuXsOynAzObnCzzclkES2GiMUB
+         nWfw==
+X-Gm-Message-State: ACrzQf0s8UgaetIT5zfCko3IvYYairKFd8waRwwYS8JReeRqUBsruTsZ
+        L5rvUjfTWAD3SesDiDTGVvnbaaRn+UjBX9QsI0TlAw==
+X-Google-Smtp-Source: AMsMyM4mFDjwKvJtTg/Yzz8RozT/UYy+3pElSAq7TFuq1ZEqDR1s26iqwELHXdK9Q2XTTM+wOKNPMi+xbxQi+xSTdnA=
+X-Received: by 2002:a17:902:70c7:b0:183:3e66:fe48 with SMTP id
+ l7-20020a17090270c700b001833e66fe48mr47299112plt.165.1666872508418; Thu, 27
+ Oct 2022 05:08:28 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 7/7] arm64: dts: mediatek: Add support for MT6795 Sony
- Xperia M5 smartphone
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@somainline.org>, robh+dt@kernel.org
-Cc:     krzysztof.kozlowski+dt@linaro.org, vkoul@kernel.org,
-        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        matthias.bgg@gmail.com, hsinyi@chromium.org,
-        nfraprado@collabora.com, allen-kh.cheng@mediatek.com,
-        fparent@baylibre.com, sam.shih@mediatek.com,
-        sean.wang@mediatek.com, long.cheng@mediatek.com,
-        wenbin.mei@mediatek.com, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, dmaengine@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, phone-devel@vger.kernel.org,
-        ~postmarketos/upstreaming@lists.sr.ht
-References: <20220729104441.39177-1-angelogioacchino.delregno@collabora.com>
- <20220729104441.39177-8-angelogioacchino.delregno@collabora.com>
- <a8fa9e22-8c3f-60b2-a0db-01cfd5c37765@somainline.org>
- <17139e24-d33c-8240-cd4a-d87fb3b29276@collabora.com>
- <9ced2822-a9d2-2e59-fe40-6c6f690be487@somainline.org>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <9ced2822-a9d2-2e59-fe40-6c6f690be487@somainline.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+References: <20221018105149.820062-1-thierry.reding@gmail.com>
+ <CAPDyKFopppohLJ7ptnQxpBHzMLh2SZObarQRC0bJyTwE=nky4w@mail.gmail.com> <Y1pLPHER+Pq+cRvc@orome>
+In-Reply-To: <Y1pLPHER+Pq+cRvc@orome>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 27 Oct 2022 14:07:51 +0200
+Message-ID: <CAPDyKFpG9ZjVTiK3HEqioDN8ksGpRYiXL_SLSmOfm9fjJfcrsw@mail.gmail.com>
+Subject: Re: [PATCH] iommu: Always define struct iommu_fwspec
+To:     Thierry Reding <thierry.reding@gmail.com>,
+        Prathamesh Shete <pshete@nvidia.com>
+Cc:     Joerg Roedel <joro@8bytes.org>, Will Deacon <will@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>, iommu@lists.linux.dev,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 27/10/22 11:40, Konrad Dybcio ha scritto:
-> 
-> On 27/10/2022 11:28, AngeloGioacchino Del Regno wrote:
->> Il 29/07/22 14:00, Konrad Dybcio ha scritto:
->>>
->>>
->>> On 29.07.2022 12:44, AngeloGioacchino Del Regno wrote:
->>>> Add a basic support for the Sony Xperia M5 (codename "Holly")
->>>> smartphone, powered by a MediaTek Helio X10 SoC.
->>>>
->>>> This achieves a console boot.
->>>>
->>>> Signed-off-by: AngeloGioacchino Del Regno 
->>>> <angelogioacchino.delregno@collabora.com>
->>
->> Hello Konrad,
->> First of all, I'm sorry for the very late reply.
->>
->>>> ---
->>>>   arch/arm64/boot/dts/mediatek/Makefile         |  1 +
->>>>   .../dts/mediatek/mt6795-sony-xperia-m5.dts    | 90 +++++++++++++++++++
->>>>   2 files changed, 91 insertions(+)
->>>>   create mode 100644 arch/arm64/boot/dts/mediatek/mt6795-sony-xperia-m5.dts
->>>>
->>>> diff --git a/arch/arm64/boot/dts/mediatek/Makefile 
->>>> b/arch/arm64/boot/dts/mediatek/Makefile
->>>> index af362a085a02..72fd683c9264 100644
->>>> --- a/arch/arm64/boot/dts/mediatek/Makefile
->>>> +++ b/arch/arm64/boot/dts/mediatek/Makefile
->>>> @@ -3,6 +3,7 @@ dtb-$(CONFIG_ARCH_MEDIATEK) += mt2712-evb.dtb
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt6755-evb.dtb
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt6779-evb.dtb
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt6795-evb.dtb
->>>> +dtb-$(CONFIG_ARCH_MEDIATEK) += mt6795-sony-xperia-m5.dtb
->>> -holly.dtb?
->>>
->>
->> I prefer using the commercial name to identify the device.
->> "Holly" is the smartphone project codename and that is mentioned almost nowhere:
->> the aim here is to enhance readability as to make it immediately understandable
->> that this devicetree is for the Xperia M5 device.
-> 
-> Ok, sounds good.
-> 
-> 
->>
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt6797-evb.dtb
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt6797-x20-dev.dtb
->>>>   dtb-$(CONFIG_ARCH_MEDIATEK) += mt7622-rfb1.dtb
->>>> diff --git a/arch/arm64/boot/dts/mediatek/mt6795-sony-xperia-m5.dts 
->>>> b/arch/arm64/boot/dts/mediatek/mt6795-sony-xperia-m5.dts
->>>> new file mode 100644
->>>> index 000000000000..94d011c4126c
->>>> --- /dev/null
->>>> +++ b/arch/arm64/boot/dts/mediatek/mt6795-sony-xperia-m5.dts
->>>> @@ -0,0 +1,90 @@
->>>> +// SPDX-License-Identifier: GPL-2.0-only
->>>> +/*
->>>> + * Copyright (c) 2022, Collabora Ltd
->>>> + * Author: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
->>>> + */
->>>> +
->>>> +/dts-v1/;
->>>> +#include "mt6795.dtsi"
->>>> +
->>>> +#include <dt-bindings/gpio/gpio.h>
->>> Looks unused.
->>>
->>
->> Right, I'll remove that in v2.
->>
->>>> +
->>>> +/ {
->>>> +    model = "Sony Xperia M5";
->>>> +    compatible = "sony,xperia-m5", "mediatek,mt6795";
->>> sony,holly?
->>>
->>
->> I'm sorry, but I can't understand the sense of adding that compatible string to
->> the mix. To the kernel, it doesn't mean anything - and we already have another
->> string advertising the specific machine, which is "sony,xperia-m5".
-> 
-> I was suggesting replacing xperia-m5 with holly, but since we agreed on keeping
-> 
-> m5 in the dtb name, I suppose it's fine for this one to stay too.
-> 
-> 
->>
->> Of course, there is no Xperia M5 with a different SoC and, even if there was a
->> xperia-m5 with a different SoC, we anyway have both a machine compatible and a
->> SoC compatible in here, so that would still not pose any issue.
->>
->>>> +    chassis-type = "handset";
->>>> +
->>>> +    aliases {
->>>> +        mmc0 = &mmc0;
->>>> +        mmc1 = &mmc1;
->>>> +        serial0 = &uart0;
->>>> +        serial1 = &uart1;
->>>> +    };
->>>> +
->>>> +    memory@40000000 {
->>>> +        device_type = "memory";
->>>> +        reg = <0 0x40000000 0 0x1E800000>;
->>> Lowercase hex in size. Also, doesn't the bootloader fill it in?
->>>
->>
->> Updating the device to the latest software version will give you a bootloader
->> that fills that in, but the first-ever software release contains one that will
->> not do that in particular conditions (fastboot boot).
-> 
-> Ugh. If only vendors tested their software before shipping it to users..
-> 
-> I think it's worth to adding a comment mentioning that, though.
-> 
-> 
->>
->>>> +    };
->>>> +
->>>> +    reserved_memory: reserved-memory {
->>>> +        #address-cells = <2>;
->>>> +        #size-cells = <2>;
->>>> +        ranges;
->>>> +
->>>> +        /* 128 KiB reserved for ARM Trusted Firmware (BL31) */
->>> Is that true for all devices with this SoC, or..? If so, it may be worth
->>> moving this into mt6795.dtsi.
->>>
+On Thu, 27 Oct 2022 at 11:11, Thierry Reding <thierry.reding@gmail.com> wrote:
+>
+> On Thu, Oct 20, 2022 at 01:32:41PM +0200, Ulf Hansson wrote:
+> > On Tue, 18 Oct 2022 at 12:51, Thierry Reding <thierry.reding@gmail.com> wrote:
+> > >
+> > > From: Thierry Reding <treding@nvidia.com>
+> > >
+> > > In order to fully make use of the !IOMMU_API stub functions, make the
+> > > struct iommu_fwspec always available so that users of the stubs can keep
+> > > using the structure's internals without causing compile failures.
+> > >
+> > > Signed-off-by: Thierry Reding <treding@nvidia.com>
+> >
+> > Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > > ---
+> > > Hi Joerg,
+> > >
+> > > this is a rebased patch extracted from an ancient series that never
+> > > ended up getting applied:
+> > >
+> > >         https://lore.kernel.org/all/20191209120005.2254786-3-thierry.reding@gmail.com/
+> > >
+> > > You had already acked this particular patch, so maybe you can pick this
+> > > up. I've seen at least two discussions where this was brought up again,
+> > > so I figured it'd be worth sending this out again because it can help
+> > > remove a number of #ifdef blocks throughout the kernel.
+> >
+> > Yes, this would certainly help to improve the code. To me, it looks
+> > like the current stub functions, like dev_iommu_fwspec_get() for
+> > example, aren't really useful without $subject patch.
+> >
+> > Note that, I have a pending patch for mmc that would benefit from
+> > this. To prevent me from delaying that, an easy way forward, assuming
+> > there are no objections of course, would be to send this for 6.1-rc.
+>
+> Adding Prathamesh for visibility. Another alternative would be to
+> prepend this to Prathamesh's series with an Acked-by from Joerg.
 
-Sorry again, I forgot to reply to this question, so addressing that now:
-no, that's not true for all devices with this SoC.
+Good idea!
 
-I'm practically sure that all commercial devices that were shipped at that time
-require the same, but here upstream we also have a MT6795 dev board devicetree,
-which uses a much newer bootloader and possibly needs a different secmon carveout,
-if any at all.
+I will then be awaiting a new version from Prathamesh's series, that
+includes $subject patch too.
 
-Hence, this one cannot be transferred to mt6795.dtsi.
+>
+> Joerg, any preference on how to move forward with this?
+>
+> Thierry
+>
 
+Kind regards
+Uffe
+
+> >
+> > >
+> > >  include/linux/iommu.h | 39 +++++++++++++++++++--------------------
+> > >  1 file changed, 19 insertions(+), 20 deletions(-)
+> > >
+> > > diff --git a/include/linux/iommu.h b/include/linux/iommu.h
+> > > index a325532aeab5..e3295c45d18f 100644
+> > > --- a/include/linux/iommu.h
+> > > +++ b/include/linux/iommu.h
+> > > @@ -173,6 +173,25 @@ enum iommu_dev_features {
+> > >
+> > >  #define IOMMU_PASID_INVALID    (-1U)
+> > >
+> > > +/**
+> > > + * struct iommu_fwspec - per-device IOMMU instance data
+> > > + * @ops: ops for this device's IOMMU
+> > > + * @iommu_fwnode: firmware handle for this device's IOMMU
+> > > + * @flags: IOMMU_FWSPEC_* flags
+> > > + * @num_ids: number of associated device IDs
+> > > + * @ids: IDs which this device may present to the IOMMU
+> > > + */
+> > > +struct iommu_fwspec {
+> > > +       const struct iommu_ops  *ops;
+> > > +       struct fwnode_handle    *iommu_fwnode;
+> > > +       u32                     flags;
+> > > +       unsigned int            num_ids;
+> > > +       u32                     ids[];
+> > > +};
+> > > +
+> > > +/* ATS is supported */
+> > > +#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> > > +
+> > >  #ifdef CONFIG_IOMMU_API
+> > >
+> > >  /**
+> > > @@ -598,25 +617,6 @@ extern struct iommu_group *generic_device_group(struct device *dev);
+> > >  /* FSL-MC device grouping function */
+> > >  struct iommu_group *fsl_mc_device_group(struct device *dev);
+> > >
+> > > -/**
+> > > - * struct iommu_fwspec - per-device IOMMU instance data
+> > > - * @ops: ops for this device's IOMMU
+> > > - * @iommu_fwnode: firmware handle for this device's IOMMU
+> > > - * @flags: IOMMU_FWSPEC_* flags
+> > > - * @num_ids: number of associated device IDs
+> > > - * @ids: IDs which this device may present to the IOMMU
+> > > - */
+> > > -struct iommu_fwspec {
+> > > -       const struct iommu_ops  *ops;
+> > > -       struct fwnode_handle    *iommu_fwnode;
+> > > -       u32                     flags;
+> > > -       unsigned int            num_ids;
+> > > -       u32                     ids[];
+> > > -};
+> > > -
+> > > -/* ATS is supported */
+> > > -#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> > > -
+> > >  /**
+> > >   * struct iommu_sva - handle to a device-mm bond
+> > >   */
+> > > @@ -680,7 +680,6 @@ bool iommu_group_dma_owner_claimed(struct iommu_group *group);
+> > >
+> > >  struct iommu_ops {};
+> > >  struct iommu_group {};
+> > > -struct iommu_fwspec {};
+> > >  struct iommu_device {};
+> > >  struct iommu_fault_param {};
+> > >  struct iommu_iotlb_gather {};
+> > > --
+> > > 2.37.3
+> > >
+> >
+> > Kind regards
+> > Uffe
