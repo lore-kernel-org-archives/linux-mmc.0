@@ -2,129 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 391E8C38A2D
-	for <linux-mmc@archiver.kernel.org>; Wed, 26 Oct 2022 20:50:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4838C38A2D
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Oct 2022 05:45:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234604AbiJZUu3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 26 Oct 2022 16:50:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56960 "EHLO
+        id S232946AbiJ0Fp3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Oct 2022 01:45:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52840 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234615AbiJZUuY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 26 Oct 2022 16:50:24 -0400
-Received: from mail-oi1-f173.google.com (mail-oi1-f173.google.com [209.85.167.173])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C74A0631F9;
-        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
-Received: by mail-oi1-f173.google.com with SMTP id g10so20306870oif.10;
-        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HykrIfDGj0Emwb0ltWiGLZGl2PcTl3HkdAqnWg1OeHs=;
-        b=gyJn1LwtZnto6T6KX5woSq3gTSjAP8sei/VgtHJkcCAoA6dcXE33Gu9quK/nmCyhJj
-         WqWRNLBppkVn22akepRle2YdQIU9adqSvpTPApbpT/cjitrjtNJUo67D9rjQ/zKRziFH
-         /BOVYYtzK3Gvl0bHP1WTWnOBsfHfZSxoD1rkQBGBeC8hzs3WvXoQmdrZGL2NgF9Z6dn/
-         kiP/Adatjt0gjfzN3C9Cf5phsYqUJpKGtP1BuzrwjozBOoAGpioy8uisSaMJJBrS4nyQ
-         sahlNsDBD2zPAwXhjIlv8/ibuAdzfNno4ekCTE0GjnletwO5sBEHxAz7HzTi1Gu6VA99
-         N26Q==
-X-Gm-Message-State: ACrzQf2V3B4R4WvIOAPrmSa1DG7AEZ+qMQz2l27qXkDcZ4gbriE0B2ZQ
-        6zHhEpsmDcQ+Ms4029L5Rg==
-X-Google-Smtp-Source: AMsMyM6KS8E4GJgpsN95NTujJva07W8KKKeA3reyNOFR2b1fz7WjG1LUzrKyh0h31G0KPSeL8vLmTg==
-X-Received: by 2002:aca:c155:0:b0:355:1aa6:d7ad with SMTP id r82-20020acac155000000b003551aa6d7admr3004216oif.0.1666817421025;
-        Wed, 26 Oct 2022 13:50:21 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id z3-20020a4ad583000000b00480816a5b8csm1268377oos.18.2022.10.26.13.50.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 26 Oct 2022 13:50:20 -0700 (PDT)
-Received: (nullmailer pid 1294279 invoked by uid 1000);
-        Wed, 26 Oct 2022 20:50:22 -0000
-Date:   Wed, 26 Oct 2022 15:50:22 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Dinh Nguyen <dinguyen@kernel.org>
-Cc:     jh80.chung@samsung.com, ulf.hansson@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-Subject: Re: [PATCHv6 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Message-ID: <20221026205022.GA1291041-robh@kernel.org>
-References: <20221026141631.696863-1-dinguyen@kernel.org>
+        with ESMTP id S234223AbiJ0Fp0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2022 01:45:26 -0400
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75A7F3D5A5;
+        Wed, 26 Oct 2022 22:45:23 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1666849523; x=1698385523;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=/g8s4f7kmFiKzd9ZEGsfSC/qwsPn27mT53xEaWFg3Xw=;
+  b=JPiqAziPCXW/8IdU7vUrP6mLuQHT4TZLdbY668g89Adv2Fc4ZuG2yOV7
+   AgCVLtIbRULq8hNXlWKZDeHX06J5+lxatNmDRR+AJ/XZROW85X30fVF2r
+   iJcXZZMlziMao6zbS/vdvj6l9V0c+P6NL+OZcnzrNOW92RLYq6FsjUrA7
+   QAU43kVJ1y7j40YSd7hF6Av/Pe9u2ok4R2rrpUZZOYyMDh0hqvM8IUi7T
+   zxrqzz+QdpsnKkvm/f1UhuxWykapI2yreYI7r4q9B5r2muW5xQQMVPDYq
+   cuhcRGhMEkmSil+srcG5MVWy2wpWJNKreOYG/M/my1zxfDv4MZnsSykFh
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10512"; a="295544235"
+X-IronPort-AV: E=Sophos;i="5.95,215,1661842800"; 
+   d="scan'208";a="295544235"
+Received: from fmsmga001.fm.intel.com ([10.253.24.23])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Oct 2022 22:45:23 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10512"; a="774864507"
+X-IronPort-AV: E=Sophos;i="5.95,215,1661842800"; 
+   d="scan'208";a="774864507"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.45.150])
+  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 26 Oct 2022 22:45:17 -0700
+Message-ID: <cbeb7a0d-16b4-2774-178d-8a83954a46a2@intel.com>
+Date:   Thu, 27 Oct 2022 08:45:14 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221026141631.696863-1-dinguyen@kernel.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.4.1
+Subject: Re: [PATCH v3 6/7] mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
+To:     Brian Norris <briannorris@chromium.org>
+Cc:     Florian Fainelli <f.fainelli@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        linux-mmc@vger.kernel.org, Al Cooper <alcooperx@gmail.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Sowjanya Komatineni <skomatineni@nvidia.com>,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Konrad Dybcio <konrad.dybcio@somainline.org>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        Michal Simek <michal.simek@xilinx.com>,
+        linux-kernel@vger.kernel.org, Shawn Guo <shawnguo@kernel.org>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        linux-arm-msm@vger.kernel.org, Haibo Chen <haibo.chen@nxp.com>,
+        Andy Gross <agross@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Jonathan Hunter <jonathanh@nvidia.com>
+References: <20221024175501.2265400-1-briannorris@chromium.org>
+ <20221024105229.v3.6.I35ca9d6220ba48304438b992a76647ca8e5b126f@changeid>
+ <5b91c0eb-52aa-8431-c286-81b7feae84ce@intel.com>
+ <Y1hY57vkkOhybwE1@google.com>
+ <6268199c-78ca-8f55-0377-c14bb0299443@gmail.com>
+ <Y1higmSUMLsxvXyq@google.com>
+ <7db0a98e-36c8-afee-5b0d-16b836ac8de0@intel.com>
+ <Y1l5/U3WnbDIIMOj@google.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <Y1l5/U3WnbDIIMOj@google.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Oct 26, 2022 at 09:16:26AM -0500, Dinh Nguyen wrote:
-> Document the optional "altr,sysmgr-syscon" binding that is used to
-> access the System Manager register that controls the SDMMC clock
-> phase.
+On 26/10/22 21:18, Brian Norris wrote:
+> Hi Adrian,
 > 
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
-> ---
-> v6: make "altr,sysmgr-syscon" optional
-> v5: document reg shift
-> v4: add else statement
-> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->     "altr,socfpga-dw-mshc"
-> v2: document "altr,sysmgr-syscon" in the MMC section
-> ---
->  .../bindings/mmc/synopsys-dw-mshc.yaml        | 23 ++++++++++++++++---
->  1 file changed, 20 insertions(+), 3 deletions(-)
+> On Wed, Oct 26, 2022 at 08:36:48AM +0300, Adrian Hunter wrote:
+>> On 26/10/22 01:26, Brian Norris wrote:
+>>> On Tue, Oct 25, 2022 at 02:53:46PM -0700, Florian Fainelli wrote:
+>>>> On 10/25/22 14:45, Brian Norris wrote:
+>>>>> On Tue, Oct 25, 2022 at 04:10:44PM +0300, Adrian Hunter wrote:
+>>>>>> On 24/10/22 20:55, Brian Norris wrote:
+>>>>>>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>>>>>>> index 8f1023480e12..6a282c7a221e 100644
+>>>>>>> --- a/drivers/mmc/host/sdhci_am654.c
+>>>>>>> +++ b/drivers/mmc/host/sdhci_am654.c
+>>>>>
+>>>>>>> @@ -378,7 +379,7 @@ static void sdhci_am654_reset(struct sdhci_host *host, u8 mask)
+>>>>>>>   	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>>>>>>   	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+>>>>>>> -	sdhci_reset(host, mask);
+>>>>>>> +	sdhci_and_cqhci_reset(host, mask);
+>>>>>>>   	if (sdhci_am654->quirks & SDHCI_AM654_QUIRK_FORCE_CDTEST) {
+>>>>>>>   		ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
+>>>>>>
+>>>>>> What about sdhci_reset in sdhci_am654_ops ?
+>>>>>
+>>>>> Oops, I think you caught a big fallacy in some of my patches: I assumed
+>>>>> there was a single reset() implementation in a given driver (an unwise
+>>>>> assumption, I realize). I see at least sdhci-brcmstb.c also has several
+>>>>> variant ops that call sdhci_reset(), and I should probably convert them
+>>>>> too.
+>>
+>> I checked and found only sdhci_am654_ops
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> index ae6d6fca79e2..0e2024eb9018 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Synopsys Designware Mobile Storage Host Controller Binding
->  
-> -allOf:
-> -  - $ref: "synopsys-dw-mshc-common.yaml#"
-> -
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
->  
-> @@ -38,6 +35,26 @@ properties:
->        - const: biu
->        - const: ciu
->  
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: altr,socfpga-dw-mshc
-> +    then:
-> +      properties:
-> +        altr,sysmgr-syscon:
-> +          $ref: /schemas/types.yaml#/definitions/phandle-array
-> +          items:
-> +            - description: phandle to the sysmgr node
-> +            - description: register offset that controls the SDMMC clock phase
-> +            - description: register shift for the smplsel(drive in) setting
-
-This goes in the top-level. Use if/then schema to add constraints, not 
-define properties.
-
-> +    else:
-
-Then you'll need to negate the if:  if: { not: { properties: ... }}
-
-> +      properties:
-> +        altr,sysmgr-syscon: false
-> +
->  required:
->    - compatible
->    - reg
-> -- 
-> 2.25.1
+> And...how about sdhci_j721e_8bit_ops in that same driver?
 > 
+>>>> You got it right for sdhci-brcmstb.c because "supports-cqe" which gates the
+>>>> enabling of CQE can only be found with the "brcm,bcm7216-sdhci" compatible
+>>>> which implies using brcmstb_reset().
+>>>
+>>> I don't see any in-tree device trees for these chips (which is OK), and
+>>> that's not what the Documentation/ says, and AFAICT nothing in the
+>>> driver is limiting other variants from specifying the "supports-cqe"
+>>> flag in their (out-of-tree) device tree. The closest thing I see is that
+>>> an *example* in brcm,sdhci-brcmstb.yaml shows "supports-cqe" only on
+>>> brcm,bcm7216-sdhci -- but an example is not a binding agreement. Am I
+>>> missing something?
+>>
+>> It was mentioned in the patch from the Fixes tag.
 > 
+> OK, good note. If I don't patch the other seemingly-unaffected variants
+> in brcmstb, I'll at least update the commit message, since the code
+> doesn't tell me they're unaffected.
+> 
+>>> Now of course, you probably know behind the scenes that there are no
+>>> other sdhci-brcmstb-relevant controllers that "support cqe", but AFAICT
+>>> I have no way of knowing that a priori. The driver and bindings give
+>>> (too much?) flexibility.
+>>>
+>>> Poking around, I think the only other one I might have missed would be
+>>> gl9763e in sdhci-pci-gli.c. That also calls cqhci_init() but is
+>>> otherwise relying on the default sdhci_pci_ops. So I'd either have to
+>>
+>> It uses sdhci_gl9763e_ops not the default sdhci_pci_ops.  It looks OK
+>> to me.
+> 
+> Ugh, of course you're right. I think I'm mixing up past history and
+> stuff I'm trying to patch now. I *am* patching gl9763e already in this
+> series, but simply as a refactor, and not any additional bugfix.
+> 
+>>> change the common sdhci_pci_ops, or else start a new copy/paste/modify
+>>> 'struct sdhci_ops' for it... This really does start to get messy when
+>>> poking around on drivers I can't test. As in, it shouldn't be harmful
+>>> to change most sdhci_reset() to sdhci_and_cqhci_reset() (as long as they
+>>> aren't using some other CQE implementation), but the more invasive it
+>>> gets (say, rewriting a bunch of other ops), the easier it is to get
+>>> something wrong.
+>>
+>> AFAICS it was just sdhci_am654_ops
+> 
+> Agreed it's less to change than I thought. But I think you (and I) also
+> missed sdhci_j721e_8bit_ops.
+
+You are right!  Thanks for spotting that!
+
+> 
+> Assuming I'm not totally off-base yet again...v4 is coming sooner or
+> later.
+> 
+> Brian
+
