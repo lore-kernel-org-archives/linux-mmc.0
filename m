@@ -2,61 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45E71FA3740
-	for <linux-mmc@archiver.kernel.org>; Thu, 27 Oct 2022 21:39:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E92AFA3745
+	for <linux-mmc@archiver.kernel.org>; Thu, 27 Oct 2022 23:11:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236841AbiJ0Vjk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 27 Oct 2022 17:39:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43092 "EHLO
+        id S235708AbiJ0XLH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 27 Oct 2022 19:11:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236694AbiJ0Vji (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2022 17:39:38 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 990F0E034;
-        Thu, 27 Oct 2022 14:39:37 -0700 (PDT)
+        with ESMTP id S229941AbiJ0XLF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 27 Oct 2022 19:11:05 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E14709A28C;
+        Thu, 27 Oct 2022 16:11:01 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 4FFD7B827D0;
-        Thu, 27 Oct 2022 21:39:36 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E9219C433C1;
-        Thu, 27 Oct 2022 21:39:34 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7C51B62595;
+        Thu, 27 Oct 2022 23:11:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C76F5C43470;
+        Thu, 27 Oct 2022 23:11:00 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1666906775;
-        bh=PnidLjfH/auqOf7LWpdRJJdl6coNXBfgOkF2gQzyHF4=;
+        s=k20201202; t=1666912260;
+        bh=KpiEoi6pX2qKSKUG5diicN97WlLWtC2P66cRAuNsOnE=;
         h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
-        b=qgVdZXXmVUN1wldXvK1QLJA2PsRcZJe3Yiw1yZfNm1OzkTRETw7gZf8KLiHZG3PFS
-         Q2iaPrvXt4UVqBhJZKu2nCAJqF1SGkidezsppfR+sagwWkmu+vExUGuOzLCpWjCkRS
-         6VwMnrRAtgRMe3/b+8bxBoqMwBx2bYpwUFiUp7PkmkOGR3Bb05nCvFjIAyetQ03NO7
-         J5pp9FsjjhHr2lJaYX2amZFihlzxgBuB7otf4L4W0zXajPnlkVg25Ow79vibMoZrYa
-         FHs2F+sVmQrEF/nkIiFbm0/K66BxfD4tAcymi96SnjCMEsnhP0pX1RyZiyZUMy/Ycv
-         34s4+9pkLUfFA==
+        b=Aoa2evZvjzvRF4K1QlaTMcMNpdb1/mxlcG+r8YmUmGF1l34Uecq70uF9O7xf+ICY6
+         2cQdLsVudksJ9udKltQeOWBIHEEye9dHJGVqiAjWS1HbTV3UVisCAbuiYMvo2Yp81o
+         asisy+aHeOSh5t7qrsLsMnpIID7Zcb5MfYQ5OtLH7NB8PDjZjjDupHr5NQYBVwFcrX
+         FxDZmmz94qFYesdi7izz8Foh4VPm/W80yAAQUKjsumAbM9JWXX9cNuSpvXAi0rdQnQ
+         s2pS4HeRbDMHCI541D2Tyy5G1DySXnjARmYp7LWWxFqOiLRKVgWgxXCnMg4BON7kDZ
+         na7zbhXEsEnwQ==
 Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20221026141631.696863-5-dinguyen@kernel.org>
-References: <20221026141631.696863-1-dinguyen@kernel.org> <20221026141631.696863-5-dinguyen@kernel.org>
-Subject: Re: [PATCHv6 5/6] clk: socfpga: remove the setting of clk-phase for sdmmc_clk
+In-Reply-To: <20221021203329.4143397-2-arnd@kernel.org>
+References: <20221021202254.4142411-1-arnd@kernel.org> <20221021203329.4143397-2-arnd@kernel.org>
+Subject: Re: [PATCH 02/21] ARM: s3c: remove s3c24xx specific hacks
 From:   Stephen Boyd <sboyd@kernel.org>
-Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org
-To:     Dinh Nguyen <dinguyen@kernel.org>, jh80.chung@samsung.com
-Date:   Thu, 27 Oct 2022 14:39:32 -0700
+Cc:     linux-kernel@vger.kernel.org, Ben Dooks <ben-linux@fluff.org>,
+        Simtec Linux Team <linux@simtec.co.uk>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Lars-Peter Clausen <lars@metafoo.de>,
+        Sylwester Nawrocki <sylvester.nawrocki@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Tomasz Figa <tomasz.figa@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Chanwoo Choi <cw00.choi@samsung.com>,
+        linux-samsung-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        linux-gpio@vger.kernel.org, linux-rtc@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux-clk@vger.kernel.org
+To:     Arnd Bergmann <arnd@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        linux-arm-kernel@lists.infradead.org
+Date:   Thu, 27 Oct 2022 16:10:58 -0700
 User-Agent: alot/0.10
-Message-Id: <20221027213934.E9219C433C1@smtp.kernel.org>
+Message-Id: <20221027231100.C76F5C43470@smtp.kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Quoting Dinh Nguyen (2022-10-26 07:16:30)
-> Now that the SDMMC driver supports setting the clk-phase, we can remove
-> the need to do it in the clock driver.
+Quoting Arnd Bergmann (2022-10-21 13:27:35)
+> From: Arnd Bergmann <arnd@arndb.de>
 >=20
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> A number of device drivers reference CONFIG_ARM_S3C24XX_CPUFREQ or
+> similar symbols that are no longer available with the platform gone,
+> though the drivers themselves are still used on newer platforms,
+> so remove these hacks.
+>=20
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 > ---
 
-Do you want to take this through mmc tree?
-
-Acked-by: Stephen Boyd <sboyd@kernel.org>
+Acked-by: Stephen Boyd <sboyd@kernel.org> # clk
