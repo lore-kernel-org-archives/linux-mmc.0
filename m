@@ -2,126 +2,138 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3563C38A02
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 13:53:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57C1BFA3745
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 14:11:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229685AbiJ1NxB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 09:53:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52490 "EHLO
+        id S229765AbiJ1OLe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Oct 2022 10:11:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229460AbiJ1NxA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 09:53:00 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84BD23DF2C
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 06:52:59 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id r14so8428650lfm.2
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 06:52:59 -0700 (PDT)
+        with ESMTP id S229696AbiJ1OLd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 10:11:33 -0400
+Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD12A79694
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 07:11:31 -0700 (PDT)
+Received: by mail-vs1-xe2e.google.com with SMTP id l190so4707748vsc.10
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 07:11:31 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=AiWvRk5q394PNtyPtfd7RRYQFcCCdv9RmCjUimVbiRc=;
-        b=u/CESXdXFuPawAP1b5wROE8H7g1FCRybxiltZnhqhICp8E+B/lrUnTRBdS6e/MCZEq
-         aYSGu+/hTirXeaI+N/4d6zRaHn8HF4O6HxoCaRhGxhx0p2dGnqkn7aDIkX96ijWIz9Hq
-         DG46k4r+LQI4g3QDtUAjRHfpWEGhd3GO8s7StrVkEd9ACR4pGhO0yeWBumhv/pEHuyRJ
-         mCnkpu3xD8JbUBprupa6nNVQeMoV+3zGjbJq2jb3Kp0NkB/tsgtdnEahIYA4HPrtEHdV
-         zzBoAyF1C4JbBcG1ZBReI1aUK6DB/rIeySOQyrr4qZcKYLaDJC+QkouCVmHdwTFzYgfZ
-         MCTg==
+        d=google.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=y3HZ5Z9INEvVnaiLMEUEyf9U1obNrEmBr92qQo5xahU=;
+        b=SoGeBPNWzaqQCc5k34nTFJIwSs305Ct6GYvm/zsEcEG5+QTtqsbtgS+rYAFrjp0g1k
+         JFvpMkBEAvnF36rsj4Fb59LRXZeev8+hD4YiS5UmM7hGRCnUOLKvJDCJJYxdwVPwIGz8
+         A1nUEhBygVgSNB2P8WoiLqz7kdznQ67OfpJWdkzDUD28TY2k6UuQwim88c76+SS+1Bw8
+         jNodqYuX9eSPNeG5cK/lCTKduEMeG7LadSBV7PVJ22cHTff+6dr7XbMVVHbLNzw7kkSD
+         SBAvhJQVxDbEMGiwbsjAZEWnZkf5W4lCEYFctOTCxa2RmP+rQQduavK/Jf1yPO6VW+Mg
+         76ug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=AiWvRk5q394PNtyPtfd7RRYQFcCCdv9RmCjUimVbiRc=;
-        b=FSpRm0nhyuRnaKAeI8uDGjr95afICb1nSIDbwgdZkc95gLnZDCzBI8YxDjyu8FmKg/
-         Wpx6qSsAKcLoFYrDAiQpVd7q0sXz9P1ZFGEr7Xtmm3wFtnABFa9LvBP5Nf5pD8gh3QkX
-         GRyhlK43tzvwWZgAtEfaRbRWm6teHRHCDRqCP/umHzefFGZspmpTeQHU8nJZ6ieP7UdQ
-         qrG288qcn962+1cvmMGMgH1tFxKPXnWowhJonm1AJQveV1JBGibRuP/3CBSq0YvH33BQ
-         psmHMOGe/UGuaKpL87TLTvjOmc1zPJdx7aHL62c+AmBiAOjqLgYXsjEX0512dnj4bPYZ
-         wEiQ==
-X-Gm-Message-State: ACrzQf2dl6Og81bjxL2inD6sFEkPycRtHKdTL1CDy1hDdu2yGP4ZJKya
-        uySWP42eYbQe3tJOo6zOn8BJvQ==
-X-Google-Smtp-Source: AMsMyM6xwa69zPU5Api0/SuUeh0vhLdfvaskkbvOqtLiVAlR/kBVhkzG42NM/VUs77WXPYk9xEjL3w==
-X-Received: by 2002:ac2:5dce:0:b0:4a2:2dad:7ad4 with SMTP id x14-20020ac25dce000000b004a22dad7ad4mr19544897lfq.654.1666965177599;
-        Fri, 28 Oct 2022 06:52:57 -0700 (PDT)
-Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id d3-20020a056512368300b00492ce573726sm572523lfs.47.2022.10.28.06.52.56
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 28 Oct 2022 06:52:56 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.1-rc3
-Date:   Fri, 28 Oct 2022 15:52:55 +0200
-Message-Id: <20221028135255.8070-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        bh=y3HZ5Z9INEvVnaiLMEUEyf9U1obNrEmBr92qQo5xahU=;
+        b=ynH1tFAlp866JfB33/An0RuFN8weGrLfcT6WVZpLz+J8x4j2iFoih4CxvgceWmUYWl
+         aGxYTlexceeXXFNbgDB4/4EjIZuHb2isYivSYM75Gc+gGeTSW/lnphWBc8FeEwvV2pcj
+         hxddzHou8wSBngt+zeFxMn/5yCpfys6bEIFhjv0d5EaNl5PBbwQb2XBGBzJJypB7udRf
+         ZvbZD2qBmq7z8BYEqBYdQuQIU5gcMPTtiQXrvCDQoGqsku9n7AClt2Np+/6kX3nKt8D1
+         q+iGXWIceh/Nr4URcQhiGzjaVAdWdYsUFO2QRX0b5rntNiAPuN1JWVeXWlBPZPK0MBhs
+         k/GA==
+X-Gm-Message-State: ACrzQf2tnipm6beQ+PsLC88b664B9hLZYU1KA4oszrjwKO4RW01XbyYC
+        1FSLB+4CFQBBMe7cvezWPnff6Lvs6HGjW9av0ByQ5A==
+X-Google-Smtp-Source: AMsMyM7i114jK4Bk8IrUka1yCuvK51e803UUSbSvSK6ZHcyqNTDxFQ/zT/LtP7m0AR3Bgy6LnwUNT2Wf7TzK90lVJb8=
+X-Received: by 2002:a67:efc4:0:b0:3ac:412e:a545 with SMTP id
+ s4-20020a67efc4000000b003ac412ea545mr923061vsp.69.1666966290722; Fri, 28 Oct
+ 2022 07:11:30 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <Y1PydJnbL/9CRFFn@sol.ermione.com> <CA+pv=HNmYsh_y1+so_p=MNePNyV-A-FQ-iX2ivvSWDuyYcPnSQ@mail.gmail.com>
+In-Reply-To: <CA+pv=HNmYsh_y1+so_p=MNePNyV-A-FQ-iX2ivvSWDuyYcPnSQ@mail.gmail.com>
+From:   Patrick Thompson <ptf@google.com>
+Date:   Fri, 28 Oct 2022 10:11:19 -0400
+Message-ID: <CAJs+hrFTfpJ6X3Q4QGzjEZmeGxP9xaG-M-VTnBgm2fu8giUB8Q@mail.gmail.com>
+Subject: Re: mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
+To:     Slade Watkins <srw@sladewatkins.net>
+Cc:     Andrea Baldoni <erm25d019@ermione.com>,
+        linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+Hello,
 
-Here's a PR with a couple of MMC fixes intended for v6.1-rc3. Details about the
-highlights are as usual found in the signed tag.
+Thank you Slade for sharing the v3 link with Andrea. The v1 patch had
+a mistake in it, hopefully the v3 works for you, let me know if you
+run into any issues.
 
-Please pull this in!
+Best,
+Patrick
 
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit 9abf2313adc1ca1b6180c508c25f22f9395cc780:
-
-  Linux 6.1-rc1 (2022-10-16 15:36:24 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc1
-
-for you to fetch changes up to 8d280b1df87e0b3d1355aeac7e62b62214b93f1c:
-
-  mmc: sdhci_am654: 'select', not 'depends' REGMAP_MMIO (2022-10-26 11:48:03 +0200)
-
-----------------------------------------------------------------
-MMC core:
- - Cancel recovery work on cleanup to avoid NULL pointer dereference
- - Fix error path in the read/write error recovery path
- - Fix kernel panic when remove non-standard SDIO card
- - Fix WRITE_ZEROES handling for CQE
-
-MMC host:
- - sdhci_am654: Fixup Kconfig dependency for REGMAP_MMIO
- - sdhci-esdhc-imx: Avoid warning of misconfigured bus-width
- - sdhci-pci: Disable broken HS400 ES mode for ASUS BIOS on Jasper Lake
-
-----------------------------------------------------------------
-Brian Norris (1):
-      mmc: sdhci_am654: 'select', not 'depends' REGMAP_MMIO
-
-Christian Löhle (2):
-      mmc: block: Remove error check of hw_reset on reset
-      mmc: queue: Cancel recovery work on cleanup
-
-Matthew Ma (1):
-      mmc: core: Fix kernel panic when remove non-standard SDIO card
-
-Patrick Thompson (1):
-      mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
-
-Sascha Hauer (1):
-      mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on 8bit bus
-
-Vincent Whitchurch (1):
-      mmc: core: Fix WRITE_ZEROES CQE handling
-
- drivers/mmc/core/block.c           | 44 ++++++++++++++++++++++----------------
- drivers/mmc/core/queue.c           |  8 +++++++
- drivers/mmc/core/sdio_bus.c        |  3 ++-
- drivers/mmc/host/Kconfig           |  3 ++-
- drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++------
- drivers/mmc/host/sdhci-pci-core.c  | 14 +++++++++---
- 6 files changed, 57 insertions(+), 29 deletions(-)
+On Sat, Oct 22, 2022 at 10:09 PM Slade Watkins <srw@sladewatkins.net> wrote:
+>
+> On Sat, Oct 22, 2022 at 8:36 PM Andrea Baldoni <erm25d019@ermione.com> wrote:
+> >
+> > Hello.
+> > I am not subscribed to the list so please CC to my address.
+> >
+> > I recently bought a new ASUS Laptop E210KA-GJ059WS with
+> >
+> > 00:1a.0 SD Host controller: Intel Corporation Device 4dc4 (rev 01) (prog-if 01)
+> >         Subsystem: ASUSTeK Computer Inc. Device 1842
+> >         Flags: bus master, fast devsel, latency 0, IRQ 16, IOMMU group 7
+> >         Memory at 6001129000 (64-bit, non-prefetchable) [size=4K]
+> >         Capabilities: [80] Power Management version 3
+> >         Capabilities: [90] Vendor Specific Information: Len=14 <?>
+> >         Kernel driver in use: sdhci-pci
+> >
+> > I tried to install Linux (vanilla kernel 5.19.4) and found that the internal
+> > 128GB eMMC SSD was unuseable, unable to make a filesystem on it, dmesg shown
+> >
+> > mmc0: running CQE recovery
+> > and
+> > mmc0: cqhci: timeout for tag 0
+> > followed by register dump
+> >
+> > (unfortunately I don't have the exact log now).
+> >
+> > I found the patch to drivers/mmc/host/sdhci-pci-core.c posted by
+> > Patrick Thompson date Thu, 13 Oct 2022 17:00:17 -0400, and applied it,
+> > but the only way to make the eMMC work was to disable
+> > CQE in its entirety by commenting
+>
+> This one I assume?[1]
+>
+> >
+> > slot->host->mmc->caps2 |= MMC_CAP2_CQE;
+> > and
+> > slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+> >
+> > If someone would like me to do any targeted test to be able to solve the
+> > issue better, I will be happy to do it.
+> >
+> > At the moment I am also searching how to get the touchpad to work, I would
+> > appreciate any hint and/or a contact with someone who has experience on
+> > this.
+> >
+> > I think the relevant device should be this one, but it doesn't show in
+> > /proc/bus/input/devices.
+> >
+> > P: /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
+> > E: DEVPATH=/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
+> > E: ID_VENDOR_FROM_DATABASE=Asuscom Network Inc
+> > E: MODALIAS=acpi:ASUE1409:PNP0C50:
+> > E: SUBSYSTEM=acpi
+> > E: USEC_INITIALIZED=10378637
+> >
+> > Thank you.
+> >
+> > Best regards,
+> > Andrea Baldoni
+>
+> Also looping in +acpi and mmc lists, +Patrick Thompson here.
+>
+> [1] https://lore.kernel.org/linux-mmc/20221013210017.3751025-1-ptf@google.com/
+>
+> Best,
+> -srw
