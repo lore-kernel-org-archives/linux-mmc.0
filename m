@@ -2,72 +2,85 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 97185FA3741
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 09:26:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6AFBECAAA1
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 10:18:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229938AbiJ1J01 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 05:26:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36724 "EHLO
+        id S229379AbiJ1KSO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Oct 2022 06:18:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230115AbiJ1JZi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 05:25:38 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC6032B85;
-        Fri, 28 Oct 2022 02:25:35 -0700 (PDT)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 01C1F6602910;
-        Fri, 28 Oct 2022 10:25:33 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1666949134;
-        bh=LvswVNx54C9wiErF7sJ0zCEyXuSuFf8n0AySygPtKqk=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=ok0mK8kPt9nuNOkQewkQYwn+LZGR4aoypCBRqgelU5q6UJpbo9N3lLL+yYBdhymKr
-         2IFJlIr/PKStSDJf20Szqp2cjBYJx49uCfNx4+VTAx8HZbmzbTh7ikzJJv2nXtgpl/
-         ZyfvPnc/1cOAOVAimNa/DCbx+PogDj/VgQdHhyf0fSpFTuBLqh2MUwjNg0q1rv1LpK
-         OPGLwP09IJFNm+pEeSQweee0UGOlG8ddiSj/T4eLSw0tpDrHBpJbhTfJPPrsdQ2taX
-         p1WzabdnjKeQDV1wRJYcICP2br0nc3GhTUOlWfZ5Q77xiS/kva2wZek0S9DRYDyPIv
-         /ivAaPPtRuM5A==
-Message-ID: <6fb93012-f923-f653-1865-5ce28ef3cec4@collabora.com>
-Date:   Fri, 28 Oct 2022 11:25:31 +0200
+        with ESMTP id S229587AbiJ1KSM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 06:18:12 -0400
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 362201C209C
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 03:18:11 -0700 (PDT)
+Received: by mail-pg1-x52c.google.com with SMTP id h185so4430910pgc.10
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 03:18:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=viy+kdLmrgnYyhO3BtLbDG8jxARgZsjjdX8poRBhrzk=;
+        b=jylc11ExTgaSXZ4vmtQkiHyKml/LCNBP6oMrbc/hh38IiT/I8lqsAnvXbl6soZ0j+L
+         p6YA8rh6/eVt7+JjpJo1G4VygFGcLR9jaWrSTRiZ4FtVqr11BnAzKdqQg0DkPRw/IdkB
+         pJbj8Zsb+o0poytSSiyaP5e3sfk3P/b/W7hA+Drp4Bn4JgNKJKrmpQgb+aEM3yeuxLOc
+         6zWiXdI6FIPtGKrZzdYve1vrPnZNgaX6bHxYTGOr+5cDFUqadhdS6wsUtrKE5H8y+/UP
+         bWxIap0ZJpQf75PuaeF5a4MAaJbxyg1bAmu1WldeNxzuxjG9WVIhEcj/xW0JhyH4lRU6
+         Ubeg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=viy+kdLmrgnYyhO3BtLbDG8jxARgZsjjdX8poRBhrzk=;
+        b=MILTOXVFRbylQ9hSroV9SHXgupsXMN8x7L8tS391DnQEc5lVpvTwlyeXyj1UosO6Cq
+         0+GrMQ9wy4U7ltNtE8wh4XLvyppg3hetee4FUD2HaFWoTp0pMbOpzkVrbYAGKTRL28cd
+         Udoie4D1UKe+AJRiQXLDIqikvKSFG1ykYfytZV23J5uaPVR8c+C5XYjbnte1TbyKm2j2
+         uGn5mR9ru42uxJyj0VbrK39OjWa5jouPPO+9YgMBARX7L/l5er1D7umCGhZ1MekT5VE2
+         5hlrabETL0YvmDQSO/t3JEpeuxvXJOVGyYKYkgkKgGjGgTo6LR+/KINysSPB/89CeQwz
+         qQ+w==
+X-Gm-Message-State: ACrzQf1CCEIzrAqNT8r8PgSIAi1gfh4yVL6n7e8JugSwfJgu9cQr9H7x
+        0rBOa8Tp8mHP9EF2SmeRRUK4vw1+RN3csSs7n1o=
+X-Google-Smtp-Source: AMsMyM5vg+786aviDcgv8FQXmTAWRFwjiHEp6WKbdgNTSLOWnj9wzvE+Ps7alZgdUO8b01xo8eQozeKdjANA2w2i94M=
+X-Received: by 2002:a62:ea0d:0:b0:55f:8624:4d8b with SMTP id
+ t13-20020a62ea0d000000b0055f86244d8bmr53953686pfh.74.1666952290692; Fri, 28
+ Oct 2022 03:18:10 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH v5 3/6] arm64: dts: mediatek: mt2712e: swap last 2 clocks
- to match binding
-Content-Language: en-US
-To:     Frank Wunderlich <linux@fw-web.de>,
-        linux-mediatek@lists.infradead.org
-Cc:     devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Sam Shih <Sam.Shih@mediatek.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        linux-arm-kernel@lists.infradead.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>
-References: <20221025132953.81286-1-linux@fw-web.de>
- <20221025132953.81286-4-linux@fw-web.de>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20221025132953.81286-4-linux@fw-web.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <1666947869-7904-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1666947869-7904-1-git-send-email-haibo.chen@nxp.com>
+From:   Fabio Estevam <festevam@gmail.com>
+Date:   Fri, 28 Oct 2022 07:17:58 -0300
+Message-ID: <CAOMZO5AVcnvSwwKhnnbBKVJiJPOd1fTTt_PSNsZY4539c-oZ2g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: reset the tuning logic before
+ execute tuning
+To:     haibo.chen@nxp.com
+Cc:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-imx@nxp.com, sherry.sun@nxp.com,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 25/10/22 15:29, Frank Wunderlich ha scritto:
-> From: Frank Wunderlich <frank-w@public-files.de>
-> 
-> First 3 clocks for mt2712 need to be "source", "hclk", "source_cg"
-> so swap last 2 of mmc0 to match the binding.
-> 
-> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
+Hi Haibo,
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+On Fri, Oct 28, 2022 at 6:25 AM <haibo.chen@nxp.com> wrote:
+>
+> From: Haibo Chen <haibo.chen@nxp.com>
+>
+> For standard tuning method on usdhc, the previous tuning result can
+> impact current tuning result, let current tuning can't set the correct
+> delay cell. And from the logic, this is also reasonable for manual
+> tuning method. So reset the tuning logic before execute tuning.
+> To avoid compile issue, this patch also move the esdhc_reset_tuning()
+> upper.
+>
+> Find this issue when support SDIO WiFi in band wakeup feature. After
+> system resume back, will do re-tuning, but then meet data CRC error.
+>
+> Do not meet this issue on SD/eMMC, because we already call
+> esdhc_reset_tuning() when config the legency ios, and SD/eMMC need
+> to re-init when system resume back, but SDIO device don't do re-init
+> if it has MMC_PM_KEEP_POWER pm_flags.
 
-
+Fixes tag missing?
