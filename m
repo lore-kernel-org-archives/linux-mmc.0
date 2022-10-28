@@ -2,138 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 57C1BFA3745
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 14:11:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D16BECAAA1
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 17:01:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229765AbiJ1OLe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 10:11:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33606 "EHLO
+        id S230473AbiJ1RBH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Oct 2022 13:01:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43578 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229696AbiJ1OLd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 10:11:33 -0400
-Received: from mail-vs1-xe2e.google.com (mail-vs1-xe2e.google.com [IPv6:2607:f8b0:4864:20::e2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD12A79694
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 07:11:31 -0700 (PDT)
-Received: by mail-vs1-xe2e.google.com with SMTP id l190so4707748vsc.10
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 07:11:31 -0700 (PDT)
+        with ESMTP id S230421AbiJ1RAC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 13:00:02 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5233B183B4
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 09:59:41 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id d26so14303488eje.10
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 09:59:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=google.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=y3HZ5Z9INEvVnaiLMEUEyf9U1obNrEmBr92qQo5xahU=;
-        b=SoGeBPNWzaqQCc5k34nTFJIwSs305Ct6GYvm/zsEcEG5+QTtqsbtgS+rYAFrjp0g1k
-         JFvpMkBEAvnF36rsj4Fb59LRXZeev8+hD4YiS5UmM7hGRCnUOLKvJDCJJYxdwVPwIGz8
-         A1nUEhBygVgSNB2P8WoiLqz7kdznQ67OfpJWdkzDUD28TY2k6UuQwim88c76+SS+1Bw8
-         jNodqYuX9eSPNeG5cK/lCTKduEMeG7LadSBV7PVJ22cHTff+6dr7XbMVVHbLNzw7kkSD
-         SBAvhJQVxDbEMGiwbsjAZEWnZkf5W4lCEYFctOTCxa2RmP+rQQduavK/Jf1yPO6VW+Mg
-         76ug==
+        d=kohlschutter-com.20210112.gappssmtp.com; s=20210112;
+        h=to:references:message-id:content-transfer-encoding:cc:date
+         :in-reply-to:from:subject:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=LdBYaH8Vkz/OFpcUliUNXSUHa5224PBWc/8NFz84BpI=;
+        b=UYFDgpwh4gQXASm0ajaOXIPSZAnokFKGRz3i8tZtZbSWWnZolu06tgNOMllG7MRETN
+         Tm4lTLSVv7CzCYX+BzbeoW4IwwOM8E6/x5qA7mq65SVAL2oHVUeyUul5Xr+eOeqg2f7B
+         QsTh2p1iAaL01/r/mfd3lrKoSa0L0Ta20tWgNpIp/Dg5kwRTi+pt+q12GtnLc98XSJsC
+         RX8Qrw7tDZ1DirvKxw/yjeXtx7rfncdWpDcvZBYHhMVQGNh8UjOEpiZaUW7i4W37dzhf
+         wCtxsU6WA1SP9LV0GcnBarIow754Qsz7AS2uYmTUFRlxLcgKdSvGX13UhPutYURKcwxl
+         wHOg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=y3HZ5Z9INEvVnaiLMEUEyf9U1obNrEmBr92qQo5xahU=;
-        b=ynH1tFAlp866JfB33/An0RuFN8weGrLfcT6WVZpLz+J8x4j2iFoih4CxvgceWmUYWl
-         aGxYTlexceeXXFNbgDB4/4EjIZuHb2isYivSYM75Gc+gGeTSW/lnphWBc8FeEwvV2pcj
-         hxddzHou8wSBngt+zeFxMn/5yCpfys6bEIFhjv0d5EaNl5PBbwQb2XBGBzJJypB7udRf
-         ZvbZD2qBmq7z8BYEqBYdQuQIU5gcMPTtiQXrvCDQoGqsku9n7AClt2Np+/6kX3nKt8D1
-         q+iGXWIceh/Nr4URcQhiGzjaVAdWdYsUFO2QRX0b5rntNiAPuN1JWVeXWlBPZPK0MBhs
-         k/GA==
-X-Gm-Message-State: ACrzQf2tnipm6beQ+PsLC88b664B9hLZYU1KA4oszrjwKO4RW01XbyYC
-        1FSLB+4CFQBBMe7cvezWPnff6Lvs6HGjW9av0ByQ5A==
-X-Google-Smtp-Source: AMsMyM7i114jK4Bk8IrUka1yCuvK51e803UUSbSvSK6ZHcyqNTDxFQ/zT/LtP7m0AR3Bgy6LnwUNT2Wf7TzK90lVJb8=
-X-Received: by 2002:a67:efc4:0:b0:3ac:412e:a545 with SMTP id
- s4-20020a67efc4000000b003ac412ea545mr923061vsp.69.1666966290722; Fri, 28 Oct
- 2022 07:11:30 -0700 (PDT)
-MIME-Version: 1.0
-References: <Y1PydJnbL/9CRFFn@sol.ermione.com> <CA+pv=HNmYsh_y1+so_p=MNePNyV-A-FQ-iX2ivvSWDuyYcPnSQ@mail.gmail.com>
-In-Reply-To: <CA+pv=HNmYsh_y1+so_p=MNePNyV-A-FQ-iX2ivvSWDuyYcPnSQ@mail.gmail.com>
-From:   Patrick Thompson <ptf@google.com>
-Date:   Fri, 28 Oct 2022 10:11:19 -0400
-Message-ID: <CAJs+hrFTfpJ6X3Q4QGzjEZmeGxP9xaG-M-VTnBgm2fu8giUB8Q@mail.gmail.com>
-Subject: Re: mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
-To:     Slade Watkins <srw@sladewatkins.net>
-Cc:     Andrea Baldoni <erm25d019@ermione.com>,
-        linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        h=to:references:message-id:content-transfer-encoding:cc:date
+         :in-reply-to:from:subject:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=LdBYaH8Vkz/OFpcUliUNXSUHa5224PBWc/8NFz84BpI=;
+        b=6xcYXK6Cd0XN8VOxzD3D6yUb9WGp0diQhxH+iUqIfGzHNj9OAGeRgUP9OTIzE2g2PL
+         Pa+9lxsyYxHWS82FRc5h0GIGXIDNSrmF0uze097m2X9JDPHXH4ksKk1GxgyoNRAIaJQa
+         4wjo1QB93xluh0wzznFnU+wng9DWtuTTA3DpHUXYSZU8ifOJ7iLUSoHIeznOpLBGNRWe
+         xP5uR8PDuyCSCwI/UUAlpMMr2go2NgTcBcOiTGW2VBw/LyloJppMavwDj9QNw+NJ37yj
+         XzWPvDcg3VkIDCoFHI+Q2ESBWiwsAG3pY6PxibWYAtOns/vi1Kkp7aZ9fBSusVTu++sO
+         Gdug==
+X-Gm-Message-State: ACrzQf3kedoJTwNakC5ugpTTC2hkpDwQ+J3apHB2rYqYM5lfW8a/VEen
+        H6fiaWmAKzxoBzrpKjbw4qD/ZAvsuDrtSPFf
+X-Google-Smtp-Source: AMsMyM4b6Makf2XUO4oZ8JASTD+TYGiZ5WlRT4RQswqjcl1lt6qbCvTXNliMY/qz6n9V80ctCVXTPA==
+X-Received: by 2002:a17:907:31c7:b0:740:e3e5:c025 with SMTP id xf7-20020a17090731c700b00740e3e5c025mr249555ejb.341.1666976379411;
+        Fri, 28 Oct 2022 09:59:39 -0700 (PDT)
+Received: from smtpclient.apple (ip5b434222.dynamic.kabel-deutschland.de. [91.67.66.34])
+        by smtp.gmail.com with ESMTPSA id t17-20020a170906065100b0072f112a6ad2sm2387793ejb.97.2022.10.28.09.59.37
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 28 Oct 2022 09:59:38 -0700 (PDT)
+Content-Type: text/plain;
+        charset=utf-8
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.120.41.1.1\))
+Subject: Re: [PATCH v2] regulator: core: Resolve supply name earlier to
+ prevent double-init
+From:   =?utf-8?Q?Christian_Kohlsch=C3=BCtter?= 
+        <christian@kohlschutter.com>
+In-Reply-To: <166083617547.142744.6260121456450934801.b4-ty@kernel.org>
+Date:   Fri, 28 Oct 2022 18:59:36 +0200
+Cc:     wens@kernel.org, =?utf-8?Q?Heiko_St=C3=BCbner?= <heiko@sntech.de>,
+        "open list:ARM/Rockchip SoC..." <linux-rockchip@lists.infradead.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Markus Reichl <m.reichl@fivetechno.de>,
+        Liam Girdwood <lgirdwood@gmail.com>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+Message-Id: <D80E1210-85D4-4D05-8FB7-843CED790A60@kohlschutter.com>
+References: <3B4AE882-0C28-41E3-9466-F8E301567627@kohlschutter.com>
+ <YtlqPbbBceBmekcV@sirena.org.uk>
+ <E0925148-3F0E-4DD6-9872-96778BFE39DE@kohlschutter.com>
+ <166083617547.142744.6260121456450934801.b4-ty@kernel.org>
+To:     Mark Brown <broonie@kernel.org>,
+        Robin Murphy <robin.murphy@arm.com>
+X-Mailer: Apple Mail (2.3696.120.41.1.1)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+> On 18. Aug 2022, at 17:22, Mark Brown <broonie@kernel.org> wrote:
+>=20
+> On Fri, 22 Jul 2022 19:42:27 +0200, Christian Kohlsch=C3=BCtter wrote:
+>> Previously, an unresolved regulator supply reference upon calling
+>> regulator_register on an always-on or boot-on regulator caused
+>> set_machine_constraints to be called twice.
+>>=20
+>> This in turn may initialize the regulator twice, leading to voltage
+>> glitches that are timing-dependent. A simple, unrelated configuration
+>> change may be enough to hide this problem, only to be surfaced by
+>> chance.
+>>=20
+>> [...]
+>=20
+> Applied to
+>=20
+> https://git.kernel.org/pub/scm/linux/kernel/git/broonie/regulator.git =
+for-next
+>=20
+> Thanks!
+>=20
+> [1/1] regulator: core: Resolve supply name earlier to prevent =
+double-init
+>    commit: 8a866d527ac0441c0eb14a991fa11358b476b11d
+>=20
+> All being well this means that it will be integrated into the =
+linux-next
+> tree (usually sometime in the next 24 hours) and sent to Linus during
+> the next merge window (or sooner if it is a bug fix), however if
+> problems are discovered then the patch may be dropped or reverted.
+>=20
+> You may get further e-mails resulting from automated or manual testing
+> and review of the tree, please engage with people reporting problems =
+and
+> send followup patches addressing any issues that are reported if =
+needed.
+>=20
+> If any updates are required or you are submitting further changes they
+> should be sent as incremental updates against current git, existing
+> patches will not be replaced.
+>=20
+> Please add any relevant lists and maintainers to the CCs when replying
+> to this mail.
+>=20
+> Thanks,
+> Mark
 
-Thank you Slade for sharing the v3 link with Andrea. The v1 patch had
-a mistake in it, hopefully the v3 works for you, let me know if you
-run into any issues.
+I've finally managed to publish a blog post about this journey into =
+regulator land; I hope you find it worthwhile.
+https://kohlschuetter.github.io/blog/posts/2022/10/28/linux-nanopi-r4s/
+
+Thanks to everybody involved for getting this far!
+Special thanks go to Robin Murphy for pulling out the oscillator, and =
+Mark Brown for helping that these changes get into 6.1.
 
 Best,
-Patrick
+Christian
 
-On Sat, Oct 22, 2022 at 10:09 PM Slade Watkins <srw@sladewatkins.net> wrote:
->
-> On Sat, Oct 22, 2022 at 8:36 PM Andrea Baldoni <erm25d019@ermione.com> wrote:
-> >
-> > Hello.
-> > I am not subscribed to the list so please CC to my address.
-> >
-> > I recently bought a new ASUS Laptop E210KA-GJ059WS with
-> >
-> > 00:1a.0 SD Host controller: Intel Corporation Device 4dc4 (rev 01) (prog-if 01)
-> >         Subsystem: ASUSTeK Computer Inc. Device 1842
-> >         Flags: bus master, fast devsel, latency 0, IRQ 16, IOMMU group 7
-> >         Memory at 6001129000 (64-bit, non-prefetchable) [size=4K]
-> >         Capabilities: [80] Power Management version 3
-> >         Capabilities: [90] Vendor Specific Information: Len=14 <?>
-> >         Kernel driver in use: sdhci-pci
-> >
-> > I tried to install Linux (vanilla kernel 5.19.4) and found that the internal
-> > 128GB eMMC SSD was unuseable, unable to make a filesystem on it, dmesg shown
-> >
-> > mmc0: running CQE recovery
-> > and
-> > mmc0: cqhci: timeout for tag 0
-> > followed by register dump
-> >
-> > (unfortunately I don't have the exact log now).
-> >
-> > I found the patch to drivers/mmc/host/sdhci-pci-core.c posted by
-> > Patrick Thompson date Thu, 13 Oct 2022 17:00:17 -0400, and applied it,
-> > but the only way to make the eMMC work was to disable
-> > CQE in its entirety by commenting
->
-> This one I assume?[1]
->
-> >
-> > slot->host->mmc->caps2 |= MMC_CAP2_CQE;
-> > and
-> > slot->host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
-> >
-> > If someone would like me to do any targeted test to be able to solve the
-> > issue better, I will be happy to do it.
-> >
-> > At the moment I am also searching how to get the touchpad to work, I would
-> > appreciate any hint and/or a contact with someone who has experience on
-> > this.
-> >
-> > I think the relevant device should be this one, but it doesn't show in
-> > /proc/bus/input/devices.
-> >
-> > P: /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
-> > E: DEVPATH=/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:6c/ASUE1409:00
-> > E: ID_VENDOR_FROM_DATABASE=Asuscom Network Inc
-> > E: MODALIAS=acpi:ASUE1409:PNP0C50:
-> > E: SUBSYSTEM=acpi
-> > E: USEC_INITIALIZED=10378637
-> >
-> > Thank you.
-> >
-> > Best regards,
-> > Andrea Baldoni
->
-> Also looping in +acpi and mmc lists, +Patrick Thompson here.
->
-> [1] https://lore.kernel.org/linux-mmc/20221013210017.3751025-1-ptf@google.com/
->
-> Best,
-> -srw
