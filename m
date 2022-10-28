@@ -2,171 +2,72 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 925F1ECAAA1
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 09:26:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97185FA3741
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 09:26:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230106AbiJ1J0H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 05:26:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35674 "EHLO
+        id S229938AbiJ1J01 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Oct 2022 05:26:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230149AbiJ1JZc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 05:25:32 -0400
-Received: from inva020.nxp.com (inva020.nxp.com [92.121.34.13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF3581AF33
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 02:25:16 -0700 (PDT)
-Received: from inva020.nxp.com (localhost [127.0.0.1])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 6EA921A0DC7;
-        Fri, 28 Oct 2022 11:25:15 +0200 (CEST)
-Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
-        by inva020.eu-rdc02.nxp.com (Postfix) with ESMTP id 0FEF81A0DC5;
-        Fri, 28 Oct 2022 11:25:15 +0200 (CEST)
-Received: from local (shlinux2.ap.freescale.net [10.192.224.44])
-        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id 8BD4B180327D;
-        Fri, 28 Oct 2022 17:25:13 +0800 (+08)
-From:   haibo.chen@nxp.com
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org
-Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, sherry.sun@nxp.com,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com
-Subject: [PATCH] mmc: sdhci-esdhc-imx: reset the tuning logic before execute tuning
-Date:   Fri, 28 Oct 2022 17:04:29 +0800
-Message-Id: <1666947869-7904-1-git-send-email-haibo.chen@nxp.com>
-X-Mailer: git-send-email 2.7.4
-X-Virus-Scanned: ClamAV using ClamSMTP
+        with ESMTP id S230115AbiJ1JZi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 05:25:38 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC6032B85;
+        Fri, 28 Oct 2022 02:25:35 -0700 (PDT)
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 01C1F6602910;
+        Fri, 28 Oct 2022 10:25:33 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1666949134;
+        bh=LvswVNx54C9wiErF7sJ0zCEyXuSuFf8n0AySygPtKqk=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=ok0mK8kPt9nuNOkQewkQYwn+LZGR4aoypCBRqgelU5q6UJpbo9N3lLL+yYBdhymKr
+         2IFJlIr/PKStSDJf20Szqp2cjBYJx49uCfNx4+VTAx8HZbmzbTh7ikzJJv2nXtgpl/
+         ZyfvPnc/1cOAOVAimNa/DCbx+PogDj/VgQdHhyf0fSpFTuBLqh2MUwjNg0q1rv1LpK
+         OPGLwP09IJFNm+pEeSQweee0UGOlG8ddiSj/T4eLSw0tpDrHBpJbhTfJPPrsdQ2taX
+         p1WzabdnjKeQDV1wRJYcICP2br0nc3GhTUOlWfZ5Q77xiS/kva2wZek0S9DRYDyPIv
+         /ivAaPPtRuM5A==
+Message-ID: <6fb93012-f923-f653-1865-5ce28ef3cec4@collabora.com>
+Date:   Fri, 28 Oct 2022 11:25:31 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.3
+Subject: Re: [PATCH v5 3/6] arm64: dts: mediatek: mt2712e: swap last 2 clocks
+ to match binding
+Content-Language: en-US
+To:     Frank Wunderlich <linux@fw-web.de>,
+        linux-mediatek@lists.infradead.org
+Cc:     devicetree@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Sam Shih <Sam.Shih@mediatek.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-arm-kernel@lists.infradead.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>
+References: <20221025132953.81286-1-linux@fw-web.de>
+ <20221025132953.81286-4-linux@fw-web.de>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <20221025132953.81286-4-linux@fw-web.de>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Haibo Chen <haibo.chen@nxp.com>
+Il 25/10/22 15:29, Frank Wunderlich ha scritto:
+> From: Frank Wunderlich <frank-w@public-files.de>
+> 
+> First 3 clocks for mt2712 need to be "source", "hclk", "source_cg"
+> so swap last 2 of mmc0 to match the binding.
+> 
+> Signed-off-by: Frank Wunderlich <frank-w@public-files.de>
 
-For standard tuning method on usdhc, the previous tuning result can
-impact current tuning result, let current tuning can't set the correct
-delay cell. And from the logic, this is also reasonable for manual
-tuning method. So reset the tuning logic before execute tuning.
-To avoid compile issue, this patch also move the esdhc_reset_tuning()
-upper.
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 
-Find this issue when support SDIO WiFi in band wakeup feature. After
-system resume back, will do re-tuning, but then meet data CRC error.
-
-Do not meet this issue on SD/eMMC, because we already call
-esdhc_reset_tuning() when config the legency ios, and SD/eMMC need
-to re-init when system resume back, but SDIO device don't do re-init
-if it has MMC_PM_KEEP_POWER pm_flags.
-
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- drivers/mmc/host/sdhci-esdhc-imx.c | 82 ++++++++++++++++--------------
- 1 file changed, 44 insertions(+), 38 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index b073e79dcd99..4559599d897d 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1012,6 +1012,44 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
- 			SDHCI_HOST_CONTROL);
- }
- 
-+static void esdhc_reset_tuning(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+	u32 ctrl;
-+	int ret;
-+
-+	/* Reset the tuning circuit */
-+	if (esdhc_is_usdhc(imx_data)) {
-+		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
-+			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-+			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
-+			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
-+			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
-+		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-+			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-+			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
-+			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-+			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
-+			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
-+			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
-+				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
-+			if (ret == -ETIMEDOUT)
-+				dev_warn(mmc_dev(host->mmc),
-+				 "Warning! clear execute tuning bit failed\n");
-+			/*
-+			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
-+			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
-+			 * will finally make sure the normal data transfer logic correct.
-+			 */
-+			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
-+			ctrl |= SDHCI_INT_DATA_AVAIL;
-+			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
-+		}
-+	}
-+}
-+
- static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1023,6 +1061,12 @@ static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	if (host->timing == MMC_TIMING_UHS_DDR50)
- 		return 0;
- 
-+	/*
-+	 * Reset tuning circuit logic. If not, the previous tuning result
-+	 * will impact current tuning, make current tuning can't set the
-+	 * correct delay cell.
-+	 */
-+	esdhc_reset_tuning(host);
- 	return sdhci_execute_tuning(mmc, opcode);
- }
- 
-@@ -1196,44 +1240,6 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
- 		"warning! HS400 strobe DLL status REF/SLV not lock in 50us, STROBE DLL status is %x!\n", v);
- }
- 
--static void esdhc_reset_tuning(struct sdhci_host *host)
--{
--	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
--	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
--	u32 ctrl;
--	int ret;
--
--	/* Reset the tuning circuit */
--	if (esdhc_is_usdhc(imx_data)) {
--		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
--			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
--			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
--			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
--			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
--			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
--		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
--			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
--			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
--			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
--			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
--			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
--			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
--				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
--			if (ret == -ETIMEDOUT)
--				dev_warn(mmc_dev(host->mmc),
--				 "Warning! clear execute tuning bit failed\n");
--			/*
--			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
--			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
--			 * will finally make sure the normal data transfer logic correct.
--			 */
--			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
--			ctrl |= SDHCI_INT_DATA_AVAIL;
--			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
--		}
--	}
--}
--
- static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- {
- 	u32 m;
--- 
-2.34.1
 
