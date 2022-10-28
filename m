@@ -2,168 +2,126 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EE09FA3742
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 13:03:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B3563C38A02
+	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 13:53:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230229AbiJ1NDS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 09:03:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49094 "EHLO
+        id S229685AbiJ1NxB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 28 Oct 2022 09:53:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52490 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230234AbiJ1NDR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 09:03:17 -0400
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2051.outbound.protection.outlook.com [40.107.237.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F361D1CC77D;
-        Fri, 28 Oct 2022 06:03:15 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Fhms5AgFOkWQTsjWWiiCA8moQ02wNae2mbR7hQZPQNCuNMW1JvsrxpkR7Ux1Dbz5FVngS43uO8+oVjOwUh4qHPzwe4It1ql488UTKIbikZW7DQcO5lDWJC8FTSmPlvHR09QosvYflF6uqYaADlUbSMYPyvcwWKqGdRxQILY14yI7jIL2QGgukhnMdDHGLptlsw6ATsZu/9ks+a8axBxcCnmIdJdD+m5HJGtG4qJ+oXeuL9IWOfo91wPm+J6Vtg3JDEYEHxCDWDf8AqCNN35w89/hgUAxEJHnYmEFginROjbpIqm+ulkI96fa3HpDEilzBimLtKoIOY03kHUF+6VL1g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F4RZIQ1Di7dneZqytQHdUTk6Ta6ap9bGCfe5EgqxPxI=;
- b=FzbJDFBhlfarPyfjhaISBCcDAuw0j9sVjsoouZut73Ilh52DEcLsP1HjO22hg4X7SA4Pj4A0juQEWZ8A/+qwn4U7dIpQIxndFzYRP5FCCLHnzpXXmR1Dxl7NSNQV1pwM8lATClcu5ylo1TNXeiPIg+mtnbpkMtoqCiuLfflS1isdrP7YDPxm+mc+qjJr1mwgl6kGCNXNL/LS4uMemAsvbUp7ug9c7ed4tc+I/dmkf7pIgAn+2qDlMYCHdkUmcRZEPIo0cUZqVoG+Pa+5+UNzVVFRtO/Wq0FZ3geyCXdC+YUbgEAP5SkTPyfh27Q9hvOk4U7RKckQNI5A4qbq3Qixlw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.118.233) smtp.rcpttodomain=8bytes.org smtp.mailfrom=nvidia.com;
- dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F4RZIQ1Di7dneZqytQHdUTk6Ta6ap9bGCfe5EgqxPxI=;
- b=osQPjwfFKFoZolKFtuIVCktYUIjJVpgd+iSEt+pLnZ4ywMXHuswBsztPYKTjqTIQoWKWKAiptnWseBvF6lwWE4KeGajLghcJgBoDu5oMlTtXtIZsFMyBTS4aptINZPNWE99WL929suNj99f8MBGyBIcLKyS3PSNkeUEBPJxgM+5ELS7KHDZ4RIyp6gzF1AdqEHVTzICbuM7Cg5XJXgbpz9wMTxAFs9AesIwSAKMT93MEhxeVMuC9UBtZDqFEAMY/s0Ho3IhdY8wnzXQbcREZsuMpz6z3czDVvgVtipN90B4Nc9lKD7DX/8r+wDV6C7iZ8z3CBFLeaD5+Wzi8s6dIhA==
-Received: from DM6PR02CA0077.namprd02.prod.outlook.com (2603:10b6:5:1f4::18)
- by DM6PR12MB4386.namprd12.prod.outlook.com (2603:10b6:5:28f::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5769.14; Fri, 28 Oct
- 2022 13:03:14 +0000
-Received: from DM6NAM11FT074.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:1f4:cafe::af) by DM6PR02CA0077.outlook.office365.com
- (2603:10b6:5:1f4::18) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5769.15 via Frontend
- Transport; Fri, 28 Oct 2022 13:03:14 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.233)
- smtp.mailfrom=nvidia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nvidia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.118.233 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.118.233; helo=mail.nvidia.com; pr=C
-Received: from mail.nvidia.com (216.228.118.233) by
- DM6NAM11FT074.mail.protection.outlook.com (10.13.173.203) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5769.14 via Frontend Transport; Fri, 28 Oct 2022 13:03:14 +0000
-Received: from drhqmail201.nvidia.com (10.126.190.180) by mail.nvidia.com
- (10.127.129.6) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Fri, 28 Oct
- 2022 06:03:06 -0700
-Received: from drhqmail201.nvidia.com (10.126.190.180) by
- drhqmail201.nvidia.com (10.126.190.180) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.29; Fri, 28 Oct 2022 06:03:06 -0700
-Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
- (10.126.190.180) with Microsoft SMTP Server id 15.2.986.29 via Frontend
- Transport; Fri, 28 Oct 2022 06:03:01 -0700
-From:   Prathamesh Shete <pshete@nvidia.com>
-To:     <joro@8bytes.org>, <adrian.hunter@intel.com>,
-        <ulf.hansson@linaro.org>, <thierry.reding@gmail.com>,
-        <jonathanh@nvidia.com>, <p.zabel@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-CC:     <will@kernel.org>, <iommu@lists.linux.dev>, <robin.murphy@arm.com>,
-        <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
-        <kyarlagadda@nvidia.com>
-Subject: [PATCH v9 4/4] mmc: sdhci-tegra: Issue CMD and DAT resets together
-Date:   Fri, 28 Oct 2022 18:32:42 +0530
-Message-ID: <20221028130242.20900-4-pshete@nvidia.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20221028130242.20900-1-pshete@nvidia.com>
-References: <CAPDyKFpG9ZjVTiK3HEqioDN8ksGpRYiXL_SLSmOfm9fjJfcrsw@mail.gmail.com>
- <20221028130242.20900-1-pshete@nvidia.com>
+        with ESMTP id S229460AbiJ1NxA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 09:53:00 -0400
+Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84BD23DF2C
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 06:52:59 -0700 (PDT)
+Received: by mail-lf1-x129.google.com with SMTP id r14so8428650lfm.2
+        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 06:52:59 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=AiWvRk5q394PNtyPtfd7RRYQFcCCdv9RmCjUimVbiRc=;
+        b=u/CESXdXFuPawAP1b5wROE8H7g1FCRybxiltZnhqhICp8E+B/lrUnTRBdS6e/MCZEq
+         aYSGu+/hTirXeaI+N/4d6zRaHn8HF4O6HxoCaRhGxhx0p2dGnqkn7aDIkX96ijWIz9Hq
+         DG46k4r+LQI4g3QDtUAjRHfpWEGhd3GO8s7StrVkEd9ACR4pGhO0yeWBumhv/pEHuyRJ
+         mCnkpu3xD8JbUBprupa6nNVQeMoV+3zGjbJq2jb3Kp0NkB/tsgtdnEahIYA4HPrtEHdV
+         zzBoAyF1C4JbBcG1ZBReI1aUK6DB/rIeySOQyrr4qZcKYLaDJC+QkouCVmHdwTFzYgfZ
+         MCTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=AiWvRk5q394PNtyPtfd7RRYQFcCCdv9RmCjUimVbiRc=;
+        b=FSpRm0nhyuRnaKAeI8uDGjr95afICb1nSIDbwgdZkc95gLnZDCzBI8YxDjyu8FmKg/
+         Wpx6qSsAKcLoFYrDAiQpVd7q0sXz9P1ZFGEr7Xtmm3wFtnABFa9LvBP5Nf5pD8gh3QkX
+         GRyhlK43tzvwWZgAtEfaRbRWm6teHRHCDRqCP/umHzefFGZspmpTeQHU8nJZ6ieP7UdQ
+         qrG288qcn962+1cvmMGMgH1tFxKPXnWowhJonm1AJQveV1JBGibRuP/3CBSq0YvH33BQ
+         psmHMOGe/UGuaKpL87TLTvjOmc1zPJdx7aHL62c+AmBiAOjqLgYXsjEX0512dnj4bPYZ
+         wEiQ==
+X-Gm-Message-State: ACrzQf2dl6Og81bjxL2inD6sFEkPycRtHKdTL1CDy1hDdu2yGP4ZJKya
+        uySWP42eYbQe3tJOo6zOn8BJvQ==
+X-Google-Smtp-Source: AMsMyM6xwa69zPU5Api0/SuUeh0vhLdfvaskkbvOqtLiVAlR/kBVhkzG42NM/VUs77WXPYk9xEjL3w==
+X-Received: by 2002:ac2:5dce:0:b0:4a2:2dad:7ad4 with SMTP id x14-20020ac25dce000000b004a22dad7ad4mr19544897lfq.654.1666965177599;
+        Fri, 28 Oct 2022 06:52:57 -0700 (PDT)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id d3-20020a056512368300b00492ce573726sm572523lfs.47.2022.10.28.06.52.56
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 28 Oct 2022 06:52:56 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.1-rc3
+Date:   Fri, 28 Oct 2022 15:52:55 +0200
+Message-Id: <20221028135255.8070-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT074:EE_|DM6PR12MB4386:EE_
-X-MS-Office365-Filtering-Correlation-Id: 964bf9d0-5233-47a3-3d4e-08dab8e4c632
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: C7YycH6GmwjPCQGKsc0vBJktHOSHvEqJprHh+Y5DJR4l4xe34R1exz2rbXNmrgRzXUFL9JVLNbpM0xFWurNqWXcId7sVUHOlSehjLGwuXR7DJsqoWEqykGfvarQvBDVoekXkCdXlOm1+XtFVWe1HmvhQ6YaTeWfWW720dT4rRpfSqdbxVcJ4huEa9/KeY/l5iRoAUoqGvkjmrNM16e3CPTiH5oXV9bxKWxiSwWrWDLEyP4Lt1AMjazLdOmKOM/gc7zbZ3hKn61RrWYUWp0tMBXN/h6m1kJc3ZU32xSXu210SOizaG2syXO08aXbjoaqAzWcKlyZZG8YHi38SaKjjK8lBg/lp4cLwI5tZVplOuPkQP56sYmUvY7xJ4sllD73Ir3gd9vkTj7JSsC9xFpyEX+JWUNX8sa4KHEObvtUlOUdKhqUnYfTldurmDZ1+jhFKlcTqN3gGIkuXP4VMrxwsJlMj22bt3CmQFG7LqWy0JGqJl0glEK4PJ3kIA4wUSEZm3cJXkmgAolTZYv9zFirqpSMNpYVPaqoppN4XCW6epEZACJnIK5Ohg5R1lrQO1a9x6g/lheaLFy/I6+WcVbKMMpcwQw4Ow2oH3+ds/YTkiKhr4XA/2VAOD3zHKKqOg3Zsp8iEI0jC0ZHnNKwjLD7diirZ8NssnNTMP6EUYlZxvhQZ3bzitBZzee96UAOqc4AoihThqK0WRjETatRN5TMpfXHqTPigNIXzRGRkiSjHkz4A1CH2TnR/oAMD0ziqB22lY3sliOFe9R0LqnzDBEUDQQ==
-X-Forefront-Antispam-Report: CIP:216.228.118.233;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(39860400002)(396003)(136003)(346002)(376002)(451199015)(36840700001)(46966006)(40470700004)(107886003)(6666004)(316002)(110136005)(36860700001)(336012)(47076005)(40480700001)(426003)(54906003)(86362001)(2906002)(40460700003)(7416002)(186003)(4326008)(8936002)(36756003)(70206006)(5660300002)(2616005)(70586007)(83380400001)(7696005)(8676002)(26005)(1076003)(41300700001)(478600001)(82740400003)(7636003)(356005)(82310400005);DIR:OUT;SFP:1101;
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 28 Oct 2022 13:03:14.2019
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 964bf9d0-5233-47a3-3d4e-08dab8e4c632
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.233];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT074.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR12MB4386
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In case of error condition to avoid system crash
-Tegra SDMMC controller requires CMD and DAT resets
-issued together. SDHCI controller FSM goes into
-bad state due to rapid SD card hot-plug event.
-Issuing reset on the CMD FSM before DATA FSM results
-in kernel panic, hence add support to issue CMD and
-DAT resets together.
-This is applicable to Tegra186 and later chips.
+Hi Linus,
 
-Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Acked-by: Thierry Reding <treding@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 3 ++-
- drivers/mmc/host/sdhci.c       | 5 +++++
- drivers/mmc/host/sdhci.h       | 2 ++
- 3 files changed, 9 insertions(+), 1 deletion(-)
+Here's a PR with a couple of MMC fixes intended for v6.1-rc3. Details about the
+highlights are as usual found in the signed tag.
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index e44060cceb68..7cb3bf34a176 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1531,7 +1531,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
- 	.ops  = &tegra186_sdhci_ops,
- };
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2b5dda521b0e..8512a69f1aae 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -270,6 +270,11 @@ enum sdhci_reset_reason {
- 
- static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)
- {
-+	if (host->quirks2 &
-+		SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER) {
-+		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+		return;
-+	}
- 	switch (reason) {
- 	case SDHCI_RESET_FOR_INIT:
- 		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d750c464bd1e..6a5766774b05 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -478,6 +478,8 @@ struct sdhci_host {
-  * block count.
-  */
- #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
-+/* Issue CMD and DATA reset together */
-+#define SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER	(1<<19)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-2.17.1
+Please pull this in!
 
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit 9abf2313adc1ca1b6180c508c25f22f9395cc780:
+
+  Linux 6.1-rc1 (2022-10-16 15:36:24 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc1
+
+for you to fetch changes up to 8d280b1df87e0b3d1355aeac7e62b62214b93f1c:
+
+  mmc: sdhci_am654: 'select', not 'depends' REGMAP_MMIO (2022-10-26 11:48:03 +0200)
+
+----------------------------------------------------------------
+MMC core:
+ - Cancel recovery work on cleanup to avoid NULL pointer dereference
+ - Fix error path in the read/write error recovery path
+ - Fix kernel panic when remove non-standard SDIO card
+ - Fix WRITE_ZEROES handling for CQE
+
+MMC host:
+ - sdhci_am654: Fixup Kconfig dependency for REGMAP_MMIO
+ - sdhci-esdhc-imx: Avoid warning of misconfigured bus-width
+ - sdhci-pci: Disable broken HS400 ES mode for ASUS BIOS on Jasper Lake
+
+----------------------------------------------------------------
+Brian Norris (1):
+      mmc: sdhci_am654: 'select', not 'depends' REGMAP_MMIO
+
+Christian Löhle (2):
+      mmc: block: Remove error check of hw_reset on reset
+      mmc: queue: Cancel recovery work on cleanup
+
+Matthew Ma (1):
+      mmc: core: Fix kernel panic when remove non-standard SDIO card
+
+Patrick Thompson (1):
+      mmc: sdhci-pci-core: Disable ES for ASUS BIOS on Jasper Lake
+
+Sascha Hauer (1):
+      mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on 8bit bus
+
+Vincent Whitchurch (1):
+      mmc: core: Fix WRITE_ZEROES CQE handling
+
+ drivers/mmc/core/block.c           | 44 ++++++++++++++++++++++----------------
+ drivers/mmc/core/queue.c           |  8 +++++++
+ drivers/mmc/core/sdio_bus.c        |  3 ++-
+ drivers/mmc/host/Kconfig           |  3 ++-
+ drivers/mmc/host/sdhci-esdhc-imx.c | 14 ++++++------
+ drivers/mmc/host/sdhci-pci-core.c  | 14 +++++++++---
+ 6 files changed, 57 insertions(+), 29 deletions(-)
