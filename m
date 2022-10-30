@@ -2,94 +2,87 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1135FFA3741
-	for <linux-mmc@archiver.kernel.org>; Fri, 28 Oct 2022 22:57:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F0F4C38A02
+	for <linux-mmc@archiver.kernel.org>; Sun, 30 Oct 2022 00:51:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229743AbiJ1W5I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 28 Oct 2022 18:57:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46902 "EHLO
+        id S229580AbiJ3Av1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 29 Oct 2022 20:51:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230264AbiJ1W4o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 28 Oct 2022 18:56:44 -0400
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C00E22E0CC
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 15:56:41 -0700 (PDT)
-Received: by mail-pj1-x102d.google.com with SMTP id c15-20020a17090a1d0f00b0021365864446so5756335pjd.4
-        for <linux-mmc@vger.kernel.org>; Fri, 28 Oct 2022 15:56:41 -0700 (PDT)
+        with ESMTP id S229441AbiJ3Av0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 29 Oct 2022 20:51:26 -0400
+Received: from mail-pf1-x433.google.com (mail-pf1-x433.google.com [IPv6:2607:f8b0:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6694D3FED1;
+        Sat, 29 Oct 2022 17:51:25 -0700 (PDT)
+Received: by mail-pf1-x433.google.com with SMTP id v28so7642925pfi.12;
+        Sat, 29 Oct 2022 17:51:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=chromium.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=rzSJgKy5DjDXCyAQwtZ/P57gLVTMALzGk3IGcvzcMzw=;
-        b=UjNUyP9zPuD187EGRc7XI956s4WuAYRtR1UbWLr8aTyWMm4IEloDh5HMwjKboxiqg7
-         DyockKVKwkIubAf89tNR3SbG3ChSdknkf0LghBIi/IJVPQ8KcLXcQa/iPA8FQHkJ2nL3
-         dzuTWMl76ElEAJ5ozjRq8caid2tWQVZNXwYRc=
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rHQuh6qQJ1NJnTL3APPWFBBH9J7/L91Isi4wqc9nEYw=;
+        b=mVD7X1NEQZy21Y5Vp5lEpL3K9hrCoysaaidlwOuzeeh68Wr0+HJgS72LN+qad0iCbQ
+         WU+b1XOLbw8oB1qbzTS62oFY0db29buW7ibDOHXvo/5nsgUg4vQ7wd8QU+qtDBmPdjRA
+         29N5COIbSAzU9nwUeB/17qOssFySIqScstY5OJD8ZoBOzQc487SRQEYO90USRtuvdOU1
+         ogPxsM9+i3B6F1QhB2kvorQm95BozVTvs/5xJSh/OfTF3sIKdlS/farV9Z4t3x+iZFh/
+         FQNgOklqiVqlBkorrG/GU5Mt14/4gSTSsTBZ4YHxUjb6o4Yzi30E35Ciz3yvQkZ9m/YM
+         mbtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=rzSJgKy5DjDXCyAQwtZ/P57gLVTMALzGk3IGcvzcMzw=;
-        b=8EkpcV4pVuS8ho+aJhHRtXzlg4m7ElbEhKTmh2+g3ppr8ZAzkTGeOU/EsfId+Xg+gu
-         13fFE0QWQMDWOC03spKQ6Mcg2v7waPI/HmqEf1ildj7zhF3It+w5lZ0CQYTR0cNN3Bzb
-         Hz/TJJYj7LxQgO370xaTdRVHwhZTPXh9iIe/G6qaS9bGUXohCRGtZvVme3tgNlpnXutv
-         E+jjjgV4zn0OR0ZGrVBGuuSviAhC6xDR54UCrDjgXC+cvtYrz0Br0n5m05ifRqTAS8bl
-         n/Kbcg/mVs/J5DTddYjByTXOcqLcRjOzgz55ABc2I0Vxfi4kqpH8ipixL4ocDw/cne9N
-         hCKQ==
-X-Gm-Message-State: ACrzQf0OurBaAjGqliQtGiX6VQbhJz7oA/FOcYhyFfjlQg1a2NhoSCmB
-        40fwCak6f1ZqfI6tc3QtCw/YJA==
-X-Google-Smtp-Source: AMsMyM4s+tgLT5YHN+KRfu/cEyv9cF8dTXCPT9Wdhv8zqmmdl0lvFSrfZrZKPnTL0Esib3hWUKg09A==
-X-Received: by 2002:a17:902:f791:b0:17c:c1dd:a3b5 with SMTP id q17-20020a170902f79100b0017cc1dda3b5mr1336253pln.141.1666997800882;
-        Fri, 28 Oct 2022 15:56:40 -0700 (PDT)
-Received: from localhost ([2620:15c:9d:2:65f9:c180:249c:190f])
-        by smtp.gmail.com with UTF8SMTPSA id u10-20020a170902bf4a00b001754064ac31sm3492890pls.280.2022.10.28.15.56.39
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 28 Oct 2022 15:56:40 -0700 (PDT)
-From:   Brian Norris <briannorris@chromium.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Brian Norris <briannorris@chromium.org>
-Subject: [PATCH] mmc: sdhci-pci: Set PROBE_PREFER_ASYNCHRONOUS
-Date:   Fri, 28 Oct 2022 15:56:37 -0700
-Message-Id: <20221028155633.1.I6c4bfb31e88fad934e7360242cb662e01612c1bb@changeid>
-X-Mailer: git-send-email 2.38.1.273.g43a17bfeac-goog
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        h=message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rHQuh6qQJ1NJnTL3APPWFBBH9J7/L91Isi4wqc9nEYw=;
+        b=R/vP1/vQUczeTM9iaD+kQWQn6zuNJkoL4Fvw577cRwBQZC0GSfVzzKWAMr+YPOKmOU
+         WjV60CDyFe2Bxo+8pLJxdopH8717ByZOlxYiwj3nU83tPCGled6du5um011ZWcYWdh/b
+         VbTz13qZ30v8h/Bfjaf/Z5Vj5nPjawHrd1tCXVkd2KkKDPFD+JUbeiqgLC7mvbB5Fh/Y
+         0GIlA9pcQqgZKLnLgZdhfg3ZI6BWpYp3ingBgXUe4YdFz67RZIAPNdbHHEqJZmGmKyOY
+         bD1xu65cJSC5NKLJKPWHbc3mF2KYFvvT0pb5TKjjqXpXkApvOHioon92tHFCtYxn1qx0
+         Jsfw==
+X-Gm-Message-State: ACrzQf13nWUCfBMKZ47eQy+66nFsIFdCjSl8E5gdd1U0geRp/FkXPVw5
+        7UmreENnmp1hsvAlr3NUbwO7YV6nQew=
+X-Google-Smtp-Source: AMsMyM619K/M3GiTGoTR8so3V7uu3Sy5nA9GcUlBs8NrPnAnUuattcHYHWaGYP98OMVaB4nP/JlbYQ==
+X-Received: by 2002:a63:fb0b:0:b0:46f:a98b:5685 with SMTP id o11-20020a63fb0b000000b0046fa98b5685mr810721pgh.393.1667091084611;
+        Sat, 29 Oct 2022 17:51:24 -0700 (PDT)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id b14-20020a170902650e00b00176dd41320dsm1836744plk.119.2022.10.29.17.51.22
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 29 Oct 2022 17:51:24 -0700 (PDT)
+From:   Tony Huang <tonyhuang.sunplus@gmail.com>
+To:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
+        ulf.hansson@linaro.org, robh+dt@kernle.org, krzk+dz@kernel.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, wells.lu@sunplus.com
+Subject: [PATCH v11 0/2] Add mmc driver for Sunplus SP7021 SOC
+Date:   Sun, 30 Oct 2022 08:50:48 +0800
+Message-Id: <cover.1667087353.git.tonyhuang.sunplus@gmail.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This driver often takes on the order of 10ms to start, but in some cases
-as much as 190ms. It shouldn't have many cross-device dependencies to
-race with, nor racy access to shared state with other drivers, so this
-should be a relatively low risk change. We've done similarly with a
-variety of other MMC host drivers already.
+This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
-This driver was pinpointed as part of a survey of top slowest initcalls
-(i.e., are built in, and probing synchronously) on a lab of ChromeOS
-systems.
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
-Signed-off-by: Brian Norris <briannorris@chromium.org>
----
+Refer to:
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
- drivers/mmc/host/sdhci-pci-core.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+Tony Huang (2):
+  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+  mmc: Add mmc driver for Sunplus SP7021
 
-diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
-index 34ea1acbb3cc..0449630acbb3 100644
---- a/drivers/mmc/host/sdhci-pci-core.c
-+++ b/drivers/mmc/host/sdhci-pci-core.c
-@@ -2281,7 +2281,8 @@ static struct pci_driver sdhci_driver = {
- 	.probe =	sdhci_pci_probe,
- 	.remove =	sdhci_pci_remove,
- 	.driver =	{
--		.pm =   &sdhci_pci_pm_ops
-+		.pm =   &sdhci_pci_pm_ops,
-+		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
- 	},
- };
- 
+ .../devicetree/bindings/mmc/sunplus,mmc.yaml       |  62 ++
+ MAINTAINERS                                        |   7 +
+ drivers/mmc/host/Kconfig                           |   9 +
+ drivers/mmc/host/Makefile                          |   1 +
+ drivers/mmc/host/sunplus-mmc.c                     | 976 +++++++++++++++++++++
+ 5 files changed, 1055 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus-mmc.c
+
 -- 
-2.38.1.273.g43a17bfeac-goog
+2.7.4
 
