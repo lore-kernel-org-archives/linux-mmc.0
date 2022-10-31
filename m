@@ -2,110 +2,155 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46FBAFA3742
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 13:04:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 11518FA3741
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 15:11:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229870AbiJaNES (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Oct 2022 09:04:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44364 "EHLO
+        id S230311AbiJaPLE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Oct 2022 11:11:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229588AbiJaNER (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 09:04:17 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D6F3C1A;
-        Mon, 31 Oct 2022 06:04:17 -0700 (PDT)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        with ESMTP id S229845AbiJaPLD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 11:11:03 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF3DC10542;
+        Mon, 31 Oct 2022 08:11:02 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 3B0F56602387;
-        Mon, 31 Oct 2022 13:04:15 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1667221455;
-        bh=KCHuPKTLk6qo9M9z3GXMITfWQ2pzzdfAl6BTM/gh23U=;
+        by ams.source.kernel.org (Postfix) with ESMTPS id 5F2CDB8159D;
+        Mon, 31 Oct 2022 15:11:01 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F38E3C433D6;
+        Mon, 31 Oct 2022 15:10:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1667229060;
+        bh=h6r/+2mAC4/njaA4+atvfxEJX7+EwKTjdDsDGq1YOf4=;
         h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=HARtKsnYnMqNlcc2dyu0BDzN6Tn9Qly7xXEr7TJsgYY5UkU0mjrrAm+8EgKFb/Vql
-         15tAlieqx8x5nykmWEbmfahVnIfJdSriYITTAOga2OY3/5BD6Rcjit8fxYgjXbY5TN
-         jwQe1zmVSPJjQpNO+P+D/mI2HPAU+olno+JWObU/uMVnjx/WOBrTpa72vXg4fnD7Y8
-         YX2jvL7xqAnkgYmX8k5WvhNQaGdOjenJyU6ZXgW+JvlhXIPY7+icX/rvDdRV8vMRIF
-         JF1Ucbn8QrbAL03Y/+ZsowkU/cklR31yGU4XZebbGgaJtEazIMdd/D+nvIUak+vIcD
-         Il1AWdIG2gr9Q==
-Message-ID: <01f6923c-87ce-b7eb-7f6c-649a84baf556@collabora.com>
-Date:   Mon, 31 Oct 2022 14:04:12 +0100
+        b=W3d/9ka5yozHPyemoWjKEnlFiRYHDNrGpKWaKr2rkkTLc0xWdpulhTYdw1a+vlWwh
+         FTIWGJ+Ujf+EExRuQbtqIuhU71PoYHyF4HWr0ZCi5T6VhIOR51RY2LWrVBAXPyObnL
+         Ncm2bXQ/gAKA64q4rAj90Z4yqcgkWKwJuTEgj88+IKS4qUsFKGLY0MqQLLrFvga/Vs
+         wZYonZtC/Lo86Jy/ysWbyHEUCZUYFrb/n2BF/dnoZiwSfJL4L73HFPIgzOBdCwj+GK
+         DspQWgxQNfRO4QojWNdee9Ffas9FVq3qe2+Seuekx6URIKJnmJGIglXSLG72nQ8Yxp
+         V1JrczX/+uInA==
+Message-ID: <f639fb74-ac76-b48f-a4fa-cfa9534f9c82@kernel.org>
+Date:   Mon, 31 Oct 2022 10:10:57 -0500
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 1/2] mmc: mtk-sd: add Inline Crypto Engine support
+ Thunderbird/102.2.2
+Subject: Re: [PATCHv6 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
+ "altr,sysmgr-syscon"
+To:     Rob Herring <robh@kernel.org>
+Cc:     jh80.chung@samsung.com, ulf.hansson@linaro.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-clk@vger.kernel.org
+References: <20221026141631.696863-1-dinguyen@kernel.org>
+ <20221026205022.GA1291041-robh@kernel.org>
 Content-Language: en-US
-To:     =?UTF-8?B?TWVuZ3FpIFpoYW5nICjlvKDmoqbnkKYp?= 
-        <Mengqi.Zhang@mediatek.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
-        =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= 
-        <Wenbin.Mei@mediatek.com>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
-        <Chaotian.Jing@mediatek.com>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>
-Cc:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-mediatek@lists.infradead.org" 
-        <linux-mediatek@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
- <20221017142007.5408-2-mengqi.zhang@mediatek.com>
- <438bf06d-c4f4-74b2-8903-e89dc52196a7@collabora.com>
- <b557604932edfcd9847f0f033f410b7a68c704dc.camel@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <b557604932edfcd9847f0f033f410b7a68c704dc.camel@mediatek.com>
+From:   Dinh Nguyen <dinguyen@kernel.org>
+In-Reply-To: <20221026205022.GA1291041-robh@kernel.org>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 31/10/22 10:50, Mengqi Zhang (张梦琦) ha scritto:
-> On Tue, 2022-10-18 at 11:50 +0200, AngeloGioacchino Del Regno wrote:
->> Il 17/10/22 16:20, Mengqi Zhang ha scritto:
->>> add crypto clock control and ungate it before CQHCI init.
->>>
->>> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+
+
+On 10/26/22 15:50, Rob Herring wrote:
+> On Wed, Oct 26, 2022 at 09:16:26AM -0500, Dinh Nguyen wrote:
+>> Document the optional "altr,sysmgr-syscon" binding that is used to
+>> access the System Manager register that controls the SDMMC clock
+>> phase.
 >>
->> Hello Mengqi,
->> I'm a bit surprised that enabling ICE only requires enabling a clock
->> as
->> on downstream code I see some SMC calls to
->> MTK_SIP_KERNEL_HW_FDE_MSDC_CTL.
+>> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+>> ---
+>> v6: make "altr,sysmgr-syscon" optional
+>> v5: document reg shift
+>> v4: add else statement
+>> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
+>>      "altr,socfpga-dw-mshc"
+>> v2: document "altr,sysmgr-syscon" in the MMC section
+>> ---
+>>   .../bindings/mmc/synopsys-dw-mshc.yaml        | 23 ++++++++++++++++---
+>>   1 file changed, 20 insertions(+), 3 deletions(-)
 >>
->> Can you please explain why SMC calls are not needed here?
->>
->> Thanks,
->> Angelo
->>
+>> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+>> index ae6d6fca79e2..0e2024eb9018 100644
+>> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
+>> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
+>>   
+>>   title: Synopsys Designware Mobile Storage Host Controller Binding
+>>   
+>> -allOf:
+>> -  - $ref: "synopsys-dw-mshc-common.yaml#"
+>> -
+>>   maintainers:
+>>     - Ulf Hansson <ulf.hansson@linaro.org>
+>>   
+>> @@ -38,6 +35,26 @@ properties:
+>>         - const: biu
+>>         - const: ciu
+>>   
+>> +allOf:
+>> +  - $ref: synopsys-dw-mshc-common.yaml#
+>> +
+>> +  - if:
+>> +      properties:
+>> +        compatible:
+>> +          contains:
+>> +            const: altr,socfpga-dw-mshc
+>> +    then:
+>> +      properties:
+>> +        altr,sysmgr-syscon:
+>> +          $ref: /schemas/types.yaml#/definitions/phandle-array
+>> +          items:
+>> +            - description: phandle to the sysmgr node
+>> +            - description: register offset that controls the SDMMC clock phase
+>> +            - description: register shift for the smplsel(drive in) setting
 > 
-> Hi Angelo,
+> This goes in the top-level. Use if/then schema to add constraints, not
+> define properties.
 > 
-> There are many wrong quotes in previous reply, let me fix it here.
+>> +    else:
 > 
-> In some MTK SoC, we need set a encrypto enable bit
-> MTK_SIP_KERNEL_HW_FDE_MSDC_CTL in secure world, so we use SMC call to
-> finish it.
-> But not every MTK SoC need to set this bit in secure world. This patch
-> is for these SoCs.
-> As for SMC call, we haven't found a proper way to deal with it, we'll
-> do it later.
+> Then you'll need to negate the if:  if: { not: { properties: ... }}
 > 
 
-Thanks for clarifying.
-In that case, I'm a little worried about people trying to enable ICE on SoCs
-that do require calling into TZ and getting a crash... but it's anyway out of
-scope for this series, so:
+Thanks Rob, is this what you mean?
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+   altr,sysmgr-syscon:
+     $ref: /schemas/types.yaml#/definitions/phandle-array
+     items:
+       - items:
+           - description: phandle to the sysmgr node
+           - description: register offset that controls the SDMMC clock 
+phase
+           - description: register shift for the smplsel(drive in) setting
+     description:
+       Contains the phandle to System Manager block that contains
+       the SDMMC clock-phase control register. The first value is the 
+pointer
+       to the sysmgr, the 2nd value is the register offset for the SDMMC
+       clock phase register, and the 3rd value is the bit shift for the
+       smplsel(drive in) setting.
+
+allOf:
+   - $ref: "synopsys-dw-mshc-common.yaml#"
+
+   - if:
+       properties:
+         compatible:
+           contains:
+             const: altr,socfpga-dw-mshc
+     then:
+       not:				<----- add the 'not' here?
+         required:
+           - altr,sysmgr-syscon
+     else:
+       properties:
+         altr,sysmgr-syscon: false
+
 
 
