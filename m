@@ -2,176 +2,182 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A675FA3742
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 09:43:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2302CFA3740
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 09:50:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229779AbiJaJnj convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Oct 2022 05:43:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51126 "EHLO
+        id S230184AbiJaJu4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Oct 2022 05:50:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229746AbiJaJnh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 05:43:37 -0400
-X-Greylist: delayed 217 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 31 Oct 2022 02:43:35 PDT
-Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7578B310;
-        Mon, 31 Oct 2022 02:43:33 -0700 (PDT)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 962AE462A31;
-        Mon, 31 Oct 2022 10:39:54 +0100 (CET)
-Received: from mail3.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 84AD546239D;
-        Mon, 31 Oct 2022 10:39:54 +0100 (CET)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail3.swissbit.com (Postfix) with ESMTPS;
-        Mon, 31 Oct 2022 10:39:54 +0100 (CET)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Mon, 31 Oct
- 2022 10:39:54 +0100
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Mon, 31 Oct 2022 10:39:54 +0100
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "stable@vger.kernel.org" <stable@vger.kernel.org>
-CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: [PATCH] mmc: block: Remove error check of hw_reset on reset
-Thread-Topic: [PATCH] mmc: block: Remove error check of hw_reset on reset
-Thread-Index: AdjtB5N3RFLjsOgLSduWNeZm5LNyqQ==
-Date:   Mon, 31 Oct 2022 09:39:53 +0000
-Message-ID: <0b965373ab0a4d35b0d98071a71fc304@hyperstone.com>
-Accept-Language: en-US, de-DE
+        with ESMTP id S230104AbiJaJuz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 05:50:55 -0400
+Received: from mailgw02.mediatek.com (unknown [210.61.82.184])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3CB4C77E;
+        Mon, 31 Oct 2022 02:50:47 -0700 (PDT)
+X-UUID: 88ea5f3829ec4f5880114fbd4dde4295-20221031
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
+        h=MIME-Version:Content-Transfer-Encoding:Content-ID:Content-Type:In-Reply-To:References:Message-ID:Date:Subject:CC:To:From; bh=wXK7R0VrP70obFWmdHfxAhAYLbXs3m1mRzgr75u+1yE=;
+        b=r3a2MOxplAiJXCA2uY1HNbr39IwoyKjPpy911B94A1kQD8/87U+ZO1ksxedKOVK3o/UIUb+1+Vx8QsPxY1gMstfvS2se4HGfWhTjfvouAgCSMIFYw+/nLfzpHhwJ0fB8gWqhb1r1LTg7VUpk5K/WKH195BYD4BXCgJn1l0QmPw4=;
+X-CID-UNFAMILIAR: 1
+X-CID-P-RULE: Release_Ham
+X-CID-O-INFO: VERSION:1.1.12,REQID:aa04bcad-4f27-45a5-aec9-bb1616f8375b,IP:0,U
+        RL:0,TC:0,Content:0,EDM:0,RT:0,SF:4,FILE:0,BULK:0,RULE:Release_Ham,ACTION:
+        release,TS:4
+X-CID-INFO: VERSION:1.1.12,REQID:aa04bcad-4f27-45a5-aec9-bb1616f8375b,IP:0,URL
+        :0,TC:0,Content:0,EDM:0,RT:0,SF:4,FILE:0,BULK:0,RULE:Release_HamU,ACTION:r
+        elease,TS:4
+X-CID-META: VersionHash:62cd327,CLOUDID:bce7f5ea-84ac-4628-a416-bc50d5503da6,B
+        ulkID:22103114591032KB6KJV,BulkQuantity:7,Recheck:0,SF:38|16|19|102,TC:nil
+        ,Content:0,EDM:-3,IP:nil,URL:0,File:nil,Bulk:40,QS:nil,BEC:nil,COL:0
+X-UUID: 88ea5f3829ec4f5880114fbd4dde4295-20221031
+Received: from mtkcas11.mediatek.inc [(172.21.101.40)] by mailgw02.mediatek.com
+        (envelope-from <mengqi.zhang@mediatek.com>)
+        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-SHA384 256/256)
+        with ESMTP id 198616210; Mon, 31 Oct 2022 17:50:43 +0800
+Received: from mtkmbs10n2.mediatek.inc (172.21.101.183) by
+ mtkmbs11n1.mediatek.inc (172.21.101.185) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.792.15; Mon, 31 Oct 2022 17:50:41 +0800
+Received: from APC01-SG2-obe.outbound.protection.outlook.com (172.21.101.239)
+ by mtkmbs10n2.mediatek.inc (172.21.101.183) with Microsoft SMTP Server id
+ 15.2.792.3 via Frontend Transport; Mon, 31 Oct 2022 17:50:41 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=PEaBDC6jTMyrcJvbViWfq/pHjI6Kk1bo8bKbuaSd9f1Qc9nQmmp4ji7jk9Ufa79b8I/nJtiLVyGp/HI8DcBLVESISl4Rs22rgkABZuJeRltN0fO3lWWgqlH6zMYiZjQR74RKfJNCn3ICDm9vDARRM2h5Ezj0C8Rp2iXb9Z6vDwkxwLVVrrh2MJp7Aud8Lug7nOwtbEIO4cxv/GHFrq17QyRbWYCbP672cGCvEsmApdojfTjsye7Vw9MSKQbcC7R4USamR8mdpYOcHskltD7/485BNeC50yXdjHXdC0L+VlToa4gNeT29C55bsgsPe1k832swCTeaaezhu8oXpJfWVA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=wXK7R0VrP70obFWmdHfxAhAYLbXs3m1mRzgr75u+1yE=;
+ b=QxhVs9FzkGWcpGvT+JR65ZFK//QveOLMWUrLzCfiw588UYauRLA52vaR1UPNOtukKdOne5O0d4Vo1TG+y1TZt8bvTinow/TOzMfZnXvsBGjDV3j8rcazbb8h5bZjgr5Q+fAbHxj+t22fPucCd+k8ykq7aA4meL1dWE1KfeAK8odZB9evPzii8ZZ8uTyr7nZ4mcl+RfIfLoAUAj+xSMhT3VcQg4dcsR08575L7F4/Nlj2NTKTvYz0+SFuV1PAU44HGgJQ5doLVbjPrlNxVJSapsUKKPWmDTl/geFw8VXb+XAhKs52ZhmrqLa1iYgauFT0abXmyPIfoHlADVv5wKZd2Q==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=mediatek.com; dmarc=pass action=none header.from=mediatek.com;
+ dkim=pass header.d=mediatek.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=mediateko365.onmicrosoft.com; s=selector2-mediateko365-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=wXK7R0VrP70obFWmdHfxAhAYLbXs3m1mRzgr75u+1yE=;
+ b=UlNplNEjCRn4KKYQJx7PSjzNFyqRZgVYoZTwWw2jB2movE6ocUq6lGJG7vKTA9NG+9v5xH85oSN+ynPOW7i5LE+3+dTjyOKQ5oDPVvqzlGwyK+NqIG0DcWXF1FbGj2zgjXKrmjPtjHuVIoUew9kS11T23f6luVveJGBWxuZ9+Ig=
+Received: from SG2PR03MB6261.apcprd03.prod.outlook.com (2603:1096:4:175::12)
+ by TYZPR03MB6217.apcprd03.prod.outlook.com (2603:1096:400:12d::9) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5791.10; Mon, 31 Oct
+ 2022 09:50:39 +0000
+Received: from SG2PR03MB6261.apcprd03.prod.outlook.com
+ ([fe80::2023:6096:cfad:9e4]) by SG2PR03MB6261.apcprd03.prod.outlook.com
+ ([fe80::2023:6096:cfad:9e4%3]) with mapi id 15.20.5791.017; Mon, 31 Oct 2022
+ 09:50:39 +0000
+From:   =?utf-8?B?TWVuZ3FpIFpoYW5nICjlvKDmoqbnkKYp?= 
+        <Mengqi.Zhang@mediatek.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+        =?utf-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= 
+        <Wenbin.Mei@mediatek.com>,
+        "angelogioacchino.delregno@collabora.com" 
+        <angelogioacchino.delregno@collabora.com>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        =?utf-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
+        <Chaotian.Jing@mediatek.com>,
+        "krzysztof.kozlowski+dt@linaro.org" 
+        <krzysztof.kozlowski+dt@linaro.org>
+CC:     "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-mediatek@lists.infradead.org" 
+        <linux-mediatek@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+Subject: Re: [PATCH 1/2] mmc: mtk-sd: add Inline Crypto Engine support
+Thread-Topic: [PATCH 1/2] mmc: mtk-sd: add Inline Crypto Engine support
+Thread-Index: AQHY4jOa8JAJQkyflEOYpQs1p9mmD64T6bKAgBRuXAA=
+Date:   Mon, 31 Oct 2022 09:50:39 +0000
+Message-ID: <b557604932edfcd9847f0f033f410b7a68c704dc.camel@mediatek.com>
+References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
+         <20221017142007.5408-2-mengqi.zhang@mediatek.com>
+         <438bf06d-c4f4-74b2-8903-e89dc52196a7@collabora.com>
+In-Reply-To: <438bf06d-c4f4-74b2-8903-e89dc52196a7@collabora.com>
+Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
-x-originating-ip: [10.242.2.56]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=mediatek.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: SG2PR03MB6261:EE_|TYZPR03MB6217:EE_
+x-ms-office365-filtering-correlation-id: dce1d892-7e17-422e-3c12-08dabb255e51
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: gFBGsuStrSE2nVKk0HHu70Ftwb47txwcMid4DdAp8cTIgtGi+6U+BWTT9a53vrXDoaDNv0s+/nAfiezASuS1BBNHfdC7UYLtnTU7/bW/wQF9iNdOmWVKpOkrl8pVdFKB8gJ/qXEjRDQ7QI8P75MoGzNbr61WjNuZkc1DMHBj1OAQNOSwiGHVO1pNM+i7myFTyK2pwQfK6AtnTqhYdlkNtQBE+lkb8ilFwRP7QfGeajiPenQow8x/D/x+wV/bcXsFSLTLJJ9Sp+93kp2Sx6DklEzPmZikGZZfLJtrK9eSIlGq1qV7gBQ2UUvEAiN7FY30PDeFEOXB/mOEm+ug1JznmPwO7YOQFaPHM31YNJvfY9wyGFzjlrz7O7a3QK2RHMt9pDb1KDRRT64o2ITktFwIrKovUGXKxgApFlHS4KGrBfc56ViHaB1cJ2Nj8shBzT+XaAn4sgG9ibB5ZLuH1r5exQU6/TlOu5vKz6rRFcZQLNyCG843/cK0jDiVW5KQtecJaiTBrPNBtHsxMT9vvd6b9/UhEpZaG6nt3SceBw+qqHDpsP7a7FBOs4V5yEyTsqmVtmgTcCdKQfqGpDrvl1m4idFhq4s4cUzm1WC9BykfyRe8nxA1M61I6KNKHhuMQxw/5c5pqdyyhFb+CnL7RLpaSEhFq7t5xj4+cXFgk2TD3rQ0YAHVGkXMfV/AZTtH5E7dM+Jy13HSOFSbHmG7QB+Y6ZjOd8h5BUbqa0p5hCkw8UkandozGm0y7qLBasLg5PMPr6JHi20KRltPTZM1X/q+sw==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:SG2PR03MB6261.apcprd03.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(136003)(346002)(376002)(366004)(39860400002)(396003)(451199015)(6506007)(66899015)(38070700005)(83380400001)(66446008)(110136005)(64756008)(76116006)(66946007)(66556008)(8676002)(4326008)(66476007)(122000001)(38100700002)(85182001)(36756003)(41300700001)(186003)(71200400001)(26005)(6486002)(6512007)(478600001)(86362001)(316002)(4001150100001)(54906003)(2906002)(8936002)(4744005)(7416002)(5660300002)(2616005);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?R3dpUW8vL0Z6QitSNk9kaXgvVzR1ZWlkWExDWWNYZXllK1FCTWZad1BWbVl5?=
+ =?utf-8?B?WlExKzJ1V3p5ZGpmdkJaTUZEQmtRUlZCcmRlNEc0TGw5d2dnL1h1MjRLM3JZ?=
+ =?utf-8?B?aDVqTndxQW5wTTlTcC9lem10RjYrRStMZ2laV1NMNUZuOGNsZFhlMmpiOUwv?=
+ =?utf-8?B?TW83NjgrL0dEanRjRHlMU3pzdStmcXNiZjROYWRLQ0h6QXc3eWwxZzlYVHdk?=
+ =?utf-8?B?L2FURTRobWNGTTNBTFBnRnRVTnZUZjhIRW9UaTlQUCszMUtJLzhCT2p1K0JS?=
+ =?utf-8?B?bkpUdHhaZlc0eFdOYi9VaGVMNld4clFIWEZ5Z29SRnhqNHdkcTRTdWpIeDVW?=
+ =?utf-8?B?aUtYTE1MSE11dWFkdVB1dlJPUGhyRVNSQjJUL2swc2p2RHBQSmZVdUt1QjFU?=
+ =?utf-8?B?em9uWDBsZ25kU2ZBaDVzemlDTTZuU0QwT2pqcnNDYm9hb1dGR1g4R1VzcExj?=
+ =?utf-8?B?WFcwekxQZXVMVTlnSjFEWnp3d0xTZGgxV1Z6ZlQyK000ODdBL1ZXWFBLYmsr?=
+ =?utf-8?B?WStJVmgvUmZ1K01ydnowV0NtSitKQi9IQ09lRlZuQzc5TWJ4UUR6dzdwcWxB?=
+ =?utf-8?B?WmY4YUw4U3phWVRUL3RacUNhaURVQjAwd2JtL2pVWmFBc3M5NkdObmtwRnVy?=
+ =?utf-8?B?QWxCaWt2dUtabnhIRjlibmRBQVVsK3BTS2JZNkpHclZKVDNiOHVLNG5QL3h0?=
+ =?utf-8?B?Qk92aU42VmNNVTgzYjZEVUphUXlGS2xWNG9vMWFlV1d0TUU2eVdvN0lTaVI2?=
+ =?utf-8?B?VnFXMHNpOFZPTm1lYlNJdkI0RklUY1hwdGxLYW9ndHh6UlZISDl1WW9YRjZr?=
+ =?utf-8?B?Zm5vVThRWlhBeEpvSDJxWllMZURrWTROUnhIQWVZV1IxbTQ0S2RvZ1l6WFJG?=
+ =?utf-8?B?U1pRM3pxQlFiK2R5NWEyWkFObHNaSVlkMS9QU3BJbGkzc21ZYUc4RnltdUlF?=
+ =?utf-8?B?N0ZZdWt6RkVlemR4Z2RDOVZXVWhyNkc2QkJMbUtWekFJMGEzbVlvTm9Jblpy?=
+ =?utf-8?B?bWRqMi8rdW5acXNQaFJIQm4vZkc5UmgybDQ2TnB2aktIWHVIMDZJK2Q2UUJB?=
+ =?utf-8?B?MGg5a2JCWXg1bDlXL1ZOWTFDM014MXhRdndtSkxySTdZSmhmK0J0RUZINXBI?=
+ =?utf-8?B?MWx2dXNPejBWL2RKQ2p2Q3cvWGxUaFV4Rng2Rk5YcjA2bEdXVjFwL2pHc3c3?=
+ =?utf-8?B?eWY3dVpxTytia0ZidlFORHhQeElpSEQ0NlRmaGZTUEFXbjVpTysxa2VJTCt5?=
+ =?utf-8?B?aW5MRzNCWTBraGlqQzVYdFdxRyttMVFqeHlNNTUvSDFJdTJZekJ3TjV2MFpQ?=
+ =?utf-8?B?NWJmcEVHRmZ3RVM4aVZyTHBwKys4SXRjcUgrbkJtQzJmcmxVWTg2SU1HbnZj?=
+ =?utf-8?B?K1ZLYmQ0Tzhoc1drdUE5MGUyRWg5NkRnZ2FQd3FpQ3ZRdi96d1pncVRmdUIr?=
+ =?utf-8?B?WGRrL2VGN3ZYeVJEWFh5QXJVOE51anVaUWlwRWtRRU94TU90aXhlbVJydGIw?=
+ =?utf-8?B?RnJsLy9QeWU1KzgzczlENEpBR29KTXhlYnpneVFwSmpSeTRaQUdLQXhQeCtk?=
+ =?utf-8?B?cGpjeHhnSTUzOWtsRkZvbWRRam1TSjM1UTVlTXZjV2d2c2huWWI2bVVybW51?=
+ =?utf-8?B?em5HR2lCeXlCNDIxWGhNcEk5TTByVWNlZzRBVEM4bGpHK200NWF6OGZybVpR?=
+ =?utf-8?B?MkVOdCsyd3pjSnVPTElLcE5SOTViZGJVaG5XSGZQOXhkY0M3WEUwVWlDQlRX?=
+ =?utf-8?B?ejhxTTZRTmxFVHFNbXNGeDZteE5UTXplWWFmN3gyL01acThSb3VWV1pKeHlR?=
+ =?utf-8?B?dnpZSEdqNnU1VU1QS3JLR2RJTnZRK0RrMWUwL09mVTJNd1Y0QzluOWg1T2hr?=
+ =?utf-8?B?WUZlZ2wvZmI0SW5qSXFwWHUxZEdkQkt4TlJ2TnhmUDZtT2traVFhTWx6RHhx?=
+ =?utf-8?B?NkFEMThjMFkyVmlXOGRSYzRkSjRWQjQ2V0tvV3QwUDdUTmN4WXNYT0M2c1lE?=
+ =?utf-8?B?ZE9rdFVMQSsvbHRMcEJ3bnk1cVlnOHV1aDd3bU5MR1VQSm5nRFdCUDJGVVZn?=
+ =?utf-8?B?TWlpVlNBaG9jTVBSR3FpczgycEFScitHd2Rhd0RnUllRWWJLNHlPY3hua1di?=
+ =?utf-8?B?VEFMSFNHWWF4V09saHVXNEd2RUNBd0sxZjNmanBhVWRZUlR5c08ySjNBU01V?=
+ =?utf-8?B?dkE9PQ==?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <379A633ADF9C42439F9A6920521F02AF@apcprd03.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27234.006
-X-TMASE-Result: 10-1.968300-10.000000
-X-TMASE-MatchedRID: gIwa0kWWszJaLxCKnrw2Bx1qGr6sYOf/homn0bwgVmniKUaoIhea7Z7V
-        Ny7+UW/97bSs17jHoll0Zb2MwG5IRayuICfJU1RUTuctSpiuWyUUi4Ehat05499RlPzeVuQQ1rP
-        f5y//KwbXerHp2eyhCZlPyeZmj2J3GwMQULTXmK4gaafg6U60I8nlJe2gk8vIhzldYl+vKikNCN
-        PJxA/UTwol8XYt5k6P6rDhzwOXTei/IFSslWntgQXtykVcrvpNN7FjQ+zMUh4RQQ4kFqjjJAZNL
-        EcrBa0wVhkjuzbJwW5/JgN7Aw6tALVQu1GNZ+si4kYXbobxJbLyU/oX+tpNmPoLEnltozQnFxhm
-        KBen8c2LkNbgO0LInr0EoIC23jYr9BbYEMZZ/LQ2RRIMOrvjaQ==
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 8aa3821f-e3c3-45da-bca6-acf872f12220-0-0-200-0
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: SG2PR03MB6261.apcprd03.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: dce1d892-7e17-422e-3c12-08dabb255e51
+X-MS-Exchange-CrossTenant-originalarrivaltime: 31 Oct 2022 09:50:39.6287
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: a7687ede-7a6b-4ef6-bace-642f677fbe31
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: 9OjtSfXTLzDmOsKSVUF42dbrEk2hR8tQZWndoouUdJoT5yrYn/JSfGtnCQEWPXcPJcO5XGw4RmlOwt2e885vzrEav2Ec4F1fojshcKV2Z+M=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR03MB6217
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-commit 406e14808ee6 upstream
-
-Before switching back to the right partition in mmc_blk_reset there used
-to be a check if hw_reset was even supported. This return value
-was removed, so there is no reason to check. Furthermore ensure
-part_curr is not falsely set to a valid value on reset or
-partition switch error.
-
-As part of this change the code paths of mmc_blk_reset calls were checked
-to ensure no commands are issued after a failed mmc_blk_reset directly
-without going through the block layer.
-
-Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
-
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/block.c | 44 ++++++++++++++++++++++++----------------
- 1 file changed, 26 insertions(+), 18 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index b2533be3a453..ed034b93cb25 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -133,6 +133,7 @@ struct mmc_blk_data {
- 	 * track of the current selected device partition.
- 	 */
- 	unsigned int	part_curr;
-+#define MMC_BLK_PART_INVALID	UINT_MAX	/* Unknown partition active */
- 	int	area_type;
- 
- 	/* debugfs files (only in main mmc_blk_data) */
-@@ -984,9 +985,16 @@ static unsigned int mmc_blk_data_timeout_ms(struct mmc_host *host,
- 	return ms;
- }
- 
-+/*
-+ * Attempts to reset the card and get back to the requested partition.
-+ * Therefore any error here must result in cancelling the block layer
-+ * request, it must not be reattempted without going through the mmc_blk
-+ * partition sanity checks.
-+ */
- static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
- 			 int type)
- {
-+	struct mmc_blk_data *main_md = dev_get_drvdata(&host->card->dev);
- 	int err;
- 
- 	if (md->reset_done & type)
-@@ -994,23 +1002,22 @@ static int mmc_blk_reset(struct mmc_blk_data *md, struct mmc_host *host,
- 
- 	md->reset_done |= type;
- 	err = mmc_hw_reset(host);
-+	/*
-+	 * A successful reset will leave the card in the main partition, but
-+	 * upon failure it might not be, so set it to MMC_BLK_PART_INVALID
-+	 * in that case.
-+	 */
-+	main_md->part_curr = err ? MMC_BLK_PART_INVALID : main_md->part_type;
-+	if (err)
-+		return err;
- 	/* Ensure we switch back to the correct partition */
--	if (err) {
--		struct mmc_blk_data *main_md =
--			dev_get_drvdata(&host->card->dev);
--		int part_err;
--
--		main_md->part_curr = main_md->part_type;
--		part_err = mmc_blk_part_switch(host->card, md->part_type);
--		if (part_err) {
--			/*
--			 * We have failed to get back into the correct
--			 * partition, so we need to abort the whole request.
--			 */
--			return -ENODEV;
--		}
--	}
--	return err;
-+	if (mmc_blk_part_switch(host->card, md->part_type))
-+		/*
-+		 * We have failed to get back into the correct
-+		 * partition, so we need to abort the whole request.
-+		 */
-+		return -ENODEV;
-+	return 0;
- }
- 
- static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
-@@ -1855,8 +1862,9 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
- 		return;
- 
- 	/* Reset before last retry */
--	if (mqrq->retries + 1 == MMC_MAX_RETRIES)
--		mmc_blk_reset(md, card->host, type);
-+	if (mqrq->retries + 1 == MMC_MAX_RETRIES &&
-+	    mmc_blk_reset(md, card->host, type))
-+		return;
- 
- 	/* Command errors fail fast, so use all MMC_MAX_RETRIES */
- 	if (brq->sbc.error || brq->cmd.error)
--- 
-2.37.3
-
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
-
+T24gVHVlLCAyMDIyLTEwLTE4IGF0IDExOjUwICswMjAwLCBBbmdlbG9HaW9hY2NoaW5vIERlbCBS
+ZWdubyB3cm90ZToNCj4gSWwgMTcvMTAvMjIgMTY6MjAsIE1lbmdxaSBaaGFuZyBoYSBzY3JpdHRv
+Og0KPiA+IGFkZCBjcnlwdG8gY2xvY2sgY29udHJvbCBhbmQgdW5nYXRlIGl0IGJlZm9yZSBDUUhD
+SSBpbml0Lg0KPiA+IA0KPiA+IFNpZ25lZC1vZmYtYnk6IE1lbmdxaSBaaGFuZyA8bWVuZ3FpLnpo
+YW5nQG1lZGlhdGVrLmNvbT4NCj4gDQo+IEhlbGxvIE1lbmdxaSwNCj4gSSdtIGEgYml0IHN1cnBy
+aXNlZCB0aGF0IGVuYWJsaW5nIElDRSBvbmx5IHJlcXVpcmVzIGVuYWJsaW5nIGEgY2xvY2sNCj4g
+YXMNCj4gb24gZG93bnN0cmVhbSBjb2RlIEkgc2VlIHNvbWUgU01DIGNhbGxzIHRvDQo+IE1US19T
+SVBfS0VSTkVMX0hXX0ZERV9NU0RDX0NUTC4NCj4gDQo+IENhbiB5b3UgcGxlYXNlIGV4cGxhaW4g
+d2h5IFNNQyBjYWxscyBhcmUgbm90IG5lZWRlZCBoZXJlPw0KPiANCj4gVGhhbmtzLA0KPiBBbmdl
+bG8NCj4gDQoNCkhpIEFuZ2VsbywNCg0KVGhlcmUgYXJlIG1hbnkgd3JvbmcgcXVvdGVzIGluIHBy
+ZXZpb3VzIHJlcGx5LCBsZXQgbWUgZml4IGl0IGhlcmUuDQoNCkluIHNvbWUgTVRLIFNvQywgd2Ug
+bmVlZCBzZXQgYSBlbmNyeXB0byBlbmFibGUgYml0DQpNVEtfU0lQX0tFUk5FTF9IV19GREVfTVNE
+Q19DVEwgaW4gc2VjdXJlIHdvcmxkLCBzbyB3ZSB1c2UgU01DIGNhbGwgdG8NCmZpbmlzaCBpdC4N
+CkJ1dCBub3QgZXZlcnkgTVRLIFNvQyBuZWVkIHRvIHNldCB0aGlzIGJpdCBpbiBzZWN1cmUgd29y
+bGQuIFRoaXMgcGF0Y2gNCmlzIGZvciB0aGVzZSBTb0NzLg0KQXMgZm9yIFNNQyBjYWxsLCB3ZSBo
+YXZlbid0IGZvdW5kIGEgcHJvcGVyIHdheSB0byBkZWFsIHdpdGggaXQsIHdlJ2xsDQpkbyBpdCBs
+YXRlci4NCg0KVGhhbmtzLA0KTWVuZ3FpLlpoYW5nDQo=
