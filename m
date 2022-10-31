@@ -2,155 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11518FA3741
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 15:11:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F148ECAAA1
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 19:37:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230311AbiJaPLE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Oct 2022 11:11:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42792 "EHLO
+        id S230112AbiJaThL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Oct 2022 15:37:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229845AbiJaPLD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 11:11:03 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF3DC10542;
-        Mon, 31 Oct 2022 08:11:02 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 5F2CDB8159D;
-        Mon, 31 Oct 2022 15:11:01 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id F38E3C433D6;
-        Mon, 31 Oct 2022 15:10:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667229060;
-        bh=h6r/+2mAC4/njaA4+atvfxEJX7+EwKTjdDsDGq1YOf4=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=W3d/9ka5yozHPyemoWjKEnlFiRYHDNrGpKWaKr2rkkTLc0xWdpulhTYdw1a+vlWwh
-         FTIWGJ+Ujf+EExRuQbtqIuhU71PoYHyF4HWr0ZCi5T6VhIOR51RY2LWrVBAXPyObnL
-         Ncm2bXQ/gAKA64q4rAj90Z4yqcgkWKwJuTEgj88+IKS4qUsFKGLY0MqQLLrFvga/Vs
-         wZYonZtC/Lo86Jy/ysWbyHEUCZUYFrb/n2BF/dnoZiwSfJL4L73HFPIgzOBdCwj+GK
-         DspQWgxQNfRO4QojWNdee9Ffas9FVq3qe2+Seuekx6URIKJnmJGIglXSLG72nQ8Yxp
-         V1JrczX/+uInA==
-Message-ID: <f639fb74-ac76-b48f-a4fa-cfa9534f9c82@kernel.org>
-Date:   Mon, 31 Oct 2022 10:10:57 -0500
+        with ESMTP id S230111AbiJaThB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 15:37:01 -0400
+Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D1F313F46
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2022 12:37:00 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
+        date:from:to:cc:subject:message-id:references:mime-version
+        :content-type:in-reply-to; s=k1; bh=8oAWEy/NUHRiH0BlpnQq/zyLbpk/
+        KJSWrramJU5Iy7Y=; b=T8BgccJ6BGBdNI/RhQ5iYbsW1qVw4NmFCmauO4FN7ixF
+        KRyDEtmDsgHN/K9kExXrzUpy4klxuVBSKl+UCuTp6CqLUpfwOYBe+cXoQqOt510n
+        KA3TGKX8XCgj/78eFW9XdDtLJP1c8jkOiHNB189sCnrQ3rzNT9ib3wDlN+Ji+JM=
+Received: (qmail 1497143 invoked from network); 31 Oct 2022 20:36:58 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 31 Oct 2022 20:36:58 +0100
+X-UD-Smtp-Session: l3s3148p1@dTHiulnsTqMujns0
+Date:   Mon, 31 Oct 2022 20:36:55 +0100
+From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 11/14] mmc: tmio_mmc_core: Remove
+ local_irq_{save,restore}() around k[un]map_atomic()
+Message-ID: <Y2Aj15elzHIPEYqz@shikoro>
+Mail-Followup-To: Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Stefan Wahren <stefan.wahren@i2se.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        linux-mmc@vger.kernel.org
+References: <20221005101951.3165-1-adrian.hunter@intel.com>
+ <20221005101951.3165-12-adrian.hunter@intel.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.2.2
-Subject: Re: [PATCHv6 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-To:     Rob Herring <robh@kernel.org>
-Cc:     jh80.chung@samsung.com, ulf.hansson@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-References: <20221026141631.696863-1-dinguyen@kernel.org>
- <20221026205022.GA1291041-robh@kernel.org>
-Content-Language: en-US
-From:   Dinh Nguyen <dinguyen@kernel.org>
-In-Reply-To: <20221026205022.GA1291041-robh@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="ml+MGP4tzBghihDH"
+Content-Disposition: inline
+In-Reply-To: <20221005101951.3165-12-adrian.hunter@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
+--ml+MGP4tzBghihDH
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-On 10/26/22 15:50, Rob Herring wrote:
-> On Wed, Oct 26, 2022 at 09:16:26AM -0500, Dinh Nguyen wrote:
->> Document the optional "altr,sysmgr-syscon" binding that is used to
->> access the System Manager register that controls the SDMMC clock
->> phase.
->>
->> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
->> ---
->> v6: make "altr,sysmgr-syscon" optional
->> v5: document reg shift
->> v4: add else statement
->> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->>      "altr,socfpga-dw-mshc"
->> v2: document "altr,sysmgr-syscon" in the MMC section
->> ---
->>   .../bindings/mmc/synopsys-dw-mshc.yaml        | 23 ++++++++++++++++---
->>   1 file changed, 20 insertions(+), 3 deletions(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> index ae6d6fca79e2..0e2024eb9018 100644
->> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
->> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->>   
->>   title: Synopsys Designware Mobile Storage Host Controller Binding
->>   
->> -allOf:
->> -  - $ref: "synopsys-dw-mshc-common.yaml#"
->> -
->>   maintainers:
->>     - Ulf Hansson <ulf.hansson@linaro.org>
->>   
->> @@ -38,6 +35,26 @@ properties:
->>         - const: biu
->>         - const: ciu
->>   
->> +allOf:
->> +  - $ref: synopsys-dw-mshc-common.yaml#
->> +
->> +  - if:
->> +      properties:
->> +        compatible:
->> +          contains:
->> +            const: altr,socfpga-dw-mshc
->> +    then:
->> +      properties:
->> +        altr,sysmgr-syscon:
->> +          $ref: /schemas/types.yaml#/definitions/phandle-array
->> +          items:
->> +            - description: phandle to the sysmgr node
->> +            - description: register offset that controls the SDMMC clock phase
->> +            - description: register shift for the smplsel(drive in) setting
-> 
-> This goes in the top-level. Use if/then schema to add constraints, not
-> define properties.
-> 
->> +    else:
-> 
-> Then you'll need to negate the if:  if: { not: { properties: ... }}
-> 
+On Wed, Oct 05, 2022 at 01:19:48PM +0300, Adrian Hunter wrote:
+> A long time ago the kmap_atomic API required a slot to be provided which
+> risked the possibility that other code might use the same slot at the
+> same time. Disabling interrupts prevented the possibility of an interrupt
+> handler doing that. However, that went away with
+> commit 3e4d3af501cc ("mm: stack based kmap_atomic()").
+>=20
+> When the second argument to kmap_atomic was removed by commit 482fce997e14
+> ("mmc: remove the second argument of k[un]map_atomic()"),
+> local_irq_{save,restore}() should have been removed also.
+>=20
+> Remove it now.
+>=20
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Thanks Rob, is this what you mean?
+Thank you for cleaning this cruft! Looks good.
 
-   altr,sysmgr-syscon:
-     $ref: /schemas/types.yaml#/definitions/phandle-array
-     items:
-       - items:
-           - description: phandle to the sysmgr node
-           - description: register offset that controls the SDMMC clock 
-phase
-           - description: register shift for the smplsel(drive in) setting
-     description:
-       Contains the phandle to System Manager block that contains
-       the SDMMC clock-phase control register. The first value is the 
-pointer
-       to the sysmgr, the 2nd value is the register offset for the SDMMC
-       clock phase register, and the 3rd value is the bit shift for the
-       smplsel(drive in) setting.
+Reviewed-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
 
-allOf:
-   - $ref: "synopsys-dw-mshc-common.yaml#"
-
-   - if:
-       properties:
-         compatible:
-           contains:
-             const: altr,socfpga-dw-mshc
-     then:
-       not:				<----- add the 'not' here?
-         required:
-           - altr,sysmgr-syscon
-     else:
-       properties:
-         altr,sysmgr-syscon: false
+I should be able to set up a board for testing this week as well.
 
 
+--ml+MGP4tzBghihDH
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEEOZGx6rniZ1Gk92RdFA3kzBSgKbYFAmNgI9IACgkQFA3kzBSg
+KbbUJw//dcAYEvUUpyOAMVHayzjJiGj6ALdQcJMLliMJcLd6p7+KB3t7Tk0kmGHM
+QSRvqaMXzQhVtEes5r7sR1I+Qxzmxw84PTPRGz9oZMJLwQDa0AXmdChFGuK9PZUS
+JFyCYcFnMmpypfT9RBL4NqgFq30Jpdu+6dxHe0z0OiQHsjsgwnz8Sd0c0Zvyi1JB
+3p0jN8o/L65AY53u/Ch88xq50zSwYjrsvIVnMJ/6Blvb0dosAlj4SMYesmTv+ztC
+4bT7TQ9K3MeutfuQlC9UvuzpCpNiKnw18u/6nRQ5U3z58Z2vXa9jDHzE6FNaQQd0
+bVD7RycXkhyCGCRmzoe1HKGWHz9ZKwfCl5tiTtGga20hUQv+5rrdyGGxfkogZC7c
+5+HCrGIfwLFmRJLbdd3jPoMQA+SczyvgF3+OLa+iHLAe+EUQVGpVdArhzxfLgIv9
+aOWApKV0bBapCy80y2nwPBNpSd6utYDQWwfx/ldocvHZu0T3KyiUv0eESFUoiJ1o
+BQyBsJpEJ8xQFR3OtyfHmy9GNwEMkMgQ1IxDVbzwK/iqoEo8hGHJMqSfq77Igb1c
+3n+VzsWga84QW7+T9VCX9/3YCls5pfBtPmDTkuWJhh54uLayfrl4TQ8pa38rv6Eo
+QBZK56oFkVKzSx8atSQYxFCbUAbhEUTYx8wjGKKiMcsqHX7eF7I=
+=6wwZ
+-----END PGP SIGNATURE-----
+
+--ml+MGP4tzBghihDH--
