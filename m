@@ -2,104 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95AF0FA3740
-	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 09:53:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46FBAFA3742
+	for <linux-mmc@archiver.kernel.org>; Mon, 31 Oct 2022 13:04:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229457AbiJaJxL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 31 Oct 2022 05:53:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55602 "EHLO
+        id S229870AbiJaNES (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 31 Oct 2022 09:04:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229566AbiJaJxK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 05:53:10 -0400
-Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com [66.111.4.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C7E5EDF21;
-        Mon, 31 Oct 2022 02:53:09 -0700 (PDT)
-Received: from compute4.internal (compute4.nyi.internal [10.202.2.44])
-        by mailout.nyi.internal (Postfix) with ESMTP id 5AF6A5C010F;
-        Mon, 31 Oct 2022 05:53:07 -0400 (EDT)
-Received: from mailfrontend1 ([10.202.2.162])
-  by compute4.internal (MEProxy); Mon, 31 Oct 2022 05:53:07 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=kroah.com; h=cc
-        :cc:content-transfer-encoding:content-type:date:date:from:from
-        :in-reply-to:in-reply-to:message-id:mime-version:references
-        :reply-to:sender:subject:subject:to:to; s=fm3; t=1667209987; x=
-        1667296387; bh=eshu+AS7T2V6CJGqUlmIIT5E3fB5dkg31ZzHlAzt/o0=; b=Y
-        QiImhNmY95txsDnQ1ddqyu3aRTS4SD8xPN7AO6kiYBAL57RHevq5MGV6o/dqo1Gs
-        qWgpXuqki9iBhBn9GYF8j5xNgf0N0+2DrpQmdoXeTzhcDPj+UN52Epqxj5zmFWfr
-        wPRG/uo7biVkEVXZXQ2+BGwE7gY6PWlyCc4uVLh6oPE0cb47Wu/tdZhX/zv1RDNp
-        7LRhSX2wUpSMSu8DwVNUVv2zC28xf5n/+Csnvp31D6Erbswo3SiG7APKRzXTNfmI
-        9DeC//YzBa9FYd8ul9p/T+kFK4KJPxSwCFtOamBZ9YOvssoiwrO4YpO04tNGZvfc
-        O53Q9QCikL8L4sX39X6gA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-transfer-encoding
-        :content-type:date:date:feedback-id:feedback-id:from:from
-        :in-reply-to:in-reply-to:message-id:mime-version:references
-        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
-        :x-me-sender:x-me-sender:x-sasl-enc; s=fm3; t=1667209987; x=
-        1667296387; bh=eshu+AS7T2V6CJGqUlmIIT5E3fB5dkg31ZzHlAzt/o0=; b=P
-        vRkNB5Bf2a75jMlY+hQEitFtFZIPk92zmHOf0ra6j1d1CMVZqRdQfhsVIKgRiuXI
-        71NiPRceozBBvEN0/Bb5DpMP0+URgRN6SAv5o2LIT6jTwKUMYl/6xhJjL/Vp0wRV
-        h3m66x6O0r1GhEky8oADJe2IJ7+dP/wYB4liyZNblPJep3pR8ayvX6STL0IEx+iU
-        UA5TyYIUAVDVIDv9GNNYsjvI3M3eTT1TTu/Rg59lbNemKqvjT3NCJ6IlnVHxjjaX
-        r+Q4E4nU3u1PwOAu2IAkZ9w0GwLN5py4hgxUWZNxD69pG2TPEH5Ba9IV0bIxcyKv
-        7F1xJH89Y/SgvArOC673Q==
-X-ME-Sender: <xms:A5tfY6ONscrOLiElktMm0rccD5-4o6RurAoGEsbFXMZ7H52vK9MKjw>
-    <xme:A5tfY4_cEweKdkZdyLpHggA4iqn1TwLehBmNGmuFat2gjMh4hXAOiHeXCDHexJKsr
-    s99IZwS6Q_BZw>
-X-ME-Received: <xmr:A5tfYxS70SgzOs00JXlkbTbu5xwh577lH8osFSjmk4T2HCdP6ZoOHB-jKhU5j_Rq6EagBk8lvB-X5JItl2TO3SwZO7eNoa_B>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrudefgddtlecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecunecujfgurhepfffhvfevuffkfhggtggugfgjsehtke
-    ertddttddunecuhfhrohhmpefirhgvghcumffjuceoghhrvghgsehkrhhorghhrdgtohhm
-    qeenucggtffrrghtthgvrhhnpeelheehudduueeggeejgfehueduffehveeukefgkeeufe
-    eltdejteeiuedtkeekleenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgr
-    ihhlfhhrohhmpehgrhgvgheskhhrohgrhhdrtghomh
-X-ME-Proxy: <xmx:A5tfY6sLtOItAPf0OcWf0A8ZD6kyMUxZdgPtbOw4_KThim-BIAjhrg>
-    <xmx:A5tfYydeDJGJUS-arQwZJX_NXaKyyfRQ7y3gPQtn_KBlR1UPH068Og>
-    <xmx:A5tfY-28tf0-W5GoL7zQ5CfF0FdQAlJoy_5nRpGKRMnlM3BO5-1YAA>
-    <xmx:A5tfY5yQdX2ZFGsEc7onxY765lLsH8ulLL4JMjjiIhLvDkuWlg35Kg>
-Feedback-ID: i787e41f1:Fastmail
-Received: by mail.messagingengine.com (Postfix) with ESMTPA; Mon,
- 31 Oct 2022 05:53:06 -0400 (EDT)
-Date:   Mon, 31 Oct 2022 10:53:58 +0100
-From:   Greg KH <greg@kroah.com>
-To:     Christian =?iso-8859-1?Q?L=F6hle?= <CLoehle@hyperstone.com>
-Cc:     "stable@vger.kernel.org" <stable@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: Re: [PATCH] mmc: block: Remove error check of hw_reset on reset
-Message-ID: <Y1+bNsOJK7kB0yBZ@kroah.com>
-References: <0b965373ab0a4d35b0d98071a71fc304@hyperstone.com>
+        with ESMTP id S229588AbiJaNER (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 31 Oct 2022 09:04:17 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D6F3C1A;
+        Mon, 31 Oct 2022 06:04:17 -0700 (PDT)
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 3B0F56602387;
+        Mon, 31 Oct 2022 13:04:15 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1667221455;
+        bh=KCHuPKTLk6qo9M9z3GXMITfWQ2pzzdfAl6BTM/gh23U=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=HARtKsnYnMqNlcc2dyu0BDzN6Tn9Qly7xXEr7TJsgYY5UkU0mjrrAm+8EgKFb/Vql
+         15tAlieqx8x5nykmWEbmfahVnIfJdSriYITTAOga2OY3/5BD6Rcjit8fxYgjXbY5TN
+         jwQe1zmVSPJjQpNO+P+D/mI2HPAU+olno+JWObU/uMVnjx/WOBrTpa72vXg4fnD7Y8
+         YX2jvL7xqAnkgYmX8k5WvhNQaGdOjenJyU6ZXgW+JvlhXIPY7+icX/rvDdRV8vMRIF
+         JF1Ucbn8QrbAL03Y/+ZsowkU/cklR31yGU4XZebbGgaJtEazIMdd/D+nvIUak+vIcD
+         Il1AWdIG2gr9Q==
+Message-ID: <01f6923c-87ce-b7eb-7f6c-649a84baf556@collabora.com>
+Date:   Mon, 31 Oct 2022 14:04:12 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.3.3
+Subject: Re: [PATCH 1/2] mmc: mtk-sd: add Inline Crypto Engine support
+Content-Language: en-US
+To:     =?UTF-8?B?TWVuZ3FpIFpoYW5nICjlvKDmoqbnkKYp?= 
+        <Mengqi.Zhang@mediatek.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
+        =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= 
+        <Wenbin.Mei@mediatek.com>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
+        <Chaotian.Jing@mediatek.com>,
+        "krzysztof.kozlowski+dt@linaro.org" 
+        <krzysztof.kozlowski+dt@linaro.org>
+Cc:     "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-mediatek@lists.infradead.org" 
+        <linux-mediatek@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
+References: <20221017142007.5408-1-mengqi.zhang@mediatek.com>
+ <20221017142007.5408-2-mengqi.zhang@mediatek.com>
+ <438bf06d-c4f4-74b2-8903-e89dc52196a7@collabora.com>
+ <b557604932edfcd9847f0f033f410b7a68c704dc.camel@mediatek.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <b557604932edfcd9847f0f033f410b7a68c704dc.camel@mediatek.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <0b965373ab0a4d35b0d98071a71fc304@hyperstone.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Oct 31, 2022 at 09:39:53AM +0000, Christian L�hle wrote:
-> commit 406e14808ee6 upstream
+Il 31/10/22 10:50, Mengqi Zhang (张梦琦) ha scritto:
+> On Tue, 2022-10-18 at 11:50 +0200, AngeloGioacchino Del Regno wrote:
+>> Il 17/10/22 16:20, Mengqi Zhang ha scritto:
+>>> add crypto clock control and ungate it before CQHCI init.
+>>>
+>>> Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
+>>
+>> Hello Mengqi,
+>> I'm a bit surprised that enabling ICE only requires enabling a clock
+>> as
+>> on downstream code I see some SMC calls to
+>> MTK_SIP_KERNEL_HW_FDE_MSDC_CTL.
+>>
+>> Can you please explain why SMC calls are not needed here?
+>>
+>> Thanks,
+>> Angelo
+>>
 > 
-> Before switching back to the right partition in mmc_blk_reset there used
-> to be a check if hw_reset was even supported. This return value
-> was removed, so there is no reason to check. Furthermore ensure
-> part_curr is not falsely set to a valid value on reset or
-> partition switch error.
+> Hi Angelo,
 > 
-> As part of this change the code paths of mmc_blk_reset calls were checked
-> to ensure no commands are issued after a failed mmc_blk_reset directly
-> without going through the block layer.
+> There are many wrong quotes in previous reply, let me fix it here.
 > 
-> Fixes: fefdd3c91e0a ("mmc: core: Drop superfluous validations in mmc_hw|sw_reset()")
+> In some MTK SoC, we need set a encrypto enable bit
+> MTK_SIP_KERNEL_HW_FDE_MSDC_CTL in secure world, so we use SMC call to
+> finish it.
+> But not every MTK SoC need to set this bit in secure world. This patch
+> is for these SoCs.
+> As for SMC call, we haven't found a proper way to deal with it, we'll
+> do it later.
 > 
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-> ---
->  drivers/mmc/core/block.c | 44 ++++++++++++++++++++++++----------------
->  1 file changed, 26 insertions(+), 18 deletions(-)
 
-Now queued up, thanks.
+Thanks for clarifying.
+In that case, I'm a little worried about people trying to enable ICE on SoCs
+that do require calling into TZ and getting a crash... but it's anyway out of
+scope for this series, so:
 
-greg k-h
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+
+
