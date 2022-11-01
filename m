@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF134FA373D
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Nov 2022 06:32:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B2F5FA373D
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Nov 2022 06:33:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229872AbiKAGcN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Nov 2022 02:32:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50242 "EHLO
+        id S229870AbiKAGdC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Nov 2022 02:33:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229911AbiKAGcK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Nov 2022 02:32:10 -0400
-Received: from szxga02-in.huawei.com (szxga02-in.huawei.com [45.249.212.188])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B36C1165B7
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2022 23:32:09 -0700 (PDT)
-Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.56])
-        by szxga02-in.huawei.com (SkyGuard) with ESMTP id 4N1gCp12kJzHvR4;
-        Tue,  1 Nov 2022 14:31:50 +0800 (CST)
+        with ESMTP id S229795AbiKAGc4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Nov 2022 02:32:56 -0400
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2EC6516587
+        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2022 23:32:56 -0700 (PDT)
+Received: from dggpemm500021.china.huawei.com (unknown [172.30.72.55])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4N1g9j6n9WzJnLB;
+        Tue,  1 Nov 2022 14:30:01 +0800 (CST)
 Received: from dggpemm500007.china.huawei.com (7.185.36.183) by
- dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ dggpemm500021.china.huawei.com (7.185.36.109) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Tue, 1 Nov 2022 14:31:51 +0800
+ 15.1.2375.31; Tue, 1 Nov 2022 14:31:53 +0800
 Received: from huawei.com (10.175.103.91) by dggpemm500007.china.huawei.com
  (7.185.36.183) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Tue, 1 Nov
- 2022 14:31:51 +0800
+ 2022 14:31:52 +0800
 From:   Yang Yingliang <yangyingliang@huawei.com>
 To:     <linux-mmc@vger.kernel.org>
 CC:     <ulf.hansson@linaro.org>, <yangyingliang@huawei.com>
-Subject: [PATCH 1/9] mmc: alcor: fix return value check of mmc_add_host()
-Date:   Tue, 1 Nov 2022 14:30:15 +0800
-Message-ID: <20221101063023.1664968-2-yangyingliang@huawei.com>
+Subject: [PATCH 5/9] mmc: rtsx_pci: fix return value check of mmc_add_host()
+Date:   Tue, 1 Nov 2022 14:30:19 +0800
+Message-ID: <20221101063023.1664968-6-yangyingliang@huawei.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221101063023.1664968-1-yangyingliang@huawei.com>
 References: <20221101063023.1664968-1-yangyingliang@huawei.com>
@@ -50,30 +50,41 @@ that allocated in mmc_alloc_host() will be leaked and it will lead a kernel
 crash because of deleting not added device in the remove path.
 
 So fix this by checking the return value and calling mmc_free_host() in the
-error path.
+error path, beside, runtime PM also needs be disabled.
 
-Fixes: c5413ad815a6 ("mmc: add new Alcor Micro Cardreader SD/MMC driver")
+Fixes: ff984e57d36e ("mmc: Add realtek pcie sdmmc host driver")
 Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
 ---
- drivers/mmc/host/alcor.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ drivers/mmc/host/rtsx_pci_sdmmc.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/alcor.c b/drivers/mmc/host/alcor.c
-index bfb8efeb7eb8..d01df01d4b4d 100644
---- a/drivers/mmc/host/alcor.c
-+++ b/drivers/mmc/host/alcor.c
-@@ -1114,7 +1114,10 @@ static int alcor_pci_sdmmc_drv_probe(struct platform_device *pdev)
- 	alcor_hw_init(host);
+diff --git a/drivers/mmc/host/rtsx_pci_sdmmc.c b/drivers/mmc/host/rtsx_pci_sdmmc.c
+index e1580f78c6b2..8098726dcc0b 100644
+--- a/drivers/mmc/host/rtsx_pci_sdmmc.c
++++ b/drivers/mmc/host/rtsx_pci_sdmmc.c
+@@ -1474,6 +1474,7 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+ 	struct realtek_pci_sdmmc *host;
+ 	struct rtsx_pcr *pcr;
+ 	struct pcr_handle *handle = pdev->dev.platform_data;
++	int ret;
  
- 	dev_set_drvdata(&pdev->dev, host);
+ 	if (!handle)
+ 		return -ENXIO;
+@@ -1511,7 +1512,13 @@ static int rtsx_pci_sdmmc_drv_probe(struct platform_device *pdev)
+ 	pm_runtime_mark_last_busy(&pdev->dev);
+ 	pm_runtime_use_autosuspend(&pdev->dev);
+ 
 -	mmc_add_host(mmc);
 +	ret = mmc_add_host(mmc);
-+	if (ret)
-+		goto free_host;
-+
- 	return 0;
++	if (ret) {
++		pm_runtime_dont_use_autosuspend(&pdev->dev);
++		pm_runtime_disable(&pdev->dev);
++		mmc_free_host(mmc);
++		return ret;
++	}
  
- free_host:
+ 	return 0;
+ }
 -- 
 2.25.1
 
