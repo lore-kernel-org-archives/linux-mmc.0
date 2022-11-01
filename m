@@ -2,92 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B0718C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  1 Nov 2022 06:33:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 851FDFA3743
+	for <linux-mmc@archiver.kernel.org>; Tue,  1 Nov 2022 10:53:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229827AbiKAGdD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 1 Nov 2022 02:33:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50328 "EHLO
+        id S229912AbiKAKxX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 1 Nov 2022 06:53:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229795AbiKAGdD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Nov 2022 02:33:03 -0400
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B95E916587
-        for <linux-mmc@vger.kernel.org>; Mon, 31 Oct 2022 23:33:02 -0700 (PDT)
-Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.56])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4N1gF73kgXz15MCd;
-        Tue,  1 Nov 2022 14:32:59 +0800 (CST)
-Received: from dggpemm500007.china.huawei.com (7.185.36.183) by
- dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Tue, 1 Nov 2022 14:31:53 +0800
-Received: from huawei.com (10.175.103.91) by dggpemm500007.china.huawei.com
- (7.185.36.183) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.31; Tue, 1 Nov
- 2022 14:31:53 +0800
-From:   Yang Yingliang <yangyingliang@huawei.com>
-To:     <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <yangyingliang@huawei.com>
-Subject: [PATCH 6/9] mmc: rtsx_usb_sdmmc: fix return value check of mmc_add_host()
-Date:   Tue, 1 Nov 2022 14:30:20 +0800
-Message-ID: <20221101063023.1664968-7-yangyingliang@huawei.com>
+        with ESMTP id S229587AbiKAKxW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 1 Nov 2022 06:53:22 -0400
+Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8348833B;
+        Tue,  1 Nov 2022 03:53:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1667300000; x=1698836000;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=iR5nbEeb8llq1Y8iZDzFZH97eYqMxkF8ru+fo1WsjQk=;
+  b=kY6mgNDZ4o7GysJNxiBJWCSdhJeLMSCsXgzjuu2UlKJ8aZ0N1/qrXORF
+   weqbaQym9ts9Y916NSYx0nrCRKKjpvY8QjQtwVkiuQerQl2C09mlb61Hb
+   Ud3i8obBmYXADHKW8KGF3Lw8dvgkFEv4Q6XACBGmKpwN3YKBK/nH2tZua
+   3DyqIHor3iCTbhfl8Nh1ymkqAjQPyz4ZMXxK5e4NPkA2aYZHf7H+nCRsW
+   FpFDLqTx0OgdarmtkmjOuuDgrrNDZpfaXjaL81sVQpavSKpO/fldzWRwO
+   nuV8n2ssjn/rYk6Qhp0s8GS8/Qa4WHanhDBxtWMDGgwoznGtbLHC8O9c1
+   A==;
+X-IronPort-AV: E=Sophos;i="5.95,230,1661810400"; 
+   d="scan'208";a="27084645"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 01 Nov 2022 11:53:18 +0100
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Tue, 01 Nov 2022 11:53:18 +0100
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Tue, 01 Nov 2022 11:53:18 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1667299998; x=1698835998;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=iR5nbEeb8llq1Y8iZDzFZH97eYqMxkF8ru+fo1WsjQk=;
+  b=DsAO7v5asU45fn25A/NOWFVRclqqAMh4qvgqKmiQCaYnV6OULs8ciJwD
+   cGOIIEjJUuMbLAK2gzmzJGTtVQlc4OrBPXaGDmHqYLJZJ74z9YdjHAsjA
+   JLe9ePi41EKKs/Ah3MZjSyrMWx7DV6WuEoRJ2G1Y91+LkoOjQYTeK8wEC
+   gQf6T/9Fa4PVLiGMPc1/2XDSjVmIPhzCRa6wwWBXkv31rgXnu0PZY15q2
+   TnH1NF56LOOLaHQwhEYqbssSC60SaS4deg51Dy7/66UruiaLgz9Wd2BIJ
+   6ffaJ5/g1nttCZsZzpbBWPBwoba82E5E4dr9ZmDVXpYxpocntePeK3wwe
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.95,230,1661810400"; 
+   d="scan'208";a="27084644"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 01 Nov 2022 11:53:18 +0100
+Received: from localhost.localdomain (SCHIFFERM-M2.tq-net.de [10.121.49.14])
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPA id 17CD0280056;
+        Tue,  1 Nov 2022 11:53:18 +0100 (CET)
+From:   Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
+Subject: [PATCH] mmc: sdhci_am654: Use dev_err_probe() for mmc_of_parse() return code
+Date:   Tue,  1 Nov 2022 11:52:42 +0100
+Message-Id: <20221101105242.2019036-1-matthias.schiffer@ew.tq-group.com>
 X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221101063023.1664968-1-yangyingliang@huawei.com>
-References: <20221101063023.1664968-1-yangyingliang@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.103.91]
-X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
- dggpemm500007.china.huawei.com (7.185.36.183)
-X-CFilter-Loop: Reflected
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-mmc_add_host() may return error, if we ignore its return value, the memory
-that allocated in mmc_alloc_host() will be leaked and it will lead a kernel
-crash because of deleting not added device in the remove path.
+Checking phandle references like mmc-pwrseq can result in -EPROBE_DEFER.
 
-So fix this by checking the return value and calling mmc_free_host() in the
-error path, besides, led_classdev_unregister() and pm_runtime_disable() also
-need be called.
-
-Fixes: c7f6558d84af ("mmc: Add realtek USB sdmmc host driver")
-Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+Signed-off-by: Matthias Schiffer <matthias.schiffer@ew.tq-group.com>
 ---
- drivers/mmc/host/rtsx_usb_sdmmc.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci_am654.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/mmc/host/rtsx_usb_sdmmc.c b/drivers/mmc/host/rtsx_usb_sdmmc.c
-index 5798aee06653..2c650cd58693 100644
---- a/drivers/mmc/host/rtsx_usb_sdmmc.c
-+++ b/drivers/mmc/host/rtsx_usb_sdmmc.c
-@@ -1329,6 +1329,7 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
- #ifdef RTSX_USB_USE_LEDS_CLASS
- 	int err;
- #endif
-+	int ret;
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 8f1023480e12..4e17efa8ab97 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -835,7 +835,7 @@ static int sdhci_am654_probe(struct platform_device *pdev)
  
- 	ucr = usb_get_intfdata(to_usb_interface(pdev->dev.parent));
- 	if (!ucr)
-@@ -1365,7 +1366,15 @@ static int rtsx_usb_sdmmc_drv_probe(struct platform_device *pdev)
- 	INIT_WORK(&host->led_work, rtsx_usb_update_led);
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret) {
+-		dev_err(dev, "parsing dt failed (%d)\n", ret);
++		dev_err_probe(dev, ret, "parsing dt failed\n");
+ 		goto pm_runtime_put;
+ 	}
  
- #endif
--	mmc_add_host(mmc);
-+	ret = mmc_add_host(mmc);
-+	if (ret) {
-+#ifdef RTSX_USB_USE_LEDS_CLASS
-+		led_classdev_unregister(&host->led);
-+#endif
-+		mmc_free_host(mmc);
-+		pm_runtime_disable(&pdev->dev);
-+		return ret;
-+	}
- 
- 	return 0;
- }
 -- 
 2.25.1
 
