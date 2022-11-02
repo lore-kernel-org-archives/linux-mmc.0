@@ -2,91 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4629FC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 17:39:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 044E4C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 18:00:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231192AbiKBRjc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Nov 2022 13:39:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36896 "EHLO
+        id S230150AbiKBSAB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Nov 2022 14:00:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231377AbiKBRjJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 13:39:09 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C21C2494F;
-        Wed,  2 Nov 2022 10:39:01 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AD838B820D6;
-        Wed,  2 Nov 2022 17:38:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4FC89C4347C;
-        Wed,  2 Nov 2022 17:38:57 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667410738;
-        bh=rZM/Jb1cF/J5Dk3UhHZ90vCNfl/3XrVYW+A+ti6fTZc=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=IesK7MHd5dukyAch713I2OIRLuxBIEKDFThjLDy+6HpPA7XO44jmY/IudmGKOzHhI
-         fhtLEZHiZPF3W618g13kxdNg2tnI4NvyOZVJqmQmBUa8J+c1uO4pVk94gdlzrMIDXa
-         bh6ISUfiDFu5i7tUpvvdvfDuY7hs4NPSULfnevvj7QLa3/supqr3azusXRue9rh/LK
-         PVG9xE+acBHC301oQ2eB1kctQf1wlDNEESIjPMK7FctYNwYgra+KBbTRuT0nitNDCM
-         6e3C5/gqs+ppnV+goFfPJzzeDrCfxJrlMY5tTiBQ1z0SebI5RLu4jbBSSoPeFOFO+X
-         71MFSiTvHTeng==
-From:   Dinh Nguyen <dinguyen@kernel.org>
-To:     jh80.chung@samsung.com
-Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-Subject: [PATCHv7 6/6] arm: dts: socfpga: remove "clk-phase" in sdmmc_clk
-Date:   Wed,  2 Nov 2022 12:38:43 -0500
-Message-Id: <20221102173843.409039-6-dinguyen@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221102173843.409039-1-dinguyen@kernel.org>
-References: <20221102173843.409039-1-dinguyen@kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S231283AbiKBR7y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 13:59:54 -0400
+Received: from wout4-smtp.messagingengine.com (wout4-smtp.messagingengine.com [64.147.123.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D64441DF02;
+        Wed,  2 Nov 2022 10:59:52 -0700 (PDT)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 74CE9320099E;
+        Wed,  2 Nov 2022 13:59:50 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Wed, 02 Nov 2022 13:59:50 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm3; t=1667411990; x=1667498390; bh=7GRoQxQ5O/
+        7M/hCgn9KlfgoFjwoQ1yifn3eO5z+5VOY=; b=RXn6bWm7GTfW/yAE4+dGVwwgy/
+        UW8G0WWZva+W4EXS4eBCoztfMzY7FwruoLXM6zYXuvlIgLofLsVG1Lr4Fa77giS6
+        1SAU4NMJ3Y2mthTFIxYMMODwTVn8zdXoG7VYbAHu77s9/79Il4vPpFFS/hLI/fkF
+        J1NfpnA9SMXi1wpInq0oHLhbooOemddUqB+X6MpenRAK2/XrreqMQXf8hx79Bqa+
+        AYeNavWelj5jR3nI4YQj7bnxLYpO9pkeNfIa5yvspDpAx3lKcAZDqoc6JSzS25Ys
+        ZAj+Vx0E89R4+/zO60lRhrzLvaHizqTX6BDD8kDueRHUmVEpgHN4J+xeIFbA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm3; t=1667411990; x=1667498390; bh=7GRoQxQ5O/7M/hCgn9KlfgoFjwoQ
+        1yifn3eO5z+5VOY=; b=ZrNtGnGJTkmajqMkJHdYo+u/cTYmUJ79yfOzoYFEzs1n
+        kRLuuuXsCdwk5N25zf3F31znCZAzbWRz7l4/IaiioigNJuMufUR+jWved/1Biyo3
+        iB+RNggbCX6j0erlJ7Efbyx/94JbngFthBQFvDMyrVTtiUhh//9MNG7vIOBN2G8v
+        ElqUTSyH7Ouv1xOOEwVUbHSGwYg++OpNvcdteFcZ+1pr6EH5qvU86wJ0eHwDigLw
+        Yf9D++8KGGdCYQGwSN46KZ6xXk8IMZqBbeISGbht4o5pyNSLXzE6boMtOGvfgieU
+        LBVBdWbWdKJdNLE96qsKMq6sFhz2NUcQ4Prven3Yiw==
+X-ME-Sender: <xms:FbBiY4wxCdWrv6f0_bkEiMl7Kb-f6ysnHjSrW-RaTBVPKWaTvoH71A>
+    <xme:FbBiY8T8c1SAIwBlrhDunEMcuS__JbmPZb6YFC0_pUIRz0k0sTNraUGF0WGfA-wPa
+    ev9Y37qbOszLaYtqK8>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrudejgddutdeiucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:FbBiY6UPix6nnvEq0TY7cN55-1OemKmGO8icLhV7msNgJqzaSC_x9w>
+    <xmx:FbBiY2hTQ7g01Xx7Ja1EjeZnaTMnGXJdV0738-4-9sQUVh0T5IqGog>
+    <xmx:FbBiY6C3vUHt7Hnfeeq7WepyxeCtGX5GvuLHCEqYimzKHbgo7LPCng>
+    <xmx:FrBiY1qcyjSY84IEFydVqf4Z3AbN3kV67bT7TG7Vzd-6wl-3ne43rw>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id BB6C5B603EA; Wed,  2 Nov 2022 13:59:49 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1087-g968661d8e1-fm-20221021.001-g968661d8
+Mime-Version: 1.0
+Message-Id: <5b882121-f129-4130-bd5c-507072463a41@app.fastmail.com>
+In-Reply-To: <20221102125430.28466-1-wsa+renesas@sang-engineering.com>
+References: <20221102125430.28466-1-wsa+renesas@sang-engineering.com>
+Date:   Wed, 02 Nov 2022 18:59:27 +0100
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
+Cc:     Linux-Renesas <linux-renesas-soc@vger.kernel.org>
+Subject: Re: [RFC PATCH 0/2] mmc: tmio: further cleanups after kmap_atomic removal
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that the SDMMC driver can use the "clk-phase-sd-hs" binding, we don't
-need the clk-phase in the sdmmc_clk anymore.
+On Wed, Nov 2, 2022, at 13:54, Wolfram Sang wrote:
+> Thanks to Adrian's patches mentioned in patch 1 in this series, we can
+> now simplify the TMIO driver a tad further to ease future refactoring.
+> This is marked as RFC because testing the corner cases is not so easy so
+> extra eyes for review are more than welcome.
+>
+> Thanks and happy hacking!
+>
 
-Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
----
-v7: no changes
-v6: no changes
-v5: new
----
- arch/arm/boot/dts/socfpga.dtsi         | 1 -
- arch/arm/boot/dts/socfpga_arria10.dtsi | 1 -
- 2 files changed, 2 deletions(-)
+Hi Wolfram,
 
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index 604fc6e0c4ad..a2419a5c6c26 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -453,7 +453,6 @@ sdmmc_clk: sdmmc_clk {
- 						compatible = "altr,socfpga-gate-clk";
- 						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
- 						clk-gate = <0xa0 8>;
--						clk-phase = <0 135>;
- 					};
- 
- 					sdmmc_clk_divided: sdmmc_clk_divided {
-diff --git a/arch/arm/boot/dts/socfpga_arria10.dtsi b/arch/arm/boot/dts/socfpga_arria10.dtsi
-index b6ebe207e2bc..eb528c103d70 100644
---- a/arch/arm/boot/dts/socfpga_arria10.dtsi
-+++ b/arch/arm/boot/dts/socfpga_arria10.dtsi
-@@ -365,7 +365,6 @@ sdmmc_clk: sdmmc_clk {
- 						compatible = "altr,socfpga-a10-gate-clk";
- 						clocks = <&sdmmc_free_clk>;
- 						clk-gate = <0xC8 5>;
--						clk-phase = <0 135>;
- 					};
- 
- 					qspi_clk: qspi_clk {
--- 
-2.25.1
+I haven't posted my PXA boardfile patches yet, but after that
+series, the separate tmio MFD devices (MFD_TMIO, MFD_ASIC3)
+will all be gone, and tmio-mmc will only be used by SuperH,
+Arm MACH_RENESAS and MACH_UNIPHIER. I hope this doesn't conflict
+too much with your work and instead opens up further cleanups.
 
+       Arnd
