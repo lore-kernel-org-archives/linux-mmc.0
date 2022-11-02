@@ -2,163 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C464C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 15:28:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AA8EEC43217
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 15:42:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229681AbiKBP2K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Nov 2022 11:28:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39850 "EHLO
+        id S230311AbiKBPmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Nov 2022 11:42:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230306AbiKBP2H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 11:28:07 -0400
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E75924BF2
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Nov 2022 08:28:01 -0700 (PDT)
-Received: by mail-pj1-x102f.google.com with SMTP id m14-20020a17090a3f8e00b00212dab39bcdso2482394pjc.0
-        for <linux-mmc@vger.kernel.org>; Wed, 02 Nov 2022 08:28:01 -0700 (PDT)
+        with ESMTP id S230427AbiKBPme (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 11:42:34 -0400
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5953428700
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Nov 2022 08:42:32 -0700 (PDT)
+Received: by mail-pg1-x52c.google.com with SMTP id v3so1619675pgh.4
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Nov 2022 08:42:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wP12hBLI/UjYflAvChPOlEUP0Fe9bcRv3GNq3jXeE+o=;
-        b=oPg7EAxfhFVgkL5qNGfY4856C1CuYDrQT15DtL6CAfeFLX8YI4d839KNXQ4S+gqr3a
-         jl0GyG/hjPYCfH8CFQOTECwjEjyDtxI5jMIWrIYga5TRq0kXfOXd9WDHC1Z//WkJKr9M
-         Ad+DCW+vZTRC+nxDpNFkhVnFxaBoD0sK2hhdLLaaFhIVjXBbWRZtsm8j4QbOW5urUEsh
-         QUwujKODHa/k883wtb2V2C6ovbNxfQKuOLJapf96fLqGvubzOHHsh3bsNDZTFiesw3Fj
-         JKrcUe8+Fk9VgsGaOAMngyH68+2DM3jdLTjfELiAs3+3Jh7pfmiTrYtJePw+hvcxFtNv
-         JbAg==
+        bh=d3T+apdPM9d/LVHvl4ssAZf/YXXS8AT6BrLPp56q6P4=;
+        b=bRoabxpWUjHKwQUA6JkZZIwcLtRde9H8Szf/vDnUvurleAFiQWwrgedTkyfECR07EJ
+         mNanCNLUePcOioA5/z/Bd0mCa+5+wDqMb/e9sEZ+R8d5HdEpoZACHT+IL5IxcrgXOoWK
+         63A4KtRgpD3JAY53QPxFEmVw+xDNCq8/IDxPjY3sCsQZLJNHoPN7WN2XcYJw0ddSCnWN
+         fSpJTl28VbRjRmg+gyk69ngOl6UuZmsaST0LfN0VGB9jGH/2ocnGfX8MTSxMCLu4wFWE
+         kAhpn8McWI0chHoTqw9HNUY+CnKLHkFvT+hH3lx50zat5pE6CgrNK33JbMTzJECZmyFb
+         Sf4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=wP12hBLI/UjYflAvChPOlEUP0Fe9bcRv3GNq3jXeE+o=;
-        b=CK7mRrj5s0mWUyW5iM3KEUkq/i4Amowt7RvIVaEuOyhFfKN2V/gmJyNNBJ0p4J38ER
-         wESAeXDODcaOzR9liLdquE+TWBJHzGFZSl5mdLi/C3LU8FQWC30tXPAuhLEBbtDO7PTM
-         PTLxxztOSmBNIhgo0PDFivhQ3ee/Xo71BbA9DSckbA+dk4E+SkV5DeQ3pKFrf7aGMuK1
-         /WGIz1plMQXddWeoX4b191hNgzFaaPBQLinzxt6sh5jlwmKkdtLt7P7UUiw5fUgxbuZP
-         FVqwMC/YTBSLCICzHXPyibuKNIlTnNGuDE9W9SuTu7hOTrFol7coreheeawuBxqGatb2
-         dU2g==
-X-Gm-Message-State: ACrzQf2dgh2rBJh7qMuek3ADSeYIxaVW0wjgQaQdHwmvsJNzW4mIeMwZ
-        ijQJnP9ZKJpfLvNUyQoI2wFGIKNKlJlXbESUucHDfQ==
-X-Google-Smtp-Source: AMsMyM6A7lrylJay1xhevhaxJCaktaXQTaOKnMRfNs50tK6THAHyXvK0B1iPkGpZmNSeU8H+Mxp5/cQp8C9UHnx/UTU=
-X-Received: by 2002:a17:902:b78b:b0:187:1623:827f with SMTP id
- e11-20020a170902b78b00b001871623827fmr18869518pls.165.1667402881129; Wed, 02
- Nov 2022 08:28:01 -0700 (PDT)
+        bh=d3T+apdPM9d/LVHvl4ssAZf/YXXS8AT6BrLPp56q6P4=;
+        b=LZnfYylIe5llytptLCqtszFIYY5XepIoxhG7N9jO5Ea99cIQaeps9B3UtwXNP2ohTT
+         SGjaH06p8VFS4GAKbUEz3AuL0/5+vUeXpLEQv1gqkISc1fcwwkWyhQWzvacXZkpj/4W7
+         9BOlkndU3wflB+9CzjwOEmu+JSv8OXFU+ySrfOQnZDMprvln8jHry6SobyTDlQbT8LZx
+         hPW+LUggNHGLKYkyh1IIeWQbgBviRsv4CjoE3EVyZwVADNAhliSlVSGGKMOpYlkHuWSa
+         d1UWWOBqDWJnLSxvl//lIgBE5MvE1jx7HEDLpCbUfsrYz6vZafGS6qpSrP/cuuL9AnbM
+         q8MA==
+X-Gm-Message-State: ACrzQf1s5ZW5MD1kKIdWoIRnY0ahwB8x1uL7YNWgY0ZWg/hPOFd0i6cc
+        XDY9ch7j5pisrzZTZTMCM3kn5+2+tnB8E0x1QOeGRw==
+X-Google-Smtp-Source: AMsMyM5VlkFzEUiLRxmTPergQNEyNQ9URlJgnCoi+4jtnGNY54X56u4XM8yxlyw/sQGfd4bQDtFzgTMLMYWYGFCjToA=
+X-Received: by 2002:a05:6a00:170a:b0:563:a40a:b5e1 with SMTP id
+ h10-20020a056a00170a00b00563a40ab5e1mr25480891pfc.40.1667403751851; Wed, 02
+ Nov 2022 08:42:31 -0700 (PDT)
 MIME-Version: 1.0
-References: <CAPDyKFpG9ZjVTiK3HEqioDN8ksGpRYiXL_SLSmOfm9fjJfcrsw@mail.gmail.com>
- <20221028130242.20900-1-pshete@nvidia.com>
-In-Reply-To: <20221028130242.20900-1-pshete@nvidia.com>
+References: <20221026141631.696863-1-dinguyen@kernel.org> <20221026141631.696863-4-dinguyen@kernel.org>
+In-Reply-To: <20221026141631.696863-4-dinguyen@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 2 Nov 2022 16:27:24 +0100
-Message-ID: <CAPDyKFqJdiCDkAfrONfnBVKw1v8=jZ+hEJiKGK70EQ4o7BSxaQ@mail.gmail.com>
-Subject: Re: [PATCH v9 1/4] iommu: Add dummy dev_iommu_fwspec_get() helper
-To:     Prathamesh Shete <pshete@nvidia.com>
-Cc:     joro@8bytes.org, adrian.hunter@intel.com, thierry.reding@gmail.com,
-        jonathanh@nvidia.com, p.zabel@pengutronix.de,
-        linux-mmc@vger.kernel.org, linux-tegra@vger.kernel.org,
-        linux-kernel@vger.kernel.org, will@kernel.org,
-        iommu@lists.linux.dev, robin.murphy@arm.com, anrao@nvidia.com,
-        smangipudi@nvidia.com, kyarlagadda@nvidia.com,
-        Thierry Reding <treding@nvidia.com>
+Date:   Wed, 2 Nov 2022 16:41:55 +0100
+Message-ID: <CAPDyKFpe30P7HzF4yfo=oPt5EwytMtkcCdBakUXkeUYtbmHt7g@mail.gmail.com>
+Subject: Re: [PATCHv6 4/6] mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
+To:     Dinh Nguyen <dinguyen@kernel.org>
+Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-clk@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 28 Oct 2022 at 15:02, Prathamesh Shete <pshete@nvidia.com> wrote:
+On Wed, 26 Oct 2022 at 16:16, Dinh Nguyen <dinguyen@kernel.org> wrote:
 >
-> This dummy implementation is useful to avoid a dependency on the
-> IOMMU_API Kconfig symbol in drivers that can optionally use the IOMMU
-> API.
+> The clock-phase settings for the SDMMC controller in the SoCFPGA
+> platforms reside in a register in the System Manager. Add a method
+> to access that register through the syscon interface.
 >
-> In order to fully use this, also move the struct iommu_fwspec definition
-> out of the IOMMU_API protected region.
+> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> ---
+> v6: not getting the clk-phase-sd-hs is not a hard failure
+> v5: change error handling from of_property_read_variable_u32_array()
+>     support arm32 by reading the reg_shift
+> v4: no change
+> v3: add space before &socfpga_drv_data
+> v2: simplify clk-phase calculations
 >
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
-> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> make property optional in driver
+> ---
+>  drivers/mmc/host/dw_mmc-pltfm.c | 43 ++++++++++++++++++++++++++++++++-
+>  1 file changed, 42 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 9901208be797..fff6222d58e4 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -17,10 +17,16 @@
+>  #include <linux/mmc/host.h>
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/of.h>
+> +#include <linux/mfd/altera-sysmgr.h>
+> +#include <linux/regmap.h>
+>
+>  #include "dw_mmc.h"
+>  #include "dw_mmc-pltfm.h"
+>
+> +#define SOCFPGA_DW_MMC_CLK_PHASE_STEP  45
+> +#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel, reg_shift) \
+> +       ((((smplsel) & 0x7) << reg_shift) | (((drvsel) & 0x7) << 0))
+> +
+>  int dw_mci_pltfm_register(struct platform_device *pdev,
+>                           const struct dw_mci_drv_data *drv_data)
+>  {
+> @@ -62,9 +68,44 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
+>  };
+>  EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+>
+> +static int dw_mci_socfpga_priv_init(struct dw_mci *host)
+> +{
+> +       struct device_node *np = host->dev->of_node;
+> +       struct regmap *sys_mgr_base_addr;
+> +       u32 clk_phase[2] = {0}, reg_offset, reg_shift;
+> +       int i, rc, hs_timing;
+> +
+> +       rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
+> +       if (rc < 0) {
+> +               dev_info(host->dev, "Optional: clk-phase-sd-hs not found!\n");
 
-It seems like you claimed authorship of the patch [1], that was
-authored by Thierry and updated the commit message header.
+Printing things about missing optional features doesn't really make
+sense. Please drop this.
 
-Can you please restore the patch to its original that was posted by Thierry?
+> +               return 0;
+> +       }
+> +
+> +       sys_mgr_base_addr = altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
+> +       if (IS_ERR(sys_mgr_base_addr)) {
+> +               dev_info(host->dev, "Optional: failed to find altr,sys-mgr regmap!\n");
+
+If the clk-phase-sd-hs property is found above, the altr,sysmgr-syscon
+property is required, isn't it?
+
+In that case, perhaps this deserves a dev_warn instead?
+
+> +               return 0;
+> +       }
+> +
+> +       of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
+> +       of_property_read_u32_index(np, "altr,sysmgr-syscon", 2, &reg_shift);
+> +
+> +       for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
+> +               clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
+> +
+> +       hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1], reg_shift);
+> +       regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
+> +
+> +       return 0;
+> +}
+> +
+> +static const struct dw_mci_drv_data socfpga_drv_data = {
+> +       .init           = dw_mci_socfpga_priv_init,
+> +};
+> +
+>  static const struct of_device_id dw_mci_pltfm_match[] = {
+>         { .compatible = "snps,dw-mshc", },
+> -       { .compatible = "altr,socfpga-dw-mshc", },
+> +       { .compatible = "altr,socfpga-dw-mshc", .data = &socfpga_drv_data, },
+>         { .compatible = "img,pistachio-dw-mshc", },
+>         {},
+>  };
 
 Kind regards
 Uffe
-
-[1]
-https://lore.kernel.org/linux-mmc/20221018105149.820062-1-thierry.reding@gmail.com/
-
-
-
-> ---
->  include/linux/iommu.h | 39 +++++++++++++++++++--------------------
->  1 file changed, 19 insertions(+), 20 deletions(-)
->
-> diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-> index ea30f00dc145..afa829bc4356 100644
-> --- a/include/linux/iommu.h
-> +++ b/include/linux/iommu.h
-> @@ -173,6 +173,25 @@ enum iommu_dev_features {
->
->  #define IOMMU_PASID_INVALID    (-1U)
->
-> +/**
-> + * struct iommu_fwspec - per-device IOMMU instance data
-> + * @ops: ops for this device's IOMMU
-> + * @iommu_fwnode: firmware handle for this device's IOMMU
-> + * @flags: IOMMU_FWSPEC_* flags
-> + * @num_ids: number of associated device IDs
-> + * @ids: IDs which this device may present to the IOMMU
-> + */
-> +struct iommu_fwspec {
-> +       const struct iommu_ops  *ops;
-> +       struct fwnode_handle    *iommu_fwnode;
-> +       u32                     flags;
-> +       unsigned int            num_ids;
-> +       u32                     ids[];
-> +};
-> +
-> +/* ATS is supported */
-> +#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
-> +
->  #ifdef CONFIG_IOMMU_API
->
->  /**
-> @@ -600,25 +619,6 @@ extern struct iommu_group *generic_device_group(struct device *dev);
->  /* FSL-MC device grouping function */
->  struct iommu_group *fsl_mc_device_group(struct device *dev);
->
-> -/**
-> - * struct iommu_fwspec - per-device IOMMU instance data
-> - * @ops: ops for this device's IOMMU
-> - * @iommu_fwnode: firmware handle for this device's IOMMU
-> - * @flags: IOMMU_FWSPEC_* flags
-> - * @num_ids: number of associated device IDs
-> - * @ids: IDs which this device may present to the IOMMU
-> - */
-> -struct iommu_fwspec {
-> -       const struct iommu_ops  *ops;
-> -       struct fwnode_handle    *iommu_fwnode;
-> -       u32                     flags;
-> -       unsigned int            num_ids;
-> -       u32                     ids[];
-> -};
-> -
-> -/* ATS is supported */
-> -#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
-> -
->  /**
->   * struct iommu_sva - handle to a device-mm bond
->   */
-> @@ -682,7 +682,6 @@ bool iommu_group_dma_owner_claimed(struct iommu_group *group);
->
->  struct iommu_ops {};
->  struct iommu_group {};
-> -struct iommu_fwspec {};
->  struct iommu_device {};
->  struct iommu_fault_param {};
->  struct iommu_iotlb_gather {};
-> --
-> 2.17.1
->
