@@ -2,139 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C489FC43217
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 12:54:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 618F6C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 14:00:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229598AbiKBMyl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Nov 2022 08:54:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36372 "EHLO
+        id S229590AbiKBOAX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Nov 2022 10:00:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230302AbiKBMyk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 08:54:40 -0400
-Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E85427CFE
-        for <linux-mmc@vger.kernel.org>; Wed,  2 Nov 2022 05:54:39 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:in-reply-to:references
-        :mime-version:content-transfer-encoding; s=k1; bh=6Qz3PtSDg94klk
-        cWL6XHq2yQoPRPCPW8xo9RNfPzFjE=; b=0crpFcQplGNlTJMxVg9t/YBUsUYR74
-        xxwpbQkuHqnJWsIbryshN9cHBtuzDzIq2Icy4Ao30LaoaPezW8NJzQHhDLvu7aLl
-        XMS6C3iUrCDnRK8WRkgTbzZG4Bl0zIGgLnLgmOnjSkzLNbzoaZELvCWLpwhTwfvb
-        +brKXIG69AJ+s=
-Received: (qmail 2206667 invoked from network); 2 Nov 2022 13:54:37 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 2 Nov 2022 13:54:37 +0100
-X-UD-Smtp-Session: l3s3148p1@FgrNV3zsx8wucrSg
-From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
-To:     linux-mmc@vger.kernel.org
-Cc:     linux-renesas-soc@vger.kernel.org,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [RFC PATCH 1/2] mmc: tmio: remove tmio_mmc_k(un)map_atomic helpers
-Date:   Wed,  2 Nov 2022 13:54:29 +0100
-Message-Id: <20221102125430.28466-2-wsa+renesas@sang-engineering.com>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221102125430.28466-1-wsa+renesas@sang-engineering.com>
-References: <20221102125430.28466-1-wsa+renesas@sang-engineering.com>
+        with ESMTP id S230294AbiKBOAX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 10:00:23 -0400
+Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9C705F56
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Nov 2022 07:00:18 -0700 (PDT)
+Received: by mail-pj1-x102b.google.com with SMTP id z5-20020a17090a8b8500b00210a3a2364fso3675297pjn.0
+        for <linux-mmc@vger.kernel.org>; Wed, 02 Nov 2022 07:00:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=monstr-eu.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=UsJlfOgqiHgUxbwmXIMpsu5a+7TfV6gKqVgE2IVuVWw=;
+        b=AHEPyvF6yJhpDPvZ8ro4YgNh/1b3ocEAMuI5HfpiDWENSPwoMudTtWa89Cu9MNghcI
+         XnvfBLm5zKyTIL++yTuLk18tUTZ4ZG3YCv5l4MUzk/otRcanr1rGZ/ppKm00oahLog9H
+         +ubnqs+SdzlTzcuFg3ASbmFgvBF4t5KTwgI9JBt2jrcWpeUjS3Q5UsoN6GHnhA5ChtjE
+         j7EkUBJLld3iBHt/oOI06qx0TSlwF52IWdr5cNBP5XQ6A+U3RD1IEzklyOcvIDL+JGCK
+         yMGPPpz4BJExg/rZDmJsOnitiANXG+NGOx2WCMP9JjCCpsyoJBBOdIO5ztzfMY7dRWSX
+         OXvw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=UsJlfOgqiHgUxbwmXIMpsu5a+7TfV6gKqVgE2IVuVWw=;
+        b=hS+kfTr8ZUcFscK9S6gGSgpVrlx7qrm33CIMrSOGwVcRKxpO3EHHLD/MTKFD3EIk8d
+         3EepFvSabDnXbF1FWzjG14qP1lUVoWo2Jy4hmVQNFcs93ZikSIuTTH15W3XHK0irwJAo
+         II9h0uLuKvWQkbqKe+yvz6d2HKJka8jCtGe2QVCqsfqJrZYMye8EKBf5DQCrq1e0x5gu
+         E709crXfS9ncTDWUrQ/BzZi/pmCwq67uYImHrS7oQylgtXDSRPQ1SS+sVu3274PHhEEw
+         SmWK7Om9oN9WG1j4j1iUCjEPJrpHPslHaWoAgPwY9g0D2GF+r++TI4geOHuzOCCsBqlE
+         /P/Q==
+X-Gm-Message-State: ACrzQf3TOXW8TXkIHDUKhfzMMwP4uFzs1/YXXxWXPshsWx1E1ZrCjPjM
+        TYm4X57jAI+ahQG10myxaM9X+Q==
+X-Google-Smtp-Source: AMsMyM6yV8ivNbcxAFIU13pFb/62Dk7GdMTsYKKajObauYtzqrNkOCFepVJeBDJgkfsgk1NarljTIQ==
+X-Received: by 2002:a17:902:ce82:b0:187:3591:edac with SMTP id f2-20020a170902ce8200b001873591edacmr9749767plg.153.1667397618240;
+        Wed, 02 Nov 2022 07:00:18 -0700 (PDT)
+Received: from [172.20.7.43] ([12.157.112.82])
+        by smtp.gmail.com with ESMTPSA id q12-20020a170902a3cc00b00176ba091cd3sm8294561plb.196.2022.11.02.07.00.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 02 Nov 2022 07:00:17 -0700 (PDT)
+Message-ID: <42b902eb-1ff3-2e44-8128-34d9a86ce8a1@monstr.eu>
+Date:   Wed, 2 Nov 2022 07:00:16 -0700
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.1
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support for dynamic
+ configuration
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, saikrishna12468@gmail.com,
+        git@amd.com
+References: <20221019054857.8286-1-sai.krishna.potthuri@amd.com>
+ <54973f0b-33ab-6cbb-82ce-be769fe82bd9@intel.com>
+Content-Language: en-US
+From:   Michal Simek <monstr@monstr.eu>
+In-Reply-To: <54973f0b-33ab-6cbb-82ce-be769fe82bd9@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After a8402aed8ca5 ("mmc: tmio_mmc_core: Remove
-local_irq_{save,restore}() around k[un]map_atomic()") and ac91578a6812
-("mmc: tmio_mmc_core: Replace kmap_atomic() with kmap_local_page()"),
-the helpers contain just a single call. Putting it directly in the code
-makes it actually more readable. More so, because we now avoid the
-'offset' calculation when mapping/unmapping and just use it when we need
-it in the copy routines.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
----
- drivers/mmc/host/renesas_sdhi_sys_dmac.c |  6 +++---
- drivers/mmc/host/tmio_mmc.h              | 11 -----------
- drivers/mmc/host/tmio_mmc_core.c         | 13 +++++++------
- 3 files changed, 10 insertions(+), 20 deletions(-)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_sys_dmac.c b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-index e9cc6c15d229..c4545cb143dd 100644
---- a/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-+++ b/drivers/mmc/host/renesas_sdhi_sys_dmac.c
-@@ -254,11 +254,11 @@ static void renesas_sdhi_sys_dmac_start_dma_tx(struct tmio_mmc_host *host)
- 
- 	/* The only sg element can be unaligned, use our bounce buffer then */
- 	if (!aligned) {
--		void *sg_vaddr = tmio_mmc_kmap_atomic(sg);
-+		void *sg_vaddr = kmap_local_page(sg_page(sg));
- 
- 		sg_init_one(&host->bounce_sg, host->bounce_buf, sg->length);
--		memcpy(host->bounce_buf, sg_vaddr, host->bounce_sg.length);
--		tmio_mmc_kunmap_atomic(sg, sg_vaddr);
-+		memcpy(host->bounce_buf, sg_vaddr + sg->offset, host->bounce_sg.length);
-+		kunmap_local(sg_vaddr);
- 		host->sg_ptr = &host->bounce_sg;
- 		sg = host->sg_ptr;
- 	}
-diff --git a/drivers/mmc/host/tmio_mmc.h b/drivers/mmc/host/tmio_mmc.h
-index e36ff80108e6..df6b3dccf96a 100644
---- a/drivers/mmc/host/tmio_mmc.h
-+++ b/drivers/mmc/host/tmio_mmc.h
-@@ -204,17 +204,6 @@ void tmio_mmc_enable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- void tmio_mmc_disable_mmc_irqs(struct tmio_mmc_host *host, u32 i);
- irqreturn_t tmio_mmc_irq(int irq, void *devid);
- 
--static inline char *tmio_mmc_kmap_atomic(struct scatterlist *sg)
--{
--	return kmap_local_page(sg_page(sg)) + sg->offset;
--}
--
--static inline void tmio_mmc_kunmap_atomic(struct scatterlist *sg,
--					  void *virt)
--{
--	kunmap_local(virt - sg->offset);
--}
--
- #ifdef CONFIG_PM
- int tmio_mmc_host_runtime_suspend(struct device *dev);
- int tmio_mmc_host_runtime_resume(struct device *dev);
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index 6d50c0dd53fe..6d8597f1d22d 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -421,8 +421,8 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 		return;
- 	}
- 
--	sg_virt = tmio_mmc_kmap_atomic(host->sg_ptr);
--	buf = (unsigned short *)(sg_virt + host->sg_off);
-+	sg_virt = kmap_local_page(sg_page(host->sg_ptr));
-+	buf = (unsigned short *)(sg_virt + host->sg_ptr->offset + host->sg_off);
- 
- 	count = host->sg_ptr->length - host->sg_off;
- 	if (count > data->blksz)
-@@ -436,7 +436,7 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- 
- 	host->sg_off += count;
- 
--	tmio_mmc_kunmap_atomic(host->sg_ptr, sg_virt);
-+	kunmap_local(sg_virt);
- 
- 	if (host->sg_off == host->sg_ptr->length)
- 		tmio_mmc_next_sg(host);
-@@ -445,10 +445,11 @@ static void tmio_mmc_pio_irq(struct tmio_mmc_host *host)
- static void tmio_mmc_check_bounce_buffer(struct tmio_mmc_host *host)
- {
- 	if (host->sg_ptr == &host->bounce_sg) {
--		void *sg_vaddr = tmio_mmc_kmap_atomic(host->sg_orig);
-+		void *sg_virt = kmap_local_page(sg_page(host->sg_orig));
- 
--		memcpy(sg_vaddr, host->bounce_buf, host->bounce_sg.length);
--		tmio_mmc_kunmap_atomic(host->sg_orig, sg_vaddr);
-+		memcpy(sg_virt + host->sg_orig->offset, host->bounce_buf,
-+		       host->bounce_sg.length);
-+		kunmap_local(sg_virt);
- 	}
- }
- 
+On 11/2/22 02:37, Adrian Hunter wrote:
+> On 19/10/22 08:48, Sai Krishna Potthuri wrote:
+>> Add dynamic configuration support for Xilinx ZynqMP which takes care of
+>> configuring the SD secure space configuration registers using EEMI APIs,
+>> performing SD reset assert and deassert.
+>> High level sequence:
+>> - Check for the PM dynamic configuration support, if no error proceed with
+>> SD dynamic configurations(next steps) otherwise skip the dynamic
+>> configuration.
+>> - Put the SD Controller in reset.
+>> - Configure SD Fixed configurations.
+>> - Configure the SD Slot Type.
+>> - Configure the BASE_CLOCK.
+>> - Configure the 8-bit support.
+>> - Bring the SD Controller out of reset.
+>> - Wait for 1msec delay.
+>>
+>> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> 
+> Can we get an Ack from xilinx folks?
+Xilinx was acquired by AMD some time ago. This has been tested and reviewed 
+internally already. But
+
+Acked-by: Michal Simek <michal.simek@amd.com>
+
+Thanks,
+Michal
+
 -- 
-2.35.1
+Michal Simek, Ing. (M.Eng), OpenPGP -> KeyID: FE3D1F91
+w: www.monstr.eu p: +42-0-721842854
+Maintainer of Linux kernel - Xilinx Microblaze
+Maintainer of Linux kernel - Xilinx Zynq ARM and ZynqMP ARM64 SoCs
+U-Boot custodian - Xilinx Microblaze/Zynq/ZynqMP/Versal SoCs
 
