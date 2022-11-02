@@ -2,183 +2,195 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DE8EDC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 09:57:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52B10C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  2 Nov 2022 10:37:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229539AbiKBJ5T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 2 Nov 2022 05:57:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60896 "EHLO
+        id S230501AbiKBKhq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 2 Nov 2022 06:37:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbiKBJ5S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 05:57:18 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA0B91F9EC;
-        Wed,  2 Nov 2022 02:57:17 -0700 (PDT)
+        with ESMTP id S230437AbiKBKhN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 2 Nov 2022 06:37:13 -0400
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 776EF28E39
+        for <linux-mmc@vger.kernel.org>; Wed,  2 Nov 2022 03:36:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1667383037; x=1698919037;
+  t=1667385415; x=1698921415;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=Y4JaRDQ1UjEawhCzQ3jBuUwFG5WGst8q8wXZ5tjw4Xw=;
-  b=h3fkaLGkPKt5+hHpCDo02ZbcAz84gadkMICUHMFsM01COQFSuudxuqVn
-   56Apw7D35Q2CxKS9Y/Nxz2eGgeTAsZPdgtIfSfVTOSwqQgVz4lQI5n71W
-   WI8AokK+rpIJ6Evj3PkV2Ipprtc+Ylx4RrzdM59PBY4xmwi8oxcEVqwpt
-   Gfis4XpM7F0VpTe1s5hE1fPsUY+Jv5+B/+RnfGDcVJYhgNJhgbhbGK/zm
-   sKytwKUTwDN+TXJekhXfwHJh9HZbZpVgx2Wsy9X0FIQkIaFCPnRuuTR4Z
-   gP7w9tXFKYTUzfo2dM8mVgaZBmFTH/gAWiIPbBmHF0lJUq0cIWwecbvTO
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10518"; a="371453206"
+  bh=3dbFdJPDNyBd8IJXS8ejoaT84uIFGJZvStH8eSnp2sk=;
+  b=D6XQqNKxH9WZnKjPqWn4DJghJeMOs0iiU1zFtgq9T52yBHih8RPxt4bB
+   IYP0Xf11jZcyDy0OG4EBGSUOBFcSG2ez2ZEp7olJ+SebspMB4SSuWd8+4
+   yLvVItL1yrfYZYaBOy3ZordFoJ5M/oOcCmqlIZjrQeKRZLzvRWyxqLZue
+   CKoolfDE19xz8E5rdhWdtWO3Kyv61hHQXWIjVL5Tnfa8q7Mr7+Pp9zqPg
+   OLhWkIWpcyO2xQ8N8XroaWa60jBVEhcheBwQKoojfXabnV0nVn4bv3TiQ
+   QaJGEcjjHbMIV8wqyVcgwqH/dIdppxQ0MKnoiy0vCRVvzkvG6qVR5Ykjf
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10518"; a="395679865"
 X-IronPort-AV: E=Sophos;i="5.95,232,1661842800"; 
-   d="scan'208";a="371453206"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Nov 2022 02:57:17 -0700
-X-IronPort-AV: E=McAfee;i="6500,9779,10518"; a="636722728"
+   d="scan'208";a="395679865"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Nov 2022 03:36:55 -0700
+X-IronPort-AV: E=McAfee;i="6500,9779,10518"; a="809233598"
 X-IronPort-AV: E=Sophos;i="5.95,232,1661842800"; 
-   d="scan'208";a="636722728"
+   d="scan'208";a="809233598"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.47.170])
-  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Nov 2022 02:57:14 -0700
-Message-ID: <54973f0b-33ab-6cbb-82ce-be769fe82bd9@intel.com>
-Date:   Wed, 2 Nov 2022 11:37:19 +0200
+  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Nov 2022 03:36:52 -0700
+Message-ID: <04db7720-c13c-2a32-c0ea-a8e72052807c@intel.com>
+Date:   Wed, 2 Nov 2022 12:16:57 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.4.1
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support for dynamic
- configuration
-To:     Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Philipp Zabel <p.zabel@pengutronix.de>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, saikrishna12468@gmail.com,
-        git@amd.com
-References: <20221019054857.8286-1-sai.krishna.potthuri@amd.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: reset the tuning logic before
+ execute tuning
 Content-Language: en-US
+To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, sherry.sun@nxp.com, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com
+References: <1666947869-7904-1-git-send-email-haibo.chen@nxp.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221019054857.8286-1-sai.krishna.potthuri@amd.com>
+In-Reply-To: <1666947869-7904-1-git-send-email-haibo.chen@nxp.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/10/22 08:48, Sai Krishna Potthuri wrote:
-> Add dynamic configuration support for Xilinx ZynqMP which takes care of
-> configuring the SD secure space configuration registers using EEMI APIs,
-> performing SD reset assert and deassert.
-> High level sequence:
-> - Check for the PM dynamic configuration support, if no error proceed with
-> SD dynamic configurations(next steps) otherwise skip the dynamic
-> configuration.
-> - Put the SD Controller in reset.
-> - Configure SD Fixed configurations.
-> - Configure the SD Slot Type.
-> - Configure the BASE_CLOCK.
-> - Configure the 8-bit support.
-> - Bring the SD Controller out of reset.
-> - Wait for 1msec delay.
+On 28/10/22 12:04, haibo.chen@nxp.com wrote:
+> From: Haibo Chen <haibo.chen@nxp.com>
 > 
-> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> For standard tuning method on usdhc, the previous tuning result can
+> impact current tuning result, let current tuning can't set the correct
+> delay cell. And from the logic, this is also reasonable for manual
+> tuning method. So reset the tuning logic before execute tuning.
+> To avoid compile issue, this patch also move the esdhc_reset_tuning()
+> upper.
+> 
+> Find this issue when support SDIO WiFi in band wakeup feature. After
+> system resume back, will do re-tuning, but then meet data CRC error.
+> 
+> Do not meet this issue on SD/eMMC, because we already call
+> esdhc_reset_tuning() when config the legency ios, and SD/eMMC need
+> to re-init when system resume back, but SDIO device don't do re-init
+> if it has MMC_PM_KEEP_POWER pm_flags.
+> 
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-Can we get an Ack from xilinx folks?
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 69 ++++++++++++++++++++++++++++++
->  1 file changed, 69 insertions(+)
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 82 ++++++++++++++++--------------
+>  1 file changed, 44 insertions(+), 38 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 3997cad1f793..f051f3802aff 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -21,6 +21,7 @@
->  #include <linux/of_device.h>
->  #include <linux/phy/phy.h>
->  #include <linux/regmap.h>
-> +#include <linux/reset.h>
->  #include <linux/of.h>
->  #include <linux/firmware/xlnx-zynqmp.h>
->  
-> @@ -1521,6 +1522,65 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
->  	return 0;
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index b073e79dcd99..4559599d897d 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1012,6 +1012,44 @@ static void esdhc_pltfm_set_bus_width(struct sdhci_host *host, int width)
+>  			SDHCI_HOST_CONTROL);
 >  }
 >  
-> +static int sdhci_zynqmp_set_dynamic_config(struct device *dev,
-> +					   struct sdhci_arasan_data *sdhci_arasan)
+> +static void esdhc_reset_tuning(struct sdhci_host *host)
 > +{
-> +	struct sdhci_host *host = sdhci_arasan->host;
-> +	struct clk_hw *hw = &sdhci_arasan->clk_data.sdcardclk_hw;
 > +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +	const char *clk_name = clk_hw_get_name(hw);
-> +	u32 mhz, node_id = !strcmp(clk_name, "clk_out_sd0") ? NODE_SD_0 : NODE_SD_1;
-> +	struct reset_control *rstc;
+> +	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+> +	u32 ctrl;
 > +	int ret;
 > +
-> +	/* Obtain SDHC reset control */
-> +	rstc = devm_reset_control_get_optional_exclusive(dev, NULL);
-> +	if (IS_ERR(rstc)) {
-> +		dev_err(dev, "Cannot get SDHC reset.\n");
-> +		return PTR_ERR(rstc);
-> +	}
-> +
-> +	ret = reset_control_assert(rstc);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_FIXED, 0);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_EMMC_SEL,
-> +				      !!(host->mmc->caps & MMC_CAP_NONREMOVABLE));
-> +	if (ret)
-> +		return ret;
-> +
-> +	mhz = DIV_ROUND_CLOSEST_ULL(clk_get_rate(pltfm_host->clk), 1000000);
-> +	if (mhz > 100 && mhz <= 200)
-> +		mhz = 200;
-> +	else if (mhz > 50 && mhz <= 100)
-> +		mhz = 100;
-> +	else if (mhz > 25 && mhz <= 50)
-> +		mhz = 50;
-> +	else
-> +		mhz = 25;
-> +
-> +	ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_BASECLK, mhz);
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_8BIT,
-> +				      !!(host->mmc->caps & MMC_CAP_8_BIT_DATA));
-> +	if (ret)
-> +		return ret;
-> +
-> +	ret = reset_control_deassert(rstc);
-> +	if (ret)
-> +		return ret;
-> +
-> +	usleep_range(1000, 1500);
-> +
-> +	return 0;
-> +}
-> +
->  static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
->  {
->  	struct sdhci_host *host = sdhci_arasan->host;
-> @@ -1685,6 +1745,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  		goto unreg_clk;
->  	}
->  
-> +	if (of_device_is_compatible(np, "xlnx,zynqmp-8.9a")) {
-> +		ret = zynqmp_pm_is_function_supported(PM_IOCTL, IOCTL_SET_SD_CONFIG);
-> +		if (!ret) {
-> +			ret = sdhci_zynqmp_set_dynamic_config(dev, sdhci_arasan);
-> +			if (ret)
-> +				goto unreg_clk;
+> +	/* Reset the tuning circuit */
+> +	if (esdhc_is_usdhc(imx_data)) {
+> +		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+> +			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
+> +			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
+> +			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+> +		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+> +			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+> +			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> +			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> +			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+> +			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
+> +			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
+> +				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
+> +			if (ret == -ETIMEDOUT)
+> +				dev_warn(mmc_dev(host->mmc),
+> +				 "Warning! clear execute tuning bit failed\n");
+> +			/*
+> +			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
+> +			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
+> +			 * will finally make sure the normal data transfer logic correct.
+> +			 */
+> +			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
+> +			ctrl |= SDHCI_INT_DATA_AVAIL;
+> +			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
 > +		}
 > +	}
+> +}
 > +
->  	sdhci_arasan->phy = ERR_PTR(-ENODEV);
->  	if (of_device_is_compatible(np, "arasan,sdhci-5.1")) {
->  		sdhci_arasan->phy = devm_phy_get(dev, "phy_arasan");
+>  static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> @@ -1023,6 +1061,12 @@ static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	if (host->timing == MMC_TIMING_UHS_DDR50)
+>  		return 0;
+>  
+> +	/*
+> +	 * Reset tuning circuit logic. If not, the previous tuning result
+> +	 * will impact current tuning, make current tuning can't set the
+> +	 * correct delay cell.
+> +	 */
+> +	esdhc_reset_tuning(host);
+>  	return sdhci_execute_tuning(mmc, opcode);
+>  }
+>  
+> @@ -1196,44 +1240,6 @@ static void esdhc_set_strobe_dll(struct sdhci_host *host)
+>  		"warning! HS400 strobe DLL status REF/SLV not lock in 50us, STROBE DLL status is %x!\n", v);
+>  }
+>  
+> -static void esdhc_reset_tuning(struct sdhci_host *host)
+> -{
+> -	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> -	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+> -	u32 ctrl;
+> -	int ret;
+> -
+> -	/* Reset the tuning circuit */
+> -	if (esdhc_is_usdhc(imx_data)) {
+> -		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+> -			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> -			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> -			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
+> -			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
+> -			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+> -		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+> -			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+> -			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+> -			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> -			writel(ctrl, host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+> -			/* Make sure ESDHC_MIX_CTRL_EXE_TUNE cleared */
+> -			ret = readl_poll_timeout(host->ioaddr + SDHCI_AUTO_CMD_STATUS,
+> -				ctrl, !(ctrl & ESDHC_MIX_CTRL_EXE_TUNE), 1, 50);
+> -			if (ret == -ETIMEDOUT)
+> -				dev_warn(mmc_dev(host->mmc),
+> -				 "Warning! clear execute tuning bit failed\n");
+> -			/*
+> -			 * SDHCI_INT_DATA_AVAIL is W1C bit, set this bit will clear the
+> -			 * usdhc IP internal logic flag execute_tuning_with_clr_buf, which
+> -			 * will finally make sure the normal data transfer logic correct.
+> -			 */
+> -			ctrl = readl(host->ioaddr + SDHCI_INT_STATUS);
+> -			ctrl |= SDHCI_INT_DATA_AVAIL;
+> -			writel(ctrl, host->ioaddr + SDHCI_INT_STATUS);
+> -		}
+> -	}
+> -}
+> -
+>  static void esdhc_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
+>  {
+>  	u32 m;
 
