@@ -2,263 +2,158 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AFA18C63706
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 15:15:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7156CC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 17:35:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232178AbiKCPPv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Nov 2022 11:15:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55980 "EHLO
+        id S231398AbiKCRfe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Nov 2022 13:35:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232151AbiKCPPt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 11:15:49 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36BAA1A04E;
-        Thu,  3 Nov 2022 08:15:40 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C808DB828EC;
-        Thu,  3 Nov 2022 15:15:38 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 6CE63C43141;
-        Thu,  3 Nov 2022 15:15:36 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667488537;
-        bh=3AJ/3Js0m6vffxwjqkk3LAfootk09OLSdWObi3CQN78=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=UmPBcGPcuMTFfVRjMeI4yR4yD0IvqEkTk1USxS5FUfXkbui7zFGqdIJ37TpfXVUon
-         RCxmWmSXiraFhtLcW515x+S94R8wMc3G70Kuzdn3YJCuhJUo2AzKoyiHrGoN9THP4W
-         ec647hEJOrHIM4MKso5g4tt0rEtPTCvoIzQWoMV+JRX1of0AnUpYcP0roVJieNhGql
-         4vL6Q0BJu0IRVZj9gz1zZIYDMfMxxoLSgH9Eyuf1FJNW1Tj4qD6H4mHjrfAzePrGYJ
-         1cOwhGgkA9D7OM8dTO0uMvyPpNwO8fFSHo+3gNLnimaLvtooaLm7aQfojIbjKT+VSs
-         mUCpujHXigrqA==
-From:   Dinh Nguyen <dinguyen@kernel.org>
-To:     jh80.chung@samsung.com
-Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-Subject: [PATCHv8 5/6] clk: socfpga: remove the setting of clk-phase for sdmmc_clk
-Date:   Thu,  3 Nov 2022 10:15:24 -0500
-Message-Id: <20221103151525.474833-5-dinguyen@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221103151525.474833-1-dinguyen@kernel.org>
-References: <20221103151525.474833-1-dinguyen@kernel.org>
+        with ESMTP id S231401AbiKCRfc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 13:35:32 -0400
+Received: from foss.arm.com (foss.arm.com [217.140.110.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 4EFDD13D1E;
+        Thu,  3 Nov 2022 10:35:29 -0700 (PDT)
+Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
+        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id 4CEAB1FB;
+        Thu,  3 Nov 2022 10:35:35 -0700 (PDT)
+Received: from [10.57.36.87] (unknown [10.57.36.87])
+        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id B14143F5A1;
+        Thu,  3 Nov 2022 10:35:26 -0700 (PDT)
+Message-ID: <4cae5c8d-d6e9-79dc-670d-22ec9fda10a2@arm.com>
+Date:   Thu, 3 Nov 2022 17:35:19 +0000
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.1
+Subject: Re: [PATCH v10 1/4] iommu: Always define struct iommu_fwspec
+Content-Language: en-GB
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Thierry Reding <thierry.reding@gmail.com>
+Cc:     Prathamesh Shete <pshete@nvidia.com>, joro@8bytes.org,
+        adrian.hunter@intel.com, jonathanh@nvidia.com,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        will@kernel.org, iommu@lists.linux.dev, anrao@nvidia.com,
+        smangipudi@nvidia.com, kyarlagadda@nvidia.com,
+        Thierry Reding <treding@nvidia.com>
+References: <CAPDyKFqJdiCDkAfrONfnBVKw1v8=jZ+hEJiKGK70EQ4o7BSxaQ@mail.gmail.com>
+ <20221103043852.24718-1-pshete@nvidia.com>
+ <6be39bae-f325-12e0-374b-a27c9ee2ef2b@arm.com> <Y2PJq27wkVwPg6rp@orome>
+ <CAPDyKFq8szzryFBNkw20wFoPTbAa8YDy0wJnb57yckZ-HFTAMw@mail.gmail.com>
+From:   Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <CAPDyKFq8szzryFBNkw20wFoPTbAa8YDy0wJnb57yckZ-HFTAMw@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that the SDMMC driver supports setting the clk-phase, we can remove
-the need to do it in the clock driver.
+On 2022-11-03 14:55, Ulf Hansson wrote:
+> On Thu, 3 Nov 2022 at 15:01, Thierry Reding <thierry.reding@gmail.com> wrote:
+>>
+>> On Thu, Nov 03, 2022 at 12:23:20PM +0000, Robin Murphy wrote:
+>>> On 2022-11-03 04:38, Prathamesh Shete wrote:
+>>>> In order to fully make use of the !IOMMU_API stub functions, make the
+>>>> struct iommu_fwspec always available so that users of the stubs can keep
+>>>> using the structure's internals without causing compile failures.
+>>>
+>>> I'm really in two minds about this... fwspecs are an internal detail of the
+>>> IOMMU API that are meant to be private between individual drivers and
+>>> firmware code, so anything poking at them arguably does and should depend on
+>>> CONFIG_IOMMU_API. It looks like the stub for dev_iommu_fwspec_get() was only
+>>> added for the sake of one driver that was misusing it where it really wanted
+>>> device_iommu_mapped(), and has since been fixed, so if anything my
+>>> preference would be to remove that stub :/
+>>
+>> Tegra has been using this type of weak dependency on IOMMU_API mainly in
+>> order to allow building without the IOMMU support on some old platforms
+>> where people may actually care about the kernel size (Tegra20 systems
+>> were sometimes severely constrained and don't have anything that we'd
+>> call an IOMMU today).
+>>
+>> We have similar stubs in place for most other major subsystems in order
+>> to allow code to simply compile out if the subsystem is disabled, which
+>> is quite convenient for sharing code between platforms that may want a
+>> given feature and other platforms that may not want it, without causing
+>> too much of a hassle with compile-testing.
+> 
+> I agree with the above.
+> 
+> Moreover, the stubs make the code more portable/scalable and so it
+> becomes easier to maintain.
 
-Acked-by: Stephen Boyd <sboyd@kernel.org>
-Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
----
-v8: no changes
-v7: add acked-by
-v6: remove unused clk_phase in clk-gate.c
-v5: new
----
- drivers/clk/socfpga/clk-gate-a10.c | 68 ------------------------------
- drivers/clk/socfpga/clk-gate.c     | 61 ---------------------------
- drivers/clk/socfpga/clk.h          |  1 -
- 3 files changed, 130 deletions(-)
+Are you suggesting that having the same thing open-coded slightly 
+differently (with bugs) in 8 different places is somehow more 
+maintainable than abstracting it into a single centralised implementation?
 
-diff --git a/drivers/clk/socfpga/clk-gate-a10.c b/drivers/clk/socfpga/clk-gate-a10.c
-index 738c53391e39..7cdf2f07c79b 100644
---- a/drivers/clk/socfpga/clk-gate-a10.c
-+++ b/drivers/clk/socfpga/clk-gate-a10.c
-@@ -35,59 +35,7 @@ static unsigned long socfpga_gate_clk_recalc_rate(struct clk_hw *hwclk,
- 	return parent_rate / div;
- }
- 
--static int socfpga_clk_prepare(struct clk_hw *hwclk)
--{
--	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
--	int i;
--	u32 hs_timing;
--	u32 clk_phase[2];
--
--	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
--		for (i = 0; i < ARRAY_SIZE(clk_phase); i++) {
--			switch (socfpgaclk->clk_phase[i]) {
--			case 0:
--				clk_phase[i] = 0;
--				break;
--			case 45:
--				clk_phase[i] = 1;
--				break;
--			case 90:
--				clk_phase[i] = 2;
--				break;
--			case 135:
--				clk_phase[i] = 3;
--				break;
--			case 180:
--				clk_phase[i] = 4;
--				break;
--			case 225:
--				clk_phase[i] = 5;
--				break;
--			case 270:
--				clk_phase[i] = 6;
--				break;
--			case 315:
--				clk_phase[i] = 7;
--				break;
--			default:
--				clk_phase[i] = 0;
--				break;
--			}
--		}
--
--		hs_timing = SYSMGR_SDMMC_CTRL_SET_AS10(clk_phase[0], clk_phase[1]);
--		if (!IS_ERR(socfpgaclk->sys_mgr_base_addr))
--			regmap_write(socfpgaclk->sys_mgr_base_addr,
--				     SYSMGR_SDMMCGRP_CTRL_OFFSET, hs_timing);
--		else
--			pr_err("%s: cannot set clk_phase because sys_mgr_base_addr is not available!\n",
--					__func__);
--	}
--	return 0;
--}
--
- static struct clk_ops gateclk_ops = {
--	.prepare = socfpga_clk_prepare,
- 	.recalc_rate = socfpga_gate_clk_recalc_rate,
- };
- 
-@@ -96,7 +44,6 @@ static void __init __socfpga_gate_init(struct device_node *node,
- {
- 	u32 clk_gate[2];
- 	u32 div_reg[3];
--	u32 clk_phase[2];
- 	u32 fixed_div;
- 	struct clk_hw *hw_clk;
- 	struct socfpga_gate_clk *socfpga_clk;
-@@ -136,21 +83,6 @@ static void __init __socfpga_gate_init(struct device_node *node,
- 		socfpga_clk->div_reg = NULL;
- 	}
- 
--	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
--	if (!rc) {
--		socfpga_clk->clk_phase[0] = clk_phase[0];
--		socfpga_clk->clk_phase[1] = clk_phase[1];
--
--		socfpga_clk->sys_mgr_base_addr =
--			syscon_regmap_lookup_by_compatible("altr,sys-mgr");
--		if (IS_ERR(socfpga_clk->sys_mgr_base_addr)) {
--			pr_err("%s: failed to find altr,sys-mgr regmap!\n",
--					__func__);
--			kfree(socfpga_clk);
--			return;
--		}
--	}
--
- 	of_property_read_string(node, "clock-output-names", &clk_name);
- 
- 	init.name = clk_name;
-diff --git a/drivers/clk/socfpga/clk-gate.c b/drivers/clk/socfpga/clk-gate.c
-index 53d6e3ec4309..3e347b9e9eff 100644
---- a/drivers/clk/socfpga/clk-gate.c
-+++ b/drivers/clk/socfpga/clk-gate.c
-@@ -108,61 +108,7 @@ static unsigned long socfpga_clk_recalc_rate(struct clk_hw *hwclk,
- 	return parent_rate / div;
- }
- 
--static int socfpga_clk_prepare(struct clk_hw *hwclk)
--{
--	struct socfpga_gate_clk *socfpgaclk = to_socfpga_gate_clk(hwclk);
--	struct regmap *sys_mgr_base_addr;
--	int i;
--	u32 hs_timing;
--	u32 clk_phase[2];
--
--	if (socfpgaclk->clk_phase[0] || socfpgaclk->clk_phase[1]) {
--		sys_mgr_base_addr = syscon_regmap_lookup_by_compatible("altr,sys-mgr");
--		if (IS_ERR(sys_mgr_base_addr)) {
--			pr_err("%s: failed to find altr,sys-mgr regmap!\n", __func__);
--			return -EINVAL;
--		}
--
--		for (i = 0; i < 2; i++) {
--			switch (socfpgaclk->clk_phase[i]) {
--			case 0:
--				clk_phase[i] = 0;
--				break;
--			case 45:
--				clk_phase[i] = 1;
--				break;
--			case 90:
--				clk_phase[i] = 2;
--				break;
--			case 135:
--				clk_phase[i] = 3;
--				break;
--			case 180:
--				clk_phase[i] = 4;
--				break;
--			case 225:
--				clk_phase[i] = 5;
--				break;
--			case 270:
--				clk_phase[i] = 6;
--				break;
--			case 315:
--				clk_phase[i] = 7;
--				break;
--			default:
--				clk_phase[i] = 0;
--				break;
--			}
--		}
--		hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1]);
--		regmap_write(sys_mgr_base_addr, SYSMGR_SDMMCGRP_CTRL_OFFSET,
--			hs_timing);
--	}
--	return 0;
--}
--
- static struct clk_ops gateclk_ops = {
--	.prepare = socfpga_clk_prepare,
- 	.recalc_rate = socfpga_clk_recalc_rate,
- 	.get_parent = socfpga_clk_get_parent,
- 	.set_parent = socfpga_clk_set_parent,
-@@ -172,7 +118,6 @@ void __init socfpga_gate_init(struct device_node *node)
- {
- 	u32 clk_gate[2];
- 	u32 div_reg[3];
--	u32 clk_phase[2];
- 	u32 fixed_div;
- 	struct clk_hw *hw_clk;
- 	struct socfpga_gate_clk *socfpga_clk;
-@@ -218,12 +163,6 @@ void __init socfpga_gate_init(struct device_node *node)
- 		socfpga_clk->div_reg = NULL;
- 	}
- 
--	rc = of_property_read_u32_array(node, "clk-phase", clk_phase, 2);
--	if (!rc) {
--		socfpga_clk->clk_phase[0] = clk_phase[0];
--		socfpga_clk->clk_phase[1] = clk_phase[1];
--	}
--
- 	of_property_read_string(node, "clock-output-names", &clk_name);
- 
- 	init.name = clk_name;
-diff --git a/drivers/clk/socfpga/clk.h b/drivers/clk/socfpga/clk.h
-index d80115fbdd6a..9a2fb2dde5b8 100644
---- a/drivers/clk/socfpga/clk.h
-+++ b/drivers/clk/socfpga/clk.h
-@@ -50,7 +50,6 @@ struct socfpga_gate_clk {
- 	u32 width;	/* only valid if div_reg != 0 */
- 	u32 shift;	/* only valid if div_reg != 0 */
- 	u32 bypass_shift;      /* only valid if bypass_reg != 0 */
--	u32 clk_phase[2];
- };
- 
- struct socfpga_periph_clk {
--- 
-2.25.1
+Is it "easier to maintain" when already seemingly every thing I try to 
+clean up or refactor in the IOMMU API at the moment is stymied by 
+finding Tegra drivers doing unexpected (and often questionable) things? 
+Is it "more scalable" to make it even easier for people to copy 
+questionable code without a second thought, leaving API maintainers to 
+play an ever-expanding game of whack-a-mole to clean it up? No. No it 
+chuffing well isn't :(
 
+>>> I don't technically have much objection to this patch in isolation, but what
+>>> I don't like is the direction of travel it implies. I see the anti-pattern
+>>> is only spread across Tegra drivers, making Tegra-specific assumptions, so
+>>> in my view the best answer would be to abstract that fwpsec dependency into
+>>> a single Tegra-specific helper, which would better represent the nature of
+>>> what's really going on here.
+>>
+>> I don't see how this is an anti-pattern. It might not be common for
+>> drivers to need to reach into iommu_fwspec, so that might indeed be
+>> specific to Tegra (for whatever reason our IP seems to want extra
+>> flexibility), but the general pattern of using stubs is wide-spread,
+>> so I don't see why IOMMU_API would need to be special.
+> 
+> Again, I agree.
+
+The anti-pattern is reaching into some other driver's private data 
+assuming a particular format, with zero indication of the huge degree of 
+assumption involved, and half the time not even checking that what's 
+being dereferenced is valid.
+
+> Moreover, a "git grep CONFIG_IOMMU_API" indicates that the problem
+> isn't specific to Tegra. The "#ifdef CONFIG_IOMMU_API" seems to be
+> sprinkled across the kernel. I think it would be nice if we could
+> improve the situation. So far, using stubs along with what the
+> $subject patch proposes, seems to me to be the best approach.
+
+Yes, there is plenty of code through the tree that is only relevant to 
+the IOMMU API and would be a complete waste of space without it, that is 
+not the point in question here. Grep for dev_iommu_fwspec_get; outside 
+drivers/iommu, the only users are IOMMU-API-specific parts of ACPI code, 
+as intended, plus 8 random Tegra drivers.
+
+Now, there does happen to be a tacit contract between the ACPI IORT code 
+and the Arm SMMU drivers for how SMMU StreamIDs are encoded in their 
+respective fwspecs, but it was never intended for wider consumption. If 
+Tegra drivers want to have a special relationship with arm-smmu then 
+fair enough, but they can do the same as MSM and formalise it somewhere 
+that the SMMU driver maintainers are at least aware of, rather than 
+holding the whole generic IOMMU API hostage.
+
+Since apparently it wasn't clear, what I was proposing is a driver 
+helper at least something like this:
+
+int tegra_arm_smmu_streamid(struct device *dev)
+{
+#ifdef CONFIG_IOMMU_API
+	struct iommu_fwspec *fwspec = dev_iommu_fwspec_get(dev)
+
+	if (fwspec && fwspec->num_ids == 1)
+		return fwspec->ids[0] & 0xffff;
+#endif
+	return -EINVAL;
+}
+
+Now THAT is scalable and maintainable; any number of random drivers can 
+call it without any preconditions, it's a lot clearer what's going on, 
+and I won't have to swear profusely while herding patches through half a 
+dozen different trees if, when my ops rework gets to the point of 
+refactoring iommu_fwspec with dev_iommu, it ends up changing anything 
+significant.
+
+Thanks,
+Robin.
