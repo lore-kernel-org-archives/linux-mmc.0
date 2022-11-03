@@ -2,168 +2,152 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEB3AC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 04:39:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8AA71C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 10:59:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230497AbiKCEjw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 3 Nov 2022 00:39:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34110 "EHLO
+        id S231140AbiKCK7w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 3 Nov 2022 06:59:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230305AbiKCEjn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 00:39:43 -0400
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2058.outbound.protection.outlook.com [40.107.237.58])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8E8017435;
-        Wed,  2 Nov 2022 21:39:38 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=aq+s+WYgXuWGQ8eAxQQubO+o3k/lUrRz3a1yBLsMehhHJkihXwyLX+8qw7uiLDjph7oTtZLYmnUQ6/bT+pGi9MnSOcjzIHvar8PB5YuAv8w+xGJu2XvVG8R2koD65ReoOJi9F5is/O1jsV0X2ZGrWAc84iF1XF10OjQtnzsHR6o555HqO6bduneRgmzSbESC0QPqES3SCXqjI72WjSwMbnQjHl9lc2BKXy2fFhDTm2MIrYtTnHD5fktJ09EpWx3FDmGoWHPzgKlridevFCFsGQSEdSfJjlWQoWs/HMTl6R4S3KQy0X6nJhP3uNmFzqBpcxqTf8BwJdhh27QSwt0r1w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=F4RZIQ1Di7dneZqytQHdUTk6Ta6ap9bGCfe5EgqxPxI=;
- b=hIfYHrnjmF+aAWU9688tYHlFqHqJwy1B0iZg1Y60im/Z2C/lU0ipBLTJisvcGIMHi5c7mjG8hw9qYY5JrSZGYchh9ADspHNWQJ8O3IJSSJ2PlHGQuf4Ug0H0FMLkcz+rXaSL0QYzicXZX5/fhbDq7WINf63Z2wUQlgFPslRbWs8BVxL0cCQagSJ1iLeQu3KtJTLXN+JlGhdxGaTxrp4wiaDs9V2dGr8e7xfbal78sb75X+Z/NjZGYoRV4ukiWGAHeA78q1f39lPHlkp9PPr8Hw4DHunvd2xoSuBylOULdFRM3KyXJiJnep23jY0eOoYxjqLAbEFla6X3DX9nzylaVw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 216.228.118.233) smtp.rcpttodomain=8bytes.org smtp.mailfrom=nvidia.com;
- dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
- s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=F4RZIQ1Di7dneZqytQHdUTk6Ta6ap9bGCfe5EgqxPxI=;
- b=hukOlJncMJL0LYaSmZVTQz5sjq2Egwpq1/3hGPStbCHcYu+NMeTGx4So8rZFjjlWqGYrU4OcRzvTML3BEvDydc0FZc7PZ8Ah2RW0jxmTBN/eWHRe33L0gxJm/KR4nfvQhxbg/70qsF1VSv7GW2bWpzFc7+/rNUlTLhpa58AbPIfQYX4SFbC6WEn6xpkSMSmnsi4FsxOaa5vjroWXJbLhW4yKPgXlAqUmxuE7fcjJ5BSjaCD+mLBqVDe7+Qr3mMRqcpnLTq3k3LW6Cq3eaSc7B1u+56cV3HcweJFCN4OwlRarhUqcMj2PA5j97MmKpsxeca0T1vSPKMHsCMvIHHOr6Q==
-Received: from BN9PR03CA0395.namprd03.prod.outlook.com (2603:10b6:408:111::10)
- by BL1PR12MB5970.namprd12.prod.outlook.com (2603:10b6:208:399::21) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5769.15; Thu, 3 Nov
- 2022 04:39:37 +0000
-Received: from BN8NAM11FT057.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:111:cafe::24) by BN9PR03CA0395.outlook.office365.com
- (2603:10b6:408:111::10) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5791.22 via Frontend
- Transport; Thu, 3 Nov 2022 04:39:37 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.118.233)
- smtp.mailfrom=nvidia.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=nvidia.com;
-Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
- 216.228.118.233 as permitted sender) receiver=protection.outlook.com;
- client-ip=216.228.118.233; helo=mail.nvidia.com; pr=C
-Received: from mail.nvidia.com (216.228.118.233) by
- BN8NAM11FT057.mail.protection.outlook.com (10.13.177.49) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5791.20 via Frontend Transport; Thu, 3 Nov 2022 04:39:36 +0000
-Received: from drhqmail203.nvidia.com (10.126.190.182) by mail.nvidia.com
- (10.127.129.6) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.26; Wed, 2 Nov 2022
- 21:39:23 -0700
-Received: from drhqmail202.nvidia.com (10.126.190.181) by
- drhqmail203.nvidia.com (10.126.190.182) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.29; Wed, 2 Nov 2022 21:39:19 -0700
-Received: from pshete-ubuntu.nvidia.com (10.127.8.14) by mail.nvidia.com
- (10.126.190.181) with Microsoft SMTP Server id 15.2.986.29 via Frontend
- Transport; Wed, 2 Nov 2022 21:39:14 -0700
-From:   Prathamesh Shete <pshete@nvidia.com>
-To:     <joro@8bytes.org>, <adrian.hunter@intel.com>,
-        <ulf.hansson@linaro.org>, <thierry.reding@gmail.com>,
-        <jonathanh@nvidia.com>, <p.zabel@pengutronix.de>,
-        <linux-mmc@vger.kernel.org>, <linux-tegra@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-CC:     <will@kernel.org>, <iommu@lists.linux.dev>, <robin.murphy@arm.com>,
-        <anrao@nvidia.com>, <smangipudi@nvidia.com>, <pshete@nvidia.com>,
-        <kyarlagadda@nvidia.com>
-Subject: [PATCH v10 4/4] mmc: sdhci-tegra: Issue CMD and DAT resets together
-Date:   Thu, 3 Nov 2022 10:08:52 +0530
-Message-ID: <20221103043852.24718-4-pshete@nvidia.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20221103043852.24718-1-pshete@nvidia.com>
+        with ESMTP id S230338AbiKCK7u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 06:59:50 -0400
+Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08F6C109F
+        for <linux-mmc@vger.kernel.org>; Thu,  3 Nov 2022 03:59:50 -0700 (PDT)
+Received: by mail-pf1-x432.google.com with SMTP id b29so1222513pfp.13
+        for <linux-mmc@vger.kernel.org>; Thu, 03 Nov 2022 03:59:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=tl6gvrKJpq1c2SMRIQkixJ9RHyBaATDZDYadUE36ADo=;
+        b=bGNCz6BI/X3dSE94R0ba6QyEEWxSsYixsiRVc3eqYT+xOJrJYnFPcQEuOt5Xcx7/C+
+         mXoyvj4knRHD2V8e2AhNKO2ehdnVWW5DGzf0i7GLopJLbJCzB1IOa4LxKlE03jL31aeP
+         lGYxws+DjOh22jTEPQ1PPK7ijJbVvZDFRuR+IbRcPPfawZ/duXNrnhtdNbPKvaos5Qmh
+         wQi/gL+CWGshJzmVyNXzucywYJE5kYvkx1+pPAlfVcHHLbDLMBZyyoIx7ygkZNIYkdet
+         w6fnn1JgkShaj3tpsQZ/7Pje2xXci6FBs1QMXDnlHvJFRON8KWk4jFt2OTNdAkO1eGRW
+         AqIQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tl6gvrKJpq1c2SMRIQkixJ9RHyBaATDZDYadUE36ADo=;
+        b=WcpBjuQx5Nhldw1RtDmHdJujhdT7KuiZRSSYu+wB3oUuBIEa0vJFH26w/lD1C0gg1r
+         ZUWKNgkPoT9fLyeBTSTr8w3F/QX5Fmc+DXbM7R0VrVVPKGsI3V8JbulQl+/eMP/AIKBT
+         rN6BEHt7mZlTBJEKRskSF4DLbfeJT/eU/WqnAP1GL8u1D8Txrj2LpRAv2Ww9TZ+ezbQI
+         M4wA4an02rvvAjWAFWTlT6B+7O6eiqZMaj4NVx2//yvVFTO+OECR5s18spYnRzcPdaIy
+         ZUOyfvTJ/GrrWsyeRs7r1XuVrkQ7HrU+zEvpKrGs740a6KcIlJi83REmZ4PMJszJUO5Z
+         6HdA==
+X-Gm-Message-State: ACrzQf05XE0KN82P/SokI1+e2ppdXf8Yb+mPtT70SMexb4XbH83Cp9Aq
+        J+udGiF/McTHmcaPXeItXWaZxudTWDosx/4kef36mg==
+X-Google-Smtp-Source: AMsMyM5mH9Kbc/UTomJNMiJt8u9MMUAkTK5EumQHhGigQ8uemLyjJRlEChWmswJsa5eXfWYYXRrGMuDgD1V0RHHk1iM=
+X-Received: by 2002:a63:9049:0:b0:46f:59b9:1645 with SMTP id
+ a70-20020a639049000000b0046f59b91645mr25122160pge.541.1667473189454; Thu, 03
+ Nov 2022 03:59:49 -0700 (PDT)
+MIME-Version: 1.0
 References: <CAPDyKFqJdiCDkAfrONfnBVKw1v8=jZ+hEJiKGK70EQ4o7BSxaQ@mail.gmail.com>
  <20221103043852.24718-1-pshete@nvidia.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BN8NAM11FT057:EE_|BL1PR12MB5970:EE_
-X-MS-Office365-Filtering-Correlation-Id: 145f2f1d-eb54-46f6-7234-08dabd5569a4
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: L0JnOLDUlALpyaJKgaBReVaQ1VHMFEy5WvspdC+OUVKkD6xU3RfgFT7fs6rCSbIRvl0ZcVZyVnoMnF7UI3tZEoLzKbcDDxlhDA7ZMxh73Plsg50jfuZ+6v4x0Y4mLeJzUZug4fk2EDtGQI0yTCbS70vDRVv/nB3FOUb2o3xFYcVOO10klmen0CMnOZAfr3/6NPrZP3Eu4awZxscXHd8/BU5sAPoCHvqrraPe9tArVIFer/rKMAWhaVxRN+taeMTybSlkH92xtnnHKy1fhY7e6fsP1bg+vJXRyygoAnXTLEMDcgKKYF1JMEXAKkB/nUVwlF+zyYHBP/JhkVOOe2t2bxm8e0noD4sKnvV8pW0X0qjqKzJlP+iCXz5B766r37kFl4W9CtE0w3FZuBWako5yLtI+Pr1ixiIb1gE5CL60mN4D6vq1rVrQ89jRARuajAkO/f/OgRy0uaW2pv0A0xEbsZlOaJTu38rYYEU1LWiyT3epDO9sjfqYXGaBkE4vkkBMB0iSh/d4VyX2Yd+zBA/msH5lflqcwlFoJs+qsQ1hSq9erW9hfzssu5SP+iC7YB8EAa4EcpsyEK5FvysbF3ZKoWkJn3alDTgoS93yekzafA/TKDDIE50YGOv92GTu5A8QD6kVrj9GtSgn/dYlCGyrPztMWHez0OLeLaBWmYTJQLH6avW/zZQ6g6r8DDP3zDlnvYcpflUR+D+bQBBlcN3YP7cJiaPPfo6T7FGYGiIUdS32VoaM2ac/dLrN9gGjlE/qcDqJDFVFKQmYCoblRjUPkQ==
-X-Forefront-Antispam-Report: CIP:216.228.118.233;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc7edge2.nvidia.com;CAT:NONE;SFS:(13230022)(4636009)(376002)(346002)(136003)(396003)(39860400002)(451199015)(40470700004)(36840700001)(46966006)(26005)(186003)(86362001)(4326008)(70206006)(316002)(8676002)(82310400005)(8936002)(70586007)(478600001)(41300700001)(110136005)(54906003)(40480700001)(7636003)(356005)(6666004)(36860700001)(82740400003)(7696005)(83380400001)(40460700003)(107886003)(2616005)(426003)(47076005)(336012)(2906002)(1076003)(36756003)(5660300002)(7416002);DIR:OUT;SFP:1101;
-X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Nov 2022 04:39:36.6726
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 145f2f1d-eb54-46f6-7234-08dabd5569a4
-X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.118.233];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT057.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BL1PR12MB5970
+In-Reply-To: <20221103043852.24718-1-pshete@nvidia.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 3 Nov 2022 11:59:12 +0100
+Message-ID: <CAPDyKFrT46SXxiHw5=q8HwK5PMJCsp+iE8Wm4CsEqfBf6EWicA@mail.gmail.com>
+Subject: Re: [PATCH v10 1/4] iommu: Always define struct iommu_fwspec
+To:     joro@8bytes.org, robin.murphy@arm.com, will@kernel.org
+Cc:     Prathamesh Shete <pshete@nvidia.com>, adrian.hunter@intel.com,
+        thierry.reding@gmail.com, jonathanh@nvidia.com,
+        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
+        iommu@lists.linux.dev, anrao@nvidia.com, smangipudi@nvidia.com,
+        kyarlagadda@nvidia.com, Thierry Reding <treding@nvidia.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-In case of error condition to avoid system crash
-Tegra SDMMC controller requires CMD and DAT resets
-issued together. SDHCI controller FSM goes into
-bad state due to rapid SD card hot-plug event.
-Issuing reset on the CMD FSM before DATA FSM results
-in kernel panic, hence add support to issue CMD and
-DAT resets together.
-This is applicable to Tegra186 and later chips.
+On Thu, 3 Nov 2022 at 05:39, Prathamesh Shete <pshete@nvidia.com> wrote:
+>
+> In order to fully make use of the !IOMMU_API stub functions, make the
+> struct iommu_fwspec always available so that users of the stubs can keep
+> using the structure's internals without causing compile failures.
+>
+> Signed-off-by: Thierry Reding <treding@nvidia.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Signed-off-by: Aniruddha TVS Rao <anrao@nvidia.com>
-Signed-off-by: Prathamesh Shete <pshete@nvidia.com>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-Acked-by: Thierry Reding <treding@nvidia.com>
----
- drivers/mmc/host/sdhci-tegra.c | 3 ++-
- drivers/mmc/host/sdhci.c       | 5 +++++
- drivers/mmc/host/sdhci.h       | 2 ++
- 3 files changed, 9 insertions(+), 1 deletion(-)
+Joerg, Will, Robin - may I have an ack from some of you for $subject
+patch, so I can funnel it via my mmc tree for v6.2?
 
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index e44060cceb68..7cb3bf34a176 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -1531,7 +1531,8 @@ static const struct sdhci_pltfm_data sdhci_tegra186_pdata = {
- 		  SDHCI_QUIRK_NO_HISPD_BIT |
- 		  SDHCI_QUIRK_BROKEN_ADMA_ZEROLEN_DESC |
- 		  SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-+	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
-+		   SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER,
- 	.ops  = &tegra186_sdhci_ops,
- };
- 
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index 2b5dda521b0e..8512a69f1aae 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -270,6 +270,11 @@ enum sdhci_reset_reason {
- 
- static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)
- {
-+	if (host->quirks2 &
-+		SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER) {
-+		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-+		return;
-+	}
- 	switch (reason) {
- 	case SDHCI_RESET_FOR_INIT:
- 		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-index d750c464bd1e..6a5766774b05 100644
---- a/drivers/mmc/host/sdhci.h
-+++ b/drivers/mmc/host/sdhci.h
-@@ -478,6 +478,8 @@ struct sdhci_host {
-  * block count.
-  */
- #define SDHCI_QUIRK2_USE_32BIT_BLK_CNT			(1<<18)
-+/* Issue CMD and DATA reset together */
-+#define SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER	(1<<19)
- 
- 	int irq;		/* Device IRQ */
- 	void __iomem *ioaddr;	/* Mapped address */
--- 
-2.17.1
+Kind regards
+Uffe
 
+> ---
+>  include/linux/iommu.h | 39 +++++++++++++++++++--------------------
+>  1 file changed, 19 insertions(+), 20 deletions(-)
+>
+> diff --git a/include/linux/iommu.h b/include/linux/iommu.h
+> index ea30f00dc145..afa829bc4356 100644
+> --- a/include/linux/iommu.h
+> +++ b/include/linux/iommu.h
+> @@ -173,6 +173,25 @@ enum iommu_dev_features {
+>
+>  #define IOMMU_PASID_INVALID    (-1U)
+>
+> +/**
+> + * struct iommu_fwspec - per-device IOMMU instance data
+> + * @ops: ops for this device's IOMMU
+> + * @iommu_fwnode: firmware handle for this device's IOMMU
+> + * @flags: IOMMU_FWSPEC_* flags
+> + * @num_ids: number of associated device IDs
+> + * @ids: IDs which this device may present to the IOMMU
+> + */
+> +struct iommu_fwspec {
+> +       const struct iommu_ops  *ops;
+> +       struct fwnode_handle    *iommu_fwnode;
+> +       u32                     flags;
+> +       unsigned int            num_ids;
+> +       u32                     ids[];
+> +};
+> +
+> +/* ATS is supported */
+> +#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> +
+>  #ifdef CONFIG_IOMMU_API
+>
+>  /**
+> @@ -600,25 +619,6 @@ extern struct iommu_group *generic_device_group(struct device *dev);
+>  /* FSL-MC device grouping function */
+>  struct iommu_group *fsl_mc_device_group(struct device *dev);
+>
+> -/**
+> - * struct iommu_fwspec - per-device IOMMU instance data
+> - * @ops: ops for this device's IOMMU
+> - * @iommu_fwnode: firmware handle for this device's IOMMU
+> - * @flags: IOMMU_FWSPEC_* flags
+> - * @num_ids: number of associated device IDs
+> - * @ids: IDs which this device may present to the IOMMU
+> - */
+> -struct iommu_fwspec {
+> -       const struct iommu_ops  *ops;
+> -       struct fwnode_handle    *iommu_fwnode;
+> -       u32                     flags;
+> -       unsigned int            num_ids;
+> -       u32                     ids[];
+> -};
+> -
+> -/* ATS is supported */
+> -#define IOMMU_FWSPEC_PCI_RC_ATS                        (1 << 0)
+> -
+>  /**
+>   * struct iommu_sva - handle to a device-mm bond
+>   */
+> @@ -682,7 +682,6 @@ bool iommu_group_dma_owner_claimed(struct iommu_group *group);
+>
+>  struct iommu_ops {};
+>  struct iommu_group {};
+> -struct iommu_fwspec {};
+>  struct iommu_device {};
+>  struct iommu_fault_param {};
+>  struct iommu_iotlb_gather {};
+> --
+> 2.17.1
+>
