@@ -2,35 +2,35 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BFDFC636F8
-	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 15:15:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED028C3A59E
+	for <linux-mmc@archiver.kernel.org>; Thu,  3 Nov 2022 15:15:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231997AbiKCPPu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S232067AbiKCPPu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Thu, 3 Nov 2022 11:15:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55980 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232083AbiKCPPr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 11:15:47 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BFBA81A043;
-        Thu,  3 Nov 2022 08:15:39 -0700 (PDT)
+        with ESMTP id S232108AbiKCPPs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 3 Nov 2022 11:15:48 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF8E9167E1;
+        Thu,  3 Nov 2022 08:15:38 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5F44E61F30;
-        Thu,  3 Nov 2022 15:15:39 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id BC677C433D7;
+        by ams.source.kernel.org (Postfix) with ESMTPS id 73AFBB828E6;
         Thu,  3 Nov 2022 15:15:37 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id B7DCCC4347C;
+        Thu,  3 Nov 2022 15:15:34 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667488538;
-        bh=MwJnmS6fDSUhGQo55F7VKSYnaQTGeLHnJz+Xo/8zXAw=;
+        s=k20201202; t=1667488536;
+        bh=/bY1lh73b7aVSyLEpKw9JT7ndFWWHSyeI4gFYIIxwuY=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=sNysG3oBgMjeWn454AxlkmT3MjWvg0xRxKqvmsIkXlUM/bYPKWtpFsmhHIG4wPr0x
-         p9THYpDoojHNCxWUr+xBodIbg3DAPVhwc7kLp0N9CLQuM0LPJfpAafZtHdmE023XB3
-         Tx0E/toncPnPdpdATAeZM98iNappzdBAy8o0mAx/HW+KpWRdjFr5s55y5tfsGIm+Jx
-         wOJP8XGI85WN8++JUReD1bRIYmJ4ObSX6x7mplrgFiSj2Lp6uuev8mR+EXouIOiOkf
-         9X9IWPN08FESeGzA0Sv1Yx+jYES4NQf4+QyRuTE4fkrMfxwXl2kvQaQQ/FDkd5mWkG
-         Rb9AI0x/0nWkw==
+        b=QP2rEhYvh4J/qWL7geNkSA7UltUvI4MMBXqk5O1LyXlMq3uwchOIDMQHvAatwwl+h
+         cLbJjzrB3PbxitK87qdW8/lphOPGeSnlru+cNrD+62L6MLvJM6nXq9bqW/m7JGIF0u
+         MkoajXobydWzITOunlvcRSIlC7ni48J3WF4+fklZGsJqtIoDRXRIwG6lCwIR297uLa
+         yB0TulE/2QdhIHAwEW+89rUIBeuFkVMQAFrcVTI/O5pwEk4sdc3ZMeF+dN8mgsMnPX
+         tKv8H2Kv+BUP/5FOUN0ORfhzoHUeia/xLhnLaoIm30xjgwRgtQIyBZYysn6kpuVgso
+         h0eFIlKyN8wYg==
 From:   Dinh Nguyen <dinguyen@kernel.org>
 To:     jh80.chung@samsung.com
 Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
@@ -38,9 +38,9 @@ Cc:     dinguyen@kernel.org, ulf.hansson@linaro.org, robh+dt@kernel.org,
         sboyd@kernel.org, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-clk@vger.kernel.org
-Subject: [PATCHv8 6/6] arm: dts: socfpga: remove "clk-phase" in sdmmc_clk
-Date:   Thu,  3 Nov 2022 10:15:25 -0500
-Message-Id: <20221103151525.474833-6-dinguyen@kernel.org>
+Subject: [PATCHv8 4/6] mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
+Date:   Thu,  3 Nov 2022 10:15:23 -0500
+Message-Id: <20221103151525.474833-4-dinguyen@kernel.org>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221103151525.474833-1-dinguyen@kernel.org>
 References: <20221103151525.474833-1-dinguyen@kernel.org>
@@ -50,44 +50,90 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that the SDMMC driver can use the "clk-phase-sd-hs" binding, we don't
-need the clk-phase in the sdmmc_clk anymore.
+The clock-phase settings for the SDMMC controller in the SoCFPGA
+platforms reside in a register in the System Manager. Add a method
+to access that register through the syscon interface.
 
 Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
 ---
 v8: no changes
-v7: no changes
-v6: no changes
-v5: new
+v7: use dev_warn if clk-phase-sd-hs is specified, but "altr,sysmgr-syscon"
+    is not found
+v6: not getting the clk-phase-sd-hs is not a hard failure
+v5: change error handling from of_property_read_variable_u32_array()
+    support arm32 by reading the reg_shift
+v4: no change
+v3: add space before &socfpga_drv_data
+v2: simplify clk-phase calculations
 ---
- arch/arm/boot/dts/socfpga.dtsi         | 1 -
- arch/arm/boot/dts/socfpga_arria10.dtsi | 1 -
- 2 files changed, 2 deletions(-)
+ drivers/mmc/host/dw_mmc-pltfm.c | 41 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 40 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm/boot/dts/socfpga.dtsi b/arch/arm/boot/dts/socfpga.dtsi
-index 604fc6e0c4ad..a2419a5c6c26 100644
---- a/arch/arm/boot/dts/socfpga.dtsi
-+++ b/arch/arm/boot/dts/socfpga.dtsi
-@@ -453,7 +453,6 @@ sdmmc_clk: sdmmc_clk {
- 						compatible = "altr,socfpga-gate-clk";
- 						clocks = <&f2s_periph_ref_clk>, <&main_nand_sdmmc_clk>, <&per_nand_mmc_clk>;
- 						clk-gate = <0xa0 8>;
--						clk-phase = <0 135>;
- 					};
+diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+index 9901208be797..13e55cff8237 100644
+--- a/drivers/mmc/host/dw_mmc-pltfm.c
++++ b/drivers/mmc/host/dw_mmc-pltfm.c
+@@ -17,10 +17,16 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/mmc.h>
+ #include <linux/of.h>
++#include <linux/mfd/altera-sysmgr.h>
++#include <linux/regmap.h>
  
- 					sdmmc_clk_divided: sdmmc_clk_divided {
-diff --git a/arch/arm/boot/dts/socfpga_arria10.dtsi b/arch/arm/boot/dts/socfpga_arria10.dtsi
-index b6ebe207e2bc..eb528c103d70 100644
---- a/arch/arm/boot/dts/socfpga_arria10.dtsi
-+++ b/arch/arm/boot/dts/socfpga_arria10.dtsi
-@@ -365,7 +365,6 @@ sdmmc_clk: sdmmc_clk {
- 						compatible = "altr,socfpga-a10-gate-clk";
- 						clocks = <&sdmmc_free_clk>;
- 						clk-gate = <0xC8 5>;
--						clk-phase = <0 135>;
- 					};
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
  
- 					qspi_clk: qspi_clk {
++#define SOCFPGA_DW_MMC_CLK_PHASE_STEP	45
++#define SYSMGR_SDMMC_CTRL_SET(smplsel, drvsel, reg_shift) \
++	((((smplsel) & 0x7) << reg_shift) | (((drvsel) & 0x7) << 0))
++
+ int dw_mci_pltfm_register(struct platform_device *pdev,
+ 			  const struct dw_mci_drv_data *drv_data)
+ {
+@@ -62,9 +68,42 @@ const struct dev_pm_ops dw_mci_pltfm_pmops = {
+ };
+ EXPORT_SYMBOL_GPL(dw_mci_pltfm_pmops);
+ 
++static int dw_mci_socfpga_priv_init(struct dw_mci *host)
++{
++	struct device_node *np = host->dev->of_node;
++	struct regmap *sys_mgr_base_addr;
++	u32 clk_phase[2] = {0}, reg_offset, reg_shift;
++	int i, rc, hs_timing;
++
++	rc = of_property_read_variable_u32_array(np, "clk-phase-sd-hs", &clk_phase[0], 2, 0);
++	if (rc < 0)
++		return 0;
++
++	sys_mgr_base_addr = altr_sysmgr_regmap_lookup_by_phandle(np, "altr,sysmgr-syscon");
++	if (IS_ERR(sys_mgr_base_addr)) {
++		dev_warn(host->dev, "clk-phase-sd-hs was specified, but failed to find altr,sys-mgr regmap!\n");
++		return 0;
++	}
++
++	of_property_read_u32_index(np, "altr,sysmgr-syscon", 1, &reg_offset);
++	of_property_read_u32_index(np, "altr,sysmgr-syscon", 2, &reg_shift);
++
++	for (i = 0; i < ARRAY_SIZE(clk_phase); i++)
++		clk_phase[i] /= SOCFPGA_DW_MMC_CLK_PHASE_STEP;
++
++	hs_timing = SYSMGR_SDMMC_CTRL_SET(clk_phase[0], clk_phase[1], reg_shift);
++	regmap_write(sys_mgr_base_addr, reg_offset, hs_timing);
++
++	return 0;
++}
++
++static const struct dw_mci_drv_data socfpga_drv_data = {
++	.init		= dw_mci_socfpga_priv_init,
++};
++
+ static const struct of_device_id dw_mci_pltfm_match[] = {
+ 	{ .compatible = "snps,dw-mshc", },
+-	{ .compatible = "altr,socfpga-dw-mshc", },
++	{ .compatible = "altr,socfpga-dw-mshc", .data = &socfpga_drv_data, },
+ 	{ .compatible = "img,pistachio-dw-mshc", },
+ 	{},
+ };
 -- 
 2.25.1
 
