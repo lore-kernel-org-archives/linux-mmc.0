@@ -2,270 +2,183 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6598C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 14:40:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A31DC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 15:10:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231443AbiKDOkv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Nov 2022 10:40:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56594 "EHLO
+        id S232386AbiKDPKJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Nov 2022 11:10:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231866AbiKDOkW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 10:40:22 -0400
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0EA63207E;
-        Fri,  4 Nov 2022 07:39:00 -0700 (PDT)
-Received: by mail-ej1-x636.google.com with SMTP id ud5so13836297ejc.4;
-        Fri, 04 Nov 2022 07:39:00 -0700 (PDT)
+        with ESMTP id S232194AbiKDPKI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 11:10:08 -0400
+Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 461422AEA
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Nov 2022 08:10:07 -0700 (PDT)
+Received: by mail-pl1-x634.google.com with SMTP id d24so5155438pls.4
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2022 08:10:07 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=HfeCae03hj8TJWurGJ2gV5aCuzV24EMjUZQG3ONIz6o=;
-        b=M4aevNjhkyVF1FJSXbNl80nza1VQFGO4HMGDIGfrpBYukavQT5/Z2kMEw1v4YJMeDY
-         z/ZT/00LagsQ2LN3VPx7LN11FgZt5ck5YfvODwErwFFaooc+1TKxS3CM9AJPFt8/tjt7
-         Pd2RpXpA9sYBAHYwwIjsr82Knnf0Br3tETh34ton9lLY84nHTgAY+/iW6RQinFwzVO+N
-         N3jq+fj93HG/LNpQ0MWI1rjHQcVoMSykjj5NFbK+rpWRrvSiDJoiXtVfUVGLozQzgS7k
-         LWrF2QV9dd7Io2y5abEh2lcCAvJDOQIg3mbBZ+gB16GWuhIc1j7WBqizu08NnR/97Htu
-         WzdA==
+        bh=BJiR0l3zu+rrq4gW27oklnD3llG/ltOJZ/tWeSlC10g=;
+        b=OTgqCSoh2YvcJ32IjPiJ0Ohi+r0dVtEVpUxV9onQ/bsloNUG/1fzVCl2FAJt5yl7qJ
+         W/0Du7QGSCJBiSfasBiW4yFO/DMawCRe25wi+GO8bE1bG3swgxEpFSmIOcLIYv8DXXxN
+         ed0NTMn8ZdF1vQQ7kC8s6L6lnRndpnCbqLchKzRkZdsKcVSY3zhVDupCJwz4WXzUU55a
+         jDsANgzibYXCccM5Iyz0ib6sk4xwNPP3OThOrQQ+d7NOTzHnKscUiLK/k+CekOc8Irsw
+         lsryTP5tYyWQelh17JwZ81rNWOZ6/xi81gmmsgP6tGfcXYe6lmtwpRj83cwf7c5m5Z/D
+         LRnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=HfeCae03hj8TJWurGJ2gV5aCuzV24EMjUZQG3ONIz6o=;
-        b=wItIDUpb4GfIUMX1qLWQ2UAUmWBWnH2xUy/cLHmplyISwQaSrwO5mAQkVPy58HIdg1
-         e4n/Wpm9RL4TUvB54idY4V/08xy7q/OcEuRwJUvsQskayslLLjzr8teHY0DKFLZN6cbB
-         p0Mb684BZCnTk0hA/VfW8CLZkdpH5HAQ6eRVw4ARd13DNIq4i8xRM2OODS7rGPU7vwB0
-         h6QcfJu0uPXuxhZyU44mzvPwu66wHHxS0XDcFgXpGOxiI1EFN7UUBTdYiWedRGS1BSMp
-         wGIRwNBnagacruLIut3NRn+oOVuN9QjaofqJhYhJ1v7u21c0GeChmN1w1vB9tqjTdzy+
-         WFMA==
-X-Gm-Message-State: ACrzQf1QrZCLiMI04nTFZy8si17WR7b7VZtvdZ1iT6PWs7KhArtUBfN0
-        QdjBJmx3V1UhPYlUYUy4X54=
-X-Google-Smtp-Source: AMsMyM5N9H4yorV3UcHnqhcDYaujVlMTrcshptR+uhjEkRYhptI8/k2K5N9PODc8Bs9KcTPeMnDB5A==
-X-Received: by 2002:a17:906:fe46:b0:73d:939a:ec99 with SMTP id wz6-20020a170906fe4600b0073d939aec99mr35162288ejb.169.1667572739109;
-        Fri, 04 Nov 2022 07:38:59 -0700 (PDT)
-Received: from orome (p200300e41f201d00f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f20:1d00:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id d17-20020a170906305100b0073d7b876621sm1833348ejd.205.2022.11.04.07.38.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Nov 2022 07:38:58 -0700 (PDT)
-Date:   Fri, 4 Nov 2022 15:38:56 +0100
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Prathamesh Shete <pshete@nvidia.com>, joro@8bytes.org,
-        adrian.hunter@intel.com, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
-        will@kernel.org, iommu@lists.linux.dev, anrao@nvidia.com,
-        smangipudi@nvidia.com, kyarlagadda@nvidia.com,
-        Thierry Reding <treding@nvidia.com>
-Subject: Re: [PATCH v10 1/4] iommu: Always define struct iommu_fwspec
-Message-ID: <Y2UkAKfHefdYW59A@orome>
-References: <CAPDyKFqJdiCDkAfrONfnBVKw1v8=jZ+hEJiKGK70EQ4o7BSxaQ@mail.gmail.com>
- <20221103043852.24718-1-pshete@nvidia.com>
- <6be39bae-f325-12e0-374b-a27c9ee2ef2b@arm.com>
- <Y2PJq27wkVwPg6rp@orome>
- <CAPDyKFq8szzryFBNkw20wFoPTbAa8YDy0wJnb57yckZ-HFTAMw@mail.gmail.com>
- <4cae5c8d-d6e9-79dc-670d-22ec9fda10a2@arm.com>
+        bh=BJiR0l3zu+rrq4gW27oklnD3llG/ltOJZ/tWeSlC10g=;
+        b=0OwHq69zodAbe7Q1m3yCnHaJuUxo3vZRVwOetbT3cBtgSp7o93FdOMR3D/CPoabM0w
+         xDydRcA+b7R/beJ0Ju2t6xYfadTdFSB1bUA523D3BMH6Qu5/ngeu/KO+JBeySsUvQu+c
+         Kxie+Jn8BFqeDrzPqNPGvcP+cfuDHYzEoMVLcyRG9lG6xYz285AoFbnekKrUHWZrk4iD
+         Ot7pf884VW1UkAJy1oIoEL7fsDNOfXiilt2w7tlTVC4pIbLbQuQDErvPgbQaAtbeKXoG
+         crp3C7WmPkbu9BOpvb9UJETH5sZ3dUjXfq+nE9DIhLzBAWZshQixuRJnNAnarvLHJ5yi
+         tGHA==
+X-Gm-Message-State: ACrzQf0CqSIu5CpWAz2DQpu5HXY4cPH/40LZyGp16aA8ugUHT3o87RfB
+        TYeK6y3Nop8LGU9qHhgrM49Jeas3nZ5fWIee+qgUZg==
+X-Google-Smtp-Source: AMsMyM7v/lhbKfY6yPId/WwdeSdcU4FwAHXJyhkf3ncszzUFaEhoZwMtxrOIFVwjKlF86Dbv3p3O9MX0Pp2IDIXlrqo=
+X-Received: by 2002:a17:903:100c:b0:186:63a1:3b5d with SMTP id
+ a12-20020a170903100c00b0018663a13b5dmr36815479plb.148.1667574606756; Fri, 04
+ Nov 2022 08:10:06 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="TwEZgldODBz9znwY"
-Content-Disposition: inline
-In-Reply-To: <4cae5c8d-d6e9-79dc-670d-22ec9fda10a2@arm.com>
-User-Agent: Mutt/2.2.7 (2022-08-07)
+References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
+ <20221019110647.11076-3-victor.shih@genesyslogic.com.tw> <e9c15b05-6515-cc40-d842-4bdaca96b0c8@wanadoo.fr>
+In-Reply-To: <e9c15b05-6515-cc40-d842-4bdaca96b0c8@wanadoo.fr>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 4 Nov 2022 16:09:30 +0100
+Message-ID: <CAPDyKFrabiXO_9dKMPL0PXfyMfznoMcdLaHmKMr4Esu3b=7fvA@mail.gmail.com>
+Subject: Re: [PATCH V5 02/26] mmc: core: Prepare to support SD UHS-II cards
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Cc:     Victor Shih <victorshihgli@gmail.com>, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
---TwEZgldODBz9znwY
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Thu, Nov 03, 2022 at 05:35:19PM +0000, Robin Murphy wrote:
-> On 2022-11-03 14:55, Ulf Hansson wrote:
-> > On Thu, 3 Nov 2022 at 15:01, Thierry Reding <thierry.reding@gmail.com> =
-wrote:
-> > >=20
-> > > On Thu, Nov 03, 2022 at 12:23:20PM +0000, Robin Murphy wrote:
-> > > > On 2022-11-03 04:38, Prathamesh Shete wrote:
-> > > > > In order to fully make use of the !IOMMU_API stub functions, make=
+On Fri, 4 Nov 2022 at 13:16, Christophe JAILLET
+<christophe.jaillet@wanadoo.fr> wrote:
+>
+> Le 19/10/2022 =C3=A0 13:06, Victor Shih a =C3=A9crit :
+> > From: Ulf Hansson <ulf.hansson@linaro.org>
+> >
+> > Updates in V4:
+> >   - Re-based, updated a comment and removed white-space.
+> >   - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
+> >
+> > Update in previous version:
+> > The SD UHS-II interface was introduced to the SD spec v4.00 several yea=
+rs
+> > ago. The interface is fundamentally different from an electrical and a
+> > protocol point of view, comparing to the legacy SD interface.
+> >
+> > However, the legacy SD protocol is supported through a specific transpo=
+rt
+> > layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows=
  the
-> > > > > struct iommu_fwspec always available so that users of the stubs c=
-an keep
-> > > > > using the structure's internals without causing compile failures.
-> > > >=20
-> > > > I'm really in two minds about this... fwspecs are an internal detai=
-l of the
-> > > > IOMMU API that are meant to be private between individual drivers a=
-nd
-> > > > firmware code, so anything poking at them arguably does and should =
-depend on
-> > > > CONFIG_IOMMU_API. It looks like the stub for dev_iommu_fwspec_get()=
- was only
-> > > > added for the sake of one driver that was misusing it where it real=
-ly wanted
-> > > > device_iommu_mapped(), and has since been fixed, so if anything my
-> > > > preference would be to remove that stub :/
-> > >=20
-> > > Tegra has been using this type of weak dependency on IOMMU_API mainly=
- in
-> > > order to allow building without the IOMMU support on some old platfor=
-ms
-> > > where people may actually care about the kernel size (Tegra20 systems
-> > > were sometimes severely constrained and don't have anything that we'd
-> > > call an IOMMU today).
-> > >=20
-> > > We have similar stubs in place for most other major subsystems in ord=
-er
-> > > to allow code to simply compile out if the subsystem is disabled, whi=
-ch
-> > > is quite convenient for sharing code between platforms that may want a
-> > > given feature and other platforms that may not want it, without causi=
-ng
-> > > too much of a hassle with compile-testing.
-> >=20
-> > I agree with the above.
-> >=20
-> > Moreover, the stubs make the code more portable/scalable and so it
-> > becomes easier to maintain.
->=20
-> Are you suggesting that having the same thing open-coded slightly
-> differently (with bugs) in 8 different places is somehow more maintainable
-> than abstracting it into a single centralised implementation?
->=20
-> Is it "easier to maintain" when already seemingly every thing I try to cl=
-ean
-> up or refactor in the IOMMU API at the moment is stymied by finding Tegra
-> drivers doing unexpected (and often questionable) things? Is it "more
-> scalable" to make it even easier for people to copy questionable code
-> without a second thought, leaving API maintainers to play an ever-expandi=
-ng
-> game of whack-a-mole to clean it up? No. No it chuffing well isn't :(
->=20
-> > > > I don't technically have much objection to this patch in isolation,=
- but what
-> > > > I don't like is the direction of travel it implies. I see the anti-=
-pattern
-> > > > is only spread across Tegra drivers, making Tegra-specific assumpti=
-ons, so
-> > > > in my view the best answer would be to abstract that fwpsec depende=
-ncy into
-> > > > a single Tegra-specific helper, which would better represent the na=
-ture of
-> > > > what's really going on here.
-> > >=20
-> > > I don't see how this is an anti-pattern. It might not be common for
-> > > drivers to need to reach into iommu_fwspec, so that might indeed be
-> > > specific to Tegra (for whatever reason our IP seems to want extra
-> > > flexibility), but the general pattern of using stubs is wide-spread,
-> > > so I don't see why IOMMU_API would need to be special.
-> >=20
-> > Again, I agree.
->=20
-> The anti-pattern is reaching into some other driver's private data assumi=
-ng
-> a particular format, with zero indication of the huge degree of assumption
-> involved, and half the time not even checking that what's being dereferen=
-ced
-> is valid.
-
-If this is really driver private data that nobody else should be
-accessing, then this certainly is lacking documentation. And quite
-frankly, perhaps it should really be hidden from other drivers in
-that case.
-
-Remember the reason why we want to make this change is because we can
-already get access to all this data if we depend on IOMMU_API, while all
-the rest is also already available for !IOMMU_API configurations. This
-change removes that inconsistency.
-
-> > Moreover, a "git grep CONFIG_IOMMU_API" indicates that the problem
-> > isn't specific to Tegra. The "#ifdef CONFIG_IOMMU_API" seems to be
-> > sprinkled across the kernel. I think it would be nice if we could
-> > improve the situation. So far, using stubs along with what the
-> > $subject patch proposes, seems to me to be the best approach.
->=20
-> Yes, there is plenty of code through the tree that is only relevant to the
-> IOMMU API and would be a complete waste of space without it, that is not =
+> > SD card to be managed in a very similar way as a legacy SD card, hence =
+a
+> > lot of code can be re-used to support these new types of cards through =
 the
-> point in question here. Grep for dev_iommu_fwspec_get; outside
-> drivers/iommu, the only users are IOMMU-API-specific parts of ACPI code, =
-as
-> intended, plus 8 random Tegra drivers.
->=20
-> Now, there does happen to be a tacit contract between the ACPI IORT code =
-and
-> the Arm SMMU drivers for how SMMU StreamIDs are encoded in their respecti=
-ve
-> fwspecs, but it was never intended for wider consumption.
+> > mmc subsystem.
+> >
+> > Moreover, an SD card that supports the UHS-II interface shall also be
+> > backwards compatible with the legacy SD interface, which allows a UHS-I=
+I
+> > card to be inserted into a legacy slot. As a matter of fact, this is
+> > already supported by mmc subsystem as of today.
+> >
+> > To prepare to add support for UHS-II, this change puts the basic founda=
+tion
+> > in the mmc core in place, allowing it to be more easily reviewed before
+> > subsequent changes implements the actual support.
+> >
+> > Basically, the approach here adds a new UHS-II bus_ops type and adds a
+> > separate initialization path for the UHS-II card. The intent is to avoi=
+d us
+> > from sprinkling the legacy initialization path, but also to simplify
+> > implementation of the UHS-II specific bits.
+> >
+> > At this point, there is only one new host ops added to manage the vario=
+us
+> > ios settings needed for UHS-II. Additional host ops that are needed, ar=
+e
+> > being added from subsequent changes.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > ---
+>
+> []
+>
+> > +static int sd_uhs2_attach(struct mmc_host *host)
+> > +{
+> > +     int err;
+> > +
+> > +     err =3D sd_uhs2_power_up(host);
+> > +     if (err)
+> > +             goto err;
+> > +
+> > +     err =3D sd_uhs2_phy_init(host);
+> > +     if (err)
+> > +             goto err;
+> > +
+> > +     err =3D sd_uhs2_init_card(host);
+> > +     if (err)
+> > +             goto err;
+> > +
+> > +     mmc_attach_bus(host, &sd_uhs2_ops);
+> > +
+> > +     mmc_release_host(host);
+> > +
+> > +     err =3D mmc_add_card(host->card);
+> > +     if (err)
+> > +             goto remove_card;
+> > +
+> > +     mmc_claim_host(host);
+> > +     return 0;
+> > +
+> > +remove_card:
+> > +     mmc_remove_card(host->card);
+>
+> Hi,
+>
+> If we arrive here, mmc_add_card() has failed.
+> is it correct to call mmc_remove_card() in such a case?
 
-Again, if iommu_fwspec and its accessors were somehow hidden, or if it
-was documented that this was not meant for wider consumption, then
-perhaps we wouldn't have started using it in the first place.
+Yes. There are some additional checks in mmc_add_card() to help to
+manage this too.
 
->                                                           If Tegra drivers
-> want to have a special relationship with arm-smmu then fair enough, but t=
-hey
-> can do the same as MSM and formalise it somewhere that the SMMU driver
-> maintainers are at least aware of, rather than holding the whole generic
-> IOMMU API hostage.
->=20
-> Since apparently it wasn't clear, what I was proposing is a driver helper=
- at
-> least something like this:
->=20
-> int tegra_arm_smmu_streamid(struct device *dev)
-> {
-> #ifdef CONFIG_IOMMU_API
-> 	struct iommu_fwspec *fwspec =3D dev_iommu_fwspec_get(dev)
->=20
-> 	if (fwspec && fwspec->num_ids =3D=3D 1)
-> 		return fwspec->ids[0] & 0xffff;
-> #endif
-> 	return -EINVAL;
-> }
->=20
-> Now THAT is scalable and maintainable; any number of random drivers can c=
-all
-> it without any preconditions, it's a lot clearer what's going on, and I
-> won't have to swear profusely while herding patches through half a dozen
-> different trees if, when my ops rework gets to the point of refactoring
-> iommu_fwspec with dev_iommu, it ends up changing anything significant.
+Although, there are certainly some cleanups that can be made to
+simplify the code in the mmc core around this, but that's a different
+story.
 
-I don't have any objection to making that change. It's not like we're
-doing all of this just for fun. We need to do this in order for the
-hardware to work correctly. If the above is an acceptable way to do this
-and preferable to using the more generic API then we can move ahead with
-that.
+>
+> > +     host->card =3D NULL;
+> > +     mmc_claim_host(host);
+> > +     mmc_detach_bus(host);
+> > +err:
+> > +     sd_uhs2_power_off(host);
+>
+> If sd_uhs2_power_up() fails, we arrive here.
+> Is its correct to call sd_uhs2_power_off() in such a case, or should we
+> return directly if sd_uhs2_power_up() fails?
 
-In order to keep things moving, do we want to merge the change as-is for
-now and then subsequently do a pass over all Tegra drivers and use a
-common function for stream ID access? Or do you want me to make that
-change prior to getting the SDHCI series merged?
+That's an option that could make the code a bit clearer. I have no
+strong opinion around this.
 
-Thierry
+Although, if changing this, we need to make sure sd_uhs2_power_up()
+restores things correctly after a failure, but it doesn't do that in
+the current version of the patch.
 
---TwEZgldODBz9znwY
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmNlI/4ACgkQ3SOs138+
-s6FaAw/+KoWc++Csbrpi0RdJRUx7lDY2tNWsxViwtFHNjz379KichZ/eQcVPBWQ4
-3Q4mFIe5tAKlJqbej5ibCsaXce5eyujLKkjpkUG/UxYrLMEG6CwyhxMydqR3aEPm
-bRTAlYeFVvyB3cukRsM36XiFAxULogyQfUDu2wL4j0WN+23C2PHgmiPc1+6QPS6+
-Rf1p5jmRg1OuvKpk6Ki4lIq5pOKQmk5Vp5MwRovZGBB7bzCYYFV7Gz05Dd8TCQLK
-xssVdJhOU59b3IpCJY8LKe4M/k7HNSNZSXbK0M1A4Eep9uF8n2HiR1b8qAUFAE+A
-RHv8Kt9ecSHeB3JOKeF0xiIqdWCMiRtRnymSSAlssz/eQB2zjlr8tLdozrR73TSi
-a4c3g/vvoSGkGu6UseY7UPzZA7QnyV4GYkKo48YIjO6JEci4WlJyjbsybOtf0Ah3
-/RdjBVU0QvfNrPkr9D+UNk5Cqj1RFduaRGJxTpgej210OJlXsJVOvwXOq5yzJkPl
-+88GBS/XH7tyoo+p6VlpjXXF5GIU2dp9pFwENqs5+BO+bhdoSsdbIgTTEP9IEBcY
-JwMG2w5vGEa1Vw3WvGN+dIxD/+5rPUSDDyEJEAAZN+7Okmy4mf8IDWMo9/4zPRFG
-o76zjBqiDAITA/IwAIkaKzx9lonoJ0LhGD/0K+hPU6SIOGnW8v8=
-=lumi
------END PGP SIGNATURE-----
-
---TwEZgldODBz9znwY--
+Kind regards
+Uffe
