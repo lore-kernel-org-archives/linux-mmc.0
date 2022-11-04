@@ -2,122 +2,140 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C4A6C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 10:44:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48B1FC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 12:24:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229485AbiKDKoI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Nov 2022 06:44:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57936 "EHLO
+        id S231887AbiKDMYJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Nov 2022 08:24:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49168 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230205AbiKDKoH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 06:44:07 -0400
-Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 266E02A710;
-        Fri,  4 Nov 2022 03:44:06 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id z18so6974333edb.9;
-        Fri, 04 Nov 2022 03:44:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=984IZej2mpdfs/fIVIJrApYfJ2ble3SFoZ3qX9WWZUI=;
-        b=OyPUd67uCOVH7YrzM/9zBOMG+WKJZ+EfvUfZU3bkm73J8oCFzRIv23+SDpStY2AqsG
-         3mj3qni8KM/Zc8JXJ8HW6B4lgOkhb6MVakT/Xjo6UFlJb0m+UANTI1nS5AbAUexswzBK
-         fUSq7RwprE0RwmoUbZHYzVksK4ku0z1PkYEKQ2bZuNup5G5ykjr5go1eaOUhFB8I6P1W
-         oN6A966G45t934QMxLXeD2XCbBpBWVFEgdwve5bge8gAlyLv6MJy8fPNOyhfAWYKpsMJ
-         zhCP1CKs2lh75KPLRqTSuL9FWSzD564kf0wEvoX1OXhvUt3l2Jykn3zHw5KN3iJcSwyb
-         i2JQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=984IZej2mpdfs/fIVIJrApYfJ2ble3SFoZ3qX9WWZUI=;
-        b=S9tSaP1dV/yL+mrblsfVAsGEzzYUVlCMlIm52vjhmpxihVzQcLoALbjBs31mthcO/n
-         tyNTlK1+PErQGHS/PBSf0CCcHE6+CnxWIF2CQ6LhQWyHLpM6CS4X8bIk1BbXINHrEpez
-         fXVebd7PxzAUlLyKjrQCX+h9dUe+zkqkA0ArFr2FcQYjeD+8ec0c3WowFjXg9JVR4E2w
-         0fvWznN3GvaMNhOXF1aDl7UMEw4mlKti/0vJMwRNfN7bplKcCi1rDHNt62fJXspnf3fJ
-         lYbxKBTsA1sKsgi/27xVO7oy06aglBU1TdYf0BtWaUCBuMpZTv2+Q1UVoLJBVMn4fJiO
-         q63w==
-X-Gm-Message-State: ACrzQf1dLMD6LmjpD8VLxoFwLNPLshZnH2TTeM4hnMzYnd3yJqaBuJiU
-        dF7K0nQ5QB5Y8ydTDIktu73qeDUknmizWxJHA8A=
-X-Google-Smtp-Source: AMsMyM7yA9RwnPl1pTphZCD/GOgwhmwFfbH8fVNcTNQcUEE3usKkVdf1LVd5wXAfen5Qw2q0BsqO5IVGFnqQ2MwA1KE=
-X-Received: by 2002:a05:6402:26cc:b0:462:2426:4953 with SMTP id
- x12-20020a05640226cc00b0046224264953mr35367648edd.13.1667558644616; Fri, 04
- Nov 2022 03:44:04 -0700 (PDT)
+        with ESMTP id S231146AbiKDMYG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 08:24:06 -0400
+X-Greylist: delayed 450 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Fri, 04 Nov 2022 05:24:05 PDT
+Received: from smtp.smtpout.orange.fr (smtp-17.smtpout.orange.fr [80.12.242.17])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EC3BB2D742
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Nov 2022 05:24:05 -0700 (PDT)
+Received: from [192.168.1.18] ([86.243.100.34])
+        by smtp.orange.fr with ESMTPA
+        id qvcdoY7T8XaejqvcdoQyhD; Fri, 04 Nov 2022 13:16:34 +0100
+X-ME-Helo: [192.168.1.18]
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Fri, 04 Nov 2022 13:16:34 +0100
+X-ME-IP: 86.243.100.34
+Message-ID: <e9c15b05-6515-cc40-d842-4bdaca96b0c8@wanadoo.fr>
+Date:   Fri, 4 Nov 2022 13:16:31 +0100
 MIME-Version: 1.0
-References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw> <ebc45ad9-9c26-9598-9e54-62d93be8de31@intel.com>
-In-Reply-To: <ebc45ad9-9c26-9598-9e54-62d93be8de31@intel.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Fri, 4 Nov 2022 18:43:49 +0800
-Message-ID: <CAK00qKBvqZ_N3YceRhQq8cbWRzkc0uc2qNbdSmrBZ3toRZ5Piw@mail.gmail.com>
-Subject: Re: [PATCH V5 00/26] Add support UHS-II for GL9755
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH V5 02/26] mmc: core: Prepare to support SD UHS-II cards
+Content-Language: fr
+To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org,
+        adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
+ <20221019110647.11076-3-victor.shih@genesyslogic.com.tw>
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+In-Reply-To: <20221019110647.11076-3-victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Adrian
+Le 19/10/2022 à 13:06, Victor Shih a écrit :
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> 
+> Updates in V4:
+>   - Re-based, updated a comment and removed white-space.
+>   - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
+> 
+> Update in previous version:
+> The SD UHS-II interface was introduced to the SD spec v4.00 several years
+> ago. The interface is fundamentally different from an electrical and a
+> protocol point of view, comparing to the legacy SD interface.
+> 
+> However, the legacy SD protocol is supported through a specific transport
+> layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows the
+> SD card to be managed in a very similar way as a legacy SD card, hence a
+> lot of code can be re-used to support these new types of cards through the
+> mmc subsystem.
+> 
+> Moreover, an SD card that supports the UHS-II interface shall also be
+> backwards compatible with the legacy SD interface, which allows a UHS-II
+> card to be inserted into a legacy slot. As a matter of fact, this is
+> already supported by mmc subsystem as of today.
+> 
+> To prepare to add support for UHS-II, this change puts the basic foundation
+> in the mmc core in place, allowing it to be more easily reviewed before
+> subsequent changes implements the actual support.
+> 
+> Basically, the approach here adds a new UHS-II bus_ops type and adds a
+> separate initialization path for the UHS-II card. The intent is to avoid us
+> from sprinkling the legacy initialization path, but also to simplify
+> implementation of the UHS-II specific bits.
+> 
+> At this point, there is only one new host ops added to manage the various
+> ios settings needed for UHS-II. Additional host ops that are needed, are
+> being added from subsequent changes.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
 
-Adrian Hunter <adrian.hunter@intel.com> =E6=96=BC 2022=E5=B9=B411=E6=9C=882=
-=E6=97=A5 =E9=80=B1=E4=B8=89 =E5=87=8C=E6=99=A81:28=E5=AF=AB=E9=81=93=EF=BC=
-=9A
->
-> On 19/10/22 14:06, Victor Shih wrote:
-> > Summary
-> > =3D=3D=3D=3D=3D=3D=3D
-> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
-> >
-> > About UHS-II, roughly deal with the following three parts:
-> > 1) A UHS-II detection and initialization:
-> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Se=
-quence
-> >   [2]).
-> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence=
-[2]).
-> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include=
- Section
-> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting R=
-egister
-> >   Setup Sequence.
-> >
-> > 2) Send Legacy SD command through SD-TRAN
-> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Leg=
-acy SD
-> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 P=
-acket
-> >   Types and Format Overview[3]).
-> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-=
-II
-> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2])=
-.
-> >
-> > 3) UHS-II Interrupt
-> > - Except for UHS-II error interrupts, most interrupts share the origina=
-l
-> >   interrupt registers.
-> >
-> > Patch structure
-> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > patch#1-#6:  for core
-> > patch#7-#25: for sdhci
-> > patch#26:    for GL9755
->
-> Thanks for putting this together.
->
-> I haven't looked at all the patches, but have requested quite
-> a lot of small changes, so there should be enough to be going
-> on with for now.
+[]
 
-Thanks for your help. I will confirm your advice in each patch and
-follow your advice to change.
+> +static int sd_uhs2_attach(struct mmc_host *host)
+> +{
+> +	int err;
+> +
+> +	err = sd_uhs2_power_up(host);
+> +	if (err)
+> +		goto err;
+> +
+> +	err = sd_uhs2_phy_init(host);
+> +	if (err)
+> +		goto err;
+> +
+> +	err = sd_uhs2_init_card(host);
+> +	if (err)
+> +		goto err;
+> +
+> +	mmc_attach_bus(host, &sd_uhs2_ops);
+> +
+> +	mmc_release_host(host);
+> +
+> +	err = mmc_add_card(host->card);
+> +	if (err)
+> +		goto remove_card;
+> +
+> +	mmc_claim_host(host);
+> +	return 0;
+> +
+> +remove_card:
+> +	mmc_remove_card(host->card);
 
-Thanks, Victor Shih
+Hi,
+
+If we arrive here, mmc_add_card() has failed.
+is it correct to call mmc_remove_card() in such a case?
+
+> +	host->card = NULL;
+> +	mmc_claim_host(host);
+> +	mmc_detach_bus(host);
+> +err:
+> +	sd_uhs2_power_off(host);
+
+If sd_uhs2_power_up() fails, we arrive here.
+Is its correct to call sd_uhs2_power_off() in such a case, or should we 
+return directly if sd_uhs2_power_up() fails?
+
+CJ
+
+> +	return err;
+> +}
+> +
+
+[]
+
