@@ -2,183 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A31DC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 15:10:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5085C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 15:19:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232386AbiKDPKJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Nov 2022 11:10:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53590 "EHLO
+        id S229481AbiKDPTa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Nov 2022 11:19:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232194AbiKDPKI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 11:10:08 -0400
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 461422AEA
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Nov 2022 08:10:07 -0700 (PDT)
-Received: by mail-pl1-x634.google.com with SMTP id d24so5155438pls.4
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2022 08:10:07 -0700 (PDT)
+        with ESMTP id S232504AbiKDPTZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 11:19:25 -0400
+Received: from mail-qv1-xf2e.google.com (mail-qv1-xf2e.google.com [IPv6:2607:f8b0:4864:20::f2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39694A457
+        for <linux-mmc@vger.kernel.org>; Fri,  4 Nov 2022 08:19:24 -0700 (PDT)
+Received: by mail-qv1-xf2e.google.com with SMTP id mi9so3389312qvb.8
+        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2022 08:19:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=BJiR0l3zu+rrq4gW27oklnD3llG/ltOJZ/tWeSlC10g=;
-        b=OTgqCSoh2YvcJ32IjPiJ0Ohi+r0dVtEVpUxV9onQ/bsloNUG/1fzVCl2FAJt5yl7qJ
-         W/0Du7QGSCJBiSfasBiW4yFO/DMawCRe25wi+GO8bE1bG3swgxEpFSmIOcLIYv8DXXxN
-         ed0NTMn8ZdF1vQQ7kC8s6L6lnRndpnCbqLchKzRkZdsKcVSY3zhVDupCJwz4WXzUU55a
-         jDsANgzibYXCccM5Iyz0ib6sk4xwNPP3OThOrQQ+d7NOTzHnKscUiLK/k+CekOc8Irsw
-         lsryTP5tYyWQelh17JwZ81rNWOZ6/xi81gmmsgP6tGfcXYe6lmtwpRj83cwf7c5m5Z/D
-         LRnw==
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=tRnjrNrKpUEdCWynwN46DRbvjj6rSysENOSI8RxBlNo=;
+        b=nG9oFgohsMgh0IKM6eaQaQ76xOTmewTADKqUnB3LIf8Pyh2WRzvGKl2UgeDuNsnYrO
+         ZhO0HKTxzc2OyZQ1bglKCjndW9q33wxeSysF3DgSu4S3CMtFgd9y90jyWtC5b5U5ifjO
+         aqfvBJVpBXXQWhAxEHawDdO9jwhdjT6SLOw45/Y16BFnutT5MoPm22ogdg0yZFT3U1vE
+         lQcM6vmJlDiOmFH6oWMlPc0e3QC6JZIXwFeREE7TJRUb2bs+LV3pQRpNjk9KasIeY7Iu
+         tWqHLNTjzLeGW+1hcJSDcC3DyWPpc0/FLatlRgpXn8OHXAzG96ee9jwrbMZJhiNmDvNv
+         BM7g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=BJiR0l3zu+rrq4gW27oklnD3llG/ltOJZ/tWeSlC10g=;
-        b=0OwHq69zodAbe7Q1m3yCnHaJuUxo3vZRVwOetbT3cBtgSp7o93FdOMR3D/CPoabM0w
-         xDydRcA+b7R/beJ0Ju2t6xYfadTdFSB1bUA523D3BMH6Qu5/ngeu/KO+JBeySsUvQu+c
-         Kxie+Jn8BFqeDrzPqNPGvcP+cfuDHYzEoMVLcyRG9lG6xYz285AoFbnekKrUHWZrk4iD
-         Ot7pf884VW1UkAJy1oIoEL7fsDNOfXiilt2w7tlTVC4pIbLbQuQDErvPgbQaAtbeKXoG
-         crp3C7WmPkbu9BOpvb9UJETH5sZ3dUjXfq+nE9DIhLzBAWZshQixuRJnNAnarvLHJ5yi
-         tGHA==
-X-Gm-Message-State: ACrzQf0CqSIu5CpWAz2DQpu5HXY4cPH/40LZyGp16aA8ugUHT3o87RfB
-        TYeK6y3Nop8LGU9qHhgrM49Jeas3nZ5fWIee+qgUZg==
-X-Google-Smtp-Source: AMsMyM7v/lhbKfY6yPId/WwdeSdcU4FwAHXJyhkf3ncszzUFaEhoZwMtxrOIFVwjKlF86Dbv3p3O9MX0Pp2IDIXlrqo=
-X-Received: by 2002:a17:903:100c:b0:186:63a1:3b5d with SMTP id
- a12-20020a170903100c00b0018663a13b5dmr36815479plb.148.1667574606756; Fri, 04
- Nov 2022 08:10:06 -0700 (PDT)
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=tRnjrNrKpUEdCWynwN46DRbvjj6rSysENOSI8RxBlNo=;
+        b=JXxc8Jwshqocaz3Q0OR5cg2UF6cQj4f4/CpgEk7aESgj2KCvzyKKj6/Qw9XqUqLMnS
+         /UpHYl9Iu/jyExGj9EDN+PR7YEpXSRujLhOwOrntiH/Oe/+VskE8GkLQATAjAR72FZCj
+         Zm9XaV9B4eI5mz+H14Xxav9kopITdoZXdOdZVps/TqT2t5HIt617TKPIDpjTb6lcG3XK
+         u6VvWKZW/Lfsm2XE2QgCUOU7br6NFmIlyU3n05I8uaZGt0RcsRpIKSbc/Ri8B8AgVymO
+         EJUiGfTsOE3hnjBSwUudyvpj04RSWM/kQGBWMMeQ2dqLtPbZznpzsY/wLCn1f8Fe7l3M
+         uk6A==
+X-Gm-Message-State: ACrzQf1hxryVElyCY6Uqd3cTj5YNhYmjSf5A3tmzhxEEKDhNmhqkxsyT
+        tJyi5glh65tDA1ZDPFXAyQhuCx+YE5O1Fg==
+X-Google-Smtp-Source: AMsMyM6/bD7TwetAszdHR3EmYhj0XT1Ya2qXerlaVZb95uTZIfvp1C7Y6AQQUqEDn0G3VLRG4dxKxg==
+X-Received: by 2002:a05:6214:20c2:b0:4b1:316c:67a2 with SMTP id 2-20020a05621420c200b004b1316c67a2mr32412761qve.32.1667575163412;
+        Fri, 04 Nov 2022 08:19:23 -0700 (PDT)
+Received: from ?IPV6:2601:586:5000:570:aad6:acd8:4ed9:299b? ([2601:586:5000:570:aad6:acd8:4ed9:299b])
+        by smtp.gmail.com with ESMTPSA id bq37-20020a05620a46a500b006ee77f1ecc3sm3160269qkb.31.2022.11.04.08.19.22
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 04 Nov 2022 08:19:22 -0700 (PDT)
+Message-ID: <8cdd0560-8a64-de1f-d1f2-a4dc729f8970@linaro.org>
+Date:   Fri, 4 Nov 2022 11:19:21 -0400
 MIME-Version: 1.0
-References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw>
- <20221019110647.11076-3-victor.shih@genesyslogic.com.tw> <e9c15b05-6515-cc40-d842-4bdaca96b0c8@wanadoo.fr>
-In-Reply-To: <e9c15b05-6515-cc40-d842-4bdaca96b0c8@wanadoo.fr>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 4 Nov 2022 16:09:30 +0100
-Message-ID: <CAPDyKFrabiXO_9dKMPL0PXfyMfznoMcdLaHmKMr4Esu3b=7fvA@mail.gmail.com>
-Subject: Re: [PATCH V5 02/26] mmc: core: Prepare to support SD UHS-II cards
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>
-Cc:     Victor Shih <victorshihgli@gmail.com>, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH v2 0/2] Mediatek eMMC Inline Crypto Engine support
+Content-Language: en-US
+To:     Mengqi Zhang <mengqi.zhang@mediatek.com>,
+        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        matthias.bgg@gmail.com, wenbin.mei@mediatek.com,
+        angelogioacchino.delregno@collabora.com
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20221104095848.27444-1-mengqi.zhang@mediatek.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221104095848.27444-1-mengqi.zhang@mediatek.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 4 Nov 2022 at 13:16, Christophe JAILLET
-<christophe.jaillet@wanadoo.fr> wrote:
->
-> Le 19/10/2022 =C3=A0 13:06, Victor Shih a =C3=A9crit :
-> > From: Ulf Hansson <ulf.hansson@linaro.org>
-> >
-> > Updates in V4:
-> >   - Re-based, updated a comment and removed white-space.
-> >   - Moved MMC_VQMMC2_VOLTAGE_180 into a later patch in the series.
-> >
-> > Update in previous version:
-> > The SD UHS-II interface was introduced to the SD spec v4.00 several yea=
-rs
-> > ago. The interface is fundamentally different from an electrical and a
-> > protocol point of view, comparing to the legacy SD interface.
-> >
-> > However, the legacy SD protocol is supported through a specific transpo=
-rt
-> > layer (SD-TRAN) defined in the UHS-II addendum of the spec. This allows=
- the
-> > SD card to be managed in a very similar way as a legacy SD card, hence =
-a
-> > lot of code can be re-used to support these new types of cards through =
-the
-> > mmc subsystem.
-> >
-> > Moreover, an SD card that supports the UHS-II interface shall also be
-> > backwards compatible with the legacy SD interface, which allows a UHS-I=
-I
-> > card to be inserted into a legacy slot. As a matter of fact, this is
-> > already supported by mmc subsystem as of today.
-> >
-> > To prepare to add support for UHS-II, this change puts the basic founda=
-tion
-> > in the mmc core in place, allowing it to be more easily reviewed before
-> > subsequent changes implements the actual support.
-> >
-> > Basically, the approach here adds a new UHS-II bus_ops type and adds a
-> > separate initialization path for the UHS-II card. The intent is to avoi=
-d us
-> > from sprinkling the legacy initialization path, but also to simplify
-> > implementation of the UHS-II specific bits.
-> >
-> > At this point, there is only one new host ops added to manage the vario=
-us
-> > ios settings needed for UHS-II. Additional host ops that are needed, ar=
-e
-> > being added from subsequent changes.
-> >
-> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > ---
->
-> []
->
-> > +static int sd_uhs2_attach(struct mmc_host *host)
-> > +{
-> > +     int err;
-> > +
-> > +     err =3D sd_uhs2_power_up(host);
-> > +     if (err)
-> > +             goto err;
-> > +
-> > +     err =3D sd_uhs2_phy_init(host);
-> > +     if (err)
-> > +             goto err;
-> > +
-> > +     err =3D sd_uhs2_init_card(host);
-> > +     if (err)
-> > +             goto err;
-> > +
-> > +     mmc_attach_bus(host, &sd_uhs2_ops);
-> > +
-> > +     mmc_release_host(host);
-> > +
-> > +     err =3D mmc_add_card(host->card);
-> > +     if (err)
-> > +             goto remove_card;
-> > +
-> > +     mmc_claim_host(host);
-> > +     return 0;
-> > +
-> > +remove_card:
-> > +     mmc_remove_card(host->card);
->
-> Hi,
->
-> If we arrive here, mmc_add_card() has failed.
-> is it correct to call mmc_remove_card() in such a case?
+On 04/11/2022 05:58, Mengqi Zhang wrote:
+> Change in v2
+> - change patch 1 commit title
+> - change patch 2 commit title, and correct commit message
+> - add crypto clock description base on new code base
+> 
+> Mediatek eMMC hardware IP has Inline Crypto Engine (ICE), we support inline encryption now.
+> 
+> This patchset supports Mediatek eMMC inline encryption which meets the upcoming version of the eMMC specification such as v5.1 or v5.2.
+> 
+> Patch 1, add crypto clock control flow in mtk-sd driver, patch 2, document the device tree description about crypto clock.
+> 
+> Mengqi Zhang (2):
+>   mmc: mtk-sd: add Inline Crypto Engine clock control
+>   dt-bindings: mmc: mtk-sd: add Inline Crypto Engine clock
+> 
 
-Yes. There are some additional checks in mmc_add_card() to help to
-manage this too.
+Your threading is broken. Resend with proper threads.
 
-Although, there are certainly some cleanups that can be made to
-simplify the code in the mmc core around this, but that's a different
-story.
+Best regards,
+Krzysztof
 
->
-> > +     host->card =3D NULL;
-> > +     mmc_claim_host(host);
-> > +     mmc_detach_bus(host);
-> > +err:
-> > +     sd_uhs2_power_off(host);
->
-> If sd_uhs2_power_up() fails, we arrive here.
-> Is its correct to call sd_uhs2_power_off() in such a case, or should we
-> return directly if sd_uhs2_power_up() fails?
-
-That's an option that could make the code a bit clearer. I have no
-strong opinion around this.
-
-Although, if changing this, we need to make sure sd_uhs2_power_up()
-restores things correctly after a failure, but it doesn't do that in
-the current version of the patch.
-
-Kind regards
-Uffe
