@@ -2,96 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5085C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 15:19:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15DE4C41535
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 17:22:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229481AbiKDPTa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Nov 2022 11:19:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60824 "EHLO
+        id S231339AbiKDRWB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Nov 2022 13:22:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232504AbiKDPTZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 11:19:25 -0400
-Received: from mail-qv1-xf2e.google.com (mail-qv1-xf2e.google.com [IPv6:2607:f8b0:4864:20::f2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39694A457
-        for <linux-mmc@vger.kernel.org>; Fri,  4 Nov 2022 08:19:24 -0700 (PDT)
-Received: by mail-qv1-xf2e.google.com with SMTP id mi9so3389312qvb.8
-        for <linux-mmc@vger.kernel.org>; Fri, 04 Nov 2022 08:19:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=tRnjrNrKpUEdCWynwN46DRbvjj6rSysENOSI8RxBlNo=;
-        b=nG9oFgohsMgh0IKM6eaQaQ76xOTmewTADKqUnB3LIf8Pyh2WRzvGKl2UgeDuNsnYrO
-         ZhO0HKTxzc2OyZQ1bglKCjndW9q33wxeSysF3DgSu4S3CMtFgd9y90jyWtC5b5U5ifjO
-         aqfvBJVpBXXQWhAxEHawDdO9jwhdjT6SLOw45/Y16BFnutT5MoPm22ogdg0yZFT3U1vE
-         lQcM6vmJlDiOmFH6oWMlPc0e3QC6JZIXwFeREE7TJRUb2bs+LV3pQRpNjk9KasIeY7Iu
-         tWqHLNTjzLeGW+1hcJSDcC3DyWPpc0/FLatlRgpXn8OHXAzG96ee9jwrbMZJhiNmDvNv
-         BM7g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=tRnjrNrKpUEdCWynwN46DRbvjj6rSysENOSI8RxBlNo=;
-        b=JXxc8Jwshqocaz3Q0OR5cg2UF6cQj4f4/CpgEk7aESgj2KCvzyKKj6/Qw9XqUqLMnS
-         /UpHYl9Iu/jyExGj9EDN+PR7YEpXSRujLhOwOrntiH/Oe/+VskE8GkLQATAjAR72FZCj
-         Zm9XaV9B4eI5mz+H14Xxav9kopITdoZXdOdZVps/TqT2t5HIt617TKPIDpjTb6lcG3XK
-         u6VvWKZW/Lfsm2XE2QgCUOU7br6NFmIlyU3n05I8uaZGt0RcsRpIKSbc/Ri8B8AgVymO
-         EJUiGfTsOE3hnjBSwUudyvpj04RSWM/kQGBWMMeQ2dqLtPbZznpzsY/wLCn1f8Fe7l3M
-         uk6A==
-X-Gm-Message-State: ACrzQf1hxryVElyCY6Uqd3cTj5YNhYmjSf5A3tmzhxEEKDhNmhqkxsyT
-        tJyi5glh65tDA1ZDPFXAyQhuCx+YE5O1Fg==
-X-Google-Smtp-Source: AMsMyM6/bD7TwetAszdHR3EmYhj0XT1Ya2qXerlaVZb95uTZIfvp1C7Y6AQQUqEDn0G3VLRG4dxKxg==
-X-Received: by 2002:a05:6214:20c2:b0:4b1:316c:67a2 with SMTP id 2-20020a05621420c200b004b1316c67a2mr32412761qve.32.1667575163412;
-        Fri, 04 Nov 2022 08:19:23 -0700 (PDT)
-Received: from ?IPV6:2601:586:5000:570:aad6:acd8:4ed9:299b? ([2601:586:5000:570:aad6:acd8:4ed9:299b])
-        by smtp.gmail.com with ESMTPSA id bq37-20020a05620a46a500b006ee77f1ecc3sm3160269qkb.31.2022.11.04.08.19.22
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 04 Nov 2022 08:19:22 -0700 (PDT)
-Message-ID: <8cdd0560-8a64-de1f-d1f2-a4dc729f8970@linaro.org>
-Date:   Fri, 4 Nov 2022 11:19:21 -0400
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH v2 0/2] Mediatek eMMC Inline Crypto Engine support
-Content-Language: en-US
-To:     Mengqi Zhang <mengqi.zhang@mediatek.com>,
-        chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
+        with ESMTP id S230035AbiKDRV7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 13:21:59 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA1CFAE5A;
+        Fri,  4 Nov 2022 10:21:58 -0700 (PDT)
+Received: from IcarusMOD.eternityproject.eu (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 0C36B6602989;
+        Fri,  4 Nov 2022 17:21:55 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1667582516;
+        bh=R/MBlJBNY8EYBt6oZqjxP8TEcbb7lnlRlY2DZ7434zU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=Ku0bwUVtf5oKlMLP0ahGkM/AFF1NVvTK4xSv08D6bDpoArwk7fNUVX4up8i7p+YS6
+         WYrOAkqaccZpd+oaLAiY6Ar/q++RvqReKQX4DoxIjAmVuVNG4GjKc1P9nsptV/qTry
+         fO/9xoBfP6Fe2KUuOnbg0KciaFngjlPyxceVz0aygW5fdg0kTOe207ImIimWwaj+8I
+         c/JLmjU7DXdI1qr+B8jWvJ7lVkPiq+U3fNvcRPvcf3wQ03oottMi2qAEsC+bClQ0EW
+         inX+4W/B9XPKzo6kWvJgQBTRMCKkOHDjQ557fzpi6e/7KlREFMyxoq6MVsZM7R5LBv
+         wiLqQNjOVMKAg==
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+To:     agross@kernel.org
+Cc:     andersson@kernel.org, konrad.dybcio@somainline.org,
         robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        matthias.bgg@gmail.com, wenbin.mei@mediatek.com,
-        angelogioacchino.delregno@collabora.com
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
-References: <20221104095848.27444-1-mengqi.zhang@mediatek.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221104095848.27444-1-mengqi.zhang@mediatek.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        lee@kernel.org, ulf.hansson@linaro.org,
+        srinivas.kandagatla@linaro.org, jic23@kernel.org, lars@metafoo.de,
+        keescook@chromium.org, tony.luck@intel.com, gpiccoli@igalia.com,
+        bhupesh.sharma@linaro.org, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-hardening@vger.kernel.org, marijn.suijten@somainline.org,
+        kernel@collabora.com, luca@z3ntu.xyz, a39.skl@gmail.com,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+Subject: [PATCH 0/9] MSM8956/76 and Sony Xperia X / X Compact support
+Date:   Fri,  4 Nov 2022 18:21:13 +0100
+Message-Id: <20221104172122.252761-1-angelogioacchino.delregno@collabora.com>
+X-Mailer: git-send-email 2.37.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 04/11/2022 05:58, Mengqi Zhang wrote:
-> Change in v2
-> - change patch 1 commit title
-> - change patch 2 commit title, and correct commit message
-> - add crypto clock description base on new code base
-> 
-> Mediatek eMMC hardware IP has Inline Crypto Engine (ICE), we support inline encryption now.
-> 
-> This patchset supports Mediatek eMMC inline encryption which meets the upcoming version of the eMMC specification such as v5.1 or v5.2.
-> 
-> Patch 1, add crypto clock control flow in mtk-sd driver, patch 2, document the device tree description about crypto clock.
-> 
-> Mengqi Zhang (2):
->   mmc: mtk-sd: add Inline Crypto Engine clock control
->   dt-bindings: mmc: mtk-sd: add Inline Crypto Engine clock
-> 
+This series adds basic support for MSM8976 and its lower spec variant
+MSM8956, along with two devices: the Sony Xperia X and X Compact.
 
-Your threading is broken. Resend with proper threads.
+For now, even though I do have a tree in which these two devices are
+fully booting, only a basic console boot is provided as the rest is
+awaiting cleanup and some more dependencies.
+Especially every device requiring IOMMU support, like MDSS, MDP and
+Adreno GPU cannot work with the current qcom_iommu driver, as it
+needs some code to get the ASIDs right for MSM8956/76.
 
-Best regards,
-Krzysztof
+This series depends on [1].
+
+Tested on both Xperia X and X Compact.
+
+[1]: https://patchwork.kernel.org/project/linux-arm-msm/list/?series=690889
+
+AngeloGioacchino Del Regno (7):
+  dt-bindings: iio: qcom-spmi-vadc: Add definitions for USB DP/DM VADCs
+  dt-bindings: soc: qcom: qcom,smd-rpm: Use qcom,smd-channels on MSM8976
+  dt-bindings: mmc: sdhci-msm: Document compatible for MSM8976
+  dt-bindings: mfd: qcom,tcsr: Add compatible for MSM8976
+  arm64: dts: qcom: Add configuration for PM8950 peripheral
+  arm64: dts: qcom: Add DTS for MSM8976 and MSM8956 SoCs
+  arm64: dts: qcom: Add support for SONY Xperia X/X Compact
+
+Marijn Suijten (2):
+  dt-bindings: nvmem: Add compatible for MSM8976
+  dt-bindings: arm: qcom: Document msm8956 and msm8976 SoC and devices
+
+ .../devicetree/bindings/arm/qcom.yaml         |   10 +
+ .../devicetree/bindings/mfd/qcom,tcsr.yaml    |    1 +
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |    1 +
+ .../bindings/nvmem/qcom,qfprom.yaml           |    1 +
+ .../bindings/soc/qcom/qcom,smd-rpm.yaml       |    1 +
+ arch/arm64/boot/dts/qcom/Makefile             |    2 +
+ .../qcom/msm8956-sony-xperia-loire-kugo.dts   |   36 +
+ .../qcom/msm8956-sony-xperia-loire-suzu.dts   |   17 +
+ .../dts/qcom/msm8956-sony-xperia-loire.dtsi   |  269 ++++
+ arch/arm64/boot/dts/qcom/msm8956.dtsi         |   18 +
+ arch/arm64/boot/dts/qcom/msm8976.dtsi         | 1208 +++++++++++++++++
+ arch/arm64/boot/dts/qcom/pm8950.dtsi          |  165 +++
+ include/dt-bindings/iio/qcom,spmi-vadc.h      |    3 +
+ 13 files changed, 1732 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8956-sony-xperia-loire-kugo.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8956-sony-xperia-loire-suzu.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8956-sony-xperia-loire.dtsi
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8956.dtsi
+ create mode 100644 arch/arm64/boot/dts/qcom/msm8976.dtsi
+ create mode 100644 arch/arm64/boot/dts/qcom/pm8950.dtsi
+
+-- 
+2.37.2
 
