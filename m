@@ -2,102 +2,122 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 74B5AC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 10:04:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C4A6C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  4 Nov 2022 10:44:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231612AbiKDKE6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 4 Nov 2022 06:04:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39136 "EHLO
+        id S229485AbiKDKoI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 4 Nov 2022 06:44:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57936 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230491AbiKDKE5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 06:04:57 -0400
-Received: from mailgw01.mediatek.com (unknown [60.244.123.138])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2C8A126;
-        Fri,  4 Nov 2022 03:04:54 -0700 (PDT)
-X-UUID: 5da8b99b54c9420285541947fdeb3be4-20221104
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=mediatek.com; s=dk;
-        h=Content-Type:Content-Transfer-Encoding:MIME-Version:Message-ID:Date:Subject:CC:To:From; bh=SiJd/cbIFHc0t29rG3pUwRbp3B0gNob0JkC9ON4oH/Y=;
-        b=HZrqVcNlvAbPIAzrFT/a7SDK2j/pXOdxQKPtMtf0y73Ae8FsEW1eiMCbgUpicP6FP5z8nfmmmrubz59gZJKaiYA22EK7Y6ji631JpxP3zgXszRfjSnL0Y/3E+OrFgY4ZBE5aGhRjW+152CL+0VIDXMhCQCG+uMQ4sj1lc3szVcs=;
-X-CID-P-RULE: Release_Ham
-X-CID-O-INFO: VERSION:1.1.12,REQID:2b7ddbb3-d266-4b5f-bfff-06f200f23879,IP:0,U
-        RL:0,TC:0,Content:-5,EDM:0,RT:0,SF:0,FILE:0,BULK:0,RULE:Release_Ham,ACTION
-        :release,TS:-5
-X-CID-META: VersionHash:62cd327,CLOUDID:8300aff3-a19e-4b45-8bfe-6a73c93611e9,B
-        ulkID:nil,BulkQuantity:0,Recheck:0,SF:102,TC:nil,Content:0,EDM:-3,IP:nil,U
-        RL:0,File:nil,Bulk:nil,QS:nil,BEC:nil,COL:0
-X-UUID: 5da8b99b54c9420285541947fdeb3be4-20221104
-Received: from mtkmbs11n1.mediatek.inc [(172.21.101.185)] by mailgw01.mediatek.com
-        (envelope-from <mengqi.zhang@mediatek.com>)
-        (Generic MTA with TLSv1.2 ECDHE-RSA-AES256-GCM-SHA384 256/256)
-        with ESMTP id 356064194; Fri, 04 Nov 2022 18:04:47 +0800
-Received: from mtkmbs13n1.mediatek.inc (172.21.101.193) by
- mtkmbs13n1.mediatek.inc (172.21.101.193) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.792.15; Fri, 4 Nov 2022 18:04:46 +0800
-Received: from localhost.localdomain (10.17.3.154) by mtkmbs13n1.mediatek.inc
- (172.21.101.73) with Microsoft SMTP Server id 15.2.792.15 via Frontend
- Transport; Fri, 4 Nov 2022 18:04:45 +0800
-From:   Mengqi Zhang <mengqi.zhang@mediatek.com>
-To:     <chaotian.jing@mediatek.com>, <ulf.hansson@linaro.org>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <matthias.bgg@gmail.com>, <wenbin.mei@mediatek.com>,
-        <angelogioacchino.delregno@collabora.com>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-mediatek@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>,
-        Mengqi Zhang <mengqi.zhang@mediatek.com>
-Subject: [PATCH v2 2/2] dt-bindings: mmc: mtk-sd: add Inline Crypto Engine clock
-Date:   Fri, 4 Nov 2022 18:04:11 +0800
-Message-ID: <20221104100410.27531-3-mengqi.zhang@mediatek.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S230205AbiKDKoH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 4 Nov 2022 06:44:07 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 266E02A710;
+        Fri,  4 Nov 2022 03:44:06 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id z18so6974333edb.9;
+        Fri, 04 Nov 2022 03:44:06 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=984IZej2mpdfs/fIVIJrApYfJ2ble3SFoZ3qX9WWZUI=;
+        b=OyPUd67uCOVH7YrzM/9zBOMG+WKJZ+EfvUfZU3bkm73J8oCFzRIv23+SDpStY2AqsG
+         3mj3qni8KM/Zc8JXJ8HW6B4lgOkhb6MVakT/Xjo6UFlJb0m+UANTI1nS5AbAUexswzBK
+         fUSq7RwprE0RwmoUbZHYzVksK4ku0z1PkYEKQ2bZuNup5G5ykjr5go1eaOUhFB8I6P1W
+         oN6A966G45t934QMxLXeD2XCbBpBWVFEgdwve5bge8gAlyLv6MJy8fPNOyhfAWYKpsMJ
+         zhCP1CKs2lh75KPLRqTSuL9FWSzD564kf0wEvoX1OXhvUt3l2Jykn3zHw5KN3iJcSwyb
+         i2JQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=984IZej2mpdfs/fIVIJrApYfJ2ble3SFoZ3qX9WWZUI=;
+        b=S9tSaP1dV/yL+mrblsfVAsGEzzYUVlCMlIm52vjhmpxihVzQcLoALbjBs31mthcO/n
+         tyNTlK1+PErQGHS/PBSf0CCcHE6+CnxWIF2CQ6LhQWyHLpM6CS4X8bIk1BbXINHrEpez
+         fXVebd7PxzAUlLyKjrQCX+h9dUe+zkqkA0ArFr2FcQYjeD+8ec0c3WowFjXg9JVR4E2w
+         0fvWznN3GvaMNhOXF1aDl7UMEw4mlKti/0vJMwRNfN7bplKcCi1rDHNt62fJXspnf3fJ
+         lYbxKBTsA1sKsgi/27xVO7oy06aglBU1TdYf0BtWaUCBuMpZTv2+Q1UVoLJBVMn4fJiO
+         q63w==
+X-Gm-Message-State: ACrzQf1dLMD6LmjpD8VLxoFwLNPLshZnH2TTeM4hnMzYnd3yJqaBuJiU
+        dF7K0nQ5QB5Y8ydTDIktu73qeDUknmizWxJHA8A=
+X-Google-Smtp-Source: AMsMyM7yA9RwnPl1pTphZCD/GOgwhmwFfbH8fVNcTNQcUEE3usKkVdf1LVd5wXAfen5Qw2q0BsqO5IVGFnqQ2MwA1KE=
+X-Received: by 2002:a05:6402:26cc:b0:462:2426:4953 with SMTP id
+ x12-20020a05640226cc00b0046224264953mr35367648edd.13.1667558644616; Fri, 04
+ Nov 2022 03:44:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+References: <20221019110647.11076-1-victor.shih@genesyslogic.com.tw> <ebc45ad9-9c26-9598-9e54-62d93be8de31@intel.com>
+In-Reply-To: <ebc45ad9-9c26-9598-9e54-62d93be8de31@intel.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Fri, 4 Nov 2022 18:43:49 +0800
+Message-ID: <CAK00qKBvqZ_N3YceRhQq8cbWRzkc0uc2qNbdSmrBZ3toRZ5Piw@mail.gmail.com>
+Subject: Re: [PATCH V5 00/26] Add support UHS-II for GL9755
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add optional crypto clock of the Inline Crypto Engine of Mediatek SoCs.
+Hi, Adrian
 
-Signed-off-by: Mengqi Zhang <mengqi.zhang@mediatek.com>
----
- .../devicetree/bindings/mmc/mtk-sd.yaml       | 22 +++++++++++++++++++
- 1 file changed, 22 insertions(+)
+Adrian Hunter <adrian.hunter@intel.com> =E6=96=BC 2022=E5=B9=B411=E6=9C=882=
+=E6=97=A5 =E9=80=B1=E4=B8=89 =E5=87=8C=E6=99=A81:28=E5=AF=AB=E9=81=93=EF=BC=
+=9A
+>
+> On 19/10/22 14:06, Victor Shih wrote:
+> > Summary
+> > =3D=3D=3D=3D=3D=3D=3D
+> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Se=
+quence
+> >   [2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence=
+[2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include=
+ Section
+> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting R=
+egister
+> >   Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Leg=
+acy SD
+> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 P=
+acket
+> >   Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-=
+II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2])=
+.
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the origina=
+l
+> >   interrupt registers.
+> >
+> > Patch structure
+> > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > patch#1-#6:  for core
+> > patch#7-#25: for sdhci
+> > patch#26:    for GL9755
+>
+> Thanks for putting this together.
+>
+> I haven't looked at all the patches, but have requested quite
+> a lot of small changes, so there should be enough to be going
+> on with for now.
 
-diff --git a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-index 6f8ecb4788eb..8ed94a12a03b 100644
---- a/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mtk-sd.yaml
-@@ -263,6 +263,28 @@ allOf:
-             - const: bus_clk
-             - const: sys_cg
- 
-+  - if:
-+      properties:
-+        compatible:
-+          enum:
-+            - mediatek,mt8186-mmc
-+            - mediatek,mt8188-mmc
-+            - mediatek,mt8195-mmc
-+    then:
-+      properties:
-+        clocks:
-+          items:
-+            - description: source clock
-+            - description: HCLK which used for host
-+            - description: independent source clock gate
-+            - description: crypto clock used for data encrypt/decrypt (optional)
-+        clock-names:
-+          items:
-+            - const: source
-+            - const: hclk
-+            - const: source_cg
-+            - const: crypto
-+
-   - if:
-       properties:
-         compatible:
--- 
-2.25.1
+Thanks for your help. I will confirm your advice in each patch and
+follow your advice to change.
 
+Thanks, Victor Shih
