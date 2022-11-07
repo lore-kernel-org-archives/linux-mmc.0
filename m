@@ -2,146 +2,114 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C09C9C43219
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:13:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 46D1CC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:13:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232831AbiKGUNh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 15:13:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50468 "EHLO
+        id S232880AbiKGUNr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 15:13:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232815AbiKGUNg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:13:36 -0500
-Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 247C619028
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:34 -0800 (PST)
-Received: by mail-pf1-x430.google.com with SMTP id m6so11715416pfb.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:34 -0800 (PST)
+        with ESMTP id S232844AbiKGUNj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:13:39 -0500
+Received: from mail-pl1-x633.google.com (mail-pl1-x633.google.com [IPv6:2607:f8b0:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 219122AE0A
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:38 -0800 (PST)
+Received: by mail-pl1-x633.google.com with SMTP id 4so12130565pli.0
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=s87rc+3CLCRrQxp5sxRKisBXBThEk3zvk8uOAZk34uQ=;
-        b=JcatK1a3bnx5+S0pZodYk+4x8ISxTRgSUsbH7K83f5H1MTWJrtZ00CC01l5+JNw5wE
-         HGZlX7Cl8JWuzC7SFQfEtoWyAXVgsPF7APeV5BhbUe+RJ8oiLKd1uCQbN6btOgc1fMDG
-         AyDCiX7VS5ckLdgp8wCICW3p2fzLRE0C0APaol3oH3OQ3GnRSUSJvyxjVc1PWpzu5U7d
-         3v+W2EobOxnhxD/Z836nIjKtP6Ua6902lPUXpqDWr1wzrGzhXv+QDfxWRbLc9CuOtY7D
-         096KePrvsoQ9QrHSkCtH+awJs7IDlhxTVHUAjrH+NjQDLDjyecM5WAhXIisMDUEu1FTC
-         DCBQ==
+        bh=k8EUFEtQtPp5wi61CP1QJz9xHMjgAa1yVc6pY8V0J90=;
+        b=BQT4hLiiNPmn6f3BxnJlJ/dUG2Fuu5F5NOayg/wozaqhclutSwVozNcp9IQrJs7BEx
+         uEKtHMnDF+Jvvw0aNmbfiOAKip8v4v3Ki/il6DKKJBWWVupNMwMLLj7FTGSXgMID+CQU
+         0nNW64Psay5UopdLn9JdB6JuAfYG7nA06iOM8Q0tXxsAWQHZdEmqfBdrXiRlFbZPlncy
+         zF4Hj3YsFVaR2yLgvV7+YKbg2fh/XsjMND4/jeYp9PFUpcHRBJ6C2HkqvvGFpNn60vq5
+         bysrQsjcInRD0BtnWMJZz8IS9euybhfFdmu58azZTqD5g99mvRZ4I7dke3jyIrxGGpNj
+         jfjw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=s87rc+3CLCRrQxp5sxRKisBXBThEk3zvk8uOAZk34uQ=;
-        b=pBL+JK9pPnM95ci9s1QCEIEkd3j0QjlPr5ZOSE/rU1VW1/JXyZRkIrf+thaBEaFdvV
-         8yx0POXA7+PEEezBBubfDUNMfWoJTtAg7KULAZvbDEW05mYTJppon4iluIo8Vsb4GGEu
-         HhEAbf8FHbznSco/56nCbahJ3aESJnqgXj+cVFXuexqILQVm8RPKnbSW6czomZvSvB/F
-         a0YJwNhU7rsNuLofM7ux+WFqnoGiCfNOMQMrfknHJWfkiQVFV96XOLuXX3ZNRWbhWgNj
-         jkLdpm+T9g2td5QzKRnEuDmdVhCik7f7VPlxWLFEH9tHhgxtmEuuHdDa8HoPmjPgizqK
-         nI9g==
-X-Gm-Message-State: ACrzQf3sT0GP91cUTFBaUds75B9+7PIz7iEa//dKAo52lTHhlGA3FxiS
-        IO9ymjma+jGwuiXISos58x44V5Lf8k9f9cEFVovG0A==
-X-Google-Smtp-Source: AMsMyM4R5Cm2QwKto+eIFDpMQNrn42E1pWAAl2yG+IdRhm6k+vQhrKETu+Dj7T4+ziC4G5VJFL56Pp+oRcye4IJBE9k=
-X-Received: by 2002:a05:6a00:1823:b0:56b:f348:998f with SMTP id
- y35-20020a056a00182300b0056bf348998fmr52092639pfa.28.1667852013605; Mon, 07
- Nov 2022 12:13:33 -0800 (PST)
+        bh=k8EUFEtQtPp5wi61CP1QJz9xHMjgAa1yVc6pY8V0J90=;
+        b=duJ3YjxDFuCfpVQjKJZS/qVD+FFurTu6wL6OUoe4NM1W4tgWCuHFd5FVk3KlGYvgbb
+         AcybhfWQlzTdAX960xCXR5nEZW+GHSo/ds836TOkbaubtDBJAUKyBEsa4xBiXF48Dnld
+         zjCh1YrMIG2ndA0HxOq2wTkkndxsbg8BVr82yvA7wQ0o7gJoNfrOBAeO1JN7rRu7odDP
+         rayxMCvCiIPsZe5xN7ru8Fwb6jS5AaIhQ2pWpmzNp09EFDogfxEJZvfK2Bw7B7KPS338
+         DAn3pG5qeInBuU9Cfz2FmKYnmkmRNRfOSZchvm5sO3b3Ng0LwVABES1IvcRr5nC/FkMV
+         XeJA==
+X-Gm-Message-State: ACrzQf0a7lEpr44BMG+7HJWVoukEdgzPvPGpVfTi57CjUySD0NmQSQX2
+        z9TAsOi0S3xUgtqM2GbtWjZe11KYwtOSpTTunZYKog==
+X-Google-Smtp-Source: AMsMyM4r39aPv3/RDP5gqVTAMK+bW31ALLLoSbUFaPKhUJbyNRGkpcf+/D4oBnSI7HwXYUhn2sQD/+znIf0BB9H11AE=
+X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
+ mw7-20020a17090b4d0700b001ef521cf051mr71862280pjb.164.1667852017652; Mon, 07
+ Nov 2022 12:13:37 -0800 (PST)
 MIME-Version: 1.0
-References: <20221026194209.3758834-1-briannorris@chromium.org>
-In-Reply-To: <20221026194209.3758834-1-briannorris@chromium.org>
+References: <20221028073740.7259-1-yann.gautier@foss.st.com>
+In-Reply-To: <20221028073740.7259-1-yann.gautier@foss.st.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Nov 2022 21:12:56 +0100
-Message-ID: <CAPDyKFqQDXPPDVHvSXG57n83wdWs1B7+NzahM0ZAd3CPh6+DXQ@mail.gmail.com>
-Subject: Re: [PATCH v4 0/7] mmc: sdhci controllers: Fix SDHCI_RESET_ALL for CQHCI
-To:     Brian Norris <briannorris@chromium.org>
-Cc:     Shawn Guo <shawnguo@kernel.org>, linux-mmc@vger.kernel.org,
+Date:   Mon, 7 Nov 2022 21:13:00 +0100
+Message-ID: <CAPDyKFptJkHGaz9zc2G65tyS=2weH7ueV1d_CAszKfAgsqCkAw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: properly select voltage range without power cycle
+To:     Yann Gautier <yann.gautier@foss.st.com>
+Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        linux-arm-msm@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        Broadcom internal kernel review list 
-        <bcm-kernel-feedback-list@broadcom.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Andy Gross <agross@kernel.org>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        linux-kernel@vger.kernel.org,
-        Konrad Dybcio <konrad.dybcio@somainline.org>,
-        Al Cooper <alcooperx@gmail.com>,
-        Fabio Estevam <festevam@gmail.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Sowjanya Komatineni <skomatineni@nvidia.com>
+        Kees Cook <keescook@chromium.org>,
+        "Darrick J . Wong" <djwong@kernel.org>,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>,
+        "Jason A . Donenfeld" <Jason@zx2c4.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, christophe.kerello@foss.st.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 26 Oct 2022 at 21:42, Brian Norris <briannorris@chromium.org> wrote:
+On Fri, 28 Oct 2022 at 09:38, Yann Gautier <yann.gautier@foss.st.com> wrote:
 >
-> This is a series of identical fixes for several SDHCI host
-> drivers. Patch #2 (for sdhci-of-arasan; plus its dependency in patch #1)
-> is the only one I've tested, and I wrote it due to a bug described
-> there.
+> In mmc_select_voltage(), if there is no full power cycle, the voltage
+> range selected at the end of the function will be on a single range
+> (e.g. 3.3V/3.4V). To keep a range around the selected voltage (3.2V/3.4V),
+> the mask shift should be reduced by 1.
 >
-> I then noticed that several other drivers do the same thing, and that
-> commit df57d73276b8 ("mmc: sdhci-pci: Fix SDHCI_RESET_ALL for CQHCI for
-> Intel GLK-based controllers") points out the likely-repeated bug. So the
-> fix is now factored into a separate sdhci_and_cqhci_reset() helper,
-> and it's likely that most/all drivers that support a combo SDHCI/CQHCI
-> controller will want to use it.
+> This issue was triggered by using a specific SD-card (Verbatim Premium
+> 16GB UHS-1) on an STM32MP157C-DK2 board. This board cannot do UHS modes
+> and there is no power cycle. And the card was failing to switch to
+> high-speed mode. When adding the range 3.2V/3.3V for this card with the
+> proposed shift change, the card can switch to high-speed mode.
 >
-> Thus, I include additional patches (compile-tested only) that apply this
-> helper/fix to the other drivers which call cqhci_init() but not
-> cqhci_deactivate(). They contain appropriate disclaimers and the
-> relevant parties are CC'd. I would suggest only merging them if you get
-> some kind of ACK from people familiar with the relevant hardware.
->
-> Notably, I do *not* patch drivers/mmc/host/mtk-sd.c although it uses
-> CQHCI, because it doesn't seem to be an SDHCI-based controller, and so
-> even if it has a similar bug, it's not clear to me how to patch it.
->
-> - Brian
->
-> Changes in v4:
->  - Improve for-stable cherry-picking notes
->  - Add Adrian's Ack
->  - Also fix sdhci_am654_ops, sdhci_j721e_8bit_ops
->
-> Changes in v3:
->  - Refactor to a "SDHCI and CQHCI" helper -- sdhci_and_cqhci_reset()
->
-> Changes in v2:
->  - Rely on cqhci_deactivate() to safely handle (ignore)
->    not-yet-initialized CQE support
->
-> Brian Norris (7):
->   mmc: cqhci: Provide helper for resetting both SDHCI and CQHCI
->   mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
->   mmc: sdhci-brcmstb: Fix SDHCI_RESET_ALL for CQHCI
->   mms: sdhci-esdhc-imx: Fix SDHCI_RESET_ALL for CQHCI
->   mmc: sdhci-tegra: Fix SDHCI_RESET_ALL for CQHCI
->   mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
->   mmc: sdhci-*: Convert drivers to new sdhci_and_cqhci_reset()
->
->  drivers/mmc/host/sdhci-brcmstb.c   |  3 ++-
->  drivers/mmc/host/sdhci-cqhci.h     | 24 ++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-esdhc-imx.c |  3 ++-
->  drivers/mmc/host/sdhci-msm.c       | 10 ++--------
->  drivers/mmc/host/sdhci-of-arasan.c |  3 ++-
->  drivers/mmc/host/sdhci-pci-core.c  | 11 ++---------
->  drivers/mmc/host/sdhci-pci-gli.c   | 11 ++---------
->  drivers/mmc/host/sdhci-tegra.c     |  3 ++-
->  drivers/mmc/host/sdhci_am654.c     |  7 ++++---
->  9 files changed, 42 insertions(+), 33 deletions(-)
->  create mode 100644 drivers/mmc/host/sdhci-cqhci.h
->
+> Fixes: ce69d37b7d8f ("mmc: core: Prevent violation of specs while initializing cards")
+> Signed-off-by: Yann Gautier <yann.gautier@foss.st.com>
 
-Patch1 -> patch6, applied for fixes and by adding stable tags. Patch7
-applied for next.
+Applied for next and by adding a stable tag, thanks!
 
-Thanks and kind regards
+Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/core/core.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 95fa8fb1d45f..c5de202f530a 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -1134,7 +1134,13 @@ u32 mmc_select_voltage(struct mmc_host *host, u32 ocr)
+>                 mmc_power_cycle(host, ocr);
+>         } else {
+>                 bit = fls(ocr) - 1;
+> -               ocr &= 3 << bit;
+> +               /*
+> +                * The bit variable represents the highest voltage bit set in
+> +                * the OCR register.
+> +                * To keep a range of 2 values (e.g. 3.2V/3.3V and 3.3V/3.4V),
+> +                * we must shift the mask '3' with (bit - 1).
+> +                */
+> +               ocr &= 3 << (bit - 1);
+>                 if (bit != host->ios.vdd)
+>                         dev_warn(mmc_dev(host), "exceeding card's volts\n");
+>         }
+> --
+> 2.25.1
+>
