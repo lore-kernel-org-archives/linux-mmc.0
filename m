@@ -2,102 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01613C4167D
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:14:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37659C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:14:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233039AbiKGUOi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 15:14:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50726 "EHLO
+        id S232993AbiKGUOm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 15:14:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50778 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232978AbiKGUOI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:14:08 -0500
-Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C4372B628
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:59 -0800 (PST)
-Received: by mail-pg1-x52b.google.com with SMTP id b62so11460814pgc.0
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:59 -0800 (PST)
+        with ESMTP id S233000AbiKGUOK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:14:10 -0500
+Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5CB002AE2D
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:14:03 -0800 (PST)
+Received: by mail-pj1-x1034.google.com with SMTP id l22-20020a17090a3f1600b00212fbbcfb78so15734399pjc.3
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:14:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=5xwUUkKpDcIPfyqgEqqK+GlgxLC+bvP4zY8tMROFslo=;
-        b=DLbUXpx5BGpG1DMQLOiBzekr6LKIQl3xNK69EzWu9cBTt0IhkdmZEwISLEFENb2XyY
-         F6/uOEAYvPy0pCsiKqNfvo+OIfm6SIX23KDx3yvMgH3sgSWchQIKDJE3GlzipiOCntXn
-         /clhW8ucjAP0zT0zof+RkYMmEXv6b4ZGsStnqT8oNHT2Ijc8ADMZhCAzlI2lH+fr1/YO
-         x8c4BelTxgBcJGxLGvn23wE5GsMamdtb7aMOLH1Yng9pUzNmTj0K1sanTKJko582ilbk
-         F/TgKqkz4ALp59zsfD87HDFQgUw9Nn7h4v9gTInuzb4aaEecdA3lo3c7rkliEi2oPP/4
-         KM3w==
+        bh=IgPXmc42gSS+9RDbk9bPwPQ6xa5IFwcVI8Es/AMs5QQ=;
+        b=Lv0jaAlJO3Pfx2NP9fOi99sjktk/EKRfwOlofukUKOgpp9M2209JDrInYlC/Hb96kX
+         WiFgfbpqnRnlKBoFNwrkXH8hdPPEdvc+JMppDiaruAqyLaQClFKAVZtFDzGkHwW7T2RL
+         WmqOYCgFSpdcFq5UUU2a314WlDmSL5htwNEqvYznRbM62EhrkUo4OQ60Zi7OKV7aVCqN
+         nrAAeEPNouP9/5fi3qrJL26TZ2acC+1IMFkeaV1a3w4/bMys9H4EYRl0pvQ5A5ZL4kee
+         +s0yRYYrISNeQuVGL6Zs/zy2ps2eAYlnxiOGNZxpi60pbVpK5w27mE62FYhwoABPH+2A
+         C+fA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=5xwUUkKpDcIPfyqgEqqK+GlgxLC+bvP4zY8tMROFslo=;
-        b=QLfbtBES/Xfq5XV6p0rnmQe1d464jvX8TzK+oKPJ8tsBjYAqfLF7gqMrdLXE/pM4vf
-         bHzvTH5Y4rSj9eoIRbs/8ob48COsxeKltsoWG0zWDDHkMGWYRslXzdep+YaJaMqiSZK1
-         dZUqPI9rdKNcqVoTFLt4F/YYFi0KVVBMOJNM0edfkEJVDE5yctj+MEUGm4WZ9KHR3sFE
-         ciGSHYIzxveQ3QiyTqM9HDyr3W1Vy5atFFYWHxNcKvP2lmHO0rvcPdD9t8K2y8AaOe5e
-         7anxAJvsZN+F7g8wI30eWzeVqAp6qjXPmaM6VwlS7OjWsnhyyrJ7xB1NFWPSToVa6gg3
-         oTcQ==
-X-Gm-Message-State: ACrzQf1DJ7e+JK2SslDH94jxzhcabkbFP3bmbgQdqBIJZ2hN31MxQLvq
-        li/QgEQn8Pj4e1vgBT6oYRhI2dQJUz6E7j5fy6QdAw==
-X-Google-Smtp-Source: AMsMyM74vaf7W54OL8zd+LH6la1LzG3+QlIhG7MtdJ/FbfqblOiiJopqiebGx/275JBCdBk/+joGXH2EXp7Nnh5kKbs=
-X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
- v13-20020a63464d000000b004415968cd0emr46115918pgk.595.1667852038821; Mon, 07
- Nov 2022 12:13:58 -0800 (PST)
+        bh=IgPXmc42gSS+9RDbk9bPwPQ6xa5IFwcVI8Es/AMs5QQ=;
+        b=wlVZo0XF9FoRGzeXiaggRlgO+lgAdc9mzu5CsU+FxDej8CY9hYgYLq++648hq/r1dR
+         Rumu+hHjD8gvDzzp85/0ohiOG7xYZwRpJPzfjssRhPH/C82WE6Flmgmh5YenetBrL7px
+         4Z4M5csjTAWN1MsB+WET6L3AS9ET74flG2e0YXj2NgCnaCmSi2YTQsaU0tik7ccMcgNB
+         UZEs4V5vKPu1ec+fQPcCKgiWj7Mxq4vZsVj9vilmwpvoKRomaVoZit+sJ7ynAJX1nhlq
+         pbnYwihF2Yw6NoDhPUB07wC2PD3ijJB6yCbpNW5uqsztRm6Co2Hj30w5y1lYjrVjzdpM
+         t5uw==
+X-Gm-Message-State: ACrzQf0tiF4K9QdRXot5EgBNIHcDPT0KQKlEQJFIFVp4g6SVHO4y7sr1
+        rrNhkcn9+gbTT5faffUJqiH+cBRt7tuBEycGoVPk8w==
+X-Google-Smtp-Source: AMsMyM4Uqs3O9TcimuuptYpAiUUKJmyf19xvGSioeogsaTGjXrG+KhSscjv5iIa2S1MqvOlKLMq04hYJyEoDAQTxJ/A=
+X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
+ mw7-20020a17090b4d0700b001ef521cf051mr71864059pjb.164.1667852042927; Mon, 07
+ Nov 2022 12:14:02 -0800 (PST)
 MIME-Version: 1.0
-References: <20221104172122.252761-1-angelogioacchino.delregno@collabora.com> <20221104172122.252761-6-angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20221104172122.252761-6-angelogioacchino.delregno@collabora.com>
+References: <20221106033924.9854-1-mengqi.zhang@mediatek.com>
+In-Reply-To: <20221106033924.9854-1-mengqi.zhang@mediatek.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Nov 2022 21:13:22 +0100
-Message-ID: <CAPDyKFramrp3gvOCCULC6anTh9ZfFbdtSgrmE_iGCJgbT0vYLQ@mail.gmail.com>
-Subject: Re: [PATCH 5/9] dt-bindings: mmc: sdhci-msm: Document compatible for MSM8976
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-Cc:     agross@kernel.org, andersson@kernel.org,
-        konrad.dybcio@somainline.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        srinivas.kandagatla@linaro.org, jic23@kernel.org, lars@metafoo.de,
-        keescook@chromium.org, tony.luck@intel.com, gpiccoli@igalia.com,
-        bhupesh.sharma@linaro.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-hardening@vger.kernel.org, marijn.suijten@somainline.org,
-        kernel@collabora.com, luca@z3ntu.xyz, a39.skl@gmail.com
+Date:   Mon, 7 Nov 2022 21:13:25 +0100
+Message-ID: <CAPDyKFp4wEaiGvyXQJPehbDkkZReUXk5fsXwJGLpVX9w2ZOZjQ@mail.gmail.com>
+Subject: Re: [RESEND v2 0/2] Mediatek eMMC Inline Crypto Engine support
+To:     Mengqi Zhang <mengqi.zhang@mediatek.com>
+Cc:     chaotian.jing@mediatek.com, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, matthias.bgg@gmail.com,
+        wenbin.mei@mediatek.com, angelogioacchino.delregno@collabora.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 4 Nov 2022 at 18:22, AngeloGioacchino Del Regno
-<angelogioacchino.delregno@collabora.com> wrote:
+On Sun, 6 Nov 2022 at 04:39, Mengqi Zhang <mengqi.zhang@mediatek.com> wrote:
 >
-> Document the compatible for the SDHCI controller(s) found on MSM8976.
+> Change in v2
+> - change patch 1 commit title
+> - change patch 2 commit title, and correct commit message
+> - add crypto clock description base on new code base
 >
-> Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+> Mediatek eMMC hardware IP has Inline Crypto Engine (ICE), we support inline encryption now.
+>
+> This patchset supports Mediatek eMMC inline encryption which meets the upcoming version of the eMMC specification such as v5.1 or v5.2.
+>
+> Patch 1, add crypto clock control flow in mtk-sd driver, patch 2, document the device tree description about crypto clock.
+>
+> Mengqi Zhang (2):
+>   mmc: mtk-sd: add Inline Crypto Engine clock control
+>   dt-bindings: mmc: mtk-sd: add Inline Crypto Engine clock
+>
+>  .../devicetree/bindings/mmc/mtk-sd.yaml       | 22 +++++++++++++++++++
+>  drivers/mmc/host/mtk-sd.c                     | 12 ++++++++++
+>  2 files changed, 34 insertions(+)
+>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index a96f143479c7..fc8a6b345d97 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -26,6 +26,7 @@ properties:
->                - qcom,msm8226-sdhci
->                - qcom,msm8953-sdhci
->                - qcom,msm8974-sdhci
-> +              - qcom,msm8976-sdhci
->                - qcom,msm8916-sdhci
->                - qcom,msm8992-sdhci
->                - qcom,msm8994-sdhci
-> --
-> 2.37.2
->
