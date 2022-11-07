@@ -2,148 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 798ACC433FE
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 09:48:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A741AC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 15:55:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231878AbiKGJsj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 04:48:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42502 "EHLO
+        id S231539AbiKGPzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 10:55:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50402 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230449AbiKGJsg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 04:48:36 -0500
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 836A1E51;
-        Mon,  7 Nov 2022 01:48:35 -0800 (PST)
-Received: by mail-ej1-x62b.google.com with SMTP id b2so28507343eja.6;
-        Mon, 07 Nov 2022 01:48:35 -0800 (PST)
+        with ESMTP id S232402AbiKGPzX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 10:55:23 -0500
+Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71B3C1CB3E;
+        Mon,  7 Nov 2022 07:55:22 -0800 (PST)
+Received: by mail-qt1-x82c.google.com with SMTP id hh9so7062237qtb.13;
+        Mon, 07 Nov 2022 07:55:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=s5L/b/iiv4bE6DnHSKSmrFG5dDWyQhbSZwF9NlGUYx8=;
-        b=LvU8zWB72HOIroDkSZ7/lodrDW3JujAAGCgt5V/BrjQk7LZlkPClWG7hdpPRAGHWTd
-         nPOS9Guj3pOsR5RNexowZazwzwimNyhP+XTYeA+R75qEej/V3j/UqYLWb5DRN58yByRY
-         oJEJWBgJwP1PPRFe79AxPSvMKu1rVLqJe2NBderzxuvk4Xrte+bTz9MZl2QX73OxKwnC
-         4Jvp6baDTRbD3Fba67Iex7RcVjU4IOFxBu4F6vQRl5/II1yqrM76FGyyfM2TWm3odpWl
-         ahodhBChBL7OeP8jJn4n9bopKtbnL0rMjhB/51As3XeYRyoH15FvrKECAQyb8sbi990T
-         CaSg==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=Cyfnek7GcKCYztRwEEteaAUP1JbSEVGwmlhNomSJ9DQ=;
+        b=Qb2rhdwl5kKh3DP3eKzJ51Ip4dUtLDWZTKx/yBg98j4iBVqpQ9ejkVjdMnlEnJySXs
+         F3vXSTypH7o+LgRfw+sWzi8/08wqNYEg8PmmqUh3zS+A0IoRgB9B1FNpNU94mt7jdBh8
+         MDYNMU8c46TD4C3FrndlIW2iwGZX/yubRhJVDtMXmHYeBB3HnqV5HWlz6+skafta8uUl
+         nw802QL/rd2hwQXD4Zob8ISIPWF7nuu1OpvCN3vmH+uWsCdglWMjuNZD3g/I/SqXe0ST
+         nwqVQzL0zWtj/s5YbySQSzvz5Al5MprPrZCbWGxAA1YBdMUXmmV3GEzg+aGxVhC6V4s0
+         Zm5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=user-agent:in-reply-to:content-disposition:mime-version:references
-         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=s5L/b/iiv4bE6DnHSKSmrFG5dDWyQhbSZwF9NlGUYx8=;
-        b=avvo9N9nKX3ZZ66Va0obskCKOYl/DURW1gSnSh83bbla1ifUXqHNmh/gc344VzPJo7
-         8LQuZWj3Wxak9PxwC3jM7DksKpM/TBaDhxPvu8K7rjNf1/DktQV6Dj4x7ugqUpM7OmhB
-         gd7XR2i0UyzjwySrkGdNt4pWDE5Y667i+IoqH3L99BmpfPY0LwDUns59P9MayEtr+CZ/
-         CNIWn1uJBy2RJ+6CTNiS464MGa7AnBtSIofoNQtAoayqYDAbQKoOh23HGVczZeRXvKIP
-         Qvp7Q9wv17sufwaXZM1vCmiQBLEJcLdymOT3VfRZrQ/Nktnzgoq8F6RF9K+QNmj14FQx
-         NUzQ==
-X-Gm-Message-State: ACrzQf3h8U6BKFgY2bZeqcunHca+qspCUOF3J5fEcx6tEJXqUHnErXH3
-        adj+oNgSF+Gp+7HzdXcVrd4=
-X-Google-Smtp-Source: AMsMyM6vwdAsY7KinVXJMHyPxPpqrdQ/wNM1Ho0qlIueUgBZmzwv11T342tFeKwcw7BjQudiO+GfBw==
-X-Received: by 2002:a17:907:3d88:b0:7ae:943:1cc2 with SMTP id he8-20020a1709073d8800b007ae09431cc2mr25128404ejc.675.1667814513845;
-        Mon, 07 Nov 2022 01:48:33 -0800 (PST)
-Received: from orome (p200300e41f201d00f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f20:1d00:f22f:74ff:fe1f:3a53])
-        by smtp.gmail.com with ESMTPSA id e17-20020a50fb91000000b0045bd14e241csm3931494edq.76.2022.11.07.01.48.32
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=Cyfnek7GcKCYztRwEEteaAUP1JbSEVGwmlhNomSJ9DQ=;
+        b=p5XtY+gVm9lUYbUlrGSSxWDBw+CgIA570alxYZAnEFRorEAOdXckzT00Pc+GrvcvAb
+         9qwPey7lJwvmX6gLZ55FlIY5KOs/oDKDrfUhF1MYzZcg+kJ7AnNay+iPDQsK4/jfgVbs
+         kdyPRe5f6dCHRbCsLgDstc3znr4EUxFiVTBkR0JvbD1hmTWnggNQaKxWGb3ga1E9/g5e
+         68a7tKILjno9xWRk5h3qi0Iy1gpTbo5EPmmxNunk5NC7FBXnH151i+o26FDDpoK0jki2
+         bELlxOhMP5v3zfH/hr9oLK9Mmll6lS6bLbW2AGWuvkhMKAhgVtsqxPhgRLy5WCnEm8QG
+         UMrA==
+X-Gm-Message-State: ANoB5pn0VY/o4qX7hYYLCY5S3Y12GlKZVAPw5iq5Tdj9EZD6Lzs+Tq4M
+        sy0rp7WlbwbEXllM8GDdiAxL5tThiYq88A==
+X-Google-Smtp-Source: AA0mqf6ZL8FmMgQ1Z7gQccrehDQhUWdMkI2RboZSu6xgHS0hJDwtdHLwFvHZ5ygOTKnEFr+nFIbjEQ==
+X-Received: by 2002:ac8:598a:0:b0:3a5:a09e:4154 with SMTP id e10-20020ac8598a000000b003a5a09e4154mr136491qte.160.1667836521282;
+        Mon, 07 Nov 2022 07:55:21 -0800 (PST)
+Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
+        by smtp.gmail.com with ESMTPSA id u11-20020a05622a17cb00b003972790deb9sm6309617qtk.84.2022.11.07.07.55.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 01:48:33 -0800 (PST)
-Date:   Mon, 7 Nov 2022 10:48:31 +0100
-From:   Thierry Reding <thierry.reding@gmail.com>
-To:     Robin Murphy <robin.murphy@arm.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Prathamesh Shete <pshete@nvidia.com>, joro@8bytes.org,
-        adrian.hunter@intel.com, jonathanh@nvidia.com,
-        p.zabel@pengutronix.de, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org, linux-kernel@vger.kernel.org,
-        will@kernel.org, iommu@lists.linux.dev, anrao@nvidia.com,
-        smangipudi@nvidia.com, kyarlagadda@nvidia.com,
-        Thierry Reding <treding@nvidia.com>
-Subject: Re: [PATCH v10 1/4] iommu: Always define struct iommu_fwspec
-Message-ID: <Y2jUb3UNeEJVekYS@orome>
-References: <CAPDyKFqJdiCDkAfrONfnBVKw1v8=jZ+hEJiKGK70EQ4o7BSxaQ@mail.gmail.com>
- <20221103043852.24718-1-pshete@nvidia.com>
- <6be39bae-f325-12e0-374b-a27c9ee2ef2b@arm.com>
- <Y2PJq27wkVwPg6rp@orome>
- <CAPDyKFq8szzryFBNkw20wFoPTbAa8YDy0wJnb57yckZ-HFTAMw@mail.gmail.com>
- <4cae5c8d-d6e9-79dc-670d-22ec9fda10a2@arm.com>
+        Mon, 07 Nov 2022 07:55:20 -0800 (PST)
+From:   Gabriel Somlo <gsomlo@gmail.com>
+To:     linux-kernel@vger.kernel.org
+Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
+        kgugala@antmicro.com, mholenko@antmicro.com, joel@jms.id.au,
+        andy.shevchenko@gmail.com, mdudek@internships.antmicro.com,
+        paulus@ozlabs.org
+Subject: [PATCH] mmc: litex_mmc: ensure `host->irq == 0` if polling
+Date:   Mon,  7 Nov 2022 10:55:16 -0500
+Message-Id: <20221107155516.2535912-1-gsomlo@gmail.com>
+X-Mailer: git-send-email 2.37.3
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="jYpMxqzTZ1vFLQJC"
-Content-Disposition: inline
-In-Reply-To: <4cae5c8d-d6e9-79dc-670d-22ec9fda10a2@arm.com>
-User-Agent: Mutt/2.2.7 (2022-08-07)
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Ensure the flag is explicitly set to 0 if we determine that polling is
+needed during driver probe, to cover all possible cases.
 
---jYpMxqzTZ1vFLQJC
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
+Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+---
+ drivers/mmc/host/litex_mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-On Thu, Nov 03, 2022 at 05:35:19PM +0000, Robin Murphy wrote:
-[...]
-> Now, there does happen to be a tacit contract between the ACPI IORT code =
-and
-> the Arm SMMU drivers for how SMMU StreamIDs are encoded in their respecti=
-ve
-> fwspecs, but it was never intended for wider consumption. If Tegra drivers
-> want to have a special relationship with arm-smmu then fair enough, but t=
-hey
-> can do the same as MSM and formalise it somewhere that the SMMU driver
-> maintainers are at least aware of, rather than holding the whole generic
-> IOMMU API hostage.
+diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
+index 6ba0d63b8c07..39c6707fdfdb 100644
+--- a/drivers/mmc/host/litex_mmc.c
++++ b/drivers/mmc/host/litex_mmc.c
+@@ -502,6 +502,7 @@ static int litex_mmc_irq_init(struct platform_device *pdev,
+ 
+ use_polling:
+ 	host->mmc->caps |= MMC_CAP_NEEDS_POLL;
++	host->irq = 0;
+ 	return 0;
+ }
+ 
+-- 
+2.37.3
 
-Are you talking about qcom_adrena_smmu_is_gpu_device()? That's the only
-place I can find where MSM uses iommu_fwspec directly and in a "special"
-way.
-
-> Since apparently it wasn't clear, what I was proposing is a driver helper=
- at
-> least something like this:
->=20
-> int tegra_arm_smmu_streamid(struct device *dev)
-> {
-> #ifdef CONFIG_IOMMU_API
-> 	struct iommu_fwspec *fwspec =3D dev_iommu_fwspec_get(dev)
->=20
-> 	if (fwspec && fwspec->num_ids =3D=3D 1)
-> 		return fwspec->ids[0] & 0xffff;
-> #endif
-> 	return -EINVAL;
-> }
-
-We actually also use this mechanism on devices that predate the ARM
-SMMU, so it'd need to be even more generic. Also, since we need to
-access this from a wide range of subsystems, it'd need to be in a
-centralized place. Do you think iommu.h would be acceptable for this?
-
-How about if I also add a comment to struct iommu_fwspec about the
-intended use?
-
-Thierry
-
---jYpMxqzTZ1vFLQJC
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmNo1G8ACgkQ3SOs138+
-s6G+AhAAuekGtAmbQT+FO9REjTNcbYsrloj9hB5mgAnet2fyTFqbqaJUeyxXAbqI
-F8DfTRRkDH4ivVN3LCySjQxJlP4Gsjs+pokCFZ9fHmUZLXYiVgCMIC1c58c6+NTp
-7Zxl4zim6O9d9xI6FqCPhraTLHtfb30IjNi351Ql2D6qzoUsJvqoctKwlDTmddP0
-vLaAfr1b3c4CYkSd+UkKV7JXWwAtKc+NiXUUpFDNPXA/7XF6M8DGHOGEPsjiPrjw
-Y0y/jixRtybEBixlgEBdDBadi7r2NQ7aKTXSt6U2Y8Z5s939/FL9VXBx6GVGRa3s
-KYZZoJ1Rdk13Q4ZEKj7pcvjdbduIskOtMyKAEOt/pKa+/Mc/y2p1L4PArwo4wFUn
-VGAhRQsFdFHTzNxanwyK6MuTCYXahA1WdSVlAd8dqrVyG9xefH5QD8ty8muwmIJS
-OshziqAHJPPOpPNXEKfXNnIvil+oUkdazKbRyBuybQJpcECcz597WQrzbhuY1BFn
-RWq2lneqzXIeiidn7+vyWxfgjzd8aASh6N3A4T+SYcbNEDvkdtJsahZxF9EFesyT
-s85i1sseVWa+UPFtKds8AKcAg9AzHm40ZJixa/YzNQ8jEH+R14getVCULMLrvYqy
-88RHhjDdRmxg/cxB3Ao+NzP7Lf3KzHcDSit2pVLxh2HXZ0Lb6dw=
-=IlwD
------END PGP SIGNATURE-----
-
---jYpMxqzTZ1vFLQJC--
