@@ -2,135 +2,192 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BF045C4321E
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 19:57:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1ABEAC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:13:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232696AbiKGT5B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 14:57:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40762 "EHLO
+        id S231580AbiKGUNd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 15:13:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50416 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232712AbiKGT47 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 14:56:59 -0500
-Received: from mail-oa1-f45.google.com (mail-oa1-f45.google.com [209.85.160.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB71D26AE6;
-        Mon,  7 Nov 2022 11:56:58 -0800 (PST)
-Received: by mail-oa1-f45.google.com with SMTP id 586e51a60fabf-13b23e29e36so13904161fac.8;
-        Mon, 07 Nov 2022 11:56:58 -0800 (PST)
+        with ESMTP id S232461AbiKGUNc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:13:32 -0500
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99555102D
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:30 -0800 (PST)
+Received: by mail-pf1-x42d.google.com with SMTP id 130so11675027pfu.8
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=LmK9VmA5NawWrTbsNF7MjvDxQgaGH0+3nIRanZy7zco=;
+        b=PI6yHV/Yn0U2tfINU9JTLjBLwdqF4IV2uF6Z3NXxOJl55qXRMikvL7GhaKoMl0OAUq
+         mTafw3vIXpWJeeCaTKY2+4680w6OsrMgaSao0uqUGc77et4vgwMiI9B2IcfuRfWNvMX8
+         WdPm8YIch+GQeLDu5b5Zj6dvw83Uf7FC5hGfG0aZyVKvAus0n/bjTwiigyoABQQzngft
+         yzepZkhdhiSCo8Prfz+mK/X6avZhyU/vaCf/NVw5QjsWb9xebUw4GAF2aQsSSJE07Wfc
+         szjPvg+5Zl5ZjQoqFYQ3vnfGdbfyUztRxiu279QSq06dUv1QDCz2g3e68XaHXMRGtbxz
+         +MKg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=r3mjAx7lLL85qpCZOJ6hUnCvzcFS81mcIgGEn4asyos=;
-        b=OvvFymnpaxwaWfuZUXHuwQyE1Aqb9tHN8wlhpWCKevoeuBIhVSxQlbnxa/7oQX/IH0
-         R1biC/QVEfpj6E9Qz/9t5W9Eb+staUVcxkGSIHIeLj9NNFmLUYK+9RtpwP5ZhbbAfv5A
-         3hagtK0w8MYeB8jahXJ4gqwsxI8uh62FNaM2851gfgqK7y8in4hKMcimnGcas1zvwwr3
-         VhFYE8VS0ZkEAtR7uJDsQCnqnIOqs6x45JfPSPBt9GIenXa6BveCQa/DdoWwnP00INIq
-         Rnp9HnkyfoRz0ZTsOkhd35a9VmZlP1dDdZvEtW7wl7dbDdqii3WYXZv80Tkbr5xQi3vA
-         ffOQ==
-X-Gm-Message-State: ACrzQf3B2mkPyGzb1Mf21fkRfSPNNsa2O5bgT7fw5XpXpYBZvz/jZjB0
-        rtVsOLbgMmqKcLpFOdKgsw==
-X-Google-Smtp-Source: AMsMyM5NYYJ3aS7MNOxMCRLSi7vINBfg4MRphj85IP5FOHjm2GVj/CoRXPEGpzKn0tuY+9X5jYR8DQ==
-X-Received: by 2002:a05:6870:41c4:b0:131:55a3:3069 with SMTP id z4-20020a05687041c400b0013155a33069mr30758903oac.159.1667851018033;
-        Mon, 07 Nov 2022 11:56:58 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g92-20020a9d2de5000000b0066c4092ae4csm3272165otb.10.2022.11.07.11.56.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 11:56:57 -0800 (PST)
-Received: (nullmailer pid 1487934 invoked by uid 1000);
-        Mon, 07 Nov 2022 19:56:59 -0000
-Date:   Mon, 7 Nov 2022 13:56:59 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Dinh Nguyen <dinguyen@kernel.org>
-Cc:     jh80.chung@samsung.com, ulf.hansson@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
-Subject: Re: [PATCHv8 1/6] dt-bindings: mmc: synopsys-dw-mshc: document
- "altr,sysmgr-syscon"
-Message-ID: <20221107195659.GA1483239-robh@kernel.org>
-References: <20221103151525.474833-1-dinguyen@kernel.org>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=LmK9VmA5NawWrTbsNF7MjvDxQgaGH0+3nIRanZy7zco=;
+        b=74iNzn9E6/p5RHebzXk8dfilXl1aAUtIfuhDUr+pq32SB7kUnE2x2q+ASpUFPOgPRr
+         iPVo0NozHO2HAAI39TUpB/io/Q+0uqNL5AJIqgDmzA0TxHbjeGtzEiLSuFinESVIc0he
+         Apu7JW5IWOGQCNC2/boc0pfnH5gBFeyoqgjaYnQXQV8i/kYuQ/vB4OXI3ZTMXW3ViYkU
+         RWH0LVh+fBDitFAnSgBqfKYuwFSlzWZk6AaoifIH8zjeTuLihHpM+UfkXwcOnuumEFDx
+         T3ds3LkiT66p/4nu7cu0oJKNYyEGJWiX/nWfzZ7hSqyC/xzrA1XqXeu/qYTWEwsGP+l0
+         dZeg==
+X-Gm-Message-State: ACrzQf3u7jPPvWqQS2WDvfcqN8SWUWfpT66shgBiz4n0tWipzORzuZdK
+        uTtIIr7yVaUrD/ykVfWsHJrMw6h44KUTg/Fh7BFQUQ==
+X-Google-Smtp-Source: AMsMyM6pTMDtu4I31DiYaGxAglszbAZx4nak9WlilhEtTB+olkeWOgX31NV4wr+ieTYhPP+wwY00HgZywZYnSYlC8m0=
+X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
+ v13-20020a63464d000000b004415968cd0emr46114161pgk.595.1667852010122; Mon, 07
+ Nov 2022 12:13:30 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221103151525.474833-1-dinguyen@kernel.org>
+References: <20221019054857.8286-1-sai.krishna.potthuri@amd.com>
+In-Reply-To: <20221019054857.8286-1-sai.krishna.potthuri@amd.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 7 Nov 2022 21:12:51 +0100
+Message-ID: <CAPDyKFq8Z+emgNToxE4hOzv1gZRcDzykwLJL=otv+7HGWP1fEw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support for dynamic configuration
+To:     Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+Cc:     Michal Simek <michal.simek@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, saikrishna12468@gmail.com,
+        git@amd.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 03, 2022 at 10:15:20AM -0500, Dinh Nguyen wrote:
-> Document the optional "altr,sysmgr-syscon" binding that is used to
-> access the System Manager register that controls the SDMMC clock
-> phase.
-> 
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+On Wed, 19 Oct 2022 at 07:49, Sai Krishna Potthuri
+<sai.krishna.potthuri@amd.com> wrote:
+>
+> Add dynamic configuration support for Xilinx ZynqMP which takes care of
+> configuring the SD secure space configuration registers using EEMI APIs,
+> performing SD reset assert and deassert.
+> High level sequence:
+> - Check for the PM dynamic configuration support, if no error proceed with
+> SD dynamic configurations(next steps) otherwise skip the dynamic
+> configuration.
+> - Put the SD Controller in reset.
+> - Configure SD Fixed configurations.
+> - Configure the SD Slot Type.
+> - Configure the BASE_CLOCK.
+> - Configure the 8-bit support.
+> - Bring the SD Controller out of reset.
+> - Wait for 1msec delay.
+>
+> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
 > ---
-> v8: remove "" around synopsys-dw-mshc-common.yaml#
-> v7: and "not" for the required "altr,sysmgr-syscon" binding
-> v6: make "altr,sysmgr-syscon" optional
-> v5: document reg shift
-> v4: add else statement
-> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->     "altr,socfpga-dw-mshc"
-> v2: document "altr,sysmgr-syscon" in the MMC section
-> ---
->  .../bindings/mmc/synopsys-dw-mshc.yaml        | 33 +++++++++++++++++--
->  1 file changed, 30 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> index ae6d6fca79e2..a37cd7a68417 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
->  title: Synopsys Designware Mobile Storage Host Controller Binding
->  
-> -allOf:
-> -  - $ref: "synopsys-dw-mshc-common.yaml#"
-> -
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
->  
-> @@ -38,6 +35,36 @@ properties:
->        - const: biu
->        - const: ciu
->  
-> +  altr,sysmgr-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
-> +      - items:
-> +          - description: phandle to the sysmgr node
-> +          - description: register offset that controls the SDMMC clock phase
-> +          - description: register shift for the smplsel(drive in) setting
-> +    description:
-> +      This property is optional. Contains the phandle to System Manager block
-> +      that contains the SDMMC clock-phase control register. The first value is
-> +      the pointer to the sysmgr, the 2nd value is the register offset for the
-> +      SDMMC clock phase register, and the 3rd value is the bit shift for the
-> +      smplsel(drive in) setting.
+>  drivers/mmc/host/sdhci-of-arasan.c | 69 ++++++++++++++++++++++++++++++
+>  1 file changed, 69 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 3997cad1f793..f051f3802aff 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -21,6 +21,7 @@
+>  #include <linux/of_device.h>
+>  #include <linux/phy/phy.h>
+>  #include <linux/regmap.h>
+> +#include <linux/reset.h>
+>  #include <linux/of.h>
+>  #include <linux/firmware/xlnx-zynqmp.h>
+>
+> @@ -1521,6 +1522,65 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+>         return 0;
+>  }
+>
+> +static int sdhci_zynqmp_set_dynamic_config(struct device *dev,
+> +                                          struct sdhci_arasan_data *sdhci_arasan)
+> +{
+> +       struct sdhci_host *host = sdhci_arasan->host;
+> +       struct clk_hw *hw = &sdhci_arasan->clk_data.sdcardclk_hw;
+> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +       const char *clk_name = clk_hw_get_name(hw);
+> +       u32 mhz, node_id = !strcmp(clk_name, "clk_out_sd0") ? NODE_SD_0 : NODE_SD_1;
+> +       struct reset_control *rstc;
+> +       int ret;
 > +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
+> +       /* Obtain SDHC reset control */
+> +       rstc = devm_reset_control_get_optional_exclusive(dev, NULL);
+> +       if (IS_ERR(rstc)) {
+> +               dev_err(dev, "Cannot get SDHC reset.\n");
+> +               return PTR_ERR(rstc);
+> +       }
 > +
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: altr,socfpga-dw-mshc
-> +    then:
-> +      not:
-> +        required:
-> +          - altr,sysmgr-syscon
-
-'required' evaluates true when all properties in the list are present.
-
-So altr,sysmgr-syscon must not be present.
-
-> +    else:
-> +      properties:
-> +        altr,sysmgr-syscon: false
-
-Else altr,sysmgr-syscon must not be present. ???
-
-Rob
+> +       ret = reset_control_assert(rstc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_FIXED, 0);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_EMMC_SEL,
+> +                                     !!(host->mmc->caps & MMC_CAP_NONREMOVABLE));
+> +       if (ret)
+> +               return ret;
+> +
+> +       mhz = DIV_ROUND_CLOSEST_ULL(clk_get_rate(pltfm_host->clk), 1000000);
+> +       if (mhz > 100 && mhz <= 200)
+> +               mhz = 200;
+> +       else if (mhz > 50 && mhz <= 100)
+> +               mhz = 100;
+> +       else if (mhz > 25 && mhz <= 50)
+> +               mhz = 50;
+> +       else
+> +               mhz = 25;
+> +
+> +       ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_BASECLK, mhz);
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = zynqmp_pm_set_sd_config(node_id, SD_CONFIG_8BIT,
+> +                                     !!(host->mmc->caps & MMC_CAP_8_BIT_DATA));
+> +       if (ret)
+> +               return ret;
+> +
+> +       ret = reset_control_deassert(rstc);
+> +       if (ret)
+> +               return ret;
+> +
+> +       usleep_range(1000, 1500);
+> +
+> +       return 0;
+> +}
+> +
+>  static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
+>  {
+>         struct sdhci_host *host = sdhci_arasan->host;
+> @@ -1685,6 +1745,15 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                 goto unreg_clk;
+>         }
+>
+> +       if (of_device_is_compatible(np, "xlnx,zynqmp-8.9a")) {
+> +               ret = zynqmp_pm_is_function_supported(PM_IOCTL, IOCTL_SET_SD_CONFIG);
+> +               if (!ret) {
+> +                       ret = sdhci_zynqmp_set_dynamic_config(dev, sdhci_arasan);
+> +                       if (ret)
+> +                               goto unreg_clk;
+> +               }
+> +       }
+> +
+>         sdhci_arasan->phy = ERR_PTR(-ENODEV);
+>         if (of_device_is_compatible(np, "arasan,sdhci-5.1")) {
+>                 sdhci_arasan->phy = devm_phy_get(dev, "phy_arasan");
+> --
+> 2.17.1
+>
