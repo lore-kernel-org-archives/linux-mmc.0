@@ -2,89 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A741AC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 15:55:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73354C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 17:33:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231539AbiKGPzY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 10:55:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50402 "EHLO
+        id S232875AbiKGRdQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 12:33:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45558 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232402AbiKGPzX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 10:55:23 -0500
-Received: from mail-qt1-x82c.google.com (mail-qt1-x82c.google.com [IPv6:2607:f8b0:4864:20::82c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 71B3C1CB3E;
-        Mon,  7 Nov 2022 07:55:22 -0800 (PST)
-Received: by mail-qt1-x82c.google.com with SMTP id hh9so7062237qtb.13;
-        Mon, 07 Nov 2022 07:55:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=Cyfnek7GcKCYztRwEEteaAUP1JbSEVGwmlhNomSJ9DQ=;
-        b=Qb2rhdwl5kKh3DP3eKzJ51Ip4dUtLDWZTKx/yBg98j4iBVqpQ9ejkVjdMnlEnJySXs
-         F3vXSTypH7o+LgRfw+sWzi8/08wqNYEg8PmmqUh3zS+A0IoRgB9B1FNpNU94mt7jdBh8
-         MDYNMU8c46TD4C3FrndlIW2iwGZX/yubRhJVDtMXmHYeBB3HnqV5HWlz6+skafta8uUl
-         nw802QL/rd2hwQXD4Zob8ISIPWF7nuu1OpvCN3vmH+uWsCdglWMjuNZD3g/I/SqXe0ST
-         nwqVQzL0zWtj/s5YbySQSzvz5Al5MprPrZCbWGxAA1YBdMUXmmV3GEzg+aGxVhC6V4s0
-         Zm5A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Cyfnek7GcKCYztRwEEteaAUP1JbSEVGwmlhNomSJ9DQ=;
-        b=p5XtY+gVm9lUYbUlrGSSxWDBw+CgIA570alxYZAnEFRorEAOdXckzT00Pc+GrvcvAb
-         9qwPey7lJwvmX6gLZ55FlIY5KOs/oDKDrfUhF1MYzZcg+kJ7AnNay+iPDQsK4/jfgVbs
-         kdyPRe5f6dCHRbCsLgDstc3znr4EUxFiVTBkR0JvbD1hmTWnggNQaKxWGb3ga1E9/g5e
-         68a7tKILjno9xWRk5h3qi0Iy1gpTbo5EPmmxNunk5NC7FBXnH151i+o26FDDpoK0jki2
-         bELlxOhMP5v3zfH/hr9oLK9Mmll6lS6bLbW2AGWuvkhMKAhgVtsqxPhgRLy5WCnEm8QG
-         UMrA==
-X-Gm-Message-State: ANoB5pn0VY/o4qX7hYYLCY5S3Y12GlKZVAPw5iq5Tdj9EZD6Lzs+Tq4M
-        sy0rp7WlbwbEXllM8GDdiAxL5tThiYq88A==
-X-Google-Smtp-Source: AA0mqf6ZL8FmMgQ1Z7gQccrehDQhUWdMkI2RboZSu6xgHS0hJDwtdHLwFvHZ5ygOTKnEFr+nFIbjEQ==
-X-Received: by 2002:ac8:598a:0:b0:3a5:a09e:4154 with SMTP id e10-20020ac8598a000000b003a5a09e4154mr136491qte.160.1667836521282;
-        Mon, 07 Nov 2022 07:55:21 -0800 (PST)
-Received: from glsvmlin.ini.cmu.edu (GLSVMLIN.INI.CMU.EDU. [128.2.16.9])
-        by smtp.gmail.com with ESMTPSA id u11-20020a05622a17cb00b003972790deb9sm6309617qtk.84.2022.11.07.07.55.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 07:55:20 -0800 (PST)
-From:   Gabriel Somlo <gsomlo@gmail.com>
-To:     linux-kernel@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org,
-        kgugala@antmicro.com, mholenko@antmicro.com, joel@jms.id.au,
-        andy.shevchenko@gmail.com, mdudek@internships.antmicro.com,
-        paulus@ozlabs.org
-Subject: [PATCH] mmc: litex_mmc: ensure `host->irq == 0` if polling
-Date:   Mon,  7 Nov 2022 10:55:16 -0500
-Message-Id: <20221107155516.2535912-1-gsomlo@gmail.com>
-X-Mailer: git-send-email 2.37.3
+        with ESMTP id S232773AbiKGRdP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 12:33:15 -0500
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35AC61F9FC;
+        Mon,  7 Nov 2022 09:33:15 -0800 (PST)
+Received: from jupiter.universe (dyndsl-091-096-035-235.ewe-ip-backbone.de [91.96.35.235])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: sre)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id B647166023A6;
+        Mon,  7 Nov 2022 17:33:13 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1667842393;
+        bh=I5nGG6JUHVwZMZBXP5eZJMglpJE+L4055H0JxM8aqmQ=;
+        h=From:To:Cc:Subject:Date:From;
+        b=DK/qrYG9emNCkBmFd7xouyl498094nEf54CsaYY7LZNAOnKxDLckx+AHlcCzlGEYo
+         GHJ9MPQJ534/Eb5+NUZD0Yg54P5gSWLaiBxDCVffYfHR/YhWXCwri4LVoQ/d11bcnL
+         R97c8TMX6HYqFR8/MkUu05qR8iLByGByVBssdM13kDHmRJnKT8cdTNOHM5Hj+ZfRgf
+         /LRcZtfa/k8Y9QX3aEaAw6vUQAZik1dyORpuP06dTAiNufFWSZgNIJgqcYtjZTWX+P
+         sKFNtIVzoFHAPTQIrRSvk3AzPMzbHUeubYzrLZZERFGNWF5UV0RLUFj7a9y/+Sykdb
+         1UbxE5b/hUbVg==
+Received: by jupiter.universe (Postfix, from userid 1000)
+        id D15B148011F; Mon,  7 Nov 2022 18:33:11 +0100 (CET)
+From:   Sebastian Reichel <sebastian.reichel@collabora.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     Jisheng Zhang <jszhang@kernel.org>, linux-mmc@vger.kernel.org,
+        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
+        Sebastian Reichel <sebastian.reichel@collabora.com>,
+        kernel@collabora.com
+Subject: [PATCHv2 1/1] dt-bindings: mmc: sdhci-of-dwcmhsc: Add reset support
+Date:   Mon,  7 Nov 2022 18:33:10 +0100
+Message-Id: <20221107173310.60503-1-sebastian.reichel@collabora.com>
+X-Mailer: git-send-email 2.35.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Ensure the flag is explicitly set to 0 if we determine that polling is
-needed during driver probe, to cover all possible cases.
+Properly describe reset related properties in the binding.
 
-Fixes: 92e099104729 ("mmc: Add driver for LiteX's LiteSDCard interface")
-Signed-off-by: Gabriel Somlo <gsomlo@gmail.com>
+Signed-off-by: Sebastian Reichel <sebastian.reichel@collabora.com>
 ---
- drivers/mmc/host/litex_mmc.c | 1 +
- 1 file changed, 1 insertion(+)
+Changes since PATCHv1:
+ * https://lore.kernel.org/all/20221021171654.87071-1-sebastian.reichel@collabora.com/
+ * dropped minItems (Krzysztof Kozlowski)
+ * reset-names are not copy pasted and intentionally the same as
+   the clock-names. DT looks like this:
 
-diff --git a/drivers/mmc/host/litex_mmc.c b/drivers/mmc/host/litex_mmc.c
-index 6ba0d63b8c07..39c6707fdfdb 100644
---- a/drivers/mmc/host/litex_mmc.c
-+++ b/drivers/mmc/host/litex_mmc.c
-@@ -502,6 +502,7 @@ static int litex_mmc_irq_init(struct platform_device *pdev,
+   clocks = <&cru CCLK_EMMC>, <&cru HCLK_EMMC>,
+            <&cru ACLK_EMMC>, <&cru BCLK_EMMC>,
+            <&cru TMCLK_EMMC>;
+   clock-names = "core", "bus", "axi", "block", "timer";
+   resets = <&cru SRST_C_EMMC>, <&cru SRST_H_EMMC>,
+            <&cru SRST_A_EMMC>, <&cru SRST_B_EMMC>,
+            <&cru SRST_T_EMMC>;
+   reset-names = "core", "bus", "axi", "block", "timer";
+---
+ .../devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml   | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+index 71f8e726d641..51ba44cad842 100644
+--- a/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/snps,dwcmshc-sdhci.yaml
+@@ -45,6 +45,17 @@ properties:
+       - const: block
+       - const: timer
  
- use_polling:
- 	host->mmc->caps |= MMC_CAP_NEEDS_POLL;
-+	host->irq = 0;
- 	return 0;
- }
- 
++  resets:
++    maxItems: 5
++
++  reset-names:
++    items:
++      - const: core
++      - const: bus
++      - const: axi
++      - const: block
++      - const: timer
++
+   rockchip,txclk-tapnum:
+     description: Specify the number of delay for tx sampling.
+     $ref: /schemas/types.yaml#/definitions/uint8
 -- 
-2.37.3
+2.35.1
 
