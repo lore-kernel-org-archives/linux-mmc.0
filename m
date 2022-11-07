@@ -2,84 +2,74 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F426C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:14:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C21E4C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon,  7 Nov 2022 20:14:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232896AbiKGUOO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 15:14:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51106 "EHLO
+        id S232942AbiKGUOT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 15:14:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232895AbiKGUOB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:14:01 -0500
-Received: from mail-pl1-x632.google.com (mail-pl1-x632.google.com [IPv6:2607:f8b0:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1067B2AE2C
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:52 -0800 (PST)
-Received: by mail-pl1-x632.google.com with SMTP id j12so12081006plj.5
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:52 -0800 (PST)
+        with ESMTP id S232851AbiKGUOD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 15:14:03 -0500
+Received: from mail-pg1-x536.google.com (mail-pg1-x536.google.com [IPv6:2607:f8b0:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EF3F2B632
+        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 12:13:55 -0800 (PST)
+Received: by mail-pg1-x536.google.com with SMTP id q71so11415039pgq.8
+        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 12:13:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=A6b9G0SCZxoZRwMrRSH3C6wfOBkmLuDPQpwT0I2yX9Q=;
-        b=WSDf0ig7BOOdDboef+ggJmeXY+xzqqVm4ytlUjbJ5ECJQwG599gRWYUvOfCFn/qzah
-         FYHHGhRDBgKYj/iMnDblRQXsPoLDpgogXLg9cy3IPoUfSq1YiNDI6pByEwF+p8U7vlBK
-         hGR5p8N17I5eOTLOEnZW0LzebTRa9FixOtIGsr2/0VYyNguvl6W0XGEnI5r1VaJ99A2p
-         qhx3doJRqZ5JArcBujJxZqcrJp2hVybr7XNsesDA0BzRZhCJul9s+lMo4YipmGXBtLVb
-         yTqYxhAzFnDYGL8cP+NR8g7ze+dLH6u1n2PdS9JZhyRk81C60k6izZ9cFMEF5fDEpDj2
-         uU2g==
+        bh=k/CPP2cwdDGdhfrnlXwHQ/NO9Q58jsLemjM9t2jp4EA=;
+        b=x0R6EwqFYarF2NtrhuhPxZzLW/aZRfANHzpmffijkvmOtNd9TFuTJdaTON3eAeuFVJ
+         FSbBVTzqoMvnR6NCgN/+sQW/QFrgrdCTb/LEeb+mMJcHkRPe77Bk7sHwkqkTJiCgA8lX
+         mOR/PoqFE6ygzoMN0l4xt+C1C5+0Q5kSrDuB4LKF4fwWgVqurdMpDewqv9yGUFgSQFqI
+         9AXom6nDsh1uAcVr/fSOmb/SvOgRWpydnALPS8N4g3TrI6i7ckwuIoqDyrrNxr6QFbdh
+         slN11MtYCk0Rf9iFgvu1SzXXQGMp0xKRSDFWd36ulWdJLXLnfTup0CJxAsc0AzcjJJPU
+         D+eA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=A6b9G0SCZxoZRwMrRSH3C6wfOBkmLuDPQpwT0I2yX9Q=;
-        b=4VnlIv5Olu3mSOu8rCbArsIyZ8OmESub0dD9SCOKVIcFvjA5Mt1HNyd+m7QBT2GDrC
-         8/H7ytl1fVqXc5DoQBFZAdjS8E9jBOjMsHC3GDRi0gD5D6RwH4Veq0Gm71Fl0JXPNUFn
-         4+O2l2sVfMLobt+x6Z8XOMQoDWl6ZMaZP+pwXeg/BOkTwqF4m36JzlCoL7iYCpF3fUhs
-         E6YmQ9LfBG/ag144Bu9xTJHpl90LltLeCm3J3yoi5tXpcH8N+dhMN/JLygEI5HQLKr2/
-         xC0nsKOAzGF06R+df4J/5T3VWEedKf1SQmrlPj/WvpDPxwVxX8Rnl+IwySBjpN5udRzr
-         d3CA==
-X-Gm-Message-State: ACrzQf0IeRS6Is2iLi+oTIJUt9QyH+udqtS9+pEUh5o6QywPem12+KbE
-        QXMEJChVywKko7qd/txPOCrtDHWD5Ygw58GbEgy2o564mCc=
-X-Google-Smtp-Source: AMsMyM5vMJVy21KVcqnnT7Au3Mp0CWhuRPw7wo1kgid2M+MIB8owKUaJDcrxbTp0exHOuevBmX0h+x/eWeCQ0nS9sRs=
-X-Received: by 2002:a17:903:100c:b0:186:63a1:3b5d with SMTP id
- a12-20020a170903100c00b0018663a13b5dmr53387786plb.148.1667852031705; Mon, 07
- Nov 2022 12:13:51 -0800 (PST)
+        bh=k/CPP2cwdDGdhfrnlXwHQ/NO9Q58jsLemjM9t2jp4EA=;
+        b=Hc/gtrctNKS6I18Jv6nlQPCC/yH7RcZeT0FoI64x3WDHHfecDEChmQFjppgLGl/w1a
+         BDedUbCBdIw/Bd+YHZwk1OtkE0asdD8b2IEDMzht8DdUnVdzRqlX4hswqmh3zY1CyQcW
+         fpvXc6fWo1PU9wngmVqyRDG5Dr+dA09tT1yKzMfAjBb6MD6v21JPM0XQ7tcHqoUPdvz+
+         493HSlYwHHvPUIevN2qY5HaVcRhegs+HRk3jQY1pj0ab5sSlxOEGD50ry6I72ih71++r
+         23+SFsBfjFeMvuNuwoo/e8W2gyFhh/V8P8Vj3SunGt3GEG7y81iZuNNYfkA92/9aKSFf
+         frmQ==
+X-Gm-Message-State: ACrzQf0ZGzRw15clxouRDMNWIMUF8cuI3MVzCpVF55RjiMFTSEr0bLHX
+        VC9zVpYdXVVBc4XkPzlebEJRzo82hshnj7R2S4HlxrBlvrQ=
+X-Google-Smtp-Source: AMsMyM4sHwwndAJfkWUAGPVDKn1smFhxb++y7Ys6RG3wC2+fkvLJQ8Pts5QilKzk0AYmG/GZlIJcsxyJDD1nNN8rAgs=
+X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
+ v13-20020a63464d000000b004415968cd0emr46115677pgk.595.1667852035052; Mon, 07
+ Nov 2022 12:13:55 -0800 (PST)
 MIME-Version: 1.0
-References: <20221102120105.5747-1-adrian.hunter@intel.com>
-In-Reply-To: <20221102120105.5747-1-adrian.hunter@intel.com>
+References: <20221104095512.4068-1-chevron.li@bayhubtech.com>
+In-Reply-To: <20221104095512.4068-1-chevron.li@bayhubtech.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 7 Nov 2022 21:13:14 +0100
-Message-ID: <CAPDyKFqKu5FpeyzifzCzyvmpiCZOwD4Pqq-8Eqf_L7a=uDDYbw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Remove duplicate words in comments
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     linux-mmc@vger.kernel.org
+Date:   Mon, 7 Nov 2022 21:13:18 +0100
+Message-ID: <CAPDyKFqaQyQ0rViHUZoN8NzcPu51utu4KhC2KsY4p2s_sua=kQ@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc: sdhci-pci-o2micro: fix card detect fail issue
+ caused by CD# debounce timeout
+To:     Chevron Li <chevron.li@bayhubtech.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, shaper.liu@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
+        louis.lu@bayhubtech.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2 Nov 2022 at 13:21, Adrian Hunter <adrian.hunter@intel.com> wrote:
+On Fri, 4 Nov 2022 at 10:55, Chevron Li <chevron.li@bayhubtech.com> wrote:
 >
-> Remove duplicate words in comments found using the following commands:
+> The SD card is recognized failed sometimes when resume from suspend.
+> Because CD# debounce time too long then card present report wrong.
+> Finally, card is recognized failed.
 >
-> pcregrep --color=always -n \
->         '([^a-zA-Z_])([a-zA-Z_]+)[[:space:]]+\2[^a-zA-Z_]' \
->         drivers/mmc/host/*.[ch] drivers/mmc/core/*.[ch] \
->         include/linux/mmc/*.h \
->         include/uapi/linux/mmc/*.h | \
->         grep -v 'long long'
->
-> pcregrep --color=always -n -M \
->         '([^a-zA-Z_])([a-zA-Z_]+)[ \t]*\n[[:space:]*]+\2[^a-zA-Z_]' \
->         drivers/mmc/host/*.[ch] \
->         drivers/mmc/core/*.[ch] \
->         include/linux/mmc/*.h \
->         include/uapi/linux/mmc/*.h
->
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-
-Nice way of doing things like this!
+> Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
 
 Applied for next, thanks!
 
@@ -87,103 +77,40 @@ Kind regards
 Uffe
 
 
-
 > ---
->  drivers/mmc/core/core.c           | 4 ++--
->  drivers/mmc/core/host.c           | 2 +-
->  drivers/mmc/host/sdhci-acpi.c     | 2 +-
->  drivers/mmc/host/sdhci-bcm-kona.c | 2 +-
->  drivers/mmc/host/sdhci-omap.c     | 2 +-
->  drivers/mmc/host/sdhci.h          | 2 +-
->  6 files changed, 7 insertions(+), 7 deletions(-)
+> Change in V1:
+> Adjust bayhub chip setting for CD# debounce time to minimum value
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 95fa8fb1d45f..757208b5a65c 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -56,7 +56,7 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
->  /*
->   * Enabling software CRCs on the data blocks can be a significant (30%)
->   * performance cost, and for other reasons may not always be desired.
-> - * So we allow it it to be disabled.
-> + * So we allow it to be disabled.
->   */
->  bool use_spi_crc = 1;
->  module_param(use_spi_crc, bool, 0);
-> @@ -527,7 +527,7 @@ EXPORT_SYMBOL(mmc_cqe_post_req);
->   * mmc_cqe_recovery - Recover from CQE errors.
->   * @host: MMC host to recover
->   *
-> - * Recovery consists of stopping CQE, stopping eMMC, discarding the queue in
-> + * Recovery consists of stopping CQE, stopping eMMC, discarding the queue
->   * in eMMC, and discarding the queue in CQE. CQE must call
->   * mmc_cqe_request_done() on all requests. An error is returned if the eMMC
->   * fails to discard its queue.
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index b89dca1f15e9..5457c8aeeea1 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -269,7 +269,7 @@ EXPORT_SYMBOL(mmc_of_parse_clk_phase);
->   * @host: host whose properties should be parsed.
->   *
->   * To keep the rest of the MMC subsystem unaware of whether DT has been
-> - * used to to instantiate and configure this host instance or not, we
-> + * used to instantiate and configure this host instance or not, we
->   * parse the properties and set respective generic mmc-host flags and
->   * parameters.
->   */
-> diff --git a/drivers/mmc/host/sdhci-acpi.c b/drivers/mmc/host/sdhci-acpi.c
-> index bddfaba091a9..8f0e639236b1 100644
-> --- a/drivers/mmc/host/sdhci-acpi.c
-> +++ b/drivers/mmc/host/sdhci-acpi.c
-> @@ -651,7 +651,7 @@ static int sdhci_acpi_emmc_amd_probe_slot(struct platform_device *pdev,
->          *       instead use the SDR104 preset register.
->          *
->          *    If the above issues are resolved we could remove this quirk for
-> -        *    firmware that that has valid presets (i.e., SDR12 <= 12 MHz).
-> +        *    firmware that has valid presets (i.e., SDR12 <= 12 MHz).
->          */
->         host->quirks2 |= SDHCI_QUIRK2_PRESET_VALUE_BROKEN;
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index ad457cd9cbaa..bca1d095b759 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -32,6 +32,7 @@
+>  #define O2_SD_CAPS             0xE0
+>  #define O2_SD_ADMA1            0xE2
+>  #define O2_SD_ADMA2            0xE7
+> +#define O2_SD_MISC_CTRL2       0xF0
+>  #define O2_SD_INF_MOD          0xF1
+>  #define O2_SD_MISC_CTRL4       0xFC
+>  #define O2_SD_MISC_CTRL                0x1C0
+> @@ -877,6 +878,12 @@ static int sdhci_pci_o2_probe(struct sdhci_pci_chip *chip)
+>                 /* Set Tuning Windows to 5 */
+>                 pci_write_config_byte(chip->pdev,
+>                                 O2_SD_TUNING_CTRL, 0x55);
+> +               //Adjust 1st and 2nd CD debounce time
+> +               pci_read_config_dword(chip->pdev, O2_SD_MISC_CTRL2, &scratch_32);
+> +               scratch_32 &= 0xFFE7FFFF;
+> +               scratch_32 |= 0x00180000;
+> +               pci_write_config_dword(chip->pdev, O2_SD_MISC_CTRL2, scratch_32);
+> +               pci_write_config_dword(chip->pdev, O2_SD_DETECT_SETTING, 1);
+>                 /* Lock WP */
+>                 ret = pci_read_config_byte(chip->pdev,
+>                                            O2_SD_LOCK_WP, &scratch);
 >
-> diff --git a/drivers/mmc/host/sdhci-bcm-kona.c b/drivers/mmc/host/sdhci-bcm-kona.c
-> index 61a12f2f7f03..6a93a54fe067 100644
-> --- a/drivers/mmc/host/sdhci-bcm-kona.c
-> +++ b/drivers/mmc/host/sdhci-bcm-kona.c
-> @@ -168,7 +168,7 @@ static void sdhci_bcm_kona_init_74_clocks(struct sdhci_host *host,
->         /*
->          *  JEDEC and SD spec specify supplying 74 continuous clocks to
->          * device after power up. With minimum bus (100KHz) that
-> -        * that translates to 740us
-> +        * translates to 740us
->          */
->         if (power_mode != MMC_POWER_OFF)
->                 udelay(740);
-> diff --git a/drivers/mmc/host/sdhci-omap.c b/drivers/mmc/host/sdhci-omap.c
-> index 033be559a730..8ed9256b83da 100644
-> --- a/drivers/mmc/host/sdhci-omap.c
-> +++ b/drivers/mmc/host/sdhci-omap.c
-> @@ -370,7 +370,7 @@ static int sdhci_omap_execute_tuning(struct mmc_host *mmc, u32 opcode)
->
->         /*
->          * Stage 1: Search for a maximum pass window ignoring any
-> -        * any single point failures. If the tuning value ends up
-> +        * single point failures. If the tuning value ends up
->          * near it, move away from it in stage 2 below
->          */
->         while (phase_delay <= MAX_PHASE_DELAY) {
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index d750c464bd1e..908da47ac5ba 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -345,7 +345,7 @@ struct sdhci_adma2_64_desc {
->   */
->  #define SDHCI_MAX_SEGS         128
->
-> -/* Allow for a a command request and a data request at the same time */
-> +/* Allow for a command request and a data request at the same time */
->  #define SDHCI_MAX_MRQS         2
->
->  /*
+> base-commit: ee6050c8af96bba2f81e8b0793a1fc2f998fcd20
 > --
-> 2.34.1
+> 2.25.1
 >
