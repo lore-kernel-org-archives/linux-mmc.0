@@ -2,78 +2,75 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E240FC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 05:02:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5CDEC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 08:06:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233220AbiKHFCK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Nov 2022 00:02:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36542 "EHLO
+        id S233087AbiKHIGZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Nov 2022 03:06:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59262 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233299AbiKHFB5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 00:01:57 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E16BB6;
-        Mon,  7 Nov 2022 21:01:55 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 1F3D7B818B3;
-        Tue,  8 Nov 2022 05:01:54 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2CEA8C433D6;
-        Tue,  8 Nov 2022 05:01:51 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1667883712;
-        bh=uY2J6/i7ChrGZanEOQgMgV6TUMGexsT52cLvRz/45UQ=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=gC5Y0e2umNjAhS6ck9kN60FveHqnT5Xf6gYjQd9awLkOD5WD0Aa0C8HUBp337qF3m
-         RDCImOipjQmodOaxkv+a4qOe/Owmb0k1pa0pGZv0bi7XnV9orraUKvq+oxldNASEOq
-         BNStE9XXJ6Btw7diToZ4NkK1J+mf7t4WMoc7JeE8N+ogqBmrppvJlLyJVZLHW7ohlm
-         dEBRUBJl2XinvAy//MLpVY3eHxyDXaWpJR4/Xeqi90DKA5Oazl3iBg1Kie1ip9Cvsw
-         1PY7ZfA8xMUtfh8u7/FcdtzLuLQgKeyJE11qBrS3BGK0tf06JxuiawGU7ZOhxBhhJx
-         AJm5YEXapuL5w==
-From:   Bjorn Andersson <andersson@kernel.org>
-To:     agross@kernel.org, angelogioacchino.delregno@collabora.com
-Cc:     Tony Luck <tony.luck@intel.com>, keescook@chromium.org,
-        marijn.suijten@somainline.org, a39.skl@gmail.com, lee@kernel.org,
-        robh+dt@kernel.org, kernel@collabora.com, ulf.hansson@linaro.org,
-        linux-iio@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-hardening@vger.kernel.org, linux-kernel@vger.kernel.org,
-        bhupesh.sharma@linaro.org, gpiccoli@igalia.com,
-        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
-        jic23@kernel.org, srinivas.kandagatla@linaro.org, lars@metafoo.de,
-        luca@z3ntu.xyz, konrad.dybcio@somainline.org,
-        linux-arm-msm@vger.kernel.org
-Subject: Re: (subset) [PATCH 0/9] MSM8956/76 and Sony Xperia X / X Compact support
-Date:   Mon,  7 Nov 2022 23:01:49 -0600
-Message-Id: <166788370693.629864.14863450709842430879.b4-ty@kernel.org>
-X-Mailer: git-send-email 2.37.1
-In-Reply-To: <20221104172122.252761-1-angelogioacchino.delregno@collabora.com>
-References: <20221104172122.252761-1-angelogioacchino.delregno@collabora.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S232494AbiKHIGY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 03:06:24 -0500
+Received: from inva021.nxp.com (inva021.nxp.com [92.121.34.21])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6994CC8;
+        Tue,  8 Nov 2022 00:06:23 -0800 (PST)
+Received: from inva021.nxp.com (localhost [127.0.0.1])
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id 2C232202967;
+        Tue,  8 Nov 2022 09:06:22 +0100 (CET)
+Received: from aprdc01srsp001v.ap-rdc01.nxp.com (aprdc01srsp001v.ap-rdc01.nxp.com [165.114.16.16])
+        by inva021.eu-rdc02.nxp.com (Postfix) with ESMTP id E9448202964;
+        Tue,  8 Nov 2022 09:06:21 +0100 (CET)
+Received: from local (shlinux2.ap.freescale.net [10.192.224.44])
+        by aprdc01srsp001v.ap-rdc01.nxp.com (Postfix) with ESMTP id E35E9180222D;
+        Tue,  8 Nov 2022 16:06:19 +0800 (+08)
+From:   haibo.chen@nxp.com
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, stable@vger.kernel.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com
+Subject: [PATCH] mmc: sdhci-esdhc-imx: use the correct host caps for MMC_CAP_8_BIT_DATA
+Date:   Tue,  8 Nov 2022 15:45:03 +0800
+Message-Id: <1667893503-20583-1-git-send-email-haibo.chen@nxp.com>
+X-Mailer: git-send-email 2.7.4
+X-Virus-Scanned: ClamAV using ClamSMTP
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 4 Nov 2022 18:21:13 +0100, AngeloGioacchino Del Regno wrote:
-> This series adds basic support for MSM8976 and its lower spec variant
-> MSM8956, along with two devices: the Sony Xperia X and X Compact.
-> 
-> For now, even though I do have a tree in which these two devices are
-> fully booting, only a basic console boot is provided as the rest is
-> awaiting cleanup and some more dependencies.
-> Especially every device requiring IOMMU support, like MDSS, MDP and
-> Adreno GPU cannot work with the current qcom_iommu driver, as it
-> needs some code to get the ASIDs right for MSM8956/76.
-> 
-> [...]
+From: Haibo Chen <haibo.chen@nxp.com>
 
-Applied, thanks!
+MMC_CAP_8_BIT_DATA belongs to struct mmc_host, not struct sdhci_host.
+So correct it here.
 
-[4/9] dt-bindings: soc: qcom: qcom,smd-rpm: Use qcom,smd-channels on MSM8976
-      commit: fe7e7def2ffc2962644de7abccf2ce85b5f07509
+Fixes: 1ed5c3b22fc7 ("mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on 8bit bus")
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+Cc: stable@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Best regards,
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index a54f1806dd57..004c6352d954 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1679,14 +1679,14 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+ 
+-	if (host->caps & MMC_CAP_8_BIT_DATA &&
++	if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+ 	    imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 		host->mmc->caps2 |= MMC_CAP2_HS400;
+ 
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
+ 		host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
+ 
+-	if (host->caps & MMC_CAP_8_BIT_DATA &&
++	if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+ 	    imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+ 		host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
 -- 
-Bjorn Andersson <andersson@kernel.org>
+2.34.1
+
