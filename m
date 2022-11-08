@@ -2,101 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 357A9C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 04:15:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F6EEC43219
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 04:57:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233360AbiKHEPK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 7 Nov 2022 23:15:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44948 "EHLO
+        id S233098AbiKHE5q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 7 Nov 2022 23:57:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233371AbiKHEOi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 23:14:38 -0500
-Received: from mail-pf1-x42c.google.com (mail-pf1-x42c.google.com [IPv6:2607:f8b0:4864:20::42c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E7DB1A06D
-        for <linux-mmc@vger.kernel.org>; Mon,  7 Nov 2022 20:14:35 -0800 (PST)
-Received: by mail-pf1-x42c.google.com with SMTP id d10so12718622pfh.6
-        for <linux-mmc@vger.kernel.org>; Mon, 07 Nov 2022 20:14:35 -0800 (PST)
+        with ESMTP id S232816AbiKHE5a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 7 Nov 2022 23:57:30 -0500
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 130D847312;
+        Mon,  7 Nov 2022 20:53:55 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id i21so20716058edj.10;
+        Mon, 07 Nov 2022 20:53:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=edgeble-ai.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=KvVKBdD+O5vHgZ+WUSF5TR185G5cSVikAYO7GBsOUyc=;
-        b=Q8jmaePBVTwlbLFxwaxJK2Eyh7lMIse91drNfCwWtWfseBIbUofCImwGWuSQWdWOgL
-         KeSXzrYMZ2aPQlFwM0JpspT7ruyJ4ykJQUq3aFnFjDQm0iHC7Zo4veWiWKrS/pBL9fCe
-         huOf2aU1YuTImJYADUJFvUOA5b+pEj9Rsqp5KB5oA+kT67qdBWfh76c2UZc/FW7oVBlH
-         HaCTpYWCYvWBvpY3dnVncb1CieLXHKIyfwlPJNmhyEJ47JagONqNSgiZ6pAIE+EkO3s+
-         c2ACVwEyQyhTI/Z4HQ6al2f4CYUds1oXWF08XmFFNwFeoaWTjy6x+F88aq8lRaglFS6A
-         kl4Q==
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=pg8ScU3pDth5YYtNSba+y23tAKdqXF6at6ma5iPQR6A=;
+        b=pGvdsmvMKFLMKcPCJ/8gIwtPi3zr+g4v+hyqpNSP1SZ6ryQSKid/FM5BGy4rrZNU72
+         n63/4aKYpRf8Yx5ig/3MTBoyRD6xLQfS4ZLpUNXMepLGkSyOFw4qq63fA36whOjwwvX6
+         Zs0iVwIqYwC7cZXF71DFuAKWms7xNV2HVPFu2JirGIYHk51DxN1PpgC9XCS7/cGC2cj+
+         udl1KzVAGytG3QK43KyAHCBkOf2OC12zTX6khFD9jeGY2yEk6hLltLCEdRXrYO9462DN
+         u/wSz0330JH+QYLkymEmAT65BpxqA9ObL8VOBZaBxTr+IKwk1paW0MaDYlS1oLlacmKx
+         f/2A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=KvVKBdD+O5vHgZ+WUSF5TR185G5cSVikAYO7GBsOUyc=;
-        b=rwnPfuHAWCTfuDbL6X15V/Duur5x6sVMzRTO1vLvPcT0BQX8QgzFWyx1K9bNltOoDM
-         bWfbTlnmQgzVH/rmSbF6UQGjXnyMN6hCMfLsAiEGQrbf46rwBZAOpCm/P5EGWCqiyccn
-         eCornl+zi5CDQu6Xb9aNdo2TJygxyzY9GtJtK9hAMLNNl3eoJUfSRW1ItwPF2TA0mwS8
-         jku9Ps/7gwktVJbzjwcCqf2rA+DNih9Akgw7ZLZ7WbCNNZs+E/sLGAbZ/9VJTzsrUgUg
-         HIIRfXjClhhbm7T95QtYtyaPdH5jEt+2GxAMT95flQv7jHf3XxLGNM3fFbuYJ/qDG+yS
-         yF0A==
-X-Gm-Message-State: ACrzQf15/LAOfPL55TikfIdL7kdeGjwWiH/ghpY49BCBpQgDZjwXHmjl
-        lh5J/ZjV86UT9wKtfngf+zWNNg==
-X-Google-Smtp-Source: AMsMyM6wsYcCCVpobtd0f0K57c6DyDwurbZLCHjPx7BRWoNlRXbMXPqq13o+JkUY8ua1OJZvF6IKTA==
-X-Received: by 2002:a63:fd4f:0:b0:45f:d7ef:9f94 with SMTP id m15-20020a63fd4f000000b0045fd7ef9f94mr47171172pgj.137.1667880874769;
-        Mon, 07 Nov 2022 20:14:34 -0800 (PST)
-Received: from localhost.localdomain ([2405:201:c00a:a809:63d1:2564:ea55:4e97])
-        by smtp.gmail.com with ESMTPSA id e5-20020a170902b78500b00186ac812ab0sm5799783pls.83.2022.11.07.20.14.30
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=pg8ScU3pDth5YYtNSba+y23tAKdqXF6at6ma5iPQR6A=;
+        b=zn8GZ7JpDZBFk38QlgJXHXhgExFo1fL0D9x1wec/w4AlrTyMDP6Bo2jy379Ovs5CJf
+         +eppK01FDoBPMi22Je0u2JHdu1jVcKZq5FLv9zTPXhpfOyXP8k5LByMZWKnmZ3zGVGky
+         2dSfteq+JWZJ2hM/GLpz0G/H4Vdu4noLmG4aePLR+ekGgXRIlYziQyD2mFR0LgoIIMBv
+         u6EgWBbxVnQ0EuRcxNkYPfcP14FmZuJWT6gnaeKCK4bXqT++lbL2H9iMqNdXuUOfIizb
+         QIsGpIKIUM7/G6+f5Jar8uS/8E59Tp66ioTgDOgpHpy8F3a+fuh1OczAViJRfATzVkp3
+         CUvg==
+X-Gm-Message-State: ACrzQf2b1EgSX3ljfAtbK7gjib59nriX/ExWGjMazyM4OGGMHAchw96W
+        kfeDzxCIBgQatJp4PQqaTmU=
+X-Google-Smtp-Source: AMsMyM6mGObMOMcT/OgXEfSZ/+y0XBnkWG4w7scRQPt88ebiOnXXWel3+lC+Td5lko/J2dEDfjF17A==
+X-Received: by 2002:aa7:cb09:0:b0:461:e6b6:4bad with SMTP id s9-20020aa7cb09000000b00461e6b64badmr30898511edt.27.1667883233519;
+        Mon, 07 Nov 2022 20:53:53 -0800 (PST)
+Received: from hp-power-15.localdomain (mm-58-12-212-37.vitebsk.dynamic.pppoe.byfly.by. [37.212.12.58])
+        by smtp.gmail.com with ESMTPSA id p11-20020a05640210cb00b004637489cf08sm4994444edu.88.2022.11.07.20.53.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 07 Nov 2022 20:14:34 -0800 (PST)
-From:   Jagan Teki <jagan@edgeble.ai>
-To:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        Johan Jonker <jbx6244@gmail.com>,
-        Jagan Teki <jagan@edgeble.ai>, linux-mmc@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [PATCH v7 02/10] dt-bindings: mmc: rockchip-dw-mshc: Add power-domains property
-Date:   Tue,  8 Nov 2022 09:43:52 +0530
-Message-Id: <20221108041400.157052-3-jagan@edgeble.ai>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221108041400.157052-1-jagan@edgeble.ai>
-References: <20221108041400.157052-1-jagan@edgeble.ai>
+        Mon, 07 Nov 2022 20:53:53 -0800 (PST)
+From:   Siarhei Volkau <lis8215@gmail.com>
+Cc:     Siarhei Volkau <lis8215@gmail.com>,
+        Paul Cercueil <paul@crapouillou.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mips@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: [PATCH 0/2] mmc: jz4740: Don't change parent clock rate for some SoCs
+Date:   Tue,  8 Nov 2022 07:52:58 +0300
+Message-Id: <20221108045300.2084671-1-lis8215@gmail.com>
+X-Mailer: git-send-email 2.36.1
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+To:     unlisted-recipients:; (no To-header on input)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document power-domains property in rockchip dw controller.
+Some SoCs have one clock divider for all MMC units, thus changing one
+affects others as well. This leads to random hangs and memory
+corruptions, observed on the JZ4755 based device with two MMC slots
+used at the same time.
 
-RV1126 is using eMMC and SDIO power domains but SDMMC is not.
+List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b.
 
-Cc: linux-mmc@vger.kernel.org
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Jagan Teki <jagan@edgeble.ai>
----
-Changes for v7:
-- new patch
+The MMC core has its own clock divisor and it goes to the first plan in
+that case.
 
- Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 3 +++
- 1 file changed, 3 insertions(+)
+Siarhei Volkau (2):
+  mmc: jz4740: Don't change parent clock rate for some SoCs
+  MIPS: ingenic: rs90: set MMC_MUX clock
 
-diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-index 95f59a5e3576..c7e14b7dba9e 100644
---- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-@@ -71,6 +71,9 @@ properties:
-       to control the clock phases, "ciu-sample" is required for tuning
-       high speed modes.
- 
-+  power-domains:
-+    maxItems: 1
-+
-   rockchip,default-sample-phase:
-     $ref: /schemas/types.yaml#/definitions/uint32
-     minimum: 0
+ arch/mips/boot/dts/ingenic/rs90.dts |  5 +++--
+ drivers/mmc/host/jz4740_mmc.c       | 10 +++++++++-
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
 -- 
-2.25.1
+2.36.1
 
