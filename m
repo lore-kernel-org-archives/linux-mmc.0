@@ -2,183 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FBCBC433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 09:07:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D081C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 09:14:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233527AbiKHJHA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Nov 2022 04:07:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59634 "EHLO
+        id S233643AbiKHJOx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Nov 2022 04:14:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233654AbiKHJGv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 04:06:51 -0500
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 423281D665;
-        Tue,  8 Nov 2022 01:06:50 -0800 (PST)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id 5A4366602339;
-        Tue,  8 Nov 2022 09:06:47 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1667898408;
-        bh=ueI+2JlJ8usQR2qw2C5uUQ8cXmpDFvzCuDuDhHJLK6k=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=Cdl0yXa75sc5uC9OZZNK8dJnq9kBEwkNsoj/Xag2CA0BWHRCUKt4WkSQMHUQ845GQ
-         saCu/BmwHKUDjX7dn4NleewUVVhHWtTsR8WSm5WXIfxx2xOUoxwp70wTprD5nYUmo5
-         5BJ0TWZqFPHIn4b3mG5h7SGb4ECS+0OMpVq+TJ1cLXqEdgshDQgaYE2P5ALSeD4xP5
-         zTaVLgDl2apypZen3F4dFpFNCUUGqR8WlZeAO95Iv3UDSAUsP0xnf/SuKzkYV6SACG
-         sHlvSzh5tLzdSkKXc6tSR6WEabp5Rkoh+6NZf6Qa82pTabMR+oE+Zz59tLNSjjBH4N
-         8aZJaOk6t1UcA==
-Message-ID: <b99a3071-0982-a1bd-f3b9-14e2a8fdd904@collabora.com>
-Date:   Tue, 8 Nov 2022 10:06:45 +0100
+        with ESMTP id S233313AbiKHJOs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 04:14:48 -0500
+Received: from mail-m11880.qiye.163.com (mail-m11880.qiye.163.com [115.236.118.80])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA9A91F9E9
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Nov 2022 01:14:47 -0800 (PST)
+Received: from [172.16.12.69] (unknown [58.22.7.114])
+        by mail-m11880.qiye.163.com (Hmail) with ESMTPA id E04A920428;
+        Tue,  8 Nov 2022 17:14:44 +0800 (CST)
+Message-ID: <dcac1f10-98a7-b831-005c-542b8a0d4337@rock-chips.com>
+Date:   Tue, 8 Nov 2022 17:14:44 +0800
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH 8/9] arm64: dts: qcom: Add DTS for MSM8976 and MSM8956
- SoCs
-Content-Language: en-US
-To:     Bjorn Andersson <andersson@kernel.org>
-Cc:     agross@kernel.org, konrad.dybcio@somainline.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee@kernel.org, ulf.hansson@linaro.org,
-        srinivas.kandagatla@linaro.org, jic23@kernel.org, lars@metafoo.de,
-        keescook@chromium.org, tony.luck@intel.com, gpiccoli@igalia.com,
-        bhupesh.sharma@linaro.org, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-hardening@vger.kernel.org, marijn.suijten@somainline.org,
-        kernel@collabora.com, luca@z3ntu.xyz, a39.skl@gmail.com,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@somainline.org>
-References: <20221104172122.252761-1-angelogioacchino.delregno@collabora.com>
- <20221104172122.252761-9-angelogioacchino.delregno@collabora.com>
- <20221108045508.hnnwt22m6ceg5u4y@builder.lan>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20221108045508.hnnwt22m6ceg5u4y@builder.lan>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Cc:     shawn.lin@rock-chips.com, linux-mmc <linux-mmc@vger.kernel.org>,
+        =?UTF-8?B?SnlhbiBDaG91IFvlkajoirflrold?= <jyanchou@realtek.com>,
+        Jisheng.Zhang@synaptics.com
+Subject: Re: Question about EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
+Content-Language: en-GB
+To:     Adrian Hunter <adrian.hunter@intel.com>
+References: <5842d536cb0d4086a225ea0fa2d42e72@realtek.com>
+ <c97df3b4-0038-616d-ef10-953eba595638@intel.com>
+ <0f8f0d91-9e1f-c71e-86a6-25a6bdb4f6b1@rock-chips.com>
+ <38161cf2-4e6e-dbb3-4743-a21657b92451@intel.com>
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <38161cf2-4e6e-dbb3-4743-a21657b92451@intel.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+        tZV1koWUFJSktLSjdXWS1ZQUlXWQ8JGhUIEh9ZQVlDSkxLVkxJSU5OSENNTklNT1UTARMWGhIXJB
+        QOD1lXWRgSC1lBWU5DVUlJVUxVSkpPWVdZFhoPEhUdFFlBWU9LSFVKSktISkNVSktLVUtZBg++
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6PxA6LDo4IT0YA0giVjMDSDI#
+        EU4KCjFVSlVKTU1MQ0JDQ0NOTU5DVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQUhJQkI3Bg++
+X-HM-Tid: 0a84568543bf2eb6kusne04a920428
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 08/11/22 05:55, Bjorn Andersson ha scritto:
-> On Fri, Nov 04, 2022 at 06:21:21PM +0100, AngeloGioacchino Del Regno wrote:
->> From: AngeloGioacchino Del Regno <angelogioacchino.delregno@somainline.org>
++ Jisheng Zhang
+
+On 2022/11/8 16:34, Adrian Hunter wrote:
+> On 8/11/22 10:28, Shawn Lin wrote:
+>> On 2022/11/8 16:20, Adrian Hunter wrote:
+>>> On 8/11/22 09:25, Jyan Chou [周芷安] wrote:
+>>>> Hello Adrian Hunter,
+>>>>
+>>>> We are now using the upstream code of EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER, but we found that the existing driver cannot support the limitation of Synopsys IP.
+>>>>
+>>>> Synopsys IP has a description on their data book " While using DMA, the host memory data buffer size and start address must not exceed 128 MB".
 >>
->> This commit adds device trees for MSM8956 and MSM8976 SoCs.
->> They are *almost* identical, with minor differences, such as
->> MSM8956 having two A72 cores less.
+>> Synopsys-based SDHCI IP does have a limitation of 128MB boundary. But it
+>> has already been solved by upstream driver.
 >>
->> However, there is a bug in Sony Loire bootloader that requires presence
->> of all 8 cores in the cpu{} node, so these will not be deleted.
+>> FYI:
 >>
->> Co-developed-by: Konrad Dybcio <konrad.dybcio@somainline.org>
->> Signed-off-by: Konrad Dybcio <konrad.dybcio@somainline.org>
->> Co-developed-by: Marijn Suijten <marijn.suijten@somainline.org>
->> Signed-off-by: Marijn Suijten <marijn.suijten@somainline.org>
->> Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@somainline.org>
->> Signed-off-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+>> commit b85c997d2cfefe7d1f706b85ae46e35a50e3131c ("mmc: sdhci-of-dwcmshc: solve 128MB DMA boundary limitation")
+> 
+> CQHCI has its own DMA descriptors, so maybe a similar change is needed for CQHCI?
 
-Hello,
+I didn't find this limitation in synopsys DW IP databook.
 
-Thanks to everyone for the feedback!
-I'll send a new version this Friday, according to the received reviews.
-
-In the meanwhile, a few answers will follow, check below.
-
->> ---
->>   arch/arm64/boot/dts/qcom/msm8956.dtsi |   18 +
->>   arch/arm64/boot/dts/qcom/msm8976.dtsi | 1208 +++++++++++++++++++++++++
->>   2 files changed, 1226 insertions(+)
->>   create mode 100644 arch/arm64/boot/dts/qcom/msm8956.dtsi
->>   create mode 100644 arch/arm64/boot/dts/qcom/msm8976.dtsi
+> 
 >>
-
-..snip..
-
->> +		cpu-map {
->> +			cluster0 {
->> +				core0 {
->> +					cpu = <&CPU0>;
->> +				};
->> +
->> +				core1 {
->> +					cpu = <&CPU1>;
->> +				};
->> +
->> +				core2 {
->> +					cpu = <&CPU2>;
->> +				};
->> +
->> +				core3 {
->> +					cpu = <&CPU3>;
->> +				};
->> +			};
->> +
->> +			cluster1 {
+>>>>
+>>>> I am wondering whether there is a method or patch that can fix this boundary limitation.
+>>>> Thanks.
+>>>> Best Regards,
+>>>> Jyan Chou
+>>>
+>>> Hello Jyan Chou
+>>>
+>>> I am not clear on what the exact limitation is.  The driver never uses buffers as big as 128 MB.
+>>> To restrict DMA to low memory addresses a DMA mask can be used.
+>>>
+>>> But perhaps you mean not to cross a 128 MB boundary?
+>>>
+>>> Please cc your questions to the linux kernel mmc mailing list: linux-mmc@vger.kernel.org because others
+>>> can answer too.
+>>>
+>>> Regards
+>>> Adrian
 > 
-> Are you sure that the two clusters should be expressed separately in the
-> cpu-map?
-> 
-
-This SoC has two clusters with split L2 cache, can shutdown one cluster CPU, or
-the L2 cache for one cluster, or one entire cluster, hence can also manage idle
-states on a per-cluster basis.
-
-Also, as per bindings/cpu/cpu-topology.txt - I am here describing the hierarchy
-of CPUs in MSM8976, containing one "little" cluster, composed of four slower CPU
-cores and its own L2 cache slice, and one "big" cluster, composed of four (8976)
-or two (8956) faster CPU cores and its own L2 cache slice.
-
-That said, I am sure that the two clusters shall be expressed separately.
-
-Am I underestimating and/or ignoring anything?
-
->> +				core0 {
->> +					cpu = <&CPU4>;
->> +				};
->> +
-
-..snip..
-
->> +
->> +	reserved-memory {
->> +		#address-cells = <2>;
->> +		#size-cells = <2>;
->> +		ranges;
->> +
->> +		cont_splash_mem: memory@83000000 {
-> 
-> memory is "reserved", please use specific node names for these regions.
-> 
-
-Agreed.
-
->> +			reg = <0x0 0x83000000 0x0 0x2800000>;
->> +		};
-> [..]
->> +		apcs: syscon@b011000 {
->> +			compatible = "syscon";
-> 
-> Why not use qcom,msm8976-apcs-kpss-global here?
-> 
-
-There's no reason not to use the suggested compatible. I'm sorry for the miss.
-
->> +			reg = <0x0b011000 0x1000>;
->> +		};
-> [..]
->> +
->> +		imem: imem@8600000 {
->> +			compatible = "simple-mfd";
-> 
-> sram/qcom,imem.yaml please.
-> 
-
-Will do on v2.
-
-Regards,
-Angelo
