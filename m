@@ -2,28 +2,27 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 55093C433FE
-	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 08:26:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B944C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue,  8 Nov 2022 08:26:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233509AbiKHI0v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 8 Nov 2022 03:26:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41116 "EHLO
+        id S233601AbiKHI0w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 8 Nov 2022 03:26:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233601AbiKHI0p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 03:26:45 -0500
-X-Greylist: delayed 63 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 08 Nov 2022 00:26:42 PST
+        with ESMTP id S233358AbiKHI0q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 8 Nov 2022 03:26:46 -0500
 Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E155E286CE
-        for <linux-mmc@vger.kernel.org>; Tue,  8 Nov 2022 00:26:42 -0800 (PST)
-Received: from unknown (HELO kinkan2-ex.css.socionext.com) ([172.31.9.52])
-  by mx.socionext.com with ESMTP; 08 Nov 2022 17:25:38 +0900
-Received: from mail.mfilter.local (m-filter-2 [10.213.24.62])
-        by kinkan2-ex.css.socionext.com (Postfix) with ESMTP id C85522059027;
-        Tue,  8 Nov 2022 17:25:38 +0900 (JST)
-Received: from 172.31.9.51 (172.31.9.51) by m-FILTER with ESMTP; Tue, 8 Nov 2022 17:25:38 +0900
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 3F24B2C108
+        for <linux-mmc@vger.kernel.org>; Tue,  8 Nov 2022 00:26:43 -0800 (PST)
+Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
+  by mx.socionext.com with ESMTP; 08 Nov 2022 17:25:40 +0900
+Received: from mail.mfilter.local (m-filter-1 [10.213.24.61])
+        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 24C1720584CE;
+        Tue,  8 Nov 2022 17:25:40 +0900 (JST)
+Received: from 172.31.9.51 (172.31.9.51) by m-FILTER with ESMTP; Tue, 8 Nov 2022 17:25:40 +0900
 Received: from plum.e01.socionext.com (unknown [10.212.243.119])
-        by kinkan2.css.socionext.com (Postfix) with ESMTP id 89233B62A4;
-        Tue,  8 Nov 2022 17:25:38 +0900 (JST)
+        by kinkan2.css.socionext.com (Postfix) with ESMTP id CDE47B62A4;
+        Tue,  8 Nov 2022 17:25:39 +0900 (JST)
 From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
@@ -31,9 +30,9 @@ Cc:     Jassi Brar <jaswinder.singh@linaro.org>,
         Ard Biesheuvel <ard.biesheuvel@linaro.org>,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Subject: [PATCH 1/4] mmc: f-sdh30: Add reset control support
-Date:   Tue,  8 Nov 2022 17:25:30 +0900
-Message-Id: <20221108082533.21384-2-hayashi.kunihiko@socionext.com>
+Subject: [PATCH 3/4] mmc: f-sdh30: Add quirks for broken timeout clock capability
+Date:   Tue,  8 Nov 2022 17:25:32 +0900
+Message-Id: <20221108082533.21384-4-hayashi.kunihiko@socionext.com>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221108082533.21384-1-hayashi.kunihiko@socionext.com>
 References: <20221108082533.21384-1-hayashi.kunihiko@socionext.com>
@@ -43,70 +42,28 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add reset control support for F_SDH30 controller. This is optional.
+There is a case where the timeout clock is not supplied to the capability.
+Add a quirk for that.
 
 Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
 ---
- drivers/mmc/host/sdhci_f_sdh30.c | 17 ++++++++++++++++-
- 1 file changed, 16 insertions(+), 1 deletion(-)
+ drivers/mmc/host/sdhci_f_sdh30.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index 3f5977979cf2..7f4553b28180 100644
+index e7617a08276d..af30343eaf33 100644
 --- a/drivers/mmc/host/sdhci_f_sdh30.c
 +++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -14,6 +14,7 @@
- #include <linux/of.h>
- #include <linux/property.h>
- #include <linux/clk.h>
-+#include <linux/reset.h>
+@@ -187,6 +187,9 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+ 	if (reg & SDHCI_CAN_DO_8BIT)
+ 		priv->vendor_hs200 = F_SDH30_EMMC_HS200;
  
- #include "sdhci-pltfm.h"
- #include "sdhci_f_sdh30.h"
-@@ -21,6 +22,7 @@
- struct f_sdhost_priv {
- 	struct clk *clk_iface;
- 	struct clk *clk;
-+	struct reset_control *rst;
- 	u32 vendor_hs200;
- 	struct device *dev;
- 	bool enable_cmd_dat_delay;
-@@ -150,6 +152,16 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 		ret = clk_prepare_enable(priv->clk);
- 		if (ret)
- 			goto err_clk;
++	if (!(reg & SDHCI_TIMEOUT_CLK_MASK))
++		host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
 +
-+		priv->rst = devm_reset_control_get_optional_shared(dev, NULL);
-+		if (IS_ERR(priv->rst)) {
-+			ret = PTR_ERR(priv->rst);
-+			goto err_rst;
-+		}
-+
-+		ret = reset_control_deassert(priv->rst);
-+		if (ret)
-+			goto err_rst;
- 	}
- 
- 	/* init vendor specific regs */
-@@ -175,6 +187,8 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 	return 0;
- 
- err_add_host:
-+	reset_control_assert(priv->rst);
-+err_rst:
- 	clk_disable_unprepare(priv->clk);
- err_clk:
- 	clk_disable_unprepare(priv->clk_iface);
-@@ -191,8 +205,9 @@ static int sdhci_f_sdh30_remove(struct platform_device *pdev)
- 	sdhci_remove_host(host, readl(host->ioaddr + SDHCI_INT_STATUS) ==
- 			  0xffffffff);
- 
--	clk_disable_unprepare(priv->clk_iface);
-+	reset_control_assert(priv->rst);
- 	clk_disable_unprepare(priv->clk);
-+	clk_disable_unprepare(priv->clk_iface);
- 
- 	sdhci_free_host(host);
- 	platform_set_drvdata(pdev, NULL);
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_add_host;
 -- 
 2.25.1
 
