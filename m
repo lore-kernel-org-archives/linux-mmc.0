@@ -2,101 +2,66 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2884DC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:48:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06C35C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 17:17:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231512AbiKIOsu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 09:48:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56726 "EHLO
+        id S230265AbiKIRRQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 12:17:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44518 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231669AbiKIOsq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:48:46 -0500
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E20E4186D6
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:48:44 -0800 (PST)
-Received: by mail-ed1-x533.google.com with SMTP id v17so27606217edc.8
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:48:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=7USN0G8Nj6bFP0DAG8wpDATUtQ4+Fo+i57WTNeIkt9o=;
-        b=NRt78M2Sb88BheBzAT20bUfEl8jig4axjLGE9cA4Lt1JAoMq4Kp2dRwmyJftLj+Aiz
-         JHHlO0YI2UjwVjPsI8Nep5TgZzvmeP1uvD0R9Zch0I38Q1dCIN54ZaXZRi5Bwm4n326w
-         owPJoFtjtzvynKQh3U1yx3zMtALznwO78lMrgqzHwN9SeFU4BE9+Yp4Y0wQWfHWdgwGJ
-         GUT9qMXOqexjc2b21CP5h0SDiefsKQuvsslSMYP9yRh1dWyR1gWDkShbMekAFnP4cKV+
-         /OcTddzVbBhYvuGTeG6Q+sgMfEeRmBl0hHWHJ1WrbEtP9RUyvtc5MsB8UmpPIZ+Uo4k5
-         0LNQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7USN0G8Nj6bFP0DAG8wpDATUtQ4+Fo+i57WTNeIkt9o=;
-        b=YAMEGPPxJtZ4zpSs2korIWg0w5llE5hI4mY5rKDZMW8Sp/wrIOQewsRcxGgZBpwGEs
-         6HtYndAs69XV7+mGjWRpPcBA27qWhA43WkR8gKzymFV8XKlnB8xL0zE6IPIKxbgMrQWk
-         ZH0IFlI+uGyQ3/pUoNVsyo41IqSItSxzRexeuIQDDKt9Izy7iXlxMlAhKnaRUAOVsbFF
-         p/PFZEgDQFCt4bBtZ/5aMGhOMImgQ743G/fzfV5LemPzVywivh75MsMHeFSlGQpJ6Lcq
-         +xCGhSW/7+hR7Bp7sck4V4YSIJz8zrVrXUBKjnEzxbKEwY/0ErFREfIbqzQX/5vQq4qH
-         edsQ==
-X-Gm-Message-State: ACrzQf0DCKqFzwS2V2d+qnOk/M7TaaSjAbmtM0X8FEaGSaPX4Fk0koC/
-        rBpVgN3xffwlzeI2V8MUsolmfBVJoegvgGXcjIEA1w==
-X-Google-Smtp-Source: AMsMyM7561mKq4Buhe3zDStvs0P4R0k11DgxiwW71lUIvN+scEkFvD5qN931ug979+El3bYeMCLFhuO0FxQfFbUIUN8=
-X-Received: by 2002:aa7:d6d1:0:b0:463:ba50:e574 with SMTP id
- x17-20020aa7d6d1000000b00463ba50e574mr42357603edr.158.1668005323470; Wed, 09
- Nov 2022 06:48:43 -0800 (PST)
-MIME-Version: 1.0
-References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com> <CAPDyKFo+FUAZ=1Vu4+503ch5_Wrw47BanTjdB=7J8XhRwczyqg@mail.gmail.com>
-In-Reply-To: <CAPDyKFo+FUAZ=1Vu4+503ch5_Wrw47BanTjdB=7J8XhRwczyqg@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Wed, 9 Nov 2022 15:48:32 +0100
-Message-ID: <CACRpkdYeJ0NuJr_RF10oMAEuhYTBfaLfHoZ=b3A2f4BqXkvzOQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>,
-        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, 3chas3@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
+        with ESMTP id S229590AbiKIRRO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 12:17:14 -0500
+Received: from vps0.lunn.ch (vps0.lunn.ch [156.67.10.101])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18C5D1D678;
+        Wed,  9 Nov 2022 09:17:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+        s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
+        Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
+        Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
+        bh=PjHhXUV/PZ9yy09Sz+BF0S4uf1JBmEQL7t9jaV7HgUk=; b=o4qkgU4nwbO4ysJ4AE7k1LCDTc
+        hQs1C5o9l5OeCGr3L51AZyNrAOCAmGyO+QXrIQSRo4P9trpzNQb8pPs2J8Bcv147RDZFmHkL5y97E
+        zMyTXzlIDIioN/r8hw0zoQfXoUwlWWeTZjOaDAdKiIEcm7RzslsXH+ByUjyCoV/+0ZOA=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
+        (envelope-from <andrew@lunn.ch>)
+        id 1osoh4-001vyJ-7e; Wed, 09 Nov 2022 18:16:54 +0100
+Date:   Wed, 9 Nov 2022 18:16:54 +0100
+From:   Andrew Lunn <andrew@lunn.ch>
+To:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+Cc:     ludovic.desroches@microchip.com, ulf.hansson@linaro.org,
+        nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
+        3chas3@gmail.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
+Message-ID: <Y2vghlEEmE+Bdm0v@lunn.ch>
+References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 9, 2022 at 1:39 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> On Wed, 9 Nov 2022 at 05:39, Balamanikandan Gunasundar
-(...)
-> > --- a/drivers/mmc/host/atmel-mci.c
-> > +++ b/drivers/mmc/host/atmel-mci.c
-> > @@ -19,7 +19,8 @@
-> >  #include <linux/module.h>
-> >  #include <linux/of.h>
-> >  #include <linux/of_device.h>
-> > -#include <linux/of_gpio.h>
-> > +#include <linux/irq.h>
-> > +#include <linux/gpio/consumer.h>
+On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
+> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
 
-This is nice, but higher up the driver also #include <linux/gpio.h>
-so delete that line too, <linux/gpio/consumer.h> should be enough.
+I was wondering why you Cc: netdev and ATM. This clearly has nothing
+to do with those lists.
 
-> > -                       of_get_named_gpio(cnp, "cd-gpios", 0);
-> > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
-> > +                                                   "cd-gpios",
-> > +                                                   0, GPIOD_IN, "cd-gpios");
-(...)
-> >                 pdata->slot[slot_id].wp_pin =
-> > -                       of_get_named_gpio(cnp, "wp-gpios", 0);
-> > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
-> > +                                                   "wp-gpios",
-> > +                                                   0, GPIOD_IN, "wp-gpios");
+You well foul of
 
-Hm. Dmitry is trying to get rid of of_get_named_gpio() I think.
+M:	Chas Williams <3chas3@gmail.com>
+L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)
+L:	netdev@vger.kernel.org
+S:	Maintained
+W:	http://linux-atm.sourceforge.net
+F:	drivers/atm/
+F:	include/linux/atm*
+F:	include/uapi/linux/atm*
 
-But I suppose we can migrate to fwnode later.
+Maybe these atm* should be more specific so they don't match atmel :-)
 
-This is at least better than before so go with this for now.
-
-Yours,
-Linus Walleij
+      Andrew
