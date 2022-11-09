@@ -2,89 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35FABC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:35:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE774C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:39:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231605AbiKIOfB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 09:35:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48252 "EHLO
+        id S229949AbiKIOji (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 09:39:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231585AbiKIOe7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:34:59 -0500
-Received: from mail-lj1-x22a.google.com (mail-lj1-x22a.google.com [IPv6:2a00:1450:4864:20::22a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 923A51261D
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:34:58 -0800 (PST)
-Received: by mail-lj1-x22a.google.com with SMTP id b9so26064781ljr.5
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:34:58 -0800 (PST)
+        with ESMTP id S229727AbiKIOjh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:39:37 -0500
+Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFEBC30A
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:39:36 -0800 (PST)
+Received: by mail-pf1-x42d.google.com with SMTP id b185so16867926pfb.9
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:39:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=bZx04SasLwqf9ldsbI3VPQRqwyw8Z+v7jFzXUXT/Qrk=;
-        b=e/YNifEm6OOdJN1uo9vjMAfEYEwXuDqJI1RrWqXrnhUw3evyiKD0XWQvBMzEKnukK9
-         dZsehmTY7c4A2rfwLSJfR7SrRAMTHZLrQwrzhpS5DkJb/CIM+cxzVrUlyI1zWvdYlWni
-         FA+Odi1FWqwTckjIAyfG0Nyyxnhbsm7bTCmRU4U9cnGmJfNiZ0k1OWhO9q/OWwCJQ2cB
-         D1PtgrAC3lqX6LWC0SC6sU/zo0uxnL00CbyTWGqCJLxkdjhIYwk66O/2LFWoiyUJBfS2
-         E/0AExbznOJ/bVZem/EoVeRNPJckFoPY3s8vJ/TSKMteBRPm7S4LrV6UygCGQA/YO23m
-         oKSA==
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=4U/u8cbAVh+AV36yv6BZmejnrXhUdTMbrT5aDsSk86s=;
+        b=LSFyt3GfAfQ6p8Z6oN7USp7eTKczhIozzEYrouVAbhawy63uTPpVi7IXYIQyD/u7aX
+         hIMWcmLqkSBZaGvrIeZoY/+TAC6+Z+WgBcc64Kf/sCY5I6mvuB9WbTtu7jhgbnJdXhIG
+         FNddG2D3Ksg2ou7Cn3u0OIOJ7LYnSB2LLR9X8XcVfRJJNfUH1JMqIkE3QGRKrQgBNsm4
+         LrxjPevU9c2Y82VsT/XSx6X41j6OFt8hkmlLUcRHM/r0V3Pq3fY5OXfdgIURRXB74rFc
+         AALHdwhprVFzxx5PVBsPlRpZBCPhiypt4Ajr8LDvG1EOIppsZjeaYMN3Cf/NRXbjcp5s
+         Fqlg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=bZx04SasLwqf9ldsbI3VPQRqwyw8Z+v7jFzXUXT/Qrk=;
-        b=GlXNf9pSy9fVv+JPJ/iAM/Kk2dzUFxnldJhrwS5zqyzJGk0ZYYvDWB1WmYLHQApcIS
-         TTgmk0zb12EAyF/MfeYsb+ZrPrFZmCJKFStx77m7Ck4ZDpCd+PsrsOIwecF6EPxK479e
-         fpI7QwSKuRU/o4S7vpMqUCLSmp1LzmWT7iiSkkFc+3E7V4EFRRFuN2kz5as+2JpuldvU
-         nKhs1/znp6WCL/XF+eMqbReaZ78T4PwWDkUYL5A24zr6oLhVmmPKA4NZu57aVTXDr3S7
-         L947CT6ejHN09/w4G5hI9cuQuQNsx3Y4Rkb5+V9sflS7/RBdMuL+l2pHY3xI3Y2Myfd+
-         dypQ==
-X-Gm-Message-State: ACrzQf2OJLcnDnpVBWPIzgVbhnL3Bj6kGHeBFq8Ua9fWJ6yr9Th5e8G/
-        BUD5p7AyyegtKfgc49AOQw9Kig==
-X-Google-Smtp-Source: AMsMyM4AD345kQHxbb29mwZgIXzAJUVPAIIuQlNzTJmQbHVxyVpmlXcw4YovKLJWDOUZOKFrOOfcnQ==
-X-Received: by 2002:a05:651c:1073:b0:277:35ca:5eef with SMTP id y19-20020a05651c107300b0027735ca5eefmr20592048ljm.150.1668004496937;
-        Wed, 09 Nov 2022 06:34:56 -0800 (PST)
-Received: from [192.168.0.20] (088156142199.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.199])
-        by smtp.gmail.com with ESMTPSA id f14-20020ac2508e000000b0049478cc4eb9sm2246056lfm.230.2022.11.09.06.34.55
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 09 Nov 2022 06:34:56 -0800 (PST)
-Message-ID: <7254aaa7-c235-aa4f-1706-be68e49f2244@linaro.org>
-Date:   Wed, 9 Nov 2022 15:34:55 +0100
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4U/u8cbAVh+AV36yv6BZmejnrXhUdTMbrT5aDsSk86s=;
+        b=ymj0t17uv9vhFAgqsC8YXA+ymcDFLrE6/kOELyJD31jJttGHdWLhJdfOiEha+USil3
+         6GkcE3J+2/e1lwwq60l4w7lwnBp8w2/PozQ9s14GWu4EwiwL45RfPD05LiI0p4oVh3en
+         NnuqYs6l0Tpd7kmAvnNyQAqWHcXaibEvqW83NEDZ5K+4K0nl2tQT2aphuERZ5Ff1Tzph
+         +Qu3MWIPySPynhjjGYg79brPRUiraTUX75tofIizSwC54eD/2e25FvacTJnsD7iVG4iv
+         aQOAWpaHyOC3iSRmWe9pzVMb0pHZO6s4jupQNslzb7mXjSaZMP7ZpbS+4R02769X3TZ2
+         SGgQ==
+X-Gm-Message-State: ACrzQf3PMmowfLmiVystJBM5ZeF4wVvYBMmGqKv7ZstEinCFCTkXcCAZ
+        WZ7O5O4rDtxlPnZsOpW774z6/nd6ZO8mJ7eFKiT8mw==
+X-Google-Smtp-Source: AMsMyM6T8MaKQNXIsd+cYOAqg2UZthGtfOWJT6Gxsrt65/G1pRHj92V5Gbkvpr4ZVQ1jxmsFVreCNFfPujcUzwdNNmw=
+X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
+ v13-20020a63464d000000b004415968cd0emr53951069pgk.595.1668004776334; Wed, 09
+ Nov 2022 06:39:36 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH 1/3] dt-bindings: mmc: sdhci-msm: Document the SM6375
- compatible
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>,
-        linux-arm-msm@vger.kernel.org, andersson@kernel.org,
-        agross@kernel.org
-Cc:     patches@linaro.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20221109142623.53052-1-konrad.dybcio@linaro.org>
- <20221109142623.53052-2-konrad.dybcio@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221109142623.53052-2-konrad.dybcio@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20221109025142.1565445-1-yangyingliang@huawei.com>
+ <20221109025142.1565445-3-yangyingliang@huawei.com> <CAPDyKFrcguZWaFd51Bk-xkkVHEWG5gTVKfVHLpc2KuF06hfFug@mail.gmail.com>
+ <774718be-ad03-8bf1-630c-a933b877cb72@huawei.com>
+In-Reply-To: <774718be-ad03-8bf1-630c-a933b877cb72@huawei.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 9 Nov 2022 15:38:59 +0100
+Message-ID: <CAPDyKFoKM3Omo=cnQsY7ZaNV=9RiY7mS_-ddVjvtx=Jjxir9HA@mail.gmail.com>
+Subject: Re: [PATCH v3 2/3] mmc: sdio: fix of node refcount leak in sdio_add_func()
+To:     Yang Yingliang <yangyingliang@huawei.com>
+Cc:     linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/11/2022 15:26, Konrad Dybcio wrote:
-> Document the compatible for SDHCI on SM6375.
-> 
-> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
-> ---
+On Wed, 9 Nov 2022 at 14:23, Yang Yingliang <yangyingliang@huawei.com> wrote:
+>
+>
+> On 2022/11/9 20:27, Ulf Hansson wrote:
+> > On Wed, 9 Nov 2022 at 03:53, Yang Yingliang <yangyingliang@huawei.com> wrote:
+> >> If device_add() returns error in sdio_add_func(), sdio function is not
+> >> presented, so the node refcount that hold in sdio_set_of_node() can not
+> >> be put in sdio_remove_func() which is called from error path. Fix this
+> >> by moving of_node_put() before present check in remove() function.
+> >>
+> >> Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
+> >> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+> >> ---
+> >>   drivers/mmc/core/sdio_bus.c | 2 +-
+> >>   1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+> >> index babf21a0adeb..266639504a94 100644
+> >> --- a/drivers/mmc/core/sdio_bus.c
+> >> +++ b/drivers/mmc/core/sdio_bus.c
+> >> @@ -377,11 +377,11 @@ int sdio_add_func(struct sdio_func *func)
+> >>    */
+> >>   void sdio_remove_func(struct sdio_func *func)
+> >>   {
+> >> +       of_node_put(func->dev.of_node);
+> >>          if (!sdio_func_present(func))
+> >>                  return;
+> >>
+> >>          device_del(&func->dev);
+> >> -       of_node_put(func->dev.of_node);
+> >>          put_device(&func->dev);
+> > Seems like we should call put_device() even if sdio_func_present()
+> > returns false, don't you think?
+> >
+> > In this way, the corresponding sdio_release_func() will help to manage
+> In sdio_release_func(), sdio_free_fun_cis() is called, it put refcount of
+> 'func->card->dev', but the refcount isn't get until sdio_init_func()
+> is successful. In this way, it's no need to put refcount of
+> 'func->card->dev',
+> so we can not call sdio_release_func() in patch1, and patch1 is needed.
 
+I see.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+However, in that case, it seems like we need to fix this slightly
+differently. In patch1, we should not do the kfree() thing immediately
+in the error patch, but rather rely on the reference counting (but in
+a more clever way).
 
-Best regards,
-Krzysztof
-
+Kind regards
+Uffe
