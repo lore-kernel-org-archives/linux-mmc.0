@@ -2,98 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC86DC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:42:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2884DC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:48:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230304AbiKIOmJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 09:42:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52802 "EHLO
+        id S231512AbiKIOsu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 09:48:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230058AbiKIOmI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:42:08 -0500
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A311665B8
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:42:03 -0800 (PST)
-Received: by mail-lf1-x131.google.com with SMTP id g7so25922728lfv.5
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:42:03 -0800 (PST)
+        with ESMTP id S231669AbiKIOsq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:48:46 -0500
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E20E4186D6
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:48:44 -0800 (PST)
+Received: by mail-ed1-x533.google.com with SMTP id v17so27606217edc.8
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:48:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=bkmGAAhASeKkyW4/+zIci7WZOjWWW0Qq/nOsqw+GfiE=;
-        b=V+GLs/B72K4vuyoJBJsydkDBTzbVVgqHfQYp12G6saidzreZLhQqcWe37HezPG4ePA
-         nl/L5zvGuatlOBPb1b6RNakbmnljcdXEtNVFsXkRhlMTTGMSl4MUPATc1YuQ/cS1dw3U
-         5Aqfl6n2U/p7cFmzm0Cqb+pxv0uHMz04AHxIMMXx+40UmqqpwRYmLQn4IZAHGcHFTF3n
-         1HyhZhNtItLmRFUK8LOTCjsbsq4cfmvi1rQw6q7muUQfRoU8RXmB14XOCZFiTkyG2FW1
-         LDH45HNZO6wYQ36Dwx7/EDJaYopfw2g2oM9XGuHiom8Jxe4USVLzSadvOuJ8QP0JOBNM
-         2hHw==
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=7USN0G8Nj6bFP0DAG8wpDATUtQ4+Fo+i57WTNeIkt9o=;
+        b=NRt78M2Sb88BheBzAT20bUfEl8jig4axjLGE9cA4Lt1JAoMq4Kp2dRwmyJftLj+Aiz
+         JHHlO0YI2UjwVjPsI8Nep5TgZzvmeP1uvD0R9Zch0I38Q1dCIN54ZaXZRi5Bwm4n326w
+         owPJoFtjtzvynKQh3U1yx3zMtALznwO78lMrgqzHwN9SeFU4BE9+Yp4Y0wQWfHWdgwGJ
+         GUT9qMXOqexjc2b21CP5h0SDiefsKQuvsslSMYP9yRh1dWyR1gWDkShbMekAFnP4cKV+
+         /OcTddzVbBhYvuGTeG6Q+sgMfEeRmBl0hHWHJ1WrbEtP9RUyvtc5MsB8UmpPIZ+Uo4k5
+         0LNQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=bkmGAAhASeKkyW4/+zIci7WZOjWWW0Qq/nOsqw+GfiE=;
-        b=07gqonylatrpO/bR71zFvGNB7LJLcYXAkUXShS+6OKX1zJe763l31SgtaQocvfJyJh
-         QCjGaj5SpdzQU5QF+GQL1sU4QAguXGulQIjQTkQWHOn0JlaiQ8j11PYtGhtl62A9Aue/
-         a14AeghPcJ5VbX9+xX6leT0VbSGWNQtwHPiBjG6yjShSECInTp4hZK4++UVB8DwjWui7
-         ybwwxwjxOKFQp0eKPFRzVSBnW22G2UoOSA7TwOFsX3OeB+lZkFZDanuDLiX+ylng/ava
-         tYuDod4VerbBdJ4u3vNc8VsiZk7P8xo8i8LjHavBDdZ17LFyVf5FxuzqX8gsKVnmb2Zf
-         FqgQ==
-X-Gm-Message-State: ACrzQf3fMZOWiAueWt1HVk+0qh0vlf8HZDh+tnnSyV5XXr2KNI6ysnJ6
-        ILXX03LO+Yy7PSG4jwWhu3qwKw==
-X-Google-Smtp-Source: AMsMyM7ZklXHqmsEaE8RxsLrvb2+FVR6HqDGDie2dTIf8XuqINH1FuRAzbnj5B02HrsAx562S4SGog==
-X-Received: by 2002:a05:6512:64:b0:4ae:2465:192a with SMTP id i4-20020a056512006400b004ae2465192amr19588900lfo.62.1668004922021;
-        Wed, 09 Nov 2022 06:42:02 -0800 (PST)
-Received: from localhost.localdomain ([194.29.137.22])
-        by smtp.gmail.com with ESMTPSA id q10-20020a056512210a00b004a478c2f4desm2235229lfr.163.2022.11.09.06.42.00
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Wed, 09 Nov 2022 06:42:01 -0800 (PST)
-From:   Konrad Dybcio <konrad.dybcio@linaro.org>
-To:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
-        agross@kernel.org, krzysztof.kozlowski@linaro.org
-Cc:     patches@linaro.org, Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2 1/3] dt-bindings: mmc: sdhci-msm: Document the SM6375 compatible
-Date:   Wed,  9 Nov 2022 15:41:51 +0100
-Message-Id: <20221109144153.53630-2-konrad.dybcio@linaro.org>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20221109144153.53630-1-konrad.dybcio@linaro.org>
-References: <20221109144153.53630-1-konrad.dybcio@linaro.org>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=7USN0G8Nj6bFP0DAG8wpDATUtQ4+Fo+i57WTNeIkt9o=;
+        b=YAMEGPPxJtZ4zpSs2korIWg0w5llE5hI4mY5rKDZMW8Sp/wrIOQewsRcxGgZBpwGEs
+         6HtYndAs69XV7+mGjWRpPcBA27qWhA43WkR8gKzymFV8XKlnB8xL0zE6IPIKxbgMrQWk
+         ZH0IFlI+uGyQ3/pUoNVsyo41IqSItSxzRexeuIQDDKt9Izy7iXlxMlAhKnaRUAOVsbFF
+         p/PFZEgDQFCt4bBtZ/5aMGhOMImgQ743G/fzfV5LemPzVywivh75MsMHeFSlGQpJ6Lcq
+         +xCGhSW/7+hR7Bp7sck4V4YSIJz8zrVrXUBKjnEzxbKEwY/0ErFREfIbqzQX/5vQq4qH
+         edsQ==
+X-Gm-Message-State: ACrzQf0DCKqFzwS2V2d+qnOk/M7TaaSjAbmtM0X8FEaGSaPX4Fk0koC/
+        rBpVgN3xffwlzeI2V8MUsolmfBVJoegvgGXcjIEA1w==
+X-Google-Smtp-Source: AMsMyM7561mKq4Buhe3zDStvs0P4R0k11DgxiwW71lUIvN+scEkFvD5qN931ug979+El3bYeMCLFhuO0FxQfFbUIUN8=
+X-Received: by 2002:aa7:d6d1:0:b0:463:ba50:e574 with SMTP id
+ x17-20020aa7d6d1000000b00463ba50e574mr42357603edr.158.1668005323470; Wed, 09
+ Nov 2022 06:48:43 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com> <CAPDyKFo+FUAZ=1Vu4+503ch5_Wrw47BanTjdB=7J8XhRwczyqg@mail.gmail.com>
+In-Reply-To: <CAPDyKFo+FUAZ=1Vu4+503ch5_Wrw47BanTjdB=7J8XhRwczyqg@mail.gmail.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 9 Nov 2022 15:48:32 +0100
+Message-ID: <CACRpkdYeJ0NuJr_RF10oMAEuhYTBfaLfHoZ=b3A2f4BqXkvzOQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>,
+        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
+        alexandre.belloni@bootlin.com, 3chas3@gmail.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the compatible for SDHCI on SM6375.
+On Wed, Nov 9, 2022 at 1:39 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On Wed, 9 Nov 2022 at 05:39, Balamanikandan Gunasundar
+(...)
+> > --- a/drivers/mmc/host/atmel-mci.c
+> > +++ b/drivers/mmc/host/atmel-mci.c
+> > @@ -19,7 +19,8 @@
+> >  #include <linux/module.h>
+> >  #include <linux/of.h>
+> >  #include <linux/of_device.h>
+> > -#include <linux/of_gpio.h>
+> > +#include <linux/irq.h>
+> > +#include <linux/gpio/consumer.h>
 
-Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
----
-Changes since v1:
-- Pick up r-b
+This is nice, but higher up the driver also #include <linux/gpio.h>
+so delete that line too, <linux/gpio/consumer.h> should be enough.
 
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
+> > -                       of_get_named_gpio(cnp, "cd-gpios", 0);
+> > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
+> > +                                                   "cd-gpios",
+> > +                                                   0, GPIOD_IN, "cd-gpios");
+(...)
+> >                 pdata->slot[slot_id].wp_pin =
+> > -                       of_get_named_gpio(cnp, "wp-gpios", 0);
+> > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
+> > +                                                   "wp-gpios",
+> > +                                                   0, GPIOD_IN, "wp-gpios");
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index fc8a6b345d97..12def0f57e3e 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -46,6 +46,7 @@ properties:
-               - qcom,sm6115-sdhci
-               - qcom,sm6125-sdhci
-               - qcom,sm6350-sdhci
-+              - qcom,sm6375-sdhci
-               - qcom,sm8150-sdhci
-               - qcom,sm8250-sdhci
-               - qcom,sm8450-sdhci
--- 
-2.38.1
+Hm. Dmitry is trying to get rid of of_get_named_gpio() I think.
 
+But I suppose we can migrate to fwnode later.
+
+This is at least better than before so go with this for now.
+
+Yours,
+Linus Walleij
