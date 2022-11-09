@@ -2,184 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49AADC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 09:29:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14971C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 09:47:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230181AbiKIJ3i (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 04:29:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34688 "EHLO
+        id S230420AbiKIJrJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 04:47:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230174AbiKIJ3h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 04:29:37 -0500
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 086C4124;
-        Wed,  9 Nov 2022 01:29:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1667986177; x=1699522177;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=11aqQt4SKDBUQ1TMjecUwMv0nEzr3fjgad3Lijb+lj8=;
-  b=M1fSUG9+YaZf4SZ5Zi/hMT8RO9NDCpPWZxriHYpY3Fsv7jtD9yx4ddih
-   0YfvgyvJFCNXDGR/tMQUSnpCfGgP1cSpq9JXogU5FxIhV2zEo8mlICCAI
-   bZOaY69b4hhNlappJHrbP2u292tQ5SShlVjTZrL0wi0tOGDZjP2iL3KBJ
-   F10rcOnAERfIHLT6ps9dmJHxx185SH3G25KtC/F86nK7p3ItKTtK1cVuS
-   JveIS9dFenghGyMCDAkN5E8oqWy5Vsg3/Xd5pNZpyZtmseSs7MFzbSimk
-   L19pgwW1qheDHLJ34Iij/FumAVZTY/eKT+MbK/mfnllCT5qFpcVxi8B1S
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10525"; a="310929903"
-X-IronPort-AV: E=Sophos;i="5.96,150,1665471600"; 
-   d="scan'208";a="310929903"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2022 01:29:36 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10525"; a="669888397"
-X-IronPort-AV: E=Sophos;i="5.96,150,1665471600"; 
-   d="scan'208";a="669888397"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.57.10])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Nov 2022 01:29:33 -0800
-Message-ID: <e75f3f16-566d-7da8-f4fa-7a54f4027de7@intel.com>
-Date:   Wed, 9 Nov 2022 11:29:28 +0200
+        with ESMTP id S230131AbiKIJq6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 04:46:58 -0500
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2430F23177
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 01:46:53 -0800 (PST)
+Received: by mail-wr1-x436.google.com with SMTP id l14so24926183wrw.2
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 01:46:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=SjAxgNVa5Iy7P1HQop4+LeiywcSnOALtrSCXa4yCO2s=;
+        b=mwsOvQxikY4BQ8qam13FHKX5DNYwgrq90MGapnaTlTrrN0vHqoxjTy0YqYOj7O80uo
+         JwBBMapqr/G0rK3he5L+pVR+r6CiQYE7SXyCRsmTdtoVnm2XVQQSYL5mYTP3tE4+ayJw
+         bNtQIrliaZuYxaR2QT7pRFfDwBrwz77XWpT7wJ7MBTLFs620Vcye/4GUmVnPpySkB3bV
+         /Koxz4qUvuxW0XgjFRVVRw2xL65XqRoblIdLpie23eLeV9kHeDn/ipg0M8mGS5Mm+YsX
+         lukmySDwqGY+/osGMxIe4RF4US5ECF3fzFEdXgxI/xMHHyY+pSAhRqAj5s0qsTRLGUsh
+         eBzw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=SjAxgNVa5Iy7P1HQop4+LeiywcSnOALtrSCXa4yCO2s=;
+        b=V+luyATVhJJScYxRXpXPXrSn5XGu/tgygs0YmdPez3RTkIOrXPMDigWY88mRycpugt
+         0G0bfe2USVB4/zorefTlUc2++wGrVe+qn5BWqx481e4nXKxEnQJniwoewDRQSwYK6V5m
+         EC/HmhgiR+fLeCP1yW6Ud++6lx8xZF1QG1gMHVeOK/CGoG8zvCVm899pyp28ijFcoV/B
+         cgMXIl/aDBhrTju5q9c6h0y3XTtnmmWlZlsoZ1+lJHwbSwS6bED9uLRS4nflsrYpVLbt
+         RegjhM2y2WixTBZYW9Viba0C0sW52BoqvChFnr6y8Iwuld+o6927C0GvzlRprhtFN6te
+         yiBw==
+X-Gm-Message-State: ACrzQf1aEnBsJualCLol++R4fYQMcSXokNvFa31x584tXJODDrrqL1Ke
+        9Zc6tic0HN1bPXEOu4fVJbE+ZA==
+X-Google-Smtp-Source: AMsMyM42vjoWHmtle3AuJ4DjbxcufaFgTYg2QBcGe4karhQ/6wycyzv9vc5rqjul6OZ02PdWuTXGpw==
+X-Received: by 2002:a5d:534b:0:b0:236:73ff:3605 with SMTP id t11-20020a5d534b000000b0023673ff3605mr36782817wrv.521.1667987211662;
+        Wed, 09 Nov 2022 01:46:51 -0800 (PST)
+Received: from ?IPV6:2a01:e0a:982:cbb0:5e95:d543:1caf:4e60? ([2a01:e0a:982:cbb0:5e95:d543:1caf:4e60])
+        by smtp.gmail.com with ESMTPSA id n10-20020a5d420a000000b0023682011c1dsm12496766wrq.104.2022.11.09.01.46.50
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 09 Nov 2022 01:46:51 -0800 (PST)
+Message-ID: <ac749b53-c768-0266-0173-9bdbf154be46@linaro.org>
+Date:   Wed, 9 Nov 2022 10:46:50 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.2
-Subject: Re: [PATCH] mmc: sdhci-xenon: Fix 2G limitation on AC5 SoC
+ Thunderbird/102.3.3
+From:   neil.armstrong@linaro.org
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH] mmc: meson-gx: fix return value check of mmc_add_host()
 Content-Language: en-US
-To:     Vadym Kochan <vadym.kochan@plvision.eu>
-Cc:     Robin Murphy <robin.murphy@arm.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Elad Nachman <enachman@marvell.com>, iommu@lists.linux.dev,
-        Mickey Rachamim <mickeyr@marvell.com>,
-        Christoph Hellwig <hch@infradead.org>
-References: <20220808095237.GA15939@plvision.eu>
- <6c94411c-4847-526c-d929-c9523aa65c11@intel.com>
- <20220808122652.GA6599@plvision.eu>
- <3f96b382-aede-1f52-33cb-5f95715bdf59@intel.com>
- <3d16ebad-ea6c-555e-2481-ca5fb08a6c66@arm.com>
- <20220816205129.GA6438@plvision.eu>
- <94888b3b-8f54-367d-c6b4-5ebfeeafe4c4@arm.com>
- <20220817160730.GA17202@plvision.eu>
- <80d2538c-bac4-cc4f-85ae-352fcf86321d@arm.com>
- <20220818120740.GA21548@plvision.eu> <YwHOCHmKaf7yfgOD@infradead.org>
- <3b88438d-1bb0-e980-b4db-1f8663dc6042@arm.com>
- <VI1P190MB031779C030CAED8026D53D1895259@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <VI1P190MB0317DC34760DFDE69F69A700953F9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <a9605f47-2f11-0ed3-d513-717c1935b83d@intel.com>
- <VI1P190MB03177BC73BCF70EF1AD0A349953E9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <VI1P190MB03177BC73BCF70EF1AD0A349953E9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8
+To:     Yang Yingliang <yangyingliang@huawei.com>,
+        linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Cc:     ulf.hansson@linaro.org, khilman@baylibre.com, jbrunet@baylibre.com,
+        martin.blumenstingl@googlemail.com
+References: <20221108123417.479045-1-yangyingliang@huawei.com>
+Organization: Linaro Developer Services
+In-Reply-To: <20221108123417.479045-1-yangyingliang@huawei.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 9/11/22 10:40, Vadym Kochan wrote:
-> Hi Adrian,
+On 08/11/2022 13:34, Yang Yingliang wrote:
+> mmc_add_host() may return error, if we ignore its return value,
+> it will lead two issues:
+> 1. The memory that allocated in mmc_alloc_host() is leaked.
+> 2. In the remove() path, mmc_remove_host() will be called to
+>     delete device, but it's not added yet, it will lead a kernel
+>     crash because of null-ptr-deref in device_del().
 > 
-> On Wed, 9 Nov 2022 09:50:06 +0200, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 8/11/22 21:05, Vadym Kochan wrote:
->>> Hi Adrian,
->>>
->>> On Thu, 13 Oct 2022 09:40:00 +0300, Vadym Kochan <vadym.kochan@plvision.eu> wrote:
->>>> Hi Robin,
->>>>
->>>> On Mon, 22 Aug 2022 11:06:43 +0100, Robin Murphy <robin.murphy@arm.com> wrote:
->>>>> On 2022-08-21 07:17, Christoph Hellwig wrote:
->>>>>> On Thu, Aug 18, 2022 at 03:07:40PM +0300, Vadym Kochan wrote:
->>>>>>> It works with the following changes:
->>>>>>>
->>>>>>>      #1 dma-ranges = <0x0 0x0 0x2 0x0 0x0 0x80000000>;
->>>>>>>
->>>>>>>      #3 swiotlb="force"
->>>>>>>
->>>>>>> Is it OK to force the memory allocation from the start for the swiotlb ?
->>>>>>
->>>>>> It should be ok, but isn't really optimal.
->>>>>>
->>>>>> I wonder if we should just allow DT to specify the swiotlb buffer
->>>>>> location.  Basically have yet another RESERVEDMEM_OF_DECLARE variant
->>>>>> for it, which shouldn't be all that much work except for figuring
->>>>>> out the interaction with the various kernel command line options.
->>>>>
->>>>> We already have all the information we need in the DT (and ACPI), the 
->>>>> arm64 init code just needs to do a better job of interpreting it 
->>>>> properly. I'll see what I can come up with once I've finished what I'm 
->>>>> currently tied up in.
->>>>>
->>>>> Thanks,
->>>>> Robin.
->>>>
->>>> Sorry to disturb you, I just 'd like to know if you have
->>>> some ideas to share or patches to test ?
->>>>
->>>> Thank you!
->>>>
->>>
->>> Since AC5X eMMC controller can fail to work on boards with >2GB memory,
->>> and considering that the best fix may not be easy (as it requires arm64 infra changes),
->>> so would it be OK to use PIO mode as temporary solution ?
->>>
->>> I understand that arm64 changes might not be trivial and it might take significant
->>> amount of time to implement considering this unusual case, I just think that better
->>> to make eMMC working even if it will be slow.
->>
->> You can disable DMA if you wish:
->> 	SDHCI_QUIRK_BROKEN_DMA | SDHCI_QUIRK_BROKEN_ADMA
->> however did you consider SDMA:
->> 	SDHCI_QUIRK_BROKEN_ADMA
->> which uses a bounce buffer allocated by SDHCI?
->>
->> In any case, you need to add comments to the code
->> and commit message explaining the swiotlb issue.
->>
+> Fix this by checking the return value and goto error path which
+> will call mmc_free_host().
 > 
-> There is a snip from my earlier reply:
+> Fixes: 51c5d8447bd7 ("MMC: meson: initial support for GX platforms")
+> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+> ---
+>   drivers/mmc/host/meson-gx-mmc.c | 4 +++-
+>   1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> [snip]
-> 
->> I could use DMA only in 2 ways:
->>
->> #1 Use sdhci bounce buffer with SDMA mode
->>
->>     But there was the issue that SDMA requires that SDHCI v4 mode should
->>     be enabled, and when I enable it via sdhci_enable_v4_mode(host)
->>     then I got error that EXT_CSD can't be recognized.
->>
->>     But if I comment this line in sdhci.c:
->>     
->>     int sdhci_setup_host(struct sdhci_host *host)
->>     {
->>         ...
->>
->> 	/* SDMA does not support 64-bit DMA if v4 mode not set */
->> 	if ((host->flags & SDHCI_USE_64_BIT_DMA) && !host->v4_mode) {
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index df05e60bed9a..6e5ea0213b47 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1335,7 +1335,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>   	}
+>   
+>   	mmc->ops = &meson_mmc_ops;
+> -	mmc_add_host(mmc);
+> +	ret = mmc_add_host(mmc);
+> +	if (ret)
+> +		goto err_free_irq;
+>   
+>   	return 0;
+>   
 
-Do you need 64-bit DMA?  The 2G limitation is still
-within 32-bits isn't it?
 
->> 		pr_info("XXX SDMA does not support 64-bit DMA if v4 mode not set\n");
->> 		host->flags &= ~SDHCI_USE_SDMA;
->> 	}
->>
->>        ...
->>     }
->>
->>     then everything is OK.
->>
->> #2 Use restricted-dma-pool in device-tree
->>
->>    But I am not sure if it is good solution compared to #1.
->>
->> Setting only DMA mask did not help because after some time I got
->> "DMA overflow address" error stack-traces.
-> 
-> [snip]
-> 
-> Regards,
-> Vadym
-
+Reviewed-by: Neil Armstrong <neil.armstrong@linaro.org>
