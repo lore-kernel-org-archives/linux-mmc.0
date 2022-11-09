@@ -2,105 +2,107 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87932C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 12:34:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA7C5C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 12:34:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229797AbiKIMeu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 07:34:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59066 "EHLO
+        id S229662AbiKIMev (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 07:34:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59124 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229662AbiKIMeq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 07:34:46 -0500
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70EB71788F
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 04:34:46 -0800 (PST)
-Received: by mail-pf1-x42e.google.com with SMTP id q9so16559554pfg.5
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 04:34:46 -0800 (PST)
+        with ESMTP id S229700AbiKIMet (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 07:34:49 -0500
+Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27A6D17E3F
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 04:34:49 -0800 (PST)
+Received: by mail-pj1-x1032.google.com with SMTP id b1-20020a17090a7ac100b00213fde52d49so1754476pjl.3
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 04:34:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1SRVYqSw1BlyTAyOUO2f9GyvglFpWlLdZyegiX8i2LY=;
-        b=dxSmSUsBhp39mrZ061eGA6D6c6fiSbuNin5eMh/mkBjQ5eKP1HYDVxdMwBFWoU6PNo
-         OPzKJfs9CxBO/3/tZ0+ERFuvyVfx/HEhBECt8DWpzQeiEi7amB7jf1l8lNsx1rzbolQv
-         fuJJ51aMO4XcN1sjuoFQB0lROYQ9jDXpplAXAgWR2QhgLK31OVx8wZcwkF42ZXfcNAky
-         SG2+fgw79mWb5ss0wC+WzBxugRqzlLRbm40BBCBJykNJn9iKoVm0TJXpeQE+S0SnIv+I
-         MTPVSvPpgJPxi7bK8Pa/WAILVdpnP8mkD9zflfoY3UC4BsBRshYDtL0LU/a5UBR5ge8j
-         iWRw==
+        bh=54ZyT6fc56mcawLFXuHDQpGJgTiE24QOQne6rNPY7lA=;
+        b=mEhzF9GvZfDYIp4nIk7aLX1AccVsUGSH00US22OvPPZ1bJh77mk1gcrlTnfI7+nZfW
+         A9PbPEY5/UM8Bh7Gx1wurMdHnNfYsV12imdcEzcXLe24prrtIEGGR3z4slqrcB7QHbgl
+         /QM7ocXdKi/u9o8rRfTKDd8wA7P3D9NT02LWK1fGTQs0IUNczuYiwNZ9fhHH1FgstRXA
+         nPhW0D9wWaeCKqDFl9r2DigPRbsM6zhTGzRcR5kSdo1UcMLF/+esiRHKbpQ7E/TrPdS5
+         1IfYF2R3ZZgoqOaRvcm1aTYT1fs0/3etvYKSXV207Z6RnoECQi0mW8DXpQGZh+rFry+X
+         5sFA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=1SRVYqSw1BlyTAyOUO2f9GyvglFpWlLdZyegiX8i2LY=;
-        b=8PrN77QK6ZCMdHjr/h6lBFHBWlFUj4nMMJWky00EB9UrgVXe+xgsSTqjVyeAmxWQOl
-         kcPQUq0NSvwGKAEnS7cScViTRywkjdHheXlmaACZ17c3mk88nDrYuZsUg0HwTfC+EmvL
-         pL5ZfmZrbvCYJuQnp2nvY9iUJBKnPiB+f55Ntehgc0fSLhLB7PBoujc3MwnG3mro5n9O
-         EELliTutIaX7adiihl9V9wMiWzFfgr5nT+rISheUFWHg5aiFfKMCVjCkttDQJuazY/xE
-         MxnJPQQUAgmjJHUOPMixvqs+Ae5+BfhGrHqJK+qbzdZIgsD4QBJ+dDiQoNi3Dr2WwlOz
-         q5fA==
-X-Gm-Message-State: ACrzQf2mHE5D2ITX5RFP3xE0SbpaS6hTL9pzmU0eAJQjefF6MuUBVQda
-        1u5hQYtCh6X688T9lYVRBhdBTzPVpF00pDfYpfSdkQ==
-X-Google-Smtp-Source: AMsMyM6ZU5ESHEtxsXXMaDBmFrcveCgizXWWxdQhAFHhVPogn1qvvU/1SmpprSects1Z3ISdUfIsH/Qg9cHrgi95DJo=
-X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
- v13-20020a63464d000000b004415968cd0emr53525795pgk.595.1667997285975; Wed, 09
- Nov 2022 04:34:45 -0800 (PST)
+        bh=54ZyT6fc56mcawLFXuHDQpGJgTiE24QOQne6rNPY7lA=;
+        b=lVlNCOW3VkY+qcRnDfLs3+WnjoQwsPNADlkdrzRzkPy1dR04WC8ZlUddflv0/SYCdT
+         OPKnUhEPSL4TCoKYMqoLWlYzQ3dkVeDbI3VbLCPTZeErJMuZ561B447VG7AOZeE7YweM
+         mhIz281CEY2fRLLhBYJK8bvwWqyKY+P5rI1AYR0W6rsxcsw8g39i3m3SCQCkVp2zEXcs
+         vZth1wW/FwXm6HEFt5IfSGw0s3JXNgtkn6Us3H9qdjHAtekw3a8w/0/842l3DeEppBkd
+         O0yuaf/kSQpcEY+uiTqA8vbcwxdvusbrh+HACPSbQW4S1JazQcuqdpIeTrVQJwsnPSw0
+         atpg==
+X-Gm-Message-State: ACrzQf1cVo3dtTjGPxwVBx0kMS5tnd7U0iQsCl+7Hv9NGi9v8epWc1cl
+        JtMP6YT1nv9NovVfyD+Q2SpjoWHf+weXFoaFP5CDUw==
+X-Google-Smtp-Source: AMsMyM7cR85cjCD286dwa+O7SgLYBEsLqTdFVs60mbDlpD2TLOplgOCpHPxyr+PqlxpKYDt5sXgSVTxjTW/b0fIdwLk=
+X-Received: by 2002:a17:90b:4d07:b0:1ef:521c:f051 with SMTP id
+ mw7-20020a17090b4d0700b001ef521cf051mr80726174pjb.164.1667997288842; Wed, 09
+ Nov 2022 04:34:48 -0800 (PST)
 MIME-Version: 1.0
-References: <20221108041400.157052-1-jagan@edgeble.ai> <20221108041400.157052-3-jagan@edgeble.ai>
-In-Reply-To: <20221108041400.157052-3-jagan@edgeble.ai>
+References: <1667893503-20583-1-git-send-email-haibo.chen@nxp.com>
+In-Reply-To: <1667893503-20583-1-git-send-email-haibo.chen@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 9 Nov 2022 13:34:09 +0100
-Message-ID: <CAPDyKFqtgSedouQKMkk0YfwjP21fhyJDwBQg8mhfP4nRY0fEhQ@mail.gmail.com>
-Subject: Re: [PATCH v7 02/10] dt-bindings: mmc: rockchip-dw-mshc: Add
- power-domains property
-To:     Jagan Teki <jagan@edgeble.ai>
-Cc:     Heiko Stuebner <heiko@sntech.de>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org, devicetree@vger.kernel.org,
-        Johan Jonker <jbx6244@gmail.com>, linux-mmc@vger.kernel.org
+Date:   Wed, 9 Nov 2022 13:34:12 +0100
+Message-ID: <CAPDyKFrmGb272TEyyAUaW7gy+YDa8L2958eF+Fy+5VVfzh04hw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: use the correct host caps for MMC_CAP_8_BIT_DATA
+To:     haibo.chen@nxp.com
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-imx@nxp.com, stable@vger.kernel.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 8 Nov 2022 at 05:14, Jagan Teki <jagan@edgeble.ai> wrote:
+On Tue, 8 Nov 2022 at 09:06, <haibo.chen@nxp.com> wrote:
 >
-> Document power-domains property in rockchip dw controller.
+> From: Haibo Chen <haibo.chen@nxp.com>
 >
-> RV1126 is using eMMC and SDIO power domains but SDMMC is not.
+> MMC_CAP_8_BIT_DATA belongs to struct mmc_host, not struct sdhci_host.
+> So correct it here.
 >
-> Cc: linux-mmc@vger.kernel.org
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Jagan Teki <jagan@edgeble.ai>
+> Fixes: 1ed5c3b22fc7 ("mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on 8bit bus")
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> Cc: stable@vger.kernel.org
 
-Applied for next, thanks!
+Applied for fixes, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> Changes for v7:
-> - new patch
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
->  Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml | 3 +++
->  1 file changed, 3 insertions(+)
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index a54f1806dd57..004c6352d954 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1679,14 +1679,14 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+>         if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+>                 host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> index 95f59a5e3576..c7e14b7dba9e 100644
-> --- a/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/rockchip-dw-mshc.yaml
-> @@ -71,6 +71,9 @@ properties:
->        to control the clock phases, "ciu-sample" is required for tuning
->        high speed modes.
+> -       if (host->caps & MMC_CAP_8_BIT_DATA &&
+> +       if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+>             imx_data->socdata->flags & ESDHC_FLAG_HS400)
+>                 host->mmc->caps2 |= MMC_CAP2_HS400;
 >
-> +  power-domains:
-> +    maxItems: 1
-> +
->    rockchip,default-sample-phase:
->      $ref: /schemas/types.yaml#/definitions/uint32
->      minimum: 0
+>         if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
+>                 host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
+>
+> -       if (host->caps & MMC_CAP_8_BIT_DATA &&
+> +       if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+>             imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+>                 host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+>                 host->mmc_host_ops.hs400_enhanced_strobe =
 > --
-> 2.25.1
+> 2.34.1
 >
