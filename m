@@ -2,112 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EE774C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:39:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC86DC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed,  9 Nov 2022 14:42:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229949AbiKIOji (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 9 Nov 2022 09:39:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52448 "EHLO
+        id S230304AbiKIOmJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 9 Nov 2022 09:42:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229727AbiKIOjh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:39:37 -0500
-Received: from mail-pf1-x42d.google.com (mail-pf1-x42d.google.com [IPv6:2607:f8b0:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFEBC30A
-        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:39:36 -0800 (PST)
-Received: by mail-pf1-x42d.google.com with SMTP id b185so16867926pfb.9
-        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:39:36 -0800 (PST)
+        with ESMTP id S230058AbiKIOmI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 9 Nov 2022 09:42:08 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A311665B8
+        for <linux-mmc@vger.kernel.org>; Wed,  9 Nov 2022 06:42:03 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id g7so25922728lfv.5
+        for <linux-mmc@vger.kernel.org>; Wed, 09 Nov 2022 06:42:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=4U/u8cbAVh+AV36yv6BZmejnrXhUdTMbrT5aDsSk86s=;
-        b=LSFyt3GfAfQ6p8Z6oN7USp7eTKczhIozzEYrouVAbhawy63uTPpVi7IXYIQyD/u7aX
-         hIMWcmLqkSBZaGvrIeZoY/+TAC6+Z+WgBcc64Kf/sCY5I6mvuB9WbTtu7jhgbnJdXhIG
-         FNddG2D3Ksg2ou7Cn3u0OIOJ7LYnSB2LLR9X8XcVfRJJNfUH1JMqIkE3QGRKrQgBNsm4
-         LrxjPevU9c2Y82VsT/XSx6X41j6OFt8hkmlLUcRHM/r0V3Pq3fY5OXfdgIURRXB74rFc
-         AALHdwhprVFzxx5PVBsPlRpZBCPhiypt4Ajr8LDvG1EOIppsZjeaYMN3Cf/NRXbjcp5s
-         Fqlg==
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=bkmGAAhASeKkyW4/+zIci7WZOjWWW0Qq/nOsqw+GfiE=;
+        b=V+GLs/B72K4vuyoJBJsydkDBTzbVVgqHfQYp12G6saidzreZLhQqcWe37HezPG4ePA
+         nl/L5zvGuatlOBPb1b6RNakbmnljcdXEtNVFsXkRhlMTTGMSl4MUPATc1YuQ/cS1dw3U
+         5Aqfl6n2U/p7cFmzm0Cqb+pxv0uHMz04AHxIMMXx+40UmqqpwRYmLQn4IZAHGcHFTF3n
+         1HyhZhNtItLmRFUK8LOTCjsbsq4cfmvi1rQw6q7muUQfRoU8RXmB14XOCZFiTkyG2FW1
+         LDH45HNZO6wYQ36Dwx7/EDJaYopfw2g2oM9XGuHiom8Jxe4USVLzSadvOuJ8QP0JOBNM
+         2hHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=4U/u8cbAVh+AV36yv6BZmejnrXhUdTMbrT5aDsSk86s=;
-        b=ymj0t17uv9vhFAgqsC8YXA+ymcDFLrE6/kOELyJD31jJttGHdWLhJdfOiEha+USil3
-         6GkcE3J+2/e1lwwq60l4w7lwnBp8w2/PozQ9s14GWu4EwiwL45RfPD05LiI0p4oVh3en
-         NnuqYs6l0Tpd7kmAvnNyQAqWHcXaibEvqW83NEDZ5K+4K0nl2tQT2aphuERZ5Ff1Tzph
-         +Qu3MWIPySPynhjjGYg79brPRUiraTUX75tofIizSwC54eD/2e25FvacTJnsD7iVG4iv
-         aQOAWpaHyOC3iSRmWe9pzVMb0pHZO6s4jupQNslzb7mXjSaZMP7ZpbS+4R02769X3TZ2
-         SGgQ==
-X-Gm-Message-State: ACrzQf3PMmowfLmiVystJBM5ZeF4wVvYBMmGqKv7ZstEinCFCTkXcCAZ
-        WZ7O5O4rDtxlPnZsOpW774z6/nd6ZO8mJ7eFKiT8mw==
-X-Google-Smtp-Source: AMsMyM6T8MaKQNXIsd+cYOAqg2UZthGtfOWJT6Gxsrt65/G1pRHj92V5Gbkvpr4ZVQ1jxmsFVreCNFfPujcUzwdNNmw=
-X-Received: by 2002:a63:464d:0:b0:441:5968:cd0e with SMTP id
- v13-20020a63464d000000b004415968cd0emr53951069pgk.595.1668004776334; Wed, 09
- Nov 2022 06:39:36 -0800 (PST)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=bkmGAAhASeKkyW4/+zIci7WZOjWWW0Qq/nOsqw+GfiE=;
+        b=07gqonylatrpO/bR71zFvGNB7LJLcYXAkUXShS+6OKX1zJe763l31SgtaQocvfJyJh
+         QCjGaj5SpdzQU5QF+GQL1sU4QAguXGulQIjQTkQWHOn0JlaiQ8j11PYtGhtl62A9Aue/
+         a14AeghPcJ5VbX9+xX6leT0VbSGWNQtwHPiBjG6yjShSECInTp4hZK4++UVB8DwjWui7
+         ybwwxwjxOKFQp0eKPFRzVSBnW22G2UoOSA7TwOFsX3OeB+lZkFZDanuDLiX+ylng/ava
+         tYuDod4VerbBdJ4u3vNc8VsiZk7P8xo8i8LjHavBDdZ17LFyVf5FxuzqX8gsKVnmb2Zf
+         FqgQ==
+X-Gm-Message-State: ACrzQf3fMZOWiAueWt1HVk+0qh0vlf8HZDh+tnnSyV5XXr2KNI6ysnJ6
+        ILXX03LO+Yy7PSG4jwWhu3qwKw==
+X-Google-Smtp-Source: AMsMyM7ZklXHqmsEaE8RxsLrvb2+FVR6HqDGDie2dTIf8XuqINH1FuRAzbnj5B02HrsAx562S4SGog==
+X-Received: by 2002:a05:6512:64:b0:4ae:2465:192a with SMTP id i4-20020a056512006400b004ae2465192amr19588900lfo.62.1668004922021;
+        Wed, 09 Nov 2022 06:42:02 -0800 (PST)
+Received: from localhost.localdomain ([194.29.137.22])
+        by smtp.gmail.com with ESMTPSA id q10-20020a056512210a00b004a478c2f4desm2235229lfr.163.2022.11.09.06.42.00
+        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
+        Wed, 09 Nov 2022 06:42:01 -0800 (PST)
+From:   Konrad Dybcio <konrad.dybcio@linaro.org>
+To:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
+        agross@kernel.org, krzysztof.kozlowski@linaro.org
+Cc:     patches@linaro.org, Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Subject: [PATCH v2 1/3] dt-bindings: mmc: sdhci-msm: Document the SM6375 compatible
+Date:   Wed,  9 Nov 2022 15:41:51 +0100
+Message-Id: <20221109144153.53630-2-konrad.dybcio@linaro.org>
+X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20221109144153.53630-1-konrad.dybcio@linaro.org>
+References: <20221109144153.53630-1-konrad.dybcio@linaro.org>
 MIME-Version: 1.0
-References: <20221109025142.1565445-1-yangyingliang@huawei.com>
- <20221109025142.1565445-3-yangyingliang@huawei.com> <CAPDyKFrcguZWaFd51Bk-xkkVHEWG5gTVKfVHLpc2KuF06hfFug@mail.gmail.com>
- <774718be-ad03-8bf1-630c-a933b877cb72@huawei.com>
-In-Reply-To: <774718be-ad03-8bf1-630c-a933b877cb72@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 9 Nov 2022 15:38:59 +0100
-Message-ID: <CAPDyKFoKM3Omo=cnQsY7ZaNV=9RiY7mS_-ddVjvtx=Jjxir9HA@mail.gmail.com>
-Subject: Re: [PATCH v3 2/3] mmc: sdio: fix of node refcount leak in sdio_add_func()
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 9 Nov 2022 at 14:23, Yang Yingliang <yangyingliang@huawei.com> wrote:
->
->
-> On 2022/11/9 20:27, Ulf Hansson wrote:
-> > On Wed, 9 Nov 2022 at 03:53, Yang Yingliang <yangyingliang@huawei.com> wrote:
-> >> If device_add() returns error in sdio_add_func(), sdio function is not
-> >> presented, so the node refcount that hold in sdio_set_of_node() can not
-> >> be put in sdio_remove_func() which is called from error path. Fix this
-> >> by moving of_node_put() before present check in remove() function.
-> >>
-> >> Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
-> >> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
-> >> ---
-> >>   drivers/mmc/core/sdio_bus.c | 2 +-
-> >>   1 file changed, 1 insertion(+), 1 deletion(-)
-> >>
-> >> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-> >> index babf21a0adeb..266639504a94 100644
-> >> --- a/drivers/mmc/core/sdio_bus.c
-> >> +++ b/drivers/mmc/core/sdio_bus.c
-> >> @@ -377,11 +377,11 @@ int sdio_add_func(struct sdio_func *func)
-> >>    */
-> >>   void sdio_remove_func(struct sdio_func *func)
-> >>   {
-> >> +       of_node_put(func->dev.of_node);
-> >>          if (!sdio_func_present(func))
-> >>                  return;
-> >>
-> >>          device_del(&func->dev);
-> >> -       of_node_put(func->dev.of_node);
-> >>          put_device(&func->dev);
-> > Seems like we should call put_device() even if sdio_func_present()
-> > returns false, don't you think?
-> >
-> > In this way, the corresponding sdio_release_func() will help to manage
-> In sdio_release_func(), sdio_free_fun_cis() is called, it put refcount of
-> 'func->card->dev', but the refcount isn't get until sdio_init_func()
-> is successful. In this way, it's no need to put refcount of
-> 'func->card->dev',
-> so we can not call sdio_release_func() in patch1, and patch1 is needed.
+Document the compatible for SDHCI on SM6375.
 
-I see.
+Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+Changes since v1:
+- Pick up r-b
 
-However, in that case, it seems like we need to fix this slightly
-differently. In patch1, we should not do the kfree() thing immediately
-in the error patch, but rather rely on the reference counting (but in
-a more clever way).
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-Kind regards
-Uffe
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index fc8a6b345d97..12def0f57e3e 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -46,6 +46,7 @@ properties:
+               - qcom,sm6115-sdhci
+               - qcom,sm6125-sdhci
+               - qcom,sm6350-sdhci
++              - qcom,sm6375-sdhci
+               - qcom,sm8150-sdhci
+               - qcom,sm8250-sdhci
+               - qcom,sm8450-sdhci
+-- 
+2.38.1
+
