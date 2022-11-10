@@ -2,112 +2,153 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49924C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 08:06:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 938F5C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 08:12:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229583AbiKJIGD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 03:06:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37538 "EHLO
+        id S232351AbiKJIMD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 03:12:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229551AbiKJIGA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 03:06:00 -0500
-Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88D5AC47;
-        Thu, 10 Nov 2022 00:05:56 -0800 (PST)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.west.internal (Postfix) with ESMTP id 2574F32009BB;
-        Thu, 10 Nov 2022 03:05:45 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute3.internal (MEProxy); Thu, 10 Nov 2022 03:05:45 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm3; t=1668067544; x=1668153944; bh=9z6dpakWTQ
-        c474Oc6sPg23vwltb7n4QHp0AAy2hupBw=; b=FGaVMC7/QkT5O6WwNld0N1blty
-        bEWjb5gKBTYQolLIJ6DSY61Aw1KDixZA5ZeciU7UkpCV66ish6RkfniQ+zoDgShD
-        RajyevWqvhMNDUou6LztAsCgOBQmCM8sdL/CipYCNOOmR8ki7/kvw755NFFPZpEh
-        grl9VkaWs7nkY2JFyrCqzVWBiGox8a5m55bL7B7XI//zBE/2733k33T8+gGT5Nc9
-        qYE8Fe4PrxwC7RuA3k7CfOveyKGE8aiD82Qplsqeg0NQMqYRnThfD7O66fSrh+7U
-        FgVg4GZLJWOutK674EB87/lLfcXrd5Y93BGOEFVm44rlW6SQb8d3HELI0wCQ==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm1; t=1668067544; x=1668153944; bh=9z6dpakWTQc474Oc6sPg23vwltb7
-        n4QHp0AAy2hupBw=; b=HdRJqJAv6NHEXmu2lTEhKHeTJfhEdzLQ5wNdAoLzlAbW
-        bhhuTvJqYR7O0PsfH9v1KcGaDF0Y1vk0xnQbZ+FDN5C6o91l16cQFz2MmVJJuD4z
-        pXs/nqMc/+ygHiCvhfKuLQ/MavYzCMSqufUrfYSLVhA53NLAm7H7S0pamB/Q0C4v
-        k8quuJPtSWuVWP74+NxtE3bEo1d3O3ImcIgl89A+61QLhG7pq6sypU5PqmvHgeNU
-        fn4oKKZXQMR2TZtQCEA9R92mbI3itNTMnbI4FJDzYqD3eTOXJaIFUTm6sr6s6JU0
-        wg15sVQsLVrTy1JzdNAjd+p8SX7D7mT8aDI4fbormQ==
-X-ME-Sender: <xms:2LBsY8d2u2cIPDIdgl5I2nvO5fnqOEueqSvdt57FqU5Ca_IGj-34TQ>
-    <xme:2LBsY-N48vDWqXpiF9UghwZ1MviYO8Nv3toMZygepzXLow8sXV0nKuKn2XrEQw6m5
-    2vvklPDp0ZHsMa-FT4>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrfeefgdduudejucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    goufhushhpvggtthffohhmrghinhculdegledmnecujfgurhepofgfggfkjghffffhvfev
-    ufgtsehttdertderredtnecuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorg
-    hrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvghrnhepleelheeffeehheefvddv
-    kedtvdeitefgvddtkefgtddulefgfedttddvjeehheelnecuffhomhgrihhnpehsohhurh
-    gtvghfohhrghgvrdhnvghtnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
-    rghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:2LBsY9jCfbLSF-G6KzIWYDt-87LVwqaGeP2DoPrJT461pr84HnPZ1g>
-    <xmx:2LBsYx9ynTAdrBky3vh20SEUjYWfoa1UQ57OXh3D-l6HqXVjgs4OZQ>
-    <xmx:2LBsY4s1aXpSEdYiZs8ueEaNMz3ZNZZO8JzdYGVmF_dkh9fLnkuayA>
-    <xmx:2LBsY2ARA8-q3CMzRu8ozNd0ScFx3vL7SWTfjvs2ZLo0Kn8Bnx9IEw>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 3470EB60086; Thu, 10 Nov 2022 03:05:44 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1115-g8b801eadce-fm-20221102.001-g8b801ead
-Mime-Version: 1.0
-Message-Id: <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
-In-Reply-To: <Y2vghlEEmE+Bdm0v@lunn.ch>
-References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
- <Y2vghlEEmE+Bdm0v@lunn.ch>
-Date:   Thu, 10 Nov 2022 09:05:25 +0100
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Andrew Lunn" <andrew@lunn.ch>,
-        "Balamanikandan Gunasundar" <balamanikandan.gunasundar@microchip.com>
-Cc:     "Ulf Hansson" <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
-        ludovic.desroches@microchip.com, 3chas3@gmail.com,
-        Netdev <netdev@vger.kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
-Content-Type: text/plain
+        with ESMTP id S232282AbiKJIMA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 03:12:00 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A08018B26
+        for <linux-mmc@vger.kernel.org>; Thu, 10 Nov 2022 00:12:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1668067920; x=1699603920;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=riGxzLx5wnc3Qa8+ajquEkzeTCy562XY1YDeH97Nc9E=;
+  b=FhQw2iHmi7W13YK3px5SIz/eR+596T35Zp4DeIHkDugpgobtUuy7BF4+
+   hPNNu7br2XmyU2Q2u+fojuRgimIhSCHGezSa9VPMbjNKFJqs888+NFTH8
+   YIG2ME+CJoi7RoaWdU82JSq9M6kSR7qsz4YofVF2ctqFXAiwRvFZe05HQ
+   4NXtu6LyFrJsbojNr2kXRofWvFpLCZAamvcLoOMJwlVzD1JA130zyv8qh
+   mphF8C8dt3HnSX1eEQ4eYx93I5GwinzFPgbl/OtLQ08aagm0p3Qh5hsBD
+   iajayMhjD3zlN54697gbCaX2nd2J9FEJoqUZsnPf+Xlt6omypl2xICB5N
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10526"; a="290967861"
+X-IronPort-AV: E=Sophos;i="5.96,153,1665471600"; 
+   d="scan'208";a="290967861"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2022 00:12:00 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10526"; a="742761556"
+X-IronPort-AV: E=Sophos;i="5.96,153,1665471600"; 
+   d="scan'208";a="742761556"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.14])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Nov 2022 00:11:58 -0800
+Message-ID: <4849ce3d-d656-2a71-426d-b567667016a3@intel.com>
+Date:   Thu, 10 Nov 2022 10:11:54 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.4.2
+Subject: Re: Question about EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
+To:     =?UTF-8?B?SnlhbiBDaG91IFvlkajoirflrold?= <jyanchou@realtek.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
+        "Jisheng.Zhang@synaptics.com" <Jisheng.Zhang@synaptics.com>
+References: <5842d536cb0d4086a225ea0fa2d42e72@realtek.com>
+ <c97df3b4-0038-616d-ef10-953eba595638@intel.com>
+ <0f8f0d91-9e1f-c71e-86a6-25a6bdb4f6b1@rock-chips.com>
+ <38161cf2-4e6e-dbb3-4743-a21657b92451@intel.com>
+ <dcac1f10-98a7-b831-005c-542b8a0d4337@rock-chips.com>
+ <20fda8f718384317a8393baefc553d1b@realtek.com>
+ <82cfb880-4283-047b-c476-c23d06706b06@rock-chips.com>
+ <c387c95ea0e9457e822e7ebf3aa98951@realtek.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <c387c95ea0e9457e822e7ebf3aa98951@realtek.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 9, 2022, at 18:16, Andrew Lunn wrote:
-> On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
->> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
->
-> I was wondering why you Cc: netdev and ATM. This clearly has nothing
-> to do with those lists.
->
-> You well foul of
->
-> M:	Chas Williams <3chas3@gmail.com>
-> L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)
-> L:	netdev@vger.kernel.org
-> S:	Maintained
-> W:	http://linux-atm.sourceforge.net
-> F:	drivers/atm/
-> F:	include/linux/atm*
-> F:	include/uapi/linux/atm*
->
-> Maybe these atm* should be more specific so they don't match atmel :-)
+On 10/11/22 04:11, Jyan Chou [周芷安] wrote:
+>> CQHCI has its own DMA descriptors, so maybe a similar change is needed for CQHCI?
+>> So you do need a similar change for CQHCI
+> 
+>>> According to these comments, it is acceptable for us to update a patch to solve the limitation of 128MB boundary ?
+> 	We have a patch and it works well on cmdq case.
+> 	Thanks. 
 
-The uapi headers look unambiguous to me, for the three headers in
-include/linux/, only the atmdev.h is actually significant, while
-linux/atm.h and linux/atm_tcp.h could each be folded into the one
-C file that actually uses the contents.
+If you have a patch, you can of course submit it.
 
-    Arnd
+> 
+> -----Original Message-----
+> From: Shawn Lin <shawn.lin@rock-chips.com> 
+> Sent: Wednesday, November 9, 2022 11:46 AM
+> To: Jyan Chou [周芷安] <jyanchou@realtek.com>
+> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>; Jisheng.Zhang@synaptics.com; Adrian Hunter <adrian.hunter@intel.com>
+> Subject: Re: Question about EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER
+> 
+> 
+> On 2022/11/8 17:19, Jyan Chou [周芷安] wrote:
+>>> CQHCI has its own DMA descriptors, so maybe a similar change is needed for CQHCI?
+>>
+>> I didn't find this limitation in synopsys DW IP databook.
+>>>> I found it on page 84
+> 
+> I see, but it wasn't clear to me if this description on P84 is for CQ engine part as well.  But seems yes after checking with the IP vendor.
+> So you do need a similar change for CQHCI in cqhci_host_alloc_tdl.
+> 
+>>
+>> -----Original Message-----
+>> From: Shawn Lin <shawn.lin@rock-chips.com>
+>> Sent: Tuesday, November 8, 2022 5:15 PM
+>> To: Adrian Hunter <adrian.hunter@intel.com>
+>> Cc: shawn.lin@rock-chips.com; linux-mmc <linux-mmc@vger.kernel.org>; 
+>> Jyan Chou [周芷安] <jyanchou@realtek.com>; Jisheng.Zhang@synaptics.com
+>> Subject: Re: Question about EMMC CMDQ HOST CONTROLLER INTERFACE 
+>> (CQHCI) DRIVER
+>>
+>> + Jisheng Zhang
+>>
+>> On 2022/11/8 16:34, Adrian Hunter wrote:
+>>> On 8/11/22 10:28, Shawn Lin wrote:
+>>>> On 2022/11/8 16:20, Adrian Hunter wrote:
+>>>>> On 8/11/22 09:25, Jyan Chou [周芷安] wrote:
+>>>>>> Hello Adrian Hunter,
+>>>>>>
+>>>>>> We are now using the upstream code of EMMC CMDQ HOST CONTROLLER INTERFACE (CQHCI) DRIVER, but we found that the existing driver cannot support the limitation of Synopsys IP.
+>>>>>>
+>>>>>> Synopsys IP has a description on their data book " While using DMA, the host memory data buffer size and start address must not exceed 128 MB".
+>>>>
+>>>> Synopsys-based SDHCI IP does have a limitation of 128MB boundary. 
+>>>> But it has already been solved by upstream driver.
+>>>>
+>>>> FYI:
+>>>>
+>>>> commit b85c997d2cfefe7d1f706b85ae46e35a50e3131c ("mmc:
+>>>> sdhci-of-dwcmshc: solve 128MB DMA boundary limitation")
+>>>
+>>> CQHCI has its own DMA descriptors, so maybe a similar change is needed for CQHCI?
+>>
+>> I didn't find this limitation in synopsys DW IP databook.
+>>
+>>>
+>>>>
+>>>>>>
+>>>>>> I am wondering whether there is a method or patch that can fix this boundary limitation.
+>>>>>> Thanks.
+>>>>>> Best Regards,
+>>>>>> Jyan Chou
+>>>>>
+>>>>> Hello Jyan Chou
+>>>>>
+>>>>> I am not clear on what the exact limitation is.  The driver never uses buffers as big as 128 MB.
+>>>>> To restrict DMA to low memory addresses a DMA mask can be used.
+>>>>>
+>>>>> But perhaps you mean not to cross a 128 MB boundary?
+>>>>>
+>>>>> Please cc your questions to the linux kernel mmc mailing list:
+>>>>> linux-mmc@vger.kernel.org because others can answer too.
+>>>>>
+>>>>> Regards
+>>>>> Adrian
+>>>
+>>
+>> ------Please consider the environment before printing this e-mail.
+
