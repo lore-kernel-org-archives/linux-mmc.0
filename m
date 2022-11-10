@@ -2,74 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 312F4C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 07:29:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49924C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 08:06:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232698AbiKJH3L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 02:29:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46078 "EHLO
+        id S229583AbiKJIGD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 03:06:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37538 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232509AbiKJH3K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 02:29:10 -0500
-Received: from mail.nfschina.com (unknown [124.16.136.209])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CC82332061;
-        Wed,  9 Nov 2022 23:29:09 -0800 (PST)
-Received: from localhost (unknown [127.0.0.1])
-        by mail.nfschina.com (Postfix) with ESMTP id 261A11E80D74;
-        Thu, 10 Nov 2022 15:26:34 +0800 (CST)
-X-Virus-Scanned: amavisd-new at test.com
-Received: from mail.nfschina.com ([127.0.0.1])
-        by localhost (mail.nfschina.com [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id uKJeQaodD6Q2; Thu, 10 Nov 2022 15:26:31 +0800 (CST)
-Received: from localhost.localdomain (unknown [180.167.10.98])
-        (Authenticated sender: yuzhe@nfschina.com)
-        by mail.nfschina.com (Postfix) with ESMTPA id D5AC71E80D6D;
-        Thu, 10 Nov 2022 15:26:30 +0800 (CST)
-From:   Yu Zhe <yuzhe@nfschina.com>
-To:     chaotian.jing@mediatek.com, ulf.hansson@linaro.org,
-        matthias.bgg@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org, liqiong@nfschina.com,
-        Yu Zhe <yuzhe@nfschina.com>
-Subject: [PATCH] mmc: mtk-sd: fix two spelling mistakes in comment
-Date:   Thu, 10 Nov 2022 15:28:19 +0800
-Message-Id: <20221110072819.11530-1-yuzhe@nfschina.com>
-X-Mailer: git-send-email 2.11.0
+        with ESMTP id S229551AbiKJIGA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 03:06:00 -0500
+Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 88D5AC47;
+        Thu, 10 Nov 2022 00:05:56 -0800 (PST)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 2574F32009BB;
+        Thu, 10 Nov 2022 03:05:45 -0500 (EST)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Thu, 10 Nov 2022 03:05:45 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm3; t=1668067544; x=1668153944; bh=9z6dpakWTQ
+        c474Oc6sPg23vwltb7n4QHp0AAy2hupBw=; b=FGaVMC7/QkT5O6WwNld0N1blty
+        bEWjb5gKBTYQolLIJ6DSY61Aw1KDixZA5ZeciU7UkpCV66ish6RkfniQ+zoDgShD
+        RajyevWqvhMNDUou6LztAsCgOBQmCM8sdL/CipYCNOOmR8ki7/kvw755NFFPZpEh
+        grl9VkaWs7nkY2JFyrCqzVWBiGox8a5m55bL7B7XI//zBE/2733k33T8+gGT5Nc9
+        qYE8Fe4PrxwC7RuA3k7CfOveyKGE8aiD82Qplsqeg0NQMqYRnThfD7O66fSrh+7U
+        FgVg4GZLJWOutK674EB87/lLfcXrd5Y93BGOEFVm44rlW6SQb8d3HELI0wCQ==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm1; t=1668067544; x=1668153944; bh=9z6dpakWTQc474Oc6sPg23vwltb7
+        n4QHp0AAy2hupBw=; b=HdRJqJAv6NHEXmu2lTEhKHeTJfhEdzLQ5wNdAoLzlAbW
+        bhhuTvJqYR7O0PsfH9v1KcGaDF0Y1vk0xnQbZ+FDN5C6o91l16cQFz2MmVJJuD4z
+        pXs/nqMc/+ygHiCvhfKuLQ/MavYzCMSqufUrfYSLVhA53NLAm7H7S0pamB/Q0C4v
+        k8quuJPtSWuVWP74+NxtE3bEo1d3O3ImcIgl89A+61QLhG7pq6sypU5PqmvHgeNU
+        fn4oKKZXQMR2TZtQCEA9R92mbI3itNTMnbI4FJDzYqD3eTOXJaIFUTm6sr6s6JU0
+        wg15sVQsLVrTy1JzdNAjd+p8SX7D7mT8aDI4fbormQ==
+X-ME-Sender: <xms:2LBsY8d2u2cIPDIdgl5I2nvO5fnqOEueqSvdt57FqU5Ca_IGj-34TQ>
+    <xme:2LBsY-N48vDWqXpiF9UghwZ1MviYO8Nv3toMZygepzXLow8sXV0nKuKn2XrEQw6m5
+    2vvklPDp0ZHsMa-FT4>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrfeefgdduudejucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    goufhushhpvggtthffohhmrghinhculdegledmnecujfgurhepofgfggfkjghffffhvfev
+    ufgtsehttdertderredtnecuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorg
+    hrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvghrnhepleelheeffeehheefvddv
+    kedtvdeitefgvddtkefgtddulefgfedttddvjeehheelnecuffhomhgrihhnpehsohhurh
+    gtvghfohhrghgvrdhnvghtnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:2LBsY9jCfbLSF-G6KzIWYDt-87LVwqaGeP2DoPrJT461pr84HnPZ1g>
+    <xmx:2LBsYx9ynTAdrBky3vh20SEUjYWfoa1UQ57OXh3D-l6HqXVjgs4OZQ>
+    <xmx:2LBsY4s1aXpSEdYiZs8ueEaNMz3ZNZZO8JzdYGVmF_dkh9fLnkuayA>
+    <xmx:2LBsY2ARA8-q3CMzRu8ozNd0ScFx3vL7SWTfjvs2ZLo0Kn8Bnx9IEw>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 3470EB60086; Thu, 10 Nov 2022 03:05:44 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1115-g8b801eadce-fm-20221102.001-g8b801ead
+Mime-Version: 1.0
+Message-Id: <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
+In-Reply-To: <Y2vghlEEmE+Bdm0v@lunn.ch>
+References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
+ <Y2vghlEEmE+Bdm0v@lunn.ch>
+Date:   Thu, 10 Nov 2022 09:05:25 +0100
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Andrew Lunn" <andrew@lunn.ch>,
+        "Balamanikandan Gunasundar" <balamanikandan.gunasundar@microchip.com>
+Cc:     "Ulf Hansson" <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
+        ludovic.desroches@microchip.com, 3chas3@gmail.com,
+        Netdev <netdev@vger.kernel.org>,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-spelling mistake fix : "alreay" -> "already"
-		       "checksume" -> "checksum"
+On Wed, Nov 9, 2022, at 18:16, Andrew Lunn wrote:
+> On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
+>> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
+>
+> I was wondering why you Cc: netdev and ATM. This clearly has nothing
+> to do with those lists.
+>
+> You well foul of
+>
+> M:	Chas Williams <3chas3@gmail.com>
+> L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)
+> L:	netdev@vger.kernel.org
+> S:	Maintained
+> W:	http://linux-atm.sourceforge.net
+> F:	drivers/atm/
+> F:	include/linux/atm*
+> F:	include/uapi/linux/atm*
+>
+> Maybe these atm* should be more specific so they don't match atmel :-)
 
-Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
----
- drivers/mmc/host/mtk-sd.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+The uapi headers look unambiguous to me, for the three headers in
+include/linux/, only the atmdev.h is actually significant, while
+linux/atm.h and linux/atm_tcp.h could each be folded into the one
+C file that actually uses the contents.
 
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index df941438aef5..a10aca76dfb3 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -735,7 +735,7 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
- 		else
- 			bd[j].bd_info &= ~BDMA_DESC_EOL;
- 
--		/* checksume need to clear first */
-+		/* checksum need to clear first */
- 		bd[j].bd_info &= ~BDMA_DESC_CHECKSUM;
- 		bd[j].bd_info |= msdc_dma_calcs((u8 *)(&bd[j]), 16) << 8;
- 	}
-@@ -1212,7 +1212,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 		     !host->hs400_tuning))
- 			/*
- 			 * should not clear fifo/interrupt as the tune data
--			 * may have alreay come when cmd19/cmd21 gets response
-+			 * may have already come when cmd19/cmd21 gets response
- 			 * CRC error.
- 			 */
- 			msdc_reset_hw(host);
--- 
-2.11.0
-
+    Arnd
