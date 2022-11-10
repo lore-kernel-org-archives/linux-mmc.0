@@ -2,119 +2,172 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38573C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 22:33:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12B9DC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 22:42:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229586AbiKJWdN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 17:33:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41522 "EHLO
+        id S229907AbiKJWl5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 17:41:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44748 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231414AbiKJWdM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 17:33:12 -0500
-Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EEA656554;
-        Thu, 10 Nov 2022 14:33:11 -0800 (PST)
-Received: by mail-pj1-x102c.google.com with SMTP id e7-20020a17090a77c700b00216928a3917so6179632pjs.4;
-        Thu, 10 Nov 2022 14:33:11 -0800 (PST)
+        with ESMTP id S229499AbiKJWl5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 17:41:57 -0500
+Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61A2849B4B;
+        Thu, 10 Nov 2022 14:41:56 -0800 (PST)
+Received: by mail-pl1-x635.google.com with SMTP id d20so2749727plr.10;
+        Thu, 10 Nov 2022 14:41:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=8gY/OzJoPnw06nvF/ax1dzsyttFIg/d8ctj7MuL258E=;
-        b=M+4u4lcZ0g8mC7ch0OT4x5PLDybVoticZj3bC8HjO0tdR+1iL639F8CnsHSzkCO75v
-         xq+TTSX9X81HBms18pplxiyp73xjplqMJyC8NOu2cLnB+Pv1TUaLwYu92VpnUs1lta57
-         +TKvsOynQ7nkn3rHnIAm08/WyKt7pjRXcLsbA2pWt6xXpSEOX4/1uLNz7Wm6CXiKhBkP
-         Q1kBOIwCb5EEKVJsYP/jf2GoNVtIfEk3aiwiZ/RMufstZm3QXYX5POHepKlBZQ8O25yN
-         ifLSDAFG1y3pzyqP+q0ANwOqz7EBlx2rvM9koKUZAD5x934+tzva5HcE4lZvf0Q5eIQ+
-         mjgQ==
+        bh=e4Qs9bEMZ3gDq4us7OrdRRiLVNWHDOmZfbfm48tPnck=;
+        b=qbRnu/4LZoqDMzfN1T1kE9YREn4aOucC9lhaWV9gbrwXT7sX/dmca+ETwg9QN60uej
+         p8/Lw/7Tfa456Y3swGCmPC7MqQ9wuo3x4IukSs7pmsB4ZnVsmSs6tCcwu9jjzAnodbID
+         5z6W2WyndMTL55lQSd6SEjmbeOvJ014Xw6UZzuJqQT+N0mn2hlEUwKTU3depJF9O3/yy
+         dxi0S3JnQZrzAGrA6eUWxlA+OBuyUHzpwHeNquZ6sfczJiRhHbx2YxTizx5S/KCtX6y3
+         o6jTHlJzo9M4Vm8OAmn/VAOTw2r0tZWDzXdgIMx8zflLzC5EOviXDk7Wu/i/68YDy2Ch
+         f8Bw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8gY/OzJoPnw06nvF/ax1dzsyttFIg/d8ctj7MuL258E=;
-        b=NaxemziIDgA7cIDlyhp8yS/Gy3Vklm5aDHurpmGCvnWd0STmNruzw3BxsoBV1MJJxC
-         n8tFl43GraN3rqmhlBcP6tIpvGDUNVgtFGo+i8txmfzVjQB4KbTdjq60D5I2c1K0NHb7
-         u5ZoI6l8ObwT9VhHtHlw3RDbRc7iW4kBfL+EPAF7HmQ2hHCUgZ9DkVbhumVL7c0C1zcn
-         I/qzOjo6L1sWKFDPhemNcFjRtpardepaxuqHTuGWgcL3e9mjIENNf49XJuh7YbTQg3ML
-         4VRAQ9fx0kl7uIYB3loX680yncrTbq5AifwTsaieby2r1L/1zryam8rCMdtzrPpCG/+I
-         HpPQ==
-X-Gm-Message-State: ACrzQf2GFSFUT9JcySnmIYqt1v2CTHsS6k2sLBMzYGEhDPaDUhViy5G9
-        K/v2RKrp1v0RJTzx0Y7oZLY=
-X-Google-Smtp-Source: AMsMyM4uxqy0CAq22wSngxYpEuQrP/za0C3jljiPdLH6FvdkUTfDrtGBxiG84ErK0aCiPHpUkUU35g==
-X-Received: by 2002:a17:90a:8503:b0:212:9b3f:dee5 with SMTP id l3-20020a17090a850300b002129b3fdee5mr2317401pjn.62.1668119590803;
-        Thu, 10 Nov 2022 14:33:10 -0800 (PST)
+        bh=e4Qs9bEMZ3gDq4us7OrdRRiLVNWHDOmZfbfm48tPnck=;
+        b=NF81mlpqs9W/awISe20nct9Wxkzr0pKkCmr8LbBq0fowwV7WCApUSGnWmck/QrCSKj
+         SyacJ+50R3VXWCu/N24PNwKE23xRAFoB/V3OX1ofxIrUJdUAsrqI2+CMCQlwDc333yxa
+         vBfQhRyC0pYF5C9Hqf5QvdgJac4U9Frv6w0S1VBCZLX2Fai2GxhTYdvhIEcx39a5/WVk
+         o4XFwI0GUkIRTp0syp8JTaFJC5aBQwV/ilmVXC1vYGgVX9Wrx8yuKzvOTntoicxOGpvM
+         4ZA11zng4PDxcpA1tbmvxHGgEIhtJqOhxOcKDAQWQOm7aUfvq2eE3jt8gMBEgSGnHU61
+         h8XA==
+X-Gm-Message-State: ACrzQf195ICPz7ZTbXFKvUQh1jKEKuEf5NMkLXw998mdBq/8r80DgEYs
+        WntnwT1T48KCcA0rm33FuZI=
+X-Google-Smtp-Source: AMsMyM4nyW6+yaR60JXHJABSjQGw+eHKUCsaYHz+iJNpbD3jbsh6paIIOlj4vz9grbTk8YBdFHZ+aw==
+X-Received: by 2002:a17:902:8211:b0:183:7f67:25d7 with SMTP id x17-20020a170902821100b001837f6725d7mr2346968pln.164.1668120115608;
+        Thu, 10 Nov 2022 14:41:55 -0800 (PST)
 Received: from google.com ([2620:15c:9d:2:2eb5:1c59:61e8:a36d])
-        by smtp.gmail.com with ESMTPSA id l5-20020a170903120500b00186727e5f5csm164375plh.248.2022.11.10.14.33.09
+        by smtp.gmail.com with ESMTPSA id d17-20020a170902ced100b001868ed86a95sm188133plg.174.2022.11.10.14.41.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 10 Nov 2022 14:33:09 -0800 (PST)
-Date:   Thu, 10 Nov 2022 14:33:06 -0800
+        Thu, 10 Nov 2022 14:41:54 -0800 (PST)
+Date:   Thu, 10 Nov 2022 14:41:51 -0800
 From:   Dmitry Torokhov <dmitry.torokhov@gmail.com>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>,
-        ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
-        alexandre.belloni@bootlin.com, 3chas3@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org,
+To:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+Cc:     ludovic.desroches@microchip.com, ulf.hansson@linaro.org,
+        nicolas.ferre@microchip.com, alexandre.belloni@bootlin.com,
+        3chas3@gmail.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org
 Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
-Message-ID: <Y218Itfc4wp3XZvt@google.com>
+Message-ID: <Y21+L01BcPQ35FYi@google.com>
 References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
- <CAPDyKFo+FUAZ=1Vu4+503ch5_Wrw47BanTjdB=7J8XhRwczyqg@mail.gmail.com>
- <CACRpkdYeJ0NuJr_RF10oMAEuhYTBfaLfHoZ=b3A2f4BqXkvzOQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CACRpkdYeJ0NuJr_RF10oMAEuhYTBfaLfHoZ=b3A2f4BqXkvzOQ@mail.gmail.com>
+In-Reply-To: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Balamanikandan,
 
-On Wed, Nov 09, 2022 at 03:48:32PM +0100, Linus Walleij wrote:
-> On Wed, Nov 9, 2022 at 1:39 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > On Wed, 9 Nov 2022 at 05:39, Balamanikandan Gunasundar
-> (...)
-> > > --- a/drivers/mmc/host/atmel-mci.c
-> > > +++ b/drivers/mmc/host/atmel-mci.c
-> > > @@ -19,7 +19,8 @@
-> > >  #include <linux/module.h>
-> > >  #include <linux/of.h>
-> > >  #include <linux/of_device.h>
-> > > -#include <linux/of_gpio.h>
-> > > +#include <linux/irq.h>
-> > > +#include <linux/gpio/consumer.h>
+On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
+> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
 > 
-> This is nice, but higher up the driver also #include <linux/gpio.h>
-> so delete that line too, <linux/gpio/consumer.h> should be enough.
+> To maintain backward compatibility, we rely on the "cd-inverted"
+> property to manage the invertion flag instead of GPIO property.
 > 
-> > > -                       of_get_named_gpio(cnp, "cd-gpios", 0);
-> > > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
-> > > +                                                   "cd-gpios",
-> > > +                                                   0, GPIOD_IN, "cd-gpios");
-> (...)
-> > >                 pdata->slot[slot_id].wp_pin =
-> > > -                       of_get_named_gpio(cnp, "wp-gpios", 0);
-> > > +                       devm_gpiod_get_from_of_node(&pdev->dev, cnp,
-> > > +                                                   "wp-gpios",
-> > > +                                                   0, GPIOD_IN, "wp-gpios");
+> Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
+> ---
+>  drivers/mmc/host/atmel-mci.c | 79 ++++++++++++++++++------------------
+>  include/linux/atmel-mci.h    |  4 +-
+>  2 files changed, 41 insertions(+), 42 deletions(-)
 > 
-> Hm. Dmitry is trying to get rid of of_get_named_gpio() I think.
-> 
-> But I suppose we can migrate to fwnode later.
+> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+> index 67b2cd166e56..1df90966e104 100644
+> --- a/drivers/mmc/host/atmel-mci.c
+> +++ b/drivers/mmc/host/atmel-mci.c
+> @@ -19,7 +19,8 @@
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> -#include <linux/of_gpio.h>
+> +#include <linux/irq.h>
+> +#include <linux/gpio/consumer.h>
+>  #include <linux/platform_device.h>
+>  #include <linux/scatterlist.h>
+>  #include <linux/seq_file.h>
+> @@ -389,8 +390,8 @@ struct atmel_mci_slot {
+>  #define ATMCI_CARD_NEED_INIT	1
+>  #define ATMCI_SHUTDOWN		2
+>  
+> -	int			detect_pin;
+> -	int			wp_pin;
+> +	struct gpio_desc        *detect_pin;
+> +	struct gpio_desc	*wp_pin;
+>  	bool			detect_is_active_high;
+>  
+>  	struct timer_list	detect_timer;
+> @@ -638,7 +639,11 @@ atmci_of_init(struct platform_device *pdev)
+>  			pdata->slot[slot_id].bus_width = 1;
+>  
+>  		pdata->slot[slot_id].detect_pin =
+> -			of_get_named_gpio(cnp, "cd-gpios", 0);
+> +			devm_gpiod_get_from_of_node(&pdev->dev, cnp,
+> +						    "cd-gpios",
+> +						    0, GPIOD_IN, "cd-gpios");
 
-I'd much rather we changed this right away to
+As I mentioned in another email, please use devm_fwnode_gpiod_get()
+instead of devm_gpiod_get_from_of_node() which is going away.
 
-	devm_fwnode_gpiod_get(&pdev->dev, of_fwnode_handle(cnp),
-			      "wp", GPIOD_IN, "wp-gpios");
+> +		if (IS_ERR(pdata->slot[slot_id].detect_pin))
+> +			pdata->slot[slot_id].detect_pin = NULL;
 
-and not added new users of devm_gpiod_get_from_of_node() which is there
-only 2 left.
+I think it would be much better if we had proper error handling and did
+something like:
 
-Thanks!
+		err = PTR_ERR_OR_ZERO(pdata->slot[slot_id].detect_pin);
+		if (err) {
+			if (err != -ENOENT)
+				return ERR_PTR(err);
+			pdata->slot[slot_id].detect_pin = NULL;
+		}
+
+This will help with proper deferral handling.
+
+>  
+>  		pdata->slot[slot_id].detect_is_active_high =
+>  			of_property_read_bool(cnp, "cd-inverted");
+
+Instead of doing gpiod_set_value_raw() below I would recommend handling
+it here via gpiod_is_active_low() and gpiod_toggle_active_low() and
+removing the flag from atmel_mci_slot structure.
+
+
+> @@ -647,7 +652,11 @@ atmci_of_init(struct platform_device *pdev)
+>  			of_property_read_bool(cnp, "non-removable");
+>  
+>  		pdata->slot[slot_id].wp_pin =
+> -			of_get_named_gpio(cnp, "wp-gpios", 0);
+> +			devm_gpiod_get_from_of_node(&pdev->dev, cnp,
+> +						    "wp-gpios",
+> +						    0, GPIOD_IN, "wp-gpios");
+> +		if (IS_ERR(pdata->slot[slot_id].wp_pin))
+> +			pdata->slot[slot_id].wp_pin = NULL;
+>  	}
+>  
+>  	return pdata;
+> @@ -1511,8 +1520,8 @@ static int atmci_get_ro(struct mmc_host *mmc)
+>  	int			read_only = -ENOSYS;
+>  	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+>  
+> -	if (gpio_is_valid(slot->wp_pin)) {
+> -		read_only = gpio_get_value(slot->wp_pin);
+> +	if (slot->wp_pin) {
+> +		read_only = gpiod_get_value(slot->wp_pin);
+
+Consider using "cansleep" variants.
+
+Thanks.
 
 -- 
 Dmitry
