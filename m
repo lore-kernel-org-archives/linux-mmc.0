@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E466C4167D
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 15:08:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61347C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 15:08:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231235AbiKJPIq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 10:08:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56552 "EHLO
+        id S230206AbiKJPIr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 10:08:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56550 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230397AbiKJPIm (ORCPT
+        with ESMTP id S230235AbiKJPIm (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 10:08:42 -0500
 Received: from mx.msync.work (mx.msync.work [185.250.0.168])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9991823157;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CF9F23149;
         Thu, 10 Nov 2022 07:08:38 -0800 (PST)
-Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id F14AD123169;
-        Thu, 10 Nov 2022 15:01:08 +0000 (UTC)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 41848123166;
+        Thu, 10 Nov 2022 15:01:07 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=lexina.in; s=dkim;
-        t=1668092469; h=from:subject:date:message-id:to:mime-version:
+        t=1668092467; h=from:subject:date:message-id:to:mime-version:
          content-transfer-encoding:in-reply-to:references;
-        bh=dONz83S/sl0lvYKGXEj7vcvWK71sD2+ztpm57yFpufg=;
-        b=OTavFoQLMbkEqY41c8FhiUtigQYo9tCEen8cj5clEkrfIdSs/a2eaDQC69VZY0uoB2otoN
-        ++qyL00LAa2ymvVaLaAGYwr8PD0HNk97Qd40oz/Wl1PGUx/mTFQYYzZNFsM+UkwvhUlrPU
-        b59Au0227AfMxPCq0qq0vaLAwxlBWdoCxPooBnfsCwmAIjkZdp0SmUoosZ8e3TL2eAIvEx
-        ScisEvn3ghRTbEUg/EeAHFm1B9EHSvfiMT2mvvWYbLnEUc4EJitW3mJ6kCZPjRdFiVyV5x
-        lZmA9Y/zZoI+PQDDl0JNUuLKyemTzhFLZe/AfNsqGhBY8ukXMVPAJBg3rvGmPQ==
+        bh=ZftRKqAeH5kEZiPRpVJLIZ6Af/f8rleyvcwfQTNcp7I=;
+        b=iBqP2MLxyMk8eCbFAdaeuExuIOALRKLLZSDpRtsRyVV6+urGSwF4pvBL4sqhn2FKo5pIcG
+        9RukbBC9aFvVOD0PBymrIR8Yl5tG0APoGBPTtAZqYX0llwiGPdtkso+w3R5S5vx36iaKTd
+        G1Oib53dVrYaq5ywCwggn5htG64J3Ifgku9cs9CZMYzXxYCfx2hbCdkfS9/Ne9qjRnm3jH
+        KdJlzMNyepdljw4YnL0PXZjRxXWWscIGgIRPSVpCt0bIdzVhi1UsGE4yQbBKD9IMwzGBAL
+        IcWrMtnp4/4GuFYrvG4QUS5q693UmEdH1f4hFdV4N3nk0etdMhYv0dF8Ku3hOw==
 From:   Vyacheslav Bocharov <adeep@lexina.in>
 To:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 4/4] arm64: dts: docs: Update mmc meson-gx documentation for new config option amlogic,mmc-phase
-Date:   Thu, 10 Nov 2022 18:00:35 +0300
-Message-Id: <20221110150035.2824580-5-adeep@lexina.in>
+Subject: [PATCH 1/4] arm64: amlogic: mmc: meson-gx: Add core, tx, rx eMMC/SD/SDIO phase clock settings from devicetree data
+Date:   Thu, 10 Nov 2022 18:00:32 +0300
+Message-Id: <20221110150035.2824580-2-adeep@lexina.in>
 In-Reply-To: <20221110150035.2824580-1-adeep@lexina.in>
 References: <20221110150035.2824580-1-adeep@lexina.in>
 MIME-Version: 1.0
@@ -41,39 +41,60 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-- amlogic,mmc-phases: 3-element array of clock phases for core, tx, rx
-clock with values:
-	0: CLK_PHASE_0 - 0 phase
-	1: CLK_PHASE_90 - 90 phase
-	2: CLK_PHASE_180 - 180 phase
-	3: CLK_PHASE_270 - 270 phase
-By default driver use <CLK_PHASE_180 CLK_PHASE_0 CLK_PHASE_0> value.
+The mmc driver has the same phase values for all meson platforms. However,
+some platforms (and even some boards) require different values. This patch
+transfers the values from the set in the code to the variables in the
+device-tree file.
 
 Signed-off-by: Vyacheslav Bocharov <adeep@lexina.in>
 
-diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-index ccc5358db131..98c89c5b3455 100644
---- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-+++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
-@@ -25,6 +25,12 @@ Required properties:
- Optional properties:
- - amlogic,dram-access-quirk: set when controller's internal DMA engine cannot access the
-   DRAM memory, like on the G12A dedicated SDIO controller.
-+- amlogic,mmc-phases: 3-element array of clock phases for core, tx, rx clock with values:
-+	0: CLK_PHASE_0 - 0 phase
-+	1: CLK_PHASE_90 - 90 phase
-+	2: CLK_PHASE_180 - 180 phase
-+	3: CLK_PHASE_270 - 270 phase
-+  By default driver use <CLK_PHASE_180 CLK_PHASE_0 CLK_PHASE_0> value.
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index df05e60bed9a..c0f32054e472 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -27,6 +27,7 @@
+ #include <linux/interrupt.h>
+ #include <linux/bitfield.h>
+ #include <linux/pinctrl/consumer.h>
++#include <dt-bindings/mmc/meson-gx-mmc.h>
  
- Example:
+ #define DRIVER_NAME "meson-gx-mmc"
  
-@@ -36,4 +42,5 @@ Example:
- 		clock-names = "core", "clkin0", "clkin1";
- 		pinctrl-0 = <&emmc_pins>;
- 		resets = <&reset RESET_SD_EMMC_A>;
-+		amlogic,mmc-phases = <CLK_PHASE_180 CLK_PHASE_0 CLK_PHASE_0>;
- 	};
+@@ -36,8 +37,6 @@
+ #define   CLK_CORE_PHASE_MASK GENMASK(9, 8)
+ #define   CLK_TX_PHASE_MASK GENMASK(11, 10)
+ #define   CLK_RX_PHASE_MASK GENMASK(13, 12)
+-#define   CLK_PHASE_0 0
+-#define   CLK_PHASE_180 2
+ #define   CLK_V2_TX_DELAY_MASK GENMASK(19, 16)
+ #define   CLK_V2_RX_DELAY_MASK GENMASK(23, 20)
+ #define   CLK_V2_ALWAYS_ON BIT(24)
+@@ -428,13 +427,22 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	const char *mux_parent_names[MUX_CLK_NUM_PARENTS];
+ 	const char *clk_parent[1];
+ 	u32 clk_reg;
++	u32 phase[3]; // <core_phase, tx_phase, rx_phase>
++
++	if (!(host->dev && host->dev->of_node) || (device_property_read_u32_array(host->dev,
++	    "amlogic,mmc-phase", phase, 3) < 0)) {
++		dev_dbg(host->dev, "get amlogic,mmc-phase failed, use default phase settings\n");
++		phase[0] = CLK_PHASE_180;
++		phase[1] = CLK_PHASE_0;
++		phase[2] = CLK_PHASE_0;
++	}
+ 
+ 	/* init SD_EMMC_CLOCK to sane defaults w/min clock rate */
+ 	clk_reg = CLK_ALWAYS_ON(host);
+ 	clk_reg |= CLK_DIV_MASK;
+-	clk_reg |= FIELD_PREP(CLK_CORE_PHASE_MASK, CLK_PHASE_180);
+-	clk_reg |= FIELD_PREP(CLK_TX_PHASE_MASK, CLK_PHASE_0);
+-	clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, CLK_PHASE_0);
++	clk_reg |= FIELD_PREP(CLK_CORE_PHASE_MASK, phase[0]);
++	clk_reg |= FIELD_PREP(CLK_TX_PHASE_MASK, phase[1]);
++	clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, phase[2]);
+ 	clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
+ 	writel(clk_reg, host->regs + SD_EMMC_CLOCK);
+ 
 -- 
 2.30.2
 
