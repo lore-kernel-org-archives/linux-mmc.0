@@ -2,63 +2,130 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 485C9C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 09:02:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68DCCC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 09:02:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229575AbiKJJCV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 04:02:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38292 "EHLO
+        id S229660AbiKJJCt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 04:02:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38844 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229562AbiKJJCT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 04:02:19 -0500
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 669C2B4B3;
-        Thu, 10 Nov 2022 01:02:18 -0800 (PST)
-Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id B994F6602A12;
-        Thu, 10 Nov 2022 09:02:16 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1668070937;
-        bh=ePBS862hPs4yf5c+mZnYpufOgVKu6Ts7nvvHguuCxDM=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=ndhZA3GFoHwv/PZPwd8KVeA7WW4XwA3owaNqgfUSS5k8gi8uYtm3HqCD4OxboqsXX
-         M7ydc5tijTAdmT2wPBlctu4DVMkAi+FSa7hqAB38v8Nb4j+n8WJd2/UVZPMWAZDart
-         Ib04DdwnYrW25DYgOmtfEDAuCXTTEI5luzfH4N+1Sk7PfBZk4h+FQmWDhDsZdEVtNe
-         VaooFsD30z90PnLjQrSwmS8d819tbNhiXOD9qAgnna7SY4mBN2FL3sN7hby8fBxJ/N
-         9Ntcq6hJWRwpSRhA4bQejaM15hHwU6hGcJXcLDyLxaBYpUUsXjT9hjxtaWmxq7Io74
-         2/cOMXxqfMHZw==
-Message-ID: <a430f1c9-0d25-5771-6a9f-23f47daa3759@collabora.com>
-Date:   Thu, 10 Nov 2022 10:02:14 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [PATCH] mmc: mtk-sd: fix two spelling mistakes in comment
-Content-Language: en-US
-To:     Yu Zhe <yuzhe@nfschina.com>, chaotian.jing@mediatek.com,
-        ulf.hansson@linaro.org, matthias.bgg@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org, liqiong@nfschina.com
-References: <20221110072819.11530-1-yuzhe@nfschina.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20221110072819.11530-1-yuzhe@nfschina.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S229588AbiKJJCs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 04:02:48 -0500
+Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA55D69DC8;
+        Thu, 10 Nov 2022 01:02:47 -0800 (PST)
+Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
+        by mailout.west.internal (Postfix) with ESMTP id 772DC3200980;
+        Thu, 10 Nov 2022 04:02:46 -0500 (EST)
+Received: from imap51 ([10.202.2.101])
+  by compute3.internal (MEProxy); Thu, 10 Nov 2022 04:02:47 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to; s=fm3; t=1668070966; x=1668157366; bh=q00moUI8K+
+        pOFD9ktwoRAAtmtSjS7qt/Tr5OG5EM1/8=; b=AwhCrceGKorlAVUjfyPbzW28FM
+        eeSS9lcVePIHpJy1ZkC23YhXvXAzXJm/XL5iETpQjPrXwFFBFQZzglNyJU1CtPkO
+        OJGOPVAIlJS37k9rJawHfyxrhIXaG53GCELC5pBUaidIUwAo9TGBaS+8dVB3fhkl
+        13ppaCl6h4DxJYeCd1xJZIxGkHKSzczq3q+nDRD+gMLDxLcLRFsRufXxzc9NIy9Y
+        3FWuiX55bh56q9X4Lge2aHy2A5GhiU909sLX5rwPjceEt78oSHEM1T9WuAHXm+Hy
+        q567cC6ruRvR7/OwLKB5d3tdLdYC8k1aw3Y6XovD7L3gR76ORY9k1FgZRkJA==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
+        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
+        :mime-version:references:reply-to:sender:subject:subject:to:to
+        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
+        fm1; t=1668070966; x=1668157366; bh=q00moUI8K+pOFD9ktwoRAAtmtSjS
+        7qt/Tr5OG5EM1/8=; b=sgH9PeCaA38pM4BH3FZX+t/rMdUT+fYgU+mHUXK6V7w/
+        xDpykZZ74JzPDSODRsqZIDYuL9WbJvcGzT5DrLc/Y6I4UacKkrNSS/Q2pcVwGp1W
+        iplpqWvNvLZY1JQl+595AQB2UtYm9SuZO40FwJRm6EKtHIw3qTfDC6pZNgUvSP8q
+        StWcv2PXkIAosUXdc/cDsHEVffLQ3J/lOEZsz/tqX4MTBiDoY9sGvRZInIacjqmK
+        L1A/qOdxMe7EvseH/x8KFQVis/cDQLkMxO9R23TVGDzuw+qxpbM07GoTZ0tIFjyl
+        DTSqi5Gv2IHxdeZ1oiKODr4HHOR7tIxVhxxo5XD7Cw==
+X-ME-Sender: <xms:Nb5sY2YcwuC4_kfJeNk8TsMohtQNJVNUxMUmIZhHsbrMIJlI8UCQng>
+    <xme:Nb5sY5bXJwL3cLG92641KVJWuTqX_9UAfLgmcJuhkSTJoOczJz9kcqwbwBjaWCjZC
+    Mqmp2DClNJiSHbka98>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrfeefgdduvdekucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    goufhushhpvggtthffohhmrghinhculdegledmnecujfgurhepofgfggfkjghffffhvfev
+    ufgtsehttdertderredtnecuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorg
+    hrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvghrnhepleelheeffeehheefvddv
+    kedtvdeitefgvddtkefgtddulefgfedttddvjeehheelnecuffhomhgrihhnpehsohhurh
+    gtvghfohhrghgvrdhnvghtnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
+    rghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:Nb5sYw_nT4BGT3u4PbsoPlkWjT0v77Pjczi9Di-YwjbILsWkbyFzkw>
+    <xmx:Nb5sY4pHVLQbI5ckX7z9GFrptNWjaxKCznBxXUs_liRDOAY2kBGaoQ>
+    <xmx:Nb5sYxo2pFvlYAVJiKTRcGVHJJo2UUY3lW050faWm3XRw3gntD-N_g>
+    <xmx:Nr5sY1exkr4JUEIuXX4GvDoGK8d3Jm0ciiPGcpSyxmELJCmph32RSA>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 909F8B60086; Thu, 10 Nov 2022 04:02:45 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1115-g8b801eadce-fm-20221102.001-g8b801ead
+Mime-Version: 1.0
+Message-Id: <d9b1e753-3bdd-4b8f-935e-718b0b590ace@app.fastmail.com>
+In-Reply-To: <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
+References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
+ <Y2vghlEEmE+Bdm0v@lunn.ch>
+ <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
+Date:   Thu, 10 Nov 2022 10:02:25 +0100
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Andrew Lunn" <andrew@lunn.ch>,
+        "Balamanikandan Gunasundar" <balamanikandan.gunasundar@microchip.com>
+Cc:     "Ulf Hansson" <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org,
+        linux-atm-general@lists.sourceforge.net,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
+        ludovic.desroches@microchip.com, 3chas3@gmail.com,
+        Netdev <netdev@vger.kernel.org>,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 10/11/22 08:28, Yu Zhe ha scritto:
-> spelling mistake fix : "alreay" -> "already"
-> 		       "checksume" -> "checksum"
-> 
-> Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
+On Thu, Nov 10, 2022, at 09:05, Arnd Bergmann wrote:
+> On Wed, Nov 9, 2022, at 18:16, Andrew Lunn wrote:
+>> On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
+>>> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
+>>
+>> I was wondering why you Cc: netdev and ATM. This clearly has nothing
+>> to do with those lists.
+>>
+>> You well foul of
+>>
+>> M:	Chas Williams <3chas3@gmail.com>
+>> L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)
+>> L:	netdev@vger.kernel.org
+>> S:	Maintained
+>> W:	http://linux-atm.sourceforge.net
+>> F:	drivers/atm/
+>> F:	include/linux/atm*
+>> F:	include/uapi/linux/atm*
+>>
+>> Maybe these atm* should be more specific so they don't match atmel :-)
+>
+> The uapi headers look unambiguous to me, for the three headers in
+> include/linux/, only the atmdev.h is actually significant, while
+> linux/atm.h and linux/atm_tcp.h could each be folded into the one
+> C file that actually uses the contents.
 
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
+Actually the situation for the linux/atmel*.h headers is similar:
+most of them are only used in one file, and the linux/atmel-mci.h
+contents should just be moved into drivers/mmc/host/atmel-mci.c
+as part of Balamanikandan's patch, to allow further cleanups.
 
+linux/atmel-isc-media.h similarly can go into its drivers as a
+separate patch if desired.
 
+The linux/atmel-ssc.h could ideally be cleaned up to get moved
+into sound/soc/atmel/ along with drivers/misc/atmel-ssc.c.
+The atmel-scc driver is technically also used by
+sound/spi/at73c213.c, but that driver has been orphaned since
+2014, with commit 2e591e7b3ac2 ("ARM: at91: remove
+at91sam9261/at91sam9g10 legacy board support"), as nobody
+ever added DT probing support to it.
+
+      Arnd
