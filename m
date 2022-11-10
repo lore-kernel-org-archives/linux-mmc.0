@@ -2,130 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68DCCC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 09:02:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1B5CC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 10 Nov 2022 15:08:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229660AbiKJJCt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 10 Nov 2022 04:02:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38844 "EHLO
+        id S231187AbiKJPIn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 10 Nov 2022 10:08:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229588AbiKJJCs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 04:02:48 -0500
-Received: from wout2-smtp.messagingengine.com (wout2-smtp.messagingengine.com [64.147.123.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA55D69DC8;
-        Thu, 10 Nov 2022 01:02:47 -0800 (PST)
-Received: from compute3.internal (compute3.nyi.internal [10.202.2.43])
-        by mailout.west.internal (Postfix) with ESMTP id 772DC3200980;
-        Thu, 10 Nov 2022 04:02:46 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute3.internal (MEProxy); Thu, 10 Nov 2022 04:02:47 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm3; t=1668070966; x=1668157366; bh=q00moUI8K+
-        pOFD9ktwoRAAtmtSjS7qt/Tr5OG5EM1/8=; b=AwhCrceGKorlAVUjfyPbzW28FM
-        eeSS9lcVePIHpJy1ZkC23YhXvXAzXJm/XL5iETpQjPrXwFFBFQZzglNyJU1CtPkO
-        OJGOPVAIlJS37k9rJawHfyxrhIXaG53GCELC5pBUaidIUwAo9TGBaS+8dVB3fhkl
-        13ppaCl6h4DxJYeCd1xJZIxGkHKSzczq3q+nDRD+gMLDxLcLRFsRufXxzc9NIy9Y
-        3FWuiX55bh56q9X4Lge2aHy2A5GhiU909sLX5rwPjceEt78oSHEM1T9WuAHXm+Hy
-        q567cC6ruRvR7/OwLKB5d3tdLdYC8k1aw3Y6XovD7L3gR76ORY9k1FgZRkJA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm1; t=1668070966; x=1668157366; bh=q00moUI8K+pOFD9ktwoRAAtmtSjS
-        7qt/Tr5OG5EM1/8=; b=sgH9PeCaA38pM4BH3FZX+t/rMdUT+fYgU+mHUXK6V7w/
-        xDpykZZ74JzPDSODRsqZIDYuL9WbJvcGzT5DrLc/Y6I4UacKkrNSS/Q2pcVwGp1W
-        iplpqWvNvLZY1JQl+595AQB2UtYm9SuZO40FwJRm6EKtHIw3qTfDC6pZNgUvSP8q
-        StWcv2PXkIAosUXdc/cDsHEVffLQ3J/lOEZsz/tqX4MTBiDoY9sGvRZInIacjqmK
-        L1A/qOdxMe7EvseH/x8KFQVis/cDQLkMxO9R23TVGDzuw+qxpbM07GoTZ0tIFjyl
-        DTSqi5Gv2IHxdeZ1oiKODr4HHOR7tIxVhxxo5XD7Cw==
-X-ME-Sender: <xms:Nb5sY2YcwuC4_kfJeNk8TsMohtQNJVNUxMUmIZhHsbrMIJlI8UCQng>
-    <xme:Nb5sY5bXJwL3cLG92641KVJWuTqX_9UAfLgmcJuhkSTJoOczJz9kcqwbwBjaWCjZC
-    Mqmp2DClNJiSHbka98>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvgedrfeefgdduvdekucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    goufhushhpvggtthffohhmrghinhculdegledmnecujfgurhepofgfggfkjghffffhvfev
-    ufgtsehttdertderredtnecuhfhrohhmpedftehrnhguuceuvghrghhmrghnnhdfuceorg
-    hrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrthhtvghrnhepleelheeffeehheefvddv
-    kedtvdeitefgvddtkefgtddulefgfedttddvjeehheelnecuffhomhgrihhnpehsohhurh
-    gtvghfohhrghgvrdhnvghtnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehm
-    rghilhhfrhhomheprghrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:Nb5sYw_nT4BGT3u4PbsoPlkWjT0v77Pjczi9Di-YwjbILsWkbyFzkw>
-    <xmx:Nb5sY4pHVLQbI5ckX7z9GFrptNWjaxKCznBxXUs_liRDOAY2kBGaoQ>
-    <xmx:Nb5sYxo2pFvlYAVJiKTRcGVHJJo2UUY3lW050faWm3XRw3gntD-N_g>
-    <xmx:Nr5sY1exkr4JUEIuXX4GvDoGK8d3Jm0ciiPGcpSyxmELJCmph32RSA>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 909F8B60086; Thu, 10 Nov 2022 04:02:45 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1115-g8b801eadce-fm-20221102.001-g8b801ead
-Mime-Version: 1.0
-Message-Id: <d9b1e753-3bdd-4b8f-935e-718b0b590ace@app.fastmail.com>
-In-Reply-To: <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
-References: <20221109043845.16617-1-balamanikandan.gunasundar@microchip.com>
- <Y2vghlEEmE+Bdm0v@lunn.ch>
- <213cb0f3-10ce-45b1-aa5d-41d753a0cadd@app.fastmail.com>
-Date:   Thu, 10 Nov 2022 10:02:25 +0100
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Andrew Lunn" <andrew@lunn.ch>,
-        "Balamanikandan Gunasundar" <balamanikandan.gunasundar@microchip.com>
-Cc:     "Ulf Hansson" <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org,
-        linux-atm-general@lists.sourceforge.net,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        "Alexandre Belloni" <alexandre.belloni@bootlin.com>,
-        ludovic.desroches@microchip.com, 3chas3@gmail.com,
-        Netdev <netdev@vger.kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH] mmc: atmel-mci: Convert to gpio descriptors
-Content-Type: text/plain
+        with ESMTP id S230160AbiKJPIm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 10 Nov 2022 10:08:42 -0500
+X-Greylist: delayed 450 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 10 Nov 2022 07:08:38 PST
+Received: from mx.msync.work (mx.msync.work [185.250.0.168])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05DCF22B21;
+        Thu, 10 Nov 2022 07:08:38 -0800 (PST)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id E961B1231BF;
+        Thu, 10 Nov 2022 15:01:07 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=lexina.in; s=dkim;
+        t=1668092468; h=from:subject:date:message-id:to:mime-version:
+         content-transfer-encoding:in-reply-to:references;
+        bh=1SsZIFbb2kZbNj0UZIQdbQ3Ryb9RW7TBdyeqOwWDSP8=;
+        b=Kcgutp29e8mIhN54VxuwUvbroBo4WK8m4eNhrhlJzw/isHYXIGIy0+z/Mn9Uxu5pG/p8MG
+        RoVPKrWlmAcR4eC7fA/qprLwh8TCN7p9NKqYUhF25AqUxKjm7HkjdKS4LAdtyHlMw2UNGH
+        eCrbkPSpeoVdGvezxtTQ4OWg3ChMIuwZakR7YGF+ZroxS66W5tzV+9QBEnLJf1Kmk8W4dh
+        LlUOtnkfzcKn3y4TQOz0OAQs/C4na6tkr9lW5Jw65ZFE10L6wwZPCvmDg4lYwIu8I8Gvqn
+        7lvG++NWulRBJygF1QRUbZu+RvG4koI+zpW1D9r4WaXqbr9W8mHJphHtCDqK5A==
+From:   Vyacheslav Bocharov <adeep@lexina.in>
+To:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH 2/4] arm64: amlogic: mmc: meson-gx: Add dts binding include for core, tx, rx eMMC/SD/SDIO phase clock settings from devicetree data
+Date:   Thu, 10 Nov 2022 18:00:33 +0300
+Message-Id: <20221110150035.2824580-3-adeep@lexina.in>
+In-Reply-To: <20221110150035.2824580-1-adeep@lexina.in>
+References: <20221110150035.2824580-1-adeep@lexina.in>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+X-Last-TLS-Session-Version: TLSv1.3
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 10, 2022, at 09:05, Arnd Bergmann wrote:
-> On Wed, Nov 9, 2022, at 18:16, Andrew Lunn wrote:
->> On Wed, Nov 09, 2022 at 10:08:45AM +0530, Balamanikandan Gunasundar wrote:
->>> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
->>
->> I was wondering why you Cc: netdev and ATM. This clearly has nothing
->> to do with those lists.
->>
->> You well foul of
->>
->> M:	Chas Williams <3chas3@gmail.com>
->> L:	linux-atm-general@lists.sourceforge.net (moderated for non-subscribers)
->> L:	netdev@vger.kernel.org
->> S:	Maintained
->> W:	http://linux-atm.sourceforge.net
->> F:	drivers/atm/
->> F:	include/linux/atm*
->> F:	include/uapi/linux/atm*
->>
->> Maybe these atm* should be more specific so they don't match atmel :-)
->
-> The uapi headers look unambiguous to me, for the three headers in
-> include/linux/, only the atmdev.h is actually significant, while
-> linux/atm.h and linux/atm_tcp.h could each be folded into the one
-> C file that actually uses the contents.
+The mmc driver has the same phase values for all meson platforms. However,
+some platforms (and even some boards) require different values. This patch
+transfers the values from the set in the code to the variables in the
+device-tree file.
 
-Actually the situation for the linux/atmel*.h headers is similar:
-most of them are only used in one file, and the linux/atmel-mci.h
-contents should just be moved into drivers/mmc/host/atmel-mci.c
-as part of Balamanikandan's patch, to allow further cleanups.
+Signed-off-by: Vyacheslav Bocharov <adeep@lexina.in>
 
-linux/atmel-isc-media.h similarly can go into its drivers as a
-separate patch if desired.
+ create mode 100644 include/dt-bindings/mmc/meson-gx-mmc.h
 
-The linux/atmel-ssc.h could ideally be cleaned up to get moved
-into sound/soc/atmel/ along with drivers/misc/atmel-ssc.c.
-The atmel-scc driver is technically also used by
-sound/spi/at73c213.c, but that driver has been orphaned since
-2014, with commit 2e591e7b3ac2 ("ARM: at91: remove
-at91sam9261/at91sam9g10 legacy board support"), as nobody
-ever added DT probing support to it.
+diff --git a/include/dt-bindings/mmc/meson-gx-mmc.h b/include/dt-bindings/mmc/meson-gx-mmc.h
+new file mode 100644
+index 000000000000..cfc4a9d75b2b
+--- /dev/null
++++ b/include/dt-bindings/mmc/meson-gx-mmc.h
+@@ -0,0 +1,35 @@
++/* SPDX-License-Identifier: (GPL-2.0+ or MIT) */
++/*
++ * Copyright (c) 2022 JetHome, Vyacheslav Bocharov
++ * Author: Vyacheslav Bocharov <adeep@lexina.in>
++ */
++
++#ifndef _DT_BINDINGS_MESON_GX_MMC_H
++#define _DT_BINDINGS_MESON_GX_MMC_H
++
++/*
++ * Cfg_rx_phase: RX clock phase
++ * bits: 9:8 R/W
++ * default: 0
++ * Recommended value: 0
++ *
++ * Cfg_tx_phase: TX clock phase
++ * bits: 9:8 R/W
++ * default: 0
++ * Recommended value: 2
++ *
++ * Cfg_co_phase: Core clock phase
++ * bits: 9:8 R/W
++ * default: 0
++ * Recommended value: 2
++ *
++ * values: 0: 0 phase, 1: 90 phase, 2: 180 phase, 3: 270 phase.
++ */
++
++#define   CLK_PHASE_0 0
++#define   CLK_PHASE_90 1
++#define   CLK_PHASE_180 2
++#define   CLK_PHASE_270 3
++
++
++#endif
+-- 
+2.30.2
 
-      Arnd
