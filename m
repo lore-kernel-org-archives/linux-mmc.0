@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD4BBC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 11:35:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7F94C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 12:06:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232907AbiKKLfO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Nov 2022 06:35:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42388 "EHLO
+        id S232983AbiKKMGU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Nov 2022 07:06:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232841AbiKKLfN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 06:35:13 -0500
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD238DE84
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 03:35:11 -0800 (PST)
-Received: by mail-pl1-x62a.google.com with SMTP id l2so4014527pld.13
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 03:35:11 -0800 (PST)
+        with ESMTP id S233918AbiKKMFx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 07:05:53 -0500
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECAED87B3A
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 04:04:38 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id f63so4265458pgc.2
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 04:04:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ZoIY7DKb5p1kzhT5B2FzSv6iW2VGwt91bZbpKjEpyDc=;
-        b=p3rDoP1vzMyiRRpiEQt/A//n+YOLwJjuDcx6Ad8cZLYHt3AV2mn6IECAHucxBly8wa
-         IwXWelN9jCtYtZE5OvWX+7nu4uJHquce4b3nwUS2IgHAl1KN6c8MnWSVSN5rLDrZBhSZ
-         koSlwkqjvWk9CdVR6Nc21VNV34uLjn4X/p+5DzoPcpHol3Z2evfQATkrfjCys+cDrNiQ
-         cAsa4NtP+vdaioJUqMPb4yI5U9jqjxrzzAsgO0GiPBBe5aea8YJ9OqmLsp4saCnyeepn
-         ig4GJGEK1U51ozSj7kzRRN75VBvItfk6AvIw+T6e4P/ESf7ZDdw2xUFYy+gBsRJlxgZv
-         g7kA==
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=hNKvnx1A72K5RwpAXHyS/gpOr76KNxIuGWIGiUa+K1o=;
+        b=gzpggyiSqnZoj8wbagPpUeQrhKwZVe+qS/vT3nYkezfED8RCwe0pMVog0fegpaMFAP
+         xTwBZNrvq45s+fgofs7bRuvR9mLZNcWDmXYoyauOBKx2Vu/a6LIBLz34dIoUCTPYI36d
+         bqIdfgUIZkuFV4eL6x0P0jvFcMSxk6tP0tZ9Sahs+ngiQlAtQrMz0Efd6D+0L9lKY4W0
+         cuXjq60owHV2g82j2/RuMq3N75w5Y8vkOBxVVSLPvYXP47daAilDXwZ+dl+izSPXao3N
+         XWgHwTIrK8pheUCnHAb6IMfrqYTrBnJhBdkD7HxHkultAXrghuuND63g+q0CmBgeuySf
+         Q6RA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=ZoIY7DKb5p1kzhT5B2FzSv6iW2VGwt91bZbpKjEpyDc=;
-        b=xdVOOs3YqVMtoFZFn5J71UkYAoJnUeLXCelFXexRVx7ax+kWueWNgJbS3E/ZqF6RiT
-         5iHyOoeUISxMI9fjMprK2E1d72yFl+jHrE87PJn/pNGrqCVnZ+MsAV3lHnr/l+DPXDaE
-         GcbAm3NUW4HI1z/XKPhc3OwimBv2DUHWL2P6SjvXeWpjjWXVObcqs+MAxuCAziHv1aPy
-         96XjjwaJ3LfaNfmhvW2uWJVXQVTsll4avbUb341prvSMcqPZ/wFPY9rNnJW6BV52rkTj
-         x81T0H3U+HDUu6E6VytdoqDA0/Uy85PS4qjoejoTZeRM5zaEVzREzRhg4h9+CU3ZX2yA
-         RVWA==
-X-Gm-Message-State: ANoB5pl7nK1xbnJ3o72K4ozqJgUkMyD4K0Cxn+HzaP7ZQPMNNw9dkIlP
-        oDIYquw4g/jln7+73iBLGW2UVV5mk5OfwC7cIs/kug==
-X-Google-Smtp-Source: AA0mqf4l1aJGllrWXMtwrV/h85w3mWa0CRJ72auSdt1G0JNnkGkUQh2Ngu/T9fGBTTwpHSxmeA6cshKZKMSEE2vU6mQ=
-X-Received: by 2002:a17:902:c142:b0:188:55f5:972f with SMTP id
- 2-20020a170902c14200b0018855f5972fmr2095276plj.148.1668166511266; Fri, 11 Nov
- 2022 03:35:11 -0800 (PST)
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hNKvnx1A72K5RwpAXHyS/gpOr76KNxIuGWIGiUa+K1o=;
+        b=U76FNzUwncFceSKue75UV2H7wmZUcCU1eaSzJoJUkrHHugn8ROgDuuYzS9EyLvNXsr
+         1sGxTAhfhOWmjlzMTAzhrBW+/cYdQRPzRCj1sg19nCL9gAgPoSd1Ha7R6XTlfqBV375X
+         GihH9DzuELKT4UJq4FYHVkf968x0rMCM9lbeOpYifXQFDSxP8hlynTFZgBrOAY3Mlxnj
+         p5MyPSdmgYhLKIgGlgtf2gBEurBTnTQ1RQ0Dx1TmWmrQS4yFUdM4XX6ya3hsgJFKp4vr
+         tnFolFuAKUmIXetoyHhFBlS+m6+zmuggiekKPI0GcHd9n4yTgvf0gzlp/ZFV2CUkfKof
+         KWjw==
+X-Gm-Message-State: ANoB5pkt2w4FPcT9mHUcJbCS5JkmdPGveigbjxDcGQii6wWl3qcZysQN
+        +6eLWQTDiWDvCkJ1hgwBT5m2Brsb5Iw11TDjZe8StA==
+X-Google-Smtp-Source: AA0mqf6OV3Lj+l536SEMd+RUIiFfQ+EczjE5C2Sx0bPEOUGzr4mOu7cum0OwLHtbCDdjacvWoC/q2slWzH+7iobFtk0=
+X-Received: by 2002:a63:db03:0:b0:470:4f30:f743 with SMTP id
+ e3-20020a63db03000000b004704f30f743mr1382087pgg.434.1668168278472; Fri, 11
+ Nov 2022 04:04:38 -0800 (PST)
 MIME-Version: 1.0
 References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
  <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
-In-Reply-To: <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+ <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
+In-Reply-To: <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 11 Nov 2022 12:34:34 +0100
-Message-ID: <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
+Date:   Fri, 11 Nov 2022 13:04:01 +0100
+Message-ID: <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
 Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
 To:     Wenchao Chen <wenchao.chen666@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>
@@ -64,210 +64,95 @@ Cc:     orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         megoo.tang@gmail.com, lzx.stg@gmail.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Nov 2022 at 08:59, Wenchao Chen <wenchao.chen666@gmail.com> wrot=
-e:
->
-> Hi Hunter
-> Thank you for your review!
-> I'm sorry to reply you so late because I've been too busy lately.
->
-> On Fri, Oct 21, 2022 at 11:50 PM Adrian Hunter <adrian.hunter@intel.com> =
-wrote:
-> >
-> > On 21/10/22 10:30, Wenchao Chen wrote:
-> > > From: Wenchao Chen <wenchao.chen@unisoc.com>
-> > >
-> > > Summary
-> > > =3D=3D=3D=3D=3D=3D=3D
-> > > These patches[1] supports the host to turn off FUA.
-> > >
-> > > About FUA, roughly deal with the following two parts:
-> > > 1) FUA(Forced Unit Access):
-> > > - The REQ_FUA flag can be OR ed into the r/w flags of a bio submitted=
- from the
-> > >   filesystem and will make sure that I/O completion for this request =
-is only
-> > >   signaled after the data has been committed to non-volatile storage.
-> > >
-> > > 2) In emmc, FUA is represented as Reliable write. code show as below:
-> > > static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_=
-req *mqrq,
-> > >               int recovery_mode, bool *do_rel_wr_p, bool *do_data_tag=
-_p)
-> > > {
-> > >       ...
-> > >       /*
-> > >        * Reliable writes are used to implement Forced Unit Access and
-> > >        * are supported only on MMCs.
-> > >        */
-> > >       do_rel_wr =3D (req->cmd_flags & REQ_FUA) &&
-> > >                       rq_data_dir(req) =3D=3D WRITE &&
-> > >                       (md->flags & MMC_BLK_REL_WR);
-> > >       ...
-> > > }
-> > >
-> > > Patch structure
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > patch#1:  for block
-> > > patch#2:  for sdhci-sprd
-> > >
-> > > Tests
-> > > =3D=3D=3D=3D=3D
-> > > Ran 'AndroBench' to evaluate the performance:
-> >
-> > It would be good to have more details e.g.
-> > What file system? What block size?  What journal size?
-> > What file size? What record size?
-> >
->
-> What file system?
-> F2FS
-> What block size?
-> Sequential: 32768KB, Random: 4KB
-> What file size?
-> 64MB
->
-> > > 1. fua_disable =3D 1
-> > > /sys/block/mmcblk0/queue # cat fua 0
-> > > I tested 5 times for each case and output a average speed.
-> > >
-> > > 1) Sequential read:
-> > > Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
-> > > Average speed: 265.74MiB/s
-> > >
-> > > 2) Random read:
-> > > Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
-> > > Average speed: 98.81MiB/s
-> > >
-> > > 3) Sequential write:
-> > > Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
-> > > Average speed: 200.5MiB/s
-> > >
-> > > 4) Random write:
-> > > Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
-> > > Average speed: 70.32MiB/s
-> > >
-> > > 2. fua_disable =3D 0 (default 0)
-> > > /sys/block/mmcblk0/queue # cat fua 1
-> > > I tested 5 times for each case and output a average speed.
-> > >
-> > > 1) Sequential read:
-> > > Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
-> > > Average speed: 257.86MiB/s
-> > >
-> > > 2) Random read:
-> > > Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
-> > > Average speed: 100.2MiB/s
-> > >
-> > > 3) Sequential write:
-> > > Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
-> > > Average speed: 149.48MiB/s
-> > >
-> > > 4) Random write:
-> > > Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
-> > > Average speed: 12.68MiB/s
-> >
-> > Is every write being sync'ed of just sync at the end?
-> >
->
-> /*
-> * Reliable writes are used to implement Forced Unit Access and
-> * are supported only on MMCs.
-> */
-> do_rel_wr =3D (req->cmd_flags & REQ_FUA) &&
->     rq_data_dir(req) =3D=3D WRITE &&
->     (md->flags & MMC_BLK_REL_WR);
->
-> A Reliable Write access shall force the data to be written to the
-> nonvolatile storage=E3=80=82
-> It will consume more time.
+[...]
 
-My apologies for side-stepping the discussion.
-
-Yes, REQ_FUA is per definition a write and a flush of the
-write-back-cache to non-volatile storage. So, this is indeed the
-correct behaviour, even if it consumes more time to complete the
-operation.
-
+> >
+> > Considering the data integrity, we did a random power-down test, and
+> > the experimental results were good.
+> >
+> > FUA can only reduce data loss under abnormal conditions, but cannot
+> > prevent data loss under abnormal conditions.
+> >
+> > I think there should be a balance between FUA and NO FUA, but
+> > filesystems seem to favor FUA.
+> >
+> > FUA brings a drop in random write performance. If enough tests are
+> > done, NO FUA is acceptable.
 >
-> > >
-> > > According to the above data, disable FUA (fua_disable =3D 1) improves=
- the
-> > > performance:
-> > > 1)Sequential read improved by 3%.
-> > > 2)Random read were down 1%.
-> >
-> > FUA should not affect reads.  If it is, you may want to investigate how=
-.
-> >
-> > > 3)Sequential write improved by 34%.
-> > > 4)Random write improved by 454%.
-> > > Therefore, it is recommended to support the host to control FUA.
-> > >
-> > > Reference
-> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
-> > > [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.gi=
-t/tree/Documentation/block/writeback_cache_control.rst
-> > > [2] Embedded Multi-Media Card (e=E2=80=A2MMC) Electrical Standard (5.=
-1)''
-> >
-> > You do not seem to have considered data integrity.
-> >
-> > Regular disks are assumed to provide atomic sector writes.  That is, a =
-sector has either the old data or the new data, but not some corrupt mixtur=
-e.
-> >
-> > mmc does not have that assumption, which is presumably why Reliable Wri=
-te has been used instead.  Although that idea appears to have been thrown a=
-way for devices with no cache by commit 08ebf903af57 ("mmc: core: Fixup sup=
-port for writeback-cache for eMMC and SD").
-> >
-> > File systems can use FUA to mark a successful journal flush.  Whether o=
-r not getting a torn sector at that point will corrupt the file system reco=
-very is presumably file system specific, and maybe specific to file system =
-options e.g. the use of checksums.
-> >
-> > It may well be that a file system can survive a torn sector at that poi=
-nt, or that user space would prefer to take the risk in order to get better=
- performance.  In either of those cases, it is not really a decision for th=
-e host controller driver.
-> >
+> Testing this isn't entirely easy. It requires you to hook up
+> electrical switches to allow you to automate the powering on/off of
+> the platform(s). Then at each cycle, really make sure to stress test
+> the data integrity of the flash memory. Is that what the tests did -
+> or can you elaborate a bit on what was really tested?
 >
-> Considering the data integrity, we did a random power-down test, and
-> the experimental results were good.
+> In any case, the performance impact boils down to how each eMMC/SD
+> card internally manages reliable writes vs regular writes. Some
+> vendors may treat them very similarly, while others do not.
 >
-> FUA can only reduce data loss under abnormal conditions, but cannot
-> prevent data loss under abnormal conditions.
+> That said, trying to disable REQ_FUA from an mmc host driver is the
+> wrong approach, as also pointed out by Adrian above. These types of
+> decisions belong solely in the mmc core layer.
 >
-> I think there should be a balance between FUA and NO FUA, but
-> filesystems seem to favor FUA.
+> Instead of what the $subject series proposes, I would rather suggest
+> we discuss (and test) whether it could make sense to disable REQ_FUA -
+> *if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
+> Hence, the mmc core could then announce only REQ_OP_FLUSH.
 >
-> FUA brings a drop in random write performance. If enough tests are
-> done, NO FUA is acceptable.
 
-Testing this isn't entirely easy. It requires you to hook up
-electrical switches to allow you to automate the powering on/off of
-the platform(s). Then at each cycle, really make sure to stress test
-the data integrity of the flash memory. Is that what the tests did -
-or can you elaborate a bit on what was really tested?
+Below is a simple patch that does the above. We may not want to enable
+this for *all* eMMC/SD cards, but it works fine for testing and to
+continue the discussions here.
 
-In any case, the performance impact boils down to how each eMMC/SD
-card internally manages reliable writes vs regular writes. Some
-vendors may treat them very similarly, while others do not.
 
-That said, trying to disable REQ_FUA from an mmc host driver is the
-wrong approach, as also pointed out by Adrian above. These types of
-decisions belong solely in the mmc core layer.
+From: Ulf Hansson <ulf.hansson@linaro.org>
+Date: Fri, 11 Nov 2022 12:48:02 +0100
+Subject: [PATCH] mmc: core: Disable REQ_FUA if the card supports an internal
+ cache
 
-Instead of what the $subject series proposes, I would rather suggest
-we discuss (and test) whether it could make sense to disable REQ_FUA -
-*if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
-Hence, the mmc core could then announce only REQ_OP_FLUSH.
+!!!! This is not for merge, but only for test and discussions!!!
+
+It has been reported that REQ_FUA can be costly on some eMMC devices. A
+potential option that could mitigate this problem, is to rely solely on
+REQ_OP_FLUSH instead, but that requires the eMMC/SD to support an internal
+cache. This is an attempt to try this out to see how it behaves.
+
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+ drivers/mmc/core/block.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index db6d8a099910..197e9f6cdaad 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2494,15 +2494,15 @@ static struct mmc_blk_data
+*mmc_blk_alloc_req(struct mmc_card *card,
+                        md->flags |= MMC_BLK_CMD23;
+        }
+
+-       if (md->flags & MMC_BLK_CMD23 &&
+-           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+-            card->ext_csd.rel_sectors)) {
++       if (mmc_cache_enabled(card->host)) {
++               cache_enabled  = true;
++       } else if (md->flags & MMC_BLK_CMD23 &&
++                 (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
++                  card->ext_csd.rel_sectors)) {
+                md->flags |= MMC_BLK_REL_WR;
+                fua_enabled = true;
+                cache_enabled = true;
+        }
+-       if (mmc_cache_enabled(card->host))
+-               cache_enabled  = true;
+
+        blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
+
+-- 
+2.34.1
 
 Kind regards
 Uffe
