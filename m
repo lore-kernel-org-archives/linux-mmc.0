@@ -2,98 +2,67 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C56BBC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 12:40:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F086CC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 18:03:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233466AbiKKMkI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Nov 2022 07:40:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52972 "EHLO
+        id S234434AbiKKSDE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Nov 2022 13:03:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48928 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233542AbiKKMkD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 07:40:03 -0500
-Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0CD537B230;
-        Fri, 11 Nov 2022 04:39:58 -0800 (PST)
-Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
-  by mx.socionext.com with ESMTP; 11 Nov 2022 21:39:58 +0900
-Received: from mail.mfilter.local (m-filter-2 [10.213.24.62])
-        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 66C1C20584CE;
-        Fri, 11 Nov 2022 21:39:58 +0900 (JST)
-Received: from 172.31.9.51 (172.31.9.51) by m-FILTER with ESMTP; Fri, 11 Nov 2022 21:39:58 +0900
-Received: from [10.212.156.100] (unknown [10.212.156.100])
-        by kinkan2.css.socionext.com (Postfix) with ESMTP id A6514B62AE;
-        Fri, 11 Nov 2022 21:39:57 +0900 (JST)
-Message-ID: <9b33d27b-37bc-2f2c-0307-eb939136d4e9@socionext.com>
-Date:   Fri, 11 Nov 2022 21:39:57 +0900
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH 1/4] mmc: f-sdh30: Add reset control support
+        with ESMTP id S234427AbiKKSDB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 13:03:01 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3839963CD8;
+        Fri, 11 Nov 2022 10:03:00 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C8FDD62086;
+        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 38ED4C433D7;
+        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1668189779;
+        bh=kRrN97yyGBeeQZI+RHL5L31upcr8CzZfwvkRpMaJYq0=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=YQW2d6cXqic7I5Zw5xWfODy9Q25hT+PN/4tP/5O6BHPtA8quXsbhYIcx3/ckZQQl7
+         Gi4Fb1cZOWGIgJyaLzt7xCvYljMw0ofT9I4TUrAc5QmoIzTqARupiBUclOJv/EUBYc
+         Chix/PT5ANmIMauD0l7Dbz6ypsF2XDCu0AxxF2VzQsSBcp+25sHWXkdLQOSwF5VCSo
+         XWKYQlfPr/LYFOQAS+Lv18FHCOB0GWKl3OreJDznH5XUo3guG13aIrryIZwPH+3azB
+         H4ie7HOv/LJluPyA4QGeS6Ao4naPob8bBMTeLI6Z5U2I8RD3zWde16BBLoiINj9ElN
+         oh6Pp0SHuu31g==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 29B85C395FE;
+        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.1-rc5
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20221111122554.112164-1-ulf.hansson@linaro.org>
+References: <20221111122554.112164-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20221111122554.112164-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc4
+X-PR-Tracked-Commit-Id: f002f45a00ee14214d96b18b9a555fe2c56afb20
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 7c42d6f5e663f39bcf56d08685d84a7b1d011c77
+Message-Id: <166818977916.15878.14095937971424375358.pr-tracker-bot@kernel.org>
+Date:   Fri, 11 Nov 2022 18:02:59 +0000
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Jassi Brar <jaswinder.singh@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20221108082533.21384-1-hayashi.kunihiko@socionext.com>
- <20221108082533.21384-2-hayashi.kunihiko@socionext.com>
- <CAPDyKFoiowaut9EhDeBH0ci50WJ7y8UFivxqExxS0EfV_KAhpw@mail.gmail.com>
- <5ed33703-0f20-68d0-d3d5-1a53ab08a1b8@socionext.com>
- <CAPDyKFo-rQ9ijSXtzE6xV0d58xdqv1qfEV1+Jycfn1ekzVp1ug@mail.gmail.com>
-Content-Language: en-US
-From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-In-Reply-To: <CAPDyKFo-rQ9ijSXtzE6xV0d58xdqv1qfEV1+Jycfn1ekzVp1ug@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2022/11/11 21:13, Ulf Hansson wrote:
-> On Fri, 11 Nov 2022 at 07:15, Kunihiko Hayashi
-> <hayashi.kunihiko@socionext.com> wrote:
->>
->> Hi Ulf,
->>
->>
->> On 2022/11/09 21:15, Ulf Hansson wrote:
->>> On Tue, 8 Nov 2022 at 09:25, Kunihiko Hayashi
->>> <hayashi.kunihiko@socionext.com> wrote:
->>>>
->>>> Add reset control support for F_SDH30 controller. This is optional.
->>>>
->>>> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
->>>
->>> This needs an update to the DT doc too, which is also the case for
->>> patch4.
->>>
->>> That said, please convert the DT doc into the yaml based format as the
->>> first step.
->>
->> Yes, I also think the document to be converted in order to add new
->> compatible.
->> I'm concerned about the maintainer and the filename.
-> 
-> If you can't find a maintainer from Socionext, feel free to put my
-> name in there.
+The pull request you sent on Fri, 11 Nov 2022 13:25:54 +0100:
 
-I see.
-For now I describe my name in v2.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc4
 
-> 
-> I don't know if there are any good rules to apply for the filename in
-> cases like this. Let's just try something and see what DT maintainers
-> think of it. Perhaps just repeating the name of the driver for the
-> filename? So something along the lines of:
-> Documentation/devicetree/bindings/mmc/sdhci-f-sdh30.yaml
-> 
->>
->> I'll convert it anyway.
-> 
-> Great, thanks for doing this!
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/7c42d6f5e663f39bcf56d08685d84a7b1d011c77
 
-I sent v2 series and I'm waiting for the comment.
+Thank you!
 
-Thank you,
-
----
-Best Regards
-Kunihiko Hayashi
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
