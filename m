@@ -2,115 +2,272 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A1B3CC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 10:32:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD4BBC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 11:35:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233744AbiKKKcK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Nov 2022 05:32:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37178 "EHLO
+        id S232907AbiKKLfO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Nov 2022 06:35:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233878AbiKKKbN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 05:31:13 -0500
-Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3164AFC3
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 02:31:00 -0800 (PST)
-Received: by mail-pg1-x52f.google.com with SMTP id b62so4126776pgc.0
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 02:31:00 -0800 (PST)
+        with ESMTP id S232841AbiKKLfN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 06:35:13 -0500
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD238DE84
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 03:35:11 -0800 (PST)
+Received: by mail-pl1-x62a.google.com with SMTP id l2so4014527pld.13
+        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 03:35:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=8EoWEktzF4xunmTW3NPGj5C3ZY4hEtE5YC4CZzU3s8w=;
-        b=acyxfZqCeg1dzpt9TFsjnhQn9D441fcog0e95pfckukoQsxwDvCRQhFPgJR8Ehj06A
-         iWatB6dA0pInT1CkyiQOUD0zDDsWAN2DpZIfBoidcBu9vwJ4hHQ/cjCGAL491uyM1d5M
-         CxGvCxanZyHQXgfwaH56kiadHxDZInMg512oyn/U9JyNWJf8eVsn1yuS/eJcy20WcHbM
-         c5p3wqwWD7l00XibEwWAb2jkIBTjAEdoin7Ty3U1vGFZJnrocWcOIUXSVFiUqpPSmhKs
-         Ghb0V5BZ3jXS330npx/BMf9ZkicttdE+ysJdV8Q+Uw1Roid4AyagEcXgZQqYjYVL5WSy
-         jMtA==
+        bh=ZoIY7DKb5p1kzhT5B2FzSv6iW2VGwt91bZbpKjEpyDc=;
+        b=p3rDoP1vzMyiRRpiEQt/A//n+YOLwJjuDcx6Ad8cZLYHt3AV2mn6IECAHucxBly8wa
+         IwXWelN9jCtYtZE5OvWX+7nu4uJHquce4b3nwUS2IgHAl1KN6c8MnWSVSN5rLDrZBhSZ
+         koSlwkqjvWk9CdVR6Nc21VNV34uLjn4X/p+5DzoPcpHol3Z2evfQATkrfjCys+cDrNiQ
+         cAsa4NtP+vdaioJUqMPb4yI5U9jqjxrzzAsgO0GiPBBe5aea8YJ9OqmLsp4saCnyeepn
+         ig4GJGEK1U51ozSj7kzRRN75VBvItfk6AvIw+T6e4P/ESf7ZDdw2xUFYy+gBsRJlxgZv
+         g7kA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=8EoWEktzF4xunmTW3NPGj5C3ZY4hEtE5YC4CZzU3s8w=;
-        b=vmrm8lvO39HYGWx8Tt40R5O1ghCMdyuxDQc003XlQupa1PkEpoSmQbVoOge3bSGdWj
-         grTFZjwM4ynnJyhG/s3+/5OYynY+jLj3uuDdcYA7vSsHIqQMxszdvhsNp3ozd9eZcap0
-         yBzgu8zNfxE8qx/346BmzxP1nmgiU1wxLdVjaWwjufCPdDfmjEBreUpKR0w3Gel2HM4i
-         wcHZJIYaYduglw/1hKbEsBlJ/sqBkyGsjPSPnr4PBzlB0NSi7aSJZHAg/Uhp4XSf3DJA
-         iHtUB2NV+oN0F5q0yGhy67pech5rF0jCXTvrPaYBzdg9P2IrM6paOC3UuvnSZ7XBvogp
-         Ct3Q==
-X-Gm-Message-State: ANoB5pkpQvUrBHsISK6ZlcXk1HDC3SoTnOsMTC1aDYcgnjpW8AGcUVur
-        PItcKGPWL7NVmVyRfWdEPmmRlDW2+VZjBJjXj/GqFg==
-X-Google-Smtp-Source: AA0mqf62BtjjmpjdtBI9U+VBt4c8CQ0WDBXW8v/LnUZ18mTN/2cC9XpELje/r/6EYWBc30pZC0IKiaa8mWK5GAWeizE=
-X-Received: by 2002:aa7:924c:0:b0:566:9f68:c0ad with SMTP id
- 12-20020aa7924c000000b005669f68c0admr1951719pfp.57.1668162659697; Fri, 11 Nov
- 2022 02:30:59 -0800 (PST)
+        bh=ZoIY7DKb5p1kzhT5B2FzSv6iW2VGwt91bZbpKjEpyDc=;
+        b=xdVOOs3YqVMtoFZFn5J71UkYAoJnUeLXCelFXexRVx7ax+kWueWNgJbS3E/ZqF6RiT
+         5iHyOoeUISxMI9fjMprK2E1d72yFl+jHrE87PJn/pNGrqCVnZ+MsAV3lHnr/l+DPXDaE
+         GcbAm3NUW4HI1z/XKPhc3OwimBv2DUHWL2P6SjvXeWpjjWXVObcqs+MAxuCAziHv1aPy
+         96XjjwaJ3LfaNfmhvW2uWJVXQVTsll4avbUb341prvSMcqPZ/wFPY9rNnJW6BV52rkTj
+         x81T0H3U+HDUu6E6VytdoqDA0/Uy85PS4qjoejoTZeRM5zaEVzREzRhg4h9+CU3ZX2yA
+         RVWA==
+X-Gm-Message-State: ANoB5pl7nK1xbnJ3o72K4ozqJgUkMyD4K0Cxn+HzaP7ZQPMNNw9dkIlP
+        oDIYquw4g/jln7+73iBLGW2UVV5mk5OfwC7cIs/kug==
+X-Google-Smtp-Source: AA0mqf4l1aJGllrWXMtwrV/h85w3mWa0CRJ72auSdt1G0JNnkGkUQh2Ngu/T9fGBTTwpHSxmeA6cshKZKMSEE2vU6mQ=
+X-Received: by 2002:a17:902:c142:b0:188:55f5:972f with SMTP id
+ 2-20020a170902c14200b0018855f5972fmr2095276plj.148.1668166511266; Fri, 11 Nov
+ 2022 03:35:11 -0800 (PST)
 MIME-Version: 1.0
-References: <22aa78389c9b4613841716c5b7bd89aa@hyperstone.com>
-In-Reply-To: <22aa78389c9b4613841716c5b7bd89aa@hyperstone.com>
+References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
+ <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+In-Reply-To: <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 11 Nov 2022 11:30:23 +0100
-Message-ID: <CAPDyKFofO7JKpE6tEndFfYEYHAr-hHbs2rxwMfUNAK+rx0k7=Q@mail.gmail.com>
-Subject: Re: [PATCH 1/3] block: Requeue req as head if driver touched it
-To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     "axboe@kernel.dk" <axboe@kernel.dk>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        Avri Altman <Avri.Altman@wdc.com>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
+Date:   Fri, 11 Nov 2022 12:34:34 +0100
+Message-ID: <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
+Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+To:     Wenchao Chen <wenchao.chen666@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+Cc:     orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com, axboe@kernel.dk, avri.altman@wdc.com,
+        kch@nvidia.com, CLoehle@hyperstone.com,
+        vincent.whitchurch@axis.com, bigeasy@linutronix.de,
+        s.shtylyov@omp.ru, michael@allwinnertech.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        megoo.tang@gmail.com, lzx.stg@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 26 Oct 2022 at 09:30, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
- wrote:
+On Fri, 11 Nov 2022 at 08:59, Wenchao Chen <wenchao.chen666@gmail.com> wrot=
+e:
 >
-> In case the driver set RQF_DONTPREP flag, requeue the request as head as
-> it is likely that the backing storage already had a request to an
-> adjacent region, so getting the requeued request out as soon as possible
-> may give us some performance benefit.
+> Hi Hunter
+> Thank you for your review!
+> I'm sorry to reply you so late because I've been too busy lately.
+>
+> On Fri, Oct 21, 2022 at 11:50 PM Adrian Hunter <adrian.hunter@intel.com> =
+wrote:
+> >
+> > On 21/10/22 10:30, Wenchao Chen wrote:
+> > > From: Wenchao Chen <wenchao.chen@unisoc.com>
+> > >
+> > > Summary
+> > > =3D=3D=3D=3D=3D=3D=3D
+> > > These patches[1] supports the host to turn off FUA.
+> > >
+> > > About FUA, roughly deal with the following two parts:
+> > > 1) FUA(Forced Unit Access):
+> > > - The REQ_FUA flag can be OR ed into the r/w flags of a bio submitted=
+ from the
+> > >   filesystem and will make sure that I/O completion for this request =
+is only
+> > >   signaled after the data has been committed to non-volatile storage.
+> > >
+> > > 2) In emmc, FUA is represented as Reliable write. code show as below:
+> > > static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_=
+req *mqrq,
+> > >               int recovery_mode, bool *do_rel_wr_p, bool *do_data_tag=
+_p)
+> > > {
+> > >       ...
+> > >       /*
+> > >        * Reliable writes are used to implement Forced Unit Access and
+> > >        * are supported only on MMCs.
+> > >        */
+> > >       do_rel_wr =3D (req->cmd_flags & REQ_FUA) &&
+> > >                       rq_data_dir(req) =3D=3D WRITE &&
+> > >                       (md->flags & MMC_BLK_REL_WR);
+> > >       ...
+> > > }
+> > >
+> > > Patch structure
+> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > > patch#1:  for block
+> > > patch#2:  for sdhci-sprd
+> > >
+> > > Tests
+> > > =3D=3D=3D=3D=3D
+> > > Ran 'AndroBench' to evaluate the performance:
+> >
+> > It would be good to have more details e.g.
+> > What file system? What block size?  What journal size?
+> > What file size? What record size?
+> >
+>
+> What file system?
+> F2FS
+> What block size?
+> Sequential: 32768KB, Random: 4KB
+> What file size?
+> 64MB
+>
+> > > 1. fua_disable =3D 1
+> > > /sys/block/mmcblk0/queue # cat fua 0
+> > > I tested 5 times for each case and output a average speed.
+> > >
+> > > 1) Sequential read:
+> > > Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
+> > > Average speed: 265.74MiB/s
+> > >
+> > > 2) Random read:
+> > > Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
+> > > Average speed: 98.81MiB/s
+> > >
+> > > 3) Sequential write:
+> > > Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
+> > > Average speed: 200.5MiB/s
+> > >
+> > > 4) Random write:
+> > > Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
+> > > Average speed: 70.32MiB/s
+> > >
+> > > 2. fua_disable =3D 0 (default 0)
+> > > /sys/block/mmcblk0/queue # cat fua 1
+> > > I tested 5 times for each case and output a average speed.
+> > >
+> > > 1) Sequential read:
+> > > Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
+> > > Average speed: 257.86MiB/s
+> > >
+> > > 2) Random read:
+> > > Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
+> > > Average speed: 100.2MiB/s
+> > >
+> > > 3) Sequential write:
+> > > Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
+> > > Average speed: 149.48MiB/s
+> > >
+> > > 4) Random write:
+> > > Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
+> > > Average speed: 12.68MiB/s
+> >
+> > Is every write being sync'ed of just sync at the end?
+> >
+>
+> /*
+> * Reliable writes are used to implement Forced Unit Access and
+> * are supported only on MMCs.
+> */
+> do_rel_wr =3D (req->cmd_flags & REQ_FUA) &&
+>     rq_data_dir(req) =3D=3D WRITE &&
+>     (md->flags & MMC_BLK_REL_WR);
+>
+> A Reliable Write access shall force the data to be written to the
+> nonvolatile storage=E3=80=82
+> It will consume more time.
 
-This is a bit handwavy to me. Would you mind extending this with a
-small concrete example, to better understand the benefit?
+My apologies for side-stepping the discussion.
+
+Yes, REQ_FUA is per definition a write and a flush of the
+write-back-cache to non-volatile storage. So, this is indeed the
+correct behaviour, even if it consumes more time to complete the
+operation.
 
 >
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> > >
+> > > According to the above data, disable FUA (fua_disable =3D 1) improves=
+ the
+> > > performance:
+> > > 1)Sequential read improved by 3%.
+> > > 2)Random read were down 1%.
+> >
+> > FUA should not affect reads.  If it is, you may want to investigate how=
+.
+> >
+> > > 3)Sequential write improved by 34%.
+> > > 4)Random write improved by 454%.
+> > > Therefore, it is recommended to support the host to control FUA.
+> > >
+> > > Reference
+> > > =3D=3D=3D=3D=3D=3D=3D=3D=3D
+> > > [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.gi=
+t/tree/Documentation/block/writeback_cache_control.rst
+> > > [2] Embedded Multi-Media Card (e=E2=80=A2MMC) Electrical Standard (5.=
+1)''
+> >
+> > You do not seem to have considered data integrity.
+> >
+> > Regular disks are assumed to provide atomic sector writes.  That is, a =
+sector has either the old data or the new data, but not some corrupt mixtur=
+e.
+> >
+> > mmc does not have that assumption, which is presumably why Reliable Wri=
+te has been used instead.  Although that idea appears to have been thrown a=
+way for devices with no cache by commit 08ebf903af57 ("mmc: core: Fixup sup=
+port for writeback-cache for eMMC and SD").
+> >
+> > File systems can use FUA to mark a successful journal flush.  Whether o=
+r not getting a torn sector at that point will corrupt the file system reco=
+very is presumably file system specific, and maybe specific to file system =
+options e.g. the use of checksums.
+> >
+> > It may well be that a file system can survive a torn sector at that poi=
+nt, or that user space would prefer to take the risk in order to get better=
+ performance.  In either of those cases, it is not really a decision for th=
+e host controller driver.
+> >
+>
+> Considering the data integrity, we did a random power-down test, and
+> the experimental results were good.
+>
+> FUA can only reduce data loss under abnormal conditions, but cannot
+> prevent data loss under abnormal conditions.
+>
+> I think there should be a balance between FUA and NO FUA, but
+> filesystems seem to favor FUA.
+>
+> FUA brings a drop in random write performance. If enough tests are
+> done, NO FUA is acceptable.
 
-Other than the above nitpick, I can't think of any obvious unwanted
-side-effects this could have. So, feel free to add:
+Testing this isn't entirely easy. It requires you to hook up
+electrical switches to allow you to automate the powering on/off of
+the platform(s). Then at each cycle, really make sure to stress test
+the data integrity of the flash memory. Is that what the tests did -
+or can you elaborate a bit on what was really tested?
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+In any case, the performance impact boils down to how each eMMC/SD
+card internally manages reliable writes vs regular writes. Some
+vendors may treat them very similarly, while others do not.
+
+That said, trying to disable REQ_FUA from an mmc host driver is the
+wrong approach, as also pointed out by Adrian above. These types of
+decisions belong solely in the mmc core layer.
+
+Instead of what the $subject series proposes, I would rather suggest
+we discuss (and test) whether it could make sense to disable REQ_FUA -
+*if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
+Hence, the mmc core could then announce only REQ_OP_FLUSH.
 
 Kind regards
 Uffe
-
-> ---
->  block/blk-mq.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/block/blk-mq.c b/block/blk-mq.c
-> index 33292c01875d..d863c826fb23 100644
-> --- a/block/blk-mq.c
-> +++ b/block/blk-mq.c
-> @@ -1429,7 +1429,7 @@ static void blk_mq_requeue_work(struct work_struct =
-*work)
->                  * merge.
->                  */
->                 if (rq->rq_flags & RQF_DONTPREP)
-> -                       blk_mq_request_bypass_insert(rq, false, false);
-> +                       blk_mq_request_bypass_insert(rq, true, false);
->                 else
->                         blk_mq_sched_insert_request(rq, true, false, fals=
-e);
->         }
-> --
-> 2.37.3
-> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-> Managing Director: Dr. Jan Peter Berns.
-> Commercial register of local courts: Freiburg HRB381782
->
