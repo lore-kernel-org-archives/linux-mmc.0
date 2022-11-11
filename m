@@ -2,116 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 20FADC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 12:26:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C56BBC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 12:40:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233271AbiKKM0K (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Nov 2022 07:26:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47986 "EHLO
+        id S233466AbiKKMkI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 11 Nov 2022 07:40:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233206AbiKKM0J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 07:26:09 -0500
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8241654E4
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 04:25:58 -0800 (PST)
-Received: by mail-lj1-x22f.google.com with SMTP id u11so4360717ljk.6
-        for <linux-mmc@vger.kernel.org>; Fri, 11 Nov 2022 04:25:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=/cPVQZP3CJGISOBWbQDciZSTi0SHMrLWneRzV2KFYjE=;
-        b=pHyFqDhc31s4yZZDCxs8Vq3ZeKBNLc0fRCACiqjqJzKBzlvW5RnyFSWM2G5f+RNbIR
-         AGjEkkB4f6DMdpBgiBp2yNp3KKP/03kFMpFXzcC6aGgMBaKkkAf3VwRzrPyvx8prohgs
-         zqKx5t6tBJQ+z2UxNnqrzhq4i1kEHK6mphpz3bTfKEpKAKkMp5zX0t4FIkgJJsZKQ7/R
-         s2sbjRuFX450+H7NCnGAdgKnrJr4uQ0Fdqty53aOUQeTsT1cBckt2JSL3lDEaVfTY1/S
-         GTYpSUqpz3w+WGmoZ3sXogxzKY5tCAXiLDOaTkY8rtx/OlYOvDfi7k3tWu+RjCAAdl9m
-         7dHQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=/cPVQZP3CJGISOBWbQDciZSTi0SHMrLWneRzV2KFYjE=;
-        b=v9B6eTDHwHMnkoHAaBoOGiqDXRbMKrgREZGqTyD7YKiM4q/bPAq191HLuirA5Qp77M
-         997y6MDr8vmqVw39L82HEUeRtKdZUaSa592DThjSXJzqEN4tCqK9zcVkOCsKJVxAXu5L
-         wdFo76idlQewoq3ruiz2I2H1sIyToG9MQta0iKQg/0pawbKYcxefEUI2NGsgU6180YDu
-         wgLMJOIg/7o1Y720+ibuFUfwUJBkCwEU6iJpcGB7Ysk8NGyV3fOB5SxvPkOyCmaTQgJH
-         wzScV5Dq4yPI1LviIxJ2k3qjhBPbEE+5FSJmJGr0ZXnhBHaXh5v1ISGMYUtBkuE99kLU
-         TBuQ==
-X-Gm-Message-State: ANoB5pmEXKSzvRWQPuJ3mmTmQKGGDIN9g4PqrHd3VDuG432WwAkXDTGe
-        73Az7jyswCVnhCXxxaTep2APIw5ibyZpDg==
-X-Google-Smtp-Source: AA0mqf4b8dhxFKi654kgglCu6s8zV8cG9HMZ8VgVKt4IMoJXJorkipUhvQF95RdZ7kC2ijMsn18ISw==
-X-Received: by 2002:a05:651c:2005:b0:276:ffbf:2ee2 with SMTP id s5-20020a05651c200500b00276ffbf2ee2mr508193ljo.505.1668169557055;
-        Fri, 11 Nov 2022 04:25:57 -0800 (PST)
-Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id g19-20020a2e3913000000b0026df5232c7fsm378101lja.42.2022.11.11.04.25.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Nov 2022 04:25:56 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.1-rc5
-Date:   Fri, 11 Nov 2022 13:25:54 +0100
-Message-Id: <20221111122554.112164-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S233542AbiKKMkD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 07:40:03 -0500
+Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0CD537B230;
+        Fri, 11 Nov 2022 04:39:58 -0800 (PST)
+Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
+  by mx.socionext.com with ESMTP; 11 Nov 2022 21:39:58 +0900
+Received: from mail.mfilter.local (m-filter-2 [10.213.24.62])
+        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 66C1C20584CE;
+        Fri, 11 Nov 2022 21:39:58 +0900 (JST)
+Received: from 172.31.9.51 (172.31.9.51) by m-FILTER with ESMTP; Fri, 11 Nov 2022 21:39:58 +0900
+Received: from [10.212.156.100] (unknown [10.212.156.100])
+        by kinkan2.css.socionext.com (Postfix) with ESMTP id A6514B62AE;
+        Fri, 11 Nov 2022 21:39:57 +0900 (JST)
+Message-ID: <9b33d27b-37bc-2f2c-0307-eb939136d4e9@socionext.com>
+Date:   Fri, 11 Nov 2022 21:39:57 +0900
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH 1/4] mmc: f-sdh30: Add reset control support
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Jassi Brar <jaswinder.singh@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <20221108082533.21384-1-hayashi.kunihiko@socionext.com>
+ <20221108082533.21384-2-hayashi.kunihiko@socionext.com>
+ <CAPDyKFoiowaut9EhDeBH0ci50WJ7y8UFivxqExxS0EfV_KAhpw@mail.gmail.com>
+ <5ed33703-0f20-68d0-d3d5-1a53ab08a1b8@socionext.com>
+ <CAPDyKFo-rQ9ijSXtzE6xV0d58xdqv1qfEV1+Jycfn1ekzVp1ug@mail.gmail.com>
+Content-Language: en-US
+From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+In-Reply-To: <CAPDyKFo-rQ9ijSXtzE6xV0d58xdqv1qfEV1+Jycfn1ekzVp1ug@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On 2022/11/11 21:13, Ulf Hansson wrote:
+> On Fri, 11 Nov 2022 at 07:15, Kunihiko Hayashi
+> <hayashi.kunihiko@socionext.com> wrote:
+>>
+>> Hi Ulf,
+>>
+>>
+>> On 2022/11/09 21:15, Ulf Hansson wrote:
+>>> On Tue, 8 Nov 2022 at 09:25, Kunihiko Hayashi
+>>> <hayashi.kunihiko@socionext.com> wrote:
+>>>>
+>>>> Add reset control support for F_SDH30 controller. This is optional.
+>>>>
+>>>> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+>>>
+>>> This needs an update to the DT doc too, which is also the case for
+>>> patch4.
+>>>
+>>> That said, please convert the DT doc into the yaml based format as the
+>>> first step.
+>>
+>> Yes, I also think the document to be converted in order to add new
+>> compatible.
+>> I'm concerned about the maintainer and the filename.
+> 
+> If you can't find a maintainer from Socionext, feel free to put my
+> name in there.
 
-Here's a PR with a couple of MMC fixes intended for v6.1-rc5. Details about the
-highlights are as usual found in the signed tag.
+I see.
+For now I describe my name in v2.
 
-Please pull this in!
+> 
+> I don't know if there are any good rules to apply for the filename in
+> cases like this. Let's just try something and see what DT maintainers
+> think of it. Perhaps just repeating the name of the driver for the
+> filename? So something along the lines of:
+> Documentation/devicetree/bindings/mmc/sdhci-f-sdh30.yaml
+> 
+>>
+>> I'll convert it anyway.
+> 
+> Great, thanks for doing this!
 
-Kind regards
-Ulf Hansson
+I sent v2 series and I'm waiting for the comment.
 
+Thank you,
 
-The following changes since commit f0c4d9fc9cc9462659728d168387191387e903cc:
-
-  Linux 6.1-rc4 (2022-11-06 15:07:11 -0800)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc4
-
-for you to fetch changes up to f002f45a00ee14214d96b18b9a555fe2c56afb20:
-
-  mmc: sdhci-esdhc-imx: use the correct host caps for MMC_CAP_8_BIT_DATA (2022-11-09 13:01:33 +0100)
-
-----------------------------------------------------------------
-MMC host:
- - cqhci: Provide helper for resetting both SDHCI and CQHCI
- - sdhci_am654: Fix reset for CQHCI
- - sdhci-brcmstb: Fix reset for CQHCI
- - sdhci-esdhc-imx: Fix reset for CQHCI
- - sdhci-esdhc-imx: Fixup support for MMC_CAP_8_BIT_DATA
- - sdhci-of-arasan: Fix reset for CQHCI
- - sdhci-tegra: Fix reset for CQHCI
-
-----------------------------------------------------------------
-Brian Norris (6):
-      mmc: cqhci: Provide helper for resetting both SDHCI and CQHCI
-      mmc: sdhci-of-arasan: Fix SDHCI_RESET_ALL for CQHCI
-      mmc: sdhci-brcmstb: Fix SDHCI_RESET_ALL for CQHCI
-      mms: sdhci-esdhc-imx: Fix SDHCI_RESET_ALL for CQHCI
-      mmc: sdhci-tegra: Fix SDHCI_RESET_ALL for CQHCI
-      mmc: sdhci_am654: Fix SDHCI_RESET_ALL for CQHCI
-
-Haibo Chen (1):
-      mmc: sdhci-esdhc-imx: use the correct host caps for MMC_CAP_8_BIT_DATA
-
- drivers/mmc/host/sdhci-brcmstb.c   |  3 ++-
- drivers/mmc/host/sdhci-cqhci.h     | 24 ++++++++++++++++++++++++
- drivers/mmc/host/sdhci-esdhc-imx.c |  7 ++++---
- drivers/mmc/host/sdhci-of-arasan.c |  3 ++-
- drivers/mmc/host/sdhci-tegra.c     |  3 ++-
- drivers/mmc/host/sdhci_am654.c     |  7 ++++---
- 6 files changed, 38 insertions(+), 9 deletions(-)
- create mode 100644 drivers/mmc/host/sdhci-cqhci.h
+---
+Best Regards
+Kunihiko Hayashi
