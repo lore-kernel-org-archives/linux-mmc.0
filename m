@@ -2,67 +2,78 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F086CC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 11 Nov 2022 18:03:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B691C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 12 Nov 2022 22:57:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234434AbiKKSDE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 11 Nov 2022 13:03:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48928 "EHLO
+        id S235016AbiKLW5t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 12 Nov 2022 17:57:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45626 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234427AbiKKSDB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 11 Nov 2022 13:03:01 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3839963CD8;
-        Fri, 11 Nov 2022 10:03:00 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C8FDD62086;
-        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 38ED4C433D7;
-        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1668189779;
-        bh=kRrN97yyGBeeQZI+RHL5L31upcr8CzZfwvkRpMaJYq0=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=YQW2d6cXqic7I5Zw5xWfODy9Q25hT+PN/4tP/5O6BHPtA8quXsbhYIcx3/ckZQQl7
-         Gi4Fb1cZOWGIgJyaLzt7xCvYljMw0ofT9I4TUrAc5QmoIzTqARupiBUclOJv/EUBYc
-         Chix/PT5ANmIMauD0l7Dbz6ypsF2XDCu0AxxF2VzQsSBcp+25sHWXkdLQOSwF5VCSo
-         XWKYQlfPr/LYFOQAS+Lv18FHCOB0GWKl3OreJDznH5XUo3guG13aIrryIZwPH+3azB
-         H4ie7HOv/LJluPyA4QGeS6Ao4naPob8bBMTeLI6Z5U2I8RD3zWde16BBLoiINj9ElN
-         oh6Pp0SHuu31g==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 29B85C395FE;
-        Fri, 11 Nov 2022 18:02:59 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.1-rc5
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20221111122554.112164-1-ulf.hansson@linaro.org>
-References: <20221111122554.112164-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20221111122554.112164-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc4
-X-PR-Tracked-Commit-Id: f002f45a00ee14214d96b18b9a555fe2c56afb20
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 7c42d6f5e663f39bcf56d08685d84a7b1d011c77
-Message-Id: <166818977916.15878.14095937971424375358.pr-tracker-bot@kernel.org>
-Date:   Fri, 11 Nov 2022 18:02:59 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S230147AbiKLW5t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 12 Nov 2022 17:57:49 -0500
+Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2D3A15FE8;
+        Sat, 12 Nov 2022 14:57:47 -0800 (PST)
+Received: by mail-ej1-x636.google.com with SMTP id n12so20146723eja.11;
+        Sat, 12 Nov 2022 14:57:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=aces7d3gh1cNZ1+1J7wsg1lJ0vNlC5CU2OQmcL8yCkw=;
+        b=gfw+fakuaAtqewolwJkRZapmehXpcSd8l/JmGIId64ZI/VruTHo7XGGyPg6PbMbhRM
+         lwHrB5JAJwJB2grGQ88zeS8g4jjqNwVznoiG/vsyYtcnSRlHUyER8YJ8OwnST3WqifIs
+         2SqeMr40gzLjARJ6Fgq5aiQs5CoySgHV/qoWBxoWnhUKEdSc76uAgaezwO8JUffiks2I
+         2etRqJzrp9IxwHH4qdf6jKZdUDq8ZeM5j/lvtq0zrhbtzmT0l6ywhuHtvm4mHwAcMP0A
+         X2O90q7XE2BT1KF/dchGlhk+5miuVkXDlgxRwlTe4FNcZp8Sb+qykZeUFCsbYfdB7p34
+         1CnA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=aces7d3gh1cNZ1+1J7wsg1lJ0vNlC5CU2OQmcL8yCkw=;
+        b=sa5EAlsXGqwI76LJngEhPgv/xTxip+WkbLqa+pgyyvj5kQtmicUrmzcMKgmc5cSBmz
+         7YbJuWTVarw0q2cLjCnTL6yHMRUVZ+ZlGgISVFqGgFj/ipChdJ3bYChX3mPSPc4DFpLO
+         XlRD0pq+O0GPxuLJbSqCQXTcTmZuG0L5Btt9JPJVxCOruZ68LMnqyAfxXHGUoikY3YrE
+         xJS0vVWXKbAa1BKE1wrhDc0gUTaSLTFohUOwFNif/rdDwQqI06sRYNXUKiOk/31L41c4
+         a6utBtRQfPAE1qb0x4aKHImZVuyCue/bBCmLGplpwMq6AjMaTbeXfYmZ/TUUemuGAJZX
+         soDg==
+X-Gm-Message-State: ANoB5pkmBMDGdxKP/u8sEHRRSag/CONye5H0qCQSi/jWTlB3LgKdJVFT
+        l4eM1BiYKJliO+x6eZTg3k83z+IWFEtfEdEbyidd8ymCvc0=
+X-Google-Smtp-Source: AA0mqf5t2EnEEHg3FiYq5ObDCWWH3FWyQ2f6sbmAwIpOq3JsEuJMFGlEqg5Gx/0fUxcJmvofAN9+ffcQTWi3Q6KAwN4=
+X-Received: by 2002:a17:906:e246:b0:7aa:ffd0:b738 with SMTP id
+ gq6-20020a170906e24600b007aaffd0b738mr6454936ejb.122.1668293866048; Sat, 12
+ Nov 2022 14:57:46 -0800 (PST)
+MIME-Version: 1.0
+References: <20221110150035.2824580-1-adeep@lexina.in> <20221110150035.2824580-2-adeep@lexina.in>
+In-Reply-To: <20221110150035.2824580-2-adeep@lexina.in>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Sat, 12 Nov 2022 23:57:35 +0100
+Message-ID: <CAFBinCAQb1BXUp_Tou-UoS5AHFFE76cwv6mynoDUZp0ySwPeeQ@mail.gmail.com>
+Subject: Re: [PATCH 1/4] arm64: amlogic: mmc: meson-gx: Add core, tx, rx
+ eMMC/SD/SDIO phase clock settings from devicetree data
+To:     Vyacheslav Bocharov <adeep@lexina.in>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Fri, 11 Nov 2022 13:25:54 +0100:
+Hi Vyacheslav,
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc4
+On Thu, Nov 10, 2022 at 4:01 PM Vyacheslav Bocharov <adeep@lexina.in> wrote:
+>
+> The mmc driver has the same phase values for all meson platforms. However,
+> some platforms (and even some boards) require different values.
+Could you please elaborate which phases are per platform and which are
+per board?
+In this series you're only managing the core phase differently for all
+AXG boards. IMO this can be achieved by extending struct
+meson_mmc_data with the desired core clock phase
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/7c42d6f5e663f39bcf56d08685d84a7b1d011c77
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+Best regards,
+Martin
