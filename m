@@ -2,97 +2,145 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B53DC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Nov 2022 09:00:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E287C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Nov 2022 09:40:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236737AbiKNJAs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Nov 2022 04:00:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43448 "EHLO
+        id S236974AbiKNJko (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Nov 2022 04:40:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236687AbiKNJAd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2022 04:00:33 -0500
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC1441CB11
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 01:00:30 -0800 (PST)
-Received: by mail-lf1-x136.google.com with SMTP id s8so1046877lfc.8
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 01:00:30 -0800 (PST)
+        with ESMTP id S236946AbiKNJkR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2022 04:40:17 -0500
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0033C1EADD
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 01:40:11 -0800 (PST)
+Received: by mail-ej1-x62c.google.com with SMTP id bj12so26745680ejb.13
+        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 01:40:11 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=jSB6TW51XM2yvmI8chRE/GRF+Jj8yKiNsELalSRirxc=;
-        b=sfsu+KoYe6/zZLJaWJ7gyMm2qpwZjyJUWiGTBNqyez7nf3ybJZ2AD/8kXVC4DAy2bs
-         EDeIqXfzEb65abG7P+/KkPfndbrgrDh48zIMqShZu242Z3IOW+ySq2/dxxn53cs9/0y8
-         W19FHMtfA5OgIeOICx6RsS9Pkq9GatkyFC3n8WvsDdw8CtVoCiZG1cNa9hgTx0yJGK/J
-         jNpFhqpFtQAh2fOdUtBZ26VM13zFbBCtOB88g6wMxKPCaK/FyifjSSAHWmR9be9KTfRP
-         i0voL+wqb+z1SDjp33lba3aLleeZPmXJoy48LMaLt9wXxI3RGDQMFGr6olRAIF+NZTWx
-         aEvw==
+        d=streamunlimited.com; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/E7DQv1w5VxBWNYYy8b3rJwQQFYjed72q0l2u49VmFw=;
+        b=mV1Xk5oqlPhbGM675526QGnANRWzR3kkuCK7FjmV9soqIRzH7cFh2DRZEQaq7RKsl8
+         +sp0+OlHXt7xWppuqpq+9kMfLz+Fmc1qs3Ui6Tm3NaeH3UUyC7VtVRIhGjQmi9WLftgZ
+         lRFGpWsBqHXodsusA1zkb0pMPsxHbH1JYQYcg=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=jSB6TW51XM2yvmI8chRE/GRF+Jj8yKiNsELalSRirxc=;
-        b=J7O1gesERPWEh/WdZhwfJT2VFeTvMzNiJ9uSWC1HY6wuJyhg5gfpG7YQB2BP10tvzf
-         TXQog/16l3+yTpRBeZBpmdL/BBdpvsQkvTb5ruuo2XuSokZ7aqDzyoMUD/v9tONNRAYn
-         vxK+ZA1o0cu25VUJSYygDXTYcj0A5zr1u3M1A7LWa07lWHiioOnLv4FRxWvhCBVCGRYr
-         jqUj16I6QBBPKXi09a85P/MH/zdkHdK86fjUfgmQBbjiNMaHZmH6eh3/4pkhoHCu42lG
-         qR/nUOHM6u0hEOQE/y0oU1EvYf4Rbe8rHpvNO2elIhY3aE1O4CFqvw/sjubDGyQztVx+
-         co3Q==
-X-Gm-Message-State: ANoB5plDja77VEDORx++/7Jpb7LvCXw/IFPFTrOzFh+Wg2L6AUO2RubN
-        lJbqfn2kMMmw+KxjQs5Q3gy1eg==
-X-Google-Smtp-Source: AA0mqf4amsE2iSGKFTVIso6JQHxz9emYnEPwgoWzceVcXofHyqdeIEb56vf8UZ90yTT2opK6yaAxmw==
-X-Received: by 2002:ac2:4db6:0:b0:4a2:2c4b:8138 with SMTP id h22-20020ac24db6000000b004a22c4b8138mr3683454lfe.14.1668416429100;
-        Mon, 14 Nov 2022 01:00:29 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id 24-20020ac24838000000b004a2550db9ddsm1729475lft.245.2022.11.14.01.00.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 14 Nov 2022 01:00:28 -0800 (PST)
-Message-ID: <cf9e261b-dbf8-bce0-ecc8-c2aec659aa18@linaro.org>
-Date:   Mon, 14 Nov 2022 10:00:27 +0100
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=/E7DQv1w5VxBWNYYy8b3rJwQQFYjed72q0l2u49VmFw=;
+        b=JqcuMDuERcUc3uXTzCHYPpmMh6gD4Kj2hYnByRVsxf1kvlB2eXrukssPqdfwtlRFmF
+         Gz5/XHvLRxpGQ7EQYufZCY9z1NN+0AO7f27/6/34YQTho6FBgkQxbuuUiIVWhHS3W7cA
+         MIeHP3oEe/JBKExRvB/VTlZcaUFD8vZS0wwr3mcgbNtXyMI07CovWNneGSwOhGAYck/1
+         lmJB7nUCSOnAdsX4sOvJw4KGCw5/m93ULIGQ1CltjUKfKsPDeTi51fk5VuFnwEU/ZGDF
+         aM0UN5xB7de02qdPtFGV09gJLPaAFzAFKOV2NRxHs/QSIUReRpAothL76ptCjRbhTTSU
+         z1Iw==
+X-Gm-Message-State: ANoB5pm1MNokmOd2YOW1KaEmelKUnHTdv1UNNwGlo6NdJZhUCPRSM+UU
+        07LGfkY3yMyQgQ4cYc4Yo9o6Rg==
+X-Google-Smtp-Source: AA0mqf5rOmZDPmo+r9tZg7mKbD10KNVdVuxgpnD4x2FxOInLKSsw/pvFBCDxNyjJ0tF2dI6SUBll/Q==
+X-Received: by 2002:a17:906:8d06:b0:78d:8d70:8bf8 with SMTP id rv6-20020a1709068d0600b0078d8d708bf8mr9312698ejc.15.1668418810409;
+        Mon, 14 Nov 2022 01:40:10 -0800 (PST)
+Received: from localhost.localdomain (vpn.streamunlimited.com. [91.114.0.140])
+        by smtp.gmail.com with ESMTPSA id 26-20020a170906311a00b007ae693cd265sm3928068ejx.150.2022.11.14.01.40.09
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 14 Nov 2022 01:40:09 -0800 (PST)
+From:   Peter Suti <peter.suti@streamunlimited.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Peter Suti <peter.suti@streamunlimited.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] mmc: meson-gx: fix SDIO interrupt handling
+Date:   Mon, 14 Nov 2022 10:38:57 +0100
+Message-Id: <20221114093857.491695-1-peter.suti@streamunlimited.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH v2 3/6] dt-bindings: sdhci-fujitsu: Add compatible string
- for F_SDH30_E51
-Content-Language: en-US
-To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     Jassi Brar <jaswinder.singh@linaro.org>,
-        Ard Biesheuvel <ardb@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20221111081033.3813-1-hayashi.kunihiko@socionext.com>
- <20221111081033.3813-4-hayashi.kunihiko@socionext.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221111081033.3813-4-hayashi.kunihiko@socionext.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/11/2022 09:10, Kunihiko Hayashi wrote:
-> Add a compatible string for F_SDH30_E51 IP to the documentation.
-> Since this IP is transferred to Socionext, so append it as vendor name.
-> 
-> Cc: devicetree@vger.kernel.org
+With the interrupt support introduced in commit 066ecde sometimes the
+Marvell-8987 wifi chip entered a deadlock using the marvell-sd-uapsta-8987
+vendor driver. The cause seems to be that sometimes the interrupt handler
+handles 2 IRQs and one of them disables the interrupts which are not reenabled
+when all interrupts are finished. To work around this, disable all interrupts
+when we are in the IRQ context and reenable them when the current IRQ is handled.
 
-No need to keep list-cc in commit log. If you really need such, keep
-them under '---'.
+Fixes: 066ecde ("mmc: meson-gx: add SDIO interrupt support")
 
-> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-> ---
->  .../devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml      | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
+Signed-off-by: Peter Suti <peter.suti@streamunlimited.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 21 ++++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
 
-
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 6e5ea0213b47..972024d57d1c 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -950,6 +950,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	struct mmc_command *cmd;
+ 	u32 status, raw_status;
+ 	irqreturn_t ret = IRQ_NONE;
++	unsigned long flags;
++
++	spin_lock_irqsave(&host->lock, flags);
++	__meson_mmc_enable_sdio_irq(host->mmc, 0);
+ 
+ 	raw_status = readl(host->regs + SD_EMMC_STATUS);
+ 	status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
+@@ -958,11 +962,11 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 		dev_dbg(host->dev,
+ 			"Unexpected IRQ! irq_en 0x%08lx - status 0x%08x\n",
+ 			 IRQ_EN_MASK | IRQ_SDIO, raw_status);
+-		return IRQ_NONE;
++		goto out_unlock;
+ 	}
+ 
+ 	if (WARN_ON(!host))
+-		return IRQ_NONE;
++		goto out_unlock;
+ 
+ 	/* ack all raised interrupts */
+ 	writel(status, host->regs + SD_EMMC_STATUS);
+@@ -970,17 +974,16 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	cmd = host->cmd;
+ 
+ 	if (status & IRQ_SDIO) {
+-		spin_lock(&host->lock);
+-		__meson_mmc_enable_sdio_irq(host->mmc, 0);
+ 		sdio_signal_irq(host->mmc);
+-		spin_unlock(&host->lock);
+ 		status &= ~IRQ_SDIO;
+-		if (!status)
++		if (!status) {
++			spin_unlock_irqrestore(&host->lock, flags);
+ 			return IRQ_HANDLED;
++		}
+ 	}
+ 
+ 	if (WARN_ON(!cmd))
+-		return IRQ_NONE;
++		goto out_unlock;
+ 
+ 	cmd->error = 0;
+ 	if (status & IRQ_CRC_ERR) {
+@@ -1023,6 +1026,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+ 	if (ret == IRQ_HANDLED)
+ 		meson_mmc_request_done(host->mmc, cmd->mrq);
+ 
++out_unlock:
++	__meson_mmc_enable_sdio_irq(host->mmc, 1);
++	spin_unlock_irqrestore(&host->lock, flags);
++
+ 	return ret;
+ }
+ 
+-- 
+2.25.1
 
