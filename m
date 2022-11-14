@@ -2,100 +2,97 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E643C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 14 Nov 2022 10:50:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9587FC433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 14 Nov 2022 13:27:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236216AbiKNKux (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 14 Nov 2022 05:50:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47808 "EHLO
+        id S229484AbiKNN1E convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 14 Nov 2022 08:27:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52090 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236173AbiKNKuw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2022 05:50:52 -0500
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 00FA81A04D
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 02:50:50 -0800 (PST)
-Received: by mail-ej1-x62a.google.com with SMTP id 13so27354359ejn.3
-        for <linux-mmc@vger.kernel.org>; Mon, 14 Nov 2022 02:50:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=O82IdtMN4gU2HPdWYJ4k/Ae4A8assTn2dDMpMVtowGw=;
-        b=txB1X4GT186dmbeGXeIIwIamZIk2UtUpnIl9NptygNxW0hHhi8FeNkijyxN7OvDPu6
-         ++YXt0DR11UBd/RSStujeTgzhiB21mBdDRsdsxJl5MXBJlArSj0m8V0NqJoWyPDNkcmb
-         AObqiV9lKX0bB3k7M9c3+U2T2gNgL+7qAyZDuMm1OvqBnZzFGcktGYUQMMup7p1cN+zm
-         qbil9d5nOG7Ebsl9KG1foKZNfZKAAEtgiA5OZcWWXuqLsUXP3gY23BleZZuNs0pO9kNU
-         lg5RnmC0wQgDObRxj5H6RunNTwEyMgocfKVEQgXQU4cROkqO8PpZaYLc4vqBaqKNd1gb
-         TUtA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=O82IdtMN4gU2HPdWYJ4k/Ae4A8assTn2dDMpMVtowGw=;
-        b=wbIwysStwg7cj7AbErBYgC9kvuOyzsKomBVl259/TzPqu2hcGMigmLcrdrUl986BlK
-         s2uleC/hFBkSdu/1O3Ut1duezLBwaQv19YA1odz6gkRGuUoS7Lgl6TKfPylGhixvO72C
-         qnVPUqXGhDi/V2R22jrhfA/MPtMwj7aktfGEpb7S6GlqgZsvezv3imXLhKp3Vpg42YTW
-         0JlECrU7hhk/h9ZWZyet+ZeZ+uGd1Zjo+942Voq+GwQbenTEnbYiaVrBPzDpZQUSDkNS
-         LCHZnsyH4mtAE2ndKdisVMpK+cB8Bz/lJLVeeH7MrymeE7BYTfBQPSb8s47cbkrAta05
-         TBNA==
-X-Gm-Message-State: ANoB5pkA72sjPIFD3WcHm2hkvofHBV9tjnNLBRx902OrCPSJxgJ5c3oh
-        5LqH3IlsBxI81VtVnNvUnc/Q9Q==
-X-Google-Smtp-Source: AA0mqf4DhiiUYgCZoIx6i3TSrYBciP3BDWtYhM4xbTCH9ibd42LoFFJte4VhLeXdm8d6RN5wXMDzUQ==
-X-Received: by 2002:a17:906:414d:b0:781:951:2fb with SMTP id l13-20020a170906414d00b00781095102fbmr9849462ejk.64.1668423049581;
-        Mon, 14 Nov 2022 02:50:49 -0800 (PST)
-Received: from localhost.localdomain ([194.29.137.22])
-        by smtp.gmail.com with ESMTPSA id kv20-20020a17090778d400b007402796f065sm4037053ejc.132.2022.11.14.02.50.48
-        (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Mon, 14 Nov 2022 02:50:49 -0800 (PST)
-From:   Konrad Dybcio <konrad.dybcio@linaro.org>
-To:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
-        agross@kernel.org, krzysztof.kozlowski@linaro.org
-Cc:     patches@linaro.org, Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v3 1/3] dt-bindings: mmc: sdhci-msm: Document the SM6375 compatible
-Date:   Mon, 14 Nov 2022 11:50:41 +0100
-Message-Id: <20221114105043.36698-2-konrad.dybcio@linaro.org>
-X-Mailer: git-send-email 2.32.0 (Apple Git-132)
-In-Reply-To: <20221114105043.36698-1-konrad.dybcio@linaro.org>
-References: <20221114105043.36698-1-konrad.dybcio@linaro.org>
+        with ESMTP id S236779AbiKNN07 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 14 Nov 2022 08:26:59 -0500
+Received: from mail3.swissbit.com (mail3.swissbit.com [176.95.1.57])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D732183BD;
+        Mon, 14 Nov 2022 05:26:58 -0800 (PST)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 410E546276B;
+        Mon, 14 Nov 2022 14:26:56 +0100 (CET)
+Received: from mail3.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 31338460D69;
+        Mon, 14 Nov 2022 14:26:56 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (unknown [10.149.2.42])
+        by mail3.swissbit.com (Postfix) with ESMTPS;
+        Mon, 14 Nov 2022 14:26:56 +0100 (CET)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Mon, 14 Nov
+ 2022 14:26:55 +0100
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Mon, 14 Nov 2022 14:26:55 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+CC:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Subject: [PATCH] mmc: core: Do not require secure trim for discard
+Thread-Topic: [PATCH] mmc: core: Do not require secure trim for discard
+Thread-Index: Adj4LIgVOpRmRBFwTaCe3El9cMIWVQ==
+Date:   Mon, 14 Nov 2022 13:26:55 +0000
+Message-ID: <8a17ed3e0eea4aaa82afd0af3b45bcaf@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.46]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-TMASE-Version: DDEI-5.1-9.0.1002-27262.007
+X-TMASE-Result: 10--0.573600-10.000000
+X-TMASE-MatchedRID: Pcf9tAO75fBRwtmwuQ5dzvgWrMZvbmeHBGvINcfHqhfkwMCV+cVEaj3v
+        MQJZlrWjIvrftAIhWmLy9zcRSkKatcjCU69DpYLpngIgpj8eDcCEYGTT/umyEtmzcdRxL+xwKra
+        uXd3MZDX4MO0bTOAtKBaUydMlh6GObMc5a0vSadwUWclmpgd+aDrGjyLONApp
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 34a5a68c-7831-4420-8b3d-899f1a779185-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the compatible for SDHCI on SM6375.
+Discard feature is independent of security features.
+The support check for all trims and discard falsely checked
+for secure trim/discard, but in the discard case this is not
+mandated by the spec.
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 ---
-No changes in v3.
+ drivers/mmc/core/core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-Changes in v2:
-- pick up rb
-
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index fc8a6b345d97..12def0f57e3e 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -46,6 +46,7 @@ properties:
-               - qcom,sm6115-sdhci
-               - qcom,sm6125-sdhci
-               - qcom,sm6350-sdhci
-+              - qcom,sm6375-sdhci
-               - qcom,sm8150-sdhci
-               - qcom,sm8250-sdhci
-               - qcom,sm8450-sdhci
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 95fa8fb1d45f..507005211529 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1761,7 +1761,8 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 		return -EOPNOTSUPP;
+ 
+ 	if (mmc_card_mmc(card) && (arg & MMC_TRIM_ARGS) &&
+-	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
++	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN) &&
++	    arg != MMC_DISCARD_ARG)
+ 		return -EOPNOTSUPP;
+ 
+ 	if (arg == MMC_SECURE_ERASE_ARG) {
 -- 
-2.38.1
+2.37.3
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
