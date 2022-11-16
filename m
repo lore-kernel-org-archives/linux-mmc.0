@@ -2,104 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AACDBC43217
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC830C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234613AbiKPQSi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:18:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55000 "EHLO
+        id S233378AbiKPQSj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:18:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55026 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234362AbiKPQS0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:26 -0500
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF559B27
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:23 -0800 (PST)
-Received: by mail-pj1-x102e.google.com with SMTP id b1-20020a17090a7ac100b00213fde52d49so2859295pjl.3
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:23 -0800 (PST)
+        with ESMTP id S233489AbiKPQS2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:28 -0500
+Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED8C8D102
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:26 -0800 (PST)
+Received: by mail-pf1-x434.google.com with SMTP id z26so17935329pff.1
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dvp6aPXdskWw22vG4cUG9Anh9RZtqEUkN6NF3CqRa8Q=;
-        b=zpHnP80Iv3WZA6SVm3xPJnPQZCfK12IBMTkLXrlkuH80NZN/zL31xOP4zW7lMISEBP
-         hlvBx6riNPPdVLgNqK05axXDOKJnPqIaUaXO1GmB1lp/oAfvvAROfxO9CXLY48qc3Rfc
-         n7i3VBAZo85JR/ChhWXjItUuDb1HAI0g8lR23WI2qgefq0mYD9lg4Q3A84yAOpRVMcRf
-         svfKUD0dh/FcyQS8+wMTedCkBrOx0mzYsEVIZ5+H3aBbqveAGiCbbEJQomP2bNAYBbaN
-         3iORzlI7ZVPv6AtS5evEMNcmNlCJyjJ5NIoV3BEhVkDRXF4V36N0OrfuVL5bcGuhniYb
-         vc9g==
+        bh=MREtAUfxs6GCst+sbJtxXnuebNaO0we0LsQex+TRU2U=;
+        b=YLKq9e4PxYelcy/1KPygzAiYgdw8nlP6lKihqNoi9Y17n80NqwrX7bnjGYO2n6+Pjc
+         iWHbM0ZUxLweKn49DXFmxaF8aKK+qm8YxCudYVFC/dqTSnojRvz2jP7/HRtizz/9uWf4
+         ysuDkob+2xwBSqVJ2VcUPqZvBOd0FDQXkeKzziytY7IiALjsVluv4I3TxhQ1cmjIo86k
+         mzEhRsMkPd6gUeJ7NjUFkycMuvv6eqBelMc3dB2jhq8j6oftGq3/jzhnaQaHvePeUgyJ
+         vJgHVceMUOkPMOt9+trpOgvpXDApYB7ZsoZU3W+51UqLBgsiJv9apXELI7BoAQwAvRm3
+         gsaA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=dvp6aPXdskWw22vG4cUG9Anh9RZtqEUkN6NF3CqRa8Q=;
-        b=CsekxO0/wNwJxSS9p3VcnxHTxTwclJupf1EZ4StIa7Q0W5NeJYG0Ra+QsDwgwotuZs
-         Bgyh5ObfOkpX1an7kCeVH5zO7dSDFpGZN+uJxLgHgXXtGJ/+gn2n6KIGDqpnAYDIsfXJ
-         TqYu4VhXZcTcEu1W7ZzR02mWpipJ09oeZQH2/737wf2zdaeVEwLZENkDDaGod6lmXA65
-         Ij6IDlbf8WnTNjzu4l4wNbzrmtjGiOoK9VLedAY/Kd0v2N8N7GwJXm/DJ+nAJW+3zb20
-         svTQy1JSK81W3vYsJVvc+KW2bjlEsop3VoSVjzyaOpzCzGoLQ/KZuzxlUCqZP9qVkr/V
-         ivEg==
-X-Gm-Message-State: ANoB5pkLF27jy+qcrOKMBg7oahB9f9GE882eHEYftYEeObDgN2HxJsWs
-        iJEse2AHV2hsnXGBpic8tb9HMjIOyKKTmJARNfk9Sw==
-X-Google-Smtp-Source: AA0mqf6xMkxT9E7DWq3Ng6vFjK9UXooF5beAHY5gscd/9HrAj272x6MYVDzSbamQoScAHq+qHs5RibHKN1fmpEb5Z+o=
-X-Received: by 2002:a17:902:a584:b0:186:be05:798e with SMTP id
- az4-20020a170902a58400b00186be05798emr9544083plb.37.1668615503443; Wed, 16
- Nov 2022 08:18:23 -0800 (PST)
+        bh=MREtAUfxs6GCst+sbJtxXnuebNaO0we0LsQex+TRU2U=;
+        b=hOjuaXdydzCavjjTfguh8uPwgIRv70qpIlE5A15iJeS51Fip5OjUsCOvKoWhC5rb48
+         tNSEmRVQnT8ES0hm83m34uJ5Lpqa8t7A6TZxNNr7YibnlNte5+2xtz8K5y7ugZ5xQcrK
+         5kblI1c3wwm3fj8XD6Zt7EEXKwKAwq9nzzZKwW5WBh2+6UM8jJx158JHTmnxeCbKZc7J
+         rpjoHoFGoDd2VPEjdRtCVLtCqV4GwFAaTY9xnr9BJq7YurQSaX3/virWnAlYei3+3ros
+         AhVvVbZbCFHPxPUuZAvJ/QR2DFctbNzQijflDrAZBkqKiEeE08Od+V/iLP492tjg4Wf+
+         R1nQ==
+X-Gm-Message-State: ANoB5plXD4rbOUt1LJvFyg+1qaykxSebW7+P4jBH6bcongUXUbD9cNrd
+        tKpt6LJK994HgROAIn/rp8svSnhe+SBygdXxoAzv0Q==
+X-Google-Smtp-Source: AA0mqf4F0lyT1wk9YUOyeZAUc29cp7zNk2+3Hkto8+6/lrQNH0m8Wm2FixIImon1tq2RsUCoFACQ7np/rcGJJIGUEn4=
+X-Received: by 2002:a62:b41a:0:b0:56e:ad31:b98b with SMTP id
+ h26-20020a62b41a000000b0056ead31b98bmr23633887pfn.40.1668615506428; Wed, 16
+ Nov 2022 08:18:26 -0800 (PST)
 MIME-Version: 1.0
-References: <20221111081033.3813-1-hayashi.kunihiko@socionext.com>
-In-Reply-To: <20221111081033.3813-1-hayashi.kunihiko@socionext.com>
+References: <20221114083100.149200-1-wangxiongfeng2@huawei.com>
+In-Reply-To: <20221114083100.149200-1-wangxiongfeng2@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Nov 2022 17:17:45 +0100
-Message-ID: <CAPDyKFpLVH1fEwKzjd8RP2NP0ZpEjo66XxvL5VVnCWMyS0dw4Q@mail.gmail.com>
-Subject: Re: [PATCH v2 0/6] mmc: sdhci-fujitsu: Add some features and support
- for F_SDH30_E51
-To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jassi Brar <jaswinder.singh@linaro.org>,
-        Ard Biesheuvel <ardb@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Wed, 16 Nov 2022 17:17:49 +0100
+Message-ID: <CAPDyKFr0moQtkLyP06CYe8pNnhmL1wL=2odBQW_S0FQhhznxZA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-pci: Fix possible memory leak caused by
+ missing pci_dev_put()
+To:     Xiongfeng Wang <wangxiongfeng2@huawei.com>
+Cc:     adrian.hunter@intel.com, ben@decadent.org.uk, treding@nvidia.com,
+        linux-mmc@vger.kernel.org, yangyingliang@huawei.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Nov 2022 at 09:10, Kunihiko Hayashi
-<hayashi.kunihiko@socionext.com> wrote:
+On Mon, 14 Nov 2022 at 09:12, Xiongfeng Wang <wangxiongfeng2@huawei.com> wrote:
 >
-> This series adds some additional features such as reset control,
-> non-removable media, and quirks for broken timeout clock.
+> pci_get_device() will increase the reference count for the returned
+> pci_dev. We need to use pci_dev_put() to decrease the reference count
+> before amd_probe() returns. There is no problem for the 'smbus_dev ==
+> NULL' branch because pci_dev_put() can also handle the NULL input
+> parameter case.
 >
-> And this adds support for F_SDH30_E51 IP that is a higher version
-> of F_SDH30 and supports eMMC 5.1.
->
-> The above features are not specific to this IP directly, but are
-> affected by IP configuration and external wiring.
->
-> Changes since v1:
-> - Add conversion and additional compatible patch for DT bindings
-> - Add description for F_SDH30_E51 to the commit message
-> - Append vendor name to MODULE_AUTHOR
->
-> Kunihiko Hayashi (6):
->   dt-bindings: mmc: Convert sdhci-fujitsu to JSON schema
->   mmc: f-sdh30: Add reset control support
->   dt-bindings: sdhci-fujitsu: Add compatible string for F_SDH30_E51
->   mmc: f-sdh30: Add compatible string for Socionext F_SDH30_E51
->   mmc: f-sdh30: Add support for non-removable media
->   mmc: f-sdh30: Add quirks for broken timeout clock capability
->
->  .../bindings/mmc/fujitsu,sdhci-fujitsu.yaml   | 57 +++++++++++++++++++
->  .../devicetree/bindings/mmc/sdhci-fujitsu.txt | 32 -----------
->  drivers/mmc/host/sdhci_f_sdh30.c              | 31 +++++++++-
->  drivers/mmc/host/sdhci_f_sdh30.h              |  3 +
->  4 files changed, 89 insertions(+), 34 deletions(-)
->  create mode 100644 Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
->  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
->
+> Fixes: 659c9bc114a8 ("mmc: sdhci-pci: Build o2micro support in the same module")
+> Signed-off-by: Xiongfeng Wang <wangxiongfeng2@huawei.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-pci-core.c
+> index 34ea1acbb3cc..28dc65023fa9 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1749,6 +1749,8 @@ static int amd_probe(struct sdhci_pci_chip *chip)
+>                 }
+>         }
+>
+> +       pci_dev_put(smbus_dev);
+> +
+>         if (gen == AMD_CHIPSET_BEFORE_ML || gen == AMD_CHIPSET_CZ)
+>                 chip->quirks2 |= SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD;
+>
+> --
+> 2.20.1
+>
