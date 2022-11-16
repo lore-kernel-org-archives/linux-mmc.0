@@ -2,179 +2,115 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2B06C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 01:05:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 69272C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 02:01:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231567AbiKPBFC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 15 Nov 2022 20:05:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43334 "EHLO
+        id S230505AbiKPCBB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 15 Nov 2022 21:01:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35842 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229495AbiKPBFB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2022 20:05:01 -0500
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF05432041
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Nov 2022 17:05:00 -0800 (PST)
-Received: by mail-pl1-x630.google.com with SMTP id y4so15017748plb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Nov 2022 17:05:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=27UddYJQC31d4E1orvFluo6m1mDuIp+0WFHUDVsxN30=;
-        b=TtD/vMEaApxvczspGq7Q4L7MmCIGTX0MxhgMsE6Rn5M5JwKv9nChzsklrQS6R2GKcQ
-         kHZCjZZfavysaxdONVUy/HuusWGt4zgTt3ZKYsTbBZAHffonQxwknk85SCbfOEAywx8U
-         TMcvnsv7kLIi04/cYrxdqRg4tjF/KoUYYeGeLnY8VGNnMxLH5dl874MpXWwcShs4qrsH
-         lfcoEmOPnBPM0NU9vsRb0ZkecDX6inWIglaJ56JWPO4kGHuYcZ0emNVrKp6mLGlptMq/
-         RCdktHoIKReuUPMh12QBP0tqIyZKgRo9Rl7uqN8HlY6EEJOHj3mjVx8pVMZK7kGlvvFF
-         yWPQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=27UddYJQC31d4E1orvFluo6m1mDuIp+0WFHUDVsxN30=;
-        b=vqSgzTWxFY/GmMQtf7vEYYcEXgwjQYnLTOrdEI0RQ0Vut8Y2xxpvpgIdUX1PF6+P1t
-         7PCEPkFYTDF/Whlv2zGeaBvMsIHKMzAqBCBerElBShVWW9QeGxGJQX/HqDRqH3eo3moV
-         9M/Hyh6Bcbt5WWL60hYmUGz+juSX9JrIqxDYgliqdzd++wMNtmHOpm+XsswNZaq/T3I+
-         jv4+YAXlNAydL0/xhLHFjznjR02s325x1WhQvByyoAWIyoWDaiuFR9u9IfB8MWVT4/PW
-         hgsI7ZrYjQeSyoPUYDaH2b0ibQE5GQVuTeUZiCarwDf8U5xFweC0/9dZSuNsp0jZNNJP
-         aX0g==
-X-Gm-Message-State: ANoB5pnj33dj53hDd65eHTe/A7A4k9gkxABn7ua5qqAO+XvV6aLJezaI
-        sCLCHKPoiv6xnScwuoGquxi/lw==
-X-Google-Smtp-Source: AA0mqf6mEgn6u2/xNi5LaQMqkpaErJ/cgxiNwhjcWn9g3AA2nM10Mx9Pwg3rfO1JOoALDg3jbk2SyA==
-X-Received: by 2002:a17:90a:3d49:b0:213:9458:8a93 with SMTP id o9-20020a17090a3d4900b0021394588a93mr1020153pjf.233.1668560699966;
-        Tue, 15 Nov 2022 17:04:59 -0800 (PST)
-Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id f14-20020a170902ce8e00b00186b6bb2f48sm10688518plg.129.2022.11.15.17.04.57
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 15 Nov 2022 17:04:58 -0800 (PST)
-From:   Brad Larson <brad@pensando.io>
-X-Google-Original-From: Brad Larson <blarson@amd.com>
-To:     linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        gsomlo@gmail.com, gerg@linux-m68k.org, krzk@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
-        broonie@kernel.org, yamada.masahiro@socionext.com,
-        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        fancer.lancer@gmail.com, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, ulf.hansson@linaro.org, will@kernel.org,
-        devicetree@vger.kernel.org
-Subject: [PATCH v7 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD Pensando Elba System Resource chip
-Date:   Tue, 15 Nov 2022 17:04:53 -0800
-Message-Id: <20221116010453.41320-1-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S231426AbiKPCA7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 15 Nov 2022 21:00:59 -0500
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id CE4512A72B
+        for <linux-mmc@vger.kernel.org>; Tue, 15 Nov 2022 18:00:57 -0800 (PST)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 2AG1xdeyF031253, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 2AG1xdeyF031253
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=FAIL);
+        Wed, 16 Nov 2022 09:59:39 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.9; Wed, 16 Nov 2022 10:00:19 +0800
+Received: from RTEXH36505.realtek.com.tw (172.21.6.25) by
+ RTEXMBS04.realtek.com.tw (172.21.6.97) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Wed, 16 Nov 2022 10:00:15 +0800
+Received: from localhost.localdomain (172.21.252.101) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server id
+ 15.1.2375.32 via Frontend Transport; Wed, 16 Nov 2022 10:00:15 +0800
+From:   Jyan Chou <jyanchou@realtek.com>
+To:     <adrian.hunter@intel.com>, <riteshh@codeaurora.org>,
+        <asutoshd@codeaurora.org>
+CC:     <linux-mmc@vger.kernel.org>, <james.tai@realtek.com>,
+        <cy.huang@realtek.com>, Jyan Chou <jyanchou@realtek.com>
+Subject: [PATCH] mmc: CQHCI: solve DMA boundary limitation of CQHCI driver
+Date:   Wed, 16 Nov 2022 10:00:12 +0800
+Message-ID: <20221116020012.19318-1-jyanchou@realtek.com>
+X-Mailer: git-send-email 2.38.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-KSE-ServerInfo: RTEXMBS04.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: scan successful
+X-KSE-AntiSpam-Version: 5.9.59, Database issued on: 11/16/2022 01:02:31
+X-KSE-AntiSpam-Status: KAS_STATUS_NOT_DETECTED
+X-KSE-AntiSpam-Method: none
+X-KSE-AntiSpam-Rate: 0
+X-KSE-AntiSpam-Info: Lua profiles 173572 [Nov 15 2022]
+X-KSE-AntiSpam-Info: Version: 5.9.59.0
+X-KSE-AntiSpam-Info: Envelope from: jyanchou@realtek.com
+X-KSE-AntiSpam-Info: LuaCore: 502 502 69dee8ef46717dd3cb3eeb129cb7cc8dab9e30f6
+X-KSE-AntiSpam-Info: {Tracking_from_domain_doesnt_match_to}
+X-KSE-AntiSpam-Info: d41d8cd98f00b204e9800998ecf8427e.com:7.1.1;127.0.0.199:7.1.2;realtek.com:7.1.1
+X-KSE-AntiSpam-Info: Rate: 0
+X-KSE-AntiSpam-Info: Status: not_detected
+X-KSE-AntiSpam-Info: Method: none
+X-KSE-AntiSpam-Info: Auth:dkim=none
+X-KSE-Antiphishing-Info: Clean
+X-KSE-Antiphishing-ScanningType: Heuristic
+X-KSE-Antiphishing-Method: None
+X-KSE-Antiphishing-Bases: 11/16/2022 01:05:00
+X-KSE-AttachmentFiltering-Interceptor-Info: no applicable attachment filtering
+ rules found
+X-KSE-Antivirus-Interceptor-Info: scan successful
+X-KSE-Antivirus-Info: =?big5?B?Q2xlYW4sIGJhc2VzOiAyMDIyLzExLzE1IKRVpMggMTA6MTk6MDA=?=
+X-KSE-BulkMessagesFiltering-Scan-Result: protection disabled
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for the AMD Pensando Elba SoC System Resource chip
-using the SPI interface.
+Because CQHCI has its own DMA descriptors, when using DMA,
+if the DMA addr or buffer size has limitaion, we need to add an
+option to set up tran_desc.
 
-Signed-off-by: Brad Larson <blarson@amd.com>
+Signed-off-by: Jyan Chou <jyanchou@realtek.com>
 ---
+ drivers/mmc/host/cqhci-core.c | 5 +++++
+ drivers/mmc/host/cqhci.h      | 2 ++
+ 2 files changed, 7 insertions(+)
 
-v7:
- - Use system-controller for the device with four chip-selects
-   connected over spi.
- - Delete child by moving reset-controller into the parent.
- - Updated and used dtschema-2022.11 and yamllint-1.28.0
-
-v6:
- - Expand description, rename nodes and change compatible usage
-
-v5:
- - Change to AMD Pensando instead of Pensando
-
-v4:
- - Change Maintained to Supported
-
- .../bindings/mfd/amd,pensando-elbasr.yaml     | 74 +++++++++++++++++++
- 1 file changed, 74 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-
-diff --git a/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-new file mode 100644
-index 000000000000..ac44d7d0a91a
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-@@ -0,0 +1,74 @@
-+# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mfd/amd,pensando-elbasr.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
+index b3d7d6d8d654..4d6fb228a21e 100644
+--- a/drivers/mmc/host/cqhci-core.c
++++ b/drivers/mmc/host/cqhci-core.c
+@@ -516,6 +516,11 @@ static int cqhci_prep_tran_desc(struct mmc_request *mrq,
+ 
+ 	desc = get_trans_desc(cq_host, tag);
+ 
++	if (cq_host->ops->setup_tran_desc) {
++		cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
++		return 0;
++	}
 +
-+title: AMD Pensando Elba SoC Resource Controller bindings
-+
-+description: |
-+  AMD Pensando Elba SoC Resource Controller functions are
-+  accessed with four chip-selects.  Reset control is on CS0.
-+
-+maintainers:
-+  - Brad Larson <blarson@amd.com>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - amd,pensando-elbasr
-+
-+  "#reset-cells":
-+    const: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - spi-max-frequency
-+
-+allOf:
-+  - $ref: /schemas/spi/spi-peripheral-props.yaml#
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    spi {
-+        #address-cells = <1>;
-+        #size-cells = <0>;
-+        num-cs = <4>;
-+        status = "okay";
-+
-+        rstc: system-controller@0 {
-+            compatible = "amd,pensando-elbasr";
-+            reg = <0>;
-+            spi-max-frequency = <12000000>;
-+            #reset-cells = <1>;
-+        };
-+
-+        system-controller@1 {
-+            compatible = "amd,pensando-elbasr";
-+            reg = <1>;
-+            spi-max-frequency = <12000000>;
-+        };
-+
-+        system-controller@2 {
-+            compatible = "amd,pensando-elbasr";
-+            reg = <2>;
-+            spi-max-frequency = <12000000>;
-+            interrupt-parent = <&porta>;
-+            interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-+        };
-+
-+        system-controller@3 {
-+            compatible = "amd,pensando-elbasr";
-+            reg = <3>;
-+            spi-max-frequency = <12000000>;
-+        };
-+    };
+ 	for_each_sg(data->sg, sg, sg_count, i) {
+ 		addr = sg_dma_address(sg);
+ 		len = sg_dma_len(sg);
+diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
+index ba9387ed90eb..2e47461096e8 100644
+--- a/drivers/mmc/host/cqhci.h
++++ b/drivers/mmc/host/cqhci.h
+@@ -290,6 +290,8 @@ struct cqhci_host_ops {
+ 	int (*program_key)(struct cqhci_host *cq_host,
+ 			   const union cqhci_crypto_cfg_entry *cfg, int slot);
+ #endif
++	void (*setup_tran_desc)(struct mmc_data *data,
++		struct cqhci_host *cq_host, u8 *desc, int sg_count);
+ };
+ 
+ static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
 -- 
-2.17.1
+2.38.1
 
