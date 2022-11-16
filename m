@@ -2,95 +2,151 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ED43C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:00:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81EEAC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:13:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233325AbiKPQAf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:00:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40758 "EHLO
+        id S233815AbiKPQNu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:13:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51888 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233652AbiKPQAe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:00:34 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D202554E2;
-        Wed, 16 Nov 2022 08:00:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668614433; x=1700150433;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=diJ0/bMYPdgdoRRxsbkYzGpbwIEt/0wPceeq6oditiA=;
-  b=DN5NVqOYkemURYECoAzNCqxh/sBt4Tu5OCHrGhncfc63apjITSh/26gz
-   iUsnjc6AyYeTgefyJhJJYgWB7LzFk8InluPMKiI5KjXRc5m7erBnKBne0
-   aWeZhkCCabuAV0lxeJf0+SrtEC9NUCHdl+uPJvOVycKG75X6ObZLW0+De
-   jDv1CBaS3bp0fAlcJHXtvtBIxOsvB4bB1LFgHFigU3fVBCyDRWh6kY/IH
-   YPu5txj1udrhNw/WpeNwN7iiEbC24ueYe4TzZG+DanK1bqMVRavz4W1Vm
-   r/EeNbQ5Elo3JDAZs14eX98YZuBY3D/adH22/CJX6hvUHpWhEbgLZRP3f
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="339396458"
-X-IronPort-AV: E=Sophos;i="5.96,167,1665471600"; 
-   d="scan'208";a="339396458"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2022 08:00:26 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="670543951"
-X-IronPort-AV: E=Sophos;i="5.96,167,1665471600"; 
-   d="scan'208";a="670543951"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.88])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2022 08:00:23 -0800
-Message-ID: <59fc95ec-c0db-4011-eca3-3d101f0bc908@intel.com>
-Date:   Wed, 16 Nov 2022 18:00:18 +0200
+        with ESMTP id S232557AbiKPQNt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:13:49 -0500
+Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1282263AF
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:13:49 -0800 (PST)
+Received: by mail-pg1-x52a.google.com with SMTP id f3so10686576pgc.2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:13:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=z1rUWutKviuABCXhXY06evbTP8Qb/JN/vOssJGqNTh0=;
+        b=LoCqcxBb/0A4en6YJPudBTBwAugncPJfF4IIlmuptJxlJ3fqpW6s+jVYF7QTFC/tpz
+         MgbIKcER8u/5z0q3veC4zk5Ucxe4fY0jOdf3ukThvDpy7ZrNkn1y0zk6CxNLh/h8NWQw
+         cb5fhTthKZP5VLvgSjrnkYYCmMQM15HBDbfi+PqXrpr5E+kBIph24rd+iZ8AmHHR0c2p
+         Ir31S94fzoErmJVIr794nJtoXRNSTG0rLvKNPL9mOb3qiaF/LPoEPDKezCt5myXTS0bm
+         BmDC9yr6HbGAt1JLqg++DlYgGuepc4iGIbbHiA1t29PN8a+DvALjHVeLclVByZBAN/4S
+         WmAw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=z1rUWutKviuABCXhXY06evbTP8Qb/JN/vOssJGqNTh0=;
+        b=G62fQ84GxGQ07Paii86mvQwJU93L/e4Ndo6wevn3QBLfr07rrPXZ66LHKBof+sNKF1
+         J9wSsB5rHUSWzIz9N0TkrueX2TgRjvH9p62+NQTOxmpJKW2rc6MMg0nqJmnDwCLorCPD
+         lumedQKh/oQVye0hMOlyTnV3QmDEFBhlbsNh05n7pOK5kOFBrDL1NpvghMK7jhidFuYc
+         28VJug4Rx+9aVqYdyDqDFGh/MSlGCjMb85qNQ2MDEBhgtAngIMXU4DW2lRTphzth8/TI
+         i+SOmFOT7rMkem/Ms8UYxp2akA9FviNpmko0EmdJIaJkdNyRdaZTlePLYTbXUaWwQCCT
+         UhTw==
+X-Gm-Message-State: ANoB5plv6xWd5sRtI94nwfNyA+Mu3b1pk6dfLtyeyLDsOUwMKQh4hIQU
+        dAFu/GNxNOiUsuF5r64Kr2yUw3hC0eKFoAZHrXDGZw==
+X-Google-Smtp-Source: AA0mqf4KePcqF8TL0F8T8aM/T0G+4+eIDf4h7ns0C0M7LyQfmaH5u4OKNFGZsyldv/vno2rUNzTGP/NdiKCTjKDJDZw=
+X-Received: by 2002:a63:121f:0:b0:442:ee11:4894 with SMTP id
+ h31-20020a63121f000000b00442ee114894mr21639035pgl.595.1668615228512; Wed, 16
+ Nov 2022 08:13:48 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.2
-Subject: Re: [PATCH 1/1] mmc: sdhci: Fixed too many logs being printed during
- tuning
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        megoo.tang@gmail.com, lzx.stg@gmail.com
-References: <20221111084214.14822-1-wenchao.chen666@gmail.com>
- <20221111084214.14822-2-wenchao.chen666@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221111084214.14822-2-wenchao.chen666@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20221114093857.491695-1-peter.suti@streamunlimited.com>
+In-Reply-To: <20221114093857.491695-1-peter.suti@streamunlimited.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 16 Nov 2022 17:13:11 +0100
+Message-ID: <CAPDyKFqrCCtY_A072WswEFa3Bnz7EfMp40MRYtr3G7Jbq_hbTw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: fix SDIO interrupt handling
+To:     Peter Suti <peter.suti@streamunlimited.com>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/11/22 10:42, Wenchao Chen wrote:
-> From: Wenchao Chen <wenchao.chen@unisoc.com>
-> 
-> During the HS200 tuning process, too many tuning errors are printed in
-> the log.
-> 
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+On Mon, 14 Nov 2022 at 10:40, Peter Suti <peter.suti@streamunlimited.com> wrote:
+>
+> With the interrupt support introduced in commit 066ecde sometimes the
+> Marvell-8987 wifi chip entered a deadlock using the marvell-sd-uapsta-8987
+> vendor driver. The cause seems to be that sometimes the interrupt handler
+> handles 2 IRQs and one of them disables the interrupts which are not reenabled
+> when all interrupts are finished. To work around this, disable all interrupts
+> when we are in the IRQ context and reenable them when the current IRQ is handled.
+>
+> Fixes: 066ecde ("mmc: meson-gx: add SDIO interrupt support")
+>
+> Signed-off-by: Peter Suti <peter.suti@streamunlimited.com>
 > ---
->  drivers/mmc/host/sdhci.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index fef03de85b99..a503b54305eb 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -3401,6 +3401,10 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  		if (host->pending_reset)
->  			return;
->  
-> +		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-> +		if (command == MMC_SEND_TUNING_BLOCK || command == MMC_SEND_TUNING_BLOCK_HS200)
-> +			return;
-
-Normally we wouldn't get here even if a request got an error because
-then we either reset the data circuit which should stop further
-interrupts, or set host->pending_reset.
-
-Can you elaborate on what is going wrong?
-
+>  drivers/mmc/host/meson-gx-mmc.c | 21 ++++++++++++++-------
+>  1 file changed, 14 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 6e5ea0213b47..972024d57d1c 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -950,6 +950,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         struct mmc_command *cmd;
+>         u32 status, raw_status;
+>         irqreturn_t ret = IRQ_NONE;
+> +       unsigned long flags;
 > +
->  		pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
->  		       mmc_hostname(host->mmc), (unsigned)intmask);
->  		sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+> +       spin_lock_irqsave(&host->lock, flags);
+> +       __meson_mmc_enable_sdio_irq(host->mmc, 0);
+>
+>         raw_status = readl(host->regs + SD_EMMC_STATUS);
+>         status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
+> @@ -958,11 +962,11 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>                 dev_dbg(host->dev,
+>                         "Unexpected IRQ! irq_en 0x%08lx - status 0x%08x\n",
+>                          IRQ_EN_MASK | IRQ_SDIO, raw_status);
+> -               return IRQ_NONE;
+> +               goto out_unlock;
 
+This may end up re-enabling the sdio irqs, even if it was not enabled
+to start with. This is probably not what we want.
+
+>         }
+>
+>         if (WARN_ON(!host))
+> -               return IRQ_NONE;
+> +               goto out_unlock;
+>
+>         /* ack all raised interrupts */
+>         writel(status, host->regs + SD_EMMC_STATUS);
+> @@ -970,17 +974,16 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         cmd = host->cmd;
+>
+>         if (status & IRQ_SDIO) {
+> -               spin_lock(&host->lock);
+> -               __meson_mmc_enable_sdio_irq(host->mmc, 0);
+>                 sdio_signal_irq(host->mmc);
+> -               spin_unlock(&host->lock);
+>                 status &= ~IRQ_SDIO;
+> -               if (!status)
+> +               if (!status) {
+> +                       spin_unlock_irqrestore(&host->lock, flags);
+>                         return IRQ_HANDLED;
+> +               }
+>         }
+>
+>         if (WARN_ON(!cmd))
+> -               return IRQ_NONE;
+> +               goto out_unlock;
+>
+>         cmd->error = 0;
+>         if (status & IRQ_CRC_ERR) {
+> @@ -1023,6 +1026,10 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+>         if (ret == IRQ_HANDLED)
+>                 meson_mmc_request_done(host->mmc, cmd->mrq);
+>
+> +out_unlock:
+> +       __meson_mmc_enable_sdio_irq(host->mmc, 1);
+> +       spin_unlock_irqrestore(&host->lock, flags);
+> +
+>         return ret;
+>  }
+>
+
+Kind regards
+Uffe
