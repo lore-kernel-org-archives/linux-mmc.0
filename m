@@ -2,107 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F258C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 06:48:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8B61C43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 08:23:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229491AbiKPGs5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 01:48:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55414 "EHLO
+        id S238861AbiKPIXu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 03:23:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232858AbiKPGnR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 01:43:17 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6875B60E5
-        for <linux-mmc@vger.kernel.org>; Tue, 15 Nov 2022 22:43:16 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668580996; x=1700116996;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=YnlAl6anjWVjwvPOH5Gh8/0WCK4IzbNaUuIgHwZIHl8=;
-  b=XoUh0H+WYMbkWT4vm2wkEvjTKLJgp67XliVyjSmIPOe0AXMPG5W69kre
-   aAdbMn9gPoIM15t7ird4aly/sfx5ipbRqAArDfrl1aL289BzCG1MPEdCB
-   Emcxjcuwl7lpkYOKpukeAMoU/lDSl4+LTZfQqbaT6tguTOfWIlPpuxyPp
-   QnqZ6ZcLfC9/rGDs3Z2zQInuWZUs99bKxvmPm1Kaizktodc4ajrS62wTP
-   osCh2uuQIoxIgFGpzh8mjqpm71ujac5t5PkfAoWDuzZGK4ELbiiqSo8/C
-   SJG12VC4sMMGTIYF+aIPNvyiFh5GjBhX33pEePQwDHMiPaEdXmOSTy70E
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10532"; a="339278278"
-X-IronPort-AV: E=Sophos;i="5.96,167,1665471600"; 
-   d="scan'208";a="339278278"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Nov 2022 22:43:16 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10532"; a="968303509"
-X-IronPort-AV: E=Sophos;i="5.96,167,1665471600"; 
-   d="scan'208";a="968303509"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.32.88])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Nov 2022 22:43:14 -0800
-Message-ID: <e3516bcf-5b5c-e81d-b51a-c9637d734886@intel.com>
-Date:   Wed, 16 Nov 2022 08:43:10 +0200
+        with ESMTP id S238810AbiKPIXT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 03:23:19 -0500
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2CC62B1A2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 00:21:35 -0800 (PST)
+Received: by mail-lj1-x22e.google.com with SMTP id a15so20822044ljb.7
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 00:21:35 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=hOhON3c92uOQG/q5cu0aF5WgWtMVsl/yA7D31IBRUvA=;
+        b=v3xeJRqsQ25HIf13rxAwKE+/6/K6rqVfZRhQyECOPVLQ7icsDHkVtYjpCaFYlBRba+
+         NnfDliMvRv8EowYlm8UwXF9AIhq8ryISGJdbQenYBhP6zVJtE0p+U4akJ5FyAwrVvi7r
+         55VMwNJQKFbqLHdk7qLf7DSYhxiny765h7f/AVAYyeLz7eQ4wT0uUBXajTaiLoQi/2IX
+         bhUnvVgWKY9wzj4ijwOxGT+VGTI9msc9yehCwaf5tJArF+DEerMe+OtlIyXDwqItc81r
+         OyU0W+2HuIm03oNHNP07ue7gC/NBDMUE/Tjj4xxMFKKsFBuNZlrTpwIia4lUGEVlYQdQ
+         6q9Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=hOhON3c92uOQG/q5cu0aF5WgWtMVsl/yA7D31IBRUvA=;
+        b=3sHT1Qu1+I4LR+/QmcHGsnvhsiypKaGq+pbidmJL1wN1jfU9DpIibt/hcUANgi+oU2
+         j55EdMGWjqqJhrJXI5HduEV2MP3xNM2mQ5HV7jcmpDyQ7P9qryJ0IFiLOCnbR7zCXqVi
+         ryAJAGh8r9A/Qd3ZecjJ0SESE4jzMVsoDbzw6Cb46xObxT1DUcIxeZ/ULzaTDwja4Sx4
+         9ytyC0/6V1ErDRIoZ3X1ftQW6e79w5dvqTlvBiCl4gqFfUzrMVuiAY2ZE8n6wucszO2r
+         uBI4ObVAizPCOPEQUw35erwSTBTrJZUoJ4PztkoOj05g7KZlobm1RYOj0jMDpzPRkYxM
+         rwlg==
+X-Gm-Message-State: ANoB5plIWaLiplY9f+EuwwPfqwWZ+XgiPOY+cTxqItmaVp+B4V74d8rI
+        APoRNF1wimPAvAuJGYiktYDPew==
+X-Google-Smtp-Source: AA0mqf7D9jtRcm31IK4h9nEOJcLgzidioIPjn0kKfE18WRLFBDH5aYRGy0EDuLZaRrezjI86pj58Ig==
+X-Received: by 2002:a2e:94cb:0:b0:277:3df:90d0 with SMTP id r11-20020a2e94cb000000b0027703df90d0mr7184219ljh.234.1668586893685;
+        Wed, 16 Nov 2022 00:21:33 -0800 (PST)
+Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
+        by smtp.gmail.com with ESMTPSA id e5-20020ac25465000000b00492dbf809e8sm2485379lfn.118.2022.11.16.00.21.32
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 16 Nov 2022 00:21:33 -0800 (PST)
+Message-ID: <a7dac56d-0fb0-b45f-a722-4cac8d1f777e@linaro.org>
+Date:   Wed, 16 Nov 2022 09:21:32 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.4.2
-Subject: Re: [PATCH] mmc: CQHCI: solve DMA boundary limitation of CQHCI driver
+ Thunderbird/102.4.2
+Subject: Re: [PATCH 1/4] dt-bindings: mmc: sdhci-msm: Document SM8350 SDHCI
 Content-Language: en-US
-To:     Jyan Chou <jyanchou@realtek.com>, riteshh@codeaurora.org,
-        asutoshd@codeaurora.org
-Cc:     linux-mmc@vger.kernel.org, james.tai@realtek.com,
-        cy.huang@realtek.com
-References: <20221116020012.19318-1-jyanchou@realtek.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221116020012.19318-1-jyanchou@realtek.com>
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>,
+        linux-arm-msm@vger.kernel.org, andersson@kernel.org,
+        agross@kernel.org
+Cc:     patches@linaro.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20221115172828.14372-1-konrad.dybcio@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221115172828.14372-1-konrad.dybcio@linaro.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/11/22 04:00, Jyan Chou wrote:
-> Because CQHCI has its own DMA descriptors, when using DMA,
-> if the DMA addr or buffer size has limitaion, we need to add an
-> option to set up tran_desc.
-
-Thanks for the patch, however we always require that features must
-be used to be included in the kernel i.e. the patch with driver
-changes that implements the ->setup_tran_desc() callback must
-also be submitted.
-
+On 15/11/2022 18:28, Konrad Dybcio wrote:
+> Document the SDHCI on SM8350.
 > 
-> Signed-off-by: Jyan Chou <jyanchou@realtek.com>
-> ---
->  drivers/mmc/host/cqhci-core.c | 5 +++++
->  drivers/mmc/host/cqhci.h      | 2 ++
->  2 files changed, 7 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/cqhci-core.c b/drivers/mmc/host/cqhci-core.c
-> index b3d7d6d8d654..4d6fb228a21e 100644
-> --- a/drivers/mmc/host/cqhci-core.c
-> +++ b/drivers/mmc/host/cqhci-core.c
-> @@ -516,6 +516,11 @@ static int cqhci_prep_tran_desc(struct mmc_request *mrq,
->  
->  	desc = get_trans_desc(cq_host, tag);
->  
-> +	if (cq_host->ops->setup_tran_desc) {
-> +		cq_host->ops->setup_tran_desc(data, cq_host, desc, sg_count);
-> +		return 0;
-> +	}
-> +
->  	for_each_sg(data->sg, sg, sg_count, i) {
->  		addr = sg_dma_address(sg);
->  		len = sg_dma_len(sg);
-> diff --git a/drivers/mmc/host/cqhci.h b/drivers/mmc/host/cqhci.h
-> index ba9387ed90eb..2e47461096e8 100644
-> --- a/drivers/mmc/host/cqhci.h
-> +++ b/drivers/mmc/host/cqhci.h
-> @@ -290,6 +290,8 @@ struct cqhci_host_ops {
->  	int (*program_key)(struct cqhci_host *cq_host,
->  			   const union cqhci_crypto_cfg_entry *cfg, int slot);
->  #endif
-> +	void (*setup_tran_desc)(struct mmc_data *data,
-> +		struct cqhci_host *cq_host, u8 *desc, int sg_count);
->  };
->  
->  static inline void cqhci_writel(struct cqhci_host *host, u32 val, int reg)
+> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+
+
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+Best regards,
+Krzysztof
 
