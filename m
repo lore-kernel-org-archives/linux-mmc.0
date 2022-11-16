@@ -2,52 +2,53 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2B16C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 12:37:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 273CAC41535
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 12:37:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233785AbiKPMhR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 07:37:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53688 "EHLO
+        id S238605AbiKPMhS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 07:37:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53064 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239083AbiKPMg5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 07:36:57 -0500
-Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A91066560
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 04:36:22 -0800 (PST)
-Received: by mail-ej1-x62d.google.com with SMTP id ft34so43642497ejc.12
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 04:36:22 -0800 (PST)
+        with ESMTP id S239108AbiKPMhA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 07:37:00 -0500
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5B6ED15FE2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 04:36:28 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id z18so26319007edb.9
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 04:36:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=KZBT8P6Dv4DO8+VutzfmTjw2eFqXhFXatHTYor7MjsU=;
-        b=hlQNk0rVp3sE85UQqVnwNbaSG3QuiVGpipf/JeuKhOANQCdtms+INmd4MyRonzImhL
-         NUi2yie/KzREDVos/KrGeq2GPvdmgJgC9a8ZfgkMRp+sv1rBnlbOA9KM6d8L6j5xdhSZ
-         Zoiy+q0RgUIABxqUTWbIwQWYMpLdjX1ovBvNpOU16Qlp7E3Fgr53z3/dKeZV+1dl8OUV
-         qkyIq8K8QgVkJio3qrqhpamZpHL5EtnUrBDGplun79N2WJfkV/aFnzq2ZOoED1kDqqJE
-         rUZZrWkwDp49YaVbf/sriTK4UqZackZ+IqOqi/MdbOz2vfEC4KD/GtiVt/beTThn4A5m
-         PxKw==
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=9knGLouoTps4CKpPqceRV5XIDseNqgQ7sZc1gE16638=;
+        b=qjmi7EO0Q3ZK0wLJ26bcXUy3mpm2LA3KcypW1YTD2x+H1Gyl+KnVa29/K4vNKe44JD
+         tj+7r69AyCovNdl8StLXox3u0lXGRljnwbBDzXrdYTvslvuw7iEe6f11nXlIXkm2R/7M
+         hoRiEk3FclmBC1AAzg48O3A3yzYc7kgOED3dwR8P62dppPJdbuA2OrYtAm3FxPQwH3sZ
+         hHk4Utj7VTKcwlAWFZR0w9RFpjH0d2cpaZX6/3euuove650ZnQjYzo9DG2i6k7o/uV5x
+         UpPqL7dg0Sr4gYrdqVI/NKx+QvS1kQKR3QL9E0CdD1PSW5R4XlWKKpBlkAy4oqF0zuwc
+         QP9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=KZBT8P6Dv4DO8+VutzfmTjw2eFqXhFXatHTYor7MjsU=;
-        b=mh/SIAmTfqPBEDqpNtN40GvmITOzZ4/u2Wa6rm/NnG7cz3WJm9VRCmGkK/ZiVjeEfv
-         EAlb47HlghEWgnE/gLM6DtydO18hkw8I6YwYHAnzHvFXkCmZbIRgoWKrbhRxgtVAaEvy
-         TWAa9FjncBcMwwblOcqfRAvWYzrzIOXrb0klyxt5PkRx8qM5nV/8hVPoxlbw3R5nxs9/
-         nob2QDRpGLCJNIL9BTTkvs8orhBDsbw0UFCBfuUcBbyPA/Zb7hr+0uZgmyVW35wnu0Ju
-         JcMVI2UpHpS0uoqWlHS7+C2URFQulFosCXUbkeE9hgc6MdTbi+7d48qNQqTLdBK5jUU4
-         lEWg==
-X-Gm-Message-State: ANoB5plwMZCLZxqtjdPBdQqKLYphxlwipVEYFotCW11etbLQotOyT9jm
-        m6SxCWgutB9FXeWQzGV2CAk7Qw==
-X-Google-Smtp-Source: AA0mqf4I/YjZAzS1pjS8ZmT2wdWov+a4rkd9ETVSHA0x7+nwD2F7Hmk5eG3SVjUQrmdM4onxSJs0/Q==
-X-Received: by 2002:a17:906:5f88:b0:7ad:92fa:589e with SMTP id a8-20020a1709065f8800b007ad92fa589emr16970948eju.668.1668602181186;
-        Wed, 16 Nov 2022 04:36:21 -0800 (PST)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=9knGLouoTps4CKpPqceRV5XIDseNqgQ7sZc1gE16638=;
+        b=LLc2cAwC8Q+hJ70XBGdFl99rKj2LLbbHHlnyMHgcRrMk8DhPy8W89vbLs96342rsVe
+         aFni5jTehV2CiMjkNR/xn9I2WKonxbl8ScymE1qFxNv2NLjm0ya8d8+Lt714RwKo4uk9
+         vZ3mKZu2mLxCY3poaPAjuOkbkl5f8uTwPybFFTsoq8aqQv/qbIh2soawHhfAuEkgpFFI
+         8oc7dvKNrLR+wQA1jcYmLFBorgxF14AKj1k31AejIl2WQOvYX2kv8drIghaOt068cYzI
+         lyMP9gg9Uk3jwCrU5h9bHPzoRmEGqBLsQhlNDZCnf607fj8NgUutBqhR8pPG4O3l3d0O
+         iHeg==
+X-Gm-Message-State: ANoB5pkEf068FO2J8Mw1qtBlSgDnmDCKDQnvSjHiYSoujbAXwWk29loS
+        yr60q9bHVrDSFci+WXysrvX84g==
+X-Google-Smtp-Source: AA0mqf5f2OOBISSSop2/aD8oGQWUikOqaakhD27e00BH0r1sbmwrW9N3WTpKVPPyH6eOAClfCJt9ug==
+X-Received: by 2002:aa7:c405:0:b0:461:4f34:d8f4 with SMTP id j5-20020aa7c405000000b004614f34d8f4mr19536298edq.144.1668602186978;
+        Wed, 16 Nov 2022 04:36:26 -0800 (PST)
 Received: from localhost.localdomain ([194.29.137.22])
-        by smtp.gmail.com with ESMTPSA id cb13-20020a170906a44d00b007abafe43c3bsm6773346ejb.86.2022.11.16.04.36.19
+        by smtp.gmail.com with ESMTPSA id cb13-20020a170906a44d00b007abafe43c3bsm6773346ejb.86.2022.11.16.04.36.25
         (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
-        Wed, 16 Nov 2022 04:36:20 -0800 (PST)
+        Wed, 16 Nov 2022 04:36:26 -0800 (PST)
 From:   Konrad Dybcio <konrad.dybcio@linaro.org>
 To:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
         agross@kernel.org, krzysztof.kozlowski@linaro.org
@@ -57,40 +58,85 @@ Cc:     patches@linaro.org, Konrad Dybcio <konrad.dybcio@linaro.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2 1/4] dt-bindings: mmc: sdhci-msm: Document SM8350 SDHCI
-Date:   Wed, 16 Nov 2022 13:36:09 +0100
-Message-Id: <20221116123612.34302-1-konrad.dybcio@linaro.org>
+        linux-kernel@vger.kernel.org,
+        Konrad Dybcio <konrad.dybcio@somainline.org>
+Subject: [PATCH v2 4/4] arm64: dts: qcom: sm8350-sagami: Wire up SDHCI2
+Date:   Wed, 16 Nov 2022 13:36:12 +0100
+Message-Id: <20221116123612.34302-4-konrad.dybcio@linaro.org>
 X-Mailer: git-send-email 2.32.0 (Apple Git-132)
+In-Reply-To: <20221116123612.34302-1-konrad.dybcio@linaro.org>
+References: <20221116123612.34302-1-konrad.dybcio@linaro.org>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the SDHCI on SM8350.
+Adjust regulators, add required pin setup and finally enable SDHCI2
+to get the SD Card slot going on Sagami Xperias.
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
 ---
 Changes in v2:
-- pick up a-b
+- drop stray newline
 
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ .../dts/qcom/sm8350-sony-xperia-sagami.dtsi   | 29 ++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index 12def0f57e3e..31dfaff0048d 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -49,6 +49,7 @@ properties:
-               - qcom,sm6375-sdhci
-               - qcom,sm8150-sdhci
-               - qcom,sm8250-sdhci
-+              - qcom,sm8350-sdhci
-               - qcom,sm8450-sdhci
-           - const: qcom,sdhci-msm-v5 # for sdcc version 5.0
+diff --git a/arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami.dtsi b/arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami.dtsi
+index a428ce31ab4e..6ae700e72d1e 100644
+--- a/arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami.dtsi
++++ b/arch/arm64/boot/dts/qcom/sm8350-sony-xperia-sagami.dtsi
+@@ -312,7 +312,8 @@ pm8350c_l8: ldo8 {
+ 		pm8350c_l9: ldo9 {
+ 			regulator-name = "pm8350c_l9";
+ 			regulator-min-microvolt = <2960000>;
+-			regulator-max-microvolt = <3008000>;
++			/* Originally max = 3008000 but SDHCI expects 2960000 */
++			regulator-max-microvolt = <2960000>;
+ 			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+ 		};
  
+@@ -558,6 +559,18 @@ &qupv3_id_2 {
+ 	status = "okay";
+ };
+ 
++&sdhc_2 {
++	cd-gpios = <&tlmm 92 GPIO_ACTIVE_HIGH>;
++	pinctrl-names = "default", "sleep";
++	pinctrl-0 = <&sdc2_default_state &sdc2_card_det_active>;
++	pinctrl-1 = <&sdc2_sleep_state &sdc2_card_det_sleep>;
++	vmmc-supply = <&pm8350c_l9>;
++	vqmmc-supply = <&pm8350c_l6>;
++	no-sdio;
++	no-mmc;
++	status = "okay";
++};
++
+ &slpi {
+ 	status = "okay";
+ 	firmware-name = "qcom/sm8350/Sony/sagami/slpi.mbn";
+@@ -782,6 +795,20 @@ ts_int_default: ts-int-default-state {
+ 		bias-disable;
+ 		input-enable;
+ 	};
++
++	sdc2_card_det_active: sd-card-det-active-state {
++		pins = "gpio92";
++		function = "gpio";
++		drive-strength = <2>;
++		bias-pull-up;
++	};
++
++	sdc2_card_det_sleep: sd-card-det-sleep-state {
++		pins = "gpio92";
++		function = "gpio";
++		drive-strength = <2>;
++		bias-disable;
++	};
+ };
+ 
+ /* BIG WARNING! DO NOT TOUCH UFS, YOUR DEVICE WILL DIE! */
 -- 
 2.38.1
 
