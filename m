@@ -2,64 +2,64 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01F8CC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0062CC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234304AbiKPQST (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:18:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55066 "EHLO
+        id S234338AbiKPQSV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:18:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55068 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234358AbiKPQSJ (ORCPT
+        with ESMTP id S233410AbiKPQSJ (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:09 -0500
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64CDAD135
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:02 -0800 (PST)
-Received: by mail-pj1-x1032.google.com with SMTP id v3-20020a17090ac90300b00218441ac0f6so4036482pjt.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:02 -0800 (PST)
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEA1356EC2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:04 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id r18so17098632pgr.12
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ksBVJef+BrlHHXYAlvYsMylSDtCe2NEmzHtcK4DRi1I=;
-        b=kYITbS1u1MGMUwz7OcDfxAIMLt7itX2VLZ4Omg0Evbw7XG5CsLQAkKdrvtlmyvK0FL
-         R2Nm50RMdv/bPXZ97UEI5W+892Bnj8juCXBl/C+InGobEXyahK1FPW1v848qP3889zu5
-         yblPLIo6aWrhzkfgDzDYej5lxGYTV49/MoblAkHQhr/0eFbwN23izhBhevxcDFlRKUyl
-         0fnQRT8OND6x2tO5zNHlzG4PKqB4Y4niBYDuUjxd3r2IbDd1bscogOEhqtwe6kTbbNUR
-         LjRv6T3Zu3Gb00ZOjVTQMPpSykSvfZ5rL5CBx7cAy5JZz/a0ZMrui//YeywSuzlcuq5z
-         q0+w==
+        bh=bd0COEi28GaR5qVUIh2S/Ew7aeN34DlRxwUBGbg/CGY=;
+        b=hlLacOTftqqiUGenMMy9GE95nEg0etFTC7acSnh0jvkPVprvV5tr8kdtKIW2oMVd+5
+         97RAU7aQL2jdtWnVvnBdivgsnSbKprd9tRFmWylZU6K0eogQBw69sF7eqOqxtDZlUJsv
+         YJnsJnma5RqtIbnyHnhSMOVvEgDoBwhZjgeXMG25HZleYN8v6sBDP62rGGr5SQ1cI9J4
+         sWHxnFSLHaKSOfVBTvvIih0CgRwBCg8G9obrDV2H8rbveeDb3PnKL+3gseDglfxRPIvS
+         pG5C4Pxc02qyZ725b28c5j8Z44E7S8gZEGQ878KGc/rpoThzfrRQYXL67YW4LXPGmdvy
+         sXFw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=ksBVJef+BrlHHXYAlvYsMylSDtCe2NEmzHtcK4DRi1I=;
-        b=1TfLzV5So9Xw0aQVWuWxAgRqEOmM+M+4tGzoI0h/xZV7JpAEBMAVqCNNpSJ0zfGT0B
-         Qmh/WvCmyOLGJPUHc83vhn+47CH8LGMuJ4uoyg2EIyx8aF+/ZCbg5TO6qm+mj+3MbdL9
-         yXpwN2L+fANeuy8wOP9gKR+hHw34UrKav5DF0QFz/lDwHklbE1iDxSWmnAhiaonP10f8
-         krvwzghJs1aSw8K8j8zvzBnhCXPIY3qZPi+5RFTMFYFt88fEatAwTDULUhj9zo1+GmF1
-         E0M0+IWe6f617nUiQwf2tynNZprFkmNCxpDR2tFhDiAEusGmz5BYZaM6yOpxYVtZr9/O
-         rcHw==
-X-Gm-Message-State: ANoB5pmYG+ElagM39/2FzcdgnUqJMVd959eHdZucM157yhM87VVx57Cq
-        ZIiwk7nFEF6PBgelmkOZo2/njBMOi0mLDFJpwH/HTrFkh+I=
-X-Google-Smtp-Source: AA0mqf7kb4ePFZWQo8OZaVnmKDH0e7iACcrjjdkJvGr0DN9iWNKbNKpV3RpYbth9jcy7dvx63b18ByArS922OpUnNpQ=
-X-Received: by 2002:a17:902:d48a:b0:188:6baf:2011 with SMTP id
- c10-20020a170902d48a00b001886baf2011mr9114689plg.165.1668615481886; Wed, 16
- Nov 2022 08:18:01 -0800 (PST)
+        bh=bd0COEi28GaR5qVUIh2S/Ew7aeN34DlRxwUBGbg/CGY=;
+        b=7uYrt12ihh1VlHt7zChNRmuneBBjG2XgSaT64FPCt5QrSHOeQkmPnzmkU8ou7Cqhhc
+         TxUly7o9mN/DAaUn2PhA17l1rmjn8lIG24du8zNK/NEqVVXhplthXHLNGP0eRoqwK61o
+         vsZGtGTNx1TBFkBhWE2ru4T/5/we5UgM5Efcuq3CEicf01HrwywUMN6uZE0Z+cMGqUHi
+         NswpWBBKXnLzLVJZXy4d7LYdyZsCDbPB1ypIFX1o0niLzufh+YdhvvZFI6QkDNYokKUg
+         QEytZRFNR+MfAWNjuDzjK70eNyroIrTJfRnVE0b6lgkNTqUjro4QXLznSwZiJ2qQO/nD
+         BGvA==
+X-Gm-Message-State: ANoB5pkOdIWaGrPql9/Yv6gFW8MZeCGJetY4T7bfa+tXQKUOGKVfNzVE
+        49JpDd901lz+WM3fsuZlVDAfEYNgnEEnzZwO0/0mKFLy9lA=
+X-Google-Smtp-Source: AA0mqf6II4S+jJ+0aJrXQHZ7x+CchFGfz3DhyJ/x2Hwvs+TvhBY3ALOAgQ2AzXc+COvAgCGGoML02axiB7Si+QUGQ04=
+X-Received: by 2002:a63:5b12:0:b0:470:18d5:b6a3 with SMTP id
+ p18-20020a635b12000000b0047018d5b6a3mr20632190pgb.541.1668615484318; Wed, 16
+ Nov 2022 08:18:04 -0800 (PST)
 MIME-Version: 1.0
-References: <20221109133237.3273558-1-yangyingliang@huawei.com>
-In-Reply-To: <20221109133237.3273558-1-yangyingliang@huawei.com>
+References: <20221109133539.3275664-1-yangyingliang@huawei.com>
+In-Reply-To: <20221109133539.3275664-1-yangyingliang@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Nov 2022 17:17:23 +0100
-Message-ID: <CAPDyKFqU04TZN8OSa7UX0cXf86mQq-ZsfV1Pe2pZN2GoeOpu2Q@mail.gmail.com>
-Subject: Re: [PATCH] mmc: wbsd: fix return value check of mmc_add_host()
+Date:   Wed, 16 Nov 2022 17:17:27 +0100
+Message-ID: <CAPDyKFoBB6AVo5hWAtBq8sdHQmgnUBeKpU=T6aopaR4BuXuC1g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mmci: fix return value check of mmc_add_host()
 To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, pierre@ossman.eu
+Cc:     linux-mmc@vger.kernel.org, p.zabel@pengutronix.de
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 9 Nov 2022 at 14:34, Yang Yingliang <yangyingliang@huawei.com> wrote:
+On Wed, 9 Nov 2022 at 14:37, Yang Yingliang <yangyingliang@huawei.com> wrote:
 >
 > mmc_add_host() may return error, if we ignore its return value,
 > it will lead two issues:
@@ -68,10 +68,8 @@ On Wed, 9 Nov 2022 at 14:34, Yang Yingliang <yangyingliang@huawei.com> wrote:
 >    delete device, but it's not added yet, it will lead a kernel
 >    crash because of null-ptr-deref in device_del().
 >
->
 > So fix this by checking the return value and goto error path which
-> will call mmc_free_host(), besides, other resources also need be
-> released.
+> will call mmc_free_host().
 >
 > Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
 > Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
@@ -83,32 +81,24 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/wbsd.c | 12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mmci.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/wbsd.c b/drivers/mmc/host/wbsd.c
-> index 67ecd342fe5f..7c7ec8d10232 100644
-> --- a/drivers/mmc/host/wbsd.c
-> +++ b/drivers/mmc/host/wbsd.c
-> @@ -1698,7 +1698,17 @@ static int wbsd_init(struct device *dev, int base, int irq, int dma,
->          */
->         wbsd_init_device(host);
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index 012aa85489d8..b9e5dfe74e5c 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -2256,7 +2256,9 @@ static int mmci_probe(struct amba_device *dev,
+>         pm_runtime_set_autosuspend_delay(&dev->dev, 50);
+>         pm_runtime_use_autosuspend(&dev->dev);
 >
 > -       mmc_add_host(mmc);
 > +       ret = mmc_add_host(mmc);
-> +       if (ret) {
-> +               if (!pnp)
-> +                       wbsd_chip_poweroff(host);
-> +
-> +               wbsd_release_resources(host);
-> +               wbsd_free_mmc(dev);
-> +
-> +               mmc_free_host(mmc);
-> +               return ret;
-> +       }
+> +       if (ret)
+> +               goto clk_disable;
 >
->         pr_info("%s: W83L51xD", mmc_hostname(mmc));
->         if (host->chip_id != 0)
+>         pm_runtime_put(&dev->dev);
+>         return 0;
 > --
 > 2.25.1
 >
