@@ -2,105 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 95C60C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AACDBC43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234347AbiKPQSe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:18:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55064 "EHLO
+        id S234613AbiKPQSi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:18:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55000 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234310AbiKPQST (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:19 -0500
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1E3157B72
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:18 -0800 (PST)
-Received: by mail-pj1-x102d.google.com with SMTP id l6so17003203pjj.0
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:18 -0800 (PST)
+        with ESMTP id S234362AbiKPQS0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:26 -0500
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF559B27
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:23 -0800 (PST)
+Received: by mail-pj1-x102e.google.com with SMTP id b1-20020a17090a7ac100b00213fde52d49so2859295pjl.3
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=3vuu78aZaHK7VJ8++7/BN17PpF7VX0jC0oheW36hmIs=;
-        b=uuC6XXHVG9Amxc061f3zNUOSdEnIEF4TjDWOnctoTMuFscut4Itv7mLnBGqCfgs0al
-         L+c/6HzzyuYppun8NsFwkMKhAp5vuR0lJkvjp0Yz5s3NOtHEoezqavVS9o1XoDOkXRp2
-         nqljq8Xzfl5NVYp/FgHWjOUh+fYjzcJCl7moBfmRkCKQLPemXAavMLERLsUbzejrOh3g
-         sGecALTxxhB0T3feWWlLZDsacHgB4UyWhkhOqkh529nWjGvMUHJ+j4rmzbEUntYWrui9
-         +lVi3b7o7oneBIJGhYCYDGHbBxGQ56+iebIAoJY2gK5JwDxBEF9X3O2nublK5wBYf97X
-         8/Qg==
+        bh=dvp6aPXdskWw22vG4cUG9Anh9RZtqEUkN6NF3CqRa8Q=;
+        b=zpHnP80Iv3WZA6SVm3xPJnPQZCfK12IBMTkLXrlkuH80NZN/zL31xOP4zW7lMISEBP
+         hlvBx6riNPPdVLgNqK05axXDOKJnPqIaUaXO1GmB1lp/oAfvvAROfxO9CXLY48qc3Rfc
+         n7i3VBAZo85JR/ChhWXjItUuDb1HAI0g8lR23WI2qgefq0mYD9lg4Q3A84yAOpRVMcRf
+         svfKUD0dh/FcyQS8+wMTedCkBrOx0mzYsEVIZ5+H3aBbqveAGiCbbEJQomP2bNAYBbaN
+         3iORzlI7ZVPv6AtS5evEMNcmNlCJyjJ5NIoV3BEhVkDRXF4V36N0OrfuVL5bcGuhniYb
+         vc9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=3vuu78aZaHK7VJ8++7/BN17PpF7VX0jC0oheW36hmIs=;
-        b=By4WsLVoJb+FYJlD8yEjzWjgabJVDQRK1QWgAl686f/E71RI4ZvYW9kNj6dFL7zRSU
-         86Dz31+s9anLR/jpE3ytmC/XLuA7PkgYp1chSkvR7aaDyoqeCGz7IvPt8+AqmQFF/EaF
-         lZ3I4OqBqffqt8CDlTheQ0BrJDKIS1AWq/5MqRc5vyvoMmv0n/PsUYm0Fku3eyn3vvVj
-         TGKe5H/E1utRKhw3a43IVtT/yZaKoEwmzKiDyekFQGnr3GOFPmloRNYcCFob+aK7+5do
-         YA3I1zZ8iAPWSMSGsDp+QNd1gCIKwOeax1JsEmlO4kiKu/qs8tY1Ww9kc33pba5CS39k
-         dJEA==
-X-Gm-Message-State: ANoB5pmb44X1hLlE6AG2MQ8L5wiSnuSt3Gw5LkdNEBR/USJJywRcRIbb
-        LQCwlvOr6qPSb0A5ljOf/k6NUDBwd/ETHuKnAlKVcg==
-X-Google-Smtp-Source: AA0mqf4Wa1H27TGFSnM/a1m63gk9/L+t2q1xko8YOBEh2/dkruP1K3xLmmg6L38tevF4sFxaktwBmh2GNWgpZ2zVkB4=
-X-Received: by 2002:a17:902:d48a:b0:188:6baf:2011 with SMTP id
- c10-20020a170902d48a00b001886baf2011mr9115763plg.165.1668615498412; Wed, 16
- Nov 2022 08:18:18 -0800 (PST)
+        bh=dvp6aPXdskWw22vG4cUG9Anh9RZtqEUkN6NF3CqRa8Q=;
+        b=CsekxO0/wNwJxSS9p3VcnxHTxTwclJupf1EZ4StIa7Q0W5NeJYG0Ra+QsDwgwotuZs
+         Bgyh5ObfOkpX1an7kCeVH5zO7dSDFpGZN+uJxLgHgXXtGJ/+gn2n6KIGDqpnAYDIsfXJ
+         TqYu4VhXZcTcEu1W7ZzR02mWpipJ09oeZQH2/737wf2zdaeVEwLZENkDDaGod6lmXA65
+         Ij6IDlbf8WnTNjzu4l4wNbzrmtjGiOoK9VLedAY/Kd0v2N8N7GwJXm/DJ+nAJW+3zb20
+         svTQy1JSK81W3vYsJVvc+KW2bjlEsop3VoSVjzyaOpzCzGoLQ/KZuzxlUCqZP9qVkr/V
+         ivEg==
+X-Gm-Message-State: ANoB5pkLF27jy+qcrOKMBg7oahB9f9GE882eHEYftYEeObDgN2HxJsWs
+        iJEse2AHV2hsnXGBpic8tb9HMjIOyKKTmJARNfk9Sw==
+X-Google-Smtp-Source: AA0mqf6xMkxT9E7DWq3Ng6vFjK9UXooF5beAHY5gscd/9HrAj272x6MYVDzSbamQoScAHq+qHs5RibHKN1fmpEb5Z+o=
+X-Received: by 2002:a17:902:a584:b0:186:be05:798e with SMTP id
+ az4-20020a170902a58400b00186be05798emr9544083plb.37.1668615503443; Wed, 16
+ Nov 2022 08:18:23 -0800 (PST)
 MIME-Version: 1.0
-References: <20221110072819.11530-1-yuzhe@nfschina.com>
-In-Reply-To: <20221110072819.11530-1-yuzhe@nfschina.com>
+References: <20221111081033.3813-1-hayashi.kunihiko@socionext.com>
+In-Reply-To: <20221111081033.3813-1-hayashi.kunihiko@socionext.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Nov 2022 17:17:41 +0100
-Message-ID: <CAPDyKFrW+FaDNc+YPjrR1eAYhjPc6BHj4zqghBRnMC0P+A_jKA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mtk-sd: fix two spelling mistakes in comment
-To:     Yu Zhe <yuzhe@nfschina.com>
-Cc:     chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org, liqiong@nfschina.com
+Date:   Wed, 16 Nov 2022 17:17:45 +0100
+Message-ID: <CAPDyKFpLVH1fEwKzjd8RP2NP0ZpEjo66XxvL5VVnCWMyS0dw4Q@mail.gmail.com>
+Subject: Re: [PATCH v2 0/6] mmc: sdhci-fujitsu: Add some features and support
+ for F_SDH30_E51
+To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jassi Brar <jaswinder.singh@linaro.org>,
+        Ard Biesheuvel <ardb@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 10 Nov 2022 at 08:29, Yu Zhe <yuzhe@nfschina.com> wrote:
+On Fri, 11 Nov 2022 at 09:10, Kunihiko Hayashi
+<hayashi.kunihiko@socionext.com> wrote:
 >
-> spelling mistake fix : "alreay" -> "already"
->                        "checksume" -> "checksum"
+> This series adds some additional features such as reset control,
+> non-removable media, and quirks for broken timeout clock.
 >
-> Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
+> And this adds support for F_SDH30_E51 IP that is a higher version
+> of F_SDH30 and supports eMMC 5.1.
+>
+> The above features are not specific to this IP directly, but are
+> affected by IP configuration and external wiring.
+>
+> Changes since v1:
+> - Add conversion and additional compatible patch for DT bindings
+> - Add description for F_SDH30_E51 to the commit message
+> - Append vendor name to MODULE_AUTHOR
+>
+> Kunihiko Hayashi (6):
+>   dt-bindings: mmc: Convert sdhci-fujitsu to JSON schema
+>   mmc: f-sdh30: Add reset control support
+>   dt-bindings: sdhci-fujitsu: Add compatible string for F_SDH30_E51
+>   mmc: f-sdh30: Add compatible string for Socionext F_SDH30_E51
+>   mmc: f-sdh30: Add support for non-removable media
+>   mmc: f-sdh30: Add quirks for broken timeout clock capability
+>
+>  .../bindings/mmc/fujitsu,sdhci-fujitsu.yaml   | 57 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/sdhci-fujitsu.txt | 32 -----------
+>  drivers/mmc/host/sdhci_f_sdh30.c              | 31 +++++++++-
+>  drivers/mmc/host/sdhci_f_sdh30.h              |  3 +
+>  4 files changed, 89 insertions(+), 34 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/mtk-sd.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index df941438aef5..a10aca76dfb3 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -735,7 +735,7 @@ static inline void msdc_dma_setup(struct msdc_host *host, struct msdc_dma *dma,
->                 else
->                         bd[j].bd_info &= ~BDMA_DESC_EOL;
->
-> -               /* checksume need to clear first */
-> +               /* checksum need to clear first */
->                 bd[j].bd_info &= ~BDMA_DESC_CHECKSUM;
->                 bd[j].bd_info |= msdc_dma_calcs((u8 *)(&bd[j]), 16) << 8;
->         }
-> @@ -1212,7 +1212,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
->                      !host->hs400_tuning))
->                         /*
->                          * should not clear fifo/interrupt as the tune data
-> -                        * may have alreay come when cmd19/cmd21 gets response
-> +                        * may have already come when cmd19/cmd21 gets response
->                          * CRC error.
->                          */
->                         msdc_reset_hw(host);
-> --
-> 2.11.0
->
