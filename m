@@ -2,77 +2,75 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0062CC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B77BC43217
+	for <linux-mmc@archiver.kernel.org>; Wed, 16 Nov 2022 16:18:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234338AbiKPQSV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 11:18:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55068 "EHLO
+        id S234355AbiKPQSY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 11:18:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233410AbiKPQSJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:09 -0500
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BEA1356EC2
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:04 -0800 (PST)
-Received: by mail-pg1-x52e.google.com with SMTP id r18so17098632pgr.12
-        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:04 -0800 (PST)
+        with ESMTP id S233843AbiKPQSL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 11:18:11 -0500
+Received: from mail-pg1-x536.google.com (mail-pg1-x536.google.com [IPv6:2607:f8b0:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F9657B6C
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:09 -0800 (PST)
+Received: by mail-pg1-x536.google.com with SMTP id f3so10698486pgc.2
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 08:18:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bd0COEi28GaR5qVUIh2S/Ew7aeN34DlRxwUBGbg/CGY=;
-        b=hlLacOTftqqiUGenMMy9GE95nEg0etFTC7acSnh0jvkPVprvV5tr8kdtKIW2oMVd+5
-         97RAU7aQL2jdtWnVvnBdivgsnSbKprd9tRFmWylZU6K0eogQBw69sF7eqOqxtDZlUJsv
-         YJnsJnma5RqtIbnyHnhSMOVvEgDoBwhZjgeXMG25HZleYN8v6sBDP62rGGr5SQ1cI9J4
-         sWHxnFSLHaKSOfVBTvvIih0CgRwBCg8G9obrDV2H8rbveeDb3PnKL+3gseDglfxRPIvS
-         pG5C4Pxc02qyZ725b28c5j8Z44E7S8gZEGQ878KGc/rpoThzfrRQYXL67YW4LXPGmdvy
-         sXFw==
+        bh=U+6kofWK+lAk9nYMdFCTFYyZyxlN1y4m9eqx3Qu6bH8=;
+        b=J6QmENGbkz8JaelIwNWSJ8l299ttLiHNHQJbCutNLWXPp7HMamJ0nxlXFphKb5OFaC
+         cNygK5/QTbSUGOeFzpo0kXYYztKZpAwspryVy6TEKqFcPFI9jDBBSb8CZ5ucaBTQzqom
+         w1ckAJmV0OkD0oeTRLj3s8GjRwb7D7gq95HJwGYtjybJzDRUnVPNwr+JSFEBlchYhAvK
+         LGJK8+IKVMPEkojNgT7uG9WNA2Iq//VYKMFaCjp/+FFRlT4oge1JJCGlm6t/+2Vq4mvA
+         TmEBOpYcrquiRPrwE0C57a3LkkFXOKaDSsxk25BkjvxyXaUlmJXwp8x6Ul39kX8wkHQG
+         RMpg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=bd0COEi28GaR5qVUIh2S/Ew7aeN34DlRxwUBGbg/CGY=;
-        b=7uYrt12ihh1VlHt7zChNRmuneBBjG2XgSaT64FPCt5QrSHOeQkmPnzmkU8ou7Cqhhc
-         TxUly7o9mN/DAaUn2PhA17l1rmjn8lIG24du8zNK/NEqVVXhplthXHLNGP0eRoqwK61o
-         vsZGtGTNx1TBFkBhWE2ru4T/5/we5UgM5Efcuq3CEicf01HrwywUMN6uZE0Z+cMGqUHi
-         NswpWBBKXnLzLVJZXy4d7LYdyZsCDbPB1ypIFX1o0niLzufh+YdhvvZFI6QkDNYokKUg
-         QEytZRFNR+MfAWNjuDzjK70eNyroIrTJfRnVE0b6lgkNTqUjro4QXLznSwZiJ2qQO/nD
-         BGvA==
-X-Gm-Message-State: ANoB5pkOdIWaGrPql9/Yv6gFW8MZeCGJetY4T7bfa+tXQKUOGKVfNzVE
-        49JpDd901lz+WM3fsuZlVDAfEYNgnEEnzZwO0/0mKFLy9lA=
-X-Google-Smtp-Source: AA0mqf6II4S+jJ+0aJrXQHZ7x+CchFGfz3DhyJ/x2Hwvs+TvhBY3ALOAgQ2AzXc+COvAgCGGoML02axiB7Si+QUGQ04=
-X-Received: by 2002:a63:5b12:0:b0:470:18d5:b6a3 with SMTP id
- p18-20020a635b12000000b0047018d5b6a3mr20632190pgb.541.1668615484318; Wed, 16
- Nov 2022 08:18:04 -0800 (PST)
+        bh=U+6kofWK+lAk9nYMdFCTFYyZyxlN1y4m9eqx3Qu6bH8=;
+        b=nev+yzCB9XGlCcBj913WzNCuJU3jYqJKW1ckbvpwdaNqywPg5pxLUEeD/FHTdUCNux
+         vobuJx194SEP0D4dxx3eyYYg8xYKo68m4UWhwYTK4SJjtx49w0eDEqGIKZFgEkDj5fZM
+         2lzmv30RkWgGodpdSFjETd/t1jGX0gdyyIy6JSVf6v0Y1srAW5DadLS/+YTC9jf1UysD
+         5+L8ak2E5O1xJiFxsLZMhfbi50wu93H5jOjq4dSTQTPW/6T5a+jNmQJT5kXdil1jiEUK
+         4di096js5v9+sgWGWsfSCGZM3bxao1EAJSFPGKwhlw7zRFpHJRIz2R6d8YdKmfgwpBPC
+         +QsQ==
+X-Gm-Message-State: ANoB5pnKtGoa08IyS4rKv8EviJAp7tDUeGwrt/qNVZD1xyEwo1lAdDp0
+        rYaK2p/K0YKV9R5xl+U7FTy1goaXW+vDBCJ1dENlBw==
+X-Google-Smtp-Source: AA0mqf7Yk01flNfOp6SxymOc+XEuglm7jqex2dsSPKvWtWPa80gI4EKbAlDuk8r2R4WzOyG+XpbjS2afb54fviVWB8w=
+X-Received: by 2002:a63:db03:0:b0:470:4f30:f743 with SMTP id
+ e3-20020a63db03000000b004704f30f743mr21500123pgg.434.1668615489044; Wed, 16
+ Nov 2022 08:18:09 -0800 (PST)
 MIME-Version: 1.0
-References: <20221109133539.3275664-1-yangyingliang@huawei.com>
-In-Reply-To: <20221109133539.3275664-1-yangyingliang@huawei.com>
+References: <20221114105043.36698-1-konrad.dybcio@linaro.org> <20221114105043.36698-2-konrad.dybcio@linaro.org>
+In-Reply-To: <20221114105043.36698-2-konrad.dybcio@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 16 Nov 2022 17:17:27 +0100
-Message-ID: <CAPDyKFoBB6AVo5hWAtBq8sdHQmgnUBeKpU=T6aopaR4BuXuC1g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: mmci: fix return value check of mmc_add_host()
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, p.zabel@pengutronix.de
+Date:   Wed, 16 Nov 2022 17:17:30 +0100
+Message-ID: <CAPDyKFq391+dvG-R=5S7RkW03hWvP2c+WEAvYLPhaoVUasm1VQ@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: sdhci-msm: Document the SM6375 compatible
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>
+Cc:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
+        agross@kernel.org, krzysztof.kozlowski@linaro.org,
+        patch@linaro.org, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 9 Nov 2022 at 14:37, Yang Yingliang <yangyingliang@huawei.com> wrote:
+On Mon, 14 Nov 2022 at 11:50, Konrad Dybcio <konrad.dybcio@linaro.org> wrote:
 >
-> mmc_add_host() may return error, if we ignore its return value,
-> it will lead two issues:
-> 1. The memory that allocated in mmc_alloc_host() is leaked.
-> 2. In the remove() path, mmc_remove_host() will be called to
->    delete device, but it's not added yet, it will lead a kernel
->    crash because of null-ptr-deref in device_del().
+> Document the compatible for SDHCI on SM6375.
 >
-> So fix this by checking the return value and goto error path which
-> will call mmc_free_host().
->
-> Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
-> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
 
 Applied for next, thanks!
 
@@ -81,24 +79,26 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/mmci.c | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+> No changes in v3.
 >
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index 012aa85489d8..b9e5dfe74e5c 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -2256,7 +2256,9 @@ static int mmci_probe(struct amba_device *dev,
->         pm_runtime_set_autosuspend_delay(&dev->dev, 50);
->         pm_runtime_use_autosuspend(&dev->dev);
+> Changes in v2:
+> - pick up rb
 >
-> -       mmc_add_host(mmc);
-> +       ret = mmc_add_host(mmc);
-> +       if (ret)
-> +               goto clk_disable;
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+>  1 file changed, 1 insertion(+)
 >
->         pm_runtime_put(&dev->dev);
->         return 0;
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index fc8a6b345d97..12def0f57e3e 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -46,6 +46,7 @@ properties:
+>                - qcom,sm6115-sdhci
+>                - qcom,sm6125-sdhci
+>                - qcom,sm6350-sdhci
+> +              - qcom,sm6375-sdhci
+>                - qcom,sm8150-sdhci
+>                - qcom,sm8250-sdhci
+>                - qcom,sm8450-sdhci
 > --
-> 2.25.1
+> 2.38.1
 >
