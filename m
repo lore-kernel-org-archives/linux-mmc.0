@@ -2,119 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7776CC4321E
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 10:33:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD152C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 10:52:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239518AbiKQKdG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Nov 2022 05:33:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60482 "EHLO
+        id S234693AbiKQKwK convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Nov 2022 05:52:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229931AbiKQKdE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 05:33:04 -0500
-Received: from pandora.armlinux.org.uk (pandora.armlinux.org.uk [IPv6:2001:4d48:ad52:32c8:5054:ff:fe00:142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1C6259841;
-        Thu, 17 Nov 2022 02:33:01 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=armlinux.org.uk; s=pandora-2019; h=Sender:In-Reply-To:Content-Type:
-        MIME-Version:References:Message-ID:Subject:Cc:To:From:Date:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description:Resent-Date:
-        Resent-From:Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:
-        List-Help:List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=2BgNwLdh+HBA4xrzyykRGd8e3nHfE6jHoZjPyIO7tQ8=; b=vf0GDy8lKzIs95KZT9hTDN9bLB
-        KkkakBOovK/EhU72ZwXcJFd6ZXnYeh5hWZFAO+QwAUy+Iil38BRQKWQA/ovqtD2R3k/zIRWUVleNY
-        mI6EufB0EHT9QlEKH1MxQI8dlYgzNxWxQ/KJJ0HUSUpP7NgTBBgzbRiK7voh4pixtxFai3XdS+4CH
-        KUkR3sQ10UY1J1DLrBw2+xk4ToBWEQq3GT1Ou599VPaU5ywBw9TAIVKjU75NdNZTSPprpMUx5CQP1
-        Y51nu+1iINv9JXk8aPYDqbEhMoPEahldPraSq7QM6Racs8sRYiTunUTXpT5cPjddHYjb4UQdEZEgF
-        MxQo2C5A==;
-Received: from shell.armlinux.org.uk ([fd8f:7570:feb6:1:5054:ff:fe00:4ec]:35306)
-        by pandora.armlinux.org.uk with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <linux@armlinux.org.uk>)
-        id 1ovcCQ-0004Iz-Pt; Thu, 17 Nov 2022 10:32:50 +0000
-Received: from linux by shell.armlinux.org.uk with local (Exim 4.94.2)
-        (envelope-from <linux@shell.armlinux.org.uk>)
-        id 1ovcCG-0006jE-Em; Thu, 17 Nov 2022 10:32:40 +0000
-Date:   Thu, 17 Nov 2022 10:32:40 +0000
-From:   "Russell King (Oracle)" <linux@armlinux.org.uk>
-To:     "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc:     Kees Cook <keescook@chromium.org>, linux-kernel@vger.kernel.org,
-        patches@lists.linux.dev,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Christoph =?iso-8859-1?Q?B=F6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>,
-        Jani Nikula <jani.nikula@linux.intel.com>,
-        Jason Gunthorpe <jgg@nvidia.com>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Richard Weinberger <richard@nod.at>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        SeongJae Park <sj@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org,
-        ydroneaud@opteya.com
-Subject: Re: [PATCH v2 3/3] treewide: use get_random_u32_between() when
- possible
-Message-ID: <Y3YNyJ8oeixYuvdI@shell.armlinux.org.uk>
-References: <20221114164558.1180362-1-Jason@zx2c4.com>
- <20221114164558.1180362-4-Jason@zx2c4.com>
- <202211161436.A45AD719A@keescook>
- <Y3V4g8eorwiU++Y3@zx2c4.com>
- <Y3WW2lOgoYLKQeve@zx2c4.com>
+        with ESMTP id S239521AbiKQKvy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 05:51:54 -0500
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B0882532FB;
+        Thu, 17 Nov 2022 02:51:51 -0800 (PST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id CD1243A2324;
+        Thu, 17 Nov 2022 11:51:49 +0100 (CET)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id B2A6A3A2322;
+        Thu, 17 Nov 2022 11:51:49 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Thu, 17 Nov 2022 11:51:49 +0100 (CET)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 17 Nov
+ 2022 11:51:49 +0100
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Thu, 17 Nov 2022 11:51:49 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: [PATCH] mmc: core: Fix ambiguous TRIM and DISCARD arg
+Thread-Topic: [PATCH] mmc: core: Fix ambiguous TRIM and DISCARD arg
+Thread-Index: Adj6cjlNmIWKPA3KQSivIeQjTaE/gQ==
+Date:   Thu, 17 Nov 2022 10:51:48 +0000
+Message-ID: <6373cfb97ef24ccfb5236c721f263f1b@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.3.46]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <Y3WW2lOgoYLKQeve@zx2c4.com>
-Sender: Russell King (Oracle) <linux@armlinux.org.uk>
+X-TMASE-Version: DDEI-5.1-9.0.1002-27268.007
+X-TMASE-Result: 10-0.263500-10.000000
+X-TMASE-MatchedRID: ewN4Wv8Mz/iz4NrOslvOzoL5ja7E+OhyKQNhMboqZlp5eyhu4TpIqx3i
+        uFfYqHyoy7U1qS9q0fS12HagvbwDji/7QU2czuUNA9lly13c/gGvMPxisLn2/B2kiqKHn7kiKwm
+        qZIhHHZAf6lD5M6DX0D6eOS91uJ8FvWXpKoZUv2mSJLHHb2KALX0tCKdnhB58nFK7VE/xL0n6C0
+        ePs7A07Xi4XEoPXecxQSmtvqQNS5+NUlAvN92JBe4VChlPobsxKIT7HncI3Qo=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 8810775b-4fde-458c-b87d-1b5c5e914dd9-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 17, 2022 at 03:05:14AM +0100, Jason A. Donenfeld wrote:
-> On Thu, Nov 17, 2022 at 12:55:47AM +0100, Jason A. Donenfeld wrote:
-> > 1) How/whether to make f(0, UR2_MAX) safe,
-> >    - without additional 64-bit arithmetic,
-> >    - minimizing the number of branches.
-> >    I have a few ideas I'll code golf for a bit.
-> > I think I can make progress with (1) alone by fiddling around with
-> > godbolt enough, like usual.
-> 
-> The code gen is definitely worse.
-> 
-> Original half-open interval:
-> 
->     return floor + get_random_u32_below(ceil - floor);
-> 
-> Suggested fully closed interval:
-> 	
->     ceil = ceil - floor + 1;
->     return likely(ceil) ? floor + get_random_u32_below(ceil) : get_random_u32();
+Clean up the MMC_TRIM_ARGS define that became ambiguous with
+DISCARD introduction.
+While at it fix one usage where MMC_TRIM_ARGS falsely included
+DISCARD, too.
 
-How many of these uses are going to have ceil and floor as a variable?
-If they're constants (e.g. due to being in an inline function with
-constant arguments) then the compiler will optimise all of the above
-and the assembly code will just be either:
+Fixes: b3bf915308ca ("mmc: core: new discard feature support at eMMC v4.5")
 
-1. a call to get_random_u32()
-2. a call to get_random_u32_below() and an addition.
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+Previously submitted as mmc: core: Do not require secure trim for discard
+ drivers/mmc/core/core.c | 10 ++++++++--
+ include/linux/mmc/mmc.h |  2 +-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
 
-If one passes ceil or floor as a variable, then yes, the code gen is
-going to be as complicated as you suggest above.
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 95fa8fb1d45f..7ce26dbd5879 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1478,6 +1478,11 @@ void mmc_init_erase(struct mmc_card *card)
+ 		card->pref_erase = 0;
+ }
+ 
++static bool is_trim_arg(unsigned int arg)
++{
++	return (arg & MMC_TRIM_OR_DISCARD_ARGS) && arg != MMC_DISCARD_ARG;
++}
++
+ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 				          unsigned int arg, unsigned int qty)
+ {
+@@ -1760,7 +1765,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN))
+ 		return -EOPNOTSUPP;
+ 
+-	if (mmc_card_mmc(card) && (arg & MMC_TRIM_ARGS) &&
++	if (mmc_card_mmc(card) && is_trim_arg(arg) &&
+ 	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
+ 		return -EOPNOTSUPP;
+ 
+@@ -1790,7 +1795,8 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	 * identified by the card->eg_boundary flag.
+ 	 */
+ 	rem = card->erase_size - (from % card->erase_size);
+-	if ((arg & MMC_TRIM_ARGS) && (card->eg_boundary) && (nr > rem)) {
++	if ((arg & MMC_TRIM_OR_DISCARD_ARGS) && (card->eg_boundary) &&
++	    (nr > rem)) {
+ 		err = mmc_do_erase(card, from, from + rem - 1, arg);
+ 		from += rem;
+ 		if ((err) || (to <= from))
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 9c50bc40f8ff..6f7993803ee7 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -451,7 +451,7 @@ static inline bool mmc_ready_for_data(u32 status)
+ #define MMC_SECURE_TRIM1_ARG		0x80000001
+ #define MMC_SECURE_TRIM2_ARG		0x80008000
+ #define MMC_SECURE_ARGS			0x80000000
+-#define MMC_TRIM_ARGS			0x00008001
++#define MMC_TRIM_OR_DISCARD_ARGS	0x00008003
+ 
+ #define mmc_driver_type_mask(n)		(1 << (n))
+ 
 -- 
-RMK's Patch system: https://www.armlinux.org.uk/developer/patches/
-FTTP is here! 40Mbps down 10Mbps up. Decent connectivity at last!
+2.37.3
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
