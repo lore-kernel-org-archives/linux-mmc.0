@@ -2,138 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 134C9C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 13:15:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C74DAC352AA
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 13:24:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234665AbiKQNPN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Nov 2022 08:15:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35782 "EHLO
+        id S240014AbiKQNYK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Nov 2022 08:24:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41348 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239776AbiKQNPL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 08:15:11 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 93A9211A11;
-        Thu, 17 Nov 2022 05:15:10 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 48AF8B81FB4;
-        Thu, 17 Nov 2022 13:15:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09D5DC43147;
-        Thu, 17 Nov 2022 13:15:08 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1668690908;
-        bh=/tCzeZEmzPRx37oBLzkagvQsj8wlh1G9bWayKEYiHts=;
-        h=References:In-Reply-To:From:Date:Subject:To:Cc:From;
-        b=lzawaooiy6SdnGmw6c/qhCTpcfLDpwM9rRHOpL8+sD+isu0berWV92XejSM3x5Q50
-         KNVEp2zBzkqlhlFWDeQ9ijOkQ3Y4nQhZXymMVfp0iLpXSHJihBsQzkNAQ++lfzH/VE
-         W3UBJjLedesqiXjwpkhzQks/Ffgiyby9KWnOAA9L1iv1Xq9NdUNsjdjtde1qSatdGP
-         iREaRV6reTbOTcxRJRze8cDsnb0X3REr3vM4N9QeppBaOJpJ/k7aI1tU4syAUGsjBi
-         bYhlelvc0cob/vFd3rgBlnKbG6zFRFPx8wsNqegA80nxGJ8VUQEVL4tIqIUUHD4TkZ
-         WqQea3px/kyPg==
-Received: by mail-lj1-f172.google.com with SMTP id d20so2607558ljc.12;
-        Thu, 17 Nov 2022 05:15:07 -0800 (PST)
-X-Gm-Message-State: ANoB5pna0QRByqRlGJukWwXuwJ4hLytVRSGFFG9P1giGrz3ruXut/Siv
-        LCw62O9HC7ompuA6TfT+7irZV9W6VGLINNz5Lw==
-X-Google-Smtp-Source: AA0mqf42jQJY2ZXKbN0Unkz+uSk5IpCPI6z0lv6peq7MNZDWv5K1ARcmdUaW1mr+Ioehwfyg6Qtbe1I7JrDQ2WZCs1w=
-X-Received: by 2002:a2e:8e6f:0:b0:279:6df:38df with SMTP id
- t15-20020a2e8e6f000000b0027906df38dfmr984844ljk.211.1668690905960; Thu, 17
- Nov 2022 05:15:05 -0800 (PST)
+        with ESMTP id S240016AbiKQNYA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 08:24:00 -0500
+Received: from vps0.lunn.ch (vps0.lunn.ch [156.67.10.101])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACC9F67F5F;
+        Thu, 17 Nov 2022 05:23:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=lunn.ch;
+        s=20171124; h=In-Reply-To:Content-Disposition:Content-Type:MIME-Version:
+        References:Message-ID:Subject:Cc:To:From:Date:From:Sender:Reply-To:Subject:
+        Date:Message-ID:To:Cc:MIME-Version:Content-Type:Content-Transfer-Encoding:
+        Content-ID:Content-Description:Content-Disposition:In-Reply-To:References;
+        bh=+G6PrQX4WZ0clAFOG+6oorGnE1VikHeuERGrZVmD//k=; b=vgwvpEFQBvBPGJ4l5Fdl5ZljTl
+        ypo25jDbsASqpcWo44PsikMJUyEh/j8+KuNKwMVnNYUK8cne4i1X7nrUciBY+tVcS/iiHdJ2HFZ/H
+        2esnkjM/ujU0Xuz3sce+hbgODPmYjA5uixlRGmvbn4lmRkP+O1N9/KY5ao9XxabklPQ0=;
+Received: from andrew by vps0.lunn.ch with local (Exim 4.94.2)
+        (envelope-from <andrew@lunn.ch>)
+        id 1overO-002grq-5j; Thu, 17 Nov 2022 14:23:18 +0100
+Date:   Thu, 17 Nov 2022 14:23:18 +0100
+From:   Andrew Lunn <andrew@lunn.ch>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-riscv@lists.infradead.org, linux-arm-msm@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-iio@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-leds@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, netdev@vger.kernel.org,
+        linux-can@vger.kernel.org, linux-pci@vger.kernel.org,
+        linux-pwm@vger.kernel.org, linux-rtc@vger.kernel.org,
+        linux-serial@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-spi@vger.kernel.org, linux-usb@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-watchdog@vger.kernel.org
+Subject: Re: [RFC PATCH 1/9] dt-bindings: drop redundant part of title of
+ shared bindings
+Message-ID: <Y3Y1xjOjijBsQLZA@lunn.ch>
+References: <20221117123850.368213-1-krzysztof.kozlowski@linaro.org>
+ <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-References: <e9d8c14d-38b3-0401-7bfc-b2bd7ab36c52@linaro.org>
- <20221116193940.67445-1-blarson@amd.com> <20221116223045.GA1130586-robh@kernel.org>
- <BL0PR12MB2401ECC21B2EA83A5D806E369B069@BL0PR12MB2401.namprd12.prod.outlook.com>
-In-Reply-To: <BL0PR12MB2401ECC21B2EA83A5D806E369B069@BL0PR12MB2401.namprd12.prod.outlook.com>
-From:   Rob Herring <robh@kernel.org>
-Date:   Thu, 17 Nov 2022 07:14:57 -0600
-X-Gmail-Original-Message-ID: <CAL_JsqJOvqdP5d52QkE=3qN5hXSxk-+OR-O4SS06Ex=4iZFaVA@mail.gmail.com>
-Message-ID: <CAL_JsqJOvqdP5d52QkE=3qN5hXSxk-+OR-O4SS06Ex=4iZFaVA@mail.gmail.com>
-Subject: Re: [PATCH v8 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
-To:     "Larson, Bradley" <Bradley.Larson@amd.com>
-Cc:     Brad Larson <brad@pensando.io>,
-        "krzysztof.kozlowski@linaro.org" <krzysztof.kozlowski@linaro.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "alcooperx@gmail.com" <alcooperx@gmail.com>,
-        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
-        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
-        "gsomlo@gmail.com" <gsomlo@gmail.com>,
-        "krzk@kernel.org" <krzk@kernel.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "p.yadav@ti.com" <p.yadav@ti.com>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "piotrs@cadence.com" <piotrs@cadence.com>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>,
-        "samuel@sholland.org" <samuel@sholland.org>,
-        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
-        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "will@kernel.org" <will@kernel.org>,
-        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 16, 2022 at 6:41 PM Larson, Bradley <Bradley.Larson@amd.com> wrote:
->
-> [AMD Official Use Only - General]
->
-> From: Rob Herring <robh@kernel.org>
-> Sent: Wednesday, November 16, 2022 2:30 PM
->
-> >> v8:
-> >>  - Apply review request changes and picked the two unique examples
-> >>    for the 4 chip-selects as one has the reset control support and
-> >>    the other an interrupt.  Missed the --in-reply-to in git
-> >>    send-email for v7, included in this update.
-> >
-> >No, you haven't. By default in git, you don't have to do anything. See
-> >--thread and --no-chain-reply-to options. If you are messing with
-> >--in-reply-to, you are doing it wrong.
-> >
-> >Please resend the whole series properly threaded.
->
-> Will resend the series
->
-> >> diff --git a/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> >> new file mode 100644
-> >> index 000000000000..622c93402a86
-> >> --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
-> >> @@ -0,0 +1,60 @@
-> ...
-> >> +
-> >> +title: AMD Pensando Elba SoC Resource Controller
-> >> +
-> >> +description: |
-> >> +  AMD Pensando Elba SoC Resource Controller functions are
-> >> +  accessed with four chip-selects.  Reset control is on CS0.
-> >
-> > One device with 4 chip-selects? Then I'd expect 'reg = <0 1 2 3>;'
-> >
-> > Hard to say more because I don't have the whole thread nor remember what
-> > exactly we discussed before. That was 100s of bindings ago...
->
-> I agree and the example for v7 had all 4 chip-selects shown.
+>  allOf:
+> -  - $ref: "dma-common.yaml#"
+> +  - $ref: dma-common.yaml#
+>  
+>  
+>  allOf:
+> -  - $ref: "dma-common.yaml#"
+> +  - $ref: dma-common.yaml#
 
-That is not what I said. Look at 'reg' above again. You have 1 device,
-but you have 4 nodes which looks like separate 4 devices. The
-exception would be if what's on each chip select is independent from
-each other.
+Looks like some other automated change made its way into this patch.
 
-Describe what your h/w has/is/does so we can provide better guidance.
-
-Rob
+      Andrew
