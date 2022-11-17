@@ -2,98 +2,92 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4AB04C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 07:16:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D489AC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 07:24:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231562AbiKQHQJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Nov 2022 02:16:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53308 "EHLO
+        id S229991AbiKQHYj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Nov 2022 02:24:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233963AbiKQHQI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 02:16:08 -0500
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B2816F35A;
-        Wed, 16 Nov 2022 23:16:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668669366; x=1700205366;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=OZR+MyWLgP8HkrZB6F3ZwjvvPglgkpwXgGMdnYgokHc=;
-  b=eHl9Ds18wekUjKrR2j+IFgYswVUB3iXAAhx6iTSBnNsave5wPW2vmh3G
-   D/BoeGbRv2WGHmP7fXo4c63BCY8h3s13IEFYx6MwQkk3cJS6Dl77jAc7T
-   as6SBo36j6dYXLRC9S4rA4ISf1FeBVefP41i20YdEb+SFA357LJGlKV6h
-   47YYOmLjO2KHebmMilHuTCwX7cCvxbT7wIZKU2Uw9YMfPZGSG96alk2MQ
-   zfubzgoJtcby2zohNeSoY8pJPbogjP1J2oOFVLUC1UNitaMo5ER7VgYip
-   4H8zPktztPXmefUTHOblgxOFc+OvOLmjzn30JP8EXicqE2guopgvOlAk4
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="311483256"
-X-IronPort-AV: E=Sophos;i="5.96,171,1665471600"; 
-   d="scan'208";a="311483256"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2022 23:16:05 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="590511493"
-X-IronPort-AV: E=Sophos;i="5.96,171,1665471600"; 
-   d="scan'208";a="590511493"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.99])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Nov 2022 23:16:02 -0800
-Message-ID: <c67001f8-8f25-2633-fc37-892d74bdf07e@intel.com>
-Date:   Thu, 17 Nov 2022 09:15:58 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH V3 1/1] mmc: sdhci: Fix the SD tuning issue that the
- SDHCI_TRANSFER_MODE is cleared incorrectly
-Content-Language: en-US
-To:     Charl Liu <charl.liu@bayhubtech.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
-        thomas.hu@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
-        shirley.her@bayhubtech.com
-References: <20221111122314.307-1-charl.liu@bayhubtech.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221111122314.307-1-charl.liu@bayhubtech.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S239065AbiKQHYi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 02:24:38 -0500
+Received: from mxct.zte.com.cn (mxct.zte.com.cn [58.251.27.85])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D8414299C
+        for <linux-mmc@vger.kernel.org>; Wed, 16 Nov 2022 23:24:33 -0800 (PST)
+Received: from mxde.zte.com.cn (unknown [10.35.20.165])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mxct.zte.com.cn (FangMail) with ESMTPS id 4NCWdC4grRz1Dsj
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 15:24:31 +0800 (CST)
+Received: from mxus.zte.com.cn (unknown [10.207.168.8])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mxde.zte.com.cn (FangMail) with ESMTPS id 4NCWd809FWz64Wdn
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 15:24:28 +0800 (CST)
+Received: from mxhk.zte.com.cn (unknown [192.168.250.137])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mxus.zte.com.cn (FangMail) with ESMTPS id 4NCWd43jN4zdmc16
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 15:24:24 +0800 (CST)
+Received: from mxct.zte.com.cn (unknown [192.168.251.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mxhk.zte.com.cn (FangMail) with ESMTPS id 4NCWd14Fppz8R041
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 15:24:21 +0800 (CST)
+Received: from mse-fl2.zte.com.cn (unknown [10.5.228.133])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mxct.zte.com.cn (FangMail) with ESMTPS id 4NCWcy6Fz6z4y0vK;
+        Thu, 17 Nov 2022 15:24:18 +0800 (CST)
+Received: from xaxapp01.zte.com.cn ([10.88.40.50])
+        by mse-fl2.zte.com.cn with SMTP id 2AH7O9Qq090542;
+        Thu, 17 Nov 2022 15:24:09 +0800 (+08)
+        (envelope-from ye.xingchen@zte.com.cn)
+Received: from mapi (xaxapp01[null])
+        by mapi (Zmail) with MAPI id mid31;
+        Thu, 17 Nov 2022 15:24:11 +0800 (CST)
+Date:   Thu, 17 Nov 2022 15:24:11 +0800 (CST)
+X-Zmail-TransId: 2af96375e19b4b0447f0
+X-Mailer: Zmail v1.0
+Message-ID: <202211171524116446204@zte.com.cn>
+Mime-Version: 1.0
+From:   <ye.xingchen@zte.com.cn>
+To:     <ulf.hansson@linaro.org>
+Cc:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: =?UTF-8?B?W1BBVENIIGxpbnV4LW5leHRdIG1tYzogcHdyc2VxOiBVc2UgZGV2aWNlX21hdGNoX29mX25vZGUoKQ==?=
+Content-Type: text/plain;
+        charset="UTF-8"
+X-MAIL: mse-fl2.zte.com.cn 2AH7O9Qq090542
+X-Fangmail-Gw-Spam-Type: 0
+X-FangMail-Miltered: at cgslv5.04-192.168.251.14.novalocal with ID 6375E1AE.001 by FangMail milter!
+X-FangMail-Envelope: 1668669871/4NCWdC4grRz1Dsj/6375E1AE.001/10.35.20.165/[10.35.20.165]/mxde.zte.com.cn/<ye.xingchen@zte.com.cn>
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 6375E1AE.001/4NCWdC4grRz1Dsj
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/11/22 14:23, Charl Liu wrote:
-> When cmd->opcode == MMC_SEND_TUNING_BLOCK, the SDHCI_TRANSFER_MODE
-> should also be kept
-> 
-> Signed-off-by: Charl Liu <charl.liu@bayhubtech.com>
+From: ye xingchen <ye.xingchen@zte.com.cn>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Replace the open-code with device_match_of_node().
 
+Signed-off-by: ye xingchen <ye.xingchen@zte.com.cn>
+---
+ drivers/mmc/core/pwrseq.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> ---
-> change in V1:
-> Keeping the SDHCI_TRANSFER_MODE when cmd->opcode == MMC_END_TUNING_BLOCK
-> 
-> change in V2:
-> add the mmc_op_tuning interface to judge if the opcode is tuning CMD
-> 
-> change in V3:
-> cancel the redundant code
-> ---
->  drivers/mmc/host/sdhci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index fef03de85b99..98ee688de50d 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1465,7 +1465,7 @@ static void sdhci_set_transfer_mode(struct sdhci_host *host,
->  		if (host->quirks2 &
->  			SDHCI_QUIRK2_CLEAR_TRANSFERMODE_REG_BEFORE_CMD) {
->  			/* must not clear SDHCI_TRANSFER_MODE when tuning */
-> -			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
-> +			if (!mmc_op_tuning(cmd->opcode))
->  				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
->  		} else {
->  		/* clear Auto CMD settings for no data CMDs */
+diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+index ef675f364bf0..2374669b588a 100644
+--- a/drivers/mmc/core/pwrseq.c
++++ b/drivers/mmc/core/pwrseq.c
+@@ -29,7 +29,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
 
+ 	mutex_lock(&pwrseq_list_mutex);
+ 	list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
+-		if (p->dev->of_node == np) {
++		if (device_match_of_node(p->dev, np)) {
+ 			if (!try_module_get(p->owner))
+ 				dev_err(host->parent,
+ 					"increasing module refcount failed\n");
+-- 
+2.25.1
