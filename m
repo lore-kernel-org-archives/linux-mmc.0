@@ -2,109 +2,84 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DDD24C43217
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 02:05:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED489C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 04:15:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234704AbiKQCFc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 16 Nov 2022 21:05:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51744 "EHLO
+        id S233151AbiKQEPA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 16 Nov 2022 23:15:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43786 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232097AbiKQCF3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 21:05:29 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D40E60686;
-        Wed, 16 Nov 2022 18:05:28 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id D2AD2B81F87;
-        Thu, 17 Nov 2022 02:05:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B916CC433D6;
-        Thu, 17 Nov 2022 02:05:21 +0000 (UTC)
-Authentication-Results: smtp.kernel.org;
-        dkim=pass (1024-bit key) header.d=zx2c4.com header.i=@zx2c4.com header.b="oBVYY4GH"
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=zx2c4.com; s=20210105;
-        t=1668650720;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         in-reply-to:in-reply-to:references:references;
-        bh=dEJat997gDB284IQJDfbqi4/5IXvytYbwgZCPi3gI8M=;
-        b=oBVYY4GH+szvpy7v+MDpWl7rIbq1Ag0+XjaiW9ivB+W/ypTPzWGRKmZ5grHtl0NRu+tdAw
-        OceXtZlFIdzaNyPTBIDx5ZFzB/5YparpWLHfLRzfitegfl7G9s7sam3TuLTYL+fICnJhuN
-        DFCVAmQjhuCf5Jl3bBUK1aEXDFPWY+A=
-Received: by mail.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id ca8ad650 (TLSv1.3:TLS_AES_256_GCM_SHA384:256:NO);
-        Thu, 17 Nov 2022 02:05:19 +0000 (UTC)
-Date:   Thu, 17 Nov 2022 03:05:14 +0100
-From:   "Jason A. Donenfeld" <Jason@zx2c4.com>
-To:     Kees Cook <keescook@chromium.org>
-Cc:     linux-kernel@vger.kernel.org, patches@lists.linux.dev,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Catalin Marinas <catalin.marinas@arm.com>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Heiko Carstens <hca@linux.ibm.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        Christoph =?utf-8?Q?B=C3=B6hmwalder?= 
-        <christoph.boehmwalder@linbit.com>,
-        Jani Nikula <jani.nikula@linux.intel.com>,
-        Jason Gunthorpe <jgg@nvidia.com>,
-        Sakari Ailus <sakari.ailus@linux.intel.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Theodore Ts'o <tytso@mit.edu>,
-        Andreas Dilger <adilger.kernel@dilger.ca>,
-        Jaegeuk Kim <jaegeuk@kernel.org>,
-        Richard Weinberger <richard@nod.at>,
-        "Darrick J . Wong" <djwong@kernel.org>,
-        SeongJae Park <sj@kernel.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Michael Ellerman <mpe@ellerman.id.au>,
-        Helge Deller <deller@gmx.de>, netdev@vger.kernel.org,
-        linux-crypto@vger.kernel.org, linux-block@vger.kernel.org,
-        linux-fsdevel@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, loongarch@lists.linux.dev,
-        linux-mips@vger.kernel.org, linuxppc-dev@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, linux-parisc@vger.kernel.org,
-        ydroneaud@opteya.com
-Subject: Re: [PATCH v2 3/3] treewide: use get_random_u32_between() when
- possible
-Message-ID: <Y3WW2lOgoYLKQeve@zx2c4.com>
-References: <20221114164558.1180362-1-Jason@zx2c4.com>
- <20221114164558.1180362-4-Jason@zx2c4.com>
- <202211161436.A45AD719A@keescook>
- <Y3V4g8eorwiU++Y3@zx2c4.com>
+        with ESMTP id S233785AbiKQEO7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 16 Nov 2022 23:14:59 -0500
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC79645EC7;
+        Wed, 16 Nov 2022 20:14:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1668658497; x=1700194497;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=YHDDmL+dktUpY7s/Oq9i3upLhyUoiijdZ9tCeqndfIo=;
+  b=PVvvbd9JHzGT8A1VApjdISFLeYG8xtqkLg7hAewLn0+PaXhXe1HZInEd
+   SvfO5VQAmfvWZrV3CigaBv+tEDaroX1BGmQPC/K03PGaJ2x9OKDnjIfLZ
+   He8yD2f7JsLuS1Mh2p/OgSNchKbd1Fn5RwlbZTm1RX8DbYpBLEe00vJ1G
+   JXCGuslrIdxeafQaUv9xik0Q6spr1DGHx3Q20rr+F9CyPH4adBhzdWs7J
+   mj1v8SQCijaRp6Ncc/EzjlG8nLEUtwAcmnFbdUA5dZOa3r7w/rXySpWPb
+   bvKgIMDBmDM4+KJhXFGESih9UbjjQpsSlO9z8l1iohGQyytzzqyhkLZfJ
+   g==;
+X-IronPort-AV: E=Sophos;i="5.96,169,1665471600"; 
+   d="scan'208";a="189317624"
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 16 Nov 2022 21:14:56 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex01.mchp-main.com (10.10.85.143) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.12; Wed, 16 Nov 2022 21:14:54 -0700
+Received: from che-lt-i64410lx.microchip.com (10.10.115.15) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
+ 15.1.2507.12 via Frontend Transport; Wed, 16 Nov 2022 21:14:50 -0700
+From:   Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+To:     <ludovic.desroches@microchip.com>, <ulf.hansson@linaro.org>,
+        <nicolas.ferre@microchip.com>, <alexandre.belloni@bootlin.com>,
+        <3chas3@gmail.com>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-atm-general@lists.sourceforge.net>,
+        <netdev@vger.kernel.org>, <linus.walleij@linaro.org>,
+        <hari.prasathge@microchip.com>
+CC:     <balamanikandan.gunasundar@microchip.com>
+Subject: [PATCH v2 0/2] mmc: atmel-mci: Convert to gpio descriptors
+Date:   Thu, 17 Nov 2022 09:44:28 +0530
+Message-ID: <20221117041430.9108-1-balamanikandan.gunasundar@microchip.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <Y3V4g8eorwiU++Y3@zx2c4.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 17, 2022 at 12:55:47AM +0100, Jason A. Donenfeld wrote:
-> 1) How/whether to make f(0, UR2_MAX) safe,
->    - without additional 64-bit arithmetic,
->    - minimizing the number of branches.
->    I have a few ideas I'll code golf for a bit.
-> I think I can make progress with (1) alone by fiddling around with
-> godbolt enough, like usual.
+Changes in v2:
 
-The code gen is definitely worse.
+[PATCH 1/2] mmc: atmel-mci: Convert to gpio descriptors
 
-Original half-open interval:
+ - Remove "#include <linux/gpio.h>" as it is not necessary
 
-    return floor + get_random_u32_below(ceil - floor);
+[PATCH 2/2] mmc: atmel-mci: move atmel MCI header file
 
-Suggested fully closed interval:
-	
-    ceil = ceil - floor + 1;
-    return likely(ceil) ? floor + get_random_u32_below(ceil) : get_random_u32();
+ - Move linux/atmel-mci.h into drivers/mmc/host/atmel-mci.c as it is
+   used only by one file
 
-Is the worse code gen actually worth it? Options:
+Balamanikandan Gunasundar (2):
+  mmc: atmel-mci: Convert to gpio descriptors
+  mmc: atmel-mci: move atmel MCI header file
 
- a) Decide worse codegen is worth it.
- b) Declare f(0, U32_MAX) undefined and just not handle it.
- c) Stick with original half-open interval that doesn't have this problem.
+ drivers/mmc/host/atmel-mci.c | 119 ++++++++++++++++++++++-------------
+ include/linux/atmel-mci.h    |  46 --------------
+ 2 files changed, 77 insertions(+), 88 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
 
-Jason
+-- 
+2.25.1
+
