@@ -2,109 +2,173 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF392C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 08:19:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6879C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 09:49:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234373AbiKQITm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Nov 2022 03:19:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60312 "EHLO
+        id S234629AbiKQJtb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Nov 2022 04:49:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233958AbiKQITm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 03:19:42 -0500
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5085212AB9;
-        Thu, 17 Nov 2022 00:19:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668673181; x=1700209181;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ubReVEz2qZTNTbxKBF2gw5OuUWPlJ/d6WGYV6O8g2Wg=;
-  b=jMJVdf6QSgE/KA2jnWIvhGSmVqNuiTnMsNWCYpdO617FZ5Q8rg/TpRZa
-   tYxnusAFNS16V9v8oB1aeimR68pkT1D6nhfh3ySEYTH8zQifyZoW0lrnL
-   vbs04uEP5rC4930fF6fjKGxH2rLcu4jlQTQvcT/b1Xwxcmq4XWVi6ZOHQ
-   STk+yh3LzhoyUFxNxbcVBv4v9F5u8tiVqbHAcCaAcWQselHi5wpjwFr0v
-   d6NRVgyNgoNu8pNTI9+6ocIAazN37YbHtn4BL2aSau0vUjaXX8h42yjvi
-   LNqqI4T8rXURnJy1jXhpDgHhwnFi/GgRulGML++zFWF+m0HAwuULbPqdP
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="377058015"
-X-IronPort-AV: E=Sophos;i="5.96,171,1665471600"; 
-   d="scan'208";a="377058015"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2022 00:19:40 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10533"; a="670837458"
-X-IronPort-AV: E=Sophos;i="5.96,171,1665471600"; 
-   d="scan'208";a="670837458"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.99])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2022 00:19:39 -0800
-Message-ID: <bf2c46b3-1117-55dd-ed89-7f4d3ff37b7e@intel.com>
-Date:   Thu, 17 Nov 2022 10:19:34 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: core: Do not require secure trim for discard
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Cc:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-References: <8a17ed3e0eea4aaa82afd0af3b45bcaf@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <8a17ed3e0eea4aaa82afd0af3b45bcaf@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S230344AbiKQJt3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 04:49:29 -0500
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C19BB877;
+        Thu, 17 Nov 2022 01:49:28 -0800 (PST)
+Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 2AH935J3001073;
+        Thu, 17 Nov 2022 09:49:17 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id; s=qcppdkim1;
+ bh=mXyp3kuz6+raj/Kj/BPH6q/i8EriXCANwM6ExVdaBaY=;
+ b=eC1sBSIAa4z0dgRUSgCpnx+p5g4R277LLYvaw1SMqJpOxDMK0gb9wQGK378zCE2HSlBq
+ wYI/tnV9m6dZmL1epc+yN3/Xt7xguHWAD7wlz8PFNl7KNeaUm77ZdFe7m6+xJcX+LfqE
+ mveOL4KBNemPwIP900G9l9fMM754oV6XmqJ26EC34cpae0SyqhQPLsO7AwVd2wlKAh+G
+ NkcafyIhdRRhXEFFQ8jdj0r2phRZ2fLQGhYEcAKxg5flS55Gl31tmCt36ALJdbV35yvq
+ ZA8JzAHjwdctVtK9cqwzdnSt5VBBpbyKpBw94+1Q/TxoECFc616fpBg+qJQF0HEQuUCf cw== 
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3kwfcb0hc4-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 17 Nov 2022 09:49:17 +0000
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 2AH9nCJ3014247;
+        Thu, 17 Nov 2022 09:49:12 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTPS id 3kt4jm2fk8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NO);
+        Thu, 17 Nov 2022 09:49:12 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 2AH9nCG9014241;
+        Thu, 17 Nov 2022 09:49:12 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 2AH9nC8w014240;
+        Thu, 17 Nov 2022 09:49:12 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
+        id 8A9495001D8; Thu, 17 Nov 2022 15:19:11 +0530 (+0530)
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "Darrick J. Wong" <djwong@kernel.org>,
+        "Jason A. Donenfeld" <Jason@zx2c4.com>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Shaik Sajida Bhanu <quic_c_sbhanu@quicinc.com>
+Subject: [PATCH V1] mmc: core: Wait for 1ms after enabling the clocks post voltage switch
+Date:   Thu, 17 Nov 2022 15:18:48 +0530
+Message-Id: <20221117094859.20582-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: E8iSzsCjZO6PhuCyrhhC2LzKyzTpc9z0
+X-Proofpoint-GUID: E8iSzsCjZO6PhuCyrhhC2LzKyzTpc9z0
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.219,Aquarius:18.0.895,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2022-11-17_06,2022-11-16_01,2022-06-22_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1011 bulkscore=0
+ mlxscore=0 lowpriorityscore=0 adultscore=0 priorityscore=1501
+ mlxlogscore=999 impostorscore=0 spamscore=0 malwarescore=0 phishscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2210170000 definitions=main-2211170075
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/11/22 15:26, Christian Löhle wrote:
-> Discard feature is independent of security features.
-> The support check for all trims and discard falsely checked
-> for secure trim/discard, but in the discard case this is not
-> mandated by the spec.
-> 
+As per spec we should wait for 1ms after providing the SD clock to the
+card again as part of voltage switch sequence but there seems to be a
+violation here. Clocks are getting gated before 1ms as part of
+sdhci_set_ios function where we try to reset SD Clock Enable by
+resetting SDHCI_CLOCK_CARD_EN bit in SDHCI_CLOCK_CONTROL register
+leading to voltage switch failures for specific SD cards.
+Below ftraces also confirms the above understanding :
 
-"Discard" was added after "Trim", so while MMC_TRIM_ARGS made
-sense originally, that stopped with:
+9.511367: mmc_host_set_uhs_voltage: mmc1 called
+9.511369: mmc_set_ios: mmc1: clock 0Hz busmode 2 powermode 2 cs 0
+Vdd 18 width 1 timing 0
+9.511370: sdhci_set_ios: mmc1 called
+9.511370: sdhci_set_ios: mmc1 setting clock ios->clock: 0 host->clock:
+400000
+9.511372: sdhci_msm_set_clock: mmc1 clock: 0
+9.511394: sdhci_set_ios: mmc1 gating clocks by writing
+~SDHCI_CLOCK_CARD_EN to SDHCI_CLOCK_CONTROL register
+9.511413: sdhci_msm_set_clock: mmc1 clock: 0
+9.511423: mmc_set_signal_voltage: mmc1 called
+9.533816: mmc_set_ios: mmc1: clock 400000Hz busmode 2 powermode 2 cs 0
+Vdd 18 width 1 timing 0
+9.533820: sdhci_set_ios: mmc1 called
+9.533822: sdhci_set_ios: mmc1 setting clock ios->clock: 400000
+host->clock: 0
+9.533826: sdhci_msm_set_clock: mmc1 clock: 400000
+9.533925: sdhci_enable_clk: mmc1 Enabling clocks by writing
+SDHCI_CLOCK_CARD_EN to SDHCI_CLOCK_CONTROL register
+9.533950: sdhci_set_ios: mmc1 gating clocks by writing
+~SDHCI_CLOCK_CARD_EN to SDHCI_CLOCK_CONTROL register
+9.533973: sdhci_msm_set_clock: mmc1 clock: 400000
+9.534043: sdhci_enable_clk: mmc1 Enabling clocks by writing
+SDHCI_CLOCK_CARD_EN to SDHCI_CLOCK_CONTROL register
+9.534045: mmc_host_set_uhs_voltage: mmc1 Done
 
-commit b3bf915308ca ("mmc: core: new discard feature support at eMMC v4.5")
+Wait for 1ms after enabling the clock post voltage switch to make sure
+clock is kept alive for alteast 1ms as per spec.
 
-So this could have that as a fixes tag.
+Signed-off-by: Sarthak Garg <quic_sartgarg@quicinc.com>
+---
+ drivers/mmc/core/core.c  | 4 ++++
+ drivers/mmc/host/sdhci.c | 3 +++
+ include/linux/mmc/host.h | 1 +
+ 3 files changed, 8 insertions(+)
 
-Also MMC_TRIM_ARGS is a bit of a misleading name since it covers
-one of the bits of MMC_DISCARD_ARG, so I suggest a second patch to
-tidy things up.
-
-Perhaps rename it and change the value to 8003 e.g.
-
-#define MMC_TRIM_OR_DISCARD_ARGS	0x00008003
-
-and make a wrapper for the Trim case:
-
-static bool is_trim_arg(unsigned int arg)
-{
-	return (arg & MMC_TRIM_OR_DISCARD_ARGS) && arg != MMC_DISCARD_ARG;
-}
-
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
-> ---
->  drivers/mmc/core/core.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 95fa8fb1d45f..507005211529 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -1761,7 +1761,8 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
->  		return -EOPNOTSUPP;
->  
->  	if (mmc_card_mmc(card) && (arg & MMC_TRIM_ARGS) &&
-> -	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
-> +	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN) &&
-> +	    arg != MMC_DISCARD_ARG)
->  		return -EOPNOTSUPP;
->  
->  	if (arg == MMC_SECURE_ERASE_ARG) {
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index a1efda85c6f2..d63e00aab6cb 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1181,6 +1181,8 @@ int mmc_host_set_uhs_voltage(struct mmc_host *host)
+ 	host->ios.clock = 0;
+ 	mmc_set_ios(host);
+ 
++	host->doing_signal_voltage_switch = true;
++
+ 	if (mmc_set_signal_voltage(host, MMC_SIGNAL_VOLTAGE_180))
+ 		return -EAGAIN;
+ 
+@@ -1189,6 +1191,8 @@ int mmc_host_set_uhs_voltage(struct mmc_host *host)
+ 	host->ios.clock = clock;
+ 	mmc_set_ios(host);
+ 
++	host->doing_signal_voltage_switch = false;
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index fb6e9a81f198..ac7c254eef4b 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2312,6 +2312,9 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		host->ops->set_clock(host, ios->clock);
+ 		host->clock = ios->clock;
+ 
++		if (mmc->doing_signal_voltage_switch)
++			usleep_range(1000, 1250);
++
+ 		if (host->quirks & SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK &&
+ 		    host->clock) {
+ 			host->timeout_clk = mmc->actual_clock ?
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+index 8fdd3cf971a3..06c88cd7a8bf 100644
+--- a/include/linux/mmc/host.h
++++ b/include/linux/mmc/host.h
+@@ -521,6 +521,7 @@ struct mmc_host {
+ 	bool			hsq_enabled;
+ 
+ 	u32			err_stats[MMC_ERR_MAX];
++	bool			doing_signal_voltage_switch;
+ 	unsigned long		private[] ____cacheline_aligned;
+ };
+ 
+-- 
+2.17.1
 
