@@ -2,409 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 01911C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 14:33:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC2FFC433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 17 Nov 2022 14:43:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240130AbiKQOd0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 17 Nov 2022 09:33:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58282 "EHLO
+        id S240421AbiKQOnm convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 17 Nov 2022 09:43:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240186AbiKQOdN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 09:33:13 -0500
-Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC7FB7C035;
-        Thu, 17 Nov 2022 06:33:07 -0800 (PST)
-Received: by mail-pf1-x435.google.com with SMTP id z26so1953770pff.1;
-        Thu, 17 Nov 2022 06:33:07 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=PbFDs+3SDAki55RJjrrFRD3jZK40Qi40k+nyqVzyofw=;
-        b=mMbOTdEjO/WsYpudFX4YM2CluSHhPm2wREMWr0zsJPGtIdOgI0+AtmqA7QePmXiSzf
-         05n4QXjvyv2y8ZSHzsx2SFH83nbl6zXi0ZrNXHOv+20rvMHBXr8maJYD38QTgh9eYVxV
-         sBusroZDjB1Adn7CFxrmighHn5CYv51/OL278swURZqeiy04D/4t48cUiyFErh3pd3He
-         eiX+Mi6pVmg22uI3JKTgtBWdkmRIyhe/gsGVpGwP9K4xjrJgBO6hzryY3b2TNpMzWRo+
-         xlSgMCgNT3v/iN5wt1JpmS/CruOzr/qkGgoPvAMxoW/YFh8yomslvg+qZl3HXtSlTCUp
-         is+g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=PbFDs+3SDAki55RJjrrFRD3jZK40Qi40k+nyqVzyofw=;
-        b=5/hOz0lpdkuPauXlyzR6BDsB4mtdtKOB6Jqcje2eiXTExBnhDNjauMtVbIHPdjPLsQ
-         GrIKdeO1IaK4x5V4Wu6strIfyauPcLX/NKIQNzlMqloQqKLQK/RXrtRrsjcG1zrup/fV
-         ORBBHvsu4mU+4sYD0+q7IYxOE1dep4n+cvp7DjTJVVwltW4kU238B2B7cGRRkouazN7Y
-         wed/0Pgkyxf7jXqDwUDhG2qt9dgg65h9opx1YOhMKi0jMplIu1wiUqTxFH69R9RfyBgh
-         lcN0cwoVC+ZG+zIPYH9nA6oMeAWiWv34F08PjMHoVKIzCgXRI2YgxakI/DvEBJ2tDsvN
-         y6JQ==
-X-Gm-Message-State: ANoB5plKuwwIiYQcbvvwb60z+aDptI0pHvaHh/WIM+lRnaGfXpZjeR7j
-        5B1MXwuEfF0kSU638GuMkng=
-X-Google-Smtp-Source: AA0mqf5dJ7wlexrp0AKne+xBVwPRPn2VKPcEdcgpAZKn7ulkPPW5dlCGCHXy/YxM9FejM3LwQqvA/Q==
-X-Received: by 2002:a62:1cd4:0:b0:56b:deea:72e9 with SMTP id c203-20020a621cd4000000b0056bdeea72e9mr3188734pfc.47.1668695587265;
-        Thu, 17 Nov 2022 06:33:07 -0800 (PST)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id o65-20020a625a44000000b00562664d5027sm1217491pfb.61.2022.11.17.06.33.05
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 17 Nov 2022 06:33:06 -0800 (PST)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Thu, 17 Nov 2022 06:33:05 -0800
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-watchdog@vger.kernel.org
-Subject: Re: [RFC PATCH 1/9] dt-bindings: drop redundant part of title of
- shared bindings
-Message-ID: <20221117143305.GC664755@roeck-us.net>
-References: <20221117123850.368213-1-krzysztof.kozlowski@linaro.org>
- <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S240767AbiKQOnJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 17 Nov 2022 09:43:09 -0500
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73FD017A9D;
+        Thu, 17 Nov 2022 06:42:11 -0800 (PST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 0B3623A2326;
+        Thu, 17 Nov 2022 15:42:10 +0100 (CET)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id E51753A2322;
+        Thu, 17 Nov 2022 15:42:09 +0100 (CET)
+X-TM-AS-ERS: 10.149.2.42-127.5.254.253
+X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
+X-DDEI-TLS-USAGE: Used
+Received: from ex.swissbit.com (sbdeex04.sbitdom.lan [10.149.2.42])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Thu, 17 Nov 2022 15:42:09 +0100 (CET)
+Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
+ (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Thu, 17 Nov
+ 2022 15:42:09 +0100
+Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
+ sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
+ 15.02.1118.009; Thu, 17 Nov 2022 15:42:09 +0100
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>
+Subject: [PATCHv2] mmc: core: Fix ambiguous TRIM and DISCARD arg
+Thread-Topic: [PATCHv2] mmc: core: Fix ambiguous TRIM and DISCARD arg
+Thread-Index: Adj6krwMIu2DPqGURfe2wappqjTDcA==
+Date:   Thu, 17 Nov 2022 14:42:09 +0000
+Message-ID: <11376b5714964345908f3990f17e0701@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.153.4.12]
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
+X-TMASE-Version: DDEI-5.1-9.0.1002-27270.000
+X-TMASE-Result: 10-0.263500-10.000000
+X-TMASE-MatchedRID: ewN4Wv8Mz/iz4NrOslvOzoL5ja7E+OhyKQNhMboqZlp5eyhu4TpIqx3i
+        uFfYqHyoy7U1qS9q0fS12HagvbwDji/7QU2czuUNA9lly13c/gGvMPxisLn2/B2kiqKHn7kiKwm
+        qZIhHHZAf6lD5M6DX0D6eOS91uJ8FvWXpKoZUv2mSJLHHb2KALX0tCKdnhB58nFK7VE/xL0n6C0
+        ePs7A07fk39LXMSri6ZIvC7CApoXdX7H2owlcj9rJI8EoSnW9P/fOdXvUQcT0=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: e00be06c-b119-4b09-ae46-c159e6b2b2af-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Nov 17, 2022 at 01:38:42PM +0100, Krzysztof Kozlowski wrote:
-> The Devicetree bindings document does not have to say in the title that
-> it is a "binding", but instead just describe the hardware.  For shared
-> (re-usable) schemas, name them all as "common properties".
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
->  Documentation/devicetree/bindings/clock/qcom,gcc.yaml         | 2 +-
->  Documentation/devicetree/bindings/dma/dma-common.yaml         | 2 +-
->  Documentation/devicetree/bindings/dma/dma-controller.yaml     | 4 ++--
->  Documentation/devicetree/bindings/dma/dma-router.yaml         | 4 ++--
->  Documentation/devicetree/bindings/iio/adc/adc.yaml            | 2 +-
->  .../devicetree/bindings/media/video-interface-devices.yaml    | 2 +-
->  Documentation/devicetree/bindings/media/video-interfaces.yaml | 2 +-
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml     | 2 +-
->  Documentation/devicetree/bindings/mtd/nand-chip.yaml          | 2 +-
->  Documentation/devicetree/bindings/mtd/nand-controller.yaml    | 2 +-
->  .../bindings/net/bluetooth/bluetooth-controller.yaml          | 2 +-
->  Documentation/devicetree/bindings/net/can/can-controller.yaml | 2 +-
->  .../devicetree/bindings/net/ethernet-controller.yaml          | 2 +-
->  Documentation/devicetree/bindings/net/ethernet-phy.yaml       | 2 +-
->  Documentation/devicetree/bindings/net/mdio.yaml               | 2 +-
->  Documentation/devicetree/bindings/opp/opp-v2-base.yaml        | 2 +-
->  .../devicetree/bindings/power/reset/restart-handler.yaml      | 2 +-
->  Documentation/devicetree/bindings/rtc/rtc.yaml                | 2 +-
->  .../devicetree/bindings/soundwire/soundwire-controller.yaml   | 2 +-
->  Documentation/devicetree/bindings/spi/spi-controller.yaml     | 2 +-
->  Documentation/devicetree/bindings/watchdog/watchdog.yaml      | 2 +-
+Clean up the MMC_TRIM_ARGS define that became ambiguous with
+DISCARD introduction.
+While at it fix one usage where MMC_TRIM_ARGS falsely included
+DISCARD, too.
 
-For watchdog:
+Fixes: b3bf915308ca ("mmc: core: new discard feature support at eMMC v4.5")
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+---
+-v2: Avoid line break
+Previously submitted as mmc: core: Do not require secure trim for discard
+ drivers/mmc/core/core.c | 9 +++++++--
+ include/linux/mmc/mmc.h | 2 +-
+ 2 files changed, 8 insertions(+), 3 deletions(-)
 
-Acked-by: Guenter Roeck <linux@roeck-us.net>
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 95fa8fb1d45f..77d4dba462a2 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -1478,6 +1478,11 @@ void mmc_init_erase(struct mmc_card *card)
+ 		card->pref_erase = 0;
+ }
+ 
++static bool is_trim_arg(unsigned int arg)
++{
++	return (arg & MMC_TRIM_OR_DISCARD_ARGS) && arg != MMC_DISCARD_ARG;
++}
++
+ static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
+ 				          unsigned int arg, unsigned int qty)
+ {
+@@ -1760,7 +1765,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN))
+ 		return -EOPNOTSUPP;
+ 
+-	if (mmc_card_mmc(card) && (arg & MMC_TRIM_ARGS) &&
++	if (mmc_card_mmc(card) && is_trim_arg(arg) &&
+ 	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_GB_CL_EN))
+ 		return -EOPNOTSUPP;
+ 
+@@ -1790,7 +1795,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 	 * identified by the card->eg_boundary flag.
+ 	 */
+ 	rem = card->erase_size - (from % card->erase_size);
+-	if ((arg & MMC_TRIM_ARGS) && (card->eg_boundary) && (nr > rem)) {
++	if ((arg & MMC_TRIM_OR_DISCARD_ARGS) && card->eg_boundary && nr > rem) {
+ 		err = mmc_do_erase(card, from, from + rem - 1, arg);
+ 		from += rem;
+ 		if ((err) || (to <= from))
+diff --git a/include/linux/mmc/mmc.h b/include/linux/mmc/mmc.h
+index 9c50bc40f8ff..6f7993803ee7 100644
+--- a/include/linux/mmc/mmc.h
++++ b/include/linux/mmc/mmc.h
+@@ -451,7 +451,7 @@ static inline bool mmc_ready_for_data(u32 status)
+ #define MMC_SECURE_TRIM1_ARG		0x80000001
+ #define MMC_SECURE_TRIM2_ARG		0x80008000
+ #define MMC_SECURE_ARGS			0x80000000
+-#define MMC_TRIM_ARGS			0x00008001
++#define MMC_TRIM_OR_DISCARD_ARGS	0x00008003
+ 
+ #define mmc_driver_type_mask(n)		(1 << (n))
+ 
+-- 
+2.37.3
 
->  21 files changed, 23 insertions(+), 23 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
-> index 1ab416c83c8d..d2de3d128b73 100644
-> --- a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
-> +++ b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/clock/qcom,gcc.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Qualcomm Global Clock & Reset Controller Common Bindings
-> +title: Qualcomm Global Clock & Reset Controller common parts
->  
->  maintainers:
->    - Stephen Boyd <sboyd@kernel.org>
-> diff --git a/Documentation/devicetree/bindings/dma/dma-common.yaml b/Documentation/devicetree/bindings/dma/dma-common.yaml
-> index ad06d36af208..9b7b94fdbb0b 100644
-> --- a/Documentation/devicetree/bindings/dma/dma-common.yaml
-> +++ b/Documentation/devicetree/bindings/dma/dma-common.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/dma/dma-common.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: DMA Engine Generic Binding
-> +title: DMA Engine common properties
->  
->  maintainers:
->    - Vinod Koul <vkoul@kernel.org>
-> diff --git a/Documentation/devicetree/bindings/dma/dma-controller.yaml b/Documentation/devicetree/bindings/dma/dma-controller.yaml
-> index 6d3727267fa8..225a141c7b5c 100644
-> --- a/Documentation/devicetree/bindings/dma/dma-controller.yaml
-> +++ b/Documentation/devicetree/bindings/dma/dma-controller.yaml
-> @@ -4,13 +4,13 @@
->  $id: http://devicetree.org/schemas/dma/dma-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: DMA Controller Generic Binding
-> +title: DMA Controller common properties
->  
->  maintainers:
->    - Vinod Koul <vkoul@kernel.org>
->  
->  allOf:
-> -  - $ref: "dma-common.yaml#"
-> +  - $ref: dma-common.yaml#
->  
->  # Everything else is described in the common file
->  properties:
-> diff --git a/Documentation/devicetree/bindings/dma/dma-router.yaml b/Documentation/devicetree/bindings/dma/dma-router.yaml
-> index 4b817f5dc30e..0ebd7bc6232b 100644
-> --- a/Documentation/devicetree/bindings/dma/dma-router.yaml
-> +++ b/Documentation/devicetree/bindings/dma/dma-router.yaml
-> @@ -4,13 +4,13 @@
->  $id: http://devicetree.org/schemas/dma/dma-router.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: DMA Router Generic Binding
-> +title: DMA Router common properties
->  
->  maintainers:
->    - Vinod Koul <vkoul@kernel.org>
->  
->  allOf:
-> -  - $ref: "dma-common.yaml#"
-> +  - $ref: dma-common.yaml#
->  
->  description:
->    DMA routers are transparent IP blocks used to route DMA request
-> diff --git a/Documentation/devicetree/bindings/iio/adc/adc.yaml b/Documentation/devicetree/bindings/iio/adc/adc.yaml
-> index db348fcbb52c..bd0f5fae256e 100644
-> --- a/Documentation/devicetree/bindings/iio/adc/adc.yaml
-> +++ b/Documentation/devicetree/bindings/iio/adc/adc.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/iio/adc/adc.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Generic IIO bindings for ADC channels
-> +title: IIO common properties for ADC channels
->  
->  maintainers:
->    - Jonathan Cameron <jic23@kernel.org>
-> diff --git a/Documentation/devicetree/bindings/media/video-interface-devices.yaml b/Documentation/devicetree/bindings/media/video-interface-devices.yaml
-> index 4527f56a5a6e..bd719cb1813e 100644
-> --- a/Documentation/devicetree/bindings/media/video-interface-devices.yaml
-> +++ b/Documentation/devicetree/bindings/media/video-interface-devices.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/media/video-interface-devices.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Common bindings for video receiver and transmitter devices
-> +title: Common properties for video receiver and transmitter devices
->  
->  maintainers:
->    - Jacopo Mondi <jacopo@jmondi.org>
-> diff --git a/Documentation/devicetree/bindings/media/video-interfaces.yaml b/Documentation/devicetree/bindings/media/video-interfaces.yaml
-> index 68c3b9871cf3..e8cf73794772 100644
-> --- a/Documentation/devicetree/bindings/media/video-interfaces.yaml
-> +++ b/Documentation/devicetree/bindings/media/video-interfaces.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/media/video-interfaces.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Common bindings for video receiver and transmitter interface endpoints
-> +title: Common properties for video receiver and transmitter interface endpoints
->  
->  maintainers:
->    - Sakari Ailus <sakari.ailus@linux.intel.com>
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 802e3ca8be4d..a17f49738abd 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/mmc/mmc-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: MMC Controller Generic Binding
-> +title: MMC Controller common properties
->  
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
-> diff --git a/Documentation/devicetree/bindings/mtd/nand-chip.yaml b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
-> index 97ac3a3fbb52..20b195ef9b70 100644
-> --- a/Documentation/devicetree/bindings/mtd/nand-chip.yaml
-> +++ b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/mtd/nand-chip.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: NAND Chip and NAND Controller Generic Binding
-> +title: NAND Chip and NAND Controller common properties
->  
->  maintainers:
->    - Miquel Raynal <miquel.raynal@bootlin.com>
-> diff --git a/Documentation/devicetree/bindings/mtd/nand-controller.yaml b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
-> index 359a015d4e5a..a004efc42842 100644
-> --- a/Documentation/devicetree/bindings/mtd/nand-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/mtd/nand-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: NAND Chip and NAND Controller Generic Binding
-> +title: NAND Chip and NAND Controller common properties
->  
->  maintainers:
->    - Miquel Raynal <miquel.raynal@bootlin.com>
-> diff --git a/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml b/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
-> index 9309dc40f54f..8715adff5eaf 100644
-> --- a/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
-> +++ b/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/net/bluetooth/bluetooth-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Bluetooth Controller Generic Binding
-> +title: Bluetooth Controller common properties
->  
->  maintainers:
->    - Marcel Holtmann <marcel@holtmann.org>
-> diff --git a/Documentation/devicetree/bindings/net/can/can-controller.yaml b/Documentation/devicetree/bindings/net/can/can-controller.yaml
-> index 1f0e98051074..3747b46cf9b6 100644
-> --- a/Documentation/devicetree/bindings/net/can/can-controller.yaml
-> +++ b/Documentation/devicetree/bindings/net/can/can-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/net/can/can-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: CAN Controller Generic Binding
-> +title: CAN Controller common properties
->  
->  maintainers:
->    - Marc Kleine-Budde <mkl@pengutronix.de>
-> diff --git a/Documentation/devicetree/bindings/net/ethernet-controller.yaml b/Documentation/devicetree/bindings/net/ethernet-controller.yaml
-> index 3aef506fa158..26502c0f2aff 100644
-> --- a/Documentation/devicetree/bindings/net/ethernet-controller.yaml
-> +++ b/Documentation/devicetree/bindings/net/ethernet-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/net/ethernet-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Ethernet Controller Generic Binding
-> +title: Ethernet Controller common properties
->  
->  maintainers:
->    - David S. Miller <davem@davemloft.net>
-> diff --git a/Documentation/devicetree/bindings/net/ethernet-phy.yaml b/Documentation/devicetree/bindings/net/ethernet-phy.yaml
-> index ad808e9ce5b9..0aa1b60e78cc 100644
-> --- a/Documentation/devicetree/bindings/net/ethernet-phy.yaml
-> +++ b/Documentation/devicetree/bindings/net/ethernet-phy.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/net/ethernet-phy.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Ethernet PHY Generic Binding
-> +title: Ethernet PHY common properties
->  
->  maintainers:
->    - Andrew Lunn <andrew@lunn.ch>
-> diff --git a/Documentation/devicetree/bindings/net/mdio.yaml b/Documentation/devicetree/bindings/net/mdio.yaml
-> index b5706d4e7e38..b184689dd6b2 100644
-> --- a/Documentation/devicetree/bindings/net/mdio.yaml
-> +++ b/Documentation/devicetree/bindings/net/mdio.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/net/mdio.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: MDIO Bus Generic Binding
-> +title: MDIO Bus common properties
->  
->  maintainers:
->    - Andrew Lunn <andrew@lunn.ch>
-> diff --git a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
-> index cf9c2f7bddc2..20ac432dc683 100644
-> --- a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
-> +++ b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/opp/opp-v2-base.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Generic OPP (Operating Performance Points) Common Binding
-> +title: Generic OPP (Operating Performance Points) common parts
->  
->  maintainers:
->    - Viresh Kumar <viresh.kumar@linaro.org>
-> diff --git a/Documentation/devicetree/bindings/power/reset/restart-handler.yaml b/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
-> index 1f9a2aac53c0..8b52fd156d4c 100644
-> --- a/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
-> +++ b/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/power/reset/restart-handler.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Restart and shutdown handler generic binding
-> +title: Restart and shutdown handler common properties
->  
->  maintainers:
->    - Sebastian Reichel <sre@kernel.org>
-> diff --git a/Documentation/devicetree/bindings/rtc/rtc.yaml b/Documentation/devicetree/bindings/rtc/rtc.yaml
-> index 0ec3551f12dd..00848a5a409e 100644
-> --- a/Documentation/devicetree/bindings/rtc/rtc.yaml
-> +++ b/Documentation/devicetree/bindings/rtc/rtc.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/rtc/rtc.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: RTC Generic Binding
-> +title: Real Time Clock common properties
->  
->  maintainers:
->    - Alexandre Belloni <alexandre.belloni@bootlin.com>
-> diff --git a/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml b/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
-> index 4aad121eff3f..2176033850dc 100644
-> --- a/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
-> +++ b/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/soundwire/soundwire-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: SoundWire Controller Generic Binding
-> +title: SoundWire Controller common properties
->  
->  maintainers:
->    - Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-> diff --git a/Documentation/devicetree/bindings/spi/spi-controller.yaml b/Documentation/devicetree/bindings/spi/spi-controller.yaml
-> index 01042a7f382e..6bbe073f894b 100644
-> --- a/Documentation/devicetree/bindings/spi/spi-controller.yaml
-> +++ b/Documentation/devicetree/bindings/spi/spi-controller.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/spi/spi-controller.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: SPI Controller Generic Binding
-> +title: SPI Controller common properties
->  
->  maintainers:
->    - Mark Brown <broonie@kernel.org>
-> diff --git a/Documentation/devicetree/bindings/watchdog/watchdog.yaml b/Documentation/devicetree/bindings/watchdog/watchdog.yaml
-> index e3dfb02f0ca5..6875cf1c3159 100644
-> --- a/Documentation/devicetree/bindings/watchdog/watchdog.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/watchdog.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/watchdog/watchdog.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Watchdog Generic Bindings
-> +title: Watchdog common properties
->  
->  maintainers:
->    - Guenter Roeck <linux@roeck-us.net>
-> -- 
-> 2.34.1
-> 
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
