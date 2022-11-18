@@ -2,94 +2,136 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D36DCC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 08:11:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CC81C4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 08:28:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231534AbiKRILg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 03:11:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38418 "EHLO
+        id S241447AbiKRI2g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 03:28:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241262AbiKRILf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 03:11:35 -0500
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32E158B123
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:11:35 -0800 (PST)
-Received: by mail-pj1-x102e.google.com with SMTP id w15-20020a17090a380f00b0021873113cb4so3938480pjb.0
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:11:35 -0800 (PST)
+        with ESMTP id S241403AbiKRI2a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 03:28:30 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3957DE6
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:28:24 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id h12so5865018ljg.9
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:28:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=D4kibJ263P3dhtkMF23jXF7dhiR5WS0nDu5d93wHySQ=;
-        b=QMnN6Ck2beKR171FsNArbFBCYkAJlprCEbC+7a/2zfkab1ohDDxgP9XPejDZAfuyoj
-         ZKPEP6M1fETHI8F9o4j2PPO0m1e2U6yzuK635F4aI6fk4yYGSxf7zk1jNRR0Umn6qUU/
-         M1iXMrQwCP9BbjDiaie4wwb0c2hAi9IPG/L9TOR7Uzy8v1aE5CQhoeB7eZtgZZHTL6LK
-         IXgfxMFjGA+/d6+DZDwOmfdldNh5BXCmAwSCLyJ9IcJgNriXNZ+Jov/CaRv2zlGKT8t9
-         wwDYk+FNrtOQgjzuzjk8VMw8tJqVtQR9idGwbiXkBNPgOstxhsrQEllEFK5TaGfkqHCs
-         FYYQ==
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=MrA5CDs46lQZm6VaAVmPmV1Nyk9XIySNq9lvhXdo7k8=;
+        b=yIT6wd8Tn/4EigMdSev3RTx1dShvONUZ1o2LJic5y3UzW8LgMuG7uFp80Y8Mw7p+2i
+         u+Hx+MWiciMmXSYnrFx98cxa4sbmSAURAUt99p8E3r2tMmF0ygoLGxcFQPJrif3jPMLj
+         y0DxRVohO6j383Jju+uqZkJFVPAKCT7G1d+SNz0aRrDl59ec+iH3SvLunNJnRAN3fFHp
+         uj/yuz8SV/cGRRKi6lGP5BHU+Y9YeVlbn5zwGo+B4clkg1nQfYqsfFdJXz60NiVE7C5x
+         xoWYk/DHjlYtipany3Ms311spap+ZgR86DO9tnSirVslPkUYj7drcMZpd/Ds56w7qUSX
+         eO2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=D4kibJ263P3dhtkMF23jXF7dhiR5WS0nDu5d93wHySQ=;
-        b=aQTRoB77DpZuT1eNZA+56T2eHrSveBrwDOOQatzaucmUibGt4SJ2JotkCfs4C31PBT
-         RNlwQVwuB80W/JTMY9prXBXB2z38Y23y6KtzUP1A/2UoPF7iXvkJ1YpMB0iCVLiMps8i
-         mSndUsmu/HaTzcZDVFP2dAPSC4DiZ8eWbPdiZYJtuBB+jREGf1TW0hfi9LfLjSZyzo9i
-         h04mIrO7TyX8IVYep2eJ1I23wOEJoYNQ+nYt89WYxjZ1UtKlEqBz8DyRTMFk1oxEwahO
-         nbkHr1TKlPN39sft6wvBwGcnEG314TwNppVSmI1pXlA/dCaJxjImwXJOrqs8f1UA1GDT
-         jeyA==
-X-Gm-Message-State: ANoB5pleIz/5DW3raFPP5ES1Ex57J2BhPtOmJYrb6HHfcpyMeZMhIzo6
-        vcKoqrpu9TvKDSCe2dEz1ENo0wSosPtm1anjGJu58g==
-X-Google-Smtp-Source: AA0mqf5z+ngOt/yQcwVsgv9aDVmQheUmmUbKLHJpLPv2rpJ71KeTs5x/5pPQWqf/L4zOqCfgF1xsfI+hXpHhkK5OWoU=
-X-Received: by 2002:a17:902:a503:b0:188:cca8:df29 with SMTP id
- s3-20020a170902a50300b00188cca8df29mr6485744plq.148.1668759094745; Fri, 18
- Nov 2022 00:11:34 -0800 (PST)
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=MrA5CDs46lQZm6VaAVmPmV1Nyk9XIySNq9lvhXdo7k8=;
+        b=oh13DuSFPZrMGnOjPaS4y23Ad3GvZUeTutOCHhRxnTkJSG8/K/AtmxUvtyld7twIUB
+         8KIwss/e7y+IqOykUpHxDkvfhF+dZoadqSNdDQE1WnQWgdL3Nd18AnqajXPuPYYwSMDo
+         sgdoPdENlXK3Rey6gnSXnI2qs1/MPulyqIQTugbMMBOQhw8Z7ORU0kXxjeZYP+w9q/VX
+         LvHvNaM9sODZqd23DXfveRumSXPcNNRJvdtGGE4G0erxqj8OzT+wP3fJyHH3EVzkkqQ0
+         it1Pq/Wc7N8xLD2D3En7TXy1Jz4036/UMf5zgGcozVfL9TRfQcZzz1Rh2wseBYKAszXw
+         5Ozg==
+X-Gm-Message-State: ANoB5plXKmbUOjV9ZcO8miEFZXJQnEYsXUAfEj4sgUmqM9kruP0cLX11
+        ZgmRr1rIAvht7SV2G+2iJE8lMA==
+X-Google-Smtp-Source: AA0mqf4FSTsj7jWLGFDuUM1KolU0pAAAlYx7n+VRF6tfHUnjgf3Tz4kJo9qfndGCbN01BGn3foVCSQ==
+X-Received: by 2002:a2e:9052:0:b0:26e:eeb:f9cf with SMTP id n18-20020a2e9052000000b0026e0eebf9cfmr2211769ljg.480.1668760070041;
+        Fri, 18 Nov 2022 00:27:50 -0800 (PST)
+Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
+        by smtp.gmail.com with ESMTPSA id g27-20020a2eb0db000000b0026bf0d71b1esm573326ljl.93.2022.11.18.00.27.48
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 18 Nov 2022 00:27:49 -0800 (PST)
+Message-ID: <06ac1c86-22f7-97ff-bf59-6fb0994dfcc5@linaro.org>
+Date:   Fri, 18 Nov 2022 09:27:47 +0100
 MIME-Version: 1.0
-References: <20221110025530.4106568-1-yangyingliang@huawei.com> <cd06c6cc-fd5a-1fe4-9570-4266f34918cd@huawei.com>
-In-Reply-To: <cd06c6cc-fd5a-1fe4-9570-4266f34918cd@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 18 Nov 2022 09:10:57 +0100
-Message-ID: <CAPDyKFrYk9Gr3Fa5mJ2KPebCWXxGFJxZtP47EmXge3CRMtEYQg@mail.gmail.com>
-Subject: Re: [PATCH v4 0/2] mmc: sdio: fixes some leaks
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [RFC PATCH 1/9] dt-bindings: drop redundant part of title of
+ shared bindings
+Content-Language: en-US
+To:     Conor Dooley <conor@kernel.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-can@vger.kernel.org,
+        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-watchdog@vger.kernel.org
+References: <20221117123850.368213-1-krzysztof.kozlowski@linaro.org>
+ <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
+ <Y3Z0w6JH1f5zgwvW@spud>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <Y3Z0w6JH1f5zgwvW@spud>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 18 Nov 2022 at 08:54, Yang Yingliang <yangyingliang@huawei.com> wrote:
->
-> Hi,
->
-> On 2022/11/10 10:55, Yang Yingliang wrote:
-> > This patchset fix a refcount leak and two memory leaks about
-> > SDIO function.
-> >
-> > v3 -> v4:
-> >    Drop patch1, keep calling put_device() to free memory,
-> >    set 'func->card' to NULL to avoid redundant put.
-> >
-> > v2 -> v3:
-> >    Change to call of_node_put() in remove() function to
-> >    fix node refcount leak.
-> >
-> > v1 -> v2:
-> >    Fix compile error in patch #2.
-> >
-> > Yang Yingliang (2):
-> >    mmc: sdio: fix of node refcount leak in sdio_add_func()
-> >    mmc: sdio: fix possible memory leak in some error path
-> >
-> >   drivers/mmc/core/sdio.c     | 1 +
-> >   drivers/mmc/core/sdio_bus.c | 6 +++---
-> >   drivers/mmc/core/sdio_cis.c | 3 ++-
-> >   3 files changed, 6 insertions(+), 4 deletions(-)
-> Is this look good to you, or any suggestions?
+On 17/11/2022 18:52, Conor Dooley wrote:
+> On Thu, Nov 17, 2022 at 01:38:42PM +0100, Krzysztof Kozlowski wrote:
+>> The Devicetree bindings document does not have to say in the title that
+>> it is a "binding", but instead just describe the hardware.  For shared
+>> (re-usable) schemas, name them all as "common properties".
+> 
+> 
+>> diff --git a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+>> index 1ab416c83c8d..d2de3d128b73 100644
+>> --- a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+>> +++ b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+>> @@ -4,7 +4,7 @@
+>>  $id: http://devicetree.org/schemas/clock/qcom,gcc.yaml#
+>>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>>  
+>> -title: Qualcomm Global Clock & Reset Controller Common Bindings
+>> +title: Qualcomm Global Clock & Reset Controller common parts
+>>  
+>>  maintainers:
+>>    - Stephen Boyd <sboyd@kernel.org>
+> 
+> 
+>> diff --git a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+>> index cf9c2f7bddc2..20ac432dc683 100644
+>> --- a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+>> +++ b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+>> @@ -4,7 +4,7 @@
+>>  $id: http://devicetree.org/schemas/opp/opp-v2-base.yaml#
+>>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>>  
+>> -title: Generic OPP (Operating Performance Points) Common Binding
+>> +title: Generic OPP (Operating Performance Points) common parts
+>>  
+>>  maintainers:
+>>    - Viresh Kumar <viresh.kumar@linaro.org>
+> 
+> Hey Krzysztof,
+> 
+> Hopefully I've not overlooked something obvious, but it wasnt noted in
+> the commit message - how come these two are "parts" rather than
+> "properties"? The opp one at least don't seem to have much more than
+> properties and patterProperties in it.
 
-I need some more time to review them, so I will get back to this early
-next week.
+They should be properties, will fix in v2.
 
-Kind regards
-Uffe
+
+Best regards,
+Krzysztof
+
