@@ -2,74 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B400C43219
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 09:47:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7F74CC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 09:47:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241062AbiKRJrc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 04:47:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57274 "EHLO
+        id S241181AbiKRJrd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 04:47:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56970 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241337AbiKRJqY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 04:46:24 -0500
-Received: from mail-pf1-x42a.google.com (mail-pf1-x42a.google.com [IPv6:2607:f8b0:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C04C8FFAB
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:46:04 -0800 (PST)
-Received: by mail-pf1-x42a.google.com with SMTP id y13so4389047pfp.7
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:46:04 -0800 (PST)
+        with ESMTP id S233760AbiKRJqa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 04:46:30 -0500
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 055D08FFB4
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:46:07 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id m14so4079964pji.0
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:46:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=VPuBk7QpwTGjZyc1/9nTkVIP5Q9YhdcXA+K9KZrkrmY=;
-        b=UtQGDof7bBDHAztrqkOGkhOuyOoYom4lxvwSofr49GG85ox4N1jxBtXdwhueKLBsZF
-         md3lgH2QPow60IL+THnukxXt8eb9zwDDLi2JeVrRNa7vFkTe+5OUuceX19P5yLvfi0ZA
-         G6FythdyG4s72nwGJXbCUVwuhe5UZjjpo60/rmlkB2nvRysl7UjLbwBUoafqvmU+lXd3
-         ruWPfnfeoaYHdu22I0XoMSTjqSN6MGlO6tEEo3aZAis+kCJgjfpOHQXwBpgjVRJm3gsp
-         3aYSGAsLC/yvL+iIbNrROF7Pn8wMMHbN8bGjYaG6kqE6LVpfRtz/oXnwrmx2tIO+I8E5
-         mO7Q==
+        bh=yAGhoUsMxs2sC8md2MBnH6lAKU536ruw0p1wXnUnqx8=;
+        b=hB1z4Zq0cIGj5xqEbdIc9Try6UeRi5TufQA1V2870JTTuXhMytdkZBgtLsVW4/mm90
+         b5JensghdKiQ5bPX/tHoY5+NsD/b8rIYzV94Ti+k+22nbZeFcK9dmmnyXxCYU5eiCuIe
+         fuWWkkBLef5QyWm+wgzumd1knfj1/34NMnMbkm0zLYqDB/qVOQavBImaRAxWlVieSU01
+         7S4AFEzjmk7w8UHqv6L26Jez+Z9HTAxaCHgKpQe8OGo8Ypl62O4hxkUsBxJ2UooIhaNX
+         RBHXn4zXwQLqW13vTrb8Xa3eXShyTL3wJn1+hdcIebYMsyo5AZNcTTaHSAVsfs1jf0+x
+         aG7Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=VPuBk7QpwTGjZyc1/9nTkVIP5Q9YhdcXA+K9KZrkrmY=;
-        b=SCk4xS/xV/BKqTxmVAMBsRPD70qR8A6Iof93fw2KKSNP3dOagX8TEwLkwiBjfUFWrl
-         PhkSxSEKBtk8gQWo/gyLlH44y5ttDVlpiDTVGmE1MW6lK/fJtNR+E4FXFlL+xtTDh4n4
-         CkdhNtfamBPxpxKOCMBG9K97J+rRThLvNY5qby1d3z/q7bpXCmv2vc5fNcl2i2uHZfEm
-         YYnsZvwwMk1h0YQb+wQv5qYSnDbNv1/4l1WAY3BrAezpWHAHFj8r82+bitPk8RlQ+Aoe
-         MIHI9tDXqhlYTAZISrQgE+QHzW0snvHUZkTVe9mtrKTb4a/p4B7vTm88umTsYqiiFg4y
-         JIKw==
-X-Gm-Message-State: ANoB5pmPc571LoXmxau9eAh/Br0ehlYr062BYijrheyfu9Tw5mdueqKt
-        wehgvlc3tnVeOb5k5+dsZcYKziXuUCzXyHteh0BALQ==
-X-Google-Smtp-Source: AA0mqf6QIOb3Jmxesp2Fnwa9wIZIPdyJQjihp4TUuc+lz3x9Z722ORzgiY4TWwjAuu8MHj574CjcyY88WfncL2yHBZs=
-X-Received: by 2002:a63:4285:0:b0:477:15c8:cd8a with SMTP id
- p127-20020a634285000000b0047715c8cd8amr4536822pga.595.1668764763969; Fri, 18
- Nov 2022 01:46:03 -0800 (PST)
+        bh=yAGhoUsMxs2sC8md2MBnH6lAKU536ruw0p1wXnUnqx8=;
+        b=dQI55eAxBh9UnTvLPuMwKU7+iGIa9R4r1OQ/UBqjtM4Tbw6MYNFNOmkV3V/PI4vP89
+         Ga2lD3QQVZIkCtUMl/tXdYAJ+KuNxN+IBnkV5/da+cgppF2Ec7X/0I0m3GWhtFCnVuiJ
+         HysP5px0biHYmTQK6G763VYx9c+KyYk3tyFBSbscoPQM8VD8P7ryGHXkLPlWF4VvnT97
+         GT4BE6b/EG7RZogvkGwnT710s7VbzRYG/Frotzof3U54kLvA1a4n6T0eTIBDMsyY45cx
+         gHjTF24S6bRCaNIw54C0hUKfuZBP946RRMlJqMeY9w1fqgx1mNtvWmCp8KO8UIjqaPJX
+         yzQw==
+X-Gm-Message-State: ANoB5pnzM7A5IEvE17shUyXplRDgy3Noi6JrOMgGt2q2XURiTQF8ZMHT
+        OEpIymSKciHurG4ELs36CUsObe46vQPxizoxh6g9KnjPVig=
+X-Google-Smtp-Source: AA0mqf7KvjqnKLTejxVMCRk1Ye4pVlzsupzUISR3rd9uxhXAzl/ggV5YOiheX933yJDBN2D5T1bQ4V2baF5bN6PRWAE=
+X-Received: by 2002:a17:902:6bc5:b0:188:6baf:2011 with SMTP id
+ m5-20020a1709026bc500b001886baf2011mr6456815plt.165.1668764766612; Fri, 18
+ Nov 2022 01:46:06 -0800 (PST)
 MIME-Version: 1.0
-References: <20221114230217.202634-1-dinguyen@kernel.org>
-In-Reply-To: <20221114230217.202634-1-dinguyen@kernel.org>
+References: <202211171524116446204@zte.com.cn>
+In-Reply-To: <202211171524116446204@zte.com.cn>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 18 Nov 2022 10:45:27 +0100
-Message-ID: <CAPDyKFq_Vu8CD6JRK_vZY8+tDQaU-uwXMY8M08Z=TF1a1rLmgQ@mail.gmail.com>
-Subject: Re: [PATCHv9 1/6] dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
-To:     Dinh Nguyen <dinguyen@kernel.org>
-Cc:     jh80.chung@samsung.com, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org
+Date:   Fri, 18 Nov 2022 10:45:30 +0100
+Message-ID: <CAPDyKFqbbcwyf9YUAPBZdfA4ujM6EcvcujQ9Skr7x_q571-CqQ@mail.gmail.com>
+Subject: Re: [PATCH linux-next] mmc: pwrseq: Use device_match_of_node()
+To:     ye.xingchen@zte.com.cn
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 15 Nov 2022 at 00:02, Dinh Nguyen <dinguyen@kernel.org> wrote:
+On Thu, 17 Nov 2022 at 08:24, <ye.xingchen@zte.com.cn> wrote:
 >
-> Document the optional "altr,sysmgr-syscon" binding that is used to
-> access the System Manager register that controls the SDMMC clock
-> phase.
+> From: ye xingchen <ye.xingchen@zte.com.cn>
 >
-> Signed-off-by: Dinh Nguyen <dinguyen@kernel.org>
+> Replace the open-code with device_match_of_node().
+>
+> Signed-off-by: ye xingchen <ye.xingchen@zte.com.cn>
 
 Applied for next, thanks!
 
@@ -77,72 +73,22 @@ Kind regards
 Uffe
 
 
-
-
 > ---
-> v9: remove required for "altr,sysmgr-syscon"
-> v8: remove "" around synopsys-dw-mshc-common.yaml#
-> v7: and "not" for the required "altr,sysmgr-syscon" binding
-> v6: make "altr,sysmgr-syscon" optional
-> v5: document reg shift
-> v4: add else statement
-> v3: document that the "altr,sysmgr-syscon" binding is only applicable to
->     "altr,socfpga-dw-mshc"
-> v2: document "altr,sysmgr-syscon" in the MMC section
-> ---
->  .../bindings/mmc/synopsys-dw-mshc.yaml        | 32 +++++++++++++++++--
->  1 file changed, 29 insertions(+), 3 deletions(-)
+>  drivers/mmc/core/pwrseq.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> index ae6d6fca79e2..e1f5f26f3f1c 100644
-> --- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc.yaml
-> @@ -6,9 +6,6 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
+> diff --git a/drivers/mmc/core/pwrseq.c b/drivers/mmc/core/pwrseq.c
+> index ef675f364bf0..2374669b588a 100644
+> --- a/drivers/mmc/core/pwrseq.c
+> +++ b/drivers/mmc/core/pwrseq.c
+> @@ -29,7 +29,7 @@ int mmc_pwrseq_alloc(struct mmc_host *host)
 >
->  title: Synopsys Designware Mobile Storage Host Controller Binding
->
-> -allOf:
-> -  - $ref: "synopsys-dw-mshc-common.yaml#"
-> -
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
->
-> @@ -38,6 +35,35 @@ properties:
->        - const: biu
->        - const: ciu
->
-> +  altr,sysmgr-syscon:
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    items:
-> +      - items:
-> +          - description: phandle to the sysmgr node
-> +          - description: register offset that controls the SDMMC clock phase
-> +          - description: register shift for the smplsel(drive in) setting
-> +    description:
-> +      This property is optional. Contains the phandle to System Manager block
-> +      that contains the SDMMC clock-phase control register. The first value is
-> +      the pointer to the sysmgr, the 2nd value is the register offset for the
-> +      SDMMC clock phase register, and the 3rd value is the bit shift for the
-> +      smplsel(drive in) setting.
-> +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +  - if:
-> +      properties:
-> +        compatible:
-> +          contains:
-> +            const: altr,socfpga-dw-mshc
-> +    then:
-> +      properties:
-> +        altr,sysmgr-syscon: true
-> +    else:
-> +      properties:
-> +        altr,sysmgr-syscon: false
-> +
->  required:
->    - compatible
->    - reg
+>         mutex_lock(&pwrseq_list_mutex);
+>         list_for_each_entry(p, &pwrseq_list, pwrseq_node) {
+> -               if (p->dev->of_node == np) {
+> +               if (device_match_of_node(p->dev, np)) {
+>                         if (!try_module_get(p->owner))
+>                                 dev_err(host->parent,
+>                                         "increasing module refcount failed\n");
 > --
 > 2.25.1
->
