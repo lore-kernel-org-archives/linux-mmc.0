@@ -2,77 +2,98 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 654D0C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 07:54:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF8EBC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 08:02:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231768AbiKRHyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 02:54:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57812 "EHLO
+        id S241323AbiKRICK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 03:02:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229743AbiKRHyA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 02:54:00 -0500
-Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E2778C08D
-        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 23:53:56 -0800 (PST)
-Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.56])
-        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4ND8DB5px3z15MgZ;
-        Fri, 18 Nov 2022 15:53:30 +0800 (CST)
-Received: from dggpemm500007.china.huawei.com (7.185.36.183) by
- dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Fri, 18 Nov 2022 15:53:54 +0800
-Received: from [10.174.178.174] (10.174.178.174) by
- dggpemm500007.china.huawei.com (7.185.36.183) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.31; Fri, 18 Nov 2022 15:53:54 +0800
-Subject: Re: [PATCH v4 0/2] mmc: sdio: fixes some leaks
-To:     <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <yangyingliang@huawei.com>
-References: <20221110025530.4106568-1-yangyingliang@huawei.com>
-From:   Yang Yingliang <yangyingliang@huawei.com>
-Message-ID: <cd06c6cc-fd5a-1fe4-9570-4266f34918cd@huawei.com>
-Date:   Fri, 18 Nov 2022 15:53:53 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
- Thunderbird/68.7.0
+        with ESMTP id S241326AbiKRICG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 03:02:06 -0500
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 996398CF24
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:02:02 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id w15-20020a17090a380f00b0021873113cb4so3917669pjb.0
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:02:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=bifffbLjthsyQVz7raaaU3RAzhugC6m3nHnZyQVgbWk=;
+        b=XAX8+PkGu+6HYW0syXQQeiMKXG9hnaZTlTJEpKHAe0/8zbt7bWVTzXPHLDXI9bihrr
+         hQtMcTnaxu1Q7XZudcR8KAEOJii+Q3RvgLFkgSMhkVvBxQ7HLy2WiV28VCBEWeJVz21a
+         NbHbJ8R7teVAhkIJn7c8ECw00V0+LleZIyjXgJ9ICxstt9dtynqxLt+Y2fPOHKwfTstF
+         Gt8KJj7CQFheeRST38mf6npWn0AgOW6Ty1/aTOcbaz5cwbjuLZfaBYNS2RMK5O9N750C
+         pGtpQM5THaBF/4cWP0YWEF4knpp8n8UgGoGVX93BBuTfW0SlgsT8Ysj5jim4NVUK4j52
+         b6cQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=bifffbLjthsyQVz7raaaU3RAzhugC6m3nHnZyQVgbWk=;
+        b=hfYbQuhJKZ5zMVQ2WbVkdQrkOegIjRFercrWR8LtdtpnkR4nSsv34HobUPdQ3QTkDg
+         dhmeOeWqaXgDZIU5iIpdvpgkEmQejD+kNjyKaa5iYEJl9XV3WRWPKC6/D2MWjr/HhM4l
+         NIRjaKYRjKCpavOk2tJnoC5/bU5UtxxAJcrSG3rJfArziX5Eb71OSOBmucNKyLaKr4/2
+         ssli8lMTRmEPVvVO/hSwefbR3XSlsMVruCaPNUH61zh03M3rq9/OTDk593Ig/OF1ZiFE
+         HEAbIFJZBRf60QHfmdzMGGWXiW9q4GIoFXpt/FCqBHsJiVD4JBEY0ut1SRMsqbkqEYCU
+         /61g==
+X-Gm-Message-State: ANoB5pn9QEOZRFlxm5UwOfdaO2J+jYBpF0FYMW3/P+dXGJbMBnGG9pwp
+        j58QFUFOcehFWqkwSVdND0iDkXSgSXzD/fWBeSA9Pg==
+X-Google-Smtp-Source: AA0mqf7uIxS1uD0aKZ0+PKLuC65tvNGec6Ak2rcHaY8X8Q5yIKNb+Vht2qiD72nu7B3QLiyaEGzexfyj1KQhqXgGFxQ=
+X-Received: by 2002:a17:90a:7804:b0:211:2d90:321 with SMTP id
+ w4-20020a17090a780400b002112d900321mr12688080pjk.84.1668758522152; Fri, 18
+ Nov 2022 00:02:02 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20221110025530.4106568-1-yangyingliang@huawei.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
-X-Originating-IP: [10.174.178.174]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpemm500007.china.huawei.com (7.185.36.183)
-X-CFilter-Loop: Reflected
+References: <20221117182720.2290761-1-thierry.reding@gmail.com>
+ <20221117182720.2290761-4-thierry.reding@gmail.com> <11a4e08b-f176-a39a-365c-278b08fc1bdb@intel.com>
+In-Reply-To: <11a4e08b-f176-a39a-365c-278b08fc1bdb@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 18 Nov 2022 09:01:23 +0100
+Message-ID: <CAPDyKFoOWuWFUq+yzm-K+9yZZjpky54VdB84ea-nzw5hSrOESQ@mail.gmail.com>
+Subject: Re: [PATCH v11 3/6] mmc: sdhci-tegra: Sort includes alphabetically
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Thierry Reding <thierry.reding@gmail.com>,
+        Joerg Roedel <joro@8bytes.org>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Thierry Reding <treding@nvidia.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Prathamesh Shete <pshete@nvidia.com>,
+        Will Deacon <will@kernel.org>,
+        iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Fri, 18 Nov 2022 at 08:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 17/11/22 20:27, Thierry Reding wrote:
+> > From: Thierry Reding <treding@nvidia.com>
+> >
+> > Sort includes alphabetically to make it easier to add new ones
+> > subsequently.
+> >
+> > Signed-off-by: Thierry Reding <treding@nvidia.com>
+> > ---
+> >  drivers/mmc/host/sdhci-tegra.c | 23 ++++++++++++-----------
+> >  1 file changed, 12 insertions(+), 11 deletions(-)
+>
+> 12 insertions and 11 deletions because linux/bitfield.h
+> was added.
+>
+> I am not super enthusiastic about reordering includes.
+> I would advise people to text search to find an include
+> instead.
 
-On 2022/11/10 10:55, Yang Yingliang wrote:
-> This patchset fix a refcount leak and two memory leaks about
-> SDIO function.
->
-> v3 -> v4:
->    Drop patch1, keep calling put_device() to free memory,
->    set 'func->card' to NULL to avoid redundant put.
->
-> v2 -> v3:
->    Change to call of_node_put() in remove() function to
->    fix node refcount leak.
->
-> v1 -> v2:
->    Fix compile error in patch #2.
->
-> Yang Yingliang (2):
->    mmc: sdio: fix of node refcount leak in sdio_add_func()
->    mmc: sdio: fix possible memory leak in some error path
->
->   drivers/mmc/core/sdio.c     | 1 +
->   drivers/mmc/core/sdio_bus.c | 6 +++---
->   drivers/mmc/core/sdio_cis.c | 3 ++-
->   3 files changed, 6 insertions(+), 4 deletions(-)
-Is this look good to you, or any suggestions?
+Yes, I agree with you. I don't quite see the benefit.
 
-Thanks,
-Yang
+On the other hand, I don't want to waste my time on discussing it (I
+just did!?), as it's (currently) not that such a big deal, I think.
+
+[...]
+
+Kind regards
+Uffe
