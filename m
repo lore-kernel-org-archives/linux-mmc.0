@@ -2,170 +2,108 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 140AAC43219
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 09:27:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 993B8C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 09:38:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241913AbiKRJ1V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 04:27:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42704 "EHLO
+        id S241985AbiKRJiu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 04:38:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49516 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229620AbiKRJ1U (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 04:27:20 -0500
-Received: from aposti.net (aposti.net [89.234.176.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF0B2FCC4;
-        Fri, 18 Nov 2022 01:27:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1668763635; h=from:from:sender:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=UcXDJLu1asVyUgEijSQXJ9DHNuMXWX+q2Hr7tq2QEPg=;
-        b=a8qpL3vt4RiHX1cI7skr1iKHaLiC9Zi1RgGVDY5VDtaaUrfGM3ZniRjf/PrMWfIKibmIo7
-        X//YP2bFxvbUaaWOxLKXWJW5jkP+0l8OrWS0d+iBHhtVoMd8ljRgcoM80eiQ8M9oPm8W9C
-        eGA7dXx5LuymQ5Eep/++6UeKvA1iq0s=
-Date:   Fri, 18 Nov 2022 09:27:05 +0000
-From:   Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH 1/2] mmc: jz4740: Don't change parent clock rate for some
- SoCs
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Siarhei Volkau <lis8215@gmail.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        linux-mips@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Message-Id: <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
-In-Reply-To: <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
-References: <20221108045300.2084671-1-lis8215@gmail.com>
-        <20221108045300.2084671-2-lis8215@gmail.com>
-        <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
+        with ESMTP id S241983AbiKRJip (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 04:38:45 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6EB5749097
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:38:43 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id j16so7292251lfe.12
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 01:38:43 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=MUs/U8UWXwIGlb1bQsandtxXOXMS30Tnukg59tTXU5Q=;
+        b=ZdhOkn3L3kPE7CBaKjCupDBlfZMCp9a0Lvp4vsOZtcrklNAo1Md6k+iTqPlz0qDATS
+         MbAp1PuUGUhmExf8y40RpSvPb1LFrP0ahEQWrXSR1xr2AFHhZj6XmD4n+l1aesVFhDFq
+         tBwTUNnzTCAu5KDxsRHV9Y/mAbwizoBO3T5/zknHrdFlLGPjC8kJLFVhzd53EMVQeyUV
+         ZEnBKASMDqG6iytbDYyHWj3K/Frk0GtaltIlWC9Mm1VM68O5fhe/XyGMXTieiU3Jh+lC
+         nBQS8pGgY/oTaptTn8RVOjJVbN8ktSAGA6IQS1TqgKEKYMEG+6cIcdGH6Gu7BG7LB095
+         icOw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=MUs/U8UWXwIGlb1bQsandtxXOXMS30Tnukg59tTXU5Q=;
+        b=LTci09eP7C+R+2WhpmS0lJppxamdecrERWLZazY3IrjrnU+i4RBRJ4GI2lx/JE5Mbf
+         McMNYIno1+66w/WakVonc08bXo9Z0MeBHsw5kizUPUAhKvtA58Qycgp2I2EYjVHxTjo5
+         Zu3HJ4b7Zwp9FMLSiDhkx/RI+smj/eMmTY8R1Y8/HBsejLy1ddq/lBdyS0CPMhMpNQ1n
+         LELR/2zM1Cd9WqLBacI1ddIxQQjIkAyD/fhiKqkNb+zh0+PcESyQz94jZScvpag+wjMK
+         SaFfYdDMAZUqYyDdWiJq/hkQG09H3Fus0BVlm1Gh9NzvwV7rTuoeaiNxzs4AMfTaf8M/
+         wMqA==
+X-Gm-Message-State: ANoB5plz06HXfO4iv9lVDTi5vjXzNbzmgyfR6gS3zW9VLl5BKPK4a821
+        Qvs4F1HEGnIYoMwSss8fcLuP85vlACSskQ==
+X-Google-Smtp-Source: AA0mqf6HjyGvjYUtFqHO189lE4mjHUGDPygUNLppsV/Hq5lAX2L4dUwtZscsa9UntInpsDWxmwVyaw==
+X-Received: by 2002:a05:6512:1594:b0:4ac:a453:7cc with SMTP id bp20-20020a056512159400b004aca45307ccmr2102606lfb.226.1668764321661;
+        Fri, 18 Nov 2022 01:38:41 -0800 (PST)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id bf8-20020a056512258800b00492b0d23d24sm591329lfb.247.2022.11.18.01.38.40
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 18 Nov 2022 01:38:40 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.1-rc6
+Date:   Fri, 18 Nov 2022 10:38:39 +0100
+Message-Id: <20221118093839.6361-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Hi Linus,
 
-(Ingenic SoCs maintainer here)
+Here's a PR with a couple of MMC fixes intended for v6.1-rc6. Details about the
+highlights are as usual found in the signed tag.
 
-Le ven. 18 nov. 2022 =E0 09:45:48 +0100, Ulf Hansson=20
-<ulf.hansson@linaro.org> a =E9crit :
-> On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com> wrote:
->>=20
->>  Some SoCs have one clock divider for all MMC units, thus changing=20
->> one
->>  affects others as well. This leads to random hangs and memory
->>  corruptions, observed on the JZ4755 based device with two MMC slots
->>  used at the same time.
->=20
-> Urgh, that sounds like broken HW to me.
->=20
-> The MMC blocks could share a parent clock (that would need a fixed
-> rate for it to be applied), assuming there is a separate gate/divider
-> available per block. But there isn't'?
+Please pull this in!
 
-They do share a parent clock and have separate gates, and each MMC IP=20
-block has an internal divider for the bus frequency derived from that=20
-shared clock.
-
->>=20
->>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b.
->>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
->>  which shall remain its behavior. For the JZ4755 is sufficient to
->>  use JZ4725b's binding. JZ4750 is outside of the patch.
->>=20
->>  The MMC core has its own clock divisor, rather coarse but suitable=20
->> well,
->>  and it shall keep the role of tuning clock for the MMC host in that
->>  case.
->=20
-> The mmc core doesn't have a clock divisor, but it does control the bus
-> clock frequency through the ->set_ios() host ops. It needs to do that,
-> to be able to conform to the (e)MMC, SD and SDIO specifications.
->=20
-> Can you please try to elaborate on the above, so I can better
-> understand your point?
-
-Yes, I don't really understand the patch, TBH.
-
-The "clk_set_rate" call will only set the shared clock to the *maximum*=20
-clock frequency (host->mmc->f_max) which should be the exact same=20
-across all MMC IPs.
-
-So it doesn't matter if it's set 3 times by 3 different instances of=20
-the IP, as long as they all request the same value.
-
-Besides, I know for a fact that the mainline driver works fine on the=20
-JZ4760(B) and JZ4725B.
-
-Finally... even if it was correct, this change would break=20
-compatibility with old Device Tree files.
-
-Cheers,
--Paul
-
->>=20
->>  Signed-off-by: Siarhei Volkau <lis8215@gmail.com>
->=20
-> Kind regards
-> Uffe
->=20
->>  ---
->>   drivers/mmc/host/jz4740_mmc.c | 10 +++++++++-
->>   1 file changed, 9 insertions(+), 1 deletion(-)
->>=20
->>  diff --git a/drivers/mmc/host/jz4740_mmc.c=20
->> b/drivers/mmc/host/jz4740_mmc.c
->>  index dc2db9c18..d390ff31d 100644
->>  --- a/drivers/mmc/host/jz4740_mmc.c
->>  +++ b/drivers/mmc/host/jz4740_mmc.c
->>  @@ -114,6 +114,7 @@ enum jz4740_mmc_version {
->>          JZ_MMC_JZ4740,
->>          JZ_MMC_JZ4725B,
->>          JZ_MMC_JZ4760,
->>  +       JZ_MMC_JZ4770,
->>          JZ_MMC_JZ4780,
->>          JZ_MMC_X1000,
->>   };
->>  @@ -887,7 +888,13 @@ static int jz4740_mmc_set_clock_rate(struct=20
->> jz4740_mmc_host *host, int rate)
->>          int real_rate;
->>=20
->>          jz4740_mmc_clock_disable(host);
->>  -       clk_set_rate(host->clk, host->mmc->f_max);
->>  +
->>  +       /*
->>  +        * Changing rate on these SoCs affects other MMC units too.
->>  +        * Make sure the rate is configured properly by the CGU=20
->> driver.
->>  +        */
->>  +       if (host->version !=3D JZ_MMC_JZ4725B && host->version !=3D=20
->> JZ_MMC_JZ4760)
->>  +               clk_set_rate(host->clk, host->mmc->f_max);
->>=20
->>          real_rate =3D clk_get_rate(host->clk);
->>=20
->>  @@ -992,6 +999,7 @@ static const struct of_device_id=20
->> jz4740_mmc_of_match[] =3D {
->>          { .compatible =3D "ingenic,jz4740-mmc", .data =3D (void *)=20
->> JZ_MMC_JZ4740 },
->>          { .compatible =3D "ingenic,jz4725b-mmc", .data =3D (void=20
->> *)JZ_MMC_JZ4725B },
->>          { .compatible =3D "ingenic,jz4760-mmc", .data =3D (void *)=20
->> JZ_MMC_JZ4760 },
->>  +       { .compatible =3D "ingenic,jz4770-mmc", .data =3D (void *)=20
->> JZ_MMC_JZ4770 },
->>          { .compatible =3D "ingenic,jz4775-mmc", .data =3D (void *)=20
->> JZ_MMC_JZ4780 },
->>          { .compatible =3D "ingenic,jz4780-mmc", .data =3D (void *)=20
->> JZ_MMC_JZ4780 },
->>          { .compatible =3D "ingenic,x1000-mmc", .data =3D (void *)=20
->> JZ_MMC_X1000 },
->>  --
->>  2.36.1
->>=20
+Kind regards
+Ulf Hansson
 
 
+The following changes since commit 094226ad94f471a9f19e8f8e7140a09c2625abaa:
+
+  Linux 6.1-rc5 (2022-11-13 13:12:55 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.1-rc5
+
+for you to fetch changes up to 222cfa0118aa68687ace74aab8fdf77ce8fbd7e6:
+
+  mmc: sdhci-pci: Fix possible memory leak caused by missing pci_dev_put() (2022-11-16 17:00:39 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fixup VDD/VMMC voltage-range negotiation
+
+MMC host:
+ - sdhci-pci: Fix memory leak by adding a missing pci_dev_put()
+ - sdhci-pci-o2micro: Fix card detect by tuning the debounce timeout
+
+----------------------------------------------------------------
+Chevron Li (1):
+      mmc: sdhci-pci-o2micro: fix card detect fail issue caused by CD# debounce timeout
+
+Xiongfeng Wang (1):
+      mmc: sdhci-pci: Fix possible memory leak caused by missing pci_dev_put()
+
+Yann Gautier (1):
+      mmc: core: properly select voltage range without power cycle
+
+ drivers/mmc/core/core.c              | 8 +++++++-
+ drivers/mmc/host/sdhci-pci-core.c    | 2 ++
+ drivers/mmc/host/sdhci-pci-o2micro.c | 7 +++++++
+ 3 files changed, 16 insertions(+), 1 deletion(-)
