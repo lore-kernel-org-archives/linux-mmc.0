@@ -2,59 +2,59 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F9A2C43217
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 14:46:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FDB5C4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 14:48:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241750AbiKROqh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 09:46:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46164 "EHLO
+        id S241718AbiKROsY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 09:48:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46966 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241877AbiKROqb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 09:46:31 -0500
-Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53AB46E541
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:46:30 -0800 (PST)
-Received: by mail-lf1-x130.google.com with SMTP id r12so8575352lfp.1
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:46:30 -0800 (PST)
+        with ESMTP id S241449AbiKROsX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 09:48:23 -0500
+Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D24E716E4
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:48:20 -0800 (PST)
+Received: by mail-lj1-x231.google.com with SMTP id d20so6997015ljc.12
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:48:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=hahClhRd3DWgz5IfF3Hi2OhGzrj/JdBwzY9rjBeju8s=;
-        b=JZmmE5Z+1MzabRyRffMS4z0aGT9BgDXgC9DY0MCMYG1Od3pGNI30/93iq6QOZW6IdU
-         fzRFWbJEIsHpicLM2uM84cqyzD3qkQI9fT5ohEFetg4fYo8GpGdRtchVdyxXexmPlddC
-         eGYx58fwwwBR/DsKEi58q/WGkaBmfRML0mdohoszmg6ZPltefO3A2rcCnwjg9H2e4uHz
-         Ht2YGQKv1bXzlOexPAnjWHR0AMT7xMNE/h4sT/R2kdz2G7JqebBANYjHtmXhnqbDNEln
-         rVq3At5moD/Yhfg5Ccq+IamuGznKvyJiQMbNIvLxeCTTkEAeoLQaX+gl3f5Kw0H/Tmzx
-         zd0g==
+        bh=JzDAVj14Kg7cyIXYwLhr95fRyEdtiFybQ+a9MmGfD7k=;
+        b=P4iKBxDecGp7qNoMMYwLnoMJ7yQ2X4wm+chKoQAVcYgIbVgW/4Ic8Xtb7DnzlMuYXa
+         a+KagPKM9e/V54JuDN4+ZpL+QSS0cClqMG3jaI8OG6ey10xV8p5VOGhv4B335yHdxxZ6
+         udWuBi6XP4QdHTPL0/u9jWPb4AmhpkScZ6bVOxyFMBMkN5Up2LKYq3H5zmJuIcdkX0Fx
+         8fRUzWUlUGxjaJQgcLB1Zf1N9rH+cvB0CSSHsOL6EuqAPju3FneXzOwnJAxFBrQpQVyr
+         +UCtax2+FAg215FZ7h57gHkOjOg6N1bkk3yl6x31o6eYoiHPgEiKNXvzlBRf3tcxr8+J
+         ZKMA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=hahClhRd3DWgz5IfF3Hi2OhGzrj/JdBwzY9rjBeju8s=;
-        b=f5i0gDv6Gc1csko7Fs4x5I40iY/fQxnHlq3V0XbtOE/BXpMAr3BYlCsyuthj+2Ey1z
-         T4TmE+SnOkZMv8qfh9B3PupenEx5IKQbALBHGzPSI8I5c/sKO5/yAWTBG8FjpTSQvipx
-         QxfB8KRG6bX1LP/eUYjLLxYOsPnfLQe0ICckHrVyX48XpFf+kTQ8WOG3ieYZ7x71wXEN
-         rf0z9w7HuNuO50D1d+FDEOB4H4N1LIVHvNI4bEStaFATrYxbq3o8AylgRLnwhQDOTShP
-         Roo2wxSfhawlQ9ioZ2rlKhy5DjK6u8ymYykAQ3h2QrJGbsvaNABbzJLKoCWFW5pSx/NL
-         5KIw==
-X-Gm-Message-State: ANoB5pmgZYK1e+ZtitWTs1GQ6GOYEHyVZ1pKHId4hVMYDKmUz4jdx7Vy
-        Tlstw7QAmwPze076SlJ9+ac9Rg==
-X-Google-Smtp-Source: AA0mqf4xQNEVq6KlclNCEMjl56xKu/uoZoZfSEq3TwF8gKAhDBzYdep45hA5R/OZ/mt+9IdD6Luzkg==
-X-Received: by 2002:a19:4f14:0:b0:4b4:b20c:4b7 with SMTP id d20-20020a194f14000000b004b4b20c04b7mr2476398lfb.201.1668782788658;
-        Fri, 18 Nov 2022 06:46:28 -0800 (PST)
+        bh=JzDAVj14Kg7cyIXYwLhr95fRyEdtiFybQ+a9MmGfD7k=;
+        b=P87Fpn27c/UjtzAotD31OzLSOiMMrPR4Fgps5EvGnApUkiyAgOLH8iKRUe8i1lXRbu
+         f4lkUgDn6YUCICovoixpMJlC1EE+4GKyteuQB/0exxyzW60GBOlGygBx48tquI5/el5k
+         n5WMZ3+xYQV1KF26mxiD4e4NfrXTehijqif96t5q50F7WwCAyN5N9H8aeDO7z0wMxmdT
+         jgL3O4kyoNhOjkLGQLqmxvRt58Bw2GuTL9hUJcYIZjyD813AVF92rC8PE/bEGqxvcGCJ
+         SeCRGmt+/9arX1OX7WX/n89x+9DeWF/w6uN5ne0hq7S84Q/Ys+SVOUJiMG8mjLIFpgvH
+         obCQ==
+X-Gm-Message-State: ANoB5pls7JyA1oS/9eTk3E0O33u/n0m7++OVWsq9Mb41y1lSZ+JLRUds
+        K89/9C1FmaA9uMJPM74mSVdQYg==
+X-Google-Smtp-Source: AA0mqf5cBtRAtVWCHt/JKQ9brxqzzQxd4TedCgkS2P/jQOnKdMCSZLGEZqSJlBl/s61brK5m99FHbQ==
+X-Received: by 2002:a2e:a274:0:b0:278:eef5:8d07 with SMTP id k20-20020a2ea274000000b00278eef58d07mr2463980ljm.61.1668782898632;
+        Fri, 18 Nov 2022 06:48:18 -0800 (PST)
 Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id c3-20020ac25f63000000b004b177293a8dsm682197lfc.210.2022.11.18.06.46.26
+        by smtp.gmail.com with ESMTPSA id be40-20020a056512252800b00497a61453a9sm683196lfb.243.2022.11.18.06.48.16
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Nov 2022 06:46:28 -0800 (PST)
-Message-ID: <57c2ca7c-05be-7fc1-69ad-e06b6e571d60@linaro.org>
-Date:   Fri, 18 Nov 2022 15:46:26 +0100
+        Fri, 18 Nov 2022 06:48:18 -0800 (PST)
+Message-ID: <40a4d3fd-bde8-c8ce-a93e-e0f8b633f10b@linaro.org>
+Date:   Fri, 18 Nov 2022 15:48:16 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.4.2
-Subject: Re: [PATCH 01/12] dt-bindings: firmware: convert meson_sm.txt to
+Subject: Re: [PATCH 02/12] dt-bindings: nvmem: convert amlogic-efuse.txt to
  dt-schema
 Content-Language: en-US
 To:     Neil Armstrong <neil.armstrong@linaro.org>,
@@ -88,9 +88,9 @@ Cc:     linux-media@vger.kernel.org, netdev@vger.kernel.org,
         linux-watchdog@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-pci@vger.kernel.org, devicetree@vger.kernel.org
 References: <20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org>
- <20221117-b4-amlogic-bindings-convert-v1-1-3f025599b968@linaro.org>
+ <20221117-b4-amlogic-bindings-convert-v1-2-3f025599b968@linaro.org>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221117-b4-amlogic-bindings-convert-v1-1-3f025599b968@linaro.org>
+In-Reply-To: <20221117-b4-amlogic-bindings-convert-v1-2-3f025599b968@linaro.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -98,49 +98,52 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 On 18/11/2022 15:33, Neil Armstrong wrote:
-> Convert the Amlogic Secure Monitor bindings to dt-schema.
+> Convert the  Amlogic Meson GX eFuse bindings to dt-schema.
 > 
 > Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 > ---
->  .../bindings/firmware/amlogic,meson-gxbb-sm.yaml   | 36 ++++++++++++++++++++++
->  .../bindings/firmware/meson/meson_sm.txt           | 15 ---------
->  2 files changed, 36 insertions(+), 15 deletions(-)
+>  .../bindings/nvmem/amlogic,meson-gxbb-efuse.yaml   | 52 ++++++++++++++++++++++
+>  .../devicetree/bindings/nvmem/amlogic-efuse.txt    | 48 --------------------
+>  2 files changed, 52 insertions(+), 48 deletions(-)
 > 
-> diff --git a/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml b/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml
+> diff --git a/Documentation/devicetree/bindings/nvmem/amlogic,meson-gxbb-efuse.yaml b/Documentation/devicetree/bindings/nvmem/amlogic,meson-gxbb-efuse.yaml
 > new file mode 100644
-> index 000000000000..33d1408610cf
+> index 000000000000..1d88f7eee840
 > --- /dev/null
-> +++ b/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml
-> @@ -0,0 +1,36 @@
+> +++ b/Documentation/devicetree/bindings/nvmem/amlogic,meson-gxbb-efuse.yaml
+> @@ -0,0 +1,52 @@
 > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 > +%YAML 1.2
 > +---
-> +$id: http://devicetree.org/schemas/firmware/amlogic,meson-gxbb-sm.yaml#
+> +$id: http://devicetree.org/schemas/nvmem/amlogic,meson-gxbb-efuse.yaml#
 > +$schema: http://devicetree.org/meta-schemas/core.yaml#
 > +
-> +title: Amlogic Secure Monitor (SM)
-> +
-> +description:
-> +  In the Amlogic SoCs the Secure Monitor code is used to provide access to the
-> +  NVMEM, enable JTAG, set USB boot, etc...
+> +title: Amlogic Meson GX eFuse
 > +
 > +maintainers:
 > +  - Neil Armstrong <neil.armstrong@linaro.org>
 > +
+> +allOf:
+> +  - $ref: nvmem.yaml#
+> +
 > +properties:
 > +  compatible:
-> +    const: amlogic,meson-gxbb-sm
+> +    const: amlogic,meson-gxbb-efuse
 > +
-> +patternProperties:
-> +  "power-controller":
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  secure-monitor:
+> +    description: phandle to the secure-monitor node
 
-This looks like a property, not a pattern.
+This does not look like standard property, so you need the type ($ref).
 
-> +    type: object
-> +    $ref: /schemas/power/amlogic,meson-sec-pwrc.yaml#
-
-Would be nice to add it here to example and drop from
-amlogic,meson-sec-pwrc.yaml (unless it will be used by more schemas?).
+> +
+> +required:
+> +  - compatible
+> +  - clocks
+> +  - secure-monitor
+> +
 
 
 Best regards,
