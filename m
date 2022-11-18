@@ -2,123 +2,202 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BBA4C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 11:37:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F026C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 11:43:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234455AbiKRLg5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 06:36:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39126 "EHLO
+        id S234724AbiKRLnf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 06:43:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241560AbiKRLg0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 06:36:26 -0500
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB04C976CC;
-        Fri, 18 Nov 2022 03:35:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668771304; x=1700307304;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=LweqJ1WTUgBMaklbw2ffFkJFga+y35ZB8OdwOq82kjo=;
-  b=SBF0nm5g/QZ4mya0A2nR1skuwBPncD/fcLS9/oWR8jgBs2IcmtCH4gbt
-   zo61J4Uvxe0TWOhpzov4pSydH6Kg9kyIKtH52tHji7CigcZoT+mw39Bki
-   Yykc0HdVUGmBJooems4tIiR45N+orKWmBNrOywPkm7GJdjFN6fsDt8NiG
-   q/ELbWihz4QBc2nNxa6XAOg0wmO90iwqEH5BuACu+i8ewuF4IoNJ08x2V
-   9yn7BURaE3tU8/EDfJmfbNim703NP3SlhNXE8pYzhHT8hQFGiE4lWwly9
-   duur29QmcEGJAfdytO93hlhcJGV+HDxvtqsb5lcXX3JrEj63sJo7cl/0n
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="292817952"
-X-IronPort-AV: E=Sophos;i="5.96,174,1665471600"; 
-   d="scan'208";a="292817952"
-Received: from fmsmga001.fm.intel.com ([10.253.24.23])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 03:34:33 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="782619333"
-X-IronPort-AV: E=Sophos;i="5.96,174,1665471600"; 
-   d="scan'208";a="782619333"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.138])
-  by fmsmga001-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 03:34:29 -0800
-Message-ID: <cebfe83b-138a-4bca-c37a-bcb5b25f580d@intel.com>
-Date:   Fri, 18 Nov 2022 13:34:25 +0200
+        with ESMTP id S230042AbiKRLnd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 06:43:33 -0500
+Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5495FE0AE;
+        Fri, 18 Nov 2022 03:43:31 -0800 (PST)
+Received: by mail-qk1-x730.google.com with SMTP id z1so3179954qkl.9;
+        Fri, 18 Nov 2022 03:43:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=LOs6c2XvVXH4tKQVpWmV3h9lepfF7gd7N53CvD43urw=;
+        b=aF6yTISiPZ7mFI2UMQPIrAovTFoJjKRj35H0n9cNYhAzaufhgyr+GG8wdFvOL8iXl9
+         kMYU0yoGGmhQUyeUYvsyn/nYq4G4y6IeD90J2UpGk0an0azWtrJ0Jx8uM1wIu+S8QPbN
+         lK4c1Q87GHXf20siW/YkVmKb/Y3e4FTWYdd+VRQjOooWzyST/QEC5uj/Yl7w2XAqOBBS
+         +H0R3x+SlP1Mu3w0amYDyvrSiZhSSyfX+Y7JUwN2EHQ7V5MmgTZ3XsYOmj/WemNP39wd
+         /PCC5iLZPsLwvFf34i+Oe61tNRO//8Ii7GNBVVIjcfqzyiQGVXKy3/oiAoHXNrbimqwS
+         Y3Lw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=LOs6c2XvVXH4tKQVpWmV3h9lepfF7gd7N53CvD43urw=;
+        b=2Hv1tSg54dfroxyigbNfASNcus7XLwrSBLlFktcRohS3LYtjJFF7PBMV+v/rl/pj6D
+         G1xVMYEs3Z+IbeclCF6xdWrfoN7vkDK+Jj5zyHbBSzRUWxknDS6m+VXt5DvbPjBaitvW
+         PhR9PDP0cSUcpJVsW3DmYZdwpE1mmyUKBdKvhnHIYGwE7x2xOptSWKcVy+JA5uEyOv6A
+         7smTlFuZDJHVJHZqFtkTxwwdantklSSoVw7+GA2Ckr6qSTGyCBnmEn4q6uaolpyxv8S5
+         29757urfmZxJZfaSg8A+uJIZEmd2vdF1CgQEV5sRQyqokYJl/bFdSQd6zPM827Y7b+lR
+         kilg==
+X-Gm-Message-State: ANoB5pkxo3FBD067W/iBY95f0onIz42o9UtbsOJ9j58zi+nX+Yo8nypi
+        osALuZNtQGe7y+jnTRYzHEIQGHfLgHW+G+hfg/pg+gWB3iNAAQ==
+X-Google-Smtp-Source: AA0mqf7FjHrgIMdUcXE6kcC899Kjubf5qPHlke+OY+gw2XNyNhSsO0D5/gZBxU8cDCh93iBHxeaiVKBX27r6gotrPDA=
+X-Received: by 2002:a05:620a:268a:b0:6fa:2c8d:d6c7 with SMTP id
+ c10-20020a05620a268a00b006fa2c8dd6c7mr5213234qkp.441.1668771810431; Fri, 18
+ Nov 2022 03:43:30 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH 3/3] mmc: block: Requeue on block size restrictions
-Content-Language: en-US
-To:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        "axboe@kernel.dk" <axboe@kernel.dk>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>
-Cc:     Avri Altman <Avri.Altman@wdc.com>,
-        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
-References: <f3b05a9103ba4c46ae78a96f8cdc700d@hyperstone.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <f3b05a9103ba4c46ae78a96f8cdc700d@hyperstone.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20221118054725.80414-1-michael@allwinnertech.com>
+In-Reply-To: <20221118054725.80414-1-michael@allwinnertech.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Fri, 18 Nov 2022 19:43:19 +0800
+Message-ID: <CA+Da2qxP2gvUc2=n5xW7_YEcgevGpDhqbcVFWVbF0c6DqXDXHA@mail.gmail.com>
+Subject: Re: [PATCH] mmc:mmc-hsq:use fifo to dispatch mmc_request
+To:     Michael Wu <michael@allwinnertech.com>
+Cc:     ulf.hansson@linaro.org, wenchao.chen@unisoc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/10/22 10:30, Christian Löhle wrote:
-> The block layer does not conform to all our sector count restrictions, so
-> requeue in case we had to modify the number of blocks sent instead of
-> going through the normal completion.
-> 
-> Note that the normal completion used before does not lead to a bug,
-> this change is just the nicer thing to do.
+On Fri, Nov 18, 2022 at 1:52 PM Michael Wu <michael@allwinnertech.com> wrote:
+>
+> Current next_tag selection will cause a large delay in some requests and
+> destroy the scheduling results of the block scheduling layer. Because the
+> issued mrq tags cannot ensure that each time is sequential, especially when
+> the IO load is heavy. In the fio performance test, we found that 4k random
+> read data was sent to mmc_hsq to start calling request_atomic It takes
+> nearly 200ms to process the request, while mmc_hsq has processed thousands
+> of other requests. So we use fifo here to ensure the first in, first out
+> feature of the request and avoid adding additional delay to the request.
+>
 
-Can you elaborate on why it is "nicer"?
+Hi Michael
+Is the test device an eMMC?
+Could you share the fio test command if you want?
+Can you provide more logs?
 
-> An example of such a restriction is max_blk_count = 1 and 512 blksz,
-> but the block layer continues to use requests of size PAGE_SIZE.
-> 
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> Signed-off-by: Michael Wu <michael@allwinnertech.com>
 > ---
->  drivers/mmc/core/block.c | 12 +++++++++---
->  1 file changed, 9 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 54cd009aee50..c434d3964880 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -1519,8 +1519,10 @@ static void mmc_blk_cqe_req_done(struct mmc_request *mrq)
->  	/*
->  	 * Block layer timeouts race with completions which means the normal
->  	 * completion path cannot be used during recovery.
-> +	 * Also do not use it if we had to modify the block count to satisfy
-> +	 * host controller needs.
->  	 */
-> -	if (mq->in_recovery)
-> +	if (mq->in_recovery || mrq->data->blocks != blk_rq_sectors(req))
->  		mmc_blk_cqe_complete_rq(mq, req);
->  	else if (likely(!blk_should_fake_timeout(req->q)))
->  		blk_mq_complete_request(req);
-> @@ -2051,8 +2053,10 @@ static void mmc_blk_hsq_req_done(struct mmc_request *mrq)
->  	/*
->  	 * Block layer timeouts race with completions which means the normal
->  	 * completion path cannot be used during recovery.
-> +	 * Also do not use it if we had to modify the block count to satisfy
-> +	 * host controller needs.
->  	 */
-> -	if (mq->in_recovery)
-> +	if (mq->in_recovery || mrq->data->blocks != blk_rq_sectors(req))
->  		mmc_blk_cqe_complete_rq(mq, req);
->  	else if (likely(!blk_should_fake_timeout(req->q)))
->  		blk_mq_complete_request(req);
-> @@ -2115,8 +2119,10 @@ static void mmc_blk_mq_post_req(struct mmc_queue *mq, struct request *req,
->  	/*
->  	 * Block layer timeouts race with completions which means the normal
->  	 * completion path cannot be used during recovery.
-> +	 * Also do not use it if we had to modify the block count to satisfy
-> +	 * host controller needs.
->  	 */
-> -	if (mq->in_recovery) {
-> +	if (mq->in_recovery || mrq->data->blocks != blk_rq_sectors(req)) {
->  		mmc_blk_mq_complete_rq(mq, req);
->  	} else if (likely(!blk_should_fake_timeout(req->q))) {
->  		if (can_sleep)
-
+>  drivers/mmc/host/mmc_hsq.c | 40 ++++++++++++++------------------------
+>  drivers/mmc/host/mmc_hsq.h |  5 +++++
+>  2 files changed, 20 insertions(+), 25 deletions(-)
+>
+> diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+> index 9d35453e7371..d2a1a96ed5bd 100644
+> --- a/drivers/mmc/host/mmc_hsq.c
+> +++ b/drivers/mmc/host/mmc_hsq.c
+> @@ -13,9 +13,6 @@
+>
+>  #include "mmc_hsq.h"
+>
+> -#define HSQ_NUM_SLOTS  64
+> -#define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
+> -
+>  static void mmc_hsq_retry_handler(struct work_struct *work)
+>  {
+>         struct mmc_hsq *hsq = container_of(work, struct mmc_hsq, retry_work);
+> @@ -73,7 +70,6 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+>
+>  static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
+>  {
+> -       struct hsq_slot *slot;
+>         int tag;
+>
+>         /*
+> @@ -82,29 +78,12 @@ static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
+>          */
+>         if (!remains) {
+>                 hsq->next_tag = HSQ_INVALID_TAG;
+> +               hsq->tag_tail = HSQ_INVALID_TAG;
+>                 return;
+>         }
+>
+> -       /*
+> -        * Increasing the next tag and check if the corresponding request is
+> -        * available, if yes, then we found a candidate request.
+> -        */
+> -       if (++hsq->next_tag != HSQ_INVALID_TAG) {
+> -               slot = &hsq->slot[hsq->next_tag];
+> -               if (slot->mrq)
+> -                       return;
+> -       }
+> -
+> -       /* Othersie we should iterate all slots to find a available tag. */
+> -       for (tag = 0; tag < HSQ_NUM_SLOTS; tag++) {
+> -               slot = &hsq->slot[tag];
+> -               if (slot->mrq)
+> -                       break;
+> -       }
+> -
+> -       if (tag == HSQ_NUM_SLOTS)
+> -               tag = HSQ_INVALID_TAG;
+> -
+> +       tag = hsq->tag_slot[hsq->next_tag];
+> +       hsq->tag_slot[hsq->next_tag] = HSQ_INVALID_TAG;
+>         hsq->next_tag = tag;
+>  }
+>
+> @@ -233,8 +212,14 @@ static int mmc_hsq_request(struct mmc_host *mmc, struct mmc_request *mrq)
+>          * Set the next tag as current request tag if no available
+>          * next tag.
+>          */
+> -       if (hsq->next_tag == HSQ_INVALID_TAG)
+> +       if (hsq->next_tag == HSQ_INVALID_TAG) {
+>                 hsq->next_tag = tag;
+> +               hsq->tag_tail = tag;
+> +               hsq->tag_slot[hsq->tag_tail] = HSQ_INVALID_TAG;
+> +       } else {
+> +               hsq->tag_slot[hsq->tag_tail] = tag;
+> +               hsq->tag_tail = tag;
+> +       }
+>
+>         hsq->qcnt++;
+>
+> @@ -339,8 +324,10 @@ static const struct mmc_cqe_ops mmc_hsq_ops = {
+>
+>  int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
+>  {
+> +       int i;
+>         hsq->num_slots = HSQ_NUM_SLOTS;
+>         hsq->next_tag = HSQ_INVALID_TAG;
+> +       hsq->tag_tail = HSQ_INVALID_TAG;
+>
+>         hsq->slot = devm_kcalloc(mmc_dev(mmc), hsq->num_slots,
+>                                  sizeof(struct hsq_slot), GFP_KERNEL);
+> @@ -351,6 +338,9 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
+>         hsq->mmc->cqe_private = hsq;
+>         mmc->cqe_ops = &mmc_hsq_ops;
+>
+> +       for (i = 0; i < HSQ_NUM_SLOTS; i++)
+> +               hsq->tag_slot[i] = HSQ_INVALID_TAG;
+> +
+>         INIT_WORK(&hsq->retry_work, mmc_hsq_retry_handler);
+>         spin_lock_init(&hsq->lock);
+>         init_waitqueue_head(&hsq->wait_queue);
+> diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
+> index ffdd9cd172c3..a783366285a9 100644
+> --- a/drivers/mmc/host/mmc_hsq.h
+> +++ b/drivers/mmc/host/mmc_hsq.h
+> @@ -2,6 +2,9 @@
+>  #ifndef LINUX_MMC_HSQ_H
+>  #define LINUX_MMC_HSQ_H
+>
+> +#define HSQ_NUM_SLOTS  64
+> +#define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
+> +
+>  struct hsq_slot {
+>         struct mmc_request *mrq;
+>  };
+> @@ -17,6 +20,8 @@ struct mmc_hsq {
+>         int next_tag;
+>         int num_slots;
+>         int qcnt;
+> +       int tag_tail;
+> +       int tag_slot[HSQ_NUM_SLOTS];
+>
+>         bool enabled;
+>         bool waiting_for_idle;
+> --
+> 2.29.0
+>
