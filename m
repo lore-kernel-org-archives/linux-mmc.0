@@ -2,123 +2,207 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85A55C43219
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 14:52:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 39B98C43217
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 14:53:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235389AbiKROwf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 09:52:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50972 "EHLO
+        id S240700AbiKROxN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 09:53:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51634 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233929AbiKROwe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 09:52:34 -0500
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 167FE193C3
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:52:33 -0800 (PST)
-Received: by mail-lf1-x132.google.com with SMTP id a29so8532036lfj.9
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:52:33 -0800 (PST)
+        with ESMTP id S235207AbiKROxM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 09:53:12 -0500
+Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C33B123174;
+        Fri, 18 Nov 2022 06:53:07 -0800 (PST)
+Received: by mail-wr1-x42a.google.com with SMTP id y16so9575471wrt.12;
+        Fri, 18 Nov 2022 06:53:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=XKTObKEL8gc5S/Q51M+L8voEMredlLnbihUYlLO76vs=;
-        b=gMK7qVcD+/wXm6dGhENohbvUGU846z0Znfnyn4YkIaWmMt7X1/cw5naSy36DVIxHYk
-         uZVj98I4oB6xd9bZLUQf19Ph1O9dDQPRXIfyTYw7E6xdNwIF1NhCnr/5k2PO705Nc5k0
-         XQ1QiUNA3VL6Ip1u8qqtVQ7z8uICNwotEUJYWA+QgjTBfmuihMV3qsZhFJ+lRubn1aKy
-         070XoR3LZfwbwMUH7Ky7T1eOGmByPNFlfsvaWR9IGBsggX8t4Eo+ZmpB2Exc/X6bY3JA
-         gWZH4YYoZmpnbfFNMeuBEXtm68vEAQ3zeK3h6H7/zWrLl9hhTz0jCBxLBOvQFXbbLTV+
-         vM4w==
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:in-reply-to:date
+         :subject:cc:to:from:references:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=O+Z7oWAPPsDnqJl4jYjtLn8srMZpWZECpL2xbCE05iM=;
+        b=ZGk3BZJO/BX+srK7si/NN/z/6Wb0cgxYbmyPK6xdNIRXFisBUdw9QGSyZ0YHFNyxeg
+         E6UhaEzD+Jq54LtcCIJAO13d2M3QDscD9pkf5y8SdkOTZiw5im+O+387Ak3pAKRSfmCW
+         +lIm2ZKavreqs5dWHhJevhTwbEj8L7gsZIdCsEiB2f+p7ZDet27Wyc14xofsx53HAW2D
+         6co4fiHzgbiku8f+L0fI19yg8jcs1JkXiIXclU8jZ4WZqCDYzI+NwWADhcOybQSwKApA
+         Wo0/hegz1HHJqnjutHW2RmUKIF8W4O7cm2QUIYhYH0upXFfsxJu5JpBwRaVJ/VBDrUyu
+         ueMg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=XKTObKEL8gc5S/Q51M+L8voEMredlLnbihUYlLO76vs=;
-        b=2pR4+cm/eQVtPQr3mBrqLUYNUZ3g0KfQQCBhLXDfpO/lgGmX/pgPbrVldKxFFBMZtP
-         59FiZjuUKQv4u7dfFkRt03PXDmZnLGnns1IAOQfbV183qCRAJkrg4alHv4Nwx1kmlUb1
-         hmyeZsWySHOo9JMwukSmY8AAWfrgOfcdzoOY9SJdn/6xozCmC+VZHYQol/pFb3Ni7yEF
-         xZAZtqVkjR5b3jMyZgXm8Y1yptOGjbv/0aJ1y1kKBGuCZs4uUktCPcIF35YLuMQWfWdF
-         LJjeunF95Q1qS+Jmhx9ramaIqfwcmhHS/bmiKauVbIWIU2HFCr/ua/FR91Memrn2IyvR
-         Gmyw==
-X-Gm-Message-State: ANoB5pno/6PcYTi1xTCihx1sw/pQXavF4/GTGxrs3yMZkFB+f8jTBx4Z
-        uSzu0OZ9l3Smy5PoOMbqWkQ0Rw==
-X-Google-Smtp-Source: AA0mqf74ROBTKaMUlZ8NEw2cWsCNjWuZzHLL5P0E9Dx63d7vUFRfCBhAqltBWgz7cA7TlfbXf1i4BA==
-X-Received: by 2002:ac2:5281:0:b0:4b3:ff4b:80a2 with SMTP id q1-20020ac25281000000b004b3ff4b80a2mr2379143lfm.281.1668783151407;
-        Fri, 18 Nov 2022 06:52:31 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id be34-20020a05651c172200b0026bf43a4d72sm676049ljb.115.2022.11.18.06.52.29
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Nov 2022 06:52:30 -0800 (PST)
-Message-ID: <15840da8-bae2-3bb2-af0c-0af563fdc27d@linaro.org>
-Date:   Fri, 18 Nov 2022 15:52:29 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH 07/12] dt-bindings: power: remove deprecated
- amlogic,meson-gx-pwrc.txt bindings
-Content-Language: en-US
-To:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Eric Dumazet <edumazet@google.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
+        h=content-transfer-encoding:mime-version:message-id:in-reply-to:date
+         :subject:cc:to:from:references:x-gm-message-state:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=O+Z7oWAPPsDnqJl4jYjtLn8srMZpWZECpL2xbCE05iM=;
+        b=jWFGHw+IQjlRygHmmMoa3HXLp9e4XzfkAZtE3d94tsPauPRTZzVtO8GKXvy89WJpwn
+         Ignx/P2cl9enWK426dy8Fxo3paKxtLSXF5A/9V1axNcjwJE9zsXfvzSCwev+VZsBH2Lu
+         8cTiDe5psEqfy9R3hKGwCkiNMstAJ4/VZCKE8EVLVBMQxG6U62t++k7fTrROqnBDD99Z
+         0N4oGcdq24b2jl0/XhaCxHm4WDS8gx/Hu9bDPYNd3ZTdpcMXaPbr8oooGHv5wQQURxvV
+         b/a5RH09uhifqlhlDHS1lfma5owYPPxuFOKjKmwW/DOSvBhWFmfEGeDSGfEYij0FznSE
+         oyJw==
+X-Gm-Message-State: ANoB5pkdvagCEMgvC1QIqA92LRWK5NsfZMqPXBqQdaJlk+D+Y4JcuN2n
+        JgNZfX6Ru+xbC9C9YCSRSx4=
+X-Google-Smtp-Source: AA0mqf41Oa+74ZDv1AvEaL4au10aUyqGoybsAt7f7b4HMj3QTDDbeDzy1OLqEPzPzaCTUXrwvo5ykw==
+X-Received: by 2002:a5d:69d0:0:b0:236:6580:da06 with SMTP id s16-20020a5d69d0000000b002366580da06mr4515981wrw.627.1668783186244;
+        Fri, 18 Nov 2022 06:53:06 -0800 (PST)
+Received: from localhost (188.28.0.239.threembb.co.uk. [188.28.0.239])
+        by smtp.gmail.com with ESMTPSA id w12-20020a05600c474c00b003b435c41103sm11263434wmo.0.2022.11.18.06.53.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 18 Nov 2022 06:53:05 -0800 (PST)
+References: <20221108045300.2084671-1-lis8215@gmail.com>
+ <20221108045300.2084671-2-lis8215@gmail.com>
+ <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
+ <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
+From:   Aidan MacDonald <aidanmacdonald.0x0@gmail.com>
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Siarhei Volkau <lis8215@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>
-Cc:     linux-media@vger.kernel.org, netdev@vger.kernel.org,
-        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-watchdog@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-pci@vger.kernel.org, devicetree@vger.kernel.org
-References: <20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org>
- <20221117-b4-amlogic-bindings-convert-v1-7-3f025599b968@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221117-b4-amlogic-bindings-convert-v1-7-3f025599b968@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        linux-mips@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 1/2] mmc: jz4740: Don't change parent clock rate for
+ some SoCs
+Date:   Fri, 18 Nov 2022 14:18:07 +0000
+In-reply-to: <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
+Message-ID: <t9aKzNwdAtshY49d7AayzhwbD9leN37T@localhost>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/11/2022 15:33, Neil Armstrong wrote:
-> Remove the deprecated amlogic,meson-gx-pwrc.txt bindings, which was
-> replaced by the amlogic,meson-ee-pwrc.yaml bindings.
-> 
-> The amlogic,meson-gx-pwrc-vpu compatible isn't used anymore since [1]
-> was merged in v5.8-rc1 and amlogic,meson-g12a-pwrc-vpu either since [2]
-> was merged in v5.3-rc1.
-> 
-> [1] commit 5273d6cacc06 ("arm64: dts: meson-gx: Switch to the meson-ee-pwrc bindings")
-> [2] commit f4f1c8d9ace7 ("arm64: dts: meson-g12: add Everything-Else power domain controller")
 
-As of next-20221109 I see both compatibles used, so something here is
-not accurate.
+Paul Cercueil <paul@crapouillou.net> writes:
 
-> 
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
-> ---
->  .../bindings/power/amlogic,meson-gx-pwrc.txt       | 63 ----------------------
->  1 file changed, 63 deletions(-)
-> 
+> Hi,
+>
+> (Ingenic SoCs maintainer here)
+>
+> Le ven. 18 nov. 2022 =C3=A0 09:45:48 +0100, Ulf Hansson <ulf.hansson@lina=
+ro.org> a
+> =C3=A9crit :
+>> On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com> wrote:
+>>>  Some SoCs have one clock divider for all MMC units, thus changing one
+>>>  affects others as well. This leads to random hangs and memory
+>>>  corruptions, observed on the JZ4755 based device with two MMC slots
+>>>  used at the same time.
+>> Urgh, that sounds like broken HW to me.
+>> The MMC blocks could share a parent clock (that would need a fixed
+>> rate for it to be applied), assuming there is a separate gate/divider
+>> available per block. But there isn't'?
+>
+> They do share a parent clock and have separate gates, and each MMC IP blo=
+ck has
+> an internal divider for the bus frequency derived from that shared clock.
+>
+>>>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b.
+>>>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
+>>>  which shall remain its behavior. For the JZ4755 is sufficient to
+>>>  use JZ4725b's binding. JZ4750 is outside of the patch.
+>>>  The MMC core has its own clock divisor, rather coarse but suitable wel=
+l,
+>>>  and it shall keep the role of tuning clock for the MMC host in that
+>>>  case.
+>> The mmc core doesn't have a clock divisor, but it does control the bus
+>> clock frequency through the ->set_ios() host ops. It needs to do that,
+>> to be able to conform to the (e)MMC, SD and SDIO specifications.
+>> Can you please try to elaborate on the above, so I can better
+>> understand your point?
+>
+> Yes, I don't really understand the patch, TBH.
+>
+> The "clk_set_rate" call will only set the shared clock to the *maximum* c=
+lock
+> frequency (host->mmc->f_max) which should be the exact same across all MM=
+C IPs.
+>
+> So it doesn't matter if it's set 3 times by 3 different instances of the =
+IP, as
+> long as they all request the same value.
 
+Isn't the fact that 3 separate driver instances call clk_set_rate()
+on a shared clock kind of... problematic? Nor is it documented that
+all controllers need to use the same max-frequency.
 
-Best regards,
-Krzysztof
+Given it's a shared clock which can't realistically be controlled by
+any of the consumers, I don't think it's unreasonable to assign the
+clock frequency from the DT, but it needs to be backward-compatible
+with old DTs.
 
+On another note, shouldn't the MMC mux parent be assigned from the DT?
+JZ4760 (and most other Ingenic SoCs) have multiple choices and I don't
+see the parent being assigned anywhere.
+
+Regards,
+Aidan
+
+>
+> Besides, I know for a fact that the mainline driver works fine on the JZ4=
+760(B)
+> and JZ4725B.
+>
+> Finally... even if it was correct, this change would break compatibility =
+with
+> old Device Tree files.
+>
+> Cheers,
+> -Paul
+>
+>>>  Signed-off-by: Siarhei Volkau <lis8215@gmail.com>
+>> Kind regards
+>> Uffe
+>>
+>>>  ---
+>>>   drivers/mmc/host/jz4740_mmc.c | 10 +++++++++-
+>>>   1 file changed, 9 insertions(+), 1 deletion(-)
+>>>  diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_m=
+mc.c
+>>>  index dc2db9c18..d390ff31d 100644
+>>>  --- a/drivers/mmc/host/jz4740_mmc.c
+>>>  +++ b/drivers/mmc/host/jz4740_mmc.c
+>>>  @@ -114,6 +114,7 @@ enum jz4740_mmc_version {
+>>>          JZ_MMC_JZ4740,
+>>>          JZ_MMC_JZ4725B,
+>>>          JZ_MMC_JZ4760,
+>>>  +       JZ_MMC_JZ4770,
+>>>          JZ_MMC_JZ4780,
+>>>          JZ_MMC_X1000,
+>>>   };
+>>>  @@ -887,7 +888,13 @@ static int jz4740_mmc_set_clock_rate(struct
+>>> jz4740_mmc_host *host, int rate)
+>>>          int real_rate;
+>>>          jz4740_mmc_clock_disable(host);
+>>>  -       clk_set_rate(host->clk, host->mmc->f_max);
+>>>  +
+>>>  +       /*
+>>>  +        * Changing rate on these SoCs affects other MMC units too.
+>>>  +        * Make sure the rate is configured properly by the CGU driver.
+>>>  +        */
+>>>  +       if (host->version !=3D JZ_MMC_JZ4725B && host->version !=3D
+>>> JZ_MMC_JZ4760)
+>>>  +               clk_set_rate(host->clk, host->mmc->f_max);
+>>>          real_rate =3D clk_get_rate(host->clk);
+>>>  @@ -992,6 +999,7 @@ static const struct of_device_id jz4740_mmc_of_mat=
+ch[]
+>>> =3D {
+>>>          { .compatible =3D "ingenic,jz4740-mmc", .data =3D (void *)
+>>> JZ_MMC_JZ4740 },
+>>>          { .compatible =3D "ingenic,jz4725b-mmc", .data =3D (void
+>>> *)JZ_MMC_JZ4725B },
+>>>          { .compatible =3D "ingenic,jz4760-mmc", .data =3D (void *)
+>>> JZ_MMC_JZ4760 },
+>>>  +       { .compatible =3D "ingenic,jz4770-mmc", .data =3D (void *)
+>>> JZ_MMC_JZ4770 },
+>>>          { .compatible =3D "ingenic,jz4775-mmc", .data =3D (void *)
+>>> JZ_MMC_JZ4780 },
+>>>          { .compatible =3D "ingenic,jz4780-mmc", .data =3D (void *)
+>>> JZ_MMC_JZ4780 },
+>>>          { .compatible =3D "ingenic,x1000-mmc", .data =3D (void *) JZ_M=
+MC_X1000
+>>> },
+>>>  --
+>>>  2.36.1
+>>>
