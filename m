@@ -2,60 +2,61 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 85638C43217
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 09:52:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9690CC433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 10:07:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241225AbiKRJwJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 04:52:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33112 "EHLO
+        id S235200AbiKRKHB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 05:07:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232902AbiKRJwI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 04:52:08 -0500
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5583B9B;
-        Fri, 18 Nov 2022 01:52:07 -0800 (PST)
-Received: by mail-ej1-x633.google.com with SMTP id n21so11692636ejb.9;
-        Fri, 18 Nov 2022 01:52:07 -0800 (PST)
+        with ESMTP id S241693AbiKRKG6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 05:06:58 -0500
+Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3414A8FB20
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 02:06:57 -0800 (PST)
+Received: by mail-pj1-x1034.google.com with SMTP id b11so4100348pjp.2
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 02:06:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=fJ4MwuPj2J9tPx2ywv2av72qIqzhlJ3AyHJuDSFMQLQ=;
-        b=RrN93dMH+xgqX/U2K/QY+iip6rrTMlsT8HIKYctbL5tgKV2rjBixUiZEjuec8Ctnb7
-         KbmjdseKXIlsQZ+5AxVcjnDM9gO7a8OO6cZF8IxdztGbUWzhPrux2STQHFMs4pVn763j
-         QCLj04udyfvJ+J08+GO3b7W41G81aAL4Gp14TjaacjKwrGP9DkwJJHag0+W0yoVuNXwv
-         ZvZ0tKoTun7XCec0n0FbhXAvgw7JPV9lfkJle1W7GMFxeFSKbhpFjEA8cg9QtyJ76hJD
-         dTff0qJs0cq++yDiJyQDj+3YkAvhp2q1gisFnPjfJA6/pcvqEGshBfZP4bcGWJHl2MJy
-         H54w==
+        bh=3uh3YxDgspkB68SJoIPbAc50d6XGVfp5931wp78ekCo=;
+        b=hs2eonUzH3U51NbUg0vNsd5tQ0Z1HqnyDlCfH1qE2oZqGApg8MIgzun6Ze88oUOO/J
+         ewfn0OyHrsF1os3fvp7YGC8JJ1uA2Tm4oVxe7VmZPu4u2Z/2jzgbXpwHhKnfKNi6PTtH
+         xDsl5Hy5omYexkgisVxzwjIjvNdCwPRbcjI9IZA18WnC6VgBVo6XM9a4jWJzFePT4z4J
+         cAuMJ2KMk2I+tlNpkmr7eLUIZaEgi//zFzKchwN+H3insIS+AWPiXIxQ0IB1MRYkPah+
+         LJahjP8cnuCmkW9s1TX+6iZd1TC49N0+EMAl5NwX7WXgsvg4ypBGLikFouVUct2V0y5x
+         LAiw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=fJ4MwuPj2J9tPx2ywv2av72qIqzhlJ3AyHJuDSFMQLQ=;
-        b=Sh5DJ9tU0Eg/HeRGs7j2FfQHYY4UK14IHSz5R1V1+xLvQkBGfEk8VCVlhv/l05hD33
-         17yTnBBZHjGKPl/LzF0y3O321m09crDMGmTE0I9neTNr+s9rCwGTk3i/YOme1I4rD3hv
-         lbdJMnGFziVmnm1mSrBe3ekohSImlbSRooQHk5KYN3cTt0lKlOMaTMGWMBWlHgLGvuxE
-         trxu5MJxvcmSe6Amr8z/M+U35s5T4gmm5e5z0D9V4+NQCdZzyw74ucijDpe4n0hALiNn
-         FMXqoPB+HGWkoAZa2MjGEpQT7AqtURz7++r6T1SRtHeNvhwW5epiIoPjlfEGoE26vAAO
-         mb2Q==
-X-Gm-Message-State: ANoB5pmqiuzPMRs2pYe0A4s6xSv+H5SCLleKDrxaMcaoDYiLgwviYqNO
-        wXD+SORrHwaTsLSzh6esi1OdXNVhdVTZFmofThE=
-X-Google-Smtp-Source: AA0mqf5IHFnH1qPUezpLU6BT8z9vH94Zy3lc/LoBaa8MHDoq9g07nSO8ueZTfHgt70IX94hKnV0CpHeuL1OoGVn77k8=
-X-Received: by 2002:a17:906:aac8:b0:7ae:df97:a033 with SMTP id
- kt8-20020a170906aac800b007aedf97a033mr5549018ejb.344.1668765126082; Fri, 18
- Nov 2022 01:52:06 -0800 (PST)
+        bh=3uh3YxDgspkB68SJoIPbAc50d6XGVfp5931wp78ekCo=;
+        b=XR/pf7pJmSFzQnBdJ74eGLg2lZ3udkZ9Ey8W2vZ6XpfTzqoMK/Hy7axK5v0cwoUTR+
+         ev7tI3E7YYW/Y1Tcgvqq7I8C42rSHKC7WCrouawDF9EoizFfwkhdkhF5hiQ/qgehRCxf
+         zXT5qrENwUXbqEJJR4AAylC99a1MTnkJVvLH5RAoJSms8G3sY3QRC/7Rby2DodgNMPnD
+         V4xrMM+loI0BhtP1j3YziNbUNt4xVvlEhbF7//qNfKyOIALfKiAuhxAOsFLj1fgbO+D8
+         qeSKkUQH0BF9wBVSAQZTpPATeUtl1LBS6Ngaw6nSeUMwSWbDKgy2aixQmkZIBzTf1ika
+         E2GQ==
+X-Gm-Message-State: ANoB5plXk4tFr1w7BWVVtjkGHvXi4RPl4aCLk7qd+t1AFQ6UsXywaMkj
+        Axj77UkFLb9bgfgVdzW/8p1jKblMo05kqeq/pmAZs2YrdDnX3Q==
+X-Google-Smtp-Source: AA0mqf5DQ+7W6xK4uZyzaxH1CPEq0BqnknF+w4PGK0v1UlGT6oDvQqas4LBFkLxvPhpjLRDpZu78WhKSiUk6wGZeezQ=
+X-Received: by 2002:a17:902:bcc9:b0:186:be05:798e with SMTP id
+ o9-20020a170902bcc900b00186be05798emr6832336pls.37.1668766016568; Fri, 18 Nov
+ 2022 02:06:56 -0800 (PST)
 MIME-Version: 1.0
 References: <20221108045300.2084671-1-lis8215@gmail.com> <20221108045300.2084671-2-lis8215@gmail.com>
- <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com> <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
-In-Reply-To: <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
-From:   Siarhei Volkau <lis8215@gmail.com>
-Date:   Fri, 18 Nov 2022 12:51:54 +0300
-Message-ID: <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
+ <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
+ <59EJLR.DQ7KHQEAEUSG2@crapouillou.net> <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
+In-Reply-To: <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 18 Nov 2022 11:06:19 +0100
+Message-ID: <CAPDyKFpNMfru+U8r-pnFpyfZ_3_7RdrApdBvcpykV1ccaMMaHQ@mail.gmail.com>
 Subject: Re: [PATCH 1/2] mmc: jz4740: Don't change parent clock rate for some SoCs
-To:     Paul Cercueil <paul@crapouillou.net>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+To:     Siarhei Volkau <lis8215@gmail.com>
+Cc:     Paul Cercueil <paul@crapouillou.net>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
@@ -67,134 +68,77 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-=D0=BF=D1=82, 18 =D0=BD=D0=BE=D1=8F=D0=B1. 2022 =D0=B3. =D0=B2 12:27, Paul =
-Cercueil <paul@crapouillou.net>:
+On Fri, 18 Nov 2022 at 10:52, Siarhei Volkau <lis8215@gmail.com> wrote:
 >
-> Hi,
->
-> (Ingenic SoCs maintainer here)
->
-> Le ven. 18 nov. 2022 =C3=A0 09:45:48 +0100, Ulf Hansson
-> <ulf.hansson@linaro.org> a =C3=A9crit :
-> > On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com> wrote:
-> >>
-> >>  Some SoCs have one clock divider for all MMC units, thus changing
-> >> one
-> >>  affects others as well. This leads to random hangs and memory
-> >>  corruptions, observed on the JZ4755 based device with two MMC slots
-> >>  used at the same time.
+> =D0=BF=D1=82, 18 =D0=BD=D0=BE=D1=8F=D0=B1. 2022 =D0=B3. =D0=B2 12:27, Pau=
+l Cercueil <paul@crapouillou.net>:
 > >
-> > Urgh, that sounds like broken HW to me.
+> > Hi,
 > >
-> > The MMC blocks could share a parent clock (that would need a fixed
-> > rate for it to be applied), assuming there is a separate gate/divider
-> > available per block. But there isn't'?
->
-> They do share a parent clock and have separate gates, and each MMC IP
-> block has an internal divider for the bus frequency derived from that
-> shared clock.
->
-> >>
-> >>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b.
-> >>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
-> >>  which shall remain its behavior. For the JZ4755 is sufficient to
-> >>  use JZ4725b's binding. JZ4750 is outside of the patch.
-> >>
-> >>  The MMC core has its own clock divisor, rather coarse but suitable
-> >> well,
-> >>  and it shall keep the role of tuning clock for the MMC host in that
-> >>  case.
+> > (Ingenic SoCs maintainer here)
 > >
-> > The mmc core doesn't have a clock divisor, but it does control the bus
-> > clock frequency through the ->set_ios() host ops. It needs to do that,
-> > to be able to conform to the (e)MMC, SD and SDIO specifications.
+> > Le ven. 18 nov. 2022 =C3=A0 09:45:48 +0100, Ulf Hansson
+> > <ulf.hansson@linaro.org> a =C3=A9crit :
+> > > On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com> wrote=
+:
+> > >>
+> > >>  Some SoCs have one clock divider for all MMC units, thus changing
+> > >> one
+> > >>  affects others as well. This leads to random hangs and memory
+> > >>  corruptions, observed on the JZ4755 based device with two MMC slots
+> > >>  used at the same time.
+> > >
+> > > Urgh, that sounds like broken HW to me.
+> > >
+> > > The MMC blocks could share a parent clock (that would need a fixed
+> > > rate for it to be applied), assuming there is a separate gate/divider
+> > > available per block. But there isn't'?
 > >
-> > Can you please try to elaborate on the above, so I can better
-> > understand your point?
+> > They do share a parent clock and have separate gates, and each MMC IP
+> > block has an internal divider for the bus frequency derived from that
+> > shared clock.
+> >
+> > >>
+> > >>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b=
+.
+> > >>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
+> > >>  which shall remain its behavior. For the JZ4755 is sufficient to
+> > >>  use JZ4725b's binding. JZ4750 is outside of the patch.
+> > >>
+> > >>  The MMC core has its own clock divisor, rather coarse but suitable
+> > >> well,
+> > >>  and it shall keep the role of tuning clock for the MMC host in that
+> > >>  case.
+> > >
+> > > The mmc core doesn't have a clock divisor, but it does control the bu=
+s
+> > > clock frequency through the ->set_ios() host ops. It needs to do that=
+,
+> > > to be able to conform to the (e)MMC, SD and SDIO specifications.
+> > >
+> > > Can you please try to elaborate on the above, so I can better
+> > > understand your point?
+> >
+> > Yes, I don't really understand the patch, TBH.
+> >
+> > The "clk_set_rate" call will only set the shared clock to the *maximum*
+> > clock frequency (host->mmc->f_max) which should be the exact same
+> > across all MMC IPs.
 >
-> Yes, I don't really understand the patch, TBH.
->
-> The "clk_set_rate" call will only set the shared clock to the *maximum*
-> clock frequency (host->mmc->f_max) which should be the exact same
-> across all MMC IPs.
+> That's the case I need different "f_max" for my HW, for some reason
+> internal slot can't do a full rate (48MHz) but the external can, the same
+> card used for checking. So I want to set 24M for mmc0, and 48M for mmc1
+> with respect to hardware limitation.
 
-That's the case I need different "f_max" for my HW, for some reason
-internal slot can't do a full rate (48MHz) but the external can, the same
-card used for checking. So I want to set 24M for mmc0, and 48M for mmc1
-with respect to hardware limitation.
+This sounds like a board specific problem, right?
 
->
-> So it doesn't matter if it's set 3 times by 3 different instances of
-> the IP, as long as they all request the same value.
->
-> Besides, I know for a fact that the mainline driver works fine on the
-> JZ4760(B) and JZ4725B.
->
-> Finally... even if it was correct, this change would break
-> compatibility with old Device Tree files.
->
-> Cheers,
-> -Paul
->
-> >>
-> >>  Signed-off-by: Siarhei Volkau <lis8215@gmail.com>
-> >
-> > Kind regards
-> > Uffe
-> >
-> >>  ---
-> >>   drivers/mmc/host/jz4740_mmc.c | 10 +++++++++-
-> >>   1 file changed, 9 insertions(+), 1 deletion(-)
-> >>
-> >>  diff --git a/drivers/mmc/host/jz4740_mmc.c
-> >> b/drivers/mmc/host/jz4740_mmc.c
-> >>  index dc2db9c18..d390ff31d 100644
-> >>  --- a/drivers/mmc/host/jz4740_mmc.c
-> >>  +++ b/drivers/mmc/host/jz4740_mmc.c
-> >>  @@ -114,6 +114,7 @@ enum jz4740_mmc_version {
-> >>          JZ_MMC_JZ4740,
-> >>          JZ_MMC_JZ4725B,
-> >>          JZ_MMC_JZ4760,
-> >>  +       JZ_MMC_JZ4770,
-> >>          JZ_MMC_JZ4780,
-> >>          JZ_MMC_X1000,
-> >>   };
-> >>  @@ -887,7 +888,13 @@ static int jz4740_mmc_set_clock_rate(struct
-> >> jz4740_mmc_host *host, int rate)
-> >>          int real_rate;
-> >>
-> >>          jz4740_mmc_clock_disable(host);
-> >>  -       clk_set_rate(host->clk, host->mmc->f_max);
-> >>  +
-> >>  +       /*
-> >>  +        * Changing rate on these SoCs affects other MMC units too.
-> >>  +        * Make sure the rate is configured properly by the CGU
-> >> driver.
-> >>  +        */
-> >>  +       if (host->version !=3D JZ_MMC_JZ4725B && host->version !=3D
-> >> JZ_MMC_JZ4760)
-> >>  +               clk_set_rate(host->clk, host->mmc->f_max);
-> >>
-> >>          real_rate =3D clk_get_rate(host->clk);
-> >>
-> >>  @@ -992,6 +999,7 @@ static const struct of_device_id
-> >> jz4740_mmc_of_match[] =3D {
-> >>          { .compatible =3D "ingenic,jz4740-mmc", .data =3D (void *)
-> >> JZ_MMC_JZ4740 },
-> >>          { .compatible =3D "ingenic,jz4725b-mmc", .data =3D (void
-> >> *)JZ_MMC_JZ4725B },
-> >>          { .compatible =3D "ingenic,jz4760-mmc", .data =3D (void *)
-> >> JZ_MMC_JZ4760 },
-> >>  +       { .compatible =3D "ingenic,jz4770-mmc", .data =3D (void *)
-> >> JZ_MMC_JZ4770 },
-> >>          { .compatible =3D "ingenic,jz4775-mmc", .data =3D (void *)
-> >> JZ_MMC_JZ4780 },
-> >>          { .compatible =3D "ingenic,jz4780-mmc", .data =3D (void *)
-> >> JZ_MMC_JZ4780 },
-> >>          { .compatible =3D "ingenic,x1000-mmc", .data =3D (void *)
-> >> JZ_MMC_X1000 },
-> >>  --
-> >>  2.36.1
-> >>
->
->
+The simple solution would be to use 24M for both hosts, but that would
+unnecessarily degrade the speed for the host for the internal slot.
+
+It sounds like we need a new DT binding to describe a capped
+max-frequency for the "broken slot". And in case that is available in
+the DTS, the mmc->f_max value should be overridden with it, while also
+respecting the original f_max value while calling clk_set_rate().
+
+Br
+Uffe
