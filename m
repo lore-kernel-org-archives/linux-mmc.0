@@ -2,74 +2,68 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEA3BC4167B
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 21:46:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C883C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 21:46:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230471AbiKRVqI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 16:46:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49698 "EHLO
+        id S231202AbiKRVqP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 16:46:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49746 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230498AbiKRVqI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 16:46:08 -0500
+        with ESMTP id S231129AbiKRVqJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 16:46:09 -0500
 Received: from mail.zeus03.de (www.zeus03.de [194.117.254.33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E260697CB
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 13:46:06 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8285C92B53
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 13:46:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=simple; d=sang-engineering.com; h=
-        from:to:cc:subject:date:message-id:mime-version
-        :content-transfer-encoding; s=k1; bh=I+n/cSBOlK+2oPfyvEXQ9g0vHwL
-        U7toRyiBqdqVkVkE=; b=hhALRwZjACO0bG+E/Wyo5GW90d6LEig0TIQD9thsryj
-        NypfiETaRo2y+6kEesft70Gh9Au6ajxvJ8AAMt5NtSeAshgTgdN1bDA6iDgUitAj
-        xiQP2xVdJi34DPd29lcPIlMLx2PAuDg8dXn4EPdo1Pr4E4CU6dzlYZ7fe1leiXh8
-        =
-Received: (qmail 1916244 invoked from network); 18 Nov 2022 22:46:04 +0100
-Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Nov 2022 22:46:04 +0100
-X-UD-Smtp-Session: l3s3148p1@lEvpocXtUIdehh99
+        from:to:cc:subject:date:message-id:in-reply-to:references
+        :mime-version:content-transfer-encoding; s=k1; bh=2YN4GpfLMSX35Q
+        RmvN2ddNeP7kM87itheot8NMxQmbs=; b=e4ntffbMIoIE3kZbu2DSOMfuT6irdM
+        2JuGJjM5UTUT7RTruVsMi73i3sUJyh/ngQhaRu6Bo/TpeUpdIAdYR9DuiXMt2kSr
+        nRXG6ohBVF43YjutMldKpuSwT1y2qJma2J8zpoaAfjfLO7JFV7CbUOPWqW7FkGg8
+        bDLYP4ydm2iOE=
+Received: (qmail 1916316 invoked from network); 18 Nov 2022 22:46:06 +0100
+Received: by mail.zeus03.de with ESMTPSA (TLS_AES_256_GCM_SHA384 encrypted, authenticated); 18 Nov 2022 22:46:06 +0100
+X-UD-Smtp-Session: l3s3148p1@OS8MosXtaIdehh99
 From:   Wolfram Sang <wsa+renesas@sang-engineering.com>
 To:     linux-mmc@vger.kernel.org
 Cc:     linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
         Wolfram Sang <wsa+renesas@sang-engineering.com>
-Subject: [PATCH 0/2] mmc: renesas_sdhi: upport better HS400 reset from BSP
-Date:   Fri, 18 Nov 2022 22:45:54 +0100
-Message-Id: <20221118214556.81763-1-wsa+renesas@sang-engineering.com>
+Subject: [PATCH 2/2] mmc: renesas_sdhi: better reset from HS400 mode
+Date:   Fri, 18 Nov 2022 22:45:56 +0100
+Message-Id: <20221118214556.81763-3-wsa+renesas@sang-engineering.com>
 X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20221118214556.81763-1-wsa+renesas@sang-engineering.com>
+References: <20221118214556.81763-1-wsa+renesas@sang-engineering.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This small series upports a BSP improvement in a refactored way. The
-original patch 15d7abbfc3f0 ("mmc: renesas_sdhi: reset calibration register")
-added a new quirk for devices which always should disable HS400
-adjustment. This was only applicable for SoCs which either had bad_taps
-or needed a calibration table. So, I simply used this logic directly.
-This is patch 2.
+Up to now, HS400 adjustment mode was only disabled on soft reset when a
+calibration table was in use. It is safer, though, to disable it as soon
+as the instance has an adjustment related quirk set, i.e. bad taps or a
+calibration table.
 
-To achieve this in a readable way, I finally did something I wanted to
-do for some time now. Having a helper to check for SDHI quirks. This is
-patch 1.
+Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
+---
+ drivers/mmc/host/renesas_sdhi_core.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-The series has been tested on a Salvator-XS (R-Car M3-N). The patches
-are based on mmc/next as of today as they depend on d901e2ba566 ("mmc:
-renesas_sdhi: take DMA end interrupts into account").
-
-Let me know what you think!
-
-Happy hacking,
-
-   Wolfram
-
-
-Wolfram Sang (2):
-  mmc: renesas_sdhi: add helper to access quirks
-  mmc: renesas_sdhi: better reset from HS400 mode
-
- drivers/mmc/host/renesas_sdhi.h               |  2 ++
- drivers/mmc/host/renesas_sdhi_core.c          | 18 +++++++++---------
- drivers/mmc/host/renesas_sdhi_internal_dmac.c |  8 ++++----
- 3 files changed, 15 insertions(+), 13 deletions(-)
-
+diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
+index af6aa637bd49..e995f312878d 100644
+--- a/drivers/mmc/host/renesas_sdhi_core.c
++++ b/drivers/mmc/host/renesas_sdhi_core.c
+@@ -546,7 +546,7 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
+ 			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
+ 			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+ 
+-	if (priv->adjust_hs400_calib_table)
++	if (sdhi_has_quirk(priv, hs400_calib_table) || sdhi_has_quirk(priv, hs400_bad_taps))
+ 		renesas_sdhi_adjust_hs400_mode_disable(host);
+ 
+ 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
 -- 
 2.30.2
 
