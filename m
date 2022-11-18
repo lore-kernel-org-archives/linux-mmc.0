@@ -2,136 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88D8FC43217
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 07:33:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 654D0C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 07:54:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240978AbiKRHdI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 02:33:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49220 "EHLO
+        id S231768AbiKRHyB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 02:54:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239887AbiKRHdH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 02:33:07 -0500
-Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B3C8C7DEDD;
-        Thu, 17 Nov 2022 23:33:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668756786; x=1700292786;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=wqq6p7emkxt5LAd+YfGgGUaluBoYtkiltPBGxPE3TbY=;
-  b=anwjS0+dVzt7K1CQ9HWE58hA8C68kSnku+wygnFzE2LWSvIjEXmqHCiB
-   Srd9cjfsP5bnY0Idb2HKWMgE19vLJecOVKS17WyJ08dDglKY+T0ltN2zO
-   f9OaN9tkBn6ANjI1xk1Dce1ja6LH9eOzSls0ovLqa6wtj2RsHOgGgbGL5
-   mntiUVACLrtIK9xir/fjF86qqGF171lHWyoBoePzbdszIUr+eHswHWhlC
-   dmIPAnY2VzciYMf6TL3WqgQorlymfdk3c7OtS04iHXVbYpxfO9fCi9tP6
-   YINkaokOO4++8Z+FLA5oLuhTD7dJH7HCDbBRsULfTQ7JZbzvaEgP6Mn23
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="296440958"
-X-IronPort-AV: E=Sophos;i="5.96,173,1665471600"; 
-   d="scan'208";a="296440958"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2022 23:33:06 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="703646901"
-X-IronPort-AV: E=Sophos;i="5.96,173,1665471600"; 
-   d="scan'208";a="703646901"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.138])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Nov 2022 23:33:03 -0800
-Message-ID: <11a4e08b-f176-a39a-365c-278b08fc1bdb@intel.com>
-Date:   Fri, 18 Nov 2022 09:32:58 +0200
+        with ESMTP id S229743AbiKRHyA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 02:54:00 -0500
+Received: from szxga08-in.huawei.com (szxga08-in.huawei.com [45.249.212.255])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E2778C08D
+        for <linux-mmc@vger.kernel.org>; Thu, 17 Nov 2022 23:53:56 -0800 (PST)
+Received: from dggpemm500020.china.huawei.com (unknown [172.30.72.56])
+        by szxga08-in.huawei.com (SkyGuard) with ESMTP id 4ND8DB5px3z15MgZ;
+        Fri, 18 Nov 2022 15:53:30 +0800 (CST)
+Received: from dggpemm500007.china.huawei.com (7.185.36.183) by
+ dggpemm500020.china.huawei.com (7.185.36.49) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Fri, 18 Nov 2022 15:53:54 +0800
+Received: from [10.174.178.174] (10.174.178.174) by
+ dggpemm500007.china.huawei.com (7.185.36.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Fri, 18 Nov 2022 15:53:54 +0800
+Subject: Re: [PATCH v4 0/2] mmc: sdio: fixes some leaks
+To:     <linux-mmc@vger.kernel.org>
+CC:     <ulf.hansson@linaro.org>, <yangyingliang@huawei.com>
+References: <20221110025530.4106568-1-yangyingliang@huawei.com>
+From:   Yang Yingliang <yangyingliang@huawei.com>
+Message-ID: <cd06c6cc-fd5a-1fe4-9570-4266f34918cd@huawei.com>
+Date:   Fri, 18 Nov 2022 15:53:53 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH v11 3/6] mmc: sdhci-tegra: Sort includes alphabetically
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Joerg Roedel <joro@8bytes.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Robin Murphy <robin.murphy@arm.com>
-Cc:     Thierry Reding <treding@nvidia.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Prathamesh Shete <pshete@nvidia.com>,
-        Will Deacon <will@kernel.org>,
-        iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org
-References: <20221117182720.2290761-1-thierry.reding@gmail.com>
- <20221117182720.2290761-4-thierry.reding@gmail.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221117182720.2290761-4-thierry.reding@gmail.com>
-Content-Type: text/plain; charset=UTF-8
+In-Reply-To: <20221110025530.4106568-1-yangyingliang@huawei.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Originating-IP: [10.174.178.174]
+X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
+ dggpemm500007.china.huawei.com (7.185.36.183)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/11/22 20:27, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
-> 
-> Sort includes alphabetically to make it easier to add new ones
-> subsequently.
-> 
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
-> ---
->  drivers/mmc/host/sdhci-tegra.c | 23 ++++++++++++-----------
->  1 file changed, 12 insertions(+), 11 deletions(-)
+Hi,
 
-12 insertions and 11 deletions because linux/bitfield.h
-was added.
+On 2022/11/10 10:55, Yang Yingliang wrote:
+> This patchset fix a refcount leak and two memory leaks about
+> SDIO function.
+>
+> v3 -> v4:
+>    Drop patch1, keep calling put_device() to free memory,
+>    set 'func->card' to NULL to avoid redundant put.
+>
+> v2 -> v3:
+>    Change to call of_node_put() in remove() function to
+>    fix node refcount leak.
+>
+> v1 -> v2:
+>    Fix compile error in patch #2.
+>
+> Yang Yingliang (2):
+>    mmc: sdio: fix of node refcount leak in sdio_add_func()
+>    mmc: sdio: fix possible memory leak in some error path
+>
+>   drivers/mmc/core/sdio.c     | 1 +
+>   drivers/mmc/core/sdio_bus.c | 6 +++---
+>   drivers/mmc/core/sdio_cis.c | 3 ++-
+>   3 files changed, 6 insertions(+), 4 deletions(-)
+Is this look good to you, or any suggestions?
 
-I am not super enthusiastic about reordering includes.
-I would advise people to text search to find an include
-instead.
-
-Nevertheless:
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> 
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index c71000a07656..e2a8488d4fa9 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -3,28 +3,29 @@
->   * Copyright (C) 2010 Google, Inc.
->   */
->  
-> +#include <linux/bitfield.h>
-> +#include <linux/clk.h>
->  #include <linux/delay.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/err.h>
-> -#include <linux/module.h>
-> +#include <linux/gpio/consumer.h>
->  #include <linux/init.h>
-> -#include <linux/iopoll.h>
-> -#include <linux/platform_device.h>
-> -#include <linux/clk.h>
->  #include <linux/io.h>
-> -#include <linux/of.h>
-> +#include <linux/iopoll.h>
-> +#include <linux/ktime.h>
-> +#include <linux/mmc/card.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/mmc.h>
-> +#include <linux/mmc/slot-gpio.h>
-> +#include <linux/module.h>
->  #include <linux/of_device.h>
-> +#include <linux/of.h>
->  #include <linux/pinctrl/consumer.h>
-> +#include <linux/platform_device.h>
->  #include <linux/pm_opp.h>
->  #include <linux/pm_runtime.h>
->  #include <linux/regulator/consumer.h>
->  #include <linux/reset.h>
-> -#include <linux/mmc/card.h>
-> -#include <linux/mmc/host.h>
-> -#include <linux/mmc/mmc.h>
-> -#include <linux/mmc/slot-gpio.h>
-> -#include <linux/gpio/consumer.h>
-> -#include <linux/ktime.h>
->  
->  #include <soc/tegra/common.h>
->  
-
+Thanks,
+Yang
