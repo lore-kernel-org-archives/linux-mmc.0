@@ -2,170 +2,221 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BC3F8C4321E
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 08:29:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 421A4C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 08:42:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241448AbiKRI3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 03:29:09 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48078 "EHLO
+        id S235025AbiKRIm5 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 03:42:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241416AbiKRI2h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 03:28:37 -0500
-Received: from mail-lj1-x230.google.com (mail-lj1-x230.google.com [IPv6:2a00:1450:4864:20::230])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8388D391C9
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:28:33 -0800 (PST)
-Received: by mail-lj1-x230.google.com with SMTP id a15so5886516ljb.7
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 00:28:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=DZabo7ibEwOOw8J7VwUfivpQWJQQOqpTQOP6qmrwcFs=;
-        b=c0DwlSGGZnpMt70g7cvHCqqLtClo+HqnYC/KDMQT/2C4Kgme2ED6Ajko4OIXpmbeXS
-         m5SIke4QdtVszOu65Cv1AnF200xxc1a/iy1cj+W/4WPUi1idnzCq3jL3rOCyXQ/Sy7Xo
-         FhxYYZmL7CP0ofdSTlNio6J4qvL4Gb4QE7SbMbyvGwdcz0q2lnaiEphLSDGuz3cWY979
-         gQT9VdBtzdRs59dL/dUgCq5BV84WRT+Q7ok8jIBAq5G8XWvjz6kIifP/efd7/+/UMkZu
-         +qzJPaRvsSeqy/GGhmsAycmFzituYnYzJUATh2BkazIz98eeuD3Eq9fkv2cSDtBNQpLB
-         eqpQ==
+        with ESMTP id S232404AbiKRImz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 03:42:55 -0500
+Received: from mail-qv1-f54.google.com (mail-qv1-f54.google.com [209.85.219.54])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DC8FE0F7;
+        Fri, 18 Nov 2022 00:42:54 -0800 (PST)
+Received: by mail-qv1-f54.google.com with SMTP id i12so2942952qvs.2;
+        Fri, 18 Nov 2022 00:42:54 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=DZabo7ibEwOOw8J7VwUfivpQWJQQOqpTQOP6qmrwcFs=;
-        b=saoVS93JiR3FeCdSgfToC9ORBosa/Ol7V7it3bgqP2wxNSr/ZsziO4VYnwWzDvcRR/
-         js0QHubsjVxJIVBEBT/6eKw69m3HhDb1fq0FTqwHKb4mXlHKFjmQF3V/22DIWE2qSj/L
-         AOWa6t3tXo3LTOllYCFaX2jVvFnEro5W/wBWPg7VkbWzCHwAYva/u0PegRqxugK5KzvW
-         SPzeuYGaIuoqOT5XlkPi+pKuFRNUGbIBwpOAre5l95Pu4HlxDYjIIopYc7cMcT+glvJl
-         TjF1I2/u6frOuQyX2g6KRyNMmGe5lEA7zaO8minexMmXZLeGXgtcAWa2pngwKx/bARWV
-         5pOw==
-X-Gm-Message-State: ANoB5plmEYzPmv4v85/0yossAhJ3Q0RJiHXmHHEX33LNsPNk6HIwRzlY
-        hLdYlEbTue+nVfZtGoAgNf6obg==
-X-Google-Smtp-Source: AA0mqf5FUU/an0yPckwGnu0iJ8FLtTfHewcyaiyp5w+c6ymGf8LMkNj5Lkw1yXdUuHVX3l3x9IvIFA==
-X-Received: by 2002:a2e:a5c7:0:b0:277:8d48:27dd with SMTP id n7-20020a2ea5c7000000b002778d4827ddmr2207144ljp.192.1668760111721;
-        Fri, 18 Nov 2022 00:28:31 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id d24-20020a056512369800b0049b8c0571e5sm564273lfs.113.2022.11.18.00.28.30
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=6UUepPjtp7tXuNI8x6TQiQ+HTeQFYkPSiIg2QjVFvAA=;
+        b=PIzYhKpPqLlXCUAJEtph3ModlJHU3wAfj1gxXaqsrQme7I9jkyhsgW5p2maGoHadij
+         U5WnfW/yFvlpQ45zA5FPkpwajjPjfEhH+tW+1sxLAO41f2h7BQ1BFIv7c/kDSF6VYEFx
+         qm9mcRZhn6XQa2aNQ0KYwRxJ8xpC8iY1KvhOgWWRKQTuAHnYMYJEHlgRTJxNu5avElW+
+         K/MCYo/ZLeDhrtZbWqPRQw5cKnQi7VAmVdCo/PpHI3c+sED7gPHLYzPGk/5hAQr9k68z
+         N2gp5NkUvnFCx6QaR8Rky6TNsejU2E1bV6hA51PLyZXxJhGan+Yp6VIUynSeCThWJXN5
+         djzw==
+X-Gm-Message-State: ANoB5pkxFl98KbYTbrLqP7eOwjoJ5kW1nh1dpX9Uyv9T0egZkTNxaf96
+        sLLQc674XtxCg168oTf/097uaztg6YFuaA==
+X-Google-Smtp-Source: AA0mqf7fmRgSuC3ZN4cd8n12HXYRTVKhQZEqGq1XsE9+BNWKhAa6eC67pOpQE38id7FyDFtHz1t9uQ==
+X-Received: by 2002:a0c:ff0b:0:b0:4bb:7349:14e5 with SMTP id w11-20020a0cff0b000000b004bb734914e5mr5586353qvt.114.1668760973329;
+        Fri, 18 Nov 2022 00:42:53 -0800 (PST)
+Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com. [209.85.219.176])
+        by smtp.gmail.com with ESMTPSA id dt18-20020a05620a479200b006ea7f9d8644sm2026710qkb.96.2022.11.18.00.42.52
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Nov 2022 00:28:31 -0800 (PST)
-Message-ID: <578b686e-8461-a959-86c5-83a8be1dc981@linaro.org>
-Date:   Fri, 18 Nov 2022 09:28:29 +0100
+        Fri, 18 Nov 2022 00:42:53 -0800 (PST)
+Received: by mail-yb1-f176.google.com with SMTP id 7so4847310ybp.13;
+        Fri, 18 Nov 2022 00:42:52 -0800 (PST)
+X-Received: by 2002:a25:9e84:0:b0:6de:6183:c5c3 with SMTP id
+ p4-20020a259e84000000b006de6183c5c3mr5804957ybq.89.1668760972393; Fri, 18 Nov
+ 2022 00:42:52 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [RFC PATCH 1/9] dt-bindings: drop redundant part of title of
- shared bindings
-Content-Language: en-US
-To:     Miquel Raynal <miquel.raynal@bootlin.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-watchdog@vger.kernel.org
-References: <20221117123850.368213-1-krzysztof.kozlowski@linaro.org>
- <20221117123850.368213-2-krzysztof.kozlowski@linaro.org>
- <20221117220756.7a1bf734@xps-13>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221117220756.7a1bf734@xps-13>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <e9d8c14d-38b3-0401-7bfc-b2bd7ab36c52@linaro.org>
+ <20221116193940.67445-1-blarson@amd.com> <20221116223045.GA1130586-robh@kernel.org>
+ <BL0PR12MB2401ECC21B2EA83A5D806E369B069@BL0PR12MB2401.namprd12.prod.outlook.com>
+ <BL0PR12MB2401AFF244ADF7B026935A419B069@BL0PR12MB2401.namprd12.prod.outlook.com>
+In-Reply-To: <BL0PR12MB2401AFF244ADF7B026935A419B069@BL0PR12MB2401.namprd12.prod.outlook.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Fri, 18 Nov 2022 09:42:40 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdXuTxAZsrqHxfhwhWq6xmJVRuzFNmgMx26zBAY=D2s19A@mail.gmail.com>
+Message-ID: <CAMuHMdXuTxAZsrqHxfhwhWq6xmJVRuzFNmgMx26zBAY=D2s19A@mail.gmail.com>
+Subject: Re: [PATCH v8 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
+ Pensando Elba System Resource chip
+To:     "Larson, Bradley" <Bradley.Larson@amd.com>
+Cc:     Rob Herring <robh@kernel.org>, Brad Larson <brad@pensando.io>,
+        "krzysztof.kozlowski@linaro.org" <krzysztof.kozlowski@linaro.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "alcooperx@gmail.com" <alcooperx@gmail.com>,
+        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "brijeshkumar.singh@amd.com" <brijeshkumar.singh@amd.com>,
+        "broonie@kernel.org" <broonie@kernel.org>,
+        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
+        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
+        "gsomlo@gmail.com" <gsomlo@gmail.com>,
+        "krzk@kernel.org" <krzk@kernel.org>,
+        "krzysztof.kozlowski+dt@linaro.org" 
+        <krzysztof.kozlowski+dt@linaro.org>,
+        "lee.jones@linaro.org" <lee.jones@linaro.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "p.yadav@ti.com" <p.yadav@ti.com>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "piotrs@cadence.com" <piotrs@cadence.com>,
+        "rdunlap@infradead.org" <rdunlap@infradead.org>,
+        "samuel@sholland.org" <samuel@sholland.org>,
+        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
+        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "will@kernel.org" <will@kernel.org>,
+        "yamada.masahiro@socionext.com" <yamada.masahiro@socionext.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/11/2022 22:07, Miquel Raynal wrote:
-> Hi Krzysztof,
-> 
-> krzysztof.kozlowski@linaro.org wrote on Thu, 17 Nov 2022 13:38:42 +0100:
-> 
->> The Devicetree bindings document does not have to say in the title that
->> it is a "binding", but instead just describe the hardware.  For shared
->> (re-usable) schemas, name them all as "common properties".
->>
->> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->> ---
->>  Documentation/devicetree/bindings/clock/qcom,gcc.yaml         | 2 +-
->>  Documentation/devicetree/bindings/dma/dma-common.yaml         | 2 +-
->>  Documentation/devicetree/bindings/dma/dma-controller.yaml     | 4 ++--
->>  Documentation/devicetree/bindings/dma/dma-router.yaml         | 4 ++--
->>  Documentation/devicetree/bindings/iio/adc/adc.yaml            | 2 +-
->>  .../devicetree/bindings/media/video-interface-devices.yaml    | 2 +-
->>  Documentation/devicetree/bindings/media/video-interfaces.yaml | 2 +-
->>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml     | 2 +-
->>  Documentation/devicetree/bindings/mtd/nand-chip.yaml          | 2 +-
->>  Documentation/devicetree/bindings/mtd/nand-controller.yaml    | 2 +-
->>  .../bindings/net/bluetooth/bluetooth-controller.yaml          | 2 +-
->>  Documentation/devicetree/bindings/net/can/can-controller.yaml | 2 +-
->>  .../devicetree/bindings/net/ethernet-controller.yaml          | 2 +-
->>  Documentation/devicetree/bindings/net/ethernet-phy.yaml       | 2 +-
->>  Documentation/devicetree/bindings/net/mdio.yaml               | 2 +-
->>  Documentation/devicetree/bindings/opp/opp-v2-base.yaml        | 2 +-
->>  .../devicetree/bindings/power/reset/restart-handler.yaml      | 2 +-
->>  Documentation/devicetree/bindings/rtc/rtc.yaml                | 2 +-
->>  .../devicetree/bindings/soundwire/soundwire-controller.yaml   | 2 +-
->>  Documentation/devicetree/bindings/spi/spi-controller.yaml     | 2 +-
->>  Documentation/devicetree/bindings/watchdog/watchdog.yaml      | 2 +-
->>  21 files changed, 23 insertions(+), 23 deletions(-)
->>
-> 
-> [...]
-> 
->> diff --git a/Documentation/devicetree/bindings/mtd/nand-chip.yaml b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
->> index 97ac3a3fbb52..20b195ef9b70 100644
->> --- a/Documentation/devicetree/bindings/mtd/nand-chip.yaml
->> +++ b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
->> @@ -4,7 +4,7 @@
->>  $id: http://devicetree.org/schemas/mtd/nand-chip.yaml#
->>  $schema: http://devicetree.org/meta-schemas/core.yaml#
->>  
->> -title: NAND Chip and NAND Controller Generic Binding
->> +title: NAND Chip and NAND Controller common properties
-> 
-> I only see this now but the title should be
-> 
-> 	"NAND chip common properties"
-> 
->>  
->>  maintainers:
->>    - Miquel Raynal <miquel.raynal@bootlin.com>
->> diff --git a/Documentation/devicetree/bindings/mtd/nand-controller.yaml b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
->> index 359a015d4e5a..a004efc42842 100644
->> --- a/Documentation/devicetree/bindings/mtd/nand-controller.yaml
->> +++ b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
->> @@ -4,7 +4,7 @@
->>  $id: http://devicetree.org/schemas/mtd/nand-controller.yaml#
->>  $schema: http://devicetree.org/meta-schemas/core.yaml#
->>  
->> -title: NAND Chip and NAND Controller Generic Binding
->> +title: NAND Chip and NAND Controller common properties
-> 
-> And here just "NAND controller..."
-> 
-> Of course the original purpose of your series is more to clean those
-> titles rather than fixing them and if you disagree I am fine doing it
-> myself aside, but if you could at the same time make the title more
-> accurate that would be perfect.
-> 
-> Either ways:
-> 
-> Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+Hi Brad,
 
-Thanks, I update these manually, so I can correct the names to ones you
-mentioned. Thanks.
+On Thu, Nov 17, 2022 at 7:39 PM Larson, Bradley <Bradley.Larson@amd.com> wrote:
+> > > > > --- /dev/null
+> > > > > +++ b/Documentation/devicetree/bindings/mfd/amd,pensando-elbasr.yaml
+> > > ...
+> > > > > +
+> > > > > +title: AMD Pensando Elba SoC Resource Controller
+> > > > > +
+> > > > > +description: |
+> > > > > +  AMD Pensando Elba SoC Resource Controller functions are
+> > > > > +  accessed with four chip-selects.  Reset control is on CS0.
+> > > >
+> > > > One device with 4 chip-selects? Then I'd expect 'reg = <0 1 2 3>;'
+> > > >
+> > > > Hard to say more because I don't have the whole thread nor remember what
+> > > > exactly we discussed before. That was 100s of bindings ago...
+> > >
+> > > I agree and the example for v7 had all 4 chip-selects shown.
+> >
+> > That is not what I said. Look at 'reg' above again. You have 1 device,
+> > but you have 4 nodes which looks like separate 4 devices. The
+> > exception would be if what's on each chip select is independent from
+> > each other.
+> >
+> > Describe what your h/w has/is/does so we can provide better guidance.
+>
+> This is the hardware design for every implementation with the Elba SoC
+>
+>   Elba <-- spi --> One FPGA or CPLD (4 chip-selects)
+>
+> where there are four functions in the FPGA accessed by userspace applications except for emmc reset control which is a bit in a CS0 register.  The IP at CS0 is a bunch of miscellaneous mgmt registers.  CS1 is a designware I2C master/slave.  CS2 is a Lattice dual I2C master.  CS3 is internal storage for the CPLD or FPGA depending on the hardware implementation.
+>
+> 'reg = <0 1 2 3>' in the dt fragment below is indicating the chip-select which is what other bindings appear to be doing.  Maybe one answer is delete this and add our compatible to spidev.c in the patchset we provide to customers.  Adding our compatible to spidev.c was nack'ed. Recommendation?
 
-Best regards,
-Krzysztof
+The fragment below does not have "reg = <0 1 2 3>", but individual
+subnodes, each with their own "reg" property.
 
+> Not including 'reg' results in this compile warning:
+>
+>   DTC     arch/arm64/boot/dts/amd/elba-asic.dtb
+> arch/arm64/boot/dts/amd/elba-asic-common.dtsi:73.28-78.4: Warning (spi_bus_reg): /soc/spi@2800/system-controller@0: missing or empty reg property
+> arch/arm64/boot/dts/amd/elba-asic-common.dtsi:80.22-84.4: Warning (spi_bus_reg): /soc/spi@2800/system-controller@1: missing or empty reg property
+> arch/arm64/boot/dts/amd/elba-asic-common.dtsi:86.22-92.4: Warning (spi_bus_reg): /soc/spi@2800/system-controller@2: missing or empty reg property
+> arch/arm64/boot/dts/amd/elba-asic-common.dtsi:94.22-98.4: Warning (spi_bus_reg): /soc/spi@2800/system-controller@3: missing or empty reg property
+>   CALL    scripts/atomic/check-atomics.sh
+>
+> &emmc {
+>         bus-width = <8>;
+>         cap-mmc-hw-reset;
+>         reset-names = "hw";
+>         resets = <&rstc 0>;
+>         status = "okay";
+> };
+>
+> &spi0 {
+>         #address-cells = <1>;
+>         #size-cells = <0>;
+>         num-cs = <4>;
+>         cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
+>                    <&porta 7 GPIO_ACTIVE_LOW>;
+>         status = "okay";
+>
+>         rstc: system-controller@0 {
+>                 compatible = "amd,pensando-elbasr";
+>                 reg = <0>;
+>                 spi-max-frequency = <12000000>;
+>                 #reset-cells = <1>;
+>         };
+>
+>         system-controller@1 {
+>                 compatible = "amd,pensando-elbasr";
+>                 reg = <1>;
+>                 spi-max-frequency = <12000000>;
+>         };
+>
+>         system-controller@2 {
+>                 compatible = "amd,pensando-elbasr";
+>                 reg = <2>;
+>                 spi-max-frequency = <12000000>;
+>                 interrupt-parent = <&porta>;
+>                 interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+>         };
+>
+>         system-controller@3 {
+>                 compatible = "amd,pensando-elbasr";
+>                 reg = <3>;
+>                 spi-max-frequency = <12000000>;
+>         };
+
+The above describes 4 individual but further identical (they have the
+same compatible value) devices, while above you say they are not identical:
+
+    The IP at CS0 is a bunch of miscellaneous mgmt registers.
+    CS1 is a designware I2C master/slave.
+    CS2 is a Lattice dual I2C master.
+    CS3 is internal storage for the CPLD or FPGA depending on the
+hardware implementation.
+
+So either this should be modelled as a single subnode with 4 chip
+selects[*]:
+
+        system-controller@0 {
+                compatible = "amd,pensando-elbasr";
+                reg = <0 1 2 3 4>;
+                spi-max-frequency = <12000000>;
+                #reset-cells = <1>;
+        };
+
+or as 4 separate subnodes, each using 4 different compatible values.
+Giving the wildly different functionalities provided by each, you also need
+4 binding documents.
+
+[*] I'm not sure the Linux SPI core actually supports this yet.
+
+> };
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
