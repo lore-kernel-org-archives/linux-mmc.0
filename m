@@ -2,166 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CCD2C433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 15:58:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2AE5C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 17:27:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235347AbiKRP6F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 10:58:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33366 "EHLO
+        id S235383AbiKRR1V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 12:27:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241312AbiKRP5y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 10:57:54 -0500
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AE838C49C;
-        Fri, 18 Nov 2022 07:57:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1668787070; x=1700323070;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=XgP2lG71f/yvkzLxgAqHrbqmDoKedQZs0MHmAuqx/Os=;
-  b=fyPkmcEnOWH+MXUeciUl7aAA1asGXCDY1o3ZY+XK2M1dy4daICl5LHwC
-   fdgBm4idh96Ey+uO8JnvackzbDL+3j1iCtM3NF5I+6BSerL/15HWM7d4g
-   GNI7NYINKf0dypKhA7HVVPeX294xLpIDM2YtMrzU3+h+kjvtwdbMq8aFk
-   0oJppJmwAze+f2VjoBrx3AdSaHF6jxYxJXgHNWFbfZSB6im+yMXlOHzt+
-   D9FKXsxgHyQwDzC7LnSc4fy0ACdKj3t9yNszcU5quEsJpb8qAKRxawzky
-   8ZZZ9+LYl74N4GCKMOnjpFBsEuHaRNU3m9K37MjbbpT/vTsAJk+VOH8Qh
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10535"; a="311867688"
-X-IronPort-AV: E=Sophos;i="5.96,174,1665471600"; 
-   d="scan'208";a="311867688"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 07:57:50 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10535"; a="673231481"
-X-IronPort-AV: E=Sophos;i="5.96,174,1665471600"; 
-   d="scan'208";a="673231481"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.138])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 07:57:47 -0800
-Message-ID: <8433ae30-2633-1f32-ef11-2168c9cfea80@intel.com>
-Date:   Fri, 18 Nov 2022 17:57:42 +0200
+        with ESMTP id S235254AbiKRR1U (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 12:27:20 -0500
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C54B5DF8B;
+        Fri, 18 Nov 2022 09:27:16 -0800 (PST)
+Received: by mail-pl1-f174.google.com with SMTP id 4so5179911pli.0;
+        Fri, 18 Nov 2022 09:27:16 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=JSuXoCSwNdmGNsrLkM16f100zMEsciiCUvb+fP2+8Zo=;
+        b=cPawLvqXPC8cgWmN4KX9KxRu94EJIvO2dV/L78M/j4Vk7fAKxjlI/918HZCqToKKE5
+         RtmlLF1MkTfNFdYQVrxcGP0fWpRlL3unrHDcT/fY2KgQjO+O26d+MoUPLbdbwNUZWudA
+         oXH5J1YFGQvl9NofnJM9Y6yhxXzByb5lwTrw54sHOuIBXqjhvpVSqTKGGmufnPrOiFej
+         BiD45hKw0XtcpWKMRMNZ+YIpgvWWfIyGL3mnvxdbVuxLx0qmEXcuSzNeSny7frzqr0gW
+         dde/PFWwEHBhv/dCSogKS68TpDOx6ycFSM+beUl14JsHsT02lBP3nlPnCULOp8agpkAf
+         TOCA==
+X-Gm-Message-State: ANoB5pmWZuRa5F240n6zPzMbcw12DRXlrg6j0UsZ2m0rzGQuG0p4U7Lw
+        OHFiuppM7G+2Rjw20/odmIM=
+X-Google-Smtp-Source: AA0mqf5ld9uUcm0BwXCXF/PhDgLbpxrFnPF34jlEiWKP2fqKrPMG4CMgkRh5sVdmyM/XgB/03ZXnQg==
+X-Received: by 2002:a17:902:ec01:b0:186:878e:3b0d with SMTP id l1-20020a170902ec0100b00186878e3b0dmr357399pld.149.1668792436174;
+        Fri, 18 Nov 2022 09:27:16 -0800 (PST)
+Received: from ?IPV6:2620:15c:211:201:5392:f94c:13ff:af1a? ([2620:15c:211:201:5392:f94c:13ff:af1a])
+        by smtp.gmail.com with ESMTPSA id h2-20020a63c002000000b0046b1dabf9a8sm3049437pgg.70.2022.11.18.09.27.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 18 Nov 2022 09:27:15 -0800 (PST)
+Message-ID: <d1a1340a-f5f8-6953-e066-b8c6095d63fd@acm.org>
+Date:   Fri, 18 Nov 2022 09:27:13 -0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH 1/1] mmc: sdhci: Fixed too many logs being printed during
- tuning
+ Thunderbird/102.3.0
+Subject: Re: [PATCH 0/3] mmc: Improve block layer requeueing behavior
 Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
-        lzx.stg@gmail.com
-References: <20221111084214.14822-1-wenchao.chen666@gmail.com>
- <20221111084214.14822-2-wenchao.chen666@gmail.com>
- <59fc95ec-c0db-4011-eca3-3d101f0bc908@intel.com>
- <CA+Da2qwdtUdCcv+HhNArGoriVtOmx+GGML4Avkk5QSdm8+XXTQ@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CA+Da2qwdtUdCcv+HhNArGoriVtOmx+GGML4Avkk5QSdm8+XXTQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
+References: <f30ec7fe7d834c1d8e116508500110cf@hyperstone.com>
+ <c1e1281e-0977-cbf7-041e-db911ee722a7@intel.com>
+From:   Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <c1e1281e-0977-cbf7-041e-db911ee722a7@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/11/22 11:25, Wenchao Chen wrote:
-> On Thu, Nov 17, 2022 at 12:00 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+On 11/18/22 02:47, Adrian Hunter wrote:
+> On 26/10/22 10:30, Christian Löhle wrote:
+>> Mmcblk relies on block layer requeueing to fulfill some requests under
+>> certain conditions. Improve the handling to get nicely ordered requests.
 >>
->> On 11/11/22 10:42, Wenchao Chen wrote:
->>> From: Wenchao Chen <wenchao.chen@unisoc.com>
->>>
->>> During the HS200 tuning process, too many tuning errors are printed in
->>> the log.
->>>
->>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
->>> ---
->>>  drivers/mmc/host/sdhci.c | 4 ++++
->>>  1 file changed, 4 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
->>> index fef03de85b99..a503b54305eb 100644
->>> --- a/drivers/mmc/host/sdhci.c
->>> +++ b/drivers/mmc/host/sdhci.c
->>> @@ -3401,6 +3401,10 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->>>               if (host->pending_reset)
->>>                       return;
->>>
->>> +             command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
->>> +             if (command == MMC_SEND_TUNING_BLOCK || command == MMC_SEND_TUNING_BLOCK_HS200)
->>> +                     return;
+>> Using the terms a bit loosely to get a point across:
+>> Current behavior for 512 blksz and max_blk_count = 1 the scenario would
+>> be as follows:
 >>
->> Normally we wouldn't get here even if a request got an error because
->> then we either reset the data circuit which should stop further
->> interrupts, or set host->pending_reset.
+>> - request for page 0 lba 0 to 7
+>> - request for page 1 lba 8 to 15
+>> - request for page 2 lba 16 to 23
+>> - request for page 3 lba 24 to 31
 >>
->> Can you elaborate on what is going wrong?
+>> mmcblk modifies data->blocks = 1 for each and requeues,
+>> this leads to:
 >>
-> Hi  adrian
-> 1. In the process of tuning, not all tuning values are good, some
-> tuning values may cause errors, and these errors print too many logs.
->     Of course, we reset the cmdline or dataline on error.
-> 2. use host->pending_reset = true
-> static void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
-> {
-> ...
-> if (sdhci_needs_reset(host, mrq))
-> host->pending_reset = true;
-> ...
-> }
+>> Access lba 0
+>> Access lba 8
+>> Access lba 16
+>> Access lba 24
+>> Access lba 1 (1. Requeue for page 0)
+>> Access lba 9 (1. Requeue for page 1)
+>> Access lba 17 (1. Requeue for page 2)
+>> Access lba 25 (1. Requeue for page 3)
+>> Access lba 2 (2. Requeue for page 0)
+>> ...
+>>
+>> Of course we would rather have lbas consecutive.
 > 
-> But intmask = 0x00200000
-> static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
-> {
-> ...
-> if (!host->data) {
-> struct mmc_command *data_cmd = host->data_cmd;
-> 
-> if (data_cmd && (data_cmd->flags & MMC_RSP_BUSY)) {
-> if (intmask & SDHCI_INT_DATA_TIMEOUT) { //#define
-> SDHCI_INT_DATA_TIMEOUT 0x00100000
-> host->data_cmd = NULL;
-> data_cmd->error = -ETIMEDOUT;
-> sdhci_err_stats_inc(host, CMD_TIMEOUT);
-> __sdhci_finish_mrq(host, data_cmd->mrq);//<=
-> return;
-> }
-> if (intmask & SDHCI_INT_DATA_END) {    //#define  SDHCI_INT_DATA_END 0x00000002
-> 
-> host->data_cmd = NULL;
-> /*
-> * Some cards handle busy-end interrupt
-> * before the command completed, so make
-> * sure we do things in the proper order.
-> */
-> if (host->cmd == data_cmd)
-> return;
-> 
-> __sdhci_finish_mrq(host, data_cmd->mrq);//<=
-> return;
-> }
-> }
-> ...
-> if (host->pending_reset)
-> return;
-> 
-> pr_err("%s: Got data interrupt 0x%08x even though no data operation
-> was in progress.\n",
->        mmc_hostname(host->mmc), (unsigned)intmask);
-> sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
-> sdhci_dumpregs(host);
-> 
-> return;
-> }
-> ...
-> }
+> Does anyone know why the block layer does not support
+> (max_hw_sectors << 9) < PAGE_SIZE ?
 
-Not really following that I'm sorry.
+Hi Adrian,
 
-Are you saying you get a data interrupt after he data circuit is reset?
+Does this mean that the following patch series would not only be
+useful for UFS but also for MMC? "[PATCH 00/10] Support DMA segments
+smaller than the page size"
+(https://lore.kernel.org/linux-block/20221019222324.362705-1-bvanassche@acm.org/).
 
-> 
->>> +
->>>               pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
->>>                      mmc_hostname(host->mmc), (unsigned)intmask);
->>>               sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
->>
+Thanks,
+
+Bart.
+
 
