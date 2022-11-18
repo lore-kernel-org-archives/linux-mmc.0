@@ -2,233 +2,215 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 33250C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 13:14:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2855CC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 14:33:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241935AbiKRNOm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 08:14:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40332 "EHLO
+        id S242385AbiKROdf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 09:33:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33594 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241312AbiKRNOl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 08:14:41 -0500
-Received: from aposti.net (aposti.net [89.234.176.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE66D48774;
-        Fri, 18 Nov 2022 05:14:40 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1668777279; h=from:from:sender:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=M1AzedYug7GwDfLpFsnro4myCbhaA1IR7C6ixaVaUME=;
-        b=GmSDzTT9zO9F5+ArV4OBentb2p3TFLkWEBcwzyPGr840UuzLLKZVF0FMtneV/g8mJ1TdUV
-        MZr2jcUqtvvZtAIyOkkcirRb447kMDrKabwVOnenabd0QB0C3uMx7sJsP1gJ/z0Qu8ode7
-        U/hA0c9LAFAHCA4WPUocmNom+o5R36Y=
-Date:   Fri, 18 Nov 2022 13:14:29 +0000
-From:   Paul Cercueil <paul@crapouillou.net>
-Subject: Re: [PATCH 1/2] mmc: jz4740: Don't change parent clock rate for some
- SoCs
-To:     Siarhei Volkau <lis8215@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        linux-mips@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Message-Id: <5SOJLR.8XBYHE5WSC681@crapouillou.net>
-In-Reply-To: <IBOJLR.I7JEODTRBACJ1@crapouillou.net>
-References: <20221108045300.2084671-1-lis8215@gmail.com>
-        <20221108045300.2084671-2-lis8215@gmail.com>
-        <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
-        <59EJLR.DQ7KHQEAEUSG2@crapouillou.net>
-        <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
-        <IBOJLR.I7JEODTRBACJ1@crapouillou.net>
+        with ESMTP id S242043AbiKROde (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 09:33:34 -0500
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F12729357
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:33:32 -0800 (PST)
+Received: by mail-wr1-x42b.google.com with SMTP id bs21so9518017wrb.4
+        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 06:33:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:message-id:date:from:content-transfer-encoding:mime-version
+         :subject:from:to:cc:subject:date:message-id:reply-to;
+        bh=r1O9HZ8MX1IL7UJAa5JH+dfK6/alNEcaVbgB3wjs4gs=;
+        b=F/nX0fPsj2tPLUnIyGh9FdlQJm505Li4kv12GOJg/laM/BN4t1o7cDArjx/hBkOv/s
+         lgxBXsILzg3UqegTRvrMY/g/ferTWZJj8KFHeAe6h//THsif+i74kXuNhfuaPJqK8exE
+         9y6milsbhIokCYIrHGbaz1nj1kyh0MSZgbsSDAEFr5MZOCvT/UJv6yeq/5nn+Ix5zjsK
+         a1LXXpOF9E3Xn45knkRZG/88aQnBk+cXFXtEpf5IWdAnEFI8wisDqHs7j02Ijs0/N+F1
+         DIXH3nibBE4L2EWIZdFpN/w3XfzgOEkxsFitChKg+FNLGWp5Y6rSv4iWCqDKToriVsqN
+         75qA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:message-id:date:from:content-transfer-encoding:mime-version
+         :subject:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=r1O9HZ8MX1IL7UJAa5JH+dfK6/alNEcaVbgB3wjs4gs=;
+        b=RvguYPKnZ11k0NUGSTkLW8Io1OE/T4dPzKMZ9sYP2Ruyb7QYRrHVgU4GZPHYqVQcOO
+         Ra/WYifvZrvdQujp7qZd/3MImLFK+d+RKJ8GcfM4LUXf7s/x+Nv54SprCr+yWuMba043
+         r22HQDgCrRmhcIxye1RXO2Mo9mn76b1cgjWPaOwhkug7FdUkVir1I+WL48RnrPE8YC6h
+         TpbE8jYMkyn25iq8fKpxWuIx/OkR+rP3zJU3REsodux7k/iF6uPXCIzhfU6uAF6CbMFz
+         Qeg/Lv9YqS20w+EvAMhne53ETYoc5MoxekGSbnJU22mEg/wpxYasVdLJCUSkjOMSu27E
+         89EQ==
+X-Gm-Message-State: ANoB5pkX8fDo9mMWgQ4IKwMqLEouaCqyXF8NWeGdgjWrC4OoxWgcBvOJ
+        XKN8qFhaazf/kJTWCvBmS/YToQ==
+X-Google-Smtp-Source: AA0mqf6XKcHEDCl9rShqtBbR8Bxs5ZkAhKbK7DnnG5j7Xa9ZYop8ey+c8nEMBxbXJS6hVwShM9KRqA==
+X-Received: by 2002:a05:6000:18f:b0:241:a046:91ff with SMTP id p15-20020a056000018f00b00241a04691ffmr4433055wrx.23.1668782010856;
+        Fri, 18 Nov 2022 06:33:30 -0800 (PST)
+Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:52eb:f6ff:feb3:451a])
+        by smtp.gmail.com with ESMTPSA id j21-20020a05600c1c1500b003cfb7c02542sm5436726wms.11.2022.11.18.06.33.29
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 18 Nov 2022 06:33:30 -0800 (PST)
+Subject: [PATCH 00/12] dt-bindings: first batch of dt-schema conversions for Amlogic Meson bindings
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+X-b4-tracking: H4sIALaXd2MC/w3MwQqDMAwA0F+RnBcwxenY37RNVgNdCs3mRfx3e3yXd4JLV3F4Tyd0OdS12QA9Js
+ h7tCKoPAxhDoGINkwLxm9tRTMmNVYrjrnZIf2HL/kQb09ewsowhhRdMPVoeR+H/Wu9rhu2AOmCcgAA AA==
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Date:   Fri, 18 Nov 2022 15:33:26 +0100
+Message-Id: <20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org>
+To:     Jakub Kicinski <kuba@kernel.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Eric Dumazet <edumazet@google.com>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Vinod Koul <vkoul@kernel.org>,
+        Russell King <linux@armlinux.org.uk>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Kishon Vijay Abraham I <kishon@kernel.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        "David S. Miller" <davem@davemloft.net>
+Cc:     linux-media@vger.kernel.org, netdev@vger.kernel.org,
+        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-watchdog@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-pci@vger.kernel.org,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        devicetree@vger.kernel.org
+X-Mailer: b4 0.10.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Batch conversion of the following bindings:
+- meson_sm.txt
+- amlogic-efuse.txt
+- amlogic-meson-mx-efuse.txt
+- meson-wdt.txt
+- meson-ir.txt
+- rtc-meson.txt
+- amlogic,meson6-timer.txt
+- meson-gxl-usb2-phy.txt
+- amlogic,meson-gx.txt
+- amlogic,meson-pcie.txt
+- mdio-mux-meson-g12a.txt
 
+The amlogic,meson-gx-pwrc.txt is removed since deprecated and unused 
+for a few releases now.
 
-Le ven. 18 nov. 2022 =C3=A0 13:04:30 +0000, Paul Cercueil=20
-<paul@crapouillou.net> a =C3=A9crit :
-> Hi Siarhei,
->=20
-> Le ven. 18 nov. 2022 =C3=A0 12:51:54 +0300, Siarhei Volkau=20
-> <lis8215@gmail.com> a =C3=A9crit :
->> =D0=BF=D1=82, 18 =D0=BD=D0=BE=D1=8F=D0=B1. 2022 =D0=B3. =D0=B2 12:27, Pa=
-ul Cercueil=20
->> =7F<paul@crapouillou.net>:
->>>=20
->>>  Hi,
->>>=20
->>>  (Ingenic SoCs maintainer here)
->>>=20
->>>  Le ven. 18 nov. 2022 =C3=A0 09:45:48 +0100, Ulf Hansson
->>>  <ulf.hansson@linaro.org> a =C3=A9crit :
->>>  > On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com>=20
->>> =7F=7Fwrote:
->>>  >>
->>>  >>  Some SoCs have one clock divider for all MMC units, thus=20
->>> =7F=7Fchanging
->>>  >> one
->>>  >>  affects others as well. This leads to random hangs and memory
->>>  >>  corruptions, observed on the JZ4755 based device with two MMC=20
->>> =7F=7Fslots
->>>  >>  used at the same time.
->>>  >
->>>  > Urgh, that sounds like broken HW to me.
->>>  >
->>>  > The MMC blocks could share a parent clock (that would need a=20
->>> fixed
->>>  > rate for it to be applied), assuming there is a separate=20
->>> =7F=7Fgate/divider
->>>  > available per block. But there isn't'?
->>>=20
->>>  They do share a parent clock and have separate gates, and each MMC=20
->>> =7F=7FIP
->>>  block has an internal divider for the bus frequency derived from=20
->>> =7F=7Fthat
->>>  shared clock.
->>>=20
->>>  >>
->>>  >>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and=20
->>> =7F=7FJZ4760b.
->>>  >>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
->>>  >>  which shall remain its behavior. For the JZ4755 is sufficient=20
->>> to
->>>  >>  use JZ4725b's binding. JZ4750 is outside of the patch.
->>>  >>
->>>  >>  The MMC core has its own clock divisor, rather coarse but=20
->>> =7F=7Fsuitable
->>>  >> well,
->>>  >>  and it shall keep the role of tuning clock for the MMC host in=20
->>> =7F=7Fthat
->>>  >>  case.
->>>  >
->>>  > The mmc core doesn't have a clock divisor, but it does control=20
->>> =7F=7Fthe bus
->>>  > clock frequency through the ->set_ios() host ops. It needs to do=20
->>> =7F=7Fthat,
->>>  > to be able to conform to the (e)MMC, SD and SDIO specifications.
->>>  >
->>>  > Can you please try to elaborate on the above, so I can better
->>>  > understand your point?
->>>=20
->>>  Yes, I don't really understand the patch, TBH.
->>>=20
->>>  The "clk_set_rate" call will only set the shared clock to the=20
->>> =7F=7F*maximum*
->>>  clock frequency (host->mmc->f_max) which should be the exact same
->>>  across all MMC IPs.
->>=20
->> That's the case I need different "f_max" for my HW, for some reason
->> internal slot can't do a full rate (48MHz) but the external can, the=20
->> =7Fsame
->> card used for checking. So I want to set 24M for mmc0, and 48M for=20
->> =7Fmmc1
->> with respect to hardware limitation.
->=20
-> The JZ4760B programming manual states that the controller is "fully=20
-> compatible with the SD Memory Card Specification 2.0". In that=20
-> specification, the bus speed is max. 25 MHz.
->=20
-> The programming manual also says: "In data transfer mode, the MSC=20
-> controller can operate card with clock rate fpp (0 ~ 25Mhz)."
->=20
-> So the max-frequency really should be 25 MHz.
+Martin Blumenstingl was also added as bindings maintainer for Meson6/8/8b
+related bindings.
 
-Nevermind. I read wrong, at least the SD spec. (the quote of the=20
-programming manual is still concerning though).
+Remaining conversions:
+- meson,pinctrl.txt
+- pwm-meson.txt
+- amlogic,meson-gpio-intc.txt
+- amlogic,meson-mx-sdio.txt
+- rtc-meson-vrtc.txt
+- amlogic,axg-sound-card.txt
+- amlogic,axg-fifo.txt
+- amlogic,axg-pdm.txt
+- amlogic,axg-spdifout.txt
+- amlogic,axg-tdm-formatters.txt
+- amlogic,axg-spdifin.txt
+- amlogic,axg-tdm-iface.txt
+- amlogic,g12a-tohdmitx.txt
+- amlogic,axg-audio-clkc.txt
+- amlogic,gxbb-clkc.txt
+- amlogic,gxbb-aoclkc.txt
+- amlogic,meson8b-clkc.txt
 
-It's rated for 25 MB/s, so 50 MHz on 4 lanes.
+To: Rob Herring <robh+dt@kernel.org>
+To: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+To: Kevin Hilman <khilman@baylibre.com>
+To: Jerome Brunet <jbrunet@baylibre.com>
+To: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+To: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+To: Wim Van Sebroeck <wim@linux-watchdog.org>
+To: Guenter Roeck <linux@roeck-us.net>
+To: Mauro Carvalho Chehab <mchehab@kernel.org>
+To: Alessandro Zummo <a.zummo@towertech.it>
+To: Alexandre Belloni <alexandre.belloni@bootlin.com>
+To: Daniel Lezcano <daniel.lezcano@linaro.org>
+To: Thomas Gleixner <tglx@linutronix.de>
+To: Vinod Koul <vkoul@kernel.org>
+To: Kishon Vijay Abraham I <kishon@kernel.org>
+To: Ulf Hansson <ulf.hansson@linaro.org>
+To: Bjorn Helgaas <bhelgaas@google.com>
+To: "David S. Miller" <davem@davemloft.net>
+To: Eric Dumazet <edumazet@google.com>
+To: Jakub Kicinski <kuba@kernel.org>
+To: Paolo Abeni <pabeni@redhat.com>
+To: Andrew Lunn <andrew@lunn.ch>
+To: Heiner Kallweit <hkallweit1@gmail.com>
+To: Russell King <linux@armlinux.org.uk>
+Cc: devicetree@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org
+Cc: linux-amlogic@lists.infradead.org
+Cc: linux-kernel@vger.kernel.org
+Cc: linux-watchdog@vger.kernel.org
+Cc: linux-media@vger.kernel.org
+Cc: linux-rtc@vger.kernel.org
+Cc: linux-phy@lists.infradead.org
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-pci@vger.kernel.org
+Cc: netdev@vger.kernel.org
+Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 
-Cheers,
--Paul
+---
+Neil Armstrong (12):
+      dt-bindings: firmware: convert meson_sm.txt to dt-schema
+      dt-bindings: nvmem: convert amlogic-efuse.txt to dt-schema
+      dt-bindings: nvmem: convert amlogic-meson-mx-efuse.txt to dt-schema
+      dt-bindings: watchdog: convert meson-wdt.txt to dt-schema
+      dt-bindings: media: convert meson-ir.txt to dt-schema
+      dt-bindings: rtc: convert rtc-meson.txt to dt-schema
+      dt-bindings: power: remove deprecated amlogic,meson-gx-pwrc.txt bindings
+      dt-bindings: timer: convert timer/amlogic,meson7-timer.txt to dt-schema
+      dt-bindings: phy: convert meson-gxl-usb2-phy.txt to dt-schema
+      dt-bindings: mmc: convert amlogic,meson-gx.txt to dt-schema
+      dt-bindings: pcie: convert amlogic,meson-pcie.txt to dt-schema
+      dt-bindings: net: convert mdio-mux-meson-g12a.txt to dt-schema
 
->=20
->>>=20
->>>  So it doesn't matter if it's set 3 times by 3 different instances=20
->>> of
->>>  the IP, as long as they all request the same value.
->>>=20
->>>  Besides, I know for a fact that the mainline driver works fine on=20
->>> =7F=7Fthe
->>>  JZ4760(B) and JZ4725B.
->>>=20
->>>  Finally... even if it was correct, this change would break
->>>  compatibility with old Device Tree files.
->>>=20
->>>  Cheers,
->>>  -Paul
->>>=20
->>>  >>
->>>  >>  Signed-off-by: Siarhei Volkau <lis8215@gmail.com>
->>>  >
->>>  > Kind regards
->>>  > Uffe
->>>  >
->>>  >>  ---
->>>  >>   drivers/mmc/host/jz4740_mmc.c | 10 +++++++++-
->>>  >>   1 file changed, 9 insertions(+), 1 deletion(-)
->>>  >>
->>>  >>  diff --git a/drivers/mmc/host/jz4740_mmc.c
->>>  >> b/drivers/mmc/host/jz4740_mmc.c
->>>  >>  index dc2db9c18..d390ff31d 100644
->>>  >>  --- a/drivers/mmc/host/jz4740_mmc.c
->>>  >>  +++ b/drivers/mmc/host/jz4740_mmc.c
->>>  >>  @@ -114,6 +114,7 @@ enum jz4740_mmc_version {
->>>  >>          JZ_MMC_JZ4740,
->>>  >>          JZ_MMC_JZ4725B,
->>>  >>          JZ_MMC_JZ4760,
->>>  >>  +       JZ_MMC_JZ4770,
->>>  >>          JZ_MMC_JZ4780,
->>>  >>          JZ_MMC_X1000,
->>>  >>   };
->>>  >>  @@ -887,7 +888,13 @@ static int=20
->>> jz4740_mmc_set_clock_rate(struct
->>>  >> jz4740_mmc_host *host, int rate)
->>>  >>          int real_rate;
->>>  >>
->>>  >>          jz4740_mmc_clock_disable(host);
->>>  >>  -       clk_set_rate(host->clk, host->mmc->f_max);
->>>  >>  +
->>>  >>  +       /*
->>>  >>  +        * Changing rate on these SoCs affects other MMC units=20
->>> =7F=7Ftoo.
->>>  >>  +        * Make sure the rate is configured properly by the CGU
->>>  >> driver.
->>>  >>  +        */
->>>  >>  +       if (host->version !=3D JZ_MMC_JZ4725B && host->version !=
-=3D
->>>  >> JZ_MMC_JZ4760)
->>>  >>  +               clk_set_rate(host->clk, host->mmc->f_max);
->>>  >>
->>>  >>          real_rate =3D clk_get_rate(host->clk);
->>>  >>
->>>  >>  @@ -992,6 +999,7 @@ static const struct of_device_id
->>>  >> jz4740_mmc_of_match[] =3D {
->>>  >>          { .compatible =3D "ingenic,jz4740-mmc", .data =3D (void *)
->>>  >> JZ_MMC_JZ4740 },
->>>  >>          { .compatible =3D "ingenic,jz4725b-mmc", .data =3D (void
->>>  >> *)JZ_MMC_JZ4725B },
->>>  >>          { .compatible =3D "ingenic,jz4760-mmc", .data =3D (void *)
->>>  >> JZ_MMC_JZ4760 },
->>>  >>  +       { .compatible =3D "ingenic,jz4770-mmc", .data =3D (void *)
->>>  >> JZ_MMC_JZ4770 },
->>>  >>          { .compatible =3D "ingenic,jz4775-mmc", .data =3D (void *)
->>>  >> JZ_MMC_JZ4780 },
->>>  >>          { .compatible =3D "ingenic,jz4780-mmc", .data =3D (void *)
->>>  >> JZ_MMC_JZ4780 },
->>>  >>          { .compatible =3D "ingenic,x1000-mmc", .data =3D (void *)
->>>  >> JZ_MMC_X1000 },
->>>  >>  --
->>>  >>  2.36.1
->>>  >>
->>>=20
->>>=20
->=20
+ .../bindings/firmware/amlogic,meson-gxbb-sm.yaml   |  36 ++++++
+ .../bindings/firmware/meson/meson_sm.txt           |  15 ---
+ .../bindings/media/amlogic,meson6-ir.yaml          |  43 +++++++
+ .../devicetree/bindings/media/meson-ir.txt         |  20 ----
+ .../bindings/mmc/amlogic,meson-gx-mmc.yaml         |  78 +++++++++++++
+ .../devicetree/bindings/mmc/amlogic,meson-gx.txt   |  39 -------
+ .../bindings/net/amlogic,g12a-mdio-mux.yaml        |  80 +++++++++++++
+ .../bindings/net/mdio-mux-meson-g12a.txt           |  48 --------
+ .../bindings/nvmem/amlogic,meson-gxbb-efuse.yaml   |  52 +++++++++
+ .../bindings/nvmem/amlogic,meson6-efuse.yaml       |  64 ++++++++++
+ .../devicetree/bindings/nvmem/amlogic-efuse.txt    |  48 --------
+ .../bindings/nvmem/amlogic-meson-mx-efuse.txt      |  22 ----
+ .../devicetree/bindings/pci/amlogic,axg-pcie.yaml  | 129 +++++++++++++++++++++
+ .../devicetree/bindings/pci/amlogic,meson-pcie.txt |  70 -----------
+ .../bindings/phy/amlogic,meson-gxl-usb2-phy.yaml   |  56 +++++++++
+ .../devicetree/bindings/phy/meson-gxl-usb2-phy.txt |  21 ----
+ .../bindings/power/amlogic,meson-gx-pwrc.txt       |  63 ----------
+ .../bindings/rtc/amlogic,meson6-rtc.yaml           |  62 ++++++++++
+ .../devicetree/bindings/rtc/rtc-meson.txt          |  35 ------
+ .../bindings/timer/amlogic,meson6-timer.txt        |  22 ----
+ .../bindings/timer/amlogic,meson6-timer.yaml       |  53 +++++++++
+ .../bindings/watchdog/amlogic,meson6-wdt.yaml      |  39 +++++++
+ .../devicetree/bindings/watchdog/meson-wdt.txt     |  21 ----
+ 23 files changed, 692 insertions(+), 424 deletions(-)
+---
+base-commit: 094226ad94f471a9f19e8f8e7140a09c2625abaa
+change-id: 20221117-b4-amlogic-bindings-convert-8ef1d75d426d
 
-
+Best regards,
+-- 
+Neil Armstrong <neil.armstrong@linaro.org>
