@@ -2,143 +2,248 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9690CC433FE
-	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 10:07:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A056C433FE
+	for <linux-mmc@archiver.kernel.org>; Fri, 18 Nov 2022 10:12:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235200AbiKRKHB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 18 Nov 2022 05:07:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39002 "EHLO
+        id S241353AbiKRKMH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 18 Nov 2022 05:12:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42946 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S241693AbiKRKG6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 05:06:58 -0500
-Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3414A8FB20
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 02:06:57 -0800 (PST)
-Received: by mail-pj1-x1034.google.com with SMTP id b11so4100348pjp.2
-        for <linux-mmc@vger.kernel.org>; Fri, 18 Nov 2022 02:06:57 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=3uh3YxDgspkB68SJoIPbAc50d6XGVfp5931wp78ekCo=;
-        b=hs2eonUzH3U51NbUg0vNsd5tQ0Z1HqnyDlCfH1qE2oZqGApg8MIgzun6Ze88oUOO/J
-         ewfn0OyHrsF1os3fvp7YGC8JJ1uA2Tm4oVxe7VmZPu4u2Z/2jzgbXpwHhKnfKNi6PTtH
-         xDsl5Hy5omYexkgisVxzwjIjvNdCwPRbcjI9IZA18WnC6VgBVo6XM9a4jWJzFePT4z4J
-         cAuMJ2KMk2I+tlNpkmr7eLUIZaEgi//zFzKchwN+H3insIS+AWPiXIxQ0IB1MRYkPah+
-         LJahjP8cnuCmkW9s1TX+6iZd1TC49N0+EMAl5NwX7WXgsvg4ypBGLikFouVUct2V0y5x
-         LAiw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=3uh3YxDgspkB68SJoIPbAc50d6XGVfp5931wp78ekCo=;
-        b=XR/pf7pJmSFzQnBdJ74eGLg2lZ3udkZ9Ey8W2vZ6XpfTzqoMK/Hy7axK5v0cwoUTR+
-         ev7tI3E7YYW/Y1Tcgvqq7I8C42rSHKC7WCrouawDF9EoizFfwkhdkhF5hiQ/qgehRCxf
-         zXT5qrENwUXbqEJJR4AAylC99a1MTnkJVvLH5RAoJSms8G3sY3QRC/7Rby2DodgNMPnD
-         V4xrMM+loI0BhtP1j3YziNbUNt4xVvlEhbF7//qNfKyOIALfKiAuhxAOsFLj1fgbO+D8
-         qeSKkUQH0BF9wBVSAQZTpPATeUtl1LBS6Ngaw6nSeUMwSWbDKgy2aixQmkZIBzTf1ika
-         E2GQ==
-X-Gm-Message-State: ANoB5plXk4tFr1w7BWVVtjkGHvXi4RPl4aCLk7qd+t1AFQ6UsXywaMkj
-        Axj77UkFLb9bgfgVdzW/8p1jKblMo05kqeq/pmAZs2YrdDnX3Q==
-X-Google-Smtp-Source: AA0mqf5DQ+7W6xK4uZyzaxH1CPEq0BqnknF+w4PGK0v1UlGT6oDvQqas4LBFkLxvPhpjLRDpZu78WhKSiUk6wGZeezQ=
-X-Received: by 2002:a17:902:bcc9:b0:186:be05:798e with SMTP id
- o9-20020a170902bcc900b00186be05798emr6832336pls.37.1668766016568; Fri, 18 Nov
- 2022 02:06:56 -0800 (PST)
+        with ESMTP id S241305AbiKRKMF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 18 Nov 2022 05:12:05 -0500
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E7D9A71F31;
+        Fri, 18 Nov 2022 02:12:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1668766324; x=1700302324;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=QgYXbxEu9fjqnUNDC7xlyK4ll/2DAkLkNnEmJFF8XoY=;
+  b=A2yDO7DT6oo967MpEpcSyvk/jtiVt93eQsO3ZquihlCKEidYESJzZcqD
+   S8famFjQVswEHSulKB8L73ery5fZRDdR19Y+NiR0A9AjO2+SjMHnwB2BR
+   5uiNZqJbfDFldPUI4DMZg+SnrHaFIAbIMkhxEXmkmimyLP5da4FxOebb6
+   MPjOWh2WgiTaiYktiNacHauQ1N4CW049gCwkoNN/N690HbzqG4H80dfW8
+   c6ovIEjC1l9yw41TmvdX4oh+zVVLNnrb21VbZnowTq74hlR/Nrp+YFKne
+   KDOTutfUgMydq8vFdhdiqrHcCO+rOuqKQUiPyM95VxRHeF5K96spg8it+
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="339942602"
+X-IronPort-AV: E=Sophos;i="5.96,173,1665471600"; 
+   d="scan'208";a="339942602"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 02:12:04 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10534"; a="671272729"
+X-IronPort-AV: E=Sophos;i="5.96,173,1665471600"; 
+   d="scan'208";a="671272729"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.61.138])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 Nov 2022 02:11:59 -0800
+Message-ID: <e0381607-d4ba-5a75-3710-8811a0776b91@intel.com>
+Date:   Fri, 18 Nov 2022 12:11:54 +0200
 MIME-Version: 1.0
-References: <20221108045300.2084671-1-lis8215@gmail.com> <20221108045300.2084671-2-lis8215@gmail.com>
- <CAPDyKFrMqCL1-faBadVP3xB-5qiCYsyRUuOHbFZuOWfLdCXwig@mail.gmail.com>
- <59EJLR.DQ7KHQEAEUSG2@crapouillou.net> <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
-In-Reply-To: <CAKNVLfYpmJjQYFOy__PkmqcftQcQUYEKJ2V2K90MfG-1MBC_uA@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 18 Nov 2022 11:06:19 +0100
-Message-ID: <CAPDyKFpNMfru+U8r-pnFpyfZ_3_7RdrApdBvcpykV1ccaMMaHQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: jz4740: Don't change parent clock rate for some SoCs
-To:     Siarhei Volkau <lis8215@gmail.com>
-Cc:     Paul Cercueil <paul@crapouillou.net>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        linux-mips@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+Content-Language: en-US
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     ulf.hansson@linaro.org, orsonzhai@gmail.com,
+        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
+        axboe@kernel.dk, avri.altman@wdc.com, kch@nvidia.com,
+        CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
+        bigeasy@linutronix.de, s.shtylyov@omp.ru,
+        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
+        lzx.stg@gmail.com
+References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
+ <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com>
+ <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 18 Nov 2022 at 10:52, Siarhei Volkau <lis8215@gmail.com> wrote:
->
-> =D0=BF=D1=82, 18 =D0=BD=D0=BE=D1=8F=D0=B1. 2022 =D0=B3. =D0=B2 12:27, Pau=
-l Cercueil <paul@crapouillou.net>:
-> >
-> > Hi,
-> >
-> > (Ingenic SoCs maintainer here)
-> >
-> > Le ven. 18 nov. 2022 =C3=A0 09:45:48 +0100, Ulf Hansson
-> > <ulf.hansson@linaro.org> a =C3=A9crit :
-> > > On Tue, 8 Nov 2022 at 05:53, Siarhei Volkau <lis8215@gmail.com> wrote=
-:
-> > >>
-> > >>  Some SoCs have one clock divider for all MMC units, thus changing
-> > >> one
-> > >>  affects others as well. This leads to random hangs and memory
-> > >>  corruptions, observed on the JZ4755 based device with two MMC slots
-> > >>  used at the same time.
-> > >
-> > > Urgh, that sounds like broken HW to me.
-> > >
-> > > The MMC blocks could share a parent clock (that would need a fixed
-> > > rate for it to be applied), assuming there is a separate gate/divider
-> > > available per block. But there isn't'?
-> >
-> > They do share a parent clock and have separate gates, and each MMC IP
-> > block has an internal divider for the bus frequency derived from that
-> > shared clock.
-> >
-> > >>
-> > >>  List of SoCs affected includes: JZ4725b, JZ4755, JZ4760 and JZ4760b=
-.
-> > >>  However, the MMC driver doesn't distinguish JZ4760 and JZ4770
-> > >>  which shall remain its behavior. For the JZ4755 is sufficient to
-> > >>  use JZ4725b's binding. JZ4750 is outside of the patch.
-> > >>
-> > >>  The MMC core has its own clock divisor, rather coarse but suitable
-> > >> well,
-> > >>  and it shall keep the role of tuning clock for the MMC host in that
-> > >>  case.
-> > >
-> > > The mmc core doesn't have a clock divisor, but it does control the bu=
-s
-> > > clock frequency through the ->set_ios() host ops. It needs to do that=
-,
-> > > to be able to conform to the (e)MMC, SD and SDIO specifications.
-> > >
-> > > Can you please try to elaborate on the above, so I can better
-> > > understand your point?
-> >
-> > Yes, I don't really understand the patch, TBH.
-> >
-> > The "clk_set_rate" call will only set the shared clock to the *maximum*
-> > clock frequency (host->mmc->f_max) which should be the exact same
-> > across all MMC IPs.
->
-> That's the case I need different "f_max" for my HW, for some reason
-> internal slot can't do a full rate (48MHz) but the external can, the same
-> card used for checking. So I want to set 24M for mmc0, and 48M for mmc1
-> with respect to hardware limitation.
+On 11/11/22 09:58, Wenchao Chen wrote:
+> Hi Hunter
+> Thank you for your review!
+> I'm sorry to reply you so late because I've been too busy lately.
+> 
+> On Fri, Oct 21, 2022 at 11:50 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>
+>> On 21/10/22 10:30, Wenchao Chen wrote:
+>>> From: Wenchao Chen <wenchao.chen@unisoc.com>
+>>>
+>>> Summary
+>>> =======
+>>> These patches[1] supports the host to turn off FUA.
+>>>
+>>> About FUA, roughly deal with the following two parts:
+>>> 1) FUA(Forced Unit Access):
+>>> - The REQ_FUA flag can be OR ed into the r/w flags of a bio submitted from the
+>>>   filesystem and will make sure that I/O completion for this request is only
+>>>   signaled after the data has been committed to non-volatile storage.
+>>>
+>>> 2) In emmc, FUA is represented as Reliable write. code show as below:
+>>> static void mmc_blk_data_prep(struct mmc_queue *mq, struct mmc_queue_req *mqrq,
+>>>               int recovery_mode, bool *do_rel_wr_p, bool *do_data_tag_p)
+>>> {
+>>>       ...
+>>>       /*
+>>>        * Reliable writes are used to implement Forced Unit Access and
+>>>        * are supported only on MMCs.
+>>>        */
+>>>       do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+>>>                       rq_data_dir(req) == WRITE &&
+>>>                       (md->flags & MMC_BLK_REL_WR);
+>>>       ...
+>>> }
+>>>
+>>> Patch structure
+>>> ===============
+>>> patch#1:  for block
+>>> patch#2:  for sdhci-sprd
+>>>
+>>> Tests
+>>> =====
+>>> Ran 'AndroBench' to evaluate the performance:
+>>
+>> It would be good to have more details e.g.
+>> What file system? What block size?  What journal size?
+>> What file size? What record size?
+>>
+> 
+> What file system?
+> F2FS
+> What block size?
+> Sequential: 32768KB, Random: 4KB
+> What file size?
+> 64MB
+> 
+>>> 1. fua_disable = 1
+>>> /sys/block/mmcblk0/queue # cat fua 0
+>>> I tested 5 times for each case and output a average speed.
+>>>
+>>> 1) Sequential read:
+>>> Speed: 266.8MiB/s, 265.1MiB/s, 262.9MiB/s, 268.7MiB/s, 265.2MiB/s
+>>> Average speed: 265.74MiB/s
+>>>
+>>> 2) Random read:
+>>> Speed: 98.75MiB/s, 98.7MiB/s, 98.5MiB/s, 99.4MiB/s, 98.7MiB/s
+>>> Average speed: 98.81MiB/s
+>>>
+>>> 3) Sequential write:
+>>> Speed: 199.94MiB/s, 199.1MiB/s, 205.5MiB/s, 206.5MiB/s, 191.5MiB/s
+>>> Average speed: 200.5MiB/s
+>>>
+>>> 4) Random write:
+>>> Speed: 68.6MiB/s, 71.8MiB/s, 77.1MiB/s, 64.8MiB/s, 69.3MiB/s
+>>> Average speed: 70.32MiB/s
+>>>
+>>> 2. fua_disable = 0 (default 0)
+>>> /sys/block/mmcblk0/queue # cat fua 1
+>>> I tested 5 times for each case and output a average speed.
+>>>
+>>> 1) Sequential read:
+>>> Speed: 259.3MiB/s, 258.8MiB/s, 258.2MiB/s, 259.5MiB/s, 253.5MiB/s
+>>> Average speed: 257.86MiB/s
+>>>
+>>> 2) Random read:
+>>> Speed: 98.9MiB/s, 101MiB/s, 101MiB/s, 99MiB/s, 101.1MiB/s
+>>> Average speed: 100.2MiB/s
+>>>
+>>> 3) Sequential write:
+>>> Speed: 153.7MiB/s, 146.2MiB/s, 151.2MiB/s, 148.8MiB/s, 147.5MiB/s
+>>> Average speed: 149.48MiB/s
+>>>
+>>> 4) Random write:
+>>> Speed: 12.9MiB/s, 12.3MiB/s, 12.6MiB/s, 12.8MiB/s, 12.8MiB/s
+>>> Average speed: 12.68MiB/s
+>>
+>> Is every write being sync'ed of just sync at the end?
+>>
+> 
+> /*
+> * Reliable writes are used to implement Forced Unit Access and
+> * are supported only on MMCs.
+> */
+> do_rel_wr = (req->cmd_flags & REQ_FUA) &&
+>     rq_data_dir(req) == WRITE &&
+>     (md->flags & MMC_BLK_REL_WR);
+> 
+> A Reliable Write access shall force the data to be written to the
+> nonvolatile storage。
+> It will consume more time.
 
-This sounds like a board specific problem, right?
+Reliable write is slow because it guarantees not to tear the write.
+The issue is torn writes, not just FUA.
 
-The simple solution would be to use 24M for both hosts, but that would
-unnecessarily degrade the speed for the host for the internal slot.
+> 
+>>>
+>>> According to the above data, disable FUA (fua_disable = 1) improves the
+>>> performance:
+>>> 1)Sequential read improved by 3%.
+>>> 2)Random read were down 1%.
+>>
+>> FUA should not affect reads.  If it is, you may want to investigate how.
+>>
+>>> 3)Sequential write improved by 34%.
+>>> 4)Random write improved by 454%.
+>>> Therefore, it is recommended to support the host to control FUA.
+>>>
+>>> Reference
+>>> =========
+>>> [1] https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/block/writeback_cache_control.rst
+>>> [2] Embedded Multi-Media Card (e•MMC) Electrical Standard (5.1)''
+>>
+>> You do not seem to have considered data integrity.
+>>
+>> Regular disks are assumed to provide atomic sector writes.  That is, a sector has either the old data or the new data, but not some corrupt mixture.
+>>
+>> mmc does not have that assumption, which is presumably why Reliable Write has been used instead.  Although that idea appears to have been thrown away for devices with no cache by commit 08ebf903af57 ("mmc: core: Fixup support for writeback-cache for eMMC and SD").
+>>
+>> File systems can use FUA to mark a successful journal flush.  Whether or not getting a torn sector at that point will corrupt the file system recovery is presumably file system specific, and maybe specific to file system options e.g. the use of checksums.
+>>
+>> It may well be that a file system can survive a torn sector at that point, or that user space would prefer to take the risk in order to get better performance.  In either of those cases, it is not really a decision for the host controller driver.
+>>
+> 
+> Considering the data integrity, we did a random power-down test, and
+> the experimental results were good.
+> 
+> FUA can only reduce data loss under abnormal conditions, but cannot
+> prevent data loss under abnormal conditions.
+> 
+> I think there should be a balance between FUA and NO FUA, but
+> filesystems seem to favor FUA.
+> 
+> FUA brings a drop in random write performance. If enough tests are
+> done, NO FUA is acceptable.
+> 
+> I found a discussion about FUA:
+> https://lore.kernel.org/linux-f2fs-devel/20220528051238.GX1098723@dread.disaster.area/
+> 
+> UFS reference:
+> https://lore.kernel.org/linux-scsi/20220531201053.3300018-1-jaegeuk@kernel.org/
+> 
 
-It sounds like we need a new DT binding to describe a capped
-max-frequency for the "broken slot". And in case that is available in
-the DTS, the mmc->f_max value should be overridden with it, while also
-respecting the original f_max value while calling clk_set_rate().
+You really need buy-in from more people, especially file system
+developers.  I suggest you try F2FS people to start with.
+Please be clear though: Reliable Write protects against torn
+writes.  If enough stakeholders agree that file systems can
+handle the torn writes anyway, then we could presumably drop
+using Reliable Write for FUA.
 
-Br
-Uffe
+>>>
+>>> Wenchao Chen (2):
+>>>   mmc: block: Support Host to control FUA
+>>>   mmc: sdhci-sprd: enable fua_disable for SPRDSDHCI
+>>>
+>>>  drivers/mmc/core/block.c      | 3 ++-
+>>>  drivers/mmc/host/sdhci-sprd.c | 2 ++
+>>>  include/linux/mmc/host.h      | 3 +++
+>>>  3 files changed, 7 insertions(+), 1 deletion(-)
+>>>
+>>
+
