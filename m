@@ -2,81 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E95AC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 20:00:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DC576C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 20:30:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231739AbiKUUAg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Nov 2022 15:00:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51286 "EHLO
+        id S230261AbiKUUaH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Nov 2022 15:30:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229808AbiKUUAf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 15:00:35 -0500
-Received: from mail-pj1-f47.google.com (mail-pj1-f47.google.com [209.85.216.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3EA92C6D32;
-        Mon, 21 Nov 2022 12:00:35 -0800 (PST)
-Received: by mail-pj1-f47.google.com with SMTP id ci10so5169171pjb.1;
-        Mon, 21 Nov 2022 12:00:35 -0800 (PST)
+        with ESMTP id S231300AbiKUUaG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 15:30:06 -0500
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BFF8D92FE
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2022 12:30:02 -0800 (PST)
+Received: by mail-pj1-x1031.google.com with SMTP id y14-20020a17090a2b4e00b002189a1b84d4so5970478pjc.2
+        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2022 12:30:02 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=myNR1dHCzOToepErRrsD8EFVvG4FbDL4QiAIuBT0+Ok=;
+        b=u7VlmPLF/RvGHIzZiQ5Uh0MzRhuDgphVQ8PBip5YmeAO7Z7FdNN0Igspn5h05rjCwU
+         H6QRi9//TntfDBFM0bG4o9KSnOP96Z8EmU38+lO1vscPaEVFAbbKnibmv4LbbWk59jJH
+         BVR9YtqYk6xFQtDYFPFTq/k3lnWExzWA1i9hSIyXnnfGxUE/zjbPcXUVvguBo6deXoK1
+         IhEePpS3rZ5L6CcFF1kFTO+YDp0OUGMy0+FcX0gfZrWruWHgQphM8sjzGXuF4OQPci0O
+         7+rNNJKGXzjQNevCHEhwj2s85oBa7gqrncz85RHpE95IZpy0QOc8KQti8MRlsGTPjex7
+         IKPQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=/NU44cfudtq3+kL/Ca5qkgDeVjL7u3LaS55isxaZE3Q=;
-        b=6/pbJ7+NxPM7gjrzW8ZVpX2xoQvXrZOU2Ka4FCHXEd4l6j2dCZELZ/4EfT3uSEZOoJ
-         iy79KUuDrMS6bOCBPHV2cqjnIRvDXlKs82E9oMkkEbkXsVb1+YoMyKKrXoy1D2g6S/RJ
-         dJuzvEBlR6ruXhiVEllZaukNFeWX3rSf1rF2iBndbknheDqA+sVstRmD2od+LKiwINER
-         AxHaGziQhHzJZvu0OfMEOeIhAjsEbfOhqohbSo9fPdXsj8EaIXs4GUGhk/WfnRjgOVG+
-         G2QGTYHWpv1uhatsE4YFBsvCjLTe30QWOl1/RadzAa0mFHzW0oBmbxQq7JXE8maTm1dq
-         VNTA==
-X-Gm-Message-State: ANoB5pnLtR2QBRf7hqYAbbASvCztp9lwx/XzMGvocnaSK+JC0hiziU9T
-        WyEl5DeR50YKsIDaNWFwsv4=
-X-Google-Smtp-Source: AA0mqf4zskjGaSZ7xf9xsEvpIAP+nhi6wrHmOytdL+C1UG9sSxJnJARRJ74/LngsmoLyB0cWTMSJSQ==
-X-Received: by 2002:a17:902:aa0c:b0:180:4030:1c7d with SMTP id be12-20020a170902aa0c00b0018040301c7dmr271689plb.99.1669060834619;
-        Mon, 21 Nov 2022 12:00:34 -0800 (PST)
-Received: from ?IPV6:2620:15c:211:201:545d:bfd:7b53:8e94? ([2620:15c:211:201:545d:bfd:7b53:8e94])
-        by smtp.gmail.com with ESMTPSA id x18-20020a17090300d200b00186b138706fsm10148952plc.13.2022.11.21.12.00.32
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Nov 2022 12:00:33 -0800 (PST)
-Message-ID: <4bba6b72-c361-f212-a8c3-9e33aab80c99@acm.org>
-Date:   Mon, 21 Nov 2022 12:00:32 -0800
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=myNR1dHCzOToepErRrsD8EFVvG4FbDL4QiAIuBT0+Ok=;
+        b=oHay2KvMmLOVb/aH8o+a6Qgm7kJyzfop7Owx1T5wxr1YBZg3KfWaBTP1fj7dtVHYF0
+         eRIUnTqJNrvms7W4QpNQLrkIkFQtr5lZVITlTeDwInXoTx3r0U5X5rK5IuDshZfNzUMx
+         9rH2+yunv9q3VaMkKzYmcQDN+2bcTA7Krg/zu31H9d/UpQ4KSQenHJICQof61Z3h7YIn
+         vMJIgse1L+joDtgTBkcbBM0XAEaZRbFBLIoXuun1r8zr9pkaY1LAQpacj/7xcKXEFaHo
+         ewiBJgVeayV+zpZwDaTkPhH6snOqwwHlEryBSB57xRNSFS4R/eZWC7aAET2+Itdu51fv
+         qT5g==
+X-Gm-Message-State: ANoB5pni2UCwNGSUW22YksDaEaH3vfsuPR5iy/Y6DmLR9MqVpU/csE3q
+        XzgYWk94nN8x5wr0slyxA3miOsywe8FztrvdhrrUqZhhdO8=
+X-Google-Smtp-Source: AA0mqf7ZrUy+0ZfCtjXsI8kHFev3U9+wk0wofNjh90U1cdOVcEMC95/tWTvBR/GxZKZ3Ov4MfHVlNRNVNIEi1qMI4o4=
+X-Received: by 2002:a17:902:b283:b0:186:be05:798e with SMTP id
+ u3-20020a170902b28300b00186be05798emr521420plr.37.1669062602054; Mon, 21 Nov
+ 2022 12:30:02 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.0
-Subject: Re: [PATCH 0/3] mmc: Improve block layer requeueing behavior
-Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        "axboe@kernel.dk" <axboe@kernel.dk>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        Christoph Hellwig <hch@lst.de>
-Cc:     Avri Altman <Avri.Altman@wdc.com>,
-        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
-References: <f30ec7fe7d834c1d8e116508500110cf@hyperstone.com>
- <c1e1281e-0977-cbf7-041e-db911ee722a7@intel.com>
- <d1a1340a-f5f8-6953-e066-b8c6095d63fd@acm.org>
- <5df2c4d5-f426-e3ea-8e6d-f772ec7091b6@intel.com>
- <bade026a-ec83-7516-d5ef-bb373df48a6e@acm.org>
- <1c9b3db6-3443-5580-08f2-42520d6a3318@intel.com>
-From:   Bart Van Assche <bvanassche@acm.org>
-In-Reply-To: <1c9b3db6-3443-5580-08f2-42520d6a3318@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20221120113457.42010-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20221120113457.42010-1-wsa+renesas@sang-engineering.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 21 Nov 2022 21:29:25 +0100
+Message-ID: <CAPDyKFqEw7zr3XH6zM14UgFOscbC11ovSNpC5k2OyGhb6=6=2Q@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] mmc: renesas_sdhi: upport improvements from BSP
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/21/22 11:42, Adrian Hunter wrote:
-> blk_queue_max_hw_sectors() does not allow it.
+On Sun, 20 Nov 2022 at 12:35, Wolfram Sang
+<wsa+renesas@sang-engineering.com> wrote:
+>
+> This series upports two BSP improvements in a refactored way. BSP patch
+> de9461ece1fa ("mmc: renesas_sdhi: scc_ctl is always set in after R-Car
+> Gen3") made sure we have a pointer to always reset SCC. I refactored it
+> to include Gen2 as well, so we can optimize the following code a bit.
+> This is patch 1. BSP patch 15d7abbfc3f0 ("mmc: renesas_sdhi: reset
+> calibration register") added a new quirk for devices which always should
+> disable HS400 adjustment. This was only applicable for SoCs which either
+> had bad_taps or needed a calibration table. So, I simply used this logic
+> directly instead of a quirk. This is patch 2.
+>
+> Two cleanups come afterwards. To increase readability, I finally did
+> something I wanted to do for some time now. Having a helper to check for
+> SDHI quirks. This is patch 3. And while working on this, I discovered a
+> new macro from the MMC core which we can make use of. This is patch 4.
+>
+> The series has been tested on a Salvator-XS (R-Car M3-N) and a Lager
+> (R-Car H2) board. The patches are based on mmc/next as of today as they
+> depend on d901e2ba566 ("mmc: renesas_sdhi: take DMA end interrupts into
+> account"). A branch can be found here:
+>
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/sdhi/for-6.2
+>
+> Let me know what you think!
+>
+> Happy hacking,
+>
+>    Wolfram
+>
+> Changes since V1:
+> * added another improvement to the series
+> * reordered cleanups last so backporting fixes is easier
+>
+>
+> Wolfram Sang (4):
+>   mmc: renesas_sdhi: alway populate SCC pointer
+>   mmc: renesas_sdhi: better reset from HS400 mode
+>   mmc: renesas_sdhi: add helper to access quirks
+>   mmc: renesas_sdhi: use new convenience macro from MMC core
+>
+>  drivers/mmc/host/renesas_sdhi.h               |  2 ++
+>  drivers/mmc/host/renesas_sdhi_core.c          | 29 ++++++++++---------
+>  drivers/mmc/host/renesas_sdhi_internal_dmac.c |  8 ++---
+>  3 files changed, 21 insertions(+), 18 deletions(-)
+>
 
-Right, I modified blk_queue_max_segment_size() in my patch series but 
-not blk_queue_max_hw_sectors(). Adding a change for 
-blk_queue_max_hw_sectors() to that patch series should be easy since 
-that patch series already adds support for max_sectors being smaller 
-than the page size.
+Applied for next, thanks!
 
-Thanks,
-
-Bart.
+Kind regards
+Uffe
