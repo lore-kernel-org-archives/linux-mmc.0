@@ -2,108 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E26C3C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 06:19:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CB6B7C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 08:25:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229664AbiKUGTG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Nov 2022 01:19:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53560 "EHLO
+        id S229613AbiKUIZx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Nov 2022 03:25:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229490AbiKUGTE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 01:19:04 -0500
-Received: from out28-221.mail.aliyun.com (out28-221.mail.aliyun.com [115.124.28.221])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACEDE29C9B;
-        Sun, 20 Nov 2022 22:19:01 -0800 (PST)
-X-Alimail-AntiSpam: AC=CONTINUE;BC=0.07477166|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.041814-0.000814244-0.957372;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047207;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=5;RT=5;SR=0;TI=SMTPD_---.QCt.C5w_1669011516;
-Received: from 192.168.220.136(mailfrom:michael@allwinnertech.com fp:SMTPD_---.QCt.C5w_1669011516)
-          by smtp.aliyun-inc.com;
-          Mon, 21 Nov 2022 14:18:58 +0800
-Message-ID: <23c0a4ae-d714-cfb1-aeb5-68b66b5bf0ee@allwinnertech.com>
-Date:   Mon, 21 Nov 2022 14:18:36 +0800
+        with ESMTP id S229491AbiKUIZw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 03:25:52 -0500
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A496563FB;
+        Mon, 21 Nov 2022 00:25:51 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669019151; x=1700555151;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=tRC91gf0tMNQxTUnM2kVX03iZwsnDeqc3G8jXCJ98P4=;
+  b=FTJoKZdYqC73wBb5/oFkoikhGuAFAu1DDJfA0ljAXI6KQeSoeiCUWW/C
+   IH3b6HJhZiXpkM0kZ750gAvu1J4g3919b8XqB9OVcdrTyPP7Bx4xJcbIx
+   oB1VLt/bUIAUP/XCoa4R93VMK0k9xNGjjJzt++RAYvZ/es1MFu/xGtSv9
+   HIMpt1TSnCAJkASjTCyC42GyHcC2ID42BqpK9WGQREPzgEv5ezESv2qL8
+   wzWtLobjjnTVTdkBismYbCLaJzsI6xd5S+H+I3h7EGXBVNKF0iJgW3CWp
+   0+v+1undo/S+5F0FGgRBr5zKKshBztdXhV0rCw2HXxVqfGsmccJYFSAOA
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10537"; a="301046507"
+X-IronPort-AV: E=Sophos;i="5.96,180,1665471600"; 
+   d="scan'208";a="301046507"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2022 00:25:51 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10537"; a="635104678"
+X-IronPort-AV: E=Sophos;i="5.96,180,1665471600"; 
+   d="scan'208";a="635104678"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.94])
+  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2022 00:25:48 -0800
+Message-ID: <5df2c4d5-f426-e3ea-8e6d-f772ec7091b6@intel.com>
+Date:   Mon, 21 Nov 2022 10:25:44 +0200
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.9.0
-Subject: Re: [PATCH] mmc:mmc-hsq:use fifo to dispatch mmc_request
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH 0/3] mmc: Improve block layer requeueing behavior
 Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     ulf.hansson@linaro.org, wenchao.chen@unisoc.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20221118054725.80414-1-michael@allwinnertech.com>
- <CA+Da2qxP2gvUc2=n5xW7_YEcgevGpDhqbcVFWVbF0c6DqXDXHA@mail.gmail.com>
-From:   Michael Wu <michael@allwinnertech.com>
-In-Reply-To: <CA+Da2qxP2gvUc2=n5xW7_YEcgevGpDhqbcVFWVbF0c6DqXDXHA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+To:     Bart Van Assche <bvanassche@acm.org>,
+        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
+References: <f30ec7fe7d834c1d8e116508500110cf@hyperstone.com>
+ <c1e1281e-0977-cbf7-041e-db911ee722a7@intel.com>
+ <d1a1340a-f5f8-6953-e066-b8c6095d63fd@acm.org>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <d1a1340a-f5f8-6953-e066-b8c6095d63fd@acm.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 11/18/2022 7:43 PM, Wenchao Chen wrote:
-> On Fri, Nov 18, 2022 at 1:52 PM Michael Wu <michael@allwinnertech.com> wrote:
+On 18/11/22 19:27, Bart Van Assche wrote:
+> On 11/18/22 02:47, Adrian Hunter wrote:
+>> On 26/10/22 10:30, Christian Löhle wrote:
+>>> Mmcblk relies on block layer requeueing to fulfill some requests under
+>>> certain conditions. Improve the handling to get nicely ordered requests.
+>>>
+>>> Using the terms a bit loosely to get a point across:
+>>> Current behavior for 512 blksz and max_blk_count = 1 the scenario would
+>>> be as follows:
+>>>
+>>> - request for page 0 lba 0 to 7
+>>> - request for page 1 lba 8 to 15
+>>> - request for page 2 lba 16 to 23
+>>> - request for page 3 lba 24 to 31
+>>>
+>>> mmcblk modifies data->blocks = 1 for each and requeues,
+>>> this leads to:
+>>>
+>>> Access lba 0
+>>> Access lba 8
+>>> Access lba 16
+>>> Access lba 24
+>>> Access lba 1 (1. Requeue for page 0)
+>>> Access lba 9 (1. Requeue for page 1)
+>>> Access lba 17 (1. Requeue for page 2)
+>>> Access lba 25 (1. Requeue for page 3)
+>>> Access lba 2 (2. Requeue for page 0)
+>>> ...
+>>>
+>>> Of course we would rather have lbas consecutive.
 >>
->> Current next_tag selection will cause a large delay in some requests and
->> destroy the scheduling results of the block scheduling layer. Because the
->> issued mrq tags cannot ensure that each time is sequential, especially when
->> the IO load is heavy. In the fio performance test, we found that 4k random
->> read data was sent to mmc_hsq to start calling request_atomic It takes
->> nearly 200ms to process the request, while mmc_hsq has processed thousands
->> of other requests. So we use fifo here to ensure the first in, first out
->> feature of the request and avoid adding additional delay to the request.
->>
+>> Does anyone know why the block layer does not support
+>> (max_hw_sectors << 9) < PAGE_SIZE ?
 > 
-> Hi Michael
-> Is the test device an eMMC?
-> Could you share the fio test command if you want?
-> Can you provide more logs?
+> Hi Adrian,
 > 
-Hi Wenchao,
-Yes, the tested device is emmc.
-The test command we used is `./fio -name=Rand_Read_IOPS_Test 
--group_reporting -rw=random -bs=4K -numjobs=8 -directory=/data/data 
--size=1G -io_size=64M -nrfiles=1 -direct=1 -thread && rm 
-/data/Rand_Read_IOPS_Test *`,  which replaces the io performance random 
-read performance test of androidbench, and the file size is set to 1G, 8 
-thread test configuration. Where /data uses f2fs and /data/data is a 
-file encrypted path.
+> Does this mean that the following patch series would not only be
+> useful for UFS but also for MMC? "[PATCH 00/10] Support DMA segments
+> smaller than the page size"
+> (https://lore.kernel.org/linux-block/20221019222324.362705-1-bvanassche@acm.org/).
 
-After enabling the hsq configuration, we can clearly see from below fio 
-test log that the minimum value of random reading is 3175 iops and the 
-maximum value is 8554iops, and the maximum delay of io completion is 
-about 200ms.
-```
-     clat percentiles (usec):
-      |  1.00th=[   498],  5.00th=[   865], 10.00th=[   963], 20.00th=[ 
-  1045],
-      | 30.00th=[  1090], 40.00th=[  1139], 50.00th=[  1172], 60.00th=[ 
-  1221],
-      | 70.00th=[  1254], 80.00th=[  1319], 90.00th=[  1401], 95.00th=[ 
-  1614],
-      | 99.00th=[  2769], 99.50th=[  3589], 99.90th=[ 31589], 99.95th=[ 
-66323],
-      | 99.99th=[200279]
-    bw (  KiB/s): min=12705, max=34225, per=100.00%, avg=23931.79, 
-stdev=497.40, samples=345
-    iops        : min= 3175, max= 8554, avg=5981.67, stdev=124.38, 
-samples=345
-```
+That patchset still does not allow max_hw_sectors = 1 which is
+what Christian's case needs.
 
-
-```
-     clat percentiles (usec):
-      |  1.00th=[  799],  5.00th=[  938], 10.00th=[  963], 20.00th=[  979],
-      | 30.00th=[  996], 40.00th=[ 1004], 50.00th=[ 1020], 60.00th=[ 1045],
-      | 70.00th=[ 1074], 80.00th=[ 1106], 90.00th=[ 1172], 95.00th=[ 1237],
-      | 99.00th=[ 1450], 99.50th=[ 1516], 99.90th=[ 1762], 99.95th=[ 2180],
-      | 99.99th=[ 9503]
-    bw (  KiB/s): min=29200, max=30944, per=100.00%, avg=30178.91, 
-stdev=53.45, samples=272
-    iops        : min= 7300, max= 7736, avg=7544.62, stdev=13.38, 
-samples=272
-```
-When NOT enabling hsq, the minimum value of random reading is 7300 iops 
-and the maximum value is 7736 iops, and the maximum delay of io is only 
-9 ms. Finally, we added debug to the mmc driver. The reason for locating 
-the 200ms delay of hsq is due to the next tag selection of hsq.
-
----
-Michael Wu
