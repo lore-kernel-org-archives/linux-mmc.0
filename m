@@ -2,119 +2,91 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E422C47088
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 13:33:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7D08C43217
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 19:15:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230378AbiKUNde (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Nov 2022 08:33:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39062 "EHLO
+        id S230081AbiKUTPI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Nov 2022 14:15:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44682 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229864AbiKUNd1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 08:33:27 -0500
-Received: from mail-qk1-f175.google.com (mail-qk1-f175.google.com [209.85.222.175])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0168784822;
-        Mon, 21 Nov 2022 05:33:26 -0800 (PST)
-Received: by mail-qk1-f175.google.com with SMTP id p18so7956362qkg.2;
-        Mon, 21 Nov 2022 05:33:25 -0800 (PST)
+        with ESMTP id S229645AbiKUTOy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 14:14:54 -0500
+Received: from mail-pl1-f169.google.com (mail-pl1-f169.google.com [209.85.214.169])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2878B61768;
+        Mon, 21 Nov 2022 11:14:52 -0800 (PST)
+Received: by mail-pl1-f169.google.com with SMTP id jn7so9605340plb.13;
+        Mon, 21 Nov 2022 11:14:52 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=W52hjy2XgXbLvoau/TZhYUdh0mFs9ky77EejBWrKJL0=;
-        b=MKBAflyqCUHtzPOOQZ6ifQuwGDxrXiqLha4B6jgtDirrkjwDpkFryHuD6F/dt8H0QI
-         /OIxYrlqSHJDdf035z2Khhf6Kryhq1gElZdNzSmWIBxdcJErG0ksH8kPf2cpKnjiGIly
-         jDZA5W2gtjqmoIEHcAdhqOYFTh1/kn8BF7eeKJcFk2VjJkIWVC5Ad5PmSNuuBGrnERyp
-         c80M43ypsnc9Em3IJzqGakMQC8lGEP87p4FVat1CCYUeyIGWTts6Q2ROcXfUuxpSE3AA
-         5Xqf4HHD5kcwg6YwWXUrJ1/eZxMVpT2w3M5TLvlivG1HOyJ8IFsM6fXzmDinFTgUttcU
-         Uqhg==
-X-Gm-Message-State: ANoB5plLQ5A+/+zT5/m1BgTpcb1kqSljtoUhzcMqioQs+/IM6aYOCLxV
-        8maqDHR5KaxgAEMGSgB6hUqsAxwHQez/9g==
-X-Google-Smtp-Source: AA0mqf5ztepVbKEErbeHzkEO/g8ATeu0M6TG2+WT51QBKFlvCWQFw94PLJ5lwReFzcLN831JtiNw6w==
-X-Received: by 2002:a05:620a:993:b0:6fa:172:c37d with SMTP id x19-20020a05620a099300b006fa0172c37dmr16277536qkx.92.1669037604910;
-        Mon, 21 Nov 2022 05:33:24 -0800 (PST)
-Received: from mail-yw1-f182.google.com (mail-yw1-f182.google.com. [209.85.128.182])
-        by smtp.gmail.com with ESMTPSA id l21-20020a37f915000000b006fa7b5ea2d1sm8239937qkj.125.2022.11.21.05.33.23
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=LForrfw/k4kDBmpFT/eGtENaxzc1S7hFGEnquIpgcGI=;
+        b=bfCe9HZQgalQtLkQdZb0zxWBRKaJ0aAaMSr4r+3df/7q8Bk4m3ugp3Xo/zhhyHPlN6
+         +cRrQoY9Fh7OzBwDLAjqx13q8Mt/M66xU086aGwLxPBQZHcxPZL3wwjsnEOLyeI4ZTcj
+         UUAXw0fhvUOA1W6UfsOF9Cg3f2+lwZ4or4sywQfeKxnW1ovvrdxcV3uGV0eD9k1pjYdn
+         bqAFVnOWRI1QR9c8IS25cf8z9ZLaAO+CWuNqcVnnpLQe6NlrnqHT5dK703GD4uJcL6zF
+         k2luIcEu3GbubiK45++zZrWrmYzR09FAnKHleOk5U41kdzd0eaVtbjhTm/O6nsDODRTO
+         ztZg==
+X-Gm-Message-State: ANoB5pknGcT0k7bqPFAAHGmRVN8B2vZl7yB3GWVSZpUqj1PYVvcSsJkv
+        0nlC6/cxTBDdfMpHcFdajbL/ICMJ2dI=
+X-Google-Smtp-Source: AA0mqf4Mn37XOmi0UK54FjPQM0Ylag6LcAD2uUA69TZL/zh+QUotfv8YF1utw0FPCTxUhZKU05z9AQ==
+X-Received: by 2002:a17:90b:b17:b0:218:a733:25ec with SMTP id bf23-20020a17090b0b1700b00218a73325ecmr9090982pjb.152.1669058091521;
+        Mon, 21 Nov 2022 11:14:51 -0800 (PST)
+Received: from ?IPV6:2620:15c:211:201:545d:bfd:7b53:8e94? ([2620:15c:211:201:545d:bfd:7b53:8e94])
+        by smtp.gmail.com with ESMTPSA id b8-20020a1709027e0800b0016c0c82e85csm10102490plm.75.2022.11.21.11.14.49
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Nov 2022 05:33:23 -0800 (PST)
-Received: by mail-yw1-f182.google.com with SMTP id 00721157ae682-36cbcda2157so113000447b3.11;
-        Mon, 21 Nov 2022 05:33:23 -0800 (PST)
-X-Received: by 2002:a81:4f4c:0:b0:357:66a5:bb25 with SMTP id
- d73-20020a814f4c000000b0035766a5bb25mr17212924ywb.383.1669037603130; Mon, 21
- Nov 2022 05:33:23 -0800 (PST)
+        Mon, 21 Nov 2022 11:14:50 -0800 (PST)
+Message-ID: <bade026a-ec83-7516-d5ef-bb373df48a6e@acm.org>
+Date:   Mon, 21 Nov 2022 11:14:48 -0800
 MIME-Version: 1.0
-References: <20221121110615.97962-1-krzysztof.kozlowski@linaro.org> <20221121110615.97962-8-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221121110615.97962-8-krzysztof.kozlowski@linaro.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 21 Nov 2022 14:33:11 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUtT3=F-3XLb604VUvKxNQBWK1y0rMnMn0kASKjQGw=3g@mail.gmail.com>
-Message-ID: <CAMuHMdUtT3=F-3XLb604VUvKxNQBWK1y0rMnMn0kASKjQGw=3g@mail.gmail.com>
-Subject: Re: [PATCH v2 7/9] dt-bindings: drop redundant part of title (beginning)
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-watchdog@vger.kernel.org, Stephen Boyd <sboyd@kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.0
+Subject: Re: [PATCH 0/3] mmc: Improve block layer requeueing behavior
+Content-Language: en-US
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        "axboe@kernel.dk" <axboe@kernel.dk>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>
+References: <f30ec7fe7d834c1d8e116508500110cf@hyperstone.com>
+ <c1e1281e-0977-cbf7-041e-db911ee722a7@intel.com>
+ <d1a1340a-f5f8-6953-e066-b8c6095d63fd@acm.org>
+ <5df2c4d5-f426-e3ea-8e6d-f772ec7091b6@intel.com>
+From:   Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <5df2c4d5-f426-e3ea-8e6d-f772ec7091b6@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Nov 21, 2022 at 12:09 PM Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
-> The Devicetree bindings document does not have to say in the title that
-> it is a "Devicetree binding", but instead just describe the hardware.
->
-> Drop beginning "Devicetree bindings" in various forms:
->
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -exec sed -i -e 's/^title: [dD]evice[ -]\?[tT]ree [bB]indings\? for \([tT]he \)\?\(.*\)$/title: \u\2/' {} \;
->
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -exec sed -i -e 's/^title: [bB]indings\? for \([tT]he \)\?\(.*\)$/title: \u\2/' {} \;
->
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -exec sed -i -e 's/^title: [dD][tT] [bB]indings\? for \([tT]he \)\?\(.*\)$/title: \u\2/' {} \;
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+On 11/21/22 00:25, Adrian Hunter wrote:
+> On 18/11/22 19:27, Bart Van Assche wrote:
+>> On 11/18/22 02:47, Adrian Hunter wrote:
+>>> Does anyone know why the block layer does not support
+>>> (max_hw_sectors << 9) < PAGE_SIZE ?
+>>
+>> Does this mean that the following patch series would not only be
+>> useful for UFS but also for MMC? "[PATCH 00/10] Support DMA segments
+>> smaller than the page size"
+>> (https://lore.kernel.org/linux-block/20221019222324.362705-1-bvanassche@acm.org/).
+> 
+> That patchset still does not allow max_hw_sectors = 1 which is
+> what Christian's case needs.
 
->  .../devicetree/bindings/interrupt-controller/renesas,irqc.yaml  | 2 +-
+Hi Adrian,
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
+Why would that patch series not support max_hw_sectors = 1? What am I 
+overlooking?
 
-Gr{oetje,eeting}s,
+Thanks,
 
-                        Geert
+Bart.
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
