@@ -2,91 +2,88 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7576C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 08:56:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CFB9C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 10:07:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229825AbiKUI4G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Nov 2022 03:56:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43262 "EHLO
+        id S231284AbiKUKHZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Nov 2022 05:07:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229965AbiKUIzv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 03:55:51 -0500
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C54820F4A
-        for <linux-mmc@vger.kernel.org>; Mon, 21 Nov 2022 00:54:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1669020851; x=1700556851;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=DAyesIn+BEWljm/vLHTeTe2qNh+LYCQIDVz8y6IjLg0=;
-  b=Z+gqrSGsH7oFgng0pclDbrOoujIrMaT+6fos/ADSWtnWEICL4kkMI6W+
-   EOw9JD3xScgvGU4+4b3mVGUOhTGbAtD0MiqxMm2jiYOseablPVIerrSd3
-   QhwUmmfEAmlEUNu8OnWRnEfq0UD+fUoAOb2/oNjnfZVMMkWpsWgzAfypk
-   QycfzSsXbQiRRdTdjT7XLSJUIZ0f1CJAW5M4hX0Yxx0I532NgQ3j6+vM+
-   Hqc6WXbuCv5r/1LidOL/Zof3nq7EsWqM1hmvnpesraLY/C1QjwOdxDQnh
-   6653HOVCwg28VLMHD9OIEOdilHLuTI4F8iptjtPKC1HUn2m3G5dkSK18R
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10537"; a="312210753"
-X-IronPort-AV: E=Sophos;i="5.96,180,1665471600"; 
-   d="scan'208";a="312210753"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2022 00:53:58 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10537"; a="746821730"
-X-IronPort-AV: E=Sophos;i="5.96,180,1665471600"; 
-   d="scan'208";a="746821730"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.35.94])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 21 Nov 2022 00:53:57 -0800
-Message-ID: <dd766653-0526-afdc-03cb-c03d96661c94@intel.com>
-Date:   Mon, 21 Nov 2022 10:53:54 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct CQHCI exit halt state check
-Content-Language: en-US
-To:     Sebastian Falbesoner <sebastian.falbesoner@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org
-References: <20221119030400.1789919-1-sebastian.falbesoner@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221119030400.1789919-1-sebastian.falbesoner@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S231384AbiKUKHG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 05:07:06 -0500
+Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62AF6A3422;
+        Mon, 21 Nov 2022 02:07:06 -0800 (PST)
+Received: by mail-pl1-x62e.google.com with SMTP id 4so10179223pli.0;
+        Mon, 21 Nov 2022 02:07:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:to:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=ANC5vOtSH3iFR9ReC7ihlapXLCWk3GPZKq86c4BIU6M=;
+        b=At+TDhJCawuix6CTkEs1nXlAMAa3TBvb7168siGKcRpoHnrCI2BbWKcT/uboq4ZUar
+         9Ek3XFNA2gtUXkDZywxJP52/nDwd4+oVDmslGnCb/QehMqyHuPInMciLpLSIzXFIE9lE
+         h01TX6bzk3M6dRV64+pGoVFeWXYtTAKDX+VT8Ljd2sJ+x3Ca2j7ZcDrUC22WcOFwvYkb
+         Ov6Vg+oWhylgDWSaocjqzefDNiTn/nnaIwLH4w774lmnKAmapqbvEER/z3AeKFOjL0Cf
+         e6NqqGm0+6awWSOXe6YbAV9hcc6pY5yl2N71y2EUrDlnMIhUWKKFEEKHFI8M2hIT0ofy
+         EmXQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=message-id:date:subject:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ANC5vOtSH3iFR9ReC7ihlapXLCWk3GPZKq86c4BIU6M=;
+        b=AzarhifrUZFMbNEXDs9O845Co2EUED81hZJbgkAVG7v5Mdl5sJ1KJv3WZhJctCGyeP
+         RqMxM8aXp0el8fhfLrRT/adY/+YEPBUDZNW7GpwUvgXPKgfM2voc+vhVlcfUICtPMk1I
+         L/065u1PJP8dwE6Tsj1ImK1OpO2KofnRSVxCyQak1NHQQ2lSzBNCiQwnNWNJcdKgHF4l
+         IeVkkqqDZgHTiUpq0hpc6TQ0RVqdbn7unA1inpzgnTcK9Zg0lEgCMBC2DpmpXKFsmfdx
+         FeHv18WxGnCNsLdXJt55zPI4R4raTirhpjGU9QvVbwgnz0MVg7P5ZTGqp+kw96eeRpO2
+         W5hw==
+X-Gm-Message-State: ANoB5plvz6Iwi+RC91pTSi8dBnnXuKukjDzrBWfyjOxkRJl/UO1d5lky
+        Px05n6JS9M34MA3fev1L2Hg=
+X-Google-Smtp-Source: AA0mqf4f+iw/lpeuE6+czXXBuE7VH9bAhq9QcerhyRt7+alS6LP6PLLlB1bng7Cf5I+AZ9sd7zDu8A==
+X-Received: by 2002:a17:903:300c:b0:188:f663:e2e7 with SMTP id o12-20020a170903300c00b00188f663e2e7mr1580107pla.121.1669025225849;
+        Mon, 21 Nov 2022 02:07:05 -0800 (PST)
+Received: from scdiu3.sunplus.com ([113.196.136.192])
+        by smtp.googlemail.com with ESMTPSA id oj8-20020a17090b4d8800b001df264610c4sm23069042pjb.0.2022.11.21.02.07.03
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Mon, 21 Nov 2022 02:07:05 -0800 (PST)
+From:   Tony Huang <tonyhuang.sunplus@gmail.com>
+To:     tonyhuang.sunplus@gmail.com, lhjeff911@gmail.com,
+        ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        p.zabel@pengutronix.de, wells.lu@sunplus.com
+Subject: [PATCH v12 0/2] Add mmc driver for Sunplus SP7021 SOC
+Date:   Mon, 21 Nov 2022 18:06:47 +0800
+Message-Id: <cover.1669023361.git.tonyhuang.sunplus@gmail.com>
+X-Mailer: git-send-email 2.7.4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/11/22 05:04, Sebastian Falbesoner wrote:
-> With the current logic the "failed to exit halt state" error would be
-> shown even if any other bit than CQHCI_HALT was set in the CQHCI_CTL
-> register, since the right hand side is always true. Fix this by using
-> the correct operator (bit-wise instead of logical AND) to only check for
-> the halt bit flag, which was obviously intended here.
-> 
-> Signed-off-by: Sebastian Falbesoner <sebastian.falbesoner@gmail.com>
+This is a patch series for mmc driver for Sunplus SP7021 SOC.
 
-Fixes: 85236d2be844 ("mmc: sdhci-esdhc-imx: clear the HALT bit when enable CQE")
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Sunplus SP7021 is an ARM Cortex A7 (4 cores) based SoC. It integrates
+many peripherals (ex: UART, I2C, SPI, SDIO, eMMC, USB, SD card and
+etc.) into a single chip. It is designed for industrial control.
 
+Refer to:
+https://sunplus-tibbo.atlassian.net/wiki/spaces/doc/overview
+https://tibbo.com/store/plus1.html
 
-> ---
->  drivers/mmc/host/sdhci-esdhc-imx.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-> index 31ea0a2fce35..ffeb5759830f 100644
-> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
-> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-> @@ -1512,7 +1512,7 @@ static void esdhc_cqe_enable(struct mmc_host *mmc)
->  	 * system resume back.
->  	 */
->  	cqhci_writel(cq_host, 0, CQHCI_CTL);
-> -	if (cqhci_readl(cq_host, CQHCI_CTL) && CQHCI_HALT)
-> +	if (cqhci_readl(cq_host, CQHCI_CTL) & CQHCI_HALT)
->  		dev_err(mmc_dev(host->mmc),
->  			"failed to exit halt state when enable CQE\n");
->  
+Tony Huang (2):
+  dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+  mmc: Add mmc driver for Sunplus SP7021
+
+ .../devicetree/bindings/mmc/sunplus,mmc.yaml       |   62 ++
+ MAINTAINERS                                        |    7 +
+ drivers/mmc/host/Kconfig                           |    9 +
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/sunplus-mmc.c                     | 1000 ++++++++++++++++++++
+ 5 files changed, 1079 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus-mmc.c
+
+-- 
+2.7.4
 
