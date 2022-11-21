@@ -2,54 +2,54 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 972C9C433FE
-	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 08:28:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80D8BC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 21 Nov 2022 08:34:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229843AbiKUI2T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 21 Nov 2022 03:28:19 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55494 "EHLO
+        id S229810AbiKUIeZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 21 Nov 2022 03:34:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59506 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230006AbiKUI2S (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 03:28:18 -0500
-Received: from mail-qk1-f178.google.com (mail-qk1-f178.google.com [209.85.222.178])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E4D218394;
-        Mon, 21 Nov 2022 00:28:17 -0800 (PST)
-Received: by mail-qk1-f178.google.com with SMTP id z17so7525611qki.11;
-        Mon, 21 Nov 2022 00:28:17 -0800 (PST)
+        with ESMTP id S229653AbiKUIeY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 21 Nov 2022 03:34:24 -0500
+Received: from mail-qk1-f169.google.com (mail-qk1-f169.google.com [209.85.222.169])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D1B9167CF;
+        Mon, 21 Nov 2022 00:34:21 -0800 (PST)
+Received: by mail-qk1-f169.google.com with SMTP id d8so7513751qki.13;
+        Mon, 21 Nov 2022 00:34:21 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=qE1fqBat725e8iz0zzpI2SYT4ym88l39TqTjHkBdTBY=;
-        b=nGdEGdVwp3T7mdBULvMVY0kztwiSGcACLhlXtn9IuiNIQXUf+OsimNkTtb5tSh2Omy
-         pSXBUMyBpdX58IFqmwaTmbw9Cb0QlvFFhiACvWMVEHP4YIy6+NwlPOrIBDtUaT4YMadp
-         TI6XMiRlHTL+6apgogS0euOAa/e0miv6WiwqtD6IeXXFZEVCcydHj+VX6QhGchM9oIq+
-         n48Hv+MDYH8T1PAfzVuhe6rigOeWdnY23MOAla0pc4tDuzI3eAlMuv9kAOq1yOl8Z7yb
-         tDd49oAoHsiVAfclVKrgV76akWFl52Eev8q7PfeZsa3LD2OloY3UUoy0fFYofVbuMnVe
-         REew==
-X-Gm-Message-State: ANoB5pmWQAkJ+ulAisxbdg8em1PyKqAW0g0wiEmtJ6jDwCO1iXY0pwZr
-        kjFs5Dr44zmGA515gtQhjb7OmQ6ttw7cdg==
-X-Google-Smtp-Source: AA0mqf7yHaoZ2lk726iGEjy5SFHitgE/Une/cRIxIRgG81dQYR82uky9Lk7Lirh3fwvLySL0tyfuRQ==
-X-Received: by 2002:a05:620a:22ab:b0:6fa:9fb8:c50b with SMTP id p11-20020a05620a22ab00b006fa9fb8c50bmr15423488qkh.48.1669019295967;
-        Mon, 21 Nov 2022 00:28:15 -0800 (PST)
-Received: from mail-yb1-f169.google.com (mail-yb1-f169.google.com. [209.85.219.169])
-        by smtp.gmail.com with ESMTPSA id x12-20020ae9e90c000000b006b5cc25535fsm7491653qkf.99.2022.11.21.00.28.15
+        bh=v8MgetOy5CnVNmfwc+KbsEuIV70+zhmbk49OeDSi6Pc=;
+        b=F5v+MXOUFlj2H7FZwBqQ9wuU/2NBcy7SG5quyeOooYi5aXsQKX94LP7Emz5gLExVXV
+         uy9f3h8J9iua/ZvEQEQPDHLHYtPv7jZPV1EnYdu2oFUDRrNPU5OxlPsgIX3T1pckiE/U
+         inOR6a0+ialu5UnXq2iMNN1QzAiScn7d+f8dWTviUKqA6g7FVQeDy1t9jsZv5C7eZ5LG
+         nQuRNu1qCs9hfiNTLUZzCFrsJFT1lnqw8s9UIJyKHsJFF3Ct11K6cZE1Qo1vJW4ACD+P
+         JeAiuWo5C8yS6eht52iPB3cXp7Ld7zoV6nCDBe6RGQUPqdanmTgsdxO5E7c2q9PqQIjN
+         eqBg==
+X-Gm-Message-State: ANoB5pmodKfIESvvjVOGKcJHfsrzM8VAWuq/uIWMh5Ck/QkD34hzSkeO
+        fd58XoqgFgGHsfswNrPwYRJDQvO4F+3i6w==
+X-Google-Smtp-Source: AA0mqf4glMGYaG/0ZN1T8zjt1/lDfnJGeND+0VyYva3ucqPH4dv03q0Wpl90BVvQcnGTjK3EA0w/DQ==
+X-Received: by 2002:a05:620a:191a:b0:6fa:774:16e3 with SMTP id bj26-20020a05620a191a00b006fa077416e3mr15410734qkb.46.1669019659994;
+        Mon, 21 Nov 2022 00:34:19 -0800 (PST)
+Received: from mail-yb1-f177.google.com (mail-yb1-f177.google.com. [209.85.219.177])
+        by smtp.gmail.com with ESMTPSA id j6-20020a05620a410600b006fa2dde9db8sm7894288qko.95.2022.11.21.00.34.19
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 21 Nov 2022 00:28:15 -0800 (PST)
-Received: by mail-yb1-f169.google.com with SMTP id p81so5046875yba.4;
-        Mon, 21 Nov 2022 00:28:15 -0800 (PST)
-X-Received: by 2002:a25:9e84:0:b0:6de:6183:c5c3 with SMTP id
- p4-20020a259e84000000b006de6183c5c3mr1226421ybq.89.1669019295127; Mon, 21 Nov
- 2022 00:28:15 -0800 (PST)
+        Mon, 21 Nov 2022 00:34:19 -0800 (PST)
+Received: by mail-yb1-f177.google.com with SMTP id k84so12762973ybk.3;
+        Mon, 21 Nov 2022 00:34:19 -0800 (PST)
+X-Received: by 2002:a5b:24b:0:b0:6ca:3b11:8d76 with SMTP id
+ g11-20020a5b024b000000b006ca3b118d76mr16176436ybp.202.1669019659156; Mon, 21
+ Nov 2022 00:34:19 -0800 (PST)
 MIME-Version: 1.0
-References: <20221118214556.81763-1-wsa+renesas@sang-engineering.com> <20221118214556.81763-2-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20221118214556.81763-2-wsa+renesas@sang-engineering.com>
+References: <20221120113457.42010-1-wsa+renesas@sang-engineering.com> <20221120113457.42010-4-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20221120113457.42010-4-wsa+renesas@sang-engineering.com>
 From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 21 Nov 2022 09:28:04 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdV=+EVsu-f3owgUn=PZUGHyDvxuuVxH1RPMcD0+Q8uvfQ@mail.gmail.com>
-Message-ID: <CAMuHMdV=+EVsu-f3owgUn=PZUGHyDvxuuVxH1RPMcD0+Q8uvfQ@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: renesas_sdhi: add helper to access quirks
+Date:   Mon, 21 Nov 2022 09:34:08 +0100
+X-Gmail-Original-Message-ID: <CAMuHMdWGYfChJ-jyyKLJVb6q34ZjvDnvb+FdVEzdoTsSR0Oo6w@mail.gmail.com>
+Message-ID: <CAMuHMdWGYfChJ-jyyKLJVb6q34ZjvDnvb+FdVEzdoTsSR0Oo6w@mail.gmail.com>
+Subject: Re: [PATCH v2 3/4] mmc: renesas_sdhi: add helper to access quirks
 To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
 Cc:     linux-mmc@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
         Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
@@ -58,7 +58,7 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Nov 18, 2022 at 10:50 PM Wolfram Sang
+On Sun, Nov 20, 2022 at 12:52 PM Wolfram Sang
 <wsa+renesas@sang-engineering.com> wrote:
 > Add a macro to check for a quirk because it a) ensures that the check
 > for non-empty 'quirks' struct is not forgotten and b) is easier to read.
