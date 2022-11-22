@@ -2,62 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4253BC47088
-	for <linux-mmc@archiver.kernel.org>; Tue, 22 Nov 2022 09:41:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B288EC43217
+	for <linux-mmc@archiver.kernel.org>; Tue, 22 Nov 2022 11:53:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233313AbiKVJlN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Nov 2022 04:41:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41938 "EHLO
+        id S233159AbiKVLxF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 22 Nov 2022 06:53:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41988 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233321AbiKVJlL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2022 04:41:11 -0500
-X-Greylist: delayed 903 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 22 Nov 2022 01:41:08 PST
-Received: from mail.axisfairfi.com (mail.axisfairfi.com [94.177.230.134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5E7151C1C
-        for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2022 01:41:07 -0800 (PST)
-Received: by mail.axisfairfi.com (Postfix, from userid 1001)
-        id B108E8254B; Tue, 22 Nov 2022 09:15:33 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=axisfairfi.com;
-        s=mail; t=1669108537;
-        bh=0BgaW9t8GFER5QecxVkFsHrVi3gO/4V5KAZgJaiRYBs=;
-        h=Date:From:To:Subject:From;
-        b=kIihny/6RV0+pzd4jnzUYifeV+KlByFw7A/3PfDUADy14j0OHh70T6vCh+TzDDGPH
-         x+FfdFiICoOcQtl9HyBxG0GrC7NJpTruGlPI1DpDmGM0UQnqXyGfBJzjh63OKiyuys
-         gm/h4Gv1J+hsW00Vkp3IMVIXkvwqBMvdU6bgBsu/DednN33u4rF/OPlZihhf+avQIF
-         GLomm7T592W9PPWrPSyl6aONpxU0mhWYu/2uLThbvZsSVyGVm+EScP7ggjCGITD135
-         6UEGadU9AshBgfFaO5dGmwXUT2a4Z20eeCL4qUIeuieRDws8VrXv+F02oWWIl8aMcX
-         +pHkRsS3bdE3w==
-Received: by mail.axisfairfi.com for <linux-mmc@vger.kernel.org>; Tue, 22 Nov 2022 09:15:27 GMT
-Message-ID: <20221122074500-0.1.d.oe3.0.5cvdhe5d88@axisfairfi.com>
-Date:   Tue, 22 Nov 2022 09:15:27 GMT
-From:   "Zbynek Spacek" <zbynek.spacek@axisfairfi.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Silikonmischungen
-X-Mailer: mail.axisfairfi.com
+        with ESMTP id S232440AbiKVLxD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2022 06:53:03 -0500
+X-Greylist: delayed 585 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 22 Nov 2022 03:52:57 PST
+Received: from mx4.securetransport.de (mx4.securetransport.de [178.254.6.145])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9CDC9167C0;
+        Tue, 22 Nov 2022 03:52:53 -0800 (PST)
+Received: from mail.dh-electronics.com (unknown [77.24.89.57])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx4.securetransport.de (Postfix) with ESMTPSA id 582B67204BB;
+        Tue, 22 Nov 2022 12:42:45 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dh-electronics.com;
+        s=dhelectronicscom; t=1669117365;
+        bh=2ZV0bTDb7qgkQDDGXEMdO4IEDitBFvE2cMMeUtDgqK8=;
+        h=From:To:CC:Subject:Date:In-Reply-To:References:From;
+        b=TnjAuy6HNThxX8BxOJ6PJ1rLq6P8Bd+IagVBhxojTdee3uzR3yFS4KhAJ0+ruQAa4
+         JzUVWuC39Hw0too9T3fj4oNMzH16h5QBSYUWIQ1GrwazrOfezI/rTDnZVITm4p7IUx
+         TSjKEWfcZRpXnyMgf0P0bLtwxsjHBk5gAF27w77IQDJkgttT4guOXnIeiqKjnc68BD
+         uOBrhdZzUFk2Z0cwvcmVFHh5dZW+nysU/BUu9CxXqWBxGFtDbQQFP0ibn6TVeYCUET
+         PdlEp16wDstM5RfDt8dh58ZaHly3av8uTB6MN4Ot9nuLVCLYg69s6WUf8Z2qQkqIjk
+         c6fRRTdUPKhEg==
+Received: from DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20; Tue, 22 Nov 2022 12:12:35 +0100
+Received: from localhost.localdomain (172.16.51.2) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20 via Frontend Transport; Tue, 22 Nov 2022 12:12:35 +0100
+From:   Christoph Niedermaier <cniedermaier@dh-electronics.com>
+To:     <linux-kernel@vger.kernel.org>
+CC:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
+Subject: [PATCH] dt-bindings: mmc: Make comment on wakeup-source less confusing
+Date:   Tue, 22 Nov 2022 12:11:24 +0100
+Message-ID: <20221122111124.6828-3-cniedermaier@dh-electronics.com>
+X-Mailer: git-send-email 2.11.0
+X-klartext: yes
+In-Reply-To: <20221122111124.6828-1-cniedermaier@dh-electronics.com>
+References: <20221122111124.6828-1-cniedermaier@dh-electronics.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Good morning,
+The current comment on wakeup-source is a bit confusing, because it isn't
+clear at first sight which property is actually deprecated.
+Change the comment to one that is less confusing.
 
-do you need intermediates for processing, plastics (e.g. rubber) or silic=
-one mixtures?
+Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
+---
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc: Marek Vasut <marex@denx.de>
+Cc: kernel@dh-electronics.com
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+---
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-We provide a wide range of silicone rubbers with various properties, sili=
-cone mixtures from renowned manufacturers such as Wacker, Elastosil LR an=
-d dyes, stabilizers, primers and anti-adhesive additives.
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index 802e3ca8be4d..a921442c6c1d 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -293,7 +293,7 @@ properties:
+     description:
+       SDIO only. Preserves card power during a suspend/resume cycle.
+ 
+-  # Deprecated: enable-sdio-wakeup
++  # Use wakeup-source instead of the deprecated enable-sdio-wakeup
+   wakeup-source:
+     $ref: /schemas/types.yaml#/definitions/flag
+     description:
+-- 
+2.11.0
 
-We also produce technical silicone compounds with increased resistance to=
- oils, resistant to high temperatures and water vapor, conductive and man=
-y more.
-
-We provide fast order fulfillment, timely deliveries and cost optimizatio=
-n.
-
-Can I introduce what we can offer you?
-
-
-Zbynek Spacek
