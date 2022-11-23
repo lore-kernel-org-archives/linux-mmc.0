@@ -2,114 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 749EDC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 04:40:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40C2EC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 09:37:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235881AbiKWEkA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 22 Nov 2022 23:40:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56346 "EHLO
+        id S237329AbiKWJhQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Nov 2022 04:37:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235952AbiKWEjo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 22 Nov 2022 23:39:44 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1811D9B386;
-        Tue, 22 Nov 2022 20:39:42 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9B54961A3F;
-        Wed, 23 Nov 2022 04:39:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 225EEC433C1;
-        Wed, 23 Nov 2022 04:39:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1669178381;
-        bh=EVw4Vc0/gYpVHxzZAdah2zLNd6pA0gTQaK+joP95BKw=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=QeBxZCprwCTU86Pqv1jbwEiUULNLeEVvPC1vdnFLEOwo4ZjJ9TnndaaoA5XZ55BlH
-         dFNUaBxj1NdIgxQuslei2pAmnW/Z2yQ9Ez0pbOGy0w60FJfyM8TQpvvGSwo4X/CPnL
-         iGkeDfTcaooUjn+RtR+b8weXzQXvnVb2mgoYJ2ygsOCLKSiOMGNGANIMuXfckChAz+
-         PyeRCc3K/Sfw5tX54bqUCF6lgw/E5TKozvtW8vmrDPLBxXa96QLuq80CiTdUw3XPSv
-         11aAf/r27UgMrIlh/qUbpu0OZ3U7Hl/Jm7U0evtgaaia6qFgX/rpiLMZNJZusN3NFD
-         cRxjZ+VpqSyfQ==
-Date:   Wed, 23 Nov 2022 10:09:36 +0530
-From:   Vinod Koul <vkoul@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-watchdog@vger.kernel.org, Stephen Boyd <sboyd@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Mark Brown <broonie@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Subject: Re: [PATCH v2 5/9] dt-bindings: drop redundant part of title (end,
- part two)
-Message-ID: <Y32kCHhdLjQvSnE3@matsya>
-References: <20221121110615.97962-1-krzysztof.kozlowski@linaro.org>
- <20221121110615.97962-6-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S237668AbiKWJgb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 04:36:31 -0500
+Received: from dggsgout11.his.huawei.com (dggsgout11.his.huawei.com [45.249.212.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47ABD1144A2;
+        Wed, 23 Nov 2022 01:33:56 -0800 (PST)
+Received: from mail02.huawei.com (unknown [172.30.67.153])
+        by dggsgout11.his.huawei.com (SkyGuard) with ESMTP id 4NHGCf0tXrz4f3jqj;
+        Wed, 23 Nov 2022 17:33:50 +0800 (CST)
+Received: from huaweicloud.com (unknown [10.175.127.227])
+        by APP4 (Coremail) with SMTP id gCh0CgAnmdYA6X1j0LUOBA--.21740S4;
+        Wed, 23 Nov 2022 17:33:53 +0800 (CST)
+From:   Ye Bin <yebin@huaweicloud.com>
+To:     ulf.hansson@linaro.org, wsa+renesas@sang-engineering.com,
+        kvalo@kernel.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org
+Cc:     linux-kernel@vger.kernel.org, yebin10@huawei.com
+Subject: [PATCH] mmc: mmc_test: fix missing assignment of 'file' when register debugfs file
+Date:   Wed, 23 Nov 2022 17:55:06 +0800
+Message-Id: <20221123095506.1965691-1-yebin@huaweicloud.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221121110615.97962-6-krzysztof.kozlowski@linaro.org>
+Content-Transfer-Encoding: 8bit
+X-CM-TRANSID: gCh0CgAnmdYA6X1j0LUOBA--.21740S4
+X-Coremail-Antispam: 1UD129KBjvdXoWrtrykCF4fXrWxCF18urWkCrg_yoWftwcE93
+        4Sqr9rArs2gry7Wr4fCw13XFW7Kan5ur13WFWaqrWayry8Xr97ZryIg34DXw43ZrZrCay3
+        AF98tF1jyr9rGjkaLaAFLSUrUUUUUb8apTn2vfkv8UJUUUU8Yxn0WfASr-VFAUDa7-sFnT
+        9fnUUIcSsGvfJTRUUUbr8YFVCjjxCrM7AC8VAFwI0_Gr0_Xr1l1xkIjI8I6I8E6xAIw20E
+        Y4v20xvaj40_Wr0E3s1l1IIY67AEw4v_Jr0_Jr4l8cAvFVAK0II2c7xJM28CjxkF64kEwV
+        A0rcxSw2x7M28EF7xvwVC0I7IYx2IY67AKxVWDJVCq3wA2z4x0Y4vE2Ix0cI8IcVCY1x02
+        67AKxVW8Jr0_Cr1UM28EF7xvwVC2z280aVAFwI0_GcCE3s1l84ACjcxK6I8E87Iv6xkF7I
+        0E14v26rxl6s0DM2AIxVAIcxkEcVAq07x20xvEncxIr21l5I8CrVACY4xI64kE6c02F40E
+        x7xfMcIj6xIIjxv20xvE14v26r106r15McIj6I8E87Iv67AKxVWUJVW8JwAm72CE4IkC6x
+        0Yz7v_Jr0_Gr1lF7xvr2IYc2Ij64vIr41l42xK82IYc2Ij64vIr41l4I8I3I0E4IkC6x0Y
+        z7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK67AKxVWUGVWUWwC2zV
+        AF1VAY17CE14v26r126r1DMIIYrxkI7VAKI48JMIIF0xvE2Ix0cI8IcVAFwI0_Jr0_JF4l
+        IxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAvwI8IcIk0rVWrJr0_WF
+        yUJwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I0E14v26r4j6r4UJbIY
+        CTnIWIevJa73UjIFyTuYvjxUOyCJDUUUU
+X-CM-SenderInfo: p1hex046kxt4xhlfz01xgou0bp/
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21-11-22, 12:06, Krzysztof Kozlowski wrote:
-> The Devicetree bindings document does not have to say in the title that
-> it is a "binding", but instead just describe the hardware.
-> 
-> Drop trailing "Node|Tree|Generic bindings" in various forms (also with
-> trailling full stop):
-> 
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -not -name 'trivial-devices.yaml' \
->     -exec sed -i -e 's/^title: \(.*\) [nN]ode [bB]indings\?\.\?$/title: \1/' {} \;
-> 
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -not -name 'trivial-devices.yaml' \
->     -exec sed -i -e 's/^title: \(.*\) [tT]ree [bB]indings\?\.\?$/title: \1/' {} \;
-> 
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -not -name 'trivial-devices.yaml' \
->     -exec sed -i -e 's/^title: \(.*\) [gG]eneric [bB]indings\?\.\?$/title: \1/' {} \;
-> 
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -not -name 'trivial-devices.yaml' \
->     -exec sed -i -e 's/^title: \(.*\) [bB]indings\? description\.\?$/title: \1/' {} \;
-> 
->   find Documentation/devicetree/bindings/ -type f -name '*.yaml' \
->     -not -name 'trivial-devices.yaml' \
->     -exec sed -i -e 's/^title: \(.*\) [bB]indings\? document\.\?$/title: \1/' {} \;
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
-> Reviewed-by: Jonathan Cameron <Jonathan.Cameron@huawei.com>
+From: Ye Bin <yebin10@huawei.com>
 
->  Documentation/devicetree/bindings/phy/brcm,ns2-pcie-phy.yaml    | 2 +-
->  Documentation/devicetree/bindings/phy/qcom,usb-hs-phy.yaml      | 2 +-
->  Documentation/devicetree/bindings/phy/ti,phy-gmii-sel.yaml      | 2 +-
+Now, 'file' is always NULL. obviously, 'file' is used to store return value of
+'debugfs_create_file()'.
 
-Acked-By: Vinod Koul <vkoul@kernel.org>
+Fixes: a04c50aaa916 ("mmc: core: no need to check return value of debugfs_create functions")
+Signed-off-by: Ye Bin <yebin10@huawei.com>
+---
+ drivers/mmc/core/mmc_test.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 6cd6f8a94a71..156d34b2ed4d 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -3174,7 +3174,8 @@ static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
+ 	struct mmc_test_dbgfs_file *df;
+ 
+ 	if (card->debugfs_root)
+-		debugfs_create_file(name, mode, card->debugfs_root, card, fops);
++		file = debugfs_create_file(name, mode, card->debugfs_root,
++					   card, fops);
+ 
+ 	df = kmalloc(sizeof(*df), GFP_KERNEL);
+ 	if (!df) {
 -- 
-~Vinod
+2.31.1
+
