@@ -2,94 +2,156 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D6C7C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 11:00:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B6E6C3A59F
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 13:54:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236697AbiKWLAc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Nov 2022 06:00:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60648 "EHLO
+        id S236308AbiKWNyy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Nov 2022 08:54:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237222AbiKWLAP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 06:00:15 -0500
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E04CF11607F;
-        Wed, 23 Nov 2022 02:54:14 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1669200854; x=1700736854;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=uDAVTOEt2Yr6bF41uMtBqnDhdX/0XRjYoiQGkjerU4M=;
-  b=NqejR+09hj2TkjfMWSATRu5PeeT6u3fkhufE2wPyveDJevYx85/g4LPM
-   1cflyVs1S1hEwk/Cx+2znChj2+uvZAO03gJA7E5qdp2m+P4k1RdOeTyQC
-   AnJo/a5PoJKbeXU1Yk38oUJ6QKvMLSBbQImyXUeciqQDHMA/bu9/WwmcR
-   RXJ7+GSfOqR3aPpntKMbRjk2aD3VWBg3l4x6tF2l8FvXIH+5qfQa0fovG
-   Kmp5gxHEFIun8b7ylHCZltxNkDIfOZt6xF89zx34wYfIKpQpGhsRn3B7B
-   9K8bx/XwvavPdVtcTclJbn33AxzkUG26KjbDssgkbs24XDLOMj4p6krSB
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10539"; a="400332857"
-X-IronPort-AV: E=Sophos;i="5.96,187,1665471600"; 
-   d="scan'208";a="400332857"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Nov 2022 02:54:14 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10539"; a="710549067"
-X-IronPort-AV: E=Sophos;i="5.96,187,1665471600"; 
-   d="scan'208";a="710549067"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.48.46])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Nov 2022 02:54:12 -0800
-Message-ID: <5bf820c6-8b07-cf0c-438b-a411815c202c@intel.com>
-Date:   Wed, 23 Nov 2022 12:54:07 +0200
+        with ESMTP id S237667AbiKWNyd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 08:54:33 -0500
+Received: from APC01-TYZ-obe.outbound.protection.outlook.com (mail-tyzapc01olkn2085.outbound.protection.outlook.com [40.92.107.85])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AB9067129
+        for <linux-mmc@vger.kernel.org>; Wed, 23 Nov 2022 05:48:36 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=GwZHL5olSSHoKSLmPZpH/seMSQDydyZqSe/b8uPoFNbS5rgSJWQvegOTm02ZbjftHzMQC+wmWRwGcbIX+I040QkeOfcqpmKpirPddNV8AfxAXjZnWbqrnhDjOteZI2J9VRNm7HW4kh5rq9vPChmbvgvaId6ABSByrnR/IV+CXXfWEJMk77CUuVPKe90Y5WceLUfQozMfNC7wthSnLS7f92cYqqSWMGNkTz7FwKU3JK8OUqZqkfIPIY5MBGvZ/MI0AZ1eGRBJ3+kzDI1GCrEgOTHTF4tRzCdlz1L0yGHLl6dgHOwOPlpnRsje0UyFY71Va9fathxn/JITwRay8aMVvQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=8RIudtpOolZW0wGVUhaRwsyCYyFliFqtoZ+5K2dRT+A=;
+ b=ECQwco5VTaeS4TD04oy3JF9NUNeGJ4YfsLAp7Zy82A2Ky4TlhhF0SaaFsi06GixnUUVWSTD6ctIxEaVjrTvjhNGPTCgYF051bS+9+4irrnGNP4daClsk5rC+LSiWpaGcSSpPLu35ESR05AhLryyqaqOQJBlRE0dJDUimR6ioYQU6/hEK3TczDLRO5k5iztoZFeAj7Zb6GtkZxzzobXiIUUFYjlHtR0Q1D25mVWfvSVcdN0JxXduOAWzyTHlUA8Ra/1AlhMigo+DHa5p2QZw87Kzm74b/jDcdSg7q32Y7lsB8kNT1oOoFibTTtlo7Py40ZTv6QwMN4wGApy7YG0OsaQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=none; dmarc=none;
+ dkim=none; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=outlook.com;
+ s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=8RIudtpOolZW0wGVUhaRwsyCYyFliFqtoZ+5K2dRT+A=;
+ b=ntGabuhvNlfDJwiozLOqmp030NlMQteEmS90xAYxEX6Ru3KMxN50fKNPw8A9TYgngRZq3mQmSSxItBjUbbIVgtn79L6rC5Z/vAKQMmhs1ttdBJ5fcvxSQb5oSdYqT/ErQhEC+WUeGnrs+K8uZQKuWya32Ha/VuoBdqZ2Soc0pGZjLSuUWLpNyVMDhjaj7/tDFz7df23mzn/rmOO0g6wE3TLMNIH11XJcOXqAbguoZ7LokN4kQ3oMjxDElwN3baIpYS/pKgv1pyKSKsMrlVMO4JMRPxIe+gZBU51OPQyOLbKvepIXnCFRJwqbIZgTHll5BdCvkxe68rh7affTjjgcXQ==
+Received: from SEZPR01MB4445.apcprd01.prod.exchangelabs.com
+ (2603:1096:101:49::5) by TYZPR01MB4506.apcprd01.prod.exchangelabs.com
+ (2603:1096:400:1fb::14) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5834.15; Wed, 23 Nov
+ 2022 13:48:34 +0000
+Received: from SEZPR01MB4445.apcprd01.prod.exchangelabs.com
+ ([fe80::ad1d:da59:22a1:d30e]) by SEZPR01MB4445.apcprd01.prod.exchangelabs.com
+ ([fe80::ad1d:da59:22a1:d30e%6]) with mapi id 15.20.5834.015; Wed, 23 Nov 2022
+ 13:48:34 +0000
+From:   Patricia Baker <patriciabaker20@outlook.com>
+To:     linux-mmc@vger.kernel.org
+Subject: Re: Blockchain solutions
+Message-ID: <SEZPR01MB44458287D619490426064DB4B40C9@SEZPR01MB4445.apcprd01.prod.exchangelabs.com>
+Date:   Wed, 23 Nov 2022 19:18:29 +0530
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.1
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+Content-Language: en-GB
+X-TMN:  [jY/sLW2CCkqy0o9SFqrEkpDyI/0eJzvC]
+X-ClientProxiedBy: PN3PR01CA0066.INDPRD01.PROD.OUTLOOK.COM
+ (2603:1096:c01:99::15) To SEZPR01MB4445.apcprd01.prod.exchangelabs.com
+ (2603:1096:101:49::5)
+X-Microsoft-Original-Message-ID: <3bd90584-eff7-0a12-d8b2-4fbcc2761bd8@outlook.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: mmc_test: fix missing assignment of 'file' when
- register debugfs file
-To:     Ye Bin <yebin@huaweicloud.com>, ulf.hansson@linaro.org,
-        wsa+renesas@sang-engineering.com, kvalo@kernel.org,
-        linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org, yebin10@huawei.com
-References: <20221123095506.1965691-1-yebin@huaweicloud.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221123095506.1965691-1-yebin@huaweicloud.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Exchange-MessageSentRepresentingType: 1
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: SEZPR01MB4445:EE_|TYZPR01MB4506:EE_
+X-MS-Office365-Filtering-Correlation-Id: e08e4f57-a38b-4b2d-8bcc-08dacd596a13
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: gBcvGnPP67v5lcEHAOYBRlT3PJ8NhdIsNgmvDWChkf/M4lxlxSbYjxhrZld3BfVH/VFcX4TNyLNdM9ji9Ngy86TXnSEsiWcS01FOrenTeo5DhXxOS/cjlW67qrxt5FxsPsNfvQSMaZGqRAuPK5qUC281m9RoGK9OXOv++4lvHqZqWhOh785ajEGFH1UKetlMeeAHR5O2uS1Ulmryce7vhkrVJHxsBLnyzpcod//1vZ/smv2J+RrDFPk/mJTtrSr4SR7C6fBAu0RWhVEO+kzxk32wYF20HLumh/gAleHjf4XyNlta4YFL58Q7lGnX3xQpbyLJj5BrteR+wbXIc/9Juo2tb6vSGIUgP07YhH9L9imYRE4U6FmzXRcitBYdVXR8Ge2H0b34WL0574YZvNVipnxu65rY+cV3hxaYn0on+76G436NPoGmy9FxdWDOFt4g9FIJlbRFskufbAJXVgl29J6+MOJO8IoPOBujIrNT2YA0BBnb5IlTz3w1D55devdf+q9N/2WUXIPUNdWQA85tFCCp69qniqfmonC718VRNnaJZ9b7dRdmBdZDlw6yWWmNqwpfHZNiEEiaBah0bMYddLwz3N9YO8mWJD4o4fhfIPnjo0tCUz5Ua2W1ZFFarHcfOMuuGywE3nUxO1g3gvdZlQ==
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?cVEwU1QzaFZ3VFFQY2QrZktZVjdLN0JZZENLV2t1aTBOd0pDTVJqVkpTMndt?=
+ =?utf-8?B?S0VBOW54MlhhSTMrcGkzNFFqV1ZHKzMwdFZ3bHZSR0RyVFBwdlk1UHhRQmNz?=
+ =?utf-8?B?bDBsalpYSjByUVZMbzdJa0dTc3NFZVQzT0ZwcTJRYjUwdVUxVXRwRENWditQ?=
+ =?utf-8?B?ZnhQWVZXaURCaFlEdFRIR3I1Y2ExTWxKUUtQL3ZMRG42anNveklSYkZOWCsv?=
+ =?utf-8?B?UXhKbER0dDlvZ0JVTmZsUDdDY1dFOXZIaEc5ZUhxWjk4bnlGRXdoMTV3YTRJ?=
+ =?utf-8?B?c0QwWW1jeVlMRFpzUU50bEZYYnVRNHdtSE5BVS84VmJwVG9ZQlIrMHpYTEJo?=
+ =?utf-8?B?Z25KUXBndE5EU1ZTTGp2aHdjZGhlZzJsWnI5SjRsdjA2VzNUbVRoT0p2VGFD?=
+ =?utf-8?B?Wm52cnQ0RjJWK1JMUVlVRnJsYlRxYjhGWndmdTBPYUoxS2N0OEdVSzVzekda?=
+ =?utf-8?B?YjZxM3dxVE8vK1E1c0k3YktMOHFaRHp0azNJMzJpQ25VRlZDWGhIZGovc2Jt?=
+ =?utf-8?B?MlJTOWlkamxlNUlsY0kwNkFPYU5vcW41cGlWRjRoRGlGeU1NeHFrbWt4eURX?=
+ =?utf-8?B?M3BKOEhKREJVZ3pJRWdHRmxyN21PMHVPSEhZR055dDBwaE8wTW9SNHZpYXNh?=
+ =?utf-8?B?bWRxcUpWSmFVVm9taHNKLy8ycW1jMVFYSDIzcVdJd2IzM1U3VnhSM1JkcTRq?=
+ =?utf-8?B?SjE1d1hvbFFsNFZMeS9ZbThZVHNCWHVEVDh1TzltV3htWDBDMFdYR3hGY3g4?=
+ =?utf-8?B?dDVGZ2c1b3YyTHZNMW15WjkxdTlDbzBJd0dFdFVFY1c4bDR3cy95WnBnand4?=
+ =?utf-8?B?Q1pEVlVHQ1FzUmFrSTVCYTdDeHZZay9YZ1hRN2pRWWRaNittNUVFQk9OeTZF?=
+ =?utf-8?B?a3RiRzRFY3A2eUh0clloSXJsQmMzRmJaOFNIUUZZWCtxWGxNcU9oZll1UjF0?=
+ =?utf-8?B?S0h6WXFWUFpTWUFUTlh3M3ZJOFczUXBnMDQ1RnFxNGlvU1FYRDdjaWliSFVP?=
+ =?utf-8?B?cldab200ZFF2YnNnZ1F4OEZMNlhjcyttMmFXV0kwYkZrbWc5eVdabEhHOURZ?=
+ =?utf-8?B?WENFUytEbHJyNWdPcVN2bjNWSjZJQ25uT0lMNytyVWxGNktXOTlESTBqK1Rv?=
+ =?utf-8?B?TzM1NWhXSzBjbXowRDNVS3U3b1VDSExRRVgvKzhxNnZGelVxWEp5YkpnaDdC?=
+ =?utf-8?B?VDJvZDNpcXc5UGVzTng1SE5Gc2FxREtZdjFrQ2VyM25jMkVkV3M3cFMzL3ll?=
+ =?utf-8?B?MFUxc1MrRWVXaWpuY1dCNVJBc3JtaWFraFZrNk90ZE41WUIxRmR2eGYxR2R1?=
+ =?utf-8?B?dFhTc3prL0htMU9taWZiUnUxT3JkcHVoSjV1VU5Oc3lWMWlqUGIzdlNsbmJY?=
+ =?utf-8?B?MTgzc0swTkkwVWVUeTV1WGI0TGE3Y0JQY3FmK21hVnV4TElWTldFMy9lVk5T?=
+ =?utf-8?B?cHB4dzUrZWJIOUhDTnRMYkx4ODBrbnh4aEtXT215T2xOd0FmVCsyNmRXTHdI?=
+ =?utf-8?B?NnpRcFRQbm85WkIxU2NDQXZEU3FBa2gvRWsxU1BYNWhTVUhWN2dvYk13aXkr?=
+ =?utf-8?B?LzF4ZktNSXRpdzJCSUFwb2VKczFBeGUxNWVjam1rOTdzS1dlZUxROWZRV0pD?=
+ =?utf-8?B?OU1UajZyQW1NUTdKOFRqRWhEaWovbmxQUzVxSTNIUzZGdyttSVhaaHJlY0kw?=
+ =?utf-8?B?YTZYRVNJZThEUm1jREMyalhEcjFnRHdTakVkRENWYUJ0T3IwVEUrZEtmWkM2?=
+ =?utf-8?Q?Gj7ZbVWa4jAtKe9HwQ=3D?=
+X-OriginatorOrg: outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: e08e4f57-a38b-4b2d-8bcc-08dacd596a13
+X-MS-Exchange-CrossTenant-AuthSource: SEZPR01MB4445.apcprd01.prod.exchangelabs.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Nov 2022 13:48:34.8357
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 84df9e7f-e9f6-40af-b435-aaaaaaaaaaaa
+X-MS-Exchange-CrossTenant-RMS-PersistedConsumerOrg: 00000000-0000-0000-0000-000000000000
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: TYZPR01MB4506
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/11/22 11:55, Ye Bin wrote:
-> From: Ye Bin <yebin10@huawei.com>
-> 
-> Now, 'file' is always NULL. obviously, 'file' is used to store return value of
-> 'debugfs_create_file()'.
 
-'file' is used to remove debugfs files when the mmc_test module is removed.
+Hello,
 
-> 
-> Fixes: a04c50aaa916 ("mmc: core: no need to check return value of debugfs_create functions")
-> Signed-off-by: Ye Bin <yebin10@huawei.com>
+I am writing to follow up on my email.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Can we get on a call on Friday (25th November) or Monday (28th November) 
+so we can discuss this further?
 
-> ---
->  drivers/mmc/core/mmc_test.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
-> index 6cd6f8a94a71..156d34b2ed4d 100644
-> --- a/drivers/mmc/core/mmc_test.c
-> +++ b/drivers/mmc/core/mmc_test.c
-> @@ -3174,7 +3174,8 @@ static int __mmc_test_register_dbgfs_file(struct mmc_card *card,
->  	struct mmc_test_dbgfs_file *df;
->  
->  	if (card->debugfs_root)
-> -		debugfs_create_file(name, mode, card->debugfs_root, card, fops);
-> +		file = debugfs_create_file(name, mode, card->debugfs_root,
-> +					   card, fops);
->  
->  	df = kmalloc(sizeof(*df), GFP_KERNEL);
->  	if (!df) {
+Please suggest a day and time to connect and also share the best number 
+to reach you.
 
+Thank you?
+Patricia Baker
+
+On 8/8/2022 2:27 PM, Patricia Baker wrote:
+
+Hello - Greetings,
+
+We are a Software/IT development company. We build Digital Solutions 
+using emerging technologies for Startups and Enterprises.
+
+We can help you to become a game changer in your business segment, we 
+deliver enterprise blockchain solutions that go beyond optimization of 
+workflow and resources. Get a resilient ecosystem to privately 
+communicate, accelerate critical processes, and continuously innovate.
+
+What can you expect from blockchain?
+
+     Automation
+     Eliminates duplication of data
+     Enhance data security
+     Reduce risk
+
+Solution we offer:
+
+     Blockchain Smart contract development
+     NFT Token and Marketplace development
+     Crypto Wallet development
+     Defi
+     Crowdfunding
+     File storage
+     Protection of intellectual property
+     Cryptocurrency Exchange Software and more
+
+Can we have a free consultation call – we'll tell you how to revamp your 
+existing system or hit the market with a new solution?
+
+Please suggest a day/time and share the best number to reach you.
+
+Thank you
+Patricia Baker
