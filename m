@@ -2,104 +2,95 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DC97C47088
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 15:53:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 336EBC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 16:23:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238901AbiKWPxs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Nov 2022 10:53:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38210 "EHLO
+        id S237943AbiKWQX1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Nov 2022 11:23:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49354 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238785AbiKWPxB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 10:53:01 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 121AC5A6EA;
-        Wed, 23 Nov 2022 07:52:57 -0800 (PST)
+        with ESMTP id S236459AbiKWQX0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 11:23:26 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62B8C88F83;
+        Wed, 23 Nov 2022 08:23:25 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 73E2E61DD9;
-        Wed, 23 Nov 2022 15:52:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0F5EEC43144;
-        Wed, 23 Nov 2022 15:52:48 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 09E0861DC9;
+        Wed, 23 Nov 2022 16:23:25 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id F37FCC433D6;
+        Wed, 23 Nov 2022 16:23:22 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1669218776;
-        bh=ZtsEDAGH6M1Hm2mKwIp+nkyl3EOfULlsa+PR5Jh+/yY=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=aCYae1otHmgUnvQhYydPYexYhzz0miYjM4zpf8c2mnxAms5CtVYUfAM7tWuXKgBlL
-         NCzjlOivqXZ6UqIGFo6Q3BntqxLP3hoWG6T432NPpsWDwgRF2tNVlSSreyLi6w5epT
-         5yRu6zDAJOHqLx2PKvtXWr2dbpMJrrYdASELSXDQ7oXGnQVROdJjqD20wCxJmK/TbF
-         LxosEZjoFf2ROozxpxjVeaVFcuzQLwzX93rS2p4/AwotUvzWq5hYJvRgCJVOQBQ8wc
-         Y+r3iBPxcrfDRitsbVrK4soZK4ULKoO7A7tHxHwHfbIwT8fluQgTwO6NOBHUOHbov+
-         PWGuJ73a1veDQ==
-Date:   Wed, 23 Nov 2022 15:52:45 +0000
-From:   Mark Brown <broonie@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
-        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-can@vger.kernel.org,
-        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
-        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
-        linux-usb@vger.kernel.org,
-        virtualization@lists.linux-foundation.org,
-        linux-watchdog@vger.kernel.org, Stephen Boyd <sboyd@kernel.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Jonathan Cameron <jic23@kernel.org>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Miquel Raynal <miquel.raynal@bootlin.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Sebastian Reichel <sre@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Jonathan Cameron <Jonathan.Cameron@huawei.com>
-Subject: Re: [PATCH v2 9/9] dt-bindings: drop redundant part of title (manual)
-Message-ID: <Y35BzU80hf36eRyo@sirena.org.uk>
-References: <20221121110615.97962-1-krzysztof.kozlowski@linaro.org>
- <20221121110615.97962-10-krzysztof.kozlowski@linaro.org>
+        s=k20201202; t=1669220604;
+        bh=RhLtqnmMaCbDvylZulq2NNvZV6guUhXmHED0yPmvTDc=;
+        h=Date:Subject:To:References:From:In-Reply-To:From;
+        b=CDkx4u4ciq3BJQ+mm7Hg+RJrOfVOZ8mLnMe5UDgBT5umauYr4s1ocwrbskk3oLPT1
+         CI8ApNBAJxPXL//r+MD6Y/MLDgNTMu36IYbsGYHWOAqsTdguLYCaRANygKr3Lf7v52
+         J/N4oD2PcxgzOOG62Z6W3avfWHf0frB7YHrdqOuj3jFxbBC0B6ur3HUWFPh/TVEv0G
+         x7yNLKcmMlwyhoGsW/307+ZzYMvB9yhJMBXpXE1v9zD3pSyVTfasndAiJ2UpwsLHaI
+         ZSfggbRftdwoflaotCdXjmOcXdeT4oW1cLAHxRm8GvNwp+r/nGxqMHMfDBEkYzqr73
+         aegCrILbzu1Bg==
+Message-ID: <a7ee14ae-3bbb-bc8a-a118-9721336d72ff@kernel.org>
+Date:   Wed, 23 Nov 2022 17:23:20 +0100
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="QAOhPtWQs4kr9fZE"
-Content-Disposition: inline
-In-Reply-To: <20221121110615.97962-10-krzysztof.kozlowski@linaro.org>
-X-Cookie: I'm rated PG-34!!
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.0
+Subject: Re: [PATCH 4/4] arm64: dts: docs: Update mmc meson-gx documentation
+ for new config option amlogic,mmc-phase
+Content-Language: en-US
+To:     Vyacheslav Bocharov <adeep@lexina.in>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20221110150035.2824580-1-adeep@lexina.in>
+ <20221110150035.2824580-5-adeep@lexina.in>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <20221110150035.2824580-5-adeep@lexina.in>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 10/11/2022 16:00, Vyacheslav Bocharov wrote:
+> - amlogic,mmc-phases: 3-element array of clock phases for core, tx, rx
 
---QAOhPtWQs4kr9fZE
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Use subject prefixes matching the subsystem (git log --oneline -- ...).
 
-On Mon, Nov 21, 2022 at 12:06:15PM +0100, Krzysztof Kozlowski wrote:
-> The Devicetree bindings document does not have to say in the title that
-> it is a "Devicetree binding" or a "schema", but instead just describe
-> the hardware.
+> clock with values:
+> 	0: CLK_PHASE_0 - 0 phase
+> 	1: CLK_PHASE_90 - 90 phase
+> 	2: CLK_PHASE_180 - 180 phase
+> 	3: CLK_PHASE_270 - 270 phase
+> By default driver use <CLK_PHASE_180 CLK_PHASE_0 CLK_PHASE_0> value.
 
-Acked-by: Mark Brown <broonie@kernel.org>
+Please use scripts/get_maintainers.pl to get a list of necessary people
+and lists to CC.  It might happen, that command when run on an older
+kernel, gives you outdated entries.  Therefore please be sure you base
+your patches on recent Linux kernel.
 
---QAOhPtWQs4kr9fZE
-Content-Type: application/pgp-signature; name="signature.asc"
+You missed several people.
 
------BEGIN PGP SIGNATURE-----
+> 
+> Signed-off-by: Vyacheslav Bocharov <adeep@lexina.in>
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> index ccc5358db131..98c89c5b3455 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx.txt
+> @@ -25,6 +25,12 @@ Required properties:
+>  Optional properties:
+>  - amlogic,dram-access-quirk: set when controller's internal DMA engine cannot access the
+>    DRAM memory, like on the G12A dedicated SDIO controller.
+> +- amlogic,mmc-phases: 3-element array of clock phases for core, tx, rx clock with values:
+> +	0: CLK_PHASE_0 - 0 phase
+> +	1: CLK_PHASE_90 - 90 phase
+> +	2: CLK_PHASE_180 - 180 phase
+> +	3: CLK_PHASE_270 - 270 phase
+> +  By default driver use <CLK_PHASE_180 CLK_PHASE_0 CLK_PHASE_0> value.
 
-iQEzBAABCgAdFiEEreZoqmdXGLWf4p/qJNaLcl1Uh9AFAmN+QcwACgkQJNaLcl1U
-h9AXjAf8DK+4g+6i+PYcdDNKGnFY/1uo0vNGE7MKgsNgIAMn42Y9Tw++ts0ZwHYw
-EDuQqMblUcsp9NKWMs1LVsvQ2YGAbZUXjgUzWpiImszGWwmUf6DZkjwNojGA5ngh
-GAGhKyUYUGXRb0MKJ1X4O3pobituSQSnz8UWlDrpBOO2OiWnWvdbURWlhNYNqMSm
-70ahwExSo8nv/Dxkvf+GV0FHLToE5K4JZxqRh/Gn0l0206IYzY4jvEbCq0DEuZPH
-Jt7Az6phpVvce86sAHnvukNdIa0EQ/8pR+v9idvZiGVY5NJvdJA54BR+1AoXlMna
-RQueknzjRrsbdQSr0xa/wr8lQW5rpw==
-=Wum3
------END PGP SIGNATURE-----
+No, this has to be converted to DT schema first.
 
---QAOhPtWQs4kr9fZE--
+Best regards,
+Krzysztof
+
