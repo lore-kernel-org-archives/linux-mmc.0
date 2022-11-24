@@ -2,265 +2,400 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96927C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Nov 2022 08:01:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 95B13C4708B
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Nov 2022 13:48:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229718AbiKXIBu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 24 Nov 2022 03:01:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49812 "EHLO
+        id S230141AbiKXNsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Nov 2022 08:48:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42102 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229597AbiKXIBs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2022 03:01:48 -0500
-Received: from mailout4.samsung.com (mailout4.samsung.com [203.254.224.34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D46FAD1C01
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Nov 2022 00:01:42 -0800 (PST)
-Received: from epcas1p1.samsung.com (unknown [182.195.41.45])
-        by mailout4.samsung.com (KnoxPortal) with ESMTP id 20221124080139epoutp0403b2b386327231efcac4748c597dd40a~qdn7VJyDP2707127071epoutp04R
-        for <linux-mmc@vger.kernel.org>; Thu, 24 Nov 2022 08:01:39 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout4.samsung.com 20221124080139epoutp0403b2b386327231efcac4748c597dd40a~qdn7VJyDP2707127071epoutp04R
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1669276899;
-        bh=voFfJu75DbaRp5dsghskwArTsRqxPUE0da7mBX7z8gU=;
-        h=From:To:Cc:Subject:Date:References:From;
-        b=uZiJjtPLvYCmwLx4FrK6teNj4ZZ6ypi30LEmpiJlz9gt9nncoU0b1zbLaLD02V790
-         9J9xGGyJfcQ7Kw1hyzOYmBbCzPuEbfr5Dx8bD5k+Mnc5eYSq2PAR0lL3Ste1mbMcfk
-         7jW0TQsxuT7hfs9ZNSZo4Whl4zHOWWlkqR/V8RDc=
-Received: from epsnrtp1.localdomain (unknown [182.195.42.162]) by
-        epcas1p3.samsung.com (KnoxPortal) with ESMTP id
-        20221124080138epcas1p3585a3fc05cd79eae89eb5d29af9eace8~qdn64bTxU0269902699epcas1p35;
-        Thu, 24 Nov 2022 08:01:38 +0000 (GMT)
-Received: from epsmges1p3.samsung.com (unknown [182.195.38.248]) by
-        epsnrtp1.localdomain (Postfix) with ESMTP id 4NHr6n6674z4x9Q7; Thu, 24 Nov
-        2022 08:01:37 +0000 (GMT)
-Received: from epcas1p1.samsung.com ( [182.195.41.45]) by
-        epsmges1p3.samsung.com (Symantec Messaging Gateway) with SMTP id
-        E5.97.57013.FD42F736; Thu, 24 Nov 2022 17:01:35 +0900 (KST)
-Received: from epsmtrp1.samsung.com (unknown [182.195.40.13]) by
-        epcas1p2.samsung.com (KnoxPortal) with ESMTPA id
-        20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a~qdn4KIM1r2650926509epcas1p2h;
-        Thu, 24 Nov 2022 08:01:35 +0000 (GMT)
-Received: from epsmgms1p1new.samsung.com (unknown [182.195.42.41]) by
-        epsmtrp1.samsung.com (KnoxPortal) with ESMTP id
-        20221124080135epsmtrp1cc1424cc27c2b7edc8d2b2353bd28c10~qdn4JMNyA0351403514epsmtrp1I;
-        Thu, 24 Nov 2022 08:01:35 +0000 (GMT)
-X-AuditID: b6c32a37-da3ff7000001deb5-94-637f24dfcb61
-Received: from epsmtip1.samsung.com ( [182.195.34.30]) by
-        epsmgms1p1new.samsung.com (Symantec Messaging Gateway) with SMTP id
-        8B.BD.14392.FD42F736; Thu, 24 Nov 2022 17:01:35 +0900 (KST)
-Received: from localhost.localdomain (unknown [10.253.100.232]) by
-        epsmtip1.samsung.com (KnoxPortal) with ESMTPA id
-        20221124080135epsmtip15d2058c14619cc941534ae0f01f7a712~qdn36XHVt1585515855epsmtip12;
-        Thu, 24 Nov 2022 08:01:35 +0000 (GMT)
-From:   Chanwoo Lee <cw9316.lee@samsung.com>
-To:     ulf.hansson@linaro.org, jh80.chung@samsung.com,
-        chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
-        agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        adrian.hunter@intel.com, linux-mmc@vger.kernel.org
-Cc:     ChanWoo Lee <cw9316.lee@samsung.com>
-Subject: [PATCH] mmc: Replace with the already declared define
- function(mmc_op_tuning)
-Date:   Thu, 24 Nov 2022 17:00:31 +0900
-Message-Id: <20221124080031.14690-1-cw9316.lee@samsung.com>
-X-Mailer: git-send-email 2.29.0
+        with ESMTP id S230119AbiKXNsS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2022 08:48:18 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 664512DA94;
+        Thu, 24 Nov 2022 05:48:11 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 06436B82474;
+        Thu, 24 Nov 2022 13:48:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 88102C433D6;
+        Thu, 24 Nov 2022 13:48:01 +0000 (UTC)
+Message-ID: <94d9789d-017c-5f56-3d6e-90f7e9cc8c70@xs4all.nl>
+Date:   Thu, 24 Nov 2022 14:47:59 +0100
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprGJsWRmVeSWpSXmKPExsWy7bCmru59lfpkg5ZvZhYnn6xhszj3+DeL
-        xbYOG4trt+azWcw41cZqceMXkOiYvJ3F4sj/fkaLphZji+Nrwx24PHbOusvusXjPSyaPTas6
-        2TzuXNvD5tFycj+LR9+WVYwenzfJBbBHZdtkpCampBYppOYl56dk5qXbKnkHxzvHm5oZGOoa
-        WlqYKynkJeam2iq5+AToumXmAB2npFCWmFMKFApILC5W0rezKcovLUlVyMgvLrFVSi1IySkw
-        K9ArTswtLs1L18tLLbEyNDAwMgUqTMjO6Ln4l7XguUHF3p8TGRsYv6t3MXJySAiYSFxa+o2l
-        i5GLQ0hgB6PExBWPGSGcT4wSc3fOZINwvjFKvPgyiwmmpWf9VXYQW0hgL6PEgj1Q7V8YJZ69
-        /sbaxcjBwSagJXH7mDdIXETgMaPE0h3n2UAamAU0JE7OegLWLCwQIXFiyWcWEJtFQFWiYdU/
-        RpBeXgFriblvcyB2yUv8ud/DDGLzCghKnJz5hAVijLxE89bZzCDzJQQ+sku8v9LHCtHgIvHp
-        32moQ4UlXh3fwg5hS0m87G9jh2hoZpTY9vUSE4TTwSixsfUFI0SVscSnz5/BrmAW0JRYv0sf
-        IqwosfP3XEaIzXwS7772gD0pIcAr0dEmBFGiIjGn6xwbzK6PNx5D3eMhsX7vU2hgxUo8mD+V
-        ZQKj/Cwk/8xC8s8shMULGJlXMYqlFhTnpqcWGxYYw2M1OT93EyM4gWqZ72Cc9vaD3iFGJg7G
-        Q4wSHMxKIrz1njXJQrwpiZVVqUX58UWlOanFhxhNgQE8kVlKNDkfmMLzSuINTSwNTMyMTCyM
-        LY3NlMR5G2ZoJQsJpCeWpGanphakFsH0MXFwSjUwid5/vO/IrqOVJ74w7k/tiHV7K3/3lfbC
-        O/sWzn9UcHHF/KXW4byHTj5NzP3f9Z15cb7/HpPqlgXTDRm3x/Etsb743Ks76Bfr/SXLfedb
-        XgvsZ/26e8Z+s9UHy1ZEmH9xahTh1egMUDBhDamboj3xJNfGsC6DFgbvUz+arSp6pm9eIXm0
-        0KtB8ABTyaN8gceLTfd2HlCL2yp/rMm4fEnCuRcMfh8+ZRw4WrT3fDeXh1N8qPv1Wgs70Rkp
-        91tb5M+qbA9Z8PR8wJXuh7/Ypynd3PTcWflMweeVdV+0Vb6xeH9Ny1reIlR3ptNjd3zT7ry1
-        M1s8PELa9TZkdbl6OlRufMRewaVS36l84IMUX1+2EktxRqKhFnNRcSIAA89ueSkEAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFjrELMWRmVeSWpSXmKPExsWy7bCSnO59lfpkg5fTpS1OPlnDZnHu8W8W
-        i20dNhbXbs1ns5hxqo3V4sYvINExeTuLxZH//YwWTS3GFsfXhjtweeycdZfdY/Gel0wem1Z1
-        snncubaHzaPl5H4Wj74tqxg9Pm+SC2CP4rJJSc3JLEst0rdL4MroufiXteC5QcXenxMZGxi/
-        q3cxcnJICJhI9Ky/yt7FyMUhJLCbUaLl1FdmiISUxO7959m6GDmAbGGJw4eLQcJCAp8YJdZM
-        SQcJswloSdw+5g3SKiLwFij8sIUdpIZZQEPi5KwnYLawQJjE/mkTWUFsFgFViYZV/xhBenkF
-        rCXmvs2B2CQv8ed+D9hWXgFBiZMzn7BAjJGXaN46m3kCI98sJKlZSFILGJlWMUqmFhTnpucW
-        GxYY5qWW6xUn5haX5qXrJefnbmIEB7OW5g7G7as+6B1iZOJgPMQowcGsJMJb71mTLMSbklhZ
-        lVqUH19UmpNafIhRmoNFSZz3QtfJeCGB9MSS1OzU1ILUIpgsEwenVAOT/3qzffst8xs8Th29
-        t21iQr7Sym9crmsD91WkzexhXlq7Uurr9JDQf1rGUqpqu75YODs3TD+w8cdi4UBN98x6EYF5
-        sx8emv7lU41bdsDFdbNWBJrPEV62ympSYJAF42fRlSz37eS/JmauZpz+bGZZj6RTloNXesyJ
-        ozIb+U4WO09Sm7BEdOVP9eJD8xKyDhmo2okeO1OpUF71g2fBQZlzh0VFTmx78cvqpLLZnpcf
-        Nhz8aqRU9db60U7PdynnjK9PfcU8JazAViC5837j3udyV16ujvnNe6L2YdTiOKWFi3fIODgv
-        qFwgHbn1PPP3+5lvV7il2d6f89DLaMamzzPWVNivcnL+NkMuOLL1wGRbHyWW4oxEQy3mouJE
-        AHAQEgvVAgAA
-X-CMS-MailID: 20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-Sendblock-Type: SVC_REQ_APPROVE
-CMS-TYPE: 101P
-DLP-Filter: Pass
-X-CFilter-Loop: Reflected
-X-CMS-RootMailID: 20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a
-References: <CGME20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a@epcas1p2.samsung.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.1
+Subject: Re: [PATCH v2 1/9] dt-bindings: drop redundant part of title of
+ shared bindings
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andrew Lunn <andrew@lunn.ch>, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-clk@vger.kernel.org, linux-riscv@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-iio@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-leds@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-can@vger.kernel.org,
+        linux-pci@vger.kernel.org, linux-pwm@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-serial@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org,
+        virtualization@lists.linux-foundation.org,
+        linux-watchdog@vger.kernel.org, Stephen Boyd <sboyd@kernel.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Jonathan Cameron <jic23@kernel.org>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Miquel Raynal <miquel.raynal@bootlin.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Sebastian Reichel <sre@kernel.org>,
+        Mark Brown <broonie@kernel.org>,
+        Guenter Roeck <linux@roeck-us.net>
+Cc:     Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Jonathan Cameron <Jonathan.Cameron@huawei.com>
+References: <20221121110615.97962-1-krzysztof.kozlowski@linaro.org>
+ <20221121110615.97962-2-krzysztof.kozlowski@linaro.org>
+From:   Hans Verkuil <hverkuil@xs4all.nl>
+In-Reply-To: <20221121110615.97962-2-krzysztof.kozlowski@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: ChanWoo Lee <cw9316.lee@samsung.com>
+On 21/11/2022 12:06, Krzysztof Kozlowski wrote:
+> The Devicetree bindings document does not have to say in the title that
+> it is a "binding", but instead just describe the hardware.  For shared
+> (re-usable) schemas, name them all as "common properties".
+> 
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Acked-by: Guenter Roeck <linux@roeck-us.net> # watchdog
+> Acked-by: Alexandre Belloni <alexandre.belloni@bootlin.com>
+> Acked-by: Jonathan Cameron <Jonathan.Cameron@huawei.com> # IIO
+> Acked-by: Miquel Raynal <miquel.raynal@bootlin.com>
+> ---
+>  Documentation/devicetree/bindings/clock/qcom,gcc.yaml           | 2 +-
+>  Documentation/devicetree/bindings/dma/dma-common.yaml           | 2 +-
+>  Documentation/devicetree/bindings/dma/dma-controller.yaml       | 2 +-
+>  Documentation/devicetree/bindings/dma/dma-router.yaml           | 2 +-
+>  Documentation/devicetree/bindings/iio/adc/adc.yaml              | 2 +-
+>  Documentation/devicetree/bindings/input/input.yaml              | 2 +-
+>  .../devicetree/bindings/media/video-interface-devices.yaml      | 2 +-
+>  Documentation/devicetree/bindings/media/video-interfaces.yaml   | 2 +-
 
-Replace with the already declared define function.
-There are no functional differences.
+For these media files:
 
-Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
----
- drivers/mmc/core/core.c              | 3 +--
- drivers/mmc/host/dw_mmc.c            | 3 +--
- drivers/mmc/host/mtk-sd.c            | 8 ++------
- drivers/mmc/host/sdhci-msm.c         | 3 +--
- drivers/mmc/host/sdhci-pci-o2micro.c | 3 +--
- drivers/mmc/host/sdhci-tegra.c       | 8 ++------
- drivers/mmc/host/sdhci.c             | 9 ++-------
- 7 files changed, 10 insertions(+), 27 deletions(-)
+Acked-by: Hans Verkuil <hverkuil-cisco@xs4all.nl>
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 1bb70d438d6c..efa7178955f8 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -142,8 +142,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
- 	int err = cmd->error;
- 
- 	/* Flag re-tuning needed on CRC errors */
--	if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
--	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-+	if (!mmc_op_tuning(cmd->opcode) &&
- 	    !host->retune_crc_disable &&
- 	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
-diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-index e4d09c439051..829af2c98a44 100644
---- a/drivers/mmc/host/dw_mmc.c
-+++ b/drivers/mmc/host/dw_mmc.c
-@@ -334,8 +334,7 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
- 	    cmdr == MMC_READ_MULTIPLE_BLOCK ||
- 	    cmdr == MMC_WRITE_BLOCK ||
- 	    cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
--	    cmdr == MMC_SEND_TUNING_BLOCK ||
--	    cmdr == MMC_SEND_TUNING_BLOCK_HS200 ||
-+	    mmc_op_tuning(cmdr) ||
- 	    cmdr == MMC_GEN_CMD) {
- 		stop->opcode = MMC_STOP_TRANSMISSION;
- 		stop->arg = 0;
-diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-index 652a67f9b054..d3f24dbda49f 100644
---- a/drivers/mmc/host/mtk-sd.c
-+++ b/drivers/mmc/host/mtk-sd.c
-@@ -1224,9 +1224,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
- 
- 	if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
- 		if (events & MSDC_INT_CMDTMO ||
--		    (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
--		     cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
--		     !host->hs400_tuning))
-+		    (!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning))
- 			/*
- 			 * should not clear fifo/interrupt as the tune data
- 			 * may have alreay come when cmd19/cmd21 gets response
-@@ -1320,9 +1318,7 @@ static void msdc_cmd_next(struct msdc_host *host,
- {
- 	if ((cmd->error &&
- 	    !(cmd->error == -EILSEQ &&
--	      (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
--	       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200 ||
--	       host->hs400_tuning))) ||
-+	      (mmc_op_tuning(cmd->opcode) || host->hs400_tuning))) ||
- 	    (mrq->sbc && mrq->sbc->error))
- 		msdc_request_done(host, mrq);
- 	else if (cmd == mrq->sbc)
-diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-index 03f76384ab3f..4ac8651d0b29 100644
---- a/drivers/mmc/host/sdhci-msm.c
-+++ b/drivers/mmc/host/sdhci-msm.c
-@@ -2219,8 +2219,7 @@ static int __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
- 		if (!msm_host->use_cdr)
- 			break;
- 		if ((msm_host->transfer_mode & SDHCI_TRNS_READ) &&
--		    SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK_HS200 &&
--		    SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK)
-+		    !mmc_op_tuning(SDHCI_GET_CMD(val)))
- 			sdhci_msm_set_cdr(host, true);
- 		else
- 			sdhci_msm_set_cdr(host, false);
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index bca1d095b759..98cadff47b2b 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -326,8 +326,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 		(host->timing != MMC_TIMING_UHS_SDR50))
- 		return sdhci_execute_tuning(mmc, opcode);
- 
--	if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
--			(opcode != MMC_SEND_TUNING_BLOCK)))
-+	if (WARN_ON(!mmc_op_tuning(opcode)))
- 		return -EINVAL;
- 
- 	/* Force power mode enter L0 */
-diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-index c71000a07656..9fc8a61eca54 100644
---- a/drivers/mmc/host/sdhci-tegra.c
-+++ b/drivers/mmc/host/sdhci-tegra.c
-@@ -268,13 +268,9 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
- {
- 	bool is_tuning_cmd = 0;
- 	bool clk_enabled;
--	u8 cmd;
- 
--	if (reg == SDHCI_COMMAND) {
--		cmd = SDHCI_GET_CMD(val);
--		is_tuning_cmd = cmd == MMC_SEND_TUNING_BLOCK ||
--				cmd == MMC_SEND_TUNING_BLOCK_HS200;
--	}
-+	if (reg == SDHCI_COMMAND)
-+		is_tuning_cmd = mmc_op_tuning(SDHCI_GET_CMD(val));
- 
- 	if (is_tuning_cmd)
- 		clk_enabled = tegra_sdhci_configure_card_clk(host, 0);
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index fb6e9a81f198..75437b0073e8 100644
---- a/drivers/mmc/host/sdhci.c
-+++ b/drivers/mmc/host/sdhci.c
-@@ -1692,8 +1692,7 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
- 		flags |= SDHCI_CMD_INDEX;
- 
- 	/* CMD19 is special in that the Data Present Select should be set */
--	if (cmd->data || cmd->opcode == MMC_SEND_TUNING_BLOCK ||
--	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
-+	if (cmd->data || mmc_op_tuning(cmd->opcode))
- 		flags |= SDHCI_CMD_DATA;
- 
- 	timeout = jiffies;
-@@ -3329,8 +3328,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
- 
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
--	u32 command;
--
- 	/*
- 	 * CMD19 generates _only_ Buffer Read Ready interrupt if
- 	 * use sdhci_send_tuning.
-@@ -3339,9 +3336,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- 	 * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
- 	 */
- 	if (intmask & SDHCI_INT_DATA_AVAIL && !host->data) {
--		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
--		if (command == MMC_SEND_TUNING_BLOCK ||
--		    command == MMC_SEND_TUNING_BLOCK_HS200) {
-+		if (mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)))) {
- 			host->tuning_done = 1;
- 			wake_up(&host->buf_ready_int);
- 			return;
--- 
-2.29.0
+Regards,
+
+	Hans
+
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml       | 2 +-
+>  Documentation/devicetree/bindings/mtd/nand-chip.yaml            | 2 +-
+>  Documentation/devicetree/bindings/mtd/nand-controller.yaml      | 2 +-
+>  .../devicetree/bindings/net/bluetooth/bluetooth-controller.yaml | 2 +-
+>  Documentation/devicetree/bindings/net/can/can-controller.yaml   | 2 +-
+>  Documentation/devicetree/bindings/net/ethernet-controller.yaml  | 2 +-
+>  Documentation/devicetree/bindings/net/ethernet-phy.yaml         | 2 +-
+>  Documentation/devicetree/bindings/net/mdio.yaml                 | 2 +-
+>  Documentation/devicetree/bindings/opp/opp-v2-base.yaml          | 2 +-
+>  .../devicetree/bindings/power/reset/restart-handler.yaml        | 2 +-
+>  Documentation/devicetree/bindings/rtc/rtc.yaml                  | 2 +-
+>  .../devicetree/bindings/soundwire/soundwire-controller.yaml     | 2 +-
+>  Documentation/devicetree/bindings/spi/spi-controller.yaml       | 2 +-
+>  Documentation/devicetree/bindings/watchdog/watchdog.yaml        | 2 +-
+>  22 files changed, 22 insertions(+), 22 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+> index 1ab416c83c8d..7129fbcf2b6c 100644
+> --- a/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+> +++ b/Documentation/devicetree/bindings/clock/qcom,gcc.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/clock/qcom,gcc.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Qualcomm Global Clock & Reset Controller Common Bindings
+> +title: Qualcomm Global Clock & Reset Controller Common Properties
+>  
+>  maintainers:
+>    - Stephen Boyd <sboyd@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/dma/dma-common.yaml b/Documentation/devicetree/bindings/dma/dma-common.yaml
+> index ad06d36af208..ea700f8ee6c6 100644
+> --- a/Documentation/devicetree/bindings/dma/dma-common.yaml
+> +++ b/Documentation/devicetree/bindings/dma/dma-common.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/dma/dma-common.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: DMA Engine Generic Binding
+> +title: DMA Engine Common Properties
+>  
+>  maintainers:
+>    - Vinod Koul <vkoul@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/dma/dma-controller.yaml b/Documentation/devicetree/bindings/dma/dma-controller.yaml
+> index 6d3727267fa8..538ebadff652 100644
+> --- a/Documentation/devicetree/bindings/dma/dma-controller.yaml
+> +++ b/Documentation/devicetree/bindings/dma/dma-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/dma/dma-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: DMA Controller Generic Binding
+> +title: DMA Controller Common Properties
+>  
+>  maintainers:
+>    - Vinod Koul <vkoul@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/dma/dma-router.yaml b/Documentation/devicetree/bindings/dma/dma-router.yaml
+> index 4b817f5dc30e..f8d8c3c88bcc 100644
+> --- a/Documentation/devicetree/bindings/dma/dma-router.yaml
+> +++ b/Documentation/devicetree/bindings/dma/dma-router.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/dma/dma-router.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: DMA Router Generic Binding
+> +title: DMA Router Common Properties
+>  
+>  maintainers:
+>    - Vinod Koul <vkoul@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/iio/adc/adc.yaml b/Documentation/devicetree/bindings/iio/adc/adc.yaml
+> index db348fcbb52c..261601729745 100644
+> --- a/Documentation/devicetree/bindings/iio/adc/adc.yaml
+> +++ b/Documentation/devicetree/bindings/iio/adc/adc.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/iio/adc/adc.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Generic IIO bindings for ADC channels
+> +title: IIO Common Properties for ADC Channels
+>  
+>  maintainers:
+>    - Jonathan Cameron <jic23@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/input/input.yaml b/Documentation/devicetree/bindings/input/input.yaml
+> index 17512f4347fd..94f7942189e8 100644
+> --- a/Documentation/devicetree/bindings/input/input.yaml
+> +++ b/Documentation/devicetree/bindings/input/input.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/input/input.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Common input schema binding
+> +title: Input Devices Common Properties
+>  
+>  maintainers:
+>    - Dmitry Torokhov <dmitry.torokhov@gmail.com>
+> diff --git a/Documentation/devicetree/bindings/media/video-interface-devices.yaml b/Documentation/devicetree/bindings/media/video-interface-devices.yaml
+> index 4527f56a5a6e..cf7712ad297c 100644
+> --- a/Documentation/devicetree/bindings/media/video-interface-devices.yaml
+> +++ b/Documentation/devicetree/bindings/media/video-interface-devices.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/media/video-interface-devices.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Common bindings for video receiver and transmitter devices
+> +title: Common Properties for Video Receiver and Transmitter Devices
+>  
+>  maintainers:
+>    - Jacopo Mondi <jacopo@jmondi.org>
+> diff --git a/Documentation/devicetree/bindings/media/video-interfaces.yaml b/Documentation/devicetree/bindings/media/video-interfaces.yaml
+> index 68c3b9871cf3..8a7162ce34f6 100644
+> --- a/Documentation/devicetree/bindings/media/video-interfaces.yaml
+> +++ b/Documentation/devicetree/bindings/media/video-interfaces.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/media/video-interfaces.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Common bindings for video receiver and transmitter interface endpoints
+> +title: Common Properties for Video Receiver and Transmitter Interface Endpoints
+>  
+>  maintainers:
+>    - Sakari Ailus <sakari.ailus@linux.intel.com>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 802e3ca8be4d..613095a3d19d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/mmc/mmc-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: MMC Controller Generic Binding
+> +title: MMC Controller Common Properties
+>  
+>  maintainers:
+>    - Ulf Hansson <ulf.hansson@linaro.org>
+> diff --git a/Documentation/devicetree/bindings/mtd/nand-chip.yaml b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
+> index 6e2dc025d694..33d079f76c05 100644
+> --- a/Documentation/devicetree/bindings/mtd/nand-chip.yaml
+> +++ b/Documentation/devicetree/bindings/mtd/nand-chip.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/mtd/nand-chip.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: NAND Chip and NAND Controller Generic Binding
+> +title: NAND Chip Common Properties
+>  
+>  maintainers:
+>    - Miquel Raynal <miquel.raynal@bootlin.com>
+> diff --git a/Documentation/devicetree/bindings/mtd/nand-controller.yaml b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
+> index 220aa2c8c0b5..efcd415f8641 100644
+> --- a/Documentation/devicetree/bindings/mtd/nand-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mtd/nand-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/mtd/nand-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: NAND Chip and NAND Controller Generic Binding
+> +title: NAND Controller Common Properties
+>  
+>  maintainers:
+>    - Miquel Raynal <miquel.raynal@bootlin.com>
+> diff --git a/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml b/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
+> index 9309dc40f54f..59bb0d7e8ab3 100644
+> --- a/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
+> +++ b/Documentation/devicetree/bindings/net/bluetooth/bluetooth-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/net/bluetooth/bluetooth-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Bluetooth Controller Generic Binding
+> +title: Bluetooth Controller Common Properties
+>  
+>  maintainers:
+>    - Marcel Holtmann <marcel@holtmann.org>
+> diff --git a/Documentation/devicetree/bindings/net/can/can-controller.yaml b/Documentation/devicetree/bindings/net/can/can-controller.yaml
+> index 1f0e98051074..217be90960e8 100644
+> --- a/Documentation/devicetree/bindings/net/can/can-controller.yaml
+> +++ b/Documentation/devicetree/bindings/net/can/can-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/net/can/can-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: CAN Controller Generic Binding
+> +title: CAN Controller Common Properties
+>  
+>  maintainers:
+>    - Marc Kleine-Budde <mkl@pengutronix.de>
+> diff --git a/Documentation/devicetree/bindings/net/ethernet-controller.yaml b/Documentation/devicetree/bindings/net/ethernet-controller.yaml
+> index 3aef506fa158..00be387984ac 100644
+> --- a/Documentation/devicetree/bindings/net/ethernet-controller.yaml
+> +++ b/Documentation/devicetree/bindings/net/ethernet-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/net/ethernet-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Ethernet Controller Generic Binding
+> +title: Ethernet Controller Common Properties
+>  
+>  maintainers:
+>    - David S. Miller <davem@davemloft.net>
+> diff --git a/Documentation/devicetree/bindings/net/ethernet-phy.yaml b/Documentation/devicetree/bindings/net/ethernet-phy.yaml
+> index ad808e9ce5b9..1327b81f15a2 100644
+> --- a/Documentation/devicetree/bindings/net/ethernet-phy.yaml
+> +++ b/Documentation/devicetree/bindings/net/ethernet-phy.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/net/ethernet-phy.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Ethernet PHY Generic Binding
+> +title: Ethernet PHY Common Properties
+>  
+>  maintainers:
+>    - Andrew Lunn <andrew@lunn.ch>
+> diff --git a/Documentation/devicetree/bindings/net/mdio.yaml b/Documentation/devicetree/bindings/net/mdio.yaml
+> index b5706d4e7e38..a266ade918ca 100644
+> --- a/Documentation/devicetree/bindings/net/mdio.yaml
+> +++ b/Documentation/devicetree/bindings/net/mdio.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/net/mdio.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: MDIO Bus Generic Binding
+> +title: MDIO Bus Common Properties
+>  
+>  maintainers:
+>    - Andrew Lunn <andrew@lunn.ch>
+> diff --git a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+> index cf9c2f7bddc2..47e6f36b7637 100644
+> --- a/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+> +++ b/Documentation/devicetree/bindings/opp/opp-v2-base.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/opp/opp-v2-base.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Generic OPP (Operating Performance Points) Common Binding
+> +title: Generic OPP (Operating Performance Points) Common Properties
+>  
+>  maintainers:
+>    - Viresh Kumar <viresh.kumar@linaro.org>
+> diff --git a/Documentation/devicetree/bindings/power/reset/restart-handler.yaml b/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
+> index 1f9a2aac53c0..378b404af7fd 100644
+> --- a/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
+> +++ b/Documentation/devicetree/bindings/power/reset/restart-handler.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/power/reset/restart-handler.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Restart and shutdown handler generic binding
+> +title: Restart and Shutdown Handler Common Properties
+>  
+>  maintainers:
+>    - Sebastian Reichel <sre@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/rtc/rtc.yaml b/Documentation/devicetree/bindings/rtc/rtc.yaml
+> index 0ec3551f12dd..c6fff5486fe6 100644
+> --- a/Documentation/devicetree/bindings/rtc/rtc.yaml
+> +++ b/Documentation/devicetree/bindings/rtc/rtc.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/rtc/rtc.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: RTC Generic Binding
+> +title: Real Time Clock Common Properties
+>  
+>  maintainers:
+>    - Alexandre Belloni <alexandre.belloni@bootlin.com>
+> diff --git a/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml b/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
+> index 4aad121eff3f..fdeb8af417d7 100644
+> --- a/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
+> +++ b/Documentation/devicetree/bindings/soundwire/soundwire-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/soundwire/soundwire-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: SoundWire Controller Generic Binding
+> +title: SoundWire Controller Common Properties
+>  
+>  maintainers:
+>    - Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+> diff --git a/Documentation/devicetree/bindings/spi/spi-controller.yaml b/Documentation/devicetree/bindings/spi/spi-controller.yaml
+> index 01042a7f382e..5a7c72cadf76 100644
+> --- a/Documentation/devicetree/bindings/spi/spi-controller.yaml
+> +++ b/Documentation/devicetree/bindings/spi/spi-controller.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/spi/spi-controller.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: SPI Controller Generic Binding
+> +title: SPI Controller Common Properties
+>  
+>  maintainers:
+>    - Mark Brown <broonie@kernel.org>
+> diff --git a/Documentation/devicetree/bindings/watchdog/watchdog.yaml b/Documentation/devicetree/bindings/watchdog/watchdog.yaml
+> index e3dfb02f0ca5..fccae0d00110 100644
+> --- a/Documentation/devicetree/bindings/watchdog/watchdog.yaml
+> +++ b/Documentation/devicetree/bindings/watchdog/watchdog.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/watchdog/watchdog.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Watchdog Generic Bindings
+> +title: Watchdog Common Properties
+>  
+>  maintainers:
+>    - Guenter Roeck <linux@roeck-us.net>
 
