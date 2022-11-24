@@ -2,123 +2,145 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83655C43219
-	for <linux-mmc@archiver.kernel.org>; Wed, 23 Nov 2022 17:39:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16F77C433FE
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Nov 2022 02:56:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236541AbiKWRjE convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Nov 2022 12:39:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58520 "EHLO
+        id S229499AbiKXC4u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 23 Nov 2022 21:56:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48534 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237549AbiKWRjD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 12:39:03 -0500
-Received: from mail4.swissbit.com (mail4.swissbit.com [176.95.1.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C52D55657A;
-        Wed, 23 Nov 2022 09:38:59 -0800 (PST)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 78D211234CB;
-        Wed, 23 Nov 2022 18:38:57 +0100 (CET)
-Received: from mail4.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 623A8121C79;
-        Wed, 23 Nov 2022 18:38:57 +0100 (CET)
-X-TM-AS-ERS: 10.149.2.42-127.5.254.253
-X-TM-AS-SMTP: 1.0 ZXguc3dpc3NiaXQuY29t Y2xvZWhsZUBoeXBlcnN0b25lLmNvbQ==
-X-DDEI-TLS-USAGE: Used
-Received: from ex.swissbit.com (unknown [10.149.2.42])
-        by mail4.swissbit.com (Postfix) with ESMTPS;
-        Wed, 23 Nov 2022 18:38:57 +0100 (CET)
-Received: from sbdeex04.sbitdom.lan (10.149.2.42) by sbdeex04.sbitdom.lan
- (10.149.2.42) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.1118.9; Wed, 23 Nov
- 2022 18:38:56 +0100
-Received: from sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818]) by
- sbdeex04.sbitdom.lan ([fe80::2047:4968:b5a0:1818%9]) with mapi id
- 15.02.1118.009; Wed, 23 Nov 2022 18:38:56 +0100
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     Avri Altman <Avri.Altman@wdc.com>
-Subject: [PATCH] mmc: block: remove non-data R1B ioctl workaround
-Thread-Topic: [PATCH] mmc: block: remove non-data R1B ioctl workaround
-Thread-Index: Adj/YjUrXkzlUmHATlmcTHF+6XwQXw==
-Date:   Wed, 23 Nov 2022 17:38:56 +0000
-Message-ID: <dd632a86fb924b019d1a009b17eb3cbc@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [10.153.4.23]
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229457AbiKXC4t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 21:56:49 -0500
+Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68703C8CA1;
+        Wed, 23 Nov 2022 18:56:48 -0800 (PST)
+Received: by mail-qv1-xf36.google.com with SMTP id p12so224289qvu.5;
+        Wed, 23 Nov 2022 18:56:48 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=dI1MZvZaLiip1FFejTpEVVfZhR5T2i7rmYdZdskI5es=;
+        b=oYoQiOuVQ0gpcQdhJ3u28N9sp8IFfK7CK/z+otstKcii5bZXTbe11zLBBcydM95MWR
+         jYsr+EjuJV+7c7ax31pfbajTA64dFwNJXOK0USwIfdxXti85Aa7A7MgLm9z95E5sw6Zl
+         GfOQCt4d+8DJZRyWf2w4JbW8uUebuXU07vimdsdLIeWIm1gWl0F1dOotjj0/AqDccsp4
+         yywRp5TsHzqNPjQs8VpbT1999TsQXrs7mmz5RbGpKp38e49sdEX54Nq+iY07qC69jP9j
+         W/pjiVk1EfyOFaOT52Oj7QzIzE6cMRpfXfpmzjCEbHc6dhE/zU2ifzn38WLf5+uZh/7J
+         3XWA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=dI1MZvZaLiip1FFejTpEVVfZhR5T2i7rmYdZdskI5es=;
+        b=eLjHWj2q49vzq2fBq0XD1qlKWHgph/6HeZzwfOUanl+HfaWSEO+FLMiDhlUqiH2MFD
+         XuFbQFZQpLoHouMYk5InRsd1L1er2vJteBXeRtWExy7UGRbBAFfuhXKqrevNczeY68rR
+         J5xBKyG+nmLASEgUTZhJ3pqk1KSfHSy/aw3aDM1wS/tQaaT8nW2aIP+SGvw6QTVOEW/z
+         54kgrMHRUm+UvviiG94MiT4aQfGlJgTXc8icAR8c/po+dKxQtqccox24TMeY0Iyfrv2B
+         L19tdAFwkoWYE8eHy6wc7jYlxIydfN0tSQtZWvXVCLBQhvTjSYeZmGtTSnLW6OtLAtZV
+         LHPw==
+X-Gm-Message-State: ANoB5pmpR7VQwu7sg8XxB7OTI4/cxEvpEILctKZmji86rwVEVxfM57i5
+        sgfPnMtGP/vFfL4GnRRZnkY5YHNN99cGSQ7eA/dZVVu7F1avCg==
+X-Google-Smtp-Source: AA0mqf4c0TpD7QVDCcuTskoOoVy5YGvqtUoUqVj0BfCQPXEQb2xxIcg8HNaOhby4C2AFtnha0fVSCrCEyKjpbKD2Olc=
+X-Received: by 2002:ad4:50ac:0:b0:4bb:ce03:5714 with SMTP id
+ d12-20020ad450ac000000b004bbce035714mr17761676qvq.30.1669258607544; Wed, 23
+ Nov 2022 18:56:47 -0800 (PST)
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27282.001
-X-TMASE-Result: 10-4.657200-10.000000
-X-TMASE-MatchedRID: ge9e+QLSeayzwwnlAhUjjJAk4Vz6rKorI64EUz6lBagHMdltgqikB9AY
-        WUo4HSIkhw5E/ZidsH8ep5R/z/M+R+ztpCSqSkXKSHCU59h5KrHVBDonH99+Vtm24hViZXUPKJp
-        KpGmR8G37pkcZlMac521ZdkOX+yj7BXY0oXpqJ14ReM8i8p3vgEyQ5fRSh265855M88ee2L/ovF
-        l9K5XN2X69Y7ea2kurrCdjRFVGO+toMCLywE0ygQtuKBGekqUpI/NGWt0UYPDKS2C7UIL4TmvpM
-        +0rLfKmp6aDqxA3fahFehRbIllwo+0DVTpPbBPr
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 4509e344-abd3-486d-bfc7-c1c6ea2d3b2a-0-0-200-0
+References: <20221118054725.80414-1-michael@allwinnertech.com>
+ <CA+Da2qxP2gvUc2=n5xW7_YEcgevGpDhqbcVFWVbF0c6DqXDXHA@mail.gmail.com> <23c0a4ae-d714-cfb1-aeb5-68b66b5bf0ee@allwinnertech.com>
+In-Reply-To: <23c0a4ae-d714-cfb1-aeb5-68b66b5bf0ee@allwinnertech.com>
+From:   Wenchao Chen <wenchao.chen666@gmail.com>
+Date:   Thu, 24 Nov 2022 10:56:36 +0800
+Message-ID: <CA+Da2qwXLapwUDX+GrFkNQE9so2Tj=ymY1YS396J_N_c+9EHYw@mail.gmail.com>
+Subject: Re: [PATCH] mmc:mmc-hsq:use fifo to dispatch mmc_request
+To:     Michael Wu <michael@allwinnertech.com>
+Cc:     ulf.hansson@linaro.org, wenchao.chen@unisoc.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The workaround of pretending R1B non-data transfers are
-data transfers in order for the busy timeout to be respected
-by the host controller driver is removed. It wasn't useful
-in a long time.
+On Mon, Nov 21, 2022 at 2:19 PM Michael Wu <michael@allwinnertech.com> wrote:
+>
+> On 11/18/2022 7:43 PM, Wenchao Chen wrote:
+> > On Fri, Nov 18, 2022 at 1:52 PM Michael Wu <michael@allwinnertech.com> wrote:
+> >>
+> >> Current next_tag selection will cause a large delay in some requests and
+> >> destroy the scheduling results of the block scheduling layer. Because the
+> >> issued mrq tags cannot ensure that each time is sequential, especially when
+> >> the IO load is heavy. In the fio performance test, we found that 4k random
+> >> read data was sent to mmc_hsq to start calling request_atomic It takes
+> >> nearly 200ms to process the request, while mmc_hsq has processed thousands
+> >> of other requests. So we use fifo here to ensure the first in, first out
+> >> feature of the request and avoid adding additional delay to the request.
+> >>
+> >
+> > Hi Michael
+> > Is the test device an eMMC?
+> > Could you share the fio test command if you want?
+> > Can you provide more logs?
+> >
+> Hi Wenchao,
+> Yes, the tested device is emmc.
+> The test command we used is `./fio -name=Rand_Read_IOPS_Test
+> -group_reporting -rw=random -bs=4K -numjobs=8 -directory=/data/data
+> -size=1G -io_size=64M -nrfiles=1 -direct=1 -thread && rm
+> /data/Rand_Read_IOPS_Test *`,  which replaces the io performance random
+> read performance test of androidbench, and the file size is set to 1G, 8
+> thread test configuration. Where /data uses f2fs and /data/data is a
+> file encrypted path.
+>
+> After enabling the hsq configuration, we can clearly see from below fio
+> test log that the minimum value of random reading is 3175 iops and the
+> maximum value is 8554iops, and the maximum delay of io completion is
+> about 200ms.
+> ```
+>      clat percentiles (usec):
+>       |  1.00th=[   498],  5.00th=[   865], 10.00th=[   963], 20.00th=[
+>   1045],
+>       | 30.00th=[  1090], 40.00th=[  1139], 50.00th=[  1172], 60.00th=[
+>   1221],
+>       | 70.00th=[  1254], 80.00th=[  1319], 90.00th=[  1401], 95.00th=[
+>   1614],
+>       | 99.00th=[  2769], 99.50th=[  3589], 99.90th=[ 31589], 99.95th=[
+> 66323],
+>       | 99.99th=[200279]
+>     bw (  KiB/s): min=12705, max=34225, per=100.00%, avg=23931.79,
+> stdev=497.40, samples=345
+>     iops        : min= 3175, max= 8554, avg=5981.67, stdev=124.38,
+> samples=345
+> ```
+>
+>
+> ```
+>      clat percentiles (usec):
+>       |  1.00th=[  799],  5.00th=[  938], 10.00th=[  963], 20.00th=[  979],
+>       | 30.00th=[  996], 40.00th=[ 1004], 50.00th=[ 1020], 60.00th=[ 1045],
+>       | 70.00th=[ 1074], 80.00th=[ 1106], 90.00th=[ 1172], 95.00th=[ 1237],
+>       | 99.00th=[ 1450], 99.50th=[ 1516], 99.90th=[ 1762], 99.95th=[ 2180],
+>       | 99.99th=[ 9503]
+>     bw (  KiB/s): min=29200, max=30944, per=100.00%, avg=30178.91,
+> stdev=53.45, samples=272
+>     iops        : min= 7300, max= 7736, avg=7544.62, stdev=13.38,
+> samples=272
+> ```
+> When NOT enabling hsq, the minimum value of random reading is 7300 iops
+> and the maximum value is 7736 iops, and the maximum delay of io is only
+> 9 ms. Finally, we added debug to the mmc driver. The reason for locating
+> the 200ms delay of hsq is due to the next tag selection of hsq.
+>
 
-Initially the workaround ensured that R1B commands did not
-time out by setting the data timeout to be the command timeout
-in commit cb87ea28ed9e ("mmc: core: Add mmc CMD+ACMD passthrough ioctl").
-This was moved inside of an if clause with idata->buf_bytes being set
-in commit 4d6144de8ba2 ("mmc: core: check for zero length ioctl data").
-This patch intends to fix the issuing of R1B data command CMD24.
-Its data timeout was being overwritten with 0 because cmd_timeout
-wasn't set at the point the workaround applied, but data_timeout was.
-But since the workaround was now inside of the idata->buf_bytes clause
-and intended to fix R1B non-data transfers that do not have buf_bytes
-set we can also remove the workaround altogether.
+Thank you very much for your Log. This patch can reduce latency, but I
+have some questions:
+1. FIO -rw does not have random, but it does have randread. Do you use
+randread? In addition, "IO_SIZE=64M" means only 64M data is tested?
+Refer to FIO:
+https://fio.readthedocs.io/en/latest/fio_doc.html?highlight=io_size#cmdoption-arg-io-size
+2. The style of "tag_tail" should remain the same as that of
+"next_tag". Would "tail_tag" be better?
+3. It is better to provide a comparison of sequential read, sequential
+write and random write.
 
-Fixes: cb87ea28ed9e ("mmc: core: Add mmc CMD+ACMD passthrough ioctl")
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/block.c | 13 -------------
- 1 file changed, 13 deletions(-)
-
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index db6d8a099910..20da7ed43e6d 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -514,19 +514,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 		if (idata->ic.data_timeout_ns)
- 			data.timeout_ns = idata->ic.data_timeout_ns;
- 
--		if ((cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
--			/*
--			 * Pretend this is a data transfer and rely on the
--			 * host driver to compute timeout.  When all host
--			 * drivers support cmd.cmd_timeout for R1B, this
--			 * can be changed to:
--			 *
--			 *     mrq.data = NULL;
--			 *     cmd.cmd_timeout = idata->ic.cmd_timeout_ms;
--			 */
--			data.timeout_ns = idata->ic.cmd_timeout_ms * 1000000;
--		}
--
- 		mrq.data = &data;
- 	}
- 
--- 
-2.37.3
-
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
-
+> ---
+> Michael Wu
