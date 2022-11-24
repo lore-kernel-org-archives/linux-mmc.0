@@ -2,145 +2,168 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16F77C433FE
-	for <linux-mmc@archiver.kernel.org>; Thu, 24 Nov 2022 02:56:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40809C4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 24 Nov 2022 06:23:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229499AbiKXC4u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 23 Nov 2022 21:56:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48534 "EHLO
+        id S229552AbiKXGXF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 24 Nov 2022 01:23:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59792 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229457AbiKXC4t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 23 Nov 2022 21:56:49 -0500
-Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68703C8CA1;
-        Wed, 23 Nov 2022 18:56:48 -0800 (PST)
-Received: by mail-qv1-xf36.google.com with SMTP id p12so224289qvu.5;
-        Wed, 23 Nov 2022 18:56:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dI1MZvZaLiip1FFejTpEVVfZhR5T2i7rmYdZdskI5es=;
-        b=oYoQiOuVQ0gpcQdhJ3u28N9sp8IFfK7CK/z+otstKcii5bZXTbe11zLBBcydM95MWR
-         jYsr+EjuJV+7c7ax31pfbajTA64dFwNJXOK0USwIfdxXti85Aa7A7MgLm9z95E5sw6Zl
-         GfOQCt4d+8DJZRyWf2w4JbW8uUebuXU07vimdsdLIeWIm1gWl0F1dOotjj0/AqDccsp4
-         yywRp5TsHzqNPjQs8VpbT1999TsQXrs7mmz5RbGpKp38e49sdEX54Nq+iY07qC69jP9j
-         W/pjiVk1EfyOFaOT52Oj7QzIzE6cMRpfXfpmzjCEbHc6dhE/zU2ifzn38WLf5+uZh/7J
-         3XWA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=dI1MZvZaLiip1FFejTpEVVfZhR5T2i7rmYdZdskI5es=;
-        b=eLjHWj2q49vzq2fBq0XD1qlKWHgph/6HeZzwfOUanl+HfaWSEO+FLMiDhlUqiH2MFD
-         XuFbQFZQpLoHouMYk5InRsd1L1er2vJteBXeRtWExy7UGRbBAFfuhXKqrevNczeY68rR
-         J5xBKyG+nmLASEgUTZhJ3pqk1KSfHSy/aw3aDM1wS/tQaaT8nW2aIP+SGvw6QTVOEW/z
-         54kgrMHRUm+UvviiG94MiT4aQfGlJgTXc8icAR8c/po+dKxQtqccox24TMeY0Iyfrv2B
-         L19tdAFwkoWYE8eHy6wc7jYlxIydfN0tSQtZWvXVCLBQhvTjSYeZmGtTSnLW6OtLAtZV
-         LHPw==
-X-Gm-Message-State: ANoB5pmpR7VQwu7sg8XxB7OTI4/cxEvpEILctKZmji86rwVEVxfM57i5
-        sgfPnMtGP/vFfL4GnRRZnkY5YHNN99cGSQ7eA/dZVVu7F1avCg==
-X-Google-Smtp-Source: AA0mqf4c0TpD7QVDCcuTskoOoVy5YGvqtUoUqVj0BfCQPXEQb2xxIcg8HNaOhby4C2AFtnha0fVSCrCEyKjpbKD2Olc=
-X-Received: by 2002:ad4:50ac:0:b0:4bb:ce03:5714 with SMTP id
- d12-20020ad450ac000000b004bbce035714mr17761676qvq.30.1669258607544; Wed, 23
- Nov 2022 18:56:47 -0800 (PST)
+        with ESMTP id S229463AbiKXGXE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 24 Nov 2022 01:23:04 -0500
+Received: from mx.msync.work (mx.msync.work [185.250.0.168])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B683B27CDF;
+        Wed, 23 Nov 2022 22:22:56 -0800 (PST)
+Received: from [127.0.0.1] (localhost [127.0.0.1]) by localhost (Mailerdaemon) with ESMTPSA id 647292AB88;
+        Thu, 24 Nov 2022 06:22:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=lexina.in; s=dkim;
+        t=1669270976; h=from:subject:date:message-id:to:mime-version:content-type:
+         content-transfer-encoding:content-language:in-reply-to:references;
+        bh=Jtkb8FsWa/xNXgK1fxfSzbSkqlyxfm+DrIrqY+1P7xA=;
+        b=excDdHXccoor+/ly4WQAAdddOMnCppJSjYZ+UA68KkBk4+F+Esr1QzonlhXwo3wqbMPIXM
+        GruVSUr6XCcxMvp6Efwj8YRh8iaurZhlF3GgaSCTHF/n7gChplhO3nykIx/s0+5buDsGs+
+        F7MARCewOgtRQZerb7SnMwfLfsxYEQKoKfHATh+4f312E6cLn+Xcmyk1HI8dDGnr6Yd4u4
+        FZU1D+GKOg+JWS9J0cqkf/qLNUObfdUcIXY5xgHsi0IyQ9drhM1aOsJQLCMaPjHLep+S69
+        KLENDe2wfgvLG8MeBRxYY3GsMn6nivs0vSpt19OGGG4chbWUwQxOrGyo5m8QDw==
+Message-ID: <c31cc8a3-8adc-3e93-f6fe-73cd7482429d@lexina.in>
+Date:   Thu, 24 Nov 2022 09:22:52 +0300
 MIME-Version: 1.0
-References: <20221118054725.80414-1-michael@allwinnertech.com>
- <CA+Da2qxP2gvUc2=n5xW7_YEcgevGpDhqbcVFWVbF0c6DqXDXHA@mail.gmail.com> <23c0a4ae-d714-cfb1-aeb5-68b66b5bf0ee@allwinnertech.com>
-In-Reply-To: <23c0a4ae-d714-cfb1-aeb5-68b66b5bf0ee@allwinnertech.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Thu, 24 Nov 2022 10:56:36 +0800
-Message-ID: <CA+Da2qwXLapwUDX+GrFkNQE9so2Tj=ymY1YS396J_N_c+9EHYw@mail.gmail.com>
-Subject: Re: [PATCH] mmc:mmc-hsq:use fifo to dispatch mmc_request
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     ulf.hansson@linaro.org, wenchao.chen@unisoc.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.0
+Subject: Re: [PATCH 0/4] arm64: amlogic: mmc: meson-gx: Add core, tx, rx
+Content-Language: en-MW
+To:     Jerome Brunet <jbrunet@baylibre.com>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Neil Armstrong <neil.armstrong@linaro.org>
+References: <20221110150035.2824580-1-adeep@lexina.in>
+ <1jk03y37vs.fsf@starbuckisacylon.baylibre.com>
+From:   Vyacheslav <adeep@lexina.in>
+In-Reply-To: <1jk03y37vs.fsf@starbuckisacylon.baylibre.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Last-TLS-Session-Version: TLSv1.3
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Nov 21, 2022 at 2:19 PM Michael Wu <michael@allwinnertech.com> wrote:
->
-> On 11/18/2022 7:43 PM, Wenchao Chen wrote:
-> > On Fri, Nov 18, 2022 at 1:52 PM Michael Wu <michael@allwinnertech.com> wrote:
-> >>
-> >> Current next_tag selection will cause a large delay in some requests and
-> >> destroy the scheduling results of the block scheduling layer. Because the
-> >> issued mrq tags cannot ensure that each time is sequential, especially when
-> >> the IO load is heavy. In the fio performance test, we found that 4k random
-> >> read data was sent to mmc_hsq to start calling request_atomic It takes
-> >> nearly 200ms to process the request, while mmc_hsq has processed thousands
-> >> of other requests. So we use fifo here to ensure the first in, first out
-> >> feature of the request and avoid adding additional delay to the request.
-> >>
-> >
-> > Hi Michael
-> > Is the test device an eMMC?
-> > Could you share the fio test command if you want?
-> > Can you provide more logs?
-> >
-> Hi Wenchao,
-> Yes, the tested device is emmc.
-> The test command we used is `./fio -name=Rand_Read_IOPS_Test
-> -group_reporting -rw=random -bs=4K -numjobs=8 -directory=/data/data
-> -size=1G -io_size=64M -nrfiles=1 -direct=1 -thread && rm
-> /data/Rand_Read_IOPS_Test *`,  which replaces the io performance random
-> read performance test of androidbench, and the file size is set to 1G, 8
-> thread test configuration. Where /data uses f2fs and /data/data is a
-> file encrypted path.
->
-> After enabling the hsq configuration, we can clearly see from below fio
-> test log that the minimum value of random reading is 3175 iops and the
-> maximum value is 8554iops, and the maximum delay of io completion is
-> about 200ms.
-> ```
->      clat percentiles (usec):
->       |  1.00th=[   498],  5.00th=[   865], 10.00th=[   963], 20.00th=[
->   1045],
->       | 30.00th=[  1090], 40.00th=[  1139], 50.00th=[  1172], 60.00th=[
->   1221],
->       | 70.00th=[  1254], 80.00th=[  1319], 90.00th=[  1401], 95.00th=[
->   1614],
->       | 99.00th=[  2769], 99.50th=[  3589], 99.90th=[ 31589], 99.95th=[
-> 66323],
->       | 99.99th=[200279]
->     bw (  KiB/s): min=12705, max=34225, per=100.00%, avg=23931.79,
-> stdev=497.40, samples=345
->     iops        : min= 3175, max= 8554, avg=5981.67, stdev=124.38,
-> samples=345
-> ```
->
->
-> ```
->      clat percentiles (usec):
->       |  1.00th=[  799],  5.00th=[  938], 10.00th=[  963], 20.00th=[  979],
->       | 30.00th=[  996], 40.00th=[ 1004], 50.00th=[ 1020], 60.00th=[ 1045],
->       | 70.00th=[ 1074], 80.00th=[ 1106], 90.00th=[ 1172], 95.00th=[ 1237],
->       | 99.00th=[ 1450], 99.50th=[ 1516], 99.90th=[ 1762], 99.95th=[ 2180],
->       | 99.99th=[ 9503]
->     bw (  KiB/s): min=29200, max=30944, per=100.00%, avg=30178.91,
-> stdev=53.45, samples=272
->     iops        : min= 7300, max= 7736, avg=7544.62, stdev=13.38,
-> samples=272
-> ```
-> When NOT enabling hsq, the minimum value of random reading is 7300 iops
-> and the maximum value is 7736 iops, and the maximum delay of io is only
-> 9 ms. Finally, we added debug to the mmc driver. The reason for locating
-> the 200ms delay of hsq is due to the next tag selection of hsq.
->
+Hi!
+Thanks for reply. Sorry for delay.
 
-Thank you very much for your Log. This patch can reduce latency, but I
-have some questions:
-1. FIO -rw does not have random, but it does have randread. Do you use
-randread? In addition, "IO_SIZE=64M" means only 64M data is tested?
-Refer to FIO:
-https://fio.readthedocs.io/en/latest/fio_doc.html?highlight=io_size#cmdoption-arg-io-size
-2. The style of "tag_tail" should remain the same as that of
-"next_tag". Would "tail_tag" be better?
-3. It is better to provide a comparison of sequential read, sequential
-write and random write.
 
-> ---
-> Michael Wu
+13.11.2022 23:06, Jerome Brunet wrote:
+> 
+> On Thu 10 Nov 2022 at 18:00, Vyacheslav Bocharov <adeep@lexina.in> wrote:
+> 
+>> The mmc driver use the same phase values (core - 180, tx/rx - 0) for all
+>> meson64 platforms. However, some platforms (and even some boards) require
+>> different values
+> 
+> Where does it stops ? Trying to solve the instabilities of this
+> IP/driver by tweaking the phase has proven to be dead-end.
+
+As a result, there is now a stalemate and various real-world operating 
+system projects use patches to change clock phases.
+
+
+> 
+> Soon, you'll end up tweaking these settings depending on the on
+> particular version of the device because it ships with a different eMMC
+> manufacturer. Then comes multi sourcing, sdio modules, sdcards ...
+> 
+>> (axg for example use 270 degree for core clock).
+> 
+> Where ? Upstream linux does not
+
+Armbian/Home Assistant OS use core phase 270 for axg/g12/sm1 boards 
+(patches by Neil). On JetHub devices phase 270 is need with eMMC more 
+than 16Gb size.
+
+> 
+> u-boot does something of the sort for sm1 and I'm not entirely sure this
+> appropriate either.
+
+U-boot in Armbian/HAOS use same phase 270 or/and force low speed mode 
+for eMMC (limit clock freq).
+
+> 
+> IMO, this setting has more to do with the mode the mmc device is
+> operating at - not the platform or board.
+> 
+> We had some discussions with the HW designers at AML and they recommended
+> to keep a phase shift of 180 between the Core and Tx. They also
+> recommended to leave Rx alone (actually, starting from the v3, the Rx
+> field has no effect. It is not even wired to actual HW)
+
+I do not have access to AML engineers :)
+I can only test settings on several different boards. And it seems that 
+the phase settings depend not only on the board layout, but also on the 
+eMMC chip used. What to do about this (if not to use the magic of the 
+driver from AML) other than providing the ability to change the value in 
+devicetree for each board I can't think of yet.
+
+> 
+> Funnily, that is not what the vendor driver does. It also does A LOT of
+> extremely complex and 'debatable' things, which mostly mask how much the
+> driver is unstable.
+
+As far as I understand they just go through all possible values until 
+the first successful attempt to initialize the device.
+What do you think of the idea to implement such a variant for the 
+meson-gx driver?
+
+> 
+> With the upstream drivers, modes up to SDR50 and HS200 have been stable
+> lately. SDR104 and DDR modes (DDR52 or HS400) remains problematic.
+
+I have troubles with HS200, for example:
+Card Type [CARD_TYPE: 0x57]
+  HS200 Single Data Rate eMMC @200MHz 1.8VI/O
+  HS Dual Data Rate eMMC @52MHz 1.8V or 3VI/O
+  HS eMMC @52MHz - at rated device voltage(s)
+  HS eMMC @26MHz - at rated device voltage(s)
+
+> 
+> Changing the settings further would require more discussion with AML.
+> Blindly poking these value until you get something stablish for 1
+> particular use case is a recipe for disaster.
+
+I assumed the idea that the dts are edited by the maintainers or the 
+board developers and will be able to choose the values themselves.
+
+
+> 
+>> This patch
+>> transfers the values from the code to the variables in the device-tree files.
+>> If not set in dts, use old default values.
+> 
+> I think going that way is opening a big can of worms.
+> I don't think this should be applied
+> 
+>>
+>> Vyacheslav Bocharov (4):
+>>    arm64: amlogic: mmc: meson-gx: Add core, tx, rx eMMC/SD/SDIO phase
+>>      clock settings from devicetree data
+>>    arm64: amlogic: mmc: meson-gx: Add dts binding include for core, tx,
+>>      rx eMMC/SD/SDIO phase clock settings from devicetree data
+>>    arm64: amlogic: dts: meson: update meson-axg device-tree for new core,
+>>      tx, rx phase clock settings.
+>>    arm64: dts: docs: Update mmc meson-gx documentation for new config
+>>      option amlogic,mmc-phase
+>>
+>>   .../bindings/mmc/amlogic,meson-gx.txt         |  7 ++++
+>>   arch/arm64/boot/dts/amlogic/meson-axg.dtsi    |  3 ++
+>>   drivers/mmc/host/meson-gx-mmc.c               | 18 +++++++---
+>>   include/dt-bindings/mmc/meson-gx-mmc.h        | 35 +++++++++++++++++++
+>>   4 files changed, 58 insertions(+), 5 deletions(-)
+>>   create mode 100644 include/dt-bindings/mmc/meson-gx-mmc.h
+> 
+> 
+> _______________________________________________
+> linux-amlogic mailing list
+> linux-amlogic@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-amlogic
+
+-- 
+Vyacheslav Bocharov
