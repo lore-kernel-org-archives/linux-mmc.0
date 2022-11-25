@@ -2,239 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B795C4167D
-	for <linux-mmc@archiver.kernel.org>; Fri, 25 Nov 2022 11:23:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DF685C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 25 Nov 2022 12:02:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229504AbiKYLXP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 25 Nov 2022 06:23:15 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50894 "EHLO
+        id S229743AbiKYMC1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 25 Nov 2022 07:02:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229795AbiKYLWu (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2022 06:22:50 -0500
-Received: from mail-wr1-x432.google.com (mail-wr1-x432.google.com [IPv6:2a00:1450:4864:20::432])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17A4414005
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2022 03:22:48 -0800 (PST)
-Received: by mail-wr1-x432.google.com with SMTP id x5so6303077wrt.7
-        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2022 03:22:48 -0800 (PST)
+        with ESMTP id S229685AbiKYMC0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 25 Nov 2022 07:02:26 -0500
+Received: from mail-pj1-x1036.google.com (mail-pj1-x1036.google.com [IPv6:2607:f8b0:4864:20::1036])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E053331F93
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2022 04:02:24 -0800 (PST)
+Received: by mail-pj1-x1036.google.com with SMTP id a1-20020a17090abe0100b00218a7df7789so7514040pjs.5
+        for <linux-mmc@vger.kernel.org>; Fri, 25 Nov 2022 04:02:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112;
-        h=mime-version:message-id:in-reply-to:date:subject:to:from:user-agent
-         :references:from:to:cc:subject:date:message-id:reply-to;
-        bh=pn54IrAg9BvGdpbmlmTu4g2JeVdd9hbFtNrFP2BoA2s=;
-        b=CxcXVjwjK4O53Xsx4YzgKeQEGBU2MaHahr/zOMhAdXq/sVnoZdb23QDoGDzacEdWZ6
-         Rlwbs2pHtNvE2W1+dPnxWGWL59DGt9iH4oZfc0sztwVn2bWaWVWwpbhBOvhnlQWpEcDW
-         wBpQ4rj5BtaEqJ8B8Hc2MS94pFz6y8zsNBfwg1gGawhTj2B7gTb12UBAqjJW7Ux3Wn7N
-         hJskj2x+HOGvCgjRHN7pFl3gbdx8vQi4J6ilaqAmNkx3tj8DTdJZ+55G40uRnTt8M/6O
-         i5ZMbjBjoZldLlzQZfmHVKIbBnyhFPQnPyROsi3B7TgVR/xprXdMqdFhrTNXGg6Jub2+
-         Q1zg==
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=rA7jP7DElPEidVByHnf5wE7T1KK+zH9PCClJosnrZb0=;
+        b=Q4itDm8eMoY3Z7onnN9UDYJexlhjMsGcsqqpzOXWIaXyN2oQyWZ/4ut0q6KzOWfhxN
+         RVf1e/cFyffAFHc/Nek1T2ouOyR6k9YmpiupAb4Q6cbMXZLCon32Lr1Jzo7o9/UVE4TM
+         UqZ5ZY7ZoxSYMLYeq7nyQDn9VFJcJbu3UGMYNzLTAsKfSu+IE3wpKbjf/wOK9VNuPDzT
+         14tINsJPO2H+mdRNkQWD+rdWdWp/gvdw+juRhGHpcJz3YNSFbWfm/y0XfVglCzkwmEBf
+         CcZAxVpo5UucdmKHchjVV+y6XS8HZOf887Ci6SVjZuQGMaKKi095vKSFlkHGgewDMbNu
+         ePHg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=mime-version:message-id:in-reply-to:date:subject:to:from:user-agent
-         :references:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=pn54IrAg9BvGdpbmlmTu4g2JeVdd9hbFtNrFP2BoA2s=;
-        b=203aGuAaRp8y2wEoDiCrM1cbanfsJOaFmWjrBryMlT5fQ1xwMD+POEEu63V8Y4iHPt
-         LZzc82X9JxP2Q1zANLfGN8PUrFSiWRGkozWZ0oe1dLijVIMi+vRpu3w7+/NWHzdWXDl1
-         Sgz60vs06jABK0cGHD6Y0hR3rjfJQiUEuySdmGTR73Qh9eKueHr5hEaOwkbZs3gR7wg7
-         Qar+6KaeP60CcvsTWOa8unVBe/uIHNCDkD1YPjA8UeYZecp0RZfTItT+jdsN9oOr6rCX
-         bE4osQ26EyoftTv/gHIk0oImr6f3epF+k5pfLs4Aw9nfRy9hqtpEjyHjoWlu2jpgapi9
-         6ojw==
-X-Gm-Message-State: ANoB5pnqzU+w2Id4242QvUMAKA/FsdH2smLY65fO+gaqK/TyqgyaaWI5
-        01LPDhZpuiF3xzIqBqRZo3GfCg==
-X-Google-Smtp-Source: AA0mqf5J1upCR0wwX6epG9BvfBXsPDWbg7ZhxcnvLJ7dj4mY2ZQicjacNyBf2f6pOKtwDPhaumPn2A==
-X-Received: by 2002:a05:6000:1088:b0:22e:4a4e:b890 with SMTP id y8-20020a056000108800b0022e4a4eb890mr14732078wrw.554.1669375366508;
-        Fri, 25 Nov 2022 03:22:46 -0800 (PST)
-Received: from localhost (253.35.17.109.rev.sfr.net. [109.17.35.253])
-        by smtp.gmail.com with ESMTPSA id m6-20020adfc586000000b002366fb99cdasm3538269wrg.50.2022.11.25.03.22.45
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Nov 2022 03:22:45 -0800 (PST)
-References: <20221110150035.2824580-1-adeep@lexina.in>
- <1jk03y37vs.fsf@starbuckisacylon.baylibre.com>
- <c31cc8a3-8adc-3e93-f6fe-73cd7482429d@lexina.in>
-User-agent: mu4e 1.8.10; emacs 28.2
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Vyacheslav <adeep@lexina.in>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Neil Armstrong <neil.armstrong@linaro.org>
-Subject: Re: [PATCH 0/4] arm64: amlogic: mmc: meson-gx: Add core, tx, rx
-Date:   Fri, 25 Nov 2022 11:28:17 +0100
-In-reply-to: <c31cc8a3-8adc-3e93-f6fe-73cd7482429d@lexina.in>
-Message-ID: <1j7czj2s8r.fsf@starbuckisacylon.baylibre.com>
+        bh=rA7jP7DElPEidVByHnf5wE7T1KK+zH9PCClJosnrZb0=;
+        b=8AgoLr84/2XGtDpjP4oDmb45ECwNsGZBRZzbE+ltIdXVUl725C7RlNbU7RxhhsEM7w
+         MtAhqYX0cSgtT4/7cc/myeIpgrKUCq4HyvvjFc4ct8HomHSFPKJ+ExYj2SaPs2ViASQu
+         L+S/ALsjejGkGdGEjfHgqWdg1h+tkIW2KcynSwrofY3DxdnSvXlNAJoRCYHIcsfAXHKU
+         yCycu2IwlWgHpXz0Mx9WJ4jFmIYUA4VQMPwXBFUeAdPaceCpRrGqOFG+iqWZGraj/0pL
+         73g+m9PftMNmb0xfB/8rJyXqhpnvrfH1XyIE/SBXjVaiHF5UrcZYbmZFJ6IGPo9FQyZP
+         fv0g==
+X-Gm-Message-State: ANoB5pndKgcq8tambPM118XaH8hheGCylFsFNGGNUoCbOBNt3CnCW6gZ
+        LWlA3iK7zYgYd6NHgQqxdaX+5nj4u94VmtxHYvT5zA==
+X-Google-Smtp-Source: AA0mqf7cFB6agKaKGSFfWKi/sVlJDT6bBUOneDv91yFf+vofRFlu/o0biAXbanZW5J4ZacSIqOiv4Lr4bvM239rExF0=
+X-Received: by 2002:a17:90b:1d45:b0:218:6db5:fd98 with SMTP id
+ ok5-20020a17090b1d4500b002186db5fd98mr41482120pjb.164.1669377744386; Fri, 25
+ Nov 2022 04:02:24 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20221124170649.63851-1-adrian.hunter@intel.com> <20221124170649.63851-2-adrian.hunter@intel.com>
+In-Reply-To: <20221124170649.63851-2-adrian.hunter@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 25 Nov 2022 13:01:47 +0100
+Message-ID: <CAPDyKFoie+qmoJ=szfFRpAvSBOtYO0OKjM+0aiCdkTUsb3zpEw@mail.gmail.com>
+Subject: Re: [PATCH 1/4] mmc: sdhci: Fix voltage switch delay
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Eugen Hristev <eugen.hristev@microchip.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Prabu Thangamuthu <prabu.t@synopsys.com>,
+        Manjunath M B <manjumb@synopsys.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Hu Ziji <huziji@marvell.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Brian Norris <briannorris@chromium.org>,
+        Wenchao Chen <wenchao.chen@unisoc.com>,
+        Chevron Li <chevron.li@bayhubtech.com>,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Thu 24 Nov 2022 at 09:22, Vyacheslav <adeep@lexina.in> wrote:
-
-> Hi!
-> Thanks for reply. Sorry for delay.
+On Thu, 24 Nov 2022 at 18:07, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
+> Commit 20b92a30b561 ("mmc: sdhci: update signal voltage switch code")
+> removed voltage switch delays from sdhci because mmc core had been
+> enhanced to support them. However that assumed that sdhci_set_ios()
+> did a single clock change, which it did not, and so the delays in mmc
+> core, which should have come after the first clock change, were not
+> effective.
 >
-> 13.11.2022 23:06, Jerome Brunet wrote:
->> On Thu 10 Nov 2022 at 18:00, Vyacheslav Bocharov <adeep@lexina.in> wrote:
->> 
->>> The mmc driver use the same phase values (core - 180, tx/rx - 0) for all
->>> meson64 platforms. However, some platforms (and even some boards) require
->>> different values
->> Where does it stops ? Trying to solve the instabilities of this
->> IP/driver by tweaking the phase has proven to be dead-end.
+> Fix by avoiding re-configuring UHS and preset settings when the clock
+> is turning on and the settings have not changed. That then also avoids
+> the associated clock changes, so that then sdhci_set_ios() does a single
+> clock change when voltage switching, and the mmc core delays become
+> effective.
 >
-> As a result, there is now a stalemate and various real-world operating
-> system projects use patches to change clock phases.
+> To do that has meant keeping track of driver strength (host->drv_type),
+> and cases of reinitialization (host->reinit_uhs).
 >
-
-The current setting has seen its fair share of "real world"
-testing too, before being applied. 
-
-It does need more work, sure. It does not make what is proposed here
-appropriate.
-
+> Note also, the 'turning_on_clk' restriction should not be necessary
+> but is done to minimize the impact of the change on stable kernels.
 >
->> Soon, you'll end up tweaking these settings depending on the on
->> particular version of the device because it ships with a different eMMC
->> manufacturer. Then comes multi sourcing, sdio modules, sdcards ...
->> 
->>> (axg for example use 270 degree for core clock).
->> Where ? Upstream linux does not
+> Fixes: 20b92a30b561 ("mmc: sdhci: update signal voltage switch code")
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+
+[...]
+
+> @@ -2335,6 +2362,18 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
 >
-> Armbian/Home Assistant OS use core phase 270 for axg/g12/sm1 boards
-> (patches by Neil). On JetHub devices phase 270 is need with eMMC more than
-> 16Gb size.
-
-Size has nothing to do with this. Few boards electing to do something
-else does justify making this a DT config. It just shows the controller
-still need work.
-
+>         host->ops->set_bus_width(host, ios->bus_width);
 >
->> u-boot does something of the sort for sm1 and I'm not entirely sure this
->> appropriate either.
->
-> U-boot in Armbian/HAOS use same phase 270 or/and force low speed mode for
-> eMMC (limit clock freq).
->
->> IMO, this setting has more to do with the mode the mmc device is
->> operating at - not the platform or board.
->> We had some discussions with the HW designers at AML and they recommended
->> to keep a phase shift of 180 between the Core and Tx. They also
->> recommended to leave Rx alone (actually, starting from the v3, the Rx
->> field has no effect. It is not even wired to actual HW)
->
-> I do not have access to AML engineers :)
-> I can only test settings on several different boards. And it seems that the
-> phase settings depend not only on the board layout, but also on the eMMC
-> chip used.
+> +       /*
+> +        * Special case to avoid multiple clock changes during voltage
+> +        * switching.
+> +        */
+> +       if (!reinit_uhs &&
+> +           turning_on_clk &&
+> +           host->timing == ios->timing &&
+> +           host->version >= SDHCI_SPEC_300 &&
+> +           (host->preset_enabled || host->drv_type == ios->drv_type) &&
+> +           (host->preset_enabled || !sdhci_preset_needed(host, ios->timing)))
 
-What are you going to do when a manufacturer does multi-sourcing then
-? Make one DT per PCB/eMMC chip combination ? It is wrong and does not scale.
+This caught my eyes, as it looks a bit messy. Not sure if it's
+possible to simplify, but the last two lines could be replaced with:
 
-> What to do about this (if not to use the magic of the driver
-> from AML) other than providing the ability to change the value in
-> devicetree for each board I can't think of yet.
->
->> Funnily, that is not what the vendor driver does. It also does A LOT of
->> extremely complex and 'debatable' things, which mostly mask how much the
->> driver is unstable.
->
-> As far as I understand they just go through all possible values until the
-> first successful attempt to initialize the device.
-> What do you think of the idea to implement such a variant for the meson-gx
-> driver?
+(host->preset_enabled ||
+(host->drv_type == ios->drv_type && !sdhci_preset_needed(host, ios->timing))))
 
-What the amlogic driver does are overly complex computation to get a tuning
-value, which is then contiously cycled (in the IRQ handler!!) while silently
-retrying failed transaction behind MMC core's back
+But, I am not sure that really helps...
 
-That's far from being desirable.
+[...]
 
->
->> With the upstream drivers, modes up to SDR50 and HS200 have been stable
->> lately. SDR104 and DDR modes (DDR52 or HS400) remains problematic.
->
-> I have troubles with HS200, for example:
-> Card Type [CARD_TYPE: 0x57]
->  HS200 Single Data Rate eMMC @200MHz 1.8VI/O
->  HS Dual Data Rate eMMC @52MHz 1.8V or 3VI/O
->  HS eMMC @52MHz - at rated device voltage(s)
->  HS eMMC @26MHz - at rated device voltage(s)
->
-
-That does not says with which mode or at which stage the problem occurs
-
->> Changing the settings further would require more discussion with AML.
->> Blindly poking these value until you get something stablish for 1
->> particular use case is a recipe for disaster.
->
-> I assumed the idea that the dts are edited by the maintainers or the board
-> developers and will be able to choose the values themselves.
->
-
-And eventually, we'll end-up telling people to adjust the phases
-depending of the sdcard they insert ... This does not work for me.
-
-I understand the will to get this working at full speed. I've spent A
-LOT more time than would have wanted in this driver, trying to do
-exactly that. There is quite an history about that on this list
-detailing why changes have been made.
-
-It was stable(ish) for while. Now we are getting more reports of
-problems. This (again) shows this need more work. It also shows there
-are still things we don't know about this controller and this where it
-gets tricky because there is high risk of causing regressions with each
-change.
-
-Let's leave Rx (which has no effect) and Tx out for now.
-
-My guess is the core phase might need to be adapted depending on
-* Mode: It seems the DDR modes are done by making the controller run
-  faster then diving the output clock by 2. This divider might
-  mess up the phase shift needed.
-* Speed: Maybe there is delay contraint between the input clock and the
-  core and we need at adapting the phase shift depending on the rate ?
-
-I think what could be tried - with a LOOONG RFT giving a chance people
-to report regressions - is:
-* Defaulting the Core phase to 270: Despite AML HW engineer
-  recommendation, this is what the vendor code does. Maybe this will help
-  with board that seems to require 270 to start.
-  I know if stays for all modes, it will cause problems
-1) Set 180 when switching to DDR modes
-2) Wether switching to 180 for high speed SDR modes (UHS, HS200) is
-   required, or not, is a bit unclear. If the problem is the internal
-   divider, it should not be required. If the problem is the delay,
-   maybe it is.
-
->
->> 
->>> This patch
->>> transfers the values from the code to the variables in the device-tree files.
->>> If not set in dts, use old default values.
->> I think going that way is opening a big can of worms.
->> I don't think this should be applied
->> 
->>>
->>> Vyacheslav Bocharov (4):
->>>    arm64: amlogic: mmc: meson-gx: Add core, tx, rx eMMC/SD/SDIO phase
->>>      clock settings from devicetree data
->>>    arm64: amlogic: mmc: meson-gx: Add dts binding include for core, tx,
->>>      rx eMMC/SD/SDIO phase clock settings from devicetree data
->>>    arm64: amlogic: dts: meson: update meson-axg device-tree for new core,
->>>      tx, rx phase clock settings.
->>>    arm64: dts: docs: Update mmc meson-gx documentation for new config
->>>      option amlogic,mmc-phase
->>>
->>>   .../bindings/mmc/amlogic,meson-gx.txt         |  7 ++++
->>>   arch/arm64/boot/dts/amlogic/meson-axg.dtsi    |  3 ++
->>>   drivers/mmc/host/meson-gx-mmc.c               | 18 +++++++---
->>>   include/dt-bindings/mmc/meson-gx-mmc.h        | 35 +++++++++++++++++++
->>>   4 files changed, 58 insertions(+), 5 deletions(-)
->>>   create mode 100644 include/dt-bindings/mmc/meson-gx-mmc.h
->> _______________________________________________
->> linux-amlogic mailing list
->> linux-amlogic@lists.infradead.org
->> http://lists.infradead.org/mailman/listinfo/linux-amlogic
-
+Kind regards
+Uffe
