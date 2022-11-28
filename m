@@ -2,148 +2,166 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE5BFC4167D
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Nov 2022 08:58:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 251D7C433FE
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Nov 2022 09:38:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229996AbiK1I6x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Nov 2022 03:58:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33626 "EHLO
+        id S229908AbiK1Ji6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Nov 2022 04:38:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229908AbiK1I6w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2022 03:58:52 -0500
-Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 039A8B7C8
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2022 00:58:51 -0800 (PST)
-Received: by mail-lf1-x12b.google.com with SMTP id u27so5272562lfc.9
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2022 00:58:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=SRo2ZHW2qUWAOKV0aSxyjMp63OMVxWk6yROB450ZpOw=;
-        b=msBknoyna+SQ3FnaZmRqOmEfz5UNjIIUvWP5e7DmwAqQZVMt8q6tlv7X+3uWxr8FNZ
-         QchWu5NbnQXskIKbfSDs/IkNhk3niDpORomP9vULfSeL+94E3wkQiGLtSunICQFmctu7
-         nKSEBxk3Bqkw0Jfz87L7Nr9vu66gehc0dI3ac0Y1mdZ57wVfn+rt/HffEZvhRGeFxUvX
-         KyLrCuSH0bf8FlTEjjj9YYL2tB6CnPUq2c53Z5s5NOcXEzKaa2NXY8bOPPp86AQTrf+7
-         mmiZloaV4a26NQ4v+X8cmvx0lPePbShzN6lsJm4lDgxJiTUJkobPtzs/DS+ENhbpQBt3
-         1/HQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=SRo2ZHW2qUWAOKV0aSxyjMp63OMVxWk6yROB450ZpOw=;
-        b=inZytcZ9ezYm2sj1E7rJe7HhaxE2GSVJeoZGa2A7BVvG/9XD5suoF7qyZ60jdzsrqx
-         gK1XeWqXwN5/3lRkrGD5s2728LxFxMuUZJePMwS2OlMmIofJTnM7QmH0YTXdaU+K2hTi
-         OFDm/4+4zvHvmsg9ifKzzu5SeQvQkWOfkbBWt+2M4Q0ciwNIZC0p+c31BaOJHIbmGYBs
-         zgrXsxk1OyqAk73xe1ul3qyA510e0/QUd/OaxPzn+JIGyx1GCUfoy2hwG03V4aCWce3u
-         lNYjDf7EnpU4MjsNTePk5NJik2tYlCZRZEJjqercXZ17lNO13kJ2o4dxvyYlM8LOONHd
-         fEYw==
-X-Gm-Message-State: ANoB5pmfhuA2qONRqqrGs6shl/0a+W0pnnQY5sQ2MrCMau7Z99FmoQn3
-        z7qxnb0BySl2fusfxkFP/fRVsiSIFPibhPTU
-X-Google-Smtp-Source: AA0mqf5g1lPF5MxCBmCbYqyXj/XvGS8lLCI+Rv/t1iuI5mdV3zuXl8rDOb4aRa8I8O+gLu73vFy3EQ==
-X-Received: by 2002:a05:6512:3da4:b0:4a2:3924:de36 with SMTP id k36-20020a0565123da400b004a23924de36mr10381943lfv.663.1669625929396;
-        Mon, 28 Nov 2022 00:58:49 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id o1-20020a056512052100b004a44ffb1023sm1666009lfc.57.2022.11.28.00.58.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Nov 2022 00:58:49 -0800 (PST)
-Message-ID: <263b5e29-f0b4-27b4-a753-592153edc3c3@linaro.org>
-Date:   Mon, 28 Nov 2022 09:58:47 +0100
+        with ESMTP id S229776AbiK1Ji5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2022 04:38:57 -0500
+Received: from out28-147.mail.aliyun.com (out28-147.mail.aliyun.com [115.124.28.147])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F17F60CB;
+        Mon, 28 Nov 2022 01:38:55 -0800 (PST)
+X-Alimail-AntiSpam: AC=CONTINUE;BC=0.1371035|-1;CH=green;DM=|CONTINUE|false|;DS=CONTINUE|ham_alarm|0.00349216-0.000151657-0.996356;FP=0|0|0|0|0|-1|-1|-1;HT=ay29a033018047203;MF=michael@allwinnertech.com;NM=1;PH=DS;RN=4;RT=4;SR=0;TI=SMTPD_---.QIl52nN_1669628331;
+Received: from SunxiBot.allwinnertech.com(mailfrom:michael@allwinnertech.com fp:SMTPD_---.QIl52nN_1669628331)
+          by smtp.aliyun-inc.com;
+          Mon, 28 Nov 2022 17:38:52 +0800
+From:   Michael Wu <michael@allwinnertech.com>
+To:     ulf.hansson@linaro.org, wenchao.chen@unisoc.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc:mmc-hsq:use fifo to dispatch mmc_request
+Date:   Mon, 28 Nov 2022 17:38:47 +0800
+Message-Id: <20221128093847.22768-1-michael@allwinnertech.com>
+X-Mailer: git-send-email 2.29.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH 8/8] dt-bindings: mmc: sdhci-pxa: add pxav1
-Content-Language: en-US
-To:     Doug Brown <doug@schmorgal.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-References: <20221128024407.224393-1-doug@schmorgal.com>
- <20221128024407.224393-9-doug@schmorgal.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221128024407.224393-9-doug@schmorgal.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 28/11/2022 03:44, Doug Brown wrote:
-> Add a compatible for the pxav1 controller in the PXA168, along with
-> optional pinctrl properties to use for an errata workaround.
-> 
-> Signed-off-by: Doug Brown <doug@schmorgal.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 22 ++++++++++++++++++-
->  1 file changed, 21 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> index 1c87f4218e18..e3fb34853921 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/mmc/sdhci-pxa.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Marvell PXA SDHCI v2/v3 bindings
-> +title: Marvell PXA SDHCI v1/v2/v3 bindings
->  
->  maintainers:
->    - Ulf Hansson <ulf.hansson@linaro.org>
-> @@ -34,6 +34,7 @@ allOf:
->  properties:
->    compatible:
->      enum:
-> +      - mrvl,pxav1-mmc
->        - mrvl,pxav2-mmc
->        - mrvl,pxav3-mmc
->        - marvell,armada-380-sdhci
-> @@ -61,6 +62,25 @@ properties:
->        - const: io
->        - const: core
->  
-> +  pinctrl-names:
-> +    description:
-> +      Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between SDIO CMD and
-> +      GPIO mode.
-> +    minItems: 2
+Current next_tag selection will cause a large delay in some requests and
+destroy the scheduling results of the block scheduling layer. Because the
+issued mrq tags cannot ensure that each time is sequential, especially when
+the IO load is heavy. In the fio performance test, we found that 4k random
+read data was sent to mmc_hsq to start calling request_atomic It takes
+nearly 200ms to process the request, while mmc_hsq has processed thousands
+of other requests. So we use fifo here to ensure the first in, first out
+feature of the request and avoid adding additional delay to the request.
 
-No need for minItems.
+Reviewed-by: Wenchao Chen <wenchao.chen@unisoc.com>
+Signed-off-by: Michael Wu <michael@allwinnertech.com>
+---
+ drivers/mmc/host/mmc_hsq.c | 40 ++++++++++++++------------------------
+ drivers/mmc/host/mmc_hsq.h |  5 +++++
+ 2 files changed, 20 insertions(+), 25 deletions(-)
 
-> +    items:
-> +      - const: default
-> +      - const: state_cmd_gpio
-> +
-> +  pinctrl-0:
-> +    description:
-> +      should contain default pinctrl.
-
-Start with capital letter if this is a sentence with full stop. It's
-anyway looking different then the rest of the file, right?
-
-> +    maxItems: 1
-
-
-Why maxItems: 1? What if one wants to add here more entries? Drop maxItems.
-
-> +
-> +  pinctrl-1:
-> +    description:
-> +      should switch CMD pin to GPIO mode as a high output.
-> +    maxItems: 1
-
-Ditto
-
-
-> +
->    mrvl,clk-delay-cycles:
->      description: Specify a number of cycles to delay for tuning.
->      $ref: /schemas/types.yaml#/definitions/uint32
-
-Best regards,
-Krzysztof
+diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
+index 9d35453e7371..424dc7b07858 100644
+--- a/drivers/mmc/host/mmc_hsq.c
++++ b/drivers/mmc/host/mmc_hsq.c
+@@ -13,9 +13,6 @@
+ 
+ #include "mmc_hsq.h"
+ 
+-#define HSQ_NUM_SLOTS	64
+-#define HSQ_INVALID_TAG	HSQ_NUM_SLOTS
+-
+ static void mmc_hsq_retry_handler(struct work_struct *work)
+ {
+ 	struct mmc_hsq *hsq = container_of(work, struct mmc_hsq, retry_work);
+@@ -73,7 +70,6 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
+ 
+ static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
+ {
+-	struct hsq_slot *slot;
+ 	int tag;
+ 
+ 	/*
+@@ -82,29 +78,12 @@ static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
+ 	 */
+ 	if (!remains) {
+ 		hsq->next_tag = HSQ_INVALID_TAG;
++		hsq->tail_tag = HSQ_INVALID_TAG;
+ 		return;
+ 	}
+ 
+-	/*
+-	 * Increasing the next tag and check if the corresponding request is
+-	 * available, if yes, then we found a candidate request.
+-	 */
+-	if (++hsq->next_tag != HSQ_INVALID_TAG) {
+-		slot = &hsq->slot[hsq->next_tag];
+-		if (slot->mrq)
+-			return;
+-	}
+-
+-	/* Othersie we should iterate all slots to find a available tag. */
+-	for (tag = 0; tag < HSQ_NUM_SLOTS; tag++) {
+-		slot = &hsq->slot[tag];
+-		if (slot->mrq)
+-			break;
+-	}
+-
+-	if (tag == HSQ_NUM_SLOTS)
+-		tag = HSQ_INVALID_TAG;
+-
++	tag = hsq->tag_slot[hsq->next_tag];
++	hsq->tag_slot[hsq->next_tag] = HSQ_INVALID_TAG;
+ 	hsq->next_tag = tag;
+ }
+ 
+@@ -233,8 +212,14 @@ static int mmc_hsq_request(struct mmc_host *mmc, struct mmc_request *mrq)
+ 	 * Set the next tag as current request tag if no available
+ 	 * next tag.
+ 	 */
+-	if (hsq->next_tag == HSQ_INVALID_TAG)
++	if (hsq->next_tag == HSQ_INVALID_TAG) {
+ 		hsq->next_tag = tag;
++		hsq->tail_tag = tag;
++		hsq->tag_slot[hsq->tail_tag] = HSQ_INVALID_TAG;
++	} else {
++		hsq->tag_slot[hsq->tail_tag] = tag;
++		hsq->tail_tag = tag;
++	}
+ 
+ 	hsq->qcnt++;
+ 
+@@ -339,8 +324,10 @@ static const struct mmc_cqe_ops mmc_hsq_ops = {
+ 
+ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
+ {
++	int i;
+ 	hsq->num_slots = HSQ_NUM_SLOTS;
+ 	hsq->next_tag = HSQ_INVALID_TAG;
++	hsq->tail_tag = HSQ_INVALID_TAG;
+ 
+ 	hsq->slot = devm_kcalloc(mmc_dev(mmc), hsq->num_slots,
+ 				 sizeof(struct hsq_slot), GFP_KERNEL);
+@@ -351,6 +338,9 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
+ 	hsq->mmc->cqe_private = hsq;
+ 	mmc->cqe_ops = &mmc_hsq_ops;
+ 
++	for (i = 0; i < HSQ_NUM_SLOTS; i++)
++		hsq->tag_slot[i] = HSQ_INVALID_TAG;
++
+ 	INIT_WORK(&hsq->retry_work, mmc_hsq_retry_handler);
+ 	spin_lock_init(&hsq->lock);
+ 	init_waitqueue_head(&hsq->wait_queue);
+diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
+index ffdd9cd172c3..1808024fc6c5 100644
+--- a/drivers/mmc/host/mmc_hsq.h
++++ b/drivers/mmc/host/mmc_hsq.h
+@@ -2,6 +2,9 @@
+ #ifndef LINUX_MMC_HSQ_H
+ #define LINUX_MMC_HSQ_H
+ 
++#define HSQ_NUM_SLOTS	64
++#define HSQ_INVALID_TAG	HSQ_NUM_SLOTS
++
+ struct hsq_slot {
+ 	struct mmc_request *mrq;
+ };
+@@ -17,6 +20,8 @@ struct mmc_hsq {
+ 	int next_tag;
+ 	int num_slots;
+ 	int qcnt;
++	int tail_tag;
++	int tag_slot[HSQ_NUM_SLOTS];
+ 
+ 	bool enabled;
+ 	bool waiting_for_idle;
+-- 
+2.29.0
 
