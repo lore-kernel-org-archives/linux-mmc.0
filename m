@@ -2,99 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C3A8C43217
-	for <linux-mmc@archiver.kernel.org>; Mon, 28 Nov 2022 12:23:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C578C43217
+	for <linux-mmc@archiver.kernel.org>; Mon, 28 Nov 2022 13:33:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230405AbiK1MXN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Nov 2022 07:23:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60936 "EHLO
+        id S231359AbiK1NdU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 28 Nov 2022 08:33:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231165AbiK1MWs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2022 07:22:48 -0500
-Received: from mail-ot1-f44.google.com (mail-ot1-f44.google.com [209.85.210.44])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A79481D317;
-        Mon, 28 Nov 2022 04:20:50 -0800 (PST)
-Received: by mail-ot1-f44.google.com with SMTP id a13-20020a9d6e8d000000b00668d65fc44fso6767709otr.9;
-        Mon, 28 Nov 2022 04:20:50 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=date:subject:message-id:references:in-reply-to:cc:to:from
-         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=CleQloKxs/oV4Y+k4xNQxImH9pxlbxqGqLN+aVF09SU=;
-        b=jgF/+psGjEeVLGBfJjb4zZ/ja1xlgwvYwznefMbdRLzC5zCR8+vWsxde/NsWGfEKvU
-         tLRu8vPrHkyRVmwR4UE+JxSQFJUUs9r6anqAlxdmdPC+Mib1rYV9KafMyfvVr2TUrq2A
-         HKz3oaRs68Eq6FmYGQwLyt8YybOhII5INPz4kaUPvuOZX/m1r5YuJWsgpcVQh/aDw68t
-         M8Z5cxSX4aYqkha0x66PhxsQdoZ0zfBgQnlQyRxpHvSr5ivmtgyiP9qJUaLu6Va79qy/
-         DtPcISfvMWaWou/8JUFYYv9ghxJctd9A2bPw0nYAMEFQv91+QqeUVhcqDaNqcTYzQcgk
-         L7OA==
-X-Gm-Message-State: ANoB5pmy1xRP52yeKWy4Md5m4yZj6O/zf0zMkPP5nlXGK0p4g6u7MGr/
-        Uc3g+/6HeYi4HbP21ny9UR+9A1b9RQ==
-X-Google-Smtp-Source: AA0mqf42E2M2bJSW49JtpbEKaOSL2UsN1IllQhZkqt/G7VXesQweSe2b32Evwp+LT0v+UglXDXKnhg==
-X-Received: by 2002:a9d:6186:0:b0:661:a7b9:dbea with SMTP id g6-20020a9d6186000000b00661a7b9dbeamr15291960otk.77.1669638049878;
-        Mon, 28 Nov 2022 04:20:49 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id e32-20020a9d2aa3000000b00666a5b5d20fsm4594137otb.32.2022.11.28.04.20.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Nov 2022 04:20:49 -0800 (PST)
-Received: (nullmailer pid 477526 invoked by uid 1000);
-        Mon, 28 Nov 2022 12:20:47 -0000
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+        with ESMTP id S230410AbiK1NdT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2022 08:33:19 -0500
+Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AA92F42
+        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2022 05:33:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669642399; x=1701178399;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=09BOGxgeXlKWNNJvljw399n1+XkbLs2It1OpzBbpCDc=;
+  b=ZCWMYlY99pCj7fLMoegM/Gt4m4Df7jBvLwQaqnyZivGruTk5S1O2hzVY
+   ngAZiugNKZeEj3ZGs+T4ffujeVDd34jly4S1oty6K2E1EQkAYFHBB8Cgm
+   axsuFn4a+fzmDibAo88KteB5myfAZpGKYcQH1qNkQsLnVthgcoXUkmapC
+   m/GLnNQ5kR4DTs9SJgk/iqb6J5csQea5M2GFlt0+rbfA0AAopVmKBxU/+
+   Aditkvolk6iuC/QJoCglwuwn6xYhLqR6swxmhxmTGbAlRYYK+vy6Bl673
+   MUS6fBU3r3DrFGjiapzbznZQObO4ZBkxalMChSkn0slS1je+uB3LD50z+
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="401121707"
+X-IronPort-AV: E=Sophos;i="5.96,200,1665471600"; 
+   d="scan'208";a="401121707"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2022 05:33:18 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="676044460"
+X-IronPort-AV: E=Sophos;i="5.96,200,1665471600"; 
+   d="scan'208";a="676044460"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.50.218])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2022 05:33:12 -0800
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Eugen Hristev <eugen.hristev@microchip.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Prabu Thangamuthu <prabu.t@synopsys.com>,
+        Manjunath M B <manjumb@synopsys.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Hu Ziji <huziji@marvell.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Brian Norris <briannorris@chromium.org>,
+        Wenchao Chen <wenchao.chen@unisoc.com>,
+        Chevron Li <chevron.li@bayhubtech.com>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH V2 0/4] mmc: sdhci: Fix voltage switch delay
+Date:   Mon, 28 Nov 2022 15:32:55 +0200
+Message-Id: <20221128133259.38305-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-From:   Rob Herring <robh@kernel.org>
-To:     Doug Brown <doug@schmorgal.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        devicetree@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>
-In-Reply-To: <20221128024407.224393-9-doug@schmorgal.com>
-References: <20221128024407.224393-1-doug@schmorgal.com>
- <20221128024407.224393-9-doug@schmorgal.com>
-Message-Id: <166963790392.472903.12789917850226152279.robh@kernel.org>
-Subject: Re: [PATCH 8/8] dt-bindings: mmc: sdhci-pxa: add pxav1
-Date:   Mon, 28 Nov 2022 06:20:47 -0600
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi
 
-On Sun, 27 Nov 2022 18:44:07 -0800, Doug Brown wrote:
-> Add a compatible for the pxav1 controller in the PXA168, along with
-> optional pinctrl properties to use for an errata workaround.
-> 
-> Signed-off-by: Doug Brown <doug@schmorgal.com>
-> ---
->  .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 22 ++++++++++++++++++-
->  1 file changed, 21 insertions(+), 1 deletion(-)
-> 
+Here is a fix for the voltage switch delay issue raised here:
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+  https://lore.kernel.org/linux-mmc/20221117094859.20582-1-quic_sartgarg@quicinc.com/
 
-yamllint warnings/errors:
+Plus some subsequent tidy-ups.
 
-dtschema/dtc warnings/errors:
-/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml: properties:pinctrl-names: 'oneOf' conditional failed, one must be fixed:
-	[{'const': 'default'}, {'const': 'state_cmd_gpio'}] is too long
-	[{'const': 'default'}, {'const': 'state_cmd_gpio'}] is too short
-	False schema does not allow 2
-	1 was expected
-	hint: "minItems" is only needed if less than the "items" list length
-	from schema $id: http://devicetree.org/meta-schemas/items.yaml#
 
-doc reference errors (make refcheckdocs):
+Changes in V2:
 
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221128024407.224393-9-doug@schmorgal.com
+    mmc: sdhci: Fix voltage switch delay
+        Tidy messy if-condition a bit
 
-This check can fail if there are any dependencies. The base for a patch
-series is generally the most recent rc1.
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+Adrian Hunter (4):
+      mmc: sdhci: Fix voltage switch delay
+      mmc: sdhci: Avoid unnecessary re-configuration
+      mmc: sdhci: Avoid unnecessary ->set_clock()
+      mmc: sdhci: Enable card clock instead of ->set_clock()
 
-pip3 install dtschema --upgrade
+ drivers/mmc/host/sdhci.c | 101 ++++++++++++++++++++++++++++++++---------------
+ drivers/mmc/host/sdhci.h |   2 +
+ 2 files changed, 71 insertions(+), 32 deletions(-)
 
-Please check and re-submit after running the above command.
 
+Regards
+Adrian
