@@ -2,96 +2,112 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26B8FC4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 03:44:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 153E8C433FE
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 06:31:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235497AbiK2Dou (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 28 Nov 2022 22:44:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33850 "EHLO
+        id S229533AbiK2Gbs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Nov 2022 01:31:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53058 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235281AbiK2Dot (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 28 Nov 2022 22:44:49 -0500
-Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53736B4A0
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2022 19:44:48 -0800 (PST)
-Received: by mail-pl1-x62f.google.com with SMTP id y17so4283531plp.3
-        for <linux-mmc@vger.kernel.org>; Mon, 28 Nov 2022 19:44:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=schmorgal.com; s=google;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Cc6YZeu86MLhbPIXSljwWJJn8NbPxcgy7OA0BHwk7uA=;
-        b=SCAOlPPooD/APYwTsXkzkioVUSqcnKSOk7t5hrhs4bXxb1EVMcpXSZPyWGyliWZKWe
-         Z9GzpWLVYalirAQ0qRzfbOPdl1ZJTz/vkX5kO9G0NfmnRHABxGldcQAZElikf+5iKI3z
-         U70mS8vv46YAjv7ZK8/CF+afnJcgWYs82qMeQ=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Cc6YZeu86MLhbPIXSljwWJJn8NbPxcgy7OA0BHwk7uA=;
-        b=mDIyKW5LCzIpmPKPEYzOGyV+uL1lIG/Y28237FMtql/lh6C28KVRGuj5uaMJeyq3YI
-         RlX2b4nV+EbYkYAGbhm3zoWrBM967BL4yYcd76cVzOUI7Z/fi4Tzs4EU6rBY4Povlu20
-         D3p6nDy+D6hb+AtGSihoWwkFKASYKRM5LkZTr38CF652c1k7AnMnPiH7MUUQkQCoF3H2
-         +PG6TBvGqnoNHPTe+Il4pEBAMhYmq3OD82oqhyhKFBbHWcfpFijtPASWYunOtilfc7ji
-         ry2CLud4tqYpcXXQAzTAJi+5BmFXUziCtq0kyKNa8jicQ5KJbQWWUyvthbJKTNKUP6j0
-         u99Q==
-X-Gm-Message-State: ANoB5pmxgaXegMTLYUhcTRskJfUKCwhVKmjy/HXwUJpPTYENoIcoQiqA
-        yMMChoxsaUEAfPL/nG/nUBkWEA==
-X-Google-Smtp-Source: AA0mqf6VE44fM8ZN+/MCjrsKz/vmsa3nEc9iyrgxnJbdY7NRiouCGIfiNOXJtaStWUulWRyZ3CGHBQ==
-X-Received: by 2002:a17:90a:9908:b0:213:b6c7:53e1 with SMTP id b8-20020a17090a990800b00213b6c753e1mr64739389pjp.35.1669693487748;
-        Mon, 28 Nov 2022 19:44:47 -0800 (PST)
-Received: from [192.168.1.33] ([192.183.212.197])
-        by smtp.googlemail.com with ESMTPSA id b194-20020a621bcb000000b00574898527c8sm8781165pfb.74.2022.11.28.19.44.46
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 28 Nov 2022 19:44:47 -0800 (PST)
-Message-ID: <08abea27-a751-d861-c526-80b41dd72ff2@schmorgal.com>
-Date:   Mon, 28 Nov 2022 19:44:46 -0800
+        with ESMTP id S229475AbiK2Gbr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 01:31:47 -0500
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F8404FF8F;
+        Mon, 28 Nov 2022 22:31:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669703506; x=1701239506;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=2ZevteJEeuBWIB8ThPdy5oJKhP3is8ThlHKOG6tF9XU=;
+  b=Sr32CTI19u5MXq8pk9Zp+BXJw+3hKWWWy7RrbSArbd3Q28lBniESSusG
+   9La2YnBraO9SxvqksjNKjaiFCA4qJQpgH2Sltk7yocl6uyzfva3kMD+lq
+   VVPgfZDMhpUboBhj0Z5p3uroZWnwat4jmEShtKzO+evIwPArF0XUxYygg
+   lHhMYcRAcYT8s05+jeC6g5WhYNaplekinThRKXPc7JxK1zL6mfgsQ1KuP
+   qKwZ1TQpglzj0z/iBnZUbfpqOgveEo01v2JnzoOmTI8WzpwW5iVDoQC/9
+   uiEvwmR9/yUAR8cxf15KMlUK0P9RN0IDt5HW12+ub3unxRk/h1Si0nRmm
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="312661910"
+X-IronPort-AV: E=Sophos;i="5.96,202,1665471600"; 
+   d="scan'208";a="312661910"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2022 22:31:46 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="749707908"
+X-IronPort-AV: E=Sophos;i="5.96,202,1665471600"; 
+   d="scan'208";a="749707908"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.34.177])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 28 Nov 2022 22:31:43 -0800
+Message-ID: <117f119b-96d3-342d-f03e-1176653be133@intel.com>
+Date:   Tue, 29 Nov 2022 08:31:39 +0200
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH 3/8] mmc: sdhci-pxav2: add register workaround for PXA168
+ silicon bug
+To:     Doug Brown <doug@schmorgal.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
 References: <20221128024407.224393-1-doug@schmorgal.com>
- <20221128024407.224393-9-doug@schmorgal.com>
- <263b5e29-f0b4-27b4-a753-592153edc3c3@linaro.org>
-From:   Doug Brown <doug@schmorgal.com>
-Subject: Re: [PATCH 8/8] dt-bindings: mmc: sdhci-pxa: add pxav1
-In-Reply-To: <263b5e29-f0b4-27b4-a753-592153edc3c3@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+ <20221128024407.224393-4-doug@schmorgal.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221128024407.224393-4-doug@schmorgal.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Krzysztof and Rob,
-
-On 11/28/2022 12:58 AM, Krzysztof Kozlowski wrote:
-
-> No need for minItems.
+On 28/11/22 04:44, Doug Brown wrote:
+> The PXA168 has a documented silicon bug that results in a data abort
+> exception when accessing the SDHCI_HOST_VERSION register on SDH2 and
+> SDH4 through a 16-bit read. Implement the workaround described in the
+> errata, which performs a 32-bit read from a lower address instead. This
+> is safe to use on all four SDH peripherals.
 > 
-> Start with capital letter if this is a sentence with full stop. It's
-> anyway looking different then the rest of the file, right?
+> Signed-off-by: Doug Brown <doug@schmorgal.com>
+> ---
+>  drivers/mmc/host/sdhci-pxav2.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
 > 
-> Why maxItems: 1? What if one wants to add here more entries? Drop maxItems.
-> 
-> Ditto
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index 2f9fa0ecbddd..d76131b8986b 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -80,6 +80,18 @@ static void pxav2_reset(struct sdhci_host *host, u8 mask)
+>  	}
+>  }
+>  
+> +static inline u16 pxav1_readw(struct sdhci_host *host, int reg)
+> +{
+> +	u32 temp;
+> +	/* Workaround for data abort exception on SDH2 and SDH4 on PXA168 */
+> +	if (reg == SDHCI_HOST_VERSION) {
+> +		temp = readl(host->ioaddr + SDHCI_HOST_VERSION - 2) >> 16;
+> +		return temp & 0xffff;
 
-Thanks for the fast review. Will fix this all in V2 after I receive
-feedback on the other patches. I was trying to follow the pattern from
-another similar schema and didn't fully understand.
+Isn't this the same as just:
 
-On 11/28/2022 4:20 AM, Rob Herring wrote:
+		return readl(host->ioaddr + SDHCI_HOST_VERSION - 2) >> 16;
 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13)
-Well this is embarrassing! I forgot to run dt_binding_check. Sorry about
-that.
+> +	}
+> +
+> +	return readw(host->ioaddr + reg);
+> +}
+> +
+>  static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
+>  {
+>  	u8 ctrl;
+> @@ -102,6 +114,7 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
+>  }
+>  
+>  static const struct sdhci_ops pxav1_sdhci_ops = {
+> +	.read_w        = pxav1_readw,
+>  	.set_clock     = sdhci_set_clock,
+>  	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>  	.set_bus_width = pxav2_mmc_set_bus_width,
 
-Doug
