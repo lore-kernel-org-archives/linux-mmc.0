@@ -2,228 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EED20C4321E
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 12:55:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A159C46467
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 12:55:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234423AbiK2MzC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Nov 2022 07:55:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41528 "EHLO
+        id S230381AbiK2MzF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Nov 2022 07:55:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232791AbiK2Myx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 07:54:53 -0500
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CF612A734
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:54:52 -0800 (PST)
-Received: by mail-pj1-x102d.google.com with SMTP id k2-20020a17090a4c8200b002187cce2f92so17231990pjh.2
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:54:52 -0800 (PST)
+        with ESMTP id S233258AbiK2MzA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 07:55:00 -0500
+Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9D1B60EB8
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:54:58 -0800 (PST)
+Received: by mail-pj1-x1029.google.com with SMTP id e7-20020a17090a77c700b00216928a3917so17228267pjs.4
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:54:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=qEdmoDp0VwqZXuUooek7LxDrUyhO539Ub+QFdiSLPUI=;
-        b=szOyF+SC2juc6vEk5e7CydMjs7NkatxTOucvKPzrOl2BTN0zYE0wQap0pduNfWv2f2
-         rrrunCwk9VVGJ0+RGQH4n7+eC2izohPptpzSaPLvMwh9lMjEqKZgM0hqrsrs0nXSrdaS
-         9wRBWjvEmVcMrMhimy0C1TFWpiP6XXAG6N1nVRpvQ7xl+DsVfr7DuszED1gZfXVnaK2D
-         ZPf+3uLWNaV0FzKjUVHyJFl46FIU7k771JviOV28WWFmK1hvmgJuGyqZ0fOmgFKcZl4E
-         3LWiN818a5Qye76/P+6J96nQtkxcDqJi/4RDZsoI4O5UNPdKg5JKxqmtAsASqVns+XNf
-         r2+w==
+        bh=KW4ffafdWRk2eNo+Vd9LUA4QY8ptBxsRJc+ciuZDU9I=;
+        b=tDGzByIuBQCRqwpzV5s6jlm7LDDXK0ketuCf0pZm4OO+51o7QQyIO7sj2hUwzlkj3l
+         vczBgP5r10LmqxWlRrQ0MHe7ogItlJ6BvApLdFkLfSYtFGTFpabrTdyG5qPEI49ZJ3rm
+         Quio1niAnlGO1DlmrJi7vKOuCGmslB5hmOCwJt2JxuZrX1JNSEqlLQF5gdhAEm52p1DF
+         FE4Rle36KT05z1CsA11u/4IpLYZ2MpxiLZt1khaasKo79rigGinoJU4uv/M0lw/nEedd
+         9CrOk/PTxzjiL4JoXgbbEvTxI/4+QpkY+6Zs7SPIAbiEDR5lNbQPAsI6Nhk9BqW8pui6
+         5yJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=qEdmoDp0VwqZXuUooek7LxDrUyhO539Ub+QFdiSLPUI=;
-        b=vxPe6T/DqashlMsg0v5jdNRua155RdcQs7tE+mgFdhFIDHy14SIvJFuxJOWEMpILGU
-         yyab+Rlc2qTEmEs7MGAefpZvBAnfzxiN1ddWKabzU4ruhlwq2bKyn+CnJ6zQR+Cqcghx
-         W3Rrizw5yt442Mk7zgzuiNQycm35Gf+xvUD8v6cDS1Yecuhfpc1NbA9EjbSEc61Icv6n
-         pd9aGLJiiw2N8GUE+E1v1kIMezrDqqyKOS470s9vwoENLI8tOjLSXc7Hx8gHKVMl3GKp
-         7PquFKTltkqB5XyZJqLvLVbXdrEPdo/Ec+wnbkBYYYvcsl+zd07LLh5S4PmJW3VRjDBA
-         hvvg==
-X-Gm-Message-State: ANoB5plHKwiVWvOYjkSiA3n7rdhDWTgFOCmOJ954ad0g6mQMwTqCFsWV
-        vucB0jMqSbxaokMff1L3IAV7HgnIyCVXanNaw7aWJw==
-X-Google-Smtp-Source: AA0mqf5YI8m48IPFeflWGnlqYhZOk4qnNV1Z+9dLOe6ODAhDBlhMdQCMEG8e+mJoaqTWjS5VnoC2zGa2I52q4YrhB7Y=
-X-Received: by 2002:a17:902:ee55:b0:189:69cf:9ea0 with SMTP id
- 21-20020a170902ee5500b0018969cf9ea0mr20123417plo.37.1669726492035; Tue, 29
- Nov 2022 04:54:52 -0800 (PST)
+        bh=KW4ffafdWRk2eNo+Vd9LUA4QY8ptBxsRJc+ciuZDU9I=;
+        b=RSq6O2wC00IKqU5p66zJCKXm6PEzXNnmP5V9UAMeodMIAVjQcXihNIN37oSUNaDT4I
+         2qT7qj9MnJAoY/oCZ2V0YBbtS9aP2RsrntoK87G3+r4VKZ8jboBVmR0qZRthWLcsVbuy
+         R9cRGNTACD3e4cRK7ksm0cAjngDHoMzefH4kHFfIylm1kRTA+VIBsenLFiD0xi+D1gXs
+         9JfXpa7lzPwCFRJdb0T5F/jd0Ra2jIREnTPwOmV3Su4CKmyYGJodrPUG2k03CL0IhqIz
+         CwkIEiST2VUkf2LcQgWQ72xLd+xKRv8pIWzr6Uwfiu8m+5xEsmSB0130SE/P2aQtti07
+         /Heg==
+X-Gm-Message-State: ANoB5pnwqZTf6rm7ETzoXP7v+0cN2s72RZZlMwqcHhYbI1BQfBH5GmIa
+        B8I9iMSt2/WgHAtFH+VJhqTbwVYavsoYtXDgId4uJQ==
+X-Google-Smtp-Source: AA0mqf53Fm1c+97bVkY2sGQYz3i1enF9huifz1wXhNyEGCzHavvLEGw2/5bwEZZ3PmacbOA5xVDS8MybnLyZXAom6V0=
+X-Received: by 2002:a17:902:a503:b0:188:6baf:2011 with SMTP id
+ s3-20020a170902a50300b001886baf2011mr35441978plq.165.1669726498347; Tue, 29
+ Nov 2022 04:54:58 -0800 (PST)
 MIME-Version: 1.0
-References: <CGME20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a@epcas1p2.samsung.com>
- <20221124080031.14690-1-cw9316.lee@samsung.com>
-In-Reply-To: <20221124080031.14690-1-cw9316.lee@samsung.com>
+References: <20221125090141.3626747-1-cuigaosheng1@huawei.com>
+In-Reply-To: <20221125090141.3626747-1-cuigaosheng1@huawei.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 29 Nov 2022 13:54:16 +0100
-Message-ID: <CAPDyKFqFhjrc0T7y5Sy1ayJO3Dt3pecsB1rziUroq1L+8wbWCg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: Replace with the already declared define function(mmc_op_tuning)
-To:     Chanwoo Lee <cw9316.lee@samsung.com>
-Cc:     jh80.chung@samsung.com, chaotian.jing@mediatek.com,
-        matthias.bgg@gmail.com, agross@kernel.org, andersson@kernel.org,
-        konrad.dybcio@linaro.org, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org
+Date:   Tue, 29 Nov 2022 13:54:22 +0100
+Message-ID: <CAPDyKFqZOMO2vA7cr89LBqfzRT==LmU4yZnAkfHub5sZWMmx9g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mtk-sd: Fix missing clk_disable_unprepare in msdc_of_clock_parse()
+To:     Gaosheng Cui <cuigaosheng1@huawei.com>
+Cc:     chaotian.jing@mediatek.com, matthias.bgg@gmail.com,
+        drinkcat@chromium.org, wenbin.mei@mediatek.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 24 Nov 2022 at 09:01, Chanwoo Lee <cw9316.lee@samsung.com> wrote:
+On Fri, 25 Nov 2022 at 10:01, Gaosheng Cui <cuigaosheng1@huawei.com> wrote:
 >
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
+> The clk_disable_unprepare() should be called in the error handling
+> of devm_clk_bulk_get_optional, fix it by replacing devm_clk_get_optional
+> and clk_prepare_enable by devm_clk_get_optional_enabled.
 >
-> Replace with the already declared define function.
-> There are no functional differences.
->
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
+> Fixes: f5eccd94b63f ("mmc: mediatek: Add subsys clock control for MT8192 msdc")
+> Signed-off-by: Gaosheng Cui <cuigaosheng1@huawei.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/core/core.c              | 3 +--
->  drivers/mmc/host/dw_mmc.c            | 3 +--
->  drivers/mmc/host/mtk-sd.c            | 8 ++------
->  drivers/mmc/host/sdhci-msm.c         | 3 +--
->  drivers/mmc/host/sdhci-pci-o2micro.c | 3 +--
->  drivers/mmc/host/sdhci-tegra.c       | 8 ++------
->  drivers/mmc/host/sdhci.c             | 9 ++-------
->  7 files changed, 10 insertions(+), 27 deletions(-)
+>  drivers/mmc/host/mtk-sd.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
 >
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 1bb70d438d6c..efa7178955f8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -142,8 +142,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->         int err = cmd->error;
->
->         /* Flag re-tuning needed on CRC errors */
-> -       if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -           cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> +       if (!mmc_op_tuning(cmd->opcode) &&
->             !host->retune_crc_disable &&
->             (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->             (mrq->data && mrq->data->error == -EILSEQ) ||
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index e4d09c439051..829af2c98a44 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -334,8 +334,7 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
->             cmdr == MMC_READ_MULTIPLE_BLOCK ||
->             cmdr == MMC_WRITE_BLOCK ||
->             cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
-> -           cmdr == MMC_SEND_TUNING_BLOCK ||
-> -           cmdr == MMC_SEND_TUNING_BLOCK_HS200 ||
-> +           mmc_op_tuning(cmdr) ||
->             cmdr == MMC_GEN_CMD) {
->                 stop->opcode = MMC_STOP_TRANSMISSION;
->                 stop->arg = 0;
 > diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 652a67f9b054..d3f24dbda49f 100644
+> index 0f06cc5fec86..abadfc319053 100644
 > --- a/drivers/mmc/host/mtk-sd.c
 > +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1224,9 +1224,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
+> @@ -2605,13 +2605,11 @@ static int msdc_of_clock_parse(struct platform_device *pdev,
+>                         return PTR_ERR(host->src_clk_cg);
+>         }
 >
->         if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
->                 if (events & MSDC_INT_CMDTMO ||
-> -                   (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -                    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> -                    !host->hs400_tuning))
-> +                   (!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning))
->                         /*
->                          * should not clear fifo/interrupt as the tune data
->                          * may have alreay come when cmd19/cmd21 gets response
-> @@ -1320,9 +1318,7 @@ static void msdc_cmd_next(struct msdc_host *host,
->  {
->         if ((cmd->error &&
->             !(cmd->error == -EILSEQ &&
-> -             (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-> -              cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200 ||
-> -              host->hs400_tuning))) ||
-> +             (mmc_op_tuning(cmd->opcode) || host->hs400_tuning))) ||
->             (mrq->sbc && mrq->sbc->error))
->                 msdc_request_done(host, mrq);
->         else if (cmd == mrq->sbc)
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 03f76384ab3f..4ac8651d0b29 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2219,8 +2219,7 @@ static int __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
->                 if (!msm_host->use_cdr)
->                         break;
->                 if ((msm_host->transfer_mode & SDHCI_TRNS_READ) &&
-> -                   SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK_HS200 &&
-> -                   SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK)
-> +                   !mmc_op_tuning(SDHCI_GET_CMD(val)))
->                         sdhci_msm_set_cdr(host, true);
->                 else
->                         sdhci_msm_set_cdr(host, false);
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index bca1d095b759..98cadff47b2b 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -326,8 +326,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->                 (host->timing != MMC_TIMING_UHS_SDR50))
->                 return sdhci_execute_tuning(mmc, opcode);
+> -       host->sys_clk_cg = devm_clk_get_optional(&pdev->dev, "sys_cg");
+> +       /* If present, always enable for this clock gate */
+> +       host->sys_clk_cg = devm_clk_get_optional_enabled(&pdev->dev, "sys_cg");
+>         if (IS_ERR(host->sys_clk_cg))
+>                 host->sys_clk_cg = NULL;
 >
-> -       if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> -                       (opcode != MMC_SEND_TUNING_BLOCK)))
-> +       if (WARN_ON(!mmc_op_tuning(opcode)))
->                 return -EINVAL;
->
->         /* Force power mode enter L0 */
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index c71000a07656..9fc8a61eca54 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -268,13 +268,9 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
->  {
->         bool is_tuning_cmd = 0;
->         bool clk_enabled;
-> -       u8 cmd;
->
-> -       if (reg == SDHCI_COMMAND) {
-> -               cmd = SDHCI_GET_CMD(val);
-> -               is_tuning_cmd = cmd == MMC_SEND_TUNING_BLOCK ||
-> -                               cmd == MMC_SEND_TUNING_BLOCK_HS200;
-> -       }
-> +       if (reg == SDHCI_COMMAND)
-> +               is_tuning_cmd = mmc_op_tuning(SDHCI_GET_CMD(val));
->
->         if (is_tuning_cmd)
->                 clk_enabled = tegra_sdhci_configure_card_clk(host, 0);
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index fb6e9a81f198..75437b0073e8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1692,8 +1692,7 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->                 flags |= SDHCI_CMD_INDEX;
->
->         /* CMD19 is special in that the Data Present Select should be set */
-> -       if (cmd->data || cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-> -           cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
-> +       if (cmd->data || mmc_op_tuning(cmd->opcode))
->                 flags |= SDHCI_CMD_DATA;
->
->         timeout = jiffies;
-> @@ -3329,8 +3328,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
->
->  static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  {
-> -       u32 command;
+> -       /* If present, always enable for this clock gate */
+> -       clk_prepare_enable(host->sys_clk_cg);
 > -
->         /*
->          * CMD19 generates _only_ Buffer Read Ready interrupt if
->          * use sdhci_send_tuning.
-> @@ -3339,9 +3336,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->          * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
->          */
->         if (intmask & SDHCI_INT_DATA_AVAIL && !host->data) {
-> -               command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-> -               if (command == MMC_SEND_TUNING_BLOCK ||
-> -                   command == MMC_SEND_TUNING_BLOCK_HS200) {
-> +               if (mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)))) {
->                         host->tuning_done = 1;
->                         wake_up(&host->buf_ready_int);
->                         return;
+>         host->bulk_clks[0].id = "pclk_cg";
+>         host->bulk_clks[1].id = "axi_cg";
+>         host->bulk_clks[2].id = "ahb_cg";
 > --
-> 2.29.0
+> 2.25.1
 >
