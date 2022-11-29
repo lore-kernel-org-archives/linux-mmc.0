@@ -2,204 +2,137 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56F04C4321E
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 12:56:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE888C4321E
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 12:56:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234568AbiK2M4C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Nov 2022 07:56:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42146 "EHLO
+        id S235013AbiK2M4T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Nov 2022 07:56:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41906 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234808AbiK2Mzj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 07:55:39 -0500
-Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A58561523
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:55:20 -0800 (PST)
-Received: by mail-pf1-x435.google.com with SMTP id 9so13581991pfx.11
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:55:20 -0800 (PST)
+        with ESMTP id S234738AbiK2Mz5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 07:55:57 -0500
+Received: from mail-pf1-x432.google.com (mail-pf1-x432.google.com [IPv6:2607:f8b0:4864:20::432])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A721C61762
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:55:34 -0800 (PST)
+Received: by mail-pf1-x432.google.com with SMTP id x66so13599133pfx.3
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:55:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nZBf1IfIVnb85Jco2r20WP4lEoHCR+U5L4gFwwhYWjk=;
-        b=HSgQmY2oi5ayga1iYG0VKBLf4rBYBUxEhyYCZO38IHE4MDHqrwh5osdtvitwVUiS/Z
-         yP8xyUC01FQtfgrq8II390a56K73zTTWFr2R5EoXFHLzsDRysn6O0xmbhSw20274XAUs
-         t6zDoDcc7oF819/0sISA/b/+PpZsjV8Zy7Bs4kmnBtGg5mXDfJ4SF8q+o4U9Y7oDMf+8
-         T8aDjOh7tdkYgGDbF0ab2FuFp0dbDFVOY8d6MpjBMGUUVhWOyupzAYI0ctnBjJtmLLmy
-         d/F4LcuJ+nZojLxdhyWplvTata+NWuQpgYFaQQOOzfY2vpQZBZ4pXMLK8mItxZ8IeSm7
-         2upg==
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Gy83467U3H+rFGcrG1yDL7ih1Oqj7wh1LLSNdYTMBcU=;
+        b=EiKvu64eC4DHQOcOHzxwMOqMowCIQqVSJAltDSBm2vZfQiVxgtIAjita4f/4fc9nBj
+         hyg143hB0ZilxYPFKHSjI2VChiX9FrtSbL09/bkjBExq/gK8CvOGsdF36t1AyjpaxZGq
+         WzbdEHzjL17HmI3w3nGbUCUe2XKcZifAm7fF5tTaA+kQDbBxrumEAzHUKhjx5fA8mgf+
+         /4hijeV/euU8jDyrolSFU9Q3XbCpAyx7Rk3FrpYQGMz97jzgwYroJv7YqF8w8TJjXjgr
+         70Pt+SWy6EHEAo97X1Ax3PN5V6tnHinYO8wOpAq3mQfzX9E51Xyvs8h6Ki/uLuv1qmwD
+         eRcQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nZBf1IfIVnb85Jco2r20WP4lEoHCR+U5L4gFwwhYWjk=;
-        b=3P69XFp4p/ft1PvEYj0pDxRxhvVuqLKrTHvMddKE7DN00cxiANg2M4b2+mIomxA0ZI
-         Hre2Cjq8x6u09088igVIZADIiyk5q6Ae8xtX6I9zX+WkJuz6bDlZyKDKLmQ/okAse94Z
-         6Ehr3tU0BeW96vhytWNAys0CKeuBXpm3oIbww9kSe4yeXH6C518fUF8GAm6R6ANgIMEB
-         C8MGTHZRmPfPlA0ps+EqVckRVVY5im5XarT95Y2BzDHPg87d3EPsutn5L2hoAzeVI8Vw
-         cTuP+uaNb7cvWyuptJ6fFiFbGeGl8jaeKq7ysVL1T4xI66b7zkLtz6E4OTz5IrydPLCi
-         eQng==
-X-Gm-Message-State: ANoB5pk1J4k/BNFkCIX/Z2NnuM2rb1rQUMzjJEHwAnd1Nbpy4R4ezj/l
-        9Q4mlB9+icanpRrSZEsNZ8iC+nvZVDjLX3Ved+mFbQ==
-X-Google-Smtp-Source: AA0mqf5mFcdHVfXr/d6zhl2LXO3vJlAlD9Hrm44RqJ4l4rkzj6P9gSWDUDXBaFW+whGNCYVlq8BB1qqCgZosXtJxoRM=
-X-Received: by 2002:aa7:998a:0:b0:575:6907:662a with SMTP id
- k10-20020aa7998a000000b005756907662amr4701446pfh.57.1669726517914; Tue, 29
- Nov 2022 04:55:17 -0800 (PST)
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Gy83467U3H+rFGcrG1yDL7ih1Oqj7wh1LLSNdYTMBcU=;
+        b=feIFCC0dBu230TOTIOz+JCXkR8h4KKTDpbnxcfVJ8rf3+Av7KTT4lhfYr6HdfBUQVt
+         ylN+LuhR38dQyUVD/0jlB/du/Ug+fXvq3JCNnPgQMhPptq7n27U2SEcBsj1oxJK1uvQi
+         f7+D4//17MIQRmZg6WEkpH053V8ir5OCqU/fk8Zmnw35xAaynPsIXk3SJDsbTY6mmOjJ
+         dgc247NU9+d5s2fVl4eZTd8LKingzBhIw6YDIukumsbxWYI21isC8/OxFOWM145HLb4m
+         pyv2XuRiQFopvUI02pMCiwVDuNYoRHkm+JbzxO2ur/MpjpSSPgkyHFbdgwt31pVqdnVj
+         QQWw==
+X-Gm-Message-State: ANoB5pmXxkzRiJQGyACLKlh0FNosdh5mleKBUPPz81CQBR5nrSFI7GjQ
+        pWtAhrgoGHdmAIvLF6c+0AZwAVurzfYXj68F564HwwUoSF8=
+X-Google-Smtp-Source: AA0mqf5sdoqiDXcTRSYvQNo3bLhe4FZXxHWETUy05AGd2lsnn1ZSSsG4KgM2ksUgpvXlj2KB91hAxORiqb0e+pNIj00=
+X-Received: by 2002:a63:2154:0:b0:477:b650:494b with SMTP id
+ s20-20020a632154000000b00477b650494bmr28701267pgm.434.1669726534164; Tue, 29
+ Nov 2022 04:55:34 -0800 (PST)
 MIME-Version: 1.0
-References: <20221128093847.22768-1-michael@allwinnertech.com>
-In-Reply-To: <20221128093847.22768-1-michael@allwinnertech.com>
+References: <57d4aceb25254e448bd3e575bd99b0c2@hyperstone.com>
+In-Reply-To: <57d4aceb25254e448bd3e575bd99b0c2@hyperstone.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 29 Nov 2022 13:54:41 +0100
-Message-ID: <CAPDyKFoz5-tU7v9im0iz07xaS9LhmCRTc9=okxBRij1c2RW27w@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc:mmc-hsq:use fifo to dispatch mmc_request
-To:     Michael Wu <michael@allwinnertech.com>
-Cc:     wenchao.chen@unisoc.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Tue, 29 Nov 2022 13:54:58 +0100
+Message-ID: <CAPDyKFpxUwX=79L1yZ=A7EOSM7WpKwQNPicYTUr+nZrBri7JUg@mail.gmail.com>
+Subject: Re: [PATCHv2] mmc: block: remove non-data R1B ioctl workaround
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 28 Nov 2022 at 10:38, Michael Wu <michael@allwinnertech.com> wrote:
+On Sun, 27 Nov 2022 at 18:46, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
+ wrote:
 >
-> Current next_tag selection will cause a large delay in some requests and
-> destroy the scheduling results of the block scheduling layer. Because the
-> issued mrq tags cannot ensure that each time is sequential, especially when
-> the IO load is heavy. In the fio performance test, we found that 4k random
-> read data was sent to mmc_hsq to start calling request_atomic It takes
-> nearly 200ms to process the request, while mmc_hsq has processed thousands
-> of other requests. So we use fifo here to ensure the first in, first out
-> feature of the request and avoid adding additional delay to the request.
+> The workaround of pretending R1B non-data transfers are
+> data transfers in order for the busy timeout to be respected
+> by the host controller driver is removed. It wasn't useful
+> in a long time.
 >
-> Reviewed-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> Signed-off-by: Michael Wu <michael@allwinnertech.com>
+> Initially the workaround ensured that R1B commands did not
+> time out by setting the data timeout to be the command timeout
+> in commit cb87ea28ed9e ("mmc: core: Add mmc CMD+ACMD passthrough ioctl").
+> This was moved inside of an if clause with idata->buf_bytes being set
+> in commit 4d6144de8ba2 ("mmc: core: check for zero length ioctl data").
+> Since the workaround is now inside of the idata->buf_bytes clause
+> and intended to fix R1B non-data transfers that do not have buf_bytes
+> set we can also remove the workaround altogether.
+> Since there are no data transfer invoking R1B commands this was dead
+> code.
+>
+> Fixes: cb87ea28ed9e ("mmc: core: Add mmc CMD+ACMD passthrough ioctl")
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-Applied for next, thanks!
+Since the code that we now remove doesn't really break anything, I
+don't think we need to use a fixes tag.
+
+So, applied for next by removing the fixes tag, thanks!
 
 Kind regards
 Uffe
 
 
+
 > ---
->  drivers/mmc/host/mmc_hsq.c | 40 ++++++++++++++------------------------
->  drivers/mmc/host/mmc_hsq.h |  5 +++++
->  2 files changed, 20 insertions(+), 25 deletions(-)
+> -v2: clarified commit message, no code change
+>  drivers/mmc/core/block.c | 13 -------------
+>  1 file changed, 13 deletions(-)
 >
-> diff --git a/drivers/mmc/host/mmc_hsq.c b/drivers/mmc/host/mmc_hsq.c
-> index 9d35453e7371..424dc7b07858 100644
-> --- a/drivers/mmc/host/mmc_hsq.c
-> +++ b/drivers/mmc/host/mmc_hsq.c
-> @@ -13,9 +13,6 @@
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index db6d8a099910..20da7ed43e6d 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -514,19 +514,6 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card=
+, struct mmc_blk_data *md,
+>                 if (idata->ic.data_timeout_ns)
+>                         data.timeout_ns =3D idata->ic.data_timeout_ns;
 >
->  #include "mmc_hsq.h"
->
-> -#define HSQ_NUM_SLOTS  64
-> -#define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
+> -               if ((cmd.flags & MMC_RSP_R1B) =3D=3D MMC_RSP_R1B) {
+> -                       /*
+> -                        * Pretend this is a data transfer and rely on th=
+e
+> -                        * host driver to compute timeout.  When all host
+> -                        * drivers support cmd.cmd_timeout for R1B, this
+> -                        * can be changed to:
+> -                        *
+> -                        *     mrq.data =3D NULL;
+> -                        *     cmd.cmd_timeout =3D idata->ic.cmd_timeout_=
+ms;
+> -                        */
+> -                       data.timeout_ns =3D idata->ic.cmd_timeout_ms * 10=
+00000;
+> -               }
 > -
->  static void mmc_hsq_retry_handler(struct work_struct *work)
->  {
->         struct mmc_hsq *hsq = container_of(work, struct mmc_hsq, retry_work);
-> @@ -73,7 +70,6 @@ static void mmc_hsq_pump_requests(struct mmc_hsq *hsq)
->
->  static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
->  {
-> -       struct hsq_slot *slot;
->         int tag;
->
->         /*
-> @@ -82,29 +78,12 @@ static void mmc_hsq_update_next_tag(struct mmc_hsq *hsq, int remains)
->          */
->         if (!remains) {
->                 hsq->next_tag = HSQ_INVALID_TAG;
-> +               hsq->tail_tag = HSQ_INVALID_TAG;
->                 return;
+>                 mrq.data =3D &data;
 >         }
 >
-> -       /*
-> -        * Increasing the next tag and check if the corresponding request is
-> -        * available, if yes, then we found a candidate request.
-> -        */
-> -       if (++hsq->next_tag != HSQ_INVALID_TAG) {
-> -               slot = &hsq->slot[hsq->next_tag];
-> -               if (slot->mrq)
-> -                       return;
-> -       }
-> -
-> -       /* Othersie we should iterate all slots to find a available tag. */
-> -       for (tag = 0; tag < HSQ_NUM_SLOTS; tag++) {
-> -               slot = &hsq->slot[tag];
-> -               if (slot->mrq)
-> -                       break;
-> -       }
-> -
-> -       if (tag == HSQ_NUM_SLOTS)
-> -               tag = HSQ_INVALID_TAG;
-> -
-> +       tag = hsq->tag_slot[hsq->next_tag];
-> +       hsq->tag_slot[hsq->next_tag] = HSQ_INVALID_TAG;
->         hsq->next_tag = tag;
->  }
->
-> @@ -233,8 +212,14 @@ static int mmc_hsq_request(struct mmc_host *mmc, struct mmc_request *mrq)
->          * Set the next tag as current request tag if no available
->          * next tag.
->          */
-> -       if (hsq->next_tag == HSQ_INVALID_TAG)
-> +       if (hsq->next_tag == HSQ_INVALID_TAG) {
->                 hsq->next_tag = tag;
-> +               hsq->tail_tag = tag;
-> +               hsq->tag_slot[hsq->tail_tag] = HSQ_INVALID_TAG;
-> +       } else {
-> +               hsq->tag_slot[hsq->tail_tag] = tag;
-> +               hsq->tail_tag = tag;
-> +       }
->
->         hsq->qcnt++;
->
-> @@ -339,8 +324,10 @@ static const struct mmc_cqe_ops mmc_hsq_ops = {
->
->  int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
->  {
-> +       int i;
->         hsq->num_slots = HSQ_NUM_SLOTS;
->         hsq->next_tag = HSQ_INVALID_TAG;
-> +       hsq->tail_tag = HSQ_INVALID_TAG;
->
->         hsq->slot = devm_kcalloc(mmc_dev(mmc), hsq->num_slots,
->                                  sizeof(struct hsq_slot), GFP_KERNEL);
-> @@ -351,6 +338,9 @@ int mmc_hsq_init(struct mmc_hsq *hsq, struct mmc_host *mmc)
->         hsq->mmc->cqe_private = hsq;
->         mmc->cqe_ops = &mmc_hsq_ops;
->
-> +       for (i = 0; i < HSQ_NUM_SLOTS; i++)
-> +               hsq->tag_slot[i] = HSQ_INVALID_TAG;
-> +
->         INIT_WORK(&hsq->retry_work, mmc_hsq_retry_handler);
->         spin_lock_init(&hsq->lock);
->         init_waitqueue_head(&hsq->wait_queue);
-> diff --git a/drivers/mmc/host/mmc_hsq.h b/drivers/mmc/host/mmc_hsq.h
-> index ffdd9cd172c3..1808024fc6c5 100644
-> --- a/drivers/mmc/host/mmc_hsq.h
-> +++ b/drivers/mmc/host/mmc_hsq.h
-> @@ -2,6 +2,9 @@
->  #ifndef LINUX_MMC_HSQ_H
->  #define LINUX_MMC_HSQ_H
->
-> +#define HSQ_NUM_SLOTS  64
-> +#define HSQ_INVALID_TAG        HSQ_NUM_SLOTS
-> +
->  struct hsq_slot {
->         struct mmc_request *mrq;
->  };
-> @@ -17,6 +20,8 @@ struct mmc_hsq {
->         int next_tag;
->         int num_slots;
->         int qcnt;
-> +       int tail_tag;
-> +       int tag_slot[HSQ_NUM_SLOTS];
->
->         bool enabled;
->         bool waiting_for_idle;
 > --
-> 2.29.0
+> 2.37.3
+>
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 >
