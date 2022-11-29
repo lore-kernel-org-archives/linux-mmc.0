@@ -2,221 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E53CC4321E
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 11:22:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEA1AC4321E
+	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 12:08:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232294AbiK2LWY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Nov 2022 06:22:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59056 "EHLO
+        id S234049AbiK2MIP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 29 Nov 2022 07:08:15 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232935AbiK2LWM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 06:22:12 -0500
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 868F15B5B4
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 03:22:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1669720930; x=1701256930;
-  h=message-id:date:mime-version:subject:to:references:from:
-   in-reply-to:content-transfer-encoding;
-  bh=v1ePCJGwC9ikNlyXtOmkqegLiW9kcqiWgUt2IfzSoRU=;
-  b=RHDwA/tWj0am+DIAILdXk1NIpsLSd5UijPqc7M+SZCp8CzhgPjHk96pe
-   C0XDI41L3Tx/2wtGCMQzeW5oHC6Zf50MMxVyAjhZtBXUw9jNL8GOakWiQ
-   M8T97q/zpTKXCGEjtudCGh9bP933pprUaM26BatbSzkAgqVcXcaPbtogD
-   iNEUpRYf2KED7VcdiRADfUEiQuRfFQ02axH9Dd0X2X2fASnhIGQxS+rUm
-   6T2BdytYdY1SVDF/TPqz/wsBrURyGNIqLEnOqZk69VTHdwLH+1Y7AVleI
-   xWos1hhA9wb7nCyzowj+b/DkgXpCQkZZ1uyiIdjMIrPUcDIzV7CuXkxpV
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="295461755"
-X-IronPort-AV: E=Sophos;i="5.96,203,1665471600"; 
-   d="scan'208";a="295461755"
-Received: from fmsmga004.fm.intel.com ([10.253.24.48])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2022 03:22:07 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10545"; a="712338068"
-X-IronPort-AV: E=Sophos;i="5.96,203,1665471600"; 
-   d="scan'208";a="712338068"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.34.177])
-  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2022 03:22:04 -0800
-Message-ID: <c2cc3898-8dec-c84d-9a98-edc8f6eb610f@intel.com>
-Date:   Tue, 29 Nov 2022 13:22:00 +0200
+        with ESMTP id S233991AbiK2MHi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 07:07:38 -0500
+Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFAAEB7A
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:07:14 -0800 (PST)
+Received: by mail-pg1-x52a.google.com with SMTP id v3so12820787pgh.4
+        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 04:07:14 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=CLaMkaBp7KGIWxfb8Zd8ve3dRx2iCekJtCJrymRzWKA=;
+        b=p8G9b0N31HwrkryXMsELri1esfPlWmkUvApiYvOqCI6V+RvhBMmAo3rfemrquf7d9x
+         gv6PUWa46Tm5Ymh/rfgG0f9Pp+xgBQte9WTjYOLFk7rLpeHHZLelf2BE/f3fbN3B3j97
+         1z7eNFVOPOogiLxxVsVYKwjsKyR61EviRxjEftCz47B9SvHBRKAoy3IGTJsuPjsJweTm
+         FcLztLnQuMo4GzUVt7cgtfppT2l1OSI4V27NEtpmc7FN5oAfth76W5jAPShueqB6Nx8F
+         9NqhCFXobifdhnyEs4L/BtbxAV7qZEoCVAwmxg/tTqr6JZJdOXvd+sgegWqE9R9DcFh2
+         /UHA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=CLaMkaBp7KGIWxfb8Zd8ve3dRx2iCekJtCJrymRzWKA=;
+        b=3LbrntLBHkMU+uijxfNbctDhjEFFdq0+cfeYxk7VlqKzVUaM1W4gcd9OtcNWS57jXl
+         DJwg+Ra3sVS5V4lPiZAzn2AA5YO+lfLXZWoBRM22Wqo/8bmIvFBVvcqSuFV1qfVvPNd6
+         XZH9ZM0VKG96V7DjM/P3l8Gh7PQA01pDuHtLcX4jkmlWcAPurPh4rJNg9Yzb0DSOpZMI
+         fzPhY/9vTbQc+2w3ZC1jh0J6vnPK3b71p58SngjXzb1EwekCac01LmZLj3i9PPP0mEif
+         grhGRfH+OzihkTlsF993lWM6SDjfsIwlYYJHB7czhFffkVuOZWywpFMmwKffbQ6e3DUw
+         rAHQ==
+X-Gm-Message-State: ANoB5plHOkHQL2EmXuM8YxB3F3l1DKkTICek12eJcvTTKY2ej3u3dV2e
+        /dtxpRH9HSRg8+knuUjlzLBUMBuU+BC8jQwgP8hd3g==
+X-Google-Smtp-Source: AA0mqf4Tf4VM1UWDXcxIfjvce1xmaAtKT915CDXPR9PGaf16YMIEdhpOXoB1vr0ly1KOA06qR727mEV0IgcbPs905yE=
+X-Received: by 2002:a05:6a00:1409:b0:56b:e1d8:e7a1 with SMTP id
+ l9-20020a056a00140900b0056be1d8e7a1mr36905889pfu.28.1669723634307; Tue, 29
+ Nov 2022 04:07:14 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: Replace with the already declared define
- function(mmc_op_tuning)
-Content-Language: en-US
-To:     Chanwoo Lee <cw9316.lee@samsung.com>, ulf.hansson@linaro.org,
-        jh80.chung@samsung.com, chaotian.jing@mediatek.com,
-        matthias.bgg@gmail.com, agross@kernel.org, andersson@kernel.org,
-        konrad.dybcio@linaro.org, linux-mmc@vger.kernel.org
-References: <CGME20221124080135epcas1p2b899bc272cfefb823453c2b0559f925a@epcas1p2.samsung.com>
- <20221124080031.14690-1-cw9316.lee@samsung.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221124080031.14690-1-cw9316.lee@samsung.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20221122111124.6828-1-cniedermaier@dh-electronics.com> <20221122111124.6828-3-cniedermaier@dh-electronics.com>
+In-Reply-To: <20221122111124.6828-3-cniedermaier@dh-electronics.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 29 Nov 2022 13:06:38 +0100
+Message-ID: <CAPDyKFqc2kc4O55BAVikZFeZpAeRYo3AAfnHyxKPcsUujeGauA@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: Make comment on wakeup-source less confusing
+To:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
+        linux-kernel@vger.kernel.org, Marek Vasut <marex@denx.de>,
+        kernel@dh-electronics.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/11/22 10:00, Chanwoo Lee wrote:
-> From: ChanWoo Lee <cw9316.lee@samsung.com>
-> 
-> Replace with the already declared define function.
-> There are no functional differences.
-> 
-> Signed-off-by: ChanWoo Lee <cw9316.lee@samsung.com>
-
-Dunno if I'd have changed dw_mmc.c, but no matter:
-
-Reviewed-by: Adrian Hunter <adrian.hunter@intel.com>
-
+On Tue, 22 Nov 2022 at 12:43, Christoph Niedermaier
+<cniedermaier@dh-electronics.com> wrote:
+>
+> The current comment on wakeup-source is a bit confusing, because it isn't
+> clear at first sight which property is actually deprecated.
+> Change the comment to one that is less confusing.
+>
+> Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
 > ---
->  drivers/mmc/core/core.c              | 3 +--
->  drivers/mmc/host/dw_mmc.c            | 3 +--
->  drivers/mmc/host/mtk-sd.c            | 8 ++------
->  drivers/mmc/host/sdhci-msm.c         | 3 +--
->  drivers/mmc/host/sdhci-pci-o2micro.c | 3 +--
->  drivers/mmc/host/sdhci-tegra.c       | 8 ++------
->  drivers/mmc/host/sdhci.c             | 9 ++-------
->  7 files changed, 10 insertions(+), 27 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> index 1bb70d438d6c..efa7178955f8 100644
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -142,8 +142,7 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
->  	int err = cmd->error;
->  
->  	/* Flag re-tuning needed on CRC errors */
-> -	if (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> +	if (!mmc_op_tuning(cmd->opcode) &&
->  	    !host->retune_crc_disable &&
->  	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
->  	    (mrq->data && mrq->data->error == -EILSEQ) ||
-> diff --git a/drivers/mmc/host/dw_mmc.c b/drivers/mmc/host/dw_mmc.c
-> index e4d09c439051..829af2c98a44 100644
-> --- a/drivers/mmc/host/dw_mmc.c
-> +++ b/drivers/mmc/host/dw_mmc.c
-> @@ -334,8 +334,7 @@ static u32 dw_mci_prep_stop_abort(struct dw_mci *host, struct mmc_command *cmd)
->  	    cmdr == MMC_READ_MULTIPLE_BLOCK ||
->  	    cmdr == MMC_WRITE_BLOCK ||
->  	    cmdr == MMC_WRITE_MULTIPLE_BLOCK ||
-> -	    cmdr == MMC_SEND_TUNING_BLOCK ||
-> -	    cmdr == MMC_SEND_TUNING_BLOCK_HS200 ||
-> +	    mmc_op_tuning(cmdr) ||
->  	    cmdr == MMC_GEN_CMD) {
->  		stop->opcode = MMC_STOP_TRANSMISSION;
->  		stop->arg = 0;
-> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
-> index 652a67f9b054..d3f24dbda49f 100644
-> --- a/drivers/mmc/host/mtk-sd.c
-> +++ b/drivers/mmc/host/mtk-sd.c
-> @@ -1224,9 +1224,7 @@ static bool msdc_cmd_done(struct msdc_host *host, int events,
->  
->  	if (!sbc_error && !(events & MSDC_INT_CMDRDY)) {
->  		if (events & MSDC_INT_CMDTMO ||
-> -		    (cmd->opcode != MMC_SEND_TUNING_BLOCK &&
-> -		     cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
-> -		     !host->hs400_tuning))
-> +		    (!mmc_op_tuning(cmd->opcode) && !host->hs400_tuning))
->  			/*
->  			 * should not clear fifo/interrupt as the tune data
->  			 * may have alreay come when cmd19/cmd21 gets response
-> @@ -1320,9 +1318,7 @@ static void msdc_cmd_next(struct msdc_host *host,
->  {
->  	if ((cmd->error &&
->  	    !(cmd->error == -EILSEQ &&
-> -	      (cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-> -	       cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200 ||
-> -	       host->hs400_tuning))) ||
-> +	      (mmc_op_tuning(cmd->opcode) || host->hs400_tuning))) ||
->  	    (mrq->sbc && mrq->sbc->error))
->  		msdc_request_done(host, mrq);
->  	else if (cmd == mrq->sbc)
-> diff --git a/drivers/mmc/host/sdhci-msm.c b/drivers/mmc/host/sdhci-msm.c
-> index 03f76384ab3f..4ac8651d0b29 100644
-> --- a/drivers/mmc/host/sdhci-msm.c
-> +++ b/drivers/mmc/host/sdhci-msm.c
-> @@ -2219,8 +2219,7 @@ static int __sdhci_msm_check_write(struct sdhci_host *host, u16 val, int reg)
->  		if (!msm_host->use_cdr)
->  			break;
->  		if ((msm_host->transfer_mode & SDHCI_TRNS_READ) &&
-> -		    SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK_HS200 &&
-> -		    SDHCI_GET_CMD(val) != MMC_SEND_TUNING_BLOCK)
-> +		    !mmc_op_tuning(SDHCI_GET_CMD(val)))
->  			sdhci_msm_set_cdr(host, true);
->  		else
->  			sdhci_msm_set_cdr(host, false);
-> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-> index bca1d095b759..98cadff47b2b 100644
-> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
-> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-> @@ -326,8 +326,7 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
->  		(host->timing != MMC_TIMING_UHS_SDR50))
->  		return sdhci_execute_tuning(mmc, opcode);
->  
-> -	if (WARN_ON((opcode != MMC_SEND_TUNING_BLOCK_HS200) &&
-> -			(opcode != MMC_SEND_TUNING_BLOCK)))
-> +	if (WARN_ON(!mmc_op_tuning(opcode)))
->  		return -EINVAL;
->  
->  	/* Force power mode enter L0 */
-> diff --git a/drivers/mmc/host/sdhci-tegra.c b/drivers/mmc/host/sdhci-tegra.c
-> index c71000a07656..9fc8a61eca54 100644
-> --- a/drivers/mmc/host/sdhci-tegra.c
-> +++ b/drivers/mmc/host/sdhci-tegra.c
-> @@ -268,13 +268,9 @@ static void tegra210_sdhci_writew(struct sdhci_host *host, u16 val, int reg)
->  {
->  	bool is_tuning_cmd = 0;
->  	bool clk_enabled;
-> -	u8 cmd;
->  
-> -	if (reg == SDHCI_COMMAND) {
-> -		cmd = SDHCI_GET_CMD(val);
-> -		is_tuning_cmd = cmd == MMC_SEND_TUNING_BLOCK ||
-> -				cmd == MMC_SEND_TUNING_BLOCK_HS200;
-> -	}
-> +	if (reg == SDHCI_COMMAND)
-> +		is_tuning_cmd = mmc_op_tuning(SDHCI_GET_CMD(val));
->  
->  	if (is_tuning_cmd)
->  		clk_enabled = tegra_sdhci_configure_card_clk(host, 0);
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index fb6e9a81f198..75437b0073e8 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1692,8 +1692,7 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
->  		flags |= SDHCI_CMD_INDEX;
->  
->  	/* CMD19 is special in that the Data Present Select should be set */
-> -	if (cmd->data || cmd->opcode == MMC_SEND_TUNING_BLOCK ||
-> -	    cmd->opcode == MMC_SEND_TUNING_BLOCK_HS200)
-> +	if (cmd->data || mmc_op_tuning(cmd->opcode))
->  		flags |= SDHCI_CMD_DATA;
->  
->  	timeout = jiffies;
-> @@ -3329,8 +3328,6 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
->  
->  static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  {
-> -	u32 command;
-> -
->  	/*
->  	 * CMD19 generates _only_ Buffer Read Ready interrupt if
->  	 * use sdhci_send_tuning.
-> @@ -3339,9 +3336,7 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
->  	 * SDHCI_INT_DATA_AVAIL always there, stuck in irq storm.
->  	 */
->  	if (intmask & SDHCI_INT_DATA_AVAIL && !host->data) {
-> -		command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
-> -		if (command == MMC_SEND_TUNING_BLOCK ||
-> -		    command == MMC_SEND_TUNING_BLOCK_HS200) {
-> +		if (mmc_op_tuning(SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND)))) {
->  			host->tuning_done = 1;
->  			wake_up(&host->buf_ready_int);
->  			return;
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Rob Herring <robh+dt@kernel.org>
+> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+> Cc: Marek Vasut <marex@denx.de>
+> Cc: kernel@dh-electronics.com
+> Cc: linux-mmc@vger.kernel.org
+> Cc: devicetree@vger.kernel.org
+> To: linux-kernel@vger.kernel.org
+> ---
+>  Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> index 802e3ca8be4d..a921442c6c1d 100644
+> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+> @@ -293,7 +293,7 @@ properties:
+>      description:
+>        SDIO only. Preserves card power during a suspend/resume cycle.
+>
+> -  # Deprecated: enable-sdio-wakeup
+> +  # Use wakeup-source instead of the deprecated enable-sdio-wakeup
+>    wakeup-source:
+>      $ref: /schemas/types.yaml#/definitions/flag
+>      description:
 
+Rob, Krzysztof - do we have a preferred pattern for how to express
+deprecated bindings - or is the above okay to you?
+
+Kind regards
+Uffe
