@@ -2,83 +2,125 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4D6DC352A1
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 12:15:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52666C352A1
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 12:18:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231322AbiK3MPa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 07:15:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33164 "EHLO
+        id S234408AbiK3MSH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 07:18:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229468AbiK3MPa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 07:15:30 -0500
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E35752B600;
-        Wed, 30 Nov 2022 04:15:27 -0800 (PST)
-Received: from SHSend.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by SHSQR01.spreadtrum.com with ESMTPS id 2AUCDen7047066
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NO);
-        Wed, 30 Nov 2022 20:13:40 +0800 (CST)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from xm13705pcu.spreadtrum.com (10.13.3.189) by
- shmbx05.spreadtrum.com (10.29.1.56) with Microsoft SMTP Server (TLS) id
- 15.0.1497.23; Wed, 30 Nov 2022 20:13:38 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <orsonzhai@gmail.com>, <baolin.wang@linux.alibaba.com>,
-        <zhang.lyra@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <zhenxiong.lai@unisoc.com>, <yuelin.tang@unisoc.com>,
-        <gengcixi@gmail.com>
-Subject: [PATCH V2] mmc: sdhci-sprd: Fix no reset data and command after voltage switch
-Date:   Wed, 30 Nov 2022 20:13:28 +0800
-Message-ID: <20221130121328.25553-1-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S230415AbiK3MSG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 07:18:06 -0500
+X-Greylist: delayed 322 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Nov 2022 04:18:03 PST
+Received: from mx3.securetransport.de (mx3.securetransport.de [IPv6:2a01:4f8:c0c:92be::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 43F7F192B8;
+        Wed, 30 Nov 2022 04:18:03 -0800 (PST)
+Received: from mail.dh-electronics.com (unknown [77.24.89.57])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx3.securetransport.de (Postfix) with ESMTPSA id 246875DE3E;
+        Wed, 30 Nov 2022 13:12:09 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dh-electronics.com;
+        s=dhelectronicscom; t=1669810329;
+        bh=mbWc09qzvq+TsmeKSXKlW9F4y+FGW/fHcrpI/xzbG2Y=;
+        h=From:To:CC:Subject:Date:From;
+        b=JkTHmZoQ/3vbGL8WmJeJQtbUNTpFIKpMNr6l1TdVUljcYPT177Qc8j3KfjTOKCMwl
+         Ly3WQwI6o9aZivrktgLec2wQQhm8ib0IySiOmRUixssjNIlEfCDPriESRFKPS573q3
+         ob23A87GwMvAYqsEEM3sMxk4eE/M2bSugjdNkIjb2/BnWSfDzFA6YPT2CzixXhUutz
+         Rqy9NhYsKcyug1b/REq4Eh9hy2Tn1k5t1LJZ74wSkhuiX36lO0BOfwq1C8KpKl2Bq+
+         m+0F9/R69I5SJdiAihKF7tX/bk0n0kXEG9oc5J+fzjDOMYwIjlaaMO+NGalLg5pwiO
+         PO2GXQXUor5iw==
+Received: from DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20; Wed, 30 Nov 2022 13:11:50 +0100
+Received: from localhost.localdomain (172.16.51.2) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20 via Frontend Transport; Wed, 30 Nov 2022 13:11:50 +0100
+From:   Christoph Niedermaier <cniedermaier@dh-electronics.com>
+To:     <linux-kernel@vger.kernel.org>
+CC:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
+Subject: [PATCH V3] dt-bindings: mmc: Remove comment on wakeup-source property
+Date:   Wed, 30 Nov 2022 13:10:33 +0100
+Message-ID: <20221130121033.7270-1-cniedermaier@dh-electronics.com>
+X-Mailer: git-send-email 2.11.0
+X-klartext: yes
 MIME-Version: 1.0
 Content-Type: text/plain
-X-Originating-IP: [10.13.3.189]
-X-ClientProxiedBy: SHCAS03.spreadtrum.com (10.0.1.207) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 2AUCDen7047066
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After switching the voltage, no reset data and command will cause
-CMD2 timeout.
+The current comment on wakeup-source is a little confusing because
+the word deprecated can be interpreted at first glance to mean that
+wakeup-source is deprecated. Also mentioning the obsolete property
+confuses more than it helps. Therefore, the comment should be removed
+completely because the enable-sdio-wakeup property is not used in
+any current DTs. Also remove enable-sdio-wakeup reference in
+wakeup-source.txt
 
-Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
 ---
-Changelog:
-
-v1 -> v2:
-There is no need to wait for the state of the pin to stabilize.
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc: Marek Vasut <marex@denx.de>
+Cc: kernel@dh-electronics.com
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
+To: linux-kernel@vger.kernel.org
 ---
- drivers/mmc/host/sdhci-sprd.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+V2: - Instead of changing the comment, remove it
+V3: - Remove also reference in power/wakeup-source.txt
+---
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml |  1 -
+ Documentation/devicetree/bindings/power/wakeup-source.txt | 13 ++++++-------
+ 2 files changed, 6 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index b92a408f138d..bec3f9e3cd3f 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 	}
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index 802e3ca8be4d..e82c00368088 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -293,7 +293,6 @@ properties:
+     description:
+       SDIO only. Preserves card power during a suspend/resume cycle.
  
- 	if (IS_ERR(sprd_host->pinctrl))
--		return 0;
-+		goto reset;
+-  # Deprecated: enable-sdio-wakeup
+   wakeup-source:
+     $ref: /schemas/types.yaml#/definitions/flag
+     description:
+diff --git a/Documentation/devicetree/bindings/power/wakeup-source.txt b/Documentation/devicetree/bindings/power/wakeup-source.txt
+index cfd74659fbed..697333a56d5e 100644
+--- a/Documentation/devicetree/bindings/power/wakeup-source.txt
++++ b/Documentation/devicetree/bindings/power/wakeup-source.txt
+@@ -17,15 +17,14 @@ interrupt.
+ List of legacy properties and respective binding document
+ ---------------------------------------------------------
  
- 	switch (ios->signal_voltage) {
- 	case MMC_SIGNAL_VOLTAGE_180:
-@@ -498,6 +498,8 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+-1. "enable-sdio-wakeup"		Documentation/devicetree/bindings/mmc/mmc.txt
+-2. "gpio-key,wakeup"		Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt
+-3. "has-tpo"			Documentation/devicetree/bindings/rtc/rtc-opal.txt
+-4. "linux,wakeup"		Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt
++1. "gpio-key,wakeup"		Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt
++2. "has-tpo"			Documentation/devicetree/bindings/rtc/rtc-opal.txt
++3. "linux,wakeup"		Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt
+ 				Documentation/devicetree/bindings/mfd/tc3589x.txt
+ 				Documentation/devicetree/bindings/input/touchscreen/ads7846.txt
+-5. "linux,keypad-wakeup"	Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt
+-6. "linux,input-wakeup"		Documentation/devicetree/bindings/input/samsung-keypad.txt
+-7. "nvidia,wakeup-source"	Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt
++4. "linux,keypad-wakeup"	Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt
++5. "linux,input-wakeup"		Documentation/devicetree/bindings/input/samsung-keypad.txt
++6. "nvidia,wakeup-source"	Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt
  
- 	/* Wait for 300 ~ 500 us for pin state stable */
- 	usleep_range(300, 500);
-+
-+reset:
- 	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
- 
- 	return 0;
+ Examples
+ --------
 -- 
-2.17.1
+2.11.0
 
