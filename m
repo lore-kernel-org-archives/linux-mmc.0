@@ -2,77 +2,69 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75C2CC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 08:03:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E7EFC433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 09:29:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233942AbiK3IDr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 03:03:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39380 "EHLO
+        id S233463AbiK3J3Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 04:29:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59472 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234336AbiK3IDp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 03:03:45 -0500
-Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BE2652895;
-        Wed, 30 Nov 2022 00:03:38 -0800 (PST)
-Received: from SHSend.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
-        by SHSQR01.spreadtrum.com with ESMTPS id 2AU82hee061268
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NO);
-        Wed, 30 Nov 2022 16:02:44 +0800 (CST)
-        (envelope-from Wenchao.Chen@unisoc.com)
-Received: from xm13705pcu.spreadtrum.com (10.13.3.189) by
- shmbx05.spreadtrum.com (10.29.1.56) with Microsoft SMTP Server (TLS) id
- 15.0.1497.23; Wed, 30 Nov 2022 16:02:40 +0800
-From:   Wenchao Chen <wenchao.chen@unisoc.com>
-To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <orsonzhai@gmail.com>, <baolin.wang@linux.alibaba.com>,
-        <zhang.lyra@gmail.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <zhenxiong.lai@unisoc.com>, <yuelin.tang@unisoc.com>,
-        <gengcixi@gmail.com>
-Subject: [PATCH] mmc: sdhci-sprd: Fix no reset data and command after voltage switch
-Date:   Wed, 30 Nov 2022 16:02:24 +0800
-Message-ID: <20221130080224.12831-1-wenchao.chen@unisoc.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S233469AbiK3J3S (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 04:29:18 -0500
+Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBD1B37230;
+        Wed, 30 Nov 2022 01:29:13 -0800 (PST)
+Received: from dggpemm500022.china.huawei.com (unknown [172.30.72.54])
+        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4NMYj84WRzzJp4N;
+        Wed, 30 Nov 2022 17:25:48 +0800 (CST)
+Received: from dggpemm500006.china.huawei.com (7.185.36.236) by
+ dggpemm500022.china.huawei.com (7.185.36.162) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Wed, 30 Nov 2022 17:29:12 +0800
+Received: from thunder-town.china.huawei.com (10.174.178.55) by
+ dggpemm500006.china.huawei.com (7.185.36.236) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Wed, 30 Nov 2022 17:29:11 +0800
+From:   Zhen Lei <thunder.leizhen@huawei.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+CC:     Zhen Lei <thunder.leizhen@huawei.com>
+Subject: [PATCH] mmc: core: Fix error return code in sd_read_ext_regs()
+Date:   Wed, 30 Nov 2022 17:28:47 +0800
+Message-ID: <20221130092847.2092-1-thunder.leizhen@huawei.com>
+X-Mailer: git-send-email 2.37.3.windows.1
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.13.3.189]
-X-ClientProxiedBy: SHCAS01.spreadtrum.com (10.0.1.201) To
- shmbx05.spreadtrum.com (10.29.1.56)
-X-MAIL: SHSQR01.spreadtrum.com 2AU82hee061268
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
+X-Originating-IP: [10.174.178.55]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ dggpemm500006.china.huawei.com (7.185.36.236)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-After switching the voltage, no reset data and command will cause
-CMD2 timeout.
+Fix to return a negative error code from the error handling
+case instead of 0, as done elsewhere in this function.
 
-Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
-Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+Fixes: c784f92769ae ("mmc: core: Read the SD function extension registers for power management")
+Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
 ---
- drivers/mmc/host/sdhci-sprd.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ drivers/mmc/core/sd.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-index b92a408f138d..464508be8ec8 100644
---- a/drivers/mmc/host/sdhci-sprd.c
-+++ b/drivers/mmc/host/sdhci-sprd.c
-@@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+index 3662bf5320ce56d..7b64f76f0179ca8 100644
+--- a/drivers/mmc/core/sd.c
++++ b/drivers/mmc/core/sd.c
+@@ -1277,6 +1277,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
+ 	if (rev != 0 || len > 512) {
+ 		pr_warn("%s: non-supported SD ext reg layout\n",
+ 			mmc_hostname(card->host));
++		err = -EOPNOTSUPP;
+ 		goto out;
  	}
  
- 	if (IS_ERR(sprd_host->pinctrl))
--		return 0;
-+		goto reset;
- 
- 	switch (ios->signal_voltage) {
- 	case MMC_SIGNAL_VOLTAGE_180:
-@@ -496,6 +496,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
- 		break;
- 	}
- 
-+reset:
- 	/* Wait for 300 ~ 500 us for pin state stable */
- 	usleep_range(300, 500);
- 	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 -- 
-2.17.1
+2.25.1
 
