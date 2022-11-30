@@ -2,99 +2,94 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3FF8C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 09:58:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DFABC352A1
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:05:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235225AbiK3J6t (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 04:58:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59354 "EHLO
+        id S235256AbiK3KFF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 05:05:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235155AbiK3J6k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 04:58:40 -0500
-Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72DF02FA71;
-        Wed, 30 Nov 2022 01:58:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1669802318; x=1701338318;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=oJ6UQrtMI2/khBTWbq8LskCJDtBIT/P3kfygL3vIM0I=;
-  b=Bd1rFdsgYXk92soz4e3cRiPVhdP0Gv6T6C4A49fT9nEPsZQ/JL3RluAr
-   pXfLMLqN8yw2jylSMDVq/AFEr5GCNgOgU+Y9XOjW+lqeBUGWRr8J7XhyN
-   AtmaQe7w2TgB5MAvsB3Vl6c3jljPeb7H+chPugEsSuMnMERjSj9o98W2y
-   wmlxxLeI6bZhqjqS6iDy4hOfGT5xy3PJAETaTRnvSSvWAjU8zzP42Iaky
-   HBGpcYuWmR8rE+k4aASxxv8N98CpDs8FfcdnyzDS6QAu7+f5g3B5mhod8
-   dIveeRL2k592fnPNKS9UhTEUKpGBkjIM1wPJolV4DsDtfgtd7x6yT4JQa
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="316507806"
-X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
-   d="scan'208";a="316507806"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 01:58:38 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="707587722"
-X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
-   d="scan'208";a="707587722"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.75])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 01:58:35 -0800
-Message-ID: <63b4b1e7-47c8-5ba3-d216-275ad7b7f867@intel.com>
-Date:   Wed, 30 Nov 2022 11:58:26 +0200
+        with ESMTP id S231607AbiK3KFE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:05:04 -0500
+Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06F45165BB
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 02:05:04 -0800 (PST)
+Received: by mail-pg1-x52b.google.com with SMTP id f9so15576161pgf.7
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 02:05:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=p+yt+polAYGWkxe5XK/5FXnciL8HR/33O9D6Q+Xt574=;
+        b=NJ/8BLLOmf100W4hr4eODpPgmL4v0vhacEbadQo1Ds2mgcuw66j9XtIVn+BAfr7fBp
+         S90Lf487KK/0o5s30+Cnbng+JrU41S5TeKvNh+PBaCAkNG3vJrUFtHf+rKwT/JBPnp2D
+         KM0q4EcNFueM8dGeB7ABFc7UBKlKICpBl4Ng81kTMhPSbeiB0LMLHPMpNjLOdKsRVVOe
+         SrYFPLeFxtMQoynqilrAnGLi5nq0FGBkwT0gl8FTsXzy+9YFWmAoei1kL9OLn7i0Jg/U
+         /luBIrJ38MxImY+824/2sZGzXfbvlrVJMLcrMGF9fbUDfGZK+v8+JfEMdKcWlVfHhYH7
+         ri2Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=p+yt+polAYGWkxe5XK/5FXnciL8HR/33O9D6Q+Xt574=;
+        b=5nS5QMQYS9K6s/SyJU1PdR7jeahwLBG0M0nJ30J6+XqTCpS4j0K/7lUVPhxX6W1CBP
+         b2Dk8PTwqrEbSpIKuOlCOKoCzKt7xGhLrizWiNfsB/OzV67lHXJ6TuhMmL2sSzpnk4gx
+         VXehBGUqnQaJ+e1PWoudYZBJFsCoO6HeSFtRXWXeEphrD8Sic2jz/8k0JItBobsdVYTG
+         aIxrzfSoXyU2u+fr9CslfNj3S6IkR05TTdUse7sJLiTQyeFQ+URH1+35HW7fRc2Rjuvd
+         M7THiwuORMa+JTVm0XDqj1tkJatx4DV2auHNqc9iZdDarR8O1V8YJsK60ptibyeMR8ZV
+         8SUQ==
+X-Gm-Message-State: ANoB5pn7WvuTzIaf8uwpAjYTeuSZhfRalue42kn9zP6SHsBMiTwGdn7H
+        V7O69H/mocrvm05+ZOSl6KCYK4MNy9OxCWh/R0u3TQ==
+X-Google-Smtp-Source: AA0mqf7olze2ulbSbK/lUjhobNgKgIS0hqBKaJrXrO5CT1xYpROW+WEywkC2ce39BQ29fnNSnU17q2k2dbNY1oCmpN8=
+X-Received: by 2002:aa7:998a:0:b0:575:6907:662a with SMTP id
+ k10-20020aa7998a000000b005756907662amr8969604pfh.57.1669802703491; Wed, 30
+ Nov 2022 02:05:03 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: sdhci-sprd: Fix no reset data and command after
- voltage switch
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        gengcixi@gmail.com
-References: <20221130080224.12831-1-wenchao.chen@unisoc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221130080224.12831-1-wenchao.chen@unisoc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20221130092847.2092-1-thunder.leizhen@huawei.com>
+In-Reply-To: <20221130092847.2092-1-thunder.leizhen@huawei.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 30 Nov 2022 11:04:27 +0100
+Message-ID: <CAPDyKFphNdR-TorULpbsMtM6MzqsaK_UdSmG9Hin=wunUwJwJQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Fix error return code in sd_read_ext_regs()
+To:     Zhen Lei <thunder.leizhen@huawei.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/11/22 10:02, Wenchao Chen wrote:
-> After switching the voltage, no reset data and command will cause
-> CMD2 timeout.
-> 
-> Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-
+On Wed, 30 Nov 2022 at 10:29, Zhen Lei <thunder.leizhen@huawei.com> wrote:
+>
+> Fix to return a negative error code from the error handling
+> case instead of 0, as done elsewhere in this function.
+>
+> Fixes: c784f92769ae ("mmc: core: Read the SD function extension registers for power management")
+> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index b92a408f138d..464508be8ec8 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->  	}
->  
->  	if (IS_ERR(sprd_host->pinctrl))
-> -		return 0;
-> +		goto reset;
->  
->  	switch (ios->signal_voltage) {
->  	case MMC_SIGNAL_VOLTAGE_180:
-> @@ -496,6 +496,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->  		break;
->  	}
->  
-> +reset:
->  	/* Wait for 300 ~ 500 us for pin state stable */
->  	usleep_range(300, 500);
->  	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+>  drivers/mmc/core/sd.c | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+> index 3662bf5320ce56d..7b64f76f0179ca8 100644
+> --- a/drivers/mmc/core/sd.c
+> +++ b/drivers/mmc/core/sd.c
+> @@ -1277,6 +1277,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
+>         if (rev != 0 || len > 512) {
+>                 pr_warn("%s: non-supported SD ext reg layout\n",
+>                         mmc_hostname(card->host));
+> +               err = -EOPNOTSUPP;
 
+The original intent was to not return an error code. Simply, because
+the card remains functional and all but the new features from the SD
+function extensions registers can still be used.
+
+Perhaps, we should update the comment a few lines above to better
+reflect that this is in-fact what we intend here.
+
+>                 goto out;
+>         }
+>
+
+Kind regards
+Uffe
