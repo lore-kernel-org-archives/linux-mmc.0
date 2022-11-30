@@ -2,106 +2,184 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A5E0BC46467
-	for <linux-mmc@archiver.kernel.org>; Tue, 29 Nov 2022 16:01:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD390C4321E
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 06:19:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236120AbiK2QBa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 29 Nov 2022 11:01:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55980 "EHLO
+        id S232637AbiK3GTI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 01:19:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42340 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236091AbiK2QBA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 29 Nov 2022 11:01:00 -0500
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 30E51697CF
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 07:59:24 -0800 (PST)
-Received: by mail-lf1-x12c.google.com with SMTP id u27so11709963lfc.9
-        for <linux-mmc@vger.kernel.org>; Tue, 29 Nov 2022 07:59:24 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=bDvxVOu+PnvvHRulbZFibX61kwkQP19u6RVUNmmpkgY=;
-        b=bw/kC+x+9HZsxIhQWPogLf1q10xRBgTta5JXdbQzEI3yOW1lB1zVd+DO+mU9OChNsp
-         OwiHrMEjR3cjneLpBilCu5WReSjHfNk1WtkziQM+nASpT277TBPjRo08F0XoVf7DyVJV
-         EQ3+bYudZ/j90oQrP9gpstBeWCQtuha7r6Lr1vQOPG1Yc20bkJeRINKzwAKyiKzpK7ws
-         roEH+azxI+KRjYeHxbMaT39a8q9We7+RTbU81GNNnUV0EqFedsVhQ26bvdjMMRwNv1pr
-         N9Wv0gtWbmS8uSJWUkOn2gXRo9JdZq2tNKFyVWiTSEGV4+GkE6AZuqoLcRlZYPkfDvVI
-         ZW7w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=bDvxVOu+PnvvHRulbZFibX61kwkQP19u6RVUNmmpkgY=;
-        b=0k89bTxyviivYlk3w3QUR/rx0HAUePe2gaCPN/5hmAM3gEaiNk5wGIMHC6YCkg3tZQ
-         U5eC2B60vxSunGZg3Fgi+s2tTkoyaEYXh/qsE2aqgd4SWHA0Wu1uI3Hh1ZqwQAgrNcqL
-         fudzClD7e3mmLCJFjZb50NS1/ABbiorZiTuN03lnZJSAQl/ffRRaf6Go0m+NsRgcsBTQ
-         t/e1BsOhiPJDR4Ixqb7XXA6L8IQ++IKs0eJAc+3ARisjzSqbkBUyoOOzWiPqRuMCamXB
-         zNtLXMGwXYVTs5tlIMUn8jnd4d5GevEDXovfdCZwQObNQA5DgGxkfbG5S3ymVTAYpHhm
-         7fFA==
-X-Gm-Message-State: ANoB5pmPxBz4pStEKlGfNeu0lvXrSEn7AMSdnZ8cSnBsL29w7r5VOO/N
-        PPVV61L9myRO0UVdLfT2AZSgCw==
-X-Google-Smtp-Source: AA0mqf6s6h21gBLJgUb7HsJExGWf4j/ozGnG1ZJJ/G04lnH7uEnRrIfZndNl3qwLh6+Y0H8lkADvEA==
-X-Received: by 2002:a05:6512:1505:b0:4af:b5d0:695e with SMTP id bq5-20020a056512150500b004afb5d0695emr20039824lfb.6.1669737562297;
-        Tue, 29 Nov 2022 07:59:22 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id z15-20020a056512370f00b004a9b9ccfbe6sm2282883lfr.51.2022.11.29.07.59.21
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 29 Nov 2022 07:59:21 -0800 (PST)
-Message-ID: <b5a6b8fc-6435-a92f-4b34-8bf95772db65@linaro.org>
-Date:   Tue, 29 Nov 2022 16:59:20 +0100
+        with ESMTP id S230147AbiK3GTG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 01:19:06 -0500
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1654530F70;
+        Tue, 29 Nov 2022 22:19:06 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669789146; x=1701325146;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=JYrA/k2tWWAw2kY6vd9Z+khRGZifgFIqAi4dqbTa+b4=;
+  b=S9lMMyQJAWPPmCLl6bnGhtqPB9wQVNm6IKyWsOpPsGfC011gtx2tHsqL
+   YWd0BmlHboVfPAJ/4/jBIQl2pCBpGUfgN2JE4mAdsQH453Gf2ichSqRNI
+   WSgHYdsW1TqqoFzYMqAGiWnsxVvWCcXMIm32x22tg+wIdDH2z+xJxWh9i
+   0xGB52LJfBEzJuY+8poy6XMQGTCpL+v+eSOSYZuocoVA8oSXEuRK2H/Xz
+   Z3a7c4gVDsDBRyQtVdSJPlMIATE22Ec3DQ6OdiOFB7Z1yHe9qslnDwfg6
+   hnigJBUpIUVWt3d3oVfYU3DczV9/taof2YhLPq1QQx8TfzYuRavGMf7c8
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="314008937"
+X-IronPort-AV: E=Sophos;i="5.96,205,1665471600"; 
+   d="scan'208";a="314008937"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2022 22:19:01 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="646209844"
+X-IronPort-AV: E=Sophos;i="5.96,205,1665471600"; 
+   d="scan'208";a="646209844"
+Received: from tuomaspe-mobl.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.75])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Nov 2022 22:18:59 -0800
+Message-ID: <6099c99e-f0a7-2be3-52bf-a99b5a3596c7@intel.com>
+Date:   Wed, 30 Nov 2022 08:18:56 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH] dt-bindings: mmc: Make comment on wakeup-source less
- confusing
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH 1/1] mmc: sdhci: Fixed too many logs being printed during
+ tuning
 Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
-        linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-References: <20221122111124.6828-1-cniedermaier@dh-electronics.com>
- <20221122111124.6828-3-cniedermaier@dh-electronics.com>
- <55c29f92-4c6b-266f-2004-ae633a658963@linaro.org>
- <CAPDyKFparoXMJ-sRxgqi8zDGn5AoNDLfsAF9YkdoaKpTU3EchQ@mail.gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <CAPDyKFparoXMJ-sRxgqi8zDGn5AoNDLfsAF9YkdoaKpTU3EchQ@mail.gmail.com>
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
+        lzx.stg@gmail.com
+References: <20221111084214.14822-1-wenchao.chen666@gmail.com>
+ <20221111084214.14822-2-wenchao.chen666@gmail.com>
+ <59fc95ec-c0db-4011-eca3-3d101f0bc908@intel.com>
+ <CA+Da2qwdtUdCcv+HhNArGoriVtOmx+GGML4Avkk5QSdm8+XXTQ@mail.gmail.com>
+ <8433ae30-2633-1f32-ef11-2168c9cfea80@intel.com>
+ <CA+Da2qwBmApEZ6ejGBTjftsytkeNZbHZ-0oQDWa5TD8Qp3CYHA@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CA+Da2qwBmApEZ6ejGBTjftsytkeNZbHZ-0oQDWa5TD8Qp3CYHA@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 29/11/2022 16:30, Ulf Hansson wrote:
-> On Tue, 29 Nov 2022 at 13:36, Krzysztof Kozlowski
-> <krzysztof.kozlowski@linaro.org> wrote:
+On 21/11/22 05:11, Wenchao Chen wrote:
+> On Fri, Nov 18, 2022 at 11:57 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >>
->> On 22/11/2022 12:11, Christoph Niedermaier wrote:
->>> The current comment on wakeup-source is a bit confusing, because it isn't
->>> clear at first sight which property is actually deprecated.
->>> Change the comment to one that is less confusing.
+>> On 18/11/22 11:25, Wenchao Chen wrote:
+>>> On Thu, Nov 17, 2022 at 12:00 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>>>>
+>>>> On 11/11/22 10:42, Wenchao Chen wrote:
+>>>>> From: Wenchao Chen <wenchao.chen@unisoc.com>
+>>>>>
+>>>>> During the HS200 tuning process, too many tuning errors are printed in
+>>>>> the log.
+>>>>>
+>>>>> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+>>>>> ---
+>>>>>  drivers/mmc/host/sdhci.c | 4 ++++
+>>>>>  1 file changed, 4 insertions(+)
+>>>>>
+>>>>> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+>>>>> index fef03de85b99..a503b54305eb 100644
+>>>>> --- a/drivers/mmc/host/sdhci.c
+>>>>> +++ b/drivers/mmc/host/sdhci.c
+>>>>> @@ -3401,6 +3401,10 @@ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>>>>               if (host->pending_reset)
+>>>>>                       return;
+>>>>>
+>>>>> +             command = SDHCI_GET_CMD(sdhci_readw(host, SDHCI_COMMAND));
+>>>>> +             if (command == MMC_SEND_TUNING_BLOCK || command == MMC_SEND_TUNING_BLOCK_HS200)
+>>>>> +                     return;
+>>>>
+>>>> Normally we wouldn't get here even if a request got an error because
+>>>> then we either reset the data circuit which should stop further
+>>>> interrupts, or set host->pending_reset.
+>>>>
+>>>> Can you elaborate on what is going wrong?
+>>>>
+>>> Hi  adrian
+>>> 1. In the process of tuning, not all tuning values are good, some
+>>> tuning values may cause errors, and these errors print too many logs.
+>>>     Of course, we reset the cmdline or dataline on error.
+>>> 2. use host->pending_reset = true
+>>> static void __sdhci_finish_mrq(struct sdhci_host *host, struct mmc_request *mrq)
+>>> {
+>>> ...
+>>> if (sdhci_needs_reset(host, mrq))
+>>> host->pending_reset = true;
+>>> ...
+>>> }
+>>>
+>>> But intmask = 0x00200000
+>>> static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
+>>> {
+>>> ...
+>>> if (!host->data) {
+>>> struct mmc_command *data_cmd = host->data_cmd;
+>>>
+>>> if (data_cmd && (data_cmd->flags & MMC_RSP_BUSY)) {
+>>> if (intmask & SDHCI_INT_DATA_TIMEOUT) { //#define
+>>> SDHCI_INT_DATA_TIMEOUT 0x00100000
+>>> host->data_cmd = NULL;
+>>> data_cmd->error = -ETIMEDOUT;
+>>> sdhci_err_stats_inc(host, CMD_TIMEOUT);
+>>> __sdhci_finish_mrq(host, data_cmd->mrq);//<=
+>>> return;
+>>> }
+>>> if (intmask & SDHCI_INT_DATA_END) {    //#define  SDHCI_INT_DATA_END 0x00000002
+>>>
+>>> host->data_cmd = NULL;
+>>> /*
+>>> * Some cards handle busy-end interrupt
+>>> * before the command completed, so make
+>>> * sure we do things in the proper order.
+>>> */
+>>> if (host->cmd == data_cmd)
+>>> return;
+>>>
+>>> __sdhci_finish_mrq(host, data_cmd->mrq);//<=
+>>> return;
+>>> }
+>>> }
+>>> ...
+>>> if (host->pending_reset)
+>>> return;
+>>>
+>>> pr_err("%s: Got data interrupt 0x%08x even though no data operation
+>>> was in progress.\n",
+>>>        mmc_hostname(host->mmc), (unsigned)intmask);
+>>> sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>>> sdhci_dumpregs(host);
+>>>
+>>> return;
+>>> }
+>>> ...
+>>> }
 >>
->> It's still confusing - you mention some non-existing property. I don't
->> think it's worth to touch it. If you insist, drop entire comment...
+>> Not really following that I'm sorry.
+>>
+>> Are you saying you get a data interrupt after he data circuit is reset?
+>>
 > 
-> Hmm, it doesn't look that easy to me. The "enable-sdio-wakeup" is
-> indeed a deprecated wakeup property [1], but it seems like it's not
-> really described somewhere. I wouldn't mind removing it (as it seems
-> to add some confusions), but in that case it needs to be entirely
-> removed from the DT docs, right?
+> No. During the tuning process, sdhci_data_irq does not skip printing
+> because the interrupt state is 0x00200000 (DATA CRC ERROR).
 
-Yes, from the bindings and from DTSes. It's already gone from
-mmc-controller.yaml bindings, so basically we already did the most of
-such removal.
+Sorry I am still confused.  Which driver is this?  I was assuming
+you were using mmc_send_tuning() because the only interrupt enabled
+for regular SDHCI tuning is SDHCI_INT_DATA_AVAIL (0x00000020).
+
+So are you saying you are getting status 0x00200000 even though the
+mask is 0x00000020 ?
 
 > 
-> Another option, would be to add a proper description of the property
-> and mark it with "deprecated: true".
-
-
-Best regards,
-Krzysztof
+>>>
+>>>>> +
+>>>>>               pr_err("%s: Got data interrupt 0x%08x even though no data operation was in progress.\n",
+>>>>>                      mmc_hostname(host->mmc), (unsigned)intmask);
+>>>>>               sdhci_err_stats_inc(host, UNEXPECTED_IRQ);
+>>>>
+>>
 
