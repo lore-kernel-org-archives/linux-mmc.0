@@ -2,96 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8950C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:30:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BE6E8C352A1
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:42:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236137AbiK3Kam (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 05:30:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59454 "EHLO
+        id S229891AbiK3KmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 05:42:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235850AbiK3KaV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:30:21 -0500
-X-Greylist: delayed 587 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Nov 2022 02:30:18 PST
-Received: from mx2.securetransport.de (mx2.securetransport.de [188.68.39.254])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 547BB3FBAF;
-        Wed, 30 Nov 2022 02:30:18 -0800 (PST)
-Received: from mail.dh-electronics.com (unknown [77.24.89.57])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx2.securetransport.de (Postfix) with ESMTPSA id 8739F5EC41;
-        Wed, 30 Nov 2022 11:20:11 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dh-electronics.com;
-        s=dhelectronicscom; t=1669803611;
-        bh=Bjb3a95JxH8fwSaNK37AgYquFmTd2pxLk+nae0XMhx4=;
-        h=From:To:CC:Subject:Date:From;
-        b=IjuNkgOGqhr2Oy8IWhRSWYsh1ndVcZsY+USFVjQhx5H4n0VVw/AOs9MTwjN6mvHnO
-         CqLqN8VOZlafm3mV8b4Q78AABGYvdD6nfN+2MVjHfpyVnH9KHGgAkxCzWoP0kvsNVe
-         14WNLtmCBQP6TnxRpfPEBJdigNOPmTwNiPHed+xei/CD50dbmAaYJ04kt/uL0A0mhd
-         aI6zXG6sxauNK9a5Z0SLiS45YSjVuqBy5nn3NSg/xvAoGStoaDlBO8hKz0Azz00yl+
-         MvCii2P5r0EZKs9Fmw1RoMZ9ur74xKNC4f3d75rOuuWvRshUEmA3whhTARCOMQ6+UO
-         u0ki+CyWasG6Q==
-Received: from DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) by
- DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.20; Wed, 30 Nov 2022 11:20:02 +0100
-Received: from localhost.localdomain (172.16.51.2) by
- DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.1118.20 via Frontend Transport; Wed, 30 Nov 2022 11:20:01 +0100
-From:   Christoph Niedermaier <cniedermaier@dh-electronics.com>
-To:     <linux-kernel@vger.kernel.org>
-CC:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
-        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
-        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
-Subject: [PATCH V2] dt-bindings: mmc: Remove comment on wakeup-source property
-Date:   Wed, 30 Nov 2022 11:18:52 +0100
-Message-ID: <20221130101852.5408-1-cniedermaier@dh-electronics.com>
-X-Mailer: git-send-email 2.11.0
-X-klartext: yes
+        with ESMTP id S229476AbiK3KmU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:42:20 -0500
+Received: from out30-6.freemail.mail.aliyun.com (out30-6.freemail.mail.aliyun.com [115.124.30.6])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBBC62790E;
+        Wed, 30 Nov 2022 02:42:18 -0800 (PST)
+X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R851e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045170;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=10;SR=0;TI=SMTPD_---0VW36MKZ_1669804935;
+Received: from 30.97.48.61(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0VW36MKZ_1669804935)
+          by smtp.aliyun-inc.com;
+          Wed, 30 Nov 2022 18:42:16 +0800
+Message-ID: <9c93dd3e-f80d-7421-05b8-9f692d33d2f2@linux.alibaba.com>
+Date:   Wed, 30 Nov 2022 18:42:20 +0800
 MIME-Version: 1.0
-Content-Type: text/plain
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.0
+Subject: Re: [PATCH] mmc: sdhci-sprd: Fix no reset data and command after
+ voltage switch
+To:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, orsonzhai@gmail.com, zhang.lyra@gmail.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
+        gengcixi@gmail.com
+References: <20221130080224.12831-1-wenchao.chen@unisoc.com>
+From:   Baolin Wang <baolin.wang@linux.alibaba.com>
+In-Reply-To: <20221130080224.12831-1-wenchao.chen@unisoc.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The current comment on wakeup-source is a little confusing because
-the word deprecated can be interpreted at first glance to mean that
-wakeup-source is deprecated. Also mentioning the obsolete property
-confuses more than it helps. Therefore, the comment should be removed
-completely because the enable-sdio-wakeup property is not used in
-any current DTs.
 
-Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
----
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: Rob Herring <robh+dt@kernel.org>
-Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc: Marek Vasut <marex@denx.de>
-Cc: kernel@dh-electronics.com
-Cc: linux-mmc@vger.kernel.org
-Cc: devicetree@vger.kernel.org
-To: linux-kernel@vger.kernel.org
----
-V2: - Instead of changing the comment, remove it
----
- Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 1 -
- 1 file changed, 1 deletion(-)
 
-diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-index 802e3ca8be4d..e82c00368088 100644
---- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-+++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-@@ -293,7 +293,6 @@ properties:
-     description:
-       SDIO only. Preserves card power during a suspend/resume cycle.
- 
--  # Deprecated: enable-sdio-wakeup
-   wakeup-source:
-     $ref: /schemas/types.yaml#/definitions/flag
-     description:
--- 
-2.11.0
+On 11/30/2022 4:02 PM, Wenchao Chen wrote:
+> After switching the voltage, no reset data and command will cause
+> CMD2 timeout.
+> 
+> Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> ---
+>   drivers/mmc/host/sdhci-sprd.c | 3 ++-
+>   1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index b92a408f138d..464508be8ec8 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+>   	}
+>   
+>   	if (IS_ERR(sprd_host->pinctrl))
+> -		return 0;
+> +		goto reset;
+>   
+>   	switch (ios->signal_voltage) {
+>   	case MMC_SIGNAL_VOLTAGE_180:
+> @@ -496,6 +496,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+>   		break;
+>   	}
+>   
+> +reset:
+>   	/* Wait for 300 ~ 500 us for pin state stable */
+>   	usleep_range(300, 500);
 
+If no pin state switching, still need stable time? Otherwise looks good 
+to me.
+
+>   	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
