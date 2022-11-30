@@ -2,103 +2,70 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43A0AC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 15:06:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D216EC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 15:19:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229776AbiK3PGm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 10:06:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60312 "EHLO
+        id S229575AbiK3PTj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 10:19:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229533AbiK3PGl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 10:06:41 -0500
-Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5B052F391
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 07:06:38 -0800 (PST)
-Received: by mail-lf1-x135.google.com with SMTP id be13so27420561lfb.4
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 07:06:38 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=mD5gyl5+b2VI0JIPzsNKHhXJF/y5xF11ltR47Z8/CH8=;
-        b=oSHSzMOkqi2ULxDEknrTYbZeynICh+gdMFA21eNeCDsPvbrobTAF2Y4OodCGyb18jZ
-         IWMtFH/cUN+PWmzaUjxmHz6VDRWV+FUJX0XgsRis5qc/rmZVgiUZPdfnz9FkBAcix+gO
-         SoIB0VU/tk5lt0Lwrn6TWFZTOJ6wNeY7XQvm2JHZGza7GP/QG5+UHpJ5KaWySoZ9amtl
-         0895/ArT79dRg3NfgylLSNqg51XzcODqoUj7fAKFF/hj9Kxf76w3rrAYNRUh0AMbOmv0
-         Kk4aztg2U2MPRpv44Jqvl3rjFuUlso/qdpKnQwhgmZLjM76KMSb14jjiB0T579LRP++r
-         b/NQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=mD5gyl5+b2VI0JIPzsNKHhXJF/y5xF11ltR47Z8/CH8=;
-        b=2D6xXAp8vfYCV9jzgceAyPTkPcI9Yye2ad7eXLi6HfpssIbKatyrzozJyieDrVIvW0
-         OjQUt1/zQ/ElQtL3OWZOf6aIGsYqHIbt+f+wruAzKgZGnR3DqIW98HlZrcC/Hc6w0DT+
-         OnyO+kC/ZhQOXU7z9Xjw6dnYDiKPxGko360GIzsbHi2YZwRqPO+uvwnxBqXkPbudsTBx
-         IfPuzeaeabvvKr7TNP9+vpzWdaEdNQ29mk4w6i6Gk7A2MRYIEOyatV3/OaBC7s9ugNpm
-         ycykejEpKc4k+EKglvv3UV0bwlg5CrC5pS8d5iZRz+ajVIqp49FTWsJCdnTdEJ2ZDion
-         KmGQ==
-X-Gm-Message-State: ANoB5pnHes3EssDYI7eP4MrLSR+oexa53LZ+DiMh1+jR/L+UHRhB2aQ2
-        8/n00pnClVquJdP95gNnxCBVTw==
-X-Google-Smtp-Source: AA0mqf4nL3MLFe+IlKOkDsmG5VgRiyNMxuwWch2f0SyPSpggGsXRm0nzcU+d/xz6z4J09NdlJKJMYg==
-X-Received: by 2002:a05:6512:401f:b0:4b4:b78a:ad8a with SMTP id br31-20020a056512401f00b004b4b78aad8amr19178620lfb.249.1669820797086;
-        Wed, 30 Nov 2022 07:06:37 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id s18-20020ac24652000000b004b0a1e77cb2sm286567lfo.137.2022.11.30.07.06.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 30 Nov 2022 07:06:36 -0800 (PST)
-Message-ID: <53a48f27-9eb9-ee9b-9dca-1911ea6e54a2@linaro.org>
-Date:   Wed, 30 Nov 2022 16:06:35 +0100
+        with ESMTP id S229548AbiK3PTi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 10:19:38 -0500
+X-Greylist: delayed 633 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Nov 2022 07:19:36 PST
+Received: from maillog.nuvoton.com (maillog.nuvoton.com [202.39.227.15])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 307F637235;
+        Wed, 30 Nov 2022 07:19:36 -0800 (PST)
+Received: from NTHCCAS04.nuvoton.com (NTHCCAS04.nuvoton.com [10.1.8.29])
+        by maillog.nuvoton.com (Postfix) with ESMTP id D04391C812A2;
+        Wed, 30 Nov 2022 23:09:00 +0800 (CST)
+Received: from NTHCCAS01.nuvoton.com (10.1.8.28) by NTHCCAS04.nuvoton.com
+ (10.1.8.29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Wed, 30
+ Nov 2022 23:09:00 +0800
+Received: from taln60.nuvoton.co.il (10.191.1.180) by NTHCCAS01.nuvoton.com
+ (10.1.12.25) with Microsoft SMTP Server id 15.1.2375.7 via Frontend
+ Transport; Wed, 30 Nov 2022 23:09:00 +0800
+Received: by taln60.nuvoton.co.il (Postfix, from userid 10070)
+        id 78B7E637C4; Wed, 30 Nov 2022 17:08:59 +0200 (IST)
+From:   Tomer Maimon <tmaimon77@gmail.com>
+To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
+        <tali.perry1@gmail.com>, <joel@jms.id.au>, <venture@google.com>,
+        <yuenn@google.com>, <benjaminfair@google.com>,
+        <adrian.hunter@intel.com>, <skhan@linuxfoundation.org>,
+        <davidgow@google.com>, <pbrobinson@gmail.com>, <gsomlo@gmail.com>,
+        <briannorris@chromium.org>, <arnd@arndb.de>,
+        <krakoczy@antmicro.com>, <andy.shevchenko@gmail.com>
+CC:     <openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Tomer Maimon <tmaimon77@gmail.com>
+Subject: [PATCH v1 0/2] MMC: add NPCM SDHCI driver support
+Date:   Wed, 30 Nov 2022 17:08:55 +0200
+Message-ID: <20221130150857.67113-1-tmaimon77@gmail.com>
+X-Mailer: git-send-email 2.33.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: xenon: Add compatible string for
- AC5 SoC
-Content-Language: en-US
-To:     Vadym Kochan <vadym.kochan@plvision.eu>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Elad Nachman <enachman@marvell.com>,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>
-References: <20221130133747.3777340-1-vadym.kochan@plvision.eu>
- <20221130133747.3777340-2-vadym.kochan@plvision.eu>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221130133747.3777340-2-vadym.kochan@plvision.eu>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/11/2022 14:37, Vadym Kochan wrote:
-> AC5 SoC has Xenon SDHCI IP, but with a limitation of maximum
-> 2G DMA address range.
-> 
-> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
-> ---
->  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> index 3ee758886558..e1178a49f264 100644
-> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-> @@ -25,6 +25,7 @@ properties:
->        - enum:
->            - marvell,armada-cp110-sdhci
->            - marvell,armada-ap806-sdhci
-> +          - marvell,ac5-sdhci
+This patch set adds SDHCI support for the Nuvoton NPCM Baseboard 
+Management Controller (BMC).
 
-Don't drop entries at the end, it's easy to create conflicts which is
-also easy to avoid by putting them in alphabetical order.
+The NPCM SDHCI driver tested on NPCM750 and NPCM845 EVB.
 
-Best regards,
-Krzysztof
+Tomer Maimon (2):
+  dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
+  mmc: sdhci-npcm: Add NPCM SDHCI driver
+
+ .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 47 +++++++++++
+ drivers/mmc/host/Kconfig                      |  8 ++
+ drivers/mmc/host/Makefile                     |  1 +
+ drivers/mmc/host/sdhci-npcm.c                 | 81 +++++++++++++++++++
+ 4 files changed, 137 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
+ create mode 100644 drivers/mmc/host/sdhci-npcm.c
+
+-- 
+2.33.0
 
