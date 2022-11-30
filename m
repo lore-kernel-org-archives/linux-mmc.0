@@ -2,186 +2,104 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6642C4708B
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 15:19:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ADF21C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 15:24:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229863AbiK3PTk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 10:19:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43818 "EHLO
+        id S229625AbiK3PYV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 10:24:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229805AbiK3PTj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 10:19:39 -0500
-Received: from maillog.nuvoton.com (maillog.nuvoton.com [202.39.227.15])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 9EE3D7CA90;
-        Wed, 30 Nov 2022 07:19:36 -0800 (PST)
-Received: from NTHCCAS04.nuvoton.com (NTHCCAS04.nuvoton.com [10.1.8.29])
-        by maillog.nuvoton.com (Postfix) with ESMTP id 053B41C812A6;
-        Wed, 30 Nov 2022 23:09:02 +0800 (CST)
-Received: from NTHCCAS02.nuvoton.com (10.1.9.121) by NTHCCAS04.nuvoton.com
- (10.1.8.29) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Wed, 30
- Nov 2022 23:09:01 +0800
-Received: from NTHCCAS01.nuvoton.com (10.1.8.28) by NTHCCAS02.nuvoton.com
- (10.1.9.121) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2176.2; Wed, 30 Nov
- 2022 23:09:01 +0800
-Received: from taln60.nuvoton.co.il (10.191.1.180) by NTHCCAS01.nuvoton.com
- (10.1.12.25) with Microsoft SMTP Server id 15.1.2375.7 via Frontend
- Transport; Wed, 30 Nov 2022 23:09:01 +0800
-Received: by taln60.nuvoton.co.il (Postfix, from userid 10070)
-        id 6A69763A6B; Wed, 30 Nov 2022 17:09:00 +0200 (IST)
-From:   Tomer Maimon <tmaimon77@gmail.com>
-To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
-        <tali.perry1@gmail.com>, <joel@jms.id.au>, <venture@google.com>,
-        <yuenn@google.com>, <benjaminfair@google.com>,
-        <adrian.hunter@intel.com>, <skhan@linuxfoundation.org>,
-        <davidgow@google.com>, <pbrobinson@gmail.com>, <gsomlo@gmail.com>,
-        <briannorris@chromium.org>, <arnd@arndb.de>,
-        <krakoczy@antmicro.com>, <andy.shevchenko@gmail.com>
-CC:     <openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Tomer Maimon <tmaimon77@gmail.com>
-Subject: [PATCH v1 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-Date:   Wed, 30 Nov 2022 17:08:57 +0200
-Message-ID: <20221130150857.67113-3-tmaimon77@gmail.com>
-X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20221130150857.67113-1-tmaimon77@gmail.com>
-References: <20221130150857.67113-1-tmaimon77@gmail.com>
+        with ESMTP id S229899AbiK3PYU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 10:24:20 -0500
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9551769F1;
+        Wed, 30 Nov 2022 07:24:18 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669821858; x=1701357858;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=oti4OnCEJPQwwRBrgmf0ykISS2XQFxLXOCWscviFvv8=;
+  b=GyMUdYR6FVBH+jEaAd2qXzGsmcjIKBaT4cZu30K111zEFnTb94t4gHIf
+   N2DpJZ81l/BBJX4RI/0rpRhmTmg/MB1PCU7+8ak7NI/iY+GyuDLAkZpjm
+   0Cg/uI3jOI1ci/dHnPrJJ2V5YWeiguPb12A0Qsm6q+NDFXiPr6d6qtFZG
+   v8HBnaHr8RavFQvW5BzaJWqb62pW2YVS/1DNaTksdQuUZcaSs/A42s5Rx
+   gB9iID2AouTYWWUzdzNN3//4DCwn4jGNjNfe2m9N00H83dlcNtKl99JSS
+   ufQyTJ1fh69fkKnUa5RvDOzxfyQWoBUZBuxih7vJ4Hm4S0bnrUXYdALcG
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10547"; a="342343336"
+X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
+   d="scan'208";a="342343336"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 07:23:53 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10547"; a="733020433"
+X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
+   d="scan'208";a="733020433"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.75])
+  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 07:23:50 -0800
+Message-ID: <6e259e6d-3821-0f2c-f308-5f5eb6550b6d@intel.com>
+Date:   Wed, 30 Nov 2022 17:23:45 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH V2] mmc: sdhci-sprd: Fix no reset data and command after
+ voltage switch
+Content-Language: en-US
+To:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org,
+        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
+        gengcixi@gmail.com
+References: <20221130121328.25553-1-wenchao.chen@unisoc.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221130121328.25553-1-wenchao.chen@unisoc.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
+On 30/11/22 14:13, Wenchao Chen wrote:
+> After switching the voltage, no reset data and command will cause
+> CMD2 timeout.
+> 
+> Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
+> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
----
- drivers/mmc/host/Kconfig      |  8 ++++
- drivers/mmc/host/Makefile     |  1 +
- drivers/mmc/host/sdhci-npcm.c | 81 +++++++++++++++++++++++++++++++++++
- 3 files changed, 90 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-npcm.c
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index fb1062a6394c..4b2d9ce4308c 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -709,6 +709,14 @@ config MMC_TMIO
- 	  This provides support for the SD/MMC cell found in TC6393XB,
- 	  T7L66XB and also HTC ASIC3
- 
-+config MMC_SDHCI_NPCM
-+	tristate "Secure Digital Host Controller Interface support for NPCM"
-+	depends on ARCH_NPCM || COMPILE_TEST
-+	depends on MMC_SDHCI_PLTFM
-+	help
-+	  This provides support for the SD/eMMC controller found in
-+	  NPCM BMC family SoCs.
-+
- config MMC_SDHI
- 	tristate "Renesas SDHI SD/SDIO controller support"
- 	depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4e4ceb32c4b4..801086613d7f 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -37,6 +37,7 @@ obj-$(CONFIG_MMC_SPI)		+= of_mmc_spi.o
- obj-$(CONFIG_MMC_S3C)   	+= s3cmci.o
- obj-$(CONFIG_MMC_SDRICOH_CS)	+= sdricoh_cs.o
- obj-$(CONFIG_MMC_TMIO)		+= tmio_mmc.o
-+obj-$(CONFIG_MMC_SDHCI_NPCM)	+= sdhci-npcm.o
- obj-$(CONFIG_MMC_TMIO_CORE)	+= tmio_mmc_core.o
- obj-$(CONFIG_MMC_SDHI)		+= renesas_sdhi_core.o
- obj-$(CONFIG_MMC_SDHI_SYS_DMAC)		+= renesas_sdhi_sys_dmac.o
-diff --git a/drivers/mmc/host/sdhci-npcm.c b/drivers/mmc/host/sdhci-npcm.c
-new file mode 100644
-index 000000000000..298c5f3e7c2b
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-npcm.c
-@@ -0,0 +1,81 @@
-+// SPDX-License-Identifier: GPL-2.0+
-+/*
-+ * NPCM SDHC MMC host controller driver.
-+ *
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/err.h>
-+#include <linux/io.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/module.h>
-+#include <linux/of.h>
-+
-+#include "sdhci-pltfm.h"
-+
-+static const struct sdhci_pltfm_data npcm_sdhci_pdata = {
-+	.quirks  = SDHCI_QUIRK_DELAY_AFTER_POWER,
-+	.quirks2 = SDHCI_QUIRK2_STOP_WITH_TC |
-+		   SDHCI_QUIRK2_NO_1_8_V,
-+};
-+
-+static int npcm_sdhci_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	u32 caps;
-+	int ret;
-+
-+	host = sdhci_pltfm_init(pdev, &npcm_sdhci_pdata, 0);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+	pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
-+
-+	if (!IS_ERR(pltfm_host->clk))
-+		clk_prepare_enable(pltfm_host->clk);
-+
-+	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (caps & SDHCI_CAN_DO_8BIT)
-+		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto err_sdhci_add;
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		goto err_sdhci_add;
-+
-+	return 0;
-+
-+err_sdhci_add:
-+	clk_disable_unprepare(pltfm_host->clk);
-+	sdhci_pltfm_free(pdev);
-+	return ret;
-+}
-+
-+static const struct of_device_id npcm_sdhci_of_match[] = {
-+	{ .compatible = "nuvoton,npcm750-sdhci" },
-+	{ .compatible = "nuvoton,npcm845-sdhci" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, npcm_sdhci_of_match);
-+
-+static struct platform_driver npcm_sdhci_driver = {
-+	.driver = {
-+		.name	= "npcm-sdhci",
-+		.of_match_table = npcm_sdhci_of_match,
-+		.pm	= &sdhci_pltfm_pmops,
-+	},
-+	.probe		= npcm_sdhci_probe,
-+	.remove		= sdhci_pltfm_unregister,
-+};
-+
-+module_platform_driver(npcm_sdhci_driver);
-+
-+MODULE_DESCRIPTION("NPCM Secure Digital Host Controller Interface driver");
-+MODULE_AUTHOR("Tomer Maimon <tomer.maimon@nuvoton.com>");
-+MODULE_LICENSE("GPL v2");
--- 
-2.33.0
+> ---
+> Changelog:
+> 
+> v1 -> v2:
+> There is no need to wait for the state of the pin to stabilize.
+> ---
+>  drivers/mmc/host/sdhci-sprd.c | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index b92a408f138d..bec3f9e3cd3f 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+>  	}
+>  
+>  	if (IS_ERR(sprd_host->pinctrl))
+> -		return 0;
+> +		goto reset;
+>  
+>  	switch (ios->signal_voltage) {
+>  	case MMC_SIGNAL_VOLTAGE_180:
+> @@ -498,6 +498,8 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
+>  
+>  	/* Wait for 300 ~ 500 us for pin state stable */
+>  	usleep_range(300, 500);
+> +
+> +reset:
+>  	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+>  
+>  	return 0;
 
