@@ -2,118 +2,103 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0719FC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 14:44:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 43A0AC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 15:06:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229541AbiK3Ooh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 09:44:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43364 "EHLO
+        id S229776AbiK3PGm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 10:06:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229503AbiK3Oog (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 09:44:36 -0500
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBD5E183BD
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 06:44:35 -0800 (PST)
-Received: by mail-pj1-x1032.google.com with SMTP id w15-20020a17090a380f00b0021873113cb4so2344274pjb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 06:44:35 -0800 (PST)
+        with ESMTP id S229533AbiK3PGl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 10:06:41 -0500
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5B052F391
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 07:06:38 -0800 (PST)
+Received: by mail-lf1-x135.google.com with SMTP id be13so27420561lfb.4
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 07:06:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZYuSJquVwIjmwCCxFA89hvpczZS6iAqYsFgIeQbQyk4=;
-        b=P6upJZHw3kEQqixVBF1l9xDXgWhHnFvJpaIkF91K7oFHU3IHlsrI87+u0LNjxkVsPD
-         lt8jjxM8uscBVyemK5Pp5TDhtcX2z3kVNe3CxuynX+0DzHSYdqsWjWvXakgGcvQJPgdS
-         hW5xC3C1C+wXWnVTWpfaynTevi5nLzjQOvD8kt0UIxki0elwTYOA1wL1XT1bM6RKZr0L
-         tl0fP1lje1l2Htl/DjdqBpX79JiLdJqro7onW3CHpR0rSrSbXPzPyRNrGl4HxJQoZszJ
-         wMnrdffqzR7yMeUGxyyrbZARMamR1qWAEeTPOl+aC2qiK+HT+86KWviq4tLncED6X/uq
-         Si5A==
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=mD5gyl5+b2VI0JIPzsNKHhXJF/y5xF11ltR47Z8/CH8=;
+        b=oSHSzMOkqi2ULxDEknrTYbZeynICh+gdMFA21eNeCDsPvbrobTAF2Y4OodCGyb18jZ
+         IWMtFH/cUN+PWmzaUjxmHz6VDRWV+FUJX0XgsRis5qc/rmZVgiUZPdfnz9FkBAcix+gO
+         SoIB0VU/tk5lt0Lwrn6TWFZTOJ6wNeY7XQvm2JHZGza7GP/QG5+UHpJ5KaWySoZ9amtl
+         0895/ArT79dRg3NfgylLSNqg51XzcODqoUj7fAKFF/hj9Kxf76w3rrAYNRUh0AMbOmv0
+         Kk4aztg2U2MPRpv44Jqvl3rjFuUlso/qdpKnQwhgmZLjM76KMSb14jjiB0T579LRP++r
+         b/NQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ZYuSJquVwIjmwCCxFA89hvpczZS6iAqYsFgIeQbQyk4=;
-        b=V+0kf2egZanCfIIJzpb5ADHQxM/Shfx1e7qJbxfCe1qh9BbXofc/iSTksGiQ+N/eZ2
-         9/qJMnHQyZWpow5w7Ka84CdcrE/AT/GUYufB3HS41VWBqJCaNNVenT146jB94LuwazIv
-         9h+jr2qbQoHn4YWR3kQZ8ZYkzJF3Hr/7H9f2CtH2CfvIKz6425BOZbfna8H/0/GvLzNP
-         ax9xUbdQDFcPj52jfj67m3q8XAdLZdXNNOkWzEtc6j7xGgIMSQlzb+NSPDpqLaHo84io
-         /bzAuuaOF0fY3WsDQSA/kLmqWRiFzFHYE3JwrbmRakJpxFwgyvNNrV1OGG7JGuLnA+Dr
-         Ca6g==
-X-Gm-Message-State: ANoB5plFg2ZFqaCyyeArE74n3akItDXHrX4liJn+vz97XPhJti2440Ac
-        yk0Vg6dJ+6u+ne6RXDxC9v18zGfy4yXRdFwB2XnElw==
-X-Google-Smtp-Source: AA0mqf4Fjnax4NQ1M1G8Yb/5mHMz2XBgnPQYbujS17h4jc8RF/kNSGd8x2Ve0ssQGzTrweZfOPpQBV5va67gO3iTNM4=
-X-Received: by 2002:a17:902:d68b:b0:188:cca8:df29 with SMTP id
- v11-20020a170902d68b00b00188cca8df29mr49431583ply.148.1669819475327; Wed, 30
- Nov 2022 06:44:35 -0800 (PST)
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=mD5gyl5+b2VI0JIPzsNKHhXJF/y5xF11ltR47Z8/CH8=;
+        b=2D6xXAp8vfYCV9jzgceAyPTkPcI9Yye2ad7eXLi6HfpssIbKatyrzozJyieDrVIvW0
+         OjQUt1/zQ/ElQtL3OWZOf6aIGsYqHIbt+f+wruAzKgZGnR3DqIW98HlZrcC/Hc6w0DT+
+         OnyO+kC/ZhQOXU7z9Xjw6dnYDiKPxGko360GIzsbHi2YZwRqPO+uvwnxBqXkPbudsTBx
+         IfPuzeaeabvvKr7TNP9+vpzWdaEdNQ29mk4w6i6Gk7A2MRYIEOyatV3/OaBC7s9ugNpm
+         ycykejEpKc4k+EKglvv3UV0bwlg5CrC5pS8d5iZRz+ajVIqp49FTWsJCdnTdEJ2ZDion
+         KmGQ==
+X-Gm-Message-State: ANoB5pnHes3EssDYI7eP4MrLSR+oexa53LZ+DiMh1+jR/L+UHRhB2aQ2
+        8/n00pnClVquJdP95gNnxCBVTw==
+X-Google-Smtp-Source: AA0mqf4nL3MLFe+IlKOkDsmG5VgRiyNMxuwWch2f0SyPSpggGsXRm0nzcU+d/xz6z4J09NdlJKJMYg==
+X-Received: by 2002:a05:6512:401f:b0:4b4:b78a:ad8a with SMTP id br31-20020a056512401f00b004b4b78aad8amr19178620lfb.249.1669820797086;
+        Wed, 30 Nov 2022 07:06:37 -0800 (PST)
+Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
+        by smtp.gmail.com with ESMTPSA id s18-20020ac24652000000b004b0a1e77cb2sm286567lfo.137.2022.11.30.07.06.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 30 Nov 2022 07:06:36 -0800 (PST)
+Message-ID: <53a48f27-9eb9-ee9b-9dca-1911ea6e54a2@linaro.org>
+Date:   Wed, 30 Nov 2022 16:06:35 +0100
 MIME-Version: 1.0
-References: <20221130134920.2109-1-thunder.leizhen@huawei.com>
-In-Reply-To: <20221130134920.2109-1-thunder.leizhen@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 30 Nov 2022 15:43:59 +0100
-Message-ID: <CAPDyKFq+poiVobaaCAYx_AD9Z6M_+r89AE6pViPFZMzVSZc92A@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: core: Normalize the error handling branch in sd_read_ext_regs()
-To:     Zhen Lei <thunder.leizhen@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.0
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: xenon: Add compatible string for
+ AC5 SoC
+Content-Language: en-US
+To:     Vadym Kochan <vadym.kochan@plvision.eu>,
+        Hu Ziji <huziji@marvell.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Elad Nachman <enachman@marvell.com>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
+References: <20221130133747.3777340-1-vadym.kochan@plvision.eu>
+ <20221130133747.3777340-2-vadym.kochan@plvision.eu>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221130133747.3777340-2-vadym.kochan@plvision.eu>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Nov 2022 at 14:49, Zhen Lei <thunder.leizhen@huawei.com> wrote:
->
-> 1. Use pr_err() to output the error message.
-> 2. Add the description of why success 0 is returned in case
->    "non-supported SD ext reg layout".
->
-> Fixes: c784f92769ae ("mmc: core: Read the SD function extension registers for power management")
-> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
-
-Applied for next, thanks!
-
-Kind regards
-Uffe
-
-
+On 30/11/2022 14:37, Vadym Kochan wrote:
+> AC5 SoC has Xenon SDHCI IP, but with a limitation of maximum
+> 2G DMA address range.
+> 
+> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
 > ---
->  drivers/mmc/core/sd.c | 11 ++++++++---
->  1 file changed, 8 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 3662bf5320ce56d..93ee53f74427c38 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1259,7 +1259,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
->          */
->         err = sd_read_ext_reg(card, 0, 0, 0, 512, gen_info_buf);
->         if (err) {
-> -               pr_warn("%s: error %d reading general info of SD ext reg\n",
-> +               pr_err("%s: error %d reading general info of SD ext reg\n",
->                         mmc_hostname(card->host), err);
->                 goto out;
->         }
-> @@ -1273,7 +1273,12 @@ static int sd_read_ext_regs(struct mmc_card *card)
->         /* Number of extensions to be find. */
->         num_ext = gen_info_buf[4];
->
-> -       /* We support revision 0, but limit it to 512 bytes for simplicity. */
-> +       /*
-> +        * We only support revision 0, and limit it to 512 bytes for simplicity.
-> +        * In other cases, success 0 is returned, because the card remains
-> +        * functional and all but the new features from the SD function
-> +        * extensions registers can still be used.
-> +        */
->         if (rev != 0 || len > 512) {
->                 pr_warn("%s: non-supported SD ext reg layout\n",
->                         mmc_hostname(card->host));
-> @@ -1288,7 +1293,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
->         for (i = 0; i < num_ext; i++) {
->                 err = sd_parse_ext_reg(card, gen_info_buf, &next_ext_addr);
->                 if (err) {
-> -                       pr_warn("%s: error %d parsing SD ext reg\n",
-> +                       pr_err("%s: error %d parsing SD ext reg\n",
->                                 mmc_hostname(card->host), err);
->                         goto out;
->                 }
-> --
-> 2.25.1
->
+>  Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> index 3ee758886558..e1178a49f264 100644
+> --- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
+> @@ -25,6 +25,7 @@ properties:
+>        - enum:
+>            - marvell,armada-cp110-sdhci
+>            - marvell,armada-ap806-sdhci
+> +          - marvell,ac5-sdhci
+
+Don't drop entries at the end, it's easy to create conflicts which is
+also easy to avoid by putting them in alphabetical order.
+
+Best regards,
+Krzysztof
+
