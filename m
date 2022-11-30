@@ -2,139 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DD61CC433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 12:36:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DDC5C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 12:46:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234924AbiK3Mgb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 07:36:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48630 "EHLO
+        id S231225AbiK3MqK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 07:46:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233081AbiK3Mg1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 07:36:27 -0500
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 046997B624
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 04:36:21 -0800 (PST)
-Received: by mail-pj1-x102b.google.com with SMTP id l22-20020a17090a3f1600b00212fbbcfb78so1803178pjc.3
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 04:36:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=bhnxxzbyBgwXVydGu+B/mgXlMp0Dw1k8g2zoQkfcNo8=;
-        b=UGvBUrFjhu1KjtfNjzoVBn01HzbaTvtlgXOW9oOqaXkePKbAcwu+MkDoRe50kZ4Lrk
-         Jjbxunl94UjNrbpRpL7Vv4hcVezpmU0GVsWDrKxhESgzoNupU3Q5rJUh3qzsJUyWH9GS
-         bfSpdaLUDPUtn7uE0btukBLIaJ4jqXG7fITLwjdxtUJnPKnirXwGPA2b7ob5KFzCOs0w
-         t9931Z0EsgOza0JO+P20+RoNsFw8pGR3YszKGTSxYcQPKIiKbVvvvI+MPfG2jx/6KTKL
-         rJ79Lv+2XOamQ4uFaCuvvHCkWB8tcgDL+5AjknLzwbV85b0Djcwa/2AnJhB4Mw+0lW5B
-         mqDg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=bhnxxzbyBgwXVydGu+B/mgXlMp0Dw1k8g2zoQkfcNo8=;
-        b=Gd0niyhHIIDnQuBeLnxBSUpWy0TXRr8sBwS2D75Tjogjzi/4O6qA4rOtiZrrQSj6Pu
-         KlTsMaCsXejW0ZRktI5JICkcjK+8fpOw+Y5+5YneWvDGq8lA3wPZElKuMaJwRRRt2oHX
-         7aQMAdTXsvi9Lxd4ZKOgZ2a02NKpRfv7p1EcRIIUIC7IStEAX1+wygD+XHCCdRQZmjlf
-         FYTxbfHMKEmI3A1LLtEI2BkVrLUx2RQ6wgdRRPBP4bFDadbA4sHbZ3UeA6gVrSTYFruF
-         v+KQZcmJZUGt18dSC7x6cQtcSBUqxSnVVU+r4LH2EICcM/TiRI23iqmIYYBAuPSi0JY6
-         FEEw==
-X-Gm-Message-State: ANoB5plRiv/zi8P7l4NsH82DMbJ6JBB0rrwCCV6k0JO/4wfmWC+cbYXN
-        DiQ24nIaAi+oKaRJZWBpywEhOAyK+NLvA6LrX0Uv6uVAw0Y=
-X-Google-Smtp-Source: AA0mqf72LaJuo+xldVLoMSH5G22UPFDHa+Am3dOjn7c81G8pnPOX5X+pJ9fUEf8ltsSZSFWEDl7tgIcAn+JXKHzqzFI=
-X-Received: by 2002:a17:902:ee55:b0:189:69cf:9ea0 with SMTP id
- 21-20020a170902ee5500b0018969cf9ea0mr24961183plo.37.1669811780504; Wed, 30
- Nov 2022 04:36:20 -0800 (PST)
+        with ESMTP id S232803AbiK3MqI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 07:46:08 -0500
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CB0E4B753
+        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 04:46:05 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1669812365; x=1701348365;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=v0K5Z+fNortxwiP+ekS3lUj0FXp5pXXc8aMN4BxSh0s=;
+  b=RJ1uZPXZ5FtdOKinnSwsbsJXx5Xi8E6kviFEYrweQdnIs/KnKfb+FfaX
+   jkBHB9IvktCWZM7IRUVZh4/mp0G5UdOHtKo3RNesDf8l2JEOxxng5jyFe
+   kj1G5qxnpgxVgd0p19y4k6rnLxkf0GQZMBF68btXNu21eC3GzSFo8h1q1
+   Cc5XFGX2eE7nWb5BahTatEZ/xTJfZs3KQQDexIIICs7m6f6BpyOFVDMr7
+   WtUBE+SM3f1Pzm1/Q1l4o7rufC0mT7KRy29S6lmcAnN5BgMJtwwA/Ezvv
+   UR6HK39O3r1crBKaw8U7wUbL13XMaiiLVX5DsWjFpJsLLu2HQsX7Cjo5u
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="316538449"
+X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
+   d="scan'208";a="316538449"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 04:46:01 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10546"; a="594650211"
+X-IronPort-AV: E=Sophos;i="5.96,206,1665471600"; 
+   d="scan'208";a="594650211"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.53.75])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Nov 2022 04:45:55 -0800
+Message-ID: <1acb9b87-088c-06f8-a2de-63b3054c55bc@intel.com>
+Date:   Wed, 30 Nov 2022 14:45:51 +0200
 MIME-Version: 1.0
-References: <20221130121033.7270-1-cniedermaier@dh-electronics.com>
-In-Reply-To: <20221130121033.7270-1-cniedermaier@dh-electronics.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 30 Nov 2022 13:35:44 +0100
-Message-ID: <CAPDyKFpTT1=d=2LnynBywyRTfC7uM8GVGHkPYA0xgFhROhoPyg@mail.gmail.com>
-Subject: Re: [PATCH V3] dt-bindings: mmc: Remove comment on wakeup-source property
-To:     Christoph Niedermaier <cniedermaier@dh-electronics.com>
-Cc:     linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Marek Vasut <marex@denx.de>, kernel@dh-electronics.com,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.0
+Subject: Re: [PATCH V2 2/4] mmc: sdhci: Avoid unnecessary re-configuration
+Content-Language: en-US
+To:     Robert Marko <robimarko@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Sarthak Garg <quic_sartgarg@quicinc.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Andrew Jeffery <andrew@aj.id.au>,
+        Eugen Hristev <eugen.hristev@microchip.com>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Prabu Thangamuthu <prabu.t@synopsys.com>,
+        Manjunath M B <manjumb@synopsys.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Viresh Kumar <vireshk@kernel.org>,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Hu Ziji <huziji@marvell.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Brian Norris <briannorris@chromium.org>,
+        Wenchao Chen <wenchao.chen@unisoc.com>,
+        Chevron Li <chevron.li@bayhubtech.com>,
+        linux-mmc@vger.kernel.org
+References: <20221128133259.38305-1-adrian.hunter@intel.com>
+ <20221128133259.38305-3-adrian.hunter@intel.com>
+ <b040b2b2-10c2-5414-1c8f-fd02fc3b300e@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <b040b2b2-10c2-5414-1c8f-fd02fc3b300e@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Nov 2022 at 13:12, Christoph Niedermaier
-<cniedermaier@dh-electronics.com> wrote:
->
-> The current comment on wakeup-source is a little confusing because
-> the word deprecated can be interpreted at first glance to mean that
-> wakeup-source is deprecated. Also mentioning the obsolete property
-> confuses more than it helps. Therefore, the comment should be removed
-> completely because the enable-sdio-wakeup property is not used in
-> any current DTs. Also remove enable-sdio-wakeup reference in
-> wakeup-source.txt
->
-> Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
+On 30/11/22 13:54, Robert Marko wrote:
+> 
+> On 28. 11. 2022. 14:32, Adrian Hunter wrote:
+>> Avoid re-configuring UHS and preset settings when the settings have not
+>> changed, irrespective of whether the clock is turning on.
+>>
+>> Tested-by: Haibo Chen <haibo.chen@nxp.com>
+>> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> 
+> Hi, this is breaking sdhci-msm on IPQ8074 in next-20221130 for me
+> and reverting it makes the eMMC work again.
+> 
+> I get a lot of:
+> 
+> [    2.727287] mmc0: tuning execution failed: -5
+> [    2.727323] mmc0: error -5 whilst initialising MMC card
+> [    3.846540] mmc0: tuning execution failed: -5
+> [    3.846564] mmc0: error -5 whilst initialising MMC card
+> [    4.966517] mmc0: tuning execution failed: -5
+> [    4.966539] mmc0: error -5 whilst initialising MMC card
+> [    6.096486] mmc0: tuning execution failed: -5
+> [    6.096508] mmc0: error -5 whilst initialising MMC card
+> [    7.206431] mmc0: tuning execution failed: -5
+> [    7.206454] mmc0: error -5 whilst initialising MMC card
 
-Applied for next, thanks!
+Thanks for the report!  Are you able to debug this any more?
+What transfer mode is it? e.g. HS400?  Can you enable debug
+messages and get more information?
 
-Kind regards
-Uffe
-
-> ---
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-> Cc: Marek Vasut <marex@denx.de>
-> Cc: kernel@dh-electronics.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: devicetree@vger.kernel.org
-> To: linux-kernel@vger.kernel.org
-> ---
-> V2: - Instead of changing the comment, remove it
-> V3: - Remove also reference in power/wakeup-source.txt
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-controller.yaml |  1 -
->  Documentation/devicetree/bindings/power/wakeup-source.txt | 13 ++++++-------
->  2 files changed, 6 insertions(+), 8 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> index 802e3ca8be4d..e82c00368088 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
-> @@ -293,7 +293,6 @@ properties:
->      description:
->        SDIO only. Preserves card power during a suspend/resume cycle.
->
-> -  # Deprecated: enable-sdio-wakeup
->    wakeup-source:
->      $ref: /schemas/types.yaml#/definitions/flag
->      description:
-> diff --git a/Documentation/devicetree/bindings/power/wakeup-source.txt b/Documentation/devicetree/bindings/power/wakeup-source.txt
-> index cfd74659fbed..697333a56d5e 100644
-> --- a/Documentation/devicetree/bindings/power/wakeup-source.txt
-> +++ b/Documentation/devicetree/bindings/power/wakeup-source.txt
-> @@ -17,15 +17,14 @@ interrupt.
->  List of legacy properties and respective binding document
->  ---------------------------------------------------------
->
-> -1. "enable-sdio-wakeup"                Documentation/devicetree/bindings/mmc/mmc.txt
-> -2. "gpio-key,wakeup"           Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt
-> -3. "has-tpo"                   Documentation/devicetree/bindings/rtc/rtc-opal.txt
-> -4. "linux,wakeup"              Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt
-> +1. "gpio-key,wakeup"           Documentation/devicetree/bindings/input/gpio-keys{,-polled}.txt
-> +2. "has-tpo"                   Documentation/devicetree/bindings/rtc/rtc-opal.txt
-> +3. "linux,wakeup"              Documentation/devicetree/bindings/input/gpio-matrix-keypad.txt
->                                 Documentation/devicetree/bindings/mfd/tc3589x.txt
->                                 Documentation/devicetree/bindings/input/touchscreen/ads7846.txt
-> -5. "linux,keypad-wakeup"       Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt
-> -6. "linux,input-wakeup"                Documentation/devicetree/bindings/input/samsung-keypad.txt
-> -7. "nvidia,wakeup-source"      Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt
-> +4. "linux,keypad-wakeup"       Documentation/devicetree/bindings/input/qcom,pm8xxx-keypad.txt
-> +5. "linux,input-wakeup"                Documentation/devicetree/bindings/input/samsung-keypad.txt
-> +6. "nvidia,wakeup-source"      Documentation/devicetree/bindings/input/nvidia,tegra20-kbc.txt
->
->  Examples
->  --------
-> --
-> 2.11.0
->
