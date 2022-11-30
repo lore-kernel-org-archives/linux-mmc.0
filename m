@@ -2,77 +2,99 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE6E8C352A1
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:42:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54027C352A1
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 11:18:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229891AbiK3KmV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 05:42:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41672 "EHLO
+        id S234346AbiK3LSn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 06:18:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42004 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229476AbiK3KmU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:42:20 -0500
-Received: from out30-6.freemail.mail.aliyun.com (out30-6.freemail.mail.aliyun.com [115.124.30.6])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DBBC62790E;
-        Wed, 30 Nov 2022 02:42:18 -0800 (PST)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R851e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045170;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=10;SR=0;TI=SMTPD_---0VW36MKZ_1669804935;
-Received: from 30.97.48.61(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0VW36MKZ_1669804935)
-          by smtp.aliyun-inc.com;
-          Wed, 30 Nov 2022 18:42:16 +0800
-Message-ID: <9c93dd3e-f80d-7421-05b8-9f692d33d2f2@linux.alibaba.com>
-Date:   Wed, 30 Nov 2022 18:42:20 +0800
+        with ESMTP id S234469AbiK3LSO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 06:18:14 -0500
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9483F4AF13;
+        Wed, 30 Nov 2022 03:18:08 -0800 (PST)
+Received: from dggpemm500022.china.huawei.com (unknown [172.30.72.57])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4NMc636DJGzqSM5;
+        Wed, 30 Nov 2022 19:14:03 +0800 (CST)
+Received: from dggpemm500006.china.huawei.com (7.185.36.236) by
+ dggpemm500022.china.huawei.com (7.185.36.162) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Wed, 30 Nov 2022 19:18:06 +0800
+Received: from [10.174.178.55] (10.174.178.55) by
+ dggpemm500006.china.huawei.com (7.185.36.236) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.31; Wed, 30 Nov 2022 19:18:06 +0800
+Subject: Re: [PATCH] mmc: core: Fix error return code in sd_read_ext_regs()
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+References: <20221130092847.2092-1-thunder.leizhen@huawei.com>
+ <CAPDyKFphNdR-TorULpbsMtM6MzqsaK_UdSmG9Hin=wunUwJwJQ@mail.gmail.com>
+From:   "Leizhen (ThunderTown)" <thunder.leizhen@huawei.com>
+Message-ID: <d9d44a9c-e61e-2803-731b-cfa5f3d3d46c@huawei.com>
+Date:   Wed, 30 Nov 2022 19:18:05 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; rv:60.0) Gecko/20100101
+ Thunderbird/60.7.0
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH] mmc: sdhci-sprd: Fix no reset data and command after
- voltage switch
-To:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, orsonzhai@gmail.com, zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        gengcixi@gmail.com
-References: <20221130080224.12831-1-wenchao.chen@unisoc.com>
-From:   Baolin Wang <baolin.wang@linux.alibaba.com>
-In-Reply-To: <20221130080224.12831-1-wenchao.chen@unisoc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+In-Reply-To: <CAPDyKFphNdR-TorULpbsMtM6MzqsaK_UdSmG9Hin=wunUwJwJQ@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.174.178.55]
+X-ClientProxiedBy: dggems701-chm.china.huawei.com (10.3.19.178) To
+ dggpemm500006.china.huawei.com (7.185.36.236)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 11/30/2022 4:02 PM, Wenchao Chen wrote:
-> After switching the voltage, no reset data and command will cause
-> CMD2 timeout.
+On 2022/11/30 18:04, Ulf Hansson wrote:
+> On Wed, 30 Nov 2022 at 10:29, Zhen Lei <thunder.leizhen@huawei.com> wrote:
+>>
+>> Fix to return a negative error code from the error handling
+>> case instead of 0, as done elsewhere in this function.
+>>
+>> Fixes: c784f92769ae ("mmc: core: Read the SD function extension registers for power management")
+>> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
+>> ---
+>>  drivers/mmc/core/sd.c | 1 +
+>>  1 file changed, 1 insertion(+)
+>>
+>> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
+>> index 3662bf5320ce56d..7b64f76f0179ca8 100644
+>> --- a/drivers/mmc/core/sd.c
+>> +++ b/drivers/mmc/core/sd.c
+>> @@ -1277,6 +1277,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
+>>         if (rev != 0 || len > 512) {
+>>                 pr_warn("%s: non-supported SD ext reg layout\n",
+>>                         mmc_hostname(card->host));
+>> +               err = -EOPNOTSUPP;
 > 
-> Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> ---
->   drivers/mmc/host/sdhci-sprd.c | 3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
+> The original intent was to not return an error code. Simply, because
+> the card remains functional and all but the new features from the SD
+> function extensions registers can still be used.
+
+OK, I got it.
+
 > 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index b92a408f138d..464508be8ec8 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->   	}
->   
->   	if (IS_ERR(sprd_host->pinctrl))
-> -		return 0;
-> +		goto reset;
->   
->   	switch (ios->signal_voltage) {
->   	case MMC_SIGNAL_VOLTAGE_180:
-> @@ -496,6 +496,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->   		break;
->   	}
->   
-> +reset:
->   	/* Wait for 300 ~ 500 us for pin state stable */
->   	usleep_range(300, 500);
+> Perhaps, we should update the comment a few lines above to better
+> reflect that this is in-fact what we intend here.
 
-If no pin state switching, still need stable time? Otherwise looks good 
-to me.
+How about also add 'warning' to the output? The other two outputs
+contain the 'error' keyword.
 
->   	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
+> 
+>>                 goto out;
+>>         }
+>>
+> 
+> Kind regards
+> Uffe
+> .
+> 
+
+-- 
+Regards,
+  Zhen Lei
