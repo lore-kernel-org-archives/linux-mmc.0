@@ -2,94 +2,96 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DFABC352A1
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:05:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B8950C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 10:30:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235256AbiK3KFF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 05:05:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35978 "EHLO
+        id S236137AbiK3Kam (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 05:30:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231607AbiK3KFE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:05:04 -0500
-Received: from mail-pg1-x52b.google.com (mail-pg1-x52b.google.com [IPv6:2607:f8b0:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06F45165BB
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 02:05:04 -0800 (PST)
-Received: by mail-pg1-x52b.google.com with SMTP id f9so15576161pgf.7
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 02:05:04 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=p+yt+polAYGWkxe5XK/5FXnciL8HR/33O9D6Q+Xt574=;
-        b=NJ/8BLLOmf100W4hr4eODpPgmL4v0vhacEbadQo1Ds2mgcuw66j9XtIVn+BAfr7fBp
-         S90Lf487KK/0o5s30+Cnbng+JrU41S5TeKvNh+PBaCAkNG3vJrUFtHf+rKwT/JBPnp2D
-         KM0q4EcNFueM8dGeB7ABFc7UBKlKICpBl4Ng81kTMhPSbeiB0LMLHPMpNjLOdKsRVVOe
-         SrYFPLeFxtMQoynqilrAnGLi5nq0FGBkwT0gl8FTsXzy+9YFWmAoei1kL9OLn7i0Jg/U
-         /luBIrJ38MxImY+824/2sZGzXfbvlrVJMLcrMGF9fbUDfGZK+v8+JfEMdKcWlVfHhYH7
-         ri2Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=p+yt+polAYGWkxe5XK/5FXnciL8HR/33O9D6Q+Xt574=;
-        b=5nS5QMQYS9K6s/SyJU1PdR7jeahwLBG0M0nJ30J6+XqTCpS4j0K/7lUVPhxX6W1CBP
-         b2Dk8PTwqrEbSpIKuOlCOKoCzKt7xGhLrizWiNfsB/OzV67lHXJ6TuhMmL2sSzpnk4gx
-         VXehBGUqnQaJ+e1PWoudYZBJFsCoO6HeSFtRXWXeEphrD8Sic2jz/8k0JItBobsdVYTG
-         aIxrzfSoXyU2u+fr9CslfNj3S6IkR05TTdUse7sJLiTQyeFQ+URH1+35HW7fRc2Rjuvd
-         M7THiwuORMa+JTVm0XDqj1tkJatx4DV2auHNqc9iZdDarR8O1V8YJsK60ptibyeMR8ZV
-         8SUQ==
-X-Gm-Message-State: ANoB5pn7WvuTzIaf8uwpAjYTeuSZhfRalue42kn9zP6SHsBMiTwGdn7H
-        V7O69H/mocrvm05+ZOSl6KCYK4MNy9OxCWh/R0u3TQ==
-X-Google-Smtp-Source: AA0mqf7olze2ulbSbK/lUjhobNgKgIS0hqBKaJrXrO5CT1xYpROW+WEywkC2ce39BQ29fnNSnU17q2k2dbNY1oCmpN8=
-X-Received: by 2002:aa7:998a:0:b0:575:6907:662a with SMTP id
- k10-20020aa7998a000000b005756907662amr8969604pfh.57.1669802703491; Wed, 30
- Nov 2022 02:05:03 -0800 (PST)
+        with ESMTP id S235850AbiK3KaV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 05:30:21 -0500
+X-Greylist: delayed 587 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 30 Nov 2022 02:30:18 PST
+Received: from mx2.securetransport.de (mx2.securetransport.de [188.68.39.254])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 547BB3FBAF;
+        Wed, 30 Nov 2022 02:30:18 -0800 (PST)
+Received: from mail.dh-electronics.com (unknown [77.24.89.57])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx2.securetransport.de (Postfix) with ESMTPSA id 8739F5EC41;
+        Wed, 30 Nov 2022 11:20:11 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=dh-electronics.com;
+        s=dhelectronicscom; t=1669803611;
+        bh=Bjb3a95JxH8fwSaNK37AgYquFmTd2pxLk+nae0XMhx4=;
+        h=From:To:CC:Subject:Date:From;
+        b=IjuNkgOGqhr2Oy8IWhRSWYsh1ndVcZsY+USFVjQhx5H4n0VVw/AOs9MTwjN6mvHnO
+         CqLqN8VOZlafm3mV8b4Q78AABGYvdD6nfN+2MVjHfpyVnH9KHGgAkxCzWoP0kvsNVe
+         14WNLtmCBQP6TnxRpfPEBJdigNOPmTwNiPHed+xei/CD50dbmAaYJ04kt/uL0A0mhd
+         aI6zXG6sxauNK9a5Z0SLiS45YSjVuqBy5nn3NSg/xvAoGStoaDlBO8hKz0Azz00yl+
+         MvCii2P5r0EZKs9Fmw1RoMZ9ur74xKNC4f3d75rOuuWvRshUEmA3whhTARCOMQ6+UO
+         u0ki+CyWasG6Q==
+Received: from DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20; Wed, 30 Nov 2022 11:20:02 +0100
+Received: from localhost.localdomain (172.16.51.2) by
+ DHPWEX01.DH-ELECTRONICS.ORG (10.64.2.30) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.1118.20 via Frontend Transport; Wed, 30 Nov 2022 11:20:01 +0100
+From:   Christoph Niedermaier <cniedermaier@dh-electronics.com>
+To:     <linux-kernel@vger.kernel.org>
+CC:     Christoph Niedermaier <cniedermaier@dh-electronics.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Marek Vasut <marex@denx.de>, <kernel@dh-electronics.com>,
+        <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>
+Subject: [PATCH V2] dt-bindings: mmc: Remove comment on wakeup-source property
+Date:   Wed, 30 Nov 2022 11:18:52 +0100
+Message-ID: <20221130101852.5408-1-cniedermaier@dh-electronics.com>
+X-Mailer: git-send-email 2.11.0
+X-klartext: yes
 MIME-Version: 1.0
-References: <20221130092847.2092-1-thunder.leizhen@huawei.com>
-In-Reply-To: <20221130092847.2092-1-thunder.leizhen@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 30 Nov 2022 11:04:27 +0100
-Message-ID: <CAPDyKFphNdR-TorULpbsMtM6MzqsaK_UdSmG9Hin=wunUwJwJQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Fix error return code in sd_read_ext_regs()
-To:     Zhen Lei <thunder.leizhen@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Nov 2022 at 10:29, Zhen Lei <thunder.leizhen@huawei.com> wrote:
->
-> Fix to return a negative error code from the error handling
-> case instead of 0, as done elsewhere in this function.
->
-> Fixes: c784f92769ae ("mmc: core: Read the SD function extension registers for power management")
-> Signed-off-by: Zhen Lei <thunder.leizhen@huawei.com>
-> ---
->  drivers/mmc/core/sd.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-> index 3662bf5320ce56d..7b64f76f0179ca8 100644
-> --- a/drivers/mmc/core/sd.c
-> +++ b/drivers/mmc/core/sd.c
-> @@ -1277,6 +1277,7 @@ static int sd_read_ext_regs(struct mmc_card *card)
->         if (rev != 0 || len > 512) {
->                 pr_warn("%s: non-supported SD ext reg layout\n",
->                         mmc_hostname(card->host));
-> +               err = -EOPNOTSUPP;
+The current comment on wakeup-source is a little confusing because
+the word deprecated can be interpreted at first glance to mean that
+wakeup-source is deprecated. Also mentioning the obsolete property
+confuses more than it helps. Therefore, the comment should be removed
+completely because the enable-sdio-wakeup property is not used in
+any current DTs.
 
-The original intent was to not return an error code. Simply, because
-the card remains functional and all but the new features from the SD
-function extensions registers can still be used.
+Signed-off-by: Christoph Niedermaier <cniedermaier@dh-electronics.com>
+---
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc: Marek Vasut <marex@denx.de>
+Cc: kernel@dh-electronics.com
+Cc: linux-mmc@vger.kernel.org
+Cc: devicetree@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+---
+V2: - Instead of changing the comment, remove it
+---
+ Documentation/devicetree/bindings/mmc/mmc-controller.yaml | 1 -
+ 1 file changed, 1 deletion(-)
 
-Perhaps, we should update the comment a few lines above to better
-reflect that this is in-fact what we intend here.
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+index 802e3ca8be4d..e82c00368088 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-controller.yaml
+@@ -293,7 +293,6 @@ properties:
+     description:
+       SDIO only. Preserves card power during a suspend/resume cycle.
+ 
+-  # Deprecated: enable-sdio-wakeup
+   wakeup-source:
+     $ref: /schemas/types.yaml#/definitions/flag
+     description:
+-- 
+2.11.0
 
->                 goto out;
->         }
->
-
-Kind regards
-Uffe
