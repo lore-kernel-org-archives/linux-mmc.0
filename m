@@ -2,122 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 29795C433FE
-	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 13:00:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7054C433FE
+	for <linux-mmc@archiver.kernel.org>; Wed, 30 Nov 2022 13:38:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230415AbiK3NAS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 08:00:18 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40800 "EHLO
+        id S229854AbiK3NiI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 08:38:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43078 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233039AbiK3NAP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 08:00:15 -0500
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 32105429B1
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 05:00:15 -0800 (PST)
-Received: by mail-pj1-x1033.google.com with SMTP id o12so7784149pjo.4
-        for <linux-mmc@vger.kernel.org>; Wed, 30 Nov 2022 05:00:15 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=vfEQmYFQW/ZK1X243P+JumNV7jJwB1rBZ2w+PSJzG80=;
-        b=GAE4WIcOP35rEimrp1m+/bNCfENdbYEVgCB4sFV3rqcJekdK2G8b+CVSj4uCjuic/0
-         155DwTFIf+Qu5Mb7h0K+KiZnlqzEmk45fXGA2ZwBBrsDZxfEapUZCcnVbZpuCwB1iHMN
-         r51iWVdl1SNEkJ8AuuSaslmp1qfCAyrgtSxFnSZSCsoGe8vOKpkucTPWv+aYPMy6VpWy
-         S2PuXRMeOH8C2VkM/SG6Uvzz5cplTEtvlU3/JPhwU3cmqbHk0JzseJfJeZK7yzOtP60G
-         koRFP1Qv7+wnbdRiU2WGkGLaG5OBGe80ABdGMj2Lb7nh4xVOhN/Aaxh11fs1++3U4d2f
-         OFVw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=vfEQmYFQW/ZK1X243P+JumNV7jJwB1rBZ2w+PSJzG80=;
-        b=xqAG00BrZJ+p1RTwps5AcBLbNeNU1rPYDwG8tUQsTJJffDXWwiGLfXmqo706fClsOy
-         APjGhT0PC+8Gh/XRON6P1rUqVzeoImINMyOpHOQn019gSYQR3+48r8/IJUH+kIVRDA4t
-         C6dpl9oayVoFkRDk/EGZmpoc45X5FKcqtxoadc1hS/gWBN0F5IE/BHGl8e8nRCsZgnJF
-         f3cwjyrtb2wyzn3frfLPqL38OnoLgmL7RkydZnknacjYWaFQWuVl3ypppXdlwUjZ7ZzT
-         4+QuJ2Tl8C3g8E+UpV+5HG9o4r47EiUIOXBbYjiIcNtMALqhz0MLIDBUZMAfpGPLWiM9
-         zu7w==
-X-Gm-Message-State: ANoB5pkXAGRahRuHs28IoaEgNRGYCVBQsqL+MULSO2azz9CVA/Byr8Mx
-        UA1ZOYbhiRKdzRqeDdA3aO1P9ZUPydHSrc5EY28=
-X-Google-Smtp-Source: AA0mqf6ZZSJG4WwutWIAfv7epfa2F8VDZxfYvaKFFyaVGmdonRMfI8jD7HrGVE9rQl42EoeX2d3eukZyu7b5lscWsXQ=
-X-Received: by 2002:a17:902:9307:b0:189:9284:2140 with SMTP id
- bc7-20020a170902930700b0018992842140mr11908090plb.111.1669813214689; Wed, 30
- Nov 2022 05:00:14 -0800 (PST)
+        with ESMTP id S229761AbiK3NiH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 08:38:07 -0500
+Received: from EUR04-DB3-obe.outbound.protection.outlook.com (mail-db3eur04on2124.outbound.protection.outlook.com [40.107.6.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 31D4427CC7;
+        Wed, 30 Nov 2022 05:38:06 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=aHxVoatZw7PVqM1OkualR/FSjyz+wcVfCf2xqUGySZiqjnSn5TiTJrgoM940KZhZ0zwelB9WWUqOCVpTUB0/3QgrHsmlM9JXlhXz8u4IZj2IND8+Xj90y9wKZYcGgzvUrnSjNMBIHCzn+JKJzCoNBjqH2Wwn/C7BwwvIwIwfk1sI5ZU1cz0BIMKzQKozW0C3Cvw6sFdsQKYJSXN7G/XneM9T9Xbf2Hfnt/6FKvs/At8w+sLLJxfsgYwsYJ14oBCPzj2NO6A4Oyz1d0ELZt8eJ4C7wf9ZMObvOnzVTLZO6AbM358T0Ifck3lf1rUm0IT5e59IOkA8TDv0yfap9iWRXQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=V00ZojqKGKV5lUPHyiivCPJtFg0c7Fpn2Oh53Dup+XI=;
+ b=KbR6iwHG+FIYagtRTOt5OM8jRymUhHeh3N6KHEYnqhXN/R8inRQDRy1fGmcA3o8oX7kdGw3Ef3Gxs2fVi4Gjpsu2g/sXOHMDHKBLcGW2s5+Q+DhOoy3ZIeDpG34udSfZNaAKBoxo7+aMVw3vi4V/S34Vy5tQBfZ8dtv5Nk0WvnwA2rgzSGBCGIs6CIfza6RcmG1qyPcFQVBM5Wa4TJHFk9JzhpTmYtAnqPcBimsbzYXIjUSp/HSzbmVlWHydcN+cLcLv0eiEX5QVQQXT1oTu0qd7hvE9ZdZIabbAPMvmIUaszByLQgiqNzlgbiPipdS+rcFScc3rlYWtUzov4EKMYQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=plvision.eu; dmarc=pass action=none header.from=plvision.eu;
+ dkim=pass header.d=plvision.eu; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plvision.eu;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=V00ZojqKGKV5lUPHyiivCPJtFg0c7Fpn2Oh53Dup+XI=;
+ b=Fy6DROpSQw/5hzm9uNger6UuP9dfTBPqeNefC/ky3ty9TVWhYISEYwBbMn28BQSvO80vi5egCHowc/oMVpGzwqLjWbm6Pe76f7Oj+4vj2qVwaAGhEEWvUcfOsHAn/YRdC+fBhJyCMltarQ3V3FXe9dQBbSfLArJKKWnA9a8CWcY=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=plvision.eu;
+Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM (2603:10a6:802:38::26)
+ by PR3P190MB0858.EURP190.PROD.OUTLOOK.COM (2603:10a6:102:80::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5857.23; Wed, 30 Nov
+ 2022 13:38:04 +0000
+Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
+ ([fe80::5912:e2b4:985e:265a]) by VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
+ ([fe80::5912:e2b4:985e:265a%3]) with mapi id 15.20.5857.023; Wed, 30 Nov 2022
+ 13:38:04 +0000
+From:   Vadym Kochan <vadym.kochan@plvision.eu>
+To:     Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Elad Nachman <enachman@marvell.com>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>,
+        Vadym Kochan <vadym.kochan@plvision.eu>
+Subject: [PATCH v2 0/3] mmc: xenon: Fix 2G DMA limitation on AC5 SoC
+Date:   Wed, 30 Nov 2022 15:37:44 +0200
+Message-Id: <20221130133747.3777340-1-vadym.kochan@plvision.eu>
+X-Mailer: git-send-email 2.25.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: FR2P281CA0105.DEUP281.PROD.OUTLOOK.COM
+ (2603:10a6:d10:9c::17) To VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
+ (2603:10a6:802:38::26)
 MIME-Version: 1.0
-References: <20221128133259.38305-1-adrian.hunter@intel.com>
- <20221128133259.38305-3-adrian.hunter@intel.com> <b040b2b2-10c2-5414-1c8f-fd02fc3b300e@gmail.com>
- <1acb9b87-088c-06f8-a2de-63b3054c55bc@intel.com>
-In-Reply-To: <1acb9b87-088c-06f8-a2de-63b3054c55bc@intel.com>
-From:   Robert Marko <robimarko@gmail.com>
-Date:   Wed, 30 Nov 2022 14:00:03 +0100
-Message-ID: <CAOX2RU54TPBowXdbJMc-x+eO8XhKjREn9R0zwv9thya3kyCP-g@mail.gmail.com>
-Subject: Re: [PATCH V2 2/4] mmc: sdhci: Avoid unnecessary re-configuration
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Sarthak Garg <quic_sartgarg@quicinc.com>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Al Cooper <alcooperx@gmail.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Andrew Jeffery <andrew@aj.id.au>,
-        Eugen Hristev <eugen.hristev@microchip.com>,
-        Vignesh Raghavendra <vigneshr@ti.com>,
-        Prabu Thangamuthu <prabu.t@synopsys.com>,
-        Manjunath M B <manjumb@synopsys.com>,
-        Ben Dooks <ben-linux@fluff.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Viresh Kumar <vireshk@kernel.org>,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Hu Ziji <huziji@marvell.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Brian Norris <briannorris@chromium.org>,
-        Wenchao Chen <wenchao.chen@unisoc.com>,
-        Chevron Li <chevron.li@bayhubtech.com>,
-        linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: VI1P190MB0317:EE_|PR3P190MB0858:EE_
+X-MS-Office365-Filtering-Correlation-Id: 953feae1-8304-4d2d-4ea5-08dad2d81b38
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: sDvIlLTRQmrVqZMp13yfCAqQHvc5kUe0vNiTCbeZGWiXnHu86pNeGmlgJN11G0Fqw5MC/pnL8tZ17ge0CX0dl4EulwUeHpTwLFOXoL+kcuoOFIzS0iGvqf/vDdL468it5kzQIWPCMM8xaz4eqMTUVFiuwvoxFVh3SHAr4vJANEkA7789OQG/eofXSFoX9cVI+2HxMGTgJ2aetkMff2bxU7ItQrcjhX6Tgp5StnD9LbxFAIOXVruFFvlePxwDpfx2OIL2qsfhSQNr7q8iVPKIU8GPdcZD76+1zLKLaaB+VIZimeU/f3OJqPYKZLlhUmdQEROQ0YV/+rAceM1VNWaojlOM/wPKhbmR879DqdkGOU8w8HsH5LNfhNGJyosVmLpgxXwC0DKaozBsDQWNMXU4yEnb18RgNEyB/Yif6M8ImPWh7YjQmtpX4wqSkSLIa9RdrWwj79N7ARj4ONr25tuAt4suCfbUBwshYLPVMZKSYLQmp+zLCMMfdftq8nNjhAIOAYfsgH6SOC8cykvcS6juqVWHRLCvdQ/bC35uooDAXyPzQYsQ9OWKWr8ODlDmUhjMWy00Oo1mhYq+A30/xK3fSaKCJFbwhnQ/IMfEbnJW3lh+BNOUcD3I+YLd3Z3VqcZR5WFF4XFrrav/IsvBzsXJUWfFwxivmwYRwzohgVjrOpPlbrJbfWC7v4YPsKqoH3FY
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1P190MB0317.EURP190.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(366004)(39830400003)(376002)(136003)(346002)(451199015)(8936002)(110136005)(5660300002)(54906003)(186003)(36756003)(41300700001)(66476007)(4326008)(66556008)(316002)(8676002)(38100700002)(83380400001)(107886003)(6486002)(2616005)(6512007)(26005)(86362001)(478600001)(7416002)(66946007)(52116002)(6666004)(1076003)(38350700002)(6506007)(2906002)(44832011)(4744005);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?XOuLbYl7whVGRIAVSP4m9IELH2dE8q8d0S8xiI3Jl9FGkXiZfWA3Izf7Yq0j?=
+ =?us-ascii?Q?qMKDSARkBi/a6ELWiHcBv2iOw7J1XlP+BJpwDyuqrnIPmUt5diUE1RT3nFtq?=
+ =?us-ascii?Q?Y92zEog40Xzh0ShFcwQxInksRUygZ/TR7MA7EqQ//XQ84N8TeOPfrZ1Okg8d?=
+ =?us-ascii?Q?lxzQtjhSMOs+5x76EuKuz9BbwCRe/Aal82gWIQmbubiiJp/eOc1lt4sBvCGw?=
+ =?us-ascii?Q?JSybguYvDVnI9A0xC+aSK9WWy3V7IJdMEmgHnc1AxjJS9Ud5z3LRwmUl+IOI?=
+ =?us-ascii?Q?560eBwK5ziapIjWPGmd5qfL7eDu/E0sVpSc5UTUsr8XUDqAernJER9zptw5X?=
+ =?us-ascii?Q?DPSqXina+KRHorVeA/Gl1PyMxMRue9cNlWRrwd6R7LzIIICPK2rGCh8yLWjd?=
+ =?us-ascii?Q?seVYr+8droev2bCfQrCRBSF2GxJbRGoJiJXuNqJqWAYtT43qoFcpfHInLIyx?=
+ =?us-ascii?Q?dHqdi6zjzFmPqfpTX+KZXfun+id9tKwU3B3tHTw4coZ//5BST5NFJ2qXddcL?=
+ =?us-ascii?Q?mnUyQaMzvwX9AcIAmnLH+LBJjovEZsv+sfCDlRGETD/K4oQbm1cvUyM/7u80?=
+ =?us-ascii?Q?Hz0GpLfKL057vXEQ4afgXPFimIP04+C5FP+IPNtaQa+QbtT342ZBwA+0ts3f?=
+ =?us-ascii?Q?lltbWHmnNCmOoPOVl/eFelhtVfBA94xU+dTA/q1JRBKtn1W/UxHhTRqk561K?=
+ =?us-ascii?Q?wf35cCjfBeJ0tSsjppdnb9Du5sdj7gzie0TzrF4woxMBVVnwNNJzfJ9fCLgE?=
+ =?us-ascii?Q?TqAOgkJUS7ZoJkvwqxTExoL+a9EXRk8Dw57cil/kk//H2Q88Q91SK0EpNVLY?=
+ =?us-ascii?Q?YIbIh0OqCmM5aV78meXWDANvAnDlBSI5YNNTHBXDKT7vDp6pRtJH5/C8hTZs?=
+ =?us-ascii?Q?5XDQwB/EiyteD5/vm28CQoTfWHWxfSiJdKDK2AQlRGhFYGWc1q4zBAJ7ky8d?=
+ =?us-ascii?Q?EGPfiuELbx2kOlxdhgG83+dmZ7o7VZMUb8vPbd1S63MZ/s/BPmIWzsgjapNd?=
+ =?us-ascii?Q?ICGm8WqI/YeA3JO2wv1B+035zE9+tGMx3ykjrc0ox0I2X6VbQHahBnR0a9j4?=
+ =?us-ascii?Q?jsdzZcMce4sthtm/GQA87nGn49KPXiWHrXgdsePdF+haoVjUHS0BU7eNLDJ0?=
+ =?us-ascii?Q?/z648NueOw3hm7apq6YYeA4EBRuRD5zsmjHQflr6bcOAfiE+jY10Pi1XS/2f?=
+ =?us-ascii?Q?DNaFYsYYwANFC8NvSgHygLTKfTmzCT6gtxGy3pQciaFnIzd/QZT0nRnYhR7o?=
+ =?us-ascii?Q?DKjjVLMrtplju2yaDOzG0tpSuHNoVjk0FPffKyh/18d27V+fJayVgt7JyHlA?=
+ =?us-ascii?Q?7WFClrNAuEotwESKqL4BRRanvX+rVOzD1YGGFzz6XZ5k2ZqSqMI98G3fOteA?=
+ =?us-ascii?Q?zYzQEpxe95irdCwDANu/FJca7MpJ6Kvk5Xk5vPYXOAO2DyUWh2FCJ/B4R1Mk?=
+ =?us-ascii?Q?fNZbfa5PQxBJQkdCfm9VNCvMpqc6oALpO/+YQPBdWZvkrwChBZ6qM54pOnHR?=
+ =?us-ascii?Q?FMU7TGQ6wSy4XDNiaHZp8LDimcKfdLwPYt+rPyB5wtB8ibUEq4GHx/SkKzc6?=
+ =?us-ascii?Q?hlC8Q1L/T6RIPqE2JZHvjQ8PbATXeOC04xgVGjxVfqRaungz1pnROA0CGHYJ?=
+ =?us-ascii?Q?FA=3D=3D?=
+X-OriginatorOrg: plvision.eu
+X-MS-Exchange-CrossTenant-Network-Message-Id: 953feae1-8304-4d2d-4ea5-08dad2d81b38
+X-MS-Exchange-CrossTenant-AuthSource: VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Nov 2022 13:38:03.9509
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 03707b74-30f3-46b6-a0e0-ff0a7438c9c4
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: a0yTl9mpZ/sXhMq5yzYjz1rG508Yo9gT2XMi10Jc75EIWX8rYYZv6d8BmpTFTUQGlvhz6hSB2pPmdAkmJ3mkIk8616XaLolW/V3y7dvUFdY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PR3P190MB0858
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 30 Nov 2022 at 13:46, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 30/11/22 13:54, Robert Marko wrote:
-> >
-> > On 28. 11. 2022. 14:32, Adrian Hunter wrote:
-> >> Avoid re-configuring UHS and preset settings when the settings have not
-> >> changed, irrespective of whether the clock is turning on.
-> >>
-> >> Tested-by: Haibo Chen <haibo.chen@nxp.com>
-> >> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
-> >
-> > Hi, this is breaking sdhci-msm on IPQ8074 in next-20221130 for me
-> > and reverting it makes the eMMC work again.
-> >
-> > I get a lot of:
-> >
-> > [    2.727287] mmc0: tuning execution failed: -5
-> > [    2.727323] mmc0: error -5 whilst initialising MMC card
-> > [    3.846540] mmc0: tuning execution failed: -5
-> > [    3.846564] mmc0: error -5 whilst initialising MMC card
-> > [    4.966517] mmc0: tuning execution failed: -5
-> > [    4.966539] mmc0: error -5 whilst initialising MMC card
-> > [    6.096486] mmc0: tuning execution failed: -5
-> > [    6.096508] mmc0: error -5 whilst initialising MMC card
-> > [    7.206431] mmc0: tuning execution failed: -5
-> > [    7.206454] mmc0: error -5 whilst initialising MMC card
->
-> Thanks for the report!  Are you able to debug this any more?
-> What transfer mode is it? e.g. HS400?  Can you enable debug
-> messages and get more information?
+There is a limitation on AC5 SoC that mmc controller
+can't have DMA access over 2G memory, so use SDMA with
+a bounce buffer. Swiotlb can't help because on arm64 arch
+it reserves memblock's at the end of the memory.
 
-With some guidance yes, it's in HS200 as there is an issue with HS400
-to HS200 switch on this SoC so I have HS400 disabled.
+Additionally set mask to 34 bit since on AC5 SoC RAM starts
+at 0x2_00000000.
 
-With CONFIG_MMC_DEBUG and loglevel=8 I dont have any new
-messages.
+Also add compatible string for AC5 SoC.
 
-Regards,
-Robert
->
+v2:
+   #1 Add compatible string for dt-bindings
+
+   #2 Use SDMA with a bounce buffer instead of PIO.
+
+Vadym Kochan (3):
+  dt-bindings: mmc: xenon: Add compatible string for AC5 SoC
+  mmc: sdhci: Export sdhci_set_dma_mask to be used by the drivers
+  mmc: xenon: Fix 2G limitation on AC5 SoC
+
+ .../bindings/mmc/marvell,xenon-sdhci.yaml     |  1 +
+ drivers/mmc/host/sdhci-xenon.c                | 38 +++++++++++++++++++
+ drivers/mmc/host/sdhci-xenon.h                |  3 +-
+ drivers/mmc/host/sdhci.c                      |  2 +-
+ drivers/mmc/host/sdhci.h                      |  2 +
+ 5 files changed, 44 insertions(+), 2 deletions(-)
+
+-- 
+2.25.1
+
