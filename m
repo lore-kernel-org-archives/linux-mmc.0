@@ -2,96 +2,101 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C825C47088
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Dec 2022 10:34:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFEFAC43217
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Dec 2022 10:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230157AbiLAKeI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Dec 2022 05:34:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39390 "EHLO
+        id S231153AbiLAKsw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Dec 2022 05:48:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52442 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229940AbiLAKdb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2022 05:33:31 -0500
-Received: from mail-pj1-x1032.google.com (mail-pj1-x1032.google.com [IPv6:2607:f8b0:4864:20::1032])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD4A8950DC
-        for <linux-mmc@vger.kernel.org>; Thu,  1 Dec 2022 02:33:29 -0800 (PST)
-Received: by mail-pj1-x1032.google.com with SMTP id k5so1443335pjo.5
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2022 02:33:29 -0800 (PST)
+        with ESMTP id S230523AbiLAKsS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2022 05:48:18 -0500
+Received: from mail-pg1-x532.google.com (mail-pg1-x532.google.com [IPv6:2607:f8b0:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2B7423AC09
+        for <linux-mmc@vger.kernel.org>; Thu,  1 Dec 2022 02:46:41 -0800 (PST)
+Received: by mail-pg1-x532.google.com with SMTP id 82so1365510pgc.0
+        for <linux-mmc@vger.kernel.org>; Thu, 01 Dec 2022 02:46:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ZG8ZHIMAeE8vl3jGpHlV1OHGCyPrpg+HO8fB2PbcU+E=;
-        b=miRj0TmGToBFvtxxpMbQ3rkI0Xu6hxlBAjgYjpbteqPrdOPIrQYRHtL8q8ZlSGeAHQ
-         n2JbJBjNMUtmxXldN/8D4fNNj0Sz/38Tk9rSYzKB7/C4F8kj18YNeFgFI1eHvfoTNuif
-         MQdkVDAW46XX/hjrJlI1yrj8Q+Z8BrlYmzjSy+IdGDyyLg0gl1xhf0pV4V8LTPAcoTsa
-         tZKk9hb1UaueRd7yaOttv6mVXwMoftNQLUvFWOemU1RmebgEBrw7CWyjoSilBDGNqmZo
-         +jnXudv+IyxHr9CR19hvq+9E/QvS+giFfJPVD9AtOyQ+ep+bz/RyKL1j3WIHmxOe1UgW
-         3hfQ==
+        bh=a6jwZZ22v6VgjNwNsN5/RPhF3k+QJnNn75TOznSm9Ko=;
+        b=MR/YWUlXQ+WQLNW+qzlvV8edNDljw+t18L+sJQFNsJVYJ+y72rK30YA2YfHCty205+
+         0HUJE7YNNdbF2btb1xv0zVIGoJ/8/dbklNKA1i2uLDGSCWQy6SMIr61wNhUDXvNvutVh
+         866pl8a+NqwP4kYk9CKDnGzqHcgK55c843vY6o0xw3S0TfbBwDCUEHVf2k/J7Shkxj3H
+         KoCOEyYHHVXeIQzdlsJIYMYlzz04FNXjyLI9wBsqGQnm8f63liRCPLXtK3BmBrLZ/dTy
+         pBcVpclhnB+/uTNOjn00ZChaQSmHia9WLXeqjrfb+6Whn/pMn5PnttC5+wWuw0H1cJRN
+         zeBw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=ZG8ZHIMAeE8vl3jGpHlV1OHGCyPrpg+HO8fB2PbcU+E=;
-        b=qy7XqEGLO8ZEyxj6iI+42XwPo2325MEYpiFLhT3LW+gGmyI3CnRh2hwsnCkuZIfqON
-         XHehNhSibuTdvWNAj92KyMej3y2c4oDqhWJ9apEDv+vPZzJrk8qeZ+H2n5bYWMwdk3AW
-         pPwX+ufsj7U80UoRjDQrHugR0dXtS2db7Na/Wv9TJCsx907EO6idy0NvnuFr5ytdw+C/
-         WUOz0W8okvJuexaY34rZbi/P9WgCL97KFPvS2pZfeTRNQLu0+G5ZkbXfrXy+NMSdPml6
-         ofXLRTj7rMgrZXNmXUlU0goz43Ab8lz6tILPzvjGxYM4YEsmUSaPu8h4Aynt3dQKp/a3
-         TguA==
-X-Gm-Message-State: ANoB5pl+M6JRCWBFVI9oQMT99nc8wxxza9pziN5FAyE9PtGJiWeHgSuE
-        zsqcSjxXbqAQzU4Om+WKh//04vne6O2Nh4umkSKrR6Z9LDl9ow==
-X-Google-Smtp-Source: AA0mqf642aoi1yRJJKtNl48AiCybnMQUQrPjPYU25zzkdJRF+D2m7Ssca0I4MtMi0OuCqqsQF2LL+Ig0/3BKfyIQlTw=
-X-Received: by 2002:a17:90a:ae0f:b0:20d:b124:33b1 with SMTP id
- t15-20020a17090aae0f00b0020db12433b1mr68326529pjq.202.1669890809387; Thu, 01
- Dec 2022 02:33:29 -0800 (PST)
+        bh=a6jwZZ22v6VgjNwNsN5/RPhF3k+QJnNn75TOznSm9Ko=;
+        b=nQTp9XkCl351Kxjpnm6LWk5gqabikBJL74yq8pBq4+RVP8YlF4/ehps7x67cFSpjVn
+         wjim7VWcjD+QE1dJ6WA3WxoXI3eilQmTL+qtXT91hp/In0qEkYXaJd7yNqKr1Y6d7ih/
+         j0fEPMaGIbKYe+1Ep3LffLfz4pur/i/bmUx21288PTLyKz4kz6S/OkbPxKIC4n3ptNny
+         KZgstviGti2ByswrKOQPxlmoLB3boNHOjtwlbgFkPyJB1vikGEPGlqqtSTcaOQjShE3m
+         vQrR1rKf8QQpFyS7F7KB4wm+KtfjaSxcnS/DdRquyVZCdJal7U/qzRI8eNm/vtAZdUim
+         hWeA==
+X-Gm-Message-State: ANoB5pnFHBMZ5O2RO32KRyDIb2F96Ybzj2xx4IkoWBX6x6KLM+cMFbPu
+        LTMApXvqBKRxxcRISvuEUuIvDpWb4C2KF0QhGvFMgQ==
+X-Google-Smtp-Source: AA0mqf4foylhYdJfuCXchn159KTlnNvnmUOJ40C/LHBs5OgMlVbSw9jlycgDuF6ZmyOTvgRjJDLoTkFvh4FJH1xfWUk=
+X-Received: by 2002:aa7:87da:0:b0:575:2f34:29d4 with SMTP id
+ i26-20020aa787da000000b005752f3429d4mr19425069pfo.40.1669891600690; Thu, 01
+ Dec 2022 02:46:40 -0800 (PST)
 MIME-Version: 1.0
-References: <20221201091150.3474-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20221201091150.3474-1-wenchao.chen@unisoc.com>
+References: <202212010926422966197@zte.com.cn>
+In-Reply-To: <202212010926422966197@zte.com.cn>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 1 Dec 2022 11:32:53 +0100
-Message-ID: <CAPDyKFoBf25CDAgg5R0MSp53iC277FzGO9DUDf3LPU+_wuxCsA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sprd: remove prefer asynchronous probe
-To:     Wenchao Chen <wenchao.chen@unisoc.com>
-Cc:     adrian.hunter@intel.com, orsonzhai@gmail.com,
-        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        gengcixi@gmail.com
+Date:   Thu, 1 Dec 2022 11:46:04 +0100
+Message-ID: <CAPDyKFp0joh5Hqj_iS5UPmXFUrs2Ws9an=-kfv5Yc+wvGq7L_A@mail.gmail.com>
+Subject: Re: [PATCH linux-next] mmc: sdhci: Remove unneeded semicolon
+To:     zhang.songyi@zte.com.cn
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 1 Dec 2022 at 10:12, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
+On Thu, 1 Dec 2022 at 02:26, <zhang.songyi@zte.com.cn> wrote:
 >
-> The prefer asynchronous probe affects the order of device probes.
-
-Is there a problem with this? If so, can you elaborate on what kind of problems?
-
+> From: zhang songyi <zhang.songyi@zte.com.cn>
 >
-> Fixes: d86472ae8b20 ("mmc: Set PROBE_PREFER_ASYNCHRONOUS for drivers that existed in v5.4")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+> The semicolon after the "}" is unneeded.
+>
+> Signed-off-by: zhang songyi <zhang.songyi@zte.com.cn>
+
+Please run checkpatch (./scripts/checkpatch.pl) to make sure there are
+no obvious formatting problems with your patch. This time it gives the
+below warning, please fix it and resubmit a new version.
+
+WARNING: please, no spaces at the start of a line
+#79: FILE: drivers/mmc/host/sdhci.c:2292:
++       }$
+
+total: 0 errors, 1 warnings, 8 lines checked
 
 Kind regards
 Uffe
 
 > ---
->  drivers/mmc/host/sdhci-sprd.c | 1 -
->  1 file changed, 1 deletion(-)
+>  drivers/mmc/host/sdhci.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index b92a408f138d..bf8df727e95e 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -801,7 +801,6 @@ static struct platform_driver sdhci_sprd_driver = {
->         .remove = sdhci_sprd_remove,
->         .driver = {
->                 .name = "sdhci_sprd_r11",
-> -               .probe_type = PROBE_PREFER_ASYNCHRONOUS,
->                 .of_match_table = sdhci_sprd_of_match,
->                 .pm = &sdhci_sprd_pm_ops,
->         },
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index 42aaeabcad22..8413180a1039 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -2289,7 +2289,7 @@ static bool sdhci_timing_has_preset(unsigned char timing)
+>         case MMC_TIMING_UHS_DDR50:
+>         case MMC_TIMING_MMC_DDR52:
+>                 return true;
+> -       };
+> +       }
+>         return false;
+>  }
+>
 > --
-> 2.17.1
->
+> 2.15.2
