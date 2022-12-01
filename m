@@ -2,83 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C14CC4321E
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Dec 2022 01:04:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A08EC4321E
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Dec 2022 01:26:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229476AbiLABEQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 30 Nov 2022 20:04:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49666 "EHLO
+        id S229724AbiLAB04 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 30 Nov 2022 20:26:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35918 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229746AbiLABEP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 20:04:15 -0500
-Received: from out30-7.freemail.mail.aliyun.com (out30-7.freemail.mail.aliyun.com [115.124.30.7])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECD7A8EE6B;
-        Wed, 30 Nov 2022 17:04:13 -0800 (PST)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R111e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018046051;MF=baolin.wang@linux.alibaba.com;NM=1;PH=DS;RN=10;SR=0;TI=SMTPD_---0VW50kJS_1669856649;
-Received: from 30.97.48.64(mailfrom:baolin.wang@linux.alibaba.com fp:SMTPD_---0VW50kJS_1669856649)
-          by smtp.aliyun-inc.com;
-          Thu, 01 Dec 2022 09:04:10 +0800
-Message-ID: <43ced087-850d-8449-dd78-6628c887f8e6@linux.alibaba.com>
-Date:   Thu, 1 Dec 2022 09:04:14 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH V2] mmc: sdhci-sprd: Fix no reset data and command after
- voltage switch
-To:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, orsonzhai@gmail.com, zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        gengcixi@gmail.com
-References: <20221130121328.25553-1-wenchao.chen@unisoc.com>
-From:   Baolin Wang <baolin.wang@linux.alibaba.com>
-In-Reply-To: <20221130121328.25553-1-wenchao.chen@unisoc.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S229461AbiLAB0z (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 30 Nov 2022 20:26:55 -0500
+Received: from mxhk.zte.com.cn (mxhk.zte.com.cn [63.216.63.40])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54BF48C6A5;
+        Wed, 30 Nov 2022 17:26:54 -0800 (PST)
+Received: from mse-fl2.zte.com.cn (unknown [10.5.228.133])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mxhk.zte.com.cn (FangMail) with ESMTPS id 4NMz222Fsgz8QrkZ;
+        Thu,  1 Dec 2022 09:26:50 +0800 (CST)
+Received: from xaxapp01.zte.com.cn ([10.88.40.50])
+        by mse-fl2.zte.com.cn with SMTP id 2B11QftC001011;
+        Thu, 1 Dec 2022 09:26:41 +0800 (+08)
+        (envelope-from zhang.songyi@zte.com.cn)
+Received: from mapi (xaxapp01[null])
+        by mapi (Zmail) with MAPI id mid31;
+        Thu, 1 Dec 2022 09:26:42 +0800 (CST)
+Date:   Thu, 1 Dec 2022 09:26:42 +0800 (CST)
+X-Zmail-TransId: 2af9638802d255a4c856
+X-Mailer: Zmail v1.0
+Message-ID: <202212010926422966197@zte.com.cn>
+Mime-Version: 1.0
+From:   <zhang.songyi@zte.com.cn>
+To:     <adrian.hunter@intel.com>
+Cc:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <zhang.songyi@zte.com.cn>
+Subject: =?UTF-8?B?W1BBVENIIGxpbnV4LW5leHRdIG1tYzogc2RoY2k6IFJlbW92ZSB1bm5lZWRlZCBzZW1pY29sb24=?=
+Content-Type: text/plain;
+        charset="UTF-8"
+X-MAIL: mse-fl2.zte.com.cn 2B11QftC001011
+X-Fangmail-Gw-Spam-Type: 0
+X-FangMail-Miltered: at cgslv5.04-192.168.250.137.novalocal with ID 638802DA.000 by FangMail milter!
+X-FangMail-Envelope: 1669858010/4NMz222Fsgz8QrkZ/638802DA.000/10.5.228.133/[10.5.228.133]/mse-fl2.zte.com.cn/<zhang.songyi@zte.com.cn>
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 638802DA.000/4NMz222Fsgz8QrkZ
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+From: zhang songyi <zhang.songyi@zte.com.cn>
 
+The semicolon after the "}" is unneeded.
 
-On 11/30/2022 8:13 PM, Wenchao Chen wrote:
-> After switching the voltage, no reset data and command will cause
-> CMD2 timeout.
-> 
-> Fixes: 29ca763fc26f ("mmc: sdhci-sprd: Add pin control support for voltage switch")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
+Signed-off-by: zhang songyi <zhang.songyi@zte.com.cn>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-LGTM. Thanks.
-Reviewed-by: Baolin Wang <baolin.wang@linux.alibaba.com>
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42aaeabcad22..8413180a1039 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2289,7 +2289,7 @@ static bool sdhci_timing_has_preset(unsigned char timing)
+        case MMC_TIMING_UHS_DDR50:
+        case MMC_TIMING_MMC_DDR52:
+                return true;
+-       };
++       }
+        return false;
+ }
 
-> ---
-> Changelog:
-> 
-> v1 -> v2:
-> There is no need to wait for the state of the pin to stabilize.
-> ---
->   drivers/mmc/host/sdhci-sprd.c | 4 +++-
->   1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index b92a408f138d..bec3f9e3cd3f 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -470,7 +470,7 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->   	}
->   
->   	if (IS_ERR(sprd_host->pinctrl))
-> -		return 0;
-> +		goto reset;
->   
->   	switch (ios->signal_voltage) {
->   	case MMC_SIGNAL_VOLTAGE_180:
-> @@ -498,6 +498,8 @@ static int sdhci_sprd_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
->   
->   	/* Wait for 300 ~ 500 us for pin state stable */
->   	usleep_range(300, 500);
-> +
-> +reset:
->   	sdhci_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
->   
->   	return 0;
+--
+2.15.2
