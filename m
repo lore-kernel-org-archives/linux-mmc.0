@@ -2,149 +2,73 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAA5CC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Dec 2022 23:49:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F88EC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  2 Dec 2022 02:33:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230232AbiLAXt7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Dec 2022 18:49:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55722 "EHLO
+        id S231382AbiLBCcj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Dec 2022 21:32:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49310 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229744AbiLAXt5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2022 18:49:57 -0500
-Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6FB1C510C;
-        Thu,  1 Dec 2022 15:49:56 -0800 (PST)
-Received: by mail-oi1-f179.google.com with SMTP id h132so3772850oif.2;
-        Thu, 01 Dec 2022 15:49:56 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=W+HjyG60puvlrURBNHopMfOrvdeMFci5vVt0oykR5tc=;
-        b=qylbzBA5hVi82YVQPOffKXd01o8ogJRY7s3g8iFccBFObfaKQHA5/8ZM70hDV4AmrI
-         COyqUWhz6pzprFxXzS9PAm+cqZWl7dJTRZPQiJmTpG5dK6WPP1VCldSF2eMjSh7X2T33
-         u6HCxrv5CCq5EYgufBopozZb1PLPXBtZPPgUkKtVrAGoeB+AJntOjYcu/m2uUAPXXAzT
-         f8MmT/dbgBSxGdn06sBJJlMnnpGOYsPiHPTS1gvQ46Kr8l5wlME9o9/5YgtVshEBHz51
-         gK1P7m0ZiI/8+88j3cHn/sVuxa42CHixkbIO+Lcz8NUX70N2RDtpJLJVumIW+P3W3Dsz
-         tjag==
-X-Gm-Message-State: ANoB5pll6dJg84CGNeAVYrmjpgutJU7OwECoMRBx2k/wYm0SuU8jfdH/
-        JW/xdZu1gSzg1WQzUpEoRQ==
-X-Google-Smtp-Source: AA0mqf5bJr0Z/sHBoXak624BdBzYGGLAuHfYECUlI0mZIj1EYsWA3ZeDo7bemwuHtU+yAdY/jKae8A==
-X-Received: by 2002:aca:44c4:0:b0:35a:6147:c6a5 with SMTP id r187-20020aca44c4000000b0035a6147c6a5mr24461259oia.149.1669938595865;
-        Thu, 01 Dec 2022 15:49:55 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g14-20020a544f8e000000b0035437f4deefsm2392807oiy.26.2022.12.01.15.49.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 01 Dec 2022 15:49:55 -0800 (PST)
-Received: (nullmailer pid 1708582 invoked by uid 1000);
-        Thu, 01 Dec 2022 23:49:54 -0000
-Date:   Thu, 1 Dec 2022 17:49:54 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Tomer Maimon <tmaimon77@gmail.com>
-Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
-        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
-        yuenn@google.com, benjaminfair@google.com, adrian.hunter@intel.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, andy.shevchenko@gmail.com,
-        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI
- controller
-Message-ID: <20221201234954.GA1704219-robh@kernel.org>
-References: <20221130150857.67113-1-tmaimon77@gmail.com>
- <20221130150857.67113-2-tmaimon77@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221130150857.67113-2-tmaimon77@gmail.com>
+        with ESMTP id S232080AbiLBCcF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Dec 2022 21:32:05 -0500
+Received: from mxhk.zte.com.cn (mxhk.zte.com.cn [63.216.63.35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50E01CCFEB;
+        Thu,  1 Dec 2022 18:32:03 -0800 (PST)
+Received: from mse-fl2.zte.com.cn (unknown [10.5.228.133])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mxhk.zte.com.cn (FangMail) with ESMTPS id 4NNcQn6VSzz4xVnd;
+        Fri,  2 Dec 2022 10:32:01 +0800 (CST)
+Received: from xaxapp01.zte.com.cn ([10.88.40.50])
+        by mse-fl2.zte.com.cn with SMTP id 2B22VuUN025368;
+        Fri, 2 Dec 2022 10:31:56 +0800 (+08)
+        (envelope-from zhang.songyi@zte.com.cn)
+Received: from mapi (xaxapp01[null])
+        by mapi (Zmail) with MAPI id mid31;
+        Fri, 2 Dec 2022 10:31:57 +0800 (CST)
+Date:   Fri, 2 Dec 2022 10:31:57 +0800 (CST)
+X-Zmail-TransId: 2af96389639d034d3baf
+X-Mailer: Zmail v1.0
+Message-ID: <202212021031575255977@zte.com.cn>
+Mime-Version: 1.0
+From:   <zhang.songyi@zte.com.cn>
+To:     <adrian.hunter@intel.com>
+Cc:     <ulf.hansson@linaro.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: =?UTF-8?B?W1BBVENIIGxpbnV4LW5leHQgdjJdIG1tYzogc2RoY2k6IFJlbW92ZSB1bm5lZWRlZCBzZW1pY29sb24=?=
+Content-Type: text/plain;
+        charset="UTF-8"
+X-MAIL: mse-fl2.zte.com.cn 2B22VuUN025368
+X-Fangmail-Gw-Spam-Type: 0
+X-FangMail-Miltered: at cgslv5.04-192.168.250.138.novalocal with ID 638963A1.000 by FangMail milter!
+X-FangMail-Envelope: 1669948321/4NNcQn6VSzz4xVnd/638963A1.000/10.5.228.133/[10.5.228.133]/mse-fl2.zte.com.cn/<zhang.songyi@zte.com.cn>
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 638963A1.000/4NNcQn6VSzz4xVnd
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Nov 30, 2022 at 05:08:56PM +0200, Tomer Maimon wrote:
-> Add binding for Nuvoton NPCM SDHCI controller.
-> 
-> Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
-> ---
->  .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 47 +++++++++++++++++++
->  1 file changed, 47 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> new file mode 100644
-> index 000000000000..38409272807a
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> @@ -0,0 +1,47 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/npcm,sdhci.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: NPCM SDHCI Controller
-> +
-> +maintainers:
-> +  - Tomer Maimon <tmaimon77@gmail.com>
-> +
-> +properties:
-> +  compatible:
-> +    enum:
-> +      - nuvoton,npcm750-sdhci
-> +      - nuvoton,npcm845-sdhci
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +patternProperties:
-> +  "^sdhci@[0-9a-f]+$":
-> +    type: object
+From: zhang songyi <zhang.songyi@zte.com.cn>
 
-sdhci is a child node of the nuvoton,npcm750-sdhci node?
+The semicolon after the "}" is unneeded.
 
-> +    $ref: mmc-controller.yaml
+Signed-off-by: zhang songyi <zhang.songyi@zte.com.cn>
+---
+ drivers/mmc/host/sdhci.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I think you want:
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index 42aaeabcad22..8413180a1039 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -2289,7 +2289,7 @@ static bool sdhci_timing_has_preset(unsigned char timing)
+ 	case MMC_TIMING_UHS_DDR50:
+ 	case MMC_TIMING_MMC_DDR52:
+ 		return true;
+-	};
++	}
+ 	return false;
+ }
 
-allOf:
-  - $ref: mmc-controller.yaml#
-
-And then you will have some errors in the example to fix.
-
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - interrupts
-> +  - clocks
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    sdhci0: sdhci@f0840000 {
-
-Drop unused labels.
-
-Node name should be 'mmc'
-
-> +      compatible = "nuvoton,npcm750-sdhci";
-
-Indent by 4 spaces.
-
-> +      reg = <0xf0840000 0x200>;
-> +      interrupts = <0 27 4>;
-> +      clocks = <&clk 4>;
-> +    };
-> -- 
-> 2.33.0
-> 
-> 
+-- 
+2.15.2
