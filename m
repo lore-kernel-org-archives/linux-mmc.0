@@ -2,104 +2,224 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C72EC4332F
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Dec 2022 09:47:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 835A4C4332F
+	for <linux-mmc@archiver.kernel.org>; Sun,  4 Dec 2022 11:21:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230150AbiLDJrv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Dec 2022 04:47:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32922 "EHLO
+        id S229805AbiLDLVb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 4 Dec 2022 06:21:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57740 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230090AbiLDJrj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2022 04:47:39 -0500
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F351387
-        for <linux-mmc@vger.kernel.org>; Sun,  4 Dec 2022 01:47:33 -0800 (PST)
-Received: by mail-lf1-x129.google.com with SMTP id 1so574826lfz.4
-        for <linux-mmc@vger.kernel.org>; Sun, 04 Dec 2022 01:47:33 -0800 (PST)
+        with ESMTP id S230083AbiLDLV3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2022 06:21:29 -0500
+Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC53C15709;
+        Sun,  4 Dec 2022 03:21:27 -0800 (PST)
+Received: by mail-lj1-x234.google.com with SMTP id l8so10407227ljh.13;
+        Sun, 04 Dec 2022 03:21:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=HV9iDq9ASawaJ80Vnkd4V2c06IYqg91+S5dBHxjopKQ=;
-        b=Ywq8JTIppvGS+u73xDuB2V1FMFl9uieH9iGsVs28JoExEMBFJRczI3+P86bLxbCzE8
-         1aEy646UPgd2Af8q09vFWDK+vbEWz478Sv6T21j93UhiqDsFsIc5o+3VkgP1SzSyoy++
-         3/SKzQl2i12sDhxT9eWoPrRbmhD11ABYZQA3dCwC9qkEETnI1VG739LObJQvmgNy+6oF
-         pCkeNNF71XO/BPFx3NapEsof0aCLPfeOx4PXiCSArGNwD99ODDQAt08kW2PinqtZ3Sit
-         npa0cK3x+3NSGnzrjgIa+NLTNf4/domrz0P4dODoSnRdmczWxgZQxC3eD5k7qwrL/lSf
-         Tv0g==
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=VzxN0a65z/xh5y8UY35P3CfCctAsgTN/CeWWUe2WBcw=;
+        b=bsm+SYLuNeRO6BAjvQlQ4TIaG6/6NdYqNvbB4RlSEyP0DFkYE2vlz8IlOuj+K/gvYW
+         8nG8WvZHhqw7z7ZotV5L/+dCsZs99lHTXgKo8kFCyK0zvFnt+ihW1AWCHtRYRXfPSjZM
+         s//Q+24IZCCfnrIfQei1k3zBSdKCUMgYMzoTpwYGx+YB2l+78dazsuZF7StEWi70mxFs
+         i8DAiUKjkU2qmgfZ5kMskeEiJPM11BGporGg0EhsDjSI7iKL7Pr87afP1n2kEhQIVVZY
+         VfDXstD+WIZ2umIqFYrml1u+Clb0dTwf1UaZql8EYZpPU6VUPOjmHLK2dIbYaug0tD5e
+         3VpQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=HV9iDq9ASawaJ80Vnkd4V2c06IYqg91+S5dBHxjopKQ=;
-        b=ceuqXX7LY+upGIx5qaeb10IJV5MuCk6k3zjRmj/6LuNs/zw5upe/7JkWF3qDu2gAjP
-         zwBNaQelG5piK9FGFf5AC6/A7uxCztnluc6u7MG5XeYOZJjfk89fRoAcCyTL61c/siKt
-         /XD+XNbus9I5s3QpQYFl82WCBVX0KnkPrmgv+mm9IWN9JKhRFl0djRI4np/vZ1KZMTPJ
-         FdULPQZuv2l/Gve4NWsTj7NUf9kgJDxdGD+N2EYs2qOjl/9aGZduEsWu8cQ3EFNYzzzw
-         3A1YY6w/hDkPlc/74efp1b8n++Ji+LGQ7rwgx2jUjwNvzUYG6/KgKDEzDonkD7VE1bhS
-         OOJQ==
-X-Gm-Message-State: ANoB5pl1tdMvBnjCHdt1T42mTYmUUoTGQAf9eQMgtJ5kYGqtz7htc4wN
-        wYzWtu6CV6f/HMpN28KBD7X8RQ==
-X-Google-Smtp-Source: AA0mqf4NXpqkpNJWIOCVpnhjza3+x2Mh1nBOpGFv66z4tTQHVxxOKG6fb3yuxq20BEQywA/02mkD8g==
-X-Received: by 2002:a05:6512:3153:b0:4a2:da6:d969 with SMTP id s19-20020a056512315300b004a20da6d969mr23719756lfi.671.1670147251886;
-        Sun, 04 Dec 2022 01:47:31 -0800 (PST)
-Received: from krzk-bin.NAT.warszawa.vectranet.pl (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id e18-20020a056512091200b00498f00420e9sm1706703lft.194.2022.12.04.01.47.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Dec 2022 01:47:31 -0800 (PST)
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>, abel.vesa@linaro.org,
-        Johan Hovold <johan+linaro@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH 5/5] dt-bindings: mmc: sdhci-msm: allow dma-coherent
-Date:   Sun,  4 Dec 2022 10:47:17 +0100
-Message-Id: <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org>
-References: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org>
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VzxN0a65z/xh5y8UY35P3CfCctAsgTN/CeWWUe2WBcw=;
+        b=jgrEMlIUidVLL3cXmZpJEM6pyId+cuNHXVp5gV9Vd26IhL8h8T0qT73juxW8AiCQdK
+         fK32ANxI4IhZpl5EHSqHbMZ8xmjej5xZgO5UTswc2+RwuVEmiXjnyViQdrlXF252GAr/
+         lMWQUuuUunjtEMcFQr4MNjhNUbitJ5HfPJF3BpojDTFCAHku293DFgm1D/XNXKSmOA1U
+         OHTuwN+eGvfn3anNXlEfsFELCEmcso6B10WiSOqdkZEno4oSa1BOwDWfN11eUHulvFKB
+         syJbKkHyWmNERs6cSqFr9cMiIpuRMRFvT27wyrAbtiZTC9h5eR0hqkHTI5SaIiMAiQH5
+         OkhQ==
+X-Gm-Message-State: ANoB5plqlCgqTYHfMT4jPWqXfhpdKLHSLo2B6AQLATT9UguZRsfffsZ4
+        pm+nf/g04p4ARysmD9ltSrnKAX08/vEY9HNp410=
+X-Google-Smtp-Source: AA0mqf6jF2SAt0IChwJcmP7BdZ2L/cinR4COc/NkJx0tLOuvLCXAKC31M+i+Q8bXLIABUTeys7fcBpVwhgKvfNAZw5w=
+X-Received: by 2002:a05:651c:b10:b0:26f:c081:9aee with SMTP id
+ b16-20020a05651c0b1000b0026fc0819aeemr18412001ljr.219.1670152885927; Sun, 04
+ Dec 2022 03:21:25 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20221130150857.67113-1-tmaimon77@gmail.com> <20221130150857.67113-3-tmaimon77@gmail.com>
+ <0b5df859-a662-a677-aaa0-cbf68c029ab9@intel.com>
+In-Reply-To: <0b5df859-a662-a677-aaa0-cbf68c029ab9@intel.com>
+From:   Tomer Maimon <tmaimon77@gmail.com>
+Date:   Sun, 4 Dec 2022 13:21:14 +0200
+Message-ID: <CAP6Zq1iokM2chLjGiRmFxe3w2vUUKQ0acd6V9z=7AmDZMSViQw@mail.gmail.com>
+Subject: Re: [PATCH v1 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
+        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
+        yuenn@google.com, benjaminfair@google.com,
+        skhan@linuxfoundation.org, davidgow@google.com,
+        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
+        arnd@arndb.de, krakoczy@antmicro.com, andy.shevchenko@gmail.com,
+        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SM8350, SM8450 and SM8550 SDHCI controllers for SD card are marked with
-dma-coherent, so allow it.
+Hi Adrian,
 
-Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Thanks for your comments.
 
----
+Your comments will be addressed next version.
 
-dma-coherent was first added to SM8450... then to SM8350 (not merged
-yet) and now it appeared in SM8550 patches, but I actually do not know
-if this is copy-paste or real need.
----
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
- 1 file changed, 2 insertions(+)
+On Thu, 1 Dec 2022 at 18:28, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 30/11/22 17:08, Tomer Maimon wrote:
+> > Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
+> >
+> > Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
+> > ---
+> >  drivers/mmc/host/Kconfig      |  8 ++++
+> >  drivers/mmc/host/Makefile     |  1 +
+> >  drivers/mmc/host/sdhci-npcm.c | 81 +++++++++++++++++++++++++++++++++++
+> >  3 files changed, 90 insertions(+)
+> >  create mode 100644 drivers/mmc/host/sdhci-npcm.c
+> >
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index fb1062a6394c..4b2d9ce4308c 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -709,6 +709,14 @@ config MMC_TMIO
+> >         This provides support for the SD/MMC cell found in TC6393XB,
+> >         T7L66XB and also HTC ASIC3
+> >
+> > +config MMC_SDHCI_NPCM
+> > +     tristate "Secure Digital Host Controller Interface support for NPCM"
+> > +     depends on ARCH_NPCM || COMPILE_TEST
+> > +     depends on MMC_SDHCI_PLTFM
+> > +     help
+> > +       This provides support for the SD/eMMC controller found in
+> > +       NPCM BMC family SoCs.
+> > +
+> >  config MMC_SDHI
+> >       tristate "Renesas SDHI SD/SDIO controller support"
+> >       depends on SUPERH || ARCH_RENESAS || COMPILE_TEST
+> > diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
+> > index 4e4ceb32c4b4..801086613d7f 100644
+> > --- a/drivers/mmc/host/Makefile
+> > +++ b/drivers/mmc/host/Makefile
+> > @@ -37,6 +37,7 @@ obj-$(CONFIG_MMC_SPI)               += of_mmc_spi.o
+> >  obj-$(CONFIG_MMC_S3C)        += s3cmci.o
+> >  obj-$(CONFIG_MMC_SDRICOH_CS) += sdricoh_cs.o
+> >  obj-$(CONFIG_MMC_TMIO)               += tmio_mmc.o
+> > +obj-$(CONFIG_MMC_SDHCI_NPCM) += sdhci-npcm.o
+> >  obj-$(CONFIG_MMC_TMIO_CORE)  += tmio_mmc_core.o
+> >  obj-$(CONFIG_MMC_SDHI)               += renesas_sdhi_core.o
+> >  obj-$(CONFIG_MMC_SDHI_SYS_DMAC)              += renesas_sdhi_sys_dmac.o
+> > diff --git a/drivers/mmc/host/sdhci-npcm.c b/drivers/mmc/host/sdhci-npcm.c
+> > new file mode 100644
+> > index 000000000000..298c5f3e7c2b
+> > --- /dev/null
+> > +++ b/drivers/mmc/host/sdhci-npcm.c
+> > @@ -0,0 +1,81 @@
+> > +// SPDX-License-Identifier: GPL-2.0+
+> > +/*
+> > + * NPCM SDHC MMC host controller driver.
+> > + *
+> > + */
+> > +
+> > +#include <linux/clk.h>
+> > +#include <linux/err.h>
+> > +#include <linux/io.h>
+> > +#include <linux/mmc/host.h>
+> > +#include <linux/mmc/mmc.h>
+> > +#include <linux/module.h>
+> > +#include <linux/of.h>
+> > +
+> > +#include "sdhci-pltfm.h"
+> > +
+> > +static const struct sdhci_pltfm_data npcm_sdhci_pdata = {
+> > +     .quirks  = SDHCI_QUIRK_DELAY_AFTER_POWER,
+> > +     .quirks2 = SDHCI_QUIRK2_STOP_WITH_TC |
+> > +                SDHCI_QUIRK2_NO_1_8_V,
+> > +};
+> > +
+> > +static int npcm_sdhci_probe(struct platform_device *pdev)
+> > +{
+> > +     struct sdhci_pltfm_host *pltfm_host;
+> > +     struct sdhci_host *host;
+> > +     u32 caps;
+> > +     int ret;
+> > +
+> > +     host = sdhci_pltfm_init(pdev, &npcm_sdhci_pdata, 0);
+> > +     if (IS_ERR(host))
+> > +             return PTR_ERR(host);
+> > +
+> > +     pltfm_host = sdhci_priv(host);
+> > +     pltfm_host->clk = devm_clk_get(&pdev->dev, NULL);
+>
+> For an optional clock, something like:
+>
+>         pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
+>         if (IS_ERR(pltfm_host->clk))
+>                 return PTR_ERR(pltfm_host->clk);
+>
+> will handle -EPROBE_DEFER
+>
+> > +
+> > +     if (!IS_ERR(pltfm_host->clk))
+> > +             clk_prepare_enable(pltfm_host->clk);
+> > +
+> > +     caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> > +     if (caps & SDHCI_CAN_DO_8BIT)
+> > +             host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> > +
+> > +     ret = mmc_of_parse(host->mmc);
+> > +     if (ret)
+> > +             goto err_sdhci_add;
+> > +
+> > +     ret = sdhci_add_host(host);
+> > +     if (ret)
+> > +             goto err_sdhci_add;
+> > +
+> > +     return 0;
+> > +
+> > +err_sdhci_add:
+> > +     clk_disable_unprepare(pltfm_host->clk);
+> > +     sdhci_pltfm_free(pdev);
+> > +     return ret;
+> > +}
+> > +
+> > +static const struct of_device_id npcm_sdhci_of_match[] = {
+> > +     { .compatible = "nuvoton,npcm750-sdhci" },
+> > +     { .compatible = "nuvoton,npcm845-sdhci" },
+> > +     { }
+> > +};
+> > +MODULE_DEVICE_TABLE(of, npcm_sdhci_of_match);
+> > +
+> > +static struct platform_driver npcm_sdhci_driver = {
+> > +     .driver = {
+> > +             .name   = "npcm-sdhci",
+> > +             .of_match_table = npcm_sdhci_of_match,
+> > +             .pm     = &sdhci_pltfm_pmops,
+> > +     },
+> > +     .probe          = npcm_sdhci_probe,
+> > +     .remove         = sdhci_pltfm_unregister,
+> > +};
+> > +
+> > +module_platform_driver(npcm_sdhci_driver);
+> > +
+> > +MODULE_DESCRIPTION("NPCM Secure Digital Host Controller Interface driver");
+> > +MODULE_AUTHOR("Tomer Maimon <tomer.maimon@nuvoton.com>");
+> > +MODULE_LICENSE("GPL v2");
+>
+> WARNING: Prefer "GPL" over "GPL v2" - see commit bf7fbeeae6db ("module: Cure the MODULE_LICENSE "GPL" vs. "GPL v2" bogosity")
+> #133: FILE: drivers/mmc/host/sdhci-npcm.c:81:
+> +MODULE_LICENSE("GPL v2");
+>
+>
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index 39e303468bc4..6b89238f0565 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -83,6 +83,8 @@ properties:
-       - const: cal
-       - const: sleep
- 
-+  dma-coherent: true
-+
-   interrupts:
-     maxItems: 2
- 
--- 
-2.34.1
+Best regards,
 
+Tomer
