@@ -2,165 +2,86 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71377C4332F
-	for <linux-mmc@archiver.kernel.org>; Sun,  4 Dec 2022 11:28:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41C9AC47089
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 08:17:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229959AbiLDL23 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 4 Dec 2022 06:28:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34832 "EHLO
+        id S231991AbiLEIRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 03:17:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229680AbiLDL22 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 4 Dec 2022 06:28:28 -0500
-Received: from mail-lj1-x234.google.com (mail-lj1-x234.google.com [IPv6:2a00:1450:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 098AF164A9;
-        Sun,  4 Dec 2022 03:28:27 -0800 (PST)
-Received: by mail-lj1-x234.google.com with SMTP id x6so10433370lji.10;
-        Sun, 04 Dec 2022 03:28:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=dlASmsVVlIAawOyrYJeITNTPMdDfsPV+VZ2ZrkYJC7Y=;
-        b=moPrFkOZYf5LNJBN0/oMqqx4uPpfxMyZw/cl1PiKjfMGljcjqM1c4A0Q10ksxLtO0j
-         D8IiGe792U06UA85nItW/E7ItcjQ1/1eBLEvmvEGF7cWElkJZ2tTr8c5eCkm42h79CwJ
-         +QaTDchUKzBWtGjmCoYTKgQZnbKe41TKBZ1vzL7Y+hBUuZK7lOHI9osS+l8XLwF6lSoF
-         vaOg91FjxV0C4iBDbLZpZpQZJFJuKWhIzfNkFtgs4h9H+rKzTgXfOZY5vjjLsZKsZF30
-         cGv5PoRvkSfSpcX0l537JA9r5GekerLZPO11IpErdr6I9lJBlrBi3PewbBEHSfHFyaE2
-         q+RA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=dlASmsVVlIAawOyrYJeITNTPMdDfsPV+VZ2ZrkYJC7Y=;
-        b=Aa05Trbar7y+/dezAm56i52Si1sYLkpjhq4ToWuG6S4SQBOzXbWVHHZO/k2eSQo3UE
-         ud9tY81JWdibIEq6m1FXLEzlYscrTqx2wSYaNCwRFt9UHU1fZa8/1YkA4gNuzwykqbsW
-         0bF2q5GivTYRkPK1R9uvaM5CVSlzTminDgWT+AmquMv+IOLvZzRzzW5Eiq5APf1I1ONq
-         h7BCb6OWf9rAd65yl9rxh1Kbn1nuCGtGrMqkpoSX5hki2jlQMlG3/P3rToxcdqqNrQAr
-         p8zNG+l8l6hyDWStjqNZsrYut6zYF6CjfcusLkUEVAqjwxV9VffU0/kOZUdAQW5cbzeK
-         qKbg==
-X-Gm-Message-State: ANoB5pnIpJu7GgkPPvLs6a2xHygX/rFOEYgyQGWTtOdFs2kZAivQZAPo
-        Pym4i2Z8O00sHQ/fc71hkA83xADqxSMIZszEepM=
-X-Google-Smtp-Source: AA0mqf67qlul+nzl9WXyoO+z3yIXlr8GwaC1mMyospYAePxhQLm8xslW6KkAghrvhrumIJLs/opwZfWejis3GQtmL9o=
-X-Received: by 2002:a2e:a37c:0:b0:26e:93:980d with SMTP id i28-20020a2ea37c000000b0026e0093980dmr26277436ljn.488.1670153305285;
- Sun, 04 Dec 2022 03:28:25 -0800 (PST)
+        with ESMTP id S231956AbiLEIQ6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 03:16:58 -0500
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15B0CBF52;
+        Mon,  5 Dec 2022 00:16:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1670228218; x=1701764218;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=sH9q+xEpJF7iv5b2TXJrMpoGv7B/IMq9/DUHAv34X4M=;
+  b=eEfgmx5Ii9D6MlfCh7uNd4idQRO+uzKHwvidEf8whuR4Qzui06lUl5bC
+   43xEAzAuJoJD+aPP13Vv/zKPwr6tKE2pgdaxEEQVAKa49w4OOHKv/4Y1N
+   CIBoSmj61I3g5qM4jyG5kIXD/byGgGeXG46KLd7M7JR9UN5xxkTlryqky
+   UrrjsbtxnpYUWf/7gtEHL+ZgMcUziAWlgTYGCmUKXbb8Z9th1D9L+KveQ
+   BnckSuqn4oSldRdZR/CQZQ5zc+DWlTnV78vLl3YUb+olj98IgJtOWpBls
+   k3/Q5V1mzQzJbpm/WXrIiYFF9u3d1IzGl5xqcYwQRF52h/IGSmwIm8Yeg
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="343283513"
+X-IronPort-AV: E=Sophos;i="5.96,218,1665471600"; 
+   d="scan'208";a="343283513"
+Received: from fmsmga003.fm.intel.com ([10.253.24.29])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 00:16:54 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="734507723"
+X-IronPort-AV: E=Sophos;i="5.96,218,1665471600"; 
+   d="scan'208";a="734507723"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.55.104])
+  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 00:16:52 -0800
+Message-ID: <973a9f5c-6798-3f92-cdeb-ce4571273cf1@intel.com>
+Date:   Mon, 5 Dec 2022 10:16:44 +0200
 MIME-Version: 1.0
-References: <20221130150857.67113-1-tmaimon77@gmail.com> <20221130150857.67113-2-tmaimon77@gmail.com>
- <20221201234954.GA1704219-robh@kernel.org>
-In-Reply-To: <20221201234954.GA1704219-robh@kernel.org>
-From:   Tomer Maimon <tmaimon77@gmail.com>
-Date:   Sun, 4 Dec 2022 13:28:14 +0200
-Message-ID: <CAP6Zq1iou=ViB_N+wE_3O6HO7FNEArhebpcbXuBsz4oRxdqXVQ@mail.gmail.com>
-Subject: Re: [PATCH v1 1/2] dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
-To:     Rob Herring <robh@kernel.org>
-Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
-        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
-        yuenn@google.com, benjaminfair@google.com, adrian.hunter@intel.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, andy.shevchenko@gmail.com,
-        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.1
+Subject: Re: [PATCH] MAINTAINERS: Update maintainer for SDHCI Broadcom BRCMSTB
+ driver
+Content-Language: en-US
+To:     Kamal Dasu <kdasu.kdev@gmail.com>, ulf.hansson@linaro.org,
+        linux-kernel@vger.kernel.org, alcooperx@gmail.com,
+        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
+Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com
+References: <20221202212119.43214-1-kdasu.kdev@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221202212119.43214-1-kdasu.kdev@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
+On 2/12/22 23:21, Kamal Dasu wrote:
+> Taking over as upstream maintainer for Broadcom SDHCI
+> driver from Al Cooper.
+> 
+> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
 
-Thanks for your comments.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Your comments will be addressed next version.
+> ---
+>  MAINTAINERS | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 1daadaa4d48b..90beddcf84b0 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18497,6 +18497,7 @@ K:	\bsecure_computing
+>  K:	\bTIF_SECCOMP\b
+>  
+>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
+> +M:	Kamal Dasu <kdasu.kdev@gmail.com>
+>  M:	Al Cooper <alcooperx@gmail.com>
+>  R:	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>
+>  L:	linux-mmc@vger.kernel.org
 
-On Fri, 2 Dec 2022 at 01:49, Rob Herring <robh@kernel.org> wrote:
->
-> On Wed, Nov 30, 2022 at 05:08:56PM +0200, Tomer Maimon wrote:
-> > Add binding for Nuvoton NPCM SDHCI controller.
-> >
-> > Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
-> > ---
-> >  .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 47 +++++++++++++++++++
-> >  1 file changed, 47 insertions(+)
-> >  create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> >
-> > diff --git a/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> > new file mode 100644
-> > index 000000000000..38409272807a
-> > --- /dev/null
-> > +++ b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
-> > @@ -0,0 +1,47 @@
-> > +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> > +%YAML 1.2
-> > +---
-> > +$id: http://devicetree.org/schemas/mmc/npcm,sdhci.yaml#
-> > +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> > +
-> > +title: NPCM SDHCI Controller
-> > +
-> > +maintainers:
-> > +  - Tomer Maimon <tmaimon77@gmail.com>
-> > +
-> > +properties:
-> > +  compatible:
-> > +    enum:
-> > +      - nuvoton,npcm750-sdhci
-> > +      - nuvoton,npcm845-sdhci
-> > +
-> > +  reg:
-> > +    maxItems: 1
-> > +
-> > +  interrupts:
-> > +    maxItems: 1
-> > +
-> > +  clocks:
-> > +    maxItems: 1
-> > +
-> > +patternProperties:
-> > +  "^sdhci@[0-9a-f]+$":
-> > +    type: object
->
-> sdhci is a child node of the nuvoton,npcm750-sdhci node?
-No, will be removed
->
-> > +    $ref: mmc-controller.yaml
->
-> I think you want:
->
-> allOf:
->   - $ref: mmc-controller.yaml#
->
-> And then you will have some errors in the example to fix.
->
-> > +
-> > +required:
-> > +  - compatible
-> > +  - reg
-> > +  - interrupts
-> > +  - clocks
-> > +
-> > +unevaluatedProperties: false
-> > +
-> > +examples:
-> > +  - |
-> > +    sdhci0: sdhci@f0840000 {
->
-> Drop unused labels.
->
-> Node name should be 'mmc'
->
-> > +      compatible = "nuvoton,npcm750-sdhci";
->
-> Indent by 4 spaces.
->
-> > +      reg = <0xf0840000 0x200>;
-> > +      interrupts = <0 27 4>;
-> > +      clocks = <&clk 4>;
-> > +    };
-> > --
-> > 2.33.0
-> >
-> >
-
-Best regards,
-
-Tomer
