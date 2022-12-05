@@ -2,94 +2,164 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47FFFC4708C
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 13:28:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D26BC47089
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 13:42:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232283AbiLEN2p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 08:28:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52738 "EHLO
+        id S231790AbiLENmH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 08:42:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34992 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232276AbiLEN2m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 08:28:42 -0500
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E4C6D2C7
-        for <linux-mmc@vger.kernel.org>; Mon,  5 Dec 2022 05:28:41 -0800 (PST)
-Received: by mail-lf1-x12a.google.com with SMTP id d6so18521500lfs.10
-        for <linux-mmc@vger.kernel.org>; Mon, 05 Dec 2022 05:28:41 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=PwSI9VpSC/SnPqRCsbFXKJqXLt4ZCxc6QuP46DNYcMY=;
-        b=WVnAq+lZ2HiSrilXWp2Ul3M6gr5yHOz1Yq8pokBcsMHzLha9GSfvDl78s3x9BXjGYd
-         DiPU8Z/mZrbGo/txLqzd8Yo5AgXsi81ZBFVsfGrvTdS61NfzgfHcNekhTv6cQzXiAf50
-         JO6bE1EbcOPjOBXD/EbOW/KGRmtqJ5Dbaw7uLrIfCttC339iHa64yCzp4xAA7U1UYmSU
-         T0+oJbEA33Hy64hHoUrEVGWD7gTjJVeDYzaX1xwuHQVodJRgslnUJh5uaLa2iSli3mYP
-         IQwXnaIP8VPynZqTAhTvOy961TRRWE9WzObJ6ykn4c75RJqJKuBoUxrHXNc7LfESqEQ0
-         tTqg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PwSI9VpSC/SnPqRCsbFXKJqXLt4ZCxc6QuP46DNYcMY=;
-        b=i8n2YQdKskJkxBWriD8CdzDDh+QldYwkQouL+8DQs+5Yh57or7FrK8qtYty74MiJkk
-         26V9CCpDotJXoygk9NAkJjuApVpwgcr+4RwyNX8N7FFyrkpiSPSV/fJllJ44xxZl40K+
-         k1a3kssPXco/9mtGp7gSzTKsYKT5xInQYhnuH2467puazjyqwnHUIEKSivLkGfz5cXpJ
-         V4wsfm4Z1K61wHT/jZNo6Vf1KZSbMKg/SPu8ihP5R+yKDvf14DS1wWa16FM8pATEf/7c
-         jz9X+AaXRhJhei0pV390hiXtyndsylYBvh0Fs6lo5FndsfmqckK+0uVPNWO1lWM2REW1
-         bj4w==
-X-Gm-Message-State: ANoB5pkl6O2J6pfVkYyoHqC0LPyyAmWV8WMdk+05f8RQLNILq1lMI47G
-        MIcGuFU0oeNKys8XMUVTeCp9hg==
-X-Google-Smtp-Source: AA0mqf47eVeP3XuAAV0TjUHuoggvWzWVGid4sHibX3LLyBqIrfuIWHZOpQLOPwzwcboLQEHLMq0lKw==
-X-Received: by 2002:a05:6512:3187:b0:4b3:ec7a:6752 with SMTP id i7-20020a056512318700b004b3ec7a6752mr26025043lfe.79.1670246919654;
-        Mon, 05 Dec 2022 05:28:39 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id k14-20020ac257ce000000b004b5284a92f9sm2129447lfo.208.2022.12.05.05.28.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 05 Dec 2022 05:28:39 -0800 (PST)
-Message-ID: <f2d7a6f0-2816-2bf3-efbb-015b43bbb686@linaro.org>
-Date:   Mon, 5 Dec 2022 14:28:38 +0100
+        with ESMTP id S232143AbiLENlu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 08:41:50 -0500
+Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E63A1CFF2;
+        Mon,  5 Dec 2022 05:41:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1670247709; x=1701783709;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=3GEBq+TnHHBMj8dKCAPrgcd5mxHNa6hFVgpFoTSTC/c=;
+  b=SpPVP0hdQppycTBJfqc525okQOHISoGrU10DQt4MPeGe/+zoIy96WjZe
+   xPWzywOdATF5flG4RQgso6tLMUNlfu82sr0fIm/lJCIVCgR0IEQ27hYNn
+   qLTsU/lzg2KK0KHd0eFHe1moYIAypi3CNFYJ930LsN73P5OU9MoY1ywSg
+   H1Ka1HeVNs1ExhFwrTd9aCa13WKW/nIQlMwnjFPY1vDiyP4p9DhrgMevW
+   2E5HplGa1ZTCDPfvi4t629DKNvDxiWZA9rxbl/pkfR5rwSTajfY9Vy/rn
+   m/L2CMNGaUm6Eo2lD9+QxbzE1Ic6kVgIf/p2Aa3qL1kpmSTwm/fCzT2tP
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="299776121"
+X-IronPort-AV: E=Sophos;i="5.96,219,1665471600"; 
+   d="scan'208";a="299776121"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 05:41:48 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="714401437"
+X-IronPort-AV: E=Sophos;i="5.96,219,1665471600"; 
+   d="scan'208";a="714401437"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.55.104])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 05:41:43 -0800
+Message-ID: <c200557f-c30a-62f9-287a-af804e818cf1@intel.com>
+Date:   Mon, 5 Dec 2022 15:41:39 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.1
-Subject: Re: [PATCH v3 1/3] dt-bindings: mmc: xenon: Add compatible string for
- AC5 SoC
+ Firefox/102.0 Thunderbird/102.5.1
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
 Content-Language: en-US
-To:     Vadym Kochan <vadym.kochan@plvision.eu>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
+        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
+        yuenn@google.com, benjaminfair@google.com,
+        skhan@linuxfoundation.org, davidgow@google.com,
+        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
+        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Elad Nachman <enachman@marvell.com>,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>
-References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
- <20221205105931.410686-2-vadym.kochan@plvision.eu>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221205105931.410686-2-vadym.kochan@plvision.eu>
+        linux-kernel@vger.kernel.org, Tomer Maimon <tmaimon77@gmail.com>
+References: <20221205085351.27566-1-tmaimon77@gmail.com>
+ <20221205085351.27566-3-tmaimon77@gmail.com>
+ <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
+ <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
+ <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 05/12/2022 11:59, Vadym Kochan wrote:
-> AC5 SoC has Xenon SDHCI IP, but with a limitation of maximum
-> 2G DMA address range.
+On 5/12/22 15:25, Andy Shevchenko wrote:
+> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
+>> On Mon, 5 Dec 2022 at 12:54, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+>>> On Mon, Dec 5, 2022 at 10:54 AM Tomer Maimon <tmaimon77@gmail.com> wrote:
 > 
-> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
-> ---
-> v3:
->    #1 Put compatible string in alphabetical order in the yaml file
+> ...
 > 
+>>>> +#include <linux/clk.h>
+>>>> +#include <linux/err.h>
+>>>> +#include <linux/io.h>
+>>>> +#include <linux/mmc/host.h>
+>>>> +#include <linux/mmc/mmc.h>
+>>>> +#include <linux/module.h>
+>>>
+>>> I guess platform_device.h is missing here.
+>> Build and work without platform_device.h, do I need it for module use?
+> 
+> The rule of thumb is to include headers we are the direct user of. I
+> believe you have a data type and API that are defined in that header.
+> 
+> ...
+> 
+>>>> +static int npcm_sdhci_probe(struct platform_device *pdev)
+>>>> +{
+>>>> +       struct sdhci_pltfm_host *pltfm_host;
+>>>> +       struct sdhci_host *host;
+>>>> +       u32 caps;
+>>>> +       int ret;
+>>>> +
+>>>> +       host = sdhci_pltfm_init(pdev, &npcm_sdhci_pdata, 0);
+>>>> +       if (IS_ERR(host))
+>>>> +               return PTR_ERR(host);
+>>>> +
+>>>> +       pltfm_host = sdhci_priv(host);
+>>>
+>>>> +       pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
+>>>
+>>> You can't mix devm with non-devm in this way.
+>> Can you explain what you mean You can't mix devm with non-devm in this
+>> way, where is the mix?
+>> In version 1 used devm_clk_get, is it problematic?
+> 
+> devm_ is problematic in your case.
+> TL;DR: you need to use clk_get_optional() and clk_put().
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+devm_ calls exactly those, so what is the issue?
 
-
-Best regards,
-Krzysztof
+> 
+> Your ->remove() callback doesn't free resources in the reversed order
+> which may or, by luck, may not be the case of all possible crashes,
+> UAFs, races, etc during removal stage. All the same for error path in
+> ->probe().
+> 
+>>>> +       if (IS_ERR(pltfm_host->clk))
+>>>> +               return PTR_ERR(pltfm_host->clk);
+>>>> +
+>>>> +       ret = clk_prepare_enable(pltfm_host->clk);
+>>>> +       if (ret)
+>>>> +               return ret;
+>>>> +
+>>>> +       caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+>>>> +       if (caps & SDHCI_CAN_DO_8BIT)
+>>>> +               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+>>>> +
+>>>> +       ret = mmc_of_parse(host->mmc);
+>>>> +       if (ret)
+>>>> +               goto err_sdhci_add;
+>>>> +
+>>>> +       ret = sdhci_add_host(host);
+>>>> +       if (ret)
+>>>> +               goto err_sdhci_add;
+>>>
+>>> Why can't you use sdhci_pltfm_register()?
+>> two things are missing in sdhci_pltfm_register
+>> 1. clock.
+> 
+> Taking into account the implementation of the corresponding
+> _unregister() I would add the clock handling to the _register() one.
+> Perhaps via a new member of the platform data that supplies the name
+> and index of the clock and hence all clk_get_optional() / clk_put will
+> be moved there.
+> 
+>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
+> 
+> All the same, why can't platform data be utilised for this?
+> 
+>>>> +       return 0;
+>>>> +
+>>>> +err_sdhci_add:
+>>>> +       clk_disable_unprepare(pltfm_host->clk);
+>>>> +       sdhci_pltfm_free(pdev);
+>>>> +       return ret;
+>>>> +}
+> 
 
