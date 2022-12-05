@@ -2,105 +2,82 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B38EC4321E
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 19:03:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1A90FC4321E
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 22:08:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233074AbiLETDb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 14:03:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53454 "EHLO
+        id S231191AbiLEWIb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 17:08:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233593AbiLETDZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 14:03:25 -0500
-Received: from foss.arm.com (foss.arm.com [217.140.110.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id DEE582BD1;
-        Mon,  5 Dec 2022 11:03:21 -0800 (PST)
-Received: from usa-sjc-imap-foss1.foss.arm.com (unknown [10.121.207.14])
-        by usa-sjc-mx-foss1.foss.arm.com (Postfix) with ESMTP id E809BD6E;
-        Mon,  5 Dec 2022 11:03:24 -0800 (PST)
-Received: from [10.57.71.118] (unknown [10.57.71.118])
-        by usa-sjc-imap-foss1.foss.arm.com (Postfix) with ESMTPSA id 592FA3F71A;
-        Mon,  5 Dec 2022 11:03:14 -0800 (PST)
-Message-ID: <0df4bfa7-4e76-b6b2-c8cf-a0776ec0fbfa@arm.com>
-Date:   Mon, 5 Dec 2022 19:03:09 +0000
+        with ESMTP id S232755AbiLEWI3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 17:08:29 -0500
+Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C766AE7A;
+        Mon,  5 Dec 2022 14:08:28 -0800 (PST)
+Received: by mail-ot1-f50.google.com with SMTP id cn2-20020a056830658200b0066c74617e3dso8162239otb.2;
+        Mon, 05 Dec 2022 14:08:28 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=La6nfqN3ZBUuSu3HPW5QNxYpkhdeT1Kpud3YY7oUeJY=;
+        b=MTdUzOECruRmgacwLnj3+eGpK1vnZlJPuPjQ+sG/8MOanqiDKy+Lcpox4BrmfCHnSZ
+         8vVU8zqQWr3C6y2QR4VMAyVktsUPF1cvdBQf6Vv5DUewiWI29FvikU07PH0spNN1y8mr
+         M6F+MkgDwZ4c40PiNrECASwkMJP1fo3ayCg8eSjFSIIdb2KwrjFemKezKSoVaAMZzZMi
+         OYuvpweFX2/+8JG3d7XEnpXlndI5IPXxVpF0Fab6Mux1rPmoP7PPyUrFAXizlCLzik7r
+         lJM9jXo25jv5AaYg8bzmmBOxLZ0uE8a+lv3ZxjDnoCP+wXBtkrSUSXx5cKgB68tWJ4Xo
+         1vgw==
+X-Gm-Message-State: ANoB5plJR4xuJu5ZX4sAuQsUIGsIHF3QJMs8O9hBxqgs6a8mztffG2dq
+        pd9L9OPPBJnFtTloByRs6g==
+X-Google-Smtp-Source: AA0mqf6WQoqpmq65YPLVcN02AAgP1XPQyjXGI8F3jmOc2Gh9PE5P05vI059K5zJswpb/4/vZfu3+rg==
+X-Received: by 2002:a9d:6486:0:b0:66d:ca7a:8b1a with SMTP id g6-20020a9d6486000000b0066dca7a8b1amr32909767otl.55.1670278107499;
+        Mon, 05 Dec 2022 14:08:27 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id eo7-20020a056870ec8700b001446a45bb49sm4836134oab.23.2022.12.05.14.08.26
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 05 Dec 2022 14:08:27 -0800 (PST)
+Received: (nullmailer pid 2741475 invoked by uid 1000);
+        Mon, 05 Dec 2022 22:08:26 -0000
+Date:   Mon, 5 Dec 2022 16:08:26 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     abel.vesa@linaro.org, linux-mmc@vger.kernel.org,
+        Johan Hovold <johan+linaro@kernel.org>,
+        linux-kernel@vger.kernel.org,
+        Bjorn Andersson <andersson@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>, devicetree@vger.kernel.org,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Subject: Re: [PATCH 1/5] dt-bindings: mmc: sdhci: document sdhci-caps and
+ sdhci-caps-mask
+Message-ID: <167027810532.2741118.8277664108645595118.robh@kernel.org>
+References: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: [PATCH v12 2/6] iommu/tegra: Add tegra_dev_iommu_get_stream_id()
- helper
-Content-Language: en-GB
-To:     Thierry Reding <thierry.reding@gmail.com>,
-        Joerg Roedel <joro@8bytes.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Prathamesh Shete <pshete@nvidia.com>,
-        Will Deacon <will@kernel.org>,
-        iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org,
-        linux-tegra@vger.kernel.org
-References: <20221202152644.29450-1-thierry.reding@gmail.com>
- <20221202152644.29450-3-thierry.reding@gmail.com>
-From:   Robin Murphy <robin.murphy@arm.com>
-In-Reply-To: <20221202152644.29450-3-thierry.reding@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2022-12-02 15:26, Thierry Reding wrote:
-> From: Thierry Reding <treding@nvidia.com>
+
+On Sun, 04 Dec 2022 10:47:13 +0100, Krzysztof Kozlowski wrote:
+> The Linux SDHCI driver core reads 'sdhci-caps' and 'sdhci-caps-mask'
+> properties and few devices already use it (e.g. Qualcomm SM8450), so add
+> them to a shared SDHCI bindings.
 > 
-> Access to the internals of struct iommu_fwspec by non-IOMMU drivers is
-> discouraged. Many drivers for Tegra SoCs, however, need access to their
-> IOMMU stream IDs so that they can be programmed into various hardware
-> registers.
-> 
-> Formalize this access into a common helper to make it easier to audit
-> and maintain.
-
-In many ways I'd be happier if this could go somewhere in 
-include/soc/tegra/ rather than the generic IOMMU API header, but I see 
-the argument for keeping fwspec usage close to home as well, so no 
-overwhelming preference one way or the other. Mostly I'd just like to 
-get something landed so that all those other drivers can be cleaned up 
-as well, and I reckon this counts as good enough.
-
-Unless Joerg has a stronger opinion,
-
-Acked-by: Robin Murphy <robin.murphy@arm.com>
-
-> Signed-off-by: Thierry Reding <treding@nvidia.com>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 > ---
->   include/linux/iommu.h | 21 +++++++++++++++++++++
->   1 file changed, 21 insertions(+)
+>  .../devicetree/bindings/mmc/sdhci-am654.yaml  |  4 +--
+>  .../devicetree/bindings/mmc/sdhci-common.yaml | 32 +++++++++++++++++++
+>  .../devicetree/bindings/mmc/sdhci-msm.yaml    |  2 +-
+>  MAINTAINERS                                   |  1 +
+>  4 files changed, 35 insertions(+), 4 deletions(-)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-common.yaml
 > 
-> diff --git a/include/linux/iommu.h b/include/linux/iommu.h
-> index dc5e6f5c14fc..f0d72acad7db 100644
-> --- a/include/linux/iommu.h
-> +++ b/include/linux/iommu.h
-> @@ -1186,4 +1186,25 @@ static inline u32 iommu_sva_get_pasid(struct iommu_sva *handle)
->   }
->   #endif /* CONFIG_IOMMU_SVA */
->   
-> +/*
-> + * Newer generations of Tegra SoCs require devices' stream IDs to be directly programmed into
-> + * some registers. These are always paired with a Tegra SMMU or ARM SMMU, for which the contents
-> + * of the struct iommu_fwspec are known. Use this helper to formalize access to these internals.
-> + */
-> +#define TEGRA_STREAM_ID_BYPASS 0x7f
-> +
-> +static inline bool tegra_dev_iommu_get_stream_id(struct device *dev, u32 *stream_id)
-> +{
-> +#ifdef CONFIG_IOMMU_API
-> +	struct iommu_fwspec *fwspec = dev_iommu_fwspec_get(dev);
-> +
-> +	if (fwspec && fwspec->num_ids == 1) {
-> +		*stream_id = fwspec->ids[0] & 0xffff;
-> +		return true;
-> +	}
-> +#endif
-> +
-> +	return false;
-> +}
-> +
->   #endif /* __LINUX_IOMMU_H */
+
+Reviewed-by: Rob Herring <robh@kernel.org>
