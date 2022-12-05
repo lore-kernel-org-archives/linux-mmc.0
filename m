@@ -2,86 +2,117 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41C9AC47089
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 08:17:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32811C47090
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 08:55:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231991AbiLEIRF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 03:17:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40360 "EHLO
+        id S232409AbiLEIzT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 03:55:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231956AbiLEIQ6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 03:16:58 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15B0CBF52;
-        Mon,  5 Dec 2022 00:16:58 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1670228218; x=1701764218;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=sH9q+xEpJF7iv5b2TXJrMpoGv7B/IMq9/DUHAv34X4M=;
-  b=eEfgmx5Ii9D6MlfCh7uNd4idQRO+uzKHwvidEf8whuR4Qzui06lUl5bC
-   43xEAzAuJoJD+aPP13Vv/zKPwr6tKE2pgdaxEEQVAKa49w4OOHKv/4Y1N
-   CIBoSmj61I3g5qM4jyG5kIXD/byGgGeXG46KLd7M7JR9UN5xxkTlryqky
-   UrrjsbtxnpYUWf/7gtEHL+ZgMcUziAWlgTYGCmUKXbb8Z9th1D9L+KveQ
-   BnckSuqn4oSldRdZR/CQZQ5zc+DWlTnV78vLl3YUb+olj98IgJtOWpBls
-   k3/Q5V1mzQzJbpm/WXrIiYFF9u3d1IzGl5xqcYwQRF52h/IGSmwIm8Yeg
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="343283513"
-X-IronPort-AV: E=Sophos;i="5.96,218,1665471600"; 
-   d="scan'208";a="343283513"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 00:16:54 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10551"; a="734507723"
-X-IronPort-AV: E=Sophos;i="5.96,218,1665471600"; 
-   d="scan'208";a="734507723"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.55.104])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Dec 2022 00:16:52 -0800
-Message-ID: <973a9f5c-6798-3f92-cdeb-ce4571273cf1@intel.com>
-Date:   Mon, 5 Dec 2022 10:16:44 +0200
+        with ESMTP id S232237AbiLEIyn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 03:54:43 -0500
+Received: from maillog.nuvoton.com (maillog.nuvoton.com [202.39.227.15])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id A0C5D240;
+        Mon,  5 Dec 2022 00:54:01 -0800 (PST)
+Received: from NTHCCAS04.nuvoton.com (NTHCCAS04.nuvoton.com [10.1.8.29])
+        by maillog.nuvoton.com (Postfix) with ESMTP id 8EDFB1C81290;
+        Mon,  5 Dec 2022 16:53:59 +0800 (CST)
+Received: from NTHCCAS02.nuvoton.com (10.1.9.121) by NTHCCAS04.nuvoton.com
+ (10.1.8.29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2176.2; Mon, 5 Dec
+ 2022 16:53:59 +0800
+Received: from NTHCCAS04.nuvoton.com (10.1.8.29) by NTHCCAS02.nuvoton.com
+ (10.1.9.121) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256) id 15.1.2176.2; Mon, 5 Dec 2022
+ 16:53:59 +0800
+Received: from taln60.nuvoton.co.il (10.191.1.180) by NTHCCAS04.nuvoton.com
+ (10.1.12.25) with Microsoft SMTP Server id 15.1.2176.2 via Frontend
+ Transport; Mon, 5 Dec 2022 16:53:58 +0800
+Received: by taln60.nuvoton.co.il (Postfix, from userid 10070)
+        id 2507563A1E; Mon,  5 Dec 2022 10:53:58 +0200 (IST)
+From:   Tomer Maimon <tmaimon77@gmail.com>
+To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
+        <tali.perry1@gmail.com>, <joel@jms.id.au>, <venture@google.com>,
+        <yuenn@google.com>, <benjaminfair@google.com>,
+        <adrian.hunter@intel.com>, <skhan@linuxfoundation.org>,
+        <davidgow@google.com>, <pbrobinson@gmail.com>, <gsomlo@gmail.com>,
+        <briannorris@chromium.org>, <arnd@arndb.de>,
+        <krakoczy@antmicro.com>, <andy.shevchenko@gmail.com>
+CC:     <openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Tomer Maimon <tmaimon77@gmail.com>
+Subject: [PATCH v2 1/2] dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI controller
+Date:   Mon, 5 Dec 2022 10:53:50 +0200
+Message-ID: <20221205085351.27566-2-tmaimon77@gmail.com>
+X-Mailer: git-send-email 2.33.0
+In-Reply-To: <20221205085351.27566-1-tmaimon77@gmail.com>
+References: <20221205085351.27566-1-tmaimon77@gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.1
-Subject: Re: [PATCH] MAINTAINERS: Update maintainer for SDHCI Broadcom BRCMSTB
- driver
-Content-Language: en-US
-To:     Kamal Dasu <kdasu.kdev@gmail.com>, ulf.hansson@linaro.org,
-        linux-kernel@vger.kernel.org, alcooperx@gmail.com,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org
-Cc:     f.fainelli@gmail.com, bcm-kernel-feedback-list@broadcom.com
-References: <20221202212119.43214-1-kdasu.kdev@gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221202212119.43214-1-kdasu.kdev@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7BIT
+Content-Type:   text/plain; charset=US-ASCII
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/12/22 23:21, Kamal Dasu wrote:
-> Taking over as upstream maintainer for Broadcom SDHCI
-> driver from Al Cooper.
-> 
-> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
+Add binding for Nuvoton NPCM SDHCI controller.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
+---
+ .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 45 +++++++++++++++++++
+ 1 file changed, 45 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
 
-> ---
->  MAINTAINERS | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/MAINTAINERS b/MAINTAINERS
-> index 1daadaa4d48b..90beddcf84b0 100644
-> --- a/MAINTAINERS
-> +++ b/MAINTAINERS
-> @@ -18497,6 +18497,7 @@ K:	\bsecure_computing
->  K:	\bTIF_SECCOMP\b
->  
->  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
-> +M:	Kamal Dasu <kdasu.kdev@gmail.com>
->  M:	Al Cooper <alcooperx@gmail.com>
->  R:	Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>
->  L:	linux-mmc@vger.kernel.org
+diff --git a/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
+new file mode 100644
+index 000000000000..196fdbfa16ed
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
+@@ -0,0 +1,45 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/npcm,sdhci.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: NPCM SDHCI Controller
++
++maintainers:
++  - Tomer Maimon <tmaimon77@gmail.com>
++
++allOf:
++  - $ref: mmc-controller.yaml#
++
++properties:
++  compatible:
++    enum:
++      - nuvoton,npcm750-sdhci
++      - nuvoton,npcm845-sdhci
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    mmc@f0840000 {
++      compatible = "nuvoton,npcm750-sdhci";
++      reg = <0xf0840000 0x200>;
++      interrupts = <0 27 4>;
++      clocks = <&clk 4>;
++    };
+-- 
+2.33.0
 
