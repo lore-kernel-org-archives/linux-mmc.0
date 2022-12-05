@@ -2,83 +2,77 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E73C5C47089
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 22:11:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 88BF7C4708E
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 22:24:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233313AbiLEWLb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 17:11:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42626 "EHLO
+        id S233781AbiLEWYi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 17:24:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233588AbiLEWL0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 17:11:26 -0500
-Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A3A31AD90;
-        Mon,  5 Dec 2022 14:11:25 -0800 (PST)
-Received: by mail-ot1-f52.google.com with SMTP id db10-20020a0568306b0a00b0066d43e80118so8173201otb.1;
-        Mon, 05 Dec 2022 14:11:25 -0800 (PST)
+        with ESMTP id S233710AbiLEWYb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 17:24:31 -0500
+Received: from mail-oa1-f51.google.com (mail-oa1-f51.google.com [209.85.160.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BE0A5643D;
+        Mon,  5 Dec 2022 14:24:26 -0800 (PST)
+Received: by mail-oa1-f51.google.com with SMTP id 586e51a60fabf-14449b7814bso10253698fac.3;
+        Mon, 05 Dec 2022 14:24:26 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=92zrpPL2isoOuIrrH1my3HzkOjBY0w33Uv97jaygHyA=;
-        b=XzKS7tDPf0kBvctKaxc0w6UYoT7SDelAGsE28PhNjuMm387doxp3j0+pcKCo1qvl0I
-         rXmL4SDfXH6FWu81oO6RxumsWi86T/E6S7fcFO4tHKiK2kz4h60NS7UJ5s8IZTx6iTEY
-         z15rYC4kBNw2HgGcYiQmJu+9LQafIS0AquM1T9JNbu4RQh72vJJHpfcztB8i9rVdzhlc
-         U4vYHDvoEpk6Q6zyDSYv2nsnyEWEOU08wukSfo8ALHExXvw+EX8v4aTKXEQCW4cOPLBO
-         UibNNoZn7s1XB2JJkuoKxWLoqJmm2iCY3gJrcrMiVrtuXqe/GfR00Sr1PVO905zq6EQ8
-         Ei1g==
-X-Gm-Message-State: ANoB5pkibaU/FobdruAbvD8xZy7FUk0oWuUu8bmZfzjoEEnrHciH35MN
-        pCbLYtd1CK3BUw1Xd7GWXxxhEsXu4A==
-X-Google-Smtp-Source: AA0mqf46PUZGYgfyzVmCFYfo10rkkbg5CujUG8ZpHy+XzOEZvhateOumUCSz8PB99OAf44ddLA1sSA==
-X-Received: by 2002:a9d:628b:0:b0:66c:6afa:5006 with SMTP id x11-20020a9d628b000000b0066c6afa5006mr36135099otk.233.1670278284631;
-        Mon, 05 Dec 2022 14:11:24 -0800 (PST)
+        bh=Co/zzkCX57YjiIHZ6diFtz/RTM1yDwFRLGgy9CALn3k=;
+        b=H6hxhtsiMDnJ57bkXu45hE90S1TcAiBJv9wn796FyjdZwPJE7BW971IgSHczblL+Sn
+         QCP3YV1OnJ4qxPJM6rzxYIdFzhxEKz2nk/mQniZh4MrKQLUWwnVm+hhT87TcT95Acmyn
+         F1WwPOZbQ+NqdvlSwNuzBQwTtDgGNeBSs/EXRlzf3f+8rXmA0yfgsVExF8oebU7jQRT2
+         fjcfkFKTYZ/nV9cU+ylrqtxRtgbUZFzirq+NGfDWziUHyhfVKP4BEhkGzUunkIBBOLoo
+         ozoAQv3sNHKsdRTp1FqazKNaN1rQNyzK+C/I8Id+3tnIC9lcLyrpR/TFUMezL/gb9tq8
+         9BgQ==
+X-Gm-Message-State: ANoB5pkdzsWgZgX32vEGjzEipnWqRZ4Tka4ngH5JWuu5YxuXG/zsJJWP
+        BQatwfqzejaCjDWim8SqgQ==
+X-Google-Smtp-Source: AA0mqf5KPUlOKZlk8T+En9HAYLNzQISM+hJVBszps97tjWaKv7NPMdh/GkYpXW4fVkzPRyfrlNTQ5g==
+X-Received: by 2002:a05:6870:bf0f:b0:13b:b20d:5c72 with SMTP id qh15-20020a056870bf0f00b0013bb20d5c72mr38013206oab.200.1670279066004;
+        Mon, 05 Dec 2022 14:24:26 -0800 (PST)
 Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id j125-20020acab983000000b0035b451d80afsm7486305oif.58.2022.12.05.14.11.23
+        by smtp.gmail.com with ESMTPSA id m23-20020a4ad517000000b004a085ddc771sm5971373oos.6.2022.12.05.14.24.24
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 05 Dec 2022 14:11:24 -0800 (PST)
-Received: (nullmailer pid 2778814 invoked by uid 1000);
-        Mon, 05 Dec 2022 22:11:23 -0000
-Date:   Mon, 5 Dec 2022 16:11:23 -0600
+        Mon, 05 Dec 2022 14:24:25 -0800 (PST)
+Received: (nullmailer pid 2797234 invoked by uid 1000);
+        Mon, 05 Dec 2022 22:24:24 -0000
+Date:   Mon, 5 Dec 2022 16:24:24 -0600
 From:   Rob Herring <robh@kernel.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Bjorn Andersson <andersson@kernel.org>, linux-mmc@vger.kernel.org,
-        abel.vesa@linaro.org, Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        devicetree@vger.kernel.org,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Johan Hovold <johan+linaro@kernel.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH 5/5] dt-bindings: mmc: sdhci-msm: allow dma-coherent
-Message-ID: <167027828316.2778752.10639863966103490623.robh@kernel.org>
-References: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org>
- <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
+To:     Tomer Maimon <tmaimon77@gmail.com>
+Cc:     venture@google.com, linux-kernel@vger.kernel.org, joel@jms.id.au,
+        pbrobinson@gmail.com, skhan@linuxfoundation.org, arnd@arndb.de,
+        adrian.hunter@intel.com, benjaminfair@google.com,
+        linux-mmc@vger.kernel.org, yuenn@google.com,
+        ulf.hansson@linaro.org, davidgow@google.com,
+        openbmc@lists.ozlabs.org, krakoczy@antmicro.com,
+        andy.shevchenko@gmail.com, briannorris@chromium.org,
+        tali.perry1@gmail.com, devicetree@vger.kernel.org,
+        avifishman70@gmail.com, gsomlo@gmail.com
+Subject: Re: [PATCH v2 1/2] dt-bindings: mmc: npcm,sdhci: Document NPCM SDHCI
+ controller
+Message-ID: <167027906409.2797176.10003950661420135791.robh@kernel.org>
+References: <20221205085351.27566-1-tmaimon77@gmail.com>
+ <20221205085351.27566-2-tmaimon77@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221205085351.27566-2-tmaimon77@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-On Sun, 04 Dec 2022 10:47:17 +0100, Krzysztof Kozlowski wrote:
-> SM8350, SM8450 and SM8550 SDHCI controllers for SD card are marked with
-> dma-coherent, so allow it.
+On Mon, 05 Dec 2022 10:53:50 +0200, Tomer Maimon wrote:
+> Add binding for Nuvoton NPCM SDHCI controller.
 > 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> 
+> Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
 > ---
-> 
-> dma-coherent was first added to SM8450... then to SM8350 (not merged
-> yet) and now it appeared in SM8550 patches, but I actually do not know
-> if this is copy-paste or real need.
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
->  1 file changed, 2 insertions(+)
+>  .../devicetree/bindings/mmc/npcm,sdhci.yaml   | 45 +++++++++++++++++++
+>  1 file changed, 45 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/npcm,sdhci.yaml
 > 
 
 Reviewed-by: Rob Herring <robh@kernel.org>
