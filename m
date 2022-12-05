@@ -2,44 +2,44 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43DB9C47089
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 11:00:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AECA8C47090
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 11:00:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231468AbiLELAY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 06:00:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53780 "EHLO
+        id S231531AbiLELA0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 06:00:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230493AbiLELAA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 06:00:00 -0500
+        with ESMTP id S230508AbiLELAB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 06:00:01 -0500
 Received: from EUR02-VI1-obe.outbound.protection.outlook.com (mail-vi1eur02on2118.outbound.protection.outlook.com [40.107.241.118])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BCF719C39;
-        Mon,  5 Dec 2022 02:59:58 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B255019292;
+        Mon,  5 Dec 2022 03:00:00 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=YXz5fv1yq64cWR7aCabADQ6UcktW6k4qKBAKB1Eoj2+2AMXnBVLMzNc3OfRt1kmMCLwL/IBTS3AzAxejgudt+8JUkb6mXRT0CHPzMbdvOQmaVmEqewXGdat0BJue4g5HbKr3GNGnZSU7Z5CqRul2OSt2O6S5Kq/2u/RpcI536pEgmLuYV9DKSpJ6X5oQeNPkOsVEVyK783qCrnfR9bw93UqQDk89R/l/VqVLsYDKWxy2+vIGy4H1Ev4MdxdCpttzTBzNMqIirFH86mZJAqPhalxr/5cT/V2f/98Ox4Y5U5NyZs+ZeQNzQqeb+Z/rnfRfDseYc8UjiyFz0vNBPFSepA==
+ b=Ic9l6lw6d7AQwrJoo4eELrx6h6ZuqczNDl79CU0hG2LWjsTZANClr9Ttl3/95rvG3xL8/pqevATnKwP7sek9fJyNKHTdlhAleWhHwVqJpUPtDnjIUsF4fD4OhELFCXBSwp/dbvMuNygG6KPbsOHMMBZbcE2WuOhsSe5Ub+KPBhF3DcXmkAh8kdLWswfDRuwDgklkfj6GGkCCVdxtLFU5dvgmCrFqATVYoH5netYuSKmK2oju9etr+2lpZ4YqDnKYM/Oz9dIgPm1yRe5ClfyCsQSStyy2Umf//YuZE0kslhytEHsb3N31aUmXvKKZyExRjL9SZk9pawN+dpCx86rQZA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=VpcaWWF4JSn6Ob5VZ6amkREguT+yRCr5wQ13O4HQulg=;
- b=RHybSP6cKlmzIQ/8BJp24QaRUH+jUCZgSoLjN8gsU0q3kUDo2Zqt4z4LkDWIQl0062NhzB4fNRTMf8Qv58LzqEAyb56OciLMKOQ3x3IV2eelbjqQBkJHj6RJTDtWLMuhgz/gkIlUQnFydITLpTbiHbLlDHmS/RRLTUbX4da2nPWWX+8oUkFWx7qLtJGWb4jHDebrahktGy7xTtWazlIfpbpslPDN0y7VaKKZQEdcRpIlACV2NUj3plOsuqK4f+6/bHnQ5dRJozWhrp4+hti5oWejpdxDU7sYWR096YqSdwnCKOth3GK8qagVsETbeNpA1i3vvKkyEcMsIzcTUsh+EA==
+ bh=FuldcKvKeWXVmKDJ7yaKSDt9K0l06pHPOxoH4W4h1gY=;
+ b=bvhoc3qJiEMTGROY8JWZDMtLA6HoQhGSp5sS5y/N1sAb3K+zja3g2e5mqAlQLGztXRrTZqfUtZ39jUywP0TG7SkvuSpBkmOmefilIoTG+h1vnyDxogMrTto/283jzAD7bfFhuo8BkXT3lZg+Zi4DVoYC/Ymz+04zeUOa0n6icOC5hpHN57SjTycOU+spX0gXy/sCdAYrkyDUYxmbX1KdNHb2tGDTQo4zikcGMQJrkul3I9tKy7N/xsXO2NiAJGFlSyshqioUQKPROolS6o44vpoUCRZu/zBXuvtnfRjNbb5UfM6DR4Iz9d6oBYLdr+g6GyWRjgX6+OOwb9n7HoEUyg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=plvision.eu; dmarc=pass action=none header.from=plvision.eu;
  dkim=pass header.d=plvision.eu; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plvision.eu;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=VpcaWWF4JSn6Ob5VZ6amkREguT+yRCr5wQ13O4HQulg=;
- b=iTi6YW8fGOSHSMCox39NHkJ6XLiNpPZxHIYvN7In2zFzNDaYF/g3fJNAEC1RiLErg9FxprkmMwxkBuOOCK8IfGyzfKEa3lP0bJDFZ2pGWcVKLRh3JmXxpD2erwpK5VjAOVriOGC//hPz3fbZB+0ighkyOyLkaoghyA+Nb8MKSIk=
+ bh=FuldcKvKeWXVmKDJ7yaKSDt9K0l06pHPOxoH4W4h1gY=;
+ b=dK2HoMVgHF4TMoT+Ar6hoxmcRHCYM4KeregMPWw8BCszlw5zD34heAkXB6IscnZcJnx5QWi0iTEkJkxrKquTeJ8RzFPoZOv32Ohwv8pDG+0M2pi1r5cR/b1OczhqJLhqh9kVpXzEaqnAcMf+lL6zYRWTKjW8CYrH+YWoOpIT5dw=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=plvision.eu;
 Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM (2603:10a6:802:38::26)
  by AM8P190MB0980.EURP190.PROD.OUTLOOK.COM (2603:10a6:20b:1da::20) with
  Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5880.14; Mon, 5 Dec
- 2022 10:59:48 +0000
+ 2022 10:59:51 +0000
 Received: from VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
  ([fe80::5912:e2b4:985e:265a]) by VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
  ([fe80::5912:e2b4:985e:265a%3]) with mapi id 15.20.5880.013; Mon, 5 Dec 2022
- 10:59:48 +0000
+ 10:59:51 +0000
 From:   Vadym Kochan <vadym.kochan@plvision.eu>
 To:     Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -50,9 +50,9 @@ To:     Hu Ziji <huziji@marvell.com>, Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     Elad Nachman <enachman@marvell.com>,
         Chris Packham <chris.packham@alliedtelesis.co.nz>,
         Vadym Kochan <vadym.kochan@plvision.eu>
-Subject: [PATCH v3 1/3] dt-bindings: mmc: xenon: Add compatible string for AC5 SoC
-Date:   Mon,  5 Dec 2022 12:59:28 +0200
-Message-Id: <20221205105931.410686-2-vadym.kochan@plvision.eu>
+Subject: [PATCH v3 3/3] mmc: xenon: Fix 2G limitation on AC5 SoC
+Date:   Mon,  5 Dec 2022 12:59:30 +0200
+Message-Id: <20221205105931.410686-4-vadym.kochan@plvision.eu>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20221205105931.410686-1-vadym.kochan@plvision.eu>
 References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
@@ -63,79 +63,171 @@ X-ClientProxiedBy: FRYP281CA0018.DEUP281.PROD.OUTLOOK.COM (2603:10a6:d10::28)
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: VI1P190MB0317:EE_|AM8P190MB0980:EE_
-X-MS-Office365-Filtering-Correlation-Id: 852ebbc4-ae17-4dd8-4610-08dad6afd34d
+X-MS-Office365-Filtering-Correlation-Id: ba06d64a-842c-4ae7-6165-08dad6afd538
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: USlIwbz5A6p3UdSmywmNB/+0kARMin87bekI2LkDbTo+TEl55Sn+5tk3ljh8RD0uxEfmWStXDYFjl+AID2utQkUs8+lrd11TT6l+/EzLIiyqPUYd1RLqMpKlt+zEpJyQ5lS8nc8Nk6r4A6mp85O1Sif2/z+rH36c8Gay51B24GVpfm6mPcQPzkapLBtmYrxp8YV0wskcnfsJhHl50n68FA9V5ABPwavUCSOAl9/74rMKahgcY5hR+ha+HG4CnygqSF7OkivkhSDkCUpwcuF70E5lUsNY8ygnBwTexyVeiVUWbDnJ/hMzitvwBwf08lEGnkeyzkWmE59TKs2m8+tj/W0E7hMbxjscujklv/4pxYXGhdxhgIj7si1X5dNnKyFcO44hyTa/VWgbakBAVHjq0VJDKJB4ARX71djYeNWYjQ30ifkUwyQxLqkYuUqIRs+1Bcp1wx3TGoX9VqWB6pnpbqIfyqKA2sPK4rD+ub3YQlECjn4p+qPrEaZ6KmGnGxnuD//tfJezR3Jlelm8SFRG3Xt4WLh2qM4RF+XdvRESQ6K0jm3bvBt9q7zCQsygKLaau0hQs8cLGam2bBdBmVSmn4NtdktKYB+9XoW8K2fwppGX6fTliQ+p67f+IlnFRUSNu2+mzQuQJbxR8PRYeVy67tELhi6cA1jg6jbDKyk7IrB3L2D87jChLzdrxtWtY7El
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1P190MB0317.EURP190.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(346002)(136003)(39830400003)(366004)(451199015)(36756003)(38100700002)(86362001)(38350700002)(2906002)(41300700001)(8936002)(4326008)(44832011)(4744005)(5660300002)(7416002)(83380400001)(66946007)(478600001)(6486002)(66476007)(66556008)(316002)(54906003)(2616005)(110136005)(8676002)(107886003)(1076003)(6666004)(52116002)(6506007)(26005)(186003)(6512007);DIR:OUT;SFP:1102;
+X-Microsoft-Antispam-Message-Info: yP99TKulsQ/XPm1R3zFFu8E4YHKtOx36NsL11kHm8R0yAeRRgxsfBhzHcfVeWkABqUk+PaHfLDirm5M180KAQ5qd5w14SwW0g//5n2FMqSTuKtK9fifxuwE1u0lSC6wD0R/Ob2mPZB5grvqKhj4W/PjXo+NwzMvKRXYY3Rh3XRJs8G9Xr0Kgc2YXr5LFdaXRyPA4yeWtEWnwyh+ZygEED2VG2E0Hwa3MQ6/E+rHRtjva0JOY6ng+kKXbjuUR9GK/LE6o/Tb0D3eMs3hc92vMmSoRrkEg7aaqzSYfz5+SxtZK4u06BKs6swY1S46lTGDE8kuCNsu7+rWuwem/+pzMLXiy8GDAav5XWqXsVwOOElFBe3NQjJurnplo3FXWAWIanPztnjZ/eQdftpzmXS5zxLeATpftB7RJPpPS5Y21Z5R70253Nxn0IsIsA8Boi4weYJebAGn15p6OViMUKdMUDhdD/bDFDEYRs8antR8GAn8wA8TKLVt5DzKwXctLauU22K+P0EsmlfxVhVdJGjaCorn8UNsWqCeLrUs1itIPvOObDMKnC4PO3z89DL7ywT4preCiWP3P9k5n7xOOQqIS1j3z77YAeqHzoNJ1st5OsUig51BEcMyJzJxqaCHHR+UjYYeEm39vJ3IXTzXHxQwTgyGmKVc2iCYemI+LVaHWHRy4e28gEPvcThEeNy+qwHdF
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:VI1P190MB0317.EURP190.PROD.OUTLOOK.COM;PTR:;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(346002)(136003)(39830400003)(366004)(451199015)(36756003)(38100700002)(86362001)(38350700002)(2906002)(41300700001)(8936002)(4326008)(44832011)(5660300002)(7416002)(83380400001)(66946007)(478600001)(6486002)(66476007)(66556008)(316002)(54906003)(2616005)(110136005)(8676002)(107886003)(1076003)(6666004)(52116002)(6506007)(26005)(186003)(6512007);DIR:OUT;SFP:1102;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?BBMub0BGKwWRJobGJQL8SVYCY4/yOnjz7pU7udmaddjZNbRb9J9wxXDQVjRx?=
- =?us-ascii?Q?ylvc+FHS9DLEhV0rUoiYF3+JHMwTzN+glyQhk39VtDopm5AR2K1jiNCoQkGL?=
- =?us-ascii?Q?+4bcz6Bp8n1kFQOwD5TZBhL5RbOOQjuUz0djduIMd8X5NJqaoRpJXdW7qBc2?=
- =?us-ascii?Q?TG759NYEVK6ljeEsVZo8gQZb6xt/RONuOIvmO9UU6MC5eVmCDl6xsjqobqFL?=
- =?us-ascii?Q?WIUDZcx4CrH4e0XK/fThcig21tJTOjSnX6yFuvzSCb5O//YRZpDWKi47+LmM?=
- =?us-ascii?Q?seMaqBfaYnkHhmIB0Bks2so76KustYS7EGy9X/DhcymAaEnjyyRPj6Yfy6JI?=
- =?us-ascii?Q?cB6710nm7Remx+45ROtysKNsYCGD7vrTde9S+em+sHGWzj0D8Y2b9ewFduRE?=
- =?us-ascii?Q?z+inpnqiWvn+yS69HZxsaXeSGa670tXWIfOGNkkDyq8siT9woStUCoR2Gici?=
- =?us-ascii?Q?DOrzdX3WZ+o854m/A+MkdZTiK+wTgrsQlOV2+FQnP0yjxcCsw1rEBBLFP8PM?=
- =?us-ascii?Q?G8l5HwHDgqzRF8Q6QkyQhUb3qSlV5v3VVCcpXfSbC6R+hjsY8O8l7Dhn2Sl2?=
- =?us-ascii?Q?o3Zt7ZF4xycxVo0h+oEwdCmTSsyt/krIfV8q5vBkL39rbGV4pFjruCmM2ipm?=
- =?us-ascii?Q?8mnwcFHj5oX/qkB7xxRVBx3N50j0umSNYbpvYq1Aq86Te3jvbktAQJCZAary?=
- =?us-ascii?Q?fgtybwl92NtmW2idiTfRltJKVzmOBZRCtM3WtKb61Z1GibUMaUEdg6v7ZNfe?=
- =?us-ascii?Q?9aB3+be4SDkCTZy9zczRGt1aPI330ZZanc6m6qf2zlvLp54p78bmUNv+vSNd?=
- =?us-ascii?Q?Ney5AD5+AXbDR59OuFMILibVXxvOkbIWA9kjwP23PB2k22xBD4RMlZMTHs0T?=
- =?us-ascii?Q?nIKtLGAbHlko8lNtgzeIrlstr75m/O5svMPV8uyZIWexfbQ6g3BzBtomQLsW?=
- =?us-ascii?Q?hHp6J3fK3NwZmGXHEEQK5zwcTA96MSOjzcyOqbXAypCjrq+mheuDUVZctaF8?=
- =?us-ascii?Q?5pY0wTK6m0Y8c0R/UCq9uyzJOCUCopARQ9MpNfFLIDCHToXTAAUzt9ZVfoZ0?=
- =?us-ascii?Q?1wY9CDvVUspYsyc40pR4AMQYNQ5pzgDPPcyolSocvFD7vQSMRkFE5GibWZ6i?=
- =?us-ascii?Q?vC1COaOZnon8o9WhBzByL/XuSKYUdmiXl900Vdi+yTV8RFyKuklvDTASawo5?=
- =?us-ascii?Q?lEVpIzTQ0l7VxAKgbWjNCsgfiEDEeuh/l3ajHDDK2JSSte58fLtYgzRLPoij?=
- =?us-ascii?Q?nZlN4Np65udSzLV1xX9eoNL+CWrXRFbC2NwVm/PmmOLHyRkua6xCzlPvi6z/?=
- =?us-ascii?Q?vET5nE/kYQkVP6FhUv8w1Ej2sL2FIBHuqKEnzUwMfVsg3duQBY1Ob7lOgYJg?=
- =?us-ascii?Q?pKAp3O0OjCnwzolFPtLPYEUABXJkGAFg7gFw4/Kmm1imtHEfzPEJwvT1tqWK?=
- =?us-ascii?Q?9+Bw7XNOLhXK0j0nm9b2ffy64mgrvE6o+CdlIcz2qi4taOe0dLaYqDFnEHRJ?=
- =?us-ascii?Q?JuftZwG1MhMPGe5LbHH7+O0btoKz+ZxYRd3du9xfUeKg9nE7fX/maRH0oVXG?=
- =?us-ascii?Q?RPAYyHUpc6XNh44+pH8A/XtqfOoY9ZM62VDLA2+KNXTB6eCcDV9LrxpdfdYS?=
- =?us-ascii?Q?qA=3D=3D?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?88ZUkP+/xJBFJYOQ1P5vFxypZv4Et7fu4X/DoRzua41khsaUYTR29PvpGqUE?=
+ =?us-ascii?Q?Ox3Tn4dK2erCjVSRizUx1LQR/LgXfBF2NgEI8b/PmG4SSW8KEPkllg7s9lIC?=
+ =?us-ascii?Q?QSuqkJzdZ3UOD0yPZtw+Et3nI8nS/MyOZyOYuLBLbT8WXbYhhsiMYG+ZC58n?=
+ =?us-ascii?Q?z151jaZDsKuMfezEhNuaTr85N6leNYApyKoe2V2UB6v5JfzkthxJXyphDMT0?=
+ =?us-ascii?Q?3/40jjZNVHnfhpMi2i2Wbtk1XvQb4f287IML2TrNc5SX2lS7vmMl9O0Rioz7?=
+ =?us-ascii?Q?8/oAS8+DmEJ1049qBlEM7I/d9suTEi+gCxtzR+M2hKyqyhTDPusVB3JKzf1Z?=
+ =?us-ascii?Q?h2TA1RhNQEeUrnK/uzcXjBi4C6z7kmYWYBtLn8kwiibtNjGfZILYa74cNsSL?=
+ =?us-ascii?Q?Tc2H+JtVHuBe6yZg5cVAHjfCBoHR7kcSjkrts7KySFUWzYmI0X3wZoUHbMOP?=
+ =?us-ascii?Q?KJ9+kP49q14X47a0wOHEUPMrIdnsNA8eRTMP54gGh2YJPn8Nq7hTFWfZSw4d?=
+ =?us-ascii?Q?US1SsGgXP8wsyhKtCrDTIePyqOc06n8hdtFie0+EgWKvxJN8kOZ76OjtS3l5?=
+ =?us-ascii?Q?AvxFNIsHqKY7Nmvmv5CvgH/Gy6i9lpFXlU7eYh4u2ZEsoxFkFZtht1TxR7Lc?=
+ =?us-ascii?Q?KiLTnfMmttIv1HAJXo66X7stRuE25prfeO09LsktbJFWZtWqrMiu5PljeuCZ?=
+ =?us-ascii?Q?Gn+en3Uy293GZcUmJhhVUGk5yjfc+R43lURIGXPeioXCA5c+EHGcaHOgRAum?=
+ =?us-ascii?Q?nh+746mFzvq71lPEA0aTgWVebiGXhHelIfhwMXMans8JZpXymrtGTDd8tGCH?=
+ =?us-ascii?Q?0qSyJndcJdhB+IYD3JAzbzuBMLHkyc9KHuvTN1PNcDOF/Ae3vJrZ/7MFWXx2?=
+ =?us-ascii?Q?OIIA/NzOgnqocLt5d7USHVkn/lXQatihGy4glZMdqKWcttyuPzz+cUEhal7n?=
+ =?us-ascii?Q?khVszXPGkcu4TOLOdF3VOgzSp8xOuZZzq7TiCnJ++PGAhkb0C8S/VIp/aC0w?=
+ =?us-ascii?Q?XOO4HOMyTiLggQmv0cOPOLp5vJ0Fa2IHaw3z8lf+CwWDwVjPe0kyw4dwko4B?=
+ =?us-ascii?Q?vTulrpapf7DSLamRD5W6K6MsmwAg9tAU+48fY9BB8IGmETfAB+pkyHhJMJU1?=
+ =?us-ascii?Q?Luwb4l2Fy/jp0TySXoH5P15NcQ4b70tcsDrLei/2NLo1+tzmnEZUxOw2mFaS?=
+ =?us-ascii?Q?wbxNwEV1Z+WVPw6yEStcVd/mCTN17Y3MTfxejhp7vOtEZBt33LTVNaEmQj3x?=
+ =?us-ascii?Q?EfGNOFPbN298rnyETamPmXkOzeRmZ+Rn7/eFX3STjTsWV25EgcpFlcN7PpWi?=
+ =?us-ascii?Q?ImfJyxMIgK1u9pow5Ss1hoeK+98DrTYjuFm0owVukSDTDuAk7+d3JhW7umpF?=
+ =?us-ascii?Q?bW3oN6H67l1fmOvQIh6YGBEK9ECmWWUzbO1A9NPzjQEuH9647zJmppp0MVIB?=
+ =?us-ascii?Q?clO571oW0jqrLdev6gRs+zIKEDbrOq3FHHvVCNqjCw4XipP32JRu6orVi5l2?=
+ =?us-ascii?Q?kbLE4lvUcFXe1HgRuDKvewEdi4scPhhW2zUrRjDNk6cpfN0uRhS1K7EMm72l?=
+ =?us-ascii?Q?o8tP20HLR/MMBTtjSiFPY0pFtdMGlYCpAldCPKJNzstNl97Y9DIvK8wB2v0H?=
+ =?us-ascii?Q?Zw=3D=3D?=
 X-OriginatorOrg: plvision.eu
-X-MS-Exchange-CrossTenant-Network-Message-Id: 852ebbc4-ae17-4dd8-4610-08dad6afd34d
+X-MS-Exchange-CrossTenant-Network-Message-Id: ba06d64a-842c-4ae7-6165-08dad6afd538
 X-MS-Exchange-CrossTenant-AuthSource: VI1P190MB0317.EURP190.PROD.OUTLOOK.COM
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Dec 2022 10:59:48.0902
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 Dec 2022 10:59:51.2771
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 03707b74-30f3-46b6-a0e0-ff0a7438c9c4
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: IhDqO5o/q02WKKLvqrUYBq4qqF9FNAIHcUDVHcoO6zTL0s88x5bLPWfF+v2nGLZP0oej2gU3RvCUBkEsredU8jU3kP3sBYPSHRG7FChAMFQ=
+X-MS-Exchange-CrossTenant-UserPrincipalName: 9HiSZn03lR21RbbMBAfCkeErssuLgYO2ZzrCjIqmZh/DbMf1reaHU9i9F1DFqECxtB4Vs+wTAJLerXX2Ufc7anSYmhN/SCP3TlVDh1IKM3M=
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM8P190MB0980
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-AC5 SoC has Xenon SDHCI IP, but with a limitation of maximum
-2G DMA address range.
+There is a limitation on AC5 SoC that mmc controller
+can't have DMA access over 2G memory, so use SDMA with
+a bounce buffer. Swiotlb can't help because on arm64 arch
+it reserves memblock's at the end of the memory.
 
+Additionally set mask to 34 bit since on AC5 SoC RAM starts
+at 0x2_00000000.
+
+Co-developed-by: Elad Nachman <enachman@marvell.com>
+Signed-off-by: Elad Nachman <enachman@marvell.com>
 Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
 ---
-v3:
-   #1 Put compatible string in alphabetical order in the yaml file
+ drivers/mmc/host/sdhci-xenon.c | 38 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-xenon.h |  3 ++-
+ 2 files changed, 40 insertions(+), 1 deletion(-)
 
- Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-index 3ee758886558..3546de114d7c 100644
---- a/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/marvell,xenon-sdhci.yaml
-@@ -23,6 +23,7 @@ properties:
-   compatible:
-     oneOf:
-       - enum:
-+          - marvell,ac5-sdhci
-           - marvell,armada-cp110-sdhci
-           - marvell,armada-ap806-sdhci
+diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+index 08e838400b52..5f3db0425674 100644
+--- a/drivers/mmc/host/sdhci-xenon.c
++++ b/drivers/mmc/host/sdhci-xenon.c
+@@ -13,7 +13,9 @@
  
+ #include <linux/acpi.h>
+ #include <linux/delay.h>
++#include <linux/dma-mapping.h>
+ #include <linux/ktime.h>
++#include <linux/mm.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/pm.h>
+@@ -253,6 +255,22 @@ static unsigned int xenon_get_max_clock(struct sdhci_host *host)
+ 		return pltfm_host->clock;
+ }
+ 
++static int xenon_set_dma_mask(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
++	struct mmc_host *mmc = host->mmc;
++	struct device *dev = mmc_dev(mmc);
++
++	if (priv->hw_version == XENON_AC5) {
++		host->flags &= ~SDHCI_USE_64_BIT_DMA;
++
++		return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(34));
++	}
++
++	return sdhci_set_dma_mask(host);
++}
++
+ static const struct sdhci_ops sdhci_xenon_ops = {
+ 	.voltage_switch		= xenon_voltage_switch,
+ 	.set_clock		= sdhci_set_clock,
+@@ -261,6 +279,7 @@ static const struct sdhci_ops sdhci_xenon_ops = {
+ 	.reset			= xenon_reset,
+ 	.set_uhs_signaling	= xenon_set_uhs_signaling,
+ 	.get_max_clock		= xenon_get_max_clock,
++	.set_dma_mask		= xenon_set_dma_mask,
+ };
+ 
+ static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+@@ -486,6 +505,18 @@ static void xenon_sdhc_unprepare(struct sdhci_host *host)
+ 	xenon_disable_sdhc(host, sdhc_id);
+ }
+ 
++static int xenon_ac5_probe(struct sdhci_host *host)
++{
++	struct sysinfo si;
++
++	si_meminfo(&si);
++
++	if ((si.totalram * si.mem_unit) > SZ_2G)
++		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
++
++	return 0;
++}
++
+ static int xenon_probe(struct platform_device *pdev)
+ {
+ 	struct sdhci_pltfm_host *pltfm_host;
+@@ -533,6 +564,12 @@ static int xenon_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
++	if (priv->hw_version == XENON_AC5) {
++		err = xenon_ac5_probe(host);
++		if (err)
++			goto err_clk_axi;
++	}
++
+ 	err = mmc_of_parse(host->mmc);
+ 	if (err)
+ 		goto err_clk_axi;
+@@ -682,6 +719,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+ 	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
+ 	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
+ 	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
++	{ .compatible = "marvell,ac5-sdhci", .data = (void *)XENON_AC5},
+ 	{}
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+index 3e9c6c908a79..0460d97aad26 100644
+--- a/drivers/mmc/host/sdhci-xenon.h
++++ b/drivers/mmc/host/sdhci-xenon.h
+@@ -57,7 +57,8 @@ enum xenon_variant {
+ 	XENON_A3700,
+ 	XENON_AP806,
+ 	XENON_AP807,
+-	XENON_CP110
++	XENON_CP110,
++	XENON_AC5
+ };
+ 
+ struct xenon_priv {
 -- 
 2.25.1
 
