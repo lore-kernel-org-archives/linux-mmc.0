@@ -2,189 +2,161 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E7A8C636F8
-	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 08:55:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E4E0C47089
+	for <linux-mmc@archiver.kernel.org>; Mon,  5 Dec 2022 10:54:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232422AbiLEIzU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 5 Dec 2022 03:55:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43688 "EHLO
+        id S230286AbiLEKyq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 5 Dec 2022 05:54:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50718 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232385AbiLEIyn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 03:54:43 -0500
-Received: from maillog.nuvoton.com (maillog.nuvoton.com [202.39.227.15])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id C3A92BBF;
-        Mon,  5 Dec 2022 00:54:01 -0800 (PST)
-Received: from NTHCCAS01.nuvoton.com (NTHCCAS01.nuvoton.com [10.1.8.28])
-        by maillog.nuvoton.com (Postfix) with ESMTP id 32ECE1C81291;
-        Mon,  5 Dec 2022 16:54:00 +0800 (CST)
-Received: from NTHCCAS03.nuvoton.com (10.1.20.28) by NTHCCAS01.nuvoton.com
- (10.1.8.28) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.7; Mon, 5 Dec 2022
- 16:54:00 +0800
-Received: from NTHCCAS01.nuvoton.com (10.1.8.28) by NTHCCAS03.nuvoton.com
- (10.1.20.28) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.1847.3; Mon, 5 Dec 2022
- 16:53:59 +0800
-Received: from taln60.nuvoton.co.il (10.191.1.180) by NTHCCAS01.nuvoton.com
- (10.1.12.25) with Microsoft SMTP Server id 15.1.2375.7 via Frontend
- Transport; Mon, 5 Dec 2022 16:53:59 +0800
-Received: by taln60.nuvoton.co.il (Postfix, from userid 10070)
-        id 9A08563A6B; Mon,  5 Dec 2022 10:53:58 +0200 (IST)
-From:   Tomer Maimon <tmaimon77@gmail.com>
-To:     <ulf.hansson@linaro.org>, <avifishman70@gmail.com>,
-        <tali.perry1@gmail.com>, <joel@jms.id.au>, <venture@google.com>,
-        <yuenn@google.com>, <benjaminfair@google.com>,
-        <adrian.hunter@intel.com>, <skhan@linuxfoundation.org>,
-        <davidgow@google.com>, <pbrobinson@gmail.com>, <gsomlo@gmail.com>,
-        <briannorris@chromium.org>, <arnd@arndb.de>,
-        <krakoczy@antmicro.com>, <andy.shevchenko@gmail.com>
-CC:     <openbmc@lists.ozlabs.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Tomer Maimon <tmaimon77@gmail.com>
-Subject: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-Date:   Mon, 5 Dec 2022 10:53:51 +0200
-Message-ID: <20221205085351.27566-3-tmaimon77@gmail.com>
-X-Mailer: git-send-email 2.33.0
-In-Reply-To: <20221205085351.27566-1-tmaimon77@gmail.com>
-References: <20221205085351.27566-1-tmaimon77@gmail.com>
+        with ESMTP id S230295AbiLEKyn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 5 Dec 2022 05:54:43 -0500
+Received: from mail-qv1-xf2b.google.com (mail-qv1-xf2b.google.com [IPv6:2607:f8b0:4864:20::f2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02BF61901F;
+        Mon,  5 Dec 2022 02:54:42 -0800 (PST)
+Received: by mail-qv1-xf2b.google.com with SMTP id e18so7954278qvs.1;
+        Mon, 05 Dec 2022 02:54:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=376Rf5lOnQYpjC3Bdbpg8sAgKZ9HnP55y45osaN1xAw=;
+        b=jI05zDjDXz8WOsRO6+EygcraOuxNP/UFpu1yCcb8DaPN4TLISmWw38eb/686phBWJR
+         oyhxwEQuPio++YYdi1qe7iGGeuMU6/0HWY3XVmHvPVuC/QFxAE8fpRONQztwP4DqIoxs
+         j5/i8mlK6OeNNdNri/MBJN+C5033I0yH8UxDC40SZkXVTr4tlE8q7eOHP4B3W6aV34P4
+         Ozqd1RRZG/nJolVgmeO6mBdfA7CuQQa6I0je44z5wf3DfD/03n+6uXpQzn/84yOdMXHx
+         /cOjxREPves/Wm93csQAgDRp0R1/YM+VrKycOlu/rnmQd8egCO9pkJxFoHbuE0UZKWuX
+         MUMQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=376Rf5lOnQYpjC3Bdbpg8sAgKZ9HnP55y45osaN1xAw=;
+        b=1YdIQYUz4zVF8aiwoxagWER1OvP73QdkKlRRjVScpVd5sDlsxThFamewr4+9ThgDkO
+         u3JqfnlDAz3sy2xgygc5gbD/Mm0sQ937E2G1FuFaBLauYleWM8JQZsFyEB55Aijlv9kB
+         yy7ZggngK4+Na5DuN8X1fBh3QPTegTzoAJQye4vP4dvLiQ4U/iuJfw8sCN4a/dQrkV1+
+         SAhwSw9Vxe9DUOEbAyY+vYvbjvWdBUar2Ls/dqEkMiRN2cwluL9PyayVeeyDLa9rKm9+
+         pIwbwyvdUrfuzwQ3HoKl7BEj2mBlYskOkSVk+Efe7vLrChPjwtkvpDONH5eqwhwq6zjy
+         Vyhg==
+X-Gm-Message-State: ANoB5pmvHy+QwQot/l3ZMOj1XDT8p4exvlXi+yEl7pW0X2Z3J8CWGNLx
+        OAPhBO68qXKwcebkvOWmhIKomYqcQYY8XSAOFBI=
+X-Google-Smtp-Source: AA0mqf6qZlIlNCoF0kFZl+6/LSGwg+JDHxFcd3brbj4h6Z3NDyzJ2hUYU0ZHCICJrrf1w/EbGCP7H6au6mM/kzQt+Vs=
+X-Received: by 2002:ad4:57aa:0:b0:4c6:f83c:4741 with SMTP id
+ g10-20020ad457aa000000b004c6f83c4741mr36107545qvx.11.1670237681973; Mon, 05
+ Dec 2022 02:54:41 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
+References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
+In-Reply-To: <20221205085351.27566-3-tmaimon77@gmail.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Mon, 5 Dec 2022 12:54:05 +0200
+Message-ID: <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
+To:     Tomer Maimon <tmaimon77@gmail.com>
+Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
+        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
+        yuenn@google.com, benjaminfair@google.com, adrian.hunter@intel.com,
+        skhan@linuxfoundation.org, davidgow@google.com,
+        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
+        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
+On Mon, Dec 5, 2022 at 10:54 AM Tomer Maimon <tmaimon77@gmail.com> wrote:
+>
+> Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
 
-Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
----
- drivers/mmc/host/Kconfig      |  8 ++++
- drivers/mmc/host/Makefile     |  1 +
- drivers/mmc/host/sdhci-npcm.c | 84 +++++++++++++++++++++++++++++++++++
- 3 files changed, 93 insertions(+)
- create mode 100644 drivers/mmc/host/sdhci-npcm.c
+Thank you for an update, my comments below.
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index fb1062a6394c..82ab6fc25dca 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -415,6 +415,14 @@ config MMC_SDHCI_MILBEAUT
- 
- 	  If unsure, say N.
- 
-+config MMC_SDHCI_NPCM
-+	tristate "Secure Digital Host Controller Interface support for NPCM"
-+	depends on ARCH_NPCM || COMPILE_TEST
-+	depends on MMC_SDHCI_PLTFM
-+	help
-+	  This provides support for the SD/eMMC controller found in
-+	  NPCM BMC family SoCs.
-+
- config MMC_SDHCI_IPROC
- 	tristate "SDHCI support for the BCM2835 & iProc SD/MMC Controller"
- 	depends on ARCH_BCM2835 || ARCH_BCM_IPROC || ARCH_BRCMSTB || COMPILE_TEST
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index 4e4ceb32c4b4..a101f87a5f19 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -97,6 +97,7 @@ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)	+= sdhci-pic32.o
- obj-$(CONFIG_MMC_SDHCI_BRCMSTB)		+= sdhci-brcmstb.o
- obj-$(CONFIG_MMC_SDHCI_OMAP)		+= sdhci-omap.o
- obj-$(CONFIG_MMC_SDHCI_SPRD)		+= sdhci-sprd.o
-+obj-$(CONFIG_MMC_SDHCI_NPCM)		+= sdhci-npcm.o
- obj-$(CONFIG_MMC_CQHCI)			+= cqhci.o
- cqhci-y					+= cqhci-core.o
- cqhci-$(CONFIG_MMC_CRYPTO)		+= cqhci-crypto.o
-diff --git a/drivers/mmc/host/sdhci-npcm.c b/drivers/mmc/host/sdhci-npcm.c
-new file mode 100644
-index 000000000000..beace15b6c00
---- /dev/null
-+++ b/drivers/mmc/host/sdhci-npcm.c
-@@ -0,0 +1,84 @@
-+// SPDX-License-Identifier: GPL-2.0+
-+/*
-+ * NPCM SDHC MMC host controller driver.
-+ *
-+ * Copyright (c) 2020 Nuvoton Technology corporation.
-+ */
-+
-+#include <linux/clk.h>
-+#include <linux/err.h>
-+#include <linux/io.h>
-+#include <linux/mmc/host.h>
-+#include <linux/mmc/mmc.h>
-+#include <linux/module.h>
-+
-+#include "sdhci-pltfm.h"
-+
-+static const struct sdhci_pltfm_data npcm_sdhci_pdata = {
-+	.quirks  = SDHCI_QUIRK_DELAY_AFTER_POWER,
-+	.quirks2 = SDHCI_QUIRK2_STOP_WITH_TC |
-+		   SDHCI_QUIRK2_NO_1_8_V,
-+};
-+
-+static int npcm_sdhci_probe(struct platform_device *pdev)
-+{
-+	struct sdhci_pltfm_host *pltfm_host;
-+	struct sdhci_host *host;
-+	u32 caps;
-+	int ret;
-+
-+	host = sdhci_pltfm_init(pdev, &npcm_sdhci_pdata, 0);
-+	if (IS_ERR(host))
-+		return PTR_ERR(host);
-+
-+	pltfm_host = sdhci_priv(host);
-+
-+	pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
-+	if (IS_ERR(pltfm_host->clk))
-+		return PTR_ERR(pltfm_host->clk);
-+
-+	ret = clk_prepare_enable(pltfm_host->clk);
-+	if (ret)
-+		return ret;
-+
-+	caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-+	if (caps & SDHCI_CAN_DO_8BIT)
-+		host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-+
-+	ret = mmc_of_parse(host->mmc);
-+	if (ret)
-+		goto err_sdhci_add;
-+
-+	ret = sdhci_add_host(host);
-+	if (ret)
-+		goto err_sdhci_add;
-+
-+	return 0;
-+
-+err_sdhci_add:
-+	clk_disable_unprepare(pltfm_host->clk);
-+	sdhci_pltfm_free(pdev);
-+	return ret;
-+}
-+
-+static const struct of_device_id npcm_sdhci_of_match[] = {
-+	{ .compatible = "nuvoton,npcm750-sdhci" },
-+	{ .compatible = "nuvoton,npcm845-sdhci" },
-+	{ }
-+};
-+MODULE_DEVICE_TABLE(of, npcm_sdhci_of_match);
-+
-+static struct platform_driver npcm_sdhci_driver = {
-+	.driver = {
-+		.name	= "npcm-sdhci",
-+		.of_match_table = npcm_sdhci_of_match,
-+		.pm	= &sdhci_pltfm_pmops,
-+	},
-+	.probe		= npcm_sdhci_probe,
-+	.remove		= sdhci_pltfm_unregister,
-+};
-+module_platform_driver(npcm_sdhci_driver);
-+
-+MODULE_DESCRIPTION("NPCM Secure Digital Host Controller Interface driver");
-+MODULE_AUTHOR("Tomer Maimon <tomer.maimon@nuvoton.com>");
-+MODULE_LICENSE("GPL");
+...
+
+> +config MMC_SDHCI_NPCM
+
+>  config MMC_SDHCI_IPROC
+
+Perhaps after IPROC?
+
+...
+
+> @@ -97,6 +97,7 @@ obj-$(CONFIG_MMC_SDHCI_MICROCHIP_PIC32)       += sdhci-pic32.o
+>  obj-$(CONFIG_MMC_SDHCI_BRCMSTB)                += sdhci-brcmstb.o
+>  obj-$(CONFIG_MMC_SDHCI_OMAP)           += sdhci-omap.o
+>  obj-$(CONFIG_MMC_SDHCI_SPRD)           += sdhci-sprd.o
+> +obj-$(CONFIG_MMC_SDHCI_NPCM)           += sdhci-npcm.o
+
+Perhaps after IPROC? (There is a group of platform drivers slightly
+below than here)
+
+>  obj-$(CONFIG_MMC_CQHCI)                        += cqhci.o
+
+...
+
+> +#include <linux/clk.h>
+> +#include <linux/err.h>
+> +#include <linux/io.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/mmc.h>
+> +#include <linux/module.h>
+
+I guess platform_device.h is missing here.
+
+...
+
+> +static int npcm_sdhci_probe(struct platform_device *pdev)
+> +{
+> +       struct sdhci_pltfm_host *pltfm_host;
+> +       struct sdhci_host *host;
+> +       u32 caps;
+> +       int ret;
+> +
+> +       host = sdhci_pltfm_init(pdev, &npcm_sdhci_pdata, 0);
+> +       if (IS_ERR(host))
+> +               return PTR_ERR(host);
+> +
+> +       pltfm_host = sdhci_priv(host);
+
+> +       pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
+
+You can't mix devm with non-devm in this way.
+
+> +       if (IS_ERR(pltfm_host->clk))
+> +               return PTR_ERR(pltfm_host->clk);
+> +
+> +       ret = clk_prepare_enable(pltfm_host->clk);
+> +       if (ret)
+> +               return ret;
+> +
+> +       caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> +       if (caps & SDHCI_CAN_DO_8BIT)
+> +               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> +
+> +       ret = mmc_of_parse(host->mmc);
+> +       if (ret)
+> +               goto err_sdhci_add;
+> +
+> +       ret = sdhci_add_host(host);
+> +       if (ret)
+> +               goto err_sdhci_add;
+
+Why can't you use sdhci_pltfm_register()?
+
+> +       return 0;
+> +
+> +err_sdhci_add:
+> +       clk_disable_unprepare(pltfm_host->clk);
+> +       sdhci_pltfm_free(pdev);
+> +       return ret;
+> +}
+
+Missing ->remove() due to above.
+
+Have you tried to compile as a module and then remove and insert it
+several times?
+
 -- 
-2.33.0
-
+With Best Regards,
+Andy Shevchenko
