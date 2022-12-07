@@ -2,111 +2,100 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 930EFC352A1
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:38:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA19AC352A1
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:38:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230002AbiLGMin (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 07:38:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53020 "EHLO
+        id S229950AbiLGMir (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 07:38:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229879AbiLGMiT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:19 -0500
-Received: from mail-pg1-x52d.google.com (mail-pg1-x52d.google.com [IPv6:2607:f8b0:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D2C1450B7
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:09 -0800 (PST)
-Received: by mail-pg1-x52d.google.com with SMTP id f9so16263183pgf.7
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:09 -0800 (PST)
+        with ESMTP id S229896AbiLGMi2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:28 -0500
+Received: from mail-pl1-x62b.google.com (mail-pl1-x62b.google.com [IPv6:2607:f8b0:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5FDF45ED8
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:12 -0800 (PST)
+Received: by mail-pl1-x62b.google.com with SMTP id y17so16909028plp.3
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:12 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mYM23FTNqIfOQt2Wc+NWK66hmV39Pj1uNxknfmVEQho=;
-        b=BKMiYekt6U/P6SgrYYV4QHdXXhw9KFWVOmx2NYYPcRbmH3XGi2wY4BoeHTLex3/PVn
-         wac86bmaxiIZ2ZePogEVA/T81wrfnffe0mc2g2/oIoK0nI3n+y8giKalg7fBcMFyRKGB
-         /H/0jsH1HG6qN8FTdCqq0dTXJrRGMrFr8TAmnbtXrLX9pQ2ipN5OCoejmBghlYT/Brz4
-         jN6qqSXSfgvtJqp22vWy68TBUBw4k1HVMwtNfxP3LG33+DXF/QfjNysl3FrLezDqTtN6
-         b/SFUi7Yyqoc5dhj29aJKQyoT3NnNvaqspYBSNV+vJa+kY3obq0VRk8ivtaNC770/NIQ
-         X3Jw==
+        bh=ZndbdLLkEgHDKboB3d1cn4QD4Wg2k0brH1CxNqU4OcQ=;
+        b=cghZdQlCdDcPw+mYqe1g/MXJ6etr9ARIyt/vjlco2GVQQ9/QHNapSbUAMmJ7sZwS81
+         //N1u7Mwkhw+q3y4ax4RK+echFY9sOagZwNWfqz5VHFUmL/KzmNn5V+gASVqOJB0CiZl
+         3Hw454NM1jlutmtyQ1u3yMBSDeGRy+FpMo99Shue2AjEYHOwXA4DwZbnmaHtuAn/aWXy
+         Vx9RRE/MeNzrDF8GcE+TI459thip53eLlZNvaETWwrvpoY0sLdRQqh8VXm2PhJpB23gk
+         fNFQRHPu3Rd4EA7lALHFAmgn+H0DIV72az93XSvz4WVlaCbtALtc4wAJBp6/h3ITb/Db
+         TTtA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mYM23FTNqIfOQt2Wc+NWK66hmV39Pj1uNxknfmVEQho=;
-        b=2aUS2vE3EWnv82eH2E/siq1+TXD/3ZXCC3XDYV9WAQ70xRjvBsJLvVONTuL+tKPKob
-         HftKDpjnLDjMc8tkgA/y4WehCs+RP4hItzYSjZBbBvhUI8L6SR5c9hc0kPpkC34II++l
-         Mc9NNH1xTJOT51oRJtbrLxfiTIqgbou6Ag7y7fprrnPg0ce7nbwGYYwruJPXU4x++VtN
-         hpxch3Vm4gHpAhaKGkoh2bnpDIoQk9U2ZGWQcC7giAJs8w0/L399bVzNNRUhQQ8XikLR
-         TESZgIO438e0Ft6oidos+tDIC2WzsZ3/QANA3IFkLE9EQaEPCUWvjAi1819pnSdCI4ru
-         vvUg==
-X-Gm-Message-State: ANoB5pmWiL2QAJmz43HFszLe/mcxMCRFq6uO7ckmxsSmlkD7D9ZEHWns
-        2uSuhCZ2GmVF6ONLQwnivs8vchalFRr64JprUQrzqxcrqE9xqg==
-X-Google-Smtp-Source: AA0mqf7/76Ca5jC5TY5aBWLKt9s1l+HvKdSlwIVOrCMaztVBuwoSqK/61JSvpjt9aLpKDNO+KPS2zS0lRrbgxrPkb4I=
-X-Received: by 2002:a65:4688:0:b0:477:7aee:a464 with SMTP id
- h8-20020a654688000000b004777aeea464mr69847980pgr.595.1670416688784; Wed, 07
- Dec 2022 04:38:08 -0800 (PST)
+        bh=ZndbdLLkEgHDKboB3d1cn4QD4Wg2k0brH1CxNqU4OcQ=;
+        b=bcSnA9ietFzZ4/juVMEmey/ElHy5rlD6WKHO1pUpuanraY+eVqFkT5DVtft/nqAlug
+         ywYxXPHyZQWl5O/6hKthIN205ZzyxstyZfCGBzkZqWbyF/tt4UGe3RxhADLMWliJaVxN
+         +9/kDlUOGVkf9qYSEw6bpnnVQz6twYtVBV32Au6A5alKunfpQCwsePPv6wsIn4k1E4JM
+         Tqbj0L/AXuorWryPAyHv3Z23OtL6WAtfE/YKwYZ0S5bdK2GCdyK6STe/EPHU/hH1XMVw
+         cK2Iu7vhoajBADBXmgU9x9uNSgLFAFW351iYQX/IuTuoIUPZTJ24D2qzpodf5n1WCEtT
+         fzYg==
+X-Gm-Message-State: ANoB5pmQcnGVEeX173K1LP7uRnYMzABRaAKcpi6XkdsQBgVLK1g5eMPl
+        tJtqZ3M3LRi+15uUvY7YC0s8QGU8mnW1sATAYnku6A==
+X-Google-Smtp-Source: AA0mqf5bCbCVsLPoFunymX5SQn8AFRqopXvc4v7G31VU4+GH5wg3JcCgLxtEIYkqaJ3mfuDn80lgtIBia0VMaUH6ygg=
+X-Received: by 2002:a17:90a:ae0f:b0:20d:b124:33b1 with SMTP id
+ t15-20020a17090aae0f00b0020db12433b1mr97405139pjq.202.1670416692492; Wed, 07
+ Dec 2022 04:38:12 -0800 (PST)
 MIME-Version: 1.0
-References: <20221202075905.25363-1-andy.tang@nxp.com>
-In-Reply-To: <20221202075905.25363-1-andy.tang@nxp.com>
+References: <20221202212119.43214-1-kdasu.kdev@gmail.com>
+In-Reply-To: <20221202212119.43214-1-kdasu.kdev@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 7 Dec 2022 13:37:32 +0100
-Message-ID: <CAPDyKForCE1VODVt5KAdcZPK0n0Gxw575aow6nDo62yYFX_qUQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: limit the SDHC clock frequency
-To:     andy.tang@nxp.com
-Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
+Date:   Wed, 7 Dec 2022 13:37:36 +0100
+Message-ID: <CAPDyKFpze71CBVoHzGWu++JWBYDgNPUmiAjDg5jm7ABMQZg+Pg@mail.gmail.com>
+Subject: Re: [PATCH] MAINTAINERS: Update maintainer for SDHCI Broadcom BRCMSTB driver
+To:     Kamal Dasu <kdasu.kdev@gmail.com>
+Cc:     linux-kernel@vger.kernel.org, alcooperx@gmail.com,
+        linux-arm-kernel@lists.infradead.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, f.fainelli@gmail.com,
+        bcm-kernel-feedback-list@broadcom.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2 Dec 2022 at 08:44, <andy.tang@nxp.com> wrote:
+On Fri, 2 Dec 2022 at 22:22, Kamal Dasu <kdasu.kdev@gmail.com> wrote:
 >
-> From: Andy Tang <andy.tang@nxp.com>
->
-> The highest clock frequency for eMMC HS200 mode on ls1043a
-> is 116.7Mhz according to its specification.
-> So add the limit to gate the frequency.
->
-> Signed-off-by: Andy Tang <andy.tang@nxp.com>
+> Taking over as upstream maintainer for Broadcom SDHCI
+> driver from Al Cooper.
 
-Applied for next, thanks!
+Looks like we are keeping Al listed as maintainer too (I am totally
+fine by that), but perhaps we should make that clearer in the commit
+message?
+
+>
+> Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
+
+Nevertheless, thanks for helping out! So, applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> v2: change the author to andy tang
+>  MAINTAINERS | 1 +
+>  1 file changed, 1 insertion(+)
 >
->  drivers/mmc/host/sdhci-of-esdhc.c | 7 +++++++
->  1 file changed, 7 insertions(+)
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 1daadaa4d48b..90beddcf84b0 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -18497,6 +18497,7 @@ K:      \bsecure_computing
+>  K:     \bTIF_SECCOMP\b
 >
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 00542dd74c07..1fd4ae10862d 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -43,6 +43,12 @@ static const struct esdhc_clk_fixup ls1021a_esdhc_clk = {
->         .max_clk[MMC_TIMING_SD_HS] = 46500000,
->  };
->
-> +static const struct esdhc_clk_fixup ls1043a_esdhc_clk = {
-> +       .sd_dflt_max_clk = 25000000,
-> +       .max_clk[MMC_TIMING_UHS_SDR104] = 116700000,
-> +       .max_clk[MMC_TIMING_MMC_HS200] = 116700000,
-> +};
-> +
->  static const struct esdhc_clk_fixup ls1046a_esdhc_clk = {
->         .sd_dflt_max_clk = 25000000,
->         .max_clk[MMC_TIMING_UHS_SDR104] = 167000000,
-> @@ -64,6 +70,7 @@ static const struct esdhc_clk_fixup p1010_esdhc_clk = {
->
->  static const struct of_device_id sdhci_esdhc_of_match[] = {
->         { .compatible = "fsl,ls1021a-esdhc", .data = &ls1021a_esdhc_clk},
-> +       { .compatible = "fsl,ls1043a-esdhc", .data = &ls1043a_esdhc_clk},
->         { .compatible = "fsl,ls1046a-esdhc", .data = &ls1046a_esdhc_clk},
->         { .compatible = "fsl,ls1012a-esdhc", .data = &ls1012a_esdhc_clk},
->         { .compatible = "fsl,p1010-esdhc",   .data = &p1010_esdhc_clk},
+>  SECURE DIGITAL HOST CONTROLLER INTERFACE (SDHCI) Broadcom BRCMSTB DRIVER
+> +M:     Kamal Dasu <kdasu.kdev@gmail.com>
+>  M:     Al Cooper <alcooperx@gmail.com>
+>  R:     Broadcom internal kernel review list <bcm-kernel-feedback-list@broadcom.com>
+>  L:     linux-mmc@vger.kernel.org
 > --
-> 2.25.1
+> 2.17.1
 >
