@@ -2,109 +2,119 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0137DC4708E
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:39:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4627BC352A1
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:39:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229480AbiLGMjA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 07:39:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53554 "EHLO
+        id S229870AbiLGMjC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 07:39:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53070 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229941AbiLGMib (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:31 -0500
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C753050D6D
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:20 -0800 (PST)
-Received: by mail-pl1-x62a.google.com with SMTP id jl24so16893270plb.8
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:20 -0800 (PST)
+        with ESMTP id S229989AbiLGMic (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:32 -0500
+Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 248165133D
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:25 -0800 (PST)
+Received: by mail-pf1-x435.google.com with SMTP id n3so13046633pfq.10
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=YBX0rthji88f2u2kpbjWW8XV26nJpBCfbkYDEQ0jGgs=;
-        b=B5n1LzzMR+vFf49xTP/rI64mCZcTUPodYeyxpjAXXP1IkgXVgcJ+aNl3ojevp2r2Lk
-         +vIcaW4NvHRmOk4n74Hr5s37NzFsIAGMEkM9JbufPIwA1EQ+G1bOsEk/iEjgMNgPs5Yv
-         flnpOPpGd6JVneMa1MM5Yw/2brb3xJ8HnW6Zw/OhWH5afCcOxi+1DKCPC3nU6JXIXx2J
-         7g3M6db5dnRclDMWCaW6GgjqGTCnpSCtK8lNjDwDR9KHlVBuk/COIHGwxmuyAKNypHQz
-         IfGHnTnckAnkzSLJBFkD0xutbWx4DF46wJIumJqTHJ1kANqSq/HMjKUkUM7+1PBNZfiE
-         QX5A==
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VFA8+rEw0dxGOhWHCOJyRKc/XlYicDFAj7Rf5FW7TzA=;
+        b=t45ZmiFiysNDnaTHfWAb3RxuHZT4KGyJJyq2U+vEKG4/PCNiljE47SCANhrxVGdhP9
+         RtgsPk1u3TFy0hRfahBjhY/pGvM9ZHNAxX3iT57ZWXEq5H/U2eE+e9XppfbmcTG51s8L
+         Wie2vlqEvOB2wjhlyj5JzkzQKsUEXHFoFGQ3IdwbPrbh1hkXh2gKcFo6Aa0F+/l1jvkN
+         vqHPU8LQcFzr5H+G2ahj7cIDlw+65Wk4C6kJyGtvg5Css5T6jTDXavykd5xs49OV4M++
+         Fy2wyBHuaG+VYMVx4iuo9NrqV6922a71Btu7pMrlV4Ys7WsFSUgNYurLaYaaTBifxMHa
+         UFbQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=YBX0rthji88f2u2kpbjWW8XV26nJpBCfbkYDEQ0jGgs=;
-        b=rMmz19z1HYgVD58uQ+ojhmFZr7+MLE2D7pN9Iexh2fgDpv/+xv7vebC7iX3XSh9QCg
-         rBmr3DtFE7Xbx1x4TNAAljj5cTyM1zz/GqWJKwL3zNKuqa7iVx68/PNmOiWnp1yq+OSS
-         VFsguVZWsACeARulzSjDRhYvgLjsJ/5CVHdGgnlb6BDpbg5ANH4g6ZoRkOUqOOTKiwfy
-         6hqUrB1Q//OCNjaxWXxxTXtRnnQlQrFsa2WCD6n/RVybSx1Hql0389YcR8FJkmRIO2bc
-         v7BDh6Ko3nKwardng6ZOIEvf3WX2453BuULWU/89O2W7SXtwe0DdARfYIumQxGn+suQc
-         YN0w==
-X-Gm-Message-State: ANoB5pkyHOg4uagXKTZi/9KcVx6v5QTyqztTUbgCaA6hRw5TDcSUUWiI
-        Hq1FQCbzRIthNNbE1Eb8eM6OKV9kUihZO86UgHpqEQ==
-X-Google-Smtp-Source: AA0mqf6dlj8DZXyu/nXvQiw+t5H43fPAM5QS0D71Dgo3NXBcy+o/mtivw3pVjRcUk4p/o1swJO8iVOuQUMTKcoCyTqE=
-X-Received: by 2002:a17:90a:7485:b0:219:ef02:a5eb with SMTP id
- p5-20020a17090a748500b00219ef02a5ebmr10667292pjk.84.1670416700348; Wed, 07
- Dec 2022 04:38:20 -0800 (PST)
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=VFA8+rEw0dxGOhWHCOJyRKc/XlYicDFAj7Rf5FW7TzA=;
+        b=rAA0MxQ7F5zni0PLtXbcP758gAK62p6czWz+aiS1y2bYrf3u7VY5OB3SYiiYn3wQjm
+         Vm7/XpSeo6b0J8RWWF0k26i/ru7sLOsBjoKXlI5hZIl5wkE3aoIe4l3eTK/wpVdsoHsO
+         +y34upzQgRVVPZ9TJKkXumh7VC5inmyZgsmIq1mcg/HhvbRppl0hWvda4FMyjo/EAJsG
+         mImvM6UtBDZQcoN1SCeHqr11ReaE0KYHmZ6yoIaaxFUNM4fdCE6DEbehgfgZmrzGP6t7
+         OBMO+OGiwZUdXyHAWbCBHldje3WydN4ctnxcfhL/DKL2+sKxt0ma/LCIXkkV/22S50nV
+         wqrg==
+X-Gm-Message-State: ANoB5plb7NjopiWaXPTidp4KDtasNS6FhehuNh74+G8fmjhr7GahM1Y4
+        m7G2FzZvgWIKeC0LxCHqiVkNM2mcU2aQxA/q9Nwn3w==
+X-Google-Smtp-Source: AA0mqf4TlYvFM19eSDCRhF5eZXqHNWp9CkKSbYT4qXd/pLe0CEnTI/WrNOSb58jE7JpoVhrOKgGsVGCK2BaabiGGE30=
+X-Received: by 2002:a63:501c:0:b0:477:650a:c29a with SMTP id
+ e28-20020a63501c000000b00477650ac29amr62955490pgb.541.1670416704625; Wed, 07
+ Dec 2022 04:38:24 -0800 (PST)
 MIME-Version: 1.0
-References: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org> <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
+References: <20221205160353.1.I5fa28f1045f17fb9285d507accf139f8b2a8f4b5@changeid>
+In-Reply-To: <20221205160353.1.I5fa28f1045f17fb9285d507accf139f8b2a8f4b5@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 7 Dec 2022 13:37:44 +0100
-Message-ID: <CAPDyKFpccW4cFvf4BSJtO+UZdZnAzAhaE0vrU9p92Hn22Hcx8g@mail.gmail.com>
-Subject: Re: [PATCH 5/5] dt-bindings: mmc: sdhci-msm: allow dma-coherent
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+Date:   Wed, 7 Dec 2022 13:37:48 +0100
+Message-ID: <CAPDyKFp_hq1-kvd4s=573vU=2AkfteSuCiDxcGK0-UHMW-mh7g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Resolve "unused" warnings with CONFIG_OF=n
+To:     Brian Norris <briannorris@chromium.org>
+Cc:     linux-mmc@vger.kernel.org, Florian Fainelli <f.fainelli@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>, abel.vesa@linaro.org,
-        Johan Hovold <johan+linaro@kernel.org>
+        Al Cooper <alcooperx@gmail.com>, linux-kernel@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        Broadcom internal kernel review list 
+        <bcm-kernel-feedback-list@broadcom.com>,
+        kernel test robot <lkp@intel.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 4 Dec 2022 at 10:47, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
+On Tue, 6 Dec 2022 at 01:04, Brian Norris <briannorris@chromium.org> wrote:
 >
-> SM8350, SM8450 and SM8550 SDHCI controllers for SD card are marked with
-> dma-coherent, so allow it.
+> With W=3D1, we can see this gcc warning:
 >
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> drivers/mmc/host/sdhci-brcmstb.c:182:34: warning: =E2=80=98sdhci_brcm_of_=
+match=E2=80=99 defined but not used [-Wunused-const-variable=3D]
+>   182 | static const struct of_device_id sdhci_brcm_of_match[] =3D {
+>       |                                  ^~~~~~~~~~~~~~~~~~~
+>
+> Rather than play around more with #ifdef's, the simplest solution is to
+> just mark this __maybe_unused.
+>
+> Fixes: 1fad8422c989 ("mmc: sdhci-brcmstb: Allow building with COMPILE_TES=
+T")
+> Reported-by: kernel test robot <lkp@intel.com>
+> Link: https://lore.kernel.org/all/202212060700.NjMecjxS-lkp@intel.com/
+> Signed-off-by: Brian Norris <briannorris@chromium.org>
 
-All five patches applied from the series and by removing the fixes tag
-from patch4/5, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
->
 > ---
 >
-> dma-coherent was first added to SM8450... then to SM8350 (not merged
-> yet) and now it appeared in SM8550 patches, but I actually do not know
-> if this is copy-paste or real need.
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
->  1 file changed, 2 insertions(+)
+>  drivers/mmc/host/sdhci-brcmstb.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 39e303468bc4..6b89238f0565 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -83,6 +83,8 @@ properties:
->        - const: cal
->        - const: sleep
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-br=
+cmstb.c
+> index 55d8bd232695..f2cf3d70db79 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -179,7 +179,7 @@ static const struct brcmstb_match_priv match_priv_721=
+6 =3D {
+>         .ops =3D &sdhci_brcmstb_ops_7216,
+>  };
 >
-> +  dma-coherent: true
-> +
->    interrupts:
->      maxItems: 2
->
+> -static const struct of_device_id sdhci_brcm_of_match[] =3D {
+> +static const struct of_device_id __maybe_unused sdhci_brcm_of_match[] =
+=3D {
+>         { .compatible =3D "brcm,bcm7425-sdhci", .data =3D &match_priv_742=
+5 },
+>         { .compatible =3D "brcm,bcm7445-sdhci", .data =3D &match_priv_744=
+5 },
+>         { .compatible =3D "brcm,bcm7216-sdhci", .data =3D &match_priv_721=
+6 },
 > --
-> 2.34.1
+> 2.39.0.rc0.267.gcb52ba06e7-goog
 >
