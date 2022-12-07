@@ -2,133 +2,199 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3401BC352A1
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:50:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B6187C63706
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:01:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229758AbiLGMux (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 07:50:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33364 "EHLO
+        id S229788AbiLGNB6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 08:01:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229754AbiLGMus (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:50:48 -0500
-Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6B7F5217D
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:50:45 -0800 (PST)
-Received: by mail-pl1-x634.google.com with SMTP id a9so16919137pld.7
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:50:45 -0800 (PST)
+        with ESMTP id S229603AbiLGNBw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:01:52 -0500
+Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BFD35133D;
+        Wed,  7 Dec 2022 05:01:51 -0800 (PST)
+Received: by mail-lj1-x22c.google.com with SMTP id bn5so20840171ljb.2;
+        Wed, 07 Dec 2022 05:01:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=gmail.com; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=smxRVhRmzb1okWqpy/grVB168UtJPXN5DHAuNQ7dA3Y=;
-        b=t+/vvYCQB2x0JLPTFVaQbBvOzgmzWSVqzIQpR6SmQS+jtHdMYtmoW25HMi4HPjlf4y
-         DMh3pPauzk+u2RnhBFYN+bvm485d3w8T83zQNWDLGH9dAQF0e7NVvyKCx+YEkmVexTNM
-         ONXu6EHgAm3AmoCjr+nYH1595rMFc7+2OI1BJefMi4n4vIjBndgOzdGe/EfsmBkdTQnK
-         G7T+B6NNYMcCvT+XblPqBCDe3bsDySYxj8gtc/h+DGRPuqgnQJLLcCW0UXwEYx4GZ1VY
-         wL4H2habQjEEJ/CTAb6HL9cIEN8iwAa1zzy2RdMfm075FmvUtfox/6I95FUzY0Zo5lGD
-         zzhw==
+        bh=58n9OnzkX+f+tALJ3x9hXjitd2F/uK0zQDu7nLFK8BM=;
+        b=Wb7aJUSwSAqnww08AQep8NInEPaa3G9cUjc8sQqZCF2rSZLiFiCkbPvi90Q2W/JB50
+         AkZ0elNUWOZAg6iyS7IFebYNSJCSfUVNBIpyGC09Wu/HfrXcsqaxszfmVUhIfIbdz+tG
+         G+oCaum5ZcLDLT9G7P/Z0Agwbw7BLr4LKCvjVbpsts29SYIH+YuFthAG5XZtiKOgPS/P
+         ZthMdAxkIZxycgbGnmvGTYQR3cEhqarrfoenHuJepkHLokhiBap+28SWnHwc7p6Shlxp
+         nwxvkfNOpUxUFzKkXI8arTvSilK593jhVasK23lsIaSSOhsg/gGZL6ZmBnWC095w8U3Y
+         noGw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=smxRVhRmzb1okWqpy/grVB168UtJPXN5DHAuNQ7dA3Y=;
-        b=5sYjU4Qa9C+gsduz04qhJtdBwCSltFwsCVNW+zlshbh6bWWWTpIaKC6nZLx9mXX0bP
-         B9u5d4ggNWxQEBv/HiL1HANuAcUFwniCj/fNXrVM0B/4pVt2LvwVS0V+Sjg1Kd6NSxcB
-         6+gnGdsY8/lpBreVXaHH56BGXieJu5nJ4P8XxzHFzk3wIQ9+S2tS8DoGoNpPfjxPUTAl
-         8/uQAfMRTkBIYfuUwj3weudkmlObgPBBLcbawgOuCBytpE+yfi+Nw0bxNKfX2l3GMLXi
-         S0VMTUKWKLSIiZr0sUaQuZfll6x7ebAFTogfP9O5rYnETUmSGO2Y7zJI7nBLH0NlrwK3
-         jNWQ==
-X-Gm-Message-State: ANoB5pntHpDm3bEqjbm5FWkOHYE/dAxi+oynYyBraw/ylsYJmaOcxEqW
-        68/VaMobczElkdWqqYTDhmI4IF8uo+0d2NUoHbCHag==
-X-Google-Smtp-Source: AA0mqf4tiC/50iNbCBRUhz2Onm5h/3OmzA9iDcTXem3pnGcF2a5DlkzCOzvbHfvpJopCuddzEqq4RtcOe5YgaEpTOSQ=
-X-Received: by 2002:a17:902:eb83:b0:189:e426:4616 with SMTP id
- q3-20020a170902eb8300b00189e4264616mr10215459plg.37.1670417445110; Wed, 07
- Dec 2022 04:50:45 -0800 (PST)
+        bh=58n9OnzkX+f+tALJ3x9hXjitd2F/uK0zQDu7nLFK8BM=;
+        b=AIX2JyowqM1l8YEOax8X0uC/g/lloZEwk9L64AJfFeqmBWI2a411Oy7hNxEah0EHdS
+         fnLMQrTvwoYn+xpHq1s3G/A1AdUgL9SQSdrCEo/72U5Dl/AOpMDqdJQfcC4KKHmnjPhp
+         4cMBErd58yiyOYoesBvgRH3z63a7pD6twt2TNlA3ha67UGvsDb+jl0PM8GGAo1QI5FBr
+         fPYWICOj8gyC/P9aZaQSaZyQkrQ29tf33cWtcqYBKRnjlZKDDJH2b9CGwbyjBGWc5SeT
+         LCUO2hDYcpxl9vgZ+p06pgNgsVZkTOrQ9pRBVf6saC9jx9jqVAzZUZSMwWWyEhgK4bOe
+         UPgQ==
+X-Gm-Message-State: ANoB5pnnbVTeLLODKxw78frcFvk/DokvFeBFXeDn45zbW0mrhqRt9Rw5
+        V+XwIUNiuNxKTihI1DPcKgToSzM/MAyeXi866nk=
+X-Google-Smtp-Source: AA0mqf6Ide4+sp8VWwohGr/fTMvzoa8oN76VSzU4an/ivwpfuzoPSBg3rAh6NB3hKlkh7TXGWyqSO8u/qTTMSXywbfY=
+X-Received: by 2002:a05:651c:c85:b0:278:f572:c9ac with SMTP id
+ bz5-20020a05651c0c8500b00278f572c9acmr30906647ljb.73.1670418109344; Wed, 07
+ Dec 2022 05:01:49 -0800 (PST)
 MIME-Version: 1.0
-References: <20221201091150.3474-1-wenchao.chen@unisoc.com>
- <CAPDyKFoBf25CDAgg5R0MSp53iC277FzGO9DUDf3LPU+_wuxCsA@mail.gmail.com> <CA+Da2qwjY=ebOmwsauPS5r8ig7wbH0JwjhDPmi1+eaT09tKxGQ@mail.gmail.com>
-In-Reply-To: <CA+Da2qwjY=ebOmwsauPS5r8ig7wbH0JwjhDPmi1+eaT09tKxGQ@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 7 Dec 2022 13:50:08 +0100
-Message-ID: <CAPDyKFrLVhBs2-b6WP-UQbaS03hBRKRUa08fYU+EWLA1kgPXYQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sprd: remove prefer asynchronous probe
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com, gengcixi@gmail.com
+References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
+ <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
+ <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
+ <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
+ <c200557f-c30a-62f9-287a-af804e818cf1@intel.com> <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
+ <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com> <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com>
+In-Reply-To: <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com>
+From:   Tomer Maimon <tmaimon77@gmail.com>
+Date:   Wed, 7 Dec 2022 15:01:38 +0200
+Message-ID: <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
+        ulf.hansson@linaro.org, avifishman70@gmail.com,
+        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
+        yuenn@google.com, benjaminfair@google.com,
+        skhan@linuxfoundation.org, davidgow@google.com,
+        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
+        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 2 Dec 2022 at 03:41, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
+Hi Andy and Adrian,
+
+Thanks for your clarifications
+
+On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> On Thu, Dec 1, 2022 at 6:41 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> On 5/12/22 16:17, Andy Shevchenko wrote:
+> > On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
+> > <andy.shevchenko@gmail.com> wrote:
+> >>
+> >> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> >>> On 5/12/22 15:25, Andy Shevchenko wrote:
+> >>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
+> >>>>> On Mon, 5 Dec 2022 at 12:54, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+> >>>>>> On Mon, Dec 5, 2022 at 10:54 AM Tomer Maimon <tmaimon77@gmail.com> wrote:
+> >>
+> >> ...
+> >>
+> >>>>>>> +       pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
+> >>>>>>
+> >>>>>> You can't mix devm with non-devm in this way.
+> >>>>> Can you explain what you mean You can't mix devm with non-devm in this
+> >>>>> way, where is the mix?
+> >>>>> In version 1 used devm_clk_get, is it problematic?
+> >>>>
+> >>>> devm_ is problematic in your case.
+> >>>> TL;DR: you need to use clk_get_optional() and clk_put().
+> >>>
+> >>> devm_ calls exactly those, so what is the issue?
+> >>
+> >> The issue is the error path or removal stage where it may or may be
+> >> not problematic. To be on the safe side, the best approach is to make
+> >> sure that allocated resources are being deallocated in the reversed
+> >> order. That said, the
+> >>
+> >> 1. call non-devm_func()
+> >> 2. call devm_func()
+> >>
+> >> is wrong strictly speaking.
 > >
-> > On Thu, 1 Dec 2022 at 10:12, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
-> > >
-> > > The prefer asynchronous probe affects the order of device probes.
+> > To elaborate more, the
 > >
-> > Is there a problem with this? If so, can you elaborate on what kind of problems?
+> > 1. call all devm_func()
+> > 2. call only non-devm_func()
+> >
+> > is the correct order.
+>
+> 1. WRT pltfm_host->clk, that is what is happening
+> 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
+> e.g. mmc_alloc_host() / mmc_free_host()
+I little confused about what to decide, should I use only
+non-devm_func because mmc_alloc_host() / mmc_free_host() is not
+warrped with devm_?
+>
+> >
+> > Hence in this case the driver can be worked around easily (by
+> > shuffling the order in ->probe() to call devm_ first), but as I said
+> > looking into implementation of the _unregister() I'm pretty sure that
+> > clock management should be in sdhci-pltfm, rather than in all callers
+> > who won't need the full customization.
+> >
+> > Hope this helps to understand my point.
+> >
+> >>>> Your ->remove() callback doesn't free resources in the reversed order
+> >>>> which may or, by luck, may not be the case of all possible crashes,
+> >>>> UAFs, races, etc during removal stage. All the same for error path in
+> >>>> ->probe().
+> >>
+> >> I also pointed out above what would be the outcome of neglecting this rule.
+> >>
+> >>>>>>> +       if (IS_ERR(pltfm_host->clk))
+> >>>>>>> +               return PTR_ERR(pltfm_host->clk);
+> >>>>>>> +
+> >>>>>>> +       ret = clk_prepare_enable(pltfm_host->clk);
+> >>>>>>> +       if (ret)
+> >>>>>>> +               return ret;
+> >>>>>>> +
+> >>>>>>> +       caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> >>>>>>> +       if (caps & SDHCI_CAN_DO_8BIT)
+> >>>>>>> +               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
+> >>>>>>> +
+> >>>>>>> +       ret = mmc_of_parse(host->mmc);
+> >>>>>>> +       if (ret)
+> >>>>>>> +               goto err_sdhci_add;
+> >>>>>>> +
+> >>>>>>> +       ret = sdhci_add_host(host);
+> >>>>>>> +       if (ret)
+> >>>>>>> +               goto err_sdhci_add;
+> >>>>>>
+> >>>>>> Why can't you use sdhci_pltfm_register()?
+> >>>>> two things are missing in sdhci_pltfm_register
+> >>>>> 1. clock.
+> >>>>
+> >>>> Taking into account the implementation of the corresponding
+> >>>> _unregister() I would add the clock handling to the _register() one.
+> >>>> Perhaps via a new member of the platform data that supplies the name
+> >>>> and index of the clock and hence all clk_get_optional() / clk_put will
+> >>>> be moved there.
+Do you mean to add it to sdhci_pltfm_register function? if yes I
+believe it will take some time to modify sdhci_pltfm_register
+I prefer not to use sdhci_pltfm_register.
+> >>>>
+> >>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
+> >>>>
+> >>>> All the same, why can't platform data be utilised for this?
+> >>>>
+> >>>>>>> +       return 0;
+> >>>>>>> +
+> >>>>>>> +err_sdhci_add:
+> >>>>>>> +       clk_disable_unprepare(pltfm_host->clk);
+> >>>>>>> +       sdhci_pltfm_free(pdev);
+> >>>>>>> +       return ret;
+> >>>>>>> +}
+> >>
+> >>
+> >> --
+> >> With Best Regards,
+> >> Andy Shevchenko
+> >
+> >
 > >
 >
-> Hi Uffe
-> dts:
-> sdio0: sdio@71100000 {
-> ...
-> bus-width = <4>;
-> no-sdio;
-> no-mmc;
-> ...
-> }; // SD Host(Device: SD CARD)
->
-> sdio3: sdio@71400000 {
-> ...
-> bus-width = <8>;
-> non-removable;
-> no-sdio;
-> no-sd;
-> ...
-> }; // eMMC Host(Device: eMMC)
->
-> According to the order of DTS: sdio0: sdio@71100000 is MMC0, sdio3:
-> sdio@71400000 is MMC1.
-> Log:
-> [    1.714617][   T11] mmc1: SDHCI controller on 71400000.sdio
-> [71400000.sdio] using ADMA 64-bit
-> [    1.715276][    T9] mmc0: SDHCI controller on 71100000.sdio
-> [71100000.sdio] using ADMA 64-bit
-> [    1.884525][   T75] mmc1: Host Software Queue enabled
-> [    1.890965][   T75] mmc1: new HS400 Enhanced strobe MMC card at address 0001
->
-> But set prefer_asynchronous_probe, sometimes there will be sdio0:
-> sdio@71100000 is MMC1, sdio3: sdio@71400000 is MMC0.
-> Log:
-> [    1.619888][   T68] mmc0: SDHCI controller on 71400000.sdio
-> [71400000.sdio] using ADMA 64-bit
-> [    1.620534][    T9] mmc1: SDHCI controller on 71100000.sdio
-> [71100000.sdio] using ADMA 64-bit
-> [    1.792570][   T77] mmc0: Host Software Queue enabled
-> [    1.799532][   T77] mmc0: new HS400 Enhanced strobe MMC card at address 0001
 
-Neither the order of the nodes in DT or dropping
-PROBE_PREFER_ASYNCHRONOUS provides the guarantees that you suggest
-above. In fact, that has never been the case for eMMC/SD cards.
+Best regards,
 
->
-> We use emmc as rootfs (without ramfs or initfs), but with SD card
-> inserted and not inserted, the partition name of emmc is different, we
-> need to fix this partition name.
-
-If you can't use PARTUUID/UUID, which is certainly the preferred
-solution - you may also assign a fixed index mmcN to an MMC host
-controller and its corresponding mmcblk[n] devices, by defining an
-alias in the /aliases device tree node.
-
-[...]
-
-Kind regards
-Uffe
+Tomer
