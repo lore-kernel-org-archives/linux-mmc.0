@@ -2,131 +2,109 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B83DEC4708E
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:38:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0137DC4708E
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 12:39:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229749AbiLGMix (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 07:38:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53516 "EHLO
+        id S229480AbiLGMjA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 07:39:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53554 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229965AbiLGMi2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:28 -0500
-Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83556C56
-        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:16 -0800 (PST)
-Received: by mail-pl1-x629.google.com with SMTP id d7so608670pll.9
-        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:16 -0800 (PST)
+        with ESMTP id S229941AbiLGMib (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 07:38:31 -0500
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C753050D6D
+        for <linux-mmc@vger.kernel.org>; Wed,  7 Dec 2022 04:38:20 -0800 (PST)
+Received: by mail-pl1-x62a.google.com with SMTP id jl24so16893270plb.8
+        for <linux-mmc@vger.kernel.org>; Wed, 07 Dec 2022 04:38:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Uq47N/ZOOwJfcqXzgmggK3bk8KWVsQXVwMJxyc39x0w=;
-        b=xuBqyfYrIxMPliMMxj9qLT1fhkr0UNssZ2JAkE4gPRsJ1c4rGN7HxWSvW986Atd/sJ
-         V++hfviQym9GCbEkuz1lIYdDku4HB2BagxiLYSLJNK1M9P0vCilOQddqR2Kq/JH3iUs6
-         UsQIJgRf0bIRR4a6QsIBBVPPR81LKJiisgSpSCAOzcBXkw04YgoZAQcFGK5zpO6/sM29
-         tBhPFOWS1gJNRb9O2MX8SDZ69/ShdugXBRmiE1JZJeAXPQ7Pc/2Lsr3l21GNDqaAlp/y
-         +H2ltfbtGp9YRMIB612MAcqAdqay5VXUps3fBF+MIMccG4cGqFz0TqxssUffutrDSgid
-         cdtw==
+        bh=YBX0rthji88f2u2kpbjWW8XV26nJpBCfbkYDEQ0jGgs=;
+        b=B5n1LzzMR+vFf49xTP/rI64mCZcTUPodYeyxpjAXXP1IkgXVgcJ+aNl3ojevp2r2Lk
+         +vIcaW4NvHRmOk4n74Hr5s37NzFsIAGMEkM9JbufPIwA1EQ+G1bOsEk/iEjgMNgPs5Yv
+         flnpOPpGd6JVneMa1MM5Yw/2brb3xJ8HnW6Zw/OhWH5afCcOxi+1DKCPC3nU6JXIXx2J
+         7g3M6db5dnRclDMWCaW6GgjqGTCnpSCtK8lNjDwDR9KHlVBuk/COIHGwxmuyAKNypHQz
+         IfGHnTnckAnkzSLJBFkD0xutbWx4DF46wJIumJqTHJ1kANqSq/HMjKUkUM7+1PBNZfiE
+         QX5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Uq47N/ZOOwJfcqXzgmggK3bk8KWVsQXVwMJxyc39x0w=;
-        b=phRv3GiZ7mnVV87c2Ie/jPnJuittHR6MHIyjHpC6/CC8PVOMWsfH0QxCRddWQbMQug
-         4ET0guU6l8vl38m7CReMxmYUZvqFStD0gMTk+3QMe6QKxAIYcZnrWEezTXwPR2ibAqV2
-         60Fo5EnT6K3NjRBX2HcaMZ3go3GiYyhh0nJ4IF0hCsBkVoWB08mfFfLkcmtbj38Dwr+G
-         SaV2k4FepMOQkDnpG9b3fOTo9B+NLpIGv29mPFk5MCb2sS7H6JetG325LB6rwmXjxUjR
-         ScrrVk7Qp/WBNCdKMb2kBhXQqkzbNECd4Z78qGU2H0BQVjnEPfteQ/NVysamvWVRIwX8
-         8WzA==
-X-Gm-Message-State: ANoB5pnXRBZNgsJozXyJV+8+hxaNqdrSu53mbj59CUeuDcxyiRWRxTO8
-        +OJpflcl1ewAGnGrxl6+w98ruMEs9qX3xXwtr7Lu9w==
-X-Google-Smtp-Source: AA0mqf44UgY9jAl2a1r9HulFGS5OcYUHT0t6QPKBXloif6qmrZJgXEqWD8xyYbXw61aM0/2wMAArsQBA+kpWZCDbRJQ=
-X-Received: by 2002:a17:902:ee01:b0:189:e089:5d51 with SMTP id
- z1-20020a170902ee0100b00189e0895d51mr10894703plb.165.1670416696083; Wed, 07
- Dec 2022 04:38:16 -0800 (PST)
+        bh=YBX0rthji88f2u2kpbjWW8XV26nJpBCfbkYDEQ0jGgs=;
+        b=rMmz19z1HYgVD58uQ+ojhmFZr7+MLE2D7pN9Iexh2fgDpv/+xv7vebC7iX3XSh9QCg
+         rBmr3DtFE7Xbx1x4TNAAljj5cTyM1zz/GqWJKwL3zNKuqa7iVx68/PNmOiWnp1yq+OSS
+         VFsguVZWsACeARulzSjDRhYvgLjsJ/5CVHdGgnlb6BDpbg5ANH4g6ZoRkOUqOOTKiwfy
+         6hqUrB1Q//OCNjaxWXxxTXtRnnQlQrFsa2WCD6n/RVybSx1Hql0389YcR8FJkmRIO2bc
+         v7BDh6Ko3nKwardng6ZOIEvf3WX2453BuULWU/89O2W7SXtwe0DdARfYIumQxGn+suQc
+         YN0w==
+X-Gm-Message-State: ANoB5pkyHOg4uagXKTZi/9KcVx6v5QTyqztTUbgCaA6hRw5TDcSUUWiI
+        Hq1FQCbzRIthNNbE1Eb8eM6OKV9kUihZO86UgHpqEQ==
+X-Google-Smtp-Source: AA0mqf6dlj8DZXyu/nXvQiw+t5H43fPAM5QS0D71Dgo3NXBcy+o/mtivw3pVjRcUk4p/o1swJO8iVOuQUMTKcoCyTqE=
+X-Received: by 2002:a17:90a:7485:b0:219:ef02:a5eb with SMTP id
+ p5-20020a17090a748500b00219ef02a5ebmr10667292pjk.84.1670416700348; Wed, 07
+ Dec 2022 04:38:20 -0800 (PST)
 MIME-Version: 1.0
-References: <87dc45b122d26d63c80532976813c9365d7160b3.1670140888.git.deren.wu@mediatek.com>
-In-Reply-To: <87dc45b122d26d63c80532976813c9365d7160b3.1670140888.git.deren.wu@mediatek.com>
+References: <20221204094717.74016-1-krzysztof.kozlowski@linaro.org> <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221204094717.74016-5-krzysztof.kozlowski@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 7 Dec 2022 13:37:40 +0100
-Message-ID: <CAPDyKFo-cU1RD1kBR+EsuAdFyJ8HmhdqZukMWJVjrHF_91qZwA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: vub300: fix warning - do not call blocking ops when !TASK_RUNNING
-To:     Deren Wu <deren.wu@mediatek.com>
-Cc:     linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-mediatek <linux-mediatek@lists.infradead.org>
+Date:   Wed, 7 Dec 2022 13:37:44 +0100
+Message-ID: <CAPDyKFpccW4cFvf4BSJtO+UZdZnAzAhaE0vrU9p92Hn22Hcx8g@mail.gmail.com>
+Subject: Re: [PATCH 5/5] dt-bindings: mmc: sdhci-msm: allow dma-coherent
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>, abel.vesa@linaro.org,
+        Johan Hovold <johan+linaro@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 4 Dec 2022 at 09:27, Deren Wu <deren.wu@mediatek.com> wrote:
+On Sun, 4 Dec 2022 at 10:47, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> vub300_enable_sdio_irq() works with mutex and need TASK_RUNNING here.
-> Ensure that we mark current as TASK_RUNNING for sleepable context.
+> SM8350, SM8450 and SM8550 SDHCI controllers for SD card are marked with
+> dma-coherent, so allow it.
 >
-> [   77.554641] do not call blocking ops when !TASK_RUNNING; state=1 set at [<ffffffff92a72c1d>] sdio_irq_thread+0x17d/0x5b0
-> [   77.554652] WARNING: CPU: 2 PID: 1983 at kernel/sched/core.c:9813 __might_sleep+0x116/0x160
-> [   77.554905] CPU: 2 PID: 1983 Comm: ksdioirqd/mmc1 Tainted: G           OE      6.1.0-rc5 #1
-> [   77.554910] Hardware name: Intel(R) Client Systems NUC8i7BEH/NUC8BEB, BIOS BECFL357.86A.0081.2020.0504.1834 05/04/2020
-> [   77.554912] RIP: 0010:__might_sleep+0x116/0x160
-> [   77.554920] RSP: 0018:ffff888107b7fdb8 EFLAGS: 00010282
-> [   77.554923] RAX: 0000000000000000 RBX: ffff888118c1b740 RCX: 0000000000000000
-> [   77.554926] RDX: 0000000000000001 RSI: 0000000000000004 RDI: ffffed1020f6ffa9
-> [   77.554928] RBP: ffff888107b7fde0 R08: 0000000000000001 R09: ffffed1043ea60ba
-> [   77.554930] R10: ffff88821f5305cb R11: ffffed1043ea60b9 R12: ffffffff93aa3a60
-> [   77.554932] R13: 000000000000011b R14: 7fffffffffffffff R15: ffffffffc0558660
-> [   77.554934] FS:  0000000000000000(0000) GS:ffff88821f500000(0000) knlGS:0000000000000000
-> [   77.554937] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [   77.554939] CR2: 00007f8a44010d68 CR3: 000000024421a003 CR4: 00000000003706e0
-> [   77.554942] Call Trace:
-> [   77.554944]  <TASK>
-> [   77.554952]  mutex_lock+0x78/0xf0
-> [   77.554973]  vub300_enable_sdio_irq+0x103/0x3c0 [vub300]
-> [   77.554981]  sdio_irq_thread+0x25c/0x5b0
-> [   77.555006]  kthread+0x2b8/0x370
-> [   77.555017]  ret_from_fork+0x1f/0x30
-> [   77.555023]  </TASK>
-> [   77.555025] ---[ end trace 0000000000000000 ]---
->
-> Fixes: 88095e7b473a ("mmc: Add new VUB300 USB-to-SD/SDIO/MMC driver")
-> Signed-off-by: Deren Wu <deren.wu@mediatek.com>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Ideally this driver should be converted to use the sdio_signal_irq()
-interface and thus move away from the legacy mmc_signal_sdio_irq()
-interface. However, as a fix for stable kernels, this looks good to
-me!
-
-So, applied for next and by adding a stable tag, thanks!
+All five patches applied from the series and by removing the fixes tag
+from patch4/5, thanks!
 
 Kind regards
 Uffe
 
 
+>
 > ---
->  drivers/mmc/host/vub300.c | 2 ++
+>
+> dma-coherent was first added to SM8450... then to SM8350 (not merged
+> yet) and now it appeared in SM8550 patches, but I actually do not know
+> if this is copy-paste or real need.
+> ---
+>  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
 >  1 file changed, 2 insertions(+)
 >
-> diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
-> index 97beece62fec..b58a1a869ed8 100644
-> --- a/drivers/mmc/host/vub300.c
-> +++ b/drivers/mmc/host/vub300.c
-> @@ -2049,6 +2049,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
->                 return;
->         kref_get(&vub300->kref);
->         if (enable) {
-> +               set_current_state(TASK_RUNNING);
->                 mutex_lock(&vub300->irq_mutex);
->                 if (vub300->irqs_queued) {
->                         vub300->irqs_queued -= 1;
-> @@ -2064,6 +2065,7 @@ static void vub300_enable_sdio_irq(struct mmc_host *mmc, int enable)
->                         vub300_queue_poll_work(vub300, 0);
->                 }
->                 mutex_unlock(&vub300->irq_mutex);
-> +               set_current_state(TASK_INTERRUPTIBLE);
->         } else {
->                 vub300->irq_enabled = 0;
->         }
+> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> index 39e303468bc4..6b89238f0565 100644
+> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+> @@ -83,6 +83,8 @@ properties:
+>        - const: cal
+>        - const: sleep
+>
+> +  dma-coherent: true
+> +
+>    interrupts:
+>      maxItems: 2
+>
 > --
-> 2.18.0
+> 2.34.1
 >
