@@ -2,105 +2,143 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25EBFC63703
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 14:20:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A0531C4708E
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 14:46:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230239AbiLGOUF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 09:20:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46696 "EHLO
+        id S230049AbiLGOqe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 09:46:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230198AbiLGOT5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 09:19:57 -0500
-Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08FDE5C779;
-        Wed,  7 Dec 2022 06:19:57 -0800 (PST)
-Received: by mail-ot1-f54.google.com with SMTP id z14-20020a9d65ce000000b0067059c25facso3225828oth.6;
-        Wed, 07 Dec 2022 06:19:57 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=date:subject:message-id:references:in-reply-to:cc:to:from
-         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=t0xsqqRAAwkCH90xN5tDo0UY2Z+9ZzZVHejNWkAJfeY=;
-        b=0r3rbxKIpw3HkjKrPB3MxmniMNtX8C4aaEnufzDuDs3NyIK2r8XNk2GrqPi4dNrFXy
-         P9wdpLMaDHk1pDkQjRb9KXXLm8zRlvzsQCIgy2UwdwIumpIuLdfKbxjd3wHnq9xB+rWB
-         aNhp/aAvlmidg0f7mPGIUN8fEonvB6Z9BstrFYKxuUqv58N+PDSzxHwt0ty2XG7HlVIk
-         hFilYBNAtsQPmJSUk7zXxD98udxLgte+EvaIiDszkcp9YwwmhZSBoMgBksUJZqNiFfDG
-         mu05ytH5w76stbnCoZxeRAVM24KucTxdnDOSLF5WiriS6wiJLU1eJhSpzfdnneh6Y6s6
-         oxsA==
-X-Gm-Message-State: ANoB5pnikM4R55PNFwUfILjtilP0fqYDp5c8KOtA+1uJWH5Md9flTmf9
-        g6NDoaBQ/gicWo0r9M0SkQ==
-X-Google-Smtp-Source: AA0mqf5uSaAugZRJi+A+E/uxyhpPDRKenpx8oRR0Qkl8Aa2el1QUalmTuXET2L/0ToRRdW9ZonSPSg==
-X-Received: by 2002:a9d:84b:0:b0:66e:f6cb:99ec with SMTP id 69-20020a9d084b000000b0066ef6cb99ecmr6303505oty.330.1670422796137;
-        Wed, 07 Dec 2022 06:19:56 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id m22-20020a056870059600b0013c8ae74a14sm12204892oap.42.2022.12.07.06.19.55
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 07 Dec 2022 06:19:55 -0800 (PST)
-Received: (nullmailer pid 2124811 invoked by uid 1000);
-        Wed, 07 Dec 2022 14:19:49 -0000
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-MIME-Version: 1.0
-From:   Rob Herring <robh@kernel.org>
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-kernel@vger.kernel.org,
+        with ESMTP id S229796AbiLGOqc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 09:46:32 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08B6B5D6B8;
+        Wed,  7 Dec 2022 06:46:32 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A680E61A21;
+        Wed,  7 Dec 2022 14:46:31 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D6633C433D6;
+        Wed,  7 Dec 2022 14:46:28 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1670424391;
+        bh=PsHVnbFBEihPB3NBp0BJWow6YIbcbhY3sBbqiwuA9vk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=UmnmuFc6Pc5jVPVWs++s8HNLuJr3H+pXoLfMKq1+RnAXtq+pQnOq0itFQnt5SxDuQ
+         /KnltwAjDN8CGYC9ul7XN9vUL1syO9N5TQzW6TwemshAv5CjlMJ9UIqkqKDWrQj7lE
+         bHjHqqIUgzSKPTR3u/U35anGRXj8CImhRp556r1pMoNerMEXgPycV1JCvkfZaqau5m
+         1XXQZzZrlxwsRMHgV5dx1dHANcS9OU1AtGBD4TE5T332op40O1SKc+c+M+7K07rZ63
+         /zh+5zrGg3ciYLNCXC9tp9HieLezwx/KQsrDn3/JmBj0DwIrroTk2vXZFlwWQg4Ddj
+         gjpEhPEv62sMw==
+Date:   Wed, 7 Dec 2022 14:46:26 +0000
+From:   Conor Dooley <conor@kernel.org>
+To:     Rob Herring <robh@kernel.org>,
+        William Qiu <william.qiu@starfivetech.com>
+Cc:     William Qiu <william.qiu@starfivetech.com>,
+        linux-kernel@vger.kernel.org,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
         linux-riscv@lists.infradead.org,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         devicetree@vger.kernel.org
-In-Reply-To: <20221207131731.1291517-2-william.qiu@starfivetech.com>
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
+Message-ID: <Y5CnQlYTZJrJNjCf@spud>
 References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
  <20221207131731.1291517-2-william.qiu@starfivetech.com>
-Message-Id: <167042222472.2111911.2050446708831690640.robh@kernel.org>
-Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
-Date:   Wed, 07 Dec 2022 08:19:49 -0600
+ <167042222472.2111911.2050446708831690640.robh@kernel.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="15iFjk02Kxw946r4"
+Content-Disposition: inline
+In-Reply-To: <167042222472.2111911.2050446708831690640.robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
-On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
-> Add documentation to describe StarFive
-> designware mobile storage host controller driver.
-> 
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
->  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
->  1 file changed, 71 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
-> 
+--15iFjk02Kxw946r4
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-on your patch (DT_CHECKER_FLAGS is new in v5.13):
+On Wed, Dec 07, 2022 at 08:19:49AM -0600, Rob Herring wrote:
+>=20
+> On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
+> > Add documentation to describe StarFive
+> > designware mobile storage host controller driver.
+> >=20
+> > Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> > ---
+> >  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
+> >  1 file changed, 71 insertions(+)
+> >  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh71=
+10-sdio.yaml
+> >=20
+>=20
+> My bot found errors running 'make DT_CHECKER_FLAGS=3D-m dt_binding_check'
+> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+>=20
+> yamllint warnings/errors:
+>=20
+> dtschema/dtc warnings/errors:
+> Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21=
+:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or dire=
+ctory
+>    21 |         #include <dt-bindings/clock/starfive-jh7110.h>
+>       |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-yamllint warnings/errors:
+Hello William,
+As with the other bindings that StarFive has sent out recently,
+including this header in the example creates a dependency on the
+clock/reset stuff being merged prior to the drivers for unrelated
+subsytems.
+To avoid that, you can drop the headers & definitions from these
+*examples* & use the numbers themselves instead.
 
-dtschema/dtc warnings/errors:
-Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or directory
-   21 |         #include <dt-bindings/clock/starfive-jh7110.h>
-      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-compilation terminated.
-make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dtb] Error 1
-make[1]: *** Waiting for unfinished jobs....
-make: *** [Makefile:1492: dt_binding_check] Error 2
+That way, the only thing that depends on the clock binding headers is
+the DeviceTree patch & the driver can be merged once it is ready.
 
-doc reference errors (make refcheckdocs):
+Thanks,
+Conor.
 
-See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221207131731.1291517-2-william.qiu@starfivetech.com
+> compilation terminated.
+> make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings=
+/mmc/starfive,jh7110-sdio.example.dtb] Error 1
+> make[1]: *** Waiting for unfinished jobs....
+> make: *** [Makefile:1492: dt_binding_check] Error 2
+>=20
+> doc reference errors (make refcheckdocs):
+>=20
+> See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/202212=
+07131731.1291517-2-william.qiu@starfivetech.com
+>=20
+> The base for the series is generally the latest rc1. A different dependen=
+cy
+> should be noted in *this* patch.
+>=20
+> If you already ran 'make dt_binding_check' and didn't see the above
+> error(s), then make sure 'yamllint' is installed and dt-schema is up to
+> date:
+>=20
+> pip3 install dtschema --upgrade
+>=20
+> Please check and re-submit after running the above command yourself. Note
+> that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+> your schema. However, it must be unset to test all examples with your sch=
+ema.
+>=20
 
-The base for the series is generally the latest rc1. A different dependency
-should be noted in *this* patch.
+--15iFjk02Kxw946r4
+Content-Type: application/pgp-signature; name="signature.asc"
 
-If you already ran 'make dt_binding_check' and didn't see the above
-error(s), then make sure 'yamllint' is installed and dt-schema is up to
-date:
+-----BEGIN PGP SIGNATURE-----
 
-pip3 install dtschema --upgrade
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCY5CnJwAKCRB4tDGHoIJi
+0jqRAQCsSx3Ke20VhxNk/Ydi4ewyUPQPytJ6yzxj4xk9pgAeMgD+LIlTVnmUzECN
+HBRjjc8AbZ9qq7SwsftQ/3nu/ACeQAI=
+=JKRg
+-----END PGP SIGNATURE-----
 
-Please check and re-submit after running the above command yourself. Note
-that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-your schema. However, it must be unset to test all examples with your schema.
-
+--15iFjk02Kxw946r4--
