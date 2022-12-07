@@ -2,175 +2,105 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C540FC63707
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:49:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25EBFC63703
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 14:20:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230101AbiLGNtb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 08:49:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45786 "EHLO
+        id S230239AbiLGOUF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 09:20:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46696 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230097AbiLGNt3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:49:29 -0500
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0A8959876;
-        Wed,  7 Dec 2022 05:49:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1670420967; x=1701956967;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=244oBt7BYcfp9OKLgDcoevrJ5DGlb+K1/OKrzuTdtw8=;
-  b=dmNw4xSB8lAyuaDHob2osPr+3zEPleJt8cKRVNCLO/rfDT+VHrY24Yh8
-   5uh5r2bmgUBPetPXkI8SOIOwsDXIE48GuFbZEDywxzJum9GN9+wQxlBnL
-   Unoe65vx2G9ow7ozmOPmceQwOqcLkLb5IEvV5lnz5S8pumqu85w5QcQBJ
-   zY+N5RpfqaGo/SUmppFqO+lmvZXv/ZtfTzEMFV/qwJxEtc3vnQEytPc5J
-   JE3SWAnRLYdvRXcq0OBxiBxTsboEygJeKnK/HIgtGu4sP9Zuk1EP4NZpO
-   Na5hyJzkMcHdwY0eCVAAqTk25AP/2xe9YX9gtor2FhrP8rMKU7qAEIrG2
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="381185384"
-X-IronPort-AV: E=Sophos;i="5.96,225,1665471600"; 
-   d="scan'208";a="381185384"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Dec 2022 05:49:27 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10553"; a="710069060"
-X-IronPort-AV: E=Sophos;i="5.96,225,1665471600"; 
-   d="scan'208";a="710069060"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.38.130])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 07 Dec 2022 05:49:21 -0800
-Message-ID: <cae6475a-a1e9-ae57-6e64-59931f467050@intel.com>
-Date:   Wed, 7 Dec 2022 15:49:16 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.1
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-Content-Language: en-US
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        Tomer Maimon <tmaimon77@gmail.com>
-Cc:     ulf.hansson@linaro.org, avifishman70@gmail.com,
-        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
-        yuenn@google.com, benjaminfair@google.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20221205085351.27566-1-tmaimon77@gmail.com>
- <20221205085351.27566-3-tmaimon77@gmail.com>
- <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
- <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
- <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
- <c200557f-c30a-62f9-287a-af804e818cf1@intel.com>
- <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
- <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com>
- <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com>
- <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
- <CAHp75Vd5DzkCW0Gpouv+0Or=Yhjp_KdFGP-jXkpHD=UZrG2ajA@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAHp75Vd5DzkCW0Gpouv+0Or=Yhjp_KdFGP-jXkpHD=UZrG2ajA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
+        with ESMTP id S230198AbiLGOT5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 09:19:57 -0500
+Received: from mail-ot1-f54.google.com (mail-ot1-f54.google.com [209.85.210.54])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08FDE5C779;
+        Wed,  7 Dec 2022 06:19:57 -0800 (PST)
+Received: by mail-ot1-f54.google.com with SMTP id z14-20020a9d65ce000000b0067059c25facso3225828oth.6;
+        Wed, 07 Dec 2022 06:19:57 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=t0xsqqRAAwkCH90xN5tDo0UY2Z+9ZzZVHejNWkAJfeY=;
+        b=0r3rbxKIpw3HkjKrPB3MxmniMNtX8C4aaEnufzDuDs3NyIK2r8XNk2GrqPi4dNrFXy
+         P9wdpLMaDHk1pDkQjRb9KXXLm8zRlvzsQCIgy2UwdwIumpIuLdfKbxjd3wHnq9xB+rWB
+         aNhp/aAvlmidg0f7mPGIUN8fEonvB6Z9BstrFYKxuUqv58N+PDSzxHwt0ty2XG7HlVIk
+         hFilYBNAtsQPmJSUk7zXxD98udxLgte+EvaIiDszkcp9YwwmhZSBoMgBksUJZqNiFfDG
+         mu05ytH5w76stbnCoZxeRAVM24KucTxdnDOSLF5WiriS6wiJLU1eJhSpzfdnneh6Y6s6
+         oxsA==
+X-Gm-Message-State: ANoB5pnikM4R55PNFwUfILjtilP0fqYDp5c8KOtA+1uJWH5Md9flTmf9
+        g6NDoaBQ/gicWo0r9M0SkQ==
+X-Google-Smtp-Source: AA0mqf5uSaAugZRJi+A+E/uxyhpPDRKenpx8oRR0Qkl8Aa2el1QUalmTuXET2L/0ToRRdW9ZonSPSg==
+X-Received: by 2002:a9d:84b:0:b0:66e:f6cb:99ec with SMTP id 69-20020a9d084b000000b0066ef6cb99ecmr6303505oty.330.1670422796137;
+        Wed, 07 Dec 2022 06:19:56 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id m22-20020a056870059600b0013c8ae74a14sm12204892oap.42.2022.12.07.06.19.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Dec 2022 06:19:55 -0800 (PST)
+Received: (nullmailer pid 2124811 invoked by uid 1000);
+        Wed, 07 Dec 2022 14:19:49 -0000
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
+MIME-Version: 1.0
+From:   Rob Herring <robh@kernel.org>
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     linux-kernel@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        linux-riscv@lists.infradead.org,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        devicetree@vger.kernel.org
+In-Reply-To: <20221207131731.1291517-2-william.qiu@starfivetech.com>
+References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+ <20221207131731.1291517-2-william.qiu@starfivetech.com>
+Message-Id: <167042222472.2111911.2050446708831690640.robh@kernel.org>
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
+Date:   Wed, 07 Dec 2022 08:19:49 -0600
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 7/12/22 15:25, Andy Shevchenko wrote:
-> On Wed, Dec 7, 2022 at 3:01 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
->> On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>> On 5/12/22 16:17, Andy Shevchenko wrote:
->>>> On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
->>>> <andy.shevchenko@gmail.com> wrote:
->>>>> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>> On 5/12/22 15:25, Andy Shevchenko wrote:
->>>>>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
-> 
-> ...
-> 
->>>>>>> devm_ is problematic in your case.
->>>>>>> TL;DR: you need to use clk_get_optional() and clk_put().
->>>>>>
->>>>>> devm_ calls exactly those, so what is the issue?
->>>>>
->>>>> The issue is the error path or removal stage where it may or may be
->>>>> not problematic. To be on the safe side, the best approach is to make
->>>>> sure that allocated resources are being deallocated in the reversed
->>>>> order. That said, the
->>>>>
->>>>> 1. call non-devm_func()
->>>>> 2. call devm_func()
->>>>>
->>>>> is wrong strictly speaking.
->>>>
->>>> To elaborate more, the
->>>>
->>>> 1. call all devm_func()
->>>> 2. call only non-devm_func()
->>>>
->>>> is the correct order.
->>>
->>> 1. WRT pltfm_host->clk, that is what is happening
->>> 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
->>> e.g. mmc_alloc_host() / mmc_free_host()
->> I little confused about what to decide, should I use only
->> non-devm_func because mmc_alloc_host() / mmc_free_host() is not
->> warrped with devm_?
-> 
-> It is up to you how to proceed. I pointed out the problem with your
-> code which may or may not be fatal.
-> 
-> If you want to solve it, there are several approaches:
-> 1) get rid of devm_ completely;
-> 2) properly shuffle the ordering in ->probe(), so all devm_ calls are
-> followed by non-devm_;
-> 3) wrap non-devm_ cals to become managed (see
-> devm_add_action_or_reset() approach);
-> 4) fix SDHCI / MMC layer by providing necessary devm_ calls and/or fix
-> sdhci_pltfm_register() to handle the clock.
 
-I can take care of sdhci_pltfm when I next have some time.
-Otherwise it looks OK to me, so I am acking it.
+On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
+> Add documentation to describe StarFive
+> designware mobile storage host controller driver.
+> 
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> ---
+>  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
+>  1 file changed, 71 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+> 
 
-> 
-> Personally, the list order is from the least, what I prefer, to the
-> most (i.o.w. I would like to see rather 4) than 1) to be implemented).
-> 
->>>> Hence in this case the driver can be worked around easily (by
->>>> shuffling the order in ->probe() to call devm_ first), but as I said
->>>> looking into implementation of the _unregister() I'm pretty sure that
->>>> clock management should be in sdhci-pltfm, rather than in all callers
->>>> who won't need the full customization.
->>>>
->>>> Hope this helps to understand my point.
->>>>
->>>>>>> Your ->remove() callback doesn't free resources in the reversed order
->>>>>>> which may or, by luck, may not be the case of all possible crashes,
->>>>>>> UAFs, races, etc during removal stage. All the same for error path in
->>>>>>> ->probe().
->>>>>
->>>>> I also pointed out above what would be the outcome of neglecting this rule.
-> 
-> ...
-> 
->>>>>>>>> Why can't you use sdhci_pltfm_register()?
->>>>>>>> two things are missing in sdhci_pltfm_register
->>>>>>>> 1. clock.
->>>>>>>
->>>>>>> Taking into account the implementation of the corresponding
->>>>>>> _unregister() I would add the clock handling to the _register() one.
->>>>>>> Perhaps via a new member of the platform data that supplies the name
->>>>>>> and index of the clock and hence all clk_get_optional() / clk_put will
->>>>>>> be moved there.
->> Do you mean to add it to sdhci_pltfm_register function? if yes I
->> believe it will take some time to modify sdhci_pltfm_register
->> I prefer not to use sdhci_pltfm_register.
-> 
-> In the Linux kernel we are trying hard to avoid code duplication. Why
-> do you need it to be open coded? (Yes, I heard you, but somebody
-> should fix the issues with that funcion at some point, right?)
-> 
->>>>>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
->>>>>>>
->>>>>>> All the same, why can't platform data be utilised for this?
-> 
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
+
+yamllint warnings/errors:
+
+dtschema/dtc warnings/errors:
+Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or directory
+   21 |         #include <dt-bindings/clock/starfive-jh7110.h>
+      |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dtb] Error 1
+make[1]: *** Waiting for unfinished jobs....
+make: *** [Makefile:1492: dt_binding_check] Error 2
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221207131731.1291517-2-william.qiu@starfivetech.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
 
