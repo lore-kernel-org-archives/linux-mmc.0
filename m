@@ -2,199 +2,81 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B6187C63706
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:01:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBF98C63706
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:17:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229788AbiLGNB6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 08:01:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39238 "EHLO
+        id S229892AbiLGNRi convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 08:17:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229603AbiLGNBw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:01:52 -0500
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BFD35133D;
-        Wed,  7 Dec 2022 05:01:51 -0800 (PST)
-Received: by mail-lj1-x22c.google.com with SMTP id bn5so20840171ljb.2;
-        Wed, 07 Dec 2022 05:01:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=58n9OnzkX+f+tALJ3x9hXjitd2F/uK0zQDu7nLFK8BM=;
-        b=Wb7aJUSwSAqnww08AQep8NInEPaa3G9cUjc8sQqZCF2rSZLiFiCkbPvi90Q2W/JB50
-         AkZ0elNUWOZAg6iyS7IFebYNSJCSfUVNBIpyGC09Wu/HfrXcsqaxszfmVUhIfIbdz+tG
-         G+oCaum5ZcLDLT9G7P/Z0Agwbw7BLr4LKCvjVbpsts29SYIH+YuFthAG5XZtiKOgPS/P
-         ZthMdAxkIZxycgbGnmvGTYQR3cEhqarrfoenHuJepkHLokhiBap+28SWnHwc7p6Shlxp
-         nwxvkfNOpUxUFzKkXI8arTvSilK593jhVasK23lsIaSSOhsg/gGZL6ZmBnWC095w8U3Y
-         noGw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=58n9OnzkX+f+tALJ3x9hXjitd2F/uK0zQDu7nLFK8BM=;
-        b=AIX2JyowqM1l8YEOax8X0uC/g/lloZEwk9L64AJfFeqmBWI2a411Oy7hNxEah0EHdS
-         fnLMQrTvwoYn+xpHq1s3G/A1AdUgL9SQSdrCEo/72U5Dl/AOpMDqdJQfcC4KKHmnjPhp
-         4cMBErd58yiyOYoesBvgRH3z63a7pD6twt2TNlA3ha67UGvsDb+jl0PM8GGAo1QI5FBr
-         fPYWICOj8gyC/P9aZaQSaZyQkrQ29tf33cWtcqYBKRnjlZKDDJH2b9CGwbyjBGWc5SeT
-         LCUO2hDYcpxl9vgZ+p06pgNgsVZkTOrQ9pRBVf6saC9jx9jqVAzZUZSMwWWyEhgK4bOe
-         UPgQ==
-X-Gm-Message-State: ANoB5pnnbVTeLLODKxw78frcFvk/DokvFeBFXeDn45zbW0mrhqRt9Rw5
-        V+XwIUNiuNxKTihI1DPcKgToSzM/MAyeXi866nk=
-X-Google-Smtp-Source: AA0mqf6Ide4+sp8VWwohGr/fTMvzoa8oN76VSzU4an/ivwpfuzoPSBg3rAh6NB3hKlkh7TXGWyqSO8u/qTTMSXywbfY=
-X-Received: by 2002:a05:651c:c85:b0:278:f572:c9ac with SMTP id
- bz5-20020a05651c0c8500b00278f572c9acmr30906647ljb.73.1670418109344; Wed, 07
- Dec 2022 05:01:49 -0800 (PST)
+        with ESMTP id S229586AbiLGNRh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:17:37 -0500
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F5CA100F;
+        Wed,  7 Dec 2022 05:17:35 -0800 (PST)
+Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 11B4C24E046;
+        Wed,  7 Dec 2022 21:17:33 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX165.cuchost.com
+ (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 7 Dec
+ 2022 21:17:33 +0800
+Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
+ by EXMBX068.cuchost.com (172.16.6.68) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.42; Wed, 7 Dec 2022 21:17:32 +0800
+From:   William Qiu <william.qiu@starfivetech.com>
+To:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        William Qiu <william.qiu@starfivetech.com>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v1 0/3] StarFive's SDIO/eMMC driver support
+Date:   Wed, 7 Dec 2022 21:17:28 +0800
+Message-ID: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
- <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
- <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
- <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
- <c200557f-c30a-62f9-287a-af804e818cf1@intel.com> <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
- <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com> <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com>
-In-Reply-To: <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com>
-From:   Tomer Maimon <tmaimon77@gmail.com>
-Date:   Wed, 7 Dec 2022 15:01:38 +0200
-Message-ID: <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>,
-        ulf.hansson@linaro.org, avifishman70@gmail.com,
-        tali.perry1@gmail.com, joel@jms.id.au, venture@google.com,
-        yuenn@google.com, benjaminfair@google.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Andy and Adrian,
+Hi,
 
-Thanks for your clarifications
+This patchset adds initial rudimentary support for the StarFive
+designware mobile storage host controller driver. And this driver will
+be used in StarFive's visionfive-v2 board. The main purpose of adding
+this driver is to accommodate the ultra-high speed mode of eMMC.
 
-On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 5/12/22 16:17, Andy Shevchenko wrote:
-> > On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
-> > <andy.shevchenko@gmail.com> wrote:
-> >>
-> >> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>> On 5/12/22 15:25, Andy Shevchenko wrote:
-> >>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
-> >>>>> On Mon, 5 Dec 2022 at 12:54, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
-> >>>>>> On Mon, Dec 5, 2022 at 10:54 AM Tomer Maimon <tmaimon77@gmail.com> wrote:
-> >>
-> >> ...
-> >>
-> >>>>>>> +       pltfm_host->clk = devm_clk_get_optional(&pdev->dev, NULL);
-> >>>>>>
-> >>>>>> You can't mix devm with non-devm in this way.
-> >>>>> Can you explain what you mean You can't mix devm with non-devm in this
-> >>>>> way, where is the mix?
-> >>>>> In version 1 used devm_clk_get, is it problematic?
-> >>>>
-> >>>> devm_ is problematic in your case.
-> >>>> TL;DR: you need to use clk_get_optional() and clk_put().
-> >>>
-> >>> devm_ calls exactly those, so what is the issue?
-> >>
-> >> The issue is the error path or removal stage where it may or may be
-> >> not problematic. To be on the safe side, the best approach is to make
-> >> sure that allocated resources are being deallocated in the reversed
-> >> order. That said, the
-> >>
-> >> 1. call non-devm_func()
-> >> 2. call devm_func()
-> >>
-> >> is wrong strictly speaking.
-> >
-> > To elaborate more, the
-> >
-> > 1. call all devm_func()
-> > 2. call only non-devm_func()
-> >
-> > is the correct order.
->
-> 1. WRT pltfm_host->clk, that is what is happening
-> 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
-> e.g. mmc_alloc_host() / mmc_free_host()
-I little confused about what to decide, should I use only
-non-devm_func because mmc_alloc_host() / mmc_free_host() is not
-warrped with devm_?
->
-> >
-> > Hence in this case the driver can be worked around easily (by
-> > shuffling the order in ->probe() to call devm_ first), but as I said
-> > looking into implementation of the _unregister() I'm pretty sure that
-> > clock management should be in sdhci-pltfm, rather than in all callers
-> > who won't need the full customization.
-> >
-> > Hope this helps to understand my point.
-> >
-> >>>> Your ->remove() callback doesn't free resources in the reversed order
-> >>>> which may or, by luck, may not be the case of all possible crashes,
-> >>>> UAFs, races, etc during removal stage. All the same for error path in
-> >>>> ->probe().
-> >>
-> >> I also pointed out above what would be the outcome of neglecting this rule.
-> >>
-> >>>>>>> +       if (IS_ERR(pltfm_host->clk))
-> >>>>>>> +               return PTR_ERR(pltfm_host->clk);
-> >>>>>>> +
-> >>>>>>> +       ret = clk_prepare_enable(pltfm_host->clk);
-> >>>>>>> +       if (ret)
-> >>>>>>> +               return ret;
-> >>>>>>> +
-> >>>>>>> +       caps = sdhci_readl(host, SDHCI_CAPABILITIES);
-> >>>>>>> +       if (caps & SDHCI_CAN_DO_8BIT)
-> >>>>>>> +               host->mmc->caps |= MMC_CAP_8_BIT_DATA;
-> >>>>>>> +
-> >>>>>>> +       ret = mmc_of_parse(host->mmc);
-> >>>>>>> +       if (ret)
-> >>>>>>> +               goto err_sdhci_add;
-> >>>>>>> +
-> >>>>>>> +       ret = sdhci_add_host(host);
-> >>>>>>> +       if (ret)
-> >>>>>>> +               goto err_sdhci_add;
-> >>>>>>
-> >>>>>> Why can't you use sdhci_pltfm_register()?
-> >>>>> two things are missing in sdhci_pltfm_register
-> >>>>> 1. clock.
-> >>>>
-> >>>> Taking into account the implementation of the corresponding
-> >>>> _unregister() I would add the clock handling to the _register() one.
-> >>>> Perhaps via a new member of the platform data that supplies the name
-> >>>> and index of the clock and hence all clk_get_optional() / clk_put will
-> >>>> be moved there.
-Do you mean to add it to sdhci_pltfm_register function? if yes I
-believe it will take some time to modify sdhci_pltfm_register
-I prefer not to use sdhci_pltfm_register.
-> >>>>
-> >>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
-> >>>>
-> >>>> All the same, why can't platform data be utilised for this?
-> >>>>
-> >>>>>>> +       return 0;
-> >>>>>>> +
-> >>>>>>> +err_sdhci_add:
-> >>>>>>> +       clk_disable_unprepare(pltfm_host->clk);
-> >>>>>>> +       sdhci_pltfm_free(pdev);
-> >>>>>>> +       return ret;
-> >>>>>>> +}
-> >>
-> >>
-> >> --
-> >> With Best Regards,
-> >> Andy Shevchenko
-> >
-> >
-> >
->
+The patch series is based on v6.1-rc5.
 
-Best regards,
+-- William
 
-Tomer
+William Qiu (3):
+  dt-bindings: mmc: Add bindings for StarFive
+  mmc: starfive: Add sdio/emmc driver support
+  riscv: dts: starfive: Add mmc node
+
+ .../bindings/mmc/starfive,jh7110-sdio.yaml    |  71 +++++++
+ MAINTAINERS                                   |   6 +
+ .../jh7110-starfive-visionfive-v2.dts         |  25 +++
+ arch/riscv/boot/dts/starfive/jh7110.dtsi      |  38 ++++
+ drivers/mmc/host/Kconfig                      |  10 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/dw_mmc-starfive.c            | 197 ++++++++++++++++++
+ 7 files changed, 348 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+ create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
+
+--
+2.34.1
+
