@@ -2,142 +2,169 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2A47C4708E
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:17:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9394EC63705
+	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 13:26:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229575AbiLGNRl convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 08:17:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49700 "EHLO
+        id S229507AbiLGN0l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 08:26:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229886AbiLGNRh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:17:37 -0500
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E4FB26E6;
-        Wed,  7 Dec 2022 05:17:36 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id AA3AB24E2AA;
-        Wed,  7 Dec 2022 21:17:33 +0800 (CST)
-Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 7 Dec
- 2022 21:17:33 +0800
-Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
- by EXMBX068.cuchost.com (172.16.6.68) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Wed, 7 Dec 2022 21:17:32 +0800
-From:   William Qiu <william.qiu@starfivetech.com>
-To:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        William Qiu <william.qiu@starfivetech.com>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
-Date:   Wed, 7 Dec 2022 21:17:29 +0800
-Message-ID: <20221207131731.1291517-2-william.qiu@starfivetech.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20221207131731.1291517-1-william.qiu@starfivetech.com>
-References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+        with ESMTP id S230045AbiLGN0X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 08:26:23 -0500
+Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E135358BF1;
+        Wed,  7 Dec 2022 05:26:04 -0800 (PST)
+Received: by mail-qk1-x72a.google.com with SMTP id p18so9951994qkg.2;
+        Wed, 07 Dec 2022 05:26:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=gasjj2Warc1QIbknNKNkywz6J4OpsWmMf8ktNJGJzxM=;
+        b=bIHdWFbwnlgZ9X7ycTDJihFthCsDpZiozQ8aRPo5JuLh15PEb9zZRUQK8qp8nDk0Vz
+         JfuW+6fXd6v1zosJUbmBo1DSHPZzrgeQ4NH/RuGTFXM+l6tzYjFEJMqAyK/DnvtK+WRG
+         hYaFKDNCwaycPkz7L9zlXE/Dh2jw9yLebTR8VYUV0c2DQ5oY9Q/X4PuouvFypRwhA5Wx
+         USwVkgVJOjDKx/mSlCC/Kr/dZi+q8x8bV3j/UfJaDxQ/ivdISebJdeQQlFG1qs5GNxHU
+         M33kyTUKZI9LbjBWr9Icf107BKr2qSF8tmIgdHAQyMvy3YmTtB8gmVUXeCoUjH5wwazP
+         ivxg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=gasjj2Warc1QIbknNKNkywz6J4OpsWmMf8ktNJGJzxM=;
+        b=tyaC/cwwQYvyUMX3VAeYh0jZ++iXHrLp7jNpQVg60nMI0i1aIIp23y6W+LBZOFbyEP
+         jKm5FgN+vBNdNG8idp1T7TIRAts3SifyM+b3V0/qCc02WK3LHrLw/eQnqjloBoMar6Cd
+         lUrGDc/lIoumo3rIXZ+ZHQVGbDic72k2TDKu5S9x5VVS0IoiVXDmvjUYvjy+dwixf/t/
+         fdkWk0E819eS9nx6Y91ijx9QAkWA0lMiy1TsM04Cqu3Td2BXso3qNqGMtB4Kd2vQJu/6
+         Z6WmvWMGAa9LANOT0+oCHcBCD8uLd2k6m9dcgdkz3ogTMI/CA3Btt5zGPJwnUA9LZqTp
+         Tydg==
+X-Gm-Message-State: ANoB5plb6nHO5+JNgZMC9lfSJR3QtqIa5AIHUv+s24/l29en8tzBoSbC
+        ww5e1SIIND/dg/HisQ4VYM9zfc2l6NqTqcrZRbU=
+X-Google-Smtp-Source: AA0mqf5RnWnS+hISdVDsA/In+NITv+EGTmDYWDSf+CwqqDeU+RkT3eKO4lbUN9HJ6WbQczEee6OKmp48cqrdxu9QXDs=
+X-Received: by 2002:a05:620a:1aa3:b0:6fa:b56f:7ede with SMTP id
+ bl35-20020a05620a1aa300b006fab56f7edemr80678604qkb.383.1670419563989; Wed, 07
+ Dec 2022 05:26:03 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
- (172.16.6.68)
-X-YovoleRuleAgent: yovoleflag
-Content-Transfer-Encoding: 8BIT
+References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
+ <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
+ <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
+ <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
+ <c200557f-c30a-62f9-287a-af804e818cf1@intel.com> <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
+ <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com>
+ <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com> <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
+In-Reply-To: <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Wed, 7 Dec 2022 15:25:27 +0200
+Message-ID: <CAHp75Vd5DzkCW0Gpouv+0Or=Yhjp_KdFGP-jXkpHD=UZrG2ajA@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
+To:     Tomer Maimon <tmaimon77@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org,
+        avifishman70@gmail.com, tali.perry1@gmail.com, joel@jms.id.au,
+        venture@google.com, yuenn@google.com, benjaminfair@google.com,
+        skhan@linuxfoundation.org, davidgow@google.com,
+        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
+        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add documentation to describe StarFive
-designware mobile storage host controller driver.
+On Wed, Dec 7, 2022 at 3:01 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
+> On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
+> > On 5/12/22 16:17, Andy Shevchenko wrote:
+> > > On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
+> > > <andy.shevchenko@gmail.com> wrote:
+> > >> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
+> > >>> On 5/12/22 15:25, Andy Shevchenko wrote:
+> > >>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
 
-Signed-off-by: William Qiu <william.qiu@starfivetech.com>
----
- .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
- 1 file changed, 71 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+...
 
-diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
-new file mode 100644
-index 000000000000..4f27ef3cf4f3
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
-@@ -0,0 +1,71 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/starfive,jh7110-sdio.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: StarFive Designware Mobile Storage Host Controller
-+
-+description:
-+  StarFive uses the Synopsys designware mobile storage host controller
-+  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
-+
-+allOf:
-+  - $ref: "synopsys-dw-mshc-common.yaml#"
-+
-+maintainers:
-+  - William Qiu <william.qiu@starfivetech.com>
-+
-+properties:
-+  compatible:
-+    const: starfive,jh7110-sdio
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 1
-+    items:
-+      - description: biu clock
-+      - description: ciu clock
-+
-+  clock-names:
-+    minItems: 1
-+    items:
-+      - const: biu
-+      - const: ciu
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  starfive,sys-syscon:
-+    $ref: /schemas/types.yaml#/definitions/uint32-array
-+    description:
-+      The desired number of times that the host execute tuning when needed.
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - clock-names
-+  - interrupts
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/starfive-jh7110.h>
-+    #include <dt-bindings/reset/starfive-jh7110.h>
-+    mmc@16010000 {
-+            compatible = "starfive,jh7110-sdio";
-+            reg = <0x16010000 0x10000>;
-+            clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
-+                 <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
-+            clock-names = "biu","ciu";
-+            resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
-+            reset-names = "reset";
-+            interrupts = <74>;
-+            fifo-depth = <32>;
-+            fifo-watermark-aligned;
-+            data-addr = <0>;
-+    };
+> > >>>> devm_ is problematic in your case.
+> > >>>> TL;DR: you need to use clk_get_optional() and clk_put().
+> > >>>
+> > >>> devm_ calls exactly those, so what is the issue?
+> > >>
+> > >> The issue is the error path or removal stage where it may or may be
+> > >> not problematic. To be on the safe side, the best approach is to make
+> > >> sure that allocated resources are being deallocated in the reversed
+> > >> order. That said, the
+> > >>
+> > >> 1. call non-devm_func()
+> > >> 2. call devm_func()
+> > >>
+> > >> is wrong strictly speaking.
+> > >
+> > > To elaborate more, the
+> > >
+> > > 1. call all devm_func()
+> > > 2. call only non-devm_func()
+> > >
+> > > is the correct order.
+> >
+> > 1. WRT pltfm_host->clk, that is what is happening
+> > 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
+> > e.g. mmc_alloc_host() / mmc_free_host()
+> I little confused about what to decide, should I use only
+> non-devm_func because mmc_alloc_host() / mmc_free_host() is not
+> warrped with devm_?
+
+It is up to you how to proceed. I pointed out the problem with your
+code which may or may not be fatal.
+
+If you want to solve it, there are several approaches:
+1) get rid of devm_ completely;
+2) properly shuffle the ordering in ->probe(), so all devm_ calls are
+followed by non-devm_;
+3) wrap non-devm_ cals to become managed (see
+devm_add_action_or_reset() approach);
+4) fix SDHCI / MMC layer by providing necessary devm_ calls and/or fix
+sdhci_pltfm_register() to handle the clock.
+
+Personally, the list order is from the least, what I prefer, to the
+most (i.o.w. I would like to see rather 4) than 1) to be implemented).
+
+> > > Hence in this case the driver can be worked around easily (by
+> > > shuffling the order in ->probe() to call devm_ first), but as I said
+> > > looking into implementation of the _unregister() I'm pretty sure that
+> > > clock management should be in sdhci-pltfm, rather than in all callers
+> > > who won't need the full customization.
+> > >
+> > > Hope this helps to understand my point.
+> > >
+> > >>>> Your ->remove() callback doesn't free resources in the reversed order
+> > >>>> which may or, by luck, may not be the case of all possible crashes,
+> > >>>> UAFs, races, etc during removal stage. All the same for error path in
+> > >>>> ->probe().
+> > >>
+> > >> I also pointed out above what would be the outcome of neglecting this rule.
+
+...
+
+> > >>>>>> Why can't you use sdhci_pltfm_register()?
+> > >>>>> two things are missing in sdhci_pltfm_register
+> > >>>>> 1. clock.
+> > >>>>
+> > >>>> Taking into account the implementation of the corresponding
+> > >>>> _unregister() I would add the clock handling to the _register() one.
+> > >>>> Perhaps via a new member of the platform data that supplies the name
+> > >>>> and index of the clock and hence all clk_get_optional() / clk_put will
+> > >>>> be moved there.
+> Do you mean to add it to sdhci_pltfm_register function? if yes I
+> believe it will take some time to modify sdhci_pltfm_register
+> I prefer not to use sdhci_pltfm_register.
+
+In the Linux kernel we are trying hard to avoid code duplication. Why
+do you need it to be open coded? (Yes, I heard you, but somebody
+should fix the issues with that funcion at some point, right?)
+
+> > >>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
+> > >>>>
+> > >>>> All the same, why can't platform data be utilised for this?
+
 -- 
-2.34.1
-
+With Best Regards,
+Andy Shevchenko
