@@ -2,177 +2,177 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94B34C352A1
-	for <linux-mmc@archiver.kernel.org>; Wed,  7 Dec 2022 16:49:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8E17C4708D
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 00:04:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229818AbiLGQtU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 11:49:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38250 "EHLO
+        id S230214AbiLHAE3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 7 Dec 2022 19:04:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229777AbiLGQtT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 11:49:19 -0500
-Received: from mail-qk1-x735.google.com (mail-qk1-x735.google.com [IPv6:2607:f8b0:4864:20::735])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4494858BD0;
-        Wed,  7 Dec 2022 08:49:18 -0800 (PST)
-Received: by mail-qk1-x735.google.com with SMTP id c2so10416540qko.1;
-        Wed, 07 Dec 2022 08:49:18 -0800 (PST)
+        with ESMTP id S230210AbiLHAE2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 19:04:28 -0500
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 526A7F7B;
+        Wed,  7 Dec 2022 16:04:27 -0800 (PST)
+Received: by mail-ej1-x62f.google.com with SMTP id gh17so89474ejb.6;
+        Wed, 07 Dec 2022 16:04:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=y18DIpbfCukk25TWC8zheO2SUvaGDQaONDYCY89KTGU=;
-        b=SMK2V74sU8D3TcIrRaSUNwZYnaaTCeoM4k+ZcZTFw/ydUkhwZLbo1yEKDxUMIBS4gA
-         iwNJGXqzS6w1suvYGlU8ecRhl6NNxEKbu7JAvBOIviytxXOltcSBfBeWp+TnxyBxXr9j
-         aMWtjDuBUNQOGk7gO4jGnxDWTQ8/yXDvz53Y4z4R9i7/KWUTuiCGkDsrHLRa/o9SuTb7
-         KqorQSVIORS6lv2KWgYWjY+eZry7XlEBoWrdcJ1POsluOkv3Gc8qESPlNGyPzJ94Jsq1
-         5AvRk0IRxLOSHpjNN6gxt9LAglz7AWcGJObOYuX4CKqkCJ0dV+a7TLBA1pKfycAlJzKC
-         YqrQ==
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=09yFi4TXhEKbvW2/X5YzYxYv1R9+iUTjSTTQ7wd1bnQ=;
+        b=MpQ9JnFQ/euUsZ/W8OFV4ShAxJSfk4Uj+Fh5ObXvfcEN/hxXWwIXtzZXxPTbiGdBqy
+         kZLlS8+RPqtgg0VJ6KeueqWQoJTozjN5cnJ62fiv8r/Q+wzr5w5fIZEmI6fa70uZrQ2B
+         R+OX3CaFxKJBPcEJYTazGjqI5suxpWUuLJThQgBBwiYjUnIgvet+Vzw82fBzAFNnXT3M
+         EjIP+EitzyNzXbBSNFlSjN/SroLmlxNCpVC4vc+6AINXRsI8JzOXDbpwV9pr6l+2pV9Z
+         dXVlTNiQACcV9uPWHZkK2vJThmnr3F9qx4teZOTXdLgBab+gRutVqMyqNj5Ac2TZFXxq
+         KZhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=y18DIpbfCukk25TWC8zheO2SUvaGDQaONDYCY89KTGU=;
-        b=mtKrzpYlOQ6xEDqaXzPNF4YAcmytXfDrb+h/1hUvV1GVXU2/uSmFYdqBl4H0gIYzq9
-         wgmcWiAwFCYtG+yjdPyYXu3J83VPiev2NylKlotcMZKdVzaSOsqYt7/X18vgcm4zO+vY
-         tn/6zrPdjBoJFNNqq4kh6r+ZQgd2mrIVukm3O9cltaN7sJL7vR/LNdj6o5k0T7Z5mmXM
-         JD2Wgivev6TRLaldbkEBbhVkzb9PnywtADQj9XR4i3qgkb+EFITdXXPjK0K3rc/OFFcM
-         PHTgcvkAfqp2K1W8nPlAhmC+19Ppoj0eD0JLxHbc1Ix/OVhLyvhcRSRAhPvPh8/OwBvr
-         KkWQ==
-X-Gm-Message-State: ANoB5pl5eOAT6pfydNLuQ8J29ogf6Gjn+LdqxbVVdT7zH9QjqMrm75Pp
-        5wL6rcPRLapYiFhG3lcM55BEgyQee0RodUqFgmE=
-X-Google-Smtp-Source: AA0mqf6Z3cBlsiKEerUxS5aa9mOeKvWW6A2uIvZwb1fbjWfE4NyTIrR4VodmXjDwbwquQncYrV7lhOxx/sjwJ4ekXxA=
-X-Received: by 2002:a37:f504:0:b0:6cf:5fa1:15f8 with SMTP id
- l4-20020a37f504000000b006cf5fa115f8mr81140787qkk.748.1670431757330; Wed, 07
- Dec 2022 08:49:17 -0800 (PST)
+        h=user-agent:in-reply-to:content-disposition:mime-version:references
+         :message-id:subject:cc:to:from:date:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=09yFi4TXhEKbvW2/X5YzYxYv1R9+iUTjSTTQ7wd1bnQ=;
+        b=pilbJu1r13CoFM0gaQeGfNarNiIm+mjPJuVpZv5txlnzIQ/WXaa00kUTs+ub9nwvCR
+         OaK67hJLQKwwxOJwIu8DopLDzzPuaVMG802WNpaeE2eC0LnmGCoOpfXO+cxXLEGz3mHv
+         897OuKLsts4fnQIdmK41CFGCTiCBVLTwjKga9WvxU4fpjN8Rs1oFjZOwWjrHONSLYtgz
+         wxS7ORjh0Mf9h5Ov8qymEoHOX5/qXChedjubf4B5fnM267vyTkQV9KQOygFcsl4doT+V
+         f1PtKIepnW/ThpX0553cZ13qjRJFH0RlMhK7R8icbIiwLxLIlXcNZMyHTof1rFeLlOgN
+         h+rw==
+X-Gm-Message-State: ANoB5plCjiZZFPDWvpV5kYw5vbK/EjHOBIGq0BXKz+tnefVy6nNmPTOW
+        oWZ1ggi7ptgo4P/uqIRrRV0=
+X-Google-Smtp-Source: AA0mqf7ix9VqiSrzOCVzD1oVQR95GIG6qQ9oCQEo05Kw2TypymU86K66teos7Ddte4Szx75gO7+V3g==
+X-Received: by 2002:a17:906:160b:b0:78d:dddb:3974 with SMTP id m11-20020a170906160b00b0078ddddb3974mr77961094ejd.411.1670457865683;
+        Wed, 07 Dec 2022 16:04:25 -0800 (PST)
+Received: from orome (p200300e41f201d00f22f74fffe1f3a53.dip0.t-ipconnect.de. [2003:e4:1f20:1d00:f22f:74ff:fe1f:3a53])
+        by smtp.gmail.com with ESMTPSA id l9-20020a1709063d2900b0079dbf06d558sm8996047ejf.184.2022.12.07.16.04.24
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Dec 2022 16:04:25 -0800 (PST)
+Date:   Thu, 8 Dec 2022 01:04:23 +0100
+From:   Thierry Reding <thierry.reding@gmail.com>
+To:     Stephen Rothwell <sfr@rothwell.id.au>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Joerg Roedel <joro@8bytes.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Prathamesh Shete <pshete@nvidia.com>,
+        Will Deacon <will@kernel.org>,
+        iommu@lists.linux-foundation.org, linux-mmc@vger.kernel.org,
+        linux-tegra@vger.kernel.org
+Subject: Re: [PATCH v13 0/6] mmc: sdhci: Add Tegra234 support
+Message-ID: <Y5EqB7v7m2XSkpn4@orome>
+References: <20221206165945.3551774-1-thierry.reding@gmail.com>
+ <CAPDyKFr2BzeE6N+ZDXj2HE2SEL30CkpvbsRP4wAPnFRHjP=miQ@mail.gmail.com>
+ <20221208104749.5a79482d@oak.ozlabs.ibm.com>
 MIME-Version: 1.0
-References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
- <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
- <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
- <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
- <c200557f-c30a-62f9-287a-af804e818cf1@intel.com> <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
- <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com>
- <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com> <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
- <CAHp75Vd5DzkCW0Gpouv+0Or=Yhjp_KdFGP-jXkpHD=UZrG2ajA@mail.gmail.com> <cae6475a-a1e9-ae57-6e64-59931f467050@intel.com>
-In-Reply-To: <cae6475a-a1e9-ae57-6e64-59931f467050@intel.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Wed, 7 Dec 2022 18:48:41 +0200
-Message-ID: <CAHp75VfVRa5m3WeEvMvGCRK7YRBD5BCxOL2DHDzyuQ1cD4J9UA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Tomer Maimon <tmaimon77@gmail.com>, ulf.hansson@linaro.org,
-        avifishman70@gmail.com, tali.perry1@gmail.com, joel@jms.id.au,
-        venture@google.com, yuenn@google.com, benjaminfair@google.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="Zl3rVGReu28PhYjM"
+Content-Disposition: inline
+In-Reply-To: <20221208104749.5a79482d@oak.ozlabs.ibm.com>
+User-Agent: Mutt/2.2.9 (2022-11-12)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 7, 2022 at 3:49 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> On 7/12/22 15:25, Andy Shevchenko wrote:
-> > On Wed, Dec 7, 2022 at 3:01 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
-> >> On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>> On 5/12/22 16:17, Andy Shevchenko wrote:
-> >>>> On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
-> >>>> <andy.shevchenko@gmail.com> wrote:
-> >>>>> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> >>>>>> On 5/12/22 15:25, Andy Shevchenko wrote:
-> >>>>>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
 
-...
+--Zl3rVGReu28PhYjM
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> >>>>>>> devm_ is problematic in your case.
-> >>>>>>> TL;DR: you need to use clk_get_optional() and clk_put().
-> >>>>>>
-> >>>>>> devm_ calls exactly those, so what is the issue?
-> >>>>>
-> >>>>> The issue is the error path or removal stage where it may or may be
-> >>>>> not problematic. To be on the safe side, the best approach is to make
-> >>>>> sure that allocated resources are being deallocated in the reversed
-> >>>>> order. That said, the
-> >>>>>
-> >>>>> 1. call non-devm_func()
-> >>>>> 2. call devm_func()
-> >>>>>
-> >>>>> is wrong strictly speaking.
-> >>>>
-> >>>> To elaborate more, the
-> >>>>
-> >>>> 1. call all devm_func()
-> >>>> 2. call only non-devm_func()
-> >>>>
-> >>>> is the correct order.
-> >>>
-> >>> 1. WRT pltfm_host->clk, that is what is happening
-> >>> 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
-> >>> e.g. mmc_alloc_host() / mmc_free_host()
-> >> I little confused about what to decide, should I use only
-> >> non-devm_func because mmc_alloc_host() / mmc_free_host() is not
-> >> warrped with devm_?
+On Thu, Dec 08, 2022 at 10:47:49AM +1100, Stephen Rothwell wrote:
+> Hi all,
+>=20
+> On Wed, 7 Dec 2022 13:37:52 +0100 Ulf Hansson <ulf.hansson@linaro.org> wr=
+ote:
 > >
-> > It is up to you how to proceed. I pointed out the problem with your
-> > code which may or may not be fatal.
-> >
-> > If you want to solve it, there are several approaches:
-> > 1) get rid of devm_ completely;
-> > 2) properly shuffle the ordering in ->probe(), so all devm_ calls are
-> > followed by non-devm_;
-> > 3) wrap non-devm_ cals to become managed (see
-> > devm_add_action_or_reset() approach);
-> > 4) fix SDHCI / MMC layer by providing necessary devm_ calls and/or fix
-> > sdhci_pltfm_register() to handle the clock.
->
-> I can take care of sdhci_pltfm when I next have some time.
-> Otherwise it looks OK to me, so I am acking it.
+> > On Tue, 6 Dec 2022 at 17:59, Thierry Reding <thierry.reding@gmail.com> =
+wrote:
+> > >
+> > > From: Thierry Reding <treding@nvidia.com>
+> > >
+> > > Hi,
+> > >
+> > > This is an updated version of v12 from a few days ago:
+> > >
+> > >     https://lore.kernel.org/all/20221202152644.29450-1-thierry.reding=
+@gmail.com/
+> > >
+> > > The only difference here is a fix for the included headers (bitops.h
+> > > does not have all the definitions on all architectures, so we need
+> > > bitfield.h instead) and an Acked-by from Robin on the new Tegra-speci=
+fic
+> > > helper.
+> > >
+> > > It'd be great to see this go in for v6.2 so that the new helper is
+> > > available for the next release and the other patches that I have
+> > > prepared can be merged.
+> > >
+> > > Ulf, given that Joerg has acked patch 1 and Robin has acked patch 2, I
+> > > think the expectation is for you to pick up the whole set. =20
+> >=20
+> > Applied for next, thanks!
+> >=20
+> > Note that, it seems likely that we may encounter a merge conflict
+> > between the mmc and iommu tree, due to changes in
+> > include/linux/iommu.h. Although, if that's the case, I believe the
+> > conflict should be trivial to resolve, so let's try this and see how
+> > it goes.
+> >=20
+> > Stephen, I added you here, just to let you know of what goes on.
+> >=20
+> > >
+> > > Thanks,
+> > > Thierry
+> > >
+> > > Prathamesh Shete (3):
+> > >   mmc: sdhci-tegra: Separate Tegra194 and Tegra234 SoC data
+> > >   mmc: sdhci-tegra: Add support to program MC stream ID
+> > >   mmc: sdhci-tegra: Issue CMD and DAT resets together
+> > >
+> > > Thierry Reding (3):
+> > >   iommu: Add note about struct iommu_fwspec usage
+> > >   iommu/tegra: Add tegra_dev_iommu_get_stream_id() helper
+> > >   mmc: sdhci-tegra: Sort includes alphabetically
+> > >
+> > >  drivers/mmc/host/sdhci-tegra.c | 69 ++++++++++++++++++++++++++++----=
+--
+> > >  drivers/mmc/host/sdhci.c       |  5 +++
+> > >  drivers/mmc/host/sdhci.h       |  2 +
+> > >  include/linux/iommu.h          | 25 ++++++++++++
+> > >  4 files changed, 89 insertions(+), 12 deletions(-) =20
+>=20
+> All good. Thanks for the heads up.
+>=20
+> BTW, it would be good if some of those long lines in comments were
+> wrapped ...
 
-Thank you!
+Hm... looks like I misinterpreted the checkpatch.pl change from a while
+ago. I should probably switch back my editor settings if the preference
+is still 80 characters instead of the 100 enforced by checkpatch.
 
-> > Personally, the list order is from the least, what I prefer, to the
-> > most (i.o.w. I would like to see rather 4) than 1) to be implemented).
-> >
-> >>>> Hence in this case the driver can be worked around easily (by
-> >>>> shuffling the order in ->probe() to call devm_ first), but as I said
-> >>>> looking into implementation of the _unregister() I'm pretty sure that
-> >>>> clock management should be in sdhci-pltfm, rather than in all callers
-> >>>> who won't need the full customization.
-> >>>>
-> >>>> Hope this helps to understand my point.
-> >>>>
-> >>>>>>> Your ->remove() callback doesn't free resources in the reversed order
-> >>>>>>> which may or, by luck, may not be the case of all possible crashes,
-> >>>>>>> UAFs, races, etc during removal stage. All the same for error path in
-> >>>>>>> ->probe().
-> >>>>>
-> >>>>> I also pointed out above what would be the outcome of neglecting this rule.
+Thierry
 
-...
+--Zl3rVGReu28PhYjM
+Content-Type: application/pgp-signature; name="signature.asc"
 
-> >>>>>>>>> Why can't you use sdhci_pltfm_register()?
-> >>>>>>>> two things are missing in sdhci_pltfm_register
-> >>>>>>>> 1. clock.
-> >>>>>>>
-> >>>>>>> Taking into account the implementation of the corresponding
-> >>>>>>> _unregister() I would add the clock handling to the _register() one.
-> >>>>>>> Perhaps via a new member of the platform data that supplies the name
-> >>>>>>> and index of the clock and hence all clk_get_optional() / clk_put will
-> >>>>>>> be moved there.
-> >> Do you mean to add it to sdhci_pltfm_register function? if yes I
-> >> believe it will take some time to modify sdhci_pltfm_register
-> >> I prefer not to use sdhci_pltfm_register.
-> >
-> > In the Linux kernel we are trying hard to avoid code duplication. Why
-> > do you need it to be open coded? (Yes, I heard you, but somebody
-> > should fix the issues with that funcion at some point, right?)
-> >
-> >>>>>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
-> >>>>>>>
-> >>>>>>> All the same, why can't platform data be utilised for this?
+-----BEGIN PGP SIGNATURE-----
 
--- 
-With Best Regards,
-Andy Shevchenko
+iQIzBAABCAAdFiEEiOrDCAFJzPfAjcif3SOs138+s6EFAmORKgQACgkQ3SOs138+
+s6Gmzg//Q2E3eo7bIzRh+yuhkK4tU3jadK0bUBvmNMKSjWjt+IKb8ntT9sAqH+Mi
+50tGNrbJWDwoWEkYcZlAWUFPvx0+X83eVRLGQO4VUU5+wih8jsvj48bfwdrhMh6T
+EkWKs8JhCDYMUoRUSrIiELdexns6pP35D2WCCNI3VYr9pAJm4Wh+14oSqB5Uu23J
+snl9mu6FoBHeEIvkvDZGfi4uQ2zX5vmQq3/6P1etSgQITiJKLIwuxxeTshQymY12
+Qd2kBdGstWtpj2OjZhCapb+OjC4GgwHZqmoy8kPjUfe8K6b/9nhw7/HOC/ztmO6d
+V3LywfbBVh8q69HWd4de121vlYwP3/IKcVIFYVIkSIvW40zoyZ3NeMLMlpC2LE6C
+GXxZhXj9ZfSH5B0IaOUbBOYo51WQY3cCg0dyfzwJm907BqWUrTkV0YBeva6/x5U3
+BVvsJUT/2MLNPBtD26XUEKn//Vu9KZ6UkAhI+2w0u6Tj2ivEGomgLDmQ/CweSy/L
+F3zP21iqnuah7+U9YEwDmdp35z8Zizhjn7XKHpjprbDrd2oz7if/vq7RwUYjDIUI
+bJJ2U1vKCneN2oyGI1rxJP7/mdBaVe0G3gVpqt/LecKLCtQ7Z/JCZW/yLW5nId9i
+dPtGB6SyMOb17OKaL+NlFkVPdPC2b8BPbRSbfnTsbauXl/tHLEQ=
+=b7jI
+-----END PGP SIGNATURE-----
+
+--Zl3rVGReu28PhYjM--
