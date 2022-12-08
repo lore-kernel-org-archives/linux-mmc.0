@@ -2,79 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B8EDAC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 21:15:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B6E7C4167B
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 21:35:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229757AbiLHVPV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Dec 2022 16:15:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33130 "EHLO
+        id S229561AbiLHVfa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Dec 2022 16:35:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229703AbiLHVPU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 16:15:20 -0500
-Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54E989492A
-        for <linux-mmc@vger.kernel.org>; Thu,  8 Dec 2022 13:15:19 -0800 (PST)
-Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-3e45d25de97so28973977b3.6
-        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2022 13:15:19 -0800 (PST)
+        with ESMTP id S229558AbiLHVf3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 16:35:29 -0500
+Received: from mail-yw1-x1131.google.com (mail-yw1-x1131.google.com [IPv6:2607:f8b0:4864:20::1131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92B5878BAA
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Dec 2022 13:35:28 -0800 (PST)
+Received: by mail-yw1-x1131.google.com with SMTP id 00721157ae682-3cbdd6c00adso29362057b3.11
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2022 13:35:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=RxLb6c3pV8MZQYOARt7wFYg4IvcTRaFrHi+WtxF8Db4=;
-        b=lzDTGWDELDro1riwKG0siQz477cfqDaZbigVvRWIM9kyY1Y2ZaJm/6ScdYxqWk9A4w
-         uRmTBk+AqMNB04d/2u8RFSfjO/sZaLnK/+RSu1G1PCfoRN/7l4y3s1OgBF7gG+tEAHtg
-         glOHd1mrJtx3STLEzzYRw3xMVS32DpaFeEoFKQ6boob1WvMYQ6BVxDhPiyNUzW4YQ+Ar
-         ntAI80HJc7iAx3daDrBeh9b9JJcM4FeHPiNNaUOOHs81KxK3kgoRompSSYsDBFxlqiXD
-         jceM7dEHfsFCreLJOAxonQfz708upMPU89xbrmpPaV01mo6mWZo/qUFR1s3aj6zTZTtS
-         2ptA==
+        bh=tlFUfNslInmoKrVXkH1lhTSHZIbojnQ8pkFmtckc3GY=;
+        b=K30+WCfX8giduPvnrjcW4mf0ZRHkFyzYUFp5Xw7Zjv/oHUrV8dMXoacaTfnJxSLDwV
+         pVeAN6CSxR/O/Vx40v4erwGSsTiSXe3BI/bCWsHnatqvqmAYi2FqyUlAzRP5W0y2p5aE
+         zAMj6D1W7oNBlX+83qRGtrT5KuxtIXTavxGMWCCNE4DdR8cS0J3wu80gRV6T992+pMA4
+         hmoUbprlR34I2rGMsgz46+y2PEb9RfKy+swqPIFvY9MPPF985zvYmfUFrwWlSjxOyf9M
+         WI2I3nsrrptkAptuLcZe9jRb6RKZya66wgPG4LDdLz5f79U48zqo0n1oOC6z22UMXm/O
+         /38A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=RxLb6c3pV8MZQYOARt7wFYg4IvcTRaFrHi+WtxF8Db4=;
-        b=h7kpBTBmw5hvzZZ0mJH3o6qamhAwFa1ESYNczHGvN5GZStcWVJwMLHnqZ7y8Jd9cwu
-         svGF0bnOpkbhVtT1IId8HfMdNhYPBhWErsfkD8bfXBNMKvV4JNMpfCAVeNZr1iOXsmQa
-         fA5N9IfPBQqZfSooxBotdvoVCtdtOvwH2GI6sb8raCQffr1d0Nj34ztLHEitNOEWS7fD
-         9eanN+7+ukK8fQG84C1mQJkTWpKz8BtYJrpfZULy/WOi4hFpf22TL3LQ0s4r1+PmFGXb
-         EUsRQl6oMS3A06CvOnEc00p+2NXIaD6yW84vYXWRqFbBvEknn+wDiKAiG0eBB/u5iMUM
-         sFKw==
-X-Gm-Message-State: ANoB5plKHOG7vRFTREajaq8GHKwcci5w79b8UlNT9Ys32g3BiMO8bGFV
-        zC+cAua0goYLufiGvoYIxjjeftA/Ncx+dPtHqZAB0A==
-X-Google-Smtp-Source: AA0mqf5TMIaMGikCivHSN8QB/ySrGFpStI9jdjJ5wqz3y8/sxy4rK7Alc1fze08qJAV5K9Tf5G1tnU9ey8KciS44t3Q=
-X-Received: by 2002:a81:5d8:0:b0:3f5:b69c:387 with SMTP id 207-20020a8105d8000000b003f5b69c0387mr10437422ywf.359.1670534118538;
- Thu, 08 Dec 2022 13:15:18 -0800 (PST)
+        bh=tlFUfNslInmoKrVXkH1lhTSHZIbojnQ8pkFmtckc3GY=;
+        b=xu+uElFsZ5Iv3MgtwUkUV5KJc/DIXH9A97YqWvjgrbRtPtXcvrecUxTfZ1x2ImnkZQ
+         3XTAfKkvMYnn2DT15FjFVNgN+kE40+EZB1ywr4EI/uDtMOfrQVfydL0YVBG0K1EErc9Q
+         32YlQKaPJa4CD3LzgKglIVug2VlekFLAPFOaDwN1N8i5xeEnHplNETwndL1h6QHmbh0Y
+         yooQCAFKK6mF5K52GR8SXkmQ42K05f+gNRyirjOJO1RPhvmVXVeL73d1qVRuEcD7kFUJ
+         lT+ZFl5H1iX5TQQ6lP0AcZSpiN1lLJUSjce2/SWKvBtJYXzw1M0Z07JvL/dYLIjpAF6i
+         d/MQ==
+X-Gm-Message-State: ANoB5pkkWasw2BCQU4uPeq9mfjRPB28NyY0NYYfkSkCF9vhKi0bbhHJ5
+        I+Oh310ig4z+Q+V3wcA8QvvDn/47IgAEvyP4/hPR/R5hDi4m4v78
+X-Google-Smtp-Source: AA0mqf5lejhclephxCw5o0uTd2TpzNhPuNBMRa9NqKnFF/sR8PB4mPhQmV9Y5dXLDaQc09tXea5EUQ+vf5gXqUZdr5c=
+X-Received: by 2002:a81:b45:0:b0:3c8:b520:2fa6 with SMTP id
+ 66-20020a810b45000000b003c8b5202fa6mr48364581ywl.411.1670535327801; Thu, 08
+ Dec 2022 13:35:27 -0800 (PST)
 MIME-Version: 1.0
-References: <20221207131731.1291517-1-william.qiu@starfivetech.com> <20221207131731.1291517-4-william.qiu@starfivetech.com>
-In-Reply-To: <20221207131731.1291517-4-william.qiu@starfivetech.com>
+References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
+ <20221205105931.410686-4-vadym.kochan@plvision.eu> <CACRpkdaXQqrCEqu9HTMZMMWbnkQxXEmoJNtiH-HENZWeDqjqTw@mail.gmail.com>
+ <BN9PR18MB4251300124E30A16B3F5C521DB1D9@BN9PR18MB4251.namprd18.prod.outlook.com>
+In-Reply-To: <BN9PR18MB4251300124E30A16B3F5C521DB1D9@BN9PR18MB4251.namprd18.prod.outlook.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 8 Dec 2022 22:15:07 +0100
-Message-ID: <CACRpkdbjaiDhPcVH115w25oxseWrz=Yb-ugkmCOiqhRDmDZj5A@mail.gmail.com>
-Subject: Re: [PATCH v1 3/3] riscv: dts: starfive: Add mmc node
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
+Date:   Thu, 8 Dec 2022 22:35:16 +0100
+Message-ID: <CACRpkdayw4JPY_3HFvgDpfPaDwOZHKKmyaahpEbKR6DaO_VJuA@mail.gmail.com>
+Subject: Re: [EXT] Re: [PATCH v3 3/3] mmc: xenon: Fix 2G limitation on AC5 SoC
+To:     Elad Nachman <enachman@marvell.com>
+Cc:     Vadym Kochan <vadym.kochan@plvision.eu>,
+        Hu Ziji <huziji@marvell.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi William,
+Hi Elad,
 
-thanks for your patch!
+I get it, I think. I was a bit confused by the 3G/4G terminology.
 
-On Wed, Dec 7, 2022 at 2:17 PM William Qiu <william.qiu@starfivetech.com> wrote:
+On Thu, Dec 8, 2022 at 11:20 AM Elad Nachman <enachman@marvell.com> wrote:
 
-> +                       starfive,sys-syscon = <&sys_syscon 0x14 0x1a 0x7c000000>;
-(...)
-> +                       starfive,sys-syscon = <&sys_syscon 0x9c 0x1 0x3e>;
+> The lower 31-bits of the address placed in the ADMA is passed through the interconnect, and remapped to the base of the DDR.
+>
+> Hence only addressing of the lower 2GB of the DDR memory is supported for eMMC in this device family (AC5/X).
+>
+> So the quirk needs to kick in above 2GB of physical memory accessed from the base of the DDR.
 
-These are registster offsets and shifts. Don't define such stuff in your device
-tree, use #defines in the code and just provide the phandle.
+How "clever" to skip bit 32. This should be in the patch description.
+
+> This is why a quirk which only kicks in above 4GB is not sufficient.
+
+So the author of the patch should create a new quirk that kicks in above 2GB,
+devised to be similar in style of the 4GB quirk we already have.
+
+> Furthermore, SDHCI_QUIRK_32BIT_DMA_ADDR is checked in sdhci_prepare_data() as a way to
+> disable DMA when the offset of the scatter-list DMA address is not 32-bit aligned. If the address is
+> aligned, this quirk does not disable the DMA, and will not solve our problem.
+
+That's right.
+
+Let's just create a new quirk:
+
+SDHCI_QUIRK_31BIT_DMA_ROOF
+
+Define the semantics such that this will allow DMA for buffers that are below
+the 31st bit, but does not have the semantics to limit scatter-gather buffers to
+be 32-bit aligned.
 
 Yours,
 Linus Walleij
