@@ -2,184 +2,233 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24D48C63703
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 12:59:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1FA9AC10F1B
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 21:09:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229942AbiLHM67 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Dec 2022 07:58:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55642 "EHLO
+        id S229500AbiLHVJ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Dec 2022 16:09:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58270 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229810AbiLHM66 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 07:58:58 -0500
-Received: from mail-lj1-x22c.google.com (mail-lj1-x22c.google.com [IPv6:2a00:1450:4864:20::22c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DAC87F8BD;
-        Thu,  8 Dec 2022 04:58:57 -0800 (PST)
-Received: by mail-lj1-x22c.google.com with SMTP id q7so1459908ljp.9;
-        Thu, 08 Dec 2022 04:58:57 -0800 (PST)
+        with ESMTP id S229676AbiLHVJz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 16:09:55 -0500
+Received: from mail-yw1-x1130.google.com (mail-yw1-x1130.google.com [IPv6:2607:f8b0:4864:20::1130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C7E392FF4
+        for <linux-mmc@vger.kernel.org>; Thu,  8 Dec 2022 13:09:54 -0800 (PST)
+Received: by mail-yw1-x1130.google.com with SMTP id 00721157ae682-381662c78a9so28820687b3.7
+        for <linux-mmc@vger.kernel.org>; Thu, 08 Dec 2022 13:09:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=JZ7np5caI4unEEBvRTaWL2Uygj5hC6MVtGCTSMAC2xE=;
-        b=OwykP3QWxZHL7mgwuoBNcNvCPcBbQrgf6edkkSg8iAP6D7MG34XPYD2JI7b2wLIeDd
-         gChUZuSv5RSGLBno4s5Vn87JZhr2tKNIXHCcFcoOztrWSds3oUjdDFBSg8ARvbVe1G2O
-         GYIrFeWCRGg7bOFtVISK+RMieqTxA6mccGaGdQvg39rKtPKrGruYom3NMZxAOeFakkKd
-         2pNWD7naBB/4lOUOI7egs15/1+nP8Es/eytoWEkNsbejPT/JO/FPRaoupnn3Z8BOvNM2
-         bH1scsjlx9323enLvf3PXOCpNzBPVSoj/CQfQ8FEA0++3tSkEcu/GVJSUh9sDETEKyfG
-         yMcA==
+        bh=iJ6E6svhr3Q9wlTRWWrDf/qx2NsbOqycebzI7mskdFw=;
+        b=Z8pJ9F1fNoTt6wr2R3agJ1j8IoMsavCjIm8FuFUB9qW8/TbA8qwb10IAhyIJrjlP87
+         85og4tS9dZHzpaS7/bmhX2G67S6Y9biDCYSIjosf43ZlJzGlsdJNJNR5X4PKP+Plxpw9
+         vqlPpZ9zxFMdnLI6IRCGTkWrtKhKneRxpBDOiZhNpPG9EOt4O+YSPdRVZegE2alo6ykJ
+         G9Y7SoKFg+3g7XZalmm/EPxfqpzvtTvwuV+lNn10PgDfVFCzEf3n7cxG9jNyu8Bg2WDb
+         t6Hsc7ZgG4M75xvfNns0tBi/PeN93xKZ+lCw+UUl6NcoJMDRztdwQQrr6vlyRIqZjDgc
+         Tojg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=JZ7np5caI4unEEBvRTaWL2Uygj5hC6MVtGCTSMAC2xE=;
-        b=VKIXHypMH/y6ZYO4kp8/8/OXGlQQqVXZhjU9mTFMILyRcw3q+ZuYW2Cj/BFadVLEZU
-         llLgx/Z8NefDnGffvv/Y7ptshUzJ4NVkDZQpFaVB4cO9nmZw6TqC15GiovyUQGA0XzQ5
-         DZVeC/xDXSxP7ptrzM23cEWtyNw0/6GocRhneqyrf1gd4Fc1tki11eLab7A+HFuDDmE/
-         Z/5qIDuTO/fJj3jv2WfdZG+kvMNFHXBR77vTZkTiZiki0mXP0wRWqqoafRMXMLz0uhUx
-         O31C7ix0oaRdsPgNEmpZjfi6RtQIi9oAC2+Jk34myPl9PI70T5Mh60TrRGvEjSNM1aHS
-         cSog==
-X-Gm-Message-State: ANoB5pkHLvp/PMLlgGswVA0dkyHnNaWXhgGWCL6kU9+mEKCjM4Lo1M1M
-        6g3EKndnBWFvV0NKQgFVnt1oJzWSOX+qQ4S0hBw=
-X-Google-Smtp-Source: AA0mqf6zq4d9b0tsEHeCgtmeDquOR37yLN23DVA+KoCW9EuxGMWOnbzCZ2s6ZkDT4oAhoxmH0yQuBynokogi3UKHQrU=
-X-Received: by 2002:a2e:7c17:0:b0:27a:17d5:2964 with SMTP id
- x23-20020a2e7c17000000b0027a17d52964mr2520757ljc.488.1670504335717; Thu, 08
- Dec 2022 04:58:55 -0800 (PST)
+        bh=iJ6E6svhr3Q9wlTRWWrDf/qx2NsbOqycebzI7mskdFw=;
+        b=eB7IsmYytthD44dCDao8w/vUjFXujP60yXe5TDirWugcnwzYCf0q/azX6IiRUjHIyc
+         Hsy4h5J277js/RbNCxVwDX1csCvQEjI5eicPkPEMZXMcztDzQfYCnXo8UIKEsMSnR5Ar
+         eO0sHEnIKODhuH+vlnUDoMFC/GlQV9+ROtU0l6Sl0VMWdzk5Jkv+eBgC3IH0YWYjgOAN
+         WczORLI1a7eW0DymPsn5jzpuwhIx5WnkqWCklAohAXKcFQ83v7QWOsB+0Xf2enEDym1P
+         OrqUseOBXfBTWq2ATIfD2PnyqGP5yxdE58pBneyKkzbe8bXUZUWx2fHXokg2YW6gOUja
+         lVvQ==
+X-Gm-Message-State: ANoB5pmJCmzBHbyl8jfwfMdNj8uVDz/yGZ5S4wYHtdesnfqPbAVfWR6n
+        4A4lzV3fLLMyRBuzVh0ftLtaMrbBwyhDqbWUFUokbg==
+X-Google-Smtp-Source: AA0mqf7wM+vhfNUXF2apxC1BoRxFZo/2/n5ITP7l/6K6fqs2HZ/zDYG89M4aSLZQVOeczE40uEyiE1EM+Uc6bc615LQ=
+X-Received: by 2002:a81:7853:0:b0:392:b19b:47e9 with SMTP id
+ t80-20020a817853000000b00392b19b47e9mr9753950ywc.252.1670533793365; Thu, 08
+ Dec 2022 13:09:53 -0800 (PST)
 MIME-Version: 1.0
-References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
- <CAHp75VeAzgCUiH5Z1pVJ-4X29aCK44q907DRQXX75zS4oEhHHg@mail.gmail.com>
- <CAP6Zq1gi7-pA9wdO3=V9Uf0+pKPTHwWw66MfbYmOwodoXeRDqA@mail.gmail.com>
- <CAHp75VctiJvvk-6AWfQSU9psHvPeKECaCWPuKL9YQ_-Vt3GBGA@mail.gmail.com>
- <c200557f-c30a-62f9-287a-af804e818cf1@intel.com> <CAHp75VczbNpHPi-TBe81Ad=P=eXJZpAmkj=m4-apGF1e0uh5kg@mail.gmail.com>
- <CAHp75VemBiGUTspEYDe3hwA9pEzjNMQGY6_kUoVMJyCuEWgChw@mail.gmail.com>
- <c4e2a00c-d09e-95e2-eaf2-1de6b820ac6e@intel.com> <CAP6Zq1h9XvH501e_nH9TkUCKPNOuH7dhOM8FrsUM=PYX4gt0qw@mail.gmail.com>
- <CAHp75Vd5DzkCW0Gpouv+0Or=Yhjp_KdFGP-jXkpHD=UZrG2ajA@mail.gmail.com>
- <cae6475a-a1e9-ae57-6e64-59931f467050@intel.com> <CAHp75VfVRa5m3WeEvMvGCRK7YRBD5BCxOL2DHDzyuQ1cD4J9UA@mail.gmail.com>
-In-Reply-To: <CAHp75VfVRa5m3WeEvMvGCRK7YRBD5BCxOL2DHDzyuQ1cD4J9UA@mail.gmail.com>
-From:   Tomer Maimon <tmaimon77@gmail.com>
-Date:   Thu, 8 Dec 2022 14:58:44 +0200
-Message-ID: <CAP6Zq1hj1YikzsY8bKMayYErQomMEGC6V3_6DUOo67=L4yfQrQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, ulf.hansson@linaro.org,
-        avifishman70@gmail.com, tali.perry1@gmail.com, joel@jms.id.au,
-        venture@google.com, yuenn@google.com, benjaminfair@google.com,
-        skhan@linuxfoundation.org, davidgow@google.com,
-        pbrobinson@gmail.com, gsomlo@gmail.com, briannorris@chromium.org,
-        arnd@arndb.de, krakoczy@antmicro.com, openbmc@lists.ozlabs.org,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+References: <20221207131731.1291517-1-william.qiu@starfivetech.com> <20221207131731.1291517-3-william.qiu@starfivetech.com>
+In-Reply-To: <20221207131731.1291517-3-william.qiu@starfivetech.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 8 Dec 2022 22:09:38 +0100
+Message-ID: <CACRpkdYP7MokLdRtxX9w7p80c=wHDHsoTYWrU53CnpsZ7o6aGg@mail.gmail.com>
+Subject: Re: [PATCH v1 2/3] mmc: starfive: Add sdio/emmc driver support
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Thanks a lot, Adrian and andy!
+Hi William,
 
-Appreciate it
+thanks for your patch!
 
-On Wed, 7 Dec 2022 at 18:49, Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+On Wed, Dec 7, 2022 at 2:17 PM William Qiu <william.qiu@starfivetech.com> wrote:
+
+> Add sdio/emmc driver support for StarFive JH7110 soc.
 >
-> On Wed, Dec 7, 2022 at 3:49 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> > On 7/12/22 15:25, Andy Shevchenko wrote:
-> > > On Wed, Dec 7, 2022 at 3:01 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
-> > >> On Mon, 5 Dec 2022 at 16:33, Adrian Hunter <adrian.hunter@intel.com> wrote:
-> > >>> On 5/12/22 16:17, Andy Shevchenko wrote:
-> > >>>> On Mon, Dec 5, 2022 at 4:14 PM Andy Shevchenko
-> > >>>> <andy.shevchenko@gmail.com> wrote:
-> > >>>>> On Mon, Dec 5, 2022 at 3:41 PM Adrian Hunter <adrian.hunter@intel.com> wrote:
-> > >>>>>> On 5/12/22 15:25, Andy Shevchenko wrote:
-> > >>>>>>> On Mon, Dec 5, 2022 at 1:20 PM Tomer Maimon <tmaimon77@gmail.com> wrote:
->
-> ...
->
-> > >>>>>>> devm_ is problematic in your case.
-> > >>>>>>> TL;DR: you need to use clk_get_optional() and clk_put().
-> > >>>>>>
-> > >>>>>> devm_ calls exactly those, so what is the issue?
-> > >>>>>
-> > >>>>> The issue is the error path or removal stage where it may or may be
-> > >>>>> not problematic. To be on the safe side, the best approach is to make
-> > >>>>> sure that allocated resources are being deallocated in the reversed
-> > >>>>> order. That said, the
-> > >>>>>
-> > >>>>> 1. call non-devm_func()
-> > >>>>> 2. call devm_func()
-> > >>>>>
-> > >>>>> is wrong strictly speaking.
-> > >>>>
-> > >>>> To elaborate more, the
-> > >>>>
-> > >>>> 1. call all devm_func()
-> > >>>> 2. call only non-devm_func()
-> > >>>>
-> > >>>> is the correct order.
-> > >>>
-> > >>> 1. WRT pltfm_host->clk, that is what is happening
-> > >>> 2. WRT other resources that is simply not always possible because not every resource is wrapped by devm_
-> > >>> e.g. mmc_alloc_host() / mmc_free_host()
-> > >> I little confused about what to decide, should I use only
-> > >> non-devm_func because mmc_alloc_host() / mmc_free_host() is not
-> > >> warrped with devm_?
-> > >
-> > > It is up to you how to proceed. I pointed out the problem with your
-> > > code which may or may not be fatal.
-> > >
-> > > If you want to solve it, there are several approaches:
-> > > 1) get rid of devm_ completely;
-> > > 2) properly shuffle the ordering in ->probe(), so all devm_ calls are
-> > > followed by non-devm_;
-> > > 3) wrap non-devm_ cals to become managed (see
-> > > devm_add_action_or_reset() approach);
-> > > 4) fix SDHCI / MMC layer by providing necessary devm_ calls and/or fix
-> > > sdhci_pltfm_register() to handle the clock.
-> >
-> > I can take care of sdhci_pltfm when I next have some time.
-> > Otherwise it looks OK to me, so I am acking it.
->
-> Thank you!
->
-> > > Personally, the list order is from the least, what I prefer, to the
-> > > most (i.o.w. I would like to see rather 4) than 1) to be implemented).
-> > >
-> > >>>> Hence in this case the driver can be worked around easily (by
-> > >>>> shuffling the order in ->probe() to call devm_ first), but as I said
-> > >>>> looking into implementation of the _unregister() I'm pretty sure that
-> > >>>> clock management should be in sdhci-pltfm, rather than in all callers
-> > >>>> who won't need the full customization.
-> > >>>>
-> > >>>> Hope this helps to understand my point.
-> > >>>>
-> > >>>>>>> Your ->remove() callback doesn't free resources in the reversed order
-> > >>>>>>> which may or, by luck, may not be the case of all possible crashes,
-> > >>>>>>> UAFs, races, etc during removal stage. All the same for error path in
-> > >>>>>>> ->probe().
-> > >>>>>
-> > >>>>> I also pointed out above what would be the outcome of neglecting this rule.
->
-> ...
->
-> > >>>>>>>>> Why can't you use sdhci_pltfm_register()?
-> > >>>>>>>> two things are missing in sdhci_pltfm_register
-> > >>>>>>>> 1. clock.
-> > >>>>>>>
-> > >>>>>>> Taking into account the implementation of the corresponding
-> > >>>>>>> _unregister() I would add the clock handling to the _register() one.
-> > >>>>>>> Perhaps via a new member of the platform data that supplies the name
-> > >>>>>>> and index of the clock and hence all clk_get_optional() / clk_put will
-> > >>>>>>> be moved there.
-> > >> Do you mean to add it to sdhci_pltfm_register function? if yes I
-> > >> believe it will take some time to modify sdhci_pltfm_register
-> > >> I prefer not to use sdhci_pltfm_register.
-> > >
-> > > In the Linux kernel we are trying hard to avoid code duplication. Why
-> > > do you need it to be open coded? (Yes, I heard you, but somebody
-> > > should fix the issues with that funcion at some point, right?)
-> > >
-> > >>>>>>>> 2. Adding SDHCI_CAN_DO_8BIT capability according the eMMC capabilities.
-> > >>>>>>>
-> > >>>>>>> All the same, why can't platform data be utilised for this?
->
-> --
-> With Best Regards,
-> Andy Shevchenko
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+
+(...)
+> +#include <linux/gpio.h>
+
+Never include this legacy header in new code. Also: you don't use it.
+
+> +#include <linux/mfd/syscon.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/module.h>
+> +#include <linux/of_address.h>
+> +#include <linux/platform_device.h>
+> +#include <linux/pm_runtime.h>
+
+You're not using this include either.
+
+> +#include <linux/regmap.h>
+> +#include <linux/regulator/consumer.h>
+
+Or this.
+
+> +#define ALL_INT_CLR            0x1ffff
+> +#define MAX_DELAY_CHAIN                32
+> +
+> +struct starfive_priv {
+> +       struct device *dev;
+> +       struct regmap *reg_syscon;
+> +       u32 syscon_offset;
+> +       u32 syscon_shift;
+> +       u32 syscon_mask;
+> +};
+> +
+> +static unsigned long dw_mci_starfive_caps[] = {
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23,
+> +       MMC_CAP_CMD23
+> +};
+> +
+> +static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+> +{
+> +       int ret;
+> +       unsigned int clock;
+> +
+> +       if (ios->timing == MMC_TIMING_MMC_DDR52 || ios->timing == MMC_TIMING_UHS_DDR50) {
+> +               clock = (ios->clock > 50000000 && ios->clock <= 52000000) ? 100000000 : ios->clock;
+> +               ret = clk_set_rate(host->ciu_clk, clock);
+> +               if (ret)
+> +                       dev_dbg(host->dev, "Use an external frequency divider %uHz\n", ios->clock);
+> +               host->bus_hz = clk_get_rate(host->ciu_clk);
+> +       } else {
+> +               dev_dbg(host->dev, "Using the internal divider\n");
+> +       }
+> +}
+> +
+> +static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
+> +                                            u32 opcode)
+> +{
+> +       static const int grade  = MAX_DELAY_CHAIN;
+> +       struct dw_mci *host = slot->host;
+> +       struct starfive_priv *priv = host->priv;
+> +       int raise_point = -1, fall_point = -1;
+> +       int err, prev_err = -1;
+
+I don't like these default-init to -1. Can you just skip it and assign it
+where it makes most sense instead?
+
+> +       int found = 0;
+
+This looks like a bool.
+
+> +       int i;
+> +       u32 regval;
+> +
+> +       for (i = 0; i < grade; i++) {
+> +               regval = i << priv->syscon_shift;
+> +               err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
+> +                                               priv->syscon_mask, regval);
+> +               if (err)
+> +                       return err;
+> +               mci_writel(host, RINTSTS, ALL_INT_CLR);
+> +
+> +               err = mmc_send_tuning(slot->mmc, opcode, NULL);
+> +               if (!err)
+> +                       found = 1;
+> +
+> +               if (i > 0) {
+> +                       if (err && !prev_err)
+> +                               fall_point = i - 1;
+> +                       if (!err && prev_err)
+> +                               raise_point = i;
+> +               }
+> +
+> +               if (raise_point != -1 && fall_point != -1)
+> +                       goto tuning_out;
+
+There are just these raise point (shouldn't this be "rise_point" in proper
+english?) and fall point, this misses some comments explaining what is
+going on, the code is not intuitively eviden. Rise and fall of *what* for
+example.
+
+> +
+> +               prev_err = err;
+> +               err = 0;
+> +       }
+> +
+> +tuning_out:
+> +       if (found) {
+> +               if (raise_point == -1)
+> +                       raise_point = 0;
+> +               if (fall_point == -1)
+> +                       fall_point = grade - 1;
+> +               if (fall_point < raise_point) {
+> +                       if ((raise_point + fall_point) >
+> +                           (grade - 1))
+> +                               i = fall_point / 2;
+> +                       else
+> +                               i = (raise_point + grade - 1) / 2;
+> +               } else {
+> +                       i = (raise_point + fall_point) / 2;
+> +               }
+
+Likewise here, explain what grade is, refer to the eMMC spec if necessary.
+
+(...)
+> +       ret = of_parse_phandle_with_fixed_args(host->dev->of_node,
+> +                                               "starfive,sys-syscon", 3, 0, &args);
+> +       if (ret) {
+> +               dev_err(host->dev, "Failed to parse starfive,sys-syscon\n");
+> +               return -EINVAL;
+> +       }
+> +
+> +       priv->reg_syscon = syscon_node_to_regmap(args.np);
+> +       of_node_put(args.np);
+> +       if (IS_ERR(priv->reg_syscon))
+> +               return PTR_ERR(priv->reg_syscon);
+> +
+> +       priv->syscon_offset = args.args[0];
+> +       priv->syscon_shift  = args.args[1];
+> +       priv->syscon_mask   = args.args[2];
+
+Why should these three things be in the device tree instead of being derived
+from the compatible-string or just plain hard-coded as #defines?
+I don't get it.
+
+> +static int dw_mci_starfive_probe(struct platform_device *pdev)
+> +{
+> +       return dw_mci_pltfm_register(pdev, &starfive_data);
+> +}
+> +
+> +static int dw_mci_starfive_remove(struct platform_device *pdev)
+> +{
+> +       return dw_mci_pltfm_remove(pdev);
+> +}
+
+Can't you just assign dw_mci_pltfm_remove() to .remove?
+
+Other than these things, the driver looks good!
+
+Yours,
+Linus Walleij
