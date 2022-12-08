@@ -2,286 +2,110 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E902CC4708D
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 03:38:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 327ACC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 08:35:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229699AbiLHDil (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 7 Dec 2022 22:38:41 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43694 "EHLO
+        id S229807AbiLHIfG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Dec 2022 03:35:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229637AbiLHDik (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 7 Dec 2022 22:38:40 -0500
-Received: from mxhk.zte.com.cn (mxhk.zte.com.cn [63.216.63.35])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E074F60364;
-        Wed,  7 Dec 2022 19:38:37 -0800 (PST)
-Received: from mse-fl1.zte.com.cn (unknown [10.5.228.132])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mxhk.zte.com.cn (FangMail) with ESMTPS id 4NSKcr1C4yz4xVnm;
-        Thu,  8 Dec 2022 11:38:36 +0800 (CST)
-Received: from xaxapp03.zte.com.cn ([10.88.40.52])
-        by mse-fl1.zte.com.cn with SMTP id 2B83cHPT001033;
-        Thu, 8 Dec 2022 11:38:17 +0800 (+08)
-        (envelope-from ye.xingchen@zte.com.cn)
-Received: from mapi (xaxapp01[null])
-        by mapi (Zmail) with MAPI id mid31;
-        Thu, 8 Dec 2022 11:38:19 +0800 (CST)
-Date:   Thu, 8 Dec 2022 11:38:19 +0800 (CST)
-X-Zmail-TransId: 2af963915c2b2708f952
-X-Mailer: Zmail v1.0
-Message-ID: <202212081138191215291@zte.com.cn>
-Mime-Version: 1.0
-From:   <ye.xingchen@zte.com.cn>
-To:     <ulf.hansson@linaro.org>
-Cc:     <maximlevitsky@gmail.com>, <oakad@yahoo.com>, <axboe@kernel.dk>,
-        <hare@suse.de>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: =?UTF-8?B?W1BBVENIXSBtZW1zdGljay9tc3Byb19ibG9jazogQ29udmVydCB0byB1c2XCoHN5c2ZzX2VtaXQoKS9zeXNmc19lbWl0X2F0KCkgQVBJcw==?=
-Content-Type: text/plain;
-        charset="UTF-8"
-X-MAIL: mse-fl1.zte.com.cn 2B83cHPT001033
-X-Fangmail-Gw-Spam-Type: 0
-X-FangMail-Miltered: at cgslv5.04-192.168.250.138.novalocal with ID 63915C3C.000 by FangMail milter!
-X-FangMail-Envelope: 1670470716/4NSKcr1C4yz4xVnm/63915C3C.000/10.5.228.132/[10.5.228.132]/mse-fl1.zte.com.cn/<ye.xingchen@zte.com.cn>
-X-Fangmail-Anti-Spam-Filtered: true
-X-Fangmail-MID-QID: 63915C3C.000/4NSKcr1C4yz4xVnm
+        with ESMTP id S229849AbiLHIfD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 03:35:03 -0500
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D14916174A;
+        Thu,  8 Dec 2022 00:35:01 -0800 (PST)
+Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 73FFB24DD6E;
+        Thu,  8 Dec 2022 16:35:00 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
+ (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 8 Dec
+ 2022 16:35:00 +0800
+Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
+ (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 8 Dec
+ 2022 16:34:59 +0800
+Message-ID: <9602e9db-5107-42cb-7f92-68fe8ab9624f@starfivetech.com>
+Date:   Thu, 8 Dec 2022 16:34:48 +0800
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.1
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
+Content-Language: en-US
+To:     Rob Herring <robh@kernel.org>
+CC:     <linux-kernel@vger.kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        <linux-riscv@lists.infradead.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <devicetree@vger.kernel.org>
+References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+ <20221207131731.1291517-2-william.qiu@starfivetech.com>
+ <167042222472.2111911.2050446708831690640.robh@kernel.org>
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <167042222472.2111911.2050446708831690640.robh@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: ye xingchen <ye.xingchen@zte.com.cn>
 
-Follow the advice of the Documentation/filesystems/sysfs.rst and show()
-should only use sysfs_emit() or sysfs_emit_at() when formatting the
-value to be returned to user space.
 
-Signed-off-by: ye xingchen <ye.xingchen@zte.com.cn>
----
- drivers/memstick/core/mspro_block.c | 177 +++++++++++-----------------
- 1 file changed, 72 insertions(+), 105 deletions(-)
+On 2022/12/7 22:19, Rob Herring wrote:
+> 
+> On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
+>> Add documentation to describe StarFive
+>> designware mobile storage host controller driver.
+>> 
+>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>> ---
+>>  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
+>>  1 file changed, 71 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+>> 
+> 
+> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> 
+> yamllint warnings/errors:
+> 
+> dtschema/dtc warnings/errors:
+> Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or directory
+>    21 |         #include <dt-bindings/clock/starfive-jh7110.h>
+>       |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> compilation terminated.
+> make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dtb] Error 1
+> make[1]: *** Waiting for unfinished jobs....
+> make: *** [Makefile:1492: dt_binding_check] Error 2
+> 
+> doc reference errors (make refcheckdocs):
+> 
+> See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221207131731.1291517-2-william.qiu@starfivetech.com
+> 
+> The base for the series is generally the latest rc1. A different dependency
+> should be noted in *this* patch.
+> 
+> If you already ran 'make dt_binding_check' and didn't see the above
+> error(s), then make sure 'yamllint' is installed and dt-schema is up to
+> date:
+> 
+> pip3 install dtschema --upgrade
+> 
+> Please check and re-submit after running the above command yourself. Note
+> that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+> your schema. However, it must be unset to test all examples with your schema.
+> 
 
-diff --git a/drivers/memstick/core/mspro_block.c b/drivers/memstick/core/mspro_block.c
-index 61cf75d4a01e..5a69ed33999b 100644
---- a/drivers/memstick/core/mspro_block.c
-+++ b/drivers/memstick/core/mspro_block.c
-@@ -260,8 +260,8 @@ static ssize_t mspro_block_attr_show_default(struct device *dev,
- 				buffer[rc++] = '\n';
- 		}
+Hi Rob Herring,
 
--		rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "%02x ",
--				((unsigned char *)s_attr->data)[cnt]);
-+		rc += sysfs_emit_at(buffer, rc, "%02x ",
-+				    ((unsigned char *)s_attr->data)[cnt]);
- 	}
- 	return rc;
- }
-@@ -290,61 +290,43 @@ static ssize_t mspro_block_attr_show_sysinfo(struct device *dev,
- 		date_tz_f *= 15;
- 	}
+Thank you for taking time to review and provide helpful comments for this patch.
+I'll take Conor's suggestion and replace the IDs and drop the header then.
 
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "class: %x\n",
--			x_sys->class);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "block size: %x\n",
--			be16_to_cpu(x_sys->block_size));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "block count: %x\n",
--			be16_to_cpu(x_sys->block_count));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "user block count: %x\n",
--			be16_to_cpu(x_sys->user_block_count));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "page size: %x\n",
--			be16_to_cpu(x_sys->page_size));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "assembly date: "
--			"GMT%+d:%d %04u-%02u-%02u %02u:%02u:%02u\n",
--			date_tz, date_tz_f,
--			be16_to_cpup((__be16 *)&x_sys->assembly_date[1]),
--			x_sys->assembly_date[3], x_sys->assembly_date[4],
--			x_sys->assembly_date[5], x_sys->assembly_date[6],
--			x_sys->assembly_date[7]);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "serial number: %x\n",
--			be32_to_cpu(x_sys->serial_number));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc,
--			"assembly maker code: %x\n",
--			x_sys->assembly_maker_code);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "assembly model code: "
--			"%02x%02x%02x\n", x_sys->assembly_model_code[0],
--			x_sys->assembly_model_code[1],
--			x_sys->assembly_model_code[2]);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "memory maker code: %x\n",
--			be16_to_cpu(x_sys->memory_maker_code));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "memory model code: %x\n",
--			be16_to_cpu(x_sys->memory_model_code));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "vcc: %x\n",
--			x_sys->vcc);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "vpp: %x\n",
--			x_sys->vpp);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "controller number: %x\n",
--			be16_to_cpu(x_sys->controller_number));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc,
--			"controller function: %x\n",
--			be16_to_cpu(x_sys->controller_function));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start sector: %x\n",
--			be16_to_cpu(x_sys->start_sector));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "unit size: %x\n",
--			be16_to_cpu(x_sys->unit_size));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "sub class: %x\n",
--			x_sys->ms_sub_class);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "interface type: %x\n",
--			x_sys->interface_type);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "controller code: %x\n",
--			be16_to_cpu(x_sys->controller_code));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "format type: %x\n",
--			x_sys->format_type);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "device type: %x\n",
--			x_sys->device_type);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "mspro id: %s\n",
--			x_sys->mspro_id);
-+	rc += sysfs_emit_at(buffer, rc, "class: %x\n", x_sys->class);
-+	rc += sysfs_emit_at(buffer, rc, "block size: %x\n", be16_to_cpu(x_sys->block_size));
-+	rc += sysfs_emit_at(buffer, rc, "block count: %x\n", be16_to_cpu(x_sys->block_count));
-+	rc += sysfs_emit_at(buffer, rc, "user block count: %x\n",
-+			    be16_to_cpu(x_sys->user_block_count));
-+	rc += sysfs_emit_at(buffer, rc, "page size: %x\n", be16_to_cpu(x_sys->page_size));
-+	rc += sysfs_emit_at(buffer, rc, "assembly date: GMT%+d:%d %04u-%02u-%02u %02u:%02u:%02u\n",
-+			    date_tz, date_tz_f,
-+			    be16_to_cpup((__be16 *)&x_sys->assembly_date[1]),
-+			    x_sys->assembly_date[3], x_sys->assembly_date[4],
-+			    x_sys->assembly_date[5], x_sys->assembly_date[6],
-+			    x_sys->assembly_date[7]);
-+	rc += sysfs_emit_at(buffer, rc, "serial number: %x\n", be32_to_cpu(x_sys->serial_number));
-+	rc += sysfs_emit_at(buffer, rc, "assembly maker code: %x\n", x_sys->assembly_maker_code);
-+	rc += sysfs_emit_at(buffer, rc, "assembly model code: %02x%02x%02x\n",
-+			    x_sys->assembly_model_code[0],
-+			    x_sys->assembly_model_code[1],
-+			    x_sys->assembly_model_code[2]);
-+	rc += sysfs_emit_at(buffer, rc, "memory maker code: %x\n",
-+			    be16_to_cpu(x_sys->memory_maker_code));
-+	rc += sysfs_emit_at(buffer, rc, "memory model code: %x\n",
-+			    be16_to_cpu(x_sys->memory_model_code));
-+	rc += sysfs_emit_at(buffer, rc, "vcc: %x\n", x_sys->vcc);
-+	rc += sysfs_emit_at(buffer, rc, "vpp: %x\n", x_sys->vpp);
-+	rc += sysfs_emit_at(buffer, rc, "controller number: %x\n",
-+			    be16_to_cpu(x_sys->controller_number));
-+	rc += sysfs_emit_at(buffer, rc, "controller function: %x\n",
-+			    be16_to_cpu(x_sys->controller_function));
-+	rc += sysfs_emit_at(buffer, rc, "start sector: %x\n", be16_to_cpu(x_sys->start_sector));
-+	rc += sysfs_emit_at(buffer, rc, "unit size: %x\n", be16_to_cpu(x_sys->unit_size));
-+	rc += sysfs_emit_at(buffer, rc, "sub class: %x\n", x_sys->ms_sub_class);
-+	rc += sysfs_emit_at(buffer, rc, "interface type: %x\n", x_sys->interface_type);
-+	rc += sysfs_emit_at(buffer, rc, "controller code: %x\n",
-+			    be16_to_cpu(x_sys->controller_code));
-+	rc += sysfs_emit_at(buffer, rc, "format type: %x\n", x_sys->format_type);
-+	rc += sysfs_emit_at(buffer, rc, "device type: %x\n", x_sys->device_type);
-+	rc += sysfs_emit_at(buffer, rc, "mspro id: %s\n", x_sys->mspro_id);
- 	return rc;
- }
-
-@@ -356,7 +338,7 @@ static ssize_t mspro_block_attr_show_modelname(struct device *dev,
- 						     struct mspro_sys_attr,
- 						     dev_attr);
-
--	return scnprintf(buffer, PAGE_SIZE, "%s", (char *)s_attr->data);
-+	return sysfs_emit(buffer, "%s", (char *)s_attr->data);
- }
-
- static ssize_t mspro_block_attr_show_mbr(struct device *dev,
-@@ -369,27 +351,17 @@ static ssize_t mspro_block_attr_show_mbr(struct device *dev,
- 	struct mspro_mbr *x_mbr = x_attr->data;
- 	ssize_t rc = 0;
-
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "boot partition: %x\n",
--			x_mbr->boot_partition);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start head: %x\n",
--			x_mbr->start_head);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start sector: %x\n",
--			x_mbr->start_sector);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start cylinder: %x\n",
--			x_mbr->start_cylinder);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "partition type: %x\n",
--			x_mbr->partition_type);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "end head: %x\n",
--			x_mbr->end_head);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "end sector: %x\n",
--			x_mbr->end_sector);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "end cylinder: %x\n",
--			x_mbr->end_cylinder);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start sectors: %x\n",
--			x_mbr->start_sectors);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc,
--			"sectors per partition: %x\n",
--			x_mbr->sectors_per_partition);
-+	rc += sysfs_emit_at(buffer, rc, "boot partition: %x\n", x_mbr->boot_partition);
-+	rc += sysfs_emit_at(buffer, rc, "start head: %x\n", x_mbr->start_head);
-+	rc += sysfs_emit_at(buffer, rc, "start sector: %x\n", x_mbr->start_sector);
-+	rc += sysfs_emit_at(buffer, rc, "start cylinder: %x\n", x_mbr->start_cylinder);
-+	rc += sysfs_emit_at(buffer, rc, "partition type: %x\n", x_mbr->partition_type);
-+	rc += sysfs_emit_at(buffer, rc, "end head: %x\n", x_mbr->end_head);
-+	rc += sysfs_emit_at(buffer, rc, "end sector: %x\n", x_mbr->end_sector);
-+	rc += sysfs_emit_at(buffer, rc, "end cylinder: %x\n", x_mbr->end_cylinder);
-+	rc += sysfs_emit_at(buffer, rc, "start sectors: %x\n", x_mbr->start_sectors);
-+	rc += sysfs_emit_at(buffer, rc, "sectors per partition: %x\n",
-+			    x_mbr->sectors_per_partition);
- 	return rc;
- }
-
-@@ -409,22 +381,19 @@ static ssize_t mspro_block_attr_show_specfile(struct device *dev,
- 	memcpy(ext, x_spfile->ext, 3);
- 	ext[3] = 0;
-
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "name: %s\n", name);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "ext: %s\n", ext);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "attribute: %x\n",
--			x_spfile->attr);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "time: %d:%d:%d\n",
--			x_spfile->time >> 11,
--			(x_spfile->time >> 5) & 0x3f,
--			(x_spfile->time & 0x1f) * 2);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "date: %d-%d-%d\n",
--			(x_spfile->date >> 9) + 1980,
--			(x_spfile->date >> 5) & 0xf,
--			x_spfile->date & 0x1f);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "start cluster: %x\n",
--			x_spfile->cluster);
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "size: %x\n",
--			x_spfile->size);
-+	rc += sysfs_emit_at(buffer, rc, "name: %s\n", name);
-+	rc += sysfs_emit_at(buffer, rc, "ext: %s\n", ext);
-+	rc += sysfs_emit_at(buffer, rc, "attribute: %x\n", x_spfile->attr);
-+	rc += sysfs_emit_at(buffer, rc, "time: %d:%d:%d\n",
-+			    x_spfile->time >> 11,
-+			    (x_spfile->time >> 5) & 0x3f,
-+			    (x_spfile->time & 0x1f) * 2);
-+	rc += sysfs_emit_at(buffer, rc, "date: %d-%d-%d\n",
-+			    (x_spfile->date >> 9) + 1980,
-+			    (x_spfile->date >> 5) & 0xf,
-+			    x_spfile->date & 0x1f);
-+	rc += sysfs_emit_at(buffer, rc, "start cluster: %x\n", x_spfile->cluster);
-+	rc += sysfs_emit_at(buffer, rc, "size: %x\n", x_spfile->size);
- 	return rc;
- }
-
-@@ -438,16 +407,14 @@ static ssize_t mspro_block_attr_show_devinfo(struct device *dev,
- 	struct mspro_devinfo *x_devinfo = x_attr->data;
- 	ssize_t rc = 0;
-
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "cylinders: %x\n",
--			be16_to_cpu(x_devinfo->cylinders));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "heads: %x\n",
--			be16_to_cpu(x_devinfo->heads));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "bytes per track: %x\n",
--			be16_to_cpu(x_devinfo->bytes_per_track));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "bytes per sector: %x\n",
--			be16_to_cpu(x_devinfo->bytes_per_sector));
--	rc += scnprintf(buffer + rc, PAGE_SIZE - rc, "sectors per track: %x\n",
--			be16_to_cpu(x_devinfo->sectors_per_track));
-+	rc += sysfs_emit_at(buffer, rc, "cylinders: %x\n", be16_to_cpu(x_devinfo->cylinders));
-+	rc += sysfs_emit_at(buffer, rc, "heads: %x\n", be16_to_cpu(x_devinfo->heads));
-+	rc += sysfs_emit_at(buffer, rc, "bytes per track: %x\n",
-+			    be16_to_cpu(x_devinfo->bytes_per_track));
-+	rc += sysfs_emit_at(buffer, rc, "bytes per sector: %x\n",
-+			    be16_to_cpu(x_devinfo->bytes_per_sector));
-+	rc += sysfs_emit_at(buffer, rc, "sectors per track: %x\n",
-+			    be16_to_cpu(x_devinfo->sectors_per_track));
- 	return rc;
- }
-
--- 
-2.25.1
+Best regards,
+William Qiu
