@@ -2,37 +2,37 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 327ACC4332F
-	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 08:35:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D5E80C63709
+	for <linux-mmc@archiver.kernel.org>; Thu,  8 Dec 2022 08:38:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229807AbiLHIfG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 8 Dec 2022 03:35:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40678 "EHLO
+        id S229749AbiLHIiR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 8 Dec 2022 03:38:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43180 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229849AbiLHIfD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 03:35:03 -0500
+        with ESMTP id S229834AbiLHIiO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 8 Dec 2022 03:38:14 -0500
 Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D14916174A;
-        Thu,  8 Dec 2022 00:35:01 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1C5E32DA9E;
+        Thu,  8 Dec 2022 00:38:08 -0800 (PST)
 Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
         (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
         (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 73FFB24DD6E;
-        Thu,  8 Dec 2022 16:35:00 +0800 (CST)
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id ED42C24DEBC;
+        Thu,  8 Dec 2022 16:38:06 +0800 (CST)
 Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
  (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 8 Dec
- 2022 16:35:00 +0800
+ 2022 16:38:07 +0800
 Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
  (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 8 Dec
- 2022 16:34:59 +0800
-Message-ID: <9602e9db-5107-42cb-7f92-68fe8ab9624f@starfivetech.com>
-Date:   Thu, 8 Dec 2022 16:34:48 +0800
+ 2022 16:38:05 +0800
+Message-ID: <39916671-8ab1-4f39-1d9b-a66ebedfc772@starfivetech.com>
+Date:   Thu, 8 Dec 2022 16:38:05 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
  Thunderbird/102.5.1
 Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
 Content-Language: en-US
-To:     Rob Herring <robh@kernel.org>
+To:     Conor Dooley <conor@kernel.org>, Rob Herring <robh@kernel.org>
 CC:     <linux-kernel@vger.kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
@@ -43,8 +43,9 @@ CC:     <linux-kernel@vger.kernel.org>,
 References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
  <20221207131731.1291517-2-william.qiu@starfivetech.com>
  <167042222472.2111911.2050446708831690640.robh@kernel.org>
+ <Y5CnQlYTZJrJNjCf@spud>
 From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <167042222472.2111911.2050446708831690640.robh@kernel.org>
+In-Reply-To: <Y5CnQlYTZJrJNjCf@spud>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 X-Originating-IP: [171.223.208.138]
@@ -57,55 +58,70 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 2022/12/7 22:19, Rob Herring wrote:
-> 
-> On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
->> Add documentation to describe StarFive
->> designware mobile storage host controller driver.
+On 2022/12/7 22:46, Conor Dooley wrote:
+> On Wed, Dec 07, 2022 at 08:19:49AM -0600, Rob Herring wrote:
 >> 
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> ---
->>  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
->>  1 file changed, 71 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+>> On Wed, 07 Dec 2022 21:17:29 +0800, William Qiu wrote:
+>> > Add documentation to describe StarFive
+>> > designware mobile storage host controller driver.
+>> > 
+>> > Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>> > ---
+>> >  .../bindings/mmc/starfive,jh7110-sdio.yaml    | 71 +++++++++++++++++++
+>> >  1 file changed, 71 insertions(+)
+>> >  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.yaml
+>> > 
 >> 
+>> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+>> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+>> 
+>> yamllint warnings/errors:
+>> 
+>> dtschema/dtc warnings/errors:
+>> Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or directory
+>>    21 |         #include <dt-bindings/clock/starfive-jh7110.h>
+>>       |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 > 
-> My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
-> on your patch (DT_CHECKER_FLAGS is new in v5.13):
+> Hello William,
+> As with the other bindings that StarFive has sent out recently,
+> including this header in the example creates a dependency on the
+> clock/reset stuff being merged prior to the drivers for unrelated
+> subsytems.
+> To avoid that, you can drop the headers & definitions from these
+> *examples* & use the numbers themselves instead.
 > 
-> yamllint warnings/errors:
+> That way, the only thing that depends on the clock binding headers is
+> the DeviceTree patch & the driver can be merged once it is ready.
 > 
-> dtschema/dtc warnings/errors:
-> Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dts:21:18: fatal error: dt-bindings/clock/starfive-jh7110.h: No such file or directory
->    21 |         #include <dt-bindings/clock/starfive-jh7110.h>
->       |                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-> compilation terminated.
-> make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dtb] Error 1
-> make[1]: *** Waiting for unfinished jobs....
-> make: *** [Makefile:1492: dt_binding_check] Error 2
+> Thanks,
+> Conor.
 > 
-> doc reference errors (make refcheckdocs):
-> 
-> See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221207131731.1291517-2-william.qiu@starfivetech.com
-> 
-> The base for the series is generally the latest rc1. A different dependency
-> should be noted in *this* patch.
-> 
-> If you already ran 'make dt_binding_check' and didn't see the above
-> error(s), then make sure 'yamllint' is installed and dt-schema is up to
-> date:
-> 
-> pip3 install dtschema --upgrade
-> 
-> Please check and re-submit after running the above command yourself. Note
-> that DT_SCHEMA_FILES can be set to your schema file to speed up checking
-> your schema. However, it must be unset to test all examples with your schema.
-> 
+Hi Conor,
 
-Hi Rob Herring,
-
-Thank you for taking time to review and provide helpful comments for this patch.
-I'll take Conor's suggestion and replace the IDs and drop the header then.
+Thank you for your suggestion. I will take it and fix it.
 
 Best regards,
 William Qiu
+
+>> compilation terminated.
+>> make[1]: *** [scripts/Makefile.lib:406: Documentation/devicetree/bindings/mmc/starfive,jh7110-sdio.example.dtb] Error 1
+>> make[1]: *** Waiting for unfinished jobs....
+>> make: *** [Makefile:1492: dt_binding_check] Error 2
+>> 
+>> doc reference errors (make refcheckdocs):
+>> 
+>> See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20221207131731.1291517-2-william.qiu@starfivetech.com
+>> 
+>> The base for the series is generally the latest rc1. A different dependency
+>> should be noted in *this* patch.
+>> 
+>> If you already ran 'make dt_binding_check' and didn't see the above
+>> error(s), then make sure 'yamllint' is installed and dt-schema is up to
+>> date:
+>> 
+>> pip3 install dtschema --upgrade
+>> 
+>> Please check and re-submit after running the above command yourself. Note
+>> that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+>> your schema. However, it must be unset to test all examples with your schema.
+>> 
