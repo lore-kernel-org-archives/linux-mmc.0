@@ -2,111 +2,113 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FE0CC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Dec 2022 09:34:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 15596C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Dec 2022 11:19:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229634AbiLIJe2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Dec 2022 04:34:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51176 "EHLO
+        id S229760AbiLILTJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Dec 2022 06:19:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45320 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229512AbiLIJe1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2022 04:34:27 -0500
-Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79CBE1F9C3
-        for <linux-mmc@vger.kernel.org>; Fri,  9 Dec 2022 01:34:26 -0800 (PST)
-Received: by mail-pj1-x1034.google.com with SMTP id u15-20020a17090a3fcf00b002191825cf02so4404057pjm.2
-        for <linux-mmc@vger.kernel.org>; Fri, 09 Dec 2022 01:34:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=DcS3x5UmVaSMKFt9E6LpEtAhtfgHDBTbU6XLvPXAh/M=;
-        b=RMV7LNGN99Ydci6QdHnV35yYk3uHMw09LYh44w6Q5gMtVmSrwcJaXacXkVcQfujsx6
-         CfvOAHDYsaS2D1kfaE3IPVDEkldu8MPpmH5+bUNYcSCI9cCuU8rNPbSPoo/uCS75DZbJ
-         v3/VFWrwCSgcDmjCy6PKUeqgIFSHYRMu2Pfgq1nrHG0EOXFuwQD+AmYs9uS1Fp2o1JLK
-         WqB19hRISni/U/ZDdnSuFAIRHOAg3AnMds/uT8KRrSPQMe6XP1GwT5yC03UxdXM94bbZ
-         KGMt7xqxiLLxE9gpV4p20YO6RVbOPZ2KygJAv809Eq6Y8pM874j/DYtC7ORgVPXyltRP
-         2/DQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=DcS3x5UmVaSMKFt9E6LpEtAhtfgHDBTbU6XLvPXAh/M=;
-        b=U+8Z88Ik5woSCGzcDabftpaCMrVnPehgLBtrQ6+hNad3xTVL+rcY24CFeFiojxdlsd
-         E4wLvAQDkzqoTXem08vfMLJ2tpQDk8iTaNP15aRtOvfg3rbk9qYrJNd+obtGMIn2AvJZ
-         /m/t9jbvfNx4fdJUuQvzu0FhFD2jiBBKWWzJPk0zQLE7l28ouxyEBNGhCaqeMDmhbJXA
-         9V5sjXK1T5NKasPyhBrVG+/LFv5+UeD8NnjZF2kNGODKIbUMB5PfP/pSYSuVzitPSnFC
-         h58vIV5KRgZ9LIN4GRbhAMtb5yodJcoYbgDZOsVOEuT9EUktBA7BPrdAVVT6+dMAjbmJ
-         3dMA==
-X-Gm-Message-State: ANoB5pl1/inj3EYjKl1x+0VmDqow2Aoqp8ctdhfqyWQb7mAjWZUsYaHA
-        leUZWGXkOgwgKdnY8Ye9w6Z3JO5h6HtUAEAEZLjUtg==
-X-Google-Smtp-Source: AA0mqf7xEOD5xk6AN0Rb6Uf5Ay0jGqKE0ipuZM1ILbs3FzQGg82UmqA9bAPNDg7B9W4YFZC3PfeD6V1Ynwm8nM8iPtU=
-X-Received: by 2002:a17:90b:268b:b0:219:ff4d:b64b with SMTP id
- pl11-20020a17090b268b00b00219ff4db64bmr12012847pjb.164.1670578466038; Fri, 09
- Dec 2022 01:34:26 -0800 (PST)
+        with ESMTP id S229683AbiLILSc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2022 06:18:32 -0500
+Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D024349095;
+        Fri,  9 Dec 2022 03:18:25 -0800 (PST)
+Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
+        by ex01.ufhost.com (Postfix) with ESMTP id A86D024E1FE;
+        Fri,  9 Dec 2022 19:18:23 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX165.cuchost.com
+ (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 9 Dec
+ 2022 19:18:23 +0800
+Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
+ (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 9 Dec
+ 2022 19:18:22 +0800
+Message-ID: <b56b3363-5792-cf51-0ffe-914afccaa423@starfivetech.com>
+Date:   Fri, 9 Dec 2022 19:18:21 +0800
 MIME-Version: 1.0
-References: <20221207051909.32126-1-wenchao.chen@unisoc.com>
-In-Reply-To: <20221207051909.32126-1-wenchao.chen@unisoc.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 9 Dec 2022 10:33:49 +0100
-Message-ID: <CAPDyKFr=GYHAtt6EitO=o_Z+w0+6b_TWmLWLT_55Qn=5kX7DyQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sprd: Disable CLK_AUTO when the clock is less
- than 400K
-To:     Wenchao Chen <wenchao.chen@unisoc.com>
-Cc:     adrian.hunter@intel.com, orsonzhai@gmail.com,
-        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.1
+Subject: Re: [PATCH v1 1/3] dt-bindings: mmc: Add bindings for StarFive
+To:     Linus Walleij <linus.walleij@linaro.org>
+CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+ <20221207131731.1291517-2-william.qiu@starfivetech.com>
+ <CACRpkdY6364RtQMgGAFA024Pb-9v6+xcTUJdH+-MvzooBGYnhw@mail.gmail.com>
+Content-Language: en-US
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <CACRpkdY6364RtQMgGAFA024Pb-9v6+xcTUJdH+-MvzooBGYnhw@mail.gmail.com>
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS061.cuchost.com (172.16.6.21) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 7 Dec 2022 at 06:20, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
->
-> When the clock is less than 400K, some SD cards fail to initialize
-> because CLK_AUTO is enabled.
->
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 
-Applied for next, and by adding a stable tag, thanks!
 
-Kind regards
-Uffe
+On 2022/12/9 5:13, Linus Walleij wrote:
+> Hi William,
+> 
+> thanks for your patch!
+> 
+> On Wed, Dec 7, 2022 at 2:17 PM William Qiu <william.qiu@starfivetech.com> wrote:
+> 
+>> Add documentation to describe StarFive
+>> designware mobile storage host controller driver.
+>>
+>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> 
+> (...)
+> 
+>> +  starfive,sys-syscon:
+>> +    $ref: /schemas/types.yaml#/definitions/uint32-array
+>> +    description:
+>> +      The desired number of times that the host execute tuning when needed.
+> 
+> This is not consistent with the use in the code of the attached driver.
+> There it is a phandle, and it has three cells, which I am critical of.
+> Also this description is hard to understand.
+> 
 
-> ---
->  drivers/mmc/host/sdhci-sprd.c | 16 +++++++++-------
->  1 file changed, 9 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index bec3f9e3cd3f..525f979e2a97 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -228,13 +228,15 @@ static inline void _sdhci_sprd_set_clock(struct sdhci_host *host,
->         div = ((div & 0x300) >> 2) | ((div & 0xFF) << 8);
->         sdhci_enable_clk(host, div);
->
-> -       /* enable auto gate sdhc_enable_auto_gate */
-> -       val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> -       mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
-> -              SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
-> -       if (mask != (val & mask)) {
-> -               val |= mask;
-> -               sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +       /* Enable CLK_AUTO when the clock is greater than 400K. */
-> +       if (clk > 400000) {
-> +               val = sdhci_readl(host, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +               mask = SDHCI_SPRD_BIT_OUTR_CLK_AUTO_EN |
-> +                       SDHCI_SPRD_BIT_INNR_CLK_AUTO_EN;
-> +               if (mask != (val & mask)) {
-> +                       val |= mask;
-> +                       sdhci_writel(host, val, SDHCI_SPRD_REG_32_BUSY_POSI);
-> +               }
->         }
->  }
->
-> --
-> 2.17.1
->
+Will update all of it in next version.
+
+
+>> +required:
+>> +  - compatible
+>> +  - reg
+>> +  - clocks
+>> +  - clock-names
+>> +  - interrupts
+> 
+> I don't think the syscon phandle is optional.
+> 
+
+Will fix.
+
+>> +    #include <dt-bindings/clock/starfive-jh7110.h>
+>> +    #include <dt-bindings/reset/starfive-jh7110.h>
+>> +    mmc@16010000 {
+>> +            compatible = "starfive,jh7110-sdio";
+>> +            reg = <0x16010000 0x10000>;
+> 
+> No syscon phandle in the example: this needs to be added.
+> 
+
+I will add the syscon phandle.
+
+Thank you for taking time to review and provide helpful comments for this patch.
+
+Best regards,
+William Qiu
+> Yours,
+> Linus Walleij
