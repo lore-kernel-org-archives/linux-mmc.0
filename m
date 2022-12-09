@@ -2,148 +2,187 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8739EC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri,  9 Dec 2022 06:37:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 76B62C10F1B
+	for <linux-mmc@archiver.kernel.org>; Fri,  9 Dec 2022 07:23:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229640AbiLIGhu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 9 Dec 2022 01:37:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58496 "EHLO
+        id S229723AbiLIHXQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 9 Dec 2022 02:23:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229462AbiLIGhs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2022 01:37:48 -0500
-Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23B90178BB;
-        Thu,  8 Dec 2022 22:37:46 -0800 (PST)
-Received: by mail-pj1-x102c.google.com with SMTP id o12so3869117pjo.4;
-        Thu, 08 Dec 2022 22:37:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=KbT7dCn+oPpeQf3mxkQY3Cx4LnSVac2KcmZMWqK+/Z0=;
-        b=SEp88cn0A7yJd/b0yAZVoc41REVHpeMxfVD4h6gzakrclrB0G6fger+wSWw2XE8zw2
-         V9nAlG6STKg70BefPJujtx9d+PBV72Q8nu6qoi8KwXruuDX7Yl1XI21TAPkoh2TNDsGM
-         rVSRN8xj4m6hBNq9dmIoXK6uoz7gFOmdXPCrGNygr277f7Y7ulETAd/Po9Vbbn8lKo4v
-         a3/BVn0oGfYBiKhKiIby6ABgNN+7uv/v8xA+14BHPnKa1umfiP0iPS1WHKo3/AvBdA8g
-         ofasaUUpc7NJRxdoOoEkjxT7hALqYJ4z1c0DttdpJRwJfYKe7yRDdWnEVFgR2FbbyOb3
-         WgGw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=KbT7dCn+oPpeQf3mxkQY3Cx4LnSVac2KcmZMWqK+/Z0=;
-        b=DnYL4fgnxF8EfnIeOZ+LGl6Y4F96dYS1m8cM+l9V8Q4EcwAI7Auknvsv08TUfYo6gO
-         jypnR7oSX0Z57y8lY36HYZb74+tJ69a9u/VEzsvd/MtyPdk2o+INsPOK2w+4lZUpd8NU
-         fjnDgoPkvaQf4YuqBkKjypXBtrkA7s4i1e7SleozcXGBDCCB5o93dvbghGs2NpdGh89m
-         pBse4dDu5XGkK6gkR30USW6d6gT8qDtysDWuyo+yAf+joynUTY+cYaGWmvwKLoqyl/lw
-         8p/964kqRTJmaib5hh8jysCB1i7kber/wNfy7LJ8v20tExO8jXumXNNNP0Q4cuJG/J6x
-         iTuA==
-X-Gm-Message-State: ANoB5plpd+qf8BOGWR6nSnxDvQFY5oL/VZR66Fqh4zmHFFSF1/7HSaf9
-        Bdu7ZvbjoElW/UWc/E1oI8Jf/YhMddnj/In4ey0=
-X-Google-Smtp-Source: AA0mqf7+2U3JG0PhM3d0nN81ovNmFUx+1vJ0BRSaZoqYGqKFVR+6IfFWU4ao49PAcOsbJoGQ9f9cctQXBvTOVTEJAzs=
-X-Received: by 2002:a17:90a:5d08:b0:218:770c:9a40 with SMTP id
- s8-20020a17090a5d0800b00218770c9a40mr87239958pji.158.1670567865615; Thu, 08
- Dec 2022 22:37:45 -0800 (PST)
+        with ESMTP id S229721AbiLIHXO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 9 Dec 2022 02:23:14 -0500
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D0A5B1F4;
+        Thu,  8 Dec 2022 23:23:13 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1670570593; x=1702106593;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=XPPDfsuC7Y1m/jmxmWIq0LVJoHQFxJM6TafM/RGZGhM=;
+  b=WRi5c4+wWVgB/hjIRBONBAEQ1Wn6VwQG89J5DN7wPKQk5RZof0rH5VlX
+   KUz+IkbYh/UAVF3u0aTpQwz15vyio5TyfbdLfZDwJT3A+C2DUGkZoQGIe
+   +4/smAzJdhWzR2L0aJaAPx1H1zATdU4ROqLiHn70fgyE90h9FsVTwB27w
+   MgJ7B+aX/19F4Pd7hMcS01vEGUVR7rILDCYMNJH2Qh/to0gh/nExoD1Jx
+   6wpQ0KZ6ZodmjV41PWFz9eSHx8fkBm5+pqb9fqfe0BBYN7b951kmZXpIB
+   eH29hAj+FYLgvXlMCk8NbzkH1OiNq0M3be0CXu+TGNqVij1Fu7vRIVF7u
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10555"; a="381707921"
+X-IronPort-AV: E=Sophos;i="5.96,230,1665471600"; 
+   d="scan'208";a="381707921"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Dec 2022 23:23:11 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10555"; a="715935677"
+X-IronPort-AV: E=Sophos;i="5.96,230,1665471600"; 
+   d="scan'208";a="715935677"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.56.86])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Dec 2022 23:23:08 -0800
+Message-ID: <18cf4197-adce-3e47-7802-80b0d078368b@intel.com>
+Date:   Fri, 9 Dec 2022 09:23:05 +0200
 MIME-Version: 1.0
-References: <20221201091150.3474-1-wenchao.chen@unisoc.com>
- <CAPDyKFoBf25CDAgg5R0MSp53iC277FzGO9DUDf3LPU+_wuxCsA@mail.gmail.com>
- <CA+Da2qwjY=ebOmwsauPS5r8ig7wbH0JwjhDPmi1+eaT09tKxGQ@mail.gmail.com> <CAPDyKFrLVhBs2-b6WP-UQbaS03hBRKRUa08fYU+EWLA1kgPXYQ@mail.gmail.com>
-In-Reply-To: <CAPDyKFrLVhBs2-b6WP-UQbaS03hBRKRUa08fYU+EWLA1kgPXYQ@mail.gmail.com>
-From:   Wenchao Chen <wenchao.chen666@gmail.com>
-Date:   Fri, 9 Dec 2022 14:37:33 +0800
-Message-ID: <CA+Da2qwDnNbinH3CHXHXHDHwB5PUaGMryQOeqoHnE=tcJ6QFqQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-sprd: remove prefer asynchronous probe
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Wenchao Chen <wenchao.chen@unisoc.com>, adrian.hunter@intel.com,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, zhenxiong.lai@unisoc.com,
-        yuelin.tang@unisoc.com, gengcixi@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.5.1
+Subject: Re: [PATCH v3 3/3] mmc: xenon: Fix 2G limitation on AC5 SoC
+Content-Language: en-US
+To:     Vadym Kochan <vadym.kochan@plvision.eu>,
+        Hu Ziji <huziji@marvell.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Elad Nachman <enachman@marvell.com>,
+        Chris Packham <chris.packham@alliedtelesis.co.nz>
+References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
+ <20221205105931.410686-4-vadym.kochan@plvision.eu>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221205105931.410686-4-vadym.kochan@plvision.eu>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 7, 2022 at 8:50 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> On Fri, 2 Dec 2022 at 03:41, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
-> >
-> > On Thu, Dec 1, 2022 at 6:41 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > >
-> > > On Thu, 1 Dec 2022 at 10:12, Wenchao Chen <wenchao.chen@unisoc.com> wrote:
-> > > >
-> > > > The prefer asynchronous probe affects the order of device probes.
-> > >
-> > > Is there a problem with this? If so, can you elaborate on what kind of problems?
-> > >
-> >
-> > Hi Uffe
-> > dts:
-> > sdio0: sdio@71100000 {
-> > ...
-> > bus-width = <4>;
-> > no-sdio;
-> > no-mmc;
-> > ...
-> > }; // SD Host(Device: SD CARD)
-> >
-> > sdio3: sdio@71400000 {
-> > ...
-> > bus-width = <8>;
-> > non-removable;
-> > no-sdio;
-> > no-sd;
-> > ...
-> > }; // eMMC Host(Device: eMMC)
-> >
-> > According to the order of DTS: sdio0: sdio@71100000 is MMC0, sdio3:
-> > sdio@71400000 is MMC1.
-> > Log:
-> > [    1.714617][   T11] mmc1: SDHCI controller on 71400000.sdio
-> > [71400000.sdio] using ADMA 64-bit
-> > [    1.715276][    T9] mmc0: SDHCI controller on 71100000.sdio
-> > [71100000.sdio] using ADMA 64-bit
-> > [    1.884525][   T75] mmc1: Host Software Queue enabled
-> > [    1.890965][   T75] mmc1: new HS400 Enhanced strobe MMC card at address 0001
-> >
-> > But set prefer_asynchronous_probe, sometimes there will be sdio0:
-> > sdio@71100000 is MMC1, sdio3: sdio@71400000 is MMC0.
-> > Log:
-> > [    1.619888][   T68] mmc0: SDHCI controller on 71400000.sdio
-> > [71400000.sdio] using ADMA 64-bit
-> > [    1.620534][    T9] mmc1: SDHCI controller on 71100000.sdio
-> > [71100000.sdio] using ADMA 64-bit
-> > [    1.792570][   T77] mmc0: Host Software Queue enabled
-> > [    1.799532][   T77] mmc0: new HS400 Enhanced strobe MMC card at address 0001
->
-> Neither the order of the nodes in DT or dropping
-> PROBE_PREFER_ASYNCHRONOUS provides the guarantees that you suggest
-> above. In fact, that has never been the case for eMMC/SD cards.
->
-> >
-> > We use emmc as rootfs (without ramfs or initfs), but with SD card
-> > inserted and not inserted, the partition name of emmc is different, we
-> > need to fix this partition name.
->
-> If you can't use PARTUUID/UUID, which is certainly the preferred
-> solution - you may also assign a fixed index mmcN to an MMC host
-> controller and its corresponding mmcblk[n] devices, by defining an
-> alias in the /aliases device tree node.
->
+On 5/12/22 12:59, Vadym Kochan wrote:
+> There is a limitation on AC5 SoC that mmc controller
+> can't have DMA access over 2G memory, so use SDMA with
+> a bounce buffer. Swiotlb can't help because on arm64 arch
+> it reserves memblock's at the end of the memory.
+> 
+> Additionally set mask to 34 bit since on AC5 SoC RAM starts
+> at 0x2_00000000.
 
-You're right.
+Can you explain more about how a 34-bit DMA mask works when
+SDMA only supports 32-bit addresses?
 
-        aliases {
-...
-               mmc0 = &sdio3;
-               mmc1 = &sdio0;
-...
-        };
+> 
+> Co-developed-by: Elad Nachman <enachman@marvell.com>
+> Signed-off-by: Elad Nachman <enachman@marvell.com>
+> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
+> ---
+>  drivers/mmc/host/sdhci-xenon.c | 38 ++++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-xenon.h |  3 ++-
+>  2 files changed, 40 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
+> index 08e838400b52..5f3db0425674 100644
+> --- a/drivers/mmc/host/sdhci-xenon.c
+> +++ b/drivers/mmc/host/sdhci-xenon.c
+> @@ -13,7 +13,9 @@
+>  
+>  #include <linux/acpi.h>
+>  #include <linux/delay.h>
+> +#include <linux/dma-mapping.h>
+>  #include <linux/ktime.h>
+> +#include <linux/mm.h>
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/pm.h>
+> @@ -253,6 +255,22 @@ static unsigned int xenon_get_max_clock(struct sdhci_host *host)
+>  		return pltfm_host->clock;
+>  }
+>  
+> +static int xenon_set_dma_mask(struct sdhci_host *host)
+> +{
+> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
+> +	struct mmc_host *mmc = host->mmc;
+> +	struct device *dev = mmc_dev(mmc);
+> +
+> +	if (priv->hw_version == XENON_AC5) {
+> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
+> +
+> +		return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(34));
+> +	}
+> +
+> +	return sdhci_set_dma_mask(host);
+> +}
+> +
+>  static const struct sdhci_ops sdhci_xenon_ops = {
+>  	.voltage_switch		= xenon_voltage_switch,
+>  	.set_clock		= sdhci_set_clock,
+> @@ -261,6 +279,7 @@ static const struct sdhci_ops sdhci_xenon_ops = {
+>  	.reset			= xenon_reset,
+>  	.set_uhs_signaling	= xenon_set_uhs_signaling,
+>  	.get_max_clock		= xenon_get_max_clock,
+> +	.set_dma_mask		= xenon_set_dma_mask,
+>  };
+>  
+>  static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
+> @@ -486,6 +505,18 @@ static void xenon_sdhc_unprepare(struct sdhci_host *host)
+>  	xenon_disable_sdhc(host, sdhc_id);
+>  }
+>  
+> +static int xenon_ac5_probe(struct sdhci_host *host)
+> +{
+> +	struct sysinfo si;
+> +
+> +	si_meminfo(&si);
+> +
+> +	if ((si.totalram * si.mem_unit) > SZ_2G)
+> +		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+> +
+> +	return 0;
+> +}
+> +
+>  static int xenon_probe(struct platform_device *pdev)
+>  {
+>  	struct sdhci_pltfm_host *pltfm_host;
+> @@ -533,6 +564,12 @@ static int xenon_probe(struct platform_device *pdev)
+>  		}
+>  	}
+>  
+> +	if (priv->hw_version == XENON_AC5) {
+> +		err = xenon_ac5_probe(host);
+> +		if (err)
+> +			goto err_clk_axi;
+> +	}
+> +
+>  	err = mmc_of_parse(host->mmc);
+>  	if (err)
+>  		goto err_clk_axi;
+> @@ -682,6 +719,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
+>  	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
+>  	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
+>  	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
+> +	{ .compatible = "marvell,ac5-sdhci", .data = (void *)XENON_AC5},
+>  	{}
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
+> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
+> index 3e9c6c908a79..0460d97aad26 100644
+> --- a/drivers/mmc/host/sdhci-xenon.h
+> +++ b/drivers/mmc/host/sdhci-xenon.h
+> @@ -57,7 +57,8 @@ enum xenon_variant {
+>  	XENON_A3700,
+>  	XENON_AP806,
+>  	XENON_AP807,
+> -	XENON_CP110
+> +	XENON_CP110,
+> +	XENON_AC5
+>  };
+>  
+>  struct xenon_priv {
 
-Thank you very much.
-
-> [...]
->
-> Kind regards
-> Uffe
