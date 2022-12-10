@@ -2,80 +2,71 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1046BC10F1B
-	for <linux-mmc@archiver.kernel.org>; Sat, 10 Dec 2022 18:44:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BA39EC4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 10 Dec 2022 18:56:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229634AbiLJSoW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 10 Dec 2022 13:44:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53886 "EHLO
+        id S229835AbiLJS4o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 10 Dec 2022 13:56:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57316 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229721AbiLJSoV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Dec 2022 13:44:21 -0500
-Received: from smtp.smtpout.orange.fr (smtp-27.smtpout.orange.fr [80.12.242.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 7F36D167C4
-        for <linux-mmc@vger.kernel.org>; Sat, 10 Dec 2022 10:44:20 -0800 (PST)
-Received: from pop-os.home ([86.243.100.34])
+        with ESMTP id S229784AbiLJS4n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 10 Dec 2022 13:56:43 -0500
+Received: from smtp.smtpout.orange.fr (smtp-24.smtpout.orange.fr [80.12.242.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 499531789C
+        for <linux-mmc@vger.kernel.org>; Sat, 10 Dec 2022 10:56:43 -0800 (PST)
+Received: from [192.168.1.18] ([86.243.100.34])
         by smtp.orange.fr with ESMTPA
-        id 44iJpNwaA1SdM44iPpAGvK; Sat, 10 Dec 2022 19:36:49 +0100
-X-ME-Helo: pop-os.home
+        id 451cprUINGPMs451cpi102; Sat, 10 Dec 2022 19:56:41 +0100
+X-ME-Helo: [192.168.1.18]
 X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
-X-ME-Date: Sat, 10 Dec 2022 19:36:49 +0100
+X-ME-Date: Sat, 10 Dec 2022 19:56:41 +0100
 X-ME-IP: 86.243.100.34
-From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+Message-ID: <2c481903-74be-6dbd-8ef9-5f01301792a7@wanadoo.fr>
+Date:   Sat, 10 Dec 2022 19:56:41 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.2.2
+Subject: Re: [PATCH 1/3] mmc: sunlpus: Fix an error handling path in
+ spmmc_drv_probe()
 To:     Tony Huang <tonyhuang.sunplus@gmail.com>,
         Li-hao Kuo <lhjeff911@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Arnd Bergmann <arnd@arndb.de>
 Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
         linux-mmc@vger.kernel.org
-Subject: [PATCH 3/3] mmc: sunlpus: Slightly simplify the error ahndling path in spmmc_drv_probe()
-Date:   Sat, 10 Dec 2022 19:36:39 +0100
-Message-Id: <579d9b5228b67a3fe5bdf305471d98f82c2b311e.1670697358.git.christophe.jaillet@wanadoo.fr>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <7c686fecb11b4ec1f55cd7075dc7cfcdd9b445ba.1670697358.git.christophe.jaillet@wanadoo.fr>
 References: <7c686fecb11b4ec1f55cd7075dc7cfcdd9b445ba.1670697358.git.christophe.jaillet@wanadoo.fr>
-MIME-Version: 1.0
+Content-Language: fr, en-US
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+In-Reply-To: <7c686fecb11b4ec1f55cd7075dc7cfcdd9b445ba.1670697358.git.christophe.jaillet@wanadoo.fr>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If mmc_alloc_host() fails, we can return directly.
-This saves some LoC, a test and some indentation in the error handling
-path.
+Le 10/12/2022 à 19:36, Christophe JAILLET a écrit :
+> If an error occurs after successful clk_prepare_enable() call in the probe,
+> the clk is not clk_disable_unprepare()'ed.
+> 
+> Use devm_clk_get_enabled() instead of devm_clk_get() to fix, and simplify
+> the probe and the remove function accordingly.
+> 
+> Fixes: 4e268fed8b18 ("mmc: Add mmc driver for Sunplus SP7021")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+> ---
+> This changes the order of resource releasing when the driver is removed,
+> but it looks ok to me.
+> ---
+>   drivers/mmc/host/sunplus-mmc.c | 7 +------
+>   1 file changed, 1 insertion(+), 6 deletions(-)
+> 
 
-Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
----
- drivers/mmc/host/sunplus-mmc.c | 9 +++------
- 1 file changed, 3 insertions(+), 6 deletions(-)
+Hi, in the whole serie, the subject was supposed to be sunplus, not sunlpus.
+Could also be SP7021, or sunplus-SP7021, or whatever else.
 
-diff --git a/drivers/mmc/host/sunplus-mmc.c b/drivers/mmc/host/sunplus-mmc.c
-index ed789a9bdd23..d990b120789d 100644
---- a/drivers/mmc/host/sunplus-mmc.c
-+++ b/drivers/mmc/host/sunplus-mmc.c
-@@ -864,10 +864,8 @@ static int spmmc_drv_probe(struct platform_device *pdev)
- 	int ret = 0;
- 
- 	mmc = mmc_alloc_host(sizeof(*host), &pdev->dev);
--	if (!mmc) {
--		ret = -ENOMEM;
--		goto probe_free_host;
--	}
-+	if (!mmc)
-+		return -ENOMEM;
- 
- 	host = mmc_priv(mmc);
- 	host->mmc = mmc;
-@@ -936,8 +934,7 @@ static int spmmc_drv_probe(struct platform_device *pdev)
- 	return ret;
- 
- probe_free_host:
--	if (mmc)
--		mmc_free_host(mmc);
-+	mmc_free_host(mmc);
- 
- 	return ret;
- }
--- 
-2.34.1
+I'll wait for potential comments on the patches themselves before 
+sending a v2 to fix the subject (and I hope it could be fixed when 
+applied if there is no comment :))
+
+CJ
 
