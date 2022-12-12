@@ -2,278 +2,194 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6F96C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 12 Dec 2022 13:14:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C747C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 12 Dec 2022 13:46:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232408AbiLLNOs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 12 Dec 2022 08:14:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43510 "EHLO
+        id S233016AbiLLNqH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 12 Dec 2022 08:46:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42090 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232414AbiLLNO2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2022 08:14:28 -0500
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A79D1032;
-        Mon, 12 Dec 2022 05:14:27 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1670850867; x=1702386867;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=9Mk/c1UnbOZ1TXK8FvpaAfqNr18tZtlpEe7k7RdUxSU=;
-  b=OTGeF+dYTagj/aeud/pLnvGOm5xcqyxBGZlm/3lwNiiQb6W/r1SUh2+O
-   nZbCubzBG6WQuRJTmY1gSi/9xo9KZKwimxUHmlVS09Ro4osffD8tDlRL5
-   wEou3Jt4FLVia0kPNLMQkX0TWXoua0xXQ0cboOga/NjxPtgBQP+8fQZKe
-   lkNQLodH9SC5IIKTtoR6ggXIgl4MTf5n0RbJFaFw6iqjkhvq4XESCohJA
-   xqUH6OkH4YhvzrrQqmAw5kYZv/jDt0ls99X7jpbvQrLBrixtNC03/NRWa
-   wicuGOE8KMVQ/M0iCANk10qHptqqEuELPc3gFoDtAU+GqPn1SY0pCAOsv
+        with ESMTP id S233041AbiLLNpi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 12 Dec 2022 08:45:38 -0500
+Received: from esa3.hgst.iphmx.com (esa3.hgst.iphmx.com [216.71.153.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A10272BE4
+        for <linux-mmc@vger.kernel.org>; Mon, 12 Dec 2022 05:45:00 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
+  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
+  t=1670852701; x=1702388701;
+  h=from:to:subject:date:message-id:references:in-reply-to:
+   content-transfer-encoding:mime-version;
+  bh=1e3lybZ5TdCLwWMCCcnh/DrS7YaWAAH9rEY5rAkQVbI=;
+  b=W0wL1pLneIHm1jEOw0As4YtN/pulU0YYuYsoh6tkSsHggtd2TKXqw9I1
+   wewJEBkSwqBPzBdj7uiYc9yJjtSR1DIsdr9wBClu7iZ1ILBdtLT/Bsjia
+   8nSSdqpzQCbhjS3RHOf0zajwSxR3Oi+eFmcUVI6AW7JxwDkYPQjxF/6P6
+   b4KwFmeeQYeLQUZQERM3SZoNvfzS1fX0hUb+emU8nbvvQ7kYm2yW0bSUm
+   VzpdgfKPY7nwm17bgNYSbO+idynKA15iuSuQqNL4RNKBhhXATubnSPQYc
+   R0PwtI+pDsGt3iFM8lz5SrBors38Mm49uzKekvNbljgPuyC/tcwk/vIA0
    g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10558"; a="305490537"
-X-IronPort-AV: E=Sophos;i="5.96,238,1665471600"; 
-   d="scan'208";a="305490537"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Dec 2022 05:14:26 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10558"; a="680671043"
-X-IronPort-AV: E=Sophos;i="5.96,238,1665471600"; 
-   d="scan'208";a="680671043"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.57.252])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Dec 2022 05:14:23 -0800
-Message-ID: <9c84dbf7-e80a-5281-1070-6aeb65cfe958@intel.com>
-Date:   Mon, 12 Dec 2022 15:13:43 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.5.1
-Subject: Re: [PATCH v3 3/3] mmc: xenon: Fix 2G limitation on AC5 SoC
+X-IronPort-AV: E=Sophos;i="5.96,238,1665417600"; 
+   d="scan'208";a="223599514"
+Received: from mail-bn7nam10lp2107.outbound.protection.outlook.com (HELO NAM10-BN7-obe.outbound.protection.outlook.com) ([104.47.70.107])
+  by ob1.hgst.iphmx.com with ESMTP; 12 Dec 2022 21:44:59 +0800
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=OWv/AfIVEvhNlgn5TRUwUWtxkZENgO7bgcrUGZUq4ImJVf9hZaJIHGXXlixsIP9174T1ikJdMM00TF+6NC0LjP8tOkdhCx5FdzoAutzjsmsarCid/NDUVyjOs1E7C6CKaIA0Ieg0+RkWHsulvuZADcrAXtFGOWyV4nVJrMkHlrdfIeBSHYPG4pvw+eCYjWT4+COGLdsEjDnuBvNNa3xYbAnSDoQwAnMX3YwMVoAlFSzF07lVX3L6WzYaM415XVRDaIRANuOMVwHjpgQvDQcRdqxumQA/nXWQ/nWSE+EWRgOkO0Vasz8Q0JEKF5QYR8L2m9wzf81pLtzmkCUASIG+/Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=agLC/9kZ1SMza6YSgDluQEhQiQxhAWJisf///NhVOok=;
+ b=WrejUOY/XEQEyQGgNu4XA2Iclxc7cTpi4wnzEeXF7qsDcH4KLY+4j+KRRh0Le3EQtKiTL206D73FKSgr8o/d50/eLWpJadU2SkK+Lh7eVQdehAyio8xkHxgJXLoUoCxFExhpbmVnrTgMx7JwHVWfUHYBp6u3A9Qk/gJnGQ9DUm4kxPU5D7JT3/WEbKZt2YE0MN3E2jaytA8Yjsd/diqZ2PW1aLlr0wnYiNMWaFmKzhHHcyXuY7CCpI19qvk/Qo6Ug5atGQiVAIK1cqAxOTpOyVaifkFS2+9cC65hneywEk4gdYpeYsUU54t2ApOlgImckJxpZ1TudP9vacQ2XYeHfA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
+ header.d=wdc.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=agLC/9kZ1SMza6YSgDluQEhQiQxhAWJisf///NhVOok=;
+ b=s+eHrk3ZlVMTn6g0bAazPyirPkP035U7QkyDsMC1QWeIL08hVQbnayFHvGGbw9husNSQsh571QE7atbY1hruvPNX+4V6LUZeXVpW4eaNbX/gbvpJxrLpYT+99TBLZ01pAeCGv/5XpXiW2jcPQUYxzOMeyvkjLGU518oY38G4KJg=
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
+ DM6PR04MB5291.namprd04.prod.outlook.com (2603:10b6:5:105::18) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.5880.19; Mon, 12 Dec 2022 13:44:57 +0000
+Received: from DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::1afa:ab74:ef51:1e72]) by DM6PR04MB6575.namprd04.prod.outlook.com
+ ([fe80::1afa:ab74:ef51:1e72%3]) with mapi id 15.20.5880.019; Mon, 12 Dec 2022
+ 13:44:57 +0000
+From:   Avri Altman <Avri.Altman@wdc.com>
+To:     =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: [PATCH] mmc-utils: Add basic erase error check
+Thread-Topic: [PATCH] mmc-utils: Add basic erase error check
+Thread-Index: AdkOCrPej0mSjhUcTiSz6oCfSEK7ywAJPclA
+Date:   Mon, 12 Dec 2022 13:44:57 +0000
+Message-ID: <DM6PR04MB65756CBEFE329BB16361ED2CFCE29@DM6PR04MB6575.namprd04.prod.outlook.com>
+References: <16c9b85406034bd6b3c526070b9fd995@hyperstone.com>
+In-Reply-To: <16c9b85406034bd6b3c526070b9fd995@hyperstone.com>
+Accept-Language: en-US
 Content-Language: en-US
-To:     Vadym Kochan <vadym.kochan@plvision.eu>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Elad Nachman <enachman@marvell.com>,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>
-References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
- <20221205105931.410686-4-vadym.kochan@plvision.eu>
- <18cf4197-adce-3e47-7802-80b0d078368b@intel.com>
- <VI1P190MB0317641905664AFF51F9F4EA951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <ce870974-3e4f-107f-2047-89dcaebff1a2@intel.com>
- <VI1P190MB0317A616976EC99EA0C44F47951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <69dd8714-4be1-6b1b-fa07-04c790a6c6fc@intel.com>
- <VI1P190MB0317DADE7450282444BFED32951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <44f642bc-8810-80d9-368a-15994de7f50d@intel.com>
- <VI1P190MB03171A8F65844DB789D85B0495E29@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <VI1P190MB03171A8F65844DB789D85B0495E29@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=wdc.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|DM6PR04MB5291:EE_
+x-ms-office365-filtering-correlation-id: 66961332-aaae-4877-65a5-08dadc470ec7
+wdcipoutbound: EOP-TRUE
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: BxEOc9aE1honR3oViWSet3ct1xX9AorHFqlNqfug52SPPncER1ICsInOZvw4RoNBJejuRKFXelSY9N+44aOkglMPn1JciSjb24qzinya7qMtcOVAxr/Sfo2hEjM379Mfih5x1MtBdTkVnxRmJY3flpiPdwMpvHHxnabman2ryXxVBUMI84ufoBShnzE89/f/gCm7k8RuiSVdjdEjw1oXQ6dPrNBVCFYSPItn1JxF98xoI/GUxSqeDYwNL7wlKdRs5duVrXem68mmJ+kv/lsahAxGt+47pX/UfzMU4Q04sABsx4glVzh1vg3BclRIwmK6/eg/sFIpmjQPJk2keOMSzKvMgd0pW2JlD/3V00Fpcmb+dajuq4LmrVayPF0JhbWM7h4/prnIiLq8901cnVI4WEhIUEYIYNjpScNt1bd7mC1fsLd4i3f+4ngimnJJm92kJ+0uem8kHR5XzMYJd5JFh/TGPldbH386w3VRQucmCnjT2rHsst/eHDiEElekyxi+zcx62Kae1ILj9wv6eEfyeZVb38tC/s9HzgJ47GSQBmkZs1ySTFRefw5n1VwfkKjadjb8JEIsNtXhXzQtZVQnzTdlUt9cQ2bWZwclg3KDgGqroQUE9dx9WfwWaBgLOpVeVXxEC231TlfDbFhmS1qyk9Y02C3p4IJE6oWHoVqvlyGJSOWyTLhw/ap7BNg0ALzNKT+zs2vV/il4ZoNkeLzJwA==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(346002)(39860400002)(136003)(366004)(451199015)(38070700005)(5660300002)(86362001)(52536014)(8936002)(55016003)(41300700001)(186003)(38100700002)(122000001)(2906002)(82960400001)(26005)(9686003)(478600001)(6506007)(7696005)(71200400001)(33656002)(66946007)(66556008)(66446008)(66476007)(76116006)(8676002)(110136005)(64756008)(316002);DIR:OUT;SFP:1102;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?iso-8859-1?Q?EPIHS2U/37PSlzkw2t5/pKNAa/yEG7cXPw5oL8cjfHMfAVrpnZwjcoESf2?=
+ =?iso-8859-1?Q?KB1RgCOSyeizYf1y70vMDleIyoia/zNay+r+HYa1uJn4nwPWcbV2g3WiVv?=
+ =?iso-8859-1?Q?7k87c10LSJe6SoDCO5iVDF2lwTrF1cmYSBYBki6u/rR81i53EQYWCFBQtH?=
+ =?iso-8859-1?Q?H7jP0zHb4uBVYRYsHSLDpOZerZLq3g0EzfnrHgOucFUv7MEUkVSeW7BAjm?=
+ =?iso-8859-1?Q?ISG75gRgPQ1zawde3d3pgNs/8prEn7ysH/HoeFsKSELCr6JIqOU20+lD0f?=
+ =?iso-8859-1?Q?p9jWiMYzWFln8YxsQQGsIDEjBevbd0QR8PCyHFblxDJxg4a40vuAChJNnG?=
+ =?iso-8859-1?Q?pn57wgzdtbdoNaTvpMkgPnOHgfiR0l+MD15uyfFNHxm4Ai0SlwCQQYqd8G?=
+ =?iso-8859-1?Q?LKhrbIx2KFWztbyhIPunIRcA9fV9IijLAUu6P4XIMRLJI1ziNDq2Gu4W8w?=
+ =?iso-8859-1?Q?v0Bf5h8VDs/Oci7OuYDey7R8Jev+c1QCnONKY+BE0vvuIsSkRE81pP1ZPl?=
+ =?iso-8859-1?Q?ZxFF5NS0DmsLAx2uMk/QOl3URUeqplejqd52NJb+kYYbTxE0OBjfp7DNNs?=
+ =?iso-8859-1?Q?xQr0XNBu9mgftSGnfha4lJJLNqMC2YEsbvqnKaa/adpUw1LHUPPrqSOaaw?=
+ =?iso-8859-1?Q?h1iMhkLgdLuZ7mB3cbwIXLvd1BgKOHL6JzQOmtkzxGEZTUj5w46D82amz8?=
+ =?iso-8859-1?Q?se6y8hK12/es1wFvJagxiAIyEae1xBsjoIMuVqqtSXCMcr/w79m1tc5ss/?=
+ =?iso-8859-1?Q?Zkvg5IBq4fhzWGACjC7U9kEoMWB221C3j/coGtrJE19OoqRudes/PTGflB?=
+ =?iso-8859-1?Q?xS9N7/8io+rlBUO7F9sk+J7ZxG334DYrBHwCM19PtLdHfAQ61M3Mr0W+HD?=
+ =?iso-8859-1?Q?8k/v2eJ1u2ELI1CmscZeY+dCKHU3xxAMtmuIau1PrX7MgTq64XbWmsCDlf?=
+ =?iso-8859-1?Q?2OomMSupM53p/4sFpcKYBierwMQq4BwQiAHokMrJlazklX3JgiyfFpOksx?=
+ =?iso-8859-1?Q?TQWLc0EQCBwqi4kgrUg/9qCIydfjH7uD1eDYgFIeDxBooEogYo+sf9Bme5?=
+ =?iso-8859-1?Q?/AUthh+9VOA0FeOF2mc+kaPCsFcEkNTKRDe2doq4T6UQNxTdUeQv6w+zrb?=
+ =?iso-8859-1?Q?ywuS7aBlwFdCWRWBrVZFuo/AKggNPlZHXg+/iXefhytJwBmqzkkhvopMCf?=
+ =?iso-8859-1?Q?eyz08NRx/MPBJPMKHPkitwxYNbEhkcxRWWapQLda/Xy5P32S0vnGJ79E+q?=
+ =?iso-8859-1?Q?1K6fNB7OT3h3X+G6RdOTZ0lQq8U9d8j4dxddE9/vse/FWFWi3uOYbm1uWq?=
+ =?iso-8859-1?Q?VxPe7vah64uK6eVKnhQQYAifndZIlXGSon+/vcEQdhYHyGHNMkw9KsS3Vw?=
+ =?iso-8859-1?Q?o3CBgAOELdbKmyHNl1kOy9GdgZT2zwObFXmmelIzJscTAjg/mpbm4Fmp4x?=
+ =?iso-8859-1?Q?9O7OGQ0onC7zucQrQ8ratxc91ds5/HFMweSstDakGJRJ7FSTo6ICYa8Xxd?=
+ =?iso-8859-1?Q?CCnKrLlPMw8D0Zo/7G33gPG+866NYK20Epw2xVdyK+tuh7yKt83s6VYyzK?=
+ =?iso-8859-1?Q?2AO4a7UausixUf+ouUcMeiAEfuVNBf6XA1e68pEkCW56Hz6CELiAzOex38?=
+ =?iso-8859-1?Q?1a2MbChmpwPNorIlwG0D5F7umiOzFBz6iv?=
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-OriginatorOrg: wdc.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 66961332-aaae-4877-65a5-08dadc470ec7
+X-MS-Exchange-CrossTenant-originalarrivaltime: 12 Dec 2022 13:44:57.4615
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ZOomnAQLXPo/jHMUF6nzJY386PZVbBI/9UEDMy1Vu7VyM5FGSh41CKc4bLaTFwG+3GG+bnb+NqCGgcG3DYbEJg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM6PR04MB5291
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/12/22 13:34, Vadym Kochan wrote:
-> Hi Adrian,
-> 
-> On Mon, 12 Dec 2022 10:42:36 +0200, Adrian Hunter <adrian.hunter@intel.com> wrote:
->> On 9/12/22 15:27, Vadym Kochan wrote:
->>> On Fri, 9 Dec 2022 14:13:06 +0200, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>> On 9/12/22 14:10, Vadym Kochan wrote:
->>>>> Hi Adrian,
->>>>>
->>>>> On Fri, 9 Dec 2022 13:53:58 +0200, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>> On 9/12/22 13:39, Vadym Kochan wrote:
->>>>>>> Hi Adrian,
->>>>>>>
->>>>>>> On Fri, 9 Dec 2022 09:23:05 +0200, Adrian Hunter <adrian.hunter@intel.com> wrote:
->>>>>>>> On 5/12/22 12:59, Vadym Kochan wrote:
->>>>>>>>> There is a limitation on AC5 SoC that mmc controller
->>>>>>>>> can't have DMA access over 2G memory, so use SDMA with
->>>>>>>>> a bounce buffer. Swiotlb can't help because on arm64 arch
->>>>>>>>> it reserves memblock's at the end of the memory.
->>>>>>>>>
->>>>>>>>> Additionally set mask to 34 bit since on AC5 SoC RAM starts
->>>>>>>>> at 0x2_00000000.
->>>>>>>>
->>>>>>>> Can you explain more about how a 34-bit DMA mask works when
->>>>>>>> SDMA only supports 32-bit addresses?
->>>>>>>>
->>>>>>>
->>>>>>> So, after I set
->>>>>>>
->>>>>>>>> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
->>>>>>>
->>>>>>> then sdhc core sets mask to 32 bit, but then dma_map fails to map
->>>>>>> bounce buffer because the base address is higher than 32bit - 0x2_00000000,
->>>>>>> and 34bit mask fixed it.
->>>>>>
->>>>>> What happens if the bounce buffer gets mapped in the range
->>>>>> 0x1_00000000 to 0x1_ffffffff ?
->>>>>>
->>>>>
->>>>> From my understanding, on the AC5 SoC RAM starts at 0x2_00000000 so the bounce
->>>>> buffer can be mapped in the range 0x2_00000000..0x2_ffffffff
->>>>
->>>> Right but I guess I meant what about 0x3_00000000..0x3_ffffffff ?
->>>> Isn't that also in DMA_BIT_MASK(34)
->>>
->>> Yes, you are right.
->>
->> So it would fail in that case?  Is it possible to use devicetree
->> reserved memory or some such, to set aside 64k for the bounce
->> buffer DMA mapping?
->>
-> 
-> The main restriction is that only lower 2GB can be used for DMA.
-> 
-> I already did send solution based on reserved memory, I can send it again in context of this series.
-> Also what about the solution which Linus suggested ?
-> 
-> [cut]
-> 
-> Let's just create a new quirk:
-> 
-> SDHCI_QUIRK_31BIT_DMA_ROOF
-> 
-> Define the semantics such that this will allow DMA for buffers that are below
-> the 31st bit, but does not have the semantics to limit scatter-gather buffers to
-> be 32-bit aligned.
-> 
-> [/cut]
+> Check for erase specific R1 errors so e.g. an OOR erase is not
+> reported as successful when it never executed.
+>=20
+> There could be checks for more error bits but R1_ERASE_SEQ_ERROR
+> on CMD38 should catch all that are reported by hardware anyway.
+>=20
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  mmc_cmds.c | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
+>=20
+> diff --git a/mmc_cmds.c b/mmc_cmds.c
+> index e6d3273..c00fe5e 100644
+> --- a/mmc_cmds.c
+> +++ b/mmc_cmds.c
+> @@ -54,6 +54,7 @@
+>  #define WPTYPE_PWRON 2
+>  #define WPTYPE_PERM 3
+>=20
+> +#define ERASE_R1_ERR_MASK (R1_ERASE_SEQ_ERROR | R1_ERASE_PARAM |
+> R1_ERASE_RESET)
+>=20
+>  int read_extcsd(int fd, __u8 *ext_csd)
+>  {
+> @@ -2668,6 +2669,23 @@ static int erase(int dev_fd, __u32 argin, __u32 st=
+art,
+> __u32 end)
+>         if (ret)
+>                 perror("Erase multi-cmd ioctl");
+>=20
+> +       /* Does not work for SPI cards */
+> +       if (multi_cmd->cmds[0].response[0] & ERASE_R1_ERR_MASK) {
+> +               fprintf(stderr, "Erase start response: %08x\n",
+> +                               multi_cmd->cmds[0].response[0]);
+> +               ret =3D -EIO;
+> +       }
+> +       if (multi_cmd->cmds[1].response[0] & ERASE_R1_ERR_MASK) {
+> +               fprintf(stderr, "Erase end response: %08x\n",
+> +                               multi_cmd->cmds[1].response[0]);
+> +               ret =3D -EIO;
+> +       }
+> +       if (multi_cmd->cmds[2].response[0] & ERASE_R1_ERR_MASK) {
+> +               fprintf(stderr, "Erase response: %08x\n",
+> +                               multi_cmd->cmds[2].response[0]);
+> +               ret =3D -EIO;
+> +       }
+> +
+AFAIK the device will not set those bits in the command responses,
+but those are only available to read in the status register.
+Let me check.
 
-Wouldn't that need to be done after DMA mapping?
+Thanks,
+Avri
 
-In the SDMA case, the bounce buffer would need to be
-checked only once and if wrong then it would be
-PIO-only for all requests.  You probably don't need
-need a quirk for that since the check could be done
-at probe time.
-
-In the ADMA case the ADMA table would have to be
-checked also.  And then after every dma_map_sg().
-
-Seems a bit messy?
-
-> 
-> Thanks,
-> 
->>>
->>>>
->>>>>
->>>>>>>
->>>>>>>>>
->>>>>>>>> Co-developed-by: Elad Nachman <enachman@marvell.com>
->>>>>>>>> Signed-off-by: Elad Nachman <enachman@marvell.com>
->>>>>>>>> Signed-off-by: Vadym Kochan <vadym.kochan@plvision.eu>
->>>>>>>>> ---
->>>>>>>>>  drivers/mmc/host/sdhci-xenon.c | 38 ++++++++++++++++++++++++++++++++++
->>>>>>>>>  drivers/mmc/host/sdhci-xenon.h |  3 ++-
->>>>>>>>>  2 files changed, 40 insertions(+), 1 deletion(-)
->>>>>>>>>
->>>>>>>>> diff --git a/drivers/mmc/host/sdhci-xenon.c b/drivers/mmc/host/sdhci-xenon.c
->>>>>>>>> index 08e838400b52..5f3db0425674 100644
->>>>>>>>> --- a/drivers/mmc/host/sdhci-xenon.c
->>>>>>>>> +++ b/drivers/mmc/host/sdhci-xenon.c
->>>>>>>>> @@ -13,7 +13,9 @@
->>>>>>>>>  
->>>>>>>>>  #include <linux/acpi.h>
->>>>>>>>>  #include <linux/delay.h>
->>>>>>>>> +#include <linux/dma-mapping.h>
->>>>>>>>>  #include <linux/ktime.h>
->>>>>>>>> +#include <linux/mm.h>
->>>>>>>>>  #include <linux/module.h>
->>>>>>>>>  #include <linux/of.h>
->>>>>>>>>  #include <linux/pm.h>
->>>>>>>>> @@ -253,6 +255,22 @@ static unsigned int xenon_get_max_clock(struct sdhci_host *host)
->>>>>>>>>  		return pltfm_host->clock;
->>>>>>>>>  }
->>>>>>>>>  
->>>>>>>>> +static int xenon_set_dma_mask(struct sdhci_host *host)
->>>>>>>>> +{
->>>>>>>>> +	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
->>>>>>>>> +	struct xenon_priv *priv = sdhci_pltfm_priv(pltfm_host);
->>>>>>>>> +	struct mmc_host *mmc = host->mmc;
->>>>>>>>> +	struct device *dev = mmc_dev(mmc);
->>>>>>>>> +
->>>>>>>>> +	if (priv->hw_version == XENON_AC5) {
->>>>>>>>> +		host->flags &= ~SDHCI_USE_64_BIT_DMA;
->>>>>>>>> +
->>>>>>>>> +		return dma_set_mask_and_coherent(dev, DMA_BIT_MASK(34));
->>>>>>>>> +	}
->>>>>>>>> +
->>>>>>>>> +	return sdhci_set_dma_mask(host);
->>>>>>>>> +}
->>>>>>>>> +
->>>>>>>>>  static const struct sdhci_ops sdhci_xenon_ops = {
->>>>>>>>>  	.voltage_switch		= xenon_voltage_switch,
->>>>>>>>>  	.set_clock		= sdhci_set_clock,
->>>>>>>>> @@ -261,6 +279,7 @@ static const struct sdhci_ops sdhci_xenon_ops = {
->>>>>>>>>  	.reset			= xenon_reset,
->>>>>>>>>  	.set_uhs_signaling	= xenon_set_uhs_signaling,
->>>>>>>>>  	.get_max_clock		= xenon_get_max_clock,
->>>>>>>>> +	.set_dma_mask		= xenon_set_dma_mask,
->>>>>>>>>  };
->>>>>>>>>  
->>>>>>>>>  static const struct sdhci_pltfm_data sdhci_xenon_pdata = {
->>>>>>>>> @@ -486,6 +505,18 @@ static void xenon_sdhc_unprepare(struct sdhci_host *host)
->>>>>>>>>  	xenon_disable_sdhc(host, sdhc_id);
->>>>>>>>>  }
->>>>>>>>>  
->>>>>>>>> +static int xenon_ac5_probe(struct sdhci_host *host)
->>>>>>>>> +{
->>>>>>>>> +	struct sysinfo si;
->>>>>>>>> +
->>>>>>>>> +	si_meminfo(&si);
->>>>>>>>> +
->>>>>>>>> +	if ((si.totalram * si.mem_unit) > SZ_2G)
->>>>>>>>> +		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
->>>>>>>>> +
->>>>>>>>> +	return 0;
->>>>>>>>> +}
->>>>>>>>> +
->>>>>>>>>  static int xenon_probe(struct platform_device *pdev)
->>>>>>>>>  {
->>>>>>>>>  	struct sdhci_pltfm_host *pltfm_host;
->>>>>>>>> @@ -533,6 +564,12 @@ static int xenon_probe(struct platform_device *pdev)
->>>>>>>>>  		}
->>>>>>>>>  	}
->>>>>>>>>  
->>>>>>>>> +	if (priv->hw_version == XENON_AC5) {
->>>>>>>>> +		err = xenon_ac5_probe(host);
->>>>>>>>> +		if (err)
->>>>>>>>> +			goto err_clk_axi;
->>>>>>>>> +	}
->>>>>>>>> +
->>>>>>>>>  	err = mmc_of_parse(host->mmc);
->>>>>>>>>  	if (err)
->>>>>>>>>  		goto err_clk_axi;
->>>>>>>>> @@ -682,6 +719,7 @@ static const struct of_device_id sdhci_xenon_dt_ids[] = {
->>>>>>>>>  	{ .compatible = "marvell,armada-ap807-sdhci", .data = (void *)XENON_AP807},
->>>>>>>>>  	{ .compatible = "marvell,armada-cp110-sdhci", .data =  (void *)XENON_CP110},
->>>>>>>>>  	{ .compatible = "marvell,armada-3700-sdhci", .data =  (void *)XENON_A3700},
->>>>>>>>> +	{ .compatible = "marvell,ac5-sdhci", .data = (void *)XENON_AC5},
->>>>>>>>>  	{}
->>>>>>>>>  };
->>>>>>>>>  MODULE_DEVICE_TABLE(of, sdhci_xenon_dt_ids);
->>>>>>>>> diff --git a/drivers/mmc/host/sdhci-xenon.h b/drivers/mmc/host/sdhci-xenon.h
->>>>>>>>> index 3e9c6c908a79..0460d97aad26 100644
->>>>>>>>> --- a/drivers/mmc/host/sdhci-xenon.h
->>>>>>>>> +++ b/drivers/mmc/host/sdhci-xenon.h
->>>>>>>>> @@ -57,7 +57,8 @@ enum xenon_variant {
->>>>>>>>>  	XENON_A3700,
->>>>>>>>>  	XENON_AP806,
->>>>>>>>>  	XENON_AP807,
->>>>>>>>> -	XENON_CP110
->>>>>>>>> +	XENON_CP110,
->>>>>>>>> +	XENON_AC5
->>>>>>>>>  };
->>>>>>>>>  
->>>>>>>>>  struct xenon_priv {
->>>>>>>>
->>>>>>>
->>>>>>> Regards,
->>>>>>
->>>>
->>
+>         free(multi_cmd);
+>         return ret;
+>  }
+> --
+> 2.37.3
+>=20
+>=20
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
 
