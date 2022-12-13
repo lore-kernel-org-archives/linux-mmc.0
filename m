@@ -2,182 +2,133 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 622B1C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 14:17:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DC38C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 15:26:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234255AbiLMORX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Dec 2022 09:17:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43228 "EHLO
+        id S235161AbiLMP0T convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Dec 2022 10:26:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57774 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235798AbiLMOQo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 09:16:44 -0500
-Received: from szxga03-in.huawei.com (szxga03-in.huawei.com [45.249.212.189])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8FB8B7B
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 06:16:31 -0800 (PST)
-Received: from dggpemm500007.china.huawei.com (unknown [172.30.72.57])
-        by szxga03-in.huawei.com (SkyGuard) with ESMTP id 4NWgSN3B4JzJpJS;
-        Tue, 13 Dec 2022 22:12:52 +0800 (CST)
-Received: from huawei.com (10.175.103.91) by dggpemm500007.china.huawei.com
- (7.185.36.183) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Tue, 13 Dec
- 2022 22:16:29 +0800
-From:   Yang Yingliang <yangyingliang@huawei.com>
-To:     <linux-mmc@vger.kernel.org>
-CC:     <ulf.hansson@linaro.org>, <yangyingliang@huawei.com>
-Subject: [PATCH v5] mmc: sdio: fix possible resource leaks in some error paths
-Date:   Tue, 13 Dec 2022 22:14:03 +0800
-Message-ID: <20221213141403.1734718-1-yangyingliang@huawei.com>
-X-Mailer: git-send-email 2.25.1
+        with ESMTP id S236132AbiLMP0R (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 10:26:17 -0500
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 790C42DC6
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 07:26:15 -0800 (PST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 7A4173A29E7
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 16:26:13 +0100 (CET)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 5ECDA3A078E
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 16:26:13 +0100 (CET)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
+        by mail5.swissbit.com (Postfix) with ESMTPS
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 16:26:13 +0100 (CET)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Avri Altman <Avri.Altman@wdc.com>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
+Subject: RE: [PATCH] mmc-utils: Add basic erase error check
+Thread-Topic: [PATCH] mmc-utils: Add basic erase error check
+Thread-Index: AdkOCrPej0mSjhUcTiSz6oCfSEK7ywAJPclAAACQQLAAADypIAAxzoEAAAK4ktA=
+Date:   Tue, 13 Dec 2022 15:26:12 +0000
+Message-ID: <256e7a78852041ffbea965e3e3a71863@hyperstone.com>
+References: <16c9b85406034bd6b3c526070b9fd995@hyperstone.com>
+ <DM6PR04MB65756CBEFE329BB16361ED2CFCE29@DM6PR04MB6575.namprd04.prod.outlook.com>
+ <1f4cb8a2e7094b249a8f40b7f4eb01da@hyperstone.com>
+ <21e4fd1b824f42d890df9a965a46344f@hyperstone.com>
+ <DM6PR04MB6575C12FBBD33AD36B8290D6FCE39@DM6PR04MB6575.namprd04.prod.outlook.com>
+In-Reply-To: <DM6PR04MB6575C12FBBD33AD36B8290D6FCE39@DM6PR04MB6575.namprd04.prod.outlook.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7BIT
-Content-Type:   text/plain; charset=US-ASCII
-X-Originating-IP: [10.175.103.91]
-X-ClientProxiedBy: dggems702-chm.china.huawei.com (10.3.19.179) To
- dggpemm500007.china.huawei.com (7.185.36.183)
-X-CFilter-Loop: Reflected
+X-TMASE-Version: DDEI-5.1-9.0.1002-27322.000
+X-TMASE-Result: 10--8.500800-10.000000
+X-TMASE-MatchedRID: F3kdXSFZYkfUL3YCMmnG4pTQgFTHgkhZC/ExpXrHizxaCbh+r2jQs2dv
+        IBM8UuLSiOOJL7UsrrssWi4sXciGhcCiHTNtFGyJqdwbW9Wx9tD/lIIryslypzpnHdhQ1BMbGSE
+        KEg7q+Dx6KCIBFzd6H2aZdF3A++/3bw6bxgWmSFwv09a+vBP41kxUJyPnqTyGxuXV3UE49jiNpx
+        yS486SbuPy996aobFy8PAec6ZZAC751PG1p8jrTSnWPZZ0/GQXkYC3rjkUXRLRguFbDyQ6QY1/b
+        5Pr4RYOUoDKDRI6O5l8sQbV/4bjS0QfOO3rxcnQ/e+uN180e5cxXH/dlhvLv/4DDXoaCqk75oaD
+        8GK3n22godYFWegkc7THG/IS3+B1v6perBgQquMe4SzTjxRVojqu3dM+YhFR3bBYhNTI0/zLKOx
+        8Px7v0uCvRZnq77Kllsm6RP1UKocYB2fOueQzjxM0JxSxHjFJseWplitmp0j6C0ePs7A07RRAJC
+        2k3BZ6nz5JOy8lvajnqvaeza1QCyX/qtViMqeDqwYwmUuy2qY=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 1c361056-b368-4fd0-aa8e-f3bd2eb8b906-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If sdio_add_func() or sdio_init_func() fails, sdio_remove_func() can
-not release the resources, because the sdio function is not presented
-in these two cases, it won't call of_node_put() or put_device().
+>> > For SD a CMD13 after CMD38 is required, too.
+>> > I guess I can add that.
+>> 
+>> Just realized that sending CMD13 is not sufficient as the kernel will 
+>> poll because of R1B and clear the error flag.
+>> Anyway I have this kernel patch for a write flag bit that aggregates 
+>> errors during polling until card is in TRAN again.
+>> I will send it then, since I don't think there is a good way of 
+>> solving this for SD in mmc-utils, please consider this patch on its own.
+> Leaving SD aside for now - I Still wasn't able to get an expert opinion - holiday season etc. 
+> While waiting however, looking in Table 70 - Device Status field/command - cross reference, I can see that :
+> - ERASE_RESET - is not reported for any of cmd35, cmd36, and cmd38
+> - ERASE_PARAM - is 'X' for cmd35 only
+> - ERASE_SEQ_ ERROR - is 'R' for cmd35 and cmd36
+>
+> So potentially only ERASE_SEQ_ ERROR may reside in those commands responses.
+> But mmc-utils uses multi-ioctl for that, so there couldn't be any mis-ordering?
+> Which error bits you see in which command responses?
+> 
+> Thanks,
+> Avri
 
-To fix these leaks, make sdio_func_present() only control whether
-device_del() needs to be called or not, then always call of_node_put()
-and put_device().
+Hey Avri,
+Thanks for having a look at this.
+Yeah I have indeed only seen ERASE_SEQ_ERROR, but added the rest because it doesn't hurt.
+Why would you say ERASE_PARAM shouldn't be checked? Or are you arguing it should only be checked at CMD38 (i.e. the X of CMD35)?
+(In which case I agree, just didn't want more than one error mask)
+Seeing a ERASE_PARAM would definitely make the erase not happen (that's all mmc-utils should really care about).
+ERASE_RESET may be removed for sure, could be checked when a SD ioctl erase fix like I described is in the kernel.
+Then an ideal mmc-utils erase operation checks that no relevant R1 bits are set at CMD38 RSP and all CMD13 until card leaves PRG and stops signalling busy.
 
-In error case in sdio_init_func(), the reference of 'card->dev' is
-not get, to avoid redundant put in sdio_free_func_cis(), move the
-get_device() to sdio_alloc_func() and put_device() to sdio_release_func(),
-it can keep the get/put function balanced.
 
-Without this patch, while doing fault inject test, it can get the
-following leak reports, after this fix, the leak is gone.
+For an erase call like this:
+mmc-utils erase legacy 0 0xFFFFFFFF /dev/mmcblk2
 
-unreferenced object 0xffff888112514000 (size 2048):
-  comm "kworker/3:2", pid 65, jiffies 4294741614 (age 124.774s)
-  hex dump (first 32 bytes):
-    00 e0 6f 12 81 88 ff ff 60 58 8d 06 81 88 ff ff  ..o.....`X......
-    10 40 51 12 81 88 ff ff 10 40 51 12 81 88 ff ff  .@Q......@Q.....
-  backtrace:
-    [<000000009e5931da>] kmalloc_trace+0x21/0x110
-    [<000000002f839ccb>] mmc_alloc_card+0x38/0xb0 [mmc_core]
-    [<0000000004adcbf6>] mmc_sdio_init_card+0xde/0x170 [mmc_core]
-    [<000000007538fea0>] mmc_attach_sdio+0xcb/0x1b0 [mmc_core]
-    [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+the MMC trace (according to spec and most cards I tried, this is one of them) looks like this:
+Format: timestamp,type,CMDOPCODE,
+for type 1 (CMD) and type 2 (Resp48) then the next field is arg/response in hex.
+I guess rest is more or less self-explanatory / not relevant.
 
-unreferenced object 0xffff888112511000 (size 2048):
-  comm "kworker/3:2", pid 65, jiffies 4294741623 (age 124.766s)
-  hex dump (first 32 bytes):
-    00 40 51 12 81 88 ff ff e0 58 8d 06 81 88 ff ff  .@Q......X......
-    10 10 51 12 81 88 ff ff 10 10 51 12 81 88 ff ff  ..Q.......Q.....
-  backtrace:
-    [<000000009e5931da>] kmalloc_trace+0x21/0x110
-    [<00000000fcbe706c>] sdio_alloc_func+0x35/0x100 [mmc_core]
-    [<00000000c68f4b50>] mmc_attach_sdio.cold.18+0xb1/0x395 [mmc_core]
-    [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+325533.758261654,1,13,00010000
+325533.758282029,2,13,00000900, READY_FOR_DATA, TRANS_STATE
+325534.549850485,1,08,00000000
+325534.549874693,2,08,00000900, READY_FOR_DATA, TRANS_STATE
+325534.550132818,4,08,0,512
+325534.550132818,5,08,00000000000000000000000... REDACTED FOR SIZE
+325534.550693693,1,35,00000000
+325534.550710026,2,35,00000900, READY_FOR_DATA, TRANS_STATE
+325534.550761651,1,36,ffffffff
+325534.550774485,2,36,80000900, ADDRESS_OUT_OF_RANGE, READY_FOR_DATA, TRANS_STATE
+325534.552136276,1,38,00000000
+325534.552164568,2,38,10000900, ERASE_SEQ_ERROR, READY_FOR_DATA, TRANS_STATE
+325534.552227568,1,13,00010000
+325534.552241276,2,13,00000900, READY_FOR_DATA, TRANS_STATE
 
-Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
-Fixes: 3d10a1ba0d37 ("sdio: fix reference counting in sdio_remove_func()")
-Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
----
-v4 -> v5:
-  Merge to two pathes in one and add leak reports.
-  Fix wrong check in sdio_remove_func().
-  Move get/put_device() in sdio_alloc/release_func.
+Hope that helps.
 
-v3 -> v4:
-  Drop patch1, keep calling put_device() to free memory,
-  set 'func->card' to NULL to avoid redundant put.
+Regards,
+Christian
 
-v2 -> v3:
-  Change to call of_node_put() in remove() function to
-  fix node refcount leak.
-
-v1 -> v2:
-  Fix compile error in patch #2.
----
- drivers/mmc/core/sdio_bus.c | 20 ++++++++++++++++----
- drivers/mmc/core/sdio_cis.c | 12 ------------
- 2 files changed, 16 insertions(+), 16 deletions(-)
-
-diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
-index babf21a0adeb..1ba135cd4caa 100644
---- a/drivers/mmc/core/sdio_bus.c
-+++ b/drivers/mmc/core/sdio_bus.c
-@@ -291,8 +291,14 @@ static void sdio_release_func(struct device *dev)
- {
- 	struct sdio_func *func = dev_to_sdio_func(dev);
- 
--	if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
-+	if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO)) {
- 		sdio_free_func_cis(func);
-+		/*
-+		 * We have now removed the link to the tuples in the
-+		 * card structure, so remove the reference.
-+		 */
-+		put_device(&func->card->dev);
-+	}
- 
- 	kfree(func->info);
- 	kfree(func->tmpbuf);
-@@ -324,6 +330,13 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card)
- 
- 	device_initialize(&func->dev);
- 
-+	/*
-+	 * We may link to tuples in the card structure,
-+	 * we need make sure we have a reference to it.
-+	 */
-+	if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
-+		get_device(&func->card->dev);
-+
- 	func->dev.parent = &card->dev;
- 	func->dev.bus = &sdio_bus_type;
- 	func->dev.release = sdio_release_func;
-@@ -377,10 +390,9 @@ int sdio_add_func(struct sdio_func *func)
-  */
- void sdio_remove_func(struct sdio_func *func)
- {
--	if (!sdio_func_present(func))
--		return;
-+	if (sdio_func_present(func))
-+		device_del(&func->dev);
- 
--	device_del(&func->dev);
- 	of_node_put(func->dev.of_node);
- 	put_device(&func->dev);
- }
-diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
-index a705ba6eff5b..afaa6cab1adc 100644
---- a/drivers/mmc/core/sdio_cis.c
-+++ b/drivers/mmc/core/sdio_cis.c
-@@ -403,12 +403,6 @@ int sdio_read_func_cis(struct sdio_func *func)
- 	if (ret)
- 		return ret;
- 
--	/*
--	 * Since we've linked to tuples in the card structure,
--	 * we must make sure we have a reference to it.
--	 */
--	get_device(&func->card->dev);
--
- 	/*
- 	 * Vendor/device id is optional for function CIS, so
- 	 * copy it from the card structure as needed.
-@@ -434,11 +428,5 @@ void sdio_free_func_cis(struct sdio_func *func)
- 	}
- 
- 	func->tuples = NULL;
--
--	/*
--	 * We have now removed the link to the tuples in the
--	 * card structure, so remove the reference.
--	 */
--	put_device(&func->card->dev);
- }
- 
--- 
-2.25.1
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
