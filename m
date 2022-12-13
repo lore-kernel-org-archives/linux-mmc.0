@@ -2,67 +2,71 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90E91C10F31
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 21:56:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E34A9C10F1B
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 23:01:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237697AbiLMV4D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Dec 2022 16:56:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44570 "EHLO
+        id S236654AbiLMXBn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Dec 2022 18:01:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237650AbiLMVze (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 16:55:34 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 036E725C67;
-        Tue, 13 Dec 2022 13:53:56 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 930EC61744;
-        Tue, 13 Dec 2022 21:53:55 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 0722DC433F1;
-        Tue, 13 Dec 2022 21:53:55 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1670968435;
-        bh=fcHL+Xbp6bIVKzFVTHveJnDAY7a8Hhnzk9+oLCqFx3w=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=WnxChA8iwnks9IjjfLdXlMlk9DV0j8q9+j4flSdHvLfc/7UoiUcc5e6/jlyjE0K+k
-         fLqpHvdXEXAheIcq0dOBUq89cuUzJv4bUTFcOWz96C4Thf9p6Jy19gnCCZFdcPqyU7
-         SzN71WSDiV86KTLt0EJ1Ly1j4TDn6MdaP7LCSPNZgLVki4SL9SXzx+RMx6It6jhb+Y
-         Nut7M5b8iPCSZPeB4l/UsfUPGCbWHbY8xYXM8Q6FMidmpmY2cg+gAMQKjDA7np2O1p
-         MHrP3xCFg+vsi0Y+g7enk2jLdXHcSUxXfSiPRiKHAD4UX36fDLhSG7zhd/cafJihzt
-         Pv4g06E/fUpUw==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id EA967C41612;
-        Tue, 13 Dec 2022 21:53:54 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC and MEMSTICK updates for v6.2
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20221213103750.107606-1-ulf.hansson@linaro.org>
-References: <20221213103750.107606-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20221213103750.107606-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2
-X-PR-Tracked-Commit-Id: ff874dbc4f868af128b412a9bd92637103cf11d7
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 71946a25f357a51dcce849367501d7fb04c0465b
-Message-Id: <167096843495.13204.1621559274438712810.pr-tracker-bot@kernel.org>
-Date:   Tue, 13 Dec 2022 21:53:54 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        with ESMTP id S236039AbiLMXBl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 18:01:41 -0500
+Received: from relmlie6.idc.renesas.com (relmlor2.renesas.com [210.160.252.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 0330F254;
+        Tue, 13 Dec 2022 15:01:38 -0800 (PST)
+X-IronPort-AV: E=Sophos;i="5.96,242,1665414000"; 
+   d="scan'208";a="146061654"
+Received: from unknown (HELO relmlir5.idc.renesas.com) ([10.200.68.151])
+  by relmlie6.idc.renesas.com with ESMTP; 14 Dec 2022 08:01:38 +0900
+Received: from mulinux.home (unknown [10.226.93.1])
+        by relmlir5.idc.renesas.com (Postfix) with ESMTP id 062D1400D4DC;
+        Wed, 14 Dec 2022 08:01:32 +0900 (JST)
+From:   Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Cc:     Fabrizio Castro <fabrizio.castro.jz@renesas.com>,
+        Magnus Damm <magnus.damm@gmail.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
+        linux-clk@vger.kernel.org,
+        Chris Paterson <Chris.Paterson2@renesas.com>,
+        Biju Das <biju.das@bp.renesas.com>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Jacopo Mondi <jacopo@jmondi.org>
+Subject: [PATCH 0/4] SDHI/MMC SoC support for the RZ/V2M
+Date:   Tue, 13 Dec 2022 23:01:25 +0000
+Message-Id: <20221213230129.549968-1-fabrizio.castro.jz@renesas.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Tue, 13 Dec 2022 11:37:50 +0100:
+This series adds SDHI/MMC support for the RZ/V2M SoC.
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2
+Thanks,
+Fab
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/71946a25f357a51dcce849367501d7fb04c0465b
+Fabrizio Castro (3):
+  dt-bindings: mmc: renesas,sdhi: Document RZ/V2M support
+  mmc: renesas_sdhi: Add RZ/V2M compatible string
+  arm64: dts: renesas: r9a09g011: Add eMMC and SDHI support
 
-Thank you!
+Phil Edworthy (1):
+  clk: renesas: r9a09g011: Add SDHI/eMMC clock and reset entries
+
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml |  1 +
+ arch/arm64/boot/dts/renesas/r9a09g011.dtsi    | 48 +++++++++++++++++++
+ drivers/clk/renesas/r9a09g011-cpg.c           | 34 +++++++++++++
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c | 11 +++++
+ 4 files changed, 94 insertions(+)
 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+2.34.1
+
