@@ -2,101 +2,427 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81F22C4167B
-	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 09:22:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 17589C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 13 Dec 2022 10:38:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234565AbiLMJWq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 13 Dec 2022 04:22:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52658 "EHLO
+        id S234982AbiLMKiD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 13 Dec 2022 05:38:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234998AbiLMJWR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 04:22:17 -0500
-Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26938C54
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 01:22:16 -0800 (PST)
-Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-3bf4ade3364so183764717b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 01:22:16 -0800 (PST)
+        with ESMTP id S234844AbiLMKh7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 13 Dec 2022 05:37:59 -0500
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEE46A1A8
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 02:37:53 -0800 (PST)
+Received: by mail-lf1-x12d.google.com with SMTP id p8so4161710lfu.11
+        for <linux-mmc@vger.kernel.org>; Tue, 13 Dec 2022 02:37:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=HBVWcvC1u9pZZ+RLRidAY3qDuAjsE1IgCmnlft6y5gA=;
-        b=D9xzxVM6u/qGZ1rHp1JhPMXBxCGZtD7foj/3zej4cipPsElJbjyc/XcC94GX9aIOOT
-         z6sWUQLmMeHVughuq7k7+IRSkiyQIRtdVJQ8+afJorVc7L+cyWshvdhVJKASkWpIu0J8
-         ZaFnqzlA79slFpYFxLDoYBP+l/D0f0HPim/0Beex52mt/lkXfkDpbZHNwQ/Wfxtj4aaD
-         sD33FmQ7ajRIW5cXbJ/duAKO4FmMmV1NxY17eEQiiDETdKczAJDJQrubBohquY6Y9Ge/
-         p6K3XTjHjD5kpZ+Cv+53vA9+iHW2mNjshoxvwYQGPr7mEgPufTT601MZXBZymh0/PCa5
-         DSRA==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=OmJ1unnLQL11jWk2NBVDCKvznUBrMSHaTbcQQLc+9QY=;
+        b=byftv/uHfMvu4IIdxSl8xoPQY7QzcpdPtCGcFh5V0dWdkn3nx2f07+4CDdgmjbhPd+
+         80isrC34eTwxJj7oHyvKWwoU6y3SLC+bmSjkPzs4zXxVDnfgHFU3+0lD6DnQH9OkD0yW
+         1sEwrhPtva1Y5x+XwL8FJEHcCl+r4cWt/Ddf2sXTbIW6s36WGmoSuzR6TT++nd+gw5LL
+         WJeKaY9zr6bCF+Moud90t4KfBEmWeq8ItQEgJsLApMs5MY6TB+b0sD0Q4rZtCfHPRNUN
+         1Qf2BshXFccZ59DDUCr4uw/iXB3eYA24kdQlJfJXy6C97JQ6dD9jpqpw4zxVQ5rt4Tww
+         viJw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=HBVWcvC1u9pZZ+RLRidAY3qDuAjsE1IgCmnlft6y5gA=;
-        b=jNwb1Pcw9Sp2rXmWhc/zSbQ1e2sxMc9F8Sf8lWe3sNuSVK/XtTxAL0C9OThKevIout
-         3q3UoWdjQflUJ4LSMskPxRn3vqBZb7mQ5/9KYOzIz3DiqKHXQoaacr3YnvbWBiacfSW6
-         8SSHAU/NEHxl0WTAiK8Pt13+GwsGROwEhK/LzeFUI/R08h/MU/Y0sgbIcF4yjIFi3xyx
-         aq+jyE6oN167L4SpBqkQm5j4NL0sStiMUVwpweTUZKyhkH9rUgiRn0nI5lKdWidVngLz
-         ne78t1iD93ZglCAKD32Zxj/sw5P1u2zodk8CaUGAG48u042WA8ifs3lj3uiI8sVUC2pt
-         VVuw==
-X-Gm-Message-State: ANoB5pmH+dIlVAUWbFdwS7/8dk+zi8Iwbrp4ER90t/l+ri2gaS11eTqI
-        Y/3Ho2FvXVb94SpHF116ut+GDfqyFtFktr6nWLCU+g==
-X-Google-Smtp-Source: AA0mqf4qLj/Z38psyROEDntD7BWmQ6BmvZhUitJMG118kXs8N9Obmriyo497ti72O/iSoZkHde1mhe+kvJEkiehpZvg=
-X-Received: by 2002:a81:6fd5:0:b0:402:3dcf:a262 with SMTP id
- k204-20020a816fd5000000b004023dcfa262mr5023789ywc.31.1670923335392; Tue, 13
- Dec 2022 01:22:15 -0800 (PST)
+        bh=OmJ1unnLQL11jWk2NBVDCKvznUBrMSHaTbcQQLc+9QY=;
+        b=MP7tM2hjtxDpeoki94SqJ+tM5e7wJOhAi2VRHB8eM6WveqLs8v+t30UZfcAyRmYxQD
+         o5skHP2NPAMT3fpPF/vj5wyuKB5H6AA4A4Q+KcWH1NLr/bQd2GIB22vj+Ay1ebhijuK7
+         qyAMgsqBPuiW2K+toA48ptKG4yNr6cfF0npzoE3S0N8zcBfS7efLMFmRvFYC/KdUD5tZ
+         MYWe9qpFabkBQLotFE9/HGokBvw9ZiYywkdpkZZmgKx3WGQlm+xiXFw+vsllCodNu6o1
+         8QrD/Y1XSb+BV90hNqdYR3x2MyjreRwptSa8L6ZrR3EMmrKyxNZQ7vlZUGzhneGEknTs
+         eSdA==
+X-Gm-Message-State: ANoB5pmuVT18Da0PRdyuQt7Gd4rb3+JFcrWBtYbq5I70U3DXr+E1DLHW
+        sPokUWpcarDbVIuA9UfqMgBSZA==
+X-Google-Smtp-Source: AA0mqf7MdstQD/trMcQoVXmLkyG8hscVT8vWOnc3Dvrl3/qocNTMDZ36UMPjwBGp94SxIdsV6vLY2w==
+X-Received: by 2002:a05:6512:b10:b0:4a6:c596:6ff7 with SMTP id w16-20020a0565120b1000b004a6c5966ff7mr6336195lfu.2.1670927871822;
+        Tue, 13 Dec 2022 02:37:51 -0800 (PST)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id f19-20020a2eb5b3000000b00279d206a43bsm214208ljn.34.2022.12.13.02.37.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 13 Dec 2022 02:37:51 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK updates for v6.2
+Date:   Tue, 13 Dec 2022 11:37:50 +0100
+Message-Id: <20221213103750.107606-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20221205105931.410686-1-vadym.kochan@plvision.eu>
- <20221205105931.410686-4-vadym.kochan@plvision.eu> <18cf4197-adce-3e47-7802-80b0d078368b@intel.com>
- <VI1P190MB0317641905664AFF51F9F4EA951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <ce870974-3e4f-107f-2047-89dcaebff1a2@intel.com> <VI1P190MB0317A616976EC99EA0C44F47951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <69dd8714-4be1-6b1b-fa07-04c790a6c6fc@intel.com> <VI1P190MB0317DADE7450282444BFED32951C9@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
- <44f642bc-8810-80d9-368a-15994de7f50d@intel.com> <VI1P190MB03171A8F65844DB789D85B0495E29@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-In-Reply-To: <VI1P190MB03171A8F65844DB789D85B0495E29@VI1P190MB0317.EURP190.PROD.OUTLOOK.COM>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Tue, 13 Dec 2022 10:22:03 +0100
-Message-ID: <CACRpkdabqqttBmPTQZmV_78oEL7+pgGaKzJcL4CFUA4SU1=tzQ@mail.gmail.com>
-Subject: Re: [PATCH v3 3/3] mmc: xenon: Fix 2G limitation on AC5 SoC
-To:     Vadym Kochan <vadym.kochan@plvision.eu>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Hu Ziji <huziji@marvell.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Elad Nachman <enachman@marvell.com>,
-        Chris Packham <chris.packham@alliedtelesis.co.nz>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Dec 12, 2022 at 12:40 PM Vadym Kochan <vadym.kochan@plvision.eu> wrote:
+Hi Linus,
 
-> The main restriction is that only lower 2GB can be used for DMA.
->
-> I already did send solution based on reserved memory, I can send it again in context of this series.
-> Also what about the solution which Linus suggested ?
->
-> [cut]
->
-> Let's just create a new quirk:
->
-> SDHCI_QUIRK_31BIT_DMA_ROOF
->
-> Define the semantics such that this will allow DMA for buffers that are below
-> the 31st bit, but does not have the semantics to limit scatter-gather buffers to
-> be 32-bit aligned.
->
-> [/cut]
+Here's the pull-request with the updates for MMC and MEMSTICK for v6.2. Details
+about the highlights are as usual found in the signed tag.
 
-One does not exclude the other, so you could technically let buffers below
-2^31 pass directly to the DMA engine, but bounce any request above that
-limit to a low memory bounce buffer.
+Note 1)
+The pull-request also includes a few patches for iommu, which are conflicting
+with some changes from the iommu tree. I think the conflict should be rather
+trivial to resolve, also managed by Stephen Rothwell [1] in linux-next. If you
+encounter any issues, just reach out to me.
 
-As Adrian points out there is also the code complexity question, the solution
-should be simple and elegant, if possible. I think always using a bounce
-buffer might be both nice and efficient.
+Note 2)
+The pull-request also includes a clock patch for socfpga.
 
-Yours,
-Linus Walleij
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+[1]
+https://lore.kernel.org/all/20221208104503.0ee41406@canb.auug.org.au/
+
+
+The following changes since commit 76dcd734eca23168cb008912c0f69ff408905235:
+
+  Linux 6.1-rc8 (2022-12-04 14:48:12 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2
+
+for you to fetch changes up to ff874dbc4f868af128b412a9bd92637103cf11d7:
+
+  mmc: sdhci-sprd: Disable CLK_AUTO when the clock is less than 400K (2022-12-09 10:32:58 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - A few minor improvements and cleanups
+
+MMC host:
+ - Remove some redundant calls to local_irq_{save,restore}()
+ - Replace kmap_atomic() with kmap_local_page()
+ - Take return values from mmc_add_host() into account
+ - dw_mmc-pltfm: Add support to configure clk-phase for socfpga
+ - hsq: Minimize latency by using a fifo to dispatch requests
+ - litex_mmc: Fixup corner case for polling mode
+ - mtk-sd: Add inline crypto engine clock control
+ - mtk-sd: Add support for the mediatek MT7986 variant
+ - renesas_sdhi: Improve reset from HS400 mode
+ - renesas_sdhi: Take DMA end interrupts into account
+ - sdhci: Avoid unnecessary update of clock
+ - sdhci: Fix an SD tuning issue
+ - sdhci-brcmst: Add Kamal Dasu as maintainer for the Broadcom driver
+ - sdhci-esdhc-imx: Improve tuning logic
+ - sdhci-esdhc-imx: Improve support for the imxrt1050 variant
+ - sdhci_f_sdh30: Add support for non-removable media
+ - sdhci_f_sdh30: Add support for the Socionext F_SDH30_E51 variant
+ - sdhci_f_sdh30: Add reset control support
+ - sdhci-msm: Add support for the Qcom SM8550/SM8350/SM6375 variants
+ - sdhci-msm: Add support for the Qcom MSM8976 variant
+ - sdhci-of-arasan: Add support for dynamic configuration
+ - sdhci-of-esdhc: Limit the clock frequency to confirm to spec
+ - sdhci-pci: Enable asynchronous probe
+ - sdhci-sprd: Improve card detection
+ - sdhci-tegra: Improve reset support
+ - sdhci-tegra: Add support to program MC stream ID
+ - sunplus-mmc: Add new mmc driver for the Sunplus SP7021 controller
+ - vub300: Fix warning splat for SDIO irq
+
+MEMSTICK core:
+ - memstick: A few minor improvements and cleanups
+
+CLK/IOMMU:
+ - clk: socfpga: Drop redundant support for clk-phase for the SD/MMC clk
+ - iommu: Add tegra specific helper to get stream_id
+
+----------------------------------------------------------------
+Abel Vesa (1):
+      dt-bindings: mmc: sdhci-msm: Document the SM8550 compatible
+
+Adrian Hunter (16):
+      mmc: sdhci: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: sdhci: Remove local_irq_{save,restore}() around sg_miter_{next,stop}()
+      mmc: sdhci: Replace kmap_atomic() with kmap_local_page()
+      mmc: bcm2835: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: bcm2835: Remove local_irq_{save,restore}() around sg_miter_{next,stop}()
+      mmc: bcm2835: Replace kmap_atomic() with kmap_local_page()
+      mmc: mmc_test: Remove local_irq_{save,restore}() around sg_copy_{from,to}_buffer()
+      mmc: tifm_sd: Remove local_irq_{save,restore}() around tifm_sd_transfer_data()
+      mmc: tifm_sd: Remove local_irq_{save,restore}() around tifm_sd_bounce_block()
+      mmc: tifm_sd: Replace kmap_atomic() with kmap_local_page()
+      mmc: tmio_mmc_core: Remove local_irq_{save,restore}() around k[un]map_atomic()
+      mmc: tmio_mmc_core: Replace kmap_atomic() with kmap_local_page()
+      mmc: au1xmmc: Replace kmap_atomic() with kmap_local_page()
+      mmc: wbsd: Replace kmap_atomic() with kmap_local_page()
+      mmc: Remove duplicate words in comments
+      mmc: sdhci: Avoid unnecessary ->set_clock()
+
+Andy Tang (1):
+      mmc: sdhci-of-esdhc: limit the SDHC clock frequency
+
+AngeloGioacchino Del Regno (1):
+      dt-bindings: mmc: sdhci-msm: Document compatible for MSM8976
+
+Brian Norris (4):
+      mmc: sdhci-brcmstb: Allow building with COMPILE_TEST
+      mmc: sdhci-*: Convert drivers to new sdhci_and_cqhci_reset()
+      mmc: sdhci-pci: Set PROBE_PREFER_ASYNCHRONOUS
+      mmc: sdhci-brcmstb: Resolve "unused" warnings with CONFIG_OF=n
+
+ChanWoo Lee (1):
+      mmc: Avoid open coding by using mmc_op_tuning()
+
+Charl Liu (1):
+      mmc: sdhci: Fix the SD tuning issue that the SDHCI_TRANSFER_MODE is cleared incorrectly
+
+Christian Löhle (1):
+      mmc: core: Remove non-data R1B ioctl workaround
+
+Christoph Niedermaier (1):
+      dt-bindings: mmc: Remove comment on wakeup-source property
+
+Deren Wu (1):
+      mmc: vub300: fix warning - do not call blocking ops when !TASK_RUNNING
+
+Dinh Nguyen (3):
+      dt-bindings: mmc: synopsys-dw-mshc: document "altr,sysmgr-syscon"
+      mmc: dw_mmc-pltfm: socfpga: add method to configure clk-phase
+      clk: socfpga: remove the setting of clk-phase for sdmmc_clk
+
+Gabriel Somlo (1):
+      mmc: litex_mmc: ensure `host->irq == 0` if polling
+
+Geert Uytterhoeven (1):
+      dt-bindings: mmc: renesas,sdhi: Document R-Car V4H support
+
+Giulio Benetti (1):
+      mmc: sdhci-esdhc-imx: improve imxrt1050 data
+
+Haibo Chen (1):
+      mmc: sdhci-esdhc-imx: reset the tuning logic before execute tuning
+
+Jagan Teki (1):
+      dt-bindings: mmc: rockchip-dw-mshc: Add power-domains property
+
+Jiapeng Chong (1):
+      mmc: sdhci-of-esdhc: Modify mismatched function name
+
+Jiasheng Jiang (1):
+      memstick/ms_block: Add check for alloc_ordered_workqueue
+
+Kamal Dasu (1):
+      MAINTAINERS: Update maintainer for SDHCI Broadcom BRCMSTB driver
+
+Konrad Dybcio (2):
+      dt-bindings: mmc: sdhci-msm: Document the SM6375 compatible
+      dt-bindings: mmc: sdhci-msm: Document SM8350 SDHCI
+
+Krzysztof Kozlowski (5):
+      dt-bindings: mmc: sdhci: document sdhci-caps and sdhci-caps-mask
+      dt-bindings: mmc: sdhci-am654: cleanup style
+      dt-bindings: mmc: sdhci-msm: cleanup style
+      dt-bindings: mmc: sdhci-msm: drop properties mentioned in common MMC
+      dt-bindings: mmc: sdhci-msm: allow dma-coherent
+
+Kunihiko Hayashi (6):
+      dt-bindings: mmc: Convert sdhci-fujitsu to JSON schema
+      mmc: f-sdh30: Add reset control support
+      dt-bindings: sdhci-fujitsu: Add compatible string for F_SDH30_E51
+      mmc: f-sdh30: Add compatible string for Socionext F_SDH30_E51
+      mmc: f-sdh30: Add support for non-removable media
+      mmc: f-sdh30: Add quirks for broken timeout clock capability
+
+Marek Vasut (1):
+      dt-bindings: mmc: arm,pl18x: Document interrupt-names is ignored
+
+Matt Ranostay (1):
+      dt-bindings: mmc: sdhci-am654: add ti,itap-del-sel-ddr50 to schema
+
+Matthias Schiffer (1):
+      mmc: sdhci_am654: Use dev_err_probe() for mmc_of_parse() return code
+
+Mengqi Zhang (2):
+      dt-bindings: mmc: mtk-sd: add Inline Crypto Engine clock
+      mmc: mtk-sd: add Inline Crypto Engine clock control
+
+Michael Wu (1):
+      mmc: mmc-hsq: Use fifo to dispatch mmc_request
+
+Nícolas F. R. A. Prado (1):
+      dt-bindings: mmc: mtk-sd: Set clocks based on compatible
+
+Peng Fan (1):
+      dt-bindings: mmc: fsl-imx-esdhc: update i.MX8DXL compatible
+
+Prathamesh Shete (3):
+      mmc: sdhci-tegra: Separate Tegra194 and Tegra234 SoC data
+      mmc: sdhci-tegra: Add support to program MC stream ID
+      mmc: sdhci-tegra: Issue CMD and DAT resets together
+
+Sai Krishna Potthuri (1):
+      mmc: sdhci-of-arasan: Add support for dynamic configuration
+
+Sam Shih (2):
+      dt-bindings: mmc: Add support for Mediatek MT7986
+      mmc: mediatek: add support for MT7986 SoC
+
+Sebastian Reichel (1):
+      dt-bindings: mmc: sdhci-of-dwcmhsc: Add reset support
+
+Thierry Reding (3):
+      iommu: Add note about struct iommu_fwspec usage
+      iommu/tegra: Add tegra_dev_iommu_get_stream_id() helper
+      mmc: sdhci-tegra: Sort includes alphabetically
+
+Tony Huang (2):
+      dt-binding: mmc: Add mmc yaml file for Sunplus SP7021
+      mmc: Add mmc driver for Sunplus SP7021
+
+Wenchao Chen (1):
+      mmc: sdhci-sprd: Disable CLK_AUTO when the clock is less than 400K
+
+Wolfram Sang (12):
+      mmc: renesas_sdhi: remove accessor function for internal_dmac
+      mmc: renesas_sdhi: improve naming of DMA struct
+      mmc: tmio: add callback for dma irq
+      mmc: renesas_sdhi: add quirk for broken register layout
+      mmc: renesas_sdhi: take DMA end interrupts into account
+      mmc: tmio: remove tmio_mmc_k(un)map_atomic helpers
+      mmc: tmio: remove 'alignment_shift' from platform data
+      mmc: renesas_sdhi: alway populate SCC pointer
+      mmc: renesas_sdhi: better reset from HS400 mode
+      mmc: renesas_sdhi: add helper to access quirks
+      mmc: renesas_sdhi: use new convenience macro from MMC core
+      mmc: renesas_sdhi: use plain numbers for end_flags
+
+Yang Li (1):
+      mmc: Remove unneeded semicolon
+
+Yang Yingliang (15):
+      mmc: alcor: fix return value check of mmc_add_host()
+      mmc: moxart: fix return value check of mmc_add_host()
+      mmc: mxcmmc: fix return value check of mmc_add_host()
+      mmc: pxamci: fix return value check of mmc_add_host()
+      mmc: rtsx_pci: fix return value check of mmc_add_host()
+      mmc: rtsx_usb_sdmmc: fix return value check of mmc_add_host()
+      mmc: toshsd: fix return value check of mmc_add_host()
+      mmc: vub300: fix return value check of mmc_add_host()
+      mmc: wmt-sdmmc: fix return value check of mmc_add_host()
+      mmc: atmel-mci: fix return value check of mmc_add_host()
+      mmc: omap_hsmmc: fix return value check of mmc_add_host()
+      mmc: meson-gx: fix return value check of mmc_add_host()
+      mmc: via-sdmmc: fix return value check of mmc_add_host()
+      mmc: wbsd: fix return value check of mmc_add_host()
+      mmc: mmci: fix return value check of mmc_add_host()
+
+Ye Bin (1):
+      mmc: core: refactor debugfs code
+
+Yu Zhe (1):
+      mmc: mtk-sd: fix two spelling mistakes in comment
+
+Zhen Lei (1):
+      mmc: core: Normalize the error handling branch in sd_read_ext_regs()
+
+wangjianli (1):
+      mmc: host: Fix repeated words in comments
+
+ye xingchen (2):
+      mmc: pwrseq: Use device_match_of_node()
+      memstick/mspro_block: Convert to use sysfs_emit()/sysfs_emit_at() APIs
+
+zhang songyi (1):
+      mmc: sdhci: Remove unneeded semicolon
+
+ .../devicetree/bindings/mmc/arm,pl18x.yaml         |    4 +-
+ .../devicetree/bindings/mmc/fsl-imx-esdhc.yaml     |    3 +-
+ .../bindings/mmc/fujitsu,sdhci-fujitsu.yaml        |   57 ++
+ .../devicetree/bindings/mmc/mmc-controller.yaml    |    1 -
+ Documentation/devicetree/bindings/mmc/mtk-sd.yaml  |  171 +++-
+ .../devicetree/bindings/mmc/renesas,sdhi.yaml      |    1 +
+ .../devicetree/bindings/mmc/rockchip-dw-mshc.yaml  |    3 +
+ .../devicetree/bindings/mmc/sdhci-am654.yaml       |   69 +-
+ .../devicetree/bindings/mmc/sdhci-common.yaml      |   32 +
+ .../devicetree/bindings/mmc/sdhci-fujitsu.txt      |   32 -
+ .../devicetree/bindings/mmc/sdhci-msm.yaml         |   23 +-
+ .../bindings/mmc/snps,dwcmshc-sdhci.yaml           |   11 +
+ .../devicetree/bindings/mmc/sunplus,mmc.yaml       |   61 ++
+ .../devicetree/bindings/mmc/synopsys-dw-mshc.yaml  |   32 +-
+ .../devicetree/bindings/power/wakeup-source.txt    |   13 +-
+ MAINTAINERS                                        |    9 +
+ drivers/clk/socfpga/clk-gate-a10.c                 |   68 --
+ drivers/clk/socfpga/clk-gate.c                     |   61 --
+ drivers/clk/socfpga/clk.h                          |    1 -
+ drivers/memstick/core/ms_block.c                   |    9 +-
+ drivers/memstick/core/mspro_block.c                |  177 ++--
+ drivers/mmc/core/block.c                           |   13 -
+ drivers/mmc/core/bus.c                             |    4 -
+ drivers/mmc/core/core.c                            |    7 +-
+ drivers/mmc/core/core.h                            |   15 +
+ drivers/mmc/core/host.c                            |    6 +-
+ drivers/mmc/core/mmc_test.c                        |    5 -
+ drivers/mmc/core/pwrseq.c                          |    2 +-
+ drivers/mmc/core/sd.c                              |   11 +-
+ drivers/mmc/host/Kconfig                           |   13 +-
+ drivers/mmc/host/Makefile                          |    1 +
+ drivers/mmc/host/alcor.c                           |    5 +-
+ drivers/mmc/host/atmel-mci.c                       |    9 +-
+ drivers/mmc/host/au1xmmc.c                         |    8 +-
+ drivers/mmc/host/bcm2835.c                         |   12 +-
+ drivers/mmc/host/dw_mmc-pltfm.c                    |   41 +-
+ drivers/mmc/host/dw_mmc.c                          |    5 +-
+ drivers/mmc/host/litex_mmc.c                       |    1 +
+ drivers/mmc/host/meson-gx-mmc.c                    |    4 +-
+ drivers/mmc/host/mmc_hsq.c                         |   40 +-
+ drivers/mmc/host/mmc_hsq.h                         |    5 +
+ drivers/mmc/host/mmci.c                            |    4 +-
+ drivers/mmc/host/moxart-mmc.c                      |    4 +-
+ drivers/mmc/host/mtk-sd.c                          |   38 +-
+ drivers/mmc/host/mxcmmc.c                          |    4 +-
+ drivers/mmc/host/omap_hsmmc.c                      |    4 +-
+ drivers/mmc/host/pxamci.c                          |    7 +-
+ drivers/mmc/host/renesas_sdhi.h                    |   16 +-
+ drivers/mmc/host/renesas_sdhi_core.c               |   32 +-
+ drivers/mmc/host/renesas_sdhi_internal_dmac.c      |   86 +-
+ drivers/mmc/host/renesas_sdhi_sys_dmac.c           |   11 +-
+ drivers/mmc/host/rtsx_pci_sdmmc.c                  |    9 +-
+ drivers/mmc/host/rtsx_usb_sdmmc.c                  |   11 +-
+ drivers/mmc/host/sdhci-acpi.c                      |    4 +-
+ drivers/mmc/host/sdhci-bcm-kona.c                  |    2 +-
+ drivers/mmc/host/sdhci-brcmstb.c                   |    2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |   87 +-
+ drivers/mmc/host/sdhci-msm.c                       |   13 +-
+ drivers/mmc/host/sdhci-of-arasan.c                 |   69 ++
+ drivers/mmc/host/sdhci-of-esdhc.c                  |   11 +-
+ drivers/mmc/host/sdhci-omap.c                      |    2 +-
+ drivers/mmc/host/sdhci-pci-core.c                  |   14 +-
+ drivers/mmc/host/sdhci-pci-gli.c                   |   11 +-
+ drivers/mmc/host/sdhci-pci-o2micro.c               |    3 +-
+ drivers/mmc/host/sdhci-sprd.c                      |   16 +-
+ drivers/mmc/host/sdhci-tegra.c                     |   77 +-
+ drivers/mmc/host/sdhci.c                           |   85 +-
+ drivers/mmc/host/sdhci.h                           |    4 +-
+ drivers/mmc/host/sdhci_am654.c                     |    2 +-
+ drivers/mmc/host/sdhci_f_sdh30.c                   |   31 +-
+ drivers/mmc/host/sdhci_f_sdh30.h                   |    3 +
+ drivers/mmc/host/sunplus-mmc.c                     | 1000 ++++++++++++++++++++
+ drivers/mmc/host/tifm_sd.c                         |   28 +-
+ drivers/mmc/host/tmio_mmc.h                        |   15 +-
+ drivers/mmc/host/tmio_mmc_core.c                   |   18 +-
+ drivers/mmc/host/toshsd.c                          |    6 +-
+ drivers/mmc/host/via-sdmmc.c                       |    4 +-
+ drivers/mmc/host/vub300.c                          |   13 +-
+ drivers/mmc/host/wbsd.c                            |   22 +-
+ drivers/mmc/host/wmt-sdmmc.c                       |    6 +-
+ include/linux/iommu.h                              |   25 +
+ include/linux/mfd/tmio.h                           |    1 -
+ 82 files changed, 2117 insertions(+), 728 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+ create mode 100644 Documentation/devicetree/bindings/mmc/sdhci-common.yaml
+ delete mode 100644 Documentation/devicetree/bindings/mmc/sdhci-fujitsu.txt
+ create mode 100644 Documentation/devicetree/bindings/mmc/sunplus,mmc.yaml
+ create mode 100644 drivers/mmc/host/sunplus-mmc.c
