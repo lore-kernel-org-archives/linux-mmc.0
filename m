@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18627C4332F
-	for <linux-mmc@archiver.kernel.org>; Sat, 17 Dec 2022 09:45:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5372AC4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Dec 2022 14:25:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230222AbiLQJpZ convert rfc822-to-8bit (ORCPT
+        id S229675AbiLQOY7 convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 17 Dec 2022 04:45:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51642 "EHLO
+        Sat, 17 Dec 2022 09:24:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41278 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229469AbiLQJpY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Dec 2022 04:45:24 -0500
+        with ESMTP id S229680AbiLQOY6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Dec 2022 09:24:58 -0500
 Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 102AF2E9F2;
-        Sat, 17 Dec 2022 01:45:20 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9912E14D1F;
+        Sat, 17 Dec 2022 06:24:54 -0800 (PST)
 Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 717F0221ECC;
-        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+        by DDEI (Postfix) with ESMTP id 74DFA221DAB;
+        Sat, 17 Dec 2022 14:24:16 +0000 (UTC)
 Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 4EE65221D67;
-        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+        by DDEI (Postfix) with ESMTP id 5357A221D67;
+        Sat, 17 Dec 2022 14:24:16 +0000 (UTC)
 X-TM-AS-ERS: 10.181.10.103-127.5.254.253
 X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
         Q==
 X-DDEI-TLS-USAGE: Used
 Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
         by mail6.swissbit.com (Postfix) with ESMTPS;
-        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+        Sat, 17 Dec 2022 14:24:16 +0000 (UTC)
 From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
 To:     Kamal Dasu <kdasu.kdev@gmail.com>,
         "keescook@chromium.org" <keescook@chromium.org>,
@@ -39,9 +39,9 @@ CC:     "f.fainelli@gmail.com" <f.fainelli@gmail.com>,
         "anton@enomsg.org" <anton@enomsg.org>
 Subject: RE: [RFC 1/1] mmc: Add mmc pstore backend support
 Thread-Topic: [RFC 1/1] mmc: Add mmc pstore backend support
-Thread-Index: AQHZEZlE8k6mFehOd0aXwZ7neOq/D65x1QlQ
-Date:   Sat, 17 Dec 2022 09:45:17 +0000
-Message-ID: <0876318f754a4399b8255b5807672e83@hyperstone.com>
+Thread-Index: AQHZEZlE8k6mFehOd0aXwZ7neOq/D65yIhzg
+Date:   Sat, 17 Dec 2022 14:24:50 +0000
+Message-ID: <08177abd04ff4120a20af6e1d8d27a19@hyperstone.com>
 References: <20221216215410.26960-1-kdasu.kdev@gmail.com>
  <20221216215410.26960-2-kdasu.kdev@gmail.com>
 In-Reply-To: <20221216215410.26960-2-kdasu.kdev@gmail.com>
@@ -53,29 +53,32 @@ Content-Type: text/plain;
         charset="iso-8859-1"
 Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27328.007
-X-TMASE-Result: 10-9.262600-10.000000
-X-TMASE-MatchedRID: 0Q75hiCFGFHUL3YCMmnG4pTQgFTHgkhZIfyQNHR2naZRiRl337i3bxFE
-        t97pQ+C8w9n86z9anTWhLjH9UxujcDmpL9mXE1+sHmtCXih7f9PvG0/D/wjsdGvlGb+24NaZ5ax
-        aw7fIL5EppiuzBwGFPv+EMOr9fJmZL/tBTZzO5Q0D2WXLXdz+Ac10jJLbCLFuBm9f7S94IJwxfp
-        GUY2S5wm8wplFk0WnAn35cKPv4RPY0G3Bj2OuOLri7edL7cQQOamKrgqy61cKHoWQt2/koFSa6j
-        ik0Mgy+ws5adMG4+YiYAeSH2mWQ7EsuK6d1t+nSIGmn4OlOtCMBGSO+Oopk6ga+3VJyK4z2tY4N
-        1nU8OYSzKnTF5VC/GV2Zj7PyQnOhuREwNxj15QPOvXpg7ONnXVK6+0HOVoSoS3LxyJ8YfRSKUma
-        UXynhB62hL3u6L8kmnBcwSk6Wt/5VmyN0+mvk2C9iVDu7EPf8Kkd89GqHvUnozDhGeQC9EqRVr7
-        nyVRs2L8pdHj/gu/qOpvWBCtxpVNPKvSkrFLVX30kDaWZBE1TdvovMm13clXj4u1KQZuZE1/xF1
-        a00T4MSnSUKaN4+WbQeFj3sWOU1IQJt3nwJw/DEOJqSsn5KmcO+wkQncuC8CuSPuSVW5+7Y5n0G
-        /viMvnMWeasl9UKPlUDmCJJo5VkIasXPlctLdLcPsR57JkIzWQ3R4k5PTnCNiKnsxFZrQG8qnFk
-        +BWUXUC4chv0pIaM95YLs1HsgHFRrPxrKjgrmH7oojjl57ZUzNsXWBvGVBqMyc+3kZn3GeWwYle
-        3v1YxHqemudHU/tv7yM2XsCXf8RFXsL2iM5nWeAiCmPx4NwGNn8XPiALIbiujc/tZ7cVtJKW4mD
+X-TMASE-Version: DDEI-5.1-9.0.1002-27330.000
+X-TMASE-Result: 11-10.336500-10.000000
+X-TMASE-MatchedRID: 0Q75hiCFGFHUL3YCMmnG4pTQgFTHgkhZEOqYpzM+g1ktferJ/d7Ab5F5
+        C17m8KTrBm/yxPTZONfhGpR3tjboi03bYJ4h3Z05AxFf86Rcir2fmd9HsjZ0U54Q+L3BXIWudTe
+        gpK7QnXFSHmZoogkDH+affHI8kAmiHY/bzRmIaZFYUconbBJWJCz3IJiNRHpLwdc9Srwl8GgCAS
+        ysVpSrKTi6NGmYTOROf4rHggDVdNenbZwEx097TfSG/+sPtZVkwJjn8yqLU6J1vePNT/4Mt0jkm
+        ZhzoGFQxz/ZG57FCLg76EG8K9nMWCExiclJoAo3G9TMqjxt7zGxdUxy7IafHf4DDXoaCqk72LPE
+        16PQlRPWtPNF84pUMf7tX3FmyDXopaAJZi8UzEUZgmFGHqyx60fLPdsHmQbnrQYkvYRXmkycQWV
+        MGtd3l1P09xzlOGEOVr625qXK7wIFpMQnBFyWOtsplnBzc8xMF4r8H5YrEqx1PfLWsNT9KVsraq
+        YpRpfWpFedpgCFxaWMduncWMZqJKaDx0F8sKdXk3rl+MaNgxBezmeoa8MJ86W36RUjgoXgfxGhu
+        XIUqfgDoLsqd4XAugNNUk1GTaREuohcuWcG2KiYh7QjWI3JDBA5wxKjT3bqR8XxRZQpn4H3hR8G
+        j83lychN9AF0Iyxo33tfuLSUKPwzPB7mzXyiQ/CW/PNRRp/ZwRdjnTeqAAFUjspoiX02F00wmBC
+        4zPglgcjNRBg0Ixi4pK9U70rN68A3teLvdQYV0e7jfBjhB8coFGGkgev9siS30GKAkBxW4aSbGE
+        Jzu4s56UleuofCzSjuLuQXBE1U+WA2WcoLTaeeAiCmPx4NwGNn8XPiALIbiujc/tZ7cVtJKW4mD
         lJsMd934/rDAK3zGjFMngtLLWhJFQD69E10vA==
 X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
 X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 0a663391-1ed4-958b-85ab-67eee426dcc4-0-0-200-0
+X-TMASE-XGENCLOUD: 49cb1207-f083-4c14-acf2-059b44503370-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Please check your patch, I think you're accidentally reverting all recent mmc changes.
+Two things right of the bat:
+MMC and SD are managed flash, you don't need to erase before writing somewhere.
+(although you can)
+There is a lot of things that need to be considered to get writes workable on all cards and hosts, it should be easier to make use of the core/block.c code somehow instead of doing this yourself.
 
 
 -----Original Message-----
