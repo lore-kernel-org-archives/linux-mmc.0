@@ -2,68 +2,90 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B600C4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 16 Dec 2022 21:54:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18627C4332F
+	for <linux-mmc@archiver.kernel.org>; Sat, 17 Dec 2022 09:45:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229863AbiLPVyd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 16 Dec 2022 16:54:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38836 "EHLO
+        id S230222AbiLQJpZ convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 17 Dec 2022 04:45:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229764AbiLPVya (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 16 Dec 2022 16:54:30 -0500
-Received: from mail-qt1-x82e.google.com (mail-qt1-x82e.google.com [IPv6:2607:f8b0:4864:20::82e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A8D65F411;
-        Fri, 16 Dec 2022 13:54:17 -0800 (PST)
-Received: by mail-qt1-x82e.google.com with SMTP id bw27so1700906qtb.3;
-        Fri, 16 Dec 2022 13:54:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=8Hb9MHxin/7lGhNZBN/hZR7ahMDbRDkBczSL8utvH1U=;
-        b=SheswvBnYdtICyVN1yZXYXdL/QsNhbPTzTzDmraNrMhWF13g4eLUUKCreOwagjvvvO
-         thgecGCD5ecPhF6Nx3LbzuucDyVS92h97UyQpXsnnnxCZEnmsENW5VhuiyW0BXjNjhuX
-         IgfP9+wfI2RfEte8VolVcjhCILO1+g0yji+s8NbQVkIebQbS51Dh3MeqxcgHCa2td7vJ
-         Xa9uEBEJFhQKJcYOHPLS7P4oE/Y/xypv6OpMgxjtgSfsk+TBb7auxHoNoUGTwdtuEFeM
-         W+ViNf9xo6bgE1D4SYS4aYSiGFu0vGSWVMo5El1FoJVFCmYeyaFhDmz8AWxotuSpWxj/
-         qjeQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=8Hb9MHxin/7lGhNZBN/hZR7ahMDbRDkBczSL8utvH1U=;
-        b=EHZv0HUtT5eOCZX2q4LxRnPWRSRvhE704oGQPbLrClgKjzPuv7j9v9BXHkcEx5OhFF
-         8nIieq3CNTbrPWlPPg9R9b0LTqykasqq6yKWkZgXH+kDbymkvCL8zCt1rS4KN+iUyv+2
-         2hyC0YtRgLVtU3QwC9aIQl9z8vRiE44J4qCSqI7Z8Y968V0odwv9snQpLHofNd402Ohq
-         Fp/VHq+A9eHGo+A3wwfBVroHHSRa8WPE80H3dBh+Ggeb0nFUWZKjuE05dtARuJl7fj+K
-         KhWk0Le5fLQ0wPwS3bHKDkOpqA4lTNPBJsIzE1abw2pwjupExpln5FflBBc8QfpNSPL8
-         JwwQ==
-X-Gm-Message-State: ANoB5pl6TPLq203XHG/3ICWa3zp6ZxrKqBJRI7cL7kiHo1BNeM1y6nDF
-        98ihFvV6RAwyq0NWDDDu2Qc=
-X-Google-Smtp-Source: AA0mqf7f1GFUlGU0cR70I+rGK4syowMwCwfxfB9VjjGuzEFV/mkBzTMsxJe0yg6bGCkRYn6L35YDDA==
-X-Received: by 2002:ac8:1014:0:b0:3a4:3137:79b3 with SMTP id z20-20020ac81014000000b003a4313779b3mr41351331qti.64.1671227655819;
-        Fri, 16 Dec 2022 13:54:15 -0800 (PST)
-Received: from mail.broadcom.net ([192.19.144.250])
-        by smtp.gmail.com with ESMTPSA id o12-20020ac8554c000000b003972790deb9sm1947605qtr.84.2022.12.16.13.54.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 16 Dec 2022 13:54:15 -0800 (PST)
-From:   Kamal Dasu <kdasu.kdev@gmail.com>
-To:     keescook@chromium.org, linux-kernel@vger.kernel.org,
-        gmpy.liaowx@gmail.com, linux-mmc@vger.kernel.org
-Cc:     f.fainelli@gmail.com, tony.luck@intel.com, anton@enomsg.org,
-        Kamal Dasu <kdasu.kdev@gmail.com>
-Subject: [RFC 1/1] mmc: Add mmc pstore backend support
-Date:   Fri, 16 Dec 2022 16:54:10 -0500
-Message-Id: <20221216215410.26960-2-kdasu.kdev@gmail.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20221216215410.26960-1-kdasu.kdev@gmail.com>
+        with ESMTP id S229469AbiLQJpY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 17 Dec 2022 04:45:24 -0500
+Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 102AF2E9F2;
+        Sat, 17 Dec 2022 01:45:20 -0800 (PST)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 717F0221ECC;
+        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 4EE65221D67;
+        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
+        by mail6.swissbit.com (Postfix) with ESMTPS;
+        Sat, 17 Dec 2022 09:44:42 +0000 (UTC)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Kamal Dasu <kdasu.kdev@gmail.com>,
+        "keescook@chromium.org" <keescook@chromium.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "gmpy.liaowx@gmail.com" <gmpy.liaowx@gmail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+CC:     "f.fainelli@gmail.com" <f.fainelli@gmail.com>,
+        "tony.luck@intel.com" <tony.luck@intel.com>,
+        "anton@enomsg.org" <anton@enomsg.org>
+Subject: RE: [RFC 1/1] mmc: Add mmc pstore backend support
+Thread-Topic: [RFC 1/1] mmc: Add mmc pstore backend support
+Thread-Index: AQHZEZlE8k6mFehOd0aXwZ7neOq/D65x1QlQ
+Date:   Sat, 17 Dec 2022 09:45:17 +0000
+Message-ID: <0876318f754a4399b8255b5807672e83@hyperstone.com>
 References: <20221216215410.26960-1-kdasu.kdev@gmail.com>
+ <20221216215410.26960-2-kdasu.kdev@gmail.com>
+In-Reply-To: <20221216215410.26960-2-kdasu.kdev@gmail.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27328.007
+X-TMASE-Result: 10-9.262600-10.000000
+X-TMASE-MatchedRID: 0Q75hiCFGFHUL3YCMmnG4pTQgFTHgkhZIfyQNHR2naZRiRl337i3bxFE
+        t97pQ+C8w9n86z9anTWhLjH9UxujcDmpL9mXE1+sHmtCXih7f9PvG0/D/wjsdGvlGb+24NaZ5ax
+        aw7fIL5EppiuzBwGFPv+EMOr9fJmZL/tBTZzO5Q0D2WXLXdz+Ac10jJLbCLFuBm9f7S94IJwxfp
+        GUY2S5wm8wplFk0WnAn35cKPv4RPY0G3Bj2OuOLri7edL7cQQOamKrgqy61cKHoWQt2/koFSa6j
+        ik0Mgy+ws5adMG4+YiYAeSH2mWQ7EsuK6d1t+nSIGmn4OlOtCMBGSO+Oopk6ga+3VJyK4z2tY4N
+        1nU8OYSzKnTF5VC/GV2Zj7PyQnOhuREwNxj15QPOvXpg7ONnXVK6+0HOVoSoS3LxyJ8YfRSKUma
+        UXynhB62hL3u6L8kmnBcwSk6Wt/5VmyN0+mvk2C9iVDu7EPf8Kkd89GqHvUnozDhGeQC9EqRVr7
+        nyVRs2L8pdHj/gu/qOpvWBCtxpVNPKvSkrFLVX30kDaWZBE1TdvovMm13clXj4u1KQZuZE1/xF1
+        a00T4MSnSUKaN4+WbQeFj3sWOU1IQJt3nwJw/DEOJqSsn5KmcO+wkQncuC8CuSPuSVW5+7Y5n0G
+        /viMvnMWeasl9UKPlUDmCJJo5VkIasXPlctLdLcPsR57JkIzWQ3R4k5PTnCNiKnsxFZrQG8qnFk
+        +BWUXUC4chv0pIaM95YLs1HsgHFRrPxrKjgrmH7oojjl57ZUzNsXWBvGVBqMyc+3kZn3GeWwYle
+        3v1YxHqemudHU/tv7yM2XsCXf8RFXsL2iM5nWeAiCmPx4NwGNn8XPiALIbiujc/tZ7cVtJKW4mD
+        lJsMd934/rDAK3zGjFMngtLLWhJFQD69E10vA==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 0a663391-1ed4-958b-85ab-67eee426dcc4-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Adding mmc pstore backend support to be able to write to pstore
-device. Code is  based on mtdpstore.
+Please check your patch, I think you're accidentally reverting all recent mmc changes.
+
+
+-----Original Message-----
+From: Kamal Dasu <kdasu.kdev@gmail.com> 
+Sent: Freitag, 16. Dezember 2022 22:54
+To: keescook@chromium.org; linux-kernel@vger.kernel.org; gmpy.liaowx@gmail.com; linux-mmc@vger.kernel.org
+Cc: f.fainelli@gmail.com; tony.luck@intel.com; anton@enomsg.org; Kamal Dasu <kdasu.kdev@gmail.com>
+Subject: [RFC 1/1] mmc: Add mmc pstore backend support
+
+Adding mmc pstore backend support to be able to write to pstore device. Code is  based on mtdpstore.
 
 Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
 ---
@@ -75,11 +97,9 @@ Signed-off-by: Kamal Dasu <kdasu.kdev@gmail.com>
  drivers/mmc/core/mmcpstore.c | 594 +++++++++++++++++++++++++++++++++++
  drivers/mmc/host/sdhci.c     | 166 +++++-----
  include/linux/mmc/host.h     |   3 +
- 8 files changed, 746 insertions(+), 129 deletions(-)
- create mode 100644 drivers/mmc/core/mmcpstore.c
+ 8 files changed, 746 insertions(+), 129 deletions(-)  create mode 100644 drivers/mmc/core/mmcpstore.c
 
-diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
-index 6f25c34e4fec..fd46753ed746 100644
+diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig index 6f25c34e4fec..fd46753ed746 100644
 --- a/drivers/mmc/core/Kconfig
 +++ b/drivers/mmc/core/Kconfig
 @@ -34,9 +34,22 @@ config PWRSEQ_SIMPLE
@@ -105,8 +125,7 @@ index 6f25c34e4fec..fd46753ed746 100644
  	default y
  	help
  	  Say Y here to enable the MMC block device driver support.
-diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile
-index 6a907736cd7a..c3f1199deb71 100644
+diff --git a/drivers/mmc/core/Makefile b/drivers/mmc/core/Makefile index 6a907736cd7a..c3f1199deb71 100644
 --- a/drivers/mmc/core/Makefile
 +++ b/drivers/mmc/core/Makefile
 @@ -16,6 +16,7 @@ obj-$(CONFIG_PWRSEQ_EMMC)	+= pwrseq_emmc.o
@@ -117,8 +136,7 @@ index 6a907736cd7a..c3f1199deb71 100644
  obj-$(CONFIG_MMC_TEST)		+= mmc_test.o
  obj-$(CONFIG_SDIO_UART)		+= sdio_uart.o
  mmc_core-$(CONFIG_MMC_CRYPTO)	+= crypto.o
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 20da7ed43e6d..95da015c65b8 100644
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c index 20da7ed43e6d..95da015c65b8 100644
 --- a/drivers/mmc/core/block.c
 +++ b/drivers/mmc/core/block.c
 @@ -134,7 +134,6 @@ struct mmc_blk_data {
@@ -128,8 +146,7 @@ index 20da7ed43e6d..95da015c65b8 100644
 -#define MMC_BLK_PART_INVALID	UINT_MAX	/* Unknown partition active */
  	int	area_type;
  
- 	/* debugfs files (only in main mmc_blk_data) */
-@@ -514,6 +513,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
+ 	/* debugfs files (only in main mmc_blk_data) */ @@ -514,6 +513,19 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
  		if (idata->ic.data_timeout_ns)
  			data.timeout_ns = idata->ic.data_timeout_ns;
  
@@ -204,8 +221,7 @@ index 20da7ed43e6d..95da015c65b8 100644
 +	return err;
  }
  
- static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type)
-@@ -1865,9 +1871,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
+ static inline void mmc_blk_reset_success(struct mmc_blk_data *md, int type) @@ -1865,9 +1871,8 @@ static void mmc_blk_mq_rw_recovery(struct mmc_queue *mq, struct request *req)
  		return;
  
  	/* Reset before last retry */
@@ -235,27 +251,22 @@ index 20da7ed43e6d..95da015c65b8 100644
  }
  
  module_init(mmc_blk_init);
-diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h
-index 31153f656f41..974081d0ab4e 100644
+diff --git a/drivers/mmc/core/block.h b/drivers/mmc/core/block.h index 31153f656f41..974081d0ab4e 100644
 --- a/drivers/mmc/core/block.h
 +++ b/drivers/mmc/core/block.h
-@@ -16,5 +16,14 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq);
- struct work_struct;
+@@ -16,5 +16,14 @@ void mmc_blk_mq_recovery(struct mmc_queue *mq);  struct work_struct;
  
  void mmc_blk_mq_complete_work(struct work_struct *work);
 +#if IS_ENABLED(CONFIG_MMC_PSTORE)
-+sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t *size);
-+void mmcpstore_register(struct mmc_card *card, const char *disk_name);
-+void unregister_mmcpstore(void);
-+#else
-+static inline void mmcpstore_register(struct mmc_card *card,
++sector_t mmc_blk_get_part(struct mmc_card *card, int part_num, sector_t 
++*size); void mmcpstore_register(struct mmc_card *card, const char 
++*disk_name); void unregister_mmcpstore(void); #else static inline void 
++mmcpstore_register(struct mmc_card *card,
 +				      const char *disk_name) {}
-+static inline void unregister_mmcpstore(void) {}
-+#endif
++static inline void unregister_mmcpstore(void) {} #endif
  
  #endif
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 426c7f66b349..ef53a2578824 100644
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c index 426c7f66b349..ef53a2578824 100644
 --- a/drivers/mmc/core/core.c
 +++ b/drivers/mmc/core/core.c
 @@ -56,7 +56,7 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
@@ -287,13 +298,13 @@ index 426c7f66b349..ef53a2578824 100644
 +	    cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200 &&
  	    !host->retune_crc_disable &&
  	    (err == -EILSEQ || (mrq->sbc && mrq->sbc->error == -EILSEQ) ||
- 	    (mrq->data && mrq->data->error == -EILSEQ) ||
-@@ -526,7 +527,7 @@ EXPORT_SYMBOL(mmc_cqe_post_req);
+ 	    (mrq->data && mrq->data->error == -EILSEQ) || @@ -526,7 +527,7 @@ EXPORT_SYMBOL(mmc_cqe_post_req);
   * mmc_cqe_recovery - Recover from CQE errors.
   * @host: MMC host to recover
   *
 - * Recovery consists of stopping CQE, stopping eMMC, discarding the queue
-+ * Recovery consists of stopping CQE, stopping eMMC, discarding the queue in
++ * Recovery consists of stopping CQE, stopping eMMC, discarding the 
++ queue in
   * in eMMC, and discarding the queue in CQE. CQE must call
   * mmc_cqe_request_done() on all requests. An error is returned if the eMMC
   * fails to discard its queue.
@@ -316,15 +327,12 @@ index 426c7f66b349..ef53a2578824 100644
  		card->pref_erase = 0;
  }
  
--static bool is_trim_arg(unsigned int arg)
--{
+-static bool is_trim_arg(unsigned int arg) -{
 -	return (arg & MMC_TRIM_OR_DISCARD_ARGS) && arg != MMC_DISCARD_ARG;
 -}
 -
  static unsigned int mmc_mmc_erase_timeout(struct mmc_card *card,
- 				          unsigned int arg, unsigned int qty)
- {
-@@ -1770,7 +1760,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
+ 				          unsigned int arg, unsigned int qty)  { @@ -1770,7 +1760,7 @@ int mmc_erase(struct mmc_card *card, unsigned int from, unsigned int nr,
  	    !(card->ext_csd.sec_feature_support & EXT_CSD_SEC_ER_EN))
  		return -EOPNOTSUPP;
  
@@ -342,9 +350,7 @@ index 426c7f66b349..ef53a2578824 100644
  		err = mmc_do_erase(card, from, from + rem - 1, arg);
  		from += rem;
  		if ((err) || (to <= from))
-diff --git a/drivers/mmc/core/mmcpstore.c b/drivers/mmc/core/mmcpstore.c
-new file mode 100644
-index 000000000000..f881be42aa41
+diff --git a/drivers/mmc/core/mmcpstore.c b/drivers/mmc/core/mmcpstore.c new file mode 100644 index 000000000000..f881be42aa41
 --- /dev/null
 +++ b/drivers/mmc/core/mmcpstore.c
 @@ -0,0 +1,594 @@
@@ -402,8 +408,7 @@ index 000000000000..f881be42aa41
 +
 +static void mmc_prep_req(struct mmc_request *mrq,
 +		unsigned int sect_offset, unsigned int nsects,
-+		struct scatterlist *sg, u32 opcode, unsigned int flags)
-+{
++		struct scatterlist *sg, u32 opcode, unsigned int flags) {
 +	mrq->cmd->opcode = opcode;
 +	mrq->cmd->arg = sect_offset;
 +	mrq->cmd->flags = MMC_RSP_R1 | MMC_CMD_ADTC;
@@ -424,8 +429,7 @@ index 000000000000..f881be42aa41
 +}
 +
 +static int mmcpstore_req(const char *buf,
-+			 size_t size, loff_t sect_offset, int write)
-+{
++			 size_t size, loff_t sect_offset, int write) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +	struct mmc_request *mrq = cxt->mrq;
 +	struct mmc_card *card = cxt->card;
@@ -489,12 +493,11 @@ index 000000000000..f881be42aa41
 +	}
 +}
 +
-+static inline int mmcpstore_is_used(struct mmcpstore_context *cxt, loff_t off)
-+{
++static inline int mmcpstore_is_used(struct mmcpstore_context *cxt, 
++loff_t off) {
 +	u64 zonenum = div_u64(off, cxt->conf.kmsg_size);
 +
-+	return test_bit(zonenum, cxt->usedmap);
-+}
++	return test_bit(zonenum, cxt->usedmap); }
 +
 +static int mmcpstore_block_is_used(struct mmcpstore_context *cxt,
 +		loff_t off)
@@ -528,8 +531,8 @@ index 000000000000..f881be42aa41
 +	return true;
 +}
 +
-+static void mmcpstore_mark_removed(struct mmcpstore_context *cxt, loff_t off)
-+{
++static void mmcpstore_mark_removed(struct mmcpstore_context *cxt, 
++loff_t off) {
 +	u64 zonenum = div_u64(off, cxt->conf.kmsg_size);
 +
 +	dev_dbg(&cxt->card->dev, "mark zone %llu removed\n", zonenum);
@@ -568,8 +571,8 @@ index 000000000000..f881be42aa41
 +	return false;
 +}
 +
-+static int mmcpstore_erase_do(struct mmcpstore_context *cxt, size_t size, loff_t off)
-+{
++static int mmcpstore_erase_do(struct mmcpstore_context *cxt, size_t 
++size, loff_t off) {
 +	int ret;
 +
 +	off = ALIGN_DOWN(off, cxt->card->erase_size);
@@ -592,11 +595,11 @@ index 000000000000..f881be42aa41
 + * called while removing file
 + *
 + * Avoiding over erasing, do erase block only when the whole block is unused.
-+ * If the block contains valid log, do erase lazily on flush_removed() when
++ * If the block contains valid log, do erase lazily on flush_removed() 
++when
 + * unregister.
 + */
-+static ssize_t mmcpstore_erase(size_t size, loff_t off)
-+{
++static ssize_t mmcpstore_erase(size_t size, loff_t off) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +
 +	mmcpstore_mark_unused(cxt, off);
@@ -608,19 +611,21 @@ index 000000000000..f881be42aa41
 +	}
 +
 +	/* all zones are unused, erase it */
-+	return mmcpstore_erase_do(cxt, size, off);
-+}
++	return mmcpstore_erase_do(cxt, size, off); }
 +
 +/*
 + * What is security for mmcpstore?
-+ * As there is no erase for panic case, we should ensure at least one zone
++ * As there is no erase for panic case, we should ensure at least one 
++zone
 + * is writable. Otherwise, panic write will fail.
-+ * If zone is used, write operation will return -ENOMSG, which means that
-+ * pstore/blk will try one by one until gets an empty zone. So, it is not
++ * If zone is used, write operation will return -ENOMSG, which means 
++that
++ * pstore/blk will try one by one until gets an empty zone. So, it is 
++not
 + * needed to ensure the next zone is empty, but at least one.
 + */
-+static int mmcpstore_security(struct mmcpstore_context *cxt, loff_t off)
-+{
++static int mmcpstore_security(struct mmcpstore_context *cxt, loff_t 
++off) {
 +	int ret = 0, i;
 +	u32 zonenum = (u32)div_u64(off, cxt->conf.kmsg_size);
 +	u32 zonecnt = (u32)div_u64(cxt->size, cxt->conf.kmsg_size);
@@ -654,8 +659,8 @@ index 000000000000..f881be42aa41
 +	return ret;
 +}
 +
-+static ssize_t mmcpstore_panic_write(const char *buf, size_t size, loff_t off)
-+{
++static ssize_t mmcpstore_panic_write(const char *buf, size_t size, 
++loff_t off) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +	int ret;
 +
@@ -674,8 +679,8 @@ index 000000000000..f881be42aa41
 +	return size;
 +}
 +
-+static ssize_t mmcpstore_write(const char *buf, size_t size, loff_t off)
-+{
++static ssize_t mmcpstore_write(const char *buf, size_t size, loff_t 
++off) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +	int ret;
 +
@@ -694,8 +699,7 @@ index 000000000000..f881be42aa41
 +	return size;
 +}
 +
-+static ssize_t mmcpstore_read(char *buf, size_t size, loff_t off)
-+{
++static ssize_t mmcpstore_read(char *buf, size_t size, loff_t off) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +	int ret;
 +
@@ -713,7 +717,7 @@ index 000000000000..f881be42aa41
 +	return size;
 +}
 +
-+static struct block_device *mmcpstore_open_backend(const char *device)
++static struct block_device *mmcpstore_open_backend(const char *device) 
 +{
 +	struct block_device *bdev;
 +	dev_t devt;
@@ -733,15 +737,13 @@ index 000000000000..f881be42aa41
 +	return bdev;
 +}
 +
-+static void mmcpstore_close_backend(struct block_device *bdev)
-+{
++static void mmcpstore_close_backend(struct block_device *bdev) {
 +	if (!bdev)
 +		return;
 +	blkdev_put(bdev, FMODE_READ);
 +}
 +
-+void mmcpstore_register(struct mmc_card *card, const char *disk_name)
-+{
++void mmcpstore_register(struct mmc_card *card, const char *disk_name) {
 +	struct mmcpstore_context *cxt = &oops_cxt;
 +	struct pstore_blk_config *conf = &cxt->conf;
 +	struct block_device *bdev;
@@ -851,7 +853,8 @@ index 000000000000..f881be42aa41
 +free_mrq:
 +	kfree(mrq);
 +out:
-+	pr_info("%s register pstoreblk backend device failed\n", conf->device);
++	pr_info("%s register pstoreblk backend device failed\n", 
++conf->device);
 +
 +	return;
 +}
@@ -904,13 +907,15 @@ index 000000000000..f881be42aa41
 +
 +/*
 + * What does mmcpstore_flush_removed() do?
-+ * When user remove any log file on pstore filesystem, mmcpstore should do
-+ * something to ensure log file removed. If the whole block is no longer used,
-+ * it's nice to erase the block. However if the block still contains valid log,
++ * When user remove any log file on pstore filesystem, mmcpstore should 
++do
++ * something to ensure log file removed. If the whole block is no 
++longer used,
++ * it's nice to erase the block. However if the block still contains 
++valid log,
 + * what mmcpstore can do is to erase and write the valid log back.
 + */
-+static int mmcpstore_flush_removed(struct mmcpstore_context *cxt)
-+{
++static int mmcpstore_flush_removed(struct mmcpstore_context *cxt) {
 +	int ret;
 +	loff_t off;
 +	u32 blkcnt = (u32)div_u64(cxt->size, cxt->card->erase_size);
@@ -942,14 +947,12 @@ index 000000000000..f881be42aa41
 +	kfree(cxt->rmmap);
 +	cxt->card = NULL;
 +}
-diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-index f3af1bd0f7b9..08e4ecd13693 100644
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c index f3af1bd0f7b9..08e4ecd13693 100644
 --- a/drivers/mmc/host/sdhci.c
 +++ b/drivers/mmc/host/sdhci.c
 @@ -270,11 +270,6 @@ enum sdhci_reset_reason {
  
- static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)
- {
+ static void sdhci_reset_for_reason(struct sdhci_host *host, enum sdhci_reset_reason reason)  {
 -	if (host->quirks2 & SDHCI_QUIRK2_ISSUE_CMD_DAT_RESET_TOGETHER) {
 -		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
 -		return;
@@ -957,8 +960,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 -
  	switch (reason) {
  	case SDHCI_RESET_FOR_INIT:
- 		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA);
-@@ -378,7 +373,6 @@ static void sdhci_init(struct sdhci_host *host, int soft)
+ 		sdhci_do_reset(host, SDHCI_RESET_CMD | SDHCI_RESET_DATA); @@ -378,7 +373,6 @@ static void sdhci_init(struct sdhci_host *host, int soft)
  	if (soft) {
  		/* force clock reconfiguration */
  		host->clock = 0;
@@ -968,8 +970,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
  }
 @@ -531,6 +525,7 @@ static inline bool sdhci_has_requests(struct sdhci_host *host)
  
- static void sdhci_read_block_pio(struct sdhci_host *host)
- {
+ static void sdhci_read_block_pio(struct sdhci_host *host)  {
 +	unsigned long flags;
  	size_t blksize, len, chunk;
  	u32 scratch;
@@ -991,8 +992,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 +	local_irq_restore(flags);
  }
  
- static void sdhci_write_block_pio(struct sdhci_host *host)
- {
+ static void sdhci_write_block_pio(struct sdhci_host *host)  {
 +	unsigned long flags;
  	size_t blksize, len, chunk;
  	u32 scratch;
@@ -1014,13 +1014,13 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 +	local_irq_restore(flags);
  }
  
- static void sdhci_transfer_pio(struct sdhci_host *host)
-@@ -701,14 +705,16 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
+ static void sdhci_transfer_pio(struct sdhci_host *host) @@ -701,14 +705,16 @@ static int sdhci_pre_dma_transfer(struct sdhci_host *host,
  	return sg_count;
  }
  
 -static char *sdhci_kmap_atomic(struct scatterlist *sg)
-+static char *sdhci_kmap_atomic(struct scatterlist *sg, unsigned long *flags)
++static char *sdhci_kmap_atomic(struct scatterlist *sg, unsigned long 
++*flags)
  {
 -	return kmap_local_page(sg_page(sg)) + sg->offset;
 +	local_irq_save(*flags);
@@ -1035,8 +1035,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 +	local_irq_restore(*flags);
  }
  
- void sdhci_adma_write_desc(struct sdhci_host *host, void **desc,
-@@ -750,6 +756,7 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
+ void sdhci_adma_write_desc(struct sdhci_host *host, void **desc, @@ -750,6 +756,7 @@ static void sdhci_adma_table_pre(struct sdhci_host *host,
  	struct mmc_data *data, int sg_count)
  {
  	struct scatterlist *sg;
@@ -1084,8 +1083,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 +			if (cmd->opcode != MMC_SEND_TUNING_BLOCK_HS200)
  				sdhci_writew(host, 0x0, SDHCI_TRANSFER_MODE);
  		} else {
- 		/* clear Auto CMD settings for no data CMDs */
-@@ -1698,7 +1706,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+ 		/* clear Auto CMD settings for no data CMDs */ @@ -1698,7 +1706,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
  		flags |= SDHCI_CMD_INDEX;
  
  	/* CMD19 is special in that the Data Present Select should be set */
@@ -1095,12 +1093,9 @@ index f3af1bd0f7b9..08e4ecd13693 100644
  		flags |= SDHCI_CMD_DATA;
  
  	timeout = jiffies;
-@@ -2284,46 +2293,11 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)
- }
- EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
+@@ -2284,46 +2293,11 @@ void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing)  }  EXPORT_SYMBOL_GPL(sdhci_set_uhs_signaling);
  
--static bool sdhci_timing_has_preset(unsigned char timing)
--{
+-static bool sdhci_timing_has_preset(unsigned char timing) -{
 -	switch (timing) {
 -	case MMC_TIMING_UHS_SDR12:
 -	case MMC_TIMING_UHS_SDR25:
@@ -1113,14 +1108,12 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 -	return false;
 -}
 -
--static bool sdhci_preset_needed(struct sdhci_host *host, unsigned char timing)
--{
+-static bool sdhci_preset_needed(struct sdhci_host *host, unsigned char timing) -{
 -	return !(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN) &&
 -	       sdhci_timing_has_preset(timing);
 -}
 -
--static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_ios *ios)
--{
+-static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_ios *ios) -{
 -	/*
 -	 * Preset Values are: Driver Strength, Clock Generator and SDCLK/RCLK
 -	 * Frequency. Check if preset values need to be enabled, or the Driver
@@ -1130,8 +1123,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 -	       (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
 -}
 -
- void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
+ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)  {
  	struct sdhci_host *host = mmc_priv(mmc);
 -	bool reinit_uhs = host->reinit_uhs;
 -	bool turning_on_clk = false;
@@ -1168,8 +1160,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 -
  	ctrl = sdhci_readb(host, SDHCI_HOST_CONTROL);
  
- 	if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) {
-@@ -2408,21 +2369,8 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	if (!(host->quirks & SDHCI_QUIRK_NO_HISPD_BIT)) { @@ -2408,21 +2369,8 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
  	if (host->version >= SDHCI_SPEC_300) {
  		u16 clk, ctrl_2;
  
@@ -1244,8 +1235,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
  		/* Re-enable SD Clock */
 @@ -3369,6 +3343,8 @@ static void sdhci_adma_show_error(struct sdhci_host *host)
  
- static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)
- {
+ static void sdhci_data_irq(struct sdhci_host *host, u32 intmask)  {
 +	u32 command;
 +
  	/*
@@ -1266,8 +1256,8 @@ index f3af1bd0f7b9..08e4ecd13693 100644
  	return result;
  }
  
-+static int sdhci_completion_poll(struct mmc_host *mmc, unsigned long msecs)
-+{
++static int sdhci_completion_poll(struct mmc_host *mmc, unsigned long 
++msecs) {
 +	int result;
 +	struct sdhci_host *host = mmc_priv(mmc);
 +
@@ -1284,8 +1274,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 +	return result;
 +}
 +
- static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)
- {
+ static irqreturn_t sdhci_thread_irq(int irq, void *dev_id)  {
  	struct sdhci_host *host = dev_id;
 @@ -3790,7 +3786,6 @@ int sdhci_resume_host(struct sdhci_host *host)
  		sdhci_init(host, 0);
@@ -1294,8 +1283,7 @@ index f3af1bd0f7b9..08e4ecd13693 100644
 -		host->reinit_uhs = true;
  		mmc->ops->set_ios(mmc, &mmc->ios);
  	} else {
- 		sdhci_init(host, (mmc->pm_flags & MMC_PM_KEEP_POWER));
-@@ -3853,7 +3848,6 @@ int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
+ 		sdhci_init(host, (mmc->pm_flags & MMC_PM_KEEP_POWER)); @@ -3853,7 +3848,6 @@ int sdhci_runtime_resume_host(struct sdhci_host *host, int soft_reset)
  		/* Force clock and power re-program */
  		host->pwr = 0;
  		host->clock = 0;
@@ -1316,13 +1304,13 @@ index f3af1bd0f7b9..08e4ecd13693 100644
  		/* This may alter mmc->*_blk_* parameters */
  		sdhci_allocate_bounce_buffer(host);
  
-+	pr_info("block size, assuming max_blk_sz %u bytes max_req_sz %u \n", mmc->max_blk_size, mmc->max_req_size);
++	pr_info("block size, assuming max_blk_sz %u bytes max_req_sz %u \n", 
++mmc->max_blk_size, mmc->max_req_size);
 +	
  	return 0;
  
  unreg:
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 8fdd3cf971a3..bb908d778843 100644
+diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h index 8fdd3cf971a3..bb908d778843 100644
 --- a/include/linux/mmc/host.h
 +++ b/include/linux/mmc/host.h
 @@ -212,6 +212,9 @@ struct mmc_host_ops {
@@ -1335,6 +1323,12 @@ index 8fdd3cf971a3..bb908d778843 100644
  };
  
  struct mmc_cqe_ops {
--- 
+--
 2.17.1
+
+
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
