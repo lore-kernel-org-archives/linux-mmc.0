@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11899C4167B
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Dec 2022 16:34:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 78E42C4332F
+	for <linux-mmc@archiver.kernel.org>; Sun, 18 Dec 2022 16:45:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232167AbiLRQer (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Dec 2022 11:34:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57670 "EHLO
+        id S232259AbiLRQpT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 18 Dec 2022 11:45:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232211AbiLRQdb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Dec 2022 11:33:31 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C172DF1A;
-        Sun, 18 Dec 2022 08:12:27 -0800 (PST)
+        with ESMTP id S232627AbiLRQoj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Dec 2022 11:44:39 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1C80C10;
+        Sun, 18 Dec 2022 08:15:49 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E5ED1B80B43;
-        Sun, 18 Dec 2022 16:12:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA9AAC433D2;
-        Sun, 18 Dec 2022 16:12:24 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3F2DB60DCC;
+        Sun, 18 Dec 2022 16:15:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DF202C433F0;
+        Sun, 18 Dec 2022 16:15:47 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671379945;
-        bh=uK2N8sWvtuJXEQYlSUHzg5AuM8NSppLJ4Q9v8QvjAWs=;
+        s=k20201202; t=1671380148;
+        bh=1fqa4hwTzUpUc3qjpVotRIMcelCiIEWnjYcZFbHL+44=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=Qn5mBo9LqtRbIvCcLYjGDS/ENbHEOeJf+dQOjdBaatRTmM9TWTcePALqkfPtx/ob0
-         qyNzHw1/Z68Dfzvv2uC9mHpil+NgIin4Zm165uPDMG1iM7EgQN1pZdkpF6CNQ0y92b
-         iCvohxbgsLoP2t8mVcEcHr9els1ULH5plTNDkAnlU1GHp9jk9uDV2VjsGr/QMa/lJC
-         ff4OmQeKS82tAOeb0CCM8C5NGcFAt2dS1h3OtYtXykUHJ6usNlBzRB8UBQJMYaSKoa
-         mV8f20BVwb7GWr9e4QQu50FZRY6LalBgqv+1VN+o2tuGrvv+NmLCW4ZqkmOhA3nCPq
-         YEzyo2zVbZcIQ==
+        b=ciQOHxtIbnTrxRPA6B/9G9znoJSPgUsK33KdBtYTll2XG2e27jutwo7Vt68Xj1slT
+         TrDYuwcu0xeQPGp7OniwV2BMPrP+DwnKT9okYbaUSFf2/eKLDlU4NNVcaG5Jv0p7Iz
+         VwQDS96eqdbiFbWXJ9hXGGQbfz/2qwmKivVza7bx0lXFLyIuHi4lxzubjQkVIIw77G
+         E9WzKnkFAxML77vsdqfjuZsIJR3xFBecyXKynxFnYAFiau7I+NxOtM3WPODtgxgw7L
+         UrdctgEfMdu8lPznHxdOnMqxMX1nmI6Y+XgdbAWbWVp6OVeMTbL5FdukXExz9dr4mJ
+         6+hV44iK+5UaA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>,
+Cc:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+        Jassi Brar <jaswinder.singh@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org,
-        linux-renesas-soc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.0 67/73] mmc: renesas_sdhi: better reset from HS400 mode
-Date:   Sun, 18 Dec 2022 11:07:35 -0500
-Message-Id: <20221218160741.927862-67-sashal@kernel.org>
+        Sasha Levin <sashal@kernel.org>, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.15 43/46] mmc: f-sdh30: Add quirks for broken timeout clock capability
+Date:   Sun, 18 Dec 2022 11:12:41 -0500
+Message-Id: <20221218161244.930785-43-sashal@kernel.org>
 X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221218160741.927862-1-sashal@kernel.org>
-References: <20221218160741.927862-1-sashal@kernel.org>
+In-Reply-To: <20221218161244.930785-1-sashal@kernel.org>
+References: <20221218161244.930785-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -52,38 +52,36 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Wolfram Sang <wsa+renesas@sang-engineering.com>
+From: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
 
-[ Upstream commit 0da69dd2155019ed4c444ede0e79ce7a4a6af627 ]
+[ Upstream commit aae9d3a440736691b3c1cb09ae2c32c4f1ee2e67 ]
 
-Up to now, HS400 adjustment mode was only disabled on soft reset when a
-calibration table was in use. It is safer, though, to disable it as soon
-as the instance has an adjustment related quirk set, i.e. bad taps or a
-calibration table.
+There is a case where the timeout clock is not supplied to the capability.
+Add a quirk for that.
 
-Signed-off-by: Wolfram Sang <wsa+renesas@sang-engineering.com>
-Reviewed-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Tested-by: Yoshihiro Shimoda <yoshihiro.shimoda.uh@renesas.com>
-Link: https://lore.kernel.org/r/20221120113457.42010-3-wsa+renesas@sang-engineering.com
+Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Acked-by: Jassi Brar <jaswinder.singh@linaro.org>
+Link: https://lore.kernel.org/r/20221111081033.3813-7-hayashi.kunihiko@socionext.com
 Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- drivers/mmc/host/renesas_sdhi_core.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/mmc/host/sdhci_f_sdh30.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/drivers/mmc/host/renesas_sdhi_core.c b/drivers/mmc/host/renesas_sdhi_core.c
-index b970699743e0..02682c2fd957 100644
---- a/drivers/mmc/host/renesas_sdhi_core.c
-+++ b/drivers/mmc/host/renesas_sdhi_core.c
-@@ -546,7 +546,7 @@ static void renesas_sdhi_reset_hs400_mode(struct tmio_mmc_host *host,
- 			 SH_MOBILE_SDHI_SCC_TMPPORT2_HS400OSEL) &
- 			sd_scc_read32(host, priv, SH_MOBILE_SDHI_SCC_TMPPORT2));
+diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
+index 3f5977979cf2..6c4f43e11282 100644
+--- a/drivers/mmc/host/sdhci_f_sdh30.c
++++ b/drivers/mmc/host/sdhci_f_sdh30.c
+@@ -168,6 +168,9 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
+ 	if (reg & SDHCI_CAN_DO_8BIT)
+ 		priv->vendor_hs200 = F_SDH30_EMMC_HS200;
  
--	if (priv->adjust_hs400_calib_table)
-+	if (priv->quirks && (priv->quirks->hs400_calib_table || priv->quirks->hs400_bad_taps))
- 		renesas_sdhi_adjust_hs400_mode_disable(host);
- 
- 	sd_ctrl_write16(host, CTL_SD_CARD_CLK_CTL, CLK_CTL_SCLKEN |
++	if (!(reg & SDHCI_TIMEOUT_CLK_MASK))
++		host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
++
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
+ 		goto err_add_host;
 -- 
 2.35.1
 
