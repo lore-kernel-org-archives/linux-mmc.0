@@ -2,86 +2,69 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEEB9C4167B
-	for <linux-mmc@archiver.kernel.org>; Sun, 18 Dec 2022 17:13:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 854BFC4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 08:49:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233486AbiLRRNM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 18 Dec 2022 12:13:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60628 "EHLO
+        id S231618AbiLSItp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Dec 2022 03:49:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233643AbiLRRLR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 18 Dec 2022 12:11:17 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [145.40.73.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D06401EC44;
-        Sun, 18 Dec 2022 08:23:57 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id 2A0A3CE0BAF;
-        Sun, 18 Dec 2022 16:23:56 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9A6C4C433F0;
-        Sun, 18 Dec 2022 16:23:53 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1671380634;
-        bh=yPl+W0vivCeUr4WZMW40HE08Gc6NkZUO0IEisN3YrCY=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=p9iy0eJOmNGoqyfMBE/ZCPGiokJp/V0XIFamRGV8FdXezjzvYJywm2nZaTFfIFEGe
-         VNeSqBr3cknMmY4MCjs9HnjMvPbWEyJxjYOljs0zTuDsvqpJyCeQwHNdNtcgfHVX02
-         TzRL/FdiyDNnG+1yoy1gPEv8JadL1GQqSwoxjjsYycAlZvwlKvTRR0Ie1q2BqIxFsD
-         bCG4taarzM+cDeoE2KT3fp3DgZhD3EtOYOm7L4nh+9g+JFHDtMLD4WBZSqesGkT7XR
-         pbrJktCX4aTtAwfoq2/8D6+5L4VIiqqVdq51Ovy1ODqsm/nPg9FCpJf/0GlXGukI95
-         +DmWKK6mRLACg==
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Jassi Brar <jaswinder.singh@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Sasha Levin <sashal@kernel.org>, adrian.hunter@intel.com,
-        linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 4.9 18/20] mmc: f-sdh30: Add quirks for broken timeout clock capability
-Date:   Sun, 18 Dec 2022 11:23:03 -0500
-Message-Id: <20221218162305.935724-18-sashal@kernel.org>
-X-Mailer: git-send-email 2.35.1
-In-Reply-To: <20221218162305.935724-1-sashal@kernel.org>
-References: <20221218162305.935724-1-sashal@kernel.org>
+        with ESMTP id S231709AbiLSItH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 03:49:07 -0500
+Received: from SHSQR01.spreadtrum.com (mx1.unisoc.com [222.66.158.135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1004D119;
+        Mon, 19 Dec 2022 00:48:35 -0800 (PST)
+Received: from SHSend.spreadtrum.com (shmbx05.spreadtrum.com [10.29.1.56])
+        by SHSQR01.spreadtrum.com with ESMTP id 2BJ8mHoF075381;
+        Mon, 19 Dec 2022 16:48:17 +0800 (+08)
+        (envelope-from Wenchao.Chen@unisoc.com)
+Received: from xm13705pcu.spreadtrum.com (10.13.3.189) by
+ shmbx05.spreadtrum.com (10.29.1.56) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.23; Mon, 19 Dec 2022 16:48:16 +0800
+From:   Wenchao Chen <wenchao.chen@unisoc.com>
+To:     <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <orsonzhai@gmail.com>, <baolin.wang@linux.alibaba.com>,
+        <zhang.lyra@gmail.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <zhenxiong.lai@unisoc.com>, <yuelin.tang@unisoc.com>,
+        <wenchao.chen666@gmail.com>
+Subject: [PATCH] mmc: sdhci-sprd: disable polling scan for sdio card
+Date:   Mon, 19 Dec 2022 16:47:54 +0800
+Message-ID: <20221219084754.11070-1-wenchao.chen@unisoc.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-X-stable: review
-X-Patchwork-Hint: Ignore
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.13.3.189]
+X-ClientProxiedBy: SHCAS01.spreadtrum.com (10.0.1.201) To
+ shmbx05.spreadtrum.com (10.29.1.56)
+X-MAIL: SHSQR01.spreadtrum.com 2BJ8mHoF075381
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Enable polling will increase the power consumption of the host.
 
-[ Upstream commit aae9d3a440736691b3c1cb09ae2c32c4f1ee2e67 ]
-
-There is a case where the timeout clock is not supplied to the capability.
-Add a quirk for that.
-
-Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Acked-by: Jassi Brar <jaswinder.singh@linaro.org>
-Link: https://lore.kernel.org/r/20221111081033.3813-7-hayashi.kunihiko@socionext.com
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
+Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
 ---
- drivers/mmc/host/sdhci_f_sdh30.c | 3 +++
- 1 file changed, 3 insertions(+)
+ drivers/mmc/host/sdhci-sprd.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci_f_sdh30.c b/drivers/mmc/host/sdhci_f_sdh30.c
-index 111b66f5439b..43e787954293 100644
---- a/drivers/mmc/host/sdhci_f_sdh30.c
-+++ b/drivers/mmc/host/sdhci_f_sdh30.c
-@@ -180,6 +180,9 @@ static int sdhci_f_sdh30_probe(struct platform_device *pdev)
- 	if (reg & SDHCI_CAN_DO_8BIT)
- 		priv->vendor_hs200 = F_SDH30_EMMC_HS200;
- 
-+	if (!(reg & SDHCI_TIMEOUT_CLK_MASK))
-+		host->quirks |= SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK;
-+
- 	ret = sdhci_add_host(host);
+diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+index 525f979e2a97..113a5c77578f 100644
+--- a/drivers/mmc/host/sdhci-sprd.c
++++ b/drivers/mmc/host/sdhci-sprd.c
+@@ -696,6 +696,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
  	if (ret)
- 		goto err_add_host;
+ 		goto err_cleanup_host;
+ 
++	if ((host->mmc->caps2 & MMC_CAP2_NO_SD) &&
++			(host->mmc->caps2 & MMC_CAP2_NO_MMC))
++		host->mmc->caps &= ~MMC_CAP_NEEDS_POLL;
++
+ 	pm_runtime_mark_last_busy(&pdev->dev);
+ 	pm_runtime_put_autosuspend(&pdev->dev);
+ 
 -- 
-2.35.1
+2.17.1
 
