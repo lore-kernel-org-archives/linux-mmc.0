@@ -2,91 +2,89 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A54BCC4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 10:36:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82108C4332F
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 14:24:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231158AbiLSKgN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Dec 2022 05:36:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46780 "EHLO
+        id S231136AbiLSOYo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Dec 2022 09:24:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59498 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230226AbiLSKgM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 05:36:12 -0500
-Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 232F92716;
-        Mon, 19 Dec 2022 02:36:11 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1671446171; x=1702982171;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=aHkzNEK8QmfP/Y9hBaXuqD6yX42n5U+gyda2XKBux6w=;
-  b=YNKB6uh1gxofSC0Aq+Dv4vEu+uuHfPs/GGZUncShfHoFEHO+RNn8nbSB
-   Z28a31hwD40UlQlnIiKysmMAJGYajs9P+TzSHhepoM4i/a3bYQf096CRm
-   Z8jPXrc48i+/pBhBfPSVXR8sHLqiQGw4/31yCKdss/jiUtCqMr+PwV/y/
-   3P2Bu2xC2JTjp3JMcrKKGQpBHd8Gz0DRXfv8j4c2LBNB4jk4pOWn7pI1W
-   9KXOz+NFCniOTSCC/70hMmjweCM4P+vmG5xLnleG9Uzu+Cj8aBqjfH9se
-   5o//khyv7pUINAruuwylH5eDR4CIYl7jz5uclpOCBoJpqopEEaoEavasx
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10565"; a="321214564"
-X-IronPort-AV: E=Sophos;i="5.96,255,1665471600"; 
-   d="scan'208";a="321214564"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Dec 2022 02:36:10 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10565"; a="774884353"
-X-IronPort-AV: E=Sophos;i="5.96,255,1665471600"; 
-   d="scan'208";a="774884353"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.60.197])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 Dec 2022 02:36:07 -0800
-Message-ID: <852db20c-7913-bb6a-8019-b02d07241960@intel.com>
-Date:   Mon, 19 Dec 2022 12:36:06 +0200
+        with ESMTP id S231764AbiLSOYj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 09:24:39 -0500
+Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E90AFAE1;
+        Mon, 19 Dec 2022 06:24:38 -0800 (PST)
+Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
+        by mx0a-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 2BJ9Q1Bv010480;
+        Mon, 19 Dec 2022 06:24:27 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
+ subject : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=pfpt0220; bh=FgZDFKQIU8xvFnnPRKl/2sY9qKhqo8ZWrrqqowliSyo=;
+ b=TIIkmtpBNt/P57VBRJtsBYUmHazVr4fAF2tVH2TILsFUQ/Jm+HJJPpQ56rVZoXH6DWXD
+ KXNrALzQMt3IMuN9gqsTYtU6R6yvSXI7JqPIJ16Ms7gxAMZfRC+g1sQuDK2fqSVgOruy
+ QLPILuaHykJEoOgY1vaCTD0Kgl5mH2MLqYUvWSZWJdbuAK/IiF1ptknrUyQG39Rf8+SN
+ 1aPnsm1Jt2wdrY69ov7D2wOH1SD7uUds2EIsQZkQzAwuh0N2Uk2rlBoSymCovR3rsZeW
+ ZoZ3IIY9AsNSsLFKhMnmT3x0FwoS/duByYQEUbpGxVcPO4fLGOur3i84X0h3CELqCMIk iw== 
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+        by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3mjnans1rv-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Mon, 19 Dec 2022 06:24:27 -0800
+Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Mon, 19 Dec
+ 2022 06:24:25 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
+ Transport; Mon, 19 Dec 2022 06:24:25 -0800
+Received: from localhost.localdomain (unknown [10.110.150.250])
+        by maili.marvell.com (Postfix) with ESMTP id AC2EB3F7054;
+        Mon, 19 Dec 2022 06:24:25 -0800 (PST)
+From:   Piyush Malgujar <pmalgujar@marvell.com>
+To:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>
+CC:     <jannadurai@marvell.com>, <cchavva@marvell.com>,
+        Piyush Malgujar <pmalgujar@marvell.com>
+Subject: [PATCH 0/5] drivers: mmc: sdhci-cadence: SD6 controller support
+Date:   Mon, 19 Dec 2022 06:24:13 -0800
+Message-ID: <20221219142418.27949-1-pmalgujar@marvell.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.6.0
-Subject: Re: [PATCH] mmc: sdhci-sprd: disable polling scan for sdio card
-Content-Language: en-US
-To:     Wenchao Chen <wenchao.chen@unisoc.com>, ulf.hansson@linaro.org,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        zhenxiong.lai@unisoc.com, yuelin.tang@unisoc.com,
-        wenchao.chen666@gmail.com
-References: <20221219084754.11070-1-wenchao.chen@unisoc.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221219084754.11070-1-wenchao.chen@unisoc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Proofpoint-GUID: SfmXkpVmD6zDf0bfWN4Vu2MQ0-1Zkmgl
+X-Proofpoint-ORIG-GUID: SfmXkpVmD6zDf0bfWN4Vu2MQ0-1Zkmgl
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.923,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2022-12-19_01,2022-12-15_02,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/12/22 10:47, Wenchao Chen wrote:
-> Enable polling will increase the power consumption of the host.
-> 
-> Fixes: fb8bd90f83c4 ("mmc: sdhci-sprd: Add Spreadtrum's initial host controller")
-> Signed-off-by: Wenchao Chen <wenchao.chen@unisoc.com>
-> ---
->  drivers/mmc/host/sdhci-sprd.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
-> index 525f979e2a97..113a5c77578f 100644
-> --- a/drivers/mmc/host/sdhci-sprd.c
-> +++ b/drivers/mmc/host/sdhci-sprd.c
-> @@ -696,6 +696,10 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto err_cleanup_host;
->  
-> +	if ((host->mmc->caps2 & MMC_CAP2_NO_SD) &&
-> +			(host->mmc->caps2 & MMC_CAP2_NO_MMC))
-> +		host->mmc->caps &= ~MMC_CAP_NEEDS_POLL;
+This patch series includes the following changes:
 
-How is MMC_CAP_NEEDS_POLL getting set? SDHCI won't set it for
-non-removable cards.  Is it removable?
+- Added support for SD6 controller
+- Support for MMC_SDHCI_IO_ACCESSORS
+- Related changes done in dt bindings
+- Introduce config option for sdhci timeout
+- Support for debug option
 
-> +
->  	pm_runtime_mark_last_busy(&pdev->dev);
->  	pm_runtime_put_autosuspend(&pdev->dev);
->  
+Dhananjay Kangude (1):
+  drivers: mmc: sdhci-cadence: SD6 controller support
+
+Jayanthi Annadurai (4):
+  drivers: mmc: sdhci-cadence: enable MMC_SDHCI_IO_ACCESSORS
+  dt-bindings: mmc: sdhci-cadence: SD6 support
+  drivers: mmc: sdhci: Add option to configure sdhci timeout
+  drivers: mmc: sdhci-cadence: Add debug option for sdhci-cadence
+    driver.
+
+ .../devicetree/bindings/mmc/cdns,sdhci.yaml   |   33 +-
+ drivers/mmc/host/Kconfig                      |   20 +
+ drivers/mmc/host/sdhci-cadence.c              | 1665 ++++++++++++++++-
+ drivers/mmc/host/sdhci.c                      |    3 +-
+ 4 files changed, 1619 insertions(+), 102 deletions(-)
+
+-- 
+2.17.1
 
