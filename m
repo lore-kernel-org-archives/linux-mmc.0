@@ -2,211 +2,182 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A26C1C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 14:26:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C012DC10F1B
+	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 15:40:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231586AbiLSO0O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Dec 2022 09:26:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32972 "EHLO
+        id S230403AbiLSPkk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Dec 2022 10:40:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232123AbiLSO0C (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 09:26:02 -0500
-Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97041C3B;
-        Mon, 19 Dec 2022 06:25:44 -0800 (PST)
-Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
-        by mx0a-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 2BJAR3YQ006554;
-        Mon, 19 Dec 2022 06:25:40 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=pfpt0220;
- bh=KuP8NpPDBWhX77mKMbWAKTy7A4aer4UO3cZcZzz+FLU=;
- b=SN0lfiHEUZ1M7mOG7IDIY1lkZT1uGsi+3RoV8IarSeAh4exaWOTdq6LpnExjAx1s1zDz
- vqwXKSNjGcBmT6wpMM5b04kKAdH9ER+Y2AC3F+1evCqbmd5D0iY55HZxJYS96yDz2tpE
- DVLSfHqT4BO2XVw1b8ow7RTRYZpj7IjlJ/3h+eKPkBD8NK8nj3cRsnO0zwgxh7qehu9P
- 8r8W5n8lmYqXQ7w/1xZX3BFOu5jK1x1Ng6p/QicduqoJRiUMLioR9StQG3gv5TatbkVw
- WA031U6DfBrbRb+Rni0ipeh0DmPbWeC4Om31FJs9W64F/V6yrbwCQoh9ScsXYZ+OMbYL Fw== 
-Received: from dc5-exch02.marvell.com ([199.233.59.182])
-        by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3mjnans1vs-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Mon, 19 Dec 2022 06:25:40 -0800
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Mon, 19 Dec
- 2022 06:25:38 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
- Transport; Mon, 19 Dec 2022 06:25:38 -0800
-Received: from localhost.localdomain (unknown [10.110.150.250])
-        by maili.marvell.com (Postfix) with ESMTP id 7EAAA3F7087;
-        Mon, 19 Dec 2022 06:25:38 -0800 (PST)
-From:   Piyush Malgujar <pmalgujar@marvell.com>
-To:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
-        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>
-CC:     <jannadurai@marvell.com>, <cchavva@marvell.com>,
-        Piyush Malgujar <pmalgujar@marvell.com>
-Subject: [PATCH 5/5] drivers: mmc: sdhci-cadence: Add debug option for sdhci-cadence driver.
-Date:   Mon, 19 Dec 2022 06:24:18 -0800
-Message-ID: <20221219142418.27949-6-pmalgujar@marvell.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20221219142418.27949-1-pmalgujar@marvell.com>
-References: <20221219142418.27949-1-pmalgujar@marvell.com>
+        with ESMTP id S231474AbiLSPkj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 10:40:39 -0500
+Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90F4411476
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2022 07:40:38 -0800 (PST)
+Received: by mail-lf1-x131.google.com with SMTP id p36so14183834lfa.12
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2022 07:40:38 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=dr8GvJaUU0STZax+c0mj5MPZF8of0PjiTPxlj3vYQSU=;
+        b=yAISmKjU+Ld+moI+LTCelr86cpzWi6b5hOAlcNuilkw320KewZAL6lKvOC0cGRSTqf
+         ZisFJ7JkPT3RwpoasAvB870jeN9uL4j6UTZbEvL5dyisTzSlWZ/LOZDKjgQRjWEQG/nc
+         Mz30NVYZuRdn9dJctLj5P8UsHSdeCLlUiMfPei8UVBvjYOQUwDmsBCZy6yuU7S2SRf7N
+         bvpuxfFDlhn9qtPCU4RTszw/2GWSdAaW58EiotDIyfGqPeIABujmxPQpT1+Kfn+JnXhv
+         eOefo3tLU/i7BZqPL7KnLYxpdKRUqRVUx2m7moEKDr0661IgwOZO0zch8cyAFpuT80e4
+         HGmw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=dr8GvJaUU0STZax+c0mj5MPZF8of0PjiTPxlj3vYQSU=;
+        b=kUhQAglLENIBM048FAL7f1N0IqW7RX66BgXDRl6LmfS4ZjIHKNl4XaDCxS2b0qmXBi
+         7IAZx4TEQv2AcJQ3cDR/RhwgaCRVtUZ7DFjal5+Yt65zq3RaIgH2eIvUIhBiCwJQy1W5
+         4/CqCYgoRCYouCwuJuxzlkYHt+gCxMMz0Gaouts3NzuZQ3RWERHskqLyZH7g/MOki5p9
+         3ikarAcomLD1JWclQyQzt1r1+qCgAapgOwL19jMEQpAsq8Eu1s9sAQ+d3ew67ct9Vhqn
+         nzn60LSedNrhYiOde/NHNHc/NmCmi+CCZ+gX5NmzYU3sojTdGbudYwzB0DspPW5GHY3u
+         ctiw==
+X-Gm-Message-State: ANoB5pmJZ7sar8yFtwTupd18Qzm7Q/n7MMMirWSQ5+NYdtlFBJ+KLV47
+        NfFLIxkJZhKJud6dNj+nCrf6ig==
+X-Google-Smtp-Source: AA0mqf7j7A82NmhWgQhPoWndLVceW4a+6WTS99f8B2Pbp14hoUEvShZP6IARYSv+akQCeEH9QvKytA==
+X-Received: by 2002:a05:6512:4029:b0:4b5:5da1:44c1 with SMTP id br41-20020a056512402900b004b55da144c1mr13683726lfb.11.1671464436943;
+        Mon, 19 Dec 2022 07:40:36 -0800 (PST)
+Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
+        by smtp.gmail.com with ESMTPSA id q15-20020ac25a0f000000b004b53eb60e3dsm1126339lfn.109.2022.12.19.07.40.35
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 19 Dec 2022 07:40:36 -0800 (PST)
+Message-ID: <5fc29d3c-e3da-3dc4-bce5-2158b81daa43@linaro.org>
+Date:   Mon, 19 Dec 2022 16:40:35 +0100
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Proofpoint-GUID: Bv0OsHvksL4ZF-SD5XvkkIIi0a8xDo6j
-X-Proofpoint-ORIG-GUID: Bv0OsHvksL4ZF-SD5XvkkIIi0a8xDo6j
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.205,Aquarius:18.0.923,Hydra:6.0.545,FMLib:17.11.122.1
- definitions=2022-12-19_01,2022-12-15_02,2022-06-22_01
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+Subject: Re: [PATCH 3/5] dt-bindings: mmc: sdhci-cadence: SD6 support
+Content-Language: en-US
+To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, adrian.hunter@intel.com,
+        ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, yamada.masahiro@socionext.com,
+        devicetree@vger.kernel.org
+Cc:     jannadurai@marvell.com, cchavva@marvell.com
+References: <20221219142418.27949-1-pmalgujar@marvell.com>
+ <20221219142418.27949-4-pmalgujar@marvell.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20221219142418.27949-4-pmalgujar@marvell.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Jayanthi Annadurai <jannadurai@marvell.com>
+On 19/12/2022 15:24, Piyush Malgujar wrote:
+> From: Jayanthi Annadurai <jannadurai@marvell.com>
+> 
 
-Use Kernel config CONFIG_MMC_DEBUG to support dumping PHY and host
-controller register configuration for debug.
+Subject: use final prefix matching the file, so "cdns,sdhci:"
 
-Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
----
- drivers/mmc/host/sdhci-cadence.c | 100 +++++++++++++++++++++++++++++++
- 1 file changed, 100 insertions(+)
+> Add support for SD6 controller support
 
-diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-index 6bf703f15bc5be7e3be4cb1144b78ec3585ec540..75363aabce9228755c4abed08fe17e57d1a44b23 100644
---- a/drivers/mmc/host/sdhci-cadence.c
-+++ b/drivers/mmc/host/sdhci-cadence.c
-@@ -15,6 +15,10 @@
- 
- #include "sdhci-pltfm.h"
- 
-+#ifdef CONFIG_MMC_DEBUG
-+#define DEBUG_DRV	pr_info
-+#endif
-+
- #define SDMCLK_MAX_FREQ		200000000
- 
- #define DEFAULT_CMD_DELAY		16
-@@ -115,6 +119,10 @@
- #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_CLK_WR_DELAY		GENMASK(15, 8)
- #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_READ_DQS_DELAY		GENMASK(7, 0)
- 
-+#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0				0x201C
-+#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1				0x2020
-+#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2				0x2024
-+
- #define SDHCI_CDNS_SD6_PHY_CTRL					0x2080
- #define	SDHCI_CDNS_SD6_PHY_CTRL_PHONY_DQS_TIMING		GENMASK(9, 4)
- 
-@@ -969,6 +977,94 @@ static void sdhci_cdns_sd6_calc_phy(struct sdhci_cdns_sd6_phy *phy)
- 	}
- }
- 
-+#ifdef CONFIG_MMC_DEBUG
-+static void sdhci_cdns_sd6_phy_dump(struct sdhci_cdns_sd6_phy *phy)
-+{
-+	DEBUG_DRV("PHY Timings\n");
-+	DEBUG_DRV("mode %d t_sdclk %d\n", phy->mode, phy->t_sdclk);
-+
-+	DEBUG_DRV("cp_clk_wr_delay %d\n", phy->settings.cp_clk_wr_delay);
-+	DEBUG_DRV("cp_clk_wrdqs_delay %d\n", phy->settings.cp_clk_wrdqs_delay);
-+	DEBUG_DRV("cp_data_select_oe_end %d\n", phy->settings.cp_data_select_oe_end);
-+	DEBUG_DRV("cp_dll_bypass_mode %d\n", phy->settings.cp_dll_bypass_mode);
-+	DEBUG_DRV("cp_dll_locked_mode %d\n", phy->settings.cp_dll_locked_mode);
-+	DEBUG_DRV("cp_dll_start_point %d\n", phy->settings.cp_dll_start_point);
-+	DEBUG_DRV("cp_io_mask_always_on %d\n", phy->settings.cp_io_mask_always_on);
-+	DEBUG_DRV("cp_io_mask_end %d\n", phy->settings.cp_io_mask_end);
-+	DEBUG_DRV("cp_io_mask_start %d\n", phy->settings.cp_io_mask_start);
-+	DEBUG_DRV("cp_rd_del_sel %d\n", phy->settings.cp_rd_del_sel);
-+	DEBUG_DRV("cp_read_dqs_cmd_delay %d\n", phy->settings.cp_read_dqs_cmd_delay);
-+	DEBUG_DRV("cp_read_dqs_delay %d\n", phy->settings.cp_read_dqs_delay);
-+	DEBUG_DRV("cp_sw_half_cycle_shift %d\n", phy->settings.cp_sw_half_cycle_shift);
-+	DEBUG_DRV("cp_sync_method %d\n", phy->settings.cp_sync_method);
-+	DEBUG_DRV("cp_use_ext_lpbk_dqs %d\n", phy->settings.cp_use_ext_lpbk_dqs);
-+	DEBUG_DRV("cp_use_lpbk_dqs %d\n", phy->settings.cp_use_lpbk_dqs);
-+	DEBUG_DRV("cp_use_phony_dqs %d\n", phy->settings.cp_use_phony_dqs);
-+	DEBUG_DRV("cp_use_phony_dqs_cmd %d\n", phy->settings.cp_use_phony_dqs_cmd);
-+	DEBUG_DRV("sdhc_extended_rd_mode %d\n", phy->settings.sdhc_extended_rd_mode);
-+	DEBUG_DRV("sdhc_extended_wr_mode %d\n", phy->settings.sdhc_extended_wr_mode);
-+
-+	DEBUG_DRV("sdhc_hcsdclkadj %d\n", phy->settings.sdhc_hcsdclkadj);
-+	DEBUG_DRV("sdhc_idelay_val %d\n", phy->settings.sdhc_idelay_val);
-+	DEBUG_DRV("sdhc_rdcmd_en %d\n", phy->settings.sdhc_rdcmd_en);
-+	DEBUG_DRV("sdhc_rddata_en %d\n", phy->settings.sdhc_rddata_en);
-+	DEBUG_DRV("sdhc_rw_compensate %d\n", phy->settings.sdhc_rw_compensate);
-+	DEBUG_DRV("sdhc_sdcfsh %d\n", phy->settings.sdhc_sdcfsh);
-+	DEBUG_DRV("sdhc_sdcfsl %d\n", phy->settings.sdhc_sdcfsl);
-+	DEBUG_DRV("sdhc_wrcmd0_dly %d %d\n",
-+		  phy->settings.sdhc_wrcmd0_dly, phy->settings.sdhc_wrcmd0_sdclk_dly);
-+	DEBUG_DRV("sdhc_wrcmd1_dly %d %d\n",
-+		  phy->settings.sdhc_wrcmd1_dly, phy->settings.sdhc_wrcmd1_sdclk_dly);
-+	DEBUG_DRV("sdhc_wrdata0_dly %d %d\n",
-+		  phy->settings.sdhc_wrdata0_dly, phy->settings.sdhc_wrdata0_sdclk_dly);
-+
-+	DEBUG_DRV("sdhc_wrdata1_dly %d %d\n",
-+		  phy->settings.sdhc_wrdata1_dly, phy->settings.sdhc_wrdata1_sdclk_dly);
-+	DEBUG_DRV("hs200_tune_val %d\n", phy->settings.hs200_tune_val);
-+}
-+
-+void sdhci_cdns_sd6_dump(struct sdhci_cdns_priv *priv)
-+{
-+	struct sdhci_cdns_sd6_phy *phy = priv->phy;
-+	int id;
-+
-+	sdhci_cdns_sd6_phy_dump(phy);
-+
-+	DEBUG_DRV("Host controller Register Dump\n");
-+	for (id = 0; id < 14; id++)
-+		DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-+
-+	id = 29;
-+	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-+	id = 30;
-+	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-+
-+	for (id = 0; id < 27; id++)
-+		DEBUG_DRV("SRS%d 0x%x\n", id, readl(priv->hrs_addr + 0x200 + (id * 4)));
-+
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQS_TIMING 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQS_TIMING));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GATE_LPBK 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GATE_LPBK));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_MASTER 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_MASTER));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_SLAVE 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_SLAVE));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_CTRL 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_CTRL));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GPIO_CTRL0 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GPIO_CTRL0));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQ_TIMING 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQ_TIMING));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1));
-+	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2 0x%x\n",
-+		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2));
-+}
-+#endif
-+
- static int sdhci_cdns_sd6_get_delay_params(struct device *dev, struct sdhci_cdns_priv *priv)
- {
- 	struct sdhci_cdns_sd6_phy *phy = priv->phy;
-@@ -1373,6 +1469,10 @@ static void sdhci_cdns_sd6_set_clock(struct sdhci_host *host,
- 		pr_debug("%s: phy init failed\n", __func__);
- 
- 	sdhci_set_clock(host, clock);
-+
-+#ifdef CONFIG_MMC_DEBUG
-+	sdhci_cdns_sd6_dump(priv);
-+#endif
- }
- 
- static int sdhci_cdns_sd4_phy_probe(struct platform_device *pdev,
--- 
-2.17.1
+Full stop.
+
+> 
+> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+> ---
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 33 +++++++++++++++++--
+>  1 file changed, 31 insertions(+), 2 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index 8b1a0fdcb5e3e2e8b87d8d7678e37f3dad447fc1..2043e78ccd5f708a01e87fd96ec410418fcd539f 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -4,7 +4,7 @@
+>  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
+>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+>  
+> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
+> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
+>  
+>  maintainers:
+>    - Masahiro Yamada <yamada.masahiro@socionext.com>
+> @@ -19,6 +19,7 @@ properties:
+>            - microchip,mpfs-sd4hc
+>            - socionext,uniphier-sd4hc
+>        - const: cdns,sd4hc
+> +      - const: cdns,sd6hc
+
+Does not look like you tested the DTS against bindings. Please run `make
+dtbs_check` (see Documentation/devicetree/bindings/writing-schema.rst
+for instructions).
+
+... because it does not really make sense. Why do you require SD6HC as
+fallback? I think you meant enum.
+
+>  
+>    reg:
+>      maxItems: 1
+> @@ -111,6 +112,34 @@ properties:
+>      minimum: 0
+>      maximum: 0x7f
+>  
+> +  cdns,iocell_input_delay:
+
+No underscores. Use proper units in name suffix:
+https://github.com/devicetree-org/dt-schema/blob/main/dtschema/schemas/property-units.yaml
+
+
+> +    description: Delay in ps across the input IO cells
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+
+Ditto... and so on - all of the fields.
+
+> +
+> +  cdns,iocell_output_delay:
+> +    description: Delay in ps across the output IO cells
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> +
+> +  cdns,delay_element:
+> +    description: Delay element in ps used for calculating phy timings
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> +
+> +  cdns,read_dqs_cmd_delay:
+> +    description: Command delay used in HS200 tuning
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> +
+> +  cdns,tune_val_start:
+> +    description: Staring value of data delay used in HS200 tuning
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> +
+> +  cdns,tune_val_step:
+> +    description: Incremental value of data delay used in HS200 tuning
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> +
+> +  cdns,max_tune_iter:
+> +    description: Maximum number of iterations to complete the HS200 tuning process
+> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+
+Why these three are properties of DT?
+
+> +
+>  required:
+>    - compatible
+>    - reg
+> @@ -122,7 +151,7 @@ unevaluatedProperties: false
+>  examples:
+>    - |
+>      emmc: mmc@5a000000 {
+> -        compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc";
+> +        compatible = "socionext,uniphier-sd4hc", "cdns,sd4hc", "cdns,sd6hc";
+
+This is confusing. I don't understand it. It requires much more
+explanation in your commit msg.
+
+>          reg = <0x5a000000 0x400>;
+>          interrupts = <0 78 4>;
+>          clocks = <&clk 4>;
+
+Best regards,
+Krzysztof
 
