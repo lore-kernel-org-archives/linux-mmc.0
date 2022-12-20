@@ -2,66 +2,106 @@ Return-Path: <linux-mmc-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D82F7C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 19 Dec 2022 23:41:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F02E2C4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 20 Dec 2022 01:53:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232776AbiLSXlL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 19 Dec 2022 18:41:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44304 "EHLO
+        id S229540AbiLTBxC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 19 Dec 2022 20:53:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50978 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232438AbiLSXlL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 18:41:11 -0500
-Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 6942AFCC0
-        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2022 15:41:05 -0800 (PST)
-Received: from [10.0.0.226] (S010600cb7a0d6c8b.vs.shawcable.net [96.55.249.129])
-        by linux.microsoft.com (Postfix) with ESMTPSA id 0479D20C3320;
-        Mon, 19 Dec 2022 15:41:04 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 0479D20C3320
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-        s=default; t=1671493265;
-        bh=bwqIzA8bX6ktnXRP4cX3zo/A4f11NapbtjSSik9kTKE=;
-        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-        b=LQ9xUbIZx3iBJvMua4sSwl6XRojXluWKMZyAySVQ1kPh5YH7UccMYMywR/RCX+UD0
-         RYPKkaCb0X3Y3o1SPBLE/PoY+ep8lEqTdcqU0vbIGUQW5Z8d3NPuVAf/yuSXhN1GXF
-         FtTMqIbLL01HgMI2CrIO/BRdmsyo5E8tnAqW91z8=
-Message-ID: <14de0095-db93-cf5b-e843-1554a392b177@linux.microsoft.com>
-Date:   Mon, 19 Dec 2022 15:41:04 -0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101
- Thunderbird/91.13.1
-Subject: Re: [PATCH] mmc: core: host: fix mmc retuning
-Content-Language: en-US
-From:   Shyam Saini <shyamsaini@linux.microsoft.com>
+        with ESMTP id S229515AbiLTBxC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 19 Dec 2022 20:53:02 -0500
+Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 84C192DFA
+        for <linux-mmc@vger.kernel.org>; Mon, 19 Dec 2022 17:53:00 -0800 (PST)
+Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 8B63B84F87;
+        Tue, 20 Dec 2022 02:52:57 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1671501177;
+        bh=2dpcU4HV0vebiYmInIi1aOzYmhB8uTABzkdtQYGB6qM=;
+        h=From:To:Cc:Subject:Date:From;
+        b=XxYVWB8T70QVLD8hJ1IyuZSDf/HLYcaeVuFL7d6RPfisWRzqFwYemOB3karJwgLLp
+         UPrerrjIyP/z3tMunkwQ2x5NgVYCV26U0ki19+nj2RZzHrU17uTiuhSyxmu2baQNso
+         zR/J2TwRl6luNETxuSqQansUQsDQY5pCvtc2wYCRJsiZCvMJhv5//QKx3fTqGtAzdF
+         YxQqonG3Nu4qmg0bkKkz/NGNTIFSXqS9CCjMwwsxAhkgsEJcg1jeg7v0WftJV18vsd
+         RKJSqmJ5IQonDuOOsa+74WW+vOsbLoRBjrxPnVjq3xwaKutRUkkY1wOCAZrAMsf99q
+         ZSzGuYY4PmyGQ==
+From:   Marek Vasut <marex@denx.de>
 To:     linux-mmc@vger.kernel.org
-Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com, code@tyhicks.com
-References: <20221219225319.24637-1-shyamsaini@linux.microsoft.com>
-In-Reply-To: <20221219225319.24637-1-shyamsaini@linux.microsoft.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Cc:     Marek Vasut <marex@denx.de>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Zach Brown <zach.brown@ni.com>
+Subject: [PATCH] [RFC] mmc: sdhci: Always apply sdhci-caps-mask and sdhci-caps to caps
+Date:   Tue, 20 Dec 2022 02:52:54 +0100
+Message-Id: <20221220015254.796568-1-marex@denx.de>
+X-Mailer: git-send-email 2.35.1
+MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi All,
+The original implementation in the commit referenced below only modifies
+caps in case no caps are passed to sdhci_read_caps() via parameter, this
+does not seem correct. Always modify the caps according to the properties
+from DT.
 
-Cc'ing Tyler
+92e0c44b92e4 ("mmc: sdhci: Use sdhci-caps-mask and sdhci-caps to change the caps read during __sdhci_read_caps")
+Signed-off-by: Marek Vasut <marex@denx.de>
+---
+Cc: Adrian Hunter <adrian.hunter@intel.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: Zach Brown <zach.brown@ni.com>
+To: linux-mmc@vger.kernel.org
+---
+Note: I am sending it as an RFC, because it seems I might be missing
+      something obvious.
+---
+ drivers/mmc/host/sdhci.c | 20 ++++++--------------
+ 1 file changed, 6 insertions(+), 14 deletions(-)
 
-Please note that I am not 100 % sure about the fix.
-This issue is reproducible without this patch and the patch at least fix 
-the issue without
-any regressions on our side.
-
-We observed that hold_retune is always greater or equal to 1 in 
-mmc_retune() function,
-
-so it may always avoid  re-tuning when it is actually needed and there may
-
-be a better fix for the issue.
-
-Please let me know your any feedback or comments.
-
-Best Regards,
-Shyam
-
+diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+index f3af1bd0f7b95..52719d3118ffd 100644
+--- a/drivers/mmc/host/sdhci.c
++++ b/drivers/mmc/host/sdhci.c
+@@ -4124,24 +4124,16 @@ void __sdhci_read_caps(struct sdhci_host *host, const u16 *ver,
+ 	if (host->quirks & SDHCI_QUIRK_MISSING_CAPS)
+ 		return;
+ 
+-	if (caps) {
+-		host->caps = *caps;
+-	} else {
+-		host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+-		host->caps &= ~lower_32_bits(dt_caps_mask);
+-		host->caps |= lower_32_bits(dt_caps);
+-	}
++	host->caps = caps ? *caps : sdhci_readl(host, SDHCI_CAPABILITIES);
++	host->caps &= ~lower_32_bits(dt_caps_mask);
++	host->caps |= lower_32_bits(dt_caps);
+ 
+ 	if (host->version < SDHCI_SPEC_300)
+ 		return;
+ 
+-	if (caps1) {
+-		host->caps1 = *caps1;
+-	} else {
+-		host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+-		host->caps1 &= ~upper_32_bits(dt_caps_mask);
+-		host->caps1 |= upper_32_bits(dt_caps);
+-	}
++	host->caps1 = caps1 ? *caps1 : sdhci_readl(host, SDHCI_CAPABILITIES_1);
++	host->caps1 &= ~upper_32_bits(dt_caps_mask);
++	host->caps1 |= upper_32_bits(dt_caps);
+ }
+ EXPORT_SYMBOL_GPL(__sdhci_read_caps);
+ 
+-- 
+2.35.1
 
