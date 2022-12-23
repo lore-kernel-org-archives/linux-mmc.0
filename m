@@ -2,50 +2,50 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF3FFC10F1D
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Dec 2022 02:50:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AADEC4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Dec 2022 02:50:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235758AbiLWCuG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Dec 2022 21:50:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47042 "EHLO
+        id S235788AbiLWCuN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Dec 2022 21:50:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235659AbiLWCuF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2022 21:50:05 -0500
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2064.outbound.protection.outlook.com [40.107.21.64])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 586911F9D6
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Dec 2022 18:50:04 -0800 (PST)
+        with ESMTP id S229587AbiLWCuL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2022 21:50:11 -0500
+Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2049.outbound.protection.outlook.com [40.107.21.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EC3F21813
+        for <linux-mmc@vger.kernel.org>; Thu, 22 Dec 2022 18:50:09 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=ZjRcpI4fmTBlvs8G/UBnj0suGDcE/HyowHcfTkuDcFPONyxCvBkeGU/xYBeawiZ3QOOo5G+lVYzlyCs66mvl3CfcP0EE3Hq9rZdkn29YrtCHsJCu60CvFKOwLE1Lovsibp7NihCWTTElTzYHWt99p1Hn2XB4PMKfZgAtjCBBu4GmK13qJFk7cqQgYn71bQw7XVOW5f5DHPnyiJDcF/sbwgiPMr1Th3o1YTeObuWaoW2+yQ20Vyy9Oa2JqqLac6bvCQQqe/kyLfWjlRgTpqPIFBb/Zymtb9a6W1fLmN1xENZHcDfc93u3A1A7V4nGiiT1hiannqSex1js7RV2m5SISg==
+ b=eYuIOSz6bsJc8vtfU1tfo687zv5C+K92gsR1gS8aDaijycy8xDBT511fGZAk1F77c4YTILfOaoMhnfC8WkQs4kQ2M3Mf9+eoGTksqAUjnIRXTR2avQ8kJjKBJIoUOubCae4/on67ugNcInvoTiHozlXEzs+Knrut+TekNTDHAEbNIhydHhAJRTKZuk7QTuMU+g4xn99FhJBTpICTSNhlZRRxz41Is4o1OGTqnDFlpJYRo/jmnXG948ZAIOCoLqevOjS4tYJV86OJkADYh5esoAEqgyr2V2dvtPoJEjtPDH/9GCwOjIqMhgZX7q07qZVZQO3BlzpzEj1hPrP6eQSIlQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=f8uRlppJfmpn0m29G7TvPlOTMdCnlTuaGNK/V/1nB7M=;
- b=UMEv1WvHk5HfGnzeSd3fEI0XB3KkSMF0Z+5kism0IlSSNdqOdJRmrfmeUct5aCFyZblGjdEIggzwN47ingQ8JV7NCzXmgX3rXT7YjrVGEwQaZGsZaf8URluZJLpDVJ4fSypzW0FHMWWDgz1hU+WkpI4tYBknj8f+iLHEULkBZAJF5Tm2hWx8Dpy7tRXIKd25EpAZTKeatUaGor7tXkCa7adGGSlz2UaDdaAyLN8UBlzrE26q1e4y4B924aaEwnY2jQNC7CQ1llKLPXTWRF2nHaC7H7pR+cWsac1Y0V0yWw5zmTyG2IZDLRadoTJfiA/mwj0+x4WerRrvvSa3osTFXA==
+ bh=cXJ44308MSRMXTQecsCzb4lg2b+aWpTM25csrYlHGPw=;
+ b=dgumAvXA05d2IE87H+Fv9HvmeUCZPOX0xHKeVExegyl5xDpGN0gbF+dau41OX6w6xpmpcPYwGgAAJ0zF7h8DSsTge421k4yt7PbMYdoCgzGak9YtG+D8i1RjrpZoOXj+Q0Dh8HxYxWfNaprB470+YkJkwqdJEJQiSFXsaYfk7161hTftsLRuW9v+0AaDv8HO74ZW5k2U9HF8jjB/xfIjF4768IZ1Try5rVsMXPj5C08x+MrVQQgCL4W+eFyouuU5oZRHzfI15wINsApO0SPr9+hAsITQJiB5cX0STCBlhluxzZQi3CJ688faXcs/Kr2pYBIcszw/hy8miPwKJNnnng==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
  smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
  header.d=nxp.com; arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=f8uRlppJfmpn0m29G7TvPlOTMdCnlTuaGNK/V/1nB7M=;
- b=Cczj8qVe1oEswhC4IwnkYFC8ZNVjWvbV+au2cWVJMUYhKCrgXEuMeYYACSIhs209wB7ProhFbFn1jSTMcpf3moX+G+VOA6VnKUqt/lobpQdXLxd4HkOxUhh0G98GZJYJcW+wkadO7T3wQREGR1d/fcOk70nZNG5S5zuyFNXiw9Y=
+ bh=cXJ44308MSRMXTQecsCzb4lg2b+aWpTM25csrYlHGPw=;
+ b=SE2+/eXURqeWQOiDT918rs5VDPGJW2a9DSetfB/ej0jm9nXRHV3wPRcZJxlpPhnbSYJNRJoDLmtbJO1vpuq3jT1sfLrss8Qfn/3zkpiUBcZ4iItHru8SEGTgmbtqLN2pKbPe3Yy1ttSfrgoFLHNlQjIvtwE8g/Aeof2xkB8GpbI=
 Authentication-Results: dkim=none (message not signed)
  header.d=none;dmarc=none action=none header.from=nxp.com;
 Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
  PA4PR04MB7709.eurprd04.prod.outlook.com (2603:10a6:102:e3::11) with Microsoft
  SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5944.13; Fri, 23 Dec 2022 02:50:03 +0000
+ 15.20.5944.13; Fri, 23 Dec 2022 02:50:06 +0000
 Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
  ([fe80::7479:76ef:8e5:da0b]) by DB7PR04MB4010.eurprd04.prod.outlook.com
  ([fe80::7479:76ef:8e5:da0b%6]) with mapi id 15.20.5924.016; Fri, 23 Dec 2022
- 02:50:03 +0000
+ 02:50:06 +0000
 From:   haibo.chen@nxp.com
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
 Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
         festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         kgroeneveld@lenbrook.com, haibo.chen@nxp.com
-Subject: [PATCH v3 1/2] mmc: sdhci-esdhc-imx: simplify the auto tuning logic
-Date:   Fri, 23 Dec 2022 10:50:21 +0800
-Message-Id: <20221223025022.1893102-2-haibo.chen@nxp.com>
+Subject: [PATCH v3 2/2] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD line auto tuning for SDIO device
+Date:   Fri, 23 Dec 2022 10:50:22 +0800
+Message-Id: <20221223025022.1893102-3-haibo.chen@nxp.com>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20221223025022.1893102-1-haibo.chen@nxp.com>
 References: <20221223025022.1893102-1-haibo.chen@nxp.com>
@@ -57,50 +57,50 @@ X-ClientProxiedBy: SI2PR02CA0008.apcprd02.prod.outlook.com
 MIME-Version: 1.0
 X-MS-PublicTrafficType: Email
 X-MS-TrafficTypeDiagnostic: DB7PR04MB4010:EE_|PA4PR04MB7709:EE_
-X-MS-Office365-Filtering-Correlation-Id: 074b66c3-44e3-4dde-22d9-08dae49063e8
+X-MS-Office365-Filtering-Correlation-Id: 13e811dd-925b-43a5-76cb-08dae49065ed
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: LxgKP1bZWOGwOh2CJ+QAdu/Xhf/aI4rpj/+8Bi1NFFOifDo3pOhaSjQVqozTb+ksIz38iyprtKrzglhrgyjC1IrOubZ/Xm3kiLZZpFTG1Ssvu/We40zlU3A9Rj4tzu9WiLKJzzyXu3FVQK9PFHFQOeSPi/B4vzY0lQqTIP8dy6y2zfsC0mGg4O+VyuNsAyKy/0kl68Bmxs5++H12/KnB/T0LJRK1M4+FInqX7Fp4He6a5BIODkLUfzkXog7pFAZcEkpfumLfQeK4KXxZkEzA6/fA38F9Cu/9mHexZfFWZRilOs1jXWugGVr4dnXwEEAaBdxdrrPXEM7N6ALb/xyNIgy8dDAdvYKjecLMMa/dEjAT0hBbHDPmFmVNXhWixNb+DfM/WZYbgU13Wh1ChC4LgMwxyUEpnuqmhJBxCmW3fqcxHbzQNGl2xQVBbndc355zPID7vjBF9O6S/zL+7VDjfiHJgx6o1jjtdLDKgoJQ2KVYCrLVjqA39QUzVpk+G491AX8gRfGBvFhwStW4hvXraP9JLgcc5Z9dZCWUJ/6Jsngxct7SSyU14thMpJ4lUCxguvCEZxOsgnYiRCYusDwGhlSJVoWv1/jsSKsFNATyFUHer4pGh49KcUPg16gUikwiXX10KkHyXZwLS/8vNWnoGfX7HgFz6oLEB0GWb02q1snIrcJFXuGTGZhcZbKdDr1UoRoC7OmlILwOzXOeY6pIZQ==
+X-Microsoft-Antispam-Message-Info: H1efqLNBt72WbITRGccRJ/ZxWepk6JBU/wqozciEqoP2xwSjRzfqNU3E9V1a58BE39LZWH1tGMwzCxm3WsXV33w0CjKVRONvysZmBKa4zlV2dlxn2yMNt0oJVdqPpOfVIAZIfsCjL8rg4WuCDAHgs4fN72Lz41+rLm/D6KxFuIT1IYoXe5aLeCRmTgX2OIGLZeNK05y+qsbGrQuAZk2ze1nR67nz7wwVnnsbK1S5kDBFDhXrlv7E1ggZ2PSIpl8pNt/Fpv88wdjc0yFK+5g0zs7JLH24vXmTc2kF/eR4vNJlwaglGMZwTUJZdjiiuoh4/ozTiQuimCNGa1KB+oPKMY4R3d6yQJVOXhpgGA5Yw6VjYpw+UEgDRAxwCMbQ01k4/p6tILKbdys12Ya3iDff+Yt99j7gmTezAGsxXEi2Zx0jPYSeqEGNf7SfNT+ByzbH0IID7A9suZubb0XPEqOS9WBWERn0tZJJPS6yv1r2oYS7aBA/oxLuaIq32xKARt6xdBYpuiNo+tavgJng1OYb8uehBoip1fCFsSlyEnj1uIwlbUjtdqdIWMsc38IKQZ53aRDRAVc+OqfSKvAvmm4mS5eiwbU5BaHH5rDhQG18AZFcugG/w9uMmiznZ5sWMWvshx4S3QSAReaeoQSCGpb1rq9fFRF3huNZO4/91wOOrUwQMQHoSwxJweAzm909cA3wTZYM/6f0jxkbqgF3bsCNLw==
 X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(136003)(346002)(376002)(366004)(39860400002)(451199015)(2906002)(38100700002)(38350700002)(36756003)(86362001)(52116002)(1076003)(6506007)(6666004)(26005)(9686003)(6512007)(186003)(6486002)(2616005)(478600001)(83380400001)(5660300002)(41300700001)(8936002)(4326008)(66946007)(66556008)(66476007)(8676002)(316002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?mkM7Wc7tz82j3jGzAMIm2JRplghBvxtWo/nX7pjpUhkB01+D3oAURZ3dn9ko?=
- =?us-ascii?Q?5sORynKldJzzAyuk+8rJYGb665O9ogGydmN9y9h0hZrqikrEjZzrXjoMD/6J?=
- =?us-ascii?Q?C3sdl2PH8+eTOrbcbLlqBjuvmclh4OdgzR+LDGRYNVogSj0uhzdcE8WADBcr?=
- =?us-ascii?Q?5hQ8IYjMFldcxp96vSBZL34HH14iVFBK0xqw2RD44aRbG6NT4hQX4jkmcYea?=
- =?us-ascii?Q?sZ7kxTAOXJl4ngtnDI0N5zwgObdtFtc8IniA9VbmbMUmUMMlw6MddlxuWPrw?=
- =?us-ascii?Q?uVmQSETUtV3WEncdmyypN7ouwDPAvytjjq/tGT/z7kSqiZNBM1cxX4a04jgN?=
- =?us-ascii?Q?ZCBYR03H95rZQYb73c6gdUyeM60cZFl7zEt8+X2uqRKC+aXd7Gv8x6OBhcmc?=
- =?us-ascii?Q?5wJcONUXicjSdPcui2MwCtCG0l9Eul89G3dhAPEt0KO3s3EijhBvzBl6xcpg?=
- =?us-ascii?Q?ZV9FBcGGlIPtrZDMp/h/JO3tob6+qYp16xe0rVqsze7RUVIdnr8uQbrlbeYh?=
- =?us-ascii?Q?LjFZp8gMIaelcWhstyxHYpWqocndT1kqCUKYtp8ToyFQmB6nyj8EqaPd9cDz?=
- =?us-ascii?Q?TTQP1xr/OIrLoLdI+3DaB0bTTz2zH0oPRZBxMnJNc42PZk/K+hJJ8PFReKxN?=
- =?us-ascii?Q?6Qea47iZ6qHe702u3D+RzFftnCVy1ax9ISSvxeEvCvfSHLTaOWS7UVt/78Tg?=
- =?us-ascii?Q?i6UkgM/gYiiFr/hqW6DFthgMr7HMqdsBzbe7ZlsXArJnGxGlM9EMCdN0y+mn?=
- =?us-ascii?Q?kCxtVhyxtEKKJMZLQW3JuXe3D5WTV2gTKF8qQwsXJLGdnZuusiPwAHjPcsRl?=
- =?us-ascii?Q?vDJcLtNbaAatwY8ueerLaNrjy12iqjBzE8fwT3Y/F/TQXXPlWj9l0pMYbHfO?=
- =?us-ascii?Q?xF27t7L6qPkJw0IpCd8hiJU9F92tVEv5ZGKA47/vtLJe1zns8c5114yNfrtp?=
- =?us-ascii?Q?0/M07JMHWhkaaz6t3Duh53UfPDrX+86QVwuI/OVN4zPOfRrOjXte9Di/eWsL?=
- =?us-ascii?Q?NB9ZxhM0Ys0bYaqEv1VbBwWosUYLZ17J5C8uoL11GJ5RQOpQk1tR2e1oooFC?=
- =?us-ascii?Q?tFYhow3lbnm6D5/GYdNYpXId76+9LTMYUSmpZvjMfrqIyeZudwfg1muEAnsJ?=
- =?us-ascii?Q?FUQ8hQI57Kdks7sxY1ydViT1M0mF+Sba1CmHUrtnYb5FOs5nrCBjRMd7qQIM?=
- =?us-ascii?Q?x3uIdUgnIK6PIGmMLFweiTZj6EoAt3cIh+e/xrMm2bWIz05Vruw4u33nR6+y?=
- =?us-ascii?Q?iM5bGFdaSMEsimlSirxVZfzGHXnEDTkzvD5TALcVDvkG19whqplnszHL2zq9?=
- =?us-ascii?Q?wqlKD85AewPaQfCF+b5IVaCcwZc8IIZB2McCpxU/aTYFjCbZ+cJF4t6RO04Y?=
- =?us-ascii?Q?p9lJ1ujCEZLwA2FKw5/SB5BkjTEzmihw13pLpXUTtBUAURRjKb3ITcjjlM0k?=
- =?us-ascii?Q?bYWPpRabm4nE3JTFQqCs/4j7gtNDqMNm1lejgvugRbPSUidyR1OkPVvgbYRU?=
- =?us-ascii?Q?uzTImuqG2TMjyYy2qxV3Z+PPM2JlKpyuPIVWdykNKgI2VwOLQ1z82UsL3Zvn?=
- =?us-ascii?Q?SBNWiUsCKB6YKvD1wEw2+W9cAqB2R7Q+A2hrh33o?=
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?2IrnAL5Y2ncAnbbBwjizS2Gsb4VOH/E8E+HWKjipPUySw0mbRn9MUowLeoTI?=
+ =?us-ascii?Q?jFtNX1317QBU2ezhAoQu48fvwq7FksUOE7su05ZPl3VZnMGfQrfeuJKJzwUL?=
+ =?us-ascii?Q?j4+SCbqwPP2uCDOvJAraMP+c5OI9923aaIzOFQ2uStVpMe8XqeuQUCy8EjeX?=
+ =?us-ascii?Q?ZP5s8PqHZYG8rZPvjNPFwtSJuvAQKZm2WAjRvdr824BWyUEmewNXnDwN0tQw?=
+ =?us-ascii?Q?FYmjJ65Sj5ycVBBeoQcDPi2JN74qYJgcgjy9ZAQ0QdrZQ4NfZNHebZB+I/ue?=
+ =?us-ascii?Q?jsP90ZFbzZ05ldQs3cNSsz13y8zneBp+FhuaK2xi/iuearQkQn+VDj9Q3J0r?=
+ =?us-ascii?Q?7IYRD+OOKfW8XkL9NIdwKjMdGJEwq0Djldr3EjE10TTx9EU2+fTbRpsVKvjI?=
+ =?us-ascii?Q?8C5ZRegnYMWKJTE8hHFr1zI/ZwrFJ0cqAI1nDkvYqoy2v/6egZDqzcHBVd8P?=
+ =?us-ascii?Q?tGRc3lJeE1VaHWhAbxCnh9wXB7Kfyj7EGHMamDjGycCQSilINNJUJa79c9SI?=
+ =?us-ascii?Q?2jfW/TyZ3HGQUbqoerX9YiIByaUXTQG0t5HqemY3puFgnxcma56a3PDCKOw2?=
+ =?us-ascii?Q?gQOGySbE2IMommaO9rgaQfe30EloIqlLcYRshZAPWotUTte/sdiZ1nzIaJTS?=
+ =?us-ascii?Q?z08Exf/fhbPh92U+YGAY8j75XBM2faJPraNPZPEY1JIgS5HmzVgvjc5I6SG2?=
+ =?us-ascii?Q?gR3wht5cPxODReKgky3I1UaP2ZpOcDb0z2jyzbadsjbPqFMWwN/ZH6V8Romj?=
+ =?us-ascii?Q?wjNXyN7atOVlmdIGhJpt9PHuBglV/vR0p61sUhFbfUWFsPRMgn5lvEe9pVDG?=
+ =?us-ascii?Q?oF/uonLd0iuwOLEZ8mUx5QPrDiZxAp502RrTUtYCvGfGyCaj5cF3EPG+B+3u?=
+ =?us-ascii?Q?ICxwE/PxUXXWwlKktbIRsaI/uF+0WP8niWOsj7pu1bx44D/p84mGFkiH4uMV?=
+ =?us-ascii?Q?Z2D2lAqDvG7X7EmAwl16/+KB+wlaChZqDOA6FjOJjuGzSWV7/6wzKwAEX+K2?=
+ =?us-ascii?Q?JuHdd17vrD1flJbPf4p/k9+EDwIGr2MdO10jxYiSi7ZJrFRb0d5qpmLei7ln?=
+ =?us-ascii?Q?BIgPpbAVnt9fnU4J1oISSj19TCPPk8skFM+kfwm4Fr3JaiiM+KpdFWHj/ogI?=
+ =?us-ascii?Q?z0KejM0CHrawoJ4OU0t3BrMbuum8g7Pnc6pHQkSa6O5ukjdXn0W6KXMv8uXq?=
+ =?us-ascii?Q?ravsBa68pA0sgcpNCHHjZwWJIwZAs5Wv1hTFmq7352hYi8MUUbL5c6SQLYG+?=
+ =?us-ascii?Q?S0nGDZ49pb1lsZoyburLwSJiyqK7XjjBcwG2jJaYfzBUEDiNBTLwqNoZVcrm?=
+ =?us-ascii?Q?NAbsHqy/lw1k80bh7f5J4Jtwok6nOCdvLMvePtJdKAoZfmwRCJGUkcvo7YB/?=
+ =?us-ascii?Q?Sze17sRfVkF3lI031YUwr5MdgyZwCeGFIfc7v5csDAmuJYjhnmGOJmo7BRO1?=
+ =?us-ascii?Q?24R9flZcoTKrWGDV5VpAEuGBNFbV1xPi6SdSOx1nBCRH+yaU/VYAt9m0gSfD?=
+ =?us-ascii?Q?L5VB9vr+cR3AADQmu2LazYwwDZD1I7l/R+xm1disq+7FXY9H5+3R0EPEixHS?=
+ =?us-ascii?Q?Viel0a9HRujyYH5sLaN0n2aNSg/kyFoixXcfvv09?=
 X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 074b66c3-44e3-4dde-22d9-08dae49063e8
+X-MS-Exchange-CrossTenant-Network-Message-Id: 13e811dd-925b-43a5-76cb-08dae49065ed
 X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2022 02:50:03.1583
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2022 02:50:06.5643
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: nN7el/rw+Ei5FgsQHnExqvkrqnnwROHpOzA7A8Wx0t7+fazQk6rKE0ISTwe1dlU/3w5AQPY88f6RQWpJaapkAw==
+X-MS-Exchange-CrossTenant-UserPrincipalName: ex0BT6+WpCGPH2FgjpuIRg9u2Ko99405S1qd2M0oeT5VCUXTd+DGL7Xb7pbZT5JfDGXdrdGoVMMhBOyNDExsaA==
 X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7709
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -108,108 +108,100 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Haibo Chen <haibo.chen@nxp.com>
 
-Clear auto tuning bit when reset tuning, and enable auto tuning
-only after tuning done successfully for both standard tuning and
-manual tuning.
+USDHC IP has one limitation: the tuning circuit can't handle the async
+sdio device interrupt correctly. When sdio device use 4 data lines,
+async sdio interrupt will use the shared DAT[1], if enable auto tuning
+circuit to check these 4 data lines, include the DAT[1], this circuit
+will detect this interrupt, take this as data on DAT[1], and adjust the
+delay cell wrongly, finally will cause the DATA/CMD CRC error.
+So for SDIO device, only enable DAT[0] and CMD line for auto tuning.
+To distinguish the card type during card init, involve init_card().
 
 Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 25 ++++++++++++++++---------
- 1 file changed, 16 insertions(+), 9 deletions(-)
+ drivers/mmc/host/sdhci-esdhc-imx.c | 41 ++++++++++++++++++++++++++++++
+ 1 file changed, 41 insertions(+)
 
 diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 89ef0c80ac37..bf8d6f60a9ee 100644
+index bf8d6f60a9ee..8f5ee5964396 100644
 --- a/drivers/mmc/host/sdhci-esdhc-imx.c
 +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -429,9 +429,10 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
- }
- 
+@@ -337,6 +337,16 @@ struct pltfm_imx_data {
+ 	struct clk *clk_ahb;
+ 	struct clk *clk_per;
+ 	unsigned int actual_clock;
++
++	/*
++	 * USDHC has one limition, require the SDIO device a different
++	 * register setting. Driver has to recognize card type during
++	 * the card init, but at this stage, mmc_host->card is not
++	 * available. So involve this field to save the card type
++	 * during card init through usdhc_init_card().
++	 */
++	unsigned int init_card_type;
++
+ 	enum {
+ 		NO_CMD_PENDING,      /* no multiblock command pending */
+ 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
+@@ -431,6 +441,8 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
  /* Enable the auto tuning circuit to check the CMD line and BUS line */
--static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
-+static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
+ static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
  {
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
  	u32 buswidth, auto_tune_buswidth;
-+	u32 reg;
+ 	u32 reg;
  
- 	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
+@@ -448,6 +460,20 @@ static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
+ 		break;
+ 	}
  
-@@ -450,6 +451,10 @@ static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
++	/*
++	 * For USDHC, auto tuning circuit can not handle the async sdio
++	 * device interrupt correctly. When sdio device use 4 data lines,
++	 * async sdio interrupt will use the shared DAT[1], if enable auto
++	 * tuning circuit check these 4 data lines, include the DAT[1],
++	 * this circuit will detect this interrupt, take this as a data on
++	 * DAT[1], and adjust the delay cell wrongly.
++	 * This is the hardware design limitation, to avoid this, for sdio
++	 * device, config the auto tuning circuit only check DAT[0] and CMD
++	 * line.
++	 */
++	if (imx_data->init_card_type == MMC_TYPE_SDIO)
++		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
++
  	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
  			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
  			ESDHC_VEND_SPEC2);
-+
-+	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-+	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+@@ -1055,6 +1081,15 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+ 	}
  }
  
- static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
-@@ -681,14 +686,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
--				m &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
- 			}
- 
- 			if (val & SDHCI_CTRL_EXEC_TUNING) {
- 				v |= ESDHC_MIX_CTRL_EXE_TUNE;
- 				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
--				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
--				usdhc_auto_tuning_mode_sel(host);
- 			} else {
- 				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
- 			}
-@@ -1022,13 +1024,15 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- 
- 	/* Reset the tuning circuit */
- 	if (esdhc_is_usdhc(imx_data)) {
-+		ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
-+		ctrl &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
- 		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
--			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
- 			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
- 			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
- 		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
-+			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
- 			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
- 			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
- 			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
-@@ -1054,6 +1058,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
++static void usdhc_init_card(struct mmc_host *mmc, struct mmc_card *card)
++{
++	struct sdhci_host *host = mmc_priv(mmc);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
++
++	imx_data->init_card_type = card->type;
++}
++
  static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
  {
  	struct sdhci_host *host = mmc_priv(mmc);
-+	int err;
- 
- 	/*
- 	 * i.MX uSDHC internally already uses a fixed optimized timing for
-@@ -1068,7 +1073,12 @@ static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	 * correct delay cell.
- 	 */
- 	esdhc_reset_tuning(host);
--	return sdhci_execute_tuning(mmc, opcode);
-+	err = sdhci_execute_tuning(mmc, opcode);
-+	/* If tuning done, enable auto tuning */
-+	if (!err && !host->tuning_err)
-+		usdhc_auto_tuning_mode_sel_and_en(host);
+@@ -1673,6 +1708,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		 * to replace the standard one in sdhci_ops.
+ 		 */
+ 		host->mmc_host_ops.execute_tuning = usdhc_execute_tuning;
 +
-+	return err;
- }
++		/*
++		 * Link usdhc specific mmc_host_ops init card function,
++		 * to distinguish the card type.
++		 */
++		host->mmc_host_ops.init_card = usdhc_init_card;
+ 	}
  
- static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
-@@ -1102,11 +1112,8 @@ static void esdhc_post_tuning(struct sdhci_host *host)
- {
- 	u32 reg;
- 
--	usdhc_auto_tuning_mode_sel(host);
--
- 	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
- 	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
--	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
- 	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
- }
- 
+ 	err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
 -- 
 2.34.1
 
