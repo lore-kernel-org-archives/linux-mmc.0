@@ -2,206 +2,141 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1AADEC4332F
-	for <linux-mmc@archiver.kernel.org>; Fri, 23 Dec 2022 02:50:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 799F6C4167B
+	for <linux-mmc@archiver.kernel.org>; Fri, 23 Dec 2022 03:02:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235788AbiLWCuN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 22 Dec 2022 21:50:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47084 "EHLO
+        id S235795AbiLWDCb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 22 Dec 2022 22:02:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229587AbiLWCuL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2022 21:50:11 -0500
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2049.outbound.protection.outlook.com [40.107.21.49])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4EC3F21813
-        for <linux-mmc@vger.kernel.org>; Thu, 22 Dec 2022 18:50:09 -0800 (PST)
+        with ESMTP id S229603AbiLWDCa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 22 Dec 2022 22:02:30 -0500
+Received: from EUR01-HE1-obe.outbound.protection.outlook.com (mail-he1eur01on2089.outbound.protection.outlook.com [40.107.13.89])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3286BDFB3;
+        Thu, 22 Dec 2022 19:02:29 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=eYuIOSz6bsJc8vtfU1tfo687zv5C+K92gsR1gS8aDaijycy8xDBT511fGZAk1F77c4YTILfOaoMhnfC8WkQs4kQ2M3Mf9+eoGTksqAUjnIRXTR2avQ8kJjKBJIoUOubCae4/on67ugNcInvoTiHozlXEzs+Knrut+TekNTDHAEbNIhydHhAJRTKZuk7QTuMU+g4xn99FhJBTpICTSNhlZRRxz41Is4o1OGTqnDFlpJYRo/jmnXG948ZAIOCoLqevOjS4tYJV86OJkADYh5esoAEqgyr2V2dvtPoJEjtPDH/9GCwOjIqMhgZX7q07qZVZQO3BlzpzEj1hPrP6eQSIlQ==
+ b=I6kkJ20R7/l3TDiyrpShLTSCXosDDkQUq6VcYChaWbESCA2sGNDwFUHLzWCwcQ13fKFd7JwjGtNTLPIKyDzaIXt/97j84oX+0RFDgjC5E+MrgbACeDJi8C4QaXTp+AP5YfjaBTmpuyf98PojMu8agW6tZv3lvp77Tw1GJs2ZCxjsboTN9m7GVP2qqXh6nzT0GAG8QB2prEKoPYzt4/aUAxAN/6esH97zMyMFuadJTPFLAVRvXikZdARDry0YChy/QiLCMlVXyjUpwp3ssq8o9fNUIps0q/fstFc87r9hkjH4tdBf3xS+n8GHnExPDC/K5Wb1109aTWx/cqy/HB4eAg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=cXJ44308MSRMXTQecsCzb4lg2b+aWpTM25csrYlHGPw=;
- b=dgumAvXA05d2IE87H+Fv9HvmeUCZPOX0xHKeVExegyl5xDpGN0gbF+dau41OX6w6xpmpcPYwGgAAJ0zF7h8DSsTge421k4yt7PbMYdoCgzGak9YtG+D8i1RjrpZoOXj+Q0Dh8HxYxWfNaprB470+YkJkwqdJEJQiSFXsaYfk7161hTftsLRuW9v+0AaDv8HO74ZW5k2U9HF8jjB/xfIjF4768IZ1Try5rVsMXPj5C08x+MrVQQgCL4W+eFyouuU5oZRHzfI15wINsApO0SPr9+hAsITQJiB5cX0STCBlhluxzZQi3CJ688faXcs/Kr2pYBIcszw/hy8miPwKJNnnng==
+ bh=HRoBwxHQjO6lXlyVXshRWrEal40SwuQOXcJms6FVzDE=;
+ b=MphpMmEWjSHalSfkMO3JlUSEvN6leM8RV3+P0C9FkXRZW5eMrojuVLZv9RbeKJvDJUTIX3dEEFD1imv1UTl/rChaPkQyy9JjTrK7puQgnnd4K31ILzPTooeofatD8tz8PI6SS9iK5MRiw0SxykazKowuulEWHev4armG7Gz1L09rqH0bbO+jTx5hrrVcHQ9ACwrYvzMyBucX/8fQ1JP4eSmmC8L1ewsgmd7wmKHWJ+EmwEu+u6y17jOr3NaeJfcvWBbZY26gYc4v2T1wzP705aVRQwSQtrtMy7S2bi2RVfVJRKum0i4cbEMFixhlgeqTq71aOnKQmv7NlDfNCtOUvw==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
+ dkim=pass header.d=oss.nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
+ s=selector2-NXP1-onmicrosoft-com;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cXJ44308MSRMXTQecsCzb4lg2b+aWpTM25csrYlHGPw=;
- b=SE2+/eXURqeWQOiDT918rs5VDPGJW2a9DSetfB/ej0jm9nXRHV3wPRcZJxlpPhnbSYJNRJoDLmtbJO1vpuq3jT1sfLrss8Qfn/3zkpiUBcZ4iItHru8SEGTgmbtqLN2pKbPe3Yy1ttSfrgoFLHNlQjIvtwE8g/Aeof2xkB8GpbI=
+ bh=HRoBwxHQjO6lXlyVXshRWrEal40SwuQOXcJms6FVzDE=;
+ b=h67NIn2J9OhHvxUWAkuMNIzDz5SF81sBlN4uHeP80TdNWYH+EhUowoGxxZHP29qrp6XgVxmzNvaQWDtWJ4jDzO+bpYGsE/uAjrjl3cIDY8vm3gvtuivm5m2DXpnUWOPepFiIHBRj5LhfXPv8gMviszLo7rB2MYYii+LhLPWlmM0=
 Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
- PA4PR04MB7709.eurprd04.prod.outlook.com (2603:10a6:102:e3::11) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.5944.13; Fri, 23 Dec 2022 02:50:06 +0000
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::7479:76ef:8e5:da0b]) by DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::7479:76ef:8e5:da0b%6]) with mapi id 15.20.5924.016; Fri, 23 Dec 2022
- 02:50:06 +0000
-From:   haibo.chen@nxp.com
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        kgroeneveld@lenbrook.com, haibo.chen@nxp.com
-Subject: [PATCH v3 2/2] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD line auto tuning for SDIO device
-Date:   Fri, 23 Dec 2022 10:50:22 +0800
-Message-Id: <20221223025022.1893102-3-haibo.chen@nxp.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20221223025022.1893102-1-haibo.chen@nxp.com>
-References: <20221223025022.1893102-1-haibo.chen@nxp.com>
+ header.d=none;dmarc=none action=none header.from=oss.nxp.com;
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
+ by GV1PR04MB9103.eurprd04.prod.outlook.com (2603:10a6:150:22::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5924.16; Fri, 23 Dec
+ 2022 03:02:25 +0000
+Received: from DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::e33c:46f9:ef88:8973]) by DU0PR04MB9417.eurprd04.prod.outlook.com
+ ([fe80::e33c:46f9:ef88:8973%5]) with mapi id 15.20.5944.013; Fri, 23 Dec 2022
+ 03:02:25 +0000
+From:   "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de
+Cc:     kernel@pengutronix.de, festevam@gmail.com, linux-imx@nxp.com,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Peng Fan <peng.fan@nxp.com>
+Subject: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: update binding for i.MX50 and i.MX7D
+Date:   Fri, 23 Dec 2022 11:03:47 +0800
+Message-Id: <20221223030347.17093-1-peng.fan@oss.nxp.com>
+X-Mailer: git-send-email 2.37.1
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
-X-ClientProxiedBy: SI2PR02CA0008.apcprd02.prod.outlook.com
- (2603:1096:4:194::12) To DB7PR04MB4010.eurprd04.prod.outlook.com
- (2603:10a6:5:21::30)
+X-ClientProxiedBy: SGAP274CA0017.SGPP274.PROD.OUTLOOK.COM (2603:1096:4:b6::29)
+ To DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
 MIME-Version: 1.0
+X-MS-Exchange-MessageSentRepresentingType: 1
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DB7PR04MB4010:EE_|PA4PR04MB7709:EE_
-X-MS-Office365-Filtering-Correlation-Id: 13e811dd-925b-43a5-76cb-08dae49065ed
+X-MS-TrafficTypeDiagnostic: DU0PR04MB9417:EE_|GV1PR04MB9103:EE_
+X-MS-Office365-Filtering-Correlation-Id: 2c876195-1429-4fb7-60e2-08dae4921e34
+X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: H1efqLNBt72WbITRGccRJ/ZxWepk6JBU/wqozciEqoP2xwSjRzfqNU3E9V1a58BE39LZWH1tGMwzCxm3WsXV33w0CjKVRONvysZmBKa4zlV2dlxn2yMNt0oJVdqPpOfVIAZIfsCjL8rg4WuCDAHgs4fN72Lz41+rLm/D6KxFuIT1IYoXe5aLeCRmTgX2OIGLZeNK05y+qsbGrQuAZk2ze1nR67nz7wwVnnsbK1S5kDBFDhXrlv7E1ggZ2PSIpl8pNt/Fpv88wdjc0yFK+5g0zs7JLH24vXmTc2kF/eR4vNJlwaglGMZwTUJZdjiiuoh4/ozTiQuimCNGa1KB+oPKMY4R3d6yQJVOXhpgGA5Yw6VjYpw+UEgDRAxwCMbQ01k4/p6tILKbdys12Ya3iDff+Yt99j7gmTezAGsxXEi2Zx0jPYSeqEGNf7SfNT+ByzbH0IID7A9suZubb0XPEqOS9WBWERn0tZJJPS6yv1r2oYS7aBA/oxLuaIq32xKARt6xdBYpuiNo+tavgJng1OYb8uehBoip1fCFsSlyEnj1uIwlbUjtdqdIWMsc38IKQZ53aRDRAVc+OqfSKvAvmm4mS5eiwbU5BaHH5rDhQG18AZFcugG/w9uMmiznZ5sWMWvshx4S3QSAReaeoQSCGpb1rq9fFRF3huNZO4/91wOOrUwQMQHoSwxJweAzm909cA3wTZYM/6f0jxkbqgF3bsCNLw==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(396003)(136003)(346002)(376002)(366004)(39860400002)(451199015)(2906002)(38100700002)(38350700002)(36756003)(86362001)(52116002)(1076003)(6506007)(6666004)(26005)(9686003)(6512007)(186003)(6486002)(2616005)(478600001)(83380400001)(5660300002)(41300700001)(8936002)(4326008)(66946007)(66556008)(66476007)(8676002)(316002);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: J3YUbPLuNnAWnoE4Cy/Vfv4/uEdQmYfl7JF2jAWj6d+/FHYNxjccZp/3eg73HUtwZCCreMuaQs7o2a9H48gOZ7qj+KzMfuykPtAwVpKD5/V9vqSIEK4/fKV5pvnB6uyJ9UubH+RXP80VfHoUg8fDPXu+3Hjtl21i1lWVJoT9NY6UVoQn+qgVzkjTn3onH6i2PcSVb0aKRWGO5L0IealAb7umKPNGq6637jbSa6yAfYUB9r+4E3/cYd1pGu0n5pp8HVczqu/D5O8LDKCVmx7ITnsneBjmvW8LVc+P1mFdCZL9tZDzPMcuvULJRsd6OSiejCmc36iX9Vbcpz6bwidjLVIw77xQdyZYqAJlErGuC2XSs+LG2PljEXMKweIHBj2zBT0HHWyTmoanAUZSH+pUv/uU5/CNYAZua0M6uYFvX5zTK+Byp39ThkCkXO8po+a74GryF5rztJZe2T/CYInce8VPI2TfKP9fc5SZ48Q86EfJBkC3hUm9Kg1CPUwyGGJ1flTaPLPF3Hm79aMwUur6rm6FQM2rX6qWyF9ukj6tdLcYmJ+OzP4mIsJBUV7g+vu4nUOKg3JgLYN0NED5D+zq8QgjaOVwUyy3tihJBiEMw+/eBDpSPaZMmILx0wXl3bdTj1/JIXBCSyC9j9s+Z5z22nJVyOpfw+924MbGF329YByoqCmyoRfWLFZ7O7RR2lGH5Qpv1IINHe4AlrLT/l+qRg==
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9417.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(39860400002)(396003)(136003)(376002)(366004)(346002)(451199015)(186003)(8676002)(7416002)(6512007)(66556008)(66476007)(5660300002)(38350700002)(4326008)(66946007)(6506007)(6666004)(52116002)(8936002)(38100700002)(83380400001)(86362001)(15650500001)(316002)(1076003)(2906002)(4744005)(2616005)(41300700001)(26005)(478600001)(6486002);DIR:OUT;SFP:1101;
 X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?2IrnAL5Y2ncAnbbBwjizS2Gsb4VOH/E8E+HWKjipPUySw0mbRn9MUowLeoTI?=
- =?us-ascii?Q?jFtNX1317QBU2ezhAoQu48fvwq7FksUOE7su05ZPl3VZnMGfQrfeuJKJzwUL?=
- =?us-ascii?Q?j4+SCbqwPP2uCDOvJAraMP+c5OI9923aaIzOFQ2uStVpMe8XqeuQUCy8EjeX?=
- =?us-ascii?Q?ZP5s8PqHZYG8rZPvjNPFwtSJuvAQKZm2WAjRvdr824BWyUEmewNXnDwN0tQw?=
- =?us-ascii?Q?FYmjJ65Sj5ycVBBeoQcDPi2JN74qYJgcgjy9ZAQ0QdrZQ4NfZNHebZB+I/ue?=
- =?us-ascii?Q?jsP90ZFbzZ05ldQs3cNSsz13y8zneBp+FhuaK2xi/iuearQkQn+VDj9Q3J0r?=
- =?us-ascii?Q?7IYRD+OOKfW8XkL9NIdwKjMdGJEwq0Djldr3EjE10TTx9EU2+fTbRpsVKvjI?=
- =?us-ascii?Q?8C5ZRegnYMWKJTE8hHFr1zI/ZwrFJ0cqAI1nDkvYqoy2v/6egZDqzcHBVd8P?=
- =?us-ascii?Q?tGRc3lJeE1VaHWhAbxCnh9wXB7Kfyj7EGHMamDjGycCQSilINNJUJa79c9SI?=
- =?us-ascii?Q?2jfW/TyZ3HGQUbqoerX9YiIByaUXTQG0t5HqemY3puFgnxcma56a3PDCKOw2?=
- =?us-ascii?Q?gQOGySbE2IMommaO9rgaQfe30EloIqlLcYRshZAPWotUTte/sdiZ1nzIaJTS?=
- =?us-ascii?Q?z08Exf/fhbPh92U+YGAY8j75XBM2faJPraNPZPEY1JIgS5HmzVgvjc5I6SG2?=
- =?us-ascii?Q?gR3wht5cPxODReKgky3I1UaP2ZpOcDb0z2jyzbadsjbPqFMWwN/ZH6V8Romj?=
- =?us-ascii?Q?wjNXyN7atOVlmdIGhJpt9PHuBglV/vR0p61sUhFbfUWFsPRMgn5lvEe9pVDG?=
- =?us-ascii?Q?oF/uonLd0iuwOLEZ8mUx5QPrDiZxAp502RrTUtYCvGfGyCaj5cF3EPG+B+3u?=
- =?us-ascii?Q?ICxwE/PxUXXWwlKktbIRsaI/uF+0WP8niWOsj7pu1bx44D/p84mGFkiH4uMV?=
- =?us-ascii?Q?Z2D2lAqDvG7X7EmAwl16/+KB+wlaChZqDOA6FjOJjuGzSWV7/6wzKwAEX+K2?=
- =?us-ascii?Q?JuHdd17vrD1flJbPf4p/k9+EDwIGr2MdO10jxYiSi7ZJrFRb0d5qpmLei7ln?=
- =?us-ascii?Q?BIgPpbAVnt9fnU4J1oISSj19TCPPk8skFM+kfwm4Fr3JaiiM+KpdFWHj/ogI?=
- =?us-ascii?Q?z0KejM0CHrawoJ4OU0t3BrMbuum8g7Pnc6pHQkSa6O5ukjdXn0W6KXMv8uXq?=
- =?us-ascii?Q?ravsBa68pA0sgcpNCHHjZwWJIwZAs5Wv1hTFmq7352hYi8MUUbL5c6SQLYG+?=
- =?us-ascii?Q?S0nGDZ49pb1lsZoyburLwSJiyqK7XjjBcwG2jJaYfzBUEDiNBTLwqNoZVcrm?=
- =?us-ascii?Q?NAbsHqy/lw1k80bh7f5J4Jtwok6nOCdvLMvePtJdKAoZfmwRCJGUkcvo7YB/?=
- =?us-ascii?Q?Sze17sRfVkF3lI031YUwr5MdgyZwCeGFIfc7v5csDAmuJYjhnmGOJmo7BRO1?=
- =?us-ascii?Q?24R9flZcoTKrWGDV5VpAEuGBNFbV1xPi6SdSOx1nBCRH+yaU/VYAt9m0gSfD?=
- =?us-ascii?Q?L5VB9vr+cR3AADQmu2LazYwwDZD1I7l/R+xm1disq+7FXY9H5+3R0EPEixHS?=
- =?us-ascii?Q?Viel0a9HRujyYH5sLaN0n2aNSg/kyFoixXcfvv09?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 13e811dd-925b-43a5-76cb-08dae49065ed
-X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?O1ZLdZSo7Ht/tVzPXgQELCqjf3rf6DnqgaI580xnQZvjrPQC9vH2c9Z1nfP9?=
+ =?us-ascii?Q?TdIUTweRF5IbhgvttNrc+USv56o2lgMn/LJIHLmd9L8Vq68/41uHzD+5t0UW?=
+ =?us-ascii?Q?x0OJZW5P53T4MdxjV1SpROEhW787nxdoxV60jX+qIB+2nBc+tFI1yfTjaDWV?=
+ =?us-ascii?Q?J40kFt72KWPDtNCruCDvea6juuQ2kvW+lONhtK5fEujxxre7JgV/dgk1HAkW?=
+ =?us-ascii?Q?hwMQ9AsaH0xIcTEKHE5pzy10WfomnhDFw6TY2bXgoeoVBqcGi23lRxaHILKU?=
+ =?us-ascii?Q?IKw2TOGqyluRHWf3BslWx/lu2wm3Kj/5UE2wyEx1yAsxDBemV0YQRAWYbMPX?=
+ =?us-ascii?Q?O2Z+pGvYNdnqVoqe0GiyCDinTBjVhjTjGGcWOoVaXDSvHbi3JX6u1JgVbfoA?=
+ =?us-ascii?Q?8fvmH3AFZtO5ZJkgdsRiaXxhIvRp/7eftpGI/3KuBkHn4ZkXqtOM+gjWP7JQ?=
+ =?us-ascii?Q?2HwB5RxjPmMAuXc3AoZAfwH804qdr3e3vEraQbZvsyqrFIOV5/WaoAYuQX+D?=
+ =?us-ascii?Q?dp/qOXDiZKn1HzHq9dvp584DPob/dez1axaCKQqns2O4RXysNc3U12GORTOJ?=
+ =?us-ascii?Q?yszagg6F5gJ5T2DWQFA05CKG85mT3kGxgFubbxpuCzx92BZLjsv04tf6D2gP?=
+ =?us-ascii?Q?csJQFF7msZPze+eMD3gytGWEuB6ewNtKFO+2cQr4yMgtdZQeM0yW8mezfsRG?=
+ =?us-ascii?Q?NPg5agSi9oB3eFDj9kWXBFgCTaEygWXrggIKRCSDx/F52V6kjP1+znwqkRJS?=
+ =?us-ascii?Q?Jfj86W1Td6JG70c+Sgt8oaEarLB9/WzDV+zuSJQBHh4WzqpNcIJUBRgdom6c?=
+ =?us-ascii?Q?uPG65kjIYaUA0nC0HtmHUTlXmJAZ2IlNachfib9rRY61tAfBDYC/BypPMO0m?=
+ =?us-ascii?Q?YKh1XiClWt4sIRIuWV2b1IQnCIkgpU6ILX/RNhC+KiVfXbuSCwr+7o4jYQtn?=
+ =?us-ascii?Q?IEbOnZF8xIh2Yc6pv+Md5TOlkU7JluDWP6ezypZiGaAyegV1Z1s6j90bs/hb?=
+ =?us-ascii?Q?ErHl/dOcXbgBSKy6bXsnjUSWY9h2I9In5eLi++CIAXniyQFQWl4N4mcoIgY3?=
+ =?us-ascii?Q?3v54QlZVi0YLD75c8SG9LKPE3rfOIUIewZzX/8FiTJhixZ1t1uhp+ihg7W/k?=
+ =?us-ascii?Q?pnKrv67UrBFBAJItTcpdm40O2bAU5w18zlWmuC/zl86/dbJx7db1I3HNtyzr?=
+ =?us-ascii?Q?ig7FNvCffTZcaF0wdndY7JKMC/jyYXI9TpwKSnaKmd/iS6D1T8j5/0JwEIzB?=
+ =?us-ascii?Q?7tcHiPff+hcUiTLeplacKTSnKp+3t8k5YTDTOZLV3NJsQygFM22o91i6SoX+?=
+ =?us-ascii?Q?NGGMHMBLS4QrqaSz5hF5qLn3JU4BRi34ArTb5Ty65Z2nZogZUvapatzQeFI4?=
+ =?us-ascii?Q?ukss4QHHIlktTUTukrbqfodsk4V125xqUkeiLKLE3y+itKoD7/Y7aDnGoIJw?=
+ =?us-ascii?Q?t+MzWWdusVutSI8iwUHtdDvrGY/KZ78z94FeTbRrfheaLLkmMc8tk2HoTzX+?=
+ =?us-ascii?Q?qauY2IUzUMA8SyFToPUxzacPJdGteaoks1JRaWr1LYoDS8tWYSSIWT0zPoUM?=
+ =?us-ascii?Q?5BhhLS2siIK8yP3VQ3F+7WW5k27UVWzzCkBVQq1U?=
+X-OriginatorOrg: oss.nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 2c876195-1429-4fb7-60e2-08dae4921e34
+X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9417.eurprd04.prod.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2022 02:50:06.5643
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Dec 2022 03:02:25.2734
  (UTC)
 X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
 X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
 X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: ex0BT6+WpCGPH2FgjpuIRg9u2Ko99405S1qd2M0oeT5VCUXTd+DGL7Xb7pbZT5JfDGXdrdGoVMMhBOyNDExsaA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7709
+X-MS-Exchange-CrossTenant-UserPrincipalName: kZbvkbjlpmNkGvIK18aiVqcnceM3aYnpjriZZi/NNO2GzOXEnEvrDUEMYDgdMfDtrl8R7/n51WMry/cTV2zn+w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GV1PR04MB9103
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Haibo Chen <haibo.chen@nxp.com>
+From: Peng Fan <peng.fan@nxp.com>
 
-USDHC IP has one limitation: the tuning circuit can't handle the async
-sdio device interrupt correctly. When sdio device use 4 data lines,
-async sdio interrupt will use the shared DAT[1], if enable auto tuning
-circuit to check these 4 data lines, include the DAT[1], this circuit
-will detect this interrupt, take this as data on DAT[1], and adjust the
-delay cell wrongly, finally will cause the DATA/CMD CRC error.
-So for SDIO device, only enable DAT[0] and CMD line for auto tuning.
-To distinguish the card type during card init, involve init_card().
+i.MX50 eSDHC is compatible with i.MX53. i.MX7D uSDHC is compatible with
+i.MX6SL. So update for them.
 
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+Signed-off-by: Peng Fan <peng.fan@nxp.com>
 ---
- drivers/mmc/host/sdhci-esdhc-imx.c | 41 ++++++++++++++++++++++++++++++
- 1 file changed, 41 insertions(+)
+ Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index bf8d6f60a9ee..8f5ee5964396 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -337,6 +337,16 @@ struct pltfm_imx_data {
- 	struct clk *clk_ahb;
- 	struct clk *clk_per;
- 	unsigned int actual_clock;
-+
-+	/*
-+	 * USDHC has one limition, require the SDIO device a different
-+	 * register setting. Driver has to recognize card type during
-+	 * the card init, but at this stage, mmc_host->card is not
-+	 * available. So involve this field to save the card type
-+	 * during card init through usdhc_init_card().
-+	 */
-+	unsigned int init_card_type;
-+
- 	enum {
- 		NO_CMD_PENDING,      /* no multiblock command pending */
- 		MULTIBLK_IN_PROCESS, /* exact multiblock cmd in process */
-@@ -431,6 +441,8 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
- /* Enable the auto tuning circuit to check the CMD line and BUS line */
- static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
- {
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
- 	u32 buswidth, auto_tune_buswidth;
- 	u32 reg;
- 
-@@ -448,6 +460,20 @@ static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
- 		break;
- 	}
- 
-+	/*
-+	 * For USDHC, auto tuning circuit can not handle the async sdio
-+	 * device interrupt correctly. When sdio device use 4 data lines,
-+	 * async sdio interrupt will use the shared DAT[1], if enable auto
-+	 * tuning circuit check these 4 data lines, include the DAT[1],
-+	 * this circuit will detect this interrupt, take this as a data on
-+	 * DAT[1], and adjust the delay cell wrongly.
-+	 * This is the hardware design limitation, to avoid this, for sdio
-+	 * device, config the auto tuning circuit only check DAT[0] and CMD
-+	 * line.
-+	 */
-+	if (imx_data->init_card_type == MMC_TYPE_SDIO)
-+		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
-+
- 	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
- 			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
- 			ESDHC_VEND_SPEC2);
-@@ -1055,6 +1081,15 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
- 	}
- }
- 
-+static void usdhc_init_card(struct mmc_host *mmc, struct mmc_card *card)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
-+
-+	imx_data->init_card_type = card->type;
-+}
-+
- static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
- {
- 	struct sdhci_host *host = mmc_priv(mmc);
-@@ -1673,6 +1708,12 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
- 		 * to replace the standard one in sdhci_ops.
- 		 */
- 		host->mmc_host_ops.execute_tuning = usdhc_execute_tuning;
-+
-+		/*
-+		 * Link usdhc specific mmc_host_ops init card function,
-+		 * to distinguish the card type.
-+		 */
-+		host->mmc_host_ops.init_card = usdhc_init_card;
- 	}
- 
- 	err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index dc6256f04b42..546ebcecaf95 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -37,6 +37,12 @@ properties:
+           - fsl,imx8mm-usdhc
+           - fsl,imxrt1050-usdhc
+           - nxp,s32g2-usdhc
++      - items:
++          - const: fsl,imx50-esdhc
++          - const: fsl,imx53-esdhc
++      - items:
++          - const: fsl,imx7d-usdhc
++          - const: fsl,imx6sl-usdhc
+       - items:
+           - enum:
+               - fsl,imx8mq-usdhc
 -- 
-2.34.1
+2.37.1
 
