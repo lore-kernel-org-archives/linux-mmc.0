@@ -2,190 +2,148 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F712C4332F
-	for <linux-mmc@archiver.kernel.org>; Mon, 26 Dec 2022 07:40:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E7B5C4167B
+	for <linux-mmc@archiver.kernel.org>; Mon, 26 Dec 2022 20:35:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231739AbiLZHkA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 26 Dec 2022 02:40:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57966 "EHLO
+        id S229762AbiLZUfV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 26 Dec 2022 15:35:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231740AbiLZHjx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2022 02:39:53 -0500
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89C02DB6;
-        Sun, 25 Dec 2022 23:39:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1672040392; x=1703576392;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=reO+M9uPJUrQnHFQ7lgJPRd7DsLi8yc69h6qz1liBlc=;
-  b=ZIR4bdh/lXHIh/vXMjlhlWZA0sABu9NkqTo48ElKk9JP9hUMubDj/65G
-   jeUYxwSRgQ92w4En4q86GSRPT5mktIwF/dl/SOLBp1W8p6knMMvKuFVh3
-   iYVuv5uKkR8Q6as4OwKUVJKOBMMGrhdYqqYjlY0PFMxI1gKW7l3YDY0T/
-   Fx7g0nQmu1lc8epfq0soD/S/6TtuU8YXEI9QJm+QztzXnKMqUYOzX8rwR
-   UjXXKJetRNTyfOZMeW8aVkxWF2lMLOf/P4A2m4iVnDGqeKDzMKIghXQVO
-   TGKqmw3Wcbe0q7HPfFoe22bgSMUoh75IumsoOqT4PYttgMgNPYnU1Z1Zh
-   w==;
-X-IronPort-AV: E=Sophos;i="5.96,274,1665471600"; 
-   d="scan'208";a="193216540"
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa2.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 26 Dec 2022 00:39:51 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.16; Mon, 26 Dec 2022 00:39:51 -0700
-Received: from che-lt-i64410lx.amer.actel.com (10.10.115.15) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.16 via Frontend Transport; Mon, 26 Dec 2022 00:39:46 -0700
-From:   Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>
-To:     <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <linus.walleij@linaro.org>,
-        <hari.prasathge@microchip.com>, <dmitry.torokhov@gmail.com>,
-        <ulf.hansson@linaro.org>
-CC:     <balamanikandan.gunasundar@microchip.com>
-Subject: [PATCH v3 2/2] mmc: atmel-mci: move atmel MCI header file
-Date:   Mon, 26 Dec 2022 13:09:08 +0530
-Message-ID: <20221226073908.17317-3-balamanikandan.gunasundar@microchip.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20221226073908.17317-1-balamanikandan.gunasundar@microchip.com>
-References: <20221226073908.17317-1-balamanikandan.gunasundar@microchip.com>
+        with ESMTP id S229547AbiLZUfU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 26 Dec 2022 15:35:20 -0500
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 10B232729
+        for <linux-mmc@vger.kernel.org>; Mon, 26 Dec 2022 12:35:20 -0800 (PST)
+Received: by mail-pj1-x102d.google.com with SMTP id k88-20020a17090a4ce100b00219d0b857bcso11494524pjh.1
+        for <linux-mmc@vger.kernel.org>; Mon, 26 Dec 2022 12:35:20 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=schmorgal.com; s=google;
+        h=content-transfer-encoding:in-reply-to:subject:from:content-language
+         :references:cc:to:user-agent:mime-version:date:message-id:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=6zZT04BE0Jy+qQBeK2Ut0h38WWYJ74qKLrwC/57eVCw=;
+        b=NSXT/nLjP4E4YaOEKbSANohMbFND9Z5HDvSHbwini59mb8vxFnQKUCj1eMVzGQLkWg
+         MJJAvTDgIJH17cvo1i6MwEtuYWSHj+g+HKMdCsZyckewz/9mFvfLrjWjlrjjVZKoI1v8
+         WeiWbZWfeIKA7QFyGKXFqw0vzektIICrbWCwM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:subject:from:content-language
+         :references:cc:to:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6zZT04BE0Jy+qQBeK2Ut0h38WWYJ74qKLrwC/57eVCw=;
+        b=0vDdPy82vlbQtx2AGLoJBLPKtB0WY7r1xTRmUWLfs7Z7ubFNR6oo1GfZcJ0Df4BvV5
+         i2ZKlef2e6iSoy4UDujBNRMvGjMrrHAaToZ0DgQdkwPBLayH9jB4bJFYhBCWLIPCqSHZ
+         e+0IZUBvI8CLhbSdeMYpn/qpodp0SRjGNxWahxSK7iejpiIlTnMMiXe9iX2Lo6Dojeqs
+         GdFkLC2HA24WZVJqHz1tDZ8W0rs15PXPTRKpwXbahHHsrEkxJBoCP3jX2NkrI/LxMpnM
+         FAjZBmsOXpZ2oG3uulon0E/ZpYmy0aZHJGe3UyBt1SLICobtQEd5RndkGpUJGfKcoMkL
+         Q4Dg==
+X-Gm-Message-State: AFqh2kph0ALqKzLnfhfYfUDLjz5ROvzMgXeTp4eU1NACDJdFXtnPl6+p
+        VT6kAKO8Old5qKIxwIbc3qL6UYYWFpxQKUIXD7A=
+X-Google-Smtp-Source: AMrXdXu4HGH/Oc5jIA0bmeKP0p6oaZVxyT0RYL1f1Kixkj8ddZFdQ7bpumdtU2zazOZhNJvhQwws1w==
+X-Received: by 2002:a17:902:ee13:b0:189:13df:9d86 with SMTP id z19-20020a170902ee1300b0018913df9d86mr23857377plb.14.1672086919133;
+        Mon, 26 Dec 2022 12:35:19 -0800 (PST)
+Received: from [192.168.1.33] ([192.183.212.197])
+        by smtp.googlemail.com with ESMTPSA id p23-20020a1709027ed700b00178b6ccc8a0sm7541996plb.51.2022.12.26.12.35.17
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 26 Dec 2022 12:35:18 -0800 (PST)
+Message-ID: <beda0a3a-05d9-6c24-0fd2-1d80a86beb6d@schmorgal.com>
+Date:   Mon, 26 Dec 2022 12:35:15 -0800
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>
+References: <20221202031330.94130-1-doug@schmorgal.com>
+ <20221202031330.94130-2-doug@schmorgal.com>
+ <c2d5fb16-2654-6406-63da-626d6d5029c3@intel.com>
+Content-Language: en-US
+From:   Doug Brown <doug@schmorgal.com>
+Subject: Re: [PATCH v2 1/8] mmc: sdhci-pxav2: add initial support for PXA168
+ V1 controller
+In-Reply-To: <c2d5fb16-2654-6406-63da-626d6d5029c3@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Move the contents of linux/atmel-mci.h into
-drivers/mmc/host/atmel-mci.c as it is only used in one file
+Hi Adrian,
 
-Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
----
- drivers/mmc/host/atmel-mci.c | 39 +++++++++++++++++++++++++++++-
- include/linux/atmel-mci.h    | 46 ------------------------------------
- 2 files changed, 38 insertions(+), 47 deletions(-)
- delete mode 100644 include/linux/atmel-mci.h
+On 12/22/2022 8:03 AM, Adrian Hunter wrote:
+> On 2/12/22 05:13, Doug Brown wrote:
+>> Add a new compatible string for the version 1 controller used in the
+>> PXA168, along with necessary quirks. Use a separate ops struct in
+>> preparation for a silicon bug workaround only necessary on V1.
+>>
+>> Signed-off-by: Doug Brown <doug@schmorgal.com>
+>> ---
+>>   drivers/mmc/host/sdhci-pxav2.c | 18 +++++++++++++++++-
+>>   1 file changed, 17 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+>> index f18906b5575f..2f9fa0ecbddd 100644
+>> --- a/drivers/mmc/host/sdhci-pxav2.c
+>> +++ b/drivers/mmc/host/sdhci-pxav2.c
+>> @@ -101,6 +101,14 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
+>>   	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+>>   }
+>>   
+>> +static const struct sdhci_ops pxav1_sdhci_ops = {
+>> +	.set_clock     = sdhci_set_clock,
+>> +	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> +	.set_bus_width = pxav2_mmc_set_bus_width,
+>> +	.reset         = pxav2_reset,
+>> +	.set_uhs_signaling = sdhci_set_uhs_signaling,
+>> +};
+>> +
+>>   static const struct sdhci_ops pxav2_sdhci_ops = {
+>>   	.set_clock     = sdhci_set_clock,
+>>   	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+>> @@ -114,6 +122,9 @@ static const struct of_device_id sdhci_pxav2_of_match[] = {
+>>   	{
+>>   		.compatible = "mrvl,pxav2-mmc",
+>>   	},
+>> +	{
+>> +		.compatible = "mrvl,pxav1-mmc",
+>> +	},
+>>   	{},
+>>   };
+>>   MODULE_DEVICE_TABLE(of, sdhci_pxav2_of_match);
+>> @@ -208,7 +219,12 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+>>   			host->mmc->pm_caps |= pdata->pm_caps;
+>>   	}
+>>   
+>> -	host->ops = &pxav2_sdhci_ops;
+>> +	if (match && of_device_is_compatible(dev->of_node, "mrvl,pxav1-mmc")) {
+>> +		host->quirks |= SDHCI_QUIRK_NO_BUSY_IRQ | SDHCI_QUIRK_32BIT_DMA_SIZE;
+>> +		host->ops = &pxav1_sdhci_ops;
+>> +	} else {
+>> +		host->ops = &pxav2_sdhci_ops;
+>> +	}
+> 
+> It would be better to put the information above in a structure and
+> get it with of_device_get_match_data() (instead of of_match_device).
+> Also drivers typically assume there is always a match since that
+> is the only way the driver ->probe() will get run.
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index 6ab43733ba9f..b48e440a2df8 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -30,7 +30,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdio.h>
- 
--#include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-@@ -41,6 +40,8 @@
- #include <asm/unaligned.h>
- #include "../core/pwrseq.h"
- 
-+#define ATMCI_MAX_NR_SLOTS	2
-+
- /*
-  * Superset of MCI IP registers integrated in Atmel AT91 Processor
-  * Registers and bitfields marked with [2] are only available in MCI2
-@@ -202,6 +203,42 @@ enum atmci_pdc_buf {
- 	PDC_SECOND_BUF,
- };
- 
-+/**
-+ * struct mci_slot_pdata - board-specific per-slot configuration
-+ * @bus_width: Number of data lines wired up the slot
-+ * @detect_pin: GPIO pin wired to the card detect switch
-+ * @wp_pin: GPIO pin wired to the write protect sensor
-+ * @detect_is_active_high: The state of the detect pin when it is active
-+ * @non_removable: The slot is not removable, only detect once
-+ *
-+ * If a given slot is not present on the board, @bus_width should be
-+ * set to 0. The other fields are ignored in this case.
-+ *
-+ * Any pins that aren't available should be set to a negative value.
-+ *
-+ * Note that support for multiple slots is experimental -- some cards
-+ * might get upset if we don't get the clock management exactly right.
-+ * But in most cases, it should work just fine.
-+ */
-+struct mci_slot_pdata {
-+	unsigned int		bus_width;
-+	struct gpio_desc        *detect_pin;
-+	struct gpio_desc	*wp_pin;
-+	bool			detect_is_active_high;
-+	bool			non_removable;
-+};
-+
-+/**
-+ * struct mci_platform_data - board-specific MMC/SDcard configuration
-+ * @dma_slave: DMA slave interface to use in data transfers.
-+ * @slot: Per-slot configuration data.
-+ */
-+struct mci_platform_data {
-+	void			*dma_slave;
-+	dma_filter_fn		dma_filter;
-+	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
-+};
-+
- struct atmel_mci_caps {
- 	bool    has_dma_conf_reg;
- 	bool    has_pdc;
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-deleted file mode 100644
-index 017e7d8f6126..000000000000
---- a/include/linux/atmel-mci.h
-+++ /dev/null
-@@ -1,46 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--#ifndef __LINUX_ATMEL_MCI_H
--#define __LINUX_ATMEL_MCI_H
--
--#include <linux/types.h>
--#include <linux/dmaengine.h>
--
--#define ATMCI_MAX_NR_SLOTS	2
--
--/**
-- * struct mci_slot_pdata - board-specific per-slot configuration
-- * @bus_width: Number of data lines wired up the slot
-- * @detect_pin: GPIO pin wired to the card detect switch
-- * @wp_pin: GPIO pin wired to the write protect sensor
-- * @detect_is_active_high: The state of the detect pin when it is active
-- * @non_removable: The slot is not removable, only detect once
-- *
-- * If a given slot is not present on the board, @bus_width should be
-- * set to 0. The other fields are ignored in this case.
-- *
-- * Any pins that aren't available should be set to a negative value.
-- *
-- * Note that support for multiple slots is experimental -- some cards
-- * might get upset if we don't get the clock management exactly right.
-- * But in most cases, it should work just fine.
-- */
--struct mci_slot_pdata {
--	unsigned int		bus_width;
--	struct gpio_desc        *detect_pin;
--	struct gpio_desc	*wp_pin;
--	bool			detect_is_active_high;
--	bool			non_removable;
--};
--
--/**
-- * struct mci_platform_data - board-specific MMC/SDcard configuration
-- * @dma_slave: DMA slave interface to use in data transfers.
-- * @slot: Per-slot configuration data.
-- */
--struct mci_platform_data {
--	void			*dma_slave;
--	dma_filter_fn		dma_filter;
--	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
--};
--
--#endif /* __LINUX_ATMEL_MCI_H */
--- 
-2.25.1
+Thanks for all of your great feedback on this series. That makes sense.
+I did have one question about this suggestion. There are other parts of
+sdhci_pxav2_probe() that don't assume there was a match so that it can
+be set up the old way as a platform_device without CONFIG_OF. I was
+trying to preserve compatibility by defaulting to pxav2_sdhci_ops if
+it was set up as a platform_device. Is it all right if I leave a
+fallback in place for that, or should I just end compatibility with the
+old way at this point and assume a match in all cases? I don't see any
+legacy board files that use this driver.
 
+> 
+>>   
+>>   	ret = sdhci_add_host(host);
+>>   	if (ret)
+> 
+
+Thanks,
+Doug
