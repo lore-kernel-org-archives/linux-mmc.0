@@ -2,138 +2,174 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 790A7C4167B
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Dec 2022 17:50:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C01DFC4332F
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Dec 2022 23:30:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229965AbiL0RuU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Dec 2022 12:50:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51660 "EHLO
+        id S229798AbiL0Xaj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Dec 2022 18:30:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229987AbiL0RuS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Dec 2022 12:50:18 -0500
-Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2921A1
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 09:50:17 -0800 (PST)
-Received: by mail-wm1-x32f.google.com with SMTP id m3so889065wmq.0
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 09:50:17 -0800 (PST)
+        with ESMTP id S229583AbiL0Xai (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Dec 2022 18:30:38 -0500
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5A52B1D;
+        Tue, 27 Dec 2022 15:30:36 -0800 (PST)
+Received: by mail-ed1-x533.google.com with SMTP id m21so20870944edc.3;
+        Tue, 27 Dec 2022 15:30:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=7f0CdUXe8phT2kexAusIBnKBuWstxNOnBu3E9cI6oAw=;
-        b=Q9sjBtEne7RjKn4hDm87PK/7ZG+eYBNLw9Wv6p8ORD/X4ZMGE00WqK/5RRwu9Ml5lk
-         mk59HNlGK2PWEXyXq9ZyMrHIif2h7tBjd2i8Gfd5mA93mHHll16vwUI4/FIya6y68QmW
-         tGwTikOjEtEmXsVEDDBjLH5NFniqHqBmFSXZZrPZpL3bpd9RJjafMQMGAiG7VtCfZJeu
-         EWsp45l1oUERqLxPaHcnsaFUcEam1uc4psoX5rQu07/4Gpe4sZ7Vp6Dmi/0BFQ3rbtbE
-         eyx+QROpP7b1hSow6o0SXDfTg0Fo/zK3i55W+9JuMaGiRlbT/dSLGvO/ETrXfMyIAcw5
-         xCqg==
+        d=googlemail.com; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=gNI4glAP8RCHIX0Vc1rrjcz+Kvrw2hTC3GBQO91dTzE=;
+        b=PgAZ5aZt60CG6sLLPDEVEddXtgBvZGHfbo1q7Kaoz+jVwewez6JV0OjWtiLxgYp3go
+         ZB/sbiE+D/1GRwsm29iOS73d+TJblGHu+/6dMjl7e/jSdgsbZ/tGayRqj4SlrwUkN/FZ
+         20AzPMvBQCXMRBBOu0pmzBPTV+LKLIwmHCYIzCZ9Byq6xzVZc808I0LoDRtTCmanS219
+         exX6w96YxESVe38a7SieSwm7goZ0V3nfc3KZvT99EgrQY61Oj4Pn8V5Xk4wj0DchHoqf
+         QTAZxF1fH6HQJ3toICNcXwmpSgvjPw8fM9I8ujGwxoGCvJsV8013XlMduN9sXK9gJDN9
+         Z4tA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
-         :to:from:date:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=7f0CdUXe8phT2kexAusIBnKBuWstxNOnBu3E9cI6oAw=;
-        b=3GfpgasVb4JHUxMAG8qi0cn2DYEtYX+rThkcFdsofy5gOnBZ/POWpIdvdxIYlw2ItR
-         xS2/AEbCUyU9Xe9pUiz6/TJW4SoKTYIrwuBmX2luAP965yVRMC8gm5UQWpWHxthTo8YG
-         15C5eAmkLpoNGeyR2knwGRLUniBnPNu7DrvXqU6fQcgIWiWCRCH6COdzJJDPBAIwkSu8
-         8RgPjPHGhqkJbQNvfXAo9CdDa6yKDYXYQEzpKZVzg0QLqkUhwJ3JXkzcBq5S+IzFRvm1
-         zc4IVELSc7jnd2X9BvXBS6JIvIS+sTFGCBmIOTK9PQuByXXBsoZqd1EMuzlOyD1CrLkz
-         4nmQ==
-X-Gm-Message-State: AFqh2krzBuDaVmwRpNKQ+zx3KjiN2AdZsBGoPtwTjskYFIINB9kUnG2M
-        kBY58DuAFpOaNdT2qH/chw4=
-X-Google-Smtp-Source: AMrXdXtEFINalGZewRhoRzS8KM0N+ONevOn0UdkngxKVKJp6fU6iLO0GHdGRhrwQ9567YL6Sv8i6zQ==
-X-Received: by 2002:a05:600c:5012:b0:3d3:5a4a:9103 with SMTP id n18-20020a05600c501200b003d35a4a9103mr15680308wmr.31.1672163416349;
-        Tue, 27 Dec 2022 09:50:16 -0800 (PST)
-Received: from localhost ([102.36.222.112])
-        by smtp.gmail.com with ESMTPSA id hg24-20020a05600c539800b003cf71b1f66csm17759245wmb.0.2022.12.27.09.50.15
+        bh=gNI4glAP8RCHIX0Vc1rrjcz+Kvrw2hTC3GBQO91dTzE=;
+        b=VOrEV6O+1RjGwO4f3/HGUDBv0qC4KE3TjMviH2gG1xZGiEZCmSnchLvIhWt5ZwTfND
+         IHdpgpN26/moSnH+rCHmt4agaoJGwgToAtyT2oUPypkDvq4olhr+47B0+jGEVAY3Dbz6
+         8H4bsFwv2VZdHwHANy9JYD2AzD7DKdGN9w/oFPIl42yJr7Usy//7ODNmTyHh2ZMKfm74
+         529x9FoIdFhSwwd/ltQvbT+EvcNxg6UPFyDKUMkUtKCcjdpI0rMjxuj1+NSmzuD8BO9y
+         ERvux4ECYoFKuc3wE62owLURxv0CaE5yliHrDIH/k/LjIcNNvvKtJtGofXZ0LDfkyKE7
+         KnXA==
+X-Gm-Message-State: AFqh2kpjcIzhUbpNiXXevs7B73TYFp9mtSj6UueOZdTehN46SwzQ9EqQ
+        wtIoxxp6N3frBG/ufdcyxHAng6jnWVA=
+X-Google-Smtp-Source: AMrXdXtHXTSThumsWgqSjQD28Ytz9upkuh0X8wck3S2bYI+sMZUeOkNp1Rj+Gpe9CHiPCzeYET7Dhg==
+X-Received: by 2002:a50:ec19:0:b0:46c:fabe:837b with SMTP id g25-20020a50ec19000000b0046cfabe837bmr19326490edr.41.1672183834861;
+        Tue, 27 Dec 2022 15:30:34 -0800 (PST)
+Received: from localhost.localdomain (dynamic-2a01-0c23-c4cf-d900-0000-0000-0000-0e63.c23.pool.telefonica.de. [2a01:c23:c4cf:d900::e63])
+        by smtp.googlemail.com with ESMTPSA id r7-20020aa7c147000000b0046cbcc86bdesm6489978edp.7.2022.12.27.15.30.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 27 Dec 2022 09:50:15 -0800 (PST)
-Date:   Tue, 27 Dec 2022 20:50:13 +0300
-From:   Dan Carpenter <error27@gmail.com>
-To:     oe-kbuild@lists.linux.dev, haibo.chen@nxp.com,
-        ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     lkp@intel.com, oe-kbuild-all@lists.linux.dev, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        kgroeneveld@lenbrook.com, haibo.chen@nxp.com
-Subject: Re: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD
- line auto tuning for SDIO device
-Message-ID: <202212262324.SVvtUbT2-lkp@intel.com>
+        Tue, 27 Dec 2022 15:30:34 -0800 (PST)
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+To:     linux-wireless@vger.kernel.org
+Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Chris Morgan <macroalpha82@gmail.com>,
+        Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Subject: [RFC PATCH v1 00/19] rtw88: Add SDIO support
+Date:   Wed, 28 Dec 2022 00:30:01 +0100
+Message-Id: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+X-Mailer: git-send-email 2.39.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221221112853.789675-4-haibo.chen@nxp.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Recently the rtw88 driver has gained locking support for the "slow" bus
+types (USB, SDIO) as part of USB support. Thanks to everyone who helped
+make this happen!
 
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Based on the USB work (especially the locking part and various
+bugfixes) this series adds support for SDIO based cards. It's the
+result of a collaboration between Jernej and myself. Neither of us has
+access to the rtw88 datasheets. All of our work is based on studying
+the RTL8822BS and RTL8822CS vendor drivers and trial and error.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/haibo-chen-nxp-com/fix-the-sdio-device-DATA-CMD-CRC-and-Timeout-issue-after-tuning/20221221-193033
-patch link:    https://lore.kernel.org/r/20221221112853.789675-4-haibo.chen%40nxp.com
-patch subject: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD line auto tuning for SDIO device
-config: parisc-randconfig-m031-20221225
-compiler: hppa-linux-gcc (GCC) 12.1.0
+Jernej and myself have tested this with RTL8822BS and RTL8822CS cards.
+Other users have confirmed that RTL8821CS support is working as well.
+RTL8723DS may also work (we tried our best to handle rtw_chip_wcpu_11n
+where needed) but has not been tested at this point.
 
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Reported-by: Dan Carpenter <error27@gmail.com>
+Jernej's results with a RTL8822BS:
+- Main functionality works
+- Had a case where no traffic got across the link until he issued a
+  scan
 
-smatch warnings:
-drivers/mmc/host/sdhci-esdhc-imx.c:462 usdhc_auto_tuning_mode_sel_and_en() error: we previously assumed 'host->mmc->card' could be null (see line 462)
+My results with a RTL8822CS:
+- 2.4GHz and 5GHz bands are both working
+- TX throughput on a 5GHz network is between 50 Mbit/s and 90 Mbit/s
+- RX throughput on a 5GHz network is at 19 Mbit/s
+- Sometimes there are frequent reconnects (once every 1-5 minutes)
+  after the link has been up for a long time (multiple hours). Today
+  I was unable to reproduce this though (I only had reconnect in 8
+  hours).
 
-vim +462 drivers/mmc/host/sdhci-esdhc-imx.c
+Why is this an RFC?
+- It needs a through review especially by the rtw88 maintainers
+- It's not clear to me how the "mmc: sdio" patch will be merged (will
+  Ulf take this or can we merge it thorugh the rtw88/linux wireless
+  driver tree?)
+- Any comments / debugging hints on the reconnect / no traffic issues
+  (see above) are welcome
+- My understanding is that there's a discussion about the rtw88 Kconfig
+  symbols. We're adding four new ones within this series. It's not
+  clear to me what the conclusion is on this topic though.
+- As with most patches: testing is very welcome. If things are working
+  fine then a Tested-by is appreciated (with some details about the
+  card, throughput, ...). If something doesn't work for you: please
+  still report back so we can investigate that problem!
 
-45334ee13858de Haibo Chen 2021-08-18  431  /* Enable the auto tuning circuit to check the CMD line and BUS line */
-235cd41770bdcb Haibo Chen 2022-12-21  432  static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
-45334ee13858de Haibo Chen 2021-08-18  433  {
-45334ee13858de Haibo Chen 2021-08-18  434  	u32 buswidth, auto_tune_buswidth;
-235cd41770bdcb Haibo Chen 2022-12-21  435  	u32 reg;
-45334ee13858de Haibo Chen 2021-08-18  436  
-45334ee13858de Haibo Chen 2021-08-18  437  	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
-45334ee13858de Haibo Chen 2021-08-18  438  
-45334ee13858de Haibo Chen 2021-08-18  439  	switch (buswidth) {
-45334ee13858de Haibo Chen 2021-08-18  440  	case ESDHC_CTRL_8BITBUS:
-45334ee13858de Haibo Chen 2021-08-18  441  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN;
-45334ee13858de Haibo Chen 2021-08-18  442  		break;
-45334ee13858de Haibo Chen 2021-08-18  443  	case ESDHC_CTRL_4BITBUS:
-45334ee13858de Haibo Chen 2021-08-18  444  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN;
-45334ee13858de Haibo Chen 2021-08-18  445  		break;
-45334ee13858de Haibo Chen 2021-08-18  446  	default:	/* 1BITBUS */
-45334ee13858de Haibo Chen 2021-08-18  447  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
-45334ee13858de Haibo Chen 2021-08-18  448  		break;
-45334ee13858de Haibo Chen 2021-08-18  449  	}
-45334ee13858de Haibo Chen 2021-08-18  450  
-e088d1496d45c2 Haibo Chen 2022-12-21  451  	/*
-e088d1496d45c2 Haibo Chen 2022-12-21  452  	 * For USDHC, auto tuning circuit can not handle the async sdio
-e088d1496d45c2 Haibo Chen 2022-12-21  453  	 * device interrupt correctly. When sdio device use 4 data lines,
-e088d1496d45c2 Haibo Chen 2022-12-21  454  	 * async sdio interrupt will use the shared DAT[1], if enable auto
-e088d1496d45c2 Haibo Chen 2022-12-21  455  	 * tuning circuit check these 4 data lines, include the DAT[1],
-e088d1496d45c2 Haibo Chen 2022-12-21  456  	 * this circuit will detect this interrupt, take this as a data on
-e088d1496d45c2 Haibo Chen 2022-12-21  457  	 * DAT[1], and adjust the delay cell wrongly.
-e088d1496d45c2 Haibo Chen 2022-12-21  458  	 * This is the hardware design limitation, to avoid this, for sdio
-e088d1496d45c2 Haibo Chen 2022-12-21  459  	 * device, config the auto tuning circuit only check DAT[0] and CMD
-e088d1496d45c2 Haibo Chen 2022-12-21  460  	 * line.
-e088d1496d45c2 Haibo Chen 2022-12-21  461  	 */
-e088d1496d45c2 Haibo Chen 2022-12-21 @462  	if (!host->mmc->card && mmc_card_sdio(host->mmc->card))
 
-Presumably the ! is a mistake?  mmc_card_sdio() dereferences
-host->mmc->card.
 
-e088d1496d45c2 Haibo Chen 2022-12-21  463  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
-e088d1496d45c2 Haibo Chen 2022-12-21  464  
-45334ee13858de Haibo Chen 2021-08-18  465  	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
-45334ee13858de Haibo Chen 2021-08-18  466  			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
-45334ee13858de Haibo Chen 2021-08-18  467  			ESDHC_VEND_SPEC2);
-235cd41770bdcb Haibo Chen 2022-12-21  468  
-235cd41770bdcb Haibo Chen 2022-12-21  469  	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
-235cd41770bdcb Haibo Chen 2022-12-21  470  	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
-235cd41770bdcb Haibo Chen 2022-12-21  471  	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
-45334ee13858de Haibo Chen 2021-08-18  472  }
+Jernej Skrabec (2):
+  rtw88: ps: Increase LEAVE_LPS_TRY_CNT for SDIO based chipsets
+  rtw88: Add support for the SDIO based RTL8822BS chipset
+
+Martin Blumenstingl (17):
+  rtw88: mac: Use existing interface mask macros in rtw_pwr_seq_parser()
+  rtw88: pci: Change type of rtw_hw_queue_mapping() and ac_to_hwq to
+    enum
+  rtw88: pci: Change queue datatype from u8 to enum rtw_tx_queue_type
+  rtw88: Move enum rtw_tx_queue_type mapping code to tx.{c,h}
+  mmc: sdio: add Realtek SDIO vendor ID and various wifi device IDs
+  rtw88: rtw8821c: Add support for parsing the RTL8821CS (SDIO) efuse
+  rtw88: rtw8822b: Add support for parsing the RTL8822BS (SDIO) efuse
+  rtw88: rtw8822c: Add support for parsing the RTL8822CS (SDIO) efuse
+  rtw88: hci: Add an optional power_switch() callback to rtw_hci_ops
+  rtw88: mac: Add support for the SDIO HCI in rtw_pwr_seq_parser()
+  rtw88: mac: Add support for the SDIO HCI in the TX/page table setup
+  rtw88: sdio: Add HCI implementation for SDIO based chipsets
+  rtw88: mac: Add support for SDIO specifics in the power on sequence
+  rtw88: main: Add the rpwm_addr and cpwm_addr for SDIO based chipsets
+  rtw88: main: Reserve 8 bytes of extra TX headroom for SDIO based cards
+  rtw88: Add support for the SDIO based RTL8822CS chipset
+  rtw88: Add support for the SDIO based RTL8821CS chipset
+
+ drivers/net/wireless/realtek/rtw88/Kconfig    |   36 +
+ drivers/net/wireless/realtek/rtw88/Makefile   |   12 +
+ drivers/net/wireless/realtek/rtw88/debug.h    |    1 +
+ drivers/net/wireless/realtek/rtw88/hci.h      |    8 +
+ drivers/net/wireless/realtek/rtw88/mac.c      |   62 +-
+ drivers/net/wireless/realtek/rtw88/mac.h      |    1 -
+ drivers/net/wireless/realtek/rtw88/main.c     |    9 +-
+ drivers/net/wireless/realtek/rtw88/pci.c      |   50 +-
+ drivers/net/wireless/realtek/rtw88/ps.h       |    2 +-
+ drivers/net/wireless/realtek/rtw88/reg.h      |   10 +
+ drivers/net/wireless/realtek/rtw88/rtw8821c.c |    9 +
+ drivers/net/wireless/realtek/rtw88/rtw8821c.h |    6 +
+ .../net/wireless/realtek/rtw88/rtw8821cs.c    |   34 +
+ drivers/net/wireless/realtek/rtw88/rtw8822b.c |   10 +
+ drivers/net/wireless/realtek/rtw88/rtw8822b.h |    6 +
+ .../net/wireless/realtek/rtw88/rtw8822bs.c    |   34 +
+ drivers/net/wireless/realtek/rtw88/rtw8822c.c |    9 +
+ drivers/net/wireless/realtek/rtw88/rtw8822c.h |    6 +
+ .../net/wireless/realtek/rtw88/rtw8822cs.c    |   34 +
+ drivers/net/wireless/realtek/rtw88/sdio.c     | 1242 +++++++++++++++++
+ drivers/net/wireless/realtek/rtw88/sdio.h     |  175 +++
+ drivers/net/wireless/realtek/rtw88/tx.c       |   41 +
+ drivers/net/wireless/realtek/rtw88/tx.h       |    3 +
+ include/linux/mmc/sdio_ids.h                  |    9 +
+ 24 files changed, 1763 insertions(+), 46 deletions(-)
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8822bs.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8822cs.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.c
+ create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.h
 
 -- 
-0-DAY CI Kernel Test Service
-https://01.org/lkp
+2.39.0
 
