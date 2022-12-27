@@ -2,166 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 768D9C4332F
-	for <linux-mmc@archiver.kernel.org>; Tue, 27 Dec 2022 13:06:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 790A7C4167B
+	for <linux-mmc@archiver.kernel.org>; Tue, 27 Dec 2022 17:50:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231652AbiL0NFp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 27 Dec 2022 08:05:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49894 "EHLO
+        id S229965AbiL0RuU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 27 Dec 2022 12:50:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51660 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231552AbiL0NFI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Dec 2022 08:05:08 -0500
-Received: from mail-lj1-x231.google.com (mail-lj1-x231.google.com [IPv6:2a00:1450:4864:20::231])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7EB46546
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 05:05:07 -0800 (PST)
-Received: by mail-lj1-x231.google.com with SMTP id u12so9992785ljj.11
-        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 05:05:07 -0800 (PST)
+        with ESMTP id S229987AbiL0RuS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 27 Dec 2022 12:50:18 -0500
+Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2921A1
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 09:50:17 -0800 (PST)
+Received: by mail-wm1-x32f.google.com with SMTP id m3so889065wmq.0
+        for <linux-mmc@vger.kernel.org>; Tue, 27 Dec 2022 09:50:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=/ypp52Jl9epzjpr9pbWfQ6VvmlV2hnbQoOTkfbsiQ3I=;
-        b=EoNAUxYY+zmf6Wsj+ariOLgHS1aIkJtMZ+xZEJof9u7wv2KLNKBzovaDAMLreyJZyh
-         OOJADUWiItyv6TmJAgTkq8vDrIlqrjfuDNu56QgaQBw8A/Ca3poWSX1V7dHZilcoWbqs
-         54IqPXsQ/+L8WbJcxsya75oBY4sE2o+b9vBIIbe8ysPikDoVO5qgllgUjCdTCHv6n7c8
-         jdF/TO1DEoPRJqDBiN4dBKchNXRo6CqkS9lZwhZ+UaeKqKrHQ/bc6YBsYSUX0kpeMlVn
-         VdJ5+GchDmVmXS0JkYY+6mUuFyZBW7pmrDlN8pC7dxyHYnw1CPEwJIGj8tFhWVtS1z0F
-         LhNw==
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
+         :to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=7f0CdUXe8phT2kexAusIBnKBuWstxNOnBu3E9cI6oAw=;
+        b=Q9sjBtEne7RjKn4hDm87PK/7ZG+eYBNLw9Wv6p8ORD/X4ZMGE00WqK/5RRwu9Ml5lk
+         mk59HNlGK2PWEXyXq9ZyMrHIif2h7tBjd2i8Gfd5mA93mHHll16vwUI4/FIya6y68QmW
+         tGwTikOjEtEmXsVEDDBjLH5NFniqHqBmFSXZZrPZpL3bpd9RJjafMQMGAiG7VtCfZJeu
+         EWsp45l1oUERqLxPaHcnsaFUcEam1uc4psoX5rQu07/4Gpe4sZ7Vp6Dmi/0BFQ3rbtbE
+         eyx+QROpP7b1hSow6o0SXDfTg0Fo/zK3i55W+9JuMaGiRlbT/dSLGvO/ETrXfMyIAcw5
+         xCqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=/ypp52Jl9epzjpr9pbWfQ6VvmlV2hnbQoOTkfbsiQ3I=;
-        b=NzTdCD8wHhynPxLuYjWLg4XiFAvNqarHlE3GzGPSDgIZZtkrESJlBNInTCPLRSqxZZ
-         VRcxj0w7Rr1g9POLR1Si15wbeJbU9M7Bk73abO294aIQ7GXOQnwNp2HmrelDueCfddkQ
-         vn30d07VH//6946M2r7/9isnzXFalJYv2R+Wns8LupBRH4eZQorz/ZRFL1cavy8b7Qs/
-         JREQWYlE1loxiMKk8Wbm28eCglV1ZlXUsAJhfhW5mtiFiHa2L/i87PMBmGBjsHa4F+ez
-         mTpzqw5Z8npfSLdYweT8AS5xnWMcpQSa2eIegGq9Lke7hTGRSHQi2YGlLsIFDcThdv2U
-         n+PA==
-X-Gm-Message-State: AFqh2koUkMlgfyCQvoqt6iXo6oS6zp01CI2206hgV34mr6GV2+nrmoB5
-        8zKCzeMS5a5CnnFE8E7DC2/p1w==
-X-Google-Smtp-Source: AMrXdXsrcaAyC6pf/voNWRFUuNfp7Hu/TWeVnY47/GLGkCGxBbKiCOmVDwvsMujUhs8TkrotZIovWg==
-X-Received: by 2002:a2e:92cf:0:b0:27f:a604:22b8 with SMTP id k15-20020a2e92cf000000b0027fa60422b8mr4544273ljh.40.1672146306070;
-        Tue, 27 Dec 2022 05:05:06 -0800 (PST)
-Received: from [192.168.0.20] (088156142067.dynamic-2-waw-k-3-2-0.vectranet.pl. [88.156.142.67])
-        by smtp.gmail.com with ESMTPSA id u9-20020ac258c9000000b004bb8a796a6bsm2244389lfo.66.2022.12.27.05.05.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 27 Dec 2022 05:05:05 -0800 (PST)
-Message-ID: <fc5866ef-4eea-bc15-7cbe-d2e00c37e282@linaro.org>
-Date:   Tue, 27 Dec 2022 14:05:03 +0100
+        h=in-reply-to:content-disposition:mime-version:message-id:subject:cc
+         :to:from:date:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=7f0CdUXe8phT2kexAusIBnKBuWstxNOnBu3E9cI6oAw=;
+        b=3GfpgasVb4JHUxMAG8qi0cn2DYEtYX+rThkcFdsofy5gOnBZ/POWpIdvdxIYlw2ItR
+         xS2/AEbCUyU9Xe9pUiz6/TJW4SoKTYIrwuBmX2luAP965yVRMC8gm5UQWpWHxthTo8YG
+         15C5eAmkLpoNGeyR2knwGRLUniBnPNu7DrvXqU6fQcgIWiWCRCH6COdzJJDPBAIwkSu8
+         8RgPjPHGhqkJbQNvfXAo9CdDa6yKDYXYQEzpKZVzg0QLqkUhwJ3JXkzcBq5S+IzFRvm1
+         zc4IVELSc7jnd2X9BvXBS6JIvIS+sTFGCBmIOTK9PQuByXXBsoZqd1EMuzlOyD1CrLkz
+         4nmQ==
+X-Gm-Message-State: AFqh2krzBuDaVmwRpNKQ+zx3KjiN2AdZsBGoPtwTjskYFIINB9kUnG2M
+        kBY58DuAFpOaNdT2qH/chw4=
+X-Google-Smtp-Source: AMrXdXtEFINalGZewRhoRzS8KM0N+ONevOn0UdkngxKVKJp6fU6iLO0GHdGRhrwQ9567YL6Sv8i6zQ==
+X-Received: by 2002:a05:600c:5012:b0:3d3:5a4a:9103 with SMTP id n18-20020a05600c501200b003d35a4a9103mr15680308wmr.31.1672163416349;
+        Tue, 27 Dec 2022 09:50:16 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id hg24-20020a05600c539800b003cf71b1f66csm17759245wmb.0.2022.12.27.09.50.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 27 Dec 2022 09:50:15 -0800 (PST)
+Date:   Tue, 27 Dec 2022 20:50:13 +0300
+From:   Dan Carpenter <error27@gmail.com>
+To:     oe-kbuild@lists.linux.dev, haibo.chen@nxp.com,
+        ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     lkp@intel.com, oe-kbuild-all@lists.linux.dev, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        kgroeneveld@lenbrook.com, haibo.chen@nxp.com
+Subject: Re: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD
+ line auto tuning for SDIO device
+Message-ID: <202212262324.SVvtUbT2-lkp@intel.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: Add bindings for StarFive
-Content-Language: en-US
-To:     William Qiu <william.qiu@starfivetech.com>,
-        linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-References: <20221227122227.460921-1-william.qiu@starfivetech.com>
- <20221227122227.460921-2-william.qiu@starfivetech.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221227122227.460921-2-william.qiu@starfivetech.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221221112853.789675-4-haibo.chen@nxp.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 27/12/2022 13:22, William Qiu wrote:
-> Add documentation to describe StarFive
-> designware mobile storage host controller driver.
+Hi,
 
-Please wrap commit message according to Linux coding style / submission
-process (neither too early nor over the limit):
-https://elixir.bootlin.com/linux/v5.18-rc4/source/Documentation/process/submitting-patches.rst#L586
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-The subject is a bit redundant and not precise. No need to mention
-"bindings" twice but "StarFive" is really too generic. Do you add now
-all possible devices from StarFive? I see only one. Rephrase (use git
-log to find examples).
+url:    https://github.com/intel-lab-lkp/linux/commits/haibo-chen-nxp-com/fix-the-sdio-device-DATA-CMD-CRC-and-Timeout-issue-after-tuning/20221221-193033
+patch link:    https://lore.kernel.org/r/20221221112853.789675-4-haibo.chen%40nxp.com
+patch subject: [PATCH v2 3/3] mmc: sdhci-esdhc-imx: only enable DAT[0] and CMD line auto tuning for SDIO device
+config: parisc-randconfig-m031-20221225
+compiler: hppa-linux-gcc (GCC) 12.1.0
 
-> 
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
->  .../bindings/mmc/starfive,jh7110-mmc.yaml     | 72 +++++++++++++++++++
->  1 file changed, 72 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> new file mode 100644
-> index 000000000000..430dd5f24933
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> @@ -0,0 +1,72 @@
-> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/starfive,jh7110-mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: StarFive Designware Mobile Storage Host Controller
-> +
-> +description:
-> +  StarFive uses the Synopsys designware mobile storage host controller
-> +  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
-> +
-> +allOf:
-> +  - $ref: synopsys-dw-mshc-common.yaml#
-> +
-> +maintainers:
-> +  - William Qiu <william.qiu@starfivetech.com>
-> +
-> +properties:
-> +  compatible:
-> +    const: starfive,jh7110-mmc
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    items:
-> +      - description: biu clock
-> +      - description: ciu clock
-> +
-> +  clock-names:
-> +    items:
-> +      - const: biu
-> +      - const: ciu
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  starfive,syscon:
+If you fix the issue, kindly add following tag where applicable
+| Reported-by: kernel test robot <lkp@intel.com>
+| Reported-by: Dan Carpenter <error27@gmail.com>
 
-Name is not specific enough. What is syscon? Any syscon? This needs to
-be specific.
+smatch warnings:
+drivers/mmc/host/sdhci-esdhc-imx.c:462 usdhc_auto_tuning_mode_sel_and_en() error: we previously assumed 'host->mmc->card' could be null (see line 462)
 
-> +    $ref: /schemas/types.yaml#/definitions/phandle-array
-> +    description:
-> +      arg0:arg0 is syscon.
+vim +462 drivers/mmc/host/sdhci-esdhc-imx.c
 
-What is syscon?
+45334ee13858de Haibo Chen 2021-08-18  431  /* Enable the auto tuning circuit to check the CMD line and BUS line */
+235cd41770bdcb Haibo Chen 2022-12-21  432  static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
+45334ee13858de Haibo Chen 2021-08-18  433  {
+45334ee13858de Haibo Chen 2021-08-18  434  	u32 buswidth, auto_tune_buswidth;
+235cd41770bdcb Haibo Chen 2022-12-21  435  	u32 reg;
+45334ee13858de Haibo Chen 2021-08-18  436  
+45334ee13858de Haibo Chen 2021-08-18  437  	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
+45334ee13858de Haibo Chen 2021-08-18  438  
+45334ee13858de Haibo Chen 2021-08-18  439  	switch (buswidth) {
+45334ee13858de Haibo Chen 2021-08-18  440  	case ESDHC_CTRL_8BITBUS:
+45334ee13858de Haibo Chen 2021-08-18  441  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_8BIT_EN;
+45334ee13858de Haibo Chen 2021-08-18  442  		break;
+45334ee13858de Haibo Chen 2021-08-18  443  	case ESDHC_CTRL_4BITBUS:
+45334ee13858de Haibo Chen 2021-08-18  444  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_4BIT_EN;
+45334ee13858de Haibo Chen 2021-08-18  445  		break;
+45334ee13858de Haibo Chen 2021-08-18  446  	default:	/* 1BITBUS */
+45334ee13858de Haibo Chen 2021-08-18  447  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
+45334ee13858de Haibo Chen 2021-08-18  448  		break;
+45334ee13858de Haibo Chen 2021-08-18  449  	}
+45334ee13858de Haibo Chen 2021-08-18  450  
+e088d1496d45c2 Haibo Chen 2022-12-21  451  	/*
+e088d1496d45c2 Haibo Chen 2022-12-21  452  	 * For USDHC, auto tuning circuit can not handle the async sdio
+e088d1496d45c2 Haibo Chen 2022-12-21  453  	 * device interrupt correctly. When sdio device use 4 data lines,
+e088d1496d45c2 Haibo Chen 2022-12-21  454  	 * async sdio interrupt will use the shared DAT[1], if enable auto
+e088d1496d45c2 Haibo Chen 2022-12-21  455  	 * tuning circuit check these 4 data lines, include the DAT[1],
+e088d1496d45c2 Haibo Chen 2022-12-21  456  	 * this circuit will detect this interrupt, take this as a data on
+e088d1496d45c2 Haibo Chen 2022-12-21  457  	 * DAT[1], and adjust the delay cell wrongly.
+e088d1496d45c2 Haibo Chen 2022-12-21  458  	 * This is the hardware design limitation, to avoid this, for sdio
+e088d1496d45c2 Haibo Chen 2022-12-21  459  	 * device, config the auto tuning circuit only check DAT[0] and CMD
+e088d1496d45c2 Haibo Chen 2022-12-21  460  	 * line.
+e088d1496d45c2 Haibo Chen 2022-12-21  461  	 */
+e088d1496d45c2 Haibo Chen 2022-12-21 @462  	if (!host->mmc->card && mmc_card_sdio(host->mmc->card))
 
-> +      arg1:arg1 is syscon register offset, used to enable MMC function.
+Presumably the ! is a mistake?  mmc_card_sdio() dereferences
+host->mmc->card.
 
-Describe the argument, not what it is used for, e.g. "offset of XXX YYY ZZZ"
+e088d1496d45c2 Haibo Chen 2022-12-21  463  		auto_tune_buswidth = ESDHC_VEND_SPEC2_AUTO_TUNE_1BIT_EN;
+e088d1496d45c2 Haibo Chen 2022-12-21  464  
+45334ee13858de Haibo Chen 2021-08-18  465  	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
+45334ee13858de Haibo Chen 2021-08-18  466  			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
+45334ee13858de Haibo Chen 2021-08-18  467  			ESDHC_VEND_SPEC2);
+235cd41770bdcb Haibo Chen 2022-12-21  468  
+235cd41770bdcb Haibo Chen 2022-12-21  469  	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+235cd41770bdcb Haibo Chen 2022-12-21  470  	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+235cd41770bdcb Haibo Chen 2022-12-21  471  	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+45334ee13858de Haibo Chen 2021-08-18  472  }
 
-> +      arg2:arg2 is used to enable the register shift of the MMC function.
-> +      arg3:arg3 is used to enable the register mask of the MMC function.
-
-That's not how the phandle array is described. Instead:
-
-https://elixir.bootlin.com/linux/v5.18-rc1/source/Documentation/devicetree/bindings/soc/samsung/exynos-usi.yaml#L42
-
-
-
-Best regards,
-Krzysztof
+-- 
+0-DAY CI Kernel Test Service
+https://01.org/lkp
 
