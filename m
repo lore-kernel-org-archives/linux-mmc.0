@@ -2,331 +2,168 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26990C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Dec 2022 09:40:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F177EC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Dec 2022 10:40:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232734AbiL1JkL convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Dec 2022 04:40:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42072 "EHLO
+        id S229708AbiL1Kk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Dec 2022 05:40:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232841AbiL1JkE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2022 04:40:04 -0500
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 940ACE09D;
-        Wed, 28 Dec 2022 01:40:02 -0800 (PST)
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 2BS9cs5X3020226, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 2BS9cs5X3020226
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=FAIL);
-        Wed, 28 Dec 2022 17:38:54 +0800
-Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.9; Wed, 28 Dec 2022 17:39:47 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Wed, 28 Dec 2022 17:39:47 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b]) by
- RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b%5]) with mapi id
- 15.01.2375.007; Wed, 28 Dec 2022 17:39:47 +0800
-From:   Ping-Ke Shih <pkshih@realtek.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
-CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        "Nitin Gupta" <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: RE: [RFC PATCH v1 12/19] rtw88: sdio: Add HCI implementation for SDIO based chipsets
-Thread-Topic: [RFC PATCH v1 12/19] rtw88: sdio: Add HCI implementation for
- SDIO based chipsets
-Thread-Index: AQHZGktCsajZQIMfG02cvFqSiCFada6C3HLQ
-Date:   Wed, 28 Dec 2022 09:39:47 +0000
-Message-ID: <2a9e671ef17444238fee3e7e6f14484b@realtek.com>
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
- <20221227233020.284266-13-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20221227233020.284266-13-martin.blumenstingl@googlemail.com>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.21.69.188]
-x-kse-serverinfo: RTEXDAG02.realtek.com.tw, 9
-x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
- rules found
-x-kse-antivirus-interceptor-info: scan successful
-x-kse-antivirus-info: =?us-ascii?Q?Clean,_bases:_2022/12/28_=3F=3F_06:00:00?=
-x-kse-bulkmessagesfiltering-scan-result: protection disabled
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229632AbiL1Kk1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2022 05:40:27 -0500
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60EEBCEB;
+        Wed, 28 Dec 2022 02:40:22 -0800 (PST)
+Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 66CF424E102;
+        Wed, 28 Dec 2022 18:40:19 +0800 (CST)
+Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
+ (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 28 Dec
+ 2022 18:40:19 +0800
+Received: from [192.168.120.55] (171.223.208.138) by EXMBX168.cuchost.com
+ (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 28 Dec
+ 2022 18:40:18 +0800
+Message-ID: <4cb26636-8f65-b801-9374-e8b7e9fff2fe@starfivetech.com>
+Date:   Wed, 28 Dec 2022 18:40:18 +0800
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: Add bindings for StarFive
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20221227122227.460921-1-william.qiu@starfivetech.com>
+ <20221227122227.460921-2-william.qiu@starfivetech.com>
+ <fc5866ef-4eea-bc15-7cbe-d2e00c37e282@linaro.org>
+Content-Language: en-US
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <fc5866ef-4eea-bc15-7cbe-d2e00c37e282@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX168.cuchost.com
+ (172.16.6.78)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-> -----Original Message-----
-> From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Sent: Wednesday, December 28, 2022 7:30 AM
-> To: linux-wireless@vger.kernel.org
-> Cc: Yan-Hsuan Chuang <tony0620emma@gmail.com>; Kalle Valo <kvalo@kernel.org>; Ulf Hansson
-> <ulf.hansson@linaro.org>; linux-kernel@vger.kernel.org; netdev@vger.kernel.org;
-> linux-mmc@vger.kernel.org; Chris Morgan <macroalpha82@gmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
-> Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
-> Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Subject: [RFC PATCH v1 12/19] rtw88: sdio: Add HCI implementation for SDIO based chipsets
+On 2022/12/27 21:05, Krzysztof Kozlowski wrote:
+> On 27/12/2022 13:22, William Qiu wrote:
+>> Add documentation to describe StarFive
+>> designware mobile storage host controller driver.
 > 
-> Add a sub-driver for SDIO based chipsets which implements the following
-> functionality:
-> - register accessors for 8, 16 and 32 bits for all states of the card
->   (including usage of 4x 8 bit access for one 32 bit buffer if the card
->   is not fully powered on yet - or if it's fully powered on then 1x 32
->   bit access is used)
-> - checking whether there's space in the TX FIFO queue to transmit data
-> - transfers from the host to the device for actual network traffic,
->   reserved pages (for firmware download) and H2C (host-to-card)
->   transfers
-> - receiving data from the device
-> - deep power saving state
+> Please wrap commit message according to Linux coding style / submission
+> process (neither too early nor over the limit):
+> https://elixir.bootlin.com/linux/v5.18-rc4/source/Documentation/process/submitting-patches.rst#L586
 > 
-> The transmit path is optimized so DMA-capable SDIO host controllers can
-> directly use the buffers provided because the buffer's physical
-> addresses are 8 byte aligned.
-> 
-> The receive path is prepared to support RX aggregation where the
-> chipset combines multiple MAC frames into one bigger buffer to reduce
-> SDIO transfer overhead.
-> 
-> Co-developed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
-> Signed-off-by: Jernej Skrabec <jernej.skrabec@gmail.com>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
->  drivers/net/wireless/realtek/rtw88/Kconfig  |    3 +
->  drivers/net/wireless/realtek/rtw88/Makefile |    3 +
->  drivers/net/wireless/realtek/rtw88/debug.h  |    1 +
->  drivers/net/wireless/realtek/rtw88/mac.h    |    1 -
->  drivers/net/wireless/realtek/rtw88/reg.h    |   10 +
->  drivers/net/wireless/realtek/rtw88/sdio.c   | 1242 +++++++++++++++++++
->  drivers/net/wireless/realtek/rtw88/sdio.h   |  175 +++
->  7 files changed, 1434 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.c
->  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.h
+> The subject is a bit redundant and not precise. No need to mention
+> "bindings" twice but "StarFive" is really too generic. Do you add now
+> all possible devices from StarFive? I see only one. Rephrase (use git
+> log to find examples).
 > 
 
-[...]
+Will update
 
-> +
-> +static void rtw_sdio_writel(struct rtw_sdio *rtwsdio, u32 val,
-> +			    u32 addr, int *ret)
-> +{
-> +	u8 buf[4];
-> +	int i;
-> +
-> +	if (!(addr & 3) && rtwsdio->is_powered_on) {
-> +		sdio_writel(rtwsdio->sdio_func, val, addr, ret);
-> +		return;
-> +	}
-> +
-> +	*(__le32 *)buf = cpu_to_le32(val);
-> +
-> +	for (i = 0; i < 4; i++) {
-> +		sdio_writeb(rtwsdio->sdio_func, buf[i], addr + i, ret);
-> +		if (*ret)
+>> 
+>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>> ---
+>>  .../bindings/mmc/starfive,jh7110-mmc.yaml     | 72 +++++++++++++++++++
+>>  1 file changed, 72 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+>> 
+>> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+>> new file mode 100644
+>> index 000000000000..430dd5f24933
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+>> @@ -0,0 +1,72 @@
+>> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/mmc/starfive,jh7110-mmc.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: StarFive Designware Mobile Storage Host Controller
+>> +
+>> +description:
+>> +  StarFive uses the Synopsys designware mobile storage host controller
+>> +  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
+>> +
+>> +allOf:
+>> +  - $ref: synopsys-dw-mshc-common.yaml#
+>> +
+>> +maintainers:
+>> +  - William Qiu <william.qiu@starfivetech.com>
+>> +
+>> +properties:
+>> +  compatible:
+>> +    const: starfive,jh7110-mmc
+>> +
+>> +  reg:
+>> +    maxItems: 1
+>> +
+>> +  clocks:
+>> +    items:
+>> +      - description: biu clock
+>> +      - description: ciu clock
+>> +
+>> +  clock-names:
+>> +    items:
+>> +      - const: biu
+>> +      - const: ciu
+>> +
+>> +  interrupts:
+>> +    maxItems: 1
+>> +
+>> +  starfive,syscon:
+> 
+> Name is not specific enough. What is syscon? Any syscon? This needs to
+> be specific.
+> 
 
-Do you need some messages to know something wrong?
+Will update.
 
-> +			return;
-> +	}
-> +}
-> +
-> +static u32 rtw_sdio_readl(struct rtw_sdio *rtwsdio, u32 addr, int *ret)
-> +{
-> +	u8 buf[4];
-> +	int i;
-> +
-> +	if (!(addr & 3) && rtwsdio->is_powered_on)
-> +		return sdio_readl(rtwsdio->sdio_func, addr, ret);
-> +
-> +	for (i = 0; i < 4; i++) {
-> +		buf[i] = sdio_readb(rtwsdio->sdio_func, addr + i, ret);
-> +		if (*ret)
-> +			return 0;
-> +	}
-> +
-> +	return le32_to_cpu(*(__le32 *)buf);
-> +}
-> +
-> +static u8 rtw_sdio_read_indirect8(struct rtw_dev *rtwdev, u32 addr, int *ret)
-> +{
-> +	struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +	u32 reg_cfg, reg_data;
-> +	int retry;
-> +	u8 tmp;
-> +
-> +	reg_cfg = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_CFG);
-> +	reg_data = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_DATA);
-> +
-> +	rtw_sdio_writel(rtwsdio, BIT(19) | addr, reg_cfg, ret);
-> +	if (*ret)
-> +		return 0;
-> +
-> +	for (retry = 0; retry < RTW_SDIO_INDIRECT_RW_RETRIES; retry++) {
-> +		tmp = sdio_readb(rtwsdio->sdio_func, reg_cfg + 2, ret);
-> +		if (!ret && tmp & BIT(4))
+>> +    $ref: /schemas/types.yaml#/definitions/phandle-array
+>> +    description:
+>> +      arg0:arg0 is syscon.
+> 
+> What is syscon?
+> 
 
-'ret' is pointer, do you need '*' ?
+Will update.
 
-if (!*ret && tmp & BIT(4)) 
+>> +      arg1:arg1 is syscon register offset, used to enable MMC function.
+> 
+> Describe the argument, not what it is used for, e.g. "offset of XXX YYY ZZZ"
+> 
+>> +      arg2:arg2 is used to enable the register shift of the MMC function.
+>> +      arg3:arg3 is used to enable the register mask of the MMC function.
+> 
+> That's not how the phandle array is described. Instead:
+> 
+> https://elixir.bootlin.com/linux/v5.18-rc1/source/Documentation/devicetree/bindings/soc/samsung/exynos-usi.yaml#L42
+> 
 
-As I look into sdio_readb(), it use 'int *err_ret' as arugment. 
-Would you like to change ' int *ret' to 'int *err_ret'?
-It could help to misunderstand. 
+Hi Krzysztof,
 
-> +			break;
-> +	}
-> +
-> +	if (*ret)
-> +		return 0;
-> +
-> +	return sdio_readb(rtwsdio->sdio_func, reg_data, ret);
-> +}
-> +
+Thank you for taking time to review and provide helpful comments for this patch.
+I will fix all the above issues in the next version.
 
-[...]
+Best Regards,
+William Qiu
 
-> +
-> +static void rtw_sdio_rx_aggregation(struct rtw_dev *rtwdev, bool enable)
-> +{
-> +	u8 size, timeout;
-> +
-> +	if (enable) {
-> +		if (rtwdev->chip->id == RTW_CHIP_TYPE_8822C) {
-> +			size = 0xff;
-> +			timeout = 0x20;
-> +		} else {
-> +			size = 0x6;
-> +			timeout = 0x6;
-> +		}
-> +
-> +		/* Make the firmware honor the size limit configured below */
-> +		rtw_write32_set(rtwdev, REG_RXDMA_AGG_PG_TH, BIT_EN_PRE_CALC);
-> +
-> +		rtw_write8_set(rtwdev, REG_TXDMA_PQ_MAP, BIT_RXDMA_AGG_EN);
-> +
-> +		rtw_write16(rtwdev, REG_RXDMA_AGG_PG_TH, size |
-> +			    (timeout << BIT_SHIFT_DMA_AGG_TO_V1));
-
-BIT_RXDMA_AGG_PG_TH GENMASK(7, 0)	// for size
-BIT_DMA_AGG_TO_V1 GENMASK(15, 8)	// for timeout
-
-> +
-> +		rtw_write8_set(rtwdev, REG_RXDMA_MODE, BIT_DMA_MODE);
-> +	} else {
-> +		rtw_write32_clr(rtwdev, REG_RXDMA_AGG_PG_TH, BIT_EN_PRE_CALC);
-> +		rtw_write8_clr(rtwdev, REG_TXDMA_PQ_MAP, BIT_RXDMA_AGG_EN);
-> +		rtw_write8_clr(rtwdev, REG_RXDMA_MODE, BIT_DMA_MODE);
-> +	}
-> +}
-> +
-> +static void rtw_sdio_enable_interrupt(struct rtw_dev *rtwdev)
-> +{
-> +	struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +	rtw_write32(rtwdev, REG_SDIO_HIMR, rtwsdio->irq_mask);
-> +}
-> +
-> +static void rtw_sdio_disable_interrupt(struct rtw_dev *rtwdev)
-> +{
-> +	rtw_write32(rtwdev, REG_SDIO_HIMR, 0x0);
-> +}
-> +
-> +static u8 rtw_sdio_get_tx_qsel(struct rtw_dev *rtwdev, struct sk_buff *skb,
-> +			       u8 queue)
-> +{
-> +	switch (queue) {
-> +	case RTW_TX_QUEUE_BCN:
-> +		return TX_DESC_QSEL_BEACON;
-> +	case RTW_TX_QUEUE_H2C:
-> +		return TX_DESC_QSEL_H2C;
-> +	case RTW_TX_QUEUE_MGMT:
-> +		if (rtw_chip_wcpu_11n(rtwdev))
-> +			return TX_DESC_QSEL_HIGH;
-> +		else
-> +			return TX_DESC_QSEL_MGMT;
-> +	case RTW_TX_QUEUE_HI0:
-> +		return TX_DESC_QSEL_HIGH;
-> +	default:
-> +		return skb->priority;
-> +	}
-> +};
-
-no need ';'
-
-[...]
-
-> +
-> +static void rtw_sdio_rx_isr(struct rtw_dev *rtwdev)
-> +{
-> +	u32 rx_len;
-> +
-> +	while (true) {
-
-add a limit to prevent infinite loop.
-
-> +		if (rtw_chip_wcpu_11n(rtwdev))
-> +			rx_len = rtw_read16(rtwdev, REG_SDIO_RX0_REQ_LEN);
-> +		else
-> +			rx_len = rtw_read32(rtwdev, REG_SDIO_RX0_REQ_LEN);
-> +
-> +		if (!rx_len)
-> +			break;
-> +
-> +		rtw_sdio_rxfifo_recv(rtwdev, rx_len);
-> +	}
-> +}
-> +
-
-[...]
-
-> +
-> +static void rtw_sdio_process_tx_queue(struct rtw_dev *rtwdev,
-> +				      enum rtw_tx_queue_type queue)
-> +{
-> +	struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +	struct sk_buff *skb;
-> +	int ret;
-> +
-> +	while (true) {
-
-Can we have a limit?
-
-> +		skb = skb_dequeue(&rtwsdio->tx_queue[queue]);
-> +		if (!skb)
-> +			break;
-> +
-> +		ret = rtw_sdio_write_port(rtwdev, skb, queue);
-> +		if (ret) {
-> +			skb_queue_head(&rtwsdio->tx_queue[queue], skb);
-> +			break;
-> +		}
-> +
-> +		if (queue <= RTW_TX_QUEUE_VO)
-> +			rtw_sdio_indicate_tx_status(rtwdev, skb);
-> +		else
-> +			dev_kfree_skb_any(skb);
-> +	}
-> +}
-> +
-
-[...]
-
-
+> 
+> 
+> Best regards,
+> Krzysztof
+> 
