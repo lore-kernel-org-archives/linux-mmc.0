@@ -2,168 +2,170 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F177EC4332F
-	for <linux-mmc@archiver.kernel.org>; Wed, 28 Dec 2022 10:40:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD284C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed, 28 Dec 2022 12:00:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229708AbiL1Kk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 28 Dec 2022 05:40:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41860 "EHLO
+        id S232824AbiL1MAg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 28 Dec 2022 07:00:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40940 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229632AbiL1Kk1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2022 05:40:27 -0500
-Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60EEBCEB;
-        Wed, 28 Dec 2022 02:40:22 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 66CF424E102;
-        Wed, 28 Dec 2022 18:40:19 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 28 Dec
- 2022 18:40:19 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX168.cuchost.com
- (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 28 Dec
- 2022 18:40:18 +0800
-Message-ID: <4cb26636-8f65-b801-9374-e8b7e9fff2fe@starfivetech.com>
-Date:   Wed, 28 Dec 2022 18:40:18 +0800
+        with ESMTP id S233130AbiL1L74 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 28 Dec 2022 06:59:56 -0500
+Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C0441057E;
+        Wed, 28 Dec 2022 03:59:55 -0800 (PST)
+Received: by mail-ed1-x52a.google.com with SMTP id c34so15967790edf.0;
+        Wed, 28 Dec 2022 03:59:54 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=y3dCBduSZep7OtTaS9LhWzGoxt4oPR9hKAZLosj+w9Y=;
+        b=O1B4AaBRlbaNtr6ENlhGMOwiBXypMphOmNmFl+u1EV1ALRUIuRz89SY14mNhOiryww
+         NLJaCfn9E+XWOFUfDXpftsyH4Ot4I6tq1NCQVCng1NN8NFCEFRES4HMc5w0zeWtZAIiD
+         /Ydzi/ZIcCC/0gkLvGOdcKMcCWB8vVRgfGEY3u6hG8R/954epU8p/egwIePu3/p4eDoa
+         vPw/jYJdO/cPXcYkHm1HemTRLyhJwoKiPW2XVk3b0jeq3OQV+/BAHbqeyoAcE2HIFdna
+         33/7ghCqjhGxY26lNdwFSviFqxDTPyE7y3fS4WEjv/uL/8pKgF2Ofnn9VE9du3fTZHvq
+         43cA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=y3dCBduSZep7OtTaS9LhWzGoxt4oPR9hKAZLosj+w9Y=;
+        b=wiwMVLTxXIhRTNnn9S3Bic/aDYntOEyhRYdc9NSSoLQnOd4fbfDnMedZrxIHMwlnTP
+         rE3ba5bmdVkNATiGoDTObgAqSueYK0eUCboVsdcFuj0GeduTu7LUTjGllCHYHaJHTax4
+         Ofw7mdhuni6+16Fkg+ZC6rfXZMMHIWXt+KMpYGHBpFRz+zbWtLChH0Y4v5kI4uKPWRHT
+         v5OsdPcr1lbJNEHOI1E74JSxfPrYhjsGWYGtMqtN9u71WT+GmSaPYGm+oSP/dTZhXuXe
+         EnDTna8O82PuYPpdcDNNVQkbLb0B/VIDYJMcEZ9R+e33B1MU1a4J+FzZwZpZUyYxUkCd
+         Hpbg==
+X-Gm-Message-State: AFqh2krAo38OKHD50yevr8QXKQhTSd9V/QshfWpbkqYIvZSa0jsaSTLY
+        90qaZlsEdIAgieRiDrsOzRFMpjEIQ+yPxR/13Zg=
+X-Google-Smtp-Source: AMrXdXunyLRnGi+5FJ5SwEShJ34TGNrDu6XFzxjG/T4X0i6iCX9AeAnSDYpw2vSBQ9EGT/1RBYyphnyr2L7UB5ORgQ0=
+X-Received: by 2002:aa7:c0cd:0:b0:461:b033:90ac with SMTP id
+ j13-20020aa7c0cd000000b00461b03390acmr2868918edp.257.1672228793315; Wed, 28
+ Dec 2022 03:59:53 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH v2 1/3] dt-bindings: mmc: Add bindings for StarFive
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
+References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+ <20221227233020.284266-13-martin.blumenstingl@googlemail.com> <2a9e671ef17444238fee3e7e6f14484b@realtek.com>
+In-Reply-To: <2a9e671ef17444238fee3e7e6f14484b@realtek.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Wed, 28 Dec 2022 12:59:42 +0100
+Message-ID: <CAFBinCDVq6o0c6OLSD0PhQKFPrXohjhdJeXk=5wuDEWMKwufrA@mail.gmail.com>
+Subject: Re: [RFC PATCH v1 12/19] rtw88: sdio: Add HCI implementation for SDIO
+ based chipsets
+To:     Ping-Ke Shih <pkshih@realtek.com>
+Cc:     "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20221227122227.460921-1-william.qiu@starfivetech.com>
- <20221227122227.460921-2-william.qiu@starfivetech.com>
- <fc5866ef-4eea-bc15-7cbe-d2e00c37e282@linaro.org>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <fc5866ef-4eea-bc15-7cbe-d2e00c37e282@linaro.org>
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Chris Morgan <macroalpha82@gmail.com>,
+        Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Ping-Ke,
+
+as always: thank you so much for taking time to go through this!
+
+On Wed, Dec 28, 2022 at 10:39 AM Ping-Ke Shih <pkshih@realtek.com> wrote:
+[...]
+>
+> > +
+> > +static void rtw_sdio_writel(struct rtw_sdio *rtwsdio, u32 val,
+> > +                         u32 addr, int *ret)
+> > +{
+> > +     u8 buf[4];
+> > +     int i;
+> > +
+> > +     if (!(addr & 3) && rtwsdio->is_powered_on) {
+> > +             sdio_writel(rtwsdio->sdio_func, val, addr, ret);
+> > +             return;
+> > +     }
+> > +
+> > +     *(__le32 *)buf = cpu_to_le32(val);
+> > +
+> > +     for (i = 0; i < 4; i++) {
+> > +             sdio_writeb(rtwsdio->sdio_func, buf[i], addr + i, ret);
+> > +             if (*ret)
+>
+> Do you need some messages to know something wrong?
+It's not obvious but we're already logging that something went wrong.
+The messages are logged in rtw_sdio_{read,write}{8,16,32}.
+We do this because there's multiple ways to access data (direct,
+indirect, ...) and some of them require multiple register operations.
+So we print one message in the end.
+
+[...]
+> > +static u8 rtw_sdio_read_indirect8(struct rtw_dev *rtwdev, u32 addr, int *ret)
+> > +{
+> > +     struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
+> > +     u32 reg_cfg, reg_data;
+> > +     int retry;
+> > +     u8 tmp;
+> > +
+> > +     reg_cfg = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_CFG);
+> > +     reg_data = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_DATA);
+> > +
+> > +     rtw_sdio_writel(rtwsdio, BIT(19) | addr, reg_cfg, ret);
+> > +     if (*ret)
+> > +             return 0;
+> > +
+> > +     for (retry = 0; retry < RTW_SDIO_INDIRECT_RW_RETRIES; retry++) {
+> > +             tmp = sdio_readb(rtwsdio->sdio_func, reg_cfg + 2, ret);
+> > +             if (!ret && tmp & BIT(4))
+>
+> 'ret' is pointer, do you need '*' ?
+Well spotted - thank you!
+
+[...]
+> As I look into sdio_readb(), it use 'int *err_ret' as arugment.
+> Would you like to change ' int *ret' to 'int *err_ret'?
+> It could help to misunderstand.
+Sure, I'll do that
+
+[...]
+> > +             rtw_write16(rtwdev, REG_RXDMA_AGG_PG_TH, size |
+> > +                         (timeout << BIT_SHIFT_DMA_AGG_TO_V1));
+>
+> BIT_RXDMA_AGG_PG_TH GENMASK(7, 0)       // for size
+> BIT_DMA_AGG_TO_V1 GENMASK(15, 8)        // for timeout
+Thanks, I'll use these
+
+[...]
+> > +static void rtw_sdio_rx_isr(struct rtw_dev *rtwdev)
+> > +{
+> > +     u32 rx_len;
+> > +
+> > +     while (true) {
+>
+> add a limit to prevent infinite loop.
+Do you have any recommendations on how many packets to pull in one go?
+My thinking is: pulling to little data at once can hurt performance
+
+[...]
+>
+> > +
+> > +static void rtw_sdio_process_tx_queue(struct rtw_dev *rtwdev,
+> > +                                   enum rtw_tx_queue_type queue)
+> > +{
+> > +     struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
+> > +     struct sk_buff *skb;
+> > +     int ret;
+> > +
+> > +     while (true) {
+>
+> Can we have a limit?
+Similar to the question above: do you have any recommendations on how
+many packets (per queue) to send in one go?
 
 
-On 2022/12/27 21:05, Krzysztof Kozlowski wrote:
-> On 27/12/2022 13:22, William Qiu wrote:
->> Add documentation to describe StarFive
->> designware mobile storage host controller driver.
-> 
-> Please wrap commit message according to Linux coding style / submission
-> process (neither too early nor over the limit):
-> https://elixir.bootlin.com/linux/v5.18-rc4/source/Documentation/process/submitting-patches.rst#L586
-> 
-> The subject is a bit redundant and not precise. No need to mention
-> "bindings" twice but "StarFive" is really too generic. Do you add now
-> all possible devices from StarFive? I see only one. Rephrase (use git
-> log to find examples).
-> 
-
-Will update
-
->> 
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> ---
->>  .../bindings/mmc/starfive,jh7110-mmc.yaml     | 72 +++++++++++++++++++
->>  1 file changed, 72 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->> 
->> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->> new file mode 100644
->> index 000000000000..430dd5f24933
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->> @@ -0,0 +1,72 @@
->> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/mmc/starfive,jh7110-mmc.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: StarFive Designware Mobile Storage Host Controller
->> +
->> +description:
->> +  StarFive uses the Synopsys designware mobile storage host controller
->> +  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
->> +
->> +allOf:
->> +  - $ref: synopsys-dw-mshc-common.yaml#
->> +
->> +maintainers:
->> +  - William Qiu <william.qiu@starfivetech.com>
->> +
->> +properties:
->> +  compatible:
->> +    const: starfive,jh7110-mmc
->> +
->> +  reg:
->> +    maxItems: 1
->> +
->> +  clocks:
->> +    items:
->> +      - description: biu clock
->> +      - description: ciu clock
->> +
->> +  clock-names:
->> +    items:
->> +      - const: biu
->> +      - const: ciu
->> +
->> +  interrupts:
->> +    maxItems: 1
->> +
->> +  starfive,syscon:
-> 
-> Name is not specific enough. What is syscon? Any syscon? This needs to
-> be specific.
-> 
-
-Will update.
-
->> +    $ref: /schemas/types.yaml#/definitions/phandle-array
->> +    description:
->> +      arg0:arg0 is syscon.
-> 
-> What is syscon?
-> 
-
-Will update.
-
->> +      arg1:arg1 is syscon register offset, used to enable MMC function.
-> 
-> Describe the argument, not what it is used for, e.g. "offset of XXX YYY ZZZ"
-> 
->> +      arg2:arg2 is used to enable the register shift of the MMC function.
->> +      arg3:arg3 is used to enable the register mask of the MMC function.
-> 
-> That's not how the phandle array is described. Instead:
-> 
-> https://elixir.bootlin.com/linux/v5.18-rc1/source/Documentation/devicetree/bindings/soc/samsung/exynos-usi.yaml#L42
-> 
-
-Hi Krzysztof,
-
-Thank you for taking time to review and provide helpful comments for this patch.
-I will fix all the above issues in the next version.
-
-Best Regards,
-William Qiu
-
-> 
-> 
-> Best regards,
-> Krzysztof
-> 
+Best regards,
+Martin
