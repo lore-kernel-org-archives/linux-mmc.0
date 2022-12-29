@@ -2,49 +2,50 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9837C46467
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Dec 2022 20:04:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7493C46467
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Dec 2022 20:04:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229688AbiL2UEq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Dec 2022 15:04:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44932 "EHLO
+        id S233287AbiL2UEy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Dec 2022 15:04:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229598AbiL2UEp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 15:04:45 -0500
-Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 56E9A13EB5
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 12:04:44 -0800 (PST)
-Received: by mail-pl1-x629.google.com with SMTP id d9so3136436pll.9
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 12:04:44 -0800 (PST)
+        with ESMTP id S229615AbiL2UEx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 15:04:53 -0500
+Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE25013F88
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 12:04:51 -0800 (PST)
+Received: by mail-pj1-x1033.google.com with SMTP id n65-20020a17090a2cc700b0021bc5ef7a14so19875444pjd.0
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 12:04:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=schmorgal.com; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=7Kdx6qunKWdZtPXqSsAPAhwXntfvceiLldzWWE6K89Y=;
-        b=XUEP9mpisotf6w0WuMD7GCwLevwuY/XmWInGswNkdlhjeIHOfeWF0L1V8bnQ7PXZ4R
-         Nery7ja3ft1afKaqRc7r0fYZK8/K/vTuk6LRorawWoWNnOBPhozi73GKazMIKzi1K6DR
-         Z4cN/SHys4A50fcKzphFHhE2YNEjajGdlb2po=
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=THu9QMNuJA2VLaqG7RBOupd/FwlnEsHSPzLMTF3bhmM=;
+        b=E+kP4To4Zqmzj4VnzgJ7fPeHfDNzUJ5kN99ndY4qRVSFbjiMwEBPI0CMuh5MA9ITBZ
+         Lo6LeHpg8JxUxDp+pO+NFqh1DHjCHvP4cytZpfyuC7zp/lxvftZZuACyM4B08QArfUzx
+         a1+UHy8ikaWM2TrhR4qSGZvAuWh+9KvMhlynA=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7Kdx6qunKWdZtPXqSsAPAhwXntfvceiLldzWWE6K89Y=;
-        b=cHOuMFsMmagQ+y1rEtz/0PdQwVj0QNbn0CoL7D8Sk1MT6+yrCKOctqPlkWWYluvkBt
-         LyCPJqWeIvftABi5vmHdikTVxcImwLgVV+AcddlC8uHZ+B26LjTphBsCRPkJZ+vBbHMg
-         KyHeK2SQbOOXRLbNITICHM2jwvMCiQbgIVIOKTgB1cSvmvzbyfISz64AJkv1nC7/AWSH
-         7YhITeyPRiMj1L1R/HBcLlfuI3vOs8jgsgSUAA8y1/tHqXs5rPZ2/F10ty6NC4GVkWQ+
-         kPOpOTP8aONnDUEG0OHiAlxYZ3MVcjJu+qLxLRol60Whv9jRapJBt+vptsjnQ2b7nGiy
-         0sqA==
-X-Gm-Message-State: AFqh2krwwY6Y6YN9BO5XoFdXfFwfskAf8TCML+xgOAfj11bEPJaZXFWe
-        EVWlJ6mtCIYWr/cQHHyd/75odw==
-X-Google-Smtp-Source: AMrXdXscnFQ+HQja6CEM+QckKJAnMvh73I84o5AlMRWucUYaKiwUxNScyiUcN0nvWl9YT89ovvv7xQ==
-X-Received: by 2002:a17:902:eb8f:b0:186:f57d:8573 with SMTP id q15-20020a170902eb8f00b00186f57d8573mr32381962plg.2.1672344283627;
-        Thu, 29 Dec 2022 12:04:43 -0800 (PST)
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=THu9QMNuJA2VLaqG7RBOupd/FwlnEsHSPzLMTF3bhmM=;
+        b=SZs+B7zYpymsEE2KYxt2quuijMmHACpwW6vZ30Z5OhVg0CcKXNnoO+duxmMZeknf8c
+         uAmy9sTPsVqrqdllsrDe8OhWkLD5G9n8eU5NvMqaGNNzYwg7s87PS8MKabQbBMXCBJ7g
+         lhmGadbvZ0p55BK+KFna2hAEfUdRaEYL+u7dpXgdQ+KQw5fgAyjsFAnDsnzwlKyFuktY
+         FvBJ4aIvyl44HQh9fFL6U6LIuxHdTI9IVFFF0ljazkQhrutrh5VQlBOimgM3drqhmANe
+         5+7Ib22a1POPXhhnDHWgzp7beAv1zEliWSKCeHc4Fy8vjCD4rs32LZlmIC+TTjmE06rQ
+         5SfA==
+X-Gm-Message-State: AFqh2kp/3jTcJ80J+gzg5H3L+4bps9XWf/6IX4DRDgBwaKj/rRbT4441
+        o33fl0CsBBjxItwck/p9kdH1Itxeyo+/ljtPYjZxIA==
+X-Google-Smtp-Source: AMrXdXuXmlyeuQYOw90K/c3dIQQ7TFZ/gllINgDBn4Z8lOCzZ0Nd+Wwljgg+hiODBHHeoT5T6huhzQ==
+X-Received: by 2002:a17:902:c10a:b0:188:bc62:276f with SMTP id 10-20020a170902c10a00b00188bc62276fmr31841494pli.3.1672344291243;
+        Thu, 29 Dec 2022 12:04:51 -0800 (PST)
 Received: from doug-ryzen-5700G.. ([192.183.212.197])
-        by smtp.gmail.com with ESMTPSA id w17-20020a170902e89100b00189ac5a2340sm13438589plg.124.2022.12.29.12.04.42
+        by smtp.gmail.com with ESMTPSA id w17-20020a170902e89100b00189ac5a2340sm13438589plg.124.2022.12.29.12.04.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 29 Dec 2022 12:04:43 -0800 (PST)
+        Thu, 29 Dec 2022 12:04:50 -0800 (PST)
 From:   Doug Brown <doug@schmorgal.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>
@@ -52,58 +53,109 @@ Cc:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         Doug Brown <doug@schmorgal.com>
-Subject: [PATCH v3 0/8] mmc: sdhci-pxav2: Add support for PXA168
-Date:   Thu, 29 Dec 2022 12:04:03 -0800
-Message-Id: <20221229200411.295339-1-doug@schmorgal.com>
+Subject: [PATCH v3 1/8] mmc: sdhci-pxav2: add initial support for PXA168 V1 controller
+Date:   Thu, 29 Dec 2022 12:04:04 -0800
+Message-Id: <20221229200411.295339-2-doug@schmorgal.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20221229200411.295339-1-doug@schmorgal.com>
+References: <20221229200411.295339-1-doug@schmorgal.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This is a revival of an earlier patch series from 2013 to add support
-for the PXA168 SDHC controller, with an additional SDIO IRQ errata fix.
-It also cleans up the clock naming to be consistent with the existing DT
-schema shared with the pxav3 driver (in a backwards-compatible way).
+Add a new compatible string for the version 1 controller used in the
+PXA168, along with necessary quirks. Use a separate ops struct in
+preparation for a silicon bug workaround only necessary on V1.
 
-Here is the original patch series this is based on:
-https://lore.kernel.org/linux-mmc/1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com/
+Signed-off-by: Doug Brown <doug@schmorgal.com>
+---
+ drivers/mmc/host/sdhci-pxav2.c | 40 +++++++++++++++++++++++++++-------
+ 1 file changed, 32 insertions(+), 8 deletions(-)
 
-Note that I left out the platform_specific_completion and clock gating
-changes from the original patches. They both seemed controversial, and
-don't seem necessary based on my testing. I've been running this code on
-a PXA168 for months without any issues.
-
-Changes in v3:
-- Use OF match data rather than of_match_device and of_device_is_compatible
-- Simplify some instances of pdev->dev that could have just been "dev"
-- Handle EPROBE_DEFER when getting the clock
-- Use devm_clk_get_optional_enabled for the core clock (it's simpler)
-- Clear sdio_mrq before calling mmc_request_done
-- Small tweaks to devicetree binding requested by Krzysztof
-
-Changes in v2:
-- Fix mistakes in devicetree binding
-- Use cleaner code for pxav1_readw suggested by Adrian
-- Switch to request_done() and irq() for SDIO workaround CMD0 handling
-
-Doug Brown (8):
-  mmc: sdhci-pxav2: add initial support for PXA168 V1 controller
-  mmc: sdhci-pxav2: enable CONFIG_MMC_SDHCI_IO_ACCESSORS
-  mmc: sdhci-pxav2: add register workaround for PXA168 silicon bug
-  mmc: sdhci-pxav2: change clock name to match DT bindings
-  mmc: sdhci-pxav2: add optional core clock
-  mmc: sdhci-pxav2: add SDIO card IRQ workaround for PXA168 V1
-    controller
-  mmc: sdhci-pxav2: add optional pinctrl for SDIO IRQ workaround
-  dt-bindings: mmc: sdhci-pxa: add pxav1
-
- .../devicetree/bindings/mmc/sdhci-pxa.yaml    |  19 ++-
- drivers/mmc/host/Kconfig                      |   1 +
- drivers/mmc/host/sdhci-pxav2.c                | 153 ++++++++++++++++--
- 3 files changed, 159 insertions(+), 14 deletions(-)
-
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index f18906b5575f..5707d597ecae 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -101,6 +101,24 @@ static void pxav2_mmc_set_bus_width(struct sdhci_host *host, int width)
+ 	writeb(ctrl, host->ioaddr + SDHCI_HOST_CONTROL);
+ }
+ 
++struct sdhci_pxa_variant {
++	const struct sdhci_ops *ops;
++	unsigned int extra_quirks;
++};
++
++static const struct sdhci_ops pxav1_sdhci_ops = {
++	.set_clock     = sdhci_set_clock,
++	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
++	.set_bus_width = pxav2_mmc_set_bus_width,
++	.reset         = pxav2_reset,
++	.set_uhs_signaling = sdhci_set_uhs_signaling,
++};
++
++static const struct sdhci_pxa_variant __maybe_unused pxav1_variant = {
++	.ops = &pxav1_sdhci_ops,
++	.extra_quirks = SDHCI_QUIRK_NO_BUSY_IRQ | SDHCI_QUIRK_32BIT_DMA_SIZE,
++};
++
+ static const struct sdhci_ops pxav2_sdhci_ops = {
+ 	.set_clock     = sdhci_set_clock,
+ 	.get_max_clock = sdhci_pltfm_clk_get_max_clock,
+@@ -109,11 +127,14 @@ static const struct sdhci_ops pxav2_sdhci_ops = {
+ 	.set_uhs_signaling = sdhci_set_uhs_signaling,
+ };
+ 
++static const struct sdhci_pxa_variant pxav2_variant = {
++	.ops = &pxav2_sdhci_ops,
++};
++
+ #ifdef CONFIG_OF
+ static const struct of_device_id sdhci_pxav2_of_match[] = {
+-	{
+-		.compatible = "mrvl,pxav2-mmc",
+-	},
++	{ .compatible = "mrvl,pxav1-mmc", .data = &pxav1_variant, },
++	{ .compatible = "mrvl,pxav2-mmc", .data = &pxav2_variant, },
+ 	{},
+ };
+ MODULE_DEVICE_TABLE(of, sdhci_pxav2_of_match);
+@@ -157,7 +178,7 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+ 	struct sdhci_pxa_platdata *pdata = pdev->dev.platform_data;
+ 	struct device *dev = &pdev->dev;
+ 	struct sdhci_host *host = NULL;
+-	const struct of_device_id *match;
++	const struct sdhci_pxa_variant *variant;
+ 
+ 	int ret;
+ 	struct clk *clk;
+@@ -185,10 +206,12 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+ 		| SDHCI_QUIRK_BROKEN_TIMEOUT_VAL
+ 		| SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN;
+ 
+-	match = of_match_device(of_match_ptr(sdhci_pxav2_of_match), &pdev->dev);
+-	if (match) {
++	variant = of_device_get_match_data(dev);
++	if (variant)
+ 		pdata = pxav2_get_mmc_pdata(dev);
+-	}
++	else
++		variant = &pxav2_variant;
++
+ 	if (pdata) {
+ 		if (pdata->flags & PXA_FLAG_CARD_PERMANENT) {
+ 			/* on-chip device */
+@@ -208,7 +231,8 @@ static int sdhci_pxav2_probe(struct platform_device *pdev)
+ 			host->mmc->pm_caps |= pdata->pm_caps;
+ 	}
+ 
+-	host->ops = &pxav2_sdhci_ops;
++	host->quirks |= variant->extra_quirks;
++	host->ops = variant->ops;
+ 
+ 	ret = sdhci_add_host(host);
+ 	if (ret)
 -- 
 2.34.1
 
