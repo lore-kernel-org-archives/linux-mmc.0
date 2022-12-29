@@ -2,166 +2,171 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 32735C4332F
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Dec 2022 12:53:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 42FCAC4332F
+	for <linux-mmc@archiver.kernel.org>; Thu, 29 Dec 2022 14:03:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233373AbiL2Mws (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Dec 2022 07:52:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40802 "EHLO
+        id S230212AbiL2ODU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Dec 2022 09:03:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233403AbiL2MwA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 07:52:00 -0500
+        with ESMTP id S229988AbiL2ODT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 09:03:19 -0500
 Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9262213FA6
-        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 04:51:59 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53153E0F1
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 06:03:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1672318319; x=1703854319;
+  t=1672322598; x=1703858598;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=qBNFHqfAWw0K0+6DvKFPNfJYBI1TpwZB8pN1Mm7JZoQ=;
-  b=FnqnvKVm0h4t9HpnIrqaqkom46lRpVCvnzW54uqMBo6GxUDe8wnFDCGs
-   XDXuZO8FWa/hXeT4uSybDf9RXW6raXRtY6Qlsc+XnA4TDnhDo+p9PjFvb
-   oqu0bspJCl9sI2bUfgt7JivxSWE6RjfrwLyPDfrPhMFIKiNkuR1OYjXCG
-   Txf1OSfmSgT58IWy+hzbdRHiTED1IP1meEq3BfxTgmXPsWOfqR/Lswuqe
-   Vn2y7XlXszwRUuupPHvRy5NewUAEmcB/c6vdsixZSKDPFgEi1ZLXHIMXF
-   WFeK8o0wqBt7h3JGCd5Pc0Tneh/1czxBT56G/Y+Vavhx87CDzsT73nWOj
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10574"; a="407300559"
+  bh=Nhdqj21r+UZ6XMS1z2hRzIkPAHCjpkvPwsiJb7p3bh0=;
+  b=cYtR6sDSTj+UjMVVIxHGThJfDl8Ioj9ZQOWSPdk3YCtUd0ThlqR8KAU9
+   MmHNkihZuGKI892JsoEwEe7uNnUtdGxmsNuJ/QB0zyI3wSkE3bqJ106A5
+   EAnFvUGmmWyx/iXAenF7Cp6hgTvhwqJHAMCFfOyk3bDpEv0c4ez9p+jPG
+   t+dZDOIP4FvPXNVHHqo4GzUqa6jwkuOd1HQhSPd10jgSqhMUP0DNHGDAo
+   uTRj52iH/b6WtuH4lBEywD9sxafSV2a37YnWZUt/jXeGF2pCbuW28SFx4
+   /CCTZC+/IJSG4Hq0rTd9XcFL+arbRU0sNzT0Mfpxj9H5SeP/5CgAr0gpF
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10575"; a="407309832"
 X-IronPort-AV: E=Sophos;i="5.96,284,1665471600"; 
-   d="scan'208";a="407300559"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2022 04:51:59 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10574"; a="827679114"
+   d="scan'208";a="407309832"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2022 06:03:14 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10575"; a="722070483"
 X-IronPort-AV: E=Sophos;i="5.96,284,1665471600"; 
-   d="scan'208";a="827679114"
+   d="scan'208";a="722070483"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.63.128])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2022 04:51:57 -0800
-Message-ID: <ebf570a1-3d2f-85d7-3a29-540caf9f576d@intel.com>
-Date:   Thu, 29 Dec 2022 14:51:52 +0200
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Dec 2022 06:03:08 -0800
+Message-ID: <40d51976-a670-aa7b-dd2b-7528e31c8f28@intel.com>
+Date:   Thu, 29 Dec 2022 16:03:04 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.6.1
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
- SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
+Subject: Re: [PATCH v3 1/2] mmc: sdhci-esdhc-imx: simplify the auto tuning
+ logic
 Content-Language: en-US
-To:     Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
-Cc:     Michal Simek <michal.simek@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-arm-kernel@lists.infradead.org
-References: <20221025191500.149167-1-marex@denx.de>
- <2b523371-7eeb-25f2-8879-76bbf028f4bb@intel.com>
- <c3d62448-fd1c-066c-aa53-2df7eae1555d@denx.de>
+To:     haibo.chen@nxp.com, ulf.hansson@linaro.org
+Cc:     shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        kgroeneveld@lenbrook.com
+References: <20221223025022.1893102-1-haibo.chen@nxp.com>
+ <20221223025022.1893102-2-haibo.chen@nxp.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <c3d62448-fd1c-066c-aa53-2df7eae1555d@denx.de>
+In-Reply-To: <20221223025022.1893102-2-haibo.chen@nxp.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/10/22 12:20, Marek Vasut wrote:
-> On 10/26/22 08:07, Adrian Hunter wrote:
->> On 25/10/22 22:15, Marek Vasut wrote:
->>> On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
->>>
->>> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
->>> Absolute Address  0x00FF160040 (SD0)
->>> Reset Value       0x280737EC6481
->>>
->>> really reads 0x200737EC6481 . The interesting part is the
->>> top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
->>> missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
->>> makes the SDHCI core disable retuning timer.
->>>
->>> Fix this up here by explicitly setting tuning_count to 8
->>> as it should be, otherwise an eMMC might fail in various
->>> thermal conditions
->>>
->>> Note that the diff is best shown with -w option, this makes it
->>> visible what happened with !sdhci_arasan->has_cqe conditional,
->>> which is placed between sdhci_setup_host() and __sdhci_add_host()
->>> calls. Since sdhci_add_host() is also a sequence of these two
->>> calls and host->tuning_count must be overriden before calling
->>
->> overriden -> overridden
+On 23/12/22 04:50, haibo.chen@nxp.com wrote:
+> From: Haibo Chen <haibo.chen@nxp.com>
 > 
-> Fixed
+> Clear auto tuning bit when reset tuning, and enable auto tuning
+> only after tuning done successfully for both standard tuning and
+> manual tuning.
 > 
->>> __sdhci_add_host(), call the two calls separately and do all
->>> the adjustments between them in either case.
->>>
->>> Signed-off-by: Marek Vasut <marex@denx.de>
->>> ---
->>> Cc: Michal Simek <michal.simek@xilinx.com>
->>> Cc: Adrian Hunter <adrian.hunter@intel.com>
->>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>> Cc: linux-arm-kernel@lists.infradead.org
->>> To: linux-mmc@vger.kernel.org
->>> ---
->>>   drivers/mmc/host/sdhci-of-arasan.c | 57 ++++++++++++++++++++----------
->>>   1 file changed, 38 insertions(+), 19 deletions(-)
->>>
->>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
->>> index 3997cad1f793d..465498f2a7c0f 100644
->>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>> @@ -1521,37 +1521,56 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
->>>       return 0;
->>>   }
->>>   -static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
->>> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan,
->>> +                 struct device *dev)
->>>   {
->>>       struct sdhci_host *host = sdhci_arasan->host;
->>>       struct cqhci_host *cq_host;
->>>       bool dma64;
->>>       int ret;
->>>   -    if (!sdhci_arasan->has_cqe)
->>> -        return sdhci_add_host(host);
->>> -
->>>       ret = sdhci_setup_host(host);
->>>       if (ret)
->>>           return ret;
->>>   -    cq_host = devm_kzalloc(host->mmc->parent,
->>> -                   sizeof(*cq_host), GFP_KERNEL);
->>> -    if (!cq_host) {
->>> -        ret = -ENOMEM;
->>> -        goto cleanup;
->>> -    }
->>> +    /*
->>> +     * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
->>> +     *
->>> +     * https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
->>> +     * Absolute Address  0x00FF160040 (SD0)
->>> +     * Reset Value         0x280737EC6481
->>> +     *
->>> +     * really reads 0x200737EC6481 . The interesting part is the
->>> +     * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
->>> +     * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
->>> +     * makes the SDHCI core disable retuning timer.
->>
->> Are you aware that caps can be changed in DT via "sdhci-caps" and
->> "sdhci-caps-mask" ?
-> 
-> No, I wasn't aware of those.
-> 
-> Is that the preferred approach to this fix, over handling it in the driver ?
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-I guess ideally.  Mainline does not really need the driver
-fix because it seems it can be done by DT.  Older kernels
-are a separate issue really.
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 25 ++++++++++++++++---------
+>  1 file changed, 16 insertions(+), 9 deletions(-)
 > 
-> I think the driver-side fix would be preferable, because it also fixes systems which use legacy DTs without the sdhci-caps properties, which would be all ZynqMP systems thus far.
-
-You could backport support of the properties "sdhci-caps"
-and "sdhci-caps-mask".
-
-> 
-> (and I would also still prefer to get feedback from Xilinx on why does the value specified in UG1087 not match what is read out of the hardware)
-> 
-> [...]
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 89ef0c80ac37..bf8d6f60a9ee 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -429,9 +429,10 @@ static inline void esdhc_wait_for_card_clock_gate_off(struct sdhci_host *host)
+>  }
+>  
+>  /* Enable the auto tuning circuit to check the CMD line and BUS line */
+> -static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
+> +static inline void usdhc_auto_tuning_mode_sel_and_en(struct sdhci_host *host)
+>  {
+>  	u32 buswidth, auto_tune_buswidth;
+> +	u32 reg;
+>  
+>  	buswidth = USDHC_GET_BUSWIDTH(readl(host->ioaddr + SDHCI_HOST_CONTROL));
+>  
+> @@ -450,6 +451,10 @@ static inline void usdhc_auto_tuning_mode_sel(struct sdhci_host *host)
+>  	esdhc_clrset_le(host, ESDHC_VEND_SPEC2_AUTO_TUNE_MODE_MASK,
+>  			auto_tune_buswidth | ESDHC_VEND_SPEC2_AUTO_TUNE_CMD_EN,
+>  			ESDHC_VEND_SPEC2);
+> +
+> +	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+> +	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+>  }
+>  
+>  static u32 esdhc_readl_le(struct sdhci_host *host, int reg)
+> @@ -681,14 +686,11 @@ static void esdhc_writew_le(struct sdhci_host *host, u16 val, int reg)
+>  			} else {
+>  				v &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+>  				m &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
+> -				m &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+>  			}
+>  
+>  			if (val & SDHCI_CTRL_EXEC_TUNING) {
+>  				v |= ESDHC_MIX_CTRL_EXE_TUNE;
+>  				m |= ESDHC_MIX_CTRL_FBCLK_SEL;
+> -				m |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+> -				usdhc_auto_tuning_mode_sel(host);
+>  			} else {
+>  				v &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+>  			}
+> @@ -1022,13 +1024,15 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+>  
+>  	/* Reset the tuning circuit */
+>  	if (esdhc_is_usdhc(imx_data)) {
+> +		ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
+> +		ctrl &= ~ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+>  		if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING) {
+> -			ctrl = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>  			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+>  			ctrl &= ~ESDHC_MIX_CTRL_FBCLK_SEL;
+>  			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
+>  			writel(0, host->ioaddr + ESDHC_TUNE_CTRL_STATUS);
+>  		} else if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+> +			writel(ctrl, host->ioaddr + ESDHC_MIX_CTRL);
+>  			ctrl = readl(host->ioaddr + SDHCI_AUTO_CMD_STATUS);
+>  			ctrl &= ~ESDHC_MIX_CTRL_SMPCLK_SEL;
+>  			ctrl &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> @@ -1054,6 +1058,7 @@ static void esdhc_reset_tuning(struct sdhci_host *host)
+>  static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  {
+>  	struct sdhci_host *host = mmc_priv(mmc);
+> +	int err;
+>  
+>  	/*
+>  	 * i.MX uSDHC internally already uses a fixed optimized timing for
+> @@ -1068,7 +1073,12 @@ static int usdhc_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	 * correct delay cell.
+>  	 */
+>  	esdhc_reset_tuning(host);
+> -	return sdhci_execute_tuning(mmc, opcode);
+> +	err = sdhci_execute_tuning(mmc, opcode);
+> +	/* If tuning done, enable auto tuning */
+> +	if (!err && !host->tuning_err)
+> +		usdhc_auto_tuning_mode_sel_and_en(host);
+> +
+> +	return err;
+>  }
+>  
+>  static void esdhc_prepare_tuning(struct sdhci_host *host, u32 val)
+> @@ -1102,11 +1112,8 @@ static void esdhc_post_tuning(struct sdhci_host *host)
+>  {
+>  	u32 reg;
+>  
+> -	usdhc_auto_tuning_mode_sel(host);
+> -
+>  	reg = readl(host->ioaddr + ESDHC_MIX_CTRL);
+>  	reg &= ~ESDHC_MIX_CTRL_EXE_TUNE;
+> -	reg |= ESDHC_MIX_CTRL_AUTO_TUNE_EN;
+>  	writel(reg, host->ioaddr + ESDHC_MIX_CTRL);
+>  }
+>  
 
