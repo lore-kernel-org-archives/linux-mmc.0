@@ -2,126 +2,160 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 507F6C3DA79
-	for <linux-mmc@archiver.kernel.org>; Fri, 30 Dec 2022 00:07:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CEC33C4332F
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Dec 2022 06:43:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234000AbiL3AHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Dec 2022 19:07:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53022 "EHLO
+        id S234467AbiL3Gna (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 30 Dec 2022 01:43:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43126 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229712AbiL3AHB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 19:07:01 -0500
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 38D7E12AEB;
-        Thu, 29 Dec 2022 16:07:00 -0800 (PST)
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 2BU05qhyE007943, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 2BU05qhyE007943
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=FAIL);
-        Fri, 30 Dec 2022 08:05:52 +0800
-Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.9; Fri, 30 Dec 2022 08:06:46 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Fri, 30 Dec 2022 08:06:46 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b]) by
- RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b%5]) with mapi id
- 15.01.2375.007; Fri, 30 Dec 2022 08:06:46 +0800
-From:   Ping-Ke Shih <pkshih@realtek.com>
-To:     "martin.blumenstingl@googlemail.com" 
-        <martin.blumenstingl@googlemail.com>
-CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "neojou@gmail.com" <neojou@gmail.com>,
-        "kvalo@kernel.org" <kvalo@kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "tony0620emma@gmail.com" <tony0620emma@gmail.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "macroalpha82@gmail.com" <macroalpha82@gmail.com>,
-        "jernej.skrabec@gmail.com" <jernej.skrabec@gmail.com>,
-        "nitin.gupta981@gmail.com" <nitin.gupta981@gmail.com>
-Subject: Re: [RFC PATCH v1 00/19] rtw88: Add SDIO support
-Thread-Topic: [RFC PATCH v1 00/19] rtw88: Add SDIO support
-Thread-Index: AQHZGks+1Xp5+2HTNk6lcrww/IAcmq6EK72QgADRVICAAA1igA==
-Date:   Fri, 30 Dec 2022 00:06:46 +0000
-Message-ID: <a681e5a2b660be3de96985628f1ab3a8acfa593f.camel@realtek.com>
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
-         <8fe9b10318994be18934ec41e792af56@realtek.com>
-         <CAFBinCBcurqiHJRSyaFpweYmrgaaUhpy632QQNWcrd3UHRtZbQ@mail.gmail.com>
-In-Reply-To: <CAFBinCBcurqiHJRSyaFpweYmrgaaUhpy632QQNWcrd3UHRtZbQ@mail.gmail.com>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-user-agent: Evolution 3.36.1-2 
-x-originating-ip: [172.16.22.50]
-x-kse-serverinfo: RTEXMBS06.realtek.com.tw, 9
-x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
- rules found
-x-kse-antivirus-interceptor-info: scan successful
-x-kse-antivirus-info: =?utf-8?B?Q2xlYW4sIGJhc2VzOiAyMDIyLzEyLzI5IOS4i+WNiCAxMDozODowMA==?=
-x-kse-bulkmessagesfiltering-scan-result: protection disabled
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <424B7CB421765E4AB163B8D90C048094@realtek.com>
-Content-Transfer-Encoding: base64
+        with ESMTP id S229557AbiL3Gn1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 30 Dec 2022 01:43:27 -0500
+Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9192186A7
+        for <linux-mmc@vger.kernel.org>; Thu, 29 Dec 2022 22:43:25 -0800 (PST)
+Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 09B47851C7;
+        Fri, 30 Dec 2022 07:43:22 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1672382603;
+        bh=rNOFhMwxUmywZCTp7LuVEHGSGhrwS33+RwXuYgvQzuA=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=ltDj5muFSDSS45KvR6lKc7xZyeyDMbhrJH8AHATw7qOz8TH/pHQeNkyCgByEAJKtu
+         NrvtVNhJ9Wm8hwi0ux7WP5QWzM9K51sXIEa0tTkneJqPcd0QTAEcGEIkrPmV1sk24a
+         dP1yRn8VkM2MyaRCD9AZGBALv4JJ3LmihOoN7sXR9QipW06muDTqsKdiFRJ7x0HnbU
+         nxS4K5uF2Stl2TukWGbnJG/kcmM6kX04hTVmNsVFrKvYBdUtk2HYl6C5Q/6IxFfDCu
+         /oLZejzqpPLI4XKxkU2mfePhmDYLobNUJBn+dYH/ef18K/JN1EETbq4Gb8RM1RB/bm
+         wmzPcOKs5OEDQ==
+Message-ID: <8958eb65-e873-a760-5ca4-a51b36f5e23d@denx.de>
+Date:   Fri, 30 Dec 2022 07:42:13 +0100
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
+ SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
+To:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc:     Michal Simek <michal.simek@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-arm-kernel@lists.infradead.org
+References: <20221025191500.149167-1-marex@denx.de>
+ <2b523371-7eeb-25f2-8879-76bbf028f4bb@intel.com>
+ <c3d62448-fd1c-066c-aa53-2df7eae1555d@denx.de>
+ <ebf570a1-3d2f-85d7-3a29-540caf9f576d@intel.com>
+Content-Language: en-US
+From:   Marek Vasut <marex@denx.de>
+In-Reply-To: <ebf570a1-3d2f-85d7-3a29-540caf9f576d@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-T24gRnJpLCAyMDIyLTEyLTMwIGF0IDAwOjE4ICswMTAwLCBNYXJ0aW4gQmx1bWVuc3RpbmdsIHdy
-b3RlOg0KPiBIaSBQaW5nLUtlLA0KPiANCj4gdGhhbmtzIGFnYWluIGZvciBhbGwgeW91ciBpbnB1
-dCENCj4gDQo+IE9uIFRodSwgRGVjIDI5LCAyMDIyIGF0IDU6MTkgQU0gUGluZy1LZSBTaGloIDxw
-a3NoaWhAcmVhbHRlay5jb20+IHdyb3RlOg0KPiBbLi4uXQ0KPiA+ID4gLSBSWCB0aHJvdWdocHV0
-IG9uIGEgNUdIeiBuZXR3b3JrIGlzIGF0IDE5IE1iaXQvcw0KPiA+IA0KPiA+IEkgaGF2ZSBhIHN1
-Z2dlc3Rpb24gYWJvdXQgUlggdGhyb3VnaHB1dCwgcGxlYXNlIGNoZWNrIGJlbG93IHJlZ2lzdGVy
-cyB3aXRoDQo+ID4gdmVuZG9yIGRyaXZlcjoNCj4gPiANCj4gPiBSRUdfUlhETUFfQUdHX1BHX1RI
-DQo+ID4gUkVHX1RYRE1BX1BRX01BUCgweDEwYykgQklUX1JYRE1BX0FHR19FTiAoYml0MikNCj4g
-PiBSRUdfUlhETUFfTU9ERSgwMjkwKSAgQklUX0RNQV9NT0RFIChiaXQxKQ0KPiBVbmZvcnR1bmF0
-ZWx5IEkgZGlkbid0IG1hbmFnZSB0byBnZXQgdGhlIHZlbmRvciBkcml2ZXIgdG8gd29yayB3aXRo
-DQo+IG1haW5saW5lIExpbnV4Lg0KPiBUaGUgQW5kcm9pZCBpbnN0YWxsYXRpb24gb24gbXkgYm9h
-cmQgKHdoaWNoIGlzIGhvdyBpdCB3YXMgc2hpcHBlZCkNCj4gdXNlcyB0aGUgdmVuZG9yIGRyaXZl
-ciBidXQgdW5saWtlIHNvbWUgQW1sb2dpYyBjb2RlIHRoZSBSZWFsdGVrDQo+ICh2ZW5kb3IpIHdp
-cmVsZXNzIGRyaXZlciBkb2VzIG5vdCBhbGxvdyByZWFkaW5nIGFyYml0cmFyeSByZWdpc3RlcnMN
-Cj4gdGhyb3VnaCBzeXNmcy4NCj4gU28gSSBjYW4ndCBjaGVjayB0aGUgdmFsdWVzIHRoYXQgdGhl
-IHZlbmRvciBkcml2ZXIgdXNlcy4NCj4gDQo+ID4gVHJ5IHRvIGFkanVzdCBBR0dfUEdfVEggdG8g
-c2VlIGlmIGl0IGNhbiBoZWxwLg0KPiBJIHRyaWVkIGEgZmV3IHZhbHVlcyBhbmQgSSBjYW4gc2F5
-IHRoYXQgaXQgZG9lcyBjaGFuZ2UgdGhlIFJYDQo+IHRocm91Z2hwdXQsIGJ1dCB0aGUgcmVzdWx0
-IGlzIGFsd2F5cyBsb3dlciB0aGFuIDE5IE1iaXQvcywgbWVhbmluZw0KPiB0aGF0IGl0J3Mgd29y
-c2UgdGhhbiBSWCBhZ2dyZWdhdGlvbiBkaXNhYmxlZCAob24gbXkgUlRMODgyMkNTKS4NCj4gQ3Vy
-cmVudGx5IHdlJ3JlIGRpc2FibGluZyBSWCBhZ2dyZWdhdGlvbiBpbiB0aGUgZHJpdmVyLiBCdXQg
-SmVybmVqDQo+IG1lbnRpb25lZCBwcmV2aW91c2x5IHRoYXQgZm9yIGhpcyBSVEw4ODIyQlMgaGUg
-Zm91bmQgdGhhdCBSWA0KPiBhZ2dyZWdhdGlvbiBzZWVtcyB0byBpbXByb3ZlIHBlcmZvcm1hbmNl
-Lg0KPiANCj4gSW5kZXBlbmRlbnQgb2YgdGhpcyBJIGRpZCBzb21lIGludmVzdGlnYXRpb24gb24g
-bXkgb3duIGFuZCBmb3VuZCB0aGF0DQo+IHdoZW4gcmVkdWNpbmcgdGhlIFRYIHRocm91Z2hwdXQg
-dGhlIFJYIHRocm91Z2hwdXQgaW5jcmVhc2VzLg0KPiBGb3IgdGhpcyBJIHRyaWVkIHVzaW5nIGll
-ZWU4MDIxMV97c3RvcCx3YWtlfV9xdWV1ZSgpIGluIHRoZSBzZGlvLmMgSENJDQo+IHN1Yi1kcml2
-ZXIuDQo+IFJYIHRocm91Z2hwdXQgaXMgbm93IGF0IDIzLjUgTWJpdC9zICh0aGF0ICsyNSUgY29t
-cGFyZWQgdG8gYmVmb3JlKSBvbg0KPiBteSBSVEw4ODIyQ1MgKHdpdGggUlggYWdncmVnYXRpb24g
-c3RpbGwgZGlzYWJsZWQsIGp1c3QgbGlrZSBpbiB0aGUgMTkNCj4gTWJpdC9zIHRlc3QpLg0KPiBV
-bmZvcnR1bmF0ZWx5IFRYIHRocm91Z2hwdXQgaXMgbm93IHdheSBiZWxvdyAxMCBNYml0L3MuDQo+
-IA0KPiBBZGRpdGlvbmFsbHkgSSB0aGluayB0aGF0IHRoZSBhbnRlbm5hIG9mIG15IGJvYXJkIGlz
-IHdvcnNlIHRoYW4gbXkNCj4gYWNjZXNzIHBvaW50J3MgYW50ZW5uYS4gU28gVFggZnJvbSBydHc4
-OCB0byBteSBBUCBtYXkgYmUgZmFzdGVyDQo+IChiZWNhdXNlIHRoZSBBUCBjYW4gImhlYXIgYmV0
-dGVyIikgdGhhbiBSWCAocnR3ODggImhlYXJpbmcgaXMgd29yc2UiKS4NCj4gDQoNCldpdGhvdXQg
-ZXF1aXBtZW50IGxpa2UgQ0FULUMsIGl0IGlzIGhhcmQgdG8gaW52ZXN0aWdhdGUgU0RJTyB1c2IN
-CmFnZ3JlZ2F0aW9uLCBzbyBJIHN1Z2dlc3QgdG8gY2FwdHVyZSBXaUZpIHBhY2tldHMgaW4gdGhl
-IGFpciB0byBtYWtlDQpzdXJlIHRoaW5ncyB3b3JrIGFzIGV4cGVjdGVkLiBBZnRlciB0aGF0LCB3
-ZSBjYW4gZm9jdXMgb24gYnVzDQphZ2dyZWdhdGlvbiB0dW5pbmcuDQoNClRoZSBpbnN0cnVjdGlv
-bnMgdG8gdXNlIGFub3RoZXIgV2lGaSBjYXJkIHRvIGNhcHR1cmUgcGFja2V0cyBhcmU6DQoxLiBz
-dWRvIGl3IGRldiB3bGFuMCBpbnRlcmZhY2UgYWRkIG1vbjAgdHlwZSBtb25pdG9yDQoyLiBzdWRv
-IHdpcmVzaGFyayAgLy8gc2VsZWN0IG1vbjAgdG8gY2FwdHVyZQ0KDQpQbGVhc2UgY2hlY2sgQU1Q
-RFUgYW5kIEFNU0RVIHNpemUgZHVyaW5nIGRvaW5nIFRYL1JYIHRocm91Z2hwdXQgdGVzdC4NCk5v
-cm1hbGx5LCBleHBlY3RlZCBBTVNEVSBzaXplIGlzIDMwMDArIGJ5dGVzLCBhbmQgQU1QRFUgbnVt
-YmVyIGlzDQphcm91bmQgMzIgTVNEVXMuIElmIFJYIGlzIHRvbyBzbG93IHJlc3VsdGluZyBpbiBi
-dWZmZXIgb3ZlcmZsb3csIA0KQVAgY291bGQgcmVzZW5kIChjaGVjayBzZXF1ZW5jZSBudW1iZXIg
-YW5kICdSJyBiaXQsIG9yIEJBIG9mIDg4MjJDUykuDQoNCkFsc28sIGNoZWNrIFRYL1JYIHJhdGVz
-IHRvIGtub3cgaWYgUkYgY2FsaWJyYXRpb24gYW5kIFBIWSBkeW5hbWljDQptZWNoYW5pc20gd29y
-ayB3ZWxsLiBOb3JtYWxseSwgd2l0aCA1MGNtIGRpc3RhbmNlIGxvbmcgZnJvbSBBUCwNCml0IG11
-c3QgeWllbGQgdGhlIGhpZ2hlc3QgcmF0ZSwgbm8gZG91YnQuDQoNCkkgaG9wZSB0aGlzIGNhbiBu
-YXJyb3cgZG93biB0aGUgcHJvYmxlbXMgeW91IG1ldC4gDQoNCi0tLQ0KUGluZy1LZQ0KDQo=
+On 12/29/22 13:51, Adrian Hunter wrote:
+> On 26/10/22 12:20, Marek Vasut wrote:
+>> On 10/26/22 08:07, Adrian Hunter wrote:
+>>> On 25/10/22 22:15, Marek Vasut wrote:
+>>>> On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
+>>>>
+>>>> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+>>>> Absolute Address  0x00FF160040 (SD0)
+>>>> Reset Value       0x280737EC6481
+>>>>
+>>>> really reads 0x200737EC6481 . The interesting part is the
+>>>> top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+>>>> missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+>>>> makes the SDHCI core disable retuning timer.
+>>>>
+>>>> Fix this up here by explicitly setting tuning_count to 8
+>>>> as it should be, otherwise an eMMC might fail in various
+>>>> thermal conditions
+>>>>
+>>>> Note that the diff is best shown with -w option, this makes it
+>>>> visible what happened with !sdhci_arasan->has_cqe conditional,
+>>>> which is placed between sdhci_setup_host() and __sdhci_add_host()
+>>>> calls. Since sdhci_add_host() is also a sequence of these two
+>>>> calls and host->tuning_count must be overriden before calling
+>>>
+>>> overriden -> overridden
+>>
+>> Fixed
+>>
+>>>> __sdhci_add_host(), call the two calls separately and do all
+>>>> the adjustments between them in either case.
+>>>>
+>>>> Signed-off-by: Marek Vasut <marex@denx.de>
+>>>> ---
+>>>> Cc: Michal Simek <michal.simek@xilinx.com>
+>>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>>>> Cc: linux-arm-kernel@lists.infradead.org
+>>>> To: linux-mmc@vger.kernel.org
+>>>> ---
+>>>>    drivers/mmc/host/sdhci-of-arasan.c | 57 ++++++++++++++++++++----------
+>>>>    1 file changed, 38 insertions(+), 19 deletions(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+>>>> index 3997cad1f793d..465498f2a7c0f 100644
+>>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>>>> @@ -1521,37 +1521,56 @@ static int sdhci_arasan_register_sdclk(struct sdhci_arasan_data *sdhci_arasan,
+>>>>        return 0;
+>>>>    }
+>>>>    -static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan)
+>>>> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan,
+>>>> +                 struct device *dev)
+>>>>    {
+>>>>        struct sdhci_host *host = sdhci_arasan->host;
+>>>>        struct cqhci_host *cq_host;
+>>>>        bool dma64;
+>>>>        int ret;
+>>>>    -    if (!sdhci_arasan->has_cqe)
+>>>> -        return sdhci_add_host(host);
+>>>> -
+>>>>        ret = sdhci_setup_host(host);
+>>>>        if (ret)
+>>>>            return ret;
+>>>>    -    cq_host = devm_kzalloc(host->mmc->parent,
+>>>> -                   sizeof(*cq_host), GFP_KERNEL);
+>>>> -    if (!cq_host) {
+>>>> -        ret = -ENOMEM;
+>>>> -        goto cleanup;
+>>>> -    }
+>>>> +    /*
+>>>> +     * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
+>>>> +     *
+>>>> +     * https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+>>>> +     * Absolute Address  0x00FF160040 (SD0)
+>>>> +     * Reset Value         0x280737EC6481
+>>>> +     *
+>>>> +     * really reads 0x200737EC6481 . The interesting part is the
+>>>> +     * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+>>>> +     * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+>>>> +     * makes the SDHCI core disable retuning timer.
+>>>
+>>> Are you aware that caps can be changed in DT via "sdhci-caps" and
+>>> "sdhci-caps-mask" ?
+>>
+>> No, I wasn't aware of those.
+>>
+>> Is that the preferred approach to this fix, over handling it in the driver ?
+> 
+> I guess ideally.  Mainline does not really need the driver
+> fix because it seems it can be done by DT.  Older kernels
+> are a separate issue really.
+> 
+>>
+>> I think the driver-side fix would be preferable, because it also fixes systems which use legacy DTs without the sdhci-caps properties, which would be all ZynqMP systems thus far.
+> 
+> You could backport support of the properties "sdhci-caps"
+> and "sdhci-caps-mask".
+
+This won't help. Vivado (the xilinx FPGA design tool) is capable of 
+generating DTs, so you can end up with a combination of new Linux kernel 
+and old generated DT, which is still missing the 
+sdhci-caps/sdhci-caps-mask .
