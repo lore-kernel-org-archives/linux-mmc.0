@@ -2,121 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 195CAC3DA79
-	for <linux-mmc@archiver.kernel.org>; Thu, 29 Dec 2022 23:19:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 507F6C3DA79
+	for <linux-mmc@archiver.kernel.org>; Fri, 30 Dec 2022 00:07:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230297AbiL2XTU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 29 Dec 2022 18:19:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39092 "EHLO
+        id S234000AbiL3AHC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 29 Dec 2022 19:07:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234200AbiL2XSx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 18:18:53 -0500
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4A66C167DC;
-        Thu, 29 Dec 2022 15:18:52 -0800 (PST)
-Received: by mail-ej1-x62e.google.com with SMTP id fc4so48017535ejc.12;
-        Thu, 29 Dec 2022 15:18:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nKD4sJvY8u64R4lrHG7fSPlR5NgK9Ot3QdTgymkFPk4=;
-        b=A1G/xzVKyRmQOfDsg8QC6+flkO9ORVgWYbr+iMzLp4FFAu25Sd940VxIx5IkDevPti
-         ki1vPF9teW/7MhHSyZZaWUjbOPIQ57aAqcCNZ99mBiTmla8maFfzoO5cHuIxQgHXlB4a
-         2ND9wNie4pYbBhYlAiDndGCLedFxWem++Mz06Qadn4kOmfg6ZRkhIk/8FvP17Ue6KDCb
-         iDXA2uz4DlWxAu30tzjl/ONi3DzpoKgbIwijKIYAdlI/5wLNKmjtvtRwSORShHdkJPYa
-         5J9S7wXYLVZvNXNttBp24FzzOiXjKzfcZvtlx/ShMUj2+vYLmlEO7fVWrS6C8dhjzRLP
-         iH2g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nKD4sJvY8u64R4lrHG7fSPlR5NgK9Ot3QdTgymkFPk4=;
-        b=QoeJvmvSZsD9fS+hDBz5GXG4cOM6VYmv9tkxOC8sbWRRWHquanqrsQD5SUBb3darIS
-         0S6SyWKS4yJ+i0GFu0GR4giZtM3KYmmZD+mYIcqOYDKRnIURKEwZ+jfrsqMQk7xN2hgL
-         8Rs9TjDVy4ZOCoNqlo7TWjTu7R56KR60LkTQmdb9dTPHA2dk5uts7hViv0ajZ9PvHCGa
-         jFE/YN7BJoJDkdNRmgCoaaGTay9vhF2LkDMSGRk/VeptDt1D0pGi8Feg4WL+ktydaF+n
-         XVbsBV2e8CvnRCQ/vEHYvt+ltV0sGA2LOaXh3+8PqrXeIwfD4FPsROa9ZQ+ZTYoPVDsG
-         xZHQ==
-X-Gm-Message-State: AFqh2krcLC282LWndnXZVIUDkVEVyrDpvsAtsLZPNft0PlQSjQEV3mUC
-        cSnNWTblML/Ln3iyDpRAqDDXtkrXQxkoP0h8UMA=
-X-Google-Smtp-Source: AMrXdXubUgI5QrUr9jQhMlRzP8ft2o7xEYt/jx8JmTEK8dKUAm4wI10/ibMcbPMziEtfHpDwzz4ralS47JWHJNcnCcc=
-X-Received: by 2002:a17:906:26d2:b0:7c1:36:8ffe with SMTP id
- u18-20020a17090626d200b007c100368ffemr2089811ejc.725.1672355930684; Thu, 29
- Dec 2022 15:18:50 -0800 (PST)
-MIME-Version: 1.0
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com> <8fe9b10318994be18934ec41e792af56@realtek.com>
-In-Reply-To: <8fe9b10318994be18934ec41e792af56@realtek.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Fri, 30 Dec 2022 00:18:39 +0100
-Message-ID: <CAFBinCBcurqiHJRSyaFpweYmrgaaUhpy632QQNWcrd3UHRtZbQ@mail.gmail.com>
-Subject: Re: [RFC PATCH v1 00/19] rtw88: Add SDIO support
-To:     Ping-Ke Shih <pkshih@realtek.com>
-Cc:     "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        with ESMTP id S229712AbiL3AHB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 29 Dec 2022 19:07:01 -0500
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 38D7E12AEB;
+        Thu, 29 Dec 2022 16:07:00 -0800 (PST)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 2BU05qhyE007943, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 2BU05qhyE007943
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=FAIL);
+        Fri, 30 Dec 2022 08:05:52 +0800
+Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.9; Fri, 30 Dec 2022 08:06:46 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Fri, 30 Dec 2022 08:06:46 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b]) by
+ RTEXMBS04.realtek.com.tw ([fe80::15b5:fc4b:72f3:424b%5]) with mapi id
+ 15.01.2375.007; Fri, 30 Dec 2022 08:06:46 +0800
+From:   Ping-Ke Shih <pkshih@realtek.com>
+To:     "martin.blumenstingl@googlemail.com" 
+        <martin.blumenstingl@googlemail.com>
+CC:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "neojou@gmail.com" <neojou@gmail.com>,
+        "kvalo@kernel.org" <kvalo@kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "tony0620emma@gmail.com" <tony0620emma@gmail.com>,
+        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
         "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "macroalpha82@gmail.com" <macroalpha82@gmail.com>,
+        "jernej.skrabec@gmail.com" <jernej.skrabec@gmail.com>,
+        "nitin.gupta981@gmail.com" <nitin.gupta981@gmail.com>
+Subject: Re: [RFC PATCH v1 00/19] rtw88: Add SDIO support
+Thread-Topic: [RFC PATCH v1 00/19] rtw88: Add SDIO support
+Thread-Index: AQHZGks+1Xp5+2HTNk6lcrww/IAcmq6EK72QgADRVICAAA1igA==
+Date:   Fri, 30 Dec 2022 00:06:46 +0000
+Message-ID: <a681e5a2b660be3de96985628f1ab3a8acfa593f.camel@realtek.com>
+References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+         <8fe9b10318994be18934ec41e792af56@realtek.com>
+         <CAFBinCBcurqiHJRSyaFpweYmrgaaUhpy632QQNWcrd3UHRtZbQ@mail.gmail.com>
+In-Reply-To: <CAFBinCBcurqiHJRSyaFpweYmrgaaUhpy632QQNWcrd3UHRtZbQ@mail.gmail.com>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Evolution 3.36.1-2 
+x-originating-ip: [172.16.22.50]
+x-kse-serverinfo: RTEXMBS06.realtek.com.tw, 9
+x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
+ rules found
+x-kse-antivirus-interceptor-info: scan successful
+x-kse-antivirus-info: =?utf-8?B?Q2xlYW4sIGJhc2VzOiAyMDIyLzEyLzI5IOS4i+WNiCAxMDozODowMA==?=
+x-kse-bulkmessagesfiltering-scan-result: protection disabled
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <424B7CB421765E4AB163B8D90C048094@realtek.com>
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ping-Ke,
-
-thanks again for all your input!
-
-On Thu, Dec 29, 2022 at 5:19 AM Ping-Ke Shih <pkshih@realtek.com> wrote:
-[...]
-> > - RX throughput on a 5GHz network is at 19 Mbit/s
->
-> I have a suggestion about RX throughput, please check below registers with
-> vendor driver:
->
-> REG_RXDMA_AGG_PG_TH
-> REG_TXDMA_PQ_MAP(0x10c) BIT_RXDMA_AGG_EN (bit2)
-> REG_RXDMA_MODE(0290)  BIT_DMA_MODE (bit1)
-Unfortunately I didn't manage to get the vendor driver to work with
-mainline Linux.
-The Android installation on my board (which is how it was shipped)
-uses the vendor driver but unlike some Amlogic code the Realtek
-(vendor) wireless driver does not allow reading arbitrary registers
-through sysfs.
-So I can't check the values that the vendor driver uses.
-
-> Try to adjust AGG_PG_TH to see if it can help.
-I tried a few values and I can say that it does change the RX
-throughput, but the result is always lower than 19 Mbit/s, meaning
-that it's worse than RX aggregation disabled (on my RTL8822CS).
-Currently we're disabling RX aggregation in the driver. But Jernej
-mentioned previously that for his RTL8822BS he found that RX
-aggregation seems to improve performance.
-
-Independent of this I did some investigation on my own and found that
-when reducing the TX throughput the RX throughput increases.
-For this I tried using ieee80211_{stop,wake}_queue() in the sdio.c HCI
-sub-driver.
-RX throughput is now at 23.5 Mbit/s (that +25% compared to before) on
-my RTL8822CS (with RX aggregation still disabled, just like in the 19
-Mbit/s test).
-Unfortunately TX throughput is now way below 10 Mbit/s.
-
-Additionally I think that the antenna of my board is worse than my
-access point's antenna. So TX from rtw88 to my AP may be faster
-(because the AP can "hear better") than RX (rtw88 "hearing is worse").
-
-For today I'm tired and will stop here.
-
-
-Best regards,
-Martin
-
-
-[0] https://github.com/xdarklight/linux/commit/3f2e6b9cd40dc785b5c72dbc9c8b471a2e205344
+T24gRnJpLCAyMDIyLTEyLTMwIGF0IDAwOjE4ICswMTAwLCBNYXJ0aW4gQmx1bWVuc3RpbmdsIHdy
+b3RlOg0KPiBIaSBQaW5nLUtlLA0KPiANCj4gdGhhbmtzIGFnYWluIGZvciBhbGwgeW91ciBpbnB1
+dCENCj4gDQo+IE9uIFRodSwgRGVjIDI5LCAyMDIyIGF0IDU6MTkgQU0gUGluZy1LZSBTaGloIDxw
+a3NoaWhAcmVhbHRlay5jb20+IHdyb3RlOg0KPiBbLi4uXQ0KPiA+ID4gLSBSWCB0aHJvdWdocHV0
+IG9uIGEgNUdIeiBuZXR3b3JrIGlzIGF0IDE5IE1iaXQvcw0KPiA+IA0KPiA+IEkgaGF2ZSBhIHN1
+Z2dlc3Rpb24gYWJvdXQgUlggdGhyb3VnaHB1dCwgcGxlYXNlIGNoZWNrIGJlbG93IHJlZ2lzdGVy
+cyB3aXRoDQo+ID4gdmVuZG9yIGRyaXZlcjoNCj4gPiANCj4gPiBSRUdfUlhETUFfQUdHX1BHX1RI
+DQo+ID4gUkVHX1RYRE1BX1BRX01BUCgweDEwYykgQklUX1JYRE1BX0FHR19FTiAoYml0MikNCj4g
+PiBSRUdfUlhETUFfTU9ERSgwMjkwKSAgQklUX0RNQV9NT0RFIChiaXQxKQ0KPiBVbmZvcnR1bmF0
+ZWx5IEkgZGlkbid0IG1hbmFnZSB0byBnZXQgdGhlIHZlbmRvciBkcml2ZXIgdG8gd29yayB3aXRo
+DQo+IG1haW5saW5lIExpbnV4Lg0KPiBUaGUgQW5kcm9pZCBpbnN0YWxsYXRpb24gb24gbXkgYm9h
+cmQgKHdoaWNoIGlzIGhvdyBpdCB3YXMgc2hpcHBlZCkNCj4gdXNlcyB0aGUgdmVuZG9yIGRyaXZl
+ciBidXQgdW5saWtlIHNvbWUgQW1sb2dpYyBjb2RlIHRoZSBSZWFsdGVrDQo+ICh2ZW5kb3IpIHdp
+cmVsZXNzIGRyaXZlciBkb2VzIG5vdCBhbGxvdyByZWFkaW5nIGFyYml0cmFyeSByZWdpc3RlcnMN
+Cj4gdGhyb3VnaCBzeXNmcy4NCj4gU28gSSBjYW4ndCBjaGVjayB0aGUgdmFsdWVzIHRoYXQgdGhl
+IHZlbmRvciBkcml2ZXIgdXNlcy4NCj4gDQo+ID4gVHJ5IHRvIGFkanVzdCBBR0dfUEdfVEggdG8g
+c2VlIGlmIGl0IGNhbiBoZWxwLg0KPiBJIHRyaWVkIGEgZmV3IHZhbHVlcyBhbmQgSSBjYW4gc2F5
+IHRoYXQgaXQgZG9lcyBjaGFuZ2UgdGhlIFJYDQo+IHRocm91Z2hwdXQsIGJ1dCB0aGUgcmVzdWx0
+IGlzIGFsd2F5cyBsb3dlciB0aGFuIDE5IE1iaXQvcywgbWVhbmluZw0KPiB0aGF0IGl0J3Mgd29y
+c2UgdGhhbiBSWCBhZ2dyZWdhdGlvbiBkaXNhYmxlZCAob24gbXkgUlRMODgyMkNTKS4NCj4gQ3Vy
+cmVudGx5IHdlJ3JlIGRpc2FibGluZyBSWCBhZ2dyZWdhdGlvbiBpbiB0aGUgZHJpdmVyLiBCdXQg
+SmVybmVqDQo+IG1lbnRpb25lZCBwcmV2aW91c2x5IHRoYXQgZm9yIGhpcyBSVEw4ODIyQlMgaGUg
+Zm91bmQgdGhhdCBSWA0KPiBhZ2dyZWdhdGlvbiBzZWVtcyB0byBpbXByb3ZlIHBlcmZvcm1hbmNl
+Lg0KPiANCj4gSW5kZXBlbmRlbnQgb2YgdGhpcyBJIGRpZCBzb21lIGludmVzdGlnYXRpb24gb24g
+bXkgb3duIGFuZCBmb3VuZCB0aGF0DQo+IHdoZW4gcmVkdWNpbmcgdGhlIFRYIHRocm91Z2hwdXQg
+dGhlIFJYIHRocm91Z2hwdXQgaW5jcmVhc2VzLg0KPiBGb3IgdGhpcyBJIHRyaWVkIHVzaW5nIGll
+ZWU4MDIxMV97c3RvcCx3YWtlfV9xdWV1ZSgpIGluIHRoZSBzZGlvLmMgSENJDQo+IHN1Yi1kcml2
+ZXIuDQo+IFJYIHRocm91Z2hwdXQgaXMgbm93IGF0IDIzLjUgTWJpdC9zICh0aGF0ICsyNSUgY29t
+cGFyZWQgdG8gYmVmb3JlKSBvbg0KPiBteSBSVEw4ODIyQ1MgKHdpdGggUlggYWdncmVnYXRpb24g
+c3RpbGwgZGlzYWJsZWQsIGp1c3QgbGlrZSBpbiB0aGUgMTkNCj4gTWJpdC9zIHRlc3QpLg0KPiBV
+bmZvcnR1bmF0ZWx5IFRYIHRocm91Z2hwdXQgaXMgbm93IHdheSBiZWxvdyAxMCBNYml0L3MuDQo+
+IA0KPiBBZGRpdGlvbmFsbHkgSSB0aGluayB0aGF0IHRoZSBhbnRlbm5hIG9mIG15IGJvYXJkIGlz
+IHdvcnNlIHRoYW4gbXkNCj4gYWNjZXNzIHBvaW50J3MgYW50ZW5uYS4gU28gVFggZnJvbSBydHc4
+OCB0byBteSBBUCBtYXkgYmUgZmFzdGVyDQo+IChiZWNhdXNlIHRoZSBBUCBjYW4gImhlYXIgYmV0
+dGVyIikgdGhhbiBSWCAocnR3ODggImhlYXJpbmcgaXMgd29yc2UiKS4NCj4gDQoNCldpdGhvdXQg
+ZXF1aXBtZW50IGxpa2UgQ0FULUMsIGl0IGlzIGhhcmQgdG8gaW52ZXN0aWdhdGUgU0RJTyB1c2IN
+CmFnZ3JlZ2F0aW9uLCBzbyBJIHN1Z2dlc3QgdG8gY2FwdHVyZSBXaUZpIHBhY2tldHMgaW4gdGhl
+IGFpciB0byBtYWtlDQpzdXJlIHRoaW5ncyB3b3JrIGFzIGV4cGVjdGVkLiBBZnRlciB0aGF0LCB3
+ZSBjYW4gZm9jdXMgb24gYnVzDQphZ2dyZWdhdGlvbiB0dW5pbmcuDQoNClRoZSBpbnN0cnVjdGlv
+bnMgdG8gdXNlIGFub3RoZXIgV2lGaSBjYXJkIHRvIGNhcHR1cmUgcGFja2V0cyBhcmU6DQoxLiBz
+dWRvIGl3IGRldiB3bGFuMCBpbnRlcmZhY2UgYWRkIG1vbjAgdHlwZSBtb25pdG9yDQoyLiBzdWRv
+IHdpcmVzaGFyayAgLy8gc2VsZWN0IG1vbjAgdG8gY2FwdHVyZQ0KDQpQbGVhc2UgY2hlY2sgQU1Q
+RFUgYW5kIEFNU0RVIHNpemUgZHVyaW5nIGRvaW5nIFRYL1JYIHRocm91Z2hwdXQgdGVzdC4NCk5v
+cm1hbGx5LCBleHBlY3RlZCBBTVNEVSBzaXplIGlzIDMwMDArIGJ5dGVzLCBhbmQgQU1QRFUgbnVt
+YmVyIGlzDQphcm91bmQgMzIgTVNEVXMuIElmIFJYIGlzIHRvbyBzbG93IHJlc3VsdGluZyBpbiBi
+dWZmZXIgb3ZlcmZsb3csIA0KQVAgY291bGQgcmVzZW5kIChjaGVjayBzZXF1ZW5jZSBudW1iZXIg
+YW5kICdSJyBiaXQsIG9yIEJBIG9mIDg4MjJDUykuDQoNCkFsc28sIGNoZWNrIFRYL1JYIHJhdGVz
+IHRvIGtub3cgaWYgUkYgY2FsaWJyYXRpb24gYW5kIFBIWSBkeW5hbWljDQptZWNoYW5pc20gd29y
+ayB3ZWxsLiBOb3JtYWxseSwgd2l0aCA1MGNtIGRpc3RhbmNlIGxvbmcgZnJvbSBBUCwNCml0IG11
+c3QgeWllbGQgdGhlIGhpZ2hlc3QgcmF0ZSwgbm8gZG91YnQuDQoNCkkgaG9wZSB0aGlzIGNhbiBu
+YXJyb3cgZG93biB0aGUgcHJvYmxlbXMgeW91IG1ldC4gDQoNCi0tLQ0KUGluZy1LZQ0KDQo=
