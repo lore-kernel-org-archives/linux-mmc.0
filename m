@@ -2,83 +2,76 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3C47C63705
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Jan 2023 15:07:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BA2FC63707
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Jan 2023 15:07:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236233AbjABPHa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Jan 2023 10:07:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49038 "EHLO
+        id S233003AbjABPHb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Jan 2023 10:07:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236244AbjABPHN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2023 10:07:13 -0500
-Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C6F4A25D6
-        for <linux-mmc@vger.kernel.org>; Mon,  2 Jan 2023 07:07:12 -0800 (PST)
-Received: by mail-pl1-x62c.google.com with SMTP id b2so29758644pld.7
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2023 07:07:12 -0800 (PST)
+        with ESMTP id S236263AbjABPHX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2023 10:07:23 -0500
+Received: from mail-pf1-x42c.google.com (mail-pf1-x42c.google.com [IPv6:2607:f8b0:4864:20::42c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3803239B
+        for <linux-mmc@vger.kernel.org>; Mon,  2 Jan 2023 07:07:23 -0800 (PST)
+Received: by mail-pf1-x42c.google.com with SMTP id z7so13132603pfq.13
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2023 07:07:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=gTUmFVkUrVVxCdL9TmMtPvZBf8ZmBmUdQovn/cWoQSs=;
-        b=J/y6pHrgolcr/idbq4kQIOcfdjv7wWo5IwW+rAF2hWtg6IUup6eb+dAOl5bprfzTbr
-         4YCR/CoV4akoRP/v9fboVdUhWM1PZd8RCsUpSZxzkvLxUqEvL7Nxi4RElJMR6L+ViC0B
-         ZkBFRlhQUYPeeTyaMalEBk1+/LsppkXpYNT5zOcYiC7wDQs5L7tb1rTNbESqCr6Fa/bG
-         vCwjNkEbPpHFyWoCZ9VMA35E4OjiANdBV3XRgVMLUv0v98dYC50eQGUX93cILW5+2YNA
-         KDrOfoea0dUcui8KrMoFzv8FXd8K/RF74tbj/ejb9k/dMDVHPxwUU2p6MX3nmqaVC3wv
-         Bq+w==
+        bh=wEXS7nrJFORzyDPmh7+FGBbOMiQgOyBfpmUbiyI6pu4=;
+        b=ksEFKm7Ezybsf9oLGYhGyyq9SUeqw7ldNnAXgJPWsgDlHveaQG2HQ0t8A+azOrymmz
+         w6teBZkH4bQoTPToLP4aZAKnPKzAvVw7E5jIvrbL62W5AIInjy4PBUZ6NBTBGrPiuYiV
+         RdIFYU66E5/o+VSA+WhPSoh9SkbhX4w7T7UNbaYeuEPVNWifUslWMXmI7oERQrKbcjMv
+         PT6oxXLbE3yarjKVJqkY5J8FzFbcAHd8v9ycpR7cWIZ3A1XkBXIPMgT6D/0Vlrgynzjo
+         QQMmosORKY+kTsHmdxEc+mGD9mUOw9zi0/cEcif0Zb9Z7vmO8Wfo3/GjL7TAZbmS+Kxe
+         LlKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=gTUmFVkUrVVxCdL9TmMtPvZBf8ZmBmUdQovn/cWoQSs=;
-        b=veQLMrR7uBh7bx00CqxTDqme1zcfI521iSWV9JfVjXi9d2qqe7H8exEc5P3HsQMGnI
-         tctGglxKi7jJ+oRraTwE0VVSCZtIVmH+nWH+Fft8k1hF/c6Ht7QuqmGMvcBU/HkR7cMq
-         nW7ztWja3+isRw6RPWUSH8yPWJX5tCjVcu+iL/I4zHEdMrJgJuXfMVBRcPEht7Ib3Gyz
-         1P2KayS35PQpn9O9LJH4KcD24KKB09kJSVVNTYBkQzfQTRFiwyfOm3q937zaI/ZF53Ie
-         tpN3c2rWXGceuDPxQI9ucyFIpDR1lVNGvM7RzIuHCJ0weGz//MWZUSAkowNsLbcyr0Aq
-         90KQ==
-X-Gm-Message-State: AFqh2krHolK6dUQ0OftlkI+UV1Kq9qTFXXkscEk0C42eY7ExbD/hE+Rq
-        nbDe1Yt9X7ayLGEDeGPJ2tjbBSelHI7esKX/9ohSaw==
-X-Google-Smtp-Source: AMrXdXv8OX9M5689SnQnaSGPrLdj9p5QLmx+kBVYmhnA495PZDaD/5bf4mxIVTxVmZLdRLzgkWlifrloH6WCSDERMeE=
-X-Received: by 2002:a17:902:e053:b0:192:8d55:4599 with SMTP id
- x19-20020a170902e05300b001928d554599mr1260768plx.165.1672672032313; Mon, 02
- Jan 2023 07:07:12 -0800 (PST)
+        bh=wEXS7nrJFORzyDPmh7+FGBbOMiQgOyBfpmUbiyI6pu4=;
+        b=m2349fJVh/Kr3/BkeblOk6ILwpn6z1gjioVYTjI5y6eEkNb6x1rky9VVHpgcszzUoV
+         fVyYeg1Mem/15yOGgh0ejJqO5w4RViIFlcjRmnPZfthB29ZvoEGbb+FWaAKgBznjNgXK
+         56rR1UdRsYxPCTchMrNIu4+qcPmgk37xculMzAf0eAVk+BsoX1mpFtci8aJI8C/SSAYi
+         sQnC9wdnT7v8zqRwPML9eU63Z5eeN+LduilxkYMC52Lm+cIEJ07tlWeYDHhNyOHFJ5rF
+         OmCDnUoQhP5UyIgVq2E6Gu0VYALFSBElIKbWllVOZq2qXLz+LKjCpF9YKrVxkH8vRnHi
+         m49w==
+X-Gm-Message-State: AFqh2kpJCDBVBCGEq2YMhhAHHTlrfpwkEnR8xCI/Nc42vGB6MTrkBD+V
+        eErNkHsjKr9REBe7kFgbQVbzr8ucIA0ycUzbpOtxQg==
+X-Google-Smtp-Source: AMrXdXveB6w6ko5UpGztJDmBUhjBlHnkl7XTn0GFtvIltj3YGiKK2OxzvjEJPtgCrP69aZ6NJTh37oya64dSSpnFuxI=
+X-Received: by 2002:a63:24c4:0:b0:499:c23c:d65b with SMTP id
+ k187-20020a6324c4000000b00499c23cd65bmr1292737pgk.541.1672672042769; Mon, 02
+ Jan 2023 07:07:22 -0800 (PST)
 MIME-Version: 1.0
-References: <20221213230129.549968-1-fabrizio.castro.jz@renesas.com> <20221213230129.549968-3-fabrizio.castro.jz@renesas.com>
-In-Reply-To: <20221213230129.549968-3-fabrizio.castro.jz@renesas.com>
+References: <20221223030347.17093-1-peng.fan@oss.nxp.com>
+In-Reply-To: <20221223030347.17093-1-peng.fan@oss.nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 2 Jan 2023 16:06:36 +0100
-Message-ID: <CAPDyKFoO6pKqg2vN1fbaBE2y=1SJFJR6FByLV3Jm3r2cWR2p1g@mail.gmail.com>
-Subject: Re: [PATCH 2/4] dt-bindings: mmc: renesas,sdhi: Document RZ/V2M support
-To:     Fabrizio Castro <fabrizio.castro.jz@renesas.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-clk@vger.kernel.org,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Jacopo Mondi <jacopo@jmondi.org>
+Date:   Mon, 2 Jan 2023 16:06:46 +0100
+Message-ID: <CAPDyKFq3f+_8SqupidTqzLmJtDwVaamb-6uWrUN3isivhHZ3PQ@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: update binding for
+ i.MX50 and i.MX7D
+To:     "Peng Fan (OSS)" <peng.fan@oss.nxp.com>
+Cc:     robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, Peng Fan <peng.fan@nxp.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 14 Dec 2022 at 00:01, Fabrizio Castro
-<fabrizio.castro.jz@renesas.com> wrote:
+On Fri, 23 Dec 2022 at 04:02, Peng Fan (OSS) <peng.fan@oss.nxp.com> wrote:
 >
-> Document support for the SD Card/MMC interface on the Renesas
-> RZ/V2M (a.k.a. r9a09g011) SoC.
+> From: Peng Fan <peng.fan@nxp.com>
 >
-> Signed-off-by: Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+> i.MX50 eSDHC is compatible with i.MX53. i.MX7D uSDHC is compatible with
+> i.MX6SL. So update for them.
+>
+> Signed-off-by: Peng Fan <peng.fan@nxp.com>
 
 Applied for next, thanks!
 
@@ -87,21 +80,26 @@ Uffe
 
 
 > ---
->  Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 6 ++++++
+>  1 file changed, 6 insertions(+)
 >
-> diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> index 7bfb10c62566..435773607489 100644
-> --- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
-> @@ -59,6 +59,7 @@ properties:
->                - renesas,sdhi-r9a07g043 # RZ/G2UL
->                - renesas,sdhi-r9a07g044 # RZ/G2{L,LC}
->                - renesas,sdhi-r9a07g054 # RZ/V2L
-> +              - renesas,sdhi-r9a09g011 # RZ/V2M
->            - const: renesas,rcar-gen3-sdhi # R-Car Gen3 or RZ/G2
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index dc6256f04b42..546ebcecaf95 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -37,6 +37,12 @@ properties:
+>            - fsl,imx8mm-usdhc
+>            - fsl,imxrt1050-usdhc
+>            - nxp,s32g2-usdhc
+> +      - items:
+> +          - const: fsl,imx50-esdhc
+> +          - const: fsl,imx53-esdhc
+> +      - items:
+> +          - const: fsl,imx7d-usdhc
+> +          - const: fsl,imx6sl-usdhc
 >        - items:
 >            - enum:
+>                - fsl,imx8mq-usdhc
 > --
-> 2.34.1
+> 2.37.1
 >
