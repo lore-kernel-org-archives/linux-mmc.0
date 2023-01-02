@@ -2,180 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A9B80C53210
-	for <linux-mmc@archiver.kernel.org>; Mon,  2 Jan 2023 14:04:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66CF5C3DA7A
+	for <linux-mmc@archiver.kernel.org>; Mon,  2 Jan 2023 15:07:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236087AbjABOEA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 2 Jan 2023 09:04:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51886 "EHLO
+        id S230205AbjABPG7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 2 Jan 2023 10:06:59 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48832 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231795AbjABOD7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2023 09:03:59 -0500
-Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E21AD6568
-        for <linux-mmc@vger.kernel.org>; Mon,  2 Jan 2023 06:03:58 -0800 (PST)
-Received: by mail-pl1-x62f.google.com with SMTP id d15so29634205pls.6
-        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2023 06:03:58 -0800 (PST)
+        with ESMTP id S236274AbjABPG4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 2 Jan 2023 10:06:56 -0500
+Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1940CB4D
+        for <linux-mmc@vger.kernel.org>; Mon,  2 Jan 2023 07:06:54 -0800 (PST)
+Received: by mail-pf1-x429.google.com with SMTP id a30so3201041pfr.6
+        for <linux-mmc@vger.kernel.org>; Mon, 02 Jan 2023 07:06:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=H6LE9777qsWo/95jEEDeNuHKeoT3KBBjJhTBB9+3438=;
-        b=WVZ8sTBHE3tdEtU8KINohrJE7jUeh7JY6+Cq1JATImhS+i7bSSIxL/ab6UedZOqcPV
-         9SaD3eWW62O0hELZpWDIB4FYxs9NEW0si5CeTtIl0ywEI7PWDSCJKSl1gpZiqeGXnHht
-         FobvPTT7miQsIRpa7tC2nUS722if4PTI2vybziRb2umWH0/5DdTjjqpeTAnz8RLQOLK+
-         NdE1DHJZil38sjCgTiP4VUdlpmCiP57OEXNjP8vmViFJOCY53vmfcrdXr5vVACYzsDU0
-         MxbGood60SlNhFcsOEcrjGfLfrBN9ZTMhdNWdjcpg0+ueQBzTYCQ5sbYWjDjdkzLQ7bW
-         gqmw==
+        bh=LoMc9pQ872B3tkICAMISF8J7bmxsn99eD6Cqj3bIdps=;
+        b=jInaRD9Zshal7P5+zlWcHY7dsmKd2EtvhhVTxlzsVkhyX97W/9PobgpdhB0OvEHyOT
+         I21Op535arLNrJthA+F2xKMCJCRJg9UsKBotbJES92nwL2KlenZhjrfniKULdbADznU6
+         8p9AAaF9i6gSyDTrAMqHETD5pGHwtmw3u9D5myAlKUzrrvijanp2Vkl5P6O5hqEzsySI
+         NE9YKn8YTa5Rfyy+3S8sq2rvaFqihVERJVBRTdQQHNOiNDc4zwxdMJtcv07zLzticKS3
+         ubcYRSnZ60IDggb/r+SGaIbbl5L86Pt9tthXrbQKnrZiyPZlbeAnKxlSD1oV5yHxINS8
+         YHZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=H6LE9777qsWo/95jEEDeNuHKeoT3KBBjJhTBB9+3438=;
-        b=gzVObqeqId5j0IPCV55RZP0pLhbW48BMmjxClAkImpqYDwz6jgr7b5jmjKdr56Wf4d
-         b/UwkoI54jeM210MyT/HzTgnYtTqlo1kcTFCudOqjUu6OnWKr3o3QD4uCeJgZtM3YZmp
-         4WxqL+MYBdoECADbxteP9OvIfsjLDm9ECoYeN4zUsdBDva3tjLtCKyujqcN28UVLiKn2
-         b4FNwOHFX3GVGtE83/FG5VtdFUnaz1u5S41o2B0a/frJZxHmhtT3OnZdrk6gLClvic8G
-         wHMxy3WHaG56NlCk2rhHzVMeymk8l706FJOxfw+o1M7xBkSRGn7H4rXGijQ921EkeTrd
-         gnug==
-X-Gm-Message-State: AFqh2koQaiL/sWm8m926iEjTXCAcbIoN7RSadwajQCXxJJNrJV6Z1Kvh
-        emfr0cVqCGEhNkWiUyqvmewWH19mojhZP/pJ3PPQjw==
-X-Google-Smtp-Source: AMrXdXvD8JA7sNYQjcYTqtzv0aBs0qREhnG3CGWGtXVKAhDWr+IAKhvXR7v2qYq2/A86epOWoS872lYqCFy/nLDsyvA=
-X-Received: by 2002:a17:902:eb83:b0:189:e426:4616 with SMTP id
- q3-20020a170902eb8300b00189e4264616mr2030130plg.37.1672668238383; Mon, 02 Jan
- 2023 06:03:58 -0800 (PST)
+        bh=LoMc9pQ872B3tkICAMISF8J7bmxsn99eD6Cqj3bIdps=;
+        b=EKw0Jmv+V9GXHluKypMdF7t8D3/EY0CxhSkc1vZDIa76qwAhdbpK0R6Nk7BrlYfhX1
+         EJrPSGCQdIwYAfj6IU0d4ilBW6QJ9owHmjlnId8V2GqResnyMkG3U2D2a+fkFLA1P8RX
+         OEnWeu9+A8GORtwiCJ7di7In61oZzJsYkpyiXKauChErmhbTGyG7DJDIlY6t3kan8bs8
+         8WJRMAHVFHqEfkA1xVWhHU+gSH3+Ut7v0Bx7LgYnxwejrDClHfOJAiT+qzPdwHJJT7Tl
+         se9CYdOX4CVd2jNYEYswj7jwSNDrHuA5kH8Ygez/k0uams+kbI7BrSKDRgQpIZVq2wuw
+         6AVg==
+X-Gm-Message-State: AFqh2koT9rBDpgxSxz/NgyGtYOjG3VxBGtqNzw0FSK26KhQOJGG1cuCJ
+        DD/0hx3ShbX5NSyLzqT/pya7FsJ0W9MGovcDhD7MBZZR2TbpHw==
+X-Google-Smtp-Source: AMrXdXsq/5u3UiD9glOis+YuFMt5vj9rwkfxHA/n0B/g+6plRm0o5dcGOYNZHUXyUK5PoA8G7cYbX4cmHrXGYOA0MC4=
+X-Received: by 2002:a63:5841:0:b0:477:b650:494b with SMTP id
+ i1-20020a635841000000b00477b650494bmr2406661pgm.434.1672672013917; Mon, 02
+ Jan 2023 07:06:53 -0800 (PST)
 MIME-Version: 1.0
-References: <20221227122227.460921-1-william.qiu@starfivetech.com> <20221227122227.460921-4-william.qiu@starfivetech.com>
-In-Reply-To: <20221227122227.460921-4-william.qiu@starfivetech.com>
+References: <20221207112315.1812222-1-haibo.chen@nxp.com>
+In-Reply-To: <20221207112315.1812222-1-haibo.chen@nxp.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 2 Jan 2023 15:03:22 +0100
-Message-ID: <CAPDyKFqziA+PB__v8nJzgkTuM9ZszW8X2U-akvRFv0_qwZ22OA@mail.gmail.com>
-Subject: Re: [PATCH v2 3/3] riscv: dts: starfive: Add mmc node
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-kernel@vger.kernel.org
+Date:   Mon, 2 Jan 2023 16:06:17 +0100
+Message-ID: <CAPDyKFqR9uGXWXTJivH1xoPS2yMQXrD8TLGH509rpELKoiSXYw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-esdhc-imx: correct the tuning start tap and
+ step setting
+To:     haibo.chen@nxp.com
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-imx@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
+        kernel@pengutronix.de, festevam@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 27 Dec 2022 at 13:22, William Qiu <william.qiu@starfivetech.com> wrote:
+On Wed, 7 Dec 2022 at 12:23, <haibo.chen@nxp.com> wrote:
 >
-> This adds the mmc node for the StarFive JH7110 SoC.
-> Set sdioo node to emmc and set sdio1 node to sd.
+> From: Haibo Chen <haibo.chen@nxp.com>
 >
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
->  .../jh7110-starfive-visionfive-v2.dts         | 25 ++++++++++++
->  arch/riscv/boot/dts/starfive/jh7110.dtsi      | 38 +++++++++++++++++++
->  2 files changed, 63 insertions(+)
+> Current code logic may be impacted by the setting of ROM/Bootloader,
+> so unmask these bits first, then setting these bits accordingly.
 >
-> diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
-> index c8946cf3a268..d8244fd1f5a0 100644
-> --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
-> +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
-> @@ -47,6 +47,31 @@ &clk_rtc {
->         clock-frequency = <32768>;
->  };
->
-> +&mmc0 {
-> +       max-frequency = <100000000>;
-> +       card-detect-delay = <300>;
+> Fixes: 2b16cf326b70 ("mmc: sdhci-esdhc-imx: move tuning static configuration into hwinit function")
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
 
-Nitpick:  This seems redundant for a non-removable card!?
-
-> +       bus-width = <8>;
-> +       cap-mmc-highspeed;
-> +       mmc-ddr-1_8v;
-> +       mmc-hs200-1_8v;
-> +       non-removable;
-> +       cap-mmc-hw-reset;
-> +       post-power-on-delay-ms = <200>;
-> +       status = "okay";
-> +};
-> +
-> +&mmc1 {
-> +       max-frequency = <100000000>;
-> +       card-detect-delay = <300>;
-
-Nitpick: This looks redundant for polling based card detection
-(broken-cd is set a few lines below).
-
-> +       bus-width = <4>;
-> +       no-sdio;
-> +       no-mmc;
-> +       broken-cd;
-> +       cap-sd-highspeed;
-> +       post-power-on-delay-ms = <200>;
-> +       status = "okay";
-> +};
-> +
->  &gmac0_rmii_refin {
->         clock-frequency = <50000000>;
->  };
-> diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
-> index c22e8f1d2640..08a780d2c0f4 100644
-> --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
-> +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
-> @@ -331,6 +331,11 @@ aoncrg: clock-controller@17000000 {
->                         #reset-cells = <1>;
->                 };
->
-> +               syscon: syscon@13030000 {
-> +                       compatible = "starfive,syscon", "syscon";
-> +                       reg = <0x0 0x13030000 0x0 0x1000>;
-> +               };
-> +
->                 gpio: gpio@13040000 {
->                         compatible = "starfive,jh7110-sys-pinctrl";
->                         reg = <0x0 0x13040000 0x0 0x10000>;
-> @@ -433,5 +438,38 @@ uart5: serial@12020000 {
->                         reg-shift = <2>;
->                         status = "disabled";
->                 };
-> +
-> +               /* unremovable emmc as mmcblk0 */
-
-Don't confuse the mmc0 node name with mmcblk0. There is no guarantee
-that this is true, unless you also specify an alias.
-
-> +               mmc0: mmc@16010000 {
-> +                       compatible = "starfive,jh7110-mmc";
-> +                       reg = <0x0 0x16010000 0x0 0x10000>;
-> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
-> +                                <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
-> +                       clock-names = "biu","ciu";
-> +                       resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
-> +                       reset-names = "reset";
-> +                       interrupts = <74>;
-> +                       fifo-depth = <32>;
-> +                       fifo-watermark-aligned;
-> +                       data-addr = <0>;
-> +                       starfive,syscon = <&syscon 0x14 0x1a 0x7c000000>;
-> +                       status = "disabled";
-> +               };
-> +
-> +               mmc1: mmc@16020000 {
-> +                       compatible = "starfive,jh7110-mmc";
-> +                       reg = <0x0 0x16020000 0x0 0x10000>;
-> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO1_AHB>,
-> +                                <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
-> +                       clock-names = "biu","ciu";
-> +                       resets = <&syscrg JH7110_SYSRST_SDIO1_AHB>;
-> +                       reset-names = "reset";
-> +                       interrupts = <75>;
-> +                       fifo-depth = <32>;
-> +                       fifo-watermark-aligned;
-> +                       data-addr = <0>;
-> +                       starfive,syscon = <&syscon 0x9c 0x1 0x3e>;
-> +                       status = "disabled";
-> +               };
->         };
->  };
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 22 +++++++++++++++-------
+>  1 file changed, 15 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 89ef0c80ac37..9e73c34b6401 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -107,6 +107,7 @@
+>  #define ESDHC_TUNING_START_TAP_DEFAULT 0x1
+>  #define ESDHC_TUNING_START_TAP_MASK    0x7f
+>  #define ESDHC_TUNING_CMD_CRC_CHECK_DISABLE     (1 << 7)
+> +#define ESDHC_TUNING_STEP_DEFAULT      0x1
+>  #define ESDHC_TUNING_STEP_MASK         0x00070000
+>  #define ESDHC_TUNING_STEP_SHIFT                16
+>
+> @@ -1368,7 +1369,7 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+>         struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>         struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+>         struct cqhci_host *cq_host = host->mmc->cqe_private;
+> -       int tmp;
+> +       u32 tmp;
+>
+>         if (esdhc_is_usdhc(imx_data)) {
+>                 /*
+> @@ -1423,17 +1424,24 @@ static void sdhci_esdhc_imx_hwinit(struct sdhci_host *host)
+>
+>                 if (imx_data->socdata->flags & ESDHC_FLAG_STD_TUNING) {
+>                         tmp = readl(host->ioaddr + ESDHC_TUNING_CTRL);
+> -                       tmp |= ESDHC_STD_TUNING_EN |
+> -                               ESDHC_TUNING_START_TAP_DEFAULT;
+> -                       if (imx_data->boarddata.tuning_start_tap) {
+> -                               tmp &= ~ESDHC_TUNING_START_TAP_MASK;
+> +                       tmp |= ESDHC_STD_TUNING_EN;
+> +
+> +                       /*
+> +                        * ROM code or bootloader may config the start tap
+> +                        * and step, unmask them first.
+> +                        */
+> +                       tmp &= ~(ESDHC_TUNING_START_TAP_MASK | ESDHC_TUNING_STEP_MASK);
+> +                       if (imx_data->boarddata.tuning_start_tap)
+>                                 tmp |= imx_data->boarddata.tuning_start_tap;
+> -                       }
+> +                       else
+> +                               tmp |= ESDHC_TUNING_START_TAP_DEFAULT;
+>
+>                         if (imx_data->boarddata.tuning_step) {
+> -                               tmp &= ~ESDHC_TUNING_STEP_MASK;
+>                                 tmp |= imx_data->boarddata.tuning_step
+>                                         << ESDHC_TUNING_STEP_SHIFT;
+> +                       } else {
+> +                               tmp |= ESDHC_TUNING_STEP_DEFAULT
+> +                                       << ESDHC_TUNING_STEP_SHIFT;
+>                         }
+>
+>                         /* Disable the CMD CRC check for tuning, if not, need to
+> --
+> 2.34.1
+>
