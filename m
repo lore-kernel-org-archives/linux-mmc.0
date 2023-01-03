@@ -2,1632 +2,413 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9C676C4708E
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 11:44:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3777C3DA7D
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 11:47:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237438AbjACLoF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Jan 2023 06:44:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39154 "EHLO
+        id S237373AbjACLrq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Jan 2023 06:47:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237477AbjACLn3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 06:43:29 -0500
-Received: from mail-pf1-x434.google.com (mail-pf1-x434.google.com [IPv6:2607:f8b0:4864:20::434])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 577DF2194
-        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 03:43:14 -0800 (PST)
-Received: by mail-pf1-x434.google.com with SMTP id x26so14119035pfq.10
-        for <linux-mmc@vger.kernel.org>; Tue, 03 Jan 2023 03:43:14 -0800 (PST)
+        with ESMTP id S237402AbjACLrm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 06:47:42 -0500
+Received: from mail-pg1-x52f.google.com (mail-pg1-x52f.google.com [IPv6:2607:f8b0:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8D58FD1E
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 03:47:38 -0800 (PST)
+Received: by mail-pg1-x52f.google.com with SMTP id 79so19930853pgf.11
+        for <linux-mmc@vger.kernel.org>; Tue, 03 Jan 2023 03:47:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=5TYzS9Lkrj6KBVhqWxrNfQcfKi37QWE4RXEU3Co6BN8=;
-        b=lAECmT+x3cOEZfxz/mBtDT9NTosZjqvXcthv87wYNOvWN8//1Zd/eRTet85KTaWD97
-         gVCYXBX0vBohYtJytipMTYvT5bj4Pto5Lk4+vc7+Ea2FedgN0/9Yd7eyudaoXA4KLXFA
-         XW451kNuH1qmNIFGY/1OyYEfOGDagfWVWt2O+cgCUc9RXjwAjgxCe+NsS87Ui6pAf1z2
-         GKxXfRHlao4TLN/rI+2sniV42rvG4XeyZBYiynOAQDqEsQNCQrI+mNunohLSOpu1mp9O
-         xK8BSZ/TFKt2+7WaZONVJuTst9YMkfDSzLqG2x6BIIKDc0ptG44iIIV0ozMpwzcigCpz
-         YRLA==
+        bh=Lte8LDhEJIxGGWKB/4JLfmA0N1/tL9JoU9hj31lh5uY=;
+        b=Y5fij6qsrNvFmIwoTp3ZNzS1obYJILzRs9/MnbLcXXxSlxsk1RxnTlUsuIIwuUamwY
+         NTFENGoUZYcHhYeq86TPzi6KM/odchYoL9blMXulgXNGEo/unagn8Sn6zwvDUt05by4v
+         mbFeaTOhGHa0hiNFFtgpwoYetj/KuH3PKStZW8A51AjTlxiwdHm8FKCYQAVX9/mREIux
+         B0ES+Uw1xdfW7A8fG9uaWN/EDoSv7XQVNsOSc6C4YX4WkLShENItIyFyh4izB3bHXnNz
+         q7rXDSS2EIyTi8bIWnkIujL/kVP1bAechQbHVMy2RzywgigFL0Cnr16W1og9IfaDmExS
+         yJng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=5TYzS9Lkrj6KBVhqWxrNfQcfKi37QWE4RXEU3Co6BN8=;
-        b=UnSJvfciZRLdg0DNFK5a6RdGl1Is9FJfQI3ukryc2rvoscs0e12GTf16Usi4ylVuZw
-         pY1r7iAakPE7vyRQ+jb7pPfFF7QvnSRA5z4x3VpF/RTk+hfA6KAXsLyQsDyyHS3GrsPz
-         zGCQWE0frWonqpykjw+XNzPrsM1WTQtoH76DaFhGbmnRXeND97dEruoS+kCnQFiFH2lV
-         /KOdf08KLOgMQ8yy1+9psOBsrxU9TGB4mttAqApP4pw8O4e8aYCUIByWymBCpv0xolqP
-         lOmrAJO7iaQwclxclI49Ll48ldSFd27/C8g85JLOv6slNdlHDLo2KzgVfNPLaVIxCGrs
-         zzdA==
-X-Gm-Message-State: AFqh2kqo28WTqx81fwWWFmxdFf3HW7P/QA4cghWOQkg7aLd+A5N0X8bV
-        4rsne4AQu/fmPYIXlnymgFE8kkgtG5cVJbnEWcGHqg==
-X-Google-Smtp-Source: AMrXdXvN6+UQRwO7+RnT6Ct3LJZMFI6MNvrJjJ1fJEIfMay6C/Bz/hYo46RgC/6nb5LsUVwYs9mammavIi5UseXC5J0=
-X-Received: by 2002:a63:5841:0:b0:477:b650:494b with SMTP id
- i1-20020a635841000000b00477b650494bmr2580808pgm.434.1672746193478; Tue, 03
- Jan 2023 03:43:13 -0800 (PST)
+        bh=Lte8LDhEJIxGGWKB/4JLfmA0N1/tL9JoU9hj31lh5uY=;
+        b=n/qBIUmuDctHhFK9HZJ4JxRXcvkLCVTaBNFsg7YRG0xKgpFkd5wnh107VkHf4rE79L
+         PExJZgGYc9lFBpmNijFbL23mUCrrPttCCl9fetartEimLSZSGmV+6ywb1DqZzlzc+d/q
+         qWmD18NhjKrdpJ1zBKx7BBNP0zkWrqwlMEHzcpSQpnVQmCesETsvhnHDbNdSx09E/ne7
+         UrT3hyKVDzzlsOELwGiHHbQcXAg7sTFg3Id+IvRMnR5vvf3RdV5uvnh0uJmj0yl6WZ8N
+         rRBr7yR4zZzCYg9dIdQlY7HwektwmNFXV+dV8GCqvJKt5DIec11uVzsQsDUpa5zt1L2S
+         xdJQ==
+X-Gm-Message-State: AFqh2ko1ULVS+nNAaq5dya5UV3v8l9H10ZZvZRKu/BBdZSGU232STM0e
+        otYwFG1YdKjUGOkoDRV857gR7dsxPgjVuSc+NlYsGQ==
+X-Google-Smtp-Source: AMrXdXvWSePVIXt7wXMnhDqA5yFN7mt4MQ4d5PwDwXRBP28F9LICHeMll3QLuUAm3ffj4MLCUNRw/4js8nmfEiFpZnY=
+X-Received: by 2002:a63:24c4:0:b0:499:c23c:d65b with SMTP id
+ k187-20020a6324c4000000b00499c23cd65bmr1443717pgk.541.1672746457362; Tue, 03
+ Jan 2023 03:47:37 -0800 (PST)
 MIME-Version: 1.0
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com> <20221227233020.284266-13-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20221227233020.284266-13-martin.blumenstingl@googlemail.com>
+References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw> <CAK00qKDrk0=Zn35HVyak=rFw+QM-h9PXjji_G7yHQT+H8LAAZg@mail.gmail.com>
+In-Reply-To: <CAK00qKDrk0=Zn35HVyak=rFw+QM-h9PXjji_G7yHQT+H8LAAZg@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 3 Jan 2023 12:42:36 +0100
-Message-ID: <CAPDyKFqfVyqAM8r2ENTFB8dLor1uyJaba21j8V67cf2HnL3U3w@mail.gmail.com>
-Subject: Re: [RFC PATCH v1 12/19] rtw88: sdio: Add HCI implementation for SDIO
- based chipsets
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>, linux-kernel@vger.kernel.org,
-        netdev@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
+Date:   Tue, 3 Jan 2023 12:47:01 +0100
+Message-ID: <CAPDyKFqYnS294tbB62=fa4ZtdYycJBT2G2vmhHeLHjdyaH9X=w@mail.gmail.com>
+Subject: Re: [PATCH V6 00/24] Add support UHS-II for GL9755
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 28 Dec 2022 at 00:30, Martin Blumenstingl
-<martin.blumenstingl@googlemail.com> wrote:
+On Tue, 3 Jan 2023 at 12:04, Victor Shih <victorshihgli@gmail.com> wrote:
 >
-> Add a sub-driver for SDIO based chipsets which implements the following
-> functionality:
-> - register accessors for 8, 16 and 32 bits for all states of the card
->   (including usage of 4x 8 bit access for one 32 bit buffer if the card
->   is not fully powered on yet - or if it's fully powered on then 1x 32
->   bit access is used)
-> - checking whether there's space in the TX FIFO queue to transmit data
-> - transfers from the host to the device for actual network traffic,
->   reserved pages (for firmware download) and H2C (host-to-card)
->   transfers
-> - receiving data from the device
-> - deep power saving state
+> Hi, Ulf and Adrian
 >
-> The transmit path is optimized so DMA-capable SDIO host controllers can
-> directly use the buffers provided because the buffer's physical
-> addresses are 8 byte aligned.
->
-> The receive path is prepared to support RX aggregation where the
-> chipset combines multiple MAC frames into one bigger buffer to reduce
-> SDIO transfer overhead.
->
-> Co-developed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
-> Signed-off-by: Jernej Skrabec <jernej.skrabec@gmail.com>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Excuse me for disturbing your nice vacation, if you already have a
+> closer look at
+>  a paragraph at the series after you finish the vacation, could you let
+>  me know your comments first, let me check it first.
 
-This looks good to me, so feel free to add:
+I am catching up on my backlog, so I am soon ready to have a look at
+this. Thanks for posting the new version!
 
-Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+Although, please note that my bandwidth is a bit limited this and next week too.
 
 Kind regards
 Uffe
 
-
-
-> ---
->  drivers/net/wireless/realtek/rtw88/Kconfig  |    3 +
->  drivers/net/wireless/realtek/rtw88/Makefile |    3 +
->  drivers/net/wireless/realtek/rtw88/debug.h  |    1 +
->  drivers/net/wireless/realtek/rtw88/mac.h    |    1 -
->  drivers/net/wireless/realtek/rtw88/reg.h    |   10 +
->  drivers/net/wireless/realtek/rtw88/sdio.c   | 1242 +++++++++++++++++++
->  drivers/net/wireless/realtek/rtw88/sdio.h   |  175 +++
->  7 files changed, 1434 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.c
->  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.h
 >
-> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
-> index 651ab56d9c6b..cdf9cb478ee2 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
-> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
-> @@ -16,6 +16,9 @@ config RTW88_CORE
->  config RTW88_PCI
->         tristate
+> Thanks, Victor Shih
 >
-> +config RTW88_SDIO
-> +       tristate
-> +
->  config RTW88_USB
->         tristate
->
-> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
-> index fe7293ee87b4..892cad60ba31 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Makefile
-> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
-> @@ -59,5 +59,8 @@ rtw88_8821cu-objs             := rtw8821cu.o
->  obj-$(CONFIG_RTW88_PCI)                += rtw88_pci.o
->  rtw88_pci-objs                 := pci.o
->
-> +obj-$(CONFIG_RTW88_SDIO)       += rtw88_sdio.o
-> +rtw88_sdio-objs                        := sdio.o
-> +
->  obj-$(CONFIG_RTW88_USB)                += rtw88_usb.o
->  rtw88_usb-objs                 := usb.o
-> diff --git a/drivers/net/wireless/realtek/rtw88/debug.h b/drivers/net/wireless/realtek/rtw88/debug.h
-> index 066792dd96af..a9149c6c2b48 100644
-> --- a/drivers/net/wireless/realtek/rtw88/debug.h
-> +++ b/drivers/net/wireless/realtek/rtw88/debug.h
-> @@ -24,6 +24,7 @@ enum rtw_debug_mask {
->         RTW_DBG_ADAPTIVITY      = 0x00008000,
->         RTW_DBG_HW_SCAN         = 0x00010000,
->         RTW_DBG_STATE           = 0x00020000,
-> +       RTW_DBG_SDIO            = 0x00040000,
->
->         RTW_DBG_ALL             = 0xffffffff
->  };
-> diff --git a/drivers/net/wireless/realtek/rtw88/mac.h b/drivers/net/wireless/realtek/rtw88/mac.h
-> index 3172aa5ac4de..58c3dccc14bb 100644
-> --- a/drivers/net/wireless/realtek/rtw88/mac.h
-> +++ b/drivers/net/wireless/realtek/rtw88/mac.h
-> @@ -7,7 +7,6 @@
->
->  #define RTW_HW_PORT_NUM                5
->  #define cut_version_to_mask(cut) (0x1 << ((cut) + 1))
-> -#define SDIO_LOCAL_OFFSET      0x10250000
->  #define DDMA_POLLING_COUNT     1000
->  #define C2H_PKT_BUF            256
->  #define REPORT_BUF             128
-> diff --git a/drivers/net/wireless/realtek/rtw88/reg.h b/drivers/net/wireless/realtek/rtw88/reg.h
-> index 8852b24d6c2a..4ea2c6b491e9 100644
-> --- a/drivers/net/wireless/realtek/rtw88/reg.h
-> +++ b/drivers/net/wireless/realtek/rtw88/reg.h
-> @@ -185,6 +185,9 @@
->         (((x) & BIT_MASK_TXDMA_VIQ_MAP) << BIT_SHIFT_TXDMA_VIQ_MAP)
->  #define REG_TXDMA_PQ_MAP       0x010C
->  #define BIT_RXDMA_ARBBW_EN     BIT(0)
-> +#define BIT_RXSHFT_EN          BIT(1)
-> +#define BIT_RXDMA_AGG_EN       BIT(2)
-> +#define BIT_TXDMA_BW_EN                BIT(3)
->  #define BIT_SHIFT_TXDMA_BEQ_MAP        8
->  #define BIT_MASK_TXDMA_BEQ_MAP 0x3
->  #define BIT_TXDMA_BEQ_MAP(x)                                                   \
-> @@ -283,10 +286,17 @@
->  #define REG_H2C_TAIL           0x0248
->  #define REG_H2C_READ_ADDR      0x024C
->  #define REG_H2C_INFO           0x0254
-> +#define REG_RXDMA_AGG_PG_TH    0x0280
-> +#define BIT_SHIFT_DMA_AGG_TO_V1        8
-> +#define BIT_EN_PRE_CALC                BIT(29)
->  #define REG_RXPKT_NUM          0x0284
->  #define BIT_RXDMA_REQ          BIT(19)
->  #define BIT_RW_RELEASE         BIT(18)
->  #define BIT_RXDMA_IDLE         BIT(17)
-> +#define REG_RXDMA_STATUS       0x0288
-> +#define REG_RXDMA_DPR          0x028C
-> +#define REG_RXDMA_MODE         0x0290
-> +#define BIT_DMA_MODE           BIT(1)
->  #define REG_RXPKTNUM           0x02B0
->
->  #define REG_INT_MIG            0x0304
-> diff --git a/drivers/net/wireless/realtek/rtw88/sdio.c b/drivers/net/wireless/realtek/rtw88/sdio.c
-> new file mode 100644
-> index 000000000000..0e637ff2293f
-> --- /dev/null
-> +++ b/drivers/net/wireless/realtek/rtw88/sdio.c
-> @@ -0,0 +1,1242 @@
-> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-> +/* Copyright (C) 2021 Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> + * Copyright (C) 2021 Jernej Skrabec <jernej.skrabec@gmail.com>
-> + *
-> + * Based on rtw88/pci.c:
-> + *   Copyright(c) 2018-2019  Realtek Corporation
-> + */
-> +
-> +#include <linux/module.h>
-> +#include <linux/mmc/host.h>
-> +#include <linux/mmc/sdio_func.h>
-> +#include "sdio.h"
-> +#include "reg.h"
-> +#include "tx.h"
-> +#include "rx.h"
-> +#include "fw.h"
-> +#include "ps.h"
-> +#include "debug.h"
-> +
-> +#define RTW_SDIO_INDIRECT_RW_RETRIES           50
-> +
-> +static bool rtw_sdio_is_bus_addr(u32 addr)
-> +{
-> +       return (addr & RTW_SDIO_BUS_MSK) != 0;
-> +}
-> +
-> +static bool rtw_sdio_bus_claim_needed(struct rtw_sdio *rtwsdio)
-> +{
-> +       return !rtwsdio->irq_thread ||
-> +              rtwsdio->irq_thread != current;
-> +}
-> +
-> +static u32 rtw_sdio_to_bus_offset(struct rtw_dev *rtwdev, u32 addr)
-> +{
-> +       switch (addr & RTW_SDIO_BUS_MSK) {
-> +       case WLAN_IOREG_OFFSET:
-> +               addr &= WLAN_IOREG_REG_MSK;
-> +               addr |= FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                  REG_SDIO_CMD_ADDR_MAC_REG);
-> +               break;
-> +       case SDIO_LOCAL_OFFSET:
-> +               addr &= SDIO_LOCAL_REG_MSK;
-> +               addr |= FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                  REG_SDIO_CMD_ADDR_SDIO_REG);
-> +               break;
-> +       default:
-> +               rtw_warn(rtwdev, "Cannot convert addr 0x%08x to bus offset",
-> +                        addr);
-> +       }
-> +
-> +       return addr;
-> +}
-> +
-> +static void rtw_sdio_writel(struct rtw_sdio *rtwsdio, u32 val,
-> +                           u32 addr, int *ret)
-> +{
-> +       u8 buf[4];
-> +       int i;
-> +
-> +       if (!(addr & 3) && rtwsdio->is_powered_on) {
-> +               sdio_writel(rtwsdio->sdio_func, val, addr, ret);
-> +               return;
-> +       }
-> +
-> +       *(__le32 *)buf = cpu_to_le32(val);
-> +
-> +       for (i = 0; i < 4; i++) {
-> +               sdio_writeb(rtwsdio->sdio_func, buf[i], addr + i, ret);
-> +               if (*ret)
-> +                       return;
-> +       }
-> +}
-> +
-> +static u32 rtw_sdio_readl(struct rtw_sdio *rtwsdio, u32 addr, int *ret)
-> +{
-> +       u8 buf[4];
-> +       int i;
-> +
-> +       if (!(addr & 3) && rtwsdio->is_powered_on)
-> +               return sdio_readl(rtwsdio->sdio_func, addr, ret);
-> +
-> +       for (i = 0; i < 4; i++) {
-> +               buf[i] = sdio_readb(rtwsdio->sdio_func, addr + i, ret);
-> +               if (*ret)
-> +                       return 0;
-> +       }
-> +
-> +       return le32_to_cpu(*(__le32 *)buf);
-> +}
-> +
-> +static u8 rtw_sdio_read_indirect8(struct rtw_dev *rtwdev, u32 addr, int *ret)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       u32 reg_cfg, reg_data;
-> +       int retry;
-> +       u8 tmp;
-> +
-> +       reg_cfg = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_CFG);
-> +       reg_data = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_DATA);
-> +
-> +       rtw_sdio_writel(rtwsdio, BIT(19) | addr, reg_cfg, ret);
-> +       if (*ret)
-> +               return 0;
-> +
-> +       for (retry = 0; retry < RTW_SDIO_INDIRECT_RW_RETRIES; retry++) {
-> +               tmp = sdio_readb(rtwsdio->sdio_func, reg_cfg + 2, ret);
-> +               if (!ret && tmp & BIT(4))
-> +                       break;
-> +       }
-> +
-> +       if (*ret)
-> +               return 0;
-> +
-> +       return sdio_readb(rtwsdio->sdio_func, reg_data, ret);
-> +}
-> +
-> +static int rtw_sdio_read_indirect_bytes(struct rtw_dev *rtwdev, u32 addr,
-> +                                       u8 *buf, int count)
-> +{
-> +       int i, ret;
-> +
-> +       for (i = 0; i < count; i++) {
-> +               buf[0] = rtw_sdio_read_indirect8(rtwdev, addr + i, &ret);
-> +               if (ret)
-> +                       break;
-> +       }
-> +
-> +       return ret;
-> +}
-> +
-> +static u32 rtw_sdio_read_indirect32(struct rtw_dev *rtwdev, u32 addr, int *ret)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       u32 reg_cfg, reg_data, val;
-> +       int retry;
-> +
-> +       reg_cfg = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_CFG);
-> +       reg_data = rtw_sdio_to_bus_offset(rtwdev, REG_SDIO_INDIRECT_REG_DATA);
-> +
-> +       rtw_sdio_writel(rtwsdio, BIT(19) | BIT(17) | addr, reg_cfg, ret);
-> +       if (*ret)
-> +               return 0;
-> +
-> +       for (retry = 0; retry < RTW_SDIO_INDIRECT_RW_RETRIES; retry++) {
-> +               val = sdio_readb(rtwsdio->sdio_func, reg_cfg + 2, ret);
-> +               if (!ret && (val & BIT(4)))
-> +                       break;
-> +       }
-> +
-> +       if (!*ret)
-> +               val = rtw_sdio_readl(rtwsdio, reg_data, ret);
-> +
-> +       return val;
-> +}
-> +
-> +static u8 rtw_sdio_read8(struct rtw_dev *rtwdev, u32 addr)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool direct, bus_claim;
-> +       int ret;
-> +       u8 val;
-> +
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +       direct = rtw_sdio_is_bus_addr(addr);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       if (direct) {
-> +               addr = rtw_sdio_to_bus_offset(rtwdev, addr);
-> +               val = sdio_readb(rtwsdio->sdio_func, addr, &ret);
-> +       } else {
-> +               val = rtw_sdio_read_indirect8(rtwdev, addr, &ret);
-> +       }
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio read8 failed (0x%x): %d", addr, ret);
-> +
-> +       return val;
-> +}
-> +
-> +static u16 rtw_sdio_read16(struct rtw_dev *rtwdev, u32 addr)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool direct, bus_claim;
-> +       u8 buf[2];
-> +       int ret;
-> +       u16 val;
-> +
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +       direct = rtw_sdio_is_bus_addr(addr);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       if (direct) {
-> +               addr = rtw_sdio_to_bus_offset(rtwdev, addr);
-> +               buf[0] = sdio_readb(rtwsdio->sdio_func, addr, &ret);
-> +               if (!ret)
-> +                       buf[1] = sdio_readb(rtwsdio->sdio_func, addr + 1, &ret);
-> +               val = le16_to_cpu(*(__le16 *)buf);
-> +       } else if (addr & 1) {
-> +               ret = rtw_sdio_read_indirect_bytes(rtwdev, addr, buf, 2);
-> +               val = le16_to_cpu(*(__le16 *)buf);
-> +       } else {
-> +               val = rtw_sdio_read_indirect32(rtwdev, addr, &ret);
-> +       }
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio read16 failed (0x%x): %d", addr, ret);
-> +
-> +       return val;
-> +}
-> +
-> +static u32 rtw_sdio_read32(struct rtw_dev *rtwdev, u32 addr)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool direct, bus_claim;
-> +       u8 buf[4];
-> +       u32 val;
-> +       int ret;
-> +
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +       direct = rtw_sdio_is_bus_addr(addr);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       if (direct) {
-> +               addr = rtw_sdio_to_bus_offset(rtwdev, addr);
-> +               val = rtw_sdio_readl(rtwsdio, addr, &ret);
-> +       } else if (addr & 3) {
-> +               ret = rtw_sdio_read_indirect_bytes(rtwdev, addr, buf, 4);
-> +               val = le32_to_cpu(*(__le32 *)buf);
-> +       } else {
-> +               val = rtw_sdio_read_indirect32(rtwdev, addr, &ret);
-> +       }
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio read32 failed (0x%x): %d", addr, ret);
-> +
-> +       return val;
-> +}
-> +
-> +static u32 rtw_sdio_to_write_address(struct rtw_dev *rtwdev, u32 addr)
-> +{
-> +       if (!rtw_sdio_is_bus_addr(addr))
-> +               addr |= WLAN_IOREG_OFFSET;
-> +
-> +       return rtw_sdio_to_bus_offset(rtwdev, addr);
-> +}
-> +
-> +static void rtw_sdio_write8(struct rtw_dev *rtwdev, u32 addr, u8 val)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool bus_claim;
-> +       int ret;
-> +
-> +       addr = rtw_sdio_to_write_address(rtwdev, addr);
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       sdio_writeb(rtwsdio->sdio_func, val, addr, &ret);
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio write8 failed (0x%x): %d", addr, ret);
-> +}
-> +
-> +static void rtw_sdio_write16(struct rtw_dev *rtwdev, u32 addr, u16 val)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool bus_claim;
-> +       int ret;
-> +
-> +       addr = rtw_sdio_to_write_address(rtwdev, addr);
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       sdio_writeb(rtwsdio->sdio_func, val, addr, &ret);
-> +       if (!ret)
-> +               sdio_writeb(rtwsdio->sdio_func, val >> 8, addr + 1, &ret);
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio write16 failed (0x%x): %d", addr, ret);
-> +}
-> +
-> +static void rtw_sdio_write32(struct rtw_dev *rtwdev, u32 addr, u32 val)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool bus_claim;
-> +       int ret;
-> +
-> +       addr = rtw_sdio_to_write_address(rtwdev, addr);
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       rtw_sdio_writel(rtwsdio, val, addr, &ret);
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev, "sdio write32 failed (0x%x): %d", addr, ret);
-> +}
-> +
-> +static u32 rtw_sdio_get_tx_addr(struct rtw_dev *rtwdev, size_t size,
-> +                               enum rtw_tx_queue_type queue)
-> +{
-> +       u32 txaddr;
-> +
-> +       switch (queue) {
-> +       case RTW_TX_QUEUE_BCN:
-> +       case RTW_TX_QUEUE_H2C:
-> +       case RTW_TX_QUEUE_HI0:
-> +               txaddr = FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                   REG_SDIO_CMD_ADDR_TXFF_HIGH);
-> +               break;
-> +       case RTW_TX_QUEUE_VI:
-> +       case RTW_TX_QUEUE_VO:
-> +               txaddr = FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                   REG_SDIO_CMD_ADDR_TXFF_NORMAL);
-> +               break;
-> +       case RTW_TX_QUEUE_BE:
-> +       case RTW_TX_QUEUE_BK:
-> +               txaddr = FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                   REG_SDIO_CMD_ADDR_TXFF_LOW);
-> +               break;
-> +       case RTW_TX_QUEUE_MGMT:
-> +               txaddr = FIELD_PREP(REG_SDIO_CMD_ADDR_MSK,
-> +                                   REG_SDIO_CMD_ADDR_TXFF_EXTRA);
-> +               break;
-> +       default:
-> +               rtw_warn(rtwdev, "Unsupported queue for TX addr: 0x%02x\n",
-> +                        queue);
-> +               return 0;
-> +       }
-> +
-> +       txaddr += DIV_ROUND_UP(size, 4);
-> +
-> +       return txaddr;
-> +};
-> +
-> +static int rtw_sdio_read_port(struct rtw_dev *rtwdev, u8 *buf, size_t count)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       u32 rxaddr = rtwsdio->rx_addr++;
-> +       int ret;
-> +
-> +       ret = sdio_memcpy_fromio(rtwsdio->sdio_func, buf,
-> +                                RTW_SDIO_ADDR_RX_RX0FF_GEN(rxaddr), count);
-> +       if (ret)
-> +               rtw_warn(rtwdev,
-> +                        "Failed to read %lu byte(s) from SDIO port 0x%08x",
-> +                        count, rxaddr);
-> +
-> +       return ret;
-> +}
-> +
-> +static int rtw_sdio_check_free_txpg(struct rtw_dev *rtwdev, u8 queue,
-> +                                   size_t count)
-> +{
-> +       unsigned int pages_free, pages_needed;
-> +
-> +       if (rtw_chip_wcpu_11n(rtwdev)) {
-> +               u32 free_txpg;
-> +
-> +               free_txpg = rtw_sdio_read32(rtwdev, REG_SDIO_FREE_TXPG);
-> +
-> +               switch (queue) {
-> +               case RTW_TX_QUEUE_BCN:
-> +               case RTW_TX_QUEUE_H2C:
-> +               case RTW_TX_QUEUE_HI0:
-> +               case RTW_TX_QUEUE_MGMT:
-> +                       /* high */
-> +                       pages_free = free_txpg & 0xff;
-> +                       break;
-> +               case RTW_TX_QUEUE_VI:
-> +               case RTW_TX_QUEUE_VO:
-> +                       /* normal */
-> +                       pages_free = (free_txpg >> 8) & 0xff;
-> +                       break;
-> +               case RTW_TX_QUEUE_BE:
-> +               case RTW_TX_QUEUE_BK:
-> +                       /* low */
-> +                       pages_free = (free_txpg >> 16) & 0xff;
-> +                       break;
-> +               default:
-> +                       rtw_warn(rtwdev, "Unknown mapping for queue %u\n", queue);
-> +                       break;
-> +               }
-> +
-> +               /* add the pages from the public queue */
-> +               pages_free += (free_txpg >> 24) & 0xff;
-> +       } else {
-> +               u32 free_txpg[3];
-> +
-> +               free_txpg[0] = rtw_sdio_read32(rtwdev, REG_SDIO_FREE_TXPG);
-> +               free_txpg[1] = rtw_sdio_read32(rtwdev, REG_SDIO_FREE_TXPG + 4);
-> +               free_txpg[2] = rtw_sdio_read32(rtwdev, REG_SDIO_FREE_TXPG + 8);
-> +
-> +               switch (queue) {
-> +               case RTW_TX_QUEUE_BCN:
-> +               case RTW_TX_QUEUE_H2C:
-> +               case RTW_TX_QUEUE_HI0:
-> +                       /* high */
-> +                       pages_free = free_txpg[0] & 0xfff;
-> +                       break;
-> +               case RTW_TX_QUEUE_VI:
-> +               case RTW_TX_QUEUE_VO:
-> +                       /* normal */
-> +                       pages_free = (free_txpg[0] >> 16) & 0xfff;
-> +                       break;
-> +               case RTW_TX_QUEUE_BE:
-> +               case RTW_TX_QUEUE_BK:
-> +                       /* low */
-> +                       pages_free = free_txpg[1] & 0xfff;
-> +                       break;
-> +               case RTW_TX_QUEUE_MGMT:
-> +                       /* extra */
-> +                       pages_free = free_txpg[2] & 0xfff;
-> +                       break;
-> +               default:
-> +                       rtw_warn(rtwdev, "Unknown mapping for queue %u\n", queue);
-> +                       return -EINVAL;
-> +               }
-> +
-> +               /* add the pages from the public queue */
-> +               pages_free += (free_txpg[1] >> 16) & 0xfff;
-> +       }
-> +
-> +       pages_needed = DIV_ROUND_UP(count, rtwdev->chip->page_size);
-> +
-> +       if (pages_needed > pages_free) {
-> +               rtw_dbg(rtwdev, RTW_DBG_SDIO,
-> +                       "Not enough free pages (%u needed, %u free) in queue %u for %zu bytes\n",
-> +                       pages_needed, pages_free, queue, count);
-> +               return -EBUSY;
-> +       }
-> +
-> +       return 0;
-> +}
-> +
-> +static int rtw_sdio_write_port(struct rtw_dev *rtwdev, struct sk_buff *skb,
-> +                              enum rtw_tx_queue_type queue)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool bus_claim;
-> +       size_t txsize;
-> +       u32 txaddr;
-> +       int ret;
-> +
-> +       txaddr = rtw_sdio_get_tx_addr(rtwdev, skb->len, queue);
-> +       if (!txaddr)
-> +               return -EINVAL;
-> +
-> +       txsize = sdio_align_size(rtwsdio->sdio_func, skb->len);
-> +
-> +       ret = rtw_sdio_check_free_txpg(rtwdev, queue, txsize);
-> +       if (ret)
-> +               return ret;
-> +
-> +       if (!IS_ALIGNED((unsigned long)skb->data, RTW_SDIO_DATA_PTR_ALIGN))
-> +               rtw_warn(rtwdev, "Got unaligned SKB in %s() for queue %u\n",
-> +                        __func__, queue);
-> +
-> +       bus_claim = rtw_sdio_bus_claim_needed(rtwsdio);
-> +
-> +       if (bus_claim)
-> +               sdio_claim_host(rtwsdio->sdio_func);
-> +
-> +       ret = sdio_memcpy_toio(rtwsdio->sdio_func, txaddr, skb->data, txsize);
-> +
-> +       if (bus_claim)
-> +               sdio_release_host(rtwsdio->sdio_func);
-> +
-> +       if (ret)
-> +               rtw_warn(rtwdev,
-> +                        "Failed to write %lu byte(s) to SDIO port 0x%08x",
-> +                        txsize, txaddr);
-> +
-> +       return ret;
-> +}
-> +
-> +static void rtw_sdio_init(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +       rtwsdio->irq_mask = REG_SDIO_HIMR_RX_REQUEST | REG_SDIO_HIMR_CPWM1;
-> +}
-> +
-> +static void rtw_sdio_rx_aggregation(struct rtw_dev *rtwdev, bool enable)
-> +{
-> +       u8 size, timeout;
-> +
-> +       if (enable) {
-> +               if (rtwdev->chip->id == RTW_CHIP_TYPE_8822C) {
-> +                       size = 0xff;
-> +                       timeout = 0x20;
-> +               } else {
-> +                       size = 0x6;
-> +                       timeout = 0x6;
-> +               }
-> +
-> +               /* Make the firmware honor the size limit configured below */
-> +               rtw_write32_set(rtwdev, REG_RXDMA_AGG_PG_TH, BIT_EN_PRE_CALC);
-> +
-> +               rtw_write8_set(rtwdev, REG_TXDMA_PQ_MAP, BIT_RXDMA_AGG_EN);
-> +
-> +               rtw_write16(rtwdev, REG_RXDMA_AGG_PG_TH, size |
-> +                           (timeout << BIT_SHIFT_DMA_AGG_TO_V1));
-> +
-> +               rtw_write8_set(rtwdev, REG_RXDMA_MODE, BIT_DMA_MODE);
-> +       } else {
-> +               rtw_write32_clr(rtwdev, REG_RXDMA_AGG_PG_TH, BIT_EN_PRE_CALC);
-> +               rtw_write8_clr(rtwdev, REG_TXDMA_PQ_MAP, BIT_RXDMA_AGG_EN);
-> +               rtw_write8_clr(rtwdev, REG_RXDMA_MODE, BIT_DMA_MODE);
-> +       }
-> +}
-> +
-> +static void rtw_sdio_enable_interrupt(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +       rtw_write32(rtwdev, REG_SDIO_HIMR, rtwsdio->irq_mask);
-> +}
-> +
-> +static void rtw_sdio_disable_interrupt(struct rtw_dev *rtwdev)
-> +{
-> +       rtw_write32(rtwdev, REG_SDIO_HIMR, 0x0);
-> +}
-> +
-> +static u8 rtw_sdio_get_tx_qsel(struct rtw_dev *rtwdev, struct sk_buff *skb,
-> +                              u8 queue)
-> +{
-> +       switch (queue) {
-> +       case RTW_TX_QUEUE_BCN:
-> +               return TX_DESC_QSEL_BEACON;
-> +       case RTW_TX_QUEUE_H2C:
-> +               return TX_DESC_QSEL_H2C;
-> +       case RTW_TX_QUEUE_MGMT:
-> +               if (rtw_chip_wcpu_11n(rtwdev))
-> +                       return TX_DESC_QSEL_HIGH;
-> +               else
-> +                       return TX_DESC_QSEL_MGMT;
-> +       case RTW_TX_QUEUE_HI0:
-> +               return TX_DESC_QSEL_HIGH;
-> +       default:
-> +               return skb->priority;
-> +       }
-> +};
-> +
-> +static int rtw_sdio_setup(struct rtw_dev *rtwdev)
-> +{
-> +       /* nothing to do */
-> +       return 0;
-> +}
-> +
-> +static int rtw_sdio_start(struct rtw_dev *rtwdev)
-> +{
-> +       rtw_sdio_rx_aggregation(rtwdev, false);
-> +       rtw_sdio_enable_interrupt(rtwdev);
-> +
-> +       return 0;
-> +}
-> +
-> +static void rtw_sdio_stop(struct rtw_dev *rtwdev)
-> +{
-> +       rtw_sdio_disable_interrupt(rtwdev);
-> +}
-> +
-> +static void rtw_sdio_deep_ps_enter(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool tx_empty = true;
-> +       u8 queue;
-> +
-> +       if (!rtw_fw_feature_check(&rtwdev->fw, FW_FEATURE_TX_WAKE)) {
-> +               /* Deep PS state is not allowed to TX-DMA */
-> +               for (queue = 0; queue < RTK_MAX_TX_QUEUE_NUM; queue++) {
-> +                       /* BCN queue is rsvd page, does not have DMA interrupt
-> +                        * H2C queue is managed by firmware
-> +                        */
-> +                       if (queue == RTW_TX_QUEUE_BCN ||
-> +                           queue == RTW_TX_QUEUE_H2C)
-> +                               continue;
-> +
-> +                       /* check if there is any skb DMAing */
-> +                       if (skb_queue_len(&rtwsdio->tx_queue[queue])) {
-> +                               tx_empty = false;
-> +                               break;
-> +                       }
-> +               }
-> +       }
-> +
-> +       if (!tx_empty) {
-> +               rtw_dbg(rtwdev, RTW_DBG_PS,
-> +                       "TX path not empty, cannot enter deep power save state\n");
-> +               return;
-> +       }
-> +
-> +       set_bit(RTW_FLAG_LEISURE_PS_DEEP, rtwdev->flags);
-> +       rtw_power_mode_change(rtwdev, true);
-> +}
-> +
-> +static void rtw_sdio_deep_ps_leave(struct rtw_dev *rtwdev)
-> +{
-> +       if (test_and_clear_bit(RTW_FLAG_LEISURE_PS_DEEP, rtwdev->flags))
-> +               rtw_power_mode_change(rtwdev, false);
-> +}
-> +
-> +static void rtw_sdio_deep_ps(struct rtw_dev *rtwdev, bool enter)
-> +{
-> +       if (enter && !test_bit(RTW_FLAG_LEISURE_PS_DEEP, rtwdev->flags))
-> +               rtw_sdio_deep_ps_enter(rtwdev);
-> +
-> +       if (!enter && test_bit(RTW_FLAG_LEISURE_PS_DEEP, rtwdev->flags))
-> +               rtw_sdio_deep_ps_leave(rtwdev);
-> +}
-> +
-> +static void rtw_sdio_tx_kick_off(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +       queue_work(rtwsdio->txwq, &rtwsdio->tx_handler_data->work);
-> +}
-> +
-> +static void rtw_sdio_link_ps(struct rtw_dev *rtwdev, bool enter)
-> +{
-> +       /* nothing to do */
-> +}
-> +
-> +static void rtw_sdio_interface_cfg(struct rtw_dev *rtwdev)
-> +{
-> +       u32 val;
-> +
-> +       rtw_read32(rtwdev, REG_SDIO_FREE_TXPG);
-> +
-> +       val = rtw_read32(rtwdev, REG_SDIO_TX_CTRL);
-> +       val &= 0xfff8;
-> +       rtw_write32(rtwdev, REG_SDIO_TX_CTRL, val);
-> +}
-> +
-> +static void rtw_sdio_power_switch(struct rtw_dev *rtwdev, bool on)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +       rtwsdio->is_powered_on = on;
-> +}
-> +
-> +static struct rtw_sdio_tx_data *rtw_sdio_get_tx_data(struct sk_buff *skb)
-> +{
-> +       struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
-> +
-> +       BUILD_BUG_ON(sizeof(struct rtw_sdio_tx_data) >
-> +                    sizeof(info->status.status_driver_data));
-> +
-> +       return (struct rtw_sdio_tx_data *)info->status.status_driver_data;
-> +}
-> +
-> +static void rtw_sdio_tx_skb_prepare(struct rtw_dev *rtwdev,
-> +                                   struct rtw_tx_pkt_info *pkt_info,
-> +                                   struct sk_buff *skb,
-> +                                   enum rtw_tx_queue_type queue)
-> +{
-> +       const struct rtw_chip_info *chip = rtwdev->chip;
-> +       unsigned long data_addr, aligned_addr;
-> +       size_t offset;
-> +       u8 *pkt_desc;
-> +
-> +       pkt_desc = skb_push(skb, chip->tx_pkt_desc_sz);
-> +
-> +       data_addr = (unsigned long)pkt_desc;
-> +       aligned_addr = ALIGN(data_addr, RTW_SDIO_DATA_PTR_ALIGN);
-> +
-> +       if (data_addr != aligned_addr) {
-> +               /* Ensure that the start of the pkt_desc is always aligned at
-> +                * RTW_SDIO_DATA_PTR_ALIGN.
-> +                */
-> +               offset = RTW_SDIO_DATA_PTR_ALIGN - (aligned_addr - data_addr);
-> +
-> +               pkt_desc = skb_push(skb, offset);
-> +
-> +               /* By inserting padding to align the start of the pkt_desc we
-> +                * need to inform the firmware that the actual data starts at
-> +                * a different offset than normal.
-> +                */
-> +               pkt_info->offset += offset;
-> +       }
-> +
-> +       memset(pkt_desc, 0, chip->tx_pkt_desc_sz);
-> +
-> +       pkt_info->qsel = rtw_sdio_get_tx_qsel(rtwdev, skb, queue);
-> +
-> +       rtw_tx_fill_tx_desc(pkt_info, skb);
-> +       chip->ops->fill_txdesc_checksum(rtwdev, pkt_info, pkt_desc);
-> +}
-> +
-> +static int rtw_sdio_write_data(struct rtw_dev *rtwdev,
-> +                              struct rtw_tx_pkt_info *pkt_info,
-> +                              struct sk_buff *skb,
-> +                              enum rtw_tx_queue_type queue)
-> +{
-> +       int ret;
-> +
-> +       rtw_sdio_tx_skb_prepare(rtwdev, pkt_info, skb, queue);
-> +
-> +       ret = rtw_sdio_write_port(rtwdev, skb, queue);
-> +       dev_kfree_skb_any(skb);
-> +
-> +       return ret;
-> +}
-> +
-> +static int rtw_sdio_write_data_rsvd_page(struct rtw_dev *rtwdev, u8 *buf,
-> +                                        u32 size)
-> +{
-> +       struct rtw_tx_pkt_info pkt_info = {};
-> +       struct sk_buff *skb;
-> +
-> +       skb = rtw_tx_write_data_rsvd_page_get(rtwdev, &pkt_info, buf, size);
-> +       if (!skb)
-> +               return -ENOMEM;
-> +
-> +       return rtw_sdio_write_data(rtwdev, &pkt_info, skb, RTW_TX_QUEUE_BCN);
-> +}
-> +
-> +static int rtw_sdio_write_data_h2c(struct rtw_dev *rtwdev, u8 *buf, u32 size)
-> +{
-> +       struct rtw_tx_pkt_info pkt_info = {};
-> +       struct sk_buff *skb;
-> +
-> +       skb = rtw_tx_write_data_h2c_get(rtwdev, &pkt_info, buf, size);
-> +       if (!skb)
-> +               return -ENOMEM;
-> +
-> +       return rtw_sdio_write_data(rtwdev, &pkt_info, skb, RTW_TX_QUEUE_H2C);
-> +}
-> +
-> +static int rtw_sdio_tx_write(struct rtw_dev *rtwdev,
-> +                            struct rtw_tx_pkt_info *pkt_info,
-> +                            struct sk_buff *skb)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       enum rtw_tx_queue_type queue = rtw_tx_queue_mapping(skb);
-> +       struct rtw_sdio_tx_data *tx_data;
-> +
-> +       rtw_sdio_tx_skb_prepare(rtwdev, pkt_info, skb, queue);
-> +
-> +       tx_data = rtw_sdio_get_tx_data(skb);
-> +       tx_data->sn = pkt_info->sn;
-> +
-> +       skb_queue_tail(&rtwsdio->tx_queue[queue], skb);
-> +
-> +       return 0;
-> +}
-> +
-> +static void rtw_sdio_tx_err_isr(struct rtw_dev *rtwdev)
-> +{
-> +       u32 val = rtw_read32(rtwdev, REG_TXDMA_STATUS);
-> +
-> +       rtw_write32(rtwdev, REG_TXDMA_STATUS, val);
-> +}
-> +
-> +static void rtw_sdio_rx_skb(struct rtw_dev *rtwdev, struct sk_buff *skb,
-> +                           u32 pkt_offset, struct rtw_rx_pkt_stat *pkt_stat,
-> +                           struct ieee80211_rx_status *rx_status)
-> +{
-> +       memcpy(IEEE80211_SKB_RXCB(skb), rx_status, sizeof(*rx_status));
-> +
-> +       if (pkt_stat->is_c2h) {
-> +               skb_put(skb, pkt_stat->pkt_len + pkt_offset);
-> +               rtw_fw_c2h_cmd_rx_irqsafe(rtwdev, pkt_offset, skb);
-> +               return;
-> +       }
-> +
-> +       skb_put(skb, pkt_stat->pkt_len);
-> +       skb_reserve(skb, pkt_offset);
-> +
-> +       rtw_rx_stats(rtwdev, pkt_stat->vif, skb);
-> +
-> +       ieee80211_rx_irqsafe(rtwdev->hw, skb);
-> +}
-> +
-> +static void rtw_sdio_rxfifo_recv(struct rtw_dev *rtwdev, u32 rx_len)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       const struct rtw_chip_info *chip = rtwdev->chip;
-> +       u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
-> +       struct ieee80211_rx_status rx_status;
-> +       struct rtw_rx_pkt_stat pkt_stat;
-> +       struct sk_buff *skb, *split_skb;
-> +       u32 pkt_offset, curr_pkt_len;
-> +       size_t bufsz;
-> +       u8 *rx_desc;
-> +       int ret;
-> +
-> +       bufsz = sdio_align_size(rtwsdio->sdio_func, rx_len);
-> +
-> +       skb = dev_alloc_skb(bufsz);
-> +       if (!skb)
-> +               return;
-> +
-> +       ret = rtw_sdio_read_port(rtwdev, skb->data, bufsz);
-> +       if (ret) {
-> +               dev_kfree_skb_any(skb);
-> +               return;
-> +       }
-> +
-> +       while (true) {
-> +               rx_desc = skb->data;
-> +               chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
-> +                                        &rx_status);
-> +               pkt_offset = pkt_desc_sz + pkt_stat.drv_info_sz +
-> +                            pkt_stat.shift;
-> +
-> +               curr_pkt_len = ALIGN(pkt_offset + pkt_stat.pkt_len,
-> +                                    RTW_SDIO_DATA_PTR_ALIGN);
-> +
-> +               if ((curr_pkt_len + pkt_desc_sz) >= rx_len) {
-> +                       /* Use the original skb (with it's adjusted offset)
-> +                        * when processing the last (or even the only) entry to
-> +                        * have it's memory freed automatically.
-> +                        */
-> +                       rtw_sdio_rx_skb(rtwdev, skb, pkt_offset, &pkt_stat,
-> +                                       &rx_status);
-> +                       break;
-> +               }
-> +
-> +               split_skb = dev_alloc_skb(curr_pkt_len);
-> +               if (!split_skb) {
-> +                       rtw_sdio_rx_skb(rtwdev, skb, pkt_offset, &pkt_stat,
-> +                                       &rx_status);
-> +                       break;
-> +               }
-> +
-> +               skb_copy_header(split_skb, skb);
-> +               memcpy(split_skb->data, skb->data, curr_pkt_len);
-> +
-> +               rtw_sdio_rx_skb(rtwdev, split_skb, pkt_offset, &pkt_stat,
-> +                               &rx_status);
-> +
-> +               /* Move to the start of the next RX descriptor */
-> +               skb_reserve(skb, curr_pkt_len);
-> +               rx_len -= curr_pkt_len;
-> +       }
-> +}
-> +
-> +static void rtw_sdio_rx_isr(struct rtw_dev *rtwdev)
-> +{
-> +       u32 rx_len;
-> +
-> +       while (true) {
-> +               if (rtw_chip_wcpu_11n(rtwdev))
-> +                       rx_len = rtw_read16(rtwdev, REG_SDIO_RX0_REQ_LEN);
-> +               else
-> +                       rx_len = rtw_read32(rtwdev, REG_SDIO_RX0_REQ_LEN);
-> +
-> +               if (!rx_len)
-> +                       break;
-> +
-> +               rtw_sdio_rxfifo_recv(rtwdev, rx_len);
-> +       }
-> +}
-> +
-> +static void rtw_sdio_handle_interrupt(struct sdio_func *sdio_func)
-> +{
-> +       struct ieee80211_hw *hw = sdio_get_drvdata(sdio_func);
-> +       struct rtw_dev *rtwdev = hw->priv;
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       u32 hisr;
-> +
-> +       rtwsdio->irq_thread = current;
-> +
-> +       hisr = rtw_read32(rtwdev, REG_SDIO_HISR);
-> +
-> +       if (hisr & REG_SDIO_HISR_TXERR)
-> +               rtw_sdio_tx_err_isr(rtwdev);
-> +       if (hisr & REG_SDIO_HISR_RX_REQUEST) {
-> +               hisr &= ~REG_SDIO_HISR_RX_REQUEST;
-> +               rtw_sdio_rx_isr(rtwdev);
-> +       }
-> +
-> +       rtw_write32(rtwdev, REG_SDIO_HISR, hisr);
-> +
-> +       rtwsdio->irq_thread = NULL;
-> +}
-> +
-> +static int __maybe_unused rtw_sdio_suspend(struct device *dev)
-> +{
-> +       return 0;
-> +}
-> +
-> +static int __maybe_unused rtw_sdio_resume(struct device *dev)
-> +{
-> +       return 0;
-> +}
-> +
-> +SIMPLE_DEV_PM_OPS(rtw_sdio_pm_ops, rtw_sdio_suspend, rtw_sdio_resume);
-> +EXPORT_SYMBOL(rtw_sdio_pm_ops);
-> +
-> +static int rtw_sdio_claim(struct rtw_dev *rtwdev, struct sdio_func *sdio_func)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       int ret;
-> +
-> +       sdio_claim_host(sdio_func);
-> +
-> +       ret = sdio_enable_func(sdio_func);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "Failed to enable SDIO func");
-> +               goto err_release_host;
-> +       }
-> +
-> +       ret = sdio_set_block_size(sdio_func, RTW_SDIO_BLOCK_SIZE);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "Failed to set SDIO block size to 512");
-> +               goto err_disable_func;
-> +       }
-> +
-> +       rtwsdio->sdio_func = sdio_func;
-> +
-> +       rtwsdio->sdio3_bus_mode = mmc_card_uhs(sdio_func->card);
-> +
-> +       sdio_set_drvdata(sdio_func, rtwdev->hw);
-> +       SET_IEEE80211_DEV(rtwdev->hw, &sdio_func->dev);
-> +
-> +       sdio_release_host(sdio_func);
-> +
-> +       return 0;
-> +
-> +err_disable_func:
-> +       sdio_disable_func(sdio_func);
-> +err_release_host:
-> +       sdio_release_host(sdio_func);
-> +       return ret;
-> +}
-> +
-> +static void rtw_sdio_declaim(struct rtw_dev *rtwdev,
-> +                            struct sdio_func *sdio_func)
-> +{
-> +       sdio_claim_host(sdio_func);
-> +       sdio_disable_func(sdio_func);
-> +       sdio_release_host(sdio_func);
-> +}
-> +
-> +static struct rtw_hci_ops rtw_sdio_ops = {
-> +       .tx_write = rtw_sdio_tx_write,
-> +       .tx_kick_off = rtw_sdio_tx_kick_off,
-> +       .setup = rtw_sdio_setup,
-> +       .start = rtw_sdio_start,
-> +       .stop = rtw_sdio_stop,
-> +       .deep_ps = rtw_sdio_deep_ps,
-> +       .link_ps = rtw_sdio_link_ps,
-> +       .interface_cfg = rtw_sdio_interface_cfg,
-> +
-> +       .power_switch = rtw_sdio_power_switch,
-> +
-> +       .read8 = rtw_sdio_read8,
-> +       .read16 = rtw_sdio_read16,
-> +       .read32 = rtw_sdio_read32,
-> +       .write8 = rtw_sdio_write8,
-> +       .write16 = rtw_sdio_write16,
-> +       .write32 = rtw_sdio_write32,
-> +       .write_data_rsvd_page = rtw_sdio_write_data_rsvd_page,
-> +       .write_data_h2c = rtw_sdio_write_data_h2c,
-> +};
-> +
-> +static int rtw_sdio_request_irq(struct rtw_dev *rtwdev,
-> +                               struct sdio_func *sdio_func)
-> +{
-> +       int ret;
-> +
-> +       sdio_claim_host(sdio_func);
-> +       ret = sdio_claim_irq(sdio_func, &rtw_sdio_handle_interrupt);
-> +       sdio_release_host(sdio_func);
-> +
-> +       if (ret) {
-> +               rtw_err(rtwdev, "failed to claim SDIO IRQ");
-> +               return ret;
-> +       }
-> +
-> +       return 0;
-> +}
-> +
-> +static void rtw_sdio_indicate_tx_status(struct rtw_dev *rtwdev,
-> +                                       struct sk_buff *skb)
-> +{
-> +       struct rtw_sdio_tx_data *tx_data = rtw_sdio_get_tx_data(skb);
-> +       struct ieee80211_tx_info *info = IEEE80211_SKB_CB(skb);
-> +       struct ieee80211_hw *hw = rtwdev->hw;
-> +
-> +       /* enqueue to wait for tx report */
-> +       if (info->flags & IEEE80211_TX_CTL_REQ_TX_STATUS) {
-> +               rtw_tx_report_enqueue(rtwdev, skb, tx_data->sn);
-> +               return;
-> +       }
-> +
-> +       /* always ACK for others, then they won't be marked as drop */
-> +       ieee80211_tx_info_clear_status(info);
-> +       if (info->flags & IEEE80211_TX_CTL_NO_ACK)
-> +               info->flags |= IEEE80211_TX_STAT_NOACK_TRANSMITTED;
-> +       else
-> +               info->flags |= IEEE80211_TX_STAT_ACK;
-> +
-> +       ieee80211_tx_status_irqsafe(hw, skb);
-> +}
-> +
-> +static void rtw_sdio_process_tx_queue(struct rtw_dev *rtwdev,
-> +                                     enum rtw_tx_queue_type queue)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       struct sk_buff *skb;
-> +       int ret;
-> +
-> +       while (true) {
-> +               skb = skb_dequeue(&rtwsdio->tx_queue[queue]);
-> +               if (!skb)
-> +                       break;
-> +
-> +               ret = rtw_sdio_write_port(rtwdev, skb, queue);
-> +               if (ret) {
-> +                       skb_queue_head(&rtwsdio->tx_queue[queue], skb);
-> +                       break;
-> +               }
-> +
-> +               if (queue <= RTW_TX_QUEUE_VO)
-> +                       rtw_sdio_indicate_tx_status(rtwdev, skb);
-> +               else
-> +                       dev_kfree_skb_any(skb);
-> +       }
-> +}
-> +
-> +static void rtw_sdio_tx_handler(struct work_struct *work)
-> +{
-> +       struct rtw_sdio_work_data *work_data =
-> +               container_of(work, struct rtw_sdio_work_data, work);
-> +       struct rtw_dev *rtwdev = work_data->rtwdev;
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       bool has_more_tx_data;
-> +       int queue;
-> +
-> +       if (!rtw_fw_feature_check(&rtwdev->fw, FW_FEATURE_TX_WAKE))
-> +               rtw_sdio_deep_ps_leave(rtwdev);
-> +
-> +       do {
-> +               has_more_tx_data = false;
-> +
-> +               for (queue = RTK_MAX_TX_QUEUE_NUM - 1; queue >= 0; queue--) {
-> +                       rtw_sdio_process_tx_queue(rtwdev, queue);
-> +
-> +                       if (!skb_queue_empty(&rtwsdio->tx_queue[queue]))
-> +                               has_more_tx_data = true;
-> +               }
-> +       } while (has_more_tx_data);
-> +}
-> +
-> +static void rtw_sdio_free_irq(struct rtw_dev *rtwdev,
-> +                             struct sdio_func *sdio_func)
-> +{
-> +       sdio_release_irq(sdio_func);
-> +}
-> +
-> +static int rtw_sdio_init_tx(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       int i;
-> +
-> +       rtwsdio->txwq = create_singlethread_workqueue("rtw88_sdio: tx wq");
-> +       if (!rtwsdio->txwq) {
-> +               rtw_err(rtwdev, "failed to create TX work queue\n");
-> +               return -ENOMEM;
-> +       }
-> +
-> +       for (i = 0; i < RTK_MAX_TX_QUEUE_NUM; i++)
-> +               skb_queue_head_init(&rtwsdio->tx_queue[i]);
-> +       rtwsdio->tx_handler_data = kmalloc(sizeof(*rtwsdio->tx_handler_data),
-> +                                          GFP_KERNEL);
-> +       if (!rtwsdio->tx_handler_data)
-> +               goto err_destroy_wq;
-> +
-> +       rtwsdio->tx_handler_data->rtwdev = rtwdev;
-> +       INIT_WORK(&rtwsdio->tx_handler_data->work, rtw_sdio_tx_handler);
-> +
-> +       return 0;
-> +
-> +err_destroy_wq:
-> +       destroy_workqueue(rtwsdio->txwq);
-> +       return -ENOMEM;
-> +}
-> +
-> +static void rtw_sdio_deinit_tx(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +       int i;
-> +
-> +       for (i = 0; i < RTK_MAX_TX_QUEUE_NUM; i++)
-> +               skb_queue_purge(&rtwsdio->tx_queue[i]);
-> +
-> +       flush_workqueue(rtwsdio->txwq);
-> +       destroy_workqueue(rtwsdio->txwq);
-> +       kfree(rtwsdio->tx_handler_data);
-> +}
-> +
-> +int rtw_sdio_probe(struct sdio_func *sdio_func,
-> +                  const struct sdio_device_id *id)
-> +{
-> +       struct ieee80211_hw *hw;
-> +       struct rtw_dev *rtwdev;
-> +       int drv_data_size;
-> +       int ret;
-> +
-> +       drv_data_size = sizeof(struct rtw_dev) + sizeof(struct rtw_sdio);
-> +       hw = ieee80211_alloc_hw(drv_data_size, &rtw_ops);
-> +       if (!hw) {
-> +               dev_err(&sdio_func->dev, "failed to allocate hw");
-> +               return -ENOMEM;
-> +       }
-> +
-> +       rtwdev = hw->priv;
-> +       rtwdev->hw = hw;
-> +       rtwdev->dev = &sdio_func->dev;
-> +       rtwdev->chip = (struct rtw_chip_info *)id->driver_data;
-> +       rtwdev->hci.ops = &rtw_sdio_ops;
-> +       rtwdev->hci.type = RTW_HCI_TYPE_SDIO;
-> +
-> +       ret = rtw_core_init(rtwdev);
-> +       if (ret)
-> +               goto err_release_hw;
-> +
-> +       rtw_dbg(rtwdev, RTW_DBG_SDIO,
-> +               "rtw88 SDIO probe: vendor=0x%04x device=%04x class=%02x",
-> +               id->vendor, id->device, id->class);
-> +
-> +       ret = rtw_sdio_claim(rtwdev, sdio_func);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "failed to claim SDIO device");
-> +               goto err_deinit_core;
-> +       }
-> +
-> +       rtw_sdio_init(rtwdev);
-> +
-> +       ret = rtw_sdio_init_tx(rtwdev);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "failed to init SDIO TX queue\n");
-> +               goto err_sdio_declaim;
-> +       }
-> +
-> +       ret = rtw_chip_info_setup(rtwdev);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "failed to setup chip information");
-> +               goto err_destroy_txwq;
-> +       }
-> +
-> +       ret = rtw_register_hw(rtwdev, hw);
-> +       if (ret) {
-> +               rtw_err(rtwdev, "failed to register hw");
-> +               goto err_destroy_txwq;
-> +       }
-> +
-> +       ret = rtw_sdio_request_irq(rtwdev, sdio_func);
-> +       if (ret)
-> +               goto err_unregister_hw;
-> +
-> +       return 0;
-> +
-> +err_unregister_hw:
-> +       rtw_unregister_hw(rtwdev, hw);
-> +err_destroy_txwq:
-> +       rtw_sdio_deinit_tx(rtwdev);
-> +err_sdio_declaim:
-> +       rtw_sdio_declaim(rtwdev, sdio_func);
-> +err_deinit_core:
-> +       rtw_core_deinit(rtwdev);
-> +err_release_hw:
-> +       ieee80211_free_hw(hw);
-> +
-> +       return ret;
-> +}
-> +EXPORT_SYMBOL(rtw_sdio_probe);
-> +
-> +void rtw_sdio_remove(struct sdio_func *sdio_func)
-> +{
-> +       struct ieee80211_hw *hw = sdio_get_drvdata(sdio_func);
-> +       struct rtw_dev *rtwdev;
-> +
-> +       if (!hw)
-> +               return;
-> +
-> +       rtwdev = hw->priv;
-> +
-> +       rtw_unregister_hw(rtwdev, hw);
-> +       rtw_sdio_disable_interrupt(rtwdev);
-> +       rtw_sdio_declaim(rtwdev, sdio_func);
-> +       rtw_sdio_free_irq(rtwdev, sdio_func);
-> +       rtw_sdio_deinit_tx(rtwdev);
-> +       rtw_core_deinit(rtwdev);
-> +       ieee80211_free_hw(hw);
-> +}
-> +EXPORT_SYMBOL(rtw_sdio_remove);
-> +
-> +void rtw_sdio_shutdown(struct device *dev)
-> +{
-> +       struct sdio_func *sdio_func = dev_to_sdio_func(dev);
-> +       struct ieee80211_hw *hw = sdio_get_drvdata(sdio_func);
-> +       const struct rtw_chip_info *chip;
-> +       struct rtw_dev *rtwdev;
-> +
-> +       if (!hw)
-> +               return;
-> +
-> +       rtwdev = hw->priv;
-> +       chip = rtwdev->chip;
-> +
-> +       if (chip->ops->shutdown)
-> +               chip->ops->shutdown(rtwdev);
-> +}
-> +EXPORT_SYMBOL(rtw_sdio_shutdown);
-> +
-> +MODULE_AUTHOR("Martin Blumenstingl");
-> +MODULE_AUTHOR("Jernej Skrabec");
-> +MODULE_DESCRIPTION("Realtek 802.11ac wireless SDIO driver");
-> +MODULE_LICENSE("Dual BSD/GPL");
-> diff --git a/drivers/net/wireless/realtek/rtw88/sdio.h b/drivers/net/wireless/realtek/rtw88/sdio.h
-> new file mode 100644
-> index 000000000000..7339e35f808a
-> --- /dev/null
-> +++ b/drivers/net/wireless/realtek/rtw88/sdio.h
-> @@ -0,0 +1,175 @@
-> +/* SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause */
-> +/* Copyright (C) 2021 Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> + * Copyright (C) 2021 Jernej Skrabec <jernej.skrabec@gmail.com>
-> + */
-> +
-> +#ifndef __REG_SDIO_H_
-> +#define __REG_SDIO_H_
-> +
-> +#include "main.h"
-> +
-> +/* I/O bus domain address mapping */
-> +#define SDIO_LOCAL_OFFSET                      0x10250000
-> +#define WLAN_IOREG_OFFSET                      0x10260000
-> +#define FIRMWARE_FIFO_OFFSET                   0x10270000
-> +#define TX_HIQ_OFFSET                          0x10310000
-> +#define TX_MIQ_OFFSET                          0x10320000
-> +#define TX_LOQ_OFFSET                          0x10330000
-> +#define TX_EPQ_OFFSET                          0x10350000
-> +#define RX_RX0FF_OFFSET                                0x10340000
-> +
-> +#define RTW_SDIO_BUS_MSK                       0xffff0000
-> +#define SDIO_LOCAL_REG_MSK                     0x00000fff
-> +#define WLAN_IOREG_REG_MSK                     0x0000ffff
-> +
-> +/* SDIO Tx Control */
-> +#define REG_SDIO_TX_CTRL                       (SDIO_LOCAL_OFFSET + 0x0000)
-> +
-> +/*SDIO status timeout*/
-> +#define REG_SDIO_TIMEOUT                       (SDIO_LOCAL_OFFSET + 0x0002)
-> +
-> +/* SDIO Host Interrupt Mask */
-> +#define REG_SDIO_HIMR                          (SDIO_LOCAL_OFFSET + 0x0014)
-> +#define REG_SDIO_HIMR_RX_REQUEST               BIT(0)
-> +#define REG_SDIO_HIMR_AVAL                     BIT(1)
-> +#define REG_SDIO_HIMR_TXERR                    BIT(2)
-> +#define REG_SDIO_HIMR_RXERR                    BIT(3)
-> +#define REG_SDIO_HIMR_TXFOVW                   BIT(4)
-> +#define REG_SDIO_HIMR_RXFOVW                   BIT(5)
-> +#define REG_SDIO_HIMR_TXBCNOK                  BIT(6)
-> +#define REG_SDIO_HIMR_TXBCNERR                 BIT(7)
-> +#define REG_SDIO_HIMR_BCNERLY_INT              BIT(16)
-> +#define REG_SDIO_HIMR_C2HCMD                   BIT(17)
-> +#define REG_SDIO_HIMR_CPWM1                    BIT(18)
-> +#define REG_SDIO_HIMR_CPWM2                    BIT(19)
-> +#define REG_SDIO_HIMR_HSISR_IND                        BIT(20)
-> +#define REG_SDIO_HIMR_GTINT3_IND               BIT(21)
-> +#define REG_SDIO_HIMR_GTINT4_IND               BIT(22)
-> +#define REG_SDIO_HIMR_PSTIMEOUT                        BIT(23)
-> +#define REG_SDIO_HIMR_OCPINT                   BIT(24)
-> +#define REG_SDIO_HIMR_ATIMEND                  BIT(25)
-> +#define REG_SDIO_HIMR_ATIMEND_E                        BIT(26)
-> +#define REG_SDIO_HIMR_CTWEND                   BIT(27)
-> +/* the following two are RTL8188 SDIO Specific */
-> +#define REG_SDIO_HIMR_MCU_ERR                  BIT(28)
-> +#define REG_SDIO_HIMR_TSF_BIT32_TOGGLE         BIT(29)
-> +
-> +/* SDIO Host Interrupt Service Routine */
-> +#define REG_SDIO_HISR                          (SDIO_LOCAL_OFFSET + 0x0018)
-> +#define REG_SDIO_HISR_RX_REQUEST               BIT(0)
-> +#define REG_SDIO_HISR_AVAL                     BIT(1)
-> +#define REG_SDIO_HISR_TXERR                    BIT(2)
-> +#define REG_SDIO_HISR_RXERR                    BIT(3)
-> +#define REG_SDIO_HISR_TXFOVW                   BIT(4)
-> +#define REG_SDIO_HISR_RXFOVW                   BIT(5)
-> +#define REG_SDIO_HISR_TXBCNOK                  BIT(6)
-> +#define REG_SDIO_HISR_TXBCNERR                 BIT(7)
-> +#define REG_SDIO_HISR_BCNERLY_INT              BIT(16)
-> +#define REG_SDIO_HISR_C2HCMD                   BIT(17)
-> +#define REG_SDIO_HISR_CPWM1                    BIT(18)
-> +#define REG_SDIO_HISR_CPWM2                    BIT(19)
-> +#define REG_SDIO_HISR_HSISR_IND                        BIT(20)
-> +#define REG_SDIO_HISR_GTINT3_IND               BIT(21)
-> +#define REG_SDIO_HISR_GTINT4_IND               BIT(22)
-> +#define REG_SDIO_HISR_PSTIMEOUT                        BIT(23)
-> +#define REG_SDIO_HISR_OCPINT                   BIT(24)
-> +#define REG_SDIO_HISR_ATIMEND                  BIT(25)
-> +#define REG_SDIO_HISR_ATIMEND_E                        BIT(26)
-> +#define REG_SDIO_HISR_CTWEND                   BIT(27)
-> +/* the following two are RTL8188 SDIO Specific */
-> +#define REG_SDIO_HISR_MCU_ERR                  BIT(28)
-> +#define REG_SDIO_HISR_TSF_BIT32_TOGGLE         BIT(29)
-> +
-> +/* HCI Current Power Mode */
-> +#define REG_SDIO_HCPWM                         (SDIO_LOCAL_OFFSET + 0x0019)
-> +/* RXDMA Request Length */
-> +#define REG_SDIO_RX0_REQ_LEN                   (SDIO_LOCAL_OFFSET + 0x001C)
-> +/* OQT Free Page */
-> +#define REG_SDIO_OQT_FREE_PG                   (SDIO_LOCAL_OFFSET + 0x001E)
-> +/* Free Tx Buffer Page */
-> +#define REG_SDIO_FREE_TXPG                     (SDIO_LOCAL_OFFSET + 0x0020)
-> +/* HCI Current Power Mode 1 */
-> +#define REG_SDIO_HCPWM1                                (SDIO_LOCAL_OFFSET + 0x0024)
-> +/* HCI Current Power Mode 2 */
-> +#define REG_SDIO_HCPWM2                                (SDIO_LOCAL_OFFSET + 0x0026)
-> +/* Free Tx Page Sequence */
-> +#define REG_SDIO_FREE_TXPG_SEQ                 (SDIO_LOCAL_OFFSET + 0x0028)
-> +/* HTSF Informaion */
-> +#define REG_SDIO_HTSFR_INFO                    (SDIO_LOCAL_OFFSET + 0x0030)
-> +#define REG_SDIO_HCPWM1_V2                     (SDIO_LOCAL_OFFSET + 0x0038)
-> +/* H2C */
-> +#define REG_SDIO_H2C                           (SDIO_LOCAL_OFFSET + 0x0060)
-> +/* HCI Request Power Mode 1 */
-> +#define REG_SDIO_HRPWM1                                (SDIO_LOCAL_OFFSET + 0x0080)
-> +/* HCI Request Power Mode 2 */
-> +#define REG_SDIO_HRPWM2                                (SDIO_LOCAL_OFFSET + 0x0082)
-> +/* HCI Power Save Clock */
-> +#define REG_SDIO_HPS_CLKR                      (SDIO_LOCAL_OFFSET + 0x0084)
-> +/* SDIO HCI Suspend Control */
-> +#define REG_SDIO_HSUS_CTRL                     (SDIO_LOCAL_OFFSET + 0x0086)
-> +/* SDIO Host Extension Interrupt Mask Always */
-> +#define REG_SDIO_HIMR_ON                       (SDIO_LOCAL_OFFSET + 0x0090)
-> +/* SDIO Host Extension Interrupt Status Always */
-> +#define REG_SDIO_HISR_ON                       (SDIO_LOCAL_OFFSET + 0x0091)
-> +
-> +#define REG_SDIO_INDIRECT_REG_CFG              (SDIO_LOCAL_OFFSET + 0x0040)
-> +#define REG_SDIO_INDIRECT_REG_DATA             (SDIO_LOCAL_OFFSET + 0x0044)
-> +
-> +/* Sdio Address for SDIO Local Reg, TRX FIFO, MAC Reg */
-> +#define REG_SDIO_CMD_ADDR_MSK                  GENMASK(16, 13)
-> +#define REG_SDIO_CMD_ADDR_SDIO_REG             0
-> +#define REG_SDIO_CMD_ADDR_MAC_REG              8
-> +#define REG_SDIO_CMD_ADDR_TXFF_HIGH            4
-> +#define REG_SDIO_CMD_ADDR_TXFF_LOW             6
-> +#define REG_SDIO_CMD_ADDR_TXFF_NORMAL          5
-> +#define REG_SDIO_CMD_ADDR_TXFF_EXTRA           7
-> +#define REG_SDIO_CMD_ADDR_RXFF                 7
-> +
-> +#define RTW_SDIO_BLOCK_SIZE                    512
-> +#define RTW_SDIO_ADDR_RX_RX0FF_GEN(_id)                (0x0e000 | ((_id) & 0x3))
-> +
-> +#define RTW_SDIO_DATA_PTR_ALIGN                        8
-> +
-> +struct sdio_func;
-> +struct sdio_device_id;
-> +
-> +struct rtw_sdio_tx_data {
-> +       u8 sn;
-> +};
-> +
-> +struct rtw_sdio_work_data {
-> +       struct work_struct work;
-> +       struct rtw_dev *rtwdev;
-> +};
-> +
-> +struct rtw_sdio {
-> +       struct sdio_func *sdio_func;
-> +
-> +       u32 irq_mask;
-> +       u8 rx_addr;
-> +       bool sdio3_bus_mode;
-> +       bool is_powered_on;
-> +
-> +       void *irq_thread;
-> +
-> +       struct workqueue_struct *txwq;
-> +
-> +       struct sk_buff_head tx_queue[RTK_MAX_TX_QUEUE_NUM];
-> +       struct rtw_sdio_work_data *tx_handler_data;
-> +};
-> +
-> +extern const struct dev_pm_ops rtw_sdio_pm_ops;
-> +
-> +int rtw_sdio_probe(struct sdio_func *sdio_func,
-> +                  const struct sdio_device_id *id);
-> +void rtw_sdio_remove(struct sdio_func *sdio_func);
-> +void rtw_sdio_shutdown(struct device *dev);
-> +
-> +static inline bool rtw_sdio_is_sdio30_supported(struct rtw_dev *rtwdev)
-> +{
-> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
-> +
-> +       return rtwsdio->sdio3_bus_mode;
-> +}
-> +
-> +#endif
-> --
-> 2.39.0
->
+> On Tue, Dec 13, 2022 at 5:01 PM Victor Shih <victorshihgli@gmail.com> wrote:
+> >
+> > Summary
+> > =======
+> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Sequence
+> >   [2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence[2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include Section
+> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting Register
+> >   Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy SD
+> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 Packet
+> >   Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the original
+> >   interrupt registers.
+> >
+> > Patch structure
+> > ===============
+> > patch#1-#6:  for core
+> > patch#7-#23: for sdhci
+> > patch#24:    for GL9755
+> >
+> > Changes in v6 (Dec. 12, 2022)
+> > * rebased to the linux-kernel-v6.1.0-rc8 in Ulf Hansson next branch.
+> > * according to the guidance and overall architecture provided
+> >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
+> >   UHS-2 Core function based on the patches of the [V4,0/6]
+> >   Preparations to support SD UHS-II cards[5].
+> > * according to the guidance and comments provided by
+> >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
+> >   the UHS-2 Host function based on the patches of the
+> >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
+> > * implement the necessary function to let the UHS-2 Core/Host
+> >   work properly.
+> > * fix most of checkpatch warnings/errors.
+> > * according to the guidance and comments provided by
+> >   Adrian Hunter, Ben Chuang to implement the UHS-2
+> >   Host function based on the patches of the
+> >   [V5,00/26] Add support UHS-II for GL9755[6].
+> > * The uhs2_post_attach_sd() has implemented in Patch#6 and
+> >   Patch#17 so drop the V5 version of the Patch#23.
+> > * Modifies the usage of the flags used by the sdhci host for
+> >   MMC_UHS2_INITIALIZED.
+> > * Patch#5: Drop unused definitions and functions.
+> > * Patch#7: Rename definitions.
+> >            Use BIT() GENMASK() in some cases.
+> > * Patch#8: Merge V5 version of Patch[7] and Patch[9] into
+> >            V6 version of Patch[8].
+> > * Patch#9: Drop unnecessary function.
+> >            Rename used definitions.
+> > * Patch#10: Drop unnecessary function and simplify some code.
+> > * Patch#11: Drop unnecessary function.
+> >             Add new mmc_opt_regulator_set_ocr function.
+> > * Patch#13: Drop unnecessary function.
+> >             Use GENMASK() and FIELD_PREP() in some cases.
+> > * Patch#14: Drop unnecessary function.
+> >             Modify return value in some function.
+> >             Use GENMASK() and FIELD_PREP() in some cases.
+> > * Patch#15: Drop unnecessary function.
+> >             Rename used definitions.
+> >             Use GENMASK() and FIELD_GET() in some cases.
+> >             Wrap at 100 columns in some functions.
+> > * Patch#16: Drop unnecessary function.
+> > * Patch#17: Drop unnecessary function.
+> >             Drop the unnecessary parameter when call the DBG()
+> >             function.
+> >             Rename used definitions.
+> >             Cancel the export state of some functions.
+> >             Use GENMASK() and FIELD_PREP() in some cases.
+> > * Patch#18: Drop unnecessary function.
+> >             Add uhs2_dev_cmd function to simplify some functions.
+> >             Rename used definitions.
+> >             Cancel the export state of some functions.
+> >             Use GENMASK() and FIELD_PREP() in some cases.
+> > * Patch#19: Drop unnecessary function.
+> >             Add sdhci_uhs2_mode() in some functions.
+> >             Rename used definitions.
+> >             Cancel the export state of some functions.
+> > * Patch#20: Add new complete_work_fn/thread_irq_fn variables in
+> >             struct sdhci_host.
+> >             Use complete_work_fn/thread_irq_fn variables in
+> >             sdhci_alloc_host()/sdhci_uhs2_add_host().
+> >             Rename used definitions.
+> > * Patch[24]: Rename used definitions.
+> >
+> > Reference
+> > =========
+> > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
+> > [2] SD Host Controller Simplified Specification 4.20
+> > [3] UHS-II Simplified Addendum 1.02
+> > [4] https://patchwork.kernel.org/project/linux-mmc/cover/20201106022726.19831-1-takahiro.akashi@linaro.org/
+> > [5] https://patchwork.kernel.org/project/linux-mmc/cover/20220418115833.10738-1-jasonlai.genesyslogic@gmail.com/
+> > [6] https://patchwork.kernel.org/project/linux-mmc/cover/20221019110647.11076-1-victor.shih@genesyslogic.com.tw/
+> >
+> > ----------------- original cover letter from v5 -----------------
+> > Summary
+> > =======
+> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Sequence
+> >   [2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence[2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include Section
+> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting Register
+> >   Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy SD
+> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 Packet
+> >   Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the original
+> >   interrupt registers.
+> >
+> > Patch structure
+> > ===============
+> > patch#1-#6:  for core
+> > patch#7-#25: for sdhci
+> > patch#26:    for GL9755
+> >
+> > Changes in v5 (Oct. 19, 2022)
+> > * rebased to the linux-kernel-v6.1-rc1 in Ulf Hansson next branch.
+> > * according to the guidance and overall architecture provided
+> >   by Ulf Hansson, Ben Chuang and Jason Lai to implement the
+> >   UHS-2 Core function based on the patches of the [V4,0/6]
+> >   Preparations to support SD UHS-II cards[5].
+> > * according to the guidance and comments provided by
+> >   Adrian Hunter, Ben Chuang and AKASHI Takahiro to implement
+> >   the UHS-2 Host function based on the patches of the
+> >   [RFC,v3.1,00/27] Add support UHS-II for GL9755[4].
+> > * implement the necessary function to let the UHS-2 Core/Host
+> >   work properly.
+> > * fix most of checkpatch warnings/errors
+> >
+> > Reference
+> > =========
+> > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
+> > [2] SD Host Controller Simplified Specification 4.20
+> > [3] UHS-II Simplified Addendum 1.02
+> > [4] https://patchwork.kernel.org/project/linux-mmc/cover/20201106022726.19831-1-takahiro.akashi@linaro.org/
+> > [5] https://patchwork.kernel.org/project/linux-mmc/cover/20220418115833.10738-1-jasonlai.genesyslogic@gmail.com/
+> >
+> > ----------------- original cover letter from v3.1 -----------------
+> > This is an interim snapshot of our next version, v4, for enabling
+> > UHS-II on MMC/SD.
+> >
+> > It is focused on 'sdhci' side to address Adrian's comments regarding
+> > "modularising" sdhci-uhs2.c.
+> > The whole aim of this version is to get early feedback from Adrian (and
+> > others) on this issue. Without any consensus about the code structure,
+> > it would make little sense to go further ahead on sdhci side.
+> > (Actually, Adrian has made no comments other than "modularising" so far.)
+> >
+> > I heavily reworked/refactored sdhci-uhs2.c and re-organised the patch
+> > set to meet what I believe Adrian expects; no UHS-II related code in
+> > Legacy (UHS-I) code or sdhci.c.
+> >
+> > Nevertheless, almost of all changes I made are trivial and straightforward
+> > in this direction, and I believe that there is no logic changed since v3
+> > except sdhci_uhs2_irq(), as ops->irq hook, where we must deal with UHS-II
+> > command sequences in addition to UHS-II errors. So I added extra handlings.
+> >
+> > I admit that there is plenty of room for improvements (for example,
+> > handling host->flags), but again the focal point here is how sdhci-uhs2.c
+> > should be built as a module.
+> >
+> > Please review this series (particularly Patch#8-#26 and #27) from this
+> > viewpoint in the first place.
+> > (Ben is working on 'host' side but there is no change on 'host' side
+> > in this submission except a minor tweak.)
+> >
+> > Thanks,
+> > -Takahiro Akashi
+> >
+> > ------ original cover letter from v3 ------
+> > Summary
+> > =======
+> > These patches[1] support UHS-II and fix GL9755 UHS-II compatibility.
+> >
+> > About UHS-II, roughly deal with the following three parts:
+> > 1) A UHS-II detection and initialization:
+> > - Host setup to support UHS-II (Section 3.13.1 Host Controller Setup Sequence
+> >   [2]).
+> > - Detect a UHS-II I/F (Section 3.13.2 Card Interface Detection Sequence[2]).
+> > - In step(9) of Section 3.13.2 in [2], UHS-II initialization is include Section
+> >   3.13.3 UHS-II Card Initialization and Section 3.13.4 UHS-II Setting Register
+> >   Setup Sequence.
+> >
+> > 2) Send Legacy SD command through SD-TRAN
+> > - Encapsulated SD packets are defined in SD-TRAN in order to ensure Legacy SD
+> >   compatibility and preserve Legacy SD infrastructures (Section 7.1.1 Packet
+> >   Types and Format Overview[3]).
+> > - Host issue a UHS-II CCMD packet or a UHS-II DCMD (Section 3.13.5 UHS-II
+> >   CCMD Packet issuing and Section 3.13.6 UHS-II DCMD Packet issuing[2]).
+> >
+> > 3) UHS-II Interrupt
+> > - Except for UHS-II error interrupts, most interrupts share the original
+> >   interrupt registers.
+> >
+> > Patch structure
+> > ===============
+> > patch#1-#7: for core
+> > patch#8-#17: for sdhci
+> > patch#18-#21: for GL9755
+> >
+> > Tests
+> > =====
+> > Ran 'dd' command to evaluate the performance:
+> > (SanDisk UHS-II card on GL9755 controller)
+> >                              Read    Write
+> > UHS-II disabled (UHS-I): 88.3MB/s 60.7MB/s
+> > UHS-II enabled         :  206MB/s   80MB/s
+> >
+> > TODO
+> > ====
+> > - replace some define with BIT macro
+> >
+> > Reference
+> > =========
+> > [1] https://gitlab.com/ben.chuang/linux-uhs2-gl9755.git
+> > [2] SD Host Controller Simplified Specification 4.20
+> > [3] UHS-II Simplified Addendum 1.02
+> >
+> > Changes in v3 (Jul. 10, 2020)
+> > * rebased to v5.8-rc4
+> > * add copyright notice
+> > * reorganize the patch set and split some commits into smaller ones
+> > * separate uhs-2 headers from others
+> > * correct wrong spellings
+> > * fix most of checkpatch warnings/errors
+> > * remove all k[cz]alloc() from the code
+> > * guard sdhci-uhs2 specific code with
+> >       'if (IS_ENABLED(CONFIG_MMC_SDHCI_UHS2))'
+> > * make sdhci-uhs2.c as a module
+> > * trivial changes, including
+> >   - rename back sdhci-core.c to sdhci.c
+> >   - allow vendor code to disable uhs2 if v4_mode == 0
+> >       in __sdhci_add_host()
+> >   - merge uhs2_power_up() into mmc_power_up()
+> >   - remove flag_uhs2 from mmc_attach_sd()
+> >   - add function descriptions to EXPORT'ed functions
+> >   - other minor code optimization
+> >
+> > Changes in v2 (Jan. 9, 2020)
+> > * rebased to v5.5-rc5
+> >
+> > AKASHI Takahiro (1):
+> >   mmc: sdhci-pci: add UHS-II support framework
+> >
+> > Ben Chuang (1):
+> >   mmc: sdhci-uhs2: add post-mmc_attach_sd hook
+> >
+> > Ulf Hansson (3):
+> >   mmc: core: Prepare to support SD UHS-II cards
+> >   mmc: core: Announce successful insertion of an SD UHS-II card
+> >   mmc: core: Extend support for mmc regulators with a vqmmc2
+> >
+> > Victor Shih (19):
+> >   mmc: core: Cleanup printing of speed mode at card insertion
+> >   mmc: core: Add definitions for SD UHS-II cards
+> >   mmc: core: Support UHS-II card control and access
+> >   mmc: sdhci: add UHS-II related definitions in headers
+> >   mmc: sdhci: add UHS-II module and add a kernel configuration
+> >   mmc: sdhci-uhs2: dump UHS-II registers
+> >   mmc: sdhci-uhs2: add reset function and uhs2_mode function
+> >   mmc: sdhci-uhs2: add set_power() to support vdd2
+> >   mmc: sdhci-uhs2: skip signal_voltage_switch()
+> >   mmc: sdhci-uhs2: add set_timeout()
+> >   mmc: sdhci-uhs2: add set_ios()
+> >   mmc: sdhci-uhs2: add detect_init() to detect the interface
+> >   mmc: sdhci-uhs2: add clock operations
+> >   mmc: sdhci-uhs2: add uhs2_control() to initialise the interface
+> >   mmc: sdhci-uhs2: add request() and others
+> >   mmc: sdhci-uhs2: add irq() and others
+> >   mmc: sdhci-uhs2: add add_host() and others to set up the driver
+> >   mmc: sdhci-uhs2: add pre-detect_init hook
+> >   mmc: sdhci-pci-gli: enable UHS-II mode for GL9755
+> >
+> >  drivers/mmc/core/Makefile         |    2 +-
+> >  drivers/mmc/core/block.c          |    6 +-
+> >  drivers/mmc/core/bus.c            |   37 +-
+> >  drivers/mmc/core/core.c           |   37 +-
+> >  drivers/mmc/core/core.h           |    1 +
+> >  drivers/mmc/core/host.h           |    4 +
+> >  drivers/mmc/core/mmc_ops.c        |   25 +-
+> >  drivers/mmc/core/mmc_ops.h        |    1 +
+> >  drivers/mmc/core/regulator.c      |   34 +
+> >  drivers/mmc/core/sd.c             |   11 +-
+> >  drivers/mmc/core/sd.h             |    3 +
+> >  drivers/mmc/core/sd_ops.c         |   13 +
+> >  drivers/mmc/core/sd_ops.h         |    3 +
+> >  drivers/mmc/core/sd_uhs2.c        | 1400 ++++++++++++++++++++++++++++
+> >  drivers/mmc/host/Kconfig          |   10 +
+> >  drivers/mmc/host/Makefile         |    1 +
+> >  drivers/mmc/host/sdhci-pci-core.c |   16 +-
+> >  drivers/mmc/host/sdhci-pci-gli.c  |  309 ++++++-
+> >  drivers/mmc/host/sdhci-pci.h      |    3 +
+> >  drivers/mmc/host/sdhci-uhs2.c     | 1414 +++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-uhs2.h     |  188 ++++
+> >  drivers/mmc/host/sdhci.c          |  343 ++++---
+> >  drivers/mmc/host/sdhci.h          |  100 +-
+> >  include/linux/mmc/card.h          |   47 +
+> >  include/linux/mmc/core.h          |   13 +
+> >  include/linux/mmc/host.h          |   91 ++
+> >  include/linux/mmc/sd_uhs2.h       |  263 ++++++
+> >  27 files changed, 4205 insertions(+), 170 deletions(-)
+> >  create mode 100644 drivers/mmc/core/sd_uhs2.c
+> >  create mode 100644 drivers/mmc/host/sdhci-uhs2.c
+> >  create mode 100644 drivers/mmc/host/sdhci-uhs2.h
+> >  create mode 100644 include/linux/mmc/sd_uhs2.h
+> >
+> > --
+> > 2.25.1
+> >
