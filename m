@@ -2,162 +2,197 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9449CC3DA7D
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 20:59:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2D82C4708E
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 23:02:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230388AbjACU7E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Jan 2023 15:59:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42824 "EHLO
+        id S233382AbjACXB6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Jan 2023 18:01:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35428 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230215AbjACU7D (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 15:59:03 -0500
-Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E53B1F581
-        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 12:59:02 -0800 (PST)
-Received: by linux.microsoft.com (Postfix, from userid 1152)
-        id 9D96320B92A6; Tue,  3 Jan 2023 12:59:02 -0800 (PST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 9D96320B92A6
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
-        s=default; t=1672779542;
-        bh=HzL/EVaJgWK+WYY7Qd+Z5hnXAUdv7/9w7ei3HlGBuzg=;
-        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
-        b=Yo/DQNhq6OhCrnD3VBLHzIS/qAA/T8Se+XynF1fEBi1Oh8nW1uQI9gEjB67iZpr1H
-         WiZJSAd96wAKPW0hBQqTdCKaEBSN11tmtOBm4/jETf1mIIuF2QGxEfLtrSZ00sxs9t
-         3e1oFKsAqrLMDNpm026tXi5zEBhpzqzsSjjEogIY=
-Received: from localhost (localhost [127.0.0.1])
-        by linux.microsoft.com (Postfix) with ESMTP id 9A41B30705CD;
-        Tue,  3 Jan 2023 12:59:02 -0800 (PST)
-Date:   Tue, 3 Jan 2023 12:59:02 -0800 (PST)
-From:   Shyam Saini <shyamsaini@linux.microsoft.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, code@tyhicks.com
-Subject: Re: [PATCH] mmc: core: host: fix mmc retuning
-In-Reply-To: <e467c158-b298-53d1-4b12-7cbfe413af79@intel.com>
-Message-ID: <cacb9337-ed1b-6c5b-efa2-ae4086f9d7a9@linux.microsoft.com>
-References: <20221219225319.24637-1-shyamsaini@linux.microsoft.com> <14de0095-db93-cf5b-e843-1554a392b177@linux.microsoft.com> <e467c158-b298-53d1-4b12-7cbfe413af79@intel.com>
+        with ESMTP id S234053AbjACXB4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 18:01:56 -0500
+Received: from mail-oa1-x2c.google.com (mail-oa1-x2c.google.com [IPv6:2001:4860:4864:20::2c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BC9514030;
+        Tue,  3 Jan 2023 15:01:55 -0800 (PST)
+Received: by mail-oa1-x2c.google.com with SMTP id 586e51a60fabf-150debe2b7cso2708150fac.0;
+        Tue, 03 Jan 2023 15:01:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=dL0ArEdazE1dptVNtHB/gi8aO8UwG9PiFQ1UhQeWBKQ=;
+        b=TvJgztBlbd8eLRJdFi0BvIy/vu+aN5nhB7OLaOaYXa5swfw15Mhg9kUMuYM4JqskFp
+         u1CGUjsSclrut29uL1pBCn70sGlnBwjOpd6RMvCU7Ld0fpA0+LZlYq+W/6+UhQGY8Akl
+         a88jibj5A32dh5MamGyBOI4vvtEuPEWZjY4/VAVILbF2aHmGgP0WafsrQWBgXlCVZj/6
+         QASCijkTUgx47HgimqIfmyTeC1Kxb/vk9QNg5XGA2C+yCxcGrNeYth2LTdvyqsEsBTAc
+         83eGXPFPuGmuFZyDkeLT4BldO1sLZ5jdAOAGifkwFTPcbbjta6EquFDz9WbenOoIeIv5
+         wuIw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=dL0ArEdazE1dptVNtHB/gi8aO8UwG9PiFQ1UhQeWBKQ=;
+        b=Q6vbVrUrA6/vEh/XlFtFUQsPeCRVlYDwu+SHC7Xbo191dAgUb7RRWPFIq0x6S7QpNG
+         LeoKlYQ+sWADe2NWN5r3rwY/TMHiciPz9uKPCcA2A6rDKg/EOs5QacV3x8qxpoOKGki3
+         OyjoOtlvWvhuglMEYh/eThhBJ2JnbYZSFvlDd762bQ2OsKFj2pK1lA/93rXmjZ68Sz9/
+         kx3otafcy7YrP6WVtJrDjnO563SaYqe9F4q+VoFI4HggdDLwblDove+Y5m5JZ+MxdUzF
+         Nngn3wKfKaAwygQxS/6NDSKL2fTWHgiGuRJXZLe2lb5jbYpk7OeOXHtdpF7yJ9Y5ppIu
+         VRIA==
+X-Gm-Message-State: AFqh2kr/HTi0XR2v+m0vJJ+yvKV5zIg68LCBzOAix4lnzUa/3mRfxGtY
+        YEiSLJd9B91mP+NmMjvoXxk=
+X-Google-Smtp-Source: AMrXdXvIn7WzhpO9PdePHDmgbHU9PCDka+j7sIVfSzdzOPs5Oo9++pL36PKgn5tatnGacBGpsjCSYA==
+X-Received: by 2002:a05:6870:648d:b0:144:bf16:f432 with SMTP id cz13-20020a056870648d00b00144bf16f432mr28996037oab.50.1672786914222;
+        Tue, 03 Jan 2023 15:01:54 -0800 (PST)
+Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
+        by smtp.gmail.com with ESMTPSA id z36-20020a056870462400b00144e6ffe9e5sm14797811oao.47.2023.01.03.15.01.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 03 Jan 2023 15:01:53 -0800 (PST)
+Message-ID: <63b4b3e1.050a0220.791fb.767c@mx.google.com>
+X-Google-Original-Message-ID: <Y7Sz3ycScm7ln170@neuromancer.>
+Date:   Tue, 3 Jan 2023 17:01:51 -0600
+From:   Chris Morgan <macroalpha82@gmail.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-wireless@vger.kernel.org,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>
+Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+ <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
 MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="656392-982051008-1672779542=:3557"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Wed, Dec 28, 2022 at 12:30:20AM +0100, Martin Blumenstingl wrote:
+> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
+> well as the existing RTL8821C chipset code.
+> 
 
---656392-982051008-1672779542=:3557
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8BIT
+Unfortunately, this doesn't work for me. I applied it on top of 6.2-rc2
+master and I get errors during probe (it appears the firmware never
+loads).
 
+Relevant dmesg logs are as follows:
 
-Hi Adrian,
+[    0.989545] mmc2: new high speed SDIO card at address 0001
+[    0.989993] rtw_8821cs mmc2:0001:1: Firmware version 24.8.0, H2C version 12
+[    1.005684] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x14): -110
+[    1.005737] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1080): -110
+[    1.005789] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x11080): -110
+[    1.005840] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x3): -110
+[    1.005920] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x1103): -110
+[    1.005998] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x80): -110
+[    1.006078] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1700): -110
 
-Thank you for response.
+The error of "sdio read32 failed (0x1700): -110" then repeats several
+hundred times, then I get this:
 
-> On 20/12/22 01:41, Shyam Saini wrote:
->> As per the JEDEC spec, tuning(command CMD21) is not allowed in
->> RPMB partition.
->>
->> To avoid retuning while switching to RPMB, hold_retune variable was
->> introduced
->
-> No, mmc_retune_pause() is used:
->
-> /*
-> * Pause re-tuning for a small set of operations.  The pause begins after the
-> * next command and after first doing re-tuning.
-> */
-> void mmc_retune_pause(struct mmc_host *host)
-> {
-> 	if (!host->retune_paused) {
-> 		host->retune_paused = 1;
-> 		mmc_retune_needed(host);
-> 		mmc_retune_hold(host);
-> 	}
-> }
->
->>            but it is not taken into account while making the tuning
->> decision. As a consequence of this, mmc driver aborts while switching to
->> RPMB partition:
->>  mmc0: mmc_hs400_to_hs200 failed, error -84
->
-> Do you normally re-tune at all?  It could just be that re-tuning
-> doesn't work.
->
+[    1.066294] rtw_8821cs mmc2:0001:1: failed to download firmware
+[    1.066367] rtw_8821cs mmc2:0001:1: sdio read16 failed (0x80): -110
+[    1.066417] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x100): -110
+[    1.066697] rtw_8821cs mmc2:0001:1: failed to setup chip efuse info
+[    1.066703] rtw_8821cs mmc2:0001:1: failed to setup chip information
+[    1.066839] rtw_8821cs: probe of mmc2:0001:1 failed with error -16
 
-Yes, we are able to retune.
+The hardware I am using is an rtl8821cs that I can confirm was working
+with a previous driver.
 
-In fact this bug occurs when we iteratively switch to RPMB partition.
+Thank you.
 
-May be related to this, we also observed that in __mmc_blk_ioctl_cmd
-function in line 487[1] part_index is assigned target_part variable and
-on the next line EXT_CSD_PART_CONFIG_ACC_RPMB OR'ed to the target_part
-variable.
-
-In mmc_blk_part_switch_pre function line 831 [2], part_type variable is
-compared to EXT_CSD_PART_CONFIG_ACC_RPMB without taking into account that
-the part_index variable is also OR'ed and its not separated before
-the comparision.
-
-Same thing happens in mmc_blk_part_switch_post function.
-
-Is it expected to be this way?, please let me know.
-
-[1] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n487
-[2] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n831
-
->>
->> To fix this, take hold_retune variable into account while making retune
->> decision in mmc_retune() function.
->>
->> Fixes: 57da0c042f4a ("mmc: block: Pause re-tuning while switched to the RPMB partition")
->> Reported-by: Judy Wang <wangjudy@linux.microsoft.com>
->> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
->> ---
->>  drivers/mmc/core/host.c | 3 +++
->>  1 file changed, 3 insertions(+)
->>
->> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->> index b89dca1f15e9..342c1f5c256b 100644
->> --- a/drivers/mmc/core/host.c
->> +++ b/drivers/mmc/core/host.c
->> @@ -181,6 +181,9 @@ int mmc_retune(struct mmc_host *host)
->>  	bool return_to_hs400 = false;
->>  	int err;
->>
->> +	if (host->hold_retune >= 1)
->> +		return 0;
->
-> No, hold_retune is set *before* the command *after* which
-> tuning is not permitted.
->
->> +
->>  	if (host->retune_now)
->>  		host->retune_now = 0;
->>  	else
->> --
->> 2.34.1
->>
-> On 20/12/22 01:41, Shyam Saini wrote:
->> Hi All,
->>
->> Cc'ing Tyler
->>
->> Please note that I am not 100 % sure about the fix.
->> This issue is reproducible without this patch and the patch at least fix the issue without
->> any regressions on our side.
->>
->> We observed that hold_retune is always greater or equal to 1 in mmc_retune() function,
->>
->> so it may always avoid  re-tuning when it is actually needed and there may
->>
->> be a better fix for the issue.
->>
->> Please let me know your any feedback or comments.
->>
->> Best Regards,
->> Shyam
->>
->>
->
->
---656392-982051008-1672779542=:3557--
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> ---
+>  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
+>  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
+>  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 34 +++++++++++++++++++
+>  3 files changed, 48 insertions(+)
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> 
+> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
+> index 6b65da81127f..29eb2f8e0eb7 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
+> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
+> @@ -133,6 +133,17 @@ config RTW88_8821CE
+>  
+>  	  802.11ac PCIe wireless network adapter
+>  
+> +config RTW88_8821CS
+> +	tristate "Realtek 8821CS SDIO wireless network adapter"
+> +	depends on MMC
+> +	select RTW88_CORE
+> +	select RTW88_SDIO
+> +	select RTW88_8821C
+> +	help
+> +	  Select this option will enable support for 8821CS chipset
+> +
+> +	  802.11ac SDIO wireless network adapter
+> +
+>  config RTW88_8821CU
+>  	tristate "Realtek 8821CU USB wireless network adapter"
+>  	depends on USB
+> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
+> index 6105c2745bda..82979b30ae8d 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Makefile
+> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
+> @@ -59,6 +59,9 @@ rtw88_8821c-objs		:= rtw8821c.o rtw8821c_table.o
+>  obj-$(CONFIG_RTW88_8821CE)	+= rtw88_8821ce.o
+>  rtw88_8821ce-objs		:= rtw8821ce.o
+>  
+> +obj-$(CONFIG_RTW88_8821CS)	+= rtw88_8821cs.o
+> +rtw88_8821cs-objs		:= rtw8821cs.o
+> +
+>  obj-$(CONFIG_RTW88_8821CU)	+= rtw88_8821cu.o
+>  rtw88_8821cu-objs		:= rtw8821cu.o
+>  
+> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> new file mode 100644
+> index 000000000000..61f82b38cda4
+> --- /dev/null
+> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> @@ -0,0 +1,34 @@
+> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+> +// Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> +
+> +#include <linux/mmc/sdio_func.h>
+> +#include <linux/mmc/sdio_ids.h>
+> +#include <linux/module.h>
+> +#include "sdio.h"
+> +#include "rtw8821c.h"
+> +
+> +static const struct sdio_device_id rtw_8821cs_id_table[] =  {
+> +	{
+> +		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
+> +			    SDIO_DEVICE_ID_REALTEK_RTW8821CS),
+> +		.driver_data = (kernel_ulong_t)&rtw8821c_hw_spec,
+> +	},
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(sdio, rtw_8821cs_id_table);
+> +
+> +static struct sdio_driver rtw_8821cs_driver = {
+> +	.name = "rtw_8821cs",
+> +	.probe = rtw_sdio_probe,
+> +	.remove = rtw_sdio_remove,
+> +	.id_table = rtw_8821cs_id_table,
+> +	.drv = {
+> +		.pm = &rtw_sdio_pm_ops,
+> +		.shutdown = rtw_sdio_shutdown,
+> +	}
+> +};
+> +module_sdio_driver(rtw_8821cs_driver);
+> +
+> +MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
+> +MODULE_DESCRIPTION("Realtek 802.11ac wireless 8821cs driver");
+> +MODULE_LICENSE("Dual BSD/GPL");
+> -- 
+> 2.39.0
+> 
