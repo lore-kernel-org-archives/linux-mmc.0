@@ -2,214 +2,162 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1F6FC3DA7D
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 20:53:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9449CC3DA7D
+	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 20:59:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232129AbjACUxh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Jan 2023 15:53:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39324 "EHLO
+        id S230388AbjACU7E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Jan 2023 15:59:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231949AbjACUxg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 15:53:36 -0500
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 384C3C740
-        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 12:53:35 -0800 (PST)
-Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 0248584CBD;
-        Tue,  3 Jan 2023 21:53:32 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1672779213;
-        bh=K1dnp6jFdDcVZGPkCX3YiQdFfZNd51omn48BwlGMdzQ=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=mCp+Uwoz/WqLQKVsvNPJeEaRbkZZbryE+VzuD8++ASbyUN3Db3xD1tFvxw49eVh3A
-         JdScWc76LSNQeAQWgfUHYkuul2situVdfk/ArwE45GvbD5KmHQKRz01gNQGreFhTZN
-         JQ/fJA+0+9Nrzl8z7umbu1F4bg7U4/wbXrtNXhX4DB3jgIpwHXg+AfeAmzpMKKNbeZ
-         QEZYZmq763dgmd8rzOxCGE1P/wbavmqy0D0viGoplpHFh2Jai0cBY4Zm6OARiqyhj7
-         UaBc7P5ycQ4sshjO36WpFkbEPUVCfr2gxoRzIIu04FKLa7Ohm7XwITn038iJ36URjD
-         AFKL1w5jsxjXQ==
-Message-ID: <feb69d12-54a7-7e55-1ec3-b94b845339a3@denx.de>
-Date:   Tue, 3 Jan 2023 21:47:18 +0100
+        with ESMTP id S230215AbjACU7D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 15:59:03 -0500
+Received: from linux.microsoft.com (linux.microsoft.com [13.77.154.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id E53B1F581
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 12:59:02 -0800 (PST)
+Received: by linux.microsoft.com (Postfix, from userid 1152)
+        id 9D96320B92A6; Tue,  3 Jan 2023 12:59:02 -0800 (PST)
+DKIM-Filter: OpenDKIM Filter v2.11.0 linux.microsoft.com 9D96320B92A6
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linux.microsoft.com;
+        s=default; t=1672779542;
+        bh=HzL/EVaJgWK+WYY7Qd+Z5hnXAUdv7/9w7ei3HlGBuzg=;
+        h=Date:From:To:cc:Subject:In-Reply-To:References:From;
+        b=Yo/DQNhq6OhCrnD3VBLHzIS/qAA/T8Se+XynF1fEBi1Oh8nW1uQI9gEjB67iZpr1H
+         WiZJSAd96wAKPW0hBQqTdCKaEBSN11tmtOBm4/jETf1mIIuF2QGxEfLtrSZ00sxs9t
+         3e1oFKsAqrLMDNpm026tXi5zEBhpzqzsSjjEogIY=
+Received: from localhost (localhost [127.0.0.1])
+        by linux.microsoft.com (Postfix) with ESMTP id 9A41B30705CD;
+        Tue,  3 Jan 2023 12:59:02 -0800 (PST)
+Date:   Tue, 3 Jan 2023 12:59:02 -0800 (PST)
+From:   Shyam Saini <shyamsaini@linux.microsoft.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, code@tyhicks.com
+Subject: Re: [PATCH] mmc: core: host: fix mmc retuning
+In-Reply-To: <e467c158-b298-53d1-4b12-7cbfe413af79@intel.com>
+Message-ID: <cacb9337-ed1b-6c5b-efa2-ae4086f9d7a9@linux.microsoft.com>
+References: <20221219225319.24637-1-shyamsaini@linux.microsoft.com> <14de0095-db93-cf5b-e843-1554a392b177@linux.microsoft.com> <e467c158-b298-53d1-4b12-7cbfe413af79@intel.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
- SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
-Content-Language: en-US
-To:     "Potthuri, Sai Krishna" <sai.krishna.potthuri@amd.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Cc:     Michal Simek <michal.simek@xilinx.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "Goud, Srinivas" <srinivas.goud@amd.com>
-References: <20221025191500.149167-1-marex@denx.de>
- <2b523371-7eeb-25f2-8879-76bbf028f4bb@intel.com>
- <c3d62448-fd1c-066c-aa53-2df7eae1555d@denx.de>
- <BY5PR12MB425809920721B2CBC5A4F517DBEB9@BY5PR12MB4258.namprd12.prod.outlook.com>
- <8b9d6dd1-01fa-5ae1-072e-c5dc7f8b553e@denx.de>
- <BY5PR12MB42584370EDE593D8DBB42CF8DBE89@BY5PR12MB4258.namprd12.prod.outlook.com>
-From:   Marek Vasut <marex@denx.de>
-In-Reply-To: <BY5PR12MB42584370EDE593D8DBB42CF8DBE89@BY5PR12MB4258.namprd12.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Virus-Scanned: clamav-milter 0.103.6 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Type: multipart/mixed; boundary="656392-982051008-1672779542=:3557"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/22/22 10:20, Potthuri, Sai Krishna wrote:
-> Hi Marek,
-> 
->> -----Original Message-----
->> From: Marek Vasut <marex@denx.de>
->> Sent: Wednesday, December 21, 2022 3:10 PM
->> To: Potthuri, Sai Krishna <sai.krishna.potthuri@amd.com>; Adrian Hunter
->> <adrian.hunter@intel.com>; linux-mmc@vger.kernel.org
->> Cc: Michal Simek <michal.simek@xilinx.com>; Ulf Hansson
->> <ulf.hansson@linaro.org>; linux-arm-kernel@lists.infradead.org
->> Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
->> SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
->>
->> On 12/21/22 06:09, Potthuri, Sai Krishna wrote:
->>> Hi Marek,
->>
->> Hi,
->>
->>>>>>
->> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabil
->>>>>> it
->>>>>> ies.html#
->>>>>> Absolute Address  0x00FF160040 (SD0)
->>>>>> Reset Value       0x280737EC6481
->>>>>>
->>>>>> really reads 0x200737EC6481 . The interesting part is the top 32
->>>>>> bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The missing 0x800 is
->>>>>> SDHCI_RETUNING_TIMER_COUNT_MASK=0, which makes the SDHCI
->> core
->>>> disable
->>>>>> retuning timer.
->>>>>>
->>>>>> Fix this up here by explicitly setting tuning_count to 8 as it
->>>>>> should be, otherwise an eMMC might fail in various thermal
->>>>>> conditions
->>>>>>
->>>>>> Note that the diff is best shown with -w option, this makes it
->>>>>> visible what happened with !sdhci_arasan->has_cqe conditional,
->>>>>> which is placed between sdhci_setup_host() and __sdhci_add_host()
->> calls.
->>>>>> Since sdhci_add_host() is also a sequence of these two calls and
->>>>>> host->tuning_count must be overriden before calling
->>>>>
->>>>> overriden -> overridden
->>>>
->>>> Fixed
->>>>
->>>>>> __sdhci_add_host(), call the two calls separately and do all the
->>>>>> adjustments between them in either case.
->>>>>>
->>>>>> Signed-off-by: Marek Vasut <marex@denx.de>
->>>>>> ---
->>>>>> Cc: Michal Simek <michal.simek@xilinx.com>
->>>>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
->>>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->>>>>> Cc: linux-arm-kernel@lists.infradead.org
->>>>>> To: linux-mmc@vger.kernel.org
->>>>>> ---
->>>>>>     drivers/mmc/host/sdhci-of-arasan.c | 57
->>>>>> ++++++++++++++++++++---------
->>>> -
->>>>>>     1 file changed, 38 insertions(+), 19 deletions(-)
->>>>>>
->>>>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c
->>>>>> b/drivers/mmc/host/sdhci-of-arasan.c
->>>>>> index 3997cad1f793d..465498f2a7c0f 100644
->>>>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
->>>>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
->>>>>> @@ -1521,37 +1521,56 @@ static int
->>>>>> sdhci_arasan_register_sdclk(struct
->>>> sdhci_arasan_data *sdhci_arasan,
->>>>>>        return 0;
->>>>>>     }
->>>>>>
->>>>>> -static int sdhci_arasan_add_host(struct sdhci_arasan_data
->>>>>> *sdhci_arasan)
->>>>>> +static int sdhci_arasan_add_host(struct sdhci_arasan_data
->>>> *sdhci_arasan,
->>>>>> +                             struct device *dev)
->>>>>>     {
->>>>>>        struct sdhci_host *host = sdhci_arasan->host;
->>>>>>        struct cqhci_host *cq_host;
->>>>>>        bool dma64;
->>>>>>        int ret;
->>>>>>
->>>>>> -    if (!sdhci_arasan->has_cqe)
->>>>>> -            return sdhci_add_host(host);
->>>>>> -
->>>>>>        ret = sdhci_setup_host(host);
->>>>>>        if (ret)
->>>>>>                return ret;
->>>>>>
->>>>>> -    cq_host = devm_kzalloc(host->mmc->parent,
->>>>>> -                           sizeof(*cq_host), GFP_KERNEL);
->>>>>> -    if (!cq_host) {
->>>>>> -            ret = -ENOMEM;
->>>>>> -            goto cleanup;
->>>>>> -    }
->>>>>> +    /*
->>>>>> +     * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
->>>>>> +     *
->>>>>> +     *
->>>>
->> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.
->>>> html#
->>>>>> +     * Absolute Address  0x00FF160040 (SD0)
->>>>>> +     * Reset Value       0x280737EC6481
->>>>>> +     *
->>>>>> +     * really reads 0x200737EC6481 . The interesting part is the
->>>>>> +     * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
->>>>>> +     * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0,
->> which
->>>>>> +     * makes the SDHCI core disable retuning timer.
->>>>>
->>>>> Are you aware that caps can be changed in DT via "sdhci-caps" and
->>>>> "sdhci-caps-mask" ?
->>>>
->>>> No, I wasn't aware of those.
->>>>
->>>> Is that the preferred approach to this fix, over handling it in the driver ?
->>>>
->>>> I think the driver-side fix would be preferable, because it also
->>>> fixes systems which use legacy DTs without the sdhci-caps properties,
->>>> which would be all ZynqMP systems thus far.
->>>>
->>>> (and I would also still prefer to get feedback from Xilinx on why
->>>> does the value specified in UG1087 not match what is read out of the
->>>> hardware)
->>> Reset value of the retuning timer count is set to 0x0 via ZynqMP FSBL,
->>> we have an ERRATA for the same.
->>> https://support.xilinx.com/s/article/68550?language=en_US
->>>
->>> Xilinx recommendation is to program the appropriate value in the
->>> retuning timer count field based on the specific requirements via DT
->> property.
->>
->> Why is the retuning timer disabled for HS200 mode ?
-> Based on discussions with the Xilinx IP design team, they told retuning is
-> not required as Xilinx uses DLL for higher frequency modes.
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
-Does this require the eMMC "DS" line ?
+--656392-982051008-1672779542=:3557
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8BIT
 
-> So, we disabled retuning by default even in Xilinx next generation platforms
-> like Versal.
-> Even in our internal PVT testing also, without retuning we didn't see any issues.
-> 
-> Did you face any real issue without this re-tuning? If yes, could you please
-> provide some details about the test case.
 
-Yes, on devices with wider temperature range, the eMMC might suffer read 
-failures over time.
+Hi Adrian,
+
+Thank you for response.
+
+> On 20/12/22 01:41, Shyam Saini wrote:
+>> As per the JEDEC spec, tuning(command CMD21) is not allowed in
+>> RPMB partition.
+>>
+>> To avoid retuning while switching to RPMB, hold_retune variable was
+>> introduced
+>
+> No, mmc_retune_pause() is used:
+>
+> /*
+> * Pause re-tuning for a small set of operations.  The pause begins after the
+> * next command and after first doing re-tuning.
+> */
+> void mmc_retune_pause(struct mmc_host *host)
+> {
+> 	if (!host->retune_paused) {
+> 		host->retune_paused = 1;
+> 		mmc_retune_needed(host);
+> 		mmc_retune_hold(host);
+> 	}
+> }
+>
+>>            but it is not taken into account while making the tuning
+>> decision. As a consequence of this, mmc driver aborts while switching to
+>> RPMB partition:
+>>  mmc0: mmc_hs400_to_hs200 failed, error -84
+>
+> Do you normally re-tune at all?  It could just be that re-tuning
+> doesn't work.
+>
+
+Yes, we are able to retune.
+
+In fact this bug occurs when we iteratively switch to RPMB partition.
+
+May be related to this, we also observed that in __mmc_blk_ioctl_cmd
+function in line 487[1] part_index is assigned target_part variable and
+on the next line EXT_CSD_PART_CONFIG_ACC_RPMB OR'ed to the target_part
+variable.
+
+In mmc_blk_part_switch_pre function line 831 [2], part_type variable is
+compared to EXT_CSD_PART_CONFIG_ACC_RPMB without taking into account that
+the part_index variable is also OR'ed and its not separated before
+the comparision.
+
+Same thing happens in mmc_blk_part_switch_post function.
+
+Is it expected to be this way?, please let me know.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n487
+[2] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n831
+
+>>
+>> To fix this, take hold_retune variable into account while making retune
+>> decision in mmc_retune() function.
+>>
+>> Fixes: 57da0c042f4a ("mmc: block: Pause re-tuning while switched to the RPMB partition")
+>> Reported-by: Judy Wang <wangjudy@linux.microsoft.com>
+>> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
+>> ---
+>>  drivers/mmc/core/host.c | 3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+>> index b89dca1f15e9..342c1f5c256b 100644
+>> --- a/drivers/mmc/core/host.c
+>> +++ b/drivers/mmc/core/host.c
+>> @@ -181,6 +181,9 @@ int mmc_retune(struct mmc_host *host)
+>>  	bool return_to_hs400 = false;
+>>  	int err;
+>>
+>> +	if (host->hold_retune >= 1)
+>> +		return 0;
+>
+> No, hold_retune is set *before* the command *after* which
+> tuning is not permitted.
+>
+>> +
+>>  	if (host->retune_now)
+>>  		host->retune_now = 0;
+>>  	else
+>> --
+>> 2.34.1
+>>
+> On 20/12/22 01:41, Shyam Saini wrote:
+>> Hi All,
+>>
+>> Cc'ing Tyler
+>>
+>> Please note that I am not 100 % sure about the fix.
+>> This issue is reproducible without this patch and the patch at least fix the issue without
+>> any regressions on our side.
+>>
+>> We observed that hold_retune is always greater or equal to 1 in mmc_retune() function,
+>>
+>> so it may always avoid  re-tuning when it is actually needed and there may
+>>
+>> be a better fix for the issue.
+>>
+>> Please let me know your any feedback or comments.
+>>
+>> Best Regards,
+>> Shyam
+>>
+>>
+>
+>
+--656392-982051008-1672779542=:3557--
