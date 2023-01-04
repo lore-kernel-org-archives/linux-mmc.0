@@ -2,197 +2,225 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2D82C4708E
-	for <linux-mmc@archiver.kernel.org>; Tue,  3 Jan 2023 23:02:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E7B3FC4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 04:56:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233382AbjACXB6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 3 Jan 2023 18:01:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35428 "EHLO
+        id S229831AbjADE4I (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 3 Jan 2023 23:56:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234053AbjACXB4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 18:01:56 -0500
-Received: from mail-oa1-x2c.google.com (mail-oa1-x2c.google.com [IPv6:2001:4860:4864:20::2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BC9514030;
-        Tue,  3 Jan 2023 15:01:55 -0800 (PST)
-Received: by mail-oa1-x2c.google.com with SMTP id 586e51a60fabf-150debe2b7cso2708150fac.0;
-        Tue, 03 Jan 2023 15:01:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=dL0ArEdazE1dptVNtHB/gi8aO8UwG9PiFQ1UhQeWBKQ=;
-        b=TvJgztBlbd8eLRJdFi0BvIy/vu+aN5nhB7OLaOaYXa5swfw15Mhg9kUMuYM4JqskFp
-         u1CGUjsSclrut29uL1pBCn70sGlnBwjOpd6RMvCU7Ld0fpA0+LZlYq+W/6+UhQGY8Akl
-         a88jibj5A32dh5MamGyBOI4vvtEuPEWZjY4/VAVILbF2aHmGgP0WafsrQWBgXlCVZj/6
-         QASCijkTUgx47HgimqIfmyTeC1Kxb/vk9QNg5XGA2C+yCxcGrNeYth2LTdvyqsEsBTAc
-         83eGXPFPuGmuFZyDkeLT4BldO1sLZ5jdAOAGifkwFTPcbbjta6EquFDz9WbenOoIeIv5
-         wuIw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dL0ArEdazE1dptVNtHB/gi8aO8UwG9PiFQ1UhQeWBKQ=;
-        b=Q6vbVrUrA6/vEh/XlFtFUQsPeCRVlYDwu+SHC7Xbo191dAgUb7RRWPFIq0x6S7QpNG
-         LeoKlYQ+sWADe2NWN5r3rwY/TMHiciPz9uKPCcA2A6rDKg/EOs5QacV3x8qxpoOKGki3
-         OyjoOtlvWvhuglMEYh/eThhBJ2JnbYZSFvlDd762bQ2OsKFj2pK1lA/93rXmjZ68Sz9/
-         kx3otafcy7YrP6WVtJrDjnO563SaYqe9F4q+VoFI4HggdDLwblDove+Y5m5JZ+MxdUzF
-         Nngn3wKfKaAwygQxS/6NDSKL2fTWHgiGuRJXZLe2lb5jbYpk7OeOXHtdpF7yJ9Y5ppIu
-         VRIA==
-X-Gm-Message-State: AFqh2kr/HTi0XR2v+m0vJJ+yvKV5zIg68LCBzOAix4lnzUa/3mRfxGtY
-        YEiSLJd9B91mP+NmMjvoXxk=
-X-Google-Smtp-Source: AMrXdXvIn7WzhpO9PdePHDmgbHU9PCDka+j7sIVfSzdzOPs5Oo9++pL36PKgn5tatnGacBGpsjCSYA==
-X-Received: by 2002:a05:6870:648d:b0:144:bf16:f432 with SMTP id cz13-20020a056870648d00b00144bf16f432mr28996037oab.50.1672786914222;
-        Tue, 03 Jan 2023 15:01:54 -0800 (PST)
-Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
-        by smtp.gmail.com with ESMTPSA id z36-20020a056870462400b00144e6ffe9e5sm14797811oao.47.2023.01.03.15.01.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 03 Jan 2023 15:01:53 -0800 (PST)
-Message-ID: <63b4b3e1.050a0220.791fb.767c@mx.google.com>
-X-Google-Original-Message-ID: <Y7Sz3ycScm7ln170@neuromancer.>
-Date:   Tue, 3 Jan 2023 17:01:51 -0600
-From:   Chris Morgan <macroalpha82@gmail.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
- RTL8821CS chipset
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
- <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
+        with ESMTP id S233269AbjADEvk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 3 Jan 2023 23:51:40 -0500
+Received: from szxga01-in.huawei.com (szxga01-in.huawei.com [45.249.212.187])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5D0E2714
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 20:51:37 -0800 (PST)
+Received: from dggpemm500007.china.huawei.com (unknown [172.30.72.56])
+        by szxga01-in.huawei.com (SkyGuard) with ESMTP id 4Nmxwx6LKnznTwW;
+        Wed,  4 Jan 2023 12:50:09 +0800 (CST)
+Received: from [10.174.178.174] (10.174.178.174) by
+ dggpemm500007.china.huawei.com (7.185.36.183) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Wed, 4 Jan 2023 12:51:35 +0800
+Subject: Re: [PATCH v5] mmc: sdio: fix possible resource leaks in some error
+ paths
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <yangyingliang@huawei.com>
+References: <20221213141403.1734718-1-yangyingliang@huawei.com>
+ <CAPDyKFqhTdk1n5Gj4aO3vQj7uZ3r+9H0tuBCNgwqvxyg=BNJRQ@mail.gmail.com>
+From:   Yang Yingliang <yangyingliang@huawei.com>
+Message-ID: <cb59db8e-e479-8181-4f2c-e1340106e6cf@huawei.com>
+Date:   Wed, 4 Jan 2023 12:51:35 +0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101
+ Thunderbird/68.7.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
+In-Reply-To: <CAPDyKFqhTdk1n5Gj4aO3vQj7uZ3r+9H0tuBCNgwqvxyg=BNJRQ@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
+X-Originating-IP: [10.174.178.174]
+X-ClientProxiedBy: dggems705-chm.china.huawei.com (10.3.19.182) To
+ dggpemm500007.china.huawei.com (7.185.36.183)
+X-CFilter-Loop: Reflected
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 28, 2022 at 12:30:20AM +0100, Martin Blumenstingl wrote:
-> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
-> well as the existing RTL8821C chipset code.
-> 
 
-Unfortunately, this doesn't work for me. I applied it on top of 6.2-rc2
-master and I get errors during probe (it appears the firmware never
-loads).
+On 2023/1/3 23:35, Ulf Hansson wrote:
+> On Tue, 13 Dec 2022 at 15:17, Yang Yingliang <yangyingliang@huawei.com> wrote:
+>> If sdio_add_func() or sdio_init_func() fails, sdio_remove_func() can
+>> not release the resources, because the sdio function is not presented
+>> in these two cases, it won't call of_node_put() or put_device().
+>>
+>> To fix these leaks, make sdio_func_present() only control whether
+>> device_del() needs to be called or not, then always call of_node_put()
+>> and put_device().
+>>
+>> In error case in sdio_init_func(), the reference of 'card->dev' is
+>> not get, to avoid redundant put in sdio_free_func_cis(), move the
+>> get_device() to sdio_alloc_func() and put_device() to sdio_release_func(),
+>> it can keep the get/put function balanced.
+>>
+>> Without this patch, while doing fault inject test, it can get the
+>> following leak reports, after this fix, the leak is gone.
+>>
+>> unreferenced object 0xffff888112514000 (size 2048):
+>>    comm "kworker/3:2", pid 65, jiffies 4294741614 (age 124.774s)
+>>    hex dump (first 32 bytes):
+>>      00 e0 6f 12 81 88 ff ff 60 58 8d 06 81 88 ff ff  ..o.....`X......
+>>      10 40 51 12 81 88 ff ff 10 40 51 12 81 88 ff ff  .@Q......@Q.....
+>>    backtrace:
+>>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
+>>      [<000000002f839ccb>] mmc_alloc_card+0x38/0xb0 [mmc_core]
+>>      [<0000000004adcbf6>] mmc_sdio_init_card+0xde/0x170 [mmc_core]
+>>      [<000000007538fea0>] mmc_attach_sdio+0xcb/0x1b0 [mmc_core]
+>>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+>>
+>> unreferenced object 0xffff888112511000 (size 2048):
+>>    comm "kworker/3:2", pid 65, jiffies 4294741623 (age 124.766s)
+>>    hex dump (first 32 bytes):
+>>      00 40 51 12 81 88 ff ff e0 58 8d 06 81 88 ff ff  .@Q......X......
+>>      10 10 51 12 81 88 ff ff 10 10 51 12 81 88 ff ff  ..Q.......Q.....
+>>    backtrace:
+>>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
+>>      [<00000000fcbe706c>] sdio_alloc_func+0x35/0x100 [mmc_core]
+>>      [<00000000c68f4b50>] mmc_attach_sdio.cold.18+0xb1/0x395 [mmc_core]
+>>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+>>
+> Thanks for the detailed description, nice!
+>
+>> Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
+> This looks wrong, it's not really that commit that introduces the
+> problem. It existed way before this.
+This patch is trying to fix of node and device refcount leaks, this commit
+introduced of node refcount leak.
+>
+>> Fixes: 3d10a1ba0d37 ("sdio: fix reference counting in sdio_remove_func()")
+> Even if the problem is really old, I am worried that we may introduce
+> other problems if $subject patch gets applied as is, to older stable
+> kernels that carry the above commit. Did you have a look at this too?
+The patch can be applied to the oldest stable kernel (linux-4.9.y) 
+cleanly, and
+I look at the code in linux-4.9.y, the logic of alloc/remove/release sdio
+is same as mainline, so I think it's ok with linux-4.9.y.
 
-Relevant dmesg logs are as follows:
-
-[    0.989545] mmc2: new high speed SDIO card at address 0001
-[    0.989993] rtw_8821cs mmc2:0001:1: Firmware version 24.8.0, H2C version 12
-[    1.005684] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x14): -110
-[    1.005737] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1080): -110
-[    1.005789] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x11080): -110
-[    1.005840] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x3): -110
-[    1.005920] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x1103): -110
-[    1.005998] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x80): -110
-[    1.006078] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1700): -110
-
-The error of "sdio read32 failed (0x1700): -110" then repeats several
-hundred times, then I get this:
-
-[    1.066294] rtw_8821cs mmc2:0001:1: failed to download firmware
-[    1.066367] rtw_8821cs mmc2:0001:1: sdio read16 failed (0x80): -110
-[    1.066417] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x100): -110
-[    1.066697] rtw_8821cs mmc2:0001:1: failed to setup chip efuse info
-[    1.066703] rtw_8821cs mmc2:0001:1: failed to setup chip information
-[    1.066839] rtw_8821cs: probe of mmc2:0001:1 failed with error -16
-
-The hardware I am using is an rtl8821cs that I can confirm was working
-with a previous driver.
-
-Thank you.
-
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
->  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
->  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
->  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 34 +++++++++++++++++++
->  3 files changed, 48 insertions(+)
->  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> 
-> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
-> index 6b65da81127f..29eb2f8e0eb7 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
-> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
-> @@ -133,6 +133,17 @@ config RTW88_8821CE
->  
->  	  802.11ac PCIe wireless network adapter
->  
-> +config RTW88_8821CS
-> +	tristate "Realtek 8821CS SDIO wireless network adapter"
-> +	depends on MMC
-> +	select RTW88_CORE
-> +	select RTW88_SDIO
-> +	select RTW88_8821C
-> +	help
-> +	  Select this option will enable support for 8821CS chipset
-> +
-> +	  802.11ac SDIO wireless network adapter
-> +
->  config RTW88_8821CU
->  	tristate "Realtek 8821CU USB wireless network adapter"
->  	depends on USB
-> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
-> index 6105c2745bda..82979b30ae8d 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Makefile
-> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
-> @@ -59,6 +59,9 @@ rtw88_8821c-objs		:= rtw8821c.o rtw8821c_table.o
->  obj-$(CONFIG_RTW88_8821CE)	+= rtw88_8821ce.o
->  rtw88_8821ce-objs		:= rtw8821ce.o
->  
-> +obj-$(CONFIG_RTW88_8821CS)	+= rtw88_8821cs.o
-> +rtw88_8821cs-objs		:= rtw8821cs.o
-> +
->  obj-$(CONFIG_RTW88_8821CU)	+= rtw88_8821cu.o
->  rtw88_8821cu-objs		:= rtw8821cu.o
->  
-> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> new file mode 100644
-> index 000000000000..61f82b38cda4
-> --- /dev/null
-> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> @@ -0,0 +1,34 @@
-> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-> +// Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> +
-> +#include <linux/mmc/sdio_func.h>
-> +#include <linux/mmc/sdio_ids.h>
-> +#include <linux/module.h>
-> +#include "sdio.h"
-> +#include "rtw8821c.h"
-> +
-> +static const struct sdio_device_id rtw_8821cs_id_table[] =  {
-> +	{
-> +		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
-> +			    SDIO_DEVICE_ID_REALTEK_RTW8821CS),
-> +		.driver_data = (kernel_ulong_t)&rtw8821c_hw_spec,
-> +	},
-> +	{}
-> +};
-> +MODULE_DEVICE_TABLE(sdio, rtw_8821cs_id_table);
-> +
-> +static struct sdio_driver rtw_8821cs_driver = {
-> +	.name = "rtw_8821cs",
-> +	.probe = rtw_sdio_probe,
-> +	.remove = rtw_sdio_remove,
-> +	.id_table = rtw_8821cs_id_table,
-> +	.drv = {
-> +		.pm = &rtw_sdio_pm_ops,
-> +		.shutdown = rtw_sdio_shutdown,
-> +	}
-> +};
-> +module_sdio_driver(rtw_8821cs_driver);
-> +
-> +MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
-> +MODULE_DESCRIPTION("Realtek 802.11ac wireless 8821cs driver");
-> +MODULE_LICENSE("Dual BSD/GPL");
-> -- 
-> 2.39.0
-> 
+Thanks,
+Yang
+>
+> Unless you propose something, I will try to figure out the best way
+> forward here.
+>
+>> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+>> ---
+>> v4 -> v5:
+>>    Merge to two pathes in one and add leak reports.
+>>    Fix wrong check in sdio_remove_func().
+>>    Move get/put_device() in sdio_alloc/release_func.
+>>
+>> v3 -> v4:
+>>    Drop patch1, keep calling put_device() to free memory,
+>>    set 'func->card' to NULL to avoid redundant put.
+>>
+>> v2 -> v3:
+>>    Change to call of_node_put() in remove() function to
+>>    fix node refcount leak.
+>>
+>> v1 -> v2:
+>>    Fix compile error in patch #2.
+>> ---
+>>   drivers/mmc/core/sdio_bus.c | 20 ++++++++++++++++----
+>>   drivers/mmc/core/sdio_cis.c | 12 ------------
+>>   2 files changed, 16 insertions(+), 16 deletions(-)
+>>
+>> diff --git a/drivers/mmc/core/sdio_bus.c b/drivers/mmc/core/sdio_bus.c
+>> index babf21a0adeb..1ba135cd4caa 100644
+>> --- a/drivers/mmc/core/sdio_bus.c
+>> +++ b/drivers/mmc/core/sdio_bus.c
+>> @@ -291,8 +291,14 @@ static void sdio_release_func(struct device *dev)
+>>   {
+>>          struct sdio_func *func = dev_to_sdio_func(dev);
+>>
+>> -       if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
+>> +       if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO)) {
+>>                  sdio_free_func_cis(func);
+>> +               /*
+>> +                * We have now removed the link to the tuples in the
+>> +                * card structure, so remove the reference.
+>> +                */
+>> +               put_device(&func->card->dev);
+> In fact, we are relying on the card's struct device itself, even if
+> the MMC_QUIRK_NONSTD_SDIO is set or not.
+>
+> More importantly, we are relying on the "card" before device_add()
+> (that helps us to manage parent/child relationships) is getting called
+> for the sdio_func's struct device.
+>
+> Therefore, I think we should call put_device() here, no matter whether
+> MMC_QUIRK_NONSTD_SDIO is set or not.
+>
+>> +       }
+>>
+>>          kfree(func->info);
+>>          kfree(func->tmpbuf);
+>> @@ -324,6 +330,13 @@ struct sdio_func *sdio_alloc_func(struct mmc_card *card)
+>>
+>>          device_initialize(&func->dev);
+>>
+>> +       /*
+>> +        * We may link to tuples in the card structure,
+>> +        * we need make sure we have a reference to it.
+>> +        */
+>> +       if (!(func->card->quirks & MMC_QUIRK_NONSTD_SDIO))
+> For the similar reasons as above, we should call get_device() here, no
+> matter whether MMC_QUIRK_NONSTD_SDIO is set or not.
+>
+>> +               get_device(&func->card->dev);
+>> +
+>>          func->dev.parent = &card->dev;
+>>          func->dev.bus = &sdio_bus_type;
+>>          func->dev.release = sdio_release_func;
+>> @@ -377,10 +390,9 @@ int sdio_add_func(struct sdio_func *func)
+>>    */
+>>   void sdio_remove_func(struct sdio_func *func)
+>>   {
+>> -       if (!sdio_func_present(func))
+>> -               return;
+>> +       if (sdio_func_present(func))
+>> +               device_del(&func->dev);
+>>
+>> -       device_del(&func->dev);
+>>          of_node_put(func->dev.of_node);
+>>          put_device(&func->dev);
+>>   }
+>> diff --git a/drivers/mmc/core/sdio_cis.c b/drivers/mmc/core/sdio_cis.c
+>> index a705ba6eff5b..afaa6cab1adc 100644
+>> --- a/drivers/mmc/core/sdio_cis.c
+>> +++ b/drivers/mmc/core/sdio_cis.c
+>> @@ -403,12 +403,6 @@ int sdio_read_func_cis(struct sdio_func *func)
+>>          if (ret)
+>>                  return ret;
+>>
+>> -       /*
+>> -        * Since we've linked to tuples in the card structure,
+>> -        * we must make sure we have a reference to it.
+>> -        */
+>> -       get_device(&func->card->dev);
+>> -
+>>          /*
+>>           * Vendor/device id is optional for function CIS, so
+>>           * copy it from the card structure as needed.
+>> @@ -434,11 +428,5 @@ void sdio_free_func_cis(struct sdio_func *func)
+>>          }
+>>
+>>          func->tuples = NULL;
+>> -
+>> -       /*
+>> -        * We have now removed the link to the tuples in the
+>> -        * card structure, so remove the reference.
+>> -        */
+>> -       put_device(&func->card->dev);
+>>   }
+>>
+> Kind regards
+> Uffe
+> .
