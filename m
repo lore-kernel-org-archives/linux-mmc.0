@@ -2,188 +2,245 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0E93C4332F
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 06:08:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B53D4C4332F
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 07:18:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229890AbjADGIj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Jan 2023 01:08:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36968 "EHLO
+        id S233204AbjADHSi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Jan 2023 02:18:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229655AbjADGIi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 01:08:38 -0500
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59BBA12777;
-        Tue,  3 Jan 2023 22:08:34 -0800 (PST)
-Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id E235724E1F3;
-        Wed,  4 Jan 2023 14:08:32 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
- (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 4 Jan
- 2023 14:08:32 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX168.cuchost.com
- (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 4 Jan
- 2023 14:08:32 +0800
-Message-ID: <14433b44-8359-b9e8-446c-bb49e86bf48f@starfivetech.com>
-Date:   Wed, 4 Jan 2023 14:08:31 +0800
+        with ESMTP id S230287AbjADHSh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 02:18:37 -0500
+Received: from NAM10-BN7-obe.outbound.protection.outlook.com (mail-bn7nam10on2075.outbound.protection.outlook.com [40.107.92.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D3852E7
+        for <linux-mmc@vger.kernel.org>; Tue,  3 Jan 2023 23:18:36 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Kiu03ZGuN5Mh+FTfUKqeiuhOp81PuBmHTEt91F/AvB7sKAwycz9VPm/ZwqePXZCZ+mEumGLLI0Ny2FvdEyncTHQU9LhGPcG0eFajleMfuBhHiFKxr4KVprVTQ1muTcO2Vr78lyopE8IsTVMbtld24hM8TdIWjcZpbarSvxUnsHcccGBqBK0o4YK2QsjVJJ3TRw7JabW4ZfK7OluKKclmacurjwdL8Nbic9+TXAzm3nSFTKzqiYdIp05S+5T0mEsQ/pfl1WmlQDCGHzTDnOmHlu0iG3MuXcvp53g3GO6ADb/w/pBPPRgPF1+MpFE3JkM42rV/VQuADneuI/1S/8Cn2A==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=tHbTyuRncT7SOFPKL1MdwGXIEXgBR2iKPD9pobouA0I=;
+ b=b1CgaRwtgYWXJZbAMpwyLqWpoAplgrGmBERbp3G4clzbtIfE0ecWnB9t1z4J4UG++vSV35idRddZGbyIee7ZwJGOr+53+RfNUYPt0AhNPm0oIVL381Tg27U9kBvUdROVHLL3XVb7C50C06wBHjG/YwdnD1COITNDOvLuNU9ySjXUlVs37FM5U/nxbL6454D8KmrRbN9As46dn86QcW2c/rJpeBc1lZuC/Oo5UC/Vn6Jhu+6yIlESv3O/ftwTOowZbHusk5QYsYsdu2oiXvKmfZ8pagYTSKj76FLrmq+7keqmdr+GewzwaS2UBYyagEwnKBG1+n32vaQm64feqs2G7A==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=denx.de smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=tHbTyuRncT7SOFPKL1MdwGXIEXgBR2iKPD9pobouA0I=;
+ b=Jl8dsbLbk+ilUWcxLmDIuO2A7/Rp3wQtAqNKtMiUT+RAc4rSKH4DUYMEnQf16aXAUsyBlmGfybu33rMqTxTNkp8nt9Gf0bcHRHdNnWrNu28tNbeZUiJ7hIaRjUW6vh+EcG/ETNLPKjPgw4ABrAOPkaiNqSgDbSaQrKTApmCJ/bs=
+Received: from MW4PR04CA0163.namprd04.prod.outlook.com (2603:10b6:303:85::18)
+ by MN2PR12MB4207.namprd12.prod.outlook.com (2603:10b6:208:1d9::23) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5944.19; Wed, 4 Jan
+ 2023 07:18:33 +0000
+Received: from CO1NAM11FT054.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:85:cafe::68) by MW4PR04CA0163.outlook.office365.com
+ (2603:10b6:303:85::18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5986.14 via Frontend
+ Transport; Wed, 4 Jan 2023 07:18:33 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ CO1NAM11FT054.mail.protection.outlook.com (10.13.174.70) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.5986.14 via Frontend Transport; Wed, 4 Jan 2023 07:18:32 +0000
+Received: from [10.254.241.50] (10.180.168.240) by SATLEXMB04.amd.com
+ (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Wed, 4 Jan
+ 2023 01:18:27 -0600
+Message-ID: <62828df4-4249-39b3-fc35-ee3cf33b95ba@amd.com>
+Date:   Wed, 4 Jan 2023 08:18:21 +0100
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.6.1
-Subject: Re: [PATCH v2 3/3] riscv: dts: starfive: Add mmc node
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        <linux-kernel@vger.kernel.org>
-References: <20221227122227.460921-1-william.qiu@starfivetech.com>
- <20221227122227.460921-4-william.qiu@starfivetech.com>
- <CAPDyKFqziA+PB__v8nJzgkTuM9ZszW8X2U-akvRFv0_qwZ22OA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Override
+ SDHCI_RETUNING_TIMER_COUNT_MASK on ZynqMP
 Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <CAPDyKFqziA+PB__v8nJzgkTuM9ZszW8X2U-akvRFv0_qwZ22OA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS063.cuchost.com (172.16.6.23) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
+To:     Marek Vasut <marex@denx.de>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>
+CC:     Michal Simek <michal.simek@xilinx.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-arm-kernel@lists.infradead.org>
+References: <20221025191500.149167-1-marex@denx.de>
+ <2b523371-7eeb-25f2-8879-76bbf028f4bb@intel.com>
+ <c3d62448-fd1c-066c-aa53-2df7eae1555d@denx.de>
+ <ebf570a1-3d2f-85d7-3a29-540caf9f576d@intel.com>
+ <8958eb65-e873-a760-5ca4-a51b36f5e23d@denx.de>
+ <873d21fa-d9ff-ee94-40a1-3354850c8865@intel.com>
+ <2db4c424-74fa-24a6-852d-10d7a18a0541@amd.com>
+ <2138356e-f101-0ca2-faae-b3bda5539f05@denx.de>
+From:   Michal Simek <michal.simek@amd.com>
+In-Reply-To: <2138356e-f101-0ca2-faae-b3bda5539f05@denx.de>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT054:EE_|MN2PR12MB4207:EE_
+X-MS-Office365-Filtering-Correlation-Id: 4067ca26-cda2-4098-dcb8-08daee23e349
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: f8IRRDBJGDfMNRyThjDLypBNi2Jl0s0ex332wk2Q1YVMO85qH9N6Ge9+2mPfaUemTGy5iSKwsiwyIQ3iu8fopcye0FyPXdxqicLSR9H66ntKurFJvf0e6RW3LYohRDiALB2Y10cykS82XDfz03B5O4qrNsl4aMobFVSHG50BWGgG+6ODiw2EFOG2Z9YPBMZUA3YbOkCzZeUJINIbLTIX1V/8rLE0biu93fMxmHqgUZaTXhfI2Z81pdfHRHdyrsDfnCcdTljTzaH3N4fKuBoDqgHY+O+edNUAblCNEMD4nszcXwBezBevuqFJ2qcQ2V/3YCx4XlnfKGLEm/IcVA5SCUgDiHQSutBIPjy6yePgtCkS0FSLFDBqlbZus6GDfE0Sh+9ufUsbClZ7Bw28j1gFa/CJans2HLXMT/gK1jDYpTj3Ar5JDJ/abo6xZJYSyA8ODy+SdI9jsqnurCtLtrpgwmjFIcDMht4T5Invw9ros17NVxyZYm9tUIBi7OCyS+EI5jhafiYXDRLYoJPiSysCQpI2N4TOHmcUufIXjh8Ji05Kxofx+Lh6X9zl+CG+CczLD+9J6ZDb2UnIrSjiwvKq/b8ni0Tcoo60pZmXsnjeGghr79LtdHNNMp4dJIUpd0FRrvNPzVwau8EwQ3teDh0k8fsAR9HUNlCPHa8Zbux5xR7ZzsMExxVb4D4BUxhh5XggQB+BEUlB4ZasH2YF9x7eKc6QqOdkegIojmr7t4207L1a4Dp58ljO1uGWyeTXhc1Z3ShxiQVK1Tz6cI3JlwfxBk90GeKvpSr/TR5eyfpElvs=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(346002)(136003)(39860400002)(451199015)(40470700004)(36840700001)(46966006)(4326008)(5660300002)(41300700001)(316002)(8936002)(70586007)(8676002)(54906003)(110136005)(66899015)(2906002)(70206006)(44832011)(16576012)(6666004)(966005)(478600001)(186003)(26005)(53546011)(31686004)(16526019)(31696002)(40480700001)(86362001)(426003)(36860700001)(2616005)(47076005)(83380400001)(336012)(36756003)(82740400003)(356005)(81166007)(82310400005)(40460700003)(36900700001)(43740500002);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 Jan 2023 07:18:32.9318
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 4067ca26-cda2-4098-dcb8-08daee23e349
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT054.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR12MB4207
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 2023/1/2 22:03, Ulf Hansson wrote:
-> On Tue, 27 Dec 2022 at 13:22, William Qiu <william.qiu@starfivetech.com> wrote:
+On 1/3/23 21:35, Marek Vasut wrote:
+> On 1/2/23 09:24, Michal Simek wrote:
 >>
->> This adds the mmc node for the StarFive JH7110 SoC.
->> Set sdioo node to emmc and set sdio1 node to sd.
 >>
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> ---
->>  .../jh7110-starfive-visionfive-v2.dts         | 25 ++++++++++++
->>  arch/riscv/boot/dts/starfive/jh7110.dtsi      | 38 +++++++++++++++++++
->>  2 files changed, 63 insertions(+)
+>> On 12/30/22 13:57, Adrian Hunter wrote:
+>>> On 30/12/22 08:42, Marek Vasut wrote:
+>>>> On 12/29/22 13:51, Adrian Hunter wrote:
+>>>>> On 26/10/22 12:20, Marek Vasut wrote:
+>>>>>> On 10/26/22 08:07, Adrian Hunter wrote:
+>>>>>>> On 25/10/22 22:15, Marek Vasut wrote:
+>>>>>>>> On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
+>>>>>>>>
+>>>>>>>> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+>>>>>>>> Absolute Address  0x00FF160040 (SD0)
+>>>>>>>> Reset Value       0x280737EC6481
+>>>>>>>>
+>>>>>>>> really reads 0x200737EC6481 . The interesting part is the
+>>>>>>>> top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+>>>>>>>> missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+>>>>>>>> makes the SDHCI core disable retuning timer.
+>>>>>>>>
+>>>>>>>> Fix this up here by explicitly setting tuning_count to 8
+>>>>>>>> as it should be, otherwise an eMMC might fail in various
+>>>>>>>> thermal conditions
+>>>>>>>>
+>>>>>>>> Note that the diff is best shown with -w option, this makes it
+>>>>>>>> visible what happened with !sdhci_arasan->has_cqe conditional,
+>>>>>>>> which is placed between sdhci_setup_host() and __sdhci_add_host()
+>>>>>>>> calls. Since sdhci_add_host() is also a sequence of these two
+>>>>>>>> calls and host->tuning_count must be overriden before calling
+>>>>>>>
+>>>>>>> overriden -> overridden
+>>>>>>
+>>>>>> Fixed
+>>>>>>
+>>>>>>>> __sdhci_add_host(), call the two calls separately and do all
+>>>>>>>> the adjustments between them in either case.
+>>>>>>>>
+>>>>>>>> Signed-off-by: Marek Vasut <marex@denx.de>
+>>>>>>>> ---
+>>>>>>>> Cc: Michal Simek <michal.simek@xilinx.com>
+>>>>>>>> Cc: Adrian Hunter <adrian.hunter@intel.com>
+>>>>>>>> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+>>>>>>>> Cc: linux-arm-kernel@lists.infradead.org
+>>>>>>>> To: linux-mmc@vger.kernel.org
+>>>>>>>> ---
+>>>>>>>>     drivers/mmc/host/sdhci-of-arasan.c | 57 ++++++++++++++++++++----------
+>>>>>>>>     1 file changed, 38 insertions(+), 19 deletions(-)
+>>>>>>>>
+>>>>>>>> diff --git a/drivers/mmc/host/sdhci-of-arasan.c 
+>>>>>>>> b/drivers/mmc/host/sdhci-of-arasan.c
+>>>>>>>> index 3997cad1f793d..465498f2a7c0f 100644
+>>>>>>>> --- a/drivers/mmc/host/sdhci-of-arasan.c
+>>>>>>>> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+>>>>>>>> @@ -1521,37 +1521,56 @@ static int sdhci_arasan_register_sdclk(struct 
+>>>>>>>> sdhci_arasan_data *sdhci_arasan,
+>>>>>>>>         return 0;
+>>>>>>>>     }
+>>>>>>>>     -static int sdhci_arasan_add_host(struct sdhci_arasan_data 
+>>>>>>>> *sdhci_arasan)
+>>>>>>>> +static int sdhci_arasan_add_host(struct sdhci_arasan_data *sdhci_arasan,
+>>>>>>>> +                 struct device *dev)
+>>>>>>>>     {
+>>>>>>>>         struct sdhci_host *host = sdhci_arasan->host;
+>>>>>>>>         struct cqhci_host *cq_host;
+>>>>>>>>         bool dma64;
+>>>>>>>>         int ret;
+>>>>>>>>     -    if (!sdhci_arasan->has_cqe)
+>>>>>>>> -        return sdhci_add_host(host);
+>>>>>>>> -
+>>>>>>>>         ret = sdhci_setup_host(host);
+>>>>>>>>         if (ret)
+>>>>>>>>             return ret;
+>>>>>>>>     -    cq_host = devm_kzalloc(host->mmc->parent,
+>>>>>>>> -                   sizeof(*cq_host), GFP_KERNEL);
+>>>>>>>> -    if (!cq_host) {
+>>>>>>>> -        ret = -ENOMEM;
+>>>>>>>> -        goto cleanup;
+>>>>>>>> -    }
+>>>>>>>> +    /*
+>>>>>>>> +     * On Xilinx ZynqMP, the reg_capabilities (SDIO) Register
+>>>>>>>> +     *
+>>>>>>>> +     * 
+>>>>>>>> https://www.xilinx.com/htmldocs/registers/ug1087/sdio___reg_capabilities.html#
+>>>>>>>> +     * Absolute Address  0x00FF160040 (SD0)
+>>>>>>>> +     * Reset Value         0x280737EC6481
+>>>>>>>> +     *
+>>>>>>>> +     * really reads 0x200737EC6481 . The interesting part is the
+>>>>>>>> +     * top 32 bits, which are SDHCI_CAPABILITIES_1 = 0x2007. The
+>>>>>>>> +     * missing 0x800 is SDHCI_RETUNING_TIMER_COUNT_MASK=0, which
+>>>>>>>> +     * makes the SDHCI core disable retuning timer.
+>>>>>>>
+>>>>>>> Are you aware that caps can be changed in DT via "sdhci-caps" and
+>>>>>>> "sdhci-caps-mask" ?
+>>>>>>
+>>>>>> No, I wasn't aware of those.
+>>>>>>
+>>>>>> Is that the preferred approach to this fix, over handling it in the driver ?
+>>>>>
+>>>>> I guess ideally.  Mainline does not really need the driver
+>>>>> fix because it seems it can be done by DT.  Older kernels
+>>>>> are a separate issue really.
+>>>>>
+>>>>>>
+>>>>>> I think the driver-side fix would be preferable, because it also fixes 
+>>>>>> systems which use legacy DTs without the sdhci-caps properties, which 
+>>>>>> would be all ZynqMP systems thus far.
+>>>>>
+>>>>> You could backport support of the properties "sdhci-caps"
+>>>>> and "sdhci-caps-mask".
+>>>>
+>>>> This won't help. Vivado (the xilinx FPGA design tool) is capable of 
+>>>> generating DTs, so you can end up with a combination of new Linux kernel and 
+>>>> old generated DT, which is still missing the sdhci-caps/sdhci-caps-mask .
+>>>
+>>> That is a bit sad.  You might want to push for changing that situation.
+>>>
+>>> Send an updated patch then.
+>>>
 >>
->> diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
->> index c8946cf3a268..d8244fd1f5a0 100644
->> --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
->> +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-v2.dts
->> @@ -47,6 +47,31 @@ &clk_rtc {
->>         clock-frequency = <32768>;
->>  };
->>
->> +&mmc0 {
->> +       max-frequency = <100000000>;
->> +       card-detect-delay = <300>;
+>> Xilinx Device Tree Generator, which is the tool for DT generation, was never 
+>> designed to be directly used without any change. It was designed to help you 
+>> to describe the system as much as possible. It means you get the base and you 
+>> need to change things which are not properly described. That's why just do it.
 > 
-> Nitpick:  This seems redundant for a non-removable card!?
+> I am under the impression that petalinux does pull the XSA from Vivado and 
+> directly builds U-Boot and Linux with DT somehow derived from the XSA, maybe 
+> using DTG ?
 > 
+> (note that I am not using petalinux)
 
-Will drop
+They do use it but they are not keeping backward compatibility that's why they 
+don't need to solve this problem.
 
->> +       bus-width = <8>;
->> +       cap-mmc-highspeed;
->> +       mmc-ddr-1_8v;
->> +       mmc-hs200-1_8v;
->> +       non-removable;
->> +       cap-mmc-hw-reset;
->> +       post-power-on-delay-ms = <200>;
->> +       status = "okay";
->> +};
->> +
->> +&mmc1 {
->> +       max-frequency = <100000000>;
->> +       card-detect-delay = <300>;
-> 
-> Nitpick: This looks redundant for polling based card detection
-> (broken-cd is set a few lines below).
-> 
+Thanks,
+Michal
 
-Will drop
-
->> +       bus-width = <4>;
->> +       no-sdio;
->> +       no-mmc;
->> +       broken-cd;
->> +       cap-sd-highspeed;
->> +       post-power-on-delay-ms = <200>;
->> +       status = "okay";
->> +};
->> +
->>  &gmac0_rmii_refin {
->>         clock-frequency = <50000000>;
->>  };
->> diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> index c22e8f1d2640..08a780d2c0f4 100644
->> --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
->> @@ -331,6 +331,11 @@ aoncrg: clock-controller@17000000 {
->>                         #reset-cells = <1>;
->>                 };
->>
->> +               syscon: syscon@13030000 {
->> +                       compatible = "starfive,syscon", "syscon";
->> +                       reg = <0x0 0x13030000 0x0 0x1000>;
->> +               };
->> +
->>                 gpio: gpio@13040000 {
->>                         compatible = "starfive,jh7110-sys-pinctrl";
->>                         reg = <0x0 0x13040000 0x0 0x10000>;
->> @@ -433,5 +438,38 @@ uart5: serial@12020000 {
->>                         reg-shift = <2>;
->>                         status = "disabled";
->>                 };
->> +
->> +               /* unremovable emmc as mmcblk0 */
-> 
-> Don't confuse the mmc0 node name with mmcblk0. There is no guarantee
-> that this is true, unless you also specify an alias.
-> 
-
-Hi Ulf,
-
-Thank you for taking time to review and provide helpful comments for this patch.
-Actually we define mmc0 as eMMC, which is mmcblk0 in the kernel, and define mmc1 as SDIO,
-which is mmcblk1 in the kernel, so it's not confuse.
-
-Best Regards
-William Qiu
->> +               mmc0: mmc@16010000 {
->> +                       compatible = "starfive,jh7110-mmc";
->> +                       reg = <0x0 0x16010000 0x0 0x10000>;
->> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
->> +                                <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
->> +                       clock-names = "biu","ciu";
->> +                       resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
->> +                       reset-names = "reset";
->> +                       interrupts = <74>;
->> +                       fifo-depth = <32>;
->> +                       fifo-watermark-aligned;
->> +                       data-addr = <0>;
->> +                       starfive,syscon = <&syscon 0x14 0x1a 0x7c000000>;
->> +                       status = "disabled";
->> +               };
->> +
->> +               mmc1: mmc@16020000 {
->> +                       compatible = "starfive,jh7110-mmc";
->> +                       reg = <0x0 0x16020000 0x0 0x10000>;
->> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO1_AHB>,
->> +                                <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
->> +                       clock-names = "biu","ciu";
->> +                       resets = <&syscrg JH7110_SYSRST_SDIO1_AHB>;
->> +                       reset-names = "reset";
->> +                       interrupts = <75>;
->> +                       fifo-depth = <32>;
->> +                       fifo-watermark-aligned;
->> +                       data-addr = <0>;
->> +                       starfive,syscon = <&syscon 0x9c 0x1 0x3e>;
->> +                       status = "disabled";
->> +               };
->>         };
->>  };
-> 
-> Kind regards
-> Uffe
