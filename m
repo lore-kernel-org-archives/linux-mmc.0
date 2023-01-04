@@ -2,199 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B632C46467
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 08:36:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72221C46467
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 10:19:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234049AbjADIgE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Jan 2023 03:36:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37900 "EHLO
+        id S233562AbjADKTt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Jan 2023 05:19:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234309AbjADIfx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 03:35:53 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34E6A13CEC
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Jan 2023 00:35:53 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1672821353; x=1704357353;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=yAbOIQZS6x+fxKK/q7k92dP7dRixNM8hVISCg7EniBk=;
-  b=cGX4cMgg7+jpv+LXrPt+SqmCmR/ZKT58SqOLy8WxHX332XRbUTisYZJk
-   9SBsgW0gcXm3Kpu2bGeOWksJrXn3UeLh3evSqsdazdID0/KJVfBiV4rmO
-   SY+jjWjoU680klZYudN7fYeiC7bsAz7qR4PNGTW8J0SVO+vNRifldh6kc
-   34VEWDYcgdlAqmm+AKs84avt/N3fekd54yYD8KThg2mvfJK+JlKrPDkDQ
-   bna7WHRg7pTLL58u34hYlX1Tzxx1h06dT8o8kXNfcIaZGkolyIhbGDN5t
-   KNgXC0cV8zMvyEE6r9SJWc6Ba1avYfHxNhfs8kKlL21XEiqsjNOyuUtBB
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10579"; a="349102698"
-X-IronPort-AV: E=Sophos;i="5.96,299,1665471600"; 
-   d="scan'208";a="349102698"
-Received: from fmsmga005.fm.intel.com ([10.253.24.32])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2023 00:35:52 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10579"; a="983844777"
-X-IronPort-AV: E=Sophos;i="5.96,299,1665471600"; 
-   d="scan'208";a="983844777"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.220.246])
-  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2023 00:35:50 -0800
-Message-ID: <2612a51f-a103-5b6a-24f1-ae3511b66c74@intel.com>
-Date:   Wed, 4 Jan 2023 10:35:46 +0200
+        with ESMTP id S233970AbjADKTr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 05:19:47 -0500
+Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87DDC193FA
+        for <linux-mmc@vger.kernel.org>; Wed,  4 Jan 2023 02:19:46 -0800 (PST)
+Received: by mail-pg1-x534.google.com with SMTP id s67so12597468pgs.3
+        for <linux-mmc@vger.kernel.org>; Wed, 04 Jan 2023 02:19:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=aBay3x5ix+eeS0Ab1w112q7r/bDoorzo0l299Ov2Q+0=;
+        b=MRVAoQUpPfvGcfuJhT9ozrOtZYt3+xLerA/WQ2SOAnro5MSNs96KEdRrqfl0TKAPht
+         tqmml6wwgIxVxaMTlEx1twESIr0ITs3T28qrOyLrLpMioiY+6qf9yty1jaLqzXxUkKIP
+         c5+dKpDF+k6SNrs4Kr8vsv/PAY14Jzq3HOflF/vu1jdN0jMFEgL6SvjW47MW/C3pW7lF
+         X+qhxRGLOPCvBCY/ZKuvfWzkMOs9Zoh5TqNAcnSmYIx5KTpxhi01fg3LtbCfEoNEYI2M
+         h4dEuiDQ0UL9O/zHRi98RQ3KtD7BflakhiofxiBvipKGd5tLuHz3o33e0nnsWjccHSgL
+         oCyg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=aBay3x5ix+eeS0Ab1w112q7r/bDoorzo0l299Ov2Q+0=;
+        b=AQC6FTc2MYHBvk2gH1YKEGYe4E9Bdf/Vj8yzBBshBSTu1cX8U3uOqB3C2HdwM0yQl3
+         W5lQrE5vmVTG0yzu/XBt68e31ikJhsQufkVyyWoVzrpaSj3htBrjgm5htU1dDGKkcy2v
+         CAbFj2Piwydzzz+MJT5lEiIf9Ps7VGLneVuQjQFzJk4L5yLI3kS4gtf7Zh+ddYZGSlCt
+         IHHfhOt2pkZTp4m4y/leazaSs5Y7clviIGFLZ+rhdmJg+9sXrXgtBaQc4ITlQqRZXk+9
+         AazDat8xf/LFHgpvIzkAJGyh6hC9SejosRfdKGXNjlUO4H7y1sqZSvabcvi4EAKypAWo
+         raWQ==
+X-Gm-Message-State: AFqh2kpn2pwJu6kW9Sp756FPKac25f3XMKOphkFSrLledOuEgCWpCAf7
+        umxCMmctuYiSghBcZjo5igCvKmllNZwb9mVdbdVu8E5TddDtPA==
+X-Google-Smtp-Source: AMrXdXvwaCEbgZysYP7/DZ0pwn3zCNWade05Mj8AyMdITn2FqHQxu7YJLCxxh6eyyldu/wWNORF+QfXS8cL5ro3cc10=
+X-Received: by 2002:a62:ed04:0:b0:577:3e5e:7a4 with SMTP id
+ u4-20020a62ed04000000b005773e5e07a4mr3263806pfh.57.1672827585941; Wed, 04 Jan
+ 2023 02:19:45 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.6.1
-Subject: Re: [PATCH] mmc: core: host: fix mmc retuning
-To:     Shyam Saini <shyamsaini@linux.microsoft.com>
-Cc:     linux-mmc@vger.kernel.org, ulf.hansson@linaro.org, code@tyhicks.com
-References: <20221219225319.24637-1-shyamsaini@linux.microsoft.com>
- <14de0095-db93-cf5b-e843-1554a392b177@linux.microsoft.com>
- <e467c158-b298-53d1-4b12-7cbfe413af79@intel.com>
- <cacb9337-ed1b-6c5b-efa2-ae4086f9d7a9@linux.microsoft.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <cacb9337-ed1b-6c5b-efa2-ae4086f9d7a9@linux.microsoft.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <20221213141403.1734718-1-yangyingliang@huawei.com>
+ <CAPDyKFqhTdk1n5Gj4aO3vQj7uZ3r+9H0tuBCNgwqvxyg=BNJRQ@mail.gmail.com> <cb59db8e-e479-8181-4f2c-e1340106e6cf@huawei.com>
+In-Reply-To: <cb59db8e-e479-8181-4f2c-e1340106e6cf@huawei.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 4 Jan 2023 11:19:09 +0100
+Message-ID: <CAPDyKFoH3o_+vC4RdhFG18-6wJqL4TZnyhvpjLXvWczN+ySKfA@mail.gmail.com>
+Subject: Re: [PATCH v5] mmc: sdio: fix possible resource leaks in some error paths
+To:     Yang Yingliang <yangyingliang@huawei.com>
+Cc:     linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/01/23 22:59, Shyam Saini wrote:
-> 
-> Hi Adrian,
-> 
-> Thank you for response.
-> 
->> On 20/12/22 01:41, Shyam Saini wrote:
->>> As per the JEDEC spec, tuning(command CMD21) is not allowed in
->>> RPMB partition.
->>>
->>> To avoid retuning while switching to RPMB, hold_retune variable was
->>> introduced
->>
->> No, mmc_retune_pause() is used:
->>
->> /*
->> * Pause re-tuning for a small set of operations.  The pause begins after the
->> * next command and after first doing re-tuning.
->> */
->> void mmc_retune_pause(struct mmc_host *host)
->> {
->>     if (!host->retune_paused) {
->>         host->retune_paused = 1;
->>         mmc_retune_needed(host);
->>         mmc_retune_hold(host);
->>     }
->> }
->>
->>>            but it is not taken into account while making the tuning
->>> decision. As a consequence of this, mmc driver aborts while switching to
->>> RPMB partition:
->>>  mmc0: mmc_hs400_to_hs200 failed, error -84
->>
->> Do you normally re-tune at all?  It could just be that re-tuning
->> doesn't work.
->>
-> 
-> Yes, we are able to retune.
-> 
-> In fact this bug occurs when we iteratively switch to RPMB partition.
-> 
-> May be related to this, we also observed that in __mmc_blk_ioctl_cmd
-> function in line 487[1] part_index is assigned target_part variable and
-> on the next line EXT_CSD_PART_CONFIG_ACC_RPMB OR'ed to the target_part
-> variable.
-> 
-> In mmc_blk_part_switch_pre function line 831 [2], part_type variable is
-> compared to EXT_CSD_PART_CONFIG_ACC_RPMB without taking into account that
-> the part_index variable is also OR'ed and its not separated before
-> the comparision.
-> 
-> Same thing happens in mmc_blk_part_switch_post function.
-> 
-> Is it expected to be this way?, please let me know.
+On Wed, 4 Jan 2023 at 05:51, Yang Yingliang <yangyingliang@huawei.com> wrote:
+>
+>
+> On 2023/1/3 23:35, Ulf Hansson wrote:
+> > On Tue, 13 Dec 2022 at 15:17, Yang Yingliang <yangyingliang@huawei.com> wrote:
+> >> If sdio_add_func() or sdio_init_func() fails, sdio_remove_func() can
+> >> not release the resources, because the sdio function is not presented
+> >> in these two cases, it won't call of_node_put() or put_device().
+> >>
+> >> To fix these leaks, make sdio_func_present() only control whether
+> >> device_del() needs to be called or not, then always call of_node_put()
+> >> and put_device().
+> >>
+> >> In error case in sdio_init_func(), the reference of 'card->dev' is
+> >> not get, to avoid redundant put in sdio_free_func_cis(), move the
+> >> get_device() to sdio_alloc_func() and put_device() to sdio_release_func(),
+> >> it can keep the get/put function balanced.
+> >>
+> >> Without this patch, while doing fault inject test, it can get the
+> >> following leak reports, after this fix, the leak is gone.
+> >>
+> >> unreferenced object 0xffff888112514000 (size 2048):
+> >>    comm "kworker/3:2", pid 65, jiffies 4294741614 (age 124.774s)
+> >>    hex dump (first 32 bytes):
+> >>      00 e0 6f 12 81 88 ff ff 60 58 8d 06 81 88 ff ff  ..o.....`X......
+> >>      10 40 51 12 81 88 ff ff 10 40 51 12 81 88 ff ff  .@Q......@Q.....
+> >>    backtrace:
+> >>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
+> >>      [<000000002f839ccb>] mmc_alloc_card+0x38/0xb0 [mmc_core]
+> >>      [<0000000004adcbf6>] mmc_sdio_init_card+0xde/0x170 [mmc_core]
+> >>      [<000000007538fea0>] mmc_attach_sdio+0xcb/0x1b0 [mmc_core]
+> >>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+> >>
+> >> unreferenced object 0xffff888112511000 (size 2048):
+> >>    comm "kworker/3:2", pid 65, jiffies 4294741623 (age 124.766s)
+> >>    hex dump (first 32 bytes):
+> >>      00 40 51 12 81 88 ff ff e0 58 8d 06 81 88 ff ff  .@Q......X......
+> >>      10 10 51 12 81 88 ff ff 10 10 51 12 81 88 ff ff  ..Q.......Q.....
+> >>    backtrace:
+> >>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
+> >>      [<00000000fcbe706c>] sdio_alloc_func+0x35/0x100 [mmc_core]
+> >>      [<00000000c68f4b50>] mmc_attach_sdio.cold.18+0xb1/0x395 [mmc_core]
+> >>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
+> >>
+> > Thanks for the detailed description, nice!
+> >
+> >> Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
+> > This looks wrong, it's not really that commit that introduces the
+> > problem. It existed way before this.
+> This patch is trying to fix of node and device refcount leaks, this commit
+> introduced of node refcount leak.
 
-According to the spec, there can only be 1 RPMB partition,
-so the comment and code are not very meaningful.
+Yes, the above commit certainly made the problem worse. However, the
+main issue about not properly decrementing the reference count for the
+device was there way before.
 
-AFAICT rpmb->part_index is set to EXT_CSD_PART_CONFIG_ACC_RPMB
-anyway, originally by mmc_decode_ext_csd():
+To avoid confusion for stable kernel maintainers, I think it's better
+to drop the above fixes tag.
 
-		/*
-		 * RPMB regions are defined in multiples of 128K.
-		 */
-		card->ext_csd.raw_rpmb_size_mult = ext_csd[EXT_CSD_RPMB_MULT];
-		if (ext_csd[EXT_CSD_RPMB_MULT] && mmc_host_cmd23(card->host)) {
-			mmc_part_add(card, ext_csd[EXT_CSD_RPMB_MULT] << 17,
-				EXT_CSD_PART_CONFIG_ACC_RPMB,
-				"rpmb", 0, false,
-				MMC_BLK_DATA_AREA_RPMB);
-		}
+> >
+> >> Fixes: 3d10a1ba0d37 ("sdio: fix reference counting in sdio_remove_func()")
+> > Even if the problem is really old, I am worried that we may introduce
+> > other problems if $subject patch gets applied as is, to older stable
+> > kernels that carry the above commit. Did you have a look at this too?
+> The patch can be applied to the oldest stable kernel (linux-4.9.y)
+> cleanly, and
+> I look at the code in linux-4.9.y, the logic of alloc/remove/release sdio
+> is same as mainline, so I think it's ok with linux-4.9.y.
 
-So the OR has no effect.
+That sounds promising, then let's add a stable tag too.
 
-As for "mmc_hs400_to_hs200 failed, error -84", I suggest enabling
-some dynamic debug messages to determine what command is getting
-an error and what the I/O state (as per mmc_set_ios()) is.
+>
+> Thanks,
+> Yang
 
-> 
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n487
-> [2] https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git/tree/drivers/mmc/core/block.c?h=next#n831
-> 
->>>
->>> To fix this, take hold_retune variable into account while making retune
->>> decision in mmc_retune() function.
->>>
->>> Fixes: 57da0c042f4a ("mmc: block: Pause re-tuning while switched to the RPMB partition")
->>> Reported-by: Judy Wang <wangjudy@linux.microsoft.com>
->>> Signed-off-by: Shyam Saini <shyamsaini@linux.microsoft.com>
->>> ---
->>>  drivers/mmc/core/host.c | 3 +++
->>>  1 file changed, 3 insertions(+)
->>>
->>> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
->>> index b89dca1f15e9..342c1f5c256b 100644
->>> --- a/drivers/mmc/core/host.c
->>> +++ b/drivers/mmc/core/host.c
->>> @@ -181,6 +181,9 @@ int mmc_retune(struct mmc_host *host)
->>>      bool return_to_hs400 = false;
->>>      int err;
->>>
->>> +    if (host->hold_retune >= 1)
->>> +        return 0;
->>
->> No, hold_retune is set *before* the command *after* which
->> tuning is not permitted.
->>
->>> +
->>>      if (host->retune_now)
->>>          host->retune_now = 0;
->>>      else
->>> -- 
->>> 2.34.1
->>>
->> On 20/12/22 01:41, Shyam Saini wrote:
->>> Hi All,
->>>
->>> Cc'ing Tyler
->>>
->>> Please note that I am not 100 % sure about the fix.
->>> This issue is reproducible without this patch and the patch at least fix the issue without
->>> any regressions on our side.
->>>
->>> We observed that hold_retune is always greater or equal to 1 in mmc_retune() function,
->>>
->>> so it may always avoid  re-tuning when it is actually needed and there may
->>>
->>> be a better fix for the issue.
->>>
->>> Please let me know your any feedback or comments.
->>>
->>> Best Regards,
->>> Shyam
->>>
->>>
->>
->>
+[...]
 
+Kind regards
+Uffe
