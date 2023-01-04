@@ -2,41 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83FBEC53210
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 21:28:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D740C46467
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 22:45:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240317AbjADV2Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Jan 2023 16:28:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42452 "EHLO
+        id S240483AbjADWpb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Jan 2023 17:45:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235379AbjADV2G (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 16:28:06 -0500
-X-Greylist: delayed 4499 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 04 Jan 2023 13:21:44 PST
-Received: from mail.schwarz.eu (eight.schwarz.eu [IPv6:2a01:4f8:c17:2a56::8:0])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C066F4103F;
-        Wed,  4 Jan 2023 13:21:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=oss.schwarz.eu; s=x; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:
-        From:References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender:Reply-To:
-        Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
-        Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=2stL7la/beV9vnoj3SG39DjOHPT+hbqJVKK5Y2G6Ges=; b=q6HFpblNkfVMedDg16XKDDIBW0
-        vLDQp3IgtN1rA311usT6MI8j1e3EQix1PMCHgh6ze+ttuzvnhtJoXRv2n2UiriYZQq9bZVo/iwOu5
-        5t7t5JasM0r8ZsvLz3lEKA8GjpjQUTNKLcSE61hh1NSxbs3bepmeww1CVqusrta1tLWDbHf+yeVef
-        u7uVxpxASbOBdYOIbG5E/PdK+Xg+wlhz8VtIaDQOohLVd4E6V9O9POFQxf8NHahvQU5d+iRL4IjVh
-        ig6xq6yVwXUOUs0MENbywUGdgGljUQ7pMfjfuM4d5XRdsrZzXg2qb8yymsRzDZi6ywAxqJ5S8vOdP
-        txCYWyzg==;
-Message-ID: <37a19225-7f34-e1f1-666f-5d08e6c1ec15@oss.schwarz.eu>
-Date:   Wed, 4 Jan 2023 21:06:41 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
- RTL8821CS chipset
-To:     Bitterblue Smith <rtl8821cerfe2@gmail.com>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+        with ESMTP id S235227AbjADWp3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 17:45:29 -0500
+Received: from mail-oi1-x22c.google.com (mail-oi1-x22c.google.com [IPv6:2607:f8b0:4864:20::22c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C36A742E11;
+        Wed,  4 Jan 2023 14:45:28 -0800 (PST)
+Received: by mail-oi1-x22c.google.com with SMTP id h185so8202682oif.5;
+        Wed, 04 Jan 2023 14:45:28 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=n0P1Cn3HY9tpg3++h0RgufbLi9nhgqUDgcarrxGrEhc=;
+        b=CTW47R0r4NmIs6nU+t9MKUeCBx6pEjcnIVkPO0q//i1TLZZf6BtV5PJGbQMXosd++o
+         uSd088mijuoe1rTdoK5ci2YBpW6svSFp89RAkA5F2k4JwTO5NNpS/M0bij6it42iyt82
+         DBrlEb7nHLtbz9YgXUyZ/naOrgjCZVin0M+hgg1Uv6W+FAuWSpIVsXX/QDJdF+GYQqKO
+         H0CVgU0hVh0iBCwn66cSmS2FIMujHwg09VbWzUzC/bz5u8rf6skGiYgxdO4OqBxPsytl
+         P4VUsp35wsnosc94bjTDu3Od7My9UoGXvMCQTuEtMsZWbGdxGnlOKGjTYZ4yZSbuwSSK
+         wHJg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=n0P1Cn3HY9tpg3++h0RgufbLi9nhgqUDgcarrxGrEhc=;
+        b=Co2bM3jh7Rm9fq4t4xkjT0gX8pFxztVBYh0VeCZjy7oxIQVWZhXo2c66lZOAsI9zeU
+         xiNGbdfAwpVcRAUGpQ/7fQQ8/H2YTn8GLXwvOutj5UfXBuS8J/B+gF34HB5lPBEJXYwW
+         1mLTCbJrqfwjbvKnLkfgn66O880JiPUnde2E0yZVpZ5odMNPY7iJaKhWDNNs6GSMbl+K
+         Id8WV5CCVfZu7//pphJFbsHmY+jYKCukzEpqbfETGnhA9NZI0zO853ssQYTaaChw99RJ
+         YNZbk0sFLjonOeB63tPCArtkdQbOUBY5fqx9flOyPgh8BKhvbcm62tsXkHP6B5TDMd0l
+         oczA==
+X-Gm-Message-State: AFqh2ko+/gd2Jyi0rzisRBcNuRaDC579b+2sWellR8k2NXVkJpKjnXMY
+        z4yVX9hoe3/sfrXvDJ1nJ66QRjw+8Ho=
+X-Google-Smtp-Source: AMrXdXs2r16GJCTizyevH27pi+20ETe7z/MiQjxbt7H7twer0U6M2TcXHj+kjrH1sRwEQ4dCYqNl4w==
+X-Received: by 2002:a05:6808:2898:b0:35e:13d2:ac2f with SMTP id eu24-20020a056808289800b0035e13d2ac2fmr20625764oib.8.1672872328058;
+        Wed, 04 Jan 2023 14:45:28 -0800 (PST)
+Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
+        by smtp.gmail.com with ESMTPSA id o189-20020aca41c6000000b00360e46a1edasm14594612oia.22.2023.01.04.14.45.27
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 04 Jan 2023 14:45:27 -0800 (PST)
+Message-ID: <63b60187.ca0a0220.a832f.5d69@mx.google.com>
+X-Google-Original-Message-ID: <Y7YBhOuq6jNaT99m@neuromancer.>
+Date:   Wed, 4 Jan 2023 16:45:24 -0600
+From:   Chris Morgan <macroalpha82@gmail.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 Cc:     linux-wireless@vger.kernel.org,
         Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         Kalle Valo <kvalo@kernel.org>,
@@ -45,41 +61,76 @@ Cc:     linux-wireless@vger.kernel.org,
         linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
         Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>
+Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
+ RTL8821CS chipset
 References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
  <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
  <63b4b3e1.050a0220.791fb.767c@mx.google.com>
- <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
-Content-Language: en-US
-From:   Felix Schwarz <felix.schwarz@oss.schwarz.eu>
-In-Reply-To: <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Received: by mail.schwarz.eu with esmtpsa (TLS1.2:ECDHE-RSA-AES256-GCM-SHA384:256)
-        (Exim 4.96)
-        (envelope-from <felix.schwarz@oss.schwarz.eu>)
-        id 1pDA25-0007qQ-2z; Wed, 04 Jan 2023 22:21:42 +0100
+ <CAFBinCDpMjHPZ4CA-YdyAu=k1F_7DxxYEMSjnBEX2aMWfSCCeA@mail.gmail.com>
+ <63b5b1c0.050a0220.a0efc.de06@mx.google.com>
+ <CAFBinCCvf8E6jwjtoSgATnBxULgytFsUnphzUuaVPygsO3Prwg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFBinCCvf8E6jwjtoSgATnBxULgytFsUnphzUuaVPygsO3Prwg@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-Am 04.01.23 um 20:59 schrieb Bitterblue Smith:
-> The USB-based RTL8811CU also doesn't work, with suspiciously similar
-> errors:
+On Wed, Jan 04, 2023 at 06:23:24PM +0100, Martin Blumenstingl wrote:
+> On Wed, Jan 4, 2023 at 6:05 PM Chris Morgan <macroalpha82@gmail.com> wrote:
+> [...]
+> > > > [    0.989545] mmc2: new high speed SDIO card at address 0001
+> > > > [    0.989993] rtw_8821cs mmc2:0001:1: Firmware version 24.8.0, H2C version 12
+> > > > [    1.005684] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x14): -110
+> > > > [    1.005737] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1080): -110
+> > > > [    1.005789] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x11080): -110
+> > > > [    1.005840] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x3): -110
+> > > > [    1.005920] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x1103): -110
+> > > > [    1.005998] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x80): -110
+> > > > [    1.006078] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1700): -110
+> > > The error starts with a write to register 0x14 (REG_SDIO_HIMR), which
+> > > happens right after configuring RX aggregation.
+> > > Can you please try two modifications inside
+> > > drivers/net/wireless/realtek/rtw88/sdio.c:
+> > > 1. inside the rtw_sdio_start() function: change
+> > > "rtw_sdio_rx_aggregation(rtwdev, false);" to
+> > > "rtw_sdio_rx_aggregation(rtwdev, true);"
+> >
+> > No change, still receive identical issue.
+> >
+> > > 2. if 1) does not work: remove the call to rtw_sdio_rx_aggregation()
+> > > from rtw_sdio_start()
+> > >
+> >
+> > Same here, still receive identical issue.
+> Thanks for testing and for reporting back!
 > 
-> Dec 25 21:43:37 home kernel: rtw_8821cu 1-2:1.0: Firmware version 24.11.0, H2C version 12
-> Dec 25 21:43:37 home kernel: rtw_8821cu 1-2:1.0 wlp0s20f0u2: renamed from wlan0
-> Dec 25 21:43:40 home kernel: rtw_8821cu 1-2:1.0: read register 0x5 failed with -110
-> Dec 25 21:43:41 home kernel: rtw_8821cu 1-2:1.0: read register 0x20 failed with -110
-> Dec 25 21:44:11 home kernel: rtw_8821cu 1-2:1.0: write register 0x20 failed with -110
-> Dec 25 21:44:12 home kernel: rtw_8821cu 1-2:1.0: read register 0x7c failed with -110
-> Dec 25 21:44:43 home kernel: rtw_8821cu 1-2:1.0: write register 0x7c failed with -110
-> Dec 25 21:44:44 home kernel: rtw_8821cu 1-2:1.0: read register 0x1080 failed with -110
-> Dec 25 21:45:16 home kernel: rtw_8821cu 1-2:1.0: write register 0x1080 failed with -110
+> Looking back at it again: I think I mis-interpreted your error output.
+> I think it's actually failing in __rtw_mac_init_system_cfg()
+> 
+> Can you please try the latest code from [0] (ignoring any changes I
+> recommended previously)?
+> There's two bug fixes in there (compared to this series) which may
+> solve the issue that you are seeing:
+> - fix typos to use "if (!*err_ret ..." (to read the error code)
+> instead of "if (!err_ret ..." (which just checks if a non-null pointer
+> was passed) in rtw_sdio_read_indirect{8,32}
+> - change buf[0] to buf[i] in rtw_sdio_read_indirect_bytes
+> 
+> These fixes will be part of v2 of this series anyways.
 
-Same for me: I saw very similar read/write failures with my "Realtek 
-Semiconductor Corp. 802.11ac NIC" (ID 0bda:c811) after applying Ping-Ke's patch 
-for rfe 38 (see my message to linux-wireless on Dec 29).
+That still doesn't fix it, I receive the same error. I'm using an older
+patch series of yours (that I can't seem to find on github anymore),
+so I'll see if I can compare the older series that works with this one
+and find out the root cause.
 
-Felix
+Thank you.
 
+> 
+> 
+> Best regards,
+> Martin
+> 
+> 
+> [0] https://github.com/xdarklight/linux/tree/d115a8631d208996510822f0805df5dfc8dfb548
