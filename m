@@ -2,140 +2,505 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72221C46467
-	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 10:19:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBB3AC54EBD
+	for <linux-mmc@archiver.kernel.org>; Wed,  4 Jan 2023 15:17:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233562AbjADKTt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 4 Jan 2023 05:19:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45484 "EHLO
+        id S239656AbjADPRG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 4 Jan 2023 10:17:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56404 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233970AbjADKTr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 05:19:47 -0500
-Received: from mail-pg1-x534.google.com (mail-pg1-x534.google.com [IPv6:2607:f8b0:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87DDC193FA
-        for <linux-mmc@vger.kernel.org>; Wed,  4 Jan 2023 02:19:46 -0800 (PST)
-Received: by mail-pg1-x534.google.com with SMTP id s67so12597468pgs.3
-        for <linux-mmc@vger.kernel.org>; Wed, 04 Jan 2023 02:19:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=aBay3x5ix+eeS0Ab1w112q7r/bDoorzo0l299Ov2Q+0=;
-        b=MRVAoQUpPfvGcfuJhT9ozrOtZYt3+xLerA/WQ2SOAnro5MSNs96KEdRrqfl0TKAPht
-         tqmml6wwgIxVxaMTlEx1twESIr0ITs3T28qrOyLrLpMioiY+6qf9yty1jaLqzXxUkKIP
-         c5+dKpDF+k6SNrs4Kr8vsv/PAY14Jzq3HOflF/vu1jdN0jMFEgL6SvjW47MW/C3pW7lF
-         X+qhxRGLOPCvBCY/ZKuvfWzkMOs9Zoh5TqNAcnSmYIx5KTpxhi01fg3LtbCfEoNEYI2M
-         h4dEuiDQ0UL9O/zHRi98RQ3KtD7BflakhiofxiBvipKGd5tLuHz3o33e0nnsWjccHSgL
-         oCyg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=aBay3x5ix+eeS0Ab1w112q7r/bDoorzo0l299Ov2Q+0=;
-        b=AQC6FTc2MYHBvk2gH1YKEGYe4E9Bdf/Vj8yzBBshBSTu1cX8U3uOqB3C2HdwM0yQl3
-         W5lQrE5vmVTG0yzu/XBt68e31ikJhsQufkVyyWoVzrpaSj3htBrjgm5htU1dDGKkcy2v
-         CAbFj2Piwydzzz+MJT5lEiIf9Ps7VGLneVuQjQFzJk4L5yLI3kS4gtf7Zh+ddYZGSlCt
-         IHHfhOt2pkZTp4m4y/leazaSs5Y7clviIGFLZ+rhdmJg+9sXrXgtBaQc4ITlQqRZXk+9
-         AazDat8xf/LFHgpvIzkAJGyh6hC9SejosRfdKGXNjlUO4H7y1sqZSvabcvi4EAKypAWo
-         raWQ==
-X-Gm-Message-State: AFqh2kpn2pwJu6kW9Sp756FPKac25f3XMKOphkFSrLledOuEgCWpCAf7
-        umxCMmctuYiSghBcZjo5igCvKmllNZwb9mVdbdVu8E5TddDtPA==
-X-Google-Smtp-Source: AMrXdXvwaCEbgZysYP7/DZ0pwn3zCNWade05Mj8AyMdITn2FqHQxu7YJLCxxh6eyyldu/wWNORF+QfXS8cL5ro3cc10=
-X-Received: by 2002:a62:ed04:0:b0:577:3e5e:7a4 with SMTP id
- u4-20020a62ed04000000b005773e5e07a4mr3263806pfh.57.1672827585941; Wed, 04 Jan
- 2023 02:19:45 -0800 (PST)
+        with ESMTP id S239464AbjADPQs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 4 Jan 2023 10:16:48 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AF70F1A3BA;
+        Wed,  4 Jan 2023 07:16:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1672845399; x=1704381399;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=CVWb6XG9UGQC3Di7ia+HzuhNkTupQPZIdsnMxoG1YN8=;
+  b=i+KQfkKdmuIgTms5hqCNC8ybC8NwwQiu67FJCDAl23KBGr752s9VYhYH
+   qF5B6y5Bg+4roMRu4425ijPKgar3VBPvHtpxORW9YCxfuGDi1zcsH/IX1
+   3w0KmE7Yzyt0Vb4DxrfHCCYOq29sFvfJam9B8e9s5qg4l3Nilzh7JJs+D
+   P+JrV+KAD90s63Ww7eTsS8HTo2I8Y8DVwGYFzEIKdiujJqIRlApHwSFz5
+   zvUdGfXUbYxyn+MQiHOY1vsmpQ5bMwgJfIPIJN8h8qSjKBNKo+Gk155Sc
+   sZRQQ9OKk3s1EEr02GoAp0Wr8zOLJTiFOg65WnXfcpCq86wMRLzgHUqDH
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10580"; a="301644443"
+X-IronPort-AV: E=Sophos;i="5.96,300,1665471600"; 
+   d="scan'208";a="301644443"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2023 07:16:11 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10580"; a="762700799"
+X-IronPort-AV: E=Sophos;i="5.96,300,1665471600"; 
+   d="scan'208";a="762700799"
+Received: from msvoboda-mobl.ger.corp.intel.com (HELO ijarvine-MOBL2.ger.corp.intel.com) ([10.252.48.119])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 04 Jan 2023 07:16:05 -0800
+From:   =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+To:     linux-serial@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Johan Hovold <johan@kernel.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        netdev@vger.kernel.org
+Cc:     =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+Subject: [PATCH 06/10] tty: Convert ->carrier_raised() and callchains to bool
+Date:   Wed,  4 Jan 2023 17:15:27 +0200
+Message-Id: <20230104151531.73994-7-ilpo.jarvinen@linux.intel.com>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20230104151531.73994-1-ilpo.jarvinen@linux.intel.com>
+References: <20230104151531.73994-1-ilpo.jarvinen@linux.intel.com>
 MIME-Version: 1.0
-References: <20221213141403.1734718-1-yangyingliang@huawei.com>
- <CAPDyKFqhTdk1n5Gj4aO3vQj7uZ3r+9H0tuBCNgwqvxyg=BNJRQ@mail.gmail.com> <cb59db8e-e479-8181-4f2c-e1340106e6cf@huawei.com>
-In-Reply-To: <cb59db8e-e479-8181-4f2c-e1340106e6cf@huawei.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 4 Jan 2023 11:19:09 +0100
-Message-ID: <CAPDyKFoH3o_+vC4RdhFG18-6wJqL4TZnyhvpjLXvWczN+ySKfA@mail.gmail.com>
-Subject: Re: [PATCH v5] mmc: sdio: fix possible resource leaks in some error paths
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 4 Jan 2023 at 05:51, Yang Yingliang <yangyingliang@huawei.com> wrote:
->
->
-> On 2023/1/3 23:35, Ulf Hansson wrote:
-> > On Tue, 13 Dec 2022 at 15:17, Yang Yingliang <yangyingliang@huawei.com> wrote:
-> >> If sdio_add_func() or sdio_init_func() fails, sdio_remove_func() can
-> >> not release the resources, because the sdio function is not presented
-> >> in these two cases, it won't call of_node_put() or put_device().
-> >>
-> >> To fix these leaks, make sdio_func_present() only control whether
-> >> device_del() needs to be called or not, then always call of_node_put()
-> >> and put_device().
-> >>
-> >> In error case in sdio_init_func(), the reference of 'card->dev' is
-> >> not get, to avoid redundant put in sdio_free_func_cis(), move the
-> >> get_device() to sdio_alloc_func() and put_device() to sdio_release_func(),
-> >> it can keep the get/put function balanced.
-> >>
-> >> Without this patch, while doing fault inject test, it can get the
-> >> following leak reports, after this fix, the leak is gone.
-> >>
-> >> unreferenced object 0xffff888112514000 (size 2048):
-> >>    comm "kworker/3:2", pid 65, jiffies 4294741614 (age 124.774s)
-> >>    hex dump (first 32 bytes):
-> >>      00 e0 6f 12 81 88 ff ff 60 58 8d 06 81 88 ff ff  ..o.....`X......
-> >>      10 40 51 12 81 88 ff ff 10 40 51 12 81 88 ff ff  .@Q......@Q.....
-> >>    backtrace:
-> >>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
-> >>      [<000000002f839ccb>] mmc_alloc_card+0x38/0xb0 [mmc_core]
-> >>      [<0000000004adcbf6>] mmc_sdio_init_card+0xde/0x170 [mmc_core]
-> >>      [<000000007538fea0>] mmc_attach_sdio+0xcb/0x1b0 [mmc_core]
-> >>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
-> >>
-> >> unreferenced object 0xffff888112511000 (size 2048):
-> >>    comm "kworker/3:2", pid 65, jiffies 4294741623 (age 124.766s)
-> >>    hex dump (first 32 bytes):
-> >>      00 40 51 12 81 88 ff ff e0 58 8d 06 81 88 ff ff  .@Q......X......
-> >>      10 10 51 12 81 88 ff ff 10 10 51 12 81 88 ff ff  ..Q.......Q.....
-> >>    backtrace:
-> >>      [<000000009e5931da>] kmalloc_trace+0x21/0x110
-> >>      [<00000000fcbe706c>] sdio_alloc_func+0x35/0x100 [mmc_core]
-> >>      [<00000000c68f4b50>] mmc_attach_sdio.cold.18+0xb1/0x395 [mmc_core]
-> >>      [<00000000d4fdeba7>] mmc_rescan+0x54a/0x640 [mmc_core]
-> >>
-> > Thanks for the detailed description, nice!
-> >
-> >> Fixes: 25185f3f31c9 ("mmc: Add SDIO function devicetree subnode parsing")
-> > This looks wrong, it's not really that commit that introduces the
-> > problem. It existed way before this.
-> This patch is trying to fix of node and device refcount leaks, this commit
-> introduced of node refcount leak.
+Return boolean from ->carrier_raised() instead of 0 and 1. Make the
+return type change also to tty_port_carrier_raised() that makes the
+->carrier_raised() call (+ cd variable in moxa into which its return
+value is stored).
 
-Yes, the above commit certainly made the problem worse. However, the
-main issue about not properly decrementing the reference count for the
-device was there way before.
+Also cleans up a few unnecessary constructs related to this change:
 
-To avoid confusion for stable kernel maintainers, I think it's better
-to drop the above fixes tag.
+	return xx ? 1 : 0;
+	-> return xx;
 
-> >
-> >> Fixes: 3d10a1ba0d37 ("sdio: fix reference counting in sdio_remove_func()")
-> > Even if the problem is really old, I am worried that we may introduce
-> > other problems if $subject patch gets applied as is, to older stable
-> > kernels that carry the above commit. Did you have a look at this too?
-> The patch can be applied to the oldest stable kernel (linux-4.9.y)
-> cleanly, and
-> I look at the code in linux-4.9.y, the logic of alloc/remove/release sdio
-> is same as mainline, so I think it's ok with linux-4.9.y.
+	if (xx)
+		return 1;
+	return 0;
+	-> return xx;
 
-That sounds promising, then let's add a stable tag too.
+Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+---
+ drivers/char/pcmcia/synclink_cs.c | 8 +++-----
+ drivers/mmc/core/sdio_uart.c      | 7 +++----
+ drivers/tty/amiserial.c           | 2 +-
+ drivers/tty/moxa.c                | 4 ++--
+ drivers/tty/mxser.c               | 5 +++--
+ drivers/tty/n_gsm.c               | 8 ++++----
+ drivers/tty/serial/serial_core.c  | 9 ++++-----
+ drivers/tty/synclink_gt.c         | 7 ++++---
+ drivers/tty/tty_port.c            | 4 ++--
+ drivers/usb/serial/ch341.c        | 7 +++----
+ drivers/usb/serial/f81232.c       | 6 ++----
+ drivers/usb/serial/pl2303.c       | 7 ++-----
+ drivers/usb/serial/spcp8x5.c      | 7 ++-----
+ drivers/usb/serial/usb-serial.c   | 4 ++--
+ include/linux/tty_port.h          | 6 +++---
+ include/linux/usb/serial.h        | 2 +-
+ net/bluetooth/rfcomm/tty.c        | 2 +-
+ 17 files changed, 42 insertions(+), 53 deletions(-)
 
->
-> Thanks,
-> Yang
+diff --git a/drivers/char/pcmcia/synclink_cs.c b/drivers/char/pcmcia/synclink_cs.c
+index baa46e8a094b..4391138e1b8a 100644
+--- a/drivers/char/pcmcia/synclink_cs.c
++++ b/drivers/char/pcmcia/synclink_cs.c
+@@ -377,7 +377,7 @@ static void async_mode(MGSLPC_INFO *info);
+ 
+ static void tx_timeout(struct timer_list *t);
+ 
+-static int carrier_raised(struct tty_port *port);
++static bool carrier_raised(struct tty_port *port);
+ static void dtr_rts(struct tty_port *port, int onoff);
+ 
+ #if SYNCLINK_GENERIC_HDLC
+@@ -2430,7 +2430,7 @@ static void mgslpc_hangup(struct tty_struct *tty)
+ 	tty_port_hangup(&info->port);
+ }
+ 
+-static int carrier_raised(struct tty_port *port)
++static bool carrier_raised(struct tty_port *port)
+ {
+ 	MGSLPC_INFO *info = container_of(port, MGSLPC_INFO, port);
+ 	unsigned long flags;
+@@ -2439,9 +2439,7 @@ static int carrier_raised(struct tty_port *port)
+ 	get_signals(info);
+ 	spin_unlock_irqrestore(&info->lock, flags);
+ 
+-	if (info->serial_signals & SerialSignal_DCD)
+-		return 1;
+-	return 0;
++	return info->serial_signals & SerialSignal_DCD;
+ }
+ 
+ static void dtr_rts(struct tty_port *port, int onoff)
+diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+index ae7ef2e038be..47f58258d8ff 100644
+--- a/drivers/mmc/core/sdio_uart.c
++++ b/drivers/mmc/core/sdio_uart.c
+@@ -526,7 +526,7 @@ static void sdio_uart_irq(struct sdio_func *func)
+ 	port->in_sdio_uart_irq = NULL;
+ }
+ 
+-static int uart_carrier_raised(struct tty_port *tport)
++static bool uart_carrier_raised(struct tty_port *tport)
+ {
+ 	struct sdio_uart_port *port =
+ 			container_of(tport, struct sdio_uart_port, port);
+@@ -535,9 +535,8 @@ static int uart_carrier_raised(struct tty_port *tport)
+ 		return 1;
+ 	ret = sdio_uart_get_mctrl(port);
+ 	sdio_uart_release_func(port);
+-	if (ret & TIOCM_CAR)
+-		return 1;
+-	return 0;
++
++	return ret & TIOCM_CAR;
+ }
+ 
+ /**
+diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
+index 460d33a1e70b..01c4fd3ce7c8 100644
+--- a/drivers/tty/amiserial.c
++++ b/drivers/tty/amiserial.c
+@@ -1454,7 +1454,7 @@ static const struct tty_operations serial_ops = {
+ 	.proc_show = rs_proc_show,
+ };
+ 
+-static int amiga_carrier_raised(struct tty_port *port)
++static bool amiga_carrier_raised(struct tty_port *port)
+ {
+ 	return !(ciab.pra & SER_DCD);
+ }
+diff --git a/drivers/tty/moxa.c b/drivers/tty/moxa.c
+index 2d9635e14ded..6a1e78e33a2c 100644
+--- a/drivers/tty/moxa.c
++++ b/drivers/tty/moxa.c
+@@ -501,7 +501,7 @@ static int moxa_tiocmset(struct tty_struct *tty,
+ static void moxa_poll(struct timer_list *);
+ static void moxa_set_tty_param(struct tty_struct *, const struct ktermios *);
+ static void moxa_shutdown(struct tty_port *);
+-static int moxa_carrier_raised(struct tty_port *);
++static bool moxa_carrier_raised(struct tty_port *);
+ static void moxa_dtr_rts(struct tty_port *, int);
+ /*
+  * moxa board interface functions:
+@@ -1432,7 +1432,7 @@ static void moxa_shutdown(struct tty_port *port)
+ 	MoxaPortFlushData(ch, 2);
+ }
+ 
+-static int moxa_carrier_raised(struct tty_port *port)
++static bool moxa_carrier_raised(struct tty_port *port)
+ {
+ 	struct moxa_port *ch = container_of(port, struct moxa_port, port);
+ 	int dcd;
+diff --git a/drivers/tty/mxser.c b/drivers/tty/mxser.c
+index 2926a831727d..96c72e691cd7 100644
+--- a/drivers/tty/mxser.c
++++ b/drivers/tty/mxser.c
+@@ -458,10 +458,11 @@ static void __mxser_stop_tx(struct mxser_port *info)
+ 	outb(info->IER, info->ioaddr + UART_IER);
+ }
+ 
+-static int mxser_carrier_raised(struct tty_port *port)
++static bool mxser_carrier_raised(struct tty_port *port)
+ {
+ 	struct mxser_port *mp = container_of(port, struct mxser_port, port);
+-	return (inb(mp->ioaddr + UART_MSR) & UART_MSR_DCD)?1:0;
++
++	return inb(mp->ioaddr + UART_MSR) & UART_MSR_DCD;
+ }
+ 
+ static void mxser_dtr_rts(struct tty_port *port, int on)
+diff --git a/drivers/tty/n_gsm.c b/drivers/tty/n_gsm.c
+index 631539c17d85..81fc2ec3693f 100644
+--- a/drivers/tty/n_gsm.c
++++ b/drivers/tty/n_gsm.c
+@@ -3770,16 +3770,16 @@ static int gsm_modem_update(struct gsm_dlci *dlci, u8 brk)
+ 	return -EPROTONOSUPPORT;
+ }
+ 
+-static int gsm_carrier_raised(struct tty_port *port)
++static bool gsm_carrier_raised(struct tty_port *port)
+ {
+ 	struct gsm_dlci *dlci = container_of(port, struct gsm_dlci, port);
+ 	struct gsm_mux *gsm = dlci->gsm;
+ 
+ 	/* Not yet open so no carrier info */
+ 	if (dlci->state != DLCI_OPEN)
+-		return 0;
++		return false;
+ 	if (debug & DBG_CD_ON)
+-		return 1;
++		return true;
+ 
+ 	/*
+ 	 * Basic mode with control channel in ADM mode may not respond
+@@ -3787,7 +3787,7 @@ static int gsm_carrier_raised(struct tty_port *port)
+ 	 */
+ 	if (gsm->encoding == GSM_BASIC_OPT &&
+ 	    gsm->dlci[0]->mode == DLCI_MODE_ADM && !dlci->modem_rx)
+-		return 1;
++		return true;
+ 
+ 	return dlci->modem_rx & TIOCM_CD;
+ }
+diff --git a/drivers/tty/serial/serial_core.c b/drivers/tty/serial/serial_core.c
+index a0260a40bdb9..f91b27e2058a 100644
+--- a/drivers/tty/serial/serial_core.c
++++ b/drivers/tty/serial/serial_core.c
+@@ -1859,7 +1859,7 @@ static void uart_port_shutdown(struct tty_port *port)
+ 	}
+ }
+ 
+-static int uart_carrier_raised(struct tty_port *port)
++static bool uart_carrier_raised(struct tty_port *port)
+ {
+ 	struct uart_state *state = container_of(port, struct uart_state, port);
+ 	struct uart_port *uport;
+@@ -1873,15 +1873,14 @@ static int uart_carrier_raised(struct tty_port *port)
+ 	 * continue and not sleep
+ 	 */
+ 	if (WARN_ON(!uport))
+-		return 1;
++		return true;
+ 	spin_lock_irq(&uport->lock);
+ 	uart_enable_ms(uport);
+ 	mctrl = uport->ops->get_mctrl(uport);
+ 	spin_unlock_irq(&uport->lock);
+ 	uart_port_deref(uport);
+-	if (mctrl & TIOCM_CAR)
+-		return 1;
+-	return 0;
++
++	return mctrl & TIOCM_CAR;
+ }
+ 
+ static void uart_dtr_rts(struct tty_port *port, int raise)
+diff --git a/drivers/tty/synclink_gt.c b/drivers/tty/synclink_gt.c
+index 81c94906f06e..4ba71ec764f7 100644
+--- a/drivers/tty/synclink_gt.c
++++ b/drivers/tty/synclink_gt.c
+@@ -3126,7 +3126,7 @@ static int tiocmset(struct tty_struct *tty,
+ 	return 0;
+ }
+ 
+-static int carrier_raised(struct tty_port *port)
++static bool carrier_raised(struct tty_port *port)
+ {
+ 	unsigned long flags;
+ 	struct slgt_info *info = container_of(port, struct slgt_info, port);
+@@ -3134,7 +3134,8 @@ static int carrier_raised(struct tty_port *port)
+ 	spin_lock_irqsave(&info->lock,flags);
+ 	get_gtsignals(info);
+ 	spin_unlock_irqrestore(&info->lock,flags);
+-	return (info->signals & SerialSignal_DCD) ? 1 : 0;
++
++	return info->signals & SerialSignal_DCD;
+ }
+ 
+ static void dtr_rts(struct tty_port *port, int on)
+@@ -3162,7 +3163,7 @@ static int block_til_ready(struct tty_struct *tty, struct file *filp,
+ 	int		retval;
+ 	bool		do_clocal = false;
+ 	unsigned long	flags;
+-	int		cd;
++	bool		cd;
+ 	struct tty_port *port = &info->port;
+ 
+ 	DBGINFO(("%s block_til_ready\n", tty->driver->name));
+diff --git a/drivers/tty/tty_port.c b/drivers/tty/tty_port.c
+index 469de3c010b8..a573c500f95b 100644
+--- a/drivers/tty/tty_port.c
++++ b/drivers/tty/tty_port.c
+@@ -444,10 +444,10 @@ EXPORT_SYMBOL_GPL(tty_port_tty_wakeup);
+  * to hide some internal details. This will eventually become entirely
+  * internal to the tty port.
+  */
+-int tty_port_carrier_raised(struct tty_port *port)
++bool tty_port_carrier_raised(struct tty_port *port)
+ {
+ 	if (port->ops->carrier_raised == NULL)
+-		return 1;
++		return true;
+ 	return port->ops->carrier_raised(port);
+ }
+ EXPORT_SYMBOL(tty_port_carrier_raised);
+diff --git a/drivers/usb/serial/ch341.c b/drivers/usb/serial/ch341.c
+index 6e1b87e67304..792f01a4ed22 100644
+--- a/drivers/usb/serial/ch341.c
++++ b/drivers/usb/serial/ch341.c
+@@ -413,12 +413,11 @@ static void ch341_port_remove(struct usb_serial_port *port)
+ 	kfree(priv);
+ }
+ 
+-static int ch341_carrier_raised(struct usb_serial_port *port)
++static bool ch341_carrier_raised(struct usb_serial_port *port)
+ {
+ 	struct ch341_private *priv = usb_get_serial_port_data(port);
+-	if (priv->msr & CH341_BIT_DCD)
+-		return 1;
+-	return 0;
++
++	return priv->msr & CH341_BIT_DCD;
+ }
+ 
+ static void ch341_dtr_rts(struct usb_serial_port *port, int on)
+diff --git a/drivers/usb/serial/f81232.c b/drivers/usb/serial/f81232.c
+index 891fb1fe69df..1a8c2925c26f 100644
+--- a/drivers/usb/serial/f81232.c
++++ b/drivers/usb/serial/f81232.c
+@@ -774,7 +774,7 @@ static bool f81232_tx_empty(struct usb_serial_port *port)
+ 	return true;
+ }
+ 
+-static int f81232_carrier_raised(struct usb_serial_port *port)
++static bool f81232_carrier_raised(struct usb_serial_port *port)
+ {
+ 	u8 msr;
+ 	struct f81232_private *priv = usb_get_serial_port_data(port);
+@@ -783,9 +783,7 @@ static int f81232_carrier_raised(struct usb_serial_port *port)
+ 	msr = priv->modem_status;
+ 	mutex_unlock(&priv->lock);
+ 
+-	if (msr & UART_MSR_DCD)
+-		return 1;
+-	return 0;
++	return msr & UART_MSR_DCD;
+ }
+ 
+ static void f81232_get_serial(struct tty_struct *tty, struct serial_struct *ss)
+diff --git a/drivers/usb/serial/pl2303.c b/drivers/usb/serial/pl2303.c
+index 8949c1891164..4cb81746a149 100644
+--- a/drivers/usb/serial/pl2303.c
++++ b/drivers/usb/serial/pl2303.c
+@@ -1050,14 +1050,11 @@ static int pl2303_tiocmget(struct tty_struct *tty)
+ 	return result;
+ }
+ 
+-static int pl2303_carrier_raised(struct usb_serial_port *port)
++static bool pl2303_carrier_raised(struct usb_serial_port *port)
+ {
+ 	struct pl2303_private *priv = usb_get_serial_port_data(port);
+ 
+-	if (priv->line_status & UART_DCD)
+-		return 1;
+-
+-	return 0;
++	return priv->line_status & UART_DCD;
+ }
+ 
+ static void pl2303_set_break(struct usb_serial_port *port, bool enable)
+diff --git a/drivers/usb/serial/spcp8x5.c b/drivers/usb/serial/spcp8x5.c
+index 09a972a838ee..8175db6c4554 100644
+--- a/drivers/usb/serial/spcp8x5.c
++++ b/drivers/usb/serial/spcp8x5.c
+@@ -247,16 +247,13 @@ static void spcp8x5_set_work_mode(struct usb_serial_port *port, u16 value,
+ 		dev_err(&port->dev, "failed to set work mode: %d\n", ret);
+ }
+ 
+-static int spcp8x5_carrier_raised(struct usb_serial_port *port)
++static bool spcp8x5_carrier_raised(struct usb_serial_port *port)
+ {
+ 	u8 msr;
+ 	int ret;
+ 
+ 	ret = spcp8x5_get_msr(port, &msr);
+-	if (ret || msr & MSR_STATUS_LINE_DCD)
+-		return 1;
+-
+-	return 0;
++	return ret || msr & MSR_STATUS_LINE_DCD;
+ }
+ 
+ static void spcp8x5_dtr_rts(struct usb_serial_port *port, int on)
+diff --git a/drivers/usb/serial/usb-serial.c b/drivers/usb/serial/usb-serial.c
+index 164521ee10c6..019720a63fac 100644
+--- a/drivers/usb/serial/usb-serial.c
++++ b/drivers/usb/serial/usb-serial.c
+@@ -754,7 +754,7 @@ static struct usb_serial_driver *search_serial_device(
+ 	return NULL;
+ }
+ 
+-static int serial_port_carrier_raised(struct tty_port *port)
++static bool serial_port_carrier_raised(struct tty_port *port)
+ {
+ 	struct usb_serial_port *p = container_of(port, struct usb_serial_port, port);
+ 	struct usb_serial_driver *drv = p->serial->type;
+@@ -762,7 +762,7 @@ static int serial_port_carrier_raised(struct tty_port *port)
+ 	if (drv->carrier_raised)
+ 		return drv->carrier_raised(p);
+ 	/* No carrier control - don't block */
+-	return 1;
++	return true;
+ }
+ 
+ static void serial_port_dtr_rts(struct tty_port *port, int on)
+diff --git a/include/linux/tty_port.h b/include/linux/tty_port.h
+index fa3c3bdaa234..cf098459cb01 100644
+--- a/include/linux/tty_port.h
++++ b/include/linux/tty_port.h
+@@ -15,7 +15,7 @@ struct tty_struct;
+ 
+ /**
+  * struct tty_port_operations -- operations on tty_port
+- * @carrier_raised: return 1 if the carrier is raised on @port
++ * @carrier_raised: return true if the carrier is raised on @port
+  * @dtr_rts: raise the DTR line if @raise is nonzero, otherwise lower DTR
+  * @shutdown: called when the last close completes or a hangup finishes IFF the
+  *	port was initialized. Do not use to free resources. Turn off the device
+@@ -31,7 +31,7 @@ struct tty_struct;
+  *	the port itself.
+  */
+ struct tty_port_operations {
+-	int (*carrier_raised)(struct tty_port *port);
++	bool (*carrier_raised)(struct tty_port *port);
+ 	void (*dtr_rts)(struct tty_port *port, int raise);
+ 	void (*shutdown)(struct tty_port *port);
+ 	int (*activate)(struct tty_port *port, struct tty_struct *tty);
+@@ -230,7 +230,7 @@ static inline void tty_port_set_kopened(struct tty_port *port, bool val)
+ 
+ struct tty_struct *tty_port_tty_get(struct tty_port *port);
+ void tty_port_tty_set(struct tty_port *port, struct tty_struct *tty);
+-int tty_port_carrier_raised(struct tty_port *port);
++bool tty_port_carrier_raised(struct tty_port *port);
+ void tty_port_raise_dtr_rts(struct tty_port *port);
+ void tty_port_lower_dtr_rts(struct tty_port *port);
+ void tty_port_hangup(struct tty_port *port);
+diff --git a/include/linux/usb/serial.h b/include/linux/usb/serial.h
+index f7bfedb740f5..dc7f90522b42 100644
+--- a/include/linux/usb/serial.h
++++ b/include/linux/usb/serial.h
+@@ -293,7 +293,7 @@ struct usb_serial_driver {
+ 	/* Called by the tty layer for port level work. There may or may not
+ 	   be an attached tty at this point */
+ 	void (*dtr_rts)(struct usb_serial_port *port, int on);
+-	int  (*carrier_raised)(struct usb_serial_port *port);
++	bool (*carrier_raised)(struct usb_serial_port *port);
+ 	/* Called by the usb serial hooks to allow the user to rework the
+ 	   termios state */
+ 	void (*init_termios)(struct tty_struct *tty);
+diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
+index 8009e0e93216..5697df9d4394 100644
+--- a/net/bluetooth/rfcomm/tty.c
++++ b/net/bluetooth/rfcomm/tty.c
+@@ -119,7 +119,7 @@ static int rfcomm_dev_activate(struct tty_port *port, struct tty_struct *tty)
+ }
+ 
+ /* we block the open until the dlc->state becomes BT_CONNECTED */
+-static int rfcomm_dev_carrier_raised(struct tty_port *port)
++static bool rfcomm_dev_carrier_raised(struct tty_port *port)
+ {
+ 	struct rfcomm_dev *dev = container_of(port, struct rfcomm_dev, port);
+ 
+-- 
+2.30.2
 
-[...]
-
-Kind regards
-Uffe
