@@ -2,109 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45BE6C53210
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 15:45:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD04EC4708E
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 21:22:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234651AbjAEPpE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Jan 2023 10:45:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35106 "EHLO
+        id S235631AbjAEVWR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Jan 2023 16:22:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234759AbjAEPo6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 10:44:58 -0500
-Received: from out1-smtp.messagingengine.com (out1-smtp.messagingengine.com [66.111.4.25])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFBEF5C92E;
-        Thu,  5 Jan 2023 07:44:49 -0800 (PST)
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
-        by mailout.nyi.internal (Postfix) with ESMTP id 476225C0040;
-        Thu,  5 Jan 2023 10:44:49 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute6.internal (MEProxy); Thu, 05 Jan 2023 10:44:49 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1672933489; x=1673019889; bh=yJasFzj7Ub
-        yu3xnPMmreuLikXp9Yy5BrAnRkfxjeKSg=; b=Ejl4sYu6BIn9+rlCuv9lmkiF0V
-        ogtorRQS1NHfW4sTtp3EjgdHGGjDtAdDNHva2LuTuMx2pvIbQABEiDqFOopYKN7Q
-        29NfTHndUM0hr10Pgkf5hTStxejF39/gEYnHRpApjLYu5rB0qEal+gT3utYhBhZQ
-        GNSc1WQD7RO23b/OHi95CWwPvXPXmUar7kmc2+ycwo+40lCWAEvtb49BzT5AV1ME
-        8iCTk2fJsCf1vcd5ut8QRUk3yuJIMAd9rg0gjBm5jCPOWvQtLISQQeqUtmCgBKok
-        BD2Zr2zTEqVDc/damYts8JTNd9ATg1W5veRvN4JK1eOS0LvxwZSccvrIPazA==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm2; t=1672933489; x=1673019889; bh=yJasFzj7Ubyu3xnPMmreuLikXp9Y
-        y5BrAnRkfxjeKSg=; b=S2yjKyih49XS3MCO4CN9ZnGc7EpCqIajLeGEZTFX1HgN
-        DefVPbNnnSRI1fe5LUa1nLlYLemZC3ibfdlvVzHr07BRRBakizWtK2bh5ZlJqlQA
-        wU5aXb7XcfkCByoQnCEWUybiZumQd4QoJdTLLQOfO3j0r5tXfdf3xJey8V6NLI1N
-        DHVRD7IpsvkIAreQV6/rD5IY5sLM+JASJnntAj3XMGLHw25d4RhLA1OA9FLBdxwX
-        9qTLqUh5pHx6VnPYPjqYkLC22+8RdF3Iu+gPCpifCbRPSQCCHgTD36Lxl+OCVM2M
-        6Kf5kNrPxgQXrMwIe4UgzF4TGX5DcuvY9jD4qi1jjQ==
-X-ME-Sender: <xms:cPC2Y78CsT-9iYTtFnMPyuH-5PRC7LJ1P3FDHqjhX7F5YEinGKZwxg>
-    <xme:cPC2Y3vh35hoeJw_XZWAa72iM35jfjC9naCH_b0qA7cp6VF4XmtUl-hezLX5_bW5-
-    2XpIJt9iZvPJgQ1Wzc>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrjeekgdekvdcutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdetrhhn
-    ugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtth
-    gvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedtkeet
-    ffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrh
-    hnugesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:cPC2Y5Dbq7oytmXOVEWQWXDpmNSuzfUJYi5uZ8e5Zq3y8HxojDE3XQ>
-    <xmx:cPC2Y3dIE3BwhEt_ALir4P3W_y5UD5eyhMWB94JIFeP_EF3-R2N2cQ>
-    <xmx:cPC2YwOJSEc7xKxIPWje6uwzeoDrc03WNIsir_v47idOQ-v2cFAvqA>
-    <xmx:cfC2YxjISHKBjXCR_CUI9Lt1uTwUMpnpUxrTd_hrfBO-RovjLYMWkQ>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id BA435B60086; Thu,  5 Jan 2023 10:44:48 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1185-g841157300a-fm-20221208.002-g84115730
-Mime-Version: 1.0
-Message-Id: <694be013-6769-438f-b85d-e7cda1b0c4fd@app.fastmail.com>
-In-Reply-To: <CAPDyKFoNrtZSDm2Ry+7_74uGLqz8KpbtEC0Z6WNxv7G9JruKtA@mail.gmail.com>
-References: <20230105134622.254560-1-arnd@kernel.org>
- <20230105134622.254560-22-arnd@kernel.org>
- <CAPDyKFoNrtZSDm2Ry+7_74uGLqz8KpbtEC0Z6WNxv7G9JruKtA@mail.gmail.com>
-Date:   Thu, 05 Jan 2023 16:44:28 +0100
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Arnd Bergmann" <arnd@kernel.org>
-Cc:     "Robert Jarzmik" <robert.jarzmik@free.fr>,
-        "Daniel Mack" <daniel@zonque.org>,
-        "Haojian Zhuang" <haojian.zhuang@gmail.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        "Ian Molton" <spyro@f2s.com>,
-        "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>
-Subject: Re: [PATCH 21/27] mmc: remove tmio_mmc driver
-Content-Type: text/plain
+        with ESMTP id S235751AbjAEVWK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 16:22:10 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 923F56319A;
+        Thu,  5 Jan 2023 13:22:09 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1672953729; x=1704489729;
+  h=message-id:date:mime-version:from:subject:to:cc:
+   references:in-reply-to:content-transfer-encoding;
+  bh=yMy1iqMTv3nnfF56KyQiFz7RFUrbN5NhKiRVliHdnAs=;
+  b=CTiRkwp4WFfMjqex/W+Dz5DQ3hE9Te1j2sU9YZnAaYUc+cpGtp1Zi4u4
+   ihHfh+rwwfvk4eruUSMfeol7efxRqyu6Bp33RHiMS48q/hanc4ubb042J
+   CLQA2TeReX6R3eyFu208hJur+FlXDBcfLR3blPa5zmmWtUJgyuICdefXP
+   IWMXHvUzBaGS9p3eVkc05sI6vQS3RRnFY3E50I4QOKndMIAJd1NGuBM/S
+   TGYxLYKKz6UnAlL14N+wSjDhYQDfa4NE1Bx9ruvpqjXKKYebiy91hZ8q2
+   CGAQFRCWo0RoFXN1/Qey5rvltuIOzw4FKdWdbPBzQf0bhOyRKHwrGPbhl
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10581"; a="302026842"
+X-IronPort-AV: E=Sophos;i="5.96,303,1665471600"; 
+   d="scan'208";a="302026842"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2023 13:22:09 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10581"; a="718969842"
+X-IronPort-AV: E=Sophos;i="5.96,303,1665471600"; 
+   d="scan'208";a="718969842"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.42.126])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2023 13:22:06 -0800
+Message-ID: <1dc8942d-b7c7-144b-f5a1-a3f614f159ff@intel.com>
+Date:   Thu, 5 Jan 2023 23:22:02 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.6.1
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Subject: Re: [PATCH V6 01/24] mmc: core: Cleanup printing of speed mode at
+ card insertion
+To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw>
+ <20221213090047.3805-2-victor.shih@genesyslogic.com.tw>
+Content-Language: en-US
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221213090047.3805-2-victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 5, 2023, at 16:01, Ulf Hansson wrote:
-> On Thu, 5 Jan 2023 at 14:47, Arnd Bergmann <arnd@kernel.org> wrote:
->>
->> From: Arnd Bergmann <arnd@arndb.de>
->>
->> With the TMIO MFD support gone, the corresponding MMC host driver can
->> be removed as well. The remaining tmio_mmc_core module however is still
->> used by both the Renesas and Socionext host drivers.
->>
->> Cc: Ian Molton <spyro@f2s.com>
->> Cc: Ulf Hansson <ulf.hansson@linaro.org>
->> Cc: Wolfram Sang <wsa+renesas@sang-engineering.com>
->> Cc: linux-mmc@vger.kernel.org
->> Cc: linux-renesas-soc@vger.kernel.org
->> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
->
-> I intend to pick this up via my mmc tree, just awaiting an ack from Wolfram.
+On 13/12/22 11:00, Victor Shih wrote:
+> The current print of the bus speed mode in mmc_add_card() has grown over
+> the years and is now difficult to parse. Let's clean up the code and also
+> take the opportunity to properly announce "DDR" for eMMCs as
+> "high speed DDR", which is according to the eMMC spec.
+> 
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> ---
+>  drivers/mmc/core/bus.c | 35 ++++++++++++++++++++---------------
+>  1 file changed, 20 insertions(+), 15 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> index 36679f4e9acc..bbbbdbca5366 100644
+> --- a/drivers/mmc/core/bus.c
+> +++ b/drivers/mmc/core/bus.c
+> @@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+>  {
+>  	int ret;
+>  	const char *type;
+> +	const char *speed_mode = "";
+>  	const char *uhs_bus_speed_mode = "";
+>  	static const char *const uhs_speeds[] = {
+>  		[UHS_SDR12_BUS_SPEED] = "SDR12 ",
+> @@ -337,25 +338,29 @@ int mmc_add_card(struct mmc_card *card)
+>  		break;
+>  	}
+>  
+> +	if (mmc_card_hs(card))
+> +		speed_mode = "high speed ";
+> +	else if (mmc_card_uhs(card))
+> +		speed_mode = "ultra high speed ";
+> +	else if	(mmc_card_ddr52(card))
+> +		speed_mode = "high speed DDR ";
+> +	else if (mmc_card_hs200(card))
+> +		speed_mode = "HS200 ";
+> +	else if (mmc_card_hs400es(card))
+> +		speed_mode = "HS400 Enhanced strobe ";
+> +	else if (mmc_card_hs400(card))
+> +		speed_mode = "HS400 ";
+> +
+>  	if (mmc_card_uhs(card) &&
+>  		(card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+>  		uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+>  
+> -	if (mmc_host_is_spi(card->host)) {
+> -		pr_info("%s: new %s%s%s card on SPI\n",
+> -			mmc_hostname(card->host),
+> -			mmc_card_hs(card) ? "high speed " : "",
+> -			mmc_card_ddr52(card) ? "DDR " : "",
+> -			type);
+> -	} else {
+> -		pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+> -			mmc_hostname(card->host),
+> -			mmc_card_uhs(card) ? "ultra high speed " :
+> -			(mmc_card_hs(card) ? "high speed " : ""),
+> -			mmc_card_hs400(card) ? "HS400 " :
+> -			(mmc_card_hs200(card) ? "HS200 " : ""),
+> -			mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+> -			mmc_card_ddr52(card) ? "DDR " : "",
+> +	if (mmc_host_is_spi(card->host))
+> +		pr_info("%s: new %s%s card on SPI\n",
+> +			mmc_hostname(card->host), speed_mode, type);
+> +	else {
 
-Actually I think it would be easier to just take this through
-my tree along with the rest of the series, unless you expect
-conflicts with other patches.
+This bracket wasn't in V5.  Brackets should be on both
+branches of the if-clause or neither.
 
-    Arnd
+> +		pr_info("%s: new %s%s%s card at address %04x\n",
+> +			mmc_hostname(card->host), speed_mode,
+>  			uhs_bus_speed_mode, type, card->rca);
+>  	}
+>  
+
