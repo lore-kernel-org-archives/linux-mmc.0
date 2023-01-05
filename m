@@ -2,154 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEABBC5479D
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 06:19:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FBEDC54EBC
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 08:02:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230131AbjAEGTk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Jan 2023 01:19:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46454 "EHLO
+        id S231266AbjAEICD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Jan 2023 03:02:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48232 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229702AbjAEGTj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 01:19:39 -0500
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BF6A63FE;
-        Wed,  4 Jan 2023 22:19:38 -0800 (PST)
-Received: by mail-wm1-f43.google.com with SMTP id m26-20020a05600c3b1a00b003d9811fcaafso554965wms.5;
-        Wed, 04 Jan 2023 22:19:38 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:to
-         :content-language:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=MMhTa8031xnJCr78Gg3MxS4F8Q+GpLcOHRVjapQT5tQ=;
-        b=GDuEYTGHUvAkQfu4Jz/oKEda42zNak78B6+NTm8++HZxsmMuhNu85ffpfVaA10g33d
-         sJUgY6mgPnV1BttjvetdlwN0TtBQWiCwkNVll0F5RXVNaGZXIowKauAkTppaeLwo49lb
-         Klk04DAJbdWRLbvNyRyKVz6GM7lrdxYJ2WaY09cvG0wrxsUM//BTDOQGGoFvMPJIG4DG
-         vQRaGgsURN5TmSkPWXf6NbowAoBrYyMbpVQFyCzuK9vGc5Thd0uCfgR4SmLFS1MAuq9j
-         kKAG/XmgSVKlq7EKwsma/OEit5u2iiu3YGSuPtuGBLSbZ2BkdNQqTe7m1TjncFm3ygWN
-         MpUw==
-X-Gm-Message-State: AFqh2kooEK7DbD/PsHMb7Z7eTTtYVartsRCeAS7n41tmGisGH30Xbo6y
-        5F1Zrt2Ixr6bsPHtoNZanVE=
-X-Google-Smtp-Source: AMrXdXvnbuIqp+JAgFHrP0UKIr61/hDJcQemGGF6LX9p8WLjDYXsDs+9lWsr5CrFNlnRZz9V75Ka4w==
-X-Received: by 2002:a05:600c:3d11:b0:3cf:8b22:76b3 with SMTP id bh17-20020a05600c3d1100b003cf8b2276b3mr35818833wmb.0.1672899577065;
-        Wed, 04 Jan 2023 22:19:37 -0800 (PST)
-Received: from ?IPV6:2a0b:e7c0:0:107::aaaa:49? ([2a0b:e7c0:0:107::aaaa:49])
-        by smtp.gmail.com with ESMTPSA id q187-20020a1c43c4000000b003c6c182bef9sm1319688wma.36.2023.01.04.22.19.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 04 Jan 2023 22:19:36 -0800 (PST)
-Message-ID: <09043f30-c516-e173-3836-5e5dd5f5c472@kernel.org>
-Date:   Thu, 5 Jan 2023 07:19:33 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Content-Language: en-US
-To:     =?UTF-8?Q?Ilpo_J=c3=a4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-        linux-serial@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Arnd Bergmann <arnd@arndb.de>,
+        with ESMTP id S231318AbjAEIB7 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 03:01:59 -0500
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A79E48828
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Jan 2023 00:01:58 -0800 (PST)
+Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <sha@pengutronix.de>)
+        id 1pDLC4-0006Mj-IX; Thu, 05 Jan 2023 09:01:44 +0100
+Received: from sha by ptx.hi.pengutronix.de with local (Exim 4.92)
+        (envelope-from <sha@pengutronix.de>)
+        id 1pDLC2-0004l2-MY; Thu, 05 Jan 2023 09:01:42 +0100
+Date:   Thu, 5 Jan 2023 09:01:42 +0100
+To:     Bitterblue Smith <rtl8821cerfe2@gmail.com>
+Cc:     Chris Morgan <macroalpha82@gmail.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        linux-wireless@vger.kernel.org,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        David Lin <dtwlin@gmail.com>, Johan Hovold <johan@kernel.org>,
-        Alex Elder <elder@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Oliver Neukum <oneukum@suse.com>, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, greybus-dev@lists.linaro.org,
-        linux-staging@lists.linux.dev, linuxppc-dev@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org
-References: <20230104151531.73994-1-ilpo.jarvinen@linux.intel.com>
- <20230104151531.73994-8-ilpo.jarvinen@linux.intel.com>
-From:   Jiri Slaby <jirislaby@kernel.org>
-Subject: Re: [PATCH 07/10] tty: Convert ->dtr_rts() to take bool argument
-In-Reply-To: <20230104151531.73994-8-ilpo.jarvinen@linux.intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>
+Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+Message-ID: <20230105080142.GA15042@pengutronix.de>
+References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+ <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
+ <63b4b3e1.050a0220.791fb.767c@mx.google.com>
+ <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
+X-Sent-From: Pengutronix Hildesheim
+X-URL:  http://www.pengutronix.de/
+X-Accept-Language: de,en
+X-Accept-Content-Type: text/plain
+User-Agent: Mutt/1.10.1 (2018-07-13)
+From:   Sascha Hauer <sha@pengutronix.de>
+X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
+X-SA-Exim-Mail-From: sha@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 04. 01. 23, 16:15, Ilpo Järvinen wrote:
-> Convert the raise/on parameter in ->dtr_rts() to bool through the
-> callchain. The parameter is used like bool. In USB serial, there
-> remains a few implicit bool -> larger type conversions because some
-> devices use u8 in their control messages.
+On Wed, Jan 04, 2023 at 09:59:35PM +0200, Bitterblue Smith wrote:
+> On 04/01/2023 01:01, Chris Morgan wrote:
+> > On Wed, Dec 28, 2022 at 12:30:20AM +0100, Martin Blumenstingl wrote:
+> >> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
+> >> well as the existing RTL8821C chipset code.
+> >>
+> > 
+> > Unfortunately, this doesn't work for me. I applied it on top of 6.2-rc2
+> > master and I get errors during probe (it appears the firmware never
+> > loads).
+> > 
+> > Relevant dmesg logs are as follows:
+> > 
+> > [    0.989545] mmc2: new high speed SDIO card at address 0001
+> > [    0.989993] rtw_8821cs mmc2:0001:1: Firmware version 24.8.0, H2C version 12
+> > [    1.005684] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x14): -110
+> > [    1.005737] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1080): -110
+> > [    1.005789] rtw_8821cs mmc2:0001:1: sdio write32 failed (0x11080): -110
+> > [    1.005840] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x3): -110
+> > [    1.005920] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x1103): -110
+> > [    1.005998] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x80): -110
+> > [    1.006078] rtw_8821cs mmc2:0001:1: sdio read32 failed (0x1700): -110
+> > 
+> > The error of "sdio read32 failed (0x1700): -110" then repeats several
+> > hundred times, then I get this:
+> > 
+> > [    1.066294] rtw_8821cs mmc2:0001:1: failed to download firmware
+> > [    1.066367] rtw_8821cs mmc2:0001:1: sdio read16 failed (0x80): -110
+> > [    1.066417] rtw_8821cs mmc2:0001:1: sdio read8 failed (0x100): -110
+> > [    1.066697] rtw_8821cs mmc2:0001:1: failed to setup chip efuse info
+> > [    1.066703] rtw_8821cs mmc2:0001:1: failed to setup chip information
+> > [    1.066839] rtw_8821cs: probe of mmc2:0001:1 failed with error -16
+> > 
+> > The hardware I am using is an rtl8821cs that I can confirm was working
+> > with a previous driver.
+> > 
+> > Thank you.
+> > 
+> The USB-based RTL8811CU also doesn't work, with suspiciously similar
+> errors:
+> 
+> Dec 25 21:43:37 home kernel: rtw_8821cu 1-2:1.0: Firmware version 24.11.0, H2C version 12
+> Dec 25 21:43:37 home kernel: rtw_8821cu 1-2:1.0 wlp0s20f0u2: renamed from wlan0
+> Dec 25 21:43:40 home kernel: rtw_8821cu 1-2:1.0: read register 0x5 failed with -110
 
-Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
+Is this the very first register access or are there other register
+accesses before that actually do work?
 
-> Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
-> ---
-...
-> --- a/drivers/char/pcmcia/synclink_cs.c
-> +++ b/drivers/char/pcmcia/synclink_cs.c
-> @@ -378,7 +378,7 @@ static void async_mode(MGSLPC_INFO *info);
->   static void tx_timeout(struct timer_list *t);
->   
->   static bool carrier_raised(struct tty_port *port);
-> -static void dtr_rts(struct tty_port *port, int onoff);
-> +static void dtr_rts(struct tty_port *port, bool onoff);
+Sascha
 
-Not anything for this patch, but having this dubbed "onoff" instead of 
-"on" makes it really confusing.
-
-> --- a/drivers/mmc/core/sdio_uart.c
-> +++ b/drivers/mmc/core/sdio_uart.c
-> @@ -548,14 +548,14 @@ static bool uart_carrier_raised(struct tty_port *tport)
->    *	adjusted during an open, close and hangup.
->    */
->   
-> -static void uart_dtr_rts(struct tty_port *tport, int onoff)
-> +static void uart_dtr_rts(struct tty_port *tport, bool onoff)
->   {
->   	struct sdio_uart_port *port =
->   			container_of(tport, struct sdio_uart_port, port);
->   	int ret = sdio_uart_claim_func(port);
->   	if (ret)
->   		return;
-> -	if (onoff == 0)
-> +	if (!onoff)
->   		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
->   	else
->   		sdio_uart_set_mctrl(port, TIOCM_DTR | TIOCM_RTS);
-
-Especially here. What does "!onoff" mean? If it were:
-
-if (on)
-   sdio_uart_set_mctrl(port, TIOCM_DTR | TIOCM_RTS);
-else
-   sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
-
-it would be a lot more clear.
-
-> --- a/drivers/tty/amiserial.c
-> +++ b/drivers/tty/amiserial.c
-> @@ -1459,7 +1459,7 @@ static bool amiga_carrier_raised(struct tty_port *port)
->   	return !(ciab.pra & SER_DCD);
->   }
->   
-> -static void amiga_dtr_rts(struct tty_port *port, int raise)
-> +static void amiga_dtr_rts(struct tty_port *port, bool raise)
-
-Or "raise". That makes sense too and we call it as such in 
-tty_port_operations:
-
-> --- a/include/linux/tty_port.h
-> +++ b/include/linux/tty_port.h
-...
-> @@ -32,7 +32,7 @@ struct tty_struct;
->    */
->   struct tty_port_operations {
->   	bool (*carrier_raised)(struct tty_port *port);
-> -	void (*dtr_rts)(struct tty_port *port, int raise);
-> +	void (*dtr_rts)(struct tty_port *port, bool raise);
->   	void (*shutdown)(struct tty_port *port);
->   	int (*activate)(struct tty_port *port, struct tty_struct *tty);
->   	void (*destruct)(struct tty_port *port);
-
-Care to fix that up too?
-
-thanks,
 -- 
-js
-suse labs
-
+Pengutronix e.K.                           |                             |
+Steuerwalder Str. 21                       | http://www.pengutronix.de/  |
+31137 Hildesheim, Germany                  | Phone: +49-5121-206917-0    |
+Amtsgericht Hildesheim, HRA 2686           | Fax:   +49-5121-206917-5555 |
