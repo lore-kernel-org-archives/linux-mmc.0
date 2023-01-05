@@ -2,96 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1004C4708E
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 21:31:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CCC0C3DA7D
+	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 21:39:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235592AbjAEVb3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Jan 2023 16:31:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55106 "EHLO
+        id S235337AbjAEVjZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Jan 2023 16:39:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58196 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235992AbjAEVbS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 16:31:18 -0500
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 237B7671BB;
-        Thu,  5 Jan 2023 13:31:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1672954277; x=1704490277;
-  h=message-id:date:mime-version:from:subject:to:cc:
-   references:in-reply-to:content-transfer-encoding;
-  bh=GOTDvrhzlvM4EmgW0TpXAOqu08MBVz3+6xW4/8keqdw=;
-  b=GIe1M5Zy1mHo/+6Nz5yfjsbiNf4Xpx0V3j4MritQwLdBB5G3acmZNGgO
-   E6+loQ/euJBQT9+WS920LvJPGFeY/xb6bR6t2Z1AFYk9ZfAQYpPXOucfL
-   XhdoRfHH62TpXLY9HpMx6wehOp9YPjzWkIbf0qYybCju3yP9Kv1jCq/cz
-   vZFSz2ZaUmKnimDnclkxR4Gf1q3ODu19qIiRLje/QQ41kXYwO+Kx1hMdb
-   tY+2gmxokdy0enQ0A8D2A59O3xModw73B0gMPoKZjMq8jec2ux+M4rAJ/
-   3H6pHeGSfXn+d0ieA6c8nCznBqa8L/0m4g7tz7Gll+EQ+U/7msvbxmyX6
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10581"; a="322395961"
-X-IronPort-AV: E=Sophos;i="5.96,303,1665471600"; 
-   d="scan'208";a="322395961"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2023 13:31:16 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10581"; a="763284816"
-X-IronPort-AV: E=Sophos;i="5.96,303,1665471600"; 
-   d="scan'208";a="763284816"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.42.126])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2023 13:31:13 -0800
-Message-ID: <9841589c-757e-ea01-0c55-abe4a38fae03@intel.com>
-Date:   Thu, 5 Jan 2023 23:31:09 +0200
+        with ESMTP id S230402AbjAEVjY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 16:39:24 -0500
+Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06023671BC;
+        Thu,  5 Jan 2023 13:39:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:MIME-Version:
+        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
+        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
+        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
+        List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=AhH6eLvFTyTXzefYJDRhSSM1c636n8NUP2ghngWh9B4=; b=TJE+5zRtvlUdOanWiqGg8fa+aL
+        VOYQjIk3sHp76KJSCjmZUwbfy71hJ1PYXBO3gTEuIMWYKWet2B1Yi/J4gr0cPylEPDrhNO2WLy7bp
+        m9EYIOD6xZvCJ/rOvdCFK746juuU3vZx03HSVSMdy+JBLFBoR8YeyTxMPCv025ALgM0nWhKMNhPjJ
+        yVsRsNSI2jVldje1EEJZ3VqPIlLeWhl1qLA+Rh+Vdqptz/CGXklILXIH6xX5JJ5MXBtNpBsfpVskh
+        4rJCcPTz3sQu9cV0nd4uMxchq1DAq5H501fIBsPEEkP7ecdly3qjiQkVc9QUFaPHiBuUERwcyT3R1
+        3xBG7Hbg==;
+Received: from p200300ccff1194001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff11:9400:1a3d:a2ff:febf:d33a] helo=aktux)
+        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.89)
+        (envelope-from <andreas@kemnade.info>)
+        id 1pDXx1-0001Ks-B1; Thu, 05 Jan 2023 22:39:03 +0100
+Received: from andi by aktux with local (Exim 4.94.2)
+        (envelope-from <andreas@kemnade.info>)
+        id 1pDXx0-007ffw-NW; Thu, 05 Jan 2023 22:39:02 +0100
+From:   Andreas Kemnade <andreas@kemnade.info>
+To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Cc:     Andreas Kemnade <andreas@kemnade.info>
+Subject: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible combinations
+Date:   Thu,  5 Jan 2023 22:38:56 +0100
+Message-Id: <20230105213856.1828360-1-andreas@kemnade.info>
+X-Mailer: git-send-email 2.30.2
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.6.1
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Subject: Re: [PATCH V6 22/24] mmc: sdhci-uhs2: add post-mmc_attach_sd hook
-To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
-        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>
-References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw>
- <20221213090047.3805-23-victor.shih@genesyslogic.com.tw>
-Content-Language: en-US
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221213090047.3805-23-victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/12/22 11:00, Victor Shih wrote:
-> From: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> 
-> This "post" hook for mmc_attach_sd(), uhs2_post_attach_sd, will be required
-> to enable UHS-II support, at least, on GL9755.
-> 
-> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> ---
->  drivers/mmc/host/sdhci.h | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> index e5f64b38e339..4aac22b58d79 100644
-> --- a/drivers/mmc/host/sdhci.h
-> +++ b/drivers/mmc/host/sdhci.h
-> @@ -728,6 +728,7 @@ struct sdhci_ops {
->  	void    (*dump_vendor_regs)(struct sdhci_host *host);
->  	void	(*dump_uhs2_regs)(struct sdhci_host *host);
->  	void    (*uhs2_pre_detect_init)(struct sdhci_host *host);
-> +	void    (*uhs2_post_attach_sd)(struct sdhci_host *host);
+Currently make dtbs_check shows lots of errors because imx*.dtsi does
+not use single compatibles but combinations of them.
+Allow all the combinations used there.
 
-This gets called already in "mmc: sdhci-uhs2: add uhs2_control()
-to initialise the interface"
+Patches fixing the dtsi files according to binding documentation were
+submitted multiple times and are commonly rejected, so relax the rules.
+Example:
+https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
 
-Either move that line to this patch or vice versa.
+Reason: compatibility of new dtbs with old kernels or bootloaders.
 
-Please check compiling after each patch is applied.
+This will significantly reduce noise on make dtbs_check.
 
->  };
->  
->  #ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
+Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
+---
+ .../bindings/mmc/fsl-imx-esdhc.yaml           | 24 +++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+index dc6256f04b42..118ebb75f136 100644
+--- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
++++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+@@ -37,6 +37,30 @@ properties:
+           - fsl,imx8mm-usdhc
+           - fsl,imxrt1050-usdhc
+           - nxp,s32g2-usdhc
++      - items:
++          - const: fsl,imx50-esdhc
++          - const: fsl,imx53-esdhc
++      - items:
++          - const: fsl,imx6sl-usdhc
++          - const: fsl,imx6q-usdhc
++      - items:
++          - const: fsl,imx6sll-usdhc
++          - const: fsl,imx6sx-usdhc
++      - items:
++          - const: fsl,imx6sx-usdhc
++          - const: fsl,imx6sl-usdhc
++      - items:
++          - const: fsl,imx6ul-usdhc
++          - const: fsl,imx6sx-usdhc
++      - items:
++          - const: fsl,imx6ull-usdhc
++          - const: fsl,imx6sx-usdhc
++      - items:
++          - const: fsl,imx7d-usdhc
++          - const: fsl,imx6sl-usdhc
++      - items:
++          - const: fsl,imx7ulp-usdhc
++          - const: fsl,imx6sx-usdhc
+       - items:
+           - enum:
+               - fsl,imx8mq-usdhc
+-- 
+2.30.2
 
