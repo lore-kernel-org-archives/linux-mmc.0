@@ -2,109 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5CCC0C3DA7D
-	for <linux-mmc@archiver.kernel.org>; Thu,  5 Jan 2023 21:39:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D21DC4708E
+	for <linux-mmc@archiver.kernel.org>; Fri,  6 Jan 2023 02:19:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235337AbjAEVjZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 5 Jan 2023 16:39:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58196 "EHLO
+        id S230059AbjAFCT0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 5 Jan 2023 21:19:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41632 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230402AbjAEVjY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 16:39:24 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 06023671BC;
-        Thu,  5 Jan 2023 13:39:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=AhH6eLvFTyTXzefYJDRhSSM1c636n8NUP2ghngWh9B4=; b=TJE+5zRtvlUdOanWiqGg8fa+aL
-        VOYQjIk3sHp76KJSCjmZUwbfy71hJ1PYXBO3gTEuIMWYKWet2B1Yi/J4gr0cPylEPDrhNO2WLy7bp
-        m9EYIOD6xZvCJ/rOvdCFK746juuU3vZx03HSVSMdy+JBLFBoR8YeyTxMPCv025ALgM0nWhKMNhPjJ
-        yVsRsNSI2jVldje1EEJZ3VqPIlLeWhl1qLA+Rh+Vdqptz/CGXklILXIH6xX5JJ5MXBtNpBsfpVskh
-        4rJCcPTz3sQu9cV0nd4uMxchq1DAq5H501fIBsPEEkP7ecdly3qjiQkVc9QUFaPHiBuUERwcyT3R1
-        3xBG7Hbg==;
-Received: from p200300ccff1194001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff11:9400:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pDXx1-0001Ks-B1; Thu, 05 Jan 2023 22:39:03 +0100
-Received: from andi by aktux with local (Exim 4.94.2)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pDXx0-007ffw-NW; Thu, 05 Jan 2023 22:39:02 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     Andreas Kemnade <andreas@kemnade.info>
-Subject: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible combinations
-Date:   Thu,  5 Jan 2023 22:38:56 +0100
-Message-Id: <20230105213856.1828360-1-andreas@kemnade.info>
-X-Mailer: git-send-email 2.30.2
+        with ESMTP id S229450AbjAFCTY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 5 Jan 2023 21:19:24 -0500
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F02C66318A
+        for <linux-mmc@vger.kernel.org>; Thu,  5 Jan 2023 18:19:23 -0800 (PST)
+Received: by mail-pl1-x629.google.com with SMTP id p24so263938plw.11
+        for <linux-mmc@vger.kernel.org>; Thu, 05 Jan 2023 18:19:23 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=i3c7r5CVeKCtGkrjBQKe2j2BkzZGAFZSBu4iQLvl/Dc=;
+        b=ymOp4FsBVO3b1dCJgqCzg2dWBwFCIirOuHMEwXPctLHzaUPUF3He3otmmrBLRffN0C
+         cjMipDRv32HQ1aatzMbbZv5mbht4mT0D9Bl2TSXPvO2JMzawqNQ7C9MeUk7m+IdBcOTL
+         rdSF9mxuTnYGxMvE7dUXnb3D9Nd83ReJXsJ+xadvl63kIOAmTUPwUVXYrMkBSseyVLHI
+         hrC9PUCo6VYymAcVwF6aXI9ANK0i6C9dNLRn0wGoh6ESD5Pf3qzBi9nLtCzO+BFAIbsv
+         BY6d+lZxJ/xAUVfr36mHi16cRTmYa0K+pSZrgZxQo6OJiVKak7qhoJts32z5haX7Yflz
+         B38Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=i3c7r5CVeKCtGkrjBQKe2j2BkzZGAFZSBu4iQLvl/Dc=;
+        b=NEsV05IJcke/jS98iPhwBMOFlDGTIXyZkU59YDocqYJJ19myuWbD1h6/RRy6H7L5zN
+         4qj98zgnPNlODdI9n9EOn+/8B/mk/hmSdStrOQudQW6jyA2DLVwA9wINRU6mia+LLOjK
+         yM0Lkv8azuzUkxzdKnZYiXmVjzQt4Nn4uFCU1cUl6jt4aXYvPjyA6IjHmE7dwGzl3s2i
+         /vSXUbYbN1gIF1P/gDVeye3O2XHK6JogBlyhXFZLNwomQfLSQb1Ugjn4snJWnhQcYZnN
+         HRxLZYlehXC2jmjdmryz69XpPb1nfVDK93W9670Uc0B6wES25xEtfjaLtS4tM3st3uOz
+         QJ8Q==
+X-Gm-Message-State: AFqh2kqcAPe7CxW90iE8adYkbQ3eiGKWPeVquiRD+lKP8uiHMx1LWKLd
+        AL+fgcF+n22qRKfC5LDw8ui0QQ==
+X-Google-Smtp-Source: AMrXdXt+zMra2PsOltyR7AhUQ+yAJvYJwHcUm6/hIXZneUjM6OQ2KmRhnJ6wy9bINmE2ogH9ZVjBLg==
+X-Received: by 2002:a17:90a:7e14:b0:219:eeb9:943f with SMTP id i20-20020a17090a7e1400b00219eeb9943fmr55978542pjl.49.1672971563379;
+        Thu, 05 Jan 2023 18:19:23 -0800 (PST)
+Received: from localhost ([122.172.82.107])
+        by smtp.gmail.com with ESMTPSA id y1-20020a17090a134100b002260b06befbsm1890357pjf.16.2023.01.05.18.19.21
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 05 Jan 2023 18:19:22 -0800 (PST)
+Date:   Fri, 6 Jan 2023 07:49:20 +0530
+From:   Viresh Kumar <viresh.kumar@linaro.org>
+To:     Arnd Bergmann <arnd@kernel.org>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Arnd Bergmann <arnd@arndb.de>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        linux-clk@vger.kernel.org, linux-pm@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH 04/27] ARM: pxa: drop pxa310/pxa320/pxa93x support
+Message-ID: <20230106021920.65cnix2lmcj6k5bs@vireshk-i7>
+References: <20230105134622.254560-1-arnd@kernel.org>
+ <20230105134622.254560-5-arnd@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230105134622.254560-5-arnd@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently make dtbs_check shows lots of errors because imx*.dtsi does
-not use single compatibles but combinations of them.
-Allow all the combinations used there.
+On 05-01-23, 14:45, Arnd Bergmann wrote:
+> From: Arnd Bergmann <arnd@arndb.de>
+> 
+> There is currently no devicetree support for any of these three
+> SoCs, and no board files remain. As it seems unlikely that anyone
+> is going to add DT support soon, let's drop the SoC specific code
+> now.
+> 
+> Cc: Michael Turquette <mturquette@baylibre.com>
+> Cc: Stephen Boyd <sboyd@kernel.org>
+> Cc: "Rafael J. Wysocki" <rafael@kernel.org>
+> Cc: Viresh Kumar <viresh.kumar@linaro.org>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: Dominik Brodowski <linux@dominikbrodowski.net>
+> Cc: linux-clk@vger.kernel.org
+> Cc: linux-pm@vger.kernel.org
+> Cc: linux-mmc@vger.kernel.org
+> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> ---
+>  drivers/cpufreq/pxa3xx-cpufreq.c |  21 +-
 
-Patches fixing the dtsi files according to binding documentation were
-submitted multiple times and are commonly rejected, so relax the rules.
-Example:
-https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
+Acked-by: Viresh Kumar <viresh.kumar@linaro.org>
 
-Reason: compatibility of new dtbs with old kernels or bootloaders.
-
-This will significantly reduce noise on make dtbs_check.
-
-Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
----
- .../bindings/mmc/fsl-imx-esdhc.yaml           | 24 +++++++++++++++++++
- 1 file changed, 24 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index dc6256f04b42..118ebb75f136 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -37,6 +37,30 @@ properties:
-           - fsl,imx8mm-usdhc
-           - fsl,imxrt1050-usdhc
-           - nxp,s32g2-usdhc
-+      - items:
-+          - const: fsl,imx50-esdhc
-+          - const: fsl,imx53-esdhc
-+      - items:
-+          - const: fsl,imx6sl-usdhc
-+          - const: fsl,imx6q-usdhc
-+      - items:
-+          - const: fsl,imx6sll-usdhc
-+          - const: fsl,imx6sx-usdhc
-+      - items:
-+          - const: fsl,imx6sx-usdhc
-+          - const: fsl,imx6sl-usdhc
-+      - items:
-+          - const: fsl,imx6ul-usdhc
-+          - const: fsl,imx6sx-usdhc
-+      - items:
-+          - const: fsl,imx6ull-usdhc
-+          - const: fsl,imx6sx-usdhc
-+      - items:
-+          - const: fsl,imx7d-usdhc
-+          - const: fsl,imx6sl-usdhc
-+      - items:
-+          - const: fsl,imx7ulp-usdhc
-+          - const: fsl,imx6sx-usdhc
-       - items:
-           - enum:
-               - fsl,imx8mq-usdhc
 -- 
-2.30.2
-
+viresh
