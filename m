@@ -2,102 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A01D6C46467
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 14:10:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 56EB0C54EBC
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 14:53:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232681AbjAGOJf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Jan 2023 09:09:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44196 "EHLO
+        id S231305AbjAGOxf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Jan 2023 09:53:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232807AbjAGOJ3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 09:09:29 -0500
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3D16644C
-        for <linux-mmc@vger.kernel.org>; Sat,  7 Jan 2023 06:09:27 -0800 (PST)
-Received: by mail-wm1-x336.google.com with SMTP id bi26-20020a05600c3d9a00b003d3404a89faso4854892wmb.1
-        for <linux-mmc@vger.kernel.org>; Sat, 07 Jan 2023 06:09:27 -0800 (PST)
+        with ESMTP id S230298AbjAGOxe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 09:53:34 -0500
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 130EE3D5F0;
+        Sat,  7 Jan 2023 06:53:33 -0800 (PST)
+Received: by mail-ej1-x635.google.com with SMTP id qk9so9687305ejc.3;
+        Sat, 07 Jan 2023 06:53:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=hTkxCHIheyNTVL7VydMOU8yLlFfEZgD4uztibkHROUs=;
-        b=pPCDkW/wC3N3XkRh44F/mw4FVFibhSDoyP3GvliH4+QEb45EU9nZWmHa2Br/icn8sz
-         eQi7UKn5aO1sP3wKFUhz5oP+jZhHFPZ8SEtLAjlYWm9tHVKUFH5R2Yd07coSodK4Ix12
-         yjazvQ/KHxR277XPrswnjJUJPqdP1Q3MNRARalP4MCoBvyWH0laPV1jvda11Jvw7llLX
-         //4o9lGM3RJA5HDDAuUrswNdO/Y2tSwQE2pJRSCt06sHs7ack1rcpQIORFNWN+B1rFCk
-         nWkplHDqBOmfEeoAaoP/rOyYyZm/pR2mbq3XJnCTE8RK4Ur4Fjd/41N9doNycm7QjuiH
-         jnQQ==
+        bh=W0kQdEWzRpszG8s93+6SCtv6ZFhZz1XMPwhp4yY8Nt0=;
+        b=o7+jcXXYD57KsUrkWZfu+BXXBBmYh1iSJ/u+jLNtUeOKvgEtEXAberPDm73JjJFy6/
+         vjuA0udOQUwPKFKZ+tejxT3baUhHQigvpA7lUYksVrw6fL1dS6ecMFOhmDNqJvD8LI7G
+         aa8/57IOiiFb3HWXbjMgEjDfP5VGA8dv2ZpQ9fPPnH5AehjUrRZufTQMcZzQRQf3yB0P
+         bABgyCIl6zmiimkYNNuWYdY/A92Zh971B6dnbRzPWqEvzd6PKlp8v2xgxb5prxHtC3tV
+         E4KxJs9QZzHwnmquy39yTQaKlD8Vg17Mr7+6Tgtev3u/PxV1lqzh1jsg/mbU9bEmBt2X
+         4yOA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=hTkxCHIheyNTVL7VydMOU8yLlFfEZgD4uztibkHROUs=;
-        b=MUCeugvYYsWTnielnKRql4hDwrHOctCodNU5f5sWsbo4G3GqjYplq1w0pU4fJKsrg6
-         snw7NviA3eKYrqBjXJUQ0Mm1G3MwxTkdiP/6BEfJA4m0G/UXncK6x320Du9JsA6i2f+h
-         /aQ2kf9SHyOqqJ9QM8ucrRWHC7PrNdRUptEgARDZQYM5x+ysm83cmSGG01Rlkb7aPr0P
-         0ekr9XxsAiUi7guDe8telFgiIuFGOAS3Y49OCOdz8gKCAJt8aJvA3reK+khgc2Yqcf9i
-         eVLh8Qt93Ndt615DLR4Os38Zo7aWSL/PYIWBIyLCdm9I9AHmzwdkW3uP/+zxOdOVTqON
-         Dykw==
-X-Gm-Message-State: AFqh2krJOAnSGuOCJJdrbbHqClV1ypXrFEhCTe/BNU1RfrpcNErm3D04
-        5dsciaFc3yKzFhe8y9hx5mfviQ==
-X-Google-Smtp-Source: AMrXdXtgyk1FFYnTGg0G6YSmSgCxjvtllGOOCra9Efk6HYqQMQ/5QPxNnQqaERO+Ep7bL0Vg7uITQQ==
-X-Received: by 2002:a05:600c:1d1d:b0:3cf:81af:8b73 with SMTP id l29-20020a05600c1d1d00b003cf81af8b73mr41729069wms.23.1673100566549;
-        Sat, 07 Jan 2023 06:09:26 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id ay13-20020a05600c1e0d00b003d34faca949sm5419825wmb.39.2023.01.07.06.09.25
+        bh=W0kQdEWzRpszG8s93+6SCtv6ZFhZz1XMPwhp4yY8Nt0=;
+        b=yObUyWfkUkk4/GYnDa9NgWYlkvsSGVbrGQq2WkSohYHgWBPUpyRlB4b4qa27HzBr/i
+         aO1kzEpC25pWO3UrQIyKqqYBhzzC4OaBFQ+cJbgz/eKRm9qbKBZhBKcl2l5oPZpBqZZd
+         r8srqPgcOSh1lcU2pkZ1J9goII8505r8ZNZ1+FZvPMjcjWpGgWOnF2lhgEnNC60CtYv5
+         aYjJNaM0xHWswZDGb0Q0vab7F23chn9x9UGZYzGSjVJ+Pp3PzOtdKoLs0tmG5FaGM3LE
+         aPSOUOxzttC6OOep+ZN//cukGFVA1tXRTNWgBM2gUnrLdG4jK6V7ZRHfWdjTdYqYUAIq
+         fIyg==
+X-Gm-Message-State: AFqh2kqrLuUdXtLueiclJMoKJr1rH0YqJVHMS9g3TZ3TDJcZUpN/2Wcx
+        V3xWh00ddhtHtr8uUN+C5fE=
+X-Google-Smtp-Source: AMrXdXus3hVj1/+R5sPy7RVf+N6SWVxEiqYjmF7uGL7atpt8Vbkp9zi2N/QrBORdjW68/z6WHa0brA==
+X-Received: by 2002:a17:906:c0ce:b0:7c1:6151:34c0 with SMTP id bn14-20020a170906c0ce00b007c1615134c0mr46524675ejb.6.1673103211624;
+        Sat, 07 Jan 2023 06:53:31 -0800 (PST)
+Received: from [192.168.1.50] ([79.119.240.114])
+        by smtp.gmail.com with ESMTPSA id b6-20020a17090630c600b007c0d0dad9c6sm1513827ejb.108.2023.01.07.06.53.30
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 07 Jan 2023 06:09:26 -0800 (PST)
-Message-ID: <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
-Date:   Sat, 7 Jan 2023 15:09:24 +0100
+        Sat, 07 Jan 2023 06:53:31 -0800 (PST)
+Message-ID: <85019785-dc58-0826-8362-cd2deca6a32e@gmail.com>
+Date:   Sat, 7 Jan 2023 16:53:29 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible
- combinations
+ Thunderbird/102.3.3
+Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+To:     Larry Finger <Larry.Finger@lwfinger.net>,
+        Chris Morgan <macroalpha82@gmail.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-wireless@vger.kernel.org,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>
+References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
+ <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
+ <63b4b3e1.050a0220.791fb.767c@mx.google.com>
+ <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
+ <2b839329-7816-722d-cb57-649fc5bf8816@lwfinger.net>
 Content-Language: en-US
-To:     Andreas Kemnade <andreas@kemnade.info>
-Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-References: <20230105213856.1828360-1-andreas@kemnade.info>
- <d7c407dc-0a6c-97d5-a06f-b432a923d74d@linaro.org>
- <20230106203358.14878660@aktux>
- <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
- <20230107144336.2ecff4f9@aktux>
- <123d1a56-8134-dc75-8b2a-b3836e727d4a@linaro.org>
- <20230107150740.0ba34aa1@aktux>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230107150740.0ba34aa1@aktux>
+From:   Bitterblue Smith <rtl8821cerfe2@gmail.com>
+In-Reply-To: <2b839329-7816-722d-cb57-649fc5bf8816@lwfinger.net>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 07/01/2023 15:07, Andreas Kemnade wrote:
-> On Sat, 7 Jan 2023 15:00:56 +0100
-> Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
+On 04/01/2023 22:14, Larry Finger wrote:
+> On 1/4/23 13:59, Bitterblue Smith wrote:
+>> I tested with https://github.com/lwfinger/rtw88/ which should have the
+>> same code as wireless-next currently.
 > 
-> [...]
->>>> I asked to remove half-compatible. Not to enforce.
->>>>  
-> so you are saying that allowing
-> compatible = "A", "B" 
-> is not ok, if B is not fully compatible. I agree with that
-> one.
-
-I did not say that. It's not related to this problem.
-
-Again - you cannot have device which is and is not compatible with
-something else. It's not a Schroedinger's cat to be in two states,
-unless you explicitly document the cases (there are exception). If this
-is such exception, it requires it's own documentation.
-
-Best regards,
-Krzysztof
-
+> I just rechecked. My repo was missing some changes from wireless-next. It now matches.
+> 
+> Larry
+> 
+> 
+Did you mean to push some commits? The latest one is still from December.
