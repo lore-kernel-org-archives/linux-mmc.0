@@ -2,184 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0571EC54EBD
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 13:25:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD6BBC46467
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 13:43:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231737AbjAGNZL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Jan 2023 08:25:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55080 "EHLO
+        id S231896AbjAGNnu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Jan 2023 08:43:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36478 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231422AbjAGNZJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 08:25:09 -0500
-Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A20D58334
-        for <linux-mmc@vger.kernel.org>; Sat,  7 Jan 2023 05:25:08 -0800 (PST)
-Received: by mail-wr1-x436.google.com with SMTP id r2so3626215wrv.7
-        for <linux-mmc@vger.kernel.org>; Sat, 07 Jan 2023 05:25:08 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=VUIOJzfR4gjCubzJSweWARYQ7jO/K6ZEKw9R7MAtXPo=;
-        b=onkbVc1rbEvGZygqbjpv2XpS5zkxuHUDgg44EIw1OuUNmXjWAcTAmvpHRZRll8WJQp
-         G0jg7xCmF+cTL38qYRcUHPoQt1bhC3SfRvp85mk1zCw+RPZiXbb77M6v3a2Wjm+Phe3r
-         /Gh9/tAp8hnGMaWMywn1kZVl7sBXbyon3U1ThTX2GoNqSE6KepUQCmsOXy6wMkjckXQq
-         EqSJ/fiwiuypfW17kSxD8ZW9Hpu+YfFbuRkpe1Qjlz0p3/7RjoqrfvLJmfjxsAg0X0Aj
-         v93NJ9nbfYV6WP2nBzBOsuw5SEegbQS4LZwJxBc2RITKHZLMMXc9Cqn7vhMyT5iX8Kbp
-         hPqQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=VUIOJzfR4gjCubzJSweWARYQ7jO/K6ZEKw9R7MAtXPo=;
-        b=Hy7siZ1WJbeeQnZCAm2QnY1+qRvW/sMmXGYqI6Ks9p1/ePEubnH7j4SBKUzehSFBHu
-         zY4YNTK2l7uHF0HKv50tEBk1PvyL+nsQPntq8rpW/z9njB0SIjJ+1Nu7OQU9C5uvAvxu
-         FnEF6tdGoycqoY+Ln3nBUfz77Pavn4Kdy65vBVeQ+0vtNXCdyIdQr0FigbJe6OCDi/MP
-         iTsk0cwgJHQ4EoJaRRk4Qkd59VmCko2JBMsiMY44hkKJpW6q7UJ2z4sVRdZkHYOhB/I/
-         +/rKmx36oL9IDydixkNUeEFLeja68gZADV+6TdFGt+Tuopv3RsI2y5OXKkU+KAWbY/th
-         U6Zg==
-X-Gm-Message-State: AFqh2krcCsKPSF7vV17tLolGSdXg1N7vZCLWMGNBCDtU7jKS+cSsTam6
-        P9hiDsHUomqkkdl+N+QIstZMWw==
-X-Google-Smtp-Source: AMrXdXsd4OlFrcapKoOIiiaSo59QJSOXueVuWMfL/ztMFbpKKDNEQLKruccFGDwsD/RBiTen9q8fqA==
-X-Received: by 2002:adf:ef49:0:b0:28b:a241:9870 with SMTP id c9-20020adfef49000000b0028ba2419870mr19927855wrp.47.1673097907042;
-        Sat, 07 Jan 2023 05:25:07 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id s2-20020adff802000000b00241bd7a7165sm3818637wrp.82.2023.01.07.05.25.04
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 07 Jan 2023 05:25:06 -0800 (PST)
-Message-ID: <f9d4c883-4b76-c95e-c6dc-a659b4410bf2@linaro.org>
-Date:   Sat, 7 Jan 2023 14:25:02 +0100
+        with ESMTP id S232215AbjAGNnt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 08:43:49 -0500
+Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50E6B5D401;
+        Sat,  7 Jan 2023 05:43:46 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:Content-Type:
+        MIME-Version:References:In-Reply-To:Message-ID:Subject:Cc:To:From:Date:Sender
+        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
+        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=rhaXr6GbOx+3CahNm/sgr9dXyzOz+6l2HYeP10Q0JCo=; b=0HD//aWyUXHWC/PtcsWpiO+njm
+        ORFj8Y4ymtQ8wwbCW1e0Ko/p+SJ7o6Xtp9VaI45hRENihlYiqcm6UyyqGmnukU44be1hgvNui4qLT
+        r8M3KnDCiiun4kGudz3IT8DrotWYMgSTze2YnGYRQTS99KlJy07Z4FD9mHDBYbaf1jiNVmrNMvpiv
+        jEJD+i35qnjuwD75LOvDCPjdSNjRMQZqirPo7g57Gz5ii6e6cp21WgPWVVqRCJ+fADWKXerC0XDhx
+        1FPU2hGhROuiXTIaBPDuIPjFbIW9YsuzKwAAfznwTwTOTODg4jgOYpbkx6Cr8DZ6PtDTwbf8+wRDV
+        +cznRC1Q==;
+Received: from p200300ccff2fec001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff2f:ec00:1a3d:a2ff:febf:d33a] helo=aktux)
+        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.89)
+        (envelope-from <andreas@kemnade.info>)
+        id 1pE9U1-00056m-DU; Sat, 07 Jan 2023 14:43:37 +0100
+Date:   Sat, 7 Jan 2023 14:43:36 +0100
+From:   Andreas Kemnade <andreas@kemnade.info>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible
+ combinations
+Message-ID: <20230107144336.2ecff4f9@aktux>
+In-Reply-To: <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
+References: <20230105213856.1828360-1-andreas@kemnade.info>
+        <d7c407dc-0a6c-97d5-a06f-b432a923d74d@linaro.org>
+        <20230106203358.14878660@aktux>
+        <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
+X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH 3/5] dt-bindings: mmc: sdhci-cadence: SD6 support
-Content-Language: en-US
-To:     Piyush Malgujar <pmalgujar@marvell.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        yamada.masahiro@socionext.com, devicetree@vger.kernel.org,
-        jannadurai@marvell.com, cchavva@marvell.com
-References: <20221219142418.27949-1-pmalgujar@marvell.com>
- <20221219142418.27949-4-pmalgujar@marvell.com>
- <5fc29d3c-e3da-3dc4-bce5-2158b81daa43@linaro.org>
- <20230106164812.GA14720@Dell2s-9>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230106164812.GA14720@Dell2s-9>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/01/2023 17:48, Piyush Malgujar wrote:
-> Hi Krzysztof,
-> 
-> Thank you the review comments.
-> 
-> On Mon, Dec 19, 2022 at 04:40:35PM +0100, Krzysztof Kozlowski wrote:
->> On 19/12/2022 15:24, Piyush Malgujar wrote:
->>> From: Jayanthi Annadurai <jannadurai@marvell.com>
->>>
->>
->> Subject: use final prefix matching the file, so "cdns,sdhci:"
->>
->>> Add support for SD6 controller support
->>
->> Full stop.
->>
->>>
->>> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
->>> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
->>> ---
->>>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 33 +++++++++++++++++--
->>>  1 file changed, 31 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->>> index 8b1a0fdcb5e3e2e8b87d8d7678e37f3dad447fc1..2043e78ccd5f708a01e87fd96ec410418fcd539f 100644
->>> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->>> @@ -4,7 +4,7 @@
->>>  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
->>>  $schema: http://devicetree.org/meta-schemas/core.yaml#
->>>  
->>> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
->>> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
->>>  
->>>  maintainers:
->>>    - Masahiro Yamada <yamada.masahiro@socionext.com>
->>> @@ -19,6 +19,7 @@ properties:
->>>            - microchip,mpfs-sd4hc
->>>            - socionext,uniphier-sd4hc
->>>        - const: cdns,sd4hc
->>> +      - const: cdns,sd6hc
->>
->> Does not look like you tested the DTS against bindings. Please run `make
->> dtbs_check` (see Documentation/devicetree/bindings/writing-schema.rst
->> for instructions).
->>
->> ... because it does not really make sense. Why do you require SD6HC as
->> fallback? I think you meant enum.
->>
-> 
-> Yes, that's correct. I will change it to enum.
-> 
->>>  
->>>    reg:
->>>      maxItems: 1
->>> @@ -111,6 +112,34 @@ properties:
->>>      minimum: 0
->>>      maximum: 0x7f
->>>  
->>> +  cdns,iocell_input_delay:
->>
->> No underscores. Use proper units in name suffix:
->> https://github.com/devicetree-org/dt-schema/blob/main/dtschema/schemas/property-units.yaml
->>
->>
->>> +    description: Delay in ps across the input IO cells
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>
->> Ditto... and so on - all of the fields.
->>
->>> +
->>> +  cdns,iocell_output_delay:
->>> +    description: Delay in ps across the output IO cells
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>> +
->>> +  cdns,delay_element:
->>> +    description: Delay element in ps used for calculating phy timings
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>> +
->>> +  cdns,read_dqs_cmd_delay:
->>> +    description: Command delay used in HS200 tuning
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>> +
->>> +  cdns,tune_val_start:
->>> +    description: Staring value of data delay used in HS200 tuning
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>> +
->>> +  cdns,tune_val_step:
->>> +    description: Incremental value of data delay used in HS200 tuning
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>> +
->>> +  cdns,max_tune_iter:
->>> +    description: Maximum number of iterations to complete the HS200 tuning process
->>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
->>
->> Why these three are properties of DT?
->>
-> 
-> These tuning parameters are added here so to make them custom configurable for different
-> boards.
+On Sat, 7 Jan 2023 14:23:08 +0100
+Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
 
-I understand why do you wanted to add them, but I am asking why these
-are suitable for DT? DT  describes hardware, so what is here specific to
-hardware which requires DT property?
+> On 06/01/2023 20:33, Andreas Kemnade wrote:
+> > On Fri, 6 Jan 2023 09:41:01 +0100
+> > Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
+> >   
+> >> On 05/01/2023 22:38, Andreas Kemnade wrote:  
+> >>> Currently make dtbs_check shows lots of errors because imx*.dtsi does
+> >>> not use single compatibles but combinations of them.
+> >>> Allow all the combinations used there.
+> >>>
+> >>> Patches fixing the dtsi files according to binding documentation were
+> >>> submitted multiple times and are commonly rejected, so relax the rules.
+> >>> Example:
+> >>> https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
+> >>>
+> >>> Reason: compatibility of new dtbs with old kernels or bootloaders.
+> >>>
+> >>> This will significantly reduce noise on make dtbs_check.
+> >>>
+> >>> Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
+> >>> ---
+> >>>  .../bindings/mmc/fsl-imx-esdhc.yaml           | 24 +++++++++++++++++++
+> >>>  1 file changed, 24 insertions(+)
+> >>>
+> >>> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> >>> index dc6256f04b42..118ebb75f136 100644
+> >>> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> >>> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> >>> @@ -37,6 +37,30 @@ properties:
+> >>>            - fsl,imx8mm-usdhc
+> >>>            - fsl,imxrt1050-usdhc
+> >>>            - nxp,s32g2-usdhc    
+> >>
+> >> You must drop the items from enum above. Binding saying:
+> >> compatible="A"
+> >> or:
+> >> compatible="A", "B"
+> >>
+> >> is not correct. Either A is or is not compatible with B.
+> >>  
+> > hmm, here we have A = B + some additional features
+> > or
+> > A = B + some additional features and additional quirks required.  
+> 
+> So why do you allow A alone?
+> 
+because A is full-compatible, and B is half-compatible, because
+the additional required quirks are not applied.
+> > 
+> > For the latter we have e.g.
+> > A=
+> > static const struct esdhc_soc_data usdhc_imx6sx_data = {
+> >         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+> >                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_HS200
+> >                         | ESDHC_FLAG_STATE_LOST_IN_LPMODE
+> >                         | ESDHC_FLAG_BROKEN_AUTO_CMD23,
+> > };
+> > B=
+> > static const struct esdhc_soc_data usdhc_imx6sl_data = {
+> >         .flags = ESDHC_FLAG_USDHC | ESDHC_FLAG_STD_TUNING
+> >                         | ESDHC_FLAG_HAVE_CAP1 | ESDHC_FLAG_ERR004536
+> >                         | ESDHC_FLAG_HS200
+> >                         | ESDHC_FLAG_BROKEN_AUTO_CMD23,
+> > };
+> > 
+> > so there is the difference in ESDHC_FLAG_STATE_LOST_IN_LPMODE.
+> > That might make no difference in some usage scenario (e.g. some bootloader
+> > not doing any LPMODE), but I wonder why
+> > we need to *enforce* specifying such half-compatible things.  
+> 
+> I asked to remove half-compatible. Not to enforce.
+> 
+well B is half-compatible, I (and others) have sent patches to remove,
+but they were rejected. I consider these patches the way to go.
 
-
-Best regards,
-Krzysztof
+Regards,
+Andreas
 
