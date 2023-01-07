@@ -2,93 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56EB0C54EBC
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 14:53:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7607EC54EBD
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 15:01:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231305AbjAGOxf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Jan 2023 09:53:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56230 "EHLO
+        id S232578AbjAGPBk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Jan 2023 10:01:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230298AbjAGOxe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 09:53:34 -0500
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 130EE3D5F0;
-        Sat,  7 Jan 2023 06:53:33 -0800 (PST)
-Received: by mail-ej1-x635.google.com with SMTP id qk9so9687305ejc.3;
-        Sat, 07 Jan 2023 06:53:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=W0kQdEWzRpszG8s93+6SCtv6ZFhZz1XMPwhp4yY8Nt0=;
-        b=o7+jcXXYD57KsUrkWZfu+BXXBBmYh1iSJ/u+jLNtUeOKvgEtEXAberPDm73JjJFy6/
-         vjuA0udOQUwPKFKZ+tejxT3baUhHQigvpA7lUYksVrw6fL1dS6ecMFOhmDNqJvD8LI7G
-         aa8/57IOiiFb3HWXbjMgEjDfP5VGA8dv2ZpQ9fPPnH5AehjUrRZufTQMcZzQRQf3yB0P
-         bABgyCIl6zmiimkYNNuWYdY/A92Zh971B6dnbRzPWqEvzd6PKlp8v2xgxb5prxHtC3tV
-         E4KxJs9QZzHwnmquy39yTQaKlD8Vg17Mr7+6Tgtev3u/PxV1lqzh1jsg/mbU9bEmBt2X
-         4yOA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=W0kQdEWzRpszG8s93+6SCtv6ZFhZz1XMPwhp4yY8Nt0=;
-        b=yObUyWfkUkk4/GYnDa9NgWYlkvsSGVbrGQq2WkSohYHgWBPUpyRlB4b4qa27HzBr/i
-         aO1kzEpC25pWO3UrQIyKqqYBhzzC4OaBFQ+cJbgz/eKRm9qbKBZhBKcl2l5oPZpBqZZd
-         r8srqPgcOSh1lcU2pkZ1J9goII8505r8ZNZ1+FZvPMjcjWpGgWOnF2lhgEnNC60CtYv5
-         aYjJNaM0xHWswZDGb0Q0vab7F23chn9x9UGZYzGSjVJ+Pp3PzOtdKoLs0tmG5FaGM3LE
-         aPSOUOxzttC6OOep+ZN//cukGFVA1tXRTNWgBM2gUnrLdG4jK6V7ZRHfWdjTdYqYUAIq
-         fIyg==
-X-Gm-Message-State: AFqh2kqrLuUdXtLueiclJMoKJr1rH0YqJVHMS9g3TZ3TDJcZUpN/2Wcx
-        V3xWh00ddhtHtr8uUN+C5fE=
-X-Google-Smtp-Source: AMrXdXus3hVj1/+R5sPy7RVf+N6SWVxEiqYjmF7uGL7atpt8Vbkp9zi2N/QrBORdjW68/z6WHa0brA==
-X-Received: by 2002:a17:906:c0ce:b0:7c1:6151:34c0 with SMTP id bn14-20020a170906c0ce00b007c1615134c0mr46524675ejb.6.1673103211624;
-        Sat, 07 Jan 2023 06:53:31 -0800 (PST)
-Received: from [192.168.1.50] ([79.119.240.114])
-        by smtp.gmail.com with ESMTPSA id b6-20020a17090630c600b007c0d0dad9c6sm1513827ejb.108.2023.01.07.06.53.30
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 07 Jan 2023 06:53:31 -0800 (PST)
-Message-ID: <85019785-dc58-0826-8362-cd2deca6a32e@gmail.com>
-Date:   Sat, 7 Jan 2023 16:53:29 +0200
+        with ESMTP id S232531AbjAGPBT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 10:01:19 -0500
+Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B760CB7;
+        Sat,  7 Jan 2023 07:01:17 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:Content-Type:
+        MIME-Version:References:In-Reply-To:Message-ID:Subject:Cc:To:From:Date:Sender
+        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
+        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
+        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
+        bh=7zgd0lbRdB3sPABnhmH1sTmDt7hs8UM+QInSldgAUns=; b=qP8IRVdKGiOer2vs894ih2yguC
+        Pw/vx/hApVCpQvKfZRId2yV42Pv1U6OesMeNwqG8sIafGzx09QMfYW40Ywp5e9z9ZoR0ZZRRwOhY0
+        ErlL8ZvkLLSW2p8kKYV9mCqvhNL7iYXC4kFME2EypUvk3ov8/au30gZECNqDYc3VS8l7umMOtvFBO
+        6xq5plXHVyHN2RMiAQjMOh4U74Nw5AU8LvlHAcpnWNnaDzvrmlpyU5KuEd0d21qxHmGJFabgFqgC0
+        XzGfn0nxD44yonCv83aKquQ1S6naYJXuDDZl+511M1/aKjXnZteyiRaXv549WCtDBRW7Y4d6qkhso
+        7TXUEefw==;
+Received: from p200300ccff2fec001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff2f:ec00:1a3d:a2ff:febf:d33a] helo=aktux)
+        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.89)
+        (envelope-from <andreas@kemnade.info>)
+        id 1pEAh1-0005EM-2T; Sat, 07 Jan 2023 16:01:07 +0100
+Date:   Sat, 7 Jan 2023 16:01:05 +0100
+From:   Andreas Kemnade <andreas@kemnade.info>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
+        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
+        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible
+ combinations
+Message-ID: <20230107160105.66df4136@aktux>
+In-Reply-To: <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
+References: <20230105213856.1828360-1-andreas@kemnade.info>
+        <d7c407dc-0a6c-97d5-a06f-b432a923d74d@linaro.org>
+        <20230106203358.14878660@aktux>
+        <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
+        <20230107144336.2ecff4f9@aktux>
+        <123d1a56-8134-dc75-8b2a-b3836e727d4a@linaro.org>
+        <20230107150740.0ba34aa1@aktux>
+        <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
+X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.3.3
-Subject: Re: [RFC PATCH v1 19/19] rtw88: Add support for the SDIO based
- RTL8821CS chipset
-To:     Larry Finger <Larry.Finger@lwfinger.net>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-References: <20221227233020.284266-1-martin.blumenstingl@googlemail.com>
- <20221227233020.284266-20-martin.blumenstingl@googlemail.com>
- <63b4b3e1.050a0220.791fb.767c@mx.google.com>
- <0acf173d-a425-dcca-ad2f-f0f0f13a9f5e@gmail.com>
- <2b839329-7816-722d-cb57-649fc5bf8816@lwfinger.net>
-Content-Language: en-US
-From:   Bitterblue Smith <rtl8821cerfe2@gmail.com>
-In-Reply-To: <2b839329-7816-722d-cb57-649fc5bf8816@lwfinger.net>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 04/01/2023 22:14, Larry Finger wrote:
-> On 1/4/23 13:59, Bitterblue Smith wrote:
->> I tested with https://github.com/lwfinger/rtw88/ which should have the
->> same code as wireless-next currently.
+On Sat, 7 Jan 2023 15:09:24 +0100
+Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
+
+> On 07/01/2023 15:07, Andreas Kemnade wrote:
+> > On Sat, 7 Jan 2023 15:00:56 +0100
+> > Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
+> > 
+> > [...]  
+> >>>> I asked to remove half-compatible. Not to enforce.
+> >>>>    
+> > so you are saying that allowing
+> > compatible = "A", "B" 
+> > is not ok, if B is not fully compatible. I agree with that
+> > one.  
 > 
-> I just rechecked. My repo was missing some changes from wireless-next. It now matches.
+> I did not say that. It's not related to this problem.
 > 
-> Larry
+You said "I asked to remove half-compatible" that means to me
+remove "B" if not fully compatible with A which sounds sane to me.
+
+> Again - you cannot have device which is and is not compatible with
+> something else. It's not a Schroedinger's cat to be in two states,
+> unless you explicitly document the cases (there are exception). If this
+> is such exception, it requires it's own documentation.
 > 
-> 
-Did you mean to push some commits? The latest one is still from December.
+so conclusion:
+If having A and B half-compatible with A:
+
+compatible = "A" only: is allowed to specifiy it the binding (status quo),
+  but not allowed to make the actual dtsi match the binding documentation
+  https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
+  and
+  https://lore.kernel.org/linux-devicetree/20210924091439.2561931-5-andreas@kemnade.info/
+
+compatible = "A", "B" in the binding definition: is not allowed ("I asked to remove
+   half-compatible" (= removing B))
+
+having mismatch between binding definition and devicetree causes dtbs_check errors
+   -> also not nice.
+
+I rather drop this patch and learn to live with dtbs_check errors
+for this one since I have no idea how to proceed. All roads are blocked.
+This all causes too much churn.
+
+Regards,
+Andreas
