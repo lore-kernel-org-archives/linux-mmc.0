@@ -2,107 +2,135 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7607EC54EBD
-	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 15:01:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40F0CC46467
+	for <linux-mmc@archiver.kernel.org>; Sat,  7 Jan 2023 15:07:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232578AbjAGPBk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 7 Jan 2023 10:01:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59656 "EHLO
+        id S231785AbjAGPHl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 7 Jan 2023 10:07:41 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232531AbjAGPBT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 10:01:19 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B760CB7;
-        Sat,  7 Jan 2023 07:01:17 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:Content-Type:
-        MIME-Version:References:In-Reply-To:Message-ID:Subject:Cc:To:From:Date:Sender
-        :Reply-To:Content-ID:Content-Description:Resent-Date:Resent-From:
-        Resent-Sender:Resent-To:Resent-Cc:Resent-Message-ID:List-Id:List-Help:
-        List-Unsubscribe:List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=7zgd0lbRdB3sPABnhmH1sTmDt7hs8UM+QInSldgAUns=; b=qP8IRVdKGiOer2vs894ih2yguC
-        Pw/vx/hApVCpQvKfZRId2yV42Pv1U6OesMeNwqG8sIafGzx09QMfYW40Ywp5e9z9ZoR0ZZRRwOhY0
-        ErlL8ZvkLLSW2p8kKYV9mCqvhNL7iYXC4kFME2EypUvk3ov8/au30gZECNqDYc3VS8l7umMOtvFBO
-        6xq5plXHVyHN2RMiAQjMOh4U74Nw5AU8LvlHAcpnWNnaDzvrmlpyU5KuEd0d21qxHmGJFabgFqgC0
-        XzGfn0nxD44yonCv83aKquQ1S6naYJXuDDZl+511M1/aKjXnZteyiRaXv549WCtDBRW7Y4d6qkhso
-        7TXUEefw==;
-Received: from p200300ccff2fec001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff2f:ec00:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pEAh1-0005EM-2T; Sat, 07 Jan 2023 16:01:07 +0100
-Date:   Sat, 7 Jan 2023 16:01:05 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+        with ESMTP id S229621AbjAGPHk (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 7 Jan 2023 10:07:40 -0500
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79BC665AD6
+        for <linux-mmc@vger.kernel.org>; Sat,  7 Jan 2023 07:07:39 -0800 (PST)
+Received: by mail-wm1-x32a.google.com with SMTP id ay12-20020a05600c1e0c00b003d9ea12bafcso137526wmb.3
+        for <linux-mmc@vger.kernel.org>; Sat, 07 Jan 2023 07:07:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=+5NdmOy1Ai82n93j2R+2KO8HXukW+/GStni2h9f4Guo=;
+        b=J2grbRRYLvRvHQMNex7quauPQpxtJI12KZZofBJvtRSuVlLdQJ/OeU30i6jI10nCc6
+         U2Hvlg6vgdFkr3qrJvQXio75A+5k/rxuaHC9VFUE6QUIk4YAxjdss1rDu1HJNbyp9CZo
+         1J9QeRwewJg64YAZxER6eiozsN4budlK1N1b+whwLwhNaFNBRO9HdxHLe3gYitFmyjlv
+         6UbNZqD9FuYnjCisYHdG3X7n40fA8diSShoUA1Q1M5sqglvOxK8fRh0SBJs6qIPZXuhU
+         ZIGP152Xk7jk/LhHPqRYzbJ7SrUIhLSFWDO4nQ+XcwxjDViC5YLRohZMy+6uaLyfBRVg
+         +onA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+5NdmOy1Ai82n93j2R+2KO8HXukW+/GStni2h9f4Guo=;
+        b=lfT2n7FNTHnTqnAQA9Nhe/iqQKI3QXuKS3Cqny6ctdfDtzuB26Uda3PAu6WNBdU2gh
+         6QqKgD7bsG9HFNGhPTb+1o2sWrkeN+Gs5yoKDdL5v1m9zm2xXm1+mkh/K8XMMq6BVrLt
+         B/1jHBUKuH5Y9P6L/7TlxcWnNYzY3ISrrYbW8fejfkr7/TvcynTNKpXMoANY1QdrjEBr
+         eK6pxGsxr4E+pJ1GXWdTn9/HvSZ/Rvpp4oYlHtufz9fCJuEPgfTqUKEh8argkgfvYxcM
+         xIP+BRf/i9f2GBDjx1t7ecT+OiNT+9eRT7BK2yGWh5ULVktqIGNIBz6yJPruneLC18r1
+         Mkiw==
+X-Gm-Message-State: AFqh2kpnSnE86xj54MG1oigFI0R86Beti90FlKcu/0oOiC/qWas+OiME
+        0yBAN18e6vRlTUUyXby5kfSeZg==
+X-Google-Smtp-Source: AMrXdXtQ+AVqw4FmyKIXZ2qw5rRUUMYF+o2woAsQxnVzG1eBHl9KZ2kRFMIfKUD/kbeeXOvMWwv7iw==
+X-Received: by 2002:a05:600c:1c21:b0:3cf:9844:7b11 with SMTP id j33-20020a05600c1c2100b003cf98447b11mr50993432wms.23.1673104058040;
+        Sat, 07 Jan 2023 07:07:38 -0800 (PST)
+Received: from [192.168.1.109] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id g14-20020a05600c310e00b003cf5ec79bf9sm6034449wmo.40.2023.01.07.07.07.36
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 07 Jan 2023 07:07:37 -0800 (PST)
+Message-ID: <e1b1450b-9421-3732-2d74-50c47b5afb0e@linaro.org>
+Date:   Sat, 7 Jan 2023 16:07:35 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible
+ combinations
+Content-Language: en-US
+To:     Andreas Kemnade <andreas@kemnade.info>
 Cc:     ulf.hansson@linaro.org, robh+dt@kernel.org,
         krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
         s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
         linux-imx@nxp.com, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: allow more compatible
- combinations
-Message-ID: <20230107160105.66df4136@aktux>
-In-Reply-To: <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
 References: <20230105213856.1828360-1-andreas@kemnade.info>
-        <d7c407dc-0a6c-97d5-a06f-b432a923d74d@linaro.org>
-        <20230106203358.14878660@aktux>
-        <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
-        <20230107144336.2ecff4f9@aktux>
-        <123d1a56-8134-dc75-8b2a-b3836e727d4a@linaro.org>
-        <20230107150740.0ba34aa1@aktux>
-        <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
-X-Mailer: Claws Mail 3.17.8 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
-MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+ <d7c407dc-0a6c-97d5-a06f-b432a923d74d@linaro.org>
+ <20230106203358.14878660@aktux>
+ <967cc7b7-f0bb-de37-52b9-7bfab05eadd7@linaro.org>
+ <20230107144336.2ecff4f9@aktux>
+ <123d1a56-8134-dc75-8b2a-b3836e727d4a@linaro.org>
+ <20230107150740.0ba34aa1@aktux>
+ <0ab84fb8-6173-54e0-abad-a0e0e4ba82e7@linaro.org>
+ <20230107160105.66df4136@aktux>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230107160105.66df4136@aktux>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 7 Jan 2023 15:09:24 +0100
-Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
-
-> On 07/01/2023 15:07, Andreas Kemnade wrote:
-> > On Sat, 7 Jan 2023 15:00:56 +0100
-> > Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
-> > 
-> > [...]  
-> >>>> I asked to remove half-compatible. Not to enforce.
-> >>>>    
-> > so you are saying that allowing
-> > compatible = "A", "B" 
-> > is not ok, if B is not fully compatible. I agree with that
-> > one.  
+On 07/01/2023 16:01, Andreas Kemnade wrote:
+> On Sat, 7 Jan 2023 15:09:24 +0100
+> Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
 > 
-> I did not say that. It's not related to this problem.
+>> On 07/01/2023 15:07, Andreas Kemnade wrote:
+>>> On Sat, 7 Jan 2023 15:00:56 +0100
+>>> Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org> wrote:
+>>>
+>>> [...]  
+>>>>>> I asked to remove half-compatible. Not to enforce.
+>>>>>>    
+>>> so you are saying that allowing
+>>> compatible = "A", "B" 
+>>> is not ok, if B is not fully compatible. I agree with that
+>>> one.  
+>>
+>> I did not say that. It's not related to this problem.
+>>
+> You said "I asked to remove half-compatible" that means to me
+> remove "B" if not fully compatible with A which sounds sane to me.
 > 
-You said "I asked to remove half-compatible" that means to me
-remove "B" if not fully compatible with A which sounds sane to me.
-
-> Again - you cannot have device which is and is not compatible with
-> something else. It's not a Schroedinger's cat to be in two states,
-> unless you explicitly document the cases (there are exception). If this
-> is such exception, it requires it's own documentation.
+>> Again - you cannot have device which is and is not compatible with
+>> something else. It's not a Schroedinger's cat to be in two states,
+>> unless you explicitly document the cases (there are exception). If this
+>> is such exception, it requires it's own documentation.
+>>
+> so conclusion:
+> If having A and B half-compatible with A:
 > 
-so conclusion:
-If having A and B half-compatible with A:
+> compatible = "A" only: is allowed to specifiy it the binding (status quo),
+>   but not allowed to make the actual dtsi match the binding documentation
+>   https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
+>   and
+>   https://lore.kernel.org/linux-devicetree/20210924091439.2561931-5-andreas@kemnade.info/
+> 
+> compatible = "A", "B" in the binding definition: is not allowed ("I asked to remove
+>    half-compatible" (= removing B))
 
-compatible = "A" only: is allowed to specifiy it the binding (status quo),
-  but not allowed to make the actual dtsi match the binding documentation
-  https://lore.kernel.org/linux-devicetree/72e1194e10ccb4f87aed96265114f0963e805092.camel@pengutronix.de/
-  and
-  https://lore.kernel.org/linux-devicetree/20210924091439.2561931-5-andreas@kemnade.info/
+No, half compatible is the A in such case.
 
-compatible = "A", "B" in the binding definition: is not allowed ("I asked to remove
-   half-compatible" (= removing B))
+> 
+> having mismatch between binding definition and devicetree causes dtbs_check errors
+>    -> also not nice.
+> 
+> I rather drop this patch and learn to live with dtbs_check errors
+> for this one since I have no idea how to proceed. All roads are blocked.
+> This all causes too much churn.
 
-having mismatch between binding definition and devicetree causes dtbs_check errors
-   -> also not nice.
+And why you cannot implement what I asked for?
 
-I rather drop this patch and learn to live with dtbs_check errors
-for this one since I have no idea how to proceed. All roads are blocked.
-This all causes too much churn.
+Best regards,
+Krzysztof
 
-Regards,
-Andreas
