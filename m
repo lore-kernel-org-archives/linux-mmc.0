@@ -2,146 +2,163 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F3E76C5479D
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 11:38:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C35FC54EBD
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 11:52:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236277AbjAILip (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Jan 2023 06:38:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54858 "EHLO
+        id S237011AbjAILwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Jan 2023 06:52:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233830AbjAILin (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 06:38:43 -0500
-Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F965399
-        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 03:38:41 -0800 (PST)
-Received: by mail-wm1-x32c.google.com with SMTP id ja17so6037838wmb.3
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2023 03:38:41 -0800 (PST)
+        with ESMTP id S236924AbjAILwY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 06:52:24 -0500
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6E8E63A6
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 03:52:20 -0800 (PST)
+Received: by mail-ed1-x536.google.com with SMTP id i15so12143885edf.2
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2023 03:52:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=uWRQwZU7Q5uXmRpQpJb8/BTaeDI/2pDdqBknaeuYMoc=;
-        b=y1NBPAWB/5QSk15IQF0sayDsBGK9DTwzo64Fwhce+Wv3f7tVbPw++Vm7KjFJ/ePuIH
-         alZSxq4wMtI3JYRZn3zmZrqmW5U+tcE/36mSZS+ao+PBouUNXkLt8uMAN3EDUZoM8y1Z
-         V38rcAlr6k9TL1waTrhaRP8dMZcyQgFxWY3TRRWCtw3tASJlyK9l3O/MWYqVGJgAknVC
-         jyzHq/yTgZ5C7OdYW+njoDU4LjZ+sYY1fS9XGuRSIkUPXzN3ekBZA31uKMfMGcdTnJze
-         j7zyR4Zp7HBcTCJS529n0Jvj5PuGWJpqpZXzP6IkeqqXkPlbC7aVB/jHNAVTFf8RXMND
-         S+Fw==
+        d=streamunlimited.com; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=aj54tILATw6IjxGXVi89331IRiw4NYazC/2sU/ZkN+Y=;
+        b=BCCCQEKmZL84Juhc7zGZCXjtK4wyyaCN4hfIM+xbNBfxo2cKpGp5cR4DCifuTkUzdJ
+         jhxXnBeM3XShSj/wMrYO9jfOrTHerhq4Vlf73TjgoH7s5JZVtNkCYE2WPHJrhaTcXe6z
+         CG+cq6MEKS/MALB+m8YJxvYIHuuPd6kDIx5CA=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=uWRQwZU7Q5uXmRpQpJb8/BTaeDI/2pDdqBknaeuYMoc=;
-        b=gySeOUbwo/DNcdttoP0iEC89vT8N4wYjstVBUua9N4jCEbv7F6c5mALRkFqxpwjkRT
-         qhnOk3QHI8vs24EhpQax7EvR04Vh9q/mmQUDrHXjAhtAYFuwbJScKwlQLVTV4gy/r64D
-         D2KvlBMAeaeti9JqPdTo3KABNgwzOkwO9L24pceCCOcQ7ysjhslY7taSY7knW94TpVHz
-         eaoa9Tn7EgCBGAMKd+hQ24Pgcwp2/QDJOwtFKHJIfyZF/AYF4PW9lpL42+ze8VOPz069
-         SfzGFL/mc4TieHigEvSyzDXPKTf8ZkwcgJKvzjgnF1XFwKnIILGWMduBjfUIzeqMMlqK
-         xGVQ==
-X-Gm-Message-State: AFqh2kp16UiT7XfCoKuYxMc9uQfGzmG666vLOsunJgZO0Rr3wGBqxbD7
-        aiXGfBbBcfN4sMl1kG0CR06s8A==
-X-Google-Smtp-Source: AMrXdXsgKZSO61ZWkew6Daa4r2uBx8Xe/DlWi/W5u/PDxgxQsVfDr2oBgtSbr4LJo3JD2nU14fQRlg==
-X-Received: by 2002:a05:600c:1f12:b0:3cf:8155:2adc with SMTP id bd18-20020a05600c1f1200b003cf81552adcmr47185923wmb.33.1673264319841;
-        Mon, 09 Jan 2023 03:38:39 -0800 (PST)
-Received: from [192.168.7.111] (679773502.box.freepro.com. [212.114.21.58])
-        by smtp.gmail.com with ESMTPSA id r126-20020a1c2b84000000b003d35c845cbbsm15439361wmr.21.2023.01.09.03.38.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 09 Jan 2023 03:38:39 -0800 (PST)
-Message-ID: <6c784b12-ea81-2ac9-ff99-e33f5c123483@linaro.org>
-Date:   Mon, 9 Jan 2023 12:38:37 +0100
+        bh=aj54tILATw6IjxGXVi89331IRiw4NYazC/2sU/ZkN+Y=;
+        b=Wo/rWxq3uCGWrKEK+b09F6muHFSg0XKLE9EyMdrXpLBlwGq3PKO8Zjo5COJR0rTRV3
+         oM5mf44BsmY8YINx2NycR6LsuE2R+j+I1iZHA0py8iSatW5zbGaqM63p1zkX2o27ZOaU
+         TEfrCAfka5MquaK1dNfs4ZDhDChJtoxogRXS7re5jdDOLRU8wqsK0Qd8xsbKOiBd0+EP
+         ZzAwVLyio+lYUvjTOUQbzN1gnhG6EzYFV5ljTOmS1Eutdrs8cNRRGWhIgK4xpARd96fD
+         Pd2Yd+ip6jsHY0F3QQPmqx0vZPQ/TjMZI4LxdueE1EiJ2SobIfDMwjlB/ASqQg7TgFwC
+         gDZQ==
+X-Gm-Message-State: AFqh2kpurW0Ona2WBf2cMGcFfsVG4MXae9WERlfAZcB3B9nylcAb1a9U
+        h1aroxdk44DqkaJ/LgW29YbMhoxq95NKZEUVRzmiMw==
+X-Google-Smtp-Source: AMrXdXvN+Ats8ThNe0Wauwq+5AC+Xtplphn3hZTaZBEbiZru8LtYPLmG1d5frTknSfPmN1CM7v2/wz2UX19/OcnHhq4=
+X-Received: by 2002:a05:6402:a49:b0:48c:974b:cffd with SMTP id
+ bt9-20020a0564020a4900b0048c974bcffdmr2271764edb.83.1673265139305; Mon, 09
+ Jan 2023 03:52:19 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-From:   Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [PATCH 03/12] dt-bindings: nvmem: convert
- amlogic-meson-mx-efuse.txt to dt-schema
-Content-Language: en-US
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     Jakub Kicinski <kuba@kernel.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>, Andrew Lunn <andrew@lunn.ch>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Eric Dumazet <edumazet@google.com>,
-        Bjorn Helgaas <bhelgaas@google.com>,
+References: <52861a84-0fe2-37f0-d66a-145f2ebe1d79@gmail.com>
+ <20221214134620.3028726-1-peter.suti@streamunlimited.com> <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
+In-Reply-To: <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
+From:   Peter Suti <peter.suti@streamunlimited.com>
+Date:   Mon, 9 Jan 2023 12:52:08 +0100
+Message-ID: <CACMGZgZY4Zb+3vHUDAS0+3r55K4_J40dtbsTPTFZMd6duBikpQ@mail.gmail.com>
+Subject: Re: [PATCH v3] mmc: meson-gx: fix SDIO interrupt handling
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
         Kevin Hilman <khilman@baylibre.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Vinod Koul <vkoul@kernel.org>,
-        Russell King <linux@armlinux.org.uk>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
         Jerome Brunet <jbrunet@baylibre.com>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        linux-media@vger.kernel.org, netdev@vger.kernel.org,
-        linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-watchdog@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-pci@vger.kernel.org, devicetree@vger.kernel.org
-References: <20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org>
- <20221117-b4-amlogic-bindings-convert-v1-3-3f025599b968@linaro.org>
- <CAFBinCANM=AOw1bbGCheFy20mqQ1ym_maK0C1sYpjceoNH-dNQ@mail.gmail.com>
-Organization: Linaro Developer Services
-In-Reply-To: <CAFBinCANM=AOw1bbGCheFy20mqQ1ym_maK0C1sYpjceoNH-dNQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 26/11/2022 00:04, Martin Blumenstingl wrote:
-> Hi Neil,
-> 
-> thanks for your work on this!
-> 
-> On Fri, Nov 18, 2022 at 3:33 PM Neil Armstrong
-> <neil.armstrong@linaro.org> wrote:
-> [...]
->> +        #address-cells = <1>;
->> +        #size-cells = <1>;
->> +
->> +        sn: sn@14 {
->> +            reg = <0x14 0x10>;
->> +        };
->> +
->> +        eth_mac: mac@34 {
->> +            reg = <0x34 0x10>;
->> +        };
->> +
->> +        bid: bid@46 {
->> +            reg = <0x46 0x30>;
->> +        };
-> I assume you took these examples from the newer, GX eFuse?
-> Unfortunately on boards with these older SoCs the serial number and
-> MAC address are often not stored in the eFuse.
-> This is just an example, so I won't be sad if we keep them. To avoid
-> confusion I suggest switching to different examples:
->    ethernet_mac_address: mac@1b4 {
->      reg = <0x1b4 0x6>;
->    };
->    temperature_calib: calib@1f4 {
->       reg = <0x1f4 0x4>;
->    };
-> 
-> What do you think?
+On Wed, Dec 14, 2022 at 10:33 PM Heiner Kallweit <hkallweit1@gmail.com> wrote:
+>
+> On 14.12.2022 14:46, Peter Suti wrote:
+> > With the interrupt support introduced in commit 066ecde sometimes the
+> > Marvell-8987 wifi chip got stuck using the marvell-sd-uapsta-8987
+> > vendor driver. The cause seems to be that after sending ack to all interrupts
+> > the IRQ_SDIO still happens, but it is ignored.
+> >
+> > To work around this, recheck the IRQ_SDIO after meson_mmc_request_done().
+> >
+> > Inspired by 9e2582e ("mmc: mediatek: fix SDIO irq issue") which used a
+> > similar fix to handle lost interrupts.
+> >
+> The commit description of the referenced fix isn't clear with regard to
+> who's fault it is that an interrupt can be lost. I'd interpret it being
+> a silicon bug rather than a kernel/driver bug.
+Unfortunately I can't confirm that the referenced bug is in the
+silicon for the original commit either.
+However a similar workaround works in this case too which is why I
+referenced that commit.
 
-
-Sure switched to it !
-
-Neil
-> 
-> 
-> Best regards,
-> Martin
-
+> Not sure whether it's the case, but it's possible that both vendors use
+> at least parts of the same IP in the MMC block, and therefore the issue
+> pops up here too.
+>
+> > Fixes: 066ecde ("mmc: meson-gx: add SDIO interrupt support")
+> >
+> > Signed-off-by: Peter Suti <peter.suti@streamunlimited.com>
+> > ---
+> > Changes in v2:
+> >       - use spin_lock instead of spin_lock_irqsave
+> >       - only reenable interrupts if they were enabled already
+> >
+> > Changes in v3:
+> >       - Rework the patch based on feedback from Heiner Kallweit.
+> >               The IRQ does not happen on 2 CPUs and the hard IRQ is not re-entrant.
+> >               But still one SDIO IRQ is lost without this change.
+> >               After the ack, reading the SD_EMMC_STATUS BIT(15) is set, but
+> >               meson_mmc_irq() is never called again.
+> >
+> >               The fix is similar to Mediatek msdc_recheck_sdio_irq().
+> >               That platform also loses an IRQ in some cases it seems.
+> >
+> >  drivers/mmc/host/meson-gx-mmc.c | 16 ++++++++++++++++
+> >  1 file changed, 16 insertions(+)
+> >
+> > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> > index 6e5ea0213b47..7d3ee2f9a7f6 100644
+> > --- a/drivers/mmc/host/meson-gx-mmc.c
+> > +++ b/drivers/mmc/host/meson-gx-mmc.c
+> > @@ -1023,6 +1023,22 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
+> >       if (ret == IRQ_HANDLED)
+> >               meson_mmc_request_done(host->mmc, cmd->mrq);
+> >
+> > +     /*
+> > +     * Sometimes after we ack all raised interrupts,
+> > +     * an IRQ_SDIO can still be pending, which can get lost.
+> > +     *
+>
+> A reader may scratch his head here and wonder how the interrupt can get lost,
+> and why adding a workaround instead of eliminating the root cause for losing
+> the interrupt. If you can't provide an explanation why the root cause for
+> losing the interrupt can't be fixed, presumably you would have to say that
+> you're adding a workaround for a suspected silicon bug.
+After talking to the manufacturer, we got the following explanation
+for this situation:
+"wifi may have dat1 interrupt coming in, without this the dat1
+interrupt would be missed"
+Supposedly this is fixed in their codebase.
+Unfortunately we were not able to find out more and can't prepare a
+patch with a proper explanation.
+Thank you for reviewing.
+>
+> > +     * To prevent this, recheck the IRQ_SDIO here and schedule
+> > +     * it to be processed.
+> > +     */
+> > +     raw_status = readl(host->regs + SD_EMMC_STATUS);
+> > +     status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
+>
+> This isn't needed here. Why not simply:
+>
+> status = readl(host->regs + SD_EMMC_STATUS);
+> if (status & IRQ_SDIO)
+>   ...
+>
+>
+> > +     if (status & IRQ_SDIO) {
+> > +             spin_lock(&host->lock);
+> > +             __meson_mmc_enable_sdio_irq(host->mmc, 0);
+> > +             sdio_signal_irq(host->mmc);
+> > +             spin_unlock(&host->lock);
+> > +     }
+> > +
+> >       return ret;
+> >  }
+> >
+>
