@@ -2,163 +2,173 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C35FC54EBD
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 11:52:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1F2A4C54EBD
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 12:54:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237011AbjAILwe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Jan 2023 06:52:34 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36862 "EHLO
+        id S231203AbjAIMyD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Jan 2023 07:54:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236924AbjAILwY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 06:52:24 -0500
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6E8E63A6
-        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 03:52:20 -0800 (PST)
-Received: by mail-ed1-x536.google.com with SMTP id i15so12143885edf.2
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2023 03:52:20 -0800 (PST)
+        with ESMTP id S234207AbjAIMxe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 07:53:34 -0500
+Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7308915FE2
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 04:53:33 -0800 (PST)
+Received: by mail-wm1-x32f.google.com with SMTP id g19-20020a05600c4ed300b003d9eb1dbc0aso3662107wmq.3
+        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2023 04:53:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=streamunlimited.com; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=aj54tILATw6IjxGXVi89331IRiw4NYazC/2sU/ZkN+Y=;
-        b=BCCCQEKmZL84Juhc7zGZCXjtK4wyyaCN4hfIM+xbNBfxo2cKpGp5cR4DCifuTkUzdJ
-         jhxXnBeM3XShSj/wMrYO9jfOrTHerhq4Vlf73TjgoH7s5JZVtNkCYE2WPHJrhaTcXe6z
-         CG+cq6MEKS/MALB+m8YJxvYIHuuPd6kDIx5CA=
+        d=linaro.org; s=google;
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=2oUr8w/fBVkJnE59k2x6LjFTgvfWlu1602Zu3esq0gQ=;
+        b=yw7651Zfiaa/ETLY1KrF3sA59Qt0nq2p9DYlfctPDk3lmFGFgxggxE1j9xeV4bWlz6
+         EJHzBbK5iAv2IEEosCynJKk6OzKB0omA/4odpZkIoCPLMKsu09p2zyYkXourRrSw2VL5
+         1GQsPjAHf3eyuc7yKnvLrLCl+mX7SXR7+KO1yANTVXg5DR0PloCvslrjAt/jq3umiql4
+         OeWyumIvb5oNn+k2blGF+uHuGRPrNWvdjSXXeWQlwFHNpan8JJYwMYBBmMpfGcDb2vOX
+         2L27BJCG4Obp0QFgf9f16SycA4f63/y5LQ0Yvay6aZRKLGheyCsfyBM7hX9y+IOzEB4z
+         BHng==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=aj54tILATw6IjxGXVi89331IRiw4NYazC/2sU/ZkN+Y=;
-        b=Wo/rWxq3uCGWrKEK+b09F6muHFSg0XKLE9EyMdrXpLBlwGq3PKO8Zjo5COJR0rTRV3
-         oM5mf44BsmY8YINx2NycR6LsuE2R+j+I1iZHA0py8iSatW5zbGaqM63p1zkX2o27ZOaU
-         TEfrCAfka5MquaK1dNfs4ZDhDChJtoxogRXS7re5jdDOLRU8wqsK0Qd8xsbKOiBd0+EP
-         ZzAwVLyio+lYUvjTOUQbzN1gnhG6EzYFV5ljTOmS1Eutdrs8cNRRGWhIgK4xpARd96fD
-         Pd2Yd+ip6jsHY0F3QQPmqx0vZPQ/TjMZI4LxdueE1EiJ2SobIfDMwjlB/ASqQg7TgFwC
-         gDZQ==
-X-Gm-Message-State: AFqh2kpurW0Ona2WBf2cMGcFfsVG4MXae9WERlfAZcB3B9nylcAb1a9U
-        h1aroxdk44DqkaJ/LgW29YbMhoxq95NKZEUVRzmiMw==
-X-Google-Smtp-Source: AMrXdXvN+Ats8ThNe0Wauwq+5AC+Xtplphn3hZTaZBEbiZru8LtYPLmG1d5frTknSfPmN1CM7v2/wz2UX19/OcnHhq4=
-X-Received: by 2002:a05:6402:a49:b0:48c:974b:cffd with SMTP id
- bt9-20020a0564020a4900b0048c974bcffdmr2271764edb.83.1673265139305; Mon, 09
- Jan 2023 03:52:19 -0800 (PST)
+        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
+         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=2oUr8w/fBVkJnE59k2x6LjFTgvfWlu1602Zu3esq0gQ=;
+        b=FYjoUsymvcjmuN+nmLpa9CuSd+PRHIhAyIWD9mDcD7v0cpl+r55PNb9hgRW2jMTBYp
+         nkNMFc15u4SdW76qYiNIwGf61A3AR9GPCO7m2PeFWd3cwsbSLCvxe6i5KfN+wYDY77Be
+         wqb/FIIIGA9APg3vjtNhsirO+ovpgyb0z52Vbwq9+uTWTlDB0dnrAsi0VlfCLxKiZP5N
+         aJiydCLbfYmxlvMIlmQ71Pn8j2YUKx8wwEEPmSrGWmwx/9XWfdXZHfF6xdrwFlP/aqeL
+         6aI/UVL+f1n8CHXWaq3VUDzqMwsmrzkljsejsF7SXx+SRpRYyneh6Ls6bVOdUoqbjTAI
+         LTPw==
+X-Gm-Message-State: AFqh2kpITiwXWv2UDog8h8+KzlVJA37VqHXqLK141T5jJdF/f+5fBZ31
+        aoDfiGqowRN5E0g4pOVofpCAtA==
+X-Google-Smtp-Source: AMrXdXvGChqLrkdOYMIrvP3oiZBLJmzLXN7wzV4hvUgkqWIZvi4SN9pHUanVnXVyf/b8Nfwm+x5bRQ==
+X-Received: by 2002:a05:600c:8507:b0:3d9:6c7d:c9ee with SMTP id gw7-20020a05600c850700b003d96c7dc9eemr41487743wmb.25.1673268811818;
+        Mon, 09 Jan 2023 04:53:31 -0800 (PST)
+Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:52eb:f6ff:feb3:451a])
+        by smtp.gmail.com with ESMTPSA id y7-20020a7bcd87000000b003d997e5e679sm12805667wmj.14.2023.01.09.04.53.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 09 Jan 2023 04:53:31 -0800 (PST)
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Date:   Mon, 09 Jan 2023 13:53:25 +0100
+Subject: [PATCH v2 01/11] dt-bindings: firmware: convert meson_sm.txt to dt-schema
 MIME-Version: 1.0
-References: <52861a84-0fe2-37f0-d66a-145f2ebe1d79@gmail.com>
- <20221214134620.3028726-1-peter.suti@streamunlimited.com> <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
-In-Reply-To: <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
-From:   Peter Suti <peter.suti@streamunlimited.com>
-Date:   Mon, 9 Jan 2023 12:52:08 +0100
-Message-ID: <CACMGZgZY4Zb+3vHUDAS0+3r55K4_J40dtbsTPTFZMd6duBikpQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: meson-gx: fix SDIO interrupt handling
-To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Message-Id: <20221117-b4-amlogic-bindings-convert-v2-1-36ad050bb625@linaro.org>
+References: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
+In-Reply-To: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
+To:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Kevin Hilman <khilman@baylibre.com>,
         Jerome Brunet <jbrunet@baylibre.com>,
         Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Vinod Koul <vkoul@kernel.org>,
+        Kishon Vijay Abraham I <kishon@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, Andrew Lunn <andrew@lunn.ch>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Russell King <linux@armlinux.org.uk>
+Cc:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
         linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
+        netdev@vger.kernel.org, Neil Armstrong <neil.armstrong@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+X-Mailer: b4 0.11.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Dec 14, 2022 at 10:33 PM Heiner Kallweit <hkallweit1@gmail.com> wrote:
->
-> On 14.12.2022 14:46, Peter Suti wrote:
-> > With the interrupt support introduced in commit 066ecde sometimes the
-> > Marvell-8987 wifi chip got stuck using the marvell-sd-uapsta-8987
-> > vendor driver. The cause seems to be that after sending ack to all interrupts
-> > the IRQ_SDIO still happens, but it is ignored.
-> >
-> > To work around this, recheck the IRQ_SDIO after meson_mmc_request_done().
-> >
-> > Inspired by 9e2582e ("mmc: mediatek: fix SDIO irq issue") which used a
-> > similar fix to handle lost interrupts.
-> >
-> The commit description of the referenced fix isn't clear with regard to
-> who's fault it is that an interrupt can be lost. I'd interpret it being
-> a silicon bug rather than a kernel/driver bug.
-Unfortunately I can't confirm that the referenced bug is in the
-silicon for the original commit either.
-However a similar workaround works in this case too which is why I
-referenced that commit.
+Convert the Amlogic Secure Monitor bindings to dt-schema.
 
-> Not sure whether it's the case, but it's possible that both vendors use
-> at least parts of the same IP in the MMC block, and therefore the issue
-> pops up here too.
->
-> > Fixes: 066ecde ("mmc: meson-gx: add SDIO interrupt support")
-> >
-> > Signed-off-by: Peter Suti <peter.suti@streamunlimited.com>
-> > ---
-> > Changes in v2:
-> >       - use spin_lock instead of spin_lock_irqsave
-> >       - only reenable interrupts if they were enabled already
-> >
-> > Changes in v3:
-> >       - Rework the patch based on feedback from Heiner Kallweit.
-> >               The IRQ does not happen on 2 CPUs and the hard IRQ is not re-entrant.
-> >               But still one SDIO IRQ is lost without this change.
-> >               After the ack, reading the SD_EMMC_STATUS BIT(15) is set, but
-> >               meson_mmc_irq() is never called again.
-> >
-> >               The fix is similar to Mediatek msdc_recheck_sdio_irq().
-> >               That platform also loses an IRQ in some cases it seems.
-> >
-> >  drivers/mmc/host/meson-gx-mmc.c | 16 ++++++++++++++++
-> >  1 file changed, 16 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> > index 6e5ea0213b47..7d3ee2f9a7f6 100644
-> > --- a/drivers/mmc/host/meson-gx-mmc.c
-> > +++ b/drivers/mmc/host/meson-gx-mmc.c
-> > @@ -1023,6 +1023,22 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
-> >       if (ret == IRQ_HANDLED)
-> >               meson_mmc_request_done(host->mmc, cmd->mrq);
-> >
-> > +     /*
-> > +     * Sometimes after we ack all raised interrupts,
-> > +     * an IRQ_SDIO can still be pending, which can get lost.
-> > +     *
->
-> A reader may scratch his head here and wonder how the interrupt can get lost,
-> and why adding a workaround instead of eliminating the root cause for losing
-> the interrupt. If you can't provide an explanation why the root cause for
-> losing the interrupt can't be fixed, presumably you would have to say that
-> you're adding a workaround for a suspected silicon bug.
-After talking to the manufacturer, we got the following explanation
-for this situation:
-"wifi may have dat1 interrupt coming in, without this the dat1
-interrupt would be missed"
-Supposedly this is fixed in their codebase.
-Unfortunately we were not able to find out more and can't prepare a
-patch with a proper explanation.
-Thank you for reviewing.
->
-> > +     * To prevent this, recheck the IRQ_SDIO here and schedule
-> > +     * it to be processed.
-> > +     */
-> > +     raw_status = readl(host->regs + SD_EMMC_STATUS);
-> > +     status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
->
-> This isn't needed here. Why not simply:
->
-> status = readl(host->regs + SD_EMMC_STATUS);
-> if (status & IRQ_SDIO)
->   ...
->
->
-> > +     if (status & IRQ_SDIO) {
-> > +             spin_lock(&host->lock);
-> > +             __meson_mmc_enable_sdio_irq(host->mmc, 0);
-> > +             sdio_signal_irq(host->mmc);
-> > +             spin_unlock(&host->lock);
-> > +     }
-> > +
-> >       return ret;
-> >  }
-> >
->
+Take in account usage the used variant with amlogic,meson-gx-sm.
+
+Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+---
+ .../bindings/firmware/amlogic,meson-gxbb-sm.yaml   | 39 ++++++++++++++++++++++
+ .../bindings/firmware/meson/meson_sm.txt           | 15 ---------
+ 2 files changed, 39 insertions(+), 15 deletions(-)
+
+diff --git a/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml b/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml
+new file mode 100644
+index 000000000000..8f50e698760e
+--- /dev/null
++++ b/Documentation/devicetree/bindings/firmware/amlogic,meson-gxbb-sm.yaml
+@@ -0,0 +1,39 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/firmware/amlogic,meson-gxbb-sm.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Amlogic Secure Monitor (SM)
++
++description:
++  In the Amlogic SoCs the Secure Monitor code is used to provide access to the
++  NVMEM, enable JTAG, set USB boot, etc...
++
++maintainers:
++  - Neil Armstrong <neil.armstrong@linaro.org>
++
++properties:
++  compatible:
++    oneOf:
++      - const: amlogic,meson-gxbb-sm
++      - items:
++          - const: amlogic,meson-gx-sm
++          - const: amlogic,meson-gxbb-sm
++
++  power-controller:
++    type: object
++    $ref: /schemas/power/amlogic,meson-sec-pwrc.yaml#
++
++required:
++  - compatible
++
++additionalProperties: false
++
++examples:
++  - |
++    firmware {
++        secure-monitor {
++            compatible = "amlogic,meson-gxbb-sm";
++        };
++    };
+diff --git a/Documentation/devicetree/bindings/firmware/meson/meson_sm.txt b/Documentation/devicetree/bindings/firmware/meson/meson_sm.txt
+deleted file mode 100644
+index c248cd44f727..000000000000
+--- a/Documentation/devicetree/bindings/firmware/meson/meson_sm.txt
++++ /dev/null
+@@ -1,15 +0,0 @@
+-* Amlogic Secure Monitor
+-
+-In the Amlogic SoCs the Secure Monitor code is used to provide access to the
+-NVMEM, enable JTAG, set USB boot, etc...
+-
+-Required properties for the secure monitor node:
+-- compatible: Should be "amlogic,meson-gxbb-sm"
+-
+-Example:
+-
+-	firmware {
+-		sm: secure-monitor {
+-			compatible = "amlogic,meson-gxbb-sm";
+-		};
+-	};
+
+-- 
+2.34.1
