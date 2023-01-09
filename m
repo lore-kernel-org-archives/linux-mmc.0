@@ -2,97 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 71823C54EBE
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 13:29:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35E8FC54EBD
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 14:19:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234463AbjAIN3A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Jan 2023 08:29:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43416 "EHLO
+        id S229455AbjAIOTR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Jan 2023 09:19:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51066 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234832AbjAIN2f (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 08:28:35 -0500
-Received: from mail-qt1-f182.google.com (mail-qt1-f182.google.com [209.85.160.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 191A78FE2;
-        Mon,  9 Jan 2023 05:28:35 -0800 (PST)
-Received: by mail-qt1-f182.google.com with SMTP id v14so7780683qtq.3;
-        Mon, 09 Jan 2023 05:28:35 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=tNPWeAzlRFUhQDC+UGHF6x7r2OGa8Y3G0j9qoaAmJCY=;
-        b=afygxGte1bioWpjX3Evh5e4JDINoRU50j6Bx5w4OLErxiNG0OrVMjwO1khEu2hu/zs
-         HcWTywyTS3q1cBQV97NyHms7yVxw3WzGVhkOsTP8AIOtik/8Xf4uAvh09sGoJaOGhlBk
-         1uaCitcT99GbvpZMg9/bI22AgWFljNE/hSs224jdqmwMhGatT67IlZt/gH59eLXnSuTa
-         lqrkJJ4McisSzFONCwdFJ4ARrM0MC4HUjVCQiqGg3+SJ37uGR5XXu1ARpgLD8sLt1sux
-         PNE+LinxYKKtyjI1I8Nja9kiS5IuDMpegQ5cvdvdnFRcCPXkExuwkX8exRDbLkuKLtkk
-         rbrA==
-X-Gm-Message-State: AFqh2krmox0ot9vYHFlZ8OjNT6t7poPwOXFyMEqJb+lz/T5t78tatxtu
-        WnqG2UDZYluBJrZHt6arCczW7Y/oSv7lzQ==
-X-Google-Smtp-Source: AMrXdXupbhzpiPXjIRIkJisaOIKFg0QEny/Ej9INUT9AZZz6Rt3JAIbOKwePJr97choTy+qW6g/cew==
-X-Received: by 2002:a05:622a:6108:b0:3ab:97cc:6ed6 with SMTP id hg8-20020a05622a610800b003ab97cc6ed6mr61126333qtb.48.1673270914047;
-        Mon, 09 Jan 2023 05:28:34 -0800 (PST)
-Received: from mail-yb1-f176.google.com (mail-yb1-f176.google.com. [209.85.219.176])
-        by smtp.gmail.com with ESMTPSA id m5-20020ac86885000000b0039cba52974fsm4565788qtq.94.2023.01.09.05.28.33
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 09 Jan 2023 05:28:33 -0800 (PST)
-Received: by mail-yb1-f176.google.com with SMTP id c124so8451154ybb.13;
-        Mon, 09 Jan 2023 05:28:33 -0800 (PST)
-X-Received: by 2002:a25:3143:0:b0:77a:b5f3:d0ac with SMTP id
- x64-20020a253143000000b0077ab5f3d0acmr4418010ybx.202.1673270913184; Mon, 09
- Jan 2023 05:28:33 -0800 (PST)
-MIME-Version: 1.0
-References: <20221213230129.549968-1-fabrizio.castro.jz@renesas.com> <20221213230129.549968-5-fabrizio.castro.jz@renesas.com>
-In-Reply-To: <20221213230129.549968-5-fabrizio.castro.jz@renesas.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Mon, 9 Jan 2023 14:28:21 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdUrAF7CRGSirfZE+aKB9dmWe9mjZoUJW3yRNu1dSuhFig@mail.gmail.com>
-Message-ID: <CAMuHMdUrAF7CRGSirfZE+aKB9dmWe9mjZoUJW3yRNu1dSuhFig@mail.gmail.com>
-Subject: Re: [PATCH 4/4] arm64: dts: renesas: r9a09g011: Add eMMC and SDHI support
-To:     Fabrizio Castro <fabrizio.castro.jz@renesas.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Magnus Damm <magnus.damm@gmail.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-renesas-soc@vger.kernel.org,
-        linux-clk@vger.kernel.org,
-        Chris Paterson <Chris.Paterson2@renesas.com>,
-        Biju Das <biju.das@bp.renesas.com>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Jacopo Mondi <jacopo@jmondi.org>
-Content-Type: text/plain; charset="UTF-8"
+        with ESMTP id S229485AbjAIOSu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 09:18:50 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5925164B4
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 06:18:49 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 6B05661170
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 14:18:49 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 73D64C43396;
+        Mon,  9 Jan 2023 14:18:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1673273928;
+        bh=rP/q5PI5+9VsM9NHQlOzk3wACSP9ZKD3iTSstyibXd0=;
+        h=In-Reply-To:References:Date:From:To:Cc:Subject:From;
+        b=Jg0rwItb7VHD3oBhc8lpS7JIUHJ+zlQ5wJeNR4edtAXQf0507V/94fGbD60K0EE1k
+         ObElcnqszNcbVd/VIb4MyFdJLROYQnA1Lsquo95u8CZPLzPPCxZ5ygTiR11OHFS0UQ
+         ViMZnAISiAYyYo71LKRxQ85Nju0hfIiiElVofD01HpTz8eed3n+JdFB0zlNW//+drH
+         z0aAz71Q5jiBTryoPLrD4glml5W1GIa5AxBve7ESYaYmGnXniOZB9NyaWAhS4iY8f/
+         JxI6DgEqcWCjwuwvr6XLpsv9y7uTQ4AoI0QdtK3boqdkElofLBQeedzNhlPBuYsD5k
+         FxDLPuOSnW+WQ==
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+        by mailauth.nyi.internal (Postfix) with ESMTP id 36D0C27C005A;
+        Mon,  9 Jan 2023 09:18:47 -0500 (EST)
+Received: from imap51 ([10.202.2.101])
+  by compute6.internal (MEProxy); Mon, 09 Jan 2023 09:18:47 -0500
+X-ME-Sender: <xms:RiK8Y3KRXR6pGL4NFNLbVNKD26lg3HuM-N3Xj2wWYDMO4p9n2tQHmw>
+    <xme:RiK8Y7J1kTez6KObYAd9FAxMwLJNj7GETNchqMUzKf8Ifs26KTd5nGAZ4s2T_IeJ5
+    BTeHTRsFkr8lGfGjVo>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrkeeigdehkecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
+    fjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdetrhhn
+    ugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugeskhgvrhhnvghlrdhorhhgqeenucggtffrrg
+    htthgvrhhnpedvveeigfetudegveeiledvgfevuedvgfetgeefieeijeejffeggeehudeg
+    tdevheenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpe
+    grrhhnugdomhgvshhmthhprghuthhhphgvrhhsohhnrghlihhthidquddvkeehudejtddv
+    gedqvdekjedttddvieegqdgrrhhnugeppehkvghrnhgvlhdrohhrghesrghrnhgusgdrug
+    gv
+X-ME-Proxy: <xmx:RiK8Y_tgJSyb9h-h3udmeagNikidGuf3UFYhmAWZ3tDoClRW_OxVSA>
+    <xmx:RiK8YwY5U7dsDzslamLKMsMuEK7x92QW6hos8Bpev2ia-gYyTL2Xzg>
+    <xmx:RiK8Y-ZvdtWHV1KwfF22rlX3bV-Tw-Gq8cpiPkYsC3P-6LH4Vba0VA>
+    <xmx:RyK8Y6SrdZVfrMS3EPzbHsr5CSGVmEfVzPv-iQBW6FIyf3KAHvvMaw>
+Feedback-ID: i36794607:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 7A37BB60086; Mon,  9 Jan 2023 09:18:46 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.7.0-alpha0-1185-g841157300a-fm-20221208.002-g84115730
+Mime-Version: 1.0
+Message-Id: <59f8702d-bfa7-45ba-a415-ff29a1203365@app.fastmail.com>
+In-Reply-To: <2d085660-41a2-492c-a343-7df80d510a59@app.fastmail.com>
+References: <20230105134622.254560-1-arnd@kernel.org>
+ <20230105134622.254560-5-arnd@kernel.org> <m2sfglh02h.fsf@free.fr>
+ <2d085660-41a2-492c-a343-7df80d510a59@app.fastmail.com>
+Date:   Mon, 09 Jan 2023 15:18:27 +0100
+From:   "Arnd Bergmann" <arnd@kernel.org>
+To:     "Arnd Bergmann" <arnd@arndb.de>,
+        "Robert Jarzmik" <robert.jarzmik@free.fr>
+Cc:     "Daniel Mack" <daniel@zonque.org>,
+        "Haojian Zhuang" <haojian.zhuang@gmail.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        "Michael Turquette" <mturquette@baylibre.com>,
+        "Stephen Boyd" <sboyd@kernel.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        "Viresh Kumar" <viresh.kumar@linaro.org>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>,
+        "Dominik Brodowski" <linux@dominikbrodowski.net>,
+        linux-clk@vger.kernel.org, linux-pm@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 04/27] ARM: pxa: drop pxa310/pxa320/pxa93x support
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Fabrizio,
+On Sun, Jan 8, 2023, at 14:40, Arnd Bergmann wrote:
+> On Sun, Jan 8, 2023, at 09:49, Robert Jarzmik wrote:
+>> Arnd Bergmann <arnd@kernel.org> writes:
 
-On Wed, Dec 14, 2022 at 12:02 AM Fabrizio Castro
-<fabrizio.castro.jz@renesas.com> wrote:
-> The RZ/V2M comes with 2 SDHI interfaces and 1 eMMC interface.
-> Add the relevant nodes to the SoC specific device tree.
+> If that's all you think is missing, I can add this
+> trivial patch as well and rework the series to not
+> drop code that depends on PXA310/PXA320:
 >
-> Signed-off-by: Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+> --- a/arch/arm/mach-pxa/Kconfig
+> +++ b/arch/arm/mach-pxa/Kconfig
+> @@ -45,6 +45,8 @@ config MACH_PXA27X_DT
+>  config MACH_PXA3XX_DT
+>         bool "Support PXA3xx platforms from device tree"
+>         select CPU_PXA300
+> +       select CPU_PXA310
+> +       select CPU_PXA320
+>         select PINCTRL
+>         select POWER_SUPPLY
+>         select PXA3xx
 
-Reviewed-by: Geert Uytterhoeven <geert+renesas@glider.be>
-i.e. will queue in renesas-devel for v6.3.
+I've put this in a separate branch now and will submit
+it as a bugfix along with two other patches for issues
+I found while testing omap1.
 
-Note that this causes "make dtbs_check" failures, due to a bug in
-the bindings. I have sent a fix.
-https://lore.kernel.org/054c9f4dbb0bb1525f780d1e85c724436465c20c.1673270716.git.geert+renesas@glider.be
+I've dropped the pxa310/320 removal now, but kept
+the pxa93x removal, since that has no DT support at
+all and remains dead code.
 
-Gr{oetje,eeting}s,
-
-                        Geert
-
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+     Arnd
