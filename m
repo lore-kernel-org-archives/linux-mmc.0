@@ -2,95 +2,76 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72B09C54EBD
-	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 13:04:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C8083C54EBD
+	for <linux-mmc@archiver.kernel.org>; Mon,  9 Jan 2023 13:26:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233067AbjAINER (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 9 Jan 2023 08:04:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49930 "EHLO
+        id S233331AbjAIN0x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 9 Jan 2023 08:26:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42354 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233900AbjAINDJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 08:03:09 -0500
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EAAE17050
-        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 05:02:26 -0800 (PST)
-Received: by mail-ej1-x62e.google.com with SMTP id hw16so8007443ejc.10
-        for <linux-mmc@vger.kernel.org>; Mon, 09 Jan 2023 05:02:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=amarulasolutions.com; s=google;
-        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=LkzjllfIyWMzDeEVD7OKUMHITseBrUR0IuEgUUno/hw=;
-        b=HVejhwClRNQ3MUtfWYs0WnCJRsAnIzlGhfP+OnefrHhLWhWhcDmk/dY2bj9CfU7+EE
-         In84VnurTtcFTxUrxWjFoLx6E60B13rANMzMHJfvaMaeCAqqA/8VB0vv7CKNiPabcFeO
-         xp007nViaZqnrqXDgI9XXZXKke4bqpEvGAP1E=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=LkzjllfIyWMzDeEVD7OKUMHITseBrUR0IuEgUUno/hw=;
-        b=2rj+pNqy2n+RmKfHNMRu+RnfDtBzWpvR9aMI7xDBFGyi4fytAf8y84miXkqT8v7zbU
-         1VDhcW7VKfaz1SyH4u31Bjmy3h95w4h1/Xz16b1jEksZ8iTRBK97VgWdhOFRDw+1Q37Q
-         C1iLon4E26IcFA0s/iONcWAl2vz9rUQ+INGtC8clGLkbAY/y7DqLoGCkrZwG3YIVkJFP
-         LZhNav082kyHJW+QSPZTuPesGN8Hvl8kEcgDNfFvlNXx66wwbleGq+rR6lxrgCWnPMdX
-         WruuVFEHB6cvBWZXmgg4QgB5sGKha5MAPvdDXLT4Vn1NQ0UtVoN5WaL+8xTlA1BJyQZ0
-         M+9A==
-X-Gm-Message-State: AFqh2kq8RtsC8Dvkw/5RZroq2Ca0Ohe7cNg23kVVr0jiGYEiTwLfu7tq
-        jZikPadCikHwcl2yhIRox0ofPQnw0j0RI/N6JOuhrwg3lGMR+c0g3t0=
-X-Google-Smtp-Source: AMrXdXuYd8ep0FE4rsIiKYO8EGoVrT8K6dwHvKpNV3yPBrN9VUSuX2TpZrcn2sMDaeDRWd6E4UufeUUjTqw6lUXPiPM=
-X-Received: by 2002:a17:906:4e98:b0:82d:e2a6:b04 with SMTP id
- v24-20020a1709064e9800b0082de2a60b04mr8059816eju.748.1673269345065; Mon, 09
- Jan 2023 05:02:25 -0800 (PST)
+        with ESMTP id S231777AbjAIN0w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 9 Jan 2023 08:26:52 -0500
+Received: from laurent.telenet-ops.be (laurent.telenet-ops.be [IPv6:2a02:1800:110:4::f00:19])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55A412AC2
+        for <linux-mmc@vger.kernel.org>; Mon,  9 Jan 2023 05:26:50 -0800 (PST)
+Received: from ramsan.of.borg ([IPv6:2a02:1810:ac12:ed10:c32c:cc7a:25f1:127a])
+        by laurent.telenet-ops.be with bizsmtp
+        id 6dSn2900y2RK3VH01dSna4; Mon, 09 Jan 2023 14:26:48 +0100
+Received: from rox.of.borg ([192.168.97.57])
+        by ramsan.of.borg with esmtp (Exim 4.95)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1pEsAn-001LjM-Gb;
+        Mon, 09 Jan 2023 14:26:47 +0100
+Received: from geert by rox.of.borg with local (Exim 4.95)
+        (envelope-from <geert@linux-m68k.org>)
+        id 1pEsAp-00EObD-B0;
+        Mon, 09 Jan 2023 14:26:47 +0100
+From:   Geert Uytterhoeven <geert+renesas@glider.be>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org,
+        Geert Uytterhoeven <geert+renesas@glider.be>
+Subject: [PATCH] dt-bindings: mmc: renesas,sdhi: Fix RZ/V2M clock description
+Date:   Mon,  9 Jan 2023 14:26:41 +0100
+Message-Id: <054c9f4dbb0bb1525f780d1e85c724436465c20c.1673270716.git.geert+renesas@glider.be>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-From:   Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
-Date:   Mon, 9 Jan 2023 14:02:14 +0100
-Message-ID: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
-Subject: NXP imx6ull nonalignment buffer question
-To:     Bough Chen <haibo.chen@nxp.com>, Shawn Guo <shawnguo@kernel.org>,
-        Fabio Estevam <festevam@gmail.com>,
-        LKML <linux-kernel@vger.kernel.org>
-Cc:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
-        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Haibo
+The SD Card/MMC interface on the Renesas RZ/V2M SoC uses 4 clocks, like
+on RZ/G2L SoCs.
 
-Working on imx6ulz design and found that if I send a sdio packet using
-the sdio_writesb the adma driver tries to handle it with two dma
-descriptors. The first one filled with the bytes up to 3 to cover the
-misalign and then another buffer descriptor
+The current description specifies 3 clocks, like on R-Car Gen3, which
+will lead to "make dtbs_check" failures:
 
-  offset = (SDHCI_ADMA2_ALIGN - (addr & SDHCI_ADMA2_MASK)) &
-                         SDHCI_ADMA2_MASK;
-                if (offset) {
-                        if (data->flags & MMC_DATA_WRITE) {
-                                buffer = sdhci_kmap_atomic(sg);
-                                memcpy(align, buffer, offset);
-                                sdhci_kunmap_atomic(buffer);
-                        }
+    arch/arm64/boot/dts/renesas/r9a09g011-v2mevk2.dtb: mmc@85000000: clocks: [[3, 1, 18], [3, 1, 20], [3, 1, 19], [3, 1, 17]] is too long
+	    From schema: Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 
-                        /* tran, valid */
-                        __sdhci_adma_write_desc(host, &desc, align_addr,
-                                                offset, ADMA2_TRAN_VALID);
+Fixes: c8dbdf2a1044951b ("dt-bindings: mmc: renesas,sdhi: Document RZ/V2M support")
+Signed-off-by: Geert Uytterhoeven <geert+renesas@glider.be>
+---
+ Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-                        BUG_ON(offset > 65536);
+diff --git a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+index 4357736074898ff3..fa089cbb155bd0fb 100644
+--- a/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
++++ b/Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
+@@ -122,6 +122,7 @@ allOf:
+               - renesas,sdhi-r9a07g043
+               - renesas,sdhi-r9a07g044
+               - renesas,sdhi-r9a07g054
++              - renesas,sdhi-r9a09g011
+     then:
+       properties:
+         clocks:
+-- 
+2.34.1
 
-                        align += SDHCI_ADMA2_ALIGN;
-                        align_addr += SDHCI_ADMA2_ALIGN;
-
-                        addr += offset;
-                        len -= offset;
-                }
-
-In 48.7.4 Data Length Setting
-For either ADMA (ADMA1 or ADMA2) transfer, the data in the data buffer must be
-word aligned, so the data length set in the descriptor must be a
-multiple of 4. I have noticed that this code does not work as
-expected.
-
-Did you have any feedback?
-
-Michael
