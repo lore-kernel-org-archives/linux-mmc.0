@@ -2,150 +2,92 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A54FEC46467
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Jan 2023 10:19:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DE4BC54EBE
+	for <linux-mmc@archiver.kernel.org>; Tue, 10 Jan 2023 10:37:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230444AbjAJKTy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Jan 2023 05:19:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43596 "EHLO
+        id S230163AbjAJKho (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 10 Jan 2023 05:37:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232338AbjAJKTc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2023 05:19:32 -0500
-Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0FA875D2A
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2023 02:18:04 -0800 (PST)
-Received: by mail-wm1-x333.google.com with SMTP id p1-20020a05600c1d8100b003d8c9b191e0so9446211wms.4
-        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2023 02:18:04 -0800 (PST)
+        with ESMTP id S230483AbjAJKhl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2023 05:37:41 -0500
+Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FBF8D2CC
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2023 02:37:41 -0800 (PST)
+Received: by mail-wr1-x435.google.com with SMTP id bn26so11266633wrb.0
+        for <linux-mmc@vger.kernel.org>; Tue, 10 Jan 2023 02:37:41 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=PM3i+83BPLCvCkjcHeSsVRsAE5H2Nw7gtRNrJCRY2Ks=;
-        b=dCctDUIS0wC58/aHLK5o+YpcliPRN6sleu5Xkbclt/zqSjkzezo8juF4OGzlLsvyGf
-         tUK3Rkiu727qQvxILep6HVoaAKnbkXRJxXvgarWY5BU8gAhVnxynCpG6cAqFAtwFfQan
-         3pwJ3RN0AT5mFJYR+byVFD9HC1x7kN8/SimGHmYJMdTQmmPWlFJml+nBX3qwrwOyQ0L2
-         UvUktrvtRBUHh2RAj9it+AGiFB2eOiNTbZqual4iMCHAWr+CVeoF7M3ea+Zyeosp0P2O
-         Fta/A301YwGUtq0CiX/gKZAwpIxyloMcGasDLKovqyrb3C28XcQSXdlOKbYVcLBa90Gh
-         bQdg==
+        bh=EqWZTPYWg74UddpBq2hX8CrCoS0DmnhoM9+iCMX4jjw=;
+        b=cryKYzziNzmtuyT8a6QGoPduvqzMN4xOc8Ov/If8qMU4p8l9CyPQp2+1Xa38xQkM9Q
+         A9MCBlqqd9A3LhLeUCNyDwGn6Px0y+TEGNdOGA+dHfvpnAQG6qJe4zPKTdwlvcxEqOmt
+         vcLoGyYFeVfMZFvdHa+HRTTa4keVyhQJaqmlrbV6aUNrZ+R1yEZnCnhZUsw+2V9I0vSX
+         EkI43vBJTUvZEESbhl2qSxOBXeGSo6v+jJ9TM7pYSFDYW+iyUUZFlewNNtp1FRQOB1TF
+         lnMptCHQi579/5MxywxjfSgnLZWmpd4EYBU6nzb4eliecNHjGe4DjTPDxaqTkFWIPq+y
+         wkWQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=PM3i+83BPLCvCkjcHeSsVRsAE5H2Nw7gtRNrJCRY2Ks=;
-        b=cSaZzh+GFAiibWsF9BwR//d4TBdz0YRdU9AAobTP1zA1oufGflXlVA0LOzDurxnVJ0
-         cY1e/Or5clP7atvxgEPGnI4kg3h7zYnDmFRS4jbvO6wV9jRyr0PRduvig5cLq/hz9rnV
-         C8TcZ0GYRpOpkMX/uP5E+T528dO8bYcSDUu+3rk6tCVCCfT4nr6SPI6uCbmFpitD0JeJ
-         U9QZ8PBbUf4NXA5ixfO5nXnNSIvq/9eywfP3YawC3llZh1rFsvQAL75zv8mYUGV/zRB1
-         6mPtPHy/AU5y5DDZ4PB612YZK9YMXdbPhy/Yy+gVaUul7sKlcA+4b70c+lOcIsp1RSur
-         4bOQ==
-X-Gm-Message-State: AFqh2kqNOiM6/dX/5CfpZbX45SA3tAwR1xyBPG1Em5WFLFaE39ciZgWv
-        3w9WH/KCeHM1coOhgu5b2t8BPw==
-X-Google-Smtp-Source: AMrXdXvxClrR4BtCis3ALpFrfvnnBH5INQXfgVxgssgGc8gS8VU+28Qjf2O0/5xOZ+1CSwryJpUEpQ==
-X-Received: by 2002:a05:600c:48a1:b0:3d1:f270:a81e with SMTP id j33-20020a05600c48a100b003d1f270a81emr48836013wmp.17.1673345883348;
-        Tue, 10 Jan 2023 02:18:03 -0800 (PST)
+        bh=EqWZTPYWg74UddpBq2hX8CrCoS0DmnhoM9+iCMX4jjw=;
+        b=s49HtuZ4/5h6blJ12Lo/PgKESXYjpHWgHohiofHvAPqjquSmuoLFue5gi7JvwDJTOK
+         YmVdnnNRFD1bw/8TxfyS1Dx4zdADlYCFc9QhcJWQhtAatNHxI7dMTYpZBb3Iu/JE2hP7
+         sRrjAjkyZursczHQXBTKzy8iM+r2j+JusdqLHxTX8w+ddGoiwIR3NrgD05upW0+j1YR0
+         eW6h8dFwO4OQ50Y5K+tfeVxMTwNwdVT0d0tjnnbBkqxg9EU/C+7tyJ5h7Hq+tmAOMV3g
+         o7lkw2GDJwFjxfo1PNz2rWlU3tNqfV+UAA85oCiiW38oj8IMMXEb2m/8/azcttvyZWn+
+         CN4w==
+X-Gm-Message-State: AFqh2ko9tVJPKqnLJZT7zWaxWFhFIVEHDjdHL3p9IAeFxCO50bJkhjAT
+        c0BTJdsd9xm6sDXHBSfUDpxhuA==
+X-Google-Smtp-Source: AMrXdXsiXz9lNzBtJRzZYoZO7knyMkGJuAKU2HVoj8SdqnkC3rF5X2Vg2ZsPumYSglpVhO+gGWBzxw==
+X-Received: by 2002:a05:6000:1e04:b0:273:e385:1a89 with SMTP id bj4-20020a0560001e0400b00273e3851a89mr41057650wrb.67.1673347059743;
+        Tue, 10 Jan 2023 02:37:39 -0800 (PST)
 Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id z9-20020a7bc7c9000000b003d9ef37ec1bsm8484251wmk.5.2023.01.10.02.17.53
+        by smtp.gmail.com with ESMTPSA id n6-20020adfe786000000b002bdbde1d3absm462943wrm.78.2023.01.10.02.37.38
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Jan 2023 02:18:02 -0800 (PST)
-Message-ID: <e3d32fe1-9f2b-09fb-d7e0-2c8f42e5365c@linaro.org>
-Date:   Tue, 10 Jan 2023 11:17:52 +0100
+        Tue, 10 Jan 2023 02:37:39 -0800 (PST)
+Message-ID: <4aaa960a-abe4-7f9b-88a5-a4bdf0da9ee8@linaro.org>
+Date:   Tue, 10 Jan 2023 11:37:37 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.6.1
-Subject: Re: [PATCH v2 09/11] dt-bindings: mmc: convert amlogic,meson-gx.txt
- to dt-schema
+Subject: Re: [PATCH] dt-bindings: mmc: renesas,sdhi: Fix RZ/V2M clock
+ description
 Content-Language: en-US
-To:     Neil Armstrong <neil.armstrong@linaro.org>,
+To:     Geert Uytterhoeven <geert+renesas@glider.be>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Vinod Koul <vkoul@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>, Andrew Lunn <andrew@lunn.ch>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Russell King <linux@armlinux.org.uk>
-Cc:     devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        netdev@vger.kernel.org
-References: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
- <20221117-b4-amlogic-bindings-convert-v2-9-36ad050bb625@linaro.org>
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Fabrizio Castro <fabrizio.castro.jz@renesas.com>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-renesas-soc@vger.kernel.org
+References: <054c9f4dbb0bb1525f780d1e85c724436465c20c.1673270716.git.geert+renesas@glider.be>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20221117-b4-amlogic-bindings-convert-v2-9-36ad050bb625@linaro.org>
+In-Reply-To: <054c9f4dbb0bb1525f780d1e85c724436465c20c.1673270716.git.geert+renesas@glider.be>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/01/2023 13:53, Neil Armstrong wrote:
-> Convert the Amlogic SD / eMMC controller for S905/GXBB family SoCs
-> to dt-schema.
+On 09/01/2023 14:26, Geert Uytterhoeven wrote:
+> The SD Card/MMC interface on the Renesas RZ/V2M SoC uses 4 clocks, like
+> on RZ/G2L SoCs.
 > 
-> Take in account the used variant with amlogic,meson-gx-mmc.
+> The current description specifies 3 clocks, like on R-Car Gen3, which
+> will lead to "make dtbs_check" failures:
 > 
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
-> ---
->  .../bindings/mmc/amlogic,meson-gx-mmc.yaml         | 75 ++++++++++++++++++++++
->  .../devicetree/bindings/mmc/amlogic,meson-gx.txt   | 39 -----------
->  2 files changed, 75 insertions(+), 39 deletions(-)
+>     arch/arm64/boot/dts/renesas/r9a09g011-v2mevk2.dtb: mmc@85000000: clocks: [[3, 1, 18], [3, 1, 20], [3, 1, 19], [3, 1, 17]] is too long
+> 	    From schema: Documentation/devicetree/bindings/mmc/renesas,sdhi.yaml
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
-> new file mode 100644
-> index 000000000000..30228964fd9c
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
-> @@ -0,0 +1,75 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/amlogic,meson-gx-mmc.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Amlogic SD / eMMC controller for S905/GXBB family SoCs
-> +
-> +description:
-> +  The MMC 5.1 compliant host controller on Amlogic provides the
-> +  interface for SD, eMMC and SDIO devices
-> +
-> +maintainers:
-> +  - Neil Armstrong <neil.armstrong@linaro.org>
-> +
-> +allOf:
-> +  - $ref: mmc-controller.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - enum:
-> +          - amlogic,meson-gx-mmc
-> +          - amlogic,meson-axg-mmc
-> +      - items:
-> +          - const: amlogic,meson-gx-mmc
-
-This does not look correct. Either gx is alone (not compatible with
-gxbb) or it is compatible with gxbb. Cannot be both.
+> Fixes: c8dbdf2a1044951b ("dt-bindings: mmc: renesas,sdhi: Document RZ/V2M support")
 
 
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
 Best regards,
 Krzysztof
