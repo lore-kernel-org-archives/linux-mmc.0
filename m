@@ -2,82 +2,88 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19EB5C61DB3
-	for <linux-mmc@archiver.kernel.org>; Tue, 10 Jan 2023 23:23:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A32D0C54EBE
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 05:56:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232252AbjAJXXb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 10 Jan 2023 18:23:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46852 "EHLO
+        id S229462AbjAKF4v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 00:56:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55046 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234114AbjAJXX3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 10 Jan 2023 18:23:29 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8ED1463F5;
-        Tue, 10 Jan 2023 15:23:27 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2D3C56194C;
-        Tue, 10 Jan 2023 23:23:27 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75CCCC433D2;
-        Tue, 10 Jan 2023 23:23:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673393006;
-        bh=KfSPuN+1QhbNUv5tw8QDzbsOpJukhbxBa7/tiSZA6YE=;
-        h=Date:From:To:Cc:Subject:In-Reply-To:References:From;
-        b=kmBayYB9RkU0+wQl/9jgcDnUFJ81UiubfLDDvtLmip6svd0iZ81Ae9ZOhNuunaz53
-         3+YDBMo3PYZkUs7PS7dCJKYagCO/5yWpIhjev9LaLijR1Sld+WLcGE/RfYOl5Mg9KC
-         9HdifMep/S3Amhq3h+Ed2IrgxEZCaC4JyGgLR36CldJ60HpvOU0qa19/oPMYFerWIu
-         qpWJ0rtAbxpY18prh4Ut8fRWlNQAZ2ISvfPniM8XDKtdWjPfQEcG3YIpPnqKZj3PgB
-         +j7daBrq1rgokCJ3+YLhtG9BQIxFuvvvg1HEltXvh+5uRv8CBvthbrqKQ0wQxv9WPq
-         Si2fNdrIaT1dQ==
-Date:   Tue, 10 Jan 2023 15:23:24 -0800
-From:   Jakub Kicinski <kuba@kernel.org>
-To:     Neil Armstrong <neil.armstrong@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Vinod Koul <vkoul@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Paolo Abeni <pabeni@redhat.com>, Andrew Lunn <andrew@lunn.ch>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Russell King <linux@armlinux.org.uk>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        netdev@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCH v2 00/11] dt-bindings: first batch of dt-schema
- conversions for Amlogic Meson bindings
-Message-ID: <20230110152324.1e19974d@kernel.org>
-In-Reply-To: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
-References: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
+        with ESMTP id S234954AbjAKF4o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 00:56:44 -0500
+Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AC4C22;
+        Tue, 10 Jan 2023 21:56:43 -0800 (PST)
+Received: by mail-wm1-f43.google.com with SMTP id m26-20020a05600c3b1a00b003d9811fcaafso11788444wms.5;
+        Tue, 10 Jan 2023 21:56:43 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=nRJzXWIcLGfsAx1uj7LxnnT+lT00vnfCm0VUVZlOxf4=;
+        b=4PGs3vxXv8jmfiTEdT5Jkqt4HXEomIub8UhN2KDW4fc1Dl+iyGTlvvu6T145xaD9LJ
+         NTrS3Xxkq3iMgVCiuyrzTjqfbzaPhsejam54sr7f3HW8ESlgELodftT3vUNEjpAP+lZS
+         3KrwPmH5/fQgcnm9RgMBxxZHYqy12ygXDTDnQwxAjXIgtn/zNzkMO5mEXlQz7NgAUYvm
+         sPA/1G9iApMBT9CzHmj8XZKcwiTfEGoMatfyguUZqTAMBHMGnIAtnQ1eDwBniRraUwwh
+         BS387+TzqWPwdQX5GqJf4N7ZJ1VpukD0ZK/hjrvNo8A0V1aRd4itJ+yoc7apxikB44Gl
+         hVyw==
+X-Gm-Message-State: AFqh2koXKexg7JsroSFfORCG6HViA2e39T7wIYHN7j6ir+/m4amU37Ey
+        k4v41cyFLYiv7DpdcM/BITU=
+X-Google-Smtp-Source: AMrXdXuGMiv2BcYICZBUe09GCtW4hRfxWXShZC6GeIunbbzMLdfIj5QG6N/iKwiH0FjjphNqa2+B0A==
+X-Received: by 2002:a05:600c:22d4:b0:3cf:82b9:2fe6 with SMTP id 20-20020a05600c22d400b003cf82b92fe6mr61119232wmg.8.1673416601718;
+        Tue, 10 Jan 2023 21:56:41 -0800 (PST)
+Received: from ?IPV6:2a0b:e7c0:0:107::aaaa:49? ([2a0b:e7c0:0:107::aaaa:49])
+        by smtp.gmail.com with ESMTPSA id az28-20020a05600c601c00b003cf57329221sm21419506wmb.14.2023.01.10.21.56.40
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 10 Jan 2023 21:56:41 -0800 (PST)
+Message-ID: <c10bf347-9f53-bcaf-acc2-d3dd6baa0efb@kernel.org>
+Date:   Wed, 11 Jan 2023 06:56:38 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+Subject: Re: [PATCH v2 11/13] tty/serial: Call ->dtr_rts() parameter active
+ consistently
+Content-Language: en-US
+To:     =?UTF-8?Q?Ilpo_J=c3=a4rvinen?= <ilpo.jarvinen@linux.intel.com>,
+        linux-serial@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Johan Hovold <johan@kernel.org>,
+        =?UTF-8?Q?Samuel_Iglesias_Gons=c3=a1lvez?= <siglesias@igalia.com>,
+        Rodolfo Giometti <giometti@enneenne.com>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        David Lin <dtwlin@gmail.com>, Alex Elder <elder@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
+        linuxppc-dev@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org
+References: <20230110120226.14972-1-ilpo.jarvinen@linux.intel.com>
+ <20230110120226.14972-12-ilpo.jarvinen@linux.intel.com>
+From:   Jiri Slaby <jirislaby@kernel.org>
+In-Reply-To: <20230110120226.14972-12-ilpo.jarvinen@linux.intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 09 Jan 2023 13:53:25 +0100 Neil Armstrong wrote:
-> - patch 12: added reviewed-by
-> - Link to v1: https://lore.kernel.org/r/20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org
+On 10. 01. 23, 13:02, Ilpo Järvinen wrote:
+> Convert various parameter names for ->dtr_rts() and related functions
+> from onoff, on, and raise to active.
 
-I'm guessing patch 12 is patch 11 in this posting.
-Should we take it via net-next? Looks acked & ready.
+Much better.
+
+> Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+
+Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
+
+-- 
+js
+suse labs
+
