@@ -2,88 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A32D0C54EBE
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 05:56:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7345EC54EBE
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 08:08:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229462AbjAKF4v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 00:56:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55046 "EHLO
+        id S230079AbjAKIIt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 03:08:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234954AbjAKF4o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 00:56:44 -0500
-Received: from mail-wm1-f43.google.com (mail-wm1-f43.google.com [209.85.128.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 34AC4C22;
-        Tue, 10 Jan 2023 21:56:43 -0800 (PST)
-Received: by mail-wm1-f43.google.com with SMTP id m26-20020a05600c3b1a00b003d9811fcaafso11788444wms.5;
-        Tue, 10 Jan 2023 21:56:43 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=nRJzXWIcLGfsAx1uj7LxnnT+lT00vnfCm0VUVZlOxf4=;
-        b=4PGs3vxXv8jmfiTEdT5Jkqt4HXEomIub8UhN2KDW4fc1Dl+iyGTlvvu6T145xaD9LJ
-         NTrS3Xxkq3iMgVCiuyrzTjqfbzaPhsejam54sr7f3HW8ESlgELodftT3vUNEjpAP+lZS
-         3KrwPmH5/fQgcnm9RgMBxxZHYqy12ygXDTDnQwxAjXIgtn/zNzkMO5mEXlQz7NgAUYvm
-         sPA/1G9iApMBT9CzHmj8XZKcwiTfEGoMatfyguUZqTAMBHMGnIAtnQ1eDwBniRraUwwh
-         BS387+TzqWPwdQX5GqJf4N7ZJ1VpukD0ZK/hjrvNo8A0V1aRd4itJ+yoc7apxikB44Gl
-         hVyw==
-X-Gm-Message-State: AFqh2koXKexg7JsroSFfORCG6HViA2e39T7wIYHN7j6ir+/m4amU37Ey
-        k4v41cyFLYiv7DpdcM/BITU=
-X-Google-Smtp-Source: AMrXdXuGMiv2BcYICZBUe09GCtW4hRfxWXShZC6GeIunbbzMLdfIj5QG6N/iKwiH0FjjphNqa2+B0A==
-X-Received: by 2002:a05:600c:22d4:b0:3cf:82b9:2fe6 with SMTP id 20-20020a05600c22d400b003cf82b92fe6mr61119232wmg.8.1673416601718;
-        Tue, 10 Jan 2023 21:56:41 -0800 (PST)
-Received: from ?IPV6:2a0b:e7c0:0:107::aaaa:49? ([2a0b:e7c0:0:107::aaaa:49])
-        by smtp.gmail.com with ESMTPSA id az28-20020a05600c601c00b003cf57329221sm21419506wmb.14.2023.01.10.21.56.40
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 10 Jan 2023 21:56:41 -0800 (PST)
-Message-ID: <c10bf347-9f53-bcaf-acc2-d3dd6baa0efb@kernel.org>
-Date:   Wed, 11 Jan 2023 06:56:38 +0100
+        with ESMTP id S231332AbjAKIIe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 03:08:34 -0500
+Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC5CBBEE;
+        Wed, 11 Jan 2023 00:08:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1673424512; x=1704960512;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=MBdMtDHtzHcShA2uCyuuiIPc0Vfm3GFaBBE0lvtFfmU=;
+  b=NBiD2ffwv38nveE8wirgd/tgEiauSlVJ0BH5p8x7KbwW8wyTQvVK+dqE
+   az3wLijaEyxxqXXp6onoVgaDojc6togoccgMcgND6GWWIYcTKD9q2//d6
+   074WDsadYfN6XS55QW1w1TQ8cQhp0FWZWSORD8r2vO70puioSx03Tfe8L
+   CxrnvW4ciN37sufs3CrwETj2EJ3KrgOEgIW2ordBmcPcL/FJ0otLYL20z
+   QistGLriBguEmLqEeCuZzPR+GJ73EmFylqkXo5KUwMcyptfE02iq255G7
+   aD90UP3h/jg/ivCHLupB+S1gQAyL7mJpciPb9fiItoNiSazbRqyNfI9AA
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="323418509"
+X-IronPort-AV: E=Sophos;i="5.96,315,1665471600"; 
+   d="scan'208";a="323418509"
+Received: from fmsmga004.fm.intel.com ([10.253.24.48])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:08:32 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="725833820"
+X-IronPort-AV: E=Sophos;i="5.96,315,1665471600"; 
+   d="scan'208";a="725833820"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.37.49])
+  by fmsmga004-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:08:29 -0800
+Message-ID: <4edc44f2-005e-803d-942c-171abd787252@intel.com>
+Date:   Wed, 11 Jan 2023 10:08:26 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH v2 11/13] tty/serial: Call ->dtr_rts() parameter active
- consistently
+ Firefox/102.0 Thunderbird/102.6.1
+Subject: Re: [PATCH 4/5] drivers: mmc: sdhci: Add option to configure sdhci
+ timeout
 Content-Language: en-US
-To:     =?UTF-8?Q?Ilpo_J=c3=a4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-        linux-serial@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Johan Hovold <johan@kernel.org>,
-        =?UTF-8?Q?Samuel_Iglesias_Gons=c3=a1lvez?= <siglesias@igalia.com>,
-        Rodolfo Giometti <giometti@enneenne.com>,
-        Arnd Bergmann <arnd@arndb.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        David Lin <dtwlin@gmail.com>, Alex Elder <elder@kernel.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
-        linuxppc-dev@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org
-References: <20230110120226.14972-1-ilpo.jarvinen@linux.intel.com>
- <20230110120226.14972-12-ilpo.jarvinen@linux.intel.com>
-From:   Jiri Slaby <jirislaby@kernel.org>
-In-Reply-To: <20230110120226.14972-12-ilpo.jarvinen@linux.intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        yamada.masahiro@socionext.com, devicetree@vger.kernel.org
+Cc:     jannadurai@marvell.com, cchavva@marvell.com
+References: <20221219142418.27949-1-pmalgujar@marvell.com>
+ <20221219142418.27949-5-pmalgujar@marvell.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221219142418.27949-5-pmalgujar@marvell.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 10. 01. 23, 13:02, Ilpo Järvinen wrote:
-> Convert various parameter names for ->dtr_rts() and related functions
-> from onoff, on, and raise to active.
+On 19/12/22 16:24, Piyush Malgujar wrote:
+> From: Jayanthi Annadurai <jannadurai@marvell.com>
+> 
+> Add config option to choose the sdhci timeout in seconds.
 
-Much better.
+This approach is not ok, but why is the change wanted?
 
-> Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
-
-Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
-
--- 
-js
-suse labs
+> 
+> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+> ---
+>  drivers/mmc/host/Kconfig | 8 ++++++++
+>  drivers/mmc/host/sdhci.c | 3 ++-
+>  2 files changed, 10 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> index b5b2ae0bb4625bdb9d17acdbb1887c9caa3a1f32..ab48f2bc4cff73d1aad8d7da542d761cf0346d9f 100644
+> --- a/drivers/mmc/host/Kconfig
+> +++ b/drivers/mmc/host/Kconfig
+> @@ -1132,3 +1132,11 @@ config MMC_LITEX
+>  	  module will be called litex_mmc.
+>  
+>  	  If unsure, say N.
+> +
+> +config MMC_SDHCI_TIMEOUT
+> +	int
+> +	default 1 if MMC_SDHCI_CADENCE
+> +	default 10
+> +	depends on MMC_SDHCI
+> +	help
+> +	  Default timeout value for command and data.
+> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> index f3af1bd0f7b955272fbd8b034ecb591860b89aed..e9bc24258746834ec9c8f13fe24456587a2b758d 100644
+> --- a/drivers/mmc/host/sdhci.c
+> +++ b/drivers/mmc/host/sdhci.c
+> @@ -1707,7 +1707,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+>  	else if (!cmd->data && cmd->busy_timeout > 9000)
+>  		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+>  	else
+> -		timeout += 10 * HZ;
+> +		timeout += CONFIG_MMC_SDHCI_TIMEOUT * HZ;
+> +
+>  	sdhci_mod_timer(host, cmd->mrq, timeout);
+>  
+>  	if (host->use_external_dma)
 
