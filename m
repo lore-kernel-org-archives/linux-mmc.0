@@ -2,48 +2,48 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02F85C6379F
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 08:24:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FD88C54EBE
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 08:29:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232088AbjAKIX6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 03:23:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41772 "EHLO
+        id S231757AbjAKI3m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 03:29:42 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46330 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236046AbjAKIXv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 03:23:51 -0500
-Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B17CD1000;
-        Wed, 11 Jan 2023 00:23:50 -0800 (PST)
+        with ESMTP id S230182AbjAKI3c (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 03:29:32 -0500
+Received: from mga18.intel.com (mga18.intel.com [134.134.136.126])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99D0B2017;
+        Wed, 11 Jan 2023 00:29:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1673425430; x=1704961430;
+  t=1673425771; x=1704961771;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=iNWrT922LmReXHq/JGYW4tBxvn+UkA4L0Brokd55I1k=;
-  b=eYgcFbIbYCkG4dXR+YBAm9mLqLMAlq+Weq6M+vYK3uaWbjo/4WrADr/4
-   b7lFA9M4O0MeE3UHb8Xy9j1YXRhhCOtJiatzhzh2ha+MMzrKA881XZ6dD
-   1kIsf+/zcSe8Bix/mgx+nkIC0lohSt8lOfvK7ZNnQ6itV+9Aa/BsxNxVR
-   M5GztPdzK3pX3Trgodd+BviNYRkDiNeNnt4vTtYtB5OLZledvf+V9OVJn
-   tzSiuj+gNuEDK7WYz0AksdReaKZtCs7xYPnVH+iwzaG3XafdPlCXrE3ae
-   7S5BINul8UdWfM/Ub4fSDH7PLaaTNasrzlkRpn3V+C5Y7xhkLUBCeT7n/
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="387820503"
+  bh=uBFuYOIFelXp3Czc6m1RT/eC6rDQTkmly1w/VKCVTlo=;
+  b=jN8Z0QgAzYTWPrnk21vg8psXEQNBXBM/BIBZnhvoaS3PgOR/P41JsZUe
+   uo1xs/6xOybWLnWRf8aZ7Fz37EREa8LTH8BALh42ShYO93TeHDSoqnDAG
+   Ttg6VnRyU3wOQgP2F9IOvM0XjE2QOyemx/ta6hu0FyFQ6NjxYe0MpL56M
+   89jvHpIwgoL80PFKQDiVRGaR+7+Ds4XL/luJ4slzCsEvZKC/wDlyTfcnV
+   oiWWeAYu4mOb/af8k/o+xlR7fyIe0u8HiflK5gOZ8E6xnQVGa9ooNvnS6
+   Ux19HKELNixobc/Ncvg9mneaajbNONdddcXbmeq+8ScewIchxgB/hw+FL
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="306878077"
 X-IronPort-AV: E=Sophos;i="5.96,315,1665471600"; 
-   d="scan'208";a="387820503"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:23:49 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="607281441"
+   d="scan'208";a="306878077"
+Received: from fmsmga005.fm.intel.com ([10.253.24.32])
+  by orsmga106.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:29:31 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="986071805"
 X-IronPort-AV: E=Sophos;i="5.96,315,1665471600"; 
-   d="scan'208";a="607281441"
+   d="scan'208";a="986071805"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.37.49])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:23:46 -0800
-Message-ID: <35ea0a7a-3d63-26b7-4dc3-69f6ca41909a@intel.com>
-Date:   Wed, 11 Jan 2023 10:23:43 +0200
+  by fmsmga005-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 00:29:27 -0800
+Message-ID: <48ac6ea0-7cd0-aae5-ff83-cdd278057708@intel.com>
+Date:   Wed, 11 Jan 2023 10:29:24 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.6.1
-Subject: Re: [PATCH 2/5] drivers: mmc: sdhci-cadence: enable
- MMC_SDHCI_IO_ACCESSORS
+Subject: Re: [PATCH 5/5] drivers: mmc: sdhci-cadence: Add debug option for
+ sdhci-cadence driver.
 Content-Language: en-US
 To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
@@ -51,11 +51,11 @@ To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
         yamada.masahiro@socionext.com, devicetree@vger.kernel.org
 Cc:     jannadurai@marvell.com, cchavva@marvell.com
 References: <20221219142418.27949-1-pmalgujar@marvell.com>
- <20221219142418.27949-3-pmalgujar@marvell.com>
+ <20221219142418.27949-6-pmalgujar@marvell.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20221219142418.27949-3-pmalgujar@marvell.com>
+In-Reply-To: <20221219142418.27949-6-pmalgujar@marvell.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -65,122 +65,169 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 19/12/22 16:24, Piyush Malgujar wrote:
 > From: Jayanthi Annadurai <jannadurai@marvell.com>
 > 
-> Add support for CONFIG_MMC_SDHCI_IO_ACCESSORS for controller
-> specific register read and write APIs.
+> Use Kernel config CONFIG_MMC_DEBUG to support dumping PHY and host
+> controller register configuration for debug.
 > 
 > Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
 > Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
 > ---
->  drivers/mmc/host/Kconfig         | 12 ++++++
->  drivers/mmc/host/sdhci-cadence.c | 63 ++++++++++++++++++++++++++++++++
->  2 files changed, 75 insertions(+)
+>  drivers/mmc/host/sdhci-cadence.c | 100 +++++++++++++++++++++++++++++++
+>  1 file changed, 100 insertions(+)
 > 
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 5e19a961c34d7b5664ab2fd43cfba82dc90913ac..b5b2ae0bb4625bdb9d17acdbb1887c9caa3a1f32 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -262,6 +262,18 @@ config MMC_SDHCI_CADENCE
->  
->  	  If unsure, say N.
->  
-> +config MMC_SDHCI_CN10K
-> +	tristate "SDHCI Cadence support for Marvell CN10K platforms"
-> +	select MMC_SDHCI_CADENCE
-> +	select MMC_SDHCI_IO_ACCESSORS
-
-Probably better to just add MMC_SDHCI_IO_ACCESSORS to 
-config MMC_SDHCI_CADENCE and drop MMC_SDHCI_CN10K
-
-> +	help
-> +	  This selects the SDHCI cadence driver and IO Accessors
-> +	  for Marvell CN10K platforms
-> +
-> +	  If you have Marvell CN10K platform, say Y or M here.
-> +
-> +	  If unsure, say N.
-> +
->  config MMC_SDHCI_CNS3XXX
->  	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
->  	depends on ARCH_CNS3XXX || COMPILE_TEST
 > diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 5332d19e489be936d6814feba4f0fc046f5e130e..6bf703f15bc5be7e3be4cb1144b78ec3585ec540 100644
+> index 6bf703f15bc5be7e3be4cb1144b78ec3585ec540..75363aabce9228755c4abed08fe17e57d1a44b23 100644
 > --- a/drivers/mmc/host/sdhci-cadence.c
 > +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -449,6 +449,61 @@ static u32 read_dqs_cmd_delay, clk_wrdqs_delay, clk_wr_delay, read_dqs_delay;
+> @@ -15,6 +15,10 @@
 >  
->  static u32 sdhci_cdns_sd6_get_mode(struct sdhci_host *host, unsigned int timing);
+>  #include "sdhci-pltfm.h"
 >  
-> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> +static u32 sdhci_cdns_sd6_readl(struct sdhci_host *host, int reg)
-> +{
-> +	return readl(host->ioaddr + reg);
-> +}
-> +
-> +static void sdhci_cdns_sd6_writel(struct sdhci_host *host, u32 val, int reg)
-> +{
-> +	writel(val, host->ioaddr + reg);
-> +}
-> +
-> +static u16 sdhci_cdns_sd6_readw(struct sdhci_host *host, int reg)
-> +{
-> +	u32 val, regoff;
-> +
-> +	regoff = reg & ~3;
-> +
-> +	val = readl(host->ioaddr + regoff);
-> +	if ((reg & 0x3) == 0)
-> +		return (val & 0xFFFF);
-> +	else
-> +		return ((val >> 16) & 0xFFFF);
-> +}
-> +
-> +static void sdhci_cdns_sd6_writew(struct sdhci_host *host, u16 val, int reg)
-> +{
-> +	writew(val, host->ioaddr + reg);
-> +}
-> +
-> +static u8 sdhci_cdns_sd6_readb(struct sdhci_host *host, int reg)
-> +{
-> +	u32 val, regoff;
-> +
-> +	regoff = reg & ~3;
-> +
-> +	val = readl(host->ioaddr + regoff);
-> +	switch (reg & 3) {
-> +	case 0:
-> +		return (val & 0xFF);
-> +	case 1:
-> +		return ((val >> 8) & 0xFF);
-> +	case 2:
-> +		return ((val >> 16) & 0xFF);
-> +	case 3:
-> +		return ((val >> 24) & 0xFF);
-> +	}
-> +	return 0;
-> +}
-> +
-> +static void sdhci_cdns_sd6_writeb(struct sdhci_host *host, u8 val, int reg)
-> +{
-> +	writeb(val, host->ioaddr + reg);
-> +}
+> +#ifdef CONFIG_MMC_DEBUG
+> +#define DEBUG_DRV	pr_info
+
+Not sure what the point of that is
+
 > +#endif
 > +
->  static int sdhci_cdns_sd6_phy_lock_dll(struct sdhci_cdns_sd6_phy *phy)
+>  #define SDMCLK_MAX_FREQ		200000000
+>  
+>  #define DEFAULT_CMD_DELAY		16
+> @@ -115,6 +119,10 @@
+>  #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_CLK_WR_DELAY		GENMASK(15, 8)
+>  #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_READ_DQS_DELAY		GENMASK(7, 0)
+>  
+> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0				0x201C
+> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1				0x2020
+> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2				0x2024
+> +
+>  #define SDHCI_CDNS_SD6_PHY_CTRL					0x2080
+>  #define	SDHCI_CDNS_SD6_PHY_CTRL_PHONY_DQS_TIMING		GENMASK(9, 4)
+>  
+> @@ -969,6 +977,94 @@ static void sdhci_cdns_sd6_calc_phy(struct sdhci_cdns_sd6_phy *phy)
+>  	}
+>  }
+>  
+> +#ifdef CONFIG_MMC_DEBUG
+
+Put the DEBUG_DRV definition here instead of above i.e.
+
+#define DEBUG_DRV	pr_info
+
+> +static void sdhci_cdns_sd6_phy_dump(struct sdhci_cdns_sd6_phy *phy)
+> +{
+> +	DEBUG_DRV("PHY Timings\n");
+> +	DEBUG_DRV("mode %d t_sdclk %d\n", phy->mode, phy->t_sdclk);
+> +
+> +	DEBUG_DRV("cp_clk_wr_delay %d\n", phy->settings.cp_clk_wr_delay);
+> +	DEBUG_DRV("cp_clk_wrdqs_delay %d\n", phy->settings.cp_clk_wrdqs_delay);
+> +	DEBUG_DRV("cp_data_select_oe_end %d\n", phy->settings.cp_data_select_oe_end);
+> +	DEBUG_DRV("cp_dll_bypass_mode %d\n", phy->settings.cp_dll_bypass_mode);
+> +	DEBUG_DRV("cp_dll_locked_mode %d\n", phy->settings.cp_dll_locked_mode);
+> +	DEBUG_DRV("cp_dll_start_point %d\n", phy->settings.cp_dll_start_point);
+> +	DEBUG_DRV("cp_io_mask_always_on %d\n", phy->settings.cp_io_mask_always_on);
+> +	DEBUG_DRV("cp_io_mask_end %d\n", phy->settings.cp_io_mask_end);
+> +	DEBUG_DRV("cp_io_mask_start %d\n", phy->settings.cp_io_mask_start);
+> +	DEBUG_DRV("cp_rd_del_sel %d\n", phy->settings.cp_rd_del_sel);
+> +	DEBUG_DRV("cp_read_dqs_cmd_delay %d\n", phy->settings.cp_read_dqs_cmd_delay);
+> +	DEBUG_DRV("cp_read_dqs_delay %d\n", phy->settings.cp_read_dqs_delay);
+> +	DEBUG_DRV("cp_sw_half_cycle_shift %d\n", phy->settings.cp_sw_half_cycle_shift);
+> +	DEBUG_DRV("cp_sync_method %d\n", phy->settings.cp_sync_method);
+> +	DEBUG_DRV("cp_use_ext_lpbk_dqs %d\n", phy->settings.cp_use_ext_lpbk_dqs);
+> +	DEBUG_DRV("cp_use_lpbk_dqs %d\n", phy->settings.cp_use_lpbk_dqs);
+> +	DEBUG_DRV("cp_use_phony_dqs %d\n", phy->settings.cp_use_phony_dqs);
+> +	DEBUG_DRV("cp_use_phony_dqs_cmd %d\n", phy->settings.cp_use_phony_dqs_cmd);
+> +	DEBUG_DRV("sdhc_extended_rd_mode %d\n", phy->settings.sdhc_extended_rd_mode);
+> +	DEBUG_DRV("sdhc_extended_wr_mode %d\n", phy->settings.sdhc_extended_wr_mode);
+> +
+> +	DEBUG_DRV("sdhc_hcsdclkadj %d\n", phy->settings.sdhc_hcsdclkadj);
+> +	DEBUG_DRV("sdhc_idelay_val %d\n", phy->settings.sdhc_idelay_val);
+> +	DEBUG_DRV("sdhc_rdcmd_en %d\n", phy->settings.sdhc_rdcmd_en);
+> +	DEBUG_DRV("sdhc_rddata_en %d\n", phy->settings.sdhc_rddata_en);
+> +	DEBUG_DRV("sdhc_rw_compensate %d\n", phy->settings.sdhc_rw_compensate);
+> +	DEBUG_DRV("sdhc_sdcfsh %d\n", phy->settings.sdhc_sdcfsh);
+> +	DEBUG_DRV("sdhc_sdcfsl %d\n", phy->settings.sdhc_sdcfsl);
+> +	DEBUG_DRV("sdhc_wrcmd0_dly %d %d\n",
+> +		  phy->settings.sdhc_wrcmd0_dly, phy->settings.sdhc_wrcmd0_sdclk_dly);
+> +	DEBUG_DRV("sdhc_wrcmd1_dly %d %d\n",
+> +		  phy->settings.sdhc_wrcmd1_dly, phy->settings.sdhc_wrcmd1_sdclk_dly);
+> +	DEBUG_DRV("sdhc_wrdata0_dly %d %d\n",
+> +		  phy->settings.sdhc_wrdata0_dly, phy->settings.sdhc_wrdata0_sdclk_dly);
+> +
+> +	DEBUG_DRV("sdhc_wrdata1_dly %d %d\n",
+> +		  phy->settings.sdhc_wrdata1_dly, phy->settings.sdhc_wrdata1_sdclk_dly);
+> +	DEBUG_DRV("hs200_tune_val %d\n", phy->settings.hs200_tune_val);
+> +}
+> +
+> +void sdhci_cdns_sd6_dump(struct sdhci_cdns_priv *priv)
+
+static
+
+> +{
+> +	struct sdhci_cdns_sd6_phy *phy = priv->phy;
+> +	int id;
+> +
+> +	sdhci_cdns_sd6_phy_dump(phy);
+> +
+> +	DEBUG_DRV("Host controller Register Dump\n");
+> +	for (id = 0; id < 14; id++)
+> +		DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
+> +
+> +	id = 29;
+> +	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
+> +	id = 30;
+> +	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
+> +
+> +	for (id = 0; id < 27; id++)
+> +		DEBUG_DRV("SRS%d 0x%x\n", id, readl(priv->hrs_addr + 0x200 + (id * 4)));
+> +
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQS_TIMING 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQS_TIMING));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GATE_LPBK 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GATE_LPBK));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_MASTER 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_MASTER));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_SLAVE 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_SLAVE));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_CTRL 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_CTRL));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GPIO_CTRL0 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GPIO_CTRL0));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQ_TIMING 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQ_TIMING));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1));
+> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2 0x%x\n",
+> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2));
+> +}
+
+Make a stub for sdhci_cdns_sd6_dump() i.e.
+
+#else
+
+static inline void sdhci_cdns_sd6_dump(struct sdhci_cdns_priv *priv)
+{
+}
+
+> +#endif
+> +
+>  static int sdhci_cdns_sd6_get_delay_params(struct device *dev, struct sdhci_cdns_priv *priv)
 >  {
->  	u32 delay_element = phy->d.delay_element_org;
-> @@ -1576,6 +1631,14 @@ static const struct sdhci_ops sdhci_cdns_sd4_ops = {
->  };
+>  	struct sdhci_cdns_sd6_phy *phy = priv->phy;
+> @@ -1373,6 +1469,10 @@ static void sdhci_cdns_sd6_set_clock(struct sdhci_host *host,
+>  		pr_debug("%s: phy init failed\n", __func__);
 >  
->  static const struct sdhci_ops sdhci_cdns_sd6_ops = {
-> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> +	.read_l = sdhci_cdns_sd6_readl,
-> +	.write_l = sdhci_cdns_sd6_writel,
-> +	.read_w = sdhci_cdns_sd6_readw,
-> +	.write_w = sdhci_cdns_sd6_writew,
-> +	.read_b = sdhci_cdns_sd6_readb,
-> +	.write_b = sdhci_cdns_sd6_writeb,
+>  	sdhci_set_clock(host, clock);
+> +
+> +#ifdef CONFIG_MMC_DEBUG
+> +	sdhci_cdns_sd6_dump(priv);
 > +#endif
->  	.get_max_clock = sdhci_cdns_get_max_clock,
->  	.set_clock = sdhci_cdns_sd6_set_clock,
->  	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
+
+With the stub above, #ifdef CONFIG_MMC_DEBUG / #endif
+is no longer needed here.
+
+>  }
+>  
+>  static int sdhci_cdns_sd4_phy_probe(struct platform_device *pdev,
 
