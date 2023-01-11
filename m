@@ -2,116 +2,110 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31546C54EBE
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 09:01:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 09103C54EBC
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 12:43:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235983AbjAKJB2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 04:01:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36502 "EHLO
+        id S231561AbjAKMnw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 07:43:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236053AbjAKJA4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 04:00:56 -0500
-Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 67B863BC
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 01:00:54 -0800 (PST)
-Received: by mail-wm1-x32a.google.com with SMTP id m26-20020a05600c3b1a00b003d9811fcaafso12066842wms.5
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 01:00:54 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=UIgNk4h0ykNf4W9R10f+g8s9MtlXPDlZWGID0CLp804=;
-        b=ACz2pUEAplUyKMwahar14IEYYnawh0ar2G+KL0+AdO+fXKDb6L1+7Aq1cR/JhRxMxF
-         mptt0m7OE+hHLEPyv2GGxmbq78+4PKJIg2OU+Et0ss+4vM4s35EB+0jdnp7VOr0n3o4Y
-         sVNrXDS1NCtl4llNRycijVOG7GqCqJE9sTXrkMnrFCkCNHARqK/VingD2ZFf2CaIyh5R
-         BkUyz70LPfPlxaoLoSrL9Eyv1OPob/snhvTSgSee+4oBHoO28UzKBMYs7qZmo3PKc7Oj
-         TZY7YEEZvny5IzPNF2MZFoR+8B8dExdbws1pT2JocEc7BXwbvR4fsYcDcyxTp6JjTglr
-         yNAw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=UIgNk4h0ykNf4W9R10f+g8s9MtlXPDlZWGID0CLp804=;
-        b=YymFutW4ELHWSFa/HvwWXg/iax7cz9uoSZA+SbtuC6jpo1F7+6sUc2tgM+eBb3onjj
-         k1h3oJYHxNa+n2BkYTyNEGtFKVWZbRpVnmMotRFsrTalfhwMqbXf83yzdnJjvOA35jx0
-         KlnpNOFMeZgLvbYKjy5l3+F8YXeuE6DsFG3E44Njd7cMXWg39eLE6fYGcyQRMgrEFOlo
-         XF46oD8Og1GBvUkB+iRYTwS6N1kkkLfzhpdBc/JOdkpHHACmLFStK4EbQtqKibtyoAex
-         o7tdS6jUKm3V9ViLSH0tQ/PHMsfCvYE7EqNo8mEKqeiZAYL0q/mr90vxje+DJ/KXvva7
-         pUVw==
-X-Gm-Message-State: AFqh2kp3sExX3CdWk68HartHl8JWcbqAXJr3Rc2nVKfa6f01XAP/+Rks
-        cy+I5pbWCJz4IgX6/+l5IxByPg==
-X-Google-Smtp-Source: AMrXdXu50nuURvF/uZXf+xmLuSwesdnOY8E4IcaZoYRp8Au4jWUve2YDc0RJ8X2U2aelNYBfkHhv2g==
-X-Received: by 2002:a05:600c:34d0:b0:3d6:b691:b80d with SMTP id d16-20020a05600c34d000b003d6b691b80dmr50949988wmq.21.1673427652953;
-        Wed, 11 Jan 2023 01:00:52 -0800 (PST)
-Received: from ?IPV6:2a01:e0a:982:cbb0:d95d:43b7:d6a9:39a5? ([2a01:e0a:982:cbb0:d95d:43b7:d6a9:39a5])
-        by smtp.gmail.com with ESMTPSA id o21-20020a1c7515000000b003d995a704fdsm17507540wmc.33.2023.01.11.01.00.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 11 Jan 2023 01:00:52 -0800 (PST)
-Message-ID: <08698c06-49b0-1cf7-efd3-1038104972cf@linaro.org>
-Date:   Wed, 11 Jan 2023 10:00:51 +0100
+        with ESMTP id S231297AbjAKMnv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 07:43:51 -0500
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4017AE5;
+        Wed, 11 Jan 2023 04:43:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1673441030; x=1704977030;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=clvbpco3vRjdOez103L/Q2h8uRiPBYken5tnQCx83QA=;
+  b=eMM9W5XPGTU91wZQ9jMixEC9+JrGk0caP9z1Kekiks7A+/K46SBAoHkI
+   Y5eC+qY6KgzzAmRGdhIgVLtvr6LDrF4ZaQstEu5pnTd2Mg/oHSq5LLIQr
+   zhXQiYGQafzsf8rtAh893fW21Xx8plmYxXCqLLZ1SbRiEvMAaXozPSo27
+   yEoZ8DoqQUM3gOiSn6OxfFXgdCpRWIHYH1hVasFUDnLPc+1hns8hhAVku
+   KBYyf2nLIkSABU8ro7rlX1dhOEIeUO8gz/e3HphRlCQ3ckFuU8iPxRP9F
+   ecW3SxtaEQeY8bidmKXXhi2A8W64VehLA/V/KVp0TaXMJgQhA2O03aIxM
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="385708569"
+X-IronPort-AV: E=Sophos;i="5.96,317,1665471600"; 
+   d="scan'208";a="385708569"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 04:43:49 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10586"; a="607347275"
+X-IronPort-AV: E=Sophos;i="5.96,317,1665471600"; 
+   d="scan'208";a="607347275"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.37.49])
+  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Jan 2023 04:43:47 -0800
+Message-ID: <5b50ea6c-d2c6-4dff-9689-a67039fb86e2@intel.com>
+Date:   Wed, 11 Jan 2023 14:43:43 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.0
-From:   Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [PATCH v2 00/11] dt-bindings: first batch of dt-schema
- conversions for Amlogic Meson bindings
+ Firefox/102.0 Thunderbird/102.6.1
+Subject: Re: [PATCH v3 0/8] mmc: sdhci-pxav2: Add support for PXA168
 Content-Language: en-US
-To:     Jakub Kicinski <kuba@kernel.org>
+To:     Doug Brown <doug@schmorgal.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Alessandro Zummo <a.zummo@towertech.it>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Vinod Koul <vkoul@kernel.org>,
-        Kishon Vijay Abraham I <kishon@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Paolo Abeni <pabeni@redhat.com>, Andrew Lunn <andrew@lunn.ch>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Russell King <linux@armlinux.org.uk>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        netdev@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-References: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
- <20230110152324.1e19974d@kernel.org>
-Organization: Linaro Developer Services
-In-Reply-To: <20230110152324.1e19974d@kernel.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+References: <20221229200411.295339-1-doug@schmorgal.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20221229200411.295339-1-doug@schmorgal.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 11/01/2023 00:23, Jakub Kicinski wrote:
-> On Mon, 09 Jan 2023 13:53:25 +0100 Neil Armstrong wrote:
->> - patch 12: added reviewed-by
->> - Link to v1: https://lore.kernel.org/r/20221117-b4-amlogic-bindings-convert-v1-0-3f025599b968@linaro.org
+On 29/12/22 22:04, Doug Brown wrote:
+> This is a revival of an earlier patch series from 2013 to add support
+> for the PXA168 SDHC controller, with an additional SDIO IRQ errata fix.
+> It also cleans up the clock naming to be consistent with the existing DT
+> schema shared with the pxav3 driver (in a backwards-compatible way).
 > 
-> I'm guessing patch 12 is patch 11 in this posting.
-> Should we take it via net-next? Looks acked & ready.
+> Here is the original patch series this is based on:
+> https://lore.kernel.org/linux-mmc/1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com/
+> 
+> Note that I left out the platform_specific_completion and clock gating
+> changes from the original patches. They both seemed controversial, and
+> don't seem necessary based on my testing. I've been running this code on
+> a PXA168 for months without any issues.
 
-Exact it's ready to be taken
+For patch 1-7:
 
-Thanks,
-Neil
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> 
+> Changes in v3:
+> - Use OF match data rather than of_match_device and of_device_is_compatible
+> - Simplify some instances of pdev->dev that could have just been "dev"
+> - Handle EPROBE_DEFER when getting the clock
+> - Use devm_clk_get_optional_enabled for the core clock (it's simpler)
+> - Clear sdio_mrq before calling mmc_request_done
+> - Small tweaks to devicetree binding requested by Krzysztof
+> 
+> Changes in v2:
+> - Fix mistakes in devicetree binding
+> - Use cleaner code for pxav1_readw suggested by Adrian
+> - Switch to request_done() and irq() for SDIO workaround CMD0 handling
+> 
+> Doug Brown (8):
+>   mmc: sdhci-pxav2: add initial support for PXA168 V1 controller
+>   mmc: sdhci-pxav2: enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+>   mmc: sdhci-pxav2: add register workaround for PXA168 silicon bug
+>   mmc: sdhci-pxav2: change clock name to match DT bindings
+>   mmc: sdhci-pxav2: add optional core clock
+>   mmc: sdhci-pxav2: add SDIO card IRQ workaround for PXA168 V1
+>     controller
+>   mmc: sdhci-pxav2: add optional pinctrl for SDIO IRQ workaround
+>   dt-bindings: mmc: sdhci-pxa: add pxav1
+> 
+>  .../devicetree/bindings/mmc/sdhci-pxa.yaml    |  19 ++-
+>  drivers/mmc/host/Kconfig                      |   1 +
+>  drivers/mmc/host/sdhci-pxav2.c                | 153 ++++++++++++++++--
+>  3 files changed, 159 insertions(+), 14 deletions(-)
+> 
 
