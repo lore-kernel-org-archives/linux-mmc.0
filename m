@@ -2,39 +2,39 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A13EEC5479D
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 16:55:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3ADAFC67871
+	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 17:30:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235058AbjAKQzI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 11:55:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57568 "EHLO
+        id S234415AbjAKRai (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 12:30:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56222 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235533AbjAKQyo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 11:54:44 -0500
+        with ESMTP id S239669AbjAKR2s (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 12:28:48 -0500
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8842F175BF;
-        Wed, 11 Jan 2023 08:54:43 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16CAB3AA9A;
+        Wed, 11 Jan 2023 09:25:03 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 155F161D9C;
-        Wed, 11 Jan 2023 16:54:43 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5EC4BC433D2;
-        Wed, 11 Jan 2023 16:54:42 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A715461DA8;
+        Wed, 11 Jan 2023 17:25:02 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0D301C433F0;
+        Wed, 11 Jan 2023 17:25:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1673456082;
-        bh=mXESQehV0wt8kRi6/+LpO/EWbusEEZr0NKPtbWhQXkk=;
+        s=k20201202; t=1673457902;
+        bh=DVZXWm+6uZXTGUquageewQdNitAS0dZ/Rv0HUi2X+jA=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=NZ2n4T9WAfM31GVkMr0U+OYQ1Le0CO4szDFcbo43kBez/1J9qnZ9YKq8esW75ezAZ
-         8JfUAS86yxHZ9RhJ0V0pNmj/VY/ORz9S6fCeFssGIrcuF1Xfq9yUTkn3I4Is0Wx2Mc
-         NFzsNx9oyDWOwe61DNPL38/EqDVkfCeFJN2jUfno83iUYhu70LDJ+1tw4eGExWbpbY
-         EOSUDeG+tMj/l65lE9dJr/seo+5C+OIm0cRJdutUZSTltGuxSufv6PYLoSM27KZI6v
-         4KVn8oRKJo1GTkXYra54pA1zq+/IHJ9a5qCkOem0Z3aiYG9t9YXNKYj154cUDU8BE7
-         E8CK13X7gSsBA==
+        b=DPY8nHsUYUyB1FMkKMK5P8AKgMQ9KX2B6f247PvJ+riiRDiQoqC/5OzHrzDJ/Vl1P
+         1UCrywVZq6EVIa8yMp/Du7Rec5ZCul8/WdqXUQfJm37zgP/MNHnH93azniNI3/rVXx
+         JKKKrg/yVcOa+w+hxVOEuMn84V+9VByHs+tKbf+o5cVdHYnFE0tlH2u0Ijl9t9Vj0s
+         9m7y2y55yRrNes8naqVEoTmKvUBBRJVkmIzPCN1k/cZTmMONERW9vmSYAW07lKNVS3
+         Wdg41E/mJeGERYO6QM58xc3RtY0Z4fSp909QhAK3H+x5ZZ0xLItWwz4oxSB4nDhied
+         fWU9/PViL4aPg==
 Received: from johan by xi.lan with local (Exim 4.94.2)
         (envelope-from <johan@kernel.org>)
-        id 1pFeN6-0003YU-Rv; Wed, 11 Jan 2023 17:54:41 +0100
-Date:   Wed, 11 Jan 2023 17:54:40 +0100
+        id 1pFeqT-00045s-AT; Wed, 11 Jan 2023 18:25:02 +0100
+Date:   Wed, 11 Jan 2023 18:25:01 +0100
 From:   Johan Hovold <johan@kernel.org>
 To:     Ilpo =?utf-8?B?SsOkcnZpbmVu?= <ilpo.jarvinen@linux.intel.com>
 Cc:     linux-serial@vger.kernel.org,
@@ -44,89 +44,77 @@ Cc:     linux-serial@vger.kernel.org,
         <siglesias@igalia.com>, Rodolfo Giometti <giometti@enneenne.com>,
         Arnd Bergmann <arnd@arndb.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        David Lin <dtwlin@gmail.com>, Alex Elder <elder@kernel.org>,
         Shawn Guo <shawnguo@kernel.org>,
         Sascha Hauer <s.hauer@pengutronix.de>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         Fabio Estevam <festevam@gmail.com>,
         NXP Linux Team <linux-imx@nxp.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        greybus-dev@lists.linaro.org, linux-staging@lists.linux.dev,
-        linuxppc-dev@lists.ozlabs.org,
-        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org
-Subject: Re: [PATCH v3 11/13] tty/serial: Call ->dtr_rts() parameter active
- consistently
-Message-ID: <Y77p0P9YaCwPArxv@hovoldconsulting.com>
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: Re: [PATCH v3 06/13] tty: Convert ->carrier_raised() and callchains
+ to bool
+Message-ID: <Y77w7aUX4f/f6kFV@hovoldconsulting.com>
 References: <20230111142331.34518-1-ilpo.jarvinen@linux.intel.com>
- <20230111142331.34518-12-ilpo.jarvinen@linux.intel.com>
+ <20230111142331.34518-7-ilpo.jarvinen@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230111142331.34518-12-ilpo.jarvinen@linux.intel.com>
+In-Reply-To: <20230111142331.34518-7-ilpo.jarvinen@linux.intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Jan 11, 2023 at 04:23:29PM +0200, Ilpo Järvinen wrote:
-> Convert various parameter names for ->dtr_rts() and related functions
-> from onoff, on, and raise to active.
+On Wed, Jan 11, 2023 at 04:23:24PM +0200, Ilpo Järvinen wrote:
+> Return boolean from ->carrier_raised() instead of 0 and 1. Make the
+> return type change also to tty_port_carrier_raised() that makes the
+> ->carrier_raised() call (+ cd variable in moxa into which its return
+> value is stored).
+> 
+> Also cleans up a few unnecessary constructs related to this change:
+> 
+> 	return xx ? 1 : 0;
+> 	-> return xx;
+> 
+> 	if (xx)
+> 		return 1;
+> 	return 0;
+> 	-> return xx;
 > 
 > Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
 > Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
 > ---
->  drivers/char/pcmcia/synclink_cs.c | 6 +++---
->  drivers/mmc/core/sdio_uart.c      | 6 +++---
->  drivers/staging/greybus/uart.c    | 4 ++--
->  drivers/tty/amiserial.c           | 4 ++--
->  drivers/tty/hvc/hvc_console.h     | 2 +-
->  drivers/tty/hvc/hvc_iucv.c        | 6 +++---
->  drivers/tty/mxser.c               | 4 ++--
->  drivers/tty/n_gsm.c               | 4 ++--
->  drivers/tty/serial/serial_core.c  | 8 ++++----
->  drivers/tty/synclink_gt.c         | 4 ++--
->  include/linux/tty_port.h          | 4 ++--
+>  drivers/char/pcmcia/synclink_cs.c | 8 +++-----
+>  drivers/mmc/core/sdio_uart.c      | 7 +++----
+>  drivers/tty/amiserial.c           | 2 +-
+>  drivers/tty/moxa.c                | 4 ++--
+>  drivers/tty/mxser.c               | 5 +++--
+>  drivers/tty/n_gsm.c               | 8 ++++----
+>  drivers/tty/serial/serial_core.c  | 9 ++++-----
+>  drivers/tty/synclink_gt.c         | 7 ++++---
+>  drivers/tty/tty_port.c            | 4 ++--
+>  drivers/usb/serial/ch341.c        | 7 +++----
+>  drivers/usb/serial/f81232.c       | 6 ++----
+>  drivers/usb/serial/pl2303.c       | 7 ++-----
+>  drivers/usb/serial/spcp8x5.c      | 7 ++-----
+>  drivers/usb/serial/usb-serial.c   | 4 ++--
+>  include/linux/tty_port.h          | 6 +++---
 >  include/linux/usb/serial.h        | 2 +-
->  12 files changed, 27 insertions(+), 27 deletions(-)
+>  net/bluetooth/rfcomm/tty.c        | 2 +-
+>  17 files changed, 42 insertions(+), 53 deletions(-)
 
-> diff --git a/include/linux/tty_port.h b/include/linux/tty_port.h
-> index c44e489de0ff..edf685a24f7c 100644
-> --- a/include/linux/tty_port.h
-> +++ b/include/linux/tty_port.h
-> @@ -16,7 +16,7 @@ struct tty_struct;
->  /**
->   * struct tty_port_operations -- operations on tty_port
->   * @carrier_raised: return true if the carrier is raised on @port
-> - * @dtr_rts: raise the DTR line if @raise is true, otherwise lower DTR
-> + * @dtr_rts: raise the DTR line if @active is true, otherwise lower DTR
->   * @shutdown: called when the last close completes or a hangup finishes IFF the
->   *	port was initialized. Do not use to free resources. Turn off the device
->   *	only. Called under the port mutex to serialize against @activate and
-> @@ -32,7 +32,7 @@ struct tty_struct;
->   */
->  struct tty_port_operations {
->  	bool (*carrier_raised)(struct tty_port *port);
-> -	void (*dtr_rts)(struct tty_port *port, bool raise);
-> +	void (*dtr_rts)(struct tty_port *port, bool active);
->  	void (*shutdown)(struct tty_port *port);
->  	int (*activate)(struct tty_port *port, struct tty_struct *tty);
->  	void (*destruct)(struct tty_port *port);
-> diff --git a/include/linux/usb/serial.h b/include/linux/usb/serial.h
-> index bad343c5e8a7..33afd9f3ebbe 100644
-> --- a/include/linux/usb/serial.h
-> +++ b/include/linux/usb/serial.h
-> @@ -292,7 +292,7 @@ struct usb_serial_driver {
->  			struct serial_icounter_struct *icount);
->  	/* Called by the tty layer for port level work. There may or may not
->  	   be an attached tty at this point */
-> -	void (*dtr_rts)(struct usb_serial_port *port, bool on);
-> +	void (*dtr_rts)(struct usb_serial_port *port, bool active);
+Same here, please split out the USB serial changes except for the
+actual tty-port op change in usb-serial.c.
 
-This is not a tty_port callback so this change does not belong in this
-patch.
-
->  	bool (*carrier_raised)(struct usb_serial_port *port);
->  	/* Called by the usb serial hooks to allow the user to rework the
->  	   termios state */
+You can submit a follow-up series for USB serial as those changes are
+otherwise unrelated to the changed tty-port interface.
 
 Johan
