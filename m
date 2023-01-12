@@ -2,135 +2,111 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 743B2C63797
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 02:20:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5241C54EBC
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 02:24:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229877AbjALCUd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 21:20:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40318 "EHLO
+        id S235727AbjALCYn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 21:24:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41132 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230201AbjALCUc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 21:20:32 -0500
-Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61204FCE9
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:20:31 -0800 (PST)
-Received: by mail-pj1-x1030.google.com with SMTP id b9-20020a17090a7ac900b00226ef160dcaso17537406pjl.2
-        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:20:31 -0800 (PST)
+        with ESMTP id S231395AbjALCYl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 21:24:41 -0500
+Received: from mail-pj1-x1034.google.com (mail-pj1-x1034.google.com [IPv6:2607:f8b0:4864:20::1034])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90C0544C4A
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:24:39 -0800 (PST)
+Received: by mail-pj1-x1034.google.com with SMTP id o7-20020a17090a0a0700b00226c9b82c3aso19286199pjo.3
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:24:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=schmorgal.com; s=google;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=QtNHpk17/WAelzP5iDU+OWjsp90Q3TI4Nh3fBvnKWZc=;
-        b=COglh8KfE6YRAz3TkaJ6GcKPxkf3vtCxD24y73jZRPfbJIdML2VQaO9ppH6tWvepH6
-         Onz4CHdT2l7/xztcZzBAgBTCyxE8W/llzQ528nLPdVxKaHwg+nnGJHcmICZc636ERyAC
-         u/XbSceAjmqFrqXdxG/ohPMTaNYEOw7aQt2Dg=
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=TE7kbIUfLw4QNwKVfaDIb623jjzBhxkI7pLuP+JvOJg=;
+        b=dOtugIkA5UJhz53YKfDcLVgP+SjKMA9ITkwkJq5qLX6TLn924yt7A0K+LTxP80M41X
+         NF+Vl0zx2ia6+Md5wvIn5DldbaOFbcn2lWZ++iBxz6Yrmvv+FA8RUotLjnRqZ8edKKjW
+         3fcTGmerhsZmQ0zUt5wl7QYCVI0PyXLMegjHI=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=QtNHpk17/WAelzP5iDU+OWjsp90Q3TI4Nh3fBvnKWZc=;
-        b=v8wCY/81YTyrIvPXJUTie30bSgRb9Sb88hFplNo8PpxvhJBOHM9zGEH1QQ+fLj+3se
-         rMzVhuQHLymoTbYpl48HsnoSzz9+OXTmPR/OFqGlvGJRaoLjH4eYLDzXmDi6T50t/klP
-         1Hpy3Wpx8NHnWkalMJqFSSvJGNM9vj4dE9GAwaPquNr5HocXnGJWo+j9PWbR/AjtenEp
-         dwNMyjvzn5R+3iN/JzOhy+9UWHDTijp7rQWNcEEu1/tIZsxOo7p33w20DIlNZ5lRdApx
-         V/87s6eQM2W9DzEE5GfuSevphseaqLXdUUpAFYk1LlrxFxuOUs2MhKPhQ9268jxmLVIl
-         JJuw==
-X-Gm-Message-State: AFqh2koD8c7ZezJsz/KeCLK0Hpmi90l+JxbRaTUSx5yqloSv+4x2xpx2
-        bwiwGnVBAScd/gWWCzwA1vnpuQ==
-X-Google-Smtp-Source: AMrXdXsfS63/C8GtuviF59EFypoXeTZUdVIOkUDbGOaE0+6SCrvAvpggbblj9YACTzjXWnYL7vStkw==
-X-Received: by 2002:a05:6a20:93a8:b0:b2:48e8:e3a9 with SMTP id x40-20020a056a2093a800b000b248e8e3a9mr6607235pzh.12.1673490030696;
-        Wed, 11 Jan 2023 18:20:30 -0800 (PST)
-Received: from [192.168.1.33] ([192.183.212.197])
-        by smtp.googlemail.com with ESMTPSA id 5-20020a621505000000b005772d55df03sm10645136pfv.35.2023.01.11.18.20.28
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 11 Jan 2023 18:20:29 -0800 (PST)
-Message-ID: <fa3d8c7d-3216-2914-8d0d-b157d90cd8a2@schmorgal.com>
-Date:   Wed, 11 Jan 2023 18:20:27 -0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=TE7kbIUfLw4QNwKVfaDIb623jjzBhxkI7pLuP+JvOJg=;
+        b=jZRTDlw5yzJdg6x6O2oh8V6U+4FZ2yvrnkjZKCjng4N2fMD9N9rp/G06OpjMxF6w0v
+         4xPZLZekRd04ntzGz0jyqiqk7zA0bf2oBio5Jo3iPc1i0X1yGgETLsAjR5Uv51KHLUZD
+         aRarOohT6jvE1Lg/VIoARwHlRF9I2iCnJqF1jxxENRY9mva7noTEW/WqcBNc352/+15l
+         k7DgGnu3u4D/R55BBrCVBBx+EbYcPgpC2pVS+4nMVqwwjwTT8hsWhgzBRDG4Y7yEJ1xb
+         /xUGV0aMdKdTC49XFwtD30nh65DaUtQn+x+Fx/ozTS1LULsq6z/ChP/D94Em1iqQd1IJ
+         oqOg==
+X-Gm-Message-State: AFqh2koEcDbR3ENelTeeACF2qxiviQMAXGA+8OlGilkAia9XGhWv5A+y
+        o7PFDv52FlM/y6NOLV3Px9UMcw==
+X-Google-Smtp-Source: AMrXdXv5UyWCp8nNPm5viIGGhUVoFwP23LTrdnq2ydx6WSjiJebtmwV5yrlSzULSsWjEq8p2dr8IoA==
+X-Received: by 2002:a17:902:6acc:b0:193:11df:670 with SMTP id i12-20020a1709026acc00b0019311df0670mr20042128plt.20.1673490278999;
+        Wed, 11 Jan 2023 18:24:38 -0800 (PST)
+Received: from doug-ryzen-5700G.. ([192.183.212.197])
+        by smtp.gmail.com with ESMTPSA id a1-20020a1709027e4100b00193020e8a90sm10759135pln.294.2023.01.11.18.24.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 11 Jan 2023 18:24:37 -0800 (PST)
+From:   Doug Brown <doug@schmorgal.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
 Cc:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-References: <20221229200411.295339-1-doug@schmorgal.com>
- <20221229200411.295339-9-doug@schmorgal.com>
- <1acd4e02-93db-88bc-2230-e230214fe591@intel.com>
-From:   Doug Brown <doug@schmorgal.com>
-Subject: Re: [PATCH v3 8/8] dt-bindings: mmc: sdhci-pxa: add pxav1
-In-Reply-To: <1acd4e02-93db-88bc-2230-e230214fe591@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+        Doug Brown <doug@schmorgal.com>
+Subject: [PATCH v4 0/8] mmc: sdhci-pxav2: Add support for PXA168
+Date:   Wed, 11 Jan 2023 18:24:08 -0800
+Message-Id: <20230112022416.8474-1-doug@schmorgal.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/11/2023 4:44 AM, Adrian Hunter wrote:
-> On 29/12/22 22:04, Doug Brown wrote:
->> Add a compatible for the pxav1 controller in the PXA168, along with
->> optional pinctrl properties to use for an errata workaround.
->>
->> Signed-off-by: Doug Brown <doug@schmorgal.com>
->> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> 
-> Doesn't apply cleanly anymore
+This is a revival of an earlier patch series from 2013 to add support
+for the PXA168 SDHC controller, with an additional SDIO IRQ errata fix.
+It also cleans up the clock naming to be consistent with the existing DT
+schema shared with the pxav3 driver (in a backwards-compatible way).
 
+Here is the original patch series this is based on:
+https://lore.kernel.org/linux-mmc/1363544206-3671-1-git-send-email-tanmay.upadhyay@einfochips.com/
 
-Sorry about that. Krzysztof beat me to the "bindings in title" removal
-he asked me to do. Will send a v4 series rebased on the latest mmc/next.
+Note that I left out the platform_specific_completion and clock gating
+changes from the original patches. They both seemed controversial, and
+don't seem necessary based on my testing. I've been running this code on
+a PXA168 for months without any issues.
 
-> 
->> ---
->>   .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 19 ++++++++++++++++++-
->>   1 file changed, 18 insertions(+), 1 deletion(-)
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
->> index 1c87f4218e18..09455f9fa8de 100644
->> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
->> @@ -4,7 +4,7 @@
->>   $id: http://devicetree.org/schemas/mmc/sdhci-pxa.yaml#
->>   $schema: http://devicetree.org/meta-schemas/core.yaml#
->>   
->> -title: Marvell PXA SDHCI v2/v3 bindings
->> +title: Marvell PXA SDHCI v1/v2/v3
->>   
->>   maintainers:
->>     - Ulf Hansson <ulf.hansson@linaro.org>
->> @@ -34,6 +34,7 @@ allOf:
->>   properties:
->>     compatible:
->>       enum:
->> +      - mrvl,pxav1-mmc
->>         - mrvl,pxav2-mmc
->>         - mrvl,pxav3-mmc
->>         - marvell,armada-380-sdhci
->> @@ -61,6 +62,22 @@ properties:
->>         - const: io
->>         - const: core
->>   
->> +  pinctrl-names:
->> +    description:
->> +      Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
->> +      SDIO CMD and GPIO mode.
->> +    items:
->> +      - const: default
->> +      - const: state_cmd_gpio
->> +
->> +  pinctrl-0:
->> +    description:
->> +      Should contain default pinctrl.
->> +
->> +  pinctrl-1:
->> +    description:
->> +      Should switch CMD pin to GPIO mode as a high output.
->> +
->>     mrvl,clk-delay-cycles:
->>       description: Specify a number of cycles to delay for tuning.
->>       $ref: /schemas/types.yaml#/definitions/uint32
-> 
+Changes in v4:
+- Rebase on latest mmc/next to fix conflict with DT binding
+
+Changes in v3:
+- Use OF match data rather than of_match_device and of_device_is_compatible
+- Simplify some instances of pdev->dev that could have just been "dev"
+- Handle EPROBE_DEFER when getting the clock
+- Use devm_clk_get_optional_enabled for the core clock (it's simpler)
+- Clear sdio_mrq before calling mmc_request_done
+- Small tweaks to devicetree binding requested by Krzysztof
+
+Changes in v2:
+- Fix mistakes in devicetree binding
+- Use cleaner code for pxav1_readw suggested by Adrian
+- Switch to request_done() and irq() for SDIO workaround CMD0 handling
+
+Doug Brown (8):
+  mmc: sdhci-pxav2: add initial support for PXA168 V1 controller
+  mmc: sdhci-pxav2: enable CONFIG_MMC_SDHCI_IO_ACCESSORS
+  mmc: sdhci-pxav2: add register workaround for PXA168 silicon bug
+  mmc: sdhci-pxav2: change clock name to match DT bindings
+  mmc: sdhci-pxav2: add optional core clock
+  mmc: sdhci-pxav2: add SDIO card IRQ workaround for PXA168 V1
+    controller
+  mmc: sdhci-pxav2: add optional pinctrl for SDIO IRQ workaround
+  dt-bindings: mmc: sdhci-pxa: add pxav1
+
+ .../devicetree/bindings/mmc/sdhci-pxa.yaml    |  19 ++-
+ drivers/mmc/host/Kconfig                      |   1 +
+ drivers/mmc/host/sdhci-pxav2.c                | 153 ++++++++++++++++--
+ 3 files changed, 159 insertions(+), 14 deletions(-)
+
+-- 
+2.34.1
+
