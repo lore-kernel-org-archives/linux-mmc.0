@@ -2,203 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6FABC67871
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 14:22:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FE61C54EBE
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 18:18:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236727AbjALOWU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Jan 2023 09:22:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45636 "EHLO
+        id S240475AbjALSSO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Jan 2023 13:18:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232016AbjALOVf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 09:21:35 -0500
-Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E8EC5E668;
-        Thu, 12 Jan 2023 06:12:45 -0800 (PST)
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-        by mx0b-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 30C9dqXG021075;
-        Thu, 12 Jan 2023 06:12:33 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=date : from : to :
- cc : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pfpt0220; bh=o99ykTzML7zFN4dw9PwlFyBeheG3xAQZAUBYrVKdw+Q=;
- b=QGtfQloFjJ6FiR9nNL3gNjjZdNToltFUiCNX2UaNIHcvCY905Uy9HNqP3aSFcf1gMVX4
- X6nn77aq8Sqn45rp0tmp6+D1T4/ib+Kkajc3u9TzpnhH6hUjZbK5UDVw+PXMHF0L7I2y
- lftzcQgMn8zXx5GcoAi6cIUxgciXumwP1uyH202nkqcS5+4iOMVkE5bV1Oslen4wccoT
- hSHuYWMQs8+prhWwPlLRVlJUdkWI2Gy2BPbul8yFkUsHVMn7dOG9CCQ08XWCEtALGX/V
- ZfLfiqObRUlH3sr+Ffui3w/bLv2KQ3LayZsLrB6U6lFHru+Ydo047enyjFjxvVGq2ACp /g== 
-Received: from dc5-exch02.marvell.com ([199.233.59.182])
-        by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3n1k570dqk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Thu, 12 Jan 2023 06:12:33 -0800
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 12 Jan
- 2023 06:12:31 -0800
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
- Transport; Thu, 12 Jan 2023 06:12:31 -0800
-Received: from Dell2s-9 (unknown [10.110.150.250])
-        by maili.marvell.com (Postfix) with ESMTP id BCE3C3F7051;
-        Thu, 12 Jan 2023 06:12:30 -0800 (PST)
-Date:   Thu, 12 Jan 2023 06:12:30 -0800
-From:   Piyush Malgujar <pmalgujar@marvell.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>,
-        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>,
-        <jannadurai@marvell.com>, <cchavva@marvell.com>
-Subject: Re: [PATCH 2/5] drivers: mmc: sdhci-cadence: enable
- MMC_SDHCI_IO_ACCESSORS
-Message-ID: <20230112141230.GB6335@Dell2s-9>
-References: <20221219142418.27949-1-pmalgujar@marvell.com>
- <20221219142418.27949-3-pmalgujar@marvell.com>
- <35ea0a7a-3d63-26b7-4dc3-69f6ca41909a@intel.com>
+        with ESMTP id S240439AbjALSRx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 13:17:53 -0500
+Received: from smtp4-g21.free.fr (smtp4-g21.free.fr [IPv6:2a01:e0c:1:1599::13])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59B9D7148A;
+        Thu, 12 Jan 2023 09:47:13 -0800 (PST)
+Received: from SOPL295.local (unknown [IPv6:2a02:8440:d20f:6de0:6125:d027:2017:9d97])
+        (Authenticated sender: robert.jarzmik@free.fr)
+        by smtp4-g21.free.fr (Postfix) with ESMTPSA id 0B0F519F59E;
+        Thu, 12 Jan 2023 18:46:52 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1673545631;
+        bh=KRTPZlKd33p2jA5AfUXMRlfCbedKs4GMu6pgnM4y4Qo=;
+        h=References:From:To:Cc:Subject:Date:In-reply-to:From;
+        b=LctVqhCykYrI8EvXeqUmUdArGNK/b6sZcJ0gtvgPgfxfckye4plPdcS9NoAVKI7ya
+         +OuDsuuF1zEN2T6xCaKeWWVNYOB0hsY5QWeDseR4wMcwypp6ocReR+eShxR7Tn5nAZ
+         Ufw1bfs5KavS1JtsBALOpAasZvUcCYSVZBr5CRr/gIpWIYd1aDgoywyutwO3O20sH5
+         /0Nwd4W/cm8SSndULierf0N+0aujwJO0K/OH7wn8eJtMgEnMJffLWHTvy94+7kx3Ie
+         RDFaxi9Ee4NeCA6M3Qk5O/EZiFYqWMlnc3k/vIrnGVtjWeFF1dX/rXG9L9x5gqdwv/
+         qwjMqYBvKHKJA==
+References: <20230105134622.254560-1-arnd@kernel.org>
+ <20230105134622.254560-5-arnd@kernel.org> <m2sfglh02h.fsf@free.fr>
+ <2d085660-41a2-492c-a343-7df80d510a59@app.fastmail.com>
+User-agent: mu4e 1.8.11; emacs 28.1
+From:   Robert Jarzmik <robert.jarzmik@free.fr>
+To:     Arnd Bergmann <arnd@arndb.de>
+Cc:     Robert Jarzmik <robert.jarzmik@free.fr>,
+        Arnd Bergmann <arnd@kernel.org>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        "Rafael J . Wysocki" <rafael@kernel.org>,
+        Viresh Kumar <viresh.kumar@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Dominik Brodowski <linux@dominikbrodowski.net>,
+        linux-clk@vger.kernel.org, linux-pm@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>
+Subject: Re: [PATCH 04/27] ARM: pxa: drop pxa310/pxa320/pxa93x support
+Date:   Thu, 12 Jan 2023 18:37:32 +0100
+In-reply-to: <2d085660-41a2-492c-a343-7df80d510a59@app.fastmail.com>
+Message-ID: <m2k01rhchf.fsf@free.fr>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <35ea0a7a-3d63-26b7-4dc3-69f6ca41909a@intel.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-ORIG-GUID: mGrgC6KPVjgpf9ISHeeX3wrUQ79TflSH
-X-Proofpoint-GUID: mGrgC6KPVjgpf9ISHeeX3wrUQ79TflSH
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.219,Aquarius:18.0.923,Hydra:6.0.545,FMLib:17.11.122.1
- definitions=2023-01-12_08,2023-01-12_01,2022-06-22_01
+Content-Type: text/plain; format=flowed
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Adrian, 
 
-Thank you for the review comments.
+"Arnd Bergmann" <arnd@arndb.de> writes:
 
-On Wed, Jan 11, 2023 at 10:23:43AM +0200, Adrian Hunter wrote:
-> On 19/12/22 16:24, Piyush Malgujar wrote:
-> > From: Jayanthi Annadurai <jannadurai@marvell.com>
-> > 
-> > Add support for CONFIG_MMC_SDHCI_IO_ACCESSORS for controller
-> > specific register read and write APIs.
-> > 
-> > Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> > Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
-> > ---
-> >  drivers/mmc/host/Kconfig         | 12 ++++++
-> >  drivers/mmc/host/sdhci-cadence.c | 63 ++++++++++++++++++++++++++++++++
-> >  2 files changed, 75 insertions(+)
-> > 
-> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> > index 5e19a961c34d7b5664ab2fd43cfba82dc90913ac..b5b2ae0bb4625bdb9d17acdbb1887c9caa3a1f32 100644
-> > --- a/drivers/mmc/host/Kconfig
-> > +++ b/drivers/mmc/host/Kconfig
-> > @@ -262,6 +262,18 @@ config MMC_SDHCI_CADENCE
-> >  
-> >  	  If unsure, say N.
-> >  
-> > +config MMC_SDHCI_CN10K
-> > +	tristate "SDHCI Cadence support for Marvell CN10K platforms"
-> > +	select MMC_SDHCI_CADENCE
-> > +	select MMC_SDHCI_IO_ACCESSORS
-> 
-> Probably better to just add MMC_SDHCI_IO_ACCESSORS to 
-> config MMC_SDHCI_CADENCE and drop MMC_SDHCI_CN10K
-> 
+> Hi Robert,
+Hi Arnd,
 
-This reason behind this was to not force SDHCI_IO_ACCESSORS upon cadence users as some may not
-require it owing to how cadence ip is integrated to soc.
+> Thanks for pointing this out, I thought that I had caught
+> all the missing dependencies ones after you pointed out
+> the AC97_BUS_NEW that I fixed in patch 14.
+Sorry I've not seen this one in my previous review.
 
-> > +	help
-> > +	  This selects the SDHCI cadence driver and IO Accessors
-> > +	  for Marvell CN10K platforms
-> > +
-> > +	  If you have Marvell CN10K platform, say Y or M here.
-> > +
-> > +	  If unsure, say N.
-> > +
-> >  config MMC_SDHCI_CNS3XXX
-> >  	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
-> >  	depends on ARCH_CNS3XXX || COMPILE_TEST
-> > diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> > index 5332d19e489be936d6814feba4f0fc046f5e130e..6bf703f15bc5be7e3be4cb1144b78ec3585ec540 100644
-> > --- a/drivers/mmc/host/sdhci-cadence.c
-> > +++ b/drivers/mmc/host/sdhci-cadence.c
-> > @@ -449,6 +449,61 @@ static u32 read_dqs_cmd_delay, clk_wrdqs_delay, clk_wr_delay, read_dqs_delay;
-> >  
-> >  static u32 sdhci_cdns_sd6_get_mode(struct sdhci_host *host, unsigned int timing);
-> >  
-> > +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> > +static u32 sdhci_cdns_sd6_readl(struct sdhci_host *host, int reg)
-> > +{
-> > +	return readl(host->ioaddr + reg);
-> > +}
-> > +
-> > +static void sdhci_cdns_sd6_writel(struct sdhci_host *host, u32 val, int reg)
-> > +{
-> > +	writel(val, host->ioaddr + reg);
-> > +}
-> > +
-> > +static u16 sdhci_cdns_sd6_readw(struct sdhci_host *host, int reg)
-> > +{
-> > +	u32 val, regoff;
-> > +
-> > +	regoff = reg & ~3;
-> > +
-> > +	val = readl(host->ioaddr + regoff);
-> > +	if ((reg & 0x3) == 0)
-> > +		return (val & 0xFFFF);
-> > +	else
-> > +		return ((val >> 16) & 0xFFFF);
-> > +}
-> > +
-> > +static void sdhci_cdns_sd6_writew(struct sdhci_host *host, u16 val, int reg)
-> > +{
-> > +	writew(val, host->ioaddr + reg);
-> > +}
-> > +
-> > +static u8 sdhci_cdns_sd6_readb(struct sdhci_host *host, int reg)
-> > +{
-> > +	u32 val, regoff;
-> > +
-> > +	regoff = reg & ~3;
-> > +
-> > +	val = readl(host->ioaddr + regoff);
-> > +	switch (reg & 3) {
-> > +	case 0:
-> > +		return (val & 0xFF);
-> > +	case 1:
-> > +		return ((val >> 8) & 0xFF);
-> > +	case 2:
-> > +		return ((val >> 16) & 0xFF);
-> > +	case 3:
-> > +		return ((val >> 24) & 0xFF);
-> > +	}
-> > +	return 0;
-> > +}
-> > +
-> > +static void sdhci_cdns_sd6_writeb(struct sdhci_host *host, u8 val, int reg)
-> > +{
-> > +	writeb(val, host->ioaddr + reg);
-> > +}
-> > +#endif
-> > +
-> >  static int sdhci_cdns_sd6_phy_lock_dll(struct sdhci_cdns_sd6_phy *phy)
-> >  {
-> >  	u32 delay_element = phy->d.delay_element_org;
-> > @@ -1576,6 +1631,14 @@ static const struct sdhci_ops sdhci_cdns_sd4_ops = {
-> >  };
-> >  
-> >  static const struct sdhci_ops sdhci_cdns_sd6_ops = {
-> > +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
-> > +	.read_l = sdhci_cdns_sd6_readl,
-> > +	.write_l = sdhci_cdns_sd6_writel,
-> > +	.read_w = sdhci_cdns_sd6_readw,
-> > +	.write_w = sdhci_cdns_sd6_writew,
-> > +	.read_b = sdhci_cdns_sd6_readb,
-> > +	.write_b = sdhci_cdns_sd6_writeb,
-> > +#endif
-> >  	.get_max_clock = sdhci_cdns_get_max_clock,
-> >  	.set_clock = sdhci_cdns_sd6_set_clock,
-> >  	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
-> 
+> From what I can tell, commit b5aaaa666a85 ("ARM: pxa: add
+> Kconfig dependencies for ATAGS based boards"), the
+> PXA310/PXA320 DT support became dead code because
+> MACH_PXA3XX_DT only selects CPU_PXA300, so if it worked
+> before that commit, it now needs CONFIG_UNUSED_BOARD_FILES
+> and CONFIG_EXPERT as well as enabling one of the legacy
+> board files with the corresponding chip support.
+>
+> If that's all you think is missing, I can add this
+> trivial patch as well and rework the series to not
+> drop code that depends on PXA310/PXA320:
+Yes, that would be great !
 
-Rest of the comments will be taken care in v2.
+> Can you have a look at the other patches to see if there
+> are more removed drivers or platform bits that are currently
+> dead code but are actually required?
+Yes, I've been through your whole serie and that's the
+last thing I have identified. I've read carefully all the
+patches now, and the whole serie looks good to me.
 
-Thanks,
-Piyush
+So with this patch and keeping the clocks and cpufreq
+parts for pxa3*0, you can add everywhere my :
+
+Acked-by: Robert Jarzmik <robert.jarzmik@free.fr>
+
+Cheers.
+
+--
+Robert
