@@ -2,97 +2,135 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6E3CC5479D
-	for <linux-mmc@archiver.kernel.org>; Wed, 11 Jan 2023 20:46:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 743B2C63797
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 02:20:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233587AbjAKUqx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 11 Jan 2023 15:46:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52510 "EHLO
+        id S229877AbjALCUd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 11 Jan 2023 21:20:33 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40318 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233532AbjAKUqv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 15:46:51 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4ACBA2AD6;
-        Wed, 11 Jan 2023 12:46:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=u6RMNbMb6ucx4uR6ZWuRrXPvgJadEglU+45lT3/wpmY=; b=BFUeKTJ8avi6CphNjqAEIkcjej
-        0X42LeAqolseHK9Vtqzi6D6lI+MdKY9zliERTHArav48PQ1P6fdYT79v1Zhz+9hbnNhD67OieiM8J
-        m/GvwZLoRN+j0/USBQhTwtOldGNNL16SjLWjUfaY1VSkydxRdKOMdiBF2MQveqxW+K+nSjMM3oJ8i
-        v28FHFTSZiUMpKBgkziGfGptEcg24eBCkQdxOzhcWW9Ebys15Nk8c0E1lWVD9mBceK3rm1bT1EMyf
-        /z7x+hntcCeC9hqU/H2EQMkwKAtEPluTrvcWQ9W9jhRLeOq2+q/FnBVwEUUyJ5PCMkYUKib1bmCGN
-        3qvu/QfA==;
-Received: from p200300ccff07a8001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff07:a800:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pFhzX-00009L-Hu; Wed, 11 Jan 2023 21:46:35 +0100
-Received: from andi by aktux with local (Exim 4.94.2)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pFhzW-008pXR-Vk; Wed, 11 Jan 2023 21:46:34 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     Andreas Kemnade <andreas@kemnade.info>
-Subject: [PATCH v2] dt-bindings: mmc: fsl-imx-esdhc: Add some compatible fallbacks
-Date:   Wed, 11 Jan 2023 21:46:33 +0100
-Message-Id: <20230111204634.2104690-1-andreas@kemnade.info>
-X-Mailer: git-send-email 2.30.2
+        with ESMTP id S230201AbjALCUc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 11 Jan 2023 21:20:32 -0500
+Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61204FCE9
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:20:31 -0800 (PST)
+Received: by mail-pj1-x1030.google.com with SMTP id b9-20020a17090a7ac900b00226ef160dcaso17537406pjl.2
+        for <linux-mmc@vger.kernel.org>; Wed, 11 Jan 2023 18:20:31 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=schmorgal.com; s=google;
+        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
+         :content-language:user-agent:mime-version:date:message-id:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QtNHpk17/WAelzP5iDU+OWjsp90Q3TI4Nh3fBvnKWZc=;
+        b=COglh8KfE6YRAz3TkaJ6GcKPxkf3vtCxD24y73jZRPfbJIdML2VQaO9ppH6tWvepH6
+         Onz4CHdT2l7/xztcZzBAgBTCyxE8W/llzQ528nLPdVxKaHwg+nnGJHcmICZc636ERyAC
+         u/XbSceAjmqFrqXdxG/ohPMTaNYEOw7aQt2Dg=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
+         :content-language:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=QtNHpk17/WAelzP5iDU+OWjsp90Q3TI4Nh3fBvnKWZc=;
+        b=v8wCY/81YTyrIvPXJUTie30bSgRb9Sb88hFplNo8PpxvhJBOHM9zGEH1QQ+fLj+3se
+         rMzVhuQHLymoTbYpl48HsnoSzz9+OXTmPR/OFqGlvGJRaoLjH4eYLDzXmDi6T50t/klP
+         1Hpy3Wpx8NHnWkalMJqFSSvJGNM9vj4dE9GAwaPquNr5HocXnGJWo+j9PWbR/AjtenEp
+         dwNMyjvzn5R+3iN/JzOhy+9UWHDTijp7rQWNcEEu1/tIZsxOo7p33w20DIlNZ5lRdApx
+         V/87s6eQM2W9DzEE5GfuSevphseaqLXdUUpAFYk1LlrxFxuOUs2MhKPhQ9268jxmLVIl
+         JJuw==
+X-Gm-Message-State: AFqh2koD8c7ZezJsz/KeCLK0Hpmi90l+JxbRaTUSx5yqloSv+4x2xpx2
+        bwiwGnVBAScd/gWWCzwA1vnpuQ==
+X-Google-Smtp-Source: AMrXdXsfS63/C8GtuviF59EFypoXeTZUdVIOkUDbGOaE0+6SCrvAvpggbblj9YACTzjXWnYL7vStkw==
+X-Received: by 2002:a05:6a20:93a8:b0:b2:48e8:e3a9 with SMTP id x40-20020a056a2093a800b000b248e8e3a9mr6607235pzh.12.1673490030696;
+        Wed, 11 Jan 2023 18:20:30 -0800 (PST)
+Received: from [192.168.1.33] ([192.183.212.197])
+        by smtp.googlemail.com with ESMTPSA id 5-20020a621505000000b005772d55df03sm10645136pfv.35.2023.01.11.18.20.28
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 11 Jan 2023 18:20:29 -0800 (PST)
+Message-ID: <fa3d8c7d-3216-2914-8d0d-b157d90cd8a2@schmorgal.com>
+Date:   Wed, 11 Jan 2023 18:20:27 -0800
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+Content-Language: en-US
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+References: <20221229200411.295339-1-doug@schmorgal.com>
+ <20221229200411.295339-9-doug@schmorgal.com>
+ <1acd4e02-93db-88bc-2230-e230214fe591@intel.com>
+From:   Doug Brown <doug@schmorgal.com>
+Subject: Re: [PATCH v3 8/8] dt-bindings: mmc: sdhci-pxa: add pxav1
+In-Reply-To: <1acd4e02-93db-88bc-2230-e230214fe591@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently make dtbs_check shows lots of errors because imx*.dtsi does
-not use single compatibles but combinations of them.
+On 1/11/2023 4:44 AM, Adrian Hunter wrote:
+> On 29/12/22 22:04, Doug Brown wrote:
+>> Add a compatible for the pxav1 controller in the PXA168, along with
+>> optional pinctrl properties to use for an errata workaround.
+>>
+>> Signed-off-by: Doug Brown <doug@schmorgal.com>
+>> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> 
+> Doesn't apply cleanly anymore
 
-Add fallbacks for imx6sll/ull which are useful for U-Boot.
 
-This will significantly reduce noise on make dtbs_check.
+Sorry about that. Krzysztof beat me to the "bindings in title" removal
+he asked me to do. Will send a v4 series rebased on the latest mmc/next.
 
-Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
----
-Changes in v2:
-- allow only combinations with fallback compatible
-- reduce them to the cases where they are actually useful
-
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index dc6256f04b42..be6caa25c57d 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -29,14 +29,18 @@ properties:
-           - fsl,imx53-esdhc
-           - fsl,imx6q-usdhc
-           - fsl,imx6sl-usdhc
--          - fsl,imx6sll-usdhc
-           - fsl,imx6sx-usdhc
--          - fsl,imx6ull-usdhc
-           - fsl,imx7d-usdhc
-           - fsl,imx7ulp-usdhc
-           - fsl,imx8mm-usdhc
-           - fsl,imxrt1050-usdhc
-           - nxp,s32g2-usdhc
-+      - items:
-+          - const: fsl,imx6sll-usdhc
-+          - const: fsl,imx6sx-usdhc
-+      - items:
-+          - const: fsl,imx6ull-usdhc
-+          - const: fsl,imx6sx-usdhc
-       - items:
-           - enum:
-               - fsl,imx8mq-usdhc
--- 
-2.30.2
-
+> 
+>> ---
+>>   .../devicetree/bindings/mmc/sdhci-pxa.yaml    | 19 ++++++++++++++++++-
+>>   1 file changed, 18 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+>> index 1c87f4218e18..09455f9fa8de 100644
+>> --- a/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/sdhci-pxa.yaml
+>> @@ -4,7 +4,7 @@
+>>   $id: http://devicetree.org/schemas/mmc/sdhci-pxa.yaml#
+>>   $schema: http://devicetree.org/meta-schemas/core.yaml#
+>>   
+>> -title: Marvell PXA SDHCI v2/v3 bindings
+>> +title: Marvell PXA SDHCI v1/v2/v3
+>>   
+>>   maintainers:
+>>     - Ulf Hansson <ulf.hansson@linaro.org>
+>> @@ -34,6 +34,7 @@ allOf:
+>>   properties:
+>>     compatible:
+>>       enum:
+>> +      - mrvl,pxav1-mmc
+>>         - mrvl,pxav2-mmc
+>>         - mrvl,pxav3-mmc
+>>         - marvell,armada-380-sdhci
+>> @@ -61,6 +62,22 @@ properties:
+>>         - const: io
+>>         - const: core
+>>   
+>> +  pinctrl-names:
+>> +    description:
+>> +      Optional for supporting PXA168 SDIO IRQ errata to switch CMD pin between
+>> +      SDIO CMD and GPIO mode.
+>> +    items:
+>> +      - const: default
+>> +      - const: state_cmd_gpio
+>> +
+>> +  pinctrl-0:
+>> +    description:
+>> +      Should contain default pinctrl.
+>> +
+>> +  pinctrl-1:
+>> +    description:
+>> +      Should switch CMD pin to GPIO mode as a high output.
+>> +
+>>     mrvl,clk-delay-cycles:
+>>       description: Specify a number of cycles to delay for tuning.
+>>       $ref: /schemas/types.yaml#/definitions/uint32
+> 
