@@ -2,62 +2,127 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A717C54EBC
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 08:52:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 33951C54EBD
+	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 13:45:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239880AbjALIw1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Jan 2023 03:52:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46514 "EHLO
+        id S229912AbjALNpC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Jan 2023 08:45:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45372 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236775AbjALIvn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 03:51:43 -0500
-Received: from mail.glencoeaur.com (mail.glencoeaur.com [217.61.97.113])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7143A2F79C
-        for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2023 00:50:00 -0800 (PST)
-Received: by mail.glencoeaur.com (Postfix, from userid 1001)
-        id E95BC82160; Thu, 12 Jan 2023 08:31:14 +0000 (GMT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=glencoeaur.com;
-        s=mail; t=1673512282;
-        bh=2S0GQFScndXkBEK4sqdoOhOYLqsB2sEH8Q5XQfVvKpo=;
-        h=Date:From:To:Subject:From;
-        b=dG8mZSJdCvRL5j9va+xfI2EOfsc19URhTkeQo+6rokbIWN/4UrsJrLQ3gQ9KNqAII
-         w1jxyOmr/sYfAKm2XQLdF6Iiozu05xtTOnKSo/gjcVJmNxNeO6xP5f/m3S0WroY2M9
-         1q82NnSl1sv5WBmUCN+jM4KtrK63DGJ2Qi/aiLeAn0OvAcpJAGIFGEqpIzexAUvq6o
-         Ug53ygSEtVKYRMUNSNc3I6fVbAtqkAs9VcWFagMdyrvnWKK+D79XOC1hOC9riHLr/u
-         tN/Us3mIcwhbp350h8lH/QL/G1vYNujLnMFrTKvepYqXU6g9UVFX0O+MZP8NmyuGBO
-         9qE/b/wwsd0vQ==
-Received: by mail.glencoeaur.com for <linux-mmc@vger.kernel.org>; Thu, 12 Jan 2023 08:31:00 GMT
-Message-ID: <20230112074500-0.1.z.3f9i.0.ybbp0iy863@glencoeaur.com>
-Date:   Thu, 12 Jan 2023 08:31:00 GMT
-From:   "Zbynek Spacek" <zbynek.spacek@glencoeaur.com>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Silikonmischungen
-X-Mailer: mail.glencoeaur.com
+        with ESMTP id S229767AbjALNov (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 08:44:51 -0500
+Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FE2A15FEE;
+        Thu, 12 Jan 2023 05:44:50 -0800 (PST)
+Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
+        by mx0a-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 30CBSU59023169;
+        Thu, 12 Jan 2023 05:44:35 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=date : from : to :
+ cc : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pfpt0220; bh=82CoWtK9ZDStVcz9wmegg9cqJt1I98wwF05YKhPPM7s=;
+ b=iNSMpo8VU65WEiz1B4600oTeDsmIiUjPH3TiJPbkgU8LXd/Yv8RA1LnzYEoLdbbc0PMt
+ LA51oB9jpj6Zm5Pdr1+IvagHYBePqJYds40DgZ6HCRvFmhJ9+KBE8JLxs+pjk/jwhYuI
+ RslqtU2yM8Y29Gu71TO8R+s4YKIV0foTvtRqZpWnaYuZprGoDTB+A+QYqecjPEwv/LAF
+ KWfat7xByjK1BkoshOca/nop9sf+YQl1m9y6+/ft4smILP5eLksCChN8JL3NSlJslTfO
+ d8TH0/eGpCQxBZqy/X4A3zpW+4RBvVqDXub0jGC0HSNLiv9tDTXQXpDF4Cf0cCVVGtph Mg== 
+Received: from dc5-exch01.marvell.com ([199.233.59.181])
+        by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3n23b2j216-2
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Thu, 12 Jan 2023 05:44:35 -0800
+Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 12 Jan
+ 2023 05:44:34 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
+ Transport; Thu, 12 Jan 2023 05:44:34 -0800
+Received: from Dell2s-9 (unknown [10.110.150.250])
+        by maili.marvell.com (Postfix) with ESMTP id E15A43F7051;
+        Thu, 12 Jan 2023 05:44:33 -0800 (PST)
+Date:   Thu, 12 Jan 2023 05:44:33 -0800
+From:   Piyush Malgujar <pmalgujar@marvell.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>,
+        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>,
+        <jannadurai@marvell.com>, <cchavva@marvell.com>
+Subject: Re: [PATCH 4/5] drivers: mmc: sdhci: Add option to configure sdhci
+ timeout
+Message-ID: <20230112134433.GA6335@Dell2s-9>
+References: <20221219142418.27949-1-pmalgujar@marvell.com>
+ <20221219142418.27949-5-pmalgujar@marvell.com>
+ <4edc44f2-005e-803d-942c-171abd787252@intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <4edc44f2-005e-803d-942c-171abd787252@intel.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-GUID: fbEQB8rXTmL68iqyCzGxgJHrF2D4vffN
+X-Proofpoint-ORIG-GUID: fbEQB8rXTmL68iqyCzGxgJHrF2D4vffN
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.219,Aquarius:18.0.923,Hydra:6.0.545,FMLib:17.11.122.1
+ definitions=2023-01-12_08,2023-01-12_01,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Good morning,
+Hi Adrian,
 
-do you need intermediates for processing, plastics (e.g. rubber) or silic=
-one mixtures?
+Thanks for the review comments.
 
-We provide a wide range of silicone rubbers with various properties, sili=
-cone mixtures from renowned manufacturers such as Wacker, Elastosil LR an=
-d dyes, stabilizers, primers and anti-adhesive additives.
+On Wed, Jan 11, 2023 at 10:08:26AM +0200, Adrian Hunter wrote:
+> On 19/12/22 16:24, Piyush Malgujar wrote:
+> > From: Jayanthi Annadurai <jannadurai@marvell.com>
+> > 
+> > Add config option to choose the sdhci timeout in seconds.
+> 
+> This approach is not ok, but why is the change wanted?
+> 
 
-We also produce technical silicone compounds with increased resistance to=
- oils, resistant to high temperatures and water vapor, conductive and man=
-y more.
+This option was just to give flexibility to opt for a different timeout value based
+on requirement, for instance, to decrease the time of tuning process. 
+Although it is not a mandatory change, we can remove this option and go with the
+default one.
 
-We provide fast order fulfillment, timely deliveries and cost optimizatio=
-n.
+> > 
+> > Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> > Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+> > ---
+> >  drivers/mmc/host/Kconfig | 8 ++++++++
+> >  drivers/mmc/host/sdhci.c | 3 ++-
+> >  2 files changed, 10 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
+> > index b5b2ae0bb4625bdb9d17acdbb1887c9caa3a1f32..ab48f2bc4cff73d1aad8d7da542d761cf0346d9f 100644
+> > --- a/drivers/mmc/host/Kconfig
+> > +++ b/drivers/mmc/host/Kconfig
+> > @@ -1132,3 +1132,11 @@ config MMC_LITEX
+> >  	  module will be called litex_mmc.
+> >  
+> >  	  If unsure, say N.
+> > +
+> > +config MMC_SDHCI_TIMEOUT
+> > +	int
+> > +	default 1 if MMC_SDHCI_CADENCE
+> > +	default 10
+> > +	depends on MMC_SDHCI
+> > +	help
+> > +	  Default timeout value for command and data.
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index f3af1bd0f7b955272fbd8b034ecb591860b89aed..e9bc24258746834ec9c8f13fe24456587a2b758d 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -1707,7 +1707,8 @@ static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
+> >  	else if (!cmd->data && cmd->busy_timeout > 9000)
+> >  		timeout += DIV_ROUND_UP(cmd->busy_timeout, 1000) * HZ + HZ;
+> >  	else
+> > -		timeout += 10 * HZ;
+> > +		timeout += CONFIG_MMC_SDHCI_TIMEOUT * HZ;
+> > +
+> >  	sdhci_mod_timer(host, cmd->mrq, timeout);
+> >  
+> >  	if (host->use_external_dma)
+>
 
-Can I introduce what we can offer you?
-
-
-Best regards
-Zbynek Spacek
+Thanks,
+Piyush 
