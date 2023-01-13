@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 985A4C54EBE
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:26:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9905FC678D6
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:27:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240704AbjAMG0L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 01:26:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33408 "EHLO
+        id S240923AbjAMG1r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 01:27:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234761AbjAMGYg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:24:36 -0500
+        with ESMTP id S235159AbjAMGZO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:25:14 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 498495C1E9;
-        Thu, 12 Jan 2023 22:24:14 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98D161BC80;
+        Thu, 12 Jan 2023 22:24:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
-        MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
-        :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=erzrm4Ty5idHGyu1jH564OsyzlBO2Da+dsAYs2Uai6g=; b=PetC+G54fA2MHOPn5yey+DdmCl
-        R14MH27shd3orjHYKWEFGSdK5sHDVqWEit9ROBI9QtItF8PeoTYlNLc27qCKd4mBlGl8jANIltvc4
-        5uvf/bF6LMZMC3fRULQGtDiirUzaHq9DinFdafA4frKBNm+yAMh94U6OnJ7LGL0XptNiPpS5DsIWd
-        GO3TjAdGZQt0xM+O6jEYTtFY/OIcQA9dsgy6SBP+X4K3WFPlg8cv17nlZY99em0nT73cU9pNa99ua
-        b3uzExO4rYmov4NBJ22hBeTV6aNAU0ZwIK9zJ00YufRoOb+tROzO9aXzsvT/iQZ6VeSKM1biDvQti
-        x8bvB2Pg==;
+        Content-Type:MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:
+        To:From:Sender:Reply-To:Content-ID:Content-Description;
+        bh=38ZdmqJfgTuYXp252hYJNLrwx/7u8Rttfe81dskbpYQ=; b=Dj8Ylj4feHn2Q8zLgHe5rgnue4
+        +Vm4CVYWIf5GgWiuDd34sTn24Z9KS8CagJsLTrbaAGo+bdtCyIrisky7SzqaYjkbAz1c+1toHsTAk
+        zERaYr6R0NZ5nfOKzpzl38Jjh5JGvj9SvZker/eCdXizSyP8RqgfDnIniAXtmDVMH7uS77fiAX3MG
+        SMTpMiziU7noj7B6ZdgjWYQQlWq7MWw/9kEYFHlda7dz/cdjMI6+Ambw8HLkOzC8SrnJ51N2nKAWd
+        Tb3WfHSt85OhCsocw3wM+N+0KaffKoBMs+e+RifN/F5Tg3MkBHM7JzPqbG6244GTNfxiRKeL3zNBf
+        l46PQTfg==;
 Received: from [2001:4bb8:181:656b:9509:7d20:8d39:f895] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pGDTu-000lTC-Dy; Fri, 13 Jan 2023 06:24:04 +0000
+        id 1pGDUE-000lh7-6c; Fri, 13 Jan 2023 06:24:23 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Yoshinori Sato <ysato@users.sourceforge.jp>,
         Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
@@ -45,3108 +45,1489 @@ Cc:     Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
         linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
         linux-sh@vger.kernel.org
-Subject: [PATCH 05/22] sound: remove sh-specific sounds/soc/sh drivers
-Date:   Fri, 13 Jan 2023 07:23:22 +0100
-Message-Id: <20230113062339.1909087-6-hch@lst.de>
+Subject: [PATCH 11/22] mtd/nand: remove sh_flctl
+Date:   Fri, 13 Jan 2023 07:23:28 +0100
+Message-Id: <20230113062339.1909087-12-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230113062339.1909087-1-hch@lst.de>
 References: <20230113062339.1909087-1-hch@lst.de>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Now that arch/sh is removed these drivers are dead code.
+Now that arch/sh is removed this driver is dead code.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- sound/soc/sh/Kconfig       |  44 --
- sound/soc/sh/Makefile      |  16 -
- sound/soc/sh/dma-sh7760.c  | 334 ----------------
- sound/soc/sh/fsi.c         |   9 -
- sound/soc/sh/hac.c         | 345 ----------------
- sound/soc/sh/migor.c       | 205 ----------
- sound/soc/sh/sh7760-ac97.c |  72 ----
- sound/soc/sh/siu.h         | 180 ---------
- sound/soc/sh/siu_dai.c     | 799 -------------------------------------
- sound/soc/sh/siu_pcm.c     | 553 -------------------------
- sound/soc/sh/ssi.c         | 403 -------------------
- 11 files changed, 2960 deletions(-)
- delete mode 100644 sound/soc/sh/dma-sh7760.c
- delete mode 100644 sound/soc/sh/hac.c
- delete mode 100644 sound/soc/sh/migor.c
- delete mode 100644 sound/soc/sh/sh7760-ac97.c
- delete mode 100644 sound/soc/sh/siu.h
- delete mode 100644 sound/soc/sh/siu_dai.c
- delete mode 100644 sound/soc/sh/siu_pcm.c
- delete mode 100644 sound/soc/sh/ssi.c
+ drivers/mtd/nand/raw/Kconfig    |    8 -
+ drivers/mtd/nand/raw/Makefile   |    1 -
+ drivers/mtd/nand/raw/sh_flctl.c | 1234 -------------------------------
+ include/linux/mtd/sh_flctl.h    |  180 -----
+ 4 files changed, 1423 deletions(-)
+ delete mode 100644 drivers/mtd/nand/raw/sh_flctl.c
+ delete mode 100644 include/linux/mtd/sh_flctl.h
 
-diff --git a/sound/soc/sh/Kconfig b/sound/soc/sh/Kconfig
-index 793a0326f32b46..4367927b81df20 100644
---- a/sound/soc/sh/Kconfig
-+++ b/sound/soc/sh/Kconfig
-@@ -2,25 +2,10 @@
- menu "SoC Audio support for Renesas SoCs"
- 	depends on ARCH_RENESAS || COMPILE_TEST
+diff --git a/drivers/mtd/nand/raw/Kconfig b/drivers/mtd/nand/raw/Kconfig
+index 98ea1c9e65c8ef..20a4988ea418d5 100644
+--- a/drivers/mtd/nand/raw/Kconfig
++++ b/drivers/mtd/nand/raw/Kconfig
+@@ -284,14 +284,6 @@ config MTD_NAND_MXC
+ 	  This enables the driver for the NAND flash controller on the
+ 	  MXC processors.
  
--config SND_SOC_PCM_SH7760
--	tristate "SoC Audio support for Renesas SH7760"
--	depends on CPU_SUBTYPE_SH7760 && SH_DMABRG
+-config MTD_NAND_SH_FLCTL
+-	tristate "Renesas SuperH FLCTL NAND controller"
+-	depends on SUPERH || COMPILE_TEST
+-	depends on HAS_IOMEM
 -	help
--	  Enable this option for SH7760 AC97/I2S audio support.
+-	  Several Renesas SuperH CPU has FLCTL. This option enables support
+-	  for NAND Flash using FLCTL.
 -
--
- ##
- ## Audio unit modules
- ##
- 
--config SND_SOC_SH4_HAC
--	tristate
--	select AC97_BUS
--	select SND_SOC_AC97_BUS
--
--config SND_SOC_SH4_SSI
--	tristate
--
- config SND_SOC_SH4_FSI
- 	tristate "SH4 FSI support"
- 	depends on COMMON_CLK
-@@ -28,14 +13,6 @@ config SND_SOC_SH4_FSI
- 	help
- 	  This option enables FSI sound support
- 
--config SND_SOC_SH4_SIU
--	tristate
--	depends on ARCH_SHMOBILE && HAVE_CLK
--	depends on DMADEVICES
--	select DMA_ENGINE
--	select SH_DMAE
--	select FW_LOADER
--
- config SND_SOC_RCAR
- 	tristate "R-Car series SRU/SCU/SSIU/SSI support"
- 	depends on COMMON_CLK
-@@ -51,25 +28,4 @@ config SND_SOC_RZ
- 	help
- 	  This option enables RZ/G2L SSIF-2 sound support.
- 
--##
--## Boards
--##
--
--config SND_SH7760_AC97
--	tristate "SH7760 AC97 sound support"
--	depends on CPU_SUBTYPE_SH7760 && SND_SOC_PCM_SH7760
--	select SND_SOC_SH4_HAC
--	select SND_SOC_AC97_CODEC
--	help
--	  This option enables generic sound support for the first
--	  AC97 unit of the SH7760.
--
--config SND_SIU_MIGOR
--	tristate "SIU sound support on Migo-R"
--	depends on SH_MIGOR && I2C
--	select SND_SOC_SH4_SIU
--	select SND_SOC_WM8978
--	help
--	  This option enables sound support for the SH7722 Migo-R board
--
- endmenu
-diff --git a/sound/soc/sh/Makefile b/sound/soc/sh/Makefile
-index f6fd79948f6ae9..c308dda887e633 100644
---- a/sound/soc/sh/Makefile
-+++ b/sound/soc/sh/Makefile
-@@ -1,28 +1,12 @@
- # SPDX-License-Identifier: GPL-2.0
--## DMA engines
--snd-soc-dma-sh7760-objs	:= dma-sh7760.o
--obj-$(CONFIG_SND_SOC_PCM_SH7760)	+= snd-soc-dma-sh7760.o
- 
- ## audio units found on some SH-4
--snd-soc-hac-objs	:= hac.o
--snd-soc-ssi-objs	:= ssi.o
- snd-soc-fsi-objs	:= fsi.o
--snd-soc-siu-objs	:= siu_pcm.o siu_dai.o
--obj-$(CONFIG_SND_SOC_SH4_HAC)	+= snd-soc-hac.o
--obj-$(CONFIG_SND_SOC_SH4_SSI)	+= snd-soc-ssi.o
- obj-$(CONFIG_SND_SOC_SH4_FSI)	+= snd-soc-fsi.o
--obj-$(CONFIG_SND_SOC_SH4_SIU)	+= snd-soc-siu.o
- 
- ## audio units for R-Car
- obj-$(CONFIG_SND_SOC_RCAR)	+= rcar/
- 
--## boards
--snd-soc-sh7760-ac97-objs	:= sh7760-ac97.o
--snd-soc-migor-objs		:= migor.o
--
--obj-$(CONFIG_SND_SH7760_AC97)	+= snd-soc-sh7760-ac97.o
--obj-$(CONFIG_SND_SIU_MIGOR)	+= snd-soc-migor.o
--
- # RZ/G2L
- snd-soc-rz-ssi-objs		:= rz-ssi.o
- obj-$(CONFIG_SND_SOC_RZ)	+= snd-soc-rz-ssi.o
-diff --git a/sound/soc/sh/dma-sh7760.c b/sound/soc/sh/dma-sh7760.c
+ config MTD_NAND_DAVINCI
+ 	tristate "DaVinci/Keystone NAND controller"
+ 	depends on ARCH_DAVINCI || (ARCH_KEYSTONE && TI_AEMIF) || COMPILE_TEST
+diff --git a/drivers/mtd/nand/raw/Makefile b/drivers/mtd/nand/raw/Makefile
+index fa1d0012031012..2c6eb25c9d0aae 100644
+--- a/drivers/mtd/nand/raw/Makefile
++++ b/drivers/mtd/nand/raw/Makefile
+@@ -33,7 +33,6 @@ obj-$(CONFIG_MTD_NAND_FSL_IFC)		+= fsl_ifc_nand.o
+ obj-$(CONFIG_MTD_NAND_FSL_UPM)		+= fsl_upm.o
+ obj-$(CONFIG_MTD_NAND_SLC_LPC32XX)      += lpc32xx_slc.o
+ obj-$(CONFIG_MTD_NAND_MLC_LPC32XX)      += lpc32xx_mlc.o
+-obj-$(CONFIG_MTD_NAND_SH_FLCTL)		+= sh_flctl.o
+ obj-$(CONFIG_MTD_NAND_MXC)		+= mxc_nand.o
+ obj-$(CONFIG_MTD_NAND_SOCRATES)		+= socrates_nand.o
+ obj-$(CONFIG_MTD_NAND_TXX9NDFMC)	+= txx9ndfmc.o
+diff --git a/drivers/mtd/nand/raw/sh_flctl.c b/drivers/mtd/nand/raw/sh_flctl.c
 deleted file mode 100644
-index 121e48f984c50c..00000000000000
---- a/sound/soc/sh/dma-sh7760.c
+index a278829469d610..00000000000000
+--- a/drivers/mtd/nand/raw/sh_flctl.c
 +++ /dev/null
-@@ -1,334 +0,0 @@
+@@ -1,1234 +0,0 @@
 -// SPDX-License-Identifier: GPL-2.0
--//
--// SH7760 ("camelot") DMABRG audio DMA unit support
--//
--// Copyright (C) 2007 Manuel Lauss <mano@roarinelk.homelinux.net>
--//
--// The SH7760 DMABRG provides 4 dma channels (2x rec, 2x play), which
--// trigger an interrupt when one half of the programmed transfer size
--// has been xmitted.
--//
--// FIXME: little-endian only for now
--
--#include <linux/module.h>
--#include <linux/gfp.h>
--#include <linux/init.h>
--#include <linux/platform_device.h>
--#include <linux/dma-mapping.h>
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/pcm_params.h>
--#include <sound/soc.h>
--#include <asm/dmabrg.h>
--
--
--/* registers and bits */
--#define BRGATXSAR	0x00
--#define BRGARXDAR	0x04
--#define BRGATXTCR	0x08
--#define BRGARXTCR	0x0C
--#define BRGACR		0x10
--#define BRGATXTCNT	0x14
--#define BRGARXTCNT	0x18
--
--#define ACR_RAR		(1 << 18)
--#define ACR_RDS		(1 << 17)
--#define ACR_RDE		(1 << 16)
--#define ACR_TAR		(1 << 2)
--#define ACR_TDS		(1 << 1)
--#define ACR_TDE		(1 << 0)
--
--/* receiver/transmitter data alignment */
--#define ACR_RAM_NONE	(0 << 24)
--#define ACR_RAM_4BYTE	(1 << 24)
--#define ACR_RAM_2WORD	(2 << 24)
--#define ACR_TAM_NONE	(0 << 8)
--#define ACR_TAM_4BYTE	(1 << 8)
--#define ACR_TAM_2WORD	(2 << 8)
--
--
--struct camelot_pcm {
--	unsigned long mmio;  /* DMABRG audio channel control reg MMIO */
--	unsigned int txid;    /* ID of first DMABRG IRQ for this unit */
--
--	struct snd_pcm_substream *tx_ss;
--	unsigned long tx_period_size;
--	unsigned int  tx_period;
--
--	struct snd_pcm_substream *rx_ss;
--	unsigned long rx_period_size;
--	unsigned int  rx_period;
--
--} cam_pcm_data[2] = {
--	{
--		.mmio	=	0xFE3C0040,
--		.txid	=	DMABRGIRQ_A0TXF,
--	},
--	{
--		.mmio	=	0xFE3C0060,
--		.txid	=	DMABRGIRQ_A1TXF,
--	},
--};
--
--#define BRGREG(x)	(*(unsigned long *)(cam->mmio + (x)))
--
 -/*
-- * set a minimum of 16kb per period, to avoid interrupt-"storm" and
-- * resulting skipping. In general, the bigger the minimum size, the
-- * better for overall system performance. (The SH7760 is a puny CPU
-- * with a slow SDRAM interface and poor internal bus bandwidth,
-- * *especially* when the LCDC is active).  The minimum for the DMAC
-- * is 8 bytes; 16kbytes are enough to get skip-free playback of a
-- * 44kHz/16bit/stereo MP3 on a lightly loaded system, and maintain
-- * reasonable responsiveness in MPlayer.
-- */
--#define DMABRG_PERIOD_MIN		16 * 1024
--#define DMABRG_PERIOD_MAX		0x03fffffc
--#define DMABRG_PREALLOC_BUFFER		32 * 1024
--#define DMABRG_PREALLOC_BUFFER_MAX	32 * 1024
--
--static const struct snd_pcm_hardware camelot_pcm_hardware = {
--	.info = (SNDRV_PCM_INFO_MMAP |
--		SNDRV_PCM_INFO_INTERLEAVED |
--		SNDRV_PCM_INFO_BLOCK_TRANSFER |
--		SNDRV_PCM_INFO_MMAP_VALID |
--		SNDRV_PCM_INFO_BATCH),
--	.buffer_bytes_max =	DMABRG_PERIOD_MAX,
--	.period_bytes_min =	DMABRG_PERIOD_MIN,
--	.period_bytes_max =	DMABRG_PERIOD_MAX / 2,
--	.periods_min =		2,
--	.periods_max =		2,
--	.fifo_size =		128,
--};
--
--static void camelot_txdma(void *data)
--{
--	struct camelot_pcm *cam = data;
--	cam->tx_period ^= 1;
--	snd_pcm_period_elapsed(cam->tx_ss);
--}
--
--static void camelot_rxdma(void *data)
--{
--	struct camelot_pcm *cam = data;
--	cam->rx_period ^= 1;
--	snd_pcm_period_elapsed(cam->rx_ss);
--}
--
--static int camelot_pcm_open(struct snd_soc_component *component,
--			    struct snd_pcm_substream *substream)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--	int recv = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0:1;
--	int ret, dmairq;
--
--	snd_soc_set_runtime_hwparams(substream, &camelot_pcm_hardware);
--
--	/* DMABRG buffer half/full events */
--	dmairq = (recv) ? cam->txid + 2 : cam->txid;
--	if (recv) {
--		cam->rx_ss = substream;
--		ret = dmabrg_request_irq(dmairq, camelot_rxdma, cam);
--		if (unlikely(ret)) {
--			pr_debug("audio unit %d irqs already taken!\n",
--			     asoc_rtd_to_cpu(rtd, 0)->id);
--			return -EBUSY;
--		}
--		(void)dmabrg_request_irq(dmairq + 1,camelot_rxdma, cam);
--	} else {
--		cam->tx_ss = substream;
--		ret = dmabrg_request_irq(dmairq, camelot_txdma, cam);
--		if (unlikely(ret)) {
--			pr_debug("audio unit %d irqs already taken!\n",
--			     asoc_rtd_to_cpu(rtd, 0)->id);
--			return -EBUSY;
--		}
--		(void)dmabrg_request_irq(dmairq + 1, camelot_txdma, cam);
--	}
--	return 0;
--}
--
--static int camelot_pcm_close(struct snd_soc_component *component,
--			     struct snd_pcm_substream *substream)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--	int recv = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0:1;
--	int dmairq;
--
--	dmairq = (recv) ? cam->txid + 2 : cam->txid;
--
--	if (recv)
--		cam->rx_ss = NULL;
--	else
--		cam->tx_ss = NULL;
--
--	dmabrg_free_irq(dmairq + 1);
--	dmabrg_free_irq(dmairq);
--
--	return 0;
--}
--
--static int camelot_hw_params(struct snd_soc_component *component,
--			     struct snd_pcm_substream *substream,
--			     struct snd_pcm_hw_params *hw_params)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--	int recv = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0:1;
--
--	if (recv) {
--		cam->rx_period_size = params_period_bytes(hw_params);
--		cam->rx_period = 0;
--	} else {
--		cam->tx_period_size = params_period_bytes(hw_params);
--		cam->tx_period = 0;
--	}
--	return 0;
--}
--
--static int camelot_prepare(struct snd_soc_component *component,
--			   struct snd_pcm_substream *substream)
--{
--	struct snd_pcm_runtime *runtime = substream->runtime;
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--
--	pr_debug("PCM data: addr 0x%08lx len %d\n",
--		 (u32)runtime->dma_addr, runtime->dma_bytes);
-- 
--	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
--		BRGREG(BRGATXSAR) = (unsigned long)runtime->dma_area;
--		BRGREG(BRGATXTCR) = runtime->dma_bytes;
--	} else {
--		BRGREG(BRGARXDAR) = (unsigned long)runtime->dma_area;
--		BRGREG(BRGARXTCR) = runtime->dma_bytes;
--	}
--
--	return 0;
--}
--
--static inline void dmabrg_play_dma_start(struct camelot_pcm *cam)
--{
--	unsigned long acr = BRGREG(BRGACR) & ~(ACR_TDS | ACR_RDS);
--	/* start DMABRG engine: XFER start, auto-addr-reload */
--	BRGREG(BRGACR) = acr | ACR_TDE | ACR_TAR | ACR_TAM_2WORD;
--}
--
--static inline void dmabrg_play_dma_stop(struct camelot_pcm *cam)
--{
--	unsigned long acr = BRGREG(BRGACR) & ~(ACR_TDS | ACR_RDS);
--	/* forcibly terminate data transmission */
--	BRGREG(BRGACR) = acr | ACR_TDS;
--}
--
--static inline void dmabrg_rec_dma_start(struct camelot_pcm *cam)
--{
--	unsigned long acr = BRGREG(BRGACR) & ~(ACR_TDS | ACR_RDS);
--	/* start DMABRG engine: recv start, auto-reload */
--	BRGREG(BRGACR) = acr | ACR_RDE | ACR_RAR | ACR_RAM_2WORD;
--}
--
--static inline void dmabrg_rec_dma_stop(struct camelot_pcm *cam)
--{
--	unsigned long acr = BRGREG(BRGACR) & ~(ACR_TDS | ACR_RDS);
--	/* forcibly terminate data receiver */
--	BRGREG(BRGACR) = acr | ACR_RDS;
--}
--
--static int camelot_trigger(struct snd_soc_component *component,
--			   struct snd_pcm_substream *substream, int cmd)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--	int recv = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0:1;
--
--	switch (cmd) {
--	case SNDRV_PCM_TRIGGER_START:
--		if (recv)
--			dmabrg_rec_dma_start(cam);
--		else
--			dmabrg_play_dma_start(cam);
--		break;
--	case SNDRV_PCM_TRIGGER_STOP:
--		if (recv)
--			dmabrg_rec_dma_stop(cam);
--		else
--			dmabrg_play_dma_stop(cam);
--		break;
--	default:
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
--static snd_pcm_uframes_t camelot_pos(struct snd_soc_component *component,
--				     struct snd_pcm_substream *substream)
--{
--	struct snd_pcm_runtime *runtime = substream->runtime;
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct camelot_pcm *cam = &cam_pcm_data[asoc_rtd_to_cpu(rtd, 0)->id];
--	int recv = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0:1;
--	unsigned long pos;
--
--	/* cannot use the DMABRG pointer register: under load, by the
--	 * time ALSA comes around to read the register, it is already
--	 * far ahead (or worse, already done with the fragment) of the
--	 * position at the time the IRQ was triggered, which results in
--	 * fast-playback sound in my test application (ScummVM)
--	 */
--	if (recv)
--		pos = cam->rx_period ? cam->rx_period_size : 0;
--	else
--		pos = cam->tx_period ? cam->tx_period_size : 0;
--
--	return bytes_to_frames(runtime, pos);
--}
--
--static int camelot_pcm_new(struct snd_soc_component *component,
--			   struct snd_soc_pcm_runtime *rtd)
--{
--	struct snd_pcm *pcm = rtd->pcm;
--
--	/* dont use SNDRV_DMA_TYPE_DEV, since it will oops the SH kernel
--	 * in MMAP mode (i.e. aplay -M)
--	 */
--	snd_pcm_set_managed_buffer_all(pcm,
--		SNDRV_DMA_TYPE_CONTINUOUS,
--		NULL,
--		DMABRG_PREALLOC_BUFFER,	DMABRG_PREALLOC_BUFFER_MAX);
--
--	return 0;
--}
--
--static const struct snd_soc_component_driver sh7760_soc_component = {
--	.open		= camelot_pcm_open,
--	.close		= camelot_pcm_close,
--	.hw_params	= camelot_hw_params,
--	.prepare	= camelot_prepare,
--	.trigger	= camelot_trigger,
--	.pointer	= camelot_pos,
--	.pcm_construct	= camelot_pcm_new,
--};
--
--static int sh7760_soc_platform_probe(struct platform_device *pdev)
--{
--	return devm_snd_soc_register_component(&pdev->dev, &sh7760_soc_component,
--					       NULL, 0);
--}
--
--static struct platform_driver sh7760_pcm_driver = {
--	.driver = {
--			.name = "sh7760-pcm-audio",
--	},
--
--	.probe = sh7760_soc_platform_probe,
--};
--
--module_platform_driver(sh7760_pcm_driver);
--
--MODULE_LICENSE("GPL v2");
--MODULE_DESCRIPTION("SH7760 Audio DMA (DMABRG) driver");
--MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
-diff --git a/sound/soc/sh/fsi.c b/sound/soc/sh/fsi.c
-index f3edc2e3d9d7c4..c599070f2210f4 100644
---- a/sound/soc/sh/fsi.c
-+++ b/sound/soc/sh/fsi.c
-@@ -1372,16 +1372,7 @@ static int fsi_dma_probe(struct fsi_priv *fsi, struct fsi_stream *io, struct dev
- {
- 	int is_play = fsi_stream_is_play(fsi, io);
- 
--#ifdef CONFIG_SUPERH
--	dma_cap_mask_t mask;
--	dma_cap_zero(mask);
--	dma_cap_set(DMA_SLAVE, mask);
--
--	io->chan = dma_request_channel(mask, shdma_chan_filter,
--				       (void *)io->dma_id);
--#else
- 	io->chan = dma_request_slave_channel(dev, is_play ? "tx" : "rx");
--#endif
- 	if (io->chan) {
- 		struct dma_slave_config cfg = {};
- 		int ret;
-diff --git a/sound/soc/sh/hac.c b/sound/soc/sh/hac.c
-deleted file mode 100644
-index 46d145cbaf2970..00000000000000
---- a/sound/soc/sh/hac.c
-+++ /dev/null
-@@ -1,345 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
--//
--// Hitachi Audio Controller (AC97) support for SH7760/SH7780
--//
--// Copyright (c) 2007 Manuel Lauss <mano@roarinelk.homelinux.net>
--//
--// dont forget to set IPSEL/OMSEL register bits (in your board code) to
--// enable HAC output pins!
--
--/* BIG FAT FIXME: although the SH7760 has 2 independent AC97 units, only
-- * the FIRST can be used since ASoC does not pass any information to the
-- * ac97_read/write() functions regarding WHICH unit to use.  You'll have
-- * to edit the code a bit to use the other AC97 unit.		--mlau
+- * SuperH FLCTL nand controller
+- *
+- * Copyright (c) 2008 Renesas Solutions Corp.
+- * Copyright (c) 2008 Atom Create Engineering Co., Ltd.
+- *
+- * Based on fsl_elbc_nand.c, Copyright (c) 2006-2007 Freescale Semiconductor
 - */
 -
--#include <linux/init.h>
 -#include <linux/module.h>
--#include <linux/platform_device.h>
--#include <linux/interrupt.h>
--#include <linux/wait.h>
+-#include <linux/kernel.h>
+-#include <linux/completion.h>
 -#include <linux/delay.h>
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/ac97_codec.h>
--#include <sound/initval.h>
--#include <sound/soc.h>
--
--/* regs and bits */
--#define HACCR		0x08
--#define HACCSAR		0x20
--#define HACCSDR		0x24
--#define HACPCML		0x28
--#define HACPCMR		0x2C
--#define HACTIER		0x50
--#define	HACTSR		0x54
--#define HACRIER		0x58
--#define HACRSR		0x5C
--#define HACACR		0x60
--
--#define CR_CR		(1 << 15)	/* "codec-ready" indicator */
--#define CR_CDRT		(1 << 11)	/* cold reset */
--#define CR_WMRT		(1 << 10)	/* warm reset */
--#define CR_B9		(1 << 9)	/* the mysterious "bit 9" */
--#define CR_ST		(1 << 5)	/* AC97 link start bit */
--
--#define CSAR_RD		(1 << 19)	/* AC97 data read bit */
--#define CSAR_WR		(0)
--
--#define TSR_CMDAMT	(1 << 31)
--#define TSR_CMDDMT	(1 << 30)
--
--#define RSR_STARY	(1 << 22)
--#define RSR_STDRY	(1 << 21)
--
--#define ACR_DMARX16	(1 << 30)
--#define ACR_DMATX16	(1 << 29)
--#define ACR_TX12ATOM	(1 << 26)
--#define ACR_DMARX20	((1 << 24) | (1 << 22))
--#define ACR_DMATX20	((1 << 23) | (1 << 21))
--
--#define CSDR_SHIFT	4
--#define CSDR_MASK	(0xffff << CSDR_SHIFT)
--#define CSAR_SHIFT	12
--#define CSAR_MASK	(0x7f << CSAR_SHIFT)
--
--#define AC97_WRITE_RETRY	1
--#define AC97_READ_RETRY		5
--
--/* manual-suggested AC97 codec access timeouts (us) */
--#define TMO_E1	500	/* 21 < E1 < 1000 */
--#define TMO_E2	13	/* 13 < E2 */
--#define TMO_E3	21	/* 21 < E3 */
--#define TMO_E4	500	/* 21 < E4 < 1000 */
--
--struct hac_priv {
--	unsigned long mmio;	/* HAC base address */
--} hac_cpu_data[] = {
--#if defined(CONFIG_CPU_SUBTYPE_SH7760)
--	{
--		.mmio	= 0xFE240000,
--	},
--	{
--		.mmio	= 0xFE250000,
--	},
--#elif defined(CONFIG_CPU_SUBTYPE_SH7780)
--	{
--		.mmio	= 0xFFE40000,
--	},
--#else
--#error "Unsupported SuperH SoC"
--#endif
--};
--
--#define HACREG(reg)	(*(unsigned long *)(hac->mmio + (reg)))
--
--/*
-- * AC97 read/write flow as outlined in the SH7760 manual (pages 903-906)
-- */
--static int hac_get_codec_data(struct hac_priv *hac, unsigned short r,
--			      unsigned short *v)
--{
--	unsigned int to1, to2, i;
--	unsigned short adr;
--
--	for (i = AC97_READ_RETRY; i; i--) {
--		*v = 0;
--		/* wait for HAC to receive something from the codec */
--		for (to1 = TMO_E4;
--		     to1 && !(HACREG(HACRSR) & RSR_STARY);
--		     --to1)
--			udelay(1);
--		for (to2 = TMO_E4; 
--		     to2 && !(HACREG(HACRSR) & RSR_STDRY);
--		     --to2)
--			udelay(1);
--
--		if (!to1 && !to2)
--			return 0;	/* codec comm is down */
--
--		adr = ((HACREG(HACCSAR) & CSAR_MASK) >> CSAR_SHIFT);
--		*v  = ((HACREG(HACCSDR) & CSDR_MASK) >> CSDR_SHIFT);
--
--		HACREG(HACRSR) &= ~(RSR_STDRY | RSR_STARY);
--
--		if (r == adr)
--			break;
--
--		/* manual says: wait at least 21 usec before retrying */
--		udelay(21);
--	}
--	HACREG(HACRSR) &= ~(RSR_STDRY | RSR_STARY);
--	return i;
--}
--
--static unsigned short hac_read_codec_aux(struct hac_priv *hac,
--					 unsigned short reg)
--{
--	unsigned short val;
--	unsigned int i, to;
--
--	for (i = AC97_READ_RETRY; i; i--) {
--		/* send_read_request */
--		local_irq_disable();
--		HACREG(HACTSR) &= ~(TSR_CMDAMT);
--		HACREG(HACCSAR) = (reg << CSAR_SHIFT) | CSAR_RD;
--		local_irq_enable();
--
--		for (to = TMO_E3;
--		     to && !(HACREG(HACTSR) & TSR_CMDAMT);
--		     --to)
--			udelay(1);
--
--		HACREG(HACTSR) &= ~TSR_CMDAMT;
--		val = 0;
--		if (hac_get_codec_data(hac, reg, &val) != 0)
--			break;
--	}
--
--	return i ? val : ~0;
--}
--
--static void hac_ac97_write(struct snd_ac97 *ac97, unsigned short reg,
--			   unsigned short val)
--{
--	int unit_id = 0 /* ac97->private_data */;
--	struct hac_priv *hac = &hac_cpu_data[unit_id];
--	unsigned int i, to;
--	/* write_codec_aux */
--	for (i = AC97_WRITE_RETRY; i; i--) {
--		/* send_write_request */
--		local_irq_disable();
--		HACREG(HACTSR) &= ~(TSR_CMDDMT | TSR_CMDAMT);
--		HACREG(HACCSDR) = (val << CSDR_SHIFT);
--		HACREG(HACCSAR) = (reg << CSAR_SHIFT) & (~CSAR_RD);
--		local_irq_enable();
--
--		/* poll-wait for CMDAMT and CMDDMT */
--		for (to = TMO_E1;
--		     to && !(HACREG(HACTSR) & (TSR_CMDAMT|TSR_CMDDMT));
--		     --to)
--			udelay(1);
--
--		HACREG(HACTSR) &= ~(TSR_CMDAMT | TSR_CMDDMT);
--		if (to)
--			break;
--		/* timeout, try again */
--	}
--}
--
--static unsigned short hac_ac97_read(struct snd_ac97 *ac97,
--				    unsigned short reg)
--{
--	int unit_id = 0 /* ac97->private_data */;
--	struct hac_priv *hac = &hac_cpu_data[unit_id];
--	return hac_read_codec_aux(hac, reg);
--}
--
--static void hac_ac97_warmrst(struct snd_ac97 *ac97)
--{
--	int unit_id = 0 /* ac97->private_data */;
--	struct hac_priv *hac = &hac_cpu_data[unit_id];
--	unsigned int tmo;
--
--	HACREG(HACCR) = CR_WMRT | CR_ST | CR_B9;
--	msleep(10);
--	HACREG(HACCR) = CR_ST | CR_B9;
--	for (tmo = 1000; (tmo > 0) && !(HACREG(HACCR) & CR_CR); tmo--)
--		udelay(1);
--
--	if (!tmo)
--		printk(KERN_INFO "hac: reset: AC97 link down!\n");
--	/* settings this bit lets us have a conversation with codec */
--	HACREG(HACACR) |= ACR_TX12ATOM;
--}
--
--static void hac_ac97_coldrst(struct snd_ac97 *ac97)
--{
--	int unit_id = 0 /* ac97->private_data */;
--	struct hac_priv *hac;
--	hac = &hac_cpu_data[unit_id];
--
--	HACREG(HACCR) = 0;
--	HACREG(HACCR) = CR_CDRT | CR_ST | CR_B9;
--	msleep(10);
--	hac_ac97_warmrst(ac97);
--}
--
--static struct snd_ac97_bus_ops hac_ac97_ops = {
--	.read	= hac_ac97_read,
--	.write	= hac_ac97_write,
--	.reset	= hac_ac97_coldrst,
--	.warm_reset = hac_ac97_warmrst,
--};
--
--static int hac_hw_params(struct snd_pcm_substream *substream,
--			 struct snd_pcm_hw_params *params,
--			 struct snd_soc_dai *dai)
--{
--	struct hac_priv *hac = &hac_cpu_data[dai->id];
--	int d = substream->stream == SNDRV_PCM_STREAM_PLAYBACK ? 0 : 1;
--
--	switch (params->msbits) {
--	case 16:
--		HACREG(HACACR) |= d ?  ACR_DMARX16 :  ACR_DMATX16;
--		HACREG(HACACR) &= d ? ~ACR_DMARX20 : ~ACR_DMATX20;
--		break;
--	case 20:
--		HACREG(HACACR) &= d ? ~ACR_DMARX16 : ~ACR_DMATX16;
--		HACREG(HACACR) |= d ?  ACR_DMARX20 :  ACR_DMATX20;
--		break;
--	default:
--		pr_debug("hac: invalid depth %d bit\n", params->msbits);
--		return -EINVAL;
--		break;
--	}
--
--	return 0;
--}
--
--#define AC97_RATES	\
--	SNDRV_PCM_RATE_8000_192000
--
--#define AC97_FMTS	\
--	SNDRV_PCM_FMTBIT_S16_LE
--
--static const struct snd_soc_dai_ops hac_dai_ops = {
--	.hw_params	= hac_hw_params,
--};
--
--static struct snd_soc_dai_driver sh4_hac_dai[] = {
--{
--	.name			= "hac-dai.0",
--	.playback = {
--		.rates		= AC97_RATES,
--		.formats	= AC97_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 2,
--	},
--	.capture = {
--		.rates		= AC97_RATES,
--		.formats	= AC97_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 2,
--	},
--	.ops = &hac_dai_ops,
--},
--#ifdef CONFIG_CPU_SUBTYPE_SH7760
--{
--	.name			= "hac-dai.1",
--	.id			= 1,
--	.playback = {
--		.rates		= AC97_RATES,
--		.formats	= AC97_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 2,
--	},
--	.capture = {
--		.rates		= AC97_RATES,
--		.formats	= AC97_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 2,
--	},
--	.ops = &hac_dai_ops,
--
--},
--#endif
--};
--
--static const struct snd_soc_component_driver sh4_hac_component = {
--	.name			= "sh4-hac",
--	.legacy_dai_naming	= 1,
--};
--
--static int hac_soc_platform_probe(struct platform_device *pdev)
--{
--	int ret;
--
--	ret = snd_soc_set_ac97_ops(&hac_ac97_ops);
--	if (ret != 0)
--		return ret;
--
--	return devm_snd_soc_register_component(&pdev->dev, &sh4_hac_component,
--					  sh4_hac_dai, ARRAY_SIZE(sh4_hac_dai));
--}
--
--static int hac_soc_platform_remove(struct platform_device *pdev)
--{
--	snd_soc_set_ac97_ops(NULL);
--	return 0;
--}
--
--static struct platform_driver hac_pcm_driver = {
--	.driver = {
--			.name = "hac-pcm-audio",
--	},
--
--	.probe = hac_soc_platform_probe,
--	.remove = hac_soc_platform_remove,
--};
--
--module_platform_driver(hac_pcm_driver);
--
--MODULE_LICENSE("GPL v2");
--MODULE_DESCRIPTION("SuperH onchip HAC (AC97) audio driver");
--MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
-diff --git a/sound/soc/sh/migor.c b/sound/soc/sh/migor.c
-deleted file mode 100644
-index 7082c12d3bf238..00000000000000
---- a/sound/soc/sh/migor.c
-+++ /dev/null
-@@ -1,205 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
--//
--// ALSA SoC driver for Migo-R
--//
--// Copyright (C) 2009-2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
--
--#include <linux/clkdev.h>
--#include <linux/device.h>
--#include <linux/firmware.h>
--#include <linux/module.h>
--
--#include <asm/clock.h>
--
--#include <cpu/sh7722.h>
--
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/soc.h>
--
--#include "../codecs/wm8978.h"
--#include "siu.h"
--
--/* Default 8000Hz sampling frequency */
--static unsigned long codec_freq = 8000 * 512;
--
--static unsigned int use_count;
--
--/* External clock, sourced from the codec at the SIUMCKB pin */
--static unsigned long siumckb_recalc(struct clk *clk)
--{
--	return codec_freq;
--}
--
--static struct sh_clk_ops siumckb_clk_ops = {
--	.recalc = siumckb_recalc,
--};
--
--static struct clk siumckb_clk = {
--	.ops		= &siumckb_clk_ops,
--	.rate		= 0, /* initialised at run-time */
--};
--
--static struct clk_lookup *siumckb_lookup;
--
--static int migor_hw_params(struct snd_pcm_substream *substream,
--			   struct snd_pcm_hw_params *params)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct snd_soc_dai *codec_dai = asoc_rtd_to_codec(rtd, 0);
--	int ret;
--	unsigned int rate = params_rate(params);
--
--	ret = snd_soc_dai_set_sysclk(codec_dai, WM8978_PLL, 13000000,
--				     SND_SOC_CLOCK_IN);
--	if (ret < 0)
--		return ret;
--
--	ret = snd_soc_dai_set_clkdiv(codec_dai, WM8978_OPCLKRATE, rate * 512);
--	if (ret < 0)
--		return ret;
--
--	codec_freq = rate * 512;
--	/*
--	 * This propagates the parent frequency change to children and
--	 * recalculates the frequency table
--	 */
--	clk_set_rate(&siumckb_clk, codec_freq);
--	dev_dbg(codec_dai->dev, "%s: configure %luHz\n", __func__, codec_freq);
--
--	ret = snd_soc_dai_set_sysclk(asoc_rtd_to_cpu(rtd, 0), SIU_CLKB_EXT,
--				     codec_freq / 2, SND_SOC_CLOCK_IN);
--
--	if (!ret)
--		use_count++;
--
--	return ret;
--}
--
--static int migor_hw_free(struct snd_pcm_substream *substream)
--{
--	struct snd_soc_pcm_runtime *rtd = asoc_substream_to_rtd(substream);
--	struct snd_soc_dai *codec_dai = asoc_rtd_to_codec(rtd, 0);
--
--	if (use_count) {
--		use_count--;
--
--		if (!use_count)
--			snd_soc_dai_set_sysclk(codec_dai, WM8978_PLL, 0,
--					       SND_SOC_CLOCK_IN);
--	} else {
--		dev_dbg(codec_dai->dev, "Unbalanced hw_free!\n");
--	}
--
--	return 0;
--}
--
--static const struct snd_soc_ops migor_dai_ops = {
--	.hw_params = migor_hw_params,
--	.hw_free = migor_hw_free,
--};
--
--static const struct snd_soc_dapm_widget migor_dapm_widgets[] = {
--	SND_SOC_DAPM_HP("Headphone", NULL),
--	SND_SOC_DAPM_MIC("Onboard Microphone", NULL),
--	SND_SOC_DAPM_MIC("External Microphone", NULL),
--};
--
--static const struct snd_soc_dapm_route audio_map[] = {
--	/* Headphone output connected to LHP/RHP, enable OUT4 for VMID */
--	{ "Headphone", NULL,  "OUT4 VMID" },
--	{ "OUT4 VMID", NULL,  "LHP" },
--	{ "OUT4 VMID", NULL,  "RHP" },
--
--	/* On-board microphone */
--	{ "RMICN", NULL, "Mic Bias" },
--	{ "RMICP", NULL, "Mic Bias" },
--	{ "Mic Bias", NULL, "Onboard Microphone" },
--
--	/* External microphone */
--	{ "LMICN", NULL, "Mic Bias" },
--	{ "LMICP", NULL, "Mic Bias" },
--	{ "Mic Bias", NULL, "External Microphone" },
--};
--
--/* migor digital audio interface glue - connects codec <--> CPU */
--SND_SOC_DAILINK_DEFS(wm8978,
--	DAILINK_COMP_ARRAY(COMP_CPU("siu-pcm-audio")),
--	DAILINK_COMP_ARRAY(COMP_CODEC("wm8978.0-001a", "wm8978-hifi")),
--	DAILINK_COMP_ARRAY(COMP_PLATFORM("siu-pcm-audio")));
--
--static struct snd_soc_dai_link migor_dai = {
--	.name = "wm8978",
--	.stream_name = "WM8978",
--	.dai_fmt = SND_SOC_DAIFMT_NB_IF | SND_SOC_DAIFMT_I2S |
--		   SND_SOC_DAIFMT_CBS_CFS,
--	.ops = &migor_dai_ops,
--	SND_SOC_DAILINK_REG(wm8978),
--};
--
--/* migor audio machine driver */
--static struct snd_soc_card snd_soc_migor = {
--	.name = "Migo-R",
--	.owner = THIS_MODULE,
--	.dai_link = &migor_dai,
--	.num_links = 1,
--
--	.dapm_widgets = migor_dapm_widgets,
--	.num_dapm_widgets = ARRAY_SIZE(migor_dapm_widgets),
--	.dapm_routes = audio_map,
--	.num_dapm_routes = ARRAY_SIZE(audio_map),
--};
--
--static struct platform_device *migor_snd_device;
--
--static int __init migor_init(void)
--{
--	int ret;
--
--	ret = clk_register(&siumckb_clk);
--	if (ret < 0)
--		return ret;
--
--	siumckb_lookup = clkdev_create(&siumckb_clk, "siumckb_clk", NULL);
--	if (!siumckb_lookup) {
--		ret = -ENOMEM;
--		goto eclkdevalloc;
--	}
--
--	/* Port number used on this machine: port B */
--	migor_snd_device = platform_device_alloc("soc-audio", 1);
--	if (!migor_snd_device) {
--		ret = -ENOMEM;
--		goto epdevalloc;
--	}
--
--	platform_set_drvdata(migor_snd_device, &snd_soc_migor);
--
--	ret = platform_device_add(migor_snd_device);
--	if (ret)
--		goto epdevadd;
--
--	return 0;
--
--epdevadd:
--	platform_device_put(migor_snd_device);
--epdevalloc:
--	clkdev_drop(siumckb_lookup);
--eclkdevalloc:
--	clk_unregister(&siumckb_clk);
--	return ret;
--}
--
--static void __exit migor_exit(void)
--{
--	clkdev_drop(siumckb_lookup);
--	clk_unregister(&siumckb_clk);
--	platform_device_unregister(migor_snd_device);
--}
--
--module_init(migor_init);
--module_exit(migor_exit);
--
--MODULE_AUTHOR("Guennadi Liakhovetski <g.liakhovetski@gmx.de>");
--MODULE_DESCRIPTION("ALSA SoC Migor");
--MODULE_LICENSE("GPL v2");
-diff --git a/sound/soc/sh/sh7760-ac97.c b/sound/soc/sh/sh7760-ac97.c
-deleted file mode 100644
-index d267243a159ba6..00000000000000
---- a/sound/soc/sh/sh7760-ac97.c
-+++ /dev/null
-@@ -1,72 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
--//
--// Generic AC97 sound support for SH7760
--//
--// (c) 2007 Manuel Lauss
--
--#include <linux/module.h>
--#include <linux/moduleparam.h>
--#include <linux/platform_device.h>
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/soc.h>
--#include <asm/io.h>
--
--#define IPSEL 0xFE400034
--
--SND_SOC_DAILINK_DEFS(ac97,
--	DAILINK_COMP_ARRAY(COMP_CPU("hac-dai.0")),	/* HAC0 */
--	DAILINK_COMP_ARRAY(COMP_CODEC("ac97-codec", "ac97-hifi")),
--	DAILINK_COMP_ARRAY(COMP_PLATFORM("sh7760-pcm-audio")));
--
--static struct snd_soc_dai_link sh7760_ac97_dai = {
--	.name = "AC97",
--	.stream_name = "AC97 HiFi",
--	SND_SOC_DAILINK_REG(ac97),
--};
--
--static struct snd_soc_card sh7760_ac97_soc_machine  = {
--	.name = "SH7760 AC97",
--	.owner = THIS_MODULE,
--	.dai_link = &sh7760_ac97_dai,
--	.num_links = 1,
--};
--
--static struct platform_device *sh7760_ac97_snd_device;
--
--static int __init sh7760_ac97_init(void)
--{
--	int ret;
--	unsigned short ipsel;
--
--	/* enable both AC97 controllers in pinmux reg */
--	ipsel = __raw_readw(IPSEL);
--	__raw_writew(ipsel | (3 << 10), IPSEL);
--
--	ret = -ENOMEM;
--	sh7760_ac97_snd_device = platform_device_alloc("soc-audio", -1);
--	if (!sh7760_ac97_snd_device)
--		goto out;
--
--	platform_set_drvdata(sh7760_ac97_snd_device,
--			     &sh7760_ac97_soc_machine);
--	ret = platform_device_add(sh7760_ac97_snd_device);
--
--	if (ret)
--		platform_device_put(sh7760_ac97_snd_device);
--
--out:
--	return ret;
--}
--
--static void __exit sh7760_ac97_exit(void)
--{
--	platform_device_unregister(sh7760_ac97_snd_device);
--}
--
--module_init(sh7760_ac97_init);
--module_exit(sh7760_ac97_exit);
--
--MODULE_LICENSE("GPL v2");
--MODULE_DESCRIPTION("Generic SH7760 AC97 sound machine");
--MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
-diff --git a/sound/soc/sh/siu.h b/sound/soc/sh/siu.h
-deleted file mode 100644
-index a675c36fc9d956..00000000000000
---- a/sound/soc/sh/siu.h
-+++ /dev/null
-@@ -1,180 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0+
--//
--// siu.h - ALSA SoC driver for Renesas SH7343, SH7722 SIU peripheral.
--//
--// Copyright (C) 2009-2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
--// Copyright (C) 2006 Carlos Munoz <carlos@kenati.com>
--
--#ifndef SIU_H
--#define SIU_H
--
--/* Common kernel and user-space firmware-building defines and types */
--
--#define YRAM0_SIZE		(0x0040 / 4)		/* 16 */
--#define YRAM1_SIZE		(0x0080 / 4)		/* 32 */
--#define YRAM2_SIZE		(0x0040 / 4)		/* 16 */
--#define YRAM3_SIZE		(0x0080 / 4)		/* 32 */
--#define YRAM4_SIZE		(0x0080 / 4)		/* 32 */
--#define YRAM_DEF_SIZE		(YRAM0_SIZE + YRAM1_SIZE + YRAM2_SIZE + \
--				 YRAM3_SIZE + YRAM4_SIZE)
--#define YRAM_FIR_SIZE		(0x0400 / 4)		/* 256 */
--#define YRAM_IIR_SIZE		(0x0200 / 4)		/* 128 */
--
--#define XRAM0_SIZE		(0x0400 / 4)		/* 256 */
--#define XRAM1_SIZE		(0x0200 / 4)		/* 128 */
--#define XRAM2_SIZE		(0x0200 / 4)		/* 128 */
--
--/* PRAM program array size */
--#define PRAM0_SIZE		(0x0100 / 4)		/* 64 */
--#define PRAM1_SIZE		((0x2000 - 0x0100) / 4)	/* 1984 */
--
--#include <linux/types.h>
--
--struct siu_spb_param {
--	__u32	ab1a;	/* input FIFO address */
--	__u32	ab0a;	/* output FIFO address */
--	__u32	dir;	/* 0=the ather except CPUOUTPUT, 1=CPUINPUT */
--	__u32	event;	/* SPB program starting conditions */
--	__u32	stfifo;	/* STFIFO register setting value */
--	__u32	trdat;	/* TRDAT register setting value */
--};
--
--struct siu_firmware {
--	__u32			yram_fir_coeff[YRAM_FIR_SIZE];
--	__u32			pram0[PRAM0_SIZE];
--	__u32			pram1[PRAM1_SIZE];
--	__u32			yram0[YRAM0_SIZE];
--	__u32			yram1[YRAM1_SIZE];
--	__u32			yram2[YRAM2_SIZE];
--	__u32			yram3[YRAM3_SIZE];
--	__u32			yram4[YRAM4_SIZE];
--	__u32			spbpar_num;
--	struct siu_spb_param	spbpar[32];
--};
--
--#ifdef __KERNEL__
--
 -#include <linux/dmaengine.h>
+-#include <linux/dma-mapping.h>
 -#include <linux/interrupt.h>
 -#include <linux/io.h>
--#include <linux/sh_dma.h>
--
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/soc.h>
--
--#define SIU_PERIOD_BYTES_MAX	8192		/* DMA transfer/period size */
--#define SIU_PERIOD_BYTES_MIN	256		/* DMA transfer/period size */
--#define SIU_PERIODS_MAX		64		/* Max periods in buffer */
--#define SIU_PERIODS_MIN		4		/* Min periods in buffer */
--#define SIU_BUFFER_BYTES_MAX	(SIU_PERIOD_BYTES_MAX * SIU_PERIODS_MAX)
--
--/* SIU ports: only one can be used at a time */
--enum {
--	SIU_PORT_A,
--	SIU_PORT_B,
--	SIU_PORT_NUM,
--};
--
--/* SIU clock configuration */
--enum {
--	SIU_CLKA_PLL,
--	SIU_CLKA_EXT,
--	SIU_CLKB_PLL,
--	SIU_CLKB_EXT
--};
--
--struct device;
--struct siu_info {
--	struct device		*dev;
--	int			port_id;
--	u32 __iomem		*pram;
--	u32 __iomem		*xram;
--	u32 __iomem		*yram;
--	u32 __iomem		*reg;
--	struct siu_firmware	fw;
--};
--
--struct siu_stream {
--	struct work_struct		work;
--	struct snd_pcm_substream	*substream;
--	snd_pcm_format_t		format;
--	size_t				buf_bytes;
--	size_t				period_bytes;
--	int				cur_period;	/* Period currently in dma */
--	u32				volume;
--	snd_pcm_sframes_t		xfer_cnt;	/* Number of frames */
--	u8				rw_flg;		/* transfer status */
--	/* DMA status */
--	struct dma_chan			*chan;		/* DMA channel */
--	struct dma_async_tx_descriptor	*tx_desc;
--	dma_cookie_t			cookie;
--	struct sh_dmae_slave		param;
--};
--
--struct siu_port {
--	unsigned long		play_cap;	/* Used to track full duplex */
--	struct snd_pcm		*pcm;
--	struct siu_stream	playback;
--	struct siu_stream	capture;
--	u32			stfifo;		/* STFIFO value from firmware */
--	u32			trdat;		/* TRDAT value from firmware */
--};
--
--extern struct siu_port *siu_ports[SIU_PORT_NUM];
--
--static inline struct siu_port *siu_port_info(struct snd_pcm_substream *substream)
--{
--	struct platform_device *pdev =
--		to_platform_device(substream->pcm->card->dev);
--	return siu_ports[pdev->id];
--}
--
--/* Register access */
--static inline void siu_write32(u32 __iomem *addr, u32 val)
--{
--	__raw_writel(val, addr);
--}
--
--static inline u32 siu_read32(u32 __iomem *addr)
--{
--	return __raw_readl(addr);
--}
--
--/* SIU registers */
--#define SIU_IFCTL	(0x000 / sizeof(u32))
--#define SIU_SRCTL	(0x004 / sizeof(u32))
--#define SIU_SFORM	(0x008 / sizeof(u32))
--#define SIU_CKCTL	(0x00c / sizeof(u32))
--#define SIU_TRDAT	(0x010 / sizeof(u32))
--#define SIU_STFIFO	(0x014 / sizeof(u32))
--#define SIU_DPAK	(0x01c / sizeof(u32))
--#define SIU_CKREV	(0x020 / sizeof(u32))
--#define SIU_EVNTC	(0x028 / sizeof(u32))
--#define SIU_SBCTL	(0x040 / sizeof(u32))
--#define SIU_SBPSET	(0x044 / sizeof(u32))
--#define SIU_SBFSTS	(0x068 / sizeof(u32))
--#define SIU_SBDVCA	(0x06c / sizeof(u32))
--#define SIU_SBDVCB	(0x070 / sizeof(u32))
--#define SIU_SBACTIV	(0x074 / sizeof(u32))
--#define SIU_DMAIA	(0x090 / sizeof(u32))
--#define SIU_DMAIB	(0x094 / sizeof(u32))
--#define SIU_DMAOA	(0x098 / sizeof(u32))
--#define SIU_DMAOB	(0x09c / sizeof(u32))
--#define SIU_DMAML	(0x0a0 / sizeof(u32))
--#define SIU_SPSTS	(0x0cc / sizeof(u32))
--#define SIU_SPCTL	(0x0d0 / sizeof(u32))
--#define SIU_BRGASEL	(0x100 / sizeof(u32))
--#define SIU_BRRA	(0x104 / sizeof(u32))
--#define SIU_BRGBSEL	(0x108 / sizeof(u32))
--#define SIU_BRRB	(0x10c / sizeof(u32))
--
--extern const struct snd_soc_component_driver siu_component;
--extern struct siu_info *siu_i2s_data;
--
--int siu_init_port(int port, struct siu_port **port_info, struct snd_card *card);
--void siu_free_port(struct siu_port *port_info);
--
--#endif
--
--#endif /* SIU_H */
-diff --git a/sound/soc/sh/siu_dai.c b/sound/soc/sh/siu_dai.c
-deleted file mode 100644
-index f2a386fcd92e4d..00000000000000
---- a/sound/soc/sh/siu_dai.c
-+++ /dev/null
-@@ -1,799 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0+
--//
--// siu_dai.c - ALSA SoC driver for Renesas SH7343, SH7722 SIU peripheral.
--//
--// Copyright (C) 2009-2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
--// Copyright (C) 2006 Carlos Munoz <carlos@kenati.com>
--
--#include <linux/delay.h>
--#include <linux/firmware.h>
--#include <linux/pm_runtime.h>
--#include <linux/slab.h>
--#include <linux/module.h>
--
--#include <asm/clock.h>
--#include <asm/siu.h>
--
--#include <sound/control.h>
--#include <sound/soc.h>
--
--#include "siu.h"
--
--/* Board specifics */
--#if defined(CONFIG_CPU_SUBTYPE_SH7722)
--# define SIU_MAX_VOLUME		0x1000
--#else
--# define SIU_MAX_VOLUME		0x7fff
--#endif
--
--#define PRAM_SIZE	0x2000
--#define XRAM_SIZE	0x800
--#define YRAM_SIZE	0x800
--
--#define XRAM_OFFSET	0x4000
--#define YRAM_OFFSET	0x6000
--#define REG_OFFSET	0xc000
--
--#define PLAYBACK_ENABLED	1
--#define CAPTURE_ENABLED		2
--
--#define VOLUME_CAPTURE		0
--#define VOLUME_PLAYBACK		1
--#define DFLT_VOLUME_LEVEL	0x08000800
--
--/*
-- * SPDIF is only available on port A and on some SIU implementations it is only
-- * available for input. Due to the lack of hardware to test it, SPDIF is left
-- * disabled in this driver version
-- */
--struct format_flag {
--	u32	i2s;
--	u32	pcm;
--	u32	spdif;
--	u32	mask;
--};
--
--struct port_flag {
--	struct format_flag	playback;
--	struct format_flag	capture;
--};
--
--struct siu_info *siu_i2s_data;
--
--static struct port_flag siu_flags[SIU_PORT_NUM] = {
--	[SIU_PORT_A] = {
--		.playback = {
--			.i2s	= 0x50000000,
--			.pcm	= 0x40000000,
--			.spdif	= 0x80000000,	/* not on all SIU versions */
--			.mask	= 0xd0000000,
--		},
--		.capture = {
--			.i2s	= 0x05000000,
--			.pcm	= 0x04000000,
--			.spdif	= 0x08000000,
--			.mask	= 0x0d000000,
--		},
--	},
--	[SIU_PORT_B] = {
--		.playback = {
--			.i2s	= 0x00500000,
--			.pcm	= 0x00400000,
--			.spdif	= 0,		/* impossible - turn off */
--			.mask	= 0x00500000,
--		},
--		.capture = {
--			.i2s	= 0x00050000,
--			.pcm	= 0x00040000,
--			.spdif	= 0,		/* impossible - turn off */
--			.mask	= 0x00050000,
--		},
--	},
--};
--
--static void siu_dai_start(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--
--	dev_dbg(port_info->pcm->card->dev, "%s\n", __func__);
--
--	/* Issue software reset to siu */
--	siu_write32(base + SIU_SRCTL, 0);
--
--	/* Wait for the reset to take effect */
--	udelay(1);
--
--	port_info->stfifo = 0;
--	port_info->trdat = 0;
--
--	/* portA, portB, SIU operate */
--	siu_write32(base + SIU_SRCTL, 0x301);
--
--	/* portA=256fs, portB=256fs */
--	siu_write32(base + SIU_CKCTL, 0x40400000);
--
--	/* portA's BRG does not divide SIUCKA */
--	siu_write32(base + SIU_BRGASEL, 0);
--	siu_write32(base + SIU_BRRA, 0);
--
--	/* portB's BRG divides SIUCKB by half */
--	siu_write32(base + SIU_BRGBSEL, 1);
--	siu_write32(base + SIU_BRRB, 0);
--
--	siu_write32(base + SIU_IFCTL, 0x44440000);
--
--	/* portA: 32 bit/fs, master; portB: 32 bit/fs, master */
--	siu_write32(base + SIU_SFORM, 0x0c0c0000);
--
--	/*
--	 * Volume levels: looks like the DSP firmware implements volume controls
--	 * differently from what's described in the datasheet
--	 */
--	siu_write32(base + SIU_SBDVCA, port_info->playback.volume);
--	siu_write32(base + SIU_SBDVCB, port_info->capture.volume);
--}
--
--static void siu_dai_stop(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--
--	/* SIU software reset */
--	siu_write32(base + SIU_SRCTL, 0);
--}
--
--static void siu_dai_spbAselect(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	struct siu_firmware *fw = &info->fw;
--	u32 *ydef = fw->yram0;
--	u32 idx;
--
--	/* path A use */
--	if (!info->port_id)
--		idx = 1;		/* portA */
--	else
--		idx = 2;		/* portB */
--
--	ydef[0] = (fw->spbpar[idx].ab1a << 16) |
--		(fw->spbpar[idx].ab0a << 8) |
--		(fw->spbpar[idx].dir << 7) | 3;
--	ydef[1] = fw->yram0[1];	/* 0x03000300 */
--	ydef[2] = (16 / 2) << 24;
--	ydef[3] = fw->yram0[3];	/* 0 */
--	ydef[4] = fw->yram0[4];	/* 0 */
--	ydef[7] = fw->spbpar[idx].event;
--	port_info->stfifo |= fw->spbpar[idx].stfifo;
--	port_info->trdat |= fw->spbpar[idx].trdat;
--}
--
--static void siu_dai_spbBselect(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	struct siu_firmware *fw = &info->fw;
--	u32 *ydef = fw->yram0;
--	u32 idx;
--
--	/* path B use */
--	if (!info->port_id)
--		idx = 7;		/* portA */
--	else
--		idx = 8;		/* portB */
--
--	ydef[5] = (fw->spbpar[idx].ab1a << 16) |
--		(fw->spbpar[idx].ab0a << 8) | 1;
--	ydef[6] = fw->spbpar[idx].event;
--	port_info->stfifo |= fw->spbpar[idx].stfifo;
--	port_info->trdat |= fw->spbpar[idx].trdat;
--}
--
--static void siu_dai_open(struct siu_stream *siu_stream)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	u32 srctl, ifctl;
--
--	srctl = siu_read32(base + SIU_SRCTL);
--	ifctl = siu_read32(base + SIU_IFCTL);
--
--	switch (info->port_id) {
--	case SIU_PORT_A:
--		/* portA operates */
--		srctl |= 0x200;
--		ifctl &= ~0xc2;
--		break;
--	case SIU_PORT_B:
--		/* portB operates */
--		srctl |= 0x100;
--		ifctl &= ~0x31;
--		break;
--	}
--
--	siu_write32(base + SIU_SRCTL, srctl);
--	/* Unmute and configure portA */
--	siu_write32(base + SIU_IFCTL, ifctl);
--}
--
--/*
-- * At the moment only fixed Left-upper, Left-lower, Right-upper, Right-lower
-- * packing is supported
-- */
--static void siu_dai_pcmdatapack(struct siu_stream *siu_stream)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	u32 dpak;
--
--	dpak = siu_read32(base + SIU_DPAK);
--
--	switch (info->port_id) {
--	case SIU_PORT_A:
--		dpak &= ~0xc0000000;
--		break;
--	case SIU_PORT_B:
--		dpak &= ~0x00c00000;
--		break;
--	}
--
--	siu_write32(base + SIU_DPAK, dpak);
--}
--
--static int siu_dai_spbstart(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_firmware *fw = &info->fw;
--	u32 *ydef = fw->yram0;
--	int cnt;
--	u32 __iomem *add;
--	u32 *ptr;
--
--	/* Load SPB Program in PRAM */
--	ptr = fw->pram0;
--	add = info->pram;
--	for (cnt = 0; cnt < PRAM0_SIZE; cnt++, add++, ptr++)
--		siu_write32(add, *ptr);
--
--	ptr = fw->pram1;
--	add = info->pram + (0x0100 / sizeof(u32));
--	for (cnt = 0; cnt < PRAM1_SIZE; cnt++, add++, ptr++)
--		siu_write32(add, *ptr);
--
--	/* XRAM initialization */
--	add = info->xram;
--	for (cnt = 0; cnt < XRAM0_SIZE + XRAM1_SIZE + XRAM2_SIZE; cnt++, add++)
--		siu_write32(add, 0);
--
--	/* YRAM variable area initialization */
--	add = info->yram;
--	for (cnt = 0; cnt < YRAM_DEF_SIZE; cnt++, add++)
--		siu_write32(add, ydef[cnt]);
--
--	/* YRAM FIR coefficient area initialization */
--	add = info->yram + (0x0200 / sizeof(u32));
--	for (cnt = 0; cnt < YRAM_FIR_SIZE; cnt++, add++)
--		siu_write32(add, fw->yram_fir_coeff[cnt]);
--
--	/* YRAM IIR coefficient area initialization */
--	add = info->yram + (0x0600 / sizeof(u32));
--	for (cnt = 0; cnt < YRAM_IIR_SIZE; cnt++, add++)
--		siu_write32(add, 0);
--
--	siu_write32(base + SIU_TRDAT, port_info->trdat);
--	port_info->trdat = 0x0;
--
--
--	/* SPB start condition: software */
--	siu_write32(base + SIU_SBACTIV, 0);
--	/* Start SPB */
--	siu_write32(base + SIU_SBCTL, 0xc0000000);
--	/* Wait for program to halt */
--	cnt = 0x10000;
--	while (--cnt && siu_read32(base + SIU_SBCTL) != 0x80000000)
--		cpu_relax();
--
--	if (!cnt)
--		return -EBUSY;
--
--	/* SPB program start address setting */
--	siu_write32(base + SIU_SBPSET, 0x00400000);
--	/* SPB hardware start(FIFOCTL source) */
--	siu_write32(base + SIU_SBACTIV, 0xc0000000);
--
--	return 0;
--}
--
--static void siu_dai_spbstop(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--
--	siu_write32(base + SIU_SBACTIV, 0);
--	/* SPB stop */
--	siu_write32(base + SIU_SBCTL, 0);
--
--	port_info->stfifo = 0;
--}
--
--/*		API functions		*/
--
--/* Playback and capture hardware properties are identical */
--static const struct snd_pcm_hardware siu_dai_pcm_hw = {
--	.info			= SNDRV_PCM_INFO_INTERLEAVED,
--	.formats		= SNDRV_PCM_FMTBIT_S16,
--	.rates			= SNDRV_PCM_RATE_8000_48000,
--	.rate_min		= 8000,
--	.rate_max		= 48000,
--	.channels_min		= 2,
--	.channels_max		= 2,
--	.buffer_bytes_max	= SIU_BUFFER_BYTES_MAX,
--	.period_bytes_min	= SIU_PERIOD_BYTES_MIN,
--	.period_bytes_max	= SIU_PERIOD_BYTES_MAX,
--	.periods_min		= SIU_PERIODS_MIN,
--	.periods_max		= SIU_PERIODS_MAX,
--};
--
--static int siu_dai_info_volume(struct snd_kcontrol *kctrl,
--			       struct snd_ctl_elem_info *uinfo)
--{
--	struct siu_port *port_info = snd_kcontrol_chip(kctrl);
--
--	dev_dbg(port_info->pcm->card->dev, "%s\n", __func__);
--
--	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
--	uinfo->count = 2;
--	uinfo->value.integer.min = 0;
--	uinfo->value.integer.max = SIU_MAX_VOLUME;
--
--	return 0;
--}
--
--static int siu_dai_get_volume(struct snd_kcontrol *kctrl,
--			      struct snd_ctl_elem_value *ucontrol)
--{
--	struct siu_port *port_info = snd_kcontrol_chip(kctrl);
--	struct device *dev = port_info->pcm->card->dev;
--	u32 vol;
--
--	dev_dbg(dev, "%s\n", __func__);
--
--	switch (kctrl->private_value) {
--	case VOLUME_PLAYBACK:
--		/* Playback is always on port 0 */
--		vol = port_info->playback.volume;
--		ucontrol->value.integer.value[0] = vol & 0xffff;
--		ucontrol->value.integer.value[1] = vol >> 16 & 0xffff;
--		break;
--	case VOLUME_CAPTURE:
--		/* Capture is always on port 1 */
--		vol = port_info->capture.volume;
--		ucontrol->value.integer.value[0] = vol & 0xffff;
--		ucontrol->value.integer.value[1] = vol >> 16 & 0xffff;
--		break;
--	default:
--		dev_err(dev, "%s() invalid private_value=%ld\n",
--			__func__, kctrl->private_value);
--		return -EINVAL;
--	}
--
--	return 0;
--}
--
--static int siu_dai_put_volume(struct snd_kcontrol *kctrl,
--			      struct snd_ctl_elem_value *ucontrol)
--{
--	struct siu_port *port_info = snd_kcontrol_chip(kctrl);
--	struct device *dev = port_info->pcm->card->dev;
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	u32 new_vol;
--	u32 cur_vol;
--
--	dev_dbg(dev, "%s\n", __func__);
--
--	if (ucontrol->value.integer.value[0] < 0 ||
--	    ucontrol->value.integer.value[0] > SIU_MAX_VOLUME ||
--	    ucontrol->value.integer.value[1] < 0 ||
--	    ucontrol->value.integer.value[1] > SIU_MAX_VOLUME)
--		return -EINVAL;
--
--	new_vol = ucontrol->value.integer.value[0] |
--		ucontrol->value.integer.value[1] << 16;
--
--	/* See comment above - DSP firmware implementation */
--	switch (kctrl->private_value) {
--	case VOLUME_PLAYBACK:
--		/* Playback is always on port 0 */
--		cur_vol = port_info->playback.volume;
--		siu_write32(base + SIU_SBDVCA, new_vol);
--		port_info->playback.volume = new_vol;
--		break;
--	case VOLUME_CAPTURE:
--		/* Capture is always on port 1 */
--		cur_vol = port_info->capture.volume;
--		siu_write32(base + SIU_SBDVCB, new_vol);
--		port_info->capture.volume = new_vol;
--		break;
--	default:
--		dev_err(dev, "%s() invalid private_value=%ld\n",
--			__func__, kctrl->private_value);
--		return -EINVAL;
--	}
--
--	if (cur_vol != new_vol)
--		return 1;
--
--	return 0;
--}
--
--static const struct snd_kcontrol_new playback_controls = {
--	.iface		= SNDRV_CTL_ELEM_IFACE_MIXER,
--	.name		= "PCM Playback Volume",
--	.index		= 0,
--	.info		= siu_dai_info_volume,
--	.get		= siu_dai_get_volume,
--	.put		= siu_dai_put_volume,
--	.private_value	= VOLUME_PLAYBACK,
--};
--
--static const struct snd_kcontrol_new capture_controls = {
--	.iface		= SNDRV_CTL_ELEM_IFACE_MIXER,
--	.name		= "PCM Capture Volume",
--	.index		= 0,
--	.info		= siu_dai_info_volume,
--	.get		= siu_dai_get_volume,
--	.put		= siu_dai_put_volume,
--	.private_value	= VOLUME_CAPTURE,
--};
--
--int siu_init_port(int port, struct siu_port **port_info, struct snd_card *card)
--{
--	struct device *dev = card->dev;
--	struct snd_kcontrol *kctrl;
--	int ret;
--
--	*port_info = kzalloc(sizeof(**port_info), GFP_KERNEL);
--	if (!*port_info)
--		return -ENOMEM;
--
--	dev_dbg(dev, "%s: port #%d@%p\n", __func__, port, *port_info);
--
--	(*port_info)->playback.volume = DFLT_VOLUME_LEVEL;
--	(*port_info)->capture.volume = DFLT_VOLUME_LEVEL;
--
--	/*
--	 * Add mixer support. The SPB is used to change the volume. Both
--	 * ports use the same SPB. Therefore, we only register one
--	 * control instance since it will be used by both channels.
--	 * In error case we continue without controls.
--	 */
--	kctrl = snd_ctl_new1(&playback_controls, *port_info);
--	ret = snd_ctl_add(card, kctrl);
--	if (ret < 0)
--		dev_err(dev,
--			"failed to add playback controls %p port=%d err=%d\n",
--			kctrl, port, ret);
--
--	kctrl = snd_ctl_new1(&capture_controls, *port_info);
--	ret = snd_ctl_add(card, kctrl);
--	if (ret < 0)
--		dev_err(dev,
--			"failed to add capture controls %p port=%d err=%d\n",
--			kctrl, port, ret);
--
--	return 0;
--}
--
--void siu_free_port(struct siu_port *port_info)
--{
--	kfree(port_info);
--}
--
--static int siu_dai_startup(struct snd_pcm_substream *substream,
--			   struct snd_soc_dai *dai)
--{
--	struct siu_info *info = snd_soc_dai_get_drvdata(dai);
--	struct snd_pcm_runtime *rt = substream->runtime;
--	struct siu_port	*port_info = siu_port_info(substream);
--	int ret;
--
--	dev_dbg(substream->pcm->card->dev, "%s: port=%d@%p\n", __func__,
--		info->port_id, port_info);
--
--	snd_soc_set_runtime_hwparams(substream, &siu_dai_pcm_hw);
--
--	ret = snd_pcm_hw_constraint_integer(rt, SNDRV_PCM_HW_PARAM_PERIODS);
--	if (unlikely(ret < 0))
--		return ret;
--
--	siu_dai_start(port_info);
--
--	return 0;
--}
--
--static void siu_dai_shutdown(struct snd_pcm_substream *substream,
--			     struct snd_soc_dai *dai)
--{
--	struct siu_info *info = snd_soc_dai_get_drvdata(dai);
--	struct siu_port	*port_info = siu_port_info(substream);
--
--	dev_dbg(substream->pcm->card->dev, "%s: port=%d@%p\n", __func__,
--		info->port_id, port_info);
--
--	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK)
--		port_info->play_cap &= ~PLAYBACK_ENABLED;
--	else
--		port_info->play_cap &= ~CAPTURE_ENABLED;
--
--	/* Stop the siu if the other stream is not using it */
--	if (!port_info->play_cap) {
--		/* during stmread or stmwrite ? */
--		if (WARN_ON(port_info->playback.rw_flg || port_info->capture.rw_flg))
--			return;
--		siu_dai_spbstop(port_info);
--		siu_dai_stop(port_info);
--	}
--}
--
--/* PCM part of siu_dai_playback_prepare() / siu_dai_capture_prepare() */
--static int siu_dai_prepare(struct snd_pcm_substream *substream,
--			   struct snd_soc_dai *dai)
--{
--	struct siu_info *info = snd_soc_dai_get_drvdata(dai);
--	struct snd_pcm_runtime *rt = substream->runtime;
--	struct siu_port *port_info = siu_port_info(substream);
--	struct siu_stream *siu_stream;
--	int self, ret;
--
--	dev_dbg(substream->pcm->card->dev,
--		"%s: port %d, active streams %lx, %d channels\n",
--		__func__, info->port_id, port_info->play_cap, rt->channels);
--
--	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
--		self = PLAYBACK_ENABLED;
--		siu_stream = &port_info->playback;
--	} else {
--		self = CAPTURE_ENABLED;
--		siu_stream = &port_info->capture;
--	}
--
--	/* Set up the siu if not already done */
--	if (!port_info->play_cap) {
--		siu_stream->rw_flg = 0;	/* stream-data transfer flag */
--
--		siu_dai_spbAselect(port_info);
--		siu_dai_spbBselect(port_info);
--
--		siu_dai_open(siu_stream);
--
--		siu_dai_pcmdatapack(siu_stream);
--
--		ret = siu_dai_spbstart(port_info);
--		if (ret < 0)
--			goto fail;
--	} else {
--		ret = 0;
--	}
--
--	port_info->play_cap |= self;
--
--fail:
--	return ret;
--}
--
--/*
-- * SIU can set bus format to I2S / PCM / SPDIF independently for playback and
-- * capture, however, the current API sets the bus format globally for a DAI.
-- */
--static int siu_dai_set_fmt(struct snd_soc_dai *dai,
--			   unsigned int fmt)
--{
--	struct siu_info *info = snd_soc_dai_get_drvdata(dai);
--	u32 __iomem *base = info->reg;
--	u32 ifctl;
--
--	dev_dbg(dai->dev, "%s: fmt 0x%x on port %d\n",
--		__func__, fmt, info->port_id);
--
--	if (info->port_id < 0)
--		return -ENODEV;
--
--	/* Here select between I2S / PCM / SPDIF */
--	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
--	case SND_SOC_DAIFMT_I2S:
--		ifctl = siu_flags[info->port_id].playback.i2s |
--			siu_flags[info->port_id].capture.i2s;
--		break;
--	case SND_SOC_DAIFMT_LEFT_J:
--		ifctl = siu_flags[info->port_id].playback.pcm |
--			siu_flags[info->port_id].capture.pcm;
--		break;
--	/* SPDIF disabled - see comment at the top */
--	default:
--		return -EINVAL;
--	}
--
--	ifctl |= ~(siu_flags[info->port_id].playback.mask |
--		   siu_flags[info->port_id].capture.mask) &
--		siu_read32(base + SIU_IFCTL);
--	siu_write32(base + SIU_IFCTL, ifctl);
--
--	return 0;
--}
--
--static int siu_dai_set_sysclk(struct snd_soc_dai *dai, int clk_id,
--			      unsigned int freq, int dir)
--{
--	struct clk *siu_clk, *parent_clk;
--	char *siu_name, *parent_name;
--	int ret;
--
--	if (dir != SND_SOC_CLOCK_IN)
--		return -EINVAL;
--
--	dev_dbg(dai->dev, "%s: using clock %d\n", __func__, clk_id);
--
--	switch (clk_id) {
--	case SIU_CLKA_PLL:
--		siu_name = "siua_clk";
--		parent_name = "pll_clk";
--		break;
--	case SIU_CLKA_EXT:
--		siu_name = "siua_clk";
--		parent_name = "siumcka_clk";
--		break;
--	case SIU_CLKB_PLL:
--		siu_name = "siub_clk";
--		parent_name = "pll_clk";
--		break;
--	case SIU_CLKB_EXT:
--		siu_name = "siub_clk";
--		parent_name = "siumckb_clk";
--		break;
--	default:
--		return -EINVAL;
--	}
--
--	siu_clk = clk_get(dai->dev, siu_name);
--	if (IS_ERR(siu_clk)) {
--		dev_err(dai->dev, "%s: cannot get a SIU clock: %ld\n", __func__,
--			PTR_ERR(siu_clk));
--		return PTR_ERR(siu_clk);
--	}
--
--	parent_clk = clk_get(dai->dev, parent_name);
--	if (IS_ERR(parent_clk)) {
--		ret = PTR_ERR(parent_clk);
--		dev_err(dai->dev, "cannot get a SIU clock parent: %d\n", ret);
--		goto epclkget;
--	}
--
--	ret = clk_set_parent(siu_clk, parent_clk);
--	if (ret < 0) {
--		dev_err(dai->dev, "cannot reparent the SIU clock: %d\n", ret);
--		goto eclksetp;
--	}
--
--	ret = clk_set_rate(siu_clk, freq);
--	if (ret < 0)
--		dev_err(dai->dev, "cannot set SIU clock rate: %d\n", ret);
--
--	/* TODO: when clkdev gets reference counting we'll move these to siu_dai_shutdown() */
--eclksetp:
--	clk_put(parent_clk);
--epclkget:
--	clk_put(siu_clk);
--
--	return ret;
--}
--
--static const struct snd_soc_dai_ops siu_dai_ops = {
--	.startup	= siu_dai_startup,
--	.shutdown	= siu_dai_shutdown,
--	.prepare	= siu_dai_prepare,
--	.set_sysclk	= siu_dai_set_sysclk,
--	.set_fmt	= siu_dai_set_fmt,
--};
--
--static struct snd_soc_dai_driver siu_i2s_dai = {
--	.name	= "siu-i2s-dai",
--	.playback = {
--		.channels_min = 2,
--		.channels_max = 2,
--		.formats = SNDRV_PCM_FMTBIT_S16,
--		.rates = SNDRV_PCM_RATE_8000_48000,
--	},
--	.capture = {
--		.channels_min = 2,
--		.channels_max = 2,
--		.formats = SNDRV_PCM_FMTBIT_S16,
--		.rates = SNDRV_PCM_RATE_8000_48000,
--	 },
--	.ops = &siu_dai_ops,
--};
--
--static int siu_probe(struct platform_device *pdev)
--{
--	const struct firmware *fw_entry;
--	struct resource *res, *region;
--	struct siu_info *info;
--	int ret;
--
--	info = devm_kmalloc(&pdev->dev, sizeof(*info), GFP_KERNEL);
--	if (!info)
--		return -ENOMEM;
--	siu_i2s_data = info;
--	info->dev = &pdev->dev;
--
--	ret = request_firmware(&fw_entry, "siu_spb.bin", &pdev->dev);
--	if (ret)
--		return ret;
--
--	/*
--	 * Loaded firmware is "const" - read only, but we have to modify it in
--	 * snd_siu_sh7343_spbAselect() and snd_siu_sh7343_spbBselect()
--	 */
--	memcpy(&info->fw, fw_entry->data, fw_entry->size);
--
--	release_firmware(fw_entry);
--
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	if (!res)
--		return -ENODEV;
--
--	region = devm_request_mem_region(&pdev->dev, res->start,
--					 resource_size(res), pdev->name);
--	if (!region) {
--		dev_err(&pdev->dev, "SIU region already claimed\n");
--		return -EBUSY;
--	}
--
--	info->pram = devm_ioremap(&pdev->dev, res->start, PRAM_SIZE);
--	if (!info->pram)
--		return -ENOMEM;
--	info->xram = devm_ioremap(&pdev->dev, res->start + XRAM_OFFSET,
--				  XRAM_SIZE);
--	if (!info->xram)
--		return -ENOMEM;
--	info->yram = devm_ioremap(&pdev->dev, res->start + YRAM_OFFSET,
--				  YRAM_SIZE);
--	if (!info->yram)
--		return -ENOMEM;
--	info->reg = devm_ioremap(&pdev->dev, res->start + REG_OFFSET,
--			    resource_size(res) - REG_OFFSET);
--	if (!info->reg)
--		return -ENOMEM;
--
--	dev_set_drvdata(&pdev->dev, info);
--
--	/* register using ARRAY version so we can keep dai name */
--	ret = devm_snd_soc_register_component(&pdev->dev, &siu_component,
--					      &siu_i2s_dai, 1);
--	if (ret < 0)
--		return ret;
--
--	pm_runtime_enable(&pdev->dev);
--
--	return 0;
--}
--
--static int siu_remove(struct platform_device *pdev)
--{
--	pm_runtime_disable(&pdev->dev);
--	return 0;
--}
--
--static struct platform_driver siu_driver = {
--	.driver 	= {
--		.name	= "siu-pcm-audio",
--	},
--	.probe		= siu_probe,
--	.remove		= siu_remove,
--};
--
--module_platform_driver(siu_driver);
--
--MODULE_AUTHOR("Carlos Munoz <carlos@kenati.com>");
--MODULE_DESCRIPTION("ALSA SoC SH7722 SIU driver");
--MODULE_LICENSE("GPL");
-diff --git a/sound/soc/sh/siu_pcm.c b/sound/soc/sh/siu_pcm.c
-deleted file mode 100644
-index f15ff36e793455..00000000000000
---- a/sound/soc/sh/siu_pcm.c
-+++ /dev/null
-@@ -1,553 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0+
--//
--// siu_pcm.c - ALSA driver for Renesas SH7343, SH7722 SIU peripheral.
--//
--// Copyright (C) 2009-2010 Guennadi Liakhovetski <g.liakhovetski@gmx.de>
--// Copyright (C) 2006 Carlos Munoz <carlos@kenati.com>
--
--#include <linux/delay.h>
--#include <linux/dma-mapping.h>
--#include <linux/dmaengine.h>
--#include <linux/interrupt.h>
--#include <linux/module.h>
+-#include <linux/of.h>
+-#include <linux/of_device.h>
 -#include <linux/platform_device.h>
+-#include <linux/pm_runtime.h>
+-#include <linux/sh_dma.h>
+-#include <linux/slab.h>
+-#include <linux/string.h>
 -
--#include <sound/control.h>
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/pcm_params.h>
--#include <sound/soc.h>
+-#include <linux/mtd/mtd.h>
+-#include <linux/mtd/rawnand.h>
+-#include <linux/mtd/partitions.h>
+-#include <linux/mtd/sh_flctl.h>
 -
--#include <asm/siu.h>
--
--#include "siu.h"
--
--#define DRV_NAME "siu-i2s"
--#define GET_MAX_PERIODS(buf_bytes, period_bytes) \
--				((buf_bytes) / (period_bytes))
--#define PERIOD_OFFSET(buf_addr, period_num, period_bytes) \
--				((buf_addr) + ((period_num) * (period_bytes)))
--
--#define RWF_STM_RD		0x01		/* Read in progress */
--#define RWF_STM_WT		0x02		/* Write in progress */
--
--struct siu_port *siu_ports[SIU_PORT_NUM];
--
--/* transfersize is number of u32 dma transfers per period */
--static int siu_pcm_stmwrite_stop(struct siu_port *port_info)
+-static int flctl_4secc_ooblayout_sp_ecc(struct mtd_info *mtd, int section,
+-					struct mtd_oob_region *oobregion)
 -{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_stream *siu_stream = &port_info->playback;
--	u32 stfifo;
+-	struct nand_chip *chip = mtd_to_nand(mtd);
 -
--	if (!siu_stream->rw_flg)
--		return -EPERM;
+-	if (section)
+-		return -ERANGE;
 -
--	/* output FIFO disable */
--	stfifo = siu_read32(base + SIU_STFIFO);
--	siu_write32(base + SIU_STFIFO, stfifo & ~0x0c180c18);
--	pr_debug("%s: STFIFO %x -> %x\n", __func__,
--		 stfifo, stfifo & ~0x0c180c18);
--
--	/* during stmwrite clear */
--	siu_stream->rw_flg = 0;
+-	oobregion->offset = 0;
+-	oobregion->length = chip->ecc.bytes;
 -
 -	return 0;
 -}
 -
--static int siu_pcm_stmwrite_start(struct siu_port *port_info)
+-static int flctl_4secc_ooblayout_sp_free(struct mtd_info *mtd, int section,
+-					 struct mtd_oob_region *oobregion)
 -{
--	struct siu_stream *siu_stream = &port_info->playback;
+-	if (section)
+-		return -ERANGE;
 -
--	if (siu_stream->rw_flg)
--		return -EPERM;
--
--	/* Current period in buffer */
--	port_info->playback.cur_period = 0;
--
--	/* during stmwrite flag set */
--	siu_stream->rw_flg = RWF_STM_WT;
--
--	/* DMA transfer start */
--	queue_work(system_highpri_wq, &siu_stream->work);
+-	oobregion->offset = 12;
+-	oobregion->length = 4;
 -
 -	return 0;
 -}
 -
--static void siu_dma_tx_complete(void *arg)
+-static const struct mtd_ooblayout_ops flctl_4secc_oob_smallpage_ops = {
+-	.ecc = flctl_4secc_ooblayout_sp_ecc,
+-	.free = flctl_4secc_ooblayout_sp_free,
+-};
+-
+-static int flctl_4secc_ooblayout_lp_ecc(struct mtd_info *mtd, int section,
+-					struct mtd_oob_region *oobregion)
 -{
--	struct siu_stream *siu_stream = arg;
+-	struct nand_chip *chip = mtd_to_nand(mtd);
 -
--	if (!siu_stream->rw_flg)
--		return;
+-	if (section >= chip->ecc.steps)
+-		return -ERANGE;
 -
--	/* Update completed period count */
--	if (++siu_stream->cur_period >=
--	    GET_MAX_PERIODS(siu_stream->buf_bytes,
--			    siu_stream->period_bytes))
--		siu_stream->cur_period = 0;
--
--	pr_debug("%s: done period #%d (%u/%u bytes), cookie %d\n",
--		__func__, siu_stream->cur_period,
--		siu_stream->cur_period * siu_stream->period_bytes,
--		siu_stream->buf_bytes, siu_stream->cookie);
--
--	queue_work(system_highpri_wq, &siu_stream->work);
--
--	/* Notify alsa: a period is done */
--	snd_pcm_period_elapsed(siu_stream->substream);
--}
--
--static int siu_pcm_wr_set(struct siu_port *port_info,
--			  dma_addr_t buff, u32 size)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_stream *siu_stream = &port_info->playback;
--	struct snd_pcm_substream *substream = siu_stream->substream;
--	struct device *dev = substream->pcm->card->dev;
--	struct dma_async_tx_descriptor *desc;
--	dma_cookie_t cookie;
--	struct scatterlist sg;
--	u32 stfifo;
--
--	sg_init_table(&sg, 1);
--	sg_set_page(&sg, pfn_to_page(PFN_DOWN(buff)),
--		    size, offset_in_page(buff));
--	sg_dma_len(&sg) = size;
--	sg_dma_address(&sg) = buff;
--
--	desc = dmaengine_prep_slave_sg(siu_stream->chan,
--		&sg, 1, DMA_MEM_TO_DEV, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
--	if (!desc) {
--		dev_err(dev, "Failed to allocate a dma descriptor\n");
--		return -ENOMEM;
--	}
--
--	desc->callback = siu_dma_tx_complete;
--	desc->callback_param = siu_stream;
--	cookie = dmaengine_submit(desc);
--	if (cookie < 0) {
--		dev_err(dev, "Failed to submit a dma transfer\n");
--		return cookie;
--	}
--
--	siu_stream->tx_desc = desc;
--	siu_stream->cookie = cookie;
--
--	dma_async_issue_pending(siu_stream->chan);
--
--	/* only output FIFO enable */
--	stfifo = siu_read32(base + SIU_STFIFO);
--	siu_write32(base + SIU_STFIFO, stfifo | (port_info->stfifo & 0x0c180c18));
--	dev_dbg(dev, "%s: STFIFO %x -> %x\n", __func__,
--		stfifo, stfifo | (port_info->stfifo & 0x0c180c18));
+-	oobregion->offset = (section * 16) + 6;
+-	oobregion->length = chip->ecc.bytes;
 -
 -	return 0;
 -}
 -
--static int siu_pcm_rd_set(struct siu_port *port_info,
--			  dma_addr_t buff, size_t size)
+-static int flctl_4secc_ooblayout_lp_free(struct mtd_info *mtd, int section,
+-					 struct mtd_oob_region *oobregion)
 -{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_stream *siu_stream = &port_info->capture;
--	struct snd_pcm_substream *substream = siu_stream->substream;
--	struct device *dev = substream->pcm->card->dev;
--	struct dma_async_tx_descriptor *desc;
--	dma_cookie_t cookie;
--	struct scatterlist sg;
--	u32 stfifo;
+-	struct nand_chip *chip = mtd_to_nand(mtd);
 -
--	dev_dbg(dev, "%s: %u@%llx\n", __func__, size, (unsigned long long)buff);
+-	if (section >= chip->ecc.steps)
+-		return -ERANGE;
 -
--	sg_init_table(&sg, 1);
--	sg_set_page(&sg, pfn_to_page(PFN_DOWN(buff)),
--		    size, offset_in_page(buff));
--	sg_dma_len(&sg) = size;
--	sg_dma_address(&sg) = buff;
+-	oobregion->offset = section * 16;
+-	oobregion->length = 6;
 -
--	desc = dmaengine_prep_slave_sg(siu_stream->chan,
--		&sg, 1, DMA_DEV_TO_MEM, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
--	if (!desc) {
--		dev_err(dev, "Failed to allocate dma descriptor\n");
--		return -ENOMEM;
+-	if (!section) {
+-		oobregion->offset += 2;
+-		oobregion->length -= 2;
 -	}
--
--	desc->callback = siu_dma_tx_complete;
--	desc->callback_param = siu_stream;
--	cookie = dmaengine_submit(desc);
--	if (cookie < 0) {
--		dev_err(dev, "Failed to submit dma descriptor\n");
--		return cookie;
--	}
--
--	siu_stream->tx_desc = desc;
--	siu_stream->cookie = cookie;
--
--	dma_async_issue_pending(siu_stream->chan);
--
--	/* only input FIFO enable */
--	stfifo = siu_read32(base + SIU_STFIFO);
--	siu_write32(base + SIU_STFIFO, siu_read32(base + SIU_STFIFO) |
--		    (port_info->stfifo & 0x13071307));
--	dev_dbg(dev, "%s: STFIFO %x -> %x\n", __func__,
--		stfifo, stfifo | (port_info->stfifo & 0x13071307));
 -
 -	return 0;
 -}
 -
--static void siu_io_work(struct work_struct *work)
+-static const struct mtd_ooblayout_ops flctl_4secc_oob_largepage_ops = {
+-	.ecc = flctl_4secc_ooblayout_lp_ecc,
+-	.free = flctl_4secc_ooblayout_lp_free,
+-};
+-
+-static uint8_t scan_ff_pattern[] = { 0xff, 0xff };
+-
+-static struct nand_bbt_descr flctl_4secc_smallpage = {
+-	.offs = 11,
+-	.len = 1,
+-	.pattern = scan_ff_pattern,
+-};
+-
+-static struct nand_bbt_descr flctl_4secc_largepage = {
+-	.offs = 0,
+-	.len = 2,
+-	.pattern = scan_ff_pattern,
+-};
+-
+-static void empty_fifo(struct sh_flctl *flctl)
 -{
--	struct siu_stream *siu_stream = container_of(work, struct siu_stream,
--						     work);
--	struct snd_pcm_substream *substream = siu_stream->substream;
--	struct device *dev = substream->pcm->card->dev;
--	struct snd_pcm_runtime *rt = substream->runtime;
--	struct siu_port *port_info = siu_port_info(substream);
+-	writel(flctl->flintdmacr_base | AC1CLR | AC0CLR, FLINTDMACR(flctl));
+-	writel(flctl->flintdmacr_base, FLINTDMACR(flctl));
+-}
 -
--	dev_dbg(dev, "%s: flags %x\n", __func__, siu_stream->rw_flg);
+-static void start_translation(struct sh_flctl *flctl)
+-{
+-	writeb(TRSTRT, FLTRCR(flctl));
+-}
 -
--	if (!siu_stream->rw_flg) {
--		dev_dbg(dev, "%s: stream inactive\n", __func__);
--		return;
+-static void timeout_error(struct sh_flctl *flctl, const char *str)
+-{
+-	dev_err(&flctl->pdev->dev, "Timeout occurred in %s\n", str);
+-}
+-
+-static void wait_completion(struct sh_flctl *flctl)
+-{
+-	uint32_t timeout = LOOP_TIMEOUT_MAX;
+-
+-	while (timeout--) {
+-		if (readb(FLTRCR(flctl)) & TREND) {
+-			writeb(0x0, FLTRCR(flctl));
+-			return;
+-		}
+-		udelay(1);
 -	}
 -
--	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE) {
--		dma_addr_t buff;
--		size_t count;
+-	timeout_error(flctl, __func__);
+-	writeb(0x0, FLTRCR(flctl));
+-}
 -
--		buff = (dma_addr_t)PERIOD_OFFSET(rt->dma_addr,
--						siu_stream->cur_period,
--						siu_stream->period_bytes);
--		count = siu_stream->period_bytes;
+-static void flctl_dma_complete(void *param)
+-{
+-	struct sh_flctl *flctl = param;
 -
--		/* DMA transfer start */
--		siu_pcm_rd_set(port_info, buff, count);
--	} else {
--		siu_pcm_wr_set(port_info,
--			       (dma_addr_t)PERIOD_OFFSET(rt->dma_addr,
--						siu_stream->cur_period,
--						siu_stream->period_bytes),
--			       siu_stream->period_bytes);
+-	complete(&flctl->dma_complete);
+-}
+-
+-static void flctl_release_dma(struct sh_flctl *flctl)
+-{
+-	if (flctl->chan_fifo0_rx) {
+-		dma_release_channel(flctl->chan_fifo0_rx);
+-		flctl->chan_fifo0_rx = NULL;
+-	}
+-	if (flctl->chan_fifo0_tx) {
+-		dma_release_channel(flctl->chan_fifo0_tx);
+-		flctl->chan_fifo0_tx = NULL;
 -	}
 -}
 -
--/* Capture */
--static int siu_pcm_stmread_start(struct siu_port *port_info)
+-static void flctl_setup_dma(struct sh_flctl *flctl)
 -{
--	struct siu_stream *siu_stream = &port_info->capture;
--
--	if (siu_stream->xfer_cnt > 0x1000000)
--		return -EINVAL;
--	if (siu_stream->rw_flg)
--		return -EPERM;
--
--	/* Current period in buffer */
--	siu_stream->cur_period = 0;
--
--	/* during stmread flag set */
--	siu_stream->rw_flg = RWF_STM_RD;
--
--	queue_work(system_highpri_wq, &siu_stream->work);
--
--	return 0;
--}
--
--static int siu_pcm_stmread_stop(struct siu_port *port_info)
--{
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_stream *siu_stream = &port_info->capture;
--	struct device *dev = siu_stream->substream->pcm->card->dev;
--	u32 stfifo;
--
--	if (!siu_stream->rw_flg)
--		return -EPERM;
--
--	/* input FIFO disable */
--	stfifo = siu_read32(base + SIU_STFIFO);
--	siu_write32(base + SIU_STFIFO, stfifo & ~0x13071307);
--	dev_dbg(dev, "%s: STFIFO %x -> %x\n", __func__,
--		stfifo, stfifo & ~0x13071307);
--
--	/* during stmread flag clear */
--	siu_stream->rw_flg = 0;
--
--	return 0;
--}
--
--static bool filter(struct dma_chan *chan, void *secondary)
--{
--	struct sh_dmae_slave *param = secondary;
--
--	pr_debug("%s: secondary ID %d\n", __func__, param->shdma_slave.slave_id);
--
--	chan->private = &param->shdma_slave;
--	return true;
--}
--
--static int siu_pcm_open(struct snd_soc_component *component,
--			struct snd_pcm_substream *ss)
--{
--	/* Playback / Capture */
--	struct siu_platform *pdata = component->dev->platform_data;
--	struct siu_info *info = siu_i2s_data;
--	struct siu_port *port_info = siu_port_info(ss);
--	struct siu_stream *siu_stream;
--	u32 port = info->port_id;
--	struct device *dev = ss->pcm->card->dev;
 -	dma_cap_mask_t mask;
--	struct sh_dmae_slave *param;
+-	struct dma_slave_config cfg;
+-	struct platform_device *pdev = flctl->pdev;
+-	struct sh_flctl_platform_data *pdata = dev_get_platdata(&pdev->dev);
+-	int ret;
 -
+-	if (!pdata)
+-		return;
+-
+-	if (pdata->slave_id_fifo0_tx <= 0 || pdata->slave_id_fifo0_rx <= 0)
+-		return;
+-
+-	/* We can only either use DMA for both Tx and Rx or not use it at all */
 -	dma_cap_zero(mask);
 -	dma_cap_set(DMA_SLAVE, mask);
 -
--	dev_dbg(dev, "%s, port=%d@%p\n", __func__, port, port_info);
+-	flctl->chan_fifo0_tx = dma_request_channel(mask, shdma_chan_filter,
+-				(void *)(uintptr_t)pdata->slave_id_fifo0_tx);
+-	dev_dbg(&pdev->dev, "%s: TX: got channel %p\n", __func__,
+-		flctl->chan_fifo0_tx);
 -
--	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK) {
--		siu_stream = &port_info->playback;
--		param = &siu_stream->param;
--		param->shdma_slave.slave_id = port ? pdata->dma_slave_tx_b :
--			pdata->dma_slave_tx_a;
+-	if (!flctl->chan_fifo0_tx)
+-		return;
+-
+-	memset(&cfg, 0, sizeof(cfg));
+-	cfg.direction = DMA_MEM_TO_DEV;
+-	cfg.dst_addr = flctl->fifo;
+-	cfg.src_addr = 0;
+-	ret = dmaengine_slave_config(flctl->chan_fifo0_tx, &cfg);
+-	if (ret < 0)
+-		goto err;
+-
+-	flctl->chan_fifo0_rx = dma_request_channel(mask, shdma_chan_filter,
+-				(void *)(uintptr_t)pdata->slave_id_fifo0_rx);
+-	dev_dbg(&pdev->dev, "%s: RX: got channel %p\n", __func__,
+-		flctl->chan_fifo0_rx);
+-
+-	if (!flctl->chan_fifo0_rx)
+-		goto err;
+-
+-	cfg.direction = DMA_DEV_TO_MEM;
+-	cfg.dst_addr = 0;
+-	cfg.src_addr = flctl->fifo;
+-	ret = dmaengine_slave_config(flctl->chan_fifo0_rx, &cfg);
+-	if (ret < 0)
+-		goto err;
+-
+-	init_completion(&flctl->dma_complete);
+-
+-	return;
+-
+-err:
+-	flctl_release_dma(flctl);
+-}
+-
+-static void set_addr(struct mtd_info *mtd, int column, int page_addr)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	uint32_t addr = 0;
+-
+-	if (column == -1) {
+-		addr = page_addr;	/* ERASE1 */
+-	} else if (page_addr != -1) {
+-		/* SEQIN, READ0, etc.. */
+-		if (flctl->chip.options & NAND_BUSWIDTH_16)
+-			column >>= 1;
+-		if (flctl->page_size) {
+-			addr = column & 0x0FFF;
+-			addr |= (page_addr & 0xff) << 16;
+-			addr |= ((page_addr >> 8) & 0xff) << 24;
+-			/* big than 128MB */
+-			if (flctl->rw_ADRCNT == ADRCNT2_E) {
+-				uint32_t 	addr2;
+-				addr2 = (page_addr >> 16) & 0xff;
+-				writel(addr2, FLADR2(flctl));
+-			}
+-		} else {
+-			addr = column;
+-			addr |= (page_addr & 0xff) << 8;
+-			addr |= ((page_addr >> 8) & 0xff) << 16;
+-			addr |= ((page_addr >> 16) & 0xff) << 24;
+-		}
+-	}
+-	writel(addr, FLADR(flctl));
+-}
+-
+-static void wait_rfifo_ready(struct sh_flctl *flctl)
+-{
+-	uint32_t timeout = LOOP_TIMEOUT_MAX;
+-
+-	while (timeout--) {
+-		uint32_t val;
+-		/* check FIFO */
+-		val = readl(FLDTCNTR(flctl)) >> 16;
+-		if (val & 0xFF)
+-			return;
+-		udelay(1);
+-	}
+-	timeout_error(flctl, __func__);
+-}
+-
+-static void wait_wfifo_ready(struct sh_flctl *flctl)
+-{
+-	uint32_t len, timeout = LOOP_TIMEOUT_MAX;
+-
+-	while (timeout--) {
+-		/* check FIFO */
+-		len = (readl(FLDTCNTR(flctl)) >> 16) & 0xFF;
+-		if (len >= 4)
+-			return;
+-		udelay(1);
+-	}
+-	timeout_error(flctl, __func__);
+-}
+-
+-static enum flctl_ecc_res_t wait_recfifo_ready
+-		(struct sh_flctl *flctl, int sector_number)
+-{
+-	uint32_t timeout = LOOP_TIMEOUT_MAX;
+-	void __iomem *ecc_reg[4];
+-	int i;
+-	int state = FL_SUCCESS;
+-	uint32_t data, size;
+-
+-	/*
+-	 * First this loops checks in FLDTCNTR if we are ready to read out the
+-	 * oob data. This is the case if either all went fine without errors or
+-	 * if the bottom part of the loop corrected the errors or marked them as
+-	 * uncorrectable and the controller is given time to push the data into
+-	 * the FIFO.
+-	 */
+-	while (timeout--) {
+-		/* check if all is ok and we can read out the OOB */
+-		size = readl(FLDTCNTR(flctl)) >> 24;
+-		if ((size & 0xFF) == 4)
+-			return state;
+-
+-		/* check if a correction code has been calculated */
+-		if (!(readl(FL4ECCCR(flctl)) & _4ECCEND)) {
+-			/*
+-			 * either we wait for the fifo to be filled or a
+-			 * correction pattern is being generated
+-			 */
+-			udelay(1);
+-			continue;
+-		}
+-
+-		/* check for an uncorrectable error */
+-		if (readl(FL4ECCCR(flctl)) & _4ECCFA) {
+-			/* check if we face a non-empty page */
+-			for (i = 0; i < 512; i++) {
+-				if (flctl->done_buff[i] != 0xff) {
+-					state = FL_ERROR; /* can't correct */
+-					break;
+-				}
+-			}
+-
+-			if (state == FL_SUCCESS)
+-				dev_dbg(&flctl->pdev->dev,
+-				"reading empty sector %d, ecc error ignored\n",
+-				sector_number);
+-
+-			writel(0, FL4ECCCR(flctl));
+-			continue;
+-		}
+-
+-		/* start error correction */
+-		ecc_reg[0] = FL4ECCRESULT0(flctl);
+-		ecc_reg[1] = FL4ECCRESULT1(flctl);
+-		ecc_reg[2] = FL4ECCRESULT2(flctl);
+-		ecc_reg[3] = FL4ECCRESULT3(flctl);
+-
+-		for (i = 0; i < 3; i++) {
+-			uint8_t org;
+-			unsigned int index;
+-
+-			data = readl(ecc_reg[i]);
+-
+-			if (flctl->page_size)
+-				index = (512 * sector_number) +
+-					(data >> 16);
+-			else
+-				index = data >> 16;
+-
+-			org = flctl->done_buff[index];
+-			flctl->done_buff[index] = org ^ (data & 0xFF);
+-		}
+-		state = FL_REPAIRABLE;
+-		writel(0, FL4ECCCR(flctl));
+-	}
+-
+-	timeout_error(flctl, __func__);
+-	return FL_TIMEOUT;	/* timeout */
+-}
+-
+-static void wait_wecfifo_ready(struct sh_flctl *flctl)
+-{
+-	uint32_t timeout = LOOP_TIMEOUT_MAX;
+-	uint32_t len;
+-
+-	while (timeout--) {
+-		/* check FLECFIFO */
+-		len = (readl(FLDTCNTR(flctl)) >> 24) & 0xFF;
+-		if (len >= 4)
+-			return;
+-		udelay(1);
+-	}
+-	timeout_error(flctl, __func__);
+-}
+-
+-static int flctl_dma_fifo0_transfer(struct sh_flctl *flctl, unsigned long *buf,
+-					int len, enum dma_data_direction dir)
+-{
+-	struct dma_async_tx_descriptor *desc = NULL;
+-	struct dma_chan *chan;
+-	enum dma_transfer_direction tr_dir;
+-	dma_addr_t dma_addr;
+-	dma_cookie_t cookie;
+-	uint32_t reg;
+-	int ret = 0;
+-	unsigned long time_left;
+-
+-	if (dir == DMA_FROM_DEVICE) {
+-		chan = flctl->chan_fifo0_rx;
+-		tr_dir = DMA_DEV_TO_MEM;
 -	} else {
--		siu_stream = &port_info->capture;
--		param = &siu_stream->param;
--		param->shdma_slave.slave_id = port ? pdata->dma_slave_rx_b :
--			pdata->dma_slave_rx_a;
+-		chan = flctl->chan_fifo0_tx;
+-		tr_dir = DMA_MEM_TO_DEV;
 -	}
 -
--	/* Get DMA channel */
--	siu_stream->chan = dma_request_channel(mask, filter, param);
--	if (!siu_stream->chan) {
--		dev_err(dev, "DMA channel allocation failed!\n");
--		return -EBUSY;
+-	dma_addr = dma_map_single(chan->device->dev, buf, len, dir);
+-
+-	if (!dma_mapping_error(chan->device->dev, dma_addr))
+-		desc = dmaengine_prep_slave_single(chan, dma_addr, len,
+-			tr_dir, DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+-
+-	if (desc) {
+-		reg = readl(FLINTDMACR(flctl));
+-		reg |= DREQ0EN;
+-		writel(reg, FLINTDMACR(flctl));
+-
+-		desc->callback = flctl_dma_complete;
+-		desc->callback_param = flctl;
+-		cookie = dmaengine_submit(desc);
+-		if (dma_submit_error(cookie)) {
+-			ret = dma_submit_error(cookie);
+-			dev_warn(&flctl->pdev->dev,
+-				 "DMA submit failed, falling back to PIO\n");
+-			goto out;
+-		}
+-
+-		dma_async_issue_pending(chan);
+-	} else {
+-		/* DMA failed, fall back to PIO */
+-		flctl_release_dma(flctl);
+-		dev_warn(&flctl->pdev->dev,
+-			 "DMA failed, falling back to PIO\n");
+-		ret = -EIO;
+-		goto out;
 -	}
 -
--	siu_stream->substream = ss;
+-	time_left =
+-	wait_for_completion_timeout(&flctl->dma_complete,
+-				msecs_to_jiffies(3000));
 -
--	return 0;
--}
--
--static int siu_pcm_close(struct snd_soc_component *component,
--			 struct snd_pcm_substream *ss)
--{
--	struct siu_info *info = siu_i2s_data;
--	struct device *dev = ss->pcm->card->dev;
--	struct siu_port *port_info = siu_port_info(ss);
--	struct siu_stream *siu_stream;
--
--	dev_dbg(dev, "%s: port=%d\n", __func__, info->port_id);
--
--	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK)
--		siu_stream = &port_info->playback;
--	else
--		siu_stream = &port_info->capture;
--
--	dma_release_channel(siu_stream->chan);
--	siu_stream->chan = NULL;
--
--	siu_stream->substream = NULL;
--
--	return 0;
--}
--
--static int siu_pcm_prepare(struct snd_soc_component *component,
--			   struct snd_pcm_substream *ss)
--{
--	struct siu_info *info = siu_i2s_data;
--	struct siu_port *port_info = siu_port_info(ss);
--	struct device *dev = ss->pcm->card->dev;
--	struct snd_pcm_runtime *rt;
--	struct siu_stream *siu_stream;
--	snd_pcm_sframes_t xfer_cnt;
--
--	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK)
--		siu_stream = &port_info->playback;
--	else
--		siu_stream = &port_info->capture;
--
--	rt = siu_stream->substream->runtime;
--
--	siu_stream->buf_bytes = snd_pcm_lib_buffer_bytes(ss);
--	siu_stream->period_bytes = snd_pcm_lib_period_bytes(ss);
--
--	dev_dbg(dev, "%s: port=%d, %d channels, period=%u bytes\n", __func__,
--		info->port_id, rt->channels, siu_stream->period_bytes);
--
--	/* We only support buffers that are multiples of the period */
--	if (siu_stream->buf_bytes % siu_stream->period_bytes) {
--		dev_err(dev, "%s() - buffer=%d not multiple of period=%d\n",
--		       __func__, siu_stream->buf_bytes,
--		       siu_stream->period_bytes);
--		return -EINVAL;
+-	if (time_left == 0) {
+-		dmaengine_terminate_all(chan);
+-		dev_err(&flctl->pdev->dev, "wait_for_completion_timeout\n");
+-		ret = -ETIMEDOUT;
 -	}
 -
--	xfer_cnt = bytes_to_frames(rt, siu_stream->period_bytes);
--	if (!xfer_cnt || xfer_cnt > 0x1000000)
--		return -EINVAL;
+-out:
+-	reg = readl(FLINTDMACR(flctl));
+-	reg &= ~DREQ0EN;
+-	writel(reg, FLINTDMACR(flctl));
 -
--	siu_stream->format = rt->format;
--	siu_stream->xfer_cnt = xfer_cnt;
+-	dma_unmap_single(chan->device->dev, dma_addr, len, dir);
 -
--	dev_dbg(dev, "port=%d buf=%lx buf_bytes=%d period_bytes=%d "
--		"format=%d channels=%d xfer_cnt=%d\n", info->port_id,
--		(unsigned long)rt->dma_addr, siu_stream->buf_bytes,
--		siu_stream->period_bytes,
--		siu_stream->format, rt->channels, (int)xfer_cnt);
--
--	return 0;
--}
--
--static int siu_pcm_trigger(struct snd_soc_component *component,
--			   struct snd_pcm_substream *ss, int cmd)
--{
--	struct siu_info *info = siu_i2s_data;
--	struct device *dev = ss->pcm->card->dev;
--	struct siu_port *port_info = siu_port_info(ss);
--	int ret;
--
--	dev_dbg(dev, "%s: port=%d@%p, cmd=%d\n", __func__,
--		info->port_id, port_info, cmd);
--
--	switch (cmd) {
--	case SNDRV_PCM_TRIGGER_START:
--		if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK)
--			ret = siu_pcm_stmwrite_start(port_info);
--		else
--			ret = siu_pcm_stmread_start(port_info);
--
--		if (ret < 0)
--			dev_warn(dev, "%s: start failed on port=%d\n",
--				 __func__, info->port_id);
--
--		break;
--	case SNDRV_PCM_TRIGGER_STOP:
--		if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK)
--			siu_pcm_stmwrite_stop(port_info);
--		else
--			siu_pcm_stmread_stop(port_info);
--		ret = 0;
--
--		break;
--	default:
--		dev_err(dev, "%s() unsupported cmd=%d\n", __func__, cmd);
--		ret = -EINVAL;
--	}
--
+-	/* ret == 0 is success */
 -	return ret;
 -}
 -
--/*
-- * So far only resolution of one period is supported, subject to extending the
-- * dmangine API
-- */
--static snd_pcm_uframes_t
--siu_pcm_pointer_dma(struct snd_soc_component *component,
--		    struct snd_pcm_substream *ss)
+-static void read_datareg(struct sh_flctl *flctl, int offset)
 -{
--	struct device *dev = ss->pcm->card->dev;
--	struct siu_info *info = siu_i2s_data;
--	u32 __iomem *base = info->reg;
--	struct siu_port *port_info = siu_port_info(ss);
--	struct snd_pcm_runtime *rt = ss->runtime;
--	size_t ptr;
--	struct siu_stream *siu_stream;
+-	unsigned long data;
+-	unsigned long *buf = (unsigned long *)&flctl->done_buff[offset];
 -
--	if (ss->stream == SNDRV_PCM_STREAM_PLAYBACK)
--		siu_stream = &port_info->playback;
+-	wait_completion(flctl);
+-
+-	data = readl(FLDATAR(flctl));
+-	*buf = le32_to_cpu(data);
+-}
+-
+-static void read_fiforeg(struct sh_flctl *flctl, int rlen, int offset)
+-{
+-	int i, len_4align;
+-	unsigned long *buf = (unsigned long *)&flctl->done_buff[offset];
+-
+-	len_4align = (rlen + 3) / 4;
+-
+-	/* initiate DMA transfer */
+-	if (flctl->chan_fifo0_rx && rlen >= 32 &&
+-		!flctl_dma_fifo0_transfer(flctl, buf, rlen, DMA_FROM_DEVICE))
+-			goto convert;	/* DMA success */
+-
+-	/* do polling transfer */
+-	for (i = 0; i < len_4align; i++) {
+-		wait_rfifo_ready(flctl);
+-		buf[i] = readl(FLDTFIFO(flctl));
+-	}
+-
+-convert:
+-	for (i = 0; i < len_4align; i++)
+-		buf[i] = be32_to_cpu(buf[i]);
+-}
+-
+-static enum flctl_ecc_res_t read_ecfiforeg
+-		(struct sh_flctl *flctl, uint8_t *buff, int sector)
+-{
+-	int i;
+-	enum flctl_ecc_res_t res;
+-	unsigned long *ecc_buf = (unsigned long *)buff;
+-
+-	res = wait_recfifo_ready(flctl , sector);
+-
+-	if (res != FL_ERROR) {
+-		for (i = 0; i < 4; i++) {
+-			ecc_buf[i] = readl(FLECFIFO(flctl));
+-			ecc_buf[i] = be32_to_cpu(ecc_buf[i]);
+-		}
+-	}
+-
+-	return res;
+-}
+-
+-static void write_fiforeg(struct sh_flctl *flctl, int rlen,
+-						unsigned int offset)
+-{
+-	int i, len_4align;
+-	unsigned long *buf = (unsigned long *)&flctl->done_buff[offset];
+-
+-	len_4align = (rlen + 3) / 4;
+-	for (i = 0; i < len_4align; i++) {
+-		wait_wfifo_ready(flctl);
+-		writel(cpu_to_be32(buf[i]), FLDTFIFO(flctl));
+-	}
+-}
+-
+-static void write_ec_fiforeg(struct sh_flctl *flctl, int rlen,
+-						unsigned int offset)
+-{
+-	int i, len_4align;
+-	unsigned long *buf = (unsigned long *)&flctl->done_buff[offset];
+-
+-	len_4align = (rlen + 3) / 4;
+-
+-	for (i = 0; i < len_4align; i++)
+-		buf[i] = cpu_to_be32(buf[i]);
+-
+-	/* initiate DMA transfer */
+-	if (flctl->chan_fifo0_tx && rlen >= 32 &&
+-		!flctl_dma_fifo0_transfer(flctl, buf, rlen, DMA_TO_DEVICE))
+-			return;	/* DMA success */
+-
+-	/* do polling transfer */
+-	for (i = 0; i < len_4align; i++) {
+-		wait_wecfifo_ready(flctl);
+-		writel(buf[i], FLECFIFO(flctl));
+-	}
+-}
+-
+-static void set_cmd_regs(struct mtd_info *mtd, uint32_t cmd, uint32_t flcmcdr_val)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	uint32_t flcmncr_val = flctl->flcmncr_base & ~SEL_16BIT;
+-	uint32_t flcmdcr_val, addr_len_bytes = 0;
+-
+-	/* Set SNAND bit if page size is 2048byte */
+-	if (flctl->page_size)
+-		flcmncr_val |= SNAND_E;
 -	else
--		siu_stream = &port_info->capture;
+-		flcmncr_val &= ~SNAND_E;
 -
--	/*
--	 * ptr is the offset into the buffer where the dma is currently at. We
--	 * check if the dma buffer has just wrapped.
--	 */
--	ptr = PERIOD_OFFSET(rt->dma_addr,
--			    siu_stream->cur_period,
--			    siu_stream->period_bytes) - rt->dma_addr;
+-	/* default FLCMDCR val */
+-	flcmdcr_val = DOCMD1_E | DOADR_E;
 -
--	dev_dbg(dev,
--		"%s: port=%d, events %x, FSTS %x, xferred %u/%u, cookie %d\n",
--		__func__, info->port_id, siu_read32(base + SIU_EVNTC),
--		siu_read32(base + SIU_SBFSTS), ptr, siu_stream->buf_bytes,
--		siu_stream->cookie);
--
--	if (ptr >= siu_stream->buf_bytes)
--		ptr = 0;
--
--	return bytes_to_frames(ss->runtime, ptr);
--}
--
--static int siu_pcm_new(struct snd_soc_component *component,
--		       struct snd_soc_pcm_runtime *rtd)
--{
--	/* card->dev == socdev->dev, see snd_soc_new_pcms() */
--	struct snd_card *card = rtd->card->snd_card;
--	struct snd_pcm *pcm = rtd->pcm;
--	struct siu_info *info = siu_i2s_data;
--	struct platform_device *pdev = to_platform_device(card->dev);
--	int ret;
--	int i;
--
--	/* pdev->id selects between SIUA and SIUB */
--	if (pdev->id < 0 || pdev->id >= SIU_PORT_NUM)
--		return -EINVAL;
--
--	info->port_id = pdev->id;
--
--	/*
--	 * While the siu has 2 ports, only one port can be on at a time (only 1
--	 * SPB). So far all the boards using the siu had only one of the ports
--	 * wired to a codec. To simplify things, we only register one port with
--	 * alsa. In case both ports are needed, it should be changed here
--	 */
--	for (i = pdev->id; i < pdev->id + 1; i++) {
--		struct siu_port **port_info = &siu_ports[i];
--
--		ret = siu_init_port(i, port_info, card);
--		if (ret < 0)
--			return ret;
--
--		snd_pcm_set_managed_buffer_all(pcm,
--				SNDRV_DMA_TYPE_DEV, card->dev,
--				SIU_BUFFER_BYTES_MAX, SIU_BUFFER_BYTES_MAX);
--
--		(*port_info)->pcm = pcm;
--
--		/* IO works */
--		INIT_WORK(&(*port_info)->playback.work, siu_io_work);
--		INIT_WORK(&(*port_info)->capture.work, siu_io_work);
--	}
--
--	dev_info(card->dev, "SuperH SIU driver initialized.\n");
--	return 0;
--}
--
--static void siu_pcm_free(struct snd_soc_component *component,
--			 struct snd_pcm *pcm)
--{
--	struct platform_device *pdev = to_platform_device(pcm->card->dev);
--	struct siu_port *port_info = siu_ports[pdev->id];
--
--	cancel_work_sync(&port_info->capture.work);
--	cancel_work_sync(&port_info->playback.work);
--
--	siu_free_port(port_info);
--
--	dev_dbg(pcm->card->dev, "%s\n", __func__);
--}
--
--const struct snd_soc_component_driver siu_component = {
--	.name			= DRV_NAME,
--	.open			= siu_pcm_open,
--	.close			= siu_pcm_close,
--	.prepare		= siu_pcm_prepare,
--	.trigger		= siu_pcm_trigger,
--	.pointer		= siu_pcm_pointer_dma,
--	.pcm_construct		= siu_pcm_new,
--	.pcm_destruct		= siu_pcm_free,
--	.legacy_dai_naming	= 1,
--};
--EXPORT_SYMBOL_GPL(siu_component);
-diff --git a/sound/soc/sh/ssi.c b/sound/soc/sh/ssi.c
-deleted file mode 100644
-index 96cf523c227343..00000000000000
---- a/sound/soc/sh/ssi.c
-+++ /dev/null
-@@ -1,403 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
--//
--// Serial Sound Interface (I2S) support for SH7760/SH7780
--//
--// Copyright (c) 2007 Manuel Lauss <mano@roarinelk.homelinux.net>
--//
--// dont forget to set IPSEL/OMSEL register bits (in your board code) to
--// enable SSI output pins!
--
--/*
-- * LIMITATIONS:
-- *	The SSI unit has only one physical data line, so full duplex is
-- *	impossible.  This can be remedied  on the  SH7760 by  using the
-- *	other SSI unit for recording; however the SH7780 has only 1 SSI
-- *	unit, and its pins are shared with the AC97 unit,  among others.
-- *
-- * FEATURES:
-- *	The SSI features "compressed mode": in this mode it continuously
-- *	streams PCM data over the I2S lines and uses LRCK as a handshake
-- *	signal.  Can be used to send compressed data (AC3/DTS) to a DSP.
-- *	The number of bits sent over the wire in a frame can be adjusted
-- *	and can be independent from the actual sample bit depth. This is
-- *	useful to support TDM mode codecs like the AD1939 which have a
-- *	fixed TDM slot size, regardless of sample resolution.
-- */
--
--#include <linux/init.h>
--#include <linux/module.h>
--#include <linux/platform_device.h>
--#include <sound/core.h>
--#include <sound/pcm.h>
--#include <sound/initval.h>
--#include <sound/soc.h>
--#include <asm/io.h>
--
--#define SSICR	0x00
--#define SSISR	0x04
--
--#define CR_DMAEN	(1 << 28)
--#define CR_CHNL_SHIFT	22
--#define CR_CHNL_MASK	(3 << CR_CHNL_SHIFT)
--#define CR_DWL_SHIFT	19
--#define CR_DWL_MASK	(7 << CR_DWL_SHIFT)
--#define CR_SWL_SHIFT	16
--#define CR_SWL_MASK	(7 << CR_SWL_SHIFT)
--#define CR_SCK_MASTER	(1 << 15)	/* bitclock master bit */
--#define CR_SWS_MASTER	(1 << 14)	/* wordselect master bit */
--#define CR_SCKP		(1 << 13)	/* I2Sclock polarity */
--#define CR_SWSP		(1 << 12)	/* LRCK polarity */
--#define CR_SPDP		(1 << 11)
--#define CR_SDTA		(1 << 10)	/* i2s alignment (msb/lsb) */
--#define CR_PDTA		(1 << 9)	/* fifo data alignment */
--#define CR_DEL		(1 << 8)	/* delay data by 1 i2sclk */
--#define CR_BREN		(1 << 7)	/* clock gating in burst mode */
--#define CR_CKDIV_SHIFT	4
--#define CR_CKDIV_MASK	(7 << CR_CKDIV_SHIFT)	/* bitclock divider */
--#define CR_MUTE		(1 << 3)	/* SSI mute */
--#define CR_CPEN		(1 << 2)	/* compressed mode */
--#define CR_TRMD		(1 << 1)	/* transmit/receive select */
--#define CR_EN		(1 << 0)	/* enable SSI */
--
--#define SSIREG(reg)	(*(unsigned long *)(ssi->mmio + (reg)))
--
--struct ssi_priv {
--	unsigned long mmio;
--	unsigned long sysclk;
--	int inuse;
--} ssi_cpu_data[] = {
--#if defined(CONFIG_CPU_SUBTYPE_SH7760)
--	{
--		.mmio	= 0xFE680000,
--	},
--	{
--		.mmio	= 0xFE690000,
--	},
--#elif defined(CONFIG_CPU_SUBTYPE_SH7780)
--	{
--		.mmio	= 0xFFE70000,
--	},
--#else
--#error "Unsupported SuperH SoC"
--#endif
--};
--
--/*
-- * track usage of the SSI; it is simplex-only so prevent attempts of
-- * concurrent playback + capture. FIXME: any locking required?
-- */
--static int ssi_startup(struct snd_pcm_substream *substream,
--		       struct snd_soc_dai *dai)
--{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--	if (ssi->inuse) {
--		pr_debug("ssi: already in use!\n");
--		return -EBUSY;
--	} else
--		ssi->inuse = 1;
--	return 0;
--}
--
--static void ssi_shutdown(struct snd_pcm_substream *substream,
--			 struct snd_soc_dai *dai)
--{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--
--	ssi->inuse = 0;
--}
--
--static int ssi_trigger(struct snd_pcm_substream *substream, int cmd,
--		       struct snd_soc_dai *dai)
--{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--
+-	/* Set for FLCMDCR */
 -	switch (cmd) {
--	case SNDRV_PCM_TRIGGER_START:
--		SSIREG(SSICR) |= CR_DMAEN | CR_EN;
+-	case NAND_CMD_ERASE1:
+-		addr_len_bytes = flctl->erase_ADRCNT;
+-		flcmdcr_val |= DOCMD2_E;
 -		break;
--	case SNDRV_PCM_TRIGGER_STOP:
--		SSIREG(SSICR) &= ~(CR_DMAEN | CR_EN);
+-	case NAND_CMD_READ0:
+-	case NAND_CMD_READOOB:
+-	case NAND_CMD_RNDOUT:
+-		addr_len_bytes = flctl->rw_ADRCNT;
+-		flcmdcr_val |= CDSRC_E;
+-		if (flctl->chip.options & NAND_BUSWIDTH_16)
+-			flcmncr_val |= SEL_16BIT;
+-		break;
+-	case NAND_CMD_SEQIN:
+-		/* This case is that cmd is READ0 or READ1 or READ00 */
+-		flcmdcr_val &= ~DOADR_E;	/* ONLY execute 1st cmd */
+-		break;
+-	case NAND_CMD_PAGEPROG:
+-		addr_len_bytes = flctl->rw_ADRCNT;
+-		flcmdcr_val |= DOCMD2_E | CDSRC_E | SELRW;
+-		if (flctl->chip.options & NAND_BUSWIDTH_16)
+-			flcmncr_val |= SEL_16BIT;
+-		break;
+-	case NAND_CMD_READID:
+-		flcmncr_val &= ~SNAND_E;
+-		flcmdcr_val |= CDSRC_E;
+-		addr_len_bytes = ADRCNT_1;
+-		break;
+-	case NAND_CMD_STATUS:
+-	case NAND_CMD_RESET:
+-		flcmncr_val &= ~SNAND_E;
+-		flcmdcr_val &= ~(DOADR_E | DOSR_E);
 -		break;
 -	default:
--		return -EINVAL;
+-		break;
 -	}
 -
+-	/* Set address bytes parameter */
+-	flcmdcr_val |= addr_len_bytes;
+-
+-	/* Now actually write */
+-	writel(flcmncr_val, FLCMNCR(flctl));
+-	writel(flcmdcr_val, FLCMDCR(flctl));
+-	writel(flcmcdr_val, FLCMCDR(flctl));
+-}
+-
+-static int flctl_read_page_hwecc(struct nand_chip *chip, uint8_t *buf,
+-				 int oob_required, int page)
+-{
+-	struct mtd_info *mtd = nand_to_mtd(chip);
+-
+-	nand_read_page_op(chip, page, 0, buf, mtd->writesize);
+-	if (oob_required)
+-		chip->legacy.read_buf(chip, chip->oob_poi, mtd->oobsize);
 -	return 0;
 -}
 -
--static int ssi_hw_params(struct snd_pcm_substream *substream,
--			 struct snd_pcm_hw_params *params,
--			 struct snd_soc_dai *dai)
+-static int flctl_write_page_hwecc(struct nand_chip *chip, const uint8_t *buf,
+-				  int oob_required, int page)
 -{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--	unsigned long ssicr = SSIREG(SSICR);
--	unsigned int bits, channels, swl, recv, i;
+-	struct mtd_info *mtd = nand_to_mtd(chip);
 -
--	channels = params_channels(params);
--	bits = params->msbits;
--	recv = (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) ? 0 : 1;
--
--	pr_debug("ssi_hw_params() enter\nssicr was    %08lx\n", ssicr);
--	pr_debug("bits: %u channels: %u\n", bits, channels);
--
--	ssicr &= ~(CR_TRMD | CR_CHNL_MASK | CR_DWL_MASK | CR_PDTA |
--		   CR_SWL_MASK);
--
--	/* direction (send/receive) */
--	if (!recv)
--		ssicr |= CR_TRMD;	/* transmit */
--
--	/* channels */
--	if ((channels < 2) || (channels > 8) || (channels & 1)) {
--		pr_debug("ssi: invalid number of channels\n");
--		return -EINVAL;
--	}
--	ssicr |= ((channels >> 1) - 1) << CR_CHNL_SHIFT;
--
--	/* DATA WORD LENGTH (DWL): databits in audio sample */
--	i = 0;
--	switch (bits) {
--	case 32: ++i;
--	case 24: ++i;
--	case 22: ++i;
--	case 20: ++i;
--	case 18: ++i;
--	case 16: ++i;
--		 ssicr |= i << CR_DWL_SHIFT;
--	case 8:	 break;
--	default:
--		pr_debug("ssi: invalid sample width\n");
--		return -EINVAL;
--	}
--
--	/*
--	 * SYSTEM WORD LENGTH: size in bits of half a frame over the I2S
--	 * wires. This is usually bits_per_sample x channels/2;  i.e. in
--	 * Stereo mode  the SWL equals DWL.  SWL can  be bigger than the
--	 * product of (channels_per_slot x samplebits), e.g.  for codecs
--	 * like the AD1939 which  only accept 32bit wide TDM slots.  For
--	 * "standard" I2S operation we set SWL = chans / 2 * DWL here.
--	 * Waiting for ASoC to get TDM support ;-)
--	 */
--	if ((bits > 16) && (bits <= 24)) {
--		bits = 24;	/* these are padded by the SSI */
--		/*ssicr |= CR_PDTA;*/ /* cpu/data endianness ? */
--	}
--	i = 0;
--	swl = (bits * channels) / 2;
--	switch (swl) {
--	case 256: ++i;
--	case 128: ++i;
--	case 64:  ++i;
--	case 48:  ++i;
--	case 32:  ++i;
--	case 16:  ++i;
--		  ssicr |= i << CR_SWL_SHIFT;
--	case 8:   break;
--	default:
--		pr_debug("ssi: invalid system word length computed\n");
--		return -EINVAL;
--	}
--
--	SSIREG(SSICR) = ssicr;
--
--	pr_debug("ssi_hw_params() leave\nssicr is now %08lx\n", ssicr);
--	return 0;
+-	nand_prog_page_begin_op(chip, page, 0, buf, mtd->writesize);
+-	chip->legacy.write_buf(chip, chip->oob_poi, mtd->oobsize);
+-	return nand_prog_page_end_op(chip);
 -}
 -
--static int ssi_set_sysclk(struct snd_soc_dai *cpu_dai, int clk_id,
--			  unsigned int freq, int dir)
+-static void execmd_read_page_sector(struct mtd_info *mtd, int page_addr)
 -{
--	struct ssi_priv *ssi = &ssi_cpu_data[cpu_dai->id];
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	int sector, page_sectors;
+-	enum flctl_ecc_res_t ecc_result;
 -
--	ssi->sysclk = freq;
+-	page_sectors = flctl->page_size ? 4 : 1;
 -
--	return 0;
+-	set_cmd_regs(mtd, NAND_CMD_READ0,
+-		(NAND_CMD_READSTART << 8) | NAND_CMD_READ0);
+-
+-	writel(readl(FLCMNCR(flctl)) | ACM_SACCES_MODE | _4ECCCORRECT,
+-		 FLCMNCR(flctl));
+-	writel(readl(FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
+-	writel(page_addr << 2, FLADR(flctl));
+-
+-	empty_fifo(flctl);
+-	start_translation(flctl);
+-
+-	for (sector = 0; sector < page_sectors; sector++) {
+-		read_fiforeg(flctl, 512, 512 * sector);
+-
+-		ecc_result = read_ecfiforeg(flctl,
+-			&flctl->done_buff[mtd->writesize + 16 * sector],
+-			sector);
+-
+-		switch (ecc_result) {
+-		case FL_REPAIRABLE:
+-			dev_info(&flctl->pdev->dev,
+-				"applied ecc on page 0x%x", page_addr);
+-			mtd->ecc_stats.corrected++;
+-			break;
+-		case FL_ERROR:
+-			dev_warn(&flctl->pdev->dev,
+-				"page 0x%x contains corrupted data\n",
+-				page_addr);
+-			mtd->ecc_stats.failed++;
+-			break;
+-		default:
+-			;
+-		}
+-	}
+-
+-	wait_completion(flctl);
+-
+-	writel(readl(FLCMNCR(flctl)) & ~(ACM_SACCES_MODE | _4ECCCORRECT),
+-			FLCMNCR(flctl));
 -}
 -
--/*
-- * This divider is used to generate the SSI_SCK (I2S bitclock) from the
-- * clock at the HAC_BIT_CLK ("oversampling clock") pin.
-- */
--static int ssi_set_clkdiv(struct snd_soc_dai *dai, int did, int div)
+-static void execmd_read_oob(struct mtd_info *mtd, int page_addr)
 -{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--	unsigned long ssicr;
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	int page_sectors = flctl->page_size ? 4 : 1;
 -	int i;
 -
--	i = 0;
--	ssicr = SSIREG(SSICR) & ~CR_CKDIV_MASK;
--	switch (div) {
--	case 16: ++i;
--	case 8:  ++i;
--	case 4:  ++i;
--	case 2:  ++i;
--		 SSIREG(SSICR) = ssicr | (i << CR_CKDIV_SHIFT);
--	case 1:  break;
+-	set_cmd_regs(mtd, NAND_CMD_READ0,
+-		(NAND_CMD_READSTART << 8) | NAND_CMD_READ0);
+-
+-	empty_fifo(flctl);
+-
+-	for (i = 0; i < page_sectors; i++) {
+-		set_addr(mtd, (512 + 16) * i + 512 , page_addr);
+-		writel(16, FLDTCNTR(flctl));
+-
+-		start_translation(flctl);
+-		read_fiforeg(flctl, 16, 16 * i);
+-		wait_completion(flctl);
+-	}
+-}
+-
+-static void execmd_write_page_sector(struct mtd_info *mtd)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	int page_addr = flctl->seqin_page_addr;
+-	int sector, page_sectors;
+-
+-	page_sectors = flctl->page_size ? 4 : 1;
+-
+-	set_cmd_regs(mtd, NAND_CMD_PAGEPROG,
+-			(NAND_CMD_PAGEPROG << 8) | NAND_CMD_SEQIN);
+-
+-	empty_fifo(flctl);
+-	writel(readl(FLCMNCR(flctl)) | ACM_SACCES_MODE, FLCMNCR(flctl));
+-	writel(readl(FLCMDCR(flctl)) | page_sectors, FLCMDCR(flctl));
+-	writel(page_addr << 2, FLADR(flctl));
+-	start_translation(flctl);
+-
+-	for (sector = 0; sector < page_sectors; sector++) {
+-		write_fiforeg(flctl, 512, 512 * sector);
+-		write_ec_fiforeg(flctl, 16, mtd->writesize + 16 * sector);
+-	}
+-
+-	wait_completion(flctl);
+-	writel(readl(FLCMNCR(flctl)) & ~ACM_SACCES_MODE, FLCMNCR(flctl));
+-}
+-
+-static void execmd_write_oob(struct mtd_info *mtd)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	int page_addr = flctl->seqin_page_addr;
+-	int sector, page_sectors;
+-
+-	page_sectors = flctl->page_size ? 4 : 1;
+-
+-	set_cmd_regs(mtd, NAND_CMD_PAGEPROG,
+-			(NAND_CMD_PAGEPROG << 8) | NAND_CMD_SEQIN);
+-
+-	for (sector = 0; sector < page_sectors; sector++) {
+-		empty_fifo(flctl);
+-		set_addr(mtd, sector * 528 + 512, page_addr);
+-		writel(16, FLDTCNTR(flctl));	/* set read size */
+-
+-		start_translation(flctl);
+-		write_fiforeg(flctl, 16, 16 * sector);
+-		wait_completion(flctl);
+-	}
+-}
+-
+-static void flctl_cmdfunc(struct nand_chip *chip, unsigned int command,
+-			int column, int page_addr)
+-{
+-	struct mtd_info *mtd = nand_to_mtd(chip);
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-	uint32_t read_cmd = 0;
+-
+-	pm_runtime_get_sync(&flctl->pdev->dev);
+-
+-	flctl->read_bytes = 0;
+-	if (command != NAND_CMD_PAGEPROG)
+-		flctl->index = 0;
+-
+-	switch (command) {
+-	case NAND_CMD_READ1:
+-	case NAND_CMD_READ0:
+-		if (flctl->hwecc) {
+-			/* read page with hwecc */
+-			execmd_read_page_sector(mtd, page_addr);
+-			break;
+-		}
+-		if (flctl->page_size)
+-			set_cmd_regs(mtd, command, (NAND_CMD_READSTART << 8)
+-				| command);
+-		else
+-			set_cmd_regs(mtd, command, command);
+-
+-		set_addr(mtd, 0, page_addr);
+-
+-		flctl->read_bytes = mtd->writesize + mtd->oobsize;
+-		if (flctl->chip.options & NAND_BUSWIDTH_16)
+-			column >>= 1;
+-		flctl->index += column;
+-		goto read_normal_exit;
+-
+-	case NAND_CMD_READOOB:
+-		if (flctl->hwecc) {
+-			/* read page with hwecc */
+-			execmd_read_oob(mtd, page_addr);
+-			break;
+-		}
+-
+-		if (flctl->page_size) {
+-			set_cmd_regs(mtd, command, (NAND_CMD_READSTART << 8)
+-				| NAND_CMD_READ0);
+-			set_addr(mtd, mtd->writesize, page_addr);
+-		} else {
+-			set_cmd_regs(mtd, command, command);
+-			set_addr(mtd, 0, page_addr);
+-		}
+-		flctl->read_bytes = mtd->oobsize;
+-		goto read_normal_exit;
+-
+-	case NAND_CMD_RNDOUT:
+-		if (flctl->hwecc)
+-			break;
+-
+-		if (flctl->page_size)
+-			set_cmd_regs(mtd, command, (NAND_CMD_RNDOUTSTART << 8)
+-				| command);
+-		else
+-			set_cmd_regs(mtd, command, command);
+-
+-		set_addr(mtd, column, 0);
+-
+-		flctl->read_bytes = mtd->writesize + mtd->oobsize - column;
+-		goto read_normal_exit;
+-
+-	case NAND_CMD_READID:
+-		set_cmd_regs(mtd, command, command);
+-
+-		/* READID is always performed using an 8-bit bus */
+-		if (flctl->chip.options & NAND_BUSWIDTH_16)
+-			column <<= 1;
+-		set_addr(mtd, column, 0);
+-
+-		flctl->read_bytes = 8;
+-		writel(flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
+-		empty_fifo(flctl);
+-		start_translation(flctl);
+-		read_fiforeg(flctl, flctl->read_bytes, 0);
+-		wait_completion(flctl);
+-		break;
+-
+-	case NAND_CMD_ERASE1:
+-		flctl->erase1_page_addr = page_addr;
+-		break;
+-
+-	case NAND_CMD_ERASE2:
+-		set_cmd_regs(mtd, NAND_CMD_ERASE1,
+-			(command << 8) | NAND_CMD_ERASE1);
+-		set_addr(mtd, -1, flctl->erase1_page_addr);
+-		start_translation(flctl);
+-		wait_completion(flctl);
+-		break;
+-
+-	case NAND_CMD_SEQIN:
+-		if (!flctl->page_size) {
+-			/* output read command */
+-			if (column >= mtd->writesize) {
+-				column -= mtd->writesize;
+-				read_cmd = NAND_CMD_READOOB;
+-			} else if (column < 256) {
+-				read_cmd = NAND_CMD_READ0;
+-			} else {
+-				column -= 256;
+-				read_cmd = NAND_CMD_READ1;
+-			}
+-		}
+-		flctl->seqin_column = column;
+-		flctl->seqin_page_addr = page_addr;
+-		flctl->seqin_read_cmd = read_cmd;
+-		break;
+-
+-	case NAND_CMD_PAGEPROG:
+-		empty_fifo(flctl);
+-		if (!flctl->page_size) {
+-			set_cmd_regs(mtd, NAND_CMD_SEQIN,
+-					flctl->seqin_read_cmd);
+-			set_addr(mtd, -1, -1);
+-			writel(0, FLDTCNTR(flctl));	/* set 0 size */
+-			start_translation(flctl);
+-			wait_completion(flctl);
+-		}
+-		if (flctl->hwecc) {
+-			/* write page with hwecc */
+-			if (flctl->seqin_column == mtd->writesize)
+-				execmd_write_oob(mtd);
+-			else if (!flctl->seqin_column)
+-				execmd_write_page_sector(mtd);
+-			else
+-				pr_err("Invalid address !?\n");
+-			break;
+-		}
+-		set_cmd_regs(mtd, command, (command << 8) | NAND_CMD_SEQIN);
+-		set_addr(mtd, flctl->seqin_column, flctl->seqin_page_addr);
+-		writel(flctl->index, FLDTCNTR(flctl));	/* set write size */
+-		start_translation(flctl);
+-		write_fiforeg(flctl, flctl->index, 0);
+-		wait_completion(flctl);
+-		break;
+-
+-	case NAND_CMD_STATUS:
+-		set_cmd_regs(mtd, command, command);
+-		set_addr(mtd, -1, -1);
+-
+-		flctl->read_bytes = 1;
+-		writel(flctl->read_bytes, FLDTCNTR(flctl)); /* set read size */
+-		start_translation(flctl);
+-		read_datareg(flctl, 0); /* read and end */
+-		break;
+-
+-	case NAND_CMD_RESET:
+-		set_cmd_regs(mtd, command, command);
+-		set_addr(mtd, -1, -1);
+-
+-		writel(0, FLDTCNTR(flctl));	/* set 0 size */
+-		start_translation(flctl);
+-		wait_completion(flctl);
+-		break;
+-
 -	default:
--		pr_debug("ssi: invalid sck divider %d\n", div);
--		return -EINVAL;
+-		break;
+-	}
+-	goto runtime_exit;
+-
+-read_normal_exit:
+-	writel(flctl->read_bytes, FLDTCNTR(flctl));	/* set read size */
+-	empty_fifo(flctl);
+-	start_translation(flctl);
+-	read_fiforeg(flctl, flctl->read_bytes, 0);
+-	wait_completion(flctl);
+-runtime_exit:
+-	pm_runtime_put_sync(&flctl->pdev->dev);
+-	return;
+-}
+-
+-static void flctl_select_chip(struct nand_chip *chip, int chipnr)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(nand_to_mtd(chip));
+-	int ret;
+-
+-	switch (chipnr) {
+-	case -1:
+-		flctl->flcmncr_base &= ~CE0_ENABLE;
+-
+-		pm_runtime_get_sync(&flctl->pdev->dev);
+-		writel(flctl->flcmncr_base, FLCMNCR(flctl));
+-
+-		if (flctl->qos_request) {
+-			dev_pm_qos_remove_request(&flctl->pm_qos);
+-			flctl->qos_request = 0;
+-		}
+-
+-		pm_runtime_put_sync(&flctl->pdev->dev);
+-		break;
+-	case 0:
+-		flctl->flcmncr_base |= CE0_ENABLE;
+-
+-		if (!flctl->qos_request) {
+-			ret = dev_pm_qos_add_request(&flctl->pdev->dev,
+-							&flctl->pm_qos,
+-							DEV_PM_QOS_RESUME_LATENCY,
+-							100);
+-			if (ret < 0)
+-				dev_err(&flctl->pdev->dev,
+-					"PM QoS request failed: %d\n", ret);
+-			flctl->qos_request = 1;
+-		}
+-
+-		if (flctl->holden) {
+-			pm_runtime_get_sync(&flctl->pdev->dev);
+-			writel(HOLDEN, FLHOLDCR(flctl));
+-			pm_runtime_put_sync(&flctl->pdev->dev);
+-		}
+-		break;
+-	default:
+-		BUG();
+-	}
+-}
+-
+-static void flctl_write_buf(struct nand_chip *chip, const uint8_t *buf, int len)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(nand_to_mtd(chip));
+-
+-	memcpy(&flctl->done_buff[flctl->index], buf, len);
+-	flctl->index += len;
+-}
+-
+-static uint8_t flctl_read_byte(struct nand_chip *chip)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(nand_to_mtd(chip));
+-	uint8_t data;
+-
+-	data = flctl->done_buff[flctl->index];
+-	flctl->index++;
+-	return data;
+-}
+-
+-static void flctl_read_buf(struct nand_chip *chip, uint8_t *buf, int len)
+-{
+-	struct sh_flctl *flctl = mtd_to_flctl(nand_to_mtd(chip));
+-
+-	memcpy(buf, &flctl->done_buff[flctl->index], len);
+-	flctl->index += len;
+-}
+-
+-static int flctl_chip_attach_chip(struct nand_chip *chip)
+-{
+-	u64 targetsize = nanddev_target_size(&chip->base);
+-	struct mtd_info *mtd = nand_to_mtd(chip);
+-	struct sh_flctl *flctl = mtd_to_flctl(mtd);
+-
+-	/*
+-	 * NAND_BUSWIDTH_16 may have been set by nand_scan_ident().
+-	 * Add the SEL_16BIT flag in flctl->flcmncr_base.
+-	 */
+-	if (chip->options & NAND_BUSWIDTH_16)
+-		flctl->flcmncr_base |= SEL_16BIT;
+-
+-	if (mtd->writesize == 512) {
+-		flctl->page_size = 0;
+-		if (targetsize > (32 << 20)) {
+-			/* big than 32MB */
+-			flctl->rw_ADRCNT = ADRCNT_4;
+-			flctl->erase_ADRCNT = ADRCNT_3;
+-		} else if (targetsize > (2 << 16)) {
+-			/* big than 128KB */
+-			flctl->rw_ADRCNT = ADRCNT_3;
+-			flctl->erase_ADRCNT = ADRCNT_2;
+-		} else {
+-			flctl->rw_ADRCNT = ADRCNT_2;
+-			flctl->erase_ADRCNT = ADRCNT_1;
+-		}
+-	} else {
+-		flctl->page_size = 1;
+-		if (targetsize > (128 << 20)) {
+-			/* big than 128MB */
+-			flctl->rw_ADRCNT = ADRCNT2_E;
+-			flctl->erase_ADRCNT = ADRCNT_3;
+-		} else if (targetsize > (8 << 16)) {
+-			/* big than 512KB */
+-			flctl->rw_ADRCNT = ADRCNT_4;
+-			flctl->erase_ADRCNT = ADRCNT_2;
+-		} else {
+-			flctl->rw_ADRCNT = ADRCNT_3;
+-			flctl->erase_ADRCNT = ADRCNT_1;
+-		}
+-	}
+-
+-	if (flctl->hwecc) {
+-		if (mtd->writesize == 512) {
+-			mtd_set_ooblayout(mtd, &flctl_4secc_oob_smallpage_ops);
+-			chip->badblock_pattern = &flctl_4secc_smallpage;
+-		} else {
+-			mtd_set_ooblayout(mtd, &flctl_4secc_oob_largepage_ops);
+-			chip->badblock_pattern = &flctl_4secc_largepage;
+-		}
+-
+-		chip->ecc.size = 512;
+-		chip->ecc.bytes = 10;
+-		chip->ecc.strength = 4;
+-		chip->ecc.read_page = flctl_read_page_hwecc;
+-		chip->ecc.write_page = flctl_write_page_hwecc;
+-		chip->ecc.engine_type = NAND_ECC_ENGINE_TYPE_ON_HOST;
+-
+-		/* 4 symbols ECC enabled */
+-		flctl->flcmncr_base |= _4ECCEN;
+-	} else {
+-		chip->ecc.engine_type = NAND_ECC_ENGINE_TYPE_SOFT;
+-		chip->ecc.algo = NAND_ECC_ALGO_HAMMING;
 -	}
 -
 -	return 0;
 -}
 -
--static int ssi_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
+-static const struct nand_controller_ops flctl_nand_controller_ops = {
+-	.attach_chip = flctl_chip_attach_chip,
+-};
+-
+-static irqreturn_t flctl_handle_flste(int irq, void *dev_id)
 -{
--	struct ssi_priv *ssi = &ssi_cpu_data[dai->id];
--	unsigned long ssicr = SSIREG(SSICR);
+-	struct sh_flctl *flctl = dev_id;
 -
--	pr_debug("ssi_set_fmt()\nssicr was    0x%08lx\n", ssicr);
+-	dev_err(&flctl->pdev->dev, "flste irq: %x\n", readl(FLINTDMACR(flctl)));
+-	writel(flctl->flintdmacr_base, FLINTDMACR(flctl));
 -
--	ssicr &= ~(CR_DEL | CR_PDTA | CR_BREN | CR_SWSP | CR_SCKP |
--		   CR_SWS_MASTER | CR_SCK_MASTER);
+-	return IRQ_HANDLED;
+-}
 -
--	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
--	case SND_SOC_DAIFMT_I2S:
--		break;
--	case SND_SOC_DAIFMT_RIGHT_J:
--		ssicr |= CR_DEL | CR_PDTA;
--		break;
--	case SND_SOC_DAIFMT_LEFT_J:
--		ssicr |= CR_DEL;
--		break;
--	default:
--		pr_debug("ssi: unsupported format\n");
+-struct flctl_soc_config {
+-	unsigned long flcmncr_val;
+-	unsigned has_hwecc:1;
+-	unsigned use_holden:1;
+-};
+-
+-static struct flctl_soc_config flctl_sh7372_config = {
+-	.flcmncr_val = CLK_16B_12L_4H | TYPESEL_SET | SHBUSSEL,
+-	.has_hwecc = 1,
+-	.use_holden = 1,
+-};
+-
+-static const struct of_device_id of_flctl_match[] = {
+-	{ .compatible = "renesas,shmobile-flctl-sh7372",
+-				.data = &flctl_sh7372_config },
+-	{},
+-};
+-MODULE_DEVICE_TABLE(of, of_flctl_match);
+-
+-static struct sh_flctl_platform_data *flctl_parse_dt(struct device *dev)
+-{
+-	const struct flctl_soc_config *config;
+-	struct sh_flctl_platform_data *pdata;
+-
+-	config = of_device_get_match_data(dev);
+-	if (!config) {
+-		dev_err(dev, "%s: no OF configuration attached\n", __func__);
+-		return NULL;
+-	}
+-
+-	pdata = devm_kzalloc(dev, sizeof(struct sh_flctl_platform_data),
+-								GFP_KERNEL);
+-	if (!pdata)
+-		return NULL;
+-
+-	/* set SoC specific options */
+-	pdata->flcmncr_val = config->flcmncr_val;
+-	pdata->has_hwecc = config->has_hwecc;
+-	pdata->use_holden = config->use_holden;
+-
+-	return pdata;
+-}
+-
+-static int flctl_probe(struct platform_device *pdev)
+-{
+-	struct resource *res;
+-	struct sh_flctl *flctl;
+-	struct mtd_info *flctl_mtd;
+-	struct nand_chip *nand;
+-	struct sh_flctl_platform_data *pdata;
+-	int ret;
+-	int irq;
+-
+-	flctl = devm_kzalloc(&pdev->dev, sizeof(struct sh_flctl), GFP_KERNEL);
+-	if (!flctl)
+-		return -ENOMEM;
+-
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	flctl->reg = devm_ioremap_resource(&pdev->dev, res);
+-	if (IS_ERR(flctl->reg))
+-		return PTR_ERR(flctl->reg);
+-	flctl->fifo = res->start + 0x24; /* FLDTFIFO */
+-
+-	irq = platform_get_irq(pdev, 0);
+-	if (irq < 0)
+-		return irq;
+-
+-	ret = devm_request_irq(&pdev->dev, irq, flctl_handle_flste, IRQF_SHARED,
+-			       "flste", flctl);
+-	if (ret) {
+-		dev_err(&pdev->dev, "request interrupt failed.\n");
+-		return ret;
+-	}
+-
+-	if (pdev->dev.of_node)
+-		pdata = flctl_parse_dt(&pdev->dev);
+-	else
+-		pdata = dev_get_platdata(&pdev->dev);
+-
+-	if (!pdata) {
+-		dev_err(&pdev->dev, "no setup data defined\n");
 -		return -EINVAL;
 -	}
 -
--	switch (fmt & SND_SOC_DAIFMT_CLOCK_MASK) {
--	case SND_SOC_DAIFMT_CONT:
--		break;
--	case SND_SOC_DAIFMT_GATED:
--		ssicr |= CR_BREN;
--		break;
--	}
+-	platform_set_drvdata(pdev, flctl);
+-	nand = &flctl->chip;
+-	flctl_mtd = nand_to_mtd(nand);
+-	nand_set_flash_node(nand, pdev->dev.of_node);
+-	flctl_mtd->dev.parent = &pdev->dev;
+-	flctl->pdev = pdev;
+-	flctl->hwecc = pdata->has_hwecc;
+-	flctl->holden = pdata->use_holden;
+-	flctl->flcmncr_base = pdata->flcmncr_val;
+-	flctl->flintdmacr_base = flctl->hwecc ? (STERINTE | ECERB) : STERINTE;
 -
--	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
--	case SND_SOC_DAIFMT_NB_NF:
--		ssicr |= CR_SCKP;	/* sample data at low clkedge */
--		break;
--	case SND_SOC_DAIFMT_NB_IF:
--		ssicr |= CR_SCKP | CR_SWSP;
--		break;
--	case SND_SOC_DAIFMT_IB_NF:
--		break;
--	case SND_SOC_DAIFMT_IB_IF:
--		ssicr |= CR_SWSP;	/* word select starts low */
--		break;
--	default:
--		pr_debug("ssi: invalid inversion\n");
--		return -EINVAL;
--	}
+-	/* Set address of hardware control function */
+-	/* 20 us command delay time */
+-	nand->legacy.chip_delay = 20;
 -
--	switch (fmt & SND_SOC_DAIFMT_CLOCK_PROVIDER_MASK) {
--	case SND_SOC_DAIFMT_BC_FC:
--		break;
--	case SND_SOC_DAIFMT_BP_FC:
--		ssicr |= CR_SCK_MASTER;
--		break;
--	case SND_SOC_DAIFMT_BC_FP:
--		ssicr |= CR_SWS_MASTER;
--		break;
--	case SND_SOC_DAIFMT_BP_FP:
--		ssicr |= CR_SWS_MASTER | CR_SCK_MASTER;
--		break;
--	default:
--		pr_debug("ssi: invalid master/secondary configuration\n");
--		return -EINVAL;
--	}
+-	nand->legacy.read_byte = flctl_read_byte;
+-	nand->legacy.write_buf = flctl_write_buf;
+-	nand->legacy.read_buf = flctl_read_buf;
+-	nand->legacy.select_chip = flctl_select_chip;
+-	nand->legacy.cmdfunc = flctl_cmdfunc;
+-	nand->legacy.set_features = nand_get_set_features_notsupp;
+-	nand->legacy.get_features = nand_get_set_features_notsupp;
 -
--	SSIREG(SSICR) = ssicr;
--	pr_debug("ssi_set_fmt() leave\nssicr is now 0x%08lx\n", ssicr);
+-	if (pdata->flcmncr_val & SEL_16BIT)
+-		nand->options |= NAND_BUSWIDTH_16;
+-
+-	nand->options |= NAND_BBM_FIRSTPAGE | NAND_BBM_SECONDPAGE;
+-
+-	pm_runtime_enable(&pdev->dev);
+-	pm_runtime_resume(&pdev->dev);
+-
+-	flctl_setup_dma(flctl);
+-
+-	nand->legacy.dummy_controller.ops = &flctl_nand_controller_ops;
+-	ret = nand_scan(nand, 1);
+-	if (ret)
+-		goto err_chip;
+-
+-	ret = mtd_device_register(flctl_mtd, pdata->parts, pdata->nr_parts);
+-	if (ret)
+-		goto cleanup_nand;
+-
+-	return 0;
+-
+-cleanup_nand:
+-	nand_cleanup(nand);
+-err_chip:
+-	flctl_release_dma(flctl);
+-	pm_runtime_disable(&pdev->dev);
+-	return ret;
+-}
+-
+-static int flctl_remove(struct platform_device *pdev)
+-{
+-	struct sh_flctl *flctl = platform_get_drvdata(pdev);
+-	struct nand_chip *chip = &flctl->chip;
+-	int ret;
+-
+-	flctl_release_dma(flctl);
+-	ret = mtd_device_unregister(nand_to_mtd(chip));
+-	WARN_ON(ret);
+-	nand_cleanup(chip);
+-	pm_runtime_disable(&pdev->dev);
 -
 -	return 0;
 -}
 -
--/* the SSI depends on an external clocksource (at HAC_BIT_CLK) even in
-- * Master mode,  so really this is board specific;  the SSI can do any
-- * rate with the right bitclk and divider settings.
-- */
--#define SSI_RATES	\
--	SNDRV_PCM_RATE_8000_192000
--
--/* the SSI can do 8-32 bit samples, with 8 possible channels */
--#define SSI_FMTS	\
--	(SNDRV_PCM_FMTBIT_S8      | SNDRV_PCM_FMTBIT_U8      |	\
--	 SNDRV_PCM_FMTBIT_S16_LE  | SNDRV_PCM_FMTBIT_U16_LE  |	\
--	 SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_U20_3LE |	\
--	 SNDRV_PCM_FMTBIT_S24_3LE | SNDRV_PCM_FMTBIT_U24_3LE |	\
--	 SNDRV_PCM_FMTBIT_S32_LE  | SNDRV_PCM_FMTBIT_U32_LE)
--
--static const struct snd_soc_dai_ops ssi_dai_ops = {
--	.startup	= ssi_startup,
--	.shutdown	= ssi_shutdown,
--	.trigger	= ssi_trigger,
--	.hw_params	= ssi_hw_params,
--	.set_sysclk	= ssi_set_sysclk,
--	.set_clkdiv	= ssi_set_clkdiv,
--	.set_fmt	= ssi_set_fmt,
--};
--
--static struct snd_soc_dai_driver sh4_ssi_dai[] = {
--{
--	.name			= "ssi-dai.0",
--	.playback = {
--		.rates		= SSI_RATES,
--		.formats	= SSI_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 8,
--	},
--	.capture = {
--		.rates		= SSI_RATES,
--		.formats	= SSI_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 8,
--	},
--	.ops = &ssi_dai_ops,
--},
--#ifdef CONFIG_CPU_SUBTYPE_SH7760
--{
--	.name			= "ssi-dai.1",
--	.playback = {
--		.rates		= SSI_RATES,
--		.formats	= SSI_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 8,
--	},
--	.capture = {
--		.rates		= SSI_RATES,
--		.formats	= SSI_FMTS,
--		.channels_min	= 2,
--		.channels_max	= 8,
--	},
--	.ops = &ssi_dai_ops,
--},
--#endif
--};
--
--static const struct snd_soc_component_driver sh4_ssi_component = {
--	.name			= "sh4-ssi",
--	.legacy_dai_naming	= 1,
--};
--
--static int sh4_soc_dai_probe(struct platform_device *pdev)
--{
--	return devm_snd_soc_register_component(&pdev->dev, &sh4_ssi_component,
--					       sh4_ssi_dai,
--					       ARRAY_SIZE(sh4_ssi_dai));
--}
--
--static struct platform_driver sh4_ssi_driver = {
+-static struct platform_driver flctl_driver = {
+-	.remove		= flctl_remove,
 -	.driver = {
--			.name = "sh4-ssi-dai",
+-		.name	= "sh_flctl",
+-		.of_match_table = of_flctl_match,
 -	},
--
--	.probe = sh4_soc_dai_probe,
 -};
 -
--module_platform_driver(sh4_ssi_driver);
+-module_platform_driver_probe(flctl_driver, flctl_probe);
 -
 -MODULE_LICENSE("GPL v2");
--MODULE_DESCRIPTION("SuperH onchip SSI (I2S) audio driver");
--MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
+-MODULE_AUTHOR("Yoshihiro Shimoda");
+-MODULE_DESCRIPTION("SuperH FLCTL driver");
+-MODULE_ALIAS("platform:sh_flctl");
+diff --git a/include/linux/mtd/sh_flctl.h b/include/linux/mtd/sh_flctl.h
+deleted file mode 100644
+index 78fc2d4218c808..00000000000000
+--- a/include/linux/mtd/sh_flctl.h
++++ /dev/null
+@@ -1,180 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0
+- *
+- * SuperH FLCTL nand controller
+- *
+- * Copyright © 2008 Renesas Solutions Corp.
+- */
+-
+-#ifndef __SH_FLCTL_H__
+-#define __SH_FLCTL_H__
+-
+-#include <linux/completion.h>
+-#include <linux/mtd/mtd.h>
+-#include <linux/mtd/rawnand.h>
+-#include <linux/mtd/partitions.h>
+-#include <linux/pm_qos.h>
+-
+-/* FLCTL registers */
+-#define FLCMNCR(f)		(f->reg + 0x0)
+-#define FLCMDCR(f)		(f->reg + 0x4)
+-#define FLCMCDR(f)		(f->reg + 0x8)
+-#define FLADR(f)		(f->reg + 0xC)
+-#define FLADR2(f)		(f->reg + 0x3C)
+-#define FLDATAR(f)		(f->reg + 0x10)
+-#define FLDTCNTR(f)		(f->reg + 0x14)
+-#define FLINTDMACR(f)		(f->reg + 0x18)
+-#define FLBSYTMR(f)		(f->reg + 0x1C)
+-#define FLBSYCNT(f)		(f->reg + 0x20)
+-#define FLDTFIFO(f)		(f->reg + 0x24)
+-#define FLECFIFO(f)		(f->reg + 0x28)
+-#define FLTRCR(f)		(f->reg + 0x2C)
+-#define FLHOLDCR(f)		(f->reg + 0x38)
+-#define	FL4ECCRESULT0(f)	(f->reg + 0x80)
+-#define	FL4ECCRESULT1(f)	(f->reg + 0x84)
+-#define	FL4ECCRESULT2(f)	(f->reg + 0x88)
+-#define	FL4ECCRESULT3(f)	(f->reg + 0x8C)
+-#define	FL4ECCCR(f)		(f->reg + 0x90)
+-#define	FL4ECCCNT(f)		(f->reg + 0x94)
+-#define	FLERRADR(f)		(f->reg + 0x98)
+-
+-/* FLCMNCR control bits */
+-#define _4ECCCNTEN	(0x1 << 24)
+-#define _4ECCEN		(0x1 << 23)
+-#define _4ECCCORRECT	(0x1 << 22)
+-#define SHBUSSEL	(0x1 << 20)
+-#define SEL_16BIT	(0x1 << 19)
+-#define SNAND_E		(0x1 << 18)	/* SNAND (0=512 1=2048)*/
+-#define QTSEL_E		(0x1 << 17)
+-#define ENDIAN		(0x1 << 16)	/* 1 = little endian */
+-#define FCKSEL_E	(0x1 << 15)
+-#define ACM_SACCES_MODE	(0x01 << 10)
+-#define NANWF_E		(0x1 << 9)
+-#define SE_D		(0x1 << 8)	/* Spare area disable */
+-#define	CE1_ENABLE	(0x1 << 4)	/* Chip Enable 1 */
+-#define	CE0_ENABLE	(0x1 << 3)	/* Chip Enable 0 */
+-#define	TYPESEL_SET	(0x1 << 0)
+-
+-/*
+- * Clock settings using the PULSEx registers from FLCMNCR
+- *
+- * Some hardware uses bits called PULSEx instead of FCKSEL_E and QTSEL_E
+- * to control the clock divider used between the High-Speed Peripheral Clock
+- * and the FLCTL internal clock. If so, use CLK_8_BIT_xxx for connecting 8 bit
+- * and CLK_16_BIT_xxx for connecting 16 bit bus bandwith NAND chips. For the 16
+- * bit version the divider is seperate for the pulse width of high and low
+- * signals.
+- */
+-#define PULSE3	(0x1 << 27)
+-#define PULSE2	(0x1 << 17)
+-#define PULSE1	(0x1 << 15)
+-#define PULSE0	(0x1 << 9)
+-#define CLK_8B_0_5			PULSE1
+-#define CLK_8B_1			0x0
+-#define CLK_8B_1_5			(PULSE1 | PULSE2)
+-#define CLK_8B_2			PULSE0
+-#define CLK_8B_3			(PULSE0 | PULSE1 | PULSE2)
+-#define CLK_8B_4			(PULSE0 | PULSE2)
+-#define CLK_16B_6L_2H			PULSE0
+-#define CLK_16B_9L_3H			(PULSE0 | PULSE1 | PULSE2)
+-#define CLK_16B_12L_4H			(PULSE0 | PULSE2)
+-
+-/* FLCMDCR control bits */
+-#define ADRCNT2_E	(0x1 << 31)	/* 5byte address enable */
+-#define ADRMD_E		(0x1 << 26)	/* Sector address access */
+-#define CDSRC_E		(0x1 << 25)	/* Data buffer selection */
+-#define DOSR_E		(0x1 << 24)	/* Status read check */
+-#define SELRW		(0x1 << 21)	/*  0:read 1:write */
+-#define DOADR_E		(0x1 << 20)	/* Address stage execute */
+-#define ADRCNT_1	(0x00 << 18)	/* Address data bytes: 1byte */
+-#define ADRCNT_2	(0x01 << 18)	/* Address data bytes: 2byte */
+-#define ADRCNT_3	(0x02 << 18)	/* Address data bytes: 3byte */
+-#define ADRCNT_4	(0x03 << 18)	/* Address data bytes: 4byte */
+-#define DOCMD2_E	(0x1 << 17)	/* 2nd cmd stage execute */
+-#define DOCMD1_E	(0x1 << 16)	/* 1st cmd stage execute */
+-
+-/* FLINTDMACR control bits */
+-#define ESTERINTE	(0x1 << 24)	/* ECC error interrupt enable */
+-#define AC1CLR		(0x1 << 19)	/* ECC FIFO clear */
+-#define AC0CLR		(0x1 << 18)	/* Data FIFO clear */
+-#define DREQ0EN		(0x1 << 16)	/* FLDTFIFODMA Request Enable */
+-#define ECERB		(0x1 << 9)	/* ECC error */
+-#define STERB		(0x1 << 8)	/* Status error */
+-#define STERINTE	(0x1 << 4)	/* Status error enable */
+-
+-/* FLTRCR control bits */
+-#define TRSTRT		(0x1 << 0)	/* translation start */
+-#define TREND		(0x1 << 1)	/* translation end */
+-
+-/*
+- * FLHOLDCR control bits
+- *
+- * HOLDEN: Bus Occupancy Enable (inverted)
+- * Enable this bit when the external bus might be used in between transfers.
+- * If not set and the bus gets used by other modules, a deadlock occurs.
+- */
+-#define HOLDEN		(0x1 << 0)
+-
+-/* FL4ECCCR control bits */
+-#define	_4ECCFA		(0x1 << 2)	/* 4 symbols correct fault */
+-#define	_4ECCEND	(0x1 << 1)	/* 4 symbols end */
+-#define	_4ECCEXST	(0x1 << 0)	/* 4 symbols exist */
+-
+-#define LOOP_TIMEOUT_MAX	0x00010000
+-
+-enum flctl_ecc_res_t {
+-	FL_SUCCESS,
+-	FL_REPAIRABLE,
+-	FL_ERROR,
+-	FL_TIMEOUT
+-};
+-
+-struct dma_chan;
+-
+-struct sh_flctl {
+-	struct nand_chip	chip;
+-	struct platform_device	*pdev;
+-	struct dev_pm_qos_request pm_qos;
+-	void __iomem		*reg;
+-	resource_size_t		fifo;
+-
+-	uint8_t	done_buff[2048 + 64];	/* max size 2048 + 64 */
+-	int	read_bytes;
+-	unsigned int index;
+-	int	seqin_column;		/* column in SEQIN cmd */
+-	int	seqin_page_addr;	/* page_addr in SEQIN cmd */
+-	uint32_t seqin_read_cmd;		/* read cmd in SEQIN cmd */
+-	int	erase1_page_addr;	/* page_addr in ERASE1 cmd */
+-	uint32_t erase_ADRCNT;		/* bits of FLCMDCR in ERASE1 cmd */
+-	uint32_t rw_ADRCNT;	/* bits of FLCMDCR in READ WRITE cmd */
+-	uint32_t flcmncr_base;	/* base value of FLCMNCR */
+-	uint32_t flintdmacr_base;	/* irq enable bits */
+-
+-	unsigned page_size:1;	/* NAND page size (0 = 512, 1 = 2048) */
+-	unsigned hwecc:1;	/* Hardware ECC (0 = disabled, 1 = enabled) */
+-	unsigned holden:1;	/* Hardware has FLHOLDCR and HOLDEN is set */
+-	unsigned qos_request:1;	/* QoS request to prevent deep power shutdown */
+-
+-	/* DMA related objects */
+-	struct dma_chan		*chan_fifo0_rx;
+-	struct dma_chan		*chan_fifo0_tx;
+-	struct completion	dma_complete;
+-};
+-
+-struct sh_flctl_platform_data {
+-	struct mtd_partition	*parts;
+-	int			nr_parts;
+-	unsigned long		flcmncr_val;
+-
+-	unsigned has_hwecc:1;
+-	unsigned use_holden:1;
+-
+-	unsigned int            slave_id_fifo0_tx;
+-	unsigned int            slave_id_fifo0_rx;
+-};
+-
+-static inline struct sh_flctl *mtd_to_flctl(struct mtd_info *mtdinfo)
+-{
+-	return container_of(mtd_to_nand(mtdinfo), struct sh_flctl, chip);
+-}
+-
+-#endif	/* __SH_FLCTL_H__ */
 -- 
 2.39.0
 
