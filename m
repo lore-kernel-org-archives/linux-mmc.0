@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 86D4DC61DB3
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:27:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 650D4C677F1
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:27:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240947AbjAMG1w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 01:27:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60798 "EHLO
+        id S240951AbjAMG1y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 01:27:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33502 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240573AbjAMGZP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:25:15 -0500
+        with ESMTP id S236952AbjAMGYr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:24:47 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BE1410073;
-        Thu, 12 Jan 2023 22:24:36 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05B766A0F5;
+        Thu, 12 Jan 2023 22:24:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=yNX/9/e3mCL8Z9/A5TRWG0UKPW9ZyWcnD51C6LTuRVI=; b=Ylt8A4HngYHMxsdrT3HnhJDlSV
-        iJ170NFOhoE5/jm4B0r2iZEgG/7ENapsBN7EG3eTyLKpN5X9ZYXjsypPqcTfmEHfo+RwMWyPpP/3+
-        mjrTudLbbjWOokwEpDHR/SYDPQjEdYu2BrhFltpnBqms3qC6BjqFpSVzUExolaX5+7GIWz7XCFYWp
-        EnNcdwUy6QpwLO2RM/m2LT0BcRLf2dwVUO5JUTWY6khIjWo2kMDSALL69dwv9d7JksbiErk0cYjJy
-        F0GEfksn110Oud3Mh6LP7zQRl0CYW85Mx25oaHsuUudRug/Y9kNkATuSeuGsCBnzF27GOv603zDC4
-        VB09RLNw==;
+        bh=mxBIoTcWoM961bskFu4vgLYA4iK6lfkfHo46ovOHhdY=; b=epactF3LWIS1c8xybu121AnX4l
+        mxQDeqmEC9J8cgMc2SIYAO9NzF3h0YlU8xbCTYRLLK24zqc8kEMH0PpbDIl1CALQ06M6j2t+DvW/2
+        52IjFzvuXiBDn229AAQmQ76IVBLDEALsaXsG/rhqbYhzaI4Hb2k5FYwBW/QtpL+GpgBj1CYNBCjoU
+        Wow0ecEypZirO8g6qBKEcpON8H7jgnTwizxUEhR74JGhqggyXfr0uC5oDRw7YO7Ldj7yKS+YzcUmZ
+        aD+BC5AU+OusXU3+GAHmRsZapXMUIGr4gkeRILIjbZ4eJzhz4I3ZIHuh91N7YMYtmI2wXUBJeRcBz
+        reMo6ZfA==;
 Received: from [2001:4bb8:181:656b:9509:7d20:8d39:f895] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pGDUH-000ljq-PK; Fri, 13 Jan 2023 06:24:26 +0000
+        id 1pGDTy-000lWK-J8; Fri, 13 Jan 2023 06:24:07 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Yoshinori Sato <ysato@users.sourceforge.jp>,
         Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
@@ -45,9 +45,9 @@ Cc:     Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
         linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
         linux-sh@vger.kernel.org
-Subject: [PATCH 12/22] net/ethernet/8390: remove stnic
-Date:   Fri, 13 Jan 2023 07:23:29 +0100
-Message-Id: <20230113062339.1909087-13-hch@lst.de>
+Subject: [PATCH 06/22] watchdog: remove the shwdt driver
+Date:   Fri, 13 Jan 2023 07:23:23 +0100
+Message-Id: <20230113062339.1909087-7-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230113062339.1909087-1-hch@lst.de>
 References: <20230113062339.1909087-1-hch@lst.de>
@@ -62,355 +62,431 @@ Now that arch/sh is removed this driver is dead code.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/net/ethernet/8390/Kconfig  |  12 --
- drivers/net/ethernet/8390/Makefile |   1 -
- drivers/net/ethernet/8390/stnic.c  | 302 -----------------------------
- 3 files changed, 315 deletions(-)
- delete mode 100644 drivers/net/ethernet/8390/stnic.c
+ .../watchdog/watchdog-parameters.rst          |  12 -
+ drivers/watchdog/Kconfig                      |  20 -
+ drivers/watchdog/Makefile                     |   3 -
+ drivers/watchdog/shwdt.c                      | 344 ------------------
+ 4 files changed, 379 deletions(-)
+ delete mode 100644 drivers/watchdog/shwdt.c
 
-diff --git a/drivers/net/ethernet/8390/Kconfig b/drivers/net/ethernet/8390/Kconfig
-index eb90de04c88419..a7976743be9ee3 100644
---- a/drivers/net/ethernet/8390/Kconfig
-+++ b/drivers/net/ethernet/8390/Kconfig
-@@ -155,18 +155,6 @@ config PCMCIA_PCNET
- 	  To compile this driver as a module, choose M here: the module will be
- 	  called pcnet_cs.  If unsure, say N.
+diff --git a/Documentation/watchdog/watchdog-parameters.rst b/Documentation/watchdog/watchdog-parameters.rst
+index 29153eed668900..553ac2f8ae23f7 100644
+--- a/Documentation/watchdog/watchdog-parameters.rst
++++ b/Documentation/watchdog/watchdog-parameters.rst
+@@ -579,18 +579,6 @@ scx200_wdt:
  
--config STNIC
--	tristate "National DP83902AV  support"
--	depends on SUPERH
--	select CRC32
+ -------------------------------------------------
+ 
+-shwdt:
+-    clock_division_ratio:
+-	Clock division ratio. Valid ranges are from 0x5 (1.31ms)
+-	to 0x7 (5.25ms). (default=7)
+-    heartbeat:
+-	Watchdog heartbeat in seconds. (1 <= heartbeat <= 3600, default=30
+-    nowayout:
+-	Watchdog cannot be stopped once started
+-	(default=kernel config parameter)
+-
+--------------------------------------------------
+-
+ smsc37b787_wdt:
+     timeout:
+ 	range is 1-255 units, default is 60
+diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
+index 0bc40b763b0652..7db0a5e636cf65 100644
+--- a/drivers/watchdog/Kconfig
++++ b/drivers/watchdog/Kconfig
+@@ -2015,26 +2015,6 @@ config DIAG288_WATCHDOG
+ 	  To compile this driver as a module, choose M here. The module
+ 	  will be called diag288_wdt.
+ 
+-# SUPERH (sh + sh64) Architecture
+-
+-config SH_WDT
+-	tristate "SuperH Watchdog"
+-	depends on SUPERH && (CPU_SH3 || CPU_SH4 || COMPILE_TEST)
+-	select WATCHDOG_CORE
 -	help
--	  Support for cards based on the National Semiconductor DP83902AV
--	  ST-NIC Serial Network Interface Controller for Twisted Pair.  This
--	  is a 10Mbit/sec Ethernet controller.  Product overview and specs at
--	  <http://www.national.com/pf/DP/DP83902A.html>.
+-	  This driver adds watchdog support for the integrated watchdog in the
+-	  SuperH processors. If you have one of these processors and wish
+-	  to have watchdog support enabled, say Y, otherwise say N.
 -
--	  If unsure, say N.
+-	  As a side note, saying Y here will automatically boost HZ to 1000
+-	  so that the timer has a chance to clear the overflow counter. On
+-	  slower systems (such as the SH-2 and SH-3) this will likely yield
+-	  some performance issues. As such, the WDT should be avoided here
+-	  unless it is absolutely necessary.
 -
- config ULTRA
- 	tristate "SMC Ultra support"
- 	depends on ISA
-diff --git a/drivers/net/ethernet/8390/Makefile b/drivers/net/ethernet/8390/Makefile
-index 85c83c566ec663..3819a3bb75a1c9 100644
---- a/drivers/net/ethernet/8390/Makefile
-+++ b/drivers/net/ethernet/8390/Makefile
-@@ -13,7 +13,6 @@ obj-$(CONFIG_NE2000) += ne.o 8390p.o
- obj-$(CONFIG_NE2K_PCI) += ne2k-pci.o 8390.o
- obj-$(CONFIG_PCMCIA_AXNET) += axnet_cs.o 8390.o
- obj-$(CONFIG_PCMCIA_PCNET) += pcnet_cs.o 8390.o
--obj-$(CONFIG_STNIC) += stnic.o 8390.o
- obj-$(CONFIG_ULTRA) += smc-ultra.o 8390.o
- obj-$(CONFIG_WD80x3) += wd.o 8390.o
- obj-$(CONFIG_XSURF100) += xsurf100.o
-diff --git a/drivers/net/ethernet/8390/stnic.c b/drivers/net/ethernet/8390/stnic.c
+-	  To compile this driver as a module, choose M here: the
+-	  module will be called shwdt.
+-
+ # SPARC Architecture
+ 
+ # SPARC64 Architecture
+diff --git a/drivers/watchdog/Makefile b/drivers/watchdog/Makefile
+index 9cbf6580f16c9f..a852ab4d7176ac 100644
+--- a/drivers/watchdog/Makefile
++++ b/drivers/watchdog/Makefile
+@@ -195,9 +195,6 @@ obj-$(CONFIG_WATCHDOG_RTAS) += wdrtas.o
+ # S390 Architecture
+ obj-$(CONFIG_DIAG288_WATCHDOG) += diag288_wdt.o
+ 
+-# SUPERH (sh + sh64) Architecture
+-obj-$(CONFIG_SH_WDT) += shwdt.o
+-
+ # SPARC Architecture
+ 
+ # SPARC64 Architecture
+diff --git a/drivers/watchdog/shwdt.c b/drivers/watchdog/shwdt.c
 deleted file mode 100644
-index bd89ca8a92dfbc..00000000000000
---- a/drivers/net/ethernet/8390/stnic.c
+index f55533e0e0454e..00000000000000
+--- a/drivers/watchdog/shwdt.c
 +++ /dev/null
-@@ -1,302 +0,0 @@
--/* stnic.c : A SH7750 specific part of driver for NS DP83902A ST-NIC.
+@@ -1,344 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-or-later
+-/*
+- * drivers/watchdog/shwdt.c
 - *
-- * This file is subject to the terms and conditions of the GNU General Public
-- * License.  See the file "COPYING" in the main directory of this archive
-- * for more details.
+- * Watchdog driver for integrated watchdog in the SuperH processors.
 - *
-- * Copyright (C) 1999 kaz Kojima
+- * Copyright (C) 2001 - 2012  Paul Mundt <lethal@linux-sh.org>
+- *
+- * 14-Dec-2001 Matt Domsch <Matt_Domsch@dell.com>
+- *     Added nowayout module option to override CONFIG_WATCHDOG_NOWAYOUT
+- *
+- * 19-Apr-2002 Rob Radez <rob@osinvestor.com>
+- *     Added expect close support, made emulated timeout runtime changeable
+- *     general cleanups, add some ioctls
 - */
 -
+-#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+-
 -#include <linux/module.h>
--#include <linux/kernel.h>
--#include <linux/errno.h>
--#include <linux/interrupt.h>
--#include <linux/ioport.h>
--#include <linux/netdevice.h>
--#include <linux/etherdevice.h>
+-#include <linux/moduleparam.h>
+-#include <linux/platform_device.h>
 -#include <linux/init.h>
--#include <linux/delay.h>
+-#include <linux/types.h>
+-#include <linux/spinlock.h>
+-#include <linux/watchdog.h>
+-#include <linux/pm_runtime.h>
+-#include <linux/fs.h>
+-#include <linux/mm.h>
+-#include <linux/slab.h>
+-#include <linux/io.h>
+-#include <linux/clk.h>
+-#include <linux/err.h>
+-#include <asm/watchdog.h>
 -
--#include <asm/io.h>
--#include <mach-se/mach/se.h>
--#include <asm/machvec.h>
--#ifdef CONFIG_SH_STANDARD_BIOS
--#include <asm/sh_bios.h>
+-#define DRV_NAME "sh-wdt"
+-
+-/*
+- * Default clock division ratio is 5.25 msecs. For an additional table of
+- * values, consult the asm-sh/watchdog.h. Overload this at module load
+- * time.
+- *
+- * In order for this to work reliably we need to have HZ set to 1000 or
+- * something quite higher than 100 (or we need a proper high-res timer
+- * implementation that will deal with this properly), otherwise the 10ms
+- * resolution of a jiffy is enough to trigger the overflow. For things like
+- * the SH-4 and SH-5, this isn't necessarily that big of a problem, though
+- * for the SH-2 and SH-3, this isn't recommended unless the WDT is absolutely
+- * necssary.
+- *
+- * As a result of this timing problem, the only modes that are particularly
+- * feasible are the 4096 and the 2048 divisors, which yield 5.25 and 2.62ms
+- * overflow periods respectively.
+- *
+- * Also, since we can't really expect userspace to be responsive enough
+- * before the overflow happens, we maintain two separate timers .. One in
+- * the kernel for clearing out WOVF every 2ms or so (again, this depends on
+- * HZ == 1000), and another for monitoring userspace writes to the WDT device.
+- *
+- * As such, we currently use a configurable heartbeat interval which defaults
+- * to 30s. In this case, the userspace daemon is only responsible for periodic
+- * writes to the device before the next heartbeat is scheduled. If the daemon
+- * misses its deadline, the kernel timer will allow the WDT to overflow.
+- */
+-static int clock_division_ratio = WTCSR_CKS_4096;
+-#define next_ping_period(cks)	(jiffies + msecs_to_jiffies(cks - 4))
+-
+-#define WATCHDOG_HEARTBEAT 30			/* 30 sec default heartbeat */
+-static int heartbeat = WATCHDOG_HEARTBEAT;	/* in seconds */
+-static bool nowayout = WATCHDOG_NOWAYOUT;
+-static unsigned long next_heartbeat;
+-
+-struct sh_wdt {
+-	void __iomem		*base;
+-	struct device		*dev;
+-	struct clk		*clk;
+-	spinlock_t		lock;
+-
+-	struct timer_list	timer;
+-};
+-
+-static int sh_wdt_start(struct watchdog_device *wdt_dev)
+-{
+-	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
+-	unsigned long flags;
+-	u8 csr;
+-
+-	pm_runtime_get_sync(wdt->dev);
+-	clk_enable(wdt->clk);
+-
+-	spin_lock_irqsave(&wdt->lock, flags);
+-
+-	next_heartbeat = jiffies + (heartbeat * HZ);
+-	mod_timer(&wdt->timer, next_ping_period(clock_division_ratio));
+-
+-	csr = sh_wdt_read_csr();
+-	csr |= WTCSR_WT | clock_division_ratio;
+-	sh_wdt_write_csr(csr);
+-
+-	sh_wdt_write_cnt(0);
+-
+-	/*
+-	 * These processors have a bit of an inconsistent initialization
+-	 * process.. starting with SH-3, RSTS was moved to WTCSR, and the
+-	 * RSTCSR register was removed.
+-	 *
+-	 * On the SH-2 however, in addition with bits being in different
+-	 * locations, we must deal with RSTCSR outright..
+-	 */
+-	csr = sh_wdt_read_csr();
+-	csr |= WTCSR_TME;
+-	csr &= ~WTCSR_RSTS;
+-	sh_wdt_write_csr(csr);
+-
+-#ifdef CONFIG_CPU_SH2
+-	csr = sh_wdt_read_rstcsr();
+-	csr &= ~RSTCSR_RSTS;
+-	sh_wdt_write_rstcsr(csr);
 -#endif
+-	spin_unlock_irqrestore(&wdt->lock, flags);
 -
--#include "8390.h"
--
--#define DRV_NAME "stnic"
--
--#define byte	unsigned char
--#define half	unsigned short
--#define word	unsigned int
--#define vbyte	volatile unsigned char
--#define vhalf	volatile unsigned short
--#define vword	volatile unsigned int
--
--#define STNIC_RUN	0x01	/* 1 == Run, 0 == reset. */
--
--#define START_PG	0	/* First page of TX buffer */
--#define STOP_PG		128	/* Last page +1 of RX ring */
--
--/* Alias */
--#define STNIC_CR	E8390_CMD
--#define PG0_RSAR0	EN0_RSARLO
--#define PG0_RSAR1	EN0_RSARHI
--#define PG0_RBCR0	EN0_RCNTLO
--#define PG0_RBCR1	EN0_RCNTHI
--
--#define CR_RRD		E8390_RREAD
--#define CR_RWR		E8390_RWRITE
--#define CR_PG0		E8390_PAGE0
--#define CR_STA		E8390_START
--#define CR_RDMA		E8390_NODMA
--
--/* FIXME! YOU MUST SET YOUR OWN ETHER ADDRESS.  */
--static byte stnic_eadr[6] =
--{0x00, 0xc0, 0x6e, 0x00, 0x00, 0x07};
--
--static struct net_device *stnic_dev;
--
--static void stnic_reset (struct net_device *dev);
--static void stnic_get_hdr (struct net_device *dev, struct e8390_pkt_hdr *hdr,
--			   int ring_page);
--static void stnic_block_input (struct net_device *dev, int count,
--			       struct sk_buff *skb , int ring_offset);
--static void stnic_block_output (struct net_device *dev, int count,
--				const unsigned char *buf, int start_page);
--
--static void stnic_init (struct net_device *dev);
--
--static u32 stnic_msg_enable;
--
--module_param_named(msg_enable, stnic_msg_enable, uint, 0444);
--MODULE_PARM_DESC(msg_enable, "Debug message level (see linux/netdevice.h for bitmap)");
--
--/* SH7750 specific read/write io. */
--static inline void
--STNIC_DELAY (void)
--{
--  vword trash;
--  trash = *(vword *) 0xa0000000;
--  trash = *(vword *) 0xa0000000;
--  trash = *(vword *) 0xa0000000;
+-	return 0;
 -}
 -
--static inline byte
--STNIC_READ (int reg)
+-static int sh_wdt_stop(struct watchdog_device *wdt_dev)
 -{
--  byte val;
+-	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
+-	unsigned long flags;
+-	u8 csr;
 -
--  val = (*(vhalf *) (PA_83902 + ((reg) << 1)) >> 8) & 0xff;
--  STNIC_DELAY ();
--  return val;
+-	spin_lock_irqsave(&wdt->lock, flags);
+-
+-	del_timer(&wdt->timer);
+-
+-	csr = sh_wdt_read_csr();
+-	csr &= ~WTCSR_TME;
+-	sh_wdt_write_csr(csr);
+-
+-	spin_unlock_irqrestore(&wdt->lock, flags);
+-
+-	clk_disable(wdt->clk);
+-	pm_runtime_put_sync(wdt->dev);
+-
+-	return 0;
 -}
 -
--static inline void
--STNIC_WRITE (int reg, byte val)
+-static int sh_wdt_keepalive(struct watchdog_device *wdt_dev)
 -{
--  *(vhalf *) (PA_83902 + ((reg) << 1)) = ((half) (val) << 8);
--  STNIC_DELAY ();
+-	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
+-	unsigned long flags;
+-
+-	spin_lock_irqsave(&wdt->lock, flags);
+-	next_heartbeat = jiffies + (heartbeat * HZ);
+-	spin_unlock_irqrestore(&wdt->lock, flags);
+-
+-	return 0;
 -}
 -
--static int __init stnic_probe(void)
+-static int sh_wdt_set_heartbeat(struct watchdog_device *wdt_dev, unsigned t)
 -{
--  struct net_device *dev;
--  struct ei_device *ei_local;
--  int err;
+-	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
+-	unsigned long flags;
 -
--  /* If we are not running on a SolutionEngine, give up now */
--  if (! MACH_SE)
--    return -ENODEV;
+-	if (unlikely(t < 1 || t > 3600)) /* arbitrary upper limit */
+-		return -EINVAL;
 -
--  /* New style probing API */
--  dev = alloc_ei_netdev();
--  if (!dev)
--	return -ENOMEM;
+-	spin_lock_irqsave(&wdt->lock, flags);
+-	heartbeat = t;
+-	wdt_dev->timeout = t;
+-	spin_unlock_irqrestore(&wdt->lock, flags);
 -
--#ifdef CONFIG_SH_STANDARD_BIOS
--  sh_bios_get_node_addr (stnic_eadr);
--#endif
--  eth_hw_addr_set(dev, stnic_eadr);
--
--  /* Set the base address to point to the NIC, not the "real" base! */
--  dev->base_addr = 0x1000;
--  dev->irq = IRQ_STNIC;
--  dev->netdev_ops = &ei_netdev_ops;
--
--  /* Snarf the interrupt now.  There's no point in waiting since we cannot
--     share and the board will usually be enabled. */
--  err = request_irq (dev->irq, ei_interrupt, 0, DRV_NAME, dev);
--  if (err)  {
--	netdev_emerg(dev, " unable to get IRQ %d.\n", dev->irq);
--	free_netdev(dev);
--	return err;
--  }
--
--  ei_status.name = dev->name;
--  ei_status.word16 = 1;
--#ifdef __LITTLE_ENDIAN__
--  ei_status.bigendian = 0;
--#else
--  ei_status.bigendian = 1;
--#endif
--  ei_status.tx_start_page = START_PG;
--  ei_status.rx_start_page = START_PG + TX_PAGES;
--  ei_status.stop_page = STOP_PG;
--
--  ei_status.reset_8390 = &stnic_reset;
--  ei_status.get_8390_hdr = &stnic_get_hdr;
--  ei_status.block_input = &stnic_block_input;
--  ei_status.block_output = &stnic_block_output;
--
--  stnic_init (dev);
--  ei_local = netdev_priv(dev);
--  ei_local->msg_enable = stnic_msg_enable;
--
--  err = register_netdev(dev);
--  if (err) {
--    free_irq(dev->irq, dev);
--    free_netdev(dev);
--    return err;
--  }
--  stnic_dev = dev;
--
--  netdev_info(dev, "NS ST-NIC 83902A\n");
--
--  return 0;
+-	return 0;
 -}
 -
--static void
--stnic_reset (struct net_device *dev)
+-static void sh_wdt_ping(struct timer_list *t)
 -{
--  struct ei_device *ei_local = netdev_priv(dev);
+-	struct sh_wdt *wdt = from_timer(wdt, t, timer);
+-	unsigned long flags;
 -
--  *(vhalf *) PA_83902_RST = 0;
--  udelay (5);
--  netif_warn(ei_local, hw, dev, "8390 reset done (%ld).\n", jiffies);
--  *(vhalf *) PA_83902_RST = ~0;
--  udelay (5);
+-	spin_lock_irqsave(&wdt->lock, flags);
+-	if (time_before(jiffies, next_heartbeat)) {
+-		u8 csr;
+-
+-		csr = sh_wdt_read_csr();
+-		csr &= ~WTCSR_IOVF;
+-		sh_wdt_write_csr(csr);
+-
+-		sh_wdt_write_cnt(0);
+-
+-		mod_timer(&wdt->timer, next_ping_period(clock_division_ratio));
+-	} else
+-		dev_warn(wdt->dev, "Heartbeat lost! Will not ping "
+-		         "the watchdog\n");
+-	spin_unlock_irqrestore(&wdt->lock, flags);
 -}
 -
--static void
--stnic_get_hdr (struct net_device *dev, struct e8390_pkt_hdr *hdr,
--	       int ring_page)
+-static const struct watchdog_info sh_wdt_info = {
+-	.options		= WDIOF_KEEPALIVEPING | WDIOF_SETTIMEOUT |
+-				  WDIOF_MAGICCLOSE,
+-	.firmware_version	= 1,
+-	.identity		= "SH WDT",
+-};
+-
+-static const struct watchdog_ops sh_wdt_ops = {
+-	.owner		= THIS_MODULE,
+-	.start		= sh_wdt_start,
+-	.stop		= sh_wdt_stop,
+-	.ping		= sh_wdt_keepalive,
+-	.set_timeout	= sh_wdt_set_heartbeat,
+-};
+-
+-static struct watchdog_device sh_wdt_dev = {
+-	.info	= &sh_wdt_info,
+-	.ops	= &sh_wdt_ops,
+-};
+-
+-static int sh_wdt_probe(struct platform_device *pdev)
 -{
--  struct ei_device *ei_local = netdev_priv(dev);
+-	struct sh_wdt *wdt;
+-	int rc;
 -
--  half buf[2];
+-	/*
+-	 * As this driver only covers the global watchdog case, reject
+-	 * any attempts to register per-CPU watchdogs.
+-	 */
+-	if (pdev->id != -1)
+-		return -EINVAL;
 -
--  STNIC_WRITE (PG0_RSAR0, 0);
--  STNIC_WRITE (PG0_RSAR1, ring_page);
--  STNIC_WRITE (PG0_RBCR0, 4);
--  STNIC_WRITE (PG0_RBCR1, 0);
--  STNIC_WRITE (STNIC_CR, CR_RRD | CR_PG0 | CR_STA);
+-	wdt = devm_kzalloc(&pdev->dev, sizeof(struct sh_wdt), GFP_KERNEL);
+-	if (unlikely(!wdt))
+-		return -ENOMEM;
 -
--  buf[0] = *(vhalf *) PA_83902_IF;
--  STNIC_DELAY ();
--  buf[1] = *(vhalf *) PA_83902_IF;
--  STNIC_DELAY ();
--  hdr->next = buf[0] >> 8;
--  hdr->status = buf[0] & 0xff;
--#ifdef __LITTLE_ENDIAN__
--  hdr->count = buf[1];
--#else
--  hdr->count = ((buf[1] >> 8) & 0xff) | (buf[1] << 8);
--#endif
+-	wdt->dev = &pdev->dev;
 -
--  netif_dbg(ei_local, probe, dev, "ring %x status %02x next %02x count %04x.\n",
--	    ring_page, hdr->status, hdr->next, hdr->count);
+-	wdt->clk = devm_clk_get(&pdev->dev, NULL);
+-	if (IS_ERR(wdt->clk)) {
+-		/*
+-		 * Clock framework support is optional, continue on
+-		 * anyways if we don't find a matching clock.
+-		 */
+-		wdt->clk = NULL;
+-	}
 -
--  STNIC_WRITE (STNIC_CR, CR_RDMA | CR_PG0 | CR_STA);
+-	wdt->base = devm_platform_ioremap_resource(pdev, 0);
+-	if (IS_ERR(wdt->base))
+-		return PTR_ERR(wdt->base);
+-
+-	watchdog_set_nowayout(&sh_wdt_dev, nowayout);
+-	watchdog_set_drvdata(&sh_wdt_dev, wdt);
+-	sh_wdt_dev.parent = &pdev->dev;
+-
+-	spin_lock_init(&wdt->lock);
+-
+-	rc = sh_wdt_set_heartbeat(&sh_wdt_dev, heartbeat);
+-	if (unlikely(rc)) {
+-		/* Default timeout if invalid */
+-		sh_wdt_set_heartbeat(&sh_wdt_dev, WATCHDOG_HEARTBEAT);
+-
+-		dev_warn(&pdev->dev,
+-			 "heartbeat value must be 1<=x<=3600, using %d\n",
+-			 sh_wdt_dev.timeout);
+-	}
+-
+-	dev_info(&pdev->dev, "configured with heartbeat=%d sec (nowayout=%d)\n",
+-		 sh_wdt_dev.timeout, nowayout);
+-
+-	rc = watchdog_register_device(&sh_wdt_dev);
+-	if (unlikely(rc)) {
+-		dev_err(&pdev->dev, "Can't register watchdog (err=%d)\n", rc);
+-		return rc;
+-	}
+-
+-	timer_setup(&wdt->timer, sh_wdt_ping, 0);
+-	wdt->timer.expires	= next_ping_period(clock_division_ratio);
+-
+-	dev_info(&pdev->dev, "initialized.\n");
+-
+-	pm_runtime_enable(&pdev->dev);
+-
+-	return 0;
 -}
 -
--/* Block input and output, similar to the Crynwr packet driver. If you are
--   porting to a new ethercard look at the packet driver source for hints.
--   The HP LAN doesn't use shared memory -- we put the packet
--   out through the "remote DMA" dataport. */
--
--static void
--stnic_block_input (struct net_device *dev, int length, struct sk_buff *skb,
--		   int offset)
+-static int sh_wdt_remove(struct platform_device *pdev)
 -{
--  char *buf = skb->data;
--  half val;
+-	watchdog_unregister_device(&sh_wdt_dev);
 -
--  STNIC_WRITE (PG0_RSAR0, offset & 0xff);
--  STNIC_WRITE (PG0_RSAR1, offset >> 8);
--  STNIC_WRITE (PG0_RBCR0, length & 0xff);
--  STNIC_WRITE (PG0_RBCR1, length >> 8);
--  STNIC_WRITE (STNIC_CR, CR_RRD | CR_PG0 | CR_STA);
+-	pm_runtime_disable(&pdev->dev);
 -
--  if (length & 1)
--    length++;
--
--  while (length > 0)
--    {
--      val = *(vhalf *) PA_83902_IF;
--#ifdef __LITTLE_ENDIAN__
--      *buf++ = val & 0xff;
--      *buf++ = val >> 8;
--#else
--      *buf++ = val >> 8;
--      *buf++ = val & 0xff;
--#endif
--      STNIC_DELAY ();
--      length -= sizeof (half);
--    }
--
--  STNIC_WRITE (STNIC_CR, CR_RDMA | CR_PG0 | CR_STA);
+-	return 0;
 -}
 -
--static void
--stnic_block_output (struct net_device *dev, int length,
--		    const unsigned char *buf, int output_page)
+-static void sh_wdt_shutdown(struct platform_device *pdev)
 -{
--  STNIC_WRITE (PG0_RBCR0, 1);	/* Write non-zero value */
--  STNIC_WRITE (STNIC_CR, CR_RRD | CR_PG0 | CR_STA);
--  STNIC_DELAY ();
--
--  STNIC_WRITE (PG0_RBCR0, length & 0xff);
--  STNIC_WRITE (PG0_RBCR1, length >> 8);
--  STNIC_WRITE (PG0_RSAR0, 0);
--  STNIC_WRITE (PG0_RSAR1, output_page);
--  STNIC_WRITE (STNIC_CR, CR_RWR | CR_PG0 | CR_STA);
--
--  if (length & 1)
--    length++;
--
--  while (length > 0)
--    {
--#ifdef __LITTLE_ENDIAN__
--      *(vhalf *) PA_83902_IF = ((half) buf[1] << 8) | buf[0];
--#else
--      *(vhalf *) PA_83902_IF = ((half) buf[0] << 8) | buf[1];
--#endif
--      STNIC_DELAY ();
--      buf += sizeof (half);
--      length -= sizeof (half);
--    }
--
--  STNIC_WRITE (STNIC_CR, CR_RDMA | CR_PG0 | CR_STA);
+-	sh_wdt_stop(&sh_wdt_dev);
 -}
 -
--/* This function resets the STNIC if something screws up.  */
--static void
--stnic_init (struct net_device *dev)
+-static struct platform_driver sh_wdt_driver = {
+-	.driver		= {
+-		.name	= DRV_NAME,
+-	},
+-
+-	.probe		= sh_wdt_probe,
+-	.remove		= sh_wdt_remove,
+-	.shutdown	= sh_wdt_shutdown,
+-};
+-
+-static int __init sh_wdt_init(void)
 -{
--  stnic_reset (dev);
--  NS8390_init (dev, 0);
+-	if (unlikely(clock_division_ratio < 0x5 ||
+-		     clock_division_ratio > 0x7)) {
+-		clock_division_ratio = WTCSR_CKS_4096;
+-
+-		pr_info("divisor must be 0x5<=x<=0x7, using %d\n",
+-			clock_division_ratio);
+-	}
+-
+-	return platform_driver_register(&sh_wdt_driver);
 -}
 -
--static void __exit stnic_cleanup(void)
+-static void __exit sh_wdt_exit(void)
 -{
--	unregister_netdev(stnic_dev);
--	free_irq(stnic_dev->irq, stnic_dev);
--	free_netdev(stnic_dev);
+-	platform_driver_unregister(&sh_wdt_driver);
 -}
+-module_init(sh_wdt_init);
+-module_exit(sh_wdt_exit);
 -
--module_init(stnic_probe);
--module_exit(stnic_cleanup);
+-MODULE_AUTHOR("Paul Mundt <lethal@linux-sh.org>");
+-MODULE_DESCRIPTION("SuperH watchdog driver");
 -MODULE_LICENSE("GPL");
+-MODULE_ALIAS("platform:" DRV_NAME);
+-
+-module_param(clock_division_ratio, int, 0);
+-MODULE_PARM_DESC(clock_division_ratio,
+-	"Clock division ratio. Valid ranges are from 0x5 (1.31ms) "
+-	"to 0x7 (5.25ms). (default=" __MODULE_STRING(WTCSR_CKS_4096) ")");
+-
+-module_param(heartbeat, int, 0);
+-MODULE_PARM_DESC(heartbeat,
+-	"Watchdog heartbeat in seconds. (1 <= heartbeat <= 3600, default="
+-				__MODULE_STRING(WATCHDOG_HEARTBEAT) ")");
+-
+-module_param(nowayout, bool, 0);
+-MODULE_PARM_DESC(nowayout,
+-	"Watchdog cannot be stopped once started (default="
+-				__MODULE_STRING(WATCHDOG_NOWAYOUT) ")");
 -- 
 2.39.0
 
