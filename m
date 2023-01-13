@@ -2,192 +2,161 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1ACCC54EBE
-	for <linux-mmc@archiver.kernel.org>; Thu, 12 Jan 2023 21:36:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD99AC54EBE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 03:30:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240559AbjALVgs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 12 Jan 2023 16:36:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33268 "EHLO
+        id S232678AbjAMDa0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 12 Jan 2023 22:30:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240208AbjALVgD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 16:36:03 -0500
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 939B758D33;
-        Thu, 12 Jan 2023 13:27:51 -0800 (PST)
-Received: by mail-wm1-x335.google.com with SMTP id m26-20020a05600c3b1a00b003d9811fcaafso16151463wms.5;
-        Thu, 12 Jan 2023 13:27:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:content-language
-         :references:cc:to:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=EQ1D5UHr4tggTsAIC/Qawu9eWnHs++i/i+4IgFLa5Fw=;
-        b=hktHdGS8fjL/kAij+ShBbKkzIj2DX4IeZwG+91HsnQGKf9BjwXH25fl46yt6QgbcEZ
-         dmfTzOcDhAiTRS+DOw8t0NNS7o2z3LWT2EQVCDBQXjryxipoiYYUFSMUoRPrsu8Bjw68
-         7oTIyZXFzZ1z4eQ+R3ziNiRiprFldf6k9DDL3XVIZE7p7R+DaIWlF5741UZf3zeb60kE
-         gOTVWs1qky+rvf2lIvNEUzIPpOVFL5VVni7fh9hxWUB1/JSkeEdgsd0lBAfyylezmWve
-         QZoodcGMs9F+rrl//E8U8si+5AMME2dFINVfuQHSXJYbjgTdZEJC7Z4wONm8skVmr1L3
-         Aw7w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:content-language
-         :references:cc:to:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EQ1D5UHr4tggTsAIC/Qawu9eWnHs++i/i+4IgFLa5Fw=;
-        b=Wma6MZwhMKCL+iq3F2xXD7yrF36CFvhApPkqUHqplWenS3nGWtKVC9Zs3CVYKGRGwW
-         FvZyXlHP+FK17yL1DCKpPGP3c5raW5VB07K0oMKUyHPAKArTyCqLmY0GyQnwvWrY/Rl5
-         LFVo8GlUdsBx+wmjQ9dCGuL23wOW20BrD+ndVsrAYmCF7AV0pYZYS1L5PhcTgq/mLKp+
-         z5AH5/xVUdh4JZoMqwzoe59InM00ddnOzR+TGVkiPMQfPL8/jkT7RoHFgwLT0o6qWEtj
-         TTiLU+YT3oknh1r6tUarKl6IXAHnpEgo8YcWZ3xu1iq0Gw2+m7HNsXnsEkgAyputv/RZ
-         LcRA==
-X-Gm-Message-State: AFqh2kptVhMk+PypTR0w6WLbD921Vt4WvKilCpqAEvREmubjhkScxmCf
-        FyvvEq1Hnxxm5YkvsUn9ANq/x02rW7g=
-X-Google-Smtp-Source: AMrXdXtQnJrnUij3Vwfvj8mzp6AXzARTTmYdUixlVR2SbeVZiq8jg1v6Uj2Hnt2dBY2MkArqeey85Q==
-X-Received: by 2002:a05:600c:601b:b0:3d3:56ce:5693 with SMTP id az27-20020a05600c601b00b003d356ce5693mr55607798wmb.17.1673558869896;
-        Thu, 12 Jan 2023 13:27:49 -0800 (PST)
-Received: from ?IPV6:2a01:c22:76ef:5d00:a043:7bec:4d7a:60ff? (dynamic-2a01-0c22-76ef-5d00-a043-7bec-4d7a-60ff.c22.pool.telefonica.de. [2a01:c22:76ef:5d00:a043:7bec:4d7a:60ff])
-        by smtp.googlemail.com with ESMTPSA id u2-20020a05600c210200b003d98f92692fsm1101375wml.17.2023.01.12.13.27.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 12 Jan 2023 13:27:49 -0800 (PST)
-Message-ID: <7c4aa0d2-d8e9-416b-b2ad-f5c3c8ea33de@gmail.com>
-Date:   Thu, 12 Jan 2023 22:27:44 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-To:     Peter Suti <peter.suti@streamunlimited.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org
-References: <52861a84-0fe2-37f0-d66a-145f2ebe1d79@gmail.com>
- <20221214134620.3028726-1-peter.suti@streamunlimited.com>
- <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
- <CACMGZgZY4Zb+3vHUDAS0+3r55K4_J40dtbsTPTFZMd6duBikpQ@mail.gmail.com>
+        with ESMTP id S232166AbjAMDaZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 12 Jan 2023 22:30:25 -0500
+Received: from EUR05-AM6-obe.outbound.protection.outlook.com (mail-am6eur05on2047.outbound.protection.outlook.com [40.107.22.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BB48E022;
+        Thu, 12 Jan 2023 19:30:24 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=Vl51qxA0/UJPIiYY7I0/7aaOipyydRnVkJPIXKYHUBe6dCW4YxLYEaTEoifF6yOZyHUBNFrImROEI+g7NEjuFx7uI6YNBPrhUk86mJPYSHMCqB4mDML14A4MeMhfvDl34zyYtQB/uKx4vMkeZjQ7RzL10DiestuKAZQgck9ecH1/rjkM3Tr0tq0RLKi3vtMo+foJwnnX0VEc1rhoMQf78Fd4xLYXwOlS/6L+iLCcHifFJ0oD2U1mfIPtwGMKUXofMebr3JRQEFpssGaT2hUqg5OkPanDEEaUz1y4WtVtVnmUsdcN58iBLChTyKETU4gjX3v+eGqSyizLNGp/Ra3fzg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ezEPbetx4jmbS8Xn2lpQ7dsuIc8mgG3jAFzE+/zZFNM=;
+ b=Ki49ZjdndDXdVBPHzsdTOQQCcPkgXeEXlbV6KEhiKvveTfVpF638/5873u3pLdZhC5bjJzFMeMt7Ej3jM1OlkYDNex8XSgT22nPJj2iOecALqqbb17UGu+E6b9ecicESEjSQUQDxMnbrtMxBGxyqfG1zNfmV7+KxDdM/jG6rn3RBPBrBbuNnIK1gVkYo1DTpWEDdHPRwkpZMJ7cAQpq5xFCcsj+M0Cv9ZaogrBP6vwx4vtaYVGIeVRLbm5LxMKCd+DdEUM9+1WUS8IPIWej9Fk0TkOjs+yv7VQN+OkslgGnJzevOklaFhEZPXerGvkMY+wqj4V2MHfYQYX3mCuToZw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ezEPbetx4jmbS8Xn2lpQ7dsuIc8mgG3jAFzE+/zZFNM=;
+ b=b5/cCXJzL7dHlTEDnWYMXgrw0vjVwe7mwheJZ4tNDkRnYWp3JI5vtbFqa1FK46Y+zPxZbljwHQCSaH7RBe/8YA+KMbqABDECAx3jAiy1vg7tl59N2TMC1YzYsfmW2TALtElHKuTG/uCjwV88p3Bosy5+psqGn5xM1zVX/gVZJvg=
+Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
+ AS8PR04MB8117.eurprd04.prod.outlook.com (2603:10a6:20b:3fc::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.5986.19; Fri, 13 Jan
+ 2023 03:30:21 +0000
+Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
+ ([fe80::7479:76ef:8e5:da0b]) by DB7PR04MB4010.eurprd04.prod.outlook.com
+ ([fe80::7479:76ef:8e5:da0b%6]) with mapi id 15.20.6002.012; Fri, 13 Jan 2023
+ 03:30:21 +0000
+From:   Bough Chen <haibo.chen@nxp.com>
+To:     Michael Nazzareno Trimarchi <michael@amarulasolutions.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        LKML <linux-kernel@vger.kernel.org>
+CC:     linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Subject: RE: NXP imx6ull nonalignment buffer question
+Thread-Topic: NXP imx6ull nonalignment buffer question
+Thread-Index: AQHZJCqfilmTz1JUB0Cl7AgFtNcXnq6btY6w
+Date:   Fri, 13 Jan 2023 03:30:21 +0000
+Message-ID: <DB7PR04MB4010D6ABA0D10AB826F468CC90C29@DB7PR04MB4010.eurprd04.prod.outlook.com>
+References: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
+In-Reply-To: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
+Accept-Language: zh-CN, en-US
 Content-Language: en-US
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH v3] mmc: meson-gx: fix SDIO interrupt handling
-In-Reply-To: <CACMGZgZY4Zb+3vHUDAS0+3r55K4_J40dtbsTPTFZMd6duBikpQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: DB7PR04MB4010:EE_|AS8PR04MB8117:EE_
+x-ms-office365-filtering-correlation-id: c16e2146-04e1-4ff4-1c0e-08daf5168004
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: IIFpkAssN+vEuyWry1gUpHL/Qqm8DbZ5oorg8Zgd3tPekANqtRrtp6NO0oFYuMmflVYmoFxccEbDqdn6CUEKON6V2YO00vprcOquUtTa4/18TGbAxT197gw9AKE8SKo7PuJlrnQn+KQysiS2TH39bAmh+G2DIgH9U7OTvv3sODRxCOm8uKzWc0NjTBkGQtUv0p80/ndfn+uzqcj4qOGLWhv3zUUvMNdZOtsjSyjrvq4F7o9GsCx7KptTnDzLzIc3IfuGHal49Um7itxVoqGQCCVk4Rr7EIG6yrbdzP7xD2de8yrlbFcI3mYEiQVyc39kOrP0ymcuvCfRaPZdyDWZUqWtBvEj6/FsSWVBjJCEDJnqOcLs+53e+SAsAU+DaIVVluH4AMIAC6lKnEU8xAJCHXmKayMxP72+h2gjgpQxw64CEqKuUmS3wjz2HYW2HIUHtMewT6k25pany42D2DhpvKmvaC/nzLV3+2wtM3gbNK2gB6UJYEiiEUJQ0PmH7liY3MHkoGXBLZ+EGxpbM4XVY5mRBuphYet8lwropmGH/KUr0Hw8gR3qF/ydoSovl02KGeUKoj+2d2BE+c4qvGWdTxkDot5fF974p3up9m8fQBRjcgHgpGh39X0zlE5ApmpY5amn70aFdFRF4087B8uFzEvdZAhPh/Yv7konQ8fjufhjqX7n0raB1m3XyMD4OHu9WVHAOa41NXama8lZr4QuQg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230022)(4636009)(376002)(366004)(396003)(39860400002)(136003)(346002)(451199015)(52536014)(5660300002)(8936002)(54906003)(41300700001)(316002)(76116006)(66946007)(2906002)(66556008)(110136005)(4326008)(8676002)(64756008)(66476007)(66446008)(71200400001)(7696005)(478600001)(122000001)(38100700002)(186003)(26005)(9686003)(53546011)(6506007)(33656002)(55016003)(38070700005)(86362001)(83380400001)(32563001);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?SVp5RlZMYW05emNsQWMveHBlWEtQOXBUREYyaDVJenplbTB4M0F6M3pRZlpZ?=
+ =?utf-8?B?aXRkaEZuNWR5bitIcjlvdG8vMWZWR0NuUE00VTBkSkxrMTFCLzRBK2RjK0RT?=
+ =?utf-8?B?ejhLTFpRWFdWVUJ0TEUvWEM2anpTNElYdzlqT0dQdjAvdFVTc0FUN1FaSTlC?=
+ =?utf-8?B?UGo0Z01GbllxR0JqeWFWeWQ5Ym91YW0xMDNCVzVjY0FqMVE0aGEwS2FFOWEz?=
+ =?utf-8?B?NVpvcW9rZytRN1BqTCtIYXk0NmFGZ2xwNGFzTVBCWlBIQ3lTS1MxRzdXVnE5?=
+ =?utf-8?B?SVRxVzI1V0xBYTQ0YkREUXh6aUw0UW5qZ0h4dWkyMk5UaUtLam14c0R1UkFR?=
+ =?utf-8?B?WlBhS2k1UDZHN21VYU56S0xNQS8yZk5DS1ErUDBWTjNFTjZnT2h5YmhnNDZo?=
+ =?utf-8?B?cE9nQUR4ZEl1c21sbGFWRTNTYVlJTzlRZDYxVks5QlYyWkhvd0ZkSUZHMDJp?=
+ =?utf-8?B?RUdkVzEzVDhXY2NIQ01KTmZTU1A4TDEzQkJDVGhCVFArZHhHN1BmU0ZMQUMz?=
+ =?utf-8?B?b1VGcWc1dFovcjRkL3NiSjRKYlJvRUoydVBCbkNNWTJZQlZsQTlDczJjMENZ?=
+ =?utf-8?B?dDVKRlZ6eTl4N0hZV1JVSjVWVUlaR2c2UEJrU3d4MlNYWllTQW1Fd2UwRmhF?=
+ =?utf-8?B?d3NmYnRtSWxBYWR4V3EyZDBOTWVSSmtSa0x2WExBa2lTOTNDZ2ovZHkwekJ6?=
+ =?utf-8?B?eFJTT2IxS2svTkNNYkhRdkRGN0cydVdGMG1xUjlxZmZBdkc4VXM0Wng1ODk4?=
+ =?utf-8?B?TFJTL09Ea0VvelRvUFY1bUZ3RmgvZWllRU5WQWpFTFczNURjcS9BblNNcVVV?=
+ =?utf-8?B?cCtrMk05VnY3Sko4MHdsRXR1eTVIQnhSZmI4Zy9kUkJKNWRuQ05XYzZ3aXB2?=
+ =?utf-8?B?L2RkWkQ3VmxETEdWVXlmQ0RCNUw1ck02eW1EdXlqcXBRU1Vsd3J1VUEzb05y?=
+ =?utf-8?B?OEtUcEE5aVo0Yi9ELzFoK1phSjUyVEg4WFcxbDE2V1ZkMXRkUG5iV05ZRnJR?=
+ =?utf-8?B?WGtuVnk3WjZYWWdkd21QWW5YOVA4bktHMmdzd1VZZkJtR0d5ZGlua25Mc05l?=
+ =?utf-8?B?bGJkdFkySFdoaEwwcUJKQThxYUtqNk5vd1ZidjR5eVdLUGFXTjQxNnRaVWZK?=
+ =?utf-8?B?VmloY09CZG5tVlF3d0puOFhYZWt3aUhnU0piL1NtNm9yTEZzT3dwbnNOSmZX?=
+ =?utf-8?B?SlYvSXVYRmMwalJ1Z0s5SGUvNnI0R3Y1NmN4dnQ4S2pxQjhsaEI2cmVNSDJS?=
+ =?utf-8?B?VDRuVW1Wc2VRdm1BZjBlZlBvK041QUs2cFNwclVkZ2NsNnlYYVVlc09va2FP?=
+ =?utf-8?B?TktPemVQQW1Yb01vSGJkWjd1WTlxcjdXUldIL2IvMUMwT0NhT0wzc3ZWd2hC?=
+ =?utf-8?B?dXZYOHJHRkhuZFIrdFA0cUVKa09adHFXaHhqZm1IQXE2cGowT2N1UDNJOHFH?=
+ =?utf-8?B?QktZeVNvRG9lRWhpVk0vSUFETXEwaWgyYnp1WmtoNWpmMXdHUk03SUZhK21p?=
+ =?utf-8?B?YkVoSFRxSnRsZy9lR1VvRS9iRmgyWlFHSWFUcGNWTWhwUlBMNkFxMkhHcUZM?=
+ =?utf-8?B?M0JSWC9INTY4ZDZGc0hocjYwaWxkUWxUS0NySEdLclhRYnVGMXRFK0dUaVc3?=
+ =?utf-8?B?YW0zNTdrYzdhY3RsT3UvUFVEOFprNm9CTHk4TFc2dThFZWJFU3dNYzQrdDNo?=
+ =?utf-8?B?QzhNcVEybUhHVDUrd2QycVlLamZ3ZlRINGQ3UUtkSFFCMmIvaUhiTkIxQkcy?=
+ =?utf-8?B?U2JZWGttN1NIaUJwd3lNMHlIWnFpV1VxemR6QjZ6RFV5Ukc0MXJqa0VralIy?=
+ =?utf-8?B?bFNteW0zS0ZyanVXRUxOV3BPSEtFQmJ5a04xcmJGUEJRNzBJcWFMYngrOHY1?=
+ =?utf-8?B?M3FSdkFhUzVOQ2VPOFVoMDMyOEFFcjN5YWN2UHNGS3Q2cmV4VWFkZWhVb0xs?=
+ =?utf-8?B?L3JIN0U1aFQwNm02N1VzelZRRno1R1puTFNEQ0QwZzNuUE5iRlMrK2tUM1Z3?=
+ =?utf-8?B?OWJMOWErZjM2WEIvUFhEVDR2MGZDT05jaDZrUExQWXZKVDRjZldvTHFxQUwr?=
+ =?utf-8?B?YmVsT2pPQUlMNHdWZkM0ZWVkY2JMYWx1TXhKVmxMVmZuSU9TcDh3ZjJDQk8z?=
+ =?utf-8?Q?MFaysvS3K1n4WgIj936hLs1a1?=
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: c16e2146-04e1-4ff4-1c0e-08daf5168004
+X-MS-Exchange-CrossTenant-originalarrivaltime: 13 Jan 2023 03:30:21.1716
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: B2vWS+Jm02nleKFoWeAWSDHzoKNwcKmisW1zq1uKIvYqU41QbzwoZk4AHICAx3Ac9qObMFbZMv+vh8i8NxRu2w==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8117
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09.01.2023 12:52, Peter Suti wrote:
-> On Wed, Dec 14, 2022 at 10:33 PM Heiner Kallweit <hkallweit1@gmail.com> wrote:
->>
->> On 14.12.2022 14:46, Peter Suti wrote:
->>> With the interrupt support introduced in commit 066ecde sometimes the
->>> Marvell-8987 wifi chip got stuck using the marvell-sd-uapsta-8987
->>> vendor driver. The cause seems to be that after sending ack to all interrupts
->>> the IRQ_SDIO still happens, but it is ignored.
->>>
->>> To work around this, recheck the IRQ_SDIO after meson_mmc_request_done().
->>>
->>> Inspired by 9e2582e ("mmc: mediatek: fix SDIO irq issue") which used a
->>> similar fix to handle lost interrupts.
->>>
->> The commit description of the referenced fix isn't clear with regard to
->> who's fault it is that an interrupt can be lost. I'd interpret it being
->> a silicon bug rather than a kernel/driver bug.
-> Unfortunately I can't confirm that the referenced bug is in the
-> silicon for the original commit either.
-> However a similar workaround works in this case too which is why I
-> referenced that commit.
-> 
->> Not sure whether it's the case, but it's possible that both vendors use
->> at least parts of the same IP in the MMC block, and therefore the issue
->> pops up here too.
->>
->>> Fixes: 066ecde ("mmc: meson-gx: add SDIO interrupt support")
->>>
->>> Signed-off-by: Peter Suti <peter.suti@streamunlimited.com>
->>> ---
->>> Changes in v2:
->>>       - use spin_lock instead of spin_lock_irqsave
->>>       - only reenable interrupts if they were enabled already
->>>
->>> Changes in v3:
->>>       - Rework the patch based on feedback from Heiner Kallweit.
->>>               The IRQ does not happen on 2 CPUs and the hard IRQ is not re-entrant.
->>>               But still one SDIO IRQ is lost without this change.
->>>               After the ack, reading the SD_EMMC_STATUS BIT(15) is set, but
->>>               meson_mmc_irq() is never called again.
->>>
->>>               The fix is similar to Mediatek msdc_recheck_sdio_irq().
->>>               That platform also loses an IRQ in some cases it seems.
->>>
->>>  drivers/mmc/host/meson-gx-mmc.c | 16 ++++++++++++++++
->>>  1 file changed, 16 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
->>> index 6e5ea0213b47..7d3ee2f9a7f6 100644
->>> --- a/drivers/mmc/host/meson-gx-mmc.c
->>> +++ b/drivers/mmc/host/meson-gx-mmc.c
->>> @@ -1023,6 +1023,22 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->>>       if (ret == IRQ_HANDLED)
->>>               meson_mmc_request_done(host->mmc, cmd->mrq);
->>>
->>> +     /*
->>> +     * Sometimes after we ack all raised interrupts,
->>> +     * an IRQ_SDIO can still be pending, which can get lost.
->>> +     *
->>
->> A reader may scratch his head here and wonder how the interrupt can get lost,
->> and why adding a workaround instead of eliminating the root cause for losing
->> the interrupt. If you can't provide an explanation why the root cause for
->> losing the interrupt can't be fixed, presumably you would have to say that
->> you're adding a workaround for a suspected silicon bug.
-> After talking to the manufacturer, we got the following explanation
-> for this situation:
-
-To which manufacturer did you talk, Marvell or Amlogic?
-
-> "wifi may have dat1 interrupt coming in, without this the dat1
-> interrupt would be missed"
-
-I don't understand this sentence. W/o the interrupt coming in
-the interrupt would be missed? Can you explain it?
-
-> Supposedly this is fixed in their codebase.
-
-Which codebase do you mean? A specific vendor driver? Or firmware?
-
-> Unfortunately we were not able to find out more and can't prepare a
-> patch with a proper explanation.
-
-The workaround is rather simple, so we should add it.
-It's just unfortunate that we have no idea about the root cause of the issue.
-
-> Thank you for reviewing.
->>
->>> +     * To prevent this, recheck the IRQ_SDIO here and schedule
->>> +     * it to be processed.
->>> +     */
->>> +     raw_status = readl(host->regs + SD_EMMC_STATUS);
->>> +     status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
->>
->> This isn't needed here. Why not simply:
->>
->> status = readl(host->regs + SD_EMMC_STATUS);
->> if (status & IRQ_SDIO)
->>   ...
->>
->>
->>> +     if (status & IRQ_SDIO) {
->>> +             spin_lock(&host->lock);
->>> +             __meson_mmc_enable_sdio_irq(host->mmc, 0);
->>> +             sdio_signal_irq(host->mmc);
->>> +             spin_unlock(&host->lock);
->>> +     }
->>> +
->>>       return ret;
->>>  }
->>>
->>
-
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNaWNoYWVsIE5henphcmVubyBU
+cmltYXJjaGkgPG1pY2hhZWxAYW1hcnVsYXNvbHV0aW9ucy5jb20+DQo+IFNlbnQ6IDIwMjPlubQx
+5pyIOeaXpSAyMTowMg0KPiBUbzogQm91Z2ggQ2hlbiA8aGFpYm8uY2hlbkBueHAuY29tPjsgU2hh
+d24gR3VvIDxzaGF3bmd1b0BrZXJuZWwub3JnPjsNCj4gRmFiaW8gRXN0ZXZhbSA8ZmVzdGV2YW1A
+Z21haWwuY29tPjsgTEtNTCA8bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZz4NCj4gQ2M6IGxp
+bnV4LWFybS1rZXJuZWwgPGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZz47DQo+
+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IFVsZiBIYW5zc29uIDx1bGYuaGFuc3NvbkBsaW5h
+cm8ub3JnPg0KPiBTdWJqZWN0OiBOWFAgaW14NnVsbCBub25hbGlnbm1lbnQgYnVmZmVyIHF1ZXN0
+aW9uDQo+IA0KPiBIaSBIYWlibw0KPiANCj4gV29ya2luZyBvbiBpbXg2dWx6IGRlc2lnbiBhbmQg
+Zm91bmQgdGhhdCBpZiBJIHNlbmQgYSBzZGlvIHBhY2tldCB1c2luZyB0aGUNCj4gc2Rpb193cml0
+ZXNiIHRoZSBhZG1hIGRyaXZlciB0cmllcyB0byBoYW5kbGUgaXQgd2l0aCB0d28gZG1hIGRlc2Ny
+aXB0b3JzLiBUaGUNCj4gZmlyc3Qgb25lIGZpbGxlZCB3aXRoIHRoZSBieXRlcyB1cCB0byAzIHRv
+IGNvdmVyIHRoZSBtaXNhbGlnbiBhbmQgdGhlbiBhbm90aGVyDQo+IGJ1ZmZlciBkZXNjcmlwdG9y
+DQo+IA0KPiAgIG9mZnNldCA9IChTREhDSV9BRE1BMl9BTElHTiAtIChhZGRyICYgU0RIQ0lfQURN
+QTJfTUFTSykpICYNCj4gICAgICAgICAgICAgICAgICAgICAgICAgIFNESENJX0FETUEyX01BU0s7
+DQo+ICAgICAgICAgICAgICAgICBpZiAob2Zmc2V0KSB7DQo+ICAgICAgICAgICAgICAgICAgICAg
+ICAgIGlmIChkYXRhLT5mbGFncyAmIE1NQ19EQVRBX1dSSVRFKSB7DQo+ICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgYnVmZmVyID0gc2RoY2lfa21hcF9hdG9taWMoc2cpOw0KPiAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1lbWNweShhbGlnbiwgYnVmZmVyLCBvZmZzZXQp
+Ow0KPiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNkaGNpX2t1bm1hcF9hdG9taWMo
+YnVmZmVyKTsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiANCj4gICAgICAgICAgICAg
+ICAgICAgICAgICAgLyogdHJhbiwgdmFsaWQgKi8NCj4gICAgICAgICAgICAgICAgICAgICAgICAg
+X19zZGhjaV9hZG1hX3dyaXRlX2Rlc2MoaG9zdCwgJmRlc2MsDQo+IGFsaWduX2FkZHIsDQo+ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG9mZnNldCwNCj4g
+QURNQTJfVFJBTl9WQUxJRCk7DQo+IA0KPiAgICAgICAgICAgICAgICAgICAgICAgICBCVUdfT04o
+b2Zmc2V0ID4gNjU1MzYpOw0KPiANCj4gICAgICAgICAgICAgICAgICAgICAgICAgYWxpZ24gKz0g
+U0RIQ0lfQURNQTJfQUxJR047DQo+ICAgICAgICAgICAgICAgICAgICAgICAgIGFsaWduX2FkZHIg
+Kz0gU0RIQ0lfQURNQTJfQUxJR047DQo+IA0KPiAgICAgICAgICAgICAgICAgICAgICAgICBhZGRy
+ICs9IG9mZnNldDsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgbGVuIC09IG9mZnNldDsNCj4g
+ICAgICAgICAgICAgICAgIH0NCj4gDQo+IEluIDQ4LjcuNCBEYXRhIExlbmd0aCBTZXR0aW5nDQo+
+IEZvciBlaXRoZXIgQURNQSAoQURNQTEgb3IgQURNQTIpIHRyYW5zZmVyLCB0aGUgZGF0YSBpbiB0
+aGUgZGF0YSBidWZmZXIgbXVzdA0KPiBiZSB3b3JkIGFsaWduZWQsIHNvIHRoZSBkYXRhIGxlbmd0
+aCBzZXQgaW4gdGhlIGRlc2NyaXB0b3IgbXVzdCBiZSBhIG11bHRpcGxlIG9mIDQuDQo+IEkgaGF2
+ZSBub3RpY2VkIHRoYXQgdGhpcyBjb2RlIGRvZXMgbm90IHdvcmsgYXMgZXhwZWN0ZWQuDQoNCkhp
+IE1pY2hhZWwsDQoNCk15IHVuZGVyc3RhbmRpbmcgaXM6IGZvciB0aGUgc2VudGVuY2UgIiB0aGUg
+ZGF0YSBpbiB0aGUgZGF0YSBidWZmZXIgbXVzdCBiZSB3b3JkIGFsaWduZWQiLCB0aGlzIG1lYW5z
+IHRoZSBzdGFydCBhZGRyZXNzIG9mIHRoZSBkYXRhIG11c3QgYmUgd29yZCBhbGlnbmVkLCBidXQg
+bm90IGxpbWl0IHRoZSBkYXRhIGxlbmd0aC4NCg0KQmVzdCBSZWdhcmRzDQpIYWlibyBDaGVuDQo+
+IA0KPiBEaWQgeW91IGhhdmUgYW55IGZlZWRiYWNrPw0KPiANCj4gTWljaGFlbA0K
