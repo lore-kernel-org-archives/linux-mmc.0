@@ -2,116 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B42FC54EBD
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 10:07:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8381EC54EBE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 11:10:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240829AbjAMKHD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 05:07:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51146 "EHLO
+        id S241264AbjAMLKw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 06:10:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239755AbjAMKG5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 05:06:57 -0500
-Received: from wnew4-smtp.messagingengine.com (wnew4-smtp.messagingengine.com [64.147.123.18])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 186DC34D65;
-        Fri, 13 Jan 2023 02:06:56 -0800 (PST)
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
-        by mailnew.west.internal (Postfix) with ESMTP id 59F1E2B066ED;
-        Fri, 13 Jan 2023 05:06:53 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute6.internal (MEProxy); Fri, 13 Jan 2023 05:06:55 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:date:date:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to; s=fm2; t=1673604412; x=1673611612; bh=wiGd1poFqy
-        c19NDgfhWxoziS+5a2ezYepeVzBSacqw8=; b=jQa0HDmPBmL/FfJL+hgRmPsB40
-        Y3mC3xChdI36TABN4RG5b4ucaLsZc6+hC+19/zCIm4A4ie1QOoF7GdEwpLDXWLgg
-        YS7KkbMyef4z8Yilol0xjO/jcY2PDSzSOyaObnKUz9YejiKar9NRQ/48gMheN8SP
-        L9ydOdhClMFMN+laVtMxeJLlISQdpKBcfrhR3HNQLngArqhNZXfmj7B7QaV3Yjlc
-        q1pbz3p93X/orY60g/G7bg2Tiz9gOW8CeW5RhiSUeYXFN/oIPHXLd05ewSyQoczy
-        YcvZ76uBqZ6njLqUwdbbXb3on9pD3cxdKgfVZ0av7GSfMv1N46xG/nNSra4w==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:date:date:feedback-id
-        :feedback-id:from:from:in-reply-to:in-reply-to:message-id
-        :mime-version:references:reply-to:sender:subject:subject:to:to
-        :x-me-proxy:x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=
-        fm3; t=1673604412; x=1673611612; bh=wiGd1poFqyc19NDgfhWxoziS+5a2
-        ezYepeVzBSacqw8=; b=T9tKOcHloTqEvCQgyITgoeWHiCG023yZCoHB8GCNjjun
-        JWtWHvJqinTMKxNzOHfWFkde1UNzFYeNjWL4OYuUevGP5ZiDtpX0SAgeRoVmsRqT
-        4s4imE9aYV/f9Pvbl/xyCzDnDswOyuD8ceeVeSEppPmXeTdO2UYN2NW+SPkjkx6z
-        7AGNecW4IwYIR8h6khoClacES7xN1wBX6oY0XpQ9E/MHHJqDRpFMe5RHSjqUpFHQ
-        972R/sDnO/VHBlJ/MZtdHhD4RBw3rwTM6MhJr5iT0G2mUNkzC1EVZ0kt797d6W2S
-        fBdJ8aBi3uu6VLi/i8mbcHwOUByNIvAxQvGBru7fCg==
-X-ME-Sender: <xms:Oy3BY2x8u8jGs5oav_hETNuy2fGaBGNB7nGV00CwtVI39ajIhtTDrA>
-    <xme:Oy3BYyQeI43uOCS5CK49RFBPrQXLvgoH7jyxA1EWEhaXS1U_GFSXnUcOsyByJ4HxX
-    7ebslCPuxwL7F72QUk>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrleekgddtkecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecusecvtfgvtghiphhivghnthhsucdlqddutddtmdenuc
-    fjughrpefofgggkfgjfhffhffvvefutgesthdtredtreertdenucfhrhhomhepfdetrhhn
-    ugcuuegvrhhgmhgrnhhnfdcuoegrrhhnugesrghrnhgusgdruggvqeenucggtffrrghtth
-    gvrhhnpeffheeugeetiefhgeethfejgfdtuefggeejleehjeeutefhfeeggefhkedtkeet
-    ffenucevlhhushhtvghrufhiiigvpedtnecurfgrrhgrmhepmhgrihhlfhhrohhmpegrrh
-    hnugesrghrnhgusgdruggv
-X-ME-Proxy: <xmx:Oy3BY4WFmJ1Wzov0EgMi6qcJljjNqlgJoW7YxZYtni3we9ZcuZJC0Q>
-    <xmx:Oy3BY8jDZdOmomBzdPQYugeTKvRs2JAmwJR9qFQ78gYn6oU0QQd3og>
-    <xmx:Oy3BY4DQ3Zg11gEbb70JkOCpYbMnoYHqWtdB8svYNbX-CHCrZb2sRA>
-    <xmx:PC3BYzV0__Pe1Lv9Yq1qvCTC7InwXhC6SGzQNcMq4ULKQsDh2lBDrgxrUdU>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id B041DB60086; Fri, 13 Jan 2023 05:06:51 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.7.0-alpha0-1185-g841157300a-fm-20221208.002-g84115730
-Mime-Version: 1.0
-Message-Id: <d9c2f760-283b-483c-8512-fdd2c372f26c@app.fastmail.com>
-In-Reply-To: <CAMuHMdXYt4dNHUDsTnPa-RP+sdK=35nNa9xQzMChwK54qO44mA@mail.gmail.com>
-References: <20230113062339.1909087-1-hch@lst.de>
- <20230113062339.1909087-12-hch@lst.de>
- <CAMuHMdXYt4dNHUDsTnPa-RP+sdK=35nNa9xQzMChwK54qO44mA@mail.gmail.com>
-Date:   Fri, 13 Jan 2023 11:06:22 +0100
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Geert Uytterhoeven" <geert@linux-m68k.org>,
-        "Christoph Hellwig" <hch@lst.de>
-Cc:     "Yoshinori Sato" <ysato@users.sourceforge.jp>,
-        "Rich Felker" <dalias@libc.org>,
-        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
-        "laurent.pinchart" <laurent.pinchart@ideasonboard.com>,
-        "Kieran Bingham" <kieran.bingham+renesas@ideasonboard.com>,
-        "Geert Uytterhoeven" <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org,
-        Linux-Arch <linux-arch@vger.kernel.org>,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        Linux-Renesas <linux-renesas-soc@vger.kernel.org>,
-        linux-i2c@vger.kernel.org, linux-input@vger.kernel.org,
-        linux-media@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-mtd@lists.infradead.org, Netdev <netdev@vger.kernel.org>,
-        "open list:GPIO SUBSYSTEM" <linux-gpio@vger.kernel.org>,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-Subject: Re: [PATCH 11/22] mtd/nand: remove sh_flctl
-Content-Type: text/plain
+        with ESMTP id S235451AbjAMLKG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 06:10:06 -0500
+Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C2BB77D00
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2023 03:00:34 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1673607634; x=1705143634;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=PhUkN5oucAg/07QwPkqu0Gym4V2o+lKjNBj00duXY4Y=;
+  b=PeqWWa4xG9fX8V1NZj7phc7XRrlJPo/khT8+OrM1wT9QdiSy6x2fAcNt
+   ZlI9Cn5U1q4gLT07iDBGRe+/C39zsb4jGDZmxkCQLU2NGN8ZCsHufxI3U
+   ek6V360gP8iRnuXQHUQwH3JB1N9wdfBtONvEAk51fQX/YhtCq2ZL9OPjs
+   frOkk1sqciHYEU6EFGqhWlmTJZp902bjcxgYcVDDcoaWdTM3gbBg2J4g4
+   r5mhdjr6ISEOMyXqhoq/ovXrpv+N8TO8pblyU2Ali20+C8QDd5+fkG9n8
+   /1pDTCa1VmgRbSLle4KZcoKdVGi3WPIy9SYwrwQOstepBz7P4um0/npBT
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10588"; a="322668271"
+X-IronPort-AV: E=Sophos;i="5.97,213,1669104000"; 
+   d="scan'208";a="322668271"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jan 2023 03:00:34 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10588"; a="690471609"
+X-IronPort-AV: E=Sophos;i="5.97,213,1669104000"; 
+   d="scan'208";a="690471609"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO ahunter-VirtualBox.home\044ger.corp.intel.com) ([10.252.38.178])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 13 Jan 2023 03:00:29 -0800
+From:   Adrian Hunter <adrian.hunter@intel.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Kamal Dasu <kdasu.kdev@gmail.com>, Al Cooper <alcooperx@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Baolin Wang <baolin.wang@linux.alibaba.com>,
+        Chunyan Zhang <zhang.lyra@gmail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
+Subject: [PATCH 0/6] mmc: sdhci: Remove SDHCI_QUIRK_MISSING_CAPS
+Date:   Fri, 13 Jan 2023 13:00:05 +0200
+Message-Id: <20230113110011.129835-1-adrian.hunter@intel.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki, Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Jan 13, 2023, at 09:30, Geert Uytterhoeven wrote:
-> On Fri, Jan 13, 2023 at 7:24 AM Christoph Hellwig <hch@lst.de> wrote:
->> Now that arch/sh is removed this driver is dead code.
->
-> FTR, this hardware block is also present on the ARM-based
-> SH-Mobile AG5 and R-Mobile A1 SoCs.
-> Again, no DT support.
+Hi
 
-I would generally consider drivers dead when they have no DT support
-and no platform in the upstream kernel registering the corresponding
-device.
+This patch set is to remove SDHCI_QUIRK_MISSING_CAPS.
 
-If anyone still uses this driver on SH-Mobile or R-Mobile, they
-have clearly given up on upstreaming their patches by now, and
-they can carry the burden of maintaining the driver out of tree,
-or re-submit a working version.
+SDHCI_QUIRK_MISSING_CAPS is not needed because __sdhci_read_caps() can be
+called instead.
 
-    Arnd
+__sdhci_read_caps() is also called from sdhci_setup_host() via
+sdhci_read_caps(), however only the first call to __sdhci_read_caps() does
+anything because after that host->read_caps has been set to true.
+
+Note, __sdhci_read_caps() does more than just set host->caps, such as do a
+reset, so calling __sdhci_read_caps() earlier could have unforeseen
+side-effects. However code flow has been reviewed with that in mind.
+
+
+Adrian Hunter (6):
+      mmc: sdhci-pci: Replace SDHCI_QUIRK_MISSING_CAPS for Ricoh controller
+      mmc: sdhci-brcmstb: Replace SDHCI_QUIRK_MISSING_CAPS
+      mmc: sdhci-sprd: Replace SDHCI_QUIRK_MISSING_CAPS
+      mmc: sdhci-pxav3: Replace SDHCI_QUIRK_MISSING_CAPS
+      mmc: sdhci-iproc: Replace SDHCI_QUIRK_MISSING_CAPS
+      mmc: sdhci: Remove SDHCI_QUIRK_MISSING_CAPS
+
+ drivers/mmc/host/sdhci-brcmstb.c  |  4 +---
+ drivers/mmc/host/sdhci-iproc.c    | 14 ++++++++------
+ drivers/mmc/host/sdhci-pci-core.c |  8 +++++---
+ drivers/mmc/host/sdhci-pxav3.c    |  4 +---
+ drivers/mmc/host/sdhci-sprd.c     |  6 ++----
+ drivers/mmc/host/sdhci.c          |  3 ---
+ drivers/mmc/host/sdhci.h          |  2 --
+ 7 files changed, 17 insertions(+), 24 deletions(-)
+
+
+Regards
+Adrian
