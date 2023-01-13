@@ -2,98 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B29CCC3DA78
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 18:37:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8A3EC678DC
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 18:59:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230310AbjAMShg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 13:37:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44772 "EHLO
+        id S230331AbjAMS76 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 13:59:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231246AbjAMShL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 13:37:11 -0500
-Received: from mail-qt1-x830.google.com (mail-qt1-x830.google.com [IPv6:2607:f8b0:4864:20::830])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BDB5FD3E
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2023 10:36:02 -0800 (PST)
-Received: by mail-qt1-x830.google.com with SMTP id fa5so14379912qtb.11
-        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2023 10:36:02 -0800 (PST)
+        with ESMTP id S230321AbjAMS7y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 13:59:54 -0500
+Received: from mail-oo1-xc34.google.com (mail-oo1-xc34.google.com [IPv6:2607:f8b0:4864:20::c34])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4E2D0568A6
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2023 10:59:50 -0800 (PST)
+Received: by mail-oo1-xc34.google.com with SMTP id y4-20020a4ab404000000b004f21c72be42so2512379oon.8
+        for <linux-mmc@vger.kernel.org>; Fri, 13 Jan 2023 10:59:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
+        d=landley-net.20210112.gappssmtp.com; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=rNFud20e/3X8l4IrIk41AXrLge0+yDw/l7DVnbmsMbk=;
-        b=e3zlcmT/ITzizAd0ZpnXmSCq615qTc1feeeGrfHE7gGsT3pQQ9UL1aZtujVq/swCOF
-         NLvW+X4MOWFXhqVbaQEqbP/IhqakO2SEs3BrcgNdTr4JmAWMSsAd/wMDmgQSQIVcRmSz
-         sXnTwK6OHdeMxDdjoayUjOojr9pP7bpxcknb5eg2q1ZCyIzIEx+uO+anbzzOF1YNMmoL
-         sCJpWZUIlyrVNxiBCdkihLqInMluSnWAGhLWKx96aMTg9aWnmFaeHHr+vNBY+NGwgVbB
-         b8qCIJF4bjAHD0Dm470903ha1bLhAhTZqc2CqavYIAxRsOhoPHrzx1oR/AKmK2rKEDD/
-         zp2g==
+        bh=bTIDomgS8mXkDJCvxm5Zm+LjWmMOagP4MCI8VhlfZ4M=;
+        b=PS9bts8WEYUdHc2dq03MseWIdo5SmkGasWJ1IHK/82VNd2x1nauvFpnIRKJHReewV4
+         qHgmemCtG+n4JzEug1j/TkXXGr7XuvlNF4IBzbNfnN6lagwFrOKhEymKlD3N/LDBaGvv
+         sKYDqBaLKXsSv5VTvSWrpB1Ro6mV2B1zSTvwS3WrXPPhGJgdWKpIwnEsYL1x49CphPxG
+         SL4YOgYdR5jGUY39ZZius3Ig7i4WfTYOC67k8Vh1lto4GbCgV9uKa97KEalM5EmLMGPn
+         3yGQHE93+pmLVFjd1TlIZLJrfjBmFeNgyn5vD6/2wKe8LZIYKJC7joRnrftdzonfyS0K
+         +t4Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=rNFud20e/3X8l4IrIk41AXrLge0+yDw/l7DVnbmsMbk=;
-        b=xR6lhJsS/XIt+QmpNEy4f69OpZM13OkD+rKnfYfgkImtEPc07dwcEXdp1h/k88AdGP
-         Mz164ussCxrUuHy/F+sU5fncIjYMwDsJRLWFD0I+m4c8VugHJ56utraHf+BZEG1tkn/2
-         qyXgmSZ4D4Bgal2pzV4WylpeSkeDCvONItg6HDy6SifRzjNhKHBP64iEBXj0/ec1QGiF
-         XAk8O0Qf2HuiLzaOlEVX3joXR8NKF1Lx6cj/gbkgx7yaPsmJWZaM7Ha/lz385fvem9PC
-         VWOyZGysmSdiqTHDkrBMonXkWluDEPPI3ep2EpmGqXuwYxN0CXRl1ll4nIOyZKNatemA
-         /2kg==
-X-Gm-Message-State: AFqh2krTpVRMrwqgENWozonBLHigIHdw7EucCoECVF8r/Gz+8KyxC6q+
-        3u85Z0mfZUndX3aMU6lud+w=
-X-Google-Smtp-Source: AMrXdXvkbzq7aNkoESIqD6oW64S94aSY5beB318Dgv8G8AYz30MXQsgrP6jycn2/nGE6J7/ZvE6qSg==
-X-Received: by 2002:a05:622a:1e14:b0:3ab:ceb9:10fd with SMTP id br20-20020a05622a1e1400b003abceb910fdmr48288020qtb.25.1673634961490;
-        Fri, 13 Jan 2023 10:36:01 -0800 (PST)
-Received: from [10.67.48.245] ([192.19.223.252])
-        by smtp.googlemail.com with ESMTPSA id fe13-20020a05622a4d4d00b003a580cd979asm11010388qtb.58.2023.01.13.10.35.55
+        bh=bTIDomgS8mXkDJCvxm5Zm+LjWmMOagP4MCI8VhlfZ4M=;
+        b=A5vsKWlzncxRO/axFQxbm5VAdFFt2VDiAMIbf4oDTUmqG5k0o6CdUi8lPTIwwIUDkB
+         Wt059cKLtJM8+5b1ldmNL47tJHq0sv4PQXR28xHV+cIUdAX/cH7moa3WkPXBAOOOmV5Y
+         JT4VPr+nmMHxAbPbiHXjwLdo616OJQPhQm2lPpGVd33wVEspSn71Pg9nLjnVGuKZer0D
+         IPfu6dugBJWRQSCQJNEcQ3kTtV1o6qDHRoInVoIOgUNo1/qGoR+caODlaNUZM0XedqbQ
+         bwImlunuzjDkAy1r1XTEOLoanVL5FdbJONrOIw7cTqbKZ7EO6kM7xUmnhNCln90IeHTY
+         s4xg==
+X-Gm-Message-State: AFqh2kog3ngDOKoUlVC6SGqfkfpYSSpdwUR0njIBZ7BvNvDKEbvbRy8O
+        ut+Ql5lz/bCNKL/jzHUfJ5dTlA==
+X-Google-Smtp-Source: AMrXdXvaOiO0G10Az4EGLc64Vx6N+KrZr3PuLGXv0M+M3iF7lrA3WUc8R2fIq6AYtp8ZC6Mk4E9lCQ==
+X-Received: by 2002:a4a:c594:0:b0:4e7:5d43:a654 with SMTP id x20-20020a4ac594000000b004e75d43a654mr22358114oop.0.1673636389556;
+        Fri, 13 Jan 2023 10:59:49 -0800 (PST)
+Received: from [192.168.86.224] ([136.62.38.22])
+        by smtp.gmail.com with ESMTPSA id bc31-20020a056820169f00b0049f8b4b2095sm10111163oob.44.2023.01.13.10.59.47
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 13 Jan 2023 10:36:01 -0800 (PST)
-Message-ID: <21e1121b-1ba0-8765-1684-cacab72c4ebb@gmail.com>
-Date:   Fri, 13 Jan 2023 10:35:52 -0800
+        Fri, 13 Jan 2023 10:59:48 -0800 (PST)
+Message-ID: <6891afb6-4190-6a52-0319-745b3f138d97@landley.net>
+Date:   Fri, 13 Jan 2023 13:11:56 -0600
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-Subject: Re: [PATCH 2/6] mmc: sdhci-brcmstb: Replace SDHCI_QUIRK_MISSING_CAPS
+ Thunderbird/102.5.0
+Subject: Re: remove arch/sh
 Content-Language: en-US
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Kamal Dasu <kdasu.kdev@gmail.com>, Al Cooper <alcooperx@gmail.com>,
-        Orson Zhai <orsonzhai@gmail.com>,
-        Baolin Wang <baolin.wang@linux.alibaba.com>,
-        Chunyan Zhang <zhang.lyra@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        Jisheng Zhang <jszhang@kernel.org>,
-        Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
-References: <20230113110011.129835-1-adrian.hunter@intel.com>
- <20230113110011.129835-3-adrian.hunter@intel.com>
-From:   Florian Fainelli <f.fainelli@gmail.com>
-In-Reply-To: <20230113110011.129835-3-adrian.hunter@intel.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+To:     John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
+        Geert Uytterhoeven <geert@linux-m68k.org>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-sh@vger.kernel.org
+References: <20230113062339.1909087-1-hch@lst.de>
+ <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
+ <CAMuHMdUcnP6a9Ch5=_CMPq-io-YWK5pshkOT2nZmP1hvNcwBAg@mail.gmail.com>
+ <142532fb-5997-bdc1-0811-a80ae33f4ba4@physik.fu-berlin.de>
+From:   Rob Landley <rob@landley.net>
+In-Reply-To: <142532fb-5997-bdc1-0811-a80ae33f4ba4@physik.fu-berlin.de>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/13/23 03:00, Adrian Hunter wrote:
-> SDHCI_QUIRK_MISSING_CAPS is not needed because sdhci_read_caps() can be
-> called instead.
+On 1/13/23 02:52, John Paul Adrian Glaubitz wrote:
+> Hi Geert!
 > 
-> In preparation to get rid of SDHCI_QUIRK_MISSING_CAPS, replace
-> SDHCI_QUIRK_MISSING_CAPS with sdhci_read_caps().
+> On 1/13/23 09:26, Geert Uytterhoeven wrote:
+>> Indeed.  The main issue is not the lack of people sending patches and
+>> fixes, but those patches never being applied by the maintainers.
+>> Perhaps someone is willing to stand up to take over maintainership?
 > 
-> __sdhci_read_caps() is also called from sdhci_setup_host() via
-> sdhci_read_caps(), however only the first call to __sdhci_read_caps() does
-> anything because after that host->read_caps has been set to true.
-> 
-> Note, __sdhci_read_caps() does more than just set host->caps, such as do a
-> reset, so calling __sdhci_read_caps() earlier could have unforeseen
-> side-effects. However the code flow has been reviewed with that in mind.
-> 
-> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
+> I actually would be willing to do it but I'm a bit hesitant as I'm not 100%
+> sure my skills are sufficient. Maybe if someone can assist me?
 
-Reviwed-by: Florian Fainelli <f.fainelli@gmail.com>
--- 
-Florian
+My skills aren't sufficient and I dunno how much time I have, but I can
+certainly assist. I test sh4 regularlyish and it's in the list of architectures
+I ship binaries and tiny VM images for, just refreshed tuesday:
 
+https://landley.net/toybox/downloads/binaries/0.8.9/
+https://landley.net/toybox/downloads/binaries/mkroot/0.8.9/
+
+(The sh2eb isn't a VM, it's a physical board I have here...)
+
+There is definitely interest in this architecture. I'm aware Rich hasn't been
+the most responsive maintainer. (I'm told he's on vacation with his family at
+the moment, according to the text I got about this issue from the J-core
+hardware guys in Japan.)
+
+The main reason we haven't converted everything to device tree is we only have
+access to test hardware for a subset of the boards. Pruning the list of
+supported boards and converting the rest to device tree might make sense. We can
+always add/convert boards back later...
+
+Rob
