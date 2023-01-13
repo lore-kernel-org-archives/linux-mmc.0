@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E6458C678D6
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:30:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FED9C54EBD
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:30:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241374AbjAMGah (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 01:30:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33438 "EHLO
+        id S241390AbjAMGat (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 01:30:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37566 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235576AbjAMG1H (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:27:07 -0500
+        with ESMTP id S240753AbjAMG0t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:26:49 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 505765C1CD;
-        Thu, 12 Jan 2023 22:25:08 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 873DE5BA14;
+        Thu, 12 Jan 2023 22:24:57 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=mVSad5lHjsb+kxcSGYOjz7Q3t7OZ/7w3LWvLI7wl90c=; b=dTK4NKZNZ24B+Iy3vetLl8In0m
-        6QyXKjhgkJrMmLcUyhOZKbm0vIupFnylr7pYV8S2hu8IL5FEJ97IN1LaPho1YjqLe7sI4/ONQJffd
-        HrN4knY96XfBH5Dg16XcB4D80tb+duR4+tun9eS3VUi93MmJDYYqXUhNRhigBMvcX6O86ZVpgYnP0
-        Oxo0qqd0c7Q9G2IGb9v1zvuuBflZwymgNPjOxWZjze2G/7PRQRiTyI0cvMRK8B8AtZNO1IocwGSOj
-        LywcuT2MFfxcH/2VNQ6voqoVr4Z3t4S8OtiyGNcDIfWd6cbKEA49ubHxa8fQ7cQSeujuP6MMQBLYI
-        oC2zjRYw==;
+        bh=iukbm4IkjfomIK3EfPQb3pM2uZtgleJjPX7CiCdGPsw=; b=bctQ26YIIgDNETWqWEH1faeoiC
+        5ktgEfTapXGrurmR9U4e7rnZhY6Cwur/HNcTFDEguI7nrrjhQMk5LJZRnXQk/Lh/SgAsj5oUR1cNC
+        6SWrceAqwQKLhXM4b9+5hQvSpMqgJj6Fi1i/TaketNXyVfW/AwoYVQnx70z7dzq4fJub9GsHbuyZ5
+        HDmhDiNuu8m8OdZDuEJyIrydgrmSdNheR0U9+6Rotsg72jUQftqVDSCn6tM1GTULxOLQT60TelhnY
+        qeYO2LcPFeCb7ZL/Bxwy4AWEhdIRBjlajWtTjxyUMXW5KzAfXsUm2V07QOaprHacrHX0gFnJIBipd
+        ZAhGSquQ==;
 Received: from [2001:4bb8:181:656b:9509:7d20:8d39:f895] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pGDUi-000m58-BO; Fri, 13 Jan 2023 06:24:53 +0000
+        id 1pGDUZ-000lye-Sk; Fri, 13 Jan 2023 06:24:44 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Yoshinori Sato <ysato@users.sourceforge.jp>,
         Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
@@ -45,9 +45,9 @@ Cc:     Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
         linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
         linux-sh@vger.kernel.org
-Subject: [PATCH 20/22] media: remove sh_vou
-Date:   Fri, 13 Jan 2023 07:23:37 +0100
-Message-Id: <20230113062339.1909087-21-hch@lst.de>
+Subject: [PATCH 17/22] spi: remove spi-jcore
+Date:   Fri, 13 Jan 2023 07:23:34 +0100
+Message-Id: <20230113062339.1909087-18-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230113062339.1909087-1-hch@lst.de>
 References: <20230113062339.1909087-1-hch@lst.de>
@@ -62,1422 +62,283 @@ Now that arch/sh is removed this driver is dead code.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- drivers/media/platform/renesas/Kconfig  |    9 -
- drivers/media/platform/renesas/Makefile |    1 -
- drivers/media/platform/renesas/sh_vou.c | 1375 -----------------------
- 3 files changed, 1385 deletions(-)
- delete mode 100644 drivers/media/platform/renesas/sh_vou.c
+ drivers/spi/Kconfig     |   7 --
+ drivers/spi/Makefile    |   1 -
+ drivers/spi/spi-jcore.c | 235 ----------------------------------------
+ 3 files changed, 243 deletions(-)
+ delete mode 100644 drivers/spi/spi-jcore.c
 
-diff --git a/drivers/media/platform/renesas/Kconfig b/drivers/media/platform/renesas/Kconfig
-index 0231672a7e1c32..935b24b864380e 100644
---- a/drivers/media/platform/renesas/Kconfig
-+++ b/drivers/media/platform/renesas/Kconfig
-@@ -31,15 +31,6 @@ config VIDEO_RCAR_ISP
- 	  To compile this driver as a module, choose M here: the
- 	  module will be called rcar-isp.
+diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
+index 76f3bc6f8c81fc..17c75f5c19be75 100644
+--- a/drivers/spi/Kconfig
++++ b/drivers/spi/Kconfig
+@@ -483,13 +483,6 @@ config SPI_INTEL_PLATFORM
+ 	  To compile this driver as a module, choose M here: the module
+ 	  will be called spi-intel-platform.
  
--config VIDEO_SH_VOU
--	tristate "SuperH VOU video output driver"
--	depends on V4L_PLATFORM_DRIVERS
--	depends on VIDEO_DEV && I2C
--	depends on ARCH_SHMOBILE || COMPILE_TEST
--	select VIDEOBUF2_DMA_CONTIG
+-config SPI_JCORE
+-	tristate "J-Core SPI Master"
+-	depends on OF && (SUPERH || COMPILE_TEST)
 -	help
--	  Support for the Video Output Unit (VOU) on SuperH SoCs.
+-	  This enables support for the SPI master controller in the J-Core
+-	  synthesizable, open source SoC.
 -
- source "drivers/media/platform/renesas/rcar-vin/Kconfig"
- source "drivers/media/platform/renesas/rzg2l-cru/Kconfig"
- 
-diff --git a/drivers/media/platform/renesas/Makefile b/drivers/media/platform/renesas/Makefile
-index 55854e8688870f..1ae7d825073df3 100644
---- a/drivers/media/platform/renesas/Makefile
-+++ b/drivers/media/platform/renesas/Makefile
-@@ -13,4 +13,3 @@ obj-$(CONFIG_VIDEO_RENESAS_CEU) += renesas-ceu.o
- obj-$(CONFIG_VIDEO_RENESAS_FCP) += rcar-fcp.o
- obj-$(CONFIG_VIDEO_RENESAS_FDP1) += rcar_fdp1.o
- obj-$(CONFIG_VIDEO_RENESAS_JPU) += rcar_jpu.o
--obj-$(CONFIG_VIDEO_SH_VOU) += sh_vou.o
-diff --git a/drivers/media/platform/renesas/sh_vou.c b/drivers/media/platform/renesas/sh_vou.c
+ config SPI_LM70_LLP
+ 	tristate "Parallel port adapter for LM70 eval board (DEVELOPMENT)"
+ 	depends on PARPORT
+diff --git a/drivers/spi/Makefile b/drivers/spi/Makefile
+index 27d877440c6539..2d03fcefc11ea2 100644
+--- a/drivers/spi/Makefile
++++ b/drivers/spi/Makefile
+@@ -67,7 +67,6 @@ obj-$(CONFIG_SPI_INTEL)			+= spi-intel.o
+ obj-$(CONFIG_SPI_INTEL_PCI)		+= spi-intel-pci.o
+ obj-$(CONFIG_SPI_INTEL_PLATFORM)	+= spi-intel-platform.o
+ obj-$(CONFIG_SPI_LANTIQ_SSC)		+= spi-lantiq-ssc.o
+-obj-$(CONFIG_SPI_JCORE)			+= spi-jcore.o
+ obj-$(CONFIG_SPI_LM70_LLP)		+= spi-lm70llp.o
+ obj-$(CONFIG_SPI_LP8841_RTC)		+= spi-lp8841-rtc.o
+ obj-$(CONFIG_SPI_MESON_SPICC)		+= spi-meson-spicc.o
+diff --git a/drivers/spi/spi-jcore.c b/drivers/spi/spi-jcore.c
 deleted file mode 100644
-index ca4310e26c49ee..00000000000000
---- a/drivers/media/platform/renesas/sh_vou.c
+index 74c8319c29f170..00000000000000
+--- a/drivers/spi/spi-jcore.c
 +++ /dev/null
-@@ -1,1375 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0
+@@ -1,235 +0,0 @@
+-// SPDX-License-Identifier: GPL-2.0-only
 -/*
-- * SuperH Video Output Unit (VOU) driver
+- * J-Core SPI controller driver
 - *
-- * Copyright (C) 2010, Guennadi Liakhovetski <g.liakhovetski@gmx.de>
+- * Copyright (C) 2012-2016 Smart Energy Instruments, Inc.
+- *
+- * Current version by Rich Felker
+- * Based loosely on initial version by Oleksandr G Zhadan
+- *
 - */
--
--#include <linux/dma-mapping.h>
--#include <linux/delay.h>
--#include <linux/errno.h>
--#include <linux/fs.h>
--#include <linux/i2c.h>
 -#include <linux/init.h>
 -#include <linux/interrupt.h>
--#include <linux/kernel.h>
--#include <linux/platform_device.h>
--#include <linux/pm_runtime.h>
--#include <linux/slab.h>
--#include <linux/videodev2.h>
+-#include <linux/errno.h>
 -#include <linux/module.h>
+-#include <linux/platform_device.h>
+-#include <linux/spi/spi.h>
+-#include <linux/clk.h>
+-#include <linux/err.h>
+-#include <linux/io.h>
+-#include <linux/of.h>
+-#include <linux/delay.h>
 -
--#include <media/drv-intf/sh_vou.h>
--#include <media/v4l2-common.h>
--#include <media/v4l2-device.h>
--#include <media/v4l2-ioctl.h>
--#include <media/v4l2-mediabus.h>
--#include <media/videobuf2-v4l2.h>
--#include <media/videobuf2-dma-contig.h>
+-#define DRV_NAME	"jcore_spi"
 -
--/* Mirror addresses are not available for all registers */
--#define VOUER	0
--#define VOUCR	4
--#define VOUSTR	8
--#define VOUVCR	0xc
--#define VOUISR	0x10
--#define VOUBCR	0x14
--#define VOUDPR	0x18
--#define VOUDSR	0x1c
--#define VOUVPR	0x20
--#define VOUIR	0x24
--#define VOUSRR	0x28
--#define VOUMSR	0x2c
--#define VOUHIR	0x30
--#define VOUDFR	0x34
--#define VOUAD1R	0x38
--#define VOUAD2R	0x3c
--#define VOUAIR	0x40
--#define VOUSWR	0x44
--#define VOURCR	0x48
--#define VOURPR	0x50
+-#define CTRL_REG	0x0
+-#define DATA_REG	0x4
 -
--enum sh_vou_status {
--	SH_VOU_IDLE,
--	SH_VOU_INITIALISING,
--	SH_VOU_RUNNING,
--};
+-#define JCORE_SPI_CTRL_XMIT		0x02
+-#define JCORE_SPI_STAT_BUSY		0x02
+-#define JCORE_SPI_CTRL_LOOP		0x08
+-#define JCORE_SPI_CTRL_CS_BITS		0x15
 -
--#define VOU_MIN_IMAGE_WIDTH	16
--#define VOU_MAX_IMAGE_WIDTH	720
--#define VOU_MIN_IMAGE_HEIGHT	16
+-#define JCORE_SPI_WAIT_RDY_MAX_LOOP	2000000
 -
--struct sh_vou_buffer {
--	struct vb2_v4l2_buffer vb;
--	struct list_head list;
--};
--
--static inline struct
--sh_vou_buffer *to_sh_vou_buffer(struct vb2_v4l2_buffer *vb2)
--{
--	return container_of(vb2, struct sh_vou_buffer, vb);
--}
--
--struct sh_vou_device {
--	struct v4l2_device v4l2_dev;
--	struct video_device vdev;
--	struct sh_vou_pdata *pdata;
--	spinlock_t lock;
+-struct jcore_spi {
+-	struct spi_master *master;
 -	void __iomem *base;
--	/* State information */
--	struct v4l2_pix_format pix;
--	struct v4l2_rect rect;
--	struct list_head buf_list;
--	v4l2_std_id std;
--	int pix_idx;
--	struct vb2_queue queue;
--	struct sh_vou_buffer *active;
--	enum sh_vou_status status;
--	unsigned sequence;
--	struct mutex fop_lock;
+-	unsigned int cs_reg;
+-	unsigned int speed_reg;
+-	unsigned int speed_hz;
+-	unsigned int clock_freq;
 -};
 -
--/* Register access routines for sides A, B and mirror addresses */
--static void sh_vou_reg_a_write(struct sh_vou_device *vou_dev, unsigned int reg,
--			       u32 value)
+-static int jcore_spi_wait(void __iomem *ctrl_reg)
 -{
--	__raw_writel(value, vou_dev->base + reg);
+-	unsigned timeout = JCORE_SPI_WAIT_RDY_MAX_LOOP;
+-
+-	do {
+-		if (!(readl(ctrl_reg) & JCORE_SPI_STAT_BUSY))
+-			return 0;
+-		cpu_relax();
+-	} while (--timeout);
+-
+-	return -EBUSY;
 -}
 -
--static void sh_vou_reg_ab_write(struct sh_vou_device *vou_dev, unsigned int reg,
--				u32 value)
+-static void jcore_spi_program(struct jcore_spi *hw)
 -{
--	__raw_writel(value, vou_dev->base + reg);
--	__raw_writel(value, vou_dev->base + reg + 0x1000);
+-	void __iomem *ctrl_reg = hw->base + CTRL_REG;
+-
+-	if (jcore_spi_wait(ctrl_reg))
+-		dev_err(hw->master->dev.parent,
+-			"timeout waiting to program ctrl reg.\n");
+-
+-	writel(hw->cs_reg | hw->speed_reg, ctrl_reg);
 -}
 -
--static void sh_vou_reg_m_write(struct sh_vou_device *vou_dev, unsigned int reg,
--			       u32 value)
+-static void jcore_spi_chipsel(struct spi_device *spi, bool value)
 -{
--	__raw_writel(value, vou_dev->base + reg + 0x2000);
+-	struct jcore_spi *hw = spi_master_get_devdata(spi->master);
+-	u32 csbit = 1U << (2 * spi->chip_select);
+-
+-	dev_dbg(hw->master->dev.parent, "chipselect %d\n", spi->chip_select);
+-
+-	if (value)
+-		hw->cs_reg |= csbit;
+-	else
+-		hw->cs_reg &= ~csbit;
+-
+-	jcore_spi_program(hw);
 -}
 -
--static u32 sh_vou_reg_a_read(struct sh_vou_device *vou_dev, unsigned int reg)
+-static void jcore_spi_baudrate(struct jcore_spi *hw, int speed)
 -{
--	return __raw_readl(vou_dev->base + reg);
+-	if (speed == hw->speed_hz)
+-		return;
+-	hw->speed_hz = speed;
+-	if (speed >= hw->clock_freq / 2)
+-		hw->speed_reg = 0;
+-	else
+-		hw->speed_reg = ((hw->clock_freq / 2 / speed) - 1) << 27;
+-	jcore_spi_program(hw);
+-	dev_dbg(hw->master->dev.parent, "speed=%d reg=0x%x\n",
+-		speed, hw->speed_reg);
 -}
 -
--static void sh_vou_reg_a_set(struct sh_vou_device *vou_dev, unsigned int reg,
--			     u32 value, u32 mask)
+-static int jcore_spi_txrx(struct spi_master *master, struct spi_device *spi,
+-			  struct spi_transfer *t)
 -{
--	u32 old = __raw_readl(vou_dev->base + reg);
+-	struct jcore_spi *hw = spi_master_get_devdata(master);
 -
--	value = (value & mask) | (old & ~mask);
--	__raw_writel(value, vou_dev->base + reg);
--}
+-	void __iomem *ctrl_reg = hw->base + CTRL_REG;
+-	void __iomem *data_reg = hw->base + DATA_REG;
+-	u32 xmit;
 -
--static void sh_vou_reg_b_set(struct sh_vou_device *vou_dev, unsigned int reg,
--			     u32 value, u32 mask)
--{
--	sh_vou_reg_a_set(vou_dev, reg + 0x1000, value, mask);
--}
+-	/* data buffers */
+-	const unsigned char *tx;
+-	unsigned char *rx;
+-	unsigned int len;
+-	unsigned int count;
 -
--static void sh_vou_reg_ab_set(struct sh_vou_device *vou_dev, unsigned int reg,
--			      u32 value, u32 mask)
--{
--	sh_vou_reg_a_set(vou_dev, reg, value, mask);
--	sh_vou_reg_b_set(vou_dev, reg, value, mask);
--}
+-	jcore_spi_baudrate(hw, t->speed_hz);
 -
--struct sh_vou_fmt {
--	u32		pfmt;
--	unsigned char	bpp;
--	unsigned char	bpl;
--	unsigned char	rgb;
--	unsigned char	yf;
--	unsigned char	pkf;
--};
+-	xmit = hw->cs_reg | hw->speed_reg | JCORE_SPI_CTRL_XMIT;
+-	tx = t->tx_buf;
+-	rx = t->rx_buf;
+-	len = t->len;
 -
--/* Further pixel formats can be added */
--static struct sh_vou_fmt vou_fmt[] = {
--	{
--		.pfmt	= V4L2_PIX_FMT_NV12,
--		.bpp	= 12,
--		.bpl	= 1,
--		.yf	= 0,
--		.rgb	= 0,
--	},
--	{
--		.pfmt	= V4L2_PIX_FMT_NV16,
--		.bpp	= 16,
--		.bpl	= 1,
--		.yf	= 1,
--		.rgb	= 0,
--	},
--	{
--		.pfmt	= V4L2_PIX_FMT_RGB24,
--		.bpp	= 24,
--		.bpl	= 3,
--		.pkf	= 2,
--		.rgb	= 1,
--	},
--	{
--		.pfmt	= V4L2_PIX_FMT_RGB565,
--		.bpp	= 16,
--		.bpl	= 2,
--		.pkf	= 3,
--		.rgb	= 1,
--	},
--	{
--		.pfmt	= V4L2_PIX_FMT_RGB565X,
--		.bpp	= 16,
--		.bpl	= 2,
--		.pkf	= 3,
--		.rgb	= 1,
--	},
--};
+-	for (count = 0; count < len; count++) {
+-		if (jcore_spi_wait(ctrl_reg))
+-			break;
 -
--static void sh_vou_schedule_next(struct sh_vou_device *vou_dev,
--				 struct vb2_v4l2_buffer *vbuf)
--{
--	dma_addr_t addr1, addr2;
+-		writel(tx ? *tx++ : 0, data_reg);
+-		writel(xmit, ctrl_reg);
 -
--	addr1 = vb2_dma_contig_plane_dma_addr(&vbuf->vb2_buf, 0);
--	switch (vou_dev->pix.pixelformat) {
--	case V4L2_PIX_FMT_NV12:
--	case V4L2_PIX_FMT_NV16:
--		addr2 = addr1 + vou_dev->pix.width * vou_dev->pix.height;
--		break;
--	default:
--		addr2 = 0;
+-		if (jcore_spi_wait(ctrl_reg))
+-			break;
+-
+-		if (rx)
+-			*rx++ = readl(data_reg);
 -	}
 -
--	sh_vou_reg_m_write(vou_dev, VOUAD1R, addr1);
--	sh_vou_reg_m_write(vou_dev, VOUAD2R, addr2);
--}
+-	spi_finalize_current_transfer(master);
 -
--static void sh_vou_stream_config(struct sh_vou_device *vou_dev)
--{
--	unsigned int row_coeff;
--#ifdef __LITTLE_ENDIAN
--	u32 dataswap = 7;
--#else
--	u32 dataswap = 0;
--#endif
--
--	switch (vou_dev->pix.pixelformat) {
--	default:
--	case V4L2_PIX_FMT_NV12:
--	case V4L2_PIX_FMT_NV16:
--		row_coeff = 1;
--		break;
--	case V4L2_PIX_FMT_RGB565:
--		dataswap ^= 1;
--		fallthrough;
--	case V4L2_PIX_FMT_RGB565X:
--		row_coeff = 2;
--		break;
--	case V4L2_PIX_FMT_RGB24:
--		row_coeff = 3;
--		break;
--	}
--
--	sh_vou_reg_a_write(vou_dev, VOUSWR, dataswap);
--	sh_vou_reg_ab_write(vou_dev, VOUAIR, vou_dev->pix.width * row_coeff);
--}
--
--/* Locking: caller holds fop_lock mutex */
--static int sh_vou_queue_setup(struct vb2_queue *vq,
--		       unsigned int *nbuffers, unsigned int *nplanes,
--		       unsigned int sizes[], struct device *alloc_devs[])
--{
--	struct sh_vou_device *vou_dev = vb2_get_drv_priv(vq);
--	struct v4l2_pix_format *pix = &vou_dev->pix;
--	int bytes_per_line = vou_fmt[vou_dev->pix_idx].bpp * pix->width / 8;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	if (*nplanes)
--		return sizes[0] < pix->height * bytes_per_line ? -EINVAL : 0;
--	*nplanes = 1;
--	sizes[0] = pix->height * bytes_per_line;
--	return 0;
--}
--
--static int sh_vou_buf_prepare(struct vb2_buffer *vb)
--{
--	struct sh_vou_device *vou_dev = vb2_get_drv_priv(vb->vb2_queue);
--	struct v4l2_pix_format *pix = &vou_dev->pix;
--	unsigned bytes_per_line = vou_fmt[vou_dev->pix_idx].bpp * pix->width / 8;
--	unsigned size = pix->height * bytes_per_line;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	if (vb2_plane_size(vb, 0) < size) {
--		/* User buffer too small */
--		dev_warn(vou_dev->v4l2_dev.dev, "buffer too small (%lu < %u)\n",
--			 vb2_plane_size(vb, 0), size);
--		return -EINVAL;
--	}
--
--	vb2_set_plane_payload(vb, 0, size);
--	return 0;
--}
--
--/* Locking: caller holds fop_lock mutex and vq->irqlock spinlock */
--static void sh_vou_buf_queue(struct vb2_buffer *vb)
--{
--	struct vb2_v4l2_buffer *vbuf = to_vb2_v4l2_buffer(vb);
--	struct sh_vou_device *vou_dev = vb2_get_drv_priv(vb->vb2_queue);
--	struct sh_vou_buffer *shbuf = to_sh_vou_buffer(vbuf);
--	unsigned long flags;
--
--	spin_lock_irqsave(&vou_dev->lock, flags);
--	list_add_tail(&shbuf->list, &vou_dev->buf_list);
--	spin_unlock_irqrestore(&vou_dev->lock, flags);
--}
--
--static int sh_vou_start_streaming(struct vb2_queue *vq, unsigned int count)
--{
--	struct sh_vou_device *vou_dev = vb2_get_drv_priv(vq);
--	struct sh_vou_buffer *buf, *node;
--	int ret;
--
--	vou_dev->sequence = 0;
--	ret = v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0,
--					 video, s_stream, 1);
--	if (ret < 0 && ret != -ENOIOCTLCMD) {
--		list_for_each_entry_safe(buf, node, &vou_dev->buf_list, list) {
--			vb2_buffer_done(&buf->vb.vb2_buf,
--					VB2_BUF_STATE_QUEUED);
--			list_del(&buf->list);
--		}
--		vou_dev->active = NULL;
--		return ret;
--	}
--
--	buf = list_entry(vou_dev->buf_list.next, struct sh_vou_buffer, list);
--
--	vou_dev->active = buf;
--
--	/* Start from side A: we use mirror addresses, so, set B */
--	sh_vou_reg_a_write(vou_dev, VOURPR, 1);
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s: first buffer status 0x%x\n",
--		__func__, sh_vou_reg_a_read(vou_dev, VOUSTR));
--	sh_vou_schedule_next(vou_dev, &buf->vb);
--
--	buf = list_entry(buf->list.next, struct sh_vou_buffer, list);
--
--	/* Second buffer - initialise register side B */
--	sh_vou_reg_a_write(vou_dev, VOURPR, 0);
--	sh_vou_schedule_next(vou_dev, &buf->vb);
--
--	/* Register side switching with frame VSYNC */
--	sh_vou_reg_a_write(vou_dev, VOURCR, 5);
--
--	sh_vou_stream_config(vou_dev);
--	/* Enable End-of-Frame (VSYNC) interrupts */
--	sh_vou_reg_a_write(vou_dev, VOUIR, 0x10004);
--
--	/* Two buffers on the queue - activate the hardware */
--	vou_dev->status = SH_VOU_RUNNING;
--	sh_vou_reg_a_write(vou_dev, VOUER, 0x107);
--	return 0;
--}
--
--static void sh_vou_stop_streaming(struct vb2_queue *vq)
--{
--	struct sh_vou_device *vou_dev = vb2_get_drv_priv(vq);
--	struct sh_vou_buffer *buf, *node;
--	unsigned long flags;
--
--	v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0,
--					 video, s_stream, 0);
--	/* disable output */
--	sh_vou_reg_a_set(vou_dev, VOUER, 0, 1);
--	/* ...but the current frame will complete */
--	sh_vou_reg_a_set(vou_dev, VOUIR, 0, 0x30000);
--	msleep(50);
--	spin_lock_irqsave(&vou_dev->lock, flags);
--	list_for_each_entry_safe(buf, node, &vou_dev->buf_list, list) {
--		vb2_buffer_done(&buf->vb.vb2_buf, VB2_BUF_STATE_ERROR);
--		list_del(&buf->list);
--	}
--	vou_dev->active = NULL;
--	spin_unlock_irqrestore(&vou_dev->lock, flags);
--}
--
--static const struct vb2_ops sh_vou_qops = {
--	.queue_setup		= sh_vou_queue_setup,
--	.buf_prepare		= sh_vou_buf_prepare,
--	.buf_queue		= sh_vou_buf_queue,
--	.start_streaming	= sh_vou_start_streaming,
--	.stop_streaming		= sh_vou_stop_streaming,
--	.wait_prepare		= vb2_ops_wait_prepare,
--	.wait_finish		= vb2_ops_wait_finish,
--};
--
--/* Video IOCTLs */
--static int sh_vou_querycap(struct file *file, void  *priv,
--			   struct v4l2_capability *cap)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	strscpy(cap->card, "SuperH VOU", sizeof(cap->card));
--	strscpy(cap->driver, "sh-vou", sizeof(cap->driver));
--	strscpy(cap->bus_info, "platform:sh-vou", sizeof(cap->bus_info));
--	return 0;
--}
--
--/* Enumerate formats, that the device can accept from the user */
--static int sh_vou_enum_fmt_vid_out(struct file *file, void  *priv,
--				   struct v4l2_fmtdesc *fmt)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	if (fmt->index >= ARRAY_SIZE(vou_fmt))
--		return -EINVAL;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	fmt->pixelformat = vou_fmt[fmt->index].pfmt;
+-	if (count < len)
+-		return -EREMOTEIO;
 -
 -	return 0;
 -}
 -
--static int sh_vou_g_fmt_vid_out(struct file *file, void *priv,
--				struct v4l2_format *fmt)
+-static int jcore_spi_probe(struct platform_device *pdev)
 -{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
+-	struct device_node *node = pdev->dev.of_node;
+-	struct jcore_spi *hw;
+-	struct spi_master *master;
+-	struct resource *res;
+-	u32 clock_freq;
+-	struct clk *clk;
+-	int err = -ENODEV;
 -
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
+-	master = spi_alloc_master(&pdev->dev, sizeof(struct jcore_spi));
+-	if (!master)
+-		return err;
 -
--	fmt->type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
--	fmt->fmt.pix = vou_dev->pix;
+-	/* Setup the master state. */
+-	master->num_chipselect = 3;
+-	master->mode_bits = SPI_CPOL | SPI_CPHA | SPI_CS_HIGH;
+-	master->transfer_one = jcore_spi_txrx;
+-	master->set_cs = jcore_spi_chipsel;
+-	master->dev.of_node = node;
+-	master->bus_num = pdev->id;
 -
--	return 0;
--}
+-	hw = spi_master_get_devdata(master);
+-	hw->master = master;
+-	platform_set_drvdata(pdev, hw);
 -
--static const unsigned char vou_scale_h_num[] = {1, 9, 2, 9, 4};
--static const unsigned char vou_scale_h_den[] = {1, 8, 1, 4, 1};
--static const unsigned char vou_scale_h_fld[] = {0, 2, 1, 3};
--static const unsigned char vou_scale_v_num[] = {1, 2, 4};
--static const unsigned char vou_scale_v_den[] = {1, 1, 1};
--static const unsigned char vou_scale_v_fld[] = {0, 1};
--
--static void sh_vou_configure_geometry(struct sh_vou_device *vou_dev,
--				      int pix_idx, int w_idx, int h_idx)
--{
--	struct sh_vou_fmt *fmt = vou_fmt + pix_idx;
--	unsigned int black_left, black_top, width_max,
--		frame_in_height, frame_out_height, frame_out_top;
--	struct v4l2_rect *rect = &vou_dev->rect;
--	struct v4l2_pix_format *pix = &vou_dev->pix;
--	u32 vouvcr = 0, dsr_h, dsr_v;
--
--	if (vou_dev->std & V4L2_STD_525_60) {
--		width_max = 858;
--		/* height_max = 262; */
--	} else {
--		width_max = 864;
--		/* height_max = 312; */
--	}
--
--	frame_in_height = pix->height / 2;
--	frame_out_height = rect->height / 2;
--	frame_out_top = rect->top / 2;
+-	/* Find and map our resources */
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!res)
+-		goto exit_busy;
+-	if (!devm_request_mem_region(&pdev->dev, res->start,
+-				     resource_size(res), pdev->name))
+-		goto exit_busy;
+-	hw->base = devm_ioremap(&pdev->dev, res->start,
+-					resource_size(res));
+-	if (!hw->base)
+-		goto exit_busy;
 -
 -	/*
--	 * Cropping scheme: max useful image is 720x480, and the total video
--	 * area is 858x525 (NTSC) or 864x625 (PAL). AK8813 / 8814 starts
--	 * sampling data beginning with fixed 276th (NTSC) / 288th (PAL) clock,
--	 * of which the first 33 / 25 clocks HSYNC must be held active. This
--	 * has to be configured in CR[HW]. 1 pixel equals 2 clock periods.
--	 * This gives CR[HW] = 16 / 12, VPR[HVP] = 138 / 144, which gives
--	 * exactly 858 - 138 = 864 - 144 = 720! We call the out-of-display area,
--	 * beyond DSR, specified on the left and top by the VPR register "black
--	 * pixels" and out-of-image area (DPR) "background pixels." We fix VPR
--	 * at 138 / 144 : 20, because that's the HSYNC timing, that our first
--	 * client requires, and that's exactly what leaves us 720 pixels for the
--	 * image; we leave VPR[VVP] at default 20 for now, because the client
--	 * doesn't seem to have any special requirements for it. Otherwise we
--	 * could also set it to max - 240 = 22 / 72. Thus VPR depends only on
--	 * the selected standard, and DPR and DSR are selected according to
--	 * cropping. Q: how does the client detect the first valid line? Does
--	 * HSYNC stay inactive during invalid (black) lines?
+-	 * The SPI clock rate controlled via a configurable clock divider
+-	 * which is applied to the reference clock. A 50 MHz reference is
+-	 * most suitable for obtaining standard SPI clock rates, but some
+-	 * designs may have a different reference clock, and the DT must
+-	 * make the driver aware so that it can properly program the
+-	 * requested rate. If the clock is omitted, 50 MHz is assumed.
 -	 */
--	black_left = width_max - VOU_MAX_IMAGE_WIDTH;
--	black_top = 20;
--
--	dsr_h = rect->width + rect->left;
--	dsr_v = frame_out_height + frame_out_top;
--
--	dev_dbg(vou_dev->v4l2_dev.dev,
--		"image %ux%u, black %u:%u, offset %u:%u, display %ux%u\n",
--		pix->width, frame_in_height, black_left, black_top,
--		rect->left, frame_out_top, dsr_h, dsr_v);
--
--	/* VOUISR height - half of a frame height in frame mode */
--	sh_vou_reg_ab_write(vou_dev, VOUISR, (pix->width << 16) | frame_in_height);
--	sh_vou_reg_ab_write(vou_dev, VOUVPR, (black_left << 16) | black_top);
--	sh_vou_reg_ab_write(vou_dev, VOUDPR, (rect->left << 16) | frame_out_top);
--	sh_vou_reg_ab_write(vou_dev, VOUDSR, (dsr_h << 16) | dsr_v);
--
--	/*
--	 * if necessary, we could set VOUHIR to
--	 * max(black_left + dsr_h, width_max) here
--	 */
--
--	if (w_idx)
--		vouvcr |= (1 << 15) | (vou_scale_h_fld[w_idx - 1] << 4);
--	if (h_idx)
--		vouvcr |= (1 << 14) | vou_scale_v_fld[h_idx - 1];
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "0x%08x: scaling 0x%x\n",
--		fmt->pfmt, vouvcr);
--
--	/* To produce a colour bar for testing set bit 23 of VOUVCR */
--	sh_vou_reg_ab_write(vou_dev, VOUVCR, vouvcr);
--	sh_vou_reg_ab_write(vou_dev, VOUDFR,
--			    fmt->pkf | (fmt->yf << 8) | (fmt->rgb << 16));
--}
--
--struct sh_vou_geometry {
--	struct v4l2_rect output;
--	unsigned int in_width;
--	unsigned int in_height;
--	int scale_idx_h;
--	int scale_idx_v;
--};
--
--/*
-- * Find input geometry, that we can use to produce output, closest to the
-- * requested rectangle, using VOU scaling
-- */
--static void vou_adjust_input(struct sh_vou_geometry *geo, v4l2_std_id std)
--{
--	/* The compiler cannot know, that best and idx will indeed be set */
--	unsigned int best_err = UINT_MAX, best = 0, img_height_max;
--	int i, idx = 0;
--
--	if (std & V4L2_STD_525_60)
--		img_height_max = 480;
--	else
--		img_height_max = 576;
--
--	/* Image width must be a multiple of 4 */
--	v4l_bound_align_image(&geo->in_width,
--			      VOU_MIN_IMAGE_WIDTH, VOU_MAX_IMAGE_WIDTH, 2,
--			      &geo->in_height,
--			      VOU_MIN_IMAGE_HEIGHT, img_height_max, 1, 0);
--
--	/* Select scales to come as close as possible to the output image */
--	for (i = ARRAY_SIZE(vou_scale_h_num) - 1; i >= 0; i--) {
--		unsigned int err;
--		unsigned int found = geo->output.width * vou_scale_h_den[i] /
--			vou_scale_h_num[i];
--
--		if (found > VOU_MAX_IMAGE_WIDTH)
--			/* scales increase */
--			break;
--
--		err = abs(found - geo->in_width);
--		if (err < best_err) {
--			best_err = err;
--			idx = i;
--			best = found;
--		}
--		if (!err)
--			break;
+-	clock_freq = 50000000;
+-	clk = devm_clk_get(&pdev->dev, "ref_clk");
+-	if (!IS_ERR(clk)) {
+-		if (clk_prepare_enable(clk) == 0) {
+-			clock_freq = clk_get_rate(clk);
+-			clk_disable_unprepare(clk);
+-		} else
+-			dev_warn(&pdev->dev, "could not enable ref_clk\n");
 -	}
+-	hw->clock_freq = clock_freq;
 -
--	geo->in_width = best;
--	geo->scale_idx_h = idx;
+-	/* Initialize all CS bits to high. */
+-	hw->cs_reg = JCORE_SPI_CTRL_CS_BITS;
+-	jcore_spi_baudrate(hw, 400000);
 -
--	best_err = UINT_MAX;
--
--	/* This loop can be replaced with one division */
--	for (i = ARRAY_SIZE(vou_scale_v_num) - 1; i >= 0; i--) {
--		unsigned int err;
--		unsigned int found = geo->output.height * vou_scale_v_den[i] /
--			vou_scale_v_num[i];
--
--		if (found > img_height_max)
--			/* scales increase */
--			break;
--
--		err = abs(found - geo->in_height);
--		if (err < best_err) {
--			best_err = err;
--			idx = i;
--			best = found;
--		}
--		if (!err)
--			break;
--	}
--
--	geo->in_height = best;
--	geo->scale_idx_v = idx;
--}
--
--/*
-- * Find output geometry, that we can produce, using VOU scaling, closest to
-- * the requested rectangle
-- */
--static void vou_adjust_output(struct sh_vou_geometry *geo, v4l2_std_id std)
--{
--	unsigned int best_err = UINT_MAX, best = geo->in_width,
--		width_max, height_max, img_height_max;
--	int i, idx_h = 0, idx_v = 0;
--
--	if (std & V4L2_STD_525_60) {
--		width_max = 858;
--		height_max = 262 * 2;
--		img_height_max = 480;
--	} else {
--		width_max = 864;
--		height_max = 312 * 2;
--		img_height_max = 576;
--	}
--
--	/* Select scales to come as close as possible to the output image */
--	for (i = 0; i < ARRAY_SIZE(vou_scale_h_num); i++) {
--		unsigned int err;
--		unsigned int found = geo->in_width * vou_scale_h_num[i] /
--			vou_scale_h_den[i];
--
--		if (found > VOU_MAX_IMAGE_WIDTH)
--			/* scales increase */
--			break;
--
--		err = abs(found - geo->output.width);
--		if (err < best_err) {
--			best_err = err;
--			idx_h = i;
--			best = found;
--		}
--		if (!err)
--			break;
--	}
--
--	geo->output.width = best;
--	geo->scale_idx_h = idx_h;
--	if (geo->output.left + best > width_max)
--		geo->output.left = width_max - best;
--
--	pr_debug("%s(): W %u * %u/%u = %u\n", __func__, geo->in_width,
--		 vou_scale_h_num[idx_h], vou_scale_h_den[idx_h], best);
--
--	best_err = UINT_MAX;
--
--	/* This loop can be replaced with one division */
--	for (i = 0; i < ARRAY_SIZE(vou_scale_v_num); i++) {
--		unsigned int err;
--		unsigned int found = geo->in_height * vou_scale_v_num[i] /
--			vou_scale_v_den[i];
--
--		if (found > img_height_max)
--			/* scales increase */
--			break;
--
--		err = abs(found - geo->output.height);
--		if (err < best_err) {
--			best_err = err;
--			idx_v = i;
--			best = found;
--		}
--		if (!err)
--			break;
--	}
--
--	geo->output.height = best;
--	geo->scale_idx_v = idx_v;
--	if (geo->output.top + best > height_max)
--		geo->output.top = height_max - best;
--
--	pr_debug("%s(): H %u * %u/%u = %u\n", __func__, geo->in_height,
--		 vou_scale_v_num[idx_v], vou_scale_v_den[idx_v], best);
--}
--
--static int sh_vou_try_fmt_vid_out(struct file *file, void *priv,
--				  struct v4l2_format *fmt)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	struct v4l2_pix_format *pix = &fmt->fmt.pix;
--	unsigned int img_height_max;
--	int pix_idx;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	pix->field = V4L2_FIELD_INTERLACED;
--	pix->colorspace = V4L2_COLORSPACE_SMPTE170M;
--	pix->ycbcr_enc = pix->quantization = 0;
--
--	for (pix_idx = 0; pix_idx < ARRAY_SIZE(vou_fmt); pix_idx++)
--		if (vou_fmt[pix_idx].pfmt == pix->pixelformat)
--			break;
--
--	if (pix_idx == ARRAY_SIZE(vou_fmt))
--		return -EINVAL;
--
--	if (vou_dev->std & V4L2_STD_525_60)
--		img_height_max = 480;
--	else
--		img_height_max = 576;
--
--	v4l_bound_align_image(&pix->width,
--			      VOU_MIN_IMAGE_WIDTH, VOU_MAX_IMAGE_WIDTH, 2,
--			      &pix->height,
--			      VOU_MIN_IMAGE_HEIGHT, img_height_max, 1, 0);
--	pix->bytesperline = pix->width * vou_fmt[pix_idx].bpl;
--	pix->sizeimage = pix->height * ((pix->width * vou_fmt[pix_idx].bpp) >> 3);
--
--	return 0;
--}
--
--static int sh_vou_set_fmt_vid_out(struct sh_vou_device *vou_dev,
--				struct v4l2_pix_format *pix)
--{
--	unsigned int img_height_max;
--	struct sh_vou_geometry geo;
--	struct v4l2_subdev_format format = {
--		.which = V4L2_SUBDEV_FORMAT_ACTIVE,
--		/* Revisit: is this the correct code? */
--		.format.code = MEDIA_BUS_FMT_YUYV8_2X8,
--		.format.field = V4L2_FIELD_INTERLACED,
--		.format.colorspace = V4L2_COLORSPACE_SMPTE170M,
--	};
--	struct v4l2_mbus_framefmt *mbfmt = &format.format;
--	int pix_idx;
--	int ret;
--
--	if (vb2_is_busy(&vou_dev->queue))
--		return -EBUSY;
--
--	for (pix_idx = 0; pix_idx < ARRAY_SIZE(vou_fmt); pix_idx++)
--		if (vou_fmt[pix_idx].pfmt == pix->pixelformat)
--			break;
--
--	geo.in_width = pix->width;
--	geo.in_height = pix->height;
--	geo.output = vou_dev->rect;
--
--	vou_adjust_output(&geo, vou_dev->std);
--
--	mbfmt->width = geo.output.width;
--	mbfmt->height = geo.output.height;
--	ret = v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0, pad,
--					 set_fmt, NULL, &format);
--	/* Must be implemented, so, don't check for -ENOIOCTLCMD */
--	if (ret < 0)
--		return ret;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s(): %ux%u -> %ux%u\n", __func__,
--		geo.output.width, geo.output.height, mbfmt->width, mbfmt->height);
--
--	if (vou_dev->std & V4L2_STD_525_60)
--		img_height_max = 480;
--	else
--		img_height_max = 576;
--
--	/* Sanity checks */
--	if ((unsigned)mbfmt->width > VOU_MAX_IMAGE_WIDTH ||
--	    (unsigned)mbfmt->height > img_height_max ||
--	    mbfmt->code != MEDIA_BUS_FMT_YUYV8_2X8)
--		return -EIO;
--
--	if (mbfmt->width != geo.output.width ||
--	    mbfmt->height != geo.output.height) {
--		geo.output.width = mbfmt->width;
--		geo.output.height = mbfmt->height;
--
--		vou_adjust_input(&geo, vou_dev->std);
--	}
--
--	/* We tried to preserve output rectangle, but it could have changed */
--	vou_dev->rect = geo.output;
--	pix->width = geo.in_width;
--	pix->height = geo.in_height;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s(): %ux%u\n", __func__,
--		pix->width, pix->height);
--
--	vou_dev->pix_idx = pix_idx;
--
--	vou_dev->pix = *pix;
--
--	sh_vou_configure_geometry(vou_dev, pix_idx,
--				  geo.scale_idx_h, geo.scale_idx_v);
--
--	return 0;
--}
--
--static int sh_vou_s_fmt_vid_out(struct file *file, void *priv,
--				struct v4l2_format *fmt)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	int ret = sh_vou_try_fmt_vid_out(file, priv, fmt);
--
--	if (ret)
--		return ret;
--	return sh_vou_set_fmt_vid_out(vou_dev, &fmt->fmt.pix);
--}
--
--static int sh_vou_enum_output(struct file *file, void *fh,
--			      struct v4l2_output *a)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	if (a->index)
--		return -EINVAL;
--	strscpy(a->name, "Video Out", sizeof(a->name));
--	a->type = V4L2_OUTPUT_TYPE_ANALOG;
--	a->std = vou_dev->vdev.tvnorms;
--	return 0;
--}
--
--static int sh_vou_g_output(struct file *file, void *fh, unsigned int *i)
--{
--	*i = 0;
--	return 0;
--}
--
--static int sh_vou_s_output(struct file *file, void *fh, unsigned int i)
--{
--	return i ? -EINVAL : 0;
--}
--
--static u32 sh_vou_ntsc_mode(enum sh_vou_bus_fmt bus_fmt)
--{
--	switch (bus_fmt) {
--	default:
--		pr_warn("%s(): Invalid bus-format code %d, using default 8-bit\n",
--			__func__, bus_fmt);
--		fallthrough;
--	case SH_VOU_BUS_8BIT:
--		return 1;
--	case SH_VOU_BUS_16BIT:
--		return 0;
--	case SH_VOU_BUS_BT656:
--		return 3;
--	}
--}
--
--static int sh_vou_s_std(struct file *file, void *priv, v4l2_std_id std_id)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	int ret;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s(): 0x%llx\n", __func__, std_id);
--
--	if (std_id == vou_dev->std)
--		return 0;
--
--	if (vb2_is_busy(&vou_dev->queue))
--		return -EBUSY;
--
--	ret = v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0, video,
--					 s_std_output, std_id);
--	/* Shall we continue, if the subdev doesn't support .s_std_output()? */
--	if (ret < 0 && ret != -ENOIOCTLCMD)
--		return ret;
--
--	vou_dev->rect.top = vou_dev->rect.left = 0;
--	vou_dev->rect.width = VOU_MAX_IMAGE_WIDTH;
--	if (std_id & V4L2_STD_525_60) {
--		sh_vou_reg_ab_set(vou_dev, VOUCR,
--			sh_vou_ntsc_mode(vou_dev->pdata->bus_fmt) << 29, 7 << 29);
--		vou_dev->rect.height = 480;
--	} else {
--		sh_vou_reg_ab_set(vou_dev, VOUCR, 5 << 29, 7 << 29);
--		vou_dev->rect.height = 576;
--	}
--
--	vou_dev->pix.width = vou_dev->rect.width;
--	vou_dev->pix.height = vou_dev->rect.height;
--	vou_dev->pix.bytesperline =
--		vou_dev->pix.width * vou_fmt[vou_dev->pix_idx].bpl;
--	vou_dev->pix.sizeimage = vou_dev->pix.height *
--		((vou_dev->pix.width * vou_fmt[vou_dev->pix_idx].bpp) >> 3);
--	vou_dev->std = std_id;
--	sh_vou_set_fmt_vid_out(vou_dev, &vou_dev->pix);
--
--	return 0;
--}
--
--static int sh_vou_g_std(struct file *file, void *priv, v4l2_std_id *std)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "%s()\n", __func__);
--
--	*std = vou_dev->std;
--
--	return 0;
--}
--
--static int sh_vou_log_status(struct file *file, void *priv)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	pr_info("VOUER:   0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUER));
--	pr_info("VOUCR:   0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUCR));
--	pr_info("VOUSTR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUSTR));
--	pr_info("VOUVCR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUVCR));
--	pr_info("VOUISR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUISR));
--	pr_info("VOUBCR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUBCR));
--	pr_info("VOUDPR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUDPR));
--	pr_info("VOUDSR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUDSR));
--	pr_info("VOUVPR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUVPR));
--	pr_info("VOUIR:   0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUIR));
--	pr_info("VOUSRR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUSRR));
--	pr_info("VOUMSR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUMSR));
--	pr_info("VOUHIR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUHIR));
--	pr_info("VOUDFR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUDFR));
--	pr_info("VOUAD1R: 0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUAD1R));
--	pr_info("VOUAD2R: 0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUAD2R));
--	pr_info("VOUAIR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUAIR));
--	pr_info("VOUSWR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOUSWR));
--	pr_info("VOURCR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOURCR));
--	pr_info("VOURPR:  0x%08x\n", sh_vou_reg_a_read(vou_dev, VOURPR));
--	return 0;
--}
--
--static int sh_vou_g_selection(struct file *file, void *fh,
--			      struct v4l2_selection *sel)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--
--	if (sel->type != V4L2_BUF_TYPE_VIDEO_OUTPUT)
--		return -EINVAL;
--	switch (sel->target) {
--	case V4L2_SEL_TGT_COMPOSE:
--		sel->r = vou_dev->rect;
--		break;
--	case V4L2_SEL_TGT_COMPOSE_DEFAULT:
--	case V4L2_SEL_TGT_COMPOSE_BOUNDS:
--		sel->r.left = 0;
--		sel->r.top = 0;
--		sel->r.width = VOU_MAX_IMAGE_WIDTH;
--		if (vou_dev->std & V4L2_STD_525_60)
--			sel->r.height = 480;
--		else
--			sel->r.height = 576;
--		break;
--	default:
--		return -EINVAL;
--	}
--	return 0;
--}
--
--/* Assume a dull encoder, do all the work ourselves. */
--static int sh_vou_s_selection(struct file *file, void *fh,
--			      struct v4l2_selection *sel)
--{
--	struct v4l2_rect *rect = &sel->r;
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	struct v4l2_subdev_selection sd_sel = {
--		.which = V4L2_SUBDEV_FORMAT_ACTIVE,
--		.target = V4L2_SEL_TGT_COMPOSE,
--	};
--	struct v4l2_pix_format *pix = &vou_dev->pix;
--	struct sh_vou_geometry geo;
--	struct v4l2_subdev_format format = {
--		.which = V4L2_SUBDEV_FORMAT_ACTIVE,
--		/* Revisit: is this the correct code? */
--		.format.code = MEDIA_BUS_FMT_YUYV8_2X8,
--		.format.field = V4L2_FIELD_INTERLACED,
--		.format.colorspace = V4L2_COLORSPACE_SMPTE170M,
--	};
--	unsigned int img_height_max;
--	int ret;
--
--	if (sel->type != V4L2_BUF_TYPE_VIDEO_OUTPUT ||
--	    sel->target != V4L2_SEL_TGT_COMPOSE)
--		return -EINVAL;
--
--	if (vb2_is_busy(&vou_dev->queue))
--		return -EBUSY;
--
--	if (vou_dev->std & V4L2_STD_525_60)
--		img_height_max = 480;
--	else
--		img_height_max = 576;
--
--	v4l_bound_align_image(&rect->width,
--			      VOU_MIN_IMAGE_WIDTH, VOU_MAX_IMAGE_WIDTH, 1,
--			      &rect->height,
--			      VOU_MIN_IMAGE_HEIGHT, img_height_max, 1, 0);
--
--	if (rect->width + rect->left > VOU_MAX_IMAGE_WIDTH)
--		rect->left = VOU_MAX_IMAGE_WIDTH - rect->width;
--
--	if (rect->height + rect->top > img_height_max)
--		rect->top = img_height_max - rect->height;
--
--	geo.output = *rect;
--	geo.in_width = pix->width;
--	geo.in_height = pix->height;
--
--	/* Configure the encoder one-to-one, position at 0, ignore errors */
--	sd_sel.r.width = geo.output.width;
--	sd_sel.r.height = geo.output.height;
--	/*
--	 * We first issue a S_SELECTION, so that the subsequent S_FMT delivers the
--	 * final encoder configuration.
--	 */
--	v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0, pad,
--				   set_selection, NULL, &sd_sel);
--	format.format.width = geo.output.width;
--	format.format.height = geo.output.height;
--	ret = v4l2_device_call_until_err(&vou_dev->v4l2_dev, 0, pad,
--					 set_fmt, NULL, &format);
--	/* Must be implemented, so, don't check for -ENOIOCTLCMD */
--	if (ret < 0)
--		return ret;
--
--	/* Sanity checks */
--	if ((unsigned)format.format.width > VOU_MAX_IMAGE_WIDTH ||
--	    (unsigned)format.format.height > img_height_max ||
--	    format.format.code != MEDIA_BUS_FMT_YUYV8_2X8)
--		return -EIO;
--
--	geo.output.width = format.format.width;
--	geo.output.height = format.format.height;
--
--	/*
--	 * No down-scaling. According to the API, current call has precedence:
--	 * https://linuxtv.org/downloads/v4l-dvb-apis/uapi/v4l/crop.html#cropping-structures
--	 */
--	vou_adjust_input(&geo, vou_dev->std);
--
--	/* We tried to preserve output rectangle, but it could have changed */
--	vou_dev->rect = geo.output;
--	pix->width = geo.in_width;
--	pix->height = geo.in_height;
--
--	sh_vou_configure_geometry(vou_dev, vou_dev->pix_idx,
--				  geo.scale_idx_h, geo.scale_idx_v);
--
--	return 0;
--}
--
--static irqreturn_t sh_vou_isr(int irq, void *dev_id)
--{
--	struct sh_vou_device *vou_dev = dev_id;
--	static unsigned long j;
--	struct sh_vou_buffer *vb;
--	static int cnt;
--	u32 irq_status = sh_vou_reg_a_read(vou_dev, VOUIR), masked;
--	u32 vou_status = sh_vou_reg_a_read(vou_dev, VOUSTR);
--
--	if (!(irq_status & 0x300)) {
--		if (printk_timed_ratelimit(&j, 500))
--			dev_warn(vou_dev->v4l2_dev.dev, "IRQ status 0x%x!\n",
--				 irq_status);
--		return IRQ_NONE;
--	}
--
--	spin_lock(&vou_dev->lock);
--	if (!vou_dev->active || list_empty(&vou_dev->buf_list)) {
--		if (printk_timed_ratelimit(&j, 500))
--			dev_warn(vou_dev->v4l2_dev.dev,
--				 "IRQ without active buffer: %x!\n", irq_status);
--		/* Just ack: buf_release will disable further interrupts */
--		sh_vou_reg_a_set(vou_dev, VOUIR, 0, 0x300);
--		spin_unlock(&vou_dev->lock);
--		return IRQ_HANDLED;
--	}
--
--	masked = ~(0x300 & irq_status) & irq_status & 0x30304;
--	dev_dbg(vou_dev->v4l2_dev.dev,
--		"IRQ status 0x%x -> 0x%x, VOU status 0x%x, cnt %d\n",
--		irq_status, masked, vou_status, cnt);
--
--	cnt++;
--	/* side = vou_status & 0x10000; */
--
--	/* Clear only set interrupts */
--	sh_vou_reg_a_write(vou_dev, VOUIR, masked);
--
--	vb = vou_dev->active;
--	if (list_is_singular(&vb->list)) {
--		/* Keep cycling while no next buffer is available */
--		sh_vou_schedule_next(vou_dev, &vb->vb);
--		spin_unlock(&vou_dev->lock);
--		return IRQ_HANDLED;
--	}
--
--	list_del(&vb->list);
--
--	vb->vb.vb2_buf.timestamp = ktime_get_ns();
--	vb->vb.sequence = vou_dev->sequence++;
--	vb->vb.field = V4L2_FIELD_INTERLACED;
--	vb2_buffer_done(&vb->vb.vb2_buf, VB2_BUF_STATE_DONE);
--
--	vou_dev->active = list_entry(vou_dev->buf_list.next,
--				     struct sh_vou_buffer, list);
--
--	if (list_is_singular(&vou_dev->buf_list)) {
--		/* Keep cycling while no next buffer is available */
--		sh_vou_schedule_next(vou_dev, &vou_dev->active->vb);
--	} else {
--		struct sh_vou_buffer *new = list_entry(vou_dev->active->list.next,
--						struct sh_vou_buffer, list);
--		sh_vou_schedule_next(vou_dev, &new->vb);
--	}
--
--	spin_unlock(&vou_dev->lock);
--
--	return IRQ_HANDLED;
--}
--
--static int sh_vou_hw_init(struct sh_vou_device *vou_dev)
--{
--	struct sh_vou_pdata *pdata = vou_dev->pdata;
--	u32 voucr = sh_vou_ntsc_mode(pdata->bus_fmt) << 29;
--	int i = 100;
--
--	/* Disable all IRQs */
--	sh_vou_reg_a_write(vou_dev, VOUIR, 0);
--
--	/* Reset VOU interfaces - registers unaffected */
--	sh_vou_reg_a_write(vou_dev, VOUSRR, 0x101);
--	while (--i && (sh_vou_reg_a_read(vou_dev, VOUSRR) & 0x101))
--		udelay(1);
--
--	if (!i)
--		return -ETIMEDOUT;
--
--	dev_dbg(vou_dev->v4l2_dev.dev, "Reset took %dus\n", 100 - i);
--
--	if (pdata->flags & SH_VOU_PCLK_FALLING)
--		voucr |= 1 << 28;
--	if (pdata->flags & SH_VOU_HSYNC_LOW)
--		voucr |= 1 << 27;
--	if (pdata->flags & SH_VOU_VSYNC_LOW)
--		voucr |= 1 << 26;
--	sh_vou_reg_ab_set(vou_dev, VOUCR, voucr, 0xfc000000);
--
--	/* Manual register side switching at first */
--	sh_vou_reg_a_write(vou_dev, VOURCR, 4);
--	/* Default - fixed HSYNC length, can be made configurable is required */
--	sh_vou_reg_ab_write(vou_dev, VOUMSR, 0x800000);
--
--	sh_vou_set_fmt_vid_out(vou_dev, &vou_dev->pix);
--
--	return 0;
--}
--
--/* File operations */
--static int sh_vou_open(struct file *file)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	int err;
--
--	if (mutex_lock_interruptible(&vou_dev->fop_lock))
--		return -ERESTARTSYS;
--
--	err = v4l2_fh_open(file);
+-	/* Register our spi controller */
+-	err = devm_spi_register_master(&pdev->dev, master);
 -	if (err)
--		goto done_open;
--	if (v4l2_fh_is_singular_file(file) &&
--	    vou_dev->status == SH_VOU_INITIALISING) {
--		/* First open */
--		err = pm_runtime_resume_and_get(vou_dev->v4l2_dev.dev);
--		if (err < 0) {
--			v4l2_fh_release(file);
--			goto done_open;
--		}
--		err = sh_vou_hw_init(vou_dev);
--		if (err < 0) {
--			pm_runtime_put(vou_dev->v4l2_dev.dev);
--			v4l2_fh_release(file);
--		} else {
--			vou_dev->status = SH_VOU_IDLE;
--		}
--	}
--done_open:
--	mutex_unlock(&vou_dev->fop_lock);
+-		goto exit;
+-
+-	return 0;
+-
+-exit_busy:
+-	err = -EBUSY;
+-exit:
+-	spi_master_put(master);
 -	return err;
 -}
 -
--static int sh_vou_release(struct file *file)
--{
--	struct sh_vou_device *vou_dev = video_drvdata(file);
--	bool is_last;
--
--	mutex_lock(&vou_dev->fop_lock);
--	is_last = v4l2_fh_is_singular_file(file);
--	_vb2_fop_release(file, NULL);
--	if (is_last) {
--		/* Last close */
--		vou_dev->status = SH_VOU_INITIALISING;
--		sh_vou_reg_a_set(vou_dev, VOUER, 0, 0x101);
--		pm_runtime_put(vou_dev->v4l2_dev.dev);
--	}
--	mutex_unlock(&vou_dev->fop_lock);
--	return 0;
--}
--
--/* sh_vou display ioctl operations */
--static const struct v4l2_ioctl_ops sh_vou_ioctl_ops = {
--	.vidioc_querycap		= sh_vou_querycap,
--	.vidioc_enum_fmt_vid_out	= sh_vou_enum_fmt_vid_out,
--	.vidioc_g_fmt_vid_out		= sh_vou_g_fmt_vid_out,
--	.vidioc_s_fmt_vid_out		= sh_vou_s_fmt_vid_out,
--	.vidioc_try_fmt_vid_out		= sh_vou_try_fmt_vid_out,
--	.vidioc_reqbufs			= vb2_ioctl_reqbufs,
--	.vidioc_create_bufs		= vb2_ioctl_create_bufs,
--	.vidioc_querybuf		= vb2_ioctl_querybuf,
--	.vidioc_qbuf			= vb2_ioctl_qbuf,
--	.vidioc_dqbuf			= vb2_ioctl_dqbuf,
--	.vidioc_prepare_buf		= vb2_ioctl_prepare_buf,
--	.vidioc_streamon		= vb2_ioctl_streamon,
--	.vidioc_streamoff		= vb2_ioctl_streamoff,
--	.vidioc_expbuf			= vb2_ioctl_expbuf,
--	.vidioc_g_output		= sh_vou_g_output,
--	.vidioc_s_output		= sh_vou_s_output,
--	.vidioc_enum_output		= sh_vou_enum_output,
--	.vidioc_s_std			= sh_vou_s_std,
--	.vidioc_g_std			= sh_vou_g_std,
--	.vidioc_g_selection		= sh_vou_g_selection,
--	.vidioc_s_selection		= sh_vou_s_selection,
--	.vidioc_log_status		= sh_vou_log_status,
+-static const struct of_device_id jcore_spi_of_match[] = {
+-	{ .compatible = "jcore,spi2" },
+-	{},
 -};
+-MODULE_DEVICE_TABLE(of, jcore_spi_of_match);
 -
--static const struct v4l2_file_operations sh_vou_fops = {
--	.owner		= THIS_MODULE,
--	.open		= sh_vou_open,
--	.release	= sh_vou_release,
--	.unlocked_ioctl	= video_ioctl2,
--	.mmap		= vb2_fop_mmap,
--	.poll		= vb2_fop_poll,
--	.write		= vb2_fop_write,
--};
--
--static const struct video_device sh_vou_video_template = {
--	.name		= "sh_vou",
--	.fops		= &sh_vou_fops,
--	.ioctl_ops	= &sh_vou_ioctl_ops,
--	.tvnorms	= V4L2_STD_525_60, /* PAL only supported in 8-bit non-bt656 mode */
--	.vfl_dir	= VFL_DIR_TX,
--	.device_caps	= V4L2_CAP_VIDEO_OUTPUT | V4L2_CAP_READWRITE |
--			  V4L2_CAP_STREAMING,
--};
--
--static int sh_vou_probe(struct platform_device *pdev)
--{
--	struct sh_vou_pdata *vou_pdata = pdev->dev.platform_data;
--	struct v4l2_rect *rect;
--	struct v4l2_pix_format *pix;
--	struct i2c_adapter *i2c_adap;
--	struct video_device *vdev;
--	struct sh_vou_device *vou_dev;
--	struct resource *reg_res;
--	struct v4l2_subdev *subdev;
--	struct vb2_queue *q;
--	int irq, ret;
--
--	reg_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	irq = platform_get_irq(pdev, 0);
--
--	if (!vou_pdata || !reg_res || irq <= 0) {
--		dev_err(&pdev->dev, "Insufficient VOU platform information.\n");
--		return -ENODEV;
--	}
--
--	vou_dev = devm_kzalloc(&pdev->dev, sizeof(*vou_dev), GFP_KERNEL);
--	if (!vou_dev)
--		return -ENOMEM;
--
--	INIT_LIST_HEAD(&vou_dev->buf_list);
--	spin_lock_init(&vou_dev->lock);
--	mutex_init(&vou_dev->fop_lock);
--	vou_dev->pdata = vou_pdata;
--	vou_dev->status = SH_VOU_INITIALISING;
--	vou_dev->pix_idx = 1;
--
--	rect = &vou_dev->rect;
--	pix = &vou_dev->pix;
--
--	/* Fill in defaults */
--	vou_dev->std		= V4L2_STD_NTSC_M;
--	rect->left		= 0;
--	rect->top		= 0;
--	rect->width		= VOU_MAX_IMAGE_WIDTH;
--	rect->height		= 480;
--	pix->width		= VOU_MAX_IMAGE_WIDTH;
--	pix->height		= 480;
--	pix->pixelformat	= V4L2_PIX_FMT_NV16;
--	pix->field		= V4L2_FIELD_INTERLACED;
--	pix->bytesperline	= VOU_MAX_IMAGE_WIDTH;
--	pix->sizeimage		= VOU_MAX_IMAGE_WIDTH * 2 * 480;
--	pix->colorspace		= V4L2_COLORSPACE_SMPTE170M;
--
--	vou_dev->base = devm_ioremap_resource(&pdev->dev, reg_res);
--	if (IS_ERR(vou_dev->base))
--		return PTR_ERR(vou_dev->base);
--
--	ret = devm_request_irq(&pdev->dev, irq, sh_vou_isr, 0, "vou", vou_dev);
--	if (ret < 0)
--		return ret;
--
--	ret = v4l2_device_register(&pdev->dev, &vou_dev->v4l2_dev);
--	if (ret < 0) {
--		dev_err(&pdev->dev, "Error registering v4l2 device\n");
--		return ret;
--	}
--
--	vdev = &vou_dev->vdev;
--	*vdev = sh_vou_video_template;
--	if (vou_pdata->bus_fmt == SH_VOU_BUS_8BIT)
--		vdev->tvnorms |= V4L2_STD_PAL;
--	vdev->v4l2_dev = &vou_dev->v4l2_dev;
--	vdev->release = video_device_release_empty;
--	vdev->lock = &vou_dev->fop_lock;
--
--	video_set_drvdata(vdev, vou_dev);
--
--	/* Initialize the vb2 queue */
--	q = &vou_dev->queue;
--	q->type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
--	q->io_modes = VB2_MMAP | VB2_DMABUF | VB2_WRITE;
--	q->drv_priv = vou_dev;
--	q->buf_struct_size = sizeof(struct sh_vou_buffer);
--	q->ops = &sh_vou_qops;
--	q->mem_ops = &vb2_dma_contig_memops;
--	q->timestamp_flags = V4L2_BUF_FLAG_TIMESTAMP_MONOTONIC;
--	q->min_buffers_needed = 2;
--	q->lock = &vou_dev->fop_lock;
--	q->dev = &pdev->dev;
--	ret = vb2_queue_init(q);
--	if (ret)
--		goto ei2cgadap;
--
--	vdev->queue = q;
--	INIT_LIST_HEAD(&vou_dev->buf_list);
--
--	pm_runtime_enable(&pdev->dev);
--	pm_runtime_resume(&pdev->dev);
--
--	i2c_adap = i2c_get_adapter(vou_pdata->i2c_adap);
--	if (!i2c_adap) {
--		ret = -ENODEV;
--		goto ei2cgadap;
--	}
--
--	ret = sh_vou_hw_init(vou_dev);
--	if (ret < 0)
--		goto ereset;
--
--	subdev = v4l2_i2c_new_subdev_board(&vou_dev->v4l2_dev, i2c_adap,
--			vou_pdata->board_info, NULL);
--	if (!subdev) {
--		ret = -ENOMEM;
--		goto ei2cnd;
--	}
--
--	ret = video_register_device(vdev, VFL_TYPE_VIDEO, -1);
--	if (ret < 0)
--		goto evregdev;
--
--	return 0;
--
--evregdev:
--ei2cnd:
--ereset:
--	i2c_put_adapter(i2c_adap);
--ei2cgadap:
--	pm_runtime_disable(&pdev->dev);
--	v4l2_device_unregister(&vou_dev->v4l2_dev);
--	return ret;
--}
--
--static int sh_vou_remove(struct platform_device *pdev)
--{
--	struct v4l2_device *v4l2_dev = platform_get_drvdata(pdev);
--	struct sh_vou_device *vou_dev = container_of(v4l2_dev,
--						struct sh_vou_device, v4l2_dev);
--	struct v4l2_subdev *sd = list_entry(v4l2_dev->subdevs.next,
--					    struct v4l2_subdev, list);
--	struct i2c_client *client = v4l2_get_subdevdata(sd);
--
--	pm_runtime_disable(&pdev->dev);
--	video_unregister_device(&vou_dev->vdev);
--	i2c_put_adapter(client->adapter);
--	v4l2_device_unregister(&vou_dev->v4l2_dev);
--	return 0;
--}
--
--static struct platform_driver sh_vou = {
--	.remove  = sh_vou_remove,
--	.driver  = {
--		.name	= "sh-vou",
+-static struct platform_driver jcore_spi_driver = {
+-	.probe = jcore_spi_probe,
+-	.driver = {
+-		.name = DRV_NAME,
+-		.of_match_table = jcore_spi_of_match,
 -	},
 -};
 -
--module_platform_driver_probe(sh_vou, sh_vou_probe);
+-module_platform_driver(jcore_spi_driver);
 -
--MODULE_DESCRIPTION("SuperH VOU driver");
--MODULE_AUTHOR("Guennadi Liakhovetski <g.liakhovetski@gmx.de>");
--MODULE_LICENSE("GPL v2");
--MODULE_VERSION("0.1.0");
--MODULE_ALIAS("platform:sh-vou");
+-MODULE_DESCRIPTION("J-Core SPI driver");
+-MODULE_AUTHOR("Rich Felker <dalias@libc.org>");
+-MODULE_LICENSE("GPL");
+-MODULE_ALIAS("platform:" DRV_NAME);
 -- 
 2.39.0
 
