@@ -2,209 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7DD1C677F1
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 07:26:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26231C54EBE
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 07:47:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229825AbjAMH0V (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 02:26:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54276 "EHLO
+        id S239769AbjAMHq6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 02:46:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237927AbjAMHZs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 02:25:48 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B2523B7E3;
-        Thu, 12 Jan 2023 23:20:13 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1673594413; x=1705130413;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=Y3dF78OQd21knEiz3Yhh/QY/Dl2oydckoMmUh4NifSQ=;
-  b=lN3g1z0swha2u/3w7jUVIV0eN7JroEzz4rWMEkUnm/vOSdfY/CuFRmnM
-   tL1wmpldvMq3W7520/tEYmhL9ZNowRwYTy1LD2XROEyXZxHB+qSpsz6+L
-   xXh8vLSRfi/xSGHLL1H0/nkkg9VSZjcwPsv6Q/VX/NYZSetqrZxfcGZcd
-   3dvXuctUIOSqxjD34c+G7A7+rgTpPd1jm5rHzKjunmW5xkecJ4ZFIdZO7
-   YG8EjUKoGGDSOBQ5BDUZCSGaxia1COpunPO9vVne2hoIABFADkFVt/7Bc
-   YtLnYKeht50DwUllXzg0X9Tfkdv4+daSw5f7U3vD5c53QdxXE2oeUjszI
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10588"; a="351170039"
-X-IronPort-AV: E=Sophos;i="5.97,213,1669104000"; 
-   d="scan'208";a="351170039"
-Received: from orsmga001.jf.intel.com ([10.7.209.18])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jan 2023 23:20:13 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10588"; a="690412760"
-X-IronPort-AV: E=Sophos;i="5.97,213,1669104000"; 
-   d="scan'208";a="690412760"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.38.178])
-  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 Jan 2023 23:20:10 -0800
-Message-ID: <47bdc4e2-a2d6-12b4-f826-63874c9c0cbb@intel.com>
-Date:   Fri, 13 Jan 2023 09:20:05 +0200
+        with ESMTP id S238828AbjAMHqx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 02:46:53 -0500
+Received: from perceval.ideasonboard.com (perceval.ideasonboard.com [IPv6:2001:4b98:dc2:55:216:3eff:fef7:d647])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 233B91B9E6;
+        Thu, 12 Jan 2023 23:46:50 -0800 (PST)
+Received: from pendragon.ideasonboard.com (85-76-5-15-nat.elisa-mobile.fi [85.76.5.15])
+        by perceval.ideasonboard.com (Postfix) with ESMTPSA id 2CD9D4D4;
+        Fri, 13 Jan 2023 08:46:48 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=ideasonboard.com;
+        s=mail; t=1673596008;
+        bh=wltYQdcEAMz3UcFF0QVHXXUKY2mcn2dIbJ+Vsno/G9o=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=LPk9GDnJb8yIAG/qZw7j85ZzRhjxe0eUQN+NAsK+9uT/7opY3bx+SaNPEdtJt/mLy
+         7ehj3skE2f1g4W6IvOyNfZJFjCDi/ZIYJt389ghohYbhf6hpvDv0vqO0a1KKztGEE2
+         l1/4JdyjqER4jRCS7n87hgkuZ+xUKmlP2i0l0lNc=
+Date:   Fri, 13 Jan 2023 09:46:47 +0200
+From:   Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-sh@vger.kernel.org
+Subject: Re: [PATCH 01/22] gpu/drm: remove the shmobile drm driver
+Message-ID: <Y8EMZ0GI5rtor9xr@pendragon.ideasonboard.com>
+References: <20230113062339.1909087-1-hch@lst.de>
+ <20230113062339.1909087-2-hch@lst.de>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.6.1
-Subject: Re: [PATCH 2/5] drivers: mmc: sdhci-cadence: enable
- MMC_SDHCI_IO_ACCESSORS
-To:     Piyush Malgujar <pmalgujar@marvell.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, yamada.masahiro@socionext.com,
-        devicetree@vger.kernel.org, jannadurai@marvell.com,
-        cchavva@marvell.com
-References: <20221219142418.27949-1-pmalgujar@marvell.com>
- <20221219142418.27949-3-pmalgujar@marvell.com>
- <35ea0a7a-3d63-26b7-4dc3-69f6ca41909a@intel.com>
- <20230112141230.GB6335@Dell2s-9>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230112141230.GB6335@Dell2s-9>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20230113062339.1909087-2-hch@lst.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/01/23 16:12, Piyush Malgujar wrote:
-> Hi Adrian, 
-> 
-> Thank you for the review comments.
-> 
-> On Wed, Jan 11, 2023 at 10:23:43AM +0200, Adrian Hunter wrote:
->> On 19/12/22 16:24, Piyush Malgujar wrote:
->>> From: Jayanthi Annadurai <jannadurai@marvell.com>
->>>
->>> Add support for CONFIG_MMC_SDHCI_IO_ACCESSORS for controller
->>> specific register read and write APIs.
->>>
->>> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
->>> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
->>> ---
->>>  drivers/mmc/host/Kconfig         | 12 ++++++
->>>  drivers/mmc/host/sdhci-cadence.c | 63 ++++++++++++++++++++++++++++++++
->>>  2 files changed, 75 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
->>> index 5e19a961c34d7b5664ab2fd43cfba82dc90913ac..b5b2ae0bb4625bdb9d17acdbb1887c9caa3a1f32 100644
->>> --- a/drivers/mmc/host/Kconfig
->>> +++ b/drivers/mmc/host/Kconfig
->>> @@ -262,6 +262,18 @@ config MMC_SDHCI_CADENCE
->>>  
->>>  	  If unsure, say N.
->>>  
->>> +config MMC_SDHCI_CN10K
->>> +	tristate "SDHCI Cadence support for Marvell CN10K platforms"
->>> +	select MMC_SDHCI_CADENCE
->>> +	select MMC_SDHCI_IO_ACCESSORS
->>
->> Probably better to just add MMC_SDHCI_IO_ACCESSORS to 
->> config MMC_SDHCI_CADENCE and drop MMC_SDHCI_CN10K
->>
-> 
-> This reason behind this was to not force SDHCI_IO_ACCESSORS upon cadence users as some may not
-> require it owing to how cadence ip is integrated to soc.
+Hi Christoph,
 
-In practice, it makes no difference to performance and adds a
-negligible amount of code, so it is not worth the extra complexity
-to make it conditional.
+Thank you for the patch.
 
+On Fri, Jan 13, 2023 at 07:23:18AM +0100, Christoph Hellwig wrote:
+> This driver depends on ARM && ARCH_SHMOBILE, but ARCH_SHMOBILE can only be
+> set for each/sh, making the driver dead code except for the COMPILE_TEST
+> case.
 > 
->>> +	help
->>> +	  This selects the SDHCI cadence driver and IO Accessors
->>> +	  for Marvell CN10K platforms
->>> +
->>> +	  If you have Marvell CN10K platform, say Y or M here.
->>> +
->>> +	  If unsure, say N.
->>> +
->>>  config MMC_SDHCI_CNS3XXX
->>>  	tristate "SDHCI support on the Cavium Networks CNS3xxx SoC"
->>>  	depends on ARCH_CNS3XXX || COMPILE_TEST
->>> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
->>> index 5332d19e489be936d6814feba4f0fc046f5e130e..6bf703f15bc5be7e3be4cb1144b78ec3585ec540 100644
->>> --- a/drivers/mmc/host/sdhci-cadence.c
->>> +++ b/drivers/mmc/host/sdhci-cadence.c
->>> @@ -449,6 +449,61 @@ static u32 read_dqs_cmd_delay, clk_wrdqs_delay, clk_wr_delay, read_dqs_delay;
->>>  
->>>  static u32 sdhci_cdns_sd6_get_mode(struct sdhci_host *host, unsigned int timing);
->>>  
->>> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->>> +static u32 sdhci_cdns_sd6_readl(struct sdhci_host *host, int reg)
->>> +{
->>> +	return readl(host->ioaddr + reg);
->>> +}
->>> +
->>> +static void sdhci_cdns_sd6_writel(struct sdhci_host *host, u32 val, int reg)
->>> +{
->>> +	writel(val, host->ioaddr + reg);
->>> +}
->>> +
->>> +static u16 sdhci_cdns_sd6_readw(struct sdhci_host *host, int reg)
->>> +{
->>> +	u32 val, regoff;
->>> +
->>> +	regoff = reg & ~3;
->>> +
->>> +	val = readl(host->ioaddr + regoff);
->>> +	if ((reg & 0x3) == 0)
->>> +		return (val & 0xFFFF);
->>> +	else
->>> +		return ((val >> 16) & 0xFFFF);
->>> +}
->>> +
->>> +static void sdhci_cdns_sd6_writew(struct sdhci_host *host, u16 val, int reg)
->>> +{
->>> +	writew(val, host->ioaddr + reg);
->>> +}
->>> +
->>> +static u8 sdhci_cdns_sd6_readb(struct sdhci_host *host, int reg)
->>> +{
->>> +	u32 val, regoff;
->>> +
->>> +	regoff = reg & ~3;
->>> +
->>> +	val = readl(host->ioaddr + regoff);
->>> +	switch (reg & 3) {
->>> +	case 0:
->>> +		return (val & 0xFF);
->>> +	case 1:
->>> +		return ((val >> 8) & 0xFF);
->>> +	case 2:
->>> +		return ((val >> 16) & 0xFF);
->>> +	case 3:
->>> +		return ((val >> 24) & 0xFF);
->>> +	}
->>> +	return 0;
->>> +}
->>> +
->>> +static void sdhci_cdns_sd6_writeb(struct sdhci_host *host, u8 val, int reg)
->>> +{
->>> +	writeb(val, host->ioaddr + reg);
->>> +}
->>> +#endif
->>> +
->>>  static int sdhci_cdns_sd6_phy_lock_dll(struct sdhci_cdns_sd6_phy *phy)
->>>  {
->>>  	u32 delay_element = phy->d.delay_element_org;
->>> @@ -1576,6 +1631,14 @@ static const struct sdhci_ops sdhci_cdns_sd4_ops = {
->>>  };
->>>  
->>>  static const struct sdhci_ops sdhci_cdns_sd6_ops = {
->>> +#ifdef CONFIG_MMC_SDHCI_IO_ACCESSORS
->>> +	.read_l = sdhci_cdns_sd6_readl,
->>> +	.write_l = sdhci_cdns_sd6_writel,
->>> +	.read_w = sdhci_cdns_sd6_readw,
->>> +	.write_w = sdhci_cdns_sd6_writew,
->>> +	.read_b = sdhci_cdns_sd6_readb,
->>> +	.write_b = sdhci_cdns_sd6_writeb,
->>> +#endif
->>>  	.get_max_clock = sdhci_cdns_get_max_clock,
->>>  	.set_clock = sdhci_cdns_sd6_set_clock,
->>>  	.get_timeout_clock = sdhci_cdns_get_timeout_clock,
->>
-> 
-> Rest of the comments will be taken care in v2.
-> 
-> Thanks,
-> Piyush
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
+No objection from me.
+
+Reviewed-by: Laurent Pinchart <laurent.pinchart@ideasonboard.com>
+
+> ---
+>  drivers/gpu/drm/Kconfig                       |   2 -
+>  drivers/gpu/drm/Makefile                      |   1 -
+>  drivers/gpu/drm/shmobile/Kconfig              |  12 -
+>  drivers/gpu/drm/shmobile/Makefile             |   8 -
+>  .../gpu/drm/shmobile/shmob_drm_backlight.c    |  82 ---
+>  .../gpu/drm/shmobile/shmob_drm_backlight.h    |  19 -
+>  drivers/gpu/drm/shmobile/shmob_drm_crtc.c     | 683 ------------------
+>  drivers/gpu/drm/shmobile/shmob_drm_crtc.h     |  55 --
+>  drivers/gpu/drm/shmobile/shmob_drm_drv.c      | 303 --------
+>  drivers/gpu/drm/shmobile/shmob_drm_drv.h      |  42 --
+>  drivers/gpu/drm/shmobile/shmob_drm_kms.c      | 150 ----
+>  drivers/gpu/drm/shmobile/shmob_drm_kms.h      |  29 -
+>  drivers/gpu/drm/shmobile/shmob_drm_plane.c    | 261 -------
+>  drivers/gpu/drm/shmobile/shmob_drm_plane.h    |  19 -
+>  drivers/gpu/drm/shmobile/shmob_drm_regs.h     | 310 --------
+>  15 files changed, 1976 deletions(-)
+>  delete mode 100644 drivers/gpu/drm/shmobile/Kconfig
+>  delete mode 100644 drivers/gpu/drm/shmobile/Makefile
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_backlight.c
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_backlight.h
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_crtc.c
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_crtc.h
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_drv.c
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_drv.h
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_kms.c
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_kms.h
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_plane.c
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_plane.h
+>  delete mode 100644 drivers/gpu/drm/shmobile/shmob_drm_regs.h
+
+-- 
+Regards,
+
+Laurent Pinchart
