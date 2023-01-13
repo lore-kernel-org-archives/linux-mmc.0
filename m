@@ -2,31 +2,31 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 650D4C677F1
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:27:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 22E00C677F1
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 06:28:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240951AbjAMG1y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 01:27:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33502 "EHLO
+        id S240960AbjAMG14 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 01:27:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33512 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236952AbjAMGYr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:24:47 -0500
+        with ESMTP id S239960AbjAMGZF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 01:25:05 -0500
 Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05B766A0F5;
-        Thu, 12 Jan 2023 22:24:17 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58A72D5F;
+        Thu, 12 Jan 2023 22:24:26 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
         d=infradead.org; s=bombadil.20210309; h=Content-Transfer-Encoding:
         MIME-Version:References:In-Reply-To:Message-Id:Date:Subject:Cc:To:From:Sender
         :Reply-To:Content-Type:Content-ID:Content-Description;
-        bh=mxBIoTcWoM961bskFu4vgLYA4iK6lfkfHo46ovOHhdY=; b=epactF3LWIS1c8xybu121AnX4l
-        mxQDeqmEC9J8cgMc2SIYAO9NzF3h0YlU8xbCTYRLLK24zqc8kEMH0PpbDIl1CALQ06M6j2t+DvW/2
-        52IjFzvuXiBDn229AAQmQ76IVBLDEALsaXsG/rhqbYhzaI4Hb2k5FYwBW/QtpL+GpgBj1CYNBCjoU
-        Wow0ecEypZirO8g6qBKEcpON8H7jgnTwizxUEhR74JGhqggyXfr0uC5oDRw7YO7Ldj7yKS+YzcUmZ
-        aD+BC5AU+OusXU3+GAHmRsZapXMUIGr4gkeRILIjbZ4eJzhz4I3ZIHuh91N7YMYtmI2wXUBJeRcBz
-        reMo6ZfA==;
+        bh=2hPC7zlGA9AoDVV3UDFLI3T20RnHyuVZW1qr++X92oI=; b=U0IxPDIbDusxYyls7GAP+XZ9hs
+        WK31Rw57DTsJeVGBg+mDkhc5spH2HTT6S2bZUnUWnMFMzjuRTQxHiqWupbwLk1M9gy0H80/2TyLAr
+        4yZAcNURNOrPm5QlFyeBEx9lyjEDdoNyEPtXoGtYw9kpeDRvlQIm1jqEylL4Lcd6JGXKqeXaBK+NJ
+        +uk9CHMdgG+2G6uVa800FbCPfygKQQtSqfcvxslcKVFQl/oOPnfpUDUTut6HA5FBLlzfI2NTovRY8
+        7+tTh7eQy6PkL+5LvQ1o6k2FC089tht54mg8KW+qjbhQzzqpgcZGx2HuDPkTk929Z5PbzaycfkZ5t
+        Zk42lm1g==;
 Received: from [2001:4bb8:181:656b:9509:7d20:8d39:f895] (helo=localhost)
         by bombadil.infradead.org with esmtpsa (Exim 4.94.2 #2 (Red Hat Linux))
-        id 1pGDTy-000lWK-J8; Fri, 13 Jan 2023 06:24:07 +0000
+        id 1pGDU8-000lc0-50; Fri, 13 Jan 2023 06:24:16 +0000
 From:   Christoph Hellwig <hch@lst.de>
 To:     Yoshinori Sato <ysato@users.sourceforge.jp>,
         Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
@@ -45,9 +45,9 @@ Cc:     Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
         linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
         linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
         linux-sh@vger.kernel.org
-Subject: [PATCH 06/22] watchdog: remove the shwdt driver
-Date:   Fri, 13 Jan 2023 07:23:23 +0100
-Message-Id: <20230113062339.1909087-7-hch@lst.de>
+Subject: [PATCH 09/22] i2c: remove i2c-sh7760
+Date:   Fri, 13 Jan 2023 07:23:26 +0100
+Message-Id: <20230113062339.1909087-10-hch@lst.de>
 X-Mailer: git-send-email 2.39.0
 In-Reply-To: <20230113062339.1909087-1-hch@lst.de>
 References: <20230113062339.1909087-1-hch@lst.de>
@@ -62,431 +62,615 @@ Now that arch/sh is removed this driver is dead code.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- .../watchdog/watchdog-parameters.rst          |  12 -
- drivers/watchdog/Kconfig                      |  20 -
- drivers/watchdog/Makefile                     |   3 -
- drivers/watchdog/shwdt.c                      | 344 ------------------
- 4 files changed, 379 deletions(-)
- delete mode 100644 drivers/watchdog/shwdt.c
+ drivers/i2c/busses/Kconfig      |   9 -
+ drivers/i2c/busses/Makefile     |   1 -
+ drivers/i2c/busses/i2c-sh7760.c | 565 --------------------------------
+ 3 files changed, 575 deletions(-)
+ delete mode 100644 drivers/i2c/busses/i2c-sh7760.c
 
-diff --git a/Documentation/watchdog/watchdog-parameters.rst b/Documentation/watchdog/watchdog-parameters.rst
-index 29153eed668900..553ac2f8ae23f7 100644
---- a/Documentation/watchdog/watchdog-parameters.rst
-+++ b/Documentation/watchdog/watchdog-parameters.rst
-@@ -579,18 +579,6 @@ scx200_wdt:
+diff --git a/drivers/i2c/busses/Kconfig b/drivers/i2c/busses/Kconfig
+index 22602c512a6e50..44267a023fd19a 100644
+--- a/drivers/i2c/busses/Kconfig
++++ b/drivers/i2c/busses/Kconfig
+@@ -1016,15 +1016,6 @@ config I2C_S3C2410
+ 	  Say Y here to include support for I2C controller in the
+ 	  Samsung SoCs (S3C, S5Pv210, Exynos).
  
- -------------------------------------------------
- 
--shwdt:
--    clock_division_ratio:
--	Clock division ratio. Valid ranges are from 0x5 (1.31ms)
--	to 0x7 (5.25ms). (default=7)
--    heartbeat:
--	Watchdog heartbeat in seconds. (1 <= heartbeat <= 3600, default=30
--    nowayout:
--	Watchdog cannot be stopped once started
--	(default=kernel config parameter)
--
---------------------------------------------------
--
- smsc37b787_wdt:
-     timeout:
- 	range is 1-255 units, default is 60
-diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
-index 0bc40b763b0652..7db0a5e636cf65 100644
---- a/drivers/watchdog/Kconfig
-+++ b/drivers/watchdog/Kconfig
-@@ -2015,26 +2015,6 @@ config DIAG288_WATCHDOG
- 	  To compile this driver as a module, choose M here. The module
- 	  will be called diag288_wdt.
- 
--# SUPERH (sh + sh64) Architecture
--
--config SH_WDT
--	tristate "SuperH Watchdog"
--	depends on SUPERH && (CPU_SH3 || CPU_SH4 || COMPILE_TEST)
--	select WATCHDOG_CORE
+-config I2C_SH7760
+-	tristate "Renesas SH7760 I2C Controller"
+-	depends on CPU_SUBTYPE_SH7760
 -	help
--	  This driver adds watchdog support for the integrated watchdog in the
--	  SuperH processors. If you have one of these processors and wish
--	  to have watchdog support enabled, say Y, otherwise say N.
+-	  This driver supports the 2 I2C interfaces on the Renesas SH7760.
 -
--	  As a side note, saying Y here will automatically boost HZ to 1000
--	  so that the timer has a chance to clear the overflow counter. On
--	  slower systems (such as the SH-2 and SH-3) this will likely yield
--	  some performance issues. As such, the WDT should be avoided here
--	  unless it is absolutely necessary.
+-	  This driver can also be built as a module.  If so, the module
+-	  will be called i2c-sh7760.
 -
--	  To compile this driver as a module, choose M here: the
--	  module will be called shwdt.
--
- # SPARC Architecture
- 
- # SPARC64 Architecture
-diff --git a/drivers/watchdog/Makefile b/drivers/watchdog/Makefile
-index 9cbf6580f16c9f..a852ab4d7176ac 100644
---- a/drivers/watchdog/Makefile
-+++ b/drivers/watchdog/Makefile
-@@ -195,9 +195,6 @@ obj-$(CONFIG_WATCHDOG_RTAS) += wdrtas.o
- # S390 Architecture
- obj-$(CONFIG_DIAG288_WATCHDOG) += diag288_wdt.o
- 
--# SUPERH (sh + sh64) Architecture
--obj-$(CONFIG_SH_WDT) += shwdt.o
--
- # SPARC Architecture
- 
- # SPARC64 Architecture
-diff --git a/drivers/watchdog/shwdt.c b/drivers/watchdog/shwdt.c
+ config I2C_SH_MOBILE
+ 	tristate "SuperH Mobile I2C Controller"
+ 	depends on ARCH_RENESAS || COMPILE_TEST
+diff --git a/drivers/i2c/busses/Makefile b/drivers/i2c/busses/Makefile
+index e73cdb1d2b5a85..6be213e5e4dd16 100644
+--- a/drivers/i2c/busses/Makefile
++++ b/drivers/i2c/busses/Makefile
+@@ -104,7 +104,6 @@ obj-$(CONFIG_I2C_RIIC)		+= i2c-riic.o
+ obj-$(CONFIG_I2C_RK3X)		+= i2c-rk3x.o
+ obj-$(CONFIG_I2C_RZV2M)		+= i2c-rzv2m.o
+ obj-$(CONFIG_I2C_S3C2410)	+= i2c-s3c2410.o
+-obj-$(CONFIG_I2C_SH7760)	+= i2c-sh7760.o
+ obj-$(CONFIG_I2C_SH_MOBILE)	+= i2c-sh_mobile.o
+ obj-$(CONFIG_I2C_SIMTEC)	+= i2c-simtec.o
+ obj-$(CONFIG_I2C_SPRD)		+= i2c-sprd.o
+diff --git a/drivers/i2c/busses/i2c-sh7760.c b/drivers/i2c/busses/i2c-sh7760.c
 deleted file mode 100644
-index f55533e0e0454e..00000000000000
---- a/drivers/watchdog/shwdt.c
+index 319d1fa617c883..00000000000000
+--- a/drivers/i2c/busses/i2c-sh7760.c
 +++ /dev/null
-@@ -1,344 +0,0 @@
--// SPDX-License-Identifier: GPL-2.0-or-later
+@@ -1,565 +0,0 @@
 -/*
-- * drivers/watchdog/shwdt.c
+- * I2C bus driver for the SH7760 I2C Interfaces.
 - *
-- * Watchdog driver for integrated watchdog in the SuperH processors.
+- * (c) 2005-2008 MSC Vertriebsges.m.b.H, Manuel Lauss <mlau@msc-ge.com>
 - *
-- * Copyright (C) 2001 - 2012  Paul Mundt <lethal@linux-sh.org>
+- * licensed under the terms outlined in the file COPYING.
 - *
-- * 14-Dec-2001 Matt Domsch <Matt_Domsch@dell.com>
-- *     Added nowayout module option to override CONFIG_WATCHDOG_NOWAYOUT
-- *
-- * 19-Apr-2002 Rob Radez <rob@osinvestor.com>
-- *     Added expect close support, made emulated timeout runtime changeable
-- *     general cleanups, add some ioctls
 - */
 -
--#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
--
--#include <linux/module.h>
--#include <linux/moduleparam.h>
+-#include <linux/completion.h>
+-#include <linux/delay.h>
+-#include <linux/err.h>
+-#include <linux/i2c.h>
+-#include <linux/interrupt.h>
+-#include <linux/ioport.h>
 -#include <linux/platform_device.h>
--#include <linux/init.h>
--#include <linux/types.h>
--#include <linux/spinlock.h>
--#include <linux/watchdog.h>
--#include <linux/pm_runtime.h>
--#include <linux/fs.h>
--#include <linux/mm.h>
 -#include <linux/slab.h>
 -#include <linux/io.h>
--#include <linux/clk.h>
--#include <linux/err.h>
--#include <asm/watchdog.h>
+-#include <linux/module.h>
 -
--#define DRV_NAME "sh-wdt"
+-#include <asm/clock.h>
+-#include <asm/i2c-sh7760.h>
 -
--/*
-- * Default clock division ratio is 5.25 msecs. For an additional table of
-- * values, consult the asm-sh/watchdog.h. Overload this at module load
-- * time.
-- *
-- * In order for this to work reliably we need to have HZ set to 1000 or
-- * something quite higher than 100 (or we need a proper high-res timer
-- * implementation that will deal with this properly), otherwise the 10ms
-- * resolution of a jiffy is enough to trigger the overflow. For things like
-- * the SH-4 and SH-5, this isn't necessarily that big of a problem, though
-- * for the SH-2 and SH-3, this isn't recommended unless the WDT is absolutely
-- * necssary.
-- *
-- * As a result of this timing problem, the only modes that are particularly
-- * feasible are the 4096 and the 2048 divisors, which yield 5.25 and 2.62ms
-- * overflow periods respectively.
-- *
-- * Also, since we can't really expect userspace to be responsive enough
-- * before the overflow happens, we maintain two separate timers .. One in
-- * the kernel for clearing out WOVF every 2ms or so (again, this depends on
-- * HZ == 1000), and another for monitoring userspace writes to the WDT device.
-- *
-- * As such, we currently use a configurable heartbeat interval which defaults
-- * to 30s. In this case, the userspace daemon is only responsible for periodic
-- * writes to the device before the next heartbeat is scheduled. If the daemon
-- * misses its deadline, the kernel timer will allow the WDT to overflow.
-- */
--static int clock_division_ratio = WTCSR_CKS_4096;
--#define next_ping_period(cks)	(jiffies + msecs_to_jiffies(cks - 4))
+-/* register offsets */
+-#define I2CSCR		0x0		/* slave ctrl		*/
+-#define I2CMCR		0x4		/* master ctrl		*/
+-#define I2CSSR		0x8		/* slave status		*/
+-#define I2CMSR		0xC		/* master status	*/
+-#define I2CSIER		0x10		/* slave irq enable	*/
+-#define I2CMIER		0x14		/* master irq enable	*/
+-#define I2CCCR		0x18		/* clock dividers	*/
+-#define I2CSAR		0x1c		/* slave address	*/
+-#define I2CMAR		0x20		/* master address	*/
+-#define I2CRXTX		0x24		/* data port		*/
+-#define I2CFCR		0x28		/* fifo control		*/
+-#define I2CFSR		0x2C		/* fifo status		*/
+-#define I2CFIER		0x30		/* fifo irq enable	*/
+-#define I2CRFDR		0x34		/* rx fifo count	*/
+-#define I2CTFDR		0x38		/* tx fifo count	*/
 -
--#define WATCHDOG_HEARTBEAT 30			/* 30 sec default heartbeat */
--static int heartbeat = WATCHDOG_HEARTBEAT;	/* in seconds */
--static bool nowayout = WATCHDOG_NOWAYOUT;
--static unsigned long next_heartbeat;
+-#define REGSIZE		0x3C
 -
--struct sh_wdt {
--	void __iomem		*base;
--	struct device		*dev;
--	struct clk		*clk;
--	spinlock_t		lock;
+-#define MCR_MDBS	0x80		/* non-fifo mode switch	*/
+-#define MCR_FSCL	0x40		/* override SCL pin	*/
+-#define MCR_FSDA	0x20		/* override SDA pin	*/
+-#define MCR_OBPC	0x10		/* override pins	*/
+-#define MCR_MIE		0x08		/* master if enable	*/
+-#define MCR_TSBE	0x04
+-#define MCR_FSB		0x02		/* force stop bit	*/
+-#define MCR_ESG		0x01		/* en startbit gen.	*/
 -
--	struct timer_list	timer;
+-#define MSR_MNR		0x40		/* nack received	*/
+-#define MSR_MAL		0x20		/* arbitration lost	*/
+-#define MSR_MST		0x10		/* sent a stop		*/
+-#define MSR_MDE		0x08
+-#define MSR_MDT		0x04
+-#define MSR_MDR		0x02
+-#define MSR_MAT		0x01		/* slave addr xfer done	*/
+-
+-#define MIE_MNRE	0x40		/* nack irq en		*/
+-#define MIE_MALE	0x20		/* arblos irq en	*/
+-#define MIE_MSTE	0x10		/* stop irq en		*/
+-#define MIE_MDEE	0x08
+-#define MIE_MDTE	0x04
+-#define MIE_MDRE	0x02
+-#define MIE_MATE	0x01		/* address sent irq en	*/
+-
+-#define FCR_RFRST	0x02		/* reset rx fifo	*/
+-#define FCR_TFRST	0x01		/* reset tx fifo	*/
+-
+-#define FSR_TEND	0x04		/* last byte sent	*/
+-#define FSR_RDF		0x02		/* rx fifo trigger	*/
+-#define FSR_TDFE	0x01		/* tx fifo empty	*/
+-
+-#define FIER_TEIE	0x04		/* tx fifo empty irq en	*/
+-#define FIER_RXIE	0x02		/* rx fifo trig irq en	*/
+-#define FIER_TXIE	0x01		/* tx fifo trig irq en	*/
+-
+-#define FIFO_SIZE	16
+-
+-struct cami2c {
+-	void __iomem *iobase;
+-	struct i2c_adapter adap;
+-
+-	/* message processing */
+-	struct i2c_msg	*msg;
+-#define IDF_SEND	1
+-#define IDF_RECV	2
+-#define IDF_STOP	4
+-	int		flags;
+-
+-#define IDS_DONE	1
+-#define IDS_ARBLOST	2
+-#define IDS_NACK	4
+-	int		status;
+-	struct completion xfer_done;
+-
+-	int irq;
+-	struct resource *ioarea;
 -};
 -
--static int sh_wdt_start(struct watchdog_device *wdt_dev)
+-static inline void OUT32(struct cami2c *cam, int reg, unsigned long val)
 -{
--	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
--	unsigned long flags;
--	u8 csr;
--
--	pm_runtime_get_sync(wdt->dev);
--	clk_enable(wdt->clk);
--
--	spin_lock_irqsave(&wdt->lock, flags);
--
--	next_heartbeat = jiffies + (heartbeat * HZ);
--	mod_timer(&wdt->timer, next_ping_period(clock_division_ratio));
--
--	csr = sh_wdt_read_csr();
--	csr |= WTCSR_WT | clock_division_ratio;
--	sh_wdt_write_csr(csr);
--
--	sh_wdt_write_cnt(0);
--
--	/*
--	 * These processors have a bit of an inconsistent initialization
--	 * process.. starting with SH-3, RSTS was moved to WTCSR, and the
--	 * RSTCSR register was removed.
--	 *
--	 * On the SH-2 however, in addition with bits being in different
--	 * locations, we must deal with RSTCSR outright..
--	 */
--	csr = sh_wdt_read_csr();
--	csr |= WTCSR_TME;
--	csr &= ~WTCSR_RSTS;
--	sh_wdt_write_csr(csr);
--
--#ifdef CONFIG_CPU_SH2
--	csr = sh_wdt_read_rstcsr();
--	csr &= ~RSTCSR_RSTS;
--	sh_wdt_write_rstcsr(csr);
--#endif
--	spin_unlock_irqrestore(&wdt->lock, flags);
--
--	return 0;
+-	__raw_writel(val, (unsigned long)cam->iobase + reg);
 -}
 -
--static int sh_wdt_stop(struct watchdog_device *wdt_dev)
+-static inline unsigned long IN32(struct cami2c *cam, int reg)
 -{
--	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
--	unsigned long flags;
--	u8 csr;
--
--	spin_lock_irqsave(&wdt->lock, flags);
--
--	del_timer(&wdt->timer);
--
--	csr = sh_wdt_read_csr();
--	csr &= ~WTCSR_TME;
--	sh_wdt_write_csr(csr);
--
--	spin_unlock_irqrestore(&wdt->lock, flags);
--
--	clk_disable(wdt->clk);
--	pm_runtime_put_sync(wdt->dev);
--
--	return 0;
+-	return __raw_readl((unsigned long)cam->iobase + reg);
 -}
 -
--static int sh_wdt_keepalive(struct watchdog_device *wdt_dev)
+-static irqreturn_t sh7760_i2c_irq(int irq, void *ptr)
 -{
--	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
--	unsigned long flags;
+-	struct cami2c *id = ptr;
+-	struct i2c_msg *msg = id->msg;
+-	char *data = msg->buf;
+-	unsigned long msr, fsr, fier, len;
 -
--	spin_lock_irqsave(&wdt->lock, flags);
--	next_heartbeat = jiffies + (heartbeat * HZ);
--	spin_unlock_irqrestore(&wdt->lock, flags);
+-	msr = IN32(id, I2CMSR);
+-	fsr = IN32(id, I2CFSR);
 -
--	return 0;
--}
+-	/* arbitration lost */
+-	if (msr & MSR_MAL) {
+-		OUT32(id, I2CMCR, 0);
+-		OUT32(id, I2CSCR, 0);
+-		OUT32(id, I2CSAR, 0);
+-		id->status |= IDS_DONE | IDS_ARBLOST;
+-		goto out;
+-	}
 -
--static int sh_wdt_set_heartbeat(struct watchdog_device *wdt_dev, unsigned t)
--{
--	struct sh_wdt *wdt = watchdog_get_drvdata(wdt_dev);
--	unsigned long flags;
--
--	if (unlikely(t < 1 || t > 3600)) /* arbitrary upper limit */
--		return -EINVAL;
--
--	spin_lock_irqsave(&wdt->lock, flags);
--	heartbeat = t;
--	wdt_dev->timeout = t;
--	spin_unlock_irqrestore(&wdt->lock, flags);
--
--	return 0;
--}
--
--static void sh_wdt_ping(struct timer_list *t)
--{
--	struct sh_wdt *wdt = from_timer(wdt, t, timer);
--	unsigned long flags;
--
--	spin_lock_irqsave(&wdt->lock, flags);
--	if (time_before(jiffies, next_heartbeat)) {
--		u8 csr;
--
--		csr = sh_wdt_read_csr();
--		csr &= ~WTCSR_IOVF;
--		sh_wdt_write_csr(csr);
--
--		sh_wdt_write_cnt(0);
--
--		mod_timer(&wdt->timer, next_ping_period(clock_division_ratio));
--	} else
--		dev_warn(wdt->dev, "Heartbeat lost! Will not ping "
--		         "the watchdog\n");
--	spin_unlock_irqrestore(&wdt->lock, flags);
--}
--
--static const struct watchdog_info sh_wdt_info = {
--	.options		= WDIOF_KEEPALIVEPING | WDIOF_SETTIMEOUT |
--				  WDIOF_MAGICCLOSE,
--	.firmware_version	= 1,
--	.identity		= "SH WDT",
--};
--
--static const struct watchdog_ops sh_wdt_ops = {
--	.owner		= THIS_MODULE,
--	.start		= sh_wdt_start,
--	.stop		= sh_wdt_stop,
--	.ping		= sh_wdt_keepalive,
--	.set_timeout	= sh_wdt_set_heartbeat,
--};
--
--static struct watchdog_device sh_wdt_dev = {
--	.info	= &sh_wdt_info,
--	.ops	= &sh_wdt_ops,
--};
--
--static int sh_wdt_probe(struct platform_device *pdev)
--{
--	struct sh_wdt *wdt;
--	int rc;
--
--	/*
--	 * As this driver only covers the global watchdog case, reject
--	 * any attempts to register per-CPU watchdogs.
--	 */
--	if (pdev->id != -1)
--		return -EINVAL;
--
--	wdt = devm_kzalloc(&pdev->dev, sizeof(struct sh_wdt), GFP_KERNEL);
--	if (unlikely(!wdt))
--		return -ENOMEM;
--
--	wdt->dev = &pdev->dev;
--
--	wdt->clk = devm_clk_get(&pdev->dev, NULL);
--	if (IS_ERR(wdt->clk)) {
--		/*
--		 * Clock framework support is optional, continue on
--		 * anyways if we don't find a matching clock.
+-	if (msr & MSR_MNR) {
+-		/* NACK handling is very screwed up.  After receiving a
+-		 * NAK IRQ one has to wait a bit  before writing to any
+-		 * registers, or the ctl will lock up. After that delay
+-		 * do a normal i2c stop. Then wait at least 1 ms before
+-		 * attempting another transfer or ctl will stop working
 -		 */
--		wdt->clk = NULL;
+-		udelay(100);	/* wait or risk ctl hang */
+-		OUT32(id, I2CFCR, FCR_RFRST | FCR_TFRST);
+-		OUT32(id, I2CMCR, MCR_MIE | MCR_FSB);
+-		OUT32(id, I2CFIER, 0);
+-		OUT32(id, I2CMIER, MIE_MSTE);
+-		OUT32(id, I2CSCR, 0);
+-		OUT32(id, I2CSAR, 0);
+-		id->status |= IDS_NACK;
+-		msr &= ~MSR_MAT;
+-		fsr = 0;
+-		/* In some cases the MST bit is also set. */
 -	}
 -
--	wdt->base = devm_platform_ioremap_resource(pdev, 0);
--	if (IS_ERR(wdt->base))
--		return PTR_ERR(wdt->base);
--
--	watchdog_set_nowayout(&sh_wdt_dev, nowayout);
--	watchdog_set_drvdata(&sh_wdt_dev, wdt);
--	sh_wdt_dev.parent = &pdev->dev;
--
--	spin_lock_init(&wdt->lock);
--
--	rc = sh_wdt_set_heartbeat(&sh_wdt_dev, heartbeat);
--	if (unlikely(rc)) {
--		/* Default timeout if invalid */
--		sh_wdt_set_heartbeat(&sh_wdt_dev, WATCHDOG_HEARTBEAT);
--
--		dev_warn(&pdev->dev,
--			 "heartbeat value must be 1<=x<=3600, using %d\n",
--			 sh_wdt_dev.timeout);
+-	/* i2c-stop was sent */
+-	if (msr & MSR_MST) {
+-		id->status |= IDS_DONE;
+-		goto out;
 -	}
 -
--	dev_info(&pdev->dev, "configured with heartbeat=%d sec (nowayout=%d)\n",
--		 sh_wdt_dev.timeout, nowayout);
+-	/* i2c slave addr was sent; set to "normal" operation */
+-	if (msr & MSR_MAT)
+-		OUT32(id, I2CMCR, MCR_MIE);
 -
--	rc = watchdog_register_device(&sh_wdt_dev);
--	if (unlikely(rc)) {
--		dev_err(&pdev->dev, "Can't register watchdog (err=%d)\n", rc);
--		return rc;
+-	fier = IN32(id, I2CFIER);
+-
+-	if (fsr & FSR_RDF) {
+-		len = IN32(id, I2CRFDR);
+-		if (msg->len <= len) {
+-			if (id->flags & IDF_STOP) {
+-				OUT32(id, I2CMCR, MCR_MIE | MCR_FSB);
+-				OUT32(id, I2CFIER, 0);
+-				/* manual says: wait >= 0.5 SCL times */
+-				udelay(5);
+-				/* next int should be MST */
+-			} else {
+-				id->status |= IDS_DONE;
+-				/* keep the RDF bit: ctrl holds SCL low
+-				 * until the setup for the next i2c_msg
+-				 * clears this bit.
+-				 */
+-				fsr &= ~FSR_RDF;
+-			}
+-		}
+-		while (msg->len && len) {
+-			*data++ = IN32(id, I2CRXTX);
+-			msg->len--;
+-			len--;
+-		}
+-
+-		if (msg->len) {
+-			len = (msg->len >= FIFO_SIZE) ? FIFO_SIZE - 1
+-						      : msg->len - 1;
+-
+-			OUT32(id, I2CFCR, FCR_TFRST | ((len & 0xf) << 4));
+-		}
+-
+-	} else if (id->flags & IDF_SEND) {
+-		if ((fsr & FSR_TEND) && (msg->len < 1)) {
+-			if (id->flags & IDF_STOP) {
+-				OUT32(id, I2CMCR, MCR_MIE | MCR_FSB);
+-			} else {
+-				id->status |= IDS_DONE;
+-				/* keep the TEND bit: ctl holds SCL low
+-				 * until the setup for the next i2c_msg
+-				 * clears this bit.
+-				 */
+-				fsr &= ~FSR_TEND;
+-			}
+-		}
+-		if (fsr & FSR_TDFE) {
+-			while (msg->len && (IN32(id, I2CTFDR) < FIFO_SIZE)) {
+-				OUT32(id, I2CRXTX, *data++);
+-				msg->len--;
+-			}
+-
+-			if (msg->len < 1) {
+-				fier &= ~FIER_TXIE;
+-				OUT32(id, I2CFIER, fier);
+-			} else {
+-				len = (msg->len >= FIFO_SIZE) ? 2 : 0;
+-				OUT32(id, I2CFCR,
+-					  FCR_RFRST | ((len & 3) << 2));
+-			}
+-		}
 -	}
+-out:
+-	if (id->status & IDS_DONE) {
+-		OUT32(id, I2CMIER, 0);
+-		OUT32(id, I2CFIER, 0);
+-		id->msg = NULL;
+-		complete(&id->xfer_done);
+-	}
+-	/* clear status flags and ctrl resumes work */
+-	OUT32(id, I2CMSR, ~msr);
+-	OUT32(id, I2CFSR, ~fsr);
+-	OUT32(id, I2CSSR, 0);
 -
--	timer_setup(&wdt->timer, sh_wdt_ping, 0);
--	wdt->timer.expires	= next_ping_period(clock_division_ratio);
--
--	dev_info(&pdev->dev, "initialized.\n");
--
--	pm_runtime_enable(&pdev->dev);
--
--	return 0;
+-	return IRQ_HANDLED;
 -}
 -
--static int sh_wdt_remove(struct platform_device *pdev)
+-
+-/* prepare and start a master receive operation */
+-static void sh7760_i2c_mrecv(struct cami2c *id)
 -{
--	watchdog_unregister_device(&sh_wdt_dev);
+-	int len;
 -
--	pm_runtime_disable(&pdev->dev);
+-	id->flags |= IDF_RECV;
 -
--	return 0;
+-	/* set the slave addr reg; otherwise rcv wont work! */
+-	OUT32(id, I2CSAR, 0xfe);
+-	OUT32(id, I2CMAR, (id->msg->addr << 1) | 1);
+-
+-	/* adjust rx fifo trigger */
+-	if (id->msg->len >= FIFO_SIZE)
+-		len = FIFO_SIZE - 1;	/* trigger at fifo full */
+-	else
+-		len = id->msg->len - 1;	/* trigger before all received */
+-
+-	OUT32(id, I2CFCR, FCR_RFRST | FCR_TFRST);
+-	OUT32(id, I2CFCR, FCR_TFRST | ((len & 0xF) << 4));
+-
+-	OUT32(id, I2CMSR, 0);
+-	OUT32(id, I2CMCR, MCR_MIE | MCR_ESG);
+-	OUT32(id, I2CMIER, MIE_MNRE | MIE_MALE | MIE_MSTE | MIE_MATE);
+-	OUT32(id, I2CFIER, FIER_RXIE);
 -}
 -
--static void sh_wdt_shutdown(struct platform_device *pdev)
+-/* prepare and start a master send operation */
+-static void sh7760_i2c_msend(struct cami2c *id)
 -{
--	sh_wdt_stop(&sh_wdt_dev);
+-	int len;
+-
+-	id->flags |= IDF_SEND;
+-
+-	/* set the slave addr reg; otherwise xmit wont work! */
+-	OUT32(id, I2CSAR, 0xfe);
+-	OUT32(id, I2CMAR, (id->msg->addr << 1) | 0);
+-
+-	/* adjust tx fifo trigger */
+-	if (id->msg->len >= FIFO_SIZE)
+-		len = 2;	/* trig: 2 bytes left in TX fifo */
+-	else
+-		len = 0;	/* trig: 8 bytes left in TX fifo */
+-
+-	OUT32(id, I2CFCR, FCR_RFRST | FCR_TFRST);
+-	OUT32(id, I2CFCR, FCR_RFRST | ((len & 3) << 2));
+-
+-	while (id->msg->len && IN32(id, I2CTFDR) < FIFO_SIZE) {
+-		OUT32(id, I2CRXTX, *(id->msg->buf));
+-		(id->msg->len)--;
+-		(id->msg->buf)++;
+-	}
+-
+-	OUT32(id, I2CMSR, 0);
+-	OUT32(id, I2CMCR, MCR_MIE | MCR_ESG);
+-	OUT32(id, I2CFSR, 0);
+-	OUT32(id, I2CMIER, MIE_MNRE | MIE_MALE | MIE_MSTE | MIE_MATE);
+-	OUT32(id, I2CFIER, FIER_TEIE | (id->msg->len ? FIER_TXIE : 0));
 -}
 -
--static struct platform_driver sh_wdt_driver = {
--	.driver		= {
--		.name	= DRV_NAME,
--	},
+-static inline int sh7760_i2c_busy_check(struct cami2c *id)
+-{
+-	return (IN32(id, I2CMCR) & MCR_FSDA);
+-}
 -
--	.probe		= sh_wdt_probe,
--	.remove		= sh_wdt_remove,
--	.shutdown	= sh_wdt_shutdown,
+-static int sh7760_i2c_master_xfer(struct i2c_adapter *adap,
+-				  struct i2c_msg *msgs,
+-				  int num)
+-{
+-	struct cami2c *id = adap->algo_data;
+-	int i, retr;
+-
+-	if (sh7760_i2c_busy_check(id)) {
+-		dev_err(&adap->dev, "sh7760-i2c%d: bus busy!\n", adap->nr);
+-		return -EBUSY;
+-	}
+-
+-	i = 0;
+-	while (i < num) {
+-		retr = adap->retries;
+-retry:
+-		id->flags = ((i == (num-1)) ? IDF_STOP : 0);
+-		id->status = 0;
+-		id->msg = msgs;
+-		init_completion(&id->xfer_done);
+-
+-		if (msgs->flags & I2C_M_RD)
+-			sh7760_i2c_mrecv(id);
+-		else
+-			sh7760_i2c_msend(id);
+-
+-		wait_for_completion(&id->xfer_done);
+-
+-		if (id->status == 0) {
+-			num = -EIO;
+-			break;
+-		}
+-
+-		if (id->status & IDS_NACK) {
+-			/* wait a bit or i2c module stops working */
+-			mdelay(1);
+-			num = -EREMOTEIO;
+-			break;
+-		}
+-
+-		if (id->status & IDS_ARBLOST) {
+-			if (retr--) {
+-				mdelay(2);
+-				goto retry;
+-			}
+-			num = -EREMOTEIO;
+-			break;
+-		}
+-
+-		msgs++;
+-		i++;
+-	}
+-
+-	id->msg = NULL;
+-	id->flags = 0;
+-	id->status = 0;
+-
+-	OUT32(id, I2CMCR, 0);
+-	OUT32(id, I2CMSR, 0);
+-	OUT32(id, I2CMIER, 0);
+-	OUT32(id, I2CFIER, 0);
+-
+-	/* reset slave module registers too: master mode enables slave
+-	 * module for receive ops (ack, data). Without this reset,
+-	 * eternal bus activity might be reported after NACK / ARBLOST.
+-	 */
+-	OUT32(id, I2CSCR, 0);
+-	OUT32(id, I2CSAR, 0);
+-	OUT32(id, I2CSSR, 0);
+-
+-	return num;
+-}
+-
+-static u32 sh7760_i2c_func(struct i2c_adapter *adap)
+-{
+-	return I2C_FUNC_I2C | (I2C_FUNC_SMBUS_EMUL & ~I2C_FUNC_SMBUS_QUICK);
+-}
+-
+-static const struct i2c_algorithm sh7760_i2c_algo = {
+-	.master_xfer	= sh7760_i2c_master_xfer,
+-	.functionality	= sh7760_i2c_func,
 -};
 -
--static int __init sh_wdt_init(void)
+-/* calculate CCR register setting for a desired scl clock.  SCL clock is
+- * derived from I2C module clock  (iclk)  which in turn is derived from
+- * peripheral module clock (mclk, usually around 33MHz):
+- * iclk = mclk/(CDF + 1).  iclk must be < 20MHz.
+- * scl = iclk/(SCGD*8 + 20).
+- */
+-static int calc_CCR(unsigned long scl_hz)
 -{
--	if (unlikely(clock_division_ratio < 0x5 ||
--		     clock_division_ratio > 0x7)) {
--		clock_division_ratio = WTCSR_CKS_4096;
+-	struct clk *mclk;
+-	unsigned long mck, m1, dff, odff, iclk;
+-	signed char cdf, cdfm;
+-	int scgd, scgdm, scgds;
 -
--		pr_info("divisor must be 0x5<=x<=0x7, using %d\n",
--			clock_division_ratio);
+-	mclk = clk_get(NULL, "peripheral_clk");
+-	if (IS_ERR(mclk)) {
+-		return PTR_ERR(mclk);
+-	} else {
+-		mck = mclk->rate;
+-		clk_put(mclk);
 -	}
 -
--	return platform_driver_register(&sh_wdt_driver);
+-	odff = scl_hz;
+-	scgdm = cdfm = m1 = 0;
+-	for (cdf = 3; cdf >= 0; cdf--) {
+-		iclk = mck / (1 + cdf);
+-		if (iclk >= 20000000)
+-			continue;
+-		scgds = ((iclk / scl_hz) - 20) >> 3;
+-		for (scgd = scgds; (scgd < 63) && scgd <= scgds + 1; scgd++) {
+-			m1 = iclk / (20 + (scgd << 3));
+-			dff = abs(scl_hz - m1);
+-			if (dff < odff) {
+-				odff = dff;
+-				cdfm = cdf;
+-				scgdm = scgd;
+-			}
+-		}
+-	}
+-	/* fail if more than 25% off of requested SCL */
+-	if (odff > (scl_hz >> 2))
+-		return -EINVAL;
+-
+-	/* create a CCR register value */
+-	return ((scgdm << 2) | cdfm);
 -}
 -
--static void __exit sh_wdt_exit(void)
+-static int sh7760_i2c_probe(struct platform_device *pdev)
 -{
--	platform_driver_unregister(&sh_wdt_driver);
+-	struct sh7760_i2c_platdata *pd;
+-	struct resource *res;
+-	struct cami2c *id;
+-	int ret;
+-
+-	pd = dev_get_platdata(&pdev->dev);
+-	if (!pd) {
+-		dev_err(&pdev->dev, "no platform_data!\n");
+-		ret = -ENODEV;
+-		goto out0;
+-	}
+-
+-	id = kzalloc(sizeof(struct cami2c), GFP_KERNEL);
+-	if (!id) {
+-		dev_err(&pdev->dev, "no mem for private data\n");
+-		ret = -ENOMEM;
+-		goto out0;
+-	}
+-
+-	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+-	if (!res) {
+-		dev_err(&pdev->dev, "no mmio resources\n");
+-		ret = -ENODEV;
+-		goto out1;
+-	}
+-
+-	id->ioarea = request_mem_region(res->start, REGSIZE, pdev->name);
+-	if (!id->ioarea) {
+-		dev_err(&pdev->dev, "mmio already reserved\n");
+-		ret = -EBUSY;
+-		goto out1;
+-	}
+-
+-	id->iobase = ioremap(res->start, REGSIZE);
+-	if (!id->iobase) {
+-		dev_err(&pdev->dev, "cannot ioremap\n");
+-		ret = -ENODEV;
+-		goto out2;
+-	}
+-
+-	ret = platform_get_irq(pdev, 0);
+-	if (ret < 0)
+-		goto out3;
+-	id->irq = ret;
+-
+-	id->adap.nr = pdev->id;
+-	id->adap.algo = &sh7760_i2c_algo;
+-	id->adap.class = I2C_CLASS_HWMON | I2C_CLASS_SPD;
+-	id->adap.retries = 3;
+-	id->adap.algo_data = id;
+-	id->adap.dev.parent = &pdev->dev;
+-	snprintf(id->adap.name, sizeof(id->adap.name),
+-		"SH7760 I2C at %08lx", (unsigned long)res->start);
+-
+-	OUT32(id, I2CMCR, 0);
+-	OUT32(id, I2CMSR, 0);
+-	OUT32(id, I2CMIER, 0);
+-	OUT32(id, I2CMAR, 0);
+-	OUT32(id, I2CSIER, 0);
+-	OUT32(id, I2CSAR, 0);
+-	OUT32(id, I2CSCR, 0);
+-	OUT32(id, I2CSSR, 0);
+-	OUT32(id, I2CFIER, 0);
+-	OUT32(id, I2CFCR, FCR_RFRST | FCR_TFRST);
+-	OUT32(id, I2CFSR, 0);
+-
+-	ret = calc_CCR(pd->speed_khz * 1000);
+-	if (ret < 0) {
+-		dev_err(&pdev->dev, "invalid SCL clock: %dkHz\n",
+-			pd->speed_khz);
+-		goto out3;
+-	}
+-	OUT32(id, I2CCCR, ret);
+-
+-	if (request_irq(id->irq, sh7760_i2c_irq, 0,
+-			SH7760_I2C_DEVNAME, id)) {
+-		dev_err(&pdev->dev, "cannot get irq %d\n", id->irq);
+-		ret = -EBUSY;
+-		goto out3;
+-	}
+-
+-	ret = i2c_add_numbered_adapter(&id->adap);
+-	if (ret < 0)
+-		goto out4;
+-
+-	platform_set_drvdata(pdev, id);
+-
+-	dev_info(&pdev->dev, "%d kHz mmio %08x irq %d\n",
+-		 pd->speed_khz, res->start, id->irq);
+-
+-	return 0;
+-
+-out4:
+-	free_irq(id->irq, id);
+-out3:
+-	iounmap(id->iobase);
+-out2:
+-	release_resource(id->ioarea);
+-	kfree(id->ioarea);
+-out1:
+-	kfree(id);
+-out0:
+-	return ret;
 -}
--module_init(sh_wdt_init);
--module_exit(sh_wdt_exit);
 -
--MODULE_AUTHOR("Paul Mundt <lethal@linux-sh.org>");
--MODULE_DESCRIPTION("SuperH watchdog driver");
+-static int sh7760_i2c_remove(struct platform_device *pdev)
+-{
+-	struct cami2c *id = platform_get_drvdata(pdev);
+-
+-	i2c_del_adapter(&id->adap);
+-	free_irq(id->irq, id);
+-	iounmap(id->iobase);
+-	release_resource(id->ioarea);
+-	kfree(id->ioarea);
+-	kfree(id);
+-
+-	return 0;
+-}
+-
+-static struct platform_driver sh7760_i2c_drv = {
+-	.driver	= {
+-		.name	= SH7760_I2C_DEVNAME,
+-	},
+-	.probe		= sh7760_i2c_probe,
+-	.remove		= sh7760_i2c_remove,
+-};
+-
+-module_platform_driver(sh7760_i2c_drv);
+-
 -MODULE_LICENSE("GPL");
--MODULE_ALIAS("platform:" DRV_NAME);
--
--module_param(clock_division_ratio, int, 0);
--MODULE_PARM_DESC(clock_division_ratio,
--	"Clock division ratio. Valid ranges are from 0x5 (1.31ms) "
--	"to 0x7 (5.25ms). (default=" __MODULE_STRING(WTCSR_CKS_4096) ")");
--
--module_param(heartbeat, int, 0);
--MODULE_PARM_DESC(heartbeat,
--	"Watchdog heartbeat in seconds. (1 <= heartbeat <= 3600, default="
--				__MODULE_STRING(WATCHDOG_HEARTBEAT) ")");
--
--module_param(nowayout, bool, 0);
--MODULE_PARM_DESC(nowayout,
--	"Watchdog cannot be stopped once started (default="
--				__MODULE_STRING(WATCHDOG_NOWAYOUT) ")");
+-MODULE_DESCRIPTION("SH7760 I2C bus driver");
+-MODULE_AUTHOR("Manuel Lauss <mano@roarinelk.homelinux.net>");
 -- 
 2.39.0
 
