@@ -2,107 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 192C9C678DA
-	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 19:05:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1512BC54EBD
+	for <linux-mmc@archiver.kernel.org>; Fri, 13 Jan 2023 19:27:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230111AbjAMTFh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 13 Jan 2023 14:05:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59626 "EHLO
+        id S229585AbjAMT1G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 13 Jan 2023 14:27:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229526AbjAMTFe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 14:05:34 -0500
-Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5580F544F5;
-        Fri, 13 Jan 2023 11:05:33 -0800 (PST)
-Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
-          by outpost.zedat.fu-berlin.de (Exim 4.95)
-          with esmtps (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@zedat.fu-berlin.de>)
-          id 1pGPMg-003M27-Uf; Fri, 13 Jan 2023 20:05:22 +0100
-Received: from p57ae5361.dip0.t-ipconnect.de ([87.174.83.97] helo=[192.168.178.35])
-          by inpost2.zedat.fu-berlin.de (Exim 4.95)
-          with esmtpsa (TLS1.3)
-          tls TLS_AES_128_GCM_SHA256
-          (envelope-from <glaubitz@physik.fu-berlin.de>)
-          id 1pGPMg-000Hn8-Jc; Fri, 13 Jan 2023 20:05:22 +0100
-Message-ID: <fe09d811-e290-821d-ec8b-75936b6583c2@physik.fu-berlin.de>
-Date:   Fri, 13 Jan 2023 20:05:20 +0100
+        with ESMTP id S229567AbjAMT1E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 13 Jan 2023 14:27:04 -0500
+Received: from mail-oi1-f174.google.com (mail-oi1-f174.google.com [209.85.167.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87BE885C95;
+        Fri, 13 Jan 2023 11:27:03 -0800 (PST)
+Received: by mail-oi1-f174.google.com with SMTP id d188so7326081oia.3;
+        Fri, 13 Jan 2023 11:27:03 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=UxiI08RgxuWuPZoqrBZbQGFb0NvzSt2qHf8gPfZ+oBY=;
+        b=p5wFnI/Co3WWzobI3UkFoLBSHlwKWklYYLbKXCJxDIHMq9eT44aVtGOAtXsI8xzq6q
+         qasgIXN9dTsHMFqYARP42GUtK4kcLzDINAVkT2O3i3/opsCjE9H8QS8aKaoDbPe0mxZO
+         DEVWCq35gS6gHjMe6fWqY31ooVYFMA6PlJmbY97hj070pTZ80bqGHsSffvdobzfJ5osn
+         zrZd5+dcAfEkIFHfL9Kymwzxc8TQEUCXl2qt4dv6Cv5OMLhF53XrLJsTQWpPHvMwD9R3
+         YJZ9bBL8NwB4wlJPBjzjbZ2bBD/noHeD+RWflc8ErESL/dFwIHq5nzwGi7T7cUk087jE
+         66Sw==
+X-Gm-Message-State: AFqh2koCyRV3+6Kn+/eut/PQOPcqNZ3zHXG6evG3PjcjuZ3d9sj1O+L5
+        KyHM65ovqQa311bRBcIoMA==
+X-Google-Smtp-Source: AMrXdXuojOLfEbXw+gZXCJ5FPbxqXJVO0vJTHqQPSUqBq8aWx/h8biMMtBRBnsOlPCO2VTrVhEcfQw==
+X-Received: by 2002:aca:f187:0:b0:364:70d:a13f with SMTP id p129-20020acaf187000000b00364070da13fmr11831152oih.14.1673638021419;
+        Fri, 13 Jan 2023 11:27:01 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id u30-20020a056808151e00b0035bd65b776bsm9698040oiw.2.2023.01.13.11.27.00
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 13 Jan 2023 11:27:01 -0800 (PST)
+Received: (nullmailer pid 2806014 invoked by uid 1000);
+        Fri, 13 Jan 2023 19:27:00 -0000
+Date:   Fri, 13 Jan 2023 13:27:00 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Andreas Kemnade <andreas@kemnade.info>
+Cc:     ulf.hansson@linaro.org, krzysztof.kozlowski+dt@linaro.org,
+        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
+        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] dt-bindings: mmc: fsl-imx-esdhc: Add some compatible
+ fallbacks
+Message-ID: <20230113192700.GA2804258-robh@kernel.org>
+References: <20230111204634.2104690-1-andreas@kemnade.info>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: remove arch/sh
-Content-Language: en-US
-To:     Rob Landley <rob@landley.net>,
-        Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-References: <20230113062339.1909087-1-hch@lst.de>
- <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
- <CAMuHMdUcnP6a9Ch5=_CMPq-io-YWK5pshkOT2nZmP1hvNcwBAg@mail.gmail.com>
- <142532fb-5997-bdc1-0811-a80ae33f4ba4@physik.fu-berlin.de>
- <6891afb6-4190-6a52-0319-745b3f138d97@landley.net>
-From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
-In-Reply-To: <6891afb6-4190-6a52-0319-745b3f138d97@landley.net>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Original-Sender: glaubitz@physik.fu-berlin.de
-X-Originating-IP: 87.174.83.97
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230111204634.2104690-1-andreas@kemnade.info>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob!
-
-On 1/13/23 20:11, Rob Landley wrote:
->> I actually would be willing to do it but I'm a bit hesitant as I'm not 100%
->> sure my skills are sufficient. Maybe if someone can assist me?
+On Wed, Jan 11, 2023 at 09:46:33PM +0100, Andreas Kemnade wrote:
+> Currently make dtbs_check shows lots of errors because imx*.dtsi does
+> not use single compatibles but combinations of them.
 > 
-> My skills aren't sufficient and I dunno how much time I have, but I can
-> certainly assist. I test sh4 regularlyish and it's in the list of architectures
-> I ship binaries and tiny VM images for, just refreshed tuesday:
+> Add fallbacks for imx6sll/ull which are useful for U-Boot.
 > 
-> https://landley.net/toybox/downloads/binaries/0.8.9/
-> https://landley.net/toybox/downloads/binaries/mkroot/0.8.9/
+> This will significantly reduce noise on make dtbs_check.
 > 
-> (The sh2eb isn't a VM, it's a physical board I have here...)
+> Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
+> ---
+> Changes in v2:
+> - allow only combinations with fallback compatible
+> - reduce them to the cases where they are actually useful
 > 
-> There is definitely interest in this architecture. I'm aware Rich hasn't been
-> the most responsive maintainer. (I'm told he's on vacation with his family at
-> the moment, according to the text I got about this issue from the J-core
-> hardware guys in Japan.)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index dc6256f04b42..be6caa25c57d 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -29,14 +29,18 @@ properties:
+>            - fsl,imx53-esdhc
+>            - fsl,imx6q-usdhc
+>            - fsl,imx6sl-usdhc
+> -          - fsl,imx6sll-usdhc
+>            - fsl,imx6sx-usdhc
+> -          - fsl,imx6ull-usdhc
+>            - fsl,imx7d-usdhc
+>            - fsl,imx7ulp-usdhc
+>            - fsl,imx8mm-usdhc
+>            - fsl,imxrt1050-usdhc
+>            - nxp,s32g2-usdhc
+> +      - items:
+> +          - const: fsl,imx6sll-usdhc
+> +          - const: fsl,imx6sx-usdhc
+> +      - items:
+> +          - const: fsl,imx6ull-usdhc
+> +          - const: fsl,imx6sx-usdhc
 
-Well, maybe we can just give it a try together ...
+Can be simplified to:
 
-> The main reason we haven't converted everything to device tree is we only have
-> access to test hardware for a subset of the boards. Pruning the list of
-> supported boards and converting the rest to device tree might make sense. We can
-> always add/convert boards back later...
-
-There is a patch by Yoshinori Sato which adds device tree support to SH. Maybe we
-can revive it.
-
-Adrian
-
--- 
-  .''`.  John Paul Adrian Glaubitz
-: :' :  Debian Developer
-`. `'   Physicist
-   `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
+- items:
+    - enum:
+        - fsl,imx6sll-usdhc
+        - fsl,imx6ull-usdhc
+    - const: fsl,imx6sx-usdhc
 
