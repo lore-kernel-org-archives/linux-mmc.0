@@ -2,87 +2,115 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 65B8CC678DA
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Jan 2023 08:52:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C55C46467
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Jan 2023 09:06:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232387AbjAPIwc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Jan 2023 03:52:32 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57744 "EHLO
+        id S232526AbjAPJGS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Jan 2023 04:06:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232371AbjAPIw0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2023 03:52:26 -0500
-Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2646044A1;
-        Mon, 16 Jan 2023 00:52:24 -0800 (PST)
-Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
-          by outpost.zedat.fu-berlin.de (Exim 4.95)
-          with esmtps (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@zedat.fu-berlin.de>)
-          id 1pHLDw-0003Fv-T9; Mon, 16 Jan 2023 09:52:12 +0100
-Received: from p57bd9464.dip0.t-ipconnect.de ([87.189.148.100] helo=[192.168.178.81])
-          by inpost2.zedat.fu-berlin.de (Exim 4.95)
-          with esmtpsa (TLS1.3)
-          tls TLS_AES_128_GCM_SHA256
-          (envelope-from <glaubitz@physik.fu-berlin.de>)
-          id 1pHLDw-000TdQ-Lf; Mon, 16 Jan 2023 09:52:12 +0100
-Message-ID: <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
-Date:   Mon, 16 Jan 2023 09:52:10 +0100
+        with ESMTP id S232494AbjAPJFv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2023 04:05:51 -0500
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AE25215574;
+        Mon, 16 Jan 2023 01:03:01 -0800 (PST)
+Received: by mail-wr1-x42b.google.com with SMTP id r9so3970391wrw.4;
+        Mon, 16 Jan 2023 01:03:01 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=JJkudWJwNygPc1saqVRch4BZHQ+ehuxSBNJGOWOBYEc=;
+        b=b1eH9W1rAzmDTe8ul034A2j9Isfkso8B2RWgb0GkfspkFWMJyjT3Dwdx4TifCn/TBo
+         6tUyzNuYsfZSH1+Ugv7TedGMmJkmdhKe92OYed/GHPJxx4F5fGTJ+W+KIfy9uwIfrKq/
+         1sXhbKdZrvWTovCZItUWJ/uxb4oyX+3wXJmc5ZK443PXBQbUL+u/Il/cwXi6SW47hTWn
+         sgzMugkdlM+jCtSg7BTKsLv3f9S7DszQN4094JDAnVpzc+/bRfwWTqKUglkFL7MwoP49
+         MenIoySpwAS7NUsdYUUcAv/+X4veTQDxTWL6HroFryrYcHuAzwfpKPBBMVsFyj2jcssS
+         5vgw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=JJkudWJwNygPc1saqVRch4BZHQ+ehuxSBNJGOWOBYEc=;
+        b=n0OvGJaDjzQFUeuo9BQKXHCMPv0NzQ49iagfV3BE8ybvoAUwgslfIucpMMpITOOwg4
+         Ln63I1dEzwVk0fNH1rYxkKL40kSk8ilnHCmwS563+bzDLo01UksFqsxX7VF1Jmew6b+o
+         Tz2vJbsZQeHzKbK1DHqzies+ZX/Ux9mfcv/pe/ltJ1XLxocCNDDivbXrOVhtq5nxU3Py
+         20vaj/ZHQNA/jlrEEBEquQnXoYaGyCCqxaYxMK3QzszMDab8aICfPCp0j0EoVXD/Ky5r
+         rWobX6nVaLAsskLiDh2V4j+QaErB7eBukijTKBcZLIcMNEPx4GiRR8QVHMQcqAAVfXny
+         p6hw==
+X-Gm-Message-State: AFqh2krb2uaAF8f4C+uUT3uQrd9UVS3jUK93D2NDmDbYsrUv695/xxa9
+        1/YEgQcTeRexNV/aUvYzjTY=
+X-Google-Smtp-Source: AMrXdXubq8KNmFzoWrAIWnJh9Wd+mZEctZzMEnSPrLhLIiYlWwGuyXD7MHR5PoeAChfEU6c9+BXC0g==
+X-Received: by 2002:adf:fbc1:0:b0:242:1415:ab02 with SMTP id d1-20020adffbc1000000b002421415ab02mr51331140wrs.9.1673859779817;
+        Mon, 16 Jan 2023 01:02:59 -0800 (PST)
+Received: from localhost ([102.36.222.112])
+        by smtp.gmail.com with ESMTPSA id t13-20020adfe10d000000b002b6bcc0b64dsm13323050wrz.4.2023.01.16.01.02.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Jan 2023 01:02:59 -0800 (PST)
+Date:   Mon, 16 Jan 2023 12:02:56 +0300
+From:   Dan Carpenter <error27@gmail.com>
+To:     Doug Brown <doug@schmorgal.com>
+Cc:     oe-kbuild@lists.linux.dev, Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>, lkp@intel.com,
+        oe-kbuild-all@lists.linux.dev, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org
+Subject: Re: [PATCH v4 5/8] mmc: sdhci-pxav2: add optional core clock
+Message-ID: <Y8USwHNZfuaP1ro8@kadam>
+References: <202301140445.zXxR25qN-lkp@intel.com>
+ <b5867cb5-aeed-b081-543f-fd611c3c84c9@schmorgal.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: remove arch/sh
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-References: <20230113062339.1909087-1-hch@lst.de>
- <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
- <20230116071306.GA15848@lst.de>
-Content-Language: en-US
-From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
-In-Reply-To: <20230116071306.GA15848@lst.de>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Original-Sender: glaubitz@physik.fu-berlin.de
-X-Originating-IP: 87.189.148.100
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b5867cb5-aeed-b081-543f-fd611c3c84c9@schmorgal.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Christoph!
-
-On 1/16/23 08:13, Christoph Hellwig wrote:
-> On Fri, Jan 13, 2023 at 09:09:52AM +0100, John Paul Adrian Glaubitz wrote:
->> I'm still maintaining and using this port in Debian.
->>
->> It's a bit disappointing that people keep hammering on it. It works fine for me.
+On Sat, Jan 14, 2023 at 02:49:07PM -0800, Doug Brown wrote:
+> Hi Dan,
 > 
-> What platforms do you (or your users) use it on?
+> On 1/14/2023 12:01 AM, Dan Carpenter wrote:
+> > Hi Doug,
+> > 
+> > https://git-scm.com/docs/git-format-patch#_base_tree_information]
+> > 
+> > url:    https://github.com/intel-lab-lkp/linux/commits/Doug-Brown/mmc-sdhci-pxav2-add-initial-support-for-PXA168-V1-controller/20230112-102921
+> > base:   https://git.kernel.org/pub/scm/linux/kernel/git/robh/linux.git for-next
+> > patch link:    https://lore.kernel.org/r/20230112022416.8474-6-doug%40schmorgal.com
+> > patch subject: [PATCH v4 5/8] mmc: sdhci-pxav2: add optional core clock
+> > config: riscv-randconfig-m041-20230113
+> > compiler: riscv64-linux-gcc (GCC) 12.1.0
+> > 
+> > If you fix the issue, kindly add following tag where applicable
+> > | Reported-by: kernel test robot <lkp@intel.com>
+> > | Reported-by: Dan Carpenter <error27@gmail.com>
+> > 
+> > smatch warnings:
+> > drivers/mmc/host/sdhci-pxav2.c:220 sdhci_pxav2_probe() warn: missing error code 'ret'
+> 
+> Thanks for passing this on. I definitely forgot an assignment to ret.
+> Since this is correcting an error in my patch that hasn't been accepted
+> yet, is it safe to assume I should omit those Reported-by tags from the
+> next version of my patch, since they don't apply to the patch itself?
+> 
 
-We have had a discussion between multiple people invested in the SuperH port and
-I have decided to volunteer as a co-maintainer of the port to support Rich Felker
-when he isn't available.
+These emails are from the kbuild team and not from me.  I just look them
+over and hit the forward button.  I'm sure it helps the kbuild team in
+their marketing when people use the tags...  Right now I'm applying to
+jobs outside the Linux community so the tags give me a measurable thing
+to say I've helped fix thousands of bugs or whatever...
 
-Adrian
+I've always argued that there should be a different Fixes-from: tag for
+people who find bugs during review (as opposed to just complaining about
+white space which is its own reward and I do that for free).  So far I
+haven't convinced anyone on this though.
 
--- 
-  .''`.  John Paul Adrian Glaubitz
-: :' :  Debian Developer
-`. `'   Physicist
-   `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
+Anyway, there isn't a policy one way or the other.  Some people add
+them and some don't.  Some people add them below the --- cut off line,
+but I don't know if that's deliberate or what the story is there.  That
+seems like it might be a good compromise.
 
+regards,
+dan carpenter
