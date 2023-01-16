@@ -2,77 +2,79 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18738C54EBE
-	for <linux-mmc@archiver.kernel.org>; Mon, 16 Jan 2023 12:18:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 322A5C54EBE
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Jan 2023 12:18:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230341AbjAPMR6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 16 Jan 2023 07:17:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49528 "EHLO
+        id S230222AbjAPMSC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 16 Jan 2023 07:18:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49494 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230190AbjAPMRc (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2023 07:17:32 -0500
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6B131F4BE
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2023 04:17:23 -0800 (PST)
-Received: by mail-pj1-x102b.google.com with SMTP id u1-20020a17090a450100b0022936a63a21so7267753pjg.4
-        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2023 04:17:23 -0800 (PST)
+        with ESMTP id S230348AbjAPMRu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 16 Jan 2023 07:17:50 -0500
+Received: from mail-pl1-x634.google.com (mail-pl1-x634.google.com [IPv6:2607:f8b0:4864:20::634])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 323111E281
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2023 04:17:28 -0800 (PST)
+Received: by mail-pl1-x634.google.com with SMTP id y1so30168458plb.2
+        for <linux-mmc@vger.kernel.org>; Mon, 16 Jan 2023 04:17:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=DPqO0oBcmgLKXeUWn1XrKDG5BAxYKOWw0dzZV7vwqgY=;
-        b=RBemEAblyGxLU2fm+hF8zw3C54DMdenP3WBAbUkch/IgLgrsspgI0YHK0xnoM41K6c
-         D6DLw3KbsYIr8wOBErprC+IDge8r0EZCkO4gYqUuuMJ71XI4SiRpl+6jYMh/ka+XnC3O
-         qBM4uqF9B69lckXQpNFIc8rJs6GbxIdEywcyzAy66ly7cI2Pq2t9pRqB28mV//niLz+c
-         vS1ZEY0tjlPlzKLDbAAlwUd77tSF6GpNoWJxRWlmSRUYkOSbhIPCHOKZTV7t2jN5BxkD
-         288U3zbCm7TE50rGRtDtdoLZxtyivIU6QKp1o+mcPfuvt2bNSmElRv5Qm+jMylI7LA6q
-         C8Fw==
+        bh=UtLlpqyTeU+jIvE+zQK1ZQtO8VhJ1e0EqEgPPnCC8Vg=;
+        b=VufIXqa9BNuskTdh092+yH/ghPEm8050FiWAKZjMEpxtgncak9a9ATug9O0hGnHpQH
+         BuPOYISSyOj/bHBE5PyjLEIh6TepUnCy+lZxrFkY8EC8BDOqIsF+a4YS5H1UwEHrOZ95
+         LxnRolNrf8VvRIV5V99KisTHvH7JvenyatnKs2vkRjeGnFcHRjwdBXpQ2LjVNbSI/GT7
+         XZYD2yXIOGI0pKIp/7RcA5nYv/zgucC2rjy36kXc39QS58hQZGo9PYq+8tXnWdJaHnhC
+         DhcoCd8NbgpZfYDLIxXPq91etyV/7butWdUOLT8wnqsyeot1GtM1lHFDz2yE/f9Al76X
+         OLkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=DPqO0oBcmgLKXeUWn1XrKDG5BAxYKOWw0dzZV7vwqgY=;
-        b=rwPY7/w3iS9pqE3F1kCEiOvWEo/8ciVgQI4SavXGjrwSIHvqjTL9zvaVrKfvFaX8/p
-         csJTMWgGz3CYw59Y2lNzoOPkSs35xizavmBN8pHURkablbEu1cv0sx/V6AVK40OtIkkl
-         DC1Jr/8g4e4q8q7COyMaW/QNrYyoLw4kSQd6d2jx8gTe49l2NBs5gxoaDDnjeOKDfoS5
-         PjlHiX8Gx5Ga8yVs9pWM/k60s16UtpelOWCcHXiJ+iFmc/5qpHt+evt8JQbGbBltEuhr
-         mbBknUGX6eIwtAGdbnQKTNmFFkSbQD2f4ntNVf/3d09SBnrxh2Cq1lCCyeiOZ7WYAcqk
-         DxDA==
-X-Gm-Message-State: AFqh2ko7DPc1DQiuQMiMuqw/CE0fKICFl+6CUvYhmXlN0JPNTZUA0rHk
-        fGEc/88rs++PNorpsprGXf4rqVdlNW+aCh20UH/wdw==
-X-Google-Smtp-Source: AMrXdXtjP8Sa+jjQ/yKSmwOET06UAgBRMczv2XdwvgBPcFbZjhPB2Nmss/cYPNG3ijFP/Uj+v3ozjZeYtP9vh3SqL4A=
-X-Received: by 2002:a17:902:9692:b0:186:a98c:4ab8 with SMTP id
- n18-20020a170902969200b00186a98c4ab8mr644271plp.118.1673871443175; Mon, 16
- Jan 2023 04:17:23 -0800 (PST)
+        bh=UtLlpqyTeU+jIvE+zQK1ZQtO8VhJ1e0EqEgPPnCC8Vg=;
+        b=nYlecYbZU1po4wozvfLlZsrojKfZTm2xQRBGzycs/L0IeGfcjuhnRSH7VdlUfUiPiK
+         nxOKwbHynIkr3GwLln/3p17p0MHRbLTo/TnUISiR72Glep2Y0kLIL/gbt1y7A2D39UNS
+         coWlQ1tCpfeH2kICyraDyzkxnhJINeqlUsbYYOW2PMYw9flkAwoixECfDgoEAgK2/EjU
+         kiNhC63oXCfH4H0CcOeW0VDRFtpBGQiRpX1EN4Jx/t4kqKc8WdmXGUn5EnUPyo6LPi+H
+         uwzeOehbf8N1jHw2TK5zXByJckUfy6ffm69E5P6iL22FnoGri6aIcHOLv4PJXUwL8cvG
+         dOog==
+X-Gm-Message-State: AFqh2koPNTvkHiE+IUSYVJStMKRqegQurQmv4/fyrF0uLf7npFcgcNTf
+        DC3BMgqMeeqE/5ruaDwCiHM2bX78EJ6mXiBPhj9DXw==
+X-Google-Smtp-Source: AMrXdXsrRJ6QKv7W46pkETfhObL49mmGA3ruRRJ86rQyjtq7LV+/ScXpcAt+DhyxsQszfdgCS2KldXRGT90fJxkN+XQ=
+X-Received: by 2002:a17:903:2cf:b0:192:9d79:d3db with SMTP id
+ s15-20020a17090302cf00b001929d79d3dbmr883684plk.129.1673871447663; Mon, 16
+ Jan 2023 04:17:27 -0800 (PST)
 MIME-Version: 1.0
-References: <20230115195212.2530087-1-andreas@kemnade.info>
-In-Reply-To: <20230115195212.2530087-1-andreas@kemnade.info>
+References: <8bb3d7c3a36985e030ba40e853c57578de8fb303.1673866725.git.lukas@wunner.de>
+In-Reply-To: <8bb3d7c3a36985e030ba40e853c57578de8fb303.1673866725.git.lukas@wunner.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 16 Jan 2023 13:16:47 +0100
-Message-ID: <CAPDyKFoTAiBFPu5cjLzX+VhWfRU3LMp+pLqGJthqqCwo3=KC_w@mail.gmail.com>
-Subject: Re: [PATCH v3] dt-bindings: mmc: fsl-imx-esdhc: Add some compatible fallbacks
-To:     Andreas Kemnade <andreas@kemnade.info>
-Cc:     robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de, kernel@pengutronix.de,
-        festevam@gmail.com, linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
+Date:   Mon, 16 Jan 2023 13:16:51 +0100
+Message-ID: <CAPDyKFozQ3x7dv4i77k7S=K_6gAMJ7T_2WbUurGObhhZ2RiZhA@mail.gmail.com>
+Subject: Re: [PATCH] mmc: pwrseq_sd8787: Allow being built-in irrespective of dependencies
+To:     Lukas Wunner <lukas@wunner.de>
+Cc:     linux-mmc@vger.kernel.org,
+        Matt Ranostay <matt@ranostay.consulting>,
+        Lubomir Rintel <lkundrak@v3.sk>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 15 Jan 2023 at 20:52, Andreas Kemnade <andreas@kemnade.info> wrote:
+On Mon, 16 Jan 2023 at 12:15, Lukas Wunner <lukas@wunner.de> wrote:
 >
-> Currently make dtbs_check shows lots of errors because imx*.dtsi does
-> not use single compatibles but combinations of them.
+> pwrseq_sd8787 is forced to be built as a module if its dependencies are.
 >
-> Add fallbacks for imx6sll/ull which are useful for U-Boot.
+> That's unnecessary, it's perfectly fine for it to be built-in even
+> though the wireless drivers that need it are modules.
 >
-> This will significantly reduce noise on make dtbs_check.
+> Relax the depends definition in Kconfig accordingly.
 >
-> Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
+> Signed-off-by: Lukas Wunner <lukas@wunner.de>
+> Cc: Matt Ranostay <matt@ranostay.consulting>
+> Cc: Lubomir Rintel <lkundrak@v3.sk>
+> Cc: Claudiu Beznea <claudiu.beznea@microchip.com>
 
 Applied for next, thanks!
 
@@ -81,40 +83,22 @@ Uffe
 
 
 > ---
-> Changes in v3:
-> - simplify things by using enums
+>  drivers/mmc/core/Kconfig | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> Changes in v2:
-> - allow only combinations with fallback compatible
-> - reduce them to the cases where they are actually useful
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index 6f25c34e4fec..e9e9d31b39b4 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -15,7 +15,7 @@ config PWRSEQ_EMMC
 >
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> index dc6256f04b42..3423e1cd8b5d 100644
-> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-> @@ -29,14 +29,17 @@ properties:
->            - fsl,imx53-esdhc
->            - fsl,imx6q-usdhc
->            - fsl,imx6sl-usdhc
-> -          - fsl,imx6sll-usdhc
->            - fsl,imx6sx-usdhc
-> -          - fsl,imx6ull-usdhc
->            - fsl,imx7d-usdhc
->            - fsl,imx7ulp-usdhc
->            - fsl,imx8mm-usdhc
->            - fsl,imxrt1050-usdhc
->            - nxp,s32g2-usdhc
-> +      - items:
-> +          - enum:
-> +              - fsl,imx6sll-usdhc
-> +              - fsl,imx6ull-usdhc
-> +          - const: fsl,imx6sx-usdhc
->        - items:
->            - enum:
->                - fsl,imx8mq-usdhc
+>  config PWRSEQ_SD8787
+>         tristate "HW reset support for SD8787 BT + Wifi module"
+> -       depends on OF && (MWIFIEX || BT_MRVL_SDIO || LIBERTAS_SDIO || WILC1000_SDIO)
+> +       depends on OF && (MWIFIEX != n || BT_MRVL_SDIO != n || LIBERTAS_SDIO != n || WILC1000_SDIO != n)
+>         help
+>           This selects hardware reset support for the SD8787 BT + Wifi
+>           module. By default this option is set to n.
 > --
-> 2.30.2
+> 2.39.0
 >
