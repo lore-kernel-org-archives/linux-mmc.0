@@ -2,99 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 742EBC677F1
-	for <linux-mmc@archiver.kernel.org>; Sun, 15 Jan 2023 19:52:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C12EC46467
+	for <linux-mmc@archiver.kernel.org>; Mon, 16 Jan 2023 01:49:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231329AbjAOTwa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 15 Jan 2023 14:52:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49804 "EHLO
+        id S231689AbjAPBtB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 15 Jan 2023 20:49:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231315AbjAOTwa (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2023 14:52:30 -0500
-Received: from mail.andi.de1.cc (mail.andi.de1.cc [IPv6:2a01:238:4321:8900:456f:ecd6:43e:202c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C11A12854;
-        Sun, 15 Jan 2023 11:52:28 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=kemnade.info; s=20220719; h=Content-Transfer-Encoding:MIME-Version:
-        Message-Id:Date:Subject:Cc:To:From:Sender:Reply-To:Content-Type:Content-ID:
-        Content-Description:Resent-Date:Resent-From:Resent-Sender:Resent-To:Resent-Cc
-        :Resent-Message-ID:In-Reply-To:References:List-Id:List-Help:List-Unsubscribe:
-        List-Subscribe:List-Post:List-Owner:List-Archive;
-        bh=yZfYvCeRQR/OkCJqdsPpVkd0rVFb184AMOYWRElkTgg=; b=roXQKhd93TuC0Nkqt4sAaj0Fis
-        J2PUjIL5dTVZ0+Cu0xIj1j9o1PO1Ib2yyqaVt2wUaTlv+8/EbxMoTXsS/jcZuvCh4Aoavz/t5ux68
-        tF9XZrXWJNSd5hzPhou8iUePgZ6iiD10nIkjdYwJEYLhNsghSTfOBqnu10tBBDl7Pi12jJyiKF/wS
-        kNa41E9mz+QIphFZdobMAkYMhcas2De7ECrgdzkiWbTDWMVAsnEGkcUSTd8UF5A6OOJAiZ6FBiBO2
-        zk7DjM+fM7wxieB+hpBEKIjuaNv6VYzQk57PUf/SNfbEcP7HmmYFl1m1/0GnEJ02kEOBifY51KjDn
-        2TlB0aow==;
-Received: from p200300ccff407d001a3da2fffebfd33a.dip0.t-ipconnect.de ([2003:cc:ff40:7d00:1a3d:a2ff:febf:d33a] helo=aktux)
-        by mail.andi.de1.cc with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.89)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pH938-0001CG-NS; Sun, 15 Jan 2023 20:52:14 +0100
-Received: from andi by aktux with local (Exim 4.94.2)
-        (envelope-from <andreas@kemnade.info>)
-        id 1pH938-00AcCe-21; Sun, 15 Jan 2023 20:52:14 +0100
-From:   Andreas Kemnade <andreas@kemnade.info>
-To:     ulf.hansson@linaro.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de, kernel@pengutronix.de, festevam@gmail.com,
-        linux-imx@nxp.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Cc:     Andreas Kemnade <andreas@kemnade.info>
-Subject: [PATCH v3] dt-bindings: mmc: fsl-imx-esdhc: Add some compatible fallbacks
-Date:   Sun, 15 Jan 2023 20:52:12 +0100
-Message-Id: <20230115195212.2530087-1-andreas@kemnade.info>
-X-Mailer: git-send-email 2.30.2
+        with ESMTP id S231783AbjAPBsz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 15 Jan 2023 20:48:55 -0500
+Received: from mail-vs1-xe30.google.com (mail-vs1-xe30.google.com [IPv6:2607:f8b0:4864:20::e30])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 234E04498
+        for <linux-mmc@vger.kernel.org>; Sun, 15 Jan 2023 17:48:50 -0800 (PST)
+Received: by mail-vs1-xe30.google.com with SMTP id i188so27674260vsi.8
+        for <linux-mmc@vger.kernel.org>; Sun, 15 Jan 2023 17:48:50 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=FDMQAc+InVAe90as5YSmu9YwvDXhMQZbvO4pT+l78qI=;
+        b=bgq9QR02Dyf/F5ogkvDHTqCEkFBjQyuun1RhW7zWXH/YWW15PFSZnv8ZlkA6KaMe2N
+         +L2LXSBfnOZhKQ7I0doWjhhxo+nq0XoPMtnYUBAeggtva1C5kqQugPR4oFoCU8WKrkXt
+         yjZXtjpcOqpVazcrRCAeI5pV0WKPjs3wdY3ni+cs6fkwjCi4+3oQ16NCejSfTOfwBA++
+         yUSt2ihBFUv6k1uviub6/pbqTqzmkqr0Hnrksr7GFms7hjqXtEmYgL8OHcXW91rLR/73
+         vC/WjLZr7EJoATmIc6xg7f51TpZV/jp+cb8VmfXrWHwrkm/EfgCOLZFTS1SJGQLN9eCN
+         8gTQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=FDMQAc+InVAe90as5YSmu9YwvDXhMQZbvO4pT+l78qI=;
+        b=1CzXOKudlGibXaHyAzYuM00U6/sALOClaoB8IqVRHQqUPqYxHLAkdZTId6fNiMeJwW
+         NCNDrBnKaLF4IVG+n5UpTsfEjmFZehspCzCgpS0R4hi1/GJfdAyLtAemiOJyCmimB2Le
+         hAm/YYC+0nNUVZQA/SIggbWDPCauowsxNg8YXb3Ekx8OZBLqyhLBbehDawYHfB5dHbSY
+         6sw/vfgbLu5JQJ3hkU4Chg3aPrDoENcoB9usiI811TtMoNhw++t8kn9/nvkjV/jHE7JB
+         8HOQPQdWrdXk7KZTl04QtLa2wvx8xa/ddwM9/3QlTCjcR2tBHFD6M7BV7pV0OEe2VjTo
+         dmQg==
+X-Gm-Message-State: AFqh2kpGvg6LFmtsdqiVSsxkmSxJeFCADlnmm0HETClyLjG/g/pWsmsb
+        wuEpKAflfwD4ODg82ZztEDeYhm4gktfvSUt8zIU=
+X-Google-Smtp-Source: AMrXdXvdqyHYMyITXs/PgCYIKVfj0i+mphMwbMY/tlbQBy0SucIvXmi5dQngdHfRBgAY9yzL8oG1BUyZF/mj22VosvY=
+X-Received: by 2002:a67:ae06:0:b0:3d1:d6e2:41c9 with SMTP id
+ x6-20020a67ae06000000b003d1d6e241c9mr1313261vse.71.1673833729236; Sun, 15 Jan
+ 2023 17:48:49 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230113110011.129835-1-adrian.hunter@intel.com> <20230113110011.129835-4-adrian.hunter@intel.com>
+In-Reply-To: <20230113110011.129835-4-adrian.hunter@intel.com>
+From:   Chunyan Zhang <zhang.lyra@gmail.com>
+Date:   Mon, 16 Jan 2023 09:48:13 +0800
+Message-ID: <CAAfSe-urYx9s9Mmbg_3DtyYyTGQG0fT87dzeYCZ-_HjyGs2x1g@mail.gmail.com>
+Subject: Re: [PATCH 3/6] mmc: sdhci-sprd: Replace SDHCI_QUIRK_MISSING_CAPS
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Kamal Dasu <kdasu.kdev@gmail.com>,
+        Al Cooper <alcooperx@gmail.com>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Orson Zhai <orsonzhai@gmail.com>,
+        Baolin Wang <baolin.wang@linux.alibaba.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        Jisheng Zhang <jszhang@kernel.org>,
+        Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently make dtbs_check shows lots of errors because imx*.dtsi does
-not use single compatibles but combinations of them.
+On Fri, 13 Jan 2023 at 19:00, Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> SDHCI_QUIRK_MISSING_CAPS is not needed because sdhci_read_caps() can be
+> called instead.
+>
+> In preparation to get rid of SDHCI_QUIRK_MISSING_CAPS, replace
+> SDHCI_QUIRK_MISSING_CAPS with sdhci_read_caps().
+>
+> __sdhci_read_caps() is also called from sdhci_setup_host() via
+> sdhci_read_caps(), however only the first call to __sdhci_read_caps() does
+> anything because after that host->read_caps has been set to true.
+>
+> Note, __sdhci_read_caps() does more than just set host->caps, such as do a
+> reset, so calling __sdhci_read_caps() earlier could have unforeseen
+> side-effects. However the code flow has been reviewed with that in mind.
+>
+> Signed-off-by: Adrian Hunter <adrian.hunter@intel.com>
 
-Add fallbacks for imx6sll/ull which are useful for U-Boot.
+Acked-by: Chunyan Zhang <zhang.lyra@gmail.com>
 
-This will significantly reduce noise on make dtbs_check.
+Thanks,
+Chunyan
 
-Signed-off-by: Andreas Kemnade <andreas@kemnade.info>
----
-Changes in v3:
-- simplify things by using enums
 
-Changes in v2:
-- allow only combinations with fallback compatible
-- reduce them to the cases where they are actually useful
-
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
-
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index dc6256f04b42..3423e1cd8b5d 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -29,14 +29,17 @@ properties:
-           - fsl,imx53-esdhc
-           - fsl,imx6q-usdhc
-           - fsl,imx6sl-usdhc
--          - fsl,imx6sll-usdhc
-           - fsl,imx6sx-usdhc
--          - fsl,imx6ull-usdhc
-           - fsl,imx7d-usdhc
-           - fsl,imx7ulp-usdhc
-           - fsl,imx8mm-usdhc
-           - fsl,imxrt1050-usdhc
-           - nxp,s32g2-usdhc
-+      - items:
-+          - enum:
-+              - fsl,imx6sll-usdhc
-+              - fsl,imx6ull-usdhc
-+          - const: fsl,imx6sx-usdhc
-       - items:
-           - enum:
-               - fsl,imx8mq-usdhc
--- 
-2.30.2
-
+> ---
+>  drivers/mmc/host/sdhci-sprd.c | 6 ++----
+>  1 file changed, 2 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-sprd.c b/drivers/mmc/host/sdhci-sprd.c
+> index 525f979e2a97..7f4ee2e12735 100644
+> --- a/drivers/mmc/host/sdhci-sprd.c
+> +++ b/drivers/mmc/host/sdhci-sprd.c
+> @@ -553,8 +553,7 @@ static void sdhci_sprd_phy_param_parse(struct sdhci_sprd_host *sprd_host,
+>
+>  static const struct sdhci_pltfm_data sdhci_sprd_pdata = {
+>         .quirks = SDHCI_QUIRK_BROKEN_CARD_DETECTION |
+> -                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK |
+> -                 SDHCI_QUIRK_MISSING_CAPS,
+> +                 SDHCI_QUIRK_DATA_TIMEOUT_USES_SDCLK,
+>         .quirks2 = SDHCI_QUIRK2_BROKEN_HS200 |
+>                    SDHCI_QUIRK2_USE_32BIT_BLK_CNT |
+>                    SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
+> @@ -671,8 +670,7 @@ static int sdhci_sprd_probe(struct platform_device *pdev)
+>          * will allow these modes to be specified only by device
+>          * tree properties through mmc_of_parse().
+>          */
+> -       host->caps = sdhci_readl(host, SDHCI_CAPABILITIES);
+> -       host->caps1 = sdhci_readl(host, SDHCI_CAPABILITIES_1);
+> +       sdhci_read_caps(host);
+>         host->caps1 &= ~(SDHCI_SUPPORT_SDR50 | SDHCI_SUPPORT_SDR104 |
+>                          SDHCI_SUPPORT_DDR50);
+>
+> --
+> 2.34.1
+>
