@@ -2,41 +2,41 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5105C678D7
-	for <linux-mmc@archiver.kernel.org>; Tue, 17 Jan 2023 09:13:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BBC73C678D8
+	for <linux-mmc@archiver.kernel.org>; Tue, 17 Jan 2023 09:14:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236505AbjAQJNR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 17 Jan 2023 04:13:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47444 "EHLO
+        id S236439AbjAQJO3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 17 Jan 2023 04:14:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236406AbjAQJMs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2023 04:12:48 -0500
+        with ESMTP id S236623AbjAQJOA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 17 Jan 2023 04:14:00 -0500
 Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F7C214E98;
-        Tue, 17 Jan 2023 01:06:02 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C612E30EA3;
+        Tue, 17 Jan 2023 01:06:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1673946362; x=1705482362;
+  t=1673946407; x=1705482407;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references:mime-version:content-transfer-encoding;
-  bh=fKt1uAC8e9IclcbWTmXXRzGDtBJPGajbi8oY2yBoREI=;
-  b=bnJ5METUEVp5psMZv7YxKXPcbCbRYFa9CdGsGnTxbZHSqHfePZQRJM9t
-   9MRTiZPMsivEOQDPOTv0CoRBk8ETrRzCtgUgZVOqJVG0qqdsOJLr82sRg
-   2u3HMnB5MSYk7mWZTF7NyUfeoYRUWFJrSlwLhQXaf6q7AB4/TCF5ocSFW
-   vgT8936vMtZGMoLc1/yGk0Vm3gEUDTqV20wuiLOUnCTyyg4BIL5tS0SVu
-   grqk1bzkJS30DfhR2d4E2U/K+uIDR+d9iLddMu7x7sp4FVgwqzMI4UAzs
-   rO2N7lhreC6d3YXlBaBqey7WvACZkO2Ycp2f7Xztu1TrIfzajouWDdcPw
+  bh=DqGwj4mZtH/ajwoE/03bzZWvrwSPcsHx4SSVX7QXSb8=;
+  b=eoCqVJ5JabHUXiDSkx7cKmtygja/Xb+O9YUt//b6fdTHJRTZbMwMkiBH
+   J6TfvAKDHuVPKt/m3/kJuVbdYtBf4tI+qekH+wSoZzLTHZe4lqfF/A59I
+   VAYI7G78wT4v8MPxUooVJw+m9rzPV29mYjp/G6UGc91ZWczvhqj1dR9KM
+   H9PCY9krfRElhY0Jl/P45MKVnaDEELT/C0dxu5zPCGE4rTEpvPaFglfAQ
+   F36f9X0BEUgp9ulH+H9AT+QPK8aVzK6hzqkkJFQQVqm97MA0vjT6m6n9q
+   LFR19w4iTGexUsWAhlNfJM+yZGv1CypADulfTNd0UAKWZzMgrMk3vxcpq
    Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="324701018"
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="324701185"
 X-IronPort-AV: E=Sophos;i="5.97,222,1669104000"; 
-   d="scan'208";a="324701018"
+   d="scan'208";a="324701185"
 Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 01:05:00 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="783174144"
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 01:05:49 -0800
+X-IronPort-AV: E=McAfee;i="6500,9779,10592"; a="783174335"
 X-IronPort-AV: E=Sophos;i="5.97,222,1669104000"; 
-   d="scan'208";a="783174144"
+   d="scan'208";a="783174335"
 Received: from tronach-mobl1.ger.corp.intel.com (HELO ijarvine-MOBL2.ger.corp.intel.com) ([10.252.40.3])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 01:04:52 -0800
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 17 Jan 2023 01:05:30 -0800
 From:   =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
 To:     linux-serial@vger.kernel.org,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -45,25 +45,20 @@ To:     linux-serial@vger.kernel.org,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Johan Hovold <johan@kernel.org>,
         Samuel Iglesias Gonsalvez <siglesias@igalia.com>,
-        Arnd Bergmann <arnd@arndb.de>, Shawn Guo <shawnguo@kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>, David Lin <dtwlin@gmail.com>,
+        Alex Elder <elder@kernel.org>, Shawn Guo <shawnguo@kernel.org>,
         Sascha Hauer <s.hauer@pengutronix.de>,
         Pengutronix Kernel Team <kernel@pengutronix.de>,
         Fabio Estevam <festevam@gmail.com>,
         NXP Linux Team <linux-imx@nxp.com>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Eric Dumazet <edumazet@google.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-usb@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        netdev@vger.kernel.org
+        Oliver Neukum <oneukum@suse.com>, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, greybus-dev@lists.linaro.org,
+        linux-staging@lists.linux.dev, linuxppc-dev@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org, linux-usb@vger.kernel.org
 Cc:     =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Subject: [PATCH v4 06/12] tty: Convert ->carrier_raised() and callchains to bool
-Date:   Tue, 17 Jan 2023 11:03:52 +0200
-Message-Id: <20230117090358.4796-7-ilpo.jarvinen@linux.intel.com>
+Subject: [PATCH v4 11/12] tty: Call ->dtr_rts() parameter active consistently
+Date:   Tue, 17 Jan 2023 11:03:57 +0200
+Message-Id: <20230117090358.4796-12-ilpo.jarvinen@linux.intel.com>
 X-Mailer: git-send-email 2.30.2
 In-Reply-To: <20230117090358.4796-1-ilpo.jarvinen@linux.intel.com>
 References: <20230117090358.4796-1-ilpo.jarvinen@linux.intel.com>
@@ -74,330 +69,304 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Return boolean from ->carrier_raised() instead of 0 and 1. Make the
-return type change also to tty_port_carrier_raised() that makes the
-->carrier_raised() call (+ cd variable in moxa into which its return
-value is stored).
-
-Also cleans up a few unnecessary constructs related to this change:
-
-	return xx ? 1 : 0;
-	-> return xx;
-
-	if (xx)
-		return 1;
-	return 0;
-	-> return xx;
+Convert various parameter names for ->dtr_rts() and related functions
+from onoff, on, and raise to active.
 
 Reviewed-by: Jiri Slaby <jirislaby@kernel.org>
 Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
 Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
 ---
- drivers/char/pcmcia/synclink_cs.c | 8 +++-----
- drivers/mmc/core/sdio_uart.c      | 7 +++----
- drivers/tty/amiserial.c           | 2 +-
- drivers/tty/moxa.c                | 4 ++--
- drivers/tty/mxser.c               | 5 +++--
- drivers/tty/n_gsm.c               | 8 ++++----
- drivers/tty/serial/serial_core.c  | 9 ++++-----
- drivers/tty/synclink_gt.c         | 7 ++++---
- drivers/tty/tty_port.c            | 4 ++--
- drivers/usb/serial/usb-serial.c   | 4 ++--
- include/linux/tty_port.h          | 6 +++---
- net/bluetooth/rfcomm/tty.c        | 2 +-
- 12 files changed, 32 insertions(+), 34 deletions(-)
+ drivers/char/pcmcia/synclink_cs.c | 6 +++---
+ drivers/mmc/core/sdio_uart.c      | 6 +++---
+ drivers/staging/greybus/uart.c    | 4 ++--
+ drivers/tty/amiserial.c           | 4 ++--
+ drivers/tty/hvc/hvc_console.h     | 2 +-
+ drivers/tty/hvc/hvc_iucv.c        | 6 +++---
+ drivers/tty/mxser.c               | 4 ++--
+ drivers/tty/n_gsm.c               | 4 ++--
+ drivers/tty/serial/serial_core.c  | 8 ++++----
+ drivers/tty/synclink_gt.c         | 4 ++--
+ drivers/usb/class/cdc-acm.c       | 4 ++--
+ include/linux/tty_port.h          | 4 ++--
+ 12 files changed, 28 insertions(+), 28 deletions(-)
 
 diff --git a/drivers/char/pcmcia/synclink_cs.c b/drivers/char/pcmcia/synclink_cs.c
-index baa46e8a094b..4391138e1b8a 100644
+index 46a0b586d234..1577eba6fe0e 100644
 --- a/drivers/char/pcmcia/synclink_cs.c
 +++ b/drivers/char/pcmcia/synclink_cs.c
-@@ -377,7 +377,7 @@ static void async_mode(MGSLPC_INFO *info);
- 
+@@ -378,7 +378,7 @@ static void async_mode(MGSLPC_INFO *info);
  static void tx_timeout(struct timer_list *t);
  
--static int carrier_raised(struct tty_port *port);
-+static bool carrier_raised(struct tty_port *port);
- static void dtr_rts(struct tty_port *port, int onoff);
+ static bool carrier_raised(struct tty_port *port);
+-static void dtr_rts(struct tty_port *port, bool onoff);
++static void dtr_rts(struct tty_port *port, bool active);
  
  #if SYNCLINK_GENERIC_HDLC
-@@ -2430,7 +2430,7 @@ static void mgslpc_hangup(struct tty_struct *tty)
- 	tty_port_hangup(&info->port);
+ #define dev_to_port(D) (dev_to_hdlc(D)->priv)
+@@ -2442,13 +2442,13 @@ static bool carrier_raised(struct tty_port *port)
+ 	return info->serial_signals & SerialSignal_DCD;
  }
  
--static int carrier_raised(struct tty_port *port)
-+static bool carrier_raised(struct tty_port *port)
+-static void dtr_rts(struct tty_port *port, bool onoff)
++static void dtr_rts(struct tty_port *port, bool active)
  {
  	MGSLPC_INFO *info = container_of(port, MGSLPC_INFO, port);
  	unsigned long flags;
-@@ -2439,9 +2439,7 @@ static int carrier_raised(struct tty_port *port)
- 	get_signals(info);
- 	spin_unlock_irqrestore(&info->lock, flags);
  
--	if (info->serial_signals & SerialSignal_DCD)
--		return 1;
--	return 0;
-+	return info->serial_signals & SerialSignal_DCD;
- }
- 
- static void dtr_rts(struct tty_port *port, int onoff)
+ 	spin_lock_irqsave(&info->lock, flags);
+-	if (onoff)
++	if (active)
+ 		info->serial_signals |= SerialSignal_RTS | SerialSignal_DTR;
+ 	else
+ 		info->serial_signals &= ~(SerialSignal_RTS | SerialSignal_DTR);
 diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
-index ae7ef2e038be..47f58258d8ff 100644
+index c6b4b2b2a4b2..50536fe59f1a 100644
 --- a/drivers/mmc/core/sdio_uart.c
 +++ b/drivers/mmc/core/sdio_uart.c
-@@ -526,7 +526,7 @@ static void sdio_uart_irq(struct sdio_func *func)
- 	port->in_sdio_uart_irq = NULL;
- }
+@@ -542,20 +542,20 @@ static bool uart_carrier_raised(struct tty_port *tport)
+ /**
+  *	uart_dtr_rts		-	 port helper to set uart signals
+  *	@tport: tty port to be updated
+- *	@onoff: set to turn on DTR/RTS
++ *	@active: set to turn on DTR/RTS
+  *
+  *	Called by the tty port helpers when the modem signals need to be
+  *	adjusted during an open, close and hangup.
+  */
  
--static int uart_carrier_raised(struct tty_port *tport)
-+static bool uart_carrier_raised(struct tty_port *tport)
+-static void uart_dtr_rts(struct tty_port *tport, bool onoff)
++static void uart_dtr_rts(struct tty_port *tport, bool active)
  {
  	struct sdio_uart_port *port =
  			container_of(tport, struct sdio_uart_port, port);
-@@ -535,9 +535,8 @@ static int uart_carrier_raised(struct tty_port *tport)
- 		return 1;
- 	ret = sdio_uart_get_mctrl(port);
- 	sdio_uart_release_func(port);
--	if (ret & TIOCM_CAR)
--		return 1;
--	return 0;
-+
-+	return ret & TIOCM_CAR;
+ 	int ret = sdio_uart_claim_func(port);
+ 	if (ret)
+ 		return;
+-	if (!onoff)
++	if (!active)
+ 		sdio_uart_clear_mctrl(port, TIOCM_DTR | TIOCM_RTS);
+ 	else
+ 		sdio_uart_set_mctrl(port, TIOCM_DTR | TIOCM_RTS);
+diff --git a/drivers/staging/greybus/uart.c b/drivers/staging/greybus/uart.c
+index 92d49740d5a4..20a34599859f 100644
+--- a/drivers/staging/greybus/uart.c
++++ b/drivers/staging/greybus/uart.c
+@@ -701,7 +701,7 @@ static int gb_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
+ 	return -ENOIOCTLCMD;
  }
  
- /**
+-static void gb_tty_dtr_rts(struct tty_port *port, bool on)
++static void gb_tty_dtr_rts(struct tty_port *port, bool active)
+ {
+ 	struct gb_tty *gb_tty;
+ 	u8 newctrl;
+@@ -709,7 +709,7 @@ static void gb_tty_dtr_rts(struct tty_port *port, bool on)
+ 	gb_tty = container_of(port, struct gb_tty, port);
+ 	newctrl = gb_tty->ctrlout;
+ 
+-	if (on)
++	if (active)
+ 		newctrl |= (GB_UART_CTRL_DTR | GB_UART_CTRL_RTS);
+ 	else
+ 		newctrl &= ~(GB_UART_CTRL_DTR | GB_UART_CTRL_RTS);
 diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
-index 460d33a1e70b..01c4fd3ce7c8 100644
+index 29d4c554f6b8..d7515d61659e 100644
 --- a/drivers/tty/amiserial.c
 +++ b/drivers/tty/amiserial.c
-@@ -1454,7 +1454,7 @@ static const struct tty_operations serial_ops = {
- 	.proc_show = rs_proc_show,
- };
- 
--static int amiga_carrier_raised(struct tty_port *port)
-+static bool amiga_carrier_raised(struct tty_port *port)
- {
+@@ -1459,13 +1459,13 @@ static bool amiga_carrier_raised(struct tty_port *port)
  	return !(ciab.pra & SER_DCD);
  }
-diff --git a/drivers/tty/moxa.c b/drivers/tty/moxa.c
-index 2d9635e14ded..6a1e78e33a2c 100644
---- a/drivers/tty/moxa.c
-+++ b/drivers/tty/moxa.c
-@@ -501,7 +501,7 @@ static int moxa_tiocmset(struct tty_struct *tty,
- static void moxa_poll(struct timer_list *);
- static void moxa_set_tty_param(struct tty_struct *, const struct ktermios *);
- static void moxa_shutdown(struct tty_port *);
--static int moxa_carrier_raised(struct tty_port *);
-+static bool moxa_carrier_raised(struct tty_port *);
- static void moxa_dtr_rts(struct tty_port *, int);
- /*
-  * moxa board interface functions:
-@@ -1432,7 +1432,7 @@ static void moxa_shutdown(struct tty_port *port)
- 	MoxaPortFlushData(ch, 2);
- }
  
--static int moxa_carrier_raised(struct tty_port *port)
-+static bool moxa_carrier_raised(struct tty_port *port)
+-static void amiga_dtr_rts(struct tty_port *port, bool raise)
++static void amiga_dtr_rts(struct tty_port *port, bool active)
  {
- 	struct moxa_port *ch = container_of(port, struct moxa_port, port);
- 	int dcd;
+ 	struct serial_state *info = container_of(port, struct serial_state,
+ 			tport);
+ 	unsigned long flags;
+ 
+-	if (raise)
++	if (active)
+ 		info->MCR |= SER_DTR|SER_RTS;
+ 	else
+ 		info->MCR &= ~(SER_DTR|SER_RTS);
+diff --git a/drivers/tty/hvc/hvc_console.h b/drivers/tty/hvc/hvc_console.h
+index 6d3428bf868f..9668f821db01 100644
+--- a/drivers/tty/hvc/hvc_console.h
++++ b/drivers/tty/hvc/hvc_console.h
+@@ -66,7 +66,7 @@ struct hv_ops {
+ 	int (*tiocmset)(struct hvc_struct *hp, unsigned int set, unsigned int clear);
+ 
+ 	/* Callbacks to handle tty ports */
+-	void (*dtr_rts)(struct hvc_struct *hp, bool raise);
++	void (*dtr_rts)(struct hvc_struct *hp, bool active);
+ };
+ 
+ /* Register a vterm and a slot index for use as a console (console_init) */
+diff --git a/drivers/tty/hvc/hvc_iucv.c b/drivers/tty/hvc/hvc_iucv.c
+index fe862a6882d6..543f35ddf523 100644
+--- a/drivers/tty/hvc/hvc_iucv.c
++++ b/drivers/tty/hvc/hvc_iucv.c
+@@ -658,13 +658,13 @@ static void hvc_iucv_notifier_hangup(struct hvc_struct *hp, int id)
+ /**
+  * hvc_iucv_dtr_rts() - HVC notifier for handling DTR/RTS
+  * @hp:		Pointer the HVC device (struct hvc_struct)
+- * @raise:	True to raise or false to lower DTR/RTS lines
++ * @active:	True to raise or false to lower DTR/RTS lines
+  *
+  * This routine notifies the HVC back-end to raise or lower DTR/RTS
+  * lines.  Raising DTR/RTS is ignored.  Lowering DTR/RTS indicates to
+  * drop the IUCV connection (similar to hang up the modem).
+  */
+-static void hvc_iucv_dtr_rts(struct hvc_struct *hp, bool raise)
++static void hvc_iucv_dtr_rts(struct hvc_struct *hp, bool active)
+ {
+ 	struct hvc_iucv_private *priv;
+ 	struct iucv_path        *path;
+@@ -672,7 +672,7 @@ static void hvc_iucv_dtr_rts(struct hvc_struct *hp, bool raise)
+ 	/* Raising the DTR/RTS is ignored as IUCV connections can be
+ 	 * established at any times.
+ 	 */
+-	if (raise)
++	if (active)
+ 		return;
+ 
+ 	priv = hvc_iucv_get_private(hp->vtermno);
 diff --git a/drivers/tty/mxser.c b/drivers/tty/mxser.c
-index 2926a831727d..96c72e691cd7 100644
+index d4fb11e39bb1..ef3116e87975 100644
 --- a/drivers/tty/mxser.c
 +++ b/drivers/tty/mxser.c
-@@ -458,10 +458,11 @@ static void __mxser_stop_tx(struct mxser_port *info)
- 	outb(info->IER, info->ioaddr + UART_IER);
+@@ -465,7 +465,7 @@ static bool mxser_carrier_raised(struct tty_port *port)
+ 	return inb(mp->ioaddr + UART_MSR) & UART_MSR_DCD;
  }
  
--static int mxser_carrier_raised(struct tty_port *port)
-+static bool mxser_carrier_raised(struct tty_port *port)
+-static void mxser_dtr_rts(struct tty_port *port, bool on)
++static void mxser_dtr_rts(struct tty_port *port, bool active)
  {
  	struct mxser_port *mp = container_of(port, struct mxser_port, port);
--	return (inb(mp->ioaddr + UART_MSR) & UART_MSR_DCD)?1:0;
-+
-+	return inb(mp->ioaddr + UART_MSR) & UART_MSR_DCD;
- }
+ 	unsigned long flags;
+@@ -473,7 +473,7 @@ static void mxser_dtr_rts(struct tty_port *port, bool on)
  
- static void mxser_dtr_rts(struct tty_port *port, int on)
+ 	spin_lock_irqsave(&mp->slock, flags);
+ 	mcr = inb(mp->ioaddr + UART_MCR);
+-	if (on)
++	if (active)
+ 		mcr |= UART_MCR_DTR | UART_MCR_RTS;
+ 	else
+ 		mcr &= ~(UART_MCR_DTR | UART_MCR_RTS);
 diff --git a/drivers/tty/n_gsm.c b/drivers/tty/n_gsm.c
-index 631539c17d85..81fc2ec3693f 100644
+index 8dd0d6441c42..4f29b00f2645 100644
 --- a/drivers/tty/n_gsm.c
 +++ b/drivers/tty/n_gsm.c
-@@ -3770,16 +3770,16 @@ static int gsm_modem_update(struct gsm_dlci *dlci, u8 brk)
- 	return -EPROTONOSUPPORT;
- }
- 
--static int gsm_carrier_raised(struct tty_port *port)
-+static bool gsm_carrier_raised(struct tty_port *port)
- {
- 	struct gsm_dlci *dlci = container_of(port, struct gsm_dlci, port);
- 	struct gsm_mux *gsm = dlci->gsm;
- 
- 	/* Not yet open so no carrier info */
- 	if (dlci->state != DLCI_OPEN)
--		return 0;
-+		return false;
- 	if (debug & DBG_CD_ON)
--		return 1;
-+		return true;
- 
- 	/*
- 	 * Basic mode with control channel in ADM mode may not respond
-@@ -3787,7 +3787,7 @@ static int gsm_carrier_raised(struct tty_port *port)
- 	 */
- 	if (gsm->encoding == GSM_BASIC_OPT &&
- 	    gsm->dlci[0]->mode == DLCI_MODE_ADM && !dlci->modem_rx)
--		return 1;
-+		return true;
- 
+@@ -3792,11 +3792,11 @@ static bool gsm_carrier_raised(struct tty_port *port)
  	return dlci->modem_rx & TIOCM_CD;
  }
+ 
+-static void gsm_dtr_rts(struct tty_port *port, bool onoff)
++static void gsm_dtr_rts(struct tty_port *port, bool active)
+ {
+ 	struct gsm_dlci *dlci = container_of(port, struct gsm_dlci, port);
+ 	unsigned int modem_tx = dlci->modem_tx;
+-	if (onoff)
++	if (active)
+ 		modem_tx |= TIOCM_DTR | TIOCM_RTS;
+ 	else
+ 		modem_tx &= ~(TIOCM_DTR | TIOCM_RTS);
 diff --git a/drivers/tty/serial/serial_core.c b/drivers/tty/serial/serial_core.c
-index f7074ac02801..20ed8a088b2d 100644
+index b8fff667d4f0..da4e4e8a2b50 100644
 --- a/drivers/tty/serial/serial_core.c
 +++ b/drivers/tty/serial/serial_core.c
-@@ -1861,7 +1861,7 @@ static void uart_port_shutdown(struct tty_port *port)
- 	}
+@@ -169,9 +169,9 @@ uart_update_mctrl(struct uart_port *port, unsigned int set, unsigned int clear)
+ #define uart_set_mctrl(port, set)	uart_update_mctrl(port, set, 0)
+ #define uart_clear_mctrl(port, clear)	uart_update_mctrl(port, 0, clear)
+ 
+-static void uart_port_dtr_rts(struct uart_port *uport, bool raise)
++static void uart_port_dtr_rts(struct uart_port *uport, bool active)
+ {
+-	if (raise)
++	if (active)
+ 		uart_set_mctrl(uport, TIOCM_DTR | TIOCM_RTS);
+ 	else
+ 		uart_clear_mctrl(uport, TIOCM_DTR | TIOCM_RTS);
+@@ -1885,7 +1885,7 @@ static bool uart_carrier_raised(struct tty_port *port)
+ 	return mctrl & TIOCM_CAR;
  }
  
--static int uart_carrier_raised(struct tty_port *port)
-+static bool uart_carrier_raised(struct tty_port *port)
+-static void uart_dtr_rts(struct tty_port *port, bool raise)
++static void uart_dtr_rts(struct tty_port *port, bool active)
  {
  	struct uart_state *state = container_of(port, struct uart_state, port);
  	struct uart_port *uport;
-@@ -1875,15 +1875,14 @@ static int uart_carrier_raised(struct tty_port *port)
- 	 * continue and not sleep
- 	 */
- 	if (WARN_ON(!uport))
--		return 1;
-+		return true;
- 	spin_lock_irq(&uport->lock);
- 	uart_enable_ms(uport);
- 	mctrl = uport->ops->get_mctrl(uport);
- 	spin_unlock_irq(&uport->lock);
+@@ -1893,7 +1893,7 @@ static void uart_dtr_rts(struct tty_port *port, bool raise)
+ 	uport = uart_port_ref(state);
+ 	if (!uport)
+ 		return;
+-	uart_port_dtr_rts(uport, raise);
++	uart_port_dtr_rts(uport, active);
  	uart_port_deref(uport);
--	if (mctrl & TIOCM_CAR)
--		return 1;
--	return 0;
-+
-+	return mctrl & TIOCM_CAR;
  }
  
- static void uart_dtr_rts(struct tty_port *port, int raise)
 diff --git a/drivers/tty/synclink_gt.c b/drivers/tty/synclink_gt.c
-index 81c94906f06e..4ba71ec764f7 100644
+index 2b786265ce7b..33f258d6fef9 100644
 --- a/drivers/tty/synclink_gt.c
 +++ b/drivers/tty/synclink_gt.c
-@@ -3126,7 +3126,7 @@ static int tiocmset(struct tty_struct *tty,
- 	return 0;
+@@ -3138,13 +3138,13 @@ static bool carrier_raised(struct tty_port *port)
+ 	return info->signals & SerialSignal_DCD;
  }
  
--static int carrier_raised(struct tty_port *port)
-+static bool carrier_raised(struct tty_port *port)
+-static void dtr_rts(struct tty_port *port, bool on)
++static void dtr_rts(struct tty_port *port, bool active)
  {
  	unsigned long flags;
  	struct slgt_info *info = container_of(port, struct slgt_info, port);
-@@ -3134,7 +3134,8 @@ static int carrier_raised(struct tty_port *port)
+ 
  	spin_lock_irqsave(&info->lock,flags);
- 	get_gtsignals(info);
- 	spin_unlock_irqrestore(&info->lock,flags);
--	return (info->signals & SerialSignal_DCD) ? 1 : 0;
-+
-+	return info->signals & SerialSignal_DCD;
+-	if (on)
++	if (active)
+ 		info->signals |= SerialSignal_RTS | SerialSignal_DTR;
+ 	else
+ 		info->signals &= ~(SerialSignal_RTS | SerialSignal_DTR);
+diff --git a/drivers/usb/class/cdc-acm.c b/drivers/usb/class/cdc-acm.c
+index d4f9220b8162..11da5fb284d0 100644
+--- a/drivers/usb/class/cdc-acm.c
++++ b/drivers/usb/class/cdc-acm.c
+@@ -651,13 +651,13 @@ static int acm_tty_open(struct tty_struct *tty, struct file *filp)
+ 	return tty_port_open(&acm->port, tty, filp);
  }
  
- static void dtr_rts(struct tty_port *port, int on)
-@@ -3162,7 +3163,7 @@ static int block_til_ready(struct tty_struct *tty, struct file *filp,
- 	int		retval;
- 	bool		do_clocal = false;
- 	unsigned long	flags;
--	int		cd;
-+	bool		cd;
- 	struct tty_port *port = &info->port;
- 
- 	DBGINFO(("%s block_til_ready\n", tty->driver->name));
-diff --git a/drivers/tty/tty_port.c b/drivers/tty/tty_port.c
-index 469de3c010b8..a573c500f95b 100644
---- a/drivers/tty/tty_port.c
-+++ b/drivers/tty/tty_port.c
-@@ -444,10 +444,10 @@ EXPORT_SYMBOL_GPL(tty_port_tty_wakeup);
-  * to hide some internal details. This will eventually become entirely
-  * internal to the tty port.
-  */
--int tty_port_carrier_raised(struct tty_port *port)
-+bool tty_port_carrier_raised(struct tty_port *port)
+-static void acm_port_dtr_rts(struct tty_port *port, bool raise)
++static void acm_port_dtr_rts(struct tty_port *port, bool active)
  {
- 	if (port->ops->carrier_raised == NULL)
--		return 1;
-+		return true;
- 	return port->ops->carrier_raised(port);
- }
- EXPORT_SYMBOL(tty_port_carrier_raised);
-diff --git a/drivers/usb/serial/usb-serial.c b/drivers/usb/serial/usb-serial.c
-index 164521ee10c6..019720a63fac 100644
---- a/drivers/usb/serial/usb-serial.c
-+++ b/drivers/usb/serial/usb-serial.c
-@@ -754,7 +754,7 @@ static struct usb_serial_driver *search_serial_device(
- 	return NULL;
- }
+ 	struct acm *acm = container_of(port, struct acm, port);
+ 	int val;
+ 	int res;
  
--static int serial_port_carrier_raised(struct tty_port *port)
-+static bool serial_port_carrier_raised(struct tty_port *port)
- {
- 	struct usb_serial_port *p = container_of(port, struct usb_serial_port, port);
- 	struct usb_serial_driver *drv = p->serial->type;
-@@ -762,7 +762,7 @@ static int serial_port_carrier_raised(struct tty_port *port)
- 	if (drv->carrier_raised)
- 		return drv->carrier_raised(p);
- 	/* No carrier control - don't block */
--	return 1;
-+	return true;
- }
- 
- static void serial_port_dtr_rts(struct tty_port *port, int on)
+-	if (raise)
++	if (active)
+ 		val = USB_CDC_CTRL_DTR | USB_CDC_CTRL_RTS;
+ 	else
+ 		val = 0;
 diff --git a/include/linux/tty_port.h b/include/linux/tty_port.h
-index fa3c3bdaa234..cf098459cb01 100644
+index c44e489de0ff..edf685a24f7c 100644
 --- a/include/linux/tty_port.h
 +++ b/include/linux/tty_port.h
-@@ -15,7 +15,7 @@ struct tty_struct;
- 
+@@ -16,7 +16,7 @@ struct tty_struct;
  /**
   * struct tty_port_operations -- operations on tty_port
-- * @carrier_raised: return 1 if the carrier is raised on @port
-+ * @carrier_raised: return true if the carrier is raised on @port
-  * @dtr_rts: raise the DTR line if @raise is nonzero, otherwise lower DTR
+  * @carrier_raised: return true if the carrier is raised on @port
+- * @dtr_rts: raise the DTR line if @raise is true, otherwise lower DTR
++ * @dtr_rts: raise the DTR line if @active is true, otherwise lower DTR
   * @shutdown: called when the last close completes or a hangup finishes IFF the
   *	port was initialized. Do not use to free resources. Turn off the device
-@@ -31,7 +31,7 @@ struct tty_struct;
-  *	the port itself.
+  *	only. Called under the port mutex to serialize against @activate and
+@@ -32,7 +32,7 @@ struct tty_struct;
   */
  struct tty_port_operations {
--	int (*carrier_raised)(struct tty_port *port);
-+	bool (*carrier_raised)(struct tty_port *port);
- 	void (*dtr_rts)(struct tty_port *port, int raise);
+ 	bool (*carrier_raised)(struct tty_port *port);
+-	void (*dtr_rts)(struct tty_port *port, bool raise);
++	void (*dtr_rts)(struct tty_port *port, bool active);
  	void (*shutdown)(struct tty_port *port);
  	int (*activate)(struct tty_port *port, struct tty_struct *tty);
-@@ -230,7 +230,7 @@ static inline void tty_port_set_kopened(struct tty_port *port, bool val)
- 
- struct tty_struct *tty_port_tty_get(struct tty_port *port);
- void tty_port_tty_set(struct tty_port *port, struct tty_struct *tty);
--int tty_port_carrier_raised(struct tty_port *port);
-+bool tty_port_carrier_raised(struct tty_port *port);
- void tty_port_raise_dtr_rts(struct tty_port *port);
- void tty_port_lower_dtr_rts(struct tty_port *port);
- void tty_port_hangup(struct tty_port *port);
-diff --git a/net/bluetooth/rfcomm/tty.c b/net/bluetooth/rfcomm/tty.c
-index 8009e0e93216..5697df9d4394 100644
---- a/net/bluetooth/rfcomm/tty.c
-+++ b/net/bluetooth/rfcomm/tty.c
-@@ -119,7 +119,7 @@ static int rfcomm_dev_activate(struct tty_port *port, struct tty_struct *tty)
- }
- 
- /* we block the open until the dlc->state becomes BT_CONNECTED */
--static int rfcomm_dev_carrier_raised(struct tty_port *port)
-+static bool rfcomm_dev_carrier_raised(struct tty_port *port)
- {
- 	struct rfcomm_dev *dev = container_of(port, struct rfcomm_dev, port);
- 
+ 	void (*destruct)(struct tty_port *port);
 -- 
 2.30.2
 
