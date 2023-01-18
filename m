@@ -2,132 +2,186 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 511F9C32793
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Jan 2023 13:58:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CA4BC32793
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Jan 2023 16:06:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230336AbjARN6p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Jan 2023 08:58:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55574 "EHLO
+        id S230097AbjARQGj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Jan 2023 11:06:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40066 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230493AbjARN6E (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 08:58:04 -0500
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3C84D54B1D
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 05:33:06 -0800 (PST)
-Received: by mail-ej1-x636.google.com with SMTP id bk15so25751136ejb.9
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 05:33:06 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=streamunlimited.com; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=r/MdaMfGpngTvDj1TEFnHjyrcQTvG4jCt3QryBUQJFc=;
-        b=ZZupgezhFoK3Ma5R4scdDL1xnc4rtd41/9W6aJRWZax9QBq3W0G3zCGVJW0U42iCYd
-         4KvJbYbw4CQi67BClvaNwX37mzcqLlr0nmJnmb8jvbyaQXvQkAtNOap+C+bD8nXs+OR8
-         3toqCE8yeR4NEL9Ne0r+XcH19jWXeAMlNKwv0=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=r/MdaMfGpngTvDj1TEFnHjyrcQTvG4jCt3QryBUQJFc=;
-        b=wGQOVRFS7utIJC928jurMbCeHzRgfPwImLEIxL1WX12liQ8RtHC8IbeNdhQ4hdfjKv
-         lD+ZqbCg8gRD+K4V626XgM0RhL1/1OwEm7gf1hQzavR+A9mFq2o7RXs766oKoT2ZvZ4p
-         JmY4dEvfVFofDE45CJxD7VNswlGlIWRwbDP4G2IVWWBqOtR88we608dHqm7MRgHPO9cj
-         9mxWTvjveglaa+BHjDodPyVDcpQX7gqXx7hJQETdbgaLZPJOK9WKD0uth33NWIVeU/a1
-         OcBc1XdclHLLfQ/d7xO8+W6Ial8+WpfERhaTrHy3EsbkPzfmpSPu1PGnxj0W5GzCg92e
-         WFig==
-X-Gm-Message-State: AFqh2kqZb2OGFaHXKT9/t+pyuC4Z5HzkbinkSEvREz7CyHCfpgUDyXHP
-        nxInWE0dvnB8m1zsKcdFeZmA+p+Pvo+j/n2z4p/t2A==
-X-Google-Smtp-Source: AMrXdXty6aY2Hc4VxG7Ode8zCbjODFHEqzOLgr86xygYZq3+W86ERvY0w5qF42m7zwo4OhQfVchNKrC1JPZn0ehrxtI=
-X-Received: by 2002:a17:906:7109:b0:84d:1502:a8b4 with SMTP id
- x9-20020a170906710900b0084d1502a8b4mr553373ejj.295.1674048784788; Wed, 18 Jan
- 2023 05:33:04 -0800 (PST)
+        with ESMTP id S229864AbjARQGE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 11:06:04 -0500
+Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B8A459756;
+        Wed, 18 Jan 2023 08:02:48 -0800 (PST)
+Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
+        by mx0b-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 30I8f4IA009052;
+        Wed, 18 Jan 2023 08:02:30 -0800
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=date : from : to :
+ cc : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pfpt0220; bh=4T0eCnCSn3ot26og/9AC5vrcmhPU97+jbxQrKlHXesQ=;
+ b=lFiIIsOcz3AmX6SmtsE4lW6G3FHbl/wEatx5x/Jb15AQrdPUfU1889ukRsoNi0Z196Rs
+ AmyCQ92nBG3LUhAuAu3kpVMkboPToEVd3tFjjQpdQMs86rVvf236BJIKQT/2rir6civQ
+ ylRFkWEa+g2uqZrjybMuxRjC4u9ygNuN6j8L3Rr4jdJwKrZSSMwhXfPg6+6Pw6Fc0SCx
+ kECaBgl+UY3NlwGDcZcGL+BTUwy3tV86inq7uBsOladCoASvdEie8ElQk2eRC33CULL4
+ ui4POl2tOQAwHZgZ/so2W71twsC3hO/4cVM9ydbEg8tWnp3vteAe7lFSTDmqYfVyOrIh Lg== 
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+        by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3n3vstj4xv-8
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Wed, 18 Jan 2023 08:02:27 -0800
+Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 18 Jan
+ 2023 08:02:18 -0800
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
+ Transport; Wed, 18 Jan 2023 08:02:18 -0800
+Received: from Dell2s-9 (unknown [10.110.150.250])
+        by maili.marvell.com (Postfix) with ESMTP id AEE4A5B695F;
+        Wed, 18 Jan 2023 08:02:16 -0800 (PST)
+Date:   Wed, 18 Jan 2023 08:02:16 -0800
+From:   Piyush Malgujar <pmalgujar@marvell.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>,
+        <jannadurai@marvell.com>, <cchavva@marvell.com>
+Subject: Re: [PATCH 3/5] dt-bindings: mmc: sdhci-cadence: SD6 support
+Message-ID: <20230118160216.GA19078@Dell2s-9>
+References: <20221219142418.27949-1-pmalgujar@marvell.com>
+ <20221219142418.27949-4-pmalgujar@marvell.com>
+ <5fc29d3c-e3da-3dc4-bce5-2158b81daa43@linaro.org>
+ <20230106164812.GA14720@Dell2s-9>
+ <f9d4c883-4b76-c95e-c6dc-a659b4410bf2@linaro.org>
 MIME-Version: 1.0
-References: <52861a84-0fe2-37f0-d66a-145f2ebe1d79@gmail.com>
- <20221214134620.3028726-1-peter.suti@streamunlimited.com> <c6863a3e-8855-50fe-25cb-0b38bc3a05e0@gmail.com>
- <CACMGZgZY4Zb+3vHUDAS0+3r55K4_J40dtbsTPTFZMd6duBikpQ@mail.gmail.com> <7c4aa0d2-d8e9-416b-b2ad-f5c3c8ea33de@gmail.com>
-In-Reply-To: <7c4aa0d2-d8e9-416b-b2ad-f5c3c8ea33de@gmail.com>
-From:   Peter Suti <peter.suti@streamunlimited.com>
-Date:   Wed, 18 Jan 2023 14:32:53 +0100
-Message-ID: <CACMGZgaS7z2YoViA3jV-gVBvASSq1maiGj_6hfrJQ3zr69esgQ@mail.gmail.com>
-Subject: Re: [PATCH v3] mmc: meson-gx: fix SDIO interrupt handling
-To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mediatek@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <f9d4c883-4b76-c95e-c6dc-a659b4410bf2@linaro.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-ORIG-GUID: 6kslb20W85i3_AAAvtNMJwdG5rQ94t3s
+X-Proofpoint-GUID: 6kslb20W85i3_AAAvtNMJwdG5rQ94t3s
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.219,Aquarius:18.0.923,Hydra:6.0.562,FMLib:17.11.122.1
+ definitions=2023-01-18_05,2023-01-18_01,2022-06-22_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Jan 12, 2023 at 10:27 PM Heiner Kallweit <hkallweit1@gmail.com> wrote:
->
-> On 09.01.2023 12:52, Peter Suti wrote:
-> > On Wed, Dec 14, 2022 at 10:33 PM Heiner Kallweit <hkallweit1@gmail.com> wrote:
-> >>
-> >> On 14.12.2022 14:46, Peter Suti wrote:
+Hi Krzysztof,
+
+On Sat, Jan 07, 2023 at 02:25:02PM +0100, Krzysztof Kozlowski wrote:
+> On 06/01/2023 17:48, Piyush Malgujar wrote:
+> > Hi Krzysztof,
+> > 
+> > Thank you the review comments.
+> > 
+> > On Mon, Dec 19, 2022 at 04:40:35PM +0100, Krzysztof Kozlowski wrote:
+> >> On 19/12/2022 15:24, Piyush Malgujar wrote:
+> >>> From: Jayanthi Annadurai <jannadurai@marvell.com>
 > >>>
-> >>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> >>> index 6e5ea0213b47..7d3ee2f9a7f6 100644
-> >>> --- a/drivers/mmc/host/meson-gx-mmc.c
-> >>> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> >>> @@ -1023,6 +1023,22 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
-> >>>       if (ret == IRQ_HANDLED)
-> >>>               meson_mmc_request_done(host->mmc, cmd->mrq);
-> >>>
-> >>> +     /*
-> >>> +     * Sometimes after we ack all raised interrupts,
-> >>> +     * an IRQ_SDIO can still be pending, which can get lost.
-> >>> +     *
 > >>
-> >> A reader may scratch his head here and wonder how the interrupt can get lost,
-> >> and why adding a workaround instead of eliminating the root cause for losing
-> >> the interrupt. If you can't provide an explanation why the root cause for
-> >> losing the interrupt can't be fixed, presumably you would have to say that
-> >> you're adding a workaround for a suspected silicon bug.
-> > After talking to the manufacturer, we got the following explanation
-> > for this situation:
->
-> To which manufacturer did you talk, Marvell or Amlogic?
+> >> Subject: use final prefix matching the file, so "cdns,sdhci:"
+> >>
+> >>> Add support for SD6 controller support
+> >>
+> >> Full stop.
+> >>
+> >>>
+> >>> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> >>> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+> >>> ---
+> >>>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 33 +++++++++++++++++--
+> >>>  1 file changed, 31 insertions(+), 2 deletions(-)
+> >>>
+> >>> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> >>> index 8b1a0fdcb5e3e2e8b87d8d7678e37f3dad447fc1..2043e78ccd5f708a01e87fd96ec410418fcd539f 100644
+> >>> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> >>> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> >>> @@ -4,7 +4,7 @@
+> >>>  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
+> >>>  $schema: http://devicetree.org/meta-schemas/core.yaml#
+> >>>  
+> >>> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
+> >>> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
+> >>>  
+> >>>  maintainers:
+> >>>    - Masahiro Yamada <yamada.masahiro@socionext.com>
+> >>> @@ -19,6 +19,7 @@ properties:
+> >>>            - microchip,mpfs-sd4hc
+> >>>            - socionext,uniphier-sd4hc
+> >>>        - const: cdns,sd4hc
+> >>> +      - const: cdns,sd6hc
+> >>
+> >> Does not look like you tested the DTS against bindings. Please run `make
+> >> dtbs_check` (see Documentation/devicetree/bindings/writing-schema.rst
+> >> for instructions).
+> >>
+> >> ... because it does not really make sense. Why do you require SD6HC as
+> >> fallback? I think you meant enum.
+> >>
+> > 
+> > Yes, that's correct. I will change it to enum.
+> > 
+> >>>  
+> >>>    reg:
+> >>>      maxItems: 1
+> >>> @@ -111,6 +112,34 @@ properties:
+> >>>      minimum: 0
+> >>>      maximum: 0x7f
+> >>>  
+> >>> +  cdns,iocell_input_delay:
+> >>
+> >> No underscores. Use proper units in name suffix:
+> >> https://github.com/devicetree-org/dt-schema/blob/main/dtschema/schemas/property-units.yaml
+> >>
+> >>
+> >>> +    description: Delay in ps across the input IO cells
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>
+> >> Ditto... and so on - all of the fields.
+> >>
+> >>> +
+> >>> +  cdns,iocell_output_delay:
+> >>> +    description: Delay in ps across the output IO cells
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>> +
+> >>> +  cdns,delay_element:
+> >>> +    description: Delay element in ps used for calculating phy timings
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>> +
+> >>> +  cdns,read_dqs_cmd_delay:
+> >>> +    description: Command delay used in HS200 tuning
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>> +
+> >>> +  cdns,tune_val_start:
+> >>> +    description: Staring value of data delay used in HS200 tuning
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>> +
+> >>> +  cdns,tune_val_step:
+> >>> +    description: Incremental value of data delay used in HS200 tuning
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>> +
+> >>> +  cdns,max_tune_iter:
+> >>> +    description: Maximum number of iterations to complete the HS200 tuning process
+> >>> +    $ref: "/schemas/types.yaml#/definitions/uint32"
+> >>
+> >> Why these three are properties of DT?
+> >>
+> > 
+> > These tuning parameters are added here so to make them custom configurable for different
+> > boards.
+> 
+> I understand why do you wanted to add them, but I am asking why these
+> are suitable for DT? DT  describes hardware, so what is here specific to
+> hardware which requires DT property?
+> 
+> 
 
-Amlogic
+We have different values based on emmc devices populated on different boards and these
+tuning parameters are used to program phy registers accordingly.
 
->
-> > "wifi may have dat1 interrupt coming in, without this the dat1
-> > interrupt would be missed"
->
-> I don't understand this sentence. W/o the interrupt coming in
-> the interrupt would be missed? Can you explain it?
+> Best regards,
+> Krzysztof
 
-So the "without this" part of that sentence referred to the patch.
-Which means that without the patch, the interrupt can be missed.
-
->
-> > Supposedly this is fixed in their codebase.
->
-> Which codebase do you mean? A specific vendor driver? Or firmware?
-
-The vendor driver from openlinux2.amlogic.com handles SDIO interrupts
-a bit differently. It uses mmc_signal_sdio_irq()
-
->
-> > Unfortunately we were not able to find out more and can't prepare a
-> > patch with a proper explanation.
->
-> The workaround is rather simple, so we should add it.
-> It's just unfortunate that we have no idea about the root cause of the issue.
-
-After doing a more long term stress test, it was revealed that this
-patch is still not sufficient, but only masks the underlying problem
-better. Reverting 066ecde fixes the issue fully for us (verified
-overnight with iperf).
-v1 and v2 also fix the issue, but v3 does not correct the bug when
-WiFi is stressed for a longer time. And therefore it should not be
-used.
-Could you please give us some advice on how to investigate this further?
+Thanks,
+Piyush> 
