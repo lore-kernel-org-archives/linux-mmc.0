@@ -2,122 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A630C677F1
-	for <linux-mmc@archiver.kernel.org>; Wed, 18 Jan 2023 11:44:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0015FC32793
+	for <linux-mmc@archiver.kernel.org>; Wed, 18 Jan 2023 13:43:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230225AbjARLoX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Jan 2023 06:44:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53576 "EHLO
+        id S231150AbjARNnW convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Jan 2023 08:43:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230140AbjARLnx (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 06:43:53 -0500
-Received: from mail-oa1-x2a.google.com (mail-oa1-x2a.google.com [IPv6:2001:4860:4864:20::2a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6A91689DB
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 03:02:22 -0800 (PST)
-Received: by mail-oa1-x2a.google.com with SMTP id 586e51a60fabf-15bb8ec196aso23317898fac.3
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 03:02:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=landley-net.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=KuI0iwHsMdHgi9UUhJbv/FF6Zx1hDWv0kF6EEdUlD2I=;
-        b=5PCGooyhPIEuUA8LfHpgz2E1NSo9q7mSLwwd+kP7a2WQx5oIObawC1SZ8b3GjlhI6w
-         k+aUwf08xYT06HES1GVAUttTfmtlU/+2mUQ+E6nwI3mvpykPVqpS3CT4T1OK8Y7wh8Lh
-         OxdivEq+CnvHPuPDLKxMirSIFn7kanNvD0azdCBrxVrZC626tljgU09Q5NwDlRdCl5Pm
-         h30BKW+O6Gpe2j8vZBVS7nQX0CZx9F+vnTsIKQmfF0oeOZkgBCg3IFGxtjTVee8Llq3v
-         VTgrTzM1eGIkuy0knsusfqmXW3O1e3iUrjIXv4sd1h2zvdReBrfi+vZn6Ejf/45OptwH
-         w5QQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=KuI0iwHsMdHgi9UUhJbv/FF6Zx1hDWv0kF6EEdUlD2I=;
-        b=XdOofNi2+neurRXO/iu+Gm2bnO3yP4JXY00cuzPAZWqo6YojbM/DHk57ExT3ul1ZUH
-         LJmhkaMrHTinmaIFeWrMAo/Oi5OOnBnXL/oi4L43geRD4O2H4rcrP4G6xr8626OAQACK
-         0nxkwDB9vTruvxckNsSVdemZ1UzaiI3lAy3gYlVkRZ3Cn9/Ar/FCMSmY7DB+b3eP37wz
-         /OrU9wObZpzE3xqdsLvIw/Il7PMa4uu7n9nGsOKbJAxLtbz4KcUgwHAb89UZSy3Ckqfs
-         fv+qvsKwntVmAoc23NSEfn8PxYOTLYu1JHmJhaYhbJ366++SjxV22Qu24EMLAM7j8SOQ
-         iVRw==
-X-Gm-Message-State: AFqh2kolTarjGOzvox/W3H266M4WCbLPm0TyjTP/QhXeMpm8AwpmSGd1
-        ft3wxMst8C3hxEag8lqck5VAGg==
-X-Google-Smtp-Source: AMrXdXvlrp1Ed3XBrrhA3zCnrQ6Rbb/wKmg6UrVk+wIslhGo+AMwXBPpNO4DwySZY2+3rtlEwlTN+A==
-X-Received: by 2002:a05:6870:c190:b0:15e:cc77:1e6d with SMTP id h16-20020a056870c19000b0015ecc771e6dmr4364085oad.13.1674039741194;
-        Wed, 18 Jan 2023 03:02:21 -0800 (PST)
-Received: from ?IPV6:2607:fb91:120e:1c84:8038:3fff:fe9f:cbb4? ([2607:fb91:120e:1c84:8038:3fff:fe9f:cbb4])
-        by smtp.gmail.com with ESMTPSA id e19-20020a056871045300b001442fada152sm18099522oag.46.2023.01.18.03.02.18
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 18 Jan 2023 03:02:20 -0800 (PST)
-Message-ID: <efa6a8aa-466e-cfaa-0113-b85002af008e@landley.net>
-Date:   Wed, 18 Jan 2023 05:14:36 -0600
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: remove arch/sh
+        with ESMTP id S230460AbjARNmz (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 08:42:55 -0500
+X-Greylist: delayed 242 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 18 Jan 2023 05:12:28 PST
+Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79DB2474FD;
+        Wed, 18 Jan 2023 05:12:28 -0800 (PST)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id EC6572227A7;
+        Wed, 18 Jan 2023 13:07:35 +0000 (UTC)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id DF3592227A3;
+        Wed, 18 Jan 2023 13:07:35 +0000 (UTC)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
+        by mail6.swissbit.com (Postfix) with ESMTPS;
+        Wed, 18 Jan 2023 13:07:35 +0000 (UTC)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     "axboe@kernel.dk" <axboe@kernel.dk>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>
+CC:     Avri Altman <Avri.Altman@wdc.com>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "vincent.whitchurch@axis.com" <vincent.whitchurch@axis.com>,
+        "bvanassche@acm.org" <bvanassche@acm.org>
+Subject: RE: [PATCH 1/3] block: Requeue req as head if driver touched it
+Thread-Topic: [PATCH 1/3] block: Requeue req as head if driver touched it
+Thread-Index: AdjpDEQm2rub+3iRTPCN7zrgvOwESBCMHO2A
+Date:   Wed, 18 Jan 2023 13:08:06 +0000
+Message-ID: <4e2b1f4c81ca478cb7e5644f5ae892cb@hyperstone.com>
+References: <22aa78389c9b4613841716c5b7bd89aa@hyperstone.com>
+In-Reply-To: <22aa78389c9b4613841716c5b7bd89aa@hyperstone.com>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-References: <20230113062339.1909087-1-hch@lst.de>
- <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
- <20230116071306.GA15848@lst.de>
- <9325a949-8d19-435a-50bd-9ebe0a432012@landley.net>
- <CAMuHMdUJm5QvzH8hvqwvn9O6qSbzNOapabjw5nh9DJd0F55Zdg@mail.gmail.com>
- <7329212f-b1a0-41eb-99b3-a56eb1d23138@landley.net>
- <CAMuHMdXo3iR2C=CAaXO5tBRCncnQAAMR6BMPLOm_nBpFAeVhrA@mail.gmail.com>
-From:   Rob Landley <rob@landley.net>
-In-Reply-To: <CAMuHMdXo3iR2C=CAaXO5tBRCncnQAAMR6BMPLOm_nBpFAeVhrA@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27392.007
+X-TMASE-Result: 10--9.637700-10.000000
+X-TMASE-MatchedRID: dwNgap4H9hjUL3YCMmnG4jo39wOA02LhlDt5PQMgj03kd9mvuqBe1m1d
+        AMAJtyyxOuzeNmOGKnPgvgZ753XHBrnccJTUpEM4rMZ+BqQt2NqnHBIbyMjCFJm3OIVSf4P5oon
+        zJ5ed8cDYgJy0r7VcQsLLQE2dzCJpL/tBTZzO5Q0D2WXLXdz+AUEe5VjFzwNbqIZZzG59lfQXnx
+        dWTEAtaYdAx4ypyagHfyYDewMOrQBccB/zVZ7coklXctromFFi+gtHj7OwNO38o7Ys1NK4Y7R7t
+        YRRx1roS/k5gHS6NuVwOxODheruVjSFiyUesjTO
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 6ddb0a30-efa8-4746-a997-ae18fdbdbf9b-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1/18/23 01:46, Geert Uytterhoeven wrote:
-> Again, I think you're talking about something different.
-> Does kexec work for you?
+Jens could you consider this patch?
+As far as I can see Barts series has not been merged in any form that would fix my problem and even if it does, requeuing RQF_DONTPREP as head seems on par at worst and a performance improvement at best.
 
-Sorry, got woken up several hours early by sirens and flashy lights this morning
-(duplex on the corner caught fire, Austin has a LOT of emergency vehicles), been
-a bit underclocked all day.
 
-No, I haven't tried kexec on sh4. I'll add it to the todo heap.
+-----Original Message-----
+From: Christian Löhle 
+Sent: Mittwoch, 26. Oktober 2022 09:29
+To: axboe@kernel.dk; ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; 'linux-block@vger.kernel.org' <linux-block@vger.kernel.org>
+Cc: 'Avri Altman' <Avri.Altman@wdc.com>; adrian.hunter@intel.com; vincent.whitchurch@axis.com; 'Christian Löhle' <CLoehle@hyperstone.com>
+Subject: [PATCH 1/3] block: Requeue req as head if driver touched it
 
->> > I tried working my way up from 2.6.22, but gave up around 2.6.29.
->> > Probably I should do this with r2d and qemu instead ;-)
->>
->> I have current running there. I've had current running there for years. Config
->> attached...
->>
->> > Both r2d and landisk are SH7751.
->>
->> Cool. Shouldn't be hard to get landisk running current then.
-> 
-> Current kernels work fine on landisk with an old Debian userspace
-> on CF.  The 8139cp driver is a bit flaky: last time I tried nfsroot,
-> that didn't work well.
+In case the driver set RQF_DONTPREP flag, requeue the request as head as it is likely that the backing storage already had a request to an adjacent region, so getting the requeued request out as soon as possible may give us some performance benefit.
 
-I've never had luck with NFS, I was using NBD. Hadn't noticed the flake but
-haven't stress tested it too hard either?
+Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+---
+ block/blk-mq.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Mostly new userspace is what I'm testing...
+diff --git a/block/blk-mq.c b/block/blk-mq.c index 33292c01875d..d863c826fb23 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -1429,7 +1429,7 @@ static void blk_mq_requeue_work(struct work_struct *work)
+ 		 * merge.
+ 		 */
+ 		if (rq->rq_flags & RQF_DONTPREP)
+-			blk_mq_request_bypass_insert(rq, false, false);
++			blk_mq_request_bypass_insert(rq, true, false);
+ 		else
+ 			blk_mq_sched_insert_request(rq, true, false, false);
+ 	}
+--
+2.37.3
 
-Rob
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
