@@ -2,119 +2,324 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E4E5C00A5A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 09:35:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD631C00A5A
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 09:46:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230146AbjASJfn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 19 Jan 2023 04:35:43 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49332 "EHLO
+        id S229695AbjASJqs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Jan 2023 04:46:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230127AbjASJfj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2023 04:35:39 -0500
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A17FB676DB
-        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2023 01:35:38 -0800 (PST)
-Received: from ptx.hi.pengutronix.de ([2001:67c:670:100:1d::c0])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <pza@pengutronix.de>)
-        id 1pIRJv-0004DY-3L; Thu, 19 Jan 2023 10:34:55 +0100
-Received: from pza by ptx.hi.pengutronix.de with local (Exim 4.92)
-        (envelope-from <pza@pengutronix.de>)
-        id 1pIRJq-00049f-Qx; Thu, 19 Jan 2023 10:34:50 +0100
-Date:   Thu, 19 Jan 2023 10:34:50 +0100
-From:   Philipp Zabel <p.zabel@pengutronix.de>
-To:     Brad Larson <blarson@amd.com>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de, brad@pensando.io,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, piotrs@cadence.com, p.yadav@ti.com,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        fancer.lancer@gmail.com, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
-        vaishnav.a@ti.com, will@kernel.org, devicetree@vger.kernel.org
-Subject: Re: [PATCH v9 14/15] mmc: sdhci-cadence: Support mmc hardware reset
-Message-ID: <20230119093450.GA14049@pengutronix.de>
-References: <20230119035136.21603-1-blarson@amd.com>
- <20230119035136.21603-15-blarson@amd.com>
+        with ESMTP id S229608AbjASJqr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2023 04:46:47 -0500
+Received: from cosmopolitan.snafu.de (cosmopolitan.snafu.de [IPv6:2001:1560:3:255::151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0A6B6D36D
+        for <linux-mmc@vger.kernel.org>; Thu, 19 Jan 2023 01:46:08 -0800 (PST)
+X-Trace: 4c7c73656261737469616e2e6b6c6f736b6140736e6166752e64657c38342e3233
+        2e3235342e3230367c3170495255652d3030304551552d39347c31363734313231
+        353630
+Received: from cosmopolitan.snafu.de ([10.151.10.19] helo=localhost)
+        by cosmopolitan.snafu.de with esmtpa (Exim 4.94.2) 
+        id 1pIRUe-000EQU-94; Thu, 19 Jan 2023 10:46:01 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230119035136.21603-15-blarson@amd.com>
-X-Sent-From: Pengutronix Hildesheim
-X-URL:  http://www.pengutronix.de/
-X-Accept-Language: de,en
-X-Accept-Content-Type: text/plain
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-SA-Exim-Connect-IP: 2001:67c:670:100:1d::c0
-X-SA-Exim-Mail-From: pza@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Date:   Thu, 19 Jan 2023 10:46:00 +0100
+From:   sebastian.kloska@snafu.de
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org, riteshh@codeaurora.org,
+        asutoshd@codeaurora.org
+Subject: Re: Regression 5.14.21 vs 5.15.1: mmc blocked: mmc0: cqhci: timeout
+ for tag #
+In-Reply-To: <05add7ba-f2f8-7cbe-3449-4a3128c096b5@intel.com>
+References: <c1214ad81df49a314bd4863751de1a45@snafu.de>
+ <05add7ba-f2f8-7cbe-3449-4a3128c096b5@intel.com>
+User-Agent: Roundcube Webmail/1.4.13
+Message-ID: <2ae56408f156f4f728cd1e94863c0795@snafu.de>
+X-Sender: sebastian.kloska@snafu.de
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+X-VISP-ShouldScan: 1
+X-VISP-Virus-Check: clean
+X-VISP-Spam-Score: 0.9 (/)
+X-VISP-Spam-Report: This message has been scanned on "cosmopolitan.snafu.de"
+ to identify if it is considered spam or not.
+ Contact the support hotline for details.
+ Content analysis details:   (0.9 points)
+  pts rule name              description
+ ---- ---------------------- --------------------------------------------------
+  0.5 JMQ_SPF_NEUTRAL        ASKDNS: SPF set to ?all
+                             [snafu.de TXT:v=spf1 mx ip4:84.23.254.128/25]
+ [ip6:2001:1560:3:255::/64 ip6:2001:1560:3:254::/64 ip4:213.73.113.34/32 ip6:2001:1560:a000:2:50:ff:fe00:27ed/128 include:_spf.snafu.de ?all]
+ -1.0 ALL_TRUSTED            Passed through trusted hosts only via SMTP
+  0.1 TW_QH                  BODY: Odd Letter Triples with QH
+  0.1 TW_XF                  BODY: Odd Letter Triples with XF
+  0.1 TW_CQ                  BODY: Odd Letter Triples with CQ
+  0.1 TW_QC                  BODY: Odd Letter Triples with QC
+  0.8 KAM_ASCII_DIVIDERS     Email that uses ascii formatting dividers and
+                              possible spam tricks
+  0.0 KAM_DMARC_STATUS       Test Rule for DKIM or SPF Failure with Strict
+                             Alignment
+  0.2 KAM_DMARC_NONE         DKIM has Failed or SPF has failed on the message
+                             and the domain has no DMARC policy
+X-VISP-Spam-Max-Score: +++++
+X-SA-Exim-Connect-IP: 84.23.254.206
+X-SA-Exim-Mail-From: sebastian.kloska@snafu.de
+X-SA-Exim-Scanned: No (on cosmopolitan.snafu.de); SAEximRunCond expanded to false
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
-
-On Wed, Jan 18, 2023 at 07:51:35PM -0800, Brad Larson wrote:
-> Add support for mmc hardware reset using a reset-controller
-> that would need to be enabled in the device tree with
-> a supporting driver.  The default is disabled for all
-> existing designs.
+Am 19.01.2023 10:15, schrieb Adrian Hunter:
+> On 18/01/23 23:24, sebastian.kloska@snafu.de wrote:
+>> Hi,
+>> 
+>> Hardware: Acer Swift-1 SF114-34-P6U1
+>> SD Host controller: Intel Corporation Device 4dc4 (rev 01) 8086:4dc4
+>> eMMC: Kingston A29128
+>> 
+>> * A couple of seconds after boot access to the eMMC is completely
+>>   blocked. Can be triggered by extensive I/O (e.g, with badblocks -w)
+>> 
+>> * Tested with stable branch linux-5.14.21 vs. linux-5.15.1
+>>   Latest highest version including the bug is a fedora 6.1.6
 > 
-> Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
+> There is very little difference in drivers/mmc between 5.14.21
+> and 5.15.1. Are you sure the same issue is not present in
+> 5.14.21?
+
+Pretty sure. Using 5.14.21 day in day out 5.15.1 fails on me after 
+~10min
+The "slowed down by pr_debug" version sometimes lives for >2h (without 
+stress
+via badblocks etc)
+
 > 
-> Changes since v6:
-> - Previously patch 17/17
-> - Changed delay after reset_control_assert() from 9 to 3 usec
-> - Renamed sdhci_mmc_hw_reset() to sdhci_cdns_mmc_hw_reset()
+> You could try disabling runtime PM to see if that helps:
 > 
-> ---
->  drivers/mmc/host/sdhci-cadence.c | 31 +++++++++++++++++++++++++++++++
->  1 file changed, 31 insertions(+)
+> 	echo on > /sys/class/mmc_host/mmc0/device/power/control
 > 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index e92aa79a8be2..62321cef41db 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -12,6 +12,7 @@
-[...]
->  static int sdhci_cdns_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> @@ -521,6 +541,17 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto free;
->  
-> +	if (host->mmc->caps & MMC_CAP_HW_RESET) {
-> +		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, "hw");
-> +		if (IS_ERR(priv->rst_hw)) {
-> +			ret = PTR_ERR(priv->rst_hw);
-> +			if (ret == -ENOENT)
-> +				priv->rst_hw = NULL;
+Will try
+> Also it should be possible to disable cqhci by adding to the kernel
+> command line:
+> 
+> 	sdhci.debug_quirks=0x40a0000
+> 
+Will try
+>> 
+>> * Spiked the code with a lot of pr_debug messages. As a side effect 
+>> the driver
+>>   seems to be much more stable, so to me it appears like a timing 
+>> issue where
+>>   the driver fails to wait for a specific state change which seems to 
+>> appear
+>>   less often when  slowed down by logging
+> 
+> Ideally it would be good to see a full log with dynamic
+> debugging enabled for the latest kernel.
 
-The optional reset_control_get variants return NULL instead of -ENOENT
-if no reset is specified.
+Latest torvalds/linux or stable/linux ?
 
-This should return on any error instead.
+> 
+> 	To enable mmc debug via kernel command line:
+> 
+> 		dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
+> 
+> 	Kernel must be configured:
+> 
+> 		CONFIG_DYNAMIC_DEBUG=y
+> 
+>> 
+>> * Would love to have a decent reference documentation to the SD 
+>> Controller
+>>   especially a detailed description of the behavior of the register 
+>> map in
+>>  mmc/host/cqhci.h All intel documents I could find seem to describe
+>>  similar but not quite identical register maps
+> 
+> The JEDEC eMMC specification describes the CQHCI registers.
+> It looks like you need to register to get access to them
+> at www.jedec.org.  AFAICT older specs, which would be just
+> fine, are free to download after registering.
+> 
+THX
+> You can get SD Host Controller Simplified Specification
+> from www.sdcard.org.
+> 
+THX
+>> 
+>> Regards
+>> 
+>> Sebastian
+>> 
+>> * dmesg
+>> 
+>> [  347.583082] mmc0: cqhci: timeout for tag 3, qcnt
+> 
+> The timeout is pretty long, so it seems like the controller
+> has gotten stuck.  It won't reset the command or data
+> circuits either, which is impossible if it is behaving
+> correctly.
+> 
+>> [  347.583086] mmc0: cqhci: ============ CQHCI REGISTER DUMP 
+>> ===========
+>> [  347.583114] mmc0: cqhci: Caps:      0x000030c0 | Version:  
+>> 0x00000510
+>> [  347.583117] mmc0: cqhci: Config:    0x00001101 | Control:  
+>> 0x00000000
+>> [  347.583120] mmc0: cqhci: Int stat:  0x00000000 | Int enab: 
+>> 0x00000016
+>> [  347.583123] mmc0: cqhci: Int sig:   0x00000016 | Int Coal: 
+>> 0x00000000
+>> [  347.583157] mmc0: cqhci: TDL base:  0x7c2b5000 | TDL up32: 
+>> 0x00000001
+>> [  347.583160] mmc0: cqhci: Doorbell:  0x0000000f | TCN:      
+>> 0x00000000
+>> [  347.583163] mmc0: cqhci: Dev queue: 0x00000008 | Dev Pend: 
+>> 0x00000008
+>> [  347.583166] mmc0: cqhci: Task clr:  0x00000000 | SSC1:     
+>> 0x00010008
+>> [  347.583169] mmc0: cqhci: SSC2:      0x00000001 | DCMD rsp: 
+>> 0x00000800
+>> [  347.583172] mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    
+>> 0x00000000
+>> [  347.583175] mmc0: cqhci: Resp idx:  0x0000002f | Resp arg: 
+>> 0x00000900
+>> [  347.583176] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>> ===========
+>> [  347.583182] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>> 0x00001002
+>> [  347.583185] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>> 0x00000070
+>> [  347.583188] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>> 0x00000023
+>> [  347.583191] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>> 0x0000003c
+>> [  347.583194] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>> 0x00000080
+>> [  347.583197] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>> 0x00000007
+>> [  347.583200] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>> 0x00000000
+>> [  347.583203] mmc0: sdhci: Int enab:  0x02ff4000 | Sig enab: 
+>> 0x02ff4000
+>> [  347.583206] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>> 0x00000000
+>> [  347.583209] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>> 0x80000807
+>> [  347.583212] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>> 0x00000000
+>> [  347.583214] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>> 0x00000000
+>> [  347.583217] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>> 0x00000000
+>> [  347.583219] mmc0: sdhci: Host ctl2: 0x0000000d
+>> [  347.583223] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>> 0x000000011eef1218
+>> [  347.583224] mmc0: sdhci: 
+>> ============================================
+>> [  347.583229] mmc0: running CQE recovery
+>> [  347.690108] mmc0: Reset 0x2 never completed.
+>> [  347.690109] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>> ===========
+>> [  347.690115] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>> 0x00001002
+>> [  347.690118] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>> 0x00000070
+>> [  347.690121] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>> 0x00000023
+>> [  347.690124] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>> 0x0000003c
+>> [  347.690127] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>> 0x00000080
+>> [  347.690130] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>> 0x00000007
+>> [  347.690133] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>> 0x00000000
+>> [  347.690136] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>> 0x00ff0003
+>> [  347.690139] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>> 0x00000000
+>> [  347.690141] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>> 0x80000807
+>> [  347.690144] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>> 0x00000000
+>> [  347.690147] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>> 0x00000000
+>> [  347.690150] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>> 0x00000000
+>> [  347.690152] mmc0: sdhci: Host ctl2: 0x0000000d
+>> [  347.690156] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>> 0x000000011eef1218
+>> [  347.690157] mmc0: sdhci: 
+>> ============================================
+>> [  347.790190] mmc0: Reset 0x4 never completed.
+>> [  347.790191] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>> ===========
+>> [  347.790193] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>> 0x00001002
+>> [  347.790196] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>> 0x00000070
+>> [  347.790199] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>> 0x00000023
+>> [  347.790202] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>> 0x0000003c
+>> [  347.790205] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>> 0x00000080
+>> [  347.790208] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>> 0x00000007
+>> [  347.790211] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>> 0x00000000
+>> [  347.790213] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>> 0x00ff0003
+>> [  347.790216] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>> 0x00000000
+>> [  347.790219] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>> 0x80000807
+>> [  347.790222] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>> 0x00000000
+>> [  347.790225] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>> 0x00000000
+>> [  347.790228] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>> 0x00000000
+>> [  347.790230] mmc0: sdhci: Host ctl2: 0x0000000d
+>> [  347.790234] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>> 0x000000011eef1218
+>> [  347.790234] mmc0: sdhci: 
+>> ============================================
+>> [  347.803056] mmc0: Controller never released inhibit bit(s).
+>> [  347.803058] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>> ===========
+>> [  347.803077] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>> 0x00001002
+>> [  347.803080] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>> 0x00000070
+>> [  347.803083] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>> 0x00000023
+>> [  347.803086] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>> 0x0000003c
+>> [  347.803089] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>> 0x00000080
+>> [  347.803092] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>> 0x00000007
+>> [  347.803095] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>> 0x00000000
+>> [  347.803098] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>> 0x00ff0003
+>> [  347.803101] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>> 0x00000000
+>> [  347.803103] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>> 0x80000807
+>> [  347.803106] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>> 0x00000000
+>> [  347.803109] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>> 0x00000000
+>> [  347.803112] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>> 0x00000000
+>> [  347.803114] mmc0: sdhci: Host ctl2: 0x0000000d
+>> [  347.803118] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>> 0x000000011eef1218
+>> [  347.803119] mmc0: sdhci: 
+>> ============================================
+>>  --
+>> 
 
-> +		} else {
-> +			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
-
-This probably shouldn't be set if reset_control_get_optional returned NULL.
-
-> +		}
-> +	}
-> +
->  	ret = sdhci_add_host(host);
-
-regards
-Philipp
+-- 
