@@ -2,106 +2,203 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D445CC678DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 04:29:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27BBFC38142
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 04:29:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229957AbjASE3E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Jan 2023 23:29:04 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36504 "EHLO
+        id S230198AbjASE3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Jan 2023 23:29:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44770 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229830AbjASDlK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 22:41:10 -0500
-Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B4AA6D378
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:40:37 -0800 (PST)
-Received: by mail-pl1-x62f.google.com with SMTP id b17so1109757pld.7
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:40:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=pensando.io; s=google;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=tADwm89Gw7MGE41VA3P+RoXDG7EzxPQzvrjTbcPBP9M=;
-        b=dapYXhKT5FyndeTczNL859WbBcWizNlJbh9DpcWLtxUgtOLj73xKfUsKBnNoI1vRAU
-         WWAzaRhkUGgy+i5XKvcgo33JbIjnUk7AeikKq3dKOsa6OUWhcDedVJnPamj/miGDxZSs
-         1v+0FAJ673xGFpN5eZG85PUsJ6VF0wk3n8TpnPYByVX2kZGupIXKDX7H70zhAunWZ/OH
-         ll3rBFxVdifJrDAzb9dt9lVb5hDG3FJTRiQk5njsYahNHvvuDdRp7WbKH79OxT+v1SAK
-         u3nV5W8XCpzegIV0r0UjD9AmQaAq851xBZgoey+fwtIDsoE7UsOkXLCMuwLIFnQ3usnB
-         8Gdw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=tADwm89Gw7MGE41VA3P+RoXDG7EzxPQzvrjTbcPBP9M=;
-        b=jjyfdMEhWRKdokiFP1OdFpV/4Om9ssldIyuDjOIrPr1nN2dm3Mpl4UkmVRCIQHUA4t
-         D/8xZHJBVQvFFIss25G9F1FCKboxj/VN8qZukLKsSBMXyS8gwUNpx+fK8a780R9Pmz2f
-         +VwgKdv1FSh2ysPPt+EjP0eI7h6UaU9KBhFAljeQG0hy/oJ1E6poM9Ivatd207ld4WEF
-         VJp1uDccD4RKqk9ukO1eOoLaPXrYbDeZTffzc94/dxwyqm4+AcNNnFYVeL+V44+MyeZr
-         e1Mrpza8JlzyWKesxtWo8DmxudxWK/q0L8hT/qALWqq9ZZaX5iaJ3MFg0yFrPjv3OotX
-         bjPw==
-X-Gm-Message-State: AFqh2kq5YzrUaZUtV4wm+MUjcTTeKePNdgWiGIofttZp4TAbbe5mQTrs
-        dUdn7P2wPHy42RBZNIbqkVlkag==
-X-Google-Smtp-Source: AMrXdXstRBZDywDfCAbI8z6KxCoyx1WFSjxph3DZedoj6AtU1vZKsc5JIUQghL8+EyRgu03FCOd29A==
-X-Received: by 2002:a05:6a21:1690:b0:b8:e25f:e2a6 with SMTP id np16-20020a056a21169000b000b8e25fe2a6mr7509719pzb.57.1674099636710;
-        Wed, 18 Jan 2023 19:40:36 -0800 (PST)
-Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id f13-20020aa7968d000000b0056b4c5dde61sm11097879pfk.98.2023.01.18.19.40.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jan 2023 19:40:36 -0800 (PST)
-From:   Brad Larson <brad@pensando.io>
-X-Google-Original-From: Brad Larson <blarson@amd.com>
-To:     linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
-        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
-        brad@pensando.io, blarson@amd.com, brendan.higgins@linux.dev,
-        briannorris@chromium.org, brijeshkumar.singh@amd.com,
-        catalin.marinas@arm.com, davidgow@google.com, gsomlo@gmail.com,
-        gerg@linux-m68k.org, krzk@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
-        devicetree@vger.kernel.org
-Subject: [PATCH v9 07/15] MAINTAINERS: Add entry for AMD PENSANDO
-Date:   Wed, 18 Jan 2023 19:39:10 -0800
-Message-Id: <20230119033918.44117-8-blarson@amd.com>
+        with ESMTP id S231178AbjASE1G (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 23:27:06 -0500
+Received: from NAM04-BN8-obe.outbound.protection.outlook.com (mail-bn8nam04on2044.outbound.protection.outlook.com [40.107.100.44])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 96AB037B71;
+        Wed, 18 Jan 2023 20:25:18 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=MeQ1i+rh09jK7cw3K0oAnBe57x9QsCov0H/JZgNluEBkByfTXuZujpm/2Ox2l5r5H688DLZdjUZBlzi00MXgXLlA9BD/qFWY68xyXQWQWoHU6WICGm2Xt/ryIeEZli6ajaqpB1G7e0mKX4eE1wTXIaIgXdi+NauPt16ctUj3D6bx3v0/R2WC7+hfXfqehPnVSEC1Te3v2ljOwsy7exbZSin4RFAHVuHai5m7eIitxSOdzlgRgCNQO+AYaAaAIoKuUGR3Q9vmIlvQDtofVIm/rQIxkZPccMBcW4ojcmPUD7nj0/9yf1fboTV/iIZ2nxzVdcbIOIr0y5NVdSYgQ9GXDA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=ulh9dhCQ0Y1jVBFO0FQi7/v9JSmPpQrHfos2awuevGM=;
+ b=lFMpEuDLQBSaJ0wU5sSLGY3h16Zm9LyKZjutm3A+xX38WOq23Egg0KJ0M/TROrU8vt/gLbQgrjUxBkUz52WQnsxbFai0w8LhCdzIaAzvAyV10jUpGYTUGaGfQEqaqVNAoD7V4FIEvJpcv24IqXDZiOIyt26J07dK6zZuM1ehI4uPqaR6wGohZ1rxoCznNydLiD1xA383eJnRM/OxVeoOqU/d5GNL3CqLX1ge4YgqyDNXMZcSC4AMVFeEQMBrTllizc5Tgf9qvNPHk78c3rVGtPR+sfZdUpRSNQJMHPN1SaDsB/2gRONPytWQ5nly9mG+xVtdA0aUmtzun0NKuM5W8g==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=amd.com; dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=ulh9dhCQ0Y1jVBFO0FQi7/v9JSmPpQrHfos2awuevGM=;
+ b=gw/+2TMnDMZP/gu+QSWvSOi7NzAwU++Q3MXN7iw9jaIh+TgghTlV2LhOqZBttSC9Z+d9IKQ4TJCbD9zsUeIniVYsPaOtG1Wnzz+iTp56U7GqpV8+ptKx04ad60zvEZ2klylNSz2qC5EAWOzdF+FZn1OedFkUx+XewYwJgH8CTXQ=
+Received: from MW4PR04CA0330.namprd04.prod.outlook.com (2603:10b6:303:82::35)
+ by PH8PR12MB6842.namprd12.prod.outlook.com (2603:10b6:510:1c9::10) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.24; Thu, 19 Jan
+ 2023 03:52:59 +0000
+Received: from CO1NAM11FT027.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:82:cafe::e0) by MW4PR04CA0330.outlook.office365.com
+ (2603:10b6:303:82::35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.19 via Frontend
+ Transport; Thu, 19 Jan 2023 03:52:59 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ CO1NAM11FT027.mail.protection.outlook.com (10.13.174.224) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6002.13 via Frontend Transport; Thu, 19 Jan 2023 03:52:58 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Wed, 18 Jan 2023 21:52:54 -0600
+From:   Brad Larson <blarson@amd.com>
+To:     <linux-arm-kernel@lists.infradead.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <adrian.hunter@intel.com>,
+        <alcooperx@gmail.com>, <andy.shevchenko@gmail.com>,
+        <arnd@arndb.de>, <brad@pensando.io>, <blarson@amd.com>,
+        <brendan.higgins@linux.dev>, <briannorris@chromium.org>,
+        <brijeshkumar.singh@amd.com>, <catalin.marinas@arm.com>,
+        <davidgow@google.com>, <gsomlo@gmail.com>, <gerg@linux-m68k.org>,
+        <krzk@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <lee@kernel.org>, <lee.jones@linaro.org>, <broonie@kernel.org>,
+        <yamada.masahiro@socionext.com>, <p.zabel@pengutronix.de>,
+        <piotrs@cadence.com>, <p.yadav@ti.com>, <rdunlap@infradead.org>,
+        <robh+dt@kernel.org>, <samuel@sholland.org>,
+        <fancer.lancer@gmail.com>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <will@kernel.org>,
+        <devicetree@vger.kernel.org>
+Subject: [PATCH v9 12/15] mmc: sdhci-cadence: Enable device specific override of writel()
+Date:   Wed, 18 Jan 2023 19:51:33 -0800
+Message-ID: <20230119035136.21603-13-blarson@amd.com>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230119033918.44117-1-blarson@amd.com>
-References: <20230119033918.44117-1-blarson@amd.com>
+In-Reply-To: <20230119035136.21603-1-blarson@amd.com>
+References: <20230119035136.21603-1-blarson@amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT027:EE_|PH8PR12MB6842:EE_
+X-MS-Office365-Filtering-Correlation-Id: 8ebe0c8a-02f8-4e04-35bf-08daf9d0a7d3
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: pHl9X67DxJJ0MXsekCYDZA74T+aBlszOwQtua5fxPZhnaDZ2qaluiLndnGo8H+pxyjN74/wYYG8dfy1oIDP8N7gtHQ0HbD4bicjbOryUPNzOwiB0kSE5gdM4l4VgKMKFu20hAW0fN+U01VRUgviFG8tOrm+DQicPzEwjBj/8yIWSB0DiN2CZdUhZyrjsXvE1INBzc9G7ehDYFW16uW+GGsZ1LTTCPMx+zJfJ3iNCXH6drbhf4wh1lQeGC1r4MHs/67+kHWg2sDyoXDBovbJ7yhJDS+C6/Ylr4Bn3QiZSweVl2Ua6fQWDWl1wmrYZJYE4Ij+J4a6rwaMQUbnM9fbtuuys2jnZ3rreKm45QZLzQKszDoDyPOoKTQFPiWkeCa2/SdI6iYJJJUTUnFgySk76TCCTYJLBnvCqXqq1E8wseQu5xuR+kNFsWll7fuWY0epYoLV9pd+AWYrRrAO2K/lIUgOrJJ5rNlJfvfWRvyzg+Har6Fv6ylSSMYll0l3W5zWaKkO9m1ukxP0utdlx3fwi2eNIU1iWPDNN0bCCP+vbczvQ3iRxBOVGQfozQat7b9ClsSfGh84/Y1W5hWlM0RAeLq6sdF9gd871dxLNGRtT5f+8UgHGcUlK6NGF9TxbKI7hdTucdiFMBGZpab2TfT0euIWtw5vRyJNnZhrwuN77Go9kijOB3mnxLGt4Ga9g6qmhUf0V1A5DnE0R+kOvshQRkbmG052RQ5XeK7doAyh+2eg=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(396003)(346002)(376002)(39860400002)(136003)(451199015)(36840700001)(40470700004)(46966006)(81166007)(82740400003)(36860700001)(70586007)(356005)(8936002)(5660300002)(7416002)(2906002)(70206006)(7406005)(4326008)(40480700001)(8676002)(6916009)(41300700001)(1076003)(26005)(2616005)(40460700003)(16526019)(82310400005)(186003)(336012)(83380400001)(47076005)(426003)(316002)(54906003)(6666004)(478600001)(36756003)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jan 2023 03:52:58.9091
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 8ebe0c8a-02f8-4e04-35bf-08daf9d0a7d3
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT027.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH8PR12MB6842
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add entry for AMD PENSANDO maintainer and files
+SoCs with device specific Cadence implementation, such as setting
+byte-enables before the write, need to override writel().  Add a
+callback where the default is writel() for all existing chips.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- MAINTAINERS | 8 ++++++++
- 1 file changed, 8 insertions(+)
 
-diff --git a/MAINTAINERS b/MAINTAINERS
-index f61eb221415b..74eb977badb4 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -1890,6 +1890,14 @@ N:	allwinner
- N:	sun[x456789]i
- N:	sun50i
+Changes since v6:
+- No change to this patch but as some patches are deleted and this is
+  a respin the three successive patches to sdhci-cadence.c are
+  patches 12, 13, and 14 which do the following:
+
+  1. Add ability for Cadence specific design to have priv writel().
+  2. Add Elba SoC support that requires its own priv writel() for
+     byte-lane control .
+  3. Add support for mmc hardware reset.
+
+---
+ drivers/mmc/host/sdhci-cadence.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 6f2de54a5987..708d4297f241 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -67,6 +67,7 @@ struct sdhci_cdns_phy_param {
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
+ 	bool enhanced_strobe;
++	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+ 	unsigned int nr_phy_params;
+ 	struct sdhci_cdns_phy_param phy_params[];
+ };
+@@ -90,6 +91,12 @@ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+ 	{ "cdns,phy-dll-delay-strobe", SDHCI_CDNS_PHY_DLY_STROBE, },
+ };
  
-+ARM/AMD PENSANDO ARM64 ARCHITECTURE
-+M:	Brad Larson <blarson@amd.com>
-+L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
-+S:	Supported
-+F:	Documentation/devicetree/bindings/*/amd,pensando*
-+F:	arch/arm64/boot/dts/amd/elba*
-+F:	drivers/spi/spi-pensando-sr.c
++static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
++			       void __iomem *reg)
++{
++	writel(val, reg);
++}
 +
- ARM/Amlogic Meson SoC CLOCK FRAMEWORK
- M:	Neil Armstrong <neil.armstrong@linaro.org>
- M:	Jerome Brunet <jbrunet@baylibre.com>
+ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 				    u8 addr, u8 data)
+ {
+@@ -104,17 +111,17 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 
+ 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+ 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	tmp |= SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
+ 	if (ret)
+ 		return ret;
+ 
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+ 				 0, 10);
+@@ -191,7 +198,7 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
+ 	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+ 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
+ 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
+-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++	priv->priv_writel(priv, tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
+ }
+ 
+ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+@@ -223,7 +230,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	 */
+ 	for (i = 0; i < 2; i++) {
+ 		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+-		writel(tmp, reg);
++		priv->priv_writel(priv, tmp, reg);
+ 
+ 		ret = readl_poll_timeout(reg, tmp,
+ 					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
+@@ -386,6 +393,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	priv->nr_phy_params = nr_phy_params;
+ 	priv->hrs_addr = host->ioaddr;
+ 	priv->enhanced_strobe = false;
++	priv->priv_writel = cdns_writel;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
 -- 
 2.17.1
 
