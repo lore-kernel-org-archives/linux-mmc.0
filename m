@@ -2,141 +2,179 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C45B8C678DD
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 04:29:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0643AC678DB
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 07:50:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230204AbjASE3L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Jan 2023 23:29:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44768 "EHLO
+        id S229853AbjASHue (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 19 Jan 2023 02:50:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54788 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231177AbjASE1G (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 23:27:06 -0500
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2073.outbound.protection.outlook.com [40.107.93.73])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF5FF4FCEF;
-        Wed, 18 Jan 2023 20:25:15 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=MUlTwp0oyOAzcjWDx064p6L36G/crm2YxlvVtKFChEkOG3kM4Vy3N414cbTMp+I4tnGeXC+j/kbJ0ZkQYCrLph/y7VLDpitPbI9Jk0tuu4AHkArtQhL0fN8CGNoPw+IVbP7T0S42MJraiIvXf5TxhCY5i+LHAt73BFBWByOtur51gGQpNAqu8KJoO4kzbC8w33T5PhF3vKbiAOtDJr3S6ksZ4es6dzjatPxU6WO6Y4JA7dK4kEqtPmtzglNdQT6EBFNioZ0I25NYitb8p75R0Wsyk+kv2NQ3iV/RXQwWFfXzkgfoUr/7DwNPC5pmZCxJQPDxb8/8tqSIcbrP/dxfPQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=p+7zok1V1K4O5OkPHqePWWhsaVAgAl7DE+PB8/1U13I=;
- b=Agi3UpbdNj6WDB3y4DMHqhTM2H0V85Cw7DF5V8NF5PlxowRuWdFrVZp9fOUj1vF6fCON9ANASOxnJsxLVsOlpitpDxunNf2kTdyeryEM4g0H8MTnO6i1DCBlbvqyPOwRFc2J8ApTpfRrdtw1O9sp04/Op3CQHuPAYiWfl/ikKc0WC+A2y0RKs/i4wmcP8fmRk2AFFJP9PRBcRwLuZeswGiljhbL4vC8KGkXwyKsjg8U7DaG+nhRj4r/APWpLR3iKo4D7VPB2LuwB4D1PL+xmjuYcALfjiYXUjtPMfsJL+ynBzPnjDhoffHAlioK5xf/DMBPpXxb6KeKrKOB4pUCH6A==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
- dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
- header.from=amd.com; dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=p+7zok1V1K4O5OkPHqePWWhsaVAgAl7DE+PB8/1U13I=;
- b=n6llflVkMHvD+z2HcM+PzrRugUNJXc9VkrVQRDl/Re4Y0t0fH4y2ugUwYbcydZUc+21QUCZ8q5J5lbHYHaWuZ26QUpCxKjUhLFeJiYLAhcMxswbKU1sMwRyD/8AdZP+jYzFzInZf2Ngk1AO7RW7TbXPpLJ54LywFUTePFOBIopA=
-Received: from MW4PR04CA0193.namprd04.prod.outlook.com (2603:10b6:303:86::18)
- by BY5PR12MB4306.namprd12.prod.outlook.com (2603:10b6:a03:206::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.24; Thu, 19 Jan
- 2023 03:52:41 +0000
-Received: from CO1NAM11FT099.eop-nam11.prod.protection.outlook.com
- (2603:10b6:303:86:cafe::dc) by MW4PR04CA0193.outlook.office365.com
- (2603:10b6:303:86::18) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.19 via Frontend
- Transport; Thu, 19 Jan 2023 03:52:41 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CO1NAM11FT099.mail.protection.outlook.com (10.13.175.171) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6002.13 via Frontend Transport; Thu, 19 Jan 2023 03:52:41 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Wed, 18 Jan 2023 21:52:37 -0600
-From:   Brad Larson <blarson@amd.com>
-To:     <linux-arm-kernel@lists.infradead.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <adrian.hunter@intel.com>,
-        <alcooperx@gmail.com>, <andy.shevchenko@gmail.com>,
-        <arnd@arndb.de>, <brad@pensando.io>, <blarson@amd.com>,
-        <brendan.higgins@linux.dev>, <briannorris@chromium.org>,
-        <brijeshkumar.singh@amd.com>, <catalin.marinas@arm.com>,
-        <davidgow@google.com>, <gsomlo@gmail.com>, <gerg@linux-m68k.org>,
-        <krzk@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
-        <lee@kernel.org>, <lee.jones@linaro.org>, <broonie@kernel.org>,
-        <yamada.masahiro@socionext.com>, <p.zabel@pengutronix.de>,
-        <piotrs@cadence.com>, <p.yadav@ti.com>, <rdunlap@infradead.org>,
-        <robh+dt@kernel.org>, <samuel@sholland.org>,
-        <fancer.lancer@gmail.com>, <skhan@linuxfoundation.org>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
-        <vaishnav.a@ti.com>, <will@kernel.org>,
-        <devicetree@vger.kernel.org>
-Subject: [PATCH v9 08/15] arm64: Add config for AMD Pensando SoC platforms
-Date:   Wed, 18 Jan 2023 19:51:29 -0800
-Message-ID: <20230119035136.21603-9-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230119035136.21603-1-blarson@amd.com>
-References: <20230119035136.21603-1-blarson@amd.com>
+        with ESMTP id S230087AbjASHtX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 19 Jan 2023 02:49:23 -0500
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 273346C56E
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 23:47:11 -0800 (PST)
+Received: by mail-wr1-x433.google.com with SMTP id z5so960603wrt.6
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 23:47:11 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=6Xf6l0pkTfUQcg4s8+KxcfrawM+/+acLE7U/I+YkgqU=;
+        b=HrbySDZwWkFSdLCzEXOLs+V+c7gkYZ6AExZCLr+NnmyUpp8N4Anc9Iifb0OmxEDgRK
+         LliDSj2RcZiSm2fEnw+hf/QjrpXb5sZE15ijxtyEOU6g2E1zpMKl26nT23mbVE8mYo0k
+         V17qUu5V196yRzkaQXIGyNi6UH+Qwoh9a5Vf3Lt5/V/JvaBh0iktV4lqC0dCeWB/2E0A
+         L8fFj9HhfFQSKZc7UnU0zps0mYU27k60DWTN2oy5VyYKa9lMpdxO4fWjsqQPqfhRpDTI
+         YbXzZGOxAdPjLIQJrN1ETEYU9M9jO21Ddp+adUdG7WO9uB1q47KLSlv9dmrSvXJ7W6Za
+         5Ysw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=6Xf6l0pkTfUQcg4s8+KxcfrawM+/+acLE7U/I+YkgqU=;
+        b=4gigOJAz62r7BdDumkb4WEsoVY20i3Fa4du4VlkYBul5nWIH+7jC9E9gfolp/2Xf53
+         mNRNtMU+sPvK1RjwKu61bvqu/Eue1a4YV7H7KD2H9HBYwFG1gIVhy4EsG+Ae5To9Vvwa
+         mr2kH3SAviSazdutVevK7SxbANu5XxK9dL09DcIXIFDaZ9g8F/QH5ScWSue6FQLPLAKP
+         gV3mbw70bfZYq5IrEkmRGY2AATVWg1OFnAyaV05lVHFfRqbxCozD3HoSyE9/739JfbMx
+         OlSJb4oUagc3QlaNmya2oQPgwPlQkmUkB+uRfBIfiSqTpqMfWTJp4e2m2Garigx4jxOs
+         Y8Nw==
+X-Gm-Message-State: AFqh2kp22AAKAdtxqRjoYcZS3RRNkIjlHcSWDO/inaUHv9YnIeYITd8D
+        jpLt+05A/h7rrjyIp6Yo0C9wvw==
+X-Google-Smtp-Source: AMrXdXuS8zdsDRinJUZd6MTyyHb3fpLxBdnccwy/4L69izCoZWdPOKRFFyFqnBBwK+HpW9Gq3M3pog==
+X-Received: by 2002:a5d:5251:0:b0:27e:7f5:6634 with SMTP id k17-20020a5d5251000000b0027e07f56634mr8289121wrc.60.1674114426892;
+        Wed, 18 Jan 2023 23:47:06 -0800 (PST)
+Received: from [192.168.1.109] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id q18-20020adfdfd2000000b002bdc129c8f6sm21608096wrn.43.2023.01.18.23.47.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 18 Jan 2023 23:47:06 -0800 (PST)
+Message-ID: <f85cdf27-7ea0-14a8-10b0-7a9ac137a040@linaro.org>
+Date:   Thu, 19 Jan 2023 08:47:02 +0100
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CO1NAM11FT099:EE_|BY5PR12MB4306:EE_
-X-MS-Office365-Filtering-Correlation-Id: 7784123c-8144-48c0-9996-08daf9d09d5b
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: PdUbyVhH+t1CsLwAS5NvS9atJKwqfvzdDcfP0SxAx0HRt0SO5td6yAC2sR/KGXnY8TTwtixHaxS5lrNo0KUtoGhM6hWRT4TeGnodkZiBcL7ttl2eNLeuWPskORj5iTCEee9D9yumJpjS4W7HtjP5ezHeM0ajS/m/vhnCzqwLXV+YsR7ffrodOYUuPiSeLntaWLiRLtRXhtJ62bTQW/P8KAQq5y+tFjWICUYz46FxNvu27ulDEFaOXQQ/byvRVigF8ZzGfFwy2bKGRV0XjH2HFmJp1azWMmUrbnRYg0/NuHvAnOwKBN8k48bYh7zvT33vGiysrAEeI7wL+PEzkyEOKMY57Tgusp8C2oFT9/7ygncXl3O+jdjYg41jxswkO8VSwK2u8QI/OTBtP1T3s9bTUJRZLOkQn5jDJcjJ31g5Rluv4RbSapxqauy7CFPsoUqVL71aD/i3DjtgvcN+G7/Iuq+LA5zppUYWULfJjZ5t0AiHSsPY58BK0oZ3dXg0M8Qu0EVU2YHRquDTM3FvdKQUw9nG0N9hiStG+eRvtRtDfNbw1lPACjZ7bHHS7pe4o0vLrHBtZXK+X1oAkce5SyBvg5LcUgDkVZNjAPKuVllvvjkkMqxj3XGgZOOvsUxM9BAII5nWvzFxOdqMV9aZ+EkTaiI3elEOpxq3jTW8H5mbdtNhIzTlVhOVOnTa4amDy3a4gcUgXJEeRJxIUITxeFoqaH5/lCXCMSnA2ZFdeUxzvxk=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(396003)(136003)(376002)(346002)(39860400002)(451199015)(36840700001)(46966006)(40470700004)(82740400003)(81166007)(70586007)(36860700001)(356005)(5660300002)(8936002)(7416002)(2906002)(4744005)(7406005)(70206006)(4326008)(40480700001)(8676002)(6916009)(41300700001)(82310400005)(40460700003)(336012)(2616005)(1076003)(186003)(26005)(16526019)(47076005)(54906003)(316002)(426003)(6666004)(478600001)(36756003)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 19 Jan 2023 03:52:41.3323
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 7784123c-8144-48c0-9996-08daf9d09d5b
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT099.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR12MB4306
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.0
+Subject: Re: [PATCH v9 02/15] dt-bindings: mmc: cdns: Add AMD Pensando Elba
+ SoC
+Content-Language: en-US
+To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        brad@pensando.io, brendan.higgins@linux.dev,
+        briannorris@chromium.org, brijeshkumar.singh@amd.com,
+        catalin.marinas@arm.com, davidgow@google.com, gsomlo@gmail.com,
+        gerg@linux-m68k.org, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20230119035136.21603-1-blarson@amd.com>
+ <20230119035136.21603-3-blarson@amd.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230119035136.21603-3-blarson@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add ARCH_PENSANDO configuration option for AMD Pensando
-SoC based platforms.
+On 19/01/2023 04:51, Brad Larson wrote:
+> AMD Pensando Elba ARM 64-bit SoC is integrated with this IP and
+> explicitly controls byte-lane enables.
+> 
+> Signed-off-by: Brad Larson <blarson@amd.com>
+> 
+> ---
+> 
+> Changes since v6:
+> - Add reset-names and resets properties
+> - Add if/then on property amd,pensando-elba-sd4hc to set reg property
+>   values for minItems and maxItems
+> 
+> ---
+>  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 28 ++++++++++++++++++-
+>  1 file changed, 27 insertions(+), 1 deletion(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> index 8b1a0fdcb5e3..f7dd6f990f96 100644
+> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> @@ -16,12 +16,14 @@ properties:
+>    compatible:
+>      items:
+>        - enum:
+> +          - amd,pensando-elba-sd4hc
+>            - microchip,mpfs-sd4hc
+>            - socionext,uniphier-sd4hc
+>        - const: cdns,sd4hc
+>  
+>    reg:
+> -    maxItems: 1
+> +    minItems: 1
+> +    maxItems: 2
+>  
+>    interrupts:
+>      maxItems: 1
+> @@ -111,12 +113,36 @@ properties:
+>      minimum: 0
+>      maximum: 0x7f
+>  
+> +  reset-names:
+> +    items:
+> +      - const: hw
+> +
+> +  resets:
+> +    description:
+> +      optional. phandle to the system reset controller with line index
 
-Signed-off-by: Brad Larson <blarson@amd.com>
----
- arch/arm64/Kconfig.platforms | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+Drop "optional"
+Drop "phandle to the" and rephrase it to describe physical reset line.
+Don't describe here DT syntax (phandle) but the hardware. What is
+expected to be here?
 
-diff --git a/arch/arm64/Kconfig.platforms b/arch/arm64/Kconfig.platforms
-index d1970adf80ab..11d4f73cd341 100644
---- a/arch/arm64/Kconfig.platforms
-+++ b/arch/arm64/Kconfig.platforms
-@@ -236,6 +236,18 @@ config ARCH_NPCM
- 	  General support for NPCM8xx BMC (Arbel).
- 	  Nuvoton NPCM8xx BMC based on the Cortex A35.
- 
-+config ARCH_PENSANDO
-+	bool "AMD Pensando Platforms"
-+	help
-+	  This enables support for the ARMv8 based AMD Pensando SoC
-+	  family to include the Elba SoC.
-+
-+	  AMD Pensando SoCs support a range of Distributed Services
-+	  Cards in PCIe format installed into servers.  The Elba
-+	  SoC includes 16 A-72 CPU cores, 144 programmable P4
-+	  cores for a minimal latency/jitter datapath, and network
-+	  interfaces up to 200 Gb/s.
-+
- config ARCH_QCOM
- 	bool "Qualcomm Platforms"
- 	select GPIOLIB
--- 
-2.17.1
+> +      for mmc hw reset line if exists.
+> +    maxItems: 1
+> +
+>  required:
+>    - compatible
+>    - reg
+>    - interrupts
+>    - clocks
+>  
+> +if:
+
+Move the allO from the top here and put it under it. Saves indentation soon.
+
+> +  properties:
+> +    compatible:
+> +      const: amd,pensando-elba-sd4hc
+> +then:
+> +  properties:
+> +    reg:
+> +      minItems: 2
+> +else:
+> +  properties:
+> +    reg:
+> +      minItems: 1
+> +      maxItems: 2
+
+No, why do you suddenly allow two items on all variants? This was not
+described in your commit msg at all, so I expect here maxItems: 1.
+
+Also, unless your reset is applicable to all variants, resets: false and
+reset-names: false.
+
+> +
+>  unevaluatedProperties: false
+>  
+>  examples:
+
+Best regards,
+Krzysztof
 
