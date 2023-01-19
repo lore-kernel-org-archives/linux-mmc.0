@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DD4BC00A5A
-	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 03:43:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 35ACFC00A5A
+	for <linux-mmc@archiver.kernel.org>; Thu, 19 Jan 2023 03:44:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229765AbjASDnX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 18 Jan 2023 22:43:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36874 "EHLO
+        id S229749AbjASDob (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 18 Jan 2023 22:44:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36474 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229919AbjASDmQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 22:42:16 -0500
-Received: from mail-pl1-x635.google.com (mail-pl1-x635.google.com [IPv6:2607:f8b0:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9C9F69B38
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:39:45 -0800 (PST)
-Received: by mail-pl1-x635.google.com with SMTP id d3so1091848plr.10
-        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:39:45 -0800 (PST)
+        with ESMTP id S229767AbjASDmT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 18 Jan 2023 22:42:19 -0500
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 243706CCCA
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:40:15 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id bj3so1159905pjb.0
+        for <linux-mmc@vger.kernel.org>; Wed, 18 Jan 2023 19:40:15 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=pensando.io; s=google;
         h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=Gl+NRk1lPPWu1qLYsSSP0N9uQlgD1WldvUdBw1ctCec=;
-        b=qoqKcYS8f6LMfCltLCw76kTijQXNvX8/VfSXOt8OQrO2E8WQaYIhFmesf6yohs5pCL
-         CKe9/hsZiNYjWzFOxE8+B9URT7SJoH8qGUey1J4QXn0UcWxlbgMZNlEAFjewsp5T4lxS
-         oKV5aeT3lsA7bO2sBGFyhsj14m/2UucKNjWqsRl+8fuy+YCWQ9zlFLvQZdrDjEoYqug4
-         Ol7di2eThl9GBfTVpWJJQUHB0bMtZv6nv244CE/TRC4TFC53wNdW9mkC/kWX6d4MsdWK
-         8uAfsPcBZUSepvXvgxsXuSf/zZIMFO/79KjunLxONC5XWH2tN8ihE875BDx9+hLxAtvh
-         Cdfg==
+        bh=VVkJKiJ32kgmrV9HwlRJqykEjqFOh7CBZW3HRZVDDmc=;
+        b=AYoOQ/8J91aj/79GYchUN5wJYIBudinYvCvZHpawYHMzb+k2DSRr1R1uVRBxEeofqo
+         LzyW1cJAQjiKJMpSTrXcqWYdzoFP2mabaNPAfxBeciFXkh7cXm4eqy3GOwWMksVTTLUI
+         WadLMrWa67XUAHDgEnXHXoGTfo1qLudHckfnDNMfrClKiZ/HJZev7fNG5VSng3BxkQtx
+         QjurQkREyFtFMLXzrt7PVeLW6lcdSbUSsmLjdxns1fImjXPAhp/chEEz+ZpqISxfVuXy
+         PQ7pj2gDNoLopkiz4HUs9lc9hjnZP8pdrQtpezvIr2b7qcNtYt90n33wvKAS0cXxDC2p
+         A1pg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=references:in-reply-to:message-id:date:subject:cc:to:from
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Gl+NRk1lPPWu1qLYsSSP0N9uQlgD1WldvUdBw1ctCec=;
-        b=KVPvM2Cq5xoQN1XtbWi+8OwfFIb8RZCRQfqnWMfMWpwLH02uX6np9f091gnEFLsD4O
-         T/3gIEZ4WWFVtxvWMzXIPE88vPHMaOKY3OAJm6Zy1ocRqVbGg/oUpWcxVM4y9tPQFARu
-         OSFRoCWrSUk2O9RGNlSFwMsNPMA74dnuh8HMsukipXWU5SEk4idxHR8ivsJQc98agmhA
-         0DG6mbwpVIrAko7KqHXBUYf1HXx7BUWMqSEL/C6/E0OMfPkGB4BYxdXGydCGNFLJUcIi
-         TwseHPwKBGuVbFP6B81nG9618mJiT3Ya3Q4KSM6AjFOKQUd/n+m+LwBahPP93+kO+YRp
-         lqqg==
-X-Gm-Message-State: AFqh2kpnaIbVGOUMSVDUx8nFhgHIh9Yb3NKD7WdTfUhsX5f66JVqQ+Oe
-        dnFt5ihv7ErJDrNjSlI/PQoa0A==
-X-Google-Smtp-Source: AMrXdXvbKqKaMAq7GGHotAAAqe4B4wwrXEa//ZM+fYtZneMxVJOeS6SJD7B7/df7q0hm0iWG4UMHMQ==
-X-Received: by 2002:a05:6a20:8f0f:b0:ac:9d6b:c1f0 with SMTP id b15-20020a056a208f0f00b000ac9d6bc1f0mr13369763pzk.40.1674099585005;
-        Wed, 18 Jan 2023 19:39:45 -0800 (PST)
+        bh=VVkJKiJ32kgmrV9HwlRJqykEjqFOh7CBZW3HRZVDDmc=;
+        b=cZGoRVOvkNWYNde3/hN7cvrarsHDVloI56JsebOmPdWSwqPN1PdMyrcOmZ/dhxZO6I
+         QXOZzVzNjEyxOckLEvjiK9yNGK/Z22QTikaKsESe7l1xMQ0FHxV0zXk3E8A4mUwAl1jm
+         m1ZqDrlyRseL/Pxiq99kPAQPQqtqx/S2nM/uh3W3DyRae0B+WuRFut+3nwwX50onfb0u
+         lP6K6s/dJ5ccfZ2X09HrpsLLBwReHYnJioPY1md56BeLCvxTyJ17w0WAHhUJcVtyC1Qq
+         6PDKofv30J2i7f26qYERyvAhXYou3U3V/3RxoArs0lDqnYi5ioCbj8srMEs+8QeZAE7G
+         f/kg==
+X-Gm-Message-State: AFqh2krUtC2I/9e2uCGFDuST0e/jPI29bIe1ai+efFtWeySxdv9nrU2u
+        PlnMQuU+e9n9XnkAru3sac195g==
+X-Google-Smtp-Source: AMrXdXspfuChE5/UxncH6rROQNGpPzZT2cnNcxd08fIyPsy5yYzclyc4tmpYZH1QhU+EWILFVKcqtw==
+X-Received: by 2002:a05:6a21:3990:b0:b6:157c:d72b with SMTP id ad16-20020a056a21399000b000b6157cd72bmr9990976pzc.33.1674099615188;
+        Wed, 18 Jan 2023 19:40:15 -0800 (PST)
 Received: from platform-dev1.pensando.io ([12.226.153.42])
-        by smtp.gmail.com with ESMTPSA id f13-20020aa7968d000000b0056b4c5dde61sm11097879pfk.98.2023.01.18.19.39.42
+        by smtp.gmail.com with ESMTPSA id f13-20020aa7968d000000b0056b4c5dde61sm11097879pfk.98.2023.01.18.19.40.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 18 Jan 2023 19:39:44 -0800 (PST)
+        Wed, 18 Jan 2023 19:40:14 -0800 (PST)
 From:   Brad Larson <brad@pensando.io>
 X-Google-Original-From: Brad Larson <blarson@amd.com>
 To:     linux-arm-kernel@lists.infradead.org
@@ -66,9 +66,9 @@ Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
         thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
         ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
         devicetree@vger.kernel.org
-Subject: [PATCH v9 01/15] dt-bindings: arm: add AMD Pensando boards
-Date:   Wed, 18 Jan 2023 19:39:04 -0800
-Message-Id: <20230119033918.44117-2-blarson@amd.com>
+Subject: [PATCH v9 05/15] dt-bindings: mfd: syscon: Add amd,pensando-elba-syscon compatible
+Date:   Wed, 18 Jan 2023 19:39:08 -0800
+Message-Id: <20230119033918.44117-6-blarson@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20230119033918.44117-1-blarson@amd.com>
 References: <20230119033918.44117-1-blarson@amd.com>
@@ -76,47 +76,26 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Document the compatible for AMD Pensando Elba SoC boards.
+Add the AMD Pensando Elba SoC system registers compatible
 
-Reviewed-by: Rob Herring <robh@kernel.org>
+Acked-by: Rob Herring <robh@kernel.org>
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
- .../devicetree/bindings/arm/amd,pensando.yaml | 26 +++++++++++++++++++
- 1 file changed, 26 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/arm/amd,pensando.yaml
+ Documentation/devicetree/bindings/mfd/syscon.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/Documentation/devicetree/bindings/arm/amd,pensando.yaml b/Documentation/devicetree/bindings/arm/amd,pensando.yaml
-new file mode 100644
-index 000000000000..e5c2591834a8
---- /dev/null
-+++ b/Documentation/devicetree/bindings/arm/amd,pensando.yaml
-@@ -0,0 +1,26 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/arm/amd,pensando.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: AMD Pensando SoC Platforms
-+
-+maintainers:
-+  - Brad Larson <blarson@amd.com>
-+
-+properties:
-+  $nodename:
-+    const: "/"
-+  compatible:
-+    oneOf:
-+
-+      - description: Boards with Pensando Elba SoC
-+        items:
-+          - enum:
-+              - amd,pensando-elba-ortano
-+          - const: amd,pensando-elba
-+
-+additionalProperties: true
-+
-+...
+diff --git a/Documentation/devicetree/bindings/mfd/syscon.yaml b/Documentation/devicetree/bindings/mfd/syscon.yaml
+index 1b01bd010431..f4b0ed4ff03c 100644
+--- a/Documentation/devicetree/bindings/mfd/syscon.yaml
++++ b/Documentation/devicetree/bindings/mfd/syscon.yaml
+@@ -38,6 +38,7 @@ properties:
+               - allwinner,sun8i-h3-system-controller
+               - allwinner,sun8i-v3s-system-controller
+               - allwinner,sun50i-a64-system-controller
++              - amd,pensando-elba-syscon
+               - brcm,cru-clkset
+               - freecom,fsg-cs2-system-controller
+               - fsl,imx93-aonmix-ns-syscfg
 -- 
 2.17.1
 
