@@ -2,94 +2,154 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FD8FC677F1
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Jan 2023 05:53:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 269F1C38141
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Jan 2023 08:57:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230188AbjATFxw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Jan 2023 00:53:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35324 "EHLO
+        id S229737AbjATI5f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Jan 2023 03:57:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39408 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230527AbjATFxq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2023 00:53:46 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D5CD149550;
-        Thu, 19 Jan 2023 21:53:27 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 9E923B825ED;
-        Thu, 19 Jan 2023 18:43:23 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 63261C433D2;
-        Thu, 19 Jan 2023 18:43:20 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1674153802;
-        bh=vF/z5qpyXP/mL10MG7EvPirP8eSE/txoS1bJzYmIYPI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=LzvGBaP/l+y/aBXX3v0npik84cCY1DzBJscI5jxbYKBb3zILhlGtoDoQp2ZMPy+Cy
-         WHtoa4ZVFyjrBAqRcpqpiPUejOAx5K2HtT4Qhy+TOtc08TWCeq7VxNz+1oj6ETt6Q9
-         ZMgwkoh1km/yo3W5vXjpst8RLohLNfj+t6SpayNbp+9RiQ+/sJ3a/UEg8h62bmU5aF
-         xYzqs7MNpc+TcSjmTNx5u3M4S8aSFh2tgDIUGEi/8NUzKpOwaLHXLkg8aO3Y9zqL/G
-         aS6I29C1ZmYj99R1kC4TO+c3J50+RlRyQjSYYP95R3+xabEHG/uX2JZsZazmU8POxO
-         HkuD0zfSKFb3A==
-Date:   Thu, 19 Jan 2023 18:43:17 +0000
-From:   Conor Dooley <conor@kernel.org>
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        with ESMTP id S229723AbjATI5e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2023 03:57:34 -0500
+Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DDC404ABCD
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2023 00:57:32 -0800 (PST)
+Received: by mail-wm1-x32b.google.com with SMTP id c10-20020a05600c0a4a00b003db0636ff84so3141697wmq.0
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2023 00:57:32 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=lLh9gLAmjmKtRy5q73jgqvg8UmN0Ojzfcs9IN4Tn3io=;
+        b=HlOp+ZzuuUNGOd5tA2tWo3ZGkj59h25nLkmRpQfVDe/ZosO8xHcnoQ01C9MGhepaP7
+         bDAEE7V9bEwWRM+0oWbiCmhFDBGWC+1nI189u+aNX/D2zvjgPY53uxsOpKyL9F2vbFir
+         MUH9uJhYEVaUEqQb0cx8MapBMo7SI7xjAlmcs15hZAZIZaC8Mn9tYy1O5BfGHrpOaSAZ
+         1zp6nU31KvCYSo+5LW4TkVufRzSyfgkqQ4MwnM3fupwfLfm6hf0DhPMwroyHGlQuwp3V
+         9YCJH8sGLi73F8JFOoaNpdWz6qjnolIW9RaSKaonT+Rp7uPzgyw4jTXGDPMHFe7FViYW
+         B15g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=lLh9gLAmjmKtRy5q73jgqvg8UmN0Ojzfcs9IN4Tn3io=;
+        b=4r2slnVJdPPRkbJqQjNjksGRkT/kjIwgFHkPYrPIWPswS+yuXuBkyPxbIWX4VelVXE
+         YkA0PTYWLCBf1gP0luR4YaBanRRGtGqj92jwFE5hcRShFWdwJedA4aksQH/CyNEvCC9O
+         3eaQinbbZczO8hQcZ2DTQXXNF4xhwsLnJWsQl3kBL4QLnt/GBd9ZPDjBqtsiSQDJAIBc
+         I3LAET1bFIXGfmdtTwWpanOA5m6Hnzq35hnjGFLbM9Vco6BOL3n3tXTeU9oYfFcUhtVg
+         o0taOjHoRqQYa95HAkuR+MRhHh42+xNcigwaN2pr3xuj0+TN2GNvDaDJetH59853Bpna
+         13DQ==
+X-Gm-Message-State: AFqh2koF3Uo/w1flypyBVUC+zmcoEzVCOT4Nk7iolphyqXC4n0XsbfU+
+        hdTTVRGPP9AD+VmXaxmmjHG8PA==
+X-Google-Smtp-Source: AMrXdXtPATBJIPGHO0muRWjbnexaaMeh6KMlt8hH9FxqJjkYVKtHLyQf4msXY2Ls0rl7zsDWKo4Zcw==
+X-Received: by 2002:a05:600c:3b17:b0:3cf:7397:c768 with SMTP id m23-20020a05600c3b1700b003cf7397c768mr13153310wms.30.1674205051416;
+        Fri, 20 Jan 2023 00:57:31 -0800 (PST)
+Received: from krzk-bin.. ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id l18-20020a1c7912000000b003db00747fdesm1612040wme.15.2023.01.20.00.57.28
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Jan 2023 00:57:30 -0800 (PST)
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Daniel Machon <daniel.machon@microchip.com>,
+        UNGLinuxDriver@microchip.com,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        =?UTF-8?q?Andreas=20F=C3=A4rber?= <afaerber@suse.de>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Heiko Stuebner <heiko@sntech.de>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Tony Huang <tonyhuang.sunplus@gmail.com>,
+        Li-hao Kuo <lhjeff911@gmail.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Markus Pargmann <mpa@pengutronix.de>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
         Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2 3/3] riscv: dts: starfive: Add mmc node
-Message-ID: <Y8mPRQnGPpAhpu8C@spud>
-References: <20221227122227.460921-1-william.qiu@starfivetech.com>
- <20221227122227.460921-4-william.qiu@starfivetech.com>
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
+        linux-kernel@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-tegra@vger.kernel.org, linux-actions@lists.infradead.org,
+        linux-rockchip@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: [PATCH 2/2] dt-bindings: mmc: correct pwrseq node names
+Date:   Fri, 20 Jan 2023 09:57:22 +0100
+Message-Id: <20230120085722.171965-2-krzysztof.kozlowski@linaro.org>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230120085722.171965-1-krzysztof.kozlowski@linaro.org>
+References: <20230120085722.171965-1-krzysztof.kozlowski@linaro.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="XKsT41m8CI9UsBxP"
-Content-Disposition: inline
-In-Reply-To: <20221227122227.460921-4-william.qiu@starfivetech.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Node names should be generic and should not contain underscores.
 
---XKsT41m8CI9UsBxP
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+---
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml   | 2 +-
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml | 2 +-
+ Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
-Hey William,
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
+index 911a5996e099..588be73168fa 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
+@@ -41,7 +41,7 @@ additionalProperties: false
+ examples:
+   - |
+     #include <dt-bindings/gpio/gpio.h>
+-    sdhci0_pwrseq {
++    pwrseq {
+       compatible = "mmc-pwrseq-emmc";
+       reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+     };
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
+index 3397dbff88c2..b35e00e8c65e 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
+@@ -35,7 +35,7 @@ additionalProperties: false
+ examples:
+   - |
+     #include <dt-bindings/gpio/gpio.h>
+-    wifi_pwrseq: wifi_pwrseq {
++    pwrseq {
+       compatible = "mmc-pwrseq-sd8787";
+       powerdown-gpios = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
+       reset-gpios = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
+diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+index 64e3644eefeb..00feaafc1063 100644
+--- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
++++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
+@@ -55,7 +55,7 @@ additionalProperties: false
+ examples:
+   - |
+     #include <dt-bindings/gpio/gpio.h>
+-    sdhci0_pwrseq {
++    pwrseq {
+       compatible = "mmc-pwrseq-simple";
+       reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
+       clocks = <&clk_32768_ck>;
+-- 
+2.34.1
 
-On Tue, Dec 27, 2022 at 08:22:27PM +0800, William Qiu wrote:
-> This adds the mmc node for the StarFive JH7110 SoC.
-> Set sdioo node to emmc and set sdio1 node to sd.
->=20
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
->  .../jh7110-starfive-visionfive-v2.dts         | 25 ++++++++++++
-
-FYI, this file does not exist in the v3 Devicetree patchset sent by Hal
-Feng:
-https://lore.kernel.org/linux-riscv/20221220011247.35560-1-hal.feng@starfiv=
-etech.com
-
-Would you make sure that future revisions take into account that there
-is now a jh7110-starfive-visionfive-2.dtsi file instead?
-
-Thanks,
-Conor.
-
-
---XKsT41m8CI9UsBxP
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCY8mPRQAKCRB4tDGHoIJi
-0toIAP4zpbU0OLSqlFxJVLB/Y+fIjOaoIFT/p8c4yIjZ70N3XAEA5X6zPiLp8UDG
-nNz0GgJfub7PTipxdxFuprUVZpvnkAg=
-=roCg
------END PGP SIGNATURE-----
-
---XKsT41m8CI9UsBxP--
