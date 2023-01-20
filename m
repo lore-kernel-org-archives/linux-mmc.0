@@ -2,141 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A503BC25B4E
-	for <linux-mmc@archiver.kernel.org>; Fri, 20 Jan 2023 09:39:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 68990C05027
+	for <linux-mmc@archiver.kernel.org>; Fri, 20 Jan 2023 10:27:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229973AbjATJjN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Jan 2023 04:39:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33774 "EHLO
+        id S229524AbjATK12 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 20 Jan 2023 05:27:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39052 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229657AbjATJjN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2023 04:39:13 -0500
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D51544BC6;
-        Fri, 20 Jan 2023 01:39:10 -0800 (PST)
-Received: from ip5b412258.dynamic.kabel-deutschland.de ([91.65.34.88] helo=diego.localnet)
-        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <heiko@sntech.de>)
-        id 1pInrA-0002gP-SZ; Fri, 20 Jan 2023 10:38:44 +0100
-From:   Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Chen-Yu Tsai <wens@csie.org>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Samuel Holland <samuel@sholland.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Lars Povlsen <lars.povlsen@microchip.com>,
-        Steen Hegelund <Steen.Hegelund@microchip.com>,
-        Daniel Machon <daniel.machon@microchip.com>,
-        UNGLinuxDriver@microchip.com,
-        Thierry Reding <thierry.reding@gmail.com>,
-        Jonathan Hunter <jonathanh@nvidia.com>,
-        Andreas =?ISO-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Tony Huang <tonyhuang.sunplus@gmail.com>,
-        Li-hao Kuo <lhjeff911@gmail.com>,
-        Maxime Ripard <mripard@kernel.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Masahiro Yamada <yamada.masahiro@socionext.com>,
-        Markus Pargmann <mpa@pengutronix.de>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
-        linux-kernel@vger.kernel.org, linux-amlogic@lists.infradead.org,
-        linux-tegra@vger.kernel.org, linux-actions@lists.infradead.org,
-        linux-rockchip@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: correct pwrseq node names
-Date:   Fri, 20 Jan 2023 10:38:43 +0100
-Message-ID: <2138388.Mh6RI2rZIc@diego>
-In-Reply-To: <20230120085722.171965-2-krzysztof.kozlowski@linaro.org>
-References: <20230120085722.171965-1-krzysztof.kozlowski@linaro.org>
- <20230120085722.171965-2-krzysztof.kozlowski@linaro.org>
+        with ESMTP id S229562AbjATK10 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2023 05:27:26 -0500
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 87990B2D25
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2023 02:26:58 -0800 (PST)
+Received: by mail-ej1-x630.google.com with SMTP id kt14so12803245ejc.3
+        for <linux-mmc@vger.kernel.org>; Fri, 20 Jan 2023 02:26:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=mSUR+eB/n+Ie+HKL6NSribhGI7dhtvVP+defqFNYRAM=;
+        b=QKsY/7wYUgsJxy1HNf2+uERj8BevvCeoNTPN4R0AbHEk7IIBR50jbMAXQTomKwnd2U
+         bj4zCTNIyUObTakzJvvqzQ5yDNf9GI0HhaYZ4yBx1qd3Zj/kJh/4YCjPswuub/NHBxT6
+         YoPLwdbhCVosqoAOMSQVA3N5MXxRjRbvqVuUfWbW3IR/5sFBdbAs61oWX9BC/6PrnmWW
+         TEeZeavbDNcnksGHGghizOxIdokZlISKmeRAhKcRG3Q/KHoQKBDYI/I5cy1xmxGS41nc
+         gV31my49APblgoAv6uJj17u93AuNJSPPe1Jv9KSzLgaWXQOdtqZdr2m/l4pQYkM4NSOO
+         teWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=mSUR+eB/n+Ie+HKL6NSribhGI7dhtvVP+defqFNYRAM=;
+        b=n/9j5x7RjUpjIHjJSNZHevQbee0Ds4hzGKzpQQ6VMH4PtLCnKkn2NLJLTHdoaUtni8
+         SrTCAYoCo7qROzT6X9bSrZSNGKNHfKpQdpL0EdCBRmODTN3yiAx6hgngcUlj/JOJJQaU
+         H7Dty+RDwBLQK5tajqRGyoBZG/PJ7kWZ71PABB1bVpDMHodS2xZArPHFQQS52ueZug+u
+         uffOH6WNnclgS+v7GwaLE7LWpfTQipZT2TgFDMVlbXiNZtwwZU0fRF6M3K4EFiBuO7g2
+         xp3Ue/ZZFTbBhFGs8EEfKp5NSOZmWgUHKrYY4+Jk7l8z2Geq/grqeQJMri69GeHxqhek
+         zevA==
+X-Gm-Message-State: AFqh2kp5tyIWGGuaHNBw2jjfpY1saIm5R7hY1JbRHfl43hzxvKaxyuRB
+        CqfcH8tBtNP3Y+1UHEt1NQfdRg==
+X-Google-Smtp-Source: AMrXdXtbaWbvW0Lei/lXUMUulEmS7v+iToBg8DvXvqXZeCh2Axm6rk0GP/LQu3Ne50FPFovW2RlitA==
+X-Received: by 2002:a17:906:3a4d:b0:873:393f:1bda with SMTP id a13-20020a1709063a4d00b00873393f1bdamr12359798ejf.47.1674210416817;
+        Fri, 20 Jan 2023 02:26:56 -0800 (PST)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id s17-20020a1709060c1100b0084d21db0691sm17830862ejf.179.2023.01.20.02.26.55
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 20 Jan 2023 02:26:56 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.2-rc5
+Date:   Fri, 20 Jan 2023 11:26:54 +0100
+Message-Id: <20230120102654.113502-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Am Freitag, 20. Januar 2023, 09:57:22 CET schrieb Krzysztof Kozlowski:
-> Node names should be generic and should not contain underscores.
-> 
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml   | 2 +-
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml | 2 +-
->  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml | 2 +-
->  3 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
-> index 911a5996e099..588be73168fa 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
-> @@ -41,7 +41,7 @@ additionalProperties: false
->  examples:
->    - |
->      #include <dt-bindings/gpio/gpio.h>
-> -    sdhci0_pwrseq {
-> +    pwrseq {
+Hi Linus,
 
-[applicable for all 3 examples]
+Here's a PR with a couple of MMC fixes intended for v6.2-rc5. Details about the
+highlights are as usual found in the signed tag.
 
-hmm, power-sequences are not necessarily tied to an address and I guess
-it will be very much a common case to have multiple ones on a system.
+Please pull this in!
 
-So might it be better to follow other patterns (like leds) to number them
-or suggest a "foo-pwrseq" / "pwrseq-foo"?
+Kind regards
+Ulf Hansson
 
 
-Heiko
+The following changes since commit 88603b6dc419445847923fcb7fe5080067a30f98:
 
+  Linux 6.2-rc2 (2023-01-01 13:53:16 -0800)
 
->        compatible = "mmc-pwrseq-emmc";
->        reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
->      };
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
-> index 3397dbff88c2..b35e00e8c65e 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml
-> @@ -35,7 +35,7 @@ additionalProperties: false
->  examples:
->    - |
->      #include <dt-bindings/gpio/gpio.h>
-> -    wifi_pwrseq: wifi_pwrseq {
-> +    pwrseq {
->        compatible = "mmc-pwrseq-sd8787";
->        powerdown-gpios = <&twl_gpio 0 GPIO_ACTIVE_LOW>;
->        reset-gpios = <&twl_gpio 1 GPIO_ACTIVE_LOW>;
-> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> index 64e3644eefeb..00feaafc1063 100644
-> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml
-> @@ -55,7 +55,7 @@ additionalProperties: false
->  examples:
->    - |
->      #include <dt-bindings/gpio/gpio.h>
-> -    sdhci0_pwrseq {
-> +    pwrseq {
->        compatible = "mmc-pwrseq-simple";
->        reset-gpios = <&gpio1 12 GPIO_ACTIVE_LOW>;
->        clocks = <&clk_32768_ck>;
-> 
+are available in the Git repository at:
 
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2-rc2
 
+for you to fetch changes up to 8509419758f2cc28dd05370385af0d91573b76b4:
 
+  mmc: sunxi-mmc: Fix clock refcount imbalance during unbind (2023-01-02 15:57:36 +0100)
 
+----------------------------------------------------------------
+MMC host:
+ - sunxi-mmc: Fix clock refcount imbalance during unbind
+ - sdhci-esdhc-imx: Fix some tuning settings
+
+----------------------------------------------------------------
+Haibo Chen (1):
+      mmc: sdhci-esdhc-imx: correct the tuning start tap and step setting
+
+Samuel Holland (1):
+      mmc: sunxi-mmc: Fix clock refcount imbalance during unbind
+
+ drivers/mmc/host/sdhci-esdhc-imx.c | 22 +++++++++++++++-------
+ drivers/mmc/host/sunxi-mmc.c       |  8 +++++---
+ 2 files changed, 20 insertions(+), 10 deletions(-)
