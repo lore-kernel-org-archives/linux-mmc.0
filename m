@@ -2,268 +2,431 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BBE5FC38141
-	for <linux-mmc@archiver.kernel.org>; Sat, 21 Jan 2023 01:10:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12EF8C004D4
+	for <linux-mmc@archiver.kernel.org>; Sat, 21 Jan 2023 13:37:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229685AbjAUBKk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 20 Jan 2023 20:10:40 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33788 "EHLO
+        id S229714AbjAUNhX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 21 Jan 2023 08:37:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50044 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229485AbjAUBKk (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 20 Jan 2023 20:10:40 -0500
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2055.outbound.protection.outlook.com [40.107.237.55])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 907725274;
-        Fri, 20 Jan 2023 17:10:38 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=RO/E+NGcFf+B5ijE/PBv6wfxLsL7KhePesSwJND2obwUZj7R36aXIGGe9nk1ubhNeBD6nSWp8CW749lDnL16f6p+yPgllm7zsOqZls+52tRkIO2RWKWyBWEGJENdkiUTXdH4atnWY1lCpvRUV/YHQi48AvLUD9tp/vuzy5baBg1HeZ4E1pygeH1/loj0R2qi+6Ax42/+qJNIPU11ogDvsl6htcloNPIKJS6y+cHLnNRzJv61MHUDRLoSnxq/HgEhH6v4ZLADWWGHn2pSMYLc4EabGGhR+2cOic3uuafwREDUy6cajYWZ27pvThGszsXu/mbzmJ7x5pG3kkzjr1s72g==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=9eWLbbNOvHgck1bTH9zYLJMkhJ3mzuuQBlSY607oxuM=;
- b=e+P162dChc5HXKHB+zo1a8Y8v3KMSalvstIr5/UQ8tE9tRK7Dc2qMwjcwpmXRxMqdTCFK2xzS0Ju3WgnK3N4h77ml9ZXiP0UTSuCgpTCXnyOu+x13JcqU27SJJPy1HqnVMj4moKg/ra4iK+mKsoTXwvu2VmdM/q+npANCkV4ZQ3Jn7RnDUDiwCO9WqVH+gWYTKYHmoU+MzHgbVNSh9Dn2YgQTelwV/zNqm8Zv7MVfaj27geoMwOWsSdkpJfZ20uIcaRi5UjGhLUfUpOhp+AEWvost7zzOX/sqlXsosTD3tDgbWvO39upYgwRBNts/CQNfB0xQxLp41v4ty+HX/PDiA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=9eWLbbNOvHgck1bTH9zYLJMkhJ3mzuuQBlSY607oxuM=;
- b=RqLL57FNnbLbP3vYAvjggPBwmk11L6LBy59nD5elbFOYCzUh/A259c55NMVaiPUYdlJmKG5Jp8KKCZVTXvsMxNb4HZvfuyIgHMKuuqt/QYiBOqCvM9IBH0KepglwKIJATBMeRWy/UQE2H+xl2/nbPopwGrSWCXo+UFDRAifOWrk=
-Received: from DM6PR08CA0051.namprd08.prod.outlook.com (2603:10b6:5:1e0::25)
- by CY8PR12MB7219.namprd12.prod.outlook.com (2603:10b6:930:59::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.27; Sat, 21 Jan
- 2023 01:10:36 +0000
-Received: from DS1PEPF0000E64A.namprd02.prod.outlook.com
- (2603:10b6:5:1e0:cafe::6b) by DM6PR08CA0051.outlook.office365.com
- (2603:10b6:5:1e0::25) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.27 via Frontend
- Transport; Sat, 21 Jan 2023 01:10:35 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DS1PEPF0000E64A.mail.protection.outlook.com (10.167.18.40) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6002.11 via Frontend Transport; Sat, 21 Jan 2023 01:10:35 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Fri, 20 Jan 2023 19:10:10 -0600
-From:   Brad Larson <blarson@amd.com>
-To:     <krzysztof.kozlowski@linaro.org>
-CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
-        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
-        <brad@pensando.io>, <brendan.higgins@linux.dev>,
-        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
-        <broonie@kernel.org>, <catalin.marinas@arm.com>,
-        <davidgow@google.com>, <devicetree@vger.kernel.org>,
-        <fancer.lancer@gmail.com>, <gerg@linux-m68k.org>,
-        <gsomlo@gmail.com>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
-        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
-        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
-        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
-        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
-        <vaishnav.a@ti.com>, <will@kernel.org>,
-        <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v9 02/15] dt-bindings: mmc: cdns: Add AMD Pensando Elba SoC
-Date:   Fri, 20 Jan 2023 17:10:04 -0800
-Message-ID: <20230121011004.38654-1-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <f85cdf27-7ea0-14a8-10b0-7a9ac137a040@linaro.org>
-References: <f85cdf27-7ea0-14a8-10b0-7a9ac137a040@linaro.org>
+        with ESMTP id S229699AbjAUNhW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 21 Jan 2023 08:37:22 -0500
+Received: from cosmopolitan.snafu.de (cosmopolitan.snafu.de [IPv6:2001:1560:3:255::151])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01DA249430
+        for <linux-mmc@vger.kernel.org>; Sat, 21 Jan 2023 05:37:18 -0800 (PST)
+X-Trace: 4c7c73656261737469616e2e6b6c6f736b6140736e6166752e64657c38342e3233
+        2e3235342e3230357c31704a4533532d3030304c58302d49797c31363734333038
+        323330
+Received: from cosmopolitan.snafu.de ([10.151.10.19] helo=localhost)
+        by cosmopolitan.snafu.de with esmtpa (Exim 4.94.2) 
+        id 1pJE3S-000LX0-Iy; Sat, 21 Jan 2023 14:37:12 +0100
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DS1PEPF0000E64A:EE_|CY8PR12MB7219:EE_
-X-MS-Office365-Filtering-Correlation-Id: 8516f73d-8fab-475d-812a-08dafb4c4d48
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: ORViS0p6GTXczKriJkNmipJBguVv8csBKvKFRvZ+2CjyQmdPUuo/Qq4iGgA43sPPfrLVsZwKpOw4UoKQ0nelTsdfGoTEPl232JnaJizyT/1fa7O5JA5cRUFiQQ1tZaoOVmwziwWMqDglvNbMOo1VyA2gCs6BvnutCaucAbiezmbWo430xiEf2ce1m6WUXMmQUcPYFgKMTl7jPJy9WoBd2zTy08oicDWsHnXh4vjwbIpCa2SZEILffm6Tkd3zH3LX8TBrl/QrD7fbdNYfddXOy5V5ZpnSI+UaYsJxFzFtXatQfQzPDWls78L2NnMtSLGkQWBe+Ac8Cz72hGAMpZ7R/AkLnvUOpmWAc31x0dsN2YbfXAtLXt5leDpT8Hy5yThMCnAsfwUstIwgGLEo604Ol21ss0RW8fWRkrjfQsZ0NFrOT6xSXqRRSsyRKxHJOGEH7bK21TahK1/MrPsMEhnM+DKlQapMvfQygehOsZ4Fgbj0vuZZ/J9tlYYzqJr4QeiUUwvfVU+ZO2tXHjM7jhu+LFzCj4dxIqbOqt/9G+0tNk2VXICplKPp2fpJ5rWBosrBF5fGpL9MnYTX8F1rs6xP184d2jNzlc9AqQlfCoEOXshnifrjdymYgu0S9uf0KBHItvd9WS65R+8AaBHIvGKmhH2dTn7EUdJCxbzbKzJNj0VcAhYk/jO2OyCQJBFdYVzWMuPVR/4a7VtOZ8TxlXdwHig9m4h6MbBPqFb13ILAuTg=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(376002)(136003)(346002)(396003)(39860400002)(451199015)(46966006)(36840700001)(40470700004)(5660300002)(8936002)(4326008)(7416002)(7406005)(8676002)(82310400005)(6916009)(70586007)(70206006)(6666004)(186003)(2906002)(16526019)(26005)(54906003)(36756003)(478600001)(2616005)(316002)(53546011)(83380400001)(41300700001)(40480700001)(82740400003)(356005)(36860700001)(47076005)(81166007)(426003)(1076003)(40460700003)(336012)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 21 Jan 2023 01:10:35.8248
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8516f73d-8fab-475d-812a-08dafb4c4d48
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DS1PEPF0000E64A.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY8PR12MB7219
+Date:   Sat, 21 Jan 2023 14:37:10 +0100
+From:   sebastian.kloska@snafu.de
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org
+Subject: Re: Regression 5.14.21 vs 5.15.1: mmc blocked: mmc0: cqhci: timeout
+ for tag #
+In-Reply-To: <a935177e-739a-abd3-c926-62028a94e913@intel.com>
+References: <c1214ad81df49a314bd4863751de1a45@snafu.de>
+ <05add7ba-f2f8-7cbe-3449-4a3128c096b5@intel.com>
+ <2ae56408f156f4f728cd1e94863c0795@snafu.de>
+ <c6f162c3-367f-d357-8eb0-27b7aa70ecd5@intel.com>
+ <08bd329f23b8fac7a2249034804ac3c7@snafu.de>
+ <f31a5b1cc0ae7182199b89730891770d@snafu.de>
+ <a935177e-739a-abd3-c926-62028a94e913@intel.com>
+User-Agent: Roundcube Webmail/1.4.13
+Message-ID: <2faae5dfb4999fba2da80ae7d18af899@snafu.de>
+X-Sender: sebastian.kloska@snafu.de
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+X-VISP-ShouldScan: 1
+X-VISP-Virus-Check: clean
+X-VISP-Spam-Score: 0.7 (/)
+X-VISP-Spam-Report: This message has been scanned on "cosmopolitan.snafu.de"
+ to identify if it is considered spam or not.
+ Contact the support hotline for details.
+ Content analysis details:   (0.7 points)
+  pts rule name              description
+ ---- ---------------------- --------------------------------------------------
+  0.5 JMQ_SPF_NEUTRAL        ASKDNS: SPF set to ?all
+                             [snafu.de TXT:v=spf1 mx ip4:84.23.254.128/25]
+ [ip6:2001:1560:3:255::/64 ip6:2001:1560:3:254::/64 ip4:213.73.113.34/32 ip6:2001:1560:a000:2:50:ff:fe00:27ed/128 include:_spf.snafu.de ?all]
+ -1.0 ALL_TRUSTED            Passed through trusted hosts only via SMTP
+  0.1 TW_GF                  BODY: Odd Letter Triples with GF
+  0.1 TW_XF                  BODY: Odd Letter Triples with XF
+  0.2 KAM_DMARC_NONE         DKIM has Failed or SPF has failed on the message
+                             and the domain has no DMARC policy
+  0.0 KAM_DMARC_STATUS       Test Rule for DKIM or SPF Failure with Strict
+                             Alignment
+  0.8 KAM_ASCII_DIVIDERS     Email that uses ascii formatting dividers and
+                              possible spam tricks
+X-VISP-Spam-Max-Score: +++++
+X-SA-Exim-Connect-IP: 84.23.254.205
+X-SA-Exim-Mail-From: sebastian.kloska@snafu.de
+X-SA-Exim-Scanned: No (on cosmopolitan.snafu.de); SAEximRunCond expanded to false
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/01/2023 7:47 UTC, Krzysztof Kozlowski wrote:
->On 19/01/2023 04:51, Brad Larson wrote:
->> AMD Pensando Elba ARM 64-bit SoC is integrated with this IP and
->> explicitly controls byte-lane enables.
+Am 20.01.2023 13:08, schrieb Adrian Hunter:
+> On 20/01/23 13:14, sebastian.kloska@snafu.de wrote:
+>> So no mail with attachment on linux-mmc@vger.kernel.org
+>> but I linked the dmesgs on 
+>> https://bugzilla.kernel.org/show_bug.cgi?id=216255 
+>> <https://bugzilla.kernel.org/show_bug.cgi?id=216255>
+> 
+> I did receive the logs but it is good to attach them to the bug anyway.
+> 
+>>  
+>> Am 19.01.2023 11:28, schrieb Adrian Hunter:
+>>> On 19/01/23 11:46, sebastian.kloska@snafu.de 
+>>> <mailto:sebastian.kloska@snafu.de> wrote:
+>>>> Am 19.01.2023 10:15, schrieb Adrian Hunter:
+>>>>> On 18/01/23 23:24, sebastian.kloska@snafu.de 
+>>>>> <mailto:sebastian.kloska@snafu.de> wrote:
+>>>>>> Hi,
+>>>>>> 
+>>>>>> Hardware: Acer Swift-1 SF114-34-P6U1
+>>>>>> SD Host controller: Intel Corporation Device 4dc4 (rev 01) 8086:4dc4
+>>>>>> eMMC: Kingston A29128
+>>>>>> 
+>>>>>> * A couple of seconds after boot access to the eMMC is completely
+>>>>>>   blocked. Can be triggered by extensive I/O (e.g, with badblocks 
+>>>>>> -w)
+>>>>>> 
+>>>>>> * Tested with stable branch linux-5.14.21 vs. linux-5.15.1
+>>>>>>   Latest highest version including the bug is a fedora 6.1.6
+>>>>> 
+>>>>> There is very little difference in drivers/mmc between 5.14.21
+>>>>> and 5.15.1. Are you sure the same issue is not present in
+>>>>> 5.14.21?
+>>>> 
+>>>> Pretty sure. Using 5.14.21 day in day out 5.15.1 fails on me after 
+>>>> ~10min
+>>>> The "slowed down by pr_debug" version sometimes lives for >2h 
+>>>> (without stress
+>>>> via badblocks etc)
+>>>> 
+>> So all of the following is now done on the latest stable, Which 
+>> currently
+>> is 6.2.0-rc4+
+> 
+> That is a release candidate (rc).  The latest stable kernel
+> is 6.1.7.
+> 
+
+I know -just thought I should pull master/HEAD from the latest stable
+
+>>>>> 
+>>>>> You could try disabling runtime PM to see if that helps:
+>>>>> 
+>>>>>     echo on > /sys/class/mmc_host/mmc0/device/power/control
+>>>>> 
+>> Didn't help
 >> 
-...
->> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> index 8b1a0fdcb5e3..f7dd6f990f96 100644
->> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
->> @@ -16,12 +16,14 @@ properties:
->>    compatible:
->>      items:
->>        - enum:
->> +          - amd,pensando-elba-sd4hc
->>            - microchip,mpfs-sd4hc
->>            - socionext,uniphier-sd4hc
->>        - const: cdns,sd4hc
->>  
->>    reg:
->> -    maxItems: 1
->> +    minItems: 1
->> +    maxItems: 2
->>  
->>    interrupts:
->>      maxItems: 1
->> @@ -111,12 +113,36 @@ properties:
->>      minimum: 0
->>      maximum: 0x7f
->>  
->> +  reset-names:
->> +    items:
->> +      - const: hw
->> +
->> +  resets:
->> +    description:
->> +      optional. phandle to the system reset controller with line index
->
->Drop "optional"
->Drop "phandle to the" and rephrase it to describe physical reset line.
->Don't describe here DT syntax (phandle) but the hardware. What is
->expected to be here?
+>>>> Will try
+>>>>> Also it should be possible to disable cqhci by adding to the kernel
+>>>>> command line:
+>>>>> 
+>>>>>     sdhci.debug_quirks=0x40a0000
+>>>>> 
+>> 
+>> Weird behavior: Seems to make it worse. System often freezes
+>> during early boot-up.
+>> 
+>> HOWEVER: If I slow down the driver via dynamic debugging it seems to 
+>> be stable
+>> Failed to crash it over a couple of hours. You can say it fixes the 
+>> issue if you
+>> are willing to accept that 80% of one CPU core is busy with logging ;-)
+> 
+> That is interesting.  Logging can have more side effects than you might 
+> expect.
+> For example the logs might be written back to storage by syslog, which 
+> causes
+> more logging, and more writing etc etc.  That in turn is bumping up the 
+> CPU
+> load.
+> 
+> Increasing the CPU load will decrease the chance of the CPU entering a 
+> low-power
+> state (C-state).
+> 
+> And there was an issue with C-state transitions affecting Intel SDHCI
+> controllers,
+> so we need to check that possibility.  You could try kernel command 
+> line option:
+> 
+> 	intel_idle.max_cstate=1
+> 
 
-Done, see the resulting diff below for full context.  The missing
-'contains' was the bug.
+This -- Sir -- works just wonderfully !!
 
->> +      for mmc hw reset line if exists.
->> +    maxItems: 1
->> +
->>  required:
->>    - compatible
->>    - reg
->>    - interrupts
->>    - clocks
->>  
->> +if:
->
->Move the allO from the top here and put it under it. Saves indentation soon.
+Don't see any changes in 
+/sys/devices/system/cpu/cpu*/cpuidle/state*/disable,but
+may be that's expected. Kernel runs just fine. works for stable/6.1.7 
+and fedora/6.1.6
+So for me personally this workaround is fine. Guess it will hurt my
+power consumption/battery live though but that's acceptable for me.
 
-Yes.
+Don't hesitate to contact if I should test patches for you. The source
+is checked out and ccache is filled.
 
->> +  properties:
->> +    compatible:
->> +      const: amd,pensando-elba-sd4hc
->
->BTW, this probably won't even work and that's the answer why you added
->fake maxItems: 2... This should make you think about the bug. You must
->use contains.
+> You can see the C-states and whether they are disabled:
+> 
+> 	grep -H . /sys/devices/system/cpu/cpu*/cpuidle/state*/disable
+> 
+> "disable" is writable by root, so you can disable them that way also.
+> 
+> In the meantime I will take a look at the logs.
+> 
+>> 
+>>>> Will try
+>>>>>> 
+>>>>>> * Spiked the code with a lot of pr_debug messages. As a side 
+>>>>>> effect the driver
+>>>>>>   seems to be much more stable, so to me it appears like a timing 
+>>>>>> issue where
+>>>>>>   the driver fails to wait for a specific state change which seems 
+>>>>>> to appear
+>>>>>>   less often when  slowed down by logging
+>>>>> 
+>>>>> Ideally it would be good to see a full log with dynamic
+>>>>> debugging enabled for the latest kernel.
+>>>> 
+>>>> Latest torvalds/linux or stable/linux ?
+>>> 
+>>> Stable would be fine.
+>>> 
+>>>> 
+>>>>> 
+>>>>>     To enable mmc debug via kernel command line:
+>>>>> 
+>>>>>         dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* 
+>>>>> +p"
+>>>>> 
+>> 
+>> This for whatever reason did not work for me on the kernel cmdline
+>> but I could trigger it via echo "..." ><debugfs>/dynamic_debug/control
+>> so the attached dmesgs are missing early logs.
+>> 
+>>>>>     Kernel must be configured:
+>>>>> 
+>>>>>         CONFIG_DYNAMIC_DEBUG=y
+>>>>> 
+>>>>>> 
+>>>>>> * Would love to have a decent reference documentation to the SD 
+>>>>>> Controller
+>>>>>>   especially a detailed description of the behavior of the 
+>>>>>> register map in
+>>>>>>  mmc/host/cqhci.h All intel documents I could find seem to describe
+>>>>>>  similar but not quite identical register maps
+>>>>> 
+>>>>> The JEDEC eMMC specification describes the CQHCI registers.
+>>>>> It looks like you need to register to get access to them
+>>>>> at www.jedec.org.  
+>>>>> <http://www.jedec.org. > AFAICT older specs, which would be just
+>>>>> fine, are free to download after registering.
+>>>>> 
+>> 
+>> Uhh -- but the price for registration is hefty. THX anyway
+>> 
+>>>> THX
+>>>>> You can get SD Host Controller Simplified Specification
+>>>>> from www.sdcard.org <http://www.sdcard.org>.
+>>>>> 
+>> 
+>> I attach to dmesg logs
+>> * One with dynamic debugging and without sdhci.debug_quirks=0x40a0000
+>> * The other without dynamic debugging (as said I failed to crash the 
+>> system) and sdhci.debug_quirks=0x40a0000
+>> 
+>> Hope I filtered properly for the relevant stuff
+>> The second one contains what seems to me a ton of kernel Oops but
+>> that might be due to the preliminary status of 6.2.0-rc4
+>> 
+>> THX
+>> 
+>>>> THX
+>>>>>> 
+>>>>>> Regards
+>>>>>> 
+>>>>>> Sebastian
+>>>>>> 
+>>>>>> * dmesg
+>>>>>> 
+>>>>>> [  347.583082] mmc0: cqhci: timeout for tag 3, qcnt
+>>>>> 
+>>>>> The timeout is pretty long, so it seems like the controller
+>>>>> has gotten stuck.  It won't reset the command or data
+>>>>> circuits either, which is impossible if it is behaving
+>>>>> correctly.
+>>>>> 
+>>>>>> [  347.583086] mmc0: cqhci: ============ CQHCI REGISTER DUMP 
+>>>>>> ===========
+>>>>>> [  347.583114] mmc0: cqhci: Caps:      0x000030c0 | Version:  
+>>>>>> 0x00000510
+>>>>>> [  347.583117] mmc0: cqhci: Config:    0x00001101 | Control:  
+>>>>>> 0x00000000
+>>>>>> [  347.583120] mmc0: cqhci: Int stat:  0x00000000 | Int enab: 
+>>>>>> 0x00000016
+>>>>>> [  347.583123] mmc0: cqhci: Int sig:   0x00000016 | Int Coal: 
+>>>>>> 0x00000000
+>>>>>> [  347.583157] mmc0: cqhci: TDL base:  0x7c2b5000 | TDL up32: 
+>>>>>> 0x00000001
+>>>>>> [  347.583160] mmc0: cqhci: Doorbell:  0x0000000f | TCN:      
+>>>>>> 0x00000000
+>>>>>> [  347.583163] mmc0: cqhci: Dev queue: 0x00000008 | Dev Pend: 
+>>>>>> 0x00000008
+>>>>>> [  347.583166] mmc0: cqhci: Task clr:  0x00000000 | SSC1:     
+>>>>>> 0x00010008
+>>>>>> [  347.583169] mmc0: cqhci: SSC2:      0x00000001 | DCMD rsp: 
+>>>>>> 0x00000800
+>>>>>> [  347.583172] mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    
+>>>>>> 0x00000000
+>>>>>> [  347.583175] mmc0: cqhci: Resp idx:  0x0000002f | Resp arg: 
+>>>>>> 0x00000900
+>>>>>> [  347.583176] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>> ===========
+>>>>>> [  347.583182] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>> 0x00001002
+>>>>>> [  347.583185] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>> 0x00000070
+>>>>>> [  347.583188] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>> 0x00000023
+>>>>>> [  347.583191] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>> 0x0000003c
+>>>>>> [  347.583194] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>> 0x00000080
+>>>>>> [  347.583197] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>> 0x00000007
+>>>>>> [  347.583200] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>> 0x00000000
+>>>>>> [  347.583203] mmc0: sdhci: Int enab:  0x02ff4000 | Sig enab: 
+>>>>>> 0x02ff4000
+>>>>>> [  347.583206] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>> 0x00000000
+>>>>>> [  347.583209] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>> 0x80000807
+>>>>>> [  347.583212] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>> 0x00000000
+>>>>>> [  347.583214] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>> 0x00000000
+>>>>>> [  347.583217] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>> 0x00000000
+>>>>>> [  347.583219] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>> [  347.583223] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>> 0x000000011eef1218
+>>>>>> [  347.583224] mmc0: sdhci: 
+>>>>>> ============================================
+>>>>>> [  347.583229] mmc0: running CQE recovery
+>>>>>> [  347.690108] mmc0: Reset 0x2 never completed.
+>>>>>> [  347.690109] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>> ===========
+>>>>>> [  347.690115] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>> 0x00001002
+>>>>>> [  347.690118] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>> 0x00000070
+>>>>>> [  347.690121] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>> 0x00000023
+>>>>>> [  347.690124] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>> 0x0000003c
+>>>>>> [  347.690127] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>> 0x00000080
+>>>>>> [  347.690130] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>> 0x00000007
+>>>>>> [  347.690133] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>> 0x00000000
+>>>>>> [  347.690136] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>> 0x00ff0003
+>>>>>> [  347.690139] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>> 0x00000000
+>>>>>> [  347.690141] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>> 0x80000807
+>>>>>> [  347.690144] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>> 0x00000000
+>>>>>> [  347.690147] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>> 0x00000000
+>>>>>> [  347.690150] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>> 0x00000000
+>>>>>> [  347.690152] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>> [  347.690156] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>> 0x000000011eef1218
+>>>>>> [  347.690157] mmc0: sdhci: 
+>>>>>> ============================================
+>>>>>> [  347.790190] mmc0: Reset 0x4 never completed.
+>>>>>> [  347.790191] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>> ===========
+>>>>>> [  347.790193] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>> 0x00001002
+>>>>>> [  347.790196] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>> 0x00000070
+>>>>>> [  347.790199] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>> 0x00000023
+>>>>>> [  347.790202] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>> 0x0000003c
+>>>>>> [  347.790205] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>> 0x00000080
+>>>>>> [  347.790208] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>> 0x00000007
+>>>>>> [  347.790211] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>> 0x00000000
+>>>>>> [  347.790213] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>> 0x00ff0003
+>>>>>> [  347.790216] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>> 0x00000000
+>>>>>> [  347.790219] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>> 0x80000807
+>>>>>> [  347.790222] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>> 0x00000000
+>>>>>> [  347.790225] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>> 0x00000000
+>>>>>> [  347.790228] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>> 0x00000000
+>>>>>> [  347.790230] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>> [  347.790234] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>> 0x000000011eef1218
+>>>>>> [  347.790234] mmc0: sdhci: 
+>>>>>> ============================================
+>>>>>> [  347.803056] mmc0: Controller never released inhibit bit(s).
+>>>>>> [  347.803058] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>> ===========
+>>>>>> [  347.803077] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>> 0x00001002
+>>>>>> [  347.803080] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>> 0x00000070
+>>>>>> [  347.803083] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>> 0x00000023
+>>>>>> [  347.803086] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>> 0x0000003c
+>>>>>> [  347.803089] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>> 0x00000080
+>>>>>> [  347.803092] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>> 0x00000007
+>>>>>> [  347.803095] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>> 0x00000000
+>>>>>> [  347.803098] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>> 0x00ff0003
+>>>>>> [  347.803101] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>> 0x00000000
+>>>>>> [  347.803103] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>> 0x80000807
+>>>>>> [  347.803106] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>> 0x00000000
+>>>>>> [  347.803109] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>> 0x00000000
+>>>>>> [  347.803112] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>> 0x00000000
+>>>>>> [  347.803114] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>> [  347.803118] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>> 0x000000011eef1218
+>>>>>> [  347.803119] mmc0: sdhci: 
+>>>>>> ============================================
+>>>>>>  --
+>>>>>> 
+>> --
+>> 
 
-That was the problem, see updated diff below.  Passes dtbs_check and dt_binding_check.
-
->> +then:
->> +  properties:
->> +    reg:
->> +      minItems: 2
->> +else:
->> +  properties:
->> +    reg:
->> +      minItems: 1
->> +      maxItems: 2
->
->No, why do you suddenly allow two items on all variants? This was not
->described in your commit msg at all, so I expect here maxItems: 1.
-
-Set maxItems: 1.
-
->Also, unless your reset is applicable to all variants, resets: false and
->reset-names: false.
-
-Added false for both, this is the diff with above changes
-
---- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-@@ -9,19 +9,18 @@ title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
- maintainers:
-   - Masahiro Yamada <yamada.masahiro@socionext.com>
- 
--allOf:
--  - $ref: mmc-controller.yaml
--
- properties:
-   compatible:
-     items:
-       - enum:
-+          - amd,pensando-elba-sd4hc
-           - microchip,mpfs-sd4hc
-           - socionext,uniphier-sd4hc
-       - const: cdns,sd4hc
- 
-   reg:
--    maxItems: 1
-+    minItems: 1
-+    maxItems: 2
- 
-   interrupts:
-     maxItems: 1
-@@ -111,12 +110,42 @@ properties:
-     minimum: 0
-     maximum: 0x7f
- 
-+  reset-names:
-+    items:
-+      - const: hw
-+
-+  resets:
-+    description:
-+      physical line number to hardware reset the mmc
-+    maxItems: 1
-+
- required:
-   - compatible
-   - reg
-   - interrupts
-   - clocks
- 
-+allOf:
-+  - $ref: mmc-controller.yaml
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: amd,pensando-elba-sd4hc
-+    then:
-+      required:
-+        - reset-names
-+        - resets
-+      properties:
-+        reg:
-+          minItems: 2
-+    else:
-+      properties:
-+        reset-names: false
-+        resets: false
-+        reg:
-+          maxItems: 1
-+
-
-Regards,
-Brad
+-- 
