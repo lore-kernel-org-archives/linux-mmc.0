@@ -2,62 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73069C38142
-	for <linux-mmc@archiver.kernel.org>; Mon, 23 Jan 2023 08:47:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F1FDC61D97
+	for <linux-mmc@archiver.kernel.org>; Mon, 23 Jan 2023 09:42:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231563AbjAWIrZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Jan 2023 03:47:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36638 "EHLO
+        id S231573AbjAWJm0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Jan 2023 04:42:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230493AbjAWIrZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2023 03:47:25 -0500
-X-Greylist: delayed 483 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 23 Jan 2023 00:47:24 PST
-Received: from mail.tryweryn.pl (mail.tryweryn.pl [5.196.29.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B69481CF40
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 00:47:24 -0800 (PST)
-Received: by mail.tryweryn.pl (Postfix, from userid 1002)
-        id 81101A245E; Mon, 23 Jan 2023 08:38:43 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tryweryn.pl; s=mail;
-        t=1674463160; bh=Bo+/jg3TCpOeS79PpZREuOWEeqJV//jojylD9dSrSik=;
-        h=Date:From:To:Subject:From;
-        b=Z+qkEjHoItqYlQuTvGjDJ2reM5QkCC6QaD7s7L9pSIxzBMHw5RRtsWY4A2CE+la9b
-         IvDHfeiVWYGQA+1DvzE0MPtxn8baHqS/1V+YlrBg+DgfX5UVmodmoug05NVsljxgDe
-         oD/Ky3rowJfuu1Spn4ikhQOlgqPzaBGu7KtJ5ZL06N5WW0PHKMxJ71vyChP2JwhDZv
-         qvibl+z/bya1SipGEHzxVyRpuqrqh5DJWuJ7POBBsEOqq14NhhKWR/yb60KKM/nBf0
-         c83KlCFIWRRG1oN9IPIHxEEvYGabxNimxWuM6YdhuqLEfmiSF16LyKzvtyiIqBaMiw
-         oTw2eRjWIvnrQ==
-Received: by mail.tryweryn.pl for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 08:37:38 GMT
-Message-ID: <20230123081829-0.1.7p.2rwbc.0.p3et6ag7mk@tryweryn.pl>
-Date:   Mon, 23 Jan 2023 08:37:38 GMT
-From:   "Karol Michun" <karol.michun@tryweryn.pl>
-To:     <linux-mmc@vger.kernel.org>
-Subject: Prezentacja
-X-Mailer: mail.tryweryn.pl
+        with ESMTP id S230360AbjAWJmZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2023 04:42:25 -0500
+Received: from mail-wm1-x331.google.com (mail-wm1-x331.google.com [IPv6:2a00:1450:4864:20::331])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA295166D1
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 01:42:22 -0800 (PST)
+Received: by mail-wm1-x331.google.com with SMTP id m5-20020a05600c4f4500b003db03b2559eso8046583wmq.5
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 01:42:22 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=bb3ehCbsmnDNOeIeuOp9X6FACVdZxwB9flFsEny7tkU=;
+        b=dV+vmkhPJupVDkDKPKw/2uJe9dhCfz2931ZZfmSlTiTucpZhV2Dz+B6f9Fv3oiI5Qg
+         xdALFShfLxjvVlVQ2K1bLQ5/4uPa6Q7gCQlFkO7bDQBoW/r8L1iBLX9dM/ZknvefkDGC
+         6iJRk6CRvJJo7qipP+9FC4RrGHDwX//qae/qj8wJurKg8c+1OHYsm56cHw4p7MWRyk1K
+         nfquz3KQcfaO9EzCTs/SUKrcWz3tEvEos7SFv6WhgRiugJpJ3DnoGoOyT8+BCgVZIzQS
+         gVFXE4RIK7gcAlT4NdXcPy1iZVBPSkMbc+B1+QYLkW51SQ6p0ODeYa+m2ek55Zj8+RQZ
+         DWEQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=bb3ehCbsmnDNOeIeuOp9X6FACVdZxwB9flFsEny7tkU=;
+        b=bEx0DnWtn76IZS1ugkbIwibUSZbF72/+s1SilBE9NhvgdH3XcXXJcO5ycuIvDj0f/Y
+         y2BFFOuJvHn5IaL8xtZr3u3F8reenax8O1I2Jw/eIsciFxuXtTqKRkLaW5rT2498eB64
+         R3NoRM5ZVmDlG+jiQVyffoToqpOqlR8sh6caNiPrL+aOQEcNbISwyMoiRoyWo54zx4K3
+         SbzkN9Y6CnEI//yhgvrW/ZEVP2oY4/3JakPUPlQKHoJwsfYtGnxwQCmEN0Vg9ZFmyp8a
+         rmPH78IAfQZvvpke1JsmyFpNsCnTQ90enHxGfgjEHCnSnvDfY/Zveek0xK4q6KLIriWT
+         GgpA==
+X-Gm-Message-State: AFqh2kolN/FqoSUudE9/bA/NCk5kstgeuovpe2sg6Yt4qgJU8ELQ3/AD
+        9yA31N/P8RZ8qJg+GMaF6cqUeA==
+X-Google-Smtp-Source: AMrXdXsm6TcBoxPPxS02VMNxznfImdfA7EnRpT/eJPmFB8AVCLXvlWQuATnvGBXA13pmaGAeWzaHKQ==
+X-Received: by 2002:a05:600c:1d12:b0:3db:53f:baea with SMTP id l18-20020a05600c1d1200b003db053fbaeamr23030706wms.6.1674466941329;
+        Mon, 23 Jan 2023 01:42:21 -0800 (PST)
+Received: from [192.168.7.111] (679773502.box.freepro.com. [212.114.21.58])
+        by smtp.gmail.com with ESMTPSA id t13-20020a1c770d000000b003db1ca20170sm9963482wmi.37.2023.01.23.01.42.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 23 Jan 2023 01:42:20 -0800 (PST)
+Message-ID: <d8f78a24-398c-8bb0-8964-778d8a0e8998@linaro.org>
+Date:   Mon, 23 Jan 2023 10:42:19 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: [PATCH v2 04/11] dt-bindings: watchdog: convert meson-wdt.txt to
+ dt-schema
+Content-Language: en-US
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Alessandro Zummo <a.zummo@towertech.it>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Vinod Koul <vkoul@kernel.org>,
+        Kishon Vijay Abraham I <kishon@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Eric Dumazet <edumazet@google.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>, Andrew Lunn <andrew@lunn.ch>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Russell King <linux@armlinux.org.uk>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
+        netdev@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+References: <20221117-b4-amlogic-bindings-convert-v2-0-36ad050bb625@linaro.org>
+ <20221117-b4-amlogic-bindings-convert-v2-4-36ad050bb625@linaro.org>
+ <CAFBinCDd1MJEmSHR1XPsfBoRasBq+cV1F+66sCBXALtCCmoyUA@mail.gmail.com>
+Organization: Linaro Developer Services
+In-Reply-To: <CAFBinCDd1MJEmSHR1XPsfBoRasBq+cV1F+66sCBXALtCCmoyUA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Dzie=C5=84 dobry!
+On 10/01/2023 22:48, Martin Blumenstingl wrote:
+> Hi Neil,
+> 
+> On Mon, Jan 9, 2023 at 1:53 PM Neil Armstrong <neil.armstrong@linaro.org> wrote:
+> [...]
+>> +  compatible:
+>> +    oneOf:
+>> +      - enum:
+>> +          - amlogic,meson6-wdt
+>> +          - amlogic,meson8-wdt
+> Technically this is not an identical representation of what we had
+> before which was:
+> -       "amlogic,meson8-wdt" and "amlogic,meson6-wdt" on Meson8 SoCs
+> 
+> We're not using the "amlogic,meson8-wdt" compatible anywhere at the moment.
+> In the meson_wdt driver it's defined with the same per-SoC data as
+> "amlogic,meson6-wdt".
+> 
+> Long story short: In my opinion there's no need to change what you
+> have right now.
+> If you have to re-spin this then maybe you can add a note to the patch
+> description.
+> Please add my:
+> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
-Czy m=C3=B3g=C5=82bym przedstawi=C4=87 rozwi=C4=85zanie, kt=C3=B3re umo=C5=
-=BCliwia monitoring ka=C5=BCdego auta w czasie rzeczywistym w tym jego po=
-zycj=C4=99, zu=C5=BCycie paliwa i przebieg?
+Sorry I was distracted, I'll add a node on the commit message.
 
-Dodatkowo nasze narz=C4=99dzie minimalizuje koszty utrzymania samochod=C3=
-=B3w, skraca czas przejazd=C3=B3w, a tak=C5=BCe tworzenie planu tras czy =
-dostaw.
+Thanks,
+Neil
 
-Z naszej wiedzy i do=C5=9Bwiadczenia korzysta ju=C5=BC ponad 49 tys. Klie=
-nt=C3=B3w. Monitorujemy 809 000 pojazd=C3=B3w na ca=C5=82ym =C5=9Bwiecie,=
- co jest nasz=C4=85 najlepsz=C4=85 wizyt=C3=B3wk=C4=85.
+> 
+> 
+> Best regards,
+> Martin
 
-Bardzo prosz=C4=99 o e-maila zwrotnego, je=C5=9Bli mogliby=C5=9Bmy wsp=C3=
-=B3lnie om=C3=B3wi=C4=87 potencja=C5=82 wykorzystania takiego rozwi=C4=85=
-zania w Pa=C5=84stwa firmie.
-
-
-Pozdrawiam
-Karol Michun
