@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08330C05027
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DB04C25B50
 	for <linux-mmc@archiver.kernel.org>; Mon, 23 Jan 2023 10:10:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231607AbjAWKKV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Jan 2023 05:10:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37046 "EHLO
+        id S231939AbjAWKKW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 23 Jan 2023 05:10:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231808AbjAWKKR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2023 05:10:17 -0500
-Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D6A3EC7C
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 02:10:07 -0800 (PST)
-Received: by mail-wr1-x42b.google.com with SMTP id bk16so10233498wrb.11
-        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 02:10:07 -0800 (PST)
+        with ESMTP id S231851AbjAWKKU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2023 05:10:20 -0500
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4F7AEC65
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 02:10:08 -0800 (PST)
+Received: by mail-wr1-x429.google.com with SMTP id d14so6569703wrr.9
+        for <linux-mmc@vger.kernel.org>; Mon, 23 Jan 2023 02:10:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=GGsfIAFzoH7ggFb2voxRa7ZKIwz9PZMg5nKhBB1/kDo=;
-        b=Xym58FVi/DyBHzoH5aFBOh1zqQtKsbxeJoh30xeVcts5R8r+TNBO0kMt4zeXDHFr8F
-         HKIOtA5Te56KxdrZp+PwbV6jqqz4IIr6ek1oCdi1wqakg3VeTdmNYXT8AV4hA4FkpUwb
-         RJwSLPpcTSTE1iL2LmxubojKsnoVwPOkEvL8xIyrNYVmfM3eNSguXyLunrnjCOZuXIpO
-         S3cAutOmEpI4Da153O1lCX4NPzliTH4PuxQ1jUA5FCri/UXHpRrGYcXfe6FMpB/Wa7md
-         DuJBl/ASQWwUnYopd/CuLLOH9ZGT9reXwj44KOqpuMmDs2SBWu9KPLoBRNjiPuxqLJj1
-         Ewww==
+        bh=RRiMwFjCYTBiVehS5Zjzxk4QhzySk5Q8XvQ2DTwvGYo=;
+        b=I8MMPFh1TcWsNd+WWe0k3fRxXgSCZ5bzuKgp1jF0Oscrp5+wIJdNqG+oCnhILfT2C7
+         AMfhxG4J1w38PSAjeX8Ng26VvukBrp2AUraxmRu/TjlcbKRUbUk6QdKPkju8/0J3GcEg
+         EtNMesusXeLgEhK4ffFf2VEUmacT+9ALA16WCi6o6JAc4mwqlaXhIPe19L/rF24jGCb3
+         jy7uXjrKQo23Nc6dXu/RbsbVK9jJC11rWLLmYq4mJhRSUidzaCSsvEnRBoZK1+BCnKFR
+         t9KV/fGbXrmSSZNQt2Xkx6SEhxnRcmWkTxOGOWiulPtkS8LZZgPmF+8K4dMq+u/lm7y/
+         OV8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=GGsfIAFzoH7ggFb2voxRa7ZKIwz9PZMg5nKhBB1/kDo=;
-        b=EVCLXTPhr05yfLrKg0hdOEzjCrjz8oI+dG74ioytL3jW71Lb40z/Yk8c4G99+AsqF/
-         LdEs4Y8bg0okLPB+McjOS5p8dP1ajR2TiV1yUQFEkBB6weWxdEYJM8GGGaOAPGzaUjPl
-         60lSJwtvylQFVL180xPYgev+sgKFVx3/icltbBaqshJJN2gt8GElkNVRaDJnAZm8N0zf
-         CgKzKzdMqHhoFdwl0EnjX+lFmoGiRJuIee1e2D7oK4Rm11CTgiISSC5ALvQd20HA0JvW
-         ZKmS5bukXKTyA1t8bwoa5WTZ7TZtDoUmCV93TjXf0D//oPyKZQ8TEypHH6l3UwHFu3og
-         saEg==
-X-Gm-Message-State: AFqh2kr7Mvh6LVXjctiN5kP4hysM+uI/PwQMI0jNSVDpBrVyOe/1Xqft
-        fD1QmVPi3VphvpiuefD5knoCog==
-X-Google-Smtp-Source: AMrXdXsuzAGVJdfpkA4r0vuPCPAnhlDTbdaJ8hZuZDAIdxluKGkX6uczQJsOtnSp0EZuPyQGa9j6xw==
-X-Received: by 2002:adf:e44d:0:b0:2bd:f31e:3460 with SMTP id t13-20020adfe44d000000b002bdf31e3460mr19527988wrm.2.1674468606016;
-        Mon, 23 Jan 2023 02:10:06 -0800 (PST)
+        bh=RRiMwFjCYTBiVehS5Zjzxk4QhzySk5Q8XvQ2DTwvGYo=;
+        b=OSDixsRb+pYiiLeWA68JfAYW9/G41vRZGyh89yX0t7TUcWzd3ht2pkZpna1fic9fY4
+         P7SUfSXtrP45t4c+TFnd4XewyQr4qnZCAH6ykC2IzGxQU/u9q39kDeS7if2mRPCXKh1k
+         HMLGAjfYHNJR5I8uvrmNh+tNmWuTWnxrnGHGMG74LJD1+sojeAcsPvV3EePX7wK6eLaf
+         v45KETjhbqZmOoPd55vA14gF2x1GV/DA/2HMYv2Nnv43y8T7ztVqIoydf+NwY0iKWRM/
+         FxDbQp5DcHFQnHtNh37/KTYTrvcdgx6dY/DA9kxx3HQro59txIz42uuPP6IvgP/+Xl4B
+         EfYQ==
+X-Gm-Message-State: AFqh2kp9zQwyFnvirAF5MPplu2NoQwCd+kaJl/WhxgxqwsN0chuBNYnB
+        6f5+BwOPqzhIuGH+nGNTF0TJSA==
+X-Google-Smtp-Source: AMrXdXsz9ZThuuglWyEkoHYSIAJZtH6Em5vfGy2znOZDNstmWHfHemnhc3HoFov4CDVgw14dH69ABA==
+X-Received: by 2002:a5d:4f90:0:b0:2bd:d542:e01e with SMTP id d16-20020a5d4f90000000b002bdd542e01emr21607229wru.10.1674468607166;
+        Mon, 23 Jan 2023 02:10:07 -0800 (PST)
 Received: from arrakeen.starnux.net ([2a01:e0a:982:cbb0:52eb:f6ff:feb3:451a])
-        by smtp.gmail.com with ESMTPSA id m9-20020a056000024900b002bdec340a1csm22670403wrz.110.2023.01.23.02.10.04
+        by smtp.gmail.com with ESMTPSA id m9-20020a056000024900b002bdec340a1csm22670403wrz.110.2023.01.23.02.10.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 23 Jan 2023 02:10:05 -0800 (PST)
+        Mon, 23 Jan 2023 02:10:06 -0800 (PST)
 From:   Neil Armstrong <neil.armstrong@linaro.org>
-Date:   Mon, 23 Jan 2023 11:10:01 +0100
-Subject: [PATCH v3 4/7] dt-bindings: media: convert meson-ir.txt to
- dt-schema
+Date:   Mon, 23 Jan 2023 11:10:02 +0100
+Subject: [PATCH v3 5/7] dt-bindings: timer: convert
+ timer/amlogic,meson6-timer.txt to dt-schema
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20221117-b4-amlogic-bindings-convert-v3-4-e28dd31e3bed@linaro.org>
+Message-Id: <20221117-b4-amlogic-bindings-convert-v3-5-e28dd31e3bed@linaro.org>
 References: <20221117-b4-amlogic-bindings-convert-v3-0-e28dd31e3bed@linaro.org>
 In-Reply-To: <20221117-b4-amlogic-bindings-convert-v3-0-e28dd31e3bed@linaro.org>
 To:     Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
@@ -86,98 +86,104 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert the Amlogic Meson IR remote control receiver bindings to
-dt-schema.
+Convert the Amlogic Meson6 SoCs Timer Controller bindings to dt-schema.
 
-Take in account the used variant with amlogic,meson-gx-ir.
-
-Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 ---
- .../bindings/media/amlogic,meson6-ir.yaml          | 47 ++++++++++++++++++++++
- .../devicetree/bindings/media/meson-ir.txt         | 20 ---------
- 2 files changed, 47 insertions(+), 20 deletions(-)
+ .../bindings/timer/amlogic,meson6-timer.txt        | 22 ---------
+ .../bindings/timer/amlogic,meson6-timer.yaml       | 54 ++++++++++++++++++++++
+ 2 files changed, 54 insertions(+), 22 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/media/amlogic,meson6-ir.yaml b/Documentation/devicetree/bindings/media/amlogic,meson6-ir.yaml
+diff --git a/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.txt b/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.txt
+deleted file mode 100644
+index a9da22bda912..000000000000
+--- a/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.txt
++++ /dev/null
+@@ -1,22 +0,0 @@
+-Amlogic Meson6 SoCs Timer Controller
+-
+-Required properties:
+-
+-- compatible : should be "amlogic,meson6-timer"
+-- reg : Specifies base physical address and size of the registers.
+-- interrupts : The four interrupts, one for each timer event
+-- clocks : phandles to the pclk (system clock) and XTAL clocks
+-- clock-names : must contain "pclk" and "xtal"
+-
+-Example:
+-
+-timer@c1109940 {
+-	compatible = "amlogic,meson6-timer";
+-	reg = <0xc1109940 0x14>;
+-	interrupts = <GIC_SPI 10 IRQ_TYPE_EDGE_RISING>,
+-		     <GIC_SPI 11 IRQ_TYPE_EDGE_RISING>,
+-		     <GIC_SPI 6 IRQ_TYPE_EDGE_RISING>,
+-		     <GIC_SPI 29 IRQ_TYPE_EDGE_RISING>;
+-	clocks = <&xtal>, <&clk81>;
+-	clock-names = "xtal", "pclk";
+-};
+diff --git a/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.yaml b/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.yaml
 new file mode 100644
-index 000000000000..3f9fa92703bb
+index 000000000000..8381a5404ef7
 --- /dev/null
-+++ b/Documentation/devicetree/bindings/media/amlogic,meson6-ir.yaml
-@@ -0,0 +1,47 @@
++++ b/Documentation/devicetree/bindings/timer/amlogic,meson6-timer.yaml
+@@ -0,0 +1,54 @@
 +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +%YAML 1.2
 +---
-+$id: http://devicetree.org/schemas/media/amlogic,meson6-ir.yaml#
++$id: http://devicetree.org/schemas/timer/amlogic,meson6-timer.yaml#
 +$schema: http://devicetree.org/meta-schemas/core.yaml#
 +
-+title: Amlogic Meson IR remote control receiver
++title: Amlogic Meson6 SoCs Timer Controller
 +
 +maintainers:
 +  - Neil Armstrong <neil.armstrong@linaro.org>
-+
-+allOf:
-+  - $ref: rc.yaml#
++  - Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 +
 +properties:
 +  compatible:
-+    oneOf:
-+      - enum:
-+          - amlogic,meson6-ir
-+          - amlogic,meson8b-ir
-+          - amlogic,meson-gxbb-ir
-+      - items:
-+          - const: amlogic,meson-gx-ir
-+          - const: amlogic,meson-gxbb-ir
++    const: amlogic,meson6-timer
 +
 +  reg:
 +    maxItems: 1
 +
 +  interrupts:
-+    maxItems: 1
++    maxItems: 4
++    description: per-timer event interrupts
++
++  clocks:
++    maxItems: 2
++
++  clock-names:
++    items:
++      - const: xtal
++      - const: pclk
 +
 +required:
 +  - compatible
 +  - reg
 +  - interrupts
++  - clocks
++  - clock-names
 +
-+unevaluatedProperties: false
++additionalProperties: false
 +
 +examples:
 +  - |
 +    #include <dt-bindings/interrupt-controller/irq.h>
 +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    ir-receiver@c8100480 {
-+        compatible = "amlogic,meson6-ir";
-+        reg = <0xc8100480 0x20>;
-+        interrupts = <GIC_SPI 15 IRQ_TYPE_EDGE_RISING>;
++    timer@c1109940 {
++        compatible = "amlogic,meson6-timer";
++        reg = <0xc1109940 0x14>;
++        interrupts = <GIC_SPI 10 IRQ_TYPE_EDGE_RISING>,
++                     <GIC_SPI 11 IRQ_TYPE_EDGE_RISING>,
++                     <GIC_SPI 6 IRQ_TYPE_EDGE_RISING>,
++                     <GIC_SPI 29 IRQ_TYPE_EDGE_RISING>;
++        clocks = <&xtal>, <&clk81>;
++        clock-names = "xtal", "pclk";
 +    };
-diff --git a/Documentation/devicetree/bindings/media/meson-ir.txt b/Documentation/devicetree/bindings/media/meson-ir.txt
-deleted file mode 100644
-index efd9d29a8f10..000000000000
---- a/Documentation/devicetree/bindings/media/meson-ir.txt
-+++ /dev/null
-@@ -1,20 +0,0 @@
--* Amlogic Meson IR remote control receiver
--
--Required properties:
-- - compatible	: depending on the platform this should be one of:
--		  - "amlogic,meson6-ir"
--		  - "amlogic,meson8b-ir"
--		  - "amlogic,meson-gxbb-ir"
-- - reg		: physical base address and length of the device registers
-- - interrupts	: a single specifier for the interrupt from the device
--
--Optional properties:
-- - linux,rc-map-name:	see rc.txt file in the same directory.
--
--Example:
--
--	ir-receiver@c8100480 {
--		compatible= "amlogic,meson6-ir";
--		reg = <0xc8100480 0x20>;
--		interrupts = <0 15 1>;
--	};
 
 -- 
 2.34.1
