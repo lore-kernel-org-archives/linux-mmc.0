@@ -2,41 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E9B6C25B4E
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 05:45:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27B1AC54EED
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 05:45:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232784AbjAXFpV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Jan 2023 00:45:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40362 "EHLO
+        id S232226AbjAXFp3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Jan 2023 00:45:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40540 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231758AbjAXFpT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 00:45:19 -0500
+        with ESMTP id S232717AbjAXFp0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 00:45:26 -0500
 Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C1F83B0F6;
-        Mon, 23 Jan 2023 21:44:49 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC81D3B3F1;
+        Mon, 23 Jan 2023 21:44:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1674539089; x=1706075089;
-  h=from:to:cc:subject:date:message-id;
-  bh=zj5C/0Dm3eXkZ7JXMjfdfRw3WwpyZ0x3VqRQ7J5XMRU=;
-  b=kO7m7BiwLV/wMjl83+xM/XPOEKxATvxL02t6digqRmo5QYmQiBc2vQ8i
-   Y8er5OwvJ56Rf1mSo8pxui2kg4paQFGQPkold6AtPT5OFFQKlIsH9LVje
-   R6XIiRK7kOeUmk1RN6RGtDrwoPL7K6wzhLZdFVd4wycjGu6e3KOaEI6FM
-   EzgT6oM91oh7OQJAmimhna8ZbBi4ftZEKR0ZX4tiDx/kg2iyfXo338YP0
-   TqhNVF//FkmTlkgQi2rwo15Dk+Jw6xoBC7WifY/ssAmufRjmx2gAOvZsN
-   mZt244kvBxVQcceZKhQkAmtcdp8XSigidGM7KzgQmyT8w1uLNrZxqOoaz
-   A==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="305895478"
+  t=1674539096; x=1706075096;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references;
+  bh=mRV+dnA3SRMEAqJffKv61NWDnzHInh5cxWCpGNICJYg=;
+  b=I5Wwf46i/dUHaiMxvKjnSlfKKGdvjlscdRLW1abpc7XDvEaLoejGMmGg
+   ZDJyucxMtSq8ssuAfrcu5tvggpqzSKaF+s/CtmvmN8zIjD4VmBxnaBZDo
+   W3RCBJyYdRK6bZatVtbYEhIVSVVuL5qarpx9ug+DTI0rztvRJuhaL+Xfd
+   tIZO+UaTo7zv1Qvqzw5K1Uu0mRmF/EiFb28gc0s9SswaKRXUjAb12lS8W
+   G1Zc47V0dhAPgzy2ARepBSf22rLPbKmktlNqB0QKe47Cn8Ob5BeMn+8hy
+   bu74TvcFnFb9ch2Bht+boEYL3OJ6vTu59KR31FBsCoBgCBvxa+fW5uR3F
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="305895486"
 X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
-   d="scan'208";a="305895478"
+   d="scan'208";a="305895486"
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jan 2023 21:44:35 -0800
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jan 2023 21:44:41 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="655307147"
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="655307165"
 X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
-   d="scan'208";a="655307147"
+   d="scan'208";a="655307165"
 Received: from coresw01.iind.intel.com ([10.106.46.194])
-  by orsmga007.jf.intel.com with ESMTP; 23 Jan 2023 21:44:28 -0800
+  by orsmga007.jf.intel.com with ESMTP; 23 Jan 2023 21:44:35 -0800
 From:   rashmi.a@intel.com
 To:     ulf.hansson@linaro.org, michal.simek@xilinx.com,
         linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
@@ -49,95 +50,69 @@ Cc:     kris.pan@linux.intel.com, adrian.hunter@intel.com,
         vasavi.v.itha@intel.com, kenchappa.demakkanavar@intel.com,
         furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
         rashmi.a@intel.com
-Subject: [PATCH v1 1/4] Revert "mmc: sdhci-of-arasan: Add intel Thunder Bay SOC support to the arasan eMMC driver"
-Date:   Tue, 24 Jan 2023 11:14:24 +0530
-Message-Id: <20230124054427.28808-1-rashmi.a@intel.com>
+Subject: [PATCH v1 2/4] Revert "dt-bindings: mmc: Add bindings for Intel Thunder Bay SoC"
+Date:   Tue, 24 Jan 2023 11:14:25 +0530
+Message-Id: <20230124054427.28808-2-rashmi.a@intel.com>
 X-Mailer: git-send-email 2.17.1
+In-Reply-To: <20230124054427.28808-1-rashmi.a@intel.com>
+References: <20230124054427.28808-1-rashmi.a@intel.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: "A, Rashmi" <rashmi.a@intel.com>
 
-This reverts commit 39013f09681341e8264dff633e70d43da84d579a.
+This reverts commit ab991c05c42853f0b6110022db9bf30fcc6323dd.
 
 Revert Thunder Bay specific code as the product got cancelled
 and there are no end customers.
 
 Signed-off-by: A, Rashmi <rashmi.a@intel.com>
-Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>
+Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>wq
 ---
- drivers/mmc/host/sdhci-of-arasan.c | 29 +----------------------------
- 1 file changed, 1 insertion(+), 28 deletions(-)
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml | 25 -------------------
+ 1 file changed, 25 deletions(-)
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 89c431a34c43..fbafc87266aa 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -193,13 +193,6 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
- 	.hiword_update = false,
- };
+diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+index 4053de758db6..0d5d21dd30bb 100644
+--- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
++++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+@@ -88,12 +88,6 @@ properties:
+         description:
+           For this device it is strongly suggested to include
+           arasan,soc-ctl-syscon.
+-      - items:
+-          - const: intel,thunderbay-sdhci-5.1   # Intel Thunder Bay eMMC PHY
+-          - const: arasan,sdhci-5.1
+-        description:
+-          For this device it is strongly suggested to include
+-          clock-output-names and '#clock-cells'.
  
--static const struct sdhci_arasan_soc_ctl_map thunderbay_soc_ctl_map = {
--	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
--	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
--	.support64b = { .reg = 0x4, .width = 1, .shift = 24 },
--	.hiword_update = false,
--};
+   reg:
+     maxItems: 1
+@@ -309,22 +303,3 @@ examples:
+                    <&scmi_clk KEEM_BAY_PSS_SD0>;
+           arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
+     };
 -
- static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
- 	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
- 	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
-@@ -465,15 +458,6 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
- 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
- };
- 
--static const struct sdhci_pltfm_data sdhci_arasan_thunderbay_pdata = {
--	.ops = &sdhci_arasan_cqe_ops,
--	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN | SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
--	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
--		SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
--		SDHCI_QUIRK2_STOP_WITH_TC |
--		SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
--};
--
- #ifdef CONFIG_PM_SLEEP
- /**
-  * sdhci_arasan_suspend - Suspend method for the driver
-@@ -1150,12 +1134,6 @@ static struct sdhci_arasan_of_data sdhci_arasan_generic_data = {
- 	.clk_ops = &arasan_clk_ops,
- };
- 
--static const struct sdhci_arasan_of_data sdhci_arasan_thunderbay_data = {
--	.soc_ctl_map = &thunderbay_soc_ctl_map,
--	.pdata = &sdhci_arasan_thunderbay_pdata,
--	.clk_ops = &arasan_clk_ops,
--};
--
- static const struct sdhci_pltfm_data sdhci_keembay_emmc_pdata = {
- 	.ops = &sdhci_arasan_cqe_ops,
- 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
-@@ -1289,10 +1267,6 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
- 		.compatible = "intel,keembay-sdhci-5.1-sdio",
- 		.data = &intel_keembay_sdio_data,
- 	},
--	{
--		.compatible = "intel,thunderbay-sdhci-5.1",
--		.data = &sdhci_arasan_thunderbay_data,
--	},
- 	/* Generic compatible below here */
- 	{
- 		.compatible = "arasan,sdhci-8.9a",
-@@ -1716,8 +1690,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 
- 	if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-emmc") ||
- 	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd") ||
--	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio") ||
--	    of_device_is_compatible(np, "intel,thunderbay-sdhci-5.1")) {
-+	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio")) {
- 		sdhci_arasan_update_clockmultiplier(host, 0x0);
- 		sdhci_arasan_update_support64b(host, 0x0);
- 
+-  - |
+-    #define EMMC_XIN_CLK
+-    #define EMMC_AXI_CLK
+-    #define TBH_PSS_EMMC_RST_N
+-    mmc@80420000 {
+-          compatible = "intel,thunderbay-sdhci-5.1", "arasan,sdhci-5.1";
+-          interrupts = <GIC_SPI 714 IRQ_TYPE_LEVEL_HIGH>;
+-          reg = <0x80420000 0x400>;
+-          clocks = <&scmi_clk EMMC_XIN_CLK>,
+-                   <&scmi_clk EMMC_AXI_CLK>;
+-          clock-names = "clk_xin", "clk_ahb";
+-          phys = <&emmc_phy>;
+-          phy-names = "phy_arasan";
+-          assigned-clocks = <&scmi_clk EMMC_XIN_CLK>;
+-          clock-output-names = "emmc_cardclock";
+-          resets = <&rst_pss1 TBH_PSS_EMMC_RST_N>;
+-          #clock-cells = <0x0>;
+-    };
 -- 
 2.17.1
 
