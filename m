@@ -2,104 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A04EC25B4E
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 11:31:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 99F84C54EAA
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 11:42:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234038AbjAXLbZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Jan 2023 06:31:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56250 "EHLO
+        id S234238AbjAXLmF convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Jan 2023 06:42:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36862 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234032AbjAXLbY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 06:31:24 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1648CF772;
-        Tue, 24 Jan 2023 03:31:24 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id AF726B8117D;
-        Tue, 24 Jan 2023 11:31:22 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8419BC433EF;
-        Tue, 24 Jan 2023 11:31:15 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1674559881;
-        bh=vSvpFgPqXmxl07qKO0PotIG3YQSs9V4kcX2WYtv6Y00=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=MMe07pLbu1gmDqdbs7WNdKnwqs+02+j539LNGY1cbZMWSb+LgaN+KtJUxKap9GrfZ
-         Hfhq+ygaBNKzJtysre7CBNnQlIR0Am8ltX6plLvaXdquNMgugVHz57WxEz2rNQ/fLz
-         BZIsFBfSWiYZADWRI7ik7KAtacsW3AzCP9theWeLzf4veQK/glOgUD9GJIjUxoCCW6
-         tC31q7RHPnyE8UPD7z5eIvTBISBkftsQgI2XvEJihbHkDyLk6OPcKaGgyBxqmM6ocJ
-         IqwjQz7zIvo0gms9KkDdTo0rv/FXFiTdDCIBDkBg1GE+6h+u6Rx4dNMyyuKWA+Ws3h
-         hZaRP1nfl9ayQ==
-Message-ID: <c850df25-57b8-3172-8e5c-c466dc8556cd@kernel.org>
-Date:   Tue, 24 Jan 2023 12:31:12 +0100
+        with ESMTP id S234232AbjAXLmA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 06:42:00 -0500
+Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BBB002CC49;
+        Tue, 24 Jan 2023 03:41:56 -0800 (PST)
+Received: from ip5b412258.dynamic.kabel-deutschland.de ([91.65.34.88] helo=diego.localnet)
+        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <heiko@sntech.de>)
+        id 1pKHfs-0007oa-LG; Tue, 24 Jan 2023 12:41:12 +0100
+From:   Heiko =?ISO-8859-1?Q?St=FCbner?= <heiko@sntech.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Chen-Yu Tsai <wens@csie.org>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Samuel Holland <samuel@sholland.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Lars Povlsen <lars.povlsen@microchip.com>,
+        Steen Hegelund <Steen.Hegelund@microchip.com>,
+        Daniel Machon <daniel.machon@microchip.com>,
+        UNGLinuxDriver@microchip.com,
+        Thierry Reding <thierry.reding@gmail.com>,
+        Jonathan Hunter <jonathanh@nvidia.com>,
+        Andreas =?ISO-8859-1?Q?F=E4rber?= <afaerber@suse.de>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Tony Huang <tonyhuang.sunplus@gmail.com>,
+        Li-hao Kuo <lhjeff911@gmail.com>,
+        Maxime Ripard <mripard@kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Masahiro Yamada <yamada.masahiro@socionext.com>,
+        Markus Pargmann <mpa@pengutronix.de>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-sunxi@lists.linux.dev,
+        linux-kernel@vger.kernel.org, linux-amlogic@lists.infradead.org,
+        linux-tegra@vger.kernel.org, linux-actions@lists.infradead.org,
+        linux-rockchip@lists.infradead.org,
+        linux-samsung-soc@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: correct pwrseq node names
+Date:   Tue, 24 Jan 2023 12:41:10 +0100
+Message-ID: <2739129.BEx9A2HvPv@diego>
+In-Reply-To: <955f4b2a-a750-11a2-0423-72023935723b@linaro.org>
+References: <20230120085722.171965-1-krzysztof.kozlowski@linaro.org>
+ <2138388.Mh6RI2rZIc@diego> <955f4b2a-a750-11a2-0423-72023935723b@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.0
-Subject: Re: [PATCH v1 2/4] Revert "dt-bindings: mmc: Add bindings for Intel
- Thunder Bay SoC"
-Content-Language: en-US
-To:     rashmi.a@intel.com, ulf.hansson@linaro.org,
-        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, robh+dt@kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kishon@ti.com, vkoul@kernel.org, andriy.shevchenko@linux.intel.com,
-        linux-phy@lists.infradead.org, mgross@linux.intel.com
-Cc:     kris.pan@linux.intel.com, adrian.hunter@intel.com,
-        mahesh.r.vaidya@intel.com, nandhini.srikandan@intel.com,
-        vasavi.v.itha@intel.com, kenchappa.demakkanavar@intel.com,
-        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com
-References: <20230124054427.28808-1-rashmi.a@intel.com>
- <20230124054427.28808-2-rashmi.a@intel.com>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <20230124054427.28808-2-rashmi.a@intel.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="iso-8859-1"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 24/01/2023 06:44, rashmi.a@intel.com wrote:
-> From: "A, Rashmi" <rashmi.a@intel.com>
+Am Dienstag, 24. Januar 2023, 09:17:12 CET schrieb Krzysztof Kozlowski:
+> On 20/01/2023 10:38, Heiko Stübner wrote:
+> > Am Freitag, 20. Januar 2023, 09:57:22 CET schrieb Krzysztof Kozlowski:
+> >> Node names should be generic and should not contain underscores.
+> >>
+> >> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> >> ---
+> >>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml   | 2 +-
+> >>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-sd8787.yaml | 2 +-
+> >>  Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml | 2 +-
+> >>  3 files changed, 3 insertions(+), 3 deletions(-)
+> >>
+> >> diff --git a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
+> >> index 911a5996e099..588be73168fa 100644
+> >> --- a/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
+> >> +++ b/Documentation/devicetree/bindings/mmc/mmc-pwrseq-emmc.yaml
+> >> @@ -41,7 +41,7 @@ additionalProperties: false
+> >>  examples:
+> >>    - |
+> >>      #include <dt-bindings/gpio/gpio.h>
+> >> -    sdhci0_pwrseq {
+> >> +    pwrseq {
+> > 
+> > [applicable for all 3 examples]
+> > 
+> > hmm, power-sequences are not necessarily tied to an address and I guess
+> > it will be very much a common case to have multiple ones on a system.
+> > 
+> > So might it be better to follow other patterns (like leds) to number them
+> > or suggest a "foo-pwrseq" / "pwrseq-foo"?
 > 
-> This reverts commit ab991c05c42853f0b6110022db9bf30fcc6323dd.
+> In such cases one can add number or descriptive suffix (pwrseq-0,
+> pwrseq-foo), just like we do for regulators. However the examples have
+> here only one node and in such case "pwrseq" is enough.
 
-Please use scripts/get_maintainers.pl to get a list of necessary people
-and lists to CC.  It might happen, that command when run on an older
-kernel, gives you outdated entries.  Therefore please be sure you base
-your patches on recent Linux kernel.
+ok, when that is already part of the schema then all is fine :-)
 
-> 
-> Revert Thunder Bay specific code as the product got cancelled
-> and there are no end customers.
-> 
-> Signed-off-by: A, Rashmi <rashmi.a@intel.com>
-> Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>wq
+Reviewed-by: Heiko Stuebner <heiko@sntech.de>
 
-Stray characters.
-
-> ---
->  .../devicetree/bindings/mmc/arasan,sdhci.yaml | 25 -------------------
->  1 file changed, 25 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> index 4053de758db6..0d5d21dd30bb 100644
-> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-> @@ -88,12 +88,6 @@ properties:
->          description:
->            For this device it is strongly suggested to include
->            arasan,soc-ctl-syscon.
-> -      - items:
-> -          - const: intel,thunderbay-sdhci-5.1   # Intel Thunder Bay eMMC PHY
-> -          - const: arasan,sdhci-5.1
-
-Instead should be made rather deprecated, unless you are sure there is
-no single person in the world using the bindings (e.g. with BSD or
-bootloader)?
-
-
-
-Best regards,
-Krzysztof
 
