@@ -2,136 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60B4DC54E94
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 03:22:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5E9B6C25B4E
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 05:45:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231544AbjAXDWp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 23 Jan 2023 22:22:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53752 "EHLO
+        id S232784AbjAXFpV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Jan 2023 00:45:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40362 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230435AbjAXDWo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 23 Jan 2023 22:22:44 -0500
-Received: from NAM04-BN8-obe.outbound.protection.outlook.com (mail-bn8nam04on2088.outbound.protection.outlook.com [40.107.100.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6438B3B3E8;
-        Mon, 23 Jan 2023 19:22:17 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Fub0qvcl07Fpct1qUhvMDYQRqREy21BjbohJOb60TuWilIIAs99djixKfX0agkAaRLR6d9PKvgUzVwywplSZ5rSsXsT2so11Gr3Cb3BqZHXbC5NhmSAlD55m6az9rkP8C/tOVv9gMU9lZKAuq87zEzEZy8ZaMmqotPWm4i8KZm41IOhQZ7/NqBqBCkWagwaCs4I0/v5Nz3yfcvjP3EodCpgnhOOxpFNoe/ZuSEwMkPumiPUE0SjpkiMcomkRpjkQqM3t1tUTXrLqLNzce6xBN338DHOwjz1B22UYP0asiEjjNpVIkmFokrZhdvNX93HWqc/b+4yX+L/XuYbZNpmcAQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=qcrzxLNvBPs0JTkwQEq6lKJ1fs8XKbeeRfY41vcy4f4=;
- b=hesSPOFFtONbVFC7y7zX6v23kuzyi8CWHaWzQZqFC4JMvGzRE5PNh8TOXmIrennEqbathrJVazz64NV10QNGpn15QAVpKCIIMeYJrlF5M+uKXwJ7AgSTN4WwhN9vOZfUMlLQ2MvB+DCVzLZ/ivtE31C6LL1O1oSIqfTt7Sjq2wKTItDTYrEkpd4KJshNacXrzl0+oJnjRKQ6cGVkZ/D5WFmL27uyNwPNAIwOcpWiQ9T8RxRFESkwkLR2FEw3kav3YvXuZLdlUD6gcgnipi+sclrhZt3UZp0YE2g/pbH/nrBEPZ1fY0+z+9zZKnIcW9jQyOrEZ08yl0fKuLrJ+2pD4g==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=qcrzxLNvBPs0JTkwQEq6lKJ1fs8XKbeeRfY41vcy4f4=;
- b=pAkhcfGVupj7SdMZysLHp47rBJKUqe5gLwLeguzP8DuPR9uwgarR3CQoFQnkSH07POALgwK21lWcUQpqDaRGXILwOn2VK5TnTDVq2dIrGjVXrnAyNonGVHIONOMxa+yUl4jVZ0yX8FGoaUrFjpoxlPyc+1vA1Q1Jg16nEM7c81M=
-Received: from DS7PR03CA0022.namprd03.prod.outlook.com (2603:10b6:5:3b8::27)
- by SN7PR12MB7788.namprd12.prod.outlook.com (2603:10b6:806:345::7) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.33; Tue, 24 Jan
- 2023 03:21:43 +0000
-Received: from DM6NAM11FT060.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:3b8:cafe::52) by DS7PR03CA0022.outlook.office365.com
- (2603:10b6:5:3b8::27) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6002.33 via Frontend
- Transport; Tue, 24 Jan 2023 03:21:42 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT060.mail.protection.outlook.com (10.13.173.63) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6023.16 via Frontend Transport; Tue, 24 Jan 2023 03:21:42 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Mon, 23 Jan 2023 21:21:38 -0600
-From:   Brad Larson <blarson@amd.com>
-To:     <broonie@kernel.org>
-CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
-        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
-        <brad@pensando.io>, <brendan.higgins@linux.dev>,
-        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
-        <catalin.marinas@arm.com>, <davidgow@google.com>,
-        <devicetree@vger.kernel.org>, <fancer.lancer@gmail.com>,
-        <gerg@linux-m68k.org>, <gsomlo@gmail.com>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
-        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
-        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
-        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
-        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
-        <vaishnav.a@ti.com>, <will@kernel.org>,
-        <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v9 00/15] Support AMD Pensando Elba SoC
-Date:   Mon, 23 Jan 2023 19:21:32 -0800
-Message-ID: <20230124032132.44082-1-blarson@amd.com>
+        with ESMTP id S231758AbjAXFpT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 00:45:19 -0500
+Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C1F83B0F6;
+        Mon, 23 Jan 2023 21:44:49 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1674539089; x=1706075089;
+  h=from:to:cc:subject:date:message-id;
+  bh=zj5C/0Dm3eXkZ7JXMjfdfRw3WwpyZ0x3VqRQ7J5XMRU=;
+  b=kO7m7BiwLV/wMjl83+xM/XPOEKxATvxL02t6digqRmo5QYmQiBc2vQ8i
+   Y8er5OwvJ56Rf1mSo8pxui2kg4paQFGQPkold6AtPT5OFFQKlIsH9LVje
+   R6XIiRK7kOeUmk1RN6RGtDrwoPL7K6wzhLZdFVd4wycjGu6e3KOaEI6FM
+   EzgT6oM91oh7OQJAmimhna8ZbBi4ftZEKR0ZX4tiDx/kg2iyfXo338YP0
+   TqhNVF//FkmTlkgQi2rwo15Dk+Jw6xoBC7WifY/ssAmufRjmx2gAOvZsN
+   mZt244kvBxVQcceZKhQkAmtcdp8XSigidGM7KzgQmyT8w1uLNrZxqOoaz
+   A==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="305895478"
+X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
+   d="scan'208";a="305895478"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jan 2023 21:44:35 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="655307147"
+X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
+   d="scan'208";a="655307147"
+Received: from coresw01.iind.intel.com ([10.106.46.194])
+  by orsmga007.jf.intel.com with ESMTP; 23 Jan 2023 21:44:28 -0800
+From:   rashmi.a@intel.com
+To:     ulf.hansson@linaro.org, michal.simek@xilinx.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        robh+dt@kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kishon@ti.com, vkoul@kernel.org,
+        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org,
+        mgross@linux.intel.com
+Cc:     kris.pan@linux.intel.com, adrian.hunter@intel.com,
+        mahesh.r.vaidya@intel.com, nandhini.srikandan@intel.com,
+        vasavi.v.itha@intel.com, kenchappa.demakkanavar@intel.com,
+        furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
+        rashmi.a@intel.com
+Subject: [PATCH v1 1/4] Revert "mmc: sdhci-of-arasan: Add intel Thunder Bay SOC support to the arasan eMMC driver"
+Date:   Tue, 24 Jan 2023 11:14:24 +0530
+Message-Id: <20230124054427.28808-1-rashmi.a@intel.com>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <Y8k+SXQ5YtjDbKMG@sirena.org.uk>
-References: <Y8k+SXQ5YtjDbKMG@sirena.org.uk>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT060:EE_|SN7PR12MB7788:EE_
-X-MS-Office365-Filtering-Correlation-Id: a1db1c4e-95e0-4405-9045-08dafdba1d6a
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: u8z/rji+rwhXnLRzd196W7VauSYNVaPj1MuSoKZAkwLeIDqFDiMarqH9B9mBgia0pGnJ0Z7y2KSJPF5Ug0AOej/LESNnqYGwJXqUWtRIOTI5mmG0bbcanLU6RjGpjb61yPNSKoPCNHDeLnTOSlC4dX5IS53AlqIFJHkcXNVDw2gYnmT1+7g1UwJFQ3M8ylkhmN+UWw2SjRWlhWSyy278BOFJ/lbwUtYozxH4XGwCz3bpCvXMvCEwsnH8OrEXABF2c64fHEltW3wDinDr76pDg29M8eWvew2RC+NxugMPN3vsOaHpO1zC8GXotEI//CuJwIoz/B/Fj3Dd8P8bWw1tTiQLHH4yue8/cXWPtC0khbMFvl3jghq5YO2ja8BVUWcokjkQFYnDJj47OeaIrVtICGocugEhhlF4dart2kwTPbJ4i/nWYwbzYkObyslsGQe3DwrP+ZwvP8d7qhMqaP6svflWAkZ7AL0oMGomiHF+CKdKLOU/hxj4WryWiO52yBE8OxT3ql3gGbLSQStnJH/yrJ1o0GJ1qv+TL0PNIKa9D1EZ1MIcusEfDB08hljYK7t0A6t9jnye+17zraQDIy3F9PVb0x1cJuvrhhBgWPR6BOhURqCgehAW4Ac5tWjqbS2U78M2YJdhV3TAlWBXY3IBcff5mW4PnaINOI/ZcHzByc7IjWsusTnGtsquy2pVylPPpB1KNgGJmUC/utE3bhocsgLo6KggztdVW982VFyU/2E=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230022)(4636009)(376002)(396003)(346002)(136003)(39860400002)(451199015)(36840700001)(40470700004)(46966006)(1076003)(53546011)(70206006)(6916009)(4326008)(8676002)(70586007)(426003)(2616005)(47076005)(16526019)(6666004)(5660300002)(8936002)(26005)(7416002)(186003)(7406005)(41300700001)(2906002)(36860700001)(82740400003)(81166007)(82310400005)(316002)(54906003)(336012)(478600001)(36756003)(40460700003)(356005)(40480700001)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 24 Jan 2023 03:21:42.4832
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: a1db1c4e-95e0-4405-9045-08dafdba1d6a
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT060.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SN7PR12MB7788
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 19/01/2023 12:57 UTC, Mark Brown wrote:
-> On Wed, Jan 18, 2023 at 07:51:21PM -0800, Brad Larson wrote:
-> > This series enables support for AMD Pensando Elba SoC based platforms.
->
-> > The Elba SoC has the following features:
-> > - Sixteen ARM64 A72 cores
-> > - Dual DDR 4/5 memory controllers
-> > - 32 lanes of PCIe Gen3/4 to the Host
-> > - Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
-> >   also a single 1GE management port.
-> > - Storage/crypto offloads and 144 programmable P4 cores.
-> > - QSPI and EMMC for SoC storage
-> > - Two SPI interfaces for peripheral management
-> > - I2C bus for platform management
->
-> Are there any interdependencies between the different leaf
-> drivers here?  Generally it's better to make the series doing
-> baseline enablement for the SoC as small as possible and submit
-> other things separately to simplify issues with dependences.
+From: "A, Rashmi" <rashmi.a@intel.com>
 
-Only enablement changes are in the patch set to include driver
-changes for Designware and Cadence IP integrated into the Elba
-SoC.  Said another way the system won't boot without the changes
-included in the patch set.
+This reverts commit 39013f09681341e8264dff633e70d43da84d579a.
 
-Regards,
-Brad
+Revert Thunder Bay specific code as the product got cancelled
+and there are no end customers.
+
+Signed-off-by: A, Rashmi <rashmi.a@intel.com>
+Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>
+---
+ drivers/mmc/host/sdhci-of-arasan.c | 29 +----------------------------
+ 1 file changed, 1 insertion(+), 28 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 89c431a34c43..fbafc87266aa 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -193,13 +193,6 @@ static const struct sdhci_arasan_soc_ctl_map intel_lgm_sdxc_soc_ctl_map = {
+ 	.hiword_update = false,
+ };
+ 
+-static const struct sdhci_arasan_soc_ctl_map thunderbay_soc_ctl_map = {
+-	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
+-	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
+-	.support64b = { .reg = 0x4, .width = 1, .shift = 24 },
+-	.hiword_update = false,
+-};
+-
+ static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
+ 	.baseclkfreq = { .reg = 0x0, .width = 8, .shift = 14 },
+ 	.clockmultiplier = { .reg = 0x4, .width = 8, .shift = 14 },
+@@ -465,15 +458,6 @@ static const struct sdhci_pltfm_data sdhci_arasan_cqe_pdata = {
+ 			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN,
+ };
+ 
+-static const struct sdhci_pltfm_data sdhci_arasan_thunderbay_pdata = {
+-	.ops = &sdhci_arasan_cqe_ops,
+-	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN | SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+-	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+-		SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+-		SDHCI_QUIRK2_STOP_WITH_TC |
+-		SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+-};
+-
+ #ifdef CONFIG_PM_SLEEP
+ /**
+  * sdhci_arasan_suspend - Suspend method for the driver
+@@ -1150,12 +1134,6 @@ static struct sdhci_arasan_of_data sdhci_arasan_generic_data = {
+ 	.clk_ops = &arasan_clk_ops,
+ };
+ 
+-static const struct sdhci_arasan_of_data sdhci_arasan_thunderbay_data = {
+-	.soc_ctl_map = &thunderbay_soc_ctl_map,
+-	.pdata = &sdhci_arasan_thunderbay_pdata,
+-	.clk_ops = &arasan_clk_ops,
+-};
+-
+ static const struct sdhci_pltfm_data sdhci_keembay_emmc_pdata = {
+ 	.ops = &sdhci_arasan_cqe_ops,
+ 	.quirks = SDHCI_QUIRK_CAP_CLOCK_BASE_BROKEN |
+@@ -1289,10 +1267,6 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+ 		.compatible = "intel,keembay-sdhci-5.1-sdio",
+ 		.data = &intel_keembay_sdio_data,
+ 	},
+-	{
+-		.compatible = "intel,thunderbay-sdhci-5.1",
+-		.data = &sdhci_arasan_thunderbay_data,
+-	},
+ 	/* Generic compatible below here */
+ 	{
+ 		.compatible = "arasan,sdhci-8.9a",
+@@ -1716,8 +1690,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 
+ 	if (of_device_is_compatible(np, "intel,keembay-sdhci-5.1-emmc") ||
+ 	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sd") ||
+-	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio") ||
+-	    of_device_is_compatible(np, "intel,thunderbay-sdhci-5.1")) {
++	    of_device_is_compatible(np, "intel,keembay-sdhci-5.1-sdio")) {
+ 		sdhci_arasan_update_clockmultiplier(host, 0x0);
+ 		sdhci_arasan_update_support64b(host, 0x0);
+ 
+-- 
+2.17.1
 
