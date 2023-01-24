@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27B1AC54EED
-	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 05:45:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96A64C54EB4
+	for <linux-mmc@archiver.kernel.org>; Tue, 24 Jan 2023 05:45:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232226AbjAXFp3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 24 Jan 2023 00:45:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40540 "EHLO
+        id S232921AbjAXFpx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 24 Jan 2023 00:45:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232717AbjAXFp0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 00:45:26 -0500
+        with ESMTP id S232892AbjAXFpt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 24 Jan 2023 00:45:49 -0500
 Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC81D3B3F1;
-        Mon, 23 Jan 2023 21:44:56 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 075C1367CD;
+        Mon, 23 Jan 2023 21:45:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1674539096; x=1706075096;
+  t=1674539120; x=1706075120;
   h=from:to:cc:subject:date:message-id:in-reply-to:
    references;
-  bh=mRV+dnA3SRMEAqJffKv61NWDnzHInh5cxWCpGNICJYg=;
-  b=I5Wwf46i/dUHaiMxvKjnSlfKKGdvjlscdRLW1abpc7XDvEaLoejGMmGg
-   ZDJyucxMtSq8ssuAfrcu5tvggpqzSKaF+s/CtmvmN8zIjD4VmBxnaBZDo
-   W3RCBJyYdRK6bZatVtbYEhIVSVVuL5qarpx9ug+DTI0rztvRJuhaL+Xfd
-   tIZO+UaTo7zv1Qvqzw5K1Uu0mRmF/EiFb28gc0s9SswaKRXUjAb12lS8W
-   G1Zc47V0dhAPgzy2ARepBSf22rLPbKmktlNqB0QKe47Cn8Ob5BeMn+8hy
-   bu74TvcFnFb9ch2Bht+boEYL3OJ6vTu59KR31FBsCoBgCBvxa+fW5uR3F
+  bh=LKVw2yOOeRpF1A8gySOnDNhea0uoF/YrAVMAwjlZ9Dw=;
+  b=YOSVq4k2FspkTQL6fGOFPIKeFKq2UeiaOkjsg0g41Jzc7A/LvqSgOw8V
+   RbafKtmqoB1OWUHMqQiDNfJu40s7Jwg1cfYvoXhRgHmR7NrnLoZMbsq6i
+   1LJLofVdLqlK5oqacOtPSxxfjbgohpWGfchGCL6v+WRZesGY1EjHjM7WE
+   AGIcNF8ZiZRMkRzuKOUM+47zEkGnkUiKo5YVnttAIdWiDe42K/bk7iUi8
+   G/jebS/gB/UZqUv9eXbsEkpWu3SjxuIKRSVcMGoykmu6We7yOSKCPxvl/
+   8eZiPVILD8K72UFLpPe/qC0gXfXKB6u6yexqafqIOfzYTtCHzBKfVsDWK
    Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="305895486"
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="305895530"
 X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
-   d="scan'208";a="305895486"
+   d="scan'208";a="305895530"
 Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jan 2023 21:44:41 -0800
+  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 23 Jan 2023 21:44:55 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="655307165"
+X-IronPort-AV: E=McAfee;i="6500,9779,10599"; a="655307231"
 X-IronPort-AV: E=Sophos;i="5.97,241,1669104000"; 
-   d="scan'208";a="655307165"
+   d="scan'208";a="655307231"
 Received: from coresw01.iind.intel.com ([10.106.46.194])
-  by orsmga007.jf.intel.com with ESMTP; 23 Jan 2023 21:44:35 -0800
+  by orsmga007.jf.intel.com with ESMTP; 23 Jan 2023 21:44:48 -0800
 From:   rashmi.a@intel.com
 To:     ulf.hansson@linaro.org, michal.simek@xilinx.com,
         linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
@@ -50,9 +50,9 @@ Cc:     kris.pan@linux.intel.com, adrian.hunter@intel.com,
         vasavi.v.itha@intel.com, kenchappa.demakkanavar@intel.com,
         furong.zhou@intel.com, mallikarjunappa.sangannavar@intel.com,
         rashmi.a@intel.com
-Subject: [PATCH v1 2/4] Revert "dt-bindings: mmc: Add bindings for Intel Thunder Bay SoC"
-Date:   Tue, 24 Jan 2023 11:14:25 +0530
-Message-Id: <20230124054427.28808-2-rashmi.a@intel.com>
+Subject: [PATCH v1 4/4] Revert "dt-bindings: phy: intel: Add Thunder Bay eMMC PHY bindings"
+Date:   Tue, 24 Jan 2023 11:14:27 +0530
+Message-Id: <20230124054427.28808-4-rashmi.a@intel.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20230124054427.28808-1-rashmi.a@intel.com>
 References: <20230124054427.28808-1-rashmi.a@intel.com>
@@ -62,57 +62,88 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: "A, Rashmi" <rashmi.a@intel.com>
 
-This reverts commit ab991c05c42853f0b6110022db9bf30fcc6323dd.
+This reverts commit efb6935dd786a9d213ee542ed77d47ece700357c.
 
 Revert Thunder Bay specific code as the product got cancelled
 and there are no end customers.
 
 Signed-off-by: A, Rashmi <rashmi.a@intel.com>
-Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>wq
+Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>
 ---
- .../devicetree/bindings/mmc/arasan,sdhci.yaml | 25 -------------------
- 1 file changed, 25 deletions(-)
+ .../phy/intel,phy-thunderbay-emmc.yaml        | 45 -------------------
+ MAINTAINERS                                   |  7 ---
+ 2 files changed, 52 deletions(-)
+ delete mode 100644 Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-index 4053de758db6..0d5d21dd30bb 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-@@ -88,12 +88,6 @@ properties:
-         description:
-           For this device it is strongly suggested to include
-           arasan,soc-ctl-syscon.
--      - items:
--          - const: intel,thunderbay-sdhci-5.1   # Intel Thunder Bay eMMC PHY
--          - const: arasan,sdhci-5.1
--        description:
--          For this device it is strongly suggested to include
--          clock-output-names and '#clock-cells'.
- 
-   reg:
-     maxItems: 1
-@@ -309,22 +303,3 @@ examples:
-                    <&scmi_clk KEEM_BAY_PSS_SD0>;
-           arasan,soc-ctl-syscon = <&sd0_phy_syscon>;
-     };
+diff --git a/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml b/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
+deleted file mode 100644
+index 361ffc35b16b..000000000000
+--- a/Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
++++ /dev/null
+@@ -1,45 +0,0 @@
+-# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+-%YAML 1.2
+----
+-$id: http://devicetree.org/schemas/phy/intel,phy-thunderbay-emmc.yaml#
+-$schema: http://devicetree.org/meta-schemas/core.yaml#
 -
+-title: Intel Thunder Bay eMMC PHY
+-
+-maintainers:
+-  - Srikandan Nandhini <nandhini.srikandan@intel.com>
+-
+-properties:
+-  compatible:
+-    const: intel,thunderbay-emmc-phy
+-
+-  "#phy-cells":
+-    const: 0
+-
+-  reg:
+-    maxItems: 1
+-
+-  clocks:
+-    maxItems: 1
+-
+-  clock-names:
+-    items:
+-      - const: emmcclk
+-
+-required:
+-  - "#phy-cells"
+-  - compatible
+-  - reg
+-  - clocks
+-
+-additionalProperties: false
+-
+-examples:
 -  - |
--    #define EMMC_XIN_CLK
--    #define EMMC_AXI_CLK
--    #define TBH_PSS_EMMC_RST_N
--    mmc@80420000 {
--          compatible = "intel,thunderbay-sdhci-5.1", "arasan,sdhci-5.1";
--          interrupts = <GIC_SPI 714 IRQ_TYPE_LEVEL_HIGH>;
--          reg = <0x80420000 0x400>;
--          clocks = <&scmi_clk EMMC_XIN_CLK>,
--                   <&scmi_clk EMMC_AXI_CLK>;
--          clock-names = "clk_xin", "clk_ahb";
--          phys = <&emmc_phy>;
--          phy-names = "phy_arasan";
--          assigned-clocks = <&scmi_clk EMMC_XIN_CLK>;
--          clock-output-names = "emmc_cardclock";
--          resets = <&rst_pss1 TBH_PSS_EMMC_RST_N>;
--          #clock-cells = <0x0>;
+-    mmc_phy@80440800 {
+-        #phy-cells = <0x0>;
+-        compatible = "intel,thunderbay-emmc-phy";
+-        reg = <0x80440800 0x100>;
+-        clocks = <&emmc>;
+-        clock-names = "emmcclk";
 -    };
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 123216b76534..e9ca0b6364b0 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -10550,13 +10550,6 @@ F:	drivers/crypto/keembay/keembay-ocs-hcu-core.c
+ F:	drivers/crypto/keembay/ocs-hcu.c
+ F:	drivers/crypto/keembay/ocs-hcu.h
+ 
+-INTEL THUNDER BAY EMMC PHY DRIVER
+-M:	Nandhini Srikandan <nandhini.srikandan@intel.com>
+-M:	Rashmi A <rashmi.a@intel.com>
+-S:	Maintained
+-F:	Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
+-F:	drivers/phy/intel/phy-intel-thunderbay-emmc.c
+-
+ INTEL MANAGEMENT ENGINE (mei)
+ M:	Tomas Winkler <tomas.winkler@intel.com>
+ L:	linux-kernel@vger.kernel.org
 -- 
 2.17.1
 
