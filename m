@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 158F9C54E94
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 15:09:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93623C54E94
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 15:10:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235492AbjAYPJH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 10:09:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37468 "EHLO
+        id S235962AbjAYPK4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Jan 2023 10:10:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38334 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234279AbjAYPJG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 10:09:06 -0500
+        with ESMTP id S233235AbjAYPKt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 10:10:49 -0500
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74CAB1BE0;
-        Wed, 25 Jan 2023 07:09:05 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9EE2344BDC;
+        Wed, 25 Jan 2023 07:10:48 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0EF9761547;
-        Wed, 25 Jan 2023 15:09:05 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5FC81C433EF;
-        Wed, 25 Jan 2023 15:08:58 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 39E826154D;
+        Wed, 25 Jan 2023 15:10:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id A53B0C4339E;
+        Wed, 25 Jan 2023 15:10:41 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1674659344;
-        bh=v+B+KDBEA50AHtVt9lQ1BTuMYwoPUgbIgH8/Amio1lE=;
+        s=k20201202; t=1674659447;
+        bh=TofsbXpZihSKZUVsy9XrANh9lc730J6wSOc2QP9eoTI=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=hSoessefOv16Xt7Qbj98AdgmJicOcikMVtEdI8hVuvfe5IRYVPezihO/irb3buQZt
-         3ZFdNvsViDwPHeE3Jm/XuN6iGzIm1ESIZsv0lbDa1vk4s6rEEf6cKYM+bN/iuQe9VW
-         P/Svjep8k+fSgfN9zyFG7lQqfCHheo29BxDr+K+4T3lE67taLSodJ3E7d4EG4RrRqe
-         73RJMrkg3YqzKBZH4GY2t14YGyMJND9cOXmrIKdYBcHjYwCgCzhERtbbPGPR5fu5EG
-         NLAP3xoucfO28ZdQF16a1/t4V81l7sTg4luWlxs+aH+wX1wDHuET+t7+76hhEK6te3
-         8HtxOatriltJw==
-Date:   Wed, 25 Jan 2023 15:08:54 +0000
+        b=PWvP9JOJGFWee6ASV9x3ADUxkKdcW+FrahCSA7zAki85HcwH0S+Qlftb5AVSx76V4
+         qBpzvZbPNozQG37LDylg+pITOqfq3rlpjhbTAHNw0Oafns2nuDLECj60B1OrLEWMnV
+         /DBCokptbh1fiSNjleo4CBNt1NKQdn8kPf8iqz68WINnJ4LRJldl0YhHV/lKBLFxj7
+         iiB6+dKsKTB+B07SQ3EH4R91GxqW6sbp7ZwJOpScy+CeEyBddDco4n5ScTpc1xMwwc
+         EyMfjtYYEe2OMD5XlBJx97JPAnsmnx3im+jMYOD9UXRGxoX7/db0GPAIhfy7NJWA1c
+         KRS15JP4gUAzw==
+Date:   Wed, 25 Jan 2023 15:10:38 +0000
 From:   Lee Jones <lee@kernel.org>
 To:     Rob Herring <robh@kernel.org>
 Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -61,13 +61,13 @@ Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         linux-usb@vger.kernel.org
 Subject: Re: [PATCH] dt-bindings: Add missing
  (unevaluated|additional)Properties on child node schemas
-Message-ID: <Y9FGBqFKMxL3XraK@google.com>
-References: <20230124230228.372305-1-robh@kernel.org>
+Message-ID: <Y9FGbr8LB9dEHx1Z@google.com>
+References: <20230124230048.371144-1-robh@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230124230228.372305-1-robh@kernel.org>
+In-Reply-To: <20230124230048.371144-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -154,7 +154,7 @@ On Tue, 24 Jan 2023, Rob Herring wrote:
 >  Documentation/devicetree/bindings/usb/qcom,dwc3.yaml   |  1 +
 >  36 files changed, 65 insertions(+), 8 deletions(-)
 
-Acked-by: Lee Jones <lee@kernel.org>
+Is this the same as the patch I just reviewed?
 
 -- 
 Lee Jones [李琼斯]
