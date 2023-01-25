@@ -2,59 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3945CC54E94
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 11:14:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF32BC27C76
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 11:14:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235728AbjAYLOV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 06:14:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39000 "EHLO
+        id S235744AbjAYLO4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Jan 2023 06:14:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39038 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235612AbjAYLN6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 06:13:58 -0500
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 257AE58673
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:13:47 -0800 (PST)
-Received: by mail-wm1-x335.google.com with SMTP id m15so13465276wms.4
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:13:47 -0800 (PST)
+        with ESMTP id S234955AbjAYLO2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 06:14:28 -0500
+Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C64F582B9
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:14:22 -0800 (PST)
+Received: by mail-wm1-x329.google.com with SMTP id l41-20020a05600c1d2900b003daf986faaeso1016490wms.3
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:14:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=content-transfer-encoding:in-reply-to:from:references:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=azSPw3xKSo7B7wtu20Ypk0qIeinHqT2sve8f6K2slzY=;
-        b=laTv96FmGN2CDnMnNgZcThObgd6kGayNKDk5sXPbWY4MlJ8WLZQQUZ/HBZHRlrYwTb
-         ngfPj1aP2sq0OwMr8YxypQg/JfRyQHeBBmQmjt81FRPYsG6fNkufWBRb2W2dhF9T+yjb
-         Xfur+XUoinDZOLhJuYmKxRxzvP6bKIXQEyF4j4YhQMk8Kdh60FXrFFWoesb3sm1KT9pI
-         c5u+GQGEsfxQWk4QKSE+wrA05wedUJN6cW/ePldUoVaEOm/O2MfkJ8jw/ckoOLbMD1iQ
-         Ry9DA2Uf0nMc2iQWVDw039CLCPo9L6GbynjpeAn0PljjXOetj0I3C/gsvu7eni4sUKzJ
-         mlTw==
+        bh=5wejdOLs59m4/7efD+ZoqO+DCHMNBKyyQYGkCW8Bk9c=;
+        b=zZV+TNnKIq14J/EJBQB8+nZwpanYv/Djpn9z23TFFmaWBR/HCRNwZaigXdq5nLeLM8
+         mUHu/26N/jFqVw7q6mZ5JHtYplCHu+q+YkKzaZD4/FIlKsUjo3JV4RsyfTedNBXrhaEn
+         2RvCFMm/JXTsHUb85DyhA95jt7ML/s0adraztfmRePkTPjbo7z5q/iB3KyZsKmIbH+dj
+         FNCcYQp3j8LWdluRDOO5HOV/l9mG/hCMWTkf40mCvHzAJg1+g+qSdZIMAlH2orna09Si
+         oFLjgu/sVFMWnc6m8QAuS8pvpJdtzR0BWRnUoa162+oSIt8GZK4GlL1Qe/QkfeQucatd
+         ErZw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=azSPw3xKSo7B7wtu20Ypk0qIeinHqT2sve8f6K2slzY=;
-        b=bo7pFBWdA2THollbSuCPoavE+qeoorsanjiqQZ0pyzXx0lBogrK2509T8GPAVLpX8x
-         q81LMJpk/nney0AXa4UYBEu8HBtO0Mew6ZI4lRprHnAhGVinDCmQE/2GsSfISdCAM2Nt
-         cL02ifhnbBGdEHWOpsao5DeI+9N8WZ4nfg6XzQZbfIHbHSf2UlgjPrb/QWmVZAhXGJ44
-         simGIQnP7hnYdhcEU/BfOH8qwiOsQn0Fn69ekBQn/WbL6pVPI5AuAfAWqJw2reIs6l1M
-         oGMLGOqYbYeV/LP+sYG4ttttt1P1FLtWIlq8RdYWTFWBFWVZ9y+5v1NGuuzdjEJeRX+m
-         4SqQ==
-X-Gm-Message-State: AFqh2ko5p4bbOC5vfSD/wtVCHiXwtsKFS3w9kZbrtDEmFdoC0SGJ+Vqz
-        rGF3a6q8EwNWik29XOIUw1odvw==
-X-Google-Smtp-Source: AMrXdXv/ioghEmSSNlplJGgotjqdQ9osMujFVj2dNQKJWKJWQejUfnANRvec9R3Rbg8+lTOoQBkHxQ==
-X-Received: by 2002:a7b:c45a:0:b0:3d1:ed41:57c0 with SMTP id l26-20020a7bc45a000000b003d1ed4157c0mr39148591wmi.30.1674645225637;
-        Wed, 25 Jan 2023 03:13:45 -0800 (PST)
+        bh=5wejdOLs59m4/7efD+ZoqO+DCHMNBKyyQYGkCW8Bk9c=;
+        b=JKEci1RMfs6KgE0wkXW2ulPU3lXcNRvuAs6I0BgwHAJMjsRXKr7KebwvkqQide/SKb
+         BiZFtGuqGdmNihloxPaF3wgLFt4UELgKRVAlgUyaQQZZ/WP58KOmjSTZzKz7eAAoG0Er
+         OjU5IrCO0WGDd1yaD80DZaAJYMiI1gK9IT9UzlEbreK6nPrj32Z+dWYJb0BRgTopsZTw
+         sYtorolyuD0GScTARyOh/3hjXkXpUlJlJ1Tc9/1iurMjBw8oWfE/7kuyRHtKtoJEVlS0
+         B3OU9pZ82s1R/Op++vwg9lXKnZFCBswh7WDu9EG8q5XsCRFkwiooBM+JpA1pENcwbIv/
+         0xSg==
+X-Gm-Message-State: AFqh2koXOFzLmu9V6RuUVmPWlQTs+Uhpm0kMxUMDgyfqUa4r8XQpOPhS
+        YxbrUzLLk81vt+ekH6P8rb/MvA==
+X-Google-Smtp-Source: AMrXdXseqbUMqqOQ++27ChVRe93u86F2Gctz414bk0UDKGbgY3mZn3GdXOlDWRS/DFh0tjsKNtsmpA==
+X-Received: by 2002:a05:600c:468f:b0:3dc:c5c:b94f with SMTP id p15-20020a05600c468f00b003dc0c5cb94fmr6842124wmo.39.1674645260611;
+        Wed, 25 Jan 2023 03:14:20 -0800 (PST)
 Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id p23-20020a1c5457000000b003da286f8332sm1380553wmi.18.2023.01.25.03.13.43
+        by smtp.gmail.com with ESMTPSA id j15-20020a05600c130f00b003db0659c454sm1774127wmf.32.2023.01.25.03.14.18
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 Jan 2023 03:13:45 -0800 (PST)
-Message-ID: <ccddc46f-b007-4e0c-9c1f-df2c13d459eb@linaro.org>
-Date:   Wed, 25 Jan 2023 12:13:42 +0100
+        Wed, 25 Jan 2023 03:14:20 -0800 (PST)
+Message-ID: <4dc231f5-fad4-6093-851d-afcc0f68e045@linaro.org>
+Date:   Wed, 25 Jan 2023 12:14:17 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.0
-Subject: Re: [PATCH 04/10] dt-bindings: clock: Add Qualcomm IPQ5332 GCC
+Subject: Re: [PATCH 05/10] clk: qcom: add Global Clock controller (GCC) driver
+ for IPQ5332 SoC
 Content-Language: en-US
 To:     Kathiravan Thirumoorthy <quic_kathirav@quicinc.com>,
         agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
@@ -69,9 +70,9 @@ To:     Kathiravan Thirumoorthy <quic_kathirav@quicinc.com>,
         linux-clk@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 References: <20230125104520.89684-1-quic_kathirav@quicinc.com>
- <20230125104520.89684-5-quic_kathirav@quicinc.com>
+ <20230125104520.89684-6-quic_kathirav@quicinc.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230125104520.89684-5-quic_kathirav@quicinc.com>
+In-Reply-To: <20230125104520.89684-6-quic_kathirav@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -81,54 +82,28 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 25/01/2023 11:45, Kathiravan Thirumoorthy wrote:
 > From: Kathiravan T <quic_kathirav@quicinc.com>
 > 
-> Add binding for the Qualcomm IPQ5332 Global Clock Controller.
+> Add support for the global clock controller found on IPQ5332 SoC.
 > 
 > Signed-off-by: Kathiravan T <quic_kathirav@quicinc.com>
 > ---
+>  drivers/clk/qcom/Kconfig       |    7 +
+>  drivers/clk/qcom/Makefile      |    1 +
+>  drivers/clk/qcom/gcc-ipq5332.c | 3954 ++++++++++++++++++++++++++++++++
+>  3 files changed, 3962 insertions(+)
+>  create mode 100644 drivers/clk/qcom/gcc-ipq5332.c
+> 
+> diff --git a/drivers/clk/qcom/Kconfig b/drivers/clk/qcom/Kconfig
+> index 70d43f0a8919..1d300c89ecfc 100644
+> --- a/drivers/clk/qcom/Kconfig
+> +++ b/drivers/clk/qcom/Kconfig
+> @@ -141,6 +141,13 @@ config IPQ_GCC_4019
+>  	  Say Y if you want to use peripheral devices such as UART, SPI,
+>  	  i2c, USB, SD/eMMC, etc.
+>  
+> +config IPQ_GCC_5332
+> +	tristate "IPQ5332 Global Clock Controller"
 
-Thank you for your patch. There is something to discuss/improve.
-
-> +  clocks:
-> +    items:
-> +      - description: Board XO clock source
-> +      - description: Sleep clock source
-> +      - description: PCIE 2lane PHY pipe clock source
-> +      - description: PCIE 2lane x1 PHY pipe clock source (For second lane)
-> +      - description: USB PCIE wrapper pipe clock source
-> +
-> +  clock-names:
-> +    items:
-> +      - const: xo
-> +      - const: sleep_clk
-> +      - const: pcie_2lane_phy_pipe_clk
-> +      - const: pcie_2lane_phy_pipe_clk_x1
-> +      - const: usb_pcie_wrapper_pipe_clk
-> +
-> +required:
-> +  - compatible
-
-clocks are required
-
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    clock-controller@1800000 {
-> +      compatible = "qcom,ipq5332-gcc";
-> +      reg = <0x01800000 0x80000>;
-> +      #clock-cells = <1>;
-> +      #power-domain-cells = <1>;
-> +      #reset-cells = <1>;
-> +    };
-> +...
-> diff --git a/include/dt-bindings/clock/qcom,gcc-ipq5332.h b/include/dt-bindings/clock/qcom,gcc-ipq5332.h
-> new file mode 100644
-> index 000000000000..a305c648b724
-> --- /dev/null
-> +++ b/include/dt-bindings/clock/qcom,gcc-ipq5332.h
-
-Filename should match bindings/compatible.
+depends on ARM64 || COMPILE_TEST
 
 
 
