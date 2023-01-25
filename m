@@ -2,116 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EC92C61DA2
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 11:03:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 34497C61D9D
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 11:08:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235404AbjAYLDy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 06:03:54 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32810 "EHLO
+        id S235708AbjAYLIR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Jan 2023 06:08:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34602 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234540AbjAYLDw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 06:03:52 -0500
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D064D2D73;
-        Wed, 25 Jan 2023 03:03:51 -0800 (PST)
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 30PAqAR7017310;
-        Wed, 25 Jan 2023 11:03:08 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=IXL4R+gDnRYT4eUOzGoTg95TtWPuPvdLwf54HuW3oqg=;
- b=EzZNmteR2YCKM49kDQJG5PHQBOTSrXxjaOTq4ksChue/IY3ofAzQZeJnCj16kCweO/tM
- dKQqt2HeGm8sWAEdBr+o19Q6VKmQ+Rj9VDUjGM2ovprucU2udZRnL59uf2T9+D9ceXWB
- /MlRSk/pC9/ztuL2cdcRgTv+720l93SQoLJY1zzN3H8fxz0o+k8oiVZggVfrG38cRJij
- WkizDdeMpi9Sg6lrJZ2LpJnSYGX30b0IooBgw7OnYO8OJIxkHnBwkKxiDk7qCuwEujMm
- btqpjE6Cl6kbbAMpok6HP03zwc5yTpgUlIg1vjgp/EU55Kltzlg71FrubT5eUtB/gqum EQ== 
-Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3nag309yjq-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 25 Jan 2023 11:03:08 +0000
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 30PB37UP009488
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 25 Jan 2023 11:03:07 GMT
-Received: from [10.50.14.225] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.36; Wed, 25 Jan
- 2023 03:02:57 -0800
-Message-ID: <3b1cf5b5-b880-01f8-742c-ec3e89a2f330@quicinc.com>
-Date:   Wed, 25 Jan 2023 16:32:49 +0530
+        with ESMTP id S235684AbjAYLIK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 06:08:10 -0500
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BE3D4B75C
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:08:04 -0800 (PST)
+Received: by mail-wm1-x330.google.com with SMTP id f19-20020a1c6a13000000b003db0ef4dedcso955897wmc.4
+        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 03:08:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=tgNd6pdprwR64P3gTI1USNLkbTKHZW562SWliCwEACM=;
+        b=ADO6TqbweMkdaSb2eI1zg9+zyiYl+laiAa083zdMlJDzys8Pf2H6WOla5OukORSZeo
+         qQd3U9cLObqdPg4kvHCN8gkLJMsRbMBGs3k+6IznwRBEDwR/gjZTZ5A7hF9w82nwVdCT
+         RedDxB9/P2okicTBIOud0z319G2b+A8QZo+C5w4tjPRm1us3gDknrA9THTS+N9qvlek2
+         IMuWpuLGH1QyqJmEGZYJ99izXbJuT009pX6TxtGhLnLrGbrzHDytRSy+D5F/EKF5MuWc
+         uwEvTVsgwUdzzu7D/VcoM+l/INLsrvkbf3OEDuRNoDsQqtZ6kenhhqImeTyHgc9SK+cg
+         P61Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=tgNd6pdprwR64P3gTI1USNLkbTKHZW562SWliCwEACM=;
+        b=stEu7IwKYPzTLpR7a2oMy0uiP9Rb5SdwuX3T1A6jXeaC3PWT3NBTOcts5xsNuJ9wl6
+         ts3OFaT5pzF0GghlgXh9GqcSMZZLhpGbykmdzhvJnPtU6wZE+8ZE+J00t8cJjltRWsFA
+         v3xrbNErBSBHS5hDeA5wRgD/Z70UDR2/kHl4/Gv/P8ME9O5dIdTRuaNJDQ372q8rXDQP
+         0GgEf+EZ8HeBfl5YwJCwh24povTo07vKb3hNW+vuibq3WhDp89KjE2fkjuL8c9RM8XXZ
+         oRu7AMLWokMqC8q7gn4qDy/vZQbvWxrfwYZJsZKdsvVUuh4f8HUrHwYEjsA0gKf9PAcG
+         kMPg==
+X-Gm-Message-State: AFqh2kqt1zq1sC1MhQJZSQ4LQImdK2NbfWc9y/8GIp0b9mogDsbeR9/L
+        P4KfUoxSLwXdbg2V/421ZTUmgA==
+X-Google-Smtp-Source: AMrXdXsPehuhP8/0wsrKQRHY7pty6KTDfGXFEaq+5JL6AFSYRRELry8uhLX7C+8zyV2XA47766i/fQ==
+X-Received: by 2002:a05:600c:46cb:b0:3db:1afd:ac45 with SMTP id q11-20020a05600c46cb00b003db1afdac45mr26226470wmo.7.1674644882380;
+        Wed, 25 Jan 2023 03:08:02 -0800 (PST)
+Received: from [192.168.1.109] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id b5-20020a05600c150500b003dafb0c8dfbsm1760931wmg.14.2023.01.25.03.07.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 25 Jan 2023 03:08:01 -0800 (PST)
+Message-ID: <36c9c3ce-1ae0-6619-d74d-142ed34b2f3f@linaro.org>
+Date:   Wed, 25 Jan 2023 12:07:59 +0100
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.0
 Subject: Re: [PATCH V1 3/8] dt-bindings: pinctrl: qcom: Document IPQ9574
  pinctrl driver
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>, <shawnguo@kernel.org>,
-        <arnd@arndb.de>, <marcel.ziswiler@toradex.com>,
-        <dmitry.baryshkov@linaro.org>, <nfraprado@collabora.com>,
-        <broonie@kernel.org>, <tdas@codeaurora.org>,
-        <bhupesh.sharma@linaro.org>, <linux-arm-msm@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-CC:     <quic_srichara@quicinc.com>, <quic_gokulsri@quicinc.com>,
-        <quic_sjaganat@quicinc.com>, <quic_kathirav@quicinc.com>,
-        <quic_arajkuma@quicinc.com>, <quic_anusha@quicinc.com>,
-        <quic_poovendh@quicinc.com>
+Content-Language: en-US
+To:     devi priya <quic_devipriy@quicinc.com>, agross@kernel.org,
+        andersson@kernel.org, konrad.dybcio@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
+        shawnguo@kernel.org, arnd@arndb.de, marcel.ziswiler@toradex.com,
+        dmitry.baryshkov@linaro.org, nfraprado@collabora.com,
+        broonie@kernel.org, tdas@codeaurora.org, bhupesh.sharma@linaro.org,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Cc:     quic_srichara@quicinc.com, quic_gokulsri@quicinc.com,
+        quic_sjaganat@quicinc.com, quic_kathirav@quicinc.com,
+        quic_arajkuma@quicinc.com, quic_anusha@quicinc.com,
+        quic_poovendh@quicinc.com
 References: <20230124141541.8290-1-quic_devipriy@quicinc.com>
  <20230124141541.8290-4-quic_devipriy@quicinc.com>
- <0b2737b2-ae24-2c2d-f258-5c374d8f04f5@linaro.org>
-Content-Language: en-US
-From:   Devi Priya <quic_devipriy@quicinc.com>
-In-Reply-To: <0b2737b2-ae24-2c2d-f258-5c374d8f04f5@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230124141541.8290-4-quic_devipriy@quicinc.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: Lddg256VlpRyGQN7IEEtpXfeMgkxddb8
-X-Proofpoint-GUID: Lddg256VlpRyGQN7IEEtpXfeMgkxddb8
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.219,Aquarius:18.0.930,Hydra:6.0.562,FMLib:17.11.122.1
- definitions=2023-01-25_05,2023-01-25_01,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0 mlxscore=0
- suspectscore=0 bulkscore=0 adultscore=0 phishscore=0 lowpriorityscore=0
- mlxlogscore=717 clxscore=1015 priorityscore=1501 impostorscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2212070000 definitions=main-2301250101
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 24/01/2023 15:15, devi priya wrote:
+> Document the pinctrl driver for IPQ9574
+> 
+> Co-developed-by: Anusha Rao <quic_anusha@quicinc.com>
+> Signed-off-by: Anusha Rao <quic_anusha@quicinc.com>
+> Signed-off-by: devi priya <quic_devipriy@quicinc.com>
+> ---
+>  .../bindings/pinctrl/qcom,ipq9574-tlmm.yaml   | 135 ++++++++++++++++++
+>  1 file changed, 135 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq9574-tlmm.yaml
+> 
+> diff --git a/Documentation/devicetree/bindings/pinctrl/qcom,ipq9574-tlmm.yaml b/Documentation/devicetree/bindings/pinctrl/qcom,ipq9574-tlmm.yaml
+> new file mode 100644
+> index 000000000000..d736f0fb7835
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/pinctrl/qcom,ipq9574-tlmm.yaml
+> @@ -0,0 +1,135 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/pinctrl/qcom,ipq9574-tlmm.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Qualcomm Technologies, Inc. IPQ9574 TLMM block
+> +
+> +maintainers:
+> +  - Bjorn Andersson <andersson@kernel.org>
+> +  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> +
+> +description:
+> +  Top Level Mode Multiplexer pin controller in Qualcomm IPQ9574 SoC.
+> +
+> +properties:
+> +  compatible:
+> +    const: qcom,ipq9574-tlmm
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  interrupts: true
 
+Also - missing maxItems.
 
-On 1/24/2023 8:38 PM, Krzysztof Kozlowski wrote:
-> On 24/01/2023 15:15, devi priya wrote:
->> Document the pinctrl driver for IPQ9574
->>
->> Co-developed-by: Anusha Rao <quic_anusha@quicinc.com>
->> Signed-off-by: Anusha Rao <quic_anusha@quicinc.com>
->> Signed-off-by: devi priya <quic_devipriy@quicinc.com>
-> 
-> Did anything changed here?
-> 
-Have rebased the binding on the recent changes as sugggested
-> b4 diff fails on this patch, there is no detailed changelog.
-> 
-> Subject looks not fixed - why "driver" appeared there? Bindings do not
-> document driver.
-> 
-Sure, will update the subject, add the changelogs and post V3 patch series
-> Best regards,
-> Krzysztof
-> 
-Best Regards,
-Devi Priya
+I think you based your patches on some older version, so you might miss
+here changes we did recently.
+
+Best regards,
+Krzysztof
+
