@@ -2,86 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DFA7C27C76
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 19:58:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E5609C61DA0
+	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 20:35:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236031AbjAYT65 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 14:58:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59826 "EHLO
+        id S236436AbjAYUfU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Jan 2023 15:35:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35128 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236044AbjAYT6z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 14:58:55 -0500
-Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 844D3D50B;
-        Wed, 25 Jan 2023 11:58:38 -0800 (PST)
-Received: by mail-ot1-f50.google.com with SMTP id f5-20020a9d5f05000000b00684c0c2eb3fso11757589oti.10;
-        Wed, 25 Jan 2023 11:58:38 -0800 (PST)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=2okyASH/JCrvQKLi2NuQ+QA06bfjxbFJqRj6dFE5tQM=;
-        b=qUWfa+l+y/VQ8wQh5WWhg+yUQep1JFUn6LwESJzivO5tRJPxIzRkrGa6jBnzACBCpi
-         hhnhp25dR7xhNibVST5zkHAvxSff1xmoXbEEyMEAdv/kl8I0GvLHhBm6MbQXIoMeJfob
-         Cgms2Fs7LJP5/nDAmU+l/hZAtDScTDsAg1V6HnitIIoLEP5a/ofygGlgaGTw+jBN5njG
-         /6NZGRdP/MyEZXxXWAoN18KR3WVu1pTrOUSUu6vhEEampYzATZuMAVLFmdCSF6wk6K7B
-         1rFYIHG+R6Z14DD8V8XQuArk1ls/fdwBcUUsNG9kvZoRZkx6zrqdczAXoLOO3pNos8Wp
-         /tLA==
-X-Gm-Message-State: AO0yUKWgkEd8t8MZ5QoJ//eHykEZeV17YPP6cuaKz6SnIoi0csTe7kdu
-        uN/FqTPYr69VT7u0HTZS2A==
-X-Google-Smtp-Source: AK7set9d1LiSdqBsy5DLQ2ic1F6Uy2cyrnOE/ZpKtoJx+XfCn0Ca8jvBCpbuk+lmAZEFdBwjVA88DA==
-X-Received: by 2002:a05:6830:3487:b0:688:4c3c:71a3 with SMTP id c7-20020a056830348700b006884c3c71a3mr2890062otu.30.1674676717739;
-        Wed, 25 Jan 2023 11:58:37 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g1-20020a9d5f81000000b0068687c98725sm2540366oti.62.2023.01.25.11.58.36
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 25 Jan 2023 11:58:37 -0800 (PST)
-Received: (nullmailer pid 2755057 invoked by uid 1000);
-        Wed, 25 Jan 2023 19:58:36 -0000
-Date:   Wed, 25 Jan 2023 13:58:36 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     rashmi.a@intel.com
-Cc:     mgross@linux.intel.com, linux-kernel@vger.kernel.org,
-        nandhini.srikandan@intel.com, vkoul@kernel.org,
-        adrian.hunter@intel.com, linux-phy@lists.infradead.org,
-        kenchappa.demakkanavar@intel.com, furong.zhou@intel.com,
-        mallikarjunappa.sangannavar@intel.com, vasavi.v.itha@intel.com,
-        robh+dt@kernel.org, kishon@ti.com,
-        andriy.shevchenko@linux.intel.com,
-        linux-arm-kernel@lists.infradead.org, linux-mmc@vger.kernel.org,
-        ulf.hansson@linaro.org, devicetree@vger.kernel.org,
-        mahesh.r.vaidya@intel.com, michal.simek@xilinx.com,
-        kris.pan@linux.intel.com
-Subject: Re: [PATCH v1 4/4] Revert "dt-bindings: phy: intel: Add Thunder Bay
- eMMC PHY bindings"
-Message-ID: <167467671590.2755018.3180084098513210344.robh@kernel.org>
-References: <20230124054427.28808-1-rashmi.a@intel.com>
- <20230124054427.28808-4-rashmi.a@intel.com>
+        with ESMTP id S230064AbjAYUfT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 15:35:19 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9412A3F298;
+        Wed, 25 Jan 2023 12:35:18 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 44733B819C1;
+        Wed, 25 Jan 2023 20:35:17 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id D60F8C433D2;
+        Wed, 25 Jan 2023 20:35:15 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674678916;
+        bh=8U2DugR9MKz12cxFiXKOhg5icyU2FP2WpZ+gq9wbYaA=;
+        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+        b=OQH3KGpP8uLcJIeQ6j+iZSMcfDEhvOegromXyLnN+AYR9+IMAXXnDLLYyW79LSYHz
+         2LR6a8xl8Uevg21g23XOMaa49u8at72bYs8Ox2L+TnH9fdpNeDNoXlA4DTdkVtLvye
+         sBBMlZgYqlMyzN6uxjbrxhJe7Fl+iU3fflfNPruzh1cDGtGhWD8CkcLR7dw6hGXryU
+         nMzvM1wPSWXePgfrknMw/fksQapG+m4oLaFpWsVkb4MRqVfq3RavNAR8ImiPPZyug+
+         Yp1pS3KFJ8Va2/ouZ06qV/ZmUcZkObTgYruNotw+DibQTcDxRGTpk+sq6Yt3h71Os7
+         ifLkpMloV5Y/g==
+Message-ID: <e9277836f6797a1b2aaca2300190da9a.sboyd@kernel.org>
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230124054427.28808-4-rashmi.a@intel.com>
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20230125104520.89684-4-quic_kathirav@quicinc.com>
+References: <20230125104520.89684-1-quic_kathirav@quicinc.com> <20230125104520.89684-4-quic_kathirav@quicinc.com>
+Subject: Re: [PATCH 03/10] clk: qcom: Add STROMER PLUS PLL type for IPQ5332
+From:   Stephen Boyd <sboyd@kernel.org>
+Cc:     Kathiravan T <quic_kathirav@quicinc.com>
+To:     Kathiravan Thirumoorthy <quic_kathirav@quicinc.com>,
+        agross@kernel.org, andersson@kernel.org, arnd@arndb.de,
+        bhupesh.sharma@linaro.org, broonie@kernel.org,
+        catalin.marinas@arm.com, devicetree@vger.kernel.org,
+        dmitry.baryshkov@linaro.org, konrad.dybcio@linaro.org,
+        krzysztof.kozlowski+dt@linaro.org, linus.walleij@linaro.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-arm-msm@vger.kernel.org, linux-clk@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, marcel.ziswiler@toradex.com,
+        mturquette@baylibre.com, nfraprado@collabora.com,
+        quic_gurus@quicinc.com, robh+dt@kernel.org, robimarko@gmail.com,
+        shawnguo@kernel.org, ulf.hansson@linaro.org, will@kernel.org
+Date:   Wed, 25 Jan 2023 12:35:13 -0800
+User-Agent: alot/0.10
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Tue, 24 Jan 2023 11:14:27 +0530, rashmi.a@intel.com wrote:
-> From: "A, Rashmi" <rashmi.a@intel.com>
-> 
-> This reverts commit efb6935dd786a9d213ee542ed77d47ece700357c.
-> 
-> Revert Thunder Bay specific code as the product got cancelled
-> and there are no end customers.
-> 
-> Signed-off-by: A, Rashmi <rashmi.a@intel.com>
-> Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>
+Quoting Kathiravan Thirumoorthy (2023-01-25 02:45:13)
+> From: Kathiravan T <quic_kathirav@quicinc.com>
+>=20
+> Add the support for stromer plus pll, which is found on the IPQ5332
+> SoCs. Programming sequence is same as the stromer pll, so we can re-use
+> the same.
+>=20
+> Signed-off-by: Kathiravan T <quic_kathirav@quicinc.com>
 > ---
->  .../phy/intel,phy-thunderbay-emmc.yaml        | 45 -------------------
->  MAINTAINERS                                   |  7 ---
->  2 files changed, 52 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/phy/intel,phy-thunderbay-emmc.yaml
-> 
 
-Acked-by: Rob Herring <robh@kernel.org>
+Reviewed-by: Stephen Boyd <sboyd@kernel.org>
+
+I'm amazed that we need so many different register layouts for PLLs. Was
+it really never standardized? So sad.
