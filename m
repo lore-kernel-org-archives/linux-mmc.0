@@ -2,320 +2,385 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AFCCC61D97
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 03:00:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EF68C54E94
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 10:59:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229844AbjAZDAz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 22:00:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40612 "EHLO
+        id S237042AbjAZK7H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Jan 2023 05:59:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229481AbjAZDAy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 22:00:54 -0500
-Received: from NAM04-BN8-obe.outbound.protection.outlook.com (mail-bn8nam04on2047.outbound.protection.outlook.com [40.107.100.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77F0C5B59D;
-        Wed, 25 Jan 2023 19:00:53 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=KLn9G3Lfr00VOyiXEfc5brWX6LQoak7FARm6ajUebUUGFYY/8INIfHpdaUjA+pwJy7+APNywkBf83v9L+stEU0WfC/cR6ORjdp9hTwfPLN1/CxpfcpV/kJbNvoRwbTnDvaEuBGWPwifwd0gax9n6VPxDe/Zm15hYL3WFX3d42h/NKdYoZZIlh6/ukJOplsDbfAUlSXFB78nses0Vko4i6DcG1vfupul34mWpQ56PRzST9TSpa6NNe6hrvG/w1/toZXeOWHe2bK0EZ3LjUPglAbygHNtnXmG2TXYLFGTzLyLel4/zY66Vq18jtQU8uKHVhXnEMhtMZ25bRpGqX2y/zQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zaN9alzCpC5KbZIB+l0mH91WgDwkYu5YErkjsxncQQE=;
- b=bKG87emfILL/2W+l1jib3FwH1qza2U7ZDKde5DVraL88vzMZHZ7R3s52hjfqxt6kk2QUBetDoZXdaEcwzdfxIt1gT4VwsDaTzuG4QhIsvSxVPWlcPLDB1nq7qCYoh3tMMS3To5ntDPKBKvZhJ7KqBhRWBG/ABXOHjCqys68xFAlztTn5KERPrPoQpjTbayNbzF5lM5sudvO7y+LCDDMtzoEKujV4FEttznHxEbC756bKzYxU+/n8kSPpTiQiGLoEkxV0KLZCv3aLPWDLZyq0f/lWyHbVxHoqZHUvl1lBarTybSqCuzsD42zWPWWlDosrhEP+XtmYyoSxp7l2YL0TtA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zaN9alzCpC5KbZIB+l0mH91WgDwkYu5YErkjsxncQQE=;
- b=cTj0EagCt5L3X6v66jFdWzvrUCti0GmGzoMxWBCRoFVRzHHbSfRlxHXaMshqEmqvYxPo4BSpjFO0La3/GOo/eixs8GvWx/wcxbKzAkRJv7IXTB6L8XrdLIm7DLETrlTX31cs1RXDM95HVKKRS1YklbrNkycTlumFj6vuSdCXXT0=
-Received: from DS7PR03CA0343.namprd03.prod.outlook.com (2603:10b6:8:55::17) by
- DS0PR12MB7629.namprd12.prod.outlook.com (2603:10b6:8:13e::13) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6043.22; Thu, 26 Jan 2023 03:00:50 +0000
-Received: from DM6NAM11FT100.eop-nam11.prod.protection.outlook.com
- (2603:10b6:8:55:cafe::b2) by DS7PR03CA0343.outlook.office365.com
- (2603:10b6:8:55::17) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6043.20 via Frontend
- Transport; Thu, 26 Jan 2023 03:00:50 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT100.mail.protection.outlook.com (10.13.172.247) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6002.13 via Frontend Transport; Thu, 26 Jan 2023 03:00:50 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Wed, 25 Jan 2023 21:00:46 -0600
-From:   Brad Larson <blarson@amd.com>
-To:     <krzysztof.kozlowski@linaro.org>
-CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
-        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
-        <brad@pensando.io>, <brendan.higgins@linux.dev>,
-        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
-        <broonie@kernel.org>, <catalin.marinas@arm.com>,
-        <davidgow@google.com>, <devicetree@vger.kernel.org>,
-        <fancer.lancer@gmail.com>, <gerg@linux-m68k.org>,
-        <gsomlo@gmail.com>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
-        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
-        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
-        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
-        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
-        <vaishnav.a@ti.com>, <will@kernel.org>,
-        <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v9 06/15] dt-bindings: mfd: amd,pensando-elbasr: Add AMD Pensando System Resource chip
-Date:   Wed, 25 Jan 2023 18:59:56 -0800
-Message-ID: <20230126025956.33859-1-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <a3c4feaf-c98d-5507-11f1-3dd1129f7360@linaro.org>
-References: <a3c4feaf-c98d-5507-11f1-3dd1129f7360@linaro.org>
+        with ESMTP id S237081AbjAZK7F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 05:59:05 -0500
+Received: from mail-qt1-x834.google.com (mail-qt1-x834.google.com [IPv6:2607:f8b0:4864:20::834])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A3D86AF6C;
+        Thu, 26 Jan 2023 02:59:03 -0800 (PST)
+Received: by mail-qt1-x834.google.com with SMTP id d3so918815qte.8;
+        Thu, 26 Jan 2023 02:59:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=UXnlptYSbyX78gH2CitFVwA6sPu8sTKAfzS5hjMaams=;
+        b=A5cKKZjUUcdZpT4uZuqXYyvHxBFK85PPrIuxgvG30V8F+Pbr+i+UQ4+A89l1ekDxKK
+         wKpmXdQNlkDLP2y6R65oNdw2s5IFtMMRK6KIxNdE6wXrPpIH9an1lVl3T2b4qNaBBDZC
+         V6aE5tjQkJk/vSN32tvuQUZmBFmej57we6l30Tb2oKGidPFzAWPrxBYQk2UNOqH7aUgB
+         aWSlrXRcgrDH/0eR3r8jxaDo8XUzgTImcvTBFYVtkiSRS7ppWh9keMjBasS8Vz9MiIGe
+         Nv2QmJSS4Zp24bgvqUS3AoyBMuu1zhA3uQrz7jtBObxlyMJgO3zCC7ImaBWtQh/luNxR
+         OX3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=UXnlptYSbyX78gH2CitFVwA6sPu8sTKAfzS5hjMaams=;
+        b=riGpuJ4GUcTZraUN8CHi80oftxho3lKtJ2BfINv40QcuQ7nhQzL6rj0XarN7ajZ6hW
+         4Vxyd4LWCwfmAc5CSxyjYpc9yBIUSCVIFSy5CcfI6UYJnaGYxviUmkPWUADtqm+LI3+v
+         rjhHiZXumNCgow0dfsSd4If51GWa9pvhU6e5JTtmd5cALlU7qPnB5lOiS+HfUVLzI2nE
+         +IqlRuU5VpADp+Vdz+MU8Irb0iQax3ebROQgvBO9PfCdo2brm/c+sfmC/rGTxyaOobc2
+         ugInb0wOROkS469jQQTMHzbcH9wP8aC+pbH/k5gJdM7xaM9mjlObPvpzuH8OprhHpdn/
+         fZCg==
+X-Gm-Message-State: AFqh2krXMVRHV4auAiGT0HNes4pI23FxDFWqALVvZ7jFiMoabu2pyK2d
+        tHeIr31yLrfDpN+zo8IvjmcXItIWHR43QN6m4yA=
+X-Google-Smtp-Source: AMrXdXu6OqUq6EYTLhNFfjRBZSBS4OGauDEVTJhS3IRrsMQzWTdsykgE8KTHcpXGLnTlhXSStypFD1JfyUGouUvMWrA=
+X-Received: by 2002:ac8:702:0:b0:3b3:22cb:acb7 with SMTP id
+ g2-20020ac80702000000b003b322cbacb7mr1841738qth.425.1674730742413; Thu, 26
+ Jan 2023 02:59:02 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT100:EE_|DS0PR12MB7629:EE_
-X-MS-Office365-Filtering-Correlation-Id: 322de92f-8546-49ef-21b7-08daff4987ef
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: OtsOyJH3itGJHaVWnFql/OVIvXIYxTgGZP6sDxcNFgHGilyE7E6WhlBuFMMmOL6nrU+sNKdjk9kUaxBAr4plbZTCg1rrl172SB/+s88uebRLAVmSZkxV8PEYsEE8XNx9Kpq9iIXqTkkY5O2yCA/b5C62mNNqG1XuEWyld+i/AkZYxSXXYCT7hL+xK8qeDEptio2eFCe7LLi3Srw7Cg+5xlUVgzEpOK0MZRtd3vSE2cAUnfIYIjemElOFzxthnXWZwNxJnHXnLchPnB2zcFhWJpkKV5miEbs3bb5LsxGKgNHsh3Pa6W+OMieOrGSFCWr6yyALNaiEy+xpzdCPvi/gOc3DP80hdr8gP8T2L0D4VpX3BX8khTxete4BX1FxbqZrYMXvsi82jKNYEnMOwbg8aNocUS1rjeaZVvRxVCNpPJ4HKPxZznCh2rjkcXim7KgRVt+92cYVgXQH8FM2qnS1j7diQbMFN/a/B3z6hXBUhm+c5UgRgfDbaKCp/QtYhbOXXmdaACkE2jTS0nlwtafU9pIh6fZki6f+xvBBejjLlP59YpAfaDYNG9t5Oq7q0hlkMMaYGqLWzV+89lVJJRHJFw3P8TmRP5eVXpv1VKW0c9EUwyFBEIB3gCh+VZpAGI3nSoyOMvVGUYAuVLjyZIU0xjBxC+8G92NxIF26y9t96ggv7jsS3mYa/8qD2YcmIbAcDpHCKGqiwT/KK8fcty9VsehG2idyqtqGTBjyi/9l/RV9WNrJZQlQf1Auf0iPvg01rIYOCR6ghBZ2WNBFmu8luuYrCLNQjX6fIz67GPDnFyc=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(346002)(376002)(136003)(39860400002)(396003)(451199018)(40470700004)(46966006)(36840700001)(54906003)(316002)(41300700001)(81166007)(356005)(8676002)(70206006)(6916009)(4326008)(70586007)(40460700003)(7416002)(5660300002)(7406005)(8936002)(36756003)(40480700001)(2906002)(36860700001)(82740400003)(1076003)(6666004)(26005)(186003)(16526019)(966005)(478600001)(426003)(83380400001)(47076005)(336012)(82310400005)(2616005)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Jan 2023 03:00:50.3856
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 322de92f-8546-49ef-21b7-08daff4987ef
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT100.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB7629
+References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw>
+ <20221213090047.3805-15-victor.shih@genesyslogic.com.tw> <fcd88dd6-4538-cb35-a4e8-750bef1a6c08@intel.com>
+In-Reply-To: <fcd88dd6-4538-cb35-a4e8-750bef1a6c08@intel.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Thu, 26 Jan 2023 18:58:51 +0800
+Message-ID: <CAK00qKB7byDgsRtRFVxFzDZAtrqTM7wny7q+zGqnY+M+sNAfUw@mail.gmail.com>
+Subject: Re: [PATCH V6 14/24] mmc: sdhci-uhs2: add set_ios()
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
->> diff --git a/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
->> new file mode 100644
->> index 000000000000..8504652f6e19
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
->> @@ -0,0 +1,68 @@
->> +# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/spi/amd,pensando-sr.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: AMD Pensando SoC Resource Controller
->> +
->> +description: |
->> +  AMD Pensando SoC Resource Controller is a set of
->> +  control/status registers accessed on four chip-selects.
->> +  This device is present in all Pensando SoC based designs.
->> +
->> +maintainers:
->> +  - Brad Larson <blarson@amd.com>
->> +
->> +properties:
->> +  compatible:
->> +    contains:
+Hi, Adrian
+
+On Fri, Jan 6, 2023 at 5:28 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> That's not correct syntax. Please start from existing schema or
-> example-schema. Drop contains.
-
-Fixed, see update below.
-
->> +      enum:
->> +        - amd,pensando-sr
->> +
->> +  reg:
->> +    minItems: 1
+> On 13/12/22 11:00, Victor Shih wrote:
+> > This is a sdhci version of mmc's set_ios operation.
+> > It covers both UHS-I and UHS-II.
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/host/sdhci-uhs2.c | 96 +++++++++++++++++++++++++++++++++++
+> >  drivers/mmc/host/sdhci-uhs2.h |  1 +
+> >  drivers/mmc/host/sdhci.c      | 53 +++++++++++--------
+> >  drivers/mmc/host/sdhci.h      |  2 +
+> >  4 files changed, 131 insertions(+), 21 deletions(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
+> > index 00b1b69b49ea..3d52d35a91a5 100644
+> > --- a/drivers/mmc/host/sdhci-uhs2.c
+> > +++ b/drivers/mmc/host/sdhci-uhs2.c
+> > @@ -213,6 +213,68 @@ void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
+> >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_uhs2_set_timeout);
+> >
+> > +/**
+> > + * sdhci_uhs2_clear_set_irqs - set Error Interrupt Status Enable register
+> > + * @host:    SDHCI host
+> > + * @clear:   bit-wise clear mask
+> > + * @set:     bit-wise set mask
+> > + *
+> > + * Set/unset bits in UHS-II Error Interrupt Status Enable register
+> > + */
+> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set)
+> > +{
+> > +     u32 ier;
+> > +
+> > +     ier = sdhci_readl(host, SDHCI_UHS2_INT_STATUS_ENABLE);
+> > +     ier &= ~clear;
+> > +     ier |= set;
+> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_STATUS_ENABLE);
+> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_SIGNAL_ENABLE);
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdhci_uhs2_clear_set_irqs);
+> > +
+> > +static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +{
+> > +     struct sdhci_host *host = mmc_priv(mmc);
+> > +     u8 cmd_res, dead_lock;
+> > +     u16 ctrl_2;
+> > +
+> > +     /* UHS2 Timeout Control */
+> > +     sdhci_calc_timeout_uhs2(host, &cmd_res, &dead_lock);
+> > +
+> > +     /* change to use calculate value */
+> > +     cmd_res |= FIELD_PREP(SDHCI_UHS2_TIMER_CTRL_DEADLOCK_MASK, dead_lock);
+> > +
+> > +     sdhci_uhs2_clear_set_irqs(host,
+> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
+> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT,
+> > +                               0);
+> > +     sdhci_writeb(host, cmd_res, SDHCI_UHS2_TIMER_CTRL);
+> > +     sdhci_uhs2_clear_set_irqs(host, 0,
+> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
+> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT);
+> > +
+> > +     /* UHS2 timing */
 >
-> maxItems. Which example or existing schema pointed you to use minItems?
-
-Should have been maxItems.  cs below is dropped and reg is used
-as discussed for the chip selects but throws a too long error, see below.
-
->> +
->> +  cs:
->> +    minItems: 1
->> +    maxItems: 4
->> +    description:
->> +      Device chip select
+> Please extend comment to include:
 >
-> Drop entire property. Isn't reg for this on SPI bus?
-
-Dropped and using reg, results in too long error for schema snps,dw-apb-ssi.yaml
-
->> +
->> +  '#reset-cells':
->> +    const: 1
->> +
->> +  interrupts:
->> +    maxItems: 1
->> +
->> +  spi-max-frequency: true
+>         Note, UHS2 timing is disabled when powering off
 >
->Drop. Missing reference to spi-peripheral-props.
-
-Removed and added spi-peripheral-props
-
->> +
->> +required:
->> +  - compatible
->> +  - cs
->> +  - spi-max-frequency
->> +  - '#reset-cells'
->> +
->> +unevaluatedProperties: false
+> > +     ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
+> > +     if (ios->timing == MMC_TIMING_SD_UHS2)
+> > +             ctrl_2 |= SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE;
+> > +     else
+> > +             ctrl_2 &= ~(SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE);
+> > +     sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
+> > +
+> > +     if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
+> > +             sdhci_enable_preset_value(host, true);
+> > +
+> > +     if (host->ops->set_power)
+> > +             host->ops->set_power(host, ios->power_mode, ios->vdd);
+> > +     else
+> > +             sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
 >
-> This does not make sense on its own. It works with additional ref. When
-> you add ref to spi props, it will be fine. But without it you should use
-> additionalProperties: false.
+> sdhci_set_ios_common() already set the power.  Are both needed?
+>
+> > +     udelay(100);
+>
+> Please add a comment for why this delay is here.
+>
+> > +
+> > +     host->timing = ios->timing;
+>
+> Please move this up to where the timing change is.
+>
 
-The updated binding
+The ios->timing was changed in sd_uhs2_power_up function and not
+modified in this function(__sdhci_uhs2_set_ios), therefore would you
+want me to move this to the sd_uhs2_power_up function?
 
---- /dev/null
-+++ b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
-@@ -0,0 +1,68 @@
-+# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/spi/amd,pensando-sr.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: AMD Pensando SoC Resource Controller
-+
-+description: |
-+  AMD Pensando SoC Resource Controller is a set of control/status
-+  registers accessed on four chip-selects.  This device is present
-+  in all Pensando SoC based designs.
-+
-+  CS0 is a set of miscellaneous control/status registers to
-+  include reset control.  CS1/CS2 are for I2C peripherals.
-+  CS3 is to access resource controller internal storage.
-+
-+maintainers:
-+  - Brad Larson <blarson@amd.com>
-+
-+properties:
-+  compatible:
-+    const: amd,pensando-sr
-+
-+  reg:
-+    maxItems: 4
-+    minimum: 0
-+    maximum: 3
-+    description:
-+      Device chip select number
-+
-+  '#reset-cells':
-+    const: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - spi-max-frequency
-+  - '#reset-cells'
-+
-+allOf:
-+  - $ref: /schemas/spi/spi-peripheral-props.yaml#
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    spi {
-+        #address-cells = <1>;
-+        #size-cells = <0>;
-+        num-cs = <4>;
-+
-+        system-controller@0 {
-+            compatible = "amd,pensando-sr";
-+            reg = <0 1 2 3>;
-+            spi-max-frequency = <12000000>;
-+            interrupt-parent = <&porta>;
-+            interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-+            #reset-cells = <1>;
-+        };
-+    };
-+
-+...
+As I know the ios->timing is used in sdhci_set_clock function, setting
+the host->timing before call the sdhci_set_clock function ensures that
+the host->timing used in sdhci_set_clock function is the most recent
+value. What do you think about this?
 
-any guidance on fixing the following?
+> > +     sdhci_set_clock(host, host->clock);
+> > +}
+> > +
+> >  /*****************************************************************************\
+> >   *                                                                           *
+> >   * MMC callbacks                                                             *
+> > @@ -234,6 +296,39 @@ static int sdhci_uhs2_start_signal_voltage_switch(struct mmc_host *mmc,
+> >       return sdhci_start_signal_voltage_switch(mmc, ios);
+> >  }
+> >
+> > +int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+>
+> Should be static
+>
+> > +{
+> > +     struct sdhci_host *host = mmc_priv(mmc);
+> > +
+> > +     if (!(host->version >= SDHCI_SPEC_400) ||
+> > +         !(host->mmc->flags & MMC_UHS2_SUPPORT &&
+> > +           host->mmc->caps2 & MMC_CAP2_SD_UHS2)) {
+>
+> This can be just:
+>
+>         if (!sdhci_uhs2_mode(host)) {
+>
+> Not sure if this is actually possible?
+>
+> > +             sdhci_set_ios(mmc, ios);
+> > +             return 0;
+> > +     }
+> > +
+> > +     if (ios->power_mode == MMC_POWER_UNDEFINED)
+> > +             return 0;
+> > +
+> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
+> > +             if (!IS_ERR(mmc->supply.vmmc) &&
+> > +                 ios->power_mode == MMC_POWER_OFF)
+> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> > +             if (!IS_ERR_OR_NULL(mmc->supply.vmmc2) &&
+> > +                 ios->power_mode == MMC_POWER_OFF)
+> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc2, 0);
+>
+> This can be just:
+>
+>                 if (ios->power_mode == MMC_POWER_OFF) {
+>                         mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+>                         mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc2, 0);
+>                 }
+>
+> > +             return -1;
+> > +     }
+> > +
+> > +     host->timing = ios->timing;
+>
+> __sdhci_uhs2_set_ios() does this so it is not needed here.
+>
+> > +
+> > +     sdhci_set_ios_common(mmc, ios);
+> > +
+> > +     __sdhci_uhs2_set_ios(mmc, ios);
+> > +
+> > +     return 0;
+> > +}
+> > +
+> >  /*****************************************************************************\
+> >   *                                                                           *
+> >   * Driver init/exit                                                          *
+> > @@ -244,6 +339,7 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
+> >  {
+> >       host->mmc_host_ops.start_signal_voltage_switch =
+> >               sdhci_uhs2_start_signal_voltage_switch;
+> > +     host->mmc_host_ops.uhs2_set_ios = sdhci_uhs2_set_ios;
+> >
+> >       return 0;
+> >  }
+> > diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
+> > index a58ef19c08aa..184fee80253c 100644
+> > --- a/drivers/mmc/host/sdhci-uhs2.h
+> > +++ b/drivers/mmc/host/sdhci-uhs2.h
+> > @@ -178,5 +178,6 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host);
+> >  bool sdhci_uhs2_mode(struct sdhci_host *host);
+> >  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
+> >  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
+> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
+> >
+> >  #endif /* __SDHCI_UHS2_H */
+> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
+> > index 99633a3ef549..49bbdc155b2b 100644
+> > --- a/drivers/mmc/host/sdhci.c
+> > +++ b/drivers/mmc/host/sdhci.c
+> > @@ -47,8 +47,6 @@
+> >  static unsigned int debug_quirks = 0;
+> >  static unsigned int debug_quirks2;
+> >
+> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+> > -
+> >  static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd);
+> >
+> >  void sdhci_dumpregs(struct sdhci_host *host)
+> > @@ -1877,6 +1875,9 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
+> >       case MMC_TIMING_MMC_HS400:
+> >               preset = sdhci_readw(host, SDHCI_PRESET_FOR_HS400);
+> >               break;
+> > +     case MMC_TIMING_SD_UHS2:
+> > +             preset = sdhci_readw(host, SDHCI_PRESET_FOR_UHS2);
+> > +             break;
+> >       default:
+> >               pr_warn("%s: Invalid UHS-I mode selected\n",
+> >                       mmc_hostname(host->mmc));
+> > @@ -2325,24 +2326,9 @@ static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_i
+> >              (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
+> >  }
+> >
+> > -void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
+> >  {
+> >       struct sdhci_host *host = mmc_priv(mmc);
+> > -     bool reinit_uhs = host->reinit_uhs;
+> > -     bool turning_on_clk = false;
+> > -     u8 ctrl;
+> > -
+> > -     host->reinit_uhs = false;
+> > -
+> > -     if (ios->power_mode == MMC_POWER_UNDEFINED)
+> > -             return;
+> > -
+> > -     if (host->flags & SDHCI_DEVICE_DEAD) {
+> > -             if (!IS_ERR(mmc->supply.vmmc) &&
+> > -                 ios->power_mode == MMC_POWER_OFF)
+> > -                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> > -             return;
+> > -     }
+> >
+> >       /*
+> >        * Reset the chip on each power off.
+> > @@ -2359,8 +2345,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> >               sdhci_enable_preset_value(host, false);
+> >
+> >       if (!ios->clock || ios->clock != host->clock) {
+> > -             turning_on_clk = ios->clock && !host->clock;
+> > -
+> >               host->ops->set_clock(host, ios->clock);
+> >               host->clock = ios->clock;
+> >
+> > @@ -2381,6 +2365,32 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> >               host->ops->set_power(host, ios->power_mode, ios->vdd);
+> >       else
+> >               sdhci_set_power(host, ios->power_mode, ios->vdd);
+> > +}
+> > +EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
+> > +
+> > +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+> > +{
+> > +     struct sdhci_host *host = mmc_priv(mmc);
+> > +     bool reinit_uhs = host->reinit_uhs;
+> > +     bool turning_on_clk = false;
+> > +     u8 ctrl;
+> > +
+> > +     host->reinit_uhs = false;
+> > +
+> > +     if (ios->power_mode == MMC_POWER_UNDEFINED)
+> > +             return;
+> > +
+> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
+> > +             if (!IS_ERR(mmc->supply.vmmc) &&
+> > +                 ios->power_mode == MMC_POWER_OFF)
+> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> > +             return;
+> > +     }
+> > +
+> > +     sdhci_set_ios_common(mmc, ios);
+> > +
+> > +     if (!ios->clock || ios->clock != host->clock)
+> > +             turning_on_clk = ios->clock && !host->clock;
+> >
+> >       if (host->ops->platform_send_init_74_clocks)
+> >               host->ops->platform_send_init_74_clocks(host, ios->power_mode);
+> > @@ -2959,7 +2969,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
+> >  }
+> >  EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
+> >
+> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
+> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
+> >  {
+> >       /* Host Controller v3.00 defines preset value registers */
+> >       if (host->version < SDHCI_SPEC_300)
+> > @@ -2987,6 +2997,7 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
+> >               host->preset_enabled = enable;
+> >       }
+> >  }
+> > +EXPORT_SYMBOL_GPL(sdhci_enable_preset_value);
+> >
+> >  static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
+> >                               int err)
+> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> > index df7fa0c0ebf8..c2f989dc2361 100644
+> > --- a/drivers/mmc/host/sdhci.h
+> > +++ b/drivers/mmc/host/sdhci.h
+> > @@ -850,6 +850,8 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
+> >  void sdhci_reset(struct sdhci_host *host, u8 mask);
+> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
+> >  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
+> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
+> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios);
+> >  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
+> >  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
+> >                                     struct mmc_ios *ios);
+>
 
-$ make ARCH=arm64 dtbs_check DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-  LINT    Documentation/devicetree/bindings
-  CHKDT   Documentation/devicetree/bindings/processed-schema.json
-  SCHEMA  Documentation/devicetree/bindings/processed-schema.json
-  DTC_CHK arch/arm64/boot/dts/amd/elba-asic.dtb
-/home/brad/linux.v10/arch/arm64/boot/dts/amd/elba-asic.dtb: spi@2800: system-controller@0:reg: [[0], [1], [2], [3]] is too long
-	From schema: /home/brad/linux.v10/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-
-where the pieces are
-
-arch/arm64/boot/dts/amd/elba.dtsi
-
-                spi0: spi@2800 {
-                        compatible = "amd,pensando-elba-spi";
-                        reg = <0x0 0x2800 0x0 0x100>;
-                        #address-cells = <1>;
-                        #size-cells = <0>;
-                        amd,pensando-elba-syscon = <&syscon>;
-                        clocks = <&ahb_clk>;
-                        interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
-                        num-cs = <2>;
-                        status = "disabled";
-                };
-
-                syscon: syscon@307c0000 {
-                        compatible = "amd,pensando-elba-syscon", "syscon";
-                        reg = <0x0 0x307c0000 0x0 0x3000>;
-                };
-
-arch/arm64/boot/dts/amd/elba-asic-common.dtsi
-
-&spi0 {
-        #address-cells = <1>;
-        #size-cells = <0>;
-        num-cs = <4>;
-        cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
-                   <&porta 7 GPIO_ACTIVE_LOW>;
-        status = "okay";
-
-        rstc: system-controller@0 {
-                compatible = "amd,pensando-sr";
-                reg = <0 1 2 3>;
-                spi-max-frequency = <12000000>;
-                interrupt-parent = <&porta>;
-                interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
-                #reset-cells = <1>;
-        };
-};
-
-Also should the driver for this SPI device used for every Pensando SoC 
-be in drivers/misc, drivers/spi?  Didn't make sense to leave it in 
-drivers/mfd once the resets was squashed in the parent and only one n
-ode with reg setting which chip selects result in creation of /dev/pensr0.<cs>.  
-
-Regards,
-Brad
-
+Thanks, Victor Shih
