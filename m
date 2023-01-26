@@ -2,385 +2,478 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EF68C54E94
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 10:59:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2CFFC05027
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 13:51:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237042AbjAZK7H (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Jan 2023 05:59:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50062 "EHLO
+        id S229830AbjAZNvF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Jan 2023 08:51:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40076 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237081AbjAZK7F (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 05:59:05 -0500
-Received: from mail-qt1-x834.google.com (mail-qt1-x834.google.com [IPv6:2607:f8b0:4864:20::834])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6A3D86AF6C;
-        Thu, 26 Jan 2023 02:59:03 -0800 (PST)
-Received: by mail-qt1-x834.google.com with SMTP id d3so918815qte.8;
-        Thu, 26 Jan 2023 02:59:03 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=UXnlptYSbyX78gH2CitFVwA6sPu8sTKAfzS5hjMaams=;
-        b=A5cKKZjUUcdZpT4uZuqXYyvHxBFK85PPrIuxgvG30V8F+Pbr+i+UQ4+A89l1ekDxKK
-         wKpmXdQNlkDLP2y6R65oNdw2s5IFtMMRK6KIxNdE6wXrPpIH9an1lVl3T2b4qNaBBDZC
-         V6aE5tjQkJk/vSN32tvuQUZmBFmej57we6l30Tb2oKGidPFzAWPrxBYQk2UNOqH7aUgB
-         aWSlrXRcgrDH/0eR3r8jxaDo8XUzgTImcvTBFYVtkiSRS7ppWh9keMjBasS8Vz9MiIGe
-         Nv2QmJSS4Zp24bgvqUS3AoyBMuu1zhA3uQrz7jtBObxlyMJgO3zCC7ImaBWtQh/luNxR
-         OX3Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=UXnlptYSbyX78gH2CitFVwA6sPu8sTKAfzS5hjMaams=;
-        b=riGpuJ4GUcTZraUN8CHi80oftxho3lKtJ2BfINv40QcuQ7nhQzL6rj0XarN7ajZ6hW
-         4Vxyd4LWCwfmAc5CSxyjYpc9yBIUSCVIFSy5CcfI6UYJnaGYxviUmkPWUADtqm+LI3+v
-         rjhHiZXumNCgow0dfsSd4If51GWa9pvhU6e5JTtmd5cALlU7qPnB5lOiS+HfUVLzI2nE
-         +IqlRuU5VpADp+Vdz+MU8Irb0iQax3ebROQgvBO9PfCdo2brm/c+sfmC/rGTxyaOobc2
-         ugInb0wOROkS469jQQTMHzbcH9wP8aC+pbH/k5gJdM7xaM9mjlObPvpzuH8OprhHpdn/
-         fZCg==
-X-Gm-Message-State: AFqh2krXMVRHV4auAiGT0HNes4pI23FxDFWqALVvZ7jFiMoabu2pyK2d
-        tHeIr31yLrfDpN+zo8IvjmcXItIWHR43QN6m4yA=
-X-Google-Smtp-Source: AMrXdXu6OqUq6EYTLhNFfjRBZSBS4OGauDEVTJhS3IRrsMQzWTdsykgE8KTHcpXGLnTlhXSStypFD1JfyUGouUvMWrA=
-X-Received: by 2002:ac8:702:0:b0:3b3:22cb:acb7 with SMTP id
- g2-20020ac80702000000b003b322cbacb7mr1841738qth.425.1674730742413; Thu, 26
- Jan 2023 02:59:02 -0800 (PST)
+        with ESMTP id S231639AbjAZNvC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 08:51:02 -0500
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB3EA4CE7F;
+        Thu, 26 Jan 2023 05:50:42 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id CCD51617FF;
+        Thu, 26 Jan 2023 13:50:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CEECBC433A0;
+        Thu, 26 Jan 2023 13:50:37 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1674741040;
+        bh=waQRMFuqxVZvLTarVOLu2AMjbJkqhlrOHWytHi3gGkQ=;
+        h=From:To:Cc:Subject:Date:From;
+        b=lgLtdinpU/cdpYmJaguihJy2shzDnw1ETYSp6SSljokJpfSf2+1vzpeeLMzYfd1qV
+         re1vWWKe/h1Evf1VtbwdREJ5VNH+p469I/ieMIoYsZosH/OaHjFUdPKA937Wg5hcfG
+         dy3PJXtKiQB1WwSnC6AOxmdsZ4mcCsC9uS9piHTAD+i6oAuC1QSUZwKPjeiSQuoX9J
+         oGv6AbjpP1QLqP27V+Ht7Xs1ub9pLa3SV9OsEWFigaWuHl/zeOdzmsGzhDuFEDGVKW
+         rLggeNHipavLW0fec6i6YmhJYOaP39SbViMImyJnNMXJxPaBDCfCWJi+5CFo+jlg+9
+         sauZ3x65FrsCw==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-gpio@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org
+Subject: [PATCH] mmc: atmel: convert to gpio descriptos
+Date:   Thu, 26 Jan 2023 14:50:04 +0100
+Message-Id: <20230126135034.3320638-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.39.0
 MIME-Version: 1.0
-References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw>
- <20221213090047.3805-15-victor.shih@genesyslogic.com.tw> <fcd88dd6-4538-cb35-a4e8-750bef1a6c08@intel.com>
-In-Reply-To: <fcd88dd6-4538-cb35-a4e8-750bef1a6c08@intel.com>
-From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Thu, 26 Jan 2023 18:58:51 +0800
-Message-ID: <CAK00qKB7byDgsRtRFVxFzDZAtrqTM7wny7q+zGqnY+M+sNAfUw@mail.gmail.com>
-Subject: Re: [PATCH V6 14/24] mmc: sdhci-uhs2: add set_ios()
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        takahiro.akashi@linaro.org, dlunev@chromium.org,
-        Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Adrian
+From: Arnd Bergmann <arnd@arndb.de>
 
-On Fri, Jan 6, 2023 at 5:28 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 13/12/22 11:00, Victor Shih wrote:
-> > This is a sdhci version of mmc's set_ios operation.
-> > It covers both UHS-I and UHS-II.
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-> > ---
-> >  drivers/mmc/host/sdhci-uhs2.c | 96 +++++++++++++++++++++++++++++++++++
-> >  drivers/mmc/host/sdhci-uhs2.h |  1 +
-> >  drivers/mmc/host/sdhci.c      | 53 +++++++++++--------
-> >  drivers/mmc/host/sdhci.h      |  2 +
-> >  4 files changed, 131 insertions(+), 21 deletions(-)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.c b/drivers/mmc/host/sdhci-uhs2.c
-> > index 00b1b69b49ea..3d52d35a91a5 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.c
-> > +++ b/drivers/mmc/host/sdhci-uhs2.c
-> > @@ -213,6 +213,68 @@ void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_uhs2_set_timeout);
-> >
-> > +/**
-> > + * sdhci_uhs2_clear_set_irqs - set Error Interrupt Status Enable register
-> > + * @host:    SDHCI host
-> > + * @clear:   bit-wise clear mask
-> > + * @set:     bit-wise set mask
-> > + *
-> > + * Set/unset bits in UHS-II Error Interrupt Status Enable register
-> > + */
-> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set)
-> > +{
-> > +     u32 ier;
-> > +
-> > +     ier = sdhci_readl(host, SDHCI_UHS2_INT_STATUS_ENABLE);
-> > +     ier &= ~clear;
-> > +     ier |= set;
-> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_STATUS_ENABLE);
-> > +     sdhci_writel(host, ier, SDHCI_UHS2_INT_SIGNAL_ENABLE);
-> > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_uhs2_clear_set_irqs);
-> > +
-> > +static void __sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +{
-> > +     struct sdhci_host *host = mmc_priv(mmc);
-> > +     u8 cmd_res, dead_lock;
-> > +     u16 ctrl_2;
-> > +
-> > +     /* UHS2 Timeout Control */
-> > +     sdhci_calc_timeout_uhs2(host, &cmd_res, &dead_lock);
-> > +
-> > +     /* change to use calculate value */
-> > +     cmd_res |= FIELD_PREP(SDHCI_UHS2_TIMER_CTRL_DEADLOCK_MASK, dead_lock);
-> > +
-> > +     sdhci_uhs2_clear_set_irqs(host,
-> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
-> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT,
-> > +                               0);
-> > +     sdhci_writeb(host, cmd_res, SDHCI_UHS2_TIMER_CTRL);
-> > +     sdhci_uhs2_clear_set_irqs(host, 0,
-> > +                               SDHCI_UHS2_INT_CMD_TIMEOUT |
-> > +                               SDHCI_UHS2_INT_DEADLOCK_TIMEOUT);
-> > +
-> > +     /* UHS2 timing */
->
-> Please extend comment to include:
->
->         Note, UHS2 timing is disabled when powering off
->
-> > +     ctrl_2 = sdhci_readw(host, SDHCI_HOST_CONTROL2);
-> > +     if (ios->timing == MMC_TIMING_SD_UHS2)
-> > +             ctrl_2 |= SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE;
-> > +     else
-> > +             ctrl_2 &= ~(SDHCI_CTRL_UHS2 | SDHCI_CTRL_UHS2_ENABLE);
-> > +     sdhci_writew(host, ctrl_2, SDHCI_HOST_CONTROL2);
-> > +
-> > +     if (!(host->quirks2 & SDHCI_QUIRK2_PRESET_VALUE_BROKEN))
-> > +             sdhci_enable_preset_value(host, true);
-> > +
-> > +     if (host->ops->set_power)
-> > +             host->ops->set_power(host, ios->power_mode, ios->vdd);
-> > +     else
-> > +             sdhci_uhs2_set_power(host, ios->power_mode, ios->vdd);
->
-> sdhci_set_ios_common() already set the power.  Are both needed?
->
-> > +     udelay(100);
->
-> Please add a comment for why this delay is here.
->
-> > +
-> > +     host->timing = ios->timing;
->
-> Please move this up to where the timing change is.
->
+All Atmel (now Microchip) machines boot using DT, so the
+old platform_data for this driver is no longer used by any
+boards.
 
-The ios->timing was changed in sd_uhs2_power_up function and not
-modified in this function(__sdhci_uhs2_set_ios), therefore would you
-want me to move this to the sd_uhs2_power_up function?
+Removing the pdata probe lets us simplify the GPIO handling
+with the use of the descriptor API.
 
-As I know the ios->timing is used in sdhci_set_clock function, setting
-the host->timing before call the sdhci_set_clock function ensures that
-the host->timing used in sdhci_set_clock function is the most recent
-value. What do you think about this?
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+---
+ drivers/mmc/host/atmel-mci.c | 179 +++++++++++++++--------------------
+ include/linux/atmel-mci.h    |  46 ---------
+ 2 files changed, 77 insertions(+), 148 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
 
-> > +     sdhci_set_clock(host, host->clock);
-> > +}
-> > +
-> >  /*****************************************************************************\
-> >   *                                                                           *
-> >   * MMC callbacks                                                             *
-> > @@ -234,6 +296,39 @@ static int sdhci_uhs2_start_signal_voltage_switch(struct mmc_host *mmc,
-> >       return sdhci_start_signal_voltage_switch(mmc, ios);
-> >  }
-> >
-> > +int sdhci_uhs2_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->
-> Should be static
->
-> > +{
-> > +     struct sdhci_host *host = mmc_priv(mmc);
-> > +
-> > +     if (!(host->version >= SDHCI_SPEC_400) ||
-> > +         !(host->mmc->flags & MMC_UHS2_SUPPORT &&
-> > +           host->mmc->caps2 & MMC_CAP2_SD_UHS2)) {
->
-> This can be just:
->
->         if (!sdhci_uhs2_mode(host)) {
->
-> Not sure if this is actually possible?
->
-> > +             sdhci_set_ios(mmc, ios);
-> > +             return 0;
-> > +     }
-> > +
-> > +     if (ios->power_mode == MMC_POWER_UNDEFINED)
-> > +             return 0;
-> > +
-> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > +             if (!IS_ERR(mmc->supply.vmmc) &&
-> > +                 ios->power_mode == MMC_POWER_OFF)
-> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > +             if (!IS_ERR_OR_NULL(mmc->supply.vmmc2) &&
-> > +                 ios->power_mode == MMC_POWER_OFF)
-> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc2, 0);
->
-> This can be just:
->
->                 if (ios->power_mode == MMC_POWER_OFF) {
->                         mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->                         mmc_opt_regulator_set_ocr(mmc, mmc->supply.vmmc2, 0);
->                 }
->
-> > +             return -1;
-> > +     }
-> > +
-> > +     host->timing = ios->timing;
->
-> __sdhci_uhs2_set_ios() does this so it is not needed here.
->
-> > +
-> > +     sdhci_set_ios_common(mmc, ios);
-> > +
-> > +     __sdhci_uhs2_set_ios(mmc, ios);
-> > +
-> > +     return 0;
-> > +}
-> > +
-> >  /*****************************************************************************\
-> >   *                                                                           *
-> >   * Driver init/exit                                                          *
-> > @@ -244,6 +339,7 @@ static int sdhci_uhs2_host_ops_init(struct sdhci_host *host)
-> >  {
-> >       host->mmc_host_ops.start_signal_voltage_switch =
-> >               sdhci_uhs2_start_signal_voltage_switch;
-> > +     host->mmc_host_ops.uhs2_set_ios = sdhci_uhs2_set_ios;
-> >
-> >       return 0;
-> >  }
-> > diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
-> > index a58ef19c08aa..184fee80253c 100644
-> > --- a/drivers/mmc/host/sdhci-uhs2.h
-> > +++ b/drivers/mmc/host/sdhci-uhs2.h
-> > @@ -178,5 +178,6 @@ void sdhci_uhs2_dump_regs(struct sdhci_host *host);
-> >  bool sdhci_uhs2_mode(struct sdhci_host *host);
-> >  void sdhci_uhs2_reset(struct sdhci_host *host, u16 mask);
-> >  void sdhci_uhs2_set_timeout(struct sdhci_host *host, struct mmc_command *cmd);
-> > +void sdhci_uhs2_clear_set_irqs(struct sdhci_host *host, u32 clear, u32 set);
-> >
-> >  #endif /* __SDHCI_UHS2_H */
-> > diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> > index 99633a3ef549..49bbdc155b2b 100644
-> > --- a/drivers/mmc/host/sdhci.c
-> > +++ b/drivers/mmc/host/sdhci.c
-> > @@ -47,8 +47,6 @@
-> >  static unsigned int debug_quirks = 0;
-> >  static unsigned int debug_quirks2;
-> >
-> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> > -
-> >  static bool sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd);
-> >
-> >  void sdhci_dumpregs(struct sdhci_host *host)
-> > @@ -1877,6 +1875,9 @@ static u16 sdhci_get_preset_value(struct sdhci_host *host)
-> >       case MMC_TIMING_MMC_HS400:
-> >               preset = sdhci_readw(host, SDHCI_PRESET_FOR_HS400);
-> >               break;
-> > +     case MMC_TIMING_SD_UHS2:
-> > +             preset = sdhci_readw(host, SDHCI_PRESET_FOR_UHS2);
-> > +             break;
-> >       default:
-> >               pr_warn("%s: Invalid UHS-I mode selected\n",
-> >                       mmc_hostname(host->mmc));
-> > @@ -2325,24 +2326,9 @@ static bool sdhci_presetable_values_change(struct sdhci_host *host, struct mmc_i
-> >              (sdhci_preset_needed(host, ios->timing) || host->drv_type != ios->drv_type);
-> >  }
-> >
-> > -void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios)
-> >  {
-> >       struct sdhci_host *host = mmc_priv(mmc);
-> > -     bool reinit_uhs = host->reinit_uhs;
-> > -     bool turning_on_clk = false;
-> > -     u8 ctrl;
-> > -
-> > -     host->reinit_uhs = false;
-> > -
-> > -     if (ios->power_mode == MMC_POWER_UNDEFINED)
-> > -             return;
-> > -
-> > -     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > -             if (!IS_ERR(mmc->supply.vmmc) &&
-> > -                 ios->power_mode == MMC_POWER_OFF)
-> > -                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > -             return;
-> > -     }
-> >
-> >       /*
-> >        * Reset the chip on each power off.
-> > @@ -2359,8 +2345,6 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >               sdhci_enable_preset_value(host, false);
-> >
-> >       if (!ios->clock || ios->clock != host->clock) {
-> > -             turning_on_clk = ios->clock && !host->clock;
-> > -
-> >               host->ops->set_clock(host, ios->clock);
-> >               host->clock = ios->clock;
-> >
-> > @@ -2381,6 +2365,32 @@ void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> >               host->ops->set_power(host, ios->power_mode, ios->vdd);
-> >       else
-> >               sdhci_set_power(host, ios->power_mode, ios->vdd);
-> > +}
-> > +EXPORT_SYMBOL_GPL(sdhci_set_ios_common);
-> > +
-> > +void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
-> > +{
-> > +     struct sdhci_host *host = mmc_priv(mmc);
-> > +     bool reinit_uhs = host->reinit_uhs;
-> > +     bool turning_on_clk = false;
-> > +     u8 ctrl;
-> > +
-> > +     host->reinit_uhs = false;
-> > +
-> > +     if (ios->power_mode == MMC_POWER_UNDEFINED)
-> > +             return;
-> > +
-> > +     if (host->flags & SDHCI_DEVICE_DEAD) {
-> > +             if (!IS_ERR(mmc->supply.vmmc) &&
-> > +                 ios->power_mode == MMC_POWER_OFF)
-> > +                     mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> > +             return;
-> > +     }
-> > +
-> > +     sdhci_set_ios_common(mmc, ios);
-> > +
-> > +     if (!ios->clock || ios->clock != host->clock)
-> > +             turning_on_clk = ios->clock && !host->clock;
-> >
-> >       if (host->ops->platform_send_init_74_clocks)
-> >               host->ops->platform_send_init_74_clocks(host, ios->power_mode);
-> > @@ -2959,7 +2969,7 @@ int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode)
-> >  }
-> >  EXPORT_SYMBOL_GPL(sdhci_execute_tuning);
-> >
-> > -static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
-> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
-> >  {
-> >       /* Host Controller v3.00 defines preset value registers */
-> >       if (host->version < SDHCI_SPEC_300)
-> > @@ -2987,6 +2997,7 @@ static void sdhci_enable_preset_value(struct sdhci_host *host, bool enable)
-> >               host->preset_enabled = enable;
-> >       }
-> >  }
-> > +EXPORT_SYMBOL_GPL(sdhci_enable_preset_value);
-> >
-> >  static void sdhci_post_req(struct mmc_host *mmc, struct mmc_request *mrq,
-> >                               int err)
-> > diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
-> > index df7fa0c0ebf8..c2f989dc2361 100644
-> > --- a/drivers/mmc/host/sdhci.h
-> > +++ b/drivers/mmc/host/sdhci.h
-> > @@ -850,6 +850,8 @@ void sdhci_set_bus_width(struct sdhci_host *host, int width);
-> >  void sdhci_reset(struct sdhci_host *host, u8 mask);
-> >  void sdhci_set_uhs_signaling(struct sdhci_host *host, unsigned timing);
-> >  int sdhci_execute_tuning(struct mmc_host *mmc, u32 opcode);
-> > +void sdhci_enable_preset_value(struct sdhci_host *host, bool enable);
-> > +void sdhci_set_ios_common(struct mmc_host *mmc, struct mmc_ios *ios);
-> >  void sdhci_set_ios(struct mmc_host *mmc, struct mmc_ios *ios);
-> >  int sdhci_start_signal_voltage_switch(struct mmc_host *mmc,
-> >                                     struct mmc_ios *ios);
->
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index bb9bbf1c927b..40006a960277 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -30,7 +30,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio.h>
+ 
+-#include <linux/atmel-mci.h>
+ #include <linux/atmel_pdc.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+@@ -40,6 +39,30 @@
+ #include <asm/io.h>
+ #include <asm/unaligned.h>
+ 
++#define ATMCI_MAX_NR_SLOTS	2
++
++/**
++ * struct mci_slot_pdata - board-specific per-slot configuration
++ * @bus_width: Number of data lines wired up the slot
++ * @wp_pin: GPIO pin wired to the write protect sensor
++ * @detect_is_active_high: The state of the detect pin when it is active
++ * @non_removable: The slot is not removable, only detect once
++ *
++ * If a given slot is not present on the board, @bus_width should be
++ * set to 0. The other fields are ignored in this case.
++ *
++ * Any pins that aren't available should be set to a negative value.
++ *
++ * Note that support for multiple slots is experimental -- some cards
++ * might get upset if we don't get the clock management exactly right.
++ * But in most cases, it should work just fine.
++ */
++struct mci_slot_pdata {
++	unsigned int		bus_width;
++	bool			detect_is_active_high;
++	bool			non_removable;
++};
++
+ /*
+  * Superset of MCI IP registers integrated in Atmel AT91 Processor
+  * Registers and bitfields marked with [2] are only available in MCI2
+@@ -388,8 +411,8 @@ struct atmel_mci_slot {
+ #define ATMCI_CARD_NEED_INIT	1
+ #define ATMCI_SHUTDOWN		2
+ 
+-	int			detect_pin;
+-	int			wp_pin;
++	struct gpio_desc	*detect_pin;
++	struct gpio_desc	*wp_pin;
+ 	bool			detect_is_active_high;
+ 
+ 	struct timer_list	detect_timer;
+@@ -593,7 +616,6 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
+ 			   &host->completed_events);
+ }
+ 
+-#if defined(CONFIG_OF)
+ static const struct of_device_id atmci_dt_ids[] = {
+ 	{ .compatible = "atmel,hsmci" },
+ 	{ /* sentinel */ }
+@@ -601,23 +623,13 @@ static const struct of_device_id atmci_dt_ids[] = {
+ 
+ MODULE_DEVICE_TABLE(of, atmci_dt_ids);
+ 
+-static struct mci_platform_data*
+-atmci_of_init(struct platform_device *pdev)
++static int
++atmci_of_init(struct platform_device *pdev, struct mci_slot_pdata *pdata)
+ {
+ 	struct device_node *np = pdev->dev.of_node;
+ 	struct device_node *cnp;
+-	struct mci_platform_data *pdata;
+ 	u32 slot_id;
+ 
+-	if (!np) {
+-		dev_err(&pdev->dev, "device node not found\n");
+-		return ERR_PTR(-EINVAL);
+-	}
+-
+-	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+-	if (!pdata)
+-		return ERR_PTR(-ENOMEM);
+-
+ 	for_each_child_of_node(np, cnp) {
+ 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
+ 			dev_warn(&pdev->dev, "reg property is missing for %pOF\n",
+@@ -633,31 +645,18 @@ atmci_of_init(struct platform_device *pdev)
+ 		}
+ 
+ 		if (of_property_read_u32(cnp, "bus-width",
+-		                         &pdata->slot[slot_id].bus_width))
+-			pdata->slot[slot_id].bus_width = 1;
+-
+-		pdata->slot[slot_id].detect_pin =
+-			of_get_named_gpio(cnp, "cd-gpios", 0);
++		                         &pdata[slot_id].bus_width))
++			pdata[slot_id].bus_width = 1;
+ 
+-		pdata->slot[slot_id].detect_is_active_high =
++		pdata[slot_id].detect_is_active_high =
+ 			of_property_read_bool(cnp, "cd-inverted");
+ 
+-		pdata->slot[slot_id].non_removable =
++		pdata[slot_id].non_removable =
+ 			of_property_read_bool(cnp, "non-removable");
+-
+-		pdata->slot[slot_id].wp_pin =
+-			of_get_named_gpio(cnp, "wp-gpios", 0);
+ 	}
+ 
+-	return pdata;
+-}
+-#else /* CONFIG_OF */
+-static inline struct mci_platform_data*
+-atmci_of_init(struct platform_device *dev)
+-{
+-	return ERR_PTR(-EINVAL);
++	return 0;
+ }
+-#endif
+ 
+ static inline unsigned int atmci_get_version(struct atmel_mci *host)
+ {
+@@ -1509,8 +1508,8 @@ static int atmci_get_ro(struct mmc_host *mmc)
+ 	int			read_only = -ENOSYS;
+ 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+ 
+-	if (gpio_is_valid(slot->wp_pin)) {
+-		read_only = gpio_get_value(slot->wp_pin);
++	if (slot->wp_pin) {
++		read_only = gpiod_get_value(slot->wp_pin);
+ 		dev_dbg(&mmc->class_dev, "card is %s\n",
+ 				read_only ? "read-only" : "read-write");
+ 	}
+@@ -1523,8 +1522,8 @@ static int atmci_get_cd(struct mmc_host *mmc)
+ 	int			present = -ENOSYS;
+ 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
+ 
+-	if (gpio_is_valid(slot->detect_pin)) {
+-		present = !(gpio_get_value(slot->detect_pin) ^
++	if (slot->detect_pin) {
++		present = !(gpiod_get_value(slot->detect_pin) ^
+ 			    slot->detect_is_active_high);
+ 		dev_dbg(&mmc->class_dev, "card is %spresent\n",
+ 				present ? "" : "not ");
+@@ -1637,8 +1636,8 @@ static void atmci_detect_change(struct timer_list *t)
+ 	if (test_bit(ATMCI_SHUTDOWN, &slot->flags))
+ 		return;
+ 
+-	enable_irq(gpio_to_irq(slot->detect_pin));
+-	present = !(gpio_get_value(slot->detect_pin) ^
++	enable_irq(gpiod_to_irq(slot->detect_pin));
++	present = !(gpiod_get_value(slot->detect_pin) ^
+ 		    slot->detect_is_active_high);
+ 	present_old = test_bit(ATMCI_CARD_PRESENT, &slot->flags);
+ 
+@@ -2231,18 +2230,15 @@ static int atmci_init_slot(struct atmel_mci *host,
+ 	slot = mmc_priv(mmc);
+ 	slot->mmc = mmc;
+ 	slot->host = host;
+-	slot->detect_pin = slot_data->detect_pin;
+-	slot->wp_pin = slot_data->wp_pin;
+ 	slot->detect_is_active_high = slot_data->detect_is_active_high;
+ 	slot->sdc_reg = sdc_reg;
+ 	slot->sdio_irq = sdio_irq;
+ 
+ 	dev_dbg(&mmc->class_dev,
+-	        "slot[%u]: bus_width=%u, detect_pin=%d, "
+-		"detect_is_active_high=%s, wp_pin=%d\n",
+-		id, slot_data->bus_width, slot_data->detect_pin,
+-		slot_data->detect_is_active_high ? "true" : "false",
+-		slot_data->wp_pin);
++	        "slot[%u]: bus_width=%u, "
++		"detect_is_active_high=%s\n",
++		id, slot_data->bus_width,
++		slot_data->detect_is_active_high ? "true" : "false");
+ 
+ 	mmc->ops = &atmci_ops;
+ 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
+@@ -2278,30 +2274,29 @@ static int atmci_init_slot(struct atmel_mci *host,
+ 
+ 	/* Assume card is present initially */
+ 	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
+-	if (gpio_is_valid(slot->detect_pin)) {
+-		if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
+-				      "mmc_detect")) {
+-			dev_dbg(&mmc->class_dev, "no detect pin available\n");
+-			slot->detect_pin = -EBUSY;
+-		} else if (gpio_get_value(slot->detect_pin) ^
+-				slot->detect_is_active_high) {
++
++	slot->detect_pin = devm_gpiod_get_optional(&host->pdev->dev, "cd", GPIOD_IN);
++	if (!IS_ERR(slot->detect_pin)) {
++		dev_dbg(&mmc->class_dev, "no detect pin available\n");
++		slot->detect_pin = NULL;
++	} else if (slot->detect_pin) {
++		if (gpiod_get_value(slot->detect_pin) ^
++		    slot->detect_is_active_high) {
+ 			clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
+ 		}
+ 	}
+ 
+-	if (!gpio_is_valid(slot->detect_pin)) {
++	if (!slot->detect_pin) {
+ 		if (slot_data->non_removable)
+ 			mmc->caps |= MMC_CAP_NONREMOVABLE;
+ 		else
+ 			mmc->caps |= MMC_CAP_NEEDS_POLL;
+ 	}
+ 
+-	if (gpio_is_valid(slot->wp_pin)) {
+-		if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
+-				      "mmc_wp")) {
+-			dev_dbg(&mmc->class_dev, "no WP pin available\n");
+-			slot->wp_pin = -EBUSY;
+-		}
++	slot->wp_pin = devm_gpiod_get_optional(&host->pdev->dev, "wp", GPIOD_IN);
++	if (IS_ERR(slot->wp_pin)) {
++		dev_dbg(&mmc->class_dev, "no WP pin available\n");
++		slot->wp_pin = NULL;
+ 	}
+ 
+ 	host->slot[id] = slot;
+@@ -2312,18 +2307,18 @@ static int atmci_init_slot(struct atmel_mci *host,
+ 		return ret;
+ 	}
+ 
+-	if (gpio_is_valid(slot->detect_pin)) {
++	if (slot->detect_pin) {
+ 		timer_setup(&slot->detect_timer, atmci_detect_change, 0);
+ 
+-		ret = request_irq(gpio_to_irq(slot->detect_pin),
++		ret = request_irq(gpiod_to_irq(slot->detect_pin),
+ 				atmci_detect_interrupt,
+ 				IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
+ 				"mmc-detect", slot);
+ 		if (ret) {
+ 			dev_dbg(&mmc->class_dev,
+ 				"could not request IRQ %d for detect pin\n",
+-				gpio_to_irq(slot->detect_pin));
+-			slot->detect_pin = -EBUSY;
++				gpiod_to_irq(slot->detect_pin));
++			slot->detect_pin = NULL;
+ 		}
+ 	}
+ 
+@@ -2342,10 +2337,8 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ 
+ 	mmc_remove_host(slot->mmc);
+ 
+-	if (gpio_is_valid(slot->detect_pin)) {
+-		int pin = slot->detect_pin;
+-
+-		free_irq(gpio_to_irq(pin), slot);
++	if (slot->detect_pin) {
++		free_irq(gpiod_to_irq(slot->detect_pin), slot);
+ 		del_timer_sync(&slot->detect_timer);
+ 	}
+ 
+@@ -2357,22 +2350,6 @@ static int atmci_configure_dma(struct atmel_mci *host)
+ {
+ 	host->dma.chan = dma_request_chan(&host->pdev->dev, "rxtx");
+ 
+-	if (PTR_ERR(host->dma.chan) == -ENODEV) {
+-		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
+-		dma_cap_mask_t mask;
+-
+-		if (!pdata || !pdata->dma_filter)
+-			return -ENODEV;
+-
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-
+-		host->dma.chan = dma_request_channel(mask, pdata->dma_filter,
+-						     pdata->dma_slave);
+-		if (!host->dma.chan)
+-			host->dma.chan = ERR_PTR(-ENODEV);
+-	}
+-
+ 	if (IS_ERR(host->dma.chan))
+ 		return PTR_ERR(host->dma.chan);
+ 
+@@ -2450,7 +2427,7 @@ static void atmci_get_cap(struct atmel_mci *host)
+ 
+ static int atmci_probe(struct platform_device *pdev)
+ {
+-	struct mci_platform_data	*pdata;
++	struct mci_slot_pdata		pdata[ATMCI_MAX_NR_SLOTS];
+ 	struct atmel_mci		*host;
+ 	struct resource			*regs;
+ 	unsigned int			nr_slots;
+@@ -2460,23 +2437,21 @@ static int atmci_probe(struct platform_device *pdev)
+ 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!regs)
+ 		return -ENXIO;
+-	pdata = pdev->dev.platform_data;
+-	if (!pdata) {
+-		pdata = atmci_of_init(pdev);
+-		if (IS_ERR(pdata)) {
+-			dev_err(&pdev->dev, "platform data not available\n");
+-			return PTR_ERR(pdata);
+-		}
++
++	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
++	if (!host)
++		return -ENOMEM;
++
++	ret = atmci_of_init(pdev, pdata);
++	if (ret) {
++		dev_err(&pdev->dev, "error parsing DT\n");
++		return ret;
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+ 	if (irq < 0)
+ 		return irq;
+ 
+-	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
+-	if (!host)
+-		return -ENOMEM;
+-
+ 	host->pdev = pdev;
+ 	spin_lock_init(&host->lock);
+ 	INIT_LIST_HEAD(&host->queue);
+@@ -2540,16 +2515,16 @@ static int atmci_probe(struct platform_device *pdev)
+ 	/* We need at least one slot to succeed */
+ 	nr_slots = 0;
+ 	ret = -ENODEV;
+-	if (pdata->slot[0].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[0],
++	if (pdata[0].bus_width) {
++		ret = atmci_init_slot(host, &pdata[0],
+ 				0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
+ 		if (!ret) {
+ 			nr_slots++;
+ 			host->buf_size = host->slot[0]->mmc->max_req_size;
+ 		}
+ 	}
+-	if (pdata->slot[1].bus_width) {
+-		ret = atmci_init_slot(host, &pdata->slot[1],
++	if (pdata[1].bus_width) {
++		ret = atmci_init_slot(host, &pdata[1],
+ 				1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
+ 		if (!ret) {
+ 			nr_slots++;
+@@ -2671,7 +2646,7 @@ static struct platform_driver atmci_driver = {
+ 	.driver		= {
+ 		.name		= "atmel_mci",
+ 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
+-		.of_match_table	= of_match_ptr(atmci_dt_ids),
++		.of_match_table	= atmci_dt_ids,
+ 		.pm		= &atmci_dev_pm_ops,
+ 	},
+ };
+diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+deleted file mode 100644
+index 1491af38cc6e..000000000000
+--- a/include/linux/atmel-mci.h
++++ /dev/null
+@@ -1,46 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0 */
+-#ifndef __LINUX_ATMEL_MCI_H
+-#define __LINUX_ATMEL_MCI_H
+-
+-#include <linux/types.h>
+-#include <linux/dmaengine.h>
+-
+-#define ATMCI_MAX_NR_SLOTS	2
+-
+-/**
+- * struct mci_slot_pdata - board-specific per-slot configuration
+- * @bus_width: Number of data lines wired up the slot
+- * @detect_pin: GPIO pin wired to the card detect switch
+- * @wp_pin: GPIO pin wired to the write protect sensor
+- * @detect_is_active_high: The state of the detect pin when it is active
+- * @non_removable: The slot is not removable, only detect once
+- *
+- * If a given slot is not present on the board, @bus_width should be
+- * set to 0. The other fields are ignored in this case.
+- *
+- * Any pins that aren't available should be set to a negative value.
+- *
+- * Note that support for multiple slots is experimental -- some cards
+- * might get upset if we don't get the clock management exactly right.
+- * But in most cases, it should work just fine.
+- */
+-struct mci_slot_pdata {
+-	unsigned int		bus_width;
+-	int			detect_pin;
+-	int			wp_pin;
+-	bool			detect_is_active_high;
+-	bool			non_removable;
+-};
+-
+-/**
+- * struct mci_platform_data - board-specific MMC/SDcard configuration
+- * @dma_slave: DMA slave interface to use in data transfers.
+- * @slot: Per-slot configuration data.
+- */
+-struct mci_platform_data {
+-	void			*dma_slave;
+-	dma_filter_fn		dma_filter;
+-	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+-};
+-
+-#endif /* __LINUX_ATMEL_MCI_H */
+-- 
+2.39.0
 
-Thanks, Victor Shih
