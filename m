@@ -2,574 +2,454 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89ACAC61DA3
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 16:50:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82B23C52D11
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 17:25:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231150AbjAZQuz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Jan 2023 11:50:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59908 "EHLO
+        id S229712AbjAZRZR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Jan 2023 12:25:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58750 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229472AbjAZQuy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 11:50:54 -0500
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F196E384;
-        Thu, 26 Jan 2023 08:50:52 -0800 (PST)
-Received: from pps.filterd (m0279873.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 30QGNE2c018575;
-        Thu, 26 Jan 2023 16:50:35 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=IXC7JTKxXqNQDx5CtXKNP4WnTahMvK9USBwHVFp5yW8=;
- b=Ytz6bI1PC9t1ywdwWMFuWyAM5T66ui3WNDzyEBI8EFKyUvdrXW2n5fF2RT5OtBLoWajQ
- qHqlq8AlJXiScJuqL6/yrp2D2kZ10AqcCPu8kMeCje2X1lcba/1GhysfmBZHMpP2w4J6
- sTyudrYJt3qFv9yybX6WO8XTLAqxsJBPJUMxtqMx3JkcpO9Qsqh2OkpF3wwhwgagqrKO
- Qyox+w6rSEsT9djXkgWCeDmosfvPRQjI12cVUk95kQ3Y4P9/ZcGsZNl48C6K8I2Rptdr
- uTzRXxgqn2cMAy6RR5u1fMkT1rHUuaILICkZx8lvo0Z43UP/+ZYQ2zLbvndGyabY1o+1 bQ== 
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3najkhch48-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 26 Jan 2023 16:50:34 +0000
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 30QGoXhW002726
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 26 Jan 2023 16:50:33 GMT
-Received: from [10.50.43.212] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.36; Thu, 26 Jan
- 2023 08:50:26 -0800
-Message-ID: <8b9ed619-8ff1-53f1-1f3a-c10a3585b9c4@quicinc.com>
-Date:   Thu, 26 Jan 2023 22:20:23 +0530
+        with ESMTP id S229437AbjAZRZQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 12:25:16 -0500
+Received: from longisland.snafu.de (longisland.snafu.de [IPv6:2001:1560:3:255::153])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C53D2ED50
+        for <linux-mmc@vger.kernel.org>; Thu, 26 Jan 2023 09:25:13 -0800 (PST)
+X-Trace: 4c7c73656261737469616e2e6b6c6f736b6140736e6166752e64657c38342e3233
+        2e3235342e3230377c31704c357a6b2d3030303831322d494d7c31363734373533
+        393034
+Received: from longisland.snafu.de ([10.153.10.19] helo=localhost)
+        by longisland.snafu.de with esmtpa (Exim 4.94.2) 
+        id 1pL5zk-000812-IM; Thu, 26 Jan 2023 18:25:07 +0100
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.0
-Subject: Re: [PATCH 09/10] arm64: dts: qcom: add IPQ5332 SoC and MI01.2 board
- support
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>, <agross@kernel.org>,
-        <andersson@kernel.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <shawnguo@kernel.org>, <arnd@arndb.de>,
-        <marcel.ziswiler@toradex.com>, <dmitry.baryshkov@linaro.org>,
-        <nfraprado@collabora.com>, <broonie@kernel.org>,
-        <robimarko@gmail.com>, <quic_gurus@quicinc.com>,
-        <bhupesh.sharma@linaro.org>, <linux-arm-msm@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-clk@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230125104520.89684-1-quic_kathirav@quicinc.com>
- <20230125104520.89684-10-quic_kathirav@quicinc.com>
- <f0312e77-0835-7f79-acf0-3d91d6548f07@linaro.org>
-From:   Kathiravan Thirumoorthy <quic_kathirav@quicinc.com>
-In-Reply-To: <f0312e77-0835-7f79-acf0-3d91d6548f07@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: C9gXMsMuaq9VEpzTGeNVMqm-BOZJRsUh
-X-Proofpoint-GUID: C9gXMsMuaq9VEpzTGeNVMqm-BOZJRsUh
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.219,Aquarius:18.0.930,Hydra:6.0.562,FMLib:17.11.122.1
- definitions=2023-01-26_07,2023-01-26_01,2022-06-22_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 bulkscore=0
- adultscore=0 spamscore=0 suspectscore=0 mlxlogscore=999 clxscore=1015
- lowpriorityscore=0 impostorscore=0 mlxscore=0 priorityscore=1501
- phishscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2212070000 definitions=main-2301260162
+Date:   Thu, 26 Jan 2023 18:25:04 +0100
+From:   sebastian.kloska@snafu.de
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org
+Subject: Re: Regression 5.14.21 vs 5.15.1: mmc blocked: mmc0: cqhci: timeout
+ for tag #
+In-Reply-To: <ec7a19a6-b0b9-37a3-074b-8c301a1dfcd5@intel.com>
+References: <c1214ad81df49a314bd4863751de1a45@snafu.de>
+ <05add7ba-f2f8-7cbe-3449-4a3128c096b5@intel.com>
+ <2ae56408f156f4f728cd1e94863c0795@snafu.de>
+ <c6f162c3-367f-d357-8eb0-27b7aa70ecd5@intel.com>
+ <08bd329f23b8fac7a2249034804ac3c7@snafu.de>
+ <f31a5b1cc0ae7182199b89730891770d@snafu.de>
+ <a935177e-739a-abd3-c926-62028a94e913@intel.com>
+ <2faae5dfb4999fba2da80ae7d18af899@snafu.de>
+ <ec7a19a6-b0b9-37a3-074b-8c301a1dfcd5@intel.com>
+User-Agent: Roundcube Webmail/1.4.13
+Message-ID: <ad859904968bc2152df474ae03c1b8e4@snafu.de>
+X-Sender: sebastian.kloska@snafu.de
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 8bit
+X-VISP-ShouldScan: 1
+X-VISP-Virus-Check: clean
+X-VISP-Spam-Score: 0.7 (/)
+X-VISP-Spam-Report: This message has been scanned on "longisland.snafu.de"
+ to identify if it is considered spam or not.
+ Contact the support hotline for details.
+ Content analysis details:   (0.7 points)
+  pts rule name              description
+ ---- ---------------------- --------------------------------------------------
+  0.5 JMQ_SPF_NEUTRAL        ASKDNS: SPF set to ?all
+                             [snafu.de TXT:v=spf1 mx ip4:84.23.254.128/25]
+ [ip6:2001:1560:3:255::/64 ip6:2001:1560:3:254::/64 ip4:213.73.113.34/32 ip6:2001:1560:a000:2:50:ff:fe00:27ed/128 include:_spf.snafu.de ?all]
+ -1.0 ALL_TRUSTED            Passed through trusted hosts only via SMTP
+  0.1 TW_GF                  BODY: Odd Letter Triples with GF
+  0.1 TW_XF                  BODY: Odd Letter Triples with XF
+  0.8 KAM_ASCII_DIVIDERS     Email that uses ascii formatting dividers and
+                              possible spam tricks
+  0.0 KAM_DMARC_STATUS       Test Rule for DKIM or SPF Failure with Strict
+                             Alignment
+  0.2 KAM_DMARC_NONE         DKIM has Failed or SPF has failed on the message
+                             and the domain has no DMARC policy
+X-VISP-Spam-Max-Score: +++++
+X-SA-Exim-Connect-IP: 84.23.254.207
+X-SA-Exim-Mail-From: sebastian.kloska@snafu.de
+X-SA-Exim-Scanned: No (on longisland.snafu.de); SAEximRunCond expanded to false
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Thanks Konrad for taking time to review the patch.
+Am 23.01.2023 11:46, schrieb Adrian Hunter:
+> On 21/01/23 15:37, sebastian.kloska@snafu.de wrote:
+>> Am 20.01.2023 13:08, schrieb Adrian Hunter:
+>>> On 20/01/23 13:14, sebastian.kloska@snafu.de wrote:
+>>>> So no mail with attachment on linux-mmc@vger.kernel.org
+>>>> but I linked the dmesgs on 
+>>>> https://bugzilla.kernel.org/show_bug.cgi?id=216255 
+>>>> <https://bugzilla.kernel.org/show_bug.cgi?id=216255>
+>>> 
+>>> I did receive the logs but it is good to attach them to the bug 
+>>> anyway.
+>>> 
+>>>>  
+>>>> Am 19.01.2023 11:28, schrieb Adrian Hunter:
+>>>>> On 19/01/23 11:46, sebastian.kloska@snafu.de 
+>>>>> <mailto:sebastian.kloska@snafu.de> wrote:
+>>>>>> Am 19.01.2023 10:15, schrieb Adrian Hunter:
+>>>>>>> On 18/01/23 23:24, sebastian.kloska@snafu.de 
+>>>>>>> <mailto:sebastian.kloska@snafu.de> wrote:
+>>>>>>>> Hi,
+>>>>>>>> 
+>>>>>>>> Hardware: Acer Swift-1 SF114-34-P6U1
+>>>>>>>> SD Host controller: Intel Corporation Device 4dc4 (rev 01) 8086:4dc4
+>>>>>>>> eMMC: Kingston A29128
+>>>>>>>> 
+>>>>>>>> * A couple of seconds after boot access to the eMMC is completely
+>>>>>>>>   blocked. Can be triggered by extensive I/O (e.g, with 
+>>>>>>>> badblocks -w)
+>>>>>>>> 
+>>>>>>>> * Tested with stable branch linux-5.14.21 vs. linux-5.15.1
+>>>>>>>>   Latest highest version including the bug is a fedora 6.1.6
+>>>>>>> 
+>>>>>>> There is very little difference in drivers/mmc between 5.14.21
+>>>>>>> and 5.15.1. Are you sure the same issue is not present in
+>>>>>>> 5.14.21?
+>>>>>> 
+>>>>>> Pretty sure. Using 5.14.21 day in day out 5.15.1 fails on me after 
+>>>>>> ~10min
+>>>>>> The "slowed down by pr_debug" version sometimes lives for >2h 
+>>>>>> (without stress
+>>>>>> via badblocks etc)
+>>>>>> 
+>>>> So all of the following is now done on the latest stable, Which 
+>>>> currently
+>>>> is 6.2.0-rc4+
+>>> 
+>>> That is a release candidate (rc).  The latest stable kernel
+>>> is 6.1.7.
+>>> 
+>> 
+>> I know -just thought I should pull master/HEAD from the latest stable
+>> 
+>>>>>>> 
+>>>>>>> You could try disabling runtime PM to see if that helps:
+>>>>>>> 
+>>>>>>>     echo on > /sys/class/mmc_host/mmc0/device/power/control
+>>>>>>> 
+>>>> Didn't help
+>>>> 
+>>>>>> Will try
+>>>>>>> Also it should be possible to disable cqhci by adding to the kernel
+>>>>>>> command line:
+>>>>>>> 
+>>>>>>>     sdhci.debug_quirks=0x40a0000
+>>>>>>> 
+>>>> 
+>>>> Weird behavior: Seems to make it worse. System often freezes
+>>>> during early boot-up.
+>>>> 
+>>>> HOWEVER: If I slow down the driver via dynamic debugging it seems to 
+>>>> be stable
+>>>> Failed to crash it over a couple of hours. You can say it fixes the 
+>>>> issue if you
+>>>> are willing to accept that 80% of one CPU core is busy with logging ;-)
+>>> 
+>>> That is interesting.  Logging can have more side effects than you 
+>>> might expect.
+>>> For example the logs might be written back to storage by syslog, 
+>>> which causes
+>>> more logging, and more writing etc etc.  That in turn is bumping up 
+>>> the CPU
+>>> load.
+>>> 
+>>> Increasing the CPU load will decrease the chance of the CPU entering 
+>>> a low-power
+>>> state (C-state).
+>>> 
+>>> And there was an issue with C-state transitions affecting Intel SDHCI
+>>> controllers,
+>>> so we need to check that possibility.  You could try kernel command 
+>>> line option:
+>>> 
+>>>     intel_idle.max_cstate=1
+>>> 
+>> 
+>> This -- Sir -- works just wonderfully !!
+>> 
+>> Don't see any changes in 
+>> /sys/devices/system/cpu/cpu*/cpuidle/state*/disable,but
+>> may be that's expected. Kernel runs just fine. works for stable/6.1.7 
+>> and fedora/6.1.6
+>> So for me personally this workaround is fine. Guess it will hurt my
+>> power consumption/battery live though but that's acceptable for me.
+>> 
+>> Don't hesitate to contact if I should test patches for you. The source
+>> is checked out and ccache is filled.
+> 
+> It is probably possible to make a kernel patch to prevent
+> low-power C-States only when eMMC is in use.  I will check
+> on that.
+> 
+> In the meantime, could you send an acpidump e.g.
+> 
+> 	sudo apt-get install acpica-tools
+> 	sudo acpidump -o /tmp/acpidump.txt
+> 
+> Also do you know if you have an up to date BIOS?
 
+So this is pretty embarrassing. Finally found the means to update my
+BIOS and turned out to fix the problem.
+Should have been the first on my list to solve the issue.
+THX for the effort
+> 
+>> 
+>>> You can see the C-states and whether they are disabled:
+>>> 
+>>>     grep -H . /sys/devices/system/cpu/cpu*/cpuidle/state*/disable
+>>> 
+>>> "disable" is writable by root, so you can disable them that way also.
+>>> 
+>>> In the meantime I will take a look at the logs.
+>>> 
+>>>> 
+>>>>>> Will try
+>>>>>>>> 
+>>>>>>>> * Spiked the code with a lot of pr_debug messages. As a side 
+>>>>>>>> effect the driver
+>>>>>>>>   seems to be much more stable, so to me it appears like a 
+>>>>>>>> timing issue where
+>>>>>>>>   the driver fails to wait for a specific state change which 
+>>>>>>>> seems to appear
+>>>>>>>>   less often when  slowed down by logging
+>>>>>>> 
+>>>>>>> Ideally it would be good to see a full log with dynamic
+>>>>>>> debugging enabled for the latest kernel.
+>>>>>> 
+>>>>>> Latest torvalds/linux or stable/linux ?
+>>>>> 
+>>>>> Stable would be fine.
+>>>>> 
+>>>>>> 
+>>>>>>> 
+>>>>>>>     To enable mmc debug via kernel command line:
+>>>>>>> 
+>>>>>>>         dyndbg="file drivers/mmc/core/* +p;file 
+>>>>>>> drivers/mmc/host/* +p"
+>>>>>>> 
+>>>> 
+>>>> This for whatever reason did not work for me on the kernel cmdline
+>>>> but I could trigger it via echo "..." ><debugfs>/dynamic_debug/control
+>>>> so the attached dmesgs are missing early logs.
+>>>> 
+>>>>>>>     Kernel must be configured:
+>>>>>>> 
+>>>>>>>         CONFIG_DYNAMIC_DEBUG=y
+>>>>>>> 
+>>>>>>>> 
+>>>>>>>> * Would love to have a decent reference documentation to the SD 
+>>>>>>>> Controller
+>>>>>>>>   especially a detailed description of the behavior of the 
+>>>>>>>> register map in
+>>>>>>>>  mmc/host/cqhci.h All intel documents I could find seem to describe
+>>>>>>>>  similar but not quite identical register maps
+>>>>>>> 
+>>>>>>> The JEDEC eMMC specification describes the CQHCI registers.
+>>>>>>> It looks like you need to register to get access to them
+>>>>>>> at www.jedec.org.  
+>>>>>>> <http://www.jedec.org. > AFAICT older specs, which would be just
+>>>>>>> fine, are free to download after registering.
+>>>>>>> 
+>>>> 
+>>>> Uhh -- but the price for registration is hefty. THX anyway
+>>>> 
+>>>>>> THX
+>>>>>>> You can get SD Host Controller Simplified Specification
+>>>>>>> from www.sdcard.org <http://www.sdcard.org>.
+>>>>>>> 
+>>>> 
+>>>> I attach to dmesg logs
+>>>> * One with dynamic debugging and without sdhci.debug_quirks=0x40a0000
+>>>> * The other without dynamic debugging (as said I failed to crash the 
+>>>> system) and sdhci.debug_quirks=0x40a0000
+>>>> 
+>>>> Hope I filtered properly for the relevant stuff
+>>>> The second one contains what seems to me a ton of kernel Oops but
+>>>> that might be due to the preliminary status of 6.2.0-rc4
+>>>> 
+>>>> THX
+>>>> 
+>>>>>> THX
+>>>>>>>> 
+>>>>>>>> Regards
+>>>>>>>> 
+>>>>>>>> Sebastian
+>>>>>>>> 
+>>>>>>>> * dmesg
+>>>>>>>> 
+>>>>>>>> [  347.583082] mmc0: cqhci: timeout for tag 3, qcnt
+>>>>>>> 
+>>>>>>> The timeout is pretty long, so it seems like the controller
+>>>>>>> has gotten stuck.  It won't reset the command or data
+>>>>>>> circuits either, which is impossible if it is behaving
+>>>>>>> correctly.
+>>>>>>> 
+>>>>>>>> [  347.583086] mmc0: cqhci: ============ CQHCI REGISTER DUMP 
+>>>>>>>> ===========
+>>>>>>>> [  347.583114] mmc0: cqhci: Caps:      0x000030c0 | Version:  
+>>>>>>>> 0x00000510
+>>>>>>>> [  347.583117] mmc0: cqhci: Config:    0x00001101 | Control:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583120] mmc0: cqhci: Int stat:  0x00000000 | Int enab: 
+>>>>>>>> 0x00000016
+>>>>>>>> [  347.583123] mmc0: cqhci: Int sig:   0x00000016 | Int Coal: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583157] mmc0: cqhci: TDL base:  0x7c2b5000 | TDL up32: 
+>>>>>>>> 0x00000001
+>>>>>>>> [  347.583160] mmc0: cqhci: Doorbell:  0x0000000f | TCN:      
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583163] mmc0: cqhci: Dev queue: 0x00000008 | Dev Pend: 
+>>>>>>>> 0x00000008
+>>>>>>>> [  347.583166] mmc0: cqhci: Task clr:  0x00000000 | SSC1:     
+>>>>>>>> 0x00010008
+>>>>>>>> [  347.583169] mmc0: cqhci: SSC2:      0x00000001 | DCMD rsp: 
+>>>>>>>> 0x00000800
+>>>>>>>> [  347.583172] mmc0: cqhci: RED mask:  0xfdf9a080 | TERRI:    
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583175] mmc0: cqhci: Resp idx:  0x0000002f | Resp arg: 
+>>>>>>>> 0x00000900
+>>>>>>>> [  347.583176] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>>>> ===========
+>>>>>>>> [  347.583182] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>>>> 0x00001002
+>>>>>>>> [  347.583185] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>>>> 0x00000070
+>>>>>>>> [  347.583188] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>>>> 0x00000023
+>>>>>>>> [  347.583191] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>>>> 0x0000003c
+>>>>>>>> [  347.583194] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>>>> 0x00000080
+>>>>>>>> [  347.583197] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>>>> 0x00000007
+>>>>>>>> [  347.583200] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583203] mmc0: sdhci: Int enab:  0x02ff4000 | Sig enab: 
+>>>>>>>> 0x02ff4000
+>>>>>>>> [  347.583206] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583209] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>>>> 0x80000807
+>>>>>>>> [  347.583212] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583214] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583217] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.583219] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>>>> [  347.583223] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>>>> 0x000000011eef1218
+>>>>>>>> [  347.583224] mmc0: sdhci: 
+>>>>>>>> ============================================
+>>>>>>>> [  347.583229] mmc0: running CQE recovery
+>>>>>>>> [  347.690108] mmc0: Reset 0x2 never completed.
+>>>>>>>> [  347.690109] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>>>> ===========
+>>>>>>>> [  347.690115] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>>>> 0x00001002
+>>>>>>>> [  347.690118] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>>>> 0x00000070
+>>>>>>>> [  347.690121] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>>>> 0x00000023
+>>>>>>>> [  347.690124] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>>>> 0x0000003c
+>>>>>>>> [  347.690127] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>>>> 0x00000080
+>>>>>>>> [  347.690130] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>>>> 0x00000007
+>>>>>>>> [  347.690133] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.690136] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>>>> 0x00ff0003
+>>>>>>>> [  347.690139] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.690141] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>>>> 0x80000807
+>>>>>>>> [  347.690144] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.690147] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.690150] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.690152] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>>>> [  347.690156] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>>>> 0x000000011eef1218
+>>>>>>>> [  347.690157] mmc0: sdhci: 
+>>>>>>>> ============================================
+>>>>>>>> [  347.790190] mmc0: Reset 0x4 never completed.
+>>>>>>>> [  347.790191] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>>>> ===========
+>>>>>>>> [  347.790193] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>>>> 0x00001002
+>>>>>>>> [  347.790196] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>>>> 0x00000070
+>>>>>>>> [  347.790199] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>>>> 0x00000023
+>>>>>>>> [  347.790202] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>>>> 0x0000003c
+>>>>>>>> [  347.790205] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>>>> 0x00000080
+>>>>>>>> [  347.790208] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>>>> 0x00000007
+>>>>>>>> [  347.790211] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.790213] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>>>> 0x00ff0003
+>>>>>>>> [  347.790216] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.790219] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>>>> 0x80000807
+>>>>>>>> [  347.790222] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.790225] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.790228] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.790230] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>>>> [  347.790234] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>>>> 0x000000011eef1218
+>>>>>>>> [  347.790234] mmc0: sdhci: 
+>>>>>>>> ============================================
+>>>>>>>> [  347.803056] mmc0: Controller never released inhibit bit(s).
+>>>>>>>> [  347.803058] mmc0: sdhci: ============ SDHCI REGISTER DUMP 
+>>>>>>>> ===========
+>>>>>>>> [  347.803077] mmc0: sdhci: Sys addr:  0x00000080 | Version:  
+>>>>>>>> 0x00001002
+>>>>>>>> [  347.803080] mmc0: sdhci: Blk size:  0x00000200 | Blk cnt:  
+>>>>>>>> 0x00000070
+>>>>>>>> [  347.803083] mmc0: sdhci: Argument:  0x00030000 | Trn mode: 
+>>>>>>>> 0x00000023
+>>>>>>>> [  347.803086] mmc0: sdhci: Present:   0x1fff0106 | Host ctl: 
+>>>>>>>> 0x0000003c
+>>>>>>>> [  347.803089] mmc0: sdhci: Power:     0x0000000b | Blk gap:  
+>>>>>>>> 0x00000080
+>>>>>>>> [  347.803092] mmc0: sdhci: Wake-up:   0x00000000 | Clock:    
+>>>>>>>> 0x00000007
+>>>>>>>> [  347.803095] mmc0: sdhci: Timeout:   0x0000000e | Int stat: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.803098] mmc0: sdhci: Int enab:  0x00ff0003 | Sig enab: 
+>>>>>>>> 0x00ff0003
+>>>>>>>> [  347.803101] mmc0: sdhci: ACmd stat: 0x00000000 | Slot int: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.803103] mmc0: sdhci: Caps:      0x546ec881 | Caps_1:   
+>>>>>>>> 0x80000807
+>>>>>>>> [  347.803106] mmc0: sdhci: Cmd:       0x00002f3a | Max curr: 
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.803109] mmc0: sdhci: Resp[0]:   0x00000900 | Resp[1]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.803112] mmc0: sdhci: Resp[2]:   0x00000000 | Resp[3]:  
+>>>>>>>> 0x00000000
+>>>>>>>> [  347.803114] mmc0: sdhci: Host ctl2: 0x0000000d
+>>>>>>>> [  347.803118] mmc0: sdhci: ADMA Err:  0x00000000 | ADMA Ptr: 
+>>>>>>>> 0x000000011eef1218
+>>>>>>>> [  347.803119] mmc0: sdhci: 
+>>>>>>>> ============================================
+>>>>>>>>  --
+>>>>>>>> 
+>>>> --
+>>>> 
+>> 
 
-On 1/26/2023 3:29 AM, Konrad Dybcio wrote:
->
-> On 25.01.2023 11:45, Kathiravan Thirumoorthy wrote:
->> From: Kathiravan T <quic_kathirav@quicinc.com>
->>
->> Add initial device tree support for the Qualcomm IPQ5332 SoC and
->> MI01.2 board.
->>
->> Signed-off-by: Kathiravan T <quic_kathirav@quicinc.com>
->> ---
->>   arch/arm64/boot/dts/qcom/Makefile           |   1 +
->>   arch/arm64/boot/dts/qcom/ipq5332-mi01.2.dts |  71 +++++
->>   arch/arm64/boot/dts/qcom/ipq5332.dtsi       | 273 ++++++++++++++++++++
->>   3 files changed, 345 insertions(+)
->>   create mode 100644 arch/arm64/boot/dts/qcom/ipq5332-mi01.2.dts
->>   create mode 100644 arch/arm64/boot/dts/qcom/ipq5332.dtsi
->>
->> diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
->> index 3e79496292e7..fbd5bc583a9b 100644
->> --- a/arch/arm64/boot/dts/qcom/Makefile
->> +++ b/arch/arm64/boot/dts/qcom/Makefile
->> @@ -3,6 +3,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= apq8094-sony-xperia-kitakami-karin_windy.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-ifc6640.dtb
->> +dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-mi01.2.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= ipq6018-cp01-c1.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= ipq8074-hk01.dtb
->>   dtb-$(CONFIG_ARCH_QCOM)	+= ipq8074-hk10-c1.dtb
->> diff --git a/arch/arm64/boot/dts/qcom/ipq5332-mi01.2.dts b/arch/arm64/boot/dts/qcom/ipq5332-mi01.2.dts
->> new file mode 100644
->> index 000000000000..7984d8f824ce
->> --- /dev/null
->> +++ b/arch/arm64/boot/dts/qcom/ipq5332-mi01.2.dts
->> @@ -0,0 +1,71 @@
->> +// SPDX-License-Identifier: (GPL-2.0+ OR BSD-3-Clause)
->> +/*
->> + * IPQ5332 AP-MI01.2 board device tree source
->> + *
->> + * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
->> + */
->> +
->> +/dts-v1/;
->> +
->> +#include "ipq5332.dtsi"
->> +
->> +/ {
->> +	model = "Qualcomm Technologies, Inc. IPQ5332/AP-MI01.2";
->> +	compatible = "qcom,ipq5332-ap-mi01.2", "qcom,ipq5332";
->> +
->> +	aliases {
->> +		serial0 = &blsp1_uart0;
->> +	};
->> +
->> +	chosen {
->> +		stdout-path = "serial0";
->> +	};
->> +};
->> +
->> +&blsp1_uart0 {
->> +	pinctrl-0 = <&serial_0_pins>;
->> +	pinctrl-names = "default";
->> +	status = "okay";
->> +};
->> +
->> +&sdhc {
->> +	pinctrl-0 = <&sdc_default_state>;
->> +	pinctrl-names = "default";
->> +	non-removable;
->> +	status = "okay";
->> +};
->> +
->> +&sleep_clk {
->> +	clock-frequency = <32000>;
->> +};
->> +
->> +&xo_board {
->> +	clock-frequency = <24000000>;
->> +};
->> +
->> +/* PINCTRL */
->> +
->> +&tlmm {
->> +	sdc_default_state: sdc-default-state {
->> +		clk-pins {
->> +			pins = "gpio13";
->> +			function = "sdc_clk";
->> +			drive-strength = <8>;
->> +			bias-disable;
->> +		};
->> +
->> +		cmd-pins {
->> +			pins = "gpio12";
->> +			function = "sdc_cmd";
->> +			drive-strength = <8>;
->> +			bias-pull-up;
->> +		};
->> +
->> +		data-pins {
->> +			pins = "gpio8", "gpio9", "gpio10", "gpio11";
->> +			function = "sdc_data";
->> +			drive-strength = <8>;
->> +			bias-pull-up;
->> +		};
->> +	};
->> +};
->> diff --git a/arch/arm64/boot/dts/qcom/ipq5332.dtsi b/arch/arm64/boot/dts/qcom/ipq5332.dtsi
->> new file mode 100644
->> index 000000000000..d04244a3cd3a
->> --- /dev/null
->> +++ b/arch/arm64/boot/dts/qcom/ipq5332.dtsi
->> @@ -0,0 +1,273 @@
->> +// SPDX-License-Identifier: BSD-3-Clause
->> +/*
->> + * IPQ5332 device tree source
->> + *
->> + * Copyright (c) 2022-2023 Qualcomm Innovation Center, Inc. All rights reserved.
->> + */
->> +
->> +#include <dt-bindings/clock/qcom,gcc-ipq5332.h>
->> +#include <dt-bindings/interrupt-controller/arm-gic.h>
->> +
->> +/ {
->> +	interrupt-parent = <&intc>;
->> +	#address-cells = <2>;
->> +	#size-cells = <2>;
->> +
->> +	clocks {
->> +		sleep_clk: sleep-clk {
->> +			compatible = "fixed-clock";
->> +			#clock-cells = <0>;
->> +		};
->> +
->> +		xo_board: xo-board-clk {
->> +			compatible = "fixed-clock";
->> +			#clock-cells = <0>;
->> +		};
->> +	};
->> +
->> +	cpus {
->> +		#address-cells = <1>;
->> +		#size-cells = <0>;
->> +
->> +		CPU0: cpu@0 {
->> +			device_type = "cpu";
->> +			compatible = "arm,cortex-a53";
->> +			reg = <0x0>;
->> +			enable-method = "psci";
->> +			next-level-cache = <&L2_0>;
->> +		};
->> +
->> +		CPU1: cpu@1 {
->> +			device_type = "cpu";
->> +			compatible = "arm,cortex-a53";
->> +			reg = <0x1>;
->> +			enable-method = "psci";
->> +			next-level-cache = <&L2_0>;
->> +		};
->> +
->> +		CPU2: cpu@2 {
->> +			device_type = "cpu";
->> +			compatible = "arm,cortex-a53";
->> +			reg = <0x2>;
->> +			enable-method = "psci";
->> +			next-level-cache = <&L2_0>;
->> +		};
->> +
->> +		CPU3: cpu@3 {
->> +			device_type = "cpu";
->> +			compatible = "arm,cortex-a53";
->> +			reg = <0x3>;
->> +			enable-method = "psci";
->> +			next-level-cache = <&L2_0>;
->> +		};
->> +
->> +		L2_0: l2-cache {
->> +			compatible = "cache";
->> +			cache-level = <0x2>;
->> +		};
->> +	};
->> +
->> +	firmware {
->> +		scm {
->> +			compatible = "qcom,scm-ipq5332", "qcom,scm";
->> +		};
->> +	};
->> +
->> +	memory@40000000 {
->> +		device_type = "memory";
->> +		/* We expect the bootloader to fill in the size */
->> +		reg = <0x0 0x40000000 0x0 0x0>;
->> +	};
->> +
->> +	pmu {
->> +		compatible = "arm,cortex-a53-pmu";
->> +		interrupts = <GIC_PPI 7 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_HIGH)>;
->> +	};
->> +
->> +	psci {
->> +		compatible = "arm,psci-1.0";
->> +		method = "smc";
->> +	};
->> +
->> +	reserved-memory {
->> +		#address-cells = <2>;
->> +		#size-cells = <2>;
->> +		ranges;
->> +
->> +		tz: memory@4a600000 {
-> memory@ is discouraged, the node name should be somewhat
-> descriptive of what lies in this reserved region. On the
-> other hand, tz: sounds like a label to a trust zone device
-> of some kind. I propose:
->
-> tz_mem: tz@4a600000 {
->
-> instead.
-
-
-Ack.
-
-
->
->> +			no-map;
->> +			reg = <0x0 0x4a600000 0x0 0x200000>;
->> +		};
->> +	};
->> +
->> +	soc@0 {
->> +		#address-cells = <1>;
->> +		#size-cells = <1>;
->> +		ranges = <0 0 0 0xffffffff>;
->> +		compatible = "simple-bus";
-> Move compatible first, please.
-
-
-Ack.
-
-
->
->> +
->> +		tlmm: pinctrl@1000000 {
->> +			compatible = "qcom,ipq5332-tlmm";
->> +			reg = <0x01000000 0x300000>;
->> +			interrupts = <GIC_SPI 249 IRQ_TYPE_LEVEL_HIGH>;
->> +			gpio-controller;
->> +			#gpio-cells = <2>;
->> +			gpio-ranges = <&tlmm 0 0 53>;
->> +			interrupt-controller;
->> +			#interrupt-cells = <2>;
->> +
->> +			serial_0_pins: serial0-state {
-> You may be interested in having a suspend state for this
-> one, so you may wish to rename this futureproofing-ly to
-> serial0-active-state.
-
-
-Ack. AFAIK, we don't support suspend state, anyways let me got back and 
-check it.
-
-
->
->> +				pins = "gpio18", "gpio19";
->> +				function = "blsp0_uart0";
->> +				drive-strength = <8>;
->> +				bias-pull-up;
->> +			};
->> +		};
->> +
->> +		gcc: clock-controller@1800000 {
->> +			compatible = "qcom,ipq5332-gcc";
->> +			reg = <0x01800000 0x80000>;
->> +			#clock-cells = <0x1>;
->> +			#reset-cells = <0x1>;
-> Decimal values for -cells, please.
-
-
-Ack.
-
-
->
->> +			#power-domain-cells = <1>;
->> +			clock-names = "xo",
->> +				      "sleep_clk",
->> +				      "pcie_2lane_phy_pipe_clk",
->> +				      "pcie_2lane_phy_pipe_clk_x1",
->> +				      "usb_pcie_wrapper_pipe_clk";
->> +			clocks = <&xo_board>,
->> +				 <&sleep_clk>,
->> +				 <0>,
->> +				 <0>,
->> +				 <0>;
->> +		};
->> +
->> +		sdhc: mmc@7804000 {
->> +			compatible = "qcom,ipq5332-sdhci", "qcom,sdhci-msm-v5";
->> +			reg = <0x07804000 0x1000>, <0x07805000 0x1000>;
->> +
->> +			interrupts = <GIC_SPI 313 IRQ_TYPE_LEVEL_HIGH>,
->> +				     <GIC_SPI 316 IRQ_TYPE_LEVEL_HIGH>;
->> +			interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
->> +				 <&gcc GCC_SDCC1_APPS_CLK>,
->> +				 <&xo_board>;
->> +			clock-names = "iface", "core", "xo";
->> +			mmc-ddr-1_8v;
->> +			mmc-hs200-1_8v;
->> +			max-frequency = <192000000>;
-> As Krzysztof pointed out, this one should go.
-
-
-Ack.
-
-
->
->> +			bus-width = <4>;
-> Oh that's interesting.. a 4-wide bus for eMMC?
-
-
-Yes, eMMC is 4bit bus width with HS200 mode only.
-
-
->
->> +			status = "disabled";
->> +		};
->> +
->> +		blsp1_uart0: serial@78af000 {
->> +			compatible = "qcom,msm-uartdm-v1.4", "qcom,msm-uartdm";
->> +			reg = <0x078af000 0x200>;
->> +			interrupts = <GIC_SPI 290 IRQ_TYPE_LEVEL_HIGH>;
->> +			clocks = <&gcc GCC_BLSP1_UART1_APPS_CLK>,
->> +				 <&gcc GCC_BLSP1_AHB_CLK>;
->> +			clock-names = "core", "iface";
->> +			status = "disabled";
->> +		};
->> +
->> +		intc: interrupt-controller@b000000 {
->> +			compatible = "qcom,msm-qgic2";
->> +			#address-cells = <1>;
->> +			#size-cells = <1>;
-> Please move these two above ranges..
-
-
-Ack.
-
-
->
->> +			interrupt-controller;
->> +			#interrupt-cells = <0x3>;
-> Decimal value, please.
-
-
-Ack.
-
-
->
->> +			reg = <0x0b000000 0x1000>,	/* GICD */
->> +			      <0x0b002000 0x1000>,	/* GICC */
->> +			      <0x0b001000 0x1000>,	/* GICH */
->> +			      <0x0b004000 0x1000>;	/* GICV */
-> ..and reg just below compatible...
-
-Ack.
-
-
->
->> +			interrupts = <GIC_PPI 9 IRQ_TYPE_LEVEL_HIGH>;
-> ..and interrupts just below reg, please.
-
-Ack.
-
-
->
->> +			ranges = <0 0x0b00c000 0x3000>;
->> +
->> +			v2m0: v2m@0 {
->> +				compatible = "arm,gic-v2m-frame";
->> +				reg = <0x0 0xffd>;
-> Please pad the reg for consistency.
-
-
-Sure.
-
-
->> +				msi-controller;
->> +			};
->> +
->> +			v2m1: v2m@1 {
->> +				compatible = "arm,gic-v2m-frame";
->> +				reg = <0x00001000 0xffd>;
->> +				msi-controller;
->> +			};
->> +
->> +			v2m2: v2m@2 {
->> +				compatible = "arm,gic-v2m-frame";
->> +				reg = <0x00002000 0xffd>;
->> +				msi-controller;
->> +			};
->> +		};
->> +
->> +		timer@b120000 {
->> +			compatible = "arm,armv7-timer-mem";
->> +			reg = <0x0b120000 0x1000>;
->> +			#address-cells = <1>;
->> +			#size-cells = <1>;
->> +			ranges;
->> +
->> +			frame@b120000 {
->> +				frame-number = <0>;
->> +				interrupts = <GIC_SPI 8 IRQ_TYPE_LEVEL_HIGH>,
->> +					     <GIC_SPI 7 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b121000 0x1000>,
->> +				      <0x0b122000 0x1000>;
-> reg
-> interrupts
-> frame-number
->
-> would be more consistent with most other nodes.
-Ack.
->
->> +			};
->> +
->> +			frame@b123000 {
->> +				frame-number = <1>;
->> +				interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b123000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +
->> +			frame@b124000 {
->> +				frame-number = <2>;
->> +				interrupts = <GIC_SPI 10 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b124000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +
->> +			frame@b125000 {
->> +				frame-number = <3>;
->> +				interrupts = <GIC_SPI 11 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b125000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +
->> +			frame@b126000 {
->> +				frame-number = <4>;
->> +				interrupts = <GIC_SPI 12 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b126000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +
->> +			frame@b127000 {
->> +				frame-number = <5>;
->> +				interrupts = <GIC_SPI 13 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b127000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +
->> +			frame@b128000 {
->> +				frame-number = <6>;
->> +				interrupts = <GIC_SPI 14 IRQ_TYPE_LEVEL_HIGH>;
->> +				reg = <0x0b128000 0x1000>;
->> +				status = "disabled";
->> +			};
->> +		};
->> +
->> +	};
->> +
->> +	timer {
->> +		compatible = "arm,armv8-timer";
->> +		interrupts = <GIC_PPI 2 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
->> +				<GIC_PPI 3 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
->> +				<GIC_PPI 4 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>,
->> +				<GIC_PPI 1 (GIC_CPU_MASK_SIMPLE(4) | IRQ_TYPE_LEVEL_LOW)>;
-> The indentation seems off here.
-
-
-Will fix it in V2. Thanks.
-
-
->
-> Konrad
->> +	};
->> +};
+-- 
