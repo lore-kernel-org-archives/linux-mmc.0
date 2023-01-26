@@ -2,478 +2,206 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2CFFC05027
-	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 13:51:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D1248C05027
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 14:44:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229830AbjAZNvF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 26 Jan 2023 08:51:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40076 "EHLO
+        id S230003AbjAZOoG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 26 Jan 2023 09:44:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231639AbjAZNvC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 08:51:02 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB3EA4CE7F;
-        Thu, 26 Jan 2023 05:50:42 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CCD51617FF;
-        Thu, 26 Jan 2023 13:50:40 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id CEECBC433A0;
-        Thu, 26 Jan 2023 13:50:37 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1674741040;
-        bh=waQRMFuqxVZvLTarVOLu2AMjbJkqhlrOHWytHi3gGkQ=;
-        h=From:To:Cc:Subject:Date:From;
-        b=lgLtdinpU/cdpYmJaguihJy2shzDnw1ETYSp6SSljokJpfSf2+1vzpeeLMzYfd1qV
-         re1vWWKe/h1Evf1VtbwdREJ5VNH+p469I/ieMIoYsZosH/OaHjFUdPKA937Wg5hcfG
-         dy3PJXtKiQB1WwSnC6AOxmdsZ4mcCsC9uS9piHTAD+i6oAuC1QSUZwKPjeiSQuoX9J
-         oGv6AbjpP1QLqP27V+Ht7Xs1ub9pLa3SV9OsEWFigaWuHl/zeOdzmsGzhDuFEDGVKW
-         rLggeNHipavLW0fec6i6YmhJYOaP39SbViMImyJnNMXJxPaBDCfCWJi+5CFo+jlg+9
-         sauZ3x65FrsCw==
-From:   Arnd Bergmann <arnd@kernel.org>
-To:     Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-gpio@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, netdev@vger.kernel.org
-Subject: [PATCH] mmc: atmel: convert to gpio descriptos
-Date:   Thu, 26 Jan 2023 14:50:04 +0100
-Message-Id: <20230126135034.3320638-1-arnd@kernel.org>
-X-Mailer: git-send-email 2.39.0
+        with ESMTP id S229473AbjAZOoE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 26 Jan 2023 09:44:04 -0500
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4911940D9;
+        Thu, 26 Jan 2023 06:44:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1674744243; x=1706280243;
+  h=from:to:cc:subject:date:message-id:references:
+   in-reply-to:content-id:content-transfer-encoding:
+   mime-version;
+  bh=d2lIgGVmzfpDMw08aByIETM4iIng/QltyCkqC/yo8K4=;
+  b=Xtbm+qSOQqZ3SJITkUeHPWiNgsL0NPDMxVOhEvNFInv7KQxbzoA1K0ZE
+   6bNTVOQaiAQj6TWrALhfPXR28Bq8o30OqtZnmQflTaoghWWVC8I/Fqc55
+   2XOouFr8GcsuTep+TXcPe9lo/2jipb/cc0MJyQdS2LbMwE2pcnA2h/xrP
+   7ovx8Dy1DFgIW51ngWcnNVd3K02uwAeim01PtD1XXcNe/7jHv7tEJE/8e
+   G+wRr57+aOcztFZO0/Gb1oLUGZZzg2yvquU/1ZFhSa0vl0AwjANLQYmmV
+   FITPhwOuruIwjkxPvra0Gnx4thz40f7/glnRIlpU3qW0B/CQXNls1Nt1M
+   g==;
+X-IronPort-AV: E=Sophos;i="5.97,248,1669100400"; 
+   d="scan'208";a="209379080"
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa1.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 26 Jan 2023 07:44:02 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.16; Thu, 26 Jan 2023 07:44:01 -0700
+Received: from NAM11-DM6-obe.outbound.protection.outlook.com (10.10.215.89) by
+ email.microchip.com (10.10.87.71) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.16 via Frontend
+ Transport; Thu, 26 Jan 2023 07:44:01 -0700
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=m/IMSPvrNstZPOfvbCNzbzxGfUBqM+R6VniNEKy0KlGdfxAgGpZgiLVEpJEMGoUtjXAMqL+XvG+rkLtsqSSfGvgfixLFLhi7Xb5AVr1pieoSd4nU6pPh5k5Cm1mMZ8GGf0zT/gw/QoBrreOP3Ipo1a5FovGzdxN1a05btrzumLoTS/ENHdBkWf5oobQTfnEQwEJJjhCM4hwLdeX6xHMcU71ESP+0Iy/QMP5cvK0PvhaBc0WnmhVeOaRO3OmUI08MAYUpttS85jVP64rVYA6kjZI0WHgk4eF289p2E7OHXitpg9iNkXGwFRZQAOB4zTzcPMIHjoHuNDAUwCJog0AnIA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=d2lIgGVmzfpDMw08aByIETM4iIng/QltyCkqC/yo8K4=;
+ b=ToveVC9/4g8xwW4r6w6FnawqyvlXnxI1ctXF2owcFdrqsIwHljocd7pv1cmQWSznl2kJrsSG8jH5NBHRSujoc5l+9awUTwB+csNUNOKY9wfOkov57UHzjFJwZNwIPzSLTkVh6H5Cwz4FvfD6qG9AK3K7mbnmzeFKtthNJQ+CD6vybeKgNtz0eFRi2Da8a+BjZXkbuoMeXavqoICA+AD/qZqbKELAgxvWmS4SaeYVXrC1D4INb7JoaZiLsQEA68e4FGPf/4H7a3ULDp5z0C+Cj+M7udRdCNLfLmHNwP719MOLw6/NAKO+La7Q7PRQazQjloC+RHyYoMZ2VfoG2mM89w==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=microchip.com; dmarc=pass action=none
+ header.from=microchip.com; dkim=pass header.d=microchip.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=microchiptechnology.onmicrosoft.com;
+ s=selector2-microchiptechnology-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=d2lIgGVmzfpDMw08aByIETM4iIng/QltyCkqC/yo8K4=;
+ b=RcKUnwXmxUxt3r2Xirqt8yyTl69Xx52vQTAA2/d6m2OXTXhTTp9PP0Uvp/47ZAj0btObp5DbpfsO8mG2fQgiI7LUbVB+BjWGNUEMhwXdiByDSr0b3kVi0fnSHTpnwTo/uVbrDCZbrJ3eaZ5MkxAQq81D18E9NXKVLa7V632qMjw=
+Received: from PH0PR11MB5192.namprd11.prod.outlook.com (2603:10b6:510:3b::9)
+ by CH0PR11MB8168.namprd11.prod.outlook.com (2603:10b6:610:186::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6043.20; Thu, 26 Jan
+ 2023 14:44:00 +0000
+Received: from PH0PR11MB5192.namprd11.prod.outlook.com
+ ([fe80::77ee:f28f:a941:2b8e]) by PH0PR11MB5192.namprd11.prod.outlook.com
+ ([fe80::77ee:f28f:a941:2b8e%4]) with mapi id 15.20.6043.022; Thu, 26 Jan 2023
+ 14:44:00 +0000
+From:   <Ludovic.Desroches@microchip.com>
+To:     <t.schramm@manjaro.org>
+CC:     <ulf.hansson@linaro.org>, <Nicolas.Ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>, <Claudiu.Beznea@microchip.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH 1/1] mmc: atmel-mci: fix race between stop command and
+ start of next command
+Thread-Topic: [PATCH 1/1] mmc: atmel-mci: fix race between stop command and
+ start of next command
+Thread-Index: AQHZHIcNyVoXsVB35EepqBgIJuxG5q6w8DGA
+Date:   Thu, 26 Jan 2023 14:43:59 +0000
+Message-ID: <54b0dcc0-5083-3ee9-6536-e58b8c01e96c@microchip.com>
+References: <20221230194315.809903-1-t.schramm@manjaro.org>
+ <20221230194315.809903-2-t.schramm@manjaro.org>
+In-Reply-To: <20221230194315.809903-2-t.schramm@manjaro.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+user-agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+authentication-results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=microchip.com;
+x-ms-publictraffictype: Email
+x-ms-traffictypediagnostic: PH0PR11MB5192:EE_|CH0PR11MB8168:EE_
+x-ms-office365-filtering-correlation-id: bcb5e06a-e767-4e08-34b9-08daffabc2d8
+x-ms-exchange-senderadcheck: 1
+x-ms-exchange-antispam-relay: 0
+x-microsoft-antispam: BCL:0;
+x-microsoft-antispam-message-info: XI7cvlCHWsocqYTDV0rmk/2NlcqpDSwJHql9ofomMW1dIKPHx2/ErLC4Uk85YX72vEZfbkorF8q7hgm5QfDhh0dyijArtTDRBrEbwVGY5u4ZZ9BnI5wl7GJbw9y1xCqvSXQWby0t59wBqHaQLj9bdrHEPGLP2hzgtPxcZ1j404HyRciJNEnNl68aRX0k84TnHPAcQrTqjZIbF1TRLOvENK5Bajp9S+ILW+ZDUC97GsPbS1kMQ1dA75E/IUBrPs+I9V0Hnv6EY8/eZphsE1E+IbNrX+7MORIcS3uN5Xy4vt0nqbfBLNQuNVWvQZplvkHN/u+NsovEAdjqtLs2dBjf6CoC32NVFKPD0ZDXe0DM94/nmFJoklVPzWC86vY/CUtagr9idN5ABtMGDWeuReyQyYEJd8cNq2s4PceHyOewq6EEJ8EqAkfESwqFkYCpdhyQCgmxpoV3cHBZX9puvSqmVD/IDEZQWzA7oO/itHE9tPdrPnq8FjR7N59YJqeRbY3io2dHBiF2bfFs8l1Lvdz93B9JvAsg36RHCByUbN+FKC3t8Rx03ZwTgKW1wzIU3Jz9PAm4tsIBwNkk6Vo+J5qoem7oJiEyN1Z6M6WN1fD6r0ay0p93ROhWyf/yoAD5zZarLxMBfXcBlpmGTxMMc8Tx1//IMee5XRswkINAO5zCsPlyUrZRnj9ErCoL+oxUv6HGXJKSQYB2SeuwDjwEY3Yss3wvxuZdyKLe5uQdNrz99NM6yGF2x+bmu5CrzuWHn8hZorM+WnT3JCXI1SwrnFjEQg==
+x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR11MB5192.namprd11.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230025)(39860400002)(136003)(376002)(396003)(366004)(346002)(451199018)(122000001)(86362001)(38100700002)(31696002)(36756003)(38070700005)(316002)(54906003)(478600001)(2906002)(76116006)(41300700001)(91956017)(8676002)(31686004)(66476007)(4326008)(66946007)(6916009)(66556008)(5660300002)(64756008)(8936002)(66446008)(6512007)(53546011)(2616005)(6486002)(186003)(83380400001)(6506007)(71200400001)(45980500001)(43740500002);DIR:OUT;SFP:1101;
+x-ms-exchange-antispam-messagedata-chunkcount: 1
+x-ms-exchange-antispam-messagedata-0: =?utf-8?B?eTBTaU9FZXBMdTJld2lMb3ZJYVNDNytPaVZpUm5Wa0o1MmRiZVgyUFdlKzNt?=
+ =?utf-8?B?S3NwMHBBVnZDS1Ezd0o1N255T1Q1MmNvdjhkL3FLbjZXeU5IYXhTS2h3enlH?=
+ =?utf-8?B?dGFVWTV6emRqVXVwVWNNaWQ2ZUVTWExZMGtOTitQekRxQWw4bml5RzFhbDE3?=
+ =?utf-8?B?WmNCN0hLb2ZyZlVaRG92L1lmU1RqcTlZT1JoU0VFSXJKamxqbE9FUGdPdmtL?=
+ =?utf-8?B?dElBTkZ1QWlERmRlckdGRnBRNmpxbmE0b0IzUmtYZFVPZkp2eFZ3a2FDN2dE?=
+ =?utf-8?B?OTlMaDNhemdRNFdMd1hnMnNNTXpwOEFwT21XRVBuMGlYOXdjRVRJYUpPSmJx?=
+ =?utf-8?B?SEhKMnl3bTRjM3h6cHNHSVNJU0kwR3RqSklLd29iRzBVeHlMNDFSMnJMUEJ4?=
+ =?utf-8?B?TVJRSnlVWG0zdDl2amgyNG1vTG5EVTJwQlcxNlFZMmRXWk54TWU1RjdXcFdT?=
+ =?utf-8?B?RE44VzVOVEIzalZQKzE5UlpKWGRjeCtYeTVSdjE2ajJyV0lWZm5NNDNZTy83?=
+ =?utf-8?B?NWIyT0MvSkJKSGN3eHhWZXlNNlgzVGxXV3pDVFhnRjhyTUNGWDdGYUpsK3F6?=
+ =?utf-8?B?eUE1ZmdMYUNXd3NoWXJJTEpMMXpGMVlhZEQvYml4aDd3QzBYTXQzbkRvaWhz?=
+ =?utf-8?B?S0x6T1d3MmJLUmIyVTJKUjA2MHNVcTBFd0dtZUJPUCtQSmIxVmEwNEtWbjVm?=
+ =?utf-8?B?R1p0cTlZRURHZ1VpQXQ2aExCZW5TTVM4dFZOYmtZTkNmckFkWTl2ckZkbXJX?=
+ =?utf-8?B?VjdmN2VHT2N3NDBMWDNvTFA4YU1QSVBDMjdoK0srNG8waUNNVGZKTE5DTXRr?=
+ =?utf-8?B?SXdTMjNOVzNOL1lWYmdSVTFJTmduck1obVBYc0JyTnJqVmRHYjJlUUkreWVJ?=
+ =?utf-8?B?UWIvWjFOVm9IaWZ3M2tzMXhoSVB4ZFhZbkNzaSsvSm8vYXZYdnhNWWRPVUlN?=
+ =?utf-8?B?QkE3QUh4VTh3MXlZanVvTkdwclFjeDZBQ0NlWndvS0tEazVWSmlrY25jY0lh?=
+ =?utf-8?B?a2NGK1pxK3QyeWl2OStLZXFSajN6MEZFTm8wcGRVTGt4dDVPMlQrdko4VEIy?=
+ =?utf-8?B?dm1uY2UxUHMvZU9EV2NtVFFtS1h2QnlsaHZNNjlqamlpckt0cEJZYlZkeC8r?=
+ =?utf-8?B?bWVBai9jMXJQaitscHRDUllNZjZiWldOSENESE5meUxabXFqNTViTUhWTkh5?=
+ =?utf-8?B?TkVRYVV3b2ZPNHp3M0kwWERkK0dOR3g3R3pJVEpMQzJTdzJVdm8yNHhDd3Zo?=
+ =?utf-8?B?cndmMkMzcC9iRGJhZE5sQW4yYThkeEN3VWhjM2YzamZCSk9ZLzFVdm9KNi83?=
+ =?utf-8?B?VFcwQWxhb3lkQzVBZVBWZGdyRVZWa2pzL1lYaG1xOEhEeW1qVjZKR2hpeGN4?=
+ =?utf-8?B?Z2l0U1NkOUhXVzJPZjVkVlpFQTRqTlRSb0dJQlc3cFllVUlYL012NUVKT3NK?=
+ =?utf-8?B?VTRkVjYyNHZERmJwS3E1OTZyY3ZyRXVHTzNtYU9BZmJya1pJcnZ6T3NuRkUv?=
+ =?utf-8?B?Unc3ekFhRTlNakFLZDBGNDZoQUdvTjdZVEp4aUdJb1NzbWJVbFUxblZ1MnRX?=
+ =?utf-8?B?RVVZWVBNblhsR3VCc2VqVS9aWGQzdTFUMTNKeEhySFV4bldPS2w1b1MwWEJC?=
+ =?utf-8?B?QU9wNFBwTjlyaVdMTzJ0d1c4TGp4YWRSc01DNEZaN2pMdHVsb1BUWDNjdmpO?=
+ =?utf-8?B?NXR6bHI1VTFEUVdtbkZ0MTZQN1dOWndwaWRuYUptajFmN016ZXFNeUhPdkNk?=
+ =?utf-8?B?UEhoNVVvUG13QTQyc20rSVdEMkt1c0JCS0RvbVVNOXVBbU5DU3hUaHBieER5?=
+ =?utf-8?B?eHBQM1h2dGFJTDYvYk1HanMyNytHYW5iQ2dvWE9oOEVLWG5pdHhpYThvV29v?=
+ =?utf-8?B?b2plSk5KRUFOcGUxQko2aG9JdkRDVENicHhNQmZETWNpMGNydFVLNjZLMTdk?=
+ =?utf-8?B?ZVUrM25VWWxhSHpJR3dzSXJjMXNKeStPL0dlYmZkREtFcVJMMUlKU3IxMU5u?=
+ =?utf-8?B?Z09YOU1oZFlBNXJrS0RIQjM1Sm9uQ2Z1ekNDWm0rQTJkczVTamg3K040Q1F5?=
+ =?utf-8?B?TlN0K1dBVjZVZ2pWdFU2K3Z3ZVRiTm00MTB1Nk16Nzd4a0IwbG8zd1VROE9r?=
+ =?utf-8?B?UkdjUEdFR1RTa0JtcU90ajFEaUVscE1GSkhYS0xzSXJ3aTV1d1o0eU9SVmpl?=
+ =?utf-8?B?bEhRWXE4NVNTOGt4UkwwZlN4d3dhK3ZoeFQxWFZvNklnU0x1aTE2OGsxRitZ?=
+ =?utf-8?B?d0N4YWZpVnpCTHNLdmxkYnZDSDB3PT0=?=
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <1C1F14C777CC954DA67D110FFAAED5FF@namprd11.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR11MB5192.namprd11.prod.outlook.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: bcb5e06a-e767-4e08-34b9-08daffabc2d8
+X-MS-Exchange-CrossTenant-originalarrivaltime: 26 Jan 2023 14:43:59.9161
+ (UTC)
+X-MS-Exchange-CrossTenant-fromentityheader: Hosted
+X-MS-Exchange-CrossTenant-id: 3f4057f3-b418-4d4e-ba84-d55b4e897d88
+X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
+X-MS-Exchange-CrossTenant-userprincipalname: ut6Y3j9AUwOlxOYESfkHljkmzrudbhayrOGQiROD0/1SAU5Rr7vwGvmOSlRfI9aHZCc716ezL2UNEJs+uSf7Bq+iOxwajpYwI6naN7Mc7WI=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR11MB8168
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Arnd Bergmann <arnd@arndb.de>
-
-All Atmel (now Microchip) machines boot using DT, so the
-old platform_data for this driver is no longer used by any
-boards.
-
-Removing the pdata probe lets us simplify the GPIO handling
-with the use of the descriptor API.
-
-Signed-off-by: Arnd Bergmann <arnd@arndb.de>
----
- drivers/mmc/host/atmel-mci.c | 179 +++++++++++++++--------------------
- include/linux/atmel-mci.h    |  46 ---------
- 2 files changed, 77 insertions(+), 148 deletions(-)
- delete mode 100644 include/linux/atmel-mci.h
-
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index bb9bbf1c927b..40006a960277 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -30,7 +30,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdio.h>
- 
--#include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-@@ -40,6 +39,30 @@
- #include <asm/io.h>
- #include <asm/unaligned.h>
- 
-+#define ATMCI_MAX_NR_SLOTS	2
-+
-+/**
-+ * struct mci_slot_pdata - board-specific per-slot configuration
-+ * @bus_width: Number of data lines wired up the slot
-+ * @wp_pin: GPIO pin wired to the write protect sensor
-+ * @detect_is_active_high: The state of the detect pin when it is active
-+ * @non_removable: The slot is not removable, only detect once
-+ *
-+ * If a given slot is not present on the board, @bus_width should be
-+ * set to 0. The other fields are ignored in this case.
-+ *
-+ * Any pins that aren't available should be set to a negative value.
-+ *
-+ * Note that support for multiple slots is experimental -- some cards
-+ * might get upset if we don't get the clock management exactly right.
-+ * But in most cases, it should work just fine.
-+ */
-+struct mci_slot_pdata {
-+	unsigned int		bus_width;
-+	bool			detect_is_active_high;
-+	bool			non_removable;
-+};
-+
- /*
-  * Superset of MCI IP registers integrated in Atmel AT91 Processor
-  * Registers and bitfields marked with [2] are only available in MCI2
-@@ -388,8 +411,8 @@ struct atmel_mci_slot {
- #define ATMCI_CARD_NEED_INIT	1
- #define ATMCI_SHUTDOWN		2
- 
--	int			detect_pin;
--	int			wp_pin;
-+	struct gpio_desc	*detect_pin;
-+	struct gpio_desc	*wp_pin;
- 	bool			detect_is_active_high;
- 
- 	struct timer_list	detect_timer;
-@@ -593,7 +616,6 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
- 			   &host->completed_events);
- }
- 
--#if defined(CONFIG_OF)
- static const struct of_device_id atmci_dt_ids[] = {
- 	{ .compatible = "atmel,hsmci" },
- 	{ /* sentinel */ }
-@@ -601,23 +623,13 @@ static const struct of_device_id atmci_dt_ids[] = {
- 
- MODULE_DEVICE_TABLE(of, atmci_dt_ids);
- 
--static struct mci_platform_data*
--atmci_of_init(struct platform_device *pdev)
-+static int
-+atmci_of_init(struct platform_device *pdev, struct mci_slot_pdata *pdata)
- {
- 	struct device_node *np = pdev->dev.of_node;
- 	struct device_node *cnp;
--	struct mci_platform_data *pdata;
- 	u32 slot_id;
- 
--	if (!np) {
--		dev_err(&pdev->dev, "device node not found\n");
--		return ERR_PTR(-EINVAL);
--	}
--
--	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
--	if (!pdata)
--		return ERR_PTR(-ENOMEM);
--
- 	for_each_child_of_node(np, cnp) {
- 		if (of_property_read_u32(cnp, "reg", &slot_id)) {
- 			dev_warn(&pdev->dev, "reg property is missing for %pOF\n",
-@@ -633,31 +645,18 @@ atmci_of_init(struct platform_device *pdev)
- 		}
- 
- 		if (of_property_read_u32(cnp, "bus-width",
--		                         &pdata->slot[slot_id].bus_width))
--			pdata->slot[slot_id].bus_width = 1;
--
--		pdata->slot[slot_id].detect_pin =
--			of_get_named_gpio(cnp, "cd-gpios", 0);
-+		                         &pdata[slot_id].bus_width))
-+			pdata[slot_id].bus_width = 1;
- 
--		pdata->slot[slot_id].detect_is_active_high =
-+		pdata[slot_id].detect_is_active_high =
- 			of_property_read_bool(cnp, "cd-inverted");
- 
--		pdata->slot[slot_id].non_removable =
-+		pdata[slot_id].non_removable =
- 			of_property_read_bool(cnp, "non-removable");
--
--		pdata->slot[slot_id].wp_pin =
--			of_get_named_gpio(cnp, "wp-gpios", 0);
- 	}
- 
--	return pdata;
--}
--#else /* CONFIG_OF */
--static inline struct mci_platform_data*
--atmci_of_init(struct platform_device *dev)
--{
--	return ERR_PTR(-EINVAL);
-+	return 0;
- }
--#endif
- 
- static inline unsigned int atmci_get_version(struct atmel_mci *host)
- {
-@@ -1509,8 +1508,8 @@ static int atmci_get_ro(struct mmc_host *mmc)
- 	int			read_only = -ENOSYS;
- 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
- 
--	if (gpio_is_valid(slot->wp_pin)) {
--		read_only = gpio_get_value(slot->wp_pin);
-+	if (slot->wp_pin) {
-+		read_only = gpiod_get_value(slot->wp_pin);
- 		dev_dbg(&mmc->class_dev, "card is %s\n",
- 				read_only ? "read-only" : "read-write");
- 	}
-@@ -1523,8 +1522,8 @@ static int atmci_get_cd(struct mmc_host *mmc)
- 	int			present = -ENOSYS;
- 	struct atmel_mci_slot	*slot = mmc_priv(mmc);
- 
--	if (gpio_is_valid(slot->detect_pin)) {
--		present = !(gpio_get_value(slot->detect_pin) ^
-+	if (slot->detect_pin) {
-+		present = !(gpiod_get_value(slot->detect_pin) ^
- 			    slot->detect_is_active_high);
- 		dev_dbg(&mmc->class_dev, "card is %spresent\n",
- 				present ? "" : "not ");
-@@ -1637,8 +1636,8 @@ static void atmci_detect_change(struct timer_list *t)
- 	if (test_bit(ATMCI_SHUTDOWN, &slot->flags))
- 		return;
- 
--	enable_irq(gpio_to_irq(slot->detect_pin));
--	present = !(gpio_get_value(slot->detect_pin) ^
-+	enable_irq(gpiod_to_irq(slot->detect_pin));
-+	present = !(gpiod_get_value(slot->detect_pin) ^
- 		    slot->detect_is_active_high);
- 	present_old = test_bit(ATMCI_CARD_PRESENT, &slot->flags);
- 
-@@ -2231,18 +2230,15 @@ static int atmci_init_slot(struct atmel_mci *host,
- 	slot = mmc_priv(mmc);
- 	slot->mmc = mmc;
- 	slot->host = host;
--	slot->detect_pin = slot_data->detect_pin;
--	slot->wp_pin = slot_data->wp_pin;
- 	slot->detect_is_active_high = slot_data->detect_is_active_high;
- 	slot->sdc_reg = sdc_reg;
- 	slot->sdio_irq = sdio_irq;
- 
- 	dev_dbg(&mmc->class_dev,
--	        "slot[%u]: bus_width=%u, detect_pin=%d, "
--		"detect_is_active_high=%s, wp_pin=%d\n",
--		id, slot_data->bus_width, slot_data->detect_pin,
--		slot_data->detect_is_active_high ? "true" : "false",
--		slot_data->wp_pin);
-+	        "slot[%u]: bus_width=%u, "
-+		"detect_is_active_high=%s\n",
-+		id, slot_data->bus_width,
-+		slot_data->detect_is_active_high ? "true" : "false");
- 
- 	mmc->ops = &atmci_ops;
- 	mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
-@@ -2278,30 +2274,29 @@ static int atmci_init_slot(struct atmel_mci *host,
- 
- 	/* Assume card is present initially */
- 	set_bit(ATMCI_CARD_PRESENT, &slot->flags);
--	if (gpio_is_valid(slot->detect_pin)) {
--		if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
--				      "mmc_detect")) {
--			dev_dbg(&mmc->class_dev, "no detect pin available\n");
--			slot->detect_pin = -EBUSY;
--		} else if (gpio_get_value(slot->detect_pin) ^
--				slot->detect_is_active_high) {
-+
-+	slot->detect_pin = devm_gpiod_get_optional(&host->pdev->dev, "cd", GPIOD_IN);
-+	if (!IS_ERR(slot->detect_pin)) {
-+		dev_dbg(&mmc->class_dev, "no detect pin available\n");
-+		slot->detect_pin = NULL;
-+	} else if (slot->detect_pin) {
-+		if (gpiod_get_value(slot->detect_pin) ^
-+		    slot->detect_is_active_high) {
- 			clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
- 		}
- 	}
- 
--	if (!gpio_is_valid(slot->detect_pin)) {
-+	if (!slot->detect_pin) {
- 		if (slot_data->non_removable)
- 			mmc->caps |= MMC_CAP_NONREMOVABLE;
- 		else
- 			mmc->caps |= MMC_CAP_NEEDS_POLL;
- 	}
- 
--	if (gpio_is_valid(slot->wp_pin)) {
--		if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
--				      "mmc_wp")) {
--			dev_dbg(&mmc->class_dev, "no WP pin available\n");
--			slot->wp_pin = -EBUSY;
--		}
-+	slot->wp_pin = devm_gpiod_get_optional(&host->pdev->dev, "wp", GPIOD_IN);
-+	if (IS_ERR(slot->wp_pin)) {
-+		dev_dbg(&mmc->class_dev, "no WP pin available\n");
-+		slot->wp_pin = NULL;
- 	}
- 
- 	host->slot[id] = slot;
-@@ -2312,18 +2307,18 @@ static int atmci_init_slot(struct atmel_mci *host,
- 		return ret;
- 	}
- 
--	if (gpio_is_valid(slot->detect_pin)) {
-+	if (slot->detect_pin) {
- 		timer_setup(&slot->detect_timer, atmci_detect_change, 0);
- 
--		ret = request_irq(gpio_to_irq(slot->detect_pin),
-+		ret = request_irq(gpiod_to_irq(slot->detect_pin),
- 				atmci_detect_interrupt,
- 				IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
- 				"mmc-detect", slot);
- 		if (ret) {
- 			dev_dbg(&mmc->class_dev,
- 				"could not request IRQ %d for detect pin\n",
--				gpio_to_irq(slot->detect_pin));
--			slot->detect_pin = -EBUSY;
-+				gpiod_to_irq(slot->detect_pin));
-+			slot->detect_pin = NULL;
- 		}
- 	}
- 
-@@ -2342,10 +2337,8 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
- 
- 	mmc_remove_host(slot->mmc);
- 
--	if (gpio_is_valid(slot->detect_pin)) {
--		int pin = slot->detect_pin;
--
--		free_irq(gpio_to_irq(pin), slot);
-+	if (slot->detect_pin) {
-+		free_irq(gpiod_to_irq(slot->detect_pin), slot);
- 		del_timer_sync(&slot->detect_timer);
- 	}
- 
-@@ -2357,22 +2350,6 @@ static int atmci_configure_dma(struct atmel_mci *host)
- {
- 	host->dma.chan = dma_request_chan(&host->pdev->dev, "rxtx");
- 
--	if (PTR_ERR(host->dma.chan) == -ENODEV) {
--		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
--		dma_cap_mask_t mask;
--
--		if (!pdata || !pdata->dma_filter)
--			return -ENODEV;
--
--		dma_cap_zero(mask);
--		dma_cap_set(DMA_SLAVE, mask);
--
--		host->dma.chan = dma_request_channel(mask, pdata->dma_filter,
--						     pdata->dma_slave);
--		if (!host->dma.chan)
--			host->dma.chan = ERR_PTR(-ENODEV);
--	}
--
- 	if (IS_ERR(host->dma.chan))
- 		return PTR_ERR(host->dma.chan);
- 
-@@ -2450,7 +2427,7 @@ static void atmci_get_cap(struct atmel_mci *host)
- 
- static int atmci_probe(struct platform_device *pdev)
- {
--	struct mci_platform_data	*pdata;
-+	struct mci_slot_pdata		pdata[ATMCI_MAX_NR_SLOTS];
- 	struct atmel_mci		*host;
- 	struct resource			*regs;
- 	unsigned int			nr_slots;
-@@ -2460,23 +2437,21 @@ static int atmci_probe(struct platform_device *pdev)
- 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
- 	if (!regs)
- 		return -ENXIO;
--	pdata = pdev->dev.platform_data;
--	if (!pdata) {
--		pdata = atmci_of_init(pdev);
--		if (IS_ERR(pdata)) {
--			dev_err(&pdev->dev, "platform data not available\n");
--			return PTR_ERR(pdata);
--		}
-+
-+	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
-+	if (!host)
-+		return -ENOMEM;
-+
-+	ret = atmci_of_init(pdev, pdata);
-+	if (ret) {
-+		dev_err(&pdev->dev, "error parsing DT\n");
-+		return ret;
- 	}
- 
- 	irq = platform_get_irq(pdev, 0);
- 	if (irq < 0)
- 		return irq;
- 
--	host = devm_kzalloc(&pdev->dev, sizeof(*host), GFP_KERNEL);
--	if (!host)
--		return -ENOMEM;
--
- 	host->pdev = pdev;
- 	spin_lock_init(&host->lock);
- 	INIT_LIST_HEAD(&host->queue);
-@@ -2540,16 +2515,16 @@ static int atmci_probe(struct platform_device *pdev)
- 	/* We need at least one slot to succeed */
- 	nr_slots = 0;
- 	ret = -ENODEV;
--	if (pdata->slot[0].bus_width) {
--		ret = atmci_init_slot(host, &pdata->slot[0],
-+	if (pdata[0].bus_width) {
-+		ret = atmci_init_slot(host, &pdata[0],
- 				0, ATMCI_SDCSEL_SLOT_A, ATMCI_SDIOIRQA);
- 		if (!ret) {
- 			nr_slots++;
- 			host->buf_size = host->slot[0]->mmc->max_req_size;
- 		}
- 	}
--	if (pdata->slot[1].bus_width) {
--		ret = atmci_init_slot(host, &pdata->slot[1],
-+	if (pdata[1].bus_width) {
-+		ret = atmci_init_slot(host, &pdata[1],
- 				1, ATMCI_SDCSEL_SLOT_B, ATMCI_SDIOIRQB);
- 		if (!ret) {
- 			nr_slots++;
-@@ -2671,7 +2646,7 @@ static struct platform_driver atmci_driver = {
- 	.driver		= {
- 		.name		= "atmel_mci",
- 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
--		.of_match_table	= of_match_ptr(atmci_dt_ids),
-+		.of_match_table	= atmci_dt_ids,
- 		.pm		= &atmci_dev_pm_ops,
- 	},
- };
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-deleted file mode 100644
-index 1491af38cc6e..000000000000
---- a/include/linux/atmel-mci.h
-+++ /dev/null
-@@ -1,46 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--#ifndef __LINUX_ATMEL_MCI_H
--#define __LINUX_ATMEL_MCI_H
--
--#include <linux/types.h>
--#include <linux/dmaengine.h>
--
--#define ATMCI_MAX_NR_SLOTS	2
--
--/**
-- * struct mci_slot_pdata - board-specific per-slot configuration
-- * @bus_width: Number of data lines wired up the slot
-- * @detect_pin: GPIO pin wired to the card detect switch
-- * @wp_pin: GPIO pin wired to the write protect sensor
-- * @detect_is_active_high: The state of the detect pin when it is active
-- * @non_removable: The slot is not removable, only detect once
-- *
-- * If a given slot is not present on the board, @bus_width should be
-- * set to 0. The other fields are ignored in this case.
-- *
-- * Any pins that aren't available should be set to a negative value.
-- *
-- * Note that support for multiple slots is experimental -- some cards
-- * might get upset if we don't get the clock management exactly right.
-- * But in most cases, it should work just fine.
-- */
--struct mci_slot_pdata {
--	unsigned int		bus_width;
--	int			detect_pin;
--	int			wp_pin;
--	bool			detect_is_active_high;
--	bool			non_removable;
--};
--
--/**
-- * struct mci_platform_data - board-specific MMC/SDcard configuration
-- * @dma_slave: DMA slave interface to use in data transfers.
-- * @slot: Per-slot configuration data.
-- */
--struct mci_platform_data {
--	void			*dma_slave;
--	dma_filter_fn		dma_filter;
--	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
--};
--
--#endif /* __LINUX_ATMEL_MCI_H */
--- 
-2.39.0
-
+T24gMzAvMTIvMjAyMiAyMDo0MywgVG9iaWFzIFNjaHJhbW0gd3JvdGU6DQo+IEVYVEVSTkFMIEVN
+QUlMOiBEbyBub3QgY2xpY2sgbGlua3Mgb3Igb3BlbiBhdHRhY2htZW50cyB1bmxlc3MgeW91IGtu
+b3cgdGhlIGNvbnRlbnQgaXMgc2FmZQ0KPiANCj4gVGhpcyBjb21taXQgZml4ZXMgYSByYWNlIGJl
+dHdlZW4gY29tcGxldGlvbiBvZiBzdG9wIGNvbW1hbmQgYW5kIHN0YXJ0IG9mIGENCj4gbmV3IGNv
+bW1hbmQuDQo+IFByZXZpb3VzbHkgdGhlIGNvbW1hbmQgcmVhZHkgaW50ZXJydXB0IHdhcyBlbmFi
+bGVkIGJlZm9yZSBzdG9wIGNvbW1hbmQNCj4gd2FzIHdyaXR0ZW4gdG8gdGhlIGNvbW1hbmQgcmVn
+aXN0ZXIuIFRoaXMgY2F1c2VkIHRoZSBjb21tYW5kIHJlYWR5DQo+IGludGVycnVwdCB0byBmaXJl
+IGltbWVkaWF0ZWx5IHNpbmNlIHRoZSBDTURSRFkgZmxhZyBpcyBhc3NlcnRlZCBjb25zdGFudGx5
+DQo+IHdoaWxlIHRoZXJlIGlzIG5vIGNvbW1hbmQgaW4gcHJvZ3Jlc3MuDQo+IENvbnNlcXVlbnRs
+eSB0aGUgY29tbWFuZCBzdGF0ZSBtYWNoaW5lIHdpbGwgaW1tZWRpYXRlbHkgYWR2YW5jZSB0byB0
+aGUNCj4gbmV4dCBzdGF0ZSB3aGVuIHRoZSB0YXNrbGV0IGZ1bmN0aW9uIGlzIGV4ZWN1dGVkIGFn
+YWluLCBubyBtYXR0ZXINCj4gYWN0dWFsIGNvbXBsZXRpb24gc3RhdGUgb2YgdGhlIHN0b3AgY29t
+bWFuZC4NCj4gVGh1cyBhIG5ldyBjb21tYW5kIGNhbiB0aGVuIGJlIGRpc3BhdGNoZWQgaW1tZWRp
+YXRlbHksIGludGVycnVwdGluZyBhbmQNCj4gY29ycnVwdGluZyB0aGUgc3RvcCBjb21tYW5kIG9u
+IHRoZSBDTUQgbGluZS4NCj4gRml4IHRoYXQgYnkgZHJvcHBpbmcgdGhlIGNvbW1hbmQgcmVhZHkg
+aW50ZXJydXB0IGVuYWJsZSBiZWZvcmUgY2FsbGluZw0KPiBhdG1jaV9zZW5kX3N0b3BfY21kLiBh
+dG1jaV9zZW5kX3N0b3BfY21kIGRvZXMgYWxyZWFkeSBlbmFibGUgdGhlDQo+IGNvbW1hbmQgcmVh
+ZHkgaW50ZXJydXB0LCBubyBmdXJ0aGVyIHdyaXRlcyB0byBBVE1DSV9JRVIgYXJlIG5lY2Vzc2Fy
+eS4NCj4gDQo+IFNpZ25lZC1vZmYtYnk6IFRvYmlhcyBTY2hyYW1tIDx0LnNjaHJhbW1AbWFuamFy
+by5vcmc+DQoNCkhpLA0KDQpJbiB0aGVvcnkgdGhpcyBjaGFuZ2VzIG1ha2Ugc2Vuc2UuIEknbSBh
+bHdheXMgYWZyYWlkIHdoZW4gc29tZXRoaW5nIGlzIA0KY2hhbmdlZCBpbiB0aGlzIGRyaXZlciB3
+aGljaCBoYW5kbGVzIG1hbnkgdmVyc2lvbiBvZiB0aGUgSVAuLi4NCg0KQXMgd2UgbmV2ZXIgZW5j
+b3VudGVyZWQgdGhpcyBpc3N1ZSB1bnRpbCBub3csIEkgY2FuJ3QgcmVhbGx5IHRlc3QgdGhpcyAN
+CmZpeC4gSSBjaGVja2VkIG9uIGFuIG9sZCBib2FyZCBhdDkxc2FtOW0xMGc0NS1layB0aGF0IG1t
+YyBpcyBzdGlsbCANCndvcmtpbmcgYW5kIGl0J3Mgb2theS4NCg0KU28NCkFja2VkLWJ5OiBMdWRv
+dmljIERlc3JvY2hlcyA8bHVkb3ZpYy5kZXNyb2NoZXNAbWljcm9jaGlwLmNvbT4NCg0KUmVnYXJk
+cywNCkx1ZG92aWMNCg0KPiAtLS0NCj4gICBkcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jIHwg
+MyAtLS0NCj4gICAxIGZpbGUgY2hhbmdlZCwgMyBkZWxldGlvbnMoLSkNCj4gDQo+IGRpZmYgLS1n
+aXQgYS9kcml2ZXJzL21tYy9ob3N0L2F0bWVsLW1jaS5jIGIvZHJpdmVycy9tbWMvaG9zdC9hdG1l
+bC1tY2kuYw0KPiBpbmRleCBiYjliYmYxYzkyN2IuLmRkMTg0NDBhOTBjNSAxMDA2NDQNCj4gLS0t
+IGEvZHJpdmVycy9tbWMvaG9zdC9hdG1lbC1tY2kuYw0KPiArKysgYi9kcml2ZXJzL21tYy9ob3N0
+L2F0bWVsLW1jaS5jDQo+IEBAIC0xODE3LDcgKzE4MTcsNiBAQCBzdGF0aWMgdm9pZCBhdG1jaV90
+YXNrbGV0X2Z1bmMoc3RydWN0IHRhc2tsZXRfc3RydWN0ICp0KQ0KPiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICBhdG1jaV93cml0ZWwoaG9zdCwgQVRNQ0lfSUVSLCBBVE1DSV9OT1RC
+VVNZKTsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RhdGUgPSBTVEFURV9X
+QUlUSU5HX05PVEJVU1k7DQo+ICAgICAgICAgICAgICAgICAgICAgICAgICB9IGVsc2UgaWYgKGhv
+c3QtPm1ycS0+c3RvcCkgew0KPiAtICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGF0bWNp
+X3dyaXRlbChob3N0LCBBVE1DSV9JRVIsIEFUTUNJX0NNRFJEWSk7DQo+ICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgIGF0bWNpX3NlbmRfc3RvcF9jbWQoaG9zdCwgZGF0YSk7DQo+ICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN0YXRlID0gU1RBVEVfU0VORElOR19TVE9Q
+Ow0KPiAgICAgICAgICAgICAgICAgICAgICAgICAgfSBlbHNlIHsNCj4gQEAgLTE4NTAsOCArMTg0
+OSw2IEBAIHN0YXRpYyB2b2lkIGF0bWNpX3Rhc2tsZXRfZnVuYyhzdHJ1Y3QgdGFza2xldF9zdHJ1
+Y3QgKnQpDQo+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAqIGNvbW1hbmQgdG8g
+c2VuZC4NCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICovDQo+ICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIGlmIChob3N0LT5tcnEtPnN0b3ApIHsNCj4gLSAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGF0bWNpX3dyaXRlbChob3N0LCBBVE1D
+SV9JRVIsDQo+IC0gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgQVRNQ0lfQ01EUkRZKTsNCj4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICBhdG1jaV9zZW5kX3N0b3BfY21kKGhvc3QsIGRhdGEpOw0KPiAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN0YXRlID0gU1RBVEVfU0VORElOR19TVE9QOw0K
+PiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9IGVsc2Ugew0KPiAtLQ0KPiAyLjMw
+LjINCj4gDQoNCg==
