@@ -2,239 +2,320 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF63EC54E94
-	for <linux-mmc@archiver.kernel.org>; Wed, 25 Jan 2023 23:51:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AFCCC61D97
+	for <linux-mmc@archiver.kernel.org>; Thu, 26 Jan 2023 03:00:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236206AbjAYXvv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 25 Jan 2023 18:51:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49620 "EHLO
+        id S229844AbjAZDAz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 25 Jan 2023 22:00:55 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40612 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230193AbjAYXvt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 18:51:49 -0500
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B4915E504
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 15:51:48 -0800 (PST)
-Received: by mail-ej1-x632.google.com with SMTP id az20so995476ejc.1
-        for <linux-mmc@vger.kernel.org>; Wed, 25 Jan 2023 15:51:48 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=U9XT09mLl+WL75rONS6rQhpQoBUs7qqRw2NNTRg0O6k=;
-        b=pv4WXCr+6wBryHfT+d4az9VDABrkTkr/Mt8wTrLz4zzuPgYQeBtq8MC+0DKEHWxG2K
-         RXkUqhmbEuKLlBVVabiHUShGoLJb43VfnA/cW7KD+5kqJi3CqFyhVgVajS/qQ793gbQr
-         fUghME+AK6AUVisJ0L4YwOtfzOMKU5yGby8OYkE34zuIdDrlZBR0Tvl2sLQ1HeFd3iMQ
-         7a3ypqF6hBes157/Rlv766hpRo5jaX1wA1WgfMC+RQH3uFlusktqN5X9Bvke9/2VGuHR
-         YRKEYqwIHEuGN64JjP3tYMKpOzgiEaRS0KZIjQk8zy84aQgNW31DAsZJW4K9+q+7CkmF
-         SKEg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=U9XT09mLl+WL75rONS6rQhpQoBUs7qqRw2NNTRg0O6k=;
-        b=Si0dLVN9CVJL778IntBsldMga5rITSVFnVyEjJcRXgVZAylxUs8u49eVC2e/Jdl7yU
-         uTbw5YaYespFIG6ePs6/pqq3hp8mzZ6RD7abTZRi/797+ImalyXsWSiJSkKpMsutSM02
-         QiqSjxVcy0O1Q7dFvVo33Ap7tBvGW4eNEokzYdV+g9JWQiwoYl+lW7fgbin3GHdt5PL4
-         6BYZgOHWmHyBHY0ER4aVyftfmGXdnScHkMfiu0UqxW6V6DtPEsclD9hxBVjt6D2oBqLF
-         h8NDJIxqOVXwG/IapsmUL70luyCdLrbw2h9cEAHW/UD3H/pA4u6WOiF11gVl7z0rApZD
-         pqbQ==
-X-Gm-Message-State: AFqh2kqtuik2q6Lqrf7qTE84DuHR8aTckMiDxQc8GDDrfOFvKdxFJm3v
-        8zK2JoJIUcTveLDrJC26NVnmrw==
-X-Google-Smtp-Source: AMrXdXtG7YeI2EgukM4aRVXZxZXYOEg+kNxLpQpBhdz1+oh0SF8iTmG7EotpsVLaqqWRhbrzJ8YTpw==
-X-Received: by 2002:a17:906:4755:b0:877:6845:adda with SMTP id j21-20020a170906475500b008776845addamr29737120ejs.50.1674690707160;
-        Wed, 25 Jan 2023 15:51:47 -0800 (PST)
-Received: from [192.168.1.101] (abyk108.neoplus.adsl.tpnet.pl. [83.9.30.108])
-        by smtp.gmail.com with ESMTPSA id x27-20020a1709060a5b00b0084debc351b3sm3035266ejf.20.2023.01.25.15.51.44
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 25 Jan 2023 15:51:46 -0800 (PST)
-Message-ID: <bd788bbd-bc62-4a16-994e-f7b527f58fe5@linaro.org>
-Date:   Thu, 26 Jan 2023 00:51:43 +0100
+        with ESMTP id S229481AbjAZDAy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 25 Jan 2023 22:00:54 -0500
+Received: from NAM04-BN8-obe.outbound.protection.outlook.com (mail-bn8nam04on2047.outbound.protection.outlook.com [40.107.100.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77F0C5B59D;
+        Wed, 25 Jan 2023 19:00:53 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=KLn9G3Lfr00VOyiXEfc5brWX6LQoak7FARm6ajUebUUGFYY/8INIfHpdaUjA+pwJy7+APNywkBf83v9L+stEU0WfC/cR6ORjdp9hTwfPLN1/CxpfcpV/kJbNvoRwbTnDvaEuBGWPwifwd0gax9n6VPxDe/Zm15hYL3WFX3d42h/NKdYoZZIlh6/ukJOplsDbfAUlSXFB78nses0Vko4i6DcG1vfupul34mWpQ56PRzST9TSpa6NNe6hrvG/w1/toZXeOWHe2bK0EZ3LjUPglAbygHNtnXmG2TXYLFGTzLyLel4/zY66Vq18jtQU8uKHVhXnEMhtMZ25bRpGqX2y/zQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=zaN9alzCpC5KbZIB+l0mH91WgDwkYu5YErkjsxncQQE=;
+ b=bKG87emfILL/2W+l1jib3FwH1qza2U7ZDKde5DVraL88vzMZHZ7R3s52hjfqxt6kk2QUBetDoZXdaEcwzdfxIt1gT4VwsDaTzuG4QhIsvSxVPWlcPLDB1nq7qCYoh3tMMS3To5ntDPKBKvZhJ7KqBhRWBG/ABXOHjCqys68xFAlztTn5KERPrPoQpjTbayNbzF5lM5sudvO7y+LCDDMtzoEKujV4FEttznHxEbC756bKzYxU+/n8kSPpTiQiGLoEkxV0KLZCv3aLPWDLZyq0f/lWyHbVxHoqZHUvl1lBarTybSqCuzsD42zWPWWlDosrhEP+XtmYyoSxp7l2YL0TtA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=zaN9alzCpC5KbZIB+l0mH91WgDwkYu5YErkjsxncQQE=;
+ b=cTj0EagCt5L3X6v66jFdWzvrUCti0GmGzoMxWBCRoFVRzHHbSfRlxHXaMshqEmqvYxPo4BSpjFO0La3/GOo/eixs8GvWx/wcxbKzAkRJv7IXTB6L8XrdLIm7DLETrlTX31cs1RXDM95HVKKRS1YklbrNkycTlumFj6vuSdCXXT0=
+Received: from DS7PR03CA0343.namprd03.prod.outlook.com (2603:10b6:8:55::17) by
+ DS0PR12MB7629.namprd12.prod.outlook.com (2603:10b6:8:13e::13) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6043.22; Thu, 26 Jan 2023 03:00:50 +0000
+Received: from DM6NAM11FT100.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:8:55:cafe::b2) by DS7PR03CA0343.outlook.office365.com
+ (2603:10b6:8:55::17) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6043.20 via Frontend
+ Transport; Thu, 26 Jan 2023 03:00:50 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ DM6NAM11FT100.mail.protection.outlook.com (10.13.172.247) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6002.13 via Frontend Transport; Thu, 26 Jan 2023 03:00:50 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Wed, 25 Jan 2023 21:00:46 -0600
+From:   Brad Larson <blarson@amd.com>
+To:     <krzysztof.kozlowski@linaro.org>
+CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
+        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
+        <brad@pensando.io>, <brendan.higgins@linux.dev>,
+        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
+        <broonie@kernel.org>, <catalin.marinas@arm.com>,
+        <davidgow@google.com>, <devicetree@vger.kernel.org>,
+        <fancer.lancer@gmail.com>, <gerg@linux-m68k.org>,
+        <gsomlo@gmail.com>, <krzk@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
+        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
+        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
+        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
+        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <will@kernel.org>,
+        <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v9 06/15] dt-bindings: mfd: amd,pensando-elbasr: Add AMD Pensando System Resource chip
+Date:   Wed, 25 Jan 2023 18:59:56 -0800
+Message-ID: <20230126025956.33859-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <a3c4feaf-c98d-5507-11f1-3dd1129f7360@linaro.org>
+References: <a3c4feaf-c98d-5507-11f1-3dd1129f7360@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.0
-Subject: Re: [PATCH V1 4/8] pinctrl: qcom: Add IPQ9574 pinctrl driver
-Content-Language: en-US
-To:     devi priya <quic_devipriy@quicinc.com>, agross@kernel.org,
-        andersson@kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
-        sboyd@kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org,
-        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
-        shawnguo@kernel.org, arnd@arndb.de, marcel.ziswiler@toradex.com,
-        dmitry.baryshkov@linaro.org, nfraprado@collabora.com,
-        broonie@kernel.org, tdas@codeaurora.org, bhupesh.sharma@linaro.org,
-        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-clk@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Cc:     quic_srichara@quicinc.com, quic_gokulsri@quicinc.com,
-        quic_sjaganat@quicinc.com, quic_kathirav@quicinc.com,
-        quic_arajkuma@quicinc.com, quic_anusha@quicinc.com,
-        quic_poovendh@quicinc.com
-References: <20230124141541.8290-1-quic_devipriy@quicinc.com>
- <20230124141541.8290-5-quic_devipriy@quicinc.com>
-From:   Konrad Dybcio <konrad.dybcio@linaro.org>
-In-Reply-To: <20230124141541.8290-5-quic_devipriy@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DM6NAM11FT100:EE_|DS0PR12MB7629:EE_
+X-MS-Office365-Filtering-Correlation-Id: 322de92f-8546-49ef-21b7-08daff4987ef
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: OtsOyJH3itGJHaVWnFql/OVIvXIYxTgGZP6sDxcNFgHGilyE7E6WhlBuFMMmOL6nrU+sNKdjk9kUaxBAr4plbZTCg1rrl172SB/+s88uebRLAVmSZkxV8PEYsEE8XNx9Kpq9iIXqTkkY5O2yCA/b5C62mNNqG1XuEWyld+i/AkZYxSXXYCT7hL+xK8qeDEptio2eFCe7LLi3Srw7Cg+5xlUVgzEpOK0MZRtd3vSE2cAUnfIYIjemElOFzxthnXWZwNxJnHXnLchPnB2zcFhWJpkKV5miEbs3bb5LsxGKgNHsh3Pa6W+OMieOrGSFCWr6yyALNaiEy+xpzdCPvi/gOc3DP80hdr8gP8T2L0D4VpX3BX8khTxete4BX1FxbqZrYMXvsi82jKNYEnMOwbg8aNocUS1rjeaZVvRxVCNpPJ4HKPxZznCh2rjkcXim7KgRVt+92cYVgXQH8FM2qnS1j7diQbMFN/a/B3z6hXBUhm+c5UgRgfDbaKCp/QtYhbOXXmdaACkE2jTS0nlwtafU9pIh6fZki6f+xvBBejjLlP59YpAfaDYNG9t5Oq7q0hlkMMaYGqLWzV+89lVJJRHJFw3P8TmRP5eVXpv1VKW0c9EUwyFBEIB3gCh+VZpAGI3nSoyOMvVGUYAuVLjyZIU0xjBxC+8G92NxIF26y9t96ggv7jsS3mYa/8qD2YcmIbAcDpHCKGqiwT/KK8fcty9VsehG2idyqtqGTBjyi/9l/RV9WNrJZQlQf1Auf0iPvg01rIYOCR6ghBZ2WNBFmu8luuYrCLNQjX6fIz67GPDnFyc=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(346002)(376002)(136003)(39860400002)(396003)(451199018)(40470700004)(46966006)(36840700001)(54906003)(316002)(41300700001)(81166007)(356005)(8676002)(70206006)(6916009)(4326008)(70586007)(40460700003)(7416002)(5660300002)(7406005)(8936002)(36756003)(40480700001)(2906002)(36860700001)(82740400003)(1076003)(6666004)(26005)(186003)(16526019)(966005)(478600001)(426003)(83380400001)(47076005)(336012)(82310400005)(2616005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 26 Jan 2023 03:00:50.3856
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 322de92f-8546-49ef-21b7-08daff4987ef
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT100.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS0PR12MB7629
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+>> diff --git a/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
+>> new file mode 100644
+>> index 000000000000..8504652f6e19
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
+>> @@ -0,0 +1,68 @@
+>> +# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
+>> +%YAML 1.2
+>> +---
+>> +$id: http://devicetree.org/schemas/spi/amd,pensando-sr.yaml#
+>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>> +
+>> +title: AMD Pensando SoC Resource Controller
+>> +
+>> +description: |
+>> +  AMD Pensando SoC Resource Controller is a set of
+>> +  control/status registers accessed on four chip-selects.
+>> +  This device is present in all Pensando SoC based designs.
+>> +
+>> +maintainers:
+>> +  - Brad Larson <blarson@amd.com>
+>> +
+>> +properties:
+>> +  compatible:
+>> +    contains:
+>
+> That's not correct syntax. Please start from existing schema or
+> example-schema. Drop contains.
 
+Fixed, see update below.
 
-On 24.01.2023 15:15, devi priya wrote:
-> Add pinctrl definitions for the TLMM of IPQ9574
-> 
-> Co-developed-by: Anusha Rao <quic_anusha@quicinc.com>
-> Signed-off-by: Anusha Rao <quic_anusha@quicinc.com>
-> Signed-off-by: devi priya <quic_devipriy@quicinc.com>
-> ---
-[...]
+>> +      enum:
+>> +        - amd,pensando-sr
+>> +
+>> +  reg:
+>> +    minItems: 1
+>
+> maxItems. Which example or existing schema pointed you to use minItems?
 
-> +enum ipq9574_functions {
-> +	msm_mux_atest_char,
-> +	msm_mux_atest_char0,
-> +	msm_mux_atest_char1,
-> +	msm_mux_atest_char2,
-> +	msm_mux_atest_char3,
-> +	msm_mux_audio_pdm0,
-> +	msm_mux_audio_pdm1,
-> +	msm_mux_audio_pri,
-> +	msm_mux_audio_sec,
-> +	msm_mux_blsp0_spi,
-> +	msm_mux_blsp0_uart,
-> +	msm_mux_blsp1_i2c,
-> +	msm_mux_blsp1_spi,
-> +	msm_mux_blsp1_uart,
-> +	msm_mux_blsp2_i2c,
-> +	msm_mux_blsp2_spi,
-> +	msm_mux_blsp2_uart,
-> +	msm_mux_blsp3_i2c,
-> +	msm_mux_blsp3_spi,
-> +	msm_mux_blsp3_uart,
-> +	msm_mux_blsp4_i2c,
-> +	msm_mux_blsp4_spi,
-> +	msm_mux_blsp4_uart,
-> +	msm_mux_blsp5_i2c,
-> +	msm_mux_blsp5_uart,
-> +	msm_mux_cri_trng0,
-> +	msm_mux_cri_trng1,
-> +	msm_mux_cri_trng2,
-> +	msm_mux_cri_trng3,
-> +	msm_mux_cxc0,
-> +	msm_mux_cxc1,
-> +	msm_mux_dbg_out,
-> +	msm_mux_dwc_ddrphy,
-> +	msm_mux_gcc_plltest,
-> +	msm_mux_gcc_tlmm,
-> +	msm_mux_gpio,
+Should have been maxItems.  cs below is dropped and reg is used
+as discussed for the chip selects but throws a too long error, see below.
 
-> +	msm_mux_mac00,
-> +	msm_mux_mac01,
-> +	msm_mux_mac10,
-> +	msm_mux_mac11,
-msm_mux_mac?
+>> +
+>> +  cs:
+>> +    minItems: 1
+>> +    maxItems: 4
+>> +    description:
+>> +      Device chip select
+>
+> Drop entire property. Isn't reg for this on SPI bus?
 
-> +	msm_mux_mdc,
-> +	msm_mux_mdio,
-> +	msm_mux_pcie0_clk,
-> +	msm_mux_pcie0_wake,
-> +	msm_mux_pcie1_clk,
-> +	msm_mux_pcie1_wake,
-> +	msm_mux_pcie2_clk,
-> +	msm_mux_pcie2_wake,
-> +	msm_mux_pcie3_clk,
-> +	msm_mux_pcie3_wake,
-> +	msm_mux_prng_rosc0,
-> +	msm_mux_prng_rosc1,
-> +	msm_mux_prng_rosc2,
-> +	msm_mux_prng_rosc3,
+Dropped and using reg, results in too long error for schema snps,dw-apb-ssi.yaml
 
-> +	msm_mux_pta1_0,
-> +	msm_mux_pta1_1,
-> +	msm_mux_pta1_2,
-> +	msm_mux_pta20,
-> +	msm_mux_pta21,
-msm_mux_pta?
+>> +
+>> +  '#reset-cells':
+>> +    const: 1
+>> +
+>> +  interrupts:
+>> +    maxItems: 1
+>> +
+>> +  spi-max-frequency: true
+>
+>Drop. Missing reference to spi-peripheral-props.
 
-> +	msm_mux_pwm00,
-> +	msm_mux_pwm01,
-> +	msm_mux_pwm02,
-> +	msm_mux_pwm03,
-> +	msm_mux_pwm04,
-> +	msm_mux_pwm10,
-> +	msm_mux_pwm11,
-> +	msm_mux_pwm12,
-> +	msm_mux_pwm13,
-> +	msm_mux_pwm14,
-> +	msm_mux_pwm20,
-> +	msm_mux_pwm21,
-> +	msm_mux_pwm22,
-> +	msm_mux_pwm23,
-> +	msm_mux_pwm24,
-> +	msm_mux_pwm30,
-> +	msm_mux_pwm31,
-> +	msm_mux_pwm32,
-> +	msm_mux_pwm33,
-msm_mux_pwm?
+Removed and added spi-peripheral-props
 
-[...]
+>> +
+>> +required:
+>> +  - compatible
+>> +  - cs
+>> +  - spi-max-frequency
+>> +  - '#reset-cells'
+>> +
+>> +unevaluatedProperties: false
+>
+> This does not make sense on its own. It works with additional ref. When
+> you add ref to spi props, it will be fine. But without it you should use
+> additionalProperties: false.
 
-> +
-> +static const int ipq9574_reserved_gpios[] = {
-> +	59, -1
-> +};
-We know it's necessary and it's good that you take care
-of it, but it would be even nicer if you left a comment
-explaining why the rx0/pwm23/qdss_tracedata_a gpio can
-not be accessed and what it's used for.
+The updated binding
 
-Konrad 
-> +
-> +static const struct msm_pinctrl_soc_data ipq9574_pinctrl = {
-> +	.pins = ipq9574_pins,
-> +	.npins = ARRAY_SIZE(ipq9574_pins),
-> +	.functions = ipq9574_functions,
-> +	.nfunctions = ARRAY_SIZE(ipq9574_functions),
-> +	.groups = ipq9574_groups,
-> +	.ngroups = ARRAY_SIZE(ipq9574_groups),
-> +	.reserved_gpios = ipq9574_reserved_gpios,
-> +	.ngpios = 65,
-> +};
-> +
-> +static int ipq9574_pinctrl_probe(struct platform_device *pdev)
-> +{
-> +	return msm_pinctrl_probe(pdev, &ipq9574_pinctrl);
-> +}
-> +
-> +static const struct of_device_id ipq9574_pinctrl_of_match[] = {
-> +	{ .compatible = "qcom,ipq9574-tlmm", },
-> +	{ },
-> +};
-> +
-> +static struct platform_driver ipq9574_pinctrl_driver = {
-> +	.driver = {
-> +		.name = "ipq9574-tlmm",
-> +		.of_match_table = ipq9574_pinctrl_of_match,
-> +	},
-> +	.probe = ipq9574_pinctrl_probe,
-> +	.remove = msm_pinctrl_remove,
-> +};
-> +
-> +static int __init ipq9574_pinctrl_init(void)
-> +{
-> +	return platform_driver_register(&ipq9574_pinctrl_driver);
-> +}
-> +arch_initcall(ipq9574_pinctrl_init);
-> +
-> +static void __exit ipq9574_pinctrl_exit(void)
-> +{
-> +	platform_driver_unregister(&ipq9574_pinctrl_driver);
-> +}
-> +module_exit(ipq9574_pinctrl_exit);
-> +
-> +MODULE_DESCRIPTION("QTI IPQ9574 TLMM driver");
-> +MODULE_LICENSE("GPL");
-> +MODULE_DEVICE_TABLE(of, ipq9574_pinctrl_of_match);
+--- /dev/null
++++ b/Documentation/devicetree/bindings/spi/amd,pensando-sr.yaml
+@@ -0,0 +1,68 @@
++# SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/spi/amd,pensando-sr.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: AMD Pensando SoC Resource Controller
++
++description: |
++  AMD Pensando SoC Resource Controller is a set of control/status
++  registers accessed on four chip-selects.  This device is present
++  in all Pensando SoC based designs.
++
++  CS0 is a set of miscellaneous control/status registers to
++  include reset control.  CS1/CS2 are for I2C peripherals.
++  CS3 is to access resource controller internal storage.
++
++maintainers:
++  - Brad Larson <blarson@amd.com>
++
++properties:
++  compatible:
++    const: amd,pensando-sr
++
++  reg:
++    maxItems: 4
++    minimum: 0
++    maximum: 3
++    description:
++      Device chip select number
++
++  '#reset-cells':
++    const: 1
++
++  interrupts:
++    maxItems: 1
++
++required:
++  - compatible
++  - reg
++  - spi-max-frequency
++  - '#reset-cells'
++
++allOf:
++  - $ref: /schemas/spi/spi-peripheral-props.yaml#
++
++unevaluatedProperties: false
++
++examples:
++  - |
++    #include <dt-bindings/interrupt-controller/arm-gic.h>
++
++    spi {
++        #address-cells = <1>;
++        #size-cells = <0>;
++        num-cs = <4>;
++
++        system-controller@0 {
++            compatible = "amd,pensando-sr";
++            reg = <0 1 2 3>;
++            spi-max-frequency = <12000000>;
++            interrupt-parent = <&porta>;
++            interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
++            #reset-cells = <1>;
++        };
++    };
++
++...
+
+any guidance on fixing the following?
+
+$ make ARCH=arm64 dtbs_check DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+  LINT    Documentation/devicetree/bindings
+  CHKDT   Documentation/devicetree/bindings/processed-schema.json
+  SCHEMA  Documentation/devicetree/bindings/processed-schema.json
+  DTC_CHK arch/arm64/boot/dts/amd/elba-asic.dtb
+/home/brad/linux.v10/arch/arm64/boot/dts/amd/elba-asic.dtb: spi@2800: system-controller@0:reg: [[0], [1], [2], [3]] is too long
+	From schema: /home/brad/linux.v10/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+
+where the pieces are
+
+arch/arm64/boot/dts/amd/elba.dtsi
+
+                spi0: spi@2800 {
+                        compatible = "amd,pensando-elba-spi";
+                        reg = <0x0 0x2800 0x0 0x100>;
+                        #address-cells = <1>;
+                        #size-cells = <0>;
+                        amd,pensando-elba-syscon = <&syscon>;
+                        clocks = <&ahb_clk>;
+                        interrupts = <GIC_SPI 9 IRQ_TYPE_LEVEL_HIGH>;
+                        num-cs = <2>;
+                        status = "disabled";
+                };
+
+                syscon: syscon@307c0000 {
+                        compatible = "amd,pensando-elba-syscon", "syscon";
+                        reg = <0x0 0x307c0000 0x0 0x3000>;
+                };
+
+arch/arm64/boot/dts/amd/elba-asic-common.dtsi
+
+&spi0 {
+        #address-cells = <1>;
+        #size-cells = <0>;
+        num-cs = <4>;
+        cs-gpios = <0>, <0>, <&porta 1 GPIO_ACTIVE_LOW>,
+                   <&porta 7 GPIO_ACTIVE_LOW>;
+        status = "okay";
+
+        rstc: system-controller@0 {
+                compatible = "amd,pensando-sr";
+                reg = <0 1 2 3>;
+                spi-max-frequency = <12000000>;
+                interrupt-parent = <&porta>;
+                interrupts = <0 IRQ_TYPE_LEVEL_LOW>;
+                #reset-cells = <1>;
+        };
+};
+
+Also should the driver for this SPI device used for every Pensando SoC 
+be in drivers/misc, drivers/spi?  Didn't make sense to leave it in 
+drivers/mfd once the resets was squashed in the parent and only one n
+ode with reg setting which chip selects result in creation of /dev/pensr0.<cs>.  
+
+Regards,
+Brad
+
