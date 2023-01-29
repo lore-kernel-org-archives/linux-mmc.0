@@ -2,102 +2,134 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B7828C05027
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Jan 2023 23:10:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 889A8C54EED
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Jan 2023 23:51:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234441AbjA2XK6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 29 Jan 2023 18:10:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50250 "EHLO
+        id S229694AbjA2Xvk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 29 Jan 2023 18:51:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229476AbjA2XK5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Jan 2023 18:10:57 -0500
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E0931ABE3
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Jan 2023 15:10:56 -0800 (PST)
-Received: by mail-ej1-x62c.google.com with SMTP id qw12so11330817ejc.2
-        for <linux-mmc@vger.kernel.org>; Sun, 29 Jan 2023 15:10:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:references:cc:to:from
-         :content-language:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=nc/LaO0TaIYFb0bbamxZIEYNdnsiW48p7UWNVXC+zYY=;
-        b=H6lC9QtAtM6NuyszabX9xTiNmX1mOx2cfyBo11WaQncIQSIILTgLC6BLixqqpoTd9w
-         eZoZSxCVjRABpUkoRBHEwDzop2G7BgtfeJqDWZIBzvHjwkYppOT0qXoMuFJfAJPH1l+2
-         zZhxKKxQvDNDR+ULqsL2HM6WpJ+pwFjoKE+OcE8LOBq29RCsa/FDNlaWGxXRqI07kCHZ
-         jOAoEJ+I4V00d5JsC1mDQJLv7KgQsYUf0QhEfdJ6J9CLh0z0vR79poNMSbJrHWKyhUMV
-         +w0mLAFHLykICnM8RC/AB+qnkxmzY2n8K6+dUcGmehRlrNPK3aHr1QIVyxH9afzJSX/a
-         KgXQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:references:cc:to:from
-         :content-language:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=nc/LaO0TaIYFb0bbamxZIEYNdnsiW48p7UWNVXC+zYY=;
-        b=j60edOMPu2Ha4xAaP4BKkU4pPkQ1pkT9tt0c3WdgYbL5HGue9TYc0glWRYZTUVRAdQ
-         IBZA4Uztb84svB/hudwZ06fOz+GxcapPy4iV6ix/WMxypXobIKyPraPqIJVORipM8Gqi
-         P/M83m/tw5ghQlnj1IZy3zcNE84GKIADQtrSR8eTUsYIBuvwVWkQmt8gZtdTNiewOokf
-         Fb8BKD8C42Z0EkAZS9GxWIsWCZBYGvlahJWRmjQfX5wVpFpzNNU/sKECwAt7jqPedcg1
-         EzywgeSH+F9OwvFEDk4hwInpq+UU+rGAzzmNPevU9F9Bd5RmdbMuN0WxqSk6zkkSR3PR
-         c2rA==
-X-Gm-Message-State: AO0yUKUGChqPDrfdhjyV2xfd/02B7mIdIt/IFTXuvXujO+76KrUJcP6h
-        XK4/+AENvXoBwRmfav2kZO4=
-X-Google-Smtp-Source: AK7set/dD8yIV885soDzwkEGuHnNYc6wpe4EDujJMlUDDgHZCDw7ENrImpWS1ZpTbqOJm1eMQhlsdw==
-X-Received: by 2002:a17:907:9054:b0:878:6519:c740 with SMTP id az20-20020a170907905400b008786519c740mr6282212ejc.44.1675033854602;
-        Sun, 29 Jan 2023 15:10:54 -0800 (PST)
-Received: from ?IPV6:2a01:c23:c5b5:3100:78bb:34b6:bd6e:6fb4? (dynamic-2a01-0c23-c5b5-3100-78bb-34b6-bd6e-6fb4.c23.pool.telefonica.de. [2a01:c23:c5b5:3100:78bb:34b6:bd6e:6fb4])
-        by smtp.googlemail.com with ESMTPSA id c19-20020a50d653000000b004a0b0cd2e45sm5941749edj.75.2023.01.29.15.10.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 29 Jan 2023 15:10:54 -0800 (PST)
-Message-ID: <9e08411b-20cb-874f-8915-6f8dc32e9fcf@gmail.com>
-Date:   Mon, 30 Jan 2023 00:10:40 +0100
+        with ESMTP id S229476AbjA2Xvj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Jan 2023 18:51:39 -0500
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3BD7FFF32;
+        Sun, 29 Jan 2023 15:51:38 -0800 (PST)
+Received: from mercury (unknown [185.209.196.162])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: sre)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 64034660086E;
+        Sun, 29 Jan 2023 23:51:36 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1675036296;
+        bh=IIIAwVilRWbK/VxJ9R07BpYKGovKnA/g9pkFp6lqOE0=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=BqkFNT0Zs/lQ4ZAdZec7R7noK9RCNBkqilV/t1bQhOMZbIlDsCTR8QIJkJbNxvyOU
+         VbE7ue6VTg0M3DdOWcJ6aGjsAcjTr2+ZxqzGv8a4wgAiwvMHBZJQ6DDXAkuexFJSWl
+         X/R91K3+3QzQ9ulj8z1XnphRoMblYCn+zpF9EVSp+xN1/FLHdO8Hkm6XRWqdErQRuJ
+         XeOTeXAI9WSIaEqngDpgSjhUg3RwspINiAkv6i7zlzWrTopqAX91YHvKTxV3bw79iu
+         MRFOyiLlAzyqG/4UwvkFeNkVVuel8NH5rRpODeuULeaiH/bQDGOlXtMZ5C14IPTwFL
+         k7BwaWsFHnZdQ==
+Received: by mercury (Postfix, from userid 1000)
+        id 44F4B1060A24; Mon, 30 Jan 2023 00:51:34 +0100 (CET)
+Date:   Mon, 30 Jan 2023 00:51:34 +0100
+From:   Sebastian Reichel <sebastian.reichel@collabora.com>
+To:     Rob Herring <robh@kernel.org>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        David Airlie <airlied@gmail.com>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Bartosz Golaszewski <brgl@bgdev.pl>,
+        Jean Delvare <jdelvare@suse.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Marc Zyngier <maz@kernel.org>,
+        Jassi Brar <jassisinghbrar@gmail.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Lee Jones <lee@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Richard Weinberger <richard@nod.at>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        Mark Brown <broonie@kernel.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        linux-arm-kernel@lists.infradead.org,
+        dri-devel@lists.freedesktop.org, linux-gpio@vger.kernel.org,
+        linux-hwmon@vger.kernel.org, linux-media@vger.kernel.org,
+        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
+        linux-mtd@lists.infradead.org, linux-pm@vger.kernel.org,
+        alsa-devel@alsa-project.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH] dt-bindings: Add missing
+ (unevaluated|additional)Properties on child node schemas
+Message-ID: <20230129235134.bmlr33mmxkges22h@mercury.elektranox.org>
+References: <20230124230228.372305-1-robh@kernel.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Content-Language: en-US
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Neil Armstrong <narmstrong@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>
-References: <dfb90ca4-1f62-e3ed-2ce4-a7b5f661e36d@gmail.com>
-Subject: [PATCH 2/2] mmc: meson-gx: support platform interrupt as card detect
- interrupt
-In-Reply-To: <dfb90ca4-1f62-e3ed-2ce4-a7b5f661e36d@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="gicruapujo3hf3sv"
+Content-Disposition: inline
+In-Reply-To: <20230124230228.372305-1-robh@kernel.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use a new mmc core feature and support specifying the card detect
-gpio interrupt in device tree.
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
- drivers/mmc/host/meson-gx-mmc.c | 3 +++
- 1 file changed, 3 insertions(+)
+--gicruapujo3hf3sv
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index be1a972c2..c87bc31d0 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1236,6 +1236,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 		goto free_host;
- 	}
- 
-+	/* gpio card detect interrupt */
-+	mmc->cd_irq = platform_get_irq_optional(pdev, 1);
-+
- 	host->pinctrl = devm_pinctrl_get(&pdev->dev);
- 	if (IS_ERR(host->pinctrl)) {
- 		ret = PTR_ERR(host->pinctrl);
--- 
-2.39.1
+Hi,
 
+On Tue, Jan 24, 2023 at 05:02:28PM -0600, Rob Herring wrote:
+> Just as unevaluatedProperties or additionalProperties are required at
+> the top level of schemas, they should (and will) also be required for
+> child node schemas. That ensures only documented properties are
+> present.
+>=20
+> Add unevaluatedProperties or additionalProperties as appropriate, and
+> then add any missing properties flagged by the addition.
+>=20
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+> [...]
+> diff --git a/Documentation/devicetree/bindings/power/supply/ti,lp8727.yam=
+l b/Documentation/devicetree/bindings/power/supply/ti,lp8727.yaml
+> index ce6fbdba8f6b..0542d4126cf5 100644
+> --- a/Documentation/devicetree/bindings/power/supply/ti,lp8727.yaml
+> +++ b/Documentation/devicetree/bindings/power/supply/ti,lp8727.yaml
+> @@ -28,6 +28,7 @@ properties:
+>  patternProperties:
+>    '^(ac|usb)$':
+>      type: object
+> +    additionalProperties: false
+>      description: USB/AC charging parameters
+>      properties:
+>        charger-type:
 
+Acked-by: Sebastian Reichel <sebastian.reichel@collabora.com>
+
+-- Sebastian
+
+--gicruapujo3hf3sv
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCgAdFiEE72YNB0Y/i3JqeVQT2O7X88g7+poFAmPXBoUACgkQ2O7X88g7
++ppJ7Q/9G9KiN17FVwYLLs8SnUjgqv/kYKrPVShDKerSSX6M0f7jyOVMBZz/QMpm
+Qzn0tl5laK3KtKo8zTuT/nHHQrwIyURSi8k3pEYUNc4KW8lTxLA4gLOCNjU+mA3r
+hFuUUvRcrmDnS9e+du/tWzYg8mSp0eucjWzURwTq+OA2qeUlEfH+1YAb+8LWHxWP
+O1pnLG9pGJMA1D3WDQzfXB0YfKpOkPYhxczD3VK0xqO77Z/PFANzD0Us/1XKtoFn
+NcsoPPSPBA/KpyjVWi94Rgy7zCXxKTeodChRqTVNUpms71aK75cO7z13ZOSYj3Kh
+5ZDpVLxWk2Yp5UujqxsMBYkJ31nQHS63CirMS84oPRR6WKbWzl9Qavl9VdPLMDe5
+9lwmcjlHoe0MSwwwuBDuwJRuO2Yr6KcOYvepEbv0/aes6hCB0e4IGq716JG2clLQ
+ZDVV5R3dmZk3KR3Ctu5twKz22MXyzqmoemtciqIsHkrLePBXwK6ylrLJfadUpgc1
+9hvsiNNTMntVlLI3gIQvsqw3W89s8UmTQAV02ykLZ19yAXhSQW34aslkoG204Dbk
+JRW+Mp6cXkXwNoMyqq1rCt4yFIG3ys3ELjFNGRX4we4+XJ7ZVU6agwxNMbyrFuUt
+UKXHATWoGucDR6hd83W0A7eREcm/GZzUnBKCAMTu4FUu1UBEOqM=
+=p8Fr
+-----END PGP SIGNATURE-----
+
+--gicruapujo3hf3sv--
