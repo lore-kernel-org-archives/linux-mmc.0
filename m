@@ -2,113 +2,92 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6FE2EC636CB
-	for <linux-mmc@archiver.kernel.org>; Sun, 29 Jan 2023 13:01:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8310EC05027
+	for <linux-mmc@archiver.kernel.org>; Sun, 29 Jan 2023 23:03:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231357AbjA2NBg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 29 Jan 2023 08:01:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48256 "EHLO
+        id S233637AbjA2XDG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 29 Jan 2023 18:03:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229907AbjA2NBe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Jan 2023 08:01:34 -0500
-Received: from mout.gmx.net (mout.gmx.net [212.227.17.22])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24CF5B47F;
-        Sun, 29 Jan 2023 05:01:33 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net; s=s31663417;
-        t=1674997271; bh=w56sESUq/A9zW6mJ3FqNY579EJHl07PnCK+2g0G+tlI=;
-        h=X-UI-Sender-Class:From:To:Cc:Subject:Date;
-        b=FIcQalt4ZGsfTrzaycwzh3J0QLJW4aF9Z7evajQ2X67habqCeH5ycXdJxgQ+KYL9g
-         YBk6swrlbMdpkqHigFlFLO2TXeUBvqTBjysrTF7LraDBIDIaTyeLdBU3jrGgBATvvj
-         tMHu0ww5RW0jHj+mDr8DdWuCT9DXBaHHXRKxpW4gCwEtvs6ANjdIOdjd52oFtYOvdC
-         8JWQBnvVEOxF6e772diCKzzle/Rsa0dku3y6d5MsI5KuiO5Gp3bu+hc/EiahQKGy9i
-         u39KNc7C0OVFJD6HSdDHEtSJJ78e9VN23cVpf0uhbimEvATBs3rARdZlTTF63ghHVI
-         9un6NxVpOPG8w==
-X-UI-Sender-Class: 724b4f7f-cbec-4199-ad4e-598c01a50d3a
-Received: from probook ([95.223.44.193]) by mail.gmx.net (mrgmx105
- [212.227.17.168]) with ESMTPSA (Nemesis) id 1MgNct-1ojUAC2SPn-00hsOp; Sun, 29
- Jan 2023 14:01:11 +0100
-From:   =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-To:     devicetree@vger.kernel.org
-Cc:     =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: Improve grammar and fix a typo
-Date:   Sun, 29 Jan 2023 14:00:59 +0100
-Message-Id: <20230129130059.1322858-1-j.neuschaefer@gmx.net>
-X-Mailer: git-send-email 2.39.0
+        with ESMTP id S229476AbjA2XDF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 29 Jan 2023 18:03:05 -0500
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 764BB1351D
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Jan 2023 15:03:04 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id m8so144131edd.10
+        for <linux-mmc@vger.kernel.org>; Sun, 29 Jan 2023 15:03:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ClbLR2ycXtZtBmoRza/OwnVXwTT5zlCJ+XLmEo5PtD8=;
+        b=g8/RieEufLG4r+Dms99sKaHel4hmJOAS5i/h9jYuYePsOwnm5mxw5Z1Ex6JEPCsIix
+         E1eJ9fRV+X/ax7K9giLWnGhy/1hywyomw+xb+oZ+yTaldIaGu2Cww/xnMj34lA4X+3gr
+         SovwQylu7mNQu7qNVTgHF+5Yk7DvNJStscveKUbc18scrgOIoB1t2AX2lLtXlECCFwa9
+         aszuIbuyIvB0evUJTyTiJ5jKbCnDI6JCSTP9j4yeeXhlW44xK0sOG/I3lLIYSS8g3NjX
+         6WzuLyd39XAEDk3yO7TvAvRpT+5xd05ssUR8RXI6E00SJyGwYXNVT/SP59XQB/RBYlt0
+         TaTg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=ClbLR2ycXtZtBmoRza/OwnVXwTT5zlCJ+XLmEo5PtD8=;
+        b=4YVCGAVhLVEj+yOBSKmreNy4mE+Hm+cyHGdDSc8cadONGz4JvnnmO4vrJGuAhWzsuz
+         7D03qyZHiD9CabAlS58yJjLQXGWI1CdVAD8t1IgOS+NFFJR9uh3vooPRjHC0hu2axpXi
+         JDiKgvfpyEYH5kr4fi+r+eRSMyABE56hcoNu6gJOiz6rLLTZ9Mq1RkeYfiAdLs/eKDpd
+         yStP9bOAhPs4XTymcmXSGC6Czq+vz97eWvJEYABvYA/L4API/vKBI9/pqz3UuRA5FCx5
+         Eh/q9Vg6GMMYRj3c6+0uJn+txm7B3kpOkxtv6B5XQuH8udup+sSK5WTiyMBBjFc6FgwV
+         zB8w==
+X-Gm-Message-State: AO0yUKWq05T+HsBCJtybzEfVBAXEExsBGHhcUQddywgkiLiJTe+8rlkn
+        TNIQTxV6OENExjOSLlricOA=
+X-Google-Smtp-Source: AK7set9ckDsq2gdZ9eivTBNoUFmQ9mkK7SgOCMcECtXrBTHIME4I0GU83O6qhDmQ0gD7N+U+2urCiA==
+X-Received: by 2002:a05:6402:339:b0:4a2:2e8a:14cb with SMTP id q25-20020a056402033900b004a22e8a14cbmr5804897edw.2.1675033382832;
+        Sun, 29 Jan 2023 15:03:02 -0800 (PST)
+Received: from ?IPV6:2a01:c23:c5b5:3100:78bb:34b6:bd6e:6fb4? (dynamic-2a01-0c23-c5b5-3100-78bb-34b6-bd6e-6fb4.c23.pool.telefonica.de. [2a01:c23:c5b5:3100:78bb:34b6:bd6e:6fb4])
+        by smtp.googlemail.com with ESMTPSA id cm17-20020a0564020c9100b004a21263bbaasm4047767edb.49.2023.01.29.15.03.01
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 29 Jan 2023 15:03:02 -0800 (PST)
+Message-ID: <dfb90ca4-1f62-e3ed-2ce4-a7b5f661e36d@gmail.com>
+Date:   Mon, 30 Jan 2023 00:02:47 +0100
 MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.1
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+Subject: [PATCH 0/2] mmc: meson-gx: support platform interrupt as card detect
+ interrupt
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-X-Provags-ID: V03:K1:gIZZ2EECX/uhdlaKjh3VjH6ZAkokhxs5Lh2T0WgO9mNzBXsFZju
- +Ysl0RE6b6gA1sOOHv+V9dCQnktTxTw1I3p3es9rcSpKBA4vnsT9thcrf8b1R5dXBLgXjWk
- QEvdAsJW6r7buS79eVh/Miq3G958F+9P0pRSi/mIRDm/CSZUMbL7bGPPrpPwk+/Tt9QvdOr
- z3Z7EZmnS8s52quzAp3+Q==
-UI-OutboundReport: notjunk:1;M01:P0:cXVWC5ZRtBI=;DCcZ5VDLG2wDshwM2u2/ksIm8ec
- 0QbKNXQXdf4lghdqfzYHdQrefjHzODMWJZn2m3OrQCmHESVLulb9v7MDtMZAEe0g9yXGKkYir
- IkwIZYKA0ROfijZTWWANcOhxZfFzYG0rDR26cwYREHv4kEajk0bnC4GHNcdunWc/fH30s2CSd
- QhzCOHUoZxti47Sk4VVbT+j+QHtDvcc4yKAPGHXHPMmibif6IHR0tyfaw/pAUiuXLWX+DJsCO
- tJXqPjTn/yFaaK32ZYOTzSWHNxb49gjt5/siMIjKLrTlrJYXHjNylM+SOdgwC9D5H0hKlbVU9
- 7GVktbUY2EQrBgrK8vEx8wWxCNTFDsIude1Sp2UROU9tO2ILBvNoLtiy4wySIdmzdxQC2SjFJ
- B4kyvUn130j0LxhpNVzMhoYZxIq/GmJtzQCwkdl1gLm59BFXimBaSG5P7QloKKsvGlbaTzqeD
- eFagdq6Ym3QKz4Z5nKFtd/PoSdHPLQag31Pmry+5ATTlriS76Vsx0/QJ4u3cj2jS/bsdatsXF
- 4Q7mH3ebzcHQf2jFozWRbK+y3FM5Qi5750z+1g69bkwsiy3smmWlA5RX9wF3JZG2AYtEL1ba2
- +K35xkCVWyfwZdym4quw2iyxml0Zw/VmHAvgk4SmRniWwHLekleWA7Fc4+ImlPyUAZRa1VFUi
- XOpwjb3bXygA6iik0CeHM0SfQPwnQ5fJlNbthMR7PrYXiX0QCOys0RVuzcr3iwTUhNaKrCBd3
- aKW7D7iEpUZbriG/WAVBIh2VozD/od+nIv2qxTz7Mxz8puifzxIVnfX5XEUA1uvjtqX8c/bZd
- RjaKiD50M9YIFpLGdDSEHITzbY7TQqhi29Nrvvu80ecjO7Ik8uN9Fdtpo+vbJG3ZoBm+3Uf1/
- d3m5oKC3hYinTWqxsK9gJjB5uBMAl2hhpanRKkk94csT08d3DbCbX++I1lcv+v1mBXLh8wYPY
- IK6dMXqI+y/1xU49QQk2mRk+zOo=
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This makes the text read a little better.
+On certain platforms like Amlogic Meson gpiod_to_irq() isn't supported
+due to the design of gpio / interrupt controller. Therefore provide an
+option to specify the cd interrupt e.g. by device tree. The host
+controller can store the interrupt in cd_irq for use by
+mmc_gpiod_request_cd_irq().
 
-Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
-=2D--
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Heiner Kallweit (2):
+  mmc: core: support platform interrupt as card detect interrupt
+  mmc: meson-gx: support platform interrupt as card detect interrupt
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Do=
-cumentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index dc6256f04b423..1c79b68753da0 100644
-=2D-- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -98,7 +98,7 @@ properties:
-       Specify the number of delay cells for override mode.
-       This is used to set the clock delay for DLL(Delay Line) on override=
- mode
-       to select a proper data sampling window in case the clock quality i=
-s not good
--      due to signal path is too long on the board. Please refer to eSDHC/=
-uSDHC
-+      because the signal path is too long on the board. Please refer to e=
-SDHC/uSDHC
-       chapter, DLL (Delay Line) section in RM for details.
-     default: 0
+ drivers/mmc/core/slot-gpio.c    | 2 +-
+ drivers/mmc/host/meson-gx-mmc.c | 3 +++
+ include/linux/mmc/host.h        | 1 +
+ 3 files changed, 5 insertions(+), 1 deletion(-)
 
-@@ -127,7 +127,7 @@ properties:
-       Specify the increasing delay cell steps in tuning procedure.
-       The uSDHC use one delay cell as default increasing step to do tunin=
-g process.
-       This property allows user to change the tuning step to more than on=
-e delay
--      cells which is useful for some special boards or cards when the def=
-ault
-+      cell which is useful for some special boards or cards when the defa=
-ult
-       tuning step can't find the proper delay window within limited tunin=
-g retries.
-     default: 0
-
-=2D-
-2.39.0
+-- 
+2.39.1
 
