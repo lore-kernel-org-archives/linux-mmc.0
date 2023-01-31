@@ -2,190 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A3E64C636CD
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Jan 2023 17:06:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCE37C636CD
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Jan 2023 17:09:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231873AbjAaRGQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Jan 2023 12:06:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41514 "EHLO
+        id S230225AbjAaRJL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 Jan 2023 12:09:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43744 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231145AbjAaRGP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2023 12:06:15 -0500
-Received: from mail-ot1-x335.google.com (mail-ot1-x335.google.com [IPv6:2607:f8b0:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12D8F3401B;
-        Tue, 31 Jan 2023 09:06:09 -0800 (PST)
-Received: by mail-ot1-x335.google.com with SMTP id x26-20020a056830115a00b0068bbc0ee3eeso2917194otq.0;
-        Tue, 31 Jan 2023 09:06:09 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=n+8rBCXp9QUszN6EtdlrzESk2YRd1LhFxQMBHxqvRZ8=;
-        b=KIotuXGen7IPQ2MM3jARlRJcgpTMmXnjonwSHT+XpZMX1+12fCZD0G96L0aAkPfdMS
-         JAHa/KIhvXy01RkzKieONIFgBovrC4z8J77AAyJPbvvJGJBhYkeZE63h9y9Q+dalddna
-         PRK0CAY2UAlQhTL3jJs0e4S33SYUchhScZ+3cEp1zWv3CrhIaqr1ZwwH9rnrfE5O1uGb
-         8yb79/rJu1S0QRRcyN2iE0OAsr3Yp7k2g9ph4snwSPo9xtOyX3Yjc6HPa4d6SIGZbfnd
-         Tfg87yjJPUuO696M3UjVX7oStAxPrNPOkWDXt/2gqibuMnOUNXmVnRByLYZqWojpaWgB
-         GukQ==
+        with ESMTP id S231638AbjAaRJE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2023 12:09:04 -0500
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF1A62A150;
+        Tue, 31 Jan 2023 09:09:03 -0800 (PST)
+Received: by mail-pj1-f42.google.com with SMTP id n20-20020a17090aab9400b00229ca6a4636so19804759pjq.0;
+        Tue, 31 Jan 2023 09:09:03 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=n+8rBCXp9QUszN6EtdlrzESk2YRd1LhFxQMBHxqvRZ8=;
-        b=m5n7Z95g9DZ3AInOfflZcZtffAaZDCZ5PvuIxSlHUtzdOsq5xCKfEr9Iu40Ex8gDLg
-         iyP8VlTeQvgd+/8Citg8WwVFstcug1dh5Acwx1skV01o9O16wXsnBNmtb+AG5swrou4X
-         ttDy29XutbwDPAkVxt9dQkrxV0BE6/FZw/EbEVy0MBKNlSmf7Yc4ak8akCg/E+yTM8IC
-         SpYJaQbvKVehpbxta7TzQNhT3Kn3oKsFPCpgO9fU7953CDsOj0744PMKUE+dthmlC6fn
-         RAbzo7EVpo9F9WrydAWdEBntNu3FC4vYnhGnbBmji/ZgUhtIs1tvZAt5BENjgi/sdm5v
-         9fdw==
-X-Gm-Message-State: AO0yUKVUCDOFkowTeAbJyihOwwLXqCETHKK3TTkeknL6E2z2G8RbGNvh
-        /LFXrx3pvdv7XZmJNdan8Ro=
-X-Google-Smtp-Source: AK7set/3cx199W6dlm+bCYeBqwh7XTb78l9Pdy4589af0XRP0nPAx1JUE7sHjjl+5ymFcH8PmR8lxQ==
-X-Received: by 2002:a9d:688:0:b0:68d:3e10:2951 with SMTP id 8-20020a9d0688000000b0068d3e102951mr89946otx.3.1675184768344;
-        Tue, 31 Jan 2023 09:06:08 -0800 (PST)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id t14-20020a9d590e000000b006864816ecd9sm6740348oth.59.2023.01.31.09.06.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 31 Jan 2023 09:06:07 -0800 (PST)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Tue, 31 Jan 2023 09:06:06 -0800
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Neil Armstrong <neil.armstrong@linaro.org>
-Cc:     Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Mauro Carvalho Chehab <mchehab@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Thomas Gleixner <tglx@linutronix.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bjorn Helgaas <bhelgaas@google.com>,
-        Lorenzo Pieralisi <lpieralisi@kernel.org>,
-        Rob Herring <robh@kernel.org>,
-        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCH v3 3/7] dt-bindings: watchdog: convert meson-wdt.txt to
- dt-schema
-Message-ID: <20230131170606.GA3599161@roeck-us.net>
-References: <20221117-b4-amlogic-bindings-convert-v3-0-e28dd31e3bed@linaro.org>
- <20221117-b4-amlogic-bindings-convert-v3-3-e28dd31e3bed@linaro.org>
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=pDzPWgoV39PuI2zsVUHpuZ+LlLjcbOcfzijWPXUhDbA=;
+        b=jWYe9bi7+YU9c8P82w6e3b1aXMGDbrxDmL8tZUenFfMEnhuCU1vPDJAIx6gyKiWI4X
+         59lNzXBQmyHN38FHwMXCmrl3IBkDjnmCfvqj8Twp6uMsoE+zTGNF69+UMjHqryQb7DOw
+         Y2c5kSVv69sue6nmEdluX3J2zXritBsLazCXW6N+igiVbyh0A9TZYKO5rqBicGOvkdeC
+         XBEZgRr4TPpDj0jfgcrGYdrTHdbr4u1JSmfXSXQMuKp2Dk0sd+vi/tIqjiaFcUsRVI7S
+         XPfbF6e3lKdU+I1Eqad3EDN6KuJF7BbTnJ0ChnByAzdAqjyhCsNNqlvm2Ovs9SX0nprX
+         rRsA==
+X-Gm-Message-State: AO0yUKWk4oehxtD2kO1hsBlpLwfNWVbm1ejjlCP9QlgxOeTSJvxuuRmJ
+        7C3I44/ArTGlH4sIu/+A6iA=
+X-Google-Smtp-Source: AK7set9TCTh4wUIRfAPtnFk5yCKafQHgCadPmFMQf598lpAiU+UXG/3e92qRZ+mc2gSYoMV8hd3k9w==
+X-Received: by 2002:a17:902:f283:b0:196:6c8c:289a with SMTP id k3-20020a170902f28300b001966c8c289amr9795926plc.20.1675184943255;
+        Tue, 31 Jan 2023 09:09:03 -0800 (PST)
+Received: from ?IPV6:2620:15c:211:201:7e97:ee02:2248:2471? ([2620:15c:211:201:7e97:ee02:2248:2471])
+        by smtp.gmail.com with ESMTPSA id q17-20020a170902edd100b001960d05991asm10079442plk.37.2023.01.31.09.09.01
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 31 Jan 2023 09:09:02 -0800 (PST)
+Message-ID: <51de158c-65f1-6506-1303-9d4bfa90e3e3@acm.org>
+Date:   Tue, 31 Jan 2023 09:09:00 -0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20221117-b4-amlogic-bindings-convert-v3-3-e28dd31e3bed@linaro.org>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.6.0
+Subject: Re: [PATCH] memstick: core: Imply IOSCHED_BFQ
+Content-Language: en-US
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>,
+        Christoph Hellwig <hch@lst.de>
+References: <20230131085220.1038241-1-linus.walleij@linaro.org>
+From:   Bart Van Assche <bvanassche@acm.org>
+In-Reply-To: <20230131085220.1038241-1-linus.walleij@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Jan 23, 2023 at 11:10:00AM +0100, Neil Armstrong wrote:
-> Convert the Amlogic Meson6 SoCs Watchdog timer bindings to dt-schema.
+On 1/31/23 00:52, Linus Walleij wrote:
+> If we enable the memory stick block layer, use Kconfig to imply
+> the BFQ I/O scheduler.
 > 
-> Take in account the used interrupts property.
-> 
-> The "amlogic,meson8-wdt" representation has been simplified
-> since there's no users of this compatible used along the
-> "amlogic,meson6-wdt".
-> 
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
+> As all memstick devices are single-queue, this is the scheduler that
+> users want so let's be helpful and make sure it gets
+> default-selected into a manual kernel configuration. It will still
+> need to be enabled at runtime (usually with udev scripts).
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
+Do users really want the BFQ scheduler? Has performance of BFQ been 
+compared with iocost (CONFIG_BLK_CGROUP_IOCOST)? My colleagues are using 
+iocost instead of BFQ in resource-constrained environments.
 
-> ---
->  .../bindings/watchdog/amlogic,meson6-wdt.yaml      | 50 ++++++++++++++++++++++
->  .../devicetree/bindings/watchdog/meson-wdt.txt     | 21 ---------
->  2 files changed, 50 insertions(+), 21 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml b/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml
-> new file mode 100644
-> index 000000000000..84732cb58ec4
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml
-> @@ -0,0 +1,50 @@
-> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/watchdog/amlogic,meson6-wdt.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Amlogic Meson6 SoCs Watchdog timer
-> +
-> +maintainers:
-> +  - Neil Armstrong <neil.armstrong@linaro.org>
-> +  - Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> +
-> +allOf:
-> +  - $ref: watchdog.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    oneOf:
-> +      - enum:
-> +          - amlogic,meson6-wdt
-> +          - amlogic,meson8-wdt
-> +          - amlogic,meson8b-wdt
-> +      - items:
-> +          - const: amlogic,meson8m2-wdt
-> +          - const: amlogic,meson8b-wdt
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +required:
-> +  - compatible
-> +  - interrupts
-> +  - reg
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +
-> +    wdt: watchdog@c1109900 {
-> +        compatible = "amlogic,meson6-wdt";
-> +        reg = <0xc1109900 0x8>;
-> +        interrupts = <GIC_SPI 0 IRQ_TYPE_EDGE_RISING>;
-> +        timeout-sec = <10>;
-> +    };
-> diff --git a/Documentation/devicetree/bindings/watchdog/meson-wdt.txt b/Documentation/devicetree/bindings/watchdog/meson-wdt.txt
-> deleted file mode 100644
-> index 7588cc3971bf..000000000000
-> --- a/Documentation/devicetree/bindings/watchdog/meson-wdt.txt
-> +++ /dev/null
-> @@ -1,21 +0,0 @@
-> -Meson SoCs Watchdog timer
-> -
-> -Required properties:
-> -
-> -- compatible : depending on the SoC this should be one of:
-> -	"amlogic,meson6-wdt" on Meson6 SoCs
-> -	"amlogic,meson8-wdt" and "amlogic,meson6-wdt" on Meson8 SoCs
-> -	"amlogic,meson8b-wdt" on Meson8b SoCs
-> -	"amlogic,meson8m2-wdt" and "amlogic,meson8b-wdt" on Meson8m2 SoCs
-> -- reg : Specifies base physical address and size of the registers.
-> -
-> -Optional properties:
-> -- timeout-sec: contains the watchdog timeout in seconds.
-> -
-> -Example:
-> -
-> -wdt: watchdog@c1109900 {
-> -	compatible = "amlogic,meson6-wdt";
-> -	reg = <0xc1109900 0x8>;
-> -	timeout-sec = <10>;
-> -};
+Bart.
+
