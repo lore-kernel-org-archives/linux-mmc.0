@@ -2,99 +2,190 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 26933C636D3
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Jan 2023 16:57:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A3E64C636CD
+	for <linux-mmc@archiver.kernel.org>; Tue, 31 Jan 2023 17:06:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231611AbjAaQ5W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Jan 2023 11:57:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33142 "EHLO
+        id S231873AbjAaRGQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 31 Jan 2023 12:06:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229680AbjAaQ5V (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2023 11:57:21 -0500
-Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDD731D904
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2023 08:57:19 -0800 (PST)
-Received: by mail-wr1-x435.google.com with SMTP id y1so14853844wru.2
-        for <linux-mmc@vger.kernel.org>; Tue, 31 Jan 2023 08:57:19 -0800 (PST)
+        with ESMTP id S231145AbjAaRGP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2023 12:06:15 -0500
+Received: from mail-ot1-x335.google.com (mail-ot1-x335.google.com [IPv6:2607:f8b0:4864:20::335])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12D8F3401B;
+        Tue, 31 Jan 2023 09:06:09 -0800 (PST)
+Received: by mail-ot1-x335.google.com with SMTP id x26-20020a056830115a00b0068bbc0ee3eeso2917194otq.0;
+        Tue, 31 Jan 2023 09:06:09 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=JRIRICEmrabbDC+z0qM+J82wcNj3dmfUYUXd7QSBt1w=;
-        b=dy5A3IWNvdGGhkzZ4Hj/Cfw51B8qkHkcMUzU3/PlUeCci5HdMHsIC1yFgUpWlENTQT
-         O5t+pLbzM/gY0Pf8v407BzziOP0eiV1/aW2wxhteWADN1oGKiE2NO3C2kX8YnzB6NjVJ
-         AC7rtWjy01xrw/iCU9vOwsKQI9/ESEkwBSUNluB/+Xzx7mrz0dUNYCYulr+jvHz1QpFd
-         GW+Hle5B6VXl1UVMpjO/uo96iZLVLXNlcgvRhpJjWU0qARNkD5W/+gagohEizqgCGJ0K
-         O5CGmYfNn8mnZPjJIhH1Iy0lMQY9Ky2PEspg4/DhK9FN6eL3gSj7dH6tsikCwdyGDQbe
-         DLyA==
+        d=gmail.com; s=20210112;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=n+8rBCXp9QUszN6EtdlrzESk2YRd1LhFxQMBHxqvRZ8=;
+        b=KIotuXGen7IPQ2MM3jARlRJcgpTMmXnjonwSHT+XpZMX1+12fCZD0G96L0aAkPfdMS
+         JAHa/KIhvXy01RkzKieONIFgBovrC4z8J77AAyJPbvvJGJBhYkeZE63h9y9Q+dalddna
+         PRK0CAY2UAlQhTL3jJs0e4S33SYUchhScZ+3cEp1zWv3CrhIaqr1ZwwH9rnrfE5O1uGb
+         8yb79/rJu1S0QRRcyN2iE0OAsr3Yp7k2g9ph4snwSPo9xtOyX3Yjc6HPa4d6SIGZbfnd
+         Tfg87yjJPUuO696M3UjVX7oStAxPrNPOkWDXt/2gqibuMnOUNXmVnRByLYZqWojpaWgB
+         GukQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=JRIRICEmrabbDC+z0qM+J82wcNj3dmfUYUXd7QSBt1w=;
-        b=NbkdjqNs0+3brJzWIbGB1lpLrRTGd0OYPmeurz3eL82l3kCV37I9DzdAIZRS5Y1BFB
-         YqDRfPppVIsRtYdC17mxp62K4p5OEnpce84wi0U2rYUg3kX1MjSyAeOWxarCJffqALRU
-         fg96We622wSGo3qqncFrwHz7avdMdOa3ycfiBvW5RU2cWV9FbqPOo4GvJ8DXeapfGg5/
-         FW5fIIJNHLiliH8izI5Yso/NFKtm+ke11S5E7VSphuQCRv54wMy/OaNwR1HSgKNqKyv7
-         Iu79JpBKajElmjLIeBrg2p46Tr6v6ohUGisOZS807g2ZTza7geZUwjwZfhKTTYhsqktH
-         THoQ==
-X-Gm-Message-State: AO0yUKWjdqEX2NboE/mUX6Iz5b4OIQymvII/ZpwrpKHXy6Bi6bFjc848
-        9KVV1VarK9EEZQKCpCrKxdFmCg==
-X-Google-Smtp-Source: AK7set+3+ztKUDCKlgPVjR+GgF5ntUTYGyYRvo//VfdzWE0w1Fddd6HXGe9FrQc6VumDHMX9cCqrwQ==
-X-Received: by 2002:a5d:62cb:0:b0:2bf:bdbd:25c0 with SMTP id o11-20020a5d62cb000000b002bfbdbd25c0mr18271625wrv.15.1675184238576;
-        Tue, 31 Jan 2023 08:57:18 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id i6-20020adff306000000b002425be3c9e2sm15364628wro.60.2023.01.31.08.57.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 31 Jan 2023 08:57:18 -0800 (PST)
-Message-ID: <a1d2ac4c-0763-5c92-be21-22820c376438@linaro.org>
-Date:   Tue, 31 Jan 2023 17:57:16 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH] dt-bindings: mmc: Add cap-aggressive-pm property
-Content-Language: en-US
-To:     Hermes Zhang <chenhuiz@axis.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=n+8rBCXp9QUszN6EtdlrzESk2YRd1LhFxQMBHxqvRZ8=;
+        b=m5n7Z95g9DZ3AInOfflZcZtffAaZDCZ5PvuIxSlHUtzdOsq5xCKfEr9Iu40Ex8gDLg
+         iyP8VlTeQvgd+/8Citg8WwVFstcug1dh5Acwx1skV01o9O16wXsnBNmtb+AG5swrou4X
+         ttDy29XutbwDPAkVxt9dQkrxV0BE6/FZw/EbEVy0MBKNlSmf7Yc4ak8akCg/E+yTM8IC
+         SpYJaQbvKVehpbxta7TzQNhT3Kn3oKsFPCpgO9fU7953CDsOj0744PMKUE+dthmlC6fn
+         RAbzo7EVpo9F9WrydAWdEBntNu3FC4vYnhGnbBmji/ZgUhtIs1tvZAt5BENjgi/sdm5v
+         9fdw==
+X-Gm-Message-State: AO0yUKVUCDOFkowTeAbJyihOwwLXqCETHKK3TTkeknL6E2z2G8RbGNvh
+        /LFXrx3pvdv7XZmJNdan8Ro=
+X-Google-Smtp-Source: AK7set/3cx199W6dlm+bCYeBqwh7XTb78l9Pdy4589af0XRP0nPAx1JUE7sHjjl+5ymFcH8PmR8lxQ==
+X-Received: by 2002:a9d:688:0:b0:68d:3e10:2951 with SMTP id 8-20020a9d0688000000b0068d3e102951mr89946otx.3.1675184768344;
+        Tue, 31 Jan 2023 09:06:08 -0800 (PST)
+Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id t14-20020a9d590e000000b006864816ecd9sm6740348oth.59.2023.01.31.09.06.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 31 Jan 2023 09:06:07 -0800 (PST)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Date:   Tue, 31 Jan 2023 09:06:06 -0800
+From:   Guenter Roeck <linux@roeck-us.net>
+To:     Neil Armstrong <neil.armstrong@linaro.org>
+Cc:     Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     kernel@axis.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20230129023630.830764-1-chenhuiz@axis.com>
- <b43f26c9-f76c-c898-aadc-ce3ee7b7823d@linaro.org>
- <b125f25d-94c7-dd5b-28d3-3948c36ef4e0@axis.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <b125f25d-94c7-dd5b-28d3-3948c36ef4e0@axis.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bjorn Helgaas <bhelgaas@google.com>,
+        Lorenzo Pieralisi <lpieralisi@kernel.org>,
+        Rob Herring <robh@kernel.org>,
+        Krzysztof =?utf-8?Q?Wilczy=C5=84ski?= <kw@linux.com>,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-amlogic@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-watchdog@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-pci@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v3 3/7] dt-bindings: watchdog: convert meson-wdt.txt to
+ dt-schema
+Message-ID: <20230131170606.GA3599161@roeck-us.net>
+References: <20221117-b4-amlogic-bindings-convert-v3-0-e28dd31e3bed@linaro.org>
+ <20221117-b4-amlogic-bindings-convert-v3-3-e28dd31e3bed@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20221117-b4-amlogic-bindings-convert-v3-3-e28dd31e3bed@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/01/2023 07:54, Hermes Zhang wrote:
-> On 2023/1/29 18:58, Krzysztof Kozlowski wrote:
->> On 29/01/2023 03:36, Hermes Zhang wrote:
->>> This commit add a new property: cap-aggressive-pm to enable the
->> Do not use "This commit/patch".
->> https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
+On Mon, Jan 23, 2023 at 11:10:00AM +0100, Neil Armstrong wrote:
+> Convert the Amlogic Meson6 SoCs Watchdog timer bindings to dt-schema.
 > 
-> Done
+> Take in account the used interrupts property.
 > 
->>> MMC_CAP_AGGRESSIVE_PM feature for (e)MMC/SD power saving.
->> Why this is a property suitable for DT? IOW, why this isn't enabled always?
+> The "amlogic,meson8-wdt" representation has been simplified
+> since there's no users of this compatible used along the
+> "amlogic,meson6-wdt".
 > 
-> This property will benfit for the power consumption, but it also may 
-> degradation in performance as it will prevent the
-> 
-> the card from executing internal house-keeping operations in idle mode. 
-> So it's better to config it from DT.
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Reviewed-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Neil Armstrong <neil.armstrong@linaro.org>
 
-Why? DT is not for policy. How you described it, this is policy or
-system tuning choice thus the job for Linux (OS), not for DT. So I will
-repeat - why this property fits the purpose of DT (describe the hardware).
+Reviewed-by: Guenter Roeck <linux@roeck-us.net>
 
-Best regards,
-Krzysztof
-
+> ---
+>  .../bindings/watchdog/amlogic,meson6-wdt.yaml      | 50 ++++++++++++++++++++++
+>  .../devicetree/bindings/watchdog/meson-wdt.txt     | 21 ---------
+>  2 files changed, 50 insertions(+), 21 deletions(-)
+> 
+> diff --git a/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml b/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml
+> new file mode 100644
+> index 000000000000..84732cb58ec4
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/watchdog/amlogic,meson6-wdt.yaml
+> @@ -0,0 +1,50 @@
+> +# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/watchdog/amlogic,meson6-wdt.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Amlogic Meson6 SoCs Watchdog timer
+> +
+> +maintainers:
+> +  - Neil Armstrong <neil.armstrong@linaro.org>
+> +  - Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> +
+> +allOf:
+> +  - $ref: watchdog.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    oneOf:
+> +      - enum:
+> +          - amlogic,meson6-wdt
+> +          - amlogic,meson8-wdt
+> +          - amlogic,meson8b-wdt
+> +      - items:
+> +          - const: amlogic,meson8m2-wdt
+> +          - const: amlogic,meson8b-wdt
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +required:
+> +  - compatible
+> +  - interrupts
+> +  - reg
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +
+> +    wdt: watchdog@c1109900 {
+> +        compatible = "amlogic,meson6-wdt";
+> +        reg = <0xc1109900 0x8>;
+> +        interrupts = <GIC_SPI 0 IRQ_TYPE_EDGE_RISING>;
+> +        timeout-sec = <10>;
+> +    };
+> diff --git a/Documentation/devicetree/bindings/watchdog/meson-wdt.txt b/Documentation/devicetree/bindings/watchdog/meson-wdt.txt
+> deleted file mode 100644
+> index 7588cc3971bf..000000000000
+> --- a/Documentation/devicetree/bindings/watchdog/meson-wdt.txt
+> +++ /dev/null
+> @@ -1,21 +0,0 @@
+> -Meson SoCs Watchdog timer
+> -
+> -Required properties:
+> -
+> -- compatible : depending on the SoC this should be one of:
+> -	"amlogic,meson6-wdt" on Meson6 SoCs
+> -	"amlogic,meson8-wdt" and "amlogic,meson6-wdt" on Meson8 SoCs
+> -	"amlogic,meson8b-wdt" on Meson8b SoCs
+> -	"amlogic,meson8m2-wdt" and "amlogic,meson8b-wdt" on Meson8m2 SoCs
+> -- reg : Specifies base physical address and size of the registers.
+> -
+> -Optional properties:
+> -- timeout-sec: contains the watchdog timeout in seconds.
+> -
+> -Example:
+> -
+> -wdt: watchdog@c1109900 {
+> -	compatible = "amlogic,meson6-wdt";
+> -	reg = <0xc1109900 0x8>;
+> -	timeout-sec = <10>;
+> -};
