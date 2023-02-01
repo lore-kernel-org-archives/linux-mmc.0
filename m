@@ -2,125 +2,59 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A0D28C38142
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Feb 2023 09:57:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 25E7CC05027
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Feb 2023 13:08:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232173AbjBAJ5Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Feb 2023 04:57:25 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38986 "EHLO
+        id S231841AbjBANIV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Feb 2023 08:08:21 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232181AbjBAJ5Y (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2023 04:57:24 -0500
-Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02FF54B4B4
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2023 01:57:21 -0800 (PST)
-Received: by mail-wm1-x330.google.com with SMTP id iv8-20020a05600c548800b003db04a0a46bso2266654wmb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2023 01:57:20 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=ePSrTzkMMNng2khdgheQOIcDWatP1PEI00zqDrWQnks=;
-        b=oYP1aL6QJH56IKmeEBcKnbjMi6/NvzJeVrQZ9Klxdvk8dvINMrXZJ/J+7/ggXz7gZA
-         U24dj5BIRXwrHxhzfDMapYDhJaRTSHqy8SN2dB4wu4iYUtsmoaAIdTTXC0ONo815UkoS
-         DAzFUmL4WbuVX4yjnFjuJds4m7XqW8bOuUxWsAn+rud6vhx+IPGhltGll2KchHDW239J
-         LeZfGKto7niCkyb+oaif2uVsuDhXvL6x71Va2XYNYT74/EvHagmrP4tpSd45iSehLB3l
-         86FC5XanFGhfmQzHmZY1gafBkm5qvzYYA+2TLxeYGl0sG2hLJTwqS/dVCidwoAYoSCcr
-         NGIA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=ePSrTzkMMNng2khdgheQOIcDWatP1PEI00zqDrWQnks=;
-        b=mEgt2z66vXU7pRnZRZAowHQ1gXsESae6xwBZ5Oq2Nwa7iYiQTdDc9pOx5f4CExlC0q
-         SncIzSm183ETYCJjEBO+6SkQt6HwzfX19tuFLIVc1C6mTeOllYL9lzquSldd4vWSvIiE
-         6udDwfQ7GFFkls0d3QK6S29XHMDVsDvSrqlYmg3sAgVvVMaC7Ot9h9HiAQwcH3h/lDT+
-         GmJOwgEHheV5GNld/42/lrE8q0s3Rx1QnEjp66y7C7aJoiVapYJJ3VVu1CzcY8mZ5E9f
-         RQ+IThSCxTUgVB/JRB/E5ttI0raxwHXPSkvPuYQAA8QqhAqSO4E7d3SLMgMjMcGUm5fu
-         hJgA==
-X-Gm-Message-State: AO0yUKUwy5lzjsou0T2vubkeCrEqtrpD1eYz0azZKLwrVDWkGcSOyHzS
-        ASZSJL1RYZBmKzLnPUl05DWEYw==
-X-Google-Smtp-Source: AK7set+Zr918sBtF0rKPtTPU2ScDCggLyV4vVqb7ZJqK6OseqgAP8hHBEGS8nh3iKyB8TlpBXtxFiQ==
-X-Received: by 2002:a05:600c:b88:b0:3dc:5965:2c35 with SMTP id fl8-20020a05600c0b8800b003dc59652c35mr1313977wmb.24.1675245439466;
-        Wed, 01 Feb 2023 01:57:19 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id h14-20020a05600c314e00b003db0b0cc2afsm1312914wmo.30.2023.02.01.01.57.17
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 01 Feb 2023 01:57:19 -0800 (PST)
-Message-ID: <039986bb-a3e0-2482-9853-30532df10ff8@linaro.org>
-Date:   Wed, 1 Feb 2023 10:57:16 +0100
+        with ESMTP id S229935AbjBANIU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2023 08:08:20 -0500
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54EA0AD24;
+        Wed,  1 Feb 2023 05:08:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=0DJ+fu1TOVGN/olgRLBTEaoZLBQeRlRCNJVimqqXr6g=; b=fKrz6P6uzRfZvE1T0iBKvtvueE
+        Tjt7XVZ1EGmjLQMUViQaY9asMLuVzvRB6lDU6Gc6r4cKFKRbWKnhem3vgSzUtLpIgdqJ7b/oXNkoj
+        c+PwrHPH0+gtVUjSMAGVBOKc9jjdln2DYbhkwuVolyMeL8weu2l3nDczv8W4f4gDGtMZH3++9V0zr
+        P4xodfgulDPj3mZCfWwJGmaAg8ayfE6Iy6XpcFN2uYbmuOBOrE8VCEyizg/e4FvBY5MBrRN2ekz5U
+        QwzR8umEKSQfoewbVp+Zl7C/EX/nVNFf/Om+wKfAdsp6UN8VftHdt/MCf5vdWEDkqbVioXhwLCG4e
+        FnCknPjw==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.94.2 #2 (Red Hat Linux))
+        id 1pNCqY-00BxMx-PB; Wed, 01 Feb 2023 13:08:18 +0000
+Date:   Wed, 1 Feb 2023 05:08:18 -0800
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Christoph Hellwig <hch@infradead.org>, linux-mmc@vger.kernel.org,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>
+Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
+Message-ID: <Y9pkQth3x9DQb9Kx@infradead.org>
+References: <20230131084742.1038135-1-linus.walleij@linaro.org>
+ <Y9jY2zsNbSCWluZG@infradead.org>
+ <CACRpkda3mk8wkdxWQFev9PrK6bPsxR6qLJo_gXnK+_jaTCFfjg@mail.gmail.com>
+ <Y9kVrh9VEz4/T76f@infradead.org>
+ <CACRpkdbd73PEAaNYr2cz=pmw7guHK0-hiPCYXgpgQfy-d9TTTQ@mail.gmail.com>
+ <Y9kvh42/T9rdqDH9@infradead.org>
+ <CACRpkdZ-r_toj3FWuxffSzmO=cDq2Og79R2t48-oAoCE0bT1sw@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH v8 06/17] dt-bindings: mfd: amd,pensando-elbasr: Add AMD
- Pensando Elba System Resource chip
-Content-Language: en-US
-To:     Brad Larson <blarson@amd.com>, robh@kernel.org
-Cc:     adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de, brad@pensando.io,
-        brijeshkumar.singh@amd.com, broonie@kernel.org,
-        catalin.marinas@arm.com, devicetree@vger.kernel.org,
-        fancer.lancer@gmail.com, gerg@linux-m68k.org, gsomlo@gmail.com,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        p.yadav@ti.com, p.zabel@pengutronix.de, piotrs@cadence.com,
-        rdunlap@infradead.org, samuel@sholland.org,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        ulf.hansson@linaro.org, will@kernel.org,
-        yamada.masahiro@socionext.com
-References: <20221116223045.GA1130586-robh@kernel.org>
- <20230130191248.1933-1-blarson@amd.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230130191248.1933-1-blarson@amd.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CACRpkdZ-r_toj3FWuxffSzmO=cDq2Og79R2t48-oAoCE0bT1sw@mail.gmail.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 30/01/2023 20:12, Brad Larson wrote:
-> Hi Rob,
-> 
-> On Wednesday, November 16, 2022 2:30 PM, Rob Herring wrote:
->> On Wed, Nov 16, 2022 at 11:39:40AM -0800, Brad Larson wrote:
->>> Add support for the AMD Pensando Elba SoC System Resource chip
->>> using the SPI interface.
->>
->> Please resend the whole series properly threaded.
-> 
-> Series sent as v9
-> 
->>> +description: |
->>> +  AMD Pensando Elba SoC Resource Controller functions are
->>> +  accessed with four chip-selects.  Reset control is on CS0.
->>
->> One device with 4 chip-selects? Then I'd expect 'reg = <0 1 2 3>;'
->>
->> Hard to say more because I don't have the whole thread nor remember what 
->> exactly we discussed before. That was 100s of bindings ago...
-> 
-> This has been changed to one device and four chip selects. This binding error
-> is occuring for snps,dw-apb-ssi.yaml using reg for the chip selects.  Any
-> guidance on how to fix? 
-> 
-> $ make ARCH=arm64 dtbs_check DT_SCHEMA_FILES=Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
->   LINT    Documentation/devicetree/bindings
->   CHKDT   Documentation/devicetree/bindings/processed-schema.json
->   SCHEMA  Documentation/devicetree/bindings/processed-schema.json
->   DTC_CHK arch/arm64/boot/dts/amd/elba-asic.dtb
-> /home/brad/linux.v10/arch/arm64/boot/dts/amd/elba-asic.dtb: spi@2800: system-controller@0:reg: [[0], [1], [2], [3]] is too long
-> 	From schema: /home/brad/linux.v10/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+On Wed, Feb 01, 2023 at 09:18:59AM +0100, Linus Walleij wrote:
+> The Kconfig change is mainly about making it available for use,
+> for systems with MMC/SD-card drivers.
 
-Maybe this would work in snps,dw-apb-ssi for children:
-
-reg:
-  items:
-    minimum: 0
-    maximum: 3
-
-Best regards,
-Krzysztof
-
+But that's really not the job of Kconfig.  If you want an I/O schedule
+enable it.  I thas absolutely no technical connection to the specific
+block driver used.
