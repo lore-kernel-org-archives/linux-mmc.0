@@ -2,143 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40FD2C38142
-	for <linux-mmc@archiver.kernel.org>; Tue, 31 Jan 2023 21:02:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4BF8C636D4
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Feb 2023 08:19:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231911AbjAaVCw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 31 Jan 2023 16:02:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36820 "EHLO
+        id S229827AbjBAIT0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Feb 2023 03:19:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231932AbjAaVCt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 31 Jan 2023 16:02:49 -0500
-Received: from aposti.net (aposti.net [89.234.176.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E91717EE7;
-        Tue, 31 Jan 2023 13:02:46 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1675198956; h=from:from:sender:reply-to:subject:subject:date:date:
-         message-id:message-id:to:to:cc:cc:mime-version:mime-version:
-         content-type:content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=pTB/5ibjHKW2X7UZeS7Tcf9Oq/nbjX1Dx/72F1/KHz4=;
-        b=2PhimR52P1QRmXzxXOkrgO2hnI+46M09JfZ//TwpNtjgjJgGEmQuQb/JyCokV6UzchP1C7
-        7GEGJ2DEaUCSrji9K1qK3egUnUKUZWew3h0Styiw0zkAwPhgyHtqlmbQo8g/bMUIzqm6Em
-        JMU1rXaoXPul/jOGjZ0oGodHOH2wdkY=
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, list@opendingux.net,
-        Paul Cercueil <paul@crapouillou.net>
-Subject: [PATCH 2/2] mmc: jz4740: Add support for vqmmc power supply
-Date:   Tue, 31 Jan 2023 21:02:29 +0000
-Message-Id: <20230131210229.68129-2-paul@crapouillou.net>
-In-Reply-To: <20230131210229.68129-1-paul@crapouillou.net>
-References: <20230131210229.68129-1-paul@crapouillou.net>
+        with ESMTP id S232144AbjBAITO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Feb 2023 03:19:14 -0500
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1D18E5EFA7
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Feb 2023 00:19:12 -0800 (PST)
+Received: by mail-yb1-xb31.google.com with SMTP id m199so21343808ybm.4
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Feb 2023 00:19:11 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=+64qMYUS/9LKQSKQXuUu9URV5MQO5mnEzXLsozGZuwc=;
+        b=XWbG/S1RDk8VgXptly9M72Hq2lxAP50GMzcjVoG9FOZ8AqmNbrUJCuW5f1ItVXcIBw
+         j2FC21FSIrrLVyH5456kkpx9rEdoI25uwO+JZylNko+P7/OdsX28fFky+udGd6VkSKlW
+         Bt5oah17IhBpncHnF7EgKyQHW6ciCOD0t3r+jYIaW0hDNNVQURQcdP1qCLefZ5d5Fh+j
+         F4zRZp7D0tviaWavSBQI46Qxr8CKJJePIwGBrtVDDOhKQKKwWfnfBW2TWN4+zXJ4j1AP
+         v37J/N1pcwyuCw7XWr/INe+eq8HMIwcr4adE0Wq6V39tMymR4kxiOy0VQKQNXTTrj8Oi
+         7UgQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+64qMYUS/9LKQSKQXuUu9URV5MQO5mnEzXLsozGZuwc=;
+        b=AYpEMdz/zp7Py3osRT3YyZMtu/iR+QD/tLN6dibrwJsYuSFsufP9DNs/9tJOOCCQRD
+         sU70rOa+fPskTsdx9b4dvUNiP092IKphTJ2apTwyMhQ5ThBL7WobzW/BQF9RlCP2eYbG
+         ammyUocZM3nvM5BXVp+tl3mlWToVs5eB1xj3EZ74dBqBVTm7FtWA+P/m5m0l4RXQ3iYN
+         AoF+vPUOO0lQfF6l8EJjKhX9OEKuv3Zwbpy23Qcl2ZP67zNsjY5RIYeLPoitPgYGm2wv
+         uZ2X7rdV/6ErCTGcq0aMNXDM2Fj0gSzqR5etwFvDLZGRPp5YPvmgU1Rxus0j2locrofX
+         aeLA==
+X-Gm-Message-State: AO0yUKWDWpx3UNvtoLE6PBBagY0tOLD0TaMrT8reR0VaOXgLeEutGWza
+        JaphT+OXW8h2szdJcefbc0Rv28cUhgmC0H/Ckw1/Ww==
+X-Google-Smtp-Source: AK7set+DH3RZ68yOI7vMHe9szOffDyqgQ7KDz6Pee0wFzmgvjgQSDjzKmzZWDta15XaKVJWTZWtO8SBTvQDCjdVJqyk=
+X-Received: by 2002:a25:9191:0:b0:7c0:acd2:6300 with SMTP id
+ w17-20020a259191000000b007c0acd26300mr189458ybl.520.1675239551079; Wed, 01
+ Feb 2023 00:19:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230131084742.1038135-1-linus.walleij@linaro.org>
+ <Y9jY2zsNbSCWluZG@infradead.org> <CACRpkda3mk8wkdxWQFev9PrK6bPsxR6qLJo_gXnK+_jaTCFfjg@mail.gmail.com>
+ <Y9kVrh9VEz4/T76f@infradead.org> <CACRpkdbd73PEAaNYr2cz=pmw7guHK0-hiPCYXgpgQfy-d9TTTQ@mail.gmail.com>
+ <Y9kvh42/T9rdqDH9@infradead.org>
+In-Reply-To: <Y9kvh42/T9rdqDH9@infradead.org>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 1 Feb 2023 09:18:59 +0100
+Message-ID: <CACRpkdZ-r_toj3FWuxffSzmO=cDq2Og79R2t48-oAoCE0bT1sw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Support enabling / disabling the vqmmc power supply if it was provided
-by the firmware.
+On Tue, Jan 31, 2023 at 4:11 PM Christoph Hellwig <hch@infradead.org> wrote:
+> On Tue, Jan 31, 2023 at 03:05:20PM +0100, Linus Walleij wrote:
+> > To be clear, "works better" in this context means, solving a problem
+> > for the interactive user, preventing random freezing of the UI on
+> > resource-limited (memory, disk throughput) systems under high
+> > I/O load.
+>
+> Which already has nothing to do with the mmc driver.  And the rest
+> of your mail makes this even more clear.  You want bfq for interactive
+> systems with little resources and really shitty storage device, which
+> just happen to use mmc in your use case.
 
-Provide the .start_signal_voltage_switch callback to change the voltage
-of the external vqmmc power supply.
+First time it helped me it was rotating rust actually, but yeah MMC/SD
+is one of those.
 
-Signed-off-by: Paul Cercueil <paul@crapouillou.net>
----
- drivers/mmc/host/jz4740_mmc.c | 38 ++++++++++++++++++++++++++++++++++-
- 1 file changed, 37 insertions(+), 1 deletion(-)
+> My use case for sd cards OTOH is extremely resource constrained systems
+> where I absolutely do not want a bloated I/O scheduler.  In fact I'd
+> love to be able to even compile the infrastructure for them away.
 
-diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-index eb8e9607b086..ccd2c3aed0f0 100644
---- a/drivers/mmc/host/jz4740_mmc.c
-+++ b/drivers/mmc/host/jz4740_mmc.c
-@@ -21,6 +21,7 @@
- #include <linux/of_device.h>
- #include <linux/pinctrl/consumer.h>
- #include <linux/platform_device.h>
-+#include <linux/regulator/consumer.h>
- #include <linux/rwsem.h>
- #include <linux/scatterlist.h>
- 
-@@ -162,6 +163,8 @@ struct jz4740_mmc_host {
- 	struct mmc_request *req;
- 	struct mmc_command *cmd;
- 
-+	bool vqmmc_enabled;
-+
- 	unsigned long waiting;
- 
- 	uint32_t cmdat;
-@@ -943,6 +946,8 @@ static void jz4740_mmc_request(struct mmc_host *mmc, struct mmc_request *req)
- static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- {
- 	struct jz4740_mmc_host *host = mmc_priv(mmc);
-+	int ret;
-+
- 	if (ios->clock)
- 		jz4740_mmc_set_clock_rate(host, ios->clock);
- 
-@@ -955,12 +960,25 @@ static void jz4740_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
- 		clk_prepare_enable(host->clk);
- 		break;
- 	case MMC_POWER_ON:
-+		if (!IS_ERR(mmc->supply.vqmmc) && !host->vqmmc_enabled) {
-+			ret = regulator_enable(mmc->supply.vqmmc);
-+			if (ret)
-+				dev_err(&host->pdev->dev, "Failed to set vqmmc power!\n");
-+			else
-+				host->vqmmc_enabled = true;
-+		}
- 		break;
--	default:
-+	case MMC_POWER_OFF:
- 		if (!IS_ERR(mmc->supply.vmmc))
- 			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-+		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
-+			regulator_disable(mmc->supply.vqmmc);
-+			host->vqmmc_enabled = false;
-+		}
- 		clk_disable_unprepare(host->clk);
- 		break;
-+	default:
-+		break;
- 	}
- 
- 	switch (ios->bus_width) {
-@@ -986,6 +1004,23 @@ static void jz4740_mmc_enable_sdio_irq(struct mmc_host *mmc, int enable)
- 	jz4740_mmc_set_irq_enabled(host, JZ_MMC_IRQ_SDIO, enable);
- }
- 
-+static int jz4740_voltage_switch(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	int ret;
-+
-+	/* vqmmc regulator is available */
-+	if (!IS_ERR(mmc->supply.vqmmc)) {
-+		ret = mmc_regulator_set_vqmmc(mmc, ios);
-+		return ret < 0 ? ret : 0;
-+	}
-+
-+	/* no vqmmc regulator, assume fixed regulator at 3/3.3V */
-+	if (ios->signal_voltage == MMC_SIGNAL_VOLTAGE_330)
-+		return 0;
-+
-+	return -EINVAL;
-+}
-+
- static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.request	= jz4740_mmc_request,
- 	.pre_req	= jz4740_mmc_pre_request,
-@@ -994,6 +1029,7 @@ static const struct mmc_host_ops jz4740_mmc_ops = {
- 	.get_ro		= mmc_gpio_get_ro,
- 	.get_cd		= mmc_gpio_get_cd,
- 	.enable_sdio_irq = jz4740_mmc_enable_sdio_irq,
-+	.start_signal_voltage_switch = jz4740_voltage_switch,
- };
- 
- static inline struct jz4740_mmc_host *
--- 
-2.39.1
+Hm I think you're mixing up different resource constraints here (that
+your storage is slow does not mean your CPU is weak or that you have
+little RAM) but I see your point.
 
+What I think a lot of the debate is about is "abundance of resources"
+systems vs "constrained resources" systems. Some are hard to keep
+busy (such as MQ devices) other are hard to get access through
+because of constant overload (such as MMC/SD-cards).
+
+> In other words:  you want distro policy to use bfq for your use case,
+> but that has no business being in the Kconfig.
+
+Well *using* it is still the matter of a udev rule for an ordinary distro
+as we have no mechanism to instruct the kernel to use any specific
+scheduler with some subsystem. (I think we should have some hint
+for that, for slow single channel devices for example.)
+
+The Kconfig change is mainly about making it available for use,
+for systems with MMC/SD-card drivers.
+
+Yours,
+Linus Walleij
