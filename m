@@ -2,234 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81567C636D3
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 11:10:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E007C05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 12:52:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231956AbjBBLKV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Feb 2023 06:10:21 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40206 "EHLO
+        id S232005AbjBBMwE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Feb 2023 07:52:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231935AbjBBLKS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 06:10:18 -0500
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 824336597;
-        Thu,  2 Feb 2023 03:09:57 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id C7E7124E255;
-        Thu,  2 Feb 2023 19:09:54 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 2 Feb
- 2023 19:09:54 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX168.cuchost.com
- (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Thu, 2 Feb
- 2023 19:09:53 +0800
-Message-ID: <4529a646-1faf-c858-cfbe-1560ebeb1fba@starfivetech.com>
-Date:   Thu, 2 Feb 2023 19:09:53 +0800
+        with ESMTP id S229721AbjBBMwE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 07:52:04 -0500
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 790D63AA8
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 04:52:03 -0800 (PST)
+Received: by mail-yb1-xb31.google.com with SMTP id t16so2029545ybk.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 04:52:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=iTEsYvNbhZUvr3t5FDyaBPDIayK5soN0V1YA6KoE95Q=;
+        b=PPfSS12X5711vg3bhuNrJmUVkzvhGet/0lNfQTXDPw/wtNntkEWqMG9cO2+AQaapQi
+         MZJcaRC71fY2ZMHLvVtk19QBWC1mCJPijp0uWxSPYRqKKnRf1wK8sVEE8LuBsjsuG+5t
+         x1Qfdfr93US48KlEdOPNzlN6NNSHJoWxD+ccOAxBTB+PoK6YHr6Fn8j8ialUwaevYP2c
+         aixY6bNdQwbQ+vFjTT8ZPOtdFdyJvVNLLrIZFSz/pqtkbGzYjg1HuIz6De2bTmz4GpwA
+         Qam0sl8kV1yAtcdu12tzoopbHGDis2sPmqKBDume7Nod8LxoXbavP03tvajPG2IFZ/lT
+         sPbg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=iTEsYvNbhZUvr3t5FDyaBPDIayK5soN0V1YA6KoE95Q=;
+        b=3z+mV5EZ6pwe7DP84DVRf7lmRkpQypSKdXsHbIXXhThswVPtMTQgmJV726x22oow60
+         23/DQ0oI8iTe4UyEVNmFlCuCVdleioY9qWN6kvmyaXylZoalCpoQCGyeXUakjzaAAmo5
+         9/gkESvuQnRa33Ky31JMqzZUvl5I+I7+0Vh14RpRMMXUFDb6KR3pZZF6TMpKzn9BVM4D
+         MtcMsD/c+fe8bhP/l/3rjmc7Z6diMEbZA5nhvE/gvCVTI5lbeRqJvJI5XgIRVI3FKDb0
+         UqYe8co6NTPI6FspgI2pDj5o62KFfF/ix0LsAipLkKpXAsXze893C3rWLv5V0hfVfan1
+         oijg==
+X-Gm-Message-State: AO0yUKV+PiJA5gJDmAOlx+ZTRkV00+/euOMqfJ7fzBg/rLbCAK7b+BgQ
+        RPKcKjzpOS0Umlm8PKhuMOYw55cq2hciSwlM8dGWPA==
+X-Google-Smtp-Source: AK7set/IzybDVeByN7olzBbtRq2zPCd8ReB2ZColcl64XBQe7/HYO17UuFBtuhM1xYbR1EXmfXF7asG9PYGE8qn+MFw=
+X-Received: by 2002:a25:fe0a:0:b0:7ca:9b40:72a7 with SMTP id
+ k10-20020a25fe0a000000b007ca9b4072a7mr435003ybe.130.1675342322566; Thu, 02
+ Feb 2023 04:52:02 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
+References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
+ <20221207131731.1291517-3-william.qiu@starfivetech.com> <CACRpkdYP7MokLdRtxX9w7p80c=wHDHsoTYWrU53CnpsZ7o6aGg@mail.gmail.com>
+ <4529a646-1faf-c858-cfbe-1560ebeb1fba@starfivetech.com>
+In-Reply-To: <4529a646-1faf-c858-cfbe-1560ebeb1fba@starfivetech.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 2 Feb 2023 13:51:51 +0100
+Message-ID: <CACRpkdYAP_WYwfiFxXybqqa8OJw98cxUwJgW0RUCgLLGaV+LJQ@mail.gmail.com>
 Subject: Re: [PATCH v1 2/3] mmc: starfive: Add sdio/emmc driver support
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20221207131731.1291517-1-william.qiu@starfivetech.com>
- <20221207131731.1291517-3-william.qiu@starfivetech.com>
- <CACRpkdYP7MokLdRtxX9w7p80c=wHDHsoTYWrU53CnpsZ7o6aGg@mail.gmail.com>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <CACRpkdYP7MokLdRtxX9w7p80c=wHDHsoTYWrU53CnpsZ7o6aGg@mail.gmail.com>
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Thu, Feb 2, 2023 at 12:10 PM William Qiu
+<william.qiu@starfivetech.com> wrote:
+> On 2022/12/9 5:09, Linus Walleij wrote:
 
+> >> +       priv->syscon_offset = args.args[0];
+> >> +       priv->syscon_shift  = args.args[1];
+> >> +       priv->syscon_mask   = args.args[2];
+> >
+> > Why should these three things be in the device tree instead of being derived
+> > from the compatible-string or just plain hard-coded as #defines?
+> > I don't get it.
+> >
+> Hi Linus,
+>
+> I'm sorry to bother you, but as for the definition of syscon, after discussing with
+> my colleagues, we think it is easier to distinguish SDIO0 and SDIO1 by defining it in
+> the device tree, and the code compatibility is better.
 
-On 2022/12/9 5:09, Linus Walleij wrote:
-> Hi William,
-> 
-> thanks for your patch!
-> 
-> On Wed, Dec 7, 2022 at 2:17 PM William Qiu <william.qiu@starfivetech.com> wrote:
-> 
->> Add sdio/emmc driver support for StarFive JH7110 soc.
->>
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> 
-> (...)
->> +#include <linux/gpio.h>
-> 
-> Never include this legacy header in new code. Also: you don't use it.
-> 
->> +#include <linux/mfd/syscon.h>
->> +#include <linux/mmc/host.h>
->> +#include <linux/module.h>
->> +#include <linux/of_address.h>
->> +#include <linux/platform_device.h>
->> +#include <linux/pm_runtime.h>
-> 
-> You're not using this include either.
-> 
->> +#include <linux/regmap.h>
->> +#include <linux/regulator/consumer.h>
-> 
-> Or this.
-> 
->> +#define ALL_INT_CLR            0x1ffff
->> +#define MAX_DELAY_CHAIN                32
->> +
->> +struct starfive_priv {
->> +       struct device *dev;
->> +       struct regmap *reg_syscon;
->> +       u32 syscon_offset;
->> +       u32 syscon_shift;
->> +       u32 syscon_mask;
->> +};
->> +
->> +static unsigned long dw_mci_starfive_caps[] = {
->> +       MMC_CAP_CMD23,
->> +       MMC_CAP_CMD23,
->> +       MMC_CAP_CMD23
->> +};
->> +
->> +static void dw_mci_starfive_set_ios(struct dw_mci *host, struct mmc_ios *ios)
->> +{
->> +       int ret;
->> +       unsigned int clock;
->> +
->> +       if (ios->timing == MMC_TIMING_MMC_DDR52 || ios->timing == MMC_TIMING_UHS_DDR50) {
->> +               clock = (ios->clock > 50000000 && ios->clock <= 52000000) ? 100000000 : ios->clock;
->> +               ret = clk_set_rate(host->ciu_clk, clock);
->> +               if (ret)
->> +                       dev_dbg(host->dev, "Use an external frequency divider %uHz\n", ios->clock);
->> +               host->bus_hz = clk_get_rate(host->ciu_clk);
->> +       } else {
->> +               dev_dbg(host->dev, "Using the internal divider\n");
->> +       }
->> +}
->> +
->> +static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
->> +                                            u32 opcode)
->> +{
->> +       static const int grade  = MAX_DELAY_CHAIN;
->> +       struct dw_mci *host = slot->host;
->> +       struct starfive_priv *priv = host->priv;
->> +       int raise_point = -1, fall_point = -1;
->> +       int err, prev_err = -1;
-> 
-> I don't like these default-init to -1. Can you just skip it and assign it
-> where it makes most sense instead?
-> 
->> +       int found = 0;
-> 
-> This looks like a bool.
-> 
->> +       int i;
->> +       u32 regval;
->> +
->> +       for (i = 0; i < grade; i++) {
->> +               regval = i << priv->syscon_shift;
->> +               err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
->> +                                               priv->syscon_mask, regval);
->> +               if (err)
->> +                       return err;
->> +               mci_writel(host, RINTSTS, ALL_INT_CLR);
->> +
->> +               err = mmc_send_tuning(slot->mmc, opcode, NULL);
->> +               if (!err)
->> +                       found = 1;
->> +
->> +               if (i > 0) {
->> +                       if (err && !prev_err)
->> +                               fall_point = i - 1;
->> +                       if (!err && prev_err)
->> +                               raise_point = i;
->> +               }
->> +
->> +               if (raise_point != -1 && fall_point != -1)
->> +                       goto tuning_out;
-> 
-> There are just these raise point (shouldn't this be "rise_point" in proper
-> english?) and fall point, this misses some comments explaining what is
-> going on, the code is not intuitively eviden. Rise and fall of *what* for
-> example.
-> 
->> +
->> +               prev_err = err;
->> +               err = 0;
->> +       }
->> +
->> +tuning_out:
->> +       if (found) {
->> +               if (raise_point == -1)
->> +                       raise_point = 0;
->> +               if (fall_point == -1)
->> +                       fall_point = grade - 1;
->> +               if (fall_point < raise_point) {
->> +                       if ((raise_point + fall_point) >
->> +                           (grade - 1))
->> +                               i = fall_point / 2;
->> +                       else
->> +                               i = (raise_point + grade - 1) / 2;
->> +               } else {
->> +                       i = (raise_point + fall_point) / 2;
->> +               }
-> 
-> Likewise here, explain what grade is, refer to the eMMC spec if necessary.
-> 
-> (...)
->> +       ret = of_parse_phandle_with_fixed_args(host->dev->of_node,
->> +                                               "starfive,sys-syscon", 3, 0, &args);
->> +       if (ret) {
->> +               dev_err(host->dev, "Failed to parse starfive,sys-syscon\n");
->> +               return -EINVAL;
->> +       }
->> +
->> +       priv->reg_syscon = syscon_node_to_regmap(args.np);
->> +       of_node_put(args.np);
->> +       if (IS_ERR(priv->reg_syscon))
->> +               return PTR_ERR(priv->reg_syscon);
->> +
->> +       priv->syscon_offset = args.args[0];
->> +       priv->syscon_shift  = args.args[1];
->> +       priv->syscon_mask   = args.args[2];
-> 
-> Why should these three things be in the device tree instead of being derived
-> from the compatible-string or just plain hard-coded as #defines?
-> I don't get it.
-> 
-Hi Linus,
+OK sounds good looking forward to seeing the result :)
 
-I'm sorry to bother you, but as for the definition of syscon, after discussing with 
-my colleagues, we think it is easier to distinguish SDIO0 and SDIO1 by defining it in
-the device tree, and the code compatibility is better.
-
-Best Regards
-William Qiu
->> +static int dw_mci_starfive_probe(struct platform_device *pdev)
->> +{
->> +       return dw_mci_pltfm_register(pdev, &starfive_data);
->> +}
->> +
->> +static int dw_mci_starfive_remove(struct platform_device *pdev)
->> +{
->> +       return dw_mci_pltfm_remove(pdev);
->> +}
-> 
-> Can't you just assign dw_mci_pltfm_remove() to .remove?
-> 
-> Other than these things, the driver looks good!
-> 
-> Yours,
-> Linus Walleij
+Yours,
+Linus Walleij
