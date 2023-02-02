@@ -2,211 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96588C636D3
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 18:45:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EAEDC61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 22:14:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232871AbjBBSpw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Feb 2023 13:45:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56258 "EHLO
+        id S230373AbjBBWOO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Feb 2023 17:14:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40030 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232755AbjBBSpt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 13:45:49 -0500
-Received: from mga04.intel.com (mga04.intel.com [192.55.52.120])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 367D110278;
-        Thu,  2 Feb 2023 10:45:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1675363526; x=1706899526;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=Zcy2tttflYiEzp2wxyvhKwM3EOAC9OK1BIvQNjHWusc=;
-  b=J42/qhaSpFZdx2opGQ/FJx1568JXVuzbGDoqGfM0BoQc7h4zyJcPD56x
-   03XFwJgc9ZtuFzkRa9ODpPb2XnSdCUfURFzXZeXlgk+CE7tOn/so0kJzL
-   J+5bjbQXZPJJBny4HL2YqU0rEQyKmh8hCHNHqC1yxEFkvzKMnLxlZa3kT
-   H4a3vIxUEyPyYOpxmdBu99gS0kBmYO21C0eDLHGHgMAZ3xfy3DQC41au2
-   hpQpZOCgck144N45zAY83wYYuV+PxeqqV82T3Ib433f4/Ts+HhwoLaCJi
-   mm6UbBIIm/3vXMmlbBg644GpYSrUdYPZdyyUFnMrrIP9njNRpCnv8CyGA
-   g==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10609"; a="327179245"
-X-IronPort-AV: E=Sophos;i="5.97,268,1669104000"; 
-   d="scan'208";a="327179245"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by fmsmga104.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2023 10:45:10 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10609"; a="789391119"
-X-IronPort-AV: E=Sophos;i="5.97,268,1669104000"; 
-   d="scan'208";a="789391119"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.35.116])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Feb 2023 10:45:07 -0800
-Message-ID: <3cd284e8-9487-077a-a835-f8241f336bda@intel.com>
-Date:   Thu, 2 Feb 2023 20:45:02 +0200
+        with ESMTP id S229974AbjBBWON (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 17:14:13 -0500
+Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 911CA23DB4
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 14:14:12 -0800 (PST)
+Received: by mail-yb1-xb33.google.com with SMTP id i2so872149ybt.2
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 14:14:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=Md74lIzR0o7460ORkMXn7KayL0aVbPKupRPBeuDbbTI=;
+        b=HRlsCWSs2dlebCLDmMtYuLDdArqtkMee6iQwte/VlkN1bbSWSHpDHWT/4je9mWPJp7
+         XgWSFXL3rw72a77sKpV5fXDQZyitEG5D7aUJKvATOj8z6s5XuDQ6k8YpAK86Q9+qcKe5
+         Cjfa7U0G5JCOuCU29CFkM6xInxzM9rWSDf9NivVjuXnS26g3GnzTfzlvJrStborIXI+7
+         phOG4nm/iHnXPn2lp5Vd40MAenaY08OtlvQtal4K/dIRzdMZvG6sEpdbIdSpRh3kXMvp
+         VfBKmyVJaEyu+t3DYYd5h9FD927ZiMrD4zKOeOOc+ANuYw68CRwq40W23G8F3FIdE52B
+         qSYw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=Md74lIzR0o7460ORkMXn7KayL0aVbPKupRPBeuDbbTI=;
+        b=kkRS2vxeMKXO4fr488lk2v7ASaXkMVrh4d/ZhNaL9jX8pigVqxB4A47F4fwRiqaSAW
+         IdNjhD6A8o+3h+w37PYYYIq97CWHcToGTAvE4Jw1oY7Dnuukl42O78LXbYcu2fw74j9u
+         bTomcutPAQ3CtnD2hbNKhtfHcK5TeWPMNcl8P244mzQi5Yr14SZr3pAZEv4/tAoy5wHd
+         g57rfj39B+yHzGCbT3BaUrpUuct5xyfy8B4uYtWuN7cz0oBg1L2DlUxyW9U4u56NMA75
+         aDhfzrnlKDYPKsTVlmiI9hwKZfn2u1aFi0s8+Wf4y390o4sSaGdx3iEPWZhS+CGnTPGL
+         DLhw==
+X-Gm-Message-State: AO0yUKUGebNBO1WRJNREvQTZzsfAeLODNMvcI/gMCZYHX/Hot83ozHFr
+        qdQTVQEv8wRKuAzI39ZhHNoKW+nCoKgotErwkCxU9g==
+X-Google-Smtp-Source: AK7set8Ww53okW+GPRByKcLI9t2DJ87/pgwZwaQZjPnrIW92KM4QAuzw/T3WwMXedMTepXLt1YwySXkRQL98LHIhZws=
+X-Received: by 2002:a25:aa0b:0:b0:80b:c9d0:c676 with SMTP id
+ s11-20020a25aa0b000000b0080bc9d0c676mr1107062ybi.341.1675376051809; Thu, 02
+ Feb 2023 14:14:11 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.7.1
-Subject: Re: [PATCH v2 5/5] drivers: mmc: sdhci-cadence: Add debug option for
- sdhci-cadence driver.
-Content-Language: en-US
-To:     Piyush Malgujar <pmalgujar@marvell.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, ulf.hansson@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        yamada.masahiro@socionext.com, devicetree@vger.kernel.org
-Cc:     jannadurai@marvell.com, cchavva@marvell.com
-References: <20230123192735.21136-1-pmalgujar@marvell.com>
- <20230123192735.21136-6-pmalgujar@marvell.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230123192735.21136-6-pmalgujar@marvell.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230131084742.1038135-1-linus.walleij@linaro.org>
+ <CAPDyKFrLetcCcFueJzZeWa-SVbsJcspwZ+nXWUDCGRXawxNhdg@mail.gmail.com> <98014ebd-7e57-0fc3-9ab0-49f4b727150d@kernel.dk>
+In-Reply-To: <98014ebd-7e57-0fc3-9ab0-49f4b727150d@kernel.dk>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Thu, 2 Feb 2023 23:14:00 +0100
+Message-ID: <CACRpkdacMR8wLX0O5qNAbeGxpJTo99F7XXCiZ+tUCuOO8=GcaQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
+To:     Jens Axboe <axboe@kernel.dk>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/01/23 21:27, Piyush Malgujar wrote:
-> From: Jayanthi Annadurai <jannadurai@marvell.com>
-> 
-> Use Kernel config CONFIG_MMC_DEBUG to support dumping PHY and host
-> controller register configuration for debug.
-> 
-> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
-> ---
->  drivers/mmc/host/sdhci-cadence.c | 104 +++++++++++++++++++++++++++++++
->  1 file changed, 104 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index baee0f98deac975ab92cf3e09a1edec5d3a59021..9aad7468ee9b7fe2755f343ac7ab1f5da8c63947 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -115,6 +115,10 @@
->  #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_CLK_WR_DELAY		GENMASK(15, 8)
->  #define	SDHCI_CDNS_SD6_PHY_DLL_SLAVE_READ_DQS_DELAY		GENMASK(7, 0)
->  
-> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0				0x201C
-> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1				0x2020
-> +#define SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2				0x2024
-> +
->  #define SDHCI_CDNS_SD6_PHY_CTRL					0x2080
->  #define	SDHCI_CDNS_SD6_PHY_CTRL_PHONY_DQS_TIMING		GENMASK(9, 4)
->  
-> @@ -969,6 +973,104 @@ static void sdhci_cdns_sd6_calc_phy(struct sdhci_cdns_sd6_phy *phy)
->  	}
->  }
->  
-> +#ifdef CONFIG_MMC_DEBUG
+On Thu, Feb 2, 2023 at 7:04 PM Jens Axboe <axboe@kernel.dk> wrote:
+> On 2/2/23 8:22=E2=80=AFAM, Ulf Hansson wrote:
+> > On Tue, 31 Jan 2023 at 09:47, Linus Walleij <linus.walleij@linaro.org> =
+wrote:
+> >>
+> >> If we enable the MMC/SD block layer, use Kconfig to imply the BFQ
+> >> I/O scheduler.
+> >>
+> >> As all MMC/SD devices are single-queue, this is the scheduler that
+> >> users want so let's be helpful and make sure it gets
+> >> default-selected into a manual kernel configuration. It will still
+> >> need to be enabled at runtime (usually with udev scripts).
+> >>
+> >> Cc: linux-block@vger.kernel.org
+> >> Cc: Paolo Valente <paolo.valente@linaro.org>
+> >> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> >
+> > I have taken the various arguments (for and against), but I think
+> > $subject patch makes sense to me. In the end, this is about moving
+> > towards a more sensible default kernel configuration and the "imply"
+> > approach works fine for me.
+> >
+> > More importantly, $subject patch doesn't really hurt anything, as it's
+> > still perfectly fine to build MMC without I/O schedulers and BFQ, for
+> > those configurations that need this.
+> >
+> > That said, applied for next, thanks!
+>
+> It doesn't make sense, for all the reasons that Christoph applied.
+> But you guys seemed to already have your mind made up and ignoring
+> valid feedback, so...
 
-So why not just use dev_dbg?
+The history leading us here as I see it:
 
-> +
-> +#define DEBUG_DRV       pr_info
+In 2017 or if it was 2016 I think Paolo and Ulf started to look into
+BFQ for improving the user experience with MMC on embedded
+devices such as phones, tablets etc. I.e all systems using it.
 
-DEBUG_DRV is not needed
+As BFQ was not accepted for the old block layer it was adopted
+for the MQ rewrite, as I understood a bit as "the new CFQ" for
+slow single-queued devices.
 
-> +
-> +static void sdhci_cdns_sd6_phy_dump(struct sdhci_cdns_sd6_phy *phy)
-> +{
-> +	DEBUG_DRV("PHY Timings\n");
-> +	DEBUG_DRV("mode %d t_sdclk %d\n", phy->mode, phy->t_sdclk);
-> +
-> +	DEBUG_DRV("cp_clk_wr_delay %d\n", phy->settings.cp_clk_wr_delay);
-> +	DEBUG_DRV("cp_clk_wrdqs_delay %d\n", phy->settings.cp_clk_wrdqs_delay);
-> +	DEBUG_DRV("cp_data_select_oe_end %d\n", phy->settings.cp_data_select_oe_end);
-> +	DEBUG_DRV("cp_dll_bypass_mode %d\n", phy->settings.cp_dll_bypass_mode);
-> +	DEBUG_DRV("cp_dll_locked_mode %d\n", phy->settings.cp_dll_locked_mode);
-> +	DEBUG_DRV("cp_dll_start_point %d\n", phy->settings.cp_dll_start_point);
-> +	DEBUG_DRV("cp_io_mask_always_on %d\n", phy->settings.cp_io_mask_always_on);
-> +	DEBUG_DRV("cp_io_mask_end %d\n", phy->settings.cp_io_mask_end);
-> +	DEBUG_DRV("cp_io_mask_start %d\n", phy->settings.cp_io_mask_start);
-> +	DEBUG_DRV("cp_rd_del_sel %d\n", phy->settings.cp_rd_del_sel);
-> +	DEBUG_DRV("cp_read_dqs_cmd_delay %d\n", phy->settings.cp_read_dqs_cmd_delay);
-> +	DEBUG_DRV("cp_read_dqs_delay %d\n", phy->settings.cp_read_dqs_delay);
-> +	DEBUG_DRV("cp_sw_half_cycle_shift %d\n", phy->settings.cp_sw_half_cycle_shift);
-> +	DEBUG_DRV("cp_sync_method %d\n", phy->settings.cp_sync_method);
-> +	DEBUG_DRV("cp_use_ext_lpbk_dqs %d\n", phy->settings.cp_use_ext_lpbk_dqs);
-> +	DEBUG_DRV("cp_use_lpbk_dqs %d\n", phy->settings.cp_use_lpbk_dqs);
-> +	DEBUG_DRV("cp_use_phony_dqs %d\n", phy->settings.cp_use_phony_dqs);
-> +	DEBUG_DRV("cp_use_phony_dqs_cmd %d\n", phy->settings.cp_use_phony_dqs_cmd);
-> +	DEBUG_DRV("sdhc_extended_rd_mode %d\n", phy->settings.sdhc_extended_rd_mode);
-> +	DEBUG_DRV("sdhc_extended_wr_mode %d\n", phy->settings.sdhc_extended_wr_mode);
-> +
-> +	DEBUG_DRV("sdhc_hcsdclkadj %d\n", phy->settings.sdhc_hcsdclkadj);
-> +	DEBUG_DRV("sdhc_idelay_val %d\n", phy->settings.sdhc_idelay_val);
-> +	DEBUG_DRV("sdhc_rdcmd_en %d\n", phy->settings.sdhc_rdcmd_en);
-> +	DEBUG_DRV("sdhc_rddata_en %d\n", phy->settings.sdhc_rddata_en);
-> +	DEBUG_DRV("sdhc_rw_compensate %d\n", phy->settings.sdhc_rw_compensate);
-> +	DEBUG_DRV("sdhc_sdcfsh %d\n", phy->settings.sdhc_sdcfsh);
-> +	DEBUG_DRV("sdhc_sdcfsl %d\n", phy->settings.sdhc_sdcfsl);
-> +	DEBUG_DRV("sdhc_wrcmd0_dly %d %d\n",
-> +		  phy->settings.sdhc_wrcmd0_dly, phy->settings.sdhc_wrcmd0_sdclk_dly);
-> +	DEBUG_DRV("sdhc_wrcmd1_dly %d %d\n",
-> +		  phy->settings.sdhc_wrcmd1_dly, phy->settings.sdhc_wrcmd1_sdclk_dly);
-> +	DEBUG_DRV("sdhc_wrdata0_dly %d %d\n",
-> +		  phy->settings.sdhc_wrdata0_dly, phy->settings.sdhc_wrdata0_sdclk_dly);
-> +
-> +	DEBUG_DRV("sdhc_wrdata1_dly %d %d\n",
-> +		  phy->settings.sdhc_wrdata1_dly, phy->settings.sdhc_wrdata1_sdclk_dly);
-> +	DEBUG_DRV("hs200_tune_val %d\n", phy->settings.hs200_tune_val);
-> +}
-> +
-> +static void sdhci_cdns_sd6_dump(struct sdhci_cdns_priv *priv)
-> +{
-> +	struct sdhci_cdns_sd6_phy *phy = priv->phy;
-> +	int id;
-> +
-> +	sdhci_cdns_sd6_phy_dump(phy);
-> +
-> +	DEBUG_DRV("Host controller Register Dump\n");
-> +	for (id = 0; id < 14; id++)
-> +		DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-> +
-> +	id = 29;
-> +	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-> +	id = 30;
-> +	DEBUG_DRV("HRS%d 0x%x\n", id, readl(priv->hrs_addr + (id * 4)));
-> +
-> +	for (id = 0; id < 27; id++)
-> +		DEBUG_DRV("SRS%d 0x%x\n", id, readl(priv->hrs_addr + 0x200 + (id * 4)));
-> +
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQS_TIMING 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQS_TIMING));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GATE_LPBK 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GATE_LPBK));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_MASTER 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_MASTER));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_SLAVE 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_SLAVE));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_CTRL 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_CTRL));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_GPIO_CTRL0 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_GPIO_CTRL0));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DQ_TIMING 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DQ_TIMING));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG0));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG1));
-> +	DEBUG_DRV("SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2 0x%x\n",
-> +		  sdhci_cdns_sd6_read_phy_reg(priv, SDHCI_CDNS_SD6_PHY_DLL_OBS_REG2));
-> +}
-> +
-> +#else
-> +
-> +static inline void sdhci_cdns_sd6_dump(struct sdhci_cdns_priv *priv)
-> +{
-> +}
-> +
-> +#endif
-> +
->  static int sdhci_cdns_sd6_get_delay_params(struct device *dev, struct sdhci_cdns_priv *priv)
->  {
->  	struct sdhci_cdns_sd6_phy *phy = priv->phy;
-> @@ -1373,6 +1475,8 @@ static void sdhci_cdns_sd6_set_clock(struct sdhci_host *host,
->  		pr_debug("%s: phy init failed\n", __func__);
->  
->  	sdhci_set_clock(host, clock);
-> +
-> +	sdhci_cdns_sd6_dump(priv);
->  }
->  
->  static int sdhci_cdns_sd4_phy_probe(struct platform_device *pdev,
+Then, the MMC subsystem was consequently
+rewritten to use MQ to be able to take advantage of BFQ.
+It's why we pushed the conversion to MQ. To the point of creating
+social conflicts I might add. Not everyone loved converting MMC
+to MQ.
 
+Those changes are direct causes and effects, one to one.
+
+And now today all that work has made it possible for the MMC
+subsystem to perform as we wanted it to.
+
+Most MMC systems are interactive human operator-facing
+devices where interactivity matters. Any other MMC storage
+is secondary, uncommon and unimportant. It is called
+MultiMedia Card for a reason.
+
+So for MMC BFQ is a sensible default as an interactivity
+boosting scheduler. The kernel should provide sensible
+defaults.
+
+I do not see why it is not a sensible default for systems with
+MMC.
+
+Yours,
+Linus Walleij
