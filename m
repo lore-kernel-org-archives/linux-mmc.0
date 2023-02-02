@@ -2,102 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E26FDC05027
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 15:00:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A94F7C05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 15:23:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232733AbjBBPAI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Feb 2023 10:00:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39874 "EHLO
+        id S231478AbjBBPXC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Feb 2023 10:23:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232622AbjBBPAG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 10:00:06 -0500
-Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 608A02BEE7
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 07:00:02 -0800 (PST)
-Received: by mail-pj1-x1030.google.com with SMTP id 88so2138768pjo.3
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 07:00:02 -0800 (PST)
+        with ESMTP id S232632AbjBBPWy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 10:22:54 -0500
+Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8247315573
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 07:22:52 -0800 (PST)
+Received: by mail-pj1-x102f.google.com with SMTP id nm12-20020a17090b19cc00b0022c2155cc0bso2132640pjb.4
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 07:22:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=hjtSMcHdo/6LQulLVHOl8CPb0d7hVaersYbne3X+bik=;
-        b=zD1E9RVv6wVZMCze1+4pkl1PKVfZrFaNrEnCtfVqtxMutX3tSn1R3IuVi8wXqBa6P4
-         zkHB7WD8EZJordFXOW310lBfbWLS0loyhQaRJ6GtbcTFQSuSUiH6WjThav0zun+OIEBw
-         P4fIgWFFWP1gxlgS/Zgouibh4BGlxtBcI94SM/T7TEjdyfB2KyPPeA3iseJAVpIFdP6D
-         iClQL/jWN05/4EayDiAEXERg3PdellksQkzqpSzHLnuFPOGMixExvAE2MjIJ4rOPqfuF
-         KKPMa4p8jy/9VjI5YRF6hwbkBRK6khrRF+sIpnaGaGcBr3pDvPRz75Oaqi5SNzAFJSWN
-         TmBw==
+        bh=RDprxbolKOWdwwbIHMkRMigRdw+EGw2x6+hQir7JvSA=;
+        b=doQlECiin+IZHhqzYYBAGmG7ruHwjSzhZrT63tI0qaxrLqoCRt1F6MC0t09QD/nDRT
+         qSuJ5JdN672y3v5s81n3vaM1ZsRwnMcZ77rgWkAEuzW/FFQ//L6IRTdP8L1DkTKQYw64
+         o/NgLjAIM5f21e1RK6cv79FOSjj0PDlhytOWysU/jnj5OkZFhWEwAEeGRDvHWDpw3Fhc
+         2FOlPRmv8n7Asfb0qMnTDsgUmCmzjU4gQMdCas6sPEjWyfJvzEmlZ6pn/WENmrL8Snmz
+         OCR4N94EGcLG/ieyVTtMfy2YLdWlh/2sDOk0PkviZWyQjk2Bmigt+1bFBjANliUXJC5n
+         0fRA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=hjtSMcHdo/6LQulLVHOl8CPb0d7hVaersYbne3X+bik=;
-        b=TkBjioXHUpBcOtXXJeEaGjHfmiAv4GFL4Hh9GXPW1u8mFbkUEv/EhZSBwZ+rjYrv44
-         ipcSA9nviZIJwUpfqD+AzoazN5dKWxMG53ZCnr2ovDx7WJ6DA6o46x/HyPPCNo1hHRAI
-         cIjYSjWFJNuM8cF7qSO6rdzOJbkOg/1GmGh+Rfvvr+x4VenkcI+ilF6burBd9oRIwXM8
-         rvl6MBGeoGw8MWDymuDhXsDMYJvw28y/U1NFFb/0n5qqHuI3vwAM2YqsocKQk+fz42NU
-         UKiWmo0jl/mkoS2UMFFnwsDytUuSnLh7YqnAhdt8JtFDJ72ZsVZmJJEp85fX3BleDNH6
-         fbhw==
-X-Gm-Message-State: AO0yUKVSgFPTApWVP1aKlUgA6qSWuUDNKDTjJr4zyvARwmVMDNMJPoQm
-        sp17qXVs8ExDZLHSsilA8ikWHcPoBCRY1Vpt4+3dsQ==
-X-Google-Smtp-Source: AK7set9YKduFWnTdTRlctnFptPfKDcEe5mltzTPrSDe8AB+1hnqam2H1UBHfk2HaxsG9DmoA9IT8Hmk2x9+IrlfWkjs=
-X-Received: by 2002:a17:902:e807:b0:198:a084:faa9 with SMTP id
- u7-20020a170902e80700b00198a084faa9mr1529979plg.33.1675350001791; Thu, 02 Feb
- 2023 07:00:01 -0800 (PST)
+        bh=RDprxbolKOWdwwbIHMkRMigRdw+EGw2x6+hQir7JvSA=;
+        b=e/YosyB0AKRitjUQDuCDr3eu3eT7r5meqoIpmsBjZWclE8KrFemiTSwD+Hb6CFiMrK
+         0j0Q3LWsseTRjycpa5gV5HbmfAcQt2otpcM+0fqRVHuwYHC1QNdDYBWONM4iucGxzhQU
+         t5AxM49C+YPebjUSen7LECOgWc9oK9ECTljLDswv/ZtKOI1jFT8YDFZ/uRM4gTLM9Lyc
+         myabO3Bl5Ntfxu6V2e/5VqTUNV2QCmLaqR57UsIETrOyEe/EPPteRHaq+yB+3q0V3MIi
+         uwQLMd8z7FIRMT5+gv2Zh2Rc5wI26fzlsxo1FmTReBHj7fdbIsJDxkI3YFQ2z6LFSXB6
+         7hBg==
+X-Gm-Message-State: AO0yUKVZV1vh8+lNFqVSHRThV0Yt4xJGshbhkV+m3Y0VwA35OYFIzDw1
+        //vdYSSOShTF9cTOWLNG4XE/kFTehNugEdRbn3TfeIl7lnAu2A==
+X-Google-Smtp-Source: AK7set98New9iXm3ve35FJg7oNZjOErzLseWUSRPRNXVwcE7LzG/FJWndHiXjjUOs11lfhzwYHgb+c0FtlQ/B3QsQgc=
+X-Received: by 2002:a17:903:11c7:b0:196:1462:3279 with SMTP id
+ q7-20020a17090311c700b0019614623279mr1676619plh.17.1675351372019; Thu, 02 Feb
+ 2023 07:22:52 -0800 (PST)
 MIME-Version: 1.0
-References: <20230129023630.830764-1-chenhuiz@axis.com> <b43f26c9-f76c-c898-aadc-ce3ee7b7823d@linaro.org>
- <b125f25d-94c7-dd5b-28d3-3948c36ef4e0@axis.com> <a1d2ac4c-0763-5c92-be21-22820c376438@linaro.org>
-In-Reply-To: <a1d2ac4c-0763-5c92-be21-22820c376438@linaro.org>
+References: <20230131084742.1038135-1-linus.walleij@linaro.org>
+In-Reply-To: <20230131084742.1038135-1-linus.walleij@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 2 Feb 2023 15:59:25 +0100
-Message-ID: <CAPDyKFqX+1HBPmgXC9Apdb02F25J9ZTKRByqZQZn6Xx4Kf=Efg@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: Add cap-aggressive-pm property
-To:     Hermes Zhang <chenhuiz@axis.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        kernel@axis.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 2 Feb 2023 16:22:15 +0100
+Message-ID: <CAPDyKFrLetcCcFueJzZeWa-SVbsJcspwZ+nXWUDCGRXawxNhdg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 31 Jan 2023 at 17:57, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
+On Tue, 31 Jan 2023 at 09:47, Linus Walleij <linus.walleij@linaro.org> wrote:
 >
-> On 30/01/2023 07:54, Hermes Zhang wrote:
-> > On 2023/1/29 18:58, Krzysztof Kozlowski wrote:
-> >> On 29/01/2023 03:36, Hermes Zhang wrote:
-> >>> This commit add a new property: cap-aggressive-pm to enable the
-> >> Do not use "This commit/patch".
-> >> https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
-> >
-> > Done
-> >
-> >>> MMC_CAP_AGGRESSIVE_PM feature for (e)MMC/SD power saving.
-> >> Why this is a property suitable for DT? IOW, why this isn't enabled always?
-> >
-> > This property will benfit for the power consumption, but it also may
-> > degradation in performance as it will prevent the
-> >
-> > the card from executing internal house-keeping operations in idle mode.
-> > So it's better to config it from DT.
+> If we enable the MMC/SD block layer, use Kconfig to imply the BFQ
+> I/O scheduler.
 >
-> Why? DT is not for policy. How you described it, this is policy or
-> system tuning choice thus the job for Linux (OS), not for DT. So I will
-> repeat - why this property fits the purpose of DT (describe the hardware).
+> As all MMC/SD devices are single-queue, this is the scheduler that
+> users want so let's be helpful and make sure it gets
+> default-selected into a manual kernel configuration. It will still
+> need to be enabled at runtime (usually with udev scripts).
 >
+> Cc: linux-block@vger.kernel.org
+> Cc: Paolo Valente <paolo.valente@linaro.org>
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 
-I guess the HW perspective here, is that it might not fit all
-platforms nor the actual eMMC/SD card to support this feature.
-However, it still seems like a policy rather than a strict HW
-constraint.
+I have taken the various arguments (for and against), but I think
+$subject patch makes sense to me. In the end, this is about moving
+towards a more sensible default kernel configuration and the "imply"
+approach works fine for me.
 
-Perhaps there is a way to figure out in the host driver, to
-conditionally set the MMC_CAP_AGGRESSIVE_PM for the host, when needed
-instead?
+More importantly, $subject patch doesn't really hurt anything, as it's
+still perfectly fine to build MMC without I/O schedulers and BFQ, for
+those configurations that need this.
+
+That said, applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/core/Kconfig | 1 +
+>  1 file changed, 1 insertion(+)
+>
+> diff --git a/drivers/mmc/core/Kconfig b/drivers/mmc/core/Kconfig
+> index 6f25c34e4fec..52fe9d7c21cc 100644
+> --- a/drivers/mmc/core/Kconfig
+> +++ b/drivers/mmc/core/Kconfig
+> @@ -37,6 +37,7 @@ config PWRSEQ_SIMPLE
+>  config MMC_BLOCK
+>         tristate "MMC block device driver"
+>         depends on BLOCK
+> +       imply IOSCHED_BFQ
+>         default y
+>         help
+>           Say Y here to enable the MMC block device driver support.
+> --
+> 2.34.1
+>
