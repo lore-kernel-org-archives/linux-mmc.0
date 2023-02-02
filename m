@@ -2,122 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A04FC636D4
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 16:25:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 61E76C05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 18:04:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230070AbjBBQZW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Feb 2023 11:25:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37844 "EHLO
+        id S232093AbjBBSER (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Feb 2023 13:04:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229974AbjBBQZR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 11:25:17 -0500
-Received: from mail-wm1-x32d.google.com (mail-wm1-x32d.google.com [IPv6:2a00:1450:4864:20::32d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 305B3113E8
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 08:25:06 -0800 (PST)
-Received: by mail-wm1-x32d.google.com with SMTP id k8-20020a05600c1c8800b003dc57ea0dfeso4143768wms.0
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 08:25:06 -0800 (PST)
+        with ESMTP id S232253AbjBBSEP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 13:04:15 -0500
+Received: from mail-il1-x136.google.com (mail-il1-x136.google.com [IPv6:2607:f8b0:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 875AD1DBAD
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 10:04:07 -0800 (PST)
+Received: by mail-il1-x136.google.com with SMTP id m15so1082555ilh.9
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 10:04:07 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
+        d=kernel-dk.20210112.gappssmtp.com; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=xKkQ/MGYg75Krl7zSnOxIL9rasEvYWJbhYfIJlw/MJE=;
-        b=VoppvjbP97+x6wLZbumvfPPdxVNlasPUlw9jNftlxNfy8mPVVNtmggL+2ShSgBe8M2
-         5ENqCsAlY6CeslsI5+h+Sv/gTCpznE1L072jzeDK/jPPuFSjZNEWrqeouJpUGmcOO5qW
-         0ovjNG1NcTgB+qh663kL+4F1Ub80QHJtnAD7FmpCLDp44UjbHbeExNtVn/yhpCfeuZZf
-         gkgSPU7IRjqoEOlCBkQF5otqWDtojKUYTyquE9G/hOsKpw7RS8mwbh5A6tsm77niUfDg
-         9NPnTcOgzkiNpJg3ZpE5DCi3sAf0h/5qOPANnFLRr5aHGzCL/gyfhRl68fs0fmBkAu69
-         xnrQ==
+        bh=z7mJPXdAyQaNMenfmKVPe1FNvGsSeoHs0bYtrg1AgZQ=;
+        b=FehBfZo++g5qKEFE///0kNP14j2r+akWBT6YHaxhdz8T6i311HvoXAa2keCg1sqSrl
+         S/jig4aI1QTvXkHXAG7LMzr/XRbbu9a90wCfuDq/Pi1nuPNG3lTPn+XQ4GiLRhv9YUXR
+         8nZHGZwpQnllXb6WT6RbTjkUrxe/irjrNXGZcbXmfcSvReAmX8204wMS2EiLOXIxYqqR
+         bLe9GDlKqiuMyU2nY5HZXIBIOMBI0OVICz1D1dZqUjr4g8RuAKZU5PbBBublZpGkMCwd
+         1vJqO+JwinLzY2KvKYXJna8TFromRW32wIVdiwHxibxTc+yA72OwtUnelAPKbNvdu35W
+         apwQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=xKkQ/MGYg75Krl7zSnOxIL9rasEvYWJbhYfIJlw/MJE=;
-        b=KeioR3RFD/335mGzvitTfNPo3xUSJhI6k1PVTx167h/5al0ijStO+x6AR5FWi7pApJ
-         ivtMqV48HZBqHFta1S80X+6RCl9IY3vavxAlcSp/r2NV1jJwT4F7Np/tbzI27GBvqGdt
-         ra3yqWhuxmiFdFclBoqJRMKZ/L+VFSSU7wl9rhGGR6/N3K+y+GNre5Z6mvZijbXnq/tC
-         nCftEoGHWTRe2OWkXf0DHmCw6fPmx5S/6x5qjP/9lCbw7f4wBxw3Jo44T8HPGI6xh1IS
-         C6bQ9JfhEJpCDWiFMNxoeTzMCjEd9sUvZ/ZnJ66SI3XoScH924kRZqLrLSHhiliCEd2/
-         DPQw==
-X-Gm-Message-State: AO0yUKUMfPfu4SSbFX4JpY4AGKFbN75lZwZy9+2e61nCcdjedDZo+orn
-        aPnVDmBkeSRKSJmLJmH/ivHzaw==
-X-Google-Smtp-Source: AK7set8aBQAyjofXakT1skJQOIhl0iX3vO6X+TF2rtqyHnfL/CNseXBsu8Llf7cxLMReWw7evMX2lg==
-X-Received: by 2002:a05:600c:4e55:b0:3d9:e5d3:bf with SMTP id e21-20020a05600c4e5500b003d9e5d300bfmr6521824wmq.32.1675355104701;
-        Thu, 02 Feb 2023 08:25:04 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id y10-20020a05600c364a00b003daf7721bb3sm5084687wmq.12.2023.02.02.08.25.03
+        bh=z7mJPXdAyQaNMenfmKVPe1FNvGsSeoHs0bYtrg1AgZQ=;
+        b=gZz+09POsn8Urmrw0B9QS1pzJ47LWEg4Tk47ROo3s2ortR1j9yvmG+tI0INtzyjNqD
+         anIenGD0O45o5rlYik3yIvRgwNhKDAe5BMQtBc1ozHYUx82qu7ab5FvYoFf554Xvfgur
+         s3yo6NDCdV56lCRVrlbFxL6zEhTN/+ymWk/6MnCbQkwUfhZRK+KQOFUoVXNzpoq+KOxf
+         H3tA5PThIYHVAar/LvQLRr89KWpGlHYwFD4g4mslf9Txvb5ml05RSuWX0NV9GbVW0oeA
+         KtqYI0+Wrs5JlCjlyhNJYGem9e3kLWGUCNr4y9y455MmVNvuV6zpRcz8WCjO2IrnNr3u
+         PXxw==
+X-Gm-Message-State: AO0yUKXBUQHw9YCFtnI9IrUaP16QUlVQFlxmakjRtusXQqLyVXcWf0n9
+        iimzSAWr7FAeJM0ITVPtamvVhP8AtQmPwqpo
+X-Google-Smtp-Source: AK7set9KkDQIRAlOPw79OCZq9pMNaSE3B1kSx9yJIeCefckSXSJYplWQ5ZJvYh3SpPmp9udsI/GS2g==
+X-Received: by 2002:a92:d150:0:b0:311:1949:dd99 with SMTP id t16-20020a92d150000000b003111949dd99mr4130561ilg.3.1675361046771;
+        Thu, 02 Feb 2023 10:04:06 -0800 (PST)
+Received: from [192.168.1.94] ([96.43.243.2])
+        by smtp.gmail.com with ESMTPSA id g14-20020a05663811ce00b003b77432cc37sm111272jas.106.2023.02.02.10.04.05
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Feb 2023 08:25:04 -0800 (PST)
-Message-ID: <7ed270eb-decc-3a5d-589f-bf8175fac0d3@linaro.org>
-Date:   Thu, 2 Feb 2023 17:25:02 +0100
+        Thu, 02 Feb 2023 10:04:06 -0800 (PST)
+Message-ID: <98014ebd-7e57-0fc3-9ab0-49f4b727150d@kernel.dk>
+Date:   Thu, 2 Feb 2023 11:04:05 -0700
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+User-Agent: Mozilla/5.0 (X11; Linux aarch64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.1
-Subject: Re: [PATCH] dt-bindings: mmc: Add cap-aggressive-pm property
+Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
 Content-Language: en-US
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Hermes Zhang <chenhuiz@axis.com>
-Cc:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        kernel@axis.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20230129023630.830764-1-chenhuiz@axis.com>
- <b43f26c9-f76c-c898-aadc-ce3ee7b7823d@linaro.org>
- <b125f25d-94c7-dd5b-28d3-3948c36ef4e0@axis.com>
- <a1d2ac4c-0763-5c92-be21-22820c376438@linaro.org>
- <CAPDyKFqX+1HBPmgXC9Apdb02F25J9ZTKRByqZQZn6Xx4Kf=Efg@mail.gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <CAPDyKFqX+1HBPmgXC9Apdb02F25J9ZTKRByqZQZn6Xx4Kf=Efg@mail.gmail.com>
+        Linus Walleij <linus.walleij@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-block@vger.kernel.org,
+        Paolo Valente <paolo.valente@linaro.org>
+References: <20230131084742.1038135-1-linus.walleij@linaro.org>
+ <CAPDyKFrLetcCcFueJzZeWa-SVbsJcspwZ+nXWUDCGRXawxNhdg@mail.gmail.com>
+From:   Jens Axboe <axboe@kernel.dk>
+In-Reply-To: <CAPDyKFrLetcCcFueJzZeWa-SVbsJcspwZ+nXWUDCGRXawxNhdg@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 02/02/2023 15:59, Ulf Hansson wrote:
-> On Tue, 31 Jan 2023 at 17:57, Krzysztof Kozlowski
-> <krzysztof.kozlowski@linaro.org> wrote:
+On 2/2/23 8:22 AM, Ulf Hansson wrote:
+> On Tue, 31 Jan 2023 at 09:47, Linus Walleij <linus.walleij@linaro.org> wrote:
 >>
->> On 30/01/2023 07:54, Hermes Zhang wrote:
->>> On 2023/1/29 18:58, Krzysztof Kozlowski wrote:
->>>> On 29/01/2023 03:36, Hermes Zhang wrote:
->>>>> This commit add a new property: cap-aggressive-pm to enable the
->>>> Do not use "This commit/patch".
->>>> https://elixir.bootlin.com/linux/v5.17.1/source/Documentation/process/submitting-patches.rst#L95
->>>
->>> Done
->>>
->>>>> MMC_CAP_AGGRESSIVE_PM feature for (e)MMC/SD power saving.
->>>> Why this is a property suitable for DT? IOW, why this isn't enabled always?
->>>
->>> This property will benfit for the power consumption, but it also may
->>> degradation in performance as it will prevent the
->>>
->>> the card from executing internal house-keeping operations in idle mode.
->>> So it's better to config it from DT.
+>> If we enable the MMC/SD block layer, use Kconfig to imply the BFQ
+>> I/O scheduler.
 >>
->> Why? DT is not for policy. How you described it, this is policy or
->> system tuning choice thus the job for Linux (OS), not for DT. So I will
->> repeat - why this property fits the purpose of DT (describe the hardware).
+>> As all MMC/SD devices are single-queue, this is the scheduler that
+>> users want so let's be helpful and make sure it gets
+>> default-selected into a manual kernel configuration. It will still
+>> need to be enabled at runtime (usually with udev scripts).
 >>
+>> Cc: linux-block@vger.kernel.org
+>> Cc: Paolo Valente <paolo.valente@linaro.org>
+>> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 > 
-> I guess the HW perspective here, is that it might not fit all
-> platforms nor the actual eMMC/SD card to support this feature.
-> However, it still seems like a policy rather than a strict HW
-> constraint.
+> I have taken the various arguments (for and against), but I think
+> $subject patch makes sense to me. In the end, this is about moving
+> towards a more sensible default kernel configuration and the "imply"
+> approach works fine for me.
 > 
-> Perhaps there is a way to figure out in the host driver, to
-> conditionally set the MMC_CAP_AGGRESSIVE_PM for the host, when needed
-> instead?
+> More importantly, $subject patch doesn't really hurt anything, as it's
+> still perfectly fine to build MMC without I/O schedulers and BFQ, for
+> those configurations that need this.
+> 
+> That said, applied for next, thanks!
 
-What also worries me is that there is no user of this property: no DTS,
-no driver, so it is tricky to deduct out when it is applicable.
+It doesn't make sense, for all the reasons that Christoph applied.
+But you guys seemed to already have your mind made up and ignoring
+valid feedback, so...
 
-Anyway things which might be obvious for the submitter, might not be for
-the reviewer, thus I would really like to see justification why
-different boards (or memories) need this property.
+-- 
+Jens Axboe
 
-Best regards,
-Krzysztof
 
