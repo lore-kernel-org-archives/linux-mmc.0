@@ -2,132 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0EAEDC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Feb 2023 22:14:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B15CBC64EC5
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 07:14:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230373AbjBBWOO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Feb 2023 17:14:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40030 "EHLO
+        id S232102AbjBCHOg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Feb 2023 02:14:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229974AbjBBWON (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Feb 2023 17:14:13 -0500
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 911CA23DB4
-        for <linux-mmc@vger.kernel.org>; Thu,  2 Feb 2023 14:14:12 -0800 (PST)
-Received: by mail-yb1-xb33.google.com with SMTP id i2so872149ybt.2
-        for <linux-mmc@vger.kernel.org>; Thu, 02 Feb 2023 14:14:12 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Md74lIzR0o7460ORkMXn7KayL0aVbPKupRPBeuDbbTI=;
-        b=HRlsCWSs2dlebCLDmMtYuLDdArqtkMee6iQwte/VlkN1bbSWSHpDHWT/4je9mWPJp7
-         XgWSFXL3rw72a77sKpV5fXDQZyitEG5D7aUJKvATOj8z6s5XuDQ6k8YpAK86Q9+qcKe5
-         Cjfa7U0G5JCOuCU29CFkM6xInxzM9rWSDf9NivVjuXnS26g3GnzTfzlvJrStborIXI+7
-         phOG4nm/iHnXPn2lp5Vd40MAenaY08OtlvQtal4K/dIRzdMZvG6sEpdbIdSpRh3kXMvp
-         VfBKmyVJaEyu+t3DYYd5h9FD927ZiMrD4zKOeOOc+ANuYw68CRwq40W23G8F3FIdE52B
-         qSYw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Md74lIzR0o7460ORkMXn7KayL0aVbPKupRPBeuDbbTI=;
-        b=kkRS2vxeMKXO4fr488lk2v7ASaXkMVrh4d/ZhNaL9jX8pigVqxB4A47F4fwRiqaSAW
-         IdNjhD6A8o+3h+w37PYYYIq97CWHcToGTAvE4Jw1oY7Dnuukl42O78LXbYcu2fw74j9u
-         bTomcutPAQ3CtnD2hbNKhtfHcK5TeWPMNcl8P244mzQi5Yr14SZr3pAZEv4/tAoy5wHd
-         g57rfj39B+yHzGCbT3BaUrpUuct5xyfy8B4uYtWuN7cz0oBg1L2DlUxyW9U4u56NMA75
-         aDhfzrnlKDYPKsTVlmiI9hwKZfn2u1aFi0s8+Wf4y390o4sSaGdx3iEPWZhS+CGnTPGL
-         DLhw==
-X-Gm-Message-State: AO0yUKUGebNBO1WRJNREvQTZzsfAeLODNMvcI/gMCZYHX/Hot83ozHFr
-        qdQTVQEv8wRKuAzI39ZhHNoKW+nCoKgotErwkCxU9g==
-X-Google-Smtp-Source: AK7set8Ww53okW+GPRByKcLI9t2DJ87/pgwZwaQZjPnrIW92KM4QAuzw/T3WwMXedMTepXLt1YwySXkRQL98LHIhZws=
-X-Received: by 2002:a25:aa0b:0:b0:80b:c9d0:c676 with SMTP id
- s11-20020a25aa0b000000b0080bc9d0c676mr1107062ybi.341.1675376051809; Thu, 02
- Feb 2023 14:14:11 -0800 (PST)
+        with ESMTP id S231748AbjBCHOd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 02:14:33 -0500
+Received: from verein.lst.de (verein.lst.de [213.95.11.211])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E52A770997;
+        Thu,  2 Feb 2023 23:14:28 -0800 (PST)
+Received: by verein.lst.de (Postfix, from userid 2407)
+        id 9CB7868C4E; Fri,  3 Feb 2023 08:14:23 +0100 (CET)
+Date:   Fri, 3 Feb 2023 08:14:23 +0100
+From:   Christoph Hellwig <hch@lst.de>
+To:     John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+Cc:     Christoph Hellwig <hch@lst.de>,
+        Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-sh@vger.kernel.org
+Subject: Re: remove arch/sh
+Message-ID: <20230203071423.GA24833@lst.de>
+References: <20230113062339.1909087-1-hch@lst.de> <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de> <20230116071306.GA15848@lst.de> <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
 MIME-Version: 1.0
-References: <20230131084742.1038135-1-linus.walleij@linaro.org>
- <CAPDyKFrLetcCcFueJzZeWa-SVbsJcspwZ+nXWUDCGRXawxNhdg@mail.gmail.com> <98014ebd-7e57-0fc3-9ab0-49f4b727150d@kernel.dk>
-In-Reply-To: <98014ebd-7e57-0fc3-9ab0-49f4b727150d@kernel.dk>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 2 Feb 2023 23:14:00 +0100
-Message-ID: <CACRpkdacMR8wLX0O5qNAbeGxpJTo99F7XXCiZ+tUCuOO8=GcaQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Imply IOSCHED_BFQ
-To:     Jens Axboe <axboe@kernel.dk>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        linux-block@vger.kernel.org,
-        Paolo Valente <paolo.valente@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
+User-Agent: Mutt/1.5.17 (2007-11-01)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Feb 2, 2023 at 7:04 PM Jens Axboe <axboe@kernel.dk> wrote:
-> On 2/2/23 8:22=E2=80=AFAM, Ulf Hansson wrote:
-> > On Tue, 31 Jan 2023 at 09:47, Linus Walleij <linus.walleij@linaro.org> =
-wrote:
-> >>
-> >> If we enable the MMC/SD block layer, use Kconfig to imply the BFQ
-> >> I/O scheduler.
-> >>
-> >> As all MMC/SD devices are single-queue, this is the scheduler that
-> >> users want so let's be helpful and make sure it gets
-> >> default-selected into a manual kernel configuration. It will still
-> >> need to be enabled at runtime (usually with udev scripts).
-> >>
-> >> Cc: linux-block@vger.kernel.org
-> >> Cc: Paolo Valente <paolo.valente@linaro.org>
-> >> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> >
-> > I have taken the various arguments (for and against), but I think
-> > $subject patch makes sense to me. In the end, this is about moving
-> > towards a more sensible default kernel configuration and the "imply"
-> > approach works fine for me.
-> >
-> > More importantly, $subject patch doesn't really hurt anything, as it's
-> > still perfectly fine to build MMC without I/O schedulers and BFQ, for
-> > those configurations that need this.
-> >
-> > That said, applied for next, thanks!
->
-> It doesn't make sense, for all the reasons that Christoph applied.
-> But you guys seemed to already have your mind made up and ignoring
-> valid feedback, so...
+On Mon, Jan 16, 2023 at 09:52:10AM +0100, John Paul Adrian Glaubitz wrote:
+> We have had a discussion between multiple people invested in the SuperH port and
+> I have decided to volunteer as a co-maintainer of the port to support Rich Felker
+> when he isn't available.
 
-The history leading us here as I see it:
-
-In 2017 or if it was 2016 I think Paolo and Ulf started to look into
-BFQ for improving the user experience with MMC on embedded
-devices such as phones, tablets etc. I.e all systems using it.
-
-As BFQ was not accepted for the old block layer it was adopted
-for the MQ rewrite, as I understood a bit as "the new CFQ" for
-slow single-queued devices.
-
-Then, the MMC subsystem was consequently
-rewritten to use MQ to be able to take advantage of BFQ.
-It's why we pushed the conversion to MQ. To the point of creating
-social conflicts I might add. Not everyone loved converting MMC
-to MQ.
-
-Those changes are direct causes and effects, one to one.
-
-And now today all that work has made it possible for the MMC
-subsystem to perform as we wanted it to.
-
-Most MMC systems are interactive human operator-facing
-devices where interactivity matters. Any other MMC storage
-is secondary, uncommon and unimportant. It is called
-MultiMedia Card for a reason.
-
-So for MMC BFQ is a sensible default as an interactivity
-boosting scheduler. The kernel should provide sensible
-defaults.
-
-I do not see why it is not a sensible default for systems with
-MMC.
-
-Yours,
-Linus Walleij
+So, this still isn't reflected in MAINTAINERS in linux-next.  When
+do you plan to take over?  What platforms will remain supported and
+what can we start dropping due to being unused and unmaintained?
