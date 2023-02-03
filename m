@@ -2,104 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FDE6C6379F
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 16:05:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79ED4C64EC4
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 20:57:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233312AbjBCQFK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Feb 2023 11:05:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36580 "EHLO
+        id S232198AbjBCU5x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Feb 2023 15:57:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43234 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233297AbjBCQFG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 11:05:06 -0500
-Received: from mail-yw1-f181.google.com (mail-yw1-f181.google.com [209.85.128.181])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6F866A2A4C;
-        Fri,  3 Feb 2023 08:05:03 -0800 (PST)
-Received: by mail-yw1-f181.google.com with SMTP id 00721157ae682-51ba4b1b9feso73909487b3.11;
-        Fri, 03 Feb 2023 08:05:03 -0800 (PST)
+        with ESMTP id S229448AbjBCU5w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 15:57:52 -0500
+Received: from mail-ot1-f46.google.com (mail-ot1-f46.google.com [209.85.210.46])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C104F928F2;
+        Fri,  3 Feb 2023 12:57:50 -0800 (PST)
+Received: by mail-ot1-f46.google.com with SMTP id 70-20020a9d084c000000b0068bccf754f1so1742405oty.7;
+        Fri, 03 Feb 2023 12:57:50 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7wIYdPVdo9w8wJeFawgcWpGlCHgpXqP0aU2proD/z4A=;
-        b=h7Y+KCF7rYYuzKa23/XVH7EqKMk5LTZnVw2PqeMnOFM+xWLo9NJHdhJ7VXQEzh/jEQ
-         43USwhMjApuBXpP8uDT4/9ZWtcfiac4as5JkOYvgtFByz33C36/DfwkQOIfY4SCuqGDK
-         Hv9r2B8MXFnnKurrI2YIIpkW+iLxoK+7IxwMN41GkLxe5SYkAMuhmyEdUiIf3h+NbtlV
-         Vjrsgdy/0uWZlA6GCyhPVQQLTybtIXlZAYgovWjXFPEmbkXmJ1R6oNLeW1Q9wjp7INOt
-         dpYwOYdzkRdvH3M1sRrIE5bOaaFyPkuU4ojNBjyPoq103GnN5D0iyOl6ib+Yx3KeeBsY
-         CkPA==
-X-Gm-Message-State: AO0yUKUt0cK5Wr875sm9z9U0bJzP+91+5+O4ghRPfaBfRmU8ORcDIFi3
-        96J/1/Ux8eteagW4UXGq2OK0nBZCNN5sEw==
-X-Google-Smtp-Source: AK7set/a/Eq2gP6R7fciPiamzKQR29gjZ+vbzZcYT0ptMjiTbNLQIWRvobf0piyfY0iq11BERjizRw==
-X-Received: by 2002:a0d:d648:0:b0:506:4342:1a2d with SMTP id y69-20020a0dd648000000b0050643421a2dmr7042060ywd.12.1675440302426;
-        Fri, 03 Feb 2023 08:05:02 -0800 (PST)
-Received: from mail-yb1-f179.google.com (mail-yb1-f179.google.com. [209.85.219.179])
-        by smtp.gmail.com with ESMTPSA id r195-20020a37a8cc000000b0071ddbe8fe23sm2101905qke.24.2023.02.03.08.05.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 03 Feb 2023 08:05:02 -0800 (PST)
-Received: by mail-yb1-f179.google.com with SMTP id 74so6528236ybl.12;
-        Fri, 03 Feb 2023 08:05:01 -0800 (PST)
-X-Received: by 2002:a5b:941:0:b0:865:e214:f4e3 with SMTP id
- x1-20020a5b0941000000b00865e214f4e3mr352487ybq.604.1675440301482; Fri, 03 Feb
- 2023 08:05:01 -0800 (PST)
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=DTUpcYkNxPIlJHACYCYR7pDb1Buy+e4lFP4bk5Zgp34=;
+        b=D6kjA0iDCoHbJoW0/A85Gd/DEhgeFoqvSv2XUAWEbb1o+0YfaV5M3siOzoHq6v+lem
+         V8B6SLkgyxx/W3zB640h3M9fhSuQRaR8LNQQOuiUzmt1QdoYEVcn76JrF6ewHHqp3BxN
+         Hy2T0sAe3/8AOzMRx9zYqk92gEFBgmAH0ufB0/8eI8xfuhJfuVaupJ3T1XZ1archyji/
+         Nola6qXtDnqlRQdvhMBBBSETrlm+Jd6/+GcxoM2hwr0JFnTnXCwe2grgSZIh27ikr6Um
+         mpX2POkA56H64IeN4GJVZ1uydAwgcMldwGbymiD8KpgUN+uUj18tRkFOctge3sIMEhyG
+         8cTg==
+X-Gm-Message-State: AO0yUKVPGuB7WkOnxV5ZFvTP+YeGM2mRoFmSfcEhOqt90HjqZ1lrYGhk
+        EH1ec8I1KvYGvqaHgJ3Iqw==
+X-Google-Smtp-Source: AK7set/idxy63+ygBDyPnMqtJWkCkCzx9MyU4A+nT1Br4FymPkR4Z0JILK7N/Htqiz/3btTinW8cgQ==
+X-Received: by 2002:a05:6830:1e57:b0:68b:b721:8f1c with SMTP id e23-20020a0568301e5700b0068bb7218f1cmr6718583otj.27.1675457869992;
+        Fri, 03 Feb 2023 12:57:49 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id c22-20020a9d6856000000b0068bd5af9b82sm1611458oto.43.2023.02.03.12.57.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 03 Feb 2023 12:57:49 -0800 (PST)
+Received: (nullmailer pid 873929 invoked by uid 1000);
+        Fri, 03 Feb 2023 20:57:48 -0000
+Date:   Fri, 3 Feb 2023 14:57:48 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     Gatien Chevallier <gatien.chevallier@foss.st.com>
+Cc:     Oleksii_Moisieiev@epam.com, gregkh@linuxfoundation.org,
+        herbert@gondor.apana.org.au, davem@davemloft.net,
+        krzysztof.kozlowski+dt@linaro.org, alexandre.torgue@foss.st.com,
+        vkoul@kernel.org, jic23@kernel.org, olivier.moysan@foss.st.com,
+        arnaud.pouliquen@foss.st.com, mchehab@kernel.org,
+        fabrice.gasnier@foss.st.com, ulf.hansson@linaro.org,
+        edumazet@google.com, kuba@kernel.org, pabeni@redhat.com,
+        linux-crypto@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-iio@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org, linux-phy@lists.infradead.org,
+        linux-serial@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-usb@vger.kernel.org
+Subject: Re: [PATCH v3 2/6] dt-bindings: treewide: add feature-domains
+ description in binding files
+Message-ID: <20230203205748.GA860175-robh@kernel.org>
+References: <20230127164040.1047583-1-gatien.chevallier@foss.st.com>
+ <20230127164040.1047583-3-gatien.chevallier@foss.st.com>
 MIME-Version: 1.0
-References: <20230113062339.1909087-1-hch@lst.de> <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
- <20230116071306.GA15848@lst.de> <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
- <20230203071423.GA24833@lst.de> <afd056a95d21944db1dc0c9708f692dd1f7bb757.camel@physik.fu-berlin.de>
- <20230203083037.GA30738@lst.de> <d10fe31b2af6cf4e03618f38ca9d3ca5c72601ed.camel@physik.fu-berlin.de>
- <CAMuHMdUitVfW088YOmqYm4kwbKwkwb22fAakHcu6boxv7dXDfQ@mail.gmail.com> <f6a60193-a5d1-c42c-158a-4b0bfe9c7538@infradead.org>
-In-Reply-To: <f6a60193-a5d1-c42c-158a-4b0bfe9c7538@infradead.org>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Fri, 3 Feb 2023 17:04:49 +0100
-X-Gmail-Original-Message-ID: <CAMuHMdWJ3XOBewDoU8umAHc6b83hJQge5xjY3Cxx03AvoiR7iQ@mail.gmail.com>
-Message-ID: <CAMuHMdWJ3XOBewDoU8umAHc6b83hJQge5xjY3Cxx03AvoiR7iQ@mail.gmail.com>
-Subject: Re: remove arch/sh
-To:     Randy Dunlap <rdunlap@infradead.org>
-Cc:     John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
-        Christoph Hellwig <hch@lst.de>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230127164040.1047583-3-gatien.chevallier@foss.st.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Randy,
+On Fri, Jan 27, 2023 at 05:40:36PM +0100, Gatien Chevallier wrote:
+> feature-domains is an optional property that allows a peripheral to
+> refer to one or more feature domain controller(s).
+> 
+> Description of this property is added to all peripheral binding files of
+> the peripheral under the STM32 System Bus. It allows an accurate
+> representation of the hardware, where various peripherals are connected
+> to this firewall bus. The firewall can then check the peripheral accesses
+> before allowing it to probe.
+> 
+> Signed-off-by: Gatien Chevallier <gatien.chevallier@foss.st.com>
+> ---
+> 
+> Patch not present in V1 and V2.
+> 
+>  Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml | 5 +++++
+>  Documentation/devicetree/bindings/dma/st,stm32-dma.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/dma/st,stm32-dmamux.yaml  | 5 +++++
+>  Documentation/devicetree/bindings/i2c/st,stm32-i2c.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/iio/adc/st,stm32-adc.yaml | 5 +++++
+>  .../devicetree/bindings/iio/adc/st,stm32-dfsdm-adc.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/iio/dac/st,stm32-dac.yaml | 5 +++++
+>  Documentation/devicetree/bindings/media/st,stm32-cec.yaml   | 5 +++++
+>  Documentation/devicetree/bindings/media/st,stm32-dcmi.yaml  | 5 +++++
+>  .../bindings/memory-controllers/st,stm32-fmc2-ebi.yaml      | 5 +++++
+>  Documentation/devicetree/bindings/mfd/st,stm32-lptimer.yaml | 5 +++++
+>  Documentation/devicetree/bindings/mfd/st,stm32-timers.yaml  | 6 ++++++
+>  Documentation/devicetree/bindings/mmc/arm,pl18x.yaml        | 5 +++++
+>  Documentation/devicetree/bindings/net/stm32-dwmac.yaml      | 5 +++++
+>  .../devicetree/bindings/phy/phy-stm32-usbphyc.yaml          | 5 +++++
+>  .../devicetree/bindings/regulator/st,stm32-vrefbuf.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/rng/st,stm32-rng.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/serial/st,stm32-uart.yaml | 5 +++++
+>  Documentation/devicetree/bindings/sound/st,stm32-i2s.yaml   | 5 +++++
+>  Documentation/devicetree/bindings/sound/st,stm32-sai.yaml   | 5 +++++
+>  .../devicetree/bindings/sound/st,stm32-spdifrx.yaml         | 5 +++++
+>  Documentation/devicetree/bindings/spi/st,stm32-qspi.yaml    | 5 +++++
+>  Documentation/devicetree/bindings/spi/st,stm32-spi.yaml     | 5 +++++
+>  Documentation/devicetree/bindings/usb/dwc2.yaml             | 5 +++++
+>  24 files changed, 121 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> index 4ccb335e8063..cb2ad7d5fdb5 100644
+> --- a/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> +++ b/Documentation/devicetree/bindings/crypto/st,stm32-hash.yaml
+> @@ -41,6 +41,11 @@ properties:
+>      maximum: 2
+>      default: 0
+>  
+> +  feature-domains:
+> +    $ref: /schemas/feature-controllers/feature-domain-controller.yaml#/properties/feature-domains
 
-On Fri, Feb 3, 2023 at 4:57 PM Randy Dunlap <rdunlap@infradead.org> wrote:
-> Is this "sh64" still accurate and applicable? from Documentation/kbuild/kbuild.rst:
->
-> But some architectures such as x86 and sparc have aliases.
->
-> - x86: i386 for 32 bit, x86_64 for 64 bit
-> - sh: sh for 32 bit, sh64 for 64 bit <<<<<<<<<<<<<<<
-> - sparc: sparc32 for 32 bit, sparc64 for 64 bit
+Not how common properties work. Consumer properties should be in a 
+schema with 'select: true' (the one you are referencing) and here you 
+just need to define the entries. Like clocks, power-domains, etc.
 
-No, support for sh64 was removed in commit 37744feebc086908
-("sh: remove sh5 support") in v5.8.
+> +    minItems: 1
+> +    maxItems: 3
 
-Gr{oetje,eeting}s,
+Why is this variable and what is each entry?
 
-                        Geert
+I still don't like the naming. Everything is a feature and a domain... 
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+It might be a bit easier to come up with a name with multiple users of 
+this binding presented. I'm hesistant to define any new common binding 
+with only 1 user as I've said multiple times on this binding.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+Rob
