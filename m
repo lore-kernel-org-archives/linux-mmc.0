@@ -2,73 +2,88 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 178ACC64EC3
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 07:25:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CDB79C636D6
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 08:21:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232315AbjBCHZX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Feb 2023 02:25:23 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46114 "EHLO
+        id S232997AbjBCIV2 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Feb 2023 03:21:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232056AbjBCHZV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 02:25:21 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0ABA8C1E8;
-        Thu,  2 Feb 2023 23:25:19 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8B4BE61DB8;
-        Fri,  3 Feb 2023 07:25:19 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 5B9EAC433D2;
-        Fri,  3 Feb 2023 07:25:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1675409118;
-        bh=w/73Uc/n5KxsufzX5CddSnsJWhi8Tl5rHcWOUj980gE=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=KvD8eTpjLOtWB+UEaur78gdbkDk2uNg4iTyG7EduGBBQeFYYfDMJR0zI5M46iGXgI
-         B/g60xlZj15BQnrefnVhdWcwV0eYwBhVI1fWaHKJRFJ022Eb8m0gihPo6B9goL/ROM
-         S4BKuWCyK0zSKt6MO3m0b0jgs8LUO3Xke14ThSpk=
-Date:   Fri, 3 Feb 2023 08:25:15 +0100
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-Subject: Re: [PATCH 02/22] usb: remove the dead USB_OHCI_SH option
-Message-ID: <Y9y221RalpLWJE0S@kroah.com>
-References: <20230113062339.1909087-1-hch@lst.de>
- <20230113062339.1909087-3-hch@lst.de>
- <Y8EEbCP6PRMzWP5y@kroah.com>
- <20230203071542.GC24833@lst.de>
+        with ESMTP id S232999AbjBCIVI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 03:21:08 -0500
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A96D6A73B;
+        Fri,  3 Feb 2023 00:19:37 -0800 (PST)
+Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id F0C7224E1D1;
+        Fri,  3 Feb 2023 16:19:14 +0800 (CST)
+Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX166.cuchost.com
+ (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 3 Feb
+ 2023 16:19:15 +0800
+Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
+ by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
+ 15.0.1497.42; Fri, 3 Feb 2023 16:19:13 +0800
+From:   William Qiu <william.qiu@starfivetech.com>
+To:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        William Qiu <william.qiu@starfivetech.com>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v3 0/3] StarFive's SDIO/eMMC driver support
+Date:   Fri, 3 Feb 2023 16:19:10 +0800
+Message-ID: <20230203081913.81968-1-william.qiu@starfivetech.com>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230203071542.GC24833@lst.de>
+Content-Type: text/plain
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX168.cuchost.com
+ (172.16.6.78)
+X-YovoleRuleAgent: yovoleflag
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Feb 03, 2023 at 08:15:42AM +0100, Christoph Hellwig wrote:
-> On Fri, Jan 13, 2023 at 08:12:44AM +0100, Greg Kroah-Hartman wrote:
-> > Do you want all of these to go through a single tree, or can they go
-> > through the different driver subsystem trees?
-> 
-> Looks like the big removal isn't going in for this merge winodw,
-> so can you queue this patch up after all Greg?
+Hi,
 
-Sure, I'll go apply it right now, thanks.
+This patchset adds initial rudimentary support for the StarFive
+designware mobile storage host controller driver. And this driver will
+be used in StarFive's VisionFive 2 board. The main purpose of adding
+this driver is to accommodate the ultra-high speed mode of eMMC.
 
-greg k-h
+The last patch should be applied after the patchset [1]:
+[1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
+
+Changes since v2:
+- Wraped commit message according to Linux coding style.
+- Rephrased the description of the patches.
+- Changed the description of syscon regsiter.
+- Dropped redundant properties.
+
+The patch series is based on v6.1.
+
+William Qiu (3):
+  dt-bindings: mmc: Add StarFive MMC module
+  mmc: starfive: Add sdio/emmc driver support
+  riscv: dts: starfive: Add mmc node
+
+ .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
+ MAINTAINERS                                   |   6 +
+ .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
+ arch/riscv/boot/dts/starfive/jh7110.dtsi      |  37 ++++
+ drivers/mmc/host/Kconfig                      |  10 +
+ drivers/mmc/host/Makefile                     |   1 +
+ drivers/mmc/host/dw_mmc-starfive.c            | 185 ++++++++++++++++++
+ 7 files changed, 339 insertions(+)
+ create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+ create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
+
+--
+2.34.1
+
