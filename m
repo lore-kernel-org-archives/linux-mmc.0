@@ -2,148 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 463B1C63797
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 08:21:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C114C64EC7
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Feb 2023 08:26:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232673AbjBCIVa convert rfc822-to-8bit (ORCPT
+        id S232771AbjBCI0q convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Feb 2023 03:21:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56428 "EHLO
+        Fri, 3 Feb 2023 03:26:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232600AbjBCIVJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 03:21:09 -0500
-Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D52A22822D;
-        Fri,  3 Feb 2023 00:19:40 -0800 (PST)
-Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 86E4024E1D4;
-        Fri,  3 Feb 2023 16:19:15 +0800 (CST)
-Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
- (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 3 Feb
- 2023 16:19:15 +0800
-Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
- by EXMBX168.cuchost.com (172.16.6.78) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Fri, 3 Feb 2023 16:19:14 +0800
-From:   William Qiu <william.qiu@starfivetech.com>
-To:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        William Qiu <william.qiu@starfivetech.com>,
-        <linux-kernel@vger.kernel.org>
-Subject: [PATCH v3 1/3] dt-bindings: mmc: Add StarFive MMC module
-Date:   Fri, 3 Feb 2023 16:19:11 +0800
-Message-ID: <20230203081913.81968-2-william.qiu@starfivetech.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230203081913.81968-1-william.qiu@starfivetech.com>
-References: <20230203081913.81968-1-william.qiu@starfivetech.com>
-MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX168.cuchost.com
- (172.16.6.78)
-X-YovoleRuleAgent: yovoleflag
+        with ESMTP id S232435AbjBCI0W (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Feb 2023 03:26:22 -0500
+Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F17E395D08;
+        Fri,  3 Feb 2023 00:24:59 -0800 (PST)
+Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
+          by outpost.zedat.fu-berlin.de (Exim 4.95)
+          with esmtps (TLS1.3)
+          tls TLS_AES_256_GCM_SHA384
+          (envelope-from <glaubitz@zedat.fu-berlin.de>)
+          id 1pNrNI-003Nx4-Ij; Fri, 03 Feb 2023 09:24:48 +0100
+Received: from p57bd9464.dip0.t-ipconnect.de ([87.189.148.100] helo=[192.168.178.81])
+          by inpost2.zedat.fu-berlin.de (Exim 4.95)
+          with esmtpsa (TLS1.3)
+          tls TLS_AES_256_GCM_SHA384
+          (envelope-from <glaubitz@physik.fu-berlin.de>)
+          id 1pNrNI-0042Ei-Ac; Fri, 03 Feb 2023 09:24:48 +0100
+Message-ID: <afd056a95d21944db1dc0c9708f692dd1f7bb757.camel@physik.fu-berlin.de>
+Subject: Re: remove arch/sh
+From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+To:     Christoph Hellwig <hch@lst.de>
+Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-sh@vger.kernel.org
+Date:   Fri, 03 Feb 2023 09:24:46 +0100
+In-Reply-To: <20230203071423.GA24833@lst.de>
+References: <20230113062339.1909087-1-hch@lst.de>
+         <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
+         <20230116071306.GA15848@lst.de>
+         <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
+         <20230203071423.GA24833@lst.de>
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
+User-Agent: Evolution 3.46.3 
+MIME-Version: 1.0
+X-Original-Sender: glaubitz@physik.fu-berlin.de
+X-Originating-IP: 87.189.148.100
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add documentation to describe StarFive designware mobile storage
-host controller driver.
+Hello Christoph!
 
-Signed-off-by: William Qiu <william.qiu@starfivetech.com>
----
- .../bindings/mmc/starfive,jh7110-mmc.yaml     | 77 +++++++++++++++++++
- 1 file changed, 77 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+On Fri, 2023-02-03 at 08:14 +0100, Christoph Hellwig wrote:
+> On Mon, Jan 16, 2023 at 09:52:10AM +0100, John Paul Adrian Glaubitz wrote:
+> > We have had a discussion between multiple people invested in the SuperH port and
+> > I have decided to volunteer as a co-maintainer of the port to support Rich Felker
+> > when he isn't available.
+> 
+> So, this still isn't reflected in MAINTAINERS in linux-next.  When
+> do you plan to take over?
 
-diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-new file mode 100644
-index 000000000000..deacf8e9cfb2
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-@@ -0,0 +1,77 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/starfive,jh7110-mmc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: StarFive Designware Mobile Storage Host Controller
-+
-+description:
-+  StarFive uses the Synopsys designware mobile storage host controller
-+  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
-+
-+allOf:
-+  - $ref: synopsys-dw-mshc-common.yaml#
-+
-+maintainers:
-+  - William Qiu <william.qiu@starfivetech.com>
-+
-+properties:
-+  compatible:
-+    const: starfive,jh7110-mmc
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    items:
-+      - description: biu clock
-+      - description: ciu clock
-+
-+  clock-names:
-+    items:
-+      - const: biu
-+      - const: ciu
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  starfive,sysreg:
-+    $ref: /schemas/types.yaml#/definitions/phandle-array
-+    items:
-+      - items:
-+          - description: phandle to System Register Controller syscon node
-+          - description: offset of SYS_SYSCONSAIF__SYSCFG register for MMC controller
-+          - description: shift of SYS_SYSCONSAIF__SYSCFG register for MMC controller
-+          - description: mask of SYS_SYSCONSAIF__SYSCFG register for MMC controller
-+    description:
-+      Should be four parameters, the phandle to System Register Controller
-+      syscon node and the offset/shift/mask of SYS_SYSCONSAIF__SYSCFG register
-+      for MMC controller.
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - clock-names
-+  - interrupts
-+  - starfive,sysreg
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    mmc@16010000 {
-+        compatible = "starfive,jh7110-mmc";
-+        reg = <0x16010000 0x10000>;
-+        clocks = <&syscrg 91>,
-+                 <&syscrg 93>;
-+        clock-names = "biu","ciu";
-+        resets = <&syscrg 64>;
-+        reset-names = "reset";
-+        interrupts = <74>;
-+        fifo-depth = <32>;
-+        fifo-watermark-aligned;
-+        data-addr = <0>;
-+        starfive,sysreg = <&sysreg 0x14 0x1a 0x7c000000>;
-+    };
+Since this is my very first time stepping up as a kernel maintainer, I was hoping
+to get some pointers on what to do to make this happen.
+
+So far, we have set up a new kernel tree and I have set up a local development and
+test environment for SH kernels using my SH7785LCR board as the target platform.
+
+Do I just need to send a patch asking to change the corresponding entry in the
+MAINTAINERS file?
+
+> What platforms will remain supported and what can we start dropping due to
+> being unused and unmaintained?
+
+This has not been sorted out yet.
+
+Adrian
+
 -- 
-2.34.1
-
+ .''`.  John Paul Adrian Glaubitz
+: :' :  Debian Developer
+`. `'   Physicist
+  `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
