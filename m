@@ -2,92 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 738EDC64ED6
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Feb 2023 09:07:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 16394C636D6
+	for <linux-mmc@archiver.kernel.org>; Tue,  7 Feb 2023 11:00:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231381AbjBGJHN convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Feb 2023 04:07:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49380 "EHLO
+        id S231876AbjBGLAa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 7 Feb 2023 06:00:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229690AbjBGJHM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2023 04:07:12 -0500
-Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68931234DF;
-        Tue,  7 Feb 2023 01:07:08 -0800 (PST)
-Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
-          by outpost.zedat.fu-berlin.de (Exim 4.95)
-          with esmtps (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@zedat.fu-berlin.de>)
-          id 1pPJwG-001RJZ-JC; Tue, 07 Feb 2023 10:06:56 +0100
-Received: from p57bd9464.dip0.t-ipconnect.de ([87.189.148.100] helo=[192.168.178.81])
-          by inpost2.zedat.fu-berlin.de (Exim 4.95)
-          with esmtpsa (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@physik.fu-berlin.de>)
-          id 1pPJwE-000mCw-Hc; Tue, 07 Feb 2023 10:06:56 +0100
-Message-ID: <60ed320c8f5286e8dbbf71be29b760339fd25069.camel@physik.fu-berlin.de>
-Subject: Re: remove arch/sh
-From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
-To:     Christoph Hellwig <hch@lst.de>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-Date:   Tue, 07 Feb 2023 10:06:53 +0100
-In-Reply-To: <20230203071423.GA24833@lst.de>
-References: <20230113062339.1909087-1-hch@lst.de>
-         <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
-         <20230116071306.GA15848@lst.de>
-         <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
-         <20230203071423.GA24833@lst.de>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-User-Agent: Evolution 3.46.3 
+        with ESMTP id S231883AbjBGLA0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Feb 2023 06:00:26 -0500
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1FEF39CFB
+        for <linux-mmc@vger.kernel.org>; Tue,  7 Feb 2023 03:00:24 -0800 (PST)
+Received: by mail-pj1-x1031.google.com with SMTP id v6-20020a17090ad58600b00229eec90a7fso1369640pju.0
+        for <linux-mmc@vger.kernel.org>; Tue, 07 Feb 2023 03:00:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=8+jhmIIz48dIXQX2IFPY0M3iWQXpZf8pO+LrMnazejU=;
+        b=hMhZBrkwn9mu5rwO8P/wWBjO2hseEQQzHCJR2ZiThOOEH2glFvgReRPEFc6st2394h
+         KJToZcnRQCop96jBGOSm+FA6D8/nUtORcBXIj+aI2pqB5s4kh+qkXg9yYTVeeX2VLhP+
+         7yEuqZYYWjbxlzQrAywc/9namt2wZI0VALX6GfWH53wjYbKOBfzrMdgBObVwi6PkGtsL
+         xzYhfX66LrbNCKS67UbfEQXkmFwQadAvEjYHkMULhFbxkhWglOBz+VXTZ4oqbDWMZEtQ
+         sPiDLdzJLh0waxyM3hMvfubtsZ2vuUWFuXRpe7Gvoz9s1mIBwv6uYRV0LvO006WHGZie
+         WoTA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=8+jhmIIz48dIXQX2IFPY0M3iWQXpZf8pO+LrMnazejU=;
+        b=5qm2AvbFTKZFGWasrg6ojLuqeGc6YYgBjFvksKS35Zflvr99WcN+hJ5gtH1bDfX5Q3
+         CJZf/b2KdByZRslhGC8QjJAdbX/crxCeqSDWjl2MD5Lp5PrUrwwSdscMxMpLtQW+LTqy
+         MNlT9gcAISY1vScBEZX3fiJ6nfkJFAkkr45RlgFU5rDsBftzunoHfu3I+srXbW/JnH+y
+         PyapaM8caliCJL/TYfP7QSeRcPImAU1MQ4PL9ZPaO1FCMMLpPDTKFHMDp/dY0PAyZcui
+         KOiXV6sH0EUMsRAHmWA4akIf+6dWcL8Kovej/3y+FIedA2iuWTga+fyjgJ+4YK6xPSnZ
+         HjkQ==
+X-Gm-Message-State: AO0yUKWsVldulr+HrngVBZ+bRy0Gkd1MXqm2hDhNoT6S+tqnmUvqhLyx
+        CWHx589dDuRkwlrZIt/7LTD3vLQta6KhghUdFNOEGw==
+X-Google-Smtp-Source: AK7set83msoaMiTXRrS5ta9B0EOybiGY0PCDj8JRYR9tI5TDFdGRWQJC3vfZF78+7WvToBf8qOiWISFUOlFdc4SubaE=
+X-Received: by 2002:a17:90a:d24f:b0:230:d1d5:2041 with SMTP id
+ o15-20020a17090ad24f00b00230d1d52041mr1289670pjw.109.1675767624059; Tue, 07
+ Feb 2023 03:00:24 -0800 (PST)
 MIME-Version: 1.0
-X-Original-Sender: glaubitz@physik.fu-berlin.de
-X-Originating-IP: 87.189.148.100
+References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw> <20221213090047.3805-6-victor.shih@genesyslogic.com.tw>
+In-Reply-To: <20221213090047.3805-6-victor.shih@genesyslogic.com.tw>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 7 Feb 2023 11:59:47 +0100
+Message-ID: <CAPDyKFrE8CBPu5GsnBrt9U4=UnCVdhR3UAeAC6Ab8P1EXVsHAw@mail.gmail.com>
+Subject: Re: [PATCH V6 05/24] mmc: core: Add definitions for SD UHS-II cards
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     adrian.hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Jason Lai <jason.lai@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Christoph!
+On Tue, 13 Dec 2022 at 10:01, Victor Shih <victorshihgli@gmail.com> wrote:
+>
+> Add UHS-II specific data structures for commands and defines for
+> registers, as described in Part 1 UHS-II Addendum Version 1.01.
+>
+> UHS-II related definitions are listed below:
+>   1. UHS-II card capability: sd_uhs2_caps{}
+>   2. UHS-II configuration: sd_uhs2_config{}
+>   3. UHS-II Command structure: uhs2_command{}
+>   4. UHS-II register I/O address and register field definitions: sd_uhs2.h
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-On Fri, 2023-02-03 at 08:14 +0100, Christoph Hellwig wrote:
-> On Mon, Jan 16, 2023 at 09:52:10AM +0100, John Paul Adrian Glaubitz wrote:
-> > We have had a discussion between multiple people invested in the SuperH port and
-> > I have decided to volunteer as a co-maintainer of the port to support Rich Felker
-> > when he isn't available.
-> 
-> So, this still isn't reflected in MAINTAINERS in linux-next.  When
-> do you plan to take over?  What platforms will remain supported and
-> what can we start dropping due to being unused and unmaintained?
+[...]
 
-I'm getting everything ready now with Geert's help and I have a probably dumb
-question regarding the MAINTAINERS file change: Shall I just add myself as an
-additional maintainer first or shall I also drop Yoshinori Sato?
+> --- a/include/linux/mmc/core.h
+> +++ b/include/linux/mmc/core.h
+> @@ -23,6 +23,14 @@ enum mmc_blk_status {
+>         MMC_BLK_NEW_REQUEST,
+>  };
+>
+> +struct uhs2_command {
+> +       u16     header;
+> +       u16     arg;
+> +       __be32  *payload;
+> +       u32     payload_len;
+> +       u32     packet_len;
+> +};
+> +
+>  struct mmc_command {
+>         u32                     opcode;
+>         u32                     arg;
+> @@ -109,6 +117,11 @@ struct mmc_command {
+>         unsigned int            busy_timeout;   /* busy detect timeout in ms */
+>         struct mmc_data         *data;          /* data segment associated with cmd */
+>         struct mmc_request      *mrq;           /* associated request */
+> +
+> +       struct uhs2_command     *uhs2_cmd;      /* UHS2 command */
+> +       u8                      *uhs2_resp;     /* UHS2 native cmd resp */
+> +       u8                      uhs2_resp_len;  /* UHS2 native cmd resp len */
+> +       u8                      uhs2_tmode0_flag; /* UHS2 transfer mode flag */
 
-Also, is it desirable to add a "T:" entry for the kernel tree?
+I forgot to comment on this flag in my earlier reply. It looks like
+the flag is being set for "MMC_CMD_ADTC" commands. This makes me
+wonder, why can't we keep using cmd->flags to check this, rather than
+adding a new flag solely for UHS2? Or is there a problem with this?
 
-Thanks,
-Adrian
+I will continue to comment around this at patch7 too.
 
--- 
- .''`.  John Paul Adrian Glaubitz
-: :' :  Debian Developer
-`. `'   Physicist
-  `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
+[...]
+
+Kind regards
+Uffe
