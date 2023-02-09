@@ -2,65 +2,64 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27831C636D3
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 02:57:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7928CC05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 03:01:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232528AbjBIC5B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Feb 2023 21:57:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43712 "EHLO
+        id S232647AbjBIDBN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Feb 2023 22:01:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45152 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231924AbjBICzt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2023 21:55:49 -0500
-Received: from mail-oa1-x36.google.com (mail-oa1-x36.google.com [IPv6:2001:4860:4864:20::36])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59AE63402F
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Feb 2023 18:53:23 -0800 (PST)
-Received: by mail-oa1-x36.google.com with SMTP id 586e51a60fabf-15fe106c7c7so961758fac.8
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2023 18:53:23 -0800 (PST)
+        with ESMTP id S232271AbjBIC7L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2023 21:59:11 -0500
+Received: from mail-oo1-xc2e.google.com (mail-oo1-xc2e.google.com [IPv6:2607:f8b0:4864:20::c2e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E94681A48E
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Feb 2023 18:56:37 -0800 (PST)
+Received: by mail-oo1-xc2e.google.com with SMTP id h12-20020a4a940c000000b004fa81915b1cso97875ooi.4
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2023 18:56:37 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=landley-net.20210112.gappssmtp.com; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=uim76Lm5dMHI6OEZRl5dYh1Pi4k74h79vxsD8ejV228=;
-        b=cGJLZWh92YeqRetjDZ7mm7cWN9+7V9DkC4NxT3TFyzxOr/dT+y9RySdTXQJoGNFodj
-         Lhk5mURgRjvFpcDTTz997u4uYb5mXXSYufkvOHW16uecAigBafpKfrfPhjupqfB69TqU
-         CpdJtnnu16tBfQsfiDPbx5CJt8woI9p/61QJECQkg6ib53DsbPoG/6qEIFtT82h7XZEd
-         bH7zIZ7zeIu+guqsHWHH7HwzmCW5uJfaHSVq8vhoIZZxTs9cCuui2tEeecApAXxH34Kl
-         VCUo/SLo54vsVKd1HLhUdcTfFi+wK+KZOUpQFgXm1zVH8Gmha3IwtqAbksT7XdA8QMjg
-         0+9Q==
+        bh=MeuDR87mT5oZz0xYPlgMzWTRgnSVFdT+RIi9fTOHK48=;
+        b=cpXzCzr+cz0YwMg8OioZbOdFT6x6Xm6HxQuCqdoPsmS9hedulw1eO6Kk/3hEebcpma
+         XmVmNXfmMApG2N79Si3uHiYwQf3pkrY8yoF8TXhNqwM63RW+rXEAr2c9GvCwLnpdMizZ
+         /i8XL5yNmB4lLP5zpVm7le3plURiLI5xI0pF39yvS1te1cCGkPno0+9YUYvh8/jIQets
+         PkfeCX7kq7oaaZINx71/ntTci+5+uSn1VJ3kfEYljJIBKf1cp8PDE/LSANc9+WdWamP2
+         UdiemMHM1/q9NSBnjYTg3Wlj/GIvYnBRMQxV2QKkM2GCOhCzUuRGyTbkMr557hPEVKAp
+         8+Cw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=uim76Lm5dMHI6OEZRl5dYh1Pi4k74h79vxsD8ejV228=;
-        b=7iy2+l+F/OjiiJ/34ypDPbff2pTFjNcuMURw8H8hFcnbjDMQ3xqeiAtEVb6B4jiIvc
-         86Cw0nO4FTMOOgUPXWRxThKrx2y1wQEPJtcfPndAjnMZkZs9d5bIKhVl0v38NTMnW8vU
-         e0k6yjL8oqrYMsJ8qxLW4c1TFPMXST0snNh0NDa8wvWHUHSTcRBb/M85dcCCOjjZOgyt
-         7NDggwhT91AQm3woPPMRWUbAIPrFuG/Y6P3Ey+vlNYEAVh/T0AdrrSYjLzR3mVtnqGn3
-         AV+UCfdTsVVncAO4cu+G07ojBdEPBvudYsHKMn4XfBDV/PMx6n2p/IZwk5CmRzEYkhOe
-         Pw0g==
-X-Gm-Message-State: AO0yUKX/geG9L4L7nn3jaY16YSYLfNucmdZTyw7tRj/ZAg/3qhMq1rqO
-        1KYTOzM3MNEnvfQa6ReGqGG4rg==
-X-Google-Smtp-Source: AK7set/IY8hpNoA4Lil9GPnYxD0kM8QMzh26dc48QApuMMt+T/W+mzLQoVZI9oh721NfnL8VF3E7Fg==
-X-Received: by 2002:a05:6870:7386:b0:163:ad96:f89c with SMTP id z6-20020a056870738600b00163ad96f89cmr5551951oam.15.1675911202632;
-        Wed, 08 Feb 2023 18:53:22 -0800 (PST)
+        bh=MeuDR87mT5oZz0xYPlgMzWTRgnSVFdT+RIi9fTOHK48=;
+        b=qrB2S996d1fBnz5mhubGZmo/UMlY2XWcSceqYj+I5ktx8wJDtO5k6WWnvCz0POw8Wh
+         RPU5fKS+PYTY1cpGvFcJQbH4iCU7jPC5/8qRgsNu97D7nYncVdNpIuSEOwwaOJk0y5Ja
+         iHLwtPMBJkUv8ub1tvTOFWvMe2juK6V47A8f1SZZ/dHNF1uOFdE4NsgFHCmC00BhF9Sf
+         P9dartnjW8A/bpOyBs0HtXsdC6s6+KV8cM+cSvs6OvgOdZg0/rS8MJZh3QM/HFYuzOpt
+         7ZKAPvrSckQjGOhb45LMFNIxbONbvidnVDTbbudfHTMvn1xCutjUHYFKj+jXl+0BtMk0
+         caYA==
+X-Gm-Message-State: AO0yUKW+mEI1jDFMNPoV7nfUzZfNNR/bBoZdqjbpGCbFAPIFH+tLPA2T
+        /z6aqsNd5GIJis8A/A8u1Y3jxg==
+X-Google-Smtp-Source: AK7set/z8RwoK5zLi99e0gYyO0saoOIvr4Qi+M0w1VEg8sxij2tCPL/DbU7DENRObgoCAx8yBLGhmQ==
+X-Received: by 2002:a4a:9b8e:0:b0:51a:48f4:75de with SMTP id x14-20020a4a9b8e000000b0051a48f475demr241022ooj.0.1675911397288;
+        Wed, 08 Feb 2023 18:56:37 -0800 (PST)
 Received: from [192.168.86.224] ([136.62.38.22])
-        by smtp.gmail.com with ESMTPSA id v6-20020a4a5a06000000b00517b076e071sm100253ooa.47.2023.02.08.18.53.20
+        by smtp.gmail.com with ESMTPSA id bm9-20020a056820188900b004f8cf5f45e9sm133765oob.22.2023.02.08.18.56.36
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Feb 2023 18:53:21 -0800 (PST)
-Message-ID: <b394bf10-2fc5-6498-955f-a904a756e0c9@landley.net>
-Date:   Wed, 8 Feb 2023 21:06:19 -0600
+        Wed, 08 Feb 2023 18:56:37 -0800 (PST)
+Message-ID: <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
+Date:   Wed, 8 Feb 2023 21:09:35 -0600
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.5.0
 Subject: Re: remove arch/sh
 Content-Language: en-US
-To:     Randy Dunlap <rdunlap@infradead.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
-Cc:     Christoph Hellwig <hch@lst.de>,
-        Yoshinori Sato <ysato@users.sourceforge.jp>,
+To:     John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
         Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
@@ -82,142 +81,50 @@ References: <20230113062339.1909087-1-hch@lst.de>
  <20230116071306.GA15848@lst.de>
  <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
  <20230203071423.GA24833@lst.de>
- <afd056a95d21944db1dc0c9708f692dd1f7bb757.camel@physik.fu-berlin.de>
- <20230203083037.GA30738@lst.de>
- <d10fe31b2af6cf4e03618f38ca9d3ca5c72601ed.camel@physik.fu-berlin.de>
- <CAMuHMdUitVfW088YOmqYm4kwbKwkwb22fAakHcu6boxv7dXDfQ@mail.gmail.com>
- <f6a60193-a5d1-c42c-158a-4b0bfe9c7538@infradead.org>
+ <60ed320c8f5286e8dbbf71be29b760339fd25069.camel@physik.fu-berlin.de>
+ <0e26bf17-864e-eb22-0d07-5b91af4fde92@infradead.org>
+ <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
 From:   Rob Landley <rob@landley.net>
-In-Reply-To: <f6a60193-a5d1-c42c-158a-4b0bfe9c7538@infradead.org>
+In-Reply-To: <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/3/23 09:57, Randy Dunlap wrote:
-> Hi--
+On 2/8/23 06:13, John Paul Adrian Glaubitz wrote:
+> Hi Randy!
 > 
-> On 2/3/23 02:33, Geert Uytterhoeven wrote:
->> Hi Adrian,
+> On Tue, 2023-02-07 at 17:31 -0800, Randy Dunlap wrote:
 >> 
->> On Fri, Feb 3, 2023 at 11:29 AM John Paul Adrian Glaubitz
->> <glaubitz@physik.fu-berlin.de> wrote:
->>> On Fri, 2023-02-03 at 09:30 +0100, Christoph Hellwig wrote:
->>>> On Fri, Feb 03, 2023 at 09:24:46AM +0100, John Paul Adrian Glaubitz wrote:
->>>>> Since this is my very first time stepping up as a kernel maintainer, I was hoping
->>>>> to get some pointers on what to do to make this happen.
->>>>>
->>>>> So far, we have set up a new kernel tree and I have set up a local development and
->>>>> test environment for SH kernels using my SH7785LCR board as the target platform.
->>>>>
->>>>> Do I just need to send a patch asking to change the corresponding entry in the
->>>>> MAINTAINERS file?
->>>>
->>>> I'm not sure a there is a document, but:
->>>>
->>>>  - add the MAINTAINERS change to your tree
->>>>  - ask Stephen to get your tree included in linux-next
->>>>
->>>> then eventually send a pull request to Linus with all of that.  Make
->>>> sure it's been in linux-next for a while.
->>>
->>> OK, thanks for the pointers! Will try to get this done by next week.
->>>
->>> We're still discussing among SuperH developer community whether there will be a second
->>> maintainer, so please bear with us a few more days. I will collect patches in the
->>> meantime.
+>> On 2/7/23 01:06, John Paul Adrian Glaubitz wrote:
+>> > Hello Christoph!
+>> > 
+>> > On Fri, 2023-02-03 at 08:14 +0100, Christoph Hellwig wrote:
+>> > > On Mon, Jan 16, 2023 at 09:52:10AM +0100, John Paul Adrian Glaubitz wrote:
+>> > > > We have had a discussion between multiple people invested in the SuperH port and
+>> > > > I have decided to volunteer as a co-maintainer of the port to support Rich Felker
+>> > > > when he isn't available.
+>> > > 
+>> > > So, this still isn't reflected in MAINTAINERS in linux-next.  When
+>> > > do you plan to take over?  What platforms will remain supported and
+>> > > what can we start dropping due to being unused and unmaintained?
+>> > 
+>> > I'm getting everything ready now with Geert's help and I have a probably dumb
+>> > question regarding the MAINTAINERS file change: Shall I just add myself as an
+>> > additional maintainer first or shall I also drop Yoshinori Sato?
+>> > 
+>> > Also, is it desirable to add a "T:" entry for the kernel tree?
 >> 
->> Thanks a lot!
->> 
->> If you need any help with process, setup, ... don't hesitate to ask
->> (on e.g. #renesas-soc on Libera).
+>> Yes, definitely.
 > 
-> While Adrian and Geert are reading this, I have a question:
-> 
-> Is this "sh64" still accurate and applicable?
+> Geert has suggested to wait with adding a tree source to the entry until I get my
+> own kernel.org account. I have enough GPG signatures from multiple kernel developers
+> on my GPG key, so I think it shouldn't be too difficult to qualify for an account.
 
-I hadn't noticed it was there... Randy Dunlap added that in 2018 (commit
-09b1565324cba). I wonder why?
+So you're not planning to use https://lk.j-core.org/J-Core-Developers/sh-linux
+but push to kernel.org and ask Linus to pull from there?
 
-> from Documentation/kbuild/kbuild.rst:
-
-There isn't an active 64 bit superh architecture for the moment: sh5 was a
-prototype that never shipped in volume, and support was removed in commit
-37744feebc08. From the j-core side j64 hasn't shipped yet either (still planned
-last I heard, but j-core went downmarket first instead due to customer demand,
-and multi-issue is on the roadmap before 64 bit address space).
-
-The general trend in linux kernel architectures has been to merge 32 and 64 bit
-anyway, and just have the .config set CONFIG_64BIT to distinguish: arch/x86 was
-created by merging arch/i386 and arch/x86_64 in 2007, arch/powerpc merged the 32
-and 64 bit directories in 2005, arch/s390 and s390x are in the same dir,
-arch/mips... (For some reason arm and arm64 are still split, but that might be
-fallout from Arm Ltd trying to distinguish aarrcchh6644 from "arm" for some
-reason? Dunno.)
-
-I wonder why is this going the other way? I thought $ARCH mostly just specified
-the subdirectory under arch/ with a few historical aliases in the top level
-Makefile:
-
-# Additional ARCH settings for x86
-ifeq ($(ARCH),i386)
-        SRCARCH := x86
-endif
-ifeq ($(ARCH),x86_64)
-        SRCARCH := x86
-endif
-
-# Additional ARCH settings for sparc
-ifeq ($(ARCH),sparc32)
-       SRCARCH := sparc
-endif
-ifeq ($(ARCH),sparc64)
-       SRCARCH := sparc
-endif
-
-# Additional ARCH settings for parisc
-ifeq ($(ARCH),parisc64)
-       SRCARCH := parisc
-endif
-
-But you could always just specify the correct ARCH directory directly and it
-would work. (Always did when I tried it, although I haven't built sparc in years
-because there's no musl-libc support, and never built parisc64 because I
-couldn't get it to work with uClibc even before musl. I _am_ still building both
-32 bit and 64 bit x86 with ARCH=x86 both times...)
-
-> But some architectures such as x86 and sparc have aliases.
-> 
-> - x86: i386 for 32 bit, x86_64 for 64 bit
-> - sh: sh for 32 bit, sh64 for 64 bit <<<<<<<<<<<<<<<
-> - sparc: sparc32 for 32 bit, sparc64 for 64 bit
-
-Randy also added the sparc alias in commit 5ba800962a80. That at least exists in
-the top level Makefile.
-
-Did he mean parisc64 and typoed sh64? Because that's the only other alias in the
-top level Makefile...
-
-In any case, these are historical aliases for old builds, which can probably get
-yanked because it should be a trivial fix to use the right ARCH= value for
-modern builds? (I'd think?)
-
-You'd even be able to build a 64 bit version of ARCH=i386 just fine if it wasn't
-for the ONE place in arch/x86/Kconfig that actually checks:
-
-config 64BIT
-        bool "64-bit kernel" if "$(ARCH)" = "x86"
-        default "$(ARCH)" != "i386"
-
-Same for arch/sparc/Kconfig:
-
-config 64BIT
-        bool "64-bit kernel" if "$(ARCH)" = "sparc"
-        default "$(ARCH)" = "sparc64"
-
-Nothing else anywhere seems to care...
-
-> Thanks.
+> Adrian
 
 Rob
