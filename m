@@ -2,126 +2,164 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE6FDC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 14:20:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C68DFC05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 14:51:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230256AbjBIOUL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Feb 2023 09:20:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44312 "EHLO
+        id S230515AbjBIOv2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Feb 2023 09:51:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230141AbjBIOUK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 09:20:10 -0500
-Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B11B75ACDC
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Feb 2023 06:20:09 -0800 (PST)
-Received: by mail-pg1-x531.google.com with SMTP id n2so1664770pgb.2
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2023 06:20:09 -0800 (PST)
+        with ESMTP id S229450AbjBIOv1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 09:51:27 -0500
+Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EF385A901
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Feb 2023 06:51:25 -0800 (PST)
+Received: by mail-pj1-x102d.google.com with SMTP id d13-20020a17090ad3cd00b0023127b2d602so2582046pjw.2
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2023 06:51:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=O5Cg/lmjMoR1Bh05RNj1sjn9gKQ3dTkNDGznwp8dtsQ=;
-        b=IR4OWa+ohCdJhw1G/eNBcq8HzcWl9NQRxQ7w+H5MUp8IUDMfxFm1xZFgR03O1gJtYl
-         6+N+Ar7XMhUM/LMTs89/4psaa2NquTWHs178hzlKE584R/ohzJ1wTc6iItitNsg1ycc7
-         khTqwl6I3Lk9G27twJG4NvgZIkL7SoZXYNbiJUvActaVNm9PVYfFVTjl3d2+89Px3lwk
-         HRoUg3ejCFZVSvO1gh7CgUSi+Wb4r2JpTVzIGPySBKmAgFXdT7XrkKa/ZQ87umJif9JN
-         cv+fchXenAD0b7B1U387eLx2mlHdcDye2v0Ir6jbhPWeFEP6IUYQ1e3FDXY1iSmuVPaP
-         /T4Q==
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=WgrBkIph/jwiixQwU37sRfxRXWlSvdzczRwmYx70sS4=;
+        b=WaMY9P7mNb05w6GiSodo/CveTO2XR42pIKhsB9iwQIdLh3ueicdjJ3Ka2GSvC0IUpU
+         vTvjXE49mUIwqs/h8ec5CGT5L7D3dgpjAAAHchun0uZ9Zh0+ZJBr66kyBuN3ghHmlQ6c
+         z5pDEamlaTmxerDfTCaMewSmoWCpLtLesVUbV5ui2FlF5Pl6tjmU6EgmlpiO6aqt1AEL
+         Qr9iqNDLC40Sh+BJSr35jUC9VE+0laJD/g8BFKt1NrAu1AAJ8cr8RZPZAWAeRevxTGJ3
+         6ZcfwKmxlRL9VcIV3r4z3kIv7vkHMbkFM1zhGxW0NnSBF54jlJbCcwg2e6L4iGEdykCg
+         IbkA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=O5Cg/lmjMoR1Bh05RNj1sjn9gKQ3dTkNDGznwp8dtsQ=;
-        b=pkxZmIjvAF9NB8PUY0MOclqmQlWed1ZoNjCSWAB+ORkhwqX6eKOk7HDr4V8VaTJyku
-         /g0ZVEYeXRcKZ0We75zMvDM19b4K7dqL3dpfSK09xoVERUR3o3pjDbKoEZ/EKVviFtSc
-         QmsSLIkB6drWXPQNPPJWM03GR1adY9RITYHrsKKS60NjZnFSJrC4JYdfUHJ2/+zI43Dw
-         CzKjy4JQKN4MOMOR8lcHhlfpu3PrayH7s2Ch1LeGOVLLhRlmgamVMXCp732w8qdf1eRI
-         ukEyruQSs1Y//kLM48F+q1Izj1PkHOMsolg81tdCakEV54qAH9Yx0i7SHJXhfjNI+LjS
-         NPnA==
-X-Gm-Message-State: AO0yUKUBg6LWH1EemELNyLgudzmqBt9XpoO8dKHux3HeDHtz2aDfq/HA
-        dEM6oktux/R8flXKmRVET5QNdv9b2QgnIEAByTLf45vm0Ep/+g==
-X-Google-Smtp-Source: AK7set8ZScQvFdvlHd4mustUI571YHGnSz/EArT+H/zHz2bn1eWmIG1QsSnx8t8GGWHZ7u2YEDLBYJ4ODDEXJ9nFQeI=
-X-Received: by 2002:a62:1901:0:b0:5a8:51bd:e0f0 with SMTP id
- 1-20020a621901000000b005a851bde0f0mr620477pfz.52.1675952409164; Thu, 09 Feb
- 2023 06:20:09 -0800 (PST)
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=WgrBkIph/jwiixQwU37sRfxRXWlSvdzczRwmYx70sS4=;
+        b=rYCaR4nG4LcJqiVuT/5K/8tmXIr92V1jxt+pBGAsmfuiJ3KcA2Ch2OjWnSGfFeKljU
+         8d3zpdR4CZV7XcdQycSSr+XkGgLBqvddAy1JvqIgJeeJO2MoKsWITAEX86JYKdTHQJpu
+         XYR/pZKK/8MXNyp81ki8gHs3jqqk66Gd2skQI7+KlbK/LIGR+8iLCoS9agTw4eWFrBz/
+         JwiwDcoQbSlK4dicRQEQGMEMw1tqnO4YKXaSMfx6gyVXjjJQ2ELjRwBtOXfKwipEllge
+         A/ElZduFCzSFZjZo9GYDxjC8gQ0uLscLXqywMl3gWdJ4j9AL/pNcEf82wc0xVR0xj7SE
+         M3GQ==
+X-Gm-Message-State: AO0yUKUZhW+mHH38RULP+o/UaRKDuSrr8ciSKtrWkXIMQQe3MQgPdmLM
+        AEJGYswEa/dx2Xn4ZyqXBRqewKfiLonVOfVQyTNAvg==
+X-Google-Smtp-Source: AK7set+/30YYhGlwN11LogLODt3RuDcUryTh1TjBFndJshB3McT3ir1tWBdsVsbnA7599MRkezDABWOckAtw0mY7UYI=
+X-Received: by 2002:a17:90a:31a:b0:232:debf:eee9 with SMTP id
+ 26-20020a17090a031a00b00232debfeee9mr373595pje.32.1675954285074; Thu, 09 Feb
+ 2023 06:51:25 -0800 (PST)
 MIME-Version: 1.0
-References: <c91cdde6288d4db6aad45f5d50d129c8@hyperstone.com>
-In-Reply-To: <c91cdde6288d4db6aad45f5d50d129c8@hyperstone.com>
+References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
+ <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+ <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com> <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
+In-Reply-To: <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Feb 2023 15:19:33 +0100
-Message-ID: <CAPDyKFohmDM07zqda7y5nAZBq5FqdydYSTCfYn27cdOEYA6U+w@mail.gmail.com>
-Subject: Re: [PATCHv3] mmc-utils: Add basic erase error check
-To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     Avri Altman <Avri.Altman@wdc.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Date:   Thu, 9 Feb 2023 15:50:48 +0100
+Message-ID: <CAPDyKFrtF32AvBKCbMESP7oFT2aBhbce0KA2zzXq+szQnShbww@mail.gmail.com>
+Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, orsonzhai@gmail.com,
+        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
+        axboe@kernel.dk, avri.altman@wdc.com, kch@nvidia.com,
+        CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
+        bigeasy@linutronix.de, s.shtylyov@omp.ru,
+        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
+        lzx.stg@gmail.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 16 Jan 2023 at 12:19, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
- wrote:
+On Fri, 11 Nov 2022 at 13:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
 >
-> Check for erase specific R1 errors so e.g. an OOR erase is not
-> reported as successful when it never executed.
+> [...]
 >
-> There could be checks for more error bits but R1_ERASE_SEQ_ERROR
-> on CMD38 should catch all that are reported by hardware anyway.
+> > >
+> > > Considering the data integrity, we did a random power-down test, and
+> > > the experimental results were good.
+> > >
+> > > FUA can only reduce data loss under abnormal conditions, but cannot
+> > > prevent data loss under abnormal conditions.
+> > >
+> > > I think there should be a balance between FUA and NO FUA, but
+> > > filesystems seem to favor FUA.
+> > >
+> > > FUA brings a drop in random write performance. If enough tests are
+> > > done, NO FUA is acceptable.
+> >
+> > Testing this isn't entirely easy. It requires you to hook up
+> > electrical switches to allow you to automate the powering on/off of
+> > the platform(s). Then at each cycle, really make sure to stress test
+> > the data integrity of the flash memory. Is that what the tests did -
+> > or can you elaborate a bit on what was really tested?
+> >
+> > In any case, the performance impact boils down to how each eMMC/SD
+> > card internally manages reliable writes vs regular writes. Some
+> > vendors may treat them very similarly, while others do not.
+> >
+> > That said, trying to disable REQ_FUA from an mmc host driver is the
+> > wrong approach, as also pointed out by Adrian above. These types of
+> > decisions belong solely in the mmc core layer.
+> >
+> > Instead of what the $subject series proposes, I would rather suggest
+> > we discuss (and test) whether it could make sense to disable REQ_FUA -
+> > *if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
+> > Hence, the mmc core could then announce only REQ_OP_FLUSH.
+> >
 >
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> Below is a simple patch that does the above. We may not want to enable
+> this for *all* eMMC/SD cards, but it works fine for testing and to
+> continue the discussions here.
+>
+>
+> From: Ulf Hansson <ulf.hansson@linaro.org>
+> Date: Fri, 11 Nov 2022 12:48:02 +0100
+> Subject: [PATCH] mmc: core: Disable REQ_FUA if the card supports an internal
+>  cache
+>
+> !!!! This is not for merge, but only for test and discussions!!!
+>
+> It has been reported that REQ_FUA can be costly on some eMMC devices. A
+> potential option that could mitigate this problem, is to rely solely on
+> REQ_OP_FLUSH instead, but that requires the eMMC/SD to support an internal
+> cache. This is an attempt to try this out to see how it behaves.
+>
+> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> ---
+>  drivers/mmc/core/block.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index db6d8a099910..197e9f6cdaad 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2494,15 +2494,15 @@ static struct mmc_blk_data
+> *mmc_blk_alloc_req(struct mmc_card *card,
+>                         md->flags |= MMC_BLK_CMD23;
+>         }
+>
+> -       if (md->flags & MMC_BLK_CMD23 &&
+> -           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+> -            card->ext_csd.rel_sectors)) {
+> +       if (mmc_cache_enabled(card->host)) {
+> +               cache_enabled  = true;
+> +       } else if (md->flags & MMC_BLK_CMD23 &&
+> +                 (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
+> +                  card->ext_csd.rel_sectors)) {
+>                 md->flags |= MMC_BLK_REL_WR;
+>                 fua_enabled = true;
+>                 cache_enabled = true;
+>         }
+> -       if (mmc_cache_enabled(card->host))
+> -               cache_enabled  = true;
+>
+>         blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
+>
+> --
+> 2.34.1
 
-Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
+Wenchao,
+
+Did you manage to try the above patch to see if that could improve the
+situation?
 
 Kind regards
 Uffe
-
-
-> ---
-> -v3: Check for ERASE_PARAM on CMD36
-> -v2: Remove unneeded error bit checking
->  mmc_cmds.c | 13 ++++++++++++-
->  1 file changed, 12 insertions(+), 1 deletion(-)
->
-> diff --git a/mmc_cmds.c b/mmc_cmds.c
-> index e6d3273..6c50bbe 100644
-> --- a/mmc_cmds.c
-> +++ b/mmc_cmds.c
-> @@ -54,7 +54,6 @@
->  #define WPTYPE_PWRON 2
->  #define WPTYPE_PERM 3
->
-> -
->  int read_extcsd(int fd, __u8 *ext_csd)
->  {
->         int ret =3D 0;
-> @@ -2668,6 +2667,18 @@ static int erase(int dev_fd, __u32 argin, __u32 st=
-art, __u32 end)
->         if (ret)
->                 perror("Erase multi-cmd ioctl");
->
-> +       /* Does not work for SPI cards */
-> +       if (multi_cmd->cmds[1].response[0] & R1_ERASE_PARAM) {
-> +               fprintf(stderr, "Erase start response: 0x%08x\n",
-> +                               multi_cmd->cmds[0].response[0]);
-> +               ret =3D -EIO;
-> +       }
-> +       if (multi_cmd->cmds[2].response[0] & R1_ERASE_SEQ_ERROR) {
-> +               fprintf(stderr, "Erase response: 0x%08x\n",
-> +                               multi_cmd->cmds[2].response[0]);
-> +               ret =3D -EIO;
-> +       }
-> +
->         free(multi_cmd);
->         return ret;
->  }
-> --
-> 2.37.3
->
->
-> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-> Managing Director: Dr. Jan Peter Berns.
-> Commercial register of local courts: Freiburg HRB381782
->
