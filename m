@@ -2,98 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88BD7C61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 09:14:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 87180C64EC5
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 09:16:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229645AbjBIJOz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Feb 2023 04:14:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48410 "EHLO
+        id S229965AbjBIJQO convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Feb 2023 04:16:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229634AbjBIJOy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 04:14:54 -0500
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F187A44A2
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Feb 2023 01:14:52 -0800 (PST)
-Received: by mail-wr1-x430.google.com with SMTP id j23so1120018wra.0
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2023 01:14:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=w6LkxZ/ozleS6gLSs0StGzehaVAeduo5o/LmquXsG8k=;
-        b=lih8dgUGhVGc8S80Uh5n8I03OQ7SCoC28FUFGZ5BTXupIfHRzzxlvfgxP4aegEZh+8
-         ljHXXoIjqF5QurcowNHngIg/gyQBTDmPJk0gGVzMG7x0WJu2BdV6r+gHQCDSY3Zcmitz
-         QfiJGEFprgx7VNIod8/r8uC/GkuXk859Nh6VSKHOUoETmooJUasQfK/kIIQpNApDpQie
-         qgWDzQWliPk1jD5iakJcwb9tutiIa6upxniMAxl+S6VnU4eQvngdRMuiywsAMLqT7Zgb
-         leBxQkjAsO3tw8MJdiJOdzmqhBkeIyc6bj2CTQvN/OAKjFi9mkAFGBLCXUOcnLfXxJsd
-         +knQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=w6LkxZ/ozleS6gLSs0StGzehaVAeduo5o/LmquXsG8k=;
-        b=kNevuvffUHzfJQbk/VFVqlC9S26/+ELGjGu2Vdu18kidDVsYoZPXvSwoHL++dLUQHe
-         ZKrunH6wXhpEMz2ftkXCj7q+LUnD1/baya/98l00KCHRel82vUVrnhNRyiHHpWCjJ4L3
-         YoPETsVOE+nO0BLs6eOcKjQPVcDAwUVm2BVsAQJGaNreImr2C/AZlUrE8BwUUlrx+gaJ
-         DmYxQCNgAP1mO5JTAUYit/UKzGZKQVyjRs/7teHfvjlWcFxoDYpdV9tcseiqdLngBQoM
-         UBJV1UdVLjjLm/YRTkSymc1E7CupTmZsY4aNeOnC4uCuCnacz2EqWkqocPEYqx/c0+gD
-         t+DA==
-X-Gm-Message-State: AO0yUKUQxTAvO1GPpq6ljIJWACBYU8eWl9sMVRwEC8OC9Y1BbkLybb4Y
-        E27vjMw6fA74P67Z0aOX4KkOHXHhIvVWdIdR
-X-Google-Smtp-Source: AK7set9MKJaV9uooZiLHtE9y2zvn5dEl+dTyYB7cId1QM2tDmoDalVOi6rUSBC9nrIoaL1PTa7Ln0g==
-X-Received: by 2002:a5d:5545:0:b0:2c5:3cfa:f7dc with SMTP id g5-20020a5d5545000000b002c53cfaf7dcmr576923wrw.7.1675934091566;
-        Thu, 09 Feb 2023 01:14:51 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id h1-20020a056000000100b002c405e19010sm764853wrx.11.2023.02.09.01.14.50
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Feb 2023 01:14:51 -0800 (PST)
-Message-ID: <ec412378-ae31-e199-b5a1-f37a4731f31a@linaro.org>
-Date:   Thu, 9 Feb 2023 10:14:49 +0100
+        with ESMTP id S229567AbjBIJQM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 04:16:12 -0500
+Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 558EB5B92;
+        Thu,  9 Feb 2023 01:16:10 -0800 (PST)
+Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
+          by outpost.zedat.fu-berlin.de (Exim 4.95)
+          with esmtps (TLS1.3)
+          tls TLS_AES_256_GCM_SHA384
+          (envelope-from <glaubitz@zedat.fu-berlin.de>)
+          id 1pQ323-003ncL-Bt; Thu, 09 Feb 2023 10:15:55 +0100
+Received: from p57bd9464.dip0.t-ipconnect.de ([87.189.148.100] helo=suse-laptop.fritz.box)
+          by inpost2.zedat.fu-berlin.de (Exim 4.95)
+          with esmtpsa (TLS1.3)
+          tls TLS_AES_256_GCM_SHA384
+          (envelope-from <glaubitz@physik.fu-berlin.de>)
+          id 1pQ323-0012H8-3k; Thu, 09 Feb 2023 10:15:55 +0100
+Message-ID: <ed4a36508c3d047f9e9a882475388be18b790b76.camel@physik.fu-berlin.de>
+Subject: Re: remove arch/sh
+From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
+To:     Rob Landley <rob@landley.net>,
+        Randy Dunlap <rdunlap@infradead.org>,
+        Christoph Hellwig <hch@lst.de>
+Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
+        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
+        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
+        Geert Uytterhoeven <geert+renesas@glider.be>,
+        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
+        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
+        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
+        linux-sh@vger.kernel.org
+Date:   Thu, 09 Feb 2023 10:15:52 +0100
+In-Reply-To: <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
+References: <20230113062339.1909087-1-hch@lst.de>
+         <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
+         <20230116071306.GA15848@lst.de>
+         <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
+         <20230203071423.GA24833@lst.de>
+         <60ed320c8f5286e8dbbf71be29b760339fd25069.camel@physik.fu-berlin.de>
+         <0e26bf17-864e-eb22-0d07-5b91af4fde92@infradead.org>
+         <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
+         <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
+User-Agent: Evolution 3.46.3 
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH] dt-bindings: mmc: Add resets property to cadence SDHCI
- binding
-Content-Language: en-US
-To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-References: <20230209014211.17816-1-hayashi.kunihiko@socionext.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230209014211.17816-1-hayashi.kunihiko@socionext.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-Original-Sender: glaubitz@physik.fu-berlin.de
+X-Originating-IP: 87.189.148.100
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/02/2023 02:42, Kunihiko Hayashi wrote:
-> Cadence SDHCI controller allows reset control support on UniPhier SoC.
-> Add resets property to cadence SDHCI binding.
+On Wed, 2023-02-08 at 21:09 -0600, Rob Landley wrote:
+> > Geert has suggested to wait with adding a tree source to the entry until I get my
+> > own kernel.org account. I have enough GPG signatures from multiple kernel developers
+> > on my GPG key, so I think it shouldn't be too difficult to qualify for an account.
 > 
-> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-> ---
->  Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index d3dce4d6c168..adacd0535c14 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -29,6 +29,9 @@ properties:
->    clocks:
->      maxItems: 1
->  
-> +  resets:
-> +    maxItems: 1
+> So you're not planning to use https://lk.j-core.org/J-Core-Developers/sh-linux
+> but push to kernel.org and ask Linus to pull from there?
 
-This looks specific to UniPhier, doesn't it?
+Yes, that's what Geert recommended.
 
-Best regards,
-Krzysztof
+Adrian
 
+-- 
+ .''`.  John Paul Adrian Glaubitz
+: :' :  Debian Developer
+`. `'   Physicist
+  `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
