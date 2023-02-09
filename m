@@ -2,89 +2,90 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 87180C64EC5
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 09:16:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 55E67C05027
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 11:47:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229965AbjBIJQO convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Feb 2023 04:16:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49712 "EHLO
+        id S229854AbjBILrw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Feb 2023 06:47:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54336 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229567AbjBIJQM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 04:16:12 -0500
-Received: from outpost1.zedat.fu-berlin.de (outpost1.zedat.fu-berlin.de [130.133.4.66])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 558EB5B92;
-        Thu,  9 Feb 2023 01:16:10 -0800 (PST)
-Received: from inpost2.zedat.fu-berlin.de ([130.133.4.69])
-          by outpost.zedat.fu-berlin.de (Exim 4.95)
-          with esmtps (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@zedat.fu-berlin.de>)
-          id 1pQ323-003ncL-Bt; Thu, 09 Feb 2023 10:15:55 +0100
-Received: from p57bd9464.dip0.t-ipconnect.de ([87.189.148.100] helo=suse-laptop.fritz.box)
-          by inpost2.zedat.fu-berlin.de (Exim 4.95)
-          with esmtpsa (TLS1.3)
-          tls TLS_AES_256_GCM_SHA384
-          (envelope-from <glaubitz@physik.fu-berlin.de>)
-          id 1pQ323-0012H8-3k; Thu, 09 Feb 2023 10:15:55 +0100
-Message-ID: <ed4a36508c3d047f9e9a882475388be18b790b76.camel@physik.fu-berlin.de>
-Subject: Re: remove arch/sh
-From:   John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>
-To:     Rob Landley <rob@landley.net>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Christoph Hellwig <hch@lst.de>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-Date:   Thu, 09 Feb 2023 10:15:52 +0100
-In-Reply-To: <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
-References: <20230113062339.1909087-1-hch@lst.de>
-         <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
-         <20230116071306.GA15848@lst.de>
-         <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
-         <20230203071423.GA24833@lst.de>
-         <60ed320c8f5286e8dbbf71be29b760339fd25069.camel@physik.fu-berlin.de>
-         <0e26bf17-864e-eb22-0d07-5b91af4fde92@infradead.org>
-         <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
-         <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
-User-Agent: Evolution 3.46.3 
+        with ESMTP id S229702AbjBILrZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 06:47:25 -0500
+Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 18E1B631C9;
+        Thu,  9 Feb 2023 03:34:44 -0800 (PST)
+Received: from unknown (HELO iyokan2-ex.css.socionext.com) ([172.31.9.54])
+  by mx.socionext.com with ESMTP; 09 Feb 2023 20:34:04 +0900
+Received: from mail.mfilter.local (m-filter-2 [10.213.24.62])
+        by iyokan2-ex.css.socionext.com (Postfix) with ESMTP id 286522058B4F;
+        Thu,  9 Feb 2023 20:34:04 +0900 (JST)
+Received: from 172.31.9.51 (172.31.9.51) by m-FILTER with ESMTP; Thu, 9 Feb 2023 20:34:30 +0900
+Received: from [10.212.157.203] (unknown [10.212.157.203])
+        by kinkan2.css.socionext.com (Postfix) with ESMTP id 557923D57;
+        Thu,  9 Feb 2023 20:34:03 +0900 (JST)
+Message-ID: <8d80a837-b2bd-26af-e633-5b6081caaaef@socionext.com>
+Date:   Thu, 9 Feb 2023 20:34:03 +0900
 MIME-Version: 1.0
-X-Original-Sender: glaubitz@physik.fu-berlin.de
-X-Originating-IP: 87.189.148.100
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH] dt-bindings: mmc: Add resets property to cadence SDHCI
+ binding
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230209014211.17816-1-hayashi.kunihiko@socionext.com>
+ <ec412378-ae31-e199-b5a1-f37a4731f31a@linaro.org>
+From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+In-Reply-To: <ec412378-ae31-e199-b5a1-f37a4731f31a@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 2023-02-08 at 21:09 -0600, Rob Landley wrote:
-> > Geert has suggested to wait with adding a tree source to the entry until I get my
-> > own kernel.org account. I have enough GPG signatures from multiple kernel developers
-> > on my GPG key, so I think it shouldn't be too difficult to qualify for an account.
+Hi Krzysztof,
+
+On 2023/02/09 18:14, Krzysztof Kozlowski wrote:
+> On 09/02/2023 02:42, Kunihiko Hayashi wrote:
+>> Cadence SDHCI controller allows reset control support on UniPhier SoC.
+>> Add resets property to cadence SDHCI binding.
+>>
+>> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+>> ---
+>>   Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 3 +++
+>>   1 file changed, 3 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>> b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>> index d3dce4d6c168..adacd0535c14 100644
+>> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>> @@ -29,6 +29,9 @@ properties:
+>>     clocks:
+>>       maxItems: 1
+>>
+>> +  resets:
+>> +    maxItems: 1
 > 
-> So you're not planning to use https://lk.j-core.org/J-Core-Developers/sh-linux
-> but push to kernel.org and ask Linus to pull from there?
+> This looks specific to UniPhier, doesn't it?
 
-Yes, that's what Geert recommended.
+I think this IP has some hardware reset lines, however,
+it depends on the implementation whether the lines can be
+soft controlled or controlled by power-on-reset.
 
-Adrian
+In case of UniPhier SoC, these lines are connected to the syscon
+reset controller, but deasserted with initial state.
 
--- 
- .''`.  John Paul Adrian Glaubitz
-: :' :  Debian Developer
-`. `'   Physicist
-  `-    GPG: 62FF 8A75 84E0 2956 9546  0006 7426 3B37 F5B5 F913
+Currently, the binding has one compatible.
+If drawing this dependency, Is the device dependent compatible necessary?
+Or I can remove reset property from DT.
+
+Thank you,
+
+---
+Best Regards
+Kunihiko Hayashi
