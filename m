@@ -2,129 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7928CC05027
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 03:01:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 577E5C636D7
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 04:30:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232647AbjBIDBN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Feb 2023 22:01:13 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45152 "EHLO
+        id S229898AbjBIEaX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Feb 2023 23:30:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46394 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232271AbjBIC7L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2023 21:59:11 -0500
-Received: from mail-oo1-xc2e.google.com (mail-oo1-xc2e.google.com [IPv6:2607:f8b0:4864:20::c2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E94681A48E
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Feb 2023 18:56:37 -0800 (PST)
-Received: by mail-oo1-xc2e.google.com with SMTP id h12-20020a4a940c000000b004fa81915b1cso97875ooi.4
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Feb 2023 18:56:37 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=landley-net.20210112.gappssmtp.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=MeuDR87mT5oZz0xYPlgMzWTRgnSVFdT+RIi9fTOHK48=;
-        b=cpXzCzr+cz0YwMg8OioZbOdFT6x6Xm6HxQuCqdoPsmS9hedulw1eO6Kk/3hEebcpma
-         XmVmNXfmMApG2N79Si3uHiYwQf3pkrY8yoF8TXhNqwM63RW+rXEAr2c9GvCwLnpdMizZ
-         /i8XL5yNmB4lLP5zpVm7le3plURiLI5xI0pF39yvS1te1cCGkPno0+9YUYvh8/jIQets
-         PkfeCX7kq7oaaZINx71/ntTci+5+uSn1VJ3kfEYljJIBKf1cp8PDE/LSANc9+WdWamP2
-         UdiemMHM1/q9NSBnjYTg3Wlj/GIvYnBRMQxV2QKkM2GCOhCzUuRGyTbkMr557hPEVKAp
-         8+Cw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=MeuDR87mT5oZz0xYPlgMzWTRgnSVFdT+RIi9fTOHK48=;
-        b=qrB2S996d1fBnz5mhubGZmo/UMlY2XWcSceqYj+I5ktx8wJDtO5k6WWnvCz0POw8Wh
-         RPU5fKS+PYTY1cpGvFcJQbH4iCU7jPC5/8qRgsNu97D7nYncVdNpIuSEOwwaOJk0y5Ja
-         iHLwtPMBJkUv8ub1tvTOFWvMe2juK6V47A8f1SZZ/dHNF1uOFdE4NsgFHCmC00BhF9Sf
-         P9dartnjW8A/bpOyBs0HtXsdC6s6+KV8cM+cSvs6OvgOdZg0/rS8MJZh3QM/HFYuzOpt
-         7ZKAPvrSckQjGOhb45LMFNIxbONbvidnVDTbbudfHTMvn1xCutjUHYFKj+jXl+0BtMk0
-         caYA==
-X-Gm-Message-State: AO0yUKW+mEI1jDFMNPoV7nfUzZfNNR/bBoZdqjbpGCbFAPIFH+tLPA2T
-        /z6aqsNd5GIJis8A/A8u1Y3jxg==
-X-Google-Smtp-Source: AK7set/z8RwoK5zLi99e0gYyO0saoOIvr4Qi+M0w1VEg8sxij2tCPL/DbU7DENRObgoCAx8yBLGhmQ==
-X-Received: by 2002:a4a:9b8e:0:b0:51a:48f4:75de with SMTP id x14-20020a4a9b8e000000b0051a48f475demr241022ooj.0.1675911397288;
-        Wed, 08 Feb 2023 18:56:37 -0800 (PST)
-Received: from [192.168.86.224] ([136.62.38.22])
-        by smtp.gmail.com with ESMTPSA id bm9-20020a056820188900b004f8cf5f45e9sm133765oob.22.2023.02.08.18.56.36
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Feb 2023 18:56:37 -0800 (PST)
-Message-ID: <1c6e7a19-a650-1852-6f74-ca5547db44c4@landley.net>
-Date:   Wed, 8 Feb 2023 21:09:35 -0600
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.0
-Subject: Re: remove arch/sh
-Content-Language: en-US
-To:     John Paul Adrian Glaubitz <glaubitz@physik.fu-berlin.de>,
-        Randy Dunlap <rdunlap@infradead.org>,
-        Christoph Hellwig <hch@lst.de>
-Cc:     Yoshinori Sato <ysato@users.sourceforge.jp>,
-        Rich Felker <dalias@libc.org>, Arnd Bergmann <arnd@arndb.de>,
+        with ESMTP id S229722AbjBIEaQ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Feb 2023 23:30:16 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A98EB3B64B;
+        Wed,  8 Feb 2023 20:29:43 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 88ECBB8201A;
+        Thu,  9 Feb 2023 04:22:13 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C1454C433EF;
+        Thu,  9 Feb 2023 04:22:08 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1675916532;
+        bh=r896al9/ic3TVzWhQihrH5WWe9yq5i1aPuOB0FJblUQ=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=BN/W1fmhyUDYnWQNFRl0yiZAlLtkPZOeM9PRJliT8ril6wiUbcRvBv1HMVz8E0tvT
+         mbyq5LYLXG+Q0iC3FE+j8oPN8wrX8CzcUUbhXZ8fLkv6SW7OFkTdgoSDQ4Z4S7676q
+         ekM+HlbJO6e1a7rJmpHX2uhrjQmq5U7OdTYpCuhnJvE8DoMV488k6BQ9GV5iJQMl+R
+         Z4eAbD3zOtPVRjxwl6mYHQRaDOaj1IjnIDvEt0MNJ02q3yVnhiKjhsmUqY3r16pJbp
+         2l1erYVmeAs/OrQ3L+bCLx5ypvDAgc3kGR5MyqzFDCB3QgSGPs4TzDKRQdWSO0Gb80
+         XNY+n6Qa5PJyg==
+From:   Bjorn Andersson <andersson@kernel.org>
+To:     Rob Clark <robdclark@gmail.com>,
+        Eric Dumazet <edumazet@google.com>,
+        Robin Murphy <robin.murphy@arm.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Jakub Kicinski <kuba@kernel.org>,
+        "James E.J. Bottomley" <jejb@linux.ibm.com>,
+        Elliot Berman <quic_eberman@quicinc.com>,
+        Mathieu Poirier <mathieu.poirier@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Andy Gross <agross@kernel.org>,
+        "Martin K. Petersen" <martin.petersen@oracle.com>,
+        Alex Elder <elder@kernel.org>, Sean Paul <sean@poorly.run>,
+        Paolo Abeni <pabeni@redhat.com>, Kalle Valo <kvalo@kernel.org>,
+        Stanimir Varbanov <stanimir.k.varbanov@gmail.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Laurent Pinchart <laurent.pinchart@ideasonboard.com>,
-        Kieran Bingham <kieran.bingham+renesas@ideasonboard.com>,
-        Geert Uytterhoeven <geert+renesas@glider.be>,
-        linux-kernel@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arch@vger.kernel.org,
-        dmaengine@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-renesas-soc@vger.kernel.org, linux-i2c@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-media@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-mtd@lists.infradead.org,
-        netdev@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-rtc@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-serial@vger.kernel.org, linux-usb@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, alsa-devel@alsa-project.org,
-        linux-sh@vger.kernel.org
-References: <20230113062339.1909087-1-hch@lst.de>
- <11e2e0a8-eabe-2d8c-d612-9cdd4bcc3648@physik.fu-berlin.de>
- <20230116071306.GA15848@lst.de>
- <40dc1bc1-d9cd-d9be-188e-5167ebae235c@physik.fu-berlin.de>
- <20230203071423.GA24833@lst.de>
- <60ed320c8f5286e8dbbf71be29b760339fd25069.camel@physik.fu-berlin.de>
- <0e26bf17-864e-eb22-0d07-5b91af4fde92@infradead.org>
- <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
-From:   Rob Landley <rob@landley.net>
-In-Reply-To: <f6317e9073362b13b10df57de23e63945becea32.camel@physik.fu-berlin.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        Arnd Bergmann <arnd@arndb.de>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Joerg Roedel <joro@8bytes.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Abhinav Kumar <quic_abhinavk@quicinc.com>,
+        Mauro Carvalho Chehab <mchehab@kernel.org>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Will Deacon <will@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        Vikash Garodia <quic_vgarodia@quicinc.com>,
+        David Airlie <airlied@gmail.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Daniel Vetter <daniel@ffwll.ch>,
+        Amit Kucheria <amitk@kernel.org>,
+        Amol Maheshwari <amahesh@qti.qualcomm.com>,
+        Zhang Rui <rui.zhang@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-pm@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-remoteproc@vger.kernel.org, linux-wireless@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-scsi@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, ath10k@lists.infradead.org,
+        freedreno@lists.freedesktop.org, iommu@lists.linux.dev,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH] firmware: qcom_scm: Move qcom_scm.h to include/linux/firmware/qcom/
+Date:   Wed,  8 Feb 2023 20:23:26 -0800
+Message-Id: <167591660372.1230100.2523010471979974316.b4-ty@kernel.org>
+X-Mailer: git-send-email 2.39.1
+In-Reply-To: <20230203210956.3580811-1-quic_eberman@quicinc.com>
+References: <20230203210956.3580811-1-quic_eberman@quicinc.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 2/8/23 06:13, John Paul Adrian Glaubitz wrote:
-> Hi Randy!
+On Fri, 3 Feb 2023 13:09:52 -0800, Elliot Berman wrote:
+> Move include/linux/qcom_scm.h to include/linux/firmware/qcom/qcom_scm.h.
+> This removes 1 of a few remaining Qualcomm-specific headers into a more
+> approciate subdirectory under include/.
 > 
-> On Tue, 2023-02-07 at 17:31 -0800, Randy Dunlap wrote:
->> 
->> On 2/7/23 01:06, John Paul Adrian Glaubitz wrote:
->> > Hello Christoph!
->> > 
->> > On Fri, 2023-02-03 at 08:14 +0100, Christoph Hellwig wrote:
->> > > On Mon, Jan 16, 2023 at 09:52:10AM +0100, John Paul Adrian Glaubitz wrote:
->> > > > We have had a discussion between multiple people invested in the SuperH port and
->> > > > I have decided to volunteer as a co-maintainer of the port to support Rich Felker
->> > > > when he isn't available.
->> > > 
->> > > So, this still isn't reflected in MAINTAINERS in linux-next.  When
->> > > do you plan to take over?  What platforms will remain supported and
->> > > what can we start dropping due to being unused and unmaintained?
->> > 
->> > I'm getting everything ready now with Geert's help and I have a probably dumb
->> > question regarding the MAINTAINERS file change: Shall I just add myself as an
->> > additional maintainer first or shall I also drop Yoshinori Sato?
->> > 
->> > Also, is it desirable to add a "T:" entry for the kernel tree?
->> 
->> Yes, definitely.
 > 
-> Geert has suggested to wait with adding a tree source to the entry until I get my
-> own kernel.org account. I have enough GPG signatures from multiple kernel developers
-> on my GPG key, so I think it shouldn't be too difficult to qualify for an account.
 
-So you're not planning to use https://lk.j-core.org/J-Core-Developers/sh-linux
-but push to kernel.org and ask Linus to pull from there?
+Applied, thanks!
 
-> Adrian
+[1/1] firmware: qcom_scm: Move qcom_scm.h to include/linux/firmware/qcom/
+      commit: 3bf90eca76c98c55c975fa817799789b9176f9f3
 
-Rob
+Best regards,
+-- 
+Bjorn Andersson <andersson@kernel.org>
