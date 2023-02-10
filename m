@@ -2,123 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9B212C05027
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Feb 2023 10:12:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 431B6C05027
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Feb 2023 11:42:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231698AbjBJKM6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Feb 2023 05:12:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34852 "EHLO
+        id S232143AbjBJLmC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Feb 2023 06:42:02 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52284 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229537AbjBJKM5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2023 05:12:57 -0500
-Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B6CB635A1;
-        Fri, 10 Feb 2023 02:12:56 -0800 (PST)
-Received: by mail-wr1-x42e.google.com with SMTP id bu23so4526089wrb.8;
-        Fri, 10 Feb 2023 02:12:56 -0800 (PST)
+        with ESMTP id S231954AbjBJLmA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2023 06:42:00 -0500
+Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8641C14234
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Feb 2023 03:41:56 -0800 (PST)
+Received: by mail-wr1-x431.google.com with SMTP id o18so4804596wrj.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Feb 2023 03:41:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=to:cc:date:message-id:subject:mime-version
-         :content-transfer-encoding:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=lTCrw7yKDyNO1TL5ejMFnwYsZD8GBVrOoqwYTjfQtmU=;
-        b=bCsFMz0TmvqBgNzhQtdKQb/Wlds2xKS76yA4DGwNlgPFfXozHaJZbXwzkFSaKWoLhB
-         /T6gQUb/ubgu9FIbYe2ScSwJBgEvoxfUJjNyn488OeK7hCehj33RnQZP4qbGWUUlfF86
-         psUi9wVguJ5yQ0u0sDr7Czu4XlJTKyfJLQvcQ5/o8HhrZNfa2kbTkOwAUye84PaitaW3
-         +RVRhCNu/pAmHMfGdZHJtyDErXf0u6lz3wyVVFi30D8csbJOvOPCBcKUMLjnj+FWAafb
-         Dx5MmyAXXpfuyN0YqoJuHUwWk8rsIsaOuy3bdvd8hZ8SJkt3xi17tBGnalL7/yV4sKsn
-         oZAQ==
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=+1Hokza/rU47NXkUNadYe1UXBqBUr2w3Zg790aE96A0=;
+        b=ltdGgJD9bbf6fuoivKqor5pMjRN+/pLdfKU6sgMhGrmDai/QeZoFwsrA72u+zKBO7G
+         yfwhepNDPNouSZfew/vRQqiJk9Z/g8o9gC4IgN07oUMVt/JDIA5SawQM195TJSs2YxKR
+         R5nYedqCGOJPLrfdn89Lq8ahA2Eh0pYD+c8evEkFRXnszQWdHTqLc+QaS0LYKzxKRnhA
+         GluyHZ5UjtlHyR7nbIW48eQ8cCSv2Vx7vr5iIm8Bl++B2raMkV5+T5rx4mNpm3y4Hjbd
+         Xr3K3ZymlWJrND3M4WwYW1k3ZrFomQzoqEq5QsDZDBR6KtE8mb+HaEpuOwgDU9YcJKOI
+         x8pg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=to:cc:date:message-id:subject:mime-version
-         :content-transfer-encoding:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=lTCrw7yKDyNO1TL5ejMFnwYsZD8GBVrOoqwYTjfQtmU=;
-        b=1h3506FXnBosK+PfbpKGh6r4pZ4eaqM/4WlVAbvnKkmZ9ZVw96SQGrJlc0Mo4Pysba
-         CVrF26JaMbEhotLD/jy2TyK7PMoljw4xJzqL4Hsg0EYcepvv2lDf4MrlDGFngi5L7otK
-         3pf3sOd8AZYV7BPDjDgWHszYk7j/ocYyI524J+ww1boYNXzs3oDdaCdmoGzQhi1hhEe+
-         OGcsmH5YyEN1Yx0im5e7OjVKqysXj/hGyjMWUi2u2gH8c2UlOhWWV/CfANGE9WYd+QaC
-         szVM8nWu53mUN90PZSPVaQKY2CiQrI9VPVRwBAh7X7B8dqfN7rx60+l1RJodzIRvzSZT
-         n9qg==
-X-Gm-Message-State: AO0yUKX+4z5/EyS5kjU4dChRoUx+VK8dGMT2Sp/EY6fmIgVijtkXY/VE
-        iFCysQNUIeQ2G97+Ea8eGdE=
-X-Google-Smtp-Source: AK7set9kvcPD1pWbMNwpXuAYzw/Inas9vlQX1mEuaq0KEApY+guH4ebYizeBM2LvMK9XWcYF98IUJg==
-X-Received: by 2002:a05:6000:118b:b0:2c5:4b7f:c4e0 with SMTP id g11-20020a056000118b00b002c54b7fc4e0mr901591wrx.57.1676023974903;
-        Fri, 10 Feb 2023 02:12:54 -0800 (PST)
-Received: from smtpclient.apple ([167.99.200.149])
-        by smtp.gmail.com with ESMTPSA id n10-20020adffe0a000000b002c3ec35f360sm3157203wrr.56.2023.02.10.02.12.52
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Fri, 10 Feb 2023 02:12:54 -0800 (PST)
-From:   Christian Hewitt <christianshewitt@gmail.com>
-Content-Type: text/plain;
-        charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3696.120.41.1.1\))
-Subject: Unknown Tuples from SDIO mmc device
-Message-Id: <6F44C9E3-12A9-49EF-B462-6CC2667FDD5A@gmail.com>
-Date:   Fri, 10 Feb 2023 14:12:51 +0400
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
-        LKML <linux-kernel@vger.kernel.org>
-X-Mailer: Apple Mail (2.3696.120.41.1.1)
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+1Hokza/rU47NXkUNadYe1UXBqBUr2w3Zg790aE96A0=;
+        b=t7fk+4RfTqcyYSvBzdr9GtYJoWmdu8sS23NiJZ9mZkdVvExyvpVl5oDZanpvVjeW0L
+         OrnFI/no/LNjs2Axn5sGBBrz3ZaKUoIGgCVOGqLKzjA6I71ZaIzSwLytkEnwpf9AA7fP
+         fYL4XuZGScRit2IonuWp0koDN1hL1bFmhQjttPdwiMzEuXc/ulTEZAjSNkJ9CkaR11Xu
+         7mXpTjCGVwOeIWQGk4FPGbh64USPfuk10yJ+VeprjLxk+0CpaqST7JsCsx5/yNjILfPD
+         7KhpWjzXUmp/D09X5TJNgJEt24ZRjEAGZVr9zWTm+d7e4cE5dT2OvLIqVBH/h22JmmAh
+         NOEw==
+X-Gm-Message-State: AO0yUKWIZUVyuob4vrl3ArlSZ8nGAQ23Ueem4WjnGfmQh7Rl2ARcNr2c
+        pSssYEt8zcust1GEQxS2y1ETeg==
+X-Google-Smtp-Source: AK7set+ywEK8ZNR0oaDC5Zo5ahb+nJPy87HEcyapQ8T1F6CTrcWTftpJgtSLQHM8hr3ISPDNr2bKTg==
+X-Received: by 2002:adf:f287:0:b0:2c5:3d1c:efda with SMTP id k7-20020adff287000000b002c53d1cefdamr4503616wro.31.1676029315093;
+        Fri, 10 Feb 2023 03:41:55 -0800 (PST)
+Received: from [192.168.1.109] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id e1-20020a5d5941000000b002c54241b4fesm2376840wri.80.2023.02.10.03.41.53
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 10 Feb 2023 03:41:54 -0800 (PST)
+Message-ID: <07d2aad9-ce87-01d2-fb21-0301606231d3@linaro.org>
+Date:   Fri, 10 Feb 2023 12:41:53 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [PATCH] dt-bindings: mmc: Add resets property to cadence SDHCI
+ binding
+Content-Language: en-US
+To:     Kunihiko Hayashi <hayashi.kunihiko@socionext.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230209014211.17816-1-hayashi.kunihiko@socionext.com>
+ <ec412378-ae31-e199-b5a1-f37a4731f31a@linaro.org>
+ <8d80a837-b2bd-26af-e633-5b6081caaaef@socionext.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <8d80a837-b2bd-26af-e633-5b6081caaaef@socionext.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello folks, I see this in dmesg from the SDIO mmc device on an Amlogic =
-S905D
-based set-top box (running Linux 6.1.11):
+On 09/02/2023 12:34, Kunihiko Hayashi wrote:
+> Hi Krzysztof,
+> 
+> On 2023/02/09 18:14, Krzysztof Kozlowski wrote:
+>> On 09/02/2023 02:42, Kunihiko Hayashi wrote:
+>>> Cadence SDHCI controller allows reset control support on UniPhier SoC.
+>>> Add resets property to cadence SDHCI binding.
+>>>
+>>> Signed-off-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+>>> ---
+>>>   Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml | 3 +++
+>>>   1 file changed, 3 insertions(+)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>>> b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>>> index d3dce4d6c168..adacd0535c14 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+>>> @@ -29,6 +29,9 @@ properties:
+>>>     clocks:
+>>>       maxItems: 1
+>>>
+>>> +  resets:
+>>> +    maxItems: 1
+>>
+>> This looks specific to UniPhier, doesn't it?
+> 
+> I think this IP has some hardware reset lines, however,
 
-SML5442TW:~ # dmesg | grep mmc
-[    0.367575] meson-gx-mmc d0072000.mmc: Got CD GPIO
-[    0.367728] meson-gx-mmc d0074000.mmc: allocated mmc-pwrseq
-[    0.438107] mmc0: new high speed SDHC card at address aaaa
-[    0.439663] mmcblk0: mmc0:aaaa SL16G 14.8 GiB=20
-[    0.445720]  mmcblk0: p1 p2
-[    0.463812] mmc1: new HS200 MMC card at address 0001
-[    0.465304] mmcblk1: mmc1:0001 8GME4R 7.28 GiB=20
-[    0.470109] mmcblk1boot0: mmc1:0001 8GME4R 4.00 MiB=20
-[    0.473747] mmcblk1boot1: mmc1:0001 8GME4R 4.00 MiB=20
-[    0.477168] mmcblk1rpmb: mmc1:0001 8GME4R 512 KiB, chardev (242:0)
-[    1.253756] meson-gx-mmc d0070000.mmc: allocated mmc-pwrseq
-[    1.331767] mmc2: queuing unknown CIS tuple 0x01 [d9 01 ff] (3 bytes)
-[    1.341857] mmc2: queuing unknown CIS tuple 0x1a [01 01 00 02 07] (5 =
-bytes)
-[    1.346197] mmc2: queuing unknown CIS tuple 0x1b [c1 41 30 30 ff ff =
-32 00] (8 bytes)
-[    1.347097] mmc2: queuing unknown CIS tuple 0x14 [] (0 bytes)
-[    1.351373] mmc2: new ultra high speed SDR104 SDIO card at address =
-0001
-[    2.170379] fsck: /dev/mmcblk0p1: 174 files, 16383/65501 clusters
-[    3.042438] EXT4-fs (mmcblk0p2): mounted filesystem with ordered data =
-mode. Quota mode: disabled.
-[   11.897414] ath10k_sdio mmc2:0001:1: qca9377 hw1.1 sdio target =
-0x05020001 chip_id 0x00000000 sub 0000:0000
-[   11.897451] ath10k_sdio mmc2:0001:1: kconfig debug 0 debugfs 0 =
-tracing 0 dfs 0 testmode 0
-[   11.897992] ath10k_sdio mmc2:0001:1: firmware ver =
-WLAN.TF.1.1.1-00061-QCATFSWPZ-1 api 5 features ignore-otp crc32 7746e551
-[   12.115387] ath10k_sdio mmc2:0001:1: failed to fetch board data for =
-bus=3Dsdio,vendor=3D0271,device=3D0701,subsystem-vendor=3D0000,subsystem-d=
-evice=3D0000 from ath10k/QCA9377/hw1.0/board-2.bin
-[   12.125611] ath10k_sdio mmc2:0001:1: board_file api 1 bmi_id N/A =
-crc32 544289f7
-[   13.399691] meson-gx-mmc d0070000.mmc: unaligned sg offset 1100, =
-disabling descriptor DMA for transfer
-[   13.449279] ath10k_sdio mmc2:0001:1: htt-ver 3.32 wmi-op 4 htt-op 3 =
-cal otp max-sta 32 raw 0 hwcrypto 1
-[   13.533081] mmc2: queuing unknown CIS tuple 0x01 [d9 01 ff] (3 bytes)
-[   13.543521] mmc2: queuing unknown CIS tuple 0x1a [01 01 00 02 07] (5 =
-bytes)
-[   13.548428] mmc2: queuing unknown CIS tuple 0x1b [c1 41 30 30 ff ff =
-32 00] (8 bytes)
-[   13.549378] mmc2: queuing unknown CIS tuple 0x14 [] (0 bytes)
 
-I=E2=80=99m not a coding developer (only light device-tree hacking) so I =
-can=E2=80=99t quite
-follow the code in drivers/mmc/core/sdio_cis.c
+Hm, fine with me. It's actually expected.
 
-What=E2=80=99s needed to make the unknown tuple(s) known?
+> it depends on the implementation whether the lines can be
+> soft controlled or controlled by power-on-reset.
+> 
+> In case of UniPhier SoC, these lines are connected to the syscon
+> reset controller, but deasserted with initial state.
+> 
+> Currently, the binding has one compatible.
+> If drawing this dependency, Is the device dependent compatible necessary?
+> Or I can remove reset property from DT.
 
-Christian=
+No, its okay.
+
+
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+
+Best regards,
+Krzysztof
+
