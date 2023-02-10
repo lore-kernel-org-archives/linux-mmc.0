@@ -2,164 +2,85 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C68DFC05027
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Feb 2023 14:51:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E1372C636CD
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Feb 2023 08:28:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230515AbjBIOv2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Feb 2023 09:51:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39790 "EHLO
+        id S231372AbjBJI2v (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Feb 2023 03:28:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37394 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229450AbjBIOv1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Feb 2023 09:51:27 -0500
-Received: from mail-pj1-x102d.google.com (mail-pj1-x102d.google.com [IPv6:2607:f8b0:4864:20::102d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8EF385A901
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Feb 2023 06:51:25 -0800 (PST)
-Received: by mail-pj1-x102d.google.com with SMTP id d13-20020a17090ad3cd00b0023127b2d602so2582046pjw.2
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Feb 2023 06:51:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=WgrBkIph/jwiixQwU37sRfxRXWlSvdzczRwmYx70sS4=;
-        b=WaMY9P7mNb05w6GiSodo/CveTO2XR42pIKhsB9iwQIdLh3ueicdjJ3Ka2GSvC0IUpU
-         vTvjXE49mUIwqs/h8ec5CGT5L7D3dgpjAAAHchun0uZ9Zh0+ZJBr66kyBuN3ghHmlQ6c
-         z5pDEamlaTmxerDfTCaMewSmoWCpLtLesVUbV5ui2FlF5Pl6tjmU6EgmlpiO6aqt1AEL
-         Qr9iqNDLC40Sh+BJSr35jUC9VE+0laJD/g8BFKt1NrAu1AAJ8cr8RZPZAWAeRevxTGJ3
-         6ZcfwKmxlRL9VcIV3r4z3kIv7vkHMbkFM1zhGxW0NnSBF54jlJbCcwg2e6L4iGEdykCg
-         IbkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=WgrBkIph/jwiixQwU37sRfxRXWlSvdzczRwmYx70sS4=;
-        b=rYCaR4nG4LcJqiVuT/5K/8tmXIr92V1jxt+pBGAsmfuiJ3KcA2Ch2OjWnSGfFeKljU
-         8d3zpdR4CZV7XcdQycSSr+XkGgLBqvddAy1JvqIgJeeJO2MoKsWITAEX86JYKdTHQJpu
-         XYR/pZKK/8MXNyp81ki8gHs3jqqk66Gd2skQI7+KlbK/LIGR+8iLCoS9agTw4eWFrBz/
-         JwiwDcoQbSlK4dicRQEQGMEMw1tqnO4YKXaSMfx6gyVXjjJQ2ELjRwBtOXfKwipEllge
-         A/ElZduFCzSFZjZo9GYDxjC8gQ0uLscLXqywMl3gWdJ4j9AL/pNcEf82wc0xVR0xj7SE
-         M3GQ==
-X-Gm-Message-State: AO0yUKUZhW+mHH38RULP+o/UaRKDuSrr8ciSKtrWkXIMQQe3MQgPdmLM
-        AEJGYswEa/dx2Xn4ZyqXBRqewKfiLonVOfVQyTNAvg==
-X-Google-Smtp-Source: AK7set+/30YYhGlwN11LogLODt3RuDcUryTh1TjBFndJshB3McT3ir1tWBdsVsbnA7599MRkezDABWOckAtw0mY7UYI=
-X-Received: by 2002:a17:90a:31a:b0:232:debf:eee9 with SMTP id
- 26-20020a17090a031a00b00232debfeee9mr373595pje.32.1675954285074; Thu, 09 Feb
- 2023 06:51:25 -0800 (PST)
-MIME-Version: 1.0
-References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
- <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
- <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com> <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
-In-Reply-To: <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Feb 2023 15:50:48 +0100
-Message-ID: <CAPDyKFrtF32AvBKCbMESP7oFT2aBhbce0KA2zzXq+szQnShbww@mail.gmail.com>
-Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, orsonzhai@gmail.com,
-        baolin.wang@linux.alibaba.com, zhang.lyra@gmail.com,
-        axboe@kernel.dk, avri.altman@wdc.com, kch@nvidia.com,
-        CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
-        bigeasy@linutronix.de, s.shtylyov@omp.ru,
-        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
-        lzx.stg@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+        with ESMTP id S230140AbjBJI2u (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Feb 2023 03:28:50 -0500
+Received: from mxct.zte.com.cn (mxct.zte.com.cn [183.62.165.209])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0340D366B2;
+        Fri, 10 Feb 2023 00:28:48 -0800 (PST)
+Received: from mse-fl2.zte.com.cn (unknown [10.5.228.133])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mxct.zte.com.cn (FangMail) with ESMTPS id 4PCn245V7Lz4xpy1;
+        Fri, 10 Feb 2023 16:28:44 +0800 (CST)
+Received: from xaxapp01.zte.com.cn ([10.88.99.176])
+        by mse-fl2.zte.com.cn with SMTP id 31A8STYW020026;
+        Fri, 10 Feb 2023 16:28:30 +0800 (+08)
+        (envelope-from ye.xingchen@zte.com.cn)
+Received: from mapi (xaxapp01[null])
+        by mapi (Zmail) with MAPI id mid31;
+        Fri, 10 Feb 2023 16:28:32 +0800 (CST)
+Date:   Fri, 10 Feb 2023 16:28:32 +0800 (CST)
+X-Zmail-TransId: 2af963e600304908c39b
+X-Mailer: Zmail v1.0
+Message-ID: <202302101628321403257@zte.com.cn>
+Mime-Version: 1.0
+From:   <ye.xingchen@zte.com.cn>
+To:     <ulf.hansson@linaro.org>
+Cc:     <kdasu.kdev@gmail.com>, <alcooperx@gmail.com>,
+        <bcm-kernel-feedback-list@broadcom.com>, <adrian.hunter@intel.com>,
+        <f.fainelli@gmail.com>, <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: =?UTF-8?B?W1BBVENIXSBtbWM6IHNkaGNpLWJyY21zdGI6IFVzZcKgZGV2bV9wbGF0Zm9ybV9nZXRfYW5kX2lvcmVtYXBfcmVzb3VyY2UoKQ==?=
+Content-Type: text/plain;
+        charset="UTF-8"
+X-MAIL: mse-fl2.zte.com.cn 31A8STYW020026
+X-Fangmail-Gw-Spam-Type: 0
+X-Fangmail-Anti-Spam-Filtered: true
+X-Fangmail-MID-QID: 63E6003C.000/4PCn245V7Lz4xpy1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 11 Nov 2022 at 13:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
->
-> [...]
->
-> > >
-> > > Considering the data integrity, we did a random power-down test, and
-> > > the experimental results were good.
-> > >
-> > > FUA can only reduce data loss under abnormal conditions, but cannot
-> > > prevent data loss under abnormal conditions.
-> > >
-> > > I think there should be a balance between FUA and NO FUA, but
-> > > filesystems seem to favor FUA.
-> > >
-> > > FUA brings a drop in random write performance. If enough tests are
-> > > done, NO FUA is acceptable.
-> >
-> > Testing this isn't entirely easy. It requires you to hook up
-> > electrical switches to allow you to automate the powering on/off of
-> > the platform(s). Then at each cycle, really make sure to stress test
-> > the data integrity of the flash memory. Is that what the tests did -
-> > or can you elaborate a bit on what was really tested?
-> >
-> > In any case, the performance impact boils down to how each eMMC/SD
-> > card internally manages reliable writes vs regular writes. Some
-> > vendors may treat them very similarly, while others do not.
-> >
-> > That said, trying to disable REQ_FUA from an mmc host driver is the
-> > wrong approach, as also pointed out by Adrian above. These types of
-> > decisions belong solely in the mmc core layer.
-> >
-> > Instead of what the $subject series proposes, I would rather suggest
-> > we discuss (and test) whether it could make sense to disable REQ_FUA -
-> > *if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
-> > Hence, the mmc core could then announce only REQ_OP_FLUSH.
-> >
->
-> Below is a simple patch that does the above. We may not want to enable
-> this for *all* eMMC/SD cards, but it works fine for testing and to
-> continue the discussions here.
->
->
-> From: Ulf Hansson <ulf.hansson@linaro.org>
-> Date: Fri, 11 Nov 2022 12:48:02 +0100
-> Subject: [PATCH] mmc: core: Disable REQ_FUA if the card supports an internal
->  cache
->
-> !!!! This is not for merge, but only for test and discussions!!!
->
-> It has been reported that REQ_FUA can be costly on some eMMC devices. A
-> potential option that could mitigate this problem, is to rely solely on
-> REQ_OP_FLUSH instead, but that requires the eMMC/SD to support an internal
-> cache. This is an attempt to try this out to see how it behaves.
->
-> Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> ---
->  drivers/mmc/core/block.c | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index db6d8a099910..197e9f6cdaad 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2494,15 +2494,15 @@ static struct mmc_blk_data
-> *mmc_blk_alloc_req(struct mmc_card *card,
->                         md->flags |= MMC_BLK_CMD23;
->         }
->
-> -       if (md->flags & MMC_BLK_CMD23 &&
-> -           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
-> -            card->ext_csd.rel_sectors)) {
-> +       if (mmc_cache_enabled(card->host)) {
-> +               cache_enabled  = true;
-> +       } else if (md->flags & MMC_BLK_CMD23 &&
-> +                 (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
-> +                  card->ext_csd.rel_sectors)) {
->                 md->flags |= MMC_BLK_REL_WR;
->                 fua_enabled = true;
->                 cache_enabled = true;
->         }
-> -       if (mmc_cache_enabled(card->host))
-> -               cache_enabled  = true;
->
->         blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
->
-> --
-> 2.34.1
+From: Ye Xingchen <ye.xingchen@zte.com.cn>
 
-Wenchao,
+Convert platform_get_resource(), devm_ioremap_resource() to a single
+call to devm_platform_get_and_ioremap_resource(), as this is exactly
+what this function does.
 
-Did you manage to try the above patch to see if that could improve the
-situation?
+Signed-off-by: Ye Xingchen <ye.xingchen@zte.com.cn>
+---
+ drivers/mmc/host/sdhci-brcmstb.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+index 0a19b7af1d41..4c22337199cf 100644
+--- a/drivers/mmc/host/sdhci-brcmstb.c
++++ b/drivers/mmc/host/sdhci-brcmstb.c
+@@ -255,7 +255,6 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	struct sdhci_brcmstb_priv *priv;
+ 	u32 actual_clock_mhz;
+ 	struct sdhci_host *host;
+-	struct resource *iomem;
+ 	struct clk *clk;
+ 	struct clk *base_clk = NULL;
+ 	int res;
+@@ -291,8 +290,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+ 	}
+
+ 	/* Map in the non-standard CFG registers */
+-	iomem = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+-	priv->cfg_regs = devm_ioremap_resource(&pdev->dev, iomem);
++	priv->cfg_regs = devm_platform_get_and_ioremap_resource(pdev, 1, NULL);
+ 	if (IS_ERR(priv->cfg_regs)) {
+ 		res = PTR_ERR(priv->cfg_regs);
+ 		goto err;
+-- 
+2.25.1
