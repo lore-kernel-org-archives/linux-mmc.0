@@ -2,55 +2,55 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF272C05027
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Feb 2023 21:54:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 534F8C636D4
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Feb 2023 21:54:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229777AbjBLVyf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        id S229605AbjBLVyf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
         Sun, 12 Feb 2023 16:54:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43234 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43242 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229740AbjBLVyd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Feb 2023 16:54:33 -0500
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6AA5EF741
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Feb 2023 13:54:32 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id v13so10552098eda.11
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Feb 2023 13:54:32 -0800 (PST)
+        with ESMTP id S229776AbjBLVye (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Feb 2023 16:54:34 -0500
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8F48EFB6
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Feb 2023 13:54:33 -0800 (PST)
+Received: by mail-ed1-x529.google.com with SMTP id bt8so4778750edb.12
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Feb 2023 13:54:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=content-transfer-encoding:subject:from:cc:to:content-language
          :user-agent:mime-version:date:message-id:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=6Qha8qrOtRQul9zEnOYzqLrmbz40JcVU27T/LLl1YA0=;
-        b=iShYEslGDEbVYb0FHuwGgh10PnxM3ep1oXkDU3iUWSTJoFKkfwE8bPISmrCp5Dwkie
-         zZefRiroutaJe2CuAM92egUfFsRNW3EhtY44GmE6N3Z0cDVrVy2OsNreuJAs69Q1Ml4B
-         Y2j3UAr1GT1cVvc6UjPL4jSqVRPtR/3jEOH/WiEVr39+xh0ZELoFc//5D4lk6ctLA5vg
-         eiaNTA/2MZtOArR1W/s7+6lFrEEFa4qm5IKXm9WgMLjgRWPrrJXv0P2n9MAbgTd8fSvl
-         R51MKcZEEgF5G69/vN3eOqtOO+n56HcrnEhKXCbzWl8St4M04cO84ZFuuo4e3ni1lVdu
-         3OUw==
+        bh=DGuGPCBH000hnUeP9HzMYSwgcYb4tjeqonZlJZ7wvEs=;
+        b=ZyL15y11COO3CVgVZ20jLnv/5obvFdsFyp8FUWUctL9nrtd1EsY31xM0tQciY1YMrG
+         z2WCPUgQCT3t6lRXCPl1bPzqZ5ds2DVaLjS6ThSus7HkekjTVp4w4n4SHJ/HtKt546uF
+         z5uoqHYPhGH4bX9A7eR2l9tkQnY3ZN0fEi0EnC+Z3DUmzv6C5cCL5KoeannMYMtLc/TJ
+         lAXiRMUVNnh5SXwTk/d98Nm7wScIw7fHh6WgvmYJJAplIXDoRC1uT9318oEaAYpWddWV
+         FX7RaF8pQotupFjWlNJo/9Fk2po3356b9Ni2kLFSTaP4ZLoe0o2VzPQMlT+b+pt300u+
+         D95Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=content-transfer-encoding:subject:from:cc:to:content-language
          :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=6Qha8qrOtRQul9zEnOYzqLrmbz40JcVU27T/LLl1YA0=;
-        b=Lx6rS040IXItjNYeZn6svvNMqtIZITgxxKEVxvGhxDLO7TYxGo+7LAGpF2UCa435da
-         ltMVHnMAdDJ2pfUGQHu0jFAXxwedLhclFcoR2lin7Hgb6WGfYcXGB1JvnC6Bv9B2i2RO
-         bvAhiyJDeaDbNF65fhq062NMSFUoh3W8fX9V/cyynOfMVfiByxr9PaG0weAqrBnQyVRw
-         9eeVuCcsPG+mklNU/VTBuRay2lBgjVijTMaKWN1RU8WcHYPCw15rbLcnm0ttHejQsNPN
-         rKiWd466Is307xwFH6w3BvyYZym1lUMD9t8zILtlFVtPCzbv9QVt00lIYWwsVA6hnFvV
-         nRWg==
-X-Gm-Message-State: AO0yUKULTtaMPaH+ceM4JEVw0fOZd9XKTn366PWIarW899zlkTD3nb7w
-        lygK1guE4fxMm1MP6o18MZg=
-X-Google-Smtp-Source: AK7set9gtN42qoq+WZ6BAwH02EDZ+b/8eUq1z6bXvcF2fuHg09Bt848oY1AZ2oavxyRqlxPKbNtsjA==
-X-Received: by 2002:a50:d613:0:b0:4aa:a280:55b5 with SMTP id x19-20020a50d613000000b004aaa28055b5mr5452016edi.20.1676238870961;
-        Sun, 12 Feb 2023 13:54:30 -0800 (PST)
+        bh=DGuGPCBH000hnUeP9HzMYSwgcYb4tjeqonZlJZ7wvEs=;
+        b=NyfVsRO1hu9c0GqOVVu8wMsbarJFzhhub+qUtazypyLrur2pPEpx9KzDlDdvzeQ88K
+         6zV4t9v27ycfUk7NFAKJ9xhu7yhc2o5ts80QOU2oFz28O/BWSzcgzMzxPP4dloVjJX47
+         NmYrm29QZ7BPSuXHKKvgPf0BdEp6ytuDiAwu4FaQsNDkPDFvyxRUNRlFvrghuvvJmYdn
+         90FYPf8adY1Z0UAcd6TklPEw+N4QbbUn2mVJ9u0KbukPLQtqOplDc5fbnmZ4xFUf1KK3
+         IaPn/uhzJaDy+6UQzPbvQUakTZywVxfDnQskx296c0zzaGBukae034A2wljykhFz/8Re
+         /Z9Q==
+X-Gm-Message-State: AO0yUKVvcYDA1hytGJxndz0poZMwxntbmX9JWH0iS1mq3wLRzRUbaM6N
+        WcvbeN7i3qjOTMcsbSNieTk=
+X-Google-Smtp-Source: AK7set8JELOs/DBqdSQGjGjcwNgqzAgHIxpNuvEQabnefMFTUjAm5p8b32WOp8xiX/NPZS7P8dXy/A==
+X-Received: by 2002:a50:8717:0:b0:4ac:b858:37b1 with SMTP id i23-20020a508717000000b004acb85837b1mr5447246edb.7.1676238872272;
+        Sun, 12 Feb 2023 13:54:32 -0800 (PST)
 Received: from ?IPV6:2a01:c23:bdd2:4300:1932:303f:b63a:5a0e? (dynamic-2a01-0c23-bdd2-4300-1932-303f-b63a-5a0e.c23.pool.telefonica.de. [2a01:c23:bdd2:4300:1932:303f:b63a:5a0e])
-        by smtp.googlemail.com with ESMTPSA id t23-20020a50ab57000000b004acbf1d8412sm1637291edc.1.2023.02.12.13.54.29
+        by smtp.googlemail.com with ESMTPSA id v20-20020a50d094000000b004acc6c67089sm793960edd.75.2023.02.12.13.54.31
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Feb 2023 13:54:30 -0800 (PST)
-Message-ID: <16502040-3beb-a3cc-b28d-28184fba0f10@gmail.com>
-Date:   Sun, 12 Feb 2023 22:43:32 +0100
+        Sun, 12 Feb 2023 13:54:31 -0800 (PST)
+Message-ID: <9e296859-0363-ecc4-2d99-fd0239efceff@gmail.com>
+Date:   Sun, 12 Feb 2023 22:54:25 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.2
@@ -63,58 +63,89 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-arm-kernel@lists.infradead.org" 
         <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        Geraldo Nascimento <geraldogabriel@gmail.com>
 From:   Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH] mmc: meson-gx: remove meson_mmc_get_cd
+Subject: [PATCH] mmc: meson-gx: fix SDIO mode if cap_sdio_irq isn't set
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-MMC core only checks whether return value of .get_cd() equals zero.
-Therefore -ENOSYS and 1 are effectively the same and the function
-can be removed.
+Some SDIO WiFi modules stopped working after SDIO interrupt mode
+was added if cap_sdio_irq isn't set in device tree. This patch was
+confirmed to fix the issue.
 
+Fixes: 066ecde6d826 ("mmc: meson-gx: add SDIO interrupt support")
+Reported-by: Geraldo Nascimento <geraldogabriel@gmail.com>
+Tested-by: Geraldo Nascimento <geraldogabriel@gmail.com>
+Cc: stable@vger.kernel.org
 Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 ---
- drivers/mmc/host/meson-gx-mmc.c | 16 +---------------
- 1 file changed, 1 insertion(+), 15 deletions(-)
+ drivers/mmc/host/meson-gx-mmc.c | 21 ++++++++++++---------
+ 1 file changed, 12 insertions(+), 9 deletions(-)
 
 diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index 6d5caf233..1d761f33d 100644
+index 6e5ea0213..a80d48d23 100644
 --- a/drivers/mmc/host/meson-gx-mmc.c
 +++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1064,20 +1064,6 @@ static irqreturn_t meson_mmc_irq_thread(int irq, void *dev_id)
- 	return IRQ_HANDLED;
- }
+@@ -435,7 +435,8 @@ static int meson_mmc_clk_init(struct meson_host *host)
+ 	clk_reg |= FIELD_PREP(CLK_CORE_PHASE_MASK, CLK_PHASE_180);
+ 	clk_reg |= FIELD_PREP(CLK_TX_PHASE_MASK, CLK_PHASE_0);
+ 	clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, CLK_PHASE_0);
+-	clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
++	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
++		clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
+ 	writel(clk_reg, host->regs + SD_EMMC_CLOCK);
  
--/*
-- * NOTE: we only need this until the GPIO/pinctrl driver can handle
-- * interrupts.  For now, the MMC core will use this for polling.
-- */
--static int meson_mmc_get_cd(struct mmc_host *mmc)
--{
--	int status = mmc_gpio_get_cd(mmc);
--
--	if (status == -ENOSYS)
--		return 1; /* assume present */
--
--	return status;
--}
--
- static void meson_mmc_cfg_init(struct meson_host *host)
+ 	/* get the mux parents */
+@@ -948,16 +949,18 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
  {
- 	u32 cfg = 0;
-@@ -1146,7 +1132,7 @@ static void meson_mmc_ack_sdio_irq(struct mmc_host *mmc)
- static const struct mmc_host_ops meson_mmc_ops = {
- 	.request	= meson_mmc_request,
- 	.set_ios	= meson_mmc_set_ios,
--	.get_cd         = meson_mmc_get_cd,
-+	.get_cd         = mmc_gpio_get_cd,
- 	.pre_req	= meson_mmc_pre_req,
- 	.post_req	= meson_mmc_post_req,
- 	.execute_tuning = meson_mmc_resampling_tuning,
+ 	struct meson_host *host = dev_id;
+ 	struct mmc_command *cmd;
+-	u32 status, raw_status;
++	u32 status, raw_status, irq_mask = IRQ_EN_MASK;
+ 	irqreturn_t ret = IRQ_NONE;
+ 
++	if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
++		irq_mask |= IRQ_SDIO;
+ 	raw_status = readl(host->regs + SD_EMMC_STATUS);
+-	status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
++	status = raw_status & irq_mask;
+ 
+ 	if (!status) {
+ 		dev_dbg(host->dev,
+ 			"Unexpected IRQ! irq_en 0x%08lx - status 0x%08x\n",
+-			 IRQ_EN_MASK | IRQ_SDIO, raw_status);
++			 irq_mask, raw_status);
+ 		return IRQ_NONE;
+ 	}
+ 
+@@ -1204,6 +1207,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 		goto free_host;
+ 	}
+ 
++	mmc->caps |= MMC_CAP_CMD23;
++
++	if (mmc->caps & MMC_CAP_SDIO_IRQ)
++		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
++
+ 	host->data = (struct meson_mmc_data *)
+ 		of_device_get_match_data(&pdev->dev);
+ 	if (!host->data) {
+@@ -1277,11 +1285,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 
+ 	spin_lock_init(&host->lock);
+ 
+-	mmc->caps |= MMC_CAP_CMD23;
+-
+-	if (mmc->caps & MMC_CAP_SDIO_IRQ)
+-		mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
+-
+ 	if (host->dram_access_quirk) {
+ 		/* Limit segments to 1 due to low available sram memory */
+ 		mmc->max_segs = 1;
 -- 
 2.39.1
 
