@@ -2,147 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 816D0C636D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 13:37:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86C13C636CC
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 13:38:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230118AbjBMNhU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Feb 2023 08:37:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42394 "EHLO
+        id S229671AbjBMNin (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Feb 2023 08:38:43 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230056AbjBMNhT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 08:37:19 -0500
-Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 50FC15279
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 05:37:18 -0800 (PST)
-Received: by mail-ed1-x534.google.com with SMTP id d40so11663429eda.8
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 05:37:18 -0800 (PST)
+        with ESMTP id S229570AbjBMNim (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 08:38:42 -0500
+Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 23F25193D4
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 05:38:39 -0800 (PST)
+Received: by mail-pg1-x52a.google.com with SMTP id x31so8117612pgl.6
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 05:38:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=VWQukUmOBboD3ve0t2WRko6zyPeadupb+Yh41Dodqd0=;
-        b=Zye4jEMN+Yl53MaO/BHLu1SWyGYajA+w0bxj16SpsO3ZyIzI5bBZaVnaZfcgH2VRkC
-         KPmKoFmw+sXR3Sl06y62D5DuLImsp/nViquQ4hMy9hbvpMRLXCykeQSGbxlEqr0YMgMs
-         1yGIUY4MgPsuOLelM/DhBm5CnB9y7QtYB19Gp0RhLFxrH5a7A53+wQN4i/BFkQnmfFZv
-         7qTbqvP6pO/zgzTRv/yuNC+GC02cXw6BJVNB3W3bgAD4Et62spQt480dIZLc1nqWgEZI
-         TGRhZ5x1rf390PSpkuRNkB8eDAWs+b9rakkX6iJQT300BJWRgN3DNfvLKsglcF28nnCU
-         D9Lg==
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vF1P5TfBIPKJ6WFS9mQOcribHkWp6/vWF2K7YLacH5c=;
+        b=nk2Lg55U9ZLgq8RFWdX82Nth7uZ9ret2VEvDT0H8OBXxROiHcNYQjOlUXpnUbjtnhF
+         IDU6XtOn5tOdK+m2w31riTEh22/cGOgzZreofdnHuyx1bsOwFRtEkv99+F2BdRn0Y+lG
+         qDNnD9UlHu3sObbt0Ieh/r+7yeeo4LsNzQmZ7z06YTkLu9TEXym821N7vYeHmBzjyhOe
+         5iLUhrUUEfi5dwi5jih66vvO7BDoR/S7Gb/yg+qqyTWUePcfR+RcANkQh2EycPRG6h1g
+         Z7chA9qjOdGGDKoBL00d2RPbO3VXqRqHVJ7hpGsL1MeRdiNSMZRTEfJFUgx/yRGx5Z18
+         uzzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=VWQukUmOBboD3ve0t2WRko6zyPeadupb+Yh41Dodqd0=;
-        b=AqQfGV6XJ2kfLi7i9hXjhUS9RRYLhhUwv8chZXaYTAKYLbRwlgcw4HK3rN+nlb4VAr
-         myPS8UX7GeqZwaIQ/RCAXrOg5d2918eb7SnmDkLSTRjD2cbVbYnuihAqM6bpwSSqWX9q
-         pCXq9Iu4EfJVLjpXcqtTOY53NZ6uNuLUrk0m8ZlxpKpW3HmodGK8qPfiezVuI7uTdi9z
-         048yNLh25jctWFfEgyDqjftcYBv5rEKeeS5K44sYicydWpe+18qHqLDdF3e8OQeLmRdo
-         GcYHWWeXFeC8B4OzTddaPLUZ0SMZJqEBSHQi9gFhRrAcQ/aHKgiiZKn0ltonr+CQp1JV
-         Ozrg==
-X-Gm-Message-State: AO0yUKW0bCO31pR9tknON3Vjjo3YXZS9346qD+2+OE9aQWx49/QUE4tH
-        v31BGZRi7KQgXbaYH/ss11AxguBwR0Zsn5Jn
-X-Google-Smtp-Source: AK7set8Lj62T8qa7+NLRmOhfIL/j5f1E2nG3gDc9Eur29BCoi0KMNC8239U6ykKD/urpvIfb4wxEZw==
-X-Received: by 2002:a50:bace:0:b0:4ac:cc7a:24c1 with SMTP id x72-20020a50bace000000b004accc7a24c1mr2235597ede.37.1676295436512;
-        Mon, 13 Feb 2023 05:37:16 -0800 (PST)
-Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
-        by smtp.gmail.com with ESMTPSA id n25-20020a50c219000000b004a21c9facd5sm6602798edf.67.2023.02.13.05.37.15
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Feb 2023 05:37:15 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: core: Align to common busy polling behaviour for mmc ioctls
-Date:   Mon, 13 Feb 2023 14:37:07 +0100
-Message-Id: <20230213133707.27857-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=vF1P5TfBIPKJ6WFS9mQOcribHkWp6/vWF2K7YLacH5c=;
+        b=jj11YKKCeI/oFA9LmBruX5ym8d1+93pfrhTSycRdiCnMslgSTSsnhPgHHZPcFItxcS
+         Uzn0UEAW3m29Rmjy3YF9Ay6CXPn7z7H/NWrBX3HnSuthHN8zUsnESOcp276Mlo6phHIr
+         CC2WjPSfnecytV/erXq9sczkXt+BCFVN/jaKv9LZuH9k/XmQemCOQhIUJo3EwYGn4zNS
+         a4aDnc/KgXN68dxoSTBmwhKKXbsOdQa28JvDSqy9nYbdWMSnXcLg7fvTD5/VGsK5NULW
+         u40AqFdZSDqj7obnIwgP56JeLKFQ/Fdp6FwqkWmdOQsllXwXVJnKHx4SRTjB3WgzF9Ao
+         TIqQ==
+X-Gm-Message-State: AO0yUKVGQ6zGSGAfocNIgE2cWDlPD71nwLAJl0LZPhkIqYajTQFtQrjV
+        a+H/RwCrnTn2aRiL3bI33IQROZzkazHXMTxsI2bR/g==
+X-Google-Smtp-Source: AK7set89uIuHycKuwV9oCG1G6vsIgA+92KlIBOAt5JdpAhjlhJzvtgLGPgckmHFpDdRpXHaiP/qNKEJi5uaurolZYlo=
+X-Received: by 2002:a62:154c:0:b0:5a8:925b:f68e with SMTP id
+ 73-20020a62154c000000b005a8925bf68emr1174634pfv.28.1676295518622; Mon, 13 Feb
+ 2023 05:38:38 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <68590206e8b044a2a71457cbbeda0794@hyperstone.com>
+In-Reply-To: <68590206e8b044a2a71457cbbeda0794@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 13 Feb 2023 14:38:02 +0100
+Message-ID: <CAPDyKFoUUoHVjCzhDeeSiQFa2s1ewYN20QcbhpQfL50jOSdxwQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: workaround long ioctl busy timeout
+To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
+Cc:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        Avri Altman <Avri.Altman@wdc.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Let's align to the common busy polling behaviour for mmc ioctls, by
-updating the below two corresponding parts, that comes into play when using
-an R1B response for a command.
+On Mon, 16 Jan 2023 at 15:38, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
+ wrote:
+>
+> The ioctl interface allowed to set cmd_timeout_ms when polling for
+> busy on R1B commands. This was often limited by the max hw timeout
+> so work around it like for the sanitize command.
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+> ---
+>  drivers/mmc/core/block.c | 10 +++++++++-
+>  1 file changed, 9 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 20da7ed43e6d..ba3bc9014179 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -472,6 +472,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card,=
+ struct mmc_blk_data *md,
+>         struct scatterlist sg;
+>         int err;
+>         unsigned int target_part;
+> +       unsigned int busy_timeout =3D MMC_BLK_TIMEOUT_MS;
+> +       int poll_prog =3D false;
+>
+>         if (!card || !md || !idata)
+>                 return -EINVAL;
+> @@ -493,6 +495,12 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card=
+, struct mmc_blk_data *md,
+>         cmd.opcode =3D idata->ic.opcode;
+>         cmd.arg =3D idata->ic.arg;
+>         cmd.flags =3D idata->ic.flags;
+> +       /* R1B flag might be removed here to work around hw, so save it *=
+/
+> +       poll_prog =3D (idata->rpmb || (cmd.flags & MMC_RSP_R1B) =3D=3D MM=
+C_RSP_R1B);
+> +       busy_timeout =3D idata->ic.cmd_timeout_ms ? :
+> +               MMC_BLK_TIMEOUT_MS;
+> +       if (poll_prog)
+> +               mmc_prepare_busy_cmd(card->host, &cmd, busy_timeout);
 
-*) A command with an R1B response should be prepared by calling
-mmc_prepare_busy_cmd(), which make us respects the host's busy timeout
-constraints.
-**) When an R1B response is being used and the host also supports HW busy
-detection, we should skip to poll for busy completion.
+This may end up using R1B for rpmb commands, we don't want that.
 
-Suggested-by: Christian Loehle <cloehle@hyperstone.com>
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
----
- drivers/mmc/core/block.c   | 25 +++++++++++++++++--------
- drivers/mmc/core/mmc_ops.c |  1 +
- 2 files changed, 18 insertions(+), 8 deletions(-)
+>
+>         if (idata->buf_bytes) {
+>                 data.sg =3D &sg;
+> @@ -596,7 +604,7 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card,=
+ struct mmc_blk_data *md,
+>         if (idata->ic.postsleep_min_us)
+>                 usleep_range(idata->ic.postsleep_min_us, idata->ic.postsl=
+eep_max_us);
+>
+> -       if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) =3D=3D MMC_RSP_R1B) =
+{
+> +       if (poll_prog) {
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 20da7ed43e6d..672ab90c4b2d 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -470,6 +470,8 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	struct mmc_data data = {};
- 	struct mmc_request mrq = {};
- 	struct scatterlist sg;
-+	bool r1b_resp, use_r1b_resp = false;
-+	unsigned int busy_timeout_ms;
- 	int err;
- 	unsigned int target_part;
- 
-@@ -545,6 +547,13 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	    (cmd.opcode == MMC_SWITCH))
- 		return mmc_sanitize(card, idata->ic.cmd_timeout_ms);
- 
-+	/* If it's an R1B response we need some more preparations. */
-+	busy_timeout_ms = idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS;
-+	r1b_resp = (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B;
-+	if (r1b_resp)
-+		use_r1b_resp = mmc_prepare_busy_cmd(card->host, &cmd,
-+						    busy_timeout_ms);
-+
- 	mmc_wait_for_req(card->host, &mrq);
- 	memcpy(&idata->ic.response, cmd.resp, sizeof(cmd.resp));
- 
-@@ -596,14 +605,14 @@ static int __mmc_blk_ioctl_cmd(struct mmc_card *card, struct mmc_blk_data *md,
- 	if (idata->ic.postsleep_min_us)
- 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
- 
--	if (idata->rpmb || (cmd.flags & MMC_RSP_R1B) == MMC_RSP_R1B) {
--		/*
--		 * Ensure RPMB/R1B command has completed by polling CMD13 "Send Status". Here we
--		 * allow to override the default timeout value if a custom timeout is specified.
--		 */
--		err = mmc_poll_for_busy(card, idata->ic.cmd_timeout_ms ? : MMC_BLK_TIMEOUT_MS,
--					false, MMC_BUSY_IO);
--	}
-+	/* No need to poll when using HW busy detection. */
-+	if ((card->host->caps & MMC_CAP_WAIT_WHILE_BUSY) && use_r1b_resp)
-+		return 0;
-+
-+	/* Ensure RPMB/R1B command has completed by polling with CMD13. */
-+	if (idata->rpmb || r1b_resp)
-+		err = mmc_poll_for_busy(card, busy_timeout_ms, false,
-+					MMC_BUSY_IO);
- 
- 	return err;
- }
-diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
-index 81c55bfd6e0c..3b3adbddf664 100644
---- a/drivers/mmc/core/mmc_ops.c
-+++ b/drivers/mmc/core/mmc_ops.c
-@@ -575,6 +575,7 @@ bool mmc_prepare_busy_cmd(struct mmc_host *host, struct mmc_command *cmd,
- 	cmd->busy_timeout = timeout_ms;
- 	return true;
- }
-+EXPORT_SYMBOL_GPL(mmc_prepare_busy_cmd);
- 
- /**
-  *	__mmc_switch - modify EXT_CSD register
--- 
-2.34.1
+If we end up using R1B and the host supports HW busy detection, we
+should skip polling.
 
+>                 /*
+>                  * Ensure RPMB/R1B command has completed by polling CMD13=
+ "Send Status". Here we
+>                  * allow to override the default timeout value if a custo=
+m timeout is specified.
+
+I believe I understand the problem you are trying to address in the
+$subject patch. Let me try to help out, by sending a re-worked patch
+to try to cover the things I pointed out above in a more consistent
+way.
+
+Kind regards
+Uffe
