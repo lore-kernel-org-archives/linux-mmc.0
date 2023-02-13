@@ -2,75 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 767E2C636D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 23:49:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EF301C636CC
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 23:49:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231288AbjBMXtM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Feb 2023 18:49:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55094 "EHLO
+        id S230480AbjBMXtr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Feb 2023 18:49:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56096 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231261AbjBMXtD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 18:49:03 -0500
-Received: from mail-pg1-x531.google.com (mail-pg1-x531.google.com [IPv6:2607:f8b0:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BD3F1A97E
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:49:02 -0800 (PST)
-Received: by mail-pg1-x531.google.com with SMTP id e1so4361987pgg.9
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:49:02 -0800 (PST)
+        with ESMTP id S231187AbjBMXtp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 18:49:45 -0500
+Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6DF09193DC
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:49:17 -0800 (PST)
+Received: by mail-pj1-x102b.google.com with SMTP id fu4-20020a17090ad18400b002341fadc370so1871660pjb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:49:17 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=kl8QzkXhRVqlS7J3L6dkB3lhTIHg1fIKAOZ1QC4ZzQs=;
-        b=Rjiw0UtkkA5pdBI3pHmcoYBvBhNOaZwmXn6Skly3X5g9JzSml5VNrNrDLbFdYdA3jH
-         LPiX4vffES/kzaQUqFhjeQ521/KlvAwysA7ob4kVlBY3Thos2RAEfY0Dm/l967Xaeeio
-         4XdBLbkTL+YEt4Gvooky6kmnhHcPY1dLjjcc4Jiq94TMqHgzvpDp4bvLTpQpop6NTn2Q
-         uUM/q7R9Cf2e52EOdNXqSsf1MIzPcHH15gOH5oFTHmTdiXm7DmRa2+PzY1bBJeRWmVOY
-         +t4dBHCeI/mIQlnKbkAqgP35Q0I3/GJ9vKfDJAKhnTl041K35y/TvtyaVHNWgVn7TwNy
-         LtKw==
+        bh=odhaLSQAYuADLGZm4pIKzQ/pEf5/tb+uT7nEOsNGavM=;
+        b=Lj9Ycve+GsNdexadAYK76iYELe+/kM1HkNXPFV4Mos+c8Ct7WaNiL7j8biV4RgX01a
+         I0UIQLsIhl3BbTQZS4c0IVZKnXFhEHepYbdaJIr3lUXLRn2zmE0/c1326/4cIQULtX58
+         1t7+DoCg/GpprokQZ6IT+NEluMrkYHxf1wSgvqfaTvmpIHDLxCXhdCicDfLNG2mz8koT
+         owlYHD5Q40cDOGb7JBpXBt7FyQfoXncyAxhsnMGAClOOYCVRGesFm8XRf3Oo2J2K28ry
+         KWx4tZ4XSqHkVEe96Ong6XaLP40qvlnP+GNBaNLQyzmNgiJ86Lpa4SOQb1VVWDecGEbo
+         Ng1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=kl8QzkXhRVqlS7J3L6dkB3lhTIHg1fIKAOZ1QC4ZzQs=;
-        b=yLs3wZvsr7bIzBE9c2PLI65JmusEOdJ2GBufwH63JPa2g9D0sxXdWcces4Be1ahOsm
-         ozUjOjT+/5Hk+8PP0ETFEgE6qUQlTz7AAJ53IaVAMSIe+YTonbUiGOt8OHle6IM/OR/E
-         e8Aa2gJC+RpZjObFoA6Pe7bHbTzs5ODWG3kqY4h2FcWtOaJ2HBHx09O85g9zK1qaAgT4
-         rV/GJFw2Syo6N7jrO/THlCBQN2B2zuazZBi6YjQ+tUogsiB8ZNZhAm0xUBgItxIASO8m
-         nioSqMevUN7igRig5fhiR3X+TgAbQ3KbNydMqB2OcJjLgiVEbbC25xkgZMubJ/Xjiysx
-         Jz5g==
-X-Gm-Message-State: AO0yUKVALUbwa+FAT8PEjJ+plbElHdfikGjMQmF9LgJxuVZe74qkSMR7
-        zOFdGcX6hX7HmNM7w4csQWgv9gsh5VdYmkdZgeIARA==
-X-Google-Smtp-Source: AK7set+6RSMgTKP2+GZlEeiAjA1q8cUPrJ2/QFq99Fpl/5bmDycICvdzoEIjD2syU8UNVJbvE22IdH4IdFNUSMtaMkE=
-X-Received: by 2002:a63:340c:0:b0:4fb:9359:493b with SMTP id
- b12-20020a63340c000000b004fb9359493bmr1346452pga.77.1676332142070; Mon, 13
- Feb 2023 15:49:02 -0800 (PST)
+        bh=odhaLSQAYuADLGZm4pIKzQ/pEf5/tb+uT7nEOsNGavM=;
+        b=d6lWr4n25NiZSRdG5mft1Es9HptCmX15xMFnWMGkCh5bW0is3aOMNhHWnnxtVt3h8/
+         d54sumtpYqcoQvjUbg67AJgpth/w9FxdkLv4VT4cfxUSZ2VR44Qbb0xfvzGj7GZFqvUN
+         /R7FMcp5k0t95De1UM87yx073GTcW1LeRk32RgZzUCmukG1twZNrOpu+4gRq0eJcui5r
+         JL2PCB+NoetwYDv2cvZgpUsak2pR2wZPH+G34lk2US5BISKpvfcCQmmAv5bL02BNywY0
+         PFOX6h5r/yxVWd1ruG900yh7c5ivTQFjMJ/k+FoCKDje3YmSE+BphQ9vMtBH+cs/NISa
+         HPZA==
+X-Gm-Message-State: AO0yUKWYHNPUVvCYxVicUZjqXg5NBoM/LVI/GOf9jcd+i3Rpv+AknRvG
+        KcgWH0wjCdNLBNRxFZdKbGOAH9OOiSGow1DtVlR3XQBbk+ryhQ==
+X-Google-Smtp-Source: AK7set9J/arpZcJrTEQTjyjRO/G9/8RYV08onHtTsJP9yMNQ5kU9PJJaQwXlv+rezCo79c8EhGdFoW4OypK42lPb4DQ=
+X-Received: by 2002:a17:90a:c710:b0:233:ce0b:5f78 with SMTP id
+ o16-20020a17090ac71000b00233ce0b5f78mr1761621pjt.32.1676332156798; Mon, 13
+ Feb 2023 15:49:16 -0800 (PST)
 MIME-Version: 1.0
-References: <20230131013835.3564011-1-yangyingliang@huawei.com>
-In-Reply-To: <20230131013835.3564011-1-yangyingliang@huawei.com>
+References: <20230131210229.68129-1-paul@crapouillou.net>
+In-Reply-To: <20230131210229.68129-1-paul@crapouillou.net>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 00:48:25 +0100
-Message-ID: <CAPDyKFqV6sCYLkGsbRVvTC0Q5ajY-VKHjfDvqQbc4StB+kWxjg@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: mmc_spi: fix error handling in mmc_spi_probe()
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, drzeus@drzeus.cx, david-b@pacbell.net,
-        CLoehle@hyperstone.com
+Date:   Tue, 14 Feb 2023 00:48:40 +0100
+Message-ID: <CAPDyKFon1_0HPZLZTVvy+oEukWaMGuXtt+3YBQBrcbguy5U3-w@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: jz4740: Work around bug on JZ4760(B)
+To:     Paul Cercueil <paul@crapouillou.net>
+Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, list@opendingux.net
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 31 Jan 2023 at 02:38, Yang Yingliang <yangyingliang@huawei.com> wrote:
+On Tue, 31 Jan 2023 at 22:02, Paul Cercueil <paul@crapouillou.net> wrote:
 >
-> If mmc_add_host() fails, it doesn't need to call mmc_remove_host(),
-> or it will cause null-ptr-deref, because of deleting a not added
-> device in mmc_remove_host().
+> On JZ4760 and JZ4760B, SD cards fail to run if the maximum clock
+> rate is set to 50 MHz, even though the controller officially does
+> support it.
 >
-> To fix this, goto label 'fail_glue_init', if mmc_add_host() fails,
-> and change the label 'fail_add_host' to 'fail_gpiod_request'.
+> Until the actual bug is found and fixed, limit the maximum clock rate to
+> 24 MHz.
 >
-> Fixes: 15a0580ced08 ("mmc_spi host driver")
-> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+> Signed-off-by: Paul Cercueil <paul@crapouillou.net>
 
 Applied for fixes and by adding a stable tag, thanks!
 
@@ -79,52 +78,30 @@ Uffe
 
 
 > ---
-> v1 -> v2:
->   Fix a typo.
-> ---
->  drivers/mmc/host/mmc_spi.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+>  drivers/mmc/host/jz4740_mmc.c | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 >
-> diff --git a/drivers/mmc/host/mmc_spi.c b/drivers/mmc/host/mmc_spi.c
-> index 106dd204b1a7..cc333ad67cac 100644
-> --- a/drivers/mmc/host/mmc_spi.c
-> +++ b/drivers/mmc/host/mmc_spi.c
-> @@ -1437,7 +1437,7 @@ static int mmc_spi_probe(struct spi_device *spi)
+> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
+> index 319a2a79c9a0..eb8e9607b086 100644
+> --- a/drivers/mmc/host/jz4740_mmc.c
+> +++ b/drivers/mmc/host/jz4740_mmc.c
+> @@ -1104,6 +1104,16 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
+>         mmc->ops = &jz4740_mmc_ops;
+>         if (!mmc->f_max)
+>                 mmc->f_max = JZ_MMC_CLK_RATE;
+> +
+> +       /*
+> +        * There seems to be a problem with this driver on the JZ4760 and
+> +        * JZ4760B SoCs. There, when using the maximum rate supported (50 MHz),
+> +        * the communication fails with many SD cards.
+> +        * Until this bug is sorted out, limit the maximum rate to 24 MHz.
+> +        */
+> +       if (host->version == JZ_MMC_JZ4760 && mmc->f_max > JZ_MMC_CLK_RATE)
+> +               mmc->f_max = JZ_MMC_CLK_RATE;
+> +
+>         mmc->f_min = mmc->f_max / 128;
+>         mmc->ocr_avail = MMC_VDD_32_33 | MMC_VDD_33_34;
 >
->         status = mmc_add_host(mmc);
->         if (status != 0)
-> -               goto fail_add_host;
-> +               goto fail_glue_init;
->
->         /*
->          * Index 0 is card detect
-> @@ -1445,7 +1445,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->          */
->         status = mmc_gpiod_request_cd(mmc, NULL, 0, false, 1000);
->         if (status == -EPROBE_DEFER)
-> -               goto fail_add_host;
-> +               goto fail_gpiod_request;
->         if (!status) {
->                 /*
->                  * The platform has a CD GPIO signal that may support
-> @@ -1460,7 +1460,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->         /* Index 1 is write protect/read only */
->         status = mmc_gpiod_request_ro(mmc, NULL, 1, 0);
->         if (status == -EPROBE_DEFER)
-> -               goto fail_add_host;
-> +               goto fail_gpiod_request;
->         if (!status)
->                 has_ro = true;
->
-> @@ -1474,7 +1474,7 @@ static int mmc_spi_probe(struct spi_device *spi)
->                                 ? ", cd polling" : "");
->         return 0;
->
-> -fail_add_host:
-> +fail_gpiod_request:
->         mmc_remove_host(mmc);
->  fail_glue_init:
->         mmc_spi_dma_free(host);
 > --
-> 2.25.1
+> 2.39.1
 >
