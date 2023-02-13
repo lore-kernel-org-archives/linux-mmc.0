@@ -2,158 +2,123 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D5420C636D4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 23:48:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E69F1C636CC
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Feb 2023 23:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229738AbjBMXss (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Feb 2023 18:48:48 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54764 "EHLO
+        id S231202AbjBMXs4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Feb 2023 18:48:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54800 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229604AbjBMXsq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 18:48:46 -0500
-Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3A32126C7
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:48:45 -0800 (PST)
-Received: by mail-pj1-x102a.google.com with SMTP id o13so13491782pjg.2
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:48:45 -0800 (PST)
+        with ESMTP id S230465AbjBMXsv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 18:48:51 -0500
+Received: from mail-pg1-x536.google.com (mail-pg1-x536.google.com [IPv6:2607:f8b0:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 541DB166E9
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:48:50 -0800 (PST)
+Received: by mail-pg1-x536.google.com with SMTP id a23so9154537pga.13
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 15:48:50 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=FkCNeSORsYc6WFEKacYRX0wbC50Zcx5IER4XSSJlizc=;
-        b=zn9CuSmE+S0LORJdl4CiBNFT0k6mOJuY0zchBywp0mpgL8KUtyYteZVGNkTDPr95lg
-         TYNa3zJXwPGJIANEUJNLFWdmNpKpEs/+K6N0yenRkD3p46VDJvt2FKAO5uZJi49XoBCV
-         82w7VA6pqgX8EOFeGN9peWJw/7XuLDCpdZzY3vFMjWTLgnrf4GRWUSErw90hWa29VH7J
-         +B3VFJvt6ZyYG3Wq8bClfuDqi1FiBPQwXSPuYO7nFCShhOkrejrxAk2/VIfro6yfAJUd
-         TQhR4FTAe4A70U8TrNgnRQ/LwRycH4Fq0sAqzVjoy6HxqQ2hebPsA7DS0JTJapEUivrB
-         RV5w==
+        d=linaro.org; s=google; t=1676332130;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=vMGp5jpDI56FIhgoLwzO01KLRWgFG/thqIKmC+ewf1A=;
+        b=DQ2gARKC+AcuFhGsEEWyLEtJbIYjQZu6fz02qaq7o5HGZcUvs8MWTuMw+UuTQ+6yNb
+         hcQdZ/vASB85DaAIGTri0H8dujwMo11jgf9DiRPXQU7R1VlNjfxjWjtpJnaK3MESazVB
+         lOr5q1vP/QM99/k6v0ymhVidxHQmIx8Pj16CthPTIVT++Lmj/nZ/mGgU/cJbUUzrV8Hu
+         b5JRStjxOK1deZvALcUwB3eXNG1Q7FG/FrF544MkQR3+hCDbdWxj6Wwim2ScwuVcvHvv
+         zKk1S8zEROYZb9eHNctBYjhxrvOUGzfSVx7vpFbsCiI5YQWM/wS4d2vXBkN4qtvavb7a
+         tkDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=FkCNeSORsYc6WFEKacYRX0wbC50Zcx5IER4XSSJlizc=;
-        b=upcG7KBEHwbBtDWET2OA7VO8gyxqjpcnoo4g8UczZdFVmRWgAfYaB4rywyd21Uyj7Q
-         RzE37p/KRPGoC1BjdRIqzatpyjxJbV6Q/4ROJHv81IhAp/cVaJI/w+agFaqr9DY8UId9
-         bCie7x91hlnRwHTxFYdgJkG2c05Y0wC8fX0xc9i5B6C+UIj4G14F9uRC7IykigZh3M5d
-         uTHzt4qB20eMKxwgmQqlrDvK4dgUrJ7D6jyRSBKNtUFPlES2n63x5nEKlFFAOxbc6qVI
-         1OI0wtfhr8SKzCxK01J5oCtK10EPoRhvUoJu0DUYDUJ0oqVZ/rhRyzRx3FA+seCHYg4M
-         KMRw==
-X-Gm-Message-State: AO0yUKVTKQOB5FrdFIAD1DtL4OUBDHkzKDXpAj6ioxh2dE9S+d02YJ82
-        07hqGVNqHn7DzynFUqcaD+zMs6ZcrORDKO7GCfyP2Q==
-X-Google-Smtp-Source: AK7set+ggBheB870d5LQZGZTGJQLon97bf4lGwg6a4C2/lc+oOwoASXu6j4Em8IAhVkXjl0iO379e4cbxDOxdh7fuGw=
-X-Received: by 2002:a17:903:2341:b0:19a:9ba6:6526 with SMTP id
- c1-20020a170903234100b0019a9ba66526mr203311plh.2.1676332125406; Mon, 13 Feb
- 2023 15:48:45 -0800 (PST)
+        d=1e100.net; s=20210112; t=1676332130;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=vMGp5jpDI56FIhgoLwzO01KLRWgFG/thqIKmC+ewf1A=;
+        b=8ROuh3qQEwiefwSPbZkA+hkWH7i8dhY0pwqijRqcD3N7w9I1B4DfzSjw4qZ7BF73ro
+         rQBx7WfI9eOsE25iWtwbxO0gqgFX1iJSkPn9JY53NrgylcuPpQfQ5rtM8LxZ8yWqq/VX
+         J6Fnw2tcUcBuTC5Z4dAbi5llw86JfgvMz6e0jyVL6AjZ4AcpvlwJk5TDMrf8XZ/TkHq2
+         vvGkfb6KKJGXNz1RvBmvolP9a0jaTg0EiiEjxw9tvOJpqIpPsz+KtkqeWaI0cWNf3Y1S
+         8ANNGQDlDAu6hRlS2wXHVBBz5fHl0Sh/Q8aWFLoRG7Xn6V4aZ8BtmzbfCisD9fL1fLaI
+         pgwA==
+X-Gm-Message-State: AO0yUKXheQ6881Uroq41ySVymGewQAKApoM2UC5pY1PpTpTHoq5ek+Gf
+        D9MiRrFmkFouIlu711TUFb0fgbAALb/K5AA3sj7UQN+4OG7Ihw==
+X-Google-Smtp-Source: AK7set8V9hjhzOSK7rhKHPbJn3smFBOI2QVV6lFBTEca2/3/LxJDzhigIc+QP4F9IXGKHjuBKsz5axhh1mR/l91nt2I=
+X-Received: by 2002:a62:1784:0:b0:5a8:bdd1:6c53 with SMTP id
+ 126-20020a621784000000b005a8bdd16c53mr59229pfx.9.1676332129756; Mon, 13 Feb
+ 2023 15:48:49 -0800 (PST)
 MIME-Version: 1.0
-References: <816cba9f-ff92-31a2-60f0-aca542d1d13e@gmail.com>
-In-Reply-To: <816cba9f-ff92-31a2-60f0-aca542d1d13e@gmail.com>
+References: <20230129130059.1322858-1-j.neuschaefer@gmx.net>
+In-Reply-To: <20230129130059.1322858-1-j.neuschaefer@gmx.net>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 00:48:08 +0100
-Message-ID: <CAPDyKFp_wK6Wyw5=hPEBf-Pgv=G2sK6uuD7ikVt0OBZLDWvSXg@mail.gmail.com>
-Subject: Re: [PATCH RESEND v2] mmc: meson-gx: fix SDIO mode if cap_sdio_irq
- isn't set
-To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        Geraldo Nascimento <geraldogabriel@gmail.com>
+Date:   Tue, 14 Feb 2023 00:48:13 +0100
+Message-ID: <CAPDyKFqUEPXbRWy7kStGi5vEuM=3=N6VS+o9HTHVTPatYRaYUQ@mail.gmail.com>
+Subject: Re: [PATCH] dt-bindings: mmc: fsl-imx-esdhc: Improve grammar and fix
+ a typo
+To:     =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Cc:     devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Feb 2023 at 21:55, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+On Sun, 29 Jan 2023 at 14:01, Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.n=
+et> wrote:
 >
-> Some SDIO WiFi modules stopped working after SDIO interrupt mode
-> was added if cap_sdio_irq isn't set in device tree. This patch was
-> confirmed to fix the issue.
+> This makes the text read a little better.
 >
-> Fixes: 066ecde6d826 ("mmc: meson-gx: add SDIO interrupt support")
-> Reported-by: Geraldo Nascimento <geraldogabriel@gmail.com>
-> Tested-by: Geraldo Nascimento <geraldogabriel@gmail.com>
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
 
-Applied for fixes, thanks!
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
-> v2:
-> - fix printf type issue
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 23 +++++++++++++----------
->  1 file changed, 13 insertions(+), 10 deletions(-)
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 6e5ea0213..5c94ad466 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -435,7 +435,8 @@ static int meson_mmc_clk_init(struct meson_host *host)
->         clk_reg |= FIELD_PREP(CLK_CORE_PHASE_MASK, CLK_PHASE_180);
->         clk_reg |= FIELD_PREP(CLK_TX_PHASE_MASK, CLK_PHASE_0);
->         clk_reg |= FIELD_PREP(CLK_RX_PHASE_MASK, CLK_PHASE_0);
-> -       clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               clk_reg |= CLK_IRQ_SDIO_SLEEP(host);
->         writel(clk_reg, host->regs + SD_EMMC_CLOCK);
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/D=
+ocumentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index dc6256f04b423..1c79b68753da0 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -98,7 +98,7 @@ properties:
+>        Specify the number of delay cells for override mode.
+>        This is used to set the clock delay for DLL(Delay Line) on overrid=
+e mode
+>        to select a proper data sampling window in case the clock quality =
+is not good
+> -      due to signal path is too long on the board. Please refer to eSDHC=
+/uSDHC
+> +      because the signal path is too long on the board. Please refer to =
+eSDHC/uSDHC
+>        chapter, DLL (Delay Line) section in RM for details.
+>      default: 0
 >
->         /* get the mux parents */
-> @@ -948,16 +949,18 @@ static irqreturn_t meson_mmc_irq(int irq, void *dev_id)
->  {
->         struct meson_host *host = dev_id;
->         struct mmc_command *cmd;
-> -       u32 status, raw_status;
-> +       u32 status, raw_status, irq_mask = IRQ_EN_MASK;
->         irqreturn_t ret = IRQ_NONE;
+> @@ -127,7 +127,7 @@ properties:
+>        Specify the increasing delay cell steps in tuning procedure.
+>        The uSDHC use one delay cell as default increasing step to do tuni=
+ng process.
+>        This property allows user to change the tuning step to more than o=
+ne delay
+> -      cells which is useful for some special boards or cards when the de=
+fault
+> +      cell which is useful for some special boards or cards when the def=
+ault
+>        tuning step can't find the proper delay window within limited tuni=
+ng retries.
+>      default: 0
 >
-> +       if (host->mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               irq_mask |= IRQ_SDIO;
->         raw_status = readl(host->regs + SD_EMMC_STATUS);
-> -       status = raw_status & (IRQ_EN_MASK | IRQ_SDIO);
-> +       status = raw_status & irq_mask;
->
->         if (!status) {
->                 dev_dbg(host->dev,
-> -                       "Unexpected IRQ! irq_en 0x%08lx - status 0x%08x\n",
-> -                        IRQ_EN_MASK | IRQ_SDIO, raw_status);
-> +                       "Unexpected IRQ! irq_en 0x%08x - status 0x%08x\n",
-> +                        irq_mask, raw_status);
->                 return IRQ_NONE;
->         }
->
-> @@ -1204,6 +1207,11 @@ static int meson_mmc_probe(struct platform_device *pdev)
->                 goto free_host;
->         }
->
-> +       mmc->caps |= MMC_CAP_CMD23;
-> +
-> +       if (mmc->caps & MMC_CAP_SDIO_IRQ)
-> +               mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-> +
->         host->data = (struct meson_mmc_data *)
->                 of_device_get_match_data(&pdev->dev);
->         if (!host->data) {
-> @@ -1277,11 +1285,6 @@ static int meson_mmc_probe(struct platform_device *pdev)
->
->         spin_lock_init(&host->lock);
->
-> -       mmc->caps |= MMC_CAP_CMD23;
-> -
-> -       if (mmc->caps & MMC_CAP_SDIO_IRQ)
-> -               mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
-> -
->         if (host->dram_access_quirk) {
->                 /* Limit segments to 1 due to low available sram memory */
->                 mmc->max_segs = 1;
 > --
-> 2.39.1
+> 2.39.0
 >
