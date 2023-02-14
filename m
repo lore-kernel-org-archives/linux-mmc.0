@@ -2,186 +2,117 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 47A6BC05027
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 11:31:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28B12C05027
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:03:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231579AbjBNLbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 06:31:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41730 "EHLO
+        id S232349AbjBNMDD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 07:03:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231441AbjBNLbv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 06:31:51 -0500
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41FEC17151
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 03:31:50 -0800 (PST)
-Received: by mail-pj1-x1035.google.com with SMTP id d2so14778804pjd.5
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 03:31:50 -0800 (PST)
+        with ESMTP id S232080AbjBNMDC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:03:02 -0500
+Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1250276B1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:03:01 -0800 (PST)
+Received: by mail-wm1-x332.google.com with SMTP id m16-20020a05600c3b1000b003dc4050c94aso11379351wms.4
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:03:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=1x+TBVegwlG1MqzfOj42RXTmtXiBCLBlcdiR6v7aEOg=;
-        b=kRu+GSUWY+Dc9YBDALXCy4+tz3+lk+jZ4TuDGQ64nzD1TROklRBqj9ZZkPbZAmfIKm
-         +y79iDA9/rwz3746Z0I3+Q5HauHswamc0SuETlzMjuIXGiwQl/SkNlUZESOD1y56iF8g
-         SidImgCNwLR4idsKfZn5S4oeeHit5BNbrIDXDDRAefE8TrLAwPZn+moM4VwC7hT1WMO7
-         UUDmfrKAfIK4MFUp5Q01vKNeggOUB+fgtPzy2QJQAM6/Npujy23+nVHfS4iGjc+5Yr+a
-         hjpHsVeQClba6g/e3jYViO7OJTd178Dc4Vc3cKofv0xgDbdwrVo1ybVKQ6Le7IrX3ka0
-         5Qlw==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=I3shvzCeDJk0aJLXCz2Fi53c14j1PwpmIfo6GpvgOlk=;
+        b=GpgoiPKZCtdioxmx0gpNue68w9ZlaCkccA7QGPdTjaq0zhsTmu2n/A6Sf2DDTex1eV
+         hPu1awwYrwjVOpeW9mbLHBdo+bqvIKl69WQgU1R/+HtrD8JTMJNZzKFn9csfK1XzQ1Qo
+         qnf4/FEFukt4IZkJyHVEO46RyN+xTpzg4QIwqp5WJzCo0LNflou2ta2wKp9ddNuqYc/V
+         KIM8Ufp43Szcqq94MUptQxETSi2K5Pa0kYxe/uUfYcCOUolVip300AIRHhcVCU3yvRxu
+         y4bFXfNvH0JlzH/NinYZfnZjMZy7X+SYCLZ12KGiF3mFysT5KlLnE5gV6v+rAvv1sLJF
+         KQpQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=1x+TBVegwlG1MqzfOj42RXTmtXiBCLBlcdiR6v7aEOg=;
-        b=3hVIxVe0XqHrq9D1LGR2oE4cuLQ0yUsDuDVctB7Pql2V9PTJNrcCqaIQIOFtKj/4aW
-         93VsOJQtcazALmFUFqwg7jwrXfePuSho2PGrklLHjI2i3tRInSUH+sYX4Gh5nVmIkpIv
-         qfrefXWuHE9rTL/VmJTk+lfFy7dYMVH2wSfyLLgwi2NvPumVyTmCtjP5xL9sMhkDYFnI
-         POXhusgVSDNmqHih9QKwLKEBp0Krv4018+OdXZ5tjuM1qa3F9HP0nciaRR7VzDEdvLHw
-         tfm9JsLDl6erchV734n0S1xHXQTyY7jU46ydzKdY0bLvNZ63cw2eLeRwJuBhcxMbIazk
-         GvQw==
-X-Gm-Message-State: AO0yUKUO/rf1niBdiRHBF66Hzyzel5qd4LH8cWvIjLxtVJr/D+5hUsPI
-        tphUjwyUwSog4BUFJzHaiwCu5bohVx6b/2IWQNoZRpnW/pK0iDll
-X-Google-Smtp-Source: AK7set8sCjRn3vdQEKNM8dBkpw73bJdyZQCSE30CNGY4XaNBI4qdMeDr7w1LFwa7SGi38mHAF+gCh4oEGbs1zpuc0tw=
-X-Received: by 2002:a17:90a:c90f:b0:233:ba2c:16a6 with SMTP id
- v15-20020a17090ac90f00b00233ba2c16a6mr2942524pjt.109.1676374309413; Tue, 14
- Feb 2023 03:31:49 -0800 (PST)
+        bh=I3shvzCeDJk0aJLXCz2Fi53c14j1PwpmIfo6GpvgOlk=;
+        b=tIjStxhlfDCeFIzq0vGMg6+VDD6Sm5lWw0n/9UJBMpfKy5YTNuCfnYefjTHVtP0Hyz
+         hYWAzplcaI68e+RVp+D6ZvsbBCKLU20RJxo1gF7PitCqsv7AdoIZjs4ZiyfAoIyz4y31
+         3zIZukVKmQeSiVR+XCBMBLxXea8GphAcb8TuySqKXu3P/4HbIeQCj6se4WAB9n8oEemq
+         lZT5TcklkDBTistFLAdUkT8FQ/z4KjIosAn9T6K8bc35Zr4z+nJKMJmVT6Zn8+KbY1Bu
+         OITYjBrXKdplfjxNkfPXoahplatmfP7NwDiH4bw40SEo99gMqELQ0+1NQOLIsqbJSt/+
+         QzuA==
+X-Gm-Message-State: AO0yUKW7S17BzbQj8Tlb0lkIgf5FkWAM3euGgREThss7iQd+5l4X8o71
+        WSoE4zzeywrhP9udoe1ykrvEiw==
+X-Google-Smtp-Source: AK7set8pUpgbV35UbjeKdI6zHSqyLvAQswd66/w+rS96k/B8bKl4FtFeNT0y8rMY3sTDuDNWKsM8nA==
+X-Received: by 2002:a05:600c:4ab0:b0:3de:d9f:3025 with SMTP id b48-20020a05600c4ab000b003de0d9f3025mr1697260wmp.0.1676376179342;
+        Tue, 14 Feb 2023 04:02:59 -0800 (PST)
+Received: from hackbox.lan ([94.52.112.99])
+        by smtp.gmail.com with ESMTPSA id l40-20020a05600c1d2800b003dd1b00bd9asm18834846wms.32.2023.02.14.04.02.57
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 14 Feb 2023 04:02:58 -0800 (PST)
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Eric Biggers <ebiggers@google.com>
+Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: [RFC PATCH 0/5] Add dedicated Qcom ICE driver
+Date:   Tue, 14 Feb 2023 14:02:48 +0200
+Message-Id: <20230214120253.1098426-1-abel.vesa@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <1675298118-64243-1-git-send-email-shawn.lin@rock-chips.com> <1675298118-64243-4-git-send-email-shawn.lin@rock-chips.com>
-In-Reply-To: <1675298118-64243-4-git-send-email-shawn.lin@rock-chips.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 12:31:13 +0100
-Message-ID: <CAPDyKFrCe-niD_bSc1wGFuOBKfDuC=TEUyK8dA5VVLTStzVxVg@mail.gmail.com>
-Subject: Re: [PATCH v3 3/3] mmc: sdhci-of-dwcmshc: Add host software queue support
-To:     Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     linux-mmc@vger.kernel.org, Adrian Hunter <adrian.hunter@intel.com>,
-        linux-rockchip@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 2 Feb 2023 at 01:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->
+As both SDCC and UFS drivers use the ICE with duplicated implementation,
+while none of the currently supported platforms make use concomitantly
+of the ICE IP block, the new SM8550 allows both UFS and SDCC to do so.
+In order to support such scenario, there is a need for a unified
+implementation and a devicetree node to be shared between both types
+of storage devices. So lets drop the duplicate implementation of the ICE
+from both SDCC and UFS and make it a dedicated (soc) driver.
 
-Please elaborate a bit to share some more information to the commit message.
+This RFC should be treated as work-in-progress. Initially, its goal is
+to figure out what is the most agreeable implementation for both types
+of storage. Note that currently, only one ICE instance is supported
+(like the existing HW suggests) and it is laking refcounting and locking
+of any sort. Also missing bindings schema file for now.
 
-Perhaps you have some performance numbers too, that would be nice to
-share in the commit message.
+Any suggestions are welcome at this point, including the location of
+such a new driver.
 
-> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->
-> ---
->
-> Changes in v2:
-> - fix Kconfig error
->
->  drivers/mmc/host/Kconfig            |  1 +
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 29 ++++++++++++++++++++++++++++-
->  2 files changed, 29 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index e96b302..e060bab 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -233,6 +233,7 @@ config MMC_SDHCI_OF_DWCMSHC
->         depends on MMC_SDHCI_PLTFM
->         depends on OF
->         depends on COMMON_CLK
-> +       select MMC_HSQ
->         help
->           This selects Synopsys DesignWare Cores Mobile Storage Controller
->           support.
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index fc917ed..e90fa69 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -20,6 +20,7 @@
->  #include <linux/sizes.h>
->
->  #include "sdhci-pltfm.h"
-> +#include "mmc_hsq.h"
->
->  #define SDHCI_DWCMSHC_ARG2_STUFF       GENMASK(31, 16)
->
-> @@ -331,6 +332,14 @@ static void rk35xx_sdhci_reset(struct sdhci_host *host, u8 mask)
->         sdhci_reset(host, mask);
->  }
->
-> +static void sdhci_dwcmshc_request_done(struct sdhci_host *host, struct mmc_request *mrq)
-> +{
-> +       if (mmc_hsq_finalize_request(host->mmc, mrq))
-> +               return;
-> +
-> +       mmc_request_done(host->mmc, mrq);
-> +}
-> +
->  static const struct sdhci_ops sdhci_dwcmshc_ops = {
->         .set_clock              = sdhci_set_clock,
->         .set_bus_width          = sdhci_set_bus_width,
-> @@ -347,6 +356,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
->         .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
->         .reset                  = rk35xx_sdhci_reset,
->         .adma_write_desc        = dwcmshc_adma_write_desc,
-> +       .request_done           = sdhci_dwcmshc_request_done,
->  };
->
->  static const struct sdhci_pltfm_data sdhci_dwcmshc_pdata = {
-> @@ -462,6 +472,7 @@ static int dwcmshc_probe(struct platform_device *pdev)
->         struct dwcmshc_priv *priv;
->         struct rk35xx_priv *rk_priv = NULL;
->         const struct sdhci_pltfm_data *pltfm_data;
-> +       struct mmc_hsq *hsq;
->         int err;
->         u32 extra;
->
-> @@ -515,6 +526,16 @@ static int dwcmshc_probe(struct platform_device *pdev)
->         host->mmc_host_ops.request = dwcmshc_request;
->         host->mmc_host_ops.hs400_enhanced_strobe = dwcmshc_hs400_enhanced_strobe;
->
-> +       hsq = devm_kzalloc(&pdev->dev, sizeof(*hsq), GFP_KERNEL);
-> +       if (!hsq) {
-> +               err = -ENOMEM;
-> +               goto err_clk;
-> +       }
-> +
-> +       err = mmc_hsq_init(hsq, host->mmc);
-> +       if (err)
-> +               goto err_clk;
-> +
->         if (pltfm_data == &sdhci_dwcmshc_rk35xx_pdata) {
->                 rk_priv = devm_kzalloc(&pdev->dev, sizeof(struct rk35xx_priv), GFP_KERNEL);
->                 if (!rk_priv) {
-> @@ -607,6 +628,8 @@ static int dwcmshc_suspend(struct device *dev)
->         struct rk35xx_priv *rk_priv = priv->priv;
->         int ret;
->
-> +       mmc_hsq_suspend(host->mmc);
-> +
->         ret = sdhci_suspend_host(host);
->         if (ret)
->                 return ret;
-> @@ -647,7 +670,11 @@ static int dwcmshc_resume(struct device *dev)
->                         return ret;
->         }
->
-> -       return sdhci_resume_host(host);
-> +       ret = sdhci_resume_host(host);
-> +       if (ret)
-> +               return ret;
-> +
-> +       return mmc_hsq_resume(host->mmc);
->  }
->  #endif
+Abel Vesa (5):
+  soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver
+  arm64: dts: qcom: sm8450: Add the Inline Crypto Engine node
+  arm64: dts: qcom: sdm630: Add the Inline Crypto Engine node
+  scsi: ufs: ufs-qcom: Switch to the new ICE API
+  mmc: sdhci-msm: Switch to the new ICE API
 
-If I understand correctly, you need to also inform sdhci and the mmc
-core, whether you support atomic request management or not. For
-sdhci-sprd, the following part below, is done during ->probe() - and I
-assume we need something similar for the sdhci-of-dwcmshc, right?
+ arch/arm64/boot/dts/qcom/sdm630.dtsi          |  18 +-
+ arch/arm64/boot/dts/qcom/sm8450-hdk.dts       |   4 +
+ arch/arm64/boot/dts/qcom/sm8450.dtsi          |  24 +-
+ drivers/mmc/host/sdhci-msm.c                  | 252 ++----------------
+ drivers/soc/qcom/Kconfig                      |  10 +
+ drivers/soc/qcom/Makefile                     |   1 +
+ .../ufs-qcom-ice.c => soc/qcom/qcom-ice.c}    | 247 +++++++++++------
+ drivers/ufs/host/Kconfig                      |   1 -
+ drivers/ufs/host/Makefile                     |   1 -
+ drivers/ufs/host/ufs-qcom.c                   |  42 ++-
+ drivers/ufs/host/ufs-qcom.h                   |  32 +--
+ include/soc/qcom/ice.h                        |  61 +++++
+ 12 files changed, 326 insertions(+), 367 deletions(-)
+ rename drivers/{ufs/host/ufs-qcom-ice.c => soc/qcom/qcom-ice.c} (50%)
+ create mode 100644 include/soc/qcom/ice.h
 
-if (!mmc_card_is_removable(host->mmc))
-    host->mmc_host_ops.request_atomic = sdhci_sprd_request_atomic;
-else
-    host->always_defer_done = true;
+-- 
+2.34.1
 
-Kind regards
-Uffe
