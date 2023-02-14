@@ -2,103 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3404CC6379F
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:20:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45D4AC05027
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:46:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232138AbjBNMUA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 07:20:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44844 "EHLO
+        id S229636AbjBNMq1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 07:46:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33136 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232310AbjBNMTo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:19:44 -0500
-Received: from mail-pj1-x1033.google.com (mail-pj1-x1033.google.com [IPv6:2607:f8b0:4864:20::1033])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 306E5279BF
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:19:20 -0800 (PST)
-Received: by mail-pj1-x1033.google.com with SMTP id bt4-20020a17090af00400b002341621377cso4279653pjb.2
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:19:20 -0800 (PST)
+        with ESMTP id S231732AbjBNMqZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:46:25 -0500
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4C5E522785
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:46:22 -0800 (PST)
+Received: by mail-wr1-x436.google.com with SMTP id bu23so15491195wrb.8
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:46:22 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=+ovmXEYXrq2+vyqNrmh/+q0b8mG/0E3L5r82zzYP6cY=;
-        b=y8YgAGJfycz1eajRJ3OxTa4gkUBalpbYdEOoYAYdodFrxH7XPByIgLUcaGSp4OzY0D
-         ABUGzaPq4R89DzXn/eU14LySsYBbuRK3Zjj2HhRz0kKZrU2lnVWAsBYyCUbd9DSQ0zqt
-         WZyqJbY8WTiHMuBnuFfANGR3knj0390epLD8ZZF2hc+S+QGQNzROGsnvnjojcpHKXEsO
-         RpUIZz5CD7EWOJADMlJvCTHedS46Nha9+LCMNADtUfJtgl4L1q23xdYqKfPM2+Z2YS4u
-         k6UxDfXpK0+wJDJiHaTIHQ8XLr6jJv3lHC+zOSZUPFUOChfdSN2sWbzLdJs8XGcRmfye
-         TyiA==
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=IxmK5g1abaNwwSCB60QD2b4u2X8cfC3SrJxt6nIz5VM=;
+        b=fyX7C6luQjo3Uvrx/Hg6E2vN53n7Qd3dRNOi67CoqqpE3BkCwMDs04ZHs3zvutJ7Ww
+         hnbAY7GDIzg+2bYuGlXPBPP2C8jF30pSbdhwr+JR1/Lmqka3s2TmSg59WgDScG8sXAgR
+         WHBGa3g0iiswVQ/n8eQnJcDEnQ3H3Cw6afjGN6ACVHuUo5rqWUNSipK7OPo3IfRRhhs4
+         7qxaFZo/oRvfq0Epg7ZzXRNOfH1oob+cwURWBFElv4Sslb18q+MMEeB5qn2ArTKzkW19
+         lSKFAIYm9IVyJWb5qpLfQmZ7Tgs26iMR0cNqIFrd26h7gbLV5ucsHC1g0MLhnA92PjR2
+         0Tkg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=+ovmXEYXrq2+vyqNrmh/+q0b8mG/0E3L5r82zzYP6cY=;
-        b=ScAJFYH8dcxci7NfTGyU/T+z8dObWzGeSXLdIecwkvt8c3C4TN1grSyToIBbgqB3+O
-         2hxCGn9hTuXT1VnBzGBEpxmSQ87Etm74xU2VCSYvsQYLkWKLEfK37kazhvKHMwZm7Xwk
-         HhD7VVWPDHwliFgJsxFZ06xIltmnOQgUax7iXcr8K8A9K6jUnmfNoTmudRcB/OlxrZ/x
-         06YOIKbUSo8KJgpshcH4rkCZqzj/QZ8fmqhJIx9hHxlc+qlZY4UVErLhyToo+CdncMDK
-         xg9jt4BdocjkU0zhy8wU3ugA5fuU7zWYMPuFjhmyG3h69gVCBwlbyZor+G4MteA6piIp
-         phxA==
-X-Gm-Message-State: AO0yUKUpJMS6fTyifXrnmdr3Mofs8hrenTXIPNxNOooKncGgJBqTshz4
-        pqQa9jvqzm55sSskJlEtBKSn5/rRlHgU5YUTODW3CMwvK+8wQg==
-X-Google-Smtp-Source: AK7set9iaXemtEt75X9jSSXzKMgJee9mLgR7Giz8FYkln7bdKK9+0dWJXw2hqvNJePGa2aMmUpJ8pMP9IrEdaGyyvv4=
-X-Received: by 2002:a17:90b:602:b0:233:d176:4e5d with SMTP id
- gb2-20020a17090b060200b00233d1764e5dmr2278579pjb.121.1676377159630; Tue, 14
- Feb 2023 04:19:19 -0800 (PST)
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=IxmK5g1abaNwwSCB60QD2b4u2X8cfC3SrJxt6nIz5VM=;
+        b=lAXCniKfvCd+ETBQ8BYdIyTPuxV4qMSnXI0tTHRPSQWHyaPrOC19yz6CPrdJJbySU+
+         b1zSiGiNDWS8ZUfcmF5btD5e1H1tYbeCsOEyHrdGsM8tVmAgLCVgrcL/1//DVqXe2gGI
+         Txrm6ogoytj/qLTYCtY+2+zY02hiYzhMnXq3S66DD2oK/4CvrIA3/l26np/tU+A4hSlL
+         4QY1kVCTH0mIS/dJq9fFTQpw7aOVeiFIUIWm6IzaWFCzT/0ye/sn+Ep+atjU1J6ZYDu2
+         bf7JUEzMwxM8QxFTnNj0dcsvLbsG0paPpemVPhmb02wyz0YqanPN4BbabNybLcTjPHg7
+         NJsw==
+X-Gm-Message-State: AO0yUKWqCQh3w+FH9Scht4OL6L66ICM0hT2vo2+IrN+LAMgNavHvb2uQ
+        w3VcXPFLW4oF7JJ32TLT/v6I3A==
+X-Google-Smtp-Source: AK7set8uGuMmyPwBMv604nXIvOjsb38cjXsq1318Ci8WaLUfENk4gIVSrHsTU7/f/fFYoYKYyjRzzg==
+X-Received: by 2002:a5d:6949:0:b0:2c5:5fe2:bcf3 with SMTP id r9-20020a5d6949000000b002c55fe2bcf3mr2140103wrw.28.1676378780835;
+        Tue, 14 Feb 2023 04:46:20 -0800 (PST)
+Received: from [192.168.1.109] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id j16-20020adfff90000000b002c55efa9cbesm3488528wrr.39.2023.02.14.04.46.19
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 14 Feb 2023 04:46:20 -0800 (PST)
+Message-ID: <0df35d66-d5c8-aa71-af14-d9550aa4f1e8@linaro.org>
+Date:   Tue, 14 Feb 2023 13:46:18 +0100
 MIME-Version: 1.0
-References: <20230213205529.2104120-1-konrad.dybcio@linaro.org>
-In-Reply-To: <20230213205529.2104120-1-konrad.dybcio@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 13:18:42 +0100
-Message-ID: <CAPDyKFoT47Dx8gZgRHF=pYYHqFp89vNoi6YK58e9G32-SyYw=g@mail.gmail.com>
-Subject: Re: [PATCH] dt-bindings: mmc: sdhci-msm: Allow 1 icc path
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>
-Cc:     linux-arm-msm@vger.kernel.org, andersson@kernel.org,
-        agross@kernel.org, krzysztof.kozlowski@linaro.org,
-        marijn.suijten@somainline.org, Rob Herring <robh+dt@kernel.org>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH 1/5] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
+ dedicated driver
+Content-Language: en-US
+To:     Abel Vesa <abel.vesa@linaro.org>, Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Eric Biggers <ebiggers@google.com>
+Cc:     linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+References: <20230214120253.1098426-1-abel.vesa@linaro.org>
+ <20230214120253.1098426-2-abel.vesa@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230214120253.1098426-2-abel.vesa@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Feb 2023 at 21:55, Konrad Dybcio <konrad.dybcio@linaro.org> wrote:
->
-> Some SoCs (like msm8998) only have a SDHC<->DDR path. Allow this case.
->
-> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+On 14/02/2023 13:02, Abel Vesa wrote:
+> This takes the already existing duplicated support in both ufs-qcom
+> and sdhci-msm drivers and makes it a dedicated driver that can be used
+> by both mentioned drivers. The reason for this is because, staring with
+> SM8550, the ICE IP block is shared between UFS and SDCC, which means we
+> need to probe a dedicated device and share it between those two
+> consumers. So let's add the ICE dedicated driver as a soc driver.
 
-Applied for next, thanks!
+To clarify - missing binding, thus NAK for the patch going with out it.
+It's not a NAK of course for the code itself.
 
-Kind regards
-Uffe
+Best regards,
+Krzysztof
 
-
-> ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 2 ++
->  1 file changed, 2 insertions(+)
->
-> diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> index 01f77a77987c..64df6919abaf 100644
-> --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> @@ -127,11 +127,13 @@ properties:
->        phandle to apps_smmu node with sid mask.
->
->    interconnects:
-> +    minItems: 1
->      items:
->        - description: data path, sdhc to ddr
->        - description: config path, cpu to sdhc
->
->    interconnect-names:
-> +    minItems: 1
->      items:
->        - const: sdhc-ddr
->        - const: cpu-sdhc
-> --
-> 2.39.1
->
