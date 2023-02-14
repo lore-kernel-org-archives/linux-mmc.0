@@ -2,171 +2,116 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F325C636CC
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 03:36:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30A58C61DA4
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 06:39:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229647AbjBNDgv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Feb 2023 22:36:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35234 "EHLO
+        id S230022AbjBNGjk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 01:39:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229539AbjBNDgv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Feb 2023 22:36:51 -0500
-Received: from mail-m11875.qiye.163.com (mail-m11875.qiye.163.com [115.236.118.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A469E395
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 19:36:49 -0800 (PST)
-Received: from [172.16.12.69] (unknown [58.22.7.114])
-        by mail-m11875.qiye.163.com (Hmail) with ESMTPA id B3E542801DF;
-        Tue, 14 Feb 2023 11:36:43 +0800 (CST)
-Message-ID: <a336a9ef-77e9-fa1d-ad95-805a8b5a89cb@rock-chips.com>
-Date:   Tue, 14 Feb 2023 11:36:43 +0800
+        with ESMTP id S231635AbjBNGjh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 01:39:37 -0500
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DE795244
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 22:39:36 -0800 (PST)
+Received: by mail-ed1-x532.google.com with SMTP id cq19so13184642edb.5
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Feb 2023 22:39:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=1nhKjEH7r7Yngny/ZqXBLs863BYkcnxD7fB2ffD3a7g=;
+        b=KhWzA/nWCJvJ2hbMirUFPhS8xCzZHclfVulD8YuxpThoyqWehSBjvsNhvnOe3VdaDf
+         YPtyvyV0wG+xt3KQtwMxlPBvoSbYADr8Dt4s3x8dVMOVMvKauMYdZm34koT24XSqym4c
+         O9+dUP5UPdv8Xaz5j43Ht8O/P1mC6X8gGKNsz97bra1IxWjYqN2UHEzwmTsswMF3/v1A
+         W68kxqUVGEBTtXr9EMmd7PhIuyK++Rt4/TmI9jOjZ6RGw+2iJdLPjDYnmADMYxdFuQLZ
+         Q7JECb7Kc2EaCbk1JuTCAj4aNKd7GcXW/KO+ODfdlPE22j/a654+OUDJVee/JRnFNXzB
+         1SBA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=1nhKjEH7r7Yngny/ZqXBLs863BYkcnxD7fB2ffD3a7g=;
+        b=o/17GnT/FJ6cLU6FDsFr0YHNVVRHuCsI/PhZSfHTDYt00ImqtrODUCKZoZ+/lEcwBf
+         uCiVO/TlVHhufVVzN7SWgDB3ynvG5r+jPh/5ajsLm0Jw4rsr3xVyFXcYolxmsw2ktHYJ
+         xM/JnoDGAxYHjNYQ6HyjnYG3ET+3YLRD7kQ2b89fys2syxP2TKgzN9SdIb0RFJ1brbxt
+         h1Jxcufq1aoZqJx8TXQFTYRBAmj0GYRUXtja/IQUYcRlzukV/hvjFwKG70919esgDREy
+         tRHdeYGln0iMVT9wHJ9pF2opU1tN5jcVdw5CQiyAVjmVb+WTFv+ZHaPdDyvOdvm1lT24
+         6PYw==
+X-Gm-Message-State: AO0yUKVn+R3SYvoQjrta3sSHlPHmYfQA9jf4+mqiqFLXkh01kliQHDiD
+        MbAFPleFpf20P2N1xYXCVFI=
+X-Google-Smtp-Source: AK7set9PbG2cD/G9Z3G++ccd4S18aj36cUCelMQMgZtNzRwkqZcEIIf5LzkYL24nqTWJ9Q7yLQjwGQ==
+X-Received: by 2002:a50:ce1c:0:b0:4ab:4c36:463c with SMTP id y28-20020a50ce1c000000b004ab4c36463cmr1180023edi.16.1676356774649;
+        Mon, 13 Feb 2023 22:39:34 -0800 (PST)
+Received: from ?IPV6:2a01:c22:7234:f800:3c3d:a22e:c2c4:b19f? (dynamic-2a01-0c22-7234-f800-3c3d-a22e-c2c4-b19f.c22.pool.telefonica.de. [2a01:c22:7234:f800:3c3d:a22e:c2c4:b19f])
+        by smtp.googlemail.com with ESMTPSA id d1-20020aa7d681000000b00499703df898sm7360254edr.69.2023.02.13.22.39.33
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 13 Feb 2023 22:39:34 -0800 (PST)
+Message-ID: <ade6669b-9a4b-094c-a485-fdc8c7f5a8c3@gmail.com>
+Date:   Tue, 14 Feb 2023 07:39:32 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.2
-Cc:     shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-dwcmshc: Add runtime PM support
+Subject: Re: [PATCH 2/2] mmc: meson-gx: support platform interrupt as card
+ detect interrupt
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-References: <1675298118-64243-1-git-send-email-shawn.lin@rock-chips.com>
- <1675298118-64243-3-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFoN3GDRYRJep1ARf8rSftZRBUceda92OPuDQLvG3dVhhQ@mail.gmail.com>
-Content-Language: en-GB
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <CAPDyKFoN3GDRYRJep1ARf8rSftZRBUceda92OPuDQLvG3dVhhQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Cc:     Kevin Hilman <khilman@baylibre.com>,
+        Neil Armstrong <narmstrong@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+References: <dfb90ca4-1f62-e3ed-2ce4-a7b5f661e36d@gmail.com>
+ <9e08411b-20cb-874f-8915-6f8dc32e9fcf@gmail.com>
+ <CAPDyKFrsTMpguDp+0ZrKYkH5CYSk_OgKLxuZu4tFoGYaLpbJUQ@mail.gmail.com>
+Content-Language: en-US
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+In-Reply-To: <CAPDyKFrsTMpguDp+0ZrKYkH5CYSk_OgKLxuZu4tFoGYaLpbJUQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZQkwaSlYeTxhIHRhOSExDTx5VEwETFh
-        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSkpLSEpMVUpLS1VLWQ
-        Y+
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6Ogw6KDo6ET0WSR84NzoSDwsJ
-        ChUaCQpVSlVKTUxNSE9OQ0tPTktKVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQU5DTkw3Bg++
-X-HM-Tid: 0a864dff04612eb1kusnb3e542801df
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
-
-On 2023/2/14 7:45, Ulf Hansson wrote:
-> On Thu, 2 Feb 2023 at 01:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+On 13.02.2023 23:47, Ulf Hansson wrote:
+> On Mon, 30 Jan 2023 at 00:10, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 >>
->> This patch adds runtime PM support.
->>
->> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->> ---
->>
->> Changes in v2: None
->>
->>   drivers/mmc/host/sdhci-of-dwcmshc.c | 51 ++++++++++++++++++++++++++++++++++++-
->>   1 file changed, 50 insertions(+), 1 deletion(-)
->>
->> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> index 46b1ce7..fc917ed 100644
->> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->> @@ -15,6 +15,7 @@
->>   #include <linux/module.h>
->>   #include <linux/of.h>
->>   #include <linux/of_device.h>
->> +#include <linux/pm_runtime.h>
->>   #include <linux/reset.h>
->>   #include <linux/sizes.h>
->>
->> @@ -551,6 +552,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>          if (err)
->>                  goto err_setup_host;
->>
->> +       pm_runtime_get_noresume(&pdev->dev);
->> +       pm_runtime_set_active(&pdev->dev);
->> +       pm_runtime_enable(&pdev->dev);
->> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->> +       pm_runtime_use_autosuspend(&pdev->dev);
->> +       pm_runtime_put_autosuspend(&pdev->dev);
->> +
->>          return 0;
->>
->>   err_setup_host:
->> @@ -580,6 +588,11 @@ static int dwcmshc_remove(struct platform_device *pdev)
->>          if (rk_priv)
->>                  clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->>                                             rk_priv->rockchip_clks);
->> +
->> +       pm_runtime_get_sync(&pdev->dev);
->> +       pm_runtime_disable(&pdev->dev);
->> +       pm_runtime_put_noidle(&pdev->dev);
->> +
->>          sdhci_pltfm_free(pdev);
->>
->>          return 0;
->> @@ -638,7 +651,43 @@ static int dwcmshc_resume(struct device *dev)
->>   }
->>   #endif
->>
->> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
->> +#ifdef CONFIG_PM
->> +static int dwcmshc_runtime_suspend(struct device *dev)
->> +{
->> +       struct sdhci_host *host = dev_get_drvdata(dev);
->> +       u16 data;
->> +       int ret;
->> +
->> +       ret = sdhci_runtime_suspend_host(host);
->> +       if (ret)
->> +               return ret;
->> +
->> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->> +       data &= ~SDHCI_CLOCK_CARD_EN;
->> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
->> +
->> +       return 0;
->> +}
->> +
->> +static int dwcmshc_runtime_resume(struct device *dev)
->> +{
->> +       struct sdhci_host *host = dev_get_drvdata(dev);
->> +       u16 data;
->> +
->> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->> +       data |= SDHCI_CLOCK_CARD_EN;
->> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
->> +
->> +       return sdhci_runtime_resume_host(host, 0);
->> +}
->> +#endif
->> +
->> +static const struct dev_pm_ops dwcmshc_pmops = {
->> +       SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend,
->> +                               dwcmshc_resume)
+>> Use a new mmc core feature and support specifying the card detect
+>> gpio interrupt in device tree.
 > 
-> I have looked at dwcmshc_suspend(), which calls sdhci_suspend_host().
-> As sdhci_suspend_host() will write to internal registers of the IP
-> block, it's recommended to make sure the device's runtime resumed
-> before doing that call. So that needs to be added along with $subject
-> patch.
+> Don't we need an update to the DT doc too?
 > 
+Right, the binding still has to be changed to allow more than one interrupt.
 
-Yep, let me add a check here.
-
-> There is also another option that may better for you, which is to use
-> the pm_runtime_force_suspend|resume() helpers. There should be plenty
-> of references to look at, but don't hesitate to ask around that, if
-> you need some more help to get that working.
-
-If I understand correctly,  pm_runtime_force_suspend|resume() helpers
-would use runtime PM ops for suspend/resume routine. In this case, the
-main issue is the handling of clock is quite different. In suspend we
-need to gate all clocks but in rpm case, it shouldn't.
-
-
-> 
->> +       SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
->> +                          dwcmshc_runtime_resume, NULL)
->> +};
->>
->>   static struct platform_driver sdhci_dwcmshc_driver = {
->>          .driver = {
-> 
 > Kind regards
 > Uffe
+> 
+>>
+>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+>> ---
+>>  drivers/mmc/host/meson-gx-mmc.c | 3 +++
+>>  1 file changed, 3 insertions(+)
+>>
+>> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+>> index be1a972c2..c87bc31d0 100644
+>> --- a/drivers/mmc/host/meson-gx-mmc.c
+>> +++ b/drivers/mmc/host/meson-gx-mmc.c
+>> @@ -1236,6 +1236,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
+>>                 goto free_host;
+>>         }
+>>
+>> +       /* gpio card detect interrupt */
+>> +       mmc->cd_irq = platform_get_irq_optional(pdev, 1);
+>> +
+>>         host->pinctrl = devm_pinctrl_get(&pdev->dev);
+>>         if (IS_ERR(host->pinctrl)) {
+>>                 ret = PTR_ERR(host->pinctrl);
+>> --
+>> 2.39.1
+>>
+>>
+
