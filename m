@@ -2,108 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2DEA9C61DA4
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:19:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 31534C61DA4
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:19:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229882AbjBNMS7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 07:18:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43384 "EHLO
+        id S232065AbjBNMTD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 07:19:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231841AbjBNMS4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:18:56 -0500
-Received: from mail-pg1-x52a.google.com (mail-pg1-x52a.google.com [IPv6:2607:f8b0:4864:20::52a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D47D26584
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:55 -0800 (PST)
-Received: by mail-pg1-x52a.google.com with SMTP id z6so6160055pgk.0
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:55 -0800 (PST)
+        with ESMTP id S232022AbjBNMTA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:19:00 -0500
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39D2327482
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:59 -0800 (PST)
+Received: by mail-pj1-x1035.google.com with SMTP id f16-20020a17090a9b1000b0023058bbd7b2so15306015pjp.0
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=mJF25grJEGbcmrR3blVtuGbf0zHzSa1eHqZOGdnJEao=;
-        b=RvLdMEI0M9Y/FEc1QfjNc3t2QPnlRQp4LhYoK6aCFKM27Pgab6Wxr0vnSagxdIgnrx
-         /8uFtlua7yNH+Juz/Ws8B61SAjU88QMZdyixJOFwkDf79eI8dbiQdiPmlu5G086QdqiK
-         JKrpUHaFPxklQzGoOcswbTAF4kk7OjRXuXVV/cvp75gvzS+YnSibBAYYI1AEpyw4yxCZ
-         v8eDSBhPnt89EHS2R57f2hQAG9hY34J8mjQsyjfmuIDrWGdFybV6gcwdtdGPD4dFGxMB
-         H2RU3AdR28cmCqIj13B/7e7jwtrUdaA2eiPquNnGONYaEujF+/R+FLFAOwg3FPFIjvAk
-         HaWw==
+        bh=6Xh0puu3pBwVerTFteBcL8T1N51CVp7Tov2k34ecZpM=;
+        b=Ik5m6qKBsYSBjKFm9MAJwpLRavqbfuB3z9MYaBBOFn3imdsVzdF8gf5+X13cMxYsMh
+         RijGQHbYNPvA0zs88a3juJZdr7DkuoT0e7O2V7ET4//GTmZy9HjC2I6UUtvZNsSGq89M
+         iP41YPTvmVSCNB0zB/LRi9RJbRdo4UrpBI33tJtAWhW/ttu8j0JQIF1dkwKGSuRQP4js
+         aW0DtrQ5phzRVE2V7V1g2vwExuE2sIPur5dDECl44Wa9VY3OGSqUohRrM65Nme5x9cXA
+         lnzXCwxZqVsPUs1KJAhNdU8LvjGIMQ99VRnpoCLHiZL4ymkDfdUvyOIctPUfK1l2NsHY
+         /gow==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=mJF25grJEGbcmrR3blVtuGbf0zHzSa1eHqZOGdnJEao=;
-        b=mUml/cH/f4mJ4kUGtOccbTYugT9VJ98FyeCmQzNEE4gdiMl0Zb1wAALP1vV3Xj4VIN
-         IvXGhjSa4+R9u+AROkvQMsVuG9Eq36KmYCYNeWJPSwjUBUugaTjgo/P7CBRh5ok7dexC
-         5D4u0lALOsMZpnu67h59y7pMMpUK/TdfNl066iH7q3ep1IcbY7pw08PNFL/aQJrUCJbo
-         85EGDq71SNnq2jNCwvLe1dTd+VGpovyYXOrxiDRo2ZdPYiwAhrhr/68vds1Uku8j2Il9
-         H6fez0Pn/7XfCNI2L/t9HwYO8qqwt9dIP+XbQmsrnteuTbS5mRdsRxv7PUq69DhzGSN/
-         H+7Q==
-X-Gm-Message-State: AO0yUKX3YEV/9+oITnAXcB6G89K2R/6qu2HeOXJIN4VOOayreFM5EpQN
-        IBRDIgEiAykRhTaRT0X4pH3ZUcRXPqjeBZRxr+Zu7A==
-X-Google-Smtp-Source: AK7set9r6FA2oxfaL/Gdvw6T8lOPC0lfz9vEUH09Doy2PfK7K4PKN/y5UpizMnUOEyCW+zd+Iarf90OGN7ZCkpc06+s=
-X-Received: by 2002:aa7:9e84:0:b0:5a8:925b:f68e with SMTP id
- p4-20020aa79e84000000b005a8925bf68emr369542pfq.28.1676377134742; Tue, 14 Feb
- 2023 04:18:54 -0800 (PST)
+        bh=6Xh0puu3pBwVerTFteBcL8T1N51CVp7Tov2k34ecZpM=;
+        b=sI0Pwn5Y5mhKsLz5C77mp8xEK70L9hvOBT0q/NGAKnXBUQqyUFDSgkabI8+sORbSz4
+         j9zy5pW0j9jzWsQi5vQDmgqB26Llm0loWwZT9g/r3jRaSXgD7wYy60dknGjKAq+Z0368
+         JPIuMlGHNVbtfMXH/Ts9wfyGqvP376fO5TJiZsEz9qeT9pVHqN0QK//v12bZn+hPi3cH
+         CjgaWbRwTXAfX+NpI9o0bad1ZX9GY3PZ1kOUeAhI4fWTou7Ac5xVMAEtQvW1mpblQIhn
+         X16QW2XjIjw63i3sQbGNihZ9nPgwIINdZLp0mZmk8AsBxChm6Xk9nHhQxcdJzvnktfeJ
+         zDSA==
+X-Gm-Message-State: AO0yUKUIzvSwhKh8NGhaVDl3PO+VOSPaEk3KxB7WneCatb3zhad84+D/
+        ysS40E/PGp92uYjizkge8X6flEJrIjJG+ts0912WaA==
+X-Google-Smtp-Source: AK7set8y6ih7+HG36KQ91giji/BrdDd/UJeTMMIq46RK+Piw24wVk53b337RaQNnFoMPo1DMXqwBgByzbplW1g++Oew=
+X-Received: by 2002:a17:90a:c90f:b0:233:ba2c:16a6 with SMTP id
+ v15-20020a17090ac90f00b00233ba2c16a6mr2976614pjt.109.1676377138128; Tue, 14
+ Feb 2023 04:18:58 -0800 (PST)
 MIME-Version: 1.0
-References: <20230203081913.81968-1-william.qiu@starfivetech.com>
-In-Reply-To: <20230203081913.81968-1-william.qiu@starfivetech.com>
+References: <202302101628321403257@zte.com.cn>
+In-Reply-To: <202302101628321403257@zte.com.cn>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 13:18:17 +0100
-Message-ID: <CAPDyKFqei-GjKpBUQnDZUbYnSyn-JS5f_EnTLOuA1U4PdYTyVA@mail.gmail.com>
-Subject: Re: [PATCH v3 0/3] StarFive's SDIO/eMMC driver support
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-kernel@vger.kernel.org
+Date:   Tue, 14 Feb 2023 13:18:21 +0100
+Message-ID: <CAPDyKFp-1FCcWJE7K+kGvvcTvNhOo69Wb4R1UNWKOsN=1dLBwg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-brcmstb: Use devm_platform_get_and_ioremap_resource()
+To:     ye.xingchen@zte.com.cn
+Cc:     kdasu.kdev@gmail.com, alcooperx@gmail.com,
+        bcm-kernel-feedback-list@broadcom.com, adrian.hunter@intel.com,
+        f.fainelli@gmail.com, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 3 Feb 2023 at 09:19, William Qiu <william.qiu@starfivetech.com> wrote:
+On Fri, 10 Feb 2023 at 09:28, <ye.xingchen@zte.com.cn> wrote:
 >
-> Hi,
+> From: Ye Xingchen <ye.xingchen@zte.com.cn>
 >
-> This patchset adds initial rudimentary support for the StarFive
-> designware mobile storage host controller driver. And this driver will
-> be used in StarFive's VisionFive 2 board. The main purpose of adding
-> this driver is to accommodate the ultra-high speed mode of eMMC.
+> Convert platform_get_resource(), devm_ioremap_resource() to a single
+> call to devm_platform_get_and_ioremap_resource(), as this is exactly
+> what this function does.
 >
-> The last patch should be applied after the patchset [1]:
-> [1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
->
-> Changes since v2:
-> - Wraped commit message according to Linux coding style.
-> - Rephrased the description of the patches.
-> - Changed the description of syscon regsiter.
-> - Dropped redundant properties.
->
-> The patch series is based on v6.1.
->
-> William Qiu (3):
->   dt-bindings: mmc: Add StarFive MMC module
->   mmc: starfive: Add sdio/emmc driver support
->   riscv: dts: starfive: Add mmc node
->
->  .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
->  MAINTAINERS                                   |   6 +
->  .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
->  arch/riscv/boot/dts/starfive/jh7110.dtsi      |  37 ++++
->  drivers/mmc/host/Kconfig                      |  10 +
->  drivers/mmc/host/Makefile                     |   1 +
->  drivers/mmc/host/dw_mmc-starfive.c            | 185 ++++++++++++++++++
->  7 files changed, 339 insertions(+)
->  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->  create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
->
+> Signed-off-by: Ye Xingchen <ye.xingchen@zte.com.cn>
 
-Patch 1 and patch 2 applied for next, thanks!
-
-Note that I fixed some checkpatch errors/warnings. Next time, please
-run ./scripts/checkpatch.pl before you submit your patches.
+Applied for next, thanks!
 
 Kind regards
 Uffe
+
+
+> ---
+>  drivers/mmc/host/sdhci-brcmstb.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
+> index 0a19b7af1d41..4c22337199cf 100644
+> --- a/drivers/mmc/host/sdhci-brcmstb.c
+> +++ b/drivers/mmc/host/sdhci-brcmstb.c
+> @@ -255,7 +255,6 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>         struct sdhci_brcmstb_priv *priv;
+>         u32 actual_clock_mhz;
+>         struct sdhci_host *host;
+> -       struct resource *iomem;
+>         struct clk *clk;
+>         struct clk *base_clk = NULL;
+>         int res;
+> @@ -291,8 +290,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+>         }
+>
+>         /* Map in the non-standard CFG registers */
+> -       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 1);
+> -       priv->cfg_regs = devm_ioremap_resource(&pdev->dev, iomem);
+> +       priv->cfg_regs = devm_platform_get_and_ioremap_resource(pdev, 1, NULL);
+>         if (IS_ERR(priv->cfg_regs)) {
+>                 res = PTR_ERR(priv->cfg_regs);
+>                 goto err;
+> --
+> 2.25.1
