@@ -2,75 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 31534C61DA4
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:19:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80F46C05027
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 12:19:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232065AbjBNMTD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 07:19:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43522 "EHLO
+        id S232031AbjBNMTG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 07:19:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232022AbjBNMTA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:19:00 -0500
-Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39D2327482
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:59 -0800 (PST)
-Received: by mail-pj1-x1035.google.com with SMTP id f16-20020a17090a9b1000b0023058bbd7b2so15306015pjp.0
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:18:59 -0800 (PST)
+        with ESMTP id S232054AbjBNMTC (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 07:19:02 -0500
+Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5460A265BF
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:19:01 -0800 (PST)
+Received: by mail-pf1-x429.google.com with SMTP id j184so5091296pfg.10
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 04:19:01 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6Xh0puu3pBwVerTFteBcL8T1N51CVp7Tov2k34ecZpM=;
-        b=Ik5m6qKBsYSBjKFm9MAJwpLRavqbfuB3z9MYaBBOFn3imdsVzdF8gf5+X13cMxYsMh
-         RijGQHbYNPvA0zs88a3juJZdr7DkuoT0e7O2V7ET4//GTmZy9HjC2I6UUtvZNsSGq89M
-         iP41YPTvmVSCNB0zB/LRi9RJbRdo4UrpBI33tJtAWhW/ttu8j0JQIF1dkwKGSuRQP4js
-         aW0DtrQ5phzRVE2V7V1g2vwExuE2sIPur5dDECl44Wa9VY3OGSqUohRrM65Nme5x9cXA
-         lnzXCwxZqVsPUs1KJAhNdU8LvjGIMQ99VRnpoCLHiZL4ymkDfdUvyOIctPUfK1l2NsHY
-         /gow==
+        bh=cAUnKTSg8HM8rsQy6BohzZgXbeIp3TlhBYPt31b6Ae8=;
+        b=dOntUdoPt4KtjO0xRQ2RJOCldhDjTb/BgVsjm0cRpeaQfzpHwJTN6OYB8L4CrdiMCQ
+         yOpuMfp0GMQWzi0aQ8h3XAiIo9YDY66wC0uIRsSZLPpalct3zuKSLTLt5uw3c+vRoIi6
+         kZWT2VWDlSMAOKNx8rxW1MCuGOqdAdmD92ly68a5Vh3EW89eTmiJsQF8UfFRVuC8eQby
+         rC2rhBmwnfLE2FiYcCPRBmDiB3jCQGYpt4IvJpd1AOjZ11+kVI5KoJczR8VLE3UAEVhW
+         vM9VvXxDniGthC55iHe1bua+Ye6IuK26rR1Y+wLSIOVIkPJF710XacfG2rDelFY6A1mZ
+         T0+w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=6Xh0puu3pBwVerTFteBcL8T1N51CVp7Tov2k34ecZpM=;
-        b=sI0Pwn5Y5mhKsLz5C77mp8xEK70L9hvOBT0q/NGAKnXBUQqyUFDSgkabI8+sORbSz4
-         j9zy5pW0j9jzWsQi5vQDmgqB26Llm0loWwZT9g/r3jRaSXgD7wYy60dknGjKAq+Z0368
-         JPIuMlGHNVbtfMXH/Ts9wfyGqvP376fO5TJiZsEz9qeT9pVHqN0QK//v12bZn+hPi3cH
-         CjgaWbRwTXAfX+NpI9o0bad1ZX9GY3PZ1kOUeAhI4fWTou7Ac5xVMAEtQvW1mpblQIhn
-         X16QW2XjIjw63i3sQbGNihZ9nPgwIINdZLp0mZmk8AsBxChm6Xk9nHhQxcdJzvnktfeJ
-         zDSA==
-X-Gm-Message-State: AO0yUKUIzvSwhKh8NGhaVDl3PO+VOSPaEk3KxB7WneCatb3zhad84+D/
-        ysS40E/PGp92uYjizkge8X6flEJrIjJG+ts0912WaA==
-X-Google-Smtp-Source: AK7set8y6ih7+HG36KQ91giji/BrdDd/UJeTMMIq46RK+Piw24wVk53b337RaQNnFoMPo1DMXqwBgByzbplW1g++Oew=
-X-Received: by 2002:a17:90a:c90f:b0:233:ba2c:16a6 with SMTP id
- v15-20020a17090ac90f00b00233ba2c16a6mr2976614pjt.109.1676377138128; Tue, 14
- Feb 2023 04:18:58 -0800 (PST)
+        bh=cAUnKTSg8HM8rsQy6BohzZgXbeIp3TlhBYPt31b6Ae8=;
+        b=R3970VckRp5xalsFkLgE7ahMXMXiuy6jjc3tEOZvlBv7x76zUyrXRHdnDydyoOEbk4
+         jLPcdyWcKXsZQ7XFmAiP2bZKA092E6sD82FYjkpk8lh1c0q1qymNDH7EP09Guv0dzExi
+         gqzOBxeBn2z5pj6BW7S67f/zHAKHUD/2DqRKO6bVgBHq/8PSagFS5Ic2wOach3gcLaG4
+         0zbleON0d0VGQbcIRiokQh2zYgYffo1xhzvVOfDUjrlTAyNx+BnmHPACqSnLhOVpebVY
+         O/9MSTzx0PTa9bjWZuA9exUIGjVhmROw6xm/KctraP6BZtC7NCD+ycdbrEpUSyAKGZFs
+         Iw/A==
+X-Gm-Message-State: AO0yUKXK6qSaTGgqSW1/S41EdECR1TL6pGkwCnuyScJkxnVM3qDXvQY8
+        W23JQv33qocwUXOFlXZG/P8YchHRmFAoY3Jr73u7o4Hj6WV3vg==
+X-Google-Smtp-Source: AK7set9vWN7YaYkuFsDNMiCF06DKol561mu12vcAVC+pKP2ioHYPeoRdHu7RF0E9LWcWOIPCTNRnxFRrd8Ct+QwGlKs=
+X-Received: by 2002:aa7:96fc:0:b0:5a8:bc1e:dea3 with SMTP id
+ i28-20020aa796fc000000b005a8bc1edea3mr358646pfq.56.1676377140832; Tue, 14 Feb
+ 2023 04:19:00 -0800 (PST)
 MIME-Version: 1.0
-References: <202302101628321403257@zte.com.cn>
-In-Reply-To: <202302101628321403257@zte.com.cn>
+References: <20230210143843.369943-1-saproj@gmail.com>
+In-Reply-To: <20230210143843.369943-1-saproj@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Feb 2023 13:18:21 +0100
-Message-ID: <CAPDyKFp-1FCcWJE7K+kGvvcTvNhOo69Wb4R1UNWKOsN=1dLBwg@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-brcmstb: Use devm_platform_get_and_ioremap_resource()
-To:     ye.xingchen@zte.com.cn
-Cc:     kdasu.kdev@gmail.com, alcooperx@gmail.com,
-        bcm-kernel-feedback-list@broadcom.com, adrian.hunter@intel.com,
-        f.fainelli@gmail.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+Date:   Tue, 14 Feb 2023 13:18:24 +0100
+Message-ID: <CAPDyKFrARWb33bH0L7PsmcKN-BWVY5iWott1+EXUPMY_aT1nxg@mail.gmail.com>
+Subject: Re: [PATCH] mmc: moxart: set maximum request/block/segment sizes
+To:     Sergei Antonov <saproj@gmail.com>
+Cc:     linux-mmc@vger.kernel.org, jonas.jensen@gmail.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 10 Feb 2023 at 09:28, <ye.xingchen@zte.com.cn> wrote:
+On Fri, 10 Feb 2023 at 15:38, Sergei Antonov <saproj@gmail.com> wrote:
 >
-> From: Ye Xingchen <ye.xingchen@zte.com.cn>
+> Per datasheet: maximum block length is 2048 bytes,
+> data length field is in bits 0-23 of the Data Length Register.
 >
-> Convert platform_get_resource(), devm_ioremap_resource() to a single
-> call to devm_platform_get_and_ioremap_resource(), as this is exactly
-> what this function does.
+> Also for DMA mode we have to take into account rx/tx buffers' sizes.
 >
-> Signed-off-by: Ye Xingchen <ye.xingchen@zte.com.cn>
+> In my tests this change doubles SD card I/O performance on big files.
+> Before the change Linux used default request size of 4 KB.
+>
+> Signed-off-by: Sergei Antonov <saproj@gmail.com>
 
 Applied for next, thanks!
 
@@ -79,30 +78,43 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-brcmstb.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
+>  drivers/mmc/host/moxart-mmc.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-brcmstb.c b/drivers/mmc/host/sdhci-brcmstb.c
-> index 0a19b7af1d41..4c22337199cf 100644
-> --- a/drivers/mmc/host/sdhci-brcmstb.c
-> +++ b/drivers/mmc/host/sdhci-brcmstb.c
-> @@ -255,7 +255,6 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
->         struct sdhci_brcmstb_priv *priv;
->         u32 actual_clock_mhz;
->         struct sdhci_host *host;
-> -       struct resource *iomem;
->         struct clk *clk;
->         struct clk *base_clk = NULL;
->         int res;
-> @@ -291,8 +290,7 @@ static int sdhci_brcmstb_probe(struct platform_device *pdev)
+> diff --git a/drivers/mmc/host/moxart-mmc.c b/drivers/mmc/host/moxart-mmc.c
+> index 52ed30f2d9f4..2d002c81dcf3 100644
+> --- a/drivers/mmc/host/moxart-mmc.c
+> +++ b/drivers/mmc/host/moxart-mmc.c
+> @@ -611,6 +611,9 @@ static int moxart_probe(struct platform_device *pdev)
+>         mmc->f_max = DIV_ROUND_CLOSEST(host->sysclk, 2);
+>         mmc->f_min = DIV_ROUND_CLOSEST(host->sysclk, CLK_DIV_MASK * 2);
+>         mmc->ocr_avail = 0xffff00;      /* Support 2.0v - 3.6v power. */
+> +       mmc->max_blk_size = 2048; /* Max. block length in REG_DATA_CONTROL */
+> +       mmc->max_req_size = DATA_LEN_MASK; /* bits 0-23 in REG_DATA_LENGTH */
+> +       mmc->max_blk_count = mmc->max_req_size / 512;
+>
+>         if (IS_ERR(host->dma_chan_tx) || IS_ERR(host->dma_chan_rx)) {
+>                 if (PTR_ERR(host->dma_chan_tx) == -EPROBE_DEFER ||
+> @@ -628,6 +631,8 @@ static int moxart_probe(struct platform_device *pdev)
+>                 }
+>                 dev_dbg(dev, "PIO mode transfer enabled\n");
+>                 host->have_dma = false;
+> +
+> +               mmc->max_seg_size = mmc->max_req_size;
+>         } else {
+>                 dev_dbg(dev, "DMA channels found (%p,%p)\n",
+>                          host->dma_chan_tx, host->dma_chan_rx);
+> @@ -646,6 +651,10 @@ static int moxart_probe(struct platform_device *pdev)
+>                 cfg.src_addr = host->reg_phys + REG_DATA_WINDOW;
+>                 cfg.dst_addr = 0;
+>                 dmaengine_slave_config(host->dma_chan_rx, &cfg);
+> +
+> +               mmc->max_seg_size = min3(mmc->max_req_size,
+> +                       dma_get_max_seg_size(host->dma_chan_rx->device->dev),
+> +                       dma_get_max_seg_size(host->dma_chan_tx->device->dev));
 >         }
 >
->         /* Map in the non-standard CFG registers */
-> -       iomem = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-> -       priv->cfg_regs = devm_ioremap_resource(&pdev->dev, iomem);
-> +       priv->cfg_regs = devm_platform_get_and_ioremap_resource(pdev, 1, NULL);
->         if (IS_ERR(priv->cfg_regs)) {
->                 res = PTR_ERR(priv->cfg_regs);
->                 goto err;
+>         if (readl(host->base + REG_BUS_WIDTH) & BUS_WIDTH_4_SUPPORT)
 > --
-> 2.25.1
+> 2.34.1
+>
