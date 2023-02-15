@@ -2,184 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AC82BC05027
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 00:51:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B95BC61DA4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 01:56:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231859AbjBOAvI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 19:51:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41878 "EHLO
+        id S230394AbjBOB4u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 20:56:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231871AbjBOAvH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 19:51:07 -0500
-Received: from mail-m11875.qiye.163.com (mail-m11875.qiye.163.com [115.236.118.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4917630E93
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 16:50:58 -0800 (PST)
-Received: from [172.16.12.69] (unknown [58.22.7.114])
-        by mail-m11875.qiye.163.com (Hmail) with ESMTPA id 3904C2801A4;
-        Wed, 15 Feb 2023 08:50:54 +0800 (CST)
-Message-ID: <c0f5f292-f639-1f7c-3d12-2c80015c67fc@rock-chips.com>
-Date:   Wed, 15 Feb 2023 08:50:55 +0800
+        with ESMTP id S229454AbjBOB4t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 20:56:49 -0500
+Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F7B17DB9;
+        Tue, 14 Feb 2023 17:56:47 -0800 (PST)
+Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
+        by ex01.ufhost.com (Postfix) with ESMTP id CE48E24E249;
+        Wed, 15 Feb 2023 09:56:45 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
+ (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
+ 2023 09:56:45 +0800
+Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
+ (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
+ 2023 09:56:45 +0800
+Message-ID: <c8e1e030-59a5-107b-d1a3-0ad7e289a419@starfivetech.com>
+Date:   Wed, 15 Feb 2023 09:56:45 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.2
-Cc:     shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-rockchip@lists.infradead.org
-Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-dwcmshc: Add runtime PM support
+ Thunderbird/102.6.1
+Subject: Re: [PATCH v3 0/3] StarFive's SDIO/eMMC driver support
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-References: <1675298118-64243-1-git-send-email-shawn.lin@rock-chips.com>
- <1675298118-64243-3-git-send-email-shawn.lin@rock-chips.com>
- <CAPDyKFoN3GDRYRJep1ARf8rSftZRBUceda92OPuDQLvG3dVhhQ@mail.gmail.com>
- <a336a9ef-77e9-fa1d-ad95-805a8b5a89cb@rock-chips.com>
- <CAPDyKFrpv+DoqMK9cLrYMBk1m6dXoDXu40xSJ_UMVK8O+=Ud6A@mail.gmail.com>
-Content-Language: en-GB
-From:   Shawn Lin <shawn.lin@rock-chips.com>
-In-Reply-To: <CAPDyKFrpv+DoqMK9cLrYMBk1m6dXoDXu40xSJ_UMVK8O+=Ud6A@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
-X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
-        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGRpDT1YdGUNMGUkfS0lMGk1VEwETFh
-        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSkpLSEpMVUpLS1VLWQ
-        Y+
-X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6OE06LTo5Iz0XIhw6ET8#Tg8w
-        AjIKCSpVSlVKTUxNT0lJSU5PQ0pLVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
-        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQU1DQ083Bg++
-X-HM-Tid: 0a86528d8f2e2eb1kusn3904c2801a4
+CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        <linux-kernel@vger.kernel.org>
+References: <20230203081913.81968-1-william.qiu@starfivetech.com>
+ <CAPDyKFqei-GjKpBUQnDZUbYnSyn-JS5f_EnTLOuA1U4PdYTyVA@mail.gmail.com>
+Content-Language: en-US
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <CAPDyKFqei-GjKpBUQnDZUbYnSyn-JS5f_EnTLOuA1U4PdYTyVA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf
 
-On 2023/2/14 18:41, Ulf Hansson wrote:
-> On Tue, 14 Feb 2023 at 04:36, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>
->> Hi Ulf,
->>
->> On 2023/2/14 7:45, Ulf Hansson wrote:
->>> On Thu, 2 Feb 2023 at 01:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
->>>>
->>>> This patch adds runtime PM support.
->>>>
->>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
->>>> ---
->>>>
->>>> Changes in v2: None
->>>>
->>>>    drivers/mmc/host/sdhci-of-dwcmshc.c | 51 ++++++++++++++++++++++++++++++++++++-
->>>>    1 file changed, 50 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>> index 46b1ce7..fc917ed 100644
->>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
->>>> @@ -15,6 +15,7 @@
->>>>    #include <linux/module.h>
->>>>    #include <linux/of.h>
->>>>    #include <linux/of_device.h>
->>>> +#include <linux/pm_runtime.h>
->>>>    #include <linux/reset.h>
->>>>    #include <linux/sizes.h>
->>>>
->>>> @@ -551,6 +552,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
->>>>           if (err)
->>>>                   goto err_setup_host;
->>>>
->>>> +       pm_runtime_get_noresume(&pdev->dev);
->>>> +       pm_runtime_set_active(&pdev->dev);
->>>> +       pm_runtime_enable(&pdev->dev);
->>>> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
->>>> +       pm_runtime_use_autosuspend(&pdev->dev);
->>>> +       pm_runtime_put_autosuspend(&pdev->dev);
->>>> +
->>>>           return 0;
->>>>
->>>>    err_setup_host:
->>>> @@ -580,6 +588,11 @@ static int dwcmshc_remove(struct platform_device *pdev)
->>>>           if (rk_priv)
->>>>                   clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
->>>>                                              rk_priv->rockchip_clks);
->>>> +
->>>> +       pm_runtime_get_sync(&pdev->dev);
->>>> +       pm_runtime_disable(&pdev->dev);
->>>> +       pm_runtime_put_noidle(&pdev->dev);
->>>> +
->>>>           sdhci_pltfm_free(pdev);
->>>>
->>>>           return 0;
->>>> @@ -638,7 +651,43 @@ static int dwcmshc_resume(struct device *dev)
->>>>    }
->>>>    #endif
->>>>
->>>> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
->>>> +#ifdef CONFIG_PM
->>>> +static int dwcmshc_runtime_suspend(struct device *dev)
->>>> +{
->>>> +       struct sdhci_host *host = dev_get_drvdata(dev);
->>>> +       u16 data;
->>>> +       int ret;
->>>> +
->>>> +       ret = sdhci_runtime_suspend_host(host);
->>>> +       if (ret)
->>>> +               return ret;
->>>> +
->>>> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->>>> +       data &= ~SDHCI_CLOCK_CARD_EN;
->>>> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
->>>> +
->>>> +       return 0;
->>>> +}
->>>> +
->>>> +static int dwcmshc_runtime_resume(struct device *dev)
->>>> +{
->>>> +       struct sdhci_host *host = dev_get_drvdata(dev);
->>>> +       u16 data;
->>>> +
->>>> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
->>>> +       data |= SDHCI_CLOCK_CARD_EN;
->>>> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
->>>> +
->>>> +       return sdhci_runtime_resume_host(host, 0);
->>>> +}
->>>> +#endif
->>>> +
->>>> +static const struct dev_pm_ops dwcmshc_pmops = {
->>>> +       SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend,
->>>> +                               dwcmshc_resume)
->>>
->>> I have looked at dwcmshc_suspend(), which calls sdhci_suspend_host().
->>> As sdhci_suspend_host() will write to internal registers of the IP
->>> block, it's recommended to make sure the device's runtime resumed
->>> before doing that call. So that needs to be added along with $subject
->>> patch.
->>>
->>
->> Yep, let me add a check here.
->>
->>> There is also another option that may better for you, which is to use
->>> the pm_runtime_force_suspend|resume() helpers. There should be plenty
->>> of references to look at, but don't hesitate to ask around that, if
->>> you need some more help to get that working.
->>
->> If I understand correctly,  pm_runtime_force_suspend|resume() helpers
->> would use runtime PM ops for suspend/resume routine. In this case, the
->> main issue is the handling of clock is quite different. In suspend we
->> need to gate all clocks but in rpm case, it shouldn't.
-> 
-> I see, but let me then ask, what's the point of keeping the clocks
-> ungated at runtime suspend?
-> 
-> That sounds like wasting energy to me - but maybe there are good reasons for it?
 
-The point to keep the clocks ungated at runtime suspend is that if they
-are gated,  the DLL would lost its locked state which causes retuning
-every time. It's quite painful for performance. However, if we just gate
-output clock to the device, the devices(basically I refer to eMMC) will 
-get into power-save status by itself. That helps us too keep balance
-between power & performance during runtime. ：）
-
+On 2023/2/14 20:18, Ulf Hansson wrote:
+> On Fri, 3 Feb 2023 at 09:19, William Qiu <william.qiu@starfivetech.com> wrote:
+>>
+>> Hi,
+>>
+>> This patchset adds initial rudimentary support for the StarFive
+>> designware mobile storage host controller driver. And this driver will
+>> be used in StarFive's VisionFive 2 board. The main purpose of adding
+>> this driver is to accommodate the ultra-high speed mode of eMMC.
+>>
+>> The last patch should be applied after the patchset [1]:
+>> [1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
+>>
+>> Changes since v2:
+>> - Wraped commit message according to Linux coding style.
+>> - Rephrased the description of the patches.
+>> - Changed the description of syscon regsiter.
+>> - Dropped redundant properties.
+>>
+>> The patch series is based on v6.1.
+>>
+>> William Qiu (3):
+>>   dt-bindings: mmc: Add StarFive MMC module
+>>   mmc: starfive: Add sdio/emmc driver support
+>>   riscv: dts: starfive: Add mmc node
+>>
+>>  .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
+>>  MAINTAINERS                                   |   6 +
+>>  .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
+>>  arch/riscv/boot/dts/starfive/jh7110.dtsi      |  37 ++++
+>>  drivers/mmc/host/Kconfig                      |  10 +
+>>  drivers/mmc/host/Makefile                     |   1 +
+>>  drivers/mmc/host/dw_mmc-starfive.c            | 185 ++++++++++++++++++
+>>  7 files changed, 339 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+>>  create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
+>>
 > 
-> [...]
+> Patch 1 and patch 2 applied for next, thanks!
+> 
+> Note that I fixed some checkpatch errors/warnings. Next time, please
+> run ./scripts/checkpatch.pl before you submit your patches.
 > 
 > Kind regards
 > Uffe
+z
+Hi Uffe,
+
+Sorry about that, I'll check the patches before submit next time.
+Thanks for taking time reviewing this patch series.
+
+Best Regards
+William
