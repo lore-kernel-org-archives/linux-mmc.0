@@ -2,30 +2,30 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9F3CC6379F
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 11:33:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C49E2C64EC7
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 11:33:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233584AbjBOLdC convert rfc822-to-8bit (ORCPT
+        id S233541AbjBOLdA convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Feb 2023 06:33:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35744 "EHLO
+        Wed, 15 Feb 2023 06:33:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35666 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233526AbjBOLc6 (ORCPT
+        with ESMTP id S233521AbjBOLc6 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 06:32:58 -0500
 Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DF11CA3B;
-        Wed, 15 Feb 2023 03:32:53 -0800 (PST)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E1AED51B;
+        Wed, 15 Feb 2023 03:32:54 -0800 (PST)
 Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
         (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
         (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id 30CF924E173;
-        Wed, 15 Feb 2023 19:32:51 +0800 (CST)
+        by ex01.ufhost.com (Postfix) with ESMTP id 95AB924E27A;
+        Wed, 15 Feb 2023 19:32:53 +0800 (CST)
 Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX165.cuchost.com
  (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
- 2023 19:32:51 +0800
+ 2023 19:32:53 +0800
 Received: from williamqiu-virtual-machine.starfivetech.com (171.223.208.138)
  by EXMBX068.cuchost.com (172.16.6.68) with Microsoft SMTP Server (TLS) id
- 15.0.1497.42; Wed, 15 Feb 2023 19:32:50 +0800
+ 15.0.1497.42; Wed, 15 Feb 2023 19:32:52 +0800
 From:   William Qiu <william.qiu@starfivetech.com>
 To:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
         <linux-mmc@vger.kernel.org>
@@ -35,10 +35,12 @@ CC:     Rob Herring <robh+dt@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         William Qiu <william.qiu@starfivetech.com>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH v4 0/4] StarFive's SDIO/eMMC driver support
-Date:   Wed, 15 Feb 2023 19:32:45 +0800
-Message-ID: <20230215113249.47727-1-william.qiu@starfivetech.com>
+Subject: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
+Date:   Wed, 15 Feb 2023 19:32:49 +0800
+Message-ID: <20230215113249.47727-5-william.qiu@starfivetech.com>
 X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230215113249.47727-1-william.qiu@starfivetech.com>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 X-Originating-IP: [171.223.208.138]
@@ -50,57 +52,88 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+Add documentation to describe StarFive System Controller Registers.
 
-This patchset adds initial rudimentary support for the StarFive
-designware mobile storage host controller driver. And this driver will
-be used in StarFive's VisionFive 2 board. The main purpose of adding
-this driver is to accommodate the ultra-high speed mode of eMMC.
-
-The last patch should be applied after the patchset [1]:
-[1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
-
-Changes v3->v4:
-- Added documentation to describe StarFive System Controller Registers.
-- Added aon_syscon and stg_syscon node.
-- Fixed some checkpatch errors/warnings.
-
-Changes v2->v3:
-- Wraped commit message according to Linux coding style.
-- Rephrased the description of the patches.
-- Changed the description of syscon regsiter.
-- Dropped redundant properties.
-
-Changes v1->v2:
-- Renamed the dt-binding 'starfive,jh7110-sdio.yaml' to 'starfive,jh7110-mmc.yaml'.
-- Changed the type of 'starfive,syscon' and modify its description.
-- Deleted unused head files like '#include <linux/gpio.h>'.
-- Added comment for the 'rise_point' and 'fall_point'.
-- Changed the API 'num_caps' to 'common_caps'.
-- Changed the node name 'sys_syscon' to 'syscon'.
-- Changed the node name 'sdio' to 'mmc'.
-
-The patch series is based on v6.1.
-
-William Qiu (4):
-  dt-bindings: mmc: Add StarFive MMC module
-  mmc: starfive: Add sdio/emmc driver support
-  riscv: dts: starfive: Add mmc node
-  dt-bindings: syscon: Add StarFive syscon doc
-
- .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
- .../bindings/soc/starfive/jh7110-syscon.yaml  |  51 +++++
- MAINTAINERS                                   |  11 ++
- .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
- arch/riscv/boot/dts/starfive/jh7110.dtsi      |  47 +++++
- drivers/mmc/host/Kconfig                      |  10 +
- drivers/mmc/host/Makefile                     |   1 +
- drivers/mmc/host/dw_mmc-starfive.c            | 186 ++++++++++++++++++
- 8 files changed, 406 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
+Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+---
+ .../bindings/soc/starfive/jh7110-syscon.yaml  | 51 +++++++++++++++++++
+ MAINTAINERS                                   |  5 ++
+ 2 files changed, 56 insertions(+)
  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
- create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
 
---
+diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+new file mode 100644
+index 000000000000..fa4d8522a454
+--- /dev/null
++++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+@@ -0,0 +1,51 @@
++# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/soc/starfive/jh7110-syscon.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: StarFive JH7110 SoC system controller
++
++maintainers:
++  - William Qiu <william.qiu@starfivetech.com>
++
++description: |
++  The StarFive JH7110 SoC system controller provides register information such
++  as offset, mask and shift to configure related modules such as MMC and PCIe.
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - starfive,jh7110-stg-syscon
++          - starfive,jh7110-sys-syscon
++          - starfive,jh7110-aon-syscon
++      - const: syscon
++
++  reg:
++    maxItems: 1
++
++required:
++  - compatible
++  - reg
++
++additionalProperties: false
++
++examples:
++  - |
++    syscon@10240000 {
++        compatible = "starfive,jh7110-stg-syscon", "syscon";
++        reg = <0x10240000 0x1000>;
++    };
++
++    syscon@13030000 {
++        compatible = "starfive,jh7110-sys-syscon", "syscon";
++        reg = <0x13030000 0x1000>;
++    };
++
++    syscon@17010000 {
++        compatible = "starfive,jh7110-aon-syscon", "syscon";
++        reg = <0x17010000 0x1000>;
++    };
++
++...
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 644ac9479a6e..fc9d1781516a 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -19665,6 +19665,11 @@ F:	Documentation/devicetree/bindings/reset/starfive,jh7100-reset.yaml
+ F:	drivers/reset/starfive/reset-starfive-jh71*
+ F:	include/dt-bindings/reset/starfive?jh71*.h
+ 
++STARFIVE JH7110 SYSCON
++M:	William Qiu <william.qiu@starfivetech.com>
++S:	Supported
++F:	Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
++
+ STATIC BRANCH/CALL
+ M:	Peter Zijlstra <peterz@infradead.org>
+ M:	Josh Poimboeuf <jpoimboe@kernel.org>
+-- 
 2.34.1
 
