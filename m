@@ -2,177 +2,215 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69A4FC636D4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 12:08:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A85EEC636CC
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 12:12:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229817AbjBOMIU convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Feb 2023 07:08:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36410 "EHLO
+        id S233912AbjBOMMY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Feb 2023 07:12:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38730 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229503AbjBOMIU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 07:08:20 -0500
-Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F8E82387A;
-        Wed, 15 Feb 2023 04:08:17 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id 4B3F524E313;
-        Wed, 15 Feb 2023 20:08:16 +0800 (CST)
-Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
- 2023 20:08:16 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
- (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
- 2023 20:08:15 +0800
-Message-ID: <9ef960ae-7b61-9ed3-5bab-822e6d7d5a76@starfivetech.com>
-Date:   Wed, 15 Feb 2023 20:08:14 +0800
+        with ESMTP id S233875AbjBOMMY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 07:12:24 -0500
+Received: from smtp-relay-internal-0.canonical.com (smtp-relay-internal-0.canonical.com [185.125.188.122])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D6BDB33465
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 04:12:22 -0800 (PST)
+Received: from mail-qt1-f198.google.com (mail-qt1-f198.google.com [209.85.160.198])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        by smtp-relay-internal-0.canonical.com (Postfix) with ESMTPS id E3EA33F4A8
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 12:12:19 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=canonical.com;
+        s=20210705; t=1676463139;
+        bh=d2HVhvClqqd8WHxTQTRIymEsBK4G3tyKOtWAvm3jRPM=;
+        h=MIME-Version:References:In-Reply-To:From:Date:Message-ID:Subject:
+         To:Cc:Content-Type;
+        b=QhPZ1QoZz/LWBNLn6cSWQx/wvjpmTCGPPdhZJD/JOO1UzG/AC7Jc0md4qZm0cdgz2
+         FGm3hiCGnoMpd3rtdiuU5rq0Ulha1NBdgxuI9pZcn/qvi0afd9EACuKmD6wMWqi9ZD
+         TIzxqaM4ZHOMY606QP3JbOa3yBSY0LvqSnqkzlvl9+lSB0uAwBkql74z25e3DmxwEd
+         Sw4h+k5N/3r7fYRTQ7vlS0I758JMU4T572qmW3MmZXJZwsBGlI39a3MJeDxlUH4iq5
+         K3jRgyECzU+RPVdwt3xu94rvtPEmNCQx6FZHsYAEy3ds4X9ixZRBJblTxhfhIq+qt+
+         h33gaJ4PwPIeQ==
+Received: by mail-qt1-f198.google.com with SMTP id i5-20020ac813c5000000b003b86b748aadso11080404qtj.14
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 04:12:19 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1676463139;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=d2HVhvClqqd8WHxTQTRIymEsBK4G3tyKOtWAvm3jRPM=;
+        b=Akdk4JIPJ6+NY3LVs4scUvj4RAUqNFLs9KbYN5FCW2gQ3MNqDWdGDAp0PKId0oH7a3
+         d0jhLT3/KOLHA6b4XxyRYMXIQit2jKqGAvqMmq3t8RdjH/fxcsEFrztPvWV7GWhzQGgX
+         /1G6x8DpVfHVJ6W/BxvDLagvlP3LMG/cG6te0zUK35+c5jxeMiYl9rAz2JnaDsGYWQCT
+         xDp7rmXp4xavEHcgxd7IltKIPyM/XXLqTfPvIBXGExl2CjscogZwUh496GFWq5wNuYMZ
+         8Dt2nCpkgtE8KeCxGt/CIhjBAuS7Cefun5IzQ+l/uST0Omn7fBmlOR2QH4Bm26XApN+L
+         1DuQ==
+X-Gm-Message-State: AO0yUKWDL/bq9TRU5XroLpTe0QAnYLHgEJtPzgpECqARtsp9/J/JPv6r
+        fl0ng00EIr2/WF0vg01YS8aJ8h+2pP2B1jieBk5QL4A6BTE1l0vHbkvPTt4/elAy+xFsXJvefdV
+        KNlhfGrZ3Q+vUGe7zfkWkVfta6YpGrgyK+3Tb6ta/JAQ6RZjv2+mNdA==
+X-Received: by 2002:a0c:aa99:0:b0:56e:9a77:3d2c with SMTP id f25-20020a0caa99000000b0056e9a773d2cmr120699qvb.5.1676463138968;
+        Wed, 15 Feb 2023 04:12:18 -0800 (PST)
+X-Google-Smtp-Source: AK7set94W4bHbLWyqqCBU/wia3LQtnIJnTfo8vvQ0Q6eIDjwkquQyW4opvnzwzhSgOt3jgiSN6xmjaU6v/LfsoIKTM0=
+X-Received: by 2002:a0c:aa99:0:b0:56e:9a77:3d2c with SMTP id
+ f25-20020a0caa99000000b0056e9a773d2cmr120692qvb.5.1676463138706; Wed, 15 Feb
+ 2023 04:12:18 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH v4 1/4] dt-bindings: mmc: Add StarFive MMC module
-To:     Shengyu Qu <wiagn233@outlook.com>,
-        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
+References: <20230215113249.47727-1-william.qiu@starfivetech.com> <20230215113249.47727-4-william.qiu@starfivetech.com>
+In-Reply-To: <20230215113249.47727-4-william.qiu@starfivetech.com>
+From:   Emil Renner Berthing <emil.renner.berthing@canonical.com>
+Date:   Wed, 15 Feb 2023 13:12:01 +0100
+Message-ID: <CAJM55Z8gVEZS4Ws2Gi7_JbdkS-4y3_8mQvR4ZxLCWZ4A1y9X1g@mail.gmail.com>
+Subject: Re: [PATCH v4 3/4] riscv: dts: starfive: Add mmc node
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20230215113249.47727-1-william.qiu@starfivetech.com>
- <20230215113249.47727-2-william.qiu@starfivetech.com>
- <TY3P286MB26111053410F3F96C9C71D2798A39@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <TY3P286MB26111053410F3F96C9C71D2798A39@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+        linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
- (172.16.6.68)
-X-YovoleRuleAgent: yovoleflag
-Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 2023/2/15 19:59, Shengyu Qu wrote:
-> Hello William,
-> 
-> Are you sure changing driver is better than changing yaml bindings? All
-> 
-> previous version sent was syscon and sysreg seems not consistent with
-> 
-> other codes.
-> 
-> Best regards,
-> 
-> Shengyu
+On Wed, 15 Feb 2023 at 12:35, William Qiu <william.qiu@starfivetech.com> wrote:
 >
+> Add the mmc node for the StarFive JH7110 SoC.
+> Set mmco node to emmc and set mmc1 node to sd.
+>
+> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> ---
+>  .../jh7110-starfive-visionfive-2.dtsi         | 23 +++++++++
+>  arch/riscv/boot/dts/starfive/jh7110.dtsi      | 47 +++++++++++++++++++
+>  2 files changed, 70 insertions(+)
+>
+> diff --git a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> index c60280b89c73..e1a0248e907f 100644
+> --- a/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> +++ b/arch/riscv/boot/dts/starfive/jh7110-starfive-visionfive-2.dtsi
+> @@ -42,6 +42,29 @@ &rtc_osc {
+>         clock-frequency = <32768>;
+>  };
+>
+> +&mmc0 {
+> +       max-frequency = <100000000>;
+> +       bus-width = <8>;
+> +       cap-mmc-highspeed;
+> +       mmc-ddr-1_8v;
+> +       mmc-hs200-1_8v;
+> +       non-removable;
+> +       cap-mmc-hw-reset;
+> +       post-power-on-delay-ms = <200>;
+> +       status = "okay";
+> +};
+> +
+> +&mmc1 {
+> +       max-frequency = <100000000>;
+> +       bus-width = <4>;
+> +       no-sdio;
+> +       no-mmc;
+> +       broken-cd;
+> +       cap-sd-highspeed;
+> +       post-power-on-delay-ms = <200>;
+> +       status = "okay";
+> +};
+> +
+>  &gmac0_rmii_refin {
+>         clock-frequency = <50000000>;
+>  };
+> diff --git a/arch/riscv/boot/dts/starfive/jh7110.dtsi b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> index 64d260ea1f29..17f7b3ee6ca3 100644
+> --- a/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> +++ b/arch/riscv/boot/dts/starfive/jh7110.dtsi
+> @@ -314,6 +314,11 @@ uart2: serial@10020000 {
+>                         status = "disabled";
+>                 };
+>
+> +               stg_syscon: syscon@10240000 {
+> +                       compatible = "starfive,jh7110-stg-syscon", "syscon";
+> +                       reg = <0x0 0x10240000 0x0 0x1000>;
+> +               };
+> +
+>                 uart3: serial@12000000 {
+>                         compatible = "snps,dw-apb-uart";
+>                         reg = <0x0 0x12000000 0x0 0x10000>;
+> @@ -370,6 +375,11 @@ syscrg: clock-controller@13020000 {
+>                         #reset-cells = <1>;
+>                 };
+>
+> +               sys_syscon: syscon@13030000 {
+> +                       compatible = "starfive,jh7110-sys-syscon", "syscon";
+> +                       reg = <0x0 0x13030000 0x0 0x1000>;
+> +               };
+> +
+>                 gpio: gpio@13040000 {
+>                         compatible = "starfive,jh7110-sys-pinctrl";
+>                         reg = <0x0 0x13040000 0x0 0x10000>;
+> @@ -397,6 +407,11 @@ aoncrg: clock-controller@17000000 {
+>                         #reset-cells = <1>;
+>                 };
+>
+> +               aon_syscon: syscon@17010000 {
+> +                       compatible = "starfive,jh7110-aon-syscon", "syscon";
+> +                       reg = <0x0 0x17010000 0x0 0x1000>;
+> +               };
+> +
+>                 gpioa: gpio@17020000 {
+>                         compatible = "starfive,jh7110-aon-pinctrl";
+>                         reg = <0x0 0x17020000 0x0 0x10000>;
+> @@ -407,5 +422,37 @@ gpioa: gpio@17020000 {
+>                         gpio-controller;
+>                         #gpio-cells = <2>;
+>                 };
+> +
+> +               mmc0: mmc@16010000 {
+> +                       compatible = "starfive,jh7110-mmc";
+> +                       reg = <0x0 0x16010000 0x0 0x10000>;
+> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO0_AHB>,
+> +                                <&syscrg JH7110_SYSCLK_SDIO0_SDCARD>;
+> +                       clock-names = "biu","ciu";
+> +                       resets = <&syscrg JH7110_SYSRST_SDIO0_AHB>;
+> +                       reset-names = "reset";
+> +                       interrupts = <74>;
+> +                       fifo-depth = <32>;
+> +                       fifo-watermark-aligned;
+> +                       data-addr = <0>;
+> +                       starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
+> +                       status = "disabled";
+> +               };
+> +
+> +               mmc1: mmc@16020000 {
+> +                       compatible = "starfive,jh7110-mmc";
+> +                       reg = <0x0 0x16020000 0x0 0x10000>;
+> +                       clocks = <&syscrg JH7110_SYSCLK_SDIO1_AHB>,
+> +                                <&syscrg JH7110_SYSCLK_SDIO1_SDCARD>;
+> +                       clock-names = "biu","ciu";
+> +                       resets = <&syscrg JH7110_SYSRST_SDIO1_AHB>;
+> +                       reset-names = "reset";
+> +                       interrupts = <75>;
+> +                       fifo-depth = <32>;
+> +                       fifo-watermark-aligned;
+> +                       data-addr = <0>;
+> +                       starfive,sysreg = <&sys_syscon 0x9c 0x1 0x3e>;
+> +                       status = "disabled";
+> +               };
 
-Hi Shengyu,
+Hi William,
 
-After discussing with colleagues, we decided to restore the lable name to 
-sys_syscon, and sysreg was just a unique name for the functionality of MMC,
-which will be used in all future versions.
+These nodes still don't seem to be sorted by address, eg. by the
+number after the @
+Also please move the dt-binding patch before this one, so dtb_check
+won't fail no matter where git bisect happens to land.
 
-Thanks for taking time reviewing this patch series.
+/Emil
 
-Best Regards
-William
-
->> Add documentation to describe StarFive designware mobile storage
->> host controller driver.
->>
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
->> ---
->>   .../bindings/mmc/starfive,jh7110-mmc.yaml     | 77 +++++++++++++++++++
->>   1 file changed, 77 insertions(+)
->>   create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->>
->> diff --git a/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->> new file mode 100644
->> index 000000000000..51e1b04e799f
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->> @@ -0,0 +1,77 @@
->> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/mmc/starfive,jh7110-mmc.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: StarFive Designware Mobile Storage Host Controller
->> +
->> +description:
->> +  StarFive uses the Synopsys designware mobile storage host controller
->> +  to interface a SoC with storage medium such as eMMC or SD/MMC cards.
->> +
->> +allOf:
->> +  - $ref: synopsys-dw-mshc-common.yaml#
->> +
->> +maintainers:
->> +  - William Qiu <william.qiu@starfivetech.com>
->> +
->> +properties:
->> +  compatible:
->> +    const: starfive,jh7110-mmc
->> +
->> +  reg:
->> +    maxItems: 1
->> +
->> +  clocks:
->> +    items:
->> +      - description: biu clock
->> +      - description: ciu clock
->> +
->> +  clock-names:
->> +    items:
->> +      - const: biu
->> +      - const: ciu
->> +
->> +  interrupts:
->> +    maxItems: 1
->> +
->> +  starfive,sysreg:
->> +    $ref: /schemas/types.yaml#/definitions/phandle-array
->> +    items:
->> +      - items:
->> +          - description: phandle to System Register Controller syscon node
->> +          - description: offset of SYS_SYSCONSAIF__SYSCFG register for MMC controller
->> +          - description: shift of SYS_SYSCONSAIF__SYSCFG register for MMC controller
->> +          - description: mask of SYS_SYSCONSAIF__SYSCFG register for MMC controller
->> +    description:
->> +      Should be four parameters, the phandle to System Register Controller
->> +      syscon node and the offset/shift/mask of SYS_SYSCONSAIF__SYSCFG register
->> +      for MMC controller.
->> +
->> +required:
->> +  - compatible
->> +  - reg
->> +  - clocks
->> +  - clock-names
->> +  - interrupts
->> +  - starfive,sysreg
->> +
->> +unevaluatedProperties: false
->> +
->> +examples:
->> +  - |
->> +    mmc@16010000 {
->> +        compatible = "starfive,jh7110-mmc";
->> +        reg = <0x16010000 0x10000>;
->> +        clocks = <&syscrg 91>,
->> +                 <&syscrg 93>;
->> +        clock-names = "biu","ciu";
->> +        resets = <&syscrg 64>;
->> +        reset-names = "reset";
->> +        interrupts = <74>;
->> +        fifo-depth = <32>;
->> +        fifo-watermark-aligned;
->> +        data-addr = <0>;
->> +        starfive,sysreg = <&sys_syscon 0x14 0x1a 0x7c000000>;
->> +    };
+>         };
+>  };
+> --
+> 2.34.1
+>
+>
+> _______________________________________________
+> linux-riscv mailing list
+> linux-riscv@lists.infradead.org
+> http://lists.infradead.org/mailman/listinfo/linux-riscv
