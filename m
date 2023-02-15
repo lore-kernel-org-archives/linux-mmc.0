@@ -2,108 +2,177 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEE16C636D4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 13:16:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 77FD4C636CC
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 15:13:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233526AbjBONQA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Feb 2023 08:16:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59758 "EHLO
+        id S230055AbjBOPN4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Feb 2023 10:13:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232055AbjBONP7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 08:15:59 -0500
-Received: from mail-pf1-x435.google.com (mail-pf1-x435.google.com [IPv6:2607:f8b0:4864:20::435])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A5982411B
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 05:15:58 -0800 (PST)
-Received: by mail-pf1-x435.google.com with SMTP id bw10so2757216pfb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 05:15:58 -0800 (PST)
+        with ESMTP id S229956AbjBOPN4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 10:13:56 -0500
+Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08E2583F7
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 07:13:55 -0800 (PST)
+Received: by mail-pf1-x42b.google.com with SMTP id bw10so3042627pfb.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 07:13:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1676466958;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=WHsKyyxem5T1jmrbt9Xb2WeJb42KIIHV4Nsq+EMoz7Q=;
-        b=HlspxRXIkOOH+2uKHi8+FzU2tdPaEvVnljyO8TPu+4+RRGAxxoey+EHrrkLFTFJp1x
-         FkCE5VYBQJz7ZdjyBNqy1ZzkNhzA9dT4Gz8RHFoXGFAs9H95+qJffo6Qw1NrfFoRhiAE
-         MiWSB4V3G77yqy0BBHPUPvwKDsWmKNzA8vTZ4MXVYwwC4AR1z1XT9IBEqYvWETubirYw
-         flj22CWt2mKqoLfoHtYQ7/eaxHm8W74cu/gZsSZYJR1umUcZ5NT2m9mr8L34Cdu6AyfA
-         Dz8j/RpLCfSfLut8+94Z0bO4CPvyhJGcPW4dXYLG0xCSHZY50bVb9Iq8Dc+3HZVb4VA3
-         VxuQ==
+        d=linaro.org; s=google; t=1676474034;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=oQ0LbCuOf0kYCLopxKDCXNwmSQOvf8luuEL4dfyG4EY=;
+        b=muMKpgF9WDwVfhhpl/vcDJVk3jayRiebQqEw41vZyZ5mHxLcnEgoFtr1Ztoq2FO5Jh
+         Ek/rn1emX1KnWj1MmbF4I6cSI51yh0IATR/l86lcncHYfIfmz1alhF9lpvk2+xa6IWZI
+         yCQdjsodJMj/3qWN8LOowGkQ+oxHe7d+dGFstt/3y3grZN3pQC2k/3Y3E3pJcthzO3j3
+         Y6gkKUygclE4u8jmdy5mIqxmiIMmbv4tNkS5m1J3VuFsrxlfMKstyJ6RZx9srlA2bXmF
+         FWYcYymRmpRdNFu+ohN9nJIHPlZ+55TYJNfu2EtMVyGh4uJaTrNUpQvqpKCYhPy9lINj
+         rDSA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1676466958;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=WHsKyyxem5T1jmrbt9Xb2WeJb42KIIHV4Nsq+EMoz7Q=;
-        b=fSvZQ31rRUOE1H67/YjcwLhYigqytHFmot4l9oPnr0zVWDS72XmVgB0GS6OIMmqoSr
-         qd5hAljYzb2g4vhtE8rSEpRLDQ43CPmzNlAcewHfNAcH5+Jfc9OP6dslq3b3q0aRflNd
-         Hv3Ou7rLaJYVEvfT7BaPq0OFBaJpUrWUTH86iMMRUzxOzuTUI0g6cWIbk63zGMPES7Al
-         cHISoNptfxVOei0JSuI2eT1QJRrAL2vC8yZBa/YDsKOO16NTuHzyDkak//vtcMjswN0A
-         TgLIZ+eQ6mEEsqGUUTKS1OXrdNf4fyud1R+oOLJmWsAgRiuS7/9IlFmweY+KxGlU+o/l
-         wSjQ==
-X-Gm-Message-State: AO0yUKVI8LXccvg58P6QGeNwo6m3LbrEMH+cJPLEtw1BmpNIXMplMnc9
-        bVqQjDr7C2CJ1sXcrGJnkC6OFG3VOrd+kl9DrhaeZjws7iFYfg==
-X-Google-Smtp-Source: AK7set+x/Zu0eSOU3pI/JAWcjwQtY2FR0D4bgm2gbOabcYxyLqGlIy3o2HuTzzzkIDLu2rFb2gsv8MzAvq6tc/jBNDU=
+        d=1e100.net; s=20210112; t=1676474034;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=oQ0LbCuOf0kYCLopxKDCXNwmSQOvf8luuEL4dfyG4EY=;
+        b=w8DIP6JxahcrGBJI87vAWW9jVXOYDhV4DV+f6vRV21hjDCtyFEVizoZudJxVm4w4OX
+         bWocbLhjG0U/AFI+RixKTnzGvUVDCKZsgPM3fDQ3w2nwNrIEhq9Lworp6xF0yr1qg/r9
+         ISfygkF3RtdPrFLd//V+aC0Q2W/MMW1POmKM804wRDBr7Itz4/6NP7QLv0QSVW2QhO3d
+         OjogyvVlrzmqBgrHPd+NPU2iEEoruq8DMaTaEqL4kciIEL2EMZw3hJSliTMkfia4PB4M
+         Ugz7Lmpp7Y9MIs4ThQF2ylTk3QK94t6JON+EXe6I81f11cF3pt6wdAEKf+ZWQysYTPZ4
+         BRQg==
+X-Gm-Message-State: AO0yUKW8q+A4QbDcMGb9Wq9D7oAZffL4XzQ3MlrBy1rSQ2+so+VwYlsy
+        WJDlKjNpZmwlD4GquBxdAzg93jmWF254dKYLozCbIQ==
+X-Google-Smtp-Source: AK7set/g/eFa20gAKf3kxtsVZmUpCLaeNriXVYuX7Upgm3M4GNre3pJoEx60OEv1ljaKsk+is3qS/ltl6naAoP0gV24=
 X-Received: by 2002:aa7:95a9:0:b0:5a8:ba5b:575 with SMTP id
- a9-20020aa795a9000000b005a8ba5b0575mr318689pfk.40.1676466958003; Wed, 15 Feb
- 2023 05:15:58 -0800 (PST)
+ a9-20020aa795a9000000b005a8ba5b0575mr387240pfk.40.1676474034462; Wed, 15 Feb
+ 2023 07:13:54 -0800 (PST)
 MIME-Version: 1.0
-References: <20230214195702.ungo5roxliq7pjas@pali>
-In-Reply-To: <20230214195702.ungo5roxliq7pjas@pali>
+References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
+ <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
+ <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
+ <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
+ <CAPDyKFrtF32AvBKCbMESP7oFT2aBhbce0KA2zzXq+szQnShbww@mail.gmail.com> <CA+Da2qzwKf6Nbz7YFj6i1Kj_3H8XKreapOHTBo+snNzMg2eW+g@mail.gmail.com>
+In-Reply-To: <CA+Da2qzwKf6Nbz7YFj6i1Kj_3H8XKreapOHTBo+snNzMg2eW+g@mail.gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Feb 2023 14:15:21 +0100
-Message-ID: <CAPDyKFptvcm=Co1JVKAtB6dqzbxvoRzAbn=b76iwgZxgdMSjmg@mail.gmail.com>
-Subject: Re: Announce: sdioutils (lssdio & sdioids)
-To:     =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
-Cc:     linux-mmc@vger.kernel.org
+Date:   Wed, 15 Feb 2023 16:13:15 +0100
+Message-ID: <CAPDyKFohV6kzUgF=3-Zm_V3pWpj17b9LfTxcQ2mARrRh7RM9=A@mail.gmail.com>
+Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
+To:     Wenchao Chen <wenchao.chen666@gmail.com>
+Cc:     avri.altman@wdc.com, Adrian Hunter <adrian.hunter@intel.com>,
+        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
+        zhang.lyra@gmail.com, axboe@kernel.dk, kch@nvidia.com,
+        CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
+        bigeasy@linutronix.de, s.shtylyov@omp.ru,
+        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
+        lzx.stg@gmail.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 14 Feb 2023 at 20:57, Pali Roh=C3=A1r <pali@kernel.org> wrote:
+On Mon, 13 Feb 2023 at 09:21, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
 >
-> Hello! I would like to inform about new (or rather old) sdioutils
-> project, which is on github: https://github.com/sdioutils/
+> On Thu, Feb 9, 2023 at 10:51 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> >
+> > On Fri, 11 Nov 2022 at 13:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
+> > >
+> > > [...]
+> > >
+> > > > >
+> > > > > Considering the data integrity, we did a random power-down test, and
+> > > > > the experimental results were good.
+> > > > >
+> > > > > FUA can only reduce data loss under abnormal conditions, but cannot
+> > > > > prevent data loss under abnormal conditions.
+> > > > >
+> > > > > I think there should be a balance between FUA and NO FUA, but
+> > > > > filesystems seem to favor FUA.
+> > > > >
+> > > > > FUA brings a drop in random write performance. If enough tests are
+> > > > > done, NO FUA is acceptable.
+> > > >
+> > > > Testing this isn't entirely easy. It requires you to hook up
+> > > > electrical switches to allow you to automate the powering on/off of
+> > > > the platform(s). Then at each cycle, really make sure to stress test
+> > > > the data integrity of the flash memory. Is that what the tests did -
+> > > > or can you elaborate a bit on what was really tested?
+> > > >
+> > > > In any case, the performance impact boils down to how each eMMC/SD
+> > > > card internally manages reliable writes vs regular writes. Some
+> > > > vendors may treat them very similarly, while others do not.
+> > > >
+> > > > That said, trying to disable REQ_FUA from an mmc host driver is the
+> > > > wrong approach, as also pointed out by Adrian above. These types of
+> > > > decisions belong solely in the mmc core layer.
+> > > >
+> > > > Instead of what the $subject series proposes, I would rather suggest
+> > > > we discuss (and test) whether it could make sense to disable REQ_FUA -
+> > > > *if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
+> > > > Hence, the mmc core could then announce only REQ_OP_FLUSH.
+> > > >
+> > >
+> > > Below is a simple patch that does the above. We may not want to enable
+> > > this for *all* eMMC/SD cards, but it works fine for testing and to
+> > > continue the discussions here.
+> > >
+> > >
+> > > From: Ulf Hansson <ulf.hansson@linaro.org>
+> > > Date: Fri, 11 Nov 2022 12:48:02 +0100
+> > > Subject: [PATCH] mmc: core: Disable REQ_FUA if the card supports an internal
+> > >  cache
+> > >
+> > > !!!! This is not for merge, but only for test and discussions!!!
+> > >
+> > > It has been reported that REQ_FUA can be costly on some eMMC devices. A
+> > > potential option that could mitigate this problem, is to rely solely on
+> > > REQ_OP_FLUSH instead, but that requires the eMMC/SD to support an internal
+> > > cache. This is an attempt to try this out to see how it behaves.
+> > >
+> > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > > ---
+> > >  drivers/mmc/core/block.c | 10 +++++-----
+> > >  1 file changed, 5 insertions(+), 5 deletions(-)
+> > >
+> > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > > index db6d8a099910..197e9f6cdaad 100644
+> > > --- a/drivers/mmc/core/block.c
+> > > +++ b/drivers/mmc/core/block.c
+> > > @@ -2494,15 +2494,15 @@ static struct mmc_blk_data
+> > > *mmc_blk_alloc_req(struct mmc_card *card,
+> > >                         md->flags |= MMC_BLK_CMD23;
+> > >         }
+> > >
+> > > -       if (md->flags & MMC_BLK_CMD23 &&
+> > > -           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+> > > -            card->ext_csd.rel_sectors)) {
+> > > +       if (mmc_cache_enabled(card->host)) {
+> > > +               cache_enabled  = true;
+> > > +       } else if (md->flags & MMC_BLK_CMD23 &&
+> > > +                 (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
+> > > +                  card->ext_csd.rel_sectors)) {
+> > >                 md->flags |= MMC_BLK_REL_WR;
+> > >                 fua_enabled = true;
+> > >                 cache_enabled = true;
+> > >         }
+> > > -       if (mmc_cache_enabled(card->host))
+> > > -               cache_enabled  = true;
+> > >
+> > >         blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
+> > >
+> > > --
+> > > 2.34.1
+> >
+> > Wenchao,
+> >
+> > Did you manage to try the above patch to see if that could improve the
+> > situation?
+> >
 >
-> It aimed to be collection of SDIO programs for Linux systems.
->
-> Currently it contains two things which can be useful for both users and
-> developers:
->
-> * lssdio - https://github.com/sdioutils/lssdio - tool which prints all
->   connected and registered SDIO devices in similar format than lspci or
->   lsusb, including tree and verbose formats (Linux v5.10+ required for
->   printing all information)
->
-> * sdioids - https://github.com/sdioutils/sdioids - database file
->   sdio.ids of known SDIO devices, in format inspired by pci.ids and
->   which is already used by lssdio
->
-> This new sdioids contains updated and imported database file from the
-> old udev project (which seems to not be updated anymore).
->
-> If you look into the repository, both parts are more than year old and
-> I did not announced it before because more people promised to test or
-> improve database... but nothing happened, only promises. So I decided to
-> announce it now at least in this state. I think that it can be useful
-> even in the current state.
->
-> So if you want to improve it or add new SDIO cards into database, feel
-> free to open a pull request on project page. I think that having some
-> central point of sdio.ids database can be useful also for other
-> projects.
+> Hi Uffe,
+> Yes, it can solve my problem. Thank you very much.
 
-Thanks for sharing the news, it looks like a useful tool to me!
-
-One thing I wonder though, is why you didn't consider extending
-"mmc-utils" with these new cool things instead? In particular, we have
-"lsmmc" in there for MMC and SD cards - and since these have a lot in
-common with the SDIO cards, I believe it would make sense to extend it
-(in some way or the other).
-
-Note that, if you are willing to help with maintenance of mmc-utils
-around this, what would certainly be appreciated too. :-)
+Okay, that's very interesting news. I will prepare a formal patch and
+make a new submission soon. Let's continue the discussion then.
 
 Kind regards
 Uffe
