@@ -2,117 +2,184 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 11EB4C64ED8
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Feb 2023 21:44:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AC82BC05027
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 00:51:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231442AbjBNVoW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 16:44:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39062 "EHLO
+        id S231859AbjBOAvI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Feb 2023 19:51:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229508AbjBNVoU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 16:44:20 -0500
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77CDD29400;
-        Tue, 14 Feb 2023 13:44:18 -0800 (PST)
-Received: by mail-ej1-x632.google.com with SMTP id rp23so43469076ejb.7;
-        Tue, 14 Feb 2023 13:44:18 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=9LqJXdxxFstKfYubhTeoAWTHHu54RXhCthHqvhTdxVw=;
-        b=qPz+gKBIC/R8A6gtUZ8ceyazI706kmMBJgDlbAJ55QeqC9llqy5M4oPP92aAhOMmdL
-         LWY84jGU18KQFjObsGNOtO9LD3yECwJaNZ9tntFSoQxhfFbKthtGafSoJ8Vc/tRRAuVw
-         C+OnZB1r39zbuG4pRsxyCwgqSqpMe8icb2wC+5xnMYb7fYePk7BmGXqDqPJQ+1CqdVti
-         IcB3RdfDuHOg078AU//wVFbsi6L5L4YJROes2Dpqxn2wB3PK8QE2aZKEUR2/K3QeG6jL
-         /19hR3kD4Ey35+eK9Y+E3iMXIoN1TmWkJ2f8Ukuf8veCGBcwsDD0h6i+zgrobOOPxWIs
-         MX8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:references:cc:to:from
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=9LqJXdxxFstKfYubhTeoAWTHHu54RXhCthHqvhTdxVw=;
-        b=VX2gWaNYHmSwDTapzCFgip1hu+WKsanKwtolpK1tSuvqB1a2UgMk6q+NVAxGdo/6iN
-         5eoIvfpGe9NUSzHHUy1pBsbc3pyBjz68wce14cs5EKiitf75PJq/IQdNtMrIHOyFDdnJ
-         3t44Kv4hPzDZJsbb4EVyxf4guA6QdaaJoYDLv5ps9mD0bbdepv1PAGt8c9eieUv+tgNS
-         zV0SvgGbz/k5mW9ebnTfFqcXKmnDU/KrmGeosVfqps8QHwU25f8pdGQcrPYgMjgNIx9J
-         8IO1R6muhyfjnAsqbkLl5ChxZEOn/bLcSpgAtb8e24M2mM85Z0LfvSWBa9Z+lnkrX/Vc
-         7/FA==
-X-Gm-Message-State: AO0yUKXNf9nUkI6RhWq8E5r8pqBs54SGwm14GkOpxpCLULBxmE9tZx5G
-        v2K8LexVg5z9Ynn8tUunO1M=
-X-Google-Smtp-Source: AK7set/az3JscyAMvJVE9MKuOV/yeIlPmFr6p9Be9W8jefOVLPXcDrovvENpnkqW2DXiWXUtMV9sPA==
-X-Received: by 2002:a17:906:850e:b0:7c1:765:9cfc with SMTP id i14-20020a170906850e00b007c107659cfcmr328840ejx.34.1676411056936;
-        Tue, 14 Feb 2023 13:44:16 -0800 (PST)
-Received: from ?IPV6:2a01:c22:7234:f800:b56b:f43d:948c:eede? (dynamic-2a01-0c22-7234-f800-b56b-f43d-948c-eede.c22.pool.telefonica.de. [2a01:c22:7234:f800:b56b:f43d:948c:eede])
-        by smtp.googlemail.com with ESMTPSA id j9-20020a1709066dc900b008b1294f7f63sm1669820ejt.221.2023.02.14.13.44.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 14 Feb 2023 13:44:16 -0800 (PST)
-Message-ID: <2bb70611-5dea-1144-51bd-93c46b455392@gmail.com>
-Date:   Tue, 14 Feb 2023 22:44:03 +0100
+        with ESMTP id S231871AbjBOAvH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 19:51:07 -0500
+Received: from mail-m11875.qiye.163.com (mail-m11875.qiye.163.com [115.236.118.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4917630E93
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Feb 2023 16:50:58 -0800 (PST)
+Received: from [172.16.12.69] (unknown [58.22.7.114])
+        by mail-m11875.qiye.163.com (Hmail) with ESMTPA id 3904C2801A4;
+        Wed, 15 Feb 2023 08:50:54 +0800 (CST)
+Message-ID: <c0f5f292-f639-1f7c-3d12-2c80015c67fc@rock-chips.com>
+Date:   Wed, 15 Feb 2023 08:50:55 +0800
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.2
-Subject: [PATCH v2 3/3] mmc: meson-gx: support platform interrupt as card
- detect interrupt
-Content-Language: en-US
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-To:     Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-References: <15df9ef0-9b73-ca5a-d3cf-0585cd135bc5@gmail.com>
-In-Reply-To: <15df9ef0-9b73-ca5a-d3cf-0585cd135bc5@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Cc:     shawn.lin@rock-chips.com, linux-mmc@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        linux-rockchip@lists.infradead.org
+Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-dwcmshc: Add runtime PM support
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+References: <1675298118-64243-1-git-send-email-shawn.lin@rock-chips.com>
+ <1675298118-64243-3-git-send-email-shawn.lin@rock-chips.com>
+ <CAPDyKFoN3GDRYRJep1ARf8rSftZRBUceda92OPuDQLvG3dVhhQ@mail.gmail.com>
+ <a336a9ef-77e9-fa1d-ad95-805a8b5a89cb@rock-chips.com>
+ <CAPDyKFrpv+DoqMK9cLrYMBk1m6dXoDXu40xSJ_UMVK8O+=Ud6A@mail.gmail.com>
+Content-Language: en-GB
+From:   Shawn Lin <shawn.lin@rock-chips.com>
+In-Reply-To: <CAPDyKFrpv+DoqMK9cLrYMBk1m6dXoDXu40xSJ_UMVK8O+=Ud6A@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-HM-Spam-Status: e1kfGhgUHx5ZQUpXWQgPGg8OCBgUHx5ZQUlOS1dZFg8aDwILHllBWSg2Ly
+        tZV1koWUFDSUNOT01LS0k3V1ktWUFJV1kPCRoVCBIfWUFZGRpDT1YdGUNMGUkfS0lMGk1VEwETFh
+        oSFyQUDg9ZV1kYEgtZQVlOQ1VJSVVMVUpKT1lXWRYaDxIVHRRZQVlPS0hVSkpLSEpMVUpLS1VLWQ
+        Y+
+X-HM-Sender-Digest: e1kMHhlZQR0aFwgeV1kSHx4VD1lBWUc6OE06LTo5Iz0XIhw6ET8#Tg8w
+        AjIKCSpVSlVKTUxNT0lJSU5PQ0pLVTMWGhIXVQgTGgwVVRcSFTsJFBgQVhgTEgsIVRgUFkVZV1kS
+        C1lBWU5DVUlJVUxVSkpPWVdZCAFZQU1DQ083Bg++
+X-HM-Tid: 0a86528d8f2e2eb1kusn3904c2801a4
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Use a new mmc core feature and support specifying the card detect
-gpio interrupt in device tree.
+Hi Ulf
 
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
-v2:
-- adopt the changed way to pass the cd interrupt number
----
- drivers/mmc/host/meson-gx-mmc.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On 2023/2/14 18:41, Ulf Hansson wrote:
+> On Tue, 14 Feb 2023 at 04:36, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>
+>> Hi Ulf,
+>>
+>> On 2023/2/14 7:45, Ulf Hansson wrote:
+>>> On Thu, 2 Feb 2023 at 01:35, Shawn Lin <shawn.lin@rock-chips.com> wrote:
+>>>>
+>>>> This patch adds runtime PM support.
+>>>>
+>>>> Signed-off-by: Shawn Lin <shawn.lin@rock-chips.com>
+>>>> ---
+>>>>
+>>>> Changes in v2: None
+>>>>
+>>>>    drivers/mmc/host/sdhci-of-dwcmshc.c | 51 ++++++++++++++++++++++++++++++++++++-
+>>>>    1 file changed, 50 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> index 46b1ce7..fc917ed 100644
+>>>> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+>>>> @@ -15,6 +15,7 @@
+>>>>    #include <linux/module.h>
+>>>>    #include <linux/of.h>
+>>>>    #include <linux/of_device.h>
+>>>> +#include <linux/pm_runtime.h>
+>>>>    #include <linux/reset.h>
+>>>>    #include <linux/sizes.h>
+>>>>
+>>>> @@ -551,6 +552,13 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>>>>           if (err)
+>>>>                   goto err_setup_host;
+>>>>
+>>>> +       pm_runtime_get_noresume(&pdev->dev);
+>>>> +       pm_runtime_set_active(&pdev->dev);
+>>>> +       pm_runtime_enable(&pdev->dev);
+>>>> +       pm_runtime_set_autosuspend_delay(&pdev->dev, 50);
+>>>> +       pm_runtime_use_autosuspend(&pdev->dev);
+>>>> +       pm_runtime_put_autosuspend(&pdev->dev);
+>>>> +
+>>>>           return 0;
+>>>>
+>>>>    err_setup_host:
+>>>> @@ -580,6 +588,11 @@ static int dwcmshc_remove(struct platform_device *pdev)
+>>>>           if (rk_priv)
+>>>>                   clk_bulk_disable_unprepare(RK35xx_MAX_CLKS,
+>>>>                                              rk_priv->rockchip_clks);
+>>>> +
+>>>> +       pm_runtime_get_sync(&pdev->dev);
+>>>> +       pm_runtime_disable(&pdev->dev);
+>>>> +       pm_runtime_put_noidle(&pdev->dev);
+>>>> +
+>>>>           sdhci_pltfm_free(pdev);
+>>>>
+>>>>           return 0;
+>>>> @@ -638,7 +651,43 @@ static int dwcmshc_resume(struct device *dev)
+>>>>    }
+>>>>    #endif
+>>>>
+>>>> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
+>>>> +#ifdef CONFIG_PM
+>>>> +static int dwcmshc_runtime_suspend(struct device *dev)
+>>>> +{
+>>>> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>>>> +       u16 data;
+>>>> +       int ret;
+>>>> +
+>>>> +       ret = sdhci_runtime_suspend_host(host);
+>>>> +       if (ret)
+>>>> +               return ret;
+>>>> +
+>>>> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>>> +       data &= ~SDHCI_CLOCK_CARD_EN;
+>>>> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
+>>>> +
+>>>> +       return 0;
+>>>> +}
+>>>> +
+>>>> +static int dwcmshc_runtime_resume(struct device *dev)
+>>>> +{
+>>>> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>>>> +       u16 data;
+>>>> +
+>>>> +       data = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>>>> +       data |= SDHCI_CLOCK_CARD_EN;
+>>>> +       sdhci_writew(host, data, SDHCI_CLOCK_CONTROL);
+>>>> +
+>>>> +       return sdhci_runtime_resume_host(host, 0);
+>>>> +}
+>>>> +#endif
+>>>> +
+>>>> +static const struct dev_pm_ops dwcmshc_pmops = {
+>>>> +       SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend,
+>>>> +                               dwcmshc_resume)
+>>>
+>>> I have looked at dwcmshc_suspend(), which calls sdhci_suspend_host().
+>>> As sdhci_suspend_host() will write to internal registers of the IP
+>>> block, it's recommended to make sure the device's runtime resumed
+>>> before doing that call. So that needs to be added along with $subject
+>>> patch.
+>>>
+>>
+>> Yep, let me add a check here.
+>>
+>>> There is also another option that may better for you, which is to use
+>>> the pm_runtime_force_suspend|resume() helpers. There should be plenty
+>>> of references to look at, but don't hesitate to ask around that, if
+>>> you need some more help to get that working.
+>>
+>> If I understand correctly,  pm_runtime_force_suspend|resume() helpers
+>> would use runtime PM ops for suspend/resume routine. In this case, the
+>> main issue is the handling of clock is quite different. In suspend we
+>> need to gate all clocks but in rpm case, it shouldn't.
+> 
+> I see, but let me then ask, what's the point of keeping the clocks
+> ungated at runtime suspend?
+> 
+> That sounds like wasting energy to me - but maybe there are good reasons for it?
 
-diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-index f4b50793e..079c52dbe 100644
---- a/drivers/mmc/host/meson-gx-mmc.c
-+++ b/drivers/mmc/host/meson-gx-mmc.c
-@@ -1166,7 +1166,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	struct resource *res;
- 	struct meson_host *host;
- 	struct mmc_host *mmc;
--	int ret;
-+	int cd_irq, ret;
- 
- 	mmc = devm_mmc_alloc_host(&pdev->dev, sizeof(struct meson_host));
- 	if (!mmc)
-@@ -1213,6 +1213,9 @@ static int meson_mmc_probe(struct platform_device *pdev)
- 	if (host->irq <= 0)
- 		return -EINVAL;
- 
-+	cd_irq = platform_get_irq_optional(pdev, 1);
-+	mmc_gpio_set_cd_irq(mmc, cd_irq);
-+
- 	host->pinctrl = devm_pinctrl_get(&pdev->dev);
- 	if (IS_ERR(host->pinctrl))
- 		return PTR_ERR(host->pinctrl);
--- 
-2.39.1
+The point to keep the clocks ungated at runtime suspend is that if they
+are gated,  the DLL would lost its locked state which causes retuning
+every time. It's quite painful for performance. However, if we just gate
+output clock to the device, the devices(basically I refer to eMMC) will 
+get into power-save status by itself. That helps us too keep balance
+between power & performance during runtime. ：）
 
-
+> 
+> [...]
+> 
+> Kind regards
+> Uffe
