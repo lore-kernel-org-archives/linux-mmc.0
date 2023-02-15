@@ -2,108 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B95BC61DA4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 01:56:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 66B63C636D4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 08:02:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230394AbjBOB4u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Feb 2023 20:56:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41528 "EHLO
+        id S233805AbjBOICR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Feb 2023 03:02:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42824 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbjBOB4t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Feb 2023 20:56:49 -0500
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F7B17DB9;
-        Tue, 14 Feb 2023 17:56:47 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id CE48E24E249;
-        Wed, 15 Feb 2023 09:56:45 +0800 (CST)
-Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
- 2023 09:56:45 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
- (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 15 Feb
- 2023 09:56:45 +0800
-Message-ID: <c8e1e030-59a5-107b-d1a3-0ad7e289a419@starfivetech.com>
-Date:   Wed, 15 Feb 2023 09:56:45 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.6.1
-Subject: Re: [PATCH v3 0/3] StarFive's SDIO/eMMC driver support
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        "Krzysztof Kozlowski" <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        <linux-kernel@vger.kernel.org>
-References: <20230203081913.81968-1-william.qiu@starfivetech.com>
- <CAPDyKFqei-GjKpBUQnDZUbYnSyn-JS5f_EnTLOuA1U4PdYTyVA@mail.gmail.com>
-Content-Language: en-US
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <CAPDyKFqei-GjKpBUQnDZUbYnSyn-JS5f_EnTLOuA1U4PdYTyVA@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
- (172.16.6.68)
-X-YovoleRuleAgent: yovoleflag
+        with ESMTP id S233794AbjBOICK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 03:02:10 -0500
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CDA4130B09;
+        Wed, 15 Feb 2023 00:02:07 -0800 (PST)
+Received: by mail-ej1-x632.google.com with SMTP id k16so14538601ejv.10;
+        Wed, 15 Feb 2023 00:02:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=wYpuouRtqGGYmfeCWWTT/2rWXrPC61M4tuQYBc16990=;
+        b=Ewy3+ElsaB8wC+43QB/lfm6tQzdZpiyQ90g2dcojPYfreVDuUoUiZIX1QRFQ4ur+8d
+         YpynnM+VOqTiBoS2gcwOCQgRMBHEHRa7DDwYgt+9gFT3Ax5RR/fK88ZjaB4ShaijJJQd
+         pKAF0DuwZeJWtxQRb/as5Rpco5nFCUbGTlK3ZrPdCaN2FJeQWaiILYYaksPdcwGRaUjt
+         pZ3+WeMMQFf3l0iYpMZhFIRp/UzxlavSH8s97HpohyoB1Wiiq27aNfG58bV2FJ3bQe3r
+         eCjGzailwH8oX3hMJek/7Y3xI0sT2pD05SE07tn61F7FzTTQUB3rW0/C9gZNuqVWZSbV
+         ulrQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=wYpuouRtqGGYmfeCWWTT/2rWXrPC61M4tuQYBc16990=;
+        b=YzXuw1xYjm3gfiIpTVv0u+Mpn2h0ogSB5hjs9o7GP9Wn6Q3vYK7Sz+vRJwu6ewiCcx
+         XpAywwg1FHMrLCVpZS8XCxyNEoQkKS9wKaKVZbAECfCjgR4T+EfSqOT+bmG5biFNtB2K
+         AjDRUGXeV+ZVUKR6yuF4pCBLqC++2RDmy0+Nrnx+JSGZf4ZVURfFmOzkamBkiBtsDrFU
+         yCA9p2xwa+KLf4C5kcH6YUEHKh0opEZ/649QnWhzY3KXbewcckMdvBzpSYrb/633T8Xd
+         ZE+eCOXg7CauJLOc6JgOSrUK/JT0FHIVP8kfdPLApYSI5HM4EnqeHOTzcJfjPvynLH44
+         8C+A==
+X-Gm-Message-State: AO0yUKXKqZCobKW8ppcAidgYnR3RqVse1/7mLU6VBKVUBZPqloklekoG
+        2V9vYcgg3OpVJFKfltyqAkA=
+X-Google-Smtp-Source: AK7set8L1CiiJwryrzPT+bqNoU9kWn4IRGRjCWQD3hofSiPU02XlmrnSQ8929Pfwkl3yRRdX0hnQzg==
+X-Received: by 2002:a17:907:584:b0:870:d9a:9ebb with SMTP id vw4-20020a170907058400b008700d9a9ebbmr1578180ejb.38.1676448126256;
+        Wed, 15 Feb 2023 00:02:06 -0800 (PST)
+Received: from felia.fritz.box ([2a02:810d:2a40:1104:983e:41b3:46f3:e161])
+        by smtp.gmail.com with ESMTPSA id p2-20020a1709066a8200b0087bdae9a1ebsm9394619ejr.94.2023.02.15.00.02.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Feb 2023 00:02:05 -0800 (PST)
+From:   Lukas Bulwahn <lukas.bulwahn@gmail.com>
+To:     William Qiu <william.qiu@starfivetech.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-riscv@lists.infradead.org, linux-mmc@vger.kernel.org,
+        kernel-janitors@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Lukas Bulwahn <lukas.bulwahn@gmail.com>
+Subject: [PATCH] MAINTAINERS: repair file entry for STARFIVE JH7110 MMC/SD/SDIO DRIVER
+Date:   Wed, 15 Feb 2023 09:02:03 +0100
+Message-Id: <20230215080203.27445-1-lukas.bulwahn@gmail.com>
+X-Mailer: git-send-email 2.17.1
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Commit bfde6b3869f5 ("mmc: starfive: Add sdio/emmc driver support") adds a
+section in MAINTAINERS refering to the file drivers/mmc/dw_mmc-starfive.c,
+but the file is actually located at drivers/mmc/host/dw_mmc-starfive.c.
 
+Hence, ./scripts/get_maintainer.pl --self-test=patterns complains about a
+broken reference.
 
-On 2023/2/14 20:18, Ulf Hansson wrote:
-> On Fri, 3 Feb 2023 at 09:19, William Qiu <william.qiu@starfivetech.com> wrote:
->>
->> Hi,
->>
->> This patchset adds initial rudimentary support for the StarFive
->> designware mobile storage host controller driver. And this driver will
->> be used in StarFive's VisionFive 2 board. The main purpose of adding
->> this driver is to accommodate the ultra-high speed mode of eMMC.
->>
->> The last patch should be applied after the patchset [1]:
->> [1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
->>
->> Changes since v2:
->> - Wraped commit message according to Linux coding style.
->> - Rephrased the description of the patches.
->> - Changed the description of syscon regsiter.
->> - Dropped redundant properties.
->>
->> The patch series is based on v6.1.
->>
->> William Qiu (3):
->>   dt-bindings: mmc: Add StarFive MMC module
->>   mmc: starfive: Add sdio/emmc driver support
->>   riscv: dts: starfive: Add mmc node
->>
->>  .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
->>  MAINTAINERS                                   |   6 +
->>  .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
->>  arch/riscv/boot/dts/starfive/jh7110.dtsi      |  37 ++++
->>  drivers/mmc/host/Kconfig                      |  10 +
->>  drivers/mmc/host/Makefile                     |   1 +
->>  drivers/mmc/host/dw_mmc-starfive.c            | 185 ++++++++++++++++++
->>  7 files changed, 339 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
->>  create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
->>
-> 
-> Patch 1 and patch 2 applied for next, thanks!
-> 
-> Note that I fixed some checkpatch errors/warnings. Next time, please
-> run ./scripts/checkpatch.pl before you submit your patches.
-> 
-> Kind regards
-> Uffe
-z
-Hi Uffe,
+Repair this file entry in STARFIVE JH7110 MMC/SD/SDIO DRIVER.
 
-Sorry about that, I'll check the patches before submit next time.
-Thanks for taking time reviewing this patch series.
+Fixes: bfde6b3869f5 ("mmc: starfive: Add sdio/emmc driver support")
+Signed-off-by: Lukas Bulwahn <lukas.bulwahn@gmail.com>
+---
+ MAINTAINERS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Best Regards
-William
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 945b86f93cf7..74a30e724f7c 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -19935,7 +19935,7 @@ STARFIVE JH7110 MMC/SD/SDIO DRIVER
+ M:	William Qiu <william.qiu@starfivetech.com>
+ S:	Maintained
+ F:	Documentation/devicetree/bindings/mmc/starfive*
+-F:	drivers/mmc/dw_mmc-starfive.c
++F:	drivers/mmc/host/dw_mmc-starfive.c
+ 
+ STARFIVE JH71XX PMU CONTROLLER DRIVER
+ M:	Walker Chen <walker.chen@starfivetech.com>
+-- 
+2.17.1
+
