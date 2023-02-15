@@ -2,177 +2,256 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77FD4C636CC
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 15:13:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3CAC4C636CC
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Feb 2023 15:53:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230055AbjBOPN4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Feb 2023 10:13:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40732 "EHLO
+        id S229716AbjBOPxj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Feb 2023 10:53:39 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41604 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229956AbjBOPN4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 10:13:56 -0500
-Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08E2583F7
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 07:13:55 -0800 (PST)
-Received: by mail-pf1-x42b.google.com with SMTP id bw10so3042627pfb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Feb 2023 07:13:55 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1676474034;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=oQ0LbCuOf0kYCLopxKDCXNwmSQOvf8luuEL4dfyG4EY=;
-        b=muMKpgF9WDwVfhhpl/vcDJVk3jayRiebQqEw41vZyZ5mHxLcnEgoFtr1Ztoq2FO5Jh
-         Ek/rn1emX1KnWj1MmbF4I6cSI51yh0IATR/l86lcncHYfIfmz1alhF9lpvk2+xa6IWZI
-         yCQdjsodJMj/3qWN8LOowGkQ+oxHe7d+dGFstt/3y3grZN3pQC2k/3Y3E3pJcthzO3j3
-         Y6gkKUygclE4u8jmdy5mIqxmiIMmbv4tNkS5m1J3VuFsrxlfMKstyJ6RZx9srlA2bXmF
-         FWYcYymRmpRdNFu+ohN9nJIHPlZ+55TYJNfu2EtMVyGh4uJaTrNUpQvqpKCYhPy9lINj
-         rDSA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1676474034;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=oQ0LbCuOf0kYCLopxKDCXNwmSQOvf8luuEL4dfyG4EY=;
-        b=w8DIP6JxahcrGBJI87vAWW9jVXOYDhV4DV+f6vRV21hjDCtyFEVizoZudJxVm4w4OX
-         bWocbLhjG0U/AFI+RixKTnzGvUVDCKZsgPM3fDQ3w2nwNrIEhq9Lworp6xF0yr1qg/r9
-         ISfygkF3RtdPrFLd//V+aC0Q2W/MMW1POmKM804wRDBr7Itz4/6NP7QLv0QSVW2QhO3d
-         OjogyvVlrzmqBgrHPd+NPU2iEEoruq8DMaTaEqL4kciIEL2EMZw3hJSliTMkfia4PB4M
-         Ugz7Lmpp7Y9MIs4ThQF2ylTk3QK94t6JON+EXe6I81f11cF3pt6wdAEKf+ZWQysYTPZ4
-         BRQg==
-X-Gm-Message-State: AO0yUKW8q+A4QbDcMGb9Wq9D7oAZffL4XzQ3MlrBy1rSQ2+so+VwYlsy
-        WJDlKjNpZmwlD4GquBxdAzg93jmWF254dKYLozCbIQ==
-X-Google-Smtp-Source: AK7set/g/eFa20gAKf3kxtsVZmUpCLaeNriXVYuX7Upgm3M4GNre3pJoEx60OEv1ljaKsk+is3qS/ltl6naAoP0gV24=
-X-Received: by 2002:aa7:95a9:0:b0:5a8:ba5b:575 with SMTP id
- a9-20020aa795a9000000b005a8ba5b0575mr387240pfk.40.1676474034462; Wed, 15 Feb
- 2023 07:13:54 -0800 (PST)
+        with ESMTP id S229574AbjBOPxi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Feb 2023 10:53:38 -0500
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4EE7A8;
+        Wed, 15 Feb 2023 07:53:37 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1676476417; x=1708012417;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=yIKGd7FoFaGRp6BU29AqU43/ancNCuEFGnNrQFiVP/E=;
+  b=iGkvYF1OTYmcG0QccAzYfwujE2143wmtURkEuDCkN0xGdyob2VjCQ3Gi
+   NI0NOCka/L6XbqOifkvDhuWw3ZF7rHnJIDHMVhwcDdshMEqBQ5vnImlqk
+   scPJqlJkVfqnV7Of32tshiUZkUOgrqcdBD+4gk2SovnHxMOs84f3h/7QF
+   keVEcF24ECORw4EaElosWzU7jCT726Bi4gnGJlrN34BLn2l0Hl3nDw4SY
+   VGu4HDW8LxomQU5uoyRjtoA6L3o+XbSxQDpKDAvXG6TWnv3LyOcbAsyB3
+   slDQyD9i07oC3gnYEscbVoRImA1wuWEaOvnqcGZ9bZ+h999fVqdgo9iZB
+   w==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10622"; a="393863381"
+X-IronPort-AV: E=Sophos;i="5.97,300,1669104000"; 
+   d="scan'208";a="393863381"
+Received: from orsmga003.jf.intel.com ([10.7.209.27])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Feb 2023 07:53:37 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10622"; a="619490478"
+X-IronPort-AV: E=Sophos;i="5.97,300,1669104000"; 
+   d="scan'208";a="619490478"
+Received: from black.fi.intel.com ([10.237.72.28])
+  by orsmga003.jf.intel.com with ESMTP; 15 Feb 2023 07:53:33 -0800
+Received: by black.fi.intel.com (Postfix, from userid 1003)
+        id 6392D1A6; Wed, 15 Feb 2023 17:54:13 +0200 (EET)
+From:   Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org
+Cc:     Ludovic Desroches <ludovic.desroches@microchip.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Nicolas Ferre <nicolas.ferre@microchip.com>,
+        Alexandre Belloni <alexandre.belloni@bootlin.com>,
+        Claudiu Beznea <claudiu.beznea@microchip.com>,
+        Chas Williams <3chas3@gmail.com>
+Subject: [PATCH v1 1/2] mmc: atmel-mci: Get rid of external platform data
+Date:   Wed, 15 Feb 2023 17:54:09 +0200
+Message-Id: <20230215155410.80944-1-andriy.shevchenko@linux.intel.com>
+X-Mailer: git-send-email 2.39.1
 MIME-Version: 1.0
-References: <20221021073025.18831-1-wenchao.chen666@gmail.com>
- <22499ab9-340d-7059-b3ff-45342b0810cf@intel.com> <CA+Da2qyx7McYStMysPdK-DV9qiOnb9rvXYqqugxsbVgqqX59VQ@mail.gmail.com>
- <CAPDyKFq8JXO6q+_JFhSGWoVfSUEtowUX85kJpsVMa0jmEEjOiQ@mail.gmail.com>
- <CAPDyKFqg5GuJ=ChPgtVPnhJiNT3=XHXR_q3vwLUFj4ZXoQK5-A@mail.gmail.com>
- <CAPDyKFrtF32AvBKCbMESP7oFT2aBhbce0KA2zzXq+szQnShbww@mail.gmail.com> <CA+Da2qzwKf6Nbz7YFj6i1Kj_3H8XKreapOHTBo+snNzMg2eW+g@mail.gmail.com>
-In-Reply-To: <CA+Da2qzwKf6Nbz7YFj6i1Kj_3H8XKreapOHTBo+snNzMg2eW+g@mail.gmail.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Feb 2023 16:13:15 +0100
-Message-ID: <CAPDyKFohV6kzUgF=3-Zm_V3pWpj17b9LfTxcQ2mARrRh7RM9=A@mail.gmail.com>
-Subject: Re: [PATCH V2 0/2] mmc: block: Support Host to control FUA
-To:     Wenchao Chen <wenchao.chen666@gmail.com>
-Cc:     avri.altman@wdc.com, Adrian Hunter <adrian.hunter@intel.com>,
-        orsonzhai@gmail.com, baolin.wang@linux.alibaba.com,
-        zhang.lyra@gmail.com, axboe@kernel.dk, kch@nvidia.com,
-        CLoehle@hyperstone.com, vincent.whitchurch@axis.com,
-        bigeasy@linutronix.de, s.shtylyov@omp.ru,
-        michael@allwinnertech.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, megoo.tang@gmail.com,
-        lzx.stg@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Feb 2023 at 09:21, Wenchao Chen <wenchao.chen666@gmail.com> wrote:
->
-> On Thu, Feb 9, 2023 at 10:51 PM Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> >
-> > On Fri, 11 Nov 2022 at 13:04, Ulf Hansson <ulf.hansson@linaro.org> wrote:
-> > >
-> > > [...]
-> > >
-> > > > >
-> > > > > Considering the data integrity, we did a random power-down test, and
-> > > > > the experimental results were good.
-> > > > >
-> > > > > FUA can only reduce data loss under abnormal conditions, but cannot
-> > > > > prevent data loss under abnormal conditions.
-> > > > >
-> > > > > I think there should be a balance between FUA and NO FUA, but
-> > > > > filesystems seem to favor FUA.
-> > > > >
-> > > > > FUA brings a drop in random write performance. If enough tests are
-> > > > > done, NO FUA is acceptable.
-> > > >
-> > > > Testing this isn't entirely easy. It requires you to hook up
-> > > > electrical switches to allow you to automate the powering on/off of
-> > > > the platform(s). Then at each cycle, really make sure to stress test
-> > > > the data integrity of the flash memory. Is that what the tests did -
-> > > > or can you elaborate a bit on what was really tested?
-> > > >
-> > > > In any case, the performance impact boils down to how each eMMC/SD
-> > > > card internally manages reliable writes vs regular writes. Some
-> > > > vendors may treat them very similarly, while others do not.
-> > > >
-> > > > That said, trying to disable REQ_FUA from an mmc host driver is the
-> > > > wrong approach, as also pointed out by Adrian above. These types of
-> > > > decisions belong solely in the mmc core layer.
-> > > >
-> > > > Instead of what the $subject series proposes, I would rather suggest
-> > > > we discuss (and test) whether it could make sense to disable REQ_FUA -
-> > > > *if* the eMMC/SD card supports a write-back-cache (REQ_OP_FLUSH) too.
-> > > > Hence, the mmc core could then announce only REQ_OP_FLUSH.
-> > > >
-> > >
-> > > Below is a simple patch that does the above. We may not want to enable
-> > > this for *all* eMMC/SD cards, but it works fine for testing and to
-> > > continue the discussions here.
-> > >
-> > >
-> > > From: Ulf Hansson <ulf.hansson@linaro.org>
-> > > Date: Fri, 11 Nov 2022 12:48:02 +0100
-> > > Subject: [PATCH] mmc: core: Disable REQ_FUA if the card supports an internal
-> > >  cache
-> > >
-> > > !!!! This is not for merge, but only for test and discussions!!!
-> > >
-> > > It has been reported that REQ_FUA can be costly on some eMMC devices. A
-> > > potential option that could mitigate this problem, is to rely solely on
-> > > REQ_OP_FLUSH instead, but that requires the eMMC/SD to support an internal
-> > > cache. This is an attempt to try this out to see how it behaves.
-> > >
-> > > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-> > > ---
-> > >  drivers/mmc/core/block.c | 10 +++++-----
-> > >  1 file changed, 5 insertions(+), 5 deletions(-)
-> > >
-> > > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> > > index db6d8a099910..197e9f6cdaad 100644
-> > > --- a/drivers/mmc/core/block.c
-> > > +++ b/drivers/mmc/core/block.c
-> > > @@ -2494,15 +2494,15 @@ static struct mmc_blk_data
-> > > *mmc_blk_alloc_req(struct mmc_card *card,
-> > >                         md->flags |= MMC_BLK_CMD23;
-> > >         }
-> > >
-> > > -       if (md->flags & MMC_BLK_CMD23 &&
-> > > -           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
-> > > -            card->ext_csd.rel_sectors)) {
-> > > +       if (mmc_cache_enabled(card->host)) {
-> > > +               cache_enabled  = true;
-> > > +       } else if (md->flags & MMC_BLK_CMD23 &&
-> > > +                 (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
-> > > +                  card->ext_csd.rel_sectors)) {
-> > >                 md->flags |= MMC_BLK_REL_WR;
-> > >                 fua_enabled = true;
-> > >                 cache_enabled = true;
-> > >         }
-> > > -       if (mmc_cache_enabled(card->host))
-> > > -               cache_enabled  = true;
-> > >
-> > >         blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
-> > >
-> > > --
-> > > 2.34.1
-> >
-> > Wenchao,
-> >
-> > Did you manage to try the above patch to see if that could improve the
-> > situation?
-> >
->
-> Hi Uffe,
-> Yes, it can solve my problem. Thank you very much.
+There is no in-kernel user that uses platform data.
+Hide it. This will allow the further cleanups to
+the driver.
 
-Okay, that's very interesting news. I will prepare a formal patch and
-make a new submission soon. Let's continue the discussion then.
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ drivers/mmc/host/atmel-mci.c | 75 ++++++++++++++++++++----------------
+ include/linux/atmel-mci.h    | 46 ----------------------
+ 2 files changed, 41 insertions(+), 80 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
 
-Kind regards
-Uffe
+diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
+index b51001c68786..fad5e6b4c654 100644
+--- a/drivers/mmc/host/atmel-mci.c
++++ b/drivers/mmc/host/atmel-mci.c
+@@ -30,7 +30,6 @@
+ #include <linux/mmc/host.h>
+ #include <linux/mmc/sdio.h>
+ 
+-#include <linux/atmel-mci.h>
+ #include <linux/atmel_pdc.h>
+ #include <linux/pm.h>
+ #include <linux/pm_runtime.h>
+@@ -40,6 +39,41 @@
+ #include <asm/io.h>
+ #include <asm/unaligned.h>
+ 
++#define ATMCI_MAX_NR_SLOTS	2
++
++/**
++ * struct mci_slot_pdata - board-specific per-slot configuration
++ * @bus_width: Number of data lines wired up the slot
++ * @detect_pin: GPIO pin wired to the card detect switch
++ * @wp_pin: GPIO pin wired to the write protect sensor
++ * @detect_is_active_high: The state of the detect pin when it is active
++ * @non_removable: The slot is not removable, only detect once
++ *
++ * If a given slot is not present on the board, @bus_width should be
++ * set to 0. The other fields are ignored in this case.
++ *
++ * Any pins that aren't available should be set to a negative value.
++ *
++ * Note that support for multiple slots is experimental -- some cards
++ * might get upset if we don't get the clock management exactly right.
++ * But in most cases, it should work just fine.
++ */
++struct mci_slot_pdata {
++	unsigned int		bus_width;
++	int			detect_pin;
++	int			wp_pin;
++	bool			detect_is_active_high;
++	bool			non_removable;
++};
++
++/**
++ * struct mci_platform_data - board-specific MMC/SDcard configuration
++ * @slot: Per-slot configuration data.
++ */
++struct mci_platform_data {
++	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
++};
++
+ /*
+  * Superset of MCI IP registers integrated in Atmel AT91 Processor
+  * Registers and bitfields marked with [2] are only available in MCI2
+@@ -593,7 +627,6 @@ static void atmci_init_debugfs(struct atmel_mci_slot *slot)
+ 			   &host->completed_events);
+ }
+ 
+-#if defined(CONFIG_OF)
+ static const struct of_device_id atmci_dt_ids[] = {
+ 	{ .compatible = "atmel,hsmci" },
+ 	{ /* sentinel */ }
+@@ -651,13 +684,6 @@ atmci_of_init(struct platform_device *pdev)
+ 
+ 	return pdata;
+ }
+-#else /* CONFIG_OF */
+-static inline struct mci_platform_data*
+-atmci_of_init(struct platform_device *dev)
+-{
+-	return ERR_PTR(-EINVAL);
+-}
+-#endif
+ 
+ static inline unsigned int atmci_get_version(struct atmel_mci *host)
+ {
+@@ -2353,23 +2379,6 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
+ static int atmci_configure_dma(struct atmel_mci *host)
+ {
+ 	host->dma.chan = dma_request_chan(&host->pdev->dev, "rxtx");
+-
+-	if (PTR_ERR(host->dma.chan) == -ENODEV) {
+-		struct mci_platform_data *pdata = host->pdev->dev.platform_data;
+-		dma_cap_mask_t mask;
+-
+-		if (!pdata || !pdata->dma_filter)
+-			return -ENODEV;
+-
+-		dma_cap_zero(mask);
+-		dma_cap_set(DMA_SLAVE, mask);
+-
+-		host->dma.chan = dma_request_channel(mask, pdata->dma_filter,
+-						     pdata->dma_slave);
+-		if (!host->dma.chan)
+-			host->dma.chan = ERR_PTR(-ENODEV);
+-	}
+-
+ 	if (IS_ERR(host->dma.chan))
+ 		return PTR_ERR(host->dma.chan);
+ 
+@@ -2457,13 +2466,11 @@ static int atmci_probe(struct platform_device *pdev)
+ 	regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+ 	if (!regs)
+ 		return -ENXIO;
+-	pdata = pdev->dev.platform_data;
+-	if (!pdata) {
+-		pdata = atmci_of_init(pdev);
+-		if (IS_ERR(pdata)) {
+-			dev_err(&pdev->dev, "platform data not available\n");
+-			return PTR_ERR(pdata);
+-		}
++
++	pdata = atmci_of_init(pdev);
++	if (IS_ERR(pdata)) {
++		dev_err(&pdev->dev, "platform data not available\n");
++		return PTR_ERR(pdata);
+ 	}
+ 
+ 	irq = platform_get_irq(pdev, 0);
+@@ -2668,7 +2675,7 @@ static struct platform_driver atmci_driver = {
+ 	.driver		= {
+ 		.name		= "atmel_mci",
+ 		.probe_type	= PROBE_PREFER_ASYNCHRONOUS,
+-		.of_match_table	= of_match_ptr(atmci_dt_ids),
++		.of_match_table	= atmci_dt_ids,
+ 		.pm		= &atmci_dev_pm_ops,
+ 	},
+ };
+diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
+deleted file mode 100644
+index 1491af38cc6e..000000000000
+--- a/include/linux/atmel-mci.h
++++ /dev/null
+@@ -1,46 +0,0 @@
+-/* SPDX-License-Identifier: GPL-2.0 */
+-#ifndef __LINUX_ATMEL_MCI_H
+-#define __LINUX_ATMEL_MCI_H
+-
+-#include <linux/types.h>
+-#include <linux/dmaengine.h>
+-
+-#define ATMCI_MAX_NR_SLOTS	2
+-
+-/**
+- * struct mci_slot_pdata - board-specific per-slot configuration
+- * @bus_width: Number of data lines wired up the slot
+- * @detect_pin: GPIO pin wired to the card detect switch
+- * @wp_pin: GPIO pin wired to the write protect sensor
+- * @detect_is_active_high: The state of the detect pin when it is active
+- * @non_removable: The slot is not removable, only detect once
+- *
+- * If a given slot is not present on the board, @bus_width should be
+- * set to 0. The other fields are ignored in this case.
+- *
+- * Any pins that aren't available should be set to a negative value.
+- *
+- * Note that support for multiple slots is experimental -- some cards
+- * might get upset if we don't get the clock management exactly right.
+- * But in most cases, it should work just fine.
+- */
+-struct mci_slot_pdata {
+-	unsigned int		bus_width;
+-	int			detect_pin;
+-	int			wp_pin;
+-	bool			detect_is_active_high;
+-	bool			non_removable;
+-};
+-
+-/**
+- * struct mci_platform_data - board-specific MMC/SDcard configuration
+- * @dma_slave: DMA slave interface to use in data transfers.
+- * @slot: Per-slot configuration data.
+- */
+-struct mci_platform_data {
+-	void			*dma_slave;
+-	dma_filter_fn		dma_filter;
+-	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
+-};
+-
+-#endif /* __LINUX_ATMEL_MCI_H */
+-- 
+2.39.1
+
