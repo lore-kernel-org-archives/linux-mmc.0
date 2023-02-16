@@ -2,117 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CB760C636CC
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 10:23:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8F14C636D6
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 10:29:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbjBPKX0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Feb 2023 05:23:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60022 "EHLO
+        id S230005AbjBPK3e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Feb 2023 05:29:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35762 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229813AbjBPKXZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 05:23:25 -0500
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 907ED42BEE
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 02:23:22 -0800 (PST)
-Received: by mail-ej1-x635.google.com with SMTP id t24so4000780eji.4
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 02:23:22 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=UQPmFYlzbC7KvPA9vOp38pjRFiHeLAnLDwoDfy/DHCQ=;
-        b=G+3SK83ZR+HwM9/pu4pN5BF9nCzAAVMNouC4FBsdvrBx/CahgW9lfHK94lhACaEZ5Q
-         tqC7+DWQZXXgTWKiSH9amNNGRs45HJ3yC983P8DQwUARHzT8F269RqvWGGybRLke1vEC
-         VFVjsLaY7Hjxia/B5LHgftlTN5STrzqIwP52AGpNfCyLhMuE+TFqdFTEkBVuqpwAZuE+
-         qP8CiWZOxCsfjVsoNGHIUslW8B/ozITvXANUiKYg9arfgeOqzNuMQOEwEigN7uxBLkJ/
-         NaPsqvFRc8FtQP75N00Uw1mDjGiz9irCKX17djHPjqy8Jp8CXJZgyXADQ/lUkQ3bX33X
-         VoTA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=UQPmFYlzbC7KvPA9vOp38pjRFiHeLAnLDwoDfy/DHCQ=;
-        b=xDe4AH3nYjC/i2CP8kNmu1Jt3NzYZX5ptFkuUM2Hwac959XdTaDLumfXRDiOM2p4Nr
-         NWvl/ZCd1mrDDSyyr0VDA9Vss/bYban/i29Okh0UeAjANzKFTGN3fHPOdWGfRZdrcl2l
-         0cYt2Sr1f7HRP27Jk3ytS/52y7d0ApArhN2s27K7sES9vDWg6vWYbd+ayfrBfez3kY7D
-         I2DLQkMm1haqAsThE85WgHDIS4DegWPJ53VDIBMgfPu5+R6E9OIn+F7pIYyKbGGTbFs0
-         kFvoO17REtJXwm9YkUuJEWd6gsHyO3QJLbFRgjQBcJifYj992wFktCzGjBkNNEGJVtV9
-         S0yg==
-X-Gm-Message-State: AO0yUKWIe0dgxhObVwUEKSc9kx8TUdZT5ZzE4fgtJ1bCIjmgJO2zsWq9
-        hd8SAwINEohgA12lFWV+6mxE0A==
-X-Google-Smtp-Source: AK7set8RV32dZOV4847Uqa2HdLcRmRKN2CKjNW0l1ybJNPeIB6ipclW+lCXzwJkdnZR3ULc1QG2mWg==
-X-Received: by 2002:a17:907:78c1:b0:8b1:32dd:3b0 with SMTP id kv1-20020a17090778c100b008b132dd03b0mr5426062ejc.57.1676543001076;
-        Thu, 16 Feb 2023 02:23:21 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id h15-20020a1709063b4f00b008878909859bsm617630ejf.152.2023.02.16.02.23.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 16 Feb 2023 02:23:06 -0800 (PST)
-Message-ID: <41bcc545-6eda-6c30-c600-d97ef009abf2@linaro.org>
-Date:   Thu, 16 Feb 2023 11:23:00 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
-Content-Language: en-US
-To:     William Qiu <william.qiu@starfivetech.com>,
-        linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-Cc:     Rob Herring <robh+dt@kernel.org>,
+        with ESMTP id S230006AbjBPK3c (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 05:29:32 -0500
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.153.233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B791F518FC;
+        Thu, 16 Feb 2023 02:29:30 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1676543371; x=1708079371;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=9gLgZeRie+5X0NWOfUFylDfDXdQvE8EQTmZGjjxlp8A=;
+  b=dFA5G8vLnYaohUXoIsVj5vQ+zYG3CWH5I9Pnwe+qOqxohlEcqr9143I6
+   RYkas1iuHvE63/tQV+LUpRq3wQ2u7OVvHfVdWolwlze7tiNO3TgjMrENG
+   pyfkHjEC12olJY8566+V1II9s4IN+tskYaVyLnU/0v/1fqX9oVi3cMkpT
+   r0okAbbNPvOf+c4T2PQz8WTKqEYLw4Gpc6fkJ9EnIGGJYUtzko+vIV7Vp
+   ykRNeZ22ZVxyFYR1yDJ04yJpTVQwHZZXOh0Px4xP/FOyLc64XfLzlEuwT
+   O1xCqWpxSoqF+yqw0GxkenKQReoGHirSgEaDIf2fpfP82Da+ZoP/AuYdF
+   A==;
+X-IronPort-AV: E=Sophos;i="5.97,302,1669100400"; 
+   d="asc'?scan'208";a="201233189"
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa5.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 16 Feb 2023 03:29:30 -0700
+Received: from chn-vm-ex01.mchp-main.com (10.10.85.143) by
+ chn-vm-ex03.mchp-main.com (10.10.85.151) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.16; Thu, 16 Feb 2023 03:29:29 -0700
+Received: from wendy (10.10.115.15) by chn-vm-ex01.mchp-main.com
+ (10.10.85.143) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.16 via Frontend
+ Transport; Thu, 16 Feb 2023 03:29:28 -0700
+Date:   Thu, 16 Feb 2023 10:29:02 +0000
+From:   Conor Dooley <conor.dooley@microchip.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+CC:     William Qiu <william.qiu@starfivetech.com>,
+        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
+        <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
+Message-ID: <Y+4Fbrz8EYIGyjVj@wendy>
 References: <20230215113249.47727-1-william.qiu@starfivetech.com>
  <20230215113249.47727-5-william.qiu@starfivetech.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230215113249.47727-5-william.qiu@starfivetech.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+ <41bcc545-6eda-6c30-c600-d97ef009abf2@linaro.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="ra2G7SmeZgRSrojk"
+Content-Disposition: inline
+In-Reply-To: <41bcc545-6eda-6c30-c600-d97ef009abf2@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 15/02/2023 12:32, William Qiu wrote:
-> Add documentation to describe StarFive System Controller Registers.
-> 
-> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> ---
+--ra2G7SmeZgRSrojk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thank you for your patch. There is something to discuss/improve.
+On Thu, Feb 16, 2023 at 11:23:00AM +0100, Krzysztof Kozlowski wrote:
+> On 15/02/2023 12:32, William Qiu wrote:
+> > Add documentation to describe StarFive System Controller Registers.
+> >=20
+> > Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> > ---
+>=20
+> Thank you for your patch. There is something to discuss/improve.
+>=20
+> > +properties:
+> > +  compatible:
+> > +    items:
+> > +      - enum:
+> > +          - starfive,jh7110-stg-syscon
+> > +          - starfive,jh7110-sys-syscon
+> > +          - starfive,jh7110-aon-syscon
+>=20
+> Maybe keep them ordered alphabetically?
+>=20
+> > +      - const: syscon
+> > +
+> > +  reg:
+> > +    maxItems: 1
+> > +
+> > +required:
+> > +  - compatible
+> > +  - reg
+> > +
+> > +additionalProperties: false
+> > +
+> > +examples:
+> > +  - |
+> > +    syscon@10240000 {
+> > +        compatible =3D "starfive,jh7110-stg-syscon", "syscon";
+> > +        reg =3D <0x10240000 0x1000>;
+> > +    };
+>=20
+> Keep only one example. All others are the same.
 
-> +properties:
-> +  compatible:
-> +    items:
-> +      - enum:
-> +          - starfive,jh7110-stg-syscon
-> +          - starfive,jh7110-sys-syscon
-> +          - starfive,jh7110-aon-syscon
+With these fixed:
+Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
 
-Maybe keep them ordered alphabetically?
+@Krzysztof, I assume the location of the binding is okay with you since
+you didn't object to it & I suppose this one is up to me to apply if so.
 
-> +      - const: syscon
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +
-> +additionalProperties: false
-> +
-> +examples:
-> +  - |
-> +    syscon@10240000 {
-> +        compatible = "starfive,jh7110-stg-syscon", "syscon";
-> +        reg = <0x10240000 0x1000>;
-> +    };
-
-Keep only one example. All others are the same.
+Cheers,
+Conor.
 
 
-Best regards,
-Krzysztof
+--ra2G7SmeZgRSrojk
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCY+4FbgAKCRB4tDGHoIJi
+0jqYAP40NbZNtujRwbP0JCaq9jdkbggGcHng7GimVi2bqkmsdQD/UXYjPT9A/qo3
+5aV3tPPs1rRe2G1HjpgQ07Ubn/Ck6gs=
+=PPhL
+-----END PGP SIGNATURE-----
+
+--ra2G7SmeZgRSrojk--
