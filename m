@@ -2,356 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51886C636CC
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 11:10:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54F7DC636D6
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 11:13:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229482AbjBPLK2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Feb 2023 06:10:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35264 "EHLO
+        id S229710AbjBPLNf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Feb 2023 06:13:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38898 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230378AbjBPLK0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 06:10:26 -0500
-Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 18E1C23133
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 03:10:23 -0800 (PST)
-Received: by mail-pj1-x1031.google.com with SMTP id kk7-20020a17090b4a0700b00234463de251so5434073pjb.3
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 03:10:23 -0800 (PST)
+        with ESMTP id S229783AbjBPLNe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 06:13:34 -0500
+Received: from mail-pf1-x430.google.com (mail-pf1-x430.google.com [IPv6:2607:f8b0:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BBB22E0D7
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 03:13:33 -0800 (PST)
+Received: by mail-pf1-x430.google.com with SMTP id ct17so1200962pfb.12
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Feb 2023 03:13:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=2GMpHHfGRg7/TnbDsGNUndyh27UCOxxExN1x1g/Vmrg=;
-        b=hTkcONNFXhyyY6b+D1ngopuY82WAhB/NaOhpHMDWLIlwvdvRg0/psMnu1kQEEQ0B1z
-         oUHVVSgEiR25dQvFxBiA2SucfwrTpHiXJ5/Ghf8ii4DkuTdiQ8oMMDZcnifjHY8dNYwi
-         GaAzLQjP/ceDYPNM5KQ9UY98gt98gWbbg8z92hoVcCex4tgqVMFh7abkPK/xYrleOdp7
-         PYkAwUbON4UkmveexyELeeNTGKo2hhg5PKqzTC+XDwoDHgO6NjL2JxJDpzIJccHuxm8Q
-         DXd7FfiIssXFM/MZs08PWx2atXvhcH5Mvtyz/19jldfY2ISmEhBkURCEKTfDUN8VNSTl
-         PC0A==
+        bh=+kR6wh9kwB/E7vRE8CyQpd6LBLK+EqxdavmtcVlfOZ4=;
+        b=Sg+fQUNTyvr2FucvVuiPGyKptOmkutRklwZcQ74bdCjoB9dKmwUe+O3dHg1bLL+WbM
+         GLPXT2Oc1YhiCN9bgWt87QXsZKMzqs17B5ZeOxieV8XDjAghFZ7kj89SMUk1tGTSVVLS
+         cqgsFggPkidPlijzDql9Bvzljqp6ILWyqSrcH7KmXSaCAmQDqlxaRTsoper6rS+554Pm
+         arcq3zT/m5Ag2IUxtufCw0B0kqN3hjcsXJAj1gOIBUtGTJX3XMPyAQi6BrsajIHRS89c
+         GKGLBn4dER1Z42cJLAcUF48Jwzb1eHHaomFk7FJ0WFQ1tCdUt0QVD7tmxYdn0NaWChIl
+         N0kA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=2GMpHHfGRg7/TnbDsGNUndyh27UCOxxExN1x1g/Vmrg=;
-        b=thV3HbTr3ljgo3ogU27BuAZ1N1tfV6vo0CoKK88NwxBQB5gLu1oClNwp8zis2uOzHg
-         9P2u5tbfJsn/bfAlACxan3oFnMd3cPnSIM7ou6DZBraKhBMBEWSPK0OMyGleNoJvw6K+
-         MhuMajf3nXgRjm2ZIjfn48tCCZfvsmIXGybGBDZv9n7lEjrRi3JTy4r68hnZO+Y9nkET
-         3cnjLj20hX/GgHrazvtsAXozpjGgFh+0qeyWpMMrqyfWFZE/ydM7b5YI9KtZ0JjRcoT5
-         B05Z0jmzYsPjeI2bEqm0zHpjxGhVJa6Q17TW0RPKPApRSfz/vhI2X3CTwfTYfb1IAikG
-         zm8Q==
-X-Gm-Message-State: AO0yUKUmseiBfiyN0W/Skz7lxH7fGsB7UBpGPOM25WAzR6nrFjgDkR2E
-        jmMhUO72BJDEvoqwd2AUmjC3AIilLwYhq0vlmBzg9g==
-X-Google-Smtp-Source: AK7set8sFgvSikw6hx/6n458aH1ciSDwVvfUnHw2qVF4We+bIcN9aEfWrb7Lc6P7xngKucLCMsUke8NhifxhmQYvZtA=
-X-Received: by 2002:a17:90b:2d86:b0:233:d176:4e5d with SMTP id
- sj6-20020a17090b2d8600b00233d1764e5dmr468611pjb.121.1676545822458; Thu, 16
- Feb 2023 03:10:22 -0800 (PST)
+        bh=+kR6wh9kwB/E7vRE8CyQpd6LBLK+EqxdavmtcVlfOZ4=;
+        b=h/rRbZOXu6j4K6UuHnVbiraisHMFBlpKXq7WQLX7aoqkKK2D6UbFBwxsI7aUNR0W8b
+         NyZQliMLlJ5xZ65JJUM74y9mPuxlFFHbMdAeeBWBUF+2qmKrO9KOaX5ObJ1v8DTHTP8M
+         qFLO9YaJLRH52NLUUTfT/6tVW+1KyLNequDcPGzCb9OytZ/1cZls93iMXJjGi8aUCUW7
+         lW3v0DZoQhkizFS/vdtRme/6+n8mtB43ETQNTvfvAc+yoxX6g24vEXBQMOTbIuI3iNGB
+         JM+s/bizRnvptv0KzTVp3vcfyYCSoq91cDrwl1VeDcdwkep6NAREFIl48RObk3JSBSjq
+         nbdw==
+X-Gm-Message-State: AO0yUKXD/ekgW6W9MGNEg2tLod2zLXNB/bvqjsuEtxpK+xumsI0c8Xjl
+        md5nPBZfMZ9DpAuqvmLdVQmD36rNwLn2hvauZgAxyw==
+X-Google-Smtp-Source: AK7set8RryQsbu+Kkw2qXt9myeqZ9YL9Pbk5ABXe5VqKD9hgnrBVz34nN6cjKsGVChY53slLb8UDby66Y68qOCd2T+k=
+X-Received: by 2002:a62:820f:0:b0:5a9:b28f:626c with SMTP id
+ w15-20020a62820f000000b005a9b28f626cmr71691pfd.56.1676546012974; Thu, 16 Feb
+ 2023 03:13:32 -0800 (PST)
 MIME-Version: 1.0
-References: <20230215155410.80944-1-andriy.shevchenko@linux.intel.com> <20230215155410.80944-2-andriy.shevchenko@linux.intel.com>
-In-Reply-To: <20230215155410.80944-2-andriy.shevchenko@linux.intel.com>
+References: <15df9ef0-9b73-ca5a-d3cf-0585cd135bc5@gmail.com>
+ <1c5996a5-491f-39d6-b120-bbef86473729@gmail.com> <b87003f6-02a8-64fc-80fb-b90ca6bec37c@linaro.org>
+ <723119a3-7c7f-6447-254e-bc340a1fe2de@gmail.com> <8e9d4c8a-40e0-65ef-ba72-ee8d1114ce97@linaro.org>
+ <eef6172c-6d74-16e2-bde2-324227ca174c@gmail.com> <bcd24667-731d-8a6c-82aa-4763d033741a@gmail.com>
+In-Reply-To: <bcd24667-731d-8a6c-82aa-4763d033741a@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 16 Feb 2023 12:09:46 +0100
-Message-ID: <CAPDyKFoghVAiyG4bko6AXrKeV5pqiXP48Sh8Mk8evwK2oayw7Q@mail.gmail.com>
-Subject: Re: [PATCH v1 2/2] mmc: atmel-mci: Convert to agnostic GPIO API
-To:     Andy Shevchenko <andriy.shevchenko@linux.intel.com>,
-        Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>,
-        Arnd Bergmann <arnd@arndb.de>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-atm-general@lists.sourceforge.net, netdev@vger.kernel.org,
-        Ludovic Desroches <ludovic.desroches@microchip.com>,
-        Nicolas Ferre <nicolas.ferre@microchip.com>,
-        Alexandre Belloni <alexandre.belloni@bootlin.com>,
-        Claudiu Beznea <claudiu.beznea@microchip.com>,
-        Chas Williams <3chas3@gmail.com>
+Date:   Thu, 16 Feb 2023 12:12:56 +0100
+Message-ID: <CAPDyKFr4aczSaAWdaX0VS+v5sGyGgktYzUGxQKdwvCfWFj8AVw@mail.gmail.com>
+Subject: Re: [PATCH v2 2/3] dt-bindings: mmc: meson-gx: support specifying cd interrupt
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ Arnd, Balamanikandan
-
-On Wed, 15 Feb 2023 at 16:53, Andy Shevchenko
-<andriy.shevchenko@linux.intel.com> wrote:
+On Thu, 16 Feb 2023 at 10:49, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 >
-> The of_gpio.h is going to be removed. In preparation of that convert
-> the driver to the agnostic API.
->
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> On 16.02.2023 10:41, Heiner Kallweit wrote:
+> > On 16.02.2023 10:34, Krzysztof Kozlowski wrote:
+> >> On 16/02/2023 10:29, Heiner Kallweit wrote:
+> >>> On 16.02.2023 10:18, Krzysztof Kozlowski wrote:
+> >>>> On 14/02/2023 22:42, Heiner Kallweit wrote:
+> >>>>> Support passing a second interrupt as card detect interrupt.
+> >>>>>
+> >>>>> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> >>>>> ---
+> >>>>>  Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml | 2 +-
+> >>>>>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>>>>
+> >>>>> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> >>>>> index 46e235bf2..c8c30300d 100644
+> >>>>> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> >>>>> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> >>>>> @@ -28,7 +28,7 @@ properties:
+> >>>>>      maxItems: 1
+> >>>>>
+> >>>>>    interrupts:
+> >>>>> -    maxItems: 1
+> >>>>> +    maxItems: 2
+> >>>>
+> >>>> Wait, you now *require* (not support) cd interrupt, so this looks like
+> >>>> ABI break.
+> >>>>
+> >>> The second interrupt is optional. If not provided MMC core falls back to
+> >>> cd polling.
+> >>
+> >> It is not. Your binding requires it. Did you test it on DTS without the
+> >> second interrupt?
+> >>
+> > You're right, the binding misses a minItems 1. I'll add that and the
+> > interrupt description.
+> >
+> Ulf,
+> do you require an add-on patch that fixes the binding issue or a
+> replacement patch?
 
-This is the third attempt to get this done, within this release cycle. :-)
-
-Arnd's:
-https://lore.kernel.org/netdev/20230126135034.3320638-1-arnd@kernel.org/
-
-Balamanikandan's:
-https://lore.kernel.org/all/20221226073908.17317-1-balamanikandan.gunasundar@microchip.com/
-
-Actually, Balamanikandan's version was acked already in December by
-Linus Walleij and Ludovic, but I failed to apply it so I was
-requesting a rebase.
-
-That said, I think we should give BalaBalamanikandan some more time
-for a re-spin (unless someone is willing to help him out in this
-regard), as it's getting late for v6.3 anyway.
+Please send an incremental patch on top, I would like to avoid any
+further rebase at this late in the release cycle.
 
 Kind regards
 Uffe
-
-> ---
->  drivers/mmc/host/atmel-mci.c | 106 ++++++++++++++++-------------------
->  1 file changed, 48 insertions(+), 58 deletions(-)
->
-> diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-> index fad5e6b4c654..79876e3152e6 100644
-> --- a/drivers/mmc/host/atmel-mci.c
-> +++ b/drivers/mmc/host/atmel-mci.c
-> @@ -11,7 +11,7 @@
->  #include <linux/dmaengine.h>
->  #include <linux/dma-mapping.h>
->  #include <linux/err.h>
-> -#include <linux/gpio.h>
-> +#include <linux/gpio/consumer.h>
->  #include <linux/init.h>
->  #include <linux/interrupt.h>
->  #include <linux/io.h>
-> @@ -19,7 +19,6 @@
->  #include <linux/module.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> -#include <linux/of_gpio.h>
->  #include <linux/platform_device.h>
->  #include <linux/scatterlist.h>
->  #include <linux/seq_file.h>
-> @@ -44,8 +43,8 @@
->  /**
->   * struct mci_slot_pdata - board-specific per-slot configuration
->   * @bus_width: Number of data lines wired up the slot
-> - * @detect_pin: GPIO pin wired to the card detect switch
-> - * @wp_pin: GPIO pin wired to the write protect sensor
-> + * @wp_gpio: GPIO pin wired to the write protect sensor
-> + * @detect_gpio: GPIO pin wired to the card detect switch
->   * @detect_is_active_high: The state of the detect pin when it is active
->   * @non_removable: The slot is not removable, only detect once
->   *
-> @@ -60,8 +59,8 @@
->   */
->  struct mci_slot_pdata {
->         unsigned int            bus_width;
-> -       int                     detect_pin;
-> -       int                     wp_pin;
-> +       struct gpio_desc        *wp_gpio;
-> +       struct gpio_desc        *detect_gpio;
->         bool                    detect_is_active_high;
->         bool                    non_removable;
->  };
-> @@ -399,12 +398,12 @@ struct atmel_mci {
->   *     &struct atmel_mci.
->   * @clock: Clock rate configured by set_ios(). Protected by host->lock.
->   * @flags: Random state bits associated with the slot.
-> - * @detect_pin: GPIO pin used for card detection, or negative if not
-> - *     available.
-> - * @wp_pin: GPIO pin used for card write protect sending, or negative
-> + * @wp_gpio: GPIO pin used for card write protect sending, or NULL
->   *     if not available.
-> + * @detect_gpio: GPIO pin used for card detection, or negative if not
-> + *     available.
->   * @detect_is_active_high: The state of the detect pin when it is active.
-> - * @detect_timer: Timer used for debouncing @detect_pin interrupts.
-> + * @detect_timer: Timer used for debouncing @detect_gpio interrupts.
->   */
->  struct atmel_mci_slot {
->         struct mmc_host         *mmc;
-> @@ -422,8 +421,9 @@ struct atmel_mci_slot {
->  #define ATMCI_CARD_NEED_INIT   1
->  #define ATMCI_SHUTDOWN         2
->
-> -       int                     detect_pin;
-> -       int                     wp_pin;
-> +       struct gpio_desc        *wp_gpio;
-> +
-> +       struct gpio_desc        *detect_gpio;
->         bool                    detect_is_active_high;
->
->         struct timer_list       detect_timer;
-> @@ -637,7 +637,8 @@ MODULE_DEVICE_TABLE(of, atmci_dt_ids);
->  static struct mci_platform_data*
->  atmci_of_init(struct platform_device *pdev)
->  {
-> -       struct device_node *np = pdev->dev.of_node;
-> +       struct device *dev = &pdev->dev;
-> +       struct device_node *np = dev->of_node;
->         struct device_node *cnp;
->         struct mci_platform_data *pdata;
->         u32 slot_id;
-> @@ -669,8 +670,10 @@ atmci_of_init(struct platform_device *pdev)
->                                          &pdata->slot[slot_id].bus_width))
->                         pdata->slot[slot_id].bus_width = 1;
->
-> -               pdata->slot[slot_id].detect_pin =
-> -                       of_get_named_gpio(cnp, "cd-gpios", 0);
-> +               pdata->slot[slot_id].detect_gpio = devm_gpiod_get_optional(dev, "cd", GPIOD_IN);
-> +               if (!pdata->slot[slot_id].detect_gpio)
-> +                       dev_dbg(dev, "no detect pin available\n");
-> +               gpiod_set_consumer_name(pdata->slot[slot_id].detect_gpio, "mmc_detect");
->
->                 pdata->slot[slot_id].detect_is_active_high =
->                         of_property_read_bool(cnp, "cd-inverted");
-> @@ -678,8 +681,10 @@ atmci_of_init(struct platform_device *pdev)
->                 pdata->slot[slot_id].non_removable =
->                         of_property_read_bool(cnp, "non-removable");
->
-> -               pdata->slot[slot_id].wp_pin =
-> -                       of_get_named_gpio(cnp, "wp-gpios", 0);
-> +               pdata->slot[slot_id].wp_gpio = devm_gpiod_get_optional(dev, "wp", GPIOD_IN);
-> +               if (!pdata->slot[slot_id].wp_gpio)
-> +                       dev_dbg(dev, "no WP pin available\n");
-> +               gpiod_set_consumer_name(pdata->slot[slot_id].wp_gpio, "mmc_wp");
->         }
->
->         return pdata;
-> @@ -1535,8 +1540,8 @@ static int atmci_get_ro(struct mmc_host *mmc)
->         int                     read_only = -ENOSYS;
->         struct atmel_mci_slot   *slot = mmc_priv(mmc);
->
-> -       if (gpio_is_valid(slot->wp_pin)) {
-> -               read_only = gpio_get_value(slot->wp_pin);
-> +       if (slot->wp_gpio) {
-> +               read_only = gpiod_get_value(slot->wp_gpio);
->                 dev_dbg(&mmc->class_dev, "card is %s\n",
->                                 read_only ? "read-only" : "read-write");
->         }
-> @@ -1544,14 +1549,18 @@ static int atmci_get_ro(struct mmc_host *mmc)
->         return read_only;
->  }
->
-> +static bool is_card_present(struct atmel_mci_slot *slot)
-> +{
-> +       return !(gpiod_get_raw_value(slot->detect_gpio) ^ slot->detect_is_active_high);
-> +}
-> +
->  static int atmci_get_cd(struct mmc_host *mmc)
->  {
->         int                     present = -ENOSYS;
->         struct atmel_mci_slot   *slot = mmc_priv(mmc);
->
-> -       if (gpio_is_valid(slot->detect_pin)) {
-> -               present = !(gpio_get_value(slot->detect_pin) ^
-> -                           slot->detect_is_active_high);
-> +       if (slot->detect_gpio) {
-> +               present = is_card_present(slot);
->                 dev_dbg(&mmc->class_dev, "card is %spresent\n",
->                                 present ? "" : "not ");
->         }
-> @@ -1663,9 +1672,8 @@ static void atmci_detect_change(struct timer_list *t)
->         if (test_bit(ATMCI_SHUTDOWN, &slot->flags))
->                 return;
->
-> -       enable_irq(gpio_to_irq(slot->detect_pin));
-> -       present = !(gpio_get_value(slot->detect_pin) ^
-> -                   slot->detect_is_active_high);
-> +       enable_irq(gpiod_to_irq(slot->detect_gpio));
-> +       present = is_card_present(slot);
->         present_old = test_bit(ATMCI_CARD_PRESENT, &slot->flags);
->
->         dev_vdbg(&slot->mmc->class_dev, "detect change: %d (was %d)\n",
-> @@ -2254,18 +2262,18 @@ static int atmci_init_slot(struct atmel_mci *host,
->         slot = mmc_priv(mmc);
->         slot->mmc = mmc;
->         slot->host = host;
-> -       slot->detect_pin = slot_data->detect_pin;
-> -       slot->wp_pin = slot_data->wp_pin;
-> +       slot->wp_gpio = slot_data->wp_gpio;
-> +       slot->detect_gpio = slot_data->detect_gpio;
->         slot->detect_is_active_high = slot_data->detect_is_active_high;
->         slot->sdc_reg = sdc_reg;
->         slot->sdio_irq = sdio_irq;
->
->         dev_dbg(&mmc->class_dev,
-> -               "slot[%u]: bus_width=%u, detect_pin=%d, "
-> -               "detect_is_active_high=%s, wp_pin=%d\n",
-> -               id, slot_data->bus_width, slot_data->detect_pin,
-> +               "slot[%u]: bus_width=%u, detect_gpio=%d, "
-> +               "detect_is_active_high=%s, wp_gpio=%d\n",
-> +               id, slot_data->bus_width, desc_to_gpio(slot_data->detect_gpio),
->                 slot_data->detect_is_active_high ? "true" : "false",
-> -               slot_data->wp_pin);
-> +               desc_to_gpio(slot_data->wp_gpio));
->
->         mmc->ops = &atmci_ops;
->         mmc->f_min = DIV_ROUND_UP(host->bus_hz, 512);
-> @@ -2301,32 +2309,16 @@ static int atmci_init_slot(struct atmel_mci *host,
->
->         /* Assume card is present initially */
->         set_bit(ATMCI_CARD_PRESENT, &slot->flags);
-> -       if (gpio_is_valid(slot->detect_pin)) {
-> -               if (devm_gpio_request(&host->pdev->dev, slot->detect_pin,
-> -                                     "mmc_detect")) {
-> -                       dev_dbg(&mmc->class_dev, "no detect pin available\n");
-> -                       slot->detect_pin = -EBUSY;
-> -               } else if (gpio_get_value(slot->detect_pin) ^
-> -                               slot->detect_is_active_high) {
-> +       if (slot->detect_gpio) {
-> +               if (!is_card_present(slot))
->                         clear_bit(ATMCI_CARD_PRESENT, &slot->flags);
-> -               }
-> -       }
-> -
-> -       if (!gpio_is_valid(slot->detect_pin)) {
-> +       } else {
->                 if (slot_data->non_removable)
->                         mmc->caps |= MMC_CAP_NONREMOVABLE;
->                 else
->                         mmc->caps |= MMC_CAP_NEEDS_POLL;
->         }
->
-> -       if (gpio_is_valid(slot->wp_pin)) {
-> -               if (devm_gpio_request(&host->pdev->dev, slot->wp_pin,
-> -                                     "mmc_wp")) {
-> -                       dev_dbg(&mmc->class_dev, "no WP pin available\n");
-> -                       slot->wp_pin = -EBUSY;
-> -               }
-> -       }
-> -
->         host->slot[id] = slot;
->         mmc_regulator_get_supply(mmc);
->         ret = mmc_add_host(mmc);
-> @@ -2335,18 +2327,18 @@ static int atmci_init_slot(struct atmel_mci *host,
->                 return ret;
->         }
->
-> -       if (gpio_is_valid(slot->detect_pin)) {
-> +       if (slot->detect_gpio) {
->                 timer_setup(&slot->detect_timer, atmci_detect_change, 0);
->
-> -               ret = request_irq(gpio_to_irq(slot->detect_pin),
-> +               ret = request_irq(gpiod_to_irq(slot->detect_gpio),
->                                 atmci_detect_interrupt,
->                                 IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING,
->                                 "mmc-detect", slot);
->                 if (ret) {
->                         dev_dbg(&mmc->class_dev,
->                                 "could not request IRQ %d for detect pin\n",
-> -                               gpio_to_irq(slot->detect_pin));
-> -                       slot->detect_pin = -EBUSY;
-> +                               gpiod_to_irq(slot->detect_gpio));
-> +                       slot->detect_gpio = NULL;
->                 }
->         }
->
-> @@ -2365,10 +2357,8 @@ static void atmci_cleanup_slot(struct atmel_mci_slot *slot,
->
->         mmc_remove_host(slot->mmc);
->
-> -       if (gpio_is_valid(slot->detect_pin)) {
-> -               int pin = slot->detect_pin;
-> -
-> -               free_irq(gpio_to_irq(pin), slot);
-> +       if (slot->detect_gpio) {
-> +               free_irq(gpiod_to_irq(slot->detect_gpio), slot);
->                 del_timer_sync(&slot->detect_timer);
->         }
->
-> --
-> 2.39.1
->
