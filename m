@@ -2,41 +2,40 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 242EEC636CC
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 07:22:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 14432C61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Feb 2023 07:42:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229462AbjBPHWz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Feb 2023 02:22:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39650 "EHLO
+        id S229738AbjBPHm5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Feb 2023 02:42:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229454AbjBPHWz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 02:22:55 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01008524B;
-        Wed, 15 Feb 2023 23:22:52 -0800 (PST)
+        with ESMTP id S229507AbjBPHm4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Feb 2023 02:42:56 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14A3D25285;
+        Wed, 15 Feb 2023 23:42:54 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 9017461EA3;
-        Thu, 16 Feb 2023 07:22:52 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 72DD3C433EF;
-        Thu, 16 Feb 2023 07:22:51 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id A41FBB825DF;
+        Thu, 16 Feb 2023 07:42:53 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BD1F9C433D2;
+        Thu, 16 Feb 2023 07:42:51 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1676532171;
-        bh=kZ1WjxkkGFjEg+o/K47n5dpVDH7R2gXcd9cVzzQujE0=;
+        s=k20201202; t=1676533372;
+        bh=MOa0xJmnMkeXlEHM9s4CPRRpe1xjLgxBt3dpclKQX5s=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=rZWP45HDcQpfjun1y3qe6ONR7rQIZZ0GYjAnbKe41lHNpQS89LtbS4qlTyo4b1hgv
-         iHqfSAycowngnN1s5SMqXw4LddJHrmDWkn9YPHFV1sD3V4MindmwQvrW+sRYwHexMx
-         tsNABpYBgF4TsHm9PpJ/BgyO1JDuC3vjcZPhGAq+synTvrZSOeuNCIiX5OoHbAGp75
-         P+y+aPZrTiaZogPk2hP5iL91SPjrXQMCQMQMjZKV2A//7e+IoviICF8L+CMI60nH4W
-         nbSj3nLrlHGZfsOwqbzSFMZJrt1GWqi5+I7m/SIFHx23LvFCxfCA2ceMCEw6wptDxk
-         x/vX1X1Sc/knQ==
-Date:   Wed, 15 Feb 2023 23:22:49 -0800
+        b=UfDNRhIc0/qbZMXtg5hF6K/EjZv8HzC9qZoSEtDu3XXxsT8GGVTpjEVV4ADQGcI+b
+         +n43X5NUq1AzksTktI+STfxuXuPIiemh0VecOBMvl/JfYVq71DggjY0tZHmA5WPFpT
+         1Zm2+lBDJ2V6/UEwYKruoHBnto/IgvsXfYijug6usrz9pj5Mx02Zj8UfTuRfjIvpxg
+         gvdazPcEsK+jPhaLhReN3AbQdjSAQ9lNH25MZF/3aeWFC0ecVPcc40ch02TqekF+6w
+         FQ5mvkb/J7rCsKRUNsohbnS7zAFiciBkP0zzjrJWHNl1X9NsyeQsAdGyi8O0kLGLt/
+         AxlK0dTuVt6+g==
+Date:   Wed, 15 Feb 2023 23:42:50 -0800
 From:   Eric Biggers <ebiggers@kernel.org>
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Andy Gross <agross@kernel.org>,
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>
+Cc:     Abel Vesa <abel.vesa@linaro.org>, Andy Gross <agross@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
@@ -49,247 +48,82 @@ Cc:     Andy Gross <agross@kernel.org>,
         linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
 Subject: Re: [RFC PATCH 1/5] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
  dedicated driver
-Message-ID: <Y+3ZyVRowJplzm9t@sol.localdomain>
+Message-ID: <Y+3eenOERCVGW+go@sol.localdomain>
 References: <20230214120253.1098426-1-abel.vesa@linaro.org>
  <20230214120253.1098426-2-abel.vesa@linaro.org>
+ <7442b4f8-0560-35ea-4b0e-1f249fc5c902@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230214120253.1098426-2-abel.vesa@linaro.org>
+In-Reply-To: <7442b4f8-0560-35ea-4b0e-1f249fc5c902@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Abel,
+On Tue, Feb 14, 2023 at 02:34:47PM +0100, Konrad Dybcio wrote:
+> > +#define QCOM_ICE_BIST_STATUS_MASK		0xF0000000
+> GENMASK(31, 28)?
 
-On Tue, Feb 14, 2023 at 02:02:49PM +0200, Abel Vesa wrote:
-> This takes the already existing duplicated support in both ufs-qcom
-> and sdhci-msm drivers and makes it a dedicated driver that can be used
-> by both mentioned drivers. The reason for this is because, staring with
-> SM8550, the ICE IP block is shared between UFS and SDCC, which means we
-> need to probe a dedicated device and share it between those two
-> consumers. So let's add the ICE dedicated driver as a soc driver.
+I personally think the plain number is much easier to read...
 
-Thanks for doing this!
+> btw, most of these defines seem unused?
 
-About a year ago there was also a patch (that seems to have been abandoned) by
-Gaurav Kashyap to create an ICE library:
-https://lore.kernel.org/linux-scsi/20211206225725.77512-2-quic_gaurkash@quicinc.com
+Yes, the unused definitions can be dropped if people prefer.  I only included
+them in the original version because this hardware has no public documentation,
+so maybe it's helpful to see what registers and fields are available.
 
-That patch just made it a library, not an actual device driver.
+I suppose that downstream code could always be dug up if needed, though.  Or
+maybe someday there will actually be documentation?
 
-Is it fair to say that the library approach would not be appropriate anymore for
-the reason you mention above: on the latest SoC there's now a single ICE
-instance for both the UFS and eMMC host controllers, instead of one per host
-controller?
+> > +static struct qcom_ice *engine;
+> > +
+> > +static bool qcom_ice_check_supported(struct qcom_ice *ice)
+> > +{
+> > +	u32 regval = qcom_ice_readl(ice, QCOM_ICE_REG_VERSION);
+> > +	struct device *dev = ice->dev;
+> > +	int major = regval >> 24;
+> > +	int minor = (regval >> 16) & 0xFF;
+> > +	int step = regval & 0xFFFF;
+> FIELD_GET?
 
-Will there be any issue with using the dedicated driver on older SoCs that do
-have separate ICE instances?
+Similarly, plain bit operations are much more universally understood...
 
-Also, in both cases, how will the ICE clock be controlled?  Currently the ICE
-clock gets turned on and off by the UFS and eMMC drivers.  I don't see any logic
-in your new driver that turns the clock on and off.
+> > +	regval = qcom_ice_readl(ice, QCOM_ICE_REG_ADVANCED_CONTROL);
+> > +	/*
+> > +	 * Enable low power mode sequence
+> > +	 * [0]-0, [1]-0, [2]-0, [3]-E, [4]-0, [5]-0, [6]-0, [7]-0
+> Pardon my ignorance, but I have no idea how this comment corresponds
+> to the value OR'd..
+> 
+> > +	 */
+> > +	regval |= 0x7000;
+> > +	qcom_ice_writel(ice, regval, QCOM_ICE_REG_ADVANCED_CONTROL);
 
-> +config QCOM_INLINE_CRYPTO_ENGINE
-> +	bool "QCOM UFS & SDCC Inline Crypto Engine driver"
+I'm not sure either!  I've never had access to any documentation for this
+hardware, so the above logic is just taken from downstream code.  I kept that
+comment because it was the only available explanation for the value OR'd.
 
-Shouldn't this be a tristate?
+Since it doesn't seem to be useful, I'm fine with just removing it.  (But please
+keep the "Enable low power mode sequence" part, as that's useful.)
 
-Also should it really be user-selectable (have a prompt string)?  There's
-already SCSI_UFS_QCOM and MMC_SDHCI_MSM that control the host controller
-drivers, and SCSI_UFS_CRYPTO and MMC_CRYPTO that control the inline encryption
-support for those host controller drivers.  Shouldn't the kconfig just select
-QCOM_INLINE_CRYPTO_ENGINE if 'SCSI_UFS_QCOM && SCSI_UFS_CRYPTO' or
-'MMC_SDHCI_MSM && MMC_CRYPTO'?  I don't think there's any need to make users
-explicitly select yet another option.
+My guess is that it is actually just describing the bits backwards, so [3]-E
+corresponds to the three bits that are set.
 
-> diff --git a/drivers/soc/qcom/qcom-ice.c b/drivers/soc/qcom/qcom-ice.c
-> new file mode 100644
-> index 000000000000..40c9adbc2666
-> --- /dev/null
-> +++ b/drivers/soc/qcom/qcom-ice.c
+> > +static void qcom_ice_optimization_enable(struct qcom_ice *ice)
+> > +{
+> > +	u32 regval;
+> > +
+> > +	if (!ice)
+> > +		return;
+> > +
+> > +	/* ICE Optimizations Enable Sequence */
+> > +	regval = qcom_ice_readl(ice, QCOM_ICE_REG_ADVANCED_CONTROL);
+> > +	regval |= 0xD807100;
+> Please use lowercase hex, or de-magic-ify this if you have the means to.
 
-The directory is already named "qcom", so how about just naming the file
-"ice.c"?
-
-> @@ -0,0 +1,315 @@
-> +// SPDX-License-Identifier: GPL-2.0
-> +/*
-> + * Qualcomm ICE (Inline Crypto Engine) support.
-> + *
-> + * Copyright (c) 2023, Linaro Limited
-> + */
-
-Can you please keep the copyright statements from the file this is derived from?
-
-> +/* Only one ICE instance is supported currently by HW */
-> +static struct qcom_ice *engine;
-
-Isn't it very bad practice for drivers to store state in static variables like
-this?  Sure, the SCM calls are global anyway, so multiple ICE instances aren't
-going to be supported regardless.  But surely it isn't necessary to use a static
-variable like this too, since the device private data could be used instead?
-
-> +static bool qcom_ice_check_supported(struct qcom_ice *ice)
-> +{
-> +	u32 regval = qcom_ice_readl(ice, QCOM_ICE_REG_VERSION);
-> +	struct device *dev = ice->dev;
-> +	int major = regval >> 24;
-> +	int minor = (regval >> 16) & 0xFF;
-> +	int step = regval & 0xFFFF;
-> +
-> +	ice->supported = true;
-> +
-> +	/* For now this driver only supports ICE version 3. */
-> +	if (major != 3) {
-> +		dev_warn(dev, "Unsupported ICE version: v%d.%d.%d\n",
-> +			 major, minor, step);
-> +		ice->supported = false;
-> +		goto out;
-> +	}
-> +
-> +	dev_info(dev, "Found QC Inline Crypto Engine (ICE) v%d.%d.%d\n",
-> +		 major, minor, step);
-> +
-> +	/* If fuses are blown, ICE might not work in the standard way. */
-> +	regval = qcom_ice_readl(ice, QCOM_ICE_REG_FUSE_SETTING);
-> +	if (regval & (QCOM_ICE_FUSE_SETTING_MASK |
-> +		      QCOM_ICE_FORCE_HW_KEY0_SETTING_MASK |
-> +		      QCOM_ICE_FORCE_HW_KEY1_SETTING_MASK)) {
-> +		dev_warn(dev, "Fuses are blown; ICE is unusable!\n");
-> +		ice->supported = false;
-> +		goto out;
-> +	}
-> +out:
-> +	return ice->supported;
-> +}
-
-Is the 'supported' field necessary?  Shouldn't the driver just not bind to the
-device if it doesn't support it?
-
-> +void qcom_ice_low_power_mode_enable(struct qcom_ice *ice)
-> +{
-
-Please make functions static whenever possible.
-
-> +/* Poll until all BIST bits are reset */
-> +static int qcom_ice_wait_bist_status(struct qcom_ice *ice)
-> +{
-> +	int count;
-> +	u32 reg;
-> +
-> +	if (!ice)
-> +		return 0;
-> +
-> +	for (count = 0; count < 100; count++) {
-> +		reg = qcom_ice_readl(ice, QCOM_ICE_REG_BIST_STATUS);
-> +		if (!(reg & QCOM_ICE_BIST_STATUS_MASK))
-> +			break;
-> +		udelay(50);
-> +	}
-> +
-> +	if (reg)
-> +		return -ETIMEDOUT;
-> +
-> +	return 0;
-> +}
-
-The version of this function in drivers/mmc/host/sdhci-msm.c has a better
-comment, and a simpler implementation using readl_poll_timeout().  How about
-using that version of this function?
-
-> +int qcom_ice_resume(struct qcom_ice *ice)
-> +{
-> +	struct device *dev = ice->dev;
-> +	int err;
-> +
-> +	if (!ice)
-> +		return 0;
-
-The above NULL check occurs after the pointer was already dereferenced.
-
-Also, why is NULL allowed here anyway?
-
-> +/*
-> + * Program a key into a QC ICE keyslot, or evict a keyslot.  QC ICE requires
-> + * vendor-specific SCM calls for this; it doesn't support the standard way.
-> + */
-> +int qcom_ice_program_key(struct qcom_ice *ice, bool config_enable,
-> +			 u8 crypto_cap_idx, u8 algorithm_id,
-> +			 u8 key_size, const u8 crypto_key[],
-> +			 u8 data_unit_size, int slot)
-> +{
-> +	struct device *dev = ice->dev;
-> +	union {
-> +		u8 bytes[AES_256_XTS_KEY_SIZE];
-> +		u32 words[AES_256_XTS_KEY_SIZE / sizeof(u32)];
-> +	} key;
-> +	int i;
-> +	int err;
-> +
-> +	if (!config_enable)
-> +		return qcom_scm_ice_invalidate_key(slot);
-
-Can you please make eviction a separate function?  All it needs is the ICE
-instance and the keyslot, not the other parameters.
-
-Yes, the UFS and eMMC drivers have the program_key method that does both
-programming and eviction, but that doesn't mean this has to do the same.
-
-> diff --git a/include/soc/qcom/ice.h b/include/soc/qcom/ice.h
-> new file mode 100644
-> index 000000000000..3ee8add7aeb9
-> --- /dev/null
-> +++ b/include/soc/qcom/ice.h
-> @@ -0,0 +1,61 @@
-> +/* SPDX-License-Identifier: GPL-2.0 */
-> +/*
-> + * Copyright (c) 2023, Linaro Limited
-> + */
-> +
-> +#ifndef __QCOM_ICE_H__
-> +#define __QCOM_ICE_H__
-> +
-> +#include <linux/err.h>
-> +
-> +struct qcom_ice {
-> +	struct device *dev;
-> +	struct device_node *np;
-> +	void __iomem *base;
-> +
-> +	struct clk *core_clk;
-> +
-> +	bool supported;
-> +};
-
-Shouldn't struct qcom_ice be private to the driver?
-
-> +enum qcom_ice_crypto_key_size {
-> +	QCOM_ICE_CRYPTO_KEY_SIZE_INVALID	= 0x0,
-> +	QCOM_ICE_CRYPTO_KEY_SIZE_128		= 0x1,
-> +	QCOM_ICE_CRYPTO_KEY_SIZE_192		= 0x2,
-> +	QCOM_ICE_CRYPTO_KEY_SIZE_256		= 0x3,
-> +	QCOM_ICE_CRYPTO_KEY_SIZE_512		= 0x4,
-> +};
-> +
-> +enum qcom_ice_crypto_alg {
-> +	QCOM_ICE_CRYPTO_ALG_AES_XTS		= 0x0,
-> +	QCOM_ICE_CRYPTO_ALG_BITLOCKER_AES_CBC	= 0x1,
-> +	QCOM_ICE_CRYPTO_ALG_AES_ECB		= 0x2,
-> +	QCOM_ICE_CRYPTO_ALG_ESSIV_AES_CBC	= 0x3,
-> +};
-
-This patch series introduces an implicit assumption that these values match the
-UFS and eMMC algorithm constants.
-
-The way it worked previously is that the UFS driver explicitly checked that the
-UFS algorithm ID was AES-256-XTS before translating it into
-QCOM_SCM_ICE_CIPHER_AES_256_XTS, and similarly for eMMC.
-
-Now there are these intermediate QCOM_ICE_CRYPTO_ALG_* constants, and there's no
-explicit validation that they actually match the UFS and eMMC constants.
-
-Maybe this part should be kept more similar to how it was before, where the
-check for AES-256-XTS happens in the UFS and eMMC drivers?
+I don't know what the 0xD807100 value means, sorry :-(  This is just the value
+that works to enable the "optimizations", and which the downstream code was
+using.  If anyone has access to the ICE hardware documentation (if there even
+*is* documentation), they might be able to say.
 
 - Eric
