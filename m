@@ -2,112 +2,118 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52548C636D4
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 10:38:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B75C7C636D4
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 10:49:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229822AbjBQKiF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Feb 2023 05:38:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49288 "EHLO
+        id S229588AbjBQKtG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Feb 2023 05:49:06 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57810 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229728AbjBQKiE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 05:38:04 -0500
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C69FA212A1
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:38:02 -0800 (PST)
-Received: by mail-lf1-x12f.google.com with SMTP id i13so1267630lfe.1
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:38:02 -0800 (PST)
+        with ESMTP id S229763AbjBQKtF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 05:49:05 -0500
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D467CB454
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:48:38 -0800 (PST)
+Received: by mail-pg1-x533.google.com with SMTP id e1so456913pgu.6
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:48:38 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=bGtDzzuefwzTlyPLD1iHm2KsU2gFe3Js3bhjfE+68t0=;
-        b=uPig5tk1p2UwftW/Xv8bb0NTNmRU4AzYltWwYXNfjQPNB0iKwdqFXPk/u3HUqHEPZM
-         pigFjDr+spJbVU1J5Xsh1KSWzd6KI7v9JMSVIuBkrudosOjZwH3O9A0mzQ0ye2CycrcJ
-         iNPO5cMvKd26gJMptd3Sw08WL2hKCkJvY1ES8bNUnfrl0RxrAT7z1r4kqcQCNo0DhCUa
-         fBb+e4njNqtdYA7TEL64cccGF2u/T1poYesPxyEA80gMxlCkRYSMyP895sM90vPy0zIa
-         dP7naC5Rk0VvgbHTAMASub18c3ZJhRU2c/u9pQEBGJRb9BTFjwntWBnIT+Q6+3PVTsPt
-         2nAQ==
+        d=linaro.org; s=google; t=1676630915;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=dF9wSEnG/pmDi0OCoUdB59pDnnwR7ktou0i6CnZGcss=;
+        b=XNcOCdRPlUBDkS9BuZrMFmRNlt0v9NkGEVPQRhipDqIiHiXlav4XsiPkGLkbOg7QNf
+         0ArOCNqExS/98VguhV/rFgZvk1WyhbYtSM1YE7inAjJ29HxT0QCF5R7h5buzZmjXPhk0
+         vcwWf7cGv/NG7fsLTwkSZeCh7sve9+kKmcmLXT2S215PZNzx12cw84+uGhAva7WEKlqo
+         bfmJ1EIFI3xUrsKSRb13AAAuCjnTcpTmq2WsLvsGiFGVoYzyF+qxlQB7OA6wfTbbNFil
+         JcpnjcZJeSo8rWG6a7fAvsyJnTyITKDKiRpc9BTgVMoi30MbPTYczncLyKM9Y5aaaBZs
+         Kz1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20210112; t=1676630915;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=bGtDzzuefwzTlyPLD1iHm2KsU2gFe3Js3bhjfE+68t0=;
-        b=rFNYK/fQQ0ldACkYd9rMXHviX76VHwwaBi2wSjCTlGFZvPaGsYkyEQPENSQza8vOIP
-         cqcTXHyprHcoACrUZ+uNga6yLL/pkfTG3/wSETZIzQuOpZbRnbrbG+XOdQ54dk4j9cBM
-         0EnUJW8tp7LG8LxNk83hYjsvBfJVxmGqPmJnt0rUF3E9d9eXS3d5y5mieJ7ksNq90pWq
-         XKsCAqzC0EYq6WjiS0YRornjT9PsL/WTDBUjSfXN08GC4MEWBhURHgl0Xp3Lm0kF4rNm
-         BWHtQHFF/QoQ+oQLbUPhqUGBAA9bJC4lDEhcoO0nonBh0GJDqUxUhXNCq1VzYf7GY1Zm
-         eCWQ==
-X-Gm-Message-State: AO0yUKV7nFfXCAP9i80izHLCr8LmrWRxcyHlbtfKmlzjHJwYd58x6ERV
-        KgtlHl/7gDBneaaW3IwEZ3XNlRZTswV7bKI+
-X-Google-Smtp-Source: AK7set8bsdmxRWZoPaaS/YX8HuNI5AG19UI3e7nLQJ4EzskQ9e/Na9/MXHPZsm6vZB+0Yqh0qG1LEg==
-X-Received: by 2002:ac2:4ac1:0:b0:4d5:8dd8:75f9 with SMTP id m1-20020ac24ac1000000b004d58dd875f9mr2491890lfp.24.1676630281084;
-        Fri, 17 Feb 2023 02:38:01 -0800 (PST)
-Received: from uffe-XPS13.. ([84.216.156.215])
-        by smtp.gmail.com with ESMTPSA id l3-20020a19c203000000b004ceb053c3ebsm634341lfc.179.2023.02.17.02.37.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 17 Feb 2023 02:38:00 -0800 (PST)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC fixes for v6.2-rc9
-Date:   Fri, 17 Feb 2023 11:37:57 +0100
-Message-Id: <20230217103757.61244-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        bh=dF9wSEnG/pmDi0OCoUdB59pDnnwR7ktou0i6CnZGcss=;
+        b=ATQJ8ASIwdvzeNbXKPJQ8e+E5ehe8X1DTG1j0EvrHeKrNVV8C159W8+tLxXdJyPTZP
+         67fcBBDoScAj+ioKuUjpLezdXMKXMGSBsfq86S6Qg8QZJHP0yM0xD1cWSO9vipk/7YYu
+         3MtJD0eMYED1RZAof0PvmV0YO/4AckCDlgVj23mjJ5c4rxcgD6OHDKr5PZPzHaypAQ3t
+         qAGu8t+0kW6ZmkK1Pky4/2YQvND00KC2SPhu90UGGwXgy7H6ukY4c9WTgEwKQkKm1G1K
+         ja7Re6Py3s2aCcghsrcFZQ9fGvGy9ln6IZZeFpsUJzjzibDCz2+9NPumB1rsQZpptLwg
+         aUwA==
+X-Gm-Message-State: AO0yUKUNiDB7DbjjR9ZnnsYVA/yTE48ID4qvDmEkvAkyGPwl72bqbZRN
+        wVtL/NXakUhW9UJjNahQCZvxnt3l4+N84eyIVfeDjQ==
+X-Google-Smtp-Source: AK7set9FzbxOqH5midfBwv8pE9z9p0qY6hnqhEYjUEOxExFohj/9qD7nGH42u0m45DFwSi3Z2IHgC+QdZ/yUe4clls4=
+X-Received: by 2002:aa7:95a9:0:b0:5a8:ba5b:575 with SMTP id
+ a9-20020aa795a9000000b005a8ba5b0575mr1432692pfk.40.1676630915302; Fri, 17 Feb
+ 2023 02:48:35 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <02b46550-e0b5-4251-8156-56eb0f690d89@gmail.com> <2553f3bc-b1e6-4af2-fb6c-def486dd99a3@gmail.com>
+In-Reply-To: <2553f3bc-b1e6-4af2-fb6c-def486dd99a3@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 17 Feb 2023 11:47:45 +0100
+Message-ID: <CAPDyKFpCEzubkJ=roniomXHaWrY5AOqfPZmNLbMbBnubHzZrEg@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: core: add helpers mmc_regulator_set_ocr_vmmc_up/off
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+On Wed, 15 Feb 2023 at 21:14, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+>
+> A lot of drivers use this code, therefore let's factor it out to
+> helpers.
+>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> ---
+>  include/linux/mmc/host.h | 17 +++++++++++++++++
+>  1 file changed, 17 insertions(+)
+>
+> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> index 812e6b583..f93fb8c7d 100644
+> --- a/include/linux/mmc/host.h
+> +++ b/include/linux/mmc/host.h
+> @@ -597,6 +597,23 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
+>  }
+>  #endif
+>
+> +static inline int mmc_regulator_set_ocr_vmmc_up(struct mmc_host *mmc,
+> +                                               struct mmc_ios *ios)
+> +{
+> +       if (IS_ERR(mmc->supply.vmmc))
+> +               return 0;
 
-Here's a PR with a couple of MMC fixes intended for v6.2-rc9. Details about
-the highlights are as usual found in the signed tag.
+Rather than adding these two new helper functions, how about adding
+the similar check in mmc_regulator_set_ocr() instead?
 
-Please pull this in!
+That should allow us to simplify some code in the host drivers too, right?
+
+> +
+> +       return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+> +}
+> +
+> +static inline int mmc_regulator_set_ocr_vmmc_off(struct mmc_host *mmc)
+> +{
+> +       if (IS_ERR(mmc->supply.vmmc))
+> +               return 0;
+> +
+> +       return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+> +}
+> +
+>  int mmc_regulator_get_supply(struct mmc_host *mmc);
+>
+>  static inline int mmc_card_is_removable(struct mmc_host *host)
+> --
+> 2.39.1
+>
+>
 
 Kind regards
-Ulf Hansson
-
-
-The following changes since commit 2241ab53cbb5cdb08a6b2d4688feb13971058f65:
-
-  Linux 6.2-rc5 (2023-01-21 16:27:01 -0800)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2-rc5
-
-for you to fetch changes up to 3f18c5046e633cc4bbad396b74c05d46d353033d:
-
-  mmc: jz4740: Work around bug on JZ4760(B) (2023-02-14 00:14:05 +0100)
-
-----------------------------------------------------------------
-MMC core:
- - Fix potential resource leaks in SDIO card detection error path
-
-MMC host:
- - jz4740: Decrease maximum clock rate to workaround bug on JZ4760(B)
- - meson-gx: Fix SDIO support to get some WiFi modules to work again
- - mmc_spi: Fix error handling in ->probe()
-
-----------------------------------------------------------------
-Heiner Kallweit (1):
-      mmc: meson-gx: fix SDIO mode if cap_sdio_irq isn't set
-
-Paul Cercueil (1):
-      mmc: jz4740: Work around bug on JZ4760(B)
-
-Yang Yingliang (2):
-      mmc: sdio: fix possible resource leaks in some error paths
-      mmc: mmc_spi: fix error handling in mmc_spi_probe()
-
- drivers/mmc/core/sdio_bus.c     | 17 ++++++++++++++---
- drivers/mmc/core/sdio_cis.c     | 12 ------------
- drivers/mmc/host/jz4740_mmc.c   | 10 ++++++++++
- drivers/mmc/host/meson-gx-mmc.c | 23 +++++++++++++----------
- drivers/mmc/host/mmc_spi.c      |  8 ++++----
- 5 files changed, 41 insertions(+), 29 deletions(-)
+Uffe
