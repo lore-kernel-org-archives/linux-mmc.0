@@ -2,92 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B91EBC636D4
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 08:47:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D22A6C636D7
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 10:27:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229629AbjBQIr6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Feb 2023 03:47:58 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48734 "EHLO
+        id S229515AbjBQK1a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Feb 2023 05:27:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229666AbjBQIr4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 03:47:56 -0500
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE0E24485
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 00:47:54 -0800 (PST)
-Received: by mail-ed1-x52b.google.com with SMTP id dn12so9291488edb.5
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 00:47:54 -0800 (PST)
+        with ESMTP id S229460AbjBQK1a (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 05:27:30 -0500
+Received: from mail-pl1-x62c.google.com (mail-pl1-x62c.google.com [IPv6:2607:f8b0:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2700627F9
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:27:27 -0800 (PST)
+Received: by mail-pl1-x62c.google.com with SMTP id b6so801267plg.11
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:27:27 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=6mCPUncoNNGQDkBH1K4Qwr2txnBpLQ2xqpC1PN44nIo=;
-        b=zMOgIsHj6qxMkglPlIGwHPtY65joY5FCUCHW41i1STnDb9VvgcgzUZZh3zCuj7WAtZ
-         hCP7+xRs0HlbLdfpWze78Iq4IdVNmlM3KLY6QC66gFDQZ/Fx+N57yeDOTHIQJ4uK3q7l
-         R1yG2LZBj0iqb6wVnsQF1yusZT/z8wy1Z2s2+Fb7mnDdSo5NiCn+kAHS6ZHq6BCBFzds
-         3aHQAavQHhPeB2EeMjpIh3J/J4dY4ASe3ZqaaljUn5HDCSqtDcxSMHD9L37ooqzBsBE3
-         AKFreSM6PdOXsILNgz/BjMR9maQiQOVcoN2SjBddVvzXAHnj2IiRxb9g4aU7TOi2UapT
-         JmTQ==
+        d=linaro.org; s=google; t=1676629647;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=dYUz8oisVi2MXZNU739kVbVZfuIh484HESHjTvaz9UM=;
+        b=meORSfrOitZ4zlTOzjjoOw+lVQAZ9cPa9GCbsF5D7r2vSISSZGzNJGvYAoYrHiKEKv
+         D6pebsua3r4XJBH5BiGIQkY8vipuODqMajcUK7EWXtgMLAScFJtklAIJJ0Z4hFgSIXNr
+         y/qUyoGREIkKZKzoA+5sVCkhERCmguZJd6+/PewB/3Eg+irdm5wISjIz0QibvzahWSHI
+         cda4g/Pef9SXm8+7XBMbYEZwkWd4TA06wYEwGRpWqC9QiNY4lpav8XLnqv8PM1qR3BpS
+         9alx2cRI00R44N9Owo8bWeX9A7bKgN0720YIXMWx1jSE3xgHdcARDIxYrKlD999FjCpT
+         YBCA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=6mCPUncoNNGQDkBH1K4Qwr2txnBpLQ2xqpC1PN44nIo=;
-        b=nRVwFNRf26xTEbt1rA36Tmh9I1aSGIDMPFPBjoCGQCOkb3X8lJGNLBrmY/U1JktKHH
-         UmwpypBS1aGrzwHZgt4tTCk76mccwscUzie8BiywqMSkG/wHCzux86+NO5stBgZy7Rto
-         9NNsnuoMPHRXVsajvSkjrqlISZuoti7cVtl10/+poYIlnESNTUnU0i/w4ga6YVR336Hu
-         z8dBFdJk9k4rGBrcZUVLNnUDgF/uP7MW3dqR8C0+xKoSC3TUVk7PSn48hFP18DU80t1V
-         iowjwiJjRLCS2G1XXEQJ6c/fIY+Muxu+bzEB5fepPRE8OTlqIAbI77SV6073TVtS6/Kt
-         wXQA==
-X-Gm-Message-State: AO0yUKXmE8J2u4+k0euUJ4+//dZkt4mjWzXgRf3AlsJ2bULTrrbu2e0j
-        PDNXGcyB9MxsAqIC5gkLcWkyfQ==
-X-Google-Smtp-Source: AK7set+bc046PiYwSDnVyB86S6c9jja8hnHbQX0stMjnEgo8oKt4A8NuJK9HWepfuMYEn0SaZNEmQw==
-X-Received: by 2002:a05:6402:445:b0:4ac:c720:9255 with SMTP id p5-20020a056402044500b004acc7209255mr580406edw.34.1676623673490;
-        Fri, 17 Feb 2023 00:47:53 -0800 (PST)
-Received: from [192.168.1.109] ([178.197.216.144])
-        by smtp.gmail.com with ESMTPSA id f29-20020a50a6dd000000b004ad6e3e4a26sm1532945edc.84.2023.02.17.00.47.51
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Feb 2023 00:47:53 -0800 (PST)
-Message-ID: <86945f01-351b-9843-0ba8-08377f12dd4d@linaro.org>
-Date:   Fri, 17 Feb 2023 09:47:51 +0100
+        d=1e100.net; s=20210112; t=1676629647;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=dYUz8oisVi2MXZNU739kVbVZfuIh484HESHjTvaz9UM=;
+        b=zdPEXX/4lRzPaueJa3Pmt+PaVbo6KWmNdAKhLcWTg0Y7uNKgQDzdUWN7ZDF6eN9Lt9
+         /39w5X0s6phn3+ZL3iRNfZ7GkVQc68thN5W7SemFr1XgXlwvAswTDY35B607jONVemni
+         Ugy0sF9UzPk2EJJOM8DK2UYJCL5MbnGshsKGnu6pvKt68UO+DcZ8jhyeVasKpRMgsvV5
+         hoAjt8P9NRN83RbLpFi1pWTlkeCJmWaF9lvnxKwHO7eFDwNV74QGIpEDj7haQMAMDDiR
+         9uAFz7WXJyZ0Ak9KEFQu2vzvuXX3r1diHEzHIPruGceSYNKBwqyA42WAc1HHzaPG9yrj
+         OIMA==
+X-Gm-Message-State: AO0yUKXQo0+xqRiLuKWUBPAE0C1SAO0OQ5P66af+ZFGfHFDe7NMVlBfb
+        eWu7s3PGUBVLFM47orNjRODsLhB7f3ujWj6lL7vKLw==
+X-Google-Smtp-Source: AK7set8Zqc99tI1n8m5kImc/yYJuO2ErLq/s41RuQOt/YA+reJHb6HINNqc7ZSfnEhsxkCMLALMX2fO1gyvLLpvOClo=
+X-Received: by 2002:a17:902:8d89:b0:199:15c2:99ae with SMTP id
+ v9-20020a1709028d8900b0019915c299aemr77197plo.20.1676629647338; Fri, 17 Feb
+ 2023 02:27:27 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
+References: <c1437eb6-0c01-809f-422b-cb1109489355@gmail.com>
+In-Reply-To: <c1437eb6-0c01-809f-422b-cb1109489355@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 17 Feb 2023 11:26:50 +0100
+Message-ID: <CAPDyKFp-ASckmet2hA7XuycijRSe64HEkVRzPSBKP4G4NG6v-g@mail.gmail.com>
 Subject: Re: [PATCH v2] dt-bindings: mmc: meson-gx: fix interrupt binding
-Content-Language: en-US
-To:     Heiner Kallweit <hkallweit1@gmail.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Neil Armstrong <neil.armstrong@linaro.org>,
         Kevin Hilman <khilman@baylibre.com>,
         Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-arm-kernel@lists.infradead.org" 
         <linux-arm-kernel@lists.infradead.org>,
         "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
         "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>
-References: <c1437eb6-0c01-809f-422b-cb1109489355@gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <c1437eb6-0c01-809f-422b-cb1109489355@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/02/2023 20:50, Heiner Kallweit wrote:
+On Thu, 16 Feb 2023 at 20:50, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+>
 > Reflect in the binding that the cd interrupt is optional,
 > and add a description of the interrupts.
-> 
+>
 > Fixes: 09b31a610328 ("dt-bindings: mmc: meson-gx: support specifying cd interrupt")
 > Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
 > ---
-
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-Best regards,
-Krzysztof
-
+> v2:
+> - omit maxItems and use items
+> ---
+>  .../devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml        | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> index c8c30300d..bc403ae9e 100644
+> --- a/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/amlogic,meson-gx-mmc.yaml
+> @@ -28,7 +28,10 @@ properties:
+>      maxItems: 1
+>
+>    interrupts:
+> -    maxItems: 2
+> +    minItems: 1
+> +    items:
+> +      - description: mmc controller instance
+> +      - description: card detect
+>
+>    clocks:
+>      maxItems: 3
+> --
+> 2.39.1
+>
