@@ -2,159 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 77F85C05027
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 20:09:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48D4BC05027
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 22:47:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229509AbjBQUJj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Feb 2023 15:09:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44030 "EHLO
+        id S229677AbjBQWru (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Feb 2023 17:47:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39322 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229507AbjBQUJi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 15:09:38 -0500
-Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B02DD5F255
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 12:09:36 -0800 (PST)
-Received: by mail-wr1-x42a.google.com with SMTP id w13so2025803wrl.13
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 12:09:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=knqzr+Iwk1EvvCLnjdCBkl7DP8eCynrrFxDniRkr/OE=;
-        b=fYv6F45ngnNrqVyVhLFtQio5yq+2u8/+ID8NolX2lT+9CO5ZkknKeylfzaRvKzFC4d
-         mkXxI7oZ9cURKJBtBbEMTCNeMfS+MPap/ZAFWPrlNy8EYzCeH0aFCyatOVI6Hib/zct0
-         0SqV3emfKT5CZ7plHuCSxkMyqUFTNOLu+bPV4O9M59PkGEx86lNL6udSGdVaLIYd92Ux
-         F4aPi6zJrPjhj2ozPT+ZVDM3snCS4txx7Vw0Ez/5ACMNU3InLnNrKg5B3pxjLD0Ncbla
-         8jLtuQ+1xRlqUznxgLK0+p7QM4TeA/8fqD66KSvYWwENXVXGJCu3X9XTm5nj2/N7y+p4
-         WWOQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
-         :content-language:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=knqzr+Iwk1EvvCLnjdCBkl7DP8eCynrrFxDniRkr/OE=;
-        b=4OpvDQ4iNOF9yxhxN7z8yIvqP5rdQNJisz9Fr/vXsmx8p5teEArT+ruVL+syrUcNz5
-         XFsOJfE8GfV6GJDMgnzIyazC+4SFT+JXabYopMD/SMMqu3JHZLBQCUroAeUbIhukv4uu
-         HlrIwfCVT1Yyz3BLZmPJbfCDrd8qMn6Au5Doibd2dwdumB6N/EAeR16SOZxCCMEsUSbe
-         j4jtG8C1+eaSbjCKrDzngRQ2Apm2m/BcIQv/trGfD8ryQzlYkgstU+nyDdrbLphhv9/E
-         y0PW2psOj7w3X4SpIXKqSaMD12hRAx65CoTRKSt4oDWwTLSnMVeMHZT3iPKNz0SzNL2C
-         yfGg==
-X-Gm-Message-State: AO0yUKWgGR3Govyxo45bC5HFJ44Y+2iqMHONbVSAGD7SXN4hao7MIT7+
-        PA5G3AqfDHQYAg3FgWNJy9IGN12SjRU=
-X-Google-Smtp-Source: AK7set/EvP4FUIjGx4wCeLZwhv1zarnr483B75rH7dVubhMR7d04o6YNoGlJZ+C7VNCnKHpyI3ktsw==
-X-Received: by 2002:a5d:4dc7:0:b0:2c5:5882:1e6f with SMTP id f7-20020a5d4dc7000000b002c558821e6fmr889399wru.64.1676664574962;
-        Fri, 17 Feb 2023 12:09:34 -0800 (PST)
-Received: from ?IPV6:2a01:c23:c0ef:9000:8c00:bd1b:3cbc:dd6? ([2a01:c23:c0ef:9000:8c00:bd1b:3cbc:dd6])
-        by smtp.googlemail.com with ESMTPSA id g6-20020adfe406000000b002c5a07e940csm3732604wrm.33.2023.02.17.12.09.34
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 17 Feb 2023 12:09:34 -0800 (PST)
-Message-ID: <0725e5eb-43fd-65a7-27e8-84bbfe31c798@gmail.com>
-Date:   Fri, 17 Feb 2023 21:09:27 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Content-Language: en-US
+        with ESMTP id S229536AbjBQWrt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 17:47:49 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B09A15FC4D;
+        Fri, 17 Feb 2023 14:47:46 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 43556B82D08;
+        Fri, 17 Feb 2023 22:47:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 07F89C433EF;
+        Fri, 17 Feb 2023 22:47:44 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1676674064;
+        bh=LCS56TJEG+qQdEZ3CBdIWYo+Y/uMrtFGu0tQgaNL2Js=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=YQ9RlnDSsiCyLx8E2NDG7uR+7iB2JrRA41ASOOSLaT6TCL2RBlDn7KsOAB3RLZP8p
+         mh+tZUa6iiobrqsClq9joOBUAgthV1RVdQLVB8gGk/wDIMhrFxAYEC4IA4La+8QCPJ
+         DS/48/CxWIQWQbLr3pawjbpIHvSTjIi8k9jsYhiJPEnrAyNAMKFwIQ/W35zpbyqeLO
+         h1UNn2id8IzclPndLFcmriwsl+VKcj3NCnE2ZrqXDm+XURHtz5sDZMvp0udoI0UrBG
+         xKsQY3p4VR5aP3re5Pzna/zsZlWT+8g4L5hLBQQxgOIWUgvPokNuE9vv+FUJgEbuit
+         jvEXLAZTG2Hdw==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id E919EC1614B;
+        Fri, 17 Feb 2023 22:47:43 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.2-rc9
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20230217103757.61244-1-ulf.hansson@linaro.org>
+References: <20230217103757.61244-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20230217103757.61244-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2-rc5
+X-PR-Tracked-Commit-Id: 3f18c5046e633cc4bbad396b74c05d46d353033d
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: bda6cfae33a541230970bad853c01a4e5bdeedde
+Message-Id: <167667406395.13496.7002399768494513198.pr-tracker-bot@kernel.org>
+Date:   Fri, 17 Feb 2023 22:47:43 +0000
 To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-References: <02b46550-e0b5-4251-8156-56eb0f690d89@gmail.com>
- <2553f3bc-b1e6-4af2-fb6c-def486dd99a3@gmail.com>
- <CAPDyKFpCEzubkJ=roniomXHaWrY5AOqfPZmNLbMbBnubHzZrEg@mail.gmail.com>
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-Subject: Re: [PATCH 1/2] mmc: core: add helpers
- mmc_regulator_set_ocr_vmmc_up/off
-In-Reply-To: <CAPDyKFpCEzubkJ=roniomXHaWrY5AOqfPZmNLbMbBnubHzZrEg@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17.02.2023 11:47, Ulf Hansson wrote:
-> On Wed, 15 Feb 2023 at 21:14, Heiner Kallweit <hkallweit1@gmail.com> wrote:
->>
->> A lot of drivers use this code, therefore let's factor it out to
->> helpers.
->>
->> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
->> ---
->>  include/linux/mmc/host.h | 17 +++++++++++++++++
->>  1 file changed, 17 insertions(+)
->>
->> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
->> index 812e6b583..f93fb8c7d 100644
->> --- a/include/linux/mmc/host.h
->> +++ b/include/linux/mmc/host.h
->> @@ -597,6 +597,23 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
->>  }
->>  #endif
->>
->> +static inline int mmc_regulator_set_ocr_vmmc_up(struct mmc_host *mmc,
->> +                                               struct mmc_ios *ios)
->> +{
->> +       if (IS_ERR(mmc->supply.vmmc))
->> +               return 0;
-> 
-> Rather than adding these two new helper functions, how about adding
-> the similar check in mmc_regulator_set_ocr() instead?
-> 
-There's a number of drivers having 3 paths here:
-1. IS_ERR() is true -> do nothing and go one
-2. mmc_regulator_set_ocr() returns 0 -> some action and go on
-3. mmc_regulator_set_ocr() returns an error -> bail out
+The pull request you sent on Fri, 17 Feb 2023 11:37:57 +0100:
 
-So the question is: what should mmc_regulator_set_ocr_vmmc_up return
-if IS_ERR() is true:
-1. An errno? Then this errno would have to be different from the
-   error codes the function can normally return. 
-2. A positive value? Seems to be the best option
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2-rc5
 
-Then we could write:
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/bda6cfae33a541230970bad853c01a4e5bdeedde
 
-ret = mmc_regulator_set_ocr()
-if (ret < 0)
-	return ret;
-if (!ret) {
-	some_action();
-}
-...
+Thank you!
 
-Works but I'm not sure whether it's very intuitive.
-
-The other benefit of the proposed helpers is that they hide the
-complexity of using mmc->supply.vmmc and ios->vdd.
-
-Mileage may vary here. Do you have any preference?
-
-> That should allow us to simplify some code in the host drivers too, right?
-> 
->> +
->> +       return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
->> +}
->> +
->> +static inline int mmc_regulator_set_ocr_vmmc_off(struct mmc_host *mmc)
->> +{
->> +       if (IS_ERR(mmc->supply.vmmc))
->> +               return 0;
->> +
->> +       return mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->> +}
->> +
->>  int mmc_regulator_get_supply(struct mmc_host *mmc);
->>
->>  static inline int mmc_card_is_removable(struct mmc_host *host)
->> --
->> 2.39.1
->>
->>
-> 
-> Kind regards
-> Uffe
-
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
