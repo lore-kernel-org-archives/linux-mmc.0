@@ -2,106 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B46BC05027
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 10:30:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 52548C636D4
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Feb 2023 10:38:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229508AbjBQKaL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Feb 2023 05:30:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46160 "EHLO
+        id S229822AbjBQKiF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Feb 2023 05:38:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49288 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjBQKaK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 05:30:10 -0500
-Received: from mail-pj1-x102f.google.com (mail-pj1-x102f.google.com [IPv6:2607:f8b0:4864:20::102f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E344D5972F
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:30:06 -0800 (PST)
-Received: by mail-pj1-x102f.google.com with SMTP id y2so803873pjd.5
-        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:30:06 -0800 (PST)
+        with ESMTP id S229728AbjBQKiE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Feb 2023 05:38:04 -0500
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C69FA212A1
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:38:02 -0800 (PST)
+Received: by mail-lf1-x12f.google.com with SMTP id i13so1267630lfe.1
+        for <linux-mmc@vger.kernel.org>; Fri, 17 Feb 2023 02:38:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Sja09N9fvMpK74dIaBQgQVymO3+vghxtOTVPe1KPssI=;
-        b=cHT/wqUJ2urpwnBJ2g6PrVkh5VkuGIWB+enRorqzC5keYCC5YFvnBGPfbsOvLmKqiX
-         2tmiVhvFowig0FqvtV2BMiD+E/NhlbXYZCTI4rw4KZT2b5KQsIVFDvcELixOrdhUVhCY
-         E0xrTa4/OWhchduObz3O6mnABZxhgUEVy4VCqFv3X/gnHBsv/9z0EPL1CFRFY5WfypxT
-         7hysTBNwbNQ7/Adku+LEsm4sZFRugPRjUlCKe+TQ/YlVjbQVY9YLZl+40mCiwmNrCJlG
-         Sial1lmqgTT8cTlZ6E+CMD+aRn3kyc4ZAJtYz9jETbr93Oyh5CGEjn8Aq+e5gDM8WOej
-         CHSA==
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=bGtDzzuefwzTlyPLD1iHm2KsU2gFe3Js3bhjfE+68t0=;
+        b=uPig5tk1p2UwftW/Xv8bb0NTNmRU4AzYltWwYXNfjQPNB0iKwdqFXPk/u3HUqHEPZM
+         pigFjDr+spJbVU1J5Xsh1KSWzd6KI7v9JMSVIuBkrudosOjZwH3O9A0mzQ0ye2CycrcJ
+         iNPO5cMvKd26gJMptd3Sw08WL2hKCkJvY1ES8bNUnfrl0RxrAT7z1r4kqcQCNo0DhCUa
+         fBb+e4njNqtdYA7TEL64cccGF2u/T1poYesPxyEA80gMxlCkRYSMyP895sM90vPy0zIa
+         dP7naC5Rk0VvgbHTAMASub18c3ZJhRU2c/u9pQEBGJRb9BTFjwntWBnIT+Q6+3PVTsPt
+         2nAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Sja09N9fvMpK74dIaBQgQVymO3+vghxtOTVPe1KPssI=;
-        b=LaU+UfKc1twJW76gKLy8I/LCfi/wqPMD4Uwp3mrpfII30PSqNcnxQatGuJs8PxdRQk
-         OIw9tkoegkCs30qg+SWkIwXJdC1HYXi3b5LZ5EoeboPOjwxiROHLsX6hcdB33rIdMrvm
-         qmE8ROgQGgtngxLlLp+N7uXA2nTTQeWylqWemKoD7RjMeOFeJiS3tyxgzS8LwdY0+Du/
-         qyDivgsZfTk9LUNgfcSoYJqMtALOGlAyFzj1dr44CNGO9JaBFuoOBwv9ZV5qjPyNj7p9
-         HTuf92RhB5tBJZ//v/NxrtjJK3pa0J8+fTUkwCRUDJOFosCvd5Xev8BF+o5njZA22K4J
-         LVdw==
-X-Gm-Message-State: AO0yUKWw0KeHYdZNybQJBITAA8Y4Tuqo6UwIxtoSEDZmNmozBs6EJHgs
-        iyQ3d1l41ahgLd6oo4rY1e/6o0AW++aKbkDlYnOpPchn+hye/g==
-X-Google-Smtp-Source: AK7set/oF5twMgPws2I+LJXa9SIdR39wHnxhlYHEIptId41IAbe34yp/jDLAm20p71jkytR/qbxdeIKbWTzB/pBsG5s=
-X-Received: by 2002:a17:90b:280d:b0:230:ae51:1cdc with SMTP id
- qb13-20020a17090b280d00b00230ae511cdcmr1346340pjb.120.1676629806345; Fri, 17
- Feb 2023 02:30:06 -0800 (PST)
-MIME-Version: 1.0
-References: <20230217024333.4018279-1-yangyingliang@huawei.com>
-In-Reply-To: <20230217024333.4018279-1-yangyingliang@huawei.com>
+        bh=bGtDzzuefwzTlyPLD1iHm2KsU2gFe3Js3bhjfE+68t0=;
+        b=rFNYK/fQQ0ldACkYd9rMXHviX76VHwwaBi2wSjCTlGFZvPaGsYkyEQPENSQza8vOIP
+         cqcTXHyprHcoACrUZ+uNga6yLL/pkfTG3/wSETZIzQuOpZbRnbrbG+XOdQ54dk4j9cBM
+         0EnUJW8tp7LG8LxNk83hYjsvBfJVxmGqPmJnt0rUF3E9d9eXS3d5y5mieJ7ksNq90pWq
+         XKsCAqzC0EYq6WjiS0YRornjT9PsL/WTDBUjSfXN08GC4MEWBhURHgl0Xp3Lm0kF4rNm
+         BWHtQHFF/QoQ+oQLbUPhqUGBAA9bJC4lDEhcoO0nonBh0GJDqUxUhXNCq1VzYf7GY1Zm
+         eCWQ==
+X-Gm-Message-State: AO0yUKV7nFfXCAP9i80izHLCr8LmrWRxcyHlbtfKmlzjHJwYd58x6ERV
+        KgtlHl/7gDBneaaW3IwEZ3XNlRZTswV7bKI+
+X-Google-Smtp-Source: AK7set8bsdmxRWZoPaaS/YX8HuNI5AG19UI3e7nLQJ4EzskQ9e/Na9/MXHPZsm6vZB+0Yqh0qG1LEg==
+X-Received: by 2002:ac2:4ac1:0:b0:4d5:8dd8:75f9 with SMTP id m1-20020ac24ac1000000b004d58dd875f9mr2491890lfp.24.1676630281084;
+        Fri, 17 Feb 2023 02:38:01 -0800 (PST)
+Received: from uffe-XPS13.. ([84.216.156.215])
+        by smtp.gmail.com with ESMTPSA id l3-20020a19c203000000b004ceb053c3ebsm634341lfc.179.2023.02.17.02.37.59
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 17 Feb 2023 02:38:00 -0800 (PST)
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 17 Feb 2023 11:29:28 +0100
-Message-ID: <CAPDyKFqyF5cb4R8u0mwoCyfpvtGtXKQ2wh72Sia3SARV_pTZ=A@mail.gmail.com>
-Subject: Re: [PATCH -next] mmc: core: fix return value check in devm_mmc_alloc_host()
-To:     Yang Yingliang <yangyingliang@huawei.com>
-Cc:     linux-mmc@vger.kernel.org, hkallweit1@gmail.com
-Content-Type: text/plain; charset="UTF-8"
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC fixes for v6.2-rc9
+Date:   Fri, 17 Feb 2023 11:37:57 +0100
+Message-Id: <20230217103757.61244-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 17 Feb 2023 at 03:44, Yang Yingliang <yangyingliang@huawei.com> wrote:
->
-> mmc_alloc_host() returns NULL pointer not PTR_ERR(), if it
-> fails, so replace the IS_ERR() check with NULL pointer check.
->
-> In commit 418f7c2de133 ("mmc: meson-gx: use devm_mmc_alloc_host"),
-> it checks NULL pointer not PTR_ERR, if devm_mmc_alloc_host() fails,
-> so make it to return NULL pointer to keep same with mmc_alloc_host(),
-> the drivers don't need to change the error handle when switch to
-> use devm_mmc_alloc_host().
->
-> Fixes: 80df83c2c57e ("mmc: core: add devm_mmc_alloc_host")
-> Signed-off-by: Yang Yingliang <yangyingliang@huawei.com>
+Hi Linus,
 
-Applied for next, thanks!
+Here's a PR with a couple of MMC fixes intended for v6.2-rc9. Details about
+the highlights are as usual found in the signed tag.
+
+Please pull this in!
 
 Kind regards
-Uffe
+Ulf Hansson
 
-> ---
->  drivers/mmc/core/host.c | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
->
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 6a7475ad7685..096093f7be00 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -599,12 +599,12 @@ struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra)
->
->         dr = devres_alloc(devm_mmc_host_release, sizeof(*dr), GFP_KERNEL);
->         if (!dr)
-> -               return ERR_PTR(-ENOMEM);
-> +               return NULL;
->
->         host = mmc_alloc_host(extra, dev);
-> -       if (IS_ERR(host)) {
-> +       if (!host) {
->                 devres_free(dr);
-> -               return host;
-> +               return NULL;
->         }
->
->         *dr = host;
-> --
-> 2.25.1
->
+
+The following changes since commit 2241ab53cbb5cdb08a6b2d4688feb13971058f65:
+
+  Linux 6.2-rc5 (2023-01-21 16:27:01 -0800)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.2-rc5
+
+for you to fetch changes up to 3f18c5046e633cc4bbad396b74c05d46d353033d:
+
+  mmc: jz4740: Work around bug on JZ4760(B) (2023-02-14 00:14:05 +0100)
+
+----------------------------------------------------------------
+MMC core:
+ - Fix potential resource leaks in SDIO card detection error path
+
+MMC host:
+ - jz4740: Decrease maximum clock rate to workaround bug on JZ4760(B)
+ - meson-gx: Fix SDIO support to get some WiFi modules to work again
+ - mmc_spi: Fix error handling in ->probe()
+
+----------------------------------------------------------------
+Heiner Kallweit (1):
+      mmc: meson-gx: fix SDIO mode if cap_sdio_irq isn't set
+
+Paul Cercueil (1):
+      mmc: jz4740: Work around bug on JZ4760(B)
+
+Yang Yingliang (2):
+      mmc: sdio: fix possible resource leaks in some error paths
+      mmc: mmc_spi: fix error handling in mmc_spi_probe()
+
+ drivers/mmc/core/sdio_bus.c     | 17 ++++++++++++++---
+ drivers/mmc/core/sdio_cis.c     | 12 ------------
+ drivers/mmc/host/jz4740_mmc.c   | 10 ++++++++++
+ drivers/mmc/host/meson-gx-mmc.c | 23 +++++++++++++----------
+ drivers/mmc/host/mmc_spi.c      |  8 ++++----
+ 5 files changed, 41 insertions(+), 29 deletions(-)
