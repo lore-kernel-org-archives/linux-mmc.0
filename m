@@ -2,108 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD131C61DA3
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Feb 2023 02:44:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 714D3C6379F
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Feb 2023 09:42:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232697AbjBUCoG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Feb 2023 21:44:06 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47392 "EHLO
+        id S233328AbjBUJmq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Feb 2023 04:42:46 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231331AbjBUCoG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Feb 2023 21:44:06 -0500
-Received: from ex01.ufhost.com (ex01.ufhost.com [61.152.239.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E04F1BDB;
-        Mon, 20 Feb 2023 18:44:04 -0800 (PST)
-Received: from EXMBX166.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX166", Issuer "EXMBX166" (not verified))
-        by ex01.ufhost.com (Postfix) with ESMTP id 58DA924E1E1;
-        Tue, 21 Feb 2023 10:44:03 +0800 (CST)
-Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX166.cuchost.com
- (172.16.6.76) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 21 Feb
- 2023 10:44:03 +0800
-Received: from [192.168.120.55] (171.223.208.138) by EXMBX068.cuchost.com
- (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 21 Feb
- 2023 10:44:02 +0800
-Message-ID: <348796cc-72d9-4dcf-9f09-4c2aa55cb858@starfivetech.com>
-Date:   Tue, 21 Feb 2023 10:44:02 +0800
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
-Content-Language: en-US
-To:     Rob Herring <robh@kernel.org>
-CC:     <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        with ESMTP id S231546AbjBUJmq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Feb 2023 04:42:46 -0500
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A177923321;
+        Tue, 21 Feb 2023 01:42:44 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1676972565; x=1708508565;
+  h=from:to:cc:subject:date:message-id:mime-version:
+   content-transfer-encoding;
+  bh=5jCo9bI2Rlr0cPYMR5trVt2bN57Y+x5yVEQluTzPn3Y=;
+  b=sZRZg88FgiuLa3fJu0vc9sK3gEpusaExhuv4WQsRfQWrIUm3Uhdc52+D
+   yWYVmuu1QUu5ZFXGVVqoafFiVq4RCn4fh3DPHHsLIRVJS9dkYYmaTyRfo
+   YiIWWjTJ7lq7Fg79zfER54MFUBcHu3l7OKa/SiDIOZvntczema3444jV8
+   yQsYl8x57S5QNXvooywOZxsVsV0UAOBmMs+YNWb/tAHtiIp1WdtxXgOS8
+   Bj6S4RH3NIVeUq37LBT0LoVW1b47rl0H4Jhm9v6ow4nUds7e8IydC8D00
+   e/AeASp74XaHwrCbsiL2dZRgLvmu1YfExdRKRX2HAyehRzq1punRky812
+   g==;
+X-IronPort-AV: E=Sophos;i="5.97,315,1669100400"; 
+   d="scan'208";a="197958252"
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa4.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 21 Feb 2023 02:42:44 -0700
+Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.16; Tue, 21 Feb 2023 02:42:43 -0700
+Received: from che-lt-i64410lx.microchip.com (10.10.115.15) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
+ 15.1.2507.16 via Frontend Transport; Tue, 21 Feb 2023 02:42:39 -0700
+From:   Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+To:     <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
+        <alexandre.belloni@bootlin.com>, <linux-kernel@vger.kernel.org>,
         <linux-mmc@vger.kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-kernel@vger.kernel.org>
-References: <20230215113249.47727-1-william.qiu@starfivetech.com>
- <20230215113249.47727-5-william.qiu@starfivetech.com>
- <20230220234335.GA615198-robh@kernel.org>
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <20230220234335.GA615198-robh@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX068.cuchost.com
- (172.16.6.68)
-X-YovoleRuleAgent: yovoleflag
+        <linux-arm-kernel@lists.infradead.org>, <linus.walleij@linaro.org>,
+        <dmitry.torokhov@gmail.com>, <ulf.hansson@linaro.org>
+CC:     <hari.prasathge@microchip.com>,
+        <balamanikandan.gunasundar@microchip.com>
+Subject: [PATCH v4 0/2] mmc: atmel-mci: Convert to gpio descriptors
+Date:   Tue, 21 Feb 2023 15:12:05 +0530
+Message-ID: <20230221094207.102006-1-balamanikandan.gunasundar@microchip.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Replace legacy gpio apis with gpio descriptors. This v4 is just a
+rebase to the "next" branch of
+https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git
 
+I would like to have the improvements suggested by Linus as a separate
+patch. Please let me know your comments.
+https://lore.kernel.org/all/CACRpkdbORVt9sFCnBFE1U206M92u4fjk9enbDJYZw7HJyAC=ng@mail.gmail.com/
 
-On 2023/2/21 7:43, Rob Herring wrote:
-> On Wed, Feb 15, 2023 at 07:32:49PM +0800, William Qiu wrote:
->> Add documentation to describe StarFive System Controller Registers.
->> 
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> ---
->>  .../bindings/soc/starfive/jh7110-syscon.yaml  | 51 +++++++++++++++++++
->>  MAINTAINERS                                   |  5 ++
->>  2 files changed, 56 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
->> 
->> diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
->> new file mode 100644
->> index 000000000000..fa4d8522a454
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
->> @@ -0,0 +1,51 @@
->> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
->> +%YAML 1.2
->> +---
->> +$id: http://devicetree.org/schemas/soc/starfive/jh7110-syscon.yaml#
->> +$schema: http://devicetree.org/meta-schemas/core.yaml#
->> +
->> +title: StarFive JH7110 SoC system controller
->> +
->> +maintainers:
->> +  - William Qiu <william.qiu@starfivetech.com>
->> +
->> +description: |
->> +  The StarFive JH7110 SoC system controller provides register information such
->> +  as offset, mask and shift to configure related modules such as MMC and PCIe.
->> +
->> +properties:
->> +  compatible:
->> +    items:
->> +      - enum:
->> +          - starfive,jh7110-stg-syscon
->> +          - starfive,jh7110-sys-syscon
->> +          - starfive,jh7110-aon-syscon
-> 
-> Is 'syscon' really part of what the blocks are called? Is just 'stg', 
-> 'sys' and 'aon' not unique enough?
-> 
-> Rob
-Hi Rob,
+v4:
 
-In StarFive SoC, we do have syscrg/aoncrg/stgcrg, which is uesd to be the clock
-controller, so 'syscon' is added to avoid confusion.
+- Rebase on top of next branch
+  https://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git 
 
-Best regards
-William
+v3:
+
+- [PATCH v3 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Convert devm_gpiod_get_from_of_node() into devm_fwnode_gpiod_get()
+
+v2:
+
+- [PATCH 1/2] mmc: atmel-mci: Convert to gpio descriptors
+  Remove "#include <linux/gpio.h>" as it is not necessary
+
+- [PATCH 2/2] mmc: atmel-mci: move atmel MCI header file
+  Move linux/atmel-mci.h into drivers/mmc/host/atmel-mci.c as it is
+  used only by one file
+
+Balamanikandan Gunasundar (2):
+  mmc: atmel-mci: Convert to gpio descriptors
+  mmc: atmel-mci: move atmel MCI header file
+
+ drivers/mmc/host/atmel-mci.c | 116 ++++++++++++++++++++++-------------
+ include/linux/atmel-mci.h    |  46 --------------
+ 2 files changed, 75 insertions(+), 87 deletions(-)
+ delete mode 100644 include/linux/atmel-mci.h
+
+-- 
+2.25.1
+
