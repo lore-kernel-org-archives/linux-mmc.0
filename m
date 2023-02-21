@@ -2,190 +2,78 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 13C77C6379F
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Feb 2023 09:43:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E026FC61DA3
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Feb 2023 11:11:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233993AbjBUJnA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Feb 2023 04:43:00 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52836 "EHLO
+        id S233994AbjBULLL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Feb 2023 06:11:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38660 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233988AbjBUJm6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Feb 2023 04:42:58 -0500
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D4CD30E9;
-        Tue, 21 Feb 2023 01:42:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1676972576; x=1708508576;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=VdRIV4wFzCNVr8yDuZx/Q+Vky4EpLNRgaQcQ7QQdiLY=;
-  b=EHh4QRy+q/XHg2kYtrkMvjVmpiv2Dzwu9X3DwiXIUxTNsI81JQGXN90n
-   /XlNI+5/QpYIkw9QLDmk/Og+K9MSTLWHaToGQGlHdthoxkh/szt4NMBeu
-   FGH3B16C3DBypfIlC2PSo9VhcNLIGl/07eJesEGCmL9KPjNaTdBBxVfi0
-   vax6puiiM214gGwsfcUj1jrCpc981m6fd1C8L3bzfUqETLmA+MFOgbjG3
-   dB31oPCq+C+lV07DM9uWT9njBjIxKce3krJiE+cAZHfsGEsqtZnFJx5er
-   tRzvjigLtPG/u6wBt6YOQUdKGgCmxmlGtjOt3Y8ZHYzrUn9uFarVSFO2H
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.97,315,1669100400"; 
-   d="scan'208";a="138246831"
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa6.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 21 Feb 2023 02:42:55 -0700
-Received: from chn-vm-ex04.mchp-main.com (10.10.85.152) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.16; Tue, 21 Feb 2023 02:42:54 -0700
-Received: from che-lt-i64410lx.microchip.com (10.10.115.15) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server id
- 15.1.2507.16 via Frontend Transport; Tue, 21 Feb 2023 02:42:49 -0700
-From:   Balamanikandan Gunasundar 
-        <balamanikandan.gunasundar@microchip.com>
-To:     <ludovic.desroches@microchip.com>, <nicolas.ferre@microchip.com>,
-        <alexandre.belloni@bootlin.com>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <linus.walleij@linaro.org>,
-        <dmitry.torokhov@gmail.com>, <ulf.hansson@linaro.org>
-CC:     <hari.prasathge@microchip.com>,
-        <balamanikandan.gunasundar@microchip.com>
-Subject: [PATCH v4 2/2] mmc: atmel-mci: move atmel MCI header file
-Date:   Tue, 21 Feb 2023 15:12:07 +0530
-Message-ID: <20230221094207.102006-3-balamanikandan.gunasundar@microchip.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230221094207.102006-1-balamanikandan.gunasundar@microchip.com>
-References: <20230221094207.102006-1-balamanikandan.gunasundar@microchip.com>
+        with ESMTP id S234120AbjBULKj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Feb 2023 06:10:39 -0500
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2BA326867
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Feb 2023 03:10:16 -0800 (PST)
+Received: by mail-yb1-xb2a.google.com with SMTP id v78so4425087ybe.3
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Feb 2023 03:10:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=wgIp62pzwCObd0eefLyPJFxxjkrzYi1dSStE7mQL2AA=;
+        b=M+mG5uA81xf5aCvrdEKImP+VJGXmDOoJqSV+r/Np9pAPGarh/3KigKLHAJduKrCRrX
+         yfJAUE+hTAKS4vY7r8f5gvgY/CCnf51ekJzzaqpFUufySN7hmYPkqflap430IybImOOV
+         bysqaiyN8VG6pdJTvCkgxh5hG635ywJ2G1YnNDixu/CS+86I97Ku+HDjgDeTo+cO5bUz
+         uLh4nS++PloEufwI+uVZIg+qkue9hI+AVhJ2h+utR2qlu49BI66EA7YwwwQuWRN3HxZg
+         qEnQRj4XxbadSrvYNlII99cbV/eSB/63sjPluNknszurQNkgnBShrbyuPI9O4DUKberX
+         c/qA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=wgIp62pzwCObd0eefLyPJFxxjkrzYi1dSStE7mQL2AA=;
+        b=vcTmufz4opLI+imp2mykVPZCoGaIrTIEf8xhlEIg4tN/g/uR3wgmLOXbYdwg+IL02G
+         8+6mbvELQ6DQoPkvzEaP4OBhMKLsIAIk5MtnT62CtpZkpNm3qKN096JHrG/t/B8PSsNs
+         cgEwAT31E9u4gO0iZcrN5PXJkqVMPP3cbwM+s84Q1oamSHdJBlqfCUtZpdj6B+5YX5zI
+         pRLwMaUu6SCzvQ3/t4QIICEHqpaYYYIAyyvRUf6hQcn2YHMkxj1cOQE1ga4vY3tjsGMM
+         xoGdQ5vYGOL0i9k7olUqRvQEt6QFYbH7Yb9L743oZ1FIoKKQxi2aO6trbP7o/HpgPd5i
+         SDng==
+X-Gm-Message-State: AO0yUKWcNMebytXSxodeExLEIXqQTQhTsEtCFc6bY9OZhAHYp5NCMAw0
+        NpF50SssGvJx4VDvTieaUAIYUhmzlZVob+hBt4wTzw==
+X-Google-Smtp-Source: AK7set9bxLWCg+I02dYRE6AtkeWcj7QVPcohWSsIO7j40qyvzrzqQVQ+iv+8opivluVMuJWItWi6KI8Sggt391jf/lE=
+X-Received: by 2002:a05:6902:10ca:b0:9ed:13e9:fe68 with SMTP id
+ w10-20020a05690210ca00b009ed13e9fe68mr366317ybu.3.1676977816195; Tue, 21 Feb
+ 2023 03:10:16 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+References: <20230221094207.102006-1-balamanikandan.gunasundar@microchip.com> <20230221094207.102006-2-balamanikandan.gunasundar@microchip.com>
+In-Reply-To: <20230221094207.102006-2-balamanikandan.gunasundar@microchip.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 21 Feb 2023 12:10:05 +0100
+Message-ID: <CACRpkdb65OondM07Uje7UWy3Gc8BDT2eFg=tjE1diELxFJNaUg@mail.gmail.com>
+Subject: Re: [PATCH v4 1/2] mmc: atmel-mci: Convert to gpio descriptors
+To:     Balamanikandan Gunasundar 
+        <balamanikandan.gunasundar@microchip.com>
+Cc:     ludovic.desroches@microchip.com, nicolas.ferre@microchip.com,
+        alexandre.belloni@bootlin.com, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        dmitry.torokhov@gmail.com, ulf.hansson@linaro.org,
+        hari.prasathge@microchip.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Move the contents of linux/atmel-mci.h into
-drivers/mmc/host/atmel-mci.c as it is only used in one file
+On Tue, Feb 21, 2023 at 10:42 AM Balamanikandan Gunasundar
+<balamanikandan.gunasundar@microchip.com> wrote:
 
-Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
----
- drivers/mmc/host/atmel-mci.c | 39 +++++++++++++++++++++++++++++-
- include/linux/atmel-mci.h    | 46 ------------------------------------
- 2 files changed, 38 insertions(+), 47 deletions(-)
- delete mode 100644 include/linux/atmel-mci.h
+> Replace the legacy GPIO APIs with gpio descriptor consumer interface.
+> To maintain backward compatibility, we rely on the "cd-inverted"
+> property to manage the invertion flag instead of GPIO property.
+>
+> Signed-off-by: Balamanikandan Gunasundar <balamanikandan.gunasundar@microchip.com>
 
-diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index ddad5a929634..8b5116d7ae74 100644
---- a/drivers/mmc/host/atmel-mci.c
-+++ b/drivers/mmc/host/atmel-mci.c
-@@ -30,7 +30,6 @@
- #include <linux/mmc/host.h>
- #include <linux/mmc/sdio.h>
- 
--#include <linux/atmel-mci.h>
- #include <linux/atmel_pdc.h>
- #include <linux/pm.h>
- #include <linux/pm_runtime.h>
-@@ -40,6 +39,8 @@
- #include <asm/io.h>
- #include <asm/unaligned.h>
- 
-+#define ATMCI_MAX_NR_SLOTS	2
-+
- /*
-  * Superset of MCI IP registers integrated in Atmel AT91 Processor
-  * Registers and bitfields marked with [2] are only available in MCI2
-@@ -201,6 +202,42 @@ enum atmci_pdc_buf {
- 	PDC_SECOND_BUF,
- };
- 
-+/**
-+ * struct mci_slot_pdata - board-specific per-slot configuration
-+ * @bus_width: Number of data lines wired up the slot
-+ * @detect_pin: GPIO pin wired to the card detect switch
-+ * @wp_pin: GPIO pin wired to the write protect sensor
-+ * @detect_is_active_high: The state of the detect pin when it is active
-+ * @non_removable: The slot is not removable, only detect once
-+ *
-+ * If a given slot is not present on the board, @bus_width should be
-+ * set to 0. The other fields are ignored in this case.
-+ *
-+ * Any pins that aren't available should be set to a negative value.
-+ *
-+ * Note that support for multiple slots is experimental -- some cards
-+ * might get upset if we don't get the clock management exactly right.
-+ * But in most cases, it should work just fine.
-+ */
-+struct mci_slot_pdata {
-+	unsigned int		bus_width;
-+	struct gpio_desc        *detect_pin;
-+	struct gpio_desc	*wp_pin;
-+	bool			detect_is_active_high;
-+	bool			non_removable;
-+};
-+
-+/**
-+ * struct mci_platform_data - board-specific MMC/SDcard configuration
-+ * @dma_slave: DMA slave interface to use in data transfers.
-+ * @slot: Per-slot configuration data.
-+ */
-+struct mci_platform_data {
-+	void			*dma_slave;
-+	dma_filter_fn		dma_filter;
-+	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
-+};
-+
- struct atmel_mci_caps {
- 	bool    has_dma_conf_reg;
- 	bool    has_pdc;
-diff --git a/include/linux/atmel-mci.h b/include/linux/atmel-mci.h
-deleted file mode 100644
-index 017e7d8f6126..000000000000
---- a/include/linux/atmel-mci.h
-+++ /dev/null
-@@ -1,46 +0,0 @@
--/* SPDX-License-Identifier: GPL-2.0 */
--#ifndef __LINUX_ATMEL_MCI_H
--#define __LINUX_ATMEL_MCI_H
--
--#include <linux/types.h>
--#include <linux/dmaengine.h>
--
--#define ATMCI_MAX_NR_SLOTS	2
--
--/**
-- * struct mci_slot_pdata - board-specific per-slot configuration
-- * @bus_width: Number of data lines wired up the slot
-- * @detect_pin: GPIO pin wired to the card detect switch
-- * @wp_pin: GPIO pin wired to the write protect sensor
-- * @detect_is_active_high: The state of the detect pin when it is active
-- * @non_removable: The slot is not removable, only detect once
-- *
-- * If a given slot is not present on the board, @bus_width should be
-- * set to 0. The other fields are ignored in this case.
-- *
-- * Any pins that aren't available should be set to a negative value.
-- *
-- * Note that support for multiple slots is experimental -- some cards
-- * might get upset if we don't get the clock management exactly right.
-- * But in most cases, it should work just fine.
-- */
--struct mci_slot_pdata {
--	unsigned int		bus_width;
--	struct gpio_desc        *detect_pin;
--	struct gpio_desc	*wp_pin;
--	bool			detect_is_active_high;
--	bool			non_removable;
--};
--
--/**
-- * struct mci_platform_data - board-specific MMC/SDcard configuration
-- * @dma_slave: DMA slave interface to use in data transfers.
-- * @slot: Per-slot configuration data.
-- */
--struct mci_platform_data {
--	void			*dma_slave;
--	dma_filter_fn		dma_filter;
--	struct mci_slot_pdata	slot[ATMCI_MAX_NR_SLOTS];
--};
--
--#endif /* __LINUX_ATMEL_MCI_H */
--- 
-2.25.1
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
+Yours,
+Linus Walleij
