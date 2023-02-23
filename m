@@ -2,108 +2,139 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3788EC636D6
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Feb 2023 12:37:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60204C636D6
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Feb 2023 14:14:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233379AbjBWMhD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Feb 2023 07:37:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33748 "EHLO
+        id S234281AbjBWOO3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Feb 2023 09:14:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233157AbjBWMhC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2023 07:37:02 -0500
-X-Greylist: delayed 1845 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 23 Feb 2023 04:36:32 PST
-Received: from m126.mail.126.com (m126.mail.126.com [220.181.12.26])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTP id 2D51C5328F;
-        Thu, 23 Feb 2023 04:36:31 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=126.com;
-        s=s110527; h=From:Subject:Date:Message-Id:MIME-Version; bh=k4Fjd
-        bg6JDTEylD+E4vE7UUfeyw4I0IpjbUzfoCkJhc=; b=U84x9rz1Ozud4kMckliMT
-        8qRQqZdZ6nkgWZdCcFvI7SriXtnUrgFaukMJ4i8rb5ZlxpzUcNCTzfrh/UeDCf2a
-        Fr4HW3ftCUc33P0wv/wfxGT+fVeJbs9xgxlg6m67m1ftD/JzaAEkj2OjBstnCHYA
-        x+nmIrxkMEUklL0BPORHpE=
-Received: from bht-Z390-M-GAMING.towerbridgetechnology.com (unknown [58.48.115.170])
-        by zwqz-smtp-mta-g2-0 (Coremail) with SMTP id _____wB30oJoVvdjqEj_AA--.44287S2;
-        Thu, 23 Feb 2023 20:05:25 +0800 (CST)
-From:   fredaibayhubtech@126.com
-To:     adrian_hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux.kernel@vger.kernel.org
-Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
-        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
-        fred.ai@bayhubtech.com
-Subject: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Fix SDR50 mode timing issue
-Date:   Thu, 23 Feb 2023 20:04:50 +0800
-Message-Id: <20230223120450.16858-1-fredaibayhubtech@126.com>
-X-Mailer: git-send-email 2.37.2
+        with ESMTP id S234284AbjBWOO1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2023 09:14:27 -0500
+Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2051.outbound.protection.outlook.com [40.107.244.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E953E26CD0;
+        Thu, 23 Feb 2023 06:14:20 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=gi1DD7NGWf2ivqVbJ3Fw0Gxf4OaXYRCco3nmF5UIGOth6abPayJM6XlVIOiK7WtPanb857fh8DvyRK/aSGA/o/DmboZgRbiu5qeo7ZbFi2UsFc+rYLJMBOKzUkKILEbYtUxHVGZTjWY70dp+w+rUdeTIHa4ScvkBBj2JvQyh3kr/27ejk7qAWLpyduMmZjzwILACgU6dYIJEiNcRnld1oPS9+xGtjyMS7o+sRyjbA89MipkGa3uJyfdCw7N12hfcGrq5sHGLfS91io8tJsGAfNxkoBai7McuknQOvxUZlVl0jecPzIX4OS8eUvv84Heq+CvirdyxQ37aLlE3jwG+AA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=0c7g5hltWK5WiLGYgI8RABl9ZTU365m03obYU21rfAw=;
+ b=jQE3OBtfT3nNzYukCWPFkLuIJ7rV5q3ekEEkLcoogH+E93N+TXtCRtV0B8nNB1QMiDJsbr5TR6Auq9DCV//3PQXr/w9Tt2f5cPAS3ZRnRavsjDaVLL/mf3ONAewSo9aWn4PFAQCkxYBILF0HqKLTJIooG0o1dmZpGsllefFCu8vfUNP7A+pdOlX/1VXijDum7g/e/9EHqheZhtDH83HFLFoNI/RaCyDzjXJlESXIRneAIlhDzmYXk1UTD+C5N+LxSc1Re6avUtHunazUXPuytAO0c9uVqpdZ1zLIppx90c6NBEH37437OMQyWEJW7laiGgXYXX0nLjv9J/+qMDFfbQ==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=0c7g5hltWK5WiLGYgI8RABl9ZTU365m03obYU21rfAw=;
+ b=fwc1Kmn/w2lI7a11qVTi9bEHnkM4jcpCh8tBRWl9Os4NWCdUrkZ7YFe4PTYn0o+KGsoI6AtXNsbYztdGwVrmSQp7YQCTv9y9uWAZjBT9PRPYoW2mPkiqwsJ7rpTIFUR2ABtAOcxSJM6ajmzpQSMqaCTLOnyT/x3Ckh9W94POWh4=
+Received: from MN2PR05CA0024.namprd05.prod.outlook.com (2603:10b6:208:c0::37)
+ by PH7PR12MB5855.namprd12.prod.outlook.com (2603:10b6:510:1d6::11) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6111.21; Thu, 23 Feb
+ 2023 14:14:18 +0000
+Received: from BL02EPF000108EA.namprd05.prod.outlook.com
+ (2603:10b6:208:c0:cafe::79) by MN2PR05CA0024.outlook.office365.com
+ (2603:10b6:208:c0::37) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.7 via Frontend
+ Transport; Thu, 23 Feb 2023 14:14:17 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com; pr=C
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ BL02EPF000108EA.mail.protection.outlook.com (10.167.241.203) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6134.14 via Frontend Transport; Thu, 23 Feb 2023 14:14:17 +0000
+Received: from SATLEXMB08.amd.com (10.181.40.132) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 23 Feb
+ 2023 08:14:17 -0600
+Received: from SATLEXMB04.amd.com (10.181.40.145) by SATLEXMB08.amd.com
+ (10.181.40.132) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 23 Feb
+ 2023 06:14:16 -0800
+Received: from xhdswatia40.xilinx.com (10.180.168.240) by SATLEXMB04.amd.com
+ (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34 via Frontend
+ Transport; Thu, 23 Feb 2023 08:14:14 -0600
+From:   Swati Agarwal <swati.agarwal@amd.com>
+To:     <adrian.hunter@intel.com>, <michal.simek@xilinx.com>,
+        <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <git@amd.com>
+Subject: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
+Date:   Thu, 23 Feb 2023 19:44:02 +0530
+Message-ID: <20230223141402.23979-1-swati.agarwal@amd.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
-X-CM-TRANSID: _____wB30oJoVvdjqEj_AA--.44287S2
-X-Coremail-Antispam: 1Uf129KBjvJXoWxWw13JF1fAF1DCF18KrWkXrb_yoW5Jw1kpr
-        Z3tayqya12qrZYvFZrXw10vr15Xw1vyrW0vFyfGw1fZF4xCrW2vrs7Ca45WFy8XrZ3tw1f
-        Xrs5tF97Wr1UX37anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
-        9KBjDUYxBIdaVFxhVjvjDU0xZFpf9x07jMtC7UUUUU=
-X-Originating-IP: [58.48.115.170]
-X-CM-SenderInfo: xiuhvtpled5x5xewvubk6rjloofrz/1tbiIQcfbWIxlYFUiQAAsO
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BL02EPF000108EA:EE_|PH7PR12MB5855:EE_
+X-MS-Office365-Filtering-Correlation-Id: 30ea5912-915d-44c0-fb70-08db15a84005
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: fRaKgH28ig3raBsCUGp/AaeE6KBkfWdV0yYUmFvNV5iEdvdWFFs0EI/lJh+LWoyV6AASHBoImd/ityP4pZyAVa0X4b1nwSNddyybac2itqqTf6HDYoDaaEq3oioOyyja64HGbXjWKE90Y91AEC3pCQ4HC9DZdb8hhmD6ZHS2CyUgJmi0MVKmdDXw0nA+Y9aEYvUIUKGWMweAF5/OyAXIESIsKqYDoO+zCp7efeuggW14LzZ//bgyi6iirBQFEiF4UEh/9+P2Kga4VuGy4ABtqiCNAOGvZXgQR51hGZ1w8vWtwCzvbSSii8n+w85Vy+I/kNypMz852HB/8fG0aUGYjWjK44HH7fN86c8rV+D/28KhOJLfVjB10DszQQ5UhlMcgRoVLnMnBjYReI9RuYLkf2YlAnygM+CbXXMvEJNCGnGUMF9LL+L+ZRJaV3Lr9I86tklbwGk3AIjkEUwl9+JTgPGqj2IRGFISJV/CGzJ9TYPIZ66M1ODtHXhQwDM0RQOh+sy5V3IaUY0/n7RD8RYJ2eAwNTjUYGIBORa56S1Y0aiiLBaGV+rLIJB988Rvwj8AYQ0rtuq5003htD369ny3CmnWHHTXB+WrICTtQe55ti39WnpX2Pq4kmvl4thbp19K8F94g1wzBNnZTTDEMq3Zi1B8EA1Qa7hZNLBLWEcMzpiQg1XOn4JF5IJ0HCjHyuQEuGgtDSZbngXGGpNROR9vRjduzNR7bskKSPPDEbkG0rw=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(346002)(136003)(396003)(376002)(39860400002)(451199018)(36840700001)(46966006)(40470700004)(110136005)(54906003)(336012)(2616005)(6666004)(36756003)(186003)(316002)(40460700003)(26005)(478600001)(40480700001)(86362001)(1076003)(8676002)(4326008)(70206006)(82310400005)(8936002)(83380400001)(5660300002)(44832011)(36860700001)(356005)(82740400003)(47076005)(2906002)(426003)(70586007)(81166007)(41300700001)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Feb 2023 14:14:17.5567
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 30ea5912-915d-44c0-fb70-08db15a84005
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BL02EPF000108EA.namprd05.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB5855
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Fred <fred.ai@bayhubtech.com>
+Add support to read the optional "gate" clock property and request the
+clock which will be used to ungate the DLL clock.
 
-Change SDR50 mode clock source from DLL output clock to PLL open clock
-1.HS200 and SDR104 mode select DLL output clock
-2.SDR50 mode select PLL open clock
+For Xilinx platforms which has DLL module, dll clock must be
+ungated/enabled when SD controller operates at higher frequencies like 50
+MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
+clock from the driver.
 
-Signed-off-by: Fred <fred.ai@bayhubtech.com>
+Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
 ---
-Change in V1
-SDR50 mode select PLL open clock as its clock source.
----
- drivers/mmc/host/sdhci-pci-o2micro.c | 30 +++++++++++++++-------------
- 1 file changed, 16 insertions(+), 14 deletions(-)
+ drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
-index 98cadff47b2b..620f52ad9667 100644
---- a/drivers/mmc/host/sdhci-pci-o2micro.c
-+++ b/drivers/mmc/host/sdhci-pci-o2micro.c
-@@ -339,22 +339,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
- 	reg_val &= ~SDHCI_CLOCK_CARD_EN;
- 	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+index 4eebbf801b41..1fd7528c14fc 100644
+--- a/drivers/mmc/host/sdhci-of-arasan.c
++++ b/drivers/mmc/host/sdhci-of-arasan.c
+@@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 	int ret;
+ 	struct device_node *node;
+ 	struct clk *clk_xin;
++	struct clk *clk_dll;
+ 	struct sdhci_host *host;
+ 	struct sdhci_pltfm_host *pltfm_host;
+ 	struct device *dev = &pdev->dev;
+@@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+ 		goto clk_dis_ahb;
+ 	}
  
--	/* UnLock WP */
--	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
--	scratch_8 &= 0x7f;
--	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
--
--	/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
--	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
--	reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
--	reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
--	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
-+	if ((host->timing == MMC_TIMING_MMC_HS200) ||
-+		(host->timing == MMC_TIMING_UHS_SDR104)) {
-+		/* UnLock WP */
-+		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+		scratch_8 &= 0x7f;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
- 
--	/* Lock WP */
--	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
--	scratch_8 |= 0x80;
--	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
-+		/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
-+		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
-+		reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
-+		reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
-+		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
- 
-+		/* Lock WP */
-+		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
-+		scratch_8 |= 0x80;
-+		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
++	clk_dll = devm_clk_get_optional_enabled(dev, "gate");
++	if (IS_ERR(clk_dll)) {
++		ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
++		goto clk_disable_all;
 +	}
- 	/* Start clk */
- 	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
- 	reg_val |= SDHCI_CLOCK_CARD_EN;
++
+ 	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+ 		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+ 
 -- 
-2.37.2
+2.17.1
 
