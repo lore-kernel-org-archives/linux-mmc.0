@@ -2,139 +2,149 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60204C636D6
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Feb 2023 14:14:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4265CC64ED8
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Feb 2023 10:22:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234281AbjBWOO3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Feb 2023 09:14:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51912 "EHLO
+        id S229552AbjBXKWo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Feb 2023 05:22:44 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45064 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234284AbjBWOO1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Feb 2023 09:14:27 -0500
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2051.outbound.protection.outlook.com [40.107.244.51])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E953E26CD0;
-        Thu, 23 Feb 2023 06:14:20 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=gi1DD7NGWf2ivqVbJ3Fw0Gxf4OaXYRCco3nmF5UIGOth6abPayJM6XlVIOiK7WtPanb857fh8DvyRK/aSGA/o/DmboZgRbiu5qeo7ZbFi2UsFc+rYLJMBOKzUkKILEbYtUxHVGZTjWY70dp+w+rUdeTIHa4ScvkBBj2JvQyh3kr/27ejk7qAWLpyduMmZjzwILACgU6dYIJEiNcRnld1oPS9+xGtjyMS7o+sRyjbA89MipkGa3uJyfdCw7N12hfcGrq5sHGLfS91io8tJsGAfNxkoBai7McuknQOvxUZlVl0jecPzIX4OS8eUvv84Heq+CvirdyxQ37aLlE3jwG+AA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=0c7g5hltWK5WiLGYgI8RABl9ZTU365m03obYU21rfAw=;
- b=jQE3OBtfT3nNzYukCWPFkLuIJ7rV5q3ekEEkLcoogH+E93N+TXtCRtV0B8nNB1QMiDJsbr5TR6Auq9DCV//3PQXr/w9Tt2f5cPAS3ZRnRavsjDaVLL/mf3ONAewSo9aWn4PFAQCkxYBILF0HqKLTJIooG0o1dmZpGsllefFCu8vfUNP7A+pdOlX/1VXijDum7g/e/9EHqheZhtDH83HFLFoNI/RaCyDzjXJlESXIRneAIlhDzmYXk1UTD+C5N+LxSc1Re6avUtHunazUXPuytAO0c9uVqpdZ1zLIppx90c6NBEH37437OMQyWEJW7laiGgXYXX0nLjv9J/+qMDFfbQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=0c7g5hltWK5WiLGYgI8RABl9ZTU365m03obYU21rfAw=;
- b=fwc1Kmn/w2lI7a11qVTi9bEHnkM4jcpCh8tBRWl9Os4NWCdUrkZ7YFe4PTYn0o+KGsoI6AtXNsbYztdGwVrmSQp7YQCTv9y9uWAZjBT9PRPYoW2mPkiqwsJ7rpTIFUR2ABtAOcxSJM6ajmzpQSMqaCTLOnyT/x3Ckh9W94POWh4=
-Received: from MN2PR05CA0024.namprd05.prod.outlook.com (2603:10b6:208:c0::37)
- by PH7PR12MB5855.namprd12.prod.outlook.com (2603:10b6:510:1d6::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6111.21; Thu, 23 Feb
- 2023 14:14:18 +0000
-Received: from BL02EPF000108EA.namprd05.prod.outlook.com
- (2603:10b6:208:c0:cafe::79) by MN2PR05CA0024.outlook.office365.com
- (2603:10b6:208:c0::37) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.7 via Frontend
- Transport; Thu, 23 Feb 2023 14:14:17 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB03.amd.com; pr=C
-Received: from SATLEXMB03.amd.com (165.204.84.17) by
- BL02EPF000108EA.mail.protection.outlook.com (10.167.241.203) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6134.14 via Frontend Transport; Thu, 23 Feb 2023 14:14:17 +0000
-Received: from SATLEXMB08.amd.com (10.181.40.132) by SATLEXMB03.amd.com
- (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 23 Feb
- 2023 08:14:17 -0600
-Received: from SATLEXMB04.amd.com (10.181.40.145) by SATLEXMB08.amd.com
- (10.181.40.132) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 23 Feb
- 2023 06:14:16 -0800
-Received: from xhdswatia40.xilinx.com (10.180.168.240) by SATLEXMB04.amd.com
- (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34 via Frontend
- Transport; Thu, 23 Feb 2023 08:14:14 -0600
-From:   Swati Agarwal <swati.agarwal@amd.com>
-To:     <adrian.hunter@intel.com>, <michal.simek@xilinx.com>,
-        <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <git@amd.com>
-Subject: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
-Date:   Thu, 23 Feb 2023 19:44:02 +0530
-Message-ID: <20230223141402.23979-1-swati.agarwal@amd.com>
-X-Mailer: git-send-email 2.17.1
+        with ESMTP id S229604AbjBXKWn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Feb 2023 05:22:43 -0500
+Received: from mail-qt1-x836.google.com (mail-qt1-x836.google.com [IPv6:2607:f8b0:4864:20::836])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BB4B1CF46;
+        Fri, 24 Feb 2023 02:22:42 -0800 (PST)
+Received: by mail-qt1-x836.google.com with SMTP id c18so440308qte.5;
+        Fri, 24 Feb 2023 02:22:42 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=5ArdJ82Ti4o0RpCTc3la0LvQj32FhuvjhyjGEJAFaRo=;
+        b=dC+nfr7TtVnR4AooU8jYBSOyZWFE53uaJTrXRf5ZXHxMwrkYb4cFtOFFOLVfq+yuaf
+         OCWXKw+rE9CPImvyXqhS1lHmHVFuzDbh7Yho2IjAwkZvRxQQHXpTje8n7N/cikNyyEx0
+         s7MgUWDsxzLWKqMbSFfyedo7TKCmnOdeNQLFv/LLv4P18NaLFYruLreA/4PLeBwIFkR5
+         VCPGLjMT7UkAwXXpf/mw3F4vcnnAImVXxUW5TLc55VFmnPiUNCBZpeQZwRrptQZMFdN2
+         L31ydk5THOP0hdu2l1zdkZLp4UxVS2TVrrBZpoMNJGDaLGHVx4sM0q7lxdNEY2tqwlXd
+         +cWw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=5ArdJ82Ti4o0RpCTc3la0LvQj32FhuvjhyjGEJAFaRo=;
+        b=bIbZvEjNdncOBtmR2z6EP/z6S53cGy7MmzwhI421v0qX+iNfqANdswZ0C1JVMpycb9
+         Oszsjmdw+32AjZcALTCTvLLmXru3AK1L+ln1pufbFnprqeF1wd+kziz3U1yT5K3LxTCI
+         TBZ7yZtijBcNcIh20KLxdA0pxksQFzOzU38UahbEHLy1pn1rzJj79S1+7UE5it3odeLN
+         SNP0Hn5CEgxYoee2xtxom4fh/JyLYFXDYYkuPBa88L47vXEJ8hj0SMvSJS7JwEI3kc+X
+         MoVvs8unP4IjArww+JLbfhEzzUmiWqYhNdShtUyR7UOUUKAreSkLDnMEldC4oorS3mdW
+         NZ4g==
+X-Gm-Message-State: AO0yUKVyKysLexonkdvxxDcN3nP5PrCP/rvVuaIT5dcxhs32r+4zGVqR
+        OF4FD/pMksH6XM0lMwjWu98N8odyM80B40SIK1U=
+X-Google-Smtp-Source: AK7set+lNXXxsCgvZ4t+iXZH2vNnwUUFCHa+MJV8RpOpu6jfJWo34rHQetYrPNWTBHzkKFezpLRWlPO/VD3cWQvBCKo=
+X-Received: by 2002:ac8:604e:0:b0:3bd:6c0:933d with SMTP id
+ k14-20020ac8604e000000b003bd06c0933dmr2758827qtm.10.1677234161233; Fri, 24
+ Feb 2023 02:22:41 -0800 (PST)
 MIME-Version: 1.0
+References: <20221213090047.3805-1-victor.shih@genesyslogic.com.tw>
+ <20221213090047.3805-2-victor.shih@genesyslogic.com.tw> <1dc8942d-b7c7-144b-f5a1-a3f614f159ff@intel.com>
+In-Reply-To: <1dc8942d-b7c7-144b-f5a1-a3f614f159ff@intel.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Fri, 24 Feb 2023 18:22:29 +0800
+Message-ID: <CAK00qKC0h1x=oXFcXPGe0hFCnTG2vsgrSWttVYro9P1D_7=LWg@mail.gmail.com>
+Subject: Re: [PATCH V6 01/24] mmc: core: Cleanup printing of speed mode at
+ card insertion
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BL02EPF000108EA:EE_|PH7PR12MB5855:EE_
-X-MS-Office365-Filtering-Correlation-Id: 30ea5912-915d-44c0-fb70-08db15a84005
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: fRaKgH28ig3raBsCUGp/AaeE6KBkfWdV0yYUmFvNV5iEdvdWFFs0EI/lJh+LWoyV6AASHBoImd/ityP4pZyAVa0X4b1nwSNddyybac2itqqTf6HDYoDaaEq3oioOyyja64HGbXjWKE90Y91AEC3pCQ4HC9DZdb8hhmD6ZHS2CyUgJmi0MVKmdDXw0nA+Y9aEYvUIUKGWMweAF5/OyAXIESIsKqYDoO+zCp7efeuggW14LzZ//bgyi6iirBQFEiF4UEh/9+P2Kga4VuGy4ABtqiCNAOGvZXgQR51hGZ1w8vWtwCzvbSSii8n+w85Vy+I/kNypMz852HB/8fG0aUGYjWjK44HH7fN86c8rV+D/28KhOJLfVjB10DszQQ5UhlMcgRoVLnMnBjYReI9RuYLkf2YlAnygM+CbXXMvEJNCGnGUMF9LL+L+ZRJaV3Lr9I86tklbwGk3AIjkEUwl9+JTgPGqj2IRGFISJV/CGzJ9TYPIZ66M1ODtHXhQwDM0RQOh+sy5V3IaUY0/n7RD8RYJ2eAwNTjUYGIBORa56S1Y0aiiLBaGV+rLIJB988Rvwj8AYQ0rtuq5003htD369ny3CmnWHHTXB+WrICTtQe55ti39WnpX2Pq4kmvl4thbp19K8F94g1wzBNnZTTDEMq3Zi1B8EA1Qa7hZNLBLWEcMzpiQg1XOn4JF5IJ0HCjHyuQEuGgtDSZbngXGGpNROR9vRjduzNR7bskKSPPDEbkG0rw=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(346002)(136003)(396003)(376002)(39860400002)(451199018)(36840700001)(46966006)(40470700004)(110136005)(54906003)(336012)(2616005)(6666004)(36756003)(186003)(316002)(40460700003)(26005)(478600001)(40480700001)(86362001)(1076003)(8676002)(4326008)(70206006)(82310400005)(8936002)(83380400001)(5660300002)(44832011)(36860700001)(356005)(82740400003)(47076005)(2906002)(426003)(70586007)(81166007)(41300700001)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Feb 2023 14:14:17.5567
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 30ea5912-915d-44c0-fb70-08db15a84005
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BL02EPF000108EA.namprd05.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB5855
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support to read the optional "gate" clock property and request the
-clock which will be used to ungate the DLL clock.
+Hi, Adrian
 
-For Xilinx platforms which has DLL module, dll clock must be
-ungated/enabled when SD controller operates at higher frequencies like 50
-MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
-clock from the driver.
+On Fri, Jan 6, 2023 at 5:22 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
+>
+> On 13/12/22 11:00, Victor Shih wrote:
+> > The current print of the bus speed mode in mmc_add_card() has grown over
+> > the years and is now difficult to parse. Let's clean up the code and also
+> > take the opportunity to properly announce "DDR" for eMMCs as
+> > "high speed DDR", which is according to the eMMC spec.
+> >
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/core/bus.c | 35 ++++++++++++++++++++---------------
+> >  1 file changed, 20 insertions(+), 15 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/bus.c b/drivers/mmc/core/bus.c
+> > index 36679f4e9acc..bbbbdbca5366 100644
+> > --- a/drivers/mmc/core/bus.c
+> > +++ b/drivers/mmc/core/bus.c
+> > @@ -299,6 +299,7 @@ int mmc_add_card(struct mmc_card *card)
+> >  {
+> >       int ret;
+> >       const char *type;
+> > +     const char *speed_mode = "";
+> >       const char *uhs_bus_speed_mode = "";
+> >       static const char *const uhs_speeds[] = {
+> >               [UHS_SDR12_BUS_SPEED] = "SDR12 ",
+> > @@ -337,25 +338,29 @@ int mmc_add_card(struct mmc_card *card)
+> >               break;
+> >       }
+> >
+> > +     if (mmc_card_hs(card))
+> > +             speed_mode = "high speed ";
+> > +     else if (mmc_card_uhs(card))
+> > +             speed_mode = "ultra high speed ";
+> > +     else if (mmc_card_ddr52(card))
+> > +             speed_mode = "high speed DDR ";
+> > +     else if (mmc_card_hs200(card))
+> > +             speed_mode = "HS200 ";
+> > +     else if (mmc_card_hs400es(card))
+> > +             speed_mode = "HS400 Enhanced strobe ";
+> > +     else if (mmc_card_hs400(card))
+> > +             speed_mode = "HS400 ";
+> > +
+> >       if (mmc_card_uhs(card) &&
+> >               (card->sd_bus_speed < ARRAY_SIZE(uhs_speeds)))
+> >               uhs_bus_speed_mode = uhs_speeds[card->sd_bus_speed];
+> >
+> > -     if (mmc_host_is_spi(card->host)) {
+> > -             pr_info("%s: new %s%s%s card on SPI\n",
+> > -                     mmc_hostname(card->host),
+> > -                     mmc_card_hs(card) ? "high speed " : "",
+> > -                     mmc_card_ddr52(card) ? "DDR " : "",
+> > -                     type);
+> > -     } else {
+> > -             pr_info("%s: new %s%s%s%s%s%s card at address %04x\n",
+> > -                     mmc_hostname(card->host),
+> > -                     mmc_card_uhs(card) ? "ultra high speed " :
+> > -                     (mmc_card_hs(card) ? "high speed " : ""),
+> > -                     mmc_card_hs400(card) ? "HS400 " :
+> > -                     (mmc_card_hs200(card) ? "HS200 " : ""),
+> > -                     mmc_card_hs400es(card) ? "Enhanced strobe " : "",
+> > -                     mmc_card_ddr52(card) ? "DDR " : "",
+> > +     if (mmc_host_is_spi(card->host))
+> > +             pr_info("%s: new %s%s card on SPI\n",
+> > +                     mmc_hostname(card->host), speed_mode, type);
+> > +     else {
+>
+> This bracket wasn't in V5.  Brackets should be on both
+> branches of the if-clause or neither.
+>
 
-Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+I will update it in V7 version.
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index 4eebbf801b41..1fd7528c14fc 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 	int ret;
- 	struct device_node *node;
- 	struct clk *clk_xin;
-+	struct clk *clk_dll;
- 	struct sdhci_host *host;
- 	struct sdhci_pltfm_host *pltfm_host;
- 	struct device *dev = &pdev->dev;
-@@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
- 		goto clk_dis_ahb;
- 	}
- 
-+	clk_dll = devm_clk_get_optional_enabled(dev, "gate");
-+	if (IS_ERR(clk_dll)) {
-+		ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
-+		goto clk_disable_all;
-+	}
-+
- 	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
- 		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
- 
--- 
-2.17.1
+> > +             pr_info("%s: new %s%s%s card at address %04x\n",
+> > +                     mmc_hostname(card->host), speed_mode,
+> >                       uhs_bus_speed_mode, type, card->rca);
+> >       }
+> >
+>
 
+Thanks, Victor Shih
