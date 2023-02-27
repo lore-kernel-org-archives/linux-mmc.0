@@ -2,92 +2,149 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F1ABC7EE23
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 15:32:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8677C64ED8
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 16:13:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229535AbjB0Pc1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Feb 2023 10:32:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48118 "EHLO
+        id S230081AbjB0QN6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Feb 2023 11:13:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58686 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229749AbjB0PcI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 10:32:08 -0500
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E3FAAE3B8
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 07:32:06 -0800 (PST)
-Received: by mail-pl1-x630.google.com with SMTP id p6so6256148plf.0
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 07:32:06 -0800 (PST)
+        with ESMTP id S229762AbjB0QN5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 11:13:57 -0500
+Received: from mail-pl1-x629.google.com (mail-pl1-x629.google.com [IPv6:2607:f8b0:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74EBF1ABDD
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 08:13:56 -0800 (PST)
+Received: by mail-pl1-x629.google.com with SMTP id i10so7217519plr.9
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 08:13:56 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=vzLIC74mB4AwHY8XZKujyRlKy1H/v8jLcorp2jlzWKI=;
-        b=rn2fD9rsD+flcfwbZ84UDOjziBTFna+IHPFzXHCPW1Yzl4fraiAdSBPnSJyrxvCOLB
-         92iPch09wt00afbcOo/z92y+270U/I8xPA1HmCsvRioGbFgK4eV7IYUqHZNeh6NeIAuX
-         JYgz5bOAQrkTqd9Yi8gjFD62Mvn/LfZ9nLh9DxzINU63gJJfTRnnzk6ibXC1N0xvt0zn
-         CZNBVGnU1NVzWfshIig6wTqCwSQsPBh+oYa6pehfaTwmYnIgfAZC23UlBjvmWXq/CxU5
-         466+NRjzW1Zibn4WN1YfwH1grqJRpdONzLm27Bw8Btuk9yCZRWBhXp1AEujakFQDVH1m
-         nxaw==
+        bh=iU3DIPiFHtyl6MAm66myHOcnybgqDkhP99roOt2WViA=;
+        b=muARfEHVBJSBPQF3V/HIv82zR+6d+0M8snnG/omf3SMTJrZd9yx5aSHSUvTxc5+7fB
+         j9ohcL7w8tctZ+6qDIZFbftTarwx8R7f4InksG7uXbcMOWdvxgSsEucSS/EPOrtEdf5b
+         rigd63046P5nmnNZGlzV7ZJYmX1jv2m6EKpQmPcRQrbBC+wHH7ZD4wDAT88xv8x8Ao21
+         5t8Z463DSiYcPx8WfDP2oatRSTTQ8v4wNd+wJBQgykaqsNC6Zk/owxEFtYFwQ03uAFk2
+         45v6evTTHOdRutMkgBgGeeqPv4/a4Z0N+ySGndPRnSlnv7bv+Q5Jx5sy0FsjbfcN0fVG
+         a8Ag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=vzLIC74mB4AwHY8XZKujyRlKy1H/v8jLcorp2jlzWKI=;
-        b=37p0wtk2pbrpzm8/PyWRsbfU59Sox0+iJ0e6lpY1EjmGo2djrLZOSjT5wNArpokuw3
-         hRsLKAMyhB62KR+2PNs0k180einCZfdnN//nvsV676NetDSBkVeri06tRuL2GnKWcZE9
-         JWqpPz5vHPd5QfCxkceWk1I9+DSfUOmRsr6F9+Uu/33oYuWyKqAnXeKGDZv4xrrBj9Cs
-         hfy0C7lIvGsfbHa/F7qF6jWfNjnRhC+EJhIRMW1JsTtoNEL21p8pTV60+yj6MhmQXmpu
-         VxNL1sbdFjVYuc17Nlk2NDSZBKapDd4DdPCr06lVIMpVG3p1pI/Q9xYs1zRv59E+xwA0
-         nBHw==
-X-Gm-Message-State: AO0yUKVFiCkv6H3JsLNn9CIDApPuoPwUQShBJN7/2LGGnBrxJ+vSTVQf
-        IMuSl0gIOQiUXa9+vi6tubr13KmF5nL4yngGoyyF9w==
-X-Google-Smtp-Source: AK7set/ieFVvPk5OsQRJ/WKQ5w2et0AxhClz7JOXVNp6TN5ekbvqgj9/a9oDkKRVv7jSrVMImvXaObbch9JIl078zXs=
-X-Received: by 2002:a17:90b:fd8:b0:236:855f:f9a8 with SMTP id
- gd24-20020a17090b0fd800b00236855ff9a8mr4890098pjb.9.1677511926439; Mon, 27
- Feb 2023 07:32:06 -0800 (PST)
+        bh=iU3DIPiFHtyl6MAm66myHOcnybgqDkhP99roOt2WViA=;
+        b=a0U59dpMkJeFKzcFPy+uLER3AXy7DLO/OG5JnOHSXTw0KWfc3uEg6lkx6TLT6+x4Xo
+         W0Ihso1AtLIRq9WOFoCYPvNFhbgp3JOOw6rwBqz2YXFqwG38b6e1/NZ15mAoVajZiABK
+         gDY/2Col/UZm/sEL0WWSQ+SBRGRfgG9lDeoLFsXJdIsbUryV2BistUvHOETgWgCpDenN
+         xVWLjogz+m4GWcOLCQTTCeU0mK7dSXnVzspcaTxdmY7dliBNBh2x425GjTiM8arxNMD/
+         4Jl/5+q9zM/OVMWLydILlM4r2U3ot3NwI73KrvTZ2qSIqq3faWqb22w3g+ffBZuNFn9j
+         /RPg==
+X-Gm-Message-State: AO0yUKVchIFUUE7vfzlQ3gRB3ZBKy8AhmQiUxI4aFsW2yU9XYLZxQ2bB
+        xBG1RdscqHtR+pjJUNfAva6jte2tV5N6z9n7q0OsSCvRC/COnCFn
+X-Google-Smtp-Source: AK7set+3RvTeQEziGmtk2RuQy5O5q53GPTIM08XtVfn+x2E/MpjnjVsIv7Zlx2KgiyWDdvKW7HlccfQMlHrFw2G7ONA=
+X-Received: by 2002:a17:90a:dc04:b0:233:d131:29be with SMTP id
+ i4-20020a17090adc0400b00233d13129bemr5023702pjv.9.1677514435569; Mon, 27 Feb
+ 2023 08:13:55 -0800 (PST)
 MIME-Version: 1.0
-References: <20230223141402.23979-1-swati.agarwal@amd.com> <CAPDyKFoGmHpdt5UckyDTWQSK7OmZ789g9Owz7sPP4VJ6ezJbsQ@mail.gmail.com>
- <6e037df0-8f59-9277-3f40-c22278e02430@amd.com>
-In-Reply-To: <6e037df0-8f59-9277-3f40-c22278e02430@amd.com>
+References: <02b46550-e0b5-4251-8156-56eb0f690d89@gmail.com>
+ <2553f3bc-b1e6-4af2-fb6c-def486dd99a3@gmail.com> <CAPDyKFpCEzubkJ=roniomXHaWrY5AOqfPZmNLbMbBnubHzZrEg@mail.gmail.com>
+ <0725e5eb-43fd-65a7-27e8-84bbfe31c798@gmail.com>
+In-Reply-To: <0725e5eb-43fd-65a7-27e8-84bbfe31c798@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 27 Feb 2023 16:31:30 +0100
-Message-ID: <CAPDyKFoJUS01wFVPbri05SdJa-Y5qhmBxWnnXFUGnsm+zCpUfw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
-To:     Michal Simek <michal.simek@amd.com>
-Cc:     Swati Agarwal <swati.agarwal@amd.com>, adrian.hunter@intel.com,
-        michal.simek@xilinx.com, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        git@amd.com
+Date:   Mon, 27 Feb 2023 17:13:19 +0100
+Message-ID: <CAPDyKFouH_uxF_p7ke_WAwwuQxp=O3qitC7iXHU7n1MGN1Nhmw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] mmc: core: add helpers mmc_regulator_set_ocr_vmmc_up/off
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 27 Feb 2023 at 16:09, Michal Simek <michal.simek@amd.com> wrote:
+On Fri, 17 Feb 2023 at 21:09, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 >
->
->
-> On 2/27/23 15:56, Ulf Hansson wrote:
-> > CAUTION: This message has originated from an External Source. Please use proper judgment and caution when opening attachments, clicking links, or responding to this email.
-> >
-> >
-> > On Thu, 23 Feb 2023 at 15:14, Swati Agarwal <swati.agarwal@amd.com> wrote:
+> On 17.02.2023 11:47, Ulf Hansson wrote:
+> > On Wed, 15 Feb 2023 at 21:14, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 > >>
-> >> Add support to read the optional "gate" clock property and request the
-> >> clock which will be used to ungate the DLL clock.
+> >> A lot of drivers use this code, therefore let's factor it out to
+> >> helpers.
 > >>
-> >> For Xilinx platforms which has DLL module, dll clock must be
-> >> ungated/enabled when SD controller operates at higher frequencies like 50
-> >> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
-> >> clock from the driver.
+> >> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> >> ---
+> >>  include/linux/mmc/host.h | 17 +++++++++++++++++
+> >>  1 file changed, 17 insertions(+)
+> >>
+> >> diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
+> >> index 812e6b583..f93fb8c7d 100644
+> >> --- a/include/linux/mmc/host.h
+> >> +++ b/include/linux/mmc/host.h
+> >> @@ -597,6 +597,23 @@ static inline int mmc_regulator_set_vqmmc(struct mmc_host *mmc,
+> >>  }
+> >>  #endif
+> >>
+> >> +static inline int mmc_regulator_set_ocr_vmmc_up(struct mmc_host *mmc,
+> >> +                                               struct mmc_ios *ios)
+> >> +{
+> >> +       if (IS_ERR(mmc->supply.vmmc))
+> >> +               return 0;
 > >
-> > I guess we need to update the DT bindings too?
->
-> DT binding has it already. It is just not used.
->
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml?h=v6.2#n110
+> > Rather than adding these two new helper functions, how about adding
+> > the similar check in mmc_regulator_set_ocr() instead?
+> >
+> There's a number of drivers having 3 paths here:
+> 1. IS_ERR() is true -> do nothing and go one
+> 2. mmc_regulator_set_ocr() returns 0 -> some action and go on
+> 3. mmc_regulator_set_ocr() returns an error -> bail out
 
-Aha, thanks for the pointer!
+Right, thanks for pointing this out.
+
+The important point I am trying to make is that the mmc core is
+treating "mmc->supply.vmmc" as optional (see
+mmc_regulator_get_supply()). To be consistent with that behaviour, I
+think it would make sense to bail out and return 0, in
+mmc_regulator_set_ocr() "if (IS_ERR(mmc->supply.vmmc))". We don't need
+a new set of helper functions to do that.
+
+>
+> So the question is: what should mmc_regulator_set_ocr_vmmc_up return
+> if IS_ERR() is true:
+> 1. An errno? Then this errno would have to be different from the
+>    error codes the function can normally return.
+> 2. A positive value? Seems to be the best option
+>
+> Then we could write:
+>
+> ret = mmc_regulator_set_ocr()
+> if (ret < 0)
+>         return ret;
+> if (!ret) {
+>         some_action();
+> }
+> ...
+>
+> Works but I'm not sure whether it's very intuitive.
+>
+> The other benefit of the proposed helpers is that they hide the
+> complexity of using mmc->supply.vmmc and ios->vdd.
+>
+> Mileage may vary here. Do you have any preference?
+
+Actually, there is no complexity. Drivers should always be able to
+pass 'ios->vdd' to mmc_regulator_set_ocr() (as it holds the correct
+value).
+
+For some reasons, some driver authors seem to find it clearer (I
+guess) to call mmc_regulator_set_ocr() with an explicit '0' at
+MMC_POWER_OFF, but it isn't needed (see mmc_power_off()).
+
+[...]
 
 Kind regards
 Uffe
