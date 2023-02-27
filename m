@@ -2,176 +2,111 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5EA7C7EE2E
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 14:53:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD45CC64ED6
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 14:57:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229904AbjB0Oxt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Feb 2023 09:53:49 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35114 "EHLO
+        id S229545AbjB0O5T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Feb 2023 09:57:19 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229930AbjB0Oxr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 09:53:47 -0500
-Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F0D8A25E
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 06:53:45 -0800 (PST)
-Received: by mail-pl1-x630.google.com with SMTP id n6so5585261plf.5
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 06:53:45 -0800 (PST)
+        with ESMTP id S229719AbjB0O5T (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 09:57:19 -0500
+Received: from mail-pj1-x1035.google.com (mail-pj1-x1035.google.com [IPv6:2607:f8b0:4864:20::1035])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 47DA5526B
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 06:57:18 -0800 (PST)
+Received: by mail-pj1-x1035.google.com with SMTP id x34so6452343pjj.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 06:57:18 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linaro.org; s=google;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=l5VT3ghgOZyVF+1GKbNcLlSESdSRebrFv96yTN2Vgpo=;
-        b=Gq9LOqIDm1nkIlqoP1xyZ+r1d2RvDdRtUzQhuQgfroW5tY/m3hOqXxShZVsKKZLPsU
-         /LABK70GXsyzF7YIUCNsgsAgnhpjHLdlwGTQFRoBFUQa4+cPKoqfMQmOnbkakyyc7NVP
-         SdchPzpYyukrQeT5euY8wqJZf4aTHsh4ud4UscR0jPqQtT/oGlQVsLBbSityTaeZiZRP
-         gaOjUL8Ih6fKPTfCQ7t6Zoka8/OMmXy5e1qQoxM8v2EpddQoiVrzWKyqZUo582dapBE4
-         EeUifUFmTWFu7+S+FBFt1EOnCo6INjP35xPjDxDQCR84mKzvdtqthNzXZW/C1hn1zZ03
-         sB9g==
+        bh=fMWRWsx+NX+ZsoBdeAksgis3WCgc+mV0ObFhcVdcQt8=;
+        b=kf+IMnpHKi2YohvVX3jI9exE0YcLnVPKVbiWhYA0UsaOt3gj0DslKbWmTeAJF+deBn
+         meF+9izukLixfjd9BAswfCNqywEex2kf9QA/qhU+V9kPWfK1QM/Z5nIKkPlfSJdGt/Zs
+         62ZV4eVachhOHvjCfu+QEoUGqRT7hhbk3Q8s0lPpd2/p+XoGLvfU3jwu2Ke5wb/n5SG4
+         imntlpnh8xUOpTeKpRfzwHPcVUuumEOHH/Zs42uN3TrVRiA5xTA5Xccd1OUgpGEFzNQz
+         d+fbSrwCyN7xcjU/bJE8aNXI83hY4vEOKzwwQc84FjnNMU0YJz+fTC+7CLznLtASAs3M
+         aDsA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=l5VT3ghgOZyVF+1GKbNcLlSESdSRebrFv96yTN2Vgpo=;
-        b=AjY7ZxxxgpviNbmFNferBCEado6QTvQUf8uduKMj3ISXbYw+OYeBGYAaUQzT4jI4ay
-         tS1gAOBWxZvmfuXZlMaw4nX1lQMXzofRi0W+HoDgdoK+B0GopxwaN/NSTwAK0N3Agoa1
-         ghjH9Xp2egNFKwwg0yDjzOcvflikTfySdSv4kLXJwn/lbx/lshYKNMnJBnZsAr0xp6WW
-         YUGsWXt7TJDeDTKEzN1IGahQ7kgsky800VMqPfiJoD64q9IWH4gN7vWns7PcVJWh6M8W
-         x8NqHY2RHuorc3+1r6YZ2ayqzxS0eQwM99DM59nnu2kLwDzql8hEvtl2m36m5B1roJin
-         LDvQ==
-X-Gm-Message-State: AO0yUKXInEuNb/0lu9irG6S0jisRXCtZE/9l7f7DFPvSr7Pkl3Zw+TA5
-        Si2YMOkFyhBeSsuM4sQvILzmEncP/TVTdKxA28s5jg==
-X-Google-Smtp-Source: AK7set+HTQu+x6c+i9QU4xI8526XGkvjGx9J6AmsgWbznB6SWWwRXE1fCT+1oSICb0P/XsJ0ryjzSBBrZzu1uNj4Yhc=
-X-Received: by 2002:a17:903:40c2:b0:19a:b502:4280 with SMTP id
- t2-20020a17090340c200b0019ab5024280mr4788629pld.3.1677509624962; Mon, 27 Feb
- 2023 06:53:44 -0800 (PST)
+        bh=fMWRWsx+NX+ZsoBdeAksgis3WCgc+mV0ObFhcVdcQt8=;
+        b=2yyJAR3PEJRJ/nsSqqWS7NYdBCdmgcNyCgBfCpEbxx5GViTUqv1f1C8WryuXLmTxen
+         lR2svJJedggBRy7kR01wX8KLtD/4caQ22yHrPrr1YBGsniiPeNI+x9/DyYAAmpkfNKCZ
+         dhFoJqomvZCoTJVp9yiMtYGNEFsl9kDJGVvTB6Jt8hGPPuX6i+VvrJp2lzpAJpkogzfM
+         6g3mbUA2jKf6DybralktODsY8HoHY3ZmkVkhzduw8h6TRFfwY5aFfDr8fM1AKdHqm0xa
+         t3AnsMz6mw6lZHXpFGY64Xu7ovf2zCak6WxEchAnqMEKiDegJdyQoLETP9bJq1EpzOdN
+         I9CA==
+X-Gm-Message-State: AO0yUKVafk+6T7i3vP7lBz8NdgB7JvGokYMz6YTMh/dfbD/3DjVcoL8w
+        OMlcB1TJle2yCvvMUUbddNV7M2LVyo1D9Uobx0fRRg==
+X-Google-Smtp-Source: AK7set/cIdRiYJnqStSeE4iB/dHP9Z6P3eJh8irZ4IU0wViUJxA8Hd4ovr+/3O68jVXLLarklUF2irVjnaHo0Uj/7rE=
+X-Received: by 2002:a17:903:48e:b0:19a:e617:34ff with SMTP id
+ jj14-20020a170903048e00b0019ae61734ffmr6114366plb.11.1677509837733; Mon, 27
+ Feb 2023 06:57:17 -0800 (PST)
 MIME-Version: 1.0
-References: <20230215113249.47727-1-william.qiu@starfivetech.com>
- <CAPDyKFqJxrLh+pgQ-u_Lwxv4_TsH--rga049GBTqKAa_M14_yw@mail.gmail.com> <ca9bed19-9809-9443-7ca1-1d11984ded55@starfivetech.com>
-In-Reply-To: <ca9bed19-9809-9443-7ca1-1d11984ded55@starfivetech.com>
+References: <20230223141402.23979-1-swati.agarwal@amd.com>
+In-Reply-To: <20230223141402.23979-1-swati.agarwal@amd.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 27 Feb 2023 15:53:08 +0100
-Message-ID: <CAPDyKFpwFq26Tqa-5k7SbQ7Zgk3-AQSrjo7ZSJt6uo6QJR3+5Q@mail.gmail.com>
-Subject: Re: [PATCH v4 0/4] StarFive's SDIO/eMMC driver support
-To:     William Qiu <william.qiu@starfivetech.com>
-Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        linux-kernel@vger.kernel.org
+Date:   Mon, 27 Feb 2023 15:56:41 +0100
+Message-ID: <CAPDyKFoGmHpdt5UckyDTWQSK7OmZ789g9Owz7sPP4VJ6ezJbsQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
+To:     Swati Agarwal <swati.agarwal@amd.com>
+Cc:     adrian.hunter@intel.com, michal.simek@xilinx.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, git@amd.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 27 Feb 2023 at 08:47, William Qiu <william.qiu@starfivetech.com> wrote:
+On Thu, 23 Feb 2023 at 15:14, Swati Agarwal <swati.agarwal@amd.com> wrote:
 >
+> Add support to read the optional "gate" clock property and request the
+> clock which will be used to ungate the DLL clock.
 >
->
-> On 2023/2/15 20:37, Ulf Hansson wrote:
-> > On Wed, 15 Feb 2023 at 12:32, William Qiu <william.qiu@starfivetech.com> wrote:
-> >>
-> >> Hi,
-> >>
-> >> This patchset adds initial rudimentary support for the StarFive
-> >> designware mobile storage host controller driver. And this driver will
-> >> be used in StarFive's VisionFive 2 board. The main purpose of adding
-> >> this driver is to accommodate the ultra-high speed mode of eMMC.
-> >>
-> >> The last patch should be applied after the patchset [1]:
-> >> [1] https://lore.kernel.org/all/20221220011247.35560-1-hal.feng@starfivetech.com/
-> >>
-> >> Changes v3->v4:
-> >> - Added documentation to describe StarFive System Controller Registers.
-> >> - Added aon_syscon and stg_syscon node.
-> >> - Fixed some checkpatch errors/warnings.
-> >>
-> >> Changes v2->v3:
-> >> - Wraped commit message according to Linux coding style.
-> >> - Rephrased the description of the patches.
-> >> - Changed the description of syscon regsiter.
-> >> - Dropped redundant properties.
-> >>
-> >> Changes v1->v2:
-> >> - Renamed the dt-binding 'starfive,jh7110-sdio.yaml' to 'starfive,jh7110-mmc.yaml'.
-> >> - Changed the type of 'starfive,syscon' and modify its description.
-> >> - Deleted unused head files like '#include <linux/gpio.h>'.
-> >> - Added comment for the 'rise_point' and 'fall_point'.
-> >> - Changed the API 'num_caps' to 'common_caps'.
-> >> - Changed the node name 'sys_syscon' to 'syscon'.
-> >> - Changed the node name 'sdio' to 'mmc'.
-> >>
-> >> The patch series is based on v6.1.
-> >>
-> >> William Qiu (4):
-> >>   dt-bindings: mmc: Add StarFive MMC module
-> >>   mmc: starfive: Add sdio/emmc driver support
-> >>   riscv: dts: starfive: Add mmc node
-> >>   dt-bindings: syscon: Add StarFive syscon doc
-> >>
-> >>  .../bindings/mmc/starfive,jh7110-mmc.yaml     |  77 ++++++++
-> >>  .../bindings/soc/starfive/jh7110-syscon.yaml  |  51 +++++
-> >>  MAINTAINERS                                   |  11 ++
-> >>  .../jh7110-starfive-visionfive-2.dtsi         |  23 +++
-> >>  arch/riscv/boot/dts/starfive/jh7110.dtsi      |  47 +++++
-> >>  drivers/mmc/host/Kconfig                      |  10 +
-> >>  drivers/mmc/host/Makefile                     |   1 +
-> >>  drivers/mmc/host/dw_mmc-starfive.c            | 186 ++++++++++++++++++
-> >>  8 files changed, 406 insertions(+)
-> >>  create mode 100644 Documentation/devicetree/bindings/mmc/starfive,jh7110-mmc.yaml
-> >>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
-> >>  create mode 100644 drivers/mmc/host/dw_mmc-starfive.c
-> >>
-> >
-> > I have dropped the v3 patches and applied patch1 and patch2 from the
-> > v4 series instead, for my next branch, thanks!
-> >
-> > Kind regards
-> > Uffe
->
-> Hi Uffe,
->
-> Sorry to bother you.But I found a bug that in drivers/mmc/host/dw_mmc-starfive.c:
->
->     47 static int dw_mci_starfive_execute_tuning(struct dw_mci_slot *slot,
->     48                                              u32 opcode)
->     49 {
->     50         static const int grade  = MAX_DELAY_CHAIN;
->     51         struct dw_mci *host = slot->host;
->     52         struct starfive_priv *priv = host->priv;
->     53         int rise_point = -1, fall_point = -1;
->     54         int err, prev_err;
->     55         int i;
->     56         bool found = 0;
->     57         u32 regval;
->     58
->     59         /*
->     60          * Use grade as the max delay chain, and use the rise_point and
->     61          * fall_point to ensure the best sampling point of a data input
->     62          * signals.
->     63          */
->     64         for (i = 0; i < grade; i++) {
->     65                 regval = i << priv->syscon_shift;
->     66                 err = regmap_update_bits(priv->reg_syscon, priv->syscon_offset,
->     67                                                 priv->syscon_mask, regval);
->     68                 if (err)
->     69                         return err;
->     70                 mci_writel(host, RINTSTS, ALL_INT_CLR);
->     71
->     72                 err = mmc_send_tuning(slot->mmc, opcode, NULL);
->     73                 if (!err)
->     74                         found = 1;
->     75
->     76                 if (i > 0) {
-> --> 77                         if (err && !prev_err)
->
-> prev_err was never initialized to zero.
->
-> So I'm here to ask for your suggestion, should I send a new version
-> to fix it or send you a patch with a fixes tag?
+> For Xilinx platforms which has DLL module, dll clock must be
+> ungated/enabled when SD controller operates at higher frequencies like 50
+> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
+> clock from the driver.
 
-Please send a new incremental patch on top. I will queue it up as a
-fix for v6.3-rc[n].
+I guess we need to update the DT bindings too?
 
 Kind regards
 Uffe
+
+>
+> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 4eebbf801b41..1fd7528c14fc 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         int ret;
+>         struct device_node *node;
+>         struct clk *clk_xin;
+> +       struct clk *clk_dll;
+>         struct sdhci_host *host;
+>         struct sdhci_pltfm_host *pltfm_host;
+>         struct device *dev = &pdev->dev;
+> @@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                 goto clk_dis_ahb;
+>         }
+>
+> +       clk_dll = devm_clk_get_optional_enabled(dev, "gate");
+> +       if (IS_ERR(clk_dll)) {
+> +               ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
+> +               goto clk_disable_all;
+> +       }
+> +
+>         if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+>                 sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+>
+> --
+> 2.17.1
+>
