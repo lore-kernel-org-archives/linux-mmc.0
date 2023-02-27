@@ -2,147 +2,149 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 51B1FC64ED8
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 08:17:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CFBA6C64ED8
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 11:22:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230044AbjB0IR1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Feb 2023 03:17:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47754 "EHLO
+        id S229379AbjB0LWS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Feb 2023 06:22:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229953AbjB0IR0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 03:17:26 -0500
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2042.outbound.protection.outlook.com [40.107.93.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A81451C7C2;
-        Mon, 27 Feb 2023 00:17:23 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=FOSr3w+iAEqXsLn6LIyzh8zEWlLewBzbi9tDu0zPhwOlV9Rrq2Yva0FEajt/utcVcazw2zz1CDP6XS4Pjx48FLPIEeILgThaXrzsXPHV8dNOLCCAd00ab2LSlcqvGEtc7cihjRSPCzaP2lTZ0iJ6Bwg00xdTK7nkLZZK2jcbwbtTimoWtMkMPdtqiiKrAAnjbb5b3s88k14oDDBr7pnh5bN6r9V3AVQOA0skltPoPA4waP9esIPNRBhJ8nfzxKBN9iDQXZ82CM6Et0jpWL6vZ5cS6e1vjucYW38KyCc6mCR10zGl/1rkqVfa/QD9XV/BH5pe1STx87bbnHQUPapyQw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=xJcpID4SNOYib70EMuZebEz/Tke5UL9H80+xPapihhI=;
- b=lc30y1l0JsfU2AHMjLCjvEm7XvqAStzCGBKAO89IDmljoUyVjErgR2s+bEiQTboG2cmsPa4SGxf36xBxGmD22hhIv5R+2lsnXojYmsa4u23Mnrg8hEWjJSfkk+2T9H5VbtioCyduRha5752OXIAxUclA8QZEE55SqNstxLsZBSgwuK7Q7xsI/h6ZB463ijc7fssNvCqRVnvhHhDPOvlPLsPI24LQC9dOZ4ANS+/W8XjjoBG7OlG3POgL0s1O1EeYjZMysZIpUe79Bi+c4qhqXnCtENGbswp+KEZ7EYxWlXARggBYD6lZu5UcELlI7fJ3ekULQ3M2BMJ1HfNeRYZKlA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=intel.com smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=xJcpID4SNOYib70EMuZebEz/Tke5UL9H80+xPapihhI=;
- b=EawbdWtmeRnty4x6z2vZpSJAPE3MCxyMdqFbmmYLsfKkXAew/eNKiSylS2G2NIF7D9ImNP76FCuQF82P/RcAyL5QgWEU7F9o5W3XvlnYBbp22l3S0SafFut0g3dvYx9bKkX+1GRBfP7jg6c6T7zvzRBoG7HgMlP2sk/QHpEX8nk=
-Received: from CYZPR05CA0034.namprd05.prod.outlook.com (2603:10b6:930:a3::20)
- by MW4PR12MB6951.namprd12.prod.outlook.com (2603:10b6:303:207::17) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6134.25; Mon, 27 Feb
- 2023 08:17:21 +0000
-Received: from CY4PEPF0000C97D.namprd02.prod.outlook.com
- (2603:10b6:930:a3:cafe::8a) by CYZPR05CA0034.outlook.office365.com
- (2603:10b6:930:a3::20) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.16 via Frontend
- Transport; Mon, 27 Feb 2023 08:17:20 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CY4PEPF0000C97D.mail.protection.outlook.com (10.167.241.136) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6156.12 via Frontend Transport; Mon, 27 Feb 2023 08:17:20 +0000
-Received: from [10.254.241.51] (10.180.168.240) by SATLEXMB04.amd.com
- (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Mon, 27 Feb
- 2023 02:17:16 -0600
-Message-ID: <9a4448cf-9064-c763-8887-791c4518af8e@amd.com>
-Date:   Mon, 27 Feb 2023 09:16:58 +0100
+        with ESMTP id S229451AbjB0LWR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 06:22:17 -0500
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 409031E286
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 03:22:16 -0800 (PST)
+Received: by mail-ed1-x532.google.com with SMTP id da10so24365184edb.3
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 03:22:16 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=amarulasolutions.com; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=xuW3scZHE2qMIgtFav0tuZiA0IMLEVnQDpbtGr6T0Gw=;
+        b=rNlxQQUOx7dVy6M2Z8ycX1fJmg8tUUKIH3s4Qlh4bIY/1L+x1oxqhlP7V9uFWJX8kv
+         cBwFIP/yv0+pF4D0KH2+LoVhr13DnA7Ios8a6oLMt+s4mOcYEYL0TXKuEy6UvwW2dw+i
+         J92QUwacdJfKIGUEhZwEG6GyjB/RvR2W4SVDU=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=xuW3scZHE2qMIgtFav0tuZiA0IMLEVnQDpbtGr6T0Gw=;
+        b=ime6zL3baGVCuYJGaD9/i3eUxjlRUpHMUrFNchLY6CDp+92exEU9vtCA5xZMZ2bYF+
+         U4Q/CW1JsmLaQGUCAn18iwO7OzhzzbBx18qOXWsyG+gTCHxKTFDs70KGWcxunAW21l/9
+         8AHTJtG1Y15NGK8ReqkNn94irYTWXc4Kb4wgjbRgBCQeeQtvfE3xwDdtaP2jXxcXpTNw
+         kSbwE1wSygFlHQotmpLbm9NkzbCOeT/XRrSeudjveXo5HnRes1USdgLNWks5WlLA4i5D
+         Ed5h3m7Md3Y3dMlof8aXeD88f98uykCAGmKHC5YNffbZjt8zm72vq+tUOcQcvQiqzvco
+         O/gg==
+X-Gm-Message-State: AO0yUKV5gn7lJvHx2XDwc3MfcgGP/RutK1UTlOp3bRLzLEz+aFU+fkTX
+        C7K/1J5NkkaNEeJcy8AwZNVianrE5F09LqIgmyrwRD7jVeo3WlGO
+X-Google-Smtp-Source: AK7set+NST0tU95K/hcnvFxkA+frcNPo5jFrZM4yJiD8J/K/tyv/ByDI/Wz689ivuK6NQRsTfokduGioM6mvK9Bq3uI=
+X-Received: by 2002:a50:d544:0:b0:4ad:6e3e:7da6 with SMTP id
+ f4-20020a50d544000000b004ad6e3e7da6mr11797961edj.6.1677496934725; Mon, 27 Feb
+ 2023 03:22:14 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Content-Language: en-US
-To:     Swati Agarwal <swati.agarwal@amd.com>, <adrian.hunter@intel.com>,
-        <michal.simek@xilinx.com>, <ulf.hansson@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <git@amd.com>
-References: <20230223141402.23979-1-swati.agarwal@amd.com>
-From:   Michal Simek <michal.simek@amd.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate"
- clock
-In-Reply-To: <20230223141402.23979-1-swati.agarwal@amd.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CY4PEPF0000C97D:EE_|MW4PR12MB6951:EE_
-X-MS-Office365-Filtering-Correlation-Id: 52539c99-13a0-4909-bc10-08db189b0c42
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: wVY5iLhvodoDzsmc26/3t88X7Ty4g3iMggUQee6ic7Y6YqYeEoVJcudZ8tovh7+liIEyFNUe4WHf6/Hf7cINHmLgGYARblaqzTjsEb2K9vHGjIthujoOpa/AqwWuaZIWPZGbIc4PuHYjkaKxi5fPuSqjYtf3W2aZ1tVLpRcn8FUnGo2h6jbN2sZ9ecfl4gC7Ge24OxZaOZap868XIQUB7AHIx8mfA7ZXpyuu6NxxDcKkhKy6dGIA2e/nSHAB5PVbdFFZrpA5XdzReC0mvMNSwW3SNebtsYWdHDF0HaSAuS4My9gd68vgFhcOCzMDPQy1mnvlJTZkHLSwFCQnL5cNdObytHKR6owZr7o8hxYPRIYlDSU5aag+pU0vy1x2B+75beT3GPaVZTV12CcFuh2FBRJUNnQYrW08OSJrYtqUyZ1/SKTP9ZKKBliJw8GLBzcTy+I8M7LCzRTq2VoVFlrfE2lXmLpX+I0v+apfXwqlJ3/HIrapUQYnzH5tDyvxWiHJM8QaF7I8lbqklRe51Y2Ciis+w6u6Wtai9t+TFNh75R2KN6t6uQdLqAtH4aflYWpYLXpuRlAeTHXd0RZAGZLvC6H7+hpeHeMzOAnRdXWG+hH3BA7wC5Wq61EcoQ5+4uuynvyMPd4hCQzhOFYjwQd+6cVkeMe2wdiReZ57vOncI1cdPRUpYgBmrT1YDRY6s79DE6tsQuZllqLFCQi/wipwoY5WKoOruduhbm9Qay7+1hVFyP69qgzpF6lCDsZHIAmz8frnL32W7b573RSOxi8ocg==
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(39860400002)(396003)(346002)(136003)(376002)(451199018)(40470700004)(46966006)(36840700001)(36756003)(86362001)(31696002)(40480700001)(40460700003)(41300700001)(4326008)(8676002)(356005)(8936002)(70206006)(70586007)(478600001)(110136005)(82310400005)(16576012)(316002)(5660300002)(54906003)(26005)(44832011)(2906002)(36860700001)(83380400001)(82740400003)(81166007)(6666004)(186003)(16526019)(53546011)(426003)(47076005)(336012)(2616005)(31686004)(36900700001)(43740500002);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 27 Feb 2023 08:17:20.6660
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 52539c99-13a0-4909-bc10-08db189b0c42
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CY4PEPF0000C97D.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW4PR12MB6951
+References: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
+ <DB7PR04MB4010D6ABA0D10AB826F468CC90C29@DB7PR04MB4010.eurprd04.prod.outlook.com>
+ <CAOf5uwmaP0x3s7W6OZaCfLmJguSMtKtJtLCgKZ2nuDZ9VgpLVg@mail.gmail.com>
+In-Reply-To: <CAOf5uwmaP0x3s7W6OZaCfLmJguSMtKtJtLCgKZ2nuDZ9VgpLVg@mail.gmail.com>
+From:   Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+Date:   Mon, 27 Feb 2023 12:22:03 +0100
+Message-ID: <CAOf5uwnuFBXF52Tbe7EFXcjzjbr-oOhn-fDVw=p8uZ8Y_Z7v+Q@mail.gmail.com>
+Subject: Re: NXP imx6ull nonalignment buffer question
+To:     Bough Chen <haibo.chen@nxp.com>
+Cc:     Shawn Guo <shawnguo@kernel.org>,
+        Fabio Estevam <festevam@gmail.com>,
+        LKML <linux-kernel@vger.kernel.org>,
+        linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Bough
 
+On Fri, Jan 13, 2023 at 8:19=E2=80=AFAM Michael Nazzareno Trimarchi
+<michael@amarulasolutions.com> wrote:
+>
+> Hi
+>
+> On Fri, Jan 13, 2023 at 4:30 AM Bough Chen <haibo.chen@nxp.com> wrote:
+> >
+> > > -----Original Message-----
+> > > From: Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+> > > Sent: 2023=E5=B9=B41=E6=9C=889=E6=97=A5 21:02
+> > > To: Bough Chen <haibo.chen@nxp.com>; Shawn Guo <shawnguo@kernel.org>;
+> > > Fabio Estevam <festevam@gmail.com>; LKML <linux-kernel@vger.kernel.or=
+g>
+> > > Cc: linux-arm-kernel <linux-arm-kernel@lists.infradead.org>;
+> > > linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
+> > > Subject: NXP imx6ull nonalignment buffer question
+> > >
+> > > Hi Haibo
+> > >
+> > > Working on imx6ulz design and found that if I send a sdio packet usin=
+g the
+> > > sdio_writesb the adma driver tries to handle it with two dma descript=
+ors. The
+> > > first one filled with the bytes up to 3 to cover the misalign and the=
+n another
+> > > buffer descriptor
+> > >
+> > >   offset =3D (SDHCI_ADMA2_ALIGN - (addr & SDHCI_ADMA2_MASK)) &
+> > >                          SDHCI_ADMA2_MASK;
+> > >                 if (offset) {
+> > >                         if (data->flags & MMC_DATA_WRITE) {
+> > >                                 buffer =3D sdhci_kmap_atomic(sg);
+> > >                                 memcpy(align, buffer, offset);
+> > >                                 sdhci_kunmap_atomic(buffer);
+> > >                         }
+> > >
+> > >                         /* tran, valid */
+> > >                         __sdhci_adma_write_desc(host, &desc,
+> > > align_addr,
+> > >                                                 offset,
+> > > ADMA2_TRAN_VALID);
+> > >
+> > >                         BUG_ON(offset > 65536);
+> > >
+> > >                         align +=3D SDHCI_ADMA2_ALIGN;
+> > >                         align_addr +=3D SDHCI_ADMA2_ALIGN;
+> > >
+> > >                         addr +=3D offset;
+> > >                         len -=3D offset;
+> > >                 }
+> > >
+> > > In 48.7.4 Data Length Setting
+> > > For either ADMA (ADMA1 or ADMA2) transfer, the data in the data buffe=
+r must
+> > > be word aligned, so the data length set in the descriptor must be a m=
+ultiple of 4.
+> > > I have noticed that this code does not work as expected.
+> >
+> > Hi Michael,
+> >
+> > My understanding is: for the sentence " the data in the data buffer mus=
+t be word aligned", this means the start address of the data must be word a=
+ligned, but not limit the data length.
+> >
+>
+> Ok. My specific problem is that this seems not working on imx6ulz, I
+> found the problem working on a wifi chipset, if the request gets split
+> for no-alignment
+> of the data in two dma descriptors, the chipset does not reply to me.
+> Anyway, I will retest it with the upstream kernel again. I will check
+> better and I will follow up if any more question
+>
 
-On 2/23/23 15:14, Swati Agarwal wrote:
-> Add support to read the optional "gate" clock property and request the
-> clock which will be used to ungate the DLL clock.
-> 
-> For Xilinx platforms which has DLL module, dll clock must be
-> ungated/enabled when SD controller operates at higher frequencies like 50
-> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
-> clock from the driver.
-> 
-> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
-> ---
->   drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
->   1 file changed, 7 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 4eebbf801b41..1fd7528c14fc 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->   	int ret;
->   	struct device_node *node;
->   	struct clk *clk_xin;
-> +	struct clk *clk_dll;
->   	struct sdhci_host *host;
->   	struct sdhci_pltfm_host *pltfm_host;
->   	struct device *dev = &pdev->dev;
-> @@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->   		goto clk_dis_ahb;
->   	}
->   
-> +	clk_dll = devm_clk_get_optional_enabled(dev, "gate");
-> +	if (IS_ERR(clk_dll)) {
-> +		ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
-> +		goto clk_disable_all;
-> +	}
-> +
->   	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
->   		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
->   
+I have done some tests and I need this quirk
+SDHCI_QUIRK_32BIT_ADMA_SIZE on imx6ulz cpu and I think that it applies
+even on imx6ull.
+Wifi can work only if the data on the sdio are aligned or we use
+interrupt mode for no-alignment data. I did not find an errata and I
+can not add as a quirk without a confirmation
 
-Based on available information, that it is not clear what gate clock really is 
-and what it is used for, I think the patch is correct.
-
-Acked-by: Michal Simek <michal.simek@amd.com>
-
-Thanks,
-Michal
+Michael
