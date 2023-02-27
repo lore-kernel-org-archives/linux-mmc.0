@@ -2,98 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8900C64ED8
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 21:02:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A23DC64ED9
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Feb 2023 22:29:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229737AbjB0VC3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Feb 2023 16:02:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41966 "EHLO
+        id S229524AbjB0W3Q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Feb 2023 17:29:16 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229786AbjB0VC2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 16:02:28 -0500
-Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D0D423D81
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 13:02:27 -0800 (PST)
-Received: by mail-ed1-x52e.google.com with SMTP id ec43so31210703edb.8
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 13:02:26 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Jy9MOuCYV5VNfajEJwG4p7UWSH7l35doRasnUcnGpDU=;
-        b=G0cLESHhsWbJAxMgmHwTgG/nCwBUVbt2Op/UQUyIzAAig2NcO55zE3CRviTz1vhYI8
-         L4J2br3NmgFJn38dMn9eGN0tSDujLpnCbfdF2aTdeRdLBjHsKh46lCtj63IvqMxR7M9s
-         7CRuaPUolp0SVnjG64lQ6J2PpsiWD2IgnPt5URQkCmrCsvV+ii9Z0NQJWzz31Z5f44KQ
-         h8jZ8pd4FlWccBYjglyHK0JZUuyGb8nZoMJJl0qBO1K/0cqrt7RIfxlExVR2ipbfF17W
-         tZ82opyiF6obZHr9OyNlxVmwicbN8s1/MQTRQRQ8KWWj3VBWy3LT89ogqt0mmAEwqLHU
-         5E+w==
+        with ESMTP id S229549AbjB0W3H (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Feb 2023 17:29:07 -0500
+Received: from mail-oa1-f42.google.com (mail-oa1-f42.google.com [209.85.160.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 459D4D33C;
+        Mon, 27 Feb 2023 14:29:06 -0800 (PST)
+Received: by mail-oa1-f42.google.com with SMTP id 586e51a60fabf-172334d5c8aso9017889fac.8;
+        Mon, 27 Feb 2023 14:29:06 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=content-transfer-encoding:subject:from:cc:to:content-language
-         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=Jy9MOuCYV5VNfajEJwG4p7UWSH7l35doRasnUcnGpDU=;
-        b=NfxoaTaxhfraZK26b3lUcbTjsVk8yR/nq6ujiRx7GcKW/Ho1fbih1afQ1SgG+KNGGs
-         M9qKgGxaZiCs9TzSz3YidRYlCyJmRdWrgf9E4JX6eP4i/k7+Aw9R5bpgb7AzpWImZ68P
-         KNaR3AmDYS92aAwYYjN+xXu1w4wPKsg/XnteERVvtUKBKRGSgayCBvPAHeVci6wX0J7C
-         jbV+XSfVPsrybPP3ZUCdxtDkYz3hsMcSIBC9OGGVkCvlX5xhs2tWEcPhZsEOhdR/KbaW
-         BNgciHkb++poDFIgUhEHPeIT0JlCCWpYuLqa7TxYs/fV5wEWQCyqEYIhIPd71Lbvv00B
-         5qHA==
-X-Gm-Message-State: AO0yUKXewaVZRMg7R3rZLSDfTQVg8xgy80aKY20FLZiF1gv/buVx6TTC
-        euwI93nxtShRqXAJAxfPpRlOOtf/bjA=
-X-Google-Smtp-Source: AK7set8d5PCYJqJc7yEmjCutFbDlE75su16K9Ic3OxhRIvalix73Rgyaho6/PJtbCUmBVbIpQwM0Ug==
-X-Received: by 2002:aa7:dd4b:0:b0:4b1:b71d:cbfe with SMTP id o11-20020aa7dd4b000000b004b1b71dcbfemr1085619edw.2.1677531745364;
-        Mon, 27 Feb 2023 13:02:25 -0800 (PST)
-Received: from ?IPV6:2a01:c23:b9e4:5300:7c04:7bb8:89f1:77e7? (dynamic-2a01-0c23-b9e4-5300-7c04-7bb8-89f1-77e7.c23.pool.telefonica.de. [2a01:c23:b9e4:5300:7c04:7bb8:89f1:77e7])
-        by smtp.googlemail.com with ESMTPSA id m19-20020a509993000000b004af5152751esm3556400edb.83.2023.02.27.13.02.24
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 27 Feb 2023 13:02:24 -0800 (PST)
-Message-ID: <0c1e7440-f4bc-b48a-137f-58b75ac98550@gmail.com>
-Date:   Mon, 27 Feb 2023 22:02:23 +0100
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZFoqsd6EBPQ0PzNdCKJoWZA5o9P3njK484v747rHzjE=;
+        b=mA3wWkjykAgF96HAeXFsQLsm+Ae8jmvbBMLerfdoX8ApnIyK8+cQCmW6COXcDQnYA3
+         Tt60250jJJVKi8lT9ldCS0EJpr+xzPqcXq7kjBo5R42w9cg2zjrcsHsd6ez6DC5fbGy4
+         CuMODpGUFXxBwqssIisI1ERbtwx754oj2Epn31kyEECZ950w8X/Kshw8oGwseK+ksHj9
+         BVzJvk0pld7VpM568AEVm7nbugymfbHjRHeNYaAnNzX0W7aC2hlevNoqVJF/MchElLwN
+         GC7yTr8tXJWZpuu/6xnz7wRtew7KNn3rX2PjVNi+8eB8XKx/qnOVdw175KPUH4sFhj+2
+         iEtA==
+X-Gm-Message-State: AO0yUKVESjBtekQyvgZ/gAfdboUMsx2rlOrhUSjJunMAHurhhhYO34Vf
+        mX5/FLkYc2U9+N0pfPA5pbDM7NGRKA==
+X-Google-Smtp-Source: AK7set9EvaHbC0pq/Q5M8Jesf6gQwD4JT+CCUAwMK4iN767gMIlj2Bv0JNrjP2eDiCwdeJnGYGCy1A==
+X-Received: by 2002:a05:6870:c113:b0:173:245d:d26c with SMTP id f19-20020a056870c11300b00173245dd26cmr271200oad.17.1677536945490;
+        Mon, 27 Feb 2023 14:29:05 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id x9-20020a4a8689000000b0051d13098c54sm3139588ooh.19.2023.02.27.14.29.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 27 Feb 2023 14:29:05 -0800 (PST)
+Received: (nullmailer pid 1215162 invoked by uid 1000);
+        Mon, 27 Feb 2023 22:29:04 -0000
+Date:   Mon, 27 Feb 2023 16:29:04 -0600
+From:   Rob Herring <robh@kernel.org>
+To:     William Qiu <william.qiu@starfivetech.com>
+Cc:     linux-riscv@lists.infradead.org, devicetree@vger.kernel.org,
+        linux-mmc@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
+Message-ID: <20230227222904.GC1048218-robh@kernel.org>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-5-william.qiu@starfivetech.com>
+ <20230220234335.GA615198-robh@kernel.org>
+ <348796cc-72d9-4dcf-9f09-4c2aa55cb858@starfivetech.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-From:   Heiner Kallweit <hkallweit1@gmail.com>
-Subject: [PATCH] mmc: core: allow errptr supply argument in,
- mmc_regulator_set_ocr
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <348796cc-72d9-4dcf-9f09-4c2aa55cb858@starfivetech.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Basically all host drivers use code like this:
+On Tue, Feb 21, 2023 at 10:44:02AM +0800, William Qiu wrote:
+> 
+> 
+> On 2023/2/21 7:43, Rob Herring wrote:
+> > On Wed, Feb 15, 2023 at 07:32:49PM +0800, William Qiu wrote:
+> >> Add documentation to describe StarFive System Controller Registers.
+> >> 
+> >> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> >> ---
+> >>  .../bindings/soc/starfive/jh7110-syscon.yaml  | 51 +++++++++++++++++++
+> >>  MAINTAINERS                                   |  5 ++
+> >>  2 files changed, 56 insertions(+)
+> >>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+> >> 
+> >> diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+> >> new file mode 100644
+> >> index 000000000000..fa4d8522a454
+> >> --- /dev/null
+> >> +++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+> >> @@ -0,0 +1,51 @@
+> >> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+> >> +%YAML 1.2
+> >> +---
+> >> +$id: http://devicetree.org/schemas/soc/starfive/jh7110-syscon.yaml#
+> >> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> >> +
+> >> +title: StarFive JH7110 SoC system controller
+> >> +
+> >> +maintainers:
+> >> +  - William Qiu <william.qiu@starfivetech.com>
+> >> +
+> >> +description: |
+> >> +  The StarFive JH7110 SoC system controller provides register information such
+> >> +  as offset, mask and shift to configure related modules such as MMC and PCIe.
+> >> +
+> >> +properties:
+> >> +  compatible:
+> >> +    items:
+> >> +      - enum:
+> >> +          - starfive,jh7110-stg-syscon
+> >> +          - starfive,jh7110-sys-syscon
+> >> +          - starfive,jh7110-aon-syscon
+> > 
+> > Is 'syscon' really part of what the blocks are called? Is just 'stg', 
+> > 'sys' and 'aon' not unique enough?
+> > 
+> > Rob
+> Hi Rob,
+> 
+> In StarFive SoC, we do have syscrg/aoncrg/stgcrg, which is uesd to be the clock
+> controller, so 'syscon' is added to avoid confusion.
 
-if (!IS_ERR(mmc->supply.vmmc))
-	mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0)
+You've only added to my confusion. 'syscrg' and 'sys-syscon' are 2 
+different h/w blocks and unrelated to each other? Or 'syscrg' is the 
+clock portion of 'sys-syscon'? In that case, 'syscrg' should be a child 
+of 'sys-syscon' or possibly just all one node. Please provide details on 
+the entire h/w block so we can provide better input on the bindings.
 
-Move the IS_ERR() check to mmc_regulator_set_ocr() to simplify
-host driver code.
-
-Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
----
- drivers/mmc/core/regulator.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
-index 609201a46..4fad81cd5 100644
---- a/drivers/mmc/core/regulator.c
-+++ b/drivers/mmc/core/regulator.c
-@@ -110,6 +110,9 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
- 	int			result = 0;
- 	int			min_uV, max_uV;
- 
-+	if (IS_ERR(supply))
-+		return 0;
-+
- 	if (vdd_bit) {
- 		mmc_ocrbitnum_to_vdd(vdd_bit, &min_uV, &max_uV);
- 
--- 
-2.39.2
-
+Rob
