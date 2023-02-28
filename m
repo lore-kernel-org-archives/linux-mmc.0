@@ -2,130 +2,232 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E3725C64ED6
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Feb 2023 15:46:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51AA3C6FA8E
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Feb 2023 17:00:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229778AbjB1Pq7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Feb 2023 10:46:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41564 "EHLO
+        id S229535AbjB1RAA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Feb 2023 12:00:00 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229950AbjB1Pq6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2023 10:46:58 -0500
-Received: from mail-ot1-f45.google.com (mail-ot1-f45.google.com [209.85.210.45])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4FFF30EB0;
-        Tue, 28 Feb 2023 07:46:50 -0800 (PST)
-Received: by mail-ot1-f45.google.com with SMTP id q11-20020a056830440b00b00693c1a62101so5851475otv.0;
-        Tue, 28 Feb 2023 07:46:50 -0800 (PST)
+        with ESMTP id S229520AbjB1Q77 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2023 11:59:59 -0500
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1D221726
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Feb 2023 08:59:56 -0800 (PST)
+Received: by mail-ed1-x52f.google.com with SMTP id cy6so42822707edb.5
+        for <linux-mmc@vger.kernel.org>; Tue, 28 Feb 2023 08:59:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1677603595;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=G3CAwyg7sB/9VuXMErbSf0ksJrW8GjtJmRw6jmJ2whs=;
+        b=CiOdaYBTbHw6f8urOsU3nUebrs2v3qJsywYf6Nui2a5tSCT3NcF2tQNX0guRJQmn9q
+         3FgqpB4jjah97YIi9brUuV/4Q6LNCCpC8V8d4a883AbzFaQx67mjd8Gjw6u4ezEzq9t+
+         5Pv6rROtmlR6Q6oIHX7k6BdVkopNJlbskTkLcb1ps9RQzFFEcv/BJ9mEwMDGdCLcvKxO
+         ITAXDPRJr8gJsvg6Qg+DPKhVCD8anRcj12lMKSDwd/YjAvI+RehW3zj035/2IpgmBRmq
+         2eIyeeokNUAG/DR3v04QtwNoNq8u/y/lVJ4ko/M6DiX4C5CDANNU3ohtXKWX6p+70WxM
+         wcgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=UOZcGd1oA7KTIN6ScdKo19pTRirA0V0P219jqFHgpsk=;
-        b=UsGz8d/o6I4jnQkDwS3F+rr9ysD617uxaNV8Q82gStZHVdpIBIMGCWIIdqCnD/V73y
-         AT5GyRJUz3+h4pyux0OKyQlKckEOoD5n6j7ZHsNnSUOnzPpwTw8YXadmei0zRuy+yroB
-         wnKKJCmd1hC9hgKS0rpDWuMxZViwgD0qW5lrDGIJGb8RsSLSOTTQoNGzl3gECrWYrriu
-         XvBK3vE4XQOpQRty3NcHAInQ4Idx5T8j4l44IaX/oEMArTcYkSBOVcH5Jk2EBqz9mcgs
-         VXXHGQc4Nphd+62Q0fqxW51QT04pWJLLPdIabp4NBWHmMLji8sntmaPOycBvTJ1AZIAx
-         vZGQ==
-X-Gm-Message-State: AO0yUKX7bmaI378jAmgVLCTz3tQiPwyw20Pdz3KMmJ3SwgMkRB1BUYL/
-        gXhN/5Wwmj2rYSpIcdEMlw==
-X-Google-Smtp-Source: AK7set8dyFOGw+fLFS6HC9s6W78LURHcGo2G/CSRLtLs+3UqekNY0HS2op+TXSAy7UOmZh22mW0zJA==
-X-Received: by 2002:a9d:178c:0:b0:68f:339f:832d with SMTP id j12-20020a9d178c000000b0068f339f832dmr1495446otj.35.1677599210014;
-        Tue, 28 Feb 2023 07:46:50 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id m55-20020a05683026f700b00693d8a315eesm3827597otu.31.2023.02.28.07.46.49
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 28 Feb 2023 07:46:49 -0800 (PST)
-Received: (nullmailer pid 3307966 invoked by uid 1000);
-        Tue, 28 Feb 2023 15:46:48 -0000
-Date:   Tue, 28 Feb 2023 09:46:48 -0600
-From:   Rob Herring <robh@kernel.org>
-To:     Piyush Malgujar <pmalgujar@marvell.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        krzysztof.kozlowski+dt@linaro.org, yamada.masahiro@socionext.com,
-        devicetree@vger.kernel.org, jannadurai@marvell.com,
-        cchavva@marvell.com
-Subject: Re: [PATCH v3 5/6] dt-bindings: mmc: sdhci-cadence: SD6 support
-Message-ID: <20230228154648.GA3298015-robh@kernel.org>
-References: <20230227183151.27912-1-pmalgujar@marvell.com>
- <20230227183151.27912-6-pmalgujar@marvell.com>
+        d=1e100.net; s=20210112; t=1677603595;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=G3CAwyg7sB/9VuXMErbSf0ksJrW8GjtJmRw6jmJ2whs=;
+        b=XtUafrCIX34R1N4MpuKFUiOA/V2NhHMaAkoa/+pB59wQuEUGtU+N3EdyvWOqcXPmgy
+         M+G2W+6A9TSKI8CXjRL6ohRhj3k9D0RDhnJV6x+1JLY0uvSh9LSurWwOl8vHf1kNLoKj
+         orDhGZ/y1fuCceRJsvte4Kp0pj8KtQq+Rxw83VKTCI49mifnUMA8BsDgnUFGuFuPLWp2
+         Ac3Wc1nLKiyBrYeaZPSEl8yEpDC4CDxGDQQk/xPpHSGsmgdzsFCfvmrB6VqUxE5nDPm/
+         nDAqRjwVOGFaU+t0bfhzf0xFiYqlBSX+mMMIozz5u9lTP0rMim9WcB00HTxA/tlfN4aK
+         yqhQ==
+X-Gm-Message-State: AO0yUKUdYc3bWRfXWYTr2GWlFR+kBvGj92uTWKuKuOZsYUEapAGP6YCI
+        QEOV8liSanzOAYXjEi2aNU0pYA==
+X-Google-Smtp-Source: AK7set+dcX85NV/5y0rU/jfP/eUeE5rM4EcjfwgjoYFl+zNApB95vzbxhyvm070CBuKcjzf8qpWuRA==
+X-Received: by 2002:a17:906:3b82:b0:889:d998:1576 with SMTP id u2-20020a1709063b8200b00889d9981576mr3063369ejf.66.1677603595302;
+        Tue, 28 Feb 2023 08:59:55 -0800 (PST)
+Received: from [192.168.1.20] ([178.197.216.144])
+        by smtp.gmail.com with ESMTPSA id m30-20020a50d7de000000b004acb3026af2sm4637945edj.59.2023.02.28.08.59.53
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 28 Feb 2023 08:59:54 -0800 (PST)
+Message-ID: <be911895-4944-e983-1af5-b11ff5e8e7cc@linaro.org>
+Date:   Tue, 28 Feb 2023 17:59:52 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230227183151.27912-6-pmalgujar@marvell.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
+To:     Emil Renner Berthing <emil.renner.berthing@canonical.com>
+Cc:     William Qiu <william.qiu@starfivetech.com>,
+        Rob Herring <robh@kernel.org>, linux-riscv@lists.infradead.org,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-5-william.qiu@starfivetech.com>
+ <20230220234335.GA615198-robh@kernel.org>
+ <348796cc-72d9-4dcf-9f09-4c2aa55cb858@starfivetech.com>
+ <20230227222904.GC1048218-robh@kernel.org>
+ <f8d2b665-ce5d-81f8-8c55-81f1a4cb62b9@starfivetech.com>
+ <54f51fa0-7821-b67b-b782-eb9a35b7bba9@linaro.org>
+ <CAJM55Z85fitjBOcCLqad9W-a7h3iN9bxtctVGzPgqCbf5fWobw@mail.gmail.com>
+ <a0168d89-3c30-55e1-cf4c-37f7fe90aae4@linaro.org>
+ <CAJM55Z8dR4TDJNeO-qiS9CurfCWM1ccNigOA1fDb7S1VKCxv2Q@mail.gmail.com>
+Content-Language: en-US
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <CAJM55Z8dR4TDJNeO-qiS9CurfCWM1ccNigOA1fDb7S1VKCxv2Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Feb 27, 2023 at 10:31:50AM -0800, Piyush Malgujar wrote:
-> From: Jayanthi Annadurai <jannadurai@marvell.com>
+On 28/02/2023 15:59, Emil Renner Berthing wrote:
+> On Tue, 28 Feb 2023 at 12:28, Krzysztof Kozlowski
+> <krzysztof.kozlowski@linaro.org> wrote:
+>> On 28/02/2023 12:02, Emil Renner Berthing wrote:
+>>> On Tue, 28 Feb 2023 at 11:40, Krzysztof Kozlowski
+>>> <krzysztof.kozlowski@linaro.org> wrote:
+>>>>
+>>>> On 28/02/2023 10:05, William Qiu wrote:
+>>>>>
+>>>>>
+>>>>> On 2023/2/28 6:29, Rob Herring wrote:
+>>>>>> On Tue, Feb 21, 2023 at 10:44:02AM +0800, William Qiu wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>> On 2023/2/21 7:43, Rob Herring wrote:
+>>>>>>>> On Wed, Feb 15, 2023 at 07:32:49PM +0800, William Qiu wrote:
+>>>>>>>>> Add documentation to describe StarFive System Controller Registers.
+>>>>>>>>>
+>>>>>>>>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>>>>>>>>> ---
+>>>>>>>>>  .../bindings/soc/starfive/jh7110-syscon.yaml  | 51 +++++++++++++++++++
+>>>>>>>>>  MAINTAINERS                                   |  5 ++
+>>>>>>>>>  2 files changed, 56 insertions(+)
+>>>>>>>>>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+>>>>>>>>>
+>>>>>>>>> diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+>>>>>>>>> new file mode 100644
+>>>>>>>>> index 000000000000..fa4d8522a454
+>>>>>>>>> --- /dev/null
+>>>>>>>>> +++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+>>>>>>>>> @@ -0,0 +1,51 @@
+>>>>>>>>> +# SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
+>>>>>>>>> +%YAML 1.2
+>>>>>>>>> +---
+>>>>>>>>> +$id: http://devicetree.org/schemas/soc/starfive/jh7110-syscon.yaml#
+>>>>>>>>> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+>>>>>>>>> +
+>>>>>>>>> +title: StarFive JH7110 SoC system controller
+>>>>>>>>> +
+>>>>>>>>> +maintainers:
+>>>>>>>>> +  - William Qiu <william.qiu@starfivetech.com>
+>>>>>>>>> +
+>>>>>>>>> +description: |
+>>>>>>>>> +  The StarFive JH7110 SoC system controller provides register information such
+>>>>>>>>> +  as offset, mask and shift to configure related modules such as MMC and PCIe.
+>>>>>>>>> +
+>>>>>>>>> +properties:
+>>>>>>>>> +  compatible:
+>>>>>>>>> +    items:
+>>>>>>>>> +      - enum:
+>>>>>>>>> +          - starfive,jh7110-stg-syscon
+>>>>>>>>> +          - starfive,jh7110-sys-syscon
+>>>>>>>>> +          - starfive,jh7110-aon-syscon
+>>>>>>>>
+>>>>>>>> Is 'syscon' really part of what the blocks are called? Is just 'stg',
+>>>>>>>> 'sys' and 'aon' not unique enough?
+>>>>>>>>
+>>>>>>>> Rob
+>>>>>>> Hi Rob,
+>>>>>>>
+>>>>>>> In StarFive SoC, we do have syscrg/aoncrg/stgcrg, which is uesd to be the clock
+>>>>>>> controller, so 'syscon' is added to avoid confusion.
+>>>>>>
+>>>>>> You've only added to my confusion. 'syscrg' and 'sys-syscon' are 2
+>>>>>> different h/w blocks and unrelated to each other? Or 'syscrg' is the
+>>>>>> clock portion of 'sys-syscon'? In that case, 'syscrg' should be a child
+>>>>>> of 'sys-syscon' or possibly just all one node. Please provide details on
+>>>>>> the entire h/w block so we can provide better input on the bindings.
+>>>>>>
+>>>>>> Rob
+>>>>>
+>>>>> Hi Rob,
+>>>>>
+>>>>> It's my description that's problematic.'syscon' here refers to the hardware module
+>>>>> inside our JH7110, which is different from the syscon interface in linux. The syscon
+>>>>> I added now uses the syscon interface of linux to read and write the syscon register
+>>>>> in our JH7110. So we decided to name it that way.
+>>>>
+>>>> You didn't really answer Rob's questions.
+>>>>
+>>>> Also, syscon is Linux term, so are you sure hardware module is called
+>>>> like this? Hardware engineers took pure Linux name and used it?
+>>>
+>>> Yes, from the documentation I could find[1] there are CRG blocks
+>>> (Clock and Reset Generator) and SYSCON blocks:
+>>> SYS CRG
+>>> STG CRG
+>>> AON CRG
+>>> SYS SYSCON
+>>> STG SYSCON
+>>> AON SYSCON
+>>>
+>>> The CRG blocks contain registers to control clocks and resets that
+>>> follow a pattern used by the clock and reset drivers. The SYSCON
+>>> blocks just seem to contain registers to control whatever didn't fit
+>>> in any other blocks, but might be vaguely related to the peripherals
+>>> that run off clocks controlled by the corresponding CRG block.
+>>
+>> The memory map [1] suggests these are indeed separate address spaces,
+>> e.g. AON CRG, AON SYSCON and AON GPIO, but now I would argue that this
+>> might be still one device - AON (or STG, SYS). Just like PCIE0 has four
+>> address spaces, it does not mean you have four separate PCIE0 devices.
+>> You have only one PCIE0, just like you have only one AON, one STG and
+>> one SYS (System).
 > 
-> Add support for SD6 controller support.
+> I see what you mean, but if you look into what the registers in the
+> SYSCON blocks actually do it's not clear to me that they should be
+> grouped with the clocks/resets any more than say the pinctrl/GPIO
+> node. Maybe it's my fault for not giving you the full picture. Eg. for
+> "system" and "always-on" there are blocks:
+> 
+> SYS CRG
+> SYS SYSCON
+> SYS IOMUX
+> AON CRG
+> AON SYSCON
+> AON IOMUX
+> 
+> ..and it really don't see why eg. SYS CRG and SYS SYSCON should be
+> thought of as one device, but not include SYS IOMUX then.
 
-On what h/w?
+... include sys iomux as well, just like GPIO is included for AON.
 
 > 
-> Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
-> ---
->  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 24 +++++++++++++++++--
->  1 file changed, 22 insertions(+), 2 deletions(-)
+> As an examly the SYS SYSCON includes registers to control:
+> - remapping of different peripherals from SD controller to video encoders
+> - voltage select for certain GPIO pins
+> - phy interface selection for ethernet and CAN
+> - QuadSPI delay chain and SRAM configuration
+> - PLL configuration
+> - endian selection for the SD controller
 > 
-> diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> index 8b1a0fdcb5e3e2e8b87d8d7678e37f3dad447fc1..0dba17c4f17f82c8ae68e46225ed72418e8361ff 100644
-> --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
-> @@ -4,7 +4,7 @@
->  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
->  $schema: http://devicetree.org/meta-schemas/core.yaml#
->  
-> -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
-> +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
->  
->  maintainers:
->    - Masahiro Yamada <yamada.masahiro@socionext.com>
-> @@ -18,7 +18,9 @@ properties:
->        - enum:
->            - microchip,mpfs-sd4hc
->            - socionext,uniphier-sd4hc
-> -      - const: cdns,sd4hc
-> +      - enum:
-> +          - cdns,sd4hc
-> +          - cdns,sd6hc
+> To me this is pretty much exactly described by the syscon device tree binding:
+> "System controller node represents a register region containing a set
+> of miscellaneous registers. The registers are not cohesive enough to
+> represent as any specific type of device. [..]"
+> In any case it's clear that however the SYSCON blocks are represented
+> in the device tree, a driver for it would need to export registers in
+> the SYSCON block for other drivers to use.
 
-Other than FPGA implementations IP vendor compatible strings are pretty 
-much useless. Define a compatible for your h/w.
+You started entire sentence with "but" so you disagree but with what
+exactly? The naming? But syscon is fine - hardware manual calls it like
+that.
 
->  
->    reg:
->      maxItems: 1
-> @@ -111,6 +113,24 @@ properties:
->      minimum: 0
->      maximum: 0x7f
->  
-> +  cdns,iocell-input-delay-ps:
-> +    description: Delay in ps across the input IO cells
-> +
-> +  cdns,iocell-output-delay-ps:
-> +    description: Delay in ps across the output IO cells
-> +
-> +  cdns,delay-element-ps:
-> +    description: Delay element in ps used for calculating phy timings
-> +
-> +  cdns,read-dqs-cmd-delay-ps:
-> +    description: Command delay used in HS200 tuning
-> +
-> +  cdns,tune-val-start-ps:
-> +    description: Staring value of data delay used in HS200 tuning
-> +
-> +  cdns,tune-val-step-ps:
-> +    description: Incremental value of data delay used in HS200 tuning
+The point was that AON is one device (consisting of multiple blocks).
 
-Wouldn't any controller implementation need these possibly? IIRC, we 
-have some common properties for this. If not, survey what we do have and 
-come up with something common. Or you can imply all this from the h/w 
-specific compatible you are going to add.
+Best regards,
+Krzysztof
 
-Rob
