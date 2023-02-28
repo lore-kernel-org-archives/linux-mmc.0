@@ -2,201 +2,240 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D161C64EC7
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Feb 2023 07:25:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB9F5C64EC7
+	for <linux-mmc@archiver.kernel.org>; Tue, 28 Feb 2023 07:43:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229469AbjB1HZO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Feb 2023 02:25:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47520 "EHLO
+        id S229543AbjB1HnH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 28 Feb 2023 02:43:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33422 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229627AbjB1HZN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2023 02:25:13 -0500
-Received: from EUR05-VI1-obe.outbound.protection.outlook.com (mail-vi1eur05on2078.outbound.protection.outlook.com [40.107.21.78])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C00ED1E1F0;
-        Mon, 27 Feb 2023 23:25:11 -0800 (PST)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=MNe+5v9YcasFiZqKr/nVjv3sO8exMl2hM9YzI4shAZH2lmp7D0Hndh8rTBaCskTWIm5uyIRONKGLUIEwXee2G8H11akiz71EDUkqld1f9C2pCsgnxnSV+rf/oVC6iUtU8v0l8JTVQ817XFLvmxh90FKplTzff1jiXyFu74nOkY3NfMy11mcPSKZRvUv+kjeNzd3YPTUn0ZvOCjsPvFjjV/6qSEWQhiMAlGj7KpAI/v0aS5lzD0ADioi3j9r52QInGlKghtppkjeMmnNKhgrYDbs/Va8LZQYfjHp/WLTQwtJ6WHiwVouFIuYr57KSYxKcJDtnww4idlvU6GIwypUBZw==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ubv3p+OluilpKzlpnjEqMQ3TtliP4082KcqUj/HPxF0=;
- b=VybyhgA7oJv+ZbUuiHW9sI6am/SVlzq6mmtfJsURIM1YJhpDNuhtPQ9X+pHel+nHekLLahmYHFV8Tcw8d7pGqXmZ9EiOZjiOCyXlAnU+ehtHvSjM5sjkHhqise6e39OP5WOoWQodLeVEaVQRMVZaJ8/mR0k9eAUvkdKRKbRY8UzBUFnaenys29/l6Q+j5c3MA6R6m4aw66rD+yf98o4kNVW3ZsJ0uQMes1EUYMW6dIP0Pjs5hNHqLEuufBCoWDgWBhGyPpkp1K3Yy/Sm3AuxhktL/8/KHk7lBPugkJ7xGUSKhv2Kfvjkos4EFg8hLUY9CGsryrJSmOD2tw/Lc7yksw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ubv3p+OluilpKzlpnjEqMQ3TtliP4082KcqUj/HPxF0=;
- b=OUBE4qaVvGQcHHdMEEvZHPCoB44MKZa3iG3HFHTgQRSR1ajRm4TogCk5itYM85pw3aRvHsXr4o0Cu/n1mXMcc+dDt4P1qpPyA/JaBWWvGjV+EQsa9SDebNqv3aC/5kPrfjI7ZmKBq6dHdq71uAjYQyqKqOosoY8UdnprYuTvjfM=
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
- PA4PR04MB7856.eurprd04.prod.outlook.com (2603:10a6:102:cc::14) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6134.30; Tue, 28 Feb 2023 07:25:09 +0000
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::df09:aca5:4487:9fcb]) by DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::df09:aca5:4487:9fcb%7]) with mapi id 15.20.6134.030; Tue, 28 Feb 2023
- 07:25:08 +0000
-From:   Bough Chen <haibo.chen@nxp.com>
-To:     Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
-CC:     Shawn Guo <shawnguo@kernel.org>,
+        with ESMTP id S229530AbjB1HnG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2023 02:43:06 -0500
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DEFB91259F
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 23:43:04 -0800 (PST)
+Received: by mail-ed1-x529.google.com with SMTP id s26so35961285edw.11
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Feb 2023 23:43:04 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=amarulasolutions.com; s=google;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=XJlE7dXPUAXu2XirlL8x9W6bjuZ6sP4aaLIyjHL5+B0=;
+        b=RgzxJwdHYlGCkxmH72XOFdzqhbV6/4X6nv9h79yiQhfYtZrsIM8Om41p7z8hSzuyn5
+         i94jnP1wJH00cSxSPVX89PfoRFO5EReddfmtm46j3dqIXnsIivWyLBO7gPXiIvXEFcRX
+         niXKEMiJqXN2zYvCB/6UjO9cmkQaIHSh0FN2s=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=XJlE7dXPUAXu2XirlL8x9W6bjuZ6sP4aaLIyjHL5+B0=;
+        b=YbLEL12XrRu3OOs7BxzJVmpGcOCZQmbksw6/VVFw/DT6Ow+A1Ygf0OHLqwLF/Kv9kB
+         1GmxUJjDQWPnlS1DNLNcnCaXvQx2MLilr1zc/KLNgoO8XsZ8+92aMJRHCcDzOKWrw/cc
+         NhRSU6QmKOMhOlP3DNkcCJE5AEyYIAEXyxBayrJY/UkKiFK463XwhBwUWSp6x9cLaD0F
+         yP586wySVw8F+steSjEOrYwocFAEyZFDVnKW6MPYkPe4+WS+pxRjWvpUVQn560ZsLcNK
+         4GUw40RGeUkj3jtcL0ioQZCjKa7VbjGQHGwtPeJFjCBSCb1QLRORHpMnYMO9owFWWK5Q
+         aEnw==
+X-Gm-Message-State: AO0yUKWnEMATjEGYbkmafRO5DIduGkemQuKkJ1g0ULNGylDAZlYWDtv0
+        VzfDmdF7zqeOf6e+RQ8WmJaJjM+UiEkg3900Myd+QQ==
+X-Google-Smtp-Source: AK7set83BnvrTN5jUTjTkZcRIHkZv19J1u4OGNmI3thQ/K38rvu4jnnFtK5VkTngNb8Y3pqZGEPbs07Aqa56AdKiABY=
+X-Received: by 2002:a50:cc88:0:b0:4ae:e548:1c6 with SMTP id
+ q8-20020a50cc88000000b004aee54801c6mr1272515edi.6.1677570183183; Mon, 27 Feb
+ 2023 23:43:03 -0800 (PST)
+MIME-Version: 1.0
+References: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
+ <DB7PR04MB4010D6ABA0D10AB826F468CC90C29@DB7PR04MB4010.eurprd04.prod.outlook.com>
+ <CAOf5uwmaP0x3s7W6OZaCfLmJguSMtKtJtLCgKZ2nuDZ9VgpLVg@mail.gmail.com>
+ <CAOf5uwnuFBXF52Tbe7EFXcjzjbr-oOhn-fDVw=p8uZ8Y_Z7v+Q@mail.gmail.com> <DB7PR04MB401000F6F54497A17D96475190AC9@DB7PR04MB4010.eurprd04.prod.outlook.com>
+In-Reply-To: <DB7PR04MB401000F6F54497A17D96475190AC9@DB7PR04MB4010.eurprd04.prod.outlook.com>
+From:   Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+Date:   Tue, 28 Feb 2023 08:42:51 +0100
+Message-ID: <CAOf5uwmdJw3KErMMVyr=zSUqLX1gANT7KxKOUBzYXvUY3XS2Tg@mail.gmail.com>
+Subject: Re: NXP imx6ull nonalignment buffer question
+To:     Bough Chen <haibo.chen@nxp.com>
+Cc:     Shawn Guo <shawnguo@kernel.org>,
         Fabio Estevam <festevam@gmail.com>,
         LKML <linux-kernel@vger.kernel.org>,
         linux-arm-kernel <linux-arm-kernel@lists.infradead.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>
-Subject: RE: NXP imx6ull nonalignment buffer question
-Thread-Topic: NXP imx6ull nonalignment buffer question
-Thread-Index: AQHZJCqfilmTz1JUB0Cl7AgFtNcXnq6btY6wgABA6ICARvyjgIABTdcQ
-Date:   Tue, 28 Feb 2023 07:25:08 +0000
-Message-ID: <DB7PR04MB401000F6F54497A17D96475190AC9@DB7PR04MB4010.eurprd04.prod.outlook.com>
-References: <CAOf5uwns3YZMY5xhM+o0rNvtTqEDwCbua5HuSy-LBwgZq_eWYg@mail.gmail.com>
- <DB7PR04MB4010D6ABA0D10AB826F468CC90C29@DB7PR04MB4010.eurprd04.prod.outlook.com>
- <CAOf5uwmaP0x3s7W6OZaCfLmJguSMtKtJtLCgKZ2nuDZ9VgpLVg@mail.gmail.com>
- <CAOf5uwnuFBXF52Tbe7EFXcjzjbr-oOhn-fDVw=p8uZ8Y_Z7v+Q@mail.gmail.com>
-In-Reply-To: <CAOf5uwnuFBXF52Tbe7EFXcjzjbr-oOhn-fDVw=p8uZ8Y_Z7v+Q@mail.gmail.com>
-Accept-Language: zh-CN, en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DB7PR04MB4010:EE_|PA4PR04MB7856:EE_
-x-ms-office365-filtering-correlation-id: ed1056fb-de62-42b3-2863-08db195cebdb
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: XwLLA+kuIerafMG+IlOKhui25fWR5QuCcHcifVbYyJKmYUbLm6nQpzHMJMVA8ATnZjElYyAXgiecuqlovy7dBp8g1dCYlSXl0wjDomRLCXnadeoqUb765McTOlv8JQSyaCw+1+Iencge4+ebi31SP06HcnnKosqh3HbeAs5+josVf3C/ou+fIZBDWRM2gz4c7oUUyuoQeiAHg9LuEVWLJpAf33gxGeeJK7me31Cl0OX6bgZ0ZiERhDR8A/TOArmbs1yU7bF3udMO6A80nyZ50jHosXrRrvnJLpgo2nS4vtiwcBUrkjCzwJDFftyf8v5iViFMpQ3Dh9Nci05oaRNUtlQgpzLlfDiL3xhFdl8Su05TpnGImrJDs1BcqhncHQh247jf4+yH42qHppEGEajJygsHF/ev45ZFwjF0K1+cBVN4BPGNv3gPsj42QcZGVapiqQuxDrr/qWpklJeR56318sTyYH0uYQ8KFmsku5EoyHOupAtpfOrD4KuQvxBpFKgBeYl59hudhO4B4sVRgETBR19+dj2R3OX5Eufc25iQd6D5/fbgBGHg0yQuceckFj7eUrft7EsfDYIvfwttW/dedM7T8m7poU+2PCWRI0V9viNzQANwcsrwQRYFguO8KDf1I3wpN6FwgdXb1FyVMUcDrmVoY7Bg0mWhZl0QsQEXoVklXLCwMFJTFrmpj30wLlonus3O353l1fTNKvDaKlEdKbG6gFWTxR8SphDRK8/sRH8=
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230025)(4636009)(396003)(376002)(346002)(366004)(136003)(39860400002)(451199018)(83380400001)(54906003)(316002)(33656002)(4326008)(6916009)(122000001)(76116006)(8676002)(55016003)(64756008)(38100700002)(53546011)(6506007)(9686003)(186003)(26005)(71200400001)(7696005)(478600001)(5660300002)(66556008)(66446008)(66946007)(66476007)(8936002)(52536014)(2906002)(41300700001)(86362001)(38070700005)(32563001);DIR:OUT;SFP:1101;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?aXNFb2xUVFNLM0pGOVUxYVBwL200dUdXZE54d1FmNWF5U21pKzF4T2R0ODhx?=
- =?utf-8?B?ODR1SGpNejZLU1MvZU9JQ2Jab0EzdHBIUU9kZk5rT3RkTU93SklTM3JYdlVL?=
- =?utf-8?B?eU93bUJ3bHpyblhpZHRON0tQaVRkN1llODF4RVpwUmtZL0pPNXhyMVBueHR5?=
- =?utf-8?B?VithYnFzZ3licGUzY29wQUpwWXVxZENXUG9xcjUzZ2VhODFmaWRnelIvVHhB?=
- =?utf-8?B?Qzd3WnpyVzd3ZGVLK0hMQUlzMGNzeDRXcTVNZ0QzdzlsMThoOGNwMmpkKzVJ?=
- =?utf-8?B?aDUwK0VZWHRub2lkeXdJMk5Hb3VrN2g3Mi9BK0hMbERQN1gzdXhvYlloR2Fh?=
- =?utf-8?B?UzU3NVU0UzRPR3lUY003T1Y5dXNUd1lUMmFuWC9kd3NIT0dRUnVEcmhvaXU2?=
- =?utf-8?B?RXh0UUkzc0N2d1dXaFJFVWJlbUt5dTNkN010dUdhUWZQdm40cUJwV0hIRWEx?=
- =?utf-8?B?b1VJbVAwbzlCclVQbDdtVlhZQXdTYzZ6N1dmUTJ1cDNHSmRQMFpHNVJMV2p1?=
- =?utf-8?B?Mk8yakZBNm5tOW1wclovY2hMLzczL2t2cVhVZVNIYndVUko5N0J0cWcxTUFM?=
- =?utf-8?B?RHNMaTFUcjBBL1NXNkpQZmlLVjc0SXNOaE1PY3FsMEUzUllyVnhPWk1BY0hx?=
- =?utf-8?B?VUZMcndZS1NNVWl5bDdsLzhlTkh1SXU3anJWWTgrdlp6R0Z4czYxWXg0VHVL?=
- =?utf-8?B?MERMNTE4eEdzMXhPNzAzaUd3WWZYMnkvSEdqNENXY0piamlxZHMrZE1GQVpp?=
- =?utf-8?B?N3lFL1NPa0dMSU53a2RGbVdaTTZVYiswWUtQQlM2WEYyZEhiby9EZHhWWEF1?=
- =?utf-8?B?dHVMdWhOVWh6eVlJYVZjRkxpWGFtdXBqdHlSUS96VWt1OXBsRGFYbzZkV2c5?=
- =?utf-8?B?Y0E3YTdPanpkSG1UeWV3TzNLcUIxVUFIYTcrMENlNGI4NjVVMnVYNGxOeml4?=
- =?utf-8?B?VzZUdTFMb01hUGt1dHpwVVRNYnpyY084SE95WFZieFRxUWVsUDJGUHNNQlhB?=
- =?utf-8?B?NUZsZkd3WFM1dFdJWThoWUsyVDhiZDZkRkZhay9YOFhSL1U5QUdVRCtNNVZk?=
- =?utf-8?B?bDRCL2RwaFdPRGROaDh0MjdIVSswbzY0Umg5MzVPZjJGdXhRZlhPTG5iZmp0?=
- =?utf-8?B?WTVBU0loOWxtaUE5VWlGVmhZVmJHNEZmWDBuQWlrRDhQN1RGSjg1Q3ZNV2t0?=
- =?utf-8?B?WGowNzdhOEZBU3lHU1F1Z1pBcG40TGtaSzVqeWFLNG5JY1Z5RXFrRmJzS0pJ?=
- =?utf-8?B?akMzdEVrcGhQTldBQTdWQ0lrczlyVzA3cUl6dlJDRFFNbEdRK2FtMWxVQWpj?=
- =?utf-8?B?Yjl2bmpVUFhIT0lWd01VaDF5L2pGS1JycDNoNGpGUmUxbXdWQi83RzBWMDJv?=
- =?utf-8?B?UEIzdW51Z2F3TldEeXFBWEUrSjBKNWJMVWY1MG8wQW8xbkozcjREcXRlL2xi?=
- =?utf-8?B?cS9zcVBBQzJERTZyNnprTHlSMzI2RkwzNFdjL0Q5ek9YQlNWVFpzVWpBQUVE?=
- =?utf-8?B?MlQwVUFTUzBnSFdHSFFoL21DUmJHOFZCYlJYSUF3WDgwbzg5bFFwT3BqZjdR?=
- =?utf-8?B?R1RaekYrcENJZFVSZ0ljbC9BT0xiQ1pnV2MreHFRbkNQYlNpRlUySnNEZmVa?=
- =?utf-8?B?WWprNnpXd0Y1QWYwR1I4YTdHK2kyWlZGWWNYM1FkRU05MWQ5L05MVE80TFhV?=
- =?utf-8?B?dzhNUWVoR3h6WERGVWhuZ1VXMjVOWmRDNm0zMlQvc2N4V3JZeTZRRVo0Y2Qr?=
- =?utf-8?B?S0ZTM3JXWTNYckJFSVd0S3JvTlU0SDZmNWFHSStkSUs3eE5aZU9pMmVxWEYr?=
- =?utf-8?B?TVFjVERBVno3QWdONEJyTU1VUHc1MVFyaXJXQlMxalNLZTJaMCtvbENGVGlZ?=
- =?utf-8?B?cmhoZ2w3RW83T1NDSWE0cXNsK2dNcTZBS251QjVsenVZRnNWZ3pPVHB4MUlj?=
- =?utf-8?B?elhMaGtxcTlHYnNxOW42RlNkb3AzbUU2clFibWVIeGFtOWtHSWlWd2F6RkJx?=
- =?utf-8?B?d3I4K0VIN2tKMVhhT3dxRFVkQUhPYVBhTGlFVkZDV0gzQmpBdU13TVhhQlh3?=
- =?utf-8?B?REVxcjA1TVdHM09ZNThYaTJOdmxsUms0bnRPQkRsR2VHZnlLUjlTRlJrSGhU?=
- =?utf-8?Q?14ZRoCGvO7mWQeKbZsqBrrCk6?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: ed1056fb-de62-42b3-2863-08db195cebdb
-X-MS-Exchange-CrossTenant-originalarrivaltime: 28 Feb 2023 07:25:08.7595
- (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: 926Fm85TCy3Q2a0ldGyTtGEjeqGm+2UJlIoXz3F9BxQcn+z8sh+1hphQnSipI3dcg5XYxjHOkDUmHupuIwU8qg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PA4PR04MB7856
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNaWNoYWVsIE5henphcmVubyBU
-cmltYXJjaGkgPG1pY2hhZWxAYW1hcnVsYXNvbHV0aW9ucy5jb20+DQo+IFNlbnQ6IDIwMjPlubQy
-5pyIMjfml6UgMTk6MjINCj4gVG86IEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4NCj4g
-Q2M6IFNoYXduIEd1byA8c2hhd25ndW9Aa2VybmVsLm9yZz47IEZhYmlvIEVzdGV2YW0NCj4gPGZl
-c3RldmFtQGdtYWlsLmNvbT47IExLTUwgPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+Ow0K
-PiBsaW51eC1hcm0ta2VybmVsIDxsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmc+
-Ow0KPiBsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnOyBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25A
-bGluYXJvLm9yZz4NCj4gU3ViamVjdDogUmU6IE5YUCBpbXg2dWxsIG5vbmFsaWdubWVudCBidWZm
-ZXIgcXVlc3Rpb24NCj4gDQo+IEhpIEJvdWdoDQo+IA0KPiBPbiBGcmksIEphbiAxMywgMjAyMyBh
-dCA4OjE54oCvQU0gTWljaGFlbCBOYXp6YXJlbm8gVHJpbWFyY2hpDQo+IDxtaWNoYWVsQGFtYXJ1
-bGFzb2x1dGlvbnMuY29tPiB3cm90ZToNCj4gPg0KPiA+IEhpDQo+ID4NCj4gPiBPbiBGcmksIEph
-biAxMywgMjAyMyBhdCA0OjMwIEFNIEJvdWdoIENoZW4gPGhhaWJvLmNoZW5AbnhwLmNvbT4gd3Jv
-dGU6DQo+ID4gPg0KPiA+ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4gPiBG
-cm9tOiBNaWNoYWVsIE5henphcmVubyBUcmltYXJjaGkgPG1pY2hhZWxAYW1hcnVsYXNvbHV0aW9u
-cy5jb20+DQo+ID4gPiA+IFNlbnQ6IDIwMjPlubQx5pyIOeaXpSAyMTowMg0KPiA+ID4gPiBUbzog
-Qm91Z2ggQ2hlbiA8aGFpYm8uY2hlbkBueHAuY29tPjsgU2hhd24gR3VvDQo+ID4gPiA+IDxzaGF3
-bmd1b0BrZXJuZWwub3JnPjsgRmFiaW8gRXN0ZXZhbSA8ZmVzdGV2YW1AZ21haWwuY29tPjsgTEtN
-TA0KPiA+ID4gPiA8bGludXgta2VybmVsQHZnZXIua2VybmVsLm9yZz4NCj4gPiA+ID4gQ2M6IGxp
-bnV4LWFybS1rZXJuZWwgPGxpbnV4LWFybS1rZXJuZWxAbGlzdHMuaW5mcmFkZWFkLm9yZz47DQo+
-ID4gPiA+IGxpbnV4LW1tY0B2Z2VyLmtlcm5lbC5vcmc7IFVsZiBIYW5zc29uIDx1bGYuaGFuc3Nv
-bkBsaW5hcm8ub3JnPg0KPiA+ID4gPiBTdWJqZWN0OiBOWFAgaW14NnVsbCBub25hbGlnbm1lbnQg
-YnVmZmVyIHF1ZXN0aW9uDQo+ID4gPiA+DQo+ID4gPiA+IEhpIEhhaWJvDQo+ID4gPiA+DQo+ID4g
-PiA+IFdvcmtpbmcgb24gaW14NnVseiBkZXNpZ24gYW5kIGZvdW5kIHRoYXQgaWYgSSBzZW5kIGEg
-c2RpbyBwYWNrZXQNCj4gPiA+ID4gdXNpbmcgdGhlIHNkaW9fd3JpdGVzYiB0aGUgYWRtYSBkcml2
-ZXIgdHJpZXMgdG8gaGFuZGxlIGl0IHdpdGggdHdvDQo+ID4gPiA+IGRtYSBkZXNjcmlwdG9ycy4g
-VGhlIGZpcnN0IG9uZSBmaWxsZWQgd2l0aCB0aGUgYnl0ZXMgdXAgdG8gMyB0bw0KPiA+ID4gPiBj
-b3ZlciB0aGUgbWlzYWxpZ24gYW5kIHRoZW4gYW5vdGhlciBidWZmZXIgZGVzY3JpcHRvcg0KPiA+
-ID4gPg0KPiA+ID4gPiAgIG9mZnNldCA9IChTREhDSV9BRE1BMl9BTElHTiAtIChhZGRyICYgU0RI
-Q0lfQURNQTJfTUFTSykpICYNCj4gPiA+ID4gICAgICAgICAgICAgICAgICAgICAgICAgIFNESENJ
-X0FETUEyX01BU0s7DQo+ID4gPiA+ICAgICAgICAgICAgICAgICBpZiAob2Zmc2V0KSB7DQo+ID4g
-PiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGlmIChkYXRhLT5mbGFncyAmIE1NQ19EQVRBX1dS
-SVRFKSB7DQo+ID4gPiA+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYnVmZmVyID0g
-c2RoY2lfa21hcF9hdG9taWMoc2cpOw0KPiA+ID4gPiAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgIG1lbWNweShhbGlnbiwgYnVmZmVyLCBvZmZzZXQpOw0KPiA+ID4gPiAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgIHNkaGNpX2t1bm1hcF9hdG9taWMoYnVmZmVyKTsNCj4gPiA+
-ID4gICAgICAgICAgICAgICAgICAgICAgICAgfQ0KPiA+ID4gPg0KPiA+ID4gPiAgICAgICAgICAg
-ICAgICAgICAgICAgICAvKiB0cmFuLCB2YWxpZCAqLw0KPiA+ID4gPiAgICAgICAgICAgICAgICAg
-ICAgICAgICBfX3NkaGNpX2FkbWFfd3JpdGVfZGVzYyhob3N0LCAmZGVzYywNCj4gPiA+ID4gYWxp
-Z25fYWRkciwNCj4gPiA+ID4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgb2Zmc2V0LA0KPiA+ID4gPiBBRE1BMl9UUkFOX1ZBTElEKTsNCj4gPiA+ID4NCj4g
-PiA+ID4gICAgICAgICAgICAgICAgICAgICAgICAgQlVHX09OKG9mZnNldCA+IDY1NTM2KTsNCj4g
-PiA+ID4NCj4gPiA+ID4gICAgICAgICAgICAgICAgICAgICAgICAgYWxpZ24gKz0gU0RIQ0lfQURN
-QTJfQUxJR047DQo+ID4gPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGFsaWduX2FkZHIgKz0g
-U0RIQ0lfQURNQTJfQUxJR047DQo+ID4gPiA+DQo+ID4gPiA+ICAgICAgICAgICAgICAgICAgICAg
-ICAgIGFkZHIgKz0gb2Zmc2V0Ow0KPiA+ID4gPiAgICAgICAgICAgICAgICAgICAgICAgICBsZW4g
-LT0gb2Zmc2V0Ow0KPiA+ID4gPiAgICAgICAgICAgICAgICAgfQ0KPiA+ID4gPg0KPiA+ID4gPiBJ
-biA0OC43LjQgRGF0YSBMZW5ndGggU2V0dGluZw0KPiA+ID4gPiBGb3IgZWl0aGVyIEFETUEgKEFE
-TUExIG9yIEFETUEyKSB0cmFuc2ZlciwgdGhlIGRhdGEgaW4gdGhlIGRhdGENCj4gPiA+ID4gYnVm
-ZmVyIG11c3QgYmUgd29yZCBhbGlnbmVkLCBzbyB0aGUgZGF0YSBsZW5ndGggc2V0IGluIHRoZSBk
-ZXNjcmlwdG9yIG11c3QNCj4gYmUgYSBtdWx0aXBsZSBvZiA0Lg0KPiA+ID4gPiBJIGhhdmUgbm90
-aWNlZCB0aGF0IHRoaXMgY29kZSBkb2VzIG5vdCB3b3JrIGFzIGV4cGVjdGVkLg0KPiA+ID4NCj4g
-PiA+IEhpIE1pY2hhZWwsDQo+ID4gPg0KPiA+ID4gTXkgdW5kZXJzdGFuZGluZyBpczogZm9yIHRo
-ZSBzZW50ZW5jZSAiIHRoZSBkYXRhIGluIHRoZSBkYXRhIGJ1ZmZlciBtdXN0IGJlDQo+IHdvcmQg
-YWxpZ25lZCIsIHRoaXMgbWVhbnMgdGhlIHN0YXJ0IGFkZHJlc3Mgb2YgdGhlIGRhdGEgbXVzdCBi
-ZSB3b3JkIGFsaWduZWQsDQo+IGJ1dCBub3QgbGltaXQgdGhlIGRhdGEgbGVuZ3RoLg0KPiA+ID4N
-Cj4gPg0KPiA+IE9rLiBNeSBzcGVjaWZpYyBwcm9ibGVtIGlzIHRoYXQgdGhpcyBzZWVtcyBub3Qg
-d29ya2luZyBvbiBpbXg2dWx6LCBJDQo+ID4gZm91bmQgdGhlIHByb2JsZW0gd29ya2luZyBvbiBh
-IHdpZmkgY2hpcHNldCwgaWYgdGhlIHJlcXVlc3QgZ2V0cyBzcGxpdA0KPiA+IGZvciBuby1hbGln
-bm1lbnQgb2YgdGhlIGRhdGEgaW4gdHdvIGRtYSBkZXNjcmlwdG9ycywgdGhlIGNoaXBzZXQgZG9l
-cw0KPiA+IG5vdCByZXBseSB0byBtZS4NCj4gPiBBbnl3YXksIEkgd2lsbCByZXRlc3QgaXQgd2l0
-aCB0aGUgdXBzdHJlYW0ga2VybmVsIGFnYWluLiBJIHdpbGwgY2hlY2sNCj4gPiBiZXR0ZXIgYW5k
-IEkgd2lsbCBmb2xsb3cgdXAgaWYgYW55IG1vcmUgcXVlc3Rpb24NCj4gPg0KPiANCj4gSSBoYXZl
-IGRvbmUgc29tZSB0ZXN0cyBhbmQgSSBuZWVkIHRoaXMgcXVpcmsgU0RIQ0lfUVVJUktfMzJCSVRf
-QURNQV9TSVpFDQo+IG9uIGlteDZ1bHogY3B1IGFuZCBJIHRoaW5rIHRoYXQgaXQgYXBwbGllcyBl
-dmVuIG9uIGlteDZ1bGwuDQo+IFdpZmkgY2FuIHdvcmsgb25seSBpZiB0aGUgZGF0YSBvbiB0aGUg
-c2RpbyBhcmUgYWxpZ25lZCBvciB3ZSB1c2UgaW50ZXJydXB0IG1vZGUNCj4gZm9yIG5vLWFsaWdu
-bWVudCBkYXRhLiBJIGRpZCBub3QgZmluZCBhbiBlcnJhdGEgYW5kIEkgY2FuIG5vdCBhZGQgYXMg
-YSBxdWlyaw0KPiB3aXRob3V0IGEgY29uZmlybWF0aW9uDQo+IA0KDQpIaSBNaWNoYWVsLA0KDQpJ
-ZiB1c2UgdGhlIHF1aXJrIFNESENJX1FVSVJLXzMyQklUX0FETUFfU0laRSwgZm9yIHRoZSBsZW5n
-dGggbm8tYWxpZ25tZW50IGRhdGEsIGl0IHdpbGwNCmNoYW5nZSB0byB1c2UgUElPIG1vZGUuDQoN
-CkhlcmUsIGNhbiB5b3UgZ2l2ZSBzb21lIG1vcmUgZGV0YWlscyBhYm91dCB0aGlzIGlzc3VlPyBX
-aGVuIHRoZSBkbWEgZGVzY3JpcHRvciBjb250YWluIHRoZQ0Kbm8tYWxpZ25tZW50IGxlbmd0aCBv
-ZiBkYXRhLCBpcyB0aGVyZSBhbnkgcmVnaXN0ZXIgZHVtcCBvbiB0aGUgY29uc29sZT8gT3IgbWVl
-dCBhbnkgdGltZW91dD8gT3IgdGhlcmUgYW55DQpBRE1BIGxlbmd0aCBtaXNtYXRjaCBoYXBwZW4/
-IA0KDQpCZXNpZGVzLCBkaWQgeW91IHRyeSBETUEgbW9kZSBpbnN0ZWFkIG9mIHRoZSBBRE1BIG1v
-ZGU/IENhbiBETUEgbW9kZSB3b3JrIGZvciB5b3VyIGNhc2U/DQoNCkJlc3QgUmVnYXJkcw0KSGFp
-Ym8gQ2hlbg0KDQo+IE1pY2hhZWwNCg==
+Hi
+
+On Tue, Feb 28, 2023 at 8:25=E2=80=AFAM Bough Chen <haibo.chen@nxp.com> wro=
+te:
+>
+> > -----Original Message-----
+> > From: Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+> > Sent: 2023=E5=B9=B42=E6=9C=8827=E6=97=A5 19:22
+> > To: Bough Chen <haibo.chen@nxp.com>
+> > Cc: Shawn Guo <shawnguo@kernel.org>; Fabio Estevam
+> > <festevam@gmail.com>; LKML <linux-kernel@vger.kernel.org>;
+> > linux-arm-kernel <linux-arm-kernel@lists.infradead.org>;
+> > linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
+> > Subject: Re: NXP imx6ull nonalignment buffer question
+> >
+> > Hi Bough
+> >
+> > On Fri, Jan 13, 2023 at 8:19=E2=80=AFAM Michael Nazzareno Trimarchi
+> > <michael@amarulasolutions.com> wrote:
+> > >
+> > > Hi
+> > >
+> > > On Fri, Jan 13, 2023 at 4:30 AM Bough Chen <haibo.chen@nxp.com> wrote=
+:
+> > > >
+> > > > > -----Original Message-----
+> > > > > From: Michael Nazzareno Trimarchi <michael@amarulasolutions.com>
+> > > > > Sent: 2023=E5=B9=B41=E6=9C=889=E6=97=A5 21:02
+> > > > > To: Bough Chen <haibo.chen@nxp.com>; Shawn Guo
+> > > > > <shawnguo@kernel.org>; Fabio Estevam <festevam@gmail.com>; LKML
+> > > > > <linux-kernel@vger.kernel.org>
+> > > > > Cc: linux-arm-kernel <linux-arm-kernel@lists.infradead.org>;
+> > > > > linux-mmc@vger.kernel.org; Ulf Hansson <ulf.hansson@linaro.org>
+> > > > > Subject: NXP imx6ull nonalignment buffer question
+> > > > >
+> > > > > Hi Haibo
+> > > > >
+> > > > > Working on imx6ulz design and found that if I send a sdio packet
+> > > > > using the sdio_writesb the adma driver tries to handle it with tw=
+o
+> > > > > dma descriptors. The first one filled with the bytes up to 3 to
+> > > > > cover the misalign and then another buffer descriptor
+> > > > >
+> > > > >   offset =3D (SDHCI_ADMA2_ALIGN - (addr & SDHCI_ADMA2_MASK)) &
+> > > > >                          SDHCI_ADMA2_MASK;
+> > > > >                 if (offset) {
+> > > > >                         if (data->flags & MMC_DATA_WRITE) {
+> > > > >                                 buffer =3D sdhci_kmap_atomic(sg);
+> > > > >                                 memcpy(align, buffer, offset);
+> > > > >                                 sdhci_kunmap_atomic(buffer);
+> > > > >                         }
+> > > > >
+> > > > >                         /* tran, valid */
+> > > > >                         __sdhci_adma_write_desc(host, &desc,
+> > > > > align_addr,
+> > > > >                                                 offset,
+> > > > > ADMA2_TRAN_VALID);
+> > > > >
+> > > > >                         BUG_ON(offset > 65536);
+> > > > >
+> > > > >                         align +=3D SDHCI_ADMA2_ALIGN;
+> > > > >                         align_addr +=3D SDHCI_ADMA2_ALIGN;
+> > > > >
+> > > > >                         addr +=3D offset;
+> > > > >                         len -=3D offset;
+> > > > >                 }
+> > > > >
+> > > > > In 48.7.4 Data Length Setting
+> > > > > For either ADMA (ADMA1 or ADMA2) transfer, the data in the data
+> > > > > buffer must be word aligned, so the data length set in the descri=
+ptor must
+> > be a multiple of 4.
+> > > > > I have noticed that this code does not work as expected.
+> > > >
+> > > > Hi Michael,
+> > > >
+> > > > My understanding is: for the sentence " the data in the data buffer=
+ must be
+> > word aligned", this means the start address of the data must be word al=
+igned,
+> > but not limit the data length.
+> > > >
+> > >
+> > > Ok. My specific problem is that this seems not working on imx6ulz, I
+> > > found the problem working on a wifi chipset, if the request gets spli=
+t
+> > > for no-alignment of the data in two dma descriptors, the chipset does
+> > > not reply to me.
+> > > Anyway, I will retest it with the upstream kernel again. I will check
+> > > better and I will follow up if any more question
+> > >
+> >
+> > I have done some tests and I need this quirk SDHCI_QUIRK_32BIT_ADMA_SIZ=
+E
+> > on imx6ulz cpu and I think that it applies even on imx6ull.
+> > Wifi can work only if the data on the sdio are aligned or we use interr=
+upt mode
+> > for no-alignment data. I did not find an errata and I can not add as a =
+quirk
+> > without a confirmation
+> >
+>
+> Hi Michael,
+>
+> If use the quirk SDHCI_QUIRK_32BIT_ADMA_SIZE, for the length no-alignment=
+ data, it will
+> change to use PIO mode.
+>
+> Here, can you give some more details about this issue? When the dma descr=
+iptor contain the
+> no-alignment length of data, is there any register dump on the console? O=
+r meet any timeout? Or there any
+> ADMA length mismatch happen?
+
+I don't have a logic analyzer or oscilloscope but from the point of
+view of the wifi, the data does not arrive or
+the transaction is not complete. Anyway I will check back again on 6.2
+
+diff --git a/drivers/net/wireless/ti/wl18xx/wl18xx.h
+b/drivers/net/wireless/ti/wl18xx/wl18xx.h
+index b642e0c437bb..97cd41a75762 100644
+--- a/drivers/net/wireless/ti/wl18xx/wl18xx.h
++++ b/drivers/net/wireless/ti/wl18xx/wl18xx.h
+@@ -32,14 +32,14 @@
+ #define WL18XX_MAX_LINKS 16
+
+ struct wl18xx_priv {
+-       /* buffer for sending commands to FW */
+-       u8 cmd_buf[WL18XX_CMD_MAX_SIZE];
+-
+        struct wl18xx_priv_conf conf;
+
+        /* Index of last released Tx desc in FW */
+        u8 last_fw_rls_idx;
+
++       /* buffer for sending commands to FW */
++       u8 cmd_buf[WL18XX_CMD_MAX_SIZE];
++
+        /* number of keys requiring extra spare mem-blocks */
+        int extra_spare_key_count;
+ };
+
+One way to try on some wifi is to move this buffer. As the code is
+done this section is kmalloc and data is copied to the buffer from cmd
+side.
+After I retest I will send an RFC patch
+
+Michael
+
+
+>
+> Besides, did you try DMA mode instead of the ADMA mode? Can DMA mode work=
+ for your case?
+>
+> Best Regards
+> Haibo Chen
+>
+> > Michael
+
+
+
+--
+Michael Nazzareno Trimarchi
+Co-Founder & Chief Executive Officer
+M. +39 347 913 2170
+michael@amarulasolutions.com
+__________________________________
+
+Amarula Solutions BV
+Joop Geesinkweg 125, 1114 AB, Amsterdam, NL
+T. +31 (0)85 111 9172
+info@amarulasolutions.com
+www.amarulasolutions.com
