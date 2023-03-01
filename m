@@ -2,124 +2,127 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EBD5C7EE32
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Mar 2023 09:03:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06A60C7EE23
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Mar 2023 23:33:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229492AbjCAJDu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Mar 2023 04:03:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56724 "EHLO
+        id S229437AbjCAXdD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Mar 2023 18:33:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59212 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229809AbjCAJDo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2023 04:03:44 -0500
-Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D84112658C
-        for <linux-mmc@vger.kernel.org>; Wed,  1 Mar 2023 01:03:25 -0800 (PST)
-Received: by mail-pj1-x102e.google.com with SMTP id x34so12705674pjj.0
-        for <linux-mmc@vger.kernel.org>; Wed, 01 Mar 2023 01:03:25 -0800 (PST)
+        with ESMTP id S229462AbjCAXdB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2023 18:33:01 -0500
+Received: from mail-ua1-x92c.google.com (mail-ua1-x92c.google.com [IPv6:2607:f8b0:4864:20::92c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6B363864E
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Mar 2023 15:32:58 -0800 (PST)
+Received: by mail-ua1-x92c.google.com with SMTP id s13so4986628uac.8
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Mar 2023 15:32:58 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=7kLFJAEhf38Z91ErKT+SpxGk8u9CKv5JjAsWvmwSh1U=;
-        b=kFV6gWvUnLZUgZ3rx1fWN6XsMVZGaOvEhSfcLg/s8cO8hXYZcsfYyMQVpM1nPe0baw
-         9ArjHkD/rTNKS5uasdrwh9EyO2HLnFSdTwYbjkFKAu3WyoU4IHt3Tz34CYydA9oO369D
-         BObp7hV6riaekilNuiKshaOLfMCvvMGnhgoDEztu+nfov0YCkeX/+HL/23Yn7jAZ8k5x
-         NMf4axghp3wg1SxSNbK2DtkVk61xSTsSv7ln/oLuupE6mXwtZ4StRepp85j7sHIy6sLP
-         gDU3wf3dZ189e0zn3+AZIZ/STcotbaSfkInW+N3RhCLw3z5qel277LPsO3bAKE4Pkh8k
-         BMvw==
+        d=gateworks-com.20210112.gappssmtp.com; s=20210112;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=FeuWO1CjmVd+hjiHrdfFptk3qAqxlXVOpLYxHpbPoMk=;
+        b=WJnh5hlGci68HiRLyG79x3u4rovbsavBZHZuR8lMJCuQbybDL2liIrmKv/gzFSNTLF
+         Mhk4fUTjpJVcxCw/2fiU3/xmdKCzxA+zINwPRhVGsy8dAgNJgQtg5j9TyKg2XU7OTh3j
+         JQYLOdGR2ehMLg3r0WrSm1wbVfF9s5efcCpWPI9E2YKTrqCHyBFHzl1SOxaHE2k2vBYB
+         C53K+XmXlc594gCMULLcpmwbxz3GlAt+9Nk3bs8ccrpIb2G0hQtLWGbACynAmihOzKYa
+         CiG6L9qz1Ocdbo521fd3B6iCeYMW+PY9orV14/wBXt1iyOv7bo4LHCXMNhXcE0nhhb3b
+         2BXg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7kLFJAEhf38Z91ErKT+SpxGk8u9CKv5JjAsWvmwSh1U=;
-        b=1e4yNPcoB3DI7UiCTSAOaQCVYpWMjjYmz3qjgt+ELYd+kWCIsk2qGFL1eJvKyxiMoA
-         XcNrl+9KdFt+fZmwSnYFYPwg0tgMjzQqVT9w+7dgGYKZrv17AD1JGnGdCfS/VA7/wlPH
-         fR3LbUrJCT+lA0lU2grU/q5jkypQ7j1AY3Wu7WnMW9S+eb54nSmeWB7KiDdB2cHn6BSZ
-         boL4wf5RrM45dU6S9Luh5+6CT2razY2m3ol1I+ZbdI1dAHKYcto/DfDaCYDDXzJWIOG9
-         E7sB9rlAqJb4AAX2DaTUkHRVgyUDpAVwkeAP/Lrp8Xvs82HkB72OAp93FGew7kTCW3Iq
-         YDfQ==
-X-Gm-Message-State: AO0yUKVyVd3V8hoiWyNPh3oI8zUzCrqMGANR1vLlkR79CSVk0h5XW/5T
-        /FUdir01E6CO0MdIGrjkNzEE8rPHaCRzUeami0ijMQ==
-X-Google-Smtp-Source: AK7set/EtY+OG6oXO/oVlz80z4XiEM8n0HHmXdl5DR+0gJsIWwZvMhJ6meksEeV5+DLgP3I/bf83eA0yaUAqAI17xbc=
-X-Received: by 2002:a17:902:e5d0:b0:19a:fa2f:559e with SMTP id
- u16-20020a170902e5d000b0019afa2f559emr3823016plf.3.1677661405158; Wed, 01 Mar
- 2023 01:03:25 -0800 (PST)
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=FeuWO1CjmVd+hjiHrdfFptk3qAqxlXVOpLYxHpbPoMk=;
+        b=23rgUqJp6X8b5asr+G5INSmiHSnQkgb1Ie0wrzc5IaXLVnz4MNbzgDzp1438zQMMvd
+         5D705MYQVroMVnMhk7i5WI4PKLasLVgojnRqmhw1eCAmFUvYr1u2B9D/Scnv6TrAdlUr
+         +/+vJPjv9h6iUbkRgvhzG6f2VN3VqfHkTpfglY8OCLc7efn8x9amNmIVo5KNr5bAJkcm
+         f+7fyYCTb7oByMHB2HH5NhVUS+14LVBAaNp0FJc0Us0eLibou6Vfr75lcQLidijeyKxX
+         5ZUxs44AHl6kToQlhm0Tok6+0BeNVoylJeBaE20VuoTOd2QODHdJ1XPoqF4s3gWRBs+8
+         9ruQ==
+X-Gm-Message-State: AO0yUKVtgXwsPym9MEPXHXsrRVyHSa1AVLCxFvKMo2IqG6bc4FYSghfR
+        hVjsvkRZgXZ89KDXrsMnUJFrzTx746Fw9xX5LESU/A==
+X-Google-Smtp-Source: AK7set9+Szwg/MF+U5fSr1gGmRga2npeRJiCdtd+i0GE46DrxKPQzMKQxRY1Hf2q/WM0J9f0VNUjzxafeTFF7J3FXGA=
+X-Received: by 2002:a05:6122:1210:b0:401:73f4:dfe with SMTP id
+ v16-20020a056122121000b0040173f40dfemr4563991vkc.3.1677713577603; Wed, 01 Mar
+ 2023 15:32:57 -0800 (PST)
 MIME-Version: 1.0
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
- <Y0hr9XTGAg8Q6K6y@google.com> <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
- <10237323.nUPlyArG6x@steina-w>
-In-Reply-To: <10237323.nUPlyArG6x@steina-w>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 1 Mar 2023 10:02:48 +0100
-Message-ID: <CAPDyKFq7NFx_cwTZajqjOnRsjJ1i-F0ip+b0ZjFUcOdLjMJSkQ@mail.gmail.com>
-Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
-To:     Alexander Stein <alexander.stein@ew.tq-group.com>
-Cc:     Matthias Kaehlcke <mka@chromium.org>,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
-        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
-        netdev@vger.kernel.org
+From:   Tim Harvey <tharvey@gateworks.com>
+Date:   Wed, 1 Mar 2023 15:32:46 -0800
+Message-ID: <CAJ+vNU2SC_Q3RWdeO9-mKDYC_TK8_vzefvGz_++O8StJer_h3Q@mail.gmail.com>
+Subject: mmc: core: Disable card detect during shutdown
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "H. Nikolaus Schaller" <hns@goldelico.com>,
+        Tony Lindgren <tony@atomide.com>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Jan Glauber <jan.glauber@gmail.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 1 Mar 2023 at 09:17, Alexander Stein
-<alexander.stein@ew.tq-group.com> wrote:
->
-> Hi,
->
-> sorry for being late to the party.
->
-> Am Mittwoch, 19. Oktober 2022, 08:03:22 CET schrieb Dmitry Baryshkov:
-> > Ho,
-> >
-> > On Thu, 13 Oct 2022 at 22:50, Matthias Kaehlcke <mka@chromium.org> wrote:
-> > > Do you still plan to refresh this series?
-> > >
-> > > I know there have been multiple attempts to get something similar
-> > > landed in the past 10 year or so. Your series didn't seem to get
-> > > much pushback from maintainers, might be worth sending a refresh :)
-> >
-> > Yes, I hope to return to it eventually. I just had no time for it lately.
->
-> I just found this thread while searching for power sequencing devices in
-> Linux. From what I understand this is transforming the existing mmc pwrseq
-> drivers into generic ones. What is the intention of this new subsystem? What
-> is it supposed to address?
-> In my case I have an LTE module attached via USB, but in order to use it I
-> need to perform several steps:
-> 1. apply power supply
-> 2. Issue a reset pulse(!), the length actually defines whether its a reset or
-> poweroff/on
-> 3a. wait for a GPIO to toggle
-> 3b. wait a minimum time
-> 4a. device will enumerate on USB
-> 4b. device can be access using UART
->
-> This is something required to actually see/detect the device in the first
-> place, thus it cannot be part of the device driver side.
-> Is this something pwrseq is supposed to address?
+Greetings,
 
-Yes, this is one of those typical use-cases for discoverable buses
-that we need to add support for, in one way or the other.
+I've encountered a hang on shutdown on octeontx (CN8030 SoC, THUNDERX
+architecture) that I bisected to commit 66c915d09b94 ("mmc: core:
+Disable card detect during shutdown").
 
->
-> Best regards,
-> Alexander
+It looks like the OMP5 Pyra ran into this as well related to a
+malfunctioning driver [1]
 
-[...]
+In the case of MMC_CAVIUM_THUNDERX the host controller supports
+multiple slots each having their own CMD signal but shared clk/data
+via the following dt:
 
-Kind regards
-Uffe
+mmc@1,4 {
+        compatible = "cavium,thunder-8890-mmc";
+        reg = <0xc00 0x00 0x00 0x00 0x00>;
+        #address-cells = <0x01>;
+        #size-cells = <0x00>;
+        clocks = <0x0b>;
+
+        /* eMMC */
+        mmc-slot@0 {
+                compatible = "mmc-slot";
+                reg = <0>;
+                vmmc-supply = <&mmc_supply_3v3>;
+                max-frequency = <35000000>;
+                no-1-8-v;
+                bus-width = <8>;
+                no-sdio;
+                no-sd;
+                mmc-ddr-3_3v;
+                cap-mmc-highspeed;
+        };
+
+        /* microSD */
+        mmc-slot@1 {
+                compatible = "mmc-slot";
+                reg = <1>;
+                vmmc-supply = <&mmc_supply_3v3>;
+                max-frequency = <35000000>;
+                no-1-8-v;
+                broken-cd;
+                bus-width = <4>;
+                cap-sd-highspeed;
+        };
+};
+
+mmc_add_host is only called once for mmc0 and I can't see any printk
+debugging added to __mmc_stop_host (maybe because serial/console has
+been disabled by that point?).
+
+It appears that what causes this hang is the 'broken-cd' which enables
+the detect change polling on mmc1. I have the ability to flip the CMD
+signal routing thus making mmc0 the microSD and mmc1 the eMMC and when
+I do that there isn't an issue so I think what happens is in the case
+where mmc polling is enabled on mmc1 but not mmc0 (as above) the
+polling causes a hang after __mmc_stop_host() is called for mmc0.
+
+Any ideas?
+
+Best Regards,
+
+Tim
+
+[1] https://lore.kernel.org/all/55A0788B-03E8-457E-B093-40FD93F1B9F3@goldelico.com/
