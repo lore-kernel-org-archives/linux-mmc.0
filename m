@@ -2,165 +2,190 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 30866C64EC7
-	for <linux-mmc@archiver.kernel.org>; Tue, 28 Feb 2023 18:06:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E17E8C7EE23
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Mar 2023 08:18:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229520AbjB1SGq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 28 Feb 2023 13:06:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50878 "EHLO
+        id S229900AbjCAISL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Mar 2023 03:18:11 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229451AbjB1SGp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 28 Feb 2023 13:06:45 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C57922A3B;
-        Tue, 28 Feb 2023 10:06:44 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S229916AbjCAISE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2023 03:18:04 -0500
+Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9E6910DE;
+        Wed,  1 Mar 2023 00:17:55 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1677658678; x=1709194678;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=FWeHY8fcd0cSFhXWZizDGcsqg2Tv5UalzCBsb0/6y80=;
+  b=NjYiJEGH2EwIOuEEKLYwlK4fXIor2PFjGvhCxDx3evc9grlKOfwb2QxQ
+   G9xbzOIk56AoWO+FiRzNbZ33wNMeMBf84/02x22PJV+/McCPHWz7I/yzw
+   +9FExOJQVrQm5TLEyHo0NfBX+ByKIlsYy58y8cP29mpeAhWmtqnSkssT7
+   Xsk7gsqaLDBos7qQ+KhcSvP/Vd+/jYJgIeZIIutDmDfHR22Gej96pnRXw
+   /793XMR1T4ywQFqlVl2HUQmY7iirW3PDpCUZUA5YPlzqgW264nRNUhrny
+   UfU8jWJ1tW843LZZK6lLKfC88sSd8P0LZ34l6jX+fVNqiIznY5bBmND28
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.98,224,1673910000"; 
+   d="scan'208";a="29386920"
+Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
+  by mx1-pgp.tq-group.com with ESMTP; 01 Mar 2023 09:17:53 +0100
+Received: from mx1.tq-group.com ([192.168.6.7])
+  by tq-pgp-pr1.tq-net.de (PGP Universal service);
+  Wed, 01 Mar 2023 09:17:53 +0100
+X-PGP-Universal: processed;
+        by tq-pgp-pr1.tq-net.de on Wed, 01 Mar 2023 09:17:53 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
+  t=1677658673; x=1709194673;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=FWeHY8fcd0cSFhXWZizDGcsqg2Tv5UalzCBsb0/6y80=;
+  b=kZhKxr2QOBN2csBA+goakWFRKF/A9T46K1hKy1/8Z0U0/u6xAh8UfOcB
+   I2WNX/82iVZcqbMnj12R84pirzVH5PPJE0jYTrBRD0mFuv/RDoAQwNR7S
+   c0djQ+XxTvuQt+U6mzoZjohZNAt5f/79wNE68DzEhlvgn2j6Ii5GBNEi9
+   8U3mGLUQWPSWf7OfKms7Nbtw+kQDJeTlXAzQj4HgVmC50kwehLjcXm5wI
+   NOCVjNWBLyl9cGSnFhhe9mOlRkLmx4nc8LAQ9mXsJh0V7POvXZ6b+iptq
+   1zyD10DyKpsKigiEcznoQwcZ9vFYCtPAuYrE861Pmk/+m85hzqmwe82fu
+   A==;
+X-IronPort-AV: E=Sophos;i="5.98,224,1673910000"; 
+   d="scan'208";a="29386919"
+Received: from vtuxmail01.tq-net.de ([10.115.0.20])
+  by mx1.tq-group.com with ESMTP; 01 Mar 2023 09:17:52 +0100
+Received: from steina-w.localnet (unknown [10.123.53.21])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id D2819610A1;
-        Tue, 28 Feb 2023 18:06:43 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 0A322C433EF;
-        Tue, 28 Feb 2023 18:06:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1677607603;
-        bh=2rrPrh+K63elL1eQoqGcoJYDst8N+5jDNSgkcC6esto=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=bbDhW8EsytBpqdpPdVqId3xBtB6/7iUHA3cNPJC9ladfQXz8e5KHXmIdKSYxhFloj
-         mIAmRTnv+EFW8KNAUUTA0O88Z2fN9rVkIBKLUFgyRWdJSQMkFCSUeo4NL14XX/3Wmb
-         7PlV+IpqYwxqX8GfHP7G4DQ+ZDP5Xr2+fgrbZm1iNcnT/3JZSpbaA+UdnpGrgR/vnq
-         pR7JZZRm2N/4AV3WpJEt+VVyzEdIvHBhU7pZ3ul2apuStiU2xqGngGFMRD7Ke247mK
-         maf1iPqHTOg8iJIgcen3M89SFzvPBSUZgz554zYusOYOaEPZKeWLa4vkhSOtHkSFK3
-         eoQM0TSwIk9lg==
-Date:   Tue, 28 Feb 2023 18:06:38 +0000
-From:   Conor Dooley <conor@kernel.org>
-To:     Emil Renner Berthing <emil.renner.berthing@canonical.com>
-Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        William Qiu <william.qiu@starfivetech.com>,
-        Rob Herring <robh@kernel.org>, linux-riscv@lists.infradead.org,
-        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
+        by vtuxmail01.tq-net.de (Postfix) with ESMTPSA id 6BDB8280056;
+        Wed,  1 Mar 2023 09:17:52 +0100 (CET)
+From:   Alexander Stein <alexander.stein@ew.tq-group.com>
+To:     Matthias Kaehlcke <mka@chromium.org>,
+        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
-Message-ID: <Y/5Crl+76wcviHKo@spud>
-References: <20230220234335.GA615198-robh@kernel.org>
- <348796cc-72d9-4dcf-9f09-4c2aa55cb858@starfivetech.com>
- <20230227222904.GC1048218-robh@kernel.org>
- <f8d2b665-ce5d-81f8-8c55-81f1a4cb62b9@starfivetech.com>
- <54f51fa0-7821-b67b-b782-eb9a35b7bba9@linaro.org>
- <CAJM55Z85fitjBOcCLqad9W-a7h3iN9bxtctVGzPgqCbf5fWobw@mail.gmail.com>
- <a0168d89-3c30-55e1-cf4c-37f7fe90aae4@linaro.org>
- <CAJM55Z8dR4TDJNeO-qiS9CurfCWM1ccNigOA1fDb7S1VKCxv2Q@mail.gmail.com>
- <be911895-4944-e983-1af5-b11ff5e8e7cc@linaro.org>
- <CAJM55Z99FZteGkzFC-cSCrTKD_qBn8huzcnynM9Xd7-4F_9rGQ@mail.gmail.com>
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        linux-arm-msm@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
+        ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
+Date:   Wed, 01 Mar 2023 09:17:50 +0100
+Message-ID: <10237323.nUPlyArG6x@steina-w>
+Organization: TQ-Systems GmbH
+In-Reply-To: <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org> <Y0hr9XTGAg8Q6K6y@google.com> <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="OgGewJrsqlCKMN24"
-Content-Disposition: inline
-In-Reply-To: <CAJM55Z99FZteGkzFC-cSCrTKD_qBn8huzcnynM9Xd7-4F_9rGQ@mail.gmail.com>
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="iso-8859-1"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
---OgGewJrsqlCKMN24
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+sorry for being late to the party.
 
-On Tue, Feb 28, 2023 at 06:31:46PM +0100, Emil Renner Berthing wrote:
-> On Tue, 28 Feb 2023 at 17:59, Krzysztof Kozlowski
-> <krzysztof.kozlowski@linaro.org> wrote:
-> > On 28/02/2023 15:59, Emil Renner Berthing wrote:
-> > > On Tue, 28 Feb 2023 at 12:28, Krzysztof Kozlowski
-> > > <krzysztof.kozlowski@linaro.org> wrote:
-
-> > > I see what you mean, but if you look into what the registers in the
-> > > SYSCON blocks actually do it's not clear to me that they should be
-> > > grouped with the clocks/resets any more than say the pinctrl/GPIO
-> > > node. Maybe it's my fault for not giving you the full picture. Eg. for
-> > > "system" and "always-on" there are blocks:
-> > >
-> > > SYS CRG
-> > > SYS SYSCON
-> > > SYS IOMUX
-> > > AON CRG
-> > > AON SYSCON
-> > > AON IOMUX
-> > >
-> > > ..and it really don't see why eg. SYS CRG and SYS SYSCON should be
-> > > thought of as one device, but not include SYS IOMUX then.
-> >
-> > ... include sys iomux as well, just like GPIO is included for AON.
+Am Mittwoch, 19. Oktober 2022, 08:03:22 CET schrieb Dmitry Baryshkov:
+> Ho,
 >=20
-> This would at least take the view that the blocks named alike should
-> be thought of as a single device to its logical conclusion.
-> Unfortunately we're a bit late for that. The pinctrl/GPiO bindings and
-> drivers are already merged:
-> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit=
-/?id=3Dd6e0a660097dcdb80e7c5c859eb12f776060b02e
+> On Thu, 13 Oct 2022 at 22:50, Matthias Kaehlcke <mka@chromium.org> wrote:
+> > Do you still plan to refresh this series?
+> >=20
+> > I know there have been multiple attempts to get something similar
+> > landed in the past 10 year or so. Your series didn't seem to get
+> > much pushback from maintainers, might be worth sending a refresh :)
 >=20
-> > >
-> > > As an examly the SYS SYSCON includes registers to control:
-> > > - remapping of different peripherals from SD controller to video enco=
-ders
-> > > - voltage select for certain GPIO pins
-> > > - phy interface selection for ethernet and CAN
-> > > - QuadSPI delay chain and SRAM configuration
-> > > - PLL configuration
-> > > - endian selection for the SD controller
-> > >
-> > > To me this is pretty much exactly described by the syscon device tree=
- binding:
-> > > "System controller node represents a register region containing a set
-> > > of miscellaneous registers. The registers are not cohesive enough to
-> > > represent as any specific type of device. [..]"
-> > > In any case it's clear that however the SYSCON blocks are represented
-> > > in the device tree, a driver for it would need to export registers in
-> > > the SYSCON block for other drivers to use.
-> >
-> > You started entire sentence with "but" so you disagree but with what
-> > exactly? The naming? But syscon is fine - hardware manual calls it like
-> > that.
-> >
-> > The point was that AON is one device (consisting of multiple blocks).
->=20
-> Yes, and what I'm trying to explain is that I'm not convinced that's
-> the right model. The CRG blocks and IOMUX blocks don't really have
-> anything in common other than the name StarFive gave them. You can
-> argue that the CRG and IOMUX blocks overlap with the corresponding
-> SYSCON block, but so do a lot of other peripherals as you can see from
-> the list above.
->=20
-> I think the IOMUX and SYSCON blocks are just named after the clock
-> domain they're under, but a lot of other peripherals are also under
-> the SYS and AON clock domains and we don't model them as one big
-> device.
+> Yes, I hope to return to it eventually. I just had no time for it lately.
 
-I went and bothered Rob/Krzysztof on IRC about this.
-Not gonna speak for them, but I think they're now okay with keeping the
-SYS_CRG (clock+reset block) separate from the SYS_SYSCON block ("random
-collection of registers"). Possibly there was just confusion due to the
-naming used here, thinking that "SYS", "STG" and "AON" were devices with
-two register blocks, as opposed to being the name of a clock/power domain
-on the SoC.
+I just found this thread while searching for power sequencing devices in=20
+Linux. From what I understand this is transforming the existing mmc pwrseq=
+=20
+drivers into generic ones. What is the intention of this new subsystem? Wha=
+t=20
+is it supposed to address?
+In my case I have an LTE module attached via USB, but in order to use it I=
+=20
+need to perform several steps:
+1. apply power supply
+2. Issue a reset pulse(!), the length actually defines whether its a reset =
+or=20
+poweroff/on
+3a. wait for a GPIO to toggle
+3b. wait a minimum time
+4a. device will enumerate on USB
+4b. device can be access using UART
 
-I'll leave it up to them to confirm that though!
+This is something required to actually see/detect the device in the first=20
+place, thus it cannot be part of the device driver side.
+Is this something pwrseq is supposed to address?
 
-Cheers,
-Conor.
+Best regards,
+Alexander
+
+> > On Wed, Oct 06, 2021 at 06:53:52AM +0300, Dmitry Baryshkov wrote:
+> > > This is a proposed power sequencer subsystem. This is a
+> > > generification of the MMC pwrseq code. The subsystem tries to abstract
+> > > the idea of complex power-up/power-down/reset of the devices.
+> > >=20
+> > > The primary set of devices that promted me to create this patchset is
+> > > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
+> > > or serial + SDIO interfaces (older generations) or on serial+PCIe (ne=
+wer
+> > > generations).  They require a set of external voltage regulators to be
+> > > powered on and (some of them) have separate WiFi and Bluetooth enable
+> > > GPIOs.
+> > >=20
+> > > The major drawback for now is the lack of proper PCIe integration
+> > > At this moment support for PCIe is hacked up to be able to test the
+> > > PCIe part of qca6390. Proper PCIe support would require automatically
+> > > powering up the devices before the scan basing on the proper device
+> > > structure in the device tree. This two last patches are noted as WIP =
+and
+> > > are included into the patchset for the purpose of testing WiFi on new=
+er
+> > > chips (like qca6390/qca6391).
+> > >=20
+> > > Changes since RFC v2:
+> > >  - Add documentation for the pwrseq code. Document data structures,
+> > > =20
+> > >    macros and exported functions.
+> > > =20
+> > >  - Export of_pwrseq_xlate_onecell()
+> > >  - Add separate pwrseq_set_drvdata() function to follow the typical A=
+PI
+> > > =20
+> > >    design
+> > > =20
+> > >  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
+> > >  - Moved code to handle old mmc-pwrseq binding to the MMC patch
+> > >  - Split of_pwrseq_xlate_onecell() support to a separate patch
+> > >=20
+> > > Changes since RFC v1:
+> > >  - Provider pwrseq fallback support
+> > >  - Implement fallback support in pwrseq_qca.
+> > >  - Mmove susclk handling to pwrseq_qca.
+> > >  - Significantly simplify hci_qca.c changes, by dropping all legacy
+> > > =20
+> > >    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
+> > >    parts of the chip.
+> > >=20
+> > > _______________________________________________
+> > > ath10k mailing list
+> > > ath10k@lists.infradead.org
+> > > http://lists.infradead.org/mailman/listinfo/ath10k
 
 
---OgGewJrsqlCKMN24
-Content-Type: application/pgp-signature; name="signature.asc"
+=2D-=20
+TQ-Systems GmbH | M=FChlstra=DFe 2, Gut Delling | 82229 Seefeld, Germany
+Amtsgericht M=FCnchen, HRB 105018
+Gesch=E4ftsf=FChrer: Detlef Schneider, R=FCdiger Stahl, Stefan Schneider
+http://www.tq-group.com/
 
------BEGIN PGP SIGNATURE-----
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCY/5CrgAKCRB4tDGHoIJi
-0pKjAQDTeT+TZc/EBmewPaKfdSLP7DCjgM+V1bTyEZ6/CVuCUAD+M46W4w/Jg86q
-jFnVxeqFklXmTiTe/VWnQwOzTfrw1ws=
-=adFT
------END PGP SIGNATURE-----
-
---OgGewJrsqlCKMN24--
