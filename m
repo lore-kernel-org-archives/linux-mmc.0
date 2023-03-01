@@ -2,68 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E17E8C7EE23
-	for <linux-mmc@archiver.kernel.org>; Wed,  1 Mar 2023 08:18:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5EBD5C7EE32
+	for <linux-mmc@archiver.kernel.org>; Wed,  1 Mar 2023 09:03:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229900AbjCAISL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 1 Mar 2023 03:18:11 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48576 "EHLO
+        id S229492AbjCAJDu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 1 Mar 2023 04:03:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56724 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229916AbjCAISE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2023 03:18:04 -0500
-Received: from mx1.tq-group.com (mx1.tq-group.com [93.104.207.81])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9E6910DE;
-        Wed,  1 Mar 2023 00:17:55 -0800 (PST)
+        with ESMTP id S229809AbjCAJDo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 1 Mar 2023 04:03:44 -0500
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D84112658C
+        for <linux-mmc@vger.kernel.org>; Wed,  1 Mar 2023 01:03:25 -0800 (PST)
+Received: by mail-pj1-x102e.google.com with SMTP id x34so12705674pjj.0
+        for <linux-mmc@vger.kernel.org>; Wed, 01 Mar 2023 01:03:25 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1677658678; x=1709194678;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=FWeHY8fcd0cSFhXWZizDGcsqg2Tv5UalzCBsb0/6y80=;
-  b=NjYiJEGH2EwIOuEEKLYwlK4fXIor2PFjGvhCxDx3evc9grlKOfwb2QxQ
-   G9xbzOIk56AoWO+FiRzNbZ33wNMeMBf84/02x22PJV+/McCPHWz7I/yzw
-   +9FExOJQVrQm5TLEyHo0NfBX+ByKIlsYy58y8cP29mpeAhWmtqnSkssT7
-   Xsk7gsqaLDBos7qQ+KhcSvP/Vd+/jYJgIeZIIutDmDfHR22Gej96pnRXw
-   /793XMR1T4ywQFqlVl2HUQmY7iirW3PDpCUZUA5YPlzqgW264nRNUhrny
-   UfU8jWJ1tW843LZZK6lLKfC88sSd8P0LZ34l6jX+fVNqiIznY5bBmND28
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.98,224,1673910000"; 
-   d="scan'208";a="29386920"
-Received: from unknown (HELO tq-pgp-pr1.tq-net.de) ([192.168.6.15])
-  by mx1-pgp.tq-group.com with ESMTP; 01 Mar 2023 09:17:53 +0100
-Received: from mx1.tq-group.com ([192.168.6.7])
-  by tq-pgp-pr1.tq-net.de (PGP Universal service);
-  Wed, 01 Mar 2023 09:17:53 +0100
-X-PGP-Universal: processed;
-        by tq-pgp-pr1.tq-net.de on Wed, 01 Mar 2023 09:17:53 +0100
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-  d=tq-group.com; i=@tq-group.com; q=dns/txt; s=key1;
-  t=1677658673; x=1709194673;
-  h=from:to:cc:subject:date:message-id:in-reply-to:
-   references:mime-version:content-transfer-encoding;
-  bh=FWeHY8fcd0cSFhXWZizDGcsqg2Tv5UalzCBsb0/6y80=;
-  b=kZhKxr2QOBN2csBA+goakWFRKF/A9T46K1hKy1/8Z0U0/u6xAh8UfOcB
-   I2WNX/82iVZcqbMnj12R84pirzVH5PPJE0jYTrBRD0mFuv/RDoAQwNR7S
-   c0djQ+XxTvuQt+U6mzoZjohZNAt5f/79wNE68DzEhlvgn2j6Ii5GBNEi9
-   8U3mGLUQWPSWf7OfKms7Nbtw+kQDJeTlXAzQj4HgVmC50kwehLjcXm5wI
-   NOCVjNWBLyl9cGSnFhhe9mOlRkLmx4nc8LAQ9mXsJh0V7POvXZ6b+iptq
-   1zyD10DyKpsKigiEcznoQwcZ9vFYCtPAuYrE861Pmk/+m85hzqmwe82fu
-   A==;
-X-IronPort-AV: E=Sophos;i="5.98,224,1673910000"; 
-   d="scan'208";a="29386919"
-Received: from vtuxmail01.tq-net.de ([10.115.0.20])
-  by mx1.tq-group.com with ESMTP; 01 Mar 2023 09:17:52 +0100
-Received: from steina-w.localnet (unknown [10.123.53.21])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        by vtuxmail01.tq-net.de (Postfix) with ESMTPSA id 6BDB8280056;
-        Wed,  1 Mar 2023 09:17:52 +0100 (CET)
-From:   Alexander Stein <alexander.stein@ew.tq-group.com>
-To:     Matthias Kaehlcke <mka@chromium.org>,
-        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>
-Cc:     Andy Gross <agross@kernel.org>,
+        d=linaro.org; s=google;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=7kLFJAEhf38Z91ErKT+SpxGk8u9CKv5JjAsWvmwSh1U=;
+        b=kFV6gWvUnLZUgZ3rx1fWN6XsMVZGaOvEhSfcLg/s8cO8hXYZcsfYyMQVpM1nPe0baw
+         9ArjHkD/rTNKS5uasdrwh9EyO2HLnFSdTwYbjkFKAu3WyoU4IHt3Tz34CYydA9oO369D
+         BObp7hV6riaekilNuiKshaOLfMCvvMGnhgoDEztu+nfov0YCkeX/+HL/23Yn7jAZ8k5x
+         NMf4axghp3wg1SxSNbK2DtkVk61xSTsSv7ln/oLuupE6mXwtZ4StRepp85j7sHIy6sLP
+         gDU3wf3dZ189e0zn3+AZIZ/STcotbaSfkInW+N3RhCLw3z5qel277LPsO3bAKE4Pkh8k
+         BMvw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=7kLFJAEhf38Z91ErKT+SpxGk8u9CKv5JjAsWvmwSh1U=;
+        b=1e4yNPcoB3DI7UiCTSAOaQCVYpWMjjYmz3qjgt+ELYd+kWCIsk2qGFL1eJvKyxiMoA
+         XcNrl+9KdFt+fZmwSnYFYPwg0tgMjzQqVT9w+7dgGYKZrv17AD1JGnGdCfS/VA7/wlPH
+         fR3LbUrJCT+lA0lU2grU/q5jkypQ7j1AY3Wu7WnMW9S+eb54nSmeWB7KiDdB2cHn6BSZ
+         boL4wf5RrM45dU6S9Luh5+6CT2razY2m3ol1I+ZbdI1dAHKYcto/DfDaCYDDXzJWIOG9
+         E7sB9rlAqJb4AAX2DaTUkHRVgyUDpAVwkeAP/Lrp8Xvs82HkB72OAp93FGew7kTCW3Iq
+         YDfQ==
+X-Gm-Message-State: AO0yUKVyVd3V8hoiWyNPh3oI8zUzCrqMGANR1vLlkR79CSVk0h5XW/5T
+        /FUdir01E6CO0MdIGrjkNzEE8rPHaCRzUeami0ijMQ==
+X-Google-Smtp-Source: AK7set/EtY+OG6oXO/oVlz80z4XiEM8n0HHmXdl5DR+0gJsIWwZvMhJ6meksEeV5+DLgP3I/bf83eA0yaUAqAI17xbc=
+X-Received: by 2002:a17:902:e5d0:b0:19a:fa2f:559e with SMTP id
+ u16-20020a170902e5d000b0019afa2f559emr3823016plf.3.1677661405158; Wed, 01 Mar
+ 2023 01:03:25 -0800 (PST)
+MIME-Version: 1.0
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+ <Y0hr9XTGAg8Q6K6y@google.com> <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
+ <10237323.nUPlyArG6x@steina-w>
+In-Reply-To: <10237323.nUPlyArG6x@steina-w>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 1 Mar 2023 10:02:48 +0100
+Message-ID: <CAPDyKFq7NFx_cwTZajqjOnRsjJ1i-F0ip+b0ZjFUcOdLjMJSkQ@mail.gmail.com>
+Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
+To:     Alexander Stein <alexander.stein@ew.tq-group.com>
+Cc:     Matthias Kaehlcke <mka@chromium.org>,
+        Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Andy Gross <agross@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
         Marcel Holtmann <marcel@holtmann.org>,
         Johan Hedberg <johan.hedberg@gmail.com>,
         Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
@@ -75,117 +70,56 @@ Cc:     Andy Gross <agross@kernel.org>,
         linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org,
         ath10k@lists.infradead.org, linux-wireless@vger.kernel.org,
         netdev@vger.kernel.org
-Subject: Re: [PATCH v1 00/15] create power sequencing subsystem
-Date:   Wed, 01 Mar 2023 09:17:50 +0100
-Message-ID: <10237323.nUPlyArG6x@steina-w>
-Organization: TQ-Systems GmbH
-In-Reply-To: <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org> <Y0hr9XTGAg8Q6K6y@google.com> <CAA8EJppuGbDGb1D-yf2WL77U1bqx1QQStQeDArWmGFCUiOtnww@mail.gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On Wed, 1 Mar 2023 at 09:17, Alexander Stein
+<alexander.stein@ew.tq-group.com> wrote:
+>
+> Hi,
+>
+> sorry for being late to the party.
+>
+> Am Mittwoch, 19. Oktober 2022, 08:03:22 CET schrieb Dmitry Baryshkov:
+> > Ho,
+> >
+> > On Thu, 13 Oct 2022 at 22:50, Matthias Kaehlcke <mka@chromium.org> wrote:
+> > > Do you still plan to refresh this series?
+> > >
+> > > I know there have been multiple attempts to get something similar
+> > > landed in the past 10 year or so. Your series didn't seem to get
+> > > much pushback from maintainers, might be worth sending a refresh :)
+> >
+> > Yes, I hope to return to it eventually. I just had no time for it lately.
+>
+> I just found this thread while searching for power sequencing devices in
+> Linux. From what I understand this is transforming the existing mmc pwrseq
+> drivers into generic ones. What is the intention of this new subsystem? What
+> is it supposed to address?
+> In my case I have an LTE module attached via USB, but in order to use it I
+> need to perform several steps:
+> 1. apply power supply
+> 2. Issue a reset pulse(!), the length actually defines whether its a reset or
+> poweroff/on
+> 3a. wait for a GPIO to toggle
+> 3b. wait a minimum time
+> 4a. device will enumerate on USB
+> 4b. device can be access using UART
+>
+> This is something required to actually see/detect the device in the first
+> place, thus it cannot be part of the device driver side.
+> Is this something pwrseq is supposed to address?
 
-sorry for being late to the party.
+Yes, this is one of those typical use-cases for discoverable buses
+that we need to add support for, in one way or the other.
 
-Am Mittwoch, 19. Oktober 2022, 08:03:22 CET schrieb Dmitry Baryshkov:
-> Ho,
->=20
-> On Thu, 13 Oct 2022 at 22:50, Matthias Kaehlcke <mka@chromium.org> wrote:
-> > Do you still plan to refresh this series?
-> >=20
-> > I know there have been multiple attempts to get something similar
-> > landed in the past 10 year or so. Your series didn't seem to get
-> > much pushback from maintainers, might be worth sending a refresh :)
->=20
-> Yes, I hope to return to it eventually. I just had no time for it lately.
+>
+> Best regards,
+> Alexander
 
-I just found this thread while searching for power sequencing devices in=20
-Linux. From what I understand this is transforming the existing mmc pwrseq=
-=20
-drivers into generic ones. What is the intention of this new subsystem? Wha=
-t=20
-is it supposed to address?
-In my case I have an LTE module attached via USB, but in order to use it I=
-=20
-need to perform several steps:
-1. apply power supply
-2. Issue a reset pulse(!), the length actually defines whether its a reset =
-or=20
-poweroff/on
-3a. wait for a GPIO to toggle
-3b. wait a minimum time
-4a. device will enumerate on USB
-4b. device can be access using UART
+[...]
 
-This is something required to actually see/detect the device in the first=20
-place, thus it cannot be part of the device driver side.
-Is this something pwrseq is supposed to address?
-
-Best regards,
-Alexander
-
-> > On Wed, Oct 06, 2021 at 06:53:52AM +0300, Dmitry Baryshkov wrote:
-> > > This is a proposed power sequencer subsystem. This is a
-> > > generification of the MMC pwrseq code. The subsystem tries to abstract
-> > > the idea of complex power-up/power-down/reset of the devices.
-> > >=20
-> > > The primary set of devices that promted me to create this patchset is
-> > > the Qualcomm BT+WiFi family of chips. They reside on serial+platform
-> > > or serial + SDIO interfaces (older generations) or on serial+PCIe (ne=
-wer
-> > > generations).  They require a set of external voltage regulators to be
-> > > powered on and (some of them) have separate WiFi and Bluetooth enable
-> > > GPIOs.
-> > >=20
-> > > The major drawback for now is the lack of proper PCIe integration
-> > > At this moment support for PCIe is hacked up to be able to test the
-> > > PCIe part of qca6390. Proper PCIe support would require automatically
-> > > powering up the devices before the scan basing on the proper device
-> > > structure in the device tree. This two last patches are noted as WIP =
-and
-> > > are included into the patchset for the purpose of testing WiFi on new=
-er
-> > > chips (like qca6390/qca6391).
-> > >=20
-> > > Changes since RFC v2:
-> > >  - Add documentation for the pwrseq code. Document data structures,
-> > > =20
-> > >    macros and exported functions.
-> > > =20
-> > >  - Export of_pwrseq_xlate_onecell()
-> > >  - Add separate pwrseq_set_drvdata() function to follow the typical A=
-PI
-> > > =20
-> > >    design
-> > > =20
-> > >  - Remove pwrseq_get_optional()/devm_pwrseq_get_optional()
-> > >  - Moved code to handle old mmc-pwrseq binding to the MMC patch
-> > >  - Split of_pwrseq_xlate_onecell() support to a separate patch
-> > >=20
-> > > Changes since RFC v1:
-> > >  - Provider pwrseq fallback support
-> > >  - Implement fallback support in pwrseq_qca.
-> > >  - Mmove susclk handling to pwrseq_qca.
-> > >  - Significantly simplify hci_qca.c changes, by dropping all legacy
-> > > =20
-> > >    code. Now hci_qca uses only pwrseq calls to power up/down bluetooth
-> > >    parts of the chip.
-> > >=20
-> > > _______________________________________________
-> > > ath10k mailing list
-> > > ath10k@lists.infradead.org
-> > > http://lists.infradead.org/mailman/listinfo/ath10k
-
-
-=2D-=20
-TQ-Systems GmbH | M=FChlstra=DFe 2, Gut Delling | 82229 Seefeld, Germany
-Amtsgericht M=FCnchen, HRB 105018
-Gesch=E4ftsf=FChrer: Detlef Schneider, R=FCdiger Stahl, Stefan Schneider
-http://www.tq-group.com/
-
-
+Kind regards
+Uffe
