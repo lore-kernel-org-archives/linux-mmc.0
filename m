@@ -2,92 +2,94 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EC3E7C678D4
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Mar 2023 15:02:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 732F8C6FA8E
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Mar 2023 15:12:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229945AbjCBPCd (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Mar 2023 10:02:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60806 "EHLO
+        id S229511AbjCBPMy convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Mar 2023 10:12:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44530 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229617AbjCBPCd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2023 10:02:33 -0500
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E734F474E3;
-        Thu,  2 Mar 2023 07:02:30 -0800 (PST)
-Received: by mail-ed1-x535.google.com with SMTP id x3so5791070edb.10;
-        Thu, 02 Mar 2023 07:02:30 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1677769349;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=OOs2xtLANmmWRA58qsYI25yvqNCALR25geLBmbCSFNE=;
-        b=SyLMzto5K1XBgDYuHFOA77jSDPNQIMCbyZ/EMQTi+bSftNWMO3KNmYlC15xO015+Qr
-         9OkakOAmEpugug782Wo4cJq2k/MuvsxfGnhdUe4hWZ9re3tU3f4PnGByUuFk4ojOA4Q8
-         o28BzrfDRQcowHt64hCaYFxmGxRJFg9Z3TT3HrsCtShJ1kQs7wc9wszYM28CbTafoGR+
-         ueh9+rZo59ypBUTp5Awu3UKGTSeMcbbpp0OH8bD130SQsRIa/H+D83h1E1TwqtEYdfbS
-         4RHlmskIewUURJPrMc7ayFaadYKiAa1CBXcXxLVvQzmbvXFht3s0a+ljcEKeMEWKI7GL
-         byQw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1677769349;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=OOs2xtLANmmWRA58qsYI25yvqNCALR25geLBmbCSFNE=;
-        b=xrW+LuFaqSt4G5VHxH6WwoSzF5IHW+JaYV2tNt0afC9bQ473g2OPXOtGgmZXmWMag3
-         4DPopW3jK4DRNnuRy/8lK9MQn9fL2JxAtDF1dzfIvyKu49B6eV78W027nDoVy6sfxoRr
-         k6TR5ogisU6klLivYWz2DMkYfeiWg3l7QCkuFzwHS576jzaH3H94inCofMp53W3ewJ1f
-         h+3fVEeEADZEe4qgXddNMykKjyWOX82nsPh5T3VrGyOATbFBjDIVkN6aoYhnZRWFNFAJ
-         LtiY0J/se0Y0an9SGiNTA2rSFQwacTSS3qV9NUO/sFIVJGoodrch8nc5/gl+0OMzxSM/
-         UDsw==
-X-Gm-Message-State: AO0yUKU9ae0cdqWTre8f8YFG1j/0uGg8fvvLUqlqyGR3I+L/GiVNDmyv
-        52ZPSSxSypAHUzj7GXloMbY=
-X-Google-Smtp-Source: AK7set/Q9Ex9rNyfIo1WFPOJMDwMZteEfSwIjznpfwD6AKbgeMu7LvjPqrUNeOVFWk+ixOMlT5gVMg==
-X-Received: by 2002:a17:906:d84:b0:88d:619:15fc with SMTP id m4-20020a1709060d8400b0088d061915fcmr7583434eji.21.1677769349214;
-        Thu, 02 Mar 2023 07:02:29 -0800 (PST)
-Received: from [10.176.235.173] ([137.201.254.41])
-        by smtp.gmail.com with ESMTPSA id hz18-20020a1709072cf200b008b26f3d45fbsm7289730ejc.143.2023.03.02.07.02.27
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 02 Mar 2023 07:02:28 -0800 (PST)
-Message-ID: <58bb34de-e333-00bd-ae3f-4ddf0e56aa5d@gmail.com>
-Date:   Thu, 2 Mar 2023 16:02:26 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
- internal cache
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        with ESMTP id S229456AbjCBPMx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2023 10:12:53 -0500
+X-Greylist: delayed 292 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 02 Mar 2023 07:12:51 PST
+Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 881231FD0;
+        Thu,  2 Mar 2023 07:12:51 -0800 (PST)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 7690522170E;
+        Thu,  2 Mar 2023 15:07:57 +0000 (UTC)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 6B5E522170A;
+        Thu,  2 Mar 2023 15:07:57 +0000 (UTC)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx.dmz.swissbit.com [10.181.10.103])
+        by mail6.swissbit.com (Postfix) with ESMTPS;
+        Thu,  2 Mar 2023 15:07:57 +0000 (UTC)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         Jens Axboe <axboe@kernel.dk>
-Cc:     Wenchao Chen <wenchao.chen666@gmail.com>,
+CC:     Wenchao Chen <wenchao.chen666@gmail.com>,
         Adrian Hunter <adrian.hunter@intel.com>,
         Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Subject: RE: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
+ internal cache
+Thread-Topic: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
+ internal cache
+Thread-Index: AQHZTRVhGw7IamWdbkW+N3YLAv3UBK7nlDEQ
+Date:   Thu, 2 Mar 2023 15:07:56 +0000
+Message-ID: <5712c69ae37447c5b576d87b247f5756@hyperstone.com>
 References: <20230302144330.274947-1-ulf.hansson@linaro.org>
-From:   Bean Huo <huobean@gmail.com>
 In-Reply-To: <20230302144330.274947-1-ulf.hansson@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27480.000
+X-TMASE-Result: 10-2.075100-10.000000
+X-TMASE-MatchedRID: w2TFuZOvAtfUL3YCMmnG4vHkpkyUphL9GbJMFqqIm9w2BwnN0UEfH5qW
+        GFVQ7EMwz7v6zGLMvM1ndcUrht03hmULhS/RYteOBe3KRVyu+k1NLPQl0QAltHROxyHvZdJsiji
+        J0PQAhX6yaJXoZYzXD1/B8CJnWufZCO9nmUqpU4TIpMSwJEh3JX0tCKdnhB58gUP+Fn6N6KZp7q
+        EhmmPgy46HM5rqDwqtRXYDrsIw5v1KVaUBlILHuXLgWxZmXoUU0N1zH9zaTpmtAP2E8fvkOA==
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 6e13c5a6-1113-4a0a-a58c-5b804538be16-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 02.03.23 3:43 PM, Ulf Hansson wrote:
-> REQ_FUA is in general supported for eMMC cards, which translates into so
-> called "reliable writes". To support these write operations, the CMD23
-> (MMC_CAP_CMD23), needs to be supported by the mmc host too, which is common
-> but not always the case.
->
-> For some eMMC devices, it has been reported that reliable writes are quite
-> costly, leading to performance degradations.
->
-> In a way to improve the situation, let's avoid announcing REQ_FUA support
-> if the eMMC supports an internal cache, as that allows us to rely solely on
-> flush-requests (REQ_OP_FLUSH) instead, which seems to be a lot cheaper.
-> Note that, those mmc hosts that lacks CMD23 support are already using this
-> type of configuration, whatever that could mean.
->
-> Reported-by: Wenchao Chen<wenchao.chen666@gmail.com>
-> Signed-off-by: Ulf Hansson<ulf.hansson@linaro.org>
-Acked-by: Bean Huo <beanhuo@micron.com>
+> Subject: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an internal cache
+
+Hey Uffe,
+I may have the setup to play with this.
+(Powerfailing eMMC devices)
+> 
+> REQ_FUA is in general supported for eMMC cards, which translates into so called "reliable writes". To support these write operations, the CMD23 (MMC_CAP_CMD23), needs to be supported by the mmc host too, which is common but not always the case.
+> 
+> For some eMMC devices, it has been reported that reliable writes are quite costly, leading to performance degradations.
+> 
+> In a way to improve the situation, let's avoid announcing REQ_FUA support if the eMMC supports an internal cache, as that allows us to rely solely on flush-requests (REQ_OP_FLUSH) instead, which seems to be a lot cheaper.
+> Note that, those mmc hosts that lacks CMD23 support are already using this type of configuration, whatever that could mean.
+
+Just note that reliable write is strictly weaker than turning cache off/flushing,
+if card loses power during cache off/flush programming / busy, sector-wise atomicity is not mandated by the spec.
+(And that is assuming cache off/flush is actually respected by the card as intended by the spec, should some cards be checked?)
+Maybe some FS people can also chime in?
+
+Regards,
+Christian
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
