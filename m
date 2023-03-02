@@ -2,104 +2,133 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CD23C7EE33
-	for <linux-mmc@archiver.kernel.org>; Thu,  2 Mar 2023 11:09:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E02CC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Thu,  2 Mar 2023 14:43:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229942AbjCBLJw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 2 Mar 2023 06:09:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58788 "EHLO
+        id S229874AbjCBOnp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 2 Mar 2023 09:43:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34814 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230136AbjCBLJt (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2023 06:09:49 -0500
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03F03125B1;
-        Thu,  2 Mar 2023 03:09:49 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1677755389; x=1709291389;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=ARbYTiI686AIOV0PhH0M827jzSEzKv2rCVlEwrQ+LeI=;
-  b=g42Wr+z2oK60izEip/g8hBTz93h247iwuJfgmPWQqZDiQAQxQB+zs2lF
-   zH8+ENP19VbRMgX+KGPvsrF5QAcsnfyWYW/yc8ZjYYCWMnFluy2sflKnw
-   qVu0nfv+yp819JC1GWklv95AG5LWEPwkvR5NWyj9fPCTK8JNS2PHy8JGR
-   nMGj3MnitKOSOTvQxFsnznuuGNwWgxMLx/wWQe5sOmzV0yFq+bSa/hIHD
-   B4sPHWfcW5BXEmlMpfeSyDba74aI2lA7jme/qWVErkt10dKT9VEQ07u25
-   T4/VNfSc/VuDciLY/PrVZtMU/Frl3LW/uihuRHNCyP0l9VcC+gIpyK4Yc
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10636"; a="315112614"
-X-IronPort-AV: E=Sophos;i="5.98,227,1673942400"; 
-   d="scan'208";a="315112614"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Mar 2023 03:09:48 -0800
-X-IronPort-AV: E=McAfee;i="6500,9779,10636"; a="624902798"
-X-IronPort-AV: E=Sophos;i="5.98,227,1673942400"; 
-   d="scan'208";a="624902798"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.217.72])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 02 Mar 2023 03:09:45 -0800
-Message-ID: <a5b66147-260e-29ae-d0a9-21cb6c905237@intel.com>
-Date:   Thu, 2 Mar 2023 13:09:40 +0200
+        with ESMTP id S229492AbjCBOnn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 2 Mar 2023 09:43:43 -0500
+Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 916A239292
+        for <linux-mmc@vger.kernel.org>; Thu,  2 Mar 2023 06:43:39 -0800 (PST)
+Received: by mail-lj1-x232.google.com with SMTP id by8so17831434ljb.7
+        for <linux-mmc@vger.kernel.org>; Thu, 02 Mar 2023 06:43:39 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=+NuIrQyu9sctpk8pQFgxNkYy00s89JzuKjWNu0rz86k=;
+        b=SXXi6eB+umI9ANFEoFGqSrifMaE0poWztgSMyQ22TTInkNboO5fBzmLJu8AVy9bLju
+         M6kRnEzSFF0tIKScNEJKtwGknd9HA8jIlBSeNTpA9OQ0f9rWBw0Ac3o87OdBq5qpWH6L
+         Hp9grmmptCV5jVYnuggL0wtHznofM7v2nu7ZWEw049NOOS9E5JjcztTeVp7gPUE4C+L7
+         W9KHKjq1tugzlmCOetH33O/q2pd/nVAr1GvLh4ynoV7NG6AHClJbXB+UVxoFI1aYc4Cl
+         LGS6rl1Q9iruf4NB+fghiDV8qU5Rqb4VK4VKXOSyITorbvahOUZuOjakf6L33nu6LEu7
+         yeHA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+NuIrQyu9sctpk8pQFgxNkYy00s89JzuKjWNu0rz86k=;
+        b=IiShmsd/tBrABk/6kXHh7BiE55kfCYtotbc9v9aq9cP+oxPhvkAYowXRLY1V7cmMD6
+         XP6js5vzPMq0Nmn3m/gXbdEnYRv1UORFIXzZ+9m29ig4lV/4sJ5UBdaeTuscCktOYHhY
+         KT89uTtnu0K3mD5TlowAeldNLj0wB0NOAGfTfR3KQAz11AJwg4fApTabqJ9M9vWg6XXb
+         GjywsDa4g3aL6dfKm8g6e9m7BXuTAEvNeW7p7I3FGCFolXDmBf3U8HL8R37c7gRrIPWZ
+         /7ZExUcQn6i0QlS2s5fMs+cSv0aj4uNh42pybz9HftEeg1IZyxnhEpgr44SSAs4V8fV2
+         KOpg==
+X-Gm-Message-State: AO0yUKU8U75/0Z6OeQbultOGn8kl0JHiIgWGP82Z37/2qQagqfUr1CtA
+        4dc5xWkD9h8s1ra0XhnKyToyWlEb91udg2Nm
+X-Google-Smtp-Source: AK7set9G/UyUxQKn0i1rnrYbqkFSeGhuf1tIk4E+t5lr32TMrrq16Jkgq8TWOo69tqns9sf6xocjZA==
+X-Received: by 2002:a2e:b98c:0:b0:295:a446:cd08 with SMTP id p12-20020a2eb98c000000b00295a446cd08mr2838122ljp.6.1677768217230;
+        Thu, 02 Mar 2023 06:43:37 -0800 (PST)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id n15-20020a2e86cf000000b0029597ebacd0sm2070791ljj.64.2023.03.02.06.43.36
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 02 Mar 2023 06:43:36 -0800 (PST)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>,
+        Jens Axboe <axboe@kernel.dk>
+Cc:     Wenchao Chen <wenchao.chen666@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an internal cache
+Date:   Thu,  2 Mar 2023 15:43:30 +0100
+Message-Id: <20230302144330.274947-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.8.0
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate"
- clock
-Content-Language: en-US
-To:     Swati Agarwal <swati.agarwal@amd.com>, michal.simek@xilinx.com,
-        ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, git@amd.com
-References: <20230223141402.23979-1-swati.agarwal@amd.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230223141402.23979-1-swati.agarwal@amd.com>
-Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/02/23 16:14, Swati Agarwal wrote:
-> Add support to read the optional "gate" clock property and request the
-> clock which will be used to ungate the DLL clock.
-> 
-> For Xilinx platforms which has DLL module, dll clock must be
-> ungated/enabled when SD controller operates at higher frequencies like 50
-> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
-> clock from the driver.
-> 
-> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
+REQ_FUA is in general supported for eMMC cards, which translates into so
+called "reliable writes". To support these write operations, the CMD23
+(MMC_CAP_CMD23), needs to be supported by the mmc host too, which is common
+but not always the case.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+For some eMMC devices, it has been reported that reliable writes are quite
+costly, leading to performance degradations.
 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
->  1 file changed, 7 insertions(+)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 4eebbf801b41..1fd7528c14fc 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  	int ret;
->  	struct device_node *node;
->  	struct clk *clk_xin;
-> +	struct clk *clk_dll;
->  	struct sdhci_host *host;
->  	struct sdhci_pltfm_host *pltfm_host;
->  	struct device *dev = &pdev->dev;
-> @@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->  		goto clk_dis_ahb;
->  	}
->  
-> +	clk_dll = devm_clk_get_optional_enabled(dev, "gate");
-> +	if (IS_ERR(clk_dll)) {
-> +		ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
-> +		goto clk_disable_all;
-> +	}
-> +
->  	if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
->  		sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
->  
+In a way to improve the situation, let's avoid announcing REQ_FUA support
+if the eMMC supports an internal cache, as that allows us to rely solely on
+flush-requests (REQ_OP_FLUSH) instead, which seems to be a lot cheaper.
+Note that, those mmc hosts that lacks CMD23 support are already using this
+type of configuration, whatever that could mean.
+
+Reported-by: Wenchao Chen <wenchao.chen666@gmail.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
+
+Note that, I haven't been able to test this patch myself, but are relying on
+Wenchao and others to help out. Sharing some performance number before and
+after the patch, would be nice.
+
+Moreover, what is not clear to me (hence the RFC), is whether relying solely on
+flush requests are sufficient and as such if it's a good idea after all.
+Comments are highly appreciated in this regards.
+
+Kind regards
+Ulf Hansson
+
+---
+ drivers/mmc/core/block.c | 15 ++++++++++-----
+ 1 file changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 672ab90c4b2d..2a49531bf023 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2490,15 +2490,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 			md->flags |= MMC_BLK_CMD23;
+ 	}
+ 
+-	if (md->flags & MMC_BLK_CMD23 &&
+-	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+-	     card->ext_csd.rel_sectors)) {
++	/*
++	 * REQ_FUA is supported through eMMC reliable writes, which has been
++	 * reported to be quite costly for some eMMCs. Therefore, let's rely
++	 * on flush requests (REQ_OP_FLUSH), if an internal cache is supported.
++	 */
++	if (mmc_cache_enabled(card->host)) {
++		cache_enabled  = true;
++	} else if (md->flags & MMC_BLK_CMD23 &&
++		  (card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN ||
++		   card->ext_csd.rel_sectors)) {
+ 		md->flags |= MMC_BLK_REL_WR;
+ 		fua_enabled = true;
+ 		cache_enabled = true;
+ 	}
+-	if (mmc_cache_enabled(card->host))
+-		cache_enabled  = true;
+ 
+ 	blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
+ 
+-- 
+2.34.1
 
