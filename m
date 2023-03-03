@@ -2,165 +2,184 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 338DFC678D4
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Mar 2023 14:41:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AEA4C7EE2D
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Mar 2023 18:19:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230054AbjCCOlf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Mar 2023 09:41:35 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56312 "EHLO
+        id S231190AbjCCST0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Mar 2023 13:19:26 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38454 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229740AbjCCOld (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2023 09:41:33 -0500
-Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 21C69360B3;
-        Fri,  3 Mar 2023 06:41:32 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1677854492; x=1709390492;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=PCA7xcIf7pUPetZRCkhEcheUlk5lHEZhdWB8pICiDFU=;
-  b=nJEH9APUT4DJ0WlHz2KViL4BB18UVqZZ2Ro4nz3zCdR6suY1qjO6FRAW
-   BeuR8FEM4a6UAR/mC6g6SNr4GRpGeJYWitdOha9VMJDDv7FEIYHEAPVyo
-   RZ18G3pwvpLiWhzNNIApuMSmRZ1q6Jy4pYUoBhem4LP0G68JxoFiYgnlh
-   aTmV/pl4cAGls+X+FI8BUJwXFrEUTcsOjMl+aCCR6KsxImJ9AkkcKo1NV
-   QnJKo0rHBZVRAV6p40bRwJzK5e8riMJt/4Clgmc+EedzUYn6oV9hTzrp5
-   WNuomMhwqpBP/qvzBPs11idiZJ6gdtzwkPVd6g/teZZLDvl5NlOBYnKKJ
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10638"; a="362648656"
-X-IronPort-AV: E=Sophos;i="5.98,230,1673942400"; 
-   d="scan'208";a="362648656"
-Received: from orsmga008.jf.intel.com ([10.7.209.65])
-  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2023 06:41:31 -0800
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10638"; a="705664872"
-X-IronPort-AV: E=Sophos;i="5.98,230,1673942400"; 
-   d="scan'208";a="705664872"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.216.227])
-  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 03 Mar 2023 06:41:27 -0800
-Message-ID: <5d7d48ff-b007-e339-8177-d0a7b7b8adc4@intel.com>
-Date:   Fri, 3 Mar 2023 16:41:23 +0200
+        with ESMTP id S230523AbjCCSTZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2023 13:19:25 -0500
+Received: from smtp5-g21.free.fr (smtp5-g21.free.fr [IPv6:2a01:e0c:1:1599::14])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 630762688;
+        Fri,  3 Mar 2023 10:19:24 -0800 (PST)
+Received: from [IPV6:2a02:8428:2a4:1a01:f88c:752c:48de:2928] (unknown [IPv6:2a02:8428:2a4:1a01:f88c:752c:48de:2928])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp5-g21.free.fr (Postfix) with ESMTPSA id E91E55FFAF;
+        Fri,  3 Mar 2023 19:19:00 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1677867562;
+        bh=VIibiph2IAZw8YCCnsAN51osihVhUJ2GrEU2ysg22B8=;
+        h=Date:From:Subject:To:Cc:From;
+        b=YCkYwiro4W8pFN7Mj4VjeohMZ7StZ6xLgPf9K54LZ6SV0v53trSAbWHffLuazXfhU
+         nprlcBb0eLvFQhcysD1ouRiIWPLyj25h7X4IRpPNaev9MJtw6U4BygK8qbNpNbi9DH
+         xC9Myay8bBR3Ua4uZAvMSe0zkuRF4s979tA4stfAE1e/RMhdO9EXuzTMkWdegoWgiL
+         BxIM1mfrA8As8WRmdKMFNU7VY7S0S0YVppk29SW+2YYI8d55Whuta2YpLRXKs9NEaE
+         MUDOhFrGmpOl+TImT4kRpUktW5NwRjWJkxQuOPeQOeOSSHzoZgF0EGQNcxshwqesCW
+         20I0TehqRrJPA==
+Message-ID: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+Date:   Fri, 3 Mar 2023 19:19:00 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.8.0
-Subject: Re: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
- internal cache
+ Thunderbird/102.4.2
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+Subject: Unsupported WiFi adapter on S905X2 board
+To:     Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Wright Feng <wright.feng@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Chi-Hsien Lin <chi-hsien.lin@cypress.com>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>
+Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
 Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Bean Huo <huobean@gmail.com>
-References: <20230302144330.274947-1-ulf.hansson@linaro.org>
- <5712c69ae37447c5b576d87b247f5756@hyperstone.com>
- <a35f3d45cab0442b9491c0b120e3fb47@hyperstone.com>
- <CAPDyKFpv3hHvg5X8WNpQEnnsNdGCBMybT-32EGPNYtBtSgK9Fw@mail.gmail.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <CAPDyKFpv3hHvg5X8WNpQEnnsNdGCBMybT-32EGPNYtBtSgK9Fw@mail.gmail.com>
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/03/23 14:01, Ulf Hansson wrote:
-> On Fri, 3 Mar 2023 at 12:40, Christian Löhle <CLoehle@hyperstone.com> wrote:
->>
->>
->>>>
->>>> REQ_FUA is in general supported for eMMC cards, which translates into so called "reliable writes". To support these write operations, the CMD23 (MMC_CAP_CMD23), needs to be supported by the mmc host too, which is common but not always the case.
->>>>
->>>> For some eMMC devices, it has been reported that reliable writes are quite costly, leading to performance degradations.
->>>>
->>>> In a way to improve the situation, let's avoid announcing REQ_FUA support if the eMMC supports an internal cache, as that allows us to rely solely on flush-requests (REQ_OP_FLUSH) instead, which seems to be a lot cheaper.
->>>> Note that, those mmc hosts that lacks CMD23 support are already using this type of configuration, whatever that could mean.
->>>
->>> Just note that reliable write is strictly weaker than turning cache off/flushing, if card loses power during cache off/flush programming / busy, sector-wise atomicity is not mandated by the spec.
->>> (And that is assuming cache off/flush is actually respected by the card as intended by the spec, should some cards be checked?) Maybe some FS people can also chime in?
->>
->> Nevermind, the sector-wise atomicity should not matter on 5.1 cards or if the block length isn't being played with, which it isn't in our case.
->> If reliable write is implemented only according to spec, I don't see why the cache flushing should be less expensive, which would only make sense if
->> a) < sector chunks are committed to flash
->> b) reliable write is implemented much stricter than the spec, ensuring atomicity for the entire write.
-> 
-> Right, I agree!
-> 
-> Note 1) Reliable write was introduced way before cache management in
-> the eMMC spec. So, if the support for reliable write would have a
-> stricter implementation than needed, I would not be surprised.
+Hello,
 
-I am not sure when you say stricter than needed.  Historically
-file systems assumed that sectors are updated atomically i.e.
-there is never a sector with a mixture of old and new data.
-The eMMC spec does not guarantee that, except for reliable
-write.
+I think there's an unsupported device in this system:
 
-File systems may use REQ_FUA for important information, like the
-superblock or a journal commit record, so using reliable write
-for REQ_FUA would seem to give better protection against file system
-corruption than a cache flush which could leave a sector
-half-written.
+# cat /sys/bus/sdio/devices/mmc2:0001:1/uevent
+OF_NAME=wifi
+OF_FULLNAME=/soc/sd@ffe03000/wifi@1
+OF_COMPATIBLE_0=brcm,bcm4329-fmac
+OF_COMPATIBLE_N=1
+SDIO_CLASS=00
+SDIO_ID=02D0:AAE7
+SDIO_REVISION=0.0
+MODALIAS=sdio:c00v02D0dAAE7
 
-On the other hand, sudden power loss is probably rare in battery
-powered systems because they are designed to monitor the battery
-power and shutdown when it gets too low.
+0xaae7 = 43751
 
-And file systems can use checksums to detect half-written updates.
+Isn't there some overlap between
+include/linux/mmc/sdio_ids.h
+and
+drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+?
 
-And there is anyway no protection for other (non REQ_FUA) writes a
-file system might do and expect not to tear sectors.
+(Relevant commit: d2587c57ffd8dc)
 
-And you are more likely to smash the screen than bounce the battery
-out and cause an unrecoverable file system error.
+Looking at all the occurrences of 43752 to insert a 43751,
+could someone comment whether this looks reasonable?
 
-Nevertheless, the commit message of this patch reads like the change
-is an optimization, whereas it seems more like a policy change.
-The commit message should perhaps say something like:
-"The consensus is that the benefit of improved performance by not
-using reliable-write for REQ_FUA is much greater than any potential
-benefit that reliable-write might provide to avoid file system
-corruption in the event of sudden power loss."
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+index 1967160f211eb..89bbad598782e 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+@@ -987,6 +987,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
+  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
+  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
++	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751, CYW),
+  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
+  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
+  	{ /* end: all zeroes */ }
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
+index 121893bbaa1d7..cab9257272dd4 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
+@@ -731,6 +731,7 @@ static u32 brcmf_chip_tcm_rambase(struct brcmf_chip_priv *ci)
+  	case BRCM_CC_4364_CHIP_ID:
+  	case CY_CC_4373_CHIP_ID:
+  		return 0x160000;
++	case CY_CC_43751_CHIP_ID:
+  	case CY_CC_43752_CHIP_ID:
+  		return 0x170000;
+  	case BRCM_CC_4378_CHIP_ID:
+@@ -1433,6 +1434,7 @@ bool brcmf_chip_sr_capable(struct brcmf_chip *pub)
+  		reg = chip->ops->read32(chip->ctx, addr);
+  		return (reg & CC_SR_CTL0_ENABLE_MASK) != 0;
+  	case BRCM_CC_4359_CHIP_ID:
++	case CY_CC_43751_CHIP_ID:
+  	case CY_CC_43752_CHIP_ID:
+  	case CY_CC_43012_CHIP_ID:
+  		addr = CORE_CC_REG(pmu->base, retention_ctl);
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+index 6b38d9de71af6..55cc7b65081fd 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
+@@ -624,6 +624,7 @@ BRCMF_FW_CLM_DEF(4356, "brcmfmac4356-sdio");
+  BRCMF_FW_DEF(4359, "brcmfmac4359-sdio");
+  BRCMF_FW_CLM_DEF(4373, "brcmfmac4373-sdio");
+  BRCMF_FW_CLM_DEF(43012, "brcmfmac43012-sdio");
++BRCMF_FW_CLM_DEF(43751, "brcmfmac43751-sdio");
+  BRCMF_FW_CLM_DEF(43752, "brcmfmac43752-sdio");
+  
+  /* firmware config files */
+@@ -657,6 +658,7 @@ static const struct brcmf_firmware_mapping brcmf_sdio_fwnames[] = {
+  	BRCMF_FW_ENTRY(CY_CC_4373_CHIP_ID, 0xFFFFFFFF, 4373),
+  	BRCMF_FW_ENTRY(CY_CC_43012_CHIP_ID, 0xFFFFFFFF, 43012),
+  	BRCMF_FW_ENTRY(CY_CC_43439_CHIP_ID, 0xFFFFFFFF, 43439),
++	BRCMF_FW_ENTRY(CY_CC_43751_CHIP_ID, 0xFFFFFFFF, 43751),
+  	BRCMF_FW_ENTRY(CY_CC_43752_CHIP_ID, 0xFFFFFFFF, 43752)
+  };
+  
+@@ -3425,6 +3427,7 @@ static int brcmf_sdio_download_firmware(struct brcmf_sdio *bus,
+  static bool brcmf_sdio_aos_no_decode(struct brcmf_sdio *bus)
+  {
+  	if (bus->ci->chip == CY_CC_43012_CHIP_ID ||
++	    bus->ci->chip == CY_CC_43751_CHIP_ID ||
+  	    bus->ci->chip == CY_CC_43752_CHIP_ID)
+  		return true;
+  	else
+@@ -4274,6 +4277,7 @@ static void brcmf_sdio_firmware_callback(struct device *dev, int err,
+  
+  		switch (sdiod->func1->device) {
+  		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373:
++		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751:
+  		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752:
+  			brcmf_dbg(INFO, "set F2 watermark to 0x%x*4 bytes\n",
+  				  CY_4373_F2_WATERMARK);
+diff --git a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+index f4939cf627672..8b21da3e66291 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
++++ b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+@@ -55,6 +55,7 @@
+  #define CY_CC_4373_CHIP_ID		0x4373
+  #define CY_CC_43012_CHIP_ID		43012
+  #define CY_CC_43439_CHIP_ID		43439
++#define CY_CC_43751_CHIP_ID		43751
+  #define CY_CC_43752_CHIP_ID		43752
+  #define CY_CC_89459_CHIP_ID		0x4355
+  
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 74f9d9a6d3307..80e84958e570f 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -76,6 +76,7 @@
+  #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
+  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
+  #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
++#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751	0xaae7
+  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
+  
+  #define SDIO_VENDOR_ID_MARVELL			0x02df
 
-As for allowing for the policy to be overridden, perhaps an mmc_core
-module option?
 
-> 
-> Note 2) In the eMMC v5.1 spec, the cache flushing support has been
-> extended to allow an explicit barrier operation. Perhaps, we should
-> let that option take precedence over a regular flush+barrier, for
-> REQ_OP_FLUSH!?
-> 
->>
->> I guess the cards which increase performance do b)? Or something else?
-> 
-> That's the tricky part to know, as it's the internals of the eMMC.
-
-It is the natural conclusion though.  The eMMC probably does not
-update mapping information with every write, instead if power is
-lost, it scans the updated areas at the next initialization. (The
-power-off notify feature would commit the mapping information to
-media to avoid that).  So a reliable write might have to:
-1. write information to record that the old mapping
-should be used, not what might be discovered by scanning
-2. do the actual write
-3. write mapping information to record the new mapping
-
-> 
-> Although, it seems like both Avri (WDC) and Bean (Micron) would be
-> happy to proceed with $subject patch, which makes me more comfortable
-> to move forward.
-> 
->> Anyway regarding FUA i don't have any concerns regarding reliability with cache flush.
->> I can add some performance comparisons with some eMMCs I have around though.
-> 
-> That would be great, thanks a lot for helping out with testing!
-> 
-> Kind regards
-> Uffe
+Regards.
 
