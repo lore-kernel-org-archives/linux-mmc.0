@@ -2,184 +2,249 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5AEA4C7EE2D
-	for <linux-mmc@archiver.kernel.org>; Fri,  3 Mar 2023 18:19:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7A3C5C64EC4
+	for <linux-mmc@archiver.kernel.org>; Fri,  3 Mar 2023 23:38:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231190AbjCCST0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 3 Mar 2023 13:19:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38454 "EHLO
+        id S229697AbjCCXif (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 3 Mar 2023 18:38:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230523AbjCCSTZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2023 13:19:25 -0500
-Received: from smtp5-g21.free.fr (smtp5-g21.free.fr [IPv6:2a01:e0c:1:1599::14])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 630762688;
-        Fri,  3 Mar 2023 10:19:24 -0800 (PST)
-Received: from [IPV6:2a02:8428:2a4:1a01:f88c:752c:48de:2928] (unknown [IPv6:2a02:8428:2a4:1a01:f88c:752c:48de:2928])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp5-g21.free.fr (Postfix) with ESMTPSA id E91E55FFAF;
-        Fri,  3 Mar 2023 19:19:00 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1677867562;
-        bh=VIibiph2IAZw8YCCnsAN51osihVhUJ2GrEU2ysg22B8=;
-        h=Date:From:Subject:To:Cc:From;
-        b=YCkYwiro4W8pFN7Mj4VjeohMZ7StZ6xLgPf9K54LZ6SV0v53trSAbWHffLuazXfhU
-         nprlcBb0eLvFQhcysD1ouRiIWPLyj25h7X4IRpPNaev9MJtw6U4BygK8qbNpNbi9DH
-         xC9Myay8bBR3Ua4uZAvMSe0zkuRF4s979tA4stfAE1e/RMhdO9EXuzTMkWdegoWgiL
-         BxIM1mfrA8As8WRmdKMFNU7VY7S0S0YVppk29SW+2YYI8d55Whuta2YpLRXKs9NEaE
-         MUDOhFrGmpOl+TImT4kRpUktW5NwRjWJkxQuOPeQOeOSSHzoZgF0EGQNcxshwqesCW
-         20I0TehqRrJPA==
-Message-ID: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
-Date:   Fri, 3 Mar 2023 19:19:00 +0100
+        with ESMTP id S229691AbjCCXid (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 3 Mar 2023 18:38:33 -0500
+Received: from mail-vs1-xe2b.google.com (mail-vs1-xe2b.google.com [IPv6:2607:f8b0:4864:20::e2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1C28193E5
+        for <linux-mmc@vger.kernel.org>; Fri,  3 Mar 2023 15:38:29 -0800 (PST)
+Received: by mail-vs1-xe2b.google.com with SMTP id o32so3889210vsv.12
+        for <linux-mmc@vger.kernel.org>; Fri, 03 Mar 2023 15:38:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gateworks-com.20210112.gappssmtp.com; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=VW/Jgy7OPnDt1x0GvM0FJ+v1d2CV3W+TQXV2zzgAUYc=;
+        b=6L8Onv7uDrP+1ncPNxj3EvpzXBhaPph1umg1oLhH+8pB0D1D6hHgpn9Bipleq5f75e
+         e9kYubQcbMH9Yv4JqkZJy76O50hopYR6ngtbymXsAJa0HuJfcJZ4rMIbmW5fDd2Ai81h
+         O9+kV5MmbxxQ6mdZ74cmJKcTf5AjReMgRqd1ILY3K0TpGPMG+dx/7rbRsDBhjnS9wiG/
+         5zGbmx0qmWrjKH8TwAkPmQuSAfW3zmFGc5fP3uxIZ9kZUF/lKikDjaa05vSaWQtLtCJt
+         OjlqV6LOM2AfVbYrEHMASHWD11sNYtXJzAdR8eT8sUvX2uG15OrESh1mAb0ZJWtEidVV
+         nbcQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=VW/Jgy7OPnDt1x0GvM0FJ+v1d2CV3W+TQXV2zzgAUYc=;
+        b=ba6/8rCHWSLdML2kQq05GJG3P//+UrteAxTsCaB5q8MNT7f6ps6EhKfEguMGAHp6wG
+         29/QxQAUz2eWcpSIVPf6f70uYNQE+BVbyn4mCb33qK3cTDdreTDWmioh5AyW8UUUTRUF
+         /5YeThVzwSdNKNDEGsFnceCIEKGCUgj+p6kOi5lIZp/4pNXOIRztdE54wJWNSxUhU02o
+         PmJxCQHBdoVzZA8hh/pHuku98AwUsRxhTch8gwRX90h79Uegr0G3DexejfMCyIcOzMKe
+         sLThS7jftB8o84Ajcw3Hl13k2qIfq4kwD3SSwSVGoU6Gvp14C7+eEOY9mqptxHqIQrmk
+         mgQg==
+X-Gm-Message-State: AO0yUKUkQa726WaYNhYJsBWHXa/lRMQOFDNMkp2l4DP/iftJS0E8gDbr
+        kVJsyyAgBk4PS3U3oFN8LwwqThm5EV3Q1LNz9gra3A==
+X-Google-Smtp-Source: AK7set9IauOkDqQ+Y4mwefS66UxFj7YpcBQV+wZXSDdEET7WIU5/gMC8mOPhWpo5ynJN1d7hGME0F6KvzBaL6kqDKis=
+X-Received: by 2002:a67:7304:0:b0:411:c1a2:9ea2 with SMTP id
+ o4-20020a677304000000b00411c1a29ea2mr2265285vsc.4.1677886708981; Fri, 03 Mar
+ 2023 15:38:28 -0800 (PST)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.4.2
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-Subject: Unsupported WiFi adapter on S905X2 board
-To:     Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Wright Feng <wright.feng@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Chi-Hsien Lin <chi-hsien.lin@cypress.com>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>
-Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-Content-Language: en-US
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <CAJ+vNU2SC_Q3RWdeO9-mKDYC_TK8_vzefvGz_++O8StJer_h3Q@mail.gmail.com>
+ <CAPDyKFq23_vCunapQ=OHFFGXs5a8_cr8w7hBUP=HQ5f2zaTBUg@mail.gmail.com>
+In-Reply-To: <CAPDyKFq23_vCunapQ=OHFFGXs5a8_cr8w7hBUP=HQ5f2zaTBUg@mail.gmail.com>
+From:   Tim Harvey <tharvey@gateworks.com>
+Date:   Fri, 3 Mar 2023 15:38:15 -0800
+Message-ID: <CAJ+vNU3RU_hM=H4Efh4WP7+d5LRJ7JeLsoSEfJeikXXE-pnH1w@mail.gmail.com>
+Subject: Re: mmc: core: Disable card detect during shutdown
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Robert Richter <rric@kernel.org>,
+        "H. Nikolaus Schaller" <hns@goldelico.com>,
+        Tony Lindgren <tony@atomide.com>,
+        linux-omap <linux-omap@vger.kernel.org>,
+        linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        Linux MMC List <linux-mmc@vger.kernel.org>,
+        Jan Glauber <jan.glauber@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello,
+On Thu, Mar 2, 2023 at 2:37=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+>
+> + Robert
+>
+> On Thu, 2 Mar 2023 at 00:32, Tim Harvey <tharvey@gateworks.com> wrote:
+> >
+> > Greetings,
+> >
+> > I've encountered a hang on shutdown on octeontx (CN8030 SoC, THUNDERX
+> > architecture) that I bisected to commit 66c915d09b94 ("mmc: core:
+> > Disable card detect during shutdown").
+> >
+> > It looks like the OMP5 Pyra ran into this as well related to a
+> > malfunctioning driver [1]
+> >
+> > In the case of MMC_CAVIUM_THUNDERX the host controller supports
+> > multiple slots each having their own CMD signal but shared clk/data
+> > via the following dt:
+> >
+> > mmc@1,4 {
+> >         compatible =3D "cavium,thunder-8890-mmc";
+> >         reg =3D <0xc00 0x00 0x00 0x00 0x00>;
+> >         #address-cells =3D <0x01>;
+> >         #size-cells =3D <0x00>;
+> >         clocks =3D <0x0b>;
+> >
+> >         /* eMMC */
+> >         mmc-slot@0 {
+> >                 compatible =3D "mmc-slot";
+> >                 reg =3D <0>;
+> >                 vmmc-supply =3D <&mmc_supply_3v3>;
+> >                 max-frequency =3D <35000000>;
+> >                 no-1-8-v;
+> >                 bus-width =3D <8>;
+> >                 no-sdio;
+> >                 no-sd;
+> >                 mmc-ddr-3_3v;
+> >                 cap-mmc-highspeed;
+> >         };
+> >
+> >         /* microSD */
+> >         mmc-slot@1 {
+> >                 compatible =3D "mmc-slot";
+> >                 reg =3D <1>;
+> >                 vmmc-supply =3D <&mmc_supply_3v3>;
+> >                 max-frequency =3D <35000000>;
+> >                 no-1-8-v;
+> >                 broken-cd;
+> >                 bus-width =3D <4>;
+> >                 cap-sd-highspeed;
+> >         };
+> > };
+> >
+> > mmc_add_host is only called once for mmc0 and I can't see any printk
+>
+> That looks wrong. There needs to be one mmc host registered per slot,
+> otherwise things will, for sure, not work.
+>
+> I suggest you have a closer look to see what goes on in thunder_mmc_probe=
+().
+>
 
-I think there's an unsupported device in this system:
+Ulf,
 
-# cat /sys/bus/sdio/devices/mmc2:0001:1/uevent
-OF_NAME=wifi
-OF_FULLNAME=/soc/sd@ffe03000/wifi@1
-OF_COMPATIBLE_0=brcm,bcm4329-fmac
-OF_COMPATIBLE_N=1
-SDIO_CLASS=00
-SDIO_ID=02D0:AAE7
-SDIO_REVISION=0.0
-MODALIAS=sdio:c00v02D0dAAE7
+Sorry, I was mistaken. Each slot does get its own mmc host.
 
-0xaae7 = 43751
+I find that with thunderx_mmc I can reproduce this hang on shutdown
+even if I just have a single slot with broken-cd defined.
 
-Isn't there some overlap between
-include/linux/mmc/sdio_ids.h
-and
-drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
-?
+I wonder if it has to do with thunder_mmc_probe getting called
+multiple times because it defers due to gpio/regulator not yet being
+available:
+[    6.846262] thunderx_mmc 0000:01:01.4: Adding to iommu group 1
+[    6.852143] thunder_mmc_probe
+[    6.855622] thunder_mmc_probe scanning slots
+[    6.860137] mmc_alloc_host: mmc0 init delayed work
+[    6.864938] cvm_mmc_of_slot_probe mmc0
+[    6.868695] cvm_mmc_of_slot_probe mmc0 Failed: EPROBE_DEFER
+[    6.874269] mmc_free_host: mmc0
+[    6.877481] thunder_mmc_probe Failed: EPROBE_DEFER
+...
+[    7.737536] gpio_thunderx 0000:00:06.0: Adding to iommu group 16
+[    7.745252] gpio gpiochip0: (gpio_thunderx): not an immutable chip,
+please consider fixing it!
+[    7.754096] gpio_thunderx 0000:00:06.0: ThunderX GPIO: 48 lines
+with base 512.
+...
+[    7.946636] thunder_mmc_probe
+[    7.950125] thunder_mmc_probe scanning slots
+[    7.954597] mmc_alloc_host: mmc0 init delayed work
+[    7.959399] cvm_mmc_of_slot_probe mmc0
+[    7.963158] cvm_mmc_of_slot_probe mmc0 Failed: EPROBE_DEFER
+[    7.968732] mmc_free_host: mmc0
+[    7.971963] thunder_mmc_probe Failed: EPROBE_DEFER
+...
+[    7.998271] reg_fixed_voltage_probe
+[    8.001773] reg-fixed-voltage mmc_supply_3v3: reg_fixed_voltage_probe
+[    8.008360] reg-fixed-voltage mmc_supply_3v3: mmc_supply_3v3
+supplying 3300000uV
+[    8.015851] thunder_mmc_probe
+[    8.019318] thunder_mmc_probe scanning slots
+[    8.023794] mmc_alloc_host: mmc0 init delayed work
+[    8.028596] cvm_mmc_of_slot_probe mmc0
+[    8.032488] mmc_add_host: mmc0
+[    8.060655] cvm_mmc_of_slot_probe mmc0 ok
+[    8.064678] thunderx_mmc 0000:01:01.4: probed
+[    8.069041] mmc_rescan: mmc0 irq=3D-22
 
-(Relevant commit: d2587c57ffd8dc)
+> > debugging added to __mmc_stop_host (maybe because serial/console has
+> > been disabled by that point?).
+>
+> The serial console should work fine at this point, at least on those
+> systems that I have tested this code with.
+>
+> Perhaps you added the debug print too late in the function, if the
+> calls to disable_irq() or cancel_delayed_work_sync() are hanging?
+>
 
-Looking at all the occurrences of 43752 to insert a 43751,
-could someone comment whether this looks reasonable?
+This was something to do with busybox reboot. I switched to using
+sysrq (echo o > /proc/sysrq-trigger) to reboot and now I can see my
+printk's
 
-diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-index 1967160f211eb..89bbad598782e 100644
---- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-+++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-@@ -987,6 +987,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
-  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
-  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
-  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
-+	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751, CYW),
-  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
-  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
-  	{ /* end: all zeroes */ }
-diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
-index 121893bbaa1d7..cab9257272dd4 100644
---- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
-+++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c
-@@ -731,6 +731,7 @@ static u32 brcmf_chip_tcm_rambase(struct brcmf_chip_priv *ci)
-  	case BRCM_CC_4364_CHIP_ID:
-  	case CY_CC_4373_CHIP_ID:
-  		return 0x160000;
-+	case CY_CC_43751_CHIP_ID:
-  	case CY_CC_43752_CHIP_ID:
-  		return 0x170000;
-  	case BRCM_CC_4378_CHIP_ID:
-@@ -1433,6 +1434,7 @@ bool brcmf_chip_sr_capable(struct brcmf_chip *pub)
-  		reg = chip->ops->read32(chip->ctx, addr);
-  		return (reg & CC_SR_CTL0_ENABLE_MASK) != 0;
-  	case BRCM_CC_4359_CHIP_ID:
-+	case CY_CC_43751_CHIP_ID:
-  	case CY_CC_43752_CHIP_ID:
-  	case CY_CC_43012_CHIP_ID:
-  		addr = CORE_CC_REG(pmu->base, retention_ctl);
-diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-index 6b38d9de71af6..55cc7b65081fd 100644
---- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-+++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c
-@@ -624,6 +624,7 @@ BRCMF_FW_CLM_DEF(4356, "brcmfmac4356-sdio");
-  BRCMF_FW_DEF(4359, "brcmfmac4359-sdio");
-  BRCMF_FW_CLM_DEF(4373, "brcmfmac4373-sdio");
-  BRCMF_FW_CLM_DEF(43012, "brcmfmac43012-sdio");
-+BRCMF_FW_CLM_DEF(43751, "brcmfmac43751-sdio");
-  BRCMF_FW_CLM_DEF(43752, "brcmfmac43752-sdio");
-  
-  /* firmware config files */
-@@ -657,6 +658,7 @@ static const struct brcmf_firmware_mapping brcmf_sdio_fwnames[] = {
-  	BRCMF_FW_ENTRY(CY_CC_4373_CHIP_ID, 0xFFFFFFFF, 4373),
-  	BRCMF_FW_ENTRY(CY_CC_43012_CHIP_ID, 0xFFFFFFFF, 43012),
-  	BRCMF_FW_ENTRY(CY_CC_43439_CHIP_ID, 0xFFFFFFFF, 43439),
-+	BRCMF_FW_ENTRY(CY_CC_43751_CHIP_ID, 0xFFFFFFFF, 43751),
-  	BRCMF_FW_ENTRY(CY_CC_43752_CHIP_ID, 0xFFFFFFFF, 43752)
-  };
-  
-@@ -3425,6 +3427,7 @@ static int brcmf_sdio_download_firmware(struct brcmf_sdio *bus,
-  static bool brcmf_sdio_aos_no_decode(struct brcmf_sdio *bus)
-  {
-  	if (bus->ci->chip == CY_CC_43012_CHIP_ID ||
-+	    bus->ci->chip == CY_CC_43751_CHIP_ID ||
-  	    bus->ci->chip == CY_CC_43752_CHIP_ID)
-  		return true;
-  	else
-@@ -4274,6 +4277,7 @@ static void brcmf_sdio_firmware_callback(struct device *dev, int err,
-  
-  		switch (sdiod->func1->device) {
-  		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373:
-+		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751:
-  		case SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752:
-  			brcmf_dbg(INFO, "set F2 watermark to 0x%x*4 bytes\n",
-  				  CY_4373_F2_WATERMARK);
-diff --git a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
-index f4939cf627672..8b21da3e66291 100644
---- a/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
-+++ b/drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
-@@ -55,6 +55,7 @@
-  #define CY_CC_4373_CHIP_ID		0x4373
-  #define CY_CC_43012_CHIP_ID		43012
-  #define CY_CC_43439_CHIP_ID		43439
-+#define CY_CC_43751_CHIP_ID		43751
-  #define CY_CC_43752_CHIP_ID		43752
-  #define CY_CC_89459_CHIP_ID		0x4355
-  
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 74f9d9a6d3307..80e84958e570f 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -76,6 +76,7 @@
-  #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
-  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
-  #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
-+#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751	0xaae7
-  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
-  
-  #define SDIO_VENDOR_ID_MARVELL			0x02df
+> >
+> > It appears that what causes this hang is the 'broken-cd' which enables
+> > the detect change polling on mmc1. I have the ability to flip the CMD
+> > signal routing thus making mmc0 the microSD and mmc1 the eMMC and when
+> > I do that there isn't an issue so I think what happens is in the case
+> > where mmc polling is enabled on mmc1 but not mmc0 (as above) the
+> > polling causes a hang after __mmc_stop_host() is called for mmc0.
+>
+> The code in __mmc_stop_host() has been tested for both polling and
+> gpio card detections. That said, it looks to me that there is
+> something weird going on in the cavium mmc driver.
+>
+> What makes this even tricker, is that it's uncommon and not
+> recommended to use more than one mmc slot per host instance.
+>
+
+that was my mistake... there is one host instance per slot and I see
+this even if I only have 1 slot as long as polling is enabled.
+
+now that I can see my printk's I can confirm it hangs when
+_mmc_stop_host calls the cancel_delayed_work_sync:
+# echo o > /proc/sysrq-trigger
+[  210.370200] sysrq: Power Off
+[  210.373147] kernel_shutdown_prepare
+[  210.896927] mmc_rescan: mmc0 irq=3D-22
+[  213.038191] mmc_host_classdev_shutdown mmc0
+[  213.042384] __mmc_stop_host: mmc0 cd_irq=3D-22
+[  213.046658] __mmc_stop_host: mmc0 calling cancel_delayed_work_sync
+^^^ never comes back
+
+If I comment out the call to cancel_delayed_work_sync in
+__mmc_stop_host then shutdown does not hang so I think it has
+something to do with mmc_alloc_host setting up the polling multiple
+times.
+
+Best Regards,
+
+Tim
 
 
-Regards.
 
+> >
+> > Any ideas?
+>
+> I hope the above thoughts can point you in a direction to narrow down
+> this problem.
+>
+> >
+> > Best Regards,
+> >
+> > Tim
+> >
+> > [1] https://lore.kernel.org/all/55A0788B-03E8-457E-B093-40FD93F1B9F3@go=
+ldelico.com/
+>
+> Kind regards
+> Uffe
