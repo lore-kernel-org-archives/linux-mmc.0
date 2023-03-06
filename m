@@ -2,43 +2,43 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B447EC61DA3
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 04:10:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCADAC6FD1A
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 04:10:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229572AbjCFEJz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 5 Mar 2023 23:09:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41920 "EHLO
+        id S229698AbjCFEJ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 5 Mar 2023 23:09:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41984 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229839AbjCFEJM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Mar 2023 23:09:12 -0500
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2065.outbound.protection.outlook.com [40.107.93.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 979DCEC49;
-        Sun,  5 Mar 2023 20:08:51 -0800 (PST)
+        with ESMTP id S229716AbjCFEJX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 5 Mar 2023 23:09:23 -0500
+Received: from NAM04-DM6-obe.outbound.protection.outlook.com (mail-dm6nam04on2053.outbound.protection.outlook.com [40.107.102.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D24BE10A91;
+        Sun,  5 Mar 2023 20:09:11 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DtezldOKSirVZoV9vZsYTr8Lcc/AVV6TSUwNQJgbS2UVATeuVNmPTVg1hZFrlk7Fmo/6xxHNcLDl3BF5OPdkNS5xivAACgnwyX1/gNOrIzkfyO9zxspSXECKrt61oBcfr1FQ7jmj7j33P6NWAGc8qgOYeeZcPa3Gy3ulr66q9IQHvOq0Phw2yYy8jAh4VPic/2uhHeyKcrDiAgiw7P9fXKU2hrL9gknqbHXINJwDHj0u95kAGPXfYXAvSjhmpKm5wA0g/BVhm0C7Y34sWjvw2brlqDXstcY5ECksHM93B0E43n8OH0u6+EqNReEv2M3Fvz9lPRB7oh0U7jrg/o9JZg==
+ b=Wh8XxqwhyiAcwDWnDItWdzbjqlLAfqWap/n2JMK3xUoIMDnPF2rM7NSIdiYT2oc1Vp7oXOnfyXIG9r+6v2vP1jq32NjOv6ELKRM62cg4Xjk4TKHSqRwoiJn498W7AjQD+C+6LZSp+rDyBzTB1FZe9oGIqD3kYp+r38Od2bqSm1DstV2HJDc27LWpU4CQaGF28PS5Rma/cVq3iA73yfP2BK782wELWcPbUmSDhnhhbV+iNK90AomfdTMCuqaU2CSq1ZEHRwSZIkiinF1JqZKDYtjfCTbP/TNCLEHSFsw7Tvi8nHoRFOmlU8FEyzIqtAl/W/9+v7nmqKYl+ELLZcnktA==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=3yF18aR/PwECZuTfdJUAKekcVDp//sLHq8QBk/IPEas=;
- b=RQY1eTwlLDA06CHhhyAVS2Ey11DG8jwdOBktIEPZA0Rl3jnX8oGR44S9H/SamIP0Q1stUL4j3Ne0dZzi4svUJNpvnWAPW/21AMg79Co70lWv3qp1Yfx/+u//6mhDziMLqyaSwbKbqobwj717JsaOMwRwcflz3coPE9XfYSGCZ5AukQ+LLSIWqs1hDHLx5wJisJ9WtyYYbpxfTIImWuWYL5zxCqpqTQvVLxAvZ5IvPbqHV61f+OjKW/4i5aybgnEFZyGzja7vP241Z8wBLLAk0VVAwzauL1nayQxmE/xfNToa7hR+mvxkFH5qV8sZd1oNEjTiOktt3WAO9KCsjkdxug==
+ bh=5d82bpmyF+6P+qy1C97qBN4cXmEmhjcPYdPiNzeQJ4E=;
+ b=GGuvlkl4bojkqlGCOAGkneT2BjYAZetGMvgpHcaMAgkgccrp0cA8y8TnBeNagwqmUDDp2x3j17RYRo5910nsOQ3JHHIU9Q80R81lAXIeudOrFcMpuF92j0RmVUlGUBcTuSRcGw8o6hOVQQ0hkgwmnLWMhZk1KRp8UOa+w9htgVWG7D/0Y6B/YiF5bCj6YAqEQ2x90J4xdI8Ss8EuCZCeEDOnFjl2ip2uL5Ylnij3MQi1QnRIdTQbUPal3fECwSLRVgEfAcVnUV2Y9Pkf4T78W0pAqu3SNDuAycfISxrLFhDKEKMSgqnIml+LEP5HfHHABuUrmQN9UIZNtmAyVU/Zfg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
  dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
  header.from=amd.com; dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=3yF18aR/PwECZuTfdJUAKekcVDp//sLHq8QBk/IPEas=;
- b=Mo4cnAHrH6+NLPCJWvqFaVVY/pKdiV3zfHN8MwsbK1RQJ9SaDmaLuWtFJEHr/+V89opMyTS/O1g4rTOyjaK2bzl6dd0NdAGJIv/4mU/13KNN7bDH5A9GcGsTyZb2gdYiWP3dnFgmrvnXJe4/jv+1OGBRs2Hwkn4HSpcJvIMxD5A=
-Received: from DS7PR03CA0029.namprd03.prod.outlook.com (2603:10b6:5:3b8::34)
- by PH7PR12MB6657.namprd12.prod.outlook.com (2603:10b6:510:212::7) with
+ bh=5d82bpmyF+6P+qy1C97qBN4cXmEmhjcPYdPiNzeQJ4E=;
+ b=e+bz/YK+uZzmKER5oxBY6ebDzSaWFC3wNGzxt6Hg+dk80rgsTOIY7LrHmCeaFnWlzRCPepajo+OutCIlklg/SN3Ld/vpMo6FFZ0GT8HLbXtDex7Z4bJn0Elq6GThWQWwirDPU/zKif87pJ4GQX6Ecd/po5mmdLWu0zm7Mmkqm+k=
+Received: from DM6PR02CA0055.namprd02.prod.outlook.com (2603:10b6:5:177::32)
+ by PH7PR12MB7793.namprd12.prod.outlook.com (2603:10b6:510:270::19) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.28; Mon, 6 Mar
- 2023 04:08:44 +0000
-Received: from DM6NAM11FT025.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:3b8:cafe::63) by DS7PR03CA0029.outlook.office365.com
- (2603:10b6:5:3b8::34) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.28 via Frontend
- Transport; Mon, 6 Mar 2023 04:08:44 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.26; Mon, 6 Mar
+ 2023 04:09:07 +0000
+Received: from DM6NAM11FT106.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:177:cafe::36) by DM6PR02CA0055.outlook.office365.com
+ (2603:10b6:5:177::32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6156.27 via Frontend
+ Transport; Mon, 6 Mar 2023 04:09:06 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +46,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT025.mail.protection.outlook.com (10.13.172.197) with Microsoft SMTP
+ DM6NAM11FT106.mail.protection.outlook.com (10.13.172.229) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6178.15 via Frontend Transport; Mon, 6 Mar 2023 04:08:44 +0000
+ 15.20.6178.14 via Frontend Transport; Mon, 6 Mar 2023 04:09:06 +0000
 Received: from platform-dev1.pensando.io (10.180.168.240) by
  SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Sun, 5 Mar 2023 22:08:41 -0600
+ 15.1.2375.34; Sun, 5 Mar 2023 22:09:01 -0600
 From:   Brad Larson <blarson@amd.com>
 To:     <linux-arm-kernel@lists.infradead.org>
 CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
@@ -72,9 +72,9 @@ CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
         <vaishnav.a@ti.com>, <will@kernel.org>,
         <devicetree@vger.kernel.org>
-Subject: [PATCH v10 04/15] dt-bindings: spi: dw: Add AMD Pensando Elba SoC SPI Controller
-Date:   Sun, 5 Mar 2023 20:07:28 -0800
-Message-ID: <20230306040739.51488-5-blarson@amd.com>
+Subject: [PATCH v10 06/15] MAINTAINERS: Add entry for AMD PENSANDO
+Date:   Sun, 5 Mar 2023 20:07:30 -0800
+Message-ID: <20230306040739.51488-7-blarson@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20230306040739.51488-1-blarson@amd.com>
 References: <20230306040739.51488-1-blarson@amd.com>
@@ -85,89 +85,54 @@ X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT025:EE_|PH7PR12MB6657:EE_
-X-MS-Office365-Filtering-Correlation-Id: 2df79922-321d-4a5c-43e3-08db1df87a77
+X-MS-TrafficTypeDiagnostic: DM6NAM11FT106:EE_|PH7PR12MB7793:EE_
+X-MS-Office365-Filtering-Correlation-Id: abab5a99-5224-45d7-f1e4-08db1df88798
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: jAN7z4zbjrNCmaeEix4QKBJt07SPS0r1PGVIibYMVSPcu8JV5OH0rQIrO2Z6cb7gcW0RQ239045YZnyOjOV7JhLOyNHFHL2CKTmrBfP3ix3HkD3Fm+Llk0tZxzcMCpXWajwjPKLldtJy2lBcF9t/svtmFUf8vmZBnTp9gwtAxzOTLbJvtKc3bIXxJluwO7IwV67QpAVVSryi7ODi2G/TdThcuzF/+4uc2QBEUYanjUnJ5KlzcUxaz0Tb4zcwY5Jh+JFz4G6f6yz1ZHwnJ6TCEsS/If86iXqGnA4OQKGiJaK+z2IokAZGFo4aGYhvoQoi4bRz9vuWiCN7I3aYtJW7i6vZ9s+OzdLjWBn05lRdWU4ERqxEAVNR3fsCdte7m4dQAMqNLHdHNG7uHIgEroVpTx3AdunZij+qAoh52vdXSOlPd9wr6dfWFf6Mxou6D/ONgDH2iX3OfXARP5CxxpP/9wantAbiKgU/dml7aa5CIoQ9fXNjva3NPq248o8cVjFIl/Z4EZcUVHeUpBe7D8EGGUe7q8pnGEG3qs1SVtDfRfigsrTr7XtDobiWBD6Pq5dCr5ke9YKDBqjaQb720GQkQ2xAx259mSHCgdPT+lP9JhMEyDzNLINR7u56OyBfEYecmpIZAe65y2YadFaXwOvx8q8LS/ojAnMrDU3vWUUccFtHhXVIZWCiVziAY5rQdt5d1HYdeDt67qNH8GCvA0dw8cNM0lkcitMf0HNs0aItl+4=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(39860400002)(136003)(346002)(396003)(376002)(451199018)(40470700004)(36840700001)(46966006)(54906003)(316002)(83380400001)(82310400005)(2616005)(426003)(47076005)(40480700001)(336012)(356005)(36860700001)(81166007)(82740400003)(36756003)(478600001)(26005)(1076003)(6666004)(186003)(16526019)(40460700003)(7406005)(7416002)(5660300002)(41300700001)(8936002)(2906002)(8676002)(70586007)(70206006)(4326008)(6916009)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: ul/uwsNwRJF9myvtAPHT3+E3ESF6Z4awjlRS3xwnt4w0pjzXuAvxtXpzqJKPb4Sz3RM9xdAF5b/gH6EIXbNLMspFmtMnk88bPRsxyBbzaP+kIl0JsUEqyd8/zMSFA43E0/Am36SbBd0dyLd+39HKQPt6yVLq9abqjUoPTZmdbvwO2LM0KPDuTOEQKr/GHWtQZDwvLE4PAVjZrmPCP4Wfbj1d6y/jwzvFHH1HIUa+RSMTdmwDr4zAePgCLQEHNZgr+HX5sQKtaS6QDUmShTEb2Rhl8MYDDZ7xYsu6KFaWzcnePOoeZbBmEUY+ueNHzsXqddxAxgKsMhFUI2woNJX9fHG1o2DICuL09rnM8u3B+gioNQ0TcgK5zHLUnQHxqQu+A0Fic1vvWIE7eBfqRl1KJzhpTqk6/8BeMX7dUiifD0IDf4mvGMAZlFJFrjm7Aui0l/BFaMfc0/Je0PVMLRIcLF8IMiVSEZOXb8JkgcDt5SNutGWqvcIkCXn2/3KUaAyDwMVPuZI449kGLNjjTgQMu5liTirz3AGCOoAdIUy0TizZ6EQabAmKQvXDvApK6v7Zxh9/9Rkk8uQNo+NHKJSDj2NZlTEeRAqUMJTO4Mt/VDE3/Lt4OYKOntpF2OdBtbepuSwRDPXplcRffuyVyemsqxPER9WdLvGfg7zK5kF//bmLIJRQOfKPCp9TtLHNe0/uK1oRV0RycNw74NUR2Py0JjbeX73VKuHd23lkuW6Iqck=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(39860400002)(396003)(346002)(376002)(136003)(451199018)(36840700001)(46966006)(40470700004)(26005)(1076003)(6666004)(36756003)(36860700001)(426003)(47076005)(40460700003)(82310400005)(82740400003)(356005)(81166007)(40480700001)(83380400001)(16526019)(2616005)(336012)(186003)(70586007)(70206006)(41300700001)(8676002)(4326008)(6916009)(2906002)(4744005)(8936002)(5660300002)(7406005)(7416002)(478600001)(54906003)(316002)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Mar 2023 04:08:44.5694
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 06 Mar 2023 04:09:06.6318
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 2df79922-321d-4a5c-43e3-08db1df87a77
+X-MS-Exchange-CrossTenant-Network-Message-Id: abab5a99-5224-45d7-f1e4-08db1df88798
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT025.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT106.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB6657
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: PH7PR12MB7793
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
+Add entry for AMD PENSANDO maintainer and files
 
 Signed-off-by: Brad Larson <blarson@amd.com>
 ---
+ MAINTAINERS | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-v10 changes:
-- Move definition of amd,pensando-elba-syscon into properties
-  with a better description
-- Add amd,pensando-elba-syscon: false for non elba designs
-
-v9 changes:
-- Define property amd,pensando-elba-syscon
-- Move compatible amd,pensando-elba-spi ahead of baikal,bt1-ssi
-
----
- .../bindings/spi/snps,dw-apb-ssi.yaml         | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-index a132b5fc56e0..2383d6497b1e 100644
---- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-+++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
-@@ -37,6 +37,17 @@ allOf:
-     else:
-       required:
-         - interrupts
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: amd,pensando-elba-spi
-+    then:
-+      required:
-+        - amd,pensando-elba-syscon
-+    else:
-+      properties:
-+        amd,pensando-elba-syscon: false
+diff --git a/MAINTAINERS b/MAINTAINERS
+index 8d5bc223f305..5e39def215c9 100644
+--- a/MAINTAINERS
++++ b/MAINTAINERS
+@@ -1875,6 +1875,15 @@ N:	allwinner
+ N:	sun[x456789]i
+ N:	sun[25]0i
  
- properties:
-   compatible:
-@@ -63,6 +74,8 @@ properties:
-         const: intel,keembay-ssi
-       - description: Intel Thunder Bay SPI Controller
-         const: intel,thunderbay-ssi
-+      - description: AMD Pensando Elba SoC SPI Controller
-+        const: amd,pensando-elba-spi
-       - description: Baikal-T1 SPI Controller
-         const: baikal,bt1-ssi
-       - description: Baikal-T1 System Boot SPI Controller
-@@ -136,6 +149,12 @@ properties:
-       of the designware controller, and the upper limit is also subject to
-       controller configuration.
- 
-+  amd,pensando-elba-syscon:
-+    $ref: /schemas/types.yaml#/definitions/phandle-array
-+    description: |
-+      Block address to control SPI chip-selects.  The Elba SoC
-+      does not use ssi.
++ARM/AMD PENSANDO ARM64 ARCHITECTURE
++M:	Brad Larson <blarson@amd.com>
++L:	linux-arm-kernel@lists.infradead.org (moderated for non-subscribers)
++S:	Supported
++F:	Documentation/devicetree/bindings/*/amd,pensando*
++F:	Documentation/devicetree/bindings/soc/amd/amd,pensando*
++F:	arch/arm64/boot/dts/amd/elba*
++F:	drivers/soc/amd/
 +
- patternProperties:
-   "^.*@[0-9a-f]+$":
-     type: object
+ ARM/Amlogic Meson SoC CLOCK FRAMEWORK
+ M:	Neil Armstrong <neil.armstrong@linaro.org>
+ M:	Jerome Brunet <jbrunet@baylibre.com>
 -- 
 2.17.1
 
