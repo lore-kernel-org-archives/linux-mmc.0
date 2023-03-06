@@ -2,151 +2,152 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B9DBAC6FA99
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 14:05:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36C35C6FA99
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 15:38:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229813AbjCFOFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Mar 2023 09:05:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33704 "EHLO
+        id S231420AbjCFPia (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Mar 2023 10:38:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33542 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229663AbjCFOFv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 09:05:51 -0500
-Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9475630EA4;
-        Mon,  6 Mar 2023 06:05:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
-  t=1678111529; x=1709647529;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=j460tnFBqbOnjRtbkvJml91BluSKepD3j5MyrI06lZY=;
-  b=wlp8q+PTjHcJvXg8e3OY7V78B4xtupl3eJ55XsXMIdpSvEeNUekLFW69
-   CM+HH+5+fV7TiRnPwP7uHNiQDHqVhIbFBjET1DonQk91jqjLizg3MHEQZ
-   w7wuhMa5W10nifPjHarHte5d6zjaOon+MXapAiwbf4Rlu3d5aHTt7EpGV
-   iQPfheJn2D7ETGGd3LHK5RJykcbiO3MaTUbS5smE8kO2B6CXG3XpMlmGJ
-   laqvQNNDINHu/og1WA4x6UkxPaKRbkk96e6eWnR8hBsGAYmrg1hm9SrWW
-   WcWlr3aBYJAu9u+i3vqN8Yh9n3fGwqvaj5XxDpr5ujWZJkubmAigGv1ls
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.98,238,1673938800"; 
-   d="asc'?scan'208";a="200138216"
-Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
-  by esa4.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 06 Mar 2023 07:05:29 -0700
-Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
- chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.16; Mon, 6 Mar 2023 07:05:27 -0700
-Received: from wendy (10.10.115.15) by chn-vm-ex03.mchp-main.com
- (10.10.85.151) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.16 via Frontend
- Transport; Mon, 6 Mar 2023 07:05:25 -0700
-Date:   Mon, 6 Mar 2023 14:04:57 +0000
-From:   Conor Dooley <conor.dooley@microchip.com>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-CC:     William Qiu <william.qiu@starfivetech.com>,
-        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        <linux-kernel@vger.kernel.org>
-Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
-Message-ID: <ZAXzCfs7wkxaUWN7@wendy>
-References: <20230215113249.47727-1-william.qiu@starfivetech.com>
- <20230215113249.47727-5-william.qiu@starfivetech.com>
- <41bcc545-6eda-6c30-c600-d97ef009abf2@linaro.org>
- <Y+4Fbrz8EYIGyjVj@wendy>
- <8388695b-98f9-223b-1e15-86aaefec2d6f@linaro.org>
+        with ESMTP id S230110AbjCFPiI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 10:38:08 -0500
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79273CA35;
+        Mon,  6 Mar 2023 07:37:29 -0800 (PST)
+Received: by mail-lf1-x12f.google.com with SMTP id f18so13313152lfa.3;
+        Mon, 06 Mar 2023 07:37:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112; t=1678116992;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=L+6yc/IA9VHnC8pRgu9mfVgrlBPbE5fizj7nSsV8E5g=;
+        b=c25DXBkA1fKBCQDejUspbB/QBrzWnK1DDLCQSlbyFSZy5E2XrYtc9eD+FIkRoTaTbX
+         02Jmw6W7I+HHbBi6rbCJk89Zq6gPkhp2HM6YpW14m9KDSlzSkQW8zI7HbWRVPRs6ewRL
+         L8e/a+rk4QE1amPPk2Cf/afm9cwqZF7K55P68TqgkJqWEdXTP33RVmeyGM5goHped1Fd
+         NeySw4RZm2auNypOy/vihLdE2T6qD+VjYnywyTgjzenkI7RgO8kz8nnYXLK+ngDnQDMd
+         s2DVcf3oaXWsXtLgCMJcUpPTH0+aPgGUVk4EYQAnEIt8Ey5rmSixz1/801CgFtDDk+pW
+         oSeA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678116992;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=L+6yc/IA9VHnC8pRgu9mfVgrlBPbE5fizj7nSsV8E5g=;
+        b=T8UUVkhnxStuxN2wO3TaOfu2TNiyJ3nEOtpqAjfiZtncZJVX7beNurH1udfieOcnmM
+         +heb7LVOmL2zcoMc23laLlWk+7LaUVsYNYsM15RrClIu01s7M5J2k/zVhVriKQToXu3/
+         TfZlRFn0c2DfRuTTarrxyYW9lAi9zWMzIna3GpyTQiUKGouY7QCFu7Ca9SwG2wI5E3wd
+         GLoaNXaTuWxiirxohcayR19rDchKWIG2ayD7teba4U6W2gWUTgyCppU5U3jVyPbQWB1v
+         ELHGrmY8CiAQ1YIBvK4hIg1vGZoqI8gtOfgR4kuzaNn7wNNeyxD4nc1YOQxqoBD58DNc
+         o7lg==
+X-Gm-Message-State: AO0yUKVUlJWq1b5k9jFZ7uBFGFRFSCbPz0nBBt28zZBOkyqrePn13EPk
+        PZq2Qna/Sa5oJy6UzlFulOA=
+X-Google-Smtp-Source: AK7set/P9MuC7QjNHQu2OSksykfEn4TKWHwShmUSZNDa4bY/+Z6gtUpVsIzDKKxIDfMMUA8V15HsWQ==
+X-Received: by 2002:ac2:558d:0:b0:4db:3882:8f42 with SMTP id v13-20020ac2558d000000b004db38828f42mr3451671lfg.45.1678116992425;
+        Mon, 06 Mar 2023 07:36:32 -0800 (PST)
+Received: from mobilestation ([95.79.133.202])
+        by smtp.gmail.com with ESMTPSA id 21-20020ac24835000000b004db1d3bf9b4sm1675178lft.26.2023.03.06.07.36.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 06 Mar 2023 07:36:31 -0800 (PST)
+Date:   Mon, 6 Mar 2023 18:36:28 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <blarson@amd.com>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, skhan@linuxfoundation.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
+        vaishnav.a@ti.com, will@kernel.org, devicetree@vger.kernel.org
+Subject: Re: [PATCH v10 04/15] dt-bindings: spi: dw: Add AMD Pensando Elba
+ SoC SPI Controller
+Message-ID: <20230306153628.kg7kzm52ft2j57fa@mobilestation>
+References: <20230306040739.51488-1-blarson@amd.com>
+ <20230306040739.51488-5-blarson@amd.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="wJtNSCpBxG2n/Eo9"
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <8388695b-98f9-223b-1e15-86aaefec2d6f@linaro.org>
+In-Reply-To: <20230306040739.51488-5-blarson@amd.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---wJtNSCpBxG2n/Eo9
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Sun, Mar 05, 2023 at 08:07:28PM -0800, Brad Larson wrote:
+> The AMD Pensando Elba SoC has integrated the DW APB SPI Controller
+> 
+> Signed-off-by: Brad Larson <blarson@amd.com>
 
-Hey William,
+Looks good. Thanks!
+Reviewed-by: Serge Semin <fancer.lancer@gmail.com>
 
-On Thu, Feb 16, 2023 at 11:31:45AM +0100, Krzysztof Kozlowski wrote:
-> On 16/02/2023 11:29, Conor Dooley wrote:
-> > On Thu, Feb 16, 2023 at 11:23:00AM +0100, Krzysztof Kozlowski wrote:
-> >> On 15/02/2023 12:32, William Qiu wrote:
-> >>> Add documentation to describe StarFive System Controller Registers.
-> >>>
-> >>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
-> >>> ---
-> >>
-> >> Thank you for your patch. There is something to discuss/improve.
+-Serge(y)
 
-Could you please submit a v5 of this, with the bits below fixed,
-whenever Hal sends their next version of the base dts series?
-There's no maintainers coverage for a soc/starfive subdirectory of
-dt-bindings yet, so please CC conor@kernel.org &
-linux-riscv@lists.infradead.com on the patch.
-
-Thanks,
-Conor.
-
-> >>
-> >>> +properties:
-> >>> +  compatible:
-> >>> +    items:
-> >>> +      - enum:
-> >>> +          - starfive,jh7110-stg-syscon
-> >>> +          - starfive,jh7110-sys-syscon
-> >>> +          - starfive,jh7110-aon-syscon
-> >>
-> >> Maybe keep them ordered alphabetically?
-> >>
-> >>> +      - const: syscon
-> >>> +
-> >>> +  reg:
-> >>> +    maxItems: 1
-> >>> +
-> >>> +required:
-> >>> +  - compatible
-> >>> +  - reg
-> >>> +
-> >>> +additionalProperties: false
-> >>> +
-> >>> +examples:
-> >>> +  - |
-> >>> +    syscon@10240000 {
-> >>> +        compatible =3D "starfive,jh7110-stg-syscon", "syscon";
-> >>> +        reg =3D <0x10240000 0x1000>;
-> >>> +    };
-> >>
-> >> Keep only one example. All others are the same.
-> >=20
-> > With these fixed:
-> > Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
-> >=20
-> > @Krzysztof, I assume the location of the binding is okay with you since
-> > you didn't object to it & I suppose this one is up to me to apply if so.
->=20
-> Yeah, generic sysreg devices go to soc. If their primary functions were
-> different (e.g. clock controller which also is syscon), then they should
-> go to respective directories, but it's not the case here, I think.
->=20
-> Best regards,
-> Krzysztof
->=20
->=20
-
---wJtNSCpBxG2n/Eo9
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZAXzCQAKCRB4tDGHoIJi
-0vj0APsEG0BpMkkdDazmeJqsM4kXPSsQBhKaSl/nXRDAbqD8GwD+O0NncG358/h5
-GJTAkWmJAdokfjZhfNFmBhbBeRylkgU=
-=Y/Ml
------END PGP SIGNATURE-----
-
---wJtNSCpBxG2n/Eo9--
+> ---
+> 
+> v10 changes:
+> - Move definition of amd,pensando-elba-syscon into properties
+>   with a better description
+> - Add amd,pensando-elba-syscon: false for non elba designs
+> 
+> v9 changes:
+> - Define property amd,pensando-elba-syscon
+> - Move compatible amd,pensando-elba-spi ahead of baikal,bt1-ssi
+> 
+> ---
+>  .../bindings/spi/snps,dw-apb-ssi.yaml         | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> index a132b5fc56e0..2383d6497b1e 100644
+> --- a/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> +++ b/Documentation/devicetree/bindings/spi/snps,dw-apb-ssi.yaml
+> @@ -37,6 +37,17 @@ allOf:
+>      else:
+>        required:
+>          - interrupts
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: amd,pensando-elba-spi
+> +    then:
+> +      required:
+> +        - amd,pensando-elba-syscon
+> +    else:
+> +      properties:
+> +        amd,pensando-elba-syscon: false
+>  
+>  properties:
+>    compatible:
+> @@ -63,6 +74,8 @@ properties:
+>          const: intel,keembay-ssi
+>        - description: Intel Thunder Bay SPI Controller
+>          const: intel,thunderbay-ssi
+> +      - description: AMD Pensando Elba SoC SPI Controller
+> +        const: amd,pensando-elba-spi
+>        - description: Baikal-T1 SPI Controller
+>          const: baikal,bt1-ssi
+>        - description: Baikal-T1 System Boot SPI Controller
+> @@ -136,6 +149,12 @@ properties:
+>        of the designware controller, and the upper limit is also subject to
+>        controller configuration.
+>  
+> +  amd,pensando-elba-syscon:
+> +    $ref: /schemas/types.yaml#/definitions/phandle-array
+> +    description: |
+> +      Block address to control SPI chip-selects.  The Elba SoC
+> +      does not use ssi.
+> +
+>  patternProperties:
+>    "^.*@[0-9a-f]+$":
+>      type: object
+> -- 
+> 2.17.1
+> 
