@@ -2,114 +2,151 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 302CDC6FD19
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 10:42:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9DBAC6FA99
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 14:05:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229668AbjCFKmB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Mar 2023 05:42:01 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50368 "EHLO
+        id S229813AbjCFOFw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Mar 2023 09:05:52 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229555AbjCFKmA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 05:42:00 -0500
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85ED522031;
-        Mon,  6 Mar 2023 02:41:59 -0800 (PST)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 10F4F200385;
-        Mon,  6 Mar 2023 11:41:38 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678099318;
-        bh=YxoZwXxfPHJkwtwOK3O1ZHXxIHHrXn5BcsTKXsclbcU=;
-        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-        b=DGhEdtcemsd0XaJppOdYWQ2p8ksVJ1PKKr2tcQ3SLgLDiRQWgFNTty4NglLJwINog
-         iuPCHcAoR4fqdyJ0D95Myb3yTSYvl23NMdqTpJKdYb7hASWmmIGc8XfKk/y9zqNawn
-         xFP/NXN1rIwKb4lpGOe0HWVWAO3DXe+dyob6G11jZf7Cv1kfb/VbRak8NauAMiAvW+
-         JnMtN+gDZzf0UzdsuhWQU8mvgu92sGA3gp4xTbEbWunurEYGnT3Mfg0PAAo15RveCN
-         nddY+NwmjWU6QOMwiRty4nv0kn91lKCHGUM8HsZ349nvLY3A5kFQ5G0f04z+h/U5OQ
-         UrAUsA2NiMT2w==
-Message-ID: <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
-Date:   Mon, 6 Mar 2023 11:41:37 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-Content-Language: en-US
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-To:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
+        with ESMTP id S229663AbjCFOFv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 09:05:51 -0500
+Received: from esa.microchip.iphmx.com (esa.microchip.iphmx.com [68.232.154.123])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9475630EA4;
+        Mon,  6 Mar 2023 06:05:29 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=microchip.com; i=@microchip.com; q=dns/txt; s=mchp;
+  t=1678111529; x=1709647529;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=j460tnFBqbOnjRtbkvJml91BluSKepD3j5MyrI06lZY=;
+  b=wlp8q+PTjHcJvXg8e3OY7V78B4xtupl3eJ55XsXMIdpSvEeNUekLFW69
+   CM+HH+5+fV7TiRnPwP7uHNiQDHqVhIbFBjET1DonQk91jqjLizg3MHEQZ
+   w7wuhMa5W10nifPjHarHte5d6zjaOon+MXapAiwbf4Rlu3d5aHTt7EpGV
+   iQPfheJn2D7ETGGd3LHK5RJykcbiO3MaTUbS5smE8kO2B6CXG3XpMlmGJ
+   laqvQNNDINHu/og1WA4x6UkxPaKRbkk96e6eWnR8hBsGAYmrg1hm9SrWW
+   WcWlr3aBYJAu9u+i3vqN8Yh9n3fGwqvaj5XxDpr5ujWZJkubmAigGv1ls
+   Q==;
+X-IronPort-AV: E=Sophos;i="5.98,238,1673938800"; 
+   d="asc'?scan'208";a="200138216"
+Received: from unknown (HELO email.microchip.com) ([170.129.1.10])
+  by esa4.microchip.iphmx.com with ESMTP/TLS/AES256-SHA256; 06 Mar 2023 07:05:29 -0700
+Received: from chn-vm-ex03.mchp-main.com (10.10.85.151) by
+ chn-vm-ex04.mchp-main.com (10.10.85.152) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.16; Mon, 6 Mar 2023 07:05:27 -0700
+Received: from wendy (10.10.115.15) by chn-vm-ex03.mchp-main.com
+ (10.10.85.151) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.16 via Frontend
+ Transport; Mon, 6 Mar 2023 07:05:25 -0700
+Date:   Mon, 6 Mar 2023 14:04:57 +0000
+From:   Conor Dooley <conor.dooley@microchip.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+CC:     William Qiu <william.qiu@starfivetech.com>,
+        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>
-Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
-In-Reply-To: <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        <linux-kernel@vger.kernel.org>
+Subject: Re: [PATCH v4 4/4] dt-bindings: syscon: Add StarFive syscon doc
+Message-ID: <ZAXzCfs7wkxaUWN7@wendy>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-5-william.qiu@starfivetech.com>
+ <41bcc545-6eda-6c30-c600-d97ef009abf2@linaro.org>
+ <Y+4Fbrz8EYIGyjVj@wendy>
+ <8388695b-98f9-223b-1e15-86aaefec2d6f@linaro.org>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="wJtNSCpBxG2n/Eo9"
+Content-Disposition: inline
+In-Reply-To: <8388695b-98f9-223b-1e15-86aaefec2d6f@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/03/2023 11:24, Marc Gonzalez wrote:
+--wJtNSCpBxG2n/Eo9
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> OF_NAME=wifi
-> OF_FULLNAME=/soc/sd@ffe03000/wifi@1
-> OF_COMPATIBLE_0=brcm,bcm4329-fmac
-> OF_COMPATIBLE_N=1
-> SDIO_CLASS=00
-> SDIO_ID=02D0:AAE7
-> SDIO_REVISION=0.0
-> MODALIAS=sdio:c00v02D0dAAE7
-> 
-> 0xaae7 = 43751
-> 
-> Isn't there some overlap between:
-> include/linux/mmc/sdio_ids.h and
-> drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h ?
-> 
-> Reference used: commit d2587c57ffd8dc
-> "brcmfmac: add 43752 SDIO ids and initialization"
-> 
-> Looking at all the occurrences of 43752 to insert a 43751,
-> could someone comment whether this looks reasonable?
+Hey William,
 
-Obviously, the commit message would have to be rewritten
-for a real patch.
+On Thu, Feb 16, 2023 at 11:31:45AM +0100, Krzysztof Kozlowski wrote:
+> On 16/02/2023 11:29, Conor Dooley wrote:
+> > On Thu, Feb 16, 2023 at 11:23:00AM +0100, Krzysztof Kozlowski wrote:
+> >> On 15/02/2023 12:32, William Qiu wrote:
+> >>> Add documentation to describe StarFive System Controller Registers.
+> >>>
+> >>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+> >>> ---
+> >>
+> >> Thank you for your patch. There is something to discuss/improve.
 
-> ---
->  drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c     | 1 +
->  drivers/net/wireless/broadcom/brcm80211/brcmfmac/chip.c       | 2 ++
->  drivers/net/wireless/broadcom/brcm80211/brcmfmac/sdio.c       | 4 ++++
->  drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h | 1 +
->  include/linux/mmc/sdio_ids.h                                  | 1 +
->  5 files changed, 9 insertions(+)
+Could you please submit a v5 of this, with the bits below fixed,
+whenever Hal sends their next version of the base dts series?
+There's no maintainers coverage for a soc/starfive subdirectory of
+dt-bindings yet, so please CC conor@kernel.org &
+linux-riscv@lists.infradead.com on the patch.
 
-This code (vendor upstream?) is probably relevant:
-https://github.com/StreamUnlimited/broadcom-bcmdhd-4359/blob/master/include/bcmdevs.h
+Thanks,
+Conor.
 
-#define BCM4362_CHIP_ID		0x4362          /* 4362 chipcommon chipid */
-#define BCM43751_CHIP_ID	0xAAE7          /* 43751 chipcommon chipid */
-#define BCM43752_CHIP_ID	0xAAE8          /* 43752 chipcommon chipid */
+> >>
+> >>> +properties:
+> >>> +  compatible:
+> >>> +    items:
+> >>> +      - enum:
+> >>> +          - starfive,jh7110-stg-syscon
+> >>> +          - starfive,jh7110-sys-syscon
+> >>> +          - starfive,jh7110-aon-syscon
+> >>
+> >> Maybe keep them ordered alphabetically?
+> >>
+> >>> +      - const: syscon
+> >>> +
+> >>> +  reg:
+> >>> +    maxItems: 1
+> >>> +
+> >>> +required:
+> >>> +  - compatible
+> >>> +  - reg
+> >>> +
+> >>> +additionalProperties: false
+> >>> +
+> >>> +examples:
+> >>> +  - |
+> >>> +    syscon@10240000 {
+> >>> +        compatible =3D "starfive,jh7110-stg-syscon", "syscon";
+> >>> +        reg =3D <0x10240000 0x1000>;
+> >>> +    };
+> >>
+> >> Keep only one example. All others are the same.
+> >=20
+> > With these fixed:
+> > Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
+> >=20
+> > @Krzysztof, I assume the location of the binding is okay with you since
+> > you didn't object to it & I suppose this one is up to me to apply if so.
+>=20
+> Yeah, generic sysreg devices go to soc. If their primary functions were
+> different (e.g. clock controller which also is syscon), then they should
+> go to respective directories, but it's not the case here, I think.
+>=20
+> Best regards,
+> Krzysztof
+>=20
+>=20
 
+--wJtNSCpBxG2n/Eo9
+Content-Type: application/pgp-signature; name="signature.asc"
 
-#define BCM4362_CHIP(chipid)	((CHIPID(chipid) == BCM4362_CHIP_ID) || \
-				(CHIPID(chipid) == BCM43751_CHIP_ID) || \
-				(CHIPID(chipid) == BCM43752_CHIP_ID))
+-----BEGIN PGP SIGNATURE-----
 
-#define BCM4362_CHIP_GRPID	BCM4362_CHIP_ID: \
-				case BCM43751_CHIP_ID: \
-				case BCM43752_CHIP_ID
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZAXzCQAKCRB4tDGHoIJi
+0vj0APsEG0BpMkkdDazmeJqsM4kXPSsQBhKaSl/nXRDAbqD8GwD+O0NncG358/h5
+GJTAkWmJAdokfjZhfNFmBhbBeRylkgU=
+=Y/Ml
+-----END PGP SIGNATURE-----
 
-
+--wJtNSCpBxG2n/Eo9--
