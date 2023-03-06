@@ -2,131 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 980A6C6FD1A
-	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 08:36:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83435C6FD1A
+	for <linux-mmc@archiver.kernel.org>; Mon,  6 Mar 2023 09:17:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229878AbjCFIgw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 6 Mar 2023 03:36:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38288 "EHLO
+        id S229536AbjCFJRa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 6 Mar 2023 04:17:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54050 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229803AbjCFIgv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 03:36:51 -0500
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03D63559C
-        for <linux-mmc@vger.kernel.org>; Mon,  6 Mar 2023 00:36:49 -0800 (PST)
-Received: by mail-ed1-x52b.google.com with SMTP id s11so35119932edy.8
-        for <linux-mmc@vger.kernel.org>; Mon, 06 Mar 2023 00:36:48 -0800 (PST)
+        with ESMTP id S229876AbjCFJR3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 6 Mar 2023 04:17:29 -0500
+Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03750211C7
+        for <linux-mmc@vger.kernel.org>; Mon,  6 Mar 2023 01:17:25 -0800 (PST)
+Received: by mail-wr1-x42d.google.com with SMTP id t15so8015960wrz.7
+        for <linux-mmc@vger.kernel.org>; Mon, 06 Mar 2023 01:17:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678091807;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=63HRbRwWzcpKqYalyNzeBO90DICoMp8EPtmeHo1nNuY=;
-        b=WaZQilGe/8pjkfbsolKohbGGZCHAzFW0NDLxH38iZC5KLYtopd/AVagWOHWt7xvWkH
-         An6mMmVAiZGPhMXiPLnYk1YH0QZ/yTgrvIG6Ypdq8fWv72JpQAuOeFv/4sbiS1No6a3I
-         TeD/WKXRbuXW9ISZ6SUuZImwGTZ5yh28uyt6CJMOH4UfrXr6umejdporFQLBvM1N8IgC
-         P7hoFqCIlbD4eFDnVZNMhR1edBH4jBoxKph97XQiS62D1LaKmrrpZ/xEYlQPzYDXt2rf
-         mWumSK5kpXF/ZzlN/TAtQiVhwEOCmOyU/blz9N6i+EAxCwB5CjPqbfg2MGda5pVlfJN+
-         Jmyw==
+        d=linaro.org; s=google; t=1678094243;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=fpTAGmKjYnXHgPn/6xv3IbFtnqRgDalc7dH55K8iLHQ=;
+        b=zeWUmLbLKttdjBAG5tsk+a/h8WCkuQQLbmMPuLAo+Xi+V4u1S+vdAMDUthDr8oZnwO
+         gpZ7C2DTQ/aigtkdk2RYFzUGpiKyiIrlZ+9iTFYhrv/WmQowjD+QueqY2yrVP5RJQ8hD
+         hT4MY4D0vsU9Qur7e0NL1TnO5llzwVkOrl/JcnNeo2fu5wMbpM6RI+t80MiaEaIlxo6z
+         JWRx2jF6lndIL4Uxh6UOXXp3E5dC2H7QjNLNsVWIX3dzI6myiLfFQPi+s0ffsk04Z2VS
+         TLy2yFSDr9Dws1jlbOTPpOOozNANM/OFTw+KkW9cp63WsR6OPtLEZwY7YT+zGyve4ji9
+         kr8w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678091807;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=63HRbRwWzcpKqYalyNzeBO90DICoMp8EPtmeHo1nNuY=;
-        b=Q6G6/xBO8M1hXyEviDXUowBGiCNFHvyWHXj6KcbWnpdUc4R3Cn3rzVb1CgUYdQ2m3V
-         eVtXnRcyWZwL+NDK/4FOJ9QxYwWIQvCluFLk/JTZV8UG6BU7St3hvEXC0Ioj2yaj+8fl
-         tDQcjv0Am7DIBITkcMZtmqaLDcmjZAgLKR0i09i8PuBZWaNq5H3mhHgby6Y9aa2kbo7w
-         IA+4QznXGv9wB4e4xigihLMlseuaDyGZuJcH85WYFfi506VGp8WHH6gHrfszEHT7zThW
-         cnCFq5CEqsWflytLPl9fJTtM5iwQA6fNMoAioegMKrjyz2MqT5BpxvqqAAczhKO8ys2N
-         70ug==
-X-Gm-Message-State: AO0yUKWdNhrJP+cCChclBEz4rYavawVOqQfCo1GEy6bbS8oSU+JaGI0L
-        J694n+SVfdI0QUfX22IYYW9Ogw==
-X-Google-Smtp-Source: AK7set+Q7Wa9E1bhKgOjdiBS3UQloHFzRMv4/c3qDMvX199R0Hd+uHkJr0idtxLPWDEFJq8rz0mywg==
-X-Received: by 2002:a05:6402:31fb:b0:4ac:c3c0:24d7 with SMTP id dy27-20020a05640231fb00b004acc3c024d7mr10352500edb.42.1678091807520;
-        Mon, 06 Mar 2023 00:36:47 -0800 (PST)
-Received: from ?IPV6:2a02:810d:15c0:828:d85d:5a4b:9830:fcfe? ([2a02:810d:15c0:828:d85d:5a4b:9830:fcfe])
-        by smtp.gmail.com with ESMTPSA id p24-20020a50cd98000000b004af6163f845sm4707551edi.28.2023.03.06.00.36.45
+        d=1e100.net; s=20210112; t=1678094243;
+        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
+         :content-language:subject:reply-to:from:user-agent:mime-version:date
+         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=fpTAGmKjYnXHgPn/6xv3IbFtnqRgDalc7dH55K8iLHQ=;
+        b=RghuDTqwtLCWofk3mR4ZWDkOUCEDwoArn/oUn6Qq5Xv2kw+dY7L2JxODPtqLr2bvd8
+         RK40REA8uGGcAZg5At9P7dq+9kbIviN4mYLcfV0rTzoWDRyglBjin37TIpwdgr47obAd
+         nO7yd4nQlbI1qk+MwsiwavLVd0OCaN9R3k0wlxdvVgbQa0WPn9VVzz6tx6/ohJX4+tWp
+         38Nwz+FAw9Cumv7XA3tohQ5Vd0DWErRODAQdBaIPampakHesD/Vq5NHgrzTyfQsMjcDI
+         hn0AI6iUf3e8BCSR5PmZ2lkVbCveQPfV6zbe/2QcWtuF8XXr/Q47UVCUxNigyVpgsE/K
+         Nk9A==
+X-Gm-Message-State: AO0yUKXdkuxOtyhNnl+5nvMs+Ef20bpH33vlwaUVt/y1DRDlArnfQJ2V
+        cFAXfdRLHV7fma1Znmui/UUTlA==
+X-Google-Smtp-Source: AK7set9uoqNTzYvFyRGiT60AnI53z1pW5Hm7qll3aqsyCgi3MeRz1fHkDbXj/iDBVU5klVUCbV4RIA==
+X-Received: by 2002:a5d:4404:0:b0:2c7:107c:e172 with SMTP id z4-20020a5d4404000000b002c7107ce172mr5642251wrq.41.1678094243500;
+        Mon, 06 Mar 2023 01:17:23 -0800 (PST)
+Received: from [192.168.7.111] (679773502.box.freepro.com. [212.114.21.58])
+        by smtp.gmail.com with ESMTPSA id q9-20020a5d61c9000000b002c54911f50bsm9294134wrv.84.2023.03.06.01.17.22
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 06 Mar 2023 00:36:47 -0800 (PST)
-Message-ID: <e82ca6f6-0870-f9b0-172f-bc6d54a9749b@linaro.org>
-Date:   Mon, 6 Mar 2023 09:36:45 +0100
+        Mon, 06 Mar 2023 01:17:23 -0800 (PST)
+Message-ID: <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+Date:   Mon, 6 Mar 2023 10:17:22 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v10 05/15] dt-bindings: soc: amd: amd,pensando-elbasr: Add
- AMD Pensando SoC System Controller
+ Thunderbird/102.7.2
+From:   Neil Armstrong <neil.armstrong@linaro.org>
+Reply-To: neil.armstrong@linaro.org
+Subject: Re: Unsupported WiFi adapter on S905X2 board
 Content-Language: en-US
-To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
-        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
-        devicetree@vger.kernel.org
-References: <20230306040739.51488-1-blarson@amd.com>
- <20230306040739.51488-6-blarson@amd.com>
- <52fb81e2-0d9b-600d-42af-1405fdd6509b@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <52fb81e2-0d9b-600d-42af-1405fdd6509b@linaro.org>
-Content-Type: text/plain; charset=UTF-8
+To:     Marc Gonzalez <marc.w.gonzalez@free.fr>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Wright Feng <wright.feng@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Chi-Hsien Lin <chi-hsien.lin@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>
+Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+Organization: Linaro Developer Services
+In-Reply-To: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 06/03/2023 09:35, Krzysztof Kozlowski wrote:
-> On 06/03/2023 05:07, Brad Larson wrote:
->> Support the AMD Pensando SoC Controller which is a SPI connected device
->> providing a miscellaneous set of essential board control/status registers.
->> This device is present in all Pensando SoC based designs.
->>
->> Signed-off-by: Brad Larson <blarson@amd.com>
->> ---
->>
->> v10 changes:
->> - Property renamed to amd,pensando-ctrl
->> - Driver is renamed and moved to soc/drivers/amd affecting binding
->> - Delete cs property, driver handles device node creation from parent num-cs
->>   fixing schema reg error in a different way
->>
->> v9 changes:
->> - Instead of four nodes, one per chip-select, a single
->>   node is used with reset-cells in the parent.
->> - No MFD API is used anymore in the driver so it made
->>   sense to move this to drivers/spi.
->> - This driver is common for all Pensando SoC based designs
->>   so changed the name to pensando-sr.c to not make it Elba
->>   SoC specific.
->> - Added property cs for the chip-select number which is used
->>   by the driver to create /dev/pensr0.<cs>
->>
->> ---
->>  .../bindings/soc/amd/amd,pensando-ctrl.yaml   | 60 +++++++++++++++++++
->>  1 file changed, 60 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
->>
->> diff --git a/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml b/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
->> new file mode 100644
->> index 000000000000..36694077b2e6
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
+Hi Mark,
+
+On 03/03/2023 19:19, Marc Gonzalez wrote:
+> Hello,
 > 
-> Your subject suggests this is pensando-elbasr but you write everywhere
-> pensando-ctrl. Confusing. Pick one.
+> I think there's an unsupported device in this system:
+> 
+> # cat /sys/bus/sdio/devices/mmc2:0001:1/uevent
+> OF_NAME=wifi
+> OF_FULLNAME=/soc/sd@ffe03000/wifi@1
+> OF_COMPATIBLE_0=brcm,bcm4329-fmac
+> OF_COMPATIBLE_N=1
+> SDIO_CLASS=00
+> SDIO_ID=02D0:AAE7
+> SDIO_REVISION=0.0
+> MODALIAS=sdio:c00v02D0dAAE7
+> 
+> 0xaae7 = 43751
+> 
+> Isn't there some overlap between
+> include/linux/mmc/sdio_ids.h
+> and
+> drivers/net/wireless/broadcom/brcm80211/include/brcm_hw_ids.h
+> ?
+> 
+> (Relevant commit: d2587c57ffd8dc)
+> 
+> Looking at all the occurrences of 43752 to insert a 43751,
+> could someone comment whether this looks reasonable?
+> 
 
-Actually pensando-ctrl is for sure not correct, because it misses the
-name of the SoC (you call it everywhere "elba").
+<snip>
 
-Best regards,
-Krzysztof
+
+I think you should send this as a patch as RFC to trigger a review.
+
+Neil
 
