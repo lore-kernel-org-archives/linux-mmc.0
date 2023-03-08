@@ -2,54 +2,97 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E559C6FA99
-	for <linux-mmc@archiver.kernel.org>; Tue,  7 Mar 2023 23:37:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D6C0C64EC4
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 05:59:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230218AbjCGXhx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 7 Mar 2023 18:37:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50884 "EHLO
+        id S229809AbjCHF7r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Mar 2023 00:59:47 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45822 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230266AbjCGXhf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 7 Mar 2023 18:37:35 -0500
-Received: from gloria.sntech.de (gloria.sntech.de [185.11.138.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46026A92D6;
-        Tue,  7 Mar 2023 15:37:17 -0800 (PST)
-Received: from ip5b412258.dynamic.kabel-deutschland.de ([91.65.34.88] helo=phil.lan)
-        by gloria.sntech.de with esmtpsa  (TLS1.3) tls TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
-        (Exim 4.94.2)
-        (envelope-from <heiko@sntech.de>)
-        id 1pZgqP-00025h-E6; Wed, 08 Mar 2023 00:35:45 +0100
-From:   Heiko Stuebner <heiko@sntech.de>
-To:     Lucas Tanure <lucas.tanure@collabora.com>
-Cc:     Heiko Stuebner <heiko@sntech.de>, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, shawn.lin@rock-chips.com,
-        linux-rockchip@lists.infradead.org, robh+dt@kernel.org,
-        ulf.hansson@linaro.org, linux-kernel@vger.kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, kernel@collabora.com,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v2] arm64: dts: rockchip: rk3588: Add sdmmc node
-Date:   Wed,  8 Mar 2023 00:35:35 +0100
-Message-Id: <167823207786.205469.9201588450242165959.b4-ty@sntech.de>
-X-Mailer: git-send-email 2.39.0
-In-Reply-To: <20230228103610.25108-1-lucas.tanure@collabora.com>
-References: <20230213152740.359055-2-lucas.tanure@collabora.com> <20230228103610.25108-1-lucas.tanure@collabora.com>
+        with ESMTP id S229716AbjCHF7q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 00:59:46 -0500
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 138ECA226F;
+        Tue,  7 Mar 2023 21:59:42 -0800 (PST)
+Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id D3ED724E2F7;
+        Wed,  8 Mar 2023 13:59:29 +0800 (CST)
+Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX165.cuchost.com
+ (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 8 Mar
+ 2023 13:59:29 +0800
+Received: from [192.168.120.57] (171.223.208.138) by EXMBX068.cuchost.com
+ (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 8 Mar
+ 2023 13:59:28 +0800
+Message-ID: <20e56116-ab76-fa8c-b321-d32c8b24a6be@starfivetech.com>
+Date:   Wed, 8 Mar 2023 13:59:28 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v5 1/2] dt-bindings: syscon: Add StarFive syscon doc
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Conor Dooley <conor.dooley@microchip.com>,
+        <linux-riscv@lists.infradead.org>
+References: <20230307024646.10216-1-william.qiu@starfivetech.com>
+ <20230307024646.10216-2-william.qiu@starfivetech.com>
+ <39ba7357-541b-a70e-5793-91bb9e038938@linaro.org>
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <39ba7357-541b-a70e-5793-91bb9e038938@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
+ (172.16.6.68)
+X-YovoleRuleAgent: yovoleflag
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 28 Feb 2023 10:36:10 +0000, Lucas Tanure wrote:
-> Add SD Card node for RK3588s and RK3588.
+
+
+On 2023/3/7 17:00, Krzysztof Kozlowski wrote:
+> On 07/03/2023 03:46, William Qiu wrote:
+>> Add documentation to describe StarFive System Controller Registers.
+> 
+> Use subject prefixes matching the subsystem (which you can get for
+> example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
+> your patch is touching). This is not "syscon" subsystem, but rather
+> starfive.
+> 
+Will update.
+>> 
+>> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
+>> Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
+>> ---
+>>  .../bindings/soc/starfive/jh7110-syscon.yaml  | 41 +++++++++++++++++++
+>>  MAINTAINERS                                   |  5 +++
+>>  2 files changed, 46 insertions(+)
+>>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+>> 
+>> diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+>> new file mode 100644
+>> index 000000000000..72c8850602b5
+>> --- /dev/null
+>> +++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
+> 
+> Filename: starfive,jh7110-syscon.yaml
+> 
+
+Will update.
+Thanks for taking times to review this patch series.
+
+Best regards
+William
 > 
 > 
-
-Applied, thanks!
-
-[1/1] arm64: dts: rockchip: rk3588: Add sdmmc node
-      commit: dbe406d1397ffccd4a0f85daef456291f265505a
-
-Best regards,
--- 
-Heiko Stuebner <heiko@sntech.de>
+> Best regards,
+> Krzysztof
+> 
