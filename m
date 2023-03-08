@@ -2,157 +2,90 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E5AFDC64EC4
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 17:38:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2494DC742A7
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 20:01:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229522AbjCHRh7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Mar 2023 12:37:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35082 "EHLO
+        id S230102AbjCHUBu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Mar 2023 15:01:50 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229536AbjCHRh6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 12:37:58 -0500
-Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09C45C0816
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Mar 2023 09:37:52 -0800 (PST)
-Received: by mail-wm1-x32b.google.com with SMTP id m25-20020a7bcb99000000b003e7842b75f2so1639560wmi.3
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Mar 2023 09:37:51 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678297070;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=skIGdbpVmMRPb/941SzbmTy9IEdDKFk95x2yttIkbCs=;
-        b=gLbkbJvQ2YNc9skI238CxF3azuVfi6CnqdjFUgi3WHqNMS9PdlHRUBSjDi5jRGijPX
-         W3sjdPenu/8Ezh+s3KGjcUtGdsfm3HEHIQUxP6AO243ZJRQqzq2gewCG4hHaxuHVSXiS
-         evZL9rd+VlnqGPq4a4ASjay2s/HMJ4hLesdCaPySck/ApFuwDuV8WaFya8oXieJKn6PM
-         tYis72tFHro4o2enQZob9si73lwjrnH1P2RXSlup5J5E4xyum5I7chNqmjZQhxIzxDjQ
-         bqT4A7ePLkqMwbeW8ZTjY5rf1XAzWpxGVYVHewwIvnWakegeauGGE8E+WN87ZWJF5bcp
-         o48g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678297070;
-        h=content-transfer-encoding:in-reply-to:organization:references:cc:to
-         :content-language:subject:reply-to:from:user-agent:mime-version:date
-         :message-id:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=skIGdbpVmMRPb/941SzbmTy9IEdDKFk95x2yttIkbCs=;
-        b=VeF7L9Izj3YlhTk0onaz0zejeaZoeGL1FFyf/A3URBk8sAcXOZonHw+qo5/Cqtiod+
-         DtRDSLnyVFZW7gJ+Vhq7D/+5EYoixKGEJ2LOBm57GStW4dWeLhxqIqUekSUUBveH19RC
-         OIXVMfdNx79+odgAMopqtUrZDmzefkn5q8Bu3flBP7o8nscIhS7Cn0ClN5WSMagzFqW0
-         pCp8futU0wiga8qParEjuhTAO1C/e0BbK9SM8SWwU1JnC87clopCs5hqt7hkWqK/cbVe
-         z7nBCQzvTzgA/XG5kjg2bSzAT8cLLyKvxjSDB6NXAwiuAQKipMqfsUarscnIIjZrpU6T
-         lOkA==
-X-Gm-Message-State: AO0yUKX+wOimvGK4vFkooYbU0wVs7XiU8GZThzb+zbzJc1gbSMw1zGs0
-        S6OHBB1XIQFQTQSUxix4Xa/9Cw==
-X-Google-Smtp-Source: AK7set88DVG9CWAtTspajqrUjWpjJ01hMHVoibkhTu1MDm2Om+vXV1B+witcqffqp8E4eiiXeCGQLw==
-X-Received: by 2002:a05:600c:a49:b0:3e2:6ec:61ea with SMTP id c9-20020a05600c0a4900b003e206ec61eamr16323844wmq.28.1678297070469;
-        Wed, 08 Mar 2023 09:37:50 -0800 (PST)
-Received: from ?IPV6:2a01:e0a:982:cbb0:b029:83b9:1fb8:7c34? ([2a01:e0a:982:cbb0:b029:83b9:1fb8:7c34])
-        by smtp.gmail.com with ESMTPSA id m8-20020a05600c3b0800b003eae73ee4a1sm108749wms.17.2023.03.08.09.37.49
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 08 Mar 2023 09:37:50 -0800 (PST)
-Message-ID: <629435a5-fb47-2cb5-78b6-e42c943aa397@linaro.org>
-Date:   Wed, 8 Mar 2023 18:37:48 +0100
+        with ESMTP id S230111AbjCHUBr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 15:01:47 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4725CE967;
+        Wed,  8 Mar 2023 12:01:46 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 51CEEB81DEF;
+        Wed,  8 Mar 2023 20:01:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 64CA9C433EF;
+        Wed,  8 Mar 2023 20:01:43 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1678305704;
+        bh=AkqRrQZvitrDRxlLCdBGZF5qiD811jL2TzZPP/iKUno=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=VQXVlmxqltM5l/JMngR1vQzCicyHmGinHxmGV4RoO46t/Eo/oRmkWeyv0nx+uCLtf
+         lbzThSIo93UB5w8AB27wXclmx9VxSfaW47tiHPeOCP7FkBwIq7lu3auhagWZwqwU8y
+         evM3HFOE2bzJue6V1uL2LQS8vU+pbtC201aEapZ+PpLfFP3UMpKcLP9BZ+mJlin513
+         LB4li9yB+8rSMZN8z5N0AL7fyd2SOzUN4W5tmJGNJMmHwea4jLwkUTc28Ma4F4AKPI
+         DnWurixaLo6mErZGmksqEHgjzrrwAqHUcNmAQHaOf9YKYiLHcsGBuuKqIX1Q2EAgab
+         /W1M6s5x/MNIw==
+Date:   Wed, 8 Mar 2023 12:01:41 -0800
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Abel Vesa <abel.vesa@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: Re: [RFC PATCH v2 4/7] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
+ dedicated driver
+Message-ID: <ZAjppY2K0/XPBHxG@sol.localdomain>
+References: <20230308155838.1094920-1-abel.vesa@linaro.org>
+ <20230308155838.1094920-5-abel.vesa@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.2
-From:   Neil Armstrong <neil.armstrong@linaro.org>
-Reply-To: neil.armstrong@linaro.org
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-Content-Language: en-US
-To:     Franky Lin <franky.lin@broadcom.com>,
-        Marc Gonzalez <marc.w.gonzalez@free.fr>
-Cc:     Arend van Spriel <aspriel@gmail.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>, linux-wireless@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
- <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
- <a215e398-2c49-19d2-0730-5e8c51df1ed9@free.fr>
- <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
- <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
- <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
-Organization: Linaro Developer Services
-In-Reply-To: <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230308155838.1094920-5-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/03/2023 18:21, Franky Lin wrote:
-> On Wed, Mar 8, 2023 at 4:48 AM Marc Gonzalez <marc.w.gonzalez@free.fr> wrote:
->>
->> On 08/03/2023 00:15, Franky Lin wrote:
->>
->>> On Tue, Mar 7, 2023 at 6:40 AM Marc Gonzalez wrote:
->>>
->>>> Through the SDIO bus, the WiFi chip reports 0xaae7 (i.e. 43751)
->>>> hence the /sys/bus/sdio/devices output above.
->>>>
->>>> sdio_read_func_cis() -> sdio_read_cis() which sets
->>>> func->vendor/func->device to 2d0/aae7
->>>>
->>>>
->>>> But when brcmf_chip_recognition() calls ci->ops->read32()
->>>> i.e. brcmf_sdio_buscore_read32()
->>>> [ vs brcmf_sdiod_readl() in brcmf_sdio_probe_attach() ]
->>>>
->>>> [    1.177283] brcmfmac: F1 signature read @0x18000000=0x1042aae8
->>>> [    1.182912] found AXI chip: BCM43752/2
->>>> [    1.186384] BCM43752/2: chip=aae8 rev=2 type=1
->>>>
->>>> Here it reports 0xaae8 (i.e. 43752)
->>>>
->>>> Why the discrepancy?
->>>> Can it cause issues?
->>>> (Sometimes, the whole SDIO bus doesn't probe at boot.
->>>> I am still investigating these intermittent problems.)
->>>>
->>>> Should I use 43751 or 43752 firmware...?
->>>
->>> This question should be answered by the Cypress/Infineon folks but
->>> unfortunately they have been quiet for a long time. In general we use
->>> the id read from 0x18000000 to decide which firmware to load. But be
->>> aware that the rev also matters. There are some examples in
->>> brcmf_sdio_fwnames table that the different firmware name can be
->>> derived from the same chip common id but different rev.
->>>
->>> However sdio device enumeration happens before firmware download so
->>> the intermittent problem you are facing probably is not related to
->>> firmware version.
->>
->> Disclosure: My knowledge of SDIO device enumeration is 0.
->>
->> When the host sends the equivalent of an "identify yourself" message
->> on the SDIO bus, doesn't the reply come from the WiFi device?
->> Why would the device reply 0xaae7 instead of 0xaae8?
->>
->> In other words, who is replying 0xaae7?
-> 
-> The enumeration response is done by the HW sdio core on the chip.  No
-> software involved.
+On Wed, Mar 08, 2023 at 05:58:35PM +0200, Abel Vesa wrote:
+>  * Switched QCOM_INLINE_CRYPTO_ENGINE to tristate and made it built-in
+>    if any of the UFS or the SDHC drivers are built-in. This is to allow
+>    the API to be available even if the built-in driver doesn't have
+>    crypto enabled.
+[...]
+> diff --git a/drivers/soc/qcom/Kconfig b/drivers/soc/qcom/Kconfig
+> index a8f283086a21..c584369e9810 100644
+> --- a/drivers/soc/qcom/Kconfig
+> +++ b/drivers/soc/qcom/Kconfig
+> @@ -275,4 +275,10 @@ config QCOM_ICC_BWMON
+>  	  the fixed bandwidth votes from cpufreq (CPU nodes) thus achieve high
+>  	  memory throughput even with lower CPU frequencies.
+>  
+> +config QCOM_INLINE_CRYPTO_ENGINE
+> +	tristate
+> +	depends on SCSI_UFS_CRYPTO || MMC_CRYPTO
+> +	default y if SCSI_UFS_QCOM=y || MMC_SDHCI_MSM=y
+> +	select QCOM_SCM
 
-Mark,
+What are the "depends on" and "default y" lines above for?
 
-This would be the:
-	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43751, CYW),
-which is returned by the SDIO bus and associated the SDIO device with the brcmf driver.
+You're already selecting this from SCSI_UFS_QCOM and MSM_SDHCI_MSM, as I had
+suggested.  Isn't that enough?
 
-All the other IDs are returned by reading registers/send commands to the SDIO device.
-
-Neil
-> 
-> Regards,
-> - Franky
-
+- Eric
