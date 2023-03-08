@@ -2,564 +2,215 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99A29C6FD1E
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 16:01:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCBC6C64EC4
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 17:23:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232406AbjCHQBQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Mar 2023 11:01:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47926 "EHLO
+        id S229932AbjCHRXK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Mar 2023 12:23:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232447AbjCHP74 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 10:59:56 -0500
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14ED8B691F
-        for <linux-mmc@vger.kernel.org>; Wed,  8 Mar 2023 07:59:29 -0800 (PST)
-Received: by mail-wm1-x334.google.com with SMTP id o11-20020a05600c4fcb00b003eb33ea29a8so1460745wmq.1
-        for <linux-mmc@vger.kernel.org>; Wed, 08 Mar 2023 07:59:28 -0800 (PST)
+        with ESMTP id S229948AbjCHRWh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 12:22:37 -0500
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBB9A5AB48
+        for <linux-mmc@vger.kernel.org>; Wed,  8 Mar 2023 09:22:02 -0800 (PST)
+Received: by mail-ed1-x52d.google.com with SMTP id o12so68618546edb.9
+        for <linux-mmc@vger.kernel.org>; Wed, 08 Mar 2023 09:22:02 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678291160;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xlkJ43vk7P2I8VJnYV/tDeORllmV6CsNFLr6sCgkF18=;
-        b=e/CmqSlBFJ05W9lE6TrYjE12XayQTdxPNYj1Qg6Upj8VFuLAC73A6kN3eC2cWSb3oc
-         vaKj9clisPRwPYWpF5HkN3c5u6Y9mRFzQgwPOAa8HYl7cWMJDkhjgkAdOC78Lmre2gqz
-         zuok1NMCS36fuEONm+hA0KzFIu6wYT27ncNqKLWtZBIVqkeexq3bFSV6Ox3/emzRaxiz
-         X0mAs6TCOt1fiUXEd4jq4wNMprBauLmBAlRoybINk4TKvqqYaZm2nvJ5EHc5GxkZTcXR
-         OGkZQoULlHsw5TTHXMbVHfmJt7n3oVSomi28z6c0zN/LOMc7jSAS1X4YTs9opjy8dOQ5
-         BbmQ==
+        d=broadcom.com; s=google; t=1678296121;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=hsLZGu+FJOqnoINdKvBDCFTzJ2Zx99o2zdq6DIq++bA=;
+        b=a8k/hn8B51REzyWPB+q42+18c0FRzrGbkRfvfWjQIAuOorryvL5h+HLrewAzQUcYTC
+         9kXr4NMF7n44SutlHY1DoI6jGq0oUC4eIgkyvUYsCZkyDChFXEgXunFlbHtwnrVEgWFA
+         JhItnwTuINpnlF2dgkYaKWumZH0ta4mDtFJ3g=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678291160;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=xlkJ43vk7P2I8VJnYV/tDeORllmV6CsNFLr6sCgkF18=;
-        b=epmd4PxZB6N9ncBWjwKh0IoHyfete1vR7B2CuLXspv0ZQyi4PrBhx/dmsQUqHDrFTN
-         i0QxBtFdS4tghjWmcieOnJlht/CNWlWHvGAqD8OtOyTyw1WQvRI7/crD5vdCl5UAFcI1
-         Put2+PBUzPT0usKJRwak6yqIt+OO9jEcDokP342udM8Nj1b9MCc9C9oEodZGjVzt4evl
-         EGgDP/ea2ZSlbbcuf1iFp7lRKs7m/30UA8XaNsqHpgshnG0hUrQMNkt3Nvkh9+uLwjmR
-         WDrNCxaey4Kc9eFQy1yrS488JL3zJzitE3pI0SiuL3lgaBI6j25HKUHDOd/EQYtgcBUP
-         IroA==
-X-Gm-Message-State: AO0yUKU9cWk9CHSujHzR0Aht0CI16/JnNerU08SY8zKlHKAExtUUXCEa
-        zGncq8mPpmKOxJ2/cPCsEDcMKw==
-X-Google-Smtp-Source: AK7set/Fk81BRAvEaEZ4n/aVjxSPcXXt7wsoigiUp9lQW/Ia06McQ6AyO/YEhz89liErYygZ+JjlJw==
-X-Received: by 2002:a05:600c:3d8b:b0:3eb:578d:ded3 with SMTP id bi11-20020a05600c3d8b00b003eb578dded3mr17442801wmb.35.1678291160552;
-        Wed, 08 Mar 2023 07:59:20 -0800 (PST)
-Received: from hackbox.lan ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id 16-20020a05600c229000b003eb2e33f327sm2548430wmf.2.2023.03.08.07.59.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Mar 2023 07:59:19 -0800 (PST)
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org
-Subject: [RFC PATCH v2 7/7] arm64: dts: qcom: Add the Inline Crypto Engine nodes
-Date:   Wed,  8 Mar 2023 17:58:38 +0200
-Message-Id: <20230308155838.1094920-8-abel.vesa@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230308155838.1094920-1-abel.vesa@linaro.org>
-References: <20230308155838.1094920-1-abel.vesa@linaro.org>
+        d=1e100.net; s=20210112; t=1678296121;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=hsLZGu+FJOqnoINdKvBDCFTzJ2Zx99o2zdq6DIq++bA=;
+        b=iPKEh0B6B082cyjM86S5b7kH0ttG5fhagB0rB26a0iA2g+vY38P2k70TYDPUh4OziI
+         oqmZaIXE79HuMD9GqBgQQ/cKBUujKyhfanUOxsKIzVEgugXB1o3e9FlRhQmmvPulZbDG
+         H5FODjH21u496ZVDWx6DPvXJdOzsEFFQOAfRXFLn+c0gnmlizCmu7ZplttYhJUSEXIdd
+         VGbo6UuhoS9oE7a6++qNy1GX0tid7UDpMiVv+IrsKm4gGFSkSTBmZvVTIJReQ8pBhohb
+         9TGAeKqsae5bRTfljFzGZP8GTZdQLJ98mUfJpbopYea1PRLIGXZn6+IZMWwJmRmZ0IM2
+         ZZ6g==
+X-Gm-Message-State: AO0yUKUN3WNRp21AwUBs6GeftOPM9LCpn25ao97ZK/du5c4lTVixx5OF
+        yal4zcBlNTeUaHrDl32jKeu0Zy5zhKugWjyIWd+eAw==
+X-Google-Smtp-Source: AK7set93f7sWYOkA8O22C1d8xzXdck+7na8pWL6R6m6wWyFeCeukDOAP/XVS0wpsNcL7NkfaaplVz551FgmxeRq0igQ=
+X-Received: by 2002:a17:906:1411:b0:8b1:b795:110a with SMTP id
+ p17-20020a170906141100b008b1b795110amr9659244ejc.13.1678296121270; Wed, 08
+ Mar 2023 09:22:01 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr> <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr> <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
+ <a215e398-2c49-19d2-0730-5e8c51df1ed9@free.fr> <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
+ <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
+In-Reply-To: <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
+From:   Franky Lin <franky.lin@broadcom.com>
+Date:   Wed, 8 Mar 2023 09:21:32 -0800
+Message-ID: <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>, linux-wireless@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha-256;
+        boundary="00000000000029605205f666c4b5"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Drop all properties related to ICE from every UFS and SDCC node,
-for all platforms, and add dedicated ICE nodes for each platform.
-On most platforms, there is only one ICE instance, used by either
-UFS or SDCC, but there are some platforms that have two separate
-instances and, therefore, two separate nodes are added.
+--00000000000029605205f666c4b5
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
----
+On Wed, Mar 8, 2023 at 4:48=E2=80=AFAM Marc Gonzalez <marc.w.gonzalez@free.=
+fr> wrote:
+>
+> On 08/03/2023 00:15, Franky Lin wrote:
+>
+> > On Tue, Mar 7, 2023 at 6:40=E2=80=AFAM Marc Gonzalez wrote:
+> >
+> >> Through the SDIO bus, the WiFi chip reports 0xaae7 (i.e. 43751)
+> >> hence the /sys/bus/sdio/devices output above.
+> >>
+> >> sdio_read_func_cis() -> sdio_read_cis() which sets
+> >> func->vendor/func->device to 2d0/aae7
+> >>
+> >>
+> >> But when brcmf_chip_recognition() calls ci->ops->read32()
+> >> i.e. brcmf_sdio_buscore_read32()
+> >> [ vs brcmf_sdiod_readl() in brcmf_sdio_probe_attach() ]
+> >>
+> >> [    1.177283] brcmfmac: F1 signature read @0x18000000=3D0x1042aae8
+> >> [    1.182912] found AXI chip: BCM43752/2
+> >> [    1.186384] BCM43752/2: chip=3Daae8 rev=3D2 type=3D1
+> >>
+> >> Here it reports 0xaae8 (i.e. 43752)
+> >>
+> >> Why the discrepancy?
+> >> Can it cause issues?
+> >> (Sometimes, the whole SDIO bus doesn't probe at boot.
+> >> I am still investigating these intermittent problems.)
+> >>
+> >> Should I use 43751 or 43752 firmware...?
+> >
+> > This question should be answered by the Cypress/Infineon folks but
+> > unfortunately they have been quiet for a long time. In general we use
+> > the id read from 0x18000000 to decide which firmware to load. But be
+> > aware that the rev also matters. There are some examples in
+> > brcmf_sdio_fwnames table that the different firmware name can be
+> > derived from the same chip common id but different rev.
+> >
+> > However sdio device enumeration happens before firmware download so
+> > the intermittent problem you are facing probably is not related to
+> > firmware version.
+>
+> Disclosure: My knowledge of SDIO device enumeration is 0.
+>
+> When the host sends the equivalent of an "identify yourself" message
+> on the SDIO bus, doesn't the reply come from the WiFi device?
+> Why would the device reply 0xaae7 instead of 0xaae8?
+>
+> In other words, who is replying 0xaae7?
 
-Changes since v1:
- * Made changes for all platforms that use ICE, as a single patch since
-   most changes look really similar.
+The enumeration response is done by the HW sdio core on the chip.  No
+software involved.
 
- arch/arm64/boot/dts/qcom/sdm630.dtsi | 18 +++++++++-----
- arch/arm64/boot/dts/qcom/sdm670.dtsi | 15 +++++++----
- arch/arm64/boot/dts/qcom/sdm845.dtsi | 21 +++++++++-------
- arch/arm64/boot/dts/qcom/sm6115.dtsi | 37 +++++++++++++++++-----------
- arch/arm64/boot/dts/qcom/sm6350.dtsi | 31 ++++++++++++++---------
- arch/arm64/boot/dts/qcom/sm8150.dtsi | 21 +++++++++-------
- arch/arm64/boot/dts/qcom/sm8450.dtsi | 22 ++++++++++-------
- 7 files changed, 102 insertions(+), 63 deletions(-)
+Regards,
+- Franky
 
-diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-index 5827cda270a0..2aed49104d9d 100644
---- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-@@ -1330,9 +1330,8 @@ opp-200000000 {
- 		sdhc_1: mmc@c0c4000 {
- 			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0x0c0c4000 0x1000>,
--			      <0x0c0c5000 0x1000>,
--			      <0x0c0c8000 0x8000>;
--			reg-names = "hc", "cqhci", "ice";
-+			      <0x0c0c5000 0x1000>;
-+			reg-names = "hc", "cqhci";
- 
- 			interrupts = <GIC_SPI 110 IRQ_TYPE_LEVEL_HIGH>,
- 					<GIC_SPI 112 IRQ_TYPE_LEVEL_HIGH>;
-@@ -1340,9 +1339,8 @@ sdhc_1: mmc@c0c4000 {
- 
- 			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
- 				 <&gcc GCC_SDCC1_APPS_CLK>,
--				 <&xo_board>,
--				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
--			clock-names = "iface", "core", "xo", "ice";
-+				 <&xo_board>;
-+			clock-names = "iface", "core", "xo";
- 
- 			interconnects = <&a2noc 2 &a2noc 10>,
- 					<&gnoc 0 &cnoc 27>;
-@@ -1353,6 +1351,8 @@ sdhc_1: mmc@c0c4000 {
- 			pinctrl-1 = <&sdc1_state_off>;
- 			power-domains = <&rpmpd SDM660_VDDCX>;
- 
-+			qcom,ice = <&ice>;
-+
- 			bus-width = <8>;
- 			non-removable;
- 
-@@ -1382,6 +1382,12 @@ opp-384000000 {
- 			};
- 		};
- 
-+		ice: inline-crypto-engine@c0c8000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0x0c0c8000 0x8000>;
-+			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+		};
-+
- 		usb2: usb@c2f8800 {
- 			compatible = "qcom,sdm660-dwc3", "qcom,dwc3";
- 			reg = <0x0c2f8800 0x400>;
-diff --git a/arch/arm64/boot/dts/qcom/sdm670.dtsi b/arch/arm64/boot/dts/qcom/sdm670.dtsi
-index 02f14692dd9d..7c1c01a8fdae 100644
---- a/arch/arm64/boot/dts/qcom/sdm670.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sdm670.dtsi
-@@ -416,9 +416,8 @@ qusb2_hstx_trim: hstx-trim@1eb {
- 		sdhc_1: mmc@7c4000 {
- 			compatible = "qcom,sdm670-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0 0x007c4000 0 0x1000>,
--			      <0 0x007c5000 0 0x1000>,
--			      <0 0x007c8000 0 0x8000>;
--			reg-names = "hc", "cqhci", "ice";
-+			      <0 0x007c5000 0 0x1000>;
-+			reg-names = "hc", "cqhci";
- 
- 			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-@@ -427,9 +426,8 @@ sdhc_1: mmc@7c4000 {
- 			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
- 				 <&gcc GCC_SDCC1_APPS_CLK>,
- 				 <&rpmhcc RPMH_CXO_CLK>,
--				 <&gcc GCC_SDCC1_ICE_CORE_CLK>,
- 				 <&gcc GCC_AGGRE_UFS_PHY_AXI_CLK>;
--			clock-names = "iface", "core", "xo", "ice", "bus";
-+			clock-names = "iface", "core", "xo", "bus";
- 
- 			iommus = <&apps_smmu 0x140 0xf>;
- 
-@@ -440,10 +438,17 @@ sdhc_1: mmc@7c4000 {
- 
- 			bus-width = <8>;
- 			non-removable;
-+			qcom,ice = <&ice>;
- 
- 			status = "disabled";
- 		};
- 
-+		ice: inline-crypto-engine@7c8000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x007c8000 0 0x8000>;
-+			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+		};
-+
- 		gpi_dma0: dma-controller@800000 {
- 			#dma-cells = <3>;
- 			compatible = "qcom,sdm670-gpi-dma", "qcom,sdm845-gpi-dma";
-diff --git a/arch/arm64/boot/dts/qcom/sdm845.dtsi b/arch/arm64/boot/dts/qcom/sdm845.dtsi
-index 479859bd8ab3..80cf76dc612c 100644
---- a/arch/arm64/boot/dts/qcom/sdm845.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sdm845.dtsi
-@@ -2543,9 +2543,8 @@ mmss_noc: interconnect@1740000 {
- 		ufs_mem_hc: ufshc@1d84000 {
- 			compatible = "qcom,sdm845-ufshc", "qcom,ufshc",
- 				     "jedec,ufs-2.0";
--			reg = <0 0x01d84000 0 0x2500>,
--			      <0 0x01d90000 0 0x8000>;
--			reg-names = "std", "ice";
-+			reg = <0 0x01d84000 0 0x2500>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy_lanes>;
- 			phy-names = "ufsphy";
-@@ -2565,8 +2564,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				"ref_clk",
- 				"tx_lane0_sync_clk",
- 				"rx_lane0_sync_clk",
--				"rx_lane1_sync_clk",
--				"ice_core_clk";
-+				"rx_lane1_sync_clk";
- 			clocks =
- 				<&gcc GCC_UFS_PHY_AXI_CLK>,
- 				<&gcc GCC_AGGRE_UFS_PHY_AXI_CLK>,
-@@ -2575,8 +2573,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<&rpmhcc RPMH_CXO_CLK>,
- 				<&gcc GCC_UFS_PHY_TX_SYMBOL_0_CLK>,
- 				<&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>,
--				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>,
--				<&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>;
- 			freq-table-hz =
- 				<50000000 200000000>,
- 				<0 0>,
-@@ -2585,12 +2582,18 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<0 0>,
- 				<0 0>,
- 				<0 0>,
--				<0 0>,
--				<0 300000000>;
-+				<0 0>;
-+			qcom,ice = <&ice>;
- 
- 			status = "disabled";
- 		};
- 
-+		ice: inline-crypto-engine@1d90000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x01d90000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		ufs_mem_phy: phy@1d87000 {
- 			compatible = "qcom,sdm845-qmp-ufs-phy";
- 			reg = <0 0x01d87000 0 0x18c>;
-diff --git a/arch/arm64/boot/dts/qcom/sm6115.dtsi b/arch/arm64/boot/dts/qcom/sm6115.dtsi
-index 4d6ec815b78b..0ac12c839bc1 100644
---- a/arch/arm64/boot/dts/qcom/sm6115.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm6115.dtsi
-@@ -717,9 +717,8 @@ sram@4690000 {
- 		sdhc_1: mmc@4744000 {
- 			compatible = "qcom,sm6115-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0x0 0x04744000 0x0 0x1000>,
--			      <0x0 0x04745000 0x0 0x1000>,
--			      <0x0 0x04748000 0x0 0x8000>;
--			reg-names = "hc", "cqhci", "ice";
-+			      <0x0 0x04745000 0x0 0x1000>;
-+			reg-names = "hc", "cqhci";
- 
- 			interrupts = <GIC_SPI 348 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 352 IRQ_TYPE_LEVEL_HIGH>;
-@@ -727,18 +726,24 @@ sdhc_1: mmc@4744000 {
- 
- 			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
- 				 <&gcc GCC_SDCC1_APPS_CLK>,
--				 <&rpmcc RPM_SMD_XO_CLK_SRC>,
--				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
--			clock-names = "iface", "core", "xo", "ice";
-+				 <&rpmcc RPM_SMD_XO_CLK_SRC>;
-+			clock-names = "iface", "core", "xo";
- 
- 			pinctrl-0 = <&sdc1_state_on>;
- 			pinctrl-1 = <&sdc1_state_off>;
- 			pinctrl-names = "default", "sleep";
- 
- 			bus-width = <8>;
-+			qcom,ice = <&sdhc_ice>;
- 			status = "disabled";
- 		};
- 
-+		sdhc_ice: inline-crypto-engine@4748000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x04748000 0 0x8000>;
-+			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+		};
-+
- 		sdhc_2: mmc@4784000 {
- 			compatible = "qcom,sm6115-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0x0 0x04784000 0x0 0x1000>;
-@@ -784,8 +789,8 @@ opp-202000000 {
- 
- 		ufs_mem_hc: ufs@4804000 {
- 			compatible = "qcom,sm6115-ufshc", "qcom,ufshc", "jedec,ufs-2.0";
--			reg = <0x0 0x04804000 0x0 0x3000>, <0x0 0x04810000 0x0 0x8000>;
--			reg-names = "std", "ice";
-+			reg = <0x0 0x04804000 0x0 0x3000>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 356 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy_lanes>;
- 			phy-names = "ufsphy";
-@@ -803,16 +808,14 @@ ufs_mem_hc: ufs@4804000 {
- 				 <&gcc GCC_UFS_PHY_UNIPRO_CORE_CLK>,
- 				 <&rpmcc RPM_SMD_XO_CLK_SRC>,
- 				 <&gcc GCC_UFS_PHY_TX_SYMBOL_0_CLK>,
--				 <&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>,
--				 <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+				 <&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>;
- 			clock-names = "core_clk",
- 				      "bus_aggr_clk",
- 				      "iface_clk",
- 				      "core_clk_unipro",
- 				      "ref_clk",
- 				      "tx_lane0_sync_clk",
--				      "rx_lane0_sync_clk",
--				      "ice_core_clk";
-+				      "rx_lane0_sync_clk";
- 
- 			freq-table-hz = <50000000 200000000>,
- 					<0 0>,
-@@ -820,12 +823,18 @@ ufs_mem_hc: ufs@4804000 {
- 					<37500000 150000000>,
- 					<0 0>,
- 					<0 0>,
--					<0 0>,
--					<75000000 300000000>;
-+					<0 0>;
-+			qcom,ice = <&ufs_ice>;
- 
- 			status = "disabled";
- 		};
- 
-+		ufs_ice: inline-crypto-engine@4810000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x04810000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		ufs_mem_phy: phy@4807000 {
- 			compatible = "qcom,sm6115-qmp-ufs-phy";
- 			reg = <0x0 0x04807000 0x0 0x1c4>;
-diff --git a/arch/arm64/boot/dts/qcom/sm6350.dtsi b/arch/arm64/boot/dts/qcom/sm6350.dtsi
-index 1e1d366c92c1..ed28f8e3626b 100644
---- a/arch/arm64/boot/dts/qcom/sm6350.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm6350.dtsi
-@@ -638,9 +638,8 @@ rng: rng@793000 {
- 		sdhc_1: mmc@7c4000 {
- 			compatible = "qcom,sm6350-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0 0x007c4000 0 0x1000>,
--				<0 0x007c5000 0 0x1000>,
--				<0 0x007c8000 0 0x8000>;
--			reg-names = "hc", "cqhci", "ice";
-+				<0 0x007c5000 0 0x1000>;
-+			reg-names = "hc", "cqhci";
- 
- 			interrupts = <GIC_SPI 641 IRQ_TYPE_LEVEL_HIGH>,
- 				     <GIC_SPI 644 IRQ_TYPE_LEVEL_HIGH>;
-@@ -659,6 +658,7 @@ sdhc_1: mmc@7c4000 {
- 			bus-width = <8>;
- 			non-removable;
- 			supports-cqe;
-+			qcom,ice = <&sdhc_ice>;
- 
- 			status = "disabled";
- 
-@@ -682,6 +682,12 @@ opp-384000000 {
- 			};
- 		};
- 
-+		sdhc_ice: inline-crypto-engine@c0c8000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x007c8000 0 0x8000>;
-+			clocks = <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+		};
-+
- 		gpi_dma0: dma-controller@800000 {
- 			compatible = "qcom,sm6350-gpi-dma";
- 			reg = <0 0x00800000 0 0x60000>;
-@@ -933,9 +939,8 @@ mmss_noc: interconnect@1740000 {
- 		ufs_mem_hc: ufs@1d84000 {
- 			compatible = "qcom,sm6350-ufshc", "qcom,ufshc",
- 				     "jedec,ufs-2.0";
--			reg = <0 0x01d84000 0 0x3000>,
--			      <0 0x01d90000 0 0x8000>;
--			reg-names = "std", "ice";
-+			reg = <0 0x01d84000 0 0x3000>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy_lanes>;
- 			phy-names = "ufsphy";
-@@ -955,8 +960,7 @@ ufs_mem_hc: ufs@1d84000 {
- 				      "ref_clk",
- 				      "tx_lane0_sync_clk",
- 				      "rx_lane0_sync_clk",
--				      "rx_lane1_sync_clk",
--				      "ice_core_clk";
-+				      "rx_lane1_sync_clk";
- 			clocks = <&gcc GCC_UFS_PHY_AXI_CLK>,
- 				 <&gcc GCC_AGGRE_UFS_PHY_AXI_CLK>,
- 				 <&gcc GCC_UFS_PHY_AHB_CLK>,
-@@ -964,8 +968,7 @@ ufs_mem_hc: ufs@1d84000 {
- 				 <&rpmhcc RPMH_QLINK_CLK>,
- 				 <&gcc GCC_UFS_PHY_TX_SYMBOL_0_CLK>,
- 				 <&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>,
--				 <&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>,
--				 <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+				 <&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>;
- 			freq-table-hz =
- 				<50000000 200000000>,
- 				<0 0>,
-@@ -974,8 +977,8 @@ ufs_mem_hc: ufs@1d84000 {
- 				<75000000 300000000>,
- 				<0 0>,
- 				<0 0>,
--				<0 0>,
- 				<0 0>;
-+			qcom,ice = <&ufs_ice>;
- 
- 			status = "disabled";
- 		};
-@@ -1007,6 +1010,12 @@ ufs_mem_phy_lanes: phy@1d87400 {
- 			};
- 		};
- 
-+		ufs_ice: inline-crypto-engine@1d90000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x01d90000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		ipa: ipa@1e40000 {
- 			compatible = "qcom,sm6350-ipa";
- 
-diff --git a/arch/arm64/boot/dts/qcom/sm8150.dtsi b/arch/arm64/boot/dts/qcom/sm8150.dtsi
-index fd20096cfc6e..844c7b80d205 100644
---- a/arch/arm64/boot/dts/qcom/sm8150.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8150.dtsi
-@@ -1983,9 +1983,8 @@ pcie1_lane: phy@1c0e200 {
- 		ufs_mem_hc: ufshc@1d84000 {
- 			compatible = "qcom,sm8150-ufshc", "qcom,ufshc",
- 				     "jedec,ufs-2.0";
--			reg = <0 0x01d84000 0 0x2500>,
--			      <0 0x01d90000 0 0x8000>;
--			reg-names = "std", "ice";
-+			reg = <0 0x01d84000 0 0x2500>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy_lanes>;
- 			phy-names = "ufsphy";
-@@ -2004,8 +2003,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				"ref_clk",
- 				"tx_lane0_sync_clk",
- 				"rx_lane0_sync_clk",
--				"rx_lane1_sync_clk",
--				"ice_core_clk";
-+				"rx_lane1_sync_clk";
- 			clocks =
- 				<&gcc GCC_UFS_PHY_AXI_CLK>,
- 				<&gcc GCC_AGGRE_UFS_PHY_AXI_CLK>,
-@@ -2014,8 +2012,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<&rpmhcc RPMH_CXO_CLK>,
- 				<&gcc GCC_UFS_PHY_TX_SYMBOL_0_CLK>,
- 				<&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>,
--				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>,
--				<&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>;
- 			freq-table-hz =
- 				<37500000 300000000>,
- 				<0 0>,
-@@ -2024,8 +2021,8 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<0 0>,
- 				<0 0>,
- 				<0 0>,
--				<0 0>,
--				<0 300000000>;
-+				<0 0>;
-+			qcom,ice = <&ice>;
- 
- 			status = "disabled";
- 		};
-@@ -2057,6 +2054,12 @@ ufs_mem_phy_lanes: phy@1d87400 {
- 			};
- 		};
- 
-+		ice: inline-crypto-engine@1d90000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x01d90000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		tcsr_mutex: hwlock@1f40000 {
- 			compatible = "qcom,tcsr-mutex";
- 			reg = <0x0 0x01f40000 0x0 0x20000>;
-diff --git a/arch/arm64/boot/dts/qcom/sm8450.dtsi b/arch/arm64/boot/dts/qcom/sm8450.dtsi
-index 1a744a33bcf4..8ebe6184a9c3 100644
---- a/arch/arm64/boot/dts/qcom/sm8450.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8450.dtsi
-@@ -3989,9 +3989,8 @@ system-cache-controller@19200000 {
- 		ufs_mem_hc: ufshc@1d84000 {
- 			compatible = "qcom,sm8450-ufshc", "qcom,ufshc",
- 				     "jedec,ufs-2.0";
--			reg = <0 0x01d84000 0 0x3000>,
--			      <0 0x01d88000 0 0x8000>;
--			reg-names = "std", "ice";
-+			reg = <0 0x01d84000 0 0x3000>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy_lanes>;
- 			phy-names = "ufsphy";
-@@ -4015,8 +4014,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				"ref_clk",
- 				"tx_lane0_sync_clk",
- 				"rx_lane0_sync_clk",
--				"rx_lane1_sync_clk",
--				"ice_core_clk";
-+				"rx_lane1_sync_clk";
- 			clocks =
- 				<&gcc GCC_UFS_PHY_AXI_CLK>,
- 				<&gcc GCC_AGGRE_UFS_PHY_AXI_CLK>,
-@@ -4025,8 +4023,7 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<&rpmhcc RPMH_CXO_CLK>,
- 				<&gcc GCC_UFS_PHY_TX_SYMBOL_0_CLK>,
- 				<&gcc GCC_UFS_PHY_RX_SYMBOL_0_CLK>,
--				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>,
--				<&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+				<&gcc GCC_UFS_PHY_RX_SYMBOL_1_CLK>;
- 			freq-table-hz =
- 				<75000000 300000000>,
- 				<0 0>,
-@@ -4035,8 +4032,9 @@ ufs_mem_hc: ufshc@1d84000 {
- 				<75000000 300000000>,
- 				<0 0>,
- 				<0 0>,
--				<0 0>,
--				<75000000 300000000>;
-+				<0 0>;
-+			qcom,ice = <&ice>;
-+
- 			status = "disabled";
- 		};
- 
-@@ -4066,6 +4064,12 @@ ufs_mem_phy_lanes: phy@1d87400 {
- 			};
- 		};
- 
-+		ice: inline-crypto-engine@1d88000 {
-+			compatible = "qcom,inline-crypto-engine";
-+			reg = <0 0x01d88000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		sdhc_2: mmc@8804000 {
- 			compatible = "qcom,sm8450-sdhci", "qcom,sdhci-msm-v5";
- 			reg = <0 0x08804000 0 0x1000>;
--- 
-2.34.1
+--00000000000029605205f666c4b5
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Description: S/MIME Cryptographic Signature
 
+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
+BZrfei1PlO2m9d3AfpeD7Y1pVL1SrZC1yvhXeDO463M8rGKz/l8XZrJY1P6qU8U6QwxjFgXr5o5B
+9N6Yw9IhwXhZI3m6F1pe3mMdZ9cFC3xS3Ke+awIDAQABo4IB2DCCAdQwDgYDVR0PAQH/BAQDAgWg
+MIGjBggrBgEFBQcBAQSBljCBkzBOBggrBgEFBQcwAoZCaHR0cDovL3NlY3VyZS5nbG9iYWxzaWdu
+LmNvbS9jYWNlcnQvZ3NnY2NyM3BlcnNvbmFsc2lnbjJjYTIwMjAuY3J0MEEGCCsGAQUFBzABhjVo
+dHRwOi8vb2NzcC5nbG9iYWxzaWduLmNvbS9nc2djY3IzcGVyc29uYWxzaWduMmNhMjAyMDBNBgNV
+HSAERjBEMEIGCisGAQQBoDIBKAowNDAyBggrBgEFBQcCARYmaHR0cHM6Ly93d3cuZ2xvYmFsc2ln
+bi5jb20vcmVwb3NpdG9yeS8wCQYDVR0TBAIwADBJBgNVHR8EQjBAMD6gPKA6hjhodHRwOi8vY3Js
+Lmdsb2JhbHNpZ24uY29tL2dzZ2NjcjNwZXJzb25hbHNpZ24yY2EyMDIwLmNybDAiBgNVHREEGzAZ
+gRdmcmFua3kubGluQGJyb2FkY29tLmNvbTATBgNVHSUEDDAKBggrBgEFBQcDBDAfBgNVHSMEGDAW
+gBSWM9HmWBdbNHWKgVZk1b5I3qGPzzAdBgNVHQ4EFgQU0v383z+6bcUXkukYi4fq7VBiM6swDQYJ
+KoZIhvcNAQELBQADggEBABUIiuJPuLq9vbb6/7d0VJ6LS6osA6kNs0Tph9iEX49TxPQJtvA97oy4
+AgPCjWNiAMLkmu+kNQKlNZG3Vl3S4A+VMOogB6aKtiLlz73Cs0sPgpohw6GSS41TKVt17PrAzo0o
+/xuXczzIbtvrpoi6OnGlsW4aVCqQSOqKUamG8wU8u3/h+iPM1rr4z6ZHdyrllNi+ukH/Z6Dpn6wF
+ATUa+n5ReFZpli4TzcqVHw7i+OaB23TMHCwed4OPFm0H3zcCJgVtgt3z95IPak7bBuYLAGMT2c3K
+Xkdn27MnpydqZw5mnP970DgyUMHXY3Jvj65UAVioJUr4LkNBL7Tsk/6q0FExggJtMIICaQIBATBr
+MFsxCzAJBgNVBAYTAkJFMRkwFwYDVQQKExBHbG9iYWxTaWduIG52LXNhMTEwLwYDVQQDEyhHbG9i
+YWxTaWduIEdDQyBSMyBQZXJzb25hbFNpZ24gMiBDQSAyMDIwAgxcbvtv+NUbtJoPDWwwDQYJYIZI
+AWUDBAIBBQCggdQwLwYJKoZIhvcNAQkEMSIEIL5bGb7GZcg5jzjpKN9XRPfia8aBZKL2bbs9+ITD
+AuxEMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIzMDMwODE3MjIw
+MVowaQYJKoZIhvcNAQkPMVwwWjALBglghkgBZQMEASowCwYJYIZIAWUDBAEWMAsGCWCGSAFlAwQB
+AjAKBggqhkiG9w0DBzALBgkqhkiG9w0BAQowCwYJKoZIhvcNAQEHMAsGCWCGSAFlAwQCATANBgkq
+hkiG9w0BAQEFAASCAQCUN7BJiTTe8WxuCqRtwpN5NRtRknBTFciggy6Qv3rriI2fxUkJH25YuD2u
+pWCsQmh2vvFGzPGSJYrcKvkZYncZ9kL9hwZ7ktNodWUJbP8UjDmKMKJGSFfiqv1jD6FIdY3VTY4G
+rOEjrZ3PhoF732dzb7qJV4pgLRXzycWsmC8LB3BXABsyGgSkB4R2CNOxFjbr8gC0tOj6lmEWZwy6
+tVPdokRo/V5DPxYrZyHGPw3lPpmL8MpBCRoZvTtRciXOMLUhM5ZLR/tJ4xypFuApTUIlTaFC9usK
+/JihSQDdmulLFRWVTlLxQkH2rDbLzhgU1o1Ku6azCCJrTZZ1vT9WVsbp
+--00000000000029605205f666c4b5--
