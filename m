@@ -2,97 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D6C0C64EC4
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 05:59:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BF2A7C64EC4
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 12:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229809AbjCHF7r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Mar 2023 00:59:47 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45822 "EHLO
+        id S229900AbjCHMsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Mar 2023 07:48:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52224 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229716AbjCHF7q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 00:59:46 -0500
-Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 138ECA226F;
-        Tue,  7 Mar 2023 21:59:42 -0800 (PST)
-Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
-        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
-        by fd01.gateway.ufhost.com (Postfix) with ESMTP id D3ED724E2F7;
-        Wed,  8 Mar 2023 13:59:29 +0800 (CST)
-Received: from EXMBX068.cuchost.com (172.16.6.68) by EXMBX165.cuchost.com
- (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 8 Mar
- 2023 13:59:29 +0800
-Received: from [192.168.120.57] (171.223.208.138) by EXMBX068.cuchost.com
- (172.16.6.68) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Wed, 8 Mar
- 2023 13:59:28 +0800
-Message-ID: <20e56116-ab76-fa8c-b321-d32c8b24a6be@starfivetech.com>
-Date:   Wed, 8 Mar 2023 13:59:28 +0800
+        with ESMTP id S229613AbjCHMsU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 07:48:20 -0500
+Received: from smtp4-g21.free.fr (smtp4-g21.free.fr [212.27.42.4])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FC365BC8A;
+        Wed,  8 Mar 2023 04:48:19 -0800 (PST)
+Received: from [IPV6:2a02:8428:2a4:1a01:45c4:a757:53fe:d68b] (unknown [IPv6:2a02:8428:2a4:1a01:45c4:a757:53fe:d68b])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp4-g21.free.fr (Postfix) with ESMTPSA id 31D3B19F5AD;
+        Wed,  8 Mar 2023 13:47:58 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1678279697;
+        bh=khQxVjFHMjEKGcJe0J+IKRrBiCSANsezuEHC8IvabDI=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=uthwmaaBuqqeWDXGBUXa60Z5MPrU6O0uLQAShfd73hN8O8BdkFhbf2Pr2TjX6MH28
+         uQwLDjUkbp8qM/vD3BRhctd3gPzbLtzfQZ61R7TevX9i9lqMhjhrCnjTrgUgOG1ayQ
+         666x28QubRO0Y5IJjZu5ledQCao76ser7c//XJh3u+5Uf9ZvhSQqMdOE3B7HhlpYHL
+         SZM0oHlbnfTBSL6R6snF2v6tGY0V0CBwi3y+H33P4GmfLP/cQTdRRuvKZFrcfYWMhZ
+         sXIcjQFkBXxTN/PcROWwHhODvG1WIMCuBzi+utQqiHdjl3NMTwQ1/HiBAXR1wScFd0
+         HIv60mCwo+qPw==
+Message-ID: <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
+Date:   Wed, 8 Mar 2023 13:47:58 +0100
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v5 1/2] dt-bindings: syscon: Add StarFive syscon doc
-Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        <devicetree@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>
-CC:     Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+To:     Franky Lin <franky.lin@broadcom.com>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Conor Dooley <conor.dooley@microchip.com>,
-        <linux-riscv@lists.infradead.org>
-References: <20230307024646.10216-1-william.qiu@starfivetech.com>
- <20230307024646.10216-2-william.qiu@starfivetech.com>
- <39ba7357-541b-a70e-5793-91bb9e038938@linaro.org>
-From:   William Qiu <william.qiu@starfivetech.com>
-In-Reply-To: <39ba7357-541b-a70e-5793-91bb9e038938@linaro.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [171.223.208.138]
-X-ClientProxiedBy: EXCAS066.cuchost.com (172.16.6.26) To EXMBX068.cuchost.com
- (172.16.6.68)
-X-YovoleRuleAgent: yovoleflag
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>, linux-wireless@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-amlogic@lists.infradead.org
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+ <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
+ <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
+ <a215e398-2c49-19d2-0730-5e8c51df1ed9@free.fr>
+ <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
+Content-Language: en-US
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+In-Reply-To: <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On 08/03/2023 00:15, Franky Lin wrote:
 
+> On Tue, Mar 7, 2023 at 6:40 AM Marc Gonzalez wrote:
+> 
+>> Through the SDIO bus, the WiFi chip reports 0xaae7 (i.e. 43751)
+>> hence the /sys/bus/sdio/devices output above.
+>>
+>> sdio_read_func_cis() -> sdio_read_cis() which sets
+>> func->vendor/func->device to 2d0/aae7
+>>
+>>
+>> But when brcmf_chip_recognition() calls ci->ops->read32()
+>> i.e. brcmf_sdio_buscore_read32()
+>> [ vs brcmf_sdiod_readl() in brcmf_sdio_probe_attach() ]
+>>
+>> [    1.177283] brcmfmac: F1 signature read @0x18000000=0x1042aae8
+>> [    1.182912] found AXI chip: BCM43752/2
+>> [    1.186384] BCM43752/2: chip=aae8 rev=2 type=1
+>>
+>> Here it reports 0xaae8 (i.e. 43752)
+>>
+>> Why the discrepancy?
+>> Can it cause issues?
+>> (Sometimes, the whole SDIO bus doesn't probe at boot.
+>> I am still investigating these intermittent problems.)
+>>
+>> Should I use 43751 or 43752 firmware...?
+> 
+> This question should be answered by the Cypress/Infineon folks but
+> unfortunately they have been quiet for a long time. In general we use
+> the id read from 0x18000000 to decide which firmware to load. But be
+> aware that the rev also matters. There are some examples in
+> brcmf_sdio_fwnames table that the different firmware name can be
+> derived from the same chip common id but different rev.
+> 
+> However sdio device enumeration happens before firmware download so
+> the intermittent problem you are facing probably is not related to
+> firmware version.
 
-On 2023/3/7 17:00, Krzysztof Kozlowski wrote:
-> On 07/03/2023 03:46, William Qiu wrote:
->> Add documentation to describe StarFive System Controller Registers.
-> 
-> Use subject prefixes matching the subsystem (which you can get for
-> example with `git log --oneline -- DIRECTORY_OR_FILE` on the directory
-> your patch is touching). This is not "syscon" subsystem, but rather
-> starfive.
-> 
-Will update.
->> 
->> Signed-off-by: William Qiu <william.qiu@starfivetech.com>
->> Reviewed-by: Conor Dooley <conor.dooley@microchip.com>
->> ---
->>  .../bindings/soc/starfive/jh7110-syscon.yaml  | 41 +++++++++++++++++++
->>  MAINTAINERS                                   |  5 +++
->>  2 files changed, 46 insertions(+)
->>  create mode 100644 Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
->> 
->> diff --git a/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
->> new file mode 100644
->> index 000000000000..72c8850602b5
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/soc/starfive/jh7110-syscon.yaml
-> 
-> Filename: starfive,jh7110-syscon.yaml
-> 
+Disclosure: My knowledge of SDIO device enumeration is 0.
 
-Will update.
-Thanks for taking times to review this patch series.
+When the host sends the equivalent of an "identify yourself" message
+on the SDIO bus, doesn't the reply come from the WiFi device?
+Why would the device reply 0xaae7 instead of 0xaae8?
 
-Best regards
-William
-> 
-> 
-> Best regards,
-> Krzysztof
-> 
+In other words, who is replying 0xaae7?
+
+Regards.
+
