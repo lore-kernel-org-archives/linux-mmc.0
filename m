@@ -2,111 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 92E3AC6FD19
-	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 23:11:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A370BC6FD19
+	for <linux-mmc@archiver.kernel.org>; Wed,  8 Mar 2023 23:17:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230335AbjCHXL0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 8 Mar 2023 18:11:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53624 "EHLO
+        id S230179AbjCHXRN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 8 Mar 2023 18:17:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230126AbjCHXLJ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 18:11:09 -0500
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D6CC6923C;
-        Wed,  8 Mar 2023 15:10:41 -0800 (PST)
+        with ESMTP id S229891AbjCHXRN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 8 Mar 2023 18:17:13 -0500
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5026C85346;
+        Wed,  8 Mar 2023 15:17:12 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id AF7856193B;
-        Wed,  8 Mar 2023 23:10:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B3F94C433EF;
-        Wed,  8 Mar 2023 23:10:30 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id EE48FB81E2E;
+        Wed,  8 Mar 2023 23:17:10 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 4B66EC433EF;
+        Wed,  8 Mar 2023 23:17:09 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678317031;
-        bh=6K5Aos/pHDOzNcZcmESeumuhe0HreLjKYHuJ1XTrzPQ=;
+        s=k20201202; t=1678317429;
+        bh=NmAkrHScLnTkuJqXt6bZ77v1FswLx79ftH2PnKG/MzQ=;
         h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=k/DseVQbYHn/At0guNyNZP4BN8i6WzjB0uRmhQobxO94ZBF0jJgd1PQlMGc04OpGE
-         lIyKOJJTGkFOUXl1nCFzpKhe2MBgIyG30zjvFh8gaq/Ry3OWbr6iw/+DwdTHfdbfT6
-         g6tDn+K/sH73TtnH0pXB6xFjCYSDJE5U8ygmaBnmDVCUtS25eS1W9ltWXSYuZK1Lzi
-         iDbk9WM5rfiKALXn+gKk6Nwn52Qcpy8GlvtIpdkRhyG0wvRL1waJ4isIaHZAuLd/8b
-         zYsmc2akgBrq5ajRhZNYtg8BOomZdsybcO3o7ld6yFFSh3hJ8IslyB0hPBarBpdIEO
-         E4LzQ0XBIIc5A==
-Date:   Wed, 8 Mar 2023 23:10:29 +0000
+        b=mIGEjYo8FRg4ruvD0SpUwymB/BrCJyhUJC2i5rpF1yeKIdQWx2dmOJfUWtw9Ed3Id
+         J7PJRAcoKC4+44Xcm4z0RZmZuOXo5nUynJY+tdBSOebBBUHgUjzJhKpHvxJhMfGBfd
+         ERW/59pb9v6lzQ7iwl6Se1puzoQtyWHkrbuiuxvfTBu9rjyaJfgGoNDpQd3DVge69M
+         pZrDdsvnivZEqk2YVjs1qL2RxLEvnOyjVpBvSQ0ymd1mF7Jooi0/E6Bhw1jv+X/B3W
+         4Jj17CuWzNZqqHmkJ0BsVN2tWEIeidJ5fFgtjyJEzhmQpabHrmB2S+pZMfj6W98ful
+         72+9jyUK4Xzag==
+Date:   Wed, 8 Mar 2023 23:17:07 +0000
 From:   Eric Biggers <ebiggers@kernel.org>
 To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
+Cc:     Andy Gross <agross@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
         Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         "James E . J . Bottomley" <jejb@linux.ibm.com>,
         "Martin K . Petersen" <martin.petersen@oracle.com>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org
-Subject: Re: [RFC PATCH v2 4/7] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
+        linux-mmc@vger.kernel.org, linux-scsi@vger.kernel.org
+Subject: Re: [RFC PATCH 1/5] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
  dedicated driver
-Message-ID: <ZAkV5ZNeK5iHU0Uq@gmail.com>
-References: <20230308155838.1094920-1-abel.vesa@linaro.org>
- <20230308155838.1094920-5-abel.vesa@linaro.org>
- <ZAjppY2K0/XPBHxG@sol.localdomain>
- <ZAkBwZNWMTsXlt+p@linaro.org>
+Message-ID: <ZAkXcyIlAhgdU3lF@gmail.com>
+References: <20230214120253.1098426-1-abel.vesa@linaro.org>
+ <20230214120253.1098426-2-abel.vesa@linaro.org>
+ <Y+3ZyVRowJplzm9t@sol.localdomain>
+ <ZAkEEXHbmxiJf7Fu@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ZAkBwZNWMTsXlt+p@linaro.org>
+In-Reply-To: <ZAkEEXHbmxiJf7Fu@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 08, 2023 at 11:44:33PM +0200, Abel Vesa wrote:
-> On 23-03-08 12:01:41, Eric Biggers wrote:
-> > On Wed, Mar 08, 2023 at 05:58:35PM +0200, Abel Vesa wrote:
-> > >  * Switched QCOM_INLINE_CRYPTO_ENGINE to tristate and made it built-in
-> > >    if any of the UFS or the SDHC drivers are built-in. This is to allow
-> > >    the API to be available even if the built-in driver doesn't have
-> > >    crypto enabled.
-> > [...]
-> > > diff --git a/drivers/soc/qcom/Kconfig b/drivers/soc/qcom/Kconfig
-> > > index a8f283086a21..c584369e9810 100644
-> > > --- a/drivers/soc/qcom/Kconfig
-> > > +++ b/drivers/soc/qcom/Kconfig
-> > > @@ -275,4 +275,10 @@ config QCOM_ICC_BWMON
-> > >  	  the fixed bandwidth votes from cpufreq (CPU nodes) thus achieve high
-> > >  	  memory throughput even with lower CPU frequencies.
-> > >  
-> > > +config QCOM_INLINE_CRYPTO_ENGINE
-> > > +	tristate
-> > > +	depends on SCSI_UFS_CRYPTO || MMC_CRYPTO
-> > > +	default y if SCSI_UFS_QCOM=y || MMC_SDHCI_MSM=y
-> > > +	select QCOM_SCM
-> > 
-> > What are the "depends on" and "default y" lines above for?
-> > 
-> > You're already selecting this from SCSI_UFS_QCOM and MSM_SDHCI_MSM, as I had
-> > suggested.  Isn't that enough?
+On Wed, Mar 08, 2023 at 11:54:25PM +0200, Abel Vesa wrote:
+> > Also, in both cases, how will the ICE clock be controlled?  Currently the ICE
+> > clock gets turned on and off by the UFS and eMMC drivers.  I don't see any logic
+> > in your new driver that turns the clock on and off.
 > 
-> We have the following:
-> (SCSI_UFS_QCOM && SCSI_UFS_CRYPTO) || (MMC_SDHCI_MSM && MMC_CRYPTO)
-> 
-> So lets take as example the scenario: (m && y) || (y && n).
-> 
-> The QCOM_INLINE_CRYPTO_ENGINE will be set to 'm' and the sdhci driver
-> will not be able to link properly since the ICE API is part of a module.
-> 
-> Therefore, if just one of SCSI_UFS_QCOM and MMC_SDHCI_MSM is built-in
-> and at least one of the crypto options are enabled, set the
-> QCOM_INLINE_CRYPTO_ENGINE to 'y' by default in order to make the
-> built-in one linkage will not fail.
-> 
+> I added clock enablement in v2. We can decide later on if the clocks
+> need to be disabled and when.
 
-That does not make sense.  If MMC_CRYPTO is disabled, then the sdhci-msm driver
-should not call any of the ICE APIs.  Likewise for ufs-qcom and SCSI_UFS_CRYPTO.
+To reduce power usage, the ICE clock should be disabled when the UFS (or eMMC)
+host controller clocks are disabled, as is currently the case.
+
+> > > +struct qcom_ice {
+> > > +	struct device *dev;
+> > > +	struct device_node *np;
+> > > +	void __iomem *base;
+> > > +
+> > > +	struct clk *core_clk;
+> > > +
+> > > +	bool supported;
+> > > +};
+> > 
+> > Shouldn't struct qcom_ice be private to the driver?
+> 
+> Nope. If the QCOM_INLINE_CRYPTO_ENGINE is not set, the consumer still
+> need to be able to call the ICE API (which in this case does really
+> nothing). Again, this allows the consumer drivers to keep clean of
+> unnecessary #ifdefs.
+
+But isn't struct qcom_ice only dereferenced by drivers/soc/qcom/ice.c?  If other
+.c files do not need it, the definition should be private to that file.
 
 - Eric
