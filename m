@@ -2,101 +2,134 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A593CC742A7
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 14:00:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04D10C74A44
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 14:00:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229897AbjCIOAD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 09:00:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49774 "EHLO
+        id S230219AbjCIOAE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 09:00:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49796 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231447AbjCIN7g (ORCPT
+        with ESMTP id S231438AbjCIN7g (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 08:59:36 -0500
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2189F1BACC
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 05:56:45 -0800 (PST)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-536c02eea4dso36545237b3.4
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 05:56:45 -0800 (PST)
+Received: from mail-pj1-x102c.google.com (mail-pj1-x102c.google.com [IPv6:2607:f8b0:4864:20::102c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51CDDF1840
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 05:56:39 -0800 (PST)
+Received: by mail-pj1-x102c.google.com with SMTP id q31-20020a17090a17a200b0023750b69614so2089810pja.5
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 05:56:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678370204;
+        d=linaro.org; s=google; t=1678370199;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Vhxj3g02U6JfJorCEqukLhEPbi5ScM6y20Fj/uWtxsc=;
-        b=M6OUagewNatTVBWogs7CL7Frl+ekF/MC2BZgxAEhzQWeyuSsXaRpkf4c99DXMGsgc6
-         GIkzhUNU2BURb1j3QuJVpX9peQPez+0A+Lwv3I+Pr4W55I9ScaDo7aFhChRp0sadmIiL
-         0lKL1TZ0CxVdMF8HoIQ/7ufJEuKA5Dra+MJuKUyHRmB9rs9CuHe4y70Qv5xVu1WwZK0B
-         1vXdXtOHzSOCFokSbLcL3GvOf4lTYuXwXKVhUa8ogJNH81T3PpCdFdiMh5PpBeOSTCOE
-         8RasSI/d7wlsztguwb8tqjCkoykqGh1gdjoQgiePJjOS2aABefBearXVltjCsf9a3xlk
-         bqLQ==
+        bh=e3FbhTd7SKq5Nq6l66tYdjvxBa3jbZG47YnMgPBOp9M=;
+        b=pjLw4fHDOZAVImaaThWQn+eRkVhUq3QsY9N9V/FjyUcna1ZcRc0B4Fu4bRsZuQXohI
+         MEcBnVbZ+jFbl4ESHWU7julFgpIVZ3jixTztpd2c7dnTbPkhsl7dlz7l46lIr0FRfDVn
+         0yqepLKil+EFrcFcNkOG/VbfQ09kPNr5AKzrn9VlJrUWEY09gUUYdb7oRtDbflirU9LB
+         BvFMIeruVyCnV/qbDp2ssBfOY7jLjc8q1vDVamNeB+eFvGCkCwJYAdM7qXLO3/35Nx+b
+         ZU7HCd1V0egVUzjzq+G4nJQR3rLBsv0WBTxSQjPWssenoaCpT9uXEuYfuZotExI3vQ8P
+         zzHQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678370204;
+        d=1e100.net; s=20210112; t=1678370199;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Vhxj3g02U6JfJorCEqukLhEPbi5ScM6y20Fj/uWtxsc=;
-        b=5t0VEF+hAOEOLMVZqlRiwAZOIddWMxzWZovr9n4Kyfdwu6SD5MDyplFLoGqsOZCzZV
-         Y0m6NObZgkxR/WEJp51MJ6Z/0GnTXF5KMO1X3JdxrREx2egiul0ofB1YgaR+K+uFm8i5
-         ttcapR8UhPlcoDhZDNM9qQCjEC3bPqsKwmIPM8iTWqqEoCgbu2pXsUv4LOctPe1HRezx
-         yS+aJGeNAfJNeUKnOZ/GOMvMI8O6yp3qkmkmoegRoySOWhakMK7+updmoFEihfMJAcSq
-         XJEjF1yCDnWKtdih24KdnrdTlUR+X9z/F/OV6TlszrW+L1AZfyyLvmZMes+KW5i3j7w0
-         xaZQ==
-X-Gm-Message-State: AO0yUKU4QzwN2ht0Y4514bFPdvW6/ilsCysj8BgBvvsY5qD31kYBej5k
-        OT2+54trBtHfqFXsjOR0fWgdGtS4qOX1M0MJtgWS+A==
-X-Google-Smtp-Source: AK7set8C8YjXMi5gSQYXdOX+ayCa5RjgmjqpOw5RNChqcaFChToV9jRVJLPT0IsYxq4ctbaJ0y/nV2OJRYi9K+NoTvc=
-X-Received: by 2002:a81:ad63:0:b0:52a:9f66:80c6 with SMTP id
- l35-20020a81ad63000000b0052a9f6680c6mr13521476ywk.9.1678370204353; Thu, 09
- Mar 2023 05:56:44 -0800 (PST)
+        bh=e3FbhTd7SKq5Nq6l66tYdjvxBa3jbZG47YnMgPBOp9M=;
+        b=XrMoQ40DIVigTesi/kE3hLx/VJXmZu3yVp7chGzH1t2EMeHNE70VcgqEz7smRqGbOp
+         +cNmiY0Jofllp8oehG9vkUlK2AfhA1cppw3ogb7G/dY68+x8HvsHWoRPmbkwTnITWhPZ
+         cU7zBaS5Udy8iDjLz5JnqDkbt7qvfXgHpE6aQ2OyYoo4TPaURuPZmJMVRwFXnxThAcBx
+         oC5YzfdXNKNt+Oz1up8os8SYT9ObcfZKdt8VGjdEp6PMHeQaQyXr50yEIC7Io17sHWB8
+         po+IreR7KuRU3y7MrwWn4QIr1+DJ0VYx4i/Ceb80OhuZUUpdR76Me44iDhhTik5TlxNc
+         eFEA==
+X-Gm-Message-State: AO0yUKUzyWKbInvs4LIEssT0ym7qgVR8G83wrM91P3hbqlzDsvXPCo/6
+        zmCP7ml1vSLjML/A8GoWbEnsw0BVwyIbEXP48M5eIQ==
+X-Google-Smtp-Source: AK7set+Erg/o6z5g7NHE2Sira6nwaIb6cAHL5jxRLmocnfnD6fomDHWggrFX0FogSL3QL5DazDMjOWoZydnLJbO8h5M=
+X-Received: by 2002:a17:90a:2aca:b0:237:5c37:d9ca with SMTP id
+ i10-20020a17090a2aca00b002375c37d9camr8194943pjg.4.1678370198666; Thu, 09 Mar
+ 2023 05:56:38 -0800 (PST)
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v2-0-6ec7cdb10ccf@baylibre.com> <20230203-evk-board-support-v2-3-6ec7cdb10ccf@baylibre.com>
-In-Reply-To: <20230203-evk-board-support-v2-3-6ec7cdb10ccf@baylibre.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Thu, 9 Mar 2023 14:56:33 +0100
-Message-ID: <CACRpkdb+CQFOW8zjK2pGhRX=tBUcJAyVN=ohEt8eccndA2nYpA@mail.gmail.com>
-Subject: Re: [PATCH v2 03/18] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
- add drive strength property
-To:     Alexandre Mergnat <amergnat@baylibre.com>
-Cc:     Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, Alexandre Bailon <abailon@baylibre.com>,
-        devicetree@vger.kernel.org,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-mediatek@lists.infradead.org,
-        Fabien Parent <fparent@baylibre.com>
+References: <20230223120450.16858-1-fredaibayhubtech@126.com>
+In-Reply-To: <20230223120450.16858-1-fredaibayhubtech@126.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 9 Mar 2023 14:56:02 +0100
+Message-ID: <CAPDyKFpJkRZVXFh7DmvEM7yDvZ3M14f0hkMvzyJp5NPT_a7ogg@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Fix SDR50 mode timing issue
+To:     fredaibayhubtech@126.com
+Cc:     linux-mmc@vger.kernel.org, linux.kernel@vger.kernel.org,
+        shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
+        fred.ai@bayhubtech.com, Adrian Hunter <adrian.hunter@intel.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Mar 7, 2023 at 2:18 PM Alexandre Mergnat <amergnat@baylibre.com> wrote:
++ Adrian (corrected the email)
 
-> This SoC is able to drive the following output current:
-> - 2 mA
-> - 4 mA
-> - 6 mA
-> - 8 mA
-> - 10 mA
-> - 12 mA
-> - 14 mA
-> - 16 mA
+On Thu, 23 Feb 2023 at 13:05, <fredaibayhubtech@126.com> wrote:
 >
-> Then drive-strength property is set with enum to reflect its HW capability.
+> From: Fred <fred.ai@bayhubtech.com>
 >
-> Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
+> Change SDR50 mode clock source from DLL output clock to PLL open clock
+> 1.HS200 and SDR104 mode select DLL output clock
+> 2.SDR50 mode select PLL open clock
+>
+> Signed-off-by: Fred <fred.ai@bayhubtech.com>
 
-Is this something I can apply directly to the pinctrl tree once the DT
-maintainers have
-had a chance to look at it?
+Looks like you posted this to an incorrect email to Adrian, perhaps
+re-post to include him.
 
-Yours,
-Linus Walleij
+Kind regards
+Uffe
+
+> ---
+> Change in V1
+> SDR50 mode select PLL open clock as its clock source.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 30 +++++++++++++++-------------
+>  1 file changed, 16 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 98cadff47b2b..620f52ad9667 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -339,22 +339,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         reg_val &= ~SDHCI_CLOCK_CARD_EN;
+>         sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+>
+> -       /* UnLock WP */
+> -       pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -       scratch_8 &= 0x7f;
+> -       pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> -
+> -       /* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> -       pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> -       reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> -       reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> -       pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+> +       if ((host->timing == MMC_TIMING_MMC_HS200) ||
+> +               (host->timing == MMC_TIMING_UHS_SDR104)) {
+> +               /* UnLock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 &= 0x7f;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>
+> -       /* Lock WP */
+> -       pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -       scratch_8 |= 0x80;
+> -       pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +               /* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> +               pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> +               reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> +               reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> +               pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+>
+> +               /* Lock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 |= 0x80;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +       }
+>         /* Start clk */
+>         reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>         reg_val |= SDHCI_CLOCK_CARD_EN;
+> --
+> 2.37.2
+>
