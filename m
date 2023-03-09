@@ -2,135 +2,204 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F41ECC64EC4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 10:31:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BD78EC61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 12:13:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229732AbjCIKbw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 05:31:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54646 "EHLO
+        id S229613AbjCIMNi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 07:13:38 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229680AbjCIKbv (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 05:31:51 -0500
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 408B52410A
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 02:31:50 -0800 (PST)
-Received: by mail-ed1-x532.google.com with SMTP id o12so4971183edb.9
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 02:31:50 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678357909;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=7CF8z9jOtSHETZ35/S5CyQ9qW+jDKWLcnRE2tTycAxk=;
-        b=lz2qXv02Qi0cPLKJ8qrTLl4kUwKDbhY5yYCkCKeO+SS273hkfqFOlMrGvpxRj8f1Bx
-         BiI6EVRN9nGDJTdNGPXh1msUnHkck/zaquorFZGQpIUCDDN3W/uqpBDSOR29It0BoNsG
-         cZLZ8fZYx/LdZcNQ+Pi1qhuSLRynQpoCYntoSrxF7KP2wGdzoWSJizeDiGBgMSE1PISH
-         aw6LYPGBlqG6Q2CSfwyq4LgIl/lfCASstHMuiYOdLDFjI16fVozkvDijYIMMF8wAXZQd
-         dtxLnPXKfcW1OsJk6VY4iXoV2m5MvlSvkEDJWWeJtMdJPy9AfhHBsQ/A+xrkLkXOOwn0
-         lMrA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678357909;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=7CF8z9jOtSHETZ35/S5CyQ9qW+jDKWLcnRE2tTycAxk=;
-        b=1OnmioHmGWrumpsTd4z7Slum62UMC1+TXMN5FZKdWDyCksLlQMiJbMLCWidYb3ogdu
-         VCaJdZ8dVcPhzBQsN8KMWvszVTC4q7pSIfYtrUP2gskk5Zc9S6FEILuzSuKw9sofVuHl
-         jksuBf1QEShv/1o4KlRdR5OInn7samr9KMFDKfe1USQpwSX7Z0VC+kTpV7ohOpguFrS7
-         AMv1hY6zZQ0AmwAlk0p0OGSdJJUgpL14L6LS6CP9tsvT1/KrWxZeLbp5v4FsHqEDokrW
-         ONfzYT311Ej1GxLezIHnuqzYR9YPMIcc77MaeWIfTJbc6pe+CZZ2/CG7anQCW/dV948o
-         NrOg==
-X-Gm-Message-State: AO0yUKUSC/hbzgDQoOV5CrIzq9kktStoSN89dHCpgUYw3Jzg7OItLRlM
-        qaHjcN0ADIZLmvyBW4bXR8H7nw==
-X-Google-Smtp-Source: AK7set9Dg6O4cO0YA5JkJqzyy2QEjbu78MIGWlRIZmzieAqsZkY6bSqEUGwojwHo/WXVK7gGEqKJlw==
-X-Received: by 2002:a17:907:7e82:b0:8f4:6efd:833f with SMTP id qb2-20020a1709077e8200b008f46efd833fmr26844959ejc.3.1678357908781;
-        Thu, 09 Mar 2023 02:31:48 -0800 (PST)
-Received: from ?IPV6:2a02:810d:15c0:828:7ee2:e73e:802e:45c1? ([2a02:810d:15c0:828:7ee2:e73e:802e:45c1])
-        by smtp.gmail.com with ESMTPSA id mb3-20020a170906eb0300b008e772c97db6sm8603741ejb.128.2023.03.09.02.31.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Mar 2023 02:31:48 -0800 (PST)
-Message-ID: <4eab53fc-2d26-dc93-3ae6-c0b2546ad3e0@linaro.org>
-Date:   Thu, 9 Mar 2023 11:31:46 +0100
+        with ESMTP id S229459AbjCIMNh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 07:13:37 -0500
+Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C78FD3CE1D;
+        Thu,  9 Mar 2023 04:13:35 -0800 (PST)
+Received: from [192.168.108.81] (unknown [213.36.7.13])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id EDA002003EF;
+        Thu,  9 Mar 2023 13:13:16 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1678364014;
+        bh=jspTNMqmiAfUcc7bb0/7iQoCw5A51k8LsKeTMnZiFno=;
+        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
+        b=CT3IxvdEnsUeQ9GIvmFA8GbayIHBlsZGLovYXBd4yECE0ZukuHtlwwTDuItCMlweL
+         KznLZoBWywgX2L8WD7uDdM1bYiIePR0NMTFGM/zcK19Ao/a0bL5M87JwgkpOIR3XQG
+         gj4S6bBgWgWJr6bj+RnIIBK5zBv5EgPvmmnCEGNasP+j+qFDhqNx6Xpvq7WwtXxvt7
+         US4t1SYwHX11tH5blJ+zdbU9p0c7Bzb2714uhBf4GyHEGj8DGOKnD/Gb4cxtKS9c2a
+         SqOw2i7OpyQsi0DtT0asDPhaQ4DDyueFqS3gfzKjwOiXSCUImUF4Hnba/7AvgynfRK
+         zg9vENDxijwuQ==
+Message-ID: <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
+Date:   Thu, 9 Mar 2023 13:13:16 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [RFC PATCH v2 7/7] arm64: dts: qcom: Add the Inline Crypto Engine
- nodes
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
 Content-Language: en-US
-To:     Abel Vesa <abel.vesa@linaro.org>,
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+To:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org
-References: <20230308155838.1094920-1-abel.vesa@linaro.org>
- <20230308155838.1094920-8-abel.vesa@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230308155838.1094920-8-abel.vesa@linaro.org>
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>
+Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+ <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
+ <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
+In-Reply-To: <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/03/2023 16:58, Abel Vesa wrote:
-> Drop all properties related to ICE from every UFS and SDCC node,
-> for all platforms, and add dedicated ICE nodes for each platform.
-> On most platforms, there is only one ICE instance, used by either
-> UFS or SDCC, but there are some platforms that have two separate
-> instances and, therefore, two separate nodes are added.
-> 
-> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> ---
-> 
-> Changes since v1:
->  * Made changes for all platforms that use ICE, as a single patch since
->    most changes look really similar.
-> 
->  arch/arm64/boot/dts/qcom/sdm630.dtsi | 18 +++++++++-----
->  arch/arm64/boot/dts/qcom/sdm670.dtsi | 15 +++++++----
->  arch/arm64/boot/dts/qcom/sdm845.dtsi | 21 +++++++++-------
->  arch/arm64/boot/dts/qcom/sm6115.dtsi | 37 +++++++++++++++++-----------
->  arch/arm64/boot/dts/qcom/sm6350.dtsi | 31 ++++++++++++++---------
->  arch/arm64/boot/dts/qcom/sm8150.dtsi | 21 +++++++++-------
->  arch/arm64/boot/dts/qcom/sm8450.dtsi | 22 ++++++++++-------
->  7 files changed, 102 insertions(+), 63 deletions(-)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-> index 5827cda270a0..2aed49104d9d 100644
-> --- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
-> @@ -1330,9 +1330,8 @@ opp-200000000 {
->  		sdhc_1: mmc@c0c4000 {
->  			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
->  			reg = <0x0c0c4000 0x1000>,
-> -			      <0x0c0c5000 0x1000>,
-> -			      <0x0c0c8000 0x8000>;
-> -			reg-names = "hc", "cqhci", "ice";
-> +			      <0x0c0c5000 0x1000>;
-> +			reg-names = "hc", "cqhci";
+On 09/03/2023 11:16, Marc Gonzalez wrote:
 
-I believe this will break the ICE on these platforms without valid
-reason. The commit msg does not explain why you do it or why this is
-necessary.
+> On 06/03/2023 11:24, Marc Gonzalez wrote:
+> 
+>> # cat /sys/bus/sdio/devices/mmc2:0001:1/uevent
+>> OF_NAME=wifi
+>> OF_FULLNAME=/soc/sd@ffe03000/wifi@1
+>> OF_COMPATIBLE_0=brcm,bcm4329-fmac
+>> OF_COMPATIBLE_N=1
+>> SDIO_CLASS=00
+>> SDIO_ID=02D0:AAE7
+>> SDIO_REVISION=0.0
+>> MODALIAS=sdio:c00v02D0dAAE7
+>>
+>> NB: 0xaae7 = 43751
+> 
+> I have run into another issue.
+> 
+> The WiFi device (and the mmc2 bus it sits on) don't show up at all
+> in the kernel log *unless* I add lots of debug output, such as with
+> #define DEBUG in drivers/base/dd.c
+> 
+> I think this points to some kind of race condition?
+> 
+> Neil suggested that maybe the host probes the mmc2 bus "too soon",
+> when the WiFi device is still powering up, which makes the entire
+> probe fail.
+> 
+> This patch appears to solve the symptom:
+> 
+> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+> index 6e5ea0213b477..999b3843c0d0b 100644
+> --- a/drivers/mmc/host/meson-gx-mmc.c
+> +++ b/drivers/mmc/host/meson-gx-mmc.c
+> @@ -1400,7 +1400,7 @@ static struct platform_driver meson_mmc_driver = {
+>  	.remove		= meson_mmc_remove,
+>  	.driver		= {
+>  		.name = DRIVER_NAME,
+> -		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
+> +		.probe_type = PROBE_FORCE_SYNCHRONOUS,
+>  		.of_match_table = meson_mmc_of_match,
+>  	},
+>  };
+> 
+> But this might just be delaying the probe enough for the device
+> to become ready?
 
-We already we received comment that we keep breaking Qualcomm platforms
-all the time and need to keep them in some shape.
+FWIW, the relevant device tree nodes are:
 
-Also, patchset is non-applicable in current set (breaks users) and
-neither commit nor cover letter mentions it.
+/* decompiled DTS */
 
-Best regards,
-Krzysztof
+		sd@ffe03000 {
+			compatible = "amlogic,meson-axg-mmc";
+			reg = <0x0 0xffe03000 0x0 0x800>;
+			interrupts = <0x0 0xbd 0x4>;
+			status = "okay";
+			clocks = <0x2 0x21 0x2 0x3c 0x2 0x2>;
+			clock-names = "core", "clkin0", "clkin1";
+			resets = <0x5 0x2c>;
+			amlogic,dram-access-quirk;
+			pinctrl-0 = <0x2c>;
+			pinctrl-1 = <0x2d>;
+			pinctrl-names = "default", "clk-gate";
+			#address-cells = <0x1>;
+			#size-cells = <0x0>;
+			bus-width = <0x4>;
+			cap-sd-highspeed;
+			sd-uhs-sdr50;
+			max-frequency = <0x5f5e100>;
+			non-removable;
+			disable-wp;
+			keep-power-in-suspend;
+			mmc-pwrseq = <0x2e>;
+			vmmc-supply = <0x2b>;
+			vqmmc-supply = <0x21>;
+
+			wifi@1 {
+				reg = <0x1>;
+				compatible = "brcm,bcm4329-fmac";
+			};
+		};
+
+
+/* original DTS */
+
+		sd_emmc_a: sd@ffe03000 {
+			compatible = "amlogic,meson-axg-mmc";
+			reg = <0x0 0xffe03000 0x0 0x800>;
+			interrupts = <GIC_SPI 189 IRQ_TYPE_LEVEL_HIGH>;
+			status = "disabled";
+			clocks = <&clkc CLKID_SD_EMMC_A>,
+				 <&clkc CLKID_SD_EMMC_A_CLK0>,
+				 <&clkc CLKID_FCLK_DIV2>;
+			clock-names = "core", "clkin0", "clkin1";
+			resets = <&reset RESET_SD_EMMC_A>;
+		};
+
+&sd_emmc_a {
+	status = "okay";
+	pinctrl-0 = <&sdio_pins>;
+	pinctrl-1 = <&sdio_clk_gate_pins>;
+	pinctrl-names = "default", "clk-gate";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	bus-width = <4>;
+	cap-sd-highspeed;
+	sd-uhs-sdr50;
+	max-frequency = <100000000>;
+
+	non-removable;
+	disable-wp;
+
+	/* WiFi firmware requires power to be kept while in suspend */
+	keep-power-in-suspend;
+
+	mmc-pwrseq = <&sdio_pwrseq>;
+
+	vmmc-supply = <&vddao_3v3>;
+	vqmmc-supply = <&vddio_ao1v8>;
+
+	brcmf: wifi@1 {
+		reg = <1>;
+		compatible = "brcm,bcm4329-fmac";
+	};
+};
+
+With an asynchronous probe, meson_mmc_probe() always succeeds,
+yet the WiFi card is not detected later on, even if I sleep
+1-2 seconds in meson_mmc_probe().
+
+[    0.879756] YO: meson_mmc_probe: ffe03000.sd
+[    0.914320] YO: meson_mmc_probe: ffe03000.sd ALL OK
+[    1.199170] YO: meson_mmc_probe: ffe07000.mmc
+[    1.232734] YO: meson_mmc_probe: ffe07000.mmc ALL OK
+
+Confused again...
+
+Regards
 
