@@ -2,76 +2,75 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40F8AC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 15:05:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F3D23C6FD1F
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 15:05:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230099AbjCIPFH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 10:05:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58834 "EHLO
+        id S231571AbjCIPFJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 10:05:09 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231923AbjCIPEg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 10:04:36 -0500
-Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6C1C6A9E4
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 07:02:40 -0800 (PST)
-Received: by mail-pg1-x52c.google.com with SMTP id 132so1200176pgh.13
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 07:02:40 -0800 (PST)
+        with ESMTP id S231483AbjCIPEh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 10:04:37 -0500
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6119FA337A
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 07:02:44 -0800 (PST)
+Received: by mail-pg1-x52e.google.com with SMTP id h31so1219060pgl.6
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 07:02:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678374160;
+        d=linaro.org; s=google; t=1678374164;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=rzsJZdpZ7LPDoQfu9o9lW5gjnwOdZ6t+X4Prhh6Xwh8=;
-        b=czM7cHYNWrkijeBV8VGOp7J3iol/R2pmJj5w+DjZF+eADrJovmHWPb2EhP1KZG8e/G
-         ZJmEC/RkA3Q1UGvqmrmOZDwWpq9N/+uim1BfEpp3eOb6G30OkPC/EgS7nrZWaSNLHEiZ
-         4rLBJdU/RpNn5kaddwjfzdFZRkF5z3QheH2rwo39cX4zccSfHZFRNoHwLFnuu/JXxYqg
-         89oTgAeGvxcadtlxYCMw8UrbWpqCvXyEK7FeN2OOezV/8mPw9siUXUyevPdEKS/MicLk
-         lWj/SClhiDYTgbQGGF3wcnXcrdTSAIwEhpdvjmF62Zgv4USje1OpSK5JEoA8mw9zFAIT
-         B6Zg==
+        bh=1UuKoyGa/qt1kM3jTrB1CNRJu1kNzDKksmWvUwV+P/A=;
+        b=Zzqnwhpg4tw7w750sAZLKYEw0E9PcI1zwKDNTHYtYRVoeEZGRVsU2mLBkSL7AqO9rs
+         ChTsDnZ1lDxM/JsAWdu6LyJ0FwD5duVhYoLdmq49489riMftNINZenMvTfxMDAAosK7y
+         QackZSS5/L74/o3gfOQkkaXSkKEBYuPALAyO8tKKEjsVykYeTjOI5wYH1F6bdnAKn8Nd
+         QU0wMFzFC5c1ol2a2qyPp0SqPxu/cDKon3VCtyjN/5ylB1JQj7+UFpvhSv1aVj870AYI
+         pC+R/JdSzQAbeL1s3yV76na79XnMXL077p/Y/0v97GKIII17GGcZSE0bkPH+HN5HNNIE
+         ObWQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678374160;
+        d=1e100.net; s=20210112; t=1678374164;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=rzsJZdpZ7LPDoQfu9o9lW5gjnwOdZ6t+X4Prhh6Xwh8=;
-        b=nZPIltJaxBBLbv92Ly5KlT2oolBO6IfudImYHEuxXjzZDe2cG0nsXC5h3GceyP3DRc
-         COv2PAUIHGw2cARFb5QdRgFRxfidxc53W3it3f7g5GTaLZn2xsb0/jQ3zWol6XS/aX3t
-         UVTULgZiIelNRQT1Foqb/BC8LQp5BniNL4uUWN0WGFeH1JYIG8GcKKYb32oiTMqH7t+L
-         ooGl8Vb6f9ostk8TtJSG1vuYgxPid55yttNDRJ06I2u+37Qatmd0Eek0c9kJiOCv/5ln
-         DXC5bkCjxo8SgGVgeK713iuocciFdjgZkJlz2nlbHd9YvlGYcfBGCtvlPdIxXXz6s5A8
-         TMfw==
-X-Gm-Message-State: AO0yUKW8eeDi7EFbL2wj4QnkFsdZ76kOVMrxwdPYBSvI0DDPHF0p0Ut7
-        fPYuMUYe1JkBFwLawsmVdsxLPkgv7TiZHKKjx0JePg==
-X-Google-Smtp-Source: AK7set/pg4ofM8YOtb7sDX31eSeRHJ4g+nh8yNyQMFWWgiMSTk2nHzbzts0k3Xa71amPJpu/lX7Qb7fMUm1R0Du6DvM=
-X-Received: by 2002:a63:f91d:0:b0:502:fd12:83ce with SMTP id
- h29-20020a63f91d000000b00502fd1283cemr7999126pgi.5.1678374160137; Thu, 09 Mar
- 2023 07:02:40 -0800 (PST)
+        bh=1UuKoyGa/qt1kM3jTrB1CNRJu1kNzDKksmWvUwV+P/A=;
+        b=V75bzq5UKg10IQDGlj61CRtG0Qq4Sa3i38K15Rk/XtroeEnIWp3YPPMbFcGyQjtnWx
+         DgS1N0EHptX6wOswfDK226Pu5KCyqVPDMMM3V+ZtwMdlygvZ1pir9eDGQUFj7Pr/C41C
+         tKLxIqMQtbx3W5OVOrkOVRZFNWcpR0jTu2xua+Oj+KIGhHmdkpwq1HjnIkC7lanF21wa
+         jUgQxpDeTq2wcE4Bz+yCRp93UX63pZIgxCR7kX9HauMafLjNPXA7uh7dG4j1eQ3UiOSO
+         m8bP5/7O7JPeYwsXOFMuT5SV3kXYxG7t/Wpv6dmvmPMGIyYex+pqMrHZEn0n4At0C+4C
+         bBYA==
+X-Gm-Message-State: AO0yUKXct1yY+wkZ8rZSzmn/I5ODHOWLTYis0UEGNrgR13gBHAz1ysFT
+        pAOoPfGWjBnBladTBar9wwjv1tAJjMHyC1IZ8P33cg==
+X-Google-Smtp-Source: AK7set+lo6zdvzScY98/uSXtHDj0DSNkjEIQjljB5eFKl0JoNA2NQIuovdW//0PP7VsuI8rp+IfYWZsaKFCtlXTcufA=
+X-Received: by 2002:a05:6a00:2253:b0:603:51de:c0dd with SMTP id
+ i19-20020a056a00225300b0060351dec0ddmr9217346pfu.6.1678374163837; Thu, 09 Mar
+ 2023 07:02:43 -0800 (PST)
 MIME-Version: 1.0
-References: <20230223141402.23979-1-swati.agarwal@amd.com>
-In-Reply-To: <20230223141402.23979-1-swati.agarwal@amd.com>
+References: <0c1e7440-f4bc-b48a-137f-58b75ac98550@gmail.com>
+In-Reply-To: <0c1e7440-f4bc-b48a-137f-58b75ac98550@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Mar 2023 16:02:03 +0100
-Message-ID: <CAPDyKFpSOs-xuQOssxPYrQPp=_qsAMem+LGYyqwSAkKqKXb7MQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
-To:     Swati Agarwal <swati.agarwal@amd.com>
-Cc:     adrian.hunter@intel.com, michal.simek@xilinx.com,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, git@amd.com
+Date:   Thu, 9 Mar 2023 16:02:07 +0100
+Message-ID: <CAPDyKFpscmx62XR6Dy4-sLBR8CB-zr7tvmuji4R_uG67eE88Xw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: allow errptr supply argument in, mmc_regulator_set_ocr
+To:     Heiner Kallweit <hkallweit1@gmail.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 23 Feb 2023 at 15:14, Swati Agarwal <swati.agarwal@amd.com> wrote:
+On Mon, 27 Feb 2023 at 22:02, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 >
-> Add support to read the optional "gate" clock property and request the
-> clock which will be used to ungate the DLL clock.
+> Basically all host drivers use code like this:
 >
-> For Xilinx platforms which has DLL module, dll clock must be
-> ungated/enabled when SD controller operates at higher frequencies like 50
-> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
-> clock from the driver.
+> if (!IS_ERR(mmc->supply.vmmc))
+>         mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0)
 >
-> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
+> Move the IS_ERR() check to mmc_regulator_set_ocr() to simplify
+> host driver code.
+>
+> Suggested-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 
 Applied for next, thanks!
 
@@ -80,34 +79,23 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
->  1 file changed, 7 insertions(+)
+>  drivers/mmc/core/regulator.c | 3 +++
+>  1 file changed, 3 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index 4eebbf801b41..1fd7528c14fc 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->         int ret;
->         struct device_node *node;
->         struct clk *clk_xin;
-> +       struct clk *clk_dll;
->         struct sdhci_host *host;
->         struct sdhci_pltfm_host *pltfm_host;
->         struct device *dev = &pdev->dev;
-> @@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
->                 goto clk_dis_ahb;
->         }
+> diff --git a/drivers/mmc/core/regulator.c b/drivers/mmc/core/regulator.c
+> index 609201a46..4fad81cd5 100644
+> --- a/drivers/mmc/core/regulator.c
+> +++ b/drivers/mmc/core/regulator.c
+> @@ -110,6 +110,9 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
+>         int                     result = 0;
+>         int                     min_uV, max_uV;
 >
-> +       clk_dll = devm_clk_get_optional_enabled(dev, "gate");
-> +       if (IS_ERR(clk_dll)) {
-> +               ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
-> +               goto clk_disable_all;
-> +       }
+> +       if (IS_ERR(supply))
+> +               return 0;
 > +
->         if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
->                 sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
+>         if (vdd_bit) {
+>                 mmc_ocrbitnum_to_vdd(vdd_bit, &min_uV, &max_uV);
 >
 > --
-> 2.17.1
+> 2.39.2
 >
