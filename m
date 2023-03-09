@@ -2,107 +2,80 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E0702C61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 06:49:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E876DC61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 07:30:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230214AbjCIGt1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 01:49:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55080 "EHLO
+        id S229996AbjCIHa1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 02:30:27 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49892 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229799AbjCIGt0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 01:49:26 -0500
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3734178C87;
-        Wed,  8 Mar 2023 22:49:25 -0800 (PST)
+        with ESMTP id S229852AbjCIHaY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 02:30:24 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BAA662FDE;
+        Wed,  8 Mar 2023 23:30:23 -0800 (PST)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C6831B81E6D;
-        Thu,  9 Mar 2023 06:48:53 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E4FF3C433D2;
-        Thu,  9 Mar 2023 06:48:47 +0000 (UTC)
+        by sin.source.kernel.org (Postfix) with ESMTPS id CA2E2CE228E;
+        Thu,  9 Mar 2023 07:30:21 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id DFAE8C433AA;
+        Thu,  9 Mar 2023 07:30:19 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678344532;
-        bh=AJVfjSxXcYK0gQiUUxvO9djvnoPGcPdXxAgjdYlMoLk=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=TfjM3ykd05WNsNTCgGh4gwUq7zCRq+j6JJ0315QgdeNERLSm1dn7L8sIK3V9nY+Gb
-         uO//nBDv6sfLYL/iM4aAlL9YssJq54H55HmqKv1RZ8hiCLCycpwU5CaTaFsAdU0WbG
-         ARgAeoMuy40GvRqD1IKYaFkgD8GZa+XCIhybyEQRz6YTJK+d0AIkyABDrNtB9+Pi1u
-         pE53NHKpMQ5GAzUDIVWbpy8yQoZYsKUnOuIqLOHIZLAIvQjB1ZeK4NnD45hmXnLUMJ
-         v1Yk/Fmjsqdtdv6WeW09srlYBOgbL45dEz7+8yDYW09bqouD9znIZBw1jU0v20IAQ+
-         +stcs56nyHHWw==
-Message-ID: <f2a11482-e5b4-027b-ba06-4d1302b658c3@kernel.org>
-Date:   Thu, 9 Mar 2023 07:48:45 +0100
+        s=k20201202; t=1678347019;
+        bh=pLu2EUjm0EUWWJ8Bq7EHf6FFQCmBn3/LFHoWP+HFOaM=;
+        h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
+        b=TRQuKn87mlc14w2ao4dBhX1cwTkgy+XNoKUXHEVGLpkVkwA961dPU03wWDtoaRCoA
+         KyBg+99tIz4BIEUt4yRJjLm4kakaKOhBW2bABom535uQzWsAYQzIuv2b1wGgbxVv1I
+         h99HVGsJH5XnneOV/MClhLyGOSNsyynn8EROjm+3GxkFpvcDqjJgsJvhOCzKNNWsad
+         T7AURXwMYPT/hjEhGGqeiGj61NUZLPgN9CxIxpcYVno1yA6HaIr2DDe7b/W8+MxBYs
+         sw45PH57JbFR6WTsYZyqATB+g1nHYdBuBvdZyVhillv7JBDYRYVwybV3DK0ya5tBtz
+         fVjbtpLQp/f2A==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id CB1B0E61B60;
+        Thu,  9 Mar 2023 07:30:19 +0000 (UTC)
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v1 2/4] Revert "dt-bindings: mmc: Add bindings for Intel
- Thunder Bay SoC"
-Content-Language: en-US
-To:     "A, Rashmi" <rashmi.a@intel.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "michal.simek@xilinx.com" <michal.simek@xilinx.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "kishon@ti.com" <kishon@ti.com>,
-        "vkoul@kernel.org" <vkoul@kernel.org>,
-        "andriy.shevchenko@linux.intel.com" 
-        <andriy.shevchenko@linux.intel.com>,
-        "linux-phy@lists.infradead.org" <linux-phy@lists.infradead.org>,
-        "mgross@linux.intel.com" <mgross@linux.intel.com>
-Cc:     "kris.pan@linux.intel.com" <kris.pan@linux.intel.com>,
-        "Hunter, Adrian" <adrian.hunter@intel.com>,
-        "Vaidya, Mahesh R" <mahesh.r.vaidya@intel.com>,
-        "Srikandan, Nandhini" <nandhini.srikandan@intel.com>,
-        "Itha, Vasavi V" <vasavi.v.itha@intel.com>,
-        "Demakkanavar, Kenchappa" <kenchappa.demakkanavar@intel.com>,
-        "Zhou, Furong" <furong.zhou@intel.com>,
-        "Sangannavar, Mallikarjunappa" 
-        <mallikarjunappa.sangannavar@intel.com>
-References: <20230124054427.28808-1-rashmi.a@intel.com>
- <20230124054427.28808-2-rashmi.a@intel.com>
- <c850df25-57b8-3172-8e5c-c466dc8556cd@kernel.org>
- <DM6PR11MB306560B02E22BC934A6BFD1F8CB59@DM6PR11MB3065.namprd11.prod.outlook.com>
-From:   Krzysztof Kozlowski <krzk@kernel.org>
-In-Reply-To: <DM6PR11MB306560B02E22BC934A6BFD1F8CB59@DM6PR11MB3065.namprd11.prod.outlook.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
+Subject: Re: [PATCH 00/11] tree-wide: remove support for Renesas R-Car H3 ES1
+From:   patchwork-bot+netdevbpf@kernel.org
+Message-Id: <167834701982.22182.9521763384207545073.git-patchwork-notify@kernel.org>
+Date:   Thu, 09 Mar 2023 07:30:19 +0000
+References: <20230307163041.3815-1-wsa+renesas@sang-engineering.com>
+In-Reply-To: <20230307163041.3815-1-wsa+renesas@sang-engineering.com>
+To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     linux-renesas-soc@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        iommu@lists.linux.dev, linux-kernel@vger.kernel.org,
+        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
+        netdev@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/03/2023 07:43, A, Rashmi wrote:
->>
->>> ---
->>>  .../devicetree/bindings/mmc/arasan,sdhci.yaml | 25
->>> -------------------
->>>  1 file changed, 25 deletions(-)
->>>
->>> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
->>> b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
->>> index 4053de758db6..0d5d21dd30bb 100644
->>> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
->>> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
->>> @@ -88,12 +88,6 @@ properties:
->>>          description:
->>>            For this device it is strongly suggested to include
->>>            arasan,soc-ctl-syscon.
->>> -      - items:
->>> -          - const: intel,thunderbay-sdhci-5.1   # Intel Thunder Bay eMMC PHY
->>> -          - const: arasan,sdhci-5.1
->>
->> Instead should be made rather deprecated, unless you are sure there is no single
->> person in the world using the bindings (e.g. with BSD or bootloader)?
-> May I know what has to be done in order to deprecate the complete patchset?
+Hello:
 
-deprecated: true
+This patch was applied to netdev/net-next.git (main)
+by Jakub Kicinski <kuba@kernel.org>:
 
-(git grep for examples)
+On Tue,  7 Mar 2023 17:30:28 +0100 you wrote:
+> Because H3 ES1 becomes an increasing maintenance burden and was only available
+> to a development group, we decided to remove upstream support for it. Here are
+> the patches to remove driver changes. Review tags have been gathered before
+> during an internal discussion. Only change since the internal version is a
+> plain rebase to v6.3-rc1. A branch with all removals is here:
+> 
+> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/h3es1-removal
+> 
+> [...]
 
-Best regards,
-Krzysztof
+Here is the summary with links:
+  - [07/11] ravb: remove R-Car H3 ES1.* handling
+    https://git.kernel.org/netdev/net-next/c/6bf0ad7f2917
+
+You are awesome, thank you!
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/patchwork/pwbot.html
+
 
