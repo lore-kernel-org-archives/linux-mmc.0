@@ -2,108 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42F3FC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 14:55:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 45B2FC742A7
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 15:01:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232181AbjCIOzg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 09:55:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47984 "EHLO
+        id S232086AbjCIPB2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 10:01:28 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232339AbjCIOy7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 09:54:59 -0500
-Received: from mail-oi1-x236.google.com (mail-oi1-x236.google.com [IPv6:2607:f8b0:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D3F1F4B56
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 06:51:56 -0800 (PST)
-Received: by mail-oi1-x236.google.com with SMTP id t22so1790755oiw.12
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 06:51:56 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1678373516;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Gpqy2UwJbTsT8CSlsBkekwaizPbfI6waBJSct+QDKo8=;
-        b=7VnZ8eoq8JCRR9LWSoq6SXSKIYIRedzcewZzSE9gKx6AQQB2Ax7dwKBcAYwJrjlsWs
-         4TCezR69X8MwfD4+CKaz/SObaltdvIIieLVdJ+BWlplOPFiALrUJwDgjMU47Vf51qRDl
-         xdFrwA1rnPNMA0GVzeDnkpXSGfyag6vAi04knNO8VIXj+D5n+705no78/qGHcnD2tLqc
-         nohnomuGXgF8COo7QbluFk8QfItIs5fLy7I2ZnAC1v81iSP6Ds1uiOBx5oP32kgrJXPW
-         yTtqYLrIVGryvFjGoykGRd0Kl8dTZeGhvhFDQoCSZrB7mIPyeb5SEOWrMbUnxfz7JmgZ
-         oQYA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678373516;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Gpqy2UwJbTsT8CSlsBkekwaizPbfI6waBJSct+QDKo8=;
-        b=eei8xALeu9FvfgrUwAxo+tQPy7wMWnTTv/kqvEbufF2L7P3BUA97DCwsp+OK0sUU/Q
-         op26+Pd3ASIm9sCqeTClYvh+a7mt43HZFIceodJ+m2NBggOfUhlutSxV+7VAttJsi0Iu
-         5b9qv89g/SwckwQ06M/8Jhfl96YqzeX4dKQaxb3baDjLq+K0INvXkU84dDeJH7zdNHpq
-         VBzS673arTX/do4EPSPWk8QEFXqVDmJ2yqi024gDAf2oJcZcoQweZYrlVhgtQ3Z2K9yw
-         7iopzQW5feIERbfkFSEFp6gI36iWMAzjY4ON4rRogKwQWWLt1HeLiKNspKwxyHkTahs/
-         8p3g==
-X-Gm-Message-State: AO0yUKXdm9EwC5zb7AQr1Hq8ZDrmIJKuf6DkUSd/RyTzfxVwf8xYdB6C
-        SA7w8ISE1YduoxgFAA1OZxBr8rP01ET/lrYSKPZUcg==
-X-Google-Smtp-Source: AK7set8A8FpW9dqaR73G09blcvv/Ti7DIE1vGNLlncw0hLE8FnQCoXHRSlvX0YUqfVCqYXdazGxGSi3CnqOThNIO2y8=
-X-Received: by 2002:a05:6808:2208:b0:37a:2bed:5756 with SMTP id
- bd8-20020a056808220800b0037a2bed5756mr12243997oib.0.1678373515531; Thu, 09
- Mar 2023 06:51:55 -0800 (PST)
+        with ESMTP id S232112AbjCIPBE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 10:01:04 -0500
+Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7CEBC62DB2;
+        Thu,  9 Mar 2023 06:57:46 -0800 (PST)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by sin.source.kernel.org (Postfix) with ESMTPS id 8FDCDCE2441;
+        Thu,  9 Mar 2023 14:57:44 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id AE7DEC433EF;
+        Thu,  9 Mar 2023 14:57:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1678373862;
+        bh=lrCJhGy31REAFHmpoQYpEnNmpg1BxinPjcIzS4zLQwc=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=dwRK5TvFHEOjFA1gJxyzNNpaoZTlAyUA24jtVNCJCjO9bjjEnNS6Hzvbcwkj5rQ7U
+         x6Aj/t6wb89PkNSrXXWha6lDESk8LQoGk/CTDCYQLZwj8b3CvyX9QknJmnWxAvCOEC
+         dxB5eqLSRu9mRE0aKKL2AIrXGlKd7GIjoXdt9/Ou3bFB+NHs9VsMnOedyDU6C8Ub4V
+         Z6MCKmDWKg0KGlhceC4CSE5Rlyy5SG+LNT4ZMFQHR2yeMUeOlBzJR8OmFEfFRxLrVl
+         Wbn3CWxeMXstVI9B3TDgUR+0fwHdclevSCbytb0fwuwmsO3z2p72+4iB/kJ1UFhCVT
+         qOAS9y0fJKdhg==
+Message-ID: <50c2b5de-4aed-ebd5-86e9-55813e740869@kernel.org>
+Date:   Thu, 9 Mar 2023 15:57:36 +0100
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v2-0-6ec7cdb10ccf@baylibre.com>
- <20230203-evk-board-support-v2-17-6ec7cdb10ccf@baylibre.com> <0fb37a8f-f284-76f2-e2f3-ff0f23eaa200@collabora.com>
-In-Reply-To: <0fb37a8f-f284-76f2-e2f3-ff0f23eaa200@collabora.com>
-From:   =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>
-Date:   Thu, 9 Mar 2023 15:51:44 +0100
-Message-ID: <CAP2ifjOtORrGKEBMw-CzPR4B8CPDaRKnqKHyKL7mC_8qH08=iA@mail.gmail.com>
-Subject: Re: [PATCH v2 17/18] arm64: dts: mediatek: fix systimer properties
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-Cc:     Alexandre Mergnat <amergnat@baylibre.com>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Rob Herring <robh+dt@kernel.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        linux-mmc@vger.kernel.org, Alexandre Bailon <abailon@baylibre.com>,
-        devicetree@vger.kernel.org,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-gpio@vger.kernel.org, linux-watchdog@vger.kernel.org,
-        linux-mediatek@lists.infradead.org,
-        Fabien Parent <fparent@baylibre.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v1 2/4] Revert "dt-bindings: mmc: Add bindings for Intel
+ Thunder Bay SoC"
+Content-Language: en-US
+To:     Adrian Hunter <adrian.hunter@intel.com>, rashmi.a@intel.com,
+        ulf.hansson@linaro.org, michal.simek@xilinx.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        robh+dt@kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kishon@ti.com, vkoul@kernel.org,
+        andriy.shevchenko@linux.intel.com, linux-phy@lists.infradead.org,
+        mgross@linux.intel.com
+Cc:     kris.pan@linux.intel.com, mahesh.r.vaidya@intel.com,
+        nandhini.srikandan@intel.com, vasavi.v.itha@intel.com,
+        kenchappa.demakkanavar@intel.com, furong.zhou@intel.com,
+        mallikarjunappa.sangannavar@intel.com
+References: <20230124054427.28808-1-rashmi.a@intel.com>
+ <20230124054427.28808-2-rashmi.a@intel.com>
+ <c850df25-57b8-3172-8e5c-c466dc8556cd@kernel.org>
+ <ef2f8faf-76cc-d221-8281-cc7b8cb68485@intel.com>
+From:   Krzysztof Kozlowski <krzk@kernel.org>
+In-Reply-To: <ef2f8faf-76cc-d221-8281-cc7b8cb68485@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
+On 09/03/2023 15:12, Adrian Hunter wrote:
+> On 24/01/23 13:31, Krzysztof Kozlowski wrote:
+>> On 24/01/2023 06:44, rashmi.a@intel.com wrote:
+>>> From: "A, Rashmi" <rashmi.a@intel.com>
+>>>
+>>> This reverts commit ab991c05c42853f0b6110022db9bf30fcc6323dd.
+>>
+>> Please use scripts/get_maintainers.pl to get a list of necessary people
+>> and lists to CC.  It might happen, that command when run on an older
+>> kernel, gives you outdated entries.  Therefore please be sure you base
+>> your patches on recent Linux kernel.
+>>
+>>>
+>>> Revert Thunder Bay specific code as the product got cancelled
+>>> and there are no end customers.
+>>>
+>>> Signed-off-by: A, Rashmi <rashmi.a@intel.com>
+>>> Reviewed-by: Hunter, Adrian <adrian.hunter@intel.com>wq
+>>
+>> Stray characters.
+>>
+>>> ---
+>>>  .../devicetree/bindings/mmc/arasan,sdhci.yaml | 25 -------------------
+>>>  1 file changed, 25 deletions(-)
+>>>
+>>> diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+>>> index 4053de758db6..0d5d21dd30bb 100644
+>>> --- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+>>> +++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
+>>> @@ -88,12 +88,6 @@ properties:
+>>>          description:
+>>>            For this device it is strongly suggested to include
+>>>            arasan,soc-ctl-syscon.
+>>> -      - items:
+>>> -          - const: intel,thunderbay-sdhci-5.1   # Intel Thunder Bay eMMC PHY
+>>> -          - const: arasan,sdhci-5.1
+>>
+>> Instead should be made rather deprecated, unless you are sure there is
+>> no single person in the world using the bindings (e.g. with BSD or
+>> bootloader)?
+> 
+> I am sorry but this is not clear to me.  As I understand it,
+> the hardware was never released, so the binding serves no
+> purpose.  Should it be removed or "deprecated"?
 
-On Thu, Mar 9, 2023 at 2:32=E2=80=AFPM AngeloGioacchino Del Regno
-<angelogioacchino.delregno@collabora.com> wrote:
->
-> Il 07/03/23 14:17, Alexandre Mergnat ha scritto:
-> > From: Amjad Ouled-Ameur <aouledameur@baylibre.com>
-> >
-> > MT8365 has a SYST timer (System Timer), therefore the compatible node
-> > should be "mediatek,mt6765-timer" instead of "mediatek,mt6795-systimer"
-> > (which corresponds to ARM/ARM64 System Timer).
->
-> So this is not a CPUXGPT, not a GPT, but a SYST?
->
-> At this point, this should not be even introduced because commit [1] is
-> not in linux-next yet.
->
-> [1]: https://lore.kernel.org/all/20230125143503.1015424-10-bero@baylibre.=
-com/
+Hm, commit msg said cancelled and I understood that it was released and
+then got cancelled. But indeed maybe just remove it.
 
-I've posted a new revision of this patchset containing the systimer fix.
+Best regards,
+Krzysztof
 
-https://lore.kernel.org/linux-mediatek/20230309143459.401783-1-bero@baylibr=
-e.com/
-
-ttyl
-bero
