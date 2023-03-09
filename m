@@ -2,204 +2,225 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BD78EC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 12:13:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 01F3AC6FD1F
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 12:14:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229613AbjCIMNi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 07:13:38 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51834 "EHLO
+        id S229651AbjCIMOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 07:14:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53556 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229459AbjCIMNh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 07:13:37 -0500
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C78FD3CE1D;
-        Thu,  9 Mar 2023 04:13:35 -0800 (PST)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id EDA002003EF;
-        Thu,  9 Mar 2023 13:13:16 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678364014;
-        bh=jspTNMqmiAfUcc7bb0/7iQoCw5A51k8LsKeTMnZiFno=;
-        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-        b=CT3IxvdEnsUeQ9GIvmFA8GbayIHBlsZGLovYXBd4yECE0ZukuHtlwwTDuItCMlweL
-         KznLZoBWywgX2L8WD7uDdM1bYiIePR0NMTFGM/zcK19Ao/a0bL5M87JwgkpOIR3XQG
-         gj4S6bBgWgWJr6bj+RnIIBK5zBv5EgPvmmnCEGNasP+j+qFDhqNx6Xpvq7WwtXxvt7
-         US4t1SYwHX11tH5blJ+zdbU9p0c7Bzb2714uhBf4GyHEGj8DGOKnD/Gb4cxtKS9c2a
-         SqOw2i7OpyQsi0DtT0asDPhaQ4DDyueFqS3gfzKjwOiXSCUImUF4Hnba/7AvgynfRK
-         zg9vENDxijwuQ==
-Message-ID: <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
-Date:   Thu, 9 Mar 2023 13:13:16 +0100
+        with ESMTP id S229459AbjCIMOV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 07:14:21 -0500
+Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40693E9CEB;
+        Thu,  9 Mar 2023 04:14:19 -0800 (PST)
+Received: by mail-lj1-x22f.google.com with SMTP id i20so1572484lja.11;
+        Thu, 09 Mar 2023 04:14:19 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112; t=1678364057;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=TRXggi04xWYcHaVC0FAY4i7eTSbEWaqGbUlV8GQrxI4=;
+        b=bxBUebwN1xXJ09HJTDv0z93xzMLucpoMFhXNI+YUQIVAP2r7PEpV1Xf5xzZLwmKQgB
+         d0XUPU7ok6Kokt5OEFLypMLwC0/aU7RIYfZ+Gux/weU9N9swKdkkUeC6IQgIXeGBsaSQ
+         vlt+QYyWhSPDp4E4O6odvBZ3BZ4AooMhCVA5LUn89zi3LhISB50/wQKHD95VVcn1C3vi
+         zriqcDD7xWeXQpb/UYVkj1RvsfGW/GFO9e3izMihHvE5m8u7Sze31uNwUqKb31xCxu2l
+         B6If0L18dmMroxcDmaANwfYijq9e8OgwTodXbsZ6THXf4ub8K3mL16pOqI50WdSxSmTV
+         0ahQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678364057;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=TRXggi04xWYcHaVC0FAY4i7eTSbEWaqGbUlV8GQrxI4=;
+        b=MUrLH+EuI/LEWhY2xqB+3tZVVPTzBlfvO2I3PH1PcEbXEQJVYl+tq6FqhUtB/9+xxN
+         xF4Da8iTCej1tv8t8bfCzHDmv3X/E0z2ayGo4pKt/ju0eoT0mLooSIp6EMtbNk01Si2K
+         CZNb9/09O+NvG0nONjSnVea5zQfbFlbVSNWRQDiTfAty56MtJmDQBmgya8G5Xw9dyXWx
+         lbGPJIHF6uBTjl7Ov/j0Gju0ttyfNRdqEzFX5OGo18XceFLQUkvFKHmcMMxepBr8xPBB
+         zo0RtB8Lb1n3uwdIqBNFv9aCNc2e1XsBnsAvDn+TK76ULEdV4E8IMf2GzOUFkILDGIZP
+         DGFg==
+X-Gm-Message-State: AO0yUKWiBtflbNNE/s5zdlY8VYJnRK04ccYSQK+4yg6BUviCgxKf6wBg
+        uzwwf0Vmh+KiEBMPo236+6c=
+X-Google-Smtp-Source: AK7set+Wn2YaPYZxCfuLq20impmYZwOoNM9/3S/XAhSmjPQfeIyuFw/PnT2wNQerWfyd7hGv/3meMw==
+X-Received: by 2002:a05:651c:105c:b0:295:a3a0:ea95 with SMTP id x28-20020a05651c105c00b00295a3a0ea95mr5812836ljm.42.1678364057335;
+        Thu, 09 Mar 2023 04:14:17 -0800 (PST)
+Received: from mobilestation ([95.79.133.202])
+        by smtp.gmail.com with ESMTPSA id z4-20020a2eb524000000b002934e1407desm2940222ljm.43.2023.03.09.04.14.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 09 Mar 2023 04:14:16 -0800 (PST)
+Date:   Thu, 9 Mar 2023 15:14:14 +0300
+From:   Serge Semin <fancer.lancer@gmail.com>
+To:     Brad Larson <blarson@amd.com>
+Cc:     adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, broonie@kernel.org,
+        catalin.marinas@arm.com, davidgow@google.com,
+        devicetree@vger.kernel.org, gerg@linux-m68k.org, gsomlo@gmail.com,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, lee@kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+        p.yadav@ti.com, p.zabel@pengutronix.de, piotrs@cadence.com,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
+        yamada.masahiro@socionext.com
+Subject: Re: [PATCH v10 10/15] spi: dw: Add support for AMD Pensando Elba SoC
+Message-ID: <20230309121414.6ay47dn57f2p26nh@mobilestation>
+References: <20230306160017.ptd3ogundxvus5zm@mobilestation>
+ <20230307022002.28874-1-blarson@amd.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-Content-Language: en-US
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-To:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>
-Cc:     linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
- <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
-In-Reply-To: <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230307022002.28874-1-blarson@amd.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 09/03/2023 11:16, Marc Gonzalez wrote:
-
-> On 06/03/2023 11:24, Marc Gonzalez wrote:
+On Mon, Mar 06, 2023 at 06:20:02PM -0800, Brad Larson wrote:
+> On Mon, Mar 06, 2023 at 16:00, Serge Semin wrote:
+> > On Sun, Mar 05, 2023 at 08:07:34PM -0800, Brad Larson wrote:
+> >> The AMD Pensando Elba SoC includes a DW apb_ssi v4 controller
+> >> with device specific chip-select control.  The Elba SoC
+> >> provides four chip-selects where the native DW IP supports
+> >> two chip-selects.  The Elba DW_SPI instance has two native
+> >> CS signals that are always overridden.
+> >> 
+> >> Signed-off-by: Brad Larson <blarson@amd.com>
+> >> ---
+> >> 
+> >> v10 changes:
+> >> - Delete struct dw_spi_elba, use regmap directly in priv
+> >> 
+> >> v9 changes:
+> >> - Add use of macros GENMASK() and BIT()
+> >> - Change ELBA_SPICS_SHIFT() to ELBA_SPICS_OFFSET()
+> >> 
+> >> ---
+> >>  drivers/spi/spi-dw-mmio.c | 65 +++++++++++++++++++++++++++++++++++++++
+> >>  1 file changed, 65 insertions(+)
+> >> 
+> >> diff --git a/drivers/spi/spi-dw-mmio.c b/drivers/spi/spi-dw-mmio.c
+> >> index 26c40ea6dd12..2076cb83a11b 100644
+> >> --- a/drivers/spi/spi-dw-mmio.c
+> >> +++ b/drivers/spi/spi-dw-mmio.c
+> >> @@ -53,6 +53,20 @@ struct dw_spi_mscc {
+> >>  	void __iomem        *spi_mst; /* Not sparx5 */
+> >>  };
+> >>  
+> >> +/*
+> >> + * Elba SoC does not use ssi, pin override is used for cs 0,1 and
+> >> + * gpios for cs 2,3 as defined in the device tree.
+> >> + *
+> >> + * cs:  |       1               0
+> >> + * bit: |---3-------2-------1-------0
+> >> + *      |  cs1   cs1_ovr   cs0   cs0_ovr
+> >> + */
+> >> +#define ELBA_SPICS_REG			0x2468
+> >> +#define ELBA_SPICS_OFFSET(cs)		((cs) << 1)
+> >> +#define ELBA_SPICS_MASK(cs)		(GENMASK(1, 0) << ELBA_SPICS_OFFSET(cs))
+> >> +#define ELBA_SPICS_SET(cs, val)		\
+> >> +		((((val) << 1) | BIT(0)) << ELBA_SPICS_OFFSET(cs))
+> >> +
+> >>  /*
+> >>   * The Designware SPI controller (referred to as master in the documentation)
+> >>   * automatically deasserts chip select when the tx fifo is empty. The chip
+> >> @@ -237,6 +251,56 @@ static int dw_spi_canaan_k210_init(struct platform_device *pdev,
+> >>  	return 0;
+> >>  }
+> >>  
+> >> +static void dw_spi_elba_override_cs(struct regmap *syscon, int cs, int enable)
+> >> +{
+> >> +	regmap_update_bits(syscon, ELBA_SPICS_REG, ELBA_SPICS_MASK(cs),
+> >> +			   ELBA_SPICS_SET(cs, enable));
+> >> +}
+> >> +
+> >> +static void dw_spi_elba_set_cs(struct spi_device *spi, bool enable)
+> >> +{
+> >> +	struct dw_spi *dws = spi_master_get_devdata(spi->master);
+> >> +	struct dw_spi_mmio *dwsmmio = container_of(dws, struct dw_spi_mmio, dws);
+> >> +	struct regmap *syscon = dwsmmio->priv;
+> >> +	u8 cs;
+> >> +
+> >> +	cs = spi->chip_select;
+> >> +	if (cs < 2)
+> >> +		dw_spi_elba_override_cs(syscon, spi->chip_select, enable);
+> >> +
+> >> +	/*
+> >> +	 * The DW SPI controller needs a native CS bit selected to start
+> >> +	 * the serial engine.
+> >> +	 */
+> >> +	spi->chip_select = 0;
+> >> +	dw_spi_set_cs(spi, enable);
+> >> +	spi->chip_select = cs;
+> >> +}
+> >> +
+> >> +static int dw_spi_elba_init(struct platform_device *pdev,
+> >> +			    struct dw_spi_mmio *dwsmmio)
+> >> +{
+> >> +	const char *syscon_name = "amd,pensando-elba-syscon";
+> >
+> >> +	struct device_node *np = pdev->dev.of_node;
+> >
+> > Drop this since it's used only once below. 
+> >
 > 
->> # cat /sys/bus/sdio/devices/mmc2:0001:1/uevent
->> OF_NAME=wifi
->> OF_FULLNAME=/soc/sd@ffe03000/wifi@1
->> OF_COMPATIBLE_0=brcm,bcm4329-fmac
->> OF_COMPATIBLE_N=1
->> SDIO_CLASS=00
->> SDIO_ID=02D0:AAE7
->> SDIO_REVISION=0.0
->> MODALIAS=sdio:c00v02D0dAAE7
->>
->> NB: 0xaae7 = 43751
+> Removed
 > 
-> I have run into another issue.
+> >> +	struct device_node *node;                                         
 > 
-> The WiFi device (and the mmc2 bus it sits on) don't show up at all
-> in the kernel log *unless* I add lots of debug output, such as with
-> #define DEBUG in drivers/base/dd.c
+> Renamed *node to *np
 > 
-> I think this points to some kind of race condition?
+> >> +	struct regmap *syscon;                                            
+> >> +                                                                       
+> >> -	node = of_parse_phandle(np, syscon_name, 0);                      
+> >
+> >	node = of_parse_phandle(dev_of_node(pdev->dev), syscon_name, 0);
+> >
+> > +	if (!node)
+> >
+> >> +		return dev_err_probe(&pdev->dev, -ENODEV, "failed to find %s\n",
+> >> +				     syscon_name);
+> >
+> > Hm, using dev_err_probe() with known error value seems overkill.
 > 
-> Neil suggested that maybe the host probes the mmc2 bus "too soon",
-> when the WiFi device is still powering up, which makes the entire
-> probe fail.
+> Changed to: return -ENODEV
 > 
-> This patch appears to solve the symptom:
+> >> +
+> >
+> >> +	syscon = syscon_node_to_regmap(node);
+> >> +	if (IS_ERR(syscon))
+> >> +		return dev_err_probe(&pdev->dev, PTR_ERR(syscon),
+> >> +				     "syscon regmap lookup failed\n");
+> >
+> > of_node_put() is missing in the error and success paths.
 > 
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 6e5ea0213b477..999b3843c0d0b 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -1400,7 +1400,7 @@ static struct platform_driver meson_mmc_driver = {
->  	.remove		= meson_mmc_remove,
->  	.driver		= {
->  		.name = DRIVER_NAME,
-> -		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
-> +		.probe_type = PROBE_FORCE_SYNCHRONOUS,
->  		.of_match_table = meson_mmc_of_match,
->  	},
->  };
+> Result of the above changes are:
 > 
-> But this might just be delaying the probe enough for the device
-> to become ready?
+> +       const char *syscon_name = "amd,pensando-elba-syscon";
+> +       struct device_node *np;
+> +       struct regmap *syscon;
+> +
 
-FWIW, the relevant device tree nodes are:
+> +       np = of_parse_phandle(pdev->dev.of_node, syscon_name, 0);
+> +       if (!np)
+> +               return -ENODEV;
+> +
+> +       syscon = syscon_node_to_regmap(np);
+> +       of_node_put(np);
+> +       if (IS_ERR(syscon))
+> +               return dev_err_probe(&pdev->dev, PTR_ERR(syscon),
+> +                                    "syscon regmap lookup failed\n");
 
-/* decompiled DTS */
+As Andy correctly noted this can be fully converted to just a single call:
+syscon_regmap_lookup_by_phandle().
 
-		sd@ffe03000 {
-			compatible = "amlogic,meson-axg-mmc";
-			reg = <0x0 0xffe03000 0x0 0x800>;
-			interrupts = <0x0 0xbd 0x4>;
-			status = "okay";
-			clocks = <0x2 0x21 0x2 0x3c 0x2 0x2>;
-			clock-names = "core", "clkin0", "clkin1";
-			resets = <0x5 0x2c>;
-			amlogic,dram-access-quirk;
-			pinctrl-0 = <0x2c>;
-			pinctrl-1 = <0x2d>;
-			pinctrl-names = "default", "clk-gate";
-			#address-cells = <0x1>;
-			#size-cells = <0x0>;
-			bus-width = <0x4>;
-			cap-sd-highspeed;
-			sd-uhs-sdr50;
-			max-frequency = <0x5f5e100>;
-			non-removable;
-			disable-wp;
-			keep-power-in-suspend;
-			mmc-pwrseq = <0x2e>;
-			vmmc-supply = <0x2b>;
-			vqmmc-supply = <0x21>;
+and replace pdev->dev.of_node with dev_of_node(pdev->dev).
 
-			wifi@1 {
-				reg = <0x1>;
-				compatible = "brcm,bcm4329-fmac";
-			};
-		};
+-Serge(y)
 
-
-/* original DTS */
-
-		sd_emmc_a: sd@ffe03000 {
-			compatible = "amlogic,meson-axg-mmc";
-			reg = <0x0 0xffe03000 0x0 0x800>;
-			interrupts = <GIC_SPI 189 IRQ_TYPE_LEVEL_HIGH>;
-			status = "disabled";
-			clocks = <&clkc CLKID_SD_EMMC_A>,
-				 <&clkc CLKID_SD_EMMC_A_CLK0>,
-				 <&clkc CLKID_FCLK_DIV2>;
-			clock-names = "core", "clkin0", "clkin1";
-			resets = <&reset RESET_SD_EMMC_A>;
-		};
-
-&sd_emmc_a {
-	status = "okay";
-	pinctrl-0 = <&sdio_pins>;
-	pinctrl-1 = <&sdio_clk_gate_pins>;
-	pinctrl-names = "default", "clk-gate";
-	#address-cells = <1>;
-	#size-cells = <0>;
-
-	bus-width = <4>;
-	cap-sd-highspeed;
-	sd-uhs-sdr50;
-	max-frequency = <100000000>;
-
-	non-removable;
-	disable-wp;
-
-	/* WiFi firmware requires power to be kept while in suspend */
-	keep-power-in-suspend;
-
-	mmc-pwrseq = <&sdio_pwrseq>;
-
-	vmmc-supply = <&vddao_3v3>;
-	vqmmc-supply = <&vddio_ao1v8>;
-
-	brcmf: wifi@1 {
-		reg = <1>;
-		compatible = "brcm,bcm4329-fmac";
-	};
-};
-
-With an asynchronous probe, meson_mmc_probe() always succeeds,
-yet the WiFi card is not detected later on, even if I sleep
-1-2 seconds in meson_mmc_probe().
-
-[    0.879756] YO: meson_mmc_probe: ffe03000.sd
-[    0.914320] YO: meson_mmc_probe: ffe03000.sd ALL OK
-[    1.199170] YO: meson_mmc_probe: ffe07000.mmc
-[    1.232734] YO: meson_mmc_probe: ffe07000.mmc ALL OK
-
-Confused again...
-
-Regards
-
+> 
+> Regards,
+> Brad
