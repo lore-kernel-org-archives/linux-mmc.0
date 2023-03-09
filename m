@@ -2,108 +2,145 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1B206C64EC4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 08:37:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5264C6FD19
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 08:47:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230174AbjCIIhD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 03:37:03 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43514 "EHLO
+        id S229937AbjCIIrH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 03:47:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229926AbjCIIgh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 03:36:37 -0500
-Received: from wout1-smtp.messagingengine.com (wout1-smtp.messagingengine.com [64.147.123.24])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9ECF8E484E;
-        Thu,  9 Mar 2023 00:34:55 -0800 (PST)
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
-        by mailout.west.internal (Postfix) with ESMTP id 234FE3200958;
-        Thu,  9 Mar 2023 03:33:59 -0500 (EST)
-Received: from imap51 ([10.202.2.101])
-  by compute6.internal (MEProxy); Thu, 09 Mar 2023 03:34:00 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :content-transfer-encoding:content-type:content-type:date:date
-        :from:from:in-reply-to:in-reply-to:message-id:mime-version
-        :references:reply-to:sender:subject:subject:to:to; s=fm1; t=
-        1678350838; x=1678437238; bh=X/QeGclk9xl/dLs0KMrYxx6pvj8LTlIVWQk
-        gwAejAF4=; b=Dki5aiMPR0FVZhDLWfggFVuCHV8/Kpg7EbAX1eybj48v1QTl2Lr
-        8Y51Nm1U+KQXYvQZD9ABY3elqEhyRmrRbTMknv/pyXKW21aFYxmlGHVsA6dzJR+r
-        HR+0kAcatICr0PRmo/3w0DGsFt5AJm6Okkus3KvJYunt/gBKZ1TVMWILcMyLKjpC
-        xmQQLBzTXG9wqPQOKQTlQxifSjat2NJHG/HQYabYSYtxkfifXzKb85V9cGSEOrkW
-        VOE4dVLWFZltPqKUWfEeXGh1c9pDCnQ88RZCPOOvlN0MwC5Tw9ufCemgJTZQckd2
-        Jri9HatItkfhXk2w/5mhiTu6of+hgXLGP1Q==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-transfer-encoding:content-type
-        :content-type:date:date:feedback-id:feedback-id:from:from
-        :in-reply-to:in-reply-to:message-id:mime-version:references
-        :reply-to:sender:subject:subject:to:to:x-me-proxy:x-me-proxy
-        :x-me-sender:x-me-sender:x-sasl-enc; s=fm1; t=1678350838; x=
-        1678437238; bh=X/QeGclk9xl/dLs0KMrYxx6pvj8LTlIVWQkgwAejAF4=; b=U
-        /PoiZ5Kjtlw4f4lUXSj081wKNDaP9G9TVC5a1eac9bg2SgJFK/bqj3/9RDw+zPnM
-        sNvtyKdVBd4BjeIxrKoZJybZY6vjsVtUEhnfyhJ+eiBhXvFZUqFEWUEvM1moW0Xg
-        uJf00VzF9YMtvK7x4bOhP5k/7waVdneTXQiXDpe4mAv496U4aTIMevCuZIcURWX7
-        /edp3XEtWJvlKc5KgAZT73MqkJA0Z+Q4L80i1jC2odzSpL1q+CdO8zB9jbqmh4Dl
-        Rk+DlaFyvTAqRmdDA/YyqobkdZ8IPYpfKsdGSt4nAYegLrp2RCzusHeoxOH0s1FW
-        wveEiAn+4hdVqj03vzFbw==
-X-ME-Sender: <xms:9pkJZJiEdXaqXZw0KjFcCUi2f0QRot3r8tPDDGPzMfNk4wuOVTVIIA>
-    <xme:9pkJZOAgQFkl7SXHOlkMdEDDDvv4k9mzOJtrZk4Tv-WxL36aEGLWOr5xnIxlcKkCl
-    6NcGgS1-j9Xq71f2zg>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrvdduhedgvddvucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvffutgfgsehtqhertderreejnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepjeeghfeutdejjeehudevgeehveduffejkefhveefgfettdehgeeiledufeeu
-    vdfhnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:9pkJZJGXtyNtOn_0qdE7d1kpH7HmL-hj1EAb_COIwMvh9kiE7Rg4Sw>
-    <xmx:9pkJZOQ65-PJmjbE91ui6TzAmX1fu8zmeb2u9-ldGrnYDZSrTZRp8g>
-    <xmx:9pkJZGyv0AYizT655KKYZEo5KLBtNP5PzD_b55HImenQDz2R9L_W2A>
-    <xmx:9pkJZLr0senTvl08EYUAmSweZk_x1LrbIYWWJoInds18lEAFq9rRUg>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 7F7C0B60086; Thu,  9 Mar 2023 03:33:58 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.9.0-alpha0-206-g57c8fdedf8-fm-20230227.001-g57c8fded
-Mime-Version: 1.0
-Message-Id: <a41277c0-d495-4b7a-969e-20019dfb1bc8@app.fastmail.com>
-In-Reply-To: <20230309082035.14880-9-ilpo.jarvinen@linux.intel.com>
-References: <20230309082035.14880-1-ilpo.jarvinen@linux.intel.com>
- <20230309082035.14880-9-ilpo.jarvinen@linux.intel.com>
-Date:   Thu, 09 Mar 2023 09:33:27 +0100
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>,
-        linux-serial@vger.kernel.org,
-        "Greg Kroah-Hartman" <gregkh@linuxfoundation.org>,
-        "Jiri Slaby" <jirislaby@kernel.org>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>,
-        "Shawn Guo" <shawnguo@kernel.org>,
-        "Sascha Hauer" <s.hauer@pengutronix.de>,
-        "Pengutronix Kernel Team" <kernel@pengutronix.de>,
-        "Fabio Estevam" <festevam@gmail.com>,
-        "NXP Linux Team" <linux-imx@nxp.com>, linux-kernel@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-arm-kernel@lists.infradead.org
-Subject: Re: [PATCH 8/8] tty: Convert hw_stopped in tty_struct to bool
-Content-Type: text/plain;charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S229846AbjCIIrH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 03:47:07 -0500
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC35A5C13F
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 00:47:03 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id ay14so3910456edb.11
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 00:47:03 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1678351622;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=cGqSi8rJkPEYNb50K8BZLZGOLTylgAMP+xBcfwszraY=;
+        b=uWrOPunOG/IX7IXgMC9nNzBAL3RVSJDMIQAhPRLPF7D7yJ63ZEUf6n4B9kZXT8EJra
+         5+lMkJFQGjwuxI/vKqAjH7GCS7/mokXszHTPnV4wsXEkyAViezjc+qd0H9KpnnQXibsk
+         cexqB/EpVgwEZTQVDS1OjOmQtO5/c7FKZHQdDC+TJb2EGxdpf/ulhTWLcngwpatM0bqU
+         xKMAnSRae3omimeoZUwNa0/Zu6XM4MK1h1k+wy2uTIii0U4oLtklUv/mrZXkWWz1KHg3
+         yXLIz1kjPyFqXSHnvpKygQSNhB+OrnXxWB4gRxWbTafxbX/LvQUFLue7GldjnhLB5oAv
+         Frow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678351622;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=cGqSi8rJkPEYNb50K8BZLZGOLTylgAMP+xBcfwszraY=;
+        b=IK6BrgqSy/2KAi8W+R1YxXEtPzjIAPSB+xlK7vy6oxlNRpuw+d/WFaHb6sHJJ/Jc9R
+         2xgtLkQoT8KP4/KLInDT2sL2Tn05y+Dikt1jWg89xNKEoJGD7/ps1fGOXdRN++QsERle
+         AU2aVfsAg2sp636vWwne7Kcwvc+1Q9MQfBhdikow0qzfHX3u2sO9HqBZsd+nfC3IS5Rf
+         MAF9CJ4U7zRy86gDCtTbAaB/D75mDwn3og8WvJzYl9/2DzU2ovAtXDt4dyf9JPcfw1Qe
+         6FAKaagw4ckrJkXNPO0QRIpvmXTXFm0pQnreLu+bp0HxiVpRUuCYYVIDUHs292FXTieL
+         2CtQ==
+X-Gm-Message-State: AO0yUKUdPYXmbiAmkwGZkzuq5QB05wkiHZKJZsbMh1HWKlObRnSD4QmD
+        6oVnbdPhNbD8Fiv1z/R3z5weXw==
+X-Google-Smtp-Source: AK7set8c8UmjoKmMwhvKXt6i586YTl/YQ9n2bzrcv3YZRo7O7HO0PDCg9C2uNGptPLP5DV9WQJiM/Q==
+X-Received: by 2002:a05:6402:2028:b0:4af:70a5:55ee with SMTP id ay8-20020a056402202800b004af70a555eemr18130112edb.3.1678351622391;
+        Thu, 09 Mar 2023 00:47:02 -0800 (PST)
+Received: from ?IPV6:2a02:810d:15c0:828:7ee2:e73e:802e:45c1? ([2a02:810d:15c0:828:7ee2:e73e:802e:45c1])
+        by smtp.gmail.com with ESMTPSA id a25-20020a509b59000000b004c0eac41829sm9183008edj.63.2023.03.09.00.47.00
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Mar 2023 00:47:01 -0800 (PST)
+Message-ID: <2691debf-0596-c265-468f-bb66d19f6db0@linaro.org>
+Date:   Thu, 9 Mar 2023 09:46:59 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v10 05/15] dt-bindings: soc: amd: amd,pensando-elbasr: Add
+ AMD Pensando SoC System Controller
+Content-Language: en-US
+To:     Brad Larson <blarson@amd.com>
+Cc:     adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, broonie@kernel.org,
+        catalin.marinas@arm.com, davidgow@google.com,
+        devicetree@vger.kernel.org, fancer.lancer@gmail.com,
+        gerg@linux-m68k.org, gsomlo@gmail.com, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee.jones@linaro.org,
+        lee@kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, p.yadav@ti.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, rdunlap@infradead.org, robh+dt@kernel.org,
+        samuel@sholland.org, skhan@linuxfoundation.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
+        vaishnav.a@ti.com, will@kernel.org, yamada.masahiro@socionext.com
+References: <e82ca6f6-0870-f9b0-172f-bc6d54a9749b@linaro.org>
+ <20230307021822.71245-1-blarson@amd.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230307021822.71245-1-blarson@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Mar 9, 2023, at 09:20, Ilpo J=C3=A4rvinen wrote:
-> hw_stopped in tty_struct is used like bool, convert the variable type
-> to bool.
->
-> Signed-off-by: Ilpo J=C3=A4rvinen <ilpo.jarvinen@linux.intel.com>
-> ---
->  drivers/char/pcmcia/synclink_cs.c |  6 +++---
->  drivers/mmc/core/sdio_uart.c      | 10 +++++-----
->  drivers/tty/amiserial.c           |  6 +++---
->  drivers/tty/mxser.c               |  6 +++---
->  drivers/tty/synclink_gt.c         |  6 +++---
->  include/linux/tty.h               |  2 +-
->  6 files changed, 18 insertions(+), 18 deletions(-)
+On 07/03/2023 03:18, Brad Larson wrote:
+> On 06/03/2023 09:35, Krzysztof Kozlowski wrote:
+>>> On 06/03/2023 05:07, Brad Larson wrote:
+>>>> Support the AMD Pensando SoC Controller which is a SPI connected device
+>>>> providing a miscellaneous set of essential board control/status registers.
+>>>> This device is present in all Pensando SoC based designs.
+>>>>
+>>>> Signed-off-by: Brad Larson <blarson@amd.com>
+>>>> ---
+>>>>
+>>>> v10 changes:
+>>>> - Property renamed to amd,pensando-ctrl
+>>>> - Driver is renamed and moved to soc/drivers/amd affecting binding
+>>>> - Delete cs property, driver handles device node creation from parent num-cs
+>>>>   fixing schema reg error in a different way
+>>>>
+>>>> v9 changes:
+>>>> - Instead of four nodes, one per chip-select, a single
+>>>>   node is used with reset-cells in the parent.
+>>>> - No MFD API is used anymore in the driver so it made
+>>>>   sense to move this to drivers/spi.
+>>>> - This driver is common for all Pensando SoC based designs
+>>>>   so changed the name to pensando-sr.c to not make it Elba
+>>>>   SoC specific.
+>>>> - Added property cs for the chip-select number which is used
+>>>>   by the driver to create /dev/pensr0.<cs>
+>>>>
+>>>> ---
+>>>>  .../bindings/soc/amd/amd,pensando-ctrl.yaml   | 60 +++++++++++++++++++
+>>>>  1 file changed, 60 insertions(+)
+>>>>  create mode 100644 Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
+>>>>
+>>>> diff --git a/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml b/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
+>>>> new file mode 100644
+>>>> index 000000000000..36694077b2e6
+>>>> --- /dev/null
+>>>> +++ b/Documentation/devicetree/bindings/soc/amd/amd,pensando-ctrl.yaml
+>>>
+>>> Your subject suggests this is pensando-elbasr but you write everywhere
+>>> pensando-ctrl. Confusing. Pick one.
+>>
+>> Actually pensando-ctrl is for sure not correct, because it misses the
+>> name of the SoC (you call it everywhere "elba").
+> 
+> The reason I dropped elba as part of the name is this driver and its associated 
+> SPI attached device (cpld or fpga depending on the board design) will be used
+> across a series of SoCs starting with Elba.  Implying its Elba specific is misleading.
 
-The patch looks good to me, but it will (trivially) conflict with the
-synclink_cs removal.
+Compatibles must be specific.
+https://elixir.bootlin.com/linux/v6.1-rc1/source/Documentation/devicetree/bindings/writing-bindings.rst#L42
+If this is SoC part it must match SoC. What is misleading in this? Why
+Pensando is different than all other SoCs (I am really getting tired
+everytime asking why people think their solution is special)?
 
-    Arnd
+If this is not part of the SoC, then your commit msg is misleading.
+Maybe bindings as well, so rework it.
+
+Best regards,
+Krzysztof
+
