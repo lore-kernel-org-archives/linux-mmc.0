@@ -2,295 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC327C64EC4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 15:02:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 40F8AC61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 15:05:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232116AbjCIPCw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 10:02:52 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58290 "EHLO
+        id S230099AbjCIPFH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 10:05:07 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232130AbjCIPC0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 10:02:26 -0500
-Received: from mail-pg1-x530.google.com (mail-pg1-x530.google.com [IPv6:2607:f8b0:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17CB12057F
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 06:58:56 -0800 (PST)
-Received: by mail-pg1-x530.google.com with SMTP id d8so1215011pgm.3
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 06:58:56 -0800 (PST)
+        with ESMTP id S231923AbjCIPEg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 10:04:36 -0500
+Received: from mail-pg1-x52c.google.com (mail-pg1-x52c.google.com [IPv6:2607:f8b0:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6C1C6A9E4
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 07:02:40 -0800 (PST)
+Received: by mail-pg1-x52c.google.com with SMTP id 132so1200176pgh.13
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 07:02:40 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678373935;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=saB/v6gZCwf7MkAV+X9hNtARD1bAir61j4EAXbQD6Fo=;
-        b=faDp15KLTT2HWFT/LmYYy/vaedNWebhFaSCnEFjpanEO99KBFPbaI7k9YHXrd9TtIR
-         38FSGlmfcGNrqO2M83aWeoZ/xXvYWsuhGE+YqjA1kOxvwF3nvTYTn4ZVRQY6UwXHZfop
-         h284RN19Mi7Px3uSd4bxKzDSzdJimx1lxYdTeDF+hnKMtZMo3cZVGhXU3Hj+iOuOQrjG
-         I+BtQ2C+mb5VuqCts2pmsvqn51c8uyV/VpmHlYapM/fHHr4S9YKc8hLM5peZuZzgrqYw
-         dMAUfa4gB02ZY27IUT/346xod8JF3dO4AQ/+GwKKMqK/Qt0OWtZUIYcR108iJugxeqcq
-         WFIw==
+        d=linaro.org; s=google; t=1678374160;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=rzsJZdpZ7LPDoQfu9o9lW5gjnwOdZ6t+X4Prhh6Xwh8=;
+        b=czM7cHYNWrkijeBV8VGOp7J3iol/R2pmJj5w+DjZF+eADrJovmHWPb2EhP1KZG8e/G
+         ZJmEC/RkA3Q1UGvqmrmOZDwWpq9N/+uim1BfEpp3eOb6G30OkPC/EgS7nrZWaSNLHEiZ
+         4rLBJdU/RpNn5kaddwjfzdFZRkF5z3QheH2rwo39cX4zccSfHZFRNoHwLFnuu/JXxYqg
+         89oTgAeGvxcadtlxYCMw8UrbWpqCvXyEK7FeN2OOezV/8mPw9siUXUyevPdEKS/MicLk
+         lWj/SClhiDYTgbQGGF3wcnXcrdTSAIwEhpdvjmF62Zgv4USje1OpSK5JEoA8mw9zFAIT
+         B6Zg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678373935;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=saB/v6gZCwf7MkAV+X9hNtARD1bAir61j4EAXbQD6Fo=;
-        b=tXaRiF2jaQFKn/h0pvRz9eqywZ74Vgc8eIoBZ+UAbU7fRcNew3OizzTlNLmqi+LocY
-         OsvFpNSSaNSDHFT8NxLIXJFkPrNKWLzwnYUq0PCA4pOFobiL8IsEwlJTAZt5hou52E2X
-         8DVV2F9KLJVRhVtVOSIibBfxCqgq8mkc3CK5RJaJ5eXBN/cYYSyZxrYs2l8C3xeqyYfS
-         FtL4dU8kmevktPdIIELKOBi325JvvvK9sIaUN8TdbVTnzovNeUKxK5pEa05iH8D3a8AD
-         mnwxp/93sQJikGlJA/ltxSgsVl8mP2kNElm54YeOnOqojwphwgzoluoLQXaLYnajXzSE
-         Tevw==
-X-Gm-Message-State: AO0yUKUiNl5GI/hnXjLSYLGgdGSAa+FCwHs6YihTW+QqxXLsMrPEA3AI
-        AVFiryfIBxEsPamiJ+ldiX4Moyns4LaEfIlLFEV4jQ==
-X-Google-Smtp-Source: AK7set/RraLPA2D1bIU1JMVsTQ9VSyR7QHluSEtoNjQ0NdnShHp1o/hystaOhadZCKbTSIj+BQkh79eMjJWsS/WgA/A=
-X-Received: by 2002:a63:b21b:0:b0:503:a8:2792 with SMTP id x27-20020a63b21b000000b0050300a82792mr7826958pge.5.1678373935497;
- Thu, 09 Mar 2023 06:58:55 -0800 (PST)
+        d=1e100.net; s=20210112; t=1678374160;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=rzsJZdpZ7LPDoQfu9o9lW5gjnwOdZ6t+X4Prhh6Xwh8=;
+        b=nZPIltJaxBBLbv92Ly5KlT2oolBO6IfudImYHEuxXjzZDe2cG0nsXC5h3GceyP3DRc
+         COv2PAUIHGw2cARFb5QdRgFRxfidxc53W3it3f7g5GTaLZn2xsb0/jQ3zWol6XS/aX3t
+         UVTULgZiIelNRQT1Foqb/BC8LQp5BniNL4uUWN0WGFeH1JYIG8GcKKYb32oiTMqH7t+L
+         ooGl8Vb6f9ostk8TtJSG1vuYgxPid55yttNDRJ06I2u+37Qatmd0Eek0c9kJiOCv/5ln
+         DXC5bkCjxo8SgGVgeK713iuocciFdjgZkJlz2nlbHd9YvlGYcfBGCtvlPdIxXXz6s5A8
+         TMfw==
+X-Gm-Message-State: AO0yUKW8eeDi7EFbL2wj4QnkFsdZ76kOVMrxwdPYBSvI0DDPHF0p0Ut7
+        fPYuMUYe1JkBFwLawsmVdsxLPkgv7TiZHKKjx0JePg==
+X-Google-Smtp-Source: AK7set/pg4ofM8YOtb7sDX31eSeRHJ4g+nh8yNyQMFWWgiMSTk2nHzbzts0k3Xa71amPJpu/lX7Qb7fMUm1R0Du6DvM=
+X-Received: by 2002:a63:f91d:0:b0:502:fd12:83ce with SMTP id
+ h29-20020a63f91d000000b00502fd1283cemr7999126pgi.5.1678374160137; Thu, 09 Mar
+ 2023 07:02:40 -0800 (PST)
 MIME-Version: 1.0
-References: <20230309082035.14880-1-ilpo.jarvinen@linux.intel.com> <20230309082035.14880-9-ilpo.jarvinen@linux.intel.com>
-In-Reply-To: <20230309082035.14880-9-ilpo.jarvinen@linux.intel.com>
+References: <20230223141402.23979-1-swati.agarwal@amd.com>
+In-Reply-To: <20230223141402.23979-1-swati.agarwal@amd.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 9 Mar 2023 15:58:18 +0100
-Message-ID: <CAPDyKFo5fC-yG_f8-w+B6bL0zvG4zMUdg38T6c8zeaA+HJ=joQ@mail.gmail.com>
-Subject: Re: [PATCH 8/8] tty: Convert hw_stopped in tty_struct to bool
-To:     =?UTF-8?Q?Ilpo_J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
-Cc:     linux-serial@vger.kernel.org,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Jiri Slaby <jirislaby@kernel.org>,
-        Arnd Bergmann <arnd@arndb.de>, Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
+Date:   Thu, 9 Mar 2023 16:02:03 +0100
+Message-ID: <CAPDyKFpSOs-xuQOssxPYrQPp=_qsAMem+LGYyqwSAkKqKXb7MQ@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci-of-arasan: Add support to request the "gate" clock
+To:     Swati Agarwal <swati.agarwal@amd.com>
+Cc:     adrian.hunter@intel.com, michal.simek@xilinx.com,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, git@amd.com
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, 9 Mar 2023 at 09:22, Ilpo J=C3=A4rvinen
-<ilpo.jarvinen@linux.intel.com> wrote:
+On Thu, 23 Feb 2023 at 15:14, Swati Agarwal <swati.agarwal@amd.com> wrote:
 >
-> hw_stopped in tty_struct is used like bool, convert the variable type
-> to bool.
+> Add support to read the optional "gate" clock property and request the
+> clock which will be used to ungate the DLL clock.
 >
-> Signed-off-by: Ilpo J=C3=A4rvinen <ilpo.jarvinen@linux.intel.com>
+> For Xilinx platforms which has DLL module, dll clock must be
+> ungated/enabled when SD controller operates at higher frequencies like 50
+> MHz, 100 MHz and 200 MHz. This will be done by explicitly requesting gate
+> clock from the driver.
+>
+> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org> # For MMC
+Applied for next, thanks!
 
 Kind regards
 Uffe
 
+
 > ---
->  drivers/char/pcmcia/synclink_cs.c |  6 +++---
->  drivers/mmc/core/sdio_uart.c      | 10 +++++-----
->  drivers/tty/amiserial.c           |  6 +++---
->  drivers/tty/mxser.c               |  6 +++---
->  drivers/tty/synclink_gt.c         |  6 +++---
->  include/linux/tty.h               |  2 +-
->  6 files changed, 18 insertions(+), 18 deletions(-)
+>  drivers/mmc/host/sdhci-of-arasan.c | 7 +++++++
+>  1 file changed, 7 insertions(+)
 >
-> diff --git a/drivers/char/pcmcia/synclink_cs.c b/drivers/char/pcmcia/sync=
-link_cs.c
-> index 6ddfeb2fe98f..97c5bfb9d58a 100644
-> --- a/drivers/char/pcmcia/synclink_cs.c
-> +++ b/drivers/char/pcmcia/synclink_cs.c
-> @@ -1060,7 +1060,7 @@ static void cts_change(MGSLPC_INFO *info, struct tt=
-y_struct *tty)
->                         if (info->serial_signals & SerialSignal_CTS) {
->                                 if (debug_level >=3D DEBUG_LEVEL_ISR)
->                                         printk("CTS tx start...");
-> -                               tty->hw_stopped =3D 0;
-> +                               tty->hw_stopped =3D false;
->                                 tx_start(info, tty);
->                                 info->pending_bh |=3D BH_TRANSMIT;
->                                 return;
-> @@ -1069,7 +1069,7 @@ static void cts_change(MGSLPC_INFO *info, struct tt=
-y_struct *tty)
->                         if (!(info->serial_signals & SerialSignal_CTS)) {
->                                 if (debug_level >=3D DEBUG_LEVEL_ISR)
->                                         printk("CTS tx stop...");
-> -                               tty->hw_stopped =3D 1;
-> +                               tty->hw_stopped =3D true;
->                                 tx_stop(info);
->                         }
->                 }
-> @@ -2312,7 +2312,7 @@ static void mgslpc_set_termios(struct tty_struct *t=
-ty,
->
->         /* Handle turning off CRTSCTS */
->         if (old_termios->c_cflag & CRTSCTS && !C_CRTSCTS(tty)) {
-> -               tty->hw_stopped =3D 0;
-> +               tty->hw_stopped =3D false;
->                 tx_release(tty);
->         }
->  }
-> diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
-> index 50536fe59f1a..aa659758563f 100644
-> --- a/drivers/mmc/core/sdio_uart.c
-> +++ b/drivers/mmc/core/sdio_uart.c
-> @@ -478,13 +478,13 @@ static void sdio_uart_check_modem_status(struct sdi=
-o_uart_port *port)
->                         int cts =3D (status & UART_MSR_CTS);
->                         if (tty->hw_stopped) {
->                                 if (cts) {
-> -                                       tty->hw_stopped =3D 0;
-> +                                       tty->hw_stopped =3D false;
->                                         sdio_uart_start_tx(port);
->                                         tty_wakeup(tty);
->                                 }
->                         } else {
->                                 if (!cts) {
-> -                                       tty->hw_stopped =3D 1;
-> +                                       tty->hw_stopped =3D true;
->                                         sdio_uart_stop_tx(port);
->                                 }
->                         }
-> @@ -633,7 +633,7 @@ static int sdio_uart_activate(struct tty_port *tport,=
- struct tty_struct *tty)
->
->         if (C_CRTSCTS(tty))
->                 if (!(sdio_uart_get_mctrl(port) & TIOCM_CTS))
-> -                       tty->hw_stopped =3D 1;
-> +                       tty->hw_stopped =3D true;
->
->         clear_bit(TTY_IO_ERROR, &tty->flags);
->
-> @@ -882,14 +882,14 @@ static void sdio_uart_set_termios(struct tty_struct=
- *tty,
->
->         /* Handle turning off CRTSCTS */
->         if ((old_termios->c_cflag & CRTSCTS) && !(cflag & CRTSCTS)) {
-> -               tty->hw_stopped =3D 0;
-> +               tty->hw_stopped =3D false;
->                 sdio_uart_start_tx(port);
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index 4eebbf801b41..1fd7528c14fc 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -1870,6 +1870,7 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>         int ret;
+>         struct device_node *node;
+>         struct clk *clk_xin;
+> +       struct clk *clk_dll;
+>         struct sdhci_host *host;
+>         struct sdhci_pltfm_host *pltfm_host;
+>         struct device *dev = &pdev->dev;
+> @@ -1943,6 +1944,12 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>                 goto clk_dis_ahb;
 >         }
 >
->         /* Handle turning on CRTSCTS */
->         if (!(old_termios->c_cflag & CRTSCTS) && (cflag & CRTSCTS)) {
->                 if (!(sdio_uart_get_mctrl(port) & TIOCM_CTS)) {
-> -                       tty->hw_stopped =3D 1;
-> +                       tty->hw_stopped =3D true;
->                         sdio_uart_stop_tx(port);
->                 }
->         }
-> diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
-> index d7515d61659e..c06ad0a0744b 100644
-> --- a/drivers/tty/amiserial.c
-> +++ b/drivers/tty/amiserial.c
-> @@ -347,7 +347,7 @@ static void check_modem_status(struct serial_state *i=
-nfo)
->  #if (defined(SERIAL_DEBUG_INTR) || defined(SERIAL_DEBUG_FLOW))
->                                 printk("CTS tx start...");
->  #endif
-> -                               port->tty->hw_stopped =3D 0;
-> +                               port->tty->hw_stopped =3D false;
->                                 info->IER |=3D UART_IER_THRI;
->                                 amiga_custom.intena =3D IF_SETCLR | IF_TB=
-E;
->                                 mb();
-> @@ -362,7 +362,7 @@ static void check_modem_status(struct serial_state *i=
-nfo)
->  #if (defined(SERIAL_DEBUG_INTR) || defined(SERIAL_DEBUG_FLOW))
->                                 printk("CTS tx stop...");
->  #endif
-> -                               port->tty->hw_stopped =3D 1;
-> +                               port->tty->hw_stopped =3D true;
->                                 info->IER &=3D ~UART_IER_THRI;
->                                 /* disable Tx interrupt and remove any pe=
-nding interrupts */
->                                 amiga_custom.intena =3D IF_TBE;
-> @@ -1197,7 +1197,7 @@ static void rs_set_termios(struct tty_struct *tty, =
-const struct ktermios *old_te
->
->         /* Handle turning off CRTSCTS */
->         if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
-> -               tty->hw_stopped =3D 0;
-> +               tty->hw_stopped =3D false;
->                 rs_start(tty);
->         }
->
-> diff --git a/drivers/tty/mxser.c b/drivers/tty/mxser.c
-> index ef3116e87975..10855e66fda1 100644
-> --- a/drivers/tty/mxser.c
-> +++ b/drivers/tty/mxser.c
-> @@ -553,7 +553,7 @@ static void mxser_handle_cts(struct tty_struct *tty, =
-struct mxser_port *info,
->
->         if (tty->hw_stopped) {
->                 if (cts) {
-> -                       tty->hw_stopped =3D 0;
-> +                       tty->hw_stopped =3D false;
->
->                         if (!mxser_16550A_or_MUST(info))
->                                 __mxser_start_tx(info);
-> @@ -563,7 +563,7 @@ static void mxser_handle_cts(struct tty_struct *tty, =
-struct mxser_port *info,
->         } else if (cts)
->                 return;
->
-> -       tty->hw_stopped =3D 1;
-> +       tty->hw_stopped =3D true;
->         if (!mxser_16550A_or_MUST(info))
->                 __mxser_stop_tx(info);
->  }
-> @@ -1361,7 +1361,7 @@ static void mxser_set_termios(struct tty_struct *tt=
-y,
->         spin_unlock_irqrestore(&info->slock, flags);
->
->         if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
-> -               tty->hw_stopped =3D 0;
-> +               tty->hw_stopped =3D false;
->                 mxser_start(tty);
->         }
->
-> diff --git a/drivers/tty/synclink_gt.c b/drivers/tty/synclink_gt.c
-> index 33f258d6fef9..543b3224dce9 100644
-> --- a/drivers/tty/synclink_gt.c
-> +++ b/drivers/tty/synclink_gt.c
-> @@ -730,7 +730,7 @@ static void set_termios(struct tty_struct *tty,
->
->         /* Handle turning off CRTSCTS */
->         if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
-> -               tty->hw_stopped =3D 0;
-> +               tty->hw_stopped =3D false;
->                 tx_release(tty);
->         }
->  }
-> @@ -1953,13 +1953,13 @@ static void cts_change(struct slgt_info *info, un=
-signed short status)
->                 if (info->port.tty) {
->                         if (info->port.tty->hw_stopped) {
->                                 if (info->signals & SerialSignal_CTS) {
-> -                                       info->port.tty->hw_stopped =3D 0;
-> +                                       info->port.tty->hw_stopped =3D fa=
-lse;
->                                         info->pending_bh |=3D BH_TRANSMIT=
-;
->                                         return;
->                                 }
->                         } else {
->                                 if (!(info->signals & SerialSignal_CTS))
-> -                                       info->port.tty->hw_stopped =3D 1;
-> +                                       info->port.tty->hw_stopped =3D tr=
-ue;
->                         }
->                 }
->         }
-> diff --git a/include/linux/tty.h b/include/linux/tty.h
-> index 093935e97f42..60871a9d3212 100644
-> --- a/include/linux/tty.h
-> +++ b/include/linux/tty.h
-> @@ -227,7 +227,7 @@ struct tty_struct {
->                 unsigned long unused[0];
->         } __aligned(sizeof(unsigned long)) ctrl;
->
-> -       int hw_stopped;
-> +       bool hw_stopped;
->         unsigned int receive_room;
->         int flow_change;
+> +       clk_dll = devm_clk_get_optional_enabled(dev, "gate");
+> +       if (IS_ERR(clk_dll)) {
+> +               ret = dev_err_probe(dev, PTR_ERR(clk_dll), "failed to get dll clk\n");
+> +               goto clk_disable_all;
+> +       }
+> +
+>         if (of_property_read_bool(np, "xlnx,fails-without-test-cd"))
+>                 sdhci_arasan->quirks |= SDHCI_ARASAN_QUIRK_FORCE_CDTEST;
 >
 > --
-> 2.30.2
+> 2.17.1
 >
