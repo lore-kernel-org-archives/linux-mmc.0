@@ -2,80 +2,263 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E876DC61DA4
-	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 07:30:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 280E7C61DA4
+	for <linux-mmc@archiver.kernel.org>; Thu,  9 Mar 2023 08:24:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229996AbjCIHa1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 02:30:27 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49892 "EHLO
+        id S230264AbjCIIYE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 9 Mar 2023 03:24:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50158 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229852AbjCIHaY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 02:30:24 -0500
-Received: from sin.source.kernel.org (sin.source.kernel.org [IPv6:2604:1380:40e1:4800::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9BAA662FDE;
-        Wed,  8 Mar 2023 23:30:23 -0800 (PST)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by sin.source.kernel.org (Postfix) with ESMTPS id CA2E2CE228E;
-        Thu,  9 Mar 2023 07:30:21 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id DFAE8C433AA;
-        Thu,  9 Mar 2023 07:30:19 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678347019;
-        bh=pLu2EUjm0EUWWJ8Bq7EHf6FFQCmBn3/LFHoWP+HFOaM=;
-        h=Subject:From:Date:References:In-Reply-To:To:Cc:From;
-        b=TRQuKn87mlc14w2ao4dBhX1cwTkgy+XNoKUXHEVGLpkVkwA961dPU03wWDtoaRCoA
-         KyBg+99tIz4BIEUt4yRJjLm4kakaKOhBW2bABom535uQzWsAYQzIuv2b1wGgbxVv1I
-         h99HVGsJH5XnneOV/MClhLyGOSNsyynn8EROjm+3GxkFpvcDqjJgsJvhOCzKNNWsad
-         T7AURXwMYPT/hjEhGGqeiGj61NUZLPgN9CxIxpcYVno1yA6HaIr2DDe7b/W8+MxBYs
-         sw45PH57JbFR6WTsYZyqATB+g1nHYdBuBvdZyVhillv7JBDYRYVwybV3DK0ya5tBtz
-         fVjbtpLQp/f2A==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id CB1B0E61B60;
-        Thu,  9 Mar 2023 07:30:19 +0000 (UTC)
-Content-Type: text/plain; charset="utf-8"
+        with ESMTP id S230110AbjCIIWt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 03:22:49 -0500
+Received: from mga01.intel.com (mga01.intel.com [192.55.52.88])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FBFD3B65B;
+        Thu,  9 Mar 2023 00:21:58 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1678350118; x=1709886118;
+  h=from:to:cc:subject:date:message-id:in-reply-to:
+   references:mime-version:content-transfer-encoding;
+  bh=CxxEqgd3/ySziCnHqMBtXGYZorO4KpYH46SmZHK5Ytg=;
+  b=SR+neSPxmTmcldf2ThYLSPFPw30FJh/D5TQPNMb0PjGc5/SsTS8YkdyL
+   oUqsxCEDaePUhwbaMlGHhDwlSE4MHQ++/P4Hb3ZxXRnbJqb2Va+HMEQk4
+   baQ3XGupiuqDjtjftZtWmYxUAOAoaIh2JnGwK6LSE7tzaPY+lW6Oa5Dzs
+   35eA7bm7AUyevc/ML5Qhf7D067RPqccvapY6HzFc2HXJF6iz6CV3V/DF1
+   WMFolMbtC9FfkAz0V+lFDESP6wTxr/RxORS/ZYNHJxqCmyxi14X+qOYjB
+   d467aAH1vVBu969umphcjacczj+pCIl1lpi9PbYQey4T1fblYk21/hYe7
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10643"; a="364025957"
+X-IronPort-AV: E=Sophos;i="5.98,245,1673942400"; 
+   d="scan'208";a="364025957"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga101.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Mar 2023 00:21:57 -0800
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10643"; a="787473901"
+X-IronPort-AV: E=Sophos;i="5.98,245,1673942400"; 
+   d="scan'208";a="787473901"
+Received: from unknown (HELO ijarvine-MOBL2.mshome.net) ([10.237.66.35])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Mar 2023 00:21:15 -0800
+From:   =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+To:     linux-serial@vger.kernel.org,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Jiri Slaby <jirislaby@kernel.org>,
+        Arnd Bergmann <arnd@arndb.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Cc:     =?UTF-8?q?Ilpo=20J=C3=A4rvinen?= <ilpo.jarvinen@linux.intel.com>
+Subject: [PATCH 8/8] tty: Convert hw_stopped in tty_struct to bool
+Date:   Thu,  9 Mar 2023 10:20:35 +0200
+Message-Id: <20230309082035.14880-9-ilpo.jarvinen@linux.intel.com>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20230309082035.14880-1-ilpo.jarvinen@linux.intel.com>
+References: <20230309082035.14880-1-ilpo.jarvinen@linux.intel.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-Subject: Re: [PATCH 00/11] tree-wide: remove support for Renesas R-Car H3 ES1
-From:   patchwork-bot+netdevbpf@kernel.org
-Message-Id: <167834701982.22182.9521763384207545073.git-patchwork-notify@kernel.org>
-Date:   Thu, 09 Mar 2023 07:30:19 +0000
-References: <20230307163041.3815-1-wsa+renesas@sang-engineering.com>
-In-Reply-To: <20230307163041.3815-1-wsa+renesas@sang-engineering.com>
-To:     Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     linux-renesas-soc@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        iommu@lists.linux.dev, linux-kernel@vger.kernel.org,
-        linux-media@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-pm@vger.kernel.org, linux-usb@vger.kernel.org,
-        netdev@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello:
+hw_stopped in tty_struct is used like bool, convert the variable type
+to bool.
 
-This patch was applied to netdev/net-next.git (main)
-by Jakub Kicinski <kuba@kernel.org>:
+Signed-off-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+---
+ drivers/char/pcmcia/synclink_cs.c |  6 +++---
+ drivers/mmc/core/sdio_uart.c      | 10 +++++-----
+ drivers/tty/amiserial.c           |  6 +++---
+ drivers/tty/mxser.c               |  6 +++---
+ drivers/tty/synclink_gt.c         |  6 +++---
+ include/linux/tty.h               |  2 +-
+ 6 files changed, 18 insertions(+), 18 deletions(-)
 
-On Tue,  7 Mar 2023 17:30:28 +0100 you wrote:
-> Because H3 ES1 becomes an increasing maintenance burden and was only available
-> to a development group, we decided to remove upstream support for it. Here are
-> the patches to remove driver changes. Review tags have been gathered before
-> during an internal discussion. Only change since the internal version is a
-> plain rebase to v6.3-rc1. A branch with all removals is here:
-> 
-> git://git.kernel.org/pub/scm/linux/kernel/git/wsa/linux.git renesas/h3es1-removal
-> 
-> [...]
-
-Here is the summary with links:
-  - [07/11] ravb: remove R-Car H3 ES1.* handling
-    https://git.kernel.org/netdev/net-next/c/6bf0ad7f2917
-
-You are awesome, thank you!
+diff --git a/drivers/char/pcmcia/synclink_cs.c b/drivers/char/pcmcia/synclink_cs.c
+index 6ddfeb2fe98f..97c5bfb9d58a 100644
+--- a/drivers/char/pcmcia/synclink_cs.c
++++ b/drivers/char/pcmcia/synclink_cs.c
+@@ -1060,7 +1060,7 @@ static void cts_change(MGSLPC_INFO *info, struct tty_struct *tty)
+ 			if (info->serial_signals & SerialSignal_CTS) {
+ 				if (debug_level >= DEBUG_LEVEL_ISR)
+ 					printk("CTS tx start...");
+-				tty->hw_stopped = 0;
++				tty->hw_stopped = false;
+ 				tx_start(info, tty);
+ 				info->pending_bh |= BH_TRANSMIT;
+ 				return;
+@@ -1069,7 +1069,7 @@ static void cts_change(MGSLPC_INFO *info, struct tty_struct *tty)
+ 			if (!(info->serial_signals & SerialSignal_CTS)) {
+ 				if (debug_level >= DEBUG_LEVEL_ISR)
+ 					printk("CTS tx stop...");
+-				tty->hw_stopped = 1;
++				tty->hw_stopped = true;
+ 				tx_stop(info);
+ 			}
+ 		}
+@@ -2312,7 +2312,7 @@ static void mgslpc_set_termios(struct tty_struct *tty,
+ 
+ 	/* Handle turning off CRTSCTS */
+ 	if (old_termios->c_cflag & CRTSCTS && !C_CRTSCTS(tty)) {
+-		tty->hw_stopped = 0;
++		tty->hw_stopped = false;
+ 		tx_release(tty);
+ 	}
+ }
+diff --git a/drivers/mmc/core/sdio_uart.c b/drivers/mmc/core/sdio_uart.c
+index 50536fe59f1a..aa659758563f 100644
+--- a/drivers/mmc/core/sdio_uart.c
++++ b/drivers/mmc/core/sdio_uart.c
+@@ -478,13 +478,13 @@ static void sdio_uart_check_modem_status(struct sdio_uart_port *port)
+ 			int cts = (status & UART_MSR_CTS);
+ 			if (tty->hw_stopped) {
+ 				if (cts) {
+-					tty->hw_stopped = 0;
++					tty->hw_stopped = false;
+ 					sdio_uart_start_tx(port);
+ 					tty_wakeup(tty);
+ 				}
+ 			} else {
+ 				if (!cts) {
+-					tty->hw_stopped = 1;
++					tty->hw_stopped = true;
+ 					sdio_uart_stop_tx(port);
+ 				}
+ 			}
+@@ -633,7 +633,7 @@ static int sdio_uart_activate(struct tty_port *tport, struct tty_struct *tty)
+ 
+ 	if (C_CRTSCTS(tty))
+ 		if (!(sdio_uart_get_mctrl(port) & TIOCM_CTS))
+-			tty->hw_stopped = 1;
++			tty->hw_stopped = true;
+ 
+ 	clear_bit(TTY_IO_ERROR, &tty->flags);
+ 
+@@ -882,14 +882,14 @@ static void sdio_uart_set_termios(struct tty_struct *tty,
+ 
+ 	/* Handle turning off CRTSCTS */
+ 	if ((old_termios->c_cflag & CRTSCTS) && !(cflag & CRTSCTS)) {
+-		tty->hw_stopped = 0;
++		tty->hw_stopped = false;
+ 		sdio_uart_start_tx(port);
+ 	}
+ 
+ 	/* Handle turning on CRTSCTS */
+ 	if (!(old_termios->c_cflag & CRTSCTS) && (cflag & CRTSCTS)) {
+ 		if (!(sdio_uart_get_mctrl(port) & TIOCM_CTS)) {
+-			tty->hw_stopped = 1;
++			tty->hw_stopped = true;
+ 			sdio_uart_stop_tx(port);
+ 		}
+ 	}
+diff --git a/drivers/tty/amiserial.c b/drivers/tty/amiserial.c
+index d7515d61659e..c06ad0a0744b 100644
+--- a/drivers/tty/amiserial.c
++++ b/drivers/tty/amiserial.c
+@@ -347,7 +347,7 @@ static void check_modem_status(struct serial_state *info)
+ #if (defined(SERIAL_DEBUG_INTR) || defined(SERIAL_DEBUG_FLOW))
+ 				printk("CTS tx start...");
+ #endif
+-				port->tty->hw_stopped = 0;
++				port->tty->hw_stopped = false;
+ 				info->IER |= UART_IER_THRI;
+ 				amiga_custom.intena = IF_SETCLR | IF_TBE;
+ 				mb();
+@@ -362,7 +362,7 @@ static void check_modem_status(struct serial_state *info)
+ #if (defined(SERIAL_DEBUG_INTR) || defined(SERIAL_DEBUG_FLOW))
+ 				printk("CTS tx stop...");
+ #endif
+-				port->tty->hw_stopped = 1;
++				port->tty->hw_stopped = true;
+ 				info->IER &= ~UART_IER_THRI;
+ 				/* disable Tx interrupt and remove any pending interrupts */
+ 				amiga_custom.intena = IF_TBE;
+@@ -1197,7 +1197,7 @@ static void rs_set_termios(struct tty_struct *tty, const struct ktermios *old_te
+ 
+ 	/* Handle turning off CRTSCTS */
+ 	if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
+-		tty->hw_stopped = 0;
++		tty->hw_stopped = false;
+ 		rs_start(tty);
+ 	}
+ 
+diff --git a/drivers/tty/mxser.c b/drivers/tty/mxser.c
+index ef3116e87975..10855e66fda1 100644
+--- a/drivers/tty/mxser.c
++++ b/drivers/tty/mxser.c
+@@ -553,7 +553,7 @@ static void mxser_handle_cts(struct tty_struct *tty, struct mxser_port *info,
+ 
+ 	if (tty->hw_stopped) {
+ 		if (cts) {
+-			tty->hw_stopped = 0;
++			tty->hw_stopped = false;
+ 
+ 			if (!mxser_16550A_or_MUST(info))
+ 				__mxser_start_tx(info);
+@@ -563,7 +563,7 @@ static void mxser_handle_cts(struct tty_struct *tty, struct mxser_port *info,
+ 	} else if (cts)
+ 		return;
+ 
+-	tty->hw_stopped = 1;
++	tty->hw_stopped = true;
+ 	if (!mxser_16550A_or_MUST(info))
+ 		__mxser_stop_tx(info);
+ }
+@@ -1361,7 +1361,7 @@ static void mxser_set_termios(struct tty_struct *tty,
+ 	spin_unlock_irqrestore(&info->slock, flags);
+ 
+ 	if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
+-		tty->hw_stopped = 0;
++		tty->hw_stopped = false;
+ 		mxser_start(tty);
+ 	}
+ 
+diff --git a/drivers/tty/synclink_gt.c b/drivers/tty/synclink_gt.c
+index 33f258d6fef9..543b3224dce9 100644
+--- a/drivers/tty/synclink_gt.c
++++ b/drivers/tty/synclink_gt.c
+@@ -730,7 +730,7 @@ static void set_termios(struct tty_struct *tty,
+ 
+ 	/* Handle turning off CRTSCTS */
+ 	if ((old_termios->c_cflag & CRTSCTS) && !C_CRTSCTS(tty)) {
+-		tty->hw_stopped = 0;
++		tty->hw_stopped = false;
+ 		tx_release(tty);
+ 	}
+ }
+@@ -1953,13 +1953,13 @@ static void cts_change(struct slgt_info *info, unsigned short status)
+ 		if (info->port.tty) {
+ 			if (info->port.tty->hw_stopped) {
+ 				if (info->signals & SerialSignal_CTS) {
+-		 			info->port.tty->hw_stopped = 0;
++					info->port.tty->hw_stopped = false;
+ 					info->pending_bh |= BH_TRANSMIT;
+ 					return;
+ 				}
+ 			} else {
+ 				if (!(info->signals & SerialSignal_CTS))
+-		 			info->port.tty->hw_stopped = 1;
++					info->port.tty->hw_stopped = true;
+ 			}
+ 		}
+ 	}
+diff --git a/include/linux/tty.h b/include/linux/tty.h
+index 093935e97f42..60871a9d3212 100644
+--- a/include/linux/tty.h
++++ b/include/linux/tty.h
+@@ -227,7 +227,7 @@ struct tty_struct {
+ 		unsigned long unused[0];
+ 	} __aligned(sizeof(unsigned long)) ctrl;
+ 
+-	int hw_stopped;
++	bool hw_stopped;
+ 	unsigned int receive_room;
+ 	int flow_change;
+ 
 -- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/patchwork/pwbot.html
-
+2.30.2
 
