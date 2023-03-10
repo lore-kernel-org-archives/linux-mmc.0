@@ -2,81 +2,85 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8465AC6FA99
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:27:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 04AD2C6FA99
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:27:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234327AbjCJP10 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 10:27:26 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55914 "EHLO
+        id S234310AbjCJP1b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 10:27:31 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60392 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234252AbjCJP1B (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:27:01 -0500
-Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEB0310EA9F
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:16:03 -0800 (PST)
-Received: by mail-pf1-x42e.google.com with SMTP id b20so3832257pfo.6
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:16:03 -0800 (PST)
+        with ESMTP id S233445AbjCJP1F (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:27:05 -0500
+Received: from mail-pj1-x102e.google.com (mail-pj1-x102e.google.com [IPv6:2607:f8b0:4864:20::102e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A4B211ABE1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:16:08 -0800 (PST)
+Received: by mail-pj1-x102e.google.com with SMTP id cp7-20020a17090afb8700b0023756229427so10164382pjb.1
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:16:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678461326;
+        d=linaro.org; s=google; t=1678461329;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ym7VeGrcmmycPzwS4GsVwPl3pR3x6Yw0IFrKSAgC43s=;
-        b=aqwcM+8BBXVb0ObGiQTEgd/jjktC8yTATcVdjhuDILuCSzR3KIw8lXhNtaTFGE8UOV
-         tD1x/n2TYsRcvqMFeVLawX3NG6vXP93wYg9ZuLLVUULSqEktTm8efjaaKpw5zyPB4s79
-         Tb7drBX5X+80CO8XoWuPZWq6jhJzLYDtgn5fdCufdgIWYVo/wlL3XDyIPSFm27sJZUfn
-         /yDfoCmgRpwK1JfOT+XFS8/q8BKaG02f+H2SMVyhORuMpI6GtOk07QOwGQTD4o/ORd0H
-         f1s8wpmAtXY4Oem3ReNRzdA3x4OpRiSg37mjC2PgGHdWbROhNwoMYl869CWWMMDgya+K
-         upIg==
+        bh=N39RYo79xVBTcwlXscYbtTZ48SrQ3sOuHu+uQiLwf8c=;
+        b=w1JpB/ZXvlR8nFbbRuZV13kAgblsxjtJ382xgxW9UzeSI+B3oi7mBtHDPakrflKi67
+         JEBe94Y824l+0EwHf05dF7FlkT9y8wmKkarFG4sWdJL55Wwae2RTDpbR/R/OFLLWtYin
+         nnGg0qDwFoPWvYHnbjgHLy2xwM5j3JVsUUWeGS6e9y9AJ6DplPucBwRDbAGCHyIVgtuw
+         mpZQEid0BvuDl7uBW9S9czZUiFClNkfN24ZMMNQcVse1m/k2fAAZ6R2yQxufCg9Du3UH
+         fHMEbaC+qfeXuWUHMsgJD4IzOJ5KHY1Gte9k9hGYwnmeEpY/4DhTggH+2PkFxuzYJYui
+         zBuA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678461326;
+        d=1e100.net; s=20210112; t=1678461329;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=ym7VeGrcmmycPzwS4GsVwPl3pR3x6Yw0IFrKSAgC43s=;
-        b=23phcLXc0Bwa2kwsVOB2tsW4oSAseFMVL0MSbiu01fH09DYnzhwlPiMJGZBmdz2wgf
-         8Rd6rqxCFJ+u6XB+JTkByUvq+/bhrZsPPaJK3wehxfvfVKbS4YIIJDt4DcpzkhdNPg5Z
-         d+uNKcupn4pnCmq0tcP953IGBmks6cD6uoDsrB6f503CQO1YAsMbJ7sDNUDZbubUQW3n
-         BXudt2XM/p5aVty8hDa4GGFewlk2fhpL/X+cCTE5xbB0hXCRyhFAHiD76iZ/10W59qbO
-         I+1d+CumdJOC9vvkoOV419YPa6nf6ScnQKQJcEEORrwHJ8lbAcX4Suxfz2brlHwFAqmA
-         gQXg==
-X-Gm-Message-State: AO0yUKXzYhAN393C04b/DXZXhMpwvpDE5XQvm3WvqsdduGr/jPbgduRq
-        Hy4QVwbS1sRrmWAsTVTfqqpQNYLUmGjt2eZMSgtxFA==
-X-Google-Smtp-Source: AK7set+oIBKQVBleHMih2zz27+dDoWDUn/yZ0r+j2ash04CMNiUj2o6kuDKe2iXpo7GPruxqk5YnLANLsO62p6+M400=
-X-Received: by 2002:a05:6a00:2254:b0:5de:ece4:2674 with SMTP id
- i20-20020a056a00225400b005deece42674mr11019194pfu.3.1678461325765; Fri, 10
- Mar 2023 07:15:25 -0800 (PST)
+        bh=N39RYo79xVBTcwlXscYbtTZ48SrQ3sOuHu+uQiLwf8c=;
+        b=2bUVyUy20DYgOwgl2isnLETcSxu7noHqalQM8HoUnCYar8rjsOREfjbl0otifWHq80
+         6UDPRD62RAqAWqy9cpTk/Bc1naqfjUw/UM9dloj/A3zuNeifN2HqG/mIjWKR/Fah47U3
+         6ybABBCHsSymBJEVkyLz+smCrhbXxatX/A8m48zAfKznrCSxLtdWWHGof9w4yB4zPlmz
+         7jF04jZ+vGJ7UoeyBOteBTRcnRpFO+prMcIhUjG0JBNXSQKwuEoqAYJGXLcPggCCSL2N
+         asPL6z/jI4ZRwnQsDa/6TbYT38fAceYM/sBDLHSd6q7jGgJC/yY5Yf0lcXdpXcbiY19R
+         3U1w==
+X-Gm-Message-State: AO0yUKVRkxTCMAICfAh7wTI5Up+hTGuuY3C6k5ocCcarc6SBNJ2vDpJU
+        T14oqSYkZKD+/xI389OViqGpGvn4FBgqCEdPn/fynw==
+X-Google-Smtp-Source: AK7set8wBPd3eR19/8FgGsEp0qu4kQMyEwrIG9kwt+pd8OJGY+yyFJ7UbTDzC6DqHo/XP34E4Wgb+nv47hPzv4BDAio=
+X-Received: by 2002:a17:90b:1283:b0:234:925b:7d61 with SMTP id
+ fw3-20020a17090b128300b00234925b7d61mr9645631pjb.9.1678461328917; Fri, 10 Mar
+ 2023 07:15:28 -0800 (PST)
 MIME-Version: 1.0
-References: <20230310010349.509132-1-anarsoul@gmail.com>
-In-Reply-To: <20230310010349.509132-1-anarsoul@gmail.com>
+References: <20230310144715.1543836-1-robh@kernel.org>
+In-Reply-To: <20230310144715.1543836-1-robh@kernel.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 10 Mar 2023 16:14:49 +0100
-Message-ID: <CAPDyKFrMG7bWune67gLAUm+OU39HXRZbT48hBe8gBTWkWDkimQ@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci-of-dwcmshc: properly determine max clock on Rockchip
-To:     Vasily Khoruzhick <anarsoul@gmail.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+Date:   Fri, 10 Mar 2023 16:14:52 +0100
+Message-ID: <CAPDyKFrwH0uEZ+ikvaPkwsmT6-JoZwDC7SCfS-TX_pXyh38+-A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: Use of_property_read_bool() for boolean properties
+To:     Rob Herring <robh@kernel.org>
+Cc:     Russell King <linux@armlinux.org.uk>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Haibo Chen <haibo.chen@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org
+        linux-renesas-soc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 10 Mar 2023 at 02:04, Vasily Khoruzhick <anarsoul@gmail.com> wrote:
+On Fri, 10 Mar 2023 at 15:48, Rob Herring <robh@kernel.org> wrote:
 >
-> Currently .get_max_clock returns the current clock rate for cclk_emmc
-> on rk35xx, thus max clock gets set to whatever bootloader set it to.
+> It is preferred to use typed property access functions (i.e.
+> of_property_read_<type> functions) rather than low-level
+> of_get_property/of_find_property functions for reading properties.
+> Convert reading boolean properties to to of_property_read_bool().
 >
-> In case of u-boot, it is intentionally reset to 50 MHz if it boots
-> from eMMC, see mmc_deinit() in u-boot sources. As a result, HS200 and
-> HS400 modes are never selected by Linux, because dwcmshc_rk35xx_postinit
-> clears appropriate caps if host->mmc->f_max is < 52MHz
->
-> cclk_emmc is not a fixed clock on rk35xx, so using
-> sdhci_pltfm_clk_get_max_clock is not appropriate here.
->
-> Implement rk35xx_get_max_clock that returns actual max clock for cclk_emmc.
->
-> Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
+> Signed-off-by: Rob Herring <robh@kernel.org>
 
 Applied for next, thanks!
 
@@ -85,36 +89,170 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/sdhci-of-dwcmshc.c | 9 ++++++++-
->  1 file changed, 8 insertions(+), 1 deletion(-)
+>  drivers/mmc/host/mmci.c            | 22 +++++++++++-----------
+>  drivers/mmc/host/omap_hsmmc.c      |  8 ++++----
+>  drivers/mmc/host/sdhci-esdhc-imx.c |  4 ++--
+>  drivers/mmc/host/sdhci-pxav2.c     |  2 +-
+>  drivers/mmc/host/sdhci-s3c.c       |  4 ++--
+>  drivers/mmc/host/tmio_mmc_core.c   |  2 +-
+>  drivers/mmc/host/wmt-sdmmc.c       |  6 ++----
+>  7 files changed, 23 insertions(+), 25 deletions(-)
 >
-> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> index d1490469184b..e68cd87998c8 100644
-> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-> @@ -126,6 +126,13 @@ static unsigned int dwcmshc_get_max_clock(struct sdhci_host *host)
->                 return pltfm_host->clock;
+> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+> index b9e5dfe74e5c..f2b2e8b0574e 100644
+> --- a/drivers/mmc/host/mmci.c
+> +++ b/drivers/mmc/host/mmci.c
+> @@ -1962,28 +1962,28 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
+>         if (ret)
+>                 return ret;
+>
+> -       if (of_get_property(np, "st,sig-dir-dat0", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir-dat0"))
+>                 host->pwr_reg_add |= MCI_ST_DATA0DIREN;
+> -       if (of_get_property(np, "st,sig-dir-dat2", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir-dat2"))
+>                 host->pwr_reg_add |= MCI_ST_DATA2DIREN;
+> -       if (of_get_property(np, "st,sig-dir-dat31", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir-dat31"))
+>                 host->pwr_reg_add |= MCI_ST_DATA31DIREN;
+> -       if (of_get_property(np, "st,sig-dir-dat74", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir-dat74"))
+>                 host->pwr_reg_add |= MCI_ST_DATA74DIREN;
+> -       if (of_get_property(np, "st,sig-dir-cmd", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir-cmd"))
+>                 host->pwr_reg_add |= MCI_ST_CMDDIREN;
+> -       if (of_get_property(np, "st,sig-pin-fbclk", NULL))
+> +       if (of_property_read_bool(np, "st,sig-pin-fbclk"))
+>                 host->pwr_reg_add |= MCI_ST_FBCLKEN;
+> -       if (of_get_property(np, "st,sig-dir", NULL))
+> +       if (of_property_read_bool(np, "st,sig-dir"))
+>                 host->pwr_reg_add |= MCI_STM32_DIRPOL;
+> -       if (of_get_property(np, "st,neg-edge", NULL))
+> +       if (of_property_read_bool(np, "st,neg-edge"))
+>                 host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
+> -       if (of_get_property(np, "st,use-ckin", NULL))
+> +       if (of_property_read_bool(np, "st,use-ckin"))
+>                 mmci_probe_level_translator(mmc);
+>
+> -       if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
+> +       if (of_property_read_bool(np, "mmc-cap-mmc-highspeed"))
+>                 mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+> -       if (of_get_property(np, "mmc-cap-sd-highspeed", NULL))
+> +       if (of_property_read_bool(np, "mmc-cap-sd-highspeed"))
+>                 mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+>
+>         return 0;
+> diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+> index 4bd744755205..517dde777413 100644
+> --- a/drivers/mmc/host/omap_hsmmc.c
+> +++ b/drivers/mmc/host/omap_hsmmc.c
+> @@ -1736,18 +1736,18 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+>         if (legacy && legacy->name)
+>                 pdata->name = legacy->name;
+>
+> -       if (of_find_property(np, "ti,dual-volt", NULL))
+> +       if (of_property_read_bool(np, "ti,dual-volt"))
+>                 pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+>
+> -       if (of_find_property(np, "ti,non-removable", NULL)) {
+> +       if (of_property_read_bool(np, "ti,non-removable")) {
+>                 pdata->nonremovable = true;
+>                 pdata->no_regulator_off_init = true;
+>         }
+>
+> -       if (of_find_property(np, "ti,needs-special-reset", NULL))
+> +       if (of_property_read_bool(np, "ti,needs-special-reset"))
+>                 pdata->features |= HSMMC_HAS_UPDATED_RESET;
+>
+> -       if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
+> +       if (of_property_read_bool(np, "ti,needs-special-hs-handling"))
+>                 pdata->features |= HSMMC_HAS_HSPE_SUPPORT;
+>
+>         return pdata;
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index 58f042fdd4f4..d7c0c0b9e26c 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1597,7 +1597,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>         struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+>         int ret;
+>
+> -       if (of_get_property(np, "fsl,wp-controller", NULL))
+> +       if (of_property_read_bool(np, "fsl,wp-controller"))
+>                 boarddata->wp_type = ESDHC_WP_CONTROLLER;
+>
+>         /*
+> @@ -1614,7 +1614,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+>
+>         of_property_read_u32(np, "fsl,strobe-dll-delay-target",
+>                                 &boarddata->strobe_dll_delay_target);
+> -       if (of_find_property(np, "no-1-8-v", NULL))
+> +       if (of_property_read_bool(np, "no-1-8-v"))
+>                 host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+>
+>         if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+> diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+> index fc306eb1f845..91aca8f8d6ef 100644
+> --- a/drivers/mmc/host/sdhci-pxav2.c
+> +++ b/drivers/mmc/host/sdhci-pxav2.c
+> @@ -228,7 +228,7 @@ static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct device *dev)
+>         if (!pdata)
+>                 return NULL;
+>
+> -       if (of_find_property(np, "non-removable", NULL))
+> +       if (of_property_read_bool(np, "non-removable"))
+>                 pdata->flags |= PXA_FLAG_CARD_PERMANENT;
+>
+>         of_property_read_u32(np, "bus-width", &bus_width);
+> diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+> index 9085f3932443..504015e84308 100644
+> --- a/drivers/mmc/host/sdhci-s3c.c
+> +++ b/drivers/mmc/host/sdhci-s3c.c
+> @@ -437,12 +437,12 @@ static int sdhci_s3c_parse_dt(struct device *dev,
+>         pdata->max_width = max_width;
+>
+>         /* get the card detection method */
+> -       if (of_get_property(node, "broken-cd", NULL)) {
+> +       if (of_property_read_bool(node, "broken-cd")) {
+>                 pdata->cd_type = S3C_SDHCI_CD_NONE;
+>                 return 0;
+>         }
+>
+> -       if (of_get_property(node, "non-removable", NULL)) {
+> +       if (of_property_read_bool(node, "non-removable")) {
+>                 pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
+>                 return 0;
+>         }
+> diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+> index e24c3d284515..be7f18fd4836 100644
+> --- a/drivers/mmc/host/tmio_mmc_core.c
+> +++ b/drivers/mmc/host/tmio_mmc_core.c
+> @@ -1084,7 +1084,7 @@ static void tmio_mmc_of_parse(struct platform_device *pdev,
+>          * For new platforms, please use "disable-wp" instead of
+>          * "toshiba,mmc-wrprotect-disable"
+>          */
+> -       if (of_get_property(np, "toshiba,mmc-wrprotect-disable", NULL))
+> +       if (of_property_read_bool(np, "toshiba,mmc-wrprotect-disable"))
+>                 mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
 >  }
 >
-> +static unsigned int rk35xx_get_max_clock(struct sdhci_host *host)
-> +{
-> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-> +
-> +       return clk_round_rate(pltfm_host->clk, ULONG_MAX);
-> +}
-> +
->  static void dwcmshc_check_auto_cmd23(struct mmc_host *mmc,
->                                      struct mmc_request *mrq)
->  {
-> @@ -343,7 +350,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
->         .set_clock              = dwcmshc_rk3568_set_clock,
->         .set_bus_width          = sdhci_set_bus_width,
->         .set_uhs_signaling      = dwcmshc_set_uhs_signaling,
-> -       .get_max_clock          = sdhci_pltfm_clk_get_max_clock,
-> +       .get_max_clock          = rk35xx_get_max_clock,
->         .reset                  = rk35xx_sdhci_reset,
->         .adma_write_desc        = dwcmshc_adma_write_desc,
->  };
+> diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+> index 9aa3027ca25e..68525d900046 100644
+> --- a/drivers/mmc/host/wmt-sdmmc.c
+> +++ b/drivers/mmc/host/wmt-sdmmc.c
+> @@ -802,10 +802,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
+>         priv->power_inverted = 0;
+>         priv->cd_inverted = 0;
+>
+> -       if (of_get_property(np, "sdon-inverted", NULL))
+> -               priv->power_inverted = 1;
+> -       if (of_get_property(np, "cd-inverted", NULL))
+> -               priv->cd_inverted = 1;
+> +       priv->power_inverted = of_property_read_bool(np, "sdon-inverted");
+> +       priv->cd_inverted = of_property_read_bool(np, "cd-inverted");
+>
+>         priv->sdmmc_base = of_iomap(np, 0);
+>         if (!priv->sdmmc_base) {
 > --
 > 2.39.2
 >
