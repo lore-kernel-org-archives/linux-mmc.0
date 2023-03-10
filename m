@@ -2,155 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4462C64EC4
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 11:12:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D32CDC64EC4
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 11:43:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229453AbjCJLMO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 06:12:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49286 "EHLO
+        id S230236AbjCJLnZ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 06:43:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44702 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229550AbjCJLLj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 06:11:39 -0500
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CE2AAF209B;
-        Fri, 10 Mar 2023 03:11:36 -0800 (PST)
+        with ESMTP id S231342AbjCJLnU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 06:43:20 -0500
+Received: from mga07.intel.com (mga07.intel.com [134.134.136.100])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 90ADB2471D;
+        Fri, 10 Mar 2023 03:43:05 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1678446696; x=1709982696;
+  t=1678448587; x=1709984587;
   h=message-id:date:mime-version:subject:to:cc:references:
    from:in-reply-to:content-transfer-encoding;
-  bh=kGzQUVv6UsDRDCHHTyUvwV4Iq1BLrr/jOo6saAGlNRQ=;
-  b=iTX30Do5YgP53/EHJgnX4RqMOFPcpS4Qyu1iffDX/Z7oLp0AHEOfkYXK
-   /dsuUyfPUV5EinjKiVY7XCxLFN0vWBkDVlbQE4gTHqv07aLf9EZRZdLHc
-   jMRur82TZBwlbzPzpBllOzBJdvE6BOGOCq7EeUhPOkNf//eGJe+LHGt4j
-   QO14w6MAvxzDxWP8IeFayZc3pBKfVilwEKwp9zYbwifuF3pWSGv6o2Med
-   +01dFHu4WGAP4GBIo19vqkn0w/jAqoD+7QYSuRkJUMhGdlgmOBoz2nXhd
-   edO+fxy7H+WlA+X9JiWC1dCgkMFe4jqIR4+41Cr7NbNra6BLcCHRfuMpJ
-   Q==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10644"; a="399303440"
+  bh=LRxW5Wq7WPFhpM3fw7IImF+pnI1/yJrimQmf3FE581A=;
+  b=LvQiiZpwSDPh6LZJ4P/DBlb9YcLcrKj5KyhcuBLkXD0oY5jRIimii/lA
+   qCEf4EigBVhFp8//3AaeP8kBWZmj6ZMm5si55nKxLNV4IhBmsBaGoAozE
+   X8blQhydnPfYdaae2HMOTMEY1gDFzuSVsDIMQ4353HTrvBMT05g11CTAc
+   GrDNYujx+trV2U1sTpqYU3ytcDN/ukVFRV7yL1MhG+hdp0+vC50LGRqEr
+   WitEG5KOR/KBh2qiGM3w6tqPCYtG64LNi+LS1HFjS9uPzQrubj+oYXcuM
+   Tf3BvGQXC4amZaF0wO5euCa5fYVl2Hy2eKnOU3YRvwckoFofte6kGzcBl
+   g==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10644"; a="401570308"
 X-IronPort-AV: E=Sophos;i="5.98,249,1673942400"; 
-   d="scan'208";a="399303440"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Mar 2023 03:11:28 -0800
+   d="scan'208";a="401570308"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga105.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Mar 2023 03:43:04 -0800
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10644"; a="671051054"
+X-IronPort-AV: E=McAfee;i="6500,9779,10644"; a="710256003"
 X-IronPort-AV: E=Sophos;i="5.98,249,1673942400"; 
-   d="scan'208";a="671051054"
+   d="scan'208";a="710256003"
 Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.60.222])
-  by orsmga007-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Mar 2023 03:11:19 -0800
-Message-ID: <8efb1736-7bbb-3ec6-d7f0-fc781edb6a4c@intel.com>
-Date:   Fri, 10 Mar 2023 13:11:15 +0200
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 10 Mar 2023 03:43:01 -0800
+Message-ID: <8647cc1c-e301-867d-3fe4-f290548d5798@intel.com>
+Date:   Fri, 10 Mar 2023 13:42:56 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Firefox/102.0 Thunderbird/102.8.0
-Subject: Re: [PATCH v10 14/15] mmc: sdhci-cadence: Support mmc hardware reset
+Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Fix SDR50 mode timing issue
 Content-Language: en-US
-To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
-        devicetree@vger.kernel.org
-References: <20230306040739.51488-1-blarson@amd.com>
- <20230306040739.51488-15-blarson@amd.com>
+To:     fredaibayhubtech@126.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux.kernel@vger.kernel.org
+Cc:     shaper.liu@bayhubtech.com, chevron.li@bayhubtech.com,
+        xiaoguang.yu@bayhubtech.com, shirley.her@bayhubtech.com,
+        fred.ai@bayhubtech.com
+References: <20230223120450.16858-1-fredaibayhubtech@126.com>
 From:   Adrian Hunter <adrian.hunter@intel.com>
 Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
  Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230306040739.51488-15-blarson@amd.com>
+In-Reply-To: <20230223120450.16858-1-fredaibayhubtech@126.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 6/03/23 06:07, Brad Larson wrote:
-> Add support for mmc hardware reset using a reset-controller
-> that would need to be enabled in the device tree with
-> a supporting driver.  The default is disabled for all
-> existing designs.
+On 23/02/23 14:04, fredaibayhubtech@126.com wrote:
+> From: Fred <fred.ai@bayhubtech.com>
 > 
-> Signed-off-by: Brad Larson <blarson@amd.com>
+> Change SDR50 mode clock source from DLL output clock to PLL open clock
+> 1.HS200 and SDR104 mode select DLL output clock
+> 2.SDR50 mode select PLL open clock
+> 
+> Signed-off-by: Fred <fred.ai@bayhubtech.com>
+
+Seems like it could use a fixes tag? Nevertheless:
 
 Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
 > ---
-> 
-> v9 changes:
-> - Previously patch 17/17
-> - Changed delay after reset_control_assert() from 9 to 3 usec
-> - Renamed sdhci_mmc_hw_reset() to sdhci_cdns_mmc_hw_reset()
-> 
+> Change in V1
+> SDR50 mode select PLL open clock as its clock source.
 > ---
->  drivers/mmc/host/sdhci-cadence.c | 27 +++++++++++++++++++++++++++
->  1 file changed, 27 insertions(+)
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 30 +++++++++++++++-------------
+>  1 file changed, 16 insertions(+), 14 deletions(-)
 > 
-> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index 31c77d32aa7d..d13081da5e30 100644
-> --- a/drivers/mmc/host/sdhci-cadence.c
-> +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -12,6 +12,7 @@
->  #include <linux/mmc/mmc.h>
->  #include <linux/of.h>
->  #include <linux/of_device.h>
-> +#include <linux/reset.h>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 98cadff47b2b..620f52ad9667 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -339,22 +339,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>  	reg_val &= ~SDHCI_CLOCK_CARD_EN;
+>  	sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
 >  
->  #include "sdhci-pltfm.h"
+> -	/* UnLock WP */
+> -	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -	scratch_8 &= 0x7f;
+> -	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> -
+> -	/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> -	pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> -	reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> -	reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> -	pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+> +	if ((host->timing == MMC_TIMING_MMC_HS200) ||
+> +		(host->timing == MMC_TIMING_UHS_SDR104)) {
+> +		/* UnLock WP */
+> +		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +		scratch_8 &= 0x7f;
+> +		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
 >  
-> @@ -70,6 +71,7 @@ struct sdhci_cdns_priv {
->  	spinlock_t wrlock;	/* write lock */
->  	bool enhanced_strobe;
->  	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
-> +	struct reset_control *rst_hw;
->  	unsigned int nr_phy_params;
->  	struct sdhci_cdns_phy_param phy_params[];
->  };
-> @@ -460,6 +462,22 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
->  					 SDHCI_CDNS_HRS06_MODE_MMC_HS400);
->  }
+> -	/* Lock WP */
+> -	pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -	scratch_8 |= 0x80;
+> -	pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +		/* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> +		pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> +		reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> +		reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> +		pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
 >  
-> +static void sdhci_cdns_mmc_hw_reset(struct mmc_host *mmc)
-> +{
-> +	struct sdhci_host *host = mmc_priv(mmc);
-> +	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +
-> +	dev_dbg(mmc_dev(host->mmc), "emmc hardware reset\n");
-> +
-> +	reset_control_assert(priv->rst_hw);
-> +	/* For eMMC, minimum is 1us but give it 3us for good measure */
-> +	udelay(3);
-> +
-> +	reset_control_deassert(priv->rst_hw);
-> +	/* For eMMC, minimum is 200us but give it 300us for good measure */
-> +	usleep_range(300, 1000);
-> +}
-> +
->  static int sdhci_cdns_probe(struct platform_device *pdev)
->  {
->  	struct sdhci_host *host;
-> @@ -523,6 +541,15 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
->  	if (ret)
->  		goto free;
->  
-> +	if (host->mmc->caps & MMC_CAP_HW_RESET) {
-> +		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, "hw");
-> +		if (IS_ERR(priv->rst_hw))
-> +			return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
-> +					     "reset controller error\n");
-> +		if (priv->rst_hw)
-> +			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
+> +		/* Lock WP */
+> +		pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +		scratch_8 |= 0x80;
+> +		pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
 > +	}
-> +
->  	ret = sdhci_add_host(host);
->  	if (ret)
->  		goto free;
+>  	/* Start clk */
+>  	reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>  	reg_val |= SDHCI_CLOCK_CARD_EN;
 
