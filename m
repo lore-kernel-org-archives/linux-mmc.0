@@ -2,167 +2,186 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C707FC6FA99
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 07:56:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 62609C6FD1C
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 08:14:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230045AbjCJH45 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 02:56:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36628 "EHLO
+        id S230240AbjCJIOF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 03:14:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229875AbjCJH45 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 02:56:57 -0500
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41569DDF34
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 23:56:53 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id ay14so16911876edb.11
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 23:56:53 -0800 (PST)
+        with ESMTP id S230395AbjCJINf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 03:13:35 -0500
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 80D194AFF6
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 00:13:32 -0800 (PST)
+Received: by mail-ed1-x52e.google.com with SMTP id da10so17226914edb.3
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 00:13:32 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678435011;
+        d=linaro.org; s=google; t=1678436011;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=Na4vhlLIT8h87R1c4saJtnoc0rpStTN6SAaJv5Ui0DU=;
-        b=f/cdum7O6TN5gJ9ROGgx6QjE0oljMSgdfelOxJDv/A44aZ7Mm1unTj43LMrAl8qXD3
-         sHI50PXnWoUWOCaGf+Lw7NcDVU4NiPijijYupEKrMb/i7yVzAFSIs2Sdxro3W9NWDoHv
-         l0FZKC3iXGb6IU9h1xEP+L1xj0TStwEsdmZgH7BeJN1yxjzdFSB6oJFobXTUS45dVs0M
-         ULQH07khMas1d0aBIt/OjZLOHVTDe9lhbsnUreYNdh+WszcP/mDLVMMeWmaL4KFGK0LG
-         +5HnCCB4hC8JohJPmZdM8SSKIi+lKSrrSUXogyHzjsDGs1U97Mara0hXF/7LevUFdWY9
-         OvCg==
+        bh=CEPOx6Kwho4WulB2OeUMcq60ngC+gDTko4FaO6LvQts=;
+        b=fZO54m22EllMgQT3ljYOGeNEoUes1cH0hDHzecRdbywedL6XngZKkw1h0xFv5H2mXA
+         0DmmTjVjV1k2ehBU0S7hULfTJSgfWiC+Qp04O5rGgtLWrVRypNIQLaHsSDSzhpJsy+6i
+         eguZ/PtTKqp5Fu+Q6JCmNdU89nnvScLgXI3PX4QC5mysGM4nNQYX5f2oosbNNgwT9K+E
+         b4x6HJqkIrRjTBnnQd2OBSwOGeehXml3thjck3Ty6gVMcOoVfFw0lKSJf/Dx6AjWRKfH
+         Pvi146UrueYcO2IlPyuaTpspwHX4zKV256ZNAyoyKe+7xi4UEeTUsENpz0WkT6U6l6NV
+         fjzA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678435011;
+        d=1e100.net; s=20210112; t=1678436011;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Na4vhlLIT8h87R1c4saJtnoc0rpStTN6SAaJv5Ui0DU=;
-        b=Ur4JbA8jYFI3kT0iWfFS77rxKUGu0EFTbNbhNHeS28FmJ5pxaOckVx+FWk7CVYkvbJ
-         lDi4GsgBJC0I4xIe56AN/8AyzzaGld2/PaOAjF2taRWFV4yF8YmJrQABmP0hfMyghJss
-         9Ph2toC9VU5eM1tKYgrKRbivpA5lwcM7s1Zt1V4fw6w1anQNYrJB2gHMVf38C+ugl+0X
-         SH9PQ8zdBMULpeVps/TdyTDMK+ka2w413d/v790kob5bDx/oyjPn+rsM1F2aIh/aenqe
-         RhYY63Mjg2lw3gM8v/+DpGJlnrK0T3LA/R1IJwM7uJGF1x6274v9L81P8C5O2tNrMIfA
-         LIpQ==
-X-Gm-Message-State: AO0yUKWdQUjBNg5YO+SLN+6w77cTvZ5ZmYQ6tU5S8yZ1t1Mgjz7QW+Mr
-        ZKE8y7MIGHiZ52CaIVpudfS6uw==
-X-Google-Smtp-Source: AK7set83ouw7MBm0jqo5iH57IkMFwoOVUzIry7zQggJ4hxcJBeN03UC69xrHLWNGpiqGw+nvqtrohA==
-X-Received: by 2002:a17:906:eecc:b0:90b:167e:3050 with SMTP id wu12-20020a170906eecc00b0090b167e3050mr30865633ejb.36.1678435011591;
-        Thu, 09 Mar 2023 23:56:51 -0800 (PST)
-Received: from [192.168.1.195] ([5.133.47.210])
-        by smtp.googlemail.com with ESMTPSA id ox11-20020a170907100b00b008cf6f8798e1sm641097ejb.54.2023.03.09.23.56.49
+        bh=CEPOx6Kwho4WulB2OeUMcq60ngC+gDTko4FaO6LvQts=;
+        b=haqNabU+eR8hqpx4ZfmM2B+2QtlGIO23TysX7gViGXk3UyRl5LfZ+DZceFIpNoX6/7
+         iHO78Rq9yCUQRbu+c7judRQXWOTStkDQ0Jpd1TnjnR1SXtsW5d8xQcKoLgXxVRfvfvJt
+         OwUdCZ52Hbf1IPRzvT3Crq1EzhaydE3+YRSaF/ctscgxvadbJGoH7htf+/mAZMvbvCbJ
+         0D5ktu5jwi6zmT7SE/S3ExO+ht7cDful5H+ZwDAFE2Qf7k1JP21zx3YQx5hAsIirytKV
+         qB90+gHPGBCaM0B0IzDwH0gnQV9qIkyTKtfhaxhbwOpWRpIwYKGUIqBANQSH7F7J0PmY
+         DvCA==
+X-Gm-Message-State: AO0yUKU7a52FCv9QqSPVeZXfJ3w5DHQ7x3pOsnyeC2cX+SpwRdIZBsig
+        3h7+nMRlbXa10hCcMbuVxhQ2NxkEj9C+KvR3PLw=
+X-Google-Smtp-Source: AK7set8hHmBQYQjiev7icT060MuM2aDe1d5sXieWR847rpHIWIaqa2m9i4Cs+I/TgT7t42q1surT2g==
+X-Received: by 2002:a05:6402:7ce:b0:4c0:57b:47a9 with SMTP id u14-20020a05640207ce00b004c0057b47a9mr21919985edy.35.1678436010973;
+        Fri, 10 Mar 2023 00:13:30 -0800 (PST)
+Received: from ?IPV6:2a02:810d:15c0:828:2a59:841a:ebc:7974? ([2a02:810d:15c0:828:2a59:841a:ebc:7974])
+        by smtp.gmail.com with ESMTPSA id c22-20020a50d656000000b004c09527d62dsm525188edj.30.2023.03.10.00.13.29
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 09 Mar 2023 23:56:50 -0800 (PST)
-Message-ID: <6108c68b-e38b-3060-f6fa-53be79a795d7@linaro.org>
-Date:   Fri, 10 Mar 2023 07:56:49 +0000
+        Fri, 10 Mar 2023 00:13:30 -0800 (PST)
+Message-ID: <b5c9aa6e-69d1-165a-4ff9-b5a9f33688e6@linaro.org>
+Date:   Fri, 10 Mar 2023 09:13:29 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH v1 01/15] dt-bindings: add pwrseq device tree bindings
+ Thunderbird/102.8.0
+Subject: Re: [RFC PATCH v2 7/7] arm64: dts: qcom: Add the Inline Crypto Engine
+ nodes
 Content-Language: en-US
-To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
-        Rob Herring <robh@kernel.org>
-Cc:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <bjorn.andersson@linaro.org>,
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     Abel Vesa <abel.vesa@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Marcel Holtmann <marcel@holtmann.org>,
-        Johan Hedberg <johan.hedberg@gmail.com>,
-        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        "David S. Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Stanimir Varbanov <svarbanov@mm-sol.com>,
-        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "open list:BLUETOOTH DRIVERS" <linux-bluetooth@vger.kernel.org>,
-        ath10k@lists.infradead.org,
-        linux-wireless <linux-wireless@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>, Abel Vesa <abel.vesa@linaro.org>
-References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
- <20211006035407.1147909-2-dmitry.baryshkov@linaro.org>
- <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
- <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
- <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
- <31792ef1-20b0-b801-23b7-29f303b91def@linaro.org>
-From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
-In-Reply-To: <31792ef1-20b0-b801-23b7-29f303b91def@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-scsi@vger.kernel.org
+References: <20230308155838.1094920-1-abel.vesa@linaro.org>
+ <20230308155838.1094920-8-abel.vesa@linaro.org>
+ <4eab53fc-2d26-dc93-3ae6-c0b2546ad3e0@linaro.org>
+ <ZAol5o5a6HZYgRaG@sol.localdomain>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <ZAol5o5a6HZYgRaG@sol.localdomain>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-On 02/11/2021 15:26, Dmitry Baryshkov wrote:
-> On 28/10/2021 00:53, Rob Herring wrote:
->> On Tue, Oct 26, 2021 at 9:42 AM Dmitry Baryshkov
->> <dmitry.baryshkov@linaro.org> wrote:
+On 09/03/2023 19:31, Eric Biggers wrote:
+> On Thu, Mar 09, 2023 at 11:31:46AM +0100, Krzysztof Kozlowski wrote:
+>> On 08/03/2023 16:58, Abel Vesa wrote:
+>>> Drop all properties related to ICE from every UFS and SDCC node,
+>>> for all platforms, and add dedicated ICE nodes for each platform.
+>>> On most platforms, there is only one ICE instance, used by either
+>>> UFS or SDCC, but there are some platforms that have two separate
+>>> instances and, therefore, two separate nodes are added.
 >>>
->>> On 26/10/2021 15:53, Rob Herring wrote:
->>>> On Wed, Oct 06, 2021 at 06:53:53AM +0300, Dmitry Baryshkov wrote:
->>>>> Add device tree bindings for the new power sequencer subsystem.
->>>>> Consumers would reference pwrseq nodes using "foo-pwrseq" properties.
->>>>> Providers would use '#pwrseq-cells' property to declare the amount of
->>>>> cells in the pwrseq specifier.
->>>>
->>>> Please use get_maintainers.pl.
->>>>
->>>> This is not a pattern I want to encourage, so NAK on a common binding.
+>>> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+>>> ---
 >>>
+>>> Changes since v1:
+>>>  * Made changes for all platforms that use ICE, as a single patch since
+>>>    most changes look really similar.
 >>>
->>> Could you please spend a few more words, describing what is not
->>> encouraged? The whole foo-subsys/#subsys-cells structure?
+>>>  arch/arm64/boot/dts/qcom/sdm630.dtsi | 18 +++++++++-----
+>>>  arch/arm64/boot/dts/qcom/sdm670.dtsi | 15 +++++++----
+>>>  arch/arm64/boot/dts/qcom/sdm845.dtsi | 21 +++++++++-------
+>>>  arch/arm64/boot/dts/qcom/sm6115.dtsi | 37 +++++++++++++++++-----------
+>>>  arch/arm64/boot/dts/qcom/sm6350.dtsi | 31 ++++++++++++++---------
+>>>  arch/arm64/boot/dts/qcom/sm8150.dtsi | 21 +++++++++-------
+>>>  arch/arm64/boot/dts/qcom/sm8450.dtsi | 22 ++++++++++-------
+>>>  7 files changed, 102 insertions(+), 63 deletions(-)
+>>>
+>>> diff --git a/arch/arm64/boot/dts/qcom/sdm630.dtsi b/arch/arm64/boot/dts/qcom/sdm630.dtsi
+>>> index 5827cda270a0..2aed49104d9d 100644
+>>> --- a/arch/arm64/boot/dts/qcom/sdm630.dtsi
+>>> +++ b/arch/arm64/boot/dts/qcom/sdm630.dtsi
+>>> @@ -1330,9 +1330,8 @@ opp-200000000 {
+>>>  		sdhc_1: mmc@c0c4000 {
+>>>  			compatible = "qcom,sdm630-sdhci", "qcom,sdhci-msm-v5";
+>>>  			reg = <0x0c0c4000 0x1000>,
+>>> -			      <0x0c0c5000 0x1000>,
+>>> -			      <0x0c0c8000 0x8000>;
+>>> -			reg-names = "hc", "cqhci", "ice";
+>>> +			      <0x0c0c5000 0x1000>;
+>>> +			reg-names = "hc", "cqhci";
 >>
->> No, that's generally how common provider/consumer style bindings work.
+>> I believe this will break the ICE on these platforms without valid
+>> reason. The commit msg does not explain why you do it or why this is
+>> necessary.
 >>
->>> Or just specifying the common binding?
+>> We already we received comment that we keep breaking Qualcomm platforms
+>> all the time and need to keep them in some shape.
 >>
->> If we could do it again, I would not have mmc pwrseq binding. The
->> properties belong in the device's node. So don't generalize the mmc
->> pwrseq binding.
+>> Also, patchset is non-applicable in current set (breaks users) and
+>> neither commit nor cover letter mentions it.
 >>
->> It's a kernel problem if the firmware says there's a device on a
->> 'discoverable' bus and the kernel can't discover it. I know you have
->> the added complication of a device with 2 interfaces, but please,
->> let's solve one problem at a time.
+> 
+> FWIW, I tested this patchset on SDA845, and ICE continues to work fine.
 
-Just to keep this topic updated with some pointers [1] to changes done 
-to solve same problem in USB Hub. These patches 
-(drivers/usb/misc/onboard_usb_hub*) have been merged since last year July.
+Really? I clearly see of_find_device_by_node -> "return NULL" and all
+old code gone, so ABI is broken. Are you sure you applied patch 1-6 and
+ICE was working?
 
-It looks like we can take some inspiration from this to address PCIE Bus 
-issue aswell.
+> 
+> (Though if I understand the patchset correctly, the ICE clock is no longer
+> turned off when the UFS host controller is suspended.  That isn't ideal as it
+> wastes power.  I would like that to be fixed.)
+> 
+> Anyway, when you say "break the ICE", do you really mean "make an incompatible
+> change to the device-tree bindings"?
 
-Thanks to Neil to point this.
+It breaks existing users of DTS and kernel.
 
-[1] 
-https://lore.kernel.org/lkml/20220630193530.2608178-1-mka@chromium.org/T/
+> 
+> I'd think there would be no problem with that as long as everything is updated
+> at once, which this patchset does.
+
+Which is obviously not possible. DTS always goes separate branch,
+always. It cannot be combined with code into the same branch! So how do
+you even imagine this?
+
+> 
+> I've heard before that some people consider the device-tree bindings to be a
+> stable UAPI.  That doesn't make sense to me. 
+
+It is stable ABI. Bindings and DTS are used by other firmwares,
+bootloaders and systems. The kernel *must* work with old and out of tree
+DTS.
+
+Even if this does not make sense to you, these are the realities,
+practice and current rules.
 
 
---srini
-> 
-> The PCI bus handling is a separate topic for now (as you have seen from 
-> the clearly WIP patches targeting just testing of qca6390's wifi part).
-> 
-> For me there are three parts of the device:
-> - power regulator / device embedded power domain.
-> - WiFi
-> - Bluetooth
-> 
-> With the power regulator being a complex and a bit nasty beast. It has 
-> several regulators beneath, which have to be powered up in a proper way.
-> Next platforms might bring additional requirements common to both WiFi 
-> and BT parts (like having additional clocks, etc). It is externally 
-> controlled (after providing power to it you have to tell, which part of 
-> the chip is required by pulling up the WiFi and/or BT enable GPIOs.
-> 
-> Having to duplicate this information in BT and WiFi cases results in 
-> non-aligned bindings (with WiFi and BT parts using different set of 
-> properties and different property names) and non-algined drivers (so the 
-> result of the powerup would depend on the order of drivers probing).
-> 
-> So far I still suppose that having a single separate entity controlling 
-> the powerup of such chips is the right thing to do.
-> 
-> I'd prefer to use the power-domain bindings (as the idea seems to be 
-> aligned here), but as the power-domain is used for the in-chip power 
-> domains, we had to invent the pwrseq name.
-> 
+> Actually, my original ICE patches
+> ran into this issue too, and the resolution was simply that the Qualcomm
+> platforms maintainer (Bjorn) decided to take the patches anyway.  I never heard
+> any complaints afterwards.  Maybe the same is fine here too?
+
+
+No, it is not fine. The patchset breaks ABI, breaks existing kernel with
+old DTS and breaks other projects using DTS and bindings.
+
+Best regards,
+Krzysztof
+
