@@ -2,219 +2,241 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D876C6FD1F
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:02:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 311C5C6FA99
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:06:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233615AbjCJPC4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 10:02:56 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56846 "EHLO
+        id S233837AbjCJPGK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 10:06:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34296 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233589AbjCJPCf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:02:35 -0500
-Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85B4112E154
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 06:55:52 -0800 (PST)
-Received: by mail-pl1-x62f.google.com with SMTP id u5so5812962plq.7
-        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 06:55:52 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678460070;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=899uIjNSnSBUDvGA5vdXcbUib6/TzEA7CBXfVAUpl0E=;
-        b=PfZ/1K/35eYfryGtgRaPzAfXjm/TTlzN7zmCUyYNSlqd0knXBwYP8lAgb03+zPznv+
-         eDQUmy4JZ9Gua1Q9qIgfWjg1NZA25DAABvXnJhzbrkvS5Q9luzxtKkybr5K6DXUngzk3
-         xu4AsjDEvmaEnsKbPkKvEo9ougjazOkDwSj5+0EicSGDg8K+N704m4XvG1WxIngqEKXT
-         8HnqDuCiY1eQy7JWntcKbKR2zqTLukIMarStVBBNPUg7IbLh0wStPLZ6xsPjdf1GsVNv
-         4XFrHoJwthEaIAqn+A7/8Gm6iBh7UpSq+8bCuQi+AGRFiUpeV4ro0Jg8jfuoMeN8DnOz
-         uFvg==
+        with ESMTP id S233214AbjCJPFb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:05:31 -0500
+Received: from mail-oa1-x2d.google.com (mail-oa1-x2d.google.com [IPv6:2001:4860:4864:20::2d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C88CF129734;
+        Fri, 10 Mar 2023 06:58:47 -0800 (PST)
+Received: by mail-oa1-x2d.google.com with SMTP id 586e51a60fabf-176b48a9a05so6166635fac.0;
+        Fri, 10 Mar 2023 06:58:47 -0800 (PST)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678460070;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=899uIjNSnSBUDvGA5vdXcbUib6/TzEA7CBXfVAUpl0E=;
-        b=H7dAPREn3SHPqfo5a06WbdaoGQTp0vLbGEnibIbPh3ArarLRFmR46Y+n0qWAF0tBbJ
-         6FEP/t+iW7hnXdlHn1sjnEvmdkCk6T7tpLEpMw+JkXnYngzjE1OgfKeMfRiUQRb7x3ju
-         Y50YiXaFO7DxJ/zR53Jh+tU4p554V/fRdZQURhny0ITh7HjH1zlPtUc/F0NgQrbLitIO
-         5liEEjUawVA3+wzi7rXV68ml9yYHg3oftMZmjKZWEMCRoUdcstXVKM7az4Pppsbm7dyW
-         NNJ6fVUdpLX3S/ExDAo8yzgAaVJdch4SWwW/1VB4VNAM73b8cXCHRgwG0/NfMEUBOCqO
-         YT+A==
-X-Gm-Message-State: AO0yUKXZ4i3MRMYoJeuc22ZJJ9keuel5igaPoO24bLS5jae63KU3nDpi
-        nG9GuGmWATAz7YLb+JeC+7J+LRFfiJZpsext7QTU4Q==
-X-Google-Smtp-Source: AK7set+0etYzFVu3Na/+89oOfp44qAlq1xHev4VKDXKuM1ZC3b+8SmFlqToekddehOw2SpuLoDcBLKODDKlT5jN+vR0=
-X-Received: by 2002:a17:90a:69c4:b0:233:bc72:1c69 with SMTP id
- s62-20020a17090a69c400b00233bc721c69mr9062179pjj.9.1678460070046; Fri, 10 Mar
- 2023 06:54:30 -0800 (PST)
-MIME-Version: 1.0
-References: <20230302144330.274947-1-ulf.hansson@linaro.org> <54cee7de4ab7479db74b21e64e5f53cf@hyperstone.com>
-In-Reply-To: <54cee7de4ab7479db74b21e64e5f53cf@hyperstone.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Fri, 10 Mar 2023 15:53:53 +0100
-Message-ID: <CAPDyKFq-qToEX+qiuHirNbcuedii_f0KKuHiPAv7+tydrUTpqQ@mail.gmail.com>
-Subject: Re: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
- internal cache
-To:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
+        d=1e100.net; s=20210112; t=1678460205;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=OQk+ypPqgihyUeUIiesj0AXK7svmXbRQzGpX4VpHfOM=;
+        b=RMIejRn7oxglsP3kjx2Oy8efmC0b0r4mvv6j7gN0qUEtrc/BdycJkuoDoIaafdlgCm
+         BmiVithf1j/MxnRUfFecfhXHT32UFnPEGnjkGVuPLyoLhr8wD9aF7da2ienBunUXQ2sU
+         tAW6ynrw8Erei3466N0IGaZGzQ3hww8cgym/i+YLvIiVvOcY6zEeE5wBMq5t/lKMJHla
+         F2HZGErYzK8ny3kprVrjTQHOCAoE//VPCduy3euaSzNzBEagi2rUoHQw9IPcMsiQoFcR
+         IDT8MVBx/dB+8KGHQ7+rKYEgwFhlkbxLEFGraIHsuoDlU8JUP7q9mU+BmKWUznQq9Mxy
+         eALg==
+X-Gm-Message-State: AO0yUKWOoTefyezEiIbZ7X3mVhY2+NISExBDdhIcFXNz2061Qd0epseJ
+        XvR0JpvvYZm5+FVQHv53X0X5ahQcWw==
+X-Google-Smtp-Source: AK7set8EIbIkzUtJ90ghmwkL/cci31MqBBSA3xxJJ9nkn5CXYyyFP2bawNWYEbOMktuugW9dBrg3pg==
+X-Received: by 2002:a05:6871:207:b0:176:53a1:b65c with SMTP id t7-20020a056871020700b0017653a1b65cmr16734662oad.11.1678459711546;
+        Fri, 10 Mar 2023 06:48:31 -0800 (PST)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id j21-20020a056870d45500b0017697dfc20fsm119271oag.12.2023.03.10.06.48.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 10 Mar 2023 06:48:30 -0800 (PST)
+Received: (nullmailer pid 1543883 invoked by uid 1000);
+        Fri, 10 Mar 2023 14:47:15 -0000
+From:   Rob Herring <robh@kernel.org>
+To:     Russell King <linux@armlinux.org.uk>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Adrian Hunter <adrian.hunter@intel.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Haibo Chen <haibo.chen@nxp.com>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Pengutronix Kernel Team <kernel@pengutronix.de>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Ben Dooks <ben-linux@fluff.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Wolfram Sang <wsa+renesas@sang-engineering.com>
+Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        linux-renesas-soc@vger.kernel.org
+Subject: [PATCH] mmc: Use of_property_read_bool() for boolean properties
+Date:   Fri, 10 Mar 2023 08:47:14 -0600
+Message-Id: <20230310144715.1543836-1-robh@kernel.org>
+X-Mailer: git-send-email 2.39.2
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 10 Mar 2023 at 14:43, Christian L=C3=B6hle <CLoehle@hyperstone.com>=
- wrote:
->
-> I have benchmarked the FUA/Cache behavior a bit.
-> I don't have an actual filesystem benchmark that does what I wanted and i=
-s easy to port to the target so I used:
->
-> # call with
-> # for loop in {1..3}; do sudo dd if=3D/dev/urandom bs=3D1M of=3D/dev/mmcb=
-lk2; done; for loop in {1..5}; do time ./filesystembenchmark.sh; umount /mn=
-t; done
-> mkfs.ext4 -F /dev/mmcblk2
-> mount /dev/mmcblk2 /mnt
-> for i in {1..3}
-> do
-> cp -r linux-6.2.2 /mnt/$i
-> done
-> for i in {1..3}
-> do
-> rm -r /mnt/$i
-> done
-> for i in {1..3}
-> do
-> cp -r linux-6.2.2 /mnt/$i
-> done
->
->
-> I found a couple of DUTs that I can link, I also tested one industrial ca=
-rd.
->
-> DUT1: blue PCB Foresee eMMC
-> https://pine64.com/product/32gb-emmc-module/
-> DUT2: green PCB SiliconGo eMMC
-> Couldn't find that one online anymore unfortunately
-> DUT3: orange hardkernel PCB 8GB
-> https://www.hardkernel.com/shop/8gb-emmc-module-c2-android/
-> DUT4: orange hardkernel PCB white dot
-> https://rlx.sk/en/odroid/3198-16gb-emmc-50-module-xu3-android-for-odroid-=
-xu3.html
-> DUT5: Industrial card
+It is preferred to use typed property access functions (i.e.
+of_property_read_<type> functions) rather than low-level
+of_get_property/of_find_property functions for reading properties.
+Convert reading boolean properties to to of_property_read_bool().
 
-Thanks a lot for helping out with testing! Much appreciated!
+Signed-off-by: Rob Herring <robh@kernel.org>
+---
+ drivers/mmc/host/mmci.c            | 22 +++++++++++-----------
+ drivers/mmc/host/omap_hsmmc.c      |  8 ++++----
+ drivers/mmc/host/sdhci-esdhc-imx.c |  4 ++--
+ drivers/mmc/host/sdhci-pxav2.c     |  2 +-
+ drivers/mmc/host/sdhci-s3c.c       |  4 ++--
+ drivers/mmc/host/tmio_mmc_core.c   |  2 +-
+ drivers/mmc/host/wmt-sdmmc.c       |  6 ++----
+ 7 files changed, 23 insertions(+), 25 deletions(-)
 
->
->
-> The test issued 461 DO_REL_WR during one of the iterations for DUT5
->
-> DUT1:
-> Cache, no FUA:
-> 13:04.49
-> 13:13.82
-> 13:30.59
-> 13:28:13
-> 13:20:64
-> FUA:
-> 13:30.32
-> 13:36.26
-> 13:10.86
-> 13:32.52
-> 13:48.59
->
-> DUT2:
-> FUA:
-> 8:11.24
-> 7:47.73
-> 7:48.00
-> 7:48.18
-> 7:47.38
-> Cache, no FUA:
-> 8:10.30
-> 7:48.97
-> 7:48.47
-> 7:47.93
-> 7:44.18
->
-> DUT3:
-> Cache, no FUA:
-> 7:02.82
-> 6:58.94
-> 7:03.20
-> 7:00.27
-> 7:00.88
-> FUA:
-> 7:05.43
-> 7:03.44
-> 7:04.82
-> 7:03.26
-> 7:04.74
->
-> DUT4:
-> FUA:
-> 7:23.92
-> 7:20.15
-> 7:20.52
-> 7:19.10
-> 7:20.71
-> Cache, no FUA:
-> 7:20.23
-> 7:20.48
-> 7:19.94
-> 7:18.90
-> 7:19.88
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index b9e5dfe74e5c..f2b2e8b0574e 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -1962,28 +1962,28 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
+ 	if (ret)
+ 		return ret;
+ 
+-	if (of_get_property(np, "st,sig-dir-dat0", NULL))
++	if (of_property_read_bool(np, "st,sig-dir-dat0"))
+ 		host->pwr_reg_add |= MCI_ST_DATA0DIREN;
+-	if (of_get_property(np, "st,sig-dir-dat2", NULL))
++	if (of_property_read_bool(np, "st,sig-dir-dat2"))
+ 		host->pwr_reg_add |= MCI_ST_DATA2DIREN;
+-	if (of_get_property(np, "st,sig-dir-dat31", NULL))
++	if (of_property_read_bool(np, "st,sig-dir-dat31"))
+ 		host->pwr_reg_add |= MCI_ST_DATA31DIREN;
+-	if (of_get_property(np, "st,sig-dir-dat74", NULL))
++	if (of_property_read_bool(np, "st,sig-dir-dat74"))
+ 		host->pwr_reg_add |= MCI_ST_DATA74DIREN;
+-	if (of_get_property(np, "st,sig-dir-cmd", NULL))
++	if (of_property_read_bool(np, "st,sig-dir-cmd"))
+ 		host->pwr_reg_add |= MCI_ST_CMDDIREN;
+-	if (of_get_property(np, "st,sig-pin-fbclk", NULL))
++	if (of_property_read_bool(np, "st,sig-pin-fbclk"))
+ 		host->pwr_reg_add |= MCI_ST_FBCLKEN;
+-	if (of_get_property(np, "st,sig-dir", NULL))
++	if (of_property_read_bool(np, "st,sig-dir"))
+ 		host->pwr_reg_add |= MCI_STM32_DIRPOL;
+-	if (of_get_property(np, "st,neg-edge", NULL))
++	if (of_property_read_bool(np, "st,neg-edge"))
+ 		host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
+-	if (of_get_property(np, "st,use-ckin", NULL))
++	if (of_property_read_bool(np, "st,use-ckin"))
+ 		mmci_probe_level_translator(mmc);
+ 
+-	if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
++	if (of_property_read_bool(np, "mmc-cap-mmc-highspeed"))
+ 		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
+-	if (of_get_property(np, "mmc-cap-sd-highspeed", NULL))
++	if (of_property_read_bool(np, "mmc-cap-sd-highspeed"))
+ 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
+ 
+ 	return 0;
+diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
+index 4bd744755205..517dde777413 100644
+--- a/drivers/mmc/host/omap_hsmmc.c
++++ b/drivers/mmc/host/omap_hsmmc.c
+@@ -1736,18 +1736,18 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
+ 	if (legacy && legacy->name)
+ 		pdata->name = legacy->name;
+ 
+-	if (of_find_property(np, "ti,dual-volt", NULL))
++	if (of_property_read_bool(np, "ti,dual-volt"))
+ 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
+ 
+-	if (of_find_property(np, "ti,non-removable", NULL)) {
++	if (of_property_read_bool(np, "ti,non-removable")) {
+ 		pdata->nonremovable = true;
+ 		pdata->no_regulator_off_init = true;
+ 	}
+ 
+-	if (of_find_property(np, "ti,needs-special-reset", NULL))
++	if (of_property_read_bool(np, "ti,needs-special-reset"))
+ 		pdata->features |= HSMMC_HAS_UPDATED_RESET;
+ 
+-	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
++	if (of_property_read_bool(np, "ti,needs-special-hs-handling"))
+ 		pdata->features |= HSMMC_HAS_HSPE_SUPPORT;
+ 
+ 	return pdata;
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index 58f042fdd4f4..d7c0c0b9e26c 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1597,7 +1597,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
+ 	int ret;
+ 
+-	if (of_get_property(np, "fsl,wp-controller", NULL))
++	if (of_property_read_bool(np, "fsl,wp-controller"))
+ 		boarddata->wp_type = ESDHC_WP_CONTROLLER;
+ 
+ 	/*
+@@ -1614,7 +1614,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 
+ 	of_property_read_u32(np, "fsl,strobe-dll-delay-target",
+ 				&boarddata->strobe_dll_delay_target);
+-	if (of_find_property(np, "no-1-8-v", NULL))
++	if (of_property_read_bool(np, "no-1-8-v"))
+ 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
+ 
+ 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
+diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
+index fc306eb1f845..91aca8f8d6ef 100644
+--- a/drivers/mmc/host/sdhci-pxav2.c
++++ b/drivers/mmc/host/sdhci-pxav2.c
+@@ -228,7 +228,7 @@ static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct device *dev)
+ 	if (!pdata)
+ 		return NULL;
+ 
+-	if (of_find_property(np, "non-removable", NULL))
++	if (of_property_read_bool(np, "non-removable"))
+ 		pdata->flags |= PXA_FLAG_CARD_PERMANENT;
+ 
+ 	of_property_read_u32(np, "bus-width", &bus_width);
+diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
+index 9085f3932443..504015e84308 100644
+--- a/drivers/mmc/host/sdhci-s3c.c
++++ b/drivers/mmc/host/sdhci-s3c.c
+@@ -437,12 +437,12 @@ static int sdhci_s3c_parse_dt(struct device *dev,
+ 	pdata->max_width = max_width;
+ 
+ 	/* get the card detection method */
+-	if (of_get_property(node, "broken-cd", NULL)) {
++	if (of_property_read_bool(node, "broken-cd")) {
+ 		pdata->cd_type = S3C_SDHCI_CD_NONE;
+ 		return 0;
+ 	}
+ 
+-	if (of_get_property(node, "non-removable", NULL)) {
++	if (of_property_read_bool(node, "non-removable")) {
+ 		pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
+ 		return 0;
+ 	}
+diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
+index e24c3d284515..be7f18fd4836 100644
+--- a/drivers/mmc/host/tmio_mmc_core.c
++++ b/drivers/mmc/host/tmio_mmc_core.c
+@@ -1084,7 +1084,7 @@ static void tmio_mmc_of_parse(struct platform_device *pdev,
+ 	 * For new platforms, please use "disable-wp" instead of
+ 	 * "toshiba,mmc-wrprotect-disable"
+ 	 */
+-	if (of_get_property(np, "toshiba,mmc-wrprotect-disable", NULL))
++	if (of_property_read_bool(np, "toshiba,mmc-wrprotect-disable"))
+ 		mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
+ }
+ 
+diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
+index 9aa3027ca25e..68525d900046 100644
+--- a/drivers/mmc/host/wmt-sdmmc.c
++++ b/drivers/mmc/host/wmt-sdmmc.c
+@@ -802,10 +802,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
+ 	priv->power_inverted = 0;
+ 	priv->cd_inverted = 0;
+ 
+-	if (of_get_property(np, "sdon-inverted", NULL))
+-		priv->power_inverted = 1;
+-	if (of_get_property(np, "cd-inverted", NULL))
+-		priv->cd_inverted = 1;
++	priv->power_inverted = of_property_read_bool(np, "sdon-inverted");
++	priv->cd_inverted = of_property_read_bool(np, "cd-inverted");
+ 
+ 	priv->sdmmc_base = of_iomap(np, 0);
+ 	if (!priv->sdmmc_base) {
+-- 
+2.39.2
 
-Without going into the details of the above, it seems like for DUT1,
-DUT2, DUT3 and DUT4 there a good reasons to why we should move forward
-with $subject patch.
-
-Do you agree?
-
->
-> Cache, no FUA:
-> 7:19.36
-> 7:02.11
-> 7:01.53
-> 7:01.35
-> 7:00.37
-> Cache, no FUA CQE:
-> 7:17.55
-> 7:00.73
-> 6:59.25
-> 6:58.44
-> 6:58.60
-> FUA:
-> 7:15.10
-> 6:58.99
-> 6:58.94
-> 6:59.17
-> 6:60.00
-> FUA CQE:
-> 7:11.03
-> 6:58.04
-> 6:56.89
-> 6:56.43
-> 6:56:28
->
-> If anyone has any comments or disagrees with the benchmark, or has a spec=
-ific eMMC to test, let me know.
-
-If I understand correctly, for DUT5, it seems like using FUA may be
-slightly better than just cache-flushing, right?
-
-For CQE, it seems like FUA could be slightly even better, at least for
-DUT5.  Do you know if REQ_OP_FLUSH translates into MMC_ISSUE_DCMD or
-MMC_ISSUE_SYNC for your case? See mmc_cqe_issue_type().
-
-When it comes to CQE, maybe Adrian have some additional thoughts
-around this? Perhaps we should keep using REQ_FUA, if we have CQE?
-
-Kind regards
-Uffe
