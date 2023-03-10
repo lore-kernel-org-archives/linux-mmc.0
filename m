@@ -2,113 +2,167 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7DD9DC61DA4
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 01:04:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C707FC6FA99
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 07:56:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229577AbjCJBEH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 9 Mar 2023 20:04:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41460 "EHLO
+        id S230045AbjCJH45 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 02:56:57 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229473AbjCJBEG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 9 Mar 2023 20:04:06 -0500
-Received: from mail-pl1-x62f.google.com (mail-pl1-x62f.google.com [IPv6:2607:f8b0:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B81B1009DD
-        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 17:04:04 -0800 (PST)
-Received: by mail-pl1-x62f.google.com with SMTP id v11so3951721plz.8
-        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 17:04:04 -0800 (PST)
+        with ESMTP id S229875AbjCJH45 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 02:56:57 -0500
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 41569DDF34
+        for <linux-mmc@vger.kernel.org>; Thu,  9 Mar 2023 23:56:53 -0800 (PST)
+Received: by mail-ed1-x52c.google.com with SMTP id ay14so16911876edb.11
+        for <linux-mmc@vger.kernel.org>; Thu, 09 Mar 2023 23:56:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678410244;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=7wv4L4R+E0m/FoUu36iHA75ZGOsZN+ELTTFM9oiUR9I=;
-        b=JJcsvNpUpUecz8800ih3zVYl5IR6DFOUc1Nt0BFZKALEgHmKogghvOVetimj2ZUKOE
-         n22P4gA/ECjsXotLJgHfAA1Oi6l4fdQQ5bXOAjg1E63D/IQOyHdAQ3dozShnUIZADSOy
-         hkVWPBFrXJ81ZJp6nFiITTy6oppr5EZ4xfFL0OO5tzuNc2N4sB0pekh1snoqmxgbRf7e
-         OmTxGbg4eOY8X2JWXNhTOyqavGDNnp7YSgPKz+1wcMUwLMRZ7AIVYVejBccQ4Fyy6Ly8
-         er0ukAYcG2nVdprpl4h0NZSVqNs5Yy9ummOWz/q1/Di1Y9txbByqUBqYqBeZFNvsxMeJ
-         FEhA==
+        d=linaro.org; s=google; t=1678435011;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=Na4vhlLIT8h87R1c4saJtnoc0rpStTN6SAaJv5Ui0DU=;
+        b=f/cdum7O6TN5gJ9ROGgx6QjE0oljMSgdfelOxJDv/A44aZ7Mm1unTj43LMrAl8qXD3
+         sHI50PXnWoUWOCaGf+Lw7NcDVU4NiPijijYupEKrMb/i7yVzAFSIs2Sdxro3W9NWDoHv
+         l0FZKC3iXGb6IU9h1xEP+L1xj0TStwEsdmZgH7BeJN1yxjzdFSB6oJFobXTUS45dVs0M
+         ULQH07khMas1d0aBIt/OjZLOHVTDe9lhbsnUreYNdh+WszcP/mDLVMMeWmaL4KFGK0LG
+         +5HnCCB4hC8JohJPmZdM8SSKIi+lKSrrSUXogyHzjsDGs1U97Mara0hXF/7LevUFdWY9
+         OvCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678410244;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=7wv4L4R+E0m/FoUu36iHA75ZGOsZN+ELTTFM9oiUR9I=;
-        b=N2M8xR6xJ7HZH++KBe0pDxRyF9FdmuwjmOfRyU8mTX4huJtgs3dRdtugFBeLd6g7Mk
-         pYNvkP0lfStsTQetSLKrTrIZWU8yFZFOHbU4SIM8xWzd5YrQpjSgvTiLTCdKjJXIKqe2
-         aHkRIv+CXQXeuTgkLNWmlmdQCW17+QoMWaxlab3xFaOsv2Hy0/TgZNPvO8SaG4cgD0dH
-         0LJWjZXEe0MCp5NnaRpcTidnUNeN3LxIY/uyBG9qroK55QbnnrO18annVJkDVNRIa7UI
-         gLsGOjF2CmpEGUBshN1IYJL6uiEwgVLfMe6ptG6YxkgpYrPM01Y+thUt3xb2REDWY0w0
-         1GJQ==
-X-Gm-Message-State: AO0yUKXR9d5g+YhUfvCRXwaIKOoqPP8lp0866qQW74lyc6Ue2gSE+58J
-        e8tXDkyuMh6Xallr7J71vYq38cfD3OE=
-X-Google-Smtp-Source: AK7set8KKK25yJnpBrNQwOrVCuhHjDj6dStlMmBmP6Qv/f5psG02zzPSwXpl0LplSTXTdchvTOJghw==
-X-Received: by 2002:a17:902:cf4e:b0:19a:a815:2877 with SMTP id e14-20020a170902cf4e00b0019aa8152877mr1007747plg.6.1678410243971;
-        Thu, 09 Mar 2023 17:04:03 -0800 (PST)
-Received: from anarsoul-xps15.lan ([2604:3d08:7780:e52::398])
-        by smtp.gmail.com with ESMTPSA id z8-20020a1709027e8800b0019cb6222691sm225763pla.133.2023.03.09.17.04.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Mar 2023 17:04:03 -0800 (PST)
-From:   Vasily Khoruzhick <anarsoul@gmail.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-rockchip@lists.infradead.org
-Cc:     Vasily Khoruzhick <anarsoul@gmail.com>
-Subject: [PATCH] mmc: sdhci-of-dwcmshc: properly determine max clock on Rockchip
-Date:   Thu,  9 Mar 2023 17:03:49 -0800
-Message-Id: <20230310010349.509132-1-anarsoul@gmail.com>
-X-Mailer: git-send-email 2.39.2
+        d=1e100.net; s=20210112; t=1678435011;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=Na4vhlLIT8h87R1c4saJtnoc0rpStTN6SAaJv5Ui0DU=;
+        b=Ur4JbA8jYFI3kT0iWfFS77rxKUGu0EFTbNbhNHeS28FmJ5pxaOckVx+FWk7CVYkvbJ
+         lDi4GsgBJC0I4xIe56AN/8AyzzaGld2/PaOAjF2taRWFV4yF8YmJrQABmP0hfMyghJss
+         9Ph2toC9VU5eM1tKYgrKRbivpA5lwcM7s1Zt1V4fw6w1anQNYrJB2gHMVf38C+ugl+0X
+         SH9PQ8zdBMULpeVps/TdyTDMK+ka2w413d/v790kob5bDx/oyjPn+rsM1F2aIh/aenqe
+         RhYY63Mjg2lw3gM8v/+DpGJlnrK0T3LA/R1IJwM7uJGF1x6274v9L81P8C5O2tNrMIfA
+         LIpQ==
+X-Gm-Message-State: AO0yUKWdQUjBNg5YO+SLN+6w77cTvZ5ZmYQ6tU5S8yZ1t1Mgjz7QW+Mr
+        ZKE8y7MIGHiZ52CaIVpudfS6uw==
+X-Google-Smtp-Source: AK7set83ouw7MBm0jqo5iH57IkMFwoOVUzIry7zQggJ4hxcJBeN03UC69xrHLWNGpiqGw+nvqtrohA==
+X-Received: by 2002:a17:906:eecc:b0:90b:167e:3050 with SMTP id wu12-20020a170906eecc00b0090b167e3050mr30865633ejb.36.1678435011591;
+        Thu, 09 Mar 2023 23:56:51 -0800 (PST)
+Received: from [192.168.1.195] ([5.133.47.210])
+        by smtp.googlemail.com with ESMTPSA id ox11-20020a170907100b00b008cf6f8798e1sm641097ejb.54.2023.03.09.23.56.49
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 09 Mar 2023 23:56:50 -0800 (PST)
+Message-ID: <6108c68b-e38b-3060-f6fa-53be79a795d7@linaro.org>
+Date:   Fri, 10 Mar 2023 07:56:49 +0000
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [PATCH v1 01/15] dt-bindings: add pwrseq device tree bindings
+Content-Language: en-US
+To:     Dmitry Baryshkov <dmitry.baryshkov@linaro.org>,
+        Rob Herring <robh@kernel.org>
+Cc:     Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <bjorn.andersson@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Marcel Holtmann <marcel@holtmann.org>,
+        Johan Hedberg <johan.hedberg@gmail.com>,
+        Luiz Augusto von Dentz <luiz.dentz@gmail.com>,
+        Kalle Valo <kvalo@codeaurora.org>,
+        "David S. Miller" <davem@davemloft.net>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Stanimir Varbanov <svarbanov@mm-sol.com>,
+        linux-arm-msm <linux-arm-msm@vger.kernel.org>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "open list:BLUETOOTH DRIVERS" <linux-bluetooth@vger.kernel.org>,
+        ath10k@lists.infradead.org,
+        linux-wireless <linux-wireless@vger.kernel.org>,
+        netdev <netdev@vger.kernel.org>, Abel Vesa <abel.vesa@linaro.org>
+References: <20211006035407.1147909-1-dmitry.baryshkov@linaro.org>
+ <20211006035407.1147909-2-dmitry.baryshkov@linaro.org>
+ <YXf6TbV2IpPbB/0Y@robh.at.kernel.org>
+ <37b26090-945f-1e17-f6ab-52552a4b6d89@linaro.org>
+ <CAL_JsqLAnJqZ95_bf6_fFmPJFMjuy43UfP2UxzEmFMNnG_t-Ug@mail.gmail.com>
+ <31792ef1-20b0-b801-23b7-29f303b91def@linaro.org>
+From:   Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
+In-Reply-To: <31792ef1-20b0-b801-23b7-29f303b91def@linaro.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Currently .get_max_clock returns the current clock rate for cclk_emmc
-on rk35xx, thus max clock gets set to whatever bootloader set it to.
 
-In case of u-boot, it is intentionally reset to 50 MHz if it boots
-from eMMC, see mmc_deinit() in u-boot sources. As a result, HS200 and
-HS400 modes are never selected by Linux, because dwcmshc_rk35xx_postinit
-clears appropriate caps if host->mmc->f_max is < 52MHz
 
-cclk_emmc is not a fixed clock on rk35xx, so using
-sdhci_pltfm_clk_get_max_clock is not appropriate here.
+On 02/11/2021 15:26, Dmitry Baryshkov wrote:
+> On 28/10/2021 00:53, Rob Herring wrote:
+>> On Tue, Oct 26, 2021 at 9:42 AM Dmitry Baryshkov
+>> <dmitry.baryshkov@linaro.org> wrote:
+>>>
+>>> On 26/10/2021 15:53, Rob Herring wrote:
+>>>> On Wed, Oct 06, 2021 at 06:53:53AM +0300, Dmitry Baryshkov wrote:
+>>>>> Add device tree bindings for the new power sequencer subsystem.
+>>>>> Consumers would reference pwrseq nodes using "foo-pwrseq" properties.
+>>>>> Providers would use '#pwrseq-cells' property to declare the amount of
+>>>>> cells in the pwrseq specifier.
+>>>>
+>>>> Please use get_maintainers.pl.
+>>>>
+>>>> This is not a pattern I want to encourage, so NAK on a common binding.
+>>>
+>>>
+>>> Could you please spend a few more words, describing what is not
+>>> encouraged? The whole foo-subsys/#subsys-cells structure?
+>>
+>> No, that's generally how common provider/consumer style bindings work.
+>>
+>>> Or just specifying the common binding?
+>>
+>> If we could do it again, I would not have mmc pwrseq binding. The
+>> properties belong in the device's node. So don't generalize the mmc
+>> pwrseq binding.
+>>
+>> It's a kernel problem if the firmware says there's a device on a
+>> 'discoverable' bus and the kernel can't discover it. I know you have
+>> the added complication of a device with 2 interfaces, but please,
+>> let's solve one problem at a time.
 
-Implement rk35xx_get_max_clock that returns actual max clock for cclk_emmc.
+Just to keep this topic updated with some pointers [1] to changes done 
+to solve same problem in USB Hub. These patches 
+(drivers/usb/misc/onboard_usb_hub*) have been merged since last year July.
 
-Signed-off-by: Vasily Khoruzhick <anarsoul@gmail.com>
----
- drivers/mmc/host/sdhci-of-dwcmshc.c | 9 ++++++++-
- 1 file changed, 8 insertions(+), 1 deletion(-)
+It looks like we can take some inspiration from this to address PCIE Bus 
+issue aswell.
 
-diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
-index d1490469184b..e68cd87998c8 100644
---- a/drivers/mmc/host/sdhci-of-dwcmshc.c
-+++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
-@@ -126,6 +126,13 @@ static unsigned int dwcmshc_get_max_clock(struct sdhci_host *host)
- 		return pltfm_host->clock;
- }
- 
-+static unsigned int rk35xx_get_max_clock(struct sdhci_host *host)
-+{
-+	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
-+
-+	return clk_round_rate(pltfm_host->clk, ULONG_MAX);
-+}
-+
- static void dwcmshc_check_auto_cmd23(struct mmc_host *mmc,
- 				     struct mmc_request *mrq)
- {
-@@ -343,7 +350,7 @@ static const struct sdhci_ops sdhci_dwcmshc_rk35xx_ops = {
- 	.set_clock		= dwcmshc_rk3568_set_clock,
- 	.set_bus_width		= sdhci_set_bus_width,
- 	.set_uhs_signaling	= dwcmshc_set_uhs_signaling,
--	.get_max_clock		= sdhci_pltfm_clk_get_max_clock,
-+	.get_max_clock		= rk35xx_get_max_clock,
- 	.reset			= rk35xx_sdhci_reset,
- 	.adma_write_desc	= dwcmshc_adma_write_desc,
- };
--- 
-2.39.2
+Thanks to Neil to point this.
 
+[1] 
+https://lore.kernel.org/lkml/20220630193530.2608178-1-mka@chromium.org/T/
+
+
+--srini
+> 
+> The PCI bus handling is a separate topic for now (as you have seen from 
+> the clearly WIP patches targeting just testing of qca6390's wifi part).
+> 
+> For me there are three parts of the device:
+> - power regulator / device embedded power domain.
+> - WiFi
+> - Bluetooth
+> 
+> With the power regulator being a complex and a bit nasty beast. It has 
+> several regulators beneath, which have to be powered up in a proper way.
+> Next platforms might bring additional requirements common to both WiFi 
+> and BT parts (like having additional clocks, etc). It is externally 
+> controlled (after providing power to it you have to tell, which part of 
+> the chip is required by pulling up the WiFi and/or BT enable GPIOs.
+> 
+> Having to duplicate this information in BT and WiFi cases results in 
+> non-aligned bindings (with WiFi and BT parts using different set of 
+> properties and different property names) and non-algined drivers (so the 
+> result of the powerup would depend on the order of drivers probing).
+> 
+> So far I still suppose that having a single separate entity controlling 
+> the powerup of such chips is the right thing to do.
+> 
+> I'd prefer to use the power-domain bindings (as the idea seems to be 
+> aligned here), but as the power-domain is used for the in-chip power 
+> domains, we had to invent the pwrseq name.
+> 
