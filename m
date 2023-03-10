@@ -2,241 +2,134 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 311C5C6FA99
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:06:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4A9FC6FA99
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 15:27:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233837AbjCJPGK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 10:06:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34296 "EHLO
+        id S233374AbjCJP1D (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 10:27:03 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54908 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233214AbjCJPFb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:05:31 -0500
-Received: from mail-oa1-x2d.google.com (mail-oa1-x2d.google.com [IPv6:2001:4860:4864:20::2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C88CF129734;
-        Fri, 10 Mar 2023 06:58:47 -0800 (PST)
-Received: by mail-oa1-x2d.google.com with SMTP id 586e51a60fabf-176b48a9a05so6166635fac.0;
-        Fri, 10 Mar 2023 06:58:47 -0800 (PST)
+        with ESMTP id S233287AbjCJP0n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 10:26:43 -0500
+Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60E00149D31
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:15:47 -0800 (PST)
+Received: by mail-pj1-x102a.google.com with SMTP id 6-20020a17090a190600b00237c5b6ecd7so10122582pjg.4
+        for <linux-mmc@vger.kernel.org>; Fri, 10 Mar 2023 07:15:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1678461312;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=xwihrqotRj+gq9lrHr6aSSaghXD8WiZvOwlvCQBnmno=;
+        b=mgcM3iMtk8E0NkK3FxpiFFp+SK5A8xXuINcsHbt+81Kg4UKp0TLJTEPIzByK5lttB8
+         4wVSRVxuvxgXVl9Loj8tyBGn8SK54iJlwopBXJheYgPnYSaAL4318V9DALRwE8QQrkiW
+         6mHjYvnqUu1UP6JviJ2kMf3LnY67vBubC/TUUWOfMHwG2EWotbqjKqqb5AVdM7QPe+qH
+         MmkkFFvtXICf1gVA9rv7A5R6ZpEeoIuTfhdFFhqiRLQuQz7YNUha4xDYELTNsezuEdTI
+         pBPR2GeOSF6KcVaTeLhO88mfcQy+U7mpYWYoadma0VGHnNcJxkZPmpRoDE/5W/NL/+oW
+         6DHw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678460205;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+        d=1e100.net; s=20210112; t=1678461312;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=OQk+ypPqgihyUeUIiesj0AXK7svmXbRQzGpX4VpHfOM=;
-        b=RMIejRn7oxglsP3kjx2Oy8efmC0b0r4mvv6j7gN0qUEtrc/BdycJkuoDoIaafdlgCm
-         BmiVithf1j/MxnRUfFecfhXHT32UFnPEGnjkGVuPLyoLhr8wD9aF7da2ienBunUXQ2sU
-         tAW6ynrw8Erei3466N0IGaZGzQ3hww8cgym/i+YLvIiVvOcY6zEeE5wBMq5t/lKMJHla
-         F2HZGErYzK8ny3kprVrjTQHOCAoE//VPCduy3euaSzNzBEagi2rUoHQw9IPcMsiQoFcR
-         IDT8MVBx/dB+8KGHQ7+rKYEgwFhlkbxLEFGraIHsuoDlU8JUP7q9mU+BmKWUznQq9Mxy
-         eALg==
-X-Gm-Message-State: AO0yUKWOoTefyezEiIbZ7X3mVhY2+NISExBDdhIcFXNz2061Qd0epseJ
-        XvR0JpvvYZm5+FVQHv53X0X5ahQcWw==
-X-Google-Smtp-Source: AK7set8EIbIkzUtJ90ghmwkL/cci31MqBBSA3xxJJ9nkn5CXYyyFP2bawNWYEbOMktuugW9dBrg3pg==
-X-Received: by 2002:a05:6871:207:b0:176:53a1:b65c with SMTP id t7-20020a056871020700b0017653a1b65cmr16734662oad.11.1678459711546;
-        Fri, 10 Mar 2023 06:48:31 -0800 (PST)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id j21-20020a056870d45500b0017697dfc20fsm119271oag.12.2023.03.10.06.48.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Mar 2023 06:48:30 -0800 (PST)
-Received: (nullmailer pid 1543883 invoked by uid 1000);
-        Fri, 10 Mar 2023 14:47:15 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Russell King <linux@armlinux.org.uk>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Haibo Chen <haibo.chen@nxp.com>,
-        Shawn Guo <shawnguo@kernel.org>,
-        Sascha Hauer <s.hauer@pengutronix.de>,
-        Pengutronix Kernel Team <kernel@pengutronix.de>,
-        Fabio Estevam <festevam@gmail.com>,
-        NXP Linux Team <linux-imx@nxp.com>,
-        Ben Dooks <ben-linux@fluff.org>,
-        Jaehoon Chung <jh80.chung@samsung.com>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>
-Cc:     devicetree@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-omap@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-renesas-soc@vger.kernel.org
-Subject: [PATCH] mmc: Use of_property_read_bool() for boolean properties
-Date:   Fri, 10 Mar 2023 08:47:14 -0600
-Message-Id: <20230310144715.1543836-1-robh@kernel.org>
-X-Mailer: git-send-email 2.39.2
+        bh=xwihrqotRj+gq9lrHr6aSSaghXD8WiZvOwlvCQBnmno=;
+        b=NpfI2fi/xsDCL+L1zZzolkT5929ECkr23RFii7JPmj1xEAmIoLZCTGqlNoxwPD26zX
+         k0xGbjrZXfwUWZWOQM4pdxLk5/bh47Z0N4hJPaNRWaFrbXWdYtkh3SK4gWs7KezeySSE
+         myDNk1Xa0lYEzQ20whnIAp9Y4E5wA0zmdD61Eu0aBFwrj4YtjJROHBqi82gATVhc5AAO
+         LJzcdgJ2lDZ6TPxlc2sKHZ8vOUocZBp9jjZNFQ6sCzKI5EKXWN9icphRuqFIHNK/KYMC
+         03xSk1cSAzg6MmUMDFjZiSQyStMugv6pEBAZfXsHg/Pi/d0JJhmFT/RpuAjQqo0/ykV9
+         K/Yw==
+X-Gm-Message-State: AO0yUKUPfhXoDf5GxHjWWtq4f5d3EEBg3oXplZD1NWQrWQborE48gzzd
+        8M9POvk1RKcfILclsCIKyBdDdT4HJxujoMtNKL7geg==
+X-Google-Smtp-Source: AK7set//B9HM9w9phC8lBZz6SXmvtiEQ094wWHiy1QRaysIdmyJ8Ds1g6f/fBRiWRyqcd4mH1thulPoGqVvT6UoXVz8=
+X-Received: by 2002:a17:902:680e:b0:19c:9fa5:b68a with SMTP id
+ h14-20020a170902680e00b0019c9fa5b68amr10258666plk.11.1678461311726; Fri, 10
+ Mar 2023 07:15:11 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230223120450.16858-1-fredaibayhubtech@126.com>
+In-Reply-To: <20230223120450.16858-1-fredaibayhubtech@126.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 10 Mar 2023 16:14:35 +0100
+Message-ID: <CAPDyKFoUNyBrN2BRfOsc+vq45+s4cmgrM6TcZ5KvEYZ7r63GRQ@mail.gmail.com>
+Subject: Re: [PATCH V1 1/1] mmc:sdhci-pci-o2micro: Fix SDR50 mode timing issue
+To:     fredaibayhubtech@126.com
+Cc:     adrian_hunter@intel.com, linux-mmc@vger.kernel.org,
+        linux.kernel@vger.kernel.org, shaper.liu@bayhubtech.com,
+        chevron.li@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
+        shirley.her@bayhubtech.com, fred.ai@bayhubtech.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It is preferred to use typed property access functions (i.e.
-of_property_read_<type> functions) rather than low-level
-of_get_property/of_find_property functions for reading properties.
-Convert reading boolean properties to to of_property_read_bool().
+On Thu, 23 Feb 2023 at 13:05, <fredaibayhubtech@126.com> wrote:
+>
+> From: Fred <fred.ai@bayhubtech.com>
+>
+> Change SDR50 mode clock source from DLL output clock to PLL open clock
+> 1.HS200 and SDR104 mode select DLL output clock
+> 2.SDR50 mode select PLL open clock
+>
+> Signed-off-by: Fred <fred.ai@bayhubtech.com>
 
-Signed-off-by: Rob Herring <robh@kernel.org>
----
- drivers/mmc/host/mmci.c            | 22 +++++++++++-----------
- drivers/mmc/host/omap_hsmmc.c      |  8 ++++----
- drivers/mmc/host/sdhci-esdhc-imx.c |  4 ++--
- drivers/mmc/host/sdhci-pxav2.c     |  2 +-
- drivers/mmc/host/sdhci-s3c.c       |  4 ++--
- drivers/mmc/host/tmio_mmc_core.c   |  2 +-
- drivers/mmc/host/wmt-sdmmc.c       |  6 ++----
- 7 files changed, 23 insertions(+), 25 deletions(-)
+Applied for next, thanks!
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index b9e5dfe74e5c..f2b2e8b0574e 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -1962,28 +1962,28 @@ static int mmci_of_parse(struct device_node *np, struct mmc_host *mmc)
- 	if (ret)
- 		return ret;
- 
--	if (of_get_property(np, "st,sig-dir-dat0", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir-dat0"))
- 		host->pwr_reg_add |= MCI_ST_DATA0DIREN;
--	if (of_get_property(np, "st,sig-dir-dat2", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir-dat2"))
- 		host->pwr_reg_add |= MCI_ST_DATA2DIREN;
--	if (of_get_property(np, "st,sig-dir-dat31", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir-dat31"))
- 		host->pwr_reg_add |= MCI_ST_DATA31DIREN;
--	if (of_get_property(np, "st,sig-dir-dat74", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir-dat74"))
- 		host->pwr_reg_add |= MCI_ST_DATA74DIREN;
--	if (of_get_property(np, "st,sig-dir-cmd", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir-cmd"))
- 		host->pwr_reg_add |= MCI_ST_CMDDIREN;
--	if (of_get_property(np, "st,sig-pin-fbclk", NULL))
-+	if (of_property_read_bool(np, "st,sig-pin-fbclk"))
- 		host->pwr_reg_add |= MCI_ST_FBCLKEN;
--	if (of_get_property(np, "st,sig-dir", NULL))
-+	if (of_property_read_bool(np, "st,sig-dir"))
- 		host->pwr_reg_add |= MCI_STM32_DIRPOL;
--	if (of_get_property(np, "st,neg-edge", NULL))
-+	if (of_property_read_bool(np, "st,neg-edge"))
- 		host->clk_reg_add |= MCI_STM32_CLK_NEGEDGE;
--	if (of_get_property(np, "st,use-ckin", NULL))
-+	if (of_property_read_bool(np, "st,use-ckin"))
- 		mmci_probe_level_translator(mmc);
- 
--	if (of_get_property(np, "mmc-cap-mmc-highspeed", NULL))
-+	if (of_property_read_bool(np, "mmc-cap-mmc-highspeed"))
- 		mmc->caps |= MMC_CAP_MMC_HIGHSPEED;
--	if (of_get_property(np, "mmc-cap-sd-highspeed", NULL))
-+	if (of_property_read_bool(np, "mmc-cap-sd-highspeed"))
- 		mmc->caps |= MMC_CAP_SD_HIGHSPEED;
- 
- 	return 0;
-diff --git a/drivers/mmc/host/omap_hsmmc.c b/drivers/mmc/host/omap_hsmmc.c
-index 4bd744755205..517dde777413 100644
---- a/drivers/mmc/host/omap_hsmmc.c
-+++ b/drivers/mmc/host/omap_hsmmc.c
-@@ -1736,18 +1736,18 @@ static struct omap_hsmmc_platform_data *of_get_hsmmc_pdata(struct device *dev)
- 	if (legacy && legacy->name)
- 		pdata->name = legacy->name;
- 
--	if (of_find_property(np, "ti,dual-volt", NULL))
-+	if (of_property_read_bool(np, "ti,dual-volt"))
- 		pdata->controller_flags |= OMAP_HSMMC_SUPPORTS_DUAL_VOLT;
- 
--	if (of_find_property(np, "ti,non-removable", NULL)) {
-+	if (of_property_read_bool(np, "ti,non-removable")) {
- 		pdata->nonremovable = true;
- 		pdata->no_regulator_off_init = true;
- 	}
- 
--	if (of_find_property(np, "ti,needs-special-reset", NULL))
-+	if (of_property_read_bool(np, "ti,needs-special-reset"))
- 		pdata->features |= HSMMC_HAS_UPDATED_RESET;
- 
--	if (of_find_property(np, "ti,needs-special-hs-handling", NULL))
-+	if (of_property_read_bool(np, "ti,needs-special-hs-handling"))
- 		pdata->features |= HSMMC_HAS_HSPE_SUPPORT;
- 
- 	return pdata;
-diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
-index 58f042fdd4f4..d7c0c0b9e26c 100644
---- a/drivers/mmc/host/sdhci-esdhc-imx.c
-+++ b/drivers/mmc/host/sdhci-esdhc-imx.c
-@@ -1597,7 +1597,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 	struct esdhc_platform_data *boarddata = &imx_data->boarddata;
- 	int ret;
- 
--	if (of_get_property(np, "fsl,wp-controller", NULL))
-+	if (of_property_read_bool(np, "fsl,wp-controller"))
- 		boarddata->wp_type = ESDHC_WP_CONTROLLER;
- 
- 	/*
-@@ -1614,7 +1614,7 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
- 
- 	of_property_read_u32(np, "fsl,strobe-dll-delay-target",
- 				&boarddata->strobe_dll_delay_target);
--	if (of_find_property(np, "no-1-8-v", NULL))
-+	if (of_property_read_bool(np, "no-1-8-v"))
- 		host->quirks2 |= SDHCI_QUIRK2_NO_1_8_V;
- 
- 	if (of_property_read_u32(np, "fsl,delay-line", &boarddata->delay_line))
-diff --git a/drivers/mmc/host/sdhci-pxav2.c b/drivers/mmc/host/sdhci-pxav2.c
-index fc306eb1f845..91aca8f8d6ef 100644
---- a/drivers/mmc/host/sdhci-pxav2.c
-+++ b/drivers/mmc/host/sdhci-pxav2.c
-@@ -228,7 +228,7 @@ static struct sdhci_pxa_platdata *pxav2_get_mmc_pdata(struct device *dev)
- 	if (!pdata)
- 		return NULL;
- 
--	if (of_find_property(np, "non-removable", NULL))
-+	if (of_property_read_bool(np, "non-removable"))
- 		pdata->flags |= PXA_FLAG_CARD_PERMANENT;
- 
- 	of_property_read_u32(np, "bus-width", &bus_width);
-diff --git a/drivers/mmc/host/sdhci-s3c.c b/drivers/mmc/host/sdhci-s3c.c
-index 9085f3932443..504015e84308 100644
---- a/drivers/mmc/host/sdhci-s3c.c
-+++ b/drivers/mmc/host/sdhci-s3c.c
-@@ -437,12 +437,12 @@ static int sdhci_s3c_parse_dt(struct device *dev,
- 	pdata->max_width = max_width;
- 
- 	/* get the card detection method */
--	if (of_get_property(node, "broken-cd", NULL)) {
-+	if (of_property_read_bool(node, "broken-cd")) {
- 		pdata->cd_type = S3C_SDHCI_CD_NONE;
- 		return 0;
- 	}
- 
--	if (of_get_property(node, "non-removable", NULL)) {
-+	if (of_property_read_bool(node, "non-removable")) {
- 		pdata->cd_type = S3C_SDHCI_CD_PERMANENT;
- 		return 0;
- 	}
-diff --git a/drivers/mmc/host/tmio_mmc_core.c b/drivers/mmc/host/tmio_mmc_core.c
-index e24c3d284515..be7f18fd4836 100644
---- a/drivers/mmc/host/tmio_mmc_core.c
-+++ b/drivers/mmc/host/tmio_mmc_core.c
-@@ -1084,7 +1084,7 @@ static void tmio_mmc_of_parse(struct platform_device *pdev,
- 	 * For new platforms, please use "disable-wp" instead of
- 	 * "toshiba,mmc-wrprotect-disable"
- 	 */
--	if (of_get_property(np, "toshiba,mmc-wrprotect-disable", NULL))
-+	if (of_property_read_bool(np, "toshiba,mmc-wrprotect-disable"))
- 		mmc->caps2 |= MMC_CAP2_NO_WRITE_PROTECT;
- }
- 
-diff --git a/drivers/mmc/host/wmt-sdmmc.c b/drivers/mmc/host/wmt-sdmmc.c
-index 9aa3027ca25e..68525d900046 100644
---- a/drivers/mmc/host/wmt-sdmmc.c
-+++ b/drivers/mmc/host/wmt-sdmmc.c
-@@ -802,10 +802,8 @@ static int wmt_mci_probe(struct platform_device *pdev)
- 	priv->power_inverted = 0;
- 	priv->cd_inverted = 0;
- 
--	if (of_get_property(np, "sdon-inverted", NULL))
--		priv->power_inverted = 1;
--	if (of_get_property(np, "cd-inverted", NULL))
--		priv->cd_inverted = 1;
-+	priv->power_inverted = of_property_read_bool(np, "sdon-inverted");
-+	priv->cd_inverted = of_property_read_bool(np, "cd-inverted");
- 
- 	priv->sdmmc_base = of_iomap(np, 0);
- 	if (!priv->sdmmc_base) {
--- 
-2.39.2
+Perhaps I should move this to the fixes branch and we should add a
+fixes and a stable tag too?
 
+Kind regards
+Uffe
+
+> ---
+> Change in V1
+> SDR50 mode select PLL open clock as its clock source.
+> ---
+>  drivers/mmc/host/sdhci-pci-o2micro.c | 30 +++++++++++++++-------------
+>  1 file changed, 16 insertions(+), 14 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-o2micro.c b/drivers/mmc/host/sdhci-pci-o2micro.c
+> index 98cadff47b2b..620f52ad9667 100644
+> --- a/drivers/mmc/host/sdhci-pci-o2micro.c
+> +++ b/drivers/mmc/host/sdhci-pci-o2micro.c
+> @@ -339,22 +339,24 @@ static int sdhci_o2_execute_tuning(struct mmc_host *mmc, u32 opcode)
+>         reg_val &= ~SDHCI_CLOCK_CARD_EN;
+>         sdhci_writew(host, reg_val, SDHCI_CLOCK_CONTROL);
+>
+> -       /* UnLock WP */
+> -       pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -       scratch_8 &= 0x7f;
+> -       pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> -
+> -       /* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> -       pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> -       reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> -       reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> -       pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+> +       if ((host->timing == MMC_TIMING_MMC_HS200) ||
+> +               (host->timing == MMC_TIMING_UHS_SDR104)) {
+> +               /* UnLock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 &= 0x7f;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+>
+> -       /* Lock WP */
+> -       pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> -       scratch_8 |= 0x80;
+> -       pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +               /* Set pcr 0x354[16] to choose dll clock, and set the default phase */
+> +               pci_read_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, &reg_val);
+> +               reg_val &= ~(O2_SD_SEL_DLL | O2_SD_PHASE_MASK);
+> +               reg_val |= (O2_SD_SEL_DLL | O2_SD_FIX_PHASE);
+> +               pci_write_config_dword(chip->pdev, O2_SD_OUTPUT_CLK_SOURCE_SWITCH, reg_val);
+>
+> +               /* Lock WP */
+> +               pci_read_config_byte(chip->pdev, O2_SD_LOCK_WP, &scratch_8);
+> +               scratch_8 |= 0x80;
+> +               pci_write_config_byte(chip->pdev, O2_SD_LOCK_WP, scratch_8);
+> +       }
+>         /* Start clk */
+>         reg_val = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+>         reg_val |= SDHCI_CLOCK_CARD_EN;
+> --
+> 2.37.2
+>
