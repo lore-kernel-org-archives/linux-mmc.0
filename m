@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 810F0C6FD1E
-	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 20:29:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71740C6FD19
+	for <linux-mmc@archiver.kernel.org>; Fri, 10 Mar 2023 20:30:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231571AbjCJU35 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 10 Mar 2023 15:29:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39154 "EHLO
+        id S231578AbjCJU36 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 10 Mar 2023 15:29:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39312 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231510AbjCJU3r (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 15:29:47 -0500
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C27F5E4C51;
-        Fri, 10 Mar 2023 12:29:45 -0800 (PST)
-Received: by mail-ed1-x535.google.com with SMTP id cy23so25316398edb.12;
-        Fri, 10 Mar 2023 12:29:45 -0800 (PST)
+        with ESMTP id S231546AbjCJU3w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 10 Mar 2023 15:29:52 -0500
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 576441184E8;
+        Fri, 10 Mar 2023 12:29:51 -0800 (PST)
+Received: by mail-ed1-x531.google.com with SMTP id ec29so25431480edb.6;
+        Fri, 10 Mar 2023 12:29:51 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1678480184;
+        d=googlemail.com; s=20210112; t=1678480189;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=GIn1AgV2sGuDsJHCIDtNHKXft4I0Zm5REzo0371LmhQ=;
-        b=AEykxNa6BcHgbOMyB3tP/sG9MFk1PgPLuIXmuPWppHLW/zgRPmvHuYhRQVafg3xhTa
-         JWw1aVxDCCKl/LCQvzMF9tICmiFwHV2eMXHw3NK65xAaN3a7xU8G5vqPpUfMHrLwn0A+
-         do7JTQD/IMt8+rh/lfhx6V5LoFzC1gTiEQSptOGkYbxfG5Omac55DqoDl7Cp3B8743NU
-         PtfEBhHQXDbJuJHhody0qxXXRameZLfslEqt8em0IkWGcvyLruGSiahpcsVxcGKyF2ZQ
-         bdZ269Vd6Q9Or0osLyJ+JJBjLHPLHE3ohhpukNgifayqcVkmCmUP+im7ZVyudBHEMgRX
-         fRlQ==
+        bh=UUBD7rch99GMOQyL8Ae2f+UXvjRNBjvU/Ii+k39kGW4=;
+        b=pahbYhYVKtx4elU1fingL0craRTW24JnUiCmt9nB5HWonJagZJMdQNondYWBZoE0fE
+         x+/gkCnMx/eqI1EO7jcMPc/0atU+kJK1u/GVMJEi8ES3yA+TffjOCuuTYxBG3tGm2vax
+         Eb/rFACvyRMjZ27SAbQGDGkUzbh3gbNtezNDW0wza6SodoklNAKl8KCbCQAERR7wiO36
+         SWNMmKVEName8pqmHEI68fe03vLMKIsO/TGF3M4ovmgdNUOrzOhAnE3vMjmI8dWj5Qej
+         dknuhEYTQaeB3DcqCX4wDhuinl2KeOnkdehZb6v7Zhjoz98AJ2EhwzcXQ9FH1sJRpoea
+         nQww==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678480184;
+        d=1e100.net; s=20210112; t=1678480189;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=GIn1AgV2sGuDsJHCIDtNHKXft4I0Zm5REzo0371LmhQ=;
-        b=UBcquoJlqLQ93u8D+tEFixgcrMmItQjeHeoViObVuX7/DERbDdjC44YysYAHNCgM2N
-         4NhDtFt3ka3yfoFuTivuxhaMVrNpL0/Cb8dIQ2lghNUO7a2NX6AfSpm6wbU4P7gUwugj
-         kO/2Tol91xax9L5wQ4UnRj1dM+l4aAk1S2rMqPuNzDnCenLNP+XrVpwFQRMGc2CH+sWW
-         v13hKIK0xXYeGOwVdwSN9+k/FcwnBYBd/UYsJKOzB9TgOC7AUn8FPACQaD9rTL7/5ggB
-         Ppbn1+U8XhO/jbxLdsWimyiQZeBeR7LpB7X1iVN5Z7S1G/SOMlC3BFmB8B+xH55I/6h2
-         uQmg==
-X-Gm-Message-State: AO0yUKV0g0FyLPxporJYQFkqOvpGMnTKbCsP3BYAFh+8s+LSnt8cyT3L
-        H1HVl0tull3hrFXUrjL5d2ofcWzkI+g=
-X-Google-Smtp-Source: AK7set/T0wyIVEnhrHRWXWwPaUFN+atvVDmEoibzsRbtl07Hy1CPKWo5GLEA7OMFoW12ik8AYZdpjg==
-X-Received: by 2002:a17:907:9494:b0:8ec:4371:19c2 with SMTP id dm20-20020a170907949400b008ec437119c2mr34790397ejc.73.1678480184037;
-        Fri, 10 Mar 2023 12:29:44 -0800 (PST)
+        bh=UUBD7rch99GMOQyL8Ae2f+UXvjRNBjvU/Ii+k39kGW4=;
+        b=NA/Eov3vGaPoYixcgAglYPcZCuFCT5v0uVSaV73Ael1BuGAICOVSNxSVgvcGBy7dj6
+         LOLpojn65p2usICUU7uwT/eDXiZqlAo4oF6KNE+nEN4ib0GnMUx5BBWyauiGjYrVjBlC
+         bAq9TfrTaTy5Btyi8abnwYudCzEukTAKQVl46FX4tPnAUIKtzcBOfRd34knJtWerqZ7g
+         lUE/Pu9jwxI5Opql+AY46FtlpkgTMyKMRs0bpg5qV7tCG8orY09GloWMnhbI0iUtMhnF
+         QIMOoHnzes0xigdm2rtoatEsiz7vgACk1TR/EByBjIlFns0o6tNi2UcurkBvEsFh9Vi6
+         f18A==
+X-Gm-Message-State: AO0yUKXiH0Kqa1hyBbnZ9iOQoYQ9VIhGvtaiX9qy9d6TnqNKZ4R7haEJ
+        /t/29DzCFYtbaHMNFqn2WNmhzyrD6rU=
+X-Google-Smtp-Source: AK7set860vu+evJ0vxvCcU02HsjApoUIPQfc2lSNA9tNx2TXzMorpqE1vL5VW2OwSBG1BC8GA5qnOg==
+X-Received: by 2002:a17:906:1604:b0:879:bff:55c with SMTP id m4-20020a170906160400b008790bff055cmr29224358ejd.1.1678480189589;
+        Fri, 10 Mar 2023 12:29:49 -0800 (PST)
 Received: from localhost.localdomain (dynamic-2a01-0c23-b84f-c400-0000-0000-0000-079c.c23.pool.telefonica.de. [2a01:c23:b84f:c400::79c])
-        by smtp.googlemail.com with ESMTPSA id md10-20020a170906ae8a00b008e34bcd7940sm259047ejb.132.2023.03.10.12.29.43
+        by smtp.googlemail.com with ESMTPSA id md10-20020a170906ae8a00b008e34bcd7940sm259047ejb.132.2023.03.10.12.29.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 10 Mar 2023 12:29:43 -0800 (PST)
+        Fri, 10 Mar 2023 12:29:49 -0800 (PST)
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 To:     linux-wireless@vger.kernel.org
 Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
@@ -60,9 +60,9 @@ Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>,
         Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v2 RFC 1/9] wifi: rtw88: Clear RTW_FLAG_POWERON early in rtw_mac_power_switch()
-Date:   Fri, 10 Mar 2023 21:29:14 +0100
-Message-Id: <20230310202922.2459680-2-martin.blumenstingl@googlemail.com>
+Subject: [PATCH v2 RFC 5/9] wifi: rtw88: main: Reserve 8 bytes of extra TX headroom for SDIO cards
+Date:   Fri, 10 Mar 2023 21:29:18 +0100
+Message-Id: <20230310202922.2459680-6-martin.blumenstingl@googlemail.com>
 X-Mailer: git-send-email 2.39.2
 In-Reply-To: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
 References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
@@ -72,56 +72,40 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The SDIO HCI implementation needs to know when the MAC is powered on.
-This is needed because 32-bit register access has to be split into 4x
-8-bit register access when the MAC is not fully powered on or while
-powering off. When the MAC is powered on 32-bit register access can be
-used to reduce the number of transfers but splitting into 4x 8-bit
-register access still works in that case.
+For SDIO host controllers with DMA support the TX buffer physical memory
+address need to be aligned at an 8-byte boundary. Reserve 8 bytes of
+extra TX headroom so we can align the data without re-allocating the
+transmit buffer.
 
-During the power on sequence is how RTW_FLAG_POWERON is only set when
-the power on sequence has completed successfully. During power off
-however RTW_FLAG_POWERON is set. This means that the upcoming SDIO HCI
-implementation does not know that it has to use 4x 8-bit register
-accessors. Clear the RTW_FLAG_POWERON flag early when powering off the
-MAC so the whole power off sequence is processed with RTW_FLAG_POWERON
-unset. This will make it possible to use the RTW_FLAG_POWERON flag in
-the upcoming SDIO HCI implementation.
+While here, also remove the TODO comment regarding extra headroom for
+USB and SDIO. For SDIO the extra headroom is now handled and for USB it
+was not needed so far.
 
 Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 ---
 Changes since v1:
-- This replaces a previous patch called "rtw88: hci: Add an optional
-  power_switch() callback to rtw_hci_ops" which added a new callback
-  to the HCI ops.
+- none
 
+ drivers/net/wireless/realtek/rtw88/main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
- drivers/net/wireless/realtek/rtw88/mac.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/net/wireless/realtek/rtw88/mac.c b/drivers/net/wireless/realtek/rtw88/mac.c
-index f3a566cf979b..cfdfc8a2c836 100644
---- a/drivers/net/wireless/realtek/rtw88/mac.c
-+++ b/drivers/net/wireless/realtek/rtw88/mac.c
-@@ -273,6 +273,9 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
- 	if (pwr_on == cur_pwr)
- 		return -EALREADY;
+diff --git a/drivers/net/wireless/realtek/rtw88/main.c b/drivers/net/wireless/realtek/rtw88/main.c
+index cdc4703ead5f..1cb553485cff 100644
+--- a/drivers/net/wireless/realtek/rtw88/main.c
++++ b/drivers/net/wireless/realtek/rtw88/main.c
+@@ -2163,9 +2163,11 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
+ 	int max_tx_headroom = 0;
+ 	int ret;
  
-+	if (!pwr_on)
-+		clear_bit(RTW_FLAG_POWERON, rtwdev->flags);
+-	/* TODO: USB & SDIO may need extra room? */
+ 	max_tx_headroom = rtwdev->chip->tx_pkt_desc_sz;
+ 
++	if (rtw_hci_type(rtwdev) == RTW_HCI_TYPE_SDIO)
++		max_tx_headroom += RTW_SDIO_DATA_PTR_ALIGN;
 +
- 	pwr_seq = pwr_on ? chip->pwr_on_seq : chip->pwr_off_seq;
- 	ret = rtw_pwr_seq_parser(rtwdev, pwr_seq);
- 	if (ret)
-@@ -280,8 +283,6 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
- 
- 	if (pwr_on)
- 		set_bit(RTW_FLAG_POWERON, rtwdev->flags);
--	else
--		clear_bit(RTW_FLAG_POWERON, rtwdev->flags);
- 
- 	return 0;
- }
+ 	hw->extra_tx_headroom = max_tx_headroom;
+ 	hw->queues = IEEE80211_NUM_ACS;
+ 	hw->txq_data_size = sizeof(struct rtw_txq);
 -- 
 2.39.2
 
