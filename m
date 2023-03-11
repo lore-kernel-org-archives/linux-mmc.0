@@ -2,110 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3EE0C61DA4
-	for <linux-mmc@archiver.kernel.org>; Sat, 11 Mar 2023 20:56:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 648BCC6FD1F
+	for <linux-mmc@archiver.kernel.org>; Sat, 11 Mar 2023 22:27:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229777AbjCKU4q (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 11 Mar 2023 15:56:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38344 "EHLO
+        id S229478AbjCKW1Z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 11 Mar 2023 17:27:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229694AbjCKU4q (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 15:56:46 -0500
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7FC44C6F6;
-        Sat, 11 Mar 2023 12:56:44 -0800 (PST)
-Received: by mail-ed1-x533.google.com with SMTP id fd5so274443edb.7;
-        Sat, 11 Mar 2023 12:56:44 -0800 (PST)
+        with ESMTP id S229437AbjCKW1Y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 17:27:24 -0500
+Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6B39265104
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 14:27:23 -0800 (PST)
+Received: by mail-wm1-x335.google.com with SMTP id ay8so359870wmb.1
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 14:27:23 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1678568203;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
+        d=gmail.com; s=20210112; t=1678573642;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wG89qGDC53apMqtBOHTRtgFqgYqAhyr7mdrOysqyOUk=;
-        b=ZKfWGHw6RRcpr6YKONN9XeUHZ5IAiAD2mfB6TNmsxLwfetbah0ZXY5eTWMcljMaP27
-         8IV61+03NE4F+X5MHzGWo+j/mNpAPg07OGJSBhKEAdZ3rXI6Z0xH0EhQROvX3X/L1Myl
-         IwsnuHDdvzIIs25yvEvBhTkOxrmlOCh+6yDnexHlkSCBkQwyq9Psp8uqXBecjM7/2n8M
-         56OkJE9FmrtDA6xTYyJqlV52uDW9cqkJOClmmBp62w8fWKUccuOk7u+33f+sCsVQ0HyM
-         rsUnx0VtNY0pOio4j9i07+NmuuYgJnfUGpmAWDwMQPAu2g7OJA0hTDeV5ZJFynzq01Oz
-         jqNw==
+        bh=AkJp2eQU+ExfF0KULASIZkwRu5oZ8n8SVM659vX9mHo=;
+        b=lbuJ+7x1MA+h/dKfSw81vTMEze+95PO7Mf4QMzOAmJjnFDcQ04SUj4EGtOuHtD60TO
+         yB0QCymlEJ0g9QVQZ9f/46N7RlQwfSyZYinsh5XdNMcb+KSM1DwO5zjV91dZ1p5sy9KK
+         TqHBK6vfsu8MDunYJXPflzGvAF1o98NpyxqjUK+E38aXEjEZKgPrQFjb3mIgVQQ6hczX
+         0JfsueMnqswQLIPnVnlwU5hkdLEKmG31J2OqLZohBoIuJPLcSNpGDOmbgFhwinPikmJQ
+         l7seyv6JTKROkvTxuRMNYrmWD85TzPyy26ze+4GnPiJbrMojyxO3V1WkILMOCHOlVDm7
+         XyWA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678568203;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=wG89qGDC53apMqtBOHTRtgFqgYqAhyr7mdrOysqyOUk=;
-        b=5y2tSvNU4H11Run4AdFe4OOun1dmMyQ4N/2L1pEmRck0KlUOZO3iAsULwwHEdF+wYP
-         Cg+o1XUcoHbhnIUrVgj0DsC3mXZmiAr/uNYOgF3w98lrpqX7DYwSMUsfagF9vXW39ebF
-         UiCh9uim5piSok/26ewZ1OAEWYv/S9L53TCj7GizjzCu2+WPF5Y5zN3g2BJ/PnYPof8g
-         dVawhIPxtegUsvQoPBwIpspLr8WKVCzp+asydg6ZMqouzLGF3D+VPubLbysQUfiWGRxG
-         UVWX+rbBoWxcJgJ7wIV+lgR1Sy9H59vuyL1BmziqQ8lgDiJQZt95zf2RRaJ3j9hh+MZs
-         o5Xg==
-X-Gm-Message-State: AO0yUKURr62jkHsqPAvTR7h28JSM8/LKicXToRJ6dYP0fHXE7mTTRb3K
-        Za+ii6zu0BBP+IQNUwkQ/HIpfnC2RGYIf6mDumk=
-X-Google-Smtp-Source: AK7set+fjGgwpMDd9lM1+8OU+R3Kaa85CmMo0pVrMx2+MYZcrTHwZ7KlV4WOukKoD1BbZY72PNg6s9uocAsnrptj7XE=
-X-Received: by 2002:a17:906:3002:b0:8dc:6674:5bac with SMTP id
- 2-20020a170906300200b008dc66745bacmr15580598ejz.4.1678568203082; Sat, 11 Mar
- 2023 12:56:43 -0800 (PST)
+        d=1e100.net; s=20210112; t=1678573642;
+        h=content-transfer-encoding:subject:from:cc:to:content-language
+         :user-agent:mime-version:date:message-id:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=AkJp2eQU+ExfF0KULASIZkwRu5oZ8n8SVM659vX9mHo=;
+        b=C8bFOqNtCthWYRM7VmGlxJqMcRy773YITK1WpAOQnQ3iuvq1ujoA3jzxaa/nv8lffL
+         IbZfJGXkrO9F0EpyOsLOzzd3Mi4tAveAHVD/1L6yBv2KwCKqkOzYieF1ZZKI+CtkQ6Ok
+         oH2PeYo1cw69KnAf8ogi3Iqdj0RDn3PNta7MDi97XFHNm5V5GudGaIXBkx7qL7BmhtyY
+         ySZxTFKyQYv1/kZV2OOf+SEm5HpolfYn3k7Wl1+G8ZJpaEnO7e4aut6HgnL+Ur+g9Hxz
+         cRZIIfkBHInes1TFNj70/ent/6lKGiNRVH5p69zNZ+S3+3dIR0qFUpCQ1Kqk69P2LXp2
+         bgpQ==
+X-Gm-Message-State: AO0yUKXgID7J0h/IV450d+RcZH8u8J/EDX+SGyQRHta9+I+TmI9ITJeQ
+        2skY9L9gV7ESbHhSac/ZqKfGUssq66U=
+X-Google-Smtp-Source: AK7set+ckb9zNk2lx2eD6Kxng1xXGiWMSX3COAHoKhx1wY6M4OBI6oa48ASD1Jw5Bm6j92WJmgIQ1g==
+X-Received: by 2002:a05:600c:512a:b0:3eb:55d2:9c4c with SMTP id o42-20020a05600c512a00b003eb55d29c4cmr5453272wms.16.1678573641711;
+        Sat, 11 Mar 2023 14:27:21 -0800 (PST)
+Received: from ?IPV6:2a01:c22:7697:7600:79dc:4e28:a7d7:a00c? (dynamic-2a01-0c22-7697-7600-79dc-4e28-a7d7-a00c.c22.pool.telefonica.de. [2a01:c22:7697:7600:79dc:4e28:a7d7:a00c])
+        by smtp.googlemail.com with ESMTPSA id k17-20020a05600c0b5100b003e1f6e18c95sm3945031wmr.21.2023.03.11.14.27.20
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 11 Mar 2023 14:27:21 -0800 (PST)
+Message-ID: <858a592b-ebf4-99b4-74fc-21b4ad3382f8@gmail.com>
+Date:   Sat, 11 Mar 2023 23:27:18 +0100
 MIME-Version: 1.0
-References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com> <174f91fc-7629-e380-4ca1-56eb39ea24ea@lwfinger.net>
-In-Reply-To: <174f91fc-7629-e380-4ca1-56eb39ea24ea@lwfinger.net>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sat, 11 Mar 2023 21:56:32 +0100
-Message-ID: <CAFBinCAn7zD-sF+5B1OHztaijt6OHFZWHM-ayxYY0=z0zkaJCg@mail.gmail.com>
-Subject: Re: [PATCH v2 RFC 0/9] rtw88: Add SDIO support
-To:     Larry Finger <Larry.Finger@lwfinger.net>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Jerome Brunet <jbrunet@baylibre.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+Subject: [PATCH] mmc: meson-gx: simplify usage of mmc_regulator_set_ocr
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Larry,
+After 087592395a96 ("mmc: core: Allow invalid regulator in
+mmc_regulator_set_ocr()") we can remove the checks here.
 
-On Sat, Mar 11, 2023 at 3:16=E2=80=AFAM Larry Finger <Larry.Finger@lwfinger=
-.net> wrote:
-[...]
-> I am not qualified to review the code, but I am integrating this version =
-into my
-> rtw88 repo at GitHub.com.
->
-> It is essential that a successful build is possible after every patch is =
-applied
-> so that an arbitrary bisection will not fail to build. This patch series =
-fails
-> after #2 is committed. File mac.c needs symbol SDIO_LOCAL_OFFSET, which w=
-as
-> moved from mac.h to sdio.h. I resolved this be including sdio.h in mac.c.=
- This
-> breaks #3, where you add the include to mac.c. It needs to happen one pat=
-ch earlier.
-Thank you for spotting and reporting this issue! You are right with
-this, I'll add the sdio.h include to mac.c with patch 2 to resolve
-this issue as you suggested.
+Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+---
+ drivers/mmc/host/meson-gx-mmc.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
 
-> The other problem for my repo is that it cannot modify
-> include/linux/mmc/sdio_ids.h, thus I have to create a local sdio_ids.h to
-> contain the new definitions. Once your patches are in the kernel, I will =
-be able
-> to eliminate this work around.
-You can also modify the three SDIO driver files (rtw8821cs.c,
-rtw8822bs.c, rtw8822cs.c) and use the literal IDs there if you have to
-patch those files anyways.
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 2b963a81c..28e04dc4e 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -604,8 +604,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 	 */
+ 	switch (ios->power_mode) {
+ 	case MMC_POWER_OFF:
+-		if (!IS_ERR(mmc->supply.vmmc))
+-			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
++		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
+ 
+ 		if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
+ 			regulator_disable(mmc->supply.vqmmc);
+@@ -615,8 +614,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
+ 		break;
+ 
+ 	case MMC_POWER_UP:
+-		if (!IS_ERR(mmc->supply.vmmc))
+-			mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
++		mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
+ 
+ 		break;
+ 
+-- 
+2.39.2
 
-> I do not have any rtw88 SDIO devices, thus I will not be able to test, bu=
-t I
-> will pass any information that I get from my users.
-That sounds great - thank you!
-
-
-Best regards,
-Martin
