@@ -2,56 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4C5A8C6FD1C
-	for <linux-mmc@archiver.kernel.org>; Sat, 11 Mar 2023 18:22:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9370BC74A5B
+	for <linux-mmc@archiver.kernel.org>; Sat, 11 Mar 2023 18:22:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229652AbjCKSW2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 11 Mar 2023 13:22:28 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36378 "EHLO
+        id S229668AbjCKSWa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 11 Mar 2023 13:22:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36294 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229800AbjCKSWZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 13:22:25 -0500
-Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 534986904B
-        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 10:21:41 -0800 (PST)
-Received: by mail-lf1-x12f.google.com with SMTP id bp27so458678lfb.6
-        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 10:21:41 -0800 (PST)
+        with ESMTP id S229643AbjCKSW2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 13:22:28 -0500
+Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E4A1161319
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 10:21:47 -0800 (PST)
+Received: by mail-lf1-x132.google.com with SMTP id m6so10764794lfq.5
+        for <linux-mmc@vger.kernel.org>; Sat, 11 Mar 2023 10:21:47 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678558876;
-        h=cc:to:subject:date:from:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=+fW/DwA4q8yKtERRs9xU/rZtvMzehwEtMWVT+wwuBm4=;
-        b=g1JGmGYdvB9HebBmdZAUW/LbhHVVgEwwjVms5PxY2tex39jpuj1NgJy5SApNueGoQI
-         HCwzU83VKixpwKUZidJ3EDCPV5RT6h1O8YF0O2lVWrNShmRDjBI8HqprPVHP6JhFtAFn
-         Yzy9UEb5a2tAXLKPrXlsxqYx5wcJ5qp8ZihjqB6vEmQEG2dFdluMpEhp1DcYSNJ+bo+C
-         A+jMSj3666Ta3RP2um9o8ryWc6Y2c4/tqI+6nW8llP6eaCsBfP6fvPv+5nlnhJntrRQz
-         P+04FfC+ojs3kIqaJb/WA2lQK5NA6P+k3Ot7CegRnei5vwKufCxgK9IA6kU1XhTlLvVW
-         N01Q==
+        d=gmail.com; s=20210112; t=1678558900;
+        h=cc:to:subject:date:from:in-reply-to:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=zgZZFa9GT3KgzmxYSLg5VRVJ2/WUIFA9QnWnNW5nD4w=;
+        b=mNtGjGWdDstEdiYUuvC/HXFG+z/PPk4RvfFsbGxt4IT/xfq93mn20/nH81OLJxf1RT
+         Yv36QxydbcaNpcuxk1VqiuJhGMpOMhx8OOYfc8sqpI1WtLtxHU7Dym6+lDtMBIJby6Ia
+         tFHa+b4tPUGHR5CaX/ptcNfvHUdCm/nAeH1gqNcrGkerig3VA4kFDPFprJIL92+3O2k+
+         viZUsN5KjmLD4U2iBinhzp6KrVqyAisr4j2iv5/B/kLkn4GEAGC4jeeXwFoKrZQ1AIAh
+         X9Lf3L87QHNoXyiNZYfgTSgcya+z6RPyEU4gY3DeG6G2kYrEjiEco0NbpmY+yxIIUP1b
+         uYEg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678558876;
-        h=cc:to:subject:date:from:message-id:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=+fW/DwA4q8yKtERRs9xU/rZtvMzehwEtMWVT+wwuBm4=;
-        b=Cx+AYQHTDS8FQuT+diax2WJGTTwhrkycF+aYTM0o424LvfI4QCRTaE7LRWk0nczQ8N
-         Jg9m38whp93FH2RWvlU7t5xXjydUiOlBeuCDNyRUrM4O/7fOax3LY8K1wyhCi+Hx4jbA
-         sBeSP4qSkphpMQARPxpluMo/Q4fVMUa0oNo/tSu0zeTwBu/2RAGq1flozVW4PDI4cEmu
-         6081LB2qBrBlp1vHZyyAih77eZnWqsmcmVRiEobmqZUTffZ0k9cURgetWquBnePMLoMH
-         s06daq1fJCJr42sFOUMq6rPqyTjO8EXW0UBKfeCZ5FSeM06dTPXvAtoK1lku094dh3j7
-         19Kw==
-X-Gm-Message-State: AO0yUKXtT6jjoCDUPWT3A4qA6SjrFCEUF9EjzWq5QwWFpHCKBuNpt75V
-        HglXvvdH7f7yJ1c1XHRVvE/dK74FIp6uXOQz+AM=
-X-Google-Smtp-Source: AK7set+HqqPm79lPZ0uRYMHOGw4avh3m7bwn5YUMNln5TNYwe3vfQ2vWFN48iBoSubVlB0HuQC8TbA==
-X-Received: by 2002:a19:f013:0:b0:4db:1b97:13 with SMTP id p19-20020a19f013000000b004db1b970013mr7628257lfc.54.1678558876165;
-        Sat, 11 Mar 2023 10:21:16 -0800 (PST)
-Received: from 0000-cover-letter.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
-        by smtp.gmail.com with ESMTPSA id v19-20020a197413000000b004dc12a7e03bsm381624lfe.222.2023.03.11.10.21.15
+        d=1e100.net; s=20210112; t=1678558900;
+        h=cc:to:subject:date:from:in-reply-to:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=zgZZFa9GT3KgzmxYSLg5VRVJ2/WUIFA9QnWnNW5nD4w=;
+        b=7H6krAou/GmUwvy161oHy07YpUWVrXYfdCoKV5Vd6Zw+GBRmDqpQ/pNmBI3n5cp35h
+         PI3fegxxJa8jSlotnVRPOm2fOUifowAaH9b/J4nwLqtgN8lwtie8Dj33+u7LT96OZdxx
+         sA7HfASitOqDzdybWS75Ybtut35MQKxohnUtIM4Ay3V3WNpNVz578hsfP5WfBXl/MXlj
+         qlsycXw8OQVwH/PO5LQ4Ki0qaq3Xo6jCZ/fLllseApHS3D5dSyOD7Kbr8h5gsAjdoTBX
+         eBMdvL9TqvpgRmfvye49scnz/9d/JXC11Pt7FNV066Cg7lJ+egZcKO4J37VZ/9UzE0bC
+         EUBg==
+X-Gm-Message-State: AO0yUKWgclseycECDR/Xslh5WllthfJnNW1AuFn2dbNPzhxdLHijRVWl
+        u7+0t5sCt44aVL4vJNhm8iM/a/ADV4bF/1iS55M=
+X-Google-Smtp-Source: AK7set/dsCM8nSmhcj4GaWC0Aejx2GNjuzxmx6GUbh5avv7VmGK2OknrAUvaAvnOc18BzQZRXdUE3g==
+X-Received: by 2002:a05:6512:20d:b0:4db:456a:9a1 with SMTP id a13-20020a056512020d00b004db456a09a1mr8313956lfo.66.1678558900240;
+        Sat, 11 Mar 2023 10:21:40 -0800 (PST)
+Received: from 0001-dt-bindings-synopsys-dw-mshc-common-add-fifo-access-.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
+        by smtp.gmail.com with ESMTPSA id r15-20020ac25a4f000000b004db50b52c08sm387004lfn.102.2023.03.11.10.21.39
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 11 Mar 2023 10:21:15 -0800 (PST)
-Message-Id: <1678558770.495747-0-sleirsgoevy@gmail.com>
+        Sat, 11 Mar 2023 10:21:40 -0800 (PST)
+Message-Id: <1678558770.495747-1-sleirsgoevy@gmail.com>
+In-Reply-To: <1678558770.495747-0-sleirsgoevy@gmail.com>
 From:   Sergey Lisov <sleirsgoevy@gmail.com>
-Date:   Sat, 11 Mar 2023 21:15:38 +0300
-Subject: [PATCH v2 0/2] mmc: dw_mmc: fix DW MMC cores with 32-bit bus on 64-bit Linux systems
+Date:   Sat, 11 Mar 2023 21:15:37 +0300
+Subject: [PATCH v2 1/2] dt-bindings: synopsys-dw-mshc-common: add
+ "fifo-access-32bit" property
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -62,29 +64,31 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-DesignWare MMC cores have a configurable data bus width of either 16, 32,
-or 64 bytes. It is possible, and some vendors actually do it, to ship a
-DW MMC core configured for 32-bit data bus within a 64-bit SoC. In this
-case the kernel will attempt 64-bit (readq) accesses to certain 64-bit MMIO
-registers, while the core will expect pairs of 32-bit accesses.
+Some Samsung Exynos boards using the arm64 architecture have DW MMC
+controllers configured for a 32-bit data bus but a 64-bit FIFO. On these
+systems the 64-bit FIFO registers must be accessed in two 32-bit halves.
+---
+ .../devicetree/bindings/mmc/synopsys-dw-mshc-common.yaml   | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-It seems that currently the only register for which the kernel performs
-64-bit accesses is the FIFO. The symptom is that the DW MMC core never
-receives a read on the second half of the register, does not register the
-datum as being read, and thus not advancing its internal FIFO pointer,
-breaking further reads. It also seems that this FIFO is only used for small
-(less than 16 bytes) transfers, which probably means that only some SDIO
-cards are affected.
-
-Sergey Lisov (2):
-  dt-bindings: synopsys-dw-mshc-common: add "fifo-access-32bit" property
-  mmc: dw_mmc: add an option to force 32-bit access to 64-bit FIFO
-
- .../bindings/mmc/synopsys-dw-mshc-common.yaml |   7 +
- drivers/mmc/host/dw_mmc.c                     | 125 +++++++++++++++++-
- drivers/mmc/host/dw_mmc.h                     |   2 +
- 3 files changed, 132 insertions(+), 2 deletions(-)
-
+diff --git a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc-common.yaml b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc-common.yaml
+index 8dfad89c7..d025b38ca 100644
+--- a/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc-common.yaml
++++ b/Documentation/devicetree/bindings/mmc/synopsys-dw-mshc-common.yaml
+@@ -57,6 +57,13 @@ properties:
+       force fifo watermark setting accordingly.
+     $ref: /schemas/types.yaml#/definitions/flag
+ 
++  fifo-access-32bit:
++    description:
++      Specifies that this device requires accesses to its 64-bit registers
++      to be done as pairs of 32-bit accesses, even on architectures where
++      readq is available.
++    $ref: /schemas/types.yaml#/definitions/flag
++
+   dmas:
+     maxItems: 1
+ 
 -- 
 2.38.3
 
