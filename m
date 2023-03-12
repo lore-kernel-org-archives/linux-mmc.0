@@ -2,77 +2,130 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 19AEBC6FA99
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 20:28:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06E70C6FD19
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 20:57:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230336AbjCLU2h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 16:28:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36976 "EHLO
+        id S231563AbjCLU5J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 16:57:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231224AbjCLU2e (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 16:28:34 -0400
+        with ESMTP id S231537AbjCLU5I (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 16:57:08 -0400
 Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 449B034C1B
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:33 -0700 (PDT)
-Received: by mail-ed1-x530.google.com with SMTP id k10so40792019edk.13
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:33 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F0B6128E93
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:57:06 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id k10so40943750edk.13
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:57:06 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1678652912;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=K2J/3a1IUaezXRt8cT97feyTSCzihsk5DrzTrn45/F0=;
-        b=JUpqysnXzPDgr43xph6NOGrfHrK3hRBSbcoJmKlMZGRDgz34bhdPORL1rTk5v6vDuh
-         o0uKboTtDj37hQp+w7kIxlt6GDhEoW4Yg2gJYl1k+d2FOPfZx0eJJdffcbDGlQs4uDVx
-         n31eTA/4bK9Wo7RXr5gVahhx78cAPjHxVt7c8/9n+SUawkBee/5BPkCl2n2v0jPiXp/z
-         GGllzt7sWFJXAS9bhl+nWe7hR0XeE4JIIZfSACTaS0G+EDs/CfeNd74gBwFBI8DS7AdA
-         q9Y3OHuc6Z5T9cVot7VrKfpjqhllDyvRTuyABN0DCqSPUwy3VvXy+sYvTcsw7yNrbAL2
-         dr1w==
+        d=linaro.org; s=google; t=1678654625;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=U/BYuAhpT1ImLYYppOi6bO5xFNSIeIPiH8VsW85cixU=;
+        b=ud/9lsVqnNiML2sSeRl1HRB7vyDYcqZsOgxGYOopUuAK04W81tMInIMSS61+Y8V4qq
+         W3D0fOHng3D1mxN9b8Jjp6bRkaRIMtRfgvz9rLoTSFDptnSkUxTZVZ0k38s7z77mcUIj
+         6hbLX40iyXZ1YSMsRwbrpHlAHKNENlVtgcL1haeKV15skD9niLbWRcJxSXJIW4NCED8N
+         8ruKKsYc/7c2/uXVZjy2Lyl/NAVQKJ60Gg1Xfs/SjkHrCFGRYQa9IP65UhktpNPBHk+b
+         Ei6e0yvsWYTLn6GrWHDiG8u/B0Qwt1jEyQnI0cMSPCyr1QMfwyvI4UJkN0L+1HzLL+bF
+         z+nQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678652912;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=K2J/3a1IUaezXRt8cT97feyTSCzihsk5DrzTrn45/F0=;
-        b=yZ+ACyOIT/paKXGailSZmQ9KRHJuhFJTvYDrC/4w3W/CLyzBr5FhW6ZWCjCe+Ctiko
-         quovU94xpeAdvpOVfXOd7uAiecjaH2jkqxSHRlBAWb6cDJ13TUpcxBbXCiP60D7L5P5X
-         FIek0dDZZu6qTDHsLbubA+LVWh2Dc6GqxTqq9aJ1EvNnCBvm4hQwLPa9/r+5dvry6X+G
-         WMSPzdnZXmlJWbNiNV8XaYGYujef8wP19xAsjbILHQfIfU1e2JDDBx3iuvoB4/dn3DA/
-         lQ0AmFE5BWJAIvPpaTnLWE+jEsVKe88RtSd5o6DW4kz35jdrwI8uRvvrAnKAQMJFU1vE
-         4VRg==
-X-Gm-Message-State: AO0yUKUCHewqzb39Ha4YoI6SqPzYVJ9TCMSoxJBlmnIfvGFO3YiMSqlH
-        17AEhyMmtSBsrPMEgcYZSf+Y6sjDCUk/Y0LYHDI=
-X-Google-Smtp-Source: AK7set93CmoSxc8XZ2D8bTosdl3KJ/YMl/BkXjYrsCPN0sT+HwveYVPnKlpKaUK0A+hjoilnAd7BihLVcNFrQayDwF4=
-X-Received: by 2002:a50:9fa5:0:b0:4fb:e0e8:5140 with SMTP id
- c34-20020a509fa5000000b004fbe0e85140mr984123edf.6.1678652911615; Sun, 12 Mar
- 2023 13:28:31 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1678654625;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=U/BYuAhpT1ImLYYppOi6bO5xFNSIeIPiH8VsW85cixU=;
+        b=JREHLRR7NiRyddC/QuvnH1GXXEDOre00WYBmL08Et9Ai7GRcTa7BQM4Vhh9QzQlJ7+
+         6vU74yHy2FhCFaV691Q/hDFcbOpz7cjMK0tXmHgXURA15CrdPIZvVCy6BqrsEa9y9aSJ
+         EBvHSS+qZ7WgeaBjNAVsExMrVSd8Uiun7cgPsUPzbPVjTHlEH6GvYCHZ1cw8sV1OAVA6
+         aoL4POm9XdXi2foQX/D9dhbMMKLOJ5FGgEoCjd9HWLaXB1tLkeWfXByZOYbBZoKRYGtu
+         pLibuoW1PQJEHCk61qCrrT7AX16ZMa5lnTAzt6SaMMIwirG0713NuQgI9oJaK5go7ciH
+         2Nag==
+X-Gm-Message-State: AO0yUKWhbpaxJCV3u2ZbK9aGpL/GH8tkS0NyQvtEqmvHkpkhAb+LtFLw
+        IsBL6+K7o5qYlLDoos/PUVD2/g==
+X-Google-Smtp-Source: AK7set+zY4WfV4JPUy9KG6Q/TUK4N0pd8ygY5c0mzm1YQfsNtCrzgJ1NegaMkj3Q3Jyp6GpNsvwo3Q==
+X-Received: by 2002:a05:6402:383:b0:4ac:bd84:43d8 with SMTP id o3-20020a056402038300b004acbd8443d8mr30431879edv.8.1678654625483;
+        Sun, 12 Mar 2023 13:57:05 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:d9f6:3e61:beeb:295a? ([2a02:810d:15c0:828:d9f6:3e61:beeb:295a])
+        by smtp.gmail.com with ESMTPSA id ia9-20020a170907a06900b0092499bb0324sm1430956ejc.12.2023.03.12.13.57.03
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 12 Mar 2023 13:57:05 -0700 (PDT)
+Message-ID: <7747168a-1b4a-9c79-d447-020a7de7bd89@linaro.org>
+Date:   Sun, 12 Mar 2023 21:57:03 +0100
 MIME-Version: 1.0
-References: <9ae6f90e-e1ea-d088-cdae-7dd8a541f00f@gmail.com> <2ceb62da-07e6-bafc-c29e-13cc1cdde93a@gmail.com>
-In-Reply-To: <2ceb62da-07e6-bafc-c29e-13cc1cdde93a@gmail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 12 Mar 2023 21:28:20 +0100
-Message-ID: <CAFBinCA-f5aC0A33bnEejvrnrxPY-qGy7QDSrVHKCDxvv8O9zA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] mmc: meson-gx: use new helpers mmc_regulator_enable/disable_vqmmc
-To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v11 02/15] dt-bindings: mmc: cdns: Add AMD Pensando Elba
+ SoC
+Content-Language: en-US
+To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20230312004445.15913-1-blarson@amd.com>
+ <20230312004445.15913-3-blarson@amd.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230312004445.15913-3-blarson@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Mar 11, 2023 at 11:41=E2=80=AFPM Heiner Kallweit <hkallweit1@gmail.=
-com> wrote:
->
-> Use new helpers mmc_regulator_enable/disable_vqmmc to simplify
-> the code.
->
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
-Acked-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+On 12/03/2023 01:44, Brad Larson wrote:
+> AMD Pensando Elba ARM 64-bit SoC is integrated with this IP and
+> explicitly controls byte-lane enables.
+> 
+> Signed-off-by: Brad Larson <blarson@amd.com>
+
+Thank you for your patch. There is something to discuss/improve.
+
+>    interrupts:
+>      maxItems: 1
+> @@ -120,6 +119,27 @@ required:
+>    - interrupts
+>    - clocks
+>  
+> +allOf:
+> +  - $ref: mmc-controller.yaml
+> +  - if:
+> +      properties:
+> +        compatible:
+> +          contains:
+> +            const: amd,pensando-elba-sd4hc
+> +    then:
+> +      properties:
+> +        reg:
+> +          items:
+> +            - description: Host controller registers
+> +            - description: Elba byte-lane enable register for writes
+> +      required:
+> +        - resets
+> +    else:
+> +      properties:
+> +        resets: false
+
+I don't think this passed the tests... You disallow resets for everyone
+else. Why? Drop this line.
+
+> +        reg:
+> +          maxItems: 1
+> +
+>  unevaluatedProperties: false
+>  
+>  examples:
+
+Best regards,
+Krzysztof
+
