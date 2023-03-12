@@ -2,53 +2,54 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 654B2C6FD1C
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:27:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B05A1C6FA99
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:30:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232200AbjCLS1g (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 14:27:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38708 "EHLO
+        id S231381AbjCLSaj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 14:30:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231494AbjCLS1T (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:27:19 -0400
-Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CCAD580F3
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:22:07 -0700 (PDT)
-Received: by mail-ed1-x52f.google.com with SMTP id g10so11292077eda.1
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:22:07 -0700 (PDT)
+        with ESMTP id S231309AbjCLSaV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:30:21 -0400
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27D52196A5
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:25:49 -0700 (PDT)
+Received: by mail-ed1-x52e.google.com with SMTP id ek18so9066192edb.6
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:25:49 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678645235;
-        h=cc:to:subject:date:from:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
+        d=gmail.com; s=20210112; t=1678645467;
+        h=cc:to:subject:date:from:in-reply-to:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
         bh=R/ZxX3DwmCtqhIm3cqoC0hxQvGcxZ6dvB//gAmJzTdM=;
-        b=lOYslAiYEfZGRFQGrUbKr8JOXtUQuFV+hLzrlo8oWxM+0tkPZFsCVUUxJsq2TiYbmO
-         iMhkf4ZD2sh7ptbMLfBCpCeP7i1ze+hMOOuor9IoOV8rk9xXYdrNFlcWHUsgD2AO5yXM
-         PSFQQyXChuyx9DmyoDngZwZ0mGMe4hKGE54F9ScT8gPgmQZLSLVQUyC5SlsY7TVwRABh
-         zIwkY9e6Pq18+2aDs4I508Wbt9+cYxjVIpSLVHkgWwHNVTo3T5L50vdbIzojSsUkh3hv
-         NRpVZj+A09TfYNjiM5tymAol+k9Dpw+fk//mStN8ECbhAipxc9h2LbZyb8GQsnI4siWV
-         xL1Q==
+        b=i5Mlli65/zWZ4mJkX1+fDA7YzU+3uZYSpjKHsk1xq5W2erR4TEzWIkKYpdZ5ea6qYP
+         ufJGirWwLqwN5bUvLmTopr6Ea8OQ/KIvHLCWgdAMeLvRLMJ12X1vf3I1FjBzEFyD1Gjj
+         tPFNjwiBYG8Ha7CFYi4y1qzoodYxcWQ5LdtbAQzJzmPl4T+BlHjFGNafmKg87ZWYNrjr
+         ZwE8CSx4PbpJi69Imb7St19lFhmWvXxGo+g4hNKuT5Q4qgjAiiqncA7+BmEBy80LDkmY
+         ZQnercBQQKWhf/duZWB+6WOt5QeSnx5XyunwAIShRpFjO3L4LA8R70W6L7P3no4DE0EY
+         PbWw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678645235;
-        h=cc:to:subject:date:from:message-id:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
+        d=1e100.net; s=20210112; t=1678645467;
+        h=cc:to:subject:date:from:in-reply-to:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
         bh=R/ZxX3DwmCtqhIm3cqoC0hxQvGcxZ6dvB//gAmJzTdM=;
-        b=t81R20B7qsVRHJA7MGskcYetCS3cVQ5id/zVvccq+K94dofsfZzrKaAZ+JogUz2K/N
-         y0dYedt0GfOinaAPtn3zffIioH0yqFPuxYR+4urlOvl09A2Cqsy/N+DU9bjPxvTppa0D
-         NAxPVVeq13vmxJzyKQJyhA7HRqVSP8uRZxYG8onQ1twpqIegOo5HcN3fmNe2UdCaJDHI
-         bbXlUF8VoOTBWvoOF8rliL5pKjn0ypp0QHsqAfV464DrNfwgm0PQ5d6g9lP2dCFwhtCK
-         WnKK6xlhuMwrdiseO+c+DkvR2tbjeXqHuAl1Mj0S+yu3GFet0WPO/uJ0V4MsiANd+hmE
-         b/zg==
-X-Gm-Message-State: AO0yUKXoMoWSaNIf0lPXwlW4ubAHJpMSJuq+vx0M0f3kLFn9t+eSNkCo
-        jriL3jOYaWzW/QN7F3PQxowLbb8fi9NE/ylZ
-X-Google-Smtp-Source: AK7set+GzDFBwf0flHAI2MxNqIcTq2n7/pMvxblYjgOfi6ZFCmlx0IgY9JN3/YDSjqi155MzrEsAmQ==
-X-Received: by 2002:a2e:8641:0:b0:293:5317:5780 with SMTP id i1-20020a2e8641000000b0029353175780mr9668111ljj.49.1678644296818;
-        Sun, 12 Mar 2023 11:04:56 -0700 (PDT)
+        b=fwWwesgo1HhdWmkuOLWYKLp4UdxhESmGcrqgRSVk5WRCIBx6PIu3cXmVVp7I8OXJsr
+         HEonuNSVO8uTpxA1ss22I12rlVAfGeh0X+qBNNFVIfv5WXb+OjPwESyT+t3C9vkEUl6v
+         fnhLP/I8uqqwATK/2ds7VhyNWoAhiL8JC5dqQc5qmQqQrcPFpctyCGAyf1aRgkqM14wO
+         /28mbhEhYAzcuZtdllzw5QJztRevIKPIK0YbJI9NPXop3N5s56prbVWLMjtJ83ldzOtJ
+         vuQEyc1+1cIGtJPL0xzsucnKtHm/09Z86lti9DXueQBEwajcYxA97gTcCFaMaES3Rfby
+         26nQ==
+X-Gm-Message-State: AO0yUKXXAO3wxUQYuXGDSeNp/A3ZyNcTwKAJTpBQEsE23w+SWeyg5Q8a
+        79503tKTomGHhB/zQ/NU3yaNnI+ayddZQOzS
+X-Google-Smtp-Source: AK7set/fdAZ5B1SG9m0SwBTYGGvdBmVl9bpfz+PlpvL0C4ArLPTiVr2CIJcEBBwsAZXMnz9tYcxJ2A==
+X-Received: by 2002:ac2:48a7:0:b0:4db:4fa6:7c0c with SMTP id u7-20020ac248a7000000b004db4fa67c0cmr9020403lfg.60.1678644672801;
+        Sun, 12 Mar 2023 11:11:12 -0700 (PDT)
 Received: from 0002-mmc-dw_mmc-add-an-option-to-force-32-bit-access-to-6.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
-        by smtp.gmail.com with ESMTPSA id f23-20020a2e3817000000b002987088bda4sm697267lja.69.2023.03.12.11.04.56
+        by smtp.gmail.com with ESMTPSA id i11-20020a056512006b00b004cb1de3f487sm719329lfo.104.2023.03.12.11.11.12
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Mar 2023 11:04:56 -0700 (PDT)
-Message-ID: <640e1448.2e0a0220.365cb.1924@mx.google.com>
+        Sun, 12 Mar 2023 11:11:12 -0700 (PDT)
+Message-Id: <1678644516.665314-2-sleirsgoevy@gmail.com>
+In-Reply-To: <1678644516.665314-0-sleirsgoevy@gmail.com>
 From:   Sergey Lisov <sleirsgoevy@gmail.com>
 Date:   Sun, 12 Mar 2023 20:58:50 +0300
 Subject: [PATCH v5 2/3] mmc: dw_mmc: add an option to force 32-bit access to
