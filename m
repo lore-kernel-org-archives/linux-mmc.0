@@ -2,43 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A63E0C74A5B
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 00:47:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51513C74A44
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 00:47:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229824AbjCLArM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 11 Mar 2023 19:47:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39996 "EHLO
+        id S229861AbjCLArW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 11 Mar 2023 19:47:22 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40210 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229740AbjCLArL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 19:47:11 -0500
-Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2069.outbound.protection.outlook.com [40.107.223.69])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 59461574CE;
-        Sat, 11 Mar 2023 16:46:38 -0800 (PST)
+        with ESMTP id S229876AbjCLArT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 11 Mar 2023 19:47:19 -0500
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on20615.outbound.protection.outlook.com [IPv6:2a01:111:f400:7e88::615])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39B6B6BC38;
+        Sat, 11 Mar 2023 16:46:52 -0800 (PST)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=BK7/bxF9f4G5lsj5KG3JuFMTi2OIC4DLDbWbWTix8z80YtR8/aAadLkbFJDxIVaTu3fRaWngHFPLQul3MkFYBMO0A4MFntLDFAwyE7oWhqWgCEi29u03zHq5Q3+2SOVOdXxVWYEejB+wrb5QwRR/s93sekQzYuy2Gn/OEMQDwTQuEfFtE4M69eTXc2dRigxYYtysMUsxJyXKO9oXfvMqillbCzxp6WZC2mJuIHLQqEu5SgOXNdOJj1tk5mWhHOOGf5NycdeG7lJYMGiFoeSGj43z4/Cifzvhb6BWkSHHTg1NxCFe5gV8uGFp90RYgUhMF25HS5Pbeln9pLn4jfK62A==
+ b=SA26QM+oMX2mjVA4Qzm5c1x5qqvE2sty/5W0YHqfjOPjIx5QDmd2HWm9i9axzB/TXcmUZicP4xTLR7d8lcQhGwLh6Jjpt3opM2P1ea0JHWVzqLqzUhrT/YhY47M/lUq4ELqeWcMBZsopj9QGEFpx/KCrmhmGKHigPgkxrERaZ7KZQfk7L5SPUGvPp1nOzMQpy3oGOwJoAmlSvHqYo/pT9cSvfBNMhWMfkv3e73H9S6BJveOPgTVXJrOg8EPqKdjzhFKaVMahVGh0zdZGnbDBHK3Vzz1yvmx7uqBIsJcwNgZSI7tiPX+KHPk9ITyEBzCkHxDIeryWQfUvuDdjpRbbWg==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=mpnIb1O3iD9+RUSdP9aH5CNIYVv5t5KX4+QyjF/xBm8=;
- b=QA1OR0pr25tWkzdqTvQstcJt2/QNIXxcq47yDT702veXlxPIqMy5sZ5PFlRzhlghiucQfmNTKXs8liU/sTloaooBSemCib9Mgk9ILTgv5bPtUPDRQCOn5UGKH4P53UQb5opbl2a7305B3uS12PakS+sBgI4jTkuHgZjVtGLixWk9JOzerNraAfVrTvHZbpjReeVLZGBJag0JzH6K6LAglTVWUuAkr8pMRWeY1+feR0lIsG0X5eSKblbPYN++7MfjvgWMHyWUUskh+SH8LrFJ/MukU9Gz9MpOckpK0DXGFUmiBta4N2ZuvjaoMQehNEbvzm7PZwvPYlcYft9UpGfWig==
+ bh=ymfACAjSLWbCk+4U3bvrCLTQlZYsf0VDrwtsvVsOjLE=;
+ b=IUswKfbSVsAasqWNN3+QNgE01dr4qsJ8HlaZFPMsc1a2jTUBhCU0hhfRkCw1sUz3cJo6yIQJR95InktanOmaf5uWY7579z8Pp010Gw6zPpX/ZCmwbYHtxvJKVQvewHAbDouHl1pAL2XDQiUhKVkQuwwYB4X74D9rhmtIysx0sN+lA7T5FG/pPN+OZqvKF4DLCNBskylu6gN9nH/h8kD4OB09uT4w6XgYYlbmgaF5CnCSCzXk5Ta3BB7qWgo5ALE5AGxhvfrcmAfIus5aGdTGx5Bqer6gaIo8WUiUIiU5KaWtcYWilIPlQtylfX0ujkzWaZ1rcWB4758FjpEHXzOuJg==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
  dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
  header.from=amd.com; dkim=none (message not signed); arc=none
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=mpnIb1O3iD9+RUSdP9aH5CNIYVv5t5KX4+QyjF/xBm8=;
- b=cC67+kwZ/4FuMXLstTixOIcPtudkMeGNUTpLOWE8MZWGS405yFrIsTQxs9rGbNBpNeEVHX/rz4z12zFuQmszM50hIN2qvDjr3fkM4BSTZdmamBMVF5F1bthBbbgJLIDFiKINALiN0bwq6O+Lof3f8CgQMWydEnLqhMQHigTwjKw=
-Received: from DM6PR13CA0037.namprd13.prod.outlook.com (2603:10b6:5:134::14)
- by SA1PR12MB6920.namprd12.prod.outlook.com (2603:10b6:806:258::5) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6178.19; Sun, 12 Mar
- 2023 00:46:18 +0000
-Received: from DM6NAM11FT029.eop-nam11.prod.protection.outlook.com
- (2603:10b6:5:134:cafe::34) by DM6PR13CA0037.outlook.office365.com
- (2603:10b6:5:134::14) with Microsoft SMTP Server (version=TLS1_2,
+ bh=ymfACAjSLWbCk+4U3bvrCLTQlZYsf0VDrwtsvVsOjLE=;
+ b=Ck9RiXge0QexozE5FqsPZ9SjY2/EVWR2vFGkXTJjv0O8b0azeAhCvb+k+LuVjieX7l38w61KkxdSE/86RtVieu4OdG4qPjlwuSv2pZNuMBzL8QmdAklQSXrOkQRnWZD22IAy1A3RfkBJ+O5mBfIE0J/Ue9c6yA6cpfcyy8vp3tA=
+Received: from DM6PR07CA0040.namprd07.prod.outlook.com (2603:10b6:5:74::17) by
+ DM4PR12MB5747.namprd12.prod.outlook.com (2603:10b6:8:5e::16) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6178.23; Sun, 12 Mar 2023 00:46:32 +0000
+Received: from DM6NAM11FT070.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:74:cafe::2a) by DM6PR07CA0040.outlook.office365.com
+ (2603:10b6:5:74::17) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6178.23 via Frontend
- Transport; Sun, 12 Mar 2023 00:46:17 +0000
+ Transport; Sun, 12 Mar 2023 00:46:32 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
  smtp.mailfrom=amd.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=amd.com;
@@ -46,13 +45,13 @@ Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
  165.204.84.17 as permitted sender) receiver=protection.outlook.com;
  client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
 Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT029.mail.protection.outlook.com (10.13.173.23) with Microsoft SMTP
+ DM6NAM11FT070.mail.protection.outlook.com (10.13.173.51) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6178.22 via Frontend Transport; Sun, 12 Mar 2023 00:46:17 +0000
+ 15.20.6178.23 via Frontend Transport; Sun, 12 Mar 2023 00:46:32 +0000
 Received: from platform-dev1.pensando.io (10.180.168.240) by
  SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Sat, 11 Mar 2023 18:46:13 -0600
+ 15.1.2375.34; Sat, 11 Mar 2023 18:46:27 -0600
 From:   Brad Larson <blarson@amd.com>
 To:     <linux-arm-kernel@lists.infradead.org>
 CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
@@ -72,9 +71,9 @@ CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
         <vaishnav.a@ti.com>, <will@kernel.org>,
         <devicetree@vger.kernel.org>
-Subject: [PATCH v11 09/15] spi: cadence-quadspi: Add compatible for AMD Pensando Elba SoC
-Date:   Sat, 11 Mar 2023 16:44:39 -0800
-Message-ID: <20230312004445.15913-10-blarson@amd.com>
+Subject: [PATCH v11 11/15] mmc: sdhci-cadence: Enable device specific override of writel()
+Date:   Sat, 11 Mar 2023 16:44:41 -0800
+Message-ID: <20230312004445.15913-12-blarson@amd.com>
 X-Mailer: git-send-email 2.17.1
 In-Reply-To: <20230312004445.15913-1-blarson@amd.com>
 References: <20230312004445.15913-1-blarson@amd.com>
@@ -85,108 +84,127 @@ X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
  (10.181.40.145)
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT029:EE_|SA1PR12MB6920:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3b2bde4f-5c07-4c96-5fb6-08db229330e5
+X-MS-TrafficTypeDiagnostic: DM6NAM11FT070:EE_|DM4PR12MB5747:EE_
+X-MS-Office365-Filtering-Correlation-Id: 69d53063-4179-4c28-cf97-08db2293399a
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: 2mODzHg6Dpnfv/AfKJl+pzOxgmsC+rVDx+IBC49WlfWt5R3X027svt62E3i24OEdU819Zcl8hxWu+892kFjZfOqk81GsKtV2S2MQAmYwvSMPOl6LuN9gA1eqp+0FkQz2zfXk1V7u5mphoOBngl56J/kW+rEbmFiZ4tuwClCOl+aQLNMffZdmzIbIeCcBJp6NI7596tkS58XA+ZCNG+/yFYEae9dDU+L7y9JIBxg/owzwHsGDa9O2tNy6NkVG24SGJzl/0fOdUDvbgUT5AzzppWUSDyhKdp9rZzQmWKpIGfUPovWBKeJJ73W4poWUZ7VqXpjKr/765Q7KAaG0KjfA7KLK+9dqejiuWb+MSWcbb97tcJ0TZDEbF/3z1nVX0R99/d5r29I9fI+8DXWHOVNURYKtfT9/Mf2ssU0YHycXCKK/d7pmBb0oYSkvlQZgvSJSQxA3HV2iD/FR/+UkLP9lSLT/9tErlPz4vVDul3dfjv9Ug5380yAgqa61SKXxPstNhJeBIx5QPX8wEKYUHUlbDkQiOOXlrpP5y7OgVzNoqQpE0+swOuHsLoM4dmXXwda29ZU74ZNfv5dpJXZsCropPGSEuXbZMyCpHXfWr+jsTLAc2QyLOhcPOncHC9mEPZiPLpuxdmvn26A9g4j6JpKRmP0Dofv56vgNEEElgO209HAzAdDANKj+FRr/GA1VaMozDEhyiAKSOUwiVKznv2I+NXFeq+dggqu4SVc28J3IhsQ=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(39860400002)(396003)(376002)(346002)(136003)(451199018)(40470700004)(46966006)(36840700001)(16526019)(36756003)(40460700003)(6666004)(54906003)(478600001)(4326008)(5660300002)(7416002)(2906002)(316002)(7406005)(70206006)(8676002)(70586007)(41300700001)(8936002)(81166007)(6916009)(186003)(36860700001)(356005)(40480700001)(2616005)(82740400003)(1076003)(26005)(82310400005)(426003)(47076005)(336012)(36900700001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: +tHfSsIu0501wbm/WxSVNReo2go6anzwi5A8CRydHOkxqqt6bR8sfGs+rN/Ce4owqLU35oeU0cW4w59lvdsroZKnrOOAgb9YxiCTc4Vp+N8cfiQIkISqpyA4JZkTVrUU4tyfZdflHLSX4875pZX4LjlOzHW5vU4U2Bmmj49syQWCVput2OdD//U8bukIRWBdFw8XDOKXu9HOPfd9qLkiEMk923NrmYAzAPR0ASRSwH6qDAw8/Ky86QXvyJ6QPr09YPjxbr7MZAhkUyKeRsnuVha8lXvqIFhE2ALuEI6Ott9h00MEGfzxOrB4+bAHoouIh9M9gEY23RG9kAiyKBwyF6RIwej0jICOLMHbK0OGCIQA4bG1Ohb8lNln1X4Ozgv5nkatNnjteYUYOE4tDNp8tWr0WrMQoP9d03tA/WhkAtdyvraMP7cWx+VS0OJ9MBkOf3iYVK9a0UMlB9IheeYAXfWls+1yJpBXemuMx86GUkJjti+jWE1EbbLTgI45Qhv+BQNd2R5Z1cPoZKKM7bNhtqsS0QXaUEUbo9ct+deNjF187g8xbeZOkE8xG/kVsGPuuRPN7wz1d2X4K2MaEdeJgTDKxgc3cfphPQpDPavcqQ1MV5rVmflBgHAkbR6wEm8hPAYZAYAziIemaxqFOShZcNzCT0aYkdadddr4k5f+vbBwmBNyNcLrAcClI7UbAYkMaedAWvg1Iy2Jjp/fUc5WeaUk6jak7EStb+s4F3U/NXo=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(136003)(39860400002)(376002)(346002)(396003)(451199018)(40470700004)(46966006)(36840700001)(2906002)(6666004)(478600001)(356005)(36756003)(186003)(26005)(1076003)(16526019)(40460700003)(2616005)(8936002)(336012)(40480700001)(426003)(47076005)(83380400001)(41300700001)(82310400005)(70206006)(70586007)(4326008)(6916009)(8676002)(5660300002)(7406005)(7416002)(54906003)(316002)(36860700001)(82740400003)(81166007)(36900700001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Mar 2023 00:46:17.7995
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 Mar 2023 00:46:32.4259
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3b2bde4f-5c07-4c96-5fb6-08db229330e5
+X-MS-Exchange-CrossTenant-Network-Message-Id: 69d53063-4179-4c28-cf97-08db2293399a
 X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT029.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT070.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA1PR12MB6920
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB5747
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The AMD Pensando Elba SoC has the Cadence QSPI controller integrated.
-
-The quirk CQSPI_NEEDS_APB_AHB_HAZARD_WAR is added and if enabled
-a dummy readback from the controller is performed to ensure
-synchronization.
+SoCs with device specific Cadence implementation, such as setting
+byte-enables before the write, need to override writel().  Add a
+callback where the default is writel() for all existing chips.
 
 Signed-off-by: Brad Larson <blarson@amd.com>
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 ---
+
+v10 changes:
+- The 1st patch adding private writel() is unchanged.  The 2nd patch is split
+  into two patches to provide for device specific init in one patch with no
+  effect on existing designs.  Then add the pensando support into the next patch.
+  Then the 4th patch is mmc hardware reset support which is unchanged.
 
 v9 changes:
-- Rebase to linux-next 6.2.0-rc1
+- No change to this patch but as some patches are deleted and this is
+  a respin the three successive patches to sdhci-cadence.c are
+  patches 12, 13, and 14 which do the following:
+
+  1. Add ability for Cadence specific design to have priv writel().
+  2. Add Elba SoC support that requires its own priv writel() for
+     byte-lane control .
+  3. Add support for mmc hardware reset.
 
 ---
- drivers/spi/spi-cadence-quadspi.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
+ drivers/mmc/host/sdhci-cadence.c | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/spi/spi-cadence-quadspi.c b/drivers/spi/spi-cadence-quadspi.c
-index 64b6a460d739..ad82d2ab3442 100644
---- a/drivers/spi/spi-cadence-quadspi.c
-+++ b/drivers/spi/spi-cadence-quadspi.c
-@@ -40,6 +40,7 @@
- #define CQSPI_SUPPORT_EXTERNAL_DMA	BIT(2)
- #define CQSPI_NO_SUPPORT_WR_COMPLETION	BIT(3)
- #define CQSPI_SLOW_SRAM		BIT(4)
-+#define CQSPI_NEEDS_APB_AHB_HAZARD_WAR	BIT(5)
- 
- /* Capabilities */
- #define CQSPI_SUPPORTS_OCTAL		BIT(0)
-@@ -90,6 +91,7 @@ struct cqspi_st {
- 	u32			pd_dev_id;
- 	bool			wr_completion;
- 	bool			slow_sram;
-+	bool			apb_ahb_hazard;
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index 6f2de54a5987..708d4297f241 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -67,6 +67,7 @@ struct sdhci_cdns_phy_param {
+ struct sdhci_cdns_priv {
+ 	void __iomem *hrs_addr;
+ 	bool enhanced_strobe;
++	void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+ 	unsigned int nr_phy_params;
+ 	struct sdhci_cdns_phy_param phy_params[];
+ };
+@@ -90,6 +91,12 @@ static const struct sdhci_cdns_phy_cfg sdhci_cdns_phy_cfgs[] = {
+ 	{ "cdns,phy-dll-delay-strobe", SDHCI_CDNS_PHY_DLY_STROBE, },
  };
  
- struct cqspi_driver_platdata {
-@@ -1004,6 +1006,13 @@ static int cqspi_indirect_write_execute(struct cqspi_flash_pdata *f_pdata,
- 	if (cqspi->wr_delay)
- 		ndelay(cqspi->wr_delay);
- 
-+	/*
-+	 * If a hazard exists between the APB and AHB interfaces, perform a
-+	 * dummy readback from the controller to ensure synchronization.
-+	 */
-+	if (cqspi->apb_ahb_hazard)
-+		readl(reg_base + CQSPI_REG_INDIRECTWR);
++static inline void cdns_writel(struct sdhci_cdns_priv *priv, u32 val,
++			       void __iomem *reg)
++{
++	writel(val, reg);
++}
 +
- 	while (remaining > 0) {
- 		size_t write_words, mod_bytes;
+ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
+ 				    u8 addr, u8 data)
+ {
+@@ -104,17 +111,17 @@ static int sdhci_cdns_write_phy_reg(struct sdhci_cdns_priv *priv,
  
-@@ -1734,6 +1743,8 @@ static int cqspi_probe(struct platform_device *pdev)
- 			cqspi->wr_completion = false;
- 		if (ddata->quirks & CQSPI_SLOW_SRAM)
- 			cqspi->slow_sram = true;
-+		if (ddata->quirks & CQSPI_NEEDS_APB_AHB_HAZARD_WAR)
-+			cqspi->apb_ahb_hazard = true;
+ 	tmp = FIELD_PREP(SDHCI_CDNS_HRS04_WDATA, data) |
+ 	      FIELD_PREP(SDHCI_CDNS_HRS04_ADDR, addr);
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
  
- 		if (of_device_is_compatible(pdev->dev.of_node,
- 					    "xlnx,versal-ospi-1.0"))
-@@ -1859,6 +1870,10 @@ static const struct cqspi_driver_platdata versal_ospi = {
- 	.get_dma_status = cqspi_get_versal_dma_status,
- };
+ 	tmp |= SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
  
-+static const struct cqspi_driver_platdata pensando_cdns_qspi = {
-+	.quirks = CQSPI_NEEDS_APB_AHB_HAZARD_WAR | CQSPI_DISABLE_DAC_MODE,
-+};
-+
- static const struct of_device_id cqspi_dt_ids[] = {
- 	{
- 		.compatible = "cdns,qspi-nor",
-@@ -1884,6 +1899,10 @@ static const struct of_device_id cqspi_dt_ids[] = {
- 		.compatible = "intel,socfpga-qspi",
- 		.data = &socfpga_qspi,
- 	},
-+	{
-+		.compatible = "amd,pensando-elba-qspi",
-+		.data = &pensando_cdns_qspi,
-+	},
- 	{ /* end of table */ }
- };
+ 	ret = readl_poll_timeout(reg, tmp, tmp & SDHCI_CDNS_HRS04_ACK, 0, 10);
+ 	if (ret)
+ 		return ret;
  
+ 	tmp &= ~SDHCI_CDNS_HRS04_WR;
+-	writel(tmp, reg);
++	priv->priv_writel(priv, tmp, reg);
+ 
+ 	ret = readl_poll_timeout(reg, tmp, !(tmp & SDHCI_CDNS_HRS04_ACK),
+ 				 0, 10);
+@@ -191,7 +198,7 @@ static void sdhci_cdns_set_emmc_mode(struct sdhci_cdns_priv *priv, u32 mode)
+ 	tmp = readl(priv->hrs_addr + SDHCI_CDNS_HRS06);
+ 	tmp &= ~SDHCI_CDNS_HRS06_MODE;
+ 	tmp |= FIELD_PREP(SDHCI_CDNS_HRS06_MODE, mode);
+-	writel(tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
++	priv->priv_writel(priv, tmp, priv->hrs_addr + SDHCI_CDNS_HRS06);
+ }
+ 
+ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
+@@ -223,7 +230,7 @@ static int sdhci_cdns_set_tune_val(struct sdhci_host *host, unsigned int val)
+ 	 */
+ 	for (i = 0; i < 2; i++) {
+ 		tmp |= SDHCI_CDNS_HRS06_TUNE_UP;
+-		writel(tmp, reg);
++		priv->priv_writel(priv, tmp, reg);
+ 
+ 		ret = readl_poll_timeout(reg, tmp,
+ 					 !(tmp & SDHCI_CDNS_HRS06_TUNE_UP),
+@@ -386,6 +393,7 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 	priv->nr_phy_params = nr_phy_params;
+ 	priv->hrs_addr = host->ioaddr;
+ 	priv->enhanced_strobe = false;
++	priv->priv_writel = cdns_writel;
+ 	host->ioaddr += SDHCI_CDNS_SRS_BASE;
+ 	host->mmc_host_ops.hs400_enhanced_strobe =
+ 				sdhci_cdns_hs400_enhanced_strobe;
 -- 
 2.17.1
 
