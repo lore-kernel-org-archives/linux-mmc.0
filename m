@@ -2,53 +2,54 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A7EE7C6FD19
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:14:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EA38AC6FD19
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:21:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232242AbjCLSOg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 14:14:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35504 "EHLO
+        id S232301AbjCLSVB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 14:21:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232306AbjCLSOR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:14:17 -0400
-Received: from mail-lf1-x129.google.com (mail-lf1-x129.google.com [IPv6:2a00:1450:4864:20::129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1396061332
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:06:56 -0700 (PDT)
-Received: by mail-lf1-x129.google.com with SMTP id bi9so12980624lfb.2
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:06:56 -0700 (PDT)
+        with ESMTP id S231169AbjCLSUn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:20:43 -0400
+Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BD3734C14
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:13:26 -0700 (PDT)
+Received: by mail-lf1-f47.google.com with SMTP id bp27so2684986lfb.6
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:13:26 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678644283;
-        h=cc:to:subject:date:from:message-id:from:to:cc:subject:date
-         :message-id:reply-to;
+        d=gmail.com; s=20210112; t=1678644645;
+        h=cc:to:subject:date:from:in-reply-to:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
         bh=THHnNubc2+UuqNjcDLN8j6le5gzsAvvJJbRATCHsptA=;
-        b=bQtiB/Tl1AOJIGiNiubvuPtlNrTJyykMFhqP4aT1ctaZJdtqGiIC3NyzYm3ID0yfLd
-         sLqK0o9p5RGpAuAXiYG4yuVz9V+yh2KwXpAyaPeC/iTrYD2NSaJlR6S8UbHvoH0S4kVr
-         zL3KDUngzJUhzdm8rOzaD6Qw3HuxDZUwDWBQyYySq3Ak5rfrNFLOYqMbN/0p8ZIksJr1
-         HNyi5flCg9LVGKzuvjYKFgM5PYZvnCniKQkkt3oEHc6TfO2Y5xPurLH6m3atwARzLfc+
-         3LRMcxEf7IFFBPN6ULCp9xy4IFrPp0ZZVdRvtTbv+jiTGGFEmXA57U36tN6fBLmQDs9T
-         rbtA==
+        b=PBtszNtCxKGWRKYQQJfsSTR8sim9jfDrP5gXHzPSCHxXcDzYiUOSV4yQsSSshpVjp4
+         hc3ettuojx74iXJDL2yw3qCDHh79p+ctVfR+L3AmOpZriYcFIH6uHthH7PaBq8VXiqG2
+         IkC/gZNqAVnJHmgf8h8iSIjXS4tPb3wtychQ9rDjKY8x31F7ss5+S/Ux34wpOHbi1yAA
+         hJcmn+RrnE/hv1bii1XS8wrvz2SZuuNOlaOsQUxYSVqCeyRsskYxsyS/ZSd6Sz/kK4Ua
+         cbng/XEukVSHpwD5kLC7vJ3HX6s1GpRKq6PmJOPRyzmrTFOkiNXMc9yaUgRb6xkMPX30
+         bWlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678644283;
-        h=cc:to:subject:date:from:message-id:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
+        d=1e100.net; s=20210112; t=1678644645;
+        h=cc:to:subject:date:from:in-reply-to:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
         bh=THHnNubc2+UuqNjcDLN8j6le5gzsAvvJJbRATCHsptA=;
-        b=UdlOyRsfg0tyc4wdi9sv6key+rPHIZ75nDBGiIdPSq9c8IIvKK+7EYuXhmKdXtRzg7
-         WjbrD2xR+GICDO2fx2CrQtmnQaTcVL0G94GcyIexT7UKdyTbYuEJmC5w78151OcV8v//
-         DA6/f9bNlyeEFmcrRS1/XKaCVfOnX6o29sVZ7Fsn85KceHqSOe/5KwEkCSyQWW0wA8DX
-         Hcfe9bS7zQMikUJNCp+Tb/nZw7CcR+rzz0zRuasNoGRvkOEepAZTKYcG9/g2thsqIb6c
-         jfWSCeaxRXsdeVWsx+rylz+1gu9JI4zpHOoeOzNy4LAf0PN73QmG/6g4kSRuJfki2X48
-         1euw==
-X-Gm-Message-State: AO0yUKWSdf1QayHJiOdDUVH1ifsYSAWMXLN0R+ow3AAy5R1v+bq8QzBs
-        1ohdjB6AE0oSBsKWqrMV/ppZkhP2YeH03Pfy
-X-Google-Smtp-Source: AK7set/Ma1d8RfSn0bHL3xySPjmlzvKBegB2rPb4tCdg9ydTjl1Twj56N5LGs2IaYRjscIQK4VKanQ==
-X-Received: by 2002:a05:6512:239b:b0:4d8:86c1:4786 with SMTP id c27-20020a056512239b00b004d886c14786mr2434394lfv.27.1678644283054;
-        Sun, 12 Mar 2023 11:04:43 -0700 (PDT)
+        b=mzUnWPwyyjB4z1Tt21GbCzh6R+bXjFWdZeEsW+M5PSk/+P4/e/TUpCuFmMmEPZ0sl7
+         0pZXrrLRr4DJCf4LhdQHpLh9XR4Z6JMT29FzMlHEaYhXlm7yDuh7mZV3620fg2hsDVSN
+         5tO1oi64D8H60ZCWYOOUoQqpVa9q2Euxv68lH1v6zaEtlKBngVRTq11HXTrJO67WG6oE
+         u6aziV9IJhDkFtxGtjpBZZRg1/aS3k1AfuwwLCPS3OM3bmbVu8fCQjvZXQGpSwsmO/wR
+         /RdQGj3sKLP8z3iJYcoy3SXwFKS3yarqe7m/IKKyaDNsQkXQ7Dw6OFxxJrybBUbOYpS6
+         /YEQ==
+X-Gm-Message-State: AO0yUKU3KN0ntgL4opz2NT9Rtird+GegeCjczIKDsyGOaePrVCZoTq9O
+        Cep2dVpL20iExLCG5aFeRtKLpDYYLXtFAbu0
+X-Google-Smtp-Source: AK7set/IiI1C607Z3rQ3WZBYI1U5VrJYLd14oT76ax3jFVXkXMjF7FPMmfpY6VPw6DjZAibNaPS36g==
+X-Received: by 2002:ac2:510c:0:b0:4cd:7fe0:24 with SMTP id q12-20020ac2510c000000b004cd7fe00024mr2606748lfb.27.1678644645549;
+        Sun, 12 Mar 2023 11:10:45 -0700 (PDT)
 Received: from 0001-dt-bindings-exynos-dw-mshc-common-add-exynos7885-var.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
-        by smtp.gmail.com with ESMTPSA id u14-20020ac2518e000000b004db250355b3sm712408lfi.138.2023.03.12.11.04.42
+        by smtp.gmail.com with ESMTPSA id w16-20020a19c510000000b004dc4b00a1f3sm720684lfe.253.2023.03.12.11.10.45
         for <linux-mmc@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Mar 2023 11:04:42 -0700 (PDT)
-Message-ID: <640e143a.c20a0220.39070.1ae1@mx.google.com>
+        Sun, 12 Mar 2023 11:10:45 -0700 (PDT)
+Message-Id: <1678644516.665314-1-sleirsgoevy@gmail.com>
+In-Reply-To: <1678644516.665314-0-sleirsgoevy@gmail.com>
 From:   Sergey Lisov <sleirsgoevy@gmail.com>
 Date:   Sun, 12 Mar 2023 20:58:50 +0300
 Subject: [PATCH v5 1/3] dt-bindings: exynos-dw-mshc-common: add exynos7885
