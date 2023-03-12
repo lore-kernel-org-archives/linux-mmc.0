@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F10E2C6FA99
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 20:28:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19AEBC6FA99
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 20:28:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229906AbjCLU2R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 16:28:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36222 "EHLO
+        id S230336AbjCLU2h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 16:28:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229829AbjCLU2P (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 16:28:15 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4982916AC3
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:13 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id r15so13702306edq.11
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:13 -0700 (PDT)
+        with ESMTP id S231224AbjCLU2e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 16:28:34 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 449B034C1B
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:33 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id k10so40792019edk.13
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 13:28:33 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1678652892;
+        d=googlemail.com; s=20210112; t=1678652912;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Yn7rGXP9a+n4kykSAVJ38yeOYG47jZ8DOqSys/GUHm0=;
-        b=CVBQzqYCNAPyWk09GzvdecOwLxuztTqPOpWt9vR0lxNEZOJ7DGfOxpQFlI/Hwhy+lA
-         Plfq05uMvlHZowrfjd+DhJzRwqNNKb/qYgyy9pSkwmNqNCO/6iMvE/x0eRMAy6VSlHyF
-         9wTmFptJL+fSKaDCnZmpDB5HlZymIDrEHwa3d5/ndQD7uFaW4Ljc3AuPhFmbKxwR4Fqp
-         oKG3HuIt3noDNUBpTHbKJI7F1WT4bFAReS120gX3np6V5KBoLyncarspZ+BpibEAkst5
-         9R2A8MTLZp/DtNFQBmy5t6PMMe9iNSTwFNo+pEZMqeEoaLtGBZqAueuDArkHb2Qcv6fj
-         ursg==
+        bh=K2J/3a1IUaezXRt8cT97feyTSCzihsk5DrzTrn45/F0=;
+        b=JUpqysnXzPDgr43xph6NOGrfHrK3hRBSbcoJmKlMZGRDgz34bhdPORL1rTk5v6vDuh
+         o0uKboTtDj37hQp+w7kIxlt6GDhEoW4Yg2gJYl1k+d2FOPfZx0eJJdffcbDGlQs4uDVx
+         n31eTA/4bK9Wo7RXr5gVahhx78cAPjHxVt7c8/9n+SUawkBee/5BPkCl2n2v0jPiXp/z
+         GGllzt7sWFJXAS9bhl+nWe7hR0XeE4JIIZfSACTaS0G+EDs/CfeNd74gBwFBI8DS7AdA
+         q9Y3OHuc6Z5T9cVot7VrKfpjqhllDyvRTuyABN0DCqSPUwy3VvXy+sYvTcsw7yNrbAL2
+         dr1w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678652892;
+        d=1e100.net; s=20210112; t=1678652912;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Yn7rGXP9a+n4kykSAVJ38yeOYG47jZ8DOqSys/GUHm0=;
-        b=rhguHGBM9LsfUVKpqeL2+bRx77C/5g3tZUBaRi+CS6WKGYTeKf5B2TVp7bXxpp1FkR
-         a6WAfixhJFD7fioxJfC1fRh8Co/QfYnb8wgB3E4HrIooFm8LoK5w66NbonswX9aAsBPd
-         h+reUtff6oHI4v0mOZQ8yjCrQ9jHUWMr1l5aFTSeOxVIagfk7G2Ix+Xk4+scF9RO2BSp
-         EBDjQgkz1+jJNR8NdT8a2Vq800Nh+T8vIWTjBVq9cRB9gSVM+1NJ54uIizj6UPzLScbx
-         Rshi0ROie/hJA0gg4qlGu/8MetXEbvLnN9bulJsDyYkQJLiuxmsJZv3m9hKI03drbl/I
-         t5+Q==
-X-Gm-Message-State: AO0yUKX+o1dplAmgMGAlJ8DQag2x+5WynJHtCRD8X68P7zHpHSjNiwIy
-        WfLRbBCFEmVgS2IXHCxq85v+5YzodiJuh7Fq+dw=
-X-Google-Smtp-Source: AK7set/6hHg0Nod0N6Qs9t9pD9PM6JVRFdHySE+N5trzgl0H0qKarMmaqrd7tgVoASSuASpnIIGevY6z3n4EQlR1SiY=
-X-Received: by 2002:a50:d758:0:b0:4bd:ce43:9ee8 with SMTP id
- i24-20020a50d758000000b004bdce439ee8mr17766701edj.6.1678652891770; Sun, 12
- Mar 2023 13:28:11 -0700 (PDT)
+        bh=K2J/3a1IUaezXRt8cT97feyTSCzihsk5DrzTrn45/F0=;
+        b=yZ+ACyOIT/paKXGailSZmQ9KRHJuhFJTvYDrC/4w3W/CLyzBr5FhW6ZWCjCe+Ctiko
+         quovU94xpeAdvpOVfXOd7uAiecjaH2jkqxSHRlBAWb6cDJ13TUpcxBbXCiP60D7L5P5X
+         FIek0dDZZu6qTDHsLbubA+LVWh2Dc6GqxTqq9aJ1EvNnCBvm4hQwLPa9/r+5dvry6X+G
+         WMSPzdnZXmlJWbNiNV8XaYGYujef8wP19xAsjbILHQfIfU1e2JDDBx3iuvoB4/dn3DA/
+         lQ0AmFE5BWJAIvPpaTnLWE+jEsVKe88RtSd5o6DW4kz35jdrwI8uRvvrAnKAQMJFU1vE
+         4VRg==
+X-Gm-Message-State: AO0yUKUCHewqzb39Ha4YoI6SqPzYVJ9TCMSoxJBlmnIfvGFO3YiMSqlH
+        17AEhyMmtSBsrPMEgcYZSf+Y6sjDCUk/Y0LYHDI=
+X-Google-Smtp-Source: AK7set93CmoSxc8XZ2D8bTosdl3KJ/YMl/BkXjYrsCPN0sT+HwveYVPnKlpKaUK0A+hjoilnAd7BihLVcNFrQayDwF4=
+X-Received: by 2002:a50:9fa5:0:b0:4fb:e0e8:5140 with SMTP id
+ c34-20020a509fa5000000b004fbe0e85140mr984123edf.6.1678652911615; Sun, 12 Mar
+ 2023 13:28:31 -0700 (PDT)
 MIME-Version: 1.0
-References: <9ae6f90e-e1ea-d088-cdae-7dd8a541f00f@gmail.com> <71586432-360f-9b92-17f6-b05a8a971bc2@gmail.com>
-In-Reply-To: <71586432-360f-9b92-17f6-b05a8a971bc2@gmail.com>
+References: <9ae6f90e-e1ea-d088-cdae-7dd8a541f00f@gmail.com> <2ceb62da-07e6-bafc-c29e-13cc1cdde93a@gmail.com>
+In-Reply-To: <2ceb62da-07e6-bafc-c29e-13cc1cdde93a@gmail.com>
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 12 Mar 2023 21:28:00 +0100
-Message-ID: <CAFBinCCJSn2LoK1MvEeQ0SUqEzczbWbSXT7ueb4yM9vO-a7eQg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] mmc: core: add helpers mmc_regulator_enable/disable_vqmmc
+Date:   Sun, 12 Mar 2023 21:28:20 +0100
+Message-ID: <CAFBinCA-f5aC0A33bnEejvrnrxPY-qGy7QDSrVHKCDxvv8O9zA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] mmc: meson-gx: use new helpers mmc_regulator_enable/disable_vqmmc
 To:     Heiner Kallweit <hkallweit1@gmail.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Jerome Brunet <jbrunet@baylibre.com>,
@@ -71,12 +71,8 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On Sat, Mar 11, 2023 at 11:41=E2=80=AFPM Heiner Kallweit <hkallweit1@gmail.=
 com> wrote:
 >
-> There's a number of drivers (e.g. dw_mmc, meson-gx, mmci, sunxi) using
-> the same mechanism and a private flag vqmmc_enabled to deal with
-> enabling/disabling the vqmmc regulator.
->
-> Move this to the core and create new helpers mmc_regulator_enable_vqmmc
-> and mmc_regulator_disable_vqmmc.
+> Use new helpers mmc_regulator_enable/disable_vqmmc to simplify
+> the code.
 >
 > Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
 Acked-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
