@@ -2,63 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2BB52C6FD19
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 17:16:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AD245C6FA99
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 17:26:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230104AbjCLRQ6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 13:16:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41060 "EHLO
+        id S229723AbjCLR0N (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 13:26:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229819AbjCLRQ5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 13:16:57 -0400
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 64EE439CCC
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:16:55 -0700 (PDT)
-Received: by mail-ed1-x532.google.com with SMTP id fd5so5941309edb.7
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:16:55 -0700 (PDT)
+        with ESMTP id S229516AbjCLR0M (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 13:26:12 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AA571BF6
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:26:11 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id g17so12913655lfv.4
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:26:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678641414;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=vRxsxskay5llPXS415DN4IN8IQbI6q5971f6Ju8jg9c=;
-        b=RxNIigu1wAI14vwzdPNbYuv+DyXqLNLYc5++sQJbPy9DDm5a+UKF+QNGPGjr8w0oU2
-         y5a7QsXzK24l0lHE3iq4jVr1rRDDb1p1zeO6x1dgBdynQE7/pzqkuEnX3zCzJfMqnphU
-         nZiL/IATeUfnQS7+rWSHwfifxGGR2DkuLWS+KGL6yjSc/JYhXK/uNf6I1hMDHr0HkZmf
-         kPbgGJYQlcUzF9kbUAkkSlQMCSoYGi0xN6hdqYz2gMQgmnaR8DBa46GjIyzHrl6K1BvQ
-         qfoIcmmJ/ls6v4/j/m7EJZilVs6iOKriOXTv5i/9SQkINe7N6KlAQ6daur79HBMDD+25
-         XHeA==
+        d=gmail.com; s=20210112; t=1678641969;
+        h=subject:in-reply-to:cc:to:from:date:message-id:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=JtCwiValjsr2h1P8SRv71t+eIe5q6n+42gVTAnSj95M=;
+        b=LVcozA24vPbLa7YPtRL0oCp1xqOCwEuPQbPBDrWYNRhH47Iy4ne+VUETTqBhOtVYeO
+         8SMf1eyG9g2skIkkZzx7HFSBGAIduQhdPafgH0aJyYkqcM84AINKX2+B9J1kYEi79XAR
+         s6EmN4ItP6gpOdX39rq9VGf4sFMP9H+51K5kkIeZsE9qjHXDIVd5j6tkt+0Y3Z/O5Ghq
+         hLKPGef7gLZNMtZSEpIePXLSw+4Z0N2LRDUXFab93dkk0wDoZ5iXG6FSJnu6HPuzfRf0
+         B/YeNIWFhAXxKflJnMIEZqPby/HTIOY9von2CxEL1gSo3X1//MFrVWBs9DJ2BcJNPbPp
+         NkCw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678641414;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=vRxsxskay5llPXS415DN4IN8IQbI6q5971f6Ju8jg9c=;
-        b=qWs73aF14dTStuyazdm5SfFkHQduzhe2oiZ2UBlUYta/GZe6u82AIChXWVrZNaNf57
-         f5wLflygUcycwKmIGUBvKVJ5+ZplDrUgpsx9P20OJtOft3f5xBSCmaWASfZW00EVXdPa
-         SvMt4rweFV0///f699of8Kwl0hSVQz5zYvllQqUi+iaa+KcxOpdGek5ksbuBTrK+txP3
-         MeQcfNzMjlE2N8Yvlby2xuHE8yOdQxp/o3tB8B3FcF6U+SLKU2BA9FrA850sX6HTU1jU
-         An7qB89oKjaUoFmsKIsngpc97IK5bt/WTIsQdOUBGH/TOzGikBlsenHEia5H7A4El1yH
-         P1Yg==
-X-Gm-Message-State: AO0yUKV1thp6sDWYnzZT1Qm8o1eRyZjfhcwFJGY40pjND81q7U/aohxj
-        Y2QjSo5mmPX6HModMIUjjP0e7g==
-X-Google-Smtp-Source: AK7set9sJEh3UDFs1Qb6/Jed4xXgK5Dtj6exgCdKPsLn04BF5Qp3phHtONrxm/N9VUj7UlYXWBh9Tg==
-X-Received: by 2002:a17:906:590:b0:886:ec6e:4c1 with SMTP id 16-20020a170906059000b00886ec6e04c1mr37473079ejn.59.1678641413921;
-        Sun, 12 Mar 2023 10:16:53 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:d9f6:3e61:beeb:295a? ([2a02:810d:15c0:828:d9f6:3e61:beeb:295a])
-        by smtp.gmail.com with ESMTPSA id g15-20020a50d0cf000000b004fa268da13esm2103151edf.56.2023.03.12.10.16.53
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Mar 2023 10:16:53 -0700 (PDT)
-Message-ID: <0d46a128-bd65-90cf-6c35-00f5364b7ae0@linaro.org>
-Date:   Sun, 12 Mar 2023 18:16:52 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v4 3/3] mmc: dw_mmc: add an option to force 32-bit access
- to 64-bit FIFO
-Content-Language: en-US
-To:     Sergey Lisov <sleirsgoevy@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        d=1e100.net; s=20210112; t=1678641969;
+        h=subject:in-reply-to:cc:to:from:date:message-id:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=JtCwiValjsr2h1P8SRv71t+eIe5q6n+42gVTAnSj95M=;
+        b=Cdr7Ecw5soMH9SldKJRYI4oz0P0oLoc6m+QD+DG5BFXhlhL85SsGmuzmOU2MbZ2u9t
+         tmeWV40yC4ZSp59Qsh23xDEvzFBre1pAM4NtOI5mhTBLirkjfYbRmOQEMg59uwsAPF9B
+         Vth4Hv2P+hQPVOAS9R7pKu4HwKvUYp+TGDp4xrmZWEuAmY8gfH1DEJeY6aXiixPyuyOh
+         eNxlUD/75ZGL92KoZA9ZgRVWcia01RL6/x/h3nNDIv1rzDGtcBEky5XtmSxm3KNBMMGm
+         /QtptevnHgdPQ1fDZHL3BzuNuhNlPcy/oFeE38FbPKFGwdQxb9Q5phWe8jbtuM1ZV43R
+         8elw==
+X-Gm-Message-State: AO0yUKUluKXXIXuIYKbPXWvHYgZFInGaAufrHWOXNhGlM/iCIWnqNTb+
+        VJadp9SbRTZNHDOgtklXC0Hrs0VHZquRT2lV
+X-Google-Smtp-Source: AK7set88XksRMxMLN1s9qahkeU4RVknlpW6noGTptFyhNIOBV0iG+SXYkYwVWodI1A3r1uqQdkothQ==
+X-Received: by 2002:ac2:5196:0:b0:4dc:807a:d144 with SMTP id u22-20020ac25196000000b004dc807ad144mr9906751lfi.39.1678641969308;
+        Sun, 12 Mar 2023 10:26:09 -0700 (PDT)
+Received: from letter7.txt (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
+        by smtp.gmail.com with ESMTPSA id g27-20020ac2539b000000b004d37d647637sm705650lfh.64.2023.03.12.10.26.08
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 12 Mar 2023 10:26:08 -0700 (PDT)
+Message-ID: <640e0b30.c20a0220.2dc43.19b0@mx.google.com>
+Date:   Sun, 12 Mar 2023 10:26:08 -0700 (PDT)
+From:   Sergey Lisov <sleirsgoevy@gmail.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Alim Akhtar <alim.akhtar@samsung.com>,
@@ -66,64 +59,35 @@ To:     Sergey Lisov <sleirsgoevy@gmail.com>,
 Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <1678640497.9030156-3-sleirsgoevy@gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <1678640497.9030156-3-sleirsgoevy@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <f34ba6e5-4a8d-0812-c334-ea47de7b1d21@linaro.org>
+Subject: Re: [PATCH v3 1/2] dt-bindings: exynos-dw-mshc-common: add exynos78xx
+ variants
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/03/2023 17:59, Sergey Lisov wrote:
-> Some Samsung Exynos boards using the arm64 architecture have DW MMC
-> controllers configured for a 32-bit data bus but a 64-bit FIFO. On these
-> systems the 64-bit FIFO registers must be accessed in two 32-bit halves.
-> ---
->  drivers/mmc/host/dw_mmc-exynos.c |  41 ++++++++++-
->  drivers/mmc/host/dw_mmc.c        | 122 ++++++++++++++++++++++++++++++-
->  drivers/mmc/host/dw_mmc.h        |   2 +
->  3 files changed, 162 insertions(+), 3 deletions(-)
+> Thanks for letting me know.
 > 
-> diff --git a/drivers/mmc/host/dw_mmc-exynos.c b/drivers/mmc/host/dw_mmc-exynos.c
-> index 9f20ac524..768774f22 100644
-> --- a/drivers/mmc/host/dw_mmc-exynos.c
-> +++ b/drivers/mmc/host/dw_mmc-exynos.c
-> @@ -28,6 +28,8 @@ enum dw_mci_exynos_type {
->  	DW_MCI_TYPE_EXYNOS5420_SMU,
->  	DW_MCI_TYPE_EXYNOS7,
->  	DW_MCI_TYPE_EXYNOS7_SMU,
-> +	DW_MCI_TYPE_EXYNOS78XX,
-> +	DW_MCI_TYPE_EXYNOS78XX_SMU,
->  	DW_MCI_TYPE_ARTPEC8,
->  };
->  
-> @@ -70,6 +72,12 @@ static struct dw_mci_exynos_compatible {
->  	}, {
->  		.compatible	= "samsung,exynos7-dw-mshc-smu",
->  		.ctrl_type	= DW_MCI_TYPE_EXYNOS7_SMU,
-> +	}, {
-> +		.compatible	= "samsung,exynos78xx-dw-mshc",
-> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS78XX,
-> +	}, {
-> +		.compatible	= "samsung,exynos78xx-dw-mshc-smu",
-> +		.ctrl_type	= DW_MCI_TYPE_EXYNOS78XX_SMU,
->  	}, {
->  		.compatible	= "axis,artpec8-dw-mshc",
->  		.ctrl_type	= DW_MCI_TYPE_ARTPEC8,
-> @@ -86,6 +94,8 @@ static inline u8 dw_mci_exynos_get_ciu_div(struct dw_mci *host)
->  		return EXYNOS4210_FIXED_CIU_CLK_DIV;
->  	else if (priv->ctrl_type == DW_MCI_TYPE_EXYNOS7 ||
->  			priv->ctrl_type == DW_MCI_TYPE_EXYNOS7_SMU ||
-> +			priv->ctrl_type == DW_MCI_TYPE_EXYNOS78XX ||
-> +			priv->ctrl_type == DW_MCI_TYPE_EXYNOS78XX_SMU ||
->  			priv->ctrl_type == DW_MCI_TYPE_ARTPEC8)
+> https://elixir.bootlin.com/linux/v6.1-rc1/source/Documentation/devicetree/bindings/writing-bindings.rst#L42
 
-This is getting look like a spaghetti code. I think this needs
-quirks/flags, except of types. Or this ifs all over should be made a bit
-smarter as all of these are pretty close to compatible.
+OK, at least its codified somewhere. Still, this results in the opposite
+effect: DTBs written for one SoC, using compatibles from other SoCs just
+because "they are the same anyway". And doing this properly, well, results
+in essentially duplicate compatibles.
 
+And "fallback compatibles" won't solve this case anyway, as there is no
+common compatible that denotes "Exynos7 DW-MMC that has the bug".
 
-Best regards,
-Krzysztof
+>>> That's non-bisectable change (also breaking other users of DTS), so you
+>>> need to explain in commit msg rationale - devices were never compatible
+>>> and using exynos7 does not work in certain cases.
+
+Probably it makes sense to put this patch after the actual implementation,
+so that git bisect always gives a working setup.
+
+> BTW, this rationale was only example - you need to come with something real.
+
+Pretty much the only thing that is broken are SDIO cards, because they run
+very short transfers (below the DMA threshold) over the data lines. That's
+exactly what I stated.
 
