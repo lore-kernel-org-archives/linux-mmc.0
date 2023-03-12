@@ -2,59 +2,63 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA38AC6FD19
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:21:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DDBCAC6FD19
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:27:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232301AbjCLSVB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 14:21:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55784 "EHLO
+        id S231143AbjCLS1R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 14:27:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39244 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231169AbjCLSUn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:20:43 -0400
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com [209.85.167.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BD3734C14
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:13:26 -0700 (PDT)
-Received: by mail-lf1-f47.google.com with SMTP id bp27so2684986lfb.6
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:13:26 -0700 (PDT)
+        with ESMTP id S231138AbjCLS1D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:27:03 -0400
+Received: from mail-wr1-x42b.google.com (mail-wr1-x42b.google.com [IPv6:2a00:1450:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5A8B5099D
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:21:34 -0700 (PDT)
+Received: by mail-wr1-x42b.google.com with SMTP id p4so3152996wre.11
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:21:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678644645;
-        h=cc:to:subject:date:from:in-reply-to:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=THHnNubc2+UuqNjcDLN8j6le5gzsAvvJJbRATCHsptA=;
-        b=PBtszNtCxKGWRKYQQJfsSTR8sim9jfDrP5gXHzPSCHxXcDzYiUOSV4yQsSSshpVjp4
-         hc3ettuojx74iXJDL2yw3qCDHh79p+ctVfR+L3AmOpZriYcFIH6uHthH7PaBq8VXiqG2
-         IkC/gZNqAVnJHmgf8h8iSIjXS4tPb3wtychQ9rDjKY8x31F7ss5+S/Ux34wpOHbi1yAA
-         hJcmn+RrnE/hv1bii1XS8wrvz2SZuuNOlaOsQUxYSVqCeyRsskYxsyS/ZSd6Sz/kK4Ua
-         cbng/XEukVSHpwD5kLC7vJ3HX6s1GpRKq6PmJOPRyzmrTFOkiNXMc9yaUgRb6xkMPX30
-         bWlQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678644645;
-        h=cc:to:subject:date:from:in-reply-to:message-id:x-gm-message-state
+        d=linaro.org; s=google; t=1678645221;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=THHnNubc2+UuqNjcDLN8j6le5gzsAvvJJbRATCHsptA=;
-        b=mzUnWPwyyjB4z1Tt21GbCzh6R+bXjFWdZeEsW+M5PSk/+P4/e/TUpCuFmMmEPZ0sl7
-         0pZXrrLRr4DJCf4LhdQHpLh9XR4Z6JMT29FzMlHEaYhXlm7yDuh7mZV3620fg2hsDVSN
-         5tO1oi64D8H60ZCWYOOUoQqpVa9q2Euxv68lH1v6zaEtlKBngVRTq11HXTrJO67WG6oE
-         u6aziV9IJhDkFtxGtjpBZZRg1/aS3k1AfuwwLCPS3OM3bmbVu8fCQjvZXQGpSwsmO/wR
-         /RdQGj3sKLP8z3iJYcoy3SXwFKS3yarqe7m/IKKyaDNsQkXQ7Dw6OFxxJrybBUbOYpS6
-         /YEQ==
-X-Gm-Message-State: AO0yUKU3KN0ntgL4opz2NT9Rtird+GegeCjczIKDsyGOaePrVCZoTq9O
-        Cep2dVpL20iExLCG5aFeRtKLpDYYLXtFAbu0
-X-Google-Smtp-Source: AK7set/IiI1C607Z3rQ3WZBYI1U5VrJYLd14oT76ax3jFVXkXMjF7FPMmfpY6VPw6DjZAibNaPS36g==
-X-Received: by 2002:ac2:510c:0:b0:4cd:7fe0:24 with SMTP id q12-20020ac2510c000000b004cd7fe00024mr2606748lfb.27.1678644645549;
-        Sun, 12 Mar 2023 11:10:45 -0700 (PDT)
-Received: from 0001-dt-bindings-exynos-dw-mshc-common-add-exynos7885-var.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
-        by smtp.gmail.com with ESMTPSA id w16-20020a19c510000000b004dc4b00a1f3sm720684lfe.253.2023.03.12.11.10.45
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 12 Mar 2023 11:10:45 -0700 (PDT)
-Message-Id: <1678644516.665314-1-sleirsgoevy@gmail.com>
-In-Reply-To: <1678644516.665314-0-sleirsgoevy@gmail.com>
-From:   Sergey Lisov <sleirsgoevy@gmail.com>
-Date:   Sun, 12 Mar 2023 20:58:50 +0300
-Subject: [PATCH v5 1/3] dt-bindings: exynos-dw-mshc-common: add exynos7885
- variants
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        bh=qJbzQk4TLzSKDEe2jC8259R3RwrclYP4GOKv7WeR0Ww=;
+        b=hnS5BzAHVWSdxHwfTJBEnnLR+Hy83W59tv7w8cnDpxjrWkSCVCT7slg+S4EhJSrMbZ
+         2UOKeYmBuRi2r/O+al79HjlWu7b0fsD5RUqLwHveGkAVX7NBZu15+dRYteuXER8AfBh0
+         KiUVFf4yK89wiZdhPp/EaKgzN9Ffdojs3VkItuwBr554fkB1mZFA4soIpp7QDyo9GcNx
+         Q8TOaZwyASUqR160bVdrqq/doaA01UQ8aNalcnIOinh/7mQTqyZo2FbfTR1i+buskYuK
+         Zug3vIj+ulNyoj5JRA8imV4lEnbRkDUXG2g+9t51tbLbJOnIwoX1J+PPHBghMtip7ZOn
+         jFlg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678645221;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=qJbzQk4TLzSKDEe2jC8259R3RwrclYP4GOKv7WeR0Ww=;
+        b=X1VZ1lW6+oxkXKT88CUG5ADUrK3lQJBKHON0l7kMu4wpWaAUvtC3c2jT5B/YDDkDhE
+         olgkNWc9ODiL1K253QlCATj6GTQI5N+APzwHS2P+iIj6Iy9gwDvlSZRXG/2m0P5IiilN
+         uRTtE2sd9XueZNM88fbzX+LqlmMxHBP2HFbCVFeN+yJ6mOSynZbdccX6isdOQbJNEeYd
+         IjZQd9R/ajlZQrSwveJtk7zMOFHKyPCAb3Noet8LtDZjWBitNVD02P06LM4AIoWiJDGB
+         1lojCos5ARR3IQNgIHFhRV1+dWcdQczAswUSLQT8R3jKOgLsD0may/xXy67kZh7lq/06
+         HF0g==
+X-Gm-Message-State: AO0yUKXi0RNEC+Y51Z1oDGEH1OChR5COYxJfKe0bLjjIYADhpTszfTbg
+        meQH2px0fIUqPB5dkzjs5cpREZ9G6QtKIhLZ6f8=
+X-Google-Smtp-Source: AK7set9brgC1i/ieyhjxBiLx9HBWqe3Fd1FsMtrCMQZRRFIISTpQPpLIbjDXETPymdO1F2gGMPajNg==
+X-Received: by 2002:a17:907:6d1a:b0:8b1:238b:80ac with SMTP id sa26-20020a1709076d1a00b008b1238b80acmr41929936ejc.67.1678644647299;
+        Sun, 12 Mar 2023 11:10:47 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:d9f6:3e61:beeb:295a? ([2a02:810d:15c0:828:d9f6:3e61:beeb:295a])
+        by smtp.gmail.com with ESMTPSA id oq12-20020a170906cc8c00b008d68d018153sm2465874ejb.23.2023.03.12.11.10.46
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 12 Mar 2023 11:10:46 -0700 (PDT)
+Message-ID: <dd6aa950-b006-9cb6-a03d-a5e54c98ab9b@linaro.org>
+Date:   Sun, 12 Mar 2023 19:10:45 +0100
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v5 0/3] mmc: dw_mmc: fix DW MMC cores with 32-bit bus on
+ 64-bit Linux systems
+Content-Language: en-US
+To:     Sergey Lisov <sleirsgoevy@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Alim Akhtar <alim.akhtar@samsung.com>,
@@ -62,36 +66,41 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <640e1428.c20a0220.f761b.1a1b@mx.google.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <640e1428.c20a0220.f761b.1a1b@mx.google.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Some Samsung Exynos boards using the arm64 architecture have DW MMC
-controllers configured for a 32-bit data bus but a 64-bit FIFO. On these
-systems the 64-bit FIFO registers must be accessed in two 32-bit halves.
+On 12/03/2023 18:58, Sergey Lisov wrote:
+> DesignWare MMC cores have a configurable data bus width of either 16, 32, or 64
+> bytes. It is possible, and some vendors actually do it, to ship a DW MMC core
+> configured for 32-bit data bus within a 64-bit SoC. In this case the kernel
+> will attempt 64-bit (readq) accesses to certain 64-bit MMIO registers, while
+> the core will expect pairs of 32-bit accesses.
+> 
+> It seems that currently the only register for which the kernel performs 64-bit
+> accesses is the FIFO. The symptom is that the DW MMC core never receives a read
+> on the second half of the register, does not register the datum as being read,
+> and thus not advancing its internal FIFO pointer, breaking further reads. It
+> also seems that this FIFO is only used for small (less than 16 bytes)
+> transfers, which probably means that only some SDIO cards are affected.
+> 
+> Changelog:
+> 
+> v5:
+> - rename "samsung,exynos78xx-dw-mshc" to "samsung,exynos7885-dw-mshc"
+> - rename "samsung,exynos78xx-dw-mshc" to "samsung,exynos7885-dw-mshc"
 
-Add two new compatible strings, "samsung,exynos7885-dw-mshc" and
-"samsung,exynos7885-dw-mshc-smu" respectively, to denote exynos7885
-boards that need this quirk. But it's very possible that all
-"samsung,exynos7-dw-mshc" boards are actually affected.
----
- .../devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml         | 2 ++
- 1 file changed, 2 insertions(+)
+So this is fifth version today? You need to wait before resending, to
+gather other comments.
 
-diff --git a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-index fdaa18481..3eebaed2c 100644
---- a/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/samsung,exynos-dw-mshc.yaml
-@@ -22,6 +22,8 @@ properties:
-       - samsung,exynos5420-dw-mshc-smu
-       - samsung,exynos7-dw-mshc
-       - samsung,exynos7-dw-mshc-smu
-+      - samsung,exynos7885-dw-mshc
-+      - samsung,exynos7885-dw-mshc-smu
-       - axis,artpec8-dw-mshc
- 
-   reg:
--- 
-2.38.3
+Also, something is wrong with your mailing. Threading is gone and all
+patches arrive twice with different Message IDs.
 
+Best regards,
+Krzysztof
 
