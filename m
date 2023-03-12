@@ -2,63 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99671C6FA99
-	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 17:29:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DE43BC6FA99
+	for <linux-mmc@archiver.kernel.org>; Sun, 12 Mar 2023 18:14:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229473AbjCLR3x (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 13:29:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57784 "EHLO
+        id S232190AbjCLSOe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 12 Mar 2023 14:14:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229723AbjCLR3w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 13:29:52 -0400
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 539D03669E
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:29:50 -0700 (PDT)
-Received: by mail-ed1-x531.google.com with SMTP id x3so39827169edb.10
-        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 10:29:50 -0700 (PDT)
+        with ESMTP id S232208AbjCLSOP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 14:14:15 -0400
+Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2989B532A3
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:06:53 -0700 (PDT)
+Received: by mail-lf1-x12d.google.com with SMTP id n2so12928386lfb.12
+        for <linux-mmc@vger.kernel.org>; Sun, 12 Mar 2023 11:06:53 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678642189;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=IxYyqt7C2nkBChfw7xRazh33TpU0YO4rKgpItaaFBK8=;
-        b=K0w8cqhO1cKFYNFzU+/0Vr3R4cYQ4RAQN0/6zsxLjlIbTfB6ZJ7dmisxSteUToo8fY
-         4wBitFWrzT+/N5Z8is240LXqFrA/QXhCmZfECaB91+PhIbTaKiP/Rp35OU96kHp/LLuF
-         hyYNbIr0dmiiERgXBLooZnaE4pffxHmcIQxt7tvFivo6AhZg5YCG0Kryi9h/BKt+81+a
-         Jh8f0xf4LBLHapc8482rhx3a97IqSkf54nLtoko0rCFZ+8sRGWYhvJ15mSbEo84jR/Ke
-         /P1o0g9lZ9qXu/5VDad9jP8ym+CTCT80NthVDp/L+kxNp+CmCWD/TyLNgOnL1M28clCI
-         XmpA==
+        d=gmail.com; s=20210112; t=1678644311;
+        h=cc:to:subject:date:from:message-id:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=rC/o1AQDcGAyPZ0tU6+VZIwVNayEqqDcPKH36IGj0wI=;
+        b=FJP17E64FDjzwdG9Ah5KMF4FEj7///U44CZPLJH9yPpLMLeysodo/XMljvOm2E4y0J
+         VJwmDZCh0WhVzKE8wwU+l6F933rmZHgzmPBHRR7DZcmiGEGuub63OcvUpGGm8FHM7cvT
+         hr6BFPgI4cvEjRBm6UVlE/JMmPvaocgxjjo5VdunynahTJ3H4HCqCAIV+bpneaJf5J0p
+         La01zc4PClvh5btkDpZ9RCx62PGBvecJBDZ47KTtH8C9tzVQwnDK4QQnHvd9Yne0gz0b
+         auSHzbwRqdiiFqcdcalfQOb4QuAeRGYxNy3vJvWIezjCGqFmVQ29gp9IXt3khkDsVw8C
+         epOQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678642189;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=IxYyqt7C2nkBChfw7xRazh33TpU0YO4rKgpItaaFBK8=;
-        b=oggItgAlIUYUdDaYV1oeuiPVB0psPero+ODw67Ezg55gPFuEja2UiYKqAYuQTtq2wk
-         5GGt8WW7RWNrPR+5bGxXsjBUu0QR97988WugcpvdNro/JEMQinmoOZ9xYfVOhYb8+G4v
-         /ts42P60vNJLLAmer4qZa564zW1YuNqt2LzZNd60WJAkB/7i4EVu9Sk7UbmCp7Yhwam6
-         MsGyjiTEeBK9lxaG4O4ftG1zBYBamzyQSgg3rK+Wv3rzwQxtgsCFFBzJsG5aYFLqIoXc
-         zI5OCEk+8Q+VvTi+ojHsElvHk38Usgh0qPTQJVIlVeHihLeYhGpRn1rqakAxtx5btQgn
-         FsBw==
-X-Gm-Message-State: AO0yUKUqKKRWWhtWGepc+F9LOWN/diJm/WZmn660Eugah+IcmIontP/u
-        ch0EuI4JfWht6oz8/FnvkaG5JA==
-X-Google-Smtp-Source: AK7set/8/0R7GalSBzGksp0r8lZEcqHwCIpaSotNVtlyPhysgmKmdXCCL1e3cm1oz4it6IEqgemeRA==
-X-Received: by 2002:a17:906:4fd5:b0:927:8285:18a3 with SMTP id i21-20020a1709064fd500b00927828518a3mr2046753ejw.0.1678642188807;
-        Sun, 12 Mar 2023 10:29:48 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:d9f6:3e61:beeb:295a? ([2a02:810d:15c0:828:d9f6:3e61:beeb:295a])
-        by smtp.gmail.com with ESMTPSA id o11-20020a17090637cb00b00926f89e2213sm724617ejc.190.2023.03.12.10.29.47
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Mar 2023 10:29:48 -0700 (PDT)
-Message-ID: <9f197b20-499a-7437-bff3-c5fbd39b5387@linaro.org>
-Date:   Sun, 12 Mar 2023 18:29:47 +0100
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [PATCH v3 1/2] dt-bindings: exynos-dw-mshc-common: add exynos78xx
- variants
-Content-Language: en-US
-To:     Sergey Lisov <sleirsgoevy@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+        d=1e100.net; s=20210112; t=1678644311;
+        h=cc:to:subject:date:from:message-id:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=rC/o1AQDcGAyPZ0tU6+VZIwVNayEqqDcPKH36IGj0wI=;
+        b=WY87xocKlO/ZPz0MFl+QgdKpjfU8YqSk9Wtr9owj+1buHIYmoqRSWq+wk+TN8IOcpo
+         bHaMVt1B/6jzjoll5q12ZW6vGRccXo7ahQKY6UNsVI74i8mPrzjE6w1i7c+ZaojQrMrc
+         I8prbClomJwzdmqeNA7SLb/myqgY3WtDjIzRep8aLCGifrQ+Dii2ZOBtxahq+QZhk7NS
+         fkMBsBrfopICX0VWiime77PoZ+QeraTu9Wnjx0t2Cdv7wgSp89neqBP133YdUYec6vN5
+         /lqwmPaon8cF4Whmw437I2fMB7mOBNodw+Oxmt5kH4vI5ztvj7uaYlW9MwboZTro6vJU
+         AiSg==
+X-Gm-Message-State: AO0yUKVg8oE8/ofWSSlyOQ83YuRsrF8skHaUH+9mF9a3jkBRan/wEQ0n
+        DxHqT2R3HGAD53Vtx34S3tia/WG4Tn5f6fmM
+X-Google-Smtp-Source: AK7set8+FGZ3HYrdpDcyryufB70LqLwtD7cbaVuK/li/DcZayvDB1xMJPHhbMhkIvzP+x1LehhHU7g==
+X-Received: by 2002:ac2:533c:0:b0:4dd:a7fb:1e7c with SMTP id f28-20020ac2533c000000b004dda7fb1e7cmr10135115lfh.3.1678644311424;
+        Sun, 12 Mar 2023 11:05:11 -0700 (PDT)
+Received: from 0003-arm64-dts-exynos-fix-wrong-mmc-compatible-in-exynos7.patch (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
+        by smtp.gmail.com with ESMTPSA id v23-20020a197417000000b004dc807b904bsm712172lfe.120.2023.03.12.11.05.10
+        for <linux-mmc@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 12 Mar 2023 11:05:11 -0700 (PDT)
+Message-ID: <640e1457.190a0220.75a58.1af0@mx.google.com>
+From:   Sergey Lisov <sleirsgoevy@gmail.com>
+Date:   Sun, 12 Mar 2023 20:58:50 +0300
+Subject: [PATCH v5 3/3] arm64: dts: exynos: fix wrong mmc compatible in
+ exynos7885.dtsi
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Alim Akhtar <alim.akhtar@samsung.com>,
@@ -66,36 +61,32 @@ To:     Sergey Lisov <sleirsgoevy@gmail.com>,
 Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-arm-kernel@lists.infradead.org,
         linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <640e0b2d.c20a0220.63661.19a4@mx.google.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <640e0b2d.c20a0220.63661.19a4@mx.google.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 12/03/2023 18:26, Sergey Lisov wrote:
->> Thanks for letting me know.
->>
->> https://elixir.bootlin.com/linux/v6.1-rc1/source/Documentation/devicetree/bindings/writing-bindings.rst#L42
-> 
-> OK, at least its codified somewhere.
+This DW-MMC variant is not actually compatible with
+"samsung,exynos7-dw-mshc-smu", and requires an additional quirk to handle
+very short data transfers, typically used by SDIO cards. Update the
+compatible string to "samsung,exynos7885-dw-mshc-smu" to reflect this fact.
+---
+ arch/arm64/boot/dts/exynos/exynos7885.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-You got feedback from Devicetree maintainer. It should have been enough.
+diff --git a/arch/arm64/boot/dts/exynos/exynos7885.dtsi b/arch/arm64/boot/dts/exynos/exynos7885.dtsi
+index 23c2e0bb0..b0addb0b3 100644
+--- a/arch/arm64/boot/dts/exynos/exynos7885.dtsi
++++ b/arch/arm64/boot/dts/exynos/exynos7885.dtsi
+@@ -294,7 +294,7 @@ pmu_system_controller: system-controller@11c80000 {
+ 		};
+ 
+ 		mmc_0: mmc@13500000 {
+-			compatible = "samsung,exynos7-dw-mshc-smu";
++			compatible = "samsung,exynos7885-dw-mshc-smu";
+ 			reg = <0x13500000 0x2000>;
+ 			interrupts = <GIC_SPI 146 IRQ_TYPE_LEVEL_HIGH>;
+ 			#address-cells = <1>;
+-- 
+2.38.3
 
-> Still, this results in the opposite
-> effect: DTBs written for one SoC, using compatibles from other SoCs just
-> because "they are the same anyway". And doing this properly, well, results
-> in essentially duplicate compatibles.
-> 
-> And "fallback compatibles" won't solve this case anyway, as there is no
-> common compatible that denotes "Exynos7 DW-MMC that has the bug".
-
-Your explanation is not correct and we talked about this so many times.
-No wildcards in compatibles. That's the rule. You cannot find any
-argument good enough to break that rule.
-
-Best regards,
-Krzysztof
 
