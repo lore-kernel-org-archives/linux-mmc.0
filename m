@@ -2,131 +2,103 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75989C61DA4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 11:53:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BB5CC61DA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 12:50:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231346AbjCMLxz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 07:53:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44960 "EHLO
+        id S230289AbjCMMuc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 08:50:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36328 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231318AbjCMLw6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 07:52:58 -0400
-Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B21975FA45
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 04:52:25 -0700 (PDT)
-Received: by mail-wm1-x336.google.com with SMTP id l7-20020a05600c1d0700b003eb5e6d906bso7616749wms.5
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 04:52:25 -0700 (PDT)
+        with ESMTP id S230297AbjCMMuX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 08:50:23 -0400
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB62630181
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 05:49:54 -0700 (PDT)
+Received: by mail-pg1-x52e.google.com with SMTP id d8so6819989pgm.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 05:49:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678708340;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1678711794;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=GOM0wU6k8YL6zyefl9B75iw3o3Fd7bxtMEc8BcltPP0=;
-        b=Yo1hi2naG0TMf+Cn9+92jHE5y5ZQeGL2G+B5oUkfpmybCcARGI/7I1AXzrsFQjcWiV
-         8AVEXZfwN4N2infnF2YabGPFC6jZgqHR6KaSHDTnN2J9G7qlq1z4GJUGWILm4ND9cEmS
-         i5GOo7xxBxsRM5Vxd6FIrU3YSoFTjHRGDlE27R5p5iRPAoB8HYfjvIPE+Aeolt+QTUgm
-         kULNFWKJPUWPph19SJfjPntRxFYdOUuopzvkEVaH93E2WcphTJGOWDCX8Is5Cx558V/a
-         haVkS8SWk6LJSshrTPtyaLryB3HegkrM/YwRTJtl3cwOAIyQWLT8oNOVg+HE2gR+Cafc
-         tn+A==
+        bh=Wx8jF7FKGmBoaIt+aFf1/ouqS3HHqR+OXeKb+Cy9oZE=;
+        b=HKEZDOm+mV1HAdL7ER3iR1vWEz+4AMwcB8/eiYzfDT6G3vlc/AaUcvMnA+QJ8TeT8y
+         VFxsnjxJGqsNiwUpJ+hn81fvGKZv4x+d58+sjI9u4cMRSUA0YEmcNXr/ygpARwkw+f7/
+         eAchNtNYJBBtn/PE4ARsywNpqb/J+N4HdfukwE8Mvc+YC+nrIxTOndCSaacbcVKRBN/3
+         DBI2ew5D4qaoQmlBSUIF6ZG1KxARWrGfgil/kWwcGRNUbrJOfxigAjZTxycUfS7z1Wpf
+         9kpY6jDanHkZIjl420k/BbT1PmWkmPeGFVFO3WSLSBbMcAU9MfOXdev+i0VBNBL/JRUj
+         XQPA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678708340;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20210112; t=1678711794;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=GOM0wU6k8YL6zyefl9B75iw3o3Fd7bxtMEc8BcltPP0=;
-        b=UvSn4IoF9F3segSzwDAyWT/fGkj9FvnjtpTE5zorXivQVtxvuTt8uDo52barxkcN/A
-         IrDdkdoQLPXfL4g4B8j+Hc3kF1Z0AB1dZOH88dUQSYqMatD+eevfqnRsD4LkIlWgHSq3
-         8dMLADDWoJqk/SeBd/T9Hie+NVc4lVyUxHzTvM+2YQ2Z7HJ1nn4PHveee7PbBxvMEd8S
-         K2r1B6BgGquIvf8nIdRDQ8nDFrkv9VEChAPX4P0DgOgBOf5OnB4bs65MN9hC8Y56v01Q
-         ERcJe4ahTGiVm09PyvKamvGEtHnFWchqrTGM8kMdsu3OUSCPCnko+yR3fM9N4KYmmsIq
-         1l3Q==
-X-Gm-Message-State: AO0yUKXz8qshMR1Md0bsTlOSjX3Rf+OtvgEHl/FSlFIrRMCrmYkBb83z
-        cKaG73cejS/hKCmK+rgtcyLjMw==
-X-Google-Smtp-Source: AK7set/Kw84B38cC6AtJ9OlHXUgfEIZvrnDse4SJG4dI+SPVu9lcD061f0fGRffAQAAHmggiK8UiRg==
-X-Received: by 2002:a05:600c:3b04:b0:3df:d431:cf64 with SMTP id m4-20020a05600c3b0400b003dfd431cf64mr10835575wms.39.1678708340264;
-        Mon, 13 Mar 2023 04:52:20 -0700 (PDT)
-Received: from localhost.localdomain ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id u15-20020a05600c440f00b003e21dcccf9fsm8801090wmn.16.2023.03.13.04.52.18
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Mar 2023 04:52:19 -0700 (PDT)
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: [RFC PATCH v3 7/7] arm64: dts: qcom: sm8550: Add the Inline Crypto Engine node
-Date:   Mon, 13 Mar 2023 13:52:02 +0200
-Message-Id: <20230313115202.3960700-8-abel.vesa@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230313115202.3960700-1-abel.vesa@linaro.org>
-References: <20230313115202.3960700-1-abel.vesa@linaro.org>
+        bh=Wx8jF7FKGmBoaIt+aFf1/ouqS3HHqR+OXeKb+Cy9oZE=;
+        b=qf1QyE2LH2mHysNbx2Qjm6KogmB35Tss4FEwZJDefxqy8nPWkExAFMzet/himGFX3H
+         6D8/duKSj/guvm4vqYMJtJy9HfSpGhcQTUw5ACUQb3ixf/ljvP27o33I7hzXlowEvq26
+         F34/uXoovJ1pAUBmHUx+d9iFVnHuXPEbg6t3tRmaOZeDjQFvtfaEt6cfBoObhOJ55VZN
+         0FdIY/zLbXygY36DpNAwo7KbrhED/1UttE8n58xysZXhQKyPbVIJk8vSi4cePSEDktdz
+         /yoj25XNFWnmuWsGOvKGVkJUXcnTeliZF9aPL27cqqDewGiUazgNXRzB8Q2KGv5d31Uj
+         9QZg==
+X-Gm-Message-State: AO0yUKUwNbL3rj2vM+aLzc43VS6ojTFhxgJJ0qJNuIxTPjZtFWHH7z0J
+        RGvXLYkW1Ufx1PKhHdXVWMr1TmRlp9pmmsCTM1ffRuC057TleehzJ5Q=
+X-Google-Smtp-Source: AK7set+nraYkEbzD7lEiHtt/giSmKeJ3bPG/6dv6QjfYN2aLbyojc2xt8UY2wcR2r3heZo8J5ExHI7B2fVzTC6vEaTg=
+X-Received: by 2002:a63:f91d:0:b0:502:fd12:83ce with SMTP id
+ h29-20020a63f91d000000b00502fd1283cemr12062421pgi.5.1678711794210; Mon, 13
+ Mar 2023 05:49:54 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20230311111238.251000-1-krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230311111238.251000-1-krzysztof.kozlowski@linaro.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 13 Mar 2023 13:49:17 +0100
+Message-ID: <CAPDyKFqaq5ysudyqOe0dB8fm=+p_ywpXdqQr33QUCq3j+Bqnrw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: sdhci: add static to !OF stub
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for UFS ICE by adding the qcom,ice property and the
-ICE dedicated devicetree node. While at it, add the reg-name property
-to the UFS HC node to be in line with older platforms.
+On Sat, 11 Mar 2023 at 12:12, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
+>
+> The sdhci_get_compatibility() is not used outside of the unit:
+>
+>   drivers/mmc/host/sdhci-pltfm.c:76:6: error: no previous prototype for =
+=E2=80=98sdhci_get_compatibility=E2=80=99 [-Werror=3Dmissing-prototypes]
+>
+> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> ---
+>  drivers/mmc/host/sdhci-pltfm.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltf=
+m.c
+> index 328b132bbe57..245e56324dff 100644
+> --- a/drivers/mmc/host/sdhci-pltfm.c
+> +++ b/drivers/mmc/host/sdhci-pltfm.c
+> @@ -73,7 +73,7 @@ static void sdhci_get_compatibility(struct platform_dev=
+ice *pdev)
+>                 host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
+>  }
+>  #else
+> -void sdhci_get_compatibility(struct platform_device *pdev) {}
+> +static void sdhci_get_compatibility(struct platform_device *pdev) {}
+>  #endif /* CONFIG_OF */
 
-Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
----
+sdhci_get_compatibility() is using OF functions with stubs for !OF.
 
-Changes since v2:
- * dropped all changes for the older platforms
- * added the suppor for ICE with the new approach to the SM8550
+Perhaps a cleaner option is to drop the #ifdef CONFIG_OF completely
+around sdhci_get_compatibility(), thus we can drop the stub too.
 
- arch/arm64/boot/dts/qcom/sm8550.dtsi | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+>
+>  void sdhci_get_property(struct platform_device *pdev)
+> --
+> 2.34.1
+>
 
-diff --git a/arch/arm64/boot/dts/qcom/sm8550.dtsi b/arch/arm64/boot/dts/qcom/sm8550.dtsi
-index ec45f13e55c9..ac7bf1e1a2ab 100644
---- a/arch/arm64/boot/dts/qcom/sm8550.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8550.dtsi
-@@ -1882,6 +1882,7 @@ ufs_mem_hc: ufs@1d84000 {
- 			compatible = "qcom,sm8550-ufshc", "qcom,ufshc",
- 				     "jedec,ufs-2.0";
- 			reg = <0x0 0x01d84000 0x0 0x3000>;
-+			reg-names = "std";
- 			interrupts = <GIC_SPI 265 IRQ_TYPE_LEVEL_HIGH>;
- 			phys = <&ufs_mem_phy>;
- 			phy-names = "ufsphy";
-@@ -1924,9 +1925,18 @@ ufs_mem_hc: ufs@1d84000 {
- 				<0 0>,
- 				<0 0>,
- 				<0 0>;
-+			qcom,ice = <&ice>;
-+
- 			status = "disabled";
- 		};
- 
-+		ice: crypto@1d88000 {
-+			compatible = "qcom,sm8550-inline-crypto-engine",
-+				     "qcom,inline-crypto-engine";
-+			reg = <0 0x01d88000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		tcsr_mutex: hwlock@1f40000 {
- 			compatible = "qcom,tcsr-mutex";
- 			reg = <0 0x01f40000 0 0x20000>;
--- 
-2.34.1
-
+Kind regards
+Uffe
