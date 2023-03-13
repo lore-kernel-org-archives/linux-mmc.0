@@ -2,111 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F35F7C7618D
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 20:12:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C6109C61DA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 21:42:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229888AbjCMUMV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 16:12:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44908 "EHLO
+        id S229493AbjCMVmf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 17:42:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60894 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229864AbjCMUMS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 16:12:18 -0400
-Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D77187D81;
-        Mon, 13 Mar 2023 13:11:56 -0700 (PDT)
-Received: by mail-ed1-x52f.google.com with SMTP id x3so53498070edb.10;
-        Mon, 13 Mar 2023 13:11:56 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1678738314;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IhNghR12Doc7EYuGR8r4Vteb6OOTNo1fI6PKH8ZpZK0=;
-        b=gonHkX7Yhe72Ie531l/HxB0Vd26zSeA4TGU3AoW1HEATK5jseXU3RGul1Z4oo9/X4A
-         oIv3rd6pQsJokXef2rVXAuZxYO8LYsK1khitF++SayAlYXbbenAMkWQa5hCtwCXV5b1e
-         FBBZpQlwljguIskB3xiapTEz5F56IZkqFTRAIxQKzFJeh8fnWZjnhm2WnE3UsnQ2cX+1
-         3vs5Wy7UhfYnEYgoNMJYBVbp6BIxKuvnlBoFR73+rr9IkPYfyMLG+BFDqcePvl6LDM1F
-         Yoe1ik1yZyj0GADpi0bnnSI0n+0ZZVtVTrE8KwjpD/bhRdgdTZ9KjZmTqzt3WAAu1F5j
-         KNUA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678738314;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=IhNghR12Doc7EYuGR8r4Vteb6OOTNo1fI6PKH8ZpZK0=;
-        b=8HGGtD4rWnWnkewLZUte/zB8bW9wMuiFVyn/Xn4+TqEl+bi99kordV8Fsda05e5aOJ
-         oeCl2cjErh72YwB344ZOhha7wgm6UljsuxFT0mjF6wuQHed9XTo4Ml8GhR5GCZB1aHB/
-         ImADtk8Ulo+W54fMQTWj0j4Pa3Q+dhWY7hMjEME2gYv/5shczKoF1LXB1Fv4qz/fnEPz
-         tKB0sQThpaZn2s179lu/Ug9zT9NdIEih0w+gY53TarH65fPZt9qas8X+ezcIRuzLysLn
-         OBLqB9HroDmgSFVf37gDeb+admzlNUAkwJ9AYjW4PMJ3802SeXbWuceGv0MF6Ux92gVk
-         px8g==
-X-Gm-Message-State: AO0yUKWOd5eC/JJ8PvC5QaPldaD3HpTrP9+jUUiX5TkhxATRnoF8lRRE
-        9/Fmv9RbB4SlRcQ5kkUXARah34rxAwZTo5D/iFg=
-X-Google-Smtp-Source: AK7set/DTcyZfjovezCMaS0m/zslIPL2EYyyypZPlsR45JWZYAH35nG/3f4bbTQcodJEiI2AwpZZ5m7541l8Pwgw8O4=
-X-Received: by 2002:a50:9f04:0:b0:4fa:3c0b:73f with SMTP id
- b4-20020a509f04000000b004fa3c0b073fmr4720292edf.4.1678738314232; Mon, 13 Mar
- 2023 13:11:54 -0700 (PDT)
+        with ESMTP id S229548AbjCMVme (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 17:42:34 -0400
+Received: from smtp1-g21.free.fr (smtp1-g21.free.fr [212.27.42.1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5813C8ABF4;
+        Mon, 13 Mar 2023 14:42:32 -0700 (PDT)
+Received: from [IPV6:2a02:8428:2a4:1a01:c8ce:acb0:d46a:bb07] (unknown [IPv6:2a02:8428:2a4:1a01:c8ce:acb0:d46a:bb07])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp1-g21.free.fr (Postfix) with ESMTPSA id 94AD1B0051E;
+        Mon, 13 Mar 2023 22:42:08 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1678743750;
+        bh=VEU8HwgWPW9ROwRnS41wvdPNcD7KmargOkeucWFLS4U=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=ibV+m8YZmaQxJ2zXcwxwmRV5EzUD98UltT/YLQ2Smu+/welo9rIawRdQ+7jrx68ZQ
+         E/smTuaMFRSOX9X5JNao+IiVwFbi2cuPl+Uuhw5qCTjXXeOqMgJPZj7BHWLqVZ0bwG
+         /oI6MeCSsRBYy/Olkw0W3jtvHFLg4ld5RwGbY1I8x1WSbAkkPFzyjieM/tBss1p9To
+         0OmWMSY3/KUyVqt0WZV7+H+GZc9wfZlBWuB4sOnAJxKZY7i7VXYYUc2BpmRKmt2N1L
+         YNfP42xtwdhZ3aEHU2P8BlQ2j7bS8WcU0rCLRv+FMbdlLPQ4iUzJOP+I6FBkPtDhrI
+         AAMECuMBLMmPg==
+Message-ID: <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr>
+Date:   Mon, 13 Mar 2023 22:42:08 +0100
 MIME-Version: 1.0
-References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
- <20230310202922.2459680-4-martin.blumenstingl@googlemail.com> <7330960d32664bf0bce8446aa93d10c8@realtek.com>
-In-Reply-To: <7330960d32664bf0bce8446aa93d10c8@realtek.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Mon, 13 Mar 2023 21:11:43 +0100
-Message-ID: <CAFBinCA-OHPbwdxdDe50og787LMSnbPhYbsRL6UzQUhxWgxWbQ@mail.gmail.com>
-Subject: Re: [PATCH v2 RFC 3/9] wifi: rtw88: mac: Support SDIO specific bits
- in the power on sequence
-To:     Ping-Ke Shih <pkshih@realtek.com>
-Cc:     "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+Content-Language: fr, en-US
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
         Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Eric Dumazet <edumazet@google.com>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Pierre-Hugues Husson <phh@phh.me>,
+        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+ <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
+ <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
+ <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
+ <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
+ <0450e34e-7190-104c-832a-150f15f7c825@free.fr>
+ <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
+ <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr>
+ <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+In-Reply-To: <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Ping-Ke,
+On 13/03/2023 21:04, Martin Blumenstingl wrote:
 
-On Mon, Mar 13, 2023 at 10:05=E2=80=AFAM Ping-Ke Shih <pkshih@realtek.com> =
-wrote:
-[...]
-> >         pwr_seq =3D pwr_on ? chip->pwr_on_seq : chip->pwr_off_seq;
-> >         ret =3D rtw_pwr_seq_parser(rtwdev, pwr_seq);
-> > -       if (ret)
-> > -               return ret;
-> > +
-> > +       if (rtw_hci_type(rtwdev) =3D=3D RTW_HCI_TYPE_SDIO)
-> > +               rtw_write32(rtwdev, REG_SDIO_HIMR, imr);
-> >
-> >         if (pwr_on)
-> >                 set_bit(RTW_FLAG_POWERON, rtwdev->flags);
+> On Mon, Mar 13, 2023 at 6:09 PM Marc Gonzalez wrote:
+> [...]
+>> QUESTION:
+>> It's not clear to me why we sleep twice for host->ios.power_delay_ms?
 >
-> If failed to power on, it still set RTW_FLAG_POWERON. Is it reasonable?
-That sounds very reasonable to me!
+> I'm not sure but I think host->ios.power_delay_ms is independent from
+> the post-power-on-delay-ms property of "mmc-pwrseq-simple".
 
-> Did you meet real problem here?
->
-> Maybe, here can be
->
->          if (pwr_on && !ret)
->                  set_bit(RTW_FLAG_POWERON, rtwdev->flags);
-I can't remember any issue that I've seen. I'll verify this at the end
-of the week (until then I am pretty busy with my daytime job) and then
-go with your suggestion.
-Thanks again as always - your feedback is really appreciated!
+They are distinct indeed (the props have the same name & similar purpose though).
 
-Also thank you for commenting on the other patches. I'll take a closer
-look at your feedback at the end of the week and send another version
-of this series.
+host->ios.power_delay_ms is set via:
+
+drivers/mmc/core/host.c:        device_property_read_u32(dev, "post-power-on-delay-ms",
+drivers/mmc/core/host.c-                                 &host->ios.power_delay_ms);
 
 
-Best regards,
-Martin
+pwrseq->post_power_on_delay_ms is set via:
+
+drivers/mmc/core/pwrseq_simple.c:       device_property_read_u32(dev, "post-power-on-delay-ms",
+drivers/mmc/core/pwrseq_simple.c-                                &pwrseq->post_power_on_delay_ms);
+
+
+However, they are both used to delay mmc_power_up(),
+and the host delay is used to sleep twice, which I
+found confusing ;)
+
+Regards
+
