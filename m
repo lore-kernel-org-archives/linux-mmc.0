@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CEBDC6FD19
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 09:11:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 49F8CC61DA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 09:22:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230402AbjCMJL2 convert rfc822-to-8bit (ORCPT
+        id S230372AbjCMJWf convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 05:11:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36430 "EHLO
+        Mon, 13 Mar 2023 05:22:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230400AbjCMJLL (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 05:11:11 -0400
+        with ESMTP id S229877AbjCMJWd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 05:22:33 -0400
 Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF5A123843;
-        Mon, 13 Mar 2023 02:10:37 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9D53303CB;
+        Mon, 13 Mar 2023 02:22:32 -0700 (PDT)
 Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32D9AEyeC027431, This message is accepted by code: ctloc85258
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32D9M9xeC013503, This message is accepted by code: ctloc85258
 Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32D9AEyeC027431
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32D9M9xeC013503
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
-        Mon, 13 Mar 2023 17:10:14 +0800
-Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+        Mon, 13 Mar 2023 17:22:09 +0800
+Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
  RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.17; Mon, 13 Mar 2023 17:10:26 +0800
+ 15.1.2507.17; Mon, 13 Mar 2023 17:22:21 +0800
 Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXMBS01.realtek.com.tw (172.21.6.94) with Microsoft SMTP Server
+ RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Mon, 13 Mar 2023 17:10:25 +0800
+ 15.1.2375.7; Mon, 13 Mar 2023 17:22:20 +0800
 Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
  RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
- 15.01.2375.007; Mon, 13 Mar 2023 17:10:25 +0800
+ 15.01.2375.007; Mon, 13 Mar 2023 17:22:20 +0800
 From:   Ping-Ke Shih <pkshih@realtek.com>
 To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
@@ -45,21 +45,21 @@ CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         "Nitin Gupta" <nitin.gupta981@gmail.com>,
         Neo Jou <neojou@gmail.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: RE: [PATCH v2 RFC 4/9] wifi: rtw88: main: Add the {cpwm,rpwm}_addr for SDIO based chipsets
-Thread-Topic: [PATCH v2 RFC 4/9] wifi: rtw88: main: Add the {cpwm,rpwm}_addr
- for SDIO based chipsets
-Thread-Index: AQHZU48SdtX/WI2DU0aZPhruQY8nsa74b0Vw
-Date:   Mon, 13 Mar 2023 09:10:25 +0000
-Message-ID: <dd4d6f75b52749c4bc34330dc4342883@realtek.com>
+Subject: RE: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
+Thread-Topic: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+Thread-Index: AQHZU48VGCxmxOqKXUqxNunwzfio6674cHaQ
+Date:   Mon, 13 Mar 2023 09:22:20 +0000
+Message-ID: <2df6178819784f9f9b5c9956bddf7e3f@realtek.com>
 References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
- <20230310202922.2459680-5-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20230310202922.2459680-5-martin.blumenstingl@googlemail.com>
+ <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
 Accept-Language: en-US, zh-TW
 Content-Language: zh-TW
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 x-originating-ip: [172.21.69.188]
-x-kse-serverinfo: RTEXMBS01.realtek.com.tw, 9
+x-kse-serverinfo: RTEXDAG02.realtek.com.tw, 9
 x-kse-antispam-interceptor-info: fallback
 x-kse-antivirus-interceptor-info: fallback
 Content-Type: text/plain; charset="us-ascii"
@@ -81,47 +81,54 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 > linux-mmc@vger.kernel.org; Chris Morgan <macroalpha82@gmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
 > Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
 > Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Subject: [PATCH v2 RFC 4/9] wifi: rtw88: main: Add the {cpwm,rpwm}_addr for SDIO based chipsets
+> Subject: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
 > 
-> Initialize the rpwm_addr and cpwm_addr for power-saving support on SDIO
-> based chipsets.
+> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
+> well as the existing RTL8821C chipset code.
 > 
 > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 > ---
 > Changes since v1:
-> - none
+> - use /* ... */ style for copyright comments
 > 
+> 
+>  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
+>  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
+>  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 35 +++++++++++++++++++
+>  3 files changed, 49 insertions(+)
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
 > 
 
-I suggest not to remove "---" here, or you add "---" for your changelog.
-This doesn't not affect the result, just looks a little odd.  
+[...]
 
->  drivers/net/wireless/realtek/rtw88/main.c | 5 +++++
->  1 file changed, 5 insertions(+)
-> 
-> diff --git a/drivers/net/wireless/realtek/rtw88/main.c b/drivers/net/wireless/realtek/rtw88/main.c
-> index b2e78737bd5d..cdc4703ead5f 100644
-> --- a/drivers/net/wireless/realtek/rtw88/main.c
-> +++ b/drivers/net/wireless/realtek/rtw88/main.c
-> @@ -18,6 +18,7 @@
->  #include "debug.h"
->  #include "bf.h"
->  #include "sar.h"
+> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> new file mode 100644
+> index 000000000000..7ad7c13ac9e6
+> --- /dev/null
+> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> @@ -0,0 +1,35 @@
+> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+> +/* Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> + */
+> +
+> +#include <linux/mmc/sdio_func.h>
+> +#include <linux/mmc/sdio_ids.h>
+> +#include <linux/module.h>
 > +#include "sdio.h"
-> 
->  bool rtw_disable_lps_deep_mode;
->  EXPORT_SYMBOL(rtw_disable_lps_deep_mode);
-> @@ -1785,6 +1786,10 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
->                 rtwdev->hci.rpwm_addr = 0x03d9;
->                 rtwdev->hci.cpwm_addr = 0x03da;
->                 break;
-> +       case RTW_HCI_TYPE_SDIO:
-> +               rtwdev->hci.rpwm_addr = REG_SDIO_HRPWM1;
-> +               rtwdev->hci.cpwm_addr = REG_SDIO_HCPWM1_V2;
-> +               break;
->         case RTW_HCI_TYPE_USB:
->                 rtwdev->hci.rpwm_addr = 0xfe58;
->                 rtwdev->hci.cpwm_addr = 0xfe57;
-> --
-> 2.39.2
+> +#include "rtw8821c.h"
+
+nit: alphabetic order
+
+
+I run sparse/smatch with this patchset, and smatch warns:
+
+1. drivers/net/wireless/realtek/rtw88/mac.c:313 rtw_mac_power_switch() error: uninitialized symbol 'imr'.
+This should be a false-alarm, but just initialize imr to 0 to avoid this.
+
+
+2. drivers/net/wireless/realtek/rtw88/sdio.c:136 rtw_sdio_read_indirect_bytes() error: uninitialized symbol 'ret'.
+This should be a false-alarm too. I guess it considers 'count = 0' is possible.
+
+Ping-Ke
 
