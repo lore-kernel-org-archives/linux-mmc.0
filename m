@@ -2,103 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BB5CC61DA4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 12:50:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B87F2C61DA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 13:56:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230289AbjCMMuc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 08:50:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36328 "EHLO
+        id S229960AbjCMN4E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 09:56:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230297AbjCMMuX (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 08:50:23 -0400
-Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB62630181
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 05:49:54 -0700 (PDT)
-Received: by mail-pg1-x52e.google.com with SMTP id d8so6819989pgm.3
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 05:49:54 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678711794;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Wx8jF7FKGmBoaIt+aFf1/ouqS3HHqR+OXeKb+Cy9oZE=;
-        b=HKEZDOm+mV1HAdL7ER3iR1vWEz+4AMwcB8/eiYzfDT6G3vlc/AaUcvMnA+QJ8TeT8y
-         VFxsnjxJGqsNiwUpJ+hn81fvGKZv4x+d58+sjI9u4cMRSUA0YEmcNXr/ygpARwkw+f7/
-         eAchNtNYJBBtn/PE4ARsywNpqb/J+N4HdfukwE8Mvc+YC+nrIxTOndCSaacbcVKRBN/3
-         DBI2ew5D4qaoQmlBSUIF6ZG1KxARWrGfgil/kWwcGRNUbrJOfxigAjZTxycUfS7z1Wpf
-         9kpY6jDanHkZIjl420k/BbT1PmWkmPeGFVFO3WSLSBbMcAU9MfOXdev+i0VBNBL/JRUj
-         XQPA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678711794;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Wx8jF7FKGmBoaIt+aFf1/ouqS3HHqR+OXeKb+Cy9oZE=;
-        b=qf1QyE2LH2mHysNbx2Qjm6KogmB35Tss4FEwZJDefxqy8nPWkExAFMzet/himGFX3H
-         6D8/duKSj/guvm4vqYMJtJy9HfSpGhcQTUw5ACUQb3ixf/ljvP27o33I7hzXlowEvq26
-         F34/uXoovJ1pAUBmHUx+d9iFVnHuXPEbg6t3tRmaOZeDjQFvtfaEt6cfBoObhOJ55VZN
-         0FdIY/zLbXygY36DpNAwo7KbrhED/1UttE8n58xysZXhQKyPbVIJk8vSi4cePSEDktdz
-         /yoj25XNFWnmuWsGOvKGVkJUXcnTeliZF9aPL27cqqDewGiUazgNXRzB8Q2KGv5d31Uj
-         9QZg==
-X-Gm-Message-State: AO0yUKUwNbL3rj2vM+aLzc43VS6ojTFhxgJJ0qJNuIxTPjZtFWHH7z0J
-        RGvXLYkW1Ufx1PKhHdXVWMr1TmRlp9pmmsCTM1ffRuC057TleehzJ5Q=
-X-Google-Smtp-Source: AK7set+nraYkEbzD7lEiHtt/giSmKeJ3bPG/6dv6QjfYN2aLbyojc2xt8UY2wcR2r3heZo8J5ExHI7B2fVzTC6vEaTg=
-X-Received: by 2002:a63:f91d:0:b0:502:fd12:83ce with SMTP id
- h29-20020a63f91d000000b00502fd1283cemr12062421pgi.5.1678711794210; Mon, 13
- Mar 2023 05:49:54 -0700 (PDT)
+        with ESMTP id S230035AbjCMN4D (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 09:56:03 -0400
+Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD70767814;
+        Mon, 13 Mar 2023 06:55:51 -0700 (PDT)
+Received: from [192.168.108.81] (unknown [213.36.7.13])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 0F5F92003EF;
+        Mon, 13 Mar 2023 14:55:29 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1678715749;
+        bh=4rdaoH3eEZKr87H7nHx4rrtPi6j7OD3G/xQau6YSaVs=;
+        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
+        b=Pogyvdw/s2rfbw/fF9jZk39okfiK2+55oA3No+mL60Fgc1xV/Ba/4PlS5PHCeVysR
+         4d8dAL4oVp0Qe3sy7KHvEV+LFlPZ/hUY5ueyEnuTL6T0gRsCIL5vaBrvcBvemgd3kQ
+         Ma82cSGimEd3fugLZFQtIDIIxtRz4M3R5vDL+ZM6NQFvUyfOV3dUWYkbPpeks45k2N
+         CUBEq/ux/YeAqLIhtm1OKqeQfCWORe6s/sMJQ2epRj0qknEXdAB2fT306UHNqMUSpJ
+         3On7/kUd8laG1uGO/1zVQTg/Q69XTr//0PNklutkMG3FNutU8Vmy4eYdr1tV/y1at7
+         DUKDdlhrtG1Fw==
+Message-ID: <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
+Date:   Mon, 13 Mar 2023 14:55:29 +0100
 MIME-Version: 1.0
-References: <20230311111238.251000-1-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230311111238.251000-1-krzysztof.kozlowski@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 13 Mar 2023 13:49:17 +0100
-Message-ID: <CAPDyKFqaq5ysudyqOe0dB8fm=+p_ywpXdqQr33QUCq3j+Bqnrw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: sdhci: add static to !OF stub
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+Content-Language: en-US
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Pierre-Hugues Husson <phh@phh.me>,
+        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+ <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
+ <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
+ <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
+ <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
+ <0450e34e-7190-104c-832a-150f15f7c825@free.fr>
+In-Reply-To: <0450e34e-7190-104c-832a-150f15f7c825@free.fr>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 11 Mar 2023 at 12:12, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
->
-> The sdhci_get_compatibility() is not used outside of the unit:
->
->   drivers/mmc/host/sdhci-pltfm.c:76:6: error: no previous prototype for =
-=E2=80=98sdhci_get_compatibility=E2=80=99 [-Werror=3Dmissing-prototypes]
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> ---
->  drivers/mmc/host/sdhci-pltfm.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltf=
-m.c
-> index 328b132bbe57..245e56324dff 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -73,7 +73,7 @@ static void sdhci_get_compatibility(struct platform_dev=
-ice *pdev)
->                 host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  }
->  #else
-> -void sdhci_get_compatibility(struct platform_device *pdev) {}
-> +static void sdhci_get_compatibility(struct platform_device *pdev) {}
->  #endif /* CONFIG_OF */
+On 09/03/2023 18:51, Marc Gonzalez wrote:
 
-sdhci_get_compatibility() is using OF functions with stubs for !OF.
+> On 09/03/2023 15:29, Ulf Hansson wrote:
+> 
+>> To narrow down the problem, I would start by preventing the WiFi
+>> driver from being insmoded. To make sure it doesn't affect the SDIO
+>> card detection process.
+>>
+>> The point is, the SDIO card should be detected properly, no matter
+>> whether there is a corresponding SDIO func driver (WiFi driver)
+>> available for it. For a detected SDIO/eMMC/SD card, mmc_add_card()
+>> prints a message about the card in the log during initialization. It
+>> could look like the below print, for example:
+>>
+>> "mmc2: new ultra high speed SDR104 SDIO card at address 0001".
+> 
+> OK, I built the WiFi driver as a module which is NOT loaded at boot time.
 
-Perhaps a cleaner option is to drop the #ifdef CONFIG_OF completely
-around sdhci_get_compatibility(), thus we can drop the stub too.
+Still trying to bisect this heisenbug into submission... :(
 
->
->  void sdhci_get_property(struct platform_device *pdev)
-> --
-> 2.34.1
->
+So far, I've pared it down to mmc_attach_sdio()
 
-Kind regards
-Uffe
+When probe WORKS, mmc_attach_sdio() returns 0.
+When probe FAILS, mmc_attach_sdio() returns ETIMEDOUT
+via mmc_send_io_op_cond(host, 0, &ocr);
+
+Wrapping mmc_send_io_op_cond() in a loop
+makes it work on the second try.
+
+Would appreciate additional guidance. Am mostly stabbing in the dark :)
+
+Regards
+
