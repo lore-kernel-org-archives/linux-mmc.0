@@ -2,133 +2,128 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 49F8CC61DA4
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 09:22:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B00EFC6FD19
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 11:52:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230372AbjCMJWf convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 05:22:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34734 "EHLO
+        id S231281AbjCMLwY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 07:52:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229877AbjCMJWd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 05:22:33 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D9D53303CB;
-        Mon, 13 Mar 2023 02:22:32 -0700 (PDT)
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32D9M9xeC013503, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32D9M9xeC013503
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
-        Mon, 13 Mar 2023 17:22:09 +0800
-Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.17; Mon, 13 Mar 2023 17:22:21 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Mon, 13 Mar 2023 17:22:20 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
- RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
- 15.01.2375.007; Mon, 13 Mar 2023 17:22:20 +0800
-From:   Ping-Ke Shih <pkshih@realtek.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
-CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        "Nitin Gupta" <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: RE: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
-Thread-Topic: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based
- RTL8821CS chipset
-Thread-Index: AQHZU48VGCxmxOqKXUqxNunwzfio6674cHaQ
-Date:   Mon, 13 Mar 2023 09:22:20 +0000
-Message-ID: <2df6178819784f9f9b5c9956bddf7e3f@realtek.com>
-References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
- <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.21.69.188]
-x-kse-serverinfo: RTEXDAG02.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S231287AbjCMLwU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 07:52:20 -0400
+Received: from mail-wm1-x336.google.com (mail-wm1-x336.google.com [IPv6:2a00:1450:4864:20::336])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 133A265072
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 04:52:10 -0700 (PDT)
+Received: by mail-wm1-x336.google.com with SMTP id o5-20020a05600c510500b003ec0e4ec6deso4648013wms.3
+        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 04:52:09 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1678708328;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=o5gykfX2bmfwMlcyaSUJHUuynXbdEn2Jn2hMntaBdA8=;
+        b=jTPVoMmYB82d+INXPTCISg1Ni/0nJkR1rU6+eaE7FcvtlCNWJT/Mlsc+FjBMCr1Vlt
+         3bs1xgcdwKd1WYS4l/cW0AxBXFRi/mXoDN5xEzUNIsIOrOlAdBvBm5NP6JBMC/1akx7G
+         KSbPa+1uzWgMjNjo4rArzyeAZSjJ2YWXbB16br78OsG6ycjc6z/4245XPpkKPSsXeD+G
+         DWfluqUrOriW991v1pUiTdBN3QQ6/P/ixTJ8cU23wnjIVcLQCQmXuahDekfNMWYLbS9b
+         UlWL+0S7YYUY5AokG9VIrL1D4vdiuTAkN+XDgPj0uPIjUj5w2Rl4zHVRZ+k+tuzFFT0o
+         3kgw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678708328;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=o5gykfX2bmfwMlcyaSUJHUuynXbdEn2Jn2hMntaBdA8=;
+        b=PQz6mrwIZ+X3mYaV4qM3Opr04JwazMN8s1jduFRami2hGuhG3NcChdMXipIJo1EDHc
+         IHI8RKyfuNQr+F/xPteHChmi+nngCTKAD7dBp46t+gyCfMbKhJDgQHY7LtP/oN784fvc
+         IZymxmjlD0PGcetcd0iyU/q/GSGVMsWEnBIizfrDPTYe+AwmbfCwDnBqrUrOtAbmdLNx
+         ZIDFuDHc+tqR5LkH8/iMLAqYCTXujD7Na9tshSLLpbZo18UkTjyEVhl0QX+rNlH/cFi6
+         1/LEfa/wncnfn3JPSF2yQbNo8f9t/yKgCngShxMcUiBiGcNlI5MM6VQewsqxYKzNsIal
+         cwrA==
+X-Gm-Message-State: AO0yUKUHA1aQKr+ONZOEEPeZgyONWD/psJnPRBMWJ0I1YOLtHwBhYSSH
+        5Kxv8cNiN3K0PKZ3JwmAQgeGnQ==
+X-Google-Smtp-Source: AK7set9uAdyrBT0fMJ/+4ExIf42UZdHhoPSYbzui/SAELuql13PVvWwSgyB6mJmYoXS75woY9Wll/w==
+X-Received: by 2002:a05:600c:c10:b0:3eb:248f:a13e with SMTP id fm16-20020a05600c0c1000b003eb248fa13emr10803608wmb.22.1678708328527;
+        Mon, 13 Mar 2023 04:52:08 -0700 (PDT)
+Received: from localhost.localdomain ([94.52.112.99])
+        by smtp.gmail.com with ESMTPSA id u15-20020a05600c440f00b003e21dcccf9fsm8801090wmn.16.2023.03.13.04.52.06
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 13 Mar 2023 04:52:08 -0700 (PDT)
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: [RFC PATCH v3 0/7] Add dedicated Qcom ICE driver
+Date:   Mon, 13 Mar 2023 13:51:55 +0200
+Message-Id: <20230313115202.3960700-1-abel.vesa@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+As both SDCC and UFS drivers use the ICE with duplicated implementation,
+while none of the currently supported platforms make use concomitantly
+of the same ICE IP block instance, the new SM8550 allows both UFS and
+SDCC to do so. In order to support such scenario, there is a need for
+a unified implementation and a devicetree node to be shared between
+both types of storage devices. So lets drop the duplicate implementation
+of the ICE from both SDCC and UFS and make it a dedicated (soc) driver.
+Also, switch all UFS and SDCC devicetree nodes to use the new ICE
+approach.
 
+See each individual patch for changelogs.
 
-> -----Original Message-----
-> From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Sent: Saturday, March 11, 2023 4:29 AM
-> To: linux-wireless@vger.kernel.org
-> Cc: Yan-Hsuan Chuang <tony0620emma@gmail.com>; Kalle Valo <kvalo@kernel.org>; Ulf Hansson
-> <ulf.hansson@linaro.org>; linux-kernel@vger.kernel.org; netdev@vger.kernel.org;
-> linux-mmc@vger.kernel.org; Chris Morgan <macroalpha82@gmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
-> Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
-> Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Subject: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
-> 
-> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
-> well as the existing RTL8821C chipset code.
-> 
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
-> Changes since v1:
-> - use /* ... */ style for copyright comments
-> 
-> 
->  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
->  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
->  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 35 +++++++++++++++++++
->  3 files changed, 49 insertions(+)
->  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> 
+The v2 is here:
+https://lore.kernel.org/all/20230308155838.1094920-1-abel.vesa@linaro.org/
 
-[...]
+Abel Vesa (7):
+  dt-bindings: crypto: Add Qualcomm Inline Crypto Engine
+  dt-bindings: mmc: sdhci-msm: Add ICE phandle and drop core clock
+  dt-bindings: ufs: qcom: Add ICE phandle and drop core clock
+  soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver
+  scsi: ufs: ufs-qcom: Switch to the new ICE API
+  mmc: sdhci-msm: Switch to the new ICE API
+  arm64: dts: qcom: sm8550: Add the Inline Crypto Engine node
 
-> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> new file mode 100644
-> index 000000000000..7ad7c13ac9e6
-> --- /dev/null
-> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> @@ -0,0 +1,35 @@
-> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-> +/* Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> + */
-> +
-> +#include <linux/mmc/sdio_func.h>
-> +#include <linux/mmc/sdio_ids.h>
-> +#include <linux/module.h>
-> +#include "sdio.h"
-> +#include "rtw8821c.h"
+ .../crypto/qcom,inline-crypto-engine.yaml     |  42 +++
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |   4 +
+ .../devicetree/bindings/ufs/qcom,ufs.yaml     |   4 +
+ arch/arm64/boot/dts/qcom/sm8550.dtsi          |  10 +
+ drivers/mmc/host/Kconfig                      |   2 +-
+ drivers/mmc/host/sdhci-msm.c                  | 215 ++---------
+ drivers/soc/qcom/Kconfig                      |   4 +
+ drivers/soc/qcom/Makefile                     |   1 +
+ drivers/soc/qcom/ice.c                        | 347 ++++++++++++++++++
+ drivers/ufs/host/Kconfig                      |   2 +-
+ drivers/ufs/host/Makefile                     |   1 -
+ drivers/ufs/host/ufs-qcom-ice.c               | 244 ------------
+ drivers/ufs/host/ufs-qcom.c                   |  83 ++++-
+ drivers/ufs/host/ufs-qcom.h                   |  32 +-
+ include/soc/qcom/ice.h                        |  39 ++
+ 15 files changed, 575 insertions(+), 455 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
+ create mode 100644 drivers/soc/qcom/ice.c
+ delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
+ create mode 100644 include/soc/qcom/ice.h
 
-nit: alphabetic order
-
-
-I run sparse/smatch with this patchset, and smatch warns:
-
-1. drivers/net/wireless/realtek/rtw88/mac.c:313 rtw_mac_power_switch() error: uninitialized symbol 'imr'.
-This should be a false-alarm, but just initialize imr to 0 to avoid this.
-
-
-2. drivers/net/wireless/realtek/rtw88/sdio.c:136 rtw_sdio_read_indirect_bytes() error: uninitialized symbol 'ret'.
-This should be a false-alarm too. I guess it considers 'count = 0' is possible.
-
-Ping-Ke
+-- 
+2.34.1
 
