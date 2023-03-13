@@ -2,127 +2,75 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F223C74A5B
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 17:11:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8635C74A5B
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 18:29:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230256AbjCMRLa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 13:11:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55228 "EHLO
+        id S229790AbjCMS33 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 14:29:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60646 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230047AbjCMRL3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 13:11:29 -0400
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 587E57DD00;
-        Mon, 13 Mar 2023 10:10:54 -0700 (PDT)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id A1CDA2003EE;
-        Mon, 13 Mar 2023 18:09:10 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678727369;
-        bh=smawnl6KcM2cRiLocVN6DhjVtIjFtbYqWrLcYzJtGnY=;
-        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
-        b=rGU7XyHdxIl9sUZUuyqtRcY3SDNWTmlRUZbYeQpRaENyZXPsv8prhAgvhHgDwAdoU
-         rY8mt+SjK4B2P2qu52P0wY6E/f3W18+hdpu/MQere84CXku+d0a34d4zy57Z15APy9
-         +k3xYYOz/+CEnRSciHewGFhpQZHfQxn+CbiI3U710m+ubPKurU7XL3Dp6Ol+y94P+1
-         dfw15qeXtssuGH9832K3TmlbYKVPe7eYUWTj0XJl17Jozw/86NP+1iy0FV3bzJ9syk
-         pLDuruTgz+erHNUjNQwQurZvI/tOOvLndaGWZYdpX/F3t84rvAceMs7Fqa0FWAqr0u
-         bo6WTEq7Ywbcg==
-Message-ID: <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr>
-Date:   Mon, 13 Mar 2023 18:09:10 +0100
+        with ESMTP id S229712AbjCMS32 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 14:29:28 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F37B882A92;
+        Mon, 13 Mar 2023 11:28:47 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3D13661468;
+        Mon, 13 Mar 2023 18:27:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 01344C433D2;
+        Mon, 13 Mar 2023 18:27:39 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1678732060;
+        bh=/UptELta1fbfIVlSU3lW1JfbEsBBjNSMIYGDMc0a6Bc=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=VvvKyry0IHRmRY/4zqVRDhYa1hlwWP5XO8DPtmSV86lG3jJNM7uxAeqCM3/hMjEnS
+         /4fGZINOj3BbOFj7VtuSn5/zADgew9/AhucSrWiCDWCAvWqK46vpsQ6ipb+6neCHzX
+         D26bSYYK00ZZp7wS/PyFzdSBom5Fc1YvU4I2sz/4csGzme6PYNmreJ9TJMdSLn2pJ3
+         cgxXHKzmvZ0aDqUoSafiMpZKQIjdbzRSu92/wVYzEbmBwzFm5rb1KpTZ9Ix5kcdW8E
+         IH7F21aKBHvZjZ0vyXFvDpM4UNcMSFajBrFy3LzzWeznIYwqpqWY/2y3YL9Y5Kytyi
+         kj7t2/qKpgCbw==
+Date:   Mon, 13 Mar 2023 11:27:38 -0700
+From:   Eric Biggers <ebiggers@kernel.org>
+To:     Abel Vesa <abel.vesa@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [RFC PATCH v3 2/7] dt-bindings: mmc: sdhci-msm: Add ICE phandle
+ and drop core clock
+Message-ID: <ZA9rGihWeLhUYMdA@sol.localdomain>
+References: <20230313115202.3960700-1-abel.vesa@linaro.org>
+ <20230313115202.3960700-3-abel.vesa@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-Content-Language: en-US
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>,
-        Pierre-Hugues Husson <phh@phh.me>,
-        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
- <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
- <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
- <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
- <0450e34e-7190-104c-832a-150f15f7c825@free.fr>
- <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
-In-Reply-To: <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230313115202.3960700-3-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 13/03/2023 14:55, Marc Gonzalez wrote:
+On Mon, Mar 13, 2023 at 01:51:57PM +0200, Abel Vesa wrote:
+> Subject: Re: [RFC PATCH v3 2/7] dt-bindings: mmc: sdhci-msm: Add ICE phandle
+> and drop core clock
 
-> Still trying to bisect this heisenbug into submission... :(
-> 
-> So far, I've pared it down to mmc_attach_sdio()
-> 
-> When probe WORKS, mmc_attach_sdio() returns 0.
-> When probe FAILS, mmc_attach_sdio() returns ETIMEDOUT
-> via mmc_send_io_op_cond(host, 0, &ocr);
-> 
-> Wrapping mmc_send_io_op_cond() in a loop
-> makes it work on the second try.
+"and drop core clock" should be removed from the subject now, right?  Same for
+patch 3.
 
-Almost there, I think, I hope :)
-
-DT prop "post-power-on-delay-ms" looks like what I needed all along.
-It exists both for host (default 10 ms) and for pwrseq_simple (default 0 apparently).
-
-/*
- * Apply power to the MMC stack.  This is a two-stage process.
- * First, we enable power to the card without the clock running.
- * We then wait a bit for the power to stabilise.  Finally,
- * enable the bus drivers and clock to the card.
- *
- * We must _NOT_ enable the clock prior to power stablising.
- *
- * If a host does all the power sequencing itself, ignore the
- * initial MMC_POWER_UP stage.
- */
-void mmc_power_up(struct mmc_host *host, u32 ocr)
-
-Calls:
-
-mmc_delay(host->ios.power_delay_ms);
-mmc_pwrseq_post_power_on(host);
-  => msleep(pwrseq->post_power_on_delay_ms);
-...
-mmc_delay(host->ios.power_delay_ms);
-
-
-QUESTION:
-It's not clear to me why we sleep twice for host->ios.power_delay_ms?
-
-
-Looks like all I need is to add post-power-on-delay-ms = <100>; to
-
-	sdio_pwrseq: sdio-pwrseq {
-		compatible = "mmc-pwrseq-simple";
-		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
-		clocks = <&wifi32k>;
-		clock-names = "ext_clock";
-	};
-
-Will revert all my stabs in the dark, and boot the board 100 times
-to check if this does the trick.
-
-Regards
-
+- Eric
