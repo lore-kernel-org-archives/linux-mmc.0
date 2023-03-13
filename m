@@ -2,116 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EBEDC6FD19
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 20:03:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9DF2C61DA4
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 20:04:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230093AbjCMUDp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 13 Mar 2023 16:03:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55742 "EHLO
+        id S229749AbjCMUEb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 13 Mar 2023 16:04:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56558 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230174AbjCMUDe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 16:03:34 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A25B386151
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 13:03:06 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 94D22B8110A
-        for <linux-mmc@vger.kernel.org>; Mon, 13 Mar 2023 20:03:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 3A3AFC433D2;
-        Mon, 13 Mar 2023 20:03:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678737783;
-        bh=PgSjK0CmEVbalBsBkX+I2OvY/W8g5uDi4H0o1SnczxQ=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=f9TLYa96f09SsT2FkKxURMZhkgUpJQMJdBy+x1oPLgcqxVhGpW/OhSL/mW7NZP6bQ
-         ZKWsNqxsWLEDOLJYCzjga+LvYeozfJdzTaXwCgzgUiNyRj/g9rmkwDgYFBOy54n2wf
-         RvZmqFU0D1E1TBbzakKVXUslTjuqOfpkDt2JY/6cZLRFUfCdB++B9kB18ojvrKq8Ba
-         W2vKIgc1M50jvVQPRLZjnZGBtj1Xzhj6dke8gtSACts13b1RnA/yqNNsGTWTt6xxiX
-         TWc9+AWE2H6yMyZl1Ov1miq899HLj6RTOkdDLQ62iWHpzITWQy5QE1qsHEND6uIgI2
-         H0yaojHhXVzzw==
-Received: by pali.im (Postfix)
-        id 37CFC777; Mon, 13 Mar 2023 21:03:00 +0100 (CET)
-Date:   Mon, 13 Mar 2023 21:03:00 +0100
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org
-Subject: Re: Announce: sdioutils (lssdio & sdioids)
-Message-ID: <20230313200300.erl3trnwtnsmhhn5@pali>
-References: <20230214195702.ungo5roxliq7pjas@pali>
- <CAPDyKFptvcm=Co1JVKAtB6dqzbxvoRzAbn=b76iwgZxgdMSjmg@mail.gmail.com>
- <20230215190551.g7oeohrjm3nmz3h7@pali>
+        with ESMTP id S229889AbjCMUE2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 16:04:28 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 247125D466;
+        Mon, 13 Mar 2023 13:04:26 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id cn21so23306645edb.0;
+        Mon, 13 Mar 2023 13:04:26 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112; t=1678737865;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=MlsJMKW6fTnSyJwAJ4cqmlm3nWjmDE6jeDNees0hYCg=;
+        b=n9+PUEiEa5PYrJ1/BoBZUrn8uJ9PX4FHL1ZcarM/14nWpoDvRkiHFPoCI7GYf11d/k
+         XMKEWzewKzarPdpkk6l803LIGdy6l9fifXm4mhMfBYaRG36g1qUyg6fqa+kS8fxnhLLM
+         3FV+2tbxvJwh0qY/BhfNaw0aL/+c0KYw4kzbQbzJEqOX7Tw7A8iQtWdOmL6a9lqE2oCY
+         LL2hszEQ5X27jJVE9gqI8EiHzNQurEoiynjojgSUNd2VXO6wCANAVXnykRzzRLgob+M9
+         32rMPxuPP9zqKh+LjmwiKhQxxdM48rHJIGJxD7tSx5Hkxd2NRAysKo2rmRm/R0lrq/hC
+         xxlw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678737865;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=MlsJMKW6fTnSyJwAJ4cqmlm3nWjmDE6jeDNees0hYCg=;
+        b=EpbtQbBSlsx50/QRHrXjcyrHGBgybBDos6u9gsInTW8xCa3niqvk7wwUpH0Hcd5CWE
+         XwRhsKf0JslWdS2jzOYijGhHWC9kLsIbY2Gty2BoiwTRpYJFAXzjAvcGJjeRCD9xW41A
+         EnHiYYKx7kvcB1kBUQuhkbXerG+lUVySPuPYE7FGIFXCg9b6MEOALqyYdwkzZZHfduOM
+         3XGW39ddk8ldRQNFQJz3yNQrsPofv2ruuBAJt2tgU8+lCWVKjrit9Sew9CH5YYhGzCz4
+         ofZU0DozWm3mkJSueSfEjOdmibK2oretPgG0wAu6xBHDsI3mK+uS+UJIB62BC/j/8KlY
+         zF4g==
+X-Gm-Message-State: AO0yUKXTqLTkzhZT5oJ6QRl1j7VHXmHPj16W9n4iwa2uglNYgFdix67x
+        GCc++J7Gzj60MACyl7Htq4Ymvp4ZsMYQcx81S5c=
+X-Google-Smtp-Source: AK7set/oCOy3yOookh9Pv+mYKU9tKB4xqe73VFecMHnsR39xC93Ftkqk+U7IUkmAnouQMWc1/qsU77Gsu/G15zFYjJA=
+X-Received: by 2002:a17:906:6083:b0:919:2e39:95e5 with SMTP id
+ t3-20020a170906608300b009192e3995e5mr9803205ejj.6.1678737865203; Mon, 13 Mar
+ 2023 13:04:25 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230215190551.g7oeohrjm3nmz3h7@pali>
-User-Agent: NeoMutt/20180716
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr> <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr> <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
+ <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr> <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
+ <0450e34e-7190-104c-832a-150f15f7c825@free.fr> <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
+ <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr>
+In-Reply-To: <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Mon, 13 Mar 2023 21:04:14 +0100
+Message-ID: <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Pierre-Hugues Husson <phh@phh.me>,
+        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wednesday 15 February 2023 20:05:51 Pali Rohár wrote:
-> On Wednesday 15 February 2023 14:15:21 Ulf Hansson wrote:
-> > On Tue, 14 Feb 2023 at 20:57, Pali Rohár <pali@kernel.org> wrote:
-> > >
-> > > Hello! I would like to inform about new (or rather old) sdioutils
-> > > project, which is on github: https://github.com/sdioutils/
-> > >
-> > > It aimed to be collection of SDIO programs for Linux systems.
-> > >
-> > > Currently it contains two things which can be useful for both users and
-> > > developers:
-> > >
-> > > * lssdio - https://github.com/sdioutils/lssdio - tool which prints all
-> > >   connected and registered SDIO devices in similar format than lspci or
-> > >   lsusb, including tree and verbose formats (Linux v5.10+ required for
-> > >   printing all information)
-> > >
-> > > * sdioids - https://github.com/sdioutils/sdioids - database file
-> > >   sdio.ids of known SDIO devices, in format inspired by pci.ids and
-> > >   which is already used by lssdio
-> > >
-> > > This new sdioids contains updated and imported database file from the
-> > > old udev project (which seems to not be updated anymore).
-> > >
-> > > If you look into the repository, both parts are more than year old and
-> > > I did not announced it before because more people promised to test or
-> > > improve database... but nothing happened, only promises. So I decided to
-> > > announce it now at least in this state. I think that it can be useful
-> > > even in the current state.
-> > >
-> > > So if you want to improve it or add new SDIO cards into database, feel
-> > > free to open a pull request on project page. I think that having some
-> > > central point of sdio.ids database can be useful also for other
-> > > projects.
-> > 
-> > Thanks for sharing the news, it looks like a useful tool to me!
-> 
-> I'm happy if it is useful for somebody :-)
+Hi Marc,
 
-Anyway, if you or anybody else on the list has some other SDIO card
-which is not in sdio.ids database then fill free to send a pull request
-to project page with adding it.
+On Mon, Mar 13, 2023 at 6:09=E2=80=AFPM Marc Gonzalez <marc.w.gonzalez@free=
+.fr> wrote:
+[...]
+> > Wrapping mmc_send_io_op_cond() in a loop
+> > makes it work on the second try.
+>
+> Almost there, I think, I hope :)
+>
+> DT prop "post-power-on-delay-ms" looks like what I needed all along.
+> It exists both for host (default 10 ms) and for pwrseq_simple (default 0 =
+apparently).
+I think you're on the right track here!
 
-> > One thing I wonder though, is why you didn't consider extending
-> > "mmc-utils" with these new cool things instead? In particular, we have
-> > "lsmmc" in there for MMC and SD cards - and since these have a lot in
-> > common with the SDIO cards, I believe it would make sense to extend it
-> > (in some way or the other).
-> 
-> It is more than year old... but what I remember is that I was thinking
-> about it but I realized that SDIO devices and SD/MMC cards are too
-> different. Also linux kernel provides for them different sysfs nodes
-> (which mimics what these type of devices provides). So SDIO (for
-> userspace) does not share too much code with SD/MMC.
-> 
-> > Note that, if you are willing to help with maintenance of mmc-utils
-> > around this, what would certainly be appreciated too. :-)
-> > 
-> > Kind regards
-> > Uffe
-> 
-> I do not have time for this project. This is also why I was waiting more
-> than year with sdioutils for testing/improving...
+[...]
+> QUESTION:
+> It's not clear to me why we sleep twice for host->ios.power_delay_ms?
+I'm not sure but I think host->ios.power_delay_ms is independent from
+the post-power-on-delay-ms property of "mmc-pwrseq-simple".
+
+> Looks like all I need is to add post-power-on-delay-ms =3D <100>; to
+>
+>         sdio_pwrseq: sdio-pwrseq {
+>                 compatible =3D "mmc-pwrseq-simple";
+>                 reset-gpios =3D <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
+>                 clocks =3D <&wifi32k>;
+>                 clock-names =3D "ext_clock";
+>         };
+I found the following code in the vendor RTL8822CS driver [0].
+Simplified version:
+    for (i =3D 0; i <=3D 50; i++) {
+       msleep(10);
+        if (sdhci_device_attached())
+           break;
+   }
+(so a delay of up to 500ms)
+
+Also I found this code [1] in the same repo:
+    mmc_pm_gpio_ctrl("rtl8189es_vdd_en", 1);
+    udelay(100);
+    mmc_pm_gpio_ctrl("rtl8189es_vcc_en", 1);
+    udelay(50);
+
+So like I said above: I think you're going in the right direction!
+
+
+Best regards,
+Martin
+
+
+[0] https://github.com/chewitt/RTL8822CS/blob/main/platform/platform_sprd_s=
+dio.c#L55-L62
+[1] https://github.com/chewitt/RTL8822CS/blob/main/platform/platform_ARM_SU=
+NxI_sdio.c#L35-L43
