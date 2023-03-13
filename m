@@ -2,36 +2,36 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B79DC6FD1C
-	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 02:29:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 18EE5C6FD19
+	for <linux-mmc@archiver.kernel.org>; Mon, 13 Mar 2023 09:04:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229823AbjCMC3X convert rfc822-to-8bit (ORCPT
+        id S229999AbjCMJD6 convert rfc822-to-8bit (ORCPT
         <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 12 Mar 2023 22:29:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48628 "EHLO
+        Mon, 13 Mar 2023 05:03:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229698AbjCMC3X (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 12 Mar 2023 22:29:23 -0400
+        with ESMTP id S231145AbjCMJDc (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 13 Mar 2023 05:03:32 -0400
 Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 33199279A9;
-        Sun, 12 Mar 2023 19:29:18 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89CE35CEDE;
+        Mon, 13 Mar 2023 01:59:32 -0700 (PDT)
 Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32D2SlRdA020761, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32D2SlRdA020761
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32D8x7OC1002005, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32D8x7OC1002005
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
-        Mon, 13 Mar 2023 10:28:47 +0800
-Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
- RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+        Mon, 13 Mar 2023 16:59:07 +0800
+Received: from RTEXMBS06.realtek.com.tw (172.21.6.99) by
+ RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2507.17; Mon, 13 Mar 2023 10:28:02 +0800
+ 15.1.2375.32; Mon, 13 Mar 2023 16:58:32 +0800
 Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
+ RTEXMBS06.realtek.com.tw (172.21.6.99) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Mon, 13 Mar 2023 10:28:01 +0800
+ 15.1.2375.34; Mon, 13 Mar 2023 16:58:31 +0800
 Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
  RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
- 15.01.2375.007; Mon, 13 Mar 2023 10:28:01 +0800
+ 15.01.2375.007; Mon, 13 Mar 2023 16:58:31 +0800
 From:   Ping-Ke Shih <pkshih@realtek.com>
 To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
@@ -45,26 +45,32 @@ CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         "Nitin Gupta" <nitin.gupta981@gmail.com>,
         Neo Jou <neojou@gmail.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: RE: [PATCH v2 RFC 1/9] wifi: rtw88: Clear RTW_FLAG_POWERON early in rtw_mac_power_switch()
-Thread-Topic: [PATCH v2 RFC 1/9] wifi: rtw88: Clear RTW_FLAG_POWERON early in
- rtw_mac_power_switch()
-Thread-Index: AQHZU48RHUVrRx5DKki3zO3RS/BQyK73/dpQ
-Date:   Mon, 13 Mar 2023 02:28:01 +0000
-Message-ID: <14619a051589472292f8270c2c291204@realtek.com>
+Subject: RE: [PATCH v2 RFC 2/9] wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
+Thread-Topic: [PATCH v2 RFC 2/9] wifi: rtw88: sdio: Add HCI implementation for
+ SDIO based chipsets
+Thread-Index: AQHZU48RuwSN13p1cEWN5arWdO1W5K74ACNg
+Date:   Mon, 13 Mar 2023 08:58:31 +0000
+Message-ID: <028947beef90440599fed50a513ba9cf@realtek.com>
 References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
- <20230310202922.2459680-2-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20230310202922.2459680-2-martin.blumenstingl@googlemail.com>
+ <20230310202922.2459680-3-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20230310202922.2459680-3-martin.blumenstingl@googlemail.com>
 Accept-Language: en-US, zh-TW
 Content-Language: zh-TW
 X-MS-Has-Attach: 
 X-MS-TNEF-Correlator: 
 x-originating-ip: [172.21.69.188]
-x-kse-serverinfo: RTEXDAG02.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
+x-kse-serverinfo: RTEXMBS06.realtek.com.tw, 9
+x-kse-attachmentfiltering-interceptor-info: no applicable attachment filtering
+ rules found
+x-kse-antivirus-interceptor-info: scan successful
+x-kse-antivirus-info: =?us-ascii?Q?Clean,_bases:_2023/3/13_=3F=3F_07:09:00?=
+x-kse-bulkmessagesfiltering-scan-result: protection disabled
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
+X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
+X-KSE-AntiSpam-Interceptor-Info: fallback
+X-KSE-Antivirus-Interceptor-Info: fallback
 X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
@@ -81,65 +87,222 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 > linux-mmc@vger.kernel.org; Chris Morgan <macroalpha82@gmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
 > Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
 > Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Subject: [PATCH v2 RFC 1/9] wifi: rtw88: Clear RTW_FLAG_POWERON early in rtw_mac_power_switch()
+> Subject: [PATCH v2 RFC 2/9] wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
 > 
-> The SDIO HCI implementation needs to know when the MAC is powered on.
-> This is needed because 32-bit register access has to be split into 4x
-> 8-bit register access when the MAC is not fully powered on or while
-> powering off. When the MAC is powered on 32-bit register access can be
-> used to reduce the number of transfers but splitting into 4x 8-bit
-> register access still works in that case.
+> Add a sub-driver for SDIO based chipsets which implements the following
+> functionality:
+> - register accessors for 8, 16 and 32 bits for all states of the card
+>   (including usage of 4x 8 bit access for one 32 bit buffer if the card
+>   is not fully powered on yet - or if it's fully powered on then 1x 32
+>   bit access is used)
+> - checking whether there's space in the TX FIFO queue to transmit data
+> - transfers from the host to the device for actual network traffic,
+>   reserved pages (for firmware download) and H2C (host-to-card)
+>   transfers
+> - receiving data from the device
+> - deep power saving state
 > 
-> During the power on sequence is how RTW_FLAG_POWERON is only set when
-> the power on sequence has completed successfully. During power off
-> however RTW_FLAG_POWERON is set. This means that the upcoming SDIO HCI
-> implementation does not know that it has to use 4x 8-bit register
-> accessors. Clear the RTW_FLAG_POWERON flag early when powering off the
-> MAC so the whole power off sequence is processed with RTW_FLAG_POWERON
-> unset. This will make it possible to use the RTW_FLAG_POWERON flag in
-> the upcoming SDIO HCI implementation.
+> The transmit path is optimized so DMA-capable SDIO host controllers can
+> directly use the buffers provided because the buffer's physical
+> addresses are 8 byte aligned.
 > 
+> The receive path is prepared to support RX aggregation where the
+> chipset combines multiple MAC frames into one bigger buffer to reduce
+> SDIO transfer overhead.
+> 
+> Co-developed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+> Signed-off-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
 > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 > ---
 > Changes since v1:
-> - This replaces a previous patch called "rtw88: hci: Add an optional
->   power_switch() callback to rtw_hci_ops" which added a new callback
->   to the HCI ops.
+> - fixed size_t printk format in rtw_sdio_{read,write}_port as reported
+>   by the Intel kernel test robot
+> - return -EINVAL from the 11n wcpu case in rtw_sdio_check_free_txpg to
+>   fix an uninitialized variable (pages_free) warning as reported by
+>   the Intel kernel test robot
+> - rename all int *ret to int *err_ret for better consistency with the
+>   sdio_readX functions as suggested by Ping-Ke
+> - fix typos to use "if (!*err_ret ..." (to read the error code)
+>   instead of "if (!err_ret ..." (which just checks if a non-null
+>   pointer was passed) in rtw_sdio_read_indirect{8,32})
+> - use a u8 tmp variable for reading the indirect status (BIT(4)) in
+>   rtw_sdio_read_indirect32
+> - change buf[0] to buf[i] in rtw_sdio_read_indirect_bytes
+> - remove stray semicolon after rtw_sdio_get_tx_qsel
+> - add proper BIT_RXDMA_AGG_PG_TH, BIT_DMA_AGG_TO_V1, BIT_HCI_SUS_REQ,
+>   BIT_HCI_RESUME_RDY and BIT_SDIO_PAD_E5 macros as suggested by
+>   Ping-Ke (thanks for sharing these names!)
+> - use /* ... */ style for copyright comments
+> - don't infinitely loop in rtw_sdio_process_tx_queue and limit the
+>   number of skbs to process per queue to 1000 in rtw_sdio_tx_handler
+> - add bus_claim check to rtw_sdio_read_port() so it works similar to
+>   rtw_sdio_write_port() (meaning it can be used from interrupt and
+>   non interrupt context)
+> - enable RX aggregation on all chips except RTL8822CS (where it hurts
+>   RX performance)
+> - use rtw_tx_fill_txdesc_checksum() helper instead of open-coding it
+> - re-use RTW_FLAG_POWERON instead of a new .power_switch callback
+> - added Ulf's Reviewed-by (who had a look at the SDIO specific bits,
+>   thank you!)
 > 
 > 
->  drivers/net/wireless/realtek/rtw88/mac.c | 5 +++--
->  1 file changed, 3 insertions(+), 2 deletions(-)
+>  drivers/net/wireless/realtek/rtw88/Kconfig  |    3 +
+>  drivers/net/wireless/realtek/rtw88/Makefile |    3 +
+>  drivers/net/wireless/realtek/rtw88/debug.h  |    1 +
+>  drivers/net/wireless/realtek/rtw88/mac.h    |    1 -
+>  drivers/net/wireless/realtek/rtw88/reg.h    |   12 +
+>  drivers/net/wireless/realtek/rtw88/sdio.c   | 1251 +++++++++++++++++++
+>  drivers/net/wireless/realtek/rtw88/sdio.h   |  175 +++
+>  7 files changed, 1445 insertions(+), 1 deletion(-)
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.c
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.h
 > 
-> diff --git a/drivers/net/wireless/realtek/rtw88/mac.c b/drivers/net/wireless/realtek/rtw88/mac.c
-> index f3a566cf979b..cfdfc8a2c836 100644
-> --- a/drivers/net/wireless/realtek/rtw88/mac.c
-> +++ b/drivers/net/wireless/realtek/rtw88/mac.c
-> @@ -273,6 +273,9 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
->         if (pwr_on == cur_pwr)
->                 return -EALREADY;
-> 
-> +       if (!pwr_on)
-> +               clear_bit(RTW_FLAG_POWERON, rtwdev->flags);
+
+[...]
+
+> diff --git a/drivers/net/wireless/realtek/rtw88/sdio.c b/drivers/net/wireless/realtek/rtw88/sdio.c
+> new file mode 100644
+> index 000000000000..915d641d9226
+> --- /dev/null
+> +++ b/drivers/net/wireless/realtek/rtw88/sdio.c
+> @@ -0,0 +1,1251 @@
+> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+> +/* Copyright (C) 2021 Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> + * Copyright (C) 2021 Jernej Skrabec <jernej.skrabec@gmail.com>
+> + *
+> + * Based on rtw88/pci.c:
+> + *   Copyright(c) 2018-2019  Realtek Corporation
+> + */
 > +
->         pwr_seq = pwr_on ? chip->pwr_on_seq : chip->pwr_off_seq;
->         ret = rtw_pwr_seq_parser(rtwdev, pwr_seq);
->         if (ret)
+> +#include <linux/module.h>
+> +#include <linux/mmc/host.h>
+> +#include <linux/mmc/sdio_func.h>
+> +#include "sdio.h"
+> +#include "reg.h"
+> +#include "tx.h"
+> +#include "rx.h"
+> +#include "fw.h"
+> +#include "ps.h"
+> +#include "debug.h"
 
-This patch changes the behavior if rtw_pwr_seq_parser() returns error while
-doing power-off, but I dig and think further about this case hardware stays in
-abnormal state. I think it would be fine to see this state as POWER_OFF.
-Do you agree this as well?
+How about making them in alphabetical order?
+
+[...]
+
+> +static void rtw_sdio_rx_skb(struct rtw_dev *rtwdev, struct sk_buff *skb,
+> +                           u32 pkt_offset, struct rtw_rx_pkt_stat *pkt_stat,
+> +                           struct ieee80211_rx_status *rx_status)
+> +{
+> +       memcpy(IEEE80211_SKB_RXCB(skb), rx_status, sizeof(*rx_status));
+
+nit: IEEE80211_SKB_RXCB(skb) = *rx_status;
+
+Then, compiler can help to check the type.
+
+> +
+> +       if (pkt_stat->is_c2h) {
+> +               skb_put(skb, pkt_stat->pkt_len + pkt_offset);
+> +               rtw_fw_c2h_cmd_rx_irqsafe(rtwdev, pkt_offset, skb);
+> +               return;
+> +       }
+> +
+> +       skb_put(skb, pkt_stat->pkt_len);
+> +       skb_reserve(skb, pkt_offset);
+> +
+> +       rtw_rx_stats(rtwdev, pkt_stat->vif, skb);
+> +
+> +       ieee80211_rx_irqsafe(rtwdev->hw, skb);
+> +}
+> +
+> +static void rtw_sdio_rxfifo_recv(struct rtw_dev *rtwdev, u32 rx_len)
+> +{
+> +       struct rtw_sdio *rtwsdio = (struct rtw_sdio *)rtwdev->priv;
+> +       const struct rtw_chip_info *chip = rtwdev->chip;
+> +       u32 pkt_desc_sz = chip->rx_pkt_desc_sz;
+> +       struct ieee80211_rx_status rx_status;
+> +       struct rtw_rx_pkt_stat pkt_stat;
+> +       struct sk_buff *skb, *split_skb;
+> +       u32 pkt_offset, curr_pkt_len;
+> +       size_t bufsz;
+> +       u8 *rx_desc;
+> +       int ret;
+> +
+> +       bufsz = sdio_align_size(rtwsdio->sdio_func, rx_len);
+> +
+> +       skb = dev_alloc_skb(bufsz);
+> +       if (!skb)
+> +               return;
+> +
+> +       ret = rtw_sdio_read_port(rtwdev, skb->data, bufsz);
+> +       if (ret) {
+> +               dev_kfree_skb_any(skb);
+> +               return;
+> +       }
+> +
+> +       while (true) {
+> +               rx_desc = skb->data;
+> +               chip->ops->query_rx_desc(rtwdev, rx_desc, &pkt_stat,
+> +                                        &rx_status);
+> +               pkt_offset = pkt_desc_sz + pkt_stat.drv_info_sz +
+> +                            pkt_stat.shift;
+> +
+> +               curr_pkt_len = ALIGN(pkt_offset + pkt_stat.pkt_len,
+> +                                    RTW_SDIO_DATA_PTR_ALIGN);
+> +
+> +               if ((curr_pkt_len + pkt_desc_sz) >= rx_len) {
+> +                       /* Use the original skb (with it's adjusted offset)
+> +                        * when processing the last (or even the only) entry to
+> +                        * have it's memory freed automatically.
+> +                        */
+> +                       rtw_sdio_rx_skb(rtwdev, skb, pkt_offset, &pkt_stat,
+> +                                       &rx_status);
+> +                       break;
+> +               }
+> +
+> +               split_skb = dev_alloc_skb(curr_pkt_len);
+> +               if (!split_skb) {
+> +                       rtw_sdio_rx_skb(rtwdev, skb, pkt_offset, &pkt_stat,
+> +                                       &rx_status);
+> +                       break;
+> +               }
+> +
+> +               skb_copy_header(split_skb, skb);
+> +               memcpy(split_skb->data, skb->data, curr_pkt_len);
+> +
+> +               rtw_sdio_rx_skb(rtwdev, split_skb, pkt_offset, &pkt_stat,
+> +                               &rx_status);
+> +
+> +               /* Move to the start of the next RX descriptor */
+> +               skb_reserve(skb, curr_pkt_len);
+> +               rx_len -= curr_pkt_len;
+> +       }
+> +}
+> +
+> +static void rtw_sdio_rx_isr(struct rtw_dev *rtwdev)
+> +{
+> +       u32 rx_len;
+> +
+> +       while (true) {
+
+I forget if we have discussed this in v1, but it would be better to have a hard
+retry limit in driver, like 500. Will we miss to receive packets if break this
+loop early?
 
 
-> @@ -280,8 +283,6 @@ static int rtw_mac_power_switch(struct rtw_dev *rtwdev, bool pwr_on)
-> 
->         if (pwr_on)
->                 set_bit(RTW_FLAG_POWERON, rtwdev->flags);
-> -       else
-> -               clear_bit(RTW_FLAG_POWERON, rtwdev->flags);
-> 
->         return 0;
->  }
-> --
-> 2.39.2
+> +               if (rtw_chip_wcpu_11n(rtwdev))
+> +                       rx_len = rtw_read16(rtwdev, REG_SDIO_RX0_REQ_LEN);
+> +               else
+> +                       rx_len = rtw_read32(rtwdev, REG_SDIO_RX0_REQ_LEN);
+> +
+> +               if (!rx_len)
+> +                       break;
+> +
+> +               rtw_sdio_rxfifo_recv(rtwdev, rx_len);
+> +       }
+> +}
+> +
+
+[...]
+
 
