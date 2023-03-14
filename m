@@ -2,44 +2,44 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7506DC6FD1C
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 12:44:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0566C6FD1C
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 12:45:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231527AbjCNMn6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Mar 2023 08:43:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60870 "EHLO
+        id S231398AbjCNMpn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Mar 2023 08:45:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231552AbjCNMnp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 08:43:45 -0400
+        with ESMTP id S231411AbjCNMpG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 08:45:06 -0400
 Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5389B12588;
-        Tue, 14 Mar 2023 05:43:12 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 491822D50;
+        Tue, 14 Mar 2023 05:44:14 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id E17B8B818F3;
-        Tue, 14 Mar 2023 12:43:09 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id B5653C433D2;
-        Tue, 14 Mar 2023 12:43:07 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 09721B818FA;
+        Tue, 14 Mar 2023 12:43:29 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E37F9C433A8;
+        Tue, 14 Mar 2023 12:43:26 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678797788;
+        s=k20201202; t=1678797807;
         bh=fXGFdJhYV+PXpv7qzl8L1ATb9+K9VRxi83TYZva0h7c=;
         h=From:To:Cc:Subject:Date:From;
-        b=kW3HzLszBC1Llr2lRFnSvggQ0sKgxxzi2e4IPbInMYwlXEd++Sp7yCQzbtVS6npln
-         c8u1v/1WXqFfuPL+ejws8HMVSggtDBGGZbck9Z43JUd2RfL9ovHr2XYc0h7rXFoPi3
-         OtVbWLjiwSh8a2zMxJIEwXfO6E4soeVjLuMc3lswdOlwTXzZ/CvsQ0SdOpDeNfnQN3
-         jh+9o7M5g3Q0dfuoBIGOOn6AtcbHFfrasRJQMe9zvtrVYGWhMIuqqvDuXCAEafhVSW
-         ULRIkuH0Zj32pc4MGQNAyEKv8J/BQbSAqNgpN28OEqcndJd4+wU7rdoI0vbFaBEHZS
-         Ht2YhWP3sLflA==
+        b=srZy/mxf+Qds6IQfVmVdyGPZtsSXpm3XpzEUNX750jfsFTgqUxt8QQuV7F6sd/PrQ
+         2rOxZL0wAJMsfla4EhSYxArN+HqmT6T2UlaI+3ckfkgP3jQLWwAZcK8wN0pNuw9Yj2
+         pZ6jp/hxbdGG8+1rWPPi5jHQWBll3MqzLQwZTH0+W6StFUmMrnUBShgzMIgYjNgTbV
+         CubSRmAN3t+0xA1Hq6DcetpNkuVGXdeD88JyWgCfuLiasY4mqarEZ+D7Ml/Y1iVrWt
+         o+1ERYxePodJIyjet5zUs2GDgSjstSW1x6IUjBUqp2yAMIqhwOl6LabMHPdRa9BJdG
+         9gj8b3IktJOcw==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Tobias Schramm <t.schramm@manjaro.org>,
         Ludovic Desroches <ludovic.desroches@microchip.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.2 01/13] mmc: atmel-mci: fix race between stop command and start of next command
-Date:   Tue, 14 Mar 2023 08:42:53 -0400
-Message-Id: <20230314124305.470657-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 6.1 01/13] mmc: atmel-mci: fix race between stop command and start of next command
+Date:   Tue, 14 Mar 2023 08:43:13 -0400
+Message-Id: <20230314124325.470931-1-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 X-stable: review
