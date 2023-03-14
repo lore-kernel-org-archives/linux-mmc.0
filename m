@@ -2,44 +2,44 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 94B85C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 12:46:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAAF8C7618B
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 12:47:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232169AbjCNMqo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Mar 2023 08:46:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56516 "EHLO
+        id S231281AbjCNMrk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Mar 2023 08:47:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60880 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232075AbjCNMpr (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 08:45:47 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5FD47A1FC2;
-        Tue, 14 Mar 2023 05:44:45 -0700 (PDT)
+        with ESMTP id S231254AbjCNMqh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 08:46:37 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C96C2A2C25;
+        Tue, 14 Mar 2023 05:45:03 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id 255B2B81904;
-        Tue, 14 Mar 2023 12:44:04 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 2D2A7C433D2;
-        Tue, 14 Mar 2023 12:44:02 +0000 (UTC)
+        by ams.source.kernel.org (Postfix) with ESMTPS id C155DB81905;
+        Tue, 14 Mar 2023 12:43:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C5D0BC433EF;
+        Tue, 14 Mar 2023 12:43:46 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678797842;
-        bh=0vGVffKTWvcvF7+SWzA/RlrcWvpEwqtW4CZqnlnVuOo=;
+        s=k20201202; t=1678797827;
+        bh=itsdBSsZuZQchIHMp91AhtheSQCQbjR2HIoL5bDPqO8=;
         h=From:To:Cc:Subject:Date:From;
-        b=myLqk5UiT3d6FMGFcEXV9ZafSVuVHjiZ5tEUJ49Atk9M5h7C8pNtAYLHAV8Fm8wzx
-         TAJJUpgy0jcFY0O9D00Z9+yUxLrdFiE+iQCWPgssEnUt+MhKMLpb/jF67Xm1xEiZ/J
-         mDrYB+935WxNnWh5TrKsxeTYHQIFKWjdqJFCns5FpfENarPix1aqpGVTfVR3PAo793
-         NdgDnU9XE6IiKEs8bpmnYXAtuSnBw1EypvCUnMKweb4wmC9g1ulFslPz3YoWVokScy
-         MWgvfBVLT5a+LtZ1FSfjvRfH6s9nf3RV9+N5hhqTE2FQ4ZN4ANmY37RCiBUP26T0jS
-         u3CYuKifVvJbA==
+        b=jfY8aUGnDnzWQ+PmYJfMSZDAf1RKOJ/aBrlBSU1QQd2PqiVkOK84I/xppVpFa11yI
+         kvEcAVkLljsriZgGo2pj/DjeJUKRw5cHxeE3cT0+qADn2sbkvkdNUeE7Jps3LERwC7
+         qTWONZUXz+yfdgqE42LthV6ih2aav0QyszquVivasMkdPoJFtkFUJqSMtSf3YBzX6w
+         LdrxSrNBkhWDLtWnWLHCg0FJBrl20gN+tW2T+45NICXkq6f+OTMnwiATQZbysZu+nT
+         HQJfFKyYBU6TbMfr2TWOdTxhc8F5U08KYiGt2n4SN1MdXKYlGty9S/NlsQIEBmgwb8
+         qeEG7C2q60IwQ==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Tobias Schramm <t.schramm@manjaro.org>,
         Ludovic Desroches <ludovic.desroches@microchip.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.10 1/8] mmc: atmel-mci: fix race between stop command and start of next command
-Date:   Tue, 14 Mar 2023 08:43:53 -0400
-Message-Id: <20230314124400.471257-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 01/10] mmc: atmel-mci: fix race between stop command and start of next command
+Date:   Tue, 14 Mar 2023 08:43:35 -0400
+Message-Id: <20230314124344.471127-1-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 X-stable: review
@@ -78,10 +78,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 3 deletions(-)
 
 diff --git a/drivers/mmc/host/atmel-mci.c b/drivers/mmc/host/atmel-mci.c
-index af85b32c6c1c8..c468f9a02ef6b 100644
+index 6f971a3e7e494..493ed8c824195 100644
 --- a/drivers/mmc/host/atmel-mci.c
 +++ b/drivers/mmc/host/atmel-mci.c
-@@ -1818,7 +1818,6 @@ static void atmci_tasklet_func(unsigned long priv)
+@@ -1818,7 +1818,6 @@ static void atmci_tasklet_func(struct tasklet_struct *t)
  				atmci_writel(host, ATMCI_IER, ATMCI_NOTBUSY);
  				state = STATE_WAITING_NOTBUSY;
  			} else if (host->mrq->stop) {
@@ -89,7 +89,7 @@ index af85b32c6c1c8..c468f9a02ef6b 100644
  				atmci_send_stop_cmd(host, data);
  				state = STATE_SENDING_STOP;
  			} else {
-@@ -1851,8 +1850,6 @@ static void atmci_tasklet_func(unsigned long priv)
+@@ -1851,8 +1850,6 @@ static void atmci_tasklet_func(struct tasklet_struct *t)
  				 * command to send.
  				 */
  				if (host->mrq->stop) {
