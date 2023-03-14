@@ -2,107 +2,81 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 35FD1C6FD1F
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 16:38:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC3D0C6FD1F
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 17:24:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230291AbjCNQik (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Mar 2023 12:38:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34498 "EHLO
+        id S229691AbjCNRY6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Mar 2023 13:24:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229827AbjCNQig (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 12:38:36 -0400
+        with ESMTP id S229516AbjCNRY5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 13:24:57 -0400
 Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [212.27.42.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57B64A9DF7;
-        Tue, 14 Mar 2023 09:38:13 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6628B9545C
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2023 10:24:56 -0700 (PDT)
 Received: from [192.168.108.81] (unknown [213.36.7.13])
         (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 83A0E2003FF;
-        Tue, 14 Mar 2023 17:37:41 +0100 (CET)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 0140620048F;
+        Tue, 14 Mar 2023 18:24:41 +0100 (CET)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678811880;
-        bh=ooLFZIh4ulWCiJYZc6yvrTXCsSwnpVuJlixKNRQY1oE=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=B9487GuR3j6kDpBB3qOrBYwF6FKn4IOPzAaNUzUdpX3Jsr+JU2tFCsol57Ej3fBfy
-         emDip74YRxyfzOIwWOcgqcZ2D13VkEkWhLyfTB3kR988vqTK2KIWmr3z2zgooYTP1j
-         Qww2XjFe4zaP+9/7ddmqUBnG0Adf3MObL06tYNkerN0AlTALt+Ccvy1SOYRjP17r9Q
-         FVVx52RR69x8RXY7yBkUNzBwCyKPI+s8kyET1WSN4zH80O9WaFNTBrkNbdEzYYCJcj
-         RQLyjyR4kao5QOey0Eab2H5ijoe4/ay8EgG0JD1kdZZ27n3pNNvgR3RiCSUNJ25TC7
-         mQRW0ZRkuJYhA==
-Message-ID: <893311e7-6fce-118b-a683-6988de161698@free.fr>
-Date:   Tue, 14 Mar 2023 17:37:41 +0100
+        s=smtp-20201208; t=1678814695;
+        bh=2e5jAUF8/ZirLPQZM6YQfIUnTkYXb6j3MWx9iDVhC4Q=;
+        h=Date:To:Cc:From:Subject:From;
+        b=qFak2Zi44M/RwtD/NtNYnTwkFP1fEnUuhHCR3zcHHXd2a46o+i4G5EMxJ+GzDIvYD
+         d30Qz/k+vij8HxGCxOxRDpnFJuKpXL4LNF441xThOJ0vn6UkoLqM4pCcTnaIMK/M0H
+         st5Ea+fRrcH1DMrDhwz4KNKpfFbw+dfRBdYBueAVAeymmTCqER2nmDOVXPWzNN9ack
+         k4OU+bsTHEyNRa0JcdCo5Vuq/67YXZRx7HPZ/nGZ4YFHn/jMhTncKvcMPpqX4tWQwa
+         wVChT6YXL9SzfdP72R4WjQkyYPrcobMUluHR8MG/KuQAQvmqTihVxifgyWzmO6AsSP
+         wKsiMzPjEOmAw==
+Message-ID: <11a8a0c8-a5b1-8f38-a139-97172ab7be68@free.fr>
+Date:   Tue, 14 Mar 2023 18:24:41 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.7.1
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
 Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
         Kevin Hilman <khilman@baylibre.com>,
         Jerome Brunet <jbrunet@baylibre.com>,
-        Angus Ainslie <angus@akkea.ca>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         Pierre-Hugues Husson <phh@phh.me>,
-        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
- <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
- <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr>
- <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
- <0450e34e-7190-104c-832a-150f15f7c825@free.fr>
- <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
- <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr>
- <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
- <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr>
- <CAPDyKFrC3a5-VP2DvCYGYUzKtX4Jc7cvNQOKfutW0sha=szOyg@mail.gmail.com>
- <c7e48c6f-530b-7198-b8bb-fc927a2fdc66@free.fr>
- <CAPDyKFpJR9rgadXEBn+73FKgmLM8sZgzNbKV_x_udwOSRGH44Q@mail.gmail.com>
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Rong Chen <rong.chen@amlogic.com>,
+        Yang Yingliang <yangyingliang@huawei.com>
+Cc:     MMC <linux-mmc@vger.kernel.org>,
+        AML <linux-amlogic@lists.infradead.org>
 From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <CAPDyKFpJR9rgadXEBn+73FKgmLM8sZgzNbKV_x_udwOSRGH44Q@mail.gmail.com>
+Subject: [PATCH] mmc: meson-gx: increase power-up delay
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/03/2023 12:08, Ulf Hansson wrote:
+With the default power-up delay, on small kernels, the host probes
+too soon, and mmc_send_io_op_cond() times out.
 
-> If the delay is to manage vmmc and vqmmc, which is somewhat part of
-> the generic specifications (SD/MMC), then it should be described in
-> the host's node.
-> 
-> A pwrseq is something special, which is also platform and device
-> specific (the SDIO device). If the delays correspond to this, it
-> should be part of the pwrseq node.
+Signed-off-by: Marc Gonzalez <marc.w.gonzalez@free.fr>
+---
+Stress-tested with 80 cold boots, checking every time
+mmc2: new ultra high speed SDR50 SDIO card at address 0001
+IIUC, this will also slow down SD & MMC probing,
+but an additional 20 ms seems acceptable?
+---
+ drivers/mmc/host/meson-gx-mmc.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Uffe,
-
-Wouldn't it make sense to warn, when probing for a non-removable card
-returns nothing?
-
-Something along these lines (which I can spin into a formal patch)
-
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2257,6 +2257,9 @@ void mmc_rescan(struct work_struct *work)
-                        break;
-        }
- 
-+       if (!mmc_card_is_removable(host) && !host->card)
-+               dev_warn(mmc_dev(host), "no device found");
-+
-        /*
-         * Ignore the command timeout errors observed during
-         * the card init as those are excepted.
-
-Regards
-
+diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
+index 6e5ea0213b477..73ecbcf588c65 100644
+--- a/drivers/mmc/host/meson-gx-mmc.c
++++ b/drivers/mmc/host/meson-gx-mmc.c
+@@ -1182,6 +1182,7 @@ static int meson_mmc_probe(struct platform_device *pdev)
+ 	mmc = mmc_alloc_host(sizeof(struct meson_host), &pdev->dev);
+ 	if (!mmc)
+ 		return -ENOMEM;
++	mmc->ios.power_delay_ms = 20;
+ 	host = mmc_priv(mmc);
+ 	host->mmc = mmc;
+ 	host->dev = &pdev->dev;
+-- 
+2.25.1
