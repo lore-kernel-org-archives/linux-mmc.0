@@ -2,146 +2,307 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1DF62C74A44
-	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 07:28:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E0EC6C6FD1C
+	for <linux-mmc@archiver.kernel.org>; Tue, 14 Mar 2023 07:57:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230282AbjCNH2a (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 14 Mar 2023 03:28:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38272 "EHLO
+        id S230104AbjCNH5C (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 14 Mar 2023 03:57:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230259AbjCNH21 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 03:28:27 -0400
-Received: from mail-pf1-x429.google.com (mail-pf1-x429.google.com [IPv6:2607:f8b0:4864:20::429])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6ABF811157
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2023 00:28:22 -0700 (PDT)
-Received: by mail-pf1-x429.google.com with SMTP id c4so9146368pfl.0
-        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2023 00:28:22 -0700 (PDT)
+        with ESMTP id S229785AbjCNH5B (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 14 Mar 2023 03:57:01 -0400
+Received: from mail-pg1-x535.google.com (mail-pg1-x535.google.com [IPv6:2607:f8b0:4864:20::535])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 571EA211D9
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2023 00:56:59 -0700 (PDT)
+Received: by mail-pg1-x535.google.com with SMTP id x37so3924165pga.1
+        for <linux-mmc@vger.kernel.org>; Tue, 14 Mar 2023 00:56:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678778902;
+        d=linaro.org; s=google; t=1678780619;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=2zrI9sVCqqmiSpcdBkCHHv05oCLBJ25Dqqg/e/HY1PE=;
-        b=C9Ey32sJTJaASu+z/1FyslqsbfnyNdmJUNUB6+oB2OmmFLHW3TXdFt4/QmkDEnPkXd
-         J+oc1JqjQ8+RGLMBczqsDWq8yStl1QMxo29VJMhOqitTFiKyguQUDPIIasYjKO17wHtT
-         ng8Vb3hQv4v493VlrtpS5Bl24vFIuA7GnsgJts+pUOY/YGNteg6pBDhmx6ob8nHqvrTc
-         aTsaVCGKF4NRp1KsEXNOuw+ii/VCp08zCDb5Qzz7Cx1Tea++NbjUycXOEphG27a5Hx4u
-         K6rD7s+ZuEbs4YHjEVgPqBSYxTWJ6abqoQQ5oeQktZjIjVT6HK9Iqwt6DgFmDgHWCydb
-         pk9w==
+        bh=H3teonhZv+4GRlKpPnO2/OV+dP6gf7xXIPN2idr7AcQ=;
+        b=XXcOs+U1IpI+nSDvWEMSJ2itr1PZ3rdDUiN643AYkn54z/+mPIZUtdI4Yn27jeNLSc
+         WwdvfKBXFef8++RK2vvH+7vA9n40bc46o/8FpIXfi9QXY56saGoB3ExXpFbHMv6EXUQy
+         wo4CEdG+4Ad+bvYNCbPBpzGOGOGY5eCzvSAm18pLfgsq3pddKBXmCzYWblRtFqjmdwax
+         b6n16yNNkoKwMIPWOBWqRunl3JLs2XyBV7nHM3CnXyUTkkjCFIBU7xCUY9CUxy1/0HbZ
+         5OIteIR/XsdnTaYC6RsllbdUf88L3TOrHfL/301jpixsWxBepUYKxawn+N51q9xaCYnH
+         h8VQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678778902;
+        d=1e100.net; s=20210112; t=1678780619;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=2zrI9sVCqqmiSpcdBkCHHv05oCLBJ25Dqqg/e/HY1PE=;
-        b=L1nhSXZBIiss9iqspVmFnpp9dbZcWK8GV/A4ZaC25kcyZc5QnKU7T1LjdK62HCGWTH
-         XS8fmB6l8JPrHdSoVfSY7pSZrwCNr7fFmfwhlksEfHU1B9kqge0qnYfngSoeVhNHzHo/
-         jWyVZ0l5clbux79bOZInXma+b8Lh+8c6yeu85VZPAYbixE7S7LAI5NtO76+0ggbx0nfL
-         Tt1DrRZL0etj0IRqzrE//RoHBT9k6KZOU6w6Dnay1g93GxyI0pBMU271T2FhMldSsDQN
-         qH5nXsI4t98obBcC9bl9j4jX7q9RBZFev6dGKnwCY2rI2H9+TxTf+PJslIljZ5hcdyB6
-         NxSQ==
-X-Gm-Message-State: AO0yUKVzpm64vo5UndnCwwzXvcxjC8xhuRBfgEmRwUYOd8S39TpsIL7W
-        N9Z7u9OLx/RTrn6iTcsTB5PV+HjMICytOWTFF+E4PQ==
-X-Google-Smtp-Source: AK7set/ymRCuQVVjd2YSJZ2ksOxjN0aMC8SJdN2Byssx3rCYzgon3Q33ArJQyLMI7amWxCU0riaxj2d7lDIOIcFTf1A=
-X-Received: by 2002:a63:7d03:0:b0:503:a268:b81e with SMTP id
- y3-20020a637d03000000b00503a268b81emr12895598pgc.5.1678778901900; Tue, 14 Mar
- 2023 00:28:21 -0700 (PDT)
+        bh=H3teonhZv+4GRlKpPnO2/OV+dP6gf7xXIPN2idr7AcQ=;
+        b=gbv1pBUqFvaRom9q2i0GY5Zr2hdkEAZaqufKiOgCyfGhaJ2aIt/WNzlkC1Tre37ouS
+         mKGVBG1jlbmUrI5MmGvjpU/5hs/YI8/ZVdD3+EVYEk9Gr26TdgST0HScDT5TJWtbDAxZ
+         l962p9n+MgMEKvtDV5g52b0/dTtJU1fLReEVo3zEcSJWxghVobDE4wSB5VV38BpOZLGQ
+         51PSEtw1mPDmtiJSQ29CYSoX0GyxrGtoETj/mA/jR7npA4hv+z5GrSRyD87Lc4XPTC9p
+         jTtOb46rUEunYW2svK68ztXF6qLAsD1sPTAvq6u14vK43KHwIBG2daUfqGf24znI56+i
+         aaPw==
+X-Gm-Message-State: AO0yUKWc33PRgonqwJr90mvj7WjFjCzIIAxwOVF/6yOQ3+QER4rHcQVC
+        i7dkYRuz6mG0/4Ud4g0f0FtYohje0ge0uWwZ2yKnfA==
+X-Google-Smtp-Source: AK7set+bVfFYE/JyksHLCXI6t1BgriFQonrsjT0nIy8sCYFSoIWrB8ZhENFGAWcdVHW4WeTwKyUlI9gCo9XNthhGTCQ=
+X-Received: by 2002:a62:f801:0:b0:5eb:e0e0:d650 with SMTP id
+ d1-20020a62f801000000b005ebe0e0d650mr14155093pfh.6.1678780618707; Tue, 14 Mar
+ 2023 00:56:58 -0700 (PDT)
 MIME-Version: 1.0
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr> <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr> <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
- <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr> <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
- <0450e34e-7190-104c-832a-150f15f7c825@free.fr> <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
- <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr> <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
- <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr>
-In-Reply-To: <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr>
+References: <20230302144330.274947-1-ulf.hansson@linaro.org>
+ <54cee7de4ab7479db74b21e64e5f53cf@hyperstone.com> <CAPDyKFq-qToEX+qiuHirNbcuedii_f0KKuHiPAv7+tydrUTpqQ@mail.gmail.com>
+ <4a2c5b752968496ca72966f80e148d47@hyperstone.com> <3effa855-1668-db9f-7d38-2c3352ea6ef1@intel.com>
+In-Reply-To: <3effa855-1668-db9f-7d38-2c3352ea6ef1@intel.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 14 Mar 2023 08:27:45 +0100
-Message-ID: <CAPDyKFrC3a5-VP2DvCYGYUzKtX4Jc7cvNQOKfutW0sha=szOyg@mail.gmail.com>
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
-Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Angus Ainslie <angus@akkea.ca>,
-        Pierre-Hugues Husson <phh@phh.me>,
-        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
+Date:   Tue, 14 Mar 2023 08:56:22 +0100
+Message-ID: <CAPDyKFpVZaHA0jPBa=uxLSCzcUTZujUzJvh1oqar6NbBHg9wtQ@mail.gmail.com>
+Subject: Re: [RFC PATCH] mmc: core: Disable REQ_FUA if the eMMC supports an
+ internal cache
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Jens Axboe <axboe@kernel.dk>,
+        Wenchao Chen <wenchao.chen666@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 13 Mar 2023 at 22:42, Marc Gonzalez <marc.w.gonzalez@free.fr> wrote=
+On Mon, 13 Mar 2023 at 17:56, Adrian Hunter <adrian.hunter@intel.com> wrote=
 :
 >
-> On 13/03/2023 21:04, Martin Blumenstingl wrote:
->
-> > On Mon, Mar 13, 2023 at 6:09=E2=80=AFPM Marc Gonzalez wrote:
-> > [...]
-> >> QUESTION:
-> >> It's not clear to me why we sleep twice for host->ios.power_delay_ms?
+> On 10/03/23 19:06, Christian L=C3=B6hle wrote:
 > >
-> > I'm not sure but I think host->ios.power_delay_ms is independent from
-> > the post-power-on-delay-ms property of "mmc-pwrseq-simple".
+> >>>
+> >>> I have benchmarked the FUA/Cache behavior a bit.
+> >>> I don't have an actual filesystem benchmark that does what I wanted a=
+nd is easy to port to the target so I used:
+> >>>
+> >>> # call with
+> >>> # for loop in {1..3}; do sudo dd if=3D/dev/urandom bs=3D1M
+> >>> of=3D/dev/mmcblk2; done; for loop in {1..5}; do time
+> >>> ./filesystembenchmark.sh; umount /mnt; done
+> >>> mkfs.ext4 -F /dev/mmcblk2
+> >>> mount /dev/mmcblk2 /mnt
+> >>> for i in {1..3}
+> >>> do
+> >>> cp -r linux-6.2.2 /mnt/$i
+> >>> done
+> >>> for i in {1..3}
+> >>> do
+> >>> rm -r /mnt/$i
+> >>> done
+> >>> for i in {1..3}
+> >>> do
+> >>> cp -r linux-6.2.2 /mnt/$i
+> >>> done
+> >>>
+> >>>
+> >>> I found a couple of DUTs that I can link, I also tested one industria=
+l card.
+> >>>
+> >>> DUT1: blue PCB Foresee eMMC
+> >>> https://pine64.com/product/32gb-emmc-module/
+> >>> DUT2: green PCB SiliconGo eMMC
+> >>> Couldn't find that one online anymore unfortunately
+> >>> DUT3: orange hardkernel PCB 8GB
+> >>> https://www.hardkernel.com/shop/8gb-emmc-module-c2-android/
+> >>> DUT4: orange hardkernel PCB white dot
+> >>> https://rlx.sk/en/odroid/3198-16gb-emmc-50-module-xu3-android-for-odr=
+o
+> >>> id-xu3.html
+> >>> DUT5: Industrial card
+> >>
+> >> Thanks a lot for helping out with testing! Much appreciated!
+> >
+> > No problem, glad to be of help.
+> >
+> >>
+> >>>
+> >>>
+> >>> The test issued 461 DO_REL_WR during one of the iterations for DUT5
+> >>>
+> >>> DUT1:
+> >>> Cache, no FUA:
+> >>> 13:04.49
+> >>> 13:13.82
+> >>> 13:30.59
+> >>> 13:28:13
+> >>> 13:20:64
+> >>> FUA:
+> >>> 13:30.32
+> >>> 13:36.26
+> >>> 13:10.86
+> >>> 13:32.52
+> >>> 13:48.59
+> >>>
+> >>> DUT2:
+> >>> FUA:
+> >>> 8:11.24
+> >>> 7:47.73
+> >>> 7:48.00
+> >>> 7:48.18
+> >>> 7:47.38
+> >>> Cache, no FUA:
+> >>> 8:10.30
+> >>> 7:48.97
+> >>> 7:48.47
+> >>> 7:47.93
+> >>> 7:44.18
+> >>>
+> >>> DUT3:
+> >>> Cache, no FUA:
+> >>> 7:02.82
+> >>> 6:58.94
+> >>> 7:03.20
+> >>> 7:00.27
+> >>> 7:00.88
+> >>> FUA:
+> >>> 7:05.43
+> >>> 7:03.44
+> >>> 7:04.82
+> >>> 7:03.26
+> >>> 7:04.74
+> >>>
+> >>> DUT4:
+> >>> FUA:
+> >>> 7:23.92
+> >>> 7:20.15
+> >>> 7:20.52
+> >>> 7:19.10
+> >>> 7:20.71
+> >>> Cache, no FUA:
+> >>> 7:20.23
+> >>> 7:20.48
+> >>> 7:19.94
+> >>> 7:18.90
+> >>> 7:19.88
+> >>
+> >> Without going into the details of the above, it seems like for DUT1, D=
+UT2, DUT3 and DUT4 there a good reasons to why we should move forward with =
+$subject patch.
+> >>
+> >> Do you agree?
+> >
+> > That is a good question, that's why I just posted the data without furt=
+her comment from my side.
+> > I was honestly expecting the difference to be much higher, given the or=
+iginal patch.
+> > If this is representative for most cards, you would require quite an un=
+usual workload to actually notice the difference IMO.
+> > If there are cards where the difference is much more significant then o=
+f course a quirk would be nicer.
+> > On the other side I don't see why not and any improvement is a good one=
+?
+> >
+> >>
+> >>>
+> >>> Cache, no FUA:
+> >>> 7:19.36
+> >>> 7:02.11
+> >>> 7:01.53
+> >>> 7:01.35
+> >>> 7:00.37
+> >>> Cache, no FUA CQE:
+> >>> 7:17.55
+> >>> 7:00.73
+> >>> 6:59.25
+> >>> 6:58.44
+> >>> 6:58.60
+> >>> FUA:
+> >>> 7:15.10
+> >>> 6:58.99
+> >>> 6:58.94
+> >>> 6:59.17
+> >>> 6:60.00
+> >>> FUA CQE:
+> >>> 7:11.03
+> >>> 6:58.04
+> >>> 6:56.89
+> >>> 6:56.43
+> >>> 6:56:28
+> >>>
+> >>> If anyone has any comments or disagrees with the benchmark, or has a =
+specific eMMC to test, let me know.
+> >>
+> >> If I understand correctly, for DUT5, it seems like using FUA may be sl=
+ightly better than just cache-flushing, right?
+> >
+> > That is correct, I specifically tested with this card as under the assu=
+mption that reliable write is without much additional cost, the DCMD would =
+be slightly worse for performance and SYNC a bit worse.
+> >
+> >>
+> >> For CQE, it seems like FUA could be slightly even better, at least for=
+ DUT5.  Do you know if REQ_OP_FLUSH translates into MMC_ISSUE_DCMD or MMC_I=
+SSUE_SYNC for your case? See mmc_cqe_issue_type().
+> > It is SYNC (this is sdhci-of-arasan on rk3399, no DCMD), but even SYNC =
+is not too bad here it seems, could of course be worse if the workload was =
+less sequential.
+> >
+> >>
+> >> When it comes to CQE, maybe Adrian have some additional thoughts aroun=
+d this? Perhaps we should keep using REQ_FUA, if we have CQE?
+> > Sure, I'm also interested in Adrian's take on this.
 >
-> They are distinct indeed (the props have the same name & similar purpose =
-though).
-
-Correct.
-
+> Testing an arbitrary system and looking only at individual I/Os,
+> which may not be representative of any use-case, resulted in
+> FUA always winning, see below.
 >
-> host->ios.power_delay_ms is set via:
+> All values are approximate and in microseconds.
 >
-> drivers/mmc/core/host.c:        device_property_read_u32(dev, "post-power=
--on-delay-ms",
-
-This is a property that may be specified in the host's OF node. See
-Documentation/devicetree/bindings/mmc/mmc-controller.yaml.
-
-> drivers/mmc/core/host.c-                                 &host->ios.power=
-_delay_ms);
-
-Note that the default value is set to 10 ms, in mmc_alloc_host(). So,
-if you need a different value, that can be specified in DT.
-
+>                 With FUA                Without FUA
 >
+> With CQE        Reliable Write  350     Write   125
+>                                         Flush   300
+>                 Total           350             425
 >
-> pwrseq->post_power_on_delay_ms is set via:
+> Without CQE     Reliable Write  350     Write   125
+>                 CMD13           100     CMD13   100
+>                                         Flush   300
+>                                         CMD13   100
+>                 Total           450             625
 >
-> drivers/mmc/core/pwrseq_simple.c:       device_property_read_u32(dev, "po=
-st-power-on-delay-ms",
-
-This is a property that may be specified in the pwrseq OF node. See
-Documentation/devicetree/bindings/mmc/mmc-pwrseq-simple.yaml.
-
-> drivers/mmc/core/pwrseq_simple.c-                                &pwrseq-=
->post_power_on_delay_ms);
+> FYI the test I was doing was:
+>
+>   # cat test.sh
+>         #!/bin/sh
+>
+>         echo "hi" > /mnt/mmc/hi.txt
+>
+>         sync
 >
 >
-> However, they are both used to delay mmc_power_up(),
-> and the host delay is used to sleep twice, which I
-> found confusing ;)
-
-It's certainly a bit hairy to follow, but I think you have understood
-things correctly.
-
+>   # perf record --no-bpf-event -e mmc:* -a -- ./test.sh
+>   # perf script --ns --deltatime
 >
-> Regards
 >
+> The conclusion in this case would seem to be that CQE
+> makes the case for removing FUA less bad.
+>
+> Perhaps CQE is more common in newer eMMCs which in turn
+> have better FUA implementations.
 
-Looks like you are getting closer to the solution, at least for the
-first step to make sure the SDIO card is getting detected properly.
-Nice!
+Very interesting data - and thanks for helping out with tests!
+
+A few observations and thoughts from the above.
+
+1)
+A "normal" use case would probably include additional writes (regular
+writes) and I guess that could impact the flushing behavior. Maybe the
+flushing becomes less heavy, if the device internally/occasionally
+needs to flush its cache anyway? Or - maybe it doesn't matter at all,
+because the reliable writes are triggering the cache to be flushed
+too.
+
+2)
+Assuming that a reliable write is triggering the internal cache to be
+flushed too, then we need less number of commands to be sent/acked to
+the eMMC - compared to not using FUA. This means less protocol
+overhead when using FUA - and perhaps that's what your tests is
+actually telling us?
 
 Kind regards
 Uffe
