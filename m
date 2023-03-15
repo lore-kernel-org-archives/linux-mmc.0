@@ -2,121 +2,156 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B1B12C61DA4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 20:56:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EEB9C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 21:14:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231820AbjCOU4h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 16:56:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54558 "EHLO
+        id S229556AbjCOVOl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 17:14:41 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58074 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230266AbjCOU4g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 16:56:36 -0400
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5D192BF7
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 13:56:35 -0700 (PDT)
-Received: by mail-pj1-x1029.google.com with SMTP id u3-20020a17090a450300b00239db6d7d47so3528657pjg.4
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 13:56:35 -0700 (PDT)
+        with ESMTP id S232319AbjCOVOh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 17:14:37 -0400
+Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46A76360AF
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 14:14:05 -0700 (PDT)
+Received: by mail-wm1-x332.google.com with SMTP id k25-20020a7bc419000000b003ed23114fa7so1877558wmi.4
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 14:14:05 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1678913795;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=z84vdnHiRqRhIyxTsu5Pz3PgSNNcE2YtTRegy9XPJ4U=;
-        b=W0vzKfbMSniEwUYBLxk3WHtG0hSZCnLx2K6R6OlCD0LwPHcI0RDH6i5waZnhw9kJzn
-         N3XxS+LMwYpLw3zKzLZPvpq8kQbRpVBxQOd0cp9yJQVqsiq5nRqcaGYfttvvc9jZLvu+
-         2wIFNiJQfVJFYf0U4AHxZloaqEy1T5MoLmCLMGxaAnvp04Ne3OesL8QVJAJ+jx3cBf7m
-         NYYwyY8hVUVn2y3ffHY34baOVwfd/NaDuKLK3XWSjDFD27zMPhmXLoQIm4kLLo51y6Xw
-         6gJqZw2LHxrwGkZhWstqT66lXaSHngVWk76252J05fblP/2/0CGeXg0WtXLs2euihfi4
-         PhTg==
+        d=gmail.com; s=20210112; t=1678914844;
+        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
+         :content-language:user-agent:mime-version:date:message-id:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=IqbFt/pBqE5TKXfMvdh7DdqHmCUQvpuDlko3Y111n6Q=;
+        b=lHyNA0iN3AhDcoMXRc4Cv+gWXaGMDbun/JVL4l1g4S0/58rP+rSTdzf9e1pdbiFCRm
+         r2TQUH7mWheMx6e/lSR+eJWrVCXgUCaXFNyTzXra5YWHCkFFmT5WyiqPnmrY+tZ4StaT
+         C6WGkRNddO6y+9o+AV1dNbW7uYF6hugngMic37KCCq9oXndkUBb+BD32Kv8RX6TQGJdi
+         zKI8RO1MibqmEFWvFbIQE1FQhAowH+lAS/9TYkYsllS+gChbiTC598aEmM0LhEXZphFp
+         9UFV9rbF+QEFhlccG7eTvxDuqlwAXSZKKYb7JEDqsWtYOzMLxUm02K/4jayP45UcST28
+         l1zw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678913795;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=z84vdnHiRqRhIyxTsu5Pz3PgSNNcE2YtTRegy9XPJ4U=;
-        b=dnO6nC/z7sJfGM3L5yRxkAr3gV8ICsAr/xWY3jfxymT6HsWM27fe2wJGnBJ7xsUhh/
-         d59g7lo9AC3HOyeR1gYE8dqPsnnuvYeyN/Rwn61+DGetfXM2j0Stu4DakfZQaswvJQeC
-         naPqTDb7HNaakqp5OTmbGez8XRW2qpDWrvBzPHWVyHgHYjfKAkUz/8KX0mroBkkjtU3w
-         +k+4CCh4jYDHccG2U8EJ8HgPgbFEmcaXq/umoMJysnOJIvhV85JXTrSlxNtwrk7wegMx
-         Vp8XWWdTRFRuxkKGrwkDbTehvSu1JKqJDmL/Ed7MkM9sb71IuoRJM/FcEjg66gIHTeW2
-         fR+Q==
-X-Gm-Message-State: AO0yUKWYfnEypohzTizb6V4ZAUGzog/FfAKbXLABPKFccZeFXnmdOojp
-        E4nVIhdzvlHmUg7DArDfVuemNfLu4FW/bCR8ACOMig==
-X-Google-Smtp-Source: AK7set9Lqxc9Zjf6HNWj3hSvkV7xlNAl2GlygnkcJoOS+b4e1BHgUEzRwsa+zk5UtznFzSacYBz7tBCLaD6lhJ72m+A=
-X-Received: by 2002:a17:903:25d5:b0:1a0:4847:864c with SMTP id
- jc21-20020a17090325d500b001a04847864cmr377557plb.13.1678913795246; Wed, 15
- Mar 2023 13:56:35 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1678914844;
+        h=content-transfer-encoding:in-reply-to:subject:from:references:cc:to
+         :content-language:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=IqbFt/pBqE5TKXfMvdh7DdqHmCUQvpuDlko3Y111n6Q=;
+        b=PNpRt/GZRpSHkToYjim96ntcIl/ilhL32Js8hZKh0H9pQ1d9TyvOt6bMk4aM2W2gsP
+         Erw1N8Qjz+vemEc6O+8mQkIy7qnlGh/xcgNob4scqifMkAhGzGdVAQVzFDA0shaHESFd
+         moZgLhE5bO4A7RIkWKKULHBtlswSnLsR9NFxO/jfZcsVXQhf9gF/abQX+WjgshCC3umY
+         Smy0g32g+SXnSG0YH3DYjKl+C5ACKI6v/4yWeEjBl0lv/CFW2RyolyYo0+qkOfM20A+E
+         7jD/RPbriUAi38YpSkOV0XDIsDPqYYnL0C4TCb4PieDC69LCtWNR570N5f9Nsc4/85jh
+         aUDg==
+X-Gm-Message-State: AO0yUKWCebiwEYchnxEgGWWop1bBE9xtuuBWPFEG1ZnyXg1f2xlbsLsv
+        91Dcb2lbWbxdEBzSWf9qUkc=
+X-Google-Smtp-Source: AK7set8dS3PA4TFy/DP8vm97OAHvVKDEGbkpTI/0jnu7LSmYNPyb37++a3xBOqFPl+MnLEgwBhkOiw==
+X-Received: by 2002:a05:600c:45d2:b0:3ed:2a8f:e6dd with SMTP id s18-20020a05600c45d200b003ed2a8fe6ddmr8033503wmo.6.1678914843708;
+        Wed, 15 Mar 2023 14:14:03 -0700 (PDT)
+Received: from ?IPV6:2a01:c23:bcc4:9b00:c423:87da:b23:892a? (dynamic-2a01-0c23-bcc4-9b00-c423-87da-0b23-892a.c23.pool.telefonica.de. [2a01:c23:bcc4:9b00:c423:87da:b23:892a])
+        by smtp.googlemail.com with ESMTPSA id k3-20020a7bc403000000b003ed1f69c967sm3068957wmi.9.2023.03.15.14.14.02
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 15 Mar 2023 14:14:03 -0700 (PDT)
+Message-ID: <15b12187-abcc-b77f-6538-ffae5988bd2b@gmail.com>
+Date:   Wed, 15 Mar 2023 22:14:00 +0100
 MIME-Version: 1.0
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr> <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr> <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
- <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr> <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
- <0450e34e-7190-104c-832a-150f15f7c825@free.fr> <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
- <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr> <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
- <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr> <CAPDyKFrC3a5-VP2DvCYGYUzKtX4Jc7cvNQOKfutW0sha=szOyg@mail.gmail.com>
- <c7e48c6f-530b-7198-b8bb-fc927a2fdc66@free.fr> <CAPDyKFpJR9rgadXEBn+73FKgmLM8sZgzNbKV_x_udwOSRGH44Q@mail.gmail.com>
- <893311e7-6fce-118b-a683-6988de161698@free.fr>
-In-Reply-To: <893311e7-6fce-118b-a683-6988de161698@free.fr>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 15 Mar 2023 21:55:58 +0100
-Message-ID: <CAPDyKFotQ3hVHM379f8yp7LBcyN6zGTz18x3X07_mx4mZsAh+A@mail.gmail.com>
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
-Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Content-Language: en-US
+To:     Jerome Brunet <jbrunet@baylibre.com>,
+        Marc Gonzalez <marc.w.gonzalez@free.fr>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
         Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Angus Ainslie <angus@akkea.ca>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         Pierre-Hugues Husson <phh@phh.me>,
-        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-Content-Type: text/plain; charset="UTF-8"
+        Rong Chen <rong.chen@amlogic.com>,
+        Yang Yingliang <yangyingliang@huawei.com>
+Cc:     MMC <linux-mmc@vger.kernel.org>,
+        AML <linux-amlogic@lists.infradead.org>
+References: <11a8a0c8-a5b1-8f38-a139-97172ab7be68@free.fr>
+ <0696106f-8d70-6410-999a-fcda6c5b39c2@gmail.com>
+ <b6971cd6-80f2-522a-64fb-82b126500010@free.fr>
+ <1jcz5axc8j.fsf@starbuckisacylon.baylibre.com>
+From:   Heiner Kallweit <hkallweit1@gmail.com>
+Subject: Re: [PATCH] mmc: meson-gx: increase power-up delay
+In-Reply-To: <1jcz5axc8j.fsf@starbuckisacylon.baylibre.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 14 Mar 2023 at 17:38, Marc Gonzalez <marc.w.gonzalez@free.fr> wrote:
->
-> On 14/03/2023 12:08, Ulf Hansson wrote:
->
-> > If the delay is to manage vmmc and vqmmc, which is somewhat part of
-> > the generic specifications (SD/MMC), then it should be described in
-> > the host's node.
-> >
-> > A pwrseq is something special, which is also platform and device
-> > specific (the SDIO device). If the delays correspond to this, it
-> > should be part of the pwrseq node.
->
-> Uffe,
->
-> Wouldn't it make sense to warn, when probing for a non-removable card
-> returns nothing?
->
-> Something along these lines (which I can spin into a formal patch)
->
-> --- a/drivers/mmc/core/core.c
-> +++ b/drivers/mmc/core/core.c
-> @@ -2257,6 +2257,9 @@ void mmc_rescan(struct work_struct *work)
->                         break;
->         }
->
-> +       if (!mmc_card_is_removable(host) && !host->card)
-> +               dev_warn(mmc_dev(host), "no device found");
-> +
->         /*
->          * Ignore the command timeout errors observed during
->          * the card init as those are excepted.
->
-> Regards
->
+On 15.03.2023 16:27, Jerome Brunet wrote:
+> 
+> On Wed 15 Mar 2023 at 11:20, Marc Gonzalez <marc.w.gonzalez@free.fr> wrote:
+> 
+>> On 14/03/2023 20:45, Heiner Kallweit wrote:
+>>
+>>> On 14.03.2023 18:24, Marc Gonzalez wrote:
+>>>
+>>>> With the default power-up delay, on small kernels, the host probes
+>>>> too soon, and mmc_send_io_op_cond() times out.
+>>>
+>>> Looking at mmc_power_up() and how power_delay_ms is used
+>>> I wonder what you mean with "host probes too soon".
+>>
+>> Hello Heiner,
+>>
+>> Thanks for your interest in my patch! :)
+>>
+>> I should have added a link to the thread that led to the patch.
+>> https://patchwork.kernel.org/project/linux-wireless/patch/c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr/
+>> Start at "I have run into another issue."
+>>
+>> Basically, I have an S905X2-based board.
+>> I built a small kernel for it (with only a few drivers), that boots really fast.
+>>
+>> mmc2 (SDIO controller hooked to WiFi chip) would not probe at all,
+>> unless I added lots of printks.
+>> Basically, calling mmc_send_io_op_cond() too soon after the controller
+>> has been reset leads to the CMD5 request timing out.
+>>
+>>
+> 
+> I tend to agree with Heiner here.
+> This patch is backing a contraint only reported on your design in the
+> driver of every AML SoC supported, for every MMC controller.
+> 
+> I think you should look first in your vmmc and vqmmc regulators and
+> their setup times.
+> 
+> "fixed-regulator" have properties which might be interesting to you,
+> like
+>  * startup-delay-us
+>  * off-on-delay-us
+> 
+>>> Are you sure that the additional delay is needed for the Amlogic MMC
+>>> block IP in general? Or could it be that your issue is caused by
+>>> a specific regulator and you need to add a delay there?
+>>
+>> The eternal question...
+>>
+>> I have only one type of board. (Actually, I have a reference design
+>> that is slightly different, so I should test on that one as well.)
+>>
 
-Seems reasonable to me! Please post a patch.
+Let me ask few more questions:
 
-Kind regards
-Uffe
+You said that the issue is with a SDIO card. How about eMMC and sdcard,
+does the issue occur for them too?
+
+Then you mention "too soon after reset", but add a delay to power-up.
+If the delay would be needed after reset, then shouldn't it be in
+meson_mmc_probe() after the call to device_reset_optional()?
+
+>> In vendor kernels, they add delays to the WiFi drivers.
+>> Maybe they have run into the issue, and they're just fixing the symptom?
+>>
+>> Default value for ios.power_delay_ms is 10 ms.
+>> msleep(ios.power_delay_ms) is called twice in mmc_power_up().
+>> So raising the delay from 10 to 20 adds 20 ms
+>> to the latency of initializing SDIO/SD/MMC controllers.
+>>
+>> Would you be willing to test if the problem manifests on your board?
+>>
+>> Regards
+> 
+
