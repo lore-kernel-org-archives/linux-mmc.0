@@ -2,77 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 56594C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 18:57:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1B12C61DA4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 20:56:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229547AbjCOS5h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 14:57:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60598 "EHLO
+        id S231820AbjCOU4h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 16:56:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54558 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232638AbjCOS5g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 14:57:36 -0400
-Received: from mail-lf1-x12c.google.com (mail-lf1-x12c.google.com [IPv6:2a00:1450:4864:20::12c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3663828E4A
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 11:57:35 -0700 (PDT)
-Received: by mail-lf1-x12c.google.com with SMTP id bi9so3364288lfb.12
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 11:57:35 -0700 (PDT)
+        with ESMTP id S230266AbjCOU4g (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 16:56:36 -0400
+Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5D192BF7
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 13:56:35 -0700 (PDT)
+Received: by mail-pj1-x1029.google.com with SMTP id u3-20020a17090a450300b00239db6d7d47so3528657pjg.4
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 13:56:35 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678906653;
-        h=subject:in-reply-to:cc:to:from:date:message-id:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=g+Z6yMufViGivHBpi3ybAlT526oTlR6qrL1yn4estsw=;
-        b=RF1h7LFH138tCY9kTL2ybEQ9KerX/5fYP0a6Fo4UuskEjKz0b4IXSNeqeXRNHBAHdo
-         C/D/CtfyW5ZbVzZVZyBV0UwH+UxcUKUXILAAk6LpoHQDReiZpNKA8+PtxZUv7J6BjpK5
-         WlXvsljW+MrK4GuHu9a3EgFdEdb3p4NmEHmPtcsUAFt2ffVdXhx1OsAGZvlN4Fo2utZd
-         bixVk4SzZx32qIbGU0W9r8j678q+L8UfhxWKRnoSWAwfenhcEBCo6XH+ip+shSaGwI6r
-         Rg7YHYAPl8w8tVWVx2lLVQw4yRnk+xe94Kn228IGyAuCdSKRK5dQyLsqu05idvSD6i2y
-         b4hw==
+        d=linaro.org; s=google; t=1678913795;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=z84vdnHiRqRhIyxTsu5Pz3PgSNNcE2YtTRegy9XPJ4U=;
+        b=W0vzKfbMSniEwUYBLxk3WHtG0hSZCnLx2K6R6OlCD0LwPHcI0RDH6i5waZnhw9kJzn
+         N3XxS+LMwYpLw3zKzLZPvpq8kQbRpVBxQOd0cp9yJQVqsiq5nRqcaGYfttvvc9jZLvu+
+         2wIFNiJQfVJFYf0U4AHxZloaqEy1T5MoLmCLMGxaAnvp04Ne3OesL8QVJAJ+jx3cBf7m
+         NYYwyY8hVUVn2y3ffHY34baOVwfd/NaDuKLK3XWSjDFD27zMPhmXLoQIm4kLLo51y6Xw
+         6gJqZw2LHxrwGkZhWstqT66lXaSHngVWk76252J05fblP/2/0CGeXg0WtXLs2euihfi4
+         PhTg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678906653;
-        h=subject:in-reply-to:cc:to:from:date:message-id:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=g+Z6yMufViGivHBpi3ybAlT526oTlR6qrL1yn4estsw=;
-        b=WNekYK6nkOYWduNMKw0kor0uk3zoRN01qxUiyaR1NjEwOJ5+hFl9+GwjcaipMiiu0y
-         M2LAjco0gVcJ/pkCjfhyvDa6Bxe0FtkWLe9dU6ftKAsosdSPg+PHAYmRlxbFoLxyxHXm
-         fwP5ojzFGd5F73pcTQin1ce5WXRH9O+dAZ5RYxiC2JlDf8+JKHw2C8k54Aiy8RQaAEiz
-         WR2HmdtS2o7+4uhbncfG4u8bM4G+MhOMVqD1V+G+ymlc1E5zUewYBt5u1qUXipMX+FYx
-         UQn32y7YqxuSaYERZjCyoDfN0COzq5LJLislbvx6oLECBnKUJpJECY+l/wXCnkcDn4IF
-         lyLw==
-X-Gm-Message-State: AO0yUKW6emdR/AxhZnT0c8u6KhqAy8JyprrgkLNDUpTcTkqQ8G99xll6
-        fXHP85woELsHarvS3dO0nT54p7w4HVIoIfe6
-X-Google-Smtp-Source: AK7set/kH0E56fzlYeGvT8XSXDFmmdEdnU/AkMVVq+DL5sx7WlFgRkbrkGyITGYATozSIltsWq68pQ==
-X-Received: by 2002:a05:6512:408:b0:4dc:65c0:c74e with SMTP id u8-20020a056512040800b004dc65c0c74emr2374568lfk.29.1678906653229;
-        Wed, 15 Mar 2023 11:57:33 -0700 (PDT)
-Received: from letter.txt (46-138-144-249.dynamic.spd-mgts.ru. [46.138.144.249])
-        by smtp.gmail.com with ESMTPSA id m4-20020a056512014400b004dc6070e121sm909932lfo.83.2023.03.15.11.57.32
-        for <linux-mmc@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 15 Mar 2023 11:57:32 -0700 (PDT)
-Message-ID: <6412151c.050a0220.36b30.3190@mx.google.com>
-Date:   Wed, 15 Mar 2023 11:57:32 -0700 (PDT)
-From:   Sergey Lisov <sleirsgoevy@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Jaehoon Chung <jh80.chung@samsung.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-samsung-soc@vger.kernel.org, linux-kernel@vger.kernel.org
-In-Reply-To: <1bd962b1-2fbc-9bdb-8b7a-9f2c70c316e2@linaro.org>
-Subject: Re: [PATCH v5 1/3] dt-bindings: exynos-dw-mshc-common: add exynos7885
- variants
+        d=1e100.net; s=20210112; t=1678913795;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=z84vdnHiRqRhIyxTsu5Pz3PgSNNcE2YtTRegy9XPJ4U=;
+        b=dnO6nC/z7sJfGM3L5yRxkAr3gV8ICsAr/xWY3jfxymT6HsWM27fe2wJGnBJ7xsUhh/
+         d59g7lo9AC3HOyeR1gYE8dqPsnnuvYeyN/Rwn61+DGetfXM2j0Stu4DakfZQaswvJQeC
+         naPqTDb7HNaakqp5OTmbGez8XRW2qpDWrvBzPHWVyHgHYjfKAkUz/8KX0mroBkkjtU3w
+         +k+4CCh4jYDHccG2U8EJ8HgPgbFEmcaXq/umoMJysnOJIvhV85JXTrSlxNtwrk7wegMx
+         Vp8XWWdTRFRuxkKGrwkDbTehvSu1JKqJDmL/Ed7MkM9sb71IuoRJM/FcEjg66gIHTeW2
+         fR+Q==
+X-Gm-Message-State: AO0yUKWYfnEypohzTizb6V4ZAUGzog/FfAKbXLABPKFccZeFXnmdOojp
+        E4nVIhdzvlHmUg7DArDfVuemNfLu4FW/bCR8ACOMig==
+X-Google-Smtp-Source: AK7set9Lqxc9Zjf6HNWj3hSvkV7xlNAl2GlygnkcJoOS+b4e1BHgUEzRwsa+zk5UtznFzSacYBz7tBCLaD6lhJ72m+A=
+X-Received: by 2002:a17:903:25d5:b0:1a0:4847:864c with SMTP id
+ jc21-20020a17090325d500b001a04847864cmr377557plb.13.1678913795246; Wed, 15
+ Mar 2023 13:56:35 -0700 (PDT)
+MIME-Version: 1.0
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr> <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr> <13676dcc-944f-cf3d-8adf-ee3d4e8fa699@free.fr>
+ <e5baf73b-3b9d-1011-2ed9-4b6fc7ee644f@free.fr> <CAPDyKFoAT-jMkYb7=m--q_eEb2xxH-VPQy5vaHNvw4s=WiAeCg@mail.gmail.com>
+ <0450e34e-7190-104c-832a-150f15f7c825@free.fr> <3d91a067-c9c3-6d71-11a7-1289ea67f109@free.fr>
+ <eecb86be-81e3-09cd-8ec7-4e77c42f2795@free.fr> <CAFBinCDHRhLSyFsEv7cdhSgZorj-TdR3HhqSBnAQcUtEsecV=Q@mail.gmail.com>
+ <6ac1ecb1-eba4-b0a3-579c-afcbe532a474@free.fr> <CAPDyKFrC3a5-VP2DvCYGYUzKtX4Jc7cvNQOKfutW0sha=szOyg@mail.gmail.com>
+ <c7e48c6f-530b-7198-b8bb-fc927a2fdc66@free.fr> <CAPDyKFpJR9rgadXEBn+73FKgmLM8sZgzNbKV_x_udwOSRGH44Q@mail.gmail.com>
+ <893311e7-6fce-118b-a683-6988de161698@free.fr>
+In-Reply-To: <893311e7-6fce-118b-a683-6988de161698@free.fr>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 15 Mar 2023 21:55:58 +0100
+Message-ID: <CAPDyKFotQ3hVHM379f8yp7LBcyN6zGTz18x3X07_mx4mZsAh+A@mail.gmail.com>
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
+Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Pierre-Hugues Husson <phh@phh.me>,
+        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-amlogic@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
->> +      - samsung,exynos7885-dw-mshc
->> +      - samsung,exynos7885-dw-mshc-smu
-> 
-> What about the if-then at the end? Since this is pretty compatible with
-> exynos7, then I would expect being added also there.
+On Tue, 14 Mar 2023 at 17:38, Marc Gonzalez <marc.w.gonzalez@free.fr> wrote:
+>
+> On 14/03/2023 12:08, Ulf Hansson wrote:
+>
+> > If the delay is to manage vmmc and vqmmc, which is somewhat part of
+> > the generic specifications (SD/MMC), then it should be described in
+> > the host's node.
+> >
+> > A pwrseq is something special, which is also platform and device
+> > specific (the SDIO device). If the delays correspond to this, it
+> > should be part of the pwrseq node.
+>
+> Uffe,
+>
+> Wouldn't it make sense to warn, when probing for a non-removable card
+> returns nothing?
+>
+> Something along these lines (which I can spin into a formal patch)
+>
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2257,6 +2257,9 @@ void mmc_rescan(struct work_struct *work)
+>                         break;
+>         }
+>
+> +       if (!mmc_card_is_removable(host) && !host->card)
+> +               dev_warn(mmc_dev(host), "no device found");
+> +
+>         /*
+>          * Ignore the command timeout errors observed during
+>          * the card init as those are excepted.
+>
+> Regards
+>
 
-Makes sense. Also it probably makes sense to add "samsung,exynos7-dw-mshc"
-as a fallback compatible to the jackpotlte.dts, because it probably
-somewhat worked for whoever contributed that.
+Seems reasonable to me! Please post a patch.
 
+Kind regards
+Uffe
