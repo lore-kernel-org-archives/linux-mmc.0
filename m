@@ -2,102 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F306AC7618B
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 07:41:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5450C61DA4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 07:48:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231387AbjCOHlz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 03:41:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58150 "EHLO
+        id S231536AbjCOHs1 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 03:48:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231759AbjCOHle (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 03:41:34 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E99482ED79;
-        Wed, 15 Mar 2023 00:41:28 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 85CD461B69;
-        Wed, 15 Mar 2023 07:41:28 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 75D56C4339B;
-        Wed, 15 Mar 2023 07:41:25 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1678866087;
-        bh=pC6J71HMGEMzfwF1VBlEF/ojnFSQmDT4iie7DhyRXec=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=V9/Z1mND4NLX/QxtJE+/+w9De3jtLBU/5d5dntHxZLs3g2iOP4xK6mlmYMche178A
-         CatEJSBbbguK3aSC6KgK9vge/ykJ63s43utNFlLIuBacGU5iZV1AkAlcFRcnR2veiO
-         GaTyzTYTLTZrEGPFaDbo9/gTuRCzjXC/A2izwx6rkVl2f3YePXP+sIrmNN+WrX54ND
-         OldYK/E8YDolbZWlmgjIbd93UhFT65GakWVpThI2XdcPF+Q2QpBnnTeo+SKXgpwnwv
-         UerA/dMtRx+Eb2mVZdi3ODS39n3mH56FOlOFSzw4h9gV42HWE5BlqiIIyZuBUN0RLR
-         jOvalyr2LwMzw==
-Date:   Wed, 15 Mar 2023 13:11:16 +0530
-From:   Manivannan Sadhasivam <mani@kernel.org>
-To:     Yang Li <yang.lee@linux.alibaba.com>
-Cc:     ulf.hansson@linaro.org, afaerber@suse.de,
-        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH -next] mmc: owl-mmc: Use
- devm_platform_get_and_ioremap_resource()
-Message-ID: <20230315074116.GB25575@thinkpad>
-References: <20230315054113.48898-1-yang.lee@linux.alibaba.com>
- <20230315073912.GA25575@thinkpad>
+        with ESMTP id S230169AbjCOHsU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 03:48:20 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B980462FE0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 00:48:02 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id cn21so41744955edb.0
+        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 00:48:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1678866481;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=flS65m6zpOwZwk8Rpq8oSYxl86XXWfwzo9qoU3TRW3k=;
+        b=a+UzzvO0EdWvfHqpZ+JkF0Sj6/Wc3KFKQrfSz/yq+K+zdci/QWUaCMcqEBBABxyfBS
+         kfRvWUOb0lsLZjLdquNb57IHHMjGT9/WruduRv4mgRcecOm0pSjwTl5OnvhM3Sdv75tL
+         bSWi9hYGEHhblWHHC5BnT9YIaJuUOrYQZrzK6obqFcOqdDQITv7wNnkPkXG654gzOKGb
+         vW96TTWPxM++gMkDWtCKq04NAhPTfQLFWqKe4bsLIQodR0Fnl9dInZL3CYEEg1zFBy8V
+         0PpfHQGLay33RtgZ9Vax1KuNYarenhpDoexvx5quYvck2srBUTfoVFb0gUFyXRb7gBRF
+         JU3w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678866481;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=flS65m6zpOwZwk8Rpq8oSYxl86XXWfwzo9qoU3TRW3k=;
+        b=QMQTZf66DMO3qw5QmbiUznffwCle4iodLbJ4aHobLD1DK2PEa+HxH5wli+ufPKSCIf
+         DZquGlIdZEadai27ZuiK06O0i7tDF+MTz+G1g2G7NlzI7CQlE5Ssnugf46yRreeAsEm8
+         WBcHeBEJi1L8dqCYy0jbNUFb2+zkLPSsx4sQW2u/Q8E07fO0vTtvvCp6CeZvYSC2T5DB
+         i+6JepeKA2o+EwrZG+BqJdQHdVN9iBr3M2CeYt1ZN6zGqFvLs+MJIj8nVnWw3MwOckO0
+         jQegNCewet+POD6MdHlCDdLWo3A46MEMRssSaX654juNSmRJ57DkfxNW0VgxRlUbMjLC
+         kO4Q==
+X-Gm-Message-State: AO0yUKVdLcf3fGmk/OlVgvSzPb1ScqS2oXjWWSyHd4yBtw6SR4nN99LE
+        WJsx/Sy9TtYQ3MAZSAjzk91LKQ==
+X-Google-Smtp-Source: AK7set9zZ+gCQxgiRNEmWP7Ta1I/fHTCP0stjypuN/iQ/Cwg3Qxi78lRHJEW9qtE5PPi1fnwrKb9Hw==
+X-Received: by 2002:a05:6402:38a:b0:4fb:2296:30af with SMTP id o10-20020a056402038a00b004fb229630afmr1746327edv.20.1678866481260;
+        Wed, 15 Mar 2023 00:48:01 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:940e:8615:37dc:c2bd? ([2a02:810d:15c0:828:940e:8615:37dc:c2bd])
+        by smtp.gmail.com with ESMTPSA id bt20-20020a0564020a5400b004fb419921e2sm1946643edb.57.2023.03.15.00.47.59
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 15 Mar 2023 00:48:00 -0700 (PDT)
+Message-ID: <33ae98be-480e-8951-88d8-7624a695fcc9@linaro.org>
+Date:   Wed, 15 Mar 2023 08:47:59 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230315073912.GA25575@thinkpad>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.8.0
+Subject: Re: [PATCH 0/6] QCM2290 compatibles
+Content-Language: en-US
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
+        Vinod Koul <vkoul@kernel.org>,
+        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        Wesley Cheng <quic_wcheng@quicinc.com>,
+        Amit Kucheria <amitk@kernel.org>,
+        Thara Gopinath <thara.gopinath@gmail.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Zhang Rui <rui.zhang@intel.com>
+Cc:     linux-arm-msm@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-usb@vger.kernel.org, linux-pm@vger.kernel.org
+References: <20230314-topic-2290_compats-v1-0-47e26c3c0365@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230314-topic-2290_compats-v1-0-47e26c3c0365@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 15, 2023 at 01:09:26PM +0530, Manivannan Sadhasivam wrote:
-> On Wed, Mar 15, 2023 at 01:41:13PM +0800, Yang Li wrote:
-> > According to commit 890cc39a8799 ("drivers: provide
-> > devm_platform_get_and_ioremap_resource()"), convert
-> > platform_get_resource(), devm_ioremap_resource() to a single
-> > call to devm_platform_get_and_ioremap_resource(), as this is exactly
-> > what this function does.
-> > 
-> > Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
-> > ---
-> >  drivers/mmc/host/owl-mmc.c | 3 +--
-> >  1 file changed, 1 insertion(+), 2 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
-> > index 3dc143b03939..6f9d31a886ba 100644
-> > --- a/drivers/mmc/host/owl-mmc.c
-> > +++ b/drivers/mmc/host/owl-mmc.c
-> > @@ -578,8 +578,7 @@ static int owl_mmc_probe(struct platform_device *pdev)
-> >  	owl_host->mmc = mmc;
-> >  	spin_lock_init(&owl_host->lock);
-> >  
-> > -	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+On 14/03/2023 13:52, Konrad Dybcio wrote:
+> Document a couple of compatibles for IPs found on the QCM2290 that don't
+> require any specific driver changes
 > 
-> You forgot to remove the local variable which is now unused.
-> 
+> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
 
-Oops, no my bad. It is being used...
+I assume this is what you talked about that DTS will follow a bit later?
 
-Reviewed-by: Manivannan Sadhasivam <mani@kernel.org>
+Best regards,
+Krzysztof
 
-Thanks,
-Mani
-
-> Thanks,
-> Mani
-> 
-> > -	owl_host->base = devm_ioremap_resource(&pdev->dev, res);
-> > +	owl_host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
-> >  	if (IS_ERR(owl_host->base)) {
-> >  		ret = PTR_ERR(owl_host->base);
-> >  		goto err_free_host;
-> > -- 
-> > 2.20.1.7.g153144c
-> > 
-> 
-> -- 
-> மணிவண்ணன் சதாசிவம்
-
--- 
-மணிவண்ணன் சதாசிவம்
