@@ -2,62 +2,89 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 68F86C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 05:54:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 10D7FC61DA4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 07:40:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231302AbjCOFyG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 01:54:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52682 "EHLO
+        id S231325AbjCOHk2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 03:40:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60388 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231229AbjCOFyE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 01:54:04 -0400
-Received: from out30-130.freemail.mail.aliyun.com (out30-130.freemail.mail.aliyun.com [115.124.30.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9893F23334;
-        Tue, 14 Mar 2023 22:54:00 -0700 (PDT)
-X-Alimail-AntiSpam: AC=PASS;BC=-1|-1;BR=01201311R361e4;CH=green;DM=||false|;DS=||;FP=0|-1|-1|-1|0|-1|-1|-1;HT=ay29a033018045192;MF=yang.lee@linux.alibaba.com;NM=1;PH=DS;RN=7;SR=0;TI=SMTPD_---0Vduv5Vs_1678859637;
-Received: from localhost(mailfrom:yang.lee@linux.alibaba.com fp:SMTPD_---0Vduv5Vs_1678859637)
-          by smtp.aliyun-inc.com;
-          Wed, 15 Mar 2023 13:53:58 +0800
-From:   Yang Li <yang.lee@linux.alibaba.com>
-To:     ulf.hansson@linaro.org
-Cc:     jesper.nilsson@axis.com, lars.persson@axis.com,
-        linux-arm-kernel@axis.com, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Yang Li <yang.lee@linux.alibaba.com>
-Subject: [PATCH -next] mmc: usdhi6rol0: Use devm_platform_get_and_ioremap_resource()
-Date:   Wed, 15 Mar 2023 13:53:55 +0800
-Message-Id: <20230315055355.66733-1-yang.lee@linux.alibaba.com>
-X-Mailer: git-send-email 2.20.1.7.g153144c
+        with ESMTP id S231983AbjCOHkJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 03:40:09 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DCD382A6C8;
+        Wed, 15 Mar 2023 00:39:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 82531B81CD1;
+        Wed, 15 Mar 2023 07:39:27 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 09EA7C433D2;
+        Wed, 15 Mar 2023 07:39:22 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1678865966;
+        bh=7ZQwAEI6pHf40qs7Wc1GLPddnkDUNdAFyfddgNyouZk=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=nkpBEKI10SNOCsHQOvp97N0A73oCG65sHifppYHIOFnlqRQdT3wRc3K5QEQ246RT5
+         y1bOqfLD56Gc0kZh3TSz+FTRw9xSZltRZ/O8oFmMTa7cUwQVSozZAEd4LGEkGpl76E
+         7opE6+ZUpNb7ZlPA0PeHjovAy7/4BEJa1XSvIza/f2ibyUjMJnyA74NuVJvBTJLQ1I
+         Q1cNmKX65nGKT8UkKbNck7B9EZ6TAugyvgUJIl6TshJPN/T4u2pZf8kxh37caH2zNA
+         JU+LliHheSljJn99NjDHMtg8nrk3CnzQGLtPUG0qJpIaL/ZWh4UmTRUVBCmzAk2P8C
+         3b8H3RjL0jmtw==
+Date:   Wed, 15 Mar 2023 13:09:12 +0530
+From:   Manivannan Sadhasivam <mani@kernel.org>
+To:     Yang Li <yang.lee@linux.alibaba.com>
+Cc:     ulf.hansson@linaro.org, afaerber@suse.de,
+        linux-mmc@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-actions@lists.infradead.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH -next] mmc: owl-mmc: Use
+ devm_platform_get_and_ioremap_resource()
+Message-ID: <20230315073912.GA25575@thinkpad>
+References: <20230315054113.48898-1-yang.lee@linux.alibaba.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20230315054113.48898-1-yang.lee@linux.alibaba.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-According to commit 890cc39a8799 ("drivers: provide
-devm_platform_get_and_ioremap_resource()"), convert
-platform_get_resource(), devm_ioremap_resource() to a single
-call to devm_platform_get_and_ioremap_resource(), as this is exactly
-what this function does.
+On Wed, Mar 15, 2023 at 01:41:13PM +0800, Yang Li wrote:
+> According to commit 890cc39a8799 ("drivers: provide
+> devm_platform_get_and_ioremap_resource()"), convert
+> platform_get_resource(), devm_ioremap_resource() to a single
+> call to devm_platform_get_and_ioremap_resource(), as this is exactly
+> what this function does.
+> 
+> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+> ---
+>  drivers/mmc/host/owl-mmc.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/host/owl-mmc.c b/drivers/mmc/host/owl-mmc.c
+> index 3dc143b03939..6f9d31a886ba 100644
+> --- a/drivers/mmc/host/owl-mmc.c
+> +++ b/drivers/mmc/host/owl-mmc.c
+> @@ -578,8 +578,7 @@ static int owl_mmc_probe(struct platform_device *pdev)
+>  	owl_host->mmc = mmc;
+>  	spin_lock_init(&owl_host->lock);
+>  
+> -	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 
-Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
----
- drivers/mmc/host/usdhi6rol0.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+You forgot to remove the local variable which is now unused.
 
-diff --git a/drivers/mmc/host/usdhi6rol0.c b/drivers/mmc/host/usdhi6rol0.c
-index 99515be6e5e5..2f59917b105e 100644
---- a/drivers/mmc/host/usdhi6rol0.c
-+++ b/drivers/mmc/host/usdhi6rol0.c
-@@ -1790,8 +1790,7 @@ static int usdhi6_probe(struct platform_device *pdev)
- 
- 	host->pins_uhs = pinctrl_lookup_state(host->pinctrl, "state_uhs");
- 
--	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
--	host->base = devm_ioremap_resource(dev, res);
-+	host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
- 	if (IS_ERR(host->base)) {
- 		ret = PTR_ERR(host->base);
- 		goto e_free_mmc;
+Thanks,
+Mani
+
+> -	owl_host->base = devm_ioremap_resource(&pdev->dev, res);
+> +	owl_host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &res);
+>  	if (IS_ERR(owl_host->base)) {
+>  		ret = PTR_ERR(owl_host->base);
+>  		goto err_free_host;
+> -- 
+> 2.20.1.7.g153144c
+> 
+
 -- 
-2.20.1.7.g153144c
-
+மணிவண்ணன் சதாசிவம்
