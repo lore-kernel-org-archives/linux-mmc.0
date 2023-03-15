@@ -2,138 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02923C61DA4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 10:30:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57DAAC6FD1D
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 10:47:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232204AbjCOKa0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 06:30:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51772 "EHLO
+        id S232498AbjCOKrV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 06:47:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43680 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232271AbjCOKaY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 06:30:24 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1F44276041;
-        Wed, 15 Mar 2023 03:30:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1678876222; x=1710412222;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=koy75pOMUC4CmOYWRalv4I1n/wTrUR2dXgcn0rQObpo=;
-  b=SE8yTPoNsnHjf+R+EWNn+Npzj/N8XZ8L4bQTT9nvAm0F9g2DXZZO6fHj
-   PL9XN6lqF5Cg9ymts8Pgwn+LYzt3KRHY9bW9PJHBuYICm9zY2JeIU4lbg
-   juBNvPHKC/XNDm+KrEda9kVV5fryd3OVeBw2DL0MPVWKK81azxt+0pdOw
-   S6iCMyYJMrLknKO6r5tDznukdCGyaeO4OBGJQIKDEE1/7/KhbqU1uoGy4
-   3VmA/fYpvwRBm0DNZ0lK3z0AZ5Ss1bBoTzwRg52fFIyxc0ZWDR8Zx/CGa
-   QFS8QAGnz+3mkX18k592ZgwjdQzKAhzuNRKc57Dg0sGd5RnS+8CiQVC82
-   w==;
-X-IronPort-AV: E=McAfee;i="6500,9779,10649"; a="335153206"
-X-IronPort-AV: E=Sophos;i="5.98,262,1673942400"; 
-   d="scan'208";a="335153206"
-Received: from orsmga003.jf.intel.com ([10.7.209.27])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2023 03:30:21 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6500,9779,10649"; a="629411290"
-X-IronPort-AV: E=Sophos;i="5.98,262,1673942400"; 
-   d="scan'208";a="629411290"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.220.200])
-  by orsmga003-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2023 03:30:19 -0700
-Message-ID: <fe0ea8fa-6b24-6bec-1957-5057e34c3c60@intel.com>
-Date:   Wed, 15 Mar 2023 12:30:13 +0200
+        with ESMTP id S232360AbjCOKqq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 06:46:46 -0400
+Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C091E7E7B8;
+        Wed, 15 Mar 2023 03:46:06 -0700 (PDT)
+Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
+         key-exchange X25519 server-signature RSA-PSS (4096 bits))
+        (No client certificate requested)
+        (Authenticated sender: kholk11)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id 41C8D66015F1;
+        Wed, 15 Mar 2023 10:45:59 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
+        s=mail; t=1678877160;
+        bh=2lu6PO85yn+bXYwQVx0BtD+c64sEAEGM7jdKQhcGME8=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=XiamhNz3BoS2Am/A916XWJivnLGJ5CbmEZpenv49PmVgRCy5qL1V/oXw16h6Mnotl
+         Z94E0gppdt/i81ppf7yISjD6rvxasFgEInXQPNXHDlX3uS8J6ayjDYaAhNHcywlCeg
+         1iuk1I6lqn39B6HRHiUSBqH7GDRIuKL3uoU2u3Oj4ob/DGjeeI4+qpmj0ErBLFkKgw
+         uwPEGsOULUOvOZwmlK6orcLbZr2fcPnaWkQdEonEXQFnJdynrI+8iw0r/TbinPVYnI
+         o6qiJhlEpNs7qK7S0eYk2ECctMGxZveWgc9Pt2T6+RwJ2tAlPC2ZFdl4yKFtU+tYZ/
+         Y1W0EDhUVPbtA==
+Message-ID: <e55bc87c-c174-6acb-d48e-9a05b9551754@collabora.com>
+Date:   Wed, 15 Mar 2023 11:45:56 +0100
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.9.0
-Subject: Re: [PATCH] mmc: sdhci-of-esdhc: fix quirk to ignore command inhibit
- for data
+ Thunderbird/102.8.0
+Subject: Re: [PATCH v2 03/18] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
+ add drive strength property
 Content-Language: en-US
-To:     Georgii Kruglov <georgy.kruglov@yandex.ru>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Yinbo Zhu <yinbo.zhu@nxp.com>, Yangbo Lu <yangbo.lu@nxp.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <20230314220619.41242-1-georgy.kruglov@yandex.ru>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230314220619.41242-1-georgy.kruglov@yandex.ru>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+To:     Alexandre Mergnat <amergnat@baylibre.com>
+Cc:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        =?UTF-8?Q?Bernhard_Rosenkr=c3=a4nzer?= <bero@baylibre.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        linux-mmc@vger.kernel.org, Alexandre Bailon <abailon@baylibre.com>,
+        devicetree@vger.kernel.org,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        linux-mediatek@lists.infradead.org,
+        Fabien Parent <fparent@baylibre.com>
+References: <20230203-evk-board-support-v2-0-6ec7cdb10ccf@baylibre.com>
+ <20230203-evk-board-support-v2-3-6ec7cdb10ccf@baylibre.com>
+ <3b7c6f28-57bd-33de-5531-8c4eae8cf6eb@linaro.org>
+ <6e08d78f-ef4c-b228-f7d2-d63767ea87b8@collabora.com>
+ <62ed2988-2347-9fd9-82f9-6dcc9ae75808@collabora.com>
+ <CAFGrd9rZxwtxx5f8Gp35-5152EPGiyEdZjps1Mhn5bL6QfufnA@mail.gmail.com>
+From:   AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>
+In-Reply-To: <CAFGrd9rZxwtxx5f8Gp35-5152EPGiyEdZjps1Mhn5bL6QfufnA@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 15/03/23 00:06, Georgii Kruglov wrote:
-> If spec_reg is equal to 'SDHCI_PRESENT_STATE', esdhc_readl_fixup()
-> fixes up register value and returns it immediately. As a result, the
-> further block
-> (spec_reg == SDHCI_PRESENT_STATE)
->     &&(esdhc->quirk_ignore_data_inhibit == true),
-> is never executed.
+Il 15/03/23 09:11, Alexandre Mergnat ha scritto:
+> Le ven. 10 mars 2023 à 10:49, AngeloGioacchino Del Regno
+> <angelogioacchino.delregno@collabora.com> a écrit :
+>>
+>> Il 10/03/23 10:46, AngeloGioacchino Del Regno ha scritto:
+>>>
+>>> Anyway, Alexandre: can you please perform a cleanup to the MT8365 pinctrl binding?
 > 
-> The patch merges the second block into the first one.
+> Yes I can ! :D
+> Should I do it directly in this patch series or (I prefer) in a new one ?
 > 
-> Found by Linux Verification Center (linuxtesting.org) with SVACE.
+
+Doing that in a new one is fine... it's a cleanup that is not strictly related to
+what you're introducing in this series.
+
+>>> The cleanup means you're setting mediatek,drive-strength-adv as deprecated and
+>>> adding the right properties (...and possibly changing the devicetrees to use it).
+>>>
+>>> For more information, you can look at commit history for the (unfortunately, named
+>>> incorrectly) MT8195 pinctrl documentation: bindings/pinctrl/pinctrl-mt8195.yaml
+>>> where we performed the same cleanup that I'm asking you to do, except we didn't
+>>> have to set any property as deprecated because there was *no devicetree upstream*
+>>> that was actually using that property (hence not an ABI breakage).
 > 
-> Fixes: 1f1929f3f2fa ("mmc: sdhci-of-esdhc: add quirk to ignore command inhibit for data")
-> Signed-off-by: Georgii Kruglov <georgy.kruglov@yandex.ru>
+> Thanks for the information, that helps.
 
-Minor comment, otherwise:
+You're welcome!
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
-
-> ---
->  drivers/mmc/host/sdhci-of-esdhc.c | 24 +++++++++++-------------
->  1 file changed, 11 insertions(+), 13 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-> index 4712adac7f7c..cdbf1b6e1313 100644
-> --- a/drivers/mmc/host/sdhci-of-esdhc.c
-> +++ b/drivers/mmc/host/sdhci-of-esdhc.c
-> @@ -133,6 +133,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  			return ret;
->  		}
->  	}
-> +
->  	/*
->  	 * The DAT[3:0] line signal levels and the CMD line signal level are
->  	 * not compatible with standard SDHC register. The line signal levels
-> @@ -144,6 +145,16 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  		ret = value & 0x000fffff;
->  		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
->  		ret |= (value << 1) & SDHCI_CMD_LVL;
-> +
-> +		/*
-> +		 * Some controllers have unreliable Data Line Active
-> +		 * bit for commands with busy signal. This affects
-> +		 * Command Inhibit (data) bit. Just ignore it since
-> +		 * MMC core driver has already polled card status
-> +		 * with CMD13 after any command with busy siganl.
-> +		 */
-> +		if (esdhc->quirk_ignore_data_inhibit == true)
-
-Might as well drop the redundant '== true'
-
-> +			ret &= ~SDHCI_DATA_INHIBIT;
->  		return ret;
->  	}
->  
-> @@ -158,19 +169,6 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
->  		return ret;
->  	}
->  
-> -	/*
-> -	 * Some controllers have unreliable Data Line Active
-> -	 * bit for commands with busy signal. This affects
-> -	 * Command Inhibit (data) bit. Just ignore it since
-> -	 * MMC core driver has already polled card status
-> -	 * with CMD13 after any command with busy siganl.
-> -	 */
-> -	if ((spec_reg == SDHCI_PRESENT_STATE) &&
-> -	(esdhc->quirk_ignore_data_inhibit == true)) {
-> -		ret = value & ~SDHCI_DATA_INHIBIT;
-> -		return ret;
-> -	}
-> -
->  	ret = value;
->  	return ret;
->  }
+Regards,
+Angelo
 
