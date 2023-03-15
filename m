@@ -2,106 +2,92 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 60693C61DA4
-	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 10:21:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 65BB5C61DA4
+	for <linux-mmc@archiver.kernel.org>; Wed, 15 Mar 2023 10:24:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232380AbjCOKVi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 15 Mar 2023 06:21:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38360 "EHLO
+        id S232249AbjCOKYG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 15 Mar 2023 06:24:06 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232491AbjCOKVN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 06:21:13 -0400
-Received: from smtp4-g21.free.fr (smtp4-g21.free.fr [IPv6:2a01:e0c:1:1599::13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 540D883159
-        for <linux-mmc@vger.kernel.org>; Wed, 15 Mar 2023 03:20:31 -0700 (PDT)
-Received: from [IPV6:2a02:8428:2a4:1a01:41fa:9273:29e6:e64f] (unknown [IPv6:2a02:8428:2a4:1a01:41fa:9273:29e6:e64f])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp4-g21.free.fr (Postfix) with ESMTPSA id 8C4F819F59E;
-        Wed, 15 Mar 2023 11:20:14 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678875627;
-        bh=nWSEty1byYWo8qP4mOf1GIvttLCcvIlo2/PFs/Pp+u4=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=GVN6b8pYo2aJTLMoR78vO3Rn+3H8rkkay6KXmr7Yl0Xu8kUvtBAWUU4BXyQMqTYHo
-         OiNhUTrNcXdESVHXgMuDqymD1S3WRe2YoRXxbxjLiUtxtt4jBsLPxYhfMZtzk4TkXY
-         LvJ8lVTLJGqUuZRT7CBrnZzZFJ8DmkS9Tr7HErcshFZ/LgIPiO9WoQbVp37Zfcp0Zg
-         CvMz7edKGP24XdlgFeSquvFFc6ocQ66S2f4IR1Ig4ESLEp49KrKceGow/0Kq7hzF0G
-         4bV54pbhTd8Ib9k6fgblFyI1sQ4KVdKdDoTRT5ZVsfg3AB5DkCF0xremmjMXbSiBHT
-         I4r64/2i6pFug==
-Message-ID: <b6971cd6-80f2-522a-64fb-82b126500010@free.fr>
-Date:   Wed, 15 Mar 2023 11:20:14 +0100
+        with ESMTP id S229765AbjCOKYF (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 15 Mar 2023 06:24:05 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0B4A35AD;
+        Wed, 15 Mar 2023 03:24:04 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1678875844; x=1710411844;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=xYkvbs2h0q7JWA1b+nO3YwUaWDYJLNgu/dGPXzcBNk8=;
+  b=ftWacGeqTmC5kZ0MJVePQJj3yWLT7mSVPKlycQTbiVGVIkvlF6gTzd3B
+   T7MBr0jC7+K4f9IexJH7iuuLDjewSAt4TMjMbyGpOCtS38G/ukthMeAdw
+   zqizWK769DUx1Od54xTDU38sSQZzIHOs7FJUPNvMwCevv/QdrV4GNzdpD
+   bQCVnPZebWnqZaRb+o9LpQevuIS9xD4nIo4rHhU1tq9tcqY6vDY006qNv
+   X4yfzPQUP3Rsh5fNJCB1Xa8r/sbveyU6KLdb+h6/qs4t+sdVAPQHd4wZ2
+   rwXinqwmQNNzP9dsLM+UMI7Mnw/6Jd2y2F9zmvxZzmBGv35SUhgLmFWMS
+   Q==;
+X-IronPort-AV: E=McAfee;i="6500,9779,10649"; a="340029683"
+X-IronPort-AV: E=Sophos;i="5.98,262,1673942400"; 
+   d="scan'208";a="340029683"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2023 03:23:54 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6500,9779,10649"; a="925293739"
+X-IronPort-AV: E=Sophos;i="5.98,262,1673942400"; 
+   d="scan'208";a="925293739"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.220.200])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Mar 2023 03:23:50 -0700
+Message-ID: <08ce7ccc-5590-1adb-bba9-71e6051e7058@intel.com>
+Date:   Wed, 15 Mar 2023 12:23:45 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH] mmc: meson-gx: increase power-up delay
-To:     Heiner Kallweit <hkallweit1@gmail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Pierre-Hugues Husson <phh@phh.me>,
-        Rong Chen <rong.chen@amlogic.com>,
-        Yang Yingliang <yangyingliang@huawei.com>
-Cc:     MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>
-References: <11a8a0c8-a5b1-8f38-a139-97172ab7be68@free.fr>
- <0696106f-8d70-6410-999a-fcda6c5b39c2@gmail.com>
-Content-Language: fr, en-US
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <0696106f-8d70-6410-999a-fcda6c5b39c2@gmail.com>
+ Firefox/102.0 Thunderbird/102.9.0
+Subject: Re: [PATCH -next] mmc: sdhci-of-aspeed: Use
+ devm_platform_get_and_ioremap_resource()
+Content-Language: en-US
+To:     Yang Li <yang.lee@linux.alibaba.com>, ulf.hansson@linaro.org
+Cc:     andrew@aj.id.au, oel@jms.id.au, linux-mmc@vger.kernel.org,
+        linux-aspeed@lists.ozlabs.org, openbmc@lists.ozlabs.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org
+References: <20230315055023.61779-1-yang.lee@linux.alibaba.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230315055023.61779-1-yang.lee@linux.alibaba.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/03/2023 20:45, Heiner Kallweit wrote:
-
-> On 14.03.2023 18:24, Marc Gonzalez wrote:
+On 15/03/23 07:50, Yang Li wrote:
+> According to commit 890cc39a8799 ("drivers: provide
+> devm_platform_get_and_ioremap_resource()"), convert
+> platform_get_resource(), devm_ioremap_resource() to a single
+> call to devm_platform_get_and_ioremap_resource(), as this is exactly
+> what this function does.
 > 
->> With the default power-up delay, on small kernels, the host probes
->> too soon, and mmc_send_io_op_cond() times out.
+> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
+> ---
+>  drivers/mmc/host/sdhci-of-aspeed.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 > 
-> Looking at mmc_power_up() and how power_delay_ms is used
-> I wonder what you mean with "host probes too soon".
-
-Hello Heiner,
-
-Thanks for your interest in my patch! :)
-
-I should have added a link to the thread that led to the patch.
-https://patchwork.kernel.org/project/linux-wireless/patch/c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr/
-Start at "I have run into another issue."
-
-Basically, I have an S905X2-based board.
-I built a small kernel for it (with only a few drivers), that boots really fast.
-
-mmc2 (SDIO controller hooked to WiFi chip) would not probe at all,
-unless I added lots of printks.
-Basically, calling mmc_send_io_op_cond() too soon after the controller
-has been reset leads to the CMD5 request timing out.
-
-
-> Are you sure that the additional delay is needed for the Amlogic MMC
-> block IP in general? Or could it be that your issue is caused by
-> a specific regulator and you need to add a delay there?
-
-The eternal question...
-
-I have only one type of board. (Actually, I have a reference design
-that is slightly different, so I should test on that one as well.)
-
-In vendor kernels, they add delays to the WiFi drivers.
-Maybe they have run into the issue, and they're just fixing the symptom?
-
-Default value for ios.power_delay_ms is 10 ms.
-msleep(ios.power_delay_ms) is called twice in mmc_power_up().
-So raising the delay from 10 to 20 adds 20 ms
-to the latency of initializing SDIO/SD/MMC controllers.
-
-Would you be willing to test if the problem manifests on your board?
-
-Regards
-
+> diff --git a/drivers/mmc/host/sdhci-of-aspeed.c b/drivers/mmc/host/sdhci-of-aspeed.c
+> index ba6677bf7372..25b4073f698b 100644
+> --- a/drivers/mmc/host/sdhci-of-aspeed.c
+> +++ b/drivers/mmc/host/sdhci-of-aspeed.c
+> @@ -547,8 +547,7 @@ static int aspeed_sdc_probe(struct platform_device *pdev)
+>  		return ret;
+>  	}
+>  
+> -	sdc->res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> -	sdc->regs = devm_ioremap_resource(&pdev->dev, sdc->res);
+> +	sdc->regs = devm_platform_get_and_ioremap_resource(pdev, 0, &sdc->res);
+>  	if (IS_ERR(sdc->regs)) {
+>  		ret = PTR_ERR(sdc->regs);
+>  		goto err_clk;
 
