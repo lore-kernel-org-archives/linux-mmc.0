@@ -2,386 +2,181 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 79351C76196
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Mar 2023 16:32:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A9B54C6FD1F
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Mar 2023 16:46:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230266AbjCPQct (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Mar 2023 12:32:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39128 "EHLO
+        id S230420AbjCPQqA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Mar 2023 12:46:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39196 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230265AbjCPQcp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2023 12:32:45 -0400
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9E9FFE4860
-        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2023 09:32:38 -0700 (PDT)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 01C352003FC;
-        Thu, 16 Mar 2023 17:32:21 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1678984356;
-        bh=8sxdS7H6QXG5b1HcsaZpyapE7VTJ4sB6Qlb5kGXbL10=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=MQRtlVLIN+1AQSla3QoJO1URqtofQVlubM5Jv54dcIUtXcFF+O7sIwiVdAO7e0uBo
-         I6j/4Ask5QawH2XJw5UxUceItUCEJBKGXu7bxAMAMjqQ6PIIYiS+vr+EeXcsCQKzfj
-         y6vZPFJ1k2DqepjkRNPNRX0jDPZuXftuOh2+7fB6kniW6bkT/Gdai3LYX4amv6tmDk
-         day6Q/UlFc5IGjtd4WSAT68vMUYKLUTsY/8BM4lUrivDtTVnOrnfjvpnpDVNqWh24P
-         x+EzwrE+jGem4ugyEABr+sEalD7mXxFpDlaCGthJbwMjIr2IbauRel1jIFxgJLjbfV
-         rlcKWcq8UmPfA==
-Message-ID: <7ac7d5c5-912b-7598-0050-3b8c76ef6cab@free.fr>
-Date:   Thu, 16 Mar 2023 17:32:21 +0100
+        with ESMTP id S231277AbjCPQp6 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2023 12:45:58 -0400
+Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C2C38DC0AA
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2023 09:45:40 -0700 (PDT)
+Received: by mail-lf1-x12a.google.com with SMTP id b10so1949412lfb.9
+        for <linux-mmc@vger.kernel.org>; Thu, 16 Mar 2023 09:45:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1678985138;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=FzczH5eeETrO7u41+m+SAJvV1HKn3xHPG5FRk5R4iDQ=;
+        b=DHLOy20m7MCDF1oySL4i4+zU0a7eMUX/+SZRLSoPMJgKFNZiKHjoLPQZItQgcW13Fo
+         uuTPnKUIEgXJ8BuHhjHRUQ00mgE7jbTgNVQ1AEfXOSDbi99xmwmLM1B+4EKqtfJHzutu
+         YXb0dxfGOKIljeS57sZZvTp0BlqRSmQHPaBQoxpKbYvFaMNZTPu+EUk342AtQC7nkPUR
+         MHxc1H/fmeQ/zyejLGhIHUFEWCaows+ShNYynYN6oqghBdqnM390JD87pWRg/PbOTOUt
+         UTsbz3nEp8gagd+xEEUouJ1f58S13Fyi/XzGLCrdCy0bAVMyQ8SVLpY9Zt0Okj006Utt
+         yhxQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678985138;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=FzczH5eeETrO7u41+m+SAJvV1HKn3xHPG5FRk5R4iDQ=;
+        b=5d70Xmi3lxLmPM4aSi3Z0gBIT7VQ4z8dsKEgc4JFKSl0yPN6fm+x53WN+ZiKae2AlA
+         RWqS7xZvQkR7XrPAjnLIMFsArDtUSbCHtoLuskog0ODoCrU8WRCNrWNUoOvg8MXZ6ct7
+         SCsngRaqDvRY0ct/wWkFl3oe3J9xOYNVrV31NJFxmdGkL85HOR8HSsAHOJYnlogrxm4p
+         vMNt74NVRXddMa2LQksMfJHJVqPHoldcjxt5Pv7Wp2vZxIQKJ7GNvZzjDBbHiINhXPIW
+         bO7aTTKlGzADwwM6eQD6EY6VV0wRLXmcruHoeQ1VJvLdGOF3kid9Jz1Y/un1hh7f4i8j
+         4Xkw==
+X-Gm-Message-State: AO0yUKUIAvxgxyjZYUAbH4auhvHREkVLsYI+e7S1ytsBctAAfWBc7Njq
+        EDlFr1dCIYk4qMD29ISHXKlg07uSlEZt3PXwG5o=
+X-Google-Smtp-Source: AK7set9NwftH1chMUKsREfVHPuVlQE8YR02r/umNJjY8L7jifbsaTKunxXrHQLZ/V4OBuS57rrFdhw==
+X-Received: by 2002:ac2:5fc1:0:b0:4de:ca63:b2d9 with SMTP id q1-20020ac25fc1000000b004deca63b2d9mr3081110lfg.49.1678985138316;
+        Thu, 16 Mar 2023 09:45:38 -0700 (PDT)
+Received: from uffe-XPS13.. (h-94-254-63-18.NA.cust.bahnhof.se. [94.254.63.18])
+        by smtp.gmail.com with ESMTPSA id u20-20020ac243d4000000b004e8452972a2sm1283996lfl.247.2023.03.16.09.45.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 16 Mar 2023 09:45:37 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     linux-mmc@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Wenchao Chen <wenchao.chen666@gmail.com>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Subject: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an internal cache
+Date:   Thu, 16 Mar 2023 17:45:14 +0100
+Message-Id: <20230316164514.1615169-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH] mmc: meson-gx: increase power-up delay
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Jerome Brunet <jbrunet@baylibre.com>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Pierre-Hugues Husson <phh@phh.me>,
-        Rong Chen <rong.chen@amlogic.com>,
-        Yang Yingliang <yangyingliang@huawei.com>,
-        MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>
-References: <11a8a0c8-a5b1-8f38-a139-97172ab7be68@free.fr>
- <0696106f-8d70-6410-999a-fcda6c5b39c2@gmail.com>
- <b6971cd6-80f2-522a-64fb-82b126500010@free.fr>
- <1jcz5axc8j.fsf@starbuckisacylon.baylibre.com>
- <CAPDyKFqYK2bEbkZ7A=t-VYwmgSYJUGxm2Ew5-7CFeO741fB-_w@mail.gmail.com>
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <CAPDyKFqYK2bEbkZ7A=t-VYwmgSYJUGxm2Ew5-7CFeO741fB-_w@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/03/2023 12:59, Ulf Hansson wrote:
+REQ_FUA translates into so called "reliable writes" (atomic writes) for
+eMMC cards, which is generally supported as it was introduced as a
+mandatory feature already in the v4.3 (2007) of the eMMC spec. To fully
+support the reliable writes (thus REQ_FUA), the mmc host driver needs to
+support the CMD23 (MMC_CAP_CMD23) too, which is rather common nowadays.
 
-> If the problem is regulator specific, this would be the correct thing to do.
-> 
-> Although, if the problem is pwrseq specific, like that we need a delay
-> after enabling the clock and asserting the GPIO enable pin for the
-> WiFi chip, then we have the "post-power-on-delay-ms" of the pwrseq
-> node to play with instead.
+File systems typically uses REQ_FUA for writing their meta-data and other
+important information. Ideally it should provide an increased protection
+against data-corruption, during sudden power-failures. This said, file
+systems have other ways to handle sudden power-failures too, like using
+checksums to detect partly-written data, for example.
 
-Heiner, Jerome, Uffe, Amlogic DT maintainers,
+It has been reported that the reliable writes are costly for some eMMCs,
+leading to performance degradations. Exactly why, is in the implementation
+details of the internals of the eMMC.
 
-Perhaps tweaking the driver for every user is too intrusive.
+Moreover, in the v4.5 (2011) of the eMMC spec, the cache-control was
+introduced as an optional feature. It allows the host to trigger a flush of
+the eMMC's internal write-cache. In the past, before the cache-control
+feature was added, the reliable write acted as trigger for the eMMC, to
+also flush its internal write-cache, even if that too remains as an
+implementation detail of the eMMC.
 
-Another solution would be to factorize all boards that implement
-the reference design SDIO-based RF (WiFi + BT using brcm).
+In a way to try to improve the situation with costly reliable writes and
+REQ_FUA, let's add a new card quirk MMC_QUIRK_AVOID_REL_WRITE, which may be
+set to avoid announcing the support for it. However, as mentioned above,
+due to the specific relationship with the cache-control feature, we must
+keep REQ_FUA unless that is supported too.
 
-Then we can add post-power-on-delay-ms = 20 in sdio_pwrseq.
+Reported-by: Wenchao Chen <wenchao.chen666@gmail.com>
+Acked-by: Bean Huo <beanhuo@micron.com>
+Acked-by: Avri Altman <avri.altman@wdc.com>
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+---
 
-NB: there's vddio_ao1v8 vs vddao_1v8 in sei510.
-Is my addition OK?
+Updated since the RFC:
+	Added a card quirk to maintain the current behaviour. The quirk isn't
+	set for any cards yet, which is needed (a patch on top) to move forward
+	with this.
 
-RFC prototype:
+---
+ drivers/mmc/core/block.c | 16 ++++++++++++----
+ drivers/mmc/core/card.h  |  5 +++++
+ include/linux/mmc/card.h |  1 +
+ 3 files changed, 18 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts b/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts
-index e3bb6df42ff3e..42b5dcf358912 100644
---- a/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-g12a-radxa-zero.dts
-@@ -6,6 +6,7 @@
- /dts-v1/;
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 672ab90c4b2d..35292e36a1fb 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -2409,8 +2409,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	struct mmc_blk_data *md;
+ 	int devidx, ret;
+ 	char cap_str[10];
+-	bool cache_enabled = false;
+-	bool fua_enabled = false;
++	bool cache_enabled, avoid_fua, fua_enabled = false;
  
- #include "meson-g12a.dtsi"
-+#include "meson-g12a-ref-design-brcm-rf.dtsi"
- #include <dt-bindings/gpio/meson-g12a-gpio.h>
- #include <dt-bindings/sound/meson-g12a-tohdmitx.h>
- 
-@@ -53,13 +54,6 @@ emmc_pwrseq: emmc-pwrseq {
- 		reset-gpios = <&gpio BOOT_12 GPIO_ACTIVE_LOW>;
- 	};
- 
--	sdio_pwrseq: sdio-pwrseq {
--		compatible = "mmc-pwrseq-simple";
--		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
--		clocks = <&wifi32k>;
--		clock-names = "ext_clock";
--	};
--
- 	ao_5v: regulator-ao_5v {
- 		compatible = "regulator-fixed";
- 		regulator-name = "AO_5V";
-@@ -182,13 +176,6 @@ codec {
- 			};
- 		};
- 	};
--
--	wifi32k: wifi32k {
--		compatible = "pwm-clock";
--		#clock-cells = <0>;
--		clock-frequency = <32768>;
--		pwms = <&pwm_ef 0 30518 0>; /* PWM_E at 32.768KHz */
--	};
- };
- 
- &arb {
-@@ -299,37 +286,6 @@ &saradc {
- 	vref-supply = <&vddao_1v8>;
- };
- 
--/* SDIO */
--&sd_emmc_a {
--	status = "okay";
--	pinctrl-0 = <&sdio_pins>;
--	pinctrl-1 = <&sdio_clk_gate_pins>;
--	pinctrl-names = "default", "clk-gate";
--	#address-cells = <1>;
--	#size-cells = <0>;
--
--	bus-width = <4>;
--	cap-sd-highspeed;
--	sd-uhs-sdr50;
--	max-frequency = <100000000>;
--
--	non-removable;
--	disable-wp;
--
--	/* WiFi firmware requires power to be kept while in suspend */
--	keep-power-in-suspend;
--
--	mmc-pwrseq = <&sdio_pwrseq>;
--
--	vmmc-supply = <&vddao_3v3>;
--	vqmmc-supply = <&vddao_1v8>;
--
--	brcmf: wifi@1 {
--		reg = <1>;
--		compatible = "brcm,bcm4329-fmac";
--	};
--};
--
- /* SD card */
- &sd_emmc_b {
- 	status = "okay";
-diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-ref-design-brcm-rf.dtsi b/arch/arm64/boot/dts/amlogic/meson-g12a-ref-design-brcm-rf.dtsi
-new file mode 100644
-index 0000000000000..e462324596964
---- /dev/null
-+++ b/arch/arm64/boot/dts/amlogic/meson-g12a-ref-design-brcm-rf.dtsi
-@@ -0,0 +1,53 @@
-+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
-+/*
-+ * Copyright (c) 2018 Amlogic, Inc. All rights reserved.
-+ */
+ 	devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+ 	if (devidx < 0) {
+@@ -2494,11 +2493,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+ 	    ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+ 	     card->ext_csd.rel_sectors)) {
+ 		md->flags |= MMC_BLK_REL_WR;
++	}
 +
-+#include <dt-bindings/gpio/meson-g12a-gpio.h>
-+
-+/ {
-+	sdio_pwrseq: sdio-pwrseq {
-+		compatible = "mmc-pwrseq-simple";
-+		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
-+		clocks = <&wifi32k>;
-+		clock-names = "ext_clock";
-+	};
-+
-+	wifi32k: wifi32k {
-+		compatible = "pwm-clock";
-+		#clock-cells = <0>;
-+		clock-frequency = <32768>;
-+		pwms = <&pwm_ef 0 30518 0>; /* PWM_E at 32.768KHz */
-+	};
-+};
-+
-+/* SDIO */
-+&sd_emmc_a {
-+	status = "okay";
-+	pinctrl-0 = <&sdio_pins>;
-+	pinctrl-1 = <&sdio_clk_gate_pins>;
-+	pinctrl-names = "default", "clk-gate";
-+	#address-cells = <1>;
-+	#size-cells = <0>;
-+
-+	bus-width = <4>;
-+	cap-sd-highspeed;
-+	sd-uhs-sdr50;
-+	max-frequency = <100000000>;
-+
-+	non-removable;
-+	disable-wp;
-+
-+	/* WiFi firmware requires power to be kept while in suspend */
-+	keep-power-in-suspend;
-+
-+	mmc-pwrseq = <&sdio_pwrseq>;
-+
-+	vmmc-supply = <&vddao_3v3>;
-+	vqmmc-supply = <&vddao_1v8>;
-+
-+	brcmf: wifi@1 {
-+		reg = <1>;
-+		compatible = "brcm,bcm4329-fmac";
-+	};
-+};
-diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-sei510.dts b/arch/arm64/boot/dts/amlogic/meson-g12a-sei510.dts
-index 23b790c6469d3..e12aeb956b7d7 100644
---- a/arch/arm64/boot/dts/amlogic/meson-g12a-sei510.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-g12a-sei510.dts
-@@ -6,6 +6,7 @@
- /dts-v1/;
++	/*
++	 * REQ_FUA is supported through eMMC reliable writes, which has been
++	 * reported to be a bit costly for some eMMCs. In these cases, let's
++	 * rely on the flush requests (REQ_OP_FLUSH) instead, if we can use the
++	 * cache-control feature too.
++	 */
++	cache_enabled = mmc_cache_enabled(card->host);
++	avoid_fua = cache_enabled && mmc_card_avoid_rel_write(card);
++	if (md->flags & MMC_BLK_REL_WR && !avoid_fua) {
+ 		fua_enabled = true;
+ 		cache_enabled = true;
+ 	}
+-	if (mmc_cache_enabled(card->host))
+-		cache_enabled  = true;
  
- #include "meson-g12a.dtsi"
-+#include "meson-g12a-ref-design-brcm-rf.dtsi"
- #include <dt-bindings/gpio/gpio.h>
- #include <dt-bindings/input/input.h>
- #include <dt-bindings/gpio/meson-g12a-gpio.h>
-@@ -96,6 +97,15 @@ emmc_1v8: regulator-emmc_1v8 {
- 		regulator-always-on;
- 	};
+ 	blk_queue_write_cache(md->queue.queue, cache_enabled, fua_enabled);
  
-+	vddao_1v8: regulator-vddao_1v8 {
-+		compatible = "regulator-fixed";
-+		regulator-name = "VDDAO_1V8";
-+		regulator-min-microvolt = <1800000>;
-+		regulator-max-microvolt = <1800000>;
-+		vin-supply = <&vddao_3v3>;
-+		regulator-always-on;
-+	};
+diff --git a/drivers/mmc/core/card.h b/drivers/mmc/core/card.h
+index cfdd1ff40b86..2ab448fa2841 100644
+--- a/drivers/mmc/core/card.h
++++ b/drivers/mmc/core/card.h
+@@ -229,6 +229,11 @@ static inline int mmc_blksz_for_byte_mode(const struct mmc_card *c)
+ 	return c->quirks & MMC_QUIRK_BLKSZ_FOR_BYTE_MODE;
+ }
+ 
++static inline int mmc_card_avoid_rel_write(const struct mmc_card *c)
++{
++	return c->quirks & MMC_QUIRK_AVOID_REL_WRITE;
++}
 +
- 	vddao_3v3: regulator-vddao_3v3 {
- 		compatible = "regulator-fixed";
- 		regulator-name = "VDDAO_3V3";
-@@ -143,20 +153,6 @@ vddio_ao1v8: regulator-vddio_ao1v8 {
- 		regulator-always-on;
- 	};
- 
--	sdio_pwrseq: sdio-pwrseq {
--		compatible = "mmc-pwrseq-simple";
--		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
--		clocks = <&wifi32k>;
--		clock-names = "ext_clock";
--	};
--
--	wifi32k: wifi32k {
--		compatible = "pwm-clock";
--		#clock-cells = <0>;
--		clock-frequency = <32768>;
--		pwms = <&pwm_ef 0 30518 0>; /* PWM_E at 32.768KHz */
--	};
--
- 	sound {
- 		compatible = "amlogic,axg-sound-card";
- 		model = "SEI510";
-@@ -375,37 +371,6 @@ &saradc {
- 	vref-supply = <&vddio_ao1v8>;
- };
- 
--/* SDIO */
--&sd_emmc_a {
--	status = "okay";
--	pinctrl-0 = <&sdio_pins>;
--	pinctrl-1 = <&sdio_clk_gate_pins>;
--	pinctrl-names = "default", "clk-gate";
--	#address-cells = <1>;
--	#size-cells = <0>;
--
--	bus-width = <4>;
--	cap-sd-highspeed;
--	sd-uhs-sdr50;
--	max-frequency = <100000000>;
--
--	non-removable;
--	disable-wp;
--
--	/* WiFi firmware requires power to be kept while in suspend */
--	keep-power-in-suspend;
--
--	mmc-pwrseq = <&sdio_pwrseq>;
--
--	vmmc-supply = <&vddao_3v3>;
--	vqmmc-supply = <&vddio_ao1v8>;
--
--	brcmf: wifi@1 {
--		reg = <1>;
--		compatible = "brcm,bcm4329-fmac";
--	};
--};
--
- /* SD card */
- &sd_emmc_b {
- 	status = "okay";
-diff --git a/arch/arm64/boot/dts/amlogic/meson-g12a-x96-max.dts b/arch/arm64/boot/dts/amlogic/meson-g12a-x96-max.dts
-index b2bb94981838f..68a8876386115 100644
---- a/arch/arm64/boot/dts/amlogic/meson-g12a-x96-max.dts
-+++ b/arch/arm64/boot/dts/amlogic/meson-g12a-x96-max.dts
-@@ -6,6 +6,7 @@
- /dts-v1/;
- 
- #include "meson-g12a.dtsi"
-+#include "meson-g12a-ref-design-brcm-rf.dtsi"
- #include <dt-bindings/gpio/gpio.h>
- #include <dt-bindings/gpio/meson-g12a-gpio.h>
- #include <dt-bindings/sound/meson-g12a-tohdmitx.h>
-@@ -60,13 +61,6 @@ emmc_pwrseq: emmc-pwrseq {
- 		reset-gpios = <&gpio BOOT_12 GPIO_ACTIVE_LOW>;
- 	};
- 
--	sdio_pwrseq: sdio-pwrseq {
--		compatible = "mmc-pwrseq-simple";
--		reset-gpios = <&gpio GPIOX_6 GPIO_ACTIVE_LOW>;
--		clocks = <&wifi32k>;
--		clock-names = "ext_clock";
--	};
--
- 	flash_1v8: regulator-flash_1v8 {
- 		compatible = "regulator-fixed";
- 		regulator-name = "FLASH_1V8";
-@@ -226,13 +220,6 @@ codec {
- 			};
- 		};
- 	};
--
--	wifi32k: wifi32k {
--		compatible = "pwm-clock";
--		#clock-cells = <0>;
--		clock-frequency = <32768>;
--		pwms = <&pwm_ef 0 30518 0>; /* PWM_E at 32.768KHz */
--	};
- };
- 
- &arb {
-@@ -391,37 +378,6 @@ &usb {
- 	dr_mode = "host";
- };
- 
--/* SDIO */
--&sd_emmc_a {
--	status = "okay";
--	pinctrl-0 = <&sdio_pins>;
--	pinctrl-1 = <&sdio_clk_gate_pins>;
--	pinctrl-names = "default", "clk-gate";
--	#address-cells = <1>;
--	#size-cells = <0>;
--
--	bus-width = <4>;
--	cap-sd-highspeed;
--	sd-uhs-sdr50;
--	max-frequency = <100000000>;
--
--	non-removable;
--	disable-wp;
--
--	/* WiFi firmware requires power to be kept while in suspend */
--	keep-power-in-suspend;
--
--	mmc-pwrseq = <&sdio_pwrseq>;
--
--	vmmc-supply = <&vddao_3v3>;
--	vqmmc-supply = <&vddao_1v8>;
--
--	brcmf: wifi@1 {
--		reg = <1>;
--		compatible = "brcm,bcm4329-fmac";
--	};
--};
--
- /* SD card */
- &sd_emmc_b {
- 	status = "okay";
+ static inline int mmc_card_disable_cd(const struct mmc_card *c)
+ {
+ 	return c->quirks & MMC_QUIRK_DISABLE_CD;
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index c726ea781255..4d297d565c83 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -282,6 +282,7 @@ struct mmc_card {
+ 						/* for byte mode */
+ #define MMC_QUIRK_NONSTD_SDIO	(1<<2)		/* non-standard SDIO card attached */
+ 						/* (missing CIA registers) */
++#define MMC_QUIRK_AVOID_REL_WRITE (1<<3)	/* Avoid rel-write (REQ_FUA) */
+ #define MMC_QUIRK_NONSTD_FUNC_IF (1<<4)		/* SDIO card has nonstd function interfaces */
+ #define MMC_QUIRK_DISABLE_CD	(1<<5)		/* disconnect CD/DAT[3] resistor */
+ #define MMC_QUIRK_INAND_CMD38	(1<<6)		/* iNAND devices have broken CMD38 */
+-- 
+2.34.1
 
