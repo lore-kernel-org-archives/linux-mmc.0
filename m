@@ -2,110 +2,180 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 362AAC6FD19
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Mar 2023 19:12:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D61BFC6FD1F
+	for <linux-mmc@archiver.kernel.org>; Thu, 16 Mar 2023 20:00:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229988AbjCPTMq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Mar 2023 15:12:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57676 "EHLO
+        id S229863AbjCPT77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 16 Mar 2023 15:59:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47022 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229620AbjCPTMo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2023 15:12:44 -0400
-Received: from mga12.intel.com (mga12.intel.com [192.55.52.136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B88321F5FD;
-        Thu, 16 Mar 2023 12:12:43 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1678993963; x=1710529963;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=isSa6T4VpH1WCIHZYBJ+SROq9MEvWMv6WPoU3Z3MMMg=;
-  b=Q4npJxBxVkXRhXANBm+BqXtnii8eKmJiWPgVGX9hXvypHzpw33TnMT0p
-   B0Xc2SaMhR+blPPg2mz4d47Ls+8I72uM/EywIJJpACt6XsHSSyN6KcbVl
-   kc1LtlahasZ5GUklOwxG32nwU0dLxU4jP/YBsvyFetLDEdjPw7oY4aaZ4
-   HQWvuSRFElylM82qjnMtnJnXwOgspOnjWmXCj1S6aN2O+fouEm65edUhQ
-   LHEjFk8bP4ZB7Ay9/wLgnCfy6Mdeu7e2+j0DMGuKjIs5R2wJTd5Sgjv9J
-   AusdB3DilG7K39SFSKkvw/UsbM9IAhkhkOG7Dt8/6LiMiKERSKusBru+L
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10651"; a="317743429"
-X-IronPort-AV: E=Sophos;i="5.98,265,1673942400"; 
-   d="scan'208";a="317743429"
-Received: from fmsmga003.fm.intel.com ([10.253.24.29])
-  by fmsmga106.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2023 12:12:43 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10651"; a="769073124"
-X-IronPort-AV: E=Sophos;i="5.98,265,1673942400"; 
-   d="scan'208";a="769073124"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.221.172])
-  by fmsmga003-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Mar 2023 12:12:40 -0700
-Message-ID: <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
-Date:   Thu, 16 Mar 2023 21:12:35 +0200
+        with ESMTP id S230152AbjCPT7w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2023 15:59:52 -0400
+Received: from mail-oo1-xc31.google.com (mail-oo1-xc31.google.com [IPv6:2607:f8b0:4864:20::c31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48A77B53FF;
+        Thu, 16 Mar 2023 12:59:22 -0700 (PDT)
+Received: by mail-oo1-xc31.google.com with SMTP id n3-20020a4ad403000000b0053351dadc20so418209oos.13;
+        Thu, 16 Mar 2023 12:59:22 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112; t=1678996748;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
+        bh=iJcydj5yu12eDXGAVXNpWYkjn09kXGYM+OpHShhhGtQ=;
+        b=M5Exo1aemhXIC+NICj+3t+mFNugig8zOaYV1viHiIlM8w1p5Wgm4MVqvTuRz3CDl/7
+         Tn2toe6g4WjeP/F5BdcHxm+0egf+oXDHbaAbAz1aBqAtJ24oaEAF6BpUqJvfdo3FfX2N
+         etDByyXvad0ZKSrlbh/6K91BaoQlWZ6M4IR1QSv2MZ50iUFP3aM2LgKUJe0ErSE+pTKP
+         0m/Ebc/US0hhKnstBMta1soZKC2I8BJvowj+VjydpB+Vm2NeUn8X52j9q0MV3hWL3vi5
+         LzPb+PteZ/g2kQR6TJ4VjjYZE1M40YFZcsOv7qAUoacDJwRvZVeh4bKNhNq30dyz0mds
+         20Pg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1678996748;
+        h=in-reply-to:content-disposition:mime-version:references:subject:cc
+         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=iJcydj5yu12eDXGAVXNpWYkjn09kXGYM+OpHShhhGtQ=;
+        b=PEJwUjtP7xvL9mWHWWsyR5qv5Tt4MH3V6akLeDBEhTv9LtuiVc+WSi05oRQOefuuzh
+         ZgDmfdb8OcVweynzGiI0BnbUSTYfoUVbHnuShvONuzp6lO3KhLWH32FHxQSp/nSmdPqt
+         IpF2FTogqLq0gxuzNSCS+41e4qYGGvDMx0TN4RRB3wfDBCPqs8ETkdxiHAmT7F/6kOSV
+         upvUPE4aYNT5PLM+F6yd05P4ZSEksF7Bj32ujGMl6AZoiZn0JDPFW++PmPSY244W2r4g
+         ACT9T7MWfk0S0bv2t8wE/LU14U2IraimDE1kSQ5eMVRhfiRpaHXtO3dQC9hmW9buQS+3
+         xuSQ==
+X-Gm-Message-State: AO0yUKU7bJn3Zz4z3PphWqiyyKzrWA5GJdLL0bWB8xN2LBZtloxj0c2P
+        pRighBgiY0cUpc1YWFReims=
+X-Google-Smtp-Source: AK7set873rjkScAW0PvvWNiDaSas6qVsx1V6E8+/VvR9+EWZwsiZipOMHLmvwH/oCotxf2TSkVj+8g==
+X-Received: by 2002:a4a:6552:0:b0:534:c38a:dafd with SMTP id z18-20020a4a6552000000b00534c38adafdmr3319661oog.6.1678996747844;
+        Thu, 16 Mar 2023 12:59:07 -0700 (PDT)
+Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
+        by smtp.gmail.com with ESMTPSA id c11-20020a4ae24b000000b005255e556399sm3620572oot.43.2023.03.16.12.59.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 16 Mar 2023 12:59:07 -0700 (PDT)
+Message-ID: <6413750b.4a0a0220.cfd67.2a0b@mx.google.com>
+X-Google-Original-Message-ID: <ZBN1CGjW8ltuGavP@neuromancer.>
+Date:   Thu, 16 Mar 2023 14:59:04 -0500
+From:   Chris Morgan <macroalpha82@gmail.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-wireless@vger.kernel.org,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>
+Subject: Re: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
+ <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.9.0
-Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an
- internal cache
-Content-Language: en-US
-To:     Christoph Hellwig <hch@infradead.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Bean Huo <beanhuo@micron.com>
-References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
- <ZBNIg8+rOdFKcsS8@infradead.org>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <ZBNIg8+rOdFKcsS8@infradead.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 16/03/23 18:49, Christoph Hellwig wrote:
-> On Thu, Mar 16, 2023 at 05:45:14PM +0100, Ulf Hansson wrote:
->> File systems typically uses REQ_FUA for writing their meta-data and other
->> important information. Ideally it should provide an increased protection
->> against data-corruption, during sudden power-failures. This said, file
->> systems have other ways to handle sudden power-failures too, like using
->> checksums to detect partly-written data, for example.
+On Fri, Mar 10, 2023 at 09:29:22PM +0100, Martin Blumenstingl wrote:
+> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
+> well as the existing RTL8821C chipset code.
 > 
-> Sorry, but this is completely wrong and dangerous, if not intentionally
-> misleading bullshit.
-
-There is some context missing.
-
-Historically file systems have assumed that sectors are updated
-atomically i.e. there is never a sector with a mixture of
-old and new data. The eMMC spec does not guarantee that,
-except for the eMMC "reliable write" operation. So the paragraph
-above is informing the potential benefit of reliable write instead
-of cache flush.
-
-Note, it is not that eMMC cannot avoid torn sectors, it is that
-the specification does not mandate that they do.
-
-However, the issue has been raised that reliable write is not
-needed to provide sufficient assurance of data integrity, and that
-in fact, cache flush can be used instead and perform better.
-
-This patch adds a card quirk MMC_QUIRK_AVOID_REL_WRITE
-that can be set for cards where cache flush outperforms
-reliable write.  We would expect acks from someone in the
-manufacturer's organization on patches setting the quirk, effectively
-assuring fitness-for-purpose, and implying that torn sectors are
-not especially more likely than any other sort of data integrity
-failure.
-
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> ---
+> Changes since v1:
+> - use /* ... */ style for copyright comments
 > 
-> The only way to provide data integrity is to ensure data is written to
-> the media and not a cache.  That can be done by a full blown cache
-> flush, or with a FUA-like optimization.
+> 
+>  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
+>  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
+>  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 35 +++++++++++++++++++
+>  3 files changed, 49 insertions(+)
+>  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> 
+> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
+> index 6b65da81127f..29eb2f8e0eb7 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
+> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
+> @@ -133,6 +133,17 @@ config RTW88_8821CE
+>  
+>  	  802.11ac PCIe wireless network adapter
+>  
+> +config RTW88_8821CS
+> +	tristate "Realtek 8821CS SDIO wireless network adapter"
+> +	depends on MMC
+> +	select RTW88_CORE
+> +	select RTW88_SDIO
+> +	select RTW88_8821C
+> +	help
+> +	  Select this option will enable support for 8821CS chipset
+> +
+> +	  802.11ac SDIO wireless network adapter
+> +
+>  config RTW88_8821CU
+>  	tristate "Realtek 8821CU USB wireless network adapter"
+>  	depends on USB
+> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
+> index 6105c2745bda..82979b30ae8d 100644
+> --- a/drivers/net/wireless/realtek/rtw88/Makefile
+> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
+> @@ -59,6 +59,9 @@ rtw88_8821c-objs		:= rtw8821c.o rtw8821c_table.o
+>  obj-$(CONFIG_RTW88_8821CE)	+= rtw88_8821ce.o
+>  rtw88_8821ce-objs		:= rtw8821ce.o
+>  
+> +obj-$(CONFIG_RTW88_8821CS)	+= rtw88_8821cs.o
+> +rtw88_8821cs-objs		:= rtw8821cs.o
+> +
+>  obj-$(CONFIG_RTW88_8821CU)	+= rtw88_8821cu.o
+>  rtw88_8821cu-objs		:= rtw8821cu.o
+>  
+> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> new file mode 100644
+> index 000000000000..7ad7c13ac9e6
+> --- /dev/null
+> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
+> @@ -0,0 +1,35 @@
+> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
+> +/* Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> + */
+> +
+> +#include <linux/mmc/sdio_func.h>
+> +#include <linux/mmc/sdio_ids.h>
+> +#include <linux/module.h>
+> +#include "sdio.h"
+> +#include "rtw8821c.h"
+> +
+> +static const struct sdio_device_id rtw_8821cs_id_table[] =  {
+> +	{
+> +		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
+> +			    SDIO_DEVICE_ID_REALTEK_RTW8821CS),
+> +		.driver_data = (kernel_ulong_t)&rtw8821c_hw_spec,
+> +	},
+> +	{}
+> +};
+> +MODULE_DEVICE_TABLE(sdio, rtw_8821cs_id_table);
+> +
+> +static struct sdio_driver rtw_8821cs_driver = {
+> +	.name = "rtw_8821cs",
+> +	.probe = rtw_sdio_probe,
+> +	.remove = rtw_sdio_remove,
+> +	.id_table = rtw_8821cs_id_table,
+> +	.drv = {
+> +		.pm = &rtw_sdio_pm_ops,
+> +		.shutdown = rtw_sdio_shutdown,
+> +	}
+> +};
+> +module_sdio_driver(rtw_8821cs_driver);
+> +
+> +MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
+> +MODULE_DESCRIPTION("Realtek 802.11ac wireless 8821cs driver");
+> +MODULE_LICENSE("Dual BSD/GPL");
+> -- 
+> 2.39.2
+> 
 
-The patch is just reporting (via blk_queue_write_cache())
-that FUA is not supported, so a flush will be done instead.
+Overall it works well for me, but when I resume from suspend I get the
+following filling up my dmesg:
 
+rtw_8821cs mmc3:0001:1: sdio read8 failed (0x86): -110
+
+So suspend/resume seems to be an issue, but otherwise it works well
+for me.
+
+Chris Morgan
