@@ -2,180 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D61BFC6FD1F
-	for <linux-mmc@archiver.kernel.org>; Thu, 16 Mar 2023 20:00:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26956C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Mar 2023 06:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229863AbjCPT77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 16 Mar 2023 15:59:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47022 "EHLO
+        id S230149AbjCQGsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Mar 2023 02:48:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35896 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230152AbjCPT7w (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 16 Mar 2023 15:59:52 -0400
-Received: from mail-oo1-xc31.google.com (mail-oo1-xc31.google.com [IPv6:2607:f8b0:4864:20::c31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 48A77B53FF;
-        Thu, 16 Mar 2023 12:59:22 -0700 (PDT)
-Received: by mail-oo1-xc31.google.com with SMTP id n3-20020a4ad403000000b0053351dadc20so418209oos.13;
-        Thu, 16 Mar 2023 12:59:22 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1678996748;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:from:to:cc:subject:date:message-id:reply-to;
-        bh=iJcydj5yu12eDXGAVXNpWYkjn09kXGYM+OpHShhhGtQ=;
-        b=M5Exo1aemhXIC+NICj+3t+mFNugig8zOaYV1viHiIlM8w1p5Wgm4MVqvTuRz3CDl/7
-         Tn2toe6g4WjeP/F5BdcHxm+0egf+oXDHbaAbAz1aBqAtJ24oaEAF6BpUqJvfdo3FfX2N
-         etDByyXvad0ZKSrlbh/6K91BaoQlWZ6M4IR1QSv2MZ50iUFP3aM2LgKUJe0ErSE+pTKP
-         0m/Ebc/US0hhKnstBMta1soZKC2I8BJvowj+VjydpB+Vm2NeUn8X52j9q0MV3hWL3vi5
-         LzPb+PteZ/g2kQR6TJ4VjjYZE1M40YFZcsOv7qAUoacDJwRvZVeh4bKNhNq30dyz0mds
-         20Pg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1678996748;
-        h=in-reply-to:content-disposition:mime-version:references:subject:cc
-         :to:from:date:message-id:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iJcydj5yu12eDXGAVXNpWYkjn09kXGYM+OpHShhhGtQ=;
-        b=PEJwUjtP7xvL9mWHWWsyR5qv5Tt4MH3V6akLeDBEhTv9LtuiVc+WSi05oRQOefuuzh
-         ZgDmfdb8OcVweynzGiI0BnbUSTYfoUVbHnuShvONuzp6lO3KhLWH32FHxQSp/nSmdPqt
-         IpF2FTogqLq0gxuzNSCS+41e4qYGGvDMx0TN4RRB3wfDBCPqs8ETkdxiHAmT7F/6kOSV
-         upvUPE4aYNT5PLM+F6yd05P4ZSEksF7Bj32ujGMl6AZoiZn0JDPFW++PmPSY244W2r4g
-         ACT9T7MWfk0S0bv2t8wE/LU14U2IraimDE1kSQ5eMVRhfiRpaHXtO3dQC9hmW9buQS+3
-         xuSQ==
-X-Gm-Message-State: AO0yUKU7bJn3Zz4z3PphWqiyyKzrWA5GJdLL0bWB8xN2LBZtloxj0c2P
-        pRighBgiY0cUpc1YWFReims=
-X-Google-Smtp-Source: AK7set873rjkScAW0PvvWNiDaSas6qVsx1V6E8+/VvR9+EWZwsiZipOMHLmvwH/oCotxf2TSkVj+8g==
-X-Received: by 2002:a4a:6552:0:b0:534:c38a:dafd with SMTP id z18-20020a4a6552000000b00534c38adafdmr3319661oog.6.1678996747844;
-        Thu, 16 Mar 2023 12:59:07 -0700 (PDT)
-Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
-        by smtp.gmail.com with ESMTPSA id c11-20020a4ae24b000000b005255e556399sm3620572oot.43.2023.03.16.12.59.07
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 16 Mar 2023 12:59:07 -0700 (PDT)
-Message-ID: <6413750b.4a0a0220.cfd67.2a0b@mx.google.com>
-X-Google-Original-Message-ID: <ZBN1CGjW8ltuGavP@neuromancer.>
-Date:   Thu, 16 Mar 2023 14:59:04 -0500
-From:   Chris Morgan <macroalpha82@gmail.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>
-Subject: Re: [PATCH v2 RFC 9/9] wifi: rtw88: Add support for the SDIO based
- RTL8821CS chipset
-References: <20230310202922.2459680-1-martin.blumenstingl@googlemail.com>
- <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230310202922.2459680-10-martin.blumenstingl@googlemail.com>
+        with ESMTP id S230154AbjCQGsV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2023 02:48:21 -0400
+Received: from mail.nfschina.com (unknown [42.101.60.237])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7A1D856B5;
+        Thu, 16 Mar 2023 23:48:19 -0700 (PDT)
+Received: from localhost (unknown [127.0.0.1])
+        by mail.nfschina.com (Postfix) with ESMTP id B14D51A00A8B;
+        Fri, 17 Mar 2023 14:48:19 +0800 (CST)
+X-Virus-Scanned: amavisd-new at nfschina.com
+Received: from mail.nfschina.com ([127.0.0.1])
+        by localhost (localhost.localdomain [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id XD_21-S8BybF; Fri, 17 Mar 2023 14:48:17 +0800 (CST)
+Received: from localhost.localdomain (unknown [180.167.10.98])
+        (Authenticated sender: yuzhe@nfschina.com)
+        by mail.nfschina.com (Postfix) with ESMTPA id 4E0A11A00994;
+        Fri, 17 Mar 2023 14:48:17 +0800 (CST)
+From:   Yu Zhe <yuzhe@nfschina.com>
+To:     ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        kernel-janitors@vger.kernel.org, liqiong@nfschina.com,
+        Yu Zhe <yuzhe@nfschina.com>
+Subject: [PATCH] mmc: core: remove unnecessary (void*) conversions
+Date:   Fri, 17 Mar 2023 14:47:29 +0800
+Message-Id: <20230317064729.24407-1-yuzhe@nfschina.com>
+X-Mailer: git-send-email 2.11.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 10, 2023 at 09:29:22PM +0100, Martin Blumenstingl wrote:
-> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
-> well as the existing RTL8821C chipset code.
-> 
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
-> Changes since v1:
-> - use /* ... */ style for copyright comments
-> 
-> 
->  drivers/net/wireless/realtek/rtw88/Kconfig    | 11 ++++++
->  drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
->  .../net/wireless/realtek/rtw88/rtw8821cs.c    | 35 +++++++++++++++++++
->  3 files changed, 49 insertions(+)
->  create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> 
-> diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
-> index 6b65da81127f..29eb2f8e0eb7 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Kconfig
-> +++ b/drivers/net/wireless/realtek/rtw88/Kconfig
-> @@ -133,6 +133,17 @@ config RTW88_8821CE
->  
->  	  802.11ac PCIe wireless network adapter
->  
-> +config RTW88_8821CS
-> +	tristate "Realtek 8821CS SDIO wireless network adapter"
-> +	depends on MMC
-> +	select RTW88_CORE
-> +	select RTW88_SDIO
-> +	select RTW88_8821C
-> +	help
-> +	  Select this option will enable support for 8821CS chipset
-> +
-> +	  802.11ac SDIO wireless network adapter
-> +
->  config RTW88_8821CU
->  	tristate "Realtek 8821CU USB wireless network adapter"
->  	depends on USB
-> diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
-> index 6105c2745bda..82979b30ae8d 100644
-> --- a/drivers/net/wireless/realtek/rtw88/Makefile
-> +++ b/drivers/net/wireless/realtek/rtw88/Makefile
-> @@ -59,6 +59,9 @@ rtw88_8821c-objs		:= rtw8821c.o rtw8821c_table.o
->  obj-$(CONFIG_RTW88_8821CE)	+= rtw88_8821ce.o
->  rtw88_8821ce-objs		:= rtw8821ce.o
->  
-> +obj-$(CONFIG_RTW88_8821CS)	+= rtw88_8821cs.o
-> +rtw88_8821cs-objs		:= rtw8821cs.o
-> +
->  obj-$(CONFIG_RTW88_8821CU)	+= rtw88_8821cu.o
->  rtw88_8821cu-objs		:= rtw8821cu.o
->  
-> diff --git a/drivers/net/wireless/realtek/rtw88/rtw8821cs.c b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> new file mode 100644
-> index 000000000000..7ad7c13ac9e6
-> --- /dev/null
-> +++ b/drivers/net/wireless/realtek/rtw88/rtw8821cs.c
-> @@ -0,0 +1,35 @@
-> +// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-> +/* Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> + */
-> +
-> +#include <linux/mmc/sdio_func.h>
-> +#include <linux/mmc/sdio_ids.h>
-> +#include <linux/module.h>
-> +#include "sdio.h"
-> +#include "rtw8821c.h"
-> +
-> +static const struct sdio_device_id rtw_8821cs_id_table[] =  {
-> +	{
-> +		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
-> +			    SDIO_DEVICE_ID_REALTEK_RTW8821CS),
-> +		.driver_data = (kernel_ulong_t)&rtw8821c_hw_spec,
-> +	},
-> +	{}
-> +};
-> +MODULE_DEVICE_TABLE(sdio, rtw_8821cs_id_table);
-> +
-> +static struct sdio_driver rtw_8821cs_driver = {
-> +	.name = "rtw_8821cs",
-> +	.probe = rtw_sdio_probe,
-> +	.remove = rtw_sdio_remove,
-> +	.id_table = rtw_8821cs_id_table,
-> +	.drv = {
-> +		.pm = &rtw_sdio_pm_ops,
-> +		.shutdown = rtw_sdio_shutdown,
-> +	}
-> +};
-> +module_sdio_driver(rtw_8821cs_driver);
-> +
-> +MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
-> +MODULE_DESCRIPTION("Realtek 802.11ac wireless 8821cs driver");
-> +MODULE_LICENSE("Dual BSD/GPL");
-> -- 
-> 2.39.2
-> 
+Pointer variables of void * type do not require type cast.
 
-Overall it works well for me, but when I resume from suspend I get the
-following filling up my dmesg:
+Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
+---
+ drivers/mmc/core/debugfs.c  | 2 +-
+ drivers/mmc/core/host.c     | 2 +-
+ drivers/mmc/core/mmc_test.c | 6 +++---
+ 3 files changed, 5 insertions(+), 5 deletions(-)
 
-rtw_8821cs mmc3:0001:1: sdio read8 failed (0x86): -110
+diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+index fe6808771bc7..2c97b94aab23 100644
+--- a/drivers/mmc/core/debugfs.c
++++ b/drivers/mmc/core/debugfs.c
+@@ -246,7 +246,7 @@ DEFINE_DEBUGFS_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
+ 
+ static int mmc_err_stats_show(struct seq_file *file, void *data)
+ {
+-	struct mmc_host *host = (struct mmc_host *)file->private;
++	struct mmc_host *host = file->private;
+ 	const char *desc[MMC_ERR_MAX] = {
+ 		[MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
+ 		[MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
+diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+index 096093f7be00..76900f67c782 100644
+--- a/drivers/mmc/core/host.c
++++ b/drivers/mmc/core/host.c
+@@ -590,7 +590,7 @@ EXPORT_SYMBOL(mmc_alloc_host);
+ 
+ static void devm_mmc_host_release(struct device *dev, void *res)
+ {
+-	mmc_free_host(*(struct mmc_host **)res);
++	mmc_free_host(res);
+ }
+ 
+ struct mmc_host *devm_mmc_alloc_host(struct device *dev, int extra)
+diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+index 156d34b2ed4d..0f6a563103fd 100644
+--- a/drivers/mmc/core/mmc_test.c
++++ b/drivers/mmc/core/mmc_test.c
+@@ -3045,7 +3045,7 @@ static LIST_HEAD(mmc_test_file_test);
+ 
+ static int mtf_test_show(struct seq_file *sf, void *data)
+ {
+-	struct mmc_card *card = (struct mmc_card *)sf->private;
++	struct mmc_card *card = sf->private;
+ 	struct mmc_test_general_result *gr;
+ 
+ 	mutex_lock(&mmc_test_lock);
+@@ -3079,8 +3079,8 @@ static int mtf_test_open(struct inode *inode, struct file *file)
+ static ssize_t mtf_test_write(struct file *file, const char __user *buf,
+ 	size_t count, loff_t *pos)
+ {
+-	struct seq_file *sf = (struct seq_file *)file->private_data;
+-	struct mmc_card *card = (struct mmc_card *)sf->private;
++	struct seq_file *sf = file->private_data;
++	struct mmc_card *card = sf->private;
+ 	struct mmc_test_card *test;
+ 	long testcase;
+ 	int ret;
+-- 
+2.11.0
 
-So suspend/resume seems to be an issue, but otherwise it works well
-for me.
-
-Chris Morgan
