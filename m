@@ -2,94 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 909ADC7618A
-	for <linux-mmc@archiver.kernel.org>; Fri, 17 Mar 2023 17:37:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D5F9C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Fri, 17 Mar 2023 17:39:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229523AbjCQRhb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 17 Mar 2023 13:37:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38416 "EHLO
+        id S230354AbjCQRjE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 17 Mar 2023 13:39:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41964 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229787AbjCQRha (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2023 13:37:30 -0400
-Received: from mail-qk1-x72b.google.com (mail-qk1-x72b.google.com [IPv6:2607:f8b0:4864:20::72b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82341C1BD3;
-        Fri, 17 Mar 2023 10:37:09 -0700 (PDT)
-Received: by mail-qk1-x72b.google.com with SMTP id bl39so1989129qkb.10;
-        Fri, 17 Mar 2023 10:37:09 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1679074628;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=nkw7xFKCGQ8y3ihDSwQaifjRjfGYpBRwz6O/9EShW4w=;
-        b=pUhvf+kdQ2fX9RNLZ9hiJXhimJItMrtY20tl+OKvdUEpAtCU1mmzPAXVlCGRz9Rv6i
-         tMhVIkUMpgTlTRDoVaOrHpFDTiISiRWAfjcs9g0rSWK/PNKlWNbzIQQq5FQ/WskZXmdi
-         8aAZpWNXa3XAPWmaSV5dqBAppsRm5iqddobUsIZGMAKTUmlH7mu/+4IVHgSd2ryEq/A9
-         3eaP/FbiN//2vViinJTQ8BI2KGQkxPp+c2J87kZ+sQfgerGVLsdRn9ADkcNjqthEygeV
-         FS8Qedt896kUQphTKiEN2Jt+T/NW6CULmYux+TuIUGACOt4hQ+mXGRoXL2q7gIkUZT8B
-         M1gA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679074628;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=nkw7xFKCGQ8y3ihDSwQaifjRjfGYpBRwz6O/9EShW4w=;
-        b=e0+ucX/qnpws3LEPiAB1ytHvvOugxlwQn50WDTUyVZEIWXHs0YTxgtFqPdcPDB5sj3
-         MHMeYmOA/aixZGHXL84oEIVoOQJ/nPwhpNDTY5/zc5s0c9bQQ65L0VIuHozYsCJd1i+D
-         /Ci5951d4eefdmZMdcwt3XlfrXkO4y+dkT3sFZXBhcVA5q89TozBPDCBcMUJiiAxvCHH
-         F/UWcabRh/uGIFTFiDlfpXhYbVVhwx5b7M40HbCNzb4+qsDn8CqABvy2cNWA6eBHIl70
-         q9RstgHaeWhAilhRdUsF8KQmFuIW4pk63huVrv7iKVbstYnd3wLfBH6crLqjBZQ3U9Bb
-         0n8g==
-X-Gm-Message-State: AO0yUKW0yXoNt+1zTYCQrkohSkYLu4j7+FnztmvtPsjIqa1TNzNHj6aL
-        d7/0QXo74tOl+n4MnOOV3eGKSI9/y65BngFBIME=
-X-Google-Smtp-Source: AK7set8hC6XZO9a9uhHE+dJ/fifDkD8AmIT3Wmrg0k48frLIgXxh+o4TnKjKmLQZ2jxVu9L8hIXrW037ynmF6qIV5gk=
-X-Received: by 2002:a05:620a:22d5:b0:745:bd3d:51df with SMTP id
- o21-20020a05620a22d500b00745bd3d51dfmr833838qki.3.1679074628076; Fri, 17 Mar
- 2023 10:37:08 -0700 (PDT)
-MIME-Version: 1.0
-References: <20221205085351.27566-1-tmaimon77@gmail.com> <20221205085351.27566-3-tmaimon77@gmail.com>
- <f28c7c34-077c-4c7e-afd8-c4180718d403@roeck-us.net>
-In-Reply-To: <f28c7c34-077c-4c7e-afd8-c4180718d403@roeck-us.net>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Fri, 17 Mar 2023 19:36:31 +0200
-Message-ID: <CAHp75Vegm=jmuJ6q5qofuLKm_LggKmtQZWcVgQN=MG3kMMCTRA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] mmc: sdhci-npcm: Add NPCM SDHCI driver
-To:     Guenter Roeck <linux@roeck-us.net>
-Cc:     Tomer Maimon <tmaimon77@gmail.com>, ulf.hansson@linaro.org,
-        avifishman70@gmail.com, tali.perry1@gmail.com, joel@jms.id.au,
-        venture@google.com, yuenn@google.com, benjaminfair@google.com,
-        adrian.hunter@intel.com, skhan@linuxfoundation.org,
-        davidgow@google.com, pbrobinson@gmail.com, gsomlo@gmail.com,
-        briannorris@chromium.org, arnd@arndb.de, krakoczy@antmicro.com,
-        openbmc@lists.ozlabs.org, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        with ESMTP id S230434AbjCQRjD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 17 Mar 2023 13:39:03 -0400
+Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA867C1BCE;
+        Fri, 17 Mar 2023 10:38:54 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by ams.source.kernel.org (Postfix) with ESMTPS id 6C077B8265C;
+        Fri, 17 Mar 2023 17:38:54 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 23D6EC433D2;
+        Fri, 17 Mar 2023 17:38:53 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1679074733;
+        bh=V1ANQfWidlpMWF1us3ofwKTkxFINmrQInMA5jQizvJY=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=VFYQb7PzoS5ciOx9EiKMOda+h0nFMJgxVOwdmWJtO8AXTY14Cs71YpNNXMOKMd8jb
+         IuTzrj9bu5Ce9Jw6x+QPLcR3KVv9qkQwM75TNSglgrN4LtR3QSmMPB86MIoI1qa5Wj
+         sRrRFAd/d+QBZSuHMYHutlS4ZBvl2YNYizH642Ybtr8Z6/oKfoZuRWOhB9k2Vz+q6Z
+         UznJyg153maOZWsLRUa1eP1r+P5gHqlGJfoHafLC8mHDqs/RRp6CyCh43MWAaW7SYQ
+         FDSLX0f06LjUpbNM5dDKHWXmOqSAV2JU8U8jgK0vQQauO5l/YxhA9CySlvn8PoyJfc
+         /EgtBe0qQUbsg==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 133F2C43161;
+        Fri, 17 Mar 2023 17:38:53 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC fixes for v6.3-rc3
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20230317092451.1616451-1-ulf.hansson@linaro.org>
+References: <20230317092451.1616451-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20230317092451.1616451-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc1
+X-PR-Tracked-Commit-Id: 92771cdd90de64b15e65f3c88d6c6199bd5f33f5
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: 2c50b0ca9082a2b92c8afdf6c2e1637d7d6185c8
+Message-Id: <167907473307.9394.6580491642058572883.pr-tracker-bot@kernel.org>
+Date:   Fri, 17 Mar 2023 17:38:53 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 17, 2023 at 4:16=E2=80=AFPM Guenter Roeck <linux@roeck-us.net> =
-wrote:
->
-> On Mon, Dec 05, 2022 at 10:53:51AM +0200, Tomer Maimon wrote:
-> > Add Nuvoton NPCM BMC sdhci-pltfm controller driver.
-> >
-> > Signed-off-by: Tomer Maimon <tmaimon77@gmail.com>
->
-> I still don't see this driver in the upstream kernel, or in linux-next.
->
-> Couple of comments:
->
-> - devm ordering does not really matter here. The devm resource
->   is the clock, it does not depend on local data, and it will be
->   released last, so that is ok.
+The pull request you sent on Fri, 17 Mar 2023 10:24:51 +0100:
 
-Not sure. Strictly speaking this is the problem. If you leave a clock
-going on in a wrong period of time it (theoretically) might break your
-hardware once and forever. Similar discussion about power, clock and
-reset signals has been held for camera sensors.
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc1
 
---=20
-With Best Regards,
-Andy Shevchenko
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/2c50b0ca9082a2b92c8afdf6c2e1637d7d6185c8
+
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
