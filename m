@@ -2,111 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 18DE7C6FD1F
-	for <linux-mmc@archiver.kernel.org>; Sun, 19 Mar 2023 16:38:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0ECC4C6FD1F
+	for <linux-mmc@archiver.kernel.org>; Sun, 19 Mar 2023 16:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229561AbjCSQiQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Mar 2023 12:38:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45686 "EHLO
+        id S231255AbjCSQsr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 19 Mar 2023 12:48:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56920 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231150AbjCSQiF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Mar 2023 12:38:05 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61BB612585
-        for <linux-mmc@vger.kernel.org>; Sun, 19 Mar 2023 09:38:04 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pdw2h-0007Tl-Hm; Sun, 19 Mar 2023 17:37:59 +0100
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pdw2b-005GT3-6P; Sun, 19 Mar 2023 17:37:53 +0100
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pdw2a-006C3R-D9; Sun, 19 Mar 2023 17:37:52 +0100
-Date:   Sun, 19 Mar 2023 17:37:49 +0100
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     lizhe <sensor1010@163.com>
-Cc:     TheSven73@gmail.com, ulf.hansson@linaro.org, fthain@linux-m68k.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-m68k@lists.linux-m68k.org, kernel@pengutronix.de,
-        srinivas.pandruvada@linux.intel.com, lznuaa@gmail.com,
-        pali@kernel.org
-Subject: Re: [PATCH] drivers/mmc/core/bus: Delete redundant match function
-Message-ID: <20230319163749.cmdyak2mhsetjt6e@pengutronix.de>
-References: <20211206165038.123107-1-sensor1010@163.com>
- <20211207072322.37dljknm24nk5vk4@pengutronix.de>
- <2447b32c.1d53.186fa5703d8.Coremail.sensor1010@163.com>
+        with ESMTP id S231156AbjCSQsf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Mar 2023 12:48:35 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.133.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D5C11EBC3
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Mar 2023 09:47:50 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1679244470;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=VkDP5nwJg3NiX0wmWxZjf2UT2F8zhLNQEpn1rGiXRWY=;
+        b=NXp+ni3eseIbvksloR4gYCqBR3QMn4TIbn8Pgm92Sld3HE4YYKOlpv5VzEcfAa1ppC4g+D
+        AVmBYO8zbRPbpjQ3ljg4WWhum/WWxyiOQAywjfvNRK2q0CoJOrg4zRKoyyze7Ru4G8zAk5
+        De09GnYhTK7VMdzr1xiyh4SOgreSP5k=
+Received: from mail-qt1-f199.google.com (mail-qt1-f199.google.com
+ [209.85.160.199]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-534-PASHLQv_OEiu6lf1KkarDw-1; Sun, 19 Mar 2023 12:47:48 -0400
+X-MC-Unique: PASHLQv_OEiu6lf1KkarDw-1
+Received: by mail-qt1-f199.google.com with SMTP id j4-20020ac85f84000000b003d864ebfc20so5248860qta.14
+        for <linux-mmc@vger.kernel.org>; Sun, 19 Mar 2023 09:47:48 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1679244468;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=VkDP5nwJg3NiX0wmWxZjf2UT2F8zhLNQEpn1rGiXRWY=;
+        b=06+x5KF6+59gZWqHdLv0EbI5KTCX0SvMexjJU49nnfVRtDsfj+NkQPzSWn7mpmLmmF
+         wXa5O5O8NAOaGz/Y1o/660PsPV9ZijkewROvOOwIDJOxaVQ8N2vmY/myQzKMaUbUxXJT
+         5sUxXOzsGARaKDMTq2dkgzo3EfAxCsdvWgweFvhn+d/qOqcwJPLweQ/Ab9UOEXcwhUdr
+         MqZIvAXnKZfGDEANbAMCwK7+nb9GS7TQzVLxG8lODhLwUCON3SeNxZCR6USGcpoQQKU2
+         7bGz95psw95btDN3Kd2kwONHUqtEkKHZ/GrlFfi5cKcVvGlrVP83KJO3A6BG+bqkRZ7V
+         Radg==
+X-Gm-Message-State: AO0yUKUjOl1LzBW0UbZrDATkgOE3A0JYIylzR50Rw8tHKElDIqsNeVfC
+        LFNnGBVvCMjEIY0jRl+sHDYq3kXdII7lXhTb9VtpmOJ98+jJ8SagYJIxvZST16ZdqWa2JbBrPSj
+        33/FPrRTkDVmNUHlveilI
+X-Received: by 2002:ac8:5f83:0:b0:3bf:d71e:5af4 with SMTP id j3-20020ac85f83000000b003bfd71e5af4mr22398120qta.26.1679244468427;
+        Sun, 19 Mar 2023 09:47:48 -0700 (PDT)
+X-Google-Smtp-Source: AK7set81mKcQVWIpj0FlTITDASkQiikMe5/r0glEegQKpqPmrpVC5hxR63neRzk9SnibKH7bRsoSwg==
+X-Received: by 2002:ac8:5f83:0:b0:3bf:d71e:5af4 with SMTP id j3-20020ac85f83000000b003bfd71e5af4mr22398109qta.26.1679244468205;
+        Sun, 19 Mar 2023 09:47:48 -0700 (PDT)
+Received: from dell-per740-01.7a2m.lab.eng.bos.redhat.com (nat-pool-bos-t.redhat.com. [66.187.233.206])
+        by smtp.gmail.com with ESMTPSA id 124-20020a370482000000b0073b929d0371sm5734012qke.4.2023.03.19.09.47.47
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sun, 19 Mar 2023 09:47:47 -0700 (PDT)
+From:   Tom Rix <trix@redhat.com>
+To:     saschasommer@freenet.de, ulf.hansson@linaro.org, nathan@kernel.org,
+        ndesaulniers@google.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        llvm@lists.linux.dev, Tom Rix <trix@redhat.com>
+Subject: [PATCH] mmc: sdricoh_cs: remove unused sdricoh_readw function
+Date:   Sun, 19 Mar 2023 12:47:44 -0400
+Message-Id: <20230319164744.1707169-1-trix@redhat.com>
+X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="57nfhufrbw27cwsp"
-Content-Disposition: inline
-In-Reply-To: <2447b32c.1d53.186fa5703d8.Coremail.sensor1010@163.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+clang with W=1 reports
+drivers/mmc/host/sdricoh_cs.c:104:28: error: unused function
+  'sdricoh_readw' [-Werror,-Wunused-function]
+static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
+                           ^
+This function is not used, so remove it.
 
---57nfhufrbw27cwsp
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Signed-off-by: Tom Rix <trix@redhat.com>
+---
+ drivers/mmc/host/sdricoh_cs.c | 8 --------
+ 1 file changed, 8 deletions(-)
 
-Hello Lizhe,
+diff --git a/drivers/mmc/host/sdricoh_cs.c b/drivers/mmc/host/sdricoh_cs.c
+index 76a8cd3a186f..57b8c1a96756 100644
+--- a/drivers/mmc/host/sdricoh_cs.c
++++ b/drivers/mmc/host/sdricoh_cs.c
+@@ -101,14 +101,6 @@ static inline void sdricoh_writel(struct sdricoh_host *host, unsigned int reg,
+ 
+ }
+ 
+-static inline unsigned int sdricoh_readw(struct sdricoh_host *host,
+-					 unsigned int reg)
+-{
+-	unsigned int value = readw(host->iobase + reg);
+-	dev_vdbg(host->dev, "rb %x 0x%x\n", reg, value);
+-	return value;
+-}
+-
+ static inline void sdricoh_writew(struct sdricoh_host *host, unsigned int reg,
+ 					 unsigned short value)
+ {
+-- 
+2.27.0
 
-On Sun, Mar 19, 2023 at 10:47:32PM +0800, lizhe wrote:
-> HI : u.kleine-koenig
->     1.=20
->     This is the earliest submission record for this patch.
->     you were also involved and gave good advice.=20
->=20
->=20
->     2.=20
->    in may 2022,  i submitted the pach again.
->=20
->=20
->    i discovered and submitted this issue twice.
->    i did the discovery and submission.
->=20
->=20
->   please consider receiving my patch. thanks.
-
-it's unclear to me, why you address me here. For the patch under
-discussion it's not me who is responsible to judge and apply your patch.
-
-If you check the output of
-
-	scripts/get_maintainer.pl -f drivers/mmc/core/bus.c=20
-
-you'll see that Ulf Hansson is the right one to nag.
-
-Best regards
-Uwe
-
-
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
-
---57nfhufrbw27cwsp
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmQXOlwACgkQj4D7WH0S
-/k7z+Qf+J+J3TZyttAyGr55dzmAYowOEX/4G6MtCZkc3/cEo0rZj5Fug6O+627ew
-s5184bgcYqLS2FdStoCiTr6bpYre9gH7pdsYJi3tHeSvn62WmfIeHq8qVh5pct5T
-Ra1BNOrOfrtXNlCHI7rD7UOrgxoWa7m+dWfsUV/oMuBE0xbj4N9MS+EaiUNu78v3
-IfwJHbCev4gLL8e1Zuz9M/KvMn5x4otYUqmd7wwUCudLHjUtZ2JlTNFHjj3PVUjb
-3t1tyKjZOER8sydO5zNPQ9U0kXHBh9RehEdIyzR9y8IvWjpJIRLifRZzRpAczk6R
-OQcHawH5+0MxOeFDIDbGkuB3WNoKfw==
-=+VhL
------END PGP SIGNATURE-----
-
---57nfhufrbw27cwsp--
