@@ -2,131 +2,87 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07117C7619A
-	for <linux-mmc@archiver.kernel.org>; Mon, 20 Mar 2023 15:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07628C7619A
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Mar 2023 15:36:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233094AbjCTPcp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 20 Mar 2023 11:32:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48100 "EHLO
+        id S233095AbjCTPgn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Mar 2023 11:36:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60234 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233011AbjCTPc0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2023 11:32:26 -0400
-Received: from mail-pj1-x102a.google.com (mail-pj1-x102a.google.com [IPv6:2607:f8b0:4864:20::102a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E870D13DCC
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2023 08:25:15 -0700 (PDT)
-Received: by mail-pj1-x102a.google.com with SMTP id d13so12512624pjh.0
-        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2023 08:25:15 -0700 (PDT)
+        with ESMTP id S233121AbjCTPgV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2023 11:36:21 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B46A51C7D7
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2023 08:28:21 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id ek18so48289783edb.6
+        for <linux-mmc@vger.kernel.org>; Mon, 20 Mar 2023 08:28:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679325913;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=v4ZPHfMn9ZrHO7nzt0vTCldpfJhClttgBh55waccA2k=;
-        b=DVo5f2DZTepL6uwwNvLriz+dqhUYAKmC1TKsmL/eJXOJEXscRqEz+oTeqdG0PZgWBY
-         nYVfOV4f8QX5UOjjTCGWddf+HovepAmqsGU3++OjLh1afgLd7EfjzA+mjmRyXh7lypiN
-         kK+L5N2Hphl+9aEfa/dwKwn8iGIcHFYZrKGozto8Se4+YfDGzEnbA9GG5lTE0keY8Yu0
-         A8O+QyNzBMU9DOLr3OXUtLjajENURRfN1GTy/b7Kl+XtKNAslIJkMOnU2UrK8JJ8Aiw8
-         /Y75oVyFPc4QOUN/8LnN2EFsKM0FvK7T2sLAKsThnTeiXWuSu+ClnSQG8xgKr1ZgWoRG
-         J3Lg==
+        d=linaro.org; s=google; t=1679326095;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=QvbqjlcL+bcFddHkzakeQEvxE0WZLFtin/eJNP/6Jds=;
+        b=FEOyk0ch5NcBUPDFJ9vRXINT4BtRWlDouCCJ816Aj6tFvs26zQZo6D+GNErhheVAid
+         kW5KwvupeDkpX+3TgwMAO0w/zysHZyZamDsRnY3p8nkDJjTLBzO1QOqFgi3eZML2VcKn
+         17q0N9QM2F0z41UQWbsuFDkOckccgC6yMMDZLZHEbUiycUDMJZDbFIfw/MlzEUaZL45K
+         JKK/bCU6IWlkF0imhDntDV+OZFOBrH7kuKxmED/oRLB0P5/8UZTfxqPvk7OY4mMkrrU7
+         mWqS0l2zgAcqy1m9l+0uS+8Ut6UimND9YNXyyAWvhz3/xAeSJje/H26bU7CeOVB53nc/
+         2Wqg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679325913;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=v4ZPHfMn9ZrHO7nzt0vTCldpfJhClttgBh55waccA2k=;
-        b=RlvXaLUmuqwHgGAtSbpfNevVW3o/EHn8vO/5dfn+jL1lybNSfLKDuEGioTTOo+sfU0
-         dy4eYSDbGuBgKdMWBRb1WoeGjlmhqxl4fD9QgV/BlcrBFiJwacwSVmfik8wJmld64W6M
-         eH6hwmvI6/bf0Vd3c/4Lxo7l8sz9jdSdPdnvWrhDO5wsixWLKSC0DnyVQ3pSjdrdlta3
-         d0uXU0ratyfr2bUaOiyJsjQ6sYVpbuut6Ro0W47gNSufQQPBw96XitR+jodnZy+K7F/d
-         OUCaPyfI+ydLz+a/DAM/TyFDJtQ6KkZo0lxwI4KItIQzNbAilkk91qiLOOfE+tt6KbUb
-         XI6g==
-X-Gm-Message-State: AO0yUKW2SrDxByra74i22ej6GfHyZtr9ZbJNzvaBYAx5KZ/E2z37/LPG
-        9/+5PVBoiYE2KoDla3nlYa8KIdJLSFm7SRScLwFKKA==
-X-Google-Smtp-Source: AK7set/tUkf1EmnvActHjEBsR9UHWqB2VVh4wJlOm6K5unVvW13dpF6gbyZ1Y1vdBoiiAf5iFUF7uimp/rwdBfqy6xE=
-X-Received: by 2002:a17:902:d484:b0:1a1:adc5:c4d with SMTP id
- c4-20020a170902d48400b001a1adc50c4dmr3947292plg.13.1679325913008; Mon, 20 Mar
- 2023 08:25:13 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1679326095;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=QvbqjlcL+bcFddHkzakeQEvxE0WZLFtin/eJNP/6Jds=;
+        b=4vpsIv+MVERQzOLxyMcjkZNQFpB1CI/NOsl3gsy2IFEFkXUON36aNfDtLdm1OebmC5
+         hK5pepjkn18FCUWP31jdJ6WOKBzywhjQX5YvIwrxWTbxYmDYgeNanwGG/aETj2S21tWe
+         LMTsix3WS9NDCUbuPas/ph73+wDKEBTONoGs1FveCQjzolOJZxe88wQPPf8Vtep3fZnq
+         ng+7cT6KX7iAgKeCbu8gpiPZHGCKXLCZhhSmbUefljXmrz3XoTU3jz4VQoGRzzeKG5ob
+         OUF6BWJxnp1fyvLWty5Sc1o/aaMxeABmgL7lHoml50fVOdJpf8AISl6JCrapj3ms/hTR
+         QPxQ==
+X-Gm-Message-State: AO0yUKUmScC4Ug/zFm+ByZUtgPROoMyt5O34zoUpnyDa10UU3RxvuCx6
+        j/VBw+RHb0gkmRokJrw9c67kyQ==
+X-Google-Smtp-Source: AK7set9o5/mI7mPNEgdgSeUp6yCydHUMivwcHSQX/kXIVqElEKWBRdss2+/J/gJTgoRLEs+1lYT3ww==
+X-Received: by 2002:a17:907:779a:b0:8fc:c566:dc67 with SMTP id ky26-20020a170907779a00b008fcc566dc67mr10735529ejc.64.1679326095219;
+        Mon, 20 Mar 2023 08:28:15 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:458e:64e7:8cf1:78b0? ([2a02:810d:15c0:828:458e:64e7:8cf1:78b0])
+        by smtp.gmail.com with ESMTPSA id v4-20020a509544000000b004fb402a2a37sm5084567eda.33.2023.03.20.08.28.14
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 20 Mar 2023 08:28:14 -0700 (PDT)
+Message-ID: <2b86ecc8-bc02-dc0b-cc80-51bcc018e4e0@linaro.org>
+Date:   Mon, 20 Mar 2023 16:28:14 +0100
 MIME-Version: 1.0
-References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
- <ZBNIg8+rOdFKcsS8@infradead.org> <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
- <ZBf8dZm1FZIusMls@infradead.org>
-In-Reply-To: <ZBf8dZm1FZIusMls@infradead.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 20 Mar 2023 16:24:36 +0100
-Message-ID: <CAPDyKFogTyf30X+3JGeqf+yER_OLQ8JwXy6oEF3Rn78KzLSDxw@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an
- internal cache
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Bean Huo <beanhuo@micron.com>
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v2] dt-bindings: mmc: fujitsu: Add Socionext Synquacer
+Content-Language: en-US
+To:     Rob Herring <robh@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230319173006.30455-1-robh@kernel.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230319173006.30455-1-robh@kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 20 Mar 2023 at 07:25, Christoph Hellwig <hch@infradead.org> wrote:
->
-> On Thu, Mar 16, 2023 at 09:12:35PM +0200, Adrian Hunter wrote:
-> > Historically file systems have assumed that sectors are updated
-> > atomically i.e. there is never a sector with a mixture of
-> > old and new data.
->
-> Yes.  Not just file systems, but also all kinds of applications.
->
-> > The eMMC spec does not guarantee that,
-> > except for the eMMC "reliable write" operation.
->
-> Neither to ATA or SCSI, but applications and file systems always very
-> much expected it, so withou it storage devices would be considered
-> fault.  Only NVMe actually finally made it part of the standard.
+On 19/03/2023 18:30, Rob Herring wrote:
+> Add support for Socionext Synquacer SDHCI. This binding has been in use for
+> some time.
+> 
+> The interrupts were not documented. The driver only uses the first
+> interrupt, but the DT and example have 2 interrupts. The 2nd one is
+> unknown. "dma-coherent" was also not documented, but is used on Synquacer.
+> 
+> Signed-off-by: Rob Herring <robh@kernel.org>
 
-Even if the standard doesn't say, it's perfectly possible that the
-storage device implements it.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Hence, $subject patch isn't changing anything in regards to REQ_FUA,
-unless the eMMC device/vendor has agreed to this (via the MMC card
-quirks).
+Best regards,
+Krzysztof
 
->
-> > So the paragraph
-> > above is informing the potential benefit of reliable write instead
-> > of cache flush.
->
-> But these are completely separate issue.  Torn writes are completely
-> unrelated to cache flushes.  You can indeed work around torn writes
-> by checksums, but not the lack of cache flushes or vice versa.
-
-It's not a separate issue for eMMC. Please read the complete commit
-message for further clarifications in this regard.
-
->
->
-> > Note, it is not that eMMC cannot avoid torn sectors, it is that
-> > the specification does not mandate that they do.
->
-> If devices tear writes it will break not only various file systems,
-> but more importantly applications, at least on file systems without
-> data checksum (aka all except for btrfs, and even that has a nodatacsum
-> option).
-
-Yes, you are correct. Again, the card quirk (as suggested in $subject
-patch) helps us to manage eMMC cards in different ways. We should not
-avoid REQ_FUA (reliable writes) for an eMMC that actually needs it.
-
->
-> > However, the issue has been raised that reliable write is not
-> > needed to provide sufficient assurance of data integrity, and that
-> > in fact, cache flush can be used instead and perform better.
->
-> It does not.
-
-Can you please elaborate on this?
-
-The tests we have done so far indicate that performance differs based
-upon what eMMC we are using, for example.
-
-Kind regards
-Uffe
