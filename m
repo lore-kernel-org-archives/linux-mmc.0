@@ -2,107 +2,90 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1EA3CC6FD1F
-	for <linux-mmc@archiver.kernel.org>; Sun, 19 Mar 2023 17:30:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B9D0C7618A
+	for <linux-mmc@archiver.kernel.org>; Mon, 20 Mar 2023 06:26:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229622AbjCSRah (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 19 Mar 2023 13:30:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41992 "EHLO
+        id S229839AbjCTG0B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 20 Mar 2023 02:26:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53344 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229448AbjCSRaf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 19 Mar 2023 13:30:35 -0400
-Received: from mail-il1-f169.google.com (mail-il1-f169.google.com [209.85.166.169])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 26BD91423A;
-        Sun, 19 Mar 2023 10:30:34 -0700 (PDT)
-Received: by mail-il1-f169.google.com with SMTP id h5so5426730ile.13;
-        Sun, 19 Mar 2023 10:30:34 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679247033;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=3OyXeMWwUcICjLt5skJDFYn4DtNOe/WaaKZtvUJ6fbQ=;
-        b=39bf/3Lqv1ZLXoZal1l1swuVDQBFnmnOh1D5OHaTb2FkJqKFF4Ub97HhqnWfFgVN+v
-         Dr0+ykeBsjhBwbX0ZPtPRSvkUp8encpHpgQXhj8zd/dUaiia2M3qzeheid7R51mYgRp3
-         Q9z9Ow5oMKpOniOkpmKdA6T/KtIc5bAdph/CO+SFQbb1o56lB+xW0+rRSTVxyDQnM23P
-         C94byvpy+YBmoYFCbcDCD4c41eCJwgkOTl7Ln8ZqJQPfvTFkBrNxG3KBNr2GPtg2QEAF
-         szixmp34qvZn7lqOfGZc9a4yki0SICBqNAq8yhcpwtPec1vBnoR+mTw0yGMornfTJq2e
-         BGow==
-X-Gm-Message-State: AO0yUKXmToOdzAy55JYDeXM6lyLU60f30Z2XDB2cc01x1B0oddhL8SXu
-        SsBf8wftRyiXh/Y1hQRwqA==
-X-Google-Smtp-Source: AK7set8ACMMvQgQNUSW8MZKD/yXBXF9f59lk/bVOHbqn7d499Uw5wsnlVpVGfw6TSXLh+x3kZp6H0A==
-X-Received: by 2002:a92:d083:0:b0:315:3421:ef2a with SMTP id h3-20020a92d083000000b003153421ef2amr3551536ilh.25.1679247033336;
-        Sun, 19 Mar 2023 10:30:33 -0700 (PDT)
-Received: from robh_at_kernel.org ([2605:ef80:80c2:711:b843:6628:3fd6:ded4])
-        by smtp.gmail.com with ESMTPSA id q12-20020a05663810cc00b003e8a17d7b1fsm2617956jad.27.2023.03.19.10.30.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 19 Mar 2023 10:30:33 -0700 (PDT)
-Received: (nullmailer pid 30794 invoked by uid 1000);
-        Sun, 19 Mar 2023 17:30:24 -0000
-From:   Rob Herring <robh@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH v2] dt-bindings: mmc: fujitsu: Add Socionext Synquacer
-Date:   Sun, 19 Mar 2023 12:30:06 -0500
-Message-Id: <20230319173006.30455-1-robh@kernel.org>
-X-Mailer: git-send-email 2.39.2
+        with ESMTP id S229561AbjCTG0A (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 20 Mar 2023 02:26:00 -0400
+Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4336A191;
+        Sun, 19 Mar 2023 23:25:58 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
+        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
+        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
+        Content-Transfer-Encoding:Content-ID:Content-Description;
+        bh=owX/GSJ4ipiXhQOajVZWX1Me7Jms4t/oUWhAspmudyg=; b=wjYHwQ9oHIg64n/tU2CYNDk1Zf
+        B7bfkHy204YrNVySBez8BG/2dfzFH5r6/tx2z+ZyH9qgRXPnzwwzz5slmLmD+56B5gQSsKcFdJMNz
+        u9yCBHsn9cVyVcvrJXRPGNdKt6xqXgR4QOU1CGBvZr8wAIRU4AjgMOYOoJJ7JFtfLmOphcYmx4kNv
+        IK8in1/PGXd2cMnRo00ioul6fHeaN1ue/xkapaWcuzGnbsXxEcNOiiBi4Qy6CFvqaQCMnmN1hr53s
+        2BFsh3wXFDXB+INaPNuKMWcyXbUCtilRXMMwzKnK+B5Fb3GIg0oQ2pyDJ9wxxf8+1f0hqiatc/hQv
+        AU+xDsOQ==;
+Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
+        id 1pe8xx-008E9B-0g;
+        Mon, 20 Mar 2023 06:25:57 +0000
+Date:   Sun, 19 Mar 2023 23:25:57 -0700
+From:   Christoph Hellwig <hch@infradead.org>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Christoph Hellwig <hch@infradead.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org,
+        Wenchao Chen <wenchao.chen666@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports
+ an internal cache
+Message-ID: <ZBf8dZm1FZIusMls@infradead.org>
+References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
+ <ZBNIg8+rOdFKcsS8@infradead.org>
+ <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
+X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for Socionext Synquacer SDHCI. This binding has been in use for
-some time.
+On Thu, Mar 16, 2023 at 09:12:35PM +0200, Adrian Hunter wrote:
+> Historically file systems have assumed that sectors are updated
+> atomically i.e. there is never a sector with a mixture of
+> old and new data.
 
-The interrupts were not documented. The driver only uses the first
-interrupt, but the DT and example have 2 interrupts. The 2nd one is
-unknown. "dma-coherent" was also not documented, but is used on Synquacer.
+Yes.  Not just file systems, but also all kinds of applications.
 
-Signed-off-by: Rob Herring <robh@kernel.org>
----
-v2:
- - Rebase on conversion done by Kunihiko
----
- .../bindings/mmc/fujitsu,sdhci-fujitsu.yaml       | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
+> The eMMC spec does not guarantee that,
+> except for the eMMC "reliable write" operation.
 
-diff --git a/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml b/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
-index 73d747e917f3..430b62899397 100644
---- a/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
-@@ -14,9 +14,13 @@ allOf:
- 
- properties:
-   compatible:
--    enum:
--      - fujitsu,mb86s70-sdhci-3.0
--      - socionext,f-sdh30-e51-mmc
-+    oneOf:
-+      - items:
-+          - const: socionext,synquacer-sdhci
-+          - const: fujitsu,mb86s70-sdhci-3.0
-+      - enum:
-+          - fujitsu,mb86s70-sdhci-3.0
-+          - socionext,f-sdh30-e51-mmc
- 
-   reg:
-     maxItems: 1
-@@ -29,6 +33,11 @@ properties:
-       - const: iface
-       - const: core
- 
-+  dma-coherent: true
-+
-+  interrupts:
-+    maxItems: 2
-+
-   resets:
-     maxItems: 1
- 
--- 
-2.39.2
+Neither to ATA or SCSI, but applications and file systems always very
+much expected it, so withou it storage devices would be considered
+fault.  Only NVMe actually finally made it part of the standard.
 
+> So the paragraph
+> above is informing the potential benefit of reliable write instead
+> of cache flush.
+
+But these are completely separate issue.  Torn writes are completely
+unrelated to cache flushes.  You can indeed work around torn writes
+by checksums, but not the lack of cache flushes or vice versa.
+
+
+> Note, it is not that eMMC cannot avoid torn sectors, it is that
+> the specification does not mandate that they do.
+
+If devices tear writes it will break not only various file systems,
+but more importantly applications, at least on file systems without
+data checksum (aka all except for btrfs, and even that has a nodatacsum
+option).
+
+> However, the issue has been raised that reliable write is not
+> needed to provide sufficient assurance of data integrity, and that
+> in fact, cache flush can be used instead and perform better.
+
+It does not.
