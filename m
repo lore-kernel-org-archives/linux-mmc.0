@@ -2,121 +2,174 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BFD2C761A6
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 10:52:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1766BC74A5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 11:04:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229833AbjCUKwK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 06:52:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53644 "EHLO
+        id S230380AbjCULEE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 07:04:04 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41290 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230491AbjCUKwH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 06:52:07 -0400
-Received: from mail-wr1-x42d.google.com (mail-wr1-x42d.google.com [IPv6:2a00:1450:4864:20::42d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B35A93C0
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 03:52:04 -0700 (PDT)
-Received: by mail-wr1-x42d.google.com with SMTP id o7so13174981wrg.5
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 03:52:04 -0700 (PDT)
+        with ESMTP id S230337AbjCULED (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 07:04:03 -0400
+Received: from mail-yb1-xb35.google.com (mail-yb1-xb35.google.com [IPv6:2607:f8b0:4864:20::b35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD3D83B862
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 04:04:00 -0700 (PDT)
+Received: by mail-yb1-xb35.google.com with SMTP id e194so16553977ybf.1
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 04:04:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1679395923;
-        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
-         :user-agent:references:from:to:cc:subject:date:message-id:reply-to;
-        bh=K68XFluEkJ4EyRHJihXO8/AhJVwZseuuuSGDSObQY3Q=;
-        b=fpY2Lc/LNVH4063nraiPu6JJwbMVe7kciEmg4YMy729ZFshtgzOmhChumgtEIdVQtN
-         YHHfEN4Ftgu5pSNSZuF0qvoDPopC6ThvEmU3DSUpZd5UU4rXczI/alLwGe4mfT3KulQq
-         br7dB0Gqixii/Nix6fcsD42k/bgP9SdBIRY4X2BXrqVvFKtzxXUbuX68ZXVEkpc4ace+
-         mSSXKwX3or4PVABNmH0mc5BABVq/MR+4d0pgeq+NZU3NQYq+sbCeuc+7MdxrX14GBcqm
-         6FTy/tg6an6FpCjJSB5XmtA+E4AUoYpKR6af4quxuslqXeikSEXo/XjBm//+JrcCX2ep
-         Ty0A==
+        d=linaro.org; s=google; t=1679396640;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=+xGaWFqZk+SjQHPaJZ22gZZSAzmIpjEZSvJQ2u7q7hU=;
+        b=Esmc5EfF3KMPYOrGWpN+3uKTDp47YY+1KX3RRmSmmAovWOaUuDAcTvSeqZ6aa+IeMW
+         b5K+4JqGLGmVm5oMAQYJJg/E1sIoySEQPczVHNLimG5jbDccF4Ze3VEmdZGSRm0pjbxC
+         juX5JCX5YE15q/YHSfsS3zL50OgeDBCM1XJcuTGodXYp4+yNnj8E/KEFB9on1tt6qBPB
+         AWqNTxMSp01qiJN2EVLNHrPgIRXVdTmIpXbvPhj5fnEXB1BBy5myUKH28C3wt5ukiPHd
+         gUfe7CDu3AeWULSqAJme5NPzMFiaUhl3/pEW8wSZk0e1isHnzA2sO/xbCvhrmXon9NFG
+         ayDw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679395923;
-        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
-         :user-agent:references:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=K68XFluEkJ4EyRHJihXO8/AhJVwZseuuuSGDSObQY3Q=;
-        b=HTuvCoXby79B6t2X0uhmLPfzsT8lN40hCs3mKIjxk9qfMSdI+kMRyIyHeF6PnYI4op
-         vZubPJs7W+CVowyDaatEU73HawIPy3NmWPBZeudpUSxuToH+t8huq/hSBd/3Z2+e4PmB
-         UIVtQkgwbA9JhXQqozPLCx5QV7bjwaO3FW37/Aog4l2xHLV+AgKX308sZhSrP1FFUA2n
-         quUTBed3kEdTU5NzSzLLiCj1bNeYCzX6CP3yRoVEoUh3+0/0WqqnPtuhRlhqwqbl3fRc
-         Tituwd3ieOyQcdVvWG1E9S3IEAeRscjPl9IHlZ5tm2RVlTEV6K8xLuV711neVKKNzzJd
-         TLTQ==
-X-Gm-Message-State: AO0yUKUnBMLQhbpQaw0qNS1j56L5G3g7zHqcAyn3nf17L8SgdBQOlfbZ
-        gBXTDnQgzIPcdGneqj3TdChHkw==
-X-Google-Smtp-Source: AK7set868qGoElUpfskvJ9bfPpYZPqFEK55esIAH/gTwGF/+V98A4OOLYzWOB74M6NG2BH6E97IH2A==
-X-Received: by 2002:adf:ec8e:0:b0:2d9:10e7:57e8 with SMTP id z14-20020adfec8e000000b002d910e757e8mr1312758wrn.16.1679395923106;
-        Tue, 21 Mar 2023 03:52:03 -0700 (PDT)
-Received: from localhost (laubervilliers-658-1-213-31.w90-63.abo.wanadoo.fr. [90.63.244.31])
-        by smtp.gmail.com with ESMTPSA id b18-20020adff912000000b002c567881dbcsm10944294wrr.48.2023.03.21.03.52.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 21 Mar 2023 03:52:02 -0700 (PDT)
-References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
-User-agent: mu4e 1.8.13; emacs 28.2
-From:   Jerome Brunet <jbrunet@baylibre.com>
-To:     Marc Gonzalez <marc.w.gonzalez@free.fr>,
-        linux-wireless@vger.kernel.org, MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@gmail.com>,
-        Angus Ainslie <angus@akkea.ca>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Pierre-Hugues Husson <phh@phh.me>
-Subject: Re: [Performance regression] BCM4359/9 on S905X2
-Date:   Tue, 21 Mar 2023 11:46:57 +0100
-In-reply-to: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
-Message-ID: <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
+        d=1e100.net; s=20210112; t=1679396640;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=+xGaWFqZk+SjQHPaJZ22gZZSAzmIpjEZSvJQ2u7q7hU=;
+        b=VmaUJ1fpRmko6uwY15teBaPXEyGwm8UuD86HFc3vQ7p1PcBVkom0aTHEBKfDRlNAR9
+         Cb5bnGBpKvCoOEySF3z1SXldSEmZqQvSHnn8fq1yiGVCI1v7rNn3noWdhSro4ukHtfb0
+         VfoSieQn9AG49SHPgLkixzsoX3sOc5yQKq2L1BcbDyjaE6sq1r4ze6EBquMKfdxRYJjR
+         dlHtLgmRVcebjYF3tLpQJeayuoQ3muFsH8+B7A6tvPoVT/vquJcRLUIbF77xUpzUSuWH
+         paLldBa6v9XRSzym6kn1NzSyrwi+3DT4H4uhRRrS/CeFT/1ZplPPgMdaN4IjTQqp6+1I
+         W4tQ==
+X-Gm-Message-State: AAQBX9c7YCkaDB0zpanlKiC2B2y9yBLnnSNkQ6QxeMpepE3pXVgh2zAP
+        HzwEeV40wJPb4LaWAfebPGs0x74f3Gdn7lpAhIp7qg==
+X-Google-Smtp-Source: AKy350anWjiUgJzmZq/Q0GSExiC0OXO7/b8ibvhwpC6ppwIWDbuvnqDTTEE2zKvhqXnHLmmpwFf5pd2YH8Ge21uSmHU=
+X-Received: by 2002:a05:6902:1107:b0:b3c:cbdb:ed5e with SMTP id
+ o7-20020a056902110700b00b3ccbdbed5emr1201464ybu.3.1679396639937; Tue, 21 Mar
+ 2023 04:03:59 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20230316164514.1615169-1-ulf.hansson@linaro.org> <8d6d12b5-39d4-ac07-f725-18ae9df9765b@intel.com>
+In-Reply-To: <8d6d12b5-39d4-ac07-f725-18ae9df9765b@intel.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 21 Mar 2023 12:03:23 +0100
+Message-ID: <CAPDyKFrvWA-SxM6d=eVHFyPTYygsXmWQGVmnHJxsRFwGOhVjYw@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an
+ internal cache
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     linux-mmc@vger.kernel.org,
+        Wenchao Chen <wenchao.chen666@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Tue 21 Mar 2023 at 11:40, Marc Gonzalez <marc.w.gonzalez@free.fr> wrote:
-
-> Hello everyone,
+On Tue, 21 Mar 2023 at 11:36, Adrian Hunter <adrian.hunter@intel.com> wrote:
 >
-> I've been benchmarking an Amlogic S905X2 board.
-> It provides a BCM4359/9 WiFi chip connected through SDIO.
+> On 16/03/23 18:45, Ulf Hansson wrote:
+> > REQ_FUA translates into so called "reliable writes" (atomic writes) for
+> > eMMC cards, which is generally supported as it was introduced as a
+> > mandatory feature already in the v4.3 (2007) of the eMMC spec. To fully
+> > support the reliable writes (thus REQ_FUA), the mmc host driver needs to
+> > support the CMD23 (MMC_CAP_CMD23) too, which is rather common nowadays.
+> >
+> > File systems typically uses REQ_FUA for writing their meta-data and other
+> > important information. Ideally it should provide an increased protection
+> > against data-corruption, during sudden power-failures. This said, file
+> > systems have other ways to handle sudden power-failures too, like using
+> > checksums to detect partly-written data, for example.
+> >
+> > It has been reported that the reliable writes are costly for some eMMCs,
+> > leading to performance degradations. Exactly why, is in the implementation
+> > details of the internals of the eMMC.
+> >
+> > Moreover, in the v4.5 (2011) of the eMMC spec, the cache-control was
+> > introduced as an optional feature. It allows the host to trigger a flush of
+> > the eMMC's internal write-cache. In the past, before the cache-control
+> > feature was added, the reliable write acted as trigger for the eMMC, to
+> > also flush its internal write-cache, even if that too remains as an
+> > implementation detail of the eMMC.
+> >
+> > In a way to try to improve the situation with costly reliable writes and
+> > REQ_FUA, let's add a new card quirk MMC_QUIRK_AVOID_REL_WRITE, which may be
+> > set to avoid announcing the support for it. However, as mentioned above,
+> > due to the specific relationship with the cache-control feature, we must
+> > keep REQ_FUA unless that is supported too.
+> >
+> > Reported-by: Wenchao Chen <wenchao.chen666@gmail.com>
+> > Acked-by: Bean Huo <beanhuo@micron.com>
+> > Acked-by: Avri Altman <avri.altman@wdc.com>
+> > Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
 >
-> There's a large performance gap between vendor kernel and mainline.
-> (Downloading a 1GB file to /dev/null from a device inches away)
+> Minor cosmetic suggestion below, but nevertheless:
+>
+> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-The title is misleading. You are comparing different sources. This is
-not a regression. This is merely a difference.
-
-If we are talking about mainline, then which board is it ? What is the
-corresponding DT ? What is the MMC configuration in both case ? Have
-you checked you are running with the same clock configuration to begin
-with ?
+Thanks!
 
 >
-> # curl -o /dev/null http://192.168.1.254:8095/fixed/1G
->   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
->                                  Dload  Upload   Total   Spent    Left  Speed
-> 100 1024M  100 1024M    0     0  27.5M      0  0:00:37  0:00:37 --:--:-- 28.6M
-> vs
-> 100 1024M  100 1024M    0     0  11.0M      0  0:01:32  0:01:32 --:--:-- 11.0M
+> > ---
+> >
+> > Updated since the RFC:
+> >       Added a card quirk to maintain the current behaviour. The quirk isn't
+> >       set for any cards yet, which is needed (a patch on top) to move forward
+> >       with this.
+> >
+> > ---
+> >  drivers/mmc/core/block.c | 16 ++++++++++++----
+> >  drivers/mmc/core/card.h  |  5 +++++
+> >  include/linux/mmc/card.h |  1 +
+> >  3 files changed, 18 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> > index 672ab90c4b2d..35292e36a1fb 100644
+> > --- a/drivers/mmc/core/block.c
+> > +++ b/drivers/mmc/core/block.c
+> > @@ -2409,8 +2409,7 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+> >       struct mmc_blk_data *md;
+> >       int devidx, ret;
+> >       char cap_str[10];
+> > -     bool cache_enabled = false;
+> > -     bool fua_enabled = false;
+> > +     bool cache_enabled, avoid_fua, fua_enabled = false;
+> >
+> >       devidx = ida_simple_get(&mmc_blk_ida, 0, max_devices, GFP_KERNEL);
+> >       if (devidx < 0) {
+> > @@ -2494,11 +2493,20 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+> >           ((card->ext_csd.rel_param & EXT_CSD_WR_REL_PARAM_EN) ||
+> >            card->ext_csd.rel_sectors)) {
+> >               md->flags |= MMC_BLK_REL_WR;
+> > +     }
+> > +
+> > +     /*
+> > +      * REQ_FUA is supported through eMMC reliable writes, which has been
+> > +      * reported to be a bit costly for some eMMCs. In these cases, let's
+> > +      * rely on the flush requests (REQ_OP_FLUSH) instead, if we can use the
+> > +      * cache-control feature too.
+> > +      */
+> > +     cache_enabled = mmc_cache_enabled(card->host);
+> > +     avoid_fua = cache_enabled && mmc_card_avoid_rel_write(card);
+> > +     if (md->flags & MMC_BLK_REL_WR && !avoid_fua) {
+> >               fua_enabled = true;
+> >               cache_enabled = true;
+> >       }
 >
-> Line 1 = vendor kernel (4.9.180 amlogic android)
+> looks like this could be just:
+>
+>         fua_enabled = (md->flags & MMC_BLK_REL_WR) && !avoid_fua;
+>
+> with fua_enabled no longer needing initialization
 
-This cannot help indentify a downstream kernel, and the infinite number
-of forks and patches associated with it.
+Unless I misunderstand your point, that would work for fua_enabled,
+but would not be sufficient for cache_enabled.
 
-> Line 2 = mainline kernel (6.2.0-rc8)
->
-> Why is the vendor kernel 2.5 times faster?
->
-> (I'm using the same firmware files, but it seems the vendor kernel reads
-> an additional configuration file that the mainline vendor seems to ignore.)
->
-> Regards
+cache_enabled should be set if fua_enabled is set - and no matter
+whether mmc_cache_enabled() returns true or not.
 
+Did that make sense?
+
+[...]
+
+Kind regards
+Uffe
