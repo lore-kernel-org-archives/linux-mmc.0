@@ -2,70 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 27BFCC74A5B
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 18:01:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 602E0C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 20:45:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229648AbjCUSBM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 14:01:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33592 "EHLO
+        id S229484AbjCUUpK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 16:45:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230176AbjCUSBI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 14:01:08 -0400
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [212.27.42.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF597244BB
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 11:01:06 -0700 (PDT)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 3F7B22003E0;
-        Tue, 21 Mar 2023 19:01:01 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1679421665;
-        bh=7jcxLZYZVIxLt/99tnslGBZy06mzJRUXDK5eV7UVG4w=;
-        h=Date:To:Cc:From:Subject:From;
-        b=uTSUPt+5ngY/UMwWdzRhQE3aZwt94Z3VI6MZ8bcJkSmM25FQRiERdzhVoVbYceTll
-         T8wk5ONZvPzU35S4CZDuOJa+ReSHEGpla/O6ZhZDOA0R0hrx/9GyUGKAI1DazHVVX1
-         GEQaNLzS0mVl4f0Xg0xk7nspVladvYcE1Uj9QxLCjkEgd885S8SgJUKewirGZO0piu
-         hUfNwiovel1nUI4o4yVOguxGchC163ToJNmoCHNUkFB7gRLAAgNMu96ZQ0R/UNAixy
-         CG0yF7DIkXKlXZ6cRAIcX4RKdPr5H4RgAKAvUYfnInmbF1Rl1Aqs8HWBhxyKer2zFN
-         yvLcVK9JBjBGA==
-Message-ID: <d2444591-c91b-a94d-71e2-9dedc3b6c514@free.fr>
-Date:   Tue, 21 Mar 2023 19:01:01 +0100
+        with ESMTP id S229700AbjCUUpH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 16:45:07 -0400
+X-Greylist: delayed 455 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 21 Mar 2023 13:45:06 PDT
+Received: from forward104j.mail.yandex.net (forward104j.mail.yandex.net [IPv6:2a02:6b8:0:801:2::107])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A95E52931
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 13:45:06 -0700 (PDT)
+Received: from forward203b.mail.yandex.net (forward203b.mail.yandex.net [IPv6:2a02:6b8:c02:900:1:45:d181:d203])
+        by forward104j.mail.yandex.net (Yandex) with ESMTP id E7F782F98F24;
+        Tue, 21 Mar 2023 23:37:29 +0300 (MSK)
+Received: from myt5-18b0513eae63.qloud-c.yandex.net (myt5-18b0513eae63.qloud-c.yandex.net [IPv6:2a02:6b8:c12:571f:0:640:18b0:513e])
+        by forward203b.mail.yandex.net (Yandex) with ESMTP id 81195600C6;
+        Tue, 21 Mar 2023 23:37:25 +0300 (MSK)
+Received: by myt5-18b0513eae63.qloud-c.yandex.net (smtp/Yandex) with ESMTPSA id GbwJmeEbJW21-wW9oWXc5;
+        Tue, 21 Mar 2023 23:37:24 +0300
+X-Yandex-Fwd: 1
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail; t=1679431044;
+        bh=5RPP7d79oVWCJLIfd/IJsuehUgySJej4tOZFP01Hr5A=;
+        h=Message-Id:Date:In-Reply-To:Cc:Subject:References:To:From;
+        b=pudVMKPTagxtNTJwDhf1rYMX7mnJSOiJ2bN4Ztgt2ZJI/T3i9Lrc1smcB/4Lidnat
+         SgJ17Cig5jHf3P+QWEkP6K1Qi59EE1XNPrNtetjWIualDr89V+rxVqquNZiFvYf8f5
+         xBSekx1liTZocndD+I7Q/yfuHlHGqJbB3AlcmEBk=
+Authentication-Results: myt5-18b0513eae63.qloud-c.yandex.net; dkim=pass header.i=@yandex.ru
+From:   Georgii Kruglov <georgy.kruglov@yandex.ru>
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     Georgii Kruglov <georgy.kruglov@yandex.ru>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Yangbo Lu <yangbo.lu@nxp.com>, Yinbo Zhu <yinbo.zhu@nxp.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        lvc-project@linuxtesting.org
+Subject: [PATCH v2] mmc: sdhci-of-esdhc: fix quirk to ignore command inhibit for data
+Date:   Tue, 21 Mar 2023 23:37:15 +0300
+Message-Id: <20230321203715.3975-1-georgy.kruglov@yandex.ru>
+X-Mailer: git-send-email 2.34.1
+In-Reply-To: <20230314220619.41242-1-georgy.kruglov@yandex.ru>
+References: 
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Pierre-Hugues Husson <phh@phh.me>, MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-Subject: [PATCH] mmc: core: log empty non-removable slots
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-An empty non-removable slot might be the symptom of probing too early.
+If spec_reg is equal to 'SDHCI_PRESENT_STATE', esdhc_readl_fixup()
+fixes up register value and returns it immediately. As a result, the
+further block
+(spec_reg == SDHCI_PRESENT_STATE)
+    &&(esdhc->quirk_ignore_data_inhibit == true),
+is never executed.
 
-Signed-off-by: Marc Gonzalez <marc.w.gonzalez@free.fr>
+The patch merges the second block into the first one.
+
+Found by Linux Verification Center (linuxtesting.org) with SVACE.
+
+Fixes: 1f1929f3f2fa ("mmc: sdhci-of-esdhc: add quirk to ignore command inhibit for data")
+Signed-off-by: Georgii Kruglov <georgy.kruglov@yandex.ru>
 ---
- drivers/mmc/core/core.c | 4 ++++
- 1 file changed, 4 insertions(+)
+v2: Drop the redundant '== true' as Adrian Hunter <adrian.hunter@intel.com> suggested.
+ drivers/mmc/host/sdhci-of-esdhc.c | 24 +++++++++++-------------
+ 1 file changed, 11 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 426c7f66b3492..b8137baecee7c 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2257,6 +2257,10 @@ void mmc_rescan(struct work_struct *work)
- 			break;
+diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
+index 4712adac7f7c..48ca1cf15b19 100644
+--- a/drivers/mmc/host/sdhci-of-esdhc.c
++++ b/drivers/mmc/host/sdhci-of-esdhc.c
+@@ -133,6 +133,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 			return ret;
+ 		}
  	}
- 
-+	if (!mmc_card_is_removable(host) && !host->card)
-+		pr_info("%s: no card detected, check post-power-on-delay-ms",
-+			mmc_hostname(host));
 +
  	/*
- 	 * Ignore the command timeout errors observed during
- 	 * the card init as those are excepted.
+ 	 * The DAT[3:0] line signal levels and the CMD line signal level are
+ 	 * not compatible with standard SDHC register. The line signal levels
+@@ -144,6 +145,16 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 		ret = value & 0x000fffff;
+ 		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
+ 		ret |= (value << 1) & SDHCI_CMD_LVL;
++
++		/*
++		 * Some controllers have unreliable Data Line Active
++		 * bit for commands with busy signal. This affects
++		 * Command Inhibit (data) bit. Just ignore it since
++		 * MMC core driver has already polled card status
++		 * with CMD13 after any command with busy siganl.
++		 */
++		if (esdhc->quirk_ignore_data_inhibit)
++			ret &= ~SDHCI_DATA_INHIBIT;
+ 		return ret;
+ 	}
+ 
+@@ -158,19 +169,6 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
+ 		return ret;
+ 	}
+ 
+-	/*
+-	 * Some controllers have unreliable Data Line Active
+-	 * bit for commands with busy signal. This affects
+-	 * Command Inhibit (data) bit. Just ignore it since
+-	 * MMC core driver has already polled card status
+-	 * with CMD13 after any command with busy siganl.
+-	 */
+-	if ((spec_reg == SDHCI_PRESENT_STATE) &&
+-	(esdhc->quirk_ignore_data_inhibit == true)) {
+-		ret = value & ~SDHCI_DATA_INHIBIT;
+-		return ret;
+-	}
+-
+ 	ret = value;
+ 	return ret;
+ }
 -- 
-2.25.1
+2.34.1
+
