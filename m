@@ -2,113 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CAD00C74A5B
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 12:38:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E1BBC74A5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 13:29:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230304AbjCUMiQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 08:38:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34236 "EHLO
+        id S230468AbjCUN3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 09:29:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49300 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229473AbjCUMiP (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 08:38:15 -0400
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98B934481;
-        Tue, 21 Mar 2023 05:38:04 -0700 (PDT)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 20C1B200410;
-        Tue, 21 Mar 2023 13:37:41 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1679402282;
-        bh=ayjhC2BQbFfTl1beiJuuMQv5sxjmgYk/0tf5p8b9j6w=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=XQYu/zDw/QM4lEqMWZJqO06dILPiNz57BlD6PhZT+iRSxi/S5ZOsNttxSsPUPc0Dl
-         PKsz2R6kOuTNFU2spJ6v35Hsao9DYOBXz+3OH6T1+K7Mb1g5tL3Bd84fIsxNvzG5hS
-         0NSDwh3MIgCn8qt/0afWl+7YhXB0uhZ00Ut4M6FsNRndcsOg2zblL3MopRR2NTJvxg
-         IHL/J+8NTvmNgCGkunFRlQkK7x6hqmDJJ+wFwpomMAPfhGtqZ7vwU6DYuprwXnzFNe
-         8nqcoe9PDphcKclH/guELoHOG88DC23na0ete6Byx66yrUkTNoPmtZ8MwjB2ZluzNh
-         zTI9GoSsLW60g==
-Message-ID: <ce0bd9a5-e44d-b30b-3434-9d5fd36e251a@free.fr>
-Date:   Tue, 21 Mar 2023 13:37:40 +0100
+        with ESMTP id S230431AbjCUN3J (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 09:29:09 -0400
+Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94C3932500
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 06:28:54 -0700 (PDT)
+Received: by mail-yb1-xb2b.google.com with SMTP id l16so7503941ybe.6
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 06:28:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1679405333;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=T8IHUW0jzANzQv9QNlwvT0rXUx7xha0g1Bpyg1M+irU=;
+        b=X1vKY07AWODDBD02IgmyrUA9QOO/4kzkmb/owSjHmTpVzHypfmk5i5v3smUp1h0VL4
+         i/CV9OBOog9xrtbzhNZClJ88IdQm/oO+nKWOu4RGhH+dSxTJCnvwYlErKAMCwTKzcB89
+         o9hf8gqc+Xmsd4jqZEVYGz2CnwrQHwwQavaSGbLiNP592DwS92pDfsDe/OnU9RBY77cT
+         WSFrAEYQI5xJzzBEggVntqVEpUILXcAqkzeaAvgZvQvDGMsioafSF6Qa7BIUGgwRmC9V
+         rxKa7j4pLKkVxDYx5KSsHN79IJz0L8rBVtaqkbxoxZXssk/Zlw+mH6hAdlx+gqMApPW4
+         gZug==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1679405333;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=T8IHUW0jzANzQv9QNlwvT0rXUx7xha0g1Bpyg1M+irU=;
+        b=jaTYlyAdbu61MNUBezSq9/jTzso/WyT4zXA5KFiuGt15fzck7OQsIYaS/cdAKvh3+u
+         F9frsghiMlqQ3XfymZE0J2dmEMQaajuCGvANVN2cyDLGo+HIGZRTczg81zdspemucm+o
+         MlLfQLi3ZV/WEJQ0docCQfauY3b+R6ZRIqVn5uum+hm5A9jDMhBkDSk9D/W4y86CwJGL
+         7BGG7B9BbOELQbCDrwC2bczSXvOJCYYigosspAalDPiTbgFsGqBLYoGs6NDICOp1H6kE
+         lbNmw10N5ZDSS11Pot3nBmznLTlZg9gSoLARxiB1aRZL6QV5xYJ0ZI678RJ69DMZlZkp
+         88mA==
+X-Gm-Message-State: AAQBX9eRImdocgZCMW6grSesK6BgQ2JHgaBncpi7gdejA9AKn1f9XHbU
+        OLEyORklkbH2L5XVXoIrXrKCoFul0IdEqpr//Xt8/g==
+X-Google-Smtp-Source: AKy350YU4hQjSGCJH0Y8ETmUXn7sueulPmLtjCK+zP0Jt7J9GJOX5hVhcG/5p92KOlB6AnfKwlfl3Qv5LdC3jKlaCGw=
+X-Received: by 2002:a05:6902:120c:b0:b6e:b924:b96f with SMTP id
+ s12-20020a056902120c00b00b6eb924b96fmr1581220ybu.3.1679405333536; Tue, 21 Mar
+ 2023 06:28:53 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: Performance lower than expected with BCM4359/9 on S905X2
-Content-Language: en-US
-To:     Jerome Brunet <jbrunet@baylibre.com>,
-        linux-wireless@vger.kernel.org, MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@gmail.com>,
-        Angus Ainslie <angus@akkea.ca>,
-        Heiner Kallweit <hkallweit1@gmail.com>,
-        Pierre-Hugues Husson <phh@phh.me>
-References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
- <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
+ <ZBNIg8+rOdFKcsS8@infradead.org> <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
+ <ZBf8dZm1FZIusMls@infradead.org> <CAPDyKFogTyf30X+3JGeqf+yER_OLQ8JwXy6oEF3Rn78KzLSDxw@mail.gmail.com>
+ <ZBmlB2K3KMt7Apv5@infradead.org>
+In-Reply-To: <ZBmlB2K3KMt7Apv5@infradead.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 21 Mar 2023 14:28:17 +0100
+Message-ID: <CAPDyKFpV9BhsFYKajWCibUD0bQ4LFEn2J1LqF8M5Qxd16z3j0A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an
+ internal cache
+To:     Christoph Hellwig <hch@infradead.org>
+Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+        Wenchao Chen <wenchao.chen666@gmail.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Christian Lohle <cloehle@hyperstone.com>,
+        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 21/03/2023 11:46, Jerome Brunet wrote:
+On Tue, 21 Mar 2023 at 13:37, Christoph Hellwig <hch@infradead.org> wrote:
+>
+> On Mon, Mar 20, 2023 at 04:24:36PM +0100, Ulf Hansson wrote:
+> > > Neither to ATA or SCSI, but applications and file systems always very
+> > > much expected it, so withou it storage devices would be considered
+> > > fault.  Only NVMe actually finally made it part of the standard.
+> >
+> > Even if the standard doesn't say, it's perfectly possible that the
+> > storage device implements it.
+>
+> That's exactly what I'm saying above.
+>
+> > > But these are completely separate issue.  Torn writes are completely
+> > > unrelated to cache flushes.  You can indeed work around torn writes
+> > > by checksums, but not the lack of cache flushes or vice versa.
+> >
+> > It's not a separate issue for eMMC. Please read the complete commit
+> > message for further clarifications in this regard.
+>
+> The commit message claims that checksums replace cache flushes.  Which
+> is dangerously wrong.  So please don't refer me to it again - this
+> dangerously incorrect commit message is wht alerted me to reply to the
+> patch.
 
-> On Tue 21 Mar 2023 at 11:40, Marc Gonzalez wrote:
-> 
->> I've been benchmarking an Amlogic S905X2 board.
->> It provides a BCM4359/9 WiFi chip connected through SDIO.
->>
->> There's a large performance gap between vendor kernel and mainline.
->> (Downloading a 1GB file to /dev/null from a device inches away)
-> 
-> The title is misleading. You are comparing different sources. This is
-> not a regression. This is merely a difference.
+That was not the intent, but rather to state that REQ_FUA isn't the
+only thing a filesystem can rely on, there are other things too. If
+it's striving towards being more tolerant to sudden power failures, I
+mean.
 
-I have changed the subject line to a (hopefully) more accurate one.
+Anyway, thanks for your advice, I will drop these parts from the
+commit message to make sure it doesn't cause confusion.
 
-> If we are talking about mainline, then which board is it ? What is the
-> corresponding DT ? What is the MMC configuration in both case ? Have
-> you checked you are running with the same clock configuration to begin
-> with ?
+>
+> > > > However, the issue has been raised that reliable write is not
+> > > > needed to provide sufficient assurance of data integrity, and that
+> > > > in fact, cache flush can be used instead and perform better.
+> > >
+> > > It does not.
+> >
+> > Can you please elaborate on this?
+>
+> Flushing caches does not replace the invariant of not tearing subsector
+> writes.  And if you need to use reliable writes for (some) devices to
+> not tear sectors, no amount of cache flushing is going to paper over
+> the problem.
 
-Perhaps my initial request was unclear, my apologies.
+Of course, then I get your point!
 
-I was asking whether anyone using any S905X2 board had noticed
-such a performance discrepancy. (Neil seems to have provided
-a full explanation for the situation.)
+I think the confusing part here is that the internals of the eMMC
+treats a "reliable write" as a cache flush too. At least this is the
+case for earlier eMMC devices, where the write-cache couldn't be
+explicitly controlled by the host.
 
-For what it's worth, I'm using an sei530 board, which appears
-to be a minor variant of the sei510 (down to the schematics).
-
->> # curl -o /dev/null http://192.168.1.254:8095/fixed/1G
->>   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
->>                                  Dload  Upload   Total   Spent    Left  Speed
->> 100 1024M  100 1024M    0     0  27.5M      0  0:00:37  0:00:37 --:--:-- 28.6M
->> vs
->> 100 1024M  100 1024M    0     0  11.0M      0  0:01:32  0:01:32 --:--:-- 11.0M
->>
->> Line 1 = vendor kernel (4.9.180 amlogic android)
-> 
-> This cannot help identify a downstream kernel, and the infinite number
-> of forks and patches associated with it.
-
-I was not asking anyone to reproduce my exact setup.
-
-I find it confusing that some assume there is something different
-about the board I'm using. The more likely hypothesis is that all
-S905X2 boards have the same behavior.
-
-Regards
-
+Kind regards
+Uffe
