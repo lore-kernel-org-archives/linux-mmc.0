@@ -2,124 +2,106 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E1BBC74A5B
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 13:29:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44C74C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 14:01:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230468AbjCUN3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 09:29:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49300 "EHLO
+        id S231241AbjCUOBt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 10:01:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37246 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230431AbjCUN3J (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 09:29:09 -0400
-Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94C3932500
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 06:28:54 -0700 (PDT)
-Received: by mail-yb1-xb2b.google.com with SMTP id l16so7503941ybe.6
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 06:28:54 -0700 (PDT)
+        with ESMTP id S229696AbjCUOBs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 10:01:48 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 319991B2DD
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 07:01:46 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id h8so60061957ede.8
+        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 07:01:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679405333;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=T8IHUW0jzANzQv9QNlwvT0rXUx7xha0g1Bpyg1M+irU=;
-        b=X1vKY07AWODDBD02IgmyrUA9QOO/4kzkmb/owSjHmTpVzHypfmk5i5v3smUp1h0VL4
-         i/CV9OBOog9xrtbzhNZClJ88IdQm/oO+nKWOu4RGhH+dSxTJCnvwYlErKAMCwTKzcB89
-         o9hf8gqc+Xmsd4jqZEVYGz2CnwrQHwwQavaSGbLiNP592DwS92pDfsDe/OnU9RBY77cT
-         WSFrAEYQI5xJzzBEggVntqVEpUILXcAqkzeaAvgZvQvDGMsioafSF6Qa7BIUGgwRmC9V
-         rxKa7j4pLKkVxDYx5KSsHN79IJz0L8rBVtaqkbxoxZXssk/Zlw+mH6hAdlx+gqMApPW4
-         gZug==
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1679407304;
+        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
+         :user-agent:references:from:to:cc:subject:date:message-id:reply-to;
+        bh=j26tJt6NnNAzyGu4WLnvCWTv3oW1M1SUyeftfDPTWn0=;
+        b=AbSVI+I4DHx9JetIGlhjpnoJxZA1uEiOjSQ7e9QiUFYmPRnCkKFhggCMOaaKHpEg1e
+         B5ivMtyPoPROhkWW8phhjDBBgw6i7oN1Lsd/t77dtgkjgLE7CcKNls0mmbd535YlMap6
+         LOAhwYzaO0eM7oYDuVPvHuCEFOqb8FTMrUUc1SiXDRyVWzz7lX88ex5GqEFv+tXMYgqQ
+         m7rC87SBxuN9OK9EE9+m7MQVXqrrwIP1I+ausKlEj5vSKmvAZWcidxD1kdFwtKDz0xXH
+         QOr5lId57Rnb34NZPWyAk08L0eRdLZTwZYpUzFeNHsgY+juw5IJxFTeui5dtHWbhfdwE
+         INYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679405333;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=T8IHUW0jzANzQv9QNlwvT0rXUx7xha0g1Bpyg1M+irU=;
-        b=jaTYlyAdbu61MNUBezSq9/jTzso/WyT4zXA5KFiuGt15fzck7OQsIYaS/cdAKvh3+u
-         F9frsghiMlqQ3XfymZE0J2dmEMQaajuCGvANVN2cyDLGo+HIGZRTczg81zdspemucm+o
-         MlLfQLi3ZV/WEJQ0docCQfauY3b+R6ZRIqVn5uum+hm5A9jDMhBkDSk9D/W4y86CwJGL
-         7BGG7B9BbOELQbCDrwC2bczSXvOJCYYigosspAalDPiTbgFsGqBLYoGs6NDICOp1H6kE
-         lbNmw10N5ZDSS11Pot3nBmznLTlZg9gSoLARxiB1aRZL6QV5xYJ0ZI678RJ69DMZlZkp
-         88mA==
-X-Gm-Message-State: AAQBX9eRImdocgZCMW6grSesK6BgQ2JHgaBncpi7gdejA9AKn1f9XHbU
-        OLEyORklkbH2L5XVXoIrXrKCoFul0IdEqpr//Xt8/g==
-X-Google-Smtp-Source: AKy350YU4hQjSGCJH0Y8ETmUXn7sueulPmLtjCK+zP0Jt7J9GJOX5hVhcG/5p92KOlB6AnfKwlfl3Qv5LdC3jKlaCGw=
-X-Received: by 2002:a05:6902:120c:b0:b6e:b924:b96f with SMTP id
- s12-20020a056902120c00b00b6eb924b96fmr1581220ybu.3.1679405333536; Tue, 21 Mar
- 2023 06:28:53 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1679407304;
+        h=mime-version:message-id:in-reply-to:date:subject:cc:to:from
+         :user-agent:references:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=j26tJt6NnNAzyGu4WLnvCWTv3oW1M1SUyeftfDPTWn0=;
+        b=dgpk2lvqZolwtTkDA3a3pd8oHQ7QsO1WVvOzSR2D7N8YAeyU4jEIgCDs5QROgRgRAG
+         cniov+wRbggaqODHErJXJgII3v3hkcDeiaOZL99wudKKXTzmYJYkF+v/roBJ9Cf/3t+T
+         2ZLzqjrTiHJsspTuRwZPVWOoZgqVP8M5ulYyL2NqgZIeHpoUrtTrIwHVnJAYLc8GVwri
+         +Fxk2JdWd519ejHfFLXVk230dT8jYRZV3oVOdhIUi9HgvTaYadEr7w/MyhXufIl2L0uO
+         BkSIc34jqrEw17/EIFltKyJoxN6SKP5GsJ6x3P4PpscfA+cIlyZ4zd9CmtTAGH8ZrhnC
+         VmEg==
+X-Gm-Message-State: AO0yUKWtyaD5xz0t9xTQD0eIjwmWKXSg/JZF52XxzZzGcry19J2HRVDo
+        KuxkgmUM24zxV0twzYAD493X5A==
+X-Google-Smtp-Source: AK7set8ucDLG9fAEqf9uy4PxfqGzqLuGzyH3LRu5tCGF8OOY6SlApdT9f6NHyGcmg6+WtRQjZlRzag==
+X-Received: by 2002:a05:6402:b35:b0:4fa:ee01:a0cb with SMTP id bo21-20020a0564020b3500b004faee01a0cbmr3386046edb.32.1679407304662;
+        Tue, 21 Mar 2023 07:01:44 -0700 (PDT)
+Received: from localhost ([2a04:cec0:11b9:8a49:3d4e:8d15:74df:30e7])
+        by smtp.gmail.com with ESMTPSA id z23-20020a50cd17000000b004bd1fe2cc02sm6412163edi.16.2023.03.21.07.01.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 21 Mar 2023 07:01:44 -0700 (PDT)
+References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
+ <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
+ <ce0bd9a5-e44d-b30b-3434-9d5fd36e251a@free.fr>
+User-agent: mu4e 1.8.13; emacs 28.2
+From:   Jerome Brunet <jbrunet@baylibre.com>
+To:     Marc Gonzalez <marc.w.gonzalez@free.fr>,
+        linux-wireless@vger.kernel.org, MMC <linux-mmc@vger.kernel.org>,
+        AML <linux-amlogic@lists.infradead.org>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@gmail.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Pierre-Hugues Husson <phh@phh.me>
+Subject: Re: Performance lower than expected with BCM4359/9 on S905X2
+Date:   Tue, 21 Mar 2023 14:54:39 +0100
+In-reply-to: <ce0bd9a5-e44d-b30b-3434-9d5fd36e251a@free.fr>
+Message-ID: <1jcz526w53.fsf@starbuckisacylon.baylibre.com>
 MIME-Version: 1.0
-References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
- <ZBNIg8+rOdFKcsS8@infradead.org> <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
- <ZBf8dZm1FZIusMls@infradead.org> <CAPDyKFogTyf30X+3JGeqf+yER_OLQ8JwXy6oEF3Rn78KzLSDxw@mail.gmail.com>
- <ZBmlB2K3KMt7Apv5@infradead.org>
-In-Reply-To: <ZBmlB2K3KMt7Apv5@infradead.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 21 Mar 2023 14:28:17 +0100
-Message-ID: <CAPDyKFpV9BhsFYKajWCibUD0bQ4LFEn2J1LqF8M5Qxd16z3j0A@mail.gmail.com>
-Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports an
- internal cache
-To:     Christoph Hellwig <hch@infradead.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Bean Huo <beanhuo@micron.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 21 Mar 2023 at 13:37, Christoph Hellwig <hch@infradead.org> wrote:
->
-> On Mon, Mar 20, 2023 at 04:24:36PM +0100, Ulf Hansson wrote:
-> > > Neither to ATA or SCSI, but applications and file systems always very
-> > > much expected it, so withou it storage devices would be considered
-> > > fault.  Only NVMe actually finally made it part of the standard.
-> >
-> > Even if the standard doesn't say, it's perfectly possible that the
-> > storage device implements it.
->
-> That's exactly what I'm saying above.
->
-> > > But these are completely separate issue.  Torn writes are completely
-> > > unrelated to cache flushes.  You can indeed work around torn writes
-> > > by checksums, but not the lack of cache flushes or vice versa.
-> >
-> > It's not a separate issue for eMMC. Please read the complete commit
-> > message for further clarifications in this regard.
->
-> The commit message claims that checksums replace cache flushes.  Which
-> is dangerously wrong.  So please don't refer me to it again - this
-> dangerously incorrect commit message is wht alerted me to reply to the
-> patch.
-
-That was not the intent, but rather to state that REQ_FUA isn't the
-only thing a filesystem can rely on, there are other things too. If
-it's striving towards being more tolerant to sudden power failures, I
-mean.
-
-Anyway, thanks for your advice, I will drop these parts from the
-commit message to make sure it doesn't cause confusion.
 
 >
-> > > > However, the issue has been raised that reliable write is not
-> > > > needed to provide sufficient assurance of data integrity, and that
-> > > > in fact, cache flush can be used instead and perform better.
-> > >
-> > > It does not.
-> >
-> > Can you please elaborate on this?
+> I was not asking anyone to reproduce my exact setup.
 >
-> Flushing caches does not replace the invariant of not tearing subsector
-> writes.  And if you need to use reliable writes for (some) devices to
-> not tear sectors, no amount of cache flushing is going to paper over
-> the problem.
+> I find it confusing that some assume there is something different
+> about the board I'm using. The more likely hypothesis is that all
+> S905X2 boards have the same behavior.
 
-Of course, then I get your point!
+High-speed MMC modes are usually defined/limited per boards.
+Check the different  DTs in arch/arm64/boot/dts/amlogic, you'll see
+that not all have the same configs.
 
-I think the confusing part here is that the internals of the eMMC
-treats a "reliable write" as a cache flush too. At least this is the
-case for earlier eMMC devices, where the write-cache couldn't be
-explicitly controlled by the host.
+Yes the S905X2 has the bounce buffer work-around which plays a role on
+the overall performance. MMC high-speed modes is critical just has well.
 
-Kind regards
-Uffe
+The Amlogic 4.9 downstream does all kinds of fancy (and unsafe) things
+to enable higher modes.
+
+So there is no assumption here, merely a tentative to get a clearer
+picture.
+
+>
+> Regards
+
