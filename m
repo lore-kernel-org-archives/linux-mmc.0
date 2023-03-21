@@ -2,90 +2,113 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 150C8C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 12:37:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CAD00C74A5B
+	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 12:38:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230517AbjCUMhi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 08:37:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33256 "EHLO
+        id S230304AbjCUMiQ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 08:38:16 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229473AbjCUMhe (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 08:37:34 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C46FB4346F;
-        Tue, 21 Mar 2023 05:37:31 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=EKPzzBQ3FvBycDuqBFuN9h8/3as7Wm8d7ysB+f2krm4=; b=nvjbX0z/nmnuQ6KwN3CNm8WoLu
-        oyEVoMHPWDfIbLBsKuQBad4rZOOiRoj5uThoiY3ks5tCiIvftymvBulFkhxEeNft/MYn6IUmgQzTX
-        xlWmqmGKYRdKZlKb/eP5Qupv1MBzXbv2T3mStJjk2S8lbDPiTtF5XVVPyLSxVGxUBHBsc+AeiNFyh
-        pkrDNXbSNnzs4NeGGEdoBYxtdFWKiW9vRbGijsMbUyoNFz+Mw0BaTLocTU7JlVRj+1NbTg/zTSIRm
-        Ts2x53hXcC+N11eHg7QYP8n945U6vZPrlZgqMjPrGyIJQj6eLTRMTWadfHu3OlFLvzqu45sIMa1Y9
-        qKQ4zYKw==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1pebF1-00CLpY-1d;
-        Tue, 21 Mar 2023 12:37:27 +0000
-Date:   Tue, 21 Mar 2023 05:37:27 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Christoph Hellwig <hch@infradead.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc@vger.kernel.org,
-        Wenchao Chen <wenchao.chen666@gmail.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Christian Lohle <cloehle@hyperstone.com>,
-        linux-block@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Bean Huo <beanhuo@micron.com>
-Subject: Re: [PATCH] mmc: core: Allow to avoid REQ_FUA if the eMMC supports
- an internal cache
-Message-ID: <ZBmlB2K3KMt7Apv5@infradead.org>
-References: <20230316164514.1615169-1-ulf.hansson@linaro.org>
- <ZBNIg8+rOdFKcsS8@infradead.org>
- <522a5d01-e939-278a-3354-1bbfb1bd6557@intel.com>
- <ZBf8dZm1FZIusMls@infradead.org>
- <CAPDyKFogTyf30X+3JGeqf+yER_OLQ8JwXy6oEF3Rn78KzLSDxw@mail.gmail.com>
+        with ESMTP id S229473AbjCUMiP (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 08:38:15 -0400
+Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [IPv6:2a01:e0c:1:1599::11])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98B934481;
+        Tue, 21 Mar 2023 05:38:04 -0700 (PDT)
+Received: from [192.168.108.81] (unknown [213.36.7.13])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 20C1B200410;
+        Tue, 21 Mar 2023 13:37:41 +0100 (CET)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1679402282;
+        bh=ayjhC2BQbFfTl1beiJuuMQv5sxjmgYk/0tf5p8b9j6w=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=XQYu/zDw/QM4lEqMWZJqO06dILPiNz57BlD6PhZT+iRSxi/S5ZOsNttxSsPUPc0Dl
+         PKsz2R6kOuTNFU2spJ6v35Hsao9DYOBXz+3OH6T1+K7Mb1g5tL3Bd84fIsxNvzG5hS
+         0NSDwh3MIgCn8qt/0afWl+7YhXB0uhZ00Ut4M6FsNRndcsOg2zblL3MopRR2NTJvxg
+         IHL/J+8NTvmNgCGkunFRlQkK7x6hqmDJJ+wFwpomMAPfhGtqZ7vwU6DYuprwXnzFNe
+         8nqcoe9PDphcKclH/guELoHOG88DC23na0ete6Byx66yrUkTNoPmtZ8MwjB2ZluzNh
+         zTI9GoSsLW60g==
+Message-ID: <ce0bd9a5-e44d-b30b-3434-9d5fd36e251a@free.fr>
+Date:   Tue, 21 Mar 2023 13:37:40 +0100
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFogTyf30X+3JGeqf+yER_OLQ8JwXy6oEF3Rn78KzLSDxw@mail.gmail.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: Performance lower than expected with BCM4359/9 on S905X2
+Content-Language: en-US
+To:     Jerome Brunet <jbrunet@baylibre.com>,
+        linux-wireless@vger.kernel.org, MMC <linux-mmc@vger.kernel.org>,
+        AML <linux-amlogic@lists.infradead.org>
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@gmail.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Heiner Kallweit <hkallweit1@gmail.com>,
+        Pierre-Hugues Husson <phh@phh.me>
+References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
+ <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+In-Reply-To: <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Mar 20, 2023 at 04:24:36PM +0100, Ulf Hansson wrote:
-> > Neither to ATA or SCSI, but applications and file systems always very
-> > much expected it, so withou it storage devices would be considered
-> > fault.  Only NVMe actually finally made it part of the standard.
+On 21/03/2023 11:46, Jerome Brunet wrote:
+
+> On Tue 21 Mar 2023 at 11:40, Marc Gonzalez wrote:
 > 
-> Even if the standard doesn't say, it's perfectly possible that the
-> storage device implements it.
-
-That's exactly what I'm saying above.
-
-> > But these are completely separate issue.  Torn writes are completely
-> > unrelated to cache flushes.  You can indeed work around torn writes
-> > by checksums, but not the lack of cache flushes or vice versa.
+>> I've been benchmarking an Amlogic S905X2 board.
+>> It provides a BCM4359/9 WiFi chip connected through SDIO.
+>>
+>> There's a large performance gap between vendor kernel and mainline.
+>> (Downloading a 1GB file to /dev/null from a device inches away)
 > 
-> It's not a separate issue for eMMC. Please read the complete commit
-> message for further clarifications in this regard.
+> The title is misleading. You are comparing different sources. This is
+> not a regression. This is merely a difference.
 
-The commit message claims that checksums replace cache flushes.  Which
-is dangerously wrong.  So please don't refer me to it again - this
-dangerously incorrect commit message is wht alerted me to reply to the
-patch.
+I have changed the subject line to a (hopefully) more accurate one.
 
-> > > However, the issue has been raised that reliable write is not
-> > > needed to provide sufficient assurance of data integrity, and that
-> > > in fact, cache flush can be used instead and perform better.
-> >
-> > It does not.
+> If we are talking about mainline, then which board is it ? What is the
+> corresponding DT ? What is the MMC configuration in both case ? Have
+> you checked you are running with the same clock configuration to begin
+> with ?
+
+Perhaps my initial request was unclear, my apologies.
+
+I was asking whether anyone using any S905X2 board had noticed
+such a performance discrepancy. (Neil seems to have provided
+a full explanation for the situation.)
+
+For what it's worth, I'm using an sei530 board, which appears
+to be a minor variant of the sei510 (down to the schematics).
+
+>> # curl -o /dev/null http://192.168.1.254:8095/fixed/1G
+>>   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+>>                                  Dload  Upload   Total   Spent    Left  Speed
+>> 100 1024M  100 1024M    0     0  27.5M      0  0:00:37  0:00:37 --:--:-- 28.6M
+>> vs
+>> 100 1024M  100 1024M    0     0  11.0M      0  0:01:32  0:01:32 --:--:-- 11.0M
+>>
+>> Line 1 = vendor kernel (4.9.180 amlogic android)
 > 
-> Can you please elaborate on this?
+> This cannot help identify a downstream kernel, and the infinite number
+> of forks and patches associated with it.
 
-Flushing caches does not replace the invariant of not tearing subsector
-writes.  And if you need to use reliable writes for (some) devices to
-not tear sectors, no amount of cache flushing is going to paper over
-the problem.
+I was not asking anyone to reproduce my exact setup.
+
+I find it confusing that some assume there is something different
+about the board I'm using. The more likely hypothesis is that all
+S905X2 boards have the same behavior.
+
+Regards
+
