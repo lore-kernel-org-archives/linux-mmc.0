@@ -2,96 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2E89C7619A
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Mar 2023 09:36:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B1C0C76195
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Mar 2023 17:40:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230492AbjCVJgh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Mar 2023 05:36:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37688 "EHLO
+        id S229754AbjCVRkU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Mar 2023 13:40:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54896 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230461AbjCVJgg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2023 05:36:36 -0400
-Received: from aposti.net (aposti.net [89.234.176.197])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6A8A5C9C7;
-        Wed, 22 Mar 2023 02:36:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=crapouillou.net;
-        s=mail; t=1679477152;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=NnyeTjIgdueY7mjaENj/U4VyZ8m5JbQk88eP7+Y+NYk=;
-        b=XEBl/Oy+30xBpk7zkIKXfBH3r4Zsd8JBd5MdDsEVQYxh2vKgxB8R2ndtqH2nlcQgqN4GQF
-        Bi8jtOEwXG/+cGXZpLiK+VcMgibiJqllPJIdJ003fjFCNHzxzawEWPh2gUGBxNOtYmD9nZ
-        AzrbSKfSj6knaFwpPsSW6miXEqX/xHE=
-Message-ID: <6aa6d80cb587c98dba5c04b47cd78f93bb3bafec.camel@crapouillou.net>
+        with ESMTP id S229646AbjCVRkT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2023 13:40:19 -0400
+X-Greylist: delayed 1669 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 22 Mar 2023 10:40:18 PDT
+Received: from www381.your-server.de (www381.your-server.de [78.46.137.84])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FDCED310;
+        Wed, 22 Mar 2023 10:40:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed; d=metafoo.de;
+        s=default2002; h=Content-Transfer-Encoding:Content-Type:In-Reply-To:From:
+        References:Cc:To:Subject:MIME-Version:Date:Message-ID:Sender:Reply-To:
+        Content-ID:Content-Description:Resent-Date:Resent-From:Resent-Sender:
+        Resent-To:Resent-Cc:Resent-Message-ID;
+        bh=j4kDtes5yQEhSaRkdjJ6fUBQBcvH3mVXdZYGKrFGxjk=; b=Um6Hi4/teqDwXcPpVqXZfqL9wl
+        rh9z89rWSr1ADTHi6PGRDt/QxiPhbq7Iq8QI9A2wBV8PFwp42Io8KM42i52LXmGiOwXbuZ6iIFLDt
+        M9n2s3vJvqLDUVMhvctvvzqw04J8y8PpWQsnuSVQjsYjdQ43HTNd+K9Ii/PfSBRLnYuctDrXyCuTt
+        oNhxRsPJMyYDKKv5m6r9ONErfTbEWJiF4+It3HJ/sEYr+oxhnoBylIDGVDD65Iei9iZCX4quZXRwO
+        6eAvWcHmPUAHoL1b5h033pm/YwiF9dOWu5WdmPNLGh/GErdDP0sMHJv1KlbMhn+RVnrObJLIJC3S1
+        Q6AtSM0g==;
+Received: from sslproxy05.your-server.de ([78.46.172.2])
+        by www381.your-server.de with esmtpsa  (TLS1.3) tls TLS_AES_256_GCM_SHA384
+        (Exim 4.94.2)
+        (envelope-from <lars@metafoo.de>)
+        id 1pf1jJ-000O2z-6W; Wed, 22 Mar 2023 17:54:29 +0100
+Received: from [2604:5500:c0e5:eb00:da5e:d3ff:feff:933b]
+        by sslproxy05.your-server.de with esmtpsa (TLSv1.3:TLS_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <lars@metafoo.de>)
+        id 1pf1jI-000RWx-Qu; Wed, 22 Mar 2023 17:54:28 +0100
+Message-ID: <997596d9-dc80-4aff-2875-869a54442e36@metafoo.de>
+Date:   Wed, 22 Mar 2023 09:54:26 -0700
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
 Subject: Re: [PATCH] mmc: jz4740: Use dev_err_probe()
-From:   Paul Cercueil <paul@crapouillou.net>
-To:     Sergei Shtylyov <sergei.shtylyov@gmail.com>,
+Content-Language: en-US
+To:     Paul Cercueil <paul@crapouillou.net>,
+        Sergei Shtylyov <sergei.shtylyov@gmail.com>,
         ye.xingchen@zte.com.cn, ulf.hansson@linaro.org
 Cc:     linux-mips@vger.kernel.org, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Date:   Wed, 22 Mar 2023 10:25:50 +0100
-In-Reply-To: <d91d6e3c-da8c-0601-0cd7-45bfe7c4ad50@gmail.com>
 References: <202303221707010277273@zte.com.cn>
-         <d91d6e3c-da8c-0601-0cd7-45bfe7c4ad50@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-MIME-Version: 1.0
+ <d91d6e3c-da8c-0601-0cd7-45bfe7c4ad50@gmail.com>
+ <6aa6d80cb587c98dba5c04b47cd78f93bb3bafec.camel@crapouillou.net>
+From:   Lars-Peter Clausen <lars@metafoo.de>
+In-Reply-To: <6aa6d80cb587c98dba5c04b47cd78f93bb3bafec.camel@crapouillou.net>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Authenticated-Sender: lars@metafoo.de
+X-Virus-Scanned: Clear (ClamAV 0.103.8/26851/Wed Mar 22 08:22:49 2023)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Le mercredi 22 mars 2023 =C3=A0 12:18 +0300, Sergei Shtylyov a =C3=A9crit=
-=C2=A0:
-> On 3/22/23 12:07 PM, ye.xingchen@zte.com.cn=C2=A0wrote:
->=20
-> > From: Ye Xingchen <ye.xingchen@zte.com.cn>
-> >=20
-> > Replace the open-code with dev_err_probe() to simplify the code.
-> >=20
-> > Signed-off-by: Ye Xingchen <ye.xingchen@zte.com.cn>
-> > ---
-> > =C2=A0drivers/mmc/host/jz4740_mmc.c | 5 +----
-> > =C2=A01 file changed, 1 insertion(+), 4 deletions(-)
-> >=20
-> > diff --git a/drivers/mmc/host/jz4740_mmc.c
-> > b/drivers/mmc/host/jz4740_mmc.c
-> > index 698450afa7bb..a6ad03b24add 100644
-> > --- a/drivers/mmc/host/jz4740_mmc.c
-> > +++ b/drivers/mmc/host/jz4740_mmc.c
-> > @@ -232,10 +232,7 @@ static int
-> > jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (!IS_ERR(host->dma_t=
-x))
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0return 0;
-> >=20
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (PTR_ERR(host->dma_tx) !=
-=3D -ENODEV) {
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0dev_err(dev, "Failed to get dma tx-rx channel\n");
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0return PTR_ERR(host->dma_tx);
-> > -=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0}
-> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0return dev_err_probe(dev, PT=
-R_ERR(host->dma_tx), "Failed to
-> > get dma tx-rx channel\n");
->=20
-> =C2=A0=C2=A0 I'm afraid this makes the following code unreachable...
-
-Also, this is not a probe(), so I don't see a point of using
+On 3/22/23 02:25, Paul Cercueil wrote:
+> Le mercredi 22 mars 2023 à 12:18 +0300, Sergei Shtylyov a écrit :
+>> On 3/22/23 12:07 PM, ye.xingchen@zte.com.cn wrote:
+>>
+>>> From: Ye Xingchen <ye.xingchen@zte.com.cn>
+>>>
+>>> Replace the open-code with dev_err_probe() to simplify the code.
+>>>
+>>> Signed-off-by: Ye Xingchen <ye.xingchen@zte.com.cn>
+>>> ---
+>>>   drivers/mmc/host/jz4740_mmc.c | 5 +----
+>>>   1 file changed, 1 insertion(+), 4 deletions(-)
+>>>
+>>> diff --git a/drivers/mmc/host/jz4740_mmc.c
+>>> b/drivers/mmc/host/jz4740_mmc.c
+>>> index 698450afa7bb..a6ad03b24add 100644
+>>> --- a/drivers/mmc/host/jz4740_mmc.c
+>>> +++ b/drivers/mmc/host/jz4740_mmc.c
+>>> @@ -232,10 +232,7 @@ static int
+>>> jz4740_mmc_acquire_dma_channels(struct jz4740_mmc_host *host)
+>>>          if (!IS_ERR(host->dma_tx))
+>>>                  return 0;
+>>>
+>>> -       if (PTR_ERR(host->dma_tx) != -ENODEV) {
+>>> -               dev_err(dev, "Failed to get dma tx-rx channel\n");
+>>> -               return PTR_ERR(host->dma_tx);
+>>> -       }
+>>> +       return dev_err_probe(dev, PTR_ERR(host->dma_tx), "Failed to
+>>> get dma tx-rx channel\n");
+>>     I'm afraid this makes the following code unreachable...
+> Also, this is not a probe(), so I don't see a point of using
+> dev_err_probe() here.
+The function is only called from probe(), I think it makes sense to use 
 dev_err_probe() here.
 
-Cheers,
--Paul
-
->=20
-> >=20
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0host->dma_tx =3D dma_re=
-quest_chan(mmc_dev(host->mmc), "tx");
-> > =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0if (IS_ERR(host->dma_tx=
-)) {
->=20
-> MBR, Sergey
 
