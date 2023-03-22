@@ -2,121 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 602E0C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Tue, 21 Mar 2023 20:45:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 20E8DC74A5B
+	for <linux-mmc@archiver.kernel.org>; Wed, 22 Mar 2023 02:27:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229484AbjCUUpK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 21 Mar 2023 16:45:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39246 "EHLO
+        id S229738AbjCVC1w (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 21 Mar 2023 22:27:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45012 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229700AbjCUUpH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 16:45:07 -0400
-X-Greylist: delayed 455 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Tue, 21 Mar 2023 13:45:06 PDT
-Received: from forward104j.mail.yandex.net (forward104j.mail.yandex.net [IPv6:2a02:6b8:0:801:2::107])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A95E52931
-        for <linux-mmc@vger.kernel.org>; Tue, 21 Mar 2023 13:45:06 -0700 (PDT)
-Received: from forward203b.mail.yandex.net (forward203b.mail.yandex.net [IPv6:2a02:6b8:c02:900:1:45:d181:d203])
-        by forward104j.mail.yandex.net (Yandex) with ESMTP id E7F782F98F24;
-        Tue, 21 Mar 2023 23:37:29 +0300 (MSK)
-Received: from myt5-18b0513eae63.qloud-c.yandex.net (myt5-18b0513eae63.qloud-c.yandex.net [IPv6:2a02:6b8:c12:571f:0:640:18b0:513e])
-        by forward203b.mail.yandex.net (Yandex) with ESMTP id 81195600C6;
-        Tue, 21 Mar 2023 23:37:25 +0300 (MSK)
-Received: by myt5-18b0513eae63.qloud-c.yandex.net (smtp/Yandex) with ESMTPSA id GbwJmeEbJW21-wW9oWXc5;
-        Tue, 21 Mar 2023 23:37:24 +0300
-X-Yandex-Fwd: 1
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yandex.ru; s=mail; t=1679431044;
-        bh=5RPP7d79oVWCJLIfd/IJsuehUgySJej4tOZFP01Hr5A=;
-        h=Message-Id:Date:In-Reply-To:Cc:Subject:References:To:From;
-        b=pudVMKPTagxtNTJwDhf1rYMX7mnJSOiJ2bN4Ztgt2ZJI/T3i9Lrc1smcB/4Lidnat
-         SgJ17Cig5jHf3P+QWEkP6K1Qi59EE1XNPrNtetjWIualDr89V+rxVqquNZiFvYf8f5
-         xBSekx1liTZocndD+I7Q/yfuHlHGqJbB3AlcmEBk=
-Authentication-Results: myt5-18b0513eae63.qloud-c.yandex.net; dkim=pass header.i=@yandex.ru
-From:   Georgii Kruglov <georgy.kruglov@yandex.ru>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     Georgii Kruglov <georgy.kruglov@yandex.ru>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Yangbo Lu <yangbo.lu@nxp.com>, Yinbo Zhu <yinbo.zhu@nxp.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        lvc-project@linuxtesting.org
-Subject: [PATCH v2] mmc: sdhci-of-esdhc: fix quirk to ignore command inhibit for data
-Date:   Tue, 21 Mar 2023 23:37:15 +0300
-Message-Id: <20230321203715.3975-1-georgy.kruglov@yandex.ru>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230314220619.41242-1-georgy.kruglov@yandex.ru>
-References: 
+        with ESMTP id S229684AbjCVC1v (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 21 Mar 2023 22:27:51 -0400
+Received: from mx.socionext.com (mx.socionext.com [202.248.49.38])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTP id EADBF166F8;
+        Tue, 21 Mar 2023 19:27:49 -0700 (PDT)
+Received: from unknown (HELO kinkan2-ex.css.socionext.com) ([172.31.9.52])
+  by mx.socionext.com with ESMTP; 22 Mar 2023 11:27:48 +0900
+Received: from mail.mfilter.local (mail-arc02.css.socionext.com [10.213.46.40])
+        by kinkan2-ex.css.socionext.com (Postfix) with ESMTP id B55332059034;
+        Wed, 22 Mar 2023 11:27:48 +0900 (JST)
+Received: from kinkan2.css.socionext.com ([172.31.9.51]) by m-FILTER with ESMTP; Wed, 22 Mar 2023 11:27:48 +0900
+Received: from [10.212.157.147] (unknown [10.212.157.147])
+        by kinkan2.css.socionext.com (Postfix) with ESMTP id 12DF7B6343;
+        Wed, 22 Mar 2023 11:27:48 +0900 (JST)
+Message-ID: <57a8f73c-02ad-6f77-95f0-9c05e25e4146@socionext.com>
+Date:   Wed, 22 Mar 2023 11:27:48 +0900
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.4.2
+Subject: Re: [PATCH v2] dt-bindings: mmc: fujitsu: Add Socionext Synquacer
+To:     Rob Herring <robh@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+References: <20230319173006.30455-1-robh@kernel.org>
+Content-Language: en-US
+From:   Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+In-Reply-To: <20230319173006.30455-1-robh@kernel.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-If spec_reg is equal to 'SDHCI_PRESENT_STATE', esdhc_readl_fixup()
-fixes up register value and returns it immediately. As a result, the
-further block
-(spec_reg == SDHCI_PRESENT_STATE)
-    &&(esdhc->quirk_ignore_data_inhibit == true),
-is never executed.
+Hi Rob,
 
-The patch merges the second block into the first one.
+On 2023/03/20 2:30, Rob Herring wrote:
+> Add support for Socionext Synquacer SDHCI. This binding has been in use
+> for
+> some time.
+> 
+> The interrupts were not documented. The driver only uses the first
+> interrupt, but the DT and example have 2 interrupts. The 2nd one is
+> unknown. "dma-coherent" was also not documented, but is used on Synquacer.
 
-Found by Linux Verification Center (linuxtesting.org) with SVACE.
+Surely "interrupts" is needed. The 2nd interrupt seems to come from
+the card, though, the driver isn't supported it.
 
-Fixes: 1f1929f3f2fa ("mmc: sdhci-of-esdhc: add quirk to ignore command inhibit for data")
-Signed-off-by: Georgii Kruglov <georgy.kruglov@yandex.ru>
+Reviewed-by: Kunihiko Hayashi <hayashi.kunihiko@socionext.com>
+
+Thank you,
+
+> 
+> Signed-off-by: Rob Herring <robh@kernel.org>
+> ---
+> v2:
+>   - Rebase on conversion done by Kunihiko
+> ---
+>   .../bindings/mmc/fujitsu,sdhci-fujitsu.yaml       | 15 ++++++++++++---
+>   1 file changed, 12 insertions(+), 3 deletions(-)
+> 
+> diff --git
+> a/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+> b/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+> index 73d747e917f3..430b62899397 100644
+> --- a/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fujitsu,sdhci-fujitsu.yaml
+> @@ -14,9 +14,13 @@ allOf:
+>   
+>   properties:
+>     compatible:
+> -    enum:
+> -      - fujitsu,mb86s70-sdhci-3.0
+> -      - socionext,f-sdh30-e51-mmc
+> +    oneOf:
+> +      - items:
+> +          - const: socionext,synquacer-sdhci
+> +          - const: fujitsu,mb86s70-sdhci-3.0
+> +      - enum:
+> +          - fujitsu,mb86s70-sdhci-3.0
+> +          - socionext,f-sdh30-e51-mmc
+>   
+>     reg:
+>       maxItems: 1
+> @@ -29,6 +33,11 @@ properties:
+>         - const: iface
+>         - const: core
+>   
+> +  dma-coherent: true
+> +
+> +  interrupts:
+> +    maxItems: 2
+> +
+>     resets:
+>       maxItems: 1
+>   
+
+
 ---
-v2: Drop the redundant '== true' as Adrian Hunter <adrian.hunter@intel.com> suggested.
- drivers/mmc/host/sdhci-of-esdhc.c | 24 +++++++++++-------------
- 1 file changed, 11 insertions(+), 13 deletions(-)
-
-diff --git a/drivers/mmc/host/sdhci-of-esdhc.c b/drivers/mmc/host/sdhci-of-esdhc.c
-index 4712adac7f7c..48ca1cf15b19 100644
---- a/drivers/mmc/host/sdhci-of-esdhc.c
-+++ b/drivers/mmc/host/sdhci-of-esdhc.c
-@@ -133,6 +133,7 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 			return ret;
- 		}
- 	}
-+
- 	/*
- 	 * The DAT[3:0] line signal levels and the CMD line signal level are
- 	 * not compatible with standard SDHC register. The line signal levels
-@@ -144,6 +145,16 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 		ret = value & 0x000fffff;
- 		ret |= (value >> 4) & SDHCI_DATA_LVL_MASK;
- 		ret |= (value << 1) & SDHCI_CMD_LVL;
-+
-+		/*
-+		 * Some controllers have unreliable Data Line Active
-+		 * bit for commands with busy signal. This affects
-+		 * Command Inhibit (data) bit. Just ignore it since
-+		 * MMC core driver has already polled card status
-+		 * with CMD13 after any command with busy siganl.
-+		 */
-+		if (esdhc->quirk_ignore_data_inhibit)
-+			ret &= ~SDHCI_DATA_INHIBIT;
- 		return ret;
- 	}
- 
-@@ -158,19 +169,6 @@ static u32 esdhc_readl_fixup(struct sdhci_host *host,
- 		return ret;
- 	}
- 
--	/*
--	 * Some controllers have unreliable Data Line Active
--	 * bit for commands with busy signal. This affects
--	 * Command Inhibit (data) bit. Just ignore it since
--	 * MMC core driver has already polled card status
--	 * with CMD13 after any command with busy siganl.
--	 */
--	if ((spec_reg == SDHCI_PRESENT_STATE) &&
--	(esdhc->quirk_ignore_data_inhibit == true)) {
--		ret = value & ~SDHCI_DATA_INHIBIT;
--		return ret;
--	}
--
- 	ret = value;
- 	return ret;
- }
--- 
-2.34.1
-
+Best Regards
+Kunihiko Hayashi
