@@ -2,98 +2,103 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96552C76195
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:14:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 155B6C7619A
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:14:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231528AbjCWMOc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Mar 2023 08:14:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50204 "EHLO
+        id S231571AbjCWMOj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Mar 2023 08:14:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231367AbjCWMOE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:14:04 -0400
-Received: from mail-yb1-xb33.google.com (mail-yb1-xb33.google.com [IPv6:2607:f8b0:4864:20::b33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40524231E6
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:47 -0700 (PDT)
-Received: by mail-yb1-xb33.google.com with SMTP id r187so403637ybr.6
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:47 -0700 (PDT)
+        with ESMTP id S231444AbjCWMOL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:14:11 -0400
+Received: from mail-yb1-xb2f.google.com (mail-yb1-xb2f.google.com [IPv6:2607:f8b0:4864:20::b2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 218CB26872
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:50 -0700 (PDT)
+Received: by mail-yb1-xb2f.google.com with SMTP id s67so7674611ybi.5
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679573626;
+        d=linaro.org; s=google; t=1679573629;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=piZ+PkFV5WvYTk12pZZbvmVa0DMKTZ0dY4RGfTiFlGE=;
-        b=qChmhFMYb7uAmDl3c9o+/OEyiiJWrsLk9qH+fBrZelNVKUCYekFJExMGimfH9+++64
-         UyOU0iHMtTi/9NJwDGZPeLR/fJwh4KRVGFrZDfxzaLxMdZLv+vkB3aPB+azsXDcr2+AB
-         XaXp0/B5GOuzWC0stmEOFztjxGZLzZjnP71BwF0LYyIJ1mgjXPGUX8QhsZlfgpsm+AU5
-         UJjl1b3COQw3wyB1FqX1o5OStmXkpNaF6UnrvUbiE1RPCmg5/OSuxMDmnuZCkWSoonL4
-         znpcCkjRS44hkWcqprqvV7PLqGKjJEQWMBkDhU9V8RcAHl5SXZcDhjZfTAQ931ku3L3M
-         NzCQ==
+        bh=5ifEL+T7wZRA+Rvojd9hiAI6QKDMb26Hf1IrrKjc65U=;
+        b=tl9aKPK5SB5v5UM1uaXt+2jUSBBG46g2NS/gdbhgaFMGiA3oI5URTVH9pepZvnv56O
+         BPRvTSpaN0fuxfUGKiPWiBhu8uRmHfbWSaMtDgdDAbLEYcCKsL0diZh24g1THTkb9Ze0
+         Bq7oJW4BHuoNvNw7awBHnI8B6UWNMtt1D4kWTE6sNrwqjnewOt/QgjW3eRdvmS3Qk/r5
+         ompQuAZMavLYdg5dq2rU7h/n/kb0YqstObNKasuHEXAfU9bIuz/Eb9mOqR7ydBmBE0xK
+         2HTbwBdlGiImRXygfGNb5H3tCi7+OtEquUCbXMYbC63waRQwP/ZHaJYfS92+KosaXBB/
+         dpIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679573626;
+        d=1e100.net; s=20210112; t=1679573629;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=piZ+PkFV5WvYTk12pZZbvmVa0DMKTZ0dY4RGfTiFlGE=;
-        b=L1eO23G6p5HdiLuWeoFc2pdkC5BhuTnck8Qc7p7AeOKrcy1gYRMNBqZaFbRrOfQyeJ
-         IeYfIV3+wK1bahn/htgjBKJVniXgMFpERzQ0h17uTp6jyVvFQKqAaXjCAU2OSI9lfZG8
-         bhPTe5FjiD6TjwEIqAD+JsTuH9vke83LAloUIa7pBknelsDEgYOMzB80zOOXlX2Zkysl
-         IGIkPv6GwE4IaIUg2MVU2pgdmxKjoNDa23q87ZfuNBIJvPc6GFwSQzdGjn8AHFSMv/wg
-         hc4Slb03rA7SqinoI88H5GAErqDZTw8/AA8as+C/kxfxNeNfvy2px7Q7uDeDaz3jp/RE
-         3hDg==
-X-Gm-Message-State: AAQBX9ewbNwm9LEUWnQFgqM5s+Q8sdz7+iGizv9rQkBKOoFN0Kmvg/bp
-        6U61llrtRLuWFF7FVxdlGH8l0EbM+nT0njPhntcOHQ==
-X-Google-Smtp-Source: AKy350b/FzYTw51HnTYwc0uSjq0ZvicnZs9K3NgIj/elTpYm4gPt7nbklyB5sQoODjeWSl0pEldwGAuyF3GQvkpN0ws=
-X-Received: by 2002:a05:6902:1705:b0:b75:8ac3:d5d8 with SMTP id
- by5-20020a056902170500b00b758ac3d5d8mr942368ybb.3.1679573626037; Thu, 23 Mar
- 2023 05:13:46 -0700 (PDT)
+        bh=5ifEL+T7wZRA+Rvojd9hiAI6QKDMb26Hf1IrrKjc65U=;
+        b=DwNFfRTit1Z35H/wXlBXNVOidVgBqjgV32dqO6tMvskQymnk+W1nFyhnhdKeqlT+tp
+         8Op2nyBfZmRcVr4zWelaXRuoPU05vlloy+j1cWSiyDWsaVUU580/4c9T6zfwhSxkad0H
+         dPUDVQVJ43Hk5PgIUKbavbrJDISsfA7ajd0X8ZtAAFA7n70r5Q5onY/HyFRUG0mKLfxH
+         UcBo59F5LpLn8jGq14xg9asgTdwGx6UvpunKOaTYVVZylZdkh7rOFF3kXnyJoYyAfVVX
+         bwmPwE/a9/X8Vq68HPdFENi+wPm8xBEt0UBWIpolwLTDkkQcx7wsEhdiENMJw6sZPJUZ
+         H51g==
+X-Gm-Message-State: AAQBX9ec7ChMxTy+xI/NATk1WH/e/2bpsXHJisdIlHjTYrMlTc74qcQ4
+        fBra9IGvSnDd2FvHOTOpFAbDgiBSpmMq+Ll+e6UklA==
+X-Google-Smtp-Source: AKy350b2z2Vy4gi04lpRmmrwo4jQa0c3vsloleDOPC0rx19EBqNS80Sa6UQSgApURx9cw/db8YGdLs70HbiJfGwiEl8=
+X-Received: by 2002:a05:6902:1895:b0:b69:bf76:2243 with SMTP id
+ cj21-20020a056902189500b00b69bf762243mr2100275ybb.3.1679573629323; Thu, 23
+ Mar 2023 05:13:49 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230315053127.33855-1-yang.lee@linux.alibaba.com>
-In-Reply-To: <20230315053127.33855-1-yang.lee@linux.alibaba.com>
+References: <20230317092711.660897-1-b-kapoor@ti.com>
+In-Reply-To: <20230317092711.660897-1-b-kapoor@ti.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Mar 2023 13:13:10 +0100
-Message-ID: <CAPDyKFooj9uqAJZvcG-QYDRPoMngXsBC_6cu_0=9WnB=Y1xqLA@mail.gmail.com>
-Subject: Re: [PATCH -next] mmc: jz4740: Use devm_platform_get_and_ioremap_resource()
-To:     Yang Li <yang.lee@linux.alibaba.com>
-Cc:     paul@crapouillou.net, linux-mips@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Thu, 23 Mar 2023 13:13:13 +0100
+Message-ID: <CAPDyKFr96FG7=+AbbDs5Z6jvoE+MDjYs5O_K-FcR=JzNbsw+mQ@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: sdhci_am654: Set HIGH_SPEED_ENA for SDR12 and SDR25
+To:     Bhavya Kapoor <b-kapoor@ti.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        adrian.hunter@intel.com
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 15 Mar 2023 at 06:31, Yang Li <yang.lee@linux.alibaba.com> wrote:
+On Fri, 17 Mar 2023 at 10:28, Bhavya Kapoor <b-kapoor@ti.com> wrote:
 >
-> According to commit 890cc39a8799 ("drivers: provide
-> devm_platform_get_and_ioremap_resource()"), convert
-> platform_get_resource(), devm_ioremap_resource() to a single
-> call to devm_platform_get_and_ioremap_resource(), as this is exactly
-> what this function does.
+> Timing Information in Datasheet assumes that HIGH_SPEED_ENA=1 should be
+> set for SDR12 and SDR25 modes. But sdhci_am654 driver clears
+> HIGH_SPEED_ENA register. Thus, Modify sdhci_am654 to not clear
+> HIGH_SPEED_ENA (HOST_CONTROL[2]) bit for SDR12 and SDR25 speed modes.
 >
-> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
+> Fixes: e374e87538f4 ("mmc: sdhci_am654: Clear HISPD_ENA in some lower speed modes")
+> Signed-off-by: Bhavya Kapoor <b-kapoor@ti.com>
 
-Applied for next, thanks!
+Applied for fixes and by adding a stable tag, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/mmc/host/jz4740_mmc.c | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/jz4740_mmc.c b/drivers/mmc/host/jz4740_mmc.c
-> index 698450afa7bb..1846a05210e3 100644
-> --- a/drivers/mmc/host/jz4740_mmc.c
-> +++ b/drivers/mmc/host/jz4740_mmc.c
-> @@ -1079,8 +1079,7 @@ static int jz4740_mmc_probe(struct platform_device* pdev)
->                 goto err_free_host;
+> Changelog v1->v2:
+>  - Corrected Names of speed modes in commit message
+>
+> Link to v1: https://lore.kernel.org/all/20230316080451.475020-1-b-kapoor@ti.com/
+>
+>  drivers/mmc/host/sdhci_am654.c | 2 --
+>  1 file changed, 2 deletions(-)
+>
+> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+> index 7ef828942df3..ac90e86bb0a0 100644
+> --- a/drivers/mmc/host/sdhci_am654.c
+> +++ b/drivers/mmc/host/sdhci_am654.c
+> @@ -351,8 +351,6 @@ static void sdhci_am654_write_b(struct sdhci_host *host, u8 val, int reg)
+>                  */
+>                 case MMC_TIMING_SD_HS:
+>                 case MMC_TIMING_MMC_HS:
+> -               case MMC_TIMING_UHS_SDR12:
+> -               case MMC_TIMING_UHS_SDR25:
+>                         val &= ~SDHCI_CTRL_HISPD;
+>                 }
 >         }
->
-> -       host->mem_res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-> -       host->base = devm_ioremap_resource(&pdev->dev, host->mem_res);
-> +       host->base = devm_platform_get_and_ioremap_resource(pdev, 0, &host->mem_res);
->         if (IS_ERR(host->base)) {
->                 ret = PTR_ERR(host->base);
->                 goto err_free_host;
 > --
-> 2.20.1.7.g153144c
+> 2.34.1
 >
