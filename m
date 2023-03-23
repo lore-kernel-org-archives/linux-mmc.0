@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8B2FC6FD1D
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:13:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30E58C7619A
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:13:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229499AbjCWMNT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Mar 2023 08:13:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48554 "EHLO
+        id S229796AbjCWMNV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Mar 2023 08:13:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48642 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229800AbjCWMNR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:13:17 -0400
-Received: from mail-yb1-xb34.google.com (mail-yb1-xb34.google.com [IPv6:2607:f8b0:4864:20::b34])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35AA914228
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:16 -0700 (PDT)
-Received: by mail-yb1-xb34.google.com with SMTP id r187so401771ybr.6
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:16 -0700 (PDT)
+        with ESMTP id S229800AbjCWMNU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:13:20 -0400
+Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BF2E612F38
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:19 -0700 (PDT)
+Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-5416b0ab0ecso391102917b3.6
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:19 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679573595;
+        d=linaro.org; s=google; t=1679573599;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=MLAcv2qG77POi+rjBlm8PmHg6ytZD4ZLUV8QpT2wDaM=;
-        b=bytt0SXWcYEL1XQ0HwoywyXKCBsz2AhEBaYUFuKdflNNfSgRIFsGr6gHSnVvAssC8t
-         Nn9yweer+1RRbOdaRKqwQD5pHVnv8RraxNFPCMOACHpCRjZUiC35VpVki8+FuuVW0Ogd
-         Md3Itq/aiLCtm40VBmeRJUAyQUjdtuvPCKHIv6HcPYsg2635V6A7RB6I8o7m7qFgUbRp
-         7zS99h2G7znErs+GZHHR8ZotXAX2PTkOp3jjzj5QI4c5AT5tSDpZq0SkxIqEx9/UAP2B
-         rQfOCwg26bR1XcjzJkOrMa4IfzXJ2STHihBui4pPpPHq1YIZrRft3qXxD7s/3k4NMlKX
-         d0gg==
+        bh=B16rkBzYZJZIfz4nN7+PWbHREgEhvwGKHJmdyTrsREI=;
+        b=k2ifNPIw6jZmT+vxBj0rBix73jWXTZN0h3AfOkyQHtFhSj3Jj7elh66U0cUmGaHAVn
+         t5hitmZqnDNjc4UPFgGDaeFRJZD/9XDdqVT+DR2641WqEwrs6DIIwJGLZpDJBB1qQQEL
+         0NRVIxt2nJaZypantK+ZzS+7GC4oCxKKp8jv12uGWNRsziJaCicZbicbbFRPb11z0JDu
+         mua2IKj+YxkIZw199HF3xCKfkprYAynziguTCiPuBYgEKwRoca1NFU98pbijFpelDj3E
+         XdqpNIx9rpwBamToMFg/YQB5WLidhcaVs8GvvUWK/KLWs7O2Wu3vo6noUzL0Udo/xe9X
+         hFDQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679573595;
+        d=1e100.net; s=20210112; t=1679573599;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=MLAcv2qG77POi+rjBlm8PmHg6ytZD4ZLUV8QpT2wDaM=;
-        b=vvnDQUj4pMxN4uCm2cgl87z/eFiWeby4ao/7Z+/jtqf4u9rmvonbwaiMy7Z0HnT0gZ
-         PX2o2Sb9t1eMJtvXf5+s7JCgFkIt+qXYPHsJD/XCe2MV+y1o+g75JnF8mP8DoEIxuPNj
-         clcr+SUs3cTKyFWMROUn8B3dPx94r2K4a/ui3nVVpX1vzh439CcbAkDMrsh4a6CpkWn/
-         vhW8qc2KA4jkDR33kYsFpgjO8COtH2Bhoi0lA3JTujS8+S4RC1LhQCByaByk5pDgyCPa
-         pcf6E9XvijVp33JdJM3CiDs3peKtNkEgj/k14bDUDYtqlSb0tg8MyrEDOjdTOrYP0awm
-         khWg==
-X-Gm-Message-State: AAQBX9emV3xt1z57DgM6fAR0NXyftfywdnSPakc/KXkWN2O0m9GsspvR
-        6MkmRh4465ajGgjeWUY4RU08SNPLVeGJU9ZR/nJn5w==
-X-Google-Smtp-Source: AKy350bMfKNae9ZI0vTPsyNQRU09GxeoPcumQLYJeKNsqhQ5KjvfHMUAjLQBzmVS7QGv0G8NP4Kk1ScN7QBWiLN/cZI=
-X-Received: by 2002:a05:6902:1705:b0:b75:8ac3:d5d8 with SMTP id
- by5-20020a056902170500b00b758ac3d5d8mr941513ybb.3.1679573595392; Thu, 23 Mar
- 2023 05:13:15 -0700 (PDT)
+        bh=B16rkBzYZJZIfz4nN7+PWbHREgEhvwGKHJmdyTrsREI=;
+        b=OKfV0q/7lvdchViUAdQfDVnwmiPRfEKkldV6o8rVUndpVGHwvxzJsox9U9DHIIhs/Y
+         AxbaNIaxbptowakvH9MyeNADcyjTZeK+8TCSt3Tz9G1WkJtXspCoE5aeYZZk99CUkBJQ
+         kX52fijBwKs2qK9wml4aj2dRAX3TdscDa57D5kpSCnyPP9gBTfHe01YF3Gad8YnkE50O
+         2vh/vUXH4IBHM5Dwfszf2/uYMW7ykGA7wNeszqVcUBF/zqTJr9LUGBVRdDfm4NSy1NWf
+         8w8z/2BaAbm4i9g4sw5+klrx7+GJx0WBmuVZWm8lA2++FnjZjDGlg2rzzgQ3AWSxpfAS
+         pAmA==
+X-Gm-Message-State: AAQBX9cqiGocEAtOFX1lNAzypdjsNXFjyzFw+TuJYcLMpOXOWMIE9/kR
+        QU2KAkWQgiMoy26ikc21myKLlPSJe0QUJ1D0U5V/Kg==
+X-Google-Smtp-Source: AKy350aFlkEwble08xseD9G21q1vBGsScCuffbA9Q9Buw614fzfZsHTiZNLse3rFreSeUsVuVKHGGdKSlsaz6Pn4+oA=
+X-Received: by 2002:a81:b344:0:b0:536:4194:e6eb with SMTP id
+ r65-20020a81b344000000b005364194e6ebmr1735646ywh.0.1679573598613; Thu, 23 Mar
+ 2023 05:13:18 -0700 (PDT)
 MIME-Version: 1.0
-References: <858a592b-ebf4-99b4-74fc-21b4ad3382f8@gmail.com>
-In-Reply-To: <858a592b-ebf4-99b4-74fc-21b4ad3382f8@gmail.com>
+References: <9ae6f90e-e1ea-d088-cdae-7dd8a541f00f@gmail.com>
+In-Reply-To: <9ae6f90e-e1ea-d088-cdae-7dd8a541f00f@gmail.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Mar 2023 13:12:39 +0100
-Message-ID: <CAPDyKFqd7R=F-gC59UrKjXrF_CMN=Njy6zGe+jNM19V+1-QE6g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-gx: simplify usage of mmc_regulator_set_ocr
+Date:   Thu, 23 Mar 2023 13:12:42 +0100
+Message-ID: <CAPDyKFq_P_7gzuH3c3TGhRcWfujFqP2KiEnbwevZYp9fW0nVtw@mail.gmail.com>
+Subject: Re: [PATCH 0/2] mmc: add and use helpers mmc_regulator_enable/disable_vqmmc
 To:     Heiner Kallweit <hkallweit1@gmail.com>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+Cc:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
         Jerome Brunet <jbrunet@baylibre.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "open list:ARM/Amlogic Meson..." <linux-amlogic@lists.infradead.org>,
         "linux-arm-kernel@lists.infradead.org" 
@@ -66,47 +66,27 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 11 Mar 2023 at 23:27, Heiner Kallweit <hkallweit1@gmail.com> wrote:
+On Sat, 11 Mar 2023 at 23:38, Heiner Kallweit <hkallweit1@gmail.com> wrote:
 >
-> After 087592395a96 ("mmc: core: Allow invalid regulator in
-> mmc_regulator_set_ocr()") we can remove the checks here.
+> There's a number of drivers (e.g. dw_mmc, meson-gx, mmci, sunxi) using
+> the same mechanism and a private flag vqmmc_enabled to deal with
+> enabling/disabling the vqmmc regulator.
 >
-> Signed-off-by: Heiner Kallweit <hkallweit1@gmail.com>
+> Move this to the core and create new helpers mmc_regulator_enable_vqmmc
+> and mmc_regulator_disable_vqmmc. Make meson-gx the first user of the
+> new helpers.
+>
+> Heiner Kallweit (2):
+>   mmc: core: add helpers mmc_regulator_enable/disable_vqmmc
+>   mmc: meson-gx: use new helpers mmc_regulator_enable/disable_vqmmc
+>
+>  drivers/mmc/core/regulator.c    | 41 +++++++++++++++++++++++++++++++++
+>  drivers/mmc/host/meson-gx-mmc.c | 18 ++-------------
+>  include/linux/mmc/host.h        |  3 +++
+>  3 files changed, 46 insertions(+), 16 deletions(-)
+>
 
 Applied for next, thanks!
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/meson-gx-mmc.c | 6 ++----
->  1 file changed, 2 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/mmc/host/meson-gx-mmc.c b/drivers/mmc/host/meson-gx-mmc.c
-> index 2b963a81c..28e04dc4e 100644
-> --- a/drivers/mmc/host/meson-gx-mmc.c
-> +++ b/drivers/mmc/host/meson-gx-mmc.c
-> @@ -604,8 +604,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->          */
->         switch (ios->power_mode) {
->         case MMC_POWER_OFF:
-> -               if (!IS_ERR(mmc->supply.vmmc))
-> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, 0);
->
->                 if (!IS_ERR(mmc->supply.vqmmc) && host->vqmmc_enabled) {
->                         regulator_disable(mmc->supply.vqmmc);
-> @@ -615,8 +614,7 @@ static void meson_mmc_set_ios(struct mmc_host *mmc, struct mmc_ios *ios)
->                 break;
->
->         case MMC_POWER_UP:
-> -               if (!IS_ERR(mmc->supply.vmmc))
-> -                       mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
-> +               mmc_regulator_set_ocr(mmc, mmc->supply.vmmc, ios->vdd);
->
->                 break;
->
-> --
-> 2.39.2
->
