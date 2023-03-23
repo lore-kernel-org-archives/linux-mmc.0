@@ -2,232 +2,511 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2784AC6FD1C
-	for <linux-mmc@archiver.kernel.org>; Wed, 22 Mar 2023 17:40:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4173CC6FD1C
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 00:07:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230081AbjCVRk4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Mar 2023 13:40:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55890 "EHLO
+        id S229881AbjCWAHX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 22 Mar 2023 20:07:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37708 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229646AbjCVRkz (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2023 13:40:55 -0400
-Received: from smtp4-g21.free.fr (smtp4-g21.free.fr [IPv6:2a01:e0c:1:1599::13])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 139715F6C5;
-        Wed, 22 Mar 2023 10:40:50 -0700 (PDT)
-Received: from [IPV6:2a02:8428:2a4:1a01:f89e:1673:1a35:a89c] (unknown [IPv6:2a02:8428:2a4:1a01:f89e:1673:1a35:a89c])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp4-g21.free.fr (Postfix) with ESMTPSA id 35B8119F57C;
-        Wed, 22 Mar 2023 18:40:26 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1679506847;
-        bh=ZLySjh6t81HhbtN2+C2divJSSHBwsdJMIKhcneYTMAM=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=reYZIEx6Yxupf0uoxOi+sKYyZ/QXO4JQVlaBVld+kJ3AgBXc3SAY/Qr5xVp0Yc+0s
-         3nxBHnVmqdTU+0yFY0bXAwv2lK3/xf7NX/nUKU7P/7nyxOtHLfeprBROKa6rrrhpPZ
-         +vdTBpFq2N73WUUziWHtU0A8GKVU2QG+suzWlAyOUwWNHPSDTMfFRWeTqlc94mtj3H
-         WX0Zh8HNblkgixQZAwzSnLtE2kIlmI/89xIRvnxHCz2fCG2Wy2KifDGrNJmf51cV3T
-         fy60SpZ++IOmOSFtgeh4m6IJeU8DjDBhIx1pkQZEoAeKRHRjtdQwoMx/oLIvPCkty2
-         YDOmHdHpGWSlA==
-Message-ID: <31dea9bf-63ef-c6db-b206-8afac960fd10@free.fr>
-Date:   Wed, 22 Mar 2023 18:40:24 +0100
+        with ESMTP id S229849AbjCWAHW (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2023 20:07:22 -0400
+Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2053.outbound.protection.outlook.com [40.107.223.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20C4A2CC40;
+        Wed, 22 Mar 2023 17:07:20 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=j4BubBzDgUG0djzOE3UcQnuzASHhhs11dSMl/tLUhwx0ovW5AHvECBt5joC1b2X0OCSG0EdY8ynAM3i2K1BBLGLVnTf03ymFyNM7VB49Tv/4R4oUHbYjPLCWWt6cIghaG3zLV+nenIxBGdreqoxzQEiO7GO2SqTy5DCxmY4nWFwIENvYqNCNNSBcVJagZ6S+edGAQS3zVl/o6CdvhSWiIwxJ6DUqFx9qPki32MgEv1Wkd++ZKm+xUrKHRVyi5ZwXlv02CHT/VI+1J5sXfb28p5o0jQlDK/IaaV1wR9pvFHAS5HABpLlp/hG81rWLdwSqnJti/hGXLBp+lTwAuR2lMA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=+QDj+QtlDj648YIxMOQ/kMgSO3O97frNw4b+UTIYwZ8=;
+ b=igGcqqOVqHbQ33dhLdO8soUBLBSBuBtkE4F4WJ7/a6bEpaViTRN52FWD1AUIyUQoN1HarmphlXNUjQN6J+EuyNqcxZEF89NUerADObAjG35MZZrGRtSIzfypDbtUFxZBA1mKBuoXI0iTc8h8sybcQBlRTxzy+wHPMSo0JwaxFvMZyJUxjv110KIP70lTqFpNkR3kdRUL3rseeILQYcuLX2MTtTeCsT3VnoCbfwK8Lgp/0PGqoe3nRY7J2zyObLpzfH1Z+v8d5r7rjA1eUB+0ipoxXcsp+KWjSy1jMwarRBgNhBJ1W1YzGTDXiVGqth9aHwBaFJykExj/eHF/FKYmtw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=amd.com; dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=+QDj+QtlDj648YIxMOQ/kMgSO3O97frNw4b+UTIYwZ8=;
+ b=2fJh6zoi/44AThhWccDQ4mrfbl4MxxdqdiNcg5XHnU0svyfEQ3XfAql1UNszGMoC8xoiU9nfC+u0oOvaC9D9u3O8Tu2zlEC50BTHMHMQ5Kvn0Y+A+tHI15Ff8FHJjeGXO/M6FTNSIrAMVkRFAOTfUw/H1i7rJnoorFgEJE/5iPw=
+Received: from BN9PR03CA0357.namprd03.prod.outlook.com (2603:10b6:408:f6::32)
+ by MW6PR12MB8915.namprd12.prod.outlook.com (2603:10b6:303:23e::16) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6178.37; Thu, 23 Mar
+ 2023 00:07:17 +0000
+Received: from BN8NAM11FT019.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:f6:cafe::a2) by BN9PR03CA0357.outlook.office365.com
+ (2603:10b6:408:f6::32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6178.37 via Frontend
+ Transport; Thu, 23 Mar 2023 00:07:17 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ BN8NAM11FT019.mail.protection.outlook.com (10.13.176.158) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6222.17 via Frontend Transport; Thu, 23 Mar 2023 00:07:17 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Wed, 22 Mar 2023 19:07:14 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <linux-arm-kernel@lists.infradead.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <adrian.hunter@intel.com>,
+        <alcooperx@gmail.com>, <andy.shevchenko@gmail.com>,
+        <arnd@arndb.de>, <blarson@amd.com>, <brendan.higgins@linux.dev>,
+        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
+        <catalin.marinas@arm.com>, <davidgow@google.com>,
+        <gsomlo@gmail.com>, <gerg@linux-m68k.org>, <krzk@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <lee@kernel.org>,
+        <lee.jones@linaro.org>, <broonie@kernel.org>,
+        <yamada.masahiro@socionext.com>, <p.zabel@pengutronix.de>,
+        <piotrs@cadence.com>, <p.yadav@ti.com>, <rdunlap@infradead.org>,
+        <robh+dt@kernel.org>, <samuel@sholland.org>,
+        <fancer.lancer@gmail.com>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <will@kernel.org>,
+        <devicetree@vger.kernel.org>
+Subject: [PATCH v12 00/15] Support AMD Pensando Elba SoC
+Date:   Wed, 22 Mar 2023 17:06:42 -0700
+Message-ID: <20230323000657.28664-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
-Content-Language: fr, en-US
-To:     Franky Lin <franky.lin@broadcom.com>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
-        Alexander Prutskov <alep@cypress.com>,
-        Joseph chuang <jiac@cypress.com>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Angus Ainslie <angus@akkea.ca>,
-        Pierre-Hugues Husson <phh@phh.me>,
-        linux-wireless@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-amlogic@lists.infradead.org
-References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
- <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
- <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
- <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
- <a215e398-2c49-19d2-0730-5e8c51df1ed9@free.fr>
- <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
- <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
- <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN8NAM11FT019:EE_|MW6PR12MB8915:EE_
+X-MS-Office365-Filtering-Correlation-Id: 6b510793-d4f3-4232-dd89-08db2b32903b
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: UC4Ptt2VrXOq3qJYNyiBpekQ3LeQxQ12fyAMxOA2SxWEyMqQvzDMpE/0p2EbXW3ZBdX/5Ud0D+OpXCo8WfBL8f/S4KytbrzQ12SZJDzzThq7BeWXT9jeyL2XhMnM+cDrPlcyi7Ev/syX4G28sCAZ+Y6K52/Xk5+YPGEbUx2sUi834oghLABTzIn61kfyHJmRzIdIDkRx8UO+dEixAHUzpZG5UhIgHrx75KfI+OUjN4vbg4fOsYvfFWS031ecQzt05BuiA29qEwpbRS3xWB/BQY573sVkz6WmdjIsmuSkqYUNXpe8AJ3KnI5lVLv81AfPuE1u4srA1Gu78VybftuyYeIufVwTRYhwkwRgZy7oBDiytD2nB5mEmEX+B3JRA7a0lvoaHXOkrOfZqrGTwJ8XbE9DV+Q1Cr0eebG6G8KPZAUdKqJVLZCeo/V7usatVfjxCEJi11wmYIHV9GWzExeKBjn+cvCEcKz9LQTpSPFNHCUU26N+VlI3HOYLnkMXjqIsLlRqp2sjA4vXLIpDs4DivXJjW4hciXgabhniC0TUd7AebKgGa+uoqu/UuPLeZsQXLrON9mJKxCtoZW2yy1O6ydaH9xYVEGWRfgyY0TTxwXiztR8DwO/ucdU0vbr/cuAtPez9dC+YehipL5UlhLGr9grPTC/Yjhfn/eoDExI4ka3B5j2I5abKBumzuHU9pY9fFuEc8TeuO3DtPunUTFqtoVfcYTW8LX2pUyJMu0JuVy4=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230025)(4636009)(136003)(39860400002)(376002)(396003)(346002)(451199018)(46966006)(36840700001)(40470700004)(478600001)(6666004)(966005)(16526019)(47076005)(426003)(186003)(336012)(1076003)(26005)(83380400001)(54906003)(316002)(2616005)(8676002)(6916009)(70206006)(70586007)(19627235002)(7406005)(4326008)(36860700001)(5660300002)(41300700001)(8936002)(7416002)(30864003)(82740400003)(40460700003)(2906002)(81166007)(36756003)(40480700001)(356005)(82310400005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 Mar 2023 00:07:17.0790
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6b510793-d4f3-4232-dd89-08db2b32903b
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT019.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MW6PR12MB8915
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/03/2023 18:21, Franky Lin wrote:
+This series enables support for AMD Pensando Elba SoC based platforms.
 
-> On Wed, Mar 8, 2023 at 4:48 AM Marc Gonzalez wrote:
->>
->> On 08/03/2023 00:15, Franky Lin wrote:
->>
->>> On Tue, Mar 7, 2023 at 6:40 AM Marc Gonzalez wrote:
->>>
->>>> Through the SDIO bus, the WiFi chip reports 0xaae7 (i.e. 43751)
->>>> hence the /sys/bus/sdio/devices output above.
->>>>
->>>> sdio_read_func_cis() -> sdio_read_cis() which sets
->>>> func->vendor/func->device to 2d0/aae7
->>>>
->>>>
->>>> But when brcmf_chip_recognition() calls ci->ops->read32()
->>>> i.e. brcmf_sdio_buscore_read32()
->>>> [ vs brcmf_sdiod_readl() in brcmf_sdio_probe_attach() ]
->>>>
->>>> [    1.177283] brcmfmac: F1 signature read @0x18000000=0x1042aae8
->>>> [    1.182912] found AXI chip: BCM43752/2
->>>> [    1.186384] BCM43752/2: chip=aae8 rev=2 type=1
->>>>
->>>> Here it reports 0xaae8 (i.e. 43752)
->>>>
->>>> Why the discrepancy?
->>>> Can it cause issues?
->>>> (Sometimes, the whole SDIO bus doesn't probe at boot.
->>>> I am still investigating these intermittent problems.)
->>>>
->>>> Should I use 43751 or 43752 firmware...?
->>>
->>> This question should be answered by the Cypress/Infineon folks but
->>> unfortunately they have been quiet for a long time. In general we use
->>> the id read from 0x18000000 to decide which firmware to load. But be
->>> aware that the rev also matters. There are some examples in
->>> brcmf_sdio_fwnames table that the different firmware name can be
->>> derived from the same chip common id but different rev.
->>>
->>> However sdio device enumeration happens before firmware download so
->>> the intermittent problem you are facing probably is not related to
->>> firmware version.
->>
->> When the host sends the equivalent of an "identify yourself" message
->> on the SDIO bus, doesn't the reply come from the WiFi device?
->> Why would the device reply 0xaae7 instead of 0xaae8?
->>
->> In other words, who is replying 0xaae7?
-> 
-> The enumeration response is done by the HW sdio core on the chip.
-> No software involved.
+The Elba SoC has the following features:
+- Sixteen ARM64 A72 cores
+- Dual DDR 4/5 memory controllers
+- 32 lanes of PCIe Gen3/4 to the Host
+- Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
+  also a single 1GE management port.
+- Storage/crypto offloads and 144 programmable P4 cores.
+- QSPI and EMMC for SoC storage
+- Two SPI interfaces for peripheral management
+- I2C bus for platform management
 
-Hello Franky et al,
+== V12 changes ==
+v12-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI
+- Correct property amd,pensando-elba-syscon description
 
-I have made some progress understanding some issues.
-But I remain baffled by many others :(
+v12-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Add a newline in function dw_spi_elba_init()
 
-At my disposal, two S905X2 boards with SDIO-based brcm modules
-(according to the labels on the boards) :
+v12-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Fix gcc-12.1.0 warning:
 
-Board A embeds "AP6398SR3"  which identifies as
-	x vendor=2d0 dev=4359 over sdio_read_cis
-	x brcmfmac: F1 signature read @0x18000000=0x17294359
-	x brcmfmac: BCM4359/9: chip=4359 rev=9
+== V11 changes ==
+v11-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Remove resets description and reset-names
+- Add descriptions for amd,pensando-elba-sd4hc reg items
 
-Board B embeds "AP6398SR32" which identifies as
-	x vendor=2d0 dev=aae7 over sdio_read_cis
-	x F1 signature read @0x18000000=0x1042aae8
-	x brcmfmac: BCM43752/2: chip=aae8 rev=2
+v11-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pens
+- Removed redundant if/then for amd,pensando-elba-qspi
 
-(I still do not understand why AP6398SR32 on board B
-identifies as AAE7 on the SDIO bus, but as AAE8 via MMIO.
-That does not make sense to me.)
+v11-0005-dt-bindings-soc-amd-amd-pensando-elba-ctrl-Add-P
+- Fixed the compatible which should have stayed as
+  'amd,pensando-elba-ctrl', the commit message, and the filename.
+- Reference spi-peripheral-props
+- Delete spi-max-frequency
+- Remove num-cs from example
 
-On board A, WiFi module probes correctly with the default timing.
-On board B, WiFi module requires waiting 10 ms more,
-otherwise mmc_send_io_op_cond() (which sends CMD5) times out,
-and the mmc core assumes that there is no card in the "slot".
+v11-0008-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Delete reset-names
+- Fix spi0 compatible to be specific 'amd,pensando-elba-ctrl'
 
-Using the same firmware files in mainline that vendor's kernel uses,
-WiFi on board A works as expected.
-WiFi on board B logs a scan error (-52) every second,
-and eventually panics the kernel.
+v11-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Simplify dw_spi_elb_init by using syscon_regmap_lookup_by_phandle()
 
-NB: using the vendor's kernel, both modules work as expected.
+v11-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp
+- Remove elba-drv_init() call to platform_get_resource() since that
+  check is done inside devm_platform_ioremap_resource()
+- Move spin_lock_init() before error check
+- Remove extra parentheses
+
+v11-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Fix the compatible to be specific 'amd,pensando-elba-ctrl'
+- Cast arguments flagged with a gcc-12.1.0 warning:
+Reported-by: kernel test robot <lkp@intel.com>
+Link: https://lore.kernel.org/oe-kbuild-all/202303061526.I8VPcR1M-lkp@intel.com/
+
+== V10 changes ==
+Binding property amd,pensando-elba-syscon was merged in 6.2
+
+v10-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Move reset-names property definition next to existing resets prop
+- Move allOf to the bottom and set resets/reset-names required only for pensando
+- Fix reg maxItems for existing, must be 1
+
+v10-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pens
+- Fix cdns,fifo-depth, only amd,pensando-elba-qspi is 1024 bytes
+
+v10-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI
+- Move definition of amd,pensando-elba-syscon into properties with a better description
+- Add amd,pensando-elba-syscon: false for non elba designs
+
+v10-0005-dt-bindings-soc-amd-amd-pensando-elbasr-Add-AMD-
+- Property renamed to amd,pensando-ctrl
+- Driver is renamed and moved to soc/drivers/amd affecting binding
+- Delete cs property, driver handles device node creation from parent num-cs
+  fixing schema reg error in a different way
+
+v10-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Delete struct dw_spi_elba, use regmap directly in priv
+
+v10-0011-mmc-sdhci-cadence-Enable-device-specific-overrid
+- The 1st patch adding private writel() is unchanged.  The 2nd patch is split
+  into two patches to provide for device specific init in one patch with no
+  effect on existing designs.  Then add the pensando support into the next patch.
+  Then the 4th patch is mmc hardware reset support which is unchanged.
+
+v10-0012-mmc-sdhci-cadence-Support-device-specific-init-i
+- New patch to provide for platform specific init() with no change
+  to existing designs.
+
+v10-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp
+- Add Elba specific support into this 3rd patch.  This builds on the private
+  writel() enabled in patch 1 followed by platform specific init() in patch 2.
+- Specify when first used the reason for the spinlock use to order byte-enable
+  prior to write data.
+
+v10-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Different driver implementation specific to this Pensando controller device.
+- Moved to soc/amd directory under new name based on guidance.  This driver is
+  of no use to any design other than all Pensando SoC based cards.
+- Removed use of builtin_driver, can be built as a module.
+
+== V9 changes ==
+v9-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Add reset-names and resets properties
+- Add if/then on property amd,pensando-elba-sd4hc to set reg property
+  values for minItems and maxItems
+
+v9-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pensa
+- Add 1024 to cdns,fifo-depth property to resolve dtbs_check error
+
+v9-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI-
+- Define property amd,pensando-elba-syscon
+- Move compatible amd,pensando-elba-spi ahead of baikal,bt1-ssi
+
+v9-0006-dt-bindings-mfd-amd-pensando-elbasr-Add-AMD-Pensa
+- Instead of four nodes, one per chip-select, a single
+  node is used with reset-cells in the parent.
+- No MFD API is used anymore in the driver so it made
+  sense to move this to drivers/spi.
+- This driver is common for all Pensando SoC based designs
+  so changed the name to pensando-sr.c to not make it Elba
+  SoC specific.
+- Added property cs for the chip-select number which is used
+  by the driver to create /dev/pensr0.<cs>
+
+v9-0009-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Single node for spi0 system-controller and squash
+  the reset-controller child into parent
+
+v9-0010-spi-cadence-quadspi-Add-compatible-for-AMD-Pensan
+- Rebase to linux-next 6.2.0-rc1
+
+v9-0011-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Add use of macros GENMASK() and BIT()
+- Change ELBA_SPICS_SHIFT() to ELBA_SPICS_OFFSET()
+
+v9-0012-mmc-sdhci-cadence-Enable-device-specific-override
+- No change to this patch but as some patches are deleted and this is
+  a respin the three successive patches to sdhci-cadence.c are
+  patches 12, 13, and 14 which do the following:
+  1. Add ability for Cadence specific design to have priv writel().
+  2. Add Elba SoC support that requires its own priv writel() for
+     byte-lane control .
+  3. Add support for mmc hardware reset.
+
+v9-0014-mmc-sdhci-cadence-Support-mmc-hardware-reset
+- Previously patch 17/17
+- Changed delay after reset_control_assert() from 9 to 3 usec
+- Renamed sdhci_mmc_hw_reset() to sdhci_cdns_mmc_hw_reset()
+
+v9-0015-spi-pensando-sr-Add-AMD-Pensando-SoC-System-Resou
+- Previously patch 14/17
+- After the change to the device tree node and squashing
+  reset-cells into the parent simplified this to not use
+  any MFD API and move it to drivers/spi/pensando-sr.c.
+- Change the naming to remove elba since this driver is common
+  for all Pensando SoC designs .
+- Default yes SPI_PENSANDO_SR for ARCH_PENSANDO
 
 
-[ 1033.293100] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1033.293130] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1034.304785] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1034.304811] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1035.316452] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1035.316480] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1036.328251] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1036.328289] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1037.340004] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1037.340030] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1038.351667] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1038.351692] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1039.363331] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1039.363357] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1040.374874] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1040.374900] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1041.386538] ieee80211 phy0: brcmf_run_escan: error (-52)
-[ 1041.386563] ieee80211 phy0: brcmf_cfg80211_scan: scan error (-52)
-[ 1042.398166] SError Interrupt on CPU1, code 0x00000000bf000000 -- SError
-[ 1042.398175] CPU: 1 PID: 61 Comm: kworker/u9:0 Not tainted 6.2.0-rc8 #431
-[ 1042.398181] Hardware name: SEI Robotics SEI510 (DT)
-[ 1042.398184] Workqueue: brcmf_wq/mmc2:0001:1 brcmf_sdio_dataworker
-[ 1042.398201] pstate: 80000005 (Nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-[ 1042.398206] pc : brcmf_sdio_dataworker+0x2090/0x23d0
-[ 1042.398213] lr : brcmf_sdio_dataworker+0x1fe8/0x23d0
-[ 1042.398219] sp : ffff80000a1d3c60
-[ 1042.398220] x29: ffff80000a1d3c70 x28: 0000000000000000 x27: ffff8000088ac558
-[ 1042.398227] x26: ffff800009ed1ab0 x25: ffff000004108000 x24: ffff80000b4f1000
-[ 1042.398233] x23: ffff800009f25b68 x22: 00000000000000a8 x21: 00000000000000e2
-[ 1042.398238] x20: 000000000000000c x19: ffff000000b3a000 x18: 0000000000000000
-[ 1042.398244] x17: 0000000000000000 x16: 0000000000000000 x15: d099d095d090d08c
-[ 1042.398250] x14: 0000000000002912 x13: ffff000067b5c400 x12: ffff000067b8db00
-[ 1042.398256] x11: ffff000067b8db00 x10: 0000000000000000 x9 : 0000000000000000
-[ 1042.398262] x8 : 000000000000005a x7 : ffff800009cc3400 x6 : 0000000000000200
-[ 1042.398268] x5 : 0000000000002a10 x4 : 00000000000000d6 x3 : 0000000000000200
-[ 1042.398273] x2 : 0000000000000002 x1 : 0000000000000008 x0 : ffff000000b39800
-[ 1042.398280] Kernel panic - not syncing: Asynchronous SError Interrupt
-[ 1042.398283] CPU: 1 PID: 61 Comm: kworker/u9:0 Not tainted 6.2.0-rc8 #431
-[ 1042.398287] Hardware name: SEI Robotics SEI510 (DT)
-[ 1042.398289] Workqueue: brcmf_wq/mmc2:0001:1 brcmf_sdio_dataworker
-[ 1042.398296] Call trace:
-[ 1042.398298]  dump_backtrace.part.0+0xe0/0xf0
-[ 1042.398307]  show_stack+0x18/0x30
-[ 1042.398313]  dump_stack_lvl+0x68/0x84
-[ 1042.398320]  dump_stack+0x18/0x34
-[ 1042.398324]  panic+0x184/0x344
-[ 1042.398330]  nmi_panic+0xac/0xb0
-[ 1042.398335]  arm64_serror_panic+0x6c/0x80
-[ 1042.398339]  do_serror+0x58/0x60
-[ 1042.398343]  el1h_64_error_handler+0x30/0x50
-[ 1042.398348]  el1h_64_error+0x64/0x68
-[ 1042.398352]  brcmf_sdio_dataworker+0x2090/0x23d0
-[ 1042.398357]  process_one_work+0x1cc/0x320
-[ 1042.398363]  worker_thread+0x14c/0x450
-[ 1042.398367]  kthread+0xfc/0x100
-[ 1042.398371]  ret_from_fork+0x10/0x20
-[ 1042.398378] SMP: stopping secondary CPUs
-[ 1042.398383] Kernel Offset: 0x80000 from 0xffff800008000000
-[ 1042.398385] PHYS_OFFSET: 0x0
-[ 1042.398387] CPU features: 0x00000,01200100,0000420b
-[ 1042.398390] Memory Limit: none
-[ 1042.608339] ---[ end Kernel panic - not syncing: Asynchronous SError Interrupt ]---
+== V6 changes ==
+- Updated copyright and SPDX
+
+v6-0001-dt-bindings-arm-add-AMD-Pensando-boards
+- Delete 'Device Tree Bindings' in title
+
+v6-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Change if/then for Elba which has a second reg for byte-lane control
+
+v6-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pensa
+- no change
+
+v6-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI-
+- Add amd,pensando-elba-syscon
+
+v6-0005-dt-bindings-mfd-syscon-Add-amd-pensando-elba-sysc
+- no change
+
+v6-0006-dt-bindings-mfd-amd-pensando-elbasr-Add-AMD-Pensa
+- Expand description, rename nodes and change compatible usage
+
+v6-0007-dt-bindings-reset-amd-pensando-elbasr-reset-Add-A
+- Delete nodename pattern and changed spi0 to spi
+- File amd,pensando-elba-reset.h is deleted as there is only
+  one reset used.
+- Update example
+
+v6-0008-MAINTAINERS-Add-entry-for-AMD-PENSANDO
+- no change
+
+v6-0009-arm64-Add-config-for-AMD-Pensando-SoC-platforms
+- no change
+
+v6-0010-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Update node names and add amd,pensando-elba-syscon
+- Delete use of amd,pensando-elba-reset.h which had a single definition
+
+v6-0011-spi-cadence-quadspi-Add-compatible-for-AMD-Pensan
+- Remove (void) cast
+
+v6-0012-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Update use of amd,pensando-elba-syscon
+
+v6-0013-mmc-sdhci-cadence-Enable-device-specific-override
+- Change this patch to add a priv_writel() callback where all
+  existing designs use writel().  This separates the Elba
+  support into three patches.  The second patch is added
+  to the end of the sequence for Elba support.  The third
+  patch enables mmc hardware reset.
+
+v6-0014-mfd-pensando-elbasr-Add-AMD-Pensando-Elba-System-
+- Updates from review comments
+- Use spi_message_init_with_transfers instead of init/add_tail API
+
+v6-0015-reset-elbasr-Add-AMD-Pensando-Elba-SR-Reset-Contr
+- Remove use of amd,pensando-elba-reset.h and use BIT()
+
+v6-0016-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-suppo
+- Elba sdhci-cadence.c support added in this patch to build on
+  0013 which just adds a callback to override priv_writel()
+
+v6-0017-mmc-sdhci-cadence-Support-mmc-hardware-reset
+- New patch where Elba has a reset-controller for mmc hardware
+  reset.  The reset is implemented by a register in the cpld.
+
+== V5 changes ==
+- Change to AMD Pensando instead of Pensando.
+- No reference to spidev in the device tree.  Add multi-function driver
+  pensando-elbasr and sub-device reset-elbasr which provides mfd and
+  /dev interface to the cpld.
+- Rebase to linux-next tag next-20220609 5.19.0-rc1
+- Redo the email list after rebase and using scripts/get_maintainer.pl
+
+== V4 changes ==
+The version of dtschema used is 2022.3.2.
+
+v4-0001-dt-bindings-arm-add-Pensando-boards.patch
+- Add description and board compatible
+
+v4-0003-dt-bindings-mmc-Add-Pensando-Elba-SoC-binding.patch
+- Change from elba-emmc to elba-sd4hc to match file convention
+- Use minItems: 1 and maxItems: 2 to pass schema check
+
+v4-0005-dt-bindings-spi-dw-Add-Pensando-Elba-SoC-SPI-Control.patch
+- Add required property pensando,syscon-spics to go with
+  pensando,elba-spi
+
+v4-0006-MAINTAINERS-Add-entry-for-PENSANDO.patch
+- Change Maintained to Supported
+
+v4-0007-arm64-Add-config-for-Pensando-SoC-platforms.patch
+- Fix a typo on interface max speed
+
+v4-0008-spi-cadence-quadspi-Add-compatible-for-Pensando-Elba.patch
+- Update due to spi-cadence-quadspi.c changes
+
+v4-0009-mmc-sdhci-cadence-Add-Pensando-Elba-SoC-support.patch
+- Change from elba-emmc to elba-sd4hc to match file convention
+
+v4-0010-spi-dw-Add-support-for-Pensando-Elba-SoC.patch
+- Use more descriptive dt property pensando,syscon-spics
+- Minor changes from review input
+
+v4-0011-arm64-dts-Add-Pensando-Elba-SoC-support.patch
+- Changed to dual copyright (GPL-2.0+ OR MIT)
+- Minor changes from review input
+
+== V3 changes ==
+v3-0001-gpio-Add-Elba-SoC-gpio-driver-for-spi-cs-control.patch
+- This patch is deleted.  Elba SOC specific gpio spics control is
+  integrated into spi-dw-mmio.c.
+
+v3-0002-spi-cadence-quadspi-Add-QSPI-support-for-Pensando-El.patch
+- Changed compatible to "pensando,elba-qspi" to be more descriptive
+  in spi-cadence-quadspi.c.
+
+- Arnd wondered if moving to DT properties for quirks may be the
+  way to go.  Feedback I've received on other patches was don't
+  mix two efforts in one patch so I'm currently just adding the
+  Elba support to the current design.
+
+v3-0003-spi-dw-Add-support-for-Pensando-Elba-SoC-SPI.patch
+- Changed the implementation to use existing dw_spi_set_cs() and
+  integrated Elba specific CS control into spi-dw-mmio.c.  The
+  native designware support is for two chip-selects while Elba
+  provides 4 chip-selects.  Instead of adding a new file for
+  this support in gpio-elba-spics.c the support is in one
+  file (spi-dw-mmio.c).
+
+v3-0004-spidev-Add-Pensando-CPLD-compatible.patch
+- This patch is deleted.  The addition of compatible "pensando,cpld"
+  to spidev.c is not added and an existing compatible is used
+  in the device tree to enable.
+
+v3-0005-mmc-sdhci-cadence-Add-Pensando-Elba-SoC-support.patch
+- Ulf and Yamada-san agreed the amount of code for this support
+  is not enough to need a new file.  The support is added into
+  sdhci-cadence.c and new files sdhci-cadence-elba.c and
+  sdhci-cadence.h are deleted.
+- Redundant defines are removed (e.g. use SDHCI_CDNS_HRS04 and
+  remove SDIO_REG_HRS4).
+- Removed phy init function sd4_set_dlyvr() and used existing
+  sdhci_cdns_phy_init(). Init values are from DT properties.
+- Replace  devm_ioremap_resource(&pdev->dev, iomem)
+     with  devm_platform_ioremap_resource(pdev, 1)
+- Refactored the elba priv_writ_l() and elba_write_l() to
+  remove a little redundant code.
+- The config option CONFIG_MMC_SDHCI_CADENCE_ELBA goes away.
+- Only C syntax and Elba functions are prefixed with elba_
+
+v3-0006-arm64-Add-config-for-Pensando-SoC-platforms.patch
+- Added a little more info to the platform help text to assist
+  users to decide on including platform support or not.
+
+v3-0007-arm64-dts-Add-Pensando-Elba-SoC-support.patch
+- Node names changed to DT generic names
+- Changed from using 'spi@' which is reserved
+- The elba-flash-parts.dtsi is kept separate as
+  it is included in multiple dts files.
+- SPDX license tags at the top of each file
+- The compatible = "pensando,elba" and 'model' are
+  now together in the board file.
+- UIO nodes removed
+- Ordered nodes by increasing unit address
+- Removed an unreferenced container node.
+- Dropped deprecated 'device_type' for uart0 node.
+
+v3-0010-dt-bindings-spi-cadence-qspi-Add-support-for-Pensand.patch
+- Updated since the latest documentation has been converted to yaml
+
+v3-0011-dt-bindings-gpio-Add-Pensando-Elba-SoC-support.patch
+- This patch is deleted since the Elba gpio spics is added to
+  the spi dw driver and documented there.
+
+Because of the deletion of patches and merging of code
+the new patchset is not similar.  A changelog is added into
+the patches for merged code to be helpful on the history.
+
+== V2 changes ==
+- 01    Fix typo, return code value and log message.
+- 03    Remove else clause, intrinsic DW chip-select is never used.
+- 08-11 Split out dts and bindings to sub-patches
+- 10    Converted existing cadence-quadspi.txt to YAML schema
+- 13    New driver should use <linux/gpio/driver.h>
+
+Brad Larson (15):
+  dt-bindings: arm: add AMD Pensando boards
+  dt-bindings: mmc: cdns: Add AMD Pensando Elba SoC
+  dt-bindings: spi: cdns: Add compatible for AMD Pensando Elba SoC
+  dt-bindings: spi: dw: Add AMD Pensando Elba SoC SPI Controller
+  dt-bindings: soc: amd: amd,pensando-elba-ctrl: Add Pensando SoC
+    Controller
+  MAINTAINERS: Add entry for AMD PENSANDO
+  arm64: Add config for AMD Pensando SoC platforms
+  arm64: dts: Add AMD Pensando Elba SoC support
+  spi: cadence-quadspi: Add compatible for AMD Pensando Elba SoC
+  spi: dw: Add support for AMD Pensando Elba SoC
+  mmc: sdhci-cadence: Enable device specific override of writel()
+  mmc: sdhci-cadence: Support device specific init during probe
+  mmc: sdhci-cadence: Add AMD Pensando Elba SoC support
+  mmc: sdhci-cadence: Support mmc hardware reset
+  soc: amd: Add support for AMD Pensando SoC Controller
+
+ .../devicetree/bindings/arm/amd,pensando.yaml |  26 ++
+ .../devicetree/bindings/mmc/cdns,sdhci.yaml   |  27 +-
+ .../soc/amd/amd,pensando-elba-ctrl.yaml       |  58 +++
+ .../bindings/spi/cdns,qspi-nor.yaml           |  19 +-
+ .../bindings/spi/snps,dw-apb-ssi.yaml         |  19 +
+ MAINTAINERS                                   |   9 +
+ arch/arm64/Kconfig.platforms                  |  12 +
+ arch/arm64/boot/dts/amd/Makefile              |   1 +
+ arch/arm64/boot/dts/amd/elba-16core.dtsi      | 189 +++++++++
+ arch/arm64/boot/dts/amd/elba-asic-common.dtsi |  80 ++++
+ arch/arm64/boot/dts/amd/elba-asic.dts         |  28 ++
+ arch/arm64/boot/dts/amd/elba-flash-parts.dtsi | 106 +++++
+ arch/arm64/boot/dts/amd/elba.dtsi             | 191 +++++++++
+ drivers/mmc/host/Kconfig                      |   1 +
+ drivers/mmc/host/sdhci-cadence.c              | 173 +++++++-
+ drivers/soc/Kconfig                           |   1 +
+ drivers/soc/Makefile                          |   1 +
+ drivers/soc/amd/Kconfig                       |  16 +
+ drivers/soc/amd/Makefile                      |   2 +
+ drivers/soc/amd/pensando-ctrl.c               | 380 ++++++++++++++++++
+ drivers/spi/spi-cadence-quadspi.c             |  19 +
+ drivers/spi/spi-dw-mmio.c                     |  58 +++
+ include/uapi/linux/amd-pensando-ctrl.h        |  30 ++
+ 23 files changed, 1426 insertions(+), 20 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/arm/amd,pensando.yaml
+ create mode 100644 Documentation/devicetree/bindings/soc/amd/amd,pensando-elba-ctrl.yaml
+ create mode 100644 arch/arm64/boot/dts/amd/elba-16core.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba-asic-common.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba-asic.dts
+ create mode 100644 arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba.dtsi
+ create mode 100644 drivers/soc/amd/Kconfig
+ create mode 100644 drivers/soc/amd/Makefile
+ create mode 100644 drivers/soc/amd/pensando-ctrl.c
+ create mode 100644 include/uapi/linux/amd-pensando-ctrl.h
 
 
-Has anyone seen a similar panic on a SDIO-based WiFi module?
-
-
-I was wondering:
-Has anyone evaluated an X2/X3 meson board with a PCIe (not SIO) WiFi module?
-Neil told PCIe is expected to be less CPU-intensive.
-
-Has anyone evaluated an SDIO-based board that doesn't require the
-amlogic,dram-access-quirk?
-
-Regards
+base-commit: fe15c26ee26efa11741a7b632e9f23b01aca4cc6
+-- 
+2.17.1
 
