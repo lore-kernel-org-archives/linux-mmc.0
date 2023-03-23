@@ -2,77 +2,73 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 14138C6FD1C
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:13:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D299FC6FD1D
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 12:13:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230416AbjCWMNb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 23 Mar 2023 08:13:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48890 "EHLO
+        id S231254AbjCWMNk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Mar 2023 08:13:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49182 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230393AbjCWMN2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:13:28 -0400
-Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 36B201C7EF
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:26 -0700 (PDT)
-Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-53d277c1834so391104647b3.10
-        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:26 -0700 (PDT)
+        with ESMTP id S230482AbjCWMNd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 08:13:33 -0400
+Received: from mail-yb1-xb29.google.com (mail-yb1-xb29.google.com [IPv6:2607:f8b0:4864:20::b29])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 717AA1C7EF
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:30 -0700 (PDT)
+Received: by mail-yb1-xb29.google.com with SMTP id b18so5453327ybp.1
+        for <linux-mmc@vger.kernel.org>; Thu, 23 Mar 2023 05:13:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679573605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=0n4JThIvTj6PwMP8Tc+wbes5jB+9//DVarS0wUhW+9E=;
-        b=YQV0ifFChMu+GzWnG+rbhqAGf40XMt4vuCpKsVheY+wiWYpZyRBLpaO4SFujLcWdNy
-         P0s775M0CzMr5ghPG+Vt86ixzyiSJ8O8+kjI6fSGf9seP5Va3A9wdcbR/iAm+gxRpkXL
-         6bHCpCWPcgwHfmXFhdIdG/7sJ2mEPxGNEVCmM1cA9F/JzxME8tdd5o8M4tvbz/dyCGaH
-         sUNQ4EWqwJQR94p54LwwjvYeOULaidfYLVC7HGqgqGz5gd8h11qVSWNrB20fhmE8P38/
-         KGMsFhJOs1h6n07rAtXOSPh6BmCQz8IXcCkLRdNTapFIJz7dvRptreXGESmvVL4CaRII
-         nFtw==
+        d=linaro.org; s=google; t=1679573609;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=uQrN+6jw1W0Vk1sn5kB/FTmE1DrEeDvSIIgUQEHjFKs=;
+        b=EOCTXJBwcdEXk3JTQVgoo0zxvBXkJVo+Hr1E19g04Uw9agrV42ddufIl0yzaFImlmI
+         l4dCmicbqkpqYv+IXg6ga3SZMtsu4ZPZunLXZhkQbwn3uiSMCPaX50XR/TTW9rcHX+zy
+         NEc6UNvEB1fNh2ix+e8bTOaomUxK/IftGjRv7ZAmvnzRKpWAt/qdAFSL97ktGxorV5uS
+         o3YJsGpw66wP6Cy6ayJRVptxtl0oUj6csYm+HtWL47aH/Ok2bv/abwN+CQFBKI32PrkW
+         vrwUWNORx1OT75DADU0O5ahER9oMQXAZWvNXS6PACQsWH9I1GO8BNh4WwmlkverLPMBd
+         ozxw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679573605;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=0n4JThIvTj6PwMP8Tc+wbes5jB+9//DVarS0wUhW+9E=;
-        b=CGBQAO3zdL+ROcHooisX/sWSWHOoisf1YFTkbZ3UXQjfwnSyg8apuuKQ3gv1yZE8wO
-         oy4LMceQWtjYQAXe6qcSortBMbjfvC8ubXLUSDjKermdGWztUzQVaR4P8L+AtoF5p68g
-         iliIjVzi9thEWN0NnLjFQx9OMXym3p2uiK4OqNBzZ5sQPjjuqEPu2spD8Abf6hPNS2k7
-         0Ow15VLWIUoO/0HqOvhfLrGxWO2oj62nVQg8b03m9NOhnt8iVf8OqJmQ6BKc+cubmv+8
-         xVgisW5krRs6easanwEuzApy5q7CYJ9Mhy9/BuypgpjdNhilleXwxD0xNkFm/2w75oAY
-         ddog==
-X-Gm-Message-State: AAQBX9eQkYd5mJ/z5U3IkZ1aPIFaV4QV0MryD3QH6Pv89huVjoIaLDgt
-        F4PlpEkXRh99Rp6xJrMMoXbfG0mhkP0OPjlT7Ruaqw==
-X-Google-Smtp-Source: AKy350aO1QSF9/2PBO4hdxQ8GSTVuWIPHxMlMcuBlCXl9q9h79YdWWP7wx9g9FVfJldi/WBStp4oDHkprcc5VDjjriM=
-X-Received: by 2002:a81:ae1c:0:b0:52e:e095:d840 with SMTP id
- m28-20020a81ae1c000000b0052ee095d840mr1766782ywh.0.1679573605233; Thu, 23 Mar
- 2023 05:13:25 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1679573609;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=uQrN+6jw1W0Vk1sn5kB/FTmE1DrEeDvSIIgUQEHjFKs=;
+        b=JMvBgzSWU+9eze6ssosd24YoxPCM14xG8xOv0ODQFL85JNn3uas1/KMzywz07wzaSK
+         W3PVEH90FewfqAJvi/P3qbY05bi81NNoQ1/zjPuUmfZE3wr9BSpDCTJxDZ8BTQeBb6iH
+         c8s7TnBVjL78KbS6dg19FrLurNbodPbM9kjRWX0+pkpppIiXJHtwoaM5BYrIHS0LFmsH
+         VCQQ6kzn7ievan8Cv5v51YmtLA/RTXfb9kmQUlQHhBsoYXuHaTta8Mw6tvqceVfgwGyT
+         0WYSdwd2BnmH54ys4hrPYnDTWRGXkyfyx/EQmZ+UOGY6XJLFyNEtcPTyt19+MJqlPlHG
+         BMuw==
+X-Gm-Message-State: AAQBX9eNzv+sbZ4rs1h3hIYSNwhpv2FBRSmtxhwNIxkSUCTZmC47TU2b
+        32ubj3/Z4pi52kneQLiy1l8F1zquHsrgYkxmjqGljQ==
+X-Google-Smtp-Source: AKy350Yz1QU/HRQZIbuhaa5BVUK11B7cbjmzYsCpg5CdGSMBa0XjL2SjXtCAZSuzYAIMePTgt5WYiB7KYmZ+AjHWZNA=
+X-Received: by 2002:a05:6902:120f:b0:b6c:f26c:e5ab with SMTP id
+ s15-20020a056902120f00b00b6cf26ce5abmr2059170ybu.3.1679573609525; Thu, 23 Mar
+ 2023 05:13:29 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230314203901.20803-1-krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230314203901.20803-1-krzysztof.kozlowski@linaro.org>
+References: <20230315052231.21212-1-yang.lee@linux.alibaba.com>
+In-Reply-To: <20230315052231.21212-1-yang.lee@linux.alibaba.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 23 Mar 2023 13:12:49 +0100
-Message-ID: <CAPDyKFq_ak_40PKm2SyuyZzHQkKJpUcLkGr_HZXTgcCfzZFjcA@mail.gmail.com>
-Subject: Re: [PATCH v2] mmc: sdhci: drop useless sdhci_get_compatibility() !OF stub
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org,
+Date:   Thu, 23 Mar 2023 13:12:52 +0100
+Message-ID: <CAPDyKFrfj87bSdcVV52pCWWtk_bdZS3LSkgfnOjpw5co6n7nYw@mail.gmail.com>
+Subject: Re: [PATCH -next] mmc: dw_mmc-pltfm: Use devm_platform_get_and_ioremap_resource()
+To:     Yang Li <yang.lee@linux.alibaba.com>
+Cc:     jh80.chung@samsung.com, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 14 Mar 2023 at 21:39, Krzysztof Kozlowski
-<krzysztof.kozlowski@linaro.org> wrote:
+On Wed, 15 Mar 2023 at 06:22, Yang Li <yang.lee@linux.alibaba.com> wrote:
 >
-> The sdhci_get_compatibility() uses OF functions which have stubs for !OF
-> case, thus entire CONFIG_OF ifdef can be dropped.  This also fixes
-> !CONFIG_OF W=3D1 warning:
+> According to commit 890cc39a8799 ("drivers: provide
+> devm_platform_get_and_ioremap_resource()"), convert
+> platform_get_resource(), devm_ioremap_resource() to a single
+> call to devm_platform_get_and_ioremap_resource(), as this is exactly
+> what this function does.
 >
->   drivers/mmc/host/sdhci-pltfm.c:76:6: error: no previous prototype for =
-=E2=80=98sdhci_get_compatibility=E2=80=99 [-Werror=3Dmissing-prototypes]
->
-> Signed-off-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Signed-off-by: Yang Li <yang.lee@linux.alibaba.com>
 
 Applied for next, thanks!
 
@@ -80,39 +76,24 @@ Kind regards
 Uffe
 
 
->
 > ---
+>  drivers/mmc/host/dw_mmc-pltfm.c | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
 >
-> Changes since v1:
-> 1. Drop the stub (Ulf)
-> ---
->  drivers/mmc/host/sdhci-pltfm.c | 4 ----
->  1 file changed, 4 deletions(-)
+> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pltfm.c
+> index 13e55cff8237..48b7da2b86b3 100644
+> --- a/drivers/mmc/host/dw_mmc-pltfm.c
+> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
+> @@ -46,8 +46,7 @@ int dw_mci_pltfm_register(struct platform_device *pdev,
+>         host->irq_flags = 0;
+>         host->pdata = pdev->dev.platform_data;
 >
-> diff --git a/drivers/mmc/host/sdhci-pltfm.c b/drivers/mmc/host/sdhci-pltf=
-m.c
-> index 328b132bbe57..673e750a8490 100644
-> --- a/drivers/mmc/host/sdhci-pltfm.c
-> +++ b/drivers/mmc/host/sdhci-pltfm.c
-> @@ -54,7 +54,6 @@ static bool sdhci_wp_inverted(struct device *dev)
->  #endif /* CONFIG_PPC */
->  }
+> -       regs = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+> -       host->regs = devm_ioremap_resource(&pdev->dev, regs);
+> +       host->regs = devm_platform_get_and_ioremap_resource(pdev, 0, &regs);
+>         if (IS_ERR(host->regs))
+>                 return PTR_ERR(host->regs);
 >
-> -#ifdef CONFIG_OF
->  static void sdhci_get_compatibility(struct platform_device *pdev)
->  {
->         struct sdhci_host *host =3D platform_get_drvdata(pdev);
-> @@ -72,9 +71,6 @@ static void sdhci_get_compatibility(struct platform_dev=
-ice *pdev)
->             of_device_is_compatible(np, "fsl,mpc8536-esdhc"))
->                 host->quirks |=3D SDHCI_QUIRK_BROKEN_TIMEOUT_VAL;
->  }
-> -#else
-> -void sdhci_get_compatibility(struct platform_device *pdev) {}
-> -#endif /* CONFIG_OF */
->
->  void sdhci_get_property(struct platform_device *pdev)
->  {
 > --
-> 2.34.1
+> 2.20.1.7.g153144c
 >
