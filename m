@@ -2,111 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AF8C2C6FD1F
-	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 02:33:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 215E6C761AF
+	for <linux-mmc@archiver.kernel.org>; Thu, 23 Mar 2023 06:36:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229597AbjCWCdd convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 22 Mar 2023 22:33:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40338 "EHLO
+        id S230021AbjCWGgv (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 23 Mar 2023 02:36:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40654 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229942AbjCWCdd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 22 Mar 2023 22:33:33 -0400
-Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4580A2CC5B;
-        Wed, 22 Mar 2023 19:33:32 -0700 (PDT)
-Authenticated-By: 
-X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32N2X2Tt8010162, This message is accepted by code: ctloc85258
-Received: from mail.realtek.com (rtexh36505.realtek.com.tw[172.21.6.25])
-        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32N2X2Tt8010162
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
-        Thu, 23 Mar 2023 10:33:02 +0800
-Received: from RTEXDAG01.realtek.com.tw (172.21.6.100) by
- RTEXH36505.realtek.com.tw (172.21.6.25) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.32; Thu, 23 Mar 2023 10:33:17 +0800
-Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
- RTEXDAG01.realtek.com.tw (172.21.6.100) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.7; Thu, 23 Mar 2023 10:33:17 +0800
-Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
- RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
- 15.01.2375.007; Thu, 23 Mar 2023 10:33:17 +0800
-From:   Ping-Ke Shih <pkshih@realtek.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
-CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        Chris Morgan <macroalpha82@gmail.com>,
-        "Nitin Gupta" <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Larry Finger <Larry.Finger@lwfinger.net>
-Subject: RE: [PATCH v3 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
-Thread-Topic: [PATCH v3 9/9] wifi: rtw88: Add support for the SDIO based
- RTL8821CS chipset
-Thread-Index: AQHZW3Po1pa1IAEt/E2D0CBscuX2k68HqBtQ
-Date:   Thu, 23 Mar 2023 02:33:16 +0000
-Message-ID: <32f57abb6b6b4215af807407b7d9452a@realtek.com>
-References: <20230320213508.2358213-1-martin.blumenstingl@googlemail.com>
- <20230320213508.2358213-10-martin.blumenstingl@googlemail.com>
-In-Reply-To: <20230320213508.2358213-10-martin.blumenstingl@googlemail.com>
-Accept-Language: en-US, zh-TW
-Content-Language: zh-TW
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-x-originating-ip: [172.21.69.188]
-x-kse-serverinfo: RTEXDAG01.realtek.com.tw, 9
-x-kse-antispam-interceptor-info: fallback
-x-kse-antivirus-interceptor-info: fallback
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S229997AbjCWGgu (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 23 Mar 2023 02:36:50 -0400
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 137981EFE5
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2023 23:36:48 -0700 (PDT)
+Received: by mail-ed1-x52d.google.com with SMTP id ew6so19233975edb.7
+        for <linux-mmc@vger.kernel.org>; Wed, 22 Mar 2023 23:36:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1679553406;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=KBuqC6g1/eaUnYvNFbBeCunU82oMiwEhP9a6uXkHuJM=;
+        b=rXGRux3R7a9zkMUCQFz337/YkRWKdtX/1Dhbt69Gk/OchVsvcyqoc9/3QKbX3gbFMy
+         49WoqDIv5HzBZcWivC6G49B5MkX6aW/JAzJtHezhhhWp0O+TMKp2FXaQEDZ4Pf1MVDFG
+         APTKCMgLczc3JrsKAdE0T7CAhzTPM/mpnlU33YQYTVu5HDHEXp0dW0VumYdaJxx0hUlT
+         VZ75H9jj0XaQOcqD9Y9Admben6MrZ57fvGxEg3zZSFNwRo2fMDV3pJuvMQrd+MwFezrK
+         4vAeiK+xbvF1h32BcKOMWH7duIB1MdplBkCCrLBsaQbFvcr8zm0K6Vio/CIu1D3pDWDn
+         m+9Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1679553406;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=KBuqC6g1/eaUnYvNFbBeCunU82oMiwEhP9a6uXkHuJM=;
+        b=1/52TsMkUcCbncup/u6vlUc8EQh+WsSL/s7VT9/zcPwUbTLfLpccIrpOIiOzDk/w2+
+         t7kG2jm7xPtecn866oreBUyqjDryqHq/5hXdOqwcSHjjPHv5bDwXW/EYqZ+CPEGv5ODI
+         hCKS6M8VqvpQoTwdF5x3SO0v+1lPJD60+D+BZc58FvtmUMOBqW7YntjGwDM3FYrl7wQ9
+         6rVpbE8IEothAlcN8g8X05s2gV4W1FSPltsD3W1hDk1NGomnAklYxixp8RCu/UHqLUDi
+         rPo2p8rhVDjClYzttsK1eDdBYqOjbjdzt/nEyLSDaUnbHwInvBkjogVF/1fzd1krfyoS
+         bapg==
+X-Gm-Message-State: AO0yUKVAVeUkzpuZ7+pMd8hThJxZkC/bKrXPg5Tl1O0vahGtecBnl1Rs
+        /lnI0ybkP5N/0SLZNZPXUAhmGg==
+X-Google-Smtp-Source: AK7set+d2WHze2YcwYBEvlDICEdFc3/PIpuRwJpx1GCMubZK+HMKila+Et5cWOrBQLq6yP3xpn3ooA==
+X-Received: by 2002:a17:906:c786:b0:939:4c86:d492 with SMTP id cw6-20020a170906c78600b009394c86d492mr4580173ejb.5.1679553406522;
+        Wed, 22 Mar 2023 23:36:46 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:a665:ed1e:3966:c991? ([2a02:810d:15c0:828:a665:ed1e:3966:c991])
+        by smtp.gmail.com with ESMTPSA id kx1-20020a170907774100b0091fdd2ee44bsm8158330ejc.197.2023.03.22.23.36.44
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 22 Mar 2023 23:36:46 -0700 (PDT)
+Message-ID: <4957b3f0-46cb-9a11-8306-81cdf5fea293@linaro.org>
+Date:   Thu, 23 Mar 2023 07:36:44 +0100
 MIME-Version: 1.0
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-ServerInfo: RTEXH36505.realtek.com.tw, 9
-X-KSE-AntiSpam-Interceptor-Info: fallback
-X-KSE-Antivirus-Interceptor-Info: fallback
-X-KSE-AntiSpam-Interceptor-Info: fallback
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v12 02/15] dt-bindings: mmc: cdns: Add AMD Pensando Elba
+ SoC
+Content-Language: en-US
+To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
+        devicetree@vger.kernel.org
+References: <20230323000657.28664-1-blarson@amd.com>
+ <20230323000657.28664-3-blarson@amd.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230323000657.28664-3-blarson@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-
-> -----Original Message-----
-> From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Sent: Tuesday, March 21, 2023 5:35 AM
-> To: linux-wireless@vger.kernel.org
-> Cc: Yan-Hsuan Chuang <tony0620emma@gmail.com>; Kalle Valo <kvalo@kernel.org>; Ulf Hansson
-> <ulf.hansson@linaro.org>; linux-kernel@vger.kernel.org; netdev@vger.kernel.org;
-> linux-mmc@vger.kernel.org; Chris Morgan <macroalpha82@gmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
-> Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
-> Larry Finger <Larry.Finger@lwfinger.net>; Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> Subject: [PATCH v3 9/9] wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
+On 23/03/2023 01:06, Brad Larson wrote:
+> AMD Pensando Elba ARM 64-bit SoC is integrated with this IP and
+> explicitly controls byte-lane enables.
 > 
-> Wire up RTL8821CS chipset support using the new rtw88 SDIO HCI code as
-> well as the existing RTL8821C chipset code.
-> 
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Signed-off-by: Brad Larson <blarson@amd.com>
 
-Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-In next patchset, please add my Reviewed-by if you don't have change.
-Thanks for your work.
-
-> ---
-> Changes since v2:
-> - sort includes alphabetically as suggested by Ping-Ke
-> - add missing #include "main.h" (after it has been removed from sdio.h
->   in patch 2 from this series)
-> 
-> Changes since v1:
-> - use /* ... */ style for copyright comments
-> 
-> 
-
+Best regards,
+Krzysztof
 
