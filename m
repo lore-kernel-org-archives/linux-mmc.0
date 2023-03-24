@@ -2,333 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C93C76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Mar 2023 15:20:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37C52C761AF
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Mar 2023 15:47:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232050AbjCXPUB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Mar 2023 11:20:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46596 "EHLO
+        id S230088AbjCXPrC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Mar 2023 11:47:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232482AbjCXPT6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2023 11:19:58 -0400
-Received: from mx0b-0016f401.pphosted.com (mx0b-0016f401.pphosted.com [67.231.156.173])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F06B87EE6;
-        Fri, 24 Mar 2023 08:19:56 -0700 (PDT)
-Received: from pps.filterd (m0045851.ppops.net [127.0.0.1])
-        by mx0b-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 32OD7ZMZ030610;
-        Fri, 24 Mar 2023 08:19:49 -0700
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=date : from : to :
- cc : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=pfpt0220; bh=Q2kGjIMhBFd/DPycP247SzcKqxUhvUtSrbx/CaMj/qU=;
- b=dGQPnZIJ7x5macjoUqa2Y+nHkE++W25zIzQmidaBZOFdyCB7l6QHLN7UqMaKO84stnJ4
- Gkgl9WALvc/F8LnpO6I1H8HglFE5Vl8bHxIpkyFnGG0XZd2P0m3EG39FxDtkbnPOhx2L
- NSBcKNOSM2eOJBjEx/U40v67YqvAbZAIhIfjtb8bPxwMO7/IyZcD7XTlNp5dyIXAReZ0
- iD3HtM1q8fOlo8vJSDl52tJ9jZv8rNlHtzGw0FJUK19nbGy66hINPnQCLofkWGAMRxYG
- NHL/q2CVA0a6g6Na0GqsIGikzywnlJs+G77Bxc69vKcF+1ga0ZsiL5f5OQoaYWVDohG5 FA== 
-Received: from dc5-exch02.marvell.com ([199.233.59.182])
-        by mx0b-0016f401.pphosted.com (PPS) with ESMTPS id 3pgxmfjx9q-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
-        Fri, 24 Mar 2023 08:19:49 -0700
-Received: from DC5-EXCH02.marvell.com (10.69.176.39) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 24 Mar
- 2023 08:19:46 -0700
-Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH02.marvell.com
- (10.69.176.39) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
- Transport; Fri, 24 Mar 2023 08:19:46 -0700
-Received: from Dell2s-9 (unknown [10.110.150.250])
-        by maili.marvell.com (Postfix) with ESMTP id 8B08E3F7067;
-        Fri, 24 Mar 2023 08:19:46 -0700 (PDT)
-Date:   Fri, 24 Mar 2023 08:19:46 -0700
-From:   Piyush Malgujar <pmalgujar@marvell.com>
-To:     Adrian Hunter <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <ulf.hansson@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>,
-        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>,
-        <jannadurai@marvell.com>, <cchavva@marvell.com>,
-        Dhananjay Kangude <dkangude@cadence.com>
-Subject: Re: [PATCH v3 2/6] mmc: sdhci-cadence: Restructure the code
-Message-ID: <20230324151946.GC462@Dell2s-9>
-References: <20230227183151.27912-1-pmalgujar@marvell.com>
- <20230227183151.27912-3-pmalgujar@marvell.com>
- <e77b9471-806c-7603-7351-76422c42df88@intel.com>
+        with ESMTP id S231531AbjCXPrB (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2023 11:47:01 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D0A7F19B7
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2023 08:46:57 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-544787916d9so39519167b3.13
+        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2023 08:46:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1679672817;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=NbMU26KvuDhxRgS5BOOObuB6VM/WTbVMpAKkjnkzln4=;
+        b=tDh/YhuOk5MCCESde0mwLUN2BM1Dl78t7pzTqGBP9gGT6jOMYEpc+CRHwZX5mzF8k8
+         G3yLu/rV1fzHghME0JzOx5ym1akTHmDTITeWXNib3v8Girj/HudNG0P3TRI6UkSD8LYa
+         ohvdkjbro+niCkywe81tZrIVijZfwEFwlzEEoKz8DJAR5vYY6W9GtvRvS7dkQy9NEolC
+         CHjWutu/1tUWd8Q/iODL4HUNL0U+VshrMfE1bGDkbYL8iro6rEfRXrli2843wuaF0ibK
+         pLrdgjdb7P4RdOR0e4XVJmJQosMHFo6mcEgsCbw0pZQFBhZfdzVqOHIjFmREgMdXWaql
+         aDrQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1679672817;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=NbMU26KvuDhxRgS5BOOObuB6VM/WTbVMpAKkjnkzln4=;
+        b=plmNJJ5lJW3QPwoNrBdb+hD8xxZpT6paWUdaKY5dQqgHEsAJNrskRm3xRgkezonS1d
+         kedmQplZhvJgfcOQF/8kWahUVYEpCj5szwUILFmI8cV6/wTcebLWKxilgMem2qvHqWum
+         +Yj3lxJe+eMVYXchYUxunO9apcgnuNTk5lzmQ+kO55+v4hjdneZLSDp7g7NArduuypIM
+         yQ8icyKhWj8DfadVxZl4EO4jYd0vYOxkWgxbai+AJ8OQwkeeNPqwnlMTCWzKBh61WPHx
+         xcY0eZc5Ar/8yaVcSbnvxkzWikpzMmt3La/+NA3ew83JgwYiUKLYggJktY+lS5aoVOxf
+         0EcQ==
+X-Gm-Message-State: AAQBX9c+Pm8sHct3PHHaaYhH590kWGBw/fJFEmBYdzYEpJ7yFC6dbWfE
+        m1UH/850g2UTdvnxN/R41SQ8rB+6RF60Edjr7m9dRg==
+X-Google-Smtp-Source: AKy350ZrRmEOfSH9HdqIpxODwcFPtiWHoT78R7Alcg8WWhH4HeDKnIqzoPGfqP55wsLi0hO4jXGqCNIiHfxxN53t7AM=
+X-Received: by 2002:a81:ae23:0:b0:52b:fd10:4809 with SMTP id
+ m35-20020a81ae23000000b0052bfd104809mr1306472ywh.0.1679672815533; Fri, 24 Mar
+ 2023 08:46:55 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <e77b9471-806c-7603-7351-76422c42df88@intel.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-GUID: zJtG4ghDSG5oghhmFoP-6Sol5h5vpW4w
-X-Proofpoint-ORIG-GUID: zJtG4ghDSG5oghhmFoP-6Sol5h5vpW4w
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-03-24_09,2023-03-24_01,2023-02-09_01
+References: <CGME20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5@eucas1p2.samsung.com>
+ <20230317064729.24407-1-yuzhe@nfschina.com> <5b555935-5657-3f38-8a55-906dd32ad052@samsung.com>
+In-Reply-To: <5b555935-5657-3f38-8a55-906dd32ad052@samsung.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 24 Mar 2023 16:46:19 +0100
+Message-ID: <CAPDyKFotp50rbyFqBzk28iXFVqUnXry5XzyA-jrBKVrDW3_a-A@mail.gmail.com>
+Subject: Re: [PATCH] mmc: core: remove unnecessary (void*) conversions
+To:     Marek Szyprowski <m.szyprowski@samsung.com>
+Cc:     Yu Zhe <yuzhe@nfschina.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        liqiong@nfschina.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Adrian,
-
-Thanks for the review comments.
-
-On Fri, Mar 03, 2023 at 10:36:30AM +0200, Adrian Hunter wrote:
-> On 27/02/23 20:31, Piyush Malgujar wrote:
-> > From: Dhananjay Kangude <dkangude@cadence.com>
-> > 
-> > Restructured the code, added new structures and functions for
-> > SD4 operations. Also this adds some abstraction to the code
-> > which will make it modular and adaptable for further SD6 operations.
-> > 
-> > Signed-off-by: Dhananjay Kangude <dkangude@cadence.com>
-> > Co-developed-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> > Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
-> > Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+On Fri, 24 Mar 2023 at 14:28, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+>
+> On 17.03.2023 07:47, Yu Zhe wrote:
+> > Pointer variables of void * type do not require type cast.
+> >
+> > Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
 > > ---
-> >  drivers/mmc/host/sdhci-cadence.c | 100 ++++++++++++++++++++++++-------
-> >  1 file changed, 80 insertions(+), 20 deletions(-)
-> > 
-> > diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> > index 5276cdbc652f7faac13bb0244af4926b63dc119a..4f7e63c90e3d68da338b8964f08b7c65ebaf1ffd 100644
-> > --- a/drivers/mmc/host/sdhci-cadence.c
-> > +++ b/drivers/mmc/host/sdhci-cadence.c
-> > @@ -59,16 +59,28 @@
-> >   */
-> >  #define SDHCI_CDNS_MAX_TUNING_LOOP	40
-> >  
-> > +struct sdhci_cdns_priv;
-> > +
-> >  struct sdhci_cdns_sd4_phy_param {
-> >  	u8 addr;
-> >  	u8 data;
-> >  };
-> >  
-> > +struct sdhci_cdns_data {
-> > +	int (*phy_init)(struct sdhci_cdns_priv *priv);
-> > +	int (*set_tune_val)(struct sdhci_host *host, unsigned int val);
-> > +};
-> > +
-> > +struct sdhci_cdns_sd4_phy {
-> > +	unsigned int nr_phy_params;
-> > +	struct sdhci_cdns_sd4_phy_param phy_params[];
-> > +};
-> > +
-> >  struct sdhci_cdns_priv {
-> >  	void __iomem *hrs_addr;
-> >  	bool enhanced_strobe;
-> > -	unsigned int nr_phy_params;
-> > -	struct sdhci_cdns_sd4_phy_param phy_params[];
-> > +	const struct sdhci_cdns_data *cdns_data;
-> 
-> Simpler if there is just a pointer to struct sdhci_cdns_of_data
-> and get rid of struct sdhci_cdns_data.
-> 
+> >   drivers/mmc/core/debugfs.c  | 2 +-
+> >   drivers/mmc/core/host.c     | 2 +-
+> >   drivers/mmc/core/mmc_test.c | 6 +++---
+> >   3 files changed, 5 insertions(+), 5 deletions(-)
+> ...
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 096093f7be00..76900f67c782 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -590,7 +590,7 @@ EXPORT_SYMBOL(mmc_alloc_host);
+> >
+> >   static void devm_mmc_host_release(struct device *dev, void *res)
+> >   {
+> > -     mmc_free_host(*(struct mmc_host **)res);
+> > +     mmc_free_host(res);
+>
+> The above chunk is wrong and causes following regression on today's
+> Linux next-20230324:
+>
+> Unable to handle kernel paging request at virtual address 0000000000001020
+> Mem abort info:
+> meson-gx-mmc ffe07000.mmc: allocated mmc-pwrseq
+> ...
+> [0000000000001020] user address but active_mm is swapper
+> Internal error: Oops: 0000000096000004 [#1] PREEMPT SMP
+> Modules linked in:
+> CPU: 3 PID: 10 Comm: kworker/u12:0 Not tainted 6.3.0-rc3-next-20230324+
+> #13452
+> Hardware name: Khadas VIM3 (DT)
+> Workqueue: events_unbound async_run_entry_fn
+> pstate: 00000005 (nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> pc : mmc_pwrseq_free+0x1c/0x38
+> lr : devm_mmc_host_release+0x1c/0x34
+> ...
+> Call trace:
+>   mmc_pwrseq_free+0x1c/0x38
+>   devm_mmc_host_release+0x1c/0x34
+>   release_nodes+0x5c/0x90
+>   devres_release_all+0x8c/0xdc
+>   device_unbind_cleanup+0x18/0x68
+>   really_probe+0x11c/0x2b4
+>   __driver_probe_device+0x78/0xe0
+>   driver_probe_device+0xd8/0x160
+>   __device_attach_driver+0xb8/0x138
+>   bus_for_each_drv+0x84/0xe0
+>   __device_attach_async_helper+0xb0/0xd4
+>   async_run_entry_fn+0x34/0xe0
+>   process_one_work+0x288/0x5c0
+>   worker_thread+0x74/0x450
+>   kthread+0x124/0x128
+>   ret_from_fork+0x10/0x20
+> Code: f9000bf3 aa0003f3 f9424c00 b4000080 (f9401000)
+> ---[ end trace 0000000000000000 ]---
+>
+> Ulf: do You want me to send a partial revert or will you handle it by
+> dropping this patch?
 
-Sure, will take care of this.
+Thanks for the report, I will simply drop the patch!
 
-> > +	void *phy;
-> >  };
-> >  
-> >  struct sdhci_cdns_sd4_phy_cfg {
-> > @@ -76,6 +88,13 @@ struct sdhci_cdns_sd4_phy_cfg {
-> >  	u8 addr;
-> >  };
-> >  
-> > +struct sdhci_cdns_of_data {
-> > +	const struct sdhci_pltfm_data *pltfm_data;
-> 
-> Kernel style is not to unnecessarily have structures that point to
-> other structures or contain other structures.
-> 
-> Here, please just put the struct not a pointer i.e.
-> 
-> 	struct sdhci_pltfm_data *pltfm_data;
-> 
-
-Ok, so, to use 
-
-	struct sdhci_pltfm_data pltfm_data;
-
-> > +	const struct sdhci_cdns_data *cdns_data;
-> 
-> Please get rid of struct sdhci_cdns_data. Instead just put its members here
-> 
-
-Ok, will modify in next version.
-
-> > +	int (*phy_probe)(struct platform_device *pdev,
-> > +			 struct sdhci_cdns_priv *priv);
-> > +};
-> > +
-> >  static const struct sdhci_cdns_sd4_phy_cfg sdhci_cdns_sd4_phy_cfgs[] = {
-> >  	{ "cdns,phy-input-delay-sd-highspeed", SDHCI_CDNS_PHY_DLY_SD_HS, },
-> >  	{ "cdns,phy-input-delay-legacy", SDHCI_CDNS_PHY_DLY_SD_DEFAULT, },
-> > @@ -135,9 +154,9 @@ static unsigned int sdhci_cdns_sd4_phy_param_count(struct device_node *np)
-> >  }
-> >  
-> >  static void sdhci_cdns_sd4_phy_param_parse(struct device_node *np,
-> > -					   struct sdhci_cdns_priv *priv)
-> > +					   struct sdhci_cdns_sd4_phy *phy)
-> >  {
-> > -	struct sdhci_cdns_sd4_phy_param *p = priv->phy_params;
-> > +	struct sdhci_cdns_sd4_phy_param *p = phy->phy_params;
-> >  	u32 val;
-> >  	int ret, i;
-> >  
-> > @@ -156,10 +175,11 @@ static void sdhci_cdns_sd4_phy_param_parse(struct device_node *np,
-> >  static int sdhci_cdns_sd4_phy_init(struct sdhci_cdns_priv *priv)
-> >  {
-> >  	int ret, i;
-> > +	struct sdhci_cdns_sd4_phy *phy = priv->phy;
-> >  
-> > -	for (i = 0; i < priv->nr_phy_params; i++) {
-> > -		ret = sdhci_cdns_sd4_write_phy_reg(priv, priv->phy_params[i].addr,
-> > -						   priv->phy_params[i].data);
-> > +	for (i = 0; i < phy->nr_phy_params; i++) {
-> > +		ret = sdhci_cdns_sd4_write_phy_reg(priv, phy->phy_params[i].addr,
-> > +						   phy->phy_params[i].data);
-> >  		if (ret)
-> >  			return ret;
-> >  	}
-> > @@ -202,6 +222,27 @@ static u32 sdhci_cdns_get_emmc_mode(struct sdhci_cdns_priv *priv)
-> >  	return FIELD_GET(SDHCI_CDNS_HRS06_MODE, tmp);
-> >  }
-> >  
-> > +static int sdhci_cdns_sd4_phy_probe(struct platform_device *pdev,
-> > +				    struct sdhci_cdns_priv *priv)
-> > +{
-> > +	unsigned int nr_phy_params;
-> > +	struct sdhci_cdns_sd4_phy *phy;
-> > +	struct device *dev = &pdev->dev;
-> > +
-> > +	nr_phy_params = sdhci_cdns_sd4_phy_param_count(dev->of_node);
-> > +	phy = devm_kzalloc(dev, struct_size(phy, phy_params, nr_phy_params),
-> > +			   GFP_KERNEL);
-> > +	if (!phy)
-> > +		return -ENOMEM;
-> > +
-> > +	phy->nr_phy_params = nr_phy_params;
-> > +
-> > +	sdhci_cdns_sd4_phy_param_parse(dev->of_node, phy);
-> > +	priv->phy = phy;
-> > +
-> > +	return 0;
-> > +}
-> > +
-> >  static int sdhci_cdns_sd4_set_tune_val(struct sdhci_host *host, unsigned int val)
-> >  {
-> >  	struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> > @@ -323,10 +364,25 @@ static const struct sdhci_pltfm_data sdhci_cdns_uniphier_pltfm_data = {
-> >  	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN,
-> >  };
-> >  
-> > +static const struct sdhci_cdns_of_data sdhci_cdns_uniphier_of_data = {
-> > +	.pltfm_data = &sdhci_cdns_uniphier_pltfm_data,
-> > +};
-> > +
-> >  static const struct sdhci_pltfm_data sdhci_cdns_sd4_pltfm_data = {
-> >  	.ops = &sdhci_cdns_sd4_ops,
-> >  };
-> >  
-> > +static const struct sdhci_cdns_data sdhci_cdns_sd4_data = {
-> > +	.phy_init = sdhci_cdns_sd4_phy_init,
-> > +	.set_tune_val = sdhci_cdns_sd4_set_tune_val,
-> > +};
-> > +
-> > +static const struct sdhci_cdns_of_data sdhci_cdns_sd4_of_data = {
-> > +	.pltfm_data = &sdhci_cdns_sd4_pltfm_data,
-> > +	.cdns_data = &sdhci_cdns_sd4_data,
-> > +	.phy_probe = sdhci_cdns_sd4_phy_probe,
-> > +};
-> > +
-> >  static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-> >  					     struct mmc_ios *ios)
-> >  {
-> > @@ -350,11 +406,10 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
-> >  static int sdhci_cdns_probe(struct platform_device *pdev)
-> >  {
-> >  	struct sdhci_host *host;
-> > -	const struct sdhci_pltfm_data *data;
-> > +	const struct sdhci_cdns_of_data *data;
-> >  	struct sdhci_pltfm_host *pltfm_host;
-> >  	struct sdhci_cdns_priv *priv;
-> >  	struct clk *clk;
-> > -	unsigned int nr_phy_params;
-> >  	int ret;
-> >  	struct device *dev = &pdev->dev;
-> >  	static const u16 version = SDHCI_SPEC_400 << SDHCI_SPEC_VER_SHIFT;
-> > @@ -368,12 +423,12 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
-> >  		return ret;
-> >  
-> >  	data = of_device_get_match_data(dev);
-> > -	if (!data)
-> > -		data = &sdhci_cdns_sd4_pltfm_data;
-> > +	if (!data) {
-> > +		ret = -EINVAL;
-> > +		goto disable_clk;
-> > +	}
-> >  
-> > -	nr_phy_params = sdhci_cdns_sd4_phy_param_count(dev->of_node);
-> > -	host = sdhci_pltfm_init(pdev, data,
-> > -				struct_size(priv, phy_params, nr_phy_params));
-> > +	host = sdhci_pltfm_init(pdev, data->pltfm_data, sizeof(*priv));
-> >  	if (IS_ERR(host)) {
-> >  		ret = PTR_ERR(host);
-> >  		goto disable_clk;
-> > @@ -383,9 +438,9 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
-> >  	pltfm_host->clk = clk;
-> >  
-> >  	priv = sdhci_pltfm_priv(pltfm_host);
-> > -	priv->nr_phy_params = nr_phy_params;
-> >  	priv->hrs_addr = host->ioaddr;
-> >  	priv->enhanced_strobe = false;
-> > +	priv->cdns_data = data->cdns_data;
-> >  	host->ioaddr += SDHCI_CDNS_SRS_BASE;
-> >  	host->mmc_host_ops.hs400_enhanced_strobe =
-> >  				sdhci_cdns_hs400_enhanced_strobe;
-> > @@ -398,9 +453,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
-> >  	if (ret)
-> >  		goto free;
-> >  
-> > -	sdhci_cdns_sd4_phy_param_parse(dev->of_node, priv);
-> > +	ret = data->phy_probe(pdev, priv);
-> > +	if (ret)
-> > +		goto free;
-> >  
-> > -	ret = sdhci_cdns_sd4_phy_init(priv);
-> > +	ret = priv->cdns_data->phy_init(priv);
-> 
-> As was pointed out last time, you are dereferncing cdns_data unconditionally
-> when it could be NULL e.g. in the case of sdhci_cdns_uniphier_of_data
-> 
-> >  	if (ret)
-> >  		goto free;
-> >  
-> > @@ -429,7 +486,7 @@ static int sdhci_cdns_resume(struct device *dev)
-> >  	if (ret)
-> >  		return ret;
-> >  
-> > -	ret = sdhci_cdns_sd4_phy_init(priv);
-> > +	ret = priv->cdns_data->phy_init(priv);
-> >  	if (ret)
-> >  		goto disable_clk;
-> >  
-> > @@ -453,9 +510,12 @@ static const struct dev_pm_ops sdhci_cdns_pm_ops = {
-> >  static const struct of_device_id sdhci_cdns_match[] = {
-> >  	{
-> >  		.compatible = "socionext,uniphier-sd4hc",
-> > -		.data = &sdhci_cdns_uniphier_pltfm_data,
-> > +		.data = &sdhci_cdns_uniphier_of_data,
-> > +	},
-> > +	{
-> > +		.compatible = "cdns,sd4hc",
-> > +		.data = &sdhci_cdns_sd4_of_data,
-> >  	},
-> > -	{ .compatible = "cdns,sd4hc" },
-> >  	{ /* sentinel */ }
-> >  };
-> >  MODULE_DEVICE_TABLE(of, sdhci_cdns_match);
-> 
-
-Rest of the comments will take care in next version.
-
-Thanks,
-Piyush
+Kind regards
+Uffe
