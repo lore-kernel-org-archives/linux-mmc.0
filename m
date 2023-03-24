@@ -2,173 +2,120 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BE86C76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 24 Mar 2023 13:29:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEA10C6FD1C
+	for <linux-mmc@archiver.kernel.org>; Fri, 24 Mar 2023 15:02:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231473AbjCXN3P (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 24 Mar 2023 09:29:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55770 "EHLO
+        id S231868AbjCXPCa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 24 Mar 2023 11:02:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230373AbjCXN3O (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2023 09:29:14 -0400
-Received: from mailout1.w1.samsung.com (mailout1.w1.samsung.com [210.118.77.11])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CC3816A44
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2023 06:29:10 -0700 (PDT)
-Received: from eucas1p2.samsung.com (unknown [182.198.249.207])
-        by mailout1.w1.samsung.com (KnoxPortal) with ESMTP id 20230324132859euoutp016e911786121e70953c3757f6c11c8d6a~PXf-HFLd20251002510euoutp01Y
-        for <linux-mmc@vger.kernel.org>; Fri, 24 Mar 2023 13:28:59 +0000 (GMT)
-DKIM-Filter: OpenDKIM Filter v2.11.0 mailout1.w1.samsung.com 20230324132859euoutp016e911786121e70953c3757f6c11c8d6a~PXf-HFLd20251002510euoutp01Y
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=samsung.com;
-        s=mail20170921; t=1679664539;
-        bh=cQM/0ETHqshPDiiSKhUhTYsu1cvKE0Fap6nFLwtl7lQ=;
-        h=Date:Subject:To:Cc:From:In-Reply-To:References:From;
-        b=N1DIUQzN9bG9yR58y+sLpw4/1c/Wz7PBVGz9CPqqfvvWU5GVNuIxCMhivDP9R5sr3
-         OdZEUxOH+NDzNRkFdGqg8HlFuYwRU/DhB+NiMSPdT0bFLG+fow/RGQX+7R3cvfp1UD
-         ty087cwjxEwxmNxwp9ZFu8R00LRnZEk8Nvs7l42c=
-Received: from eusmges3new.samsung.com (unknown [203.254.199.245]) by
-        eucas1p1.samsung.com (KnoxPortal) with ESMTP id
-        20230324132858eucas1p19a31f5aa31855b9bab60e05198206015~PXf_55iiW1910719107eucas1p1H;
-        Fri, 24 Mar 2023 13:28:58 +0000 (GMT)
-Received: from eucas1p1.samsung.com ( [182.198.249.206]) by
-        eusmges3new.samsung.com (EUCPMTA) with SMTP id B2.86.10014.A95AD146; Fri, 24
-        Mar 2023 13:28:58 +0000 (GMT)
-Received: from eusmtrp2.samsung.com (unknown [182.198.249.139]) by
-        eucas1p2.samsung.com (KnoxPortal) with ESMTPA id
-        20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5~PXf_h2n0R0932909329eucas1p2r;
-        Fri, 24 Mar 2023 13:28:58 +0000 (GMT)
-Received: from eusmgms2.samsung.com (unknown [182.198.249.180]) by
-        eusmtrp2.samsung.com (KnoxPortal) with ESMTP id
-        20230324132858eusmtrp22953b978f8afdd348de0cda5bee8b920~PXf_hPvGN1089610896eusmtrp2H;
-        Fri, 24 Mar 2023 13:28:58 +0000 (GMT)
-X-AuditID: cbfec7f5-b8bff7000000271e-fb-641da59a7c04
-Received: from eusmtip2.samsung.com ( [203.254.199.222]) by
-        eusmgms2.samsung.com (EUCPMTA) with SMTP id 80.53.09583.A95AD146; Fri, 24
-        Mar 2023 13:28:58 +0000 (GMT)
-Received: from [106.210.134.192] (unknown [106.210.134.192]) by
-        eusmtip2.samsung.com (KnoxPortal) with ESMTPA id
-        20230324132858eusmtip20eecce0707b4a8823cdfc389cfcdbe1b~PXf_Gd2oz1742317423eusmtip22;
-        Fri, 24 Mar 2023 13:28:58 +0000 (GMT)
-Message-ID: <5b555935-5657-3f38-8a55-906dd32ad052@samsung.com>
-Date:   Fri, 24 Mar 2023 14:28:57 +0100
+        with ESMTP id S232280AbjCXPCa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 24 Mar 2023 11:02:30 -0400
+Received: from mx0b-0016f401.pphosted.com (mx0a-0016f401.pphosted.com [67.231.148.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 479D41A67B;
+        Fri, 24 Mar 2023 08:02:29 -0700 (PDT)
+Received: from pps.filterd (m0045849.ppops.net [127.0.0.1])
+        by mx0a-0016f401.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 32O6YNpg018286;
+        Fri, 24 Mar 2023 08:02:22 -0700
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=marvell.com; h=date : from : to :
+ cc : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=pfpt0220; bh=KsuiKi0/2VWPXAHDgeXROi/C4iGh0eo1W7TTdfdWANw=;
+ b=E2ilRJZUvqrOxMsA9WLLkNbHNHt5hcSu5J03zfU7jmUuLhehfm0VOfZB/iWJ43Xztgeu
+ 4DelJtNLmV4h3ziokmKiAdt3PXpGZShray/YEymlbh4FsK8rG9cxiBWHe/jMr3OrR4w7
+ /hwkxFkeu39jKWIrdGpcsqFMsOTsJZZ0TsVBUKGkDNk+0gDfG/hmFLhN1TEtr6k74Q0n
+ xPhyfLoEbdC6BsmAUd3Lv2to2KPAABWGa65IFxsRnRFeemGk0RYAWyNy6dpfHWCHDy/m
+ 8X5CgGmcV2oUKbZTfz26sKamuQdRb1PaCLAtXIMbp/2P5mJYinWknKpzYSK8GY+GSngm HA== 
+Received: from dc5-exch02.marvell.com ([199.233.59.182])
+        by mx0a-0016f401.pphosted.com (PPS) with ESMTPS id 3ph6q3smbb-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT);
+        Fri, 24 Mar 2023 08:02:21 -0700
+Received: from DC5-EXCH01.marvell.com (10.69.176.38) by DC5-EXCH02.marvell.com
+ (10.69.176.39) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Fri, 24 Mar
+ 2023 08:02:20 -0700
+Received: from maili.marvell.com (10.69.176.80) by DC5-EXCH01.marvell.com
+ (10.69.176.38) with Microsoft SMTP Server id 15.0.1497.42 via Frontend
+ Transport; Fri, 24 Mar 2023 08:02:19 -0700
+Received: from Dell2s-9 (unknown [10.110.150.250])
+        by maili.marvell.com (Postfix) with ESMTP id CCE483F7067;
+        Fri, 24 Mar 2023 08:02:19 -0700 (PDT)
+Date:   Fri, 24 Mar 2023 08:02:19 -0700
+From:   Piyush Malgujar <pmalgujar@marvell.com>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <adrian.hunter@intel.com>, <ulf.hansson@linaro.org>,
+        <robh+dt@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <yamada.masahiro@socionext.com>, <devicetree@vger.kernel.org>,
+        <jannadurai@marvell.com>, <cchavva@marvell.com>
+Subject: Re: [PATCH v3 5/6] dt-bindings: mmc: sdhci-cadence: SD6 support
+Message-ID: <20230324150219.GA462@Dell2s-9>
+References: <20230227183151.27912-1-pmalgujar@marvell.com>
+ <20230227183151.27912-6-pmalgujar@marvell.com>
+ <90b332b7-ba62-d9b5-2d94-5d2e70fad4af@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0)
-        Gecko/20100101 Thunderbird/102.9.0
-Subject: Re: [PATCH] mmc: core: remove unnecessary (void*) conversions
-Content-Language: en-US
-To:     Yu Zhe <yuzhe@nfschina.com>, ulf.hansson@linaro.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        kernel-janitors@vger.kernel.org, liqiong@nfschina.com
-From:   Marek Szyprowski <m.szyprowski@samsung.com>
-In-Reply-To: <20230317064729.24407-1-yuzhe@nfschina.com>
-Content-Transfer-Encoding: 8bit
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFupmleLIzCtJLcpLzFFi42LZduznOd1ZS2VTDFacNbLYekva4vKuOWwW
-        R/73M1rs+HWT0eL42nCLV6f/Mzuwedy5tofNY82Za2wenzfJBTBHcdmkpOZklqUW6dslcGV0
-        vHQrmCZY0dDRxdjAuJ+vi5GTQ0LARKLz+wOmLkYuDiGBFYwSV44eZIRwvjBK7F51AyrzmVHi
-        /6TPjDAtS+fNYwWxhQSWM0rcPs4BUfSRUWLD7xksXYwcHLwCdhJHH9qA1LAIqErsnniTHcTm
-        FRCUODnzCQuILSqQIjFxxgYmEFtYwE3ie+t+ZhCbWUBc4taT+WBxEQFziek/ZrFDxEskWldM
-        ZgOx2QQMJbredoHZnAIWEtMOTWeEqJGXaN46mxnkHgmBIxwSd65cYII42kXi65oeFghbWOLV
-        8S3sELaMxP+d85kgGtoZJRb8vg/lTGCUaHh+C+pla4k7536xgXzGLKApsX6XPkTYUeLYqhtg
-        D0sI8EnceCsIcQSfxKRt05khwrwSHW1CENVqErOOr4Nbe/DCJeYJjEqzkIJlFpL3ZyF5ZxbC
-        3gWMLKsYxVNLi3PTU4uN81LL9YoTc4tL89L1kvNzNzEC08vpf8e/7mBc8eqj3iFGJg7GQ4wS
-        HMxKIrzvQmRThHhTEiurUovy44tKc1KLDzFKc7AoifNq255MFhJITyxJzU5NLUgtgskycXBK
-        NTD5R0YuO3zm4uGuh+pdaVOuatyxfucWHCQr++tgyC2eJK8+xWiTnvb/ZasdTv+YtvxJVfCS
-        NxtbUj2PinyOLLybd8+yhjFXX+GmoGoA5+lLVyxWMeREZ3FmXTwjObtePd78QkBDZ8/1d9Im
-        XwLMQo14b66R2tzuYfriuL6o2sXz7998Yb0Q/Ndrpd/ia89CXFabM0294Xc1ZNKihPu3EpZv
-        YzNtdeA9vu2a2FInM+bzJyZ/9JnH7Ptn6YNF4UsvHoo0Zk/llS3MMvogpKzDtMcqiMngWN/i
-        STt+Mok78h+TMv635Yzt0Zlfkn5MO2N/6NLFhI933d/f8Vh1ynxzR+GK07c3Jb3JWXtw5Z+q
-        rE01SizFGYmGWsxFxYkAu71Ehp4DAAA=
-X-Brightmail-Tracker: H4sIAAAAAAAAA+NgFprLIsWRmVeSWpSXmKPExsVy+t/xe7qzlsqmGJzrlbLYekva4vKuOWwW
-        R/73M1rs+HWT0eL42nCLV6f/Mzuwedy5tofNY82Za2wenzfJBTBH6dkU5ZeWpCpk5BeX2CpF
-        G1oY6RlaWugZmVjqGRqbx1oZmSrp29mkpOZklqUW6dsl6GV0vHQrmCZY0dDRxdjAuJ+vi5GT
-        Q0LARGLpvHmsXYxcHEICSxklfk66wwqRkJE4Oa0ByhaW+HOtiw2i6D2jxOIpCxi7GDk4eAXs
-        JI4+tAGpYRFQldg98SY7iM0rIChxcuYTFhBbVCBFYuLSy2wgtrCAm8T31v3MIDazgLjErSfz
-        mUBsEQFziek/ZrFDxEskph3+A1YvBBSf+uow2Bw2AUOJrrddYHFOAQuJaYemM0LUm0l0be2C
-        suUlmrfOZp7AKDQLyRmzkKybhaRlFpKWBYwsqxhFUkuLc9Nzi430ihNzi0vz0vWS83M3MQLj
-        aduxn1t2MK589VHvECMTB+MhRgkOZiUR3nchsilCvCmJlVWpRfnxRaU5qcWHGE2BYTGRWUo0
-        OR8Y0Xkl8YZmBqaGJmaWBqaWZsZK4ryeBR2JQgLpiSWp2ampBalFMH1MHJxSDUwb/WqnbAj+
-        +f7C0kof08dHTjdyXjNxtJdsVL3SdWEdY/j3snVPNCSZl0otfXUwqSWvat7CbR+2Cbu/qOP4
-        Wn3m2QweLqWi3UxLN7+9dmONfkp5esWipB2rLitVSRYbffm11eyOWWTSomcNjzKYu+bEPGit
-        Klov/4Bv0r/7OerRuWdsJ+jn3hbbNdlU20NFTmHu5ND9m57Gu/baZgpbiHgl/Qw9u+PDXZ+c
-        X9xLPznuv8CqEvbkxeboEhuXdXHaEYvlrm07yGF90vfa2Tf3zSWSGrJ23q9YvUbTaJPCxWuG
-        4kujm+6vTl0l7/xDcs45x3sn1+W5Hzi9jcVO+qDFhKePHH7NrVxtdWeupOBfm/9xSizFGYmG
-        WsxFxYkADlv+bzADAAA=
-X-CMS-MailID: 20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5
-X-Msg-Generator: CA
-Content-Type: text/plain; charset="utf-8"
-X-RootMTR: 20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5
-X-EPHeader: CA
-CMS-TYPE: 201P
-X-CMS-RootMailID: 20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5
-References: <20230317064729.24407-1-yuzhe@nfschina.com>
-        <CGME20230324132858eucas1p25cdd6af81a14bf40474f58fa16d087f5@eucas1p2.samsung.com>
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <90b332b7-ba62-d9b5-2d94-5d2e70fad4af@linaro.org>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-GUID: 0gdXSSbut2TIb_yfuWOQP7iJSSYS0grh
+X-Proofpoint-ORIG-GUID: 0gdXSSbut2TIb_yfuWOQP7iJSSYS0grh
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-03-24_08,2023-03-24_01,2023-02-09_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17.03.2023 07:47, Yu Zhe wrote:
-> Pointer variables of void * type do not require type cast.
+Hi Krzysztof,
+
+Thanks for the review comments.
+
+On Tue, Feb 28, 2023 at 11:53:51AM +0100, Krzysztof Kozlowski wrote:
+> On 27/02/2023 19:31, Piyush Malgujar wrote:
+> > From: Jayanthi Annadurai <jannadurai@marvell.com>
+> > 
+> > Add support for SD6 controller support.
+> > 
+> > Signed-off-by: Jayanthi Annadurai <jannadurai@marvell.com>
+> > Signed-off-by: Piyush Malgujar <pmalgujar@marvell.com>
+> > ---
+> >  .../devicetree/bindings/mmc/cdns,sdhci.yaml   | 24 +++++++++++++++++--
+> >  1 file changed, 22 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > index 8b1a0fdcb5e3e2e8b87d8d7678e37f3dad447fc1..0dba17c4f17f82c8ae68e46225ed72418e8361ff 100644
+> > --- a/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > +++ b/Documentation/devicetree/bindings/mmc/cdns,sdhci.yaml
+> > @@ -4,7 +4,7 @@
+> >  $id: http://devicetree.org/schemas/mmc/cdns,sdhci.yaml#
+> >  $schema: http://devicetree.org/meta-schemas/core.yaml#
+> >  
+> > -title: Cadence SD/SDIO/eMMC Host Controller (SD4HC)
+> > +title: Cadence SD/SDIO/eMMC Host Controller (SD4HC, SD6HC)
+> >  
+> >  maintainers:
+> >    - Masahiro Yamada <yamada.masahiro@socionext.com>
+> > @@ -18,7 +18,9 @@ properties:
+> >        - enum:
+> >            - microchip,mpfs-sd4hc
+> >            - socionext,uniphier-sd4hc
+> > -      - const: cdns,sd4hc
+> > +      - enum:
+> > +          - cdns,sd4hc
+> > +          - cdns,sd6hc
+> 
+> I see here rather random set of changes in each version of this patch.
+> This does not really make sense. You are saying that existing (!!!)
+> mpfs-sd4hc is compatible with sd6hc. I think you wanted oneOf here, but
+> not sure. Can you explain what is your intention? Your commit msg is
+> just one line saying the same as subject, so not really helpful.
+> 
+> 
+> Best regards,
+> Krzysztof
 >
-> Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
-> ---
->   drivers/mmc/core/debugfs.c  | 2 +-
->   drivers/mmc/core/host.c     | 2 +-
->   drivers/mmc/core/mmc_test.c | 6 +++---
->   3 files changed, 5 insertions(+), 5 deletions(-)
-...
-> diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> index 096093f7be00..76900f67c782 100644
-> --- a/drivers/mmc/core/host.c
-> +++ b/drivers/mmc/core/host.c
-> @@ -590,7 +590,7 @@ EXPORT_SYMBOL(mmc_alloc_host);
->   
->   static void devm_mmc_host_release(struct device *dev, void *res)
->   {
-> -	mmc_free_host(*(struct mmc_host **)res);
-> +	mmc_free_host(res);
 
-The above chunk is wrong and causes following regression on today's 
-Linux next-20230324:
+Yes thank you, it should be oneOf as sd6hc is exclusive. I will correct it in the
+next version.
 
-Unable to handle kernel paging request at virtual address 0000000000001020
-Mem abort info:
-meson-gx-mmc ffe07000.mmc: allocated mmc-pwrseq
-...
-[0000000000001020] user address but active_mm is swapper
-Internal error: Oops: 0000000096000004 [#1] PREEMPT SMP
-Modules linked in:
-CPU: 3 PID: 10 Comm: kworker/u12:0 Not tainted 6.3.0-rc3-next-20230324+ 
-#13452
-Hardware name: Khadas VIM3 (DT)
-Workqueue: events_unbound async_run_entry_fn
-pstate: 00000005 (nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-pc : mmc_pwrseq_free+0x1c/0x38
-lr : devm_mmc_host_release+0x1c/0x34
-...
-Call trace:
-  mmc_pwrseq_free+0x1c/0x38
-  devm_mmc_host_release+0x1c/0x34
-  release_nodes+0x5c/0x90
-  devres_release_all+0x8c/0xdc
-  device_unbind_cleanup+0x18/0x68
-  really_probe+0x11c/0x2b4
-  __driver_probe_device+0x78/0xe0
-  driver_probe_device+0xd8/0x160
-  __device_attach_driver+0xb8/0x138
-  bus_for_each_drv+0x84/0xe0
-  __device_attach_async_helper+0xb0/0xd4
-  async_run_entry_fn+0x34/0xe0
-  process_one_work+0x288/0x5c0
-  worker_thread+0x74/0x450
-  kthread+0x124/0x128
-  ret_from_fork+0x10/0x20
-Code: f9000bf3 aa0003f3 f9424c00 b4000080 (f9401000)
----[ end trace 0000000000000000 ]---
-
-Ulf: do You want me to send a partial revert or will you handle it by 
-dropping this patch?
-
-Best regards
--- 
-Marek Szyprowski, PhD
-Samsung R&D Institute Poland
-
+Best Regards,
+Piyush
