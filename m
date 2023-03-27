@@ -2,109 +2,122 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48AB5C6FD1C
-	for <linux-mmc@archiver.kernel.org>; Sun, 26 Mar 2023 14:02:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF39C74A5B
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Mar 2023 02:07:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231834AbjCZOCt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Mar 2023 10:02:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37308 "EHLO
+        id S230135AbjC0CHc convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 26 Mar 2023 22:07:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37924 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231893AbjCZOCo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Mar 2023 10:02:44 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [IPv6:2604:1380:4601:e00::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 796CF7EF5;
-        Sun, 26 Mar 2023 07:02:43 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id BDE76B80CA1;
-        Sun, 26 Mar 2023 14:02:41 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 41CE7C4339C;
-        Sun, 26 Mar 2023 14:02:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1679839360;
-        bh=6UjvC4vhYxQxNMue1HYv9yzXbIQLEgQPzyEiOjLkqFc=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=TMAAwTApQMKdTwoGA0IfW9u7L4NQmFDA20ay2WvLWxp2Xu+vgVrE/M6EBlgfi8caH
-         /RXar0PujO9g0vV/xBQtmFuBtU5E3NtuR2RJFu3EdM0498npfbN/p7vVEKS4cPNx/r
-         MOBwUlw8Gj8Foub8sOYab4bi6GwBVR08YmjxR6d3759PsptwIRL69EXOyi4eg6G+ez
-         qW/KXCR3PcayRCTBc7qjVndMhxMUo2TZ7L7TgnOo3lpB3OR43eG2Uo7i71Afn4LsJX
-         MbQscsTLmTSrlIY7FstA0uUBi/I8B0O7trKB+lUMHlSxXFCuNDQs/LLcKqPj4VwFHZ
-         rC93Y4rOJq0Tg==
-Received: by pali.im (Postfix)
-        id 703A578E; Sun, 26 Mar 2023 16:02:37 +0200 (CEST)
-Date:   Sun, 26 Mar 2023 16:02:37 +0200
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Larry Finger <Larry.Finger@lwfinger.net>
-Subject: Re: [PATCH v3 6/9] mmc: sdio: add Realtek SDIO vendor ID and various
- wifi device IDs
-Message-ID: <20230326140237.mjj37si7hqbx5xds@pali>
-References: <20230320213508.2358213-1-martin.blumenstingl@googlemail.com>
- <20230320213508.2358213-7-martin.blumenstingl@googlemail.com>
+        with ESMTP id S229475AbjC0CHb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Mar 2023 22:07:31 -0400
+Received: from mail.nfschina.com (unknown [42.101.60.237])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A4204C38;
+        Sun, 26 Mar 2023 19:07:26 -0700 (PDT)
+Received: from localhost (unknown [127.0.0.1])
+        by mail.nfschina.com (Postfix) with ESMTP id 723E31A00A7A;
+        Mon, 27 Mar 2023 10:07:32 +0800 (CST)
+X-Virus-Scanned: amavisd-new at nfschina.com
+Received: from mail.nfschina.com ([127.0.0.1])
+        by localhost (localhost.localdomain [127.0.0.1]) (amavisd-new, port 10024)
+        with ESMTP id T-yrv0qkjBf9; Mon, 27 Mar 2023 10:07:31 +0800 (CST)
+Received: from 127.0.0.1 (unknown [127.0.0.1])
+        (Authenticated sender: yuzhe@nfschina.com)
+        by mail.nfschina.com (Postfix) with ESMTPA id B108A1A009F3;
+        Mon, 27 Mar 2023 10:07:31 +0800 (CST)
+Date:   Mon, 27 Mar 2023 10:07:31 +0800 (CST)
+From:   yuzhe <yuzhe@nfschina.com>
+Reply-To: yuzhe@nfschina.com
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Marek Szyprowski <m.szyprowski@samsung.com>
+Cc:     Yu Zhe <yuzhe@nfschina.com>, linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-kernel <linux-kernel@vger.kernel.org>,
+        kernel-janitors <kernel-janitors@vger.kernel.org>,
+        liqiong <liqiong@nfschina.com>
+Message-ID: <95083698.3076.1679882851720@127.0.0.1>
+Subject: Re: Re: [PATCH] mmc: core: remove unnecessary (void*) conversions
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230320213508.2358213-7-martin.blumenstingl@googlemail.com>
-User-Agent: NeoMutt/20180716
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
+X-Priority: 3
+X-NFS-GUID: ssqreoDnzK1SiXj1Du7b
+X-ISRICH: 0
+Content-ID: 96d1d1a3-6230-4603-a0a4-48f60747430f
+X-Mail-src: 21
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Monday 20 March 2023 22:35:05 Martin Blumenstingl wrote:
-> Add the SDIO vendor ID for Realtek and some device IDs extracted from
-> their GPL vendor driver. This will be useful in the future when the
-> rtw88 driver gains support for these chips.
-> 
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> ---
-> Changes since v2:
-> - none
-> 
-> Changes since v1:
-> - Add Ulf's Acked-by (who added: "I assume it's easier if Kalle picks
->   up this patch, along with the series")
-> 
-> 
->  include/linux/mmc/sdio_ids.h | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 0e4ef9c5127a..d7cd39a8ad57 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -112,6 +112,15 @@
->  #define SDIO_VENDOR_ID_MICROCHIP_WILC		0x0296
->  #define SDIO_DEVICE_ID_MICROCHIP_WILC1000	0x5347
->  
-> +#define SDIO_VENDOR_ID_REALTEK			0x024c
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8723BS	0xb723
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8723DS	0xd723
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821BS	0xb821
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821CS	0xc821
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821DS	0xd821
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8822BS	0xb822
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8822CS	0xc822
+<p><br /><br /><br />在 2023-03-24, 星期五, 23:47:08 ,Ulf Hansson 写到：</p>
+<pre>On Fri, 24 Mar 2023 at 14:28, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
+>
+> On 17.03.2023 07:47, Yu Zhe wrote:
+> > Pointer variables of void * type do not require type cast.
+> >
+> > Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
+> > ---
+> > drivers/mmc/core/debugfs.c | 2 +-
+> > drivers/mmc/core/host.c | 2 +-
+> > drivers/mmc/core/mmc_test.c | 6 +++---
+> > 3 files changed, 5 insertions(+), 5 deletions(-)
+> ...
+> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
+> > index 096093f7be00..76900f67c782 100644
+> > --- a/drivers/mmc/core/host.c
+> > +++ b/drivers/mmc/core/host.c
+> > @@ -590,7 +590,7 @@ EXPORT_SYMBOL(mmc_alloc_host);
+> >
+> > static void devm_mmc_host_release(struct device *dev, void *res)
+> > {
+> > - mmc_free_host(*(struct mmc_host **)res);
+> > + mmc_free_host(res);
+>
+> The above chunk is wrong and causes following regression on today's
+> Linux next-20230324:
+>
+> Unable to handle kernel paging request at virtual address 0000000000001020
+> Mem abort info:
+> meson-gx-mmc ffe07000.mmc: allocated mmc-pwrseq
+> ...
+> [0000000000001020] user address but active_mm is swapper
+> Internal error: Oops: 0000000096000004 [#1] PREEMPT SMP
+> Modules linked in:
+> CPU: 3 PID: 10 Comm: kworker/u12:0 Not tainted 6.3.0-rc3-next-20230324+
+> #13452
+> Hardware name: Khadas VIM3 (DT)
+> Workqueue: events_unbound async_run_entry_fn
+> pstate: 00000005 (nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
+> pc : mmc_pwrseq_free+0x1c/0x38
+> lr : devm_mmc_host_release+0x1c/0x34
+> ...
+> Call trace:
+> mmc_pwrseq_free+0x1c/0x38
+> devm_mmc_host_release+0x1c/0x34
+> release_nodes+0x5c/0x90
+> devres_release_all+0x8c/0xdc
+> device_unbind_cleanup+0x18/0x68
+> really_probe+0x11c/0x2b4
+> __driver_probe_device+0x78/0xe0
+> driver_probe_device+0xd8/0x160
+> __device_attach_driver+0xb8/0x138
+> bus_for_each_drv+0x84/0xe0
+> __device_attach_async_helper+0xb0/0xd4
+> async_run_entry_fn+0x34/0xe0
+> process_one_work+0x288/0x5c0
+> worker_thread+0x74/0x450
+> kthread+0x124/0x128
+> ret_from_fork+0x10/0x20
+> Code: f9000bf3 aa0003f3 f9424c00 b4000080 (f9401000)
+> ---[ end trace 0000000000000000 ]---
+>
+> Ulf: do You want me to send a partial revert or will you handle it by
+> dropping this patch?
 
-Hello! Could you sort lines by values, like it is in all other sections?
+Thanks for the report, I will simply drop the patch!
 
-Also it would be nice to put these ids into sdioids database at:
-https://github.com/sdioutils
+Kind regards
+Uffe
+</pre>
 
-> +
->  #define SDIO_VENDOR_ID_SIANO			0x039a
->  #define SDIO_DEVICE_ID_SIANO_NOVA_B0		0x0201
->  #define SDIO_DEVICE_ID_SIANO_NICE		0x0202
-> -- 
-> 2.40.0
-> 
+sorry for making this mistake, I will check seriously next time.
