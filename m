@@ -2,122 +2,140 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FF39C74A5B
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Mar 2023 02:07:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 27FFEC7619A
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Mar 2023 09:12:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230135AbjC0CHc convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 26 Mar 2023 22:07:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37924 "EHLO
+        id S233015AbjC0JMW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Mar 2023 05:12:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229475AbjC0CHb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 26 Mar 2023 22:07:31 -0400
-Received: from mail.nfschina.com (unknown [42.101.60.237])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A4204C38;
-        Sun, 26 Mar 2023 19:07:26 -0700 (PDT)
-Received: from localhost (unknown [127.0.0.1])
-        by mail.nfschina.com (Postfix) with ESMTP id 723E31A00A7A;
-        Mon, 27 Mar 2023 10:07:32 +0800 (CST)
-X-Virus-Scanned: amavisd-new at nfschina.com
-Received: from mail.nfschina.com ([127.0.0.1])
-        by localhost (localhost.localdomain [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id T-yrv0qkjBf9; Mon, 27 Mar 2023 10:07:31 +0800 (CST)
-Received: from 127.0.0.1 (unknown [127.0.0.1])
-        (Authenticated sender: yuzhe@nfschina.com)
-        by mail.nfschina.com (Postfix) with ESMTPA id B108A1A009F3;
-        Mon, 27 Mar 2023 10:07:31 +0800 (CST)
-Date:   Mon, 27 Mar 2023 10:07:31 +0800 (CST)
-From:   yuzhe <yuzhe@nfschina.com>
-Reply-To: yuzhe@nfschina.com
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Marek Szyprowski <m.szyprowski@samsung.com>
-Cc:     Yu Zhe <yuzhe@nfschina.com>, linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        kernel-janitors <kernel-janitors@vger.kernel.org>,
-        liqiong <liqiong@nfschina.com>
-Message-ID: <95083698.3076.1679882851720@127.0.0.1>
-Subject: Re: Re: [PATCH] mmc: core: remove unnecessary (void*) conversions
+        with ESMTP id S233036AbjC0JMS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2023 05:12:18 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6DBC49E8;
+        Mon, 27 Mar 2023 02:12:15 -0700 (PDT)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 32R9BfaN6021750, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 32R9BfaN6021750
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
+        Mon, 27 Mar 2023 17:11:41 +0800
+Received: from RTEXMBS01.realtek.com.tw (172.21.6.94) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.17; Mon, 27 Mar 2023 17:11:57 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXMBS01.realtek.com.tw (172.21.6.94) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Mon, 27 Mar 2023 17:11:57 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
+ RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
+ 15.01.2375.007; Mon, 27 Mar 2023 17:11:57 +0800
+From:   Ping-Ke Shih <pkshih@realtek.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+CC:     "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Chris Morgan <macroalpha82@gmail.com>,
+        "Nitin Gupta" <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Larry Finger <Larry.Finger@lwfinger.net>
+Subject: RE: [PATCH v3 2/9] wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
+Thread-Topic: [PATCH v3 2/9] wifi: rtw88: sdio: Add HCI implementation for
+ SDIO based chipsets
+Thread-Index: AQHZW3PmZA7gPA0kmU6G6BuQjRUl4q8HoQbggAAT5QCAAIJ4AIAGJ0Tw
+Date:   Mon, 27 Mar 2023 09:11:56 +0000
+Message-ID: <33e7ca4c7ba947d68d451e919837f6b7@realtek.com>
+References: <20230320213508.2358213-1-martin.blumenstingl@googlemail.com>
+ <20230320213508.2358213-3-martin.blumenstingl@googlemail.com>
+ <f7b9dda9d852456caffc3c0572f88947@realtek.com>
+ <CAFBinCCspK=GaCMEiHsXi=0H4Sbp2vg_4EK=8bqQLWR8+qg7Sw@mail.gmail.com>
+ <CAFBinCAxuEyNkUxsqJ9wVxXupErcp33JCFsJ2hDupWj9MRMYGA@mail.gmail.com>
+In-Reply-To: <CAFBinCAxuEyNkUxsqJ9wVxXupErcp33JCFsJ2hDupWj9MRMYGA@mail.gmail.com>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.21.69.188]
+x-kse-serverinfo: RTEXMBS01.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
-X-Priority: 3
-X-NFS-GUID: ssqreoDnzK1SiXj1Du7b
-X-ISRICH: 0
-Content-ID: 96d1d1a3-6230-4603-a0a4-48f60747430f
-X-Mail-src: 21
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-<p><br /><br /><br />在 2023-03-24, 星期五, 23:47:08 ,Ulf Hansson 写到：</p>
-<pre>On Fri, 24 Mar 2023 at 14:28, Marek Szyprowski <m.szyprowski@samsung.com> wrote:
->
-> On 17.03.2023 07:47, Yu Zhe wrote:
-> > Pointer variables of void * type do not require type cast.
-> >
-> > Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
-> > ---
-> > drivers/mmc/core/debugfs.c | 2 +-
-> > drivers/mmc/core/host.c | 2 +-
-> > drivers/mmc/core/mmc_test.c | 6 +++---
-> > 3 files changed, 5 insertions(+), 5 deletions(-)
-> ...
-> > diff --git a/drivers/mmc/core/host.c b/drivers/mmc/core/host.c
-> > index 096093f7be00..76900f67c782 100644
-> > --- a/drivers/mmc/core/host.c
-> > +++ b/drivers/mmc/core/host.c
-> > @@ -590,7 +590,7 @@ EXPORT_SYMBOL(mmc_alloc_host);
-> >
-> > static void devm_mmc_host_release(struct device *dev, void *res)
-> > {
-> > - mmc_free_host(*(struct mmc_host **)res);
-> > + mmc_free_host(res);
->
-> The above chunk is wrong and causes following regression on today's
-> Linux next-20230324:
->
-> Unable to handle kernel paging request at virtual address 0000000000001020
-> Mem abort info:
-> meson-gx-mmc ffe07000.mmc: allocated mmc-pwrseq
-> ...
-> [0000000000001020] user address but active_mm is swapper
-> Internal error: Oops: 0000000096000004 [#1] PREEMPT SMP
-> Modules linked in:
-> CPU: 3 PID: 10 Comm: kworker/u12:0 Not tainted 6.3.0-rc3-next-20230324+
-> #13452
-> Hardware name: Khadas VIM3 (DT)
-> Workqueue: events_unbound async_run_entry_fn
-> pstate: 00000005 (nzcv daif -PAN -UAO -TCO -DIT -SSBS BTYPE=--)
-> pc : mmc_pwrseq_free+0x1c/0x38
-> lr : devm_mmc_host_release+0x1c/0x34
-> ...
-> Call trace:
-> mmc_pwrseq_free+0x1c/0x38
-> devm_mmc_host_release+0x1c/0x34
-> release_nodes+0x5c/0x90
-> devres_release_all+0x8c/0xdc
-> device_unbind_cleanup+0x18/0x68
-> really_probe+0x11c/0x2b4
-> __driver_probe_device+0x78/0xe0
-> driver_probe_device+0xd8/0x160
-> __device_attach_driver+0xb8/0x138
-> bus_for_each_drv+0x84/0xe0
-> __device_attach_async_helper+0xb0/0xd4
-> async_run_entry_fn+0x34/0xe0
-> process_one_work+0x288/0x5c0
-> worker_thread+0x74/0x450
-> kthread+0x124/0x128
-> ret_from_fork+0x10/0x20
-> Code: f9000bf3 aa0003f3 f9424c00 b4000080 (f9401000)
-> ---[ end trace 0000000000000000 ]---
->
-> Ulf: do You want me to send a partial revert or will you handle it by
-> dropping this patch?
-
-Thanks for the report, I will simply drop the patch!
-
-Kind regards
-Uffe
-</pre>
-
-sorry for making this mistake, I will check seriously next time.
+DQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogTWFydGluIEJsdW1lbnN0
+aW5nbCA8bWFydGluLmJsdW1lbnN0aW5nbEBnb29nbGVtYWlsLmNvbT4NCj4gU2VudDogRnJpZGF5
+LCBNYXJjaCAyNCwgMjAyMyAzOjA0IEFNDQo+IFRvOiBQaW5nLUtlIFNoaWggPHBrc2hpaEByZWFs
+dGVrLmNvbT4NCj4gQ2M6IGxpbnV4LXdpcmVsZXNzQHZnZXIua2VybmVsLm9yZzsgWWFuLUhzdWFu
+IENodWFuZyA8dG9ueTA2MjBlbW1hQGdtYWlsLmNvbT47IEthbGxlIFZhbG8NCj4gPGt2YWxvQGtl
+cm5lbC5vcmc+OyBVbGYgSGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz47IGxpbnV4LWtl
+cm5lbEB2Z2VyLmtlcm5lbC5vcmc7DQo+IG5ldGRldkB2Z2VyLmtlcm5lbC5vcmc7IGxpbnV4LW1t
+Y0B2Z2VyLmtlcm5lbC5vcmc7IENocmlzIE1vcmdhbiA8bWFjcm9hbHBoYTgyQGdtYWlsLmNvbT47
+IE5pdGluIEd1cHRhDQo+IDxuaXRpbi5ndXB0YTk4MUBnbWFpbC5jb20+OyBOZW8gSm91IDxuZW9q
+b3VAZ21haWwuY29tPjsgSmVybmVqIFNrcmFiZWMgPGplcm5lai5za3JhYmVjQGdtYWlsLmNvbT47
+IExhcnJ5DQo+IEZpbmdlciA8TGFycnkuRmluZ2VyQGx3ZmluZ2VyLm5ldD4NCj4gU3ViamVjdDog
+UmU6IFtQQVRDSCB2MyAyLzldIHdpZmk6IHJ0dzg4OiBzZGlvOiBBZGQgSENJIGltcGxlbWVudGF0
+aW9uIGZvciBTRElPIGJhc2VkIGNoaXBzZXRzDQo+IA0KPiBIZWxsbyBQaW5nLUtlLA0KPiANCj4g
+T24gVGh1LCBNYXIgMjMsIDIwMjMgYXQgMTI6MTbigK9QTSBNYXJ0aW4gQmx1bWVuc3RpbmdsDQo+
+IDxtYXJ0aW4uYmx1bWVuc3RpbmdsQGdvb2dsZW1haWwuY29tPiB3cm90ZToNCj4gWy4uLl0NCj4g
+PiA+ID4gKyAgICAgICBpZiAoZGlyZWN0KSB7DQo+ID4gPiA+ICsgICAgICAgICAgICAgICBhZGRy
+ID0gcnR3X3NkaW9fdG9fYnVzX29mZnNldChydHdkZXYsIGFkZHIpOw0KPiA+ID4gPiArICAgICAg
+ICAgICAgICAgdmFsID0gcnR3X3NkaW9fcmVhZGwocnR3ZGV2LCBhZGRyLCAmcmV0KTsNCj4gPiA+
+ID4gKyAgICAgICB9IGVsc2UgaWYgKGFkZHIgJiAzKSB7DQo+ID4gPg0KPiA+ID4gZWxzZSBpZiAo
+SVNfQUxJR05FRChhZGRyLCA0KSB7DQo+ID4gSSdsbCBhZGQgdGhlc2UgSVNfQUxJR05FRCBpbiB2
+NA0KPiA+IEFsc28gSSBmb3VuZCBhbiBpc3N1ZSB3aXRoIFJUV19XQ1BVXzExTiBkZXZpY2VzIHdo
+ZXJlIGluZGlyZWN0IHJlYWQNCj4gPiB3b3JrcyBkaWZmZXJlbnRseSAodGhvc2UgY2FuJ3QgdXNl
+DQo+ID4gUkVHX1NESU9fSU5ESVJFQ1RfUkVHX0NGRy9SRUdfU0RJT19JTkRJUkVDVF9SRUdfREFU
+QSBidXQgbmVlZCB0byBnbw0KPiA+IHRocm91Z2ggdGhlIG5vcm1hbCBwYXRoIHdpdGggV0xBTl9J
+T1JFR19PRkZTRVQgaW5zdGVhZCkuIEknbGwgYWxzbw0KPiA+IGluY2x1ZGUgdGhhdCBmaXggaW4g
+djQNCj4gSSBoYXZlIGEgcXVlc3Rpb24gYWJvdXQgdGhlICJpbmRpcmVjdCIgaGFuZGxpbmcuDQo+
+IExldCBtZSBzdGFydCB3aXRoIHdoYXQgSSBrbm93Og0KPiAtIFJFR19TRElPX0lORElSRUNUX1JF
+R19DRkcgYW5kIFJFR19TRElPX0lORElSRUNUX1JFR19EQVRBIGFyZSBvbmx5DQo+IHByZXNlbnQg
+b24gUlRXX1dDUFVfMTFBQyBiYXNlZCBjaGlwcyAob2xkZXIgUlRXX1dDUFVfMTFOIGNoaXBzIGRv
+bid0DQo+IGhhdmUgdGhlc2UgcmVnaXN0ZXJzKQ0KPiAtIHRoZSBuYW1lIG9mIFJFR19TRElPX0lO
+RElSRUNUX1JFR19DRkdbMjBdIGlzIG5vdCBrbm93biBidXQgd2UncmUNCj4gcG9sbGluZyB0aGF0
+IGJpdCB0byBjaGVjayBpZiBSRUdfU0RJT19JTkRJUkVDVF9SRUdfREFUQSBpcyByZWFkeSB0byBi
+ZQ0KPiByZWFkIG9yIGhhcyBkYXRhIGZyb20gUkVHX1NESU9fSU5ESVJFQ1RfUkVHX0RBVEEgaGFz
+IGJlZW4gd3JpdHRlbg0KPiAtIFJFR19TRElPX0lORElSRUNUX1JFR19DRkdbMTldIGNvbmZpZ3Vy
+ZXMgYSByZWFkIG9wZXJhdGlvbg0KPiAtIFJFR19TRElPX0lORElSRUNUX1JFR19DRkdbMThdIGNv
+bmZpZ3VyZXMgYSB3cml0ZSBvcGVyYXRpb24NCj4gLSBSRUdfU0RJT19JTkRJUkVDVF9SRUdfQ0ZH
+WzE3XSBpbmRpY2F0ZXMgdGhhdCBhIERXT1JEICgzMi1iaXQpIGFyZQ0KPiB3cml0dGVuIHRvIFJF
+R19TRElPX0lORElSRUNUX1JFR19EQVRBICgrIHRoZSBmb2xsb3dpbmcgMyksIHRoaXMgYml0DQo+
+IHNlZW1zIGlycmVsZXZhbnQgZm9yIHJlYWQgbW9kZQ0KPiAtIFJFR19TRElPX0lORElSRUNUX1JF
+R19DRkdbMTZdIGluZGljYXRlcyB0aGF0IGEgRFdPUkQgKDE2LWJpdCkgYXJlDQo+IHdyaXR0ZW4g
+dG8gUkVHX1NESU9fSU5ESVJFQ1RfUkVHX0RBVEEgKCsgdGhlIGZvbGxvd2luZyAzKSwgdGhpcyBi
+aXQNCj4gc2VlbXMgaXJyZWxldmFudCBmb3IgcmVhZCBtb2RlDQo+IC0gUlRXX1dDUFVfMTFOIGNo
+aXBzIGFyZSBzaW1wbHkgdXNpbmcgImFkZHIgfCBXTEFOX0lPUkVHX09GRlNFVCIgZm9yDQo+IGFj
+Y2Vzc2VzIHRoYXQgd291bGQgdXN1YWxseSBiZSAiaW5kaXJlY3QiIHJlYWRzL3dyaXRlcyBvbg0K
+PiBSVFdfV0NQVV8xMUFDIGNoaXBzDQo+IA0KPiBXaGlsZSBmaXhpbmcgdGhlIGlzc3VlIGZvciB0
+aGUgUlRXX1dDUFVfMTFOIGNoaXBzIEkgZGlzY292ZXJlZCB0aGF0DQo+IHRoZSAib2xkIiBhcHBy
+b2FjaCBmb3IgaW5kaXJlY3QgcmVnaXN0ZXIgYWNjZXNzICh3aXRob3V0DQo+IFJFR19TRElPX0lO
+RElSRUNUX1JFR19DRkcgYW5kIFJFR19TRElPX0lORElSRUNUX1JFR19EQVRBKSBhbHNvIHdvcmtz
+DQo+IG9uIFJUV19XQ1BVXzExQUMgY2hpcHMuDQo+IChJJ20gY2FsbGluZyBpdCB0aGUgIm9sZCIg
+YXBwcm9hY2ggYmVjYXVzZSBpdCdzIHdoYXQgdGhlIFJUTDg3MjNEUyBhbg0KPiBSVEw4NzIzQlMg
+dmVuZG9yIGRyaXZlcnMgdXNlKQ0KPiBJbiBmYWN0LCB0aGlzIHNlcmllcyBpcyB1c2luZyB0aGUg
+Im9sZCIgYXBwcm9hY2ggZm9yIHdyaXRlcywgYnV0IHRoZQ0KPiBuZXcgKFJFR19TRElPX0lORElS
+RUNUX1JFR19DRkcgYW5kIFJFR19TRElPX0lORElSRUNUX1JFR19EQVRBIGJhc2VkKQ0KPiBhcHBy
+b2FjaCBmb3IgcmVhZHMuDQo+IE5hdHVyYWxseSBJJ20gY3VyaW91cyBhcyB0byB3aHkgdHdvIGRp
+ZmZlcmVudCBhcHByb2FjaGVzIGFjaGlldmUgdGhlDQo+IHNhbWUgZ29hbC4gVXNpbmcgdGhlICJv
+bGQiIGFwcHJvYWNoIChhZGRyIHwgV0xBTl9JT1JFR19PRkZTRVQpIG1lYW5zIGENCj4gbG90IG9m
+IGNvZGUgY291bGQgYmUgZGVsZXRlZC9zaW1wbGlmaWVkLg0KPiANCj4gTm93IG15IHF1ZXN0aW9u
+Og0KPiBEbyB5b3UgaGF2ZSBhbnkgZXhwbGFuYXRpb24gKGVpdGhlciBmcm9tIGludGVybmFsIGRv
+Y3VtZW50YXRpb24gb3INCj4gZnJvbSB0aGUgaGFyZHdhcmUvZmlybXdhcmUgdGVhbXMpIGlmIGFu
+ZCB3aGVuIHRoZQ0KPiBSRUdfU0RJT19JTkRJUkVDVF9SRUdfQ0ZHIGFuZCBSRUdfU0RJT19JTkRJ
+UkVDVF9SRUdfREFUQSByZWdpc3RlcnMNCj4gc2hvdWxkIGJlIHVzZWQgb24gUlRXX1dDUFVfMTFB
+QyBjaGlwcz8NCj4gDQoNClVzaW5nIFJFR19TRElPX0lORElSRUNUX1JFR19DRkcgYW5kIFJFR19T
+RElPX0lORElSRUNUX1JFR19EQVRBIGlmIHlvdSBhcmUNCnVzaW5nIFNESU8gMy4wOyBvdGhlcndp
+c2UsIGl0IGNvdWxkIGNhdXNlcyBJTyBhYm5vcm1hbC4gT3Bwb3NpdGVseSwgdXNpbmcNCiJvbGQi
+IGFwcHJvYWNoIChhZGRyIHwgV0xBTl9JT1JFR19PRkZTRVQpIGZvciBTRElPIDIuMC4gDQoNClBp
+bmctS2UNCg0K
