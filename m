@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9EECC761AF
-	for <linux-mmc@archiver.kernel.org>; Mon, 27 Mar 2023 13:47:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94EBFC761A6
+	for <linux-mmc@archiver.kernel.org>; Mon, 27 Mar 2023 13:48:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232686AbjC0Nr6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 27 Mar 2023 09:47:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39528 "EHLO
+        id S232731AbjC0NsA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 27 Mar 2023 09:48:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40096 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232562AbjC0Nru (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2023 09:47:50 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B068E4202
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2023 06:47:47 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id t10so36359563edd.12
-        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2023 06:47:47 -0700 (PDT)
+        with ESMTP id S232654AbjC0Nr5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 27 Mar 2023 09:47:57 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EEBA14EE2
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2023 06:47:50 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id i5so36675065eda.0
+        for <linux-mmc@vger.kernel.org>; Mon, 27 Mar 2023 06:47:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1679924866;
+        d=linaro.org; s=google; t=1679924869;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=p0KD/jLws7DEnQqR3LPOKCTTyWTBeDFcUElMUlrf4Cs=;
-        b=OEHVtldo3KwjwlQXEc6AulF0M5fxWxFB+xezRDLngj5ZhWFsH+T0v4IpuyThaABiFA
-         Hhz+2y2vSeMDR9BVp0HpD01XbjEJ8XdhyTcEanTF31Sf2pfDPl9nUQJKGcy80ZLUkgsE
-         DuNtAXiqDQcM9YpooWMQToKiZ+6lXyohY3cjdhUyiZP5qqiS9RbWC/mOkVB7UbziYeb0
-         +SHvoMk9+F/GFS8du1+/q4I6Wgc2khRmfye5cFB8AV6czzzE6kUTsvWXe3OYccPM1Ltj
-         86L/bOf0pdahkhUdHXF6DjYBd/Oh5qGRGQnOT6v6RTwzao0+q7vYtgWGTpyWiblyGx3p
-         EwSQ==
+        bh=WvM3Xo7kWQeMts4fqfXfCBu6rrobV0+vnp4Z7+CdlkQ=;
+        b=B4naxOaDhWktG/khO/taOqV9o/7QvJdyksa6qhRytXzBrkIy6MSOfL8Oa+/v9a9Hz8
+         7KM+PUs0NosvFFWxIs0lEDcVuiZ+AwykkATXNzAW1PC1VKHjVAF/Cp2orXN3S/gky8tR
+         PRyjaAbME4oUHvt9New8vbw0g7GEOMBu52RTqbL12LeO++1wegpdENywpf8hn+L9YNSC
+         yu5/yoJTKGTCEo8SaQzH05RFM9gXF+PWxrHPFHh2Nx/awsy7BHzBwukzGeF0grC95IvW
+         SSb7crrTw8PDl3ExNpneU4Fc5Qrf50/z3thQ3667/cINWCFw6M8ljLXj30BNeMWk0Hf/
+         jyZQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1679924866;
+        d=1e100.net; s=20210112; t=1679924869;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=p0KD/jLws7DEnQqR3LPOKCTTyWTBeDFcUElMUlrf4Cs=;
-        b=oB68U7unklytJBCdKsx5kbol75zqGTyigeHW9uHRnaX8kvwEEI3uJfrYnCX8ArkIlg
-         3lho6ycsfUGF5uUF55j4rrwQO25tsdWOMwyyIYVuCIeY7jWgYhCf6j6rOh2bRmP0BHK8
-         pByBTNntuXmZmGDCdg8TOUaEXT6CBvsJb8zGF0uhSap5xjYL8pCYdY+DhLP6Hyb6Mqrm
-         Vf7S4wVou3jcAHwaYC6UTvzUPJse8M9bbxMeEncprufaaCJJVORpM0G1Hzc0aRkpebY9
-         CpRArhQo8DABEeEy92mBkeULShu7zwGSVNEZpe4VLgOn6mKSnRGHW6p7aJGmw8VjTs/t
-         OBkg==
-X-Gm-Message-State: AAQBX9dknyRlwfXoaBd/o/DcAJzB4Bgbszjhz8h4WSna5kRwEv29mjpK
-        nYXomRouCgbO+TkJoJ+bUkGPGA==
-X-Google-Smtp-Source: AKy350YceXgl+kZDDd+NLFArfrp+OzKfRgRbJyXdyikVpbjrlnWrwtsLu04uGpjohcRf725rAumMvA==
-X-Received: by 2002:a17:907:c710:b0:8b1:806b:7dbb with SMTP id ty16-20020a170907c71000b008b1806b7dbbmr13213372ejc.51.1679924866013;
-        Mon, 27 Mar 2023 06:47:46 -0700 (PDT)
+        bh=WvM3Xo7kWQeMts4fqfXfCBu6rrobV0+vnp4Z7+CdlkQ=;
+        b=BYWHC9mB50qEkah+DkwWNfTC4UfD5EOYLpte8bISeTbWFli+LCQ49ef9VWGiZjZ2S2
+         jI4RZM70ROW9TDAzMhwoZNsQMD1NPIDkiKYfDrvQ7lmAWI8LVYltqYoeO1zyrmHxmvxn
+         gxIYatmTABVvs/WoMb0bd0heTx/+qw/9PzOvAaHihu2wtVACh8H95S++ub7IRBaWVuhJ
+         jEdD78bEnTc1Xakprqi80oKk7ajAI27Rfhb4id2y10Snx+fHwaZuzb4FriJD0i6+uToF
+         xCzwhaF4kDJ0NYNdns065DSSMr6BA74xsRr9+6vosq8d+EB4a1p0AVJCcuphH1HSEssf
+         /ziQ==
+X-Gm-Message-State: AAQBX9e2tk9p2QUfMwxFVUS6Ha2lROowm8Zmk6MVzc0aEplhINprDDEC
+        SPIuQ5a3zXlKsOPC1Ra2KSlNKw==
+X-Google-Smtp-Source: AKy350ZpwGYP2PtxPrEZJIqCM1Ph8zc1++uh/cIq0hw9GToR37FTmvA5FdYGMLCu+1FMH8iGQTKULg==
+X-Received: by 2002:a17:906:caa:b0:8b1:3821:1406 with SMTP id k10-20020a1709060caa00b008b138211406mr13012331ejh.45.1679924869430;
+        Mon, 27 Mar 2023 06:47:49 -0700 (PDT)
 Received: from localhost.localdomain ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id n7-20020a509347000000b005023ddb37eesm2394303eda.8.2023.03.27.06.47.44
+        by smtp.gmail.com with ESMTPSA id n7-20020a509347000000b005023ddb37eesm2394303eda.8.2023.03.27.06.47.47
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 27 Mar 2023 06:47:45 -0700 (PDT)
+        Mon, 27 Mar 2023 06:47:48 -0700 (PDT)
 From:   Abel Vesa <abel.vesa@linaro.org>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -69,11 +69,10 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: [PATCH v4 1/7] dt-bindings: crypto: Add Qualcomm Inline Crypto Engine
-Date:   Mon, 27 Mar 2023 16:47:28 +0300
-Message-Id: <20230327134734.3256974-2-abel.vesa@linaro.org>
+        linux-scsi@vger.kernel.org
+Subject: [PATCH v4 3/7] dt-bindings: ufs: qcom: Add ICE phandle
+Date:   Mon, 27 Mar 2023 16:47:30 +0300
+Message-Id: <20230327134734.3256974-4-abel.vesa@linaro.org>
 X-Mailer: git-send-email 2.34.1
 In-Reply-To: <20230327134734.3256974-1-abel.vesa@linaro.org>
 References: <20230327134734.3256974-1-abel.vesa@linaro.org>
@@ -83,76 +82,39 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add schema file for new Qualcomm Inline Crypto Engine driver.
+Starting with SM8550, the ICE will have its own devicetree node
+so add the qcom,ice property to reference it.
 
 Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 ---
 
 The v3 (RFC) is here:
-https://lore.kernel.org/all/20230313115202.3960700-2-abel.vesa@linaro.org/
+https://lore.kernel.org/all/20230313115202.3960700-4-abel.vesa@linaro.org/
 
 Changes since v3:
- * added Krzysztof's R-b tag
+ * dropped the "and drop core clock" part from subject line
 
 Changes since v2:
- * moved the file to crypto dir
- * added soc specific compatible
- * dropped top level description
- * renamed node to crypto and dropped label in example
+ * dropped all changes except the qcom,ice property
 
- .../crypto/qcom,inline-crypto-engine.yaml     | 42 +++++++++++++++++++
- 1 file changed, 42 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
+ Documentation/devicetree/bindings/ufs/qcom,ufs.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml b/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
-new file mode 100644
-index 000000000000..92e1d76e29ee
---- /dev/null
-+++ b/Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
-@@ -0,0 +1,42 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/crypto/qcom,inline-crypto-engine.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
+index c5a06c048389..7384300c421d 100644
+--- a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
++++ b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
+@@ -70,6 +70,10 @@ properties:
+   power-domains:
+     maxItems: 1
+ 
++  qcom,ice:
++    $ref: /schemas/types.yaml#/definitions/phandle
++    description: phandle to the Inline Crypto Engine node
 +
-+title: Qualcomm Technologies, Inc. (QTI) Inline Crypto Engine
-+
-+maintainers:
-+  - Bjorn Andersson <andersson@kernel.org>
-+
-+properties:
-+  compatible:
-+    items:
-+      - enum:
-+          - qcom,sm8550-inline-crypto-engine
-+      - const: qcom,inline-crypto-engine
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/clock/qcom,sm8550-gcc.h>
-+
-+    crypto@1d88000 {
-+      compatible = "qcom,sm8550-inline-crypto-engine",
-+                   "qcom,inline-crypto-engine";
-+      reg = <0x01d88000 0x8000>;
-+      clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+    };
-+...
+   reg:
+     minItems: 1
+     maxItems: 2
 -- 
 2.34.1
 
