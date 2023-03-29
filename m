@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9AC9FC6FD18
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 08:55:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C85AAC74A5B
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 08:56:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229781AbjC2Iz5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Mar 2023 04:55:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50110 "EHLO
+        id S230365AbjC2I4A (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Mar 2023 04:56:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231409AbjC2Iza (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 04:55:30 -0400
-Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 028E74ED0
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:55:09 -0700 (PDT)
-Received: by mail-wm1-x332.google.com with SMTP id bg16-20020a05600c3c9000b003eb34e21bdfso10982323wmb.0
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:55:09 -0700 (PDT)
+        with ESMTP id S231433AbjC2Izj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 04:55:39 -0400
+Received: from mail-wr1-x42f.google.com (mail-wr1-x42f.google.com [IPv6:2a00:1450:4864:20::42f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6A3249F1
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:55:10 -0700 (PDT)
+Received: by mail-wr1-x42f.google.com with SMTP id r11so14832304wrr.12
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:55:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680080108;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680080110;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=Tc0tvFfRXISHKnCDd1o9x7ZirUcZ+kLbNssiFkvaiEo=;
-        b=0w7dcK8QqyDtRT/8IraSXznp84ASDFAs2r/m2hfTxe5wFTfAuYv6Xc4GZftHGgSvtd
-         oXjSgNWQthqlmrv9ortHiRrpdZ4N3d7HERiDn+JyqLeomP9jASoTAH6xp+QTHR/X/XzJ
-         EGOs9rUjrSGwfBkWpRIBShcD4k0mta8Hx6XOigof9yUEO3Th3H/0kc8OgoP/lnD77Bjw
-         OwQ2yVz9z9ffyfMMfZTqbrjpLXM9qkI1L2W8pmeYsNMQe3QNWJPGRZd9g1vhzkNqWmlz
-         CVQnsW5VblH7U0tO5dqQbgKFK+vWzgKL6tH1sitDxML61JTsebhNOWTGtRFHziTD8ozC
-         Ts9A==
+        bh=D+9PHAPPCN5jb4x3hnhdMgy2to7itNwb0YpOnA8EnRk=;
+        b=hsPp30ME6q6c0MvSAujzX4JfIL02UlDUE//BjcWBELhaoBKaVvXmUG+4jAmp8BIqNY
+         BXMH4tJk9Uo5brNbTOqMhRAJcRGyMgEYsUbppYzb74G526Qis+K/KcPWpxK9t5cJu0Yw
+         /z+SPaDezktz7SbV+6te4xRnRFVlMSXbVtumsmKeEridINs8BjR+uwFdNj1QJK+SOCxQ
+         psRj0YOQlix3tF0TgalgHOTyHAskks/5fOG+AMptMno9EdOlrhtUXuNaPkkyPjiGDL5j
+         6cqR2c9Kwz326S+XK5zejkV4bAaHR7x7tCvf54v2tiPMK2CbARdphzmdT2Co6vuiniYx
+         GK2g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680080108;
+        d=1e100.net; s=20210112; t=1680080110;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Tc0tvFfRXISHKnCDd1o9x7ZirUcZ+kLbNssiFkvaiEo=;
-        b=C1gxB04ltFYdnlXXRhnafQ2Qu+eRRdkk6VaDev+aoJcv626tXcxBY4bo5MdMQbq73m
-         LnwqFVNKUmcF6d1An6UH5kwAO4hMT+eoEjped74mdBZkOqb++GoCdaM+L9S9ZSeMbk3f
-         b9J04L3CR15u1n8IABrF2ZCsxMaMqXhkrBNk07A8blYfNO1gJq5sXvdNcP9r6TABHLcC
-         T4LMCjPDxmUbE3vxy4/s3doUpaXVApBOe5Cbd0wOBpx/DeMN4KV5c5SKJ5j0bU/aO+z2
-         Pj5cthsnVV9uBbQj5lfwOhPaAfyutEuE3L5sGjv5iY0B9SoPYeSwUf+mGsnxSN7tRBWn
-         I7Bw==
-X-Gm-Message-State: AO0yUKUu+hWVCTOOIuWdY9YHlF/rlq6LR8Rmpav+ALfqFYfzmVp5NhBU
-        QG3MAli85XZai4QI73LIZLKfDw==
-X-Google-Smtp-Source: AK7set9iLPnqzlkJP27bD71VhJuqsetDy3oUBZyGG+iJbiqKddZU/Sc+nQfuu8h42LeKmA7Ib+1bxA==
-X-Received: by 2002:a7b:c3c7:0:b0:3ea:f75d:4626 with SMTP id t7-20020a7bc3c7000000b003eaf75d4626mr14067428wmj.38.1680080107999;
-        Wed, 29 Mar 2023 01:55:07 -0700 (PDT)
+        bh=D+9PHAPPCN5jb4x3hnhdMgy2to7itNwb0YpOnA8EnRk=;
+        b=mNuTwrIzqkNpQRuv7vCoaI9TivB/TBj8Olrmw3TeLZW+nfS1HRzgs79Cw0E6VS5By6
+         nyihsODsbFiCF7h4p7bQp1Oi4nXZfBJgdpSrAmCUNGQDIZABXioUmHvcWJk131vZ1SBs
+         ibf456bUX60VkOEaL2wId+w3IX2EkYvbqne3s7lb5qYUjQTjDSNxEccM/3Nq6oda2DyA
+         INexAzGJ4IDovbAWROT78lArmBf8l7uzaIm4xjMkvsHDISf7Y48KQJ1POe470yYTq9WD
+         XaJRu2IbH7c4Wy9x+xJIz6bQPC9W90M9U8sRINsoE0otfURqJcacQUq2zx4v2efO0QRC
+         iv2Q==
+X-Gm-Message-State: AAQBX9djOgdSFDItH0moFS4dE5V+r+d7ZaoXCM1hqIlaVQvwlGUCdt/Y
+        XV7x/taAosDGNGW8EJ8MFcsSnw==
+X-Google-Smtp-Source: AKy350aVRAuk9UHGzbz3JrKgJsTi7Y2812R2vccKV/PxFG0+Tjj8/xtw3NOjO2V87CGaB7DohkLHSw==
+X-Received: by 2002:adf:e90c:0:b0:2cf:eeae:88c3 with SMTP id f12-20020adfe90c000000b002cfeeae88c3mr15422099wrm.32.1680080110071;
+        Wed, 29 Mar 2023 01:55:10 -0700 (PDT)
 Received: from [127.0.1.1] (158.22.5.93.rev.sfr.net. [93.5.22.158])
-        by smtp.googlemail.com with ESMTPSA id f9-20020adff989000000b002cea392f000sm29571964wrr.69.2023.03.29.01.55.06
+        by smtp.googlemail.com with ESMTPSA id f9-20020adff989000000b002cea392f000sm29571964wrr.69.2023.03.29.01.55.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Mar 2023 01:55:07 -0700 (PDT)
+        Wed, 29 Mar 2023 01:55:09 -0700 (PDT)
 From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Wed, 29 Mar 2023 10:54:34 +0200
-Subject: [PATCH v3 13/17] arm64: dts: mediatek: add ethernet support for
+Date:   Wed, 29 Mar 2023 10:54:36 +0200
+Subject: [PATCH v3 15/17] arm64: dts: mediatek: add cpufreq support for
  mt8365-evk
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230203-evk-board-support-v3-13-0003e80e0095@baylibre.com>
+Message-Id: <20230203-evk-board-support-v3-15-0003e80e0095@baylibre.com>
 References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
 In-Reply-To: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
 To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
@@ -81,113 +81,64 @@ Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
         Amjad Ouled-Ameur <aouledameur@baylibre.com>,
         Alexandre Mergnat <amergnat@baylibre.com>
 X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2430; i=amergnat@baylibre.com;
- h=from:subject:message-id; bh=/sWnZn5I2Q2gVnzorBAXHY3JwcCKjkzGjd4XBmHmgDY=;
- b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkI/zcNeBQfaPCLdrn1gPlj5P0kizCnmtupqihg/t+
- +Z4ADtyJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCP83AAKCRArRkmdfjHURUWwD/
- 41cgFLnCf6V+fkBD6PXpyBrWc6crMUZVp6jIndN/sOnPmLI03fFu1jnsk6iFGXJHkaeQ1C1YrW7Khr
- 4gDEzInZuDj+PIQASI8R441Z526VbUoByRUGhRFwjhFEOD1NagoPltEEpR0xphX+4DuR4rxKA2GRhd
- V0+tx8cE4GNMMbmOcJ3crFuMgnnIKsEVTOo8AxxUxuvQ+6E3t4BiIS8zOb35aPdlkYbPF6AC18kP9R
- vDCKMaDMpmj9QZZhUxVmFC3gb/mLJOdISqQkPP02cjFC24vxfCovTtVxBoUtJdRcM6/mYeP+WNG9Z9
- nvwWnvR8gWqGgYtK1G/ZKXUvcOr73OSHDrT5DafHEUCpkVetP79eaJTqLduDXOk76KbFRa2JtoFlG+
- /VfNpP+VvNx+IuxlHv6MvaVyBRYUINoHWfjaGuwRI/NndPZ+1YbjWYw5FQKyrmBtAyV3Hk+UMGv9/C
- +IM8dR0EcQUW5vxHJrk0jCuBDLlDqgPuZjOqlzgDZKiGrNvx/LrcmTuwls2QBZYsWrv2jY8pyaM26Z
- fsMfuOdhQqc0wsVTntL1Dl959Evc8iEQROx9EKyQAG75GPu1cjTU0LxkQ01F3ynfFrt8cjVAqkN5hV
- gR3wFfp3eD7B6/e9u2fGQGTRSbmuNV1tBEp589EvTN0RBQ0cWFmFz4POyjiQ==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1070; i=amergnat@baylibre.com;
+ h=from:subject:message-id; bh=Z2Oft9Ecb3H2vKhjmkmQxcbqKZ2Y712Mk7ceRLy9+1Q=;
+ b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkI/zcHv+n9+SgMIsZtBX98ZGYamPG8zt91y3/5fJp
+ Vd7lMw2JAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCP83AAKCRArRkmdfjHURc36D/
+ wMDS2x7THMMHHgg3ChRl85Kk6ZKzh2Fut6DuJr3RECqAihMlzkEXYwVzQhyxmhmRvm1KFHs6vcXPNI
+ MJTFEQmLNZfs0PkyqTfkGfLQACnQar4EiZl1ekgYyIrkYl1hDOtsHyKFkuhqH4CgDspoBHQko4lJX8
+ 2IVRkhb58uKtC6GlZ9K1DcfhakQLhIs/XOCJe+V4INWO1tgI0y0ITaWNfiNSQmegenKv9bUUF/AJWx
+ vwKSC6MeDjJ3b0i+AXT0sB/SygL8WkZHs4Va3g7Xmm7+br1cO+foR+rVZEAf8OX1w2LuevuH/5QSXl
+ YX/ffPVhSvGPe4rzhen4GmM+V15d4rHOFr834rUq9VXUWSxo8MhBjQ5JhiLxj7ZuGWROPjfYecNgBt
+ cwpsjHklfHbrGlPm8qufiLeNqOHlym5jwT7ziHEYo4ozw9Tr8wbCQo8SwNH9gRMCEilo4BFm+RFkn+
+ zAP8hwGBi4jmXfDbEcMtNS3imwpst/o77WrEeLyGSrE3QoNAuvtmmOzSfjCPuJeJpOwczhO75vOBnh
+ kHIlGuR1XhRG0vBzSR1Y82Pn2MAX70iUI228wIBA7BPfe3cCfVUWATnvCcjPZUK3qYWjQmuckm+JnR
+ AlkVwWXv3FrUp7Wm52QErOvycncL9OQ9SCcGJCA0lDiIb68v+Zmvy1cmLO8Q==
 X-Developer-Key: i=amergnat@baylibre.com; a=openpgp;
  fpr=231B5ED7F3EAAA700E60FE8B2B46499D7E31D445
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-- Enable "vibr" and "vsim2" regulators to power the ethernet chip.
+In order to have cpufreq support, this patch adds proc-supply and sram-supply
+for each CPU.
 
 Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8365-evk.dts | 57 +++++++++++++++++++++++++++++
- 1 file changed, 57 insertions(+)
+ arch/arm64/boot/dts/mediatek/mt8365-evk.dts | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts b/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-index 868ee0d160e4..1820daad6da3 100644
+index 1820daad6da3..edf3a4b6a76e 100644
 --- a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
 +++ b/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-@@ -88,6 +88,28 @@ optee_reserved: optee@43200000 {
+@@ -88,6 +88,26 @@ optee_reserved: optee@43200000 {
  	};
  };
  
-+&ethernet {
-+	pinctrl-names = "default";
-+	pinctrl-0 = <&ethernet_pins>;
-+	phy-handle = <&eth_phy>;
-+	phy-mode = "rmii";
-+	/*
-+	 * Ethernet and HDMI (DSI0) are sharing pins.
-+	 * Only one can be enabled at a time and require the physical switch
-+	 * SW2101 to be set on LAN position
-+	 */
-+	status = "disabled";
-+
-+	mdio {
-+		#address-cells = <1>;
-+		#size-cells = <0>;
-+
-+		eth_phy: ethernet-phy@0 {
-+			reg = <0>;
-+		};
-+	};
++&cpu0 {
++	proc-supply = <&mt6357_vproc_reg>;
++	sram-supply = <&mt6357_vsram_proc_reg>;
 +};
 +
- &i2c0 {
++&cpu1 {
++	proc-supply = <&mt6357_vproc_reg>;
++	sram-supply = <&mt6357_vsram_proc_reg>;
++};
++
++&cpu2 {
++	proc-supply = <&mt6357_vproc_reg>;
++	sram-supply = <&mt6357_vsram_proc_reg>;
++};
++
++&cpu3 {
++	proc-supply = <&mt6357_vproc_reg>;
++	sram-supply = <&mt6357_vsram_proc_reg>;
++};
++
+ &ethernet {
  	pinctrl-names = "default";
- 	pinctrl-0 = <&i2c0_pins>;
-@@ -140,12 +162,47 @@ &mt6357_pmic {
- 	#interrupt-cells = <2>;
- };
- 
-+/* Needed by analog switch (multiplexer), HDMI and ethernet */
-+&mt6357_vibr_reg {
-+	regulator-always-on;
-+};
-+
- /* Needed by MSDC1 */
- &mt6357_vmc_reg {
- 	regulator-always-on;
- };
- 
-+/* Needed by ethernet */
-+&mt6357_vsim2_reg {
-+	regulator-always-on;
-+};
-+
- &pio {
-+	ethernet_pins: ethernet-pins {
-+		phy_reset_pins {
-+			pinmux = <MT8365_PIN_133_TDM_TX_DATA1__FUNC_GPIO133>;
-+		};
-+
-+		rmii_pins {
-+			pinmux = <MT8365_PIN_0_GPIO0__FUNC_EXT_TXD0>,
-+				 <MT8365_PIN_1_GPIO1__FUNC_EXT_TXD1>,
-+				 <MT8365_PIN_2_GPIO2__FUNC_EXT_TXD2>,
-+				 <MT8365_PIN_3_GPIO3__FUNC_EXT_TXD3>,
-+				 <MT8365_PIN_4_GPIO4__FUNC_EXT_TXC>,
-+				 <MT8365_PIN_5_GPIO5__FUNC_EXT_RXER>,
-+				 <MT8365_PIN_6_GPIO6__FUNC_EXT_RXC>,
-+				 <MT8365_PIN_7_GPIO7__FUNC_EXT_RXDV>,
-+				 <MT8365_PIN_8_GPIO8__FUNC_EXT_RXD0>,
-+				 <MT8365_PIN_9_GPIO9__FUNC_EXT_RXD1>,
-+				 <MT8365_PIN_10_GPIO10__FUNC_EXT_RXD2>,
-+				 <MT8365_PIN_11_GPIO11__FUNC_EXT_RXD3>,
-+				 <MT8365_PIN_12_GPIO12__FUNC_EXT_TXEN>,
-+				 <MT8365_PIN_13_GPIO13__FUNC_EXT_COL>,
-+				 <MT8365_PIN_14_GPIO14__FUNC_EXT_MDIO>,
-+				 <MT8365_PIN_15_GPIO15__FUNC_EXT_MDC>;
-+		};
-+	};
-+
- 	gpio_keys: gpio-keys-pins {
- 		pins {
- 			pinmux = <MT8365_PIN_24_KPCOL0__FUNC_KPCOL0>;
+ 	pinctrl-0 = <&ethernet_pins>;
 
 -- 
 2.25.1
