@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CBF48C77B6E
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 08:55:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 430B0C6FD18
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 08:55:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231290AbjC2IzB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Mar 2023 04:55:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47998 "EHLO
+        id S230011AbjC2IzC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Mar 2023 04:55:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48062 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230447AbjC2Iy7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 04:54:59 -0400
-Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37A9410A
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:54:56 -0700 (PDT)
-Received: by mail-wr1-x433.google.com with SMTP id e18so14840514wra.9
-        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:54:56 -0700 (PDT)
+        with ESMTP id S231238AbjC2IzA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 04:55:00 -0400
+Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3AEDD3C04
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:54:57 -0700 (PDT)
+Received: by mail-wr1-x42a.google.com with SMTP id t4so9615781wra.7
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 01:54:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680080094;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680080096;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=igjjn7nnejMTz1eixMcGI3oknnIp1cLnv8QilS7wOFs=;
-        b=1pckWm5lqVJim18m13Jqwrrt5hZmCx8O5deDD4Fd3ovp7hrrVULpjYqNWzFYKkkghn
-         tJTMtgH7Yya2Xq7DoaTfMpLdQmHuesJXMLMSYxi95IL+R4ZKARuKAHhWY76HAbtoe6F/
-         txjRmArhe26LoFJ/TN30UTbNHFA552As7Bn/nPTNz6GlKWzbbIjJJ5wVUdaaPSCJXDPA
-         HIOvyqDifBE7u5lZw9nbdT9rZQxgoZsQYlua99lT9TFBVGIg4XLRUbjTPycwS9ZnQC+x
-         ZjmU7IWK1PwHNb/2xRBJLA8cl9yS4cYswyaP8rfNQg40x5sZab2LTWCBeWf10E8umT4o
-         rMIw==
+        bh=hVP5ogEJUfh7DhnBZdRIBIwVL+R9BPURRS9YlmwkoZs=;
+        b=k+Nmni1Rb9y2/ilRFy4uDkbXD3gpCGYyS28Ea/O3AYecarLNqIoPHUysWteYiRb2go
+         TEtO3l2aWTF0+UhVX1u45HrZHNMjZVeEPHJnia2nJ7suQfVwlHzr6KWvoTiZQQE1P0Vw
+         jg2TdtLrcK61nFSnJznlOHuSkr9J54oP2pXWQms4lNJoH7eNImedRsHt1WlO5XuUA3OI
+         VtzjQJJMXzmrcAw4t1ybV6/76LmE2uqOrxmsNOREN600CPlKZ1OtWmnseRseaWvdgXw/
+         Uo/c7q3UvzsWSVO6DAxGB6Sspqk/1Dvtrpot/oLdD2hfWY+gPAgSMwT/yyITLfGiRlI3
+         09YQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680080095;
+        d=1e100.net; s=20210112; t=1680080096;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=igjjn7nnejMTz1eixMcGI3oknnIp1cLnv8QilS7wOFs=;
-        b=1VsEsSeF99OtATI+P9ZnG9r9zTBXNDljRnvVFkdVxi4EwzzH/pEzKVCtaa2CHopGgF
-         k6Cr6NnkWegRAUTxlu3YolqwMgt/RuYslwJsRulxk+oMQ1EBFCja7rdvN5E9WPTuDEcS
-         ubx0NYZBtouKQRiavo7VuDNb6oTO/HWr2sGEGvoz4rhI3g0BMDRMR7jKTXq8YoQvCx4j
-         RmfA9YqJma9b3jy/1GXyFEV3Px1W+a9AiQ85fcaltpcuUwAaBzQJbQE0f7mb5TfCl8q1
-         OfFWIo3JgRR4pWqjn6MTQxs2ftHDtjpXgxKj41MTiSFm2Gu2c7m9HQkOyOHUC9s5cGtg
-         BjLQ==
-X-Gm-Message-State: AAQBX9f6Q8ZWgrGz8jvYSBs6Joy6BTmae1mCBhfrmQWuF867MgREBeff
-        3rCAyAvNgJVZ1UDgSTY89GwDGg==
-X-Google-Smtp-Source: AKy350ZoMcAOyKvTBVaeDbCCQd6MvOOZavs5uIwd62wSfVmNOv4g7SBuoNg9n+CdyQ8Y79xV/XFLhg==
-X-Received: by 2002:a5d:6647:0:b0:2cf:ed44:693c with SMTP id f7-20020a5d6647000000b002cfed44693cmr1251632wrw.31.1680080094702;
-        Wed, 29 Mar 2023 01:54:54 -0700 (PDT)
+        bh=hVP5ogEJUfh7DhnBZdRIBIwVL+R9BPURRS9YlmwkoZs=;
+        b=HWPpUjPpXKmMQMlVAfAPaq/b8s5vWAxGx+ymCK7fBODUcq+a9bG50fHhKuEzWA0HZM
+         VFuWNCab9VpE5Tp6TmLcSJ+ueVD+kNjcWdTNKA24plYSp+twobQ36neBOi3KngIuQ2lz
+         cBHDW8q1doAGDckwaI4B4PE8xGH8HPlwqnGEJ/qmXQGPiiEfFJ1cJaef60wrZXeJgKOn
+         STazcQC1j9cwyIwTKUnj3pL4iT8Ex/ZPV4ifNvgzgpBX3U3IG4nq3rNi2zH4NR2Ug/iz
+         Wos6ckOv90GhxvkdJp6I/XTbMW1Po2DLTsMTkDlFPVKI4PBUHZEPypCQD08Bzc4eixAM
+         8RyQ==
+X-Gm-Message-State: AAQBX9fVMsY2hlzbRAjj+7+RSb1B7vKv3SMHdxYWFK3myYXhzb5t+NLl
+        CRtwlDK87YDsoiU8SZz6bgLE3Q==
+X-Google-Smtp-Source: AKy350bM6jzZfbFxzCV249eUTj3usBz4gdmxhhofiRr7kO2NsjfNamiYWT3HZC6p0LBPT+My9bsYtg==
+X-Received: by 2002:a5d:4d4c:0:b0:2ce:aad8:9bee with SMTP id a12-20020a5d4d4c000000b002ceaad89beemr14955632wru.46.1680080095706;
+        Wed, 29 Mar 2023 01:54:55 -0700 (PDT)
 Received: from [127.0.1.1] (158.22.5.93.rev.sfr.net. [93.5.22.158])
-        by smtp.googlemail.com with ESMTPSA id f9-20020adff989000000b002cea392f000sm29571964wrr.69.2023.03.29.01.54.53
+        by smtp.googlemail.com with ESMTPSA id f9-20020adff989000000b002cea392f000sm29571964wrr.69.2023.03.29.01.54.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Mar 2023 01:54:54 -0700 (PDT)
+        Wed, 29 Mar 2023 01:54:55 -0700 (PDT)
 From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Wed, 29 Mar 2023 10:54:22 +0200
-Subject: [PATCH v3 01/17] dt-bindings: watchdog: mediatek,mtk-wdt: add
- mt8365
+Date:   Wed, 29 Mar 2023 10:54:23 +0200
+Subject: [PATCH v3 02/17] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
+ add drive strength property
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230203-evk-board-support-v3-1-0003e80e0095@baylibre.com>
+Message-Id: <20230203-evk-board-support-v3-2-0003e80e0095@baylibre.com>
 References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
 In-Reply-To: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
 To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
@@ -79,48 +79,59 @@ Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
         Alexandre Bailon <abailon@baylibre.com>,
         Fabien Parent <fparent@baylibre.com>,
         Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        Alexandre Mergnat <amergnat@baylibre.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+        Alexandre Mergnat <amergnat@baylibre.com>
 X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=897; i=amergnat@baylibre.com;
- h=from:subject:message-id; bh=GtS6oI/KN5oVnvp16fjoQNYsWiITnEz8YK0eFeooLks=;
- b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkI/zbJXFbmFNHEMPjqJ2mO2eYE9irHz0jp12ggc5d
- YIXQH6SJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCP82wAKCRArRkmdfjHURSSVD/
- 0QZO7k+NJY8iRztOVHNHy4/lEF0q+OXUaNYoaPGTBhP/QoBNgf48B0/DPRmbmbaNhzJQ7Qh7vTeDHg
- H1DrLD3618Llgh40XJrc3lQ26UsFSJK4+UW5ljiIfsgG6ePXG7RmXwBi/TS+dzTBBZSe4yGHrxKhhP
- bTPqXZ/jBYu3VyE0KLqBAGWKmSSGz+zF5Ik0Fe6WKaazUd8thAnLVwE9lxejHCFU5RWNcFfWBONM9Y
- lhGtnaM+6WsZgCMokP4JUtO1t9WRvYlhKCNSJKpya7j5nTXtUPhOtEJyiBbwdrUN5INa7DX0Hf0y5K
- cqQY//Z37HjaIF5nric4YNpY2IMrvmYBxoSbZrdYI++wfvn/TxVAoGdtNUi/NmBdqtR87Ga8a83C6t
- S0fQ4/xrVRdddriRQpCOoQ69erEoaiT4BzLfhHw665qyaanDtzf0uqh0XM/Wj2wmB2OMRvZdrxsEpI
- LykMMYcR5/8JJd0zbu8zVZM9Igf3tMdwPzqt8yk/RQDR1iZkyJkJvXmHze8EaEc+0qnk/znYKmvw7S
- eELX1dFzEprTqDFsDmbT/s6C02LlFDZQAl8XB1+z+BV0q30SnbQgcSumXDwj0CyMVAcV0xMRvTwtxL
- UMDde/CHH4YNBoImWJWPRryAN1eOM7886kIZD1RYFlWBEt5/Hm4JHOmQSn9A==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1062; i=amergnat@baylibre.com;
+ h=from:subject:message-id; bh=Q6KYTQGi9BQ9506wErkVzgHSmMBN0a0BRBzstC8ybEY=;
+ b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkI/zblB4RGAHNE+u3bmnkO8ILb2ZIXB3T7xVpT6WS
+ AvCMQQiJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCP82wAKCRArRkmdfjHURdonD/
+ 4yZPAZubkiDP1QhAA7kBXJXeh6TssL0PBYQYI9ScFAJ4ISeajBVhKdTCmJdSUjutkauaKljkPXKFg/
+ Z2seGD/nqR51iUPHQJgr0xVDGXRbxiAb9OLoTrJRvc9uuF/ix3cnYm7YVsztKhrl5NsQXVJFEARrV6
+ HJ0IsrsUVWY6NuDP8AjBfkh5oT94Eav+5qc9XZUUODVYbyJImZ0tziN0Ur3ThHE2380AJgkzwfca6r
+ RWkvqMQ6+URxaN+RH5IdCYzatDuUPsNpGu0yiVov5+BYQ6/z2SSEU61hH3dnl4VD4fv0EAD50cRAd6
+ roaptS0VbansANLDMzHDEuCfPKdspW2z8ZX4H7/49VlhXeHQNcNFZ1bW9igmGdWBCuEGZI/JkFkit+
+ MwhYBgN1EScGnRBSnCGBMOKuc3yT0d09cSt4+x81XlOuVvrQgiR2OXYyv1j4slaTKAL0IJrtEudidr
+ 0PsmjsHSgb4VgJYrw4Y9p6fciKflZA+CEJYoqJ4JH//hY26+n4402DWQZXTaP77Qo0nz22EP2CMdaO
+ 4UQ8hQHR9ATr4gRcIM0LEIJHt8oYdOzjsDOGjotuk1u/YkkXhJb1tMKIVkhSGgddZCbpN+3V617Y+1
+ yYVAnIj7Y9WDcw6huhoKs0osDpE9M8Ik/wp68pPWGwyHUHSdIgfcJ6PHvIng==
 X-Developer-Key: i=amergnat@baylibre.com; a=openpgp;
  fpr=231B5ED7F3EAAA700E60FE8B2B46499D7E31D445
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add binding description for mediatek,mt8365-wdt
+This SoC is able to drive the following output current:
+- 2 mA
+- 4 mA
+- 6 mA
+- 8 mA
+- 10 mA
+- 12 mA
+- 14 mA
+- 16 mA
 
-Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Then drive-strength property is set with enum to reflect its HW capability.
+
+Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
 Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
 ---
- Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ Documentation/devicetree/bindings/pinctrl/mediatek,mt8365-pinctrl.yaml | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-index 55b34461df1b..66cacea8e47f 100644
---- a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-+++ b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-@@ -38,6 +38,7 @@ properties:
-               - mediatek,mt7623-wdt
-               - mediatek,mt7629-wdt
-               - mediatek,mt8173-wdt
-+              - mediatek,mt8365-wdt
-               - mediatek,mt8516-wdt
-           - const: mediatek,mt6589-wdt
+diff --git a/Documentation/devicetree/bindings/pinctrl/mediatek,mt8365-pinctrl.yaml b/Documentation/devicetree/bindings/pinctrl/mediatek,mt8365-pinctrl.yaml
+index 4b96884a1afc..101871ec6693 100644
+--- a/Documentation/devicetree/bindings/pinctrl/mediatek,mt8365-pinctrl.yaml
++++ b/Documentation/devicetree/bindings/pinctrl/mediatek,mt8365-pinctrl.yaml
+@@ -79,6 +79,9 @@ patternProperties:
  
+           bias-pull-down: true
+ 
++          drive-strength:
++            enum: [2, 4, 6, 8, 10, 12, 14, 16]
++
+           input-enable: true
+ 
+           input-disable: true
 
 -- 
 2.25.1
