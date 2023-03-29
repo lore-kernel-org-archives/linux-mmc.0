@@ -2,55 +2,47 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12D5AC6FD18
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 23:37:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 75683C74A5B
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 23:48:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230002AbjC2XhX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Mar 2023 19:37:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44906 "EHLO
+        id S230173AbjC2XsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Mar 2023 19:48:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49912 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229774AbjC2XhU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 19:37:20 -0400
-Received: from mga05.intel.com (mga05.intel.com [192.55.52.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 048B05260;
-        Wed, 29 Mar 2023 16:37:18 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1680133039; x=1711669039;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=0HvsDv4WB1iBA2t6SV9xl2qiHbdTwL5+Hyq6lxcFQ7s=;
-  b=UwyCYcPx9LdGwESiKvkOrZCkOgaL6QgbS2gw1fH3lJL13ylNWOA+nPSC
-   BO5h02uStKETeUEmRqzYZ9UMouI6rWQ9urwo/xTq1hTJTCgqCA7nBRDCq
-   8DsPIMTbGeEMkY0PjvA+FDdmW8IkUwjsVryx9wby6BbHhFl1egzBOVw0i
-   yJfHXvf9KyH/+2yPgl9X1ypOP/l1A+KtzMmp3C0X7ScfoxbfubvE5UMfe
-   bjQ7itmg28a9G0rItnzaqkH1QCMSy71b6JIzHjS8t64RLyWYwA8mf0Bqm
-   R1b/+9bVcwszUF/bQmk2Ses7zkH3k1pgWvd3kcn2212YERPZ9gRJop7Zi
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="427300065"
-X-IronPort-AV: E=Sophos;i="5.98,301,1673942400"; 
-   d="scan'208";a="427300065"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga105.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 Mar 2023 16:37:18 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="858690302"
-X-IronPort-AV: E=Sophos;i="5.98,301,1673942400"; 
-   d="scan'208";a="858690302"
-Received: from lkp-server01.sh.intel.com (HELO b613635ddfff) ([10.239.97.150])
-  by orsmga005.jf.intel.com with ESMTP; 29 Mar 2023 16:37:16 -0700
-Received: from kbuild by b613635ddfff with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1phfLw-000K36-03;
-        Wed, 29 Mar 2023 23:37:16 +0000
-Date:   Thu, 30 Mar 2023 07:36:51 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Dennis Zhou <dennis@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        Dennis Zhou <dennis@kernel.org>
-Subject: Re: [PATCH] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <202303300728.pAr0H6ZJ-lkp@intel.com>
+        with ESMTP id S229462AbjC2XsH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 19:48:07 -0400
+Received: from mail-pj1-f46.google.com (mail-pj1-f46.google.com [209.85.216.46])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98C423C1E;
+        Wed, 29 Mar 2023 16:48:06 -0700 (PDT)
+Received: by mail-pj1-f46.google.com with SMTP id lr16-20020a17090b4b9000b0023f187954acso17889294pjb.2;
+        Wed, 29 Mar 2023 16:48:06 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680133686;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=7ETYu9f3O7bRoQnr7/k7PLVrkbB1GMeAB1+nXGIoc5o=;
+        b=iRI/dFowb/m0oJsln98s1Zh6mfmPsRdbtf1nvZSX9l9fJ/73lqbptBUFzlVZ+uFtDn
+         jqgpnRMrIFQM/EaOQXAZY/tyXRFVYt88CNWhowJdTB0X5i1xgDFjMFF/V6E2Et5IeISm
+         Ey4uKhA5ZXiCx45Fe3kPiKENijwhGZ9OJRy9P6aTMmZXXClIXStaMqFBKTIk0O34b8b+
+         xlHlEuwJQSju/XABmtJfV//oFmbMHZ5+z+mfKx8497Ew++9ktbvFqhLb1FQhpoqeR/Ap
+         90e4ioE1yepgP+GyygZCBWv5NGk11FysjmKzsvLLjP5zP5jBCZFIClxTQF9DfzVJeTpB
+         fAYA==
+X-Gm-Message-State: AAQBX9fLUuyLPox2rYpXrVCVOMIjK8wPVGVAL47+/uvnhRiYx/OELbw1
+        xEjFSNZW6+vfq+E0quwxoCQb3XidEu5wnw==
+X-Google-Smtp-Source: AKy350aA/nKzBf/dNWMtkLWggrUUufSqsxTj3eNZu3/Cugd4hGWziglradj5hIni77zV0BT96w7Ykw==
+X-Received: by 2002:a17:90b:4c12:b0:23f:7dfb:7dc1 with SMTP id na18-20020a17090b4c1200b0023f7dfb7dc1mr22878981pjb.33.1680133685493;
+        Wed, 29 Mar 2023 16:48:05 -0700 (PDT)
+Received: from snowbird ([199.73.127.3])
+        by smtp.gmail.com with ESMTPSA id q59-20020a17090a1b4100b00233acae2ce6sm1931922pjq.23.2023.03.29.16.48.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 29 Mar 2023 16:48:05 -0700 (PDT)
+Date:   Wed, 29 Mar 2023 16:48:01 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZCTOMVjW+pnZVGsQ@snowbird>
 References: <20230329202148.71107-1-dennis@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
@@ -60,170 +52,61 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Dennis,
+When using dm-verity with a data partition on an emmc device, dm-verity
+races with the discovery of attached emmc devices. This is because mmc's
+probing code sets up the host data structure then a work item is
+scheduled to do discovery afterwards. To prevent this race on init,
+let's inline the first call to detection, __mm_scan(), and let
+subsequent detect calls be handled via the workqueue.
 
-I love your patch! Perhaps something to improve:
+Signed-off-by: Dennis Zhou <dennis@kernel.org>
+---
+Sigh.. fix missing static declaration.
 
-[auto build test WARNING on ulf-hansson-mmc-mirror/next]
-[also build test WARNING on linus/master v6.3-rc4 next-20230329]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+ drivers/mmc/core/core.c | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Dennis-Zhou/mmc-inline-the-first-mmc_scan-on-mmc_start_host/20230330-042213
-base:   https://git.linaro.org/people/ulf.hansson/mmc-mirror.git next
-patch link:    https://lore.kernel.org/r/20230329202148.71107-1-dennis%40kernel.org
-patch subject: [PATCH] mmc: inline the first mmc_scan() on mmc_start_host()
-config: hexagon-randconfig-r045-20230329 (https://download.01.org/0day-ci/archive/20230330/202303300728.pAr0H6ZJ-lkp@intel.com/config)
-compiler: clang version 17.0.0 (https://github.com/llvm/llvm-project 67409911353323ca5edf2049ef0df54132fa1ca7)
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/d2de7314d2198df0c7a452546af0c15799b2d864
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Dennis-Zhou/mmc-inline-the-first-mmc_scan-on-mmc_start_host/20230330-042213
-        git checkout d2de7314d2198df0c7a452546af0c15799b2d864
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=hexagon olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=hexagon SHELL=/bin/bash drivers/mmc/core/
-
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Link: https://lore.kernel.org/oe-kbuild-all/202303300728.pAr0H6ZJ-lkp@intel.com/
-
-All warnings (new ones prefixed by >>):
-
-   In file included from drivers/mmc/core/core.c:12:
-   In file included from include/linux/interrupt.h:11:
-   In file included from include/linux/hardirq.h:11:
-   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
-   In file included from include/asm-generic/hardirq.h:17:
-   In file included from include/linux/irq.h:20:
-   In file included from include/linux/io.h:13:
-   In file included from arch/hexagon/include/asm/io.h:334:
-   include/asm-generic/io.h:547:31: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           val = __raw_readb(PCI_IOBASE + addr);
-                             ~~~~~~~~~~ ^
-   include/asm-generic/io.h:560:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           val = __le16_to_cpu((__le16 __force)__raw_readw(PCI_IOBASE + addr));
-                                                           ~~~~~~~~~~ ^
-   include/uapi/linux/byteorder/little_endian.h:37:51: note: expanded from macro '__le16_to_cpu'
-   #define __le16_to_cpu(x) ((__force __u16)(__le16)(x))
-                                                     ^
-   In file included from drivers/mmc/core/core.c:12:
-   In file included from include/linux/interrupt.h:11:
-   In file included from include/linux/hardirq.h:11:
-   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
-   In file included from include/asm-generic/hardirq.h:17:
-   In file included from include/linux/irq.h:20:
-   In file included from include/linux/io.h:13:
-   In file included from arch/hexagon/include/asm/io.h:334:
-   include/asm-generic/io.h:573:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           val = __le32_to_cpu((__le32 __force)__raw_readl(PCI_IOBASE + addr));
-                                                           ~~~~~~~~~~ ^
-   include/uapi/linux/byteorder/little_endian.h:35:51: note: expanded from macro '__le32_to_cpu'
-   #define __le32_to_cpu(x) ((__force __u32)(__le32)(x))
-                                                     ^
-   In file included from drivers/mmc/core/core.c:12:
-   In file included from include/linux/interrupt.h:11:
-   In file included from include/linux/hardirq.h:11:
-   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
-   In file included from include/asm-generic/hardirq.h:17:
-   In file included from include/linux/irq.h:20:
-   In file included from include/linux/io.h:13:
-   In file included from arch/hexagon/include/asm/io.h:334:
-   include/asm-generic/io.h:584:33: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           __raw_writeb(value, PCI_IOBASE + addr);
-                               ~~~~~~~~~~ ^
-   include/asm-generic/io.h:594:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           __raw_writew((u16 __force)cpu_to_le16(value), PCI_IOBASE + addr);
-                                                         ~~~~~~~~~~ ^
-   include/asm-generic/io.h:604:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
-           __raw_writel((u32 __force)cpu_to_le32(value), PCI_IOBASE + addr);
-                                                         ~~~~~~~~~~ ^
->> drivers/mmc/core/core.c:2202:6: warning: no previous prototype for function '__mmc_rescan' [-Wmissing-prototypes]
-   void __mmc_rescan(struct mmc_host *host)
-        ^
-   drivers/mmc/core/core.c:2202:1: note: declare 'static' if the function is not intended to be used outside of this translation unit
-   void __mmc_rescan(struct mmc_host *host)
-   ^
-   static 
-   7 warnings generated.
-
-
-vim +/__mmc_rescan +2202 drivers/mmc/core/core.c
-
-  2201	
-> 2202	void __mmc_rescan(struct mmc_host *host)
-  2203	{
-  2204		int i;
-  2205	
-  2206		if (host->rescan_disable)
-  2207			return;
-  2208	
-  2209		/* If there is a non-removable card registered, only scan once */
-  2210		if (!mmc_card_is_removable(host) && host->rescan_entered)
-  2211			return;
-  2212		host->rescan_entered = 1;
-  2213	
-  2214		if (host->trigger_card_event && host->ops->card_event) {
-  2215			mmc_claim_host(host);
-  2216			host->ops->card_event(host);
-  2217			mmc_release_host(host);
-  2218			host->trigger_card_event = false;
-  2219		}
-  2220	
-  2221		/* Verify a registered card to be functional, else remove it. */
-  2222		if (host->bus_ops)
-  2223			host->bus_ops->detect(host);
-  2224	
-  2225		host->detect_change = 0;
-  2226	
-  2227		/* if there still is a card present, stop here */
-  2228		if (host->bus_ops != NULL)
-  2229			goto out;
-  2230	
-  2231		mmc_claim_host(host);
-  2232		if (mmc_card_is_removable(host) && host->ops->get_cd &&
-  2233				host->ops->get_cd(host) == 0) {
-  2234			mmc_power_off(host);
-  2235			mmc_release_host(host);
-  2236			goto out;
-  2237		}
-  2238	
-  2239		/* If an SD express card is present, then leave it as is. */
-  2240		if (mmc_card_sd_express(host)) {
-  2241			mmc_release_host(host);
-  2242			goto out;
-  2243		}
-  2244	
-  2245		for (i = 0; i < ARRAY_SIZE(freqs); i++) {
-  2246			unsigned int freq = freqs[i];
-  2247			if (freq > host->f_max) {
-  2248				if (i + 1 < ARRAY_SIZE(freqs))
-  2249					continue;
-  2250				freq = host->f_max;
-  2251			}
-  2252			if (!mmc_rescan_try_freq(host, max(freq, host->f_min)))
-  2253				break;
-  2254			if (freqs[i] <= host->f_min)
-  2255				break;
-  2256		}
-  2257	
-  2258		/*
-  2259		 * Ignore the command timeout errors observed during
-  2260		 * the card init as those are excepted.
-  2261		 */
-  2262		host->err_stats[MMC_ERR_CMD_TIMEOUT] = 0;
-  2263		mmc_release_host(host);
-  2264	
-  2265	 out:
-  2266		if (host->caps & MMC_CAP_NEEDS_POLL)
-  2267			mmc_schedule_delayed_work(&host->detect, HZ);
-  2268	}
-  2269	
-
+diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+index 368f10405e13..fda7ee57dee3 100644
+--- a/drivers/mmc/core/core.c
++++ b/drivers/mmc/core/core.c
+@@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+ }
+ EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+ 
+-void mmc_rescan(struct work_struct *work)
++static void __mmc_rescan(struct mmc_host *host)
+ {
+-	struct mmc_host *host =
+-		container_of(work, struct mmc_host, detect.work);
+ 	int i;
+ 
+ 	if (host->rescan_disable)
+@@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+ 		mmc_schedule_delayed_work(&host->detect, HZ);
+ }
+ 
++void mmc_rescan(struct work_struct *work)
++{
++	struct mmc_host *host =
++		container_of(work, struct mmc_host, detect.work);
++
++	__mmc_rescan(host);
++}
++
+ void mmc_start_host(struct mmc_host *host)
+ {
+ 	host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+@@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+ 	}
+ 
+ 	mmc_gpiod_request_cd_irq(host);
+-	_mmc_detect_change(host, 0, false);
++	host->detect_change = 1;
++	__mmc_rescan(host);
+ }
+ 
+ void __mmc_stop_host(struct mmc_host *host)
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests
+2.40.0
+
