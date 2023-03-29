@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 88B59C761A6
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 13:18:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 072E5C77B72
+	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 13:18:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230189AbjC2NSA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Mar 2023 09:18:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39826 "EHLO
+        id S230221AbjC2NSD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Mar 2023 09:18:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39914 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230177AbjC2NR6 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 09:17:58 -0400
+        with ESMTP id S230195AbjC2NSA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 09:18:00 -0400
 Received: from madras.collabora.co.uk (madras.collabora.co.uk [IPv6:2a00:1098:0:82:1000:25:2eeb:e5ab])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8403049D5;
-        Wed, 29 Mar 2023 06:17:54 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CCD4810D2;
+        Wed, 29 Mar 2023 06:17:57 -0700 (PDT)
 Received: from [192.168.1.100] (2-237-20-237.ip236.fastwebnet.it [2.237.20.237])
         (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
          key-exchange X25519 server-signature RSA-PSS (4096 bits))
         (No client certificate requested)
         (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id DF74D660316F;
-        Wed, 29 Mar 2023 14:17:51 +0100 (BST)
+        by madras.collabora.co.uk (Postfix) with ESMTPSA id EB7EF6603173;
+        Wed, 29 Mar 2023 14:17:54 +0100 (BST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1680095873;
-        bh=qTmxjyfcP5I5Xj6wCEgR0k1cS22atKBkP1Lgre2sabQ=;
+        s=mail; t=1680095876;
+        bh=Xa0p0IV1rYh41ZUiU4I0r4N322DWyNNQVt6PERWVrrM=;
         h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=FaIVp1r52Fx00yV49EnK0WzOWDoXi12jY33WMlwI/oJO0/2cEeqd2vopPu72LiWAC
-         jMkjAOlm68kEYppT0VjI4UnlPSk7HqWlKhHKv/BmZlq7zrEsTlMVaq6xJtxnd8poAo
-         IpI9/u9jQUJrEFUQZEbn4+zQEBLC7RYOhiUBHp216Oj2c6t74RCorpIzJTHojXquSe
-         FaX23FAAajNdpeorVFUOwnEch3x+a/hmFZQkx+Euz7ro6S7kHH5vUK76hIuNwUb+M3
-         xtpHnBzSt8q2e1OMcsI53xdQRd9DzUge0v/suvoiWLvT1ZxeZwQhUxqi8AC0vG1g3f
-         yOHNsJHe8zVFw==
-Message-ID: <dd3a26af-819b-6d79-3e08-a351c404060e@collabora.com>
-Date:   Wed, 29 Mar 2023 15:17:49 +0200
+        b=ffblz76rZcLQ52B9fMQb0AltLva4aPIN+VcsFGIv7HMK/1EM9U21eQhU/D6Ekg2Zj
+         rIDYxjVL3z1/3CNHJdJQvG8QMZpT6r2ffaYEciwpyNg6oWJiW68X0E6ABYWeeGVOI2
+         4LqX9lfLD2ZyKCTjMwcSddvG14w0itLWTy6VX2v93F3k84DoklLs/OQ3mrKX3R2KkI
+         HdqTRCXdDX2pXcYVeo8I8UkKbPDhiaXhOxbEh/8sKlyuLdDcqqJpayZIs7GyPjZJxu
+         fo9jBlY1u1PGJDVsEsbJq5Uyn5zA0GspBKH+wFWX/oWol4OqbamcgEqh8lZGuPGjQf
+         0tXt9prlPTkqQ==
+Message-ID: <ba709e0d-f573-0ae9-5408-7b4f54ff2a13@collabora.com>
+Date:   Wed, 29 Mar 2023 15:17:52 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.9.0
-Subject: Re: [PATCH v3 04/17] arm64: dts: mediatek: add watchdog support for
- mt8365 SoC
+Subject: Re: [PATCH v3 01/17] dt-bindings: watchdog: mediatek,mtk-wdt: add
+ mt8365
 Content-Language: en-US
 To:     Alexandre Mergnat <amergnat@baylibre.com>,
         Wim Van Sebroeck <wim@linux-watchdog.org>,
@@ -57,12 +57,13 @@ Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
         linux-gpio@vger.kernel.org,
         Alexandre Bailon <abailon@baylibre.com>,
         Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
- <20230203-evk-board-support-v3-4-0003e80e0095@baylibre.com>
+ <20230203-evk-board-support-v3-1-0003e80e0095@baylibre.com>
 From:   AngeloGioacchino Del Regno 
         <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <20230203-evk-board-support-v3-4-0003e80e0095@baylibre.com>
+In-Reply-To: <20230203-evk-board-support-v3-1-0003e80e0095@baylibre.com>
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -70,30 +71,10 @@ List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 Il 29/03/23 10:54, Alexandre Mergnat ha scritto:
-> Add watchdog support.
+> Add binding description for mediatek,mt8365-wdt
 > 
+> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
-> ---
->   arch/arm64/boot/dts/mediatek/mt8365.dtsi | 7 +++++++
->   1 file changed, 7 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8365.dtsi b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-> index 553c7516406a..e018df6844f6 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-> +++ b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-> @@ -162,6 +162,13 @@ syscfg_pctl: syscfg-pctl@10005000 {
->   			reg = <0 0x10005000 0 0x1000>;
->   		};
->   
-> +		watchdog: watchdog@10007000 {
-> +			compatible = "mediatek,mt8365-wdt",
-> +				     "mediatek,mt6589-wdt";
-
-This fits in one line, 83 columns is *definitely* fine.
-Can you please compress that?
-
-After which:
 
 Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-
 
