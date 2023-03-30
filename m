@@ -2,137 +2,426 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B029C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Thu, 30 Mar 2023 06:54:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 960FDC6FD1D
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Mar 2023 08:15:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230344AbjC3GyE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 30 Mar 2023 02:54:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46488 "EHLO
+        id S229925AbjC3IPk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 30 Mar 2023 04:15:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229829AbjC3GyC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2023 02:54:02 -0400
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2086.outbound.protection.outlook.com [40.107.244.86])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ACE616A59;
-        Wed, 29 Mar 2023 23:53:44 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=EySzM83RPKXmhthVlgv7u7Jy0xl+wD25HL1zL7Ew8IRainkc0PsWvWle95HCjkGz8XZ0vL7RPVYgZTdXs7E5w7OXjfIIYZM3n9kXF7jN13F9EeDgcsa3CUFCJlKdN8MlC1WJJu5F499qUA379pHrCzI/lcq/fjpsLAnM6PtbKjUvatu/906wa69wYFoMoiVwLkaB4caEWw32Kh544kFXKFqy1qL1octokuYDopV7nbahlGI6TABrmGhR7hGFfmfK6V0Sh6iDRTxDyOQ3IZsQ1Q0rU7PpmApaLn/4yT0XAQqvILxI8bLFKoituQQO+cFKP3KhMNRu+gdqCJrIDifovQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=cPXsF43lNqdWJWUYD2LqCEsI8xe+3edlhNk42CY+WME=;
- b=HaALa4xq3YvF4DcFPu6GKsPc4wlCS7a+O4EPmfl5peb/Bx4qpamJcOD9ICis/BsBBLPyiF4hTKwNZqOOr23qghuZE8EzKBVm5ui6VkHs4ICx4byaaqxDdte8EP8Oq9wMHcJ6onTh3hER6WVXNc0pK9amrgZqkJGdC2J4UGJZxa+JJKZJtHsaYTt0uhxEGzTexn7yjaIALOo5tP3LXmWhgglEyqGcmX3wuHPF9eN0D2LN8jnpH5Yc133habUg2qlcy2xydSCfyUkEy+aNtaL0V+Cw1tlGaHZYD8TZigSSrW3zeuvixd1i2iGOdVlWJFYYCPl2cfVK3Uwe6AuGlB+Fqg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=cPXsF43lNqdWJWUYD2LqCEsI8xe+3edlhNk42CY+WME=;
- b=cuY5dF2FZ3dU5aMbCeVr2Bo+NGLVn7JsG9qgdG5SsG4gKBp5OQeF6Xkgi0VK3PK+hjDZ/L6xFHDSgNZU3yaHE4EpKK8d8JA3V2/UJsyxtSLpx5sQ4viSfIMM0mRBvLReyEJxeO/1TdyU7QnsHn/VznSeh/mThtWzGTicuDNJ5vY=
-Received: from MW4PR04CA0101.namprd04.prod.outlook.com (2603:10b6:303:83::16)
- by IA0PR12MB7625.namprd12.prod.outlook.com (2603:10b6:208:439::22) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6222.33; Thu, 30 Mar
- 2023 06:53:42 +0000
-Received: from CO1NAM11FT023.eop-nam11.prod.protection.outlook.com
- (2603:10b6:303:83:cafe::28) by MW4PR04CA0101.outlook.office365.com
- (2603:10b6:303:83::16) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.22 via Frontend
- Transport; Thu, 30 Mar 2023 06:53:42 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- CO1NAM11FT023.mail.protection.outlook.com (10.13.175.35) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6254.22 via Frontend Transport; Thu, 30 Mar 2023 06:53:41 +0000
-Received: from SATLEXMB06.amd.com (10.181.40.147) by SATLEXMB04.amd.com
- (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 30 Mar
- 2023 01:53:36 -0500
-Received: from SATLEXMB03.amd.com (10.181.40.144) by SATLEXMB06.amd.com
- (10.181.40.147) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Thu, 30 Mar
- 2023 01:53:14 -0500
-Received: from xhdlakshmis40.xilinx.com (10.180.168.240) by SATLEXMB03.amd.com
- (10.181.40.144) with Microsoft SMTP Server id 15.1.2375.34 via Frontend
- Transport; Thu, 30 Mar 2023 01:53:11 -0500
-From:   Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S229470AbjC3IPj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 30 Mar 2023 04:15:39 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 925BE40C9;
+        Thu, 30 Mar 2023 01:15:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1680164137; x=1711700137;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Y59aS2iwIzFygngRIrw4Fw3tE/XzmwJj81XtUjvAhBE=;
+  b=Dnute8G+JxWI6+DZ2oBzpJILz1//RM/wP+FMAur85F4ubizrifKGCwpD
+   LQp8XzhNaB8Gh/NN0iZQPlYdy9g+07GwMYS2QBge2q0O/CK9T9rqz0H18
+   nXmk7JWgEi6n4ipusGzT2raaoQITNHwPt3z4dfvmwLfeXYNKnOJyzaj1d
+   oLg0GUUzDHZzVSERRBtOIm1jEIDlyQT+jvI0qbztJD/lOJ2LbYUeycRY9
+   bM1SgVmnz+C8zbp8+3TgtvbNaxyYzLFGRQcbOnzC9zGhGxCcVtR2w2Z3u
+   Zgm4r2p893FPeAXnxoQKWPdNWKoyYKF5FQybvtla1onRyk+Rky7PecTcK
+   A==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="342714662"
+X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
+   d="scan'208";a="342714662"
+Received: from fmsmga007.fm.intel.com ([10.253.24.52])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 01:15:36 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10664"; a="687144010"
+X-IronPort-AV: E=Sophos;i="5.98,303,1673942400"; 
+   d="scan'208";a="687144010"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.32.122])
+  by fmsmga007-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 30 Mar 2023 01:15:32 -0700
+Message-ID: <e806aad7-68f7-9e1d-7383-32b70d6afac2@intel.com>
+Date:   Thu, 30 Mar 2023 11:15:27 +0300
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.9.1
+Subject: Re: [PATCH v2 2/2] mmc: sdhci-of-arasan: Add support for eMMC5.1 on
+ Xilinx Versal Net platform
+Content-Language: en-US
+To:     Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <git@amd.com>,
-        <saikrishna12468@gmail.com>,
-        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-Subject: [PATCH v2 1/2] dt-bindings: mmc: arasan,sdci: Add Xilinx Versal Net compatible
-Date:   Thu, 30 Mar 2023 12:22:39 +0530
-Message-ID: <20230330065240.3532010-2-sai.krishna.potthuri@amd.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230330065240.3532010-1-sai.krishna.potthuri@amd.com>
+        Michal Simek <michal.simek@xilinx.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        git@amd.com, saikrishna12468@gmail.com,
+        Swati Agarwal <swati.agarwal@amd.com>
 References: <20230330065240.3532010-1-sai.krishna.potthuri@amd.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CO1NAM11FT023:EE_|IA0PR12MB7625:EE_
-X-MS-Office365-Filtering-Correlation-Id: 8d439acb-69e7-4389-9edd-08db30eb7f9e
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: YialoQDTP4McaGmwZxSIbHzRq8xx3FFEZOdDWrRh1NucPVjJZWrCUrTlRM5G+NXgGBEce9fysLIwZzrxJZJfUO+FfDkx6sL2KGF7SFexWyD7SOIJYia0f1TUTZvL2n6Oxzd7ymxgXPNdPJZVVrg31Ku4lkYJPDrfHi09B/UAlCLxNwVbepYnOn9omxPaKtGcoo+qyE1qcDtIY1Z4rzphuKPMDlPM37+QdiN+NWz0Lrvaj9lhGkN0mCjqiCnD8odb64KgteofKWglyF9zg/fgBZ457rWrU8H0Jcla+bneHLiV1ZWXbipD8XJRvHdOMKUfaL3DDRUlwm7V1v8MFRXkUJzxfQfmeSrqg2kkWbJ+4KQ+RhAdkwQPbkX6gNvDsPiN4hOgH824CGKqq00uwV/l/qy3+6C6qIO9Ft+xiJ8tt1A5N0LeFqEVSa+nMnoTJGBouJ+UqRP9NNa51fWYTeIe0noyqq5EqrJN3vLSozHzaRtTLd0khoxKbsPhgUvAx2vwXiTS8E55CcFyDJ+BEkOBPD+PcvC7ZMkcJPuWXiqXZ2WTMmhQPNJml7eNYJ7/Ch7qU2/Zqpv/oNul0uzFUXtMAPZKPLuNt1hHpWuPzLOBtk+tNixIVl+wZ15CP40KHjZN6b4UWCRB18xr94s1J+0UsHnEs5LrwDQeowPL0xDo3eOYJwFI0D/apD7XTOQu7v1amQSEOp0WI8JTYbCFBohw73/UafiCJg7Y7NJ3M4emZFU=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(136003)(346002)(396003)(39860400002)(376002)(451199021)(46966006)(36840700001)(40470700004)(41300700001)(8936002)(4326008)(5660300002)(2906002)(7416002)(82310400005)(40480700001)(86362001)(103116003)(36756003)(40460700003)(82740400003)(81166007)(356005)(316002)(478600001)(110136005)(54906003)(6666004)(70586007)(1076003)(26005)(336012)(2616005)(83380400001)(8676002)(70206006)(186003)(426003)(36860700001)(47076005)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 Mar 2023 06:53:41.8200
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 8d439acb-69e7-4389-9edd-08db30eb7f9e
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT023.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA0PR12MB7625
+ <20230330065240.3532010-3-sai.krishna.potthuri@amd.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230330065240.3532010-3-sai.krishna.potthuri@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add Xilinx Versal Net compatible to support eMMC 5.1 PHY.
+On 30/03/23 09:52, Sai Krishna Potthuri wrote:
+> From: Swati Agarwal <swati.agarwal@amd.com>
+> 
+> Add support for eMMC5.1 on Xilinx Versal Net platform
+> - Add new compatible string(xlnx,versal-net-emmc).
+> - Add support for PHY which is part of Host Controller register space.
+> - Add DLL and Delay Chain mode support and corresponding tap delays for
+> all eMMC modes.
+> - Add Strobe select tap for HS400 mode.
+> 
+> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
+> Co-developed-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 237 ++++++++++++++++++++++++++++-
+>  1 file changed, 236 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index deb67daf179f..d9a29c346745 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -41,11 +41,41 @@
+>  #define VENDOR_ENHANCED_STROBE		BIT(0)
+>  
+>  #define PHY_CLK_TOO_SLOW_HZ		400000
+> +#define MIN_PHY_CLK_HZ			50000000
+>  
+>  #define SDHCI_ITAPDLY_CHGWIN		0x200
+>  #define SDHCI_ITAPDLY_ENABLE		0x100
+>  #define SDHCI_OTAPDLY_ENABLE		0x40
+>  
+> +#define PHY_CTRL_REG1			0x270
+> +#define PHY_CTRL_ITAPDLY_ENA_MASK	BIT(0)
+> +#define PHY_CTRL_ITAPDLY_SEL_MASK	GENMASK(5, 1)
+> +#define PHY_CTRL_ITAPDLY_SEL_SHIFT	1
+> +#define PHY_CTRL_ITAP_CHG_WIN_MASK	BIT(6)
+> +#define PHY_CTRL_OTAPDLY_ENA_MASK	BIT(8)
+> +#define PHY_CTRL_OTAPDLY_SEL_MASK	GENMASK(15, 12)
+> +#define PHY_CTRL_OTAPDLY_SEL_SHIFT	12
+> +#define PHY_CTRL_STRB_SEL_MASK		GENMASK(23, 16)
+> +#define PHY_CTRL_STRB_SEL_SHIFT		16
+> +#define PHY_CTRL_TEST_CTRL_MASK		GENMASK(31, 24)
+> +
+> +#define PHY_CTRL_REG2			0x274
+> +#define PHY_CTRL_EN_DLL_MASK		BIT(0)
+> +#define PHY_CTRL_DLL_RDY_MASK		BIT(1)
+> +#define PHY_CTRL_FREQ_SEL_MASK		GENMASK(6, 4)
+> +#define PHY_CTRL_FREQ_SEL_SHIFT		4
+> +#define PHY_CTRL_SEL_DLY_TX_MASK	BIT(16)
+> +#define PHY_CTRL_SEL_DLY_RX_MASK	BIT(17)
+> +#define FREQSEL_200M_170M		0x0
+> +#define FREQSEL_170M_140M	        0x1
+> +#define FREQSEL_140M_110M	        0x2
+> +#define FREQSEL_110M_80M	        0x3
+> +#define FREQSEL_80M_50M			0x4
+> +#define FREQSEL_275M_250M		0x5
+> +#define FREQSEL_250M_225M		0x6
+> +#define FREQSEL_225M_200M		0x7
+> +#define PHY_DLL_TIMEOUT_MS		100
+> +
+>  /* Default settings for ZynqMP Clock Phases */
+>  #define ZYNQMP_ICLK_PHASE {0, 63, 63, 0, 63,  0,   0, 183, 54,  0, 0}
+>  #define ZYNQMP_OCLK_PHASE {0, 72, 60, 0, 60, 72, 135, 48, 72, 135, 0}
+> @@ -53,6 +83,11 @@
+>  #define VERSAL_ICLK_PHASE {0, 132, 132, 0, 132, 0, 0, 162, 90, 0, 0}
+>  #define VERSAL_OCLK_PHASE {0,  60, 48, 0, 48, 72, 90, 36, 60, 90, 0}
+>  
+> +#define VERSAL_NET_EMMC_ICLK_PHASE {0, 0, 0, 0, 0, 0, 0, 0, 39, 0, 0}
+> +#define VERSAL_NET_EMMC_OCLK_PHASE {0, 113, 0, 0, 0, 0, 0, 0, 113, 79, 45}
+> +
+> +#define VERSAL_NET_PHY_CTRL_STRB90_STRB180_VAL		0X77
+> +
+>  /*
+>   * On some SoCs the syscon area has a feature where the upper 16-bits of
+>   * each 32-bit register act as a write mask for the lower 16-bits.  This allows
+> @@ -135,6 +170,7 @@ struct sdhci_arasan_clk_data {
+>   * @clk_ahb:		Pointer to the AHB clock
+>   * @phy:		Pointer to the generic phy
+>   * @is_phy_on:		True if the PHY is on; false if not.
+> + * @internal_phy_reg:	True if the PHY is within the Host controller.
+>   * @has_cqe:		True if controller has command queuing engine.
+>   * @clk_data:		Struct for the Arasan Controller Clock Data.
+>   * @clk_ops:		Struct for the Arasan Controller Clock Operations.
+> @@ -147,6 +183,7 @@ struct sdhci_arasan_data {
+>  	struct clk	*clk_ahb;
+>  	struct phy	*phy;
+>  	bool		is_phy_on;
+> +	bool		internal_phy_reg;
+>  
+>  	bool		has_cqe;
+>  	struct sdhci_arasan_clk_data clk_data;
+> @@ -207,6 +244,61 @@ static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
+>  	.hiword_update = false,
+>  };
+>  
+> +static void sdhci_arasan_phy_set_delaychain(struct sdhci_host *host, bool enable)
+> +{
+> +	u32 reg;
+> +
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	if (enable)
+> +		reg |= (PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
+> +	else
+> +		reg &= ~(PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
+> +
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+> +}
+> +
+> +static int sdhci_arasan_phy_set_dll(struct sdhci_host *host, bool enable)
+> +{
+> +	u32 reg;
+> +
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	if (enable)
+> +		reg |= PHY_CTRL_EN_DLL_MASK;
+> +	else
+> +		reg &= ~PHY_CTRL_EN_DLL_MASK;
+> +
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+> +
+> +	if (!enable)
+> +		return 0;
+> +
+> +	return readl_relaxed_poll_timeout(host->ioaddr + PHY_CTRL_REG2, reg,
+> +					  (reg & PHY_CTRL_DLL_RDY_MASK), 10,
+> +					  1000 * PHY_DLL_TIMEOUT_MS);
+> +}
+> +
+> +static void sdhci_arasan_phy_dll_set_freq(struct sdhci_host *host, int clock)
+> +{
+> +	u32 reg, freq_sel, freq;
+> +
+> +	freq = DIV_ROUND_CLOSEST(clock, 1000000);
+> +	if (freq <= 200 && freq > 170)
+> +		freq_sel = FREQSEL_200M_170M;
+> +	else if (freq <= 170 && freq > 140)
+> +		freq_sel = FREQSEL_170M_140M;
+> +	else if (freq <= 140 && freq > 110)
+> +		freq_sel = FREQSEL_140M_110M;
+> +	else if (freq <= 110 && freq > 80)
+> +		freq_sel = FREQSEL_110M_80M;
+> +	else
+> +		freq_sel = FREQSEL_80M_50M;
+> +
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	reg &= ~PHY_CTRL_FREQ_SEL_MASK;
+> +	reg |= (freq_sel << PHY_CTRL_FREQ_SEL_SHIFT);
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+> +}
+> +
+>  /**
+>   * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
+>   *
+> @@ -321,11 +413,24 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	}
+>  
+>  	/* Set the Input and Output Clock Phase Delays */
+> -	if (clk_data->set_clk_delays)
+> +	if (clk_data->set_clk_delays && clock > PHY_CLK_TOO_SLOW_HZ)
 
-Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
----
- Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml | 5 +++++
- 1 file changed, 5 insertions(+)
+This change looks like it would affect other devices than 
+"xlnx,versal-net-emmc", in which case it should be a separate
+patch?
 
-diff --git a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-index 8296c34cfa00..9166ac061b44 100644
---- a/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-+++ b/Documentation/devicetree/bindings/mmc/arasan,sdhci.yaml
-@@ -27,6 +27,7 @@ allOf:
-             enum:
-               - xlnx,zynqmp-8.9a
-               - xlnx,versal-8.9a
-+              - xlnx,versal-net-emmc
-     then:
-       properties:
-         clock-output-names:
-@@ -62,6 +63,10 @@ properties:
-         description:
-           For this device it is strongly suggested to include
-           clock-output-names and '#clock-cells'.
-+      - const: xlnx,versal-net-emmc     # Versal Net eMMC PHY
-+        description:
-+          For this device it is strongly suggested to include
-+          clock-output-names and '#clock-cells'.
-       - items:
-           - const: intel,lgm-sdhci-5.1-emmc     # Intel LGM eMMC PHY
-           - const: arasan,sdhci-5.1
--- 
-2.25.1
+>  		clk_data->set_clk_delays(host);
+>  
+> +	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ) {
+> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +		sdhci_arasan_phy_set_dll(host, 0);
+> +		sdhci_arasan_phy_set_delaychain(host, 0);
+> +		sdhci_arasan_phy_dll_set_freq(host, clock);
+> +	} else if (sdhci_arasan->internal_phy_reg) {
+> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +		sdhci_arasan_phy_set_delaychain(host, 1);
+> +	}
+> +
+>  	sdhci_set_clock(host, clock);
+>  
+> +	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ)
+> +		sdhci_arasan_phy_set_dll(host, 1);
+> +
+>  	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+>  		/*
+>  		 * Some controllers immediately report SDHCI_CLOCK_INT_STABLE
+> @@ -897,6 +1002,101 @@ static const struct clk_ops versal_sampleclk_ops = {
+>  	.set_phase = sdhci_versal_sampleclk_set_phase,
+>  };
+>  
+> +static int sdhci_versal_net_emmc_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
+> +{
+> +	struct sdhci_arasan_clk_data *clk_data =
+> +		container_of(hw, struct sdhci_arasan_clk_data, sdcardclk_hw);
+> +	struct sdhci_arasan_data *sdhci_arasan =
+> +		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+> +	struct sdhci_host *host = sdhci_arasan->host;
+> +	u8 tap_delay, tap_max = 0;
+> +
+> +	switch (host->timing) {
+> +	case MMC_TIMING_MMC_HS:
+> +	case MMC_TIMING_MMC_DDR52:
+> +		tap_max = 16;
+> +		break;
+> +	case MMC_TIMING_MMC_HS200:
+> +	case MMC_TIMING_MMC_HS400:
+> +		 /* For 200MHz clock, 32 Taps are available */
+> +		tap_max = 32;
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	tap_delay = (degrees * tap_max) / 360;
+> +
+> +	/* Set the Clock Phase */
+> +	if (tap_delay) {
+> +		u32 regval;
+> +
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_OTAPDLY_ENA_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_OTAPDLY_SEL_MASK;
+> +		regval |= tap_delay << PHY_CTRL_OTAPDLY_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct clk_ops versal_net_sdcardclk_ops = {
+> +	.recalc_rate = sdhci_arasan_sdcardclk_recalc_rate,
+> +	.set_phase = sdhci_versal_net_emmc_sdcardclk_set_phase,
+> +};
+> +
+> +static int sdhci_versal_net_emmc_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+> +{
+> +	struct sdhci_arasan_clk_data *clk_data =
+> +		container_of(hw, struct sdhci_arasan_clk_data, sampleclk_hw);
+> +	struct sdhci_arasan_data *sdhci_arasan =
+> +		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+> +	struct sdhci_host *host = sdhci_arasan->host;
+> +	u8 tap_delay, tap_max = 0;
+> +	u32 regval;
+> +
+> +	switch (host->timing) {
+> +	case MMC_TIMING_MMC_HS:
+> +	case MMC_TIMING_MMC_DDR52:
+> +		tap_max = 32;
+> +		break;
+> +	case MMC_TIMING_MMC_HS400:
+> +		/* Strobe select tap point for strb90 and strb180 */
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_STRB_SEL_MASK;
+> +		regval |= VERSAL_NET_PHY_CTRL_STRB90_STRB180_VAL << PHY_CTRL_STRB_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	tap_delay = (degrees * tap_max) / 360;
+> +
+> +	/* Set the Clock Phase */
+> +	if (tap_delay) {
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_ITAP_CHG_WIN_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_ITAPDLY_ENA_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_ITAPDLY_SEL_MASK;
+> +		regval |= tap_delay << PHY_CTRL_ITAPDLY_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_ITAP_CHG_WIN_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct clk_ops versal_net_sampleclk_ops = {
+> +	.recalc_rate = sdhci_arasan_sampleclk_recalc_rate,
+> +	.set_phase = sdhci_versal_net_emmc_sampleclk_set_phase,
+> +};
+> +
+>  static void arasan_zynqmp_dll_reset(struct sdhci_host *host, u32 deviceid)
+>  {
+>  	u16 clk;
+> @@ -1107,7 +1307,17 @@ static void arasan_dt_parse_clk_phases(struct device *dev,
+>  			clk_data->clk_phase_out[i] = versal_oclk_phase[i];
+>  		}
+>  	}
+> +	if (of_device_is_compatible(dev->of_node, "xlnx,versal-net-emmc")) {
+> +		u32 versal_net_iclk_phase[MMC_TIMING_MMC_HS400 + 1] =
+> +			VERSAL_NET_EMMC_ICLK_PHASE;
+> +		u32 versal_net_oclk_phase[MMC_TIMING_MMC_HS400 + 1] =
+> +			VERSAL_NET_EMMC_OCLK_PHASE;
+>  
+> +		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
+> +			clk_data->clk_phase_in[i] = versal_net_iclk_phase[i];
+> +			clk_data->clk_phase_out[i] = versal_net_oclk_phase[i];
+> +		}
+> +	}
+>  	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_LEGACY,
+>  				 "clk-phase-legacy");
+>  	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS,
+> @@ -1225,6 +1435,14 @@ static const struct sdhci_pltfm_data sdhci_arasan_zynqmp_pdata = {
+>  			SDHCI_QUIRK2_STOP_WITH_TC,
+>  };
+>  
+> +static const struct sdhci_pltfm_data sdhci_arasan_versal_net_pdata = {
+> +	.ops = &sdhci_arasan_ops,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +			SDHCI_QUIRK2_STOP_WITH_TC |
+> +			SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+> +};
+> +
+>  static const struct sdhci_arasan_clk_ops zynqmp_clk_ops = {
+>  	.sdcardclk_ops = &zynqmp_sdcardclk_ops,
+>  	.sampleclk_ops = &zynqmp_sampleclk_ops,
+> @@ -1245,6 +1463,16 @@ static struct sdhci_arasan_of_data sdhci_arasan_versal_data = {
+>  	.clk_ops = &versal_clk_ops,
+>  };
+>  
+> +static const struct sdhci_arasan_clk_ops versal_net_clk_ops = {
+> +	.sdcardclk_ops = &versal_net_sdcardclk_ops,
+> +	.sampleclk_ops = &versal_net_sampleclk_ops,
+> +};
+> +
+> +static struct sdhci_arasan_of_data sdhci_arasan_versal_net_data = {
+> +	.pdata = &sdhci_arasan_versal_net_pdata,
+> +	.clk_ops = &versal_net_clk_ops,
+> +};
+> +
+>  static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
+>  	.soc_ctl_map = &intel_keembay_soc_ctl_map,
+>  	.pdata = &sdhci_keembay_emmc_pdata,
+> @@ -1314,6 +1542,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+>  		.compatible = "xlnx,versal-8.9a",
+>  		.data = &sdhci_arasan_versal_data,
+>  	},
+> +	{
+> +		.compatible = "xlnx,versal-net-emmc",
+> +		.data = &sdhci_arasan_versal_net_data,
+> +	},
+>  	{ /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
+> @@ -1788,6 +2020,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  			host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+>  	}
+>  
+> +	if (of_device_is_compatible(np, "xlnx,versal-net-emmc"))
+> +		sdhci_arasan->internal_phy_reg = true;
+> +
+>  	ret = sdhci_arasan_add_host(sdhci_arasan);
+>  	if (ret)
+>  		goto err_add_host;
 
