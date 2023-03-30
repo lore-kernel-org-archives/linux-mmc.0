@@ -2,111 +2,111 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75683C74A5B
-	for <linux-mmc@archiver.kernel.org>; Wed, 29 Mar 2023 23:48:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 748A0C761A6
+	for <linux-mmc@archiver.kernel.org>; Thu, 30 Mar 2023 00:09:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230173AbjC2XsI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 29 Mar 2023 19:48:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49912 "EHLO
+        id S229607AbjC3AJf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 29 Mar 2023 20:09:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35910 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229462AbjC2XsH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 19:48:07 -0400
-Received: from mail-pj1-f46.google.com (mail-pj1-f46.google.com [209.85.216.46])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98C423C1E;
-        Wed, 29 Mar 2023 16:48:06 -0700 (PDT)
-Received: by mail-pj1-f46.google.com with SMTP id lr16-20020a17090b4b9000b0023f187954acso17889294pjb.2;
-        Wed, 29 Mar 2023 16:48:06 -0700 (PDT)
+        with ESMTP id S229631AbjC3AJd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 29 Mar 2023 20:09:33 -0400
+Received: from mail-pg1-x52e.google.com (mail-pg1-x52e.google.com [IPv6:2607:f8b0:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DBC84202
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 17:09:32 -0700 (PDT)
+Received: by mail-pg1-x52e.google.com with SMTP id x37so10346163pga.1
+        for <linux-mmc@vger.kernel.org>; Wed, 29 Mar 2023 17:09:32 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680134971;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=/f6kuz/aoEQ4OdZFUZeQhJ2qbcXsJoCNBezisNQzSyA=;
+        b=5Kg0RdKhyt1ID55+N/2TYj6ASuDLlE9kRuP0jfiHD4WW7DHikuXWKM2Wa7enwDIIr2
+         gHlkiUBISnQXA9MZiTvb2L7nCORsEoGs6XoF+wsbiSQtLp/7J6DseD+18SbWFxpI4biV
+         hQqxeFg7tKw1YsyWeuU8P/xbxdpa4pmuQPIoHXo3alTyYmN6tUAtJ7Xt8GHhts7ujCmH
+         nmucmTfbtQPVS1TZsAvug12n2oGmAGh4M7rY4dAn9wuJiBRL/PWq59a3lMLkVvET/tI6
+         1/jqnqK85F1+ixeZDTcYh4MwV0DmzPcq1a9gFhhYTKq6jpWEoILS9qgt94YioVUj+1wr
+         w+fg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680133686;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=7ETYu9f3O7bRoQnr7/k7PLVrkbB1GMeAB1+nXGIoc5o=;
-        b=iRI/dFowb/m0oJsln98s1Zh6mfmPsRdbtf1nvZSX9l9fJ/73lqbptBUFzlVZ+uFtDn
-         jqgpnRMrIFQM/EaOQXAZY/tyXRFVYt88CNWhowJdTB0X5i1xgDFjMFF/V6E2Et5IeISm
-         Ey4uKhA5ZXiCx45Fe3kPiKENijwhGZ9OJRy9P6aTMmZXXClIXStaMqFBKTIk0O34b8b+
-         xlHlEuwJQSju/XABmtJfV//oFmbMHZ5+z+mfKx8497Ew++9ktbvFqhLb1FQhpoqeR/Ap
-         90e4ioE1yepgP+GyygZCBWv5NGk11FysjmKzsvLLjP5zP5jBCZFIClxTQF9DfzVJeTpB
-         fAYA==
-X-Gm-Message-State: AAQBX9fLUuyLPox2rYpXrVCVOMIjK8wPVGVAL47+/uvnhRiYx/OELbw1
-        xEjFSNZW6+vfq+E0quwxoCQb3XidEu5wnw==
-X-Google-Smtp-Source: AKy350aA/nKzBf/dNWMtkLWggrUUufSqsxTj3eNZu3/Cugd4hGWziglradj5hIni77zV0BT96w7Ykw==
-X-Received: by 2002:a17:90b:4c12:b0:23f:7dfb:7dc1 with SMTP id na18-20020a17090b4c1200b0023f7dfb7dc1mr22878981pjb.33.1680133685493;
-        Wed, 29 Mar 2023 16:48:05 -0700 (PDT)
-Received: from snowbird ([199.73.127.3])
-        by smtp.gmail.com with ESMTPSA id q59-20020a17090a1b4100b00233acae2ce6sm1931922pjq.23.2023.03.29.16.48.04
+        d=1e100.net; s=20210112; t=1680134971;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=/f6kuz/aoEQ4OdZFUZeQhJ2qbcXsJoCNBezisNQzSyA=;
+        b=HYHQnBDKBwOZV3pBfRDshvGz81LK+ZzLTkvg5rF3cqXSU6OGmLP69qV8ZDmFdyXsD7
+         rPcKduSnvAoEfrQ30vKio0aQW+miU9LQplyqdZxVn6eVaa6IpKc4uQFumqoY3ZLkuhHV
+         iP/njxqrYjXY8lyzco3P6wlfNQ9CwrfeYcgryd4Q2kX8CKxlox6fRJbrSvL+m1ZcRB+m
+         zVvAhI6UA7jYta8mHBOTDxFrzrWOsW/bTd4yoEc12Fq0M1tDVCl7jdY9rKXRJknv5Sow
+         1a++Ua+Ltv4SkXHn4wjVdworiJwL0ojEWoXZ5Sct0NBXOhUwipMtL+nDm+BbY26h566b
+         Slmw==
+X-Gm-Message-State: AAQBX9cm0dU0QW0lsQScNlJDK2/0GSRjn+k+vQWPVNynZ+supfdASel9
+        uisZwRg2YcTuwnw6PJw0rZoYYw==
+X-Google-Smtp-Source: AKy350ZqpWfQPvqSLpocQ8IdxE8V92Qac7/wDI/66IsLf2Y5AbMcbw++dG5+dtf9jgtCifCda5nNOg==
+X-Received: by 2002:a62:1885:0:b0:623:d058:8661 with SMTP id 127-20020a621885000000b00623d0588661mr17961473pfy.28.1680134971465;
+        Wed, 29 Mar 2023 17:09:31 -0700 (PDT)
+Received: from localhost (63-228-113-140.tukw.qwest.net. [63.228.113.140])
+        by smtp.gmail.com with ESMTPSA id p14-20020a62ab0e000000b0062505afff9fsm23574889pff.126.2023.03.29.17.09.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 29 Mar 2023 16:48:05 -0700 (PDT)
-Date:   Wed, 29 Mar 2023 16:48:01 -0700
-From:   Dennis Zhou <dennis@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <ZCTOMVjW+pnZVGsQ@snowbird>
-References: <20230329202148.71107-1-dennis@kernel.org>
+        Wed, 29 Mar 2023 17:09:30 -0700 (PDT)
+From:   Kevin Hilman <khilman@baylibre.com>
+To:     Alexandre Mergnat <amergnat@baylibre.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        Bernhard =?utf-8?Q?Rosenkr=C3=A4n?= =?utf-8?Q?zer?= 
+        <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Alexandre Mergnat <amergnat@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v3 00/17] Improve the MT8365 SoC and EVK board support
+In-Reply-To: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
+References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
+Date:   Wed, 29 Mar 2023 17:09:30 -0700
+Message-ID: <7h8rffyu9x.fsf@baylibre.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230329202148.71107-1-dennis@kernel.org>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-When using dm-verity with a data partition on an emmc device, dm-verity
-races with the discovery of attached emmc devices. This is because mmc's
-probing code sets up the host data structure then a work item is
-scheduled to do discovery afterwards. To prevent this race on init,
-let's inline the first call to detection, __mm_scan(), and let
-subsequent detect calls be handled via the workqueue.
+Alexandre Mergnat <amergnat@baylibre.com> writes:
 
-Signed-off-by: Dennis Zhou <dennis@kernel.org>
----
-Sigh.. fix missing static declaration.
+> This commits are based on the Fabien Parent <fparent@baylibre.com> work.
+>
+> The purpose of this series is to add the following HWs / IPs support for
+> the mt8365-evk board:
+> - Watchdog
+> - Power Management Integrated Circuit "PMIC" wrapper
+>   - MT6357 PMIC
+> - MultiMediaCard "MMC" & Secure Digital "SD" controller
+> - USB controller
+> - Ethernet MAC controller
+>
+> Add CPU Freq & IDLE support for this board.
+>
+> This series depends to another one which add support for MT8365 SoC and
+> EVK board [1].
 
- drivers/mmc/core/core.c | 15 +++++++++++----
- 1 file changed, 11 insertions(+), 4 deletions(-)
+It seems to depend on more than that series.  In order to test this, I
+tried applying this series on top of Bero's minimal support (now in
+linux-next), and it does not apply cleanly.
 
-diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-index 368f10405e13..fda7ee57dee3 100644
---- a/drivers/mmc/core/core.c
-+++ b/drivers/mmc/core/core.c
-@@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
- }
- EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
- 
--void mmc_rescan(struct work_struct *work)
-+static void __mmc_rescan(struct mmc_host *host)
- {
--	struct mmc_host *host =
--		container_of(work, struct mmc_host, detect.work);
- 	int i;
- 
- 	if (host->rescan_disable)
-@@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
- 		mmc_schedule_delayed_work(&host->detect, HZ);
- }
- 
-+void mmc_rescan(struct work_struct *work)
-+{
-+	struct mmc_host *host =
-+		container_of(work, struct mmc_host, detect.work);
-+
-+	__mmc_rescan(host);
-+}
-+
- void mmc_start_host(struct mmc_host *host)
- {
- 	host->f_init = max(min(freqs[0], host->f_max), host->f_min);
-@@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
- 	}
- 
- 	mmc_gpiod_request_cd_irq(host);
--	_mmc_detect_change(host, 0, false);
-+	host->detect_change = 1;
-+	__mmc_rescan(host);
- }
- 
- void __mmc_stop_host(struct mmc_host *host)
--- 
-2.40.0
+Could you please list all the dependencies that are not yet upstream.
 
+Thanks,
+
+Kevin
