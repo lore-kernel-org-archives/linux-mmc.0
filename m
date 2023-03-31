@@ -2,428 +2,432 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E891C761A6
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 20:48:23 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7BC2C77B6C
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 22:26:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230193AbjCaUsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 16:48:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58472 "EHLO
+        id S231912AbjCaW0z (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 18:26:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53036 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229988AbjCaUsV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 16:48:21 -0400
-Received: from domac.alu.hr (domac.alu.unizg.hr [IPv6:2001:b68:2:2800::3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A114448B;
-        Fri, 31 Mar 2023 13:48:18 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by domac.alu.hr (Postfix) with ESMTP id D66E460515;
-        Fri, 31 Mar 2023 22:48:16 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680295696; bh=fS91/3cPwJF5+zHbhFgdBHeVwCJg8/LbQ5WlJ+kivfo=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=NfYm271B/pt548o24aZ69dE9AIVPcZRO4vmTJPFlndsqFIFQoJfhl/20yhLdBoM0b
-         LQGhMSU6jq5PkO0YDMnBYtIrHmhcTXB4Tj6c4BHi3Y9BjeofmiqxEjbjvYiAhv2OND
-         i2GDtNS0tSm3Blt9xi1uoRh9f5fo52QgHQsIG9rE4HqjuNYsidrdS7YdXvYOkLcqBE
-         +XwDZyVhqsv0it3tjcRw8ERvvEngIeJV+QlWPB3XwTZaGLBf6wTFPW3LTkj8Zq5YHH
-         IIzT6Q2jzkHGNMRwsZwIlIZEI2vR1C4Xq7vSCpJFQ05G8OodMwrFDcF1Ys9zSTmklv
-         Psne/w2WU7cjQ==
-X-Virus-Scanned: Debian amavisd-new at domac.alu.hr
-Received: from domac.alu.hr ([127.0.0.1])
-        by localhost (domac.alu.hr [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id heKpXYI2-ECE; Fri, 31 Mar 2023 22:48:13 +0200 (CEST)
-Received: from [192.168.1.4] (unknown [77.237.101.225])
-        by domac.alu.hr (Postfix) with ESMTPSA id D2D1D60514;
-        Fri, 31 Mar 2023 22:48:10 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680295693; bh=fS91/3cPwJF5+zHbhFgdBHeVwCJg8/LbQ5WlJ+kivfo=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=G/nkr3megpThabjOXE9WWbUIYSCqZmc81iy2AZVGjVmdeBEuK9eB8/FBw1TefXFkU
-         lOQuCdv2L8Hd9/DdiFgKVSup410flZwusVXLowPWKIrytot9b74RWyBQ1vbtzHcbHE
-         srfxjvqMYfUrwnEmhPT9UwYUNC5paCzyxwqV+cL75CDdmDQdyyid0iqs3Po9vqBISl
-         6ZKsy+xzMvd+OYy4wlrcvCGz9bm/mZ8cwp/GdFgN8LgZU7e3GnuRLAwtjERwIB6yl0
-         FDx2+dw4IJAfkQY6WFflQpUuGj7CCrG+HBA7PD84B7TKnRhA8uwpvaSuUkn2GodGKA
-         WqGx75ACQkSWQ==
-Message-ID: <d0d9ac65-a692-4e4e-d721-2ea709e9d4ae@alu.unizg.hr>
-Date:   Fri, 31 Mar 2023 22:48:10 +0200
+        with ESMTP id S229909AbjCaW0y (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 18:26:54 -0400
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2041.outbound.protection.outlook.com [40.107.94.41])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2952D1EA02;
+        Fri, 31 Mar 2023 15:26:53 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=LaVr02sTaQcKvJIUHePjdYYSxreBPuvH3BMt3tR+CzoRhGhhdbqauq6hUgwx4apQlnfIL5+r7Zv3aeDMJ91pbcrqwe1yUxbuSaIiRym8jKATSY0ucvwDw+fjWdcF7YOMW9IQvq/si3lC8MBZNoRrXrtgsdGRB3f1rT9y4L1c2iyq5xXBJmeYrvfgnYOKwzID9OAMeZccc3QXRMtR9Z4HDjvYjHAswZl3YGdO1I5+0iDccvFQlLGmiU9fNy+cZAPAXVrcgrzyXJaysgY56laYEjkIXJ+KzNrpuKDK9b08pdW5Dqf0MHOWJvkbXWG+Ya/mTgmikLYs6bVY6WCpewnW3Q==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=n+uGch/gunkBudLYZUnokyTAsyvZyh6X+7w/D5fLpHU=;
+ b=nGIJzVS4js86UmevWkCzlXD3V2uUYnzuU6a/5p/0MYcMzLKMeGLEOaYaCJAiH3oOd1ADpZ7dMxiTAc4OL5nmm7oAhGJ0QTli74UbhB5gm8wjtFtmDGLLvMVKUxMCOWJNJKBkCEPkOnWC+w20OjxatRODhEArcvJYh30AJ4H5m5oOqUnVt70JnrqTEaf3j52j8ivGSGPS7KA/xhTN3XLLHqiU3OKnyEU02GJ7y+glzMNVV0lF8SQtr7BTqe86H7WvPU1VmGwDHFjJ3b3cDEYdY4UkhhDj/m490zfJCCPeMwY18c5TcQAL+X5zZZdyFZunjUArRvuI5SX6++h6tYVYQg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=gmail.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=n+uGch/gunkBudLYZUnokyTAsyvZyh6X+7w/D5fLpHU=;
+ b=2hqV4aROb7/LdwjJxniMEowHiM7iZp52t96WlaoyL1ueHtt9ALv1PNTN+J7LgFMfaDcRPUeCNygEP4QBFQ0D1jt3melvpYDinL9feCJDrBc4lfUYD5R7yUPK4cBNOYapqy5SS2mgmqd/eRh3p5Kpi1s0s+E0K/FI5mRrbsOg9+g=
+Received: from DS7PR03CA0144.namprd03.prod.outlook.com (2603:10b6:5:3b4::29)
+ by SJ0PR12MB8091.namprd12.prod.outlook.com (2603:10b6:a03:4d5::21) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.22; Fri, 31 Mar
+ 2023 22:26:50 +0000
+Received: from DM6NAM11FT094.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3b4:cafe::1b) by DS7PR03CA0144.outlook.office365.com
+ (2603:10b6:5:3b4::29) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.20 via Frontend
+ Transport; Fri, 31 Mar 2023 22:26:50 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ DM6NAM11FT094.mail.protection.outlook.com (10.13.172.195) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6254.20 via Frontend Transport; Fri, 31 Mar 2023 22:26:50 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Fri, 31 Mar 2023 17:26:47 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <andy.shevchenko@gmail.com>
+CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>, <arnd@arndb.de>,
+        <blarson@amd.com>, <brendan.higgins@linux.dev>,
+        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
+        <broonie@kernel.org>, <catalin.marinas@arm.com>,
+        <davidgow@google.com>, <devicetree@vger.kernel.org>,
+        <fancer.lancer@gmail.com>, <gerg@linux-m68k.org>,
+        <gsomlo@gmail.com>, <krzk@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
+        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
+        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
+        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
+        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <will@kernel.org>,
+        <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v12 15/15] soc: amd: Add support for AMD Pensando SoC Controller
+Date:   Fri, 31 Mar 2023 15:26:41 -0700
+Message-ID: <20230331222641.38009-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <CAHp75VcbDBUf2cH_6rRqn5RCGSEOWqE85Yn3gDhYiJPhGf1S=Q@mail.gmail.com>
+References: <CAHp75VcbDBUf2cH_6rRqn5RCGSEOWqE85Yn3gDhYiJPhGf1S=Q@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.8.0
-Subject: Re: BUG FIX: [PATCH RFC v2] memstick_check() memleak in kernel 6.1.0+
- introduced pre 4.17
-Content-Language: en-US, hr
-To:     Greg KH <gregkh@linuxfoundation.org>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Thorsten Leemhuis <regressions@leemhuis.info>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        Hannes Reinecke <hare@suse.de>,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>,
-        ye xingchen <ye.xingchen@zte.com.cn>, linux-mmc@vger.kernel.org
-References: <7d873dd3-9bab-175b-8158-c458b61a7122@alu.unizg.hr>
- <f74219a7-1607-deb4-a6ae-7b73e2467ac7@alu.unizg.hr>
- <df560535-2a8e-de21-d45d-805159d70954@alu.unizg.hr>
- <2023033124-causing-cassette-4d96@gregkh>
-From:   Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-In-Reply-To: <2023033124-causing-cassette-4d96@gregkh>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DM6NAM11FT094:EE_|SJ0PR12MB8091:EE_
+X-MS-Office365-Filtering-Correlation-Id: cee2fa23-36eb-444c-7a25-08db323705b9
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: DBXLH+xfqQPQ1z4o9OwxtkkkckCYImkvvE35aS/z+ng5TbwOFVaEe570mWBdox+FWo+HWPFWlaQf42QGwWeSpdIiGwVnUilY1L7ZP8NJpZgD+TH1kLXm5VOpBwUObXU5KCcY+FWIWq1MhLHTk9G1dB1dWv6fWA8/RJmLrfWRd8YKIsOa5gh0zvyPcO5BMBPZhiMSETI6HNIcjPbPt/Kt+u0JLtAKwEL5liP3lVtXhTw3SC+ASMYcDqt4ZWpa+NRcg5RZl9asOJo0/ge8s6FzbXN1NRdeK/nbI0haUWM4k3VlKslYgBMlr93IrCs/6walv2odjf0d1z6Ni2meoPP9mOCb2HhtIM12dRnSNoP78gtMjJjsyaWYrKTDDNqiQFg64yz1Ee26iZ5Oh7HoAohdPrTKeyf60BVDoS19qfWoaYYrbavJ9O3kNLPsxTz8aUSw9w7FA++pwzltMYEIz7FiZbzpt2zClk3dqggKkS3gCdOWFcfHm4oIhwFhaQyz103fWciGkEPS41lBzDOsVHHWHB8qBC9sq8VOXcedGxxhBXTQwhHGvZohz5lCT1hXpHv+sYQBxhsTbL46tKVRRsL5moNSe3OTHczmVctW/D32vq+IgXL634U2218Is6KBlaiVOgwgkySivQjRj1JnNd6dFhbWS9hYGvl7/YsqEcNIA3xG8gcOQXiB757lhb9s/mSqfBoiRpY/EWfQRjEwEOibH1Cp1mvEpah9sPSBmB/6FWU=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(346002)(39860400002)(396003)(136003)(376002)(451199021)(40470700004)(46966006)(36840700001)(316002)(1076003)(26005)(53546011)(40460700003)(81166007)(356005)(8676002)(36756003)(8936002)(6666004)(41300700001)(70206006)(6916009)(70586007)(5660300002)(4326008)(82740400003)(82310400005)(40480700001)(54906003)(36860700001)(478600001)(7406005)(7416002)(2906002)(47076005)(2616005)(336012)(186003)(66899021)(426003)(16526019)(83380400001)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 31 Mar 2023 22:26:50.2907
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: cee2fa23-36eb-444c-7a25-08db323705b9
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT094.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: SJ0PR12MB8091
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 31. 03. 2023. 18:32, Greg KH wrote:
-> On Fri, Mar 31, 2023 at 04:46:03PM +0200, Mirsad Goran Todorovac wrote:
->> On 29.3.2023. 19:25, Mirsad Goran Todorovac wrote:
->>> On 23.12.2022. 14:20, Mirsad Goran Todorovac wrote:
->>>> Hi all,
->>>>
->>>> When building a RPM 6.1.0-rc3 for AlmaLinux 8.6, I have enabled CONFIG_DEBUG_KMEMLEAK=y
->>>> and the result showed an unreferenced object in kworker process:
->>>>
->>>> cat /sys/kernel/debug/kmemleak
->>>> unreferenced object 0xffff888105028d80 (size 16):
->>>>    comm "kworker/u12:5", pid 359, jiffies 4294902898 (age 1620.144s)
->>>>    hex dump (first 16 bytes):
->>>>      6d 65 6d 73 74 69 63 6b 30 00 00 00 00 00 00 00  memstick0.......
->>>>    backtrace:
->>>>      [<ffffffffb6bb5542>] slab_post_alloc_hook+0xb2/0x340
->>>>      [<ffffffffb6bbbf5f>] __kmem_cache_alloc_node+0x1bf/0x2c0
->>>>      [<ffffffffb6af8175>] __kmalloc_node_track_caller+0x55/0x160
->>>>      [<ffffffffb6ae34a6>] kstrdup+0x36/0x60
->>>>      [<ffffffffb6ae3508>] kstrdup_const+0x28/0x30
->>>>      [<ffffffffb70d0757>] kvasprintf_const+0x97/0xd0
->>>>      [<ffffffffb7c9cdf4>] kobject_set_name_vargs+0x34/0xc0
->>>>      [<ffffffffb750289b>] dev_set_name+0x9b/0xd0
->>>>      [<ffffffffc12d9201>] memstick_check+0x181/0x639 [memstick]
->>>>      [<ffffffffb676e1d6>] process_one_work+0x4e6/0x7e0
->>>>      [<ffffffffb676e556>] worker_thread+0x76/0x770
->>>>      [<ffffffffb677b468>] kthread+0x168/0x1a0
->>>>      [<ffffffffb6604c99>] ret_from_fork+0x29/0x50
->>>>
->>>> mtodorov@domac:~/linux/kernel/linux_stable$ git bisect log
->>>> git bisect start
->>>> # bad: [f0c4d9fc9cc9462659728d168387191387e903cc] Linux 6.1-rc4
->>>> git bisect bad f0c4d9fc9cc9462659728d168387191387e903cc
->>>> # bad: [fbd56ddcecab5a3623a89c8e941fdbcc55b41045] Linux 6.0.1
->>>> git bisect bad fbd56ddcecab5a3623a89c8e941fdbcc55b41045
->>>> # bad: [7e18e42e4b280c85b76967a9106a13ca61c16179] Linux 6.0-rc4
->>>> git bisect bad 7e18e42e4b280c85b76967a9106a13ca61c16179
->>>> # bad: [568035b01cfb107af8d2e4bd2fb9aea22cf5b868] Linux 6.0-rc1
->>>> git bisect bad 568035b01cfb107af8d2e4bd2fb9aea22cf5b868
->>>> # bad: [84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d] Linux 4.19
->>>> git bisect bad 84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d
->>>> # bad: [94710cac0ef4ee177a63b5227664b38c95bbf703] Linux 4.18
->>>> git bisect bad 94710cac0ef4ee177a63b5227664b38c95bbf703
->>>> # bad: [29dcea88779c856c7dc92040a0c01233263101d4] Linux 4.17
->>>> git bisect bad 29dcea88779c856c7dc92040a0c01233263101d4
->>>>
->>>> Greg asked me if I would help bisect the bug, since I failed to
->>>> reproduce it on pre 4.17 kernels, because they wouldn't boot (black
->>>> screen) on the Lenovo ALmaLinux 8.7 (CentOS fork) desktop box that
->>>> only reproduced that bug:
->>>>
->>>>      product: 10TX000VCR (LENOVO_MT_10TX_BU_Lenovo_FM_V530S-07ICB)
->>>>      vendor: LENOVO
->>>>      version: V530S-07ICB
->>>>
->>>> I would welcome any advice.
->>>>
->>>> Please find attached the lshw output and the build config from the
->>>> last kernel version that also exhibits this bug, so the conclusion
->>>> is that it is not fixed since the report on November 29th 2022:
->>>>
->>>> https://lore.kernel.org/regressions/0d9c3f6c-3948-d5d1-bcc1-baf31141beaa@alu.unizg.hr/T/#t
->>>>
->>>> With the hint of Tvrtko, I was able to extract the correct list of maintainers this time.
->>>>
->>>> The bug occurs in one kernel memory leak, and it is unobvious
->>>> whether a skilled attacker could use an abusive program to trigger
->>>> the leak of enough 16 byte slabs (and overhead) to exhaust kernel
->>>> memory and cause denial-of-service (crash of the system).
->>>>
->>>> I apologise for the first unsuccessful attempt.
->>>
->>> static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
->>>
->>> calls dev_set_name(&card->dev, "%s", dev_name(&host->dev)); that
->>> calls err = kobject_set_name_vargs(&dev->kobj, fmt, vargs); that
->>> executes:
->>>
->>>      if (strchr(s, '/')) {
->>>          char *t;
->>>
->>>          t = kstrdup(s, GFP_KERNEL);
->>>          kfree_const(s);
->>>          if (!t)
->>>              return -ENOMEM;
->>>          strreplace(t, '/', '!');
->>>          s = t;
->>>      }
->>>      kfree_const(kobj->name);
->>>      kobj->name = s;
->>>
->>> so, this kobj->name was never freed in the "goto err_out" case in line 404.
->>>
->>> 380 static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
->>> 381 {
->>> 382         struct memstick_dev *card = kzalloc(sizeof(struct memstick_dev),
->>> 383                                             GFP_KERNEL);
->>> 384         struct memstick_dev *old_card = host->card;
->>> 385         struct ms_id_register id_reg;
->>> 386
->>> 387         if (card) {
->>> 388                 card->host = host;
->>> 389                 dev_set_name(&card->dev, "%s", dev_name(&host->dev));
->>> 390                 card->dev.parent = &host->dev;
->>> 391                 card->dev.bus = &memstick_bus_type;
->>> 392                 card->dev.release = memstick_free_card;
->>> 393                 card->check = memstick_dummy_check;
->>> 394
->>> 395                 card->reg_addr.r_offset = offsetof(struct ms_register, id);
->>> 396                 card->reg_addr.r_length = sizeof(id_reg);
->>> 397                 card->reg_addr.w_offset = offsetof(struct ms_register, id);
->>> 398                 card->reg_addr.w_length = sizeof(id_reg);
->>> 399
->>> 400                 init_completion(&card->mrq_complete);
->>> 401
->>> 402                 host->card = card;
->>> 403                 if (memstick_set_rw_addr(card))
->>> 404                         goto err_out;
->>> 405
->>> 406                 card->next_request = h_memstick_read_dev_id;
->>> 407                 memstick_new_req(host);
->>> 408                 wait_for_completion(&card->mrq_complete);
->>> 409
->>> 410                 if (card->current_mrq.error)
->>> 411                         goto err_out;
->>> 412         }
->>> 413         host->card = old_card;
->>> 414         return card;
->>> 415 err_out:
->>> 416         host->card = old_card;
->>> 421         kfree(card);
->>> 422         return NULL;
->>> 423 }
->>>
->>> This little patch fixes it, also at the release() method.
->>>
->>> However, release() had not yet been tested, and I am not certain that in that case
->>> kobj->name would not be kfree_const()-ed automatically.
->>>
->>> Maybe it ought to be separated in two independent patches?
->>>
->>> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
->>> index bf7667845459..403ab06e3ffa 100644
->>> --- a/drivers/memstick/core/memstick.c
->>> +++ b/drivers/memstick/core/memstick.c
->>> @@ -191,6 +191,10 @@ static void memstick_free_card(struct device *dev)
->>>   {
->>>          struct memstick_dev *card = container_of(dev, struct memstick_dev,
->>>                                                   dev);
->>> +       if ((card->dev).kobj.name) {
->>> +               kfree_const((card->dev).kobj.name);
->>> +               (card->dev).kobj.name = NULL;
->>> +       }
->>>          kfree(card);
->>>   }
->>>
->>> @@ -410,6 +414,10 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
->>>          return card;
->>>   err_out:
->>>          host->card = old_card;
->>> +       if ((card->dev).kobj.name) {
->>> +               kfree_const((card->dev).kobj.name);
->>> +               (card->dev).kobj.name = NULL;
->>> +       }
->>>          kfree(card);
->>>          return NULL;
->>>   }
->>>
->>> This morning I did not feel like we'd fix two memory leaks today.
->>>
->>> This one was a nag for three months :-)
->>>
->>> Of course, this requires peer review. The fact that it fixed the /sys/kernel/debug/kmemleak
->>> output doesn't mean that it wouldn't break something, does it?
->>>
->>> It is clearly the good wind of the Providence.
+Hi Andy,
+
+Thanks for the review.
+
+On Thu, Mar 23, 2023 at 13:06 Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+> On Thu, Mar 23, 2023 at 2:11 AM Brad Larson <blarson@amd.com> wrote:
 >>
->> This is the second version of the patch, without the paranoid parentheses.
->>
->> I am still in the process of convincing Thunderbird not to convert tabs to
->> spaces, so please use --ignore-whitespace when testing this patch. :-(
->>
->> ---
->>  drivers/memstick/core/memstick.c | 8 ++++++++
->>  1 file changed, 8 insertions(+)
->>
->> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
->> index bf7667845459..390287c23f27 100644
->> --- a/drivers/memstick/core/memstick.c
->> +++ b/drivers/memstick/core/memstick.c
->> @@ -191,6 +191,10 @@ static void memstick_free_card(struct device *dev)
->>  {
->>         struct memstick_dev *card = container_of(dev, struct memstick_dev,
->>                                                  dev);
->> +       if (card->dev.kobj.name) {
->> +               kfree_const(card->dev.kobj.name);
-> 
-> Ick, no, please don't mess around with a kobject name from within a
-> driver like this.  That's indicitave that something else is really
-> wrong.
-> 
-> Yes, the nvme core code does it, but it shouldn't.
-> 
-> Hm, the driver core does it in two places too, that's not good, I'll
-> look at fixing that up too.
-> 
-> This patch is implying that anyone who calls "dev_set_name()" also has
-> to do this hack, which shouldn't be the case at all.
-> 
-> thanks,
-> 
-> greg k-h
+>> The Pensando SoC controller is a SPI connected companion device
+>> that is present in all Pensando SoC board designs.  The essential
+>> board management registers are accessed on chip select 0 with
+>> board mgmt IO support accessed using additional chip selects.
+>
+> ...
+>
+>> +config AMD_PENSANDO_CTRL
+>> +       tristate "AMD Pensando SoC Controller"
+>> +       depends on SPI_MASTER=y
+>> +       depends on (ARCH_PENSANDO && OF) || COMPILE_TEST
+>> +       default y if ARCH_PENSANDO
+>
+>       default ARCH_PENSANDO
 
-Hi, Mr. Greg,
+Changed to default ARCH_PENSANDO
 
-I tend to agree with you that releasing card->dev.kobj.name
-should be done from the destructor method of the card object.
+>> +       select REGMAP_SPI
+>> +       select MFD_SYSCON
+>
+> ...
+>
+>> +/*
+>> + * AMD Pensando SoC Controller
+>> + *
+>> + * Userspace interface and reset driver support for SPI connected Pensando SoC
+>> + * controller device.  This device is present in all Pensando SoC designs and
+>> + * contains board control/status regsiters and management IO support.
+>
+> registers ?
 
-AFAICT, the kobj.name is allocated deep withing dev_set_name in line 385
-of drivers/memstick/core/memstick.c:
+Fixed the typo
 
-376 static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-377 {
-378         struct memstick_dev *card = kzalloc(sizeof(struct memstick_dev),
-379                                             GFP_KERNEL);
-380         struct memstick_dev *old_card = host->card;
-381         struct ms_id_register id_reg;
-382 
-383         if (card) {
-384                 card->host = host;
-385                 dev_set_name(&card->dev, "%s", dev_name(&host->dev));
-386                 card->dev.parent = &host->dev;
-387                 card->dev.bus = &memstick_bus_type;
-388                 card->dev.release = memstick_free_card;
-389                 card->check = memstick_dummy_check;
-390 
-391                 card->reg_addr.r_offset = offsetof(struct ms_register, id);
-392                 card->reg_addr.r_length = sizeof(id_reg);
-393                 card->reg_addr.w_offset = offsetof(struct ms_register, id);
-394                 card->reg_addr.w_length = sizeof(id_reg);
-395 
-396                 init_completion(&card->mrq_complete);
-397 
-398                 host->card = card;
-399                 if (memstick_set_rw_addr(card))
-400                         goto err_out;
-401 
-402                 card->next_request = h_memstick_read_dev_id;
-403                 memstick_new_req(host);
-404                 wait_for_completion(&card->mrq_complete);
-405 
-406                 if (card->current_mrq.error)
-407                         goto err_out;
-408         }
-409         host->card = old_card;
-410         return card;
-411 err_out:
-412         host->card = old_card;
-413         if (card->dev.kobj.name) {
-414                 kfree_const(card->dev.kobj.name);
-415                 card->dev.kobj.name = NULL;
-416         }
-417         kfree(card);
-418         return NULL;
-419 }
+> ...
+>
+>> +#include <linux/cdev.h>
+>> +#include <linux/delay.h>
+>> +#include <linux/device.h>
+>> +#include <linux/err.h>
+>> +#include <linux/fs.h>
+>> +#include <linux/init.h>
+>> +#include <linux/module.h>
+>> +#include <linux/mutex.h>
+>> +#include <linux/of.h>
+>> +#include <linux/of_device.h>
+>
+> Seems semi-random. Are you sure you use this and not missing mod_devicetable.h?
 
-I am not certain what is semantically right thing to do in this case, I also 
-see there is another kfree(card) in memstick_check():
+Added mod_devicetable.h.
+Removed delay.h, fs.h and of_device.h
 
-431 static void memstick_check(struct work_struct *work)
-432 {
-433         struct memstick_host *host = container_of(work, struct memstick_host,
-434                                                   media_checker);
-435         struct memstick_dev *card;
-436 
-437         dev_dbg(&host->dev, "memstick_check started\n");
-438         pm_runtime_get_noresume(host->dev.parent);
-439         mutex_lock(&host->lock);
-440         if (!host->card) {
-441                 if (memstick_power_on(host))
-442                         goto out_power_off;
-443         } else if (host->card->stop)
-444                 host->card->stop(host->card);
-445 
-446         if (host->removing)
-447                 goto out_power_off;
-448 
-449         card = memstick_alloc_card(host);
-450 
-451         if (!card) {
-452                 if (host->card) {
-453                         device_unregister(&host->card->dev);
-454                         host->card = NULL;
-455                 }
-456         } else {
-457                 dev_dbg(&host->dev, "new card %02x, %02x, %02x\n",
-458                         card->id.type, card->id.category, card->id.class);
-459                 if (host->card) {
-460                         if (memstick_set_rw_addr(host->card)
-461                             || !memstick_dev_match(host->card, &card->id)
-462                             || !(host->card->check(host->card))) {
-463                                 device_unregister(&host->card->dev);
-464                                 host->card = NULL;
-465                         } else if (host->card->start)
-466                                 host->card->start(host->card);
-467                 }
-468 
-469                 if (!host->card) {
-470                         host->card = card;
-471                         if (device_register(&card->dev)) {
-472                                 put_device(&card->dev);
-473                                 host->card = NULL;
-474                         }
-475                 } else
-476                         kfree(card);
-477         }
-478 
-479 out_power_off:
-480         if (!host->card)
-481                 host->set_param(host, MEMSTICK_POWER, MEMSTICK_POWER_OFF);
-482 
-483         mutex_unlock(&host->lock);
-484         pm_runtime_put(host->dev.parent);
-485         dev_dbg(&host->dev, "memstick_check finished\n");
-486 }
+>> +#include <linux/reset-controller.h>
+>> +#include <linux/spi/spi.h>
+>
+>...
+>
+>> +struct penctrl_device {
+>> +       struct spi_device *spi_dev;
+>> +       struct reset_controller_dev rcdev;
+>
+> Perhaps swapping these two might provide a better code generation.
 
-Frankly, I was happy to remove /sys/kernel/debug/kmemleak report of the leak,
-and this is still in pre-alpha stage.
+Its a 96 byte struct with pointer followed by the reset controller.
+The spi_device variable is accessed frequently and rcdev during
+boot and ideally never again so if rcdev is mostly missing from
+cache that is fine.  Likely the address of spi_dev is also in 
+cache given it is periodically accessed.
 
-This fix was not a formal patch but a PoC - once the blame is located at the
-line 385 in memstick_alloc_card() and on dev_set_name(), I see there are other
-places where the driver could leak memory safe for the initial patched fix.
+> ...
+>
+>> +       struct spi_transfer t[2] = { 0 };
+>
+> 0 is not needed.
 
-It seems obvious that the card->dev.kobj.name has to be released and freed or
-it will leak memory. I do not have sufficient insight into the Source to
-do that. I think you will do a better job at it, having the advantage of seeing
-the forest and not just the tree.
+Dropped the 0.
 
-Thanks,
-Mirsad
+> ...
+>
+>> +       if (_IOC_DIR(cmd) & _IOC_READ)
+>> +               ret = !access_ok((void __user *)arg, _IOC_SIZE(cmd));
+>> +       else if (_IOC_DIR(cmd) & _IOC_WRITE)
+>> +               ret = !access_ok((void __user *)arg, _IOC_SIZE(cmd));
+>
+>
+> Maybe you should create a temporary variable as
+>
+>    void __user *in = ... arg;
 
--- 
-Mirsad Goran Todorovac
-Sistem inženjer
-Grafički fakultet | Akademija likovnih umjetnosti
-Sveučilište u Zagrebu
- 
-System engineer
-Faculty of Graphic Arts | Academy of Fine Arts
-University of Zagreb, Republic of Croatia
-The European Union
+Yes, created temp variable.
 
-"I see something approaching fast ... Will it be friends with me?"
+>
+>> +       if (ret)
+>> +               return -EFAULT;
+>
+> ...
+>
+>> +       /* Verify and prepare spi message */
+>
+> SPI
 
+Changed to SPI
+
+>> +       size = _IOC_SIZE(cmd);
+>> +       if ((size % sizeof(struct penctrl_spi_xfer)) != 0) {
+>
+> ' != 0' is redundant.
+
+Fixed
+
+>
+>> +               ret = -EINVAL;
+>> +               goto done;
+>> +       }
+>> +       num_msgs = size / sizeof(struct penctrl_spi_xfer);
+>
+>> +       if (num_msgs == 0) {
+>> +               ret = -EINVAL;
+>> +               goto done;
+>> +       }
+>
+> Can be unified with a previous check as
+>
+> if (size == 0 || size % ...)
+
+Yes, made this change.
+
+>> +       msg = memdup_user((struct penctrl_spi_xfer __user *)arg, size);
+>> +       if (!msg) {
+>> +               ret = PTR_ERR(msg);
+>> +               goto done;
+>> +       }
+>
+>...
+>
+>> +       if (copy_from_user((void *)(uintptr_t)tx_buf,
+>> +                          (void __user *)msg->tx_buf, msg->len)) {
+>
+> Why are all these castings here?
+
+Yes, overkill, changed to:
+
+        if (copy_from_user(tx_buf, (void __user *)msg->tx_buf, msg->len)) {
+
+> ...
+>
+>> +       if (copy_to_user((void __user *)msg->rx_buf,
+>> +                        (void *)(uintptr_t)rx_buf, msg->len))
+>> +               ret = -EFAULT;
+>
+> Ditto.
+
+Changed to:
+
+        if (copy_to_user((void __user *)msg->rx_buf, rx_buf, msg->len))
+
+> ...
+>
+>> +       struct spi_transfer t[2] = { 0 };
+>
+> 0 is redundant.
+
+Dropped the 0.
+
+> ...
+>
+>> +       struct spi_transfer t[1] = { 0 };
+>
+> Ditto.
+
+Dropped the 0.
+
+> Why is this an array?
+
+Fixed, it's a single message and shouldn't be an array.
+
+> ...
+>
+>> +       ret = spi_sync(spi_dev, &m);
+>> +       return ret;
+>
+> return spi_sync(...);
+
+Fixed.
+
+> ...
+>
+>> +       np = spi_dev->dev.parent->of_node;
+>> +       ret = of_property_read_u32(np, "num-cs", &num_cs);
+>
+> Why not simply device_property_read_u32()?
+
+It can be and removed two lines with below result. Also changed the
+variable spi_dev to spi which is the more common usage.
+
+        ret = device_property_read_u32(spi->dev.parent, "num-cs", &num_cs);
+        if (ret)
+                return dev_err_probe(&spi->dev, ret,
+                                     "number of chip-selects not defined\n");
+
+> ...
+>
+>> +       cdev = cdev_alloc();
+>> +       if (!cdev) {
+>> +               dev_err(&spi_dev->dev, "allocation of cdev failed");
+>> +               ret = -ENOMEM;
+>
+> ret = dev_err_probe(...);
+
+Fixed.
+
+>> +               goto cdev_failed;
+>> +       }
+>
+> ...
+>
+>> +       ret = cdev_add(cdev, penctrl_devt, num_cs);
+>> +       if (ret) {
+>
+>> +               dev_err(&spi_dev->dev, "register of cdev failed");
+>
+> dev_err_probe() ?
+
+Fixed.
+
+>> +               goto cdev_delete;
+>> +       }
+>
+> ...
+>
+>> +       penctrl = kzalloc(sizeof(*penctrl), GFP_KERNEL);
+>> +       if (!penctrl) {
+>
+>> +               ret = -ENOMEM;
+>> +               dev_err(&spi_dev->dev, "allocate driver data failed");
+>
+> ret = dev_err_probe();
+> But we do not print memory allocation failure messages.
+
+Fixed this way
+
+        penctrl = kzalloc(sizeof(*penctrl), GFP_KERNEL);
+        if (!penctrl) {
+                ret = -ENOMEM;
+                goto free_cdev;
+        }
+
+> ...
+>
+>> +               if (IS_ERR(dev)) {
+>> +                       ret = IS_ERR(dev);
+>> +                       dev_err(&spi_dev->dev, "error creating device\n");
+>
+> ret = dev_err_probe();
+
+Fixed.
+
+> ...
+>
+> +       spi_set_drvdata(spi_dev, penctrl);
+>
+> Is it in use?
+
+Not used and now dropped.
+
+> ...
+>
+>> +       penctrl->rcdev.of_node = spi_dev->dev.of_node;
+>
+> device_set_node();
+
+Added: device_set_node(&spi->dev, dev_fwnode(dev));
+
+> ...
+>
+>> +       ret = reset_controller_register(&penctrl->rcdev);
+>> +       if (ret)
+>> +               return dev_err_probe(&spi_dev->dev, ret,
+>> +                                    "failed to register reset controller\n");
+>> +       return ret;
+>
+> return 0;
+
+Yes, changed.
+
+> ...
+>
+>> +       device_destroy(penctrl_class, penctrl_devt);
+>
+> Are you sure this is the correct API?
+
+Yes, however a probe error could call up to 5 APIs to clean up which resulted
+in this update:
+
+destroy_device:
+        for (cs = 0; cs < num_cs; cs++)
+                device_destroy(penctrl_class, MKDEV(MAJOR(penctrl_devt), cs));
+        kfree(penctrl);
+free_cdev:
+        cdev_del(cdev);
+destroy_class:
+        class_destroy(penctrl_class);
+unregister_chrdev:
+        unregister_chrdev(MAJOR(penctrl_devt), "penctrl");
+
+        return ret;
+
+> ...
+>
+>> +#include <linux/types.h>
+>> +#include <linux/ioctl.h>
+>
+> Sorted?
+
+Swapped these
+
+Regards,
+Brad
