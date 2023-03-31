@@ -2,118 +2,134 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A90E1C77B62
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 12:05:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 223E4C6FD18
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 12:44:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230390AbjCaMFf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 08:05:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47750 "EHLO
+        id S230148AbjCaMoX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 08:44:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39412 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230112AbjCaMFf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 08:05:35 -0400
-Received: from mail-yw1-x112f.google.com (mail-yw1-x112f.google.com [IPv6:2607:f8b0:4864:20::112f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C09581D2C6
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 05:05:31 -0700 (PDT)
-Received: by mail-yw1-x112f.google.com with SMTP id 00721157ae682-544787916d9so410125067b3.13
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 05:05:31 -0700 (PDT)
+        with ESMTP id S230332AbjCaMoV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 08:44:21 -0400
+Received: from mail-yb1-xb31.google.com (mail-yb1-xb31.google.com [IPv6:2607:f8b0:4864:20::b31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73E8B1F79B
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 05:43:54 -0700 (PDT)
+Received: by mail-yb1-xb31.google.com with SMTP id i6so27243530ybu.8
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 05:43:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680264331;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=SBertetORVW57D4Qn1kS8HxfnJyMQ3NfyoVt6rJXeWw=;
-        b=jJYKQuohc4q23MSrpDjfNbvItKi4OeXxV/JiVsMH1u69/oc+hhZnHl+qafU/eiH4n6
-         fW+LnLnJ1EbzJrlZrmw27H30jZAlcHuAElxlUoo5p2XHokmFvACqJ/swhGjAQ3WNqWco
-         DumOcwmKSRpfirCl6ztX/cQNURZ8+AB/lp1zGF80Ul/QKpbuTucfgL8kH8y1HF+8j+9+
-         yq8jO/0GALbIjk7DOXxP5cnYW/SuxOZ/j+PBe9ZNyRhAoEyiR6ye1iP69ZbVcGpU3a+3
-         nSQ1Lhe98iMsb8F3ZOh6VIDOIfw5wXQQjHoL6I9b4Rp0OkH3q45tYXLqlUmlP+IGCdL1
-         6oLg==
+        d=linaro.org; s=google; t=1680266626;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=d8wUcVZufaGcIMkEEh5Kyyy9hNa4NEI3tlGV4NFbfOA=;
+        b=dOYhn1Pv4R1vbnTkOa99isSC9HUFcbFyWXhXVBsjf5bUyLWeOxyByjakyAilvTZTC1
+         5JSKVUNDPGvDSRB03FKdq4BZK/hztXF7/qdghNdiQ6noa3NYPLm+PbAt6P5cNtYGcbof
+         PCT2vUMAUBKwSZf7bxmL1he8vAGPYTHj8LZWlia4SfQkKiFDrbNR9lOPGDdQRpYAlp9e
+         Eo6Bd4Pc1uCZzgcg4lPPOYwZ0KD0HExGiHadyGawrhpCgq5zbM8iRHI4uainN3m6MDSH
+         +fLw7P1golGEwTXGc2TmFZFyJ5vjVRTrYDJgXEgQnctl5Hc1z57/tXXvCIv9gk9P6C3c
+         8/ug==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680264331;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=SBertetORVW57D4Qn1kS8HxfnJyMQ3NfyoVt6rJXeWw=;
-        b=gkM8NnGHaK30gJv67AAK9MQ8BMStc6tCXXyzD4/T0T6SP7Ia/o+jILqzxG7tMz85PI
-         M0aN/k3QVSNi1y02r7QBfsFnNBndfoXc97yqgMgPSKRWnQaxtkOhYSRFInazMhK6VBE3
-         stJhaGjkhqSs4DJJ3uOdYu2CjwGTkki7rp8XP3zOz+Ct4BBqqcit9VdD3SkAo5vWrecC
-         FksjV1ixHHX+xN0kF0Ml5ote7is4Oa5olioiNMA2CoaRlPUcesidfIuLNPl/bNp7UUiu
-         wmIDNMt3LJCEEcec1yXYafeHSFGcdTgRU0tyAzc7zZFw6QJDbNBLrsHqhxxpCu5hwlzC
-         rV8w==
-X-Gm-Message-State: AAQBX9ejcziA9DpMAFzhoNNAygzIdSqxyb2awpi6VprH4dezAM2Hvjdr
-        bXr8XtyIb20VRyPiMMWH4mtyCd0B7hke+4Ms0Pl40A==
-X-Google-Smtp-Source: AKy350alOUKFv8JHxb8OmChOgvitPrDAx4h8WLR3fhEV2ib1x87O1DkuqB5uGPeBCLNGixpUYQPibS7V5oz35p99nco=
-X-Received: by 2002:a81:ad5d:0:b0:540:e744:13ae with SMTP id
- l29-20020a81ad5d000000b00540e74413aemr12477767ywk.3.1680264330881; Fri, 31
- Mar 2023 05:05:30 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1680266626;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=d8wUcVZufaGcIMkEEh5Kyyy9hNa4NEI3tlGV4NFbfOA=;
+        b=e94sNCmNwbLVk5/zG6dOoa0QtCoCbYowHDEKQuQ4pzIifwSGGonZofE2gtSskTelkB
+         MUl55tLvlFNOBbrIg1yvPLPkXJ6d8cyYzTU8f6or+4KqRXERn3p/ZKRZdImON0SxY7OV
+         6U4KMC8UH0j3n/Z/ASMOwWZtweY3zY6Hvstrjnb4rpcSo9VehynSSXaciYfHQhI1YWBE
+         uKfGZLoP/+a72nOmz1zGlK0KG3ah3QCKG9MdUVxBS6ZbwQPql03afBO6qlkb+4pDdfe1
+         8piTAw6joU76yjEoYaULGZytCoOzhViUUp8lEMRNO6DgymVXbQuyG/cM4hxPTNmSPCcx
+         nsgg==
+X-Gm-Message-State: AAQBX9ePrx73gTHn6Da9O+/CZjoDMzoa02QCDVqvYtlpVhpm1q3eNa5C
+        pCUu44eJQn8JYDo+SYSpBALK4lU9pxfM6I7oee/LV72iYcPoOuJv
+X-Google-Smtp-Source: AKy350bFUOgDXgmIhpH3HEs+a3adie/r2r+Fz9iEPH6HVz++8tVbnwb4WPPXtaN83foxwOjKDtGmQsn3jTViuZa3pFs=
+X-Received: by 2002:a25:1185:0:b0:a27:3ecc:ffe7 with SMTP id
+ 127-20020a251185000000b00a273eccffe7mr4970550ybr.3.1680266626404; Fri, 31 Mar
+ 2023 05:43:46 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
- <20230203-evk-board-support-v3-16-0003e80e0095@baylibre.com> <8c917be2-e15a-921f-aaa9-b8753d2463de@gmail.com>
-In-Reply-To: <8c917be2-e15a-921f-aaa9-b8753d2463de@gmail.com>
-From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Fri, 31 Mar 2023 14:05:20 +0200
-Message-ID: <CAFGrd9oPKn84yK2VpfJQRd1HbBTwq87Fuc6=Uw3uaeLjm89=8w@mail.gmail.com>
-Subject: Re: [PATCH v3 16/17] arm64: dts: mediatek: fix systimer properties
-To:     Matthias Brugger <matthias.bgg@gmail.com>
-Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
-        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>
+References: <20230329202148.71107-1-dennis@kernel.org> <ZCTOMVjW+pnZVGsQ@snowbird>
+In-Reply-To: <ZCTOMVjW+pnZVGsQ@snowbird>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Fri, 31 Mar 2023 14:43:10 +0200
+Message-ID: <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Matthias
-
-Le jeu. 30 mars 2023 =C3=A0 19:34, Matthias Brugger
-<matthias.bgg@gmail.com> a =C3=A9crit :
+On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
 >
->
->
-> On 29/03/2023 10:54, amergnat@baylibre.com wrote:
-> > From: Amjad Ouled-Ameur <aouledameur@baylibre.com>
-> >
-> > MT8365 has a SYST timer (System Timer), therefore the compatible node
-> > should be "mediatek,mt6765-timer" instead of "mediatek,mt6795-systimer"
-> > (which corresponds to ARM/ARM64 System Timer).
-> >
-> > Plus, register range should be 0x100 instead of 0x10.
-> >
-> > Finally, interrupt polarity of systimer is LEVEL_HIGH.
-> >
-> > Fix the above properties accordingly.
-> >
-> > Signed-off-by: Amjad Ouled-Ameur <aouledameur@baylibre.com>
-> > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
->
-> Patch looks good but does not apply cleanly because of previous patches t=
-hat I
-> didn't take and need rework. Please resend the patches I didn't queue wit=
-h the
-> comments addressed.
+> When using dm-verity with a data partition on an emmc device, dm-verity
+> races with the discovery of attached emmc devices. This is because mmc's
+> probing code sets up the host data structure then a work item is
+> scheduled to do discovery afterwards. To prevent this race on init,
+> let's inline the first call to detection, __mm_scan(), and let
+> subsequent detect calls be handled via the workqueue.
 
-Sorry for that, I forgot to drop this patch since it has been already
-fixed in the Bero's series [1]
-I will drop it for the next version
+In principle, I don't mind the changes in $subject patch, as long as
+it doesn't hurt the overall initialization/boot time. Especially, we
+may have more than one mmc-slot being used, so this needs to be well
+tested.
 
-[1]: https://lore.kernel.org/all/20230309213501.794764-4-bero@baylibre.com/
+Although, more importantly, I fail to understand how this is going to
+solve the race condition. Any I/O request to an eMMC or SD requires
+the mmc block device driver to be up and running too, which is getting
+probed from a separate module/driver that's not part of mmc_rescan().
 
-Regards,
-Alex
+Kind regards
+Uffe
+
+>
+> Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> ---
+> Sigh.. fix missing static declaration.
+>
+>  drivers/mmc/core/core.c | 15 +++++++++++----
+>  1 file changed, 11 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> index 368f10405e13..fda7ee57dee3 100644
+> --- a/drivers/mmc/core/core.c
+> +++ b/drivers/mmc/core/core.c
+> @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+>  }
+>  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+>
+> -void mmc_rescan(struct work_struct *work)
+> +static void __mmc_rescan(struct mmc_host *host)
+>  {
+> -       struct mmc_host *host =
+> -               container_of(work, struct mmc_host, detect.work);
+>         int i;
+>
+>         if (host->rescan_disable)
+> @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+>                 mmc_schedule_delayed_work(&host->detect, HZ);
+>  }
+>
+> +void mmc_rescan(struct work_struct *work)
+> +{
+> +       struct mmc_host *host =
+> +               container_of(work, struct mmc_host, detect.work);
+> +
+> +       __mmc_rescan(host);
+> +}
+> +
+>  void mmc_start_host(struct mmc_host *host)
+>  {
+>         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+>         }
+>
+>         mmc_gpiod_request_cd_irq(host);
+> -       _mmc_detect_change(host, 0, false);
+> +       host->detect_change = 1;
+> +       __mmc_rescan(host);
+>  }
+>
+>  void __mmc_stop_host(struct mmc_host *host)
+> --
+> 2.40.0
+>
