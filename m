@@ -2,53 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6935C6FD18
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 10:57:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0DF18C761AF
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 10:57:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231834AbjCaK5E (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 06:57:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58816 "EHLO
+        id S230360AbjCaK5S (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 06:57:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58690 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230445AbjCaK43 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 06:56:29 -0400
-Received: from mail-pj1-x1030.google.com (mail-pj1-x1030.google.com [IPv6:2607:f8b0:4864:20::1030])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5DA0D1EA14;
-        Fri, 31 Mar 2023 03:56:20 -0700 (PDT)
-Received: by mail-pj1-x1030.google.com with SMTP id mp3-20020a17090b190300b0023fcc8ce113so24960230pjb.4;
-        Fri, 31 Mar 2023 03:56:20 -0700 (PDT)
+        with ESMTP id S230403AbjCaK4o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 06:56:44 -0400
+Received: from mail-pj1-x1031.google.com (mail-pj1-x1031.google.com [IPv6:2607:f8b0:4864:20::1031])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15BA51D93C;
+        Fri, 31 Mar 2023 03:56:25 -0700 (PDT)
+Received: by mail-pj1-x1031.google.com with SMTP id lr16-20020a17090b4b9000b0023f187954acso22953398pjb.2;
+        Fri, 31 Mar 2023 03:56:25 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1680260180;
+        d=gmail.com; s=20210112; t=1680260185;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=t6RUdpSX04dBLtzIjrw3rQA0gsbOjhQ17pBF0AtYfG4=;
-        b=U0DNnLkKdkpLgcuRd6vf7YEJwVGwJNtZ/U7pteehdz5Ahtcw3lMNzPVtmPaoAyaSKX
-         K23K6VbF0ii+iFa8h46X5e7hVteboctr1gguVSL5XAZk8PZ3Kak7h2+h4DOmDqGqaBbF
-         pxX4Qyb+13heq6Hvqj5iqwVqRO3wupShDtsJDIFhpu8+7XQh6Ows5CkVwuei4SbeTSk4
-         xpXaQEWz9Mk8ED+63hrCpmJejBO+/5MxlptZ5kKTu9BkQHj7qtxvapE0hBBL+do69FR4
-         f+apy8t17JQoJ1TOj8khAigtKvcJWQMtQp1a1r7GteMSZIh3LMtwmLwCwT1qDw4b+ZFP
-         RQdA==
+        bh=rRJgGv/WKN6qp6VsAmVW33zFoeLZBxDjjAldRLuUtFQ=;
+        b=elCJbOndKKDBLUCrvaqP4Q4lmZ8cn5JMqp4zdUjUat6MCwoK0BdM/hjuMLVAqPrK8/
+         0gqErqoRMQxPaLofQ0ybJnQS/RYpwZ9cTNCRTDpeMNf6fck1OFEAkgdQlTnfZxuYj6z0
+         ZHG1GE79ODhlafwel4p+OAkfjH3rdn4TJX/X3jMHiFB/mAJGgnVmRl9B/L2qWvi/Gign
+         ol8HBABAOq/ahb78tpV0d9kX9NF1kJt6R199TDwb6CLFYvOq56CrJOzRZwU403YNUQ6j
+         9GP+Xj00+ubeIEbEA7iicLrD6R7qwMzPFGWdm5sLCuky4ruMwEGijhjfzCHGHe8ta5e3
+         xriA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680260180;
+        d=1e100.net; s=20210112; t=1680260185;
         h=content-transfer-encoding:mime-version:references:in-reply-to
          :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=t6RUdpSX04dBLtzIjrw3rQA0gsbOjhQ17pBF0AtYfG4=;
-        b=aivNKO087IjYuzx1hz2Wz/yz1ul4uYT+ft/bJ36eiw9S6OGeMhmR1Tcj/uQfW1nIBX
-         9Hc0uKK5LZIyDs+XEIPKLOkLxSOsq9KiaT/inoLk8QqP/fA+XAGhrbTnkPnrYtDG69cO
-         93r4PNi1RSvj7Kwn/+Cp7KMwRYfzBmUFhUa/N0G3qMxtLnJLRj7aWVaqqnC5dAvWptnY
-         SzIeC2es9wI8Tu96+F6qKGAmg3cG/KVBMR1u0z8vhyGwsw+CZVbQOGTK4wsOQSADYB2J
-         MAtOuDfXYQ9YG58nEq5g/EejCX1iFv0gJeA1M2QilAxVyisB3dDhhYDPe3RdDfe7yP6+
-         Pszg==
-X-Gm-Message-State: AO0yUKWrsR9Dd8U6XVcpOaGC/koRY6ZF/VfH3jfuVpS5HHHyHPGnytHN
-        mAjyrgPjWKA1UC2acxjqCrg=
-X-Google-Smtp-Source: AKy350btT1/GgLnXVmO/pmlQWjwfl6mBeZVRaT5pMsnKxk+Un8WIAz+lM6LMKIXSPsKYS4zWEkOiUg==
-X-Received: by 2002:a17:90b:4a8b:b0:23f:1165:b49f with SMTP id lp11-20020a17090b4a8b00b0023f1165b49fmr27211459pjb.38.1680260179697;
-        Fri, 31 Mar 2023 03:56:19 -0700 (PDT)
+        bh=rRJgGv/WKN6qp6VsAmVW33zFoeLZBxDjjAldRLuUtFQ=;
+        b=TU25dunTLvYfj/KTCAxonq2WALgImRpH/ns/mtII/X3q8DAL++aiL1fGC2HmY2047B
+         vdVcgioc+NEPRw8WTCGDLjujBbPNW7TIKUMMTqqlGWQg2g6lHe8VU0msl//bdG4Jb4aL
+         EI3GBZkrRJu7XK/dxmv+wz9N3syxzg5FwQA5HnRfcVcpYgEEHkvfnpDGv+9XlRGI8lV8
+         IOrrfDTha7z6zR2lLrealYcxjInfFyFZlvVMWrXeDCoZgZAGlu5MGYQXlaUC/jJJTMcJ
+         0CF+vnYGpHRB4+6YAeZwDzJee4E0mIHRi/AByWZPd3oXq/TzueoUKJRp7+rVEwrRtYM7
+         n+Kg==
+X-Gm-Message-State: AAQBX9fkwubLMoboLMuPRLJCjNXx4OkD/jnT0YOVCO+QXmOJMk+748/z
+        PnHikPGDneP2AX1QtI/7lMQ=
+X-Google-Smtp-Source: AKy350a/TknYnsiHvT8BxMgXuyfQY8cgJbqKtGp+AWM9wGhmLV0ifrV3s8ASmZQzZ+xXKkaYuS53Ng==
+X-Received: by 2002:a17:902:ce92:b0:1a2:1042:cadc with SMTP id f18-20020a170902ce9200b001a21042cadcmr31238192plg.18.1680260184922;
+        Fri, 31 Mar 2023 03:56:24 -0700 (PDT)
 Received: from localhost.localdomain (2001-b400-e25c-983f-c7ff-3efd-77d9-6c16.emome-ip6.hinet.net. [2001:b400:e25c:983f:c7ff:3efd:77d9:6c16])
-        by smtp.gmail.com with ESMTPSA id f19-20020a170902e99300b0019acd3151d0sm1287665plb.114.2023.03.31.03.56.17
+        by smtp.gmail.com with ESMTPSA id f19-20020a170902e99300b0019acd3151d0sm1287665plb.114.2023.03.31.03.56.22
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Mar 2023 03:56:19 -0700 (PDT)
+        Fri, 31 Mar 2023 03:56:24 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
 X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
 To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
@@ -56,10 +56,10 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
         Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
         dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>,
-        Jason Lai <jason.lai@genesyslogic.com.tw>
-Subject: [PATCH V7 05/23] mmc: core: Add definitions for SD UHS-II cards
-Date:   Fri, 31 Mar 2023 18:55:28 +0800
-Message-Id: <20230331105546.13607-6-victor.shih@genesyslogic.com.tw>
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Subject: [PATCH V7 07/23] mmc: sdhci: add UHS-II related definitions in headers
+Date:   Fri, 31 Mar 2023 18:55:30 +0800
+Message-Id: <20230331105546.13607-8-victor.shih@genesyslogic.com.tw>
 X-Mailer: git-send-email 2.25.1
 In-Reply-To: <20230331105546.13607-1-victor.shih@genesyslogic.com.tw>
 References: <20230331105546.13607-1-victor.shih@genesyslogic.com.tw>
@@ -69,469 +69,384 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add UHS-II specific data structures for commands and defines for
-registers, as described in Part 1 UHS-II Addendum Version 1.01.
+Add UHS-II related definitions in shdci.h and sdhci-uhs2.h.
 
-UHS-II related definitions are listed below:
-  1. UHS-II card capability: sd_uhs2_caps{}
-  2. UHS-II configuration: sd_uhs2_config{}
-  3. UHS-II Command structure: uhs2_command{}
-  4. UHS-II register I/O address and register field definitions: sd_uhs2.h
-
-Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
-Signed-off-by: Jason Lai <jason.lai@genesyslogic.com.tw>
+Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
 Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 ---
- include/linux/mmc/card.h    |  31 ++++-
- include/linux/mmc/core.h    |  13 ++
- include/linux/mmc/host.h    |  60 ++++++++-
- include/linux/mmc/sd_uhs2.h | 240 ++++++++++++++++++++++++++++++++++++
- 4 files changed, 341 insertions(+), 3 deletions(-)
- create mode 100644 include/linux/mmc/sd_uhs2.h
+ drivers/mmc/host/sdhci-uhs2.h | 178 ++++++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci.h      |  62 +++++++++++-
+ 2 files changed, 239 insertions(+), 1 deletion(-)
+ create mode 100644 drivers/mmc/host/sdhci-uhs2.h
 
-diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
-index 4a42f31b7bb0..3a712dc09492 100644
---- a/include/linux/mmc/card.h
-+++ b/include/linux/mmc/card.h
-@@ -190,6 +190,12 @@ struct sd_switch_caps {
- #define SD_MAX_CURRENT_400	(1 << SD_SET_CURRENT_LIMIT_400)
- #define SD_MAX_CURRENT_600	(1 << SD_SET_CURRENT_LIMIT_600)
- #define SD_MAX_CURRENT_800	(1 << SD_SET_CURRENT_LIMIT_800)
-+
-+#define SD4_SET_POWER_LIMIT_0_72W	0
-+#define SD4_SET_POWER_LIMIT_1_44W	1
-+#define SD4_SET_POWER_LIMIT_2_16W	2
-+#define SD4_SET_POWER_LIMIT_2_88W	3
-+#define SD4_SET_POWER_LIMIT_1_80W	4
- };
- 
- struct sd_ext_reg {
-@@ -213,7 +219,30 @@ struct sd_ext_reg {
- 
- struct sd_uhs2_config {
- 	u32			node_id;
--	/* TODO: Extend with more register configs. */
-+
-+	u32			n_fcu;
-+	u32			maxblk_len;
-+	u8			n_lanes;
-+	u8			dadr_len;
-+	u8			app_type;
-+	u8			phy_minor_rev;
-+	u8			phy_major_rev;
-+	u8			can_hibernate;
-+	u8			n_lss_sync;
-+	u8			n_lss_dir;
-+	u8			link_minor_rev;
-+	u8			link_major_rev;
-+	u8			dev_type;
-+	u8			n_data_gap;
-+
-+	u32			n_fcu_set;
-+	u32			maxblk_len_set;
-+	u8			n_lanes_set;
-+	u8			speed_range_set;
-+	u8			n_lss_sync_set;
-+	u8			n_lss_dir_set;
-+	u8			n_data_gap_set;
-+	u8			max_retry_set;
- };
- 
- struct sdio_cccr {
-diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
-index 6efec0b9820c..2a0581d87706 100644
---- a/include/linux/mmc/core.h
-+++ b/include/linux/mmc/core.h
-@@ -23,6 +23,14 @@ enum mmc_blk_status {
- 	MMC_BLK_NEW_REQUEST,
- };
- 
-+struct uhs2_command {
-+	u16	header;
-+	u16	arg;
-+	__be32	*payload;
-+	u32	payload_len;
-+	u32	packet_len;
-+};
-+
- struct mmc_command {
- 	u32			opcode;
- 	u32			arg;
-@@ -109,6 +117,11 @@ struct mmc_command {
- 	unsigned int		busy_timeout;	/* busy detect timeout in ms */
- 	struct mmc_data		*data;		/* data segment associated with cmd */
- 	struct mmc_request	*mrq;		/* associated request */
-+
-+	struct uhs2_command	*uhs2_cmd;	/* UHS2 command */
-+	u8			*uhs2_resp;	/* UHS2 native cmd resp */
-+	u8			uhs2_resp_len;	/* UHS2 native cmd resp len */
-+	u8			uhs2_tmode0_flag; /* UHS2 transfer mode flag */
- };
- 
- struct mmc_data {
-diff --git a/include/linux/mmc/host.h b/include/linux/mmc/host.h
-index 703f5ce9713c..8803fe46ed24 100644
---- a/include/linux/mmc/host.h
-+++ b/include/linux/mmc/host.h
-@@ -16,6 +16,7 @@
- #include <linux/mmc/pm.h>
- #include <linux/dma-direction.h>
- #include <linux/blk-crypto-profile.h>
-+#include <linux/mmc/sd_uhs2.h>
- 
- struct mmc_ios {
- 	unsigned int	clock;			/* clock rate */
-@@ -99,7 +100,40 @@ struct mmc_clk_phase_map {
- };
- 
- struct sd_uhs2_caps {
--	/* TODO: Add UHS-II capabilities for the host. */
-+	u32	dap;
-+	u32	gap;
-+	u32	group_desc;
-+	u32	maxblk_len;
-+	u32	n_fcu;
-+	u8	n_lanes;
-+	u8	addr64;
-+	u8	card_type;
-+	u8	phy_rev;
-+	u8	speed_range;
-+	u8	n_lss_sync;
-+	u8	n_lss_dir;
-+	u8	link_rev;
-+	u8	host_type;
-+	u8	n_data_gap;
-+
-+	u32	maxblk_len_set;
-+	u32	n_fcu_set;
-+	u8	n_lanes_set;
-+	u8	n_lss_sync_set;
-+	u8	n_lss_dir_set;
-+	u8	n_data_gap_set;
-+	u8	max_retry_set;
-+};
-+
-+enum sd_uhs2_operation {
-+	UHS2_PHY_INIT = 0,
-+	UHS2_SET_CONFIG,
-+	UHS2_ENABLE_INT,
-+	UHS2_DISABLE_INT,
-+	UHS2_ENABLE_CLK,
-+	UHS2_DISABLE_CLK,
-+	UHS2_CHECK_DORMANT,
-+	UHS2_SET_IOS,
- };
- 
- struct mmc_host;
-@@ -234,6 +268,14 @@ struct mmc_host_ops {
- 
- 	/* Initialize an SD express card, mandatory for MMC_CAP2_SD_EXP. */
- 	int	(*init_sd_express)(struct mmc_host *host, struct mmc_ios *ios);
-+
-+	/*
-+	 * The uhs2_control callback is used to execute SD UHS-II specific
-+	 * operations. It's mandatory to implement for hosts that supports the
-+	 * SD UHS-II interface (MMC_CAP2_SD_UHS2). Expected return values are a
-+	 * negative errno in case of a failure or zero for success.
-+	 */
-+	int	(*uhs2_control)(struct mmc_host *host, enum sd_uhs2_operation op);
- };
- 
- struct mmc_cqe_ops {
-@@ -326,6 +368,7 @@ struct mmc_pwrseq;
- 
- struct mmc_supply {
- 	struct regulator *vmmc;		/* Card power supply */
-+	struct regulator *vmmc2;	/* UHS2 VDD2 power supply */
- 	struct regulator *vqmmc;	/* Optional Vccq supply */
- 	struct regulator *vqmmc2;	/* Optional supply for phy */
- };
-@@ -347,10 +390,12 @@ struct mmc_host {
- 	u32			ocr_avail_sdio;	/* SDIO-specific OCR */
- 	u32			ocr_avail_sd;	/* SD-specific OCR */
- 	u32			ocr_avail_mmc;	/* MMC-specific OCR */
-+	u32			ocr_avail_uhs2; /* UHS2-specific OCR */
- 	struct wakeup_source	*ws;		/* Enable consume of uevents */
- 	u32			max_current_330;
- 	u32			max_current_300;
- 	u32			max_current_180;
-+	u32			max_current_180_vdd2; /* UHS2 vdd2 max curt. */
- 
- #define MMC_VDD_165_195		0x00000080	/* VDD voltage 1.65 - 1.95 */
- #define MMC_VDD_20_21		0x00000100	/* VDD voltage 2.0 ~ 2.1 */
-@@ -446,7 +491,12 @@ struct mmc_host {
- #endif
- #define MMC_CAP2_ALT_GPT_TEGRA	(1 << 28)	/* Host with eMMC that has GPT entry at a non-standard location */
- 
--	struct sd_uhs2_caps	uhs2_caps;	/* Host UHS-II capabilities */
-+	int flags;
-+#define MMC_UHS2_SUPPORT (1 << 0)
-+#define MMC_UHS2_SD_TRAN (1 << 1)
-+
-+	bool   uhs2_app_cmd;           /* Host UHS-II APP Command */
-+	struct sd_uhs2_caps uhs2_caps; /* Host UHS-II capabilities */
- 
- 	int			fixed_drv_type;	/* fixed driver type for non-removable media */
- 
-@@ -698,6 +748,12 @@ static inline void mmc_debugfs_err_stats_inc(struct mmc_host *host,
- 	host->err_stats[stat] += 1;
- }
- 
-+static inline int mmc_card_uhs2_hd_mode(struct mmc_host *host)
-+{
-+	return host->ios.timing == MMC_TIMING_UHS2_SPEED_A_HD ||
-+	       host->ios.timing == MMC_TIMING_UHS2_SPEED_B_HD;
-+}
-+
- int mmc_send_tuning(struct mmc_host *host, u32 opcode, int *cmd_error);
- int mmc_send_abort_tuning(struct mmc_host *host, u32 opcode);
- int mmc_get_ext_csd(struct mmc_card *card, u8 **new_ext_csd);
-diff --git a/include/linux/mmc/sd_uhs2.h b/include/linux/mmc/sd_uhs2.h
+diff --git a/drivers/mmc/host/sdhci-uhs2.h b/drivers/mmc/host/sdhci-uhs2.h
 new file mode 100644
-index 000000000000..7abe9bd870c7
+index 000000000000..c47debb7497e
 --- /dev/null
-+++ b/include/linux/mmc/sd_uhs2.h
-@@ -0,0 +1,240 @@
++++ b/drivers/mmc/host/sdhci-uhs2.h
+@@ -0,0 +1,178 @@
 +/* SPDX-License-Identifier: GPL-2.0-or-later */
 +/*
-+ * Header file for UHS-II packets, Host Controller registers and I/O
-+ * accessors.
++ *  linux/drivers/mmc/host/sdhci-uhs2.h - Secure Digital Host Controller
++ *  Interface driver
++ *
++ * Header file for Host Controller UHS2 related registers.
 + *
 + *  Copyright (C) 2014 Intel Corp, All Rights Reserved.
 + */
-+#ifndef LINUX_MMC_UHS2_H
-+#define LINUX_MMC_UHS2_H
++#ifndef __SDHCI_UHS2_H
++#define __SDHCI_UHS2_H
 +
-+/* LINK Layer definition */
++#include <linux/bits.h>
++
++/* SDHCI Category C registers : UHS2 usage */
++
++#define  SDHCI_UHS2_CM_TRAN_RESP                0x10
++#define  SDHCI_UHS2_SD_TRAN_RESP                0x18
++#define  SDHCI_UHS2_SD_TRAN_RESP_1              0x1C
++
++/* SDHCI Category B registers : UHS2 only */
++
++#define SDHCI_UHS2_BLOCK_SIZE                   0x80
++#define  SDHCI_UHS2_MAKE_BLKSZ(dma, blksz)      ((((dma) & 0x7) << 12) | ((blksz) & 0xFFF))
++
++#define SDHCI_UHS2_BLOCK_COUNT                  0x84
++
++#define SDHCI_UHS2_CMD_PACKET                   0x88
++#define  SDHCI_UHS2_CMD_PACK_MAX_LEN            20
++
++#define SDHCI_UHS2_TRANS_MODE                   0x9C
++#define  SDHCI_UHS2_TRNS_DMA                    BIT(0)
++#define  SDHCI_UHS2_TRNS_BLK_CNT_EN             BIT(1)
++#define  SDHCI_UHS2_TRNS_DATA_TRNS_WRT          BIT(4)
++#define  SDHCI_UHS2_TRNS_BLK_BYTE_MODE          BIT(5)
++#define  SDHCI_UHS2_TRNS_RES_R5                 BIT(6)
++#define  SDHCI_UHS2_TRNS_RES_ERR_CHECK_EN       BIT(7)
++#define  SDHCI_UHS2_TRNS_RES_INT_DIS            BIT(8)
++#define  SDHCI_UHS2_TRNS_WAIT_EBSY              BIT(14)
++#define  SDHCI_UHS2_TRNS_2L_HD                  BIT(15)
++
++#define SDHCI_UHS2_CMD                          0x9E
++#define  SDHCI_UHS2_CMD_SUB_CMD                 BIT(2)
++#define  SDHCI_UHS2_CMD_DATA                    BIT(5)
++#define  SDHCI_UHS2_CMD_TRNS_ABORT              BIT(6)
++#define  SDHCI_UHS2_CMD_CMD12                   BIT(7)
++#define  SDHCI_UHS2_CMD_DORMANT                 GENMASK(7, 6)
++#define  SDHCI_UHS2_CMD_PACK_LEN_MASK           GENMASK(12, 8)
++
++#define SDHCI_UHS2_RESPONSE                     0xA0
++#define  SDHCI_UHS2_RESPONSE_MAX_LEN            20
++
++#define SDHCI_UHS2_MSG_SELECT                   0xB4
++#define SDHCI_UHS2_MSG_SELECT_CURR              0x0
++#define SDHCI_UHS2_MSG_SELECT_ONE               0x1
++#define SDHCI_UHS2_MSG_SELECT_TWO               0x2
++#define SDHCI_UHS2_MSG_SELECT_THREE             0x3
++
++#define SDHCI_UHS2_MSG                          0xB8
++
++#define SDHCI_UHS2_DEV_INT_STATUS               0xBC
++
++#define SDHCI_UHS2_DEV_SELECT                   0xBE
++#define SDHCI_UHS2_DEV_SEL_MASK                 GENMASK(3, 0)
++#define SDHCI_UHS2_DEV_SEL_INT_MSG_EN           BIT(7)
++
++#define SDHCI_UHS2_DEV_INT_CODE                 0xBF
++
++#define SDHCI_UHS2_SW_RESET                     0xC0
++#define SDHCI_UHS2_SW_RESET_FULL                BIT(0)
++#define SDHCI_UHS2_SW_RESET_SD                  BIT(1)
++
++#define SDHCI_UHS2_TIMER_CTRL                   0xC2
++#define SDHCI_UHS2_TIMER_CTRL_DEADLOCK_MASK     GENMASK(7, 4)
++
++#define SDHCI_UHS2_INT_STATUS                   0xC4
++#define SDHCI_UHS2_INT_STATUS_ENABLE            0xC8
++#define SDHCI_UHS2_INT_SIGNAL_ENABLE            0xCC
++#define SDHCI_UHS2_INT_HEADER_ERR               BIT(0)
++#define SDHCI_UHS2_INT_RES_ERR                  BIT(1)
++#define SDHCI_UHS2_INT_RETRY_EXP                BIT(2)
++#define SDHCI_UHS2_INT_CRC                      BIT(3)
++#define SDHCI_UHS2_INT_FRAME_ERR                BIT(4)
++#define SDHCI_UHS2_INT_TID_ERR                  BIT(5)
++#define SDHCI_UHS2_INT_UNRECOVER                BIT(7)
++#define SDHCI_UHS2_INT_EBUSY_ERR                BIT(8)
++#define SDHCI_UHS2_INT_ADMA_ERROR               BIT(15)
++#define SDHCI_UHS2_INT_CMD_TIMEOUT              BIT(16)
++#define SDHCI_UHS2_INT_DEADLOCK_TIMEOUT         BIT(17)
++#define SDHCI_UHS2_INT_VENDOR_ERR               BIT(27)
++#define SDHCI_UHS2_INT_ERROR_MASK            ( \
++	       SDHCI_UHS2_INT_HEADER_ERR      | \
++	       SDHCI_UHS2_INT_RES_ERR         | \
++	       SDHCI_UHS2_INT_RETRY_EXP       | \
++	       SDHCI_UHS2_INT_CRC             | \
++	       SDHCI_UHS2_INT_FRAME_ERR       | \
++	       SDHCI_UHS2_INT_TID_ERR         | \
++	       SDHCI_UHS2_INT_UNRECOVER       | \
++	       SDHCI_UHS2_INT_EBUSY_ERR       | \
++	       SDHCI_UHS2_INT_ADMA_ERROR      | \
++	       SDHCI_UHS2_INT_CMD_TIMEOUT     | \
++	       SDHCI_UHS2_INT_DEADLOCK_TIMEOUT)
++#define SDHCI_UHS2_INT_CMD_ERR_MASK     ( \
++	       SDHCI_UHS2_INT_HEADER_ERR | \
++	       SDHCI_UHS2_INT_RES_ERR    | \
++	       SDHCI_UHS2_INT_FRAME_ERR  | \
++	       SDHCI_UHS2_INT_TID_ERR    | \
++	       SDHCI_UHS2_INT_CMD_TIMEOUT)
++/* CRC Error occurs during a packet receiving */
++#define SDHCI_UHS2_INT_DATA_ERR_MASK         ( \
++	       SDHCI_UHS2_INT_RETRY_EXP       | \
++	       SDHCI_UHS2_INT_CRC             | \
++	       SDHCI_UHS2_INT_UNRECOVER       | \
++	       SDHCI_UHS2_INT_EBUSY_ERR       | \
++	       SDHCI_UHS2_INT_ADMA_ERROR      | \
++	       SDHCI_UHS2_INT_DEADLOCK_TIMEOUT)
++
++#define SDHCI_UHS2_SETTINGS_PTR                 0xE0
++#define   SDHCI_UHS2_GEN_SETTINGS_POWER_LOW     BIT(0)
++#define   SDHCI_UHS2_GEN_SETTINGS_N_LANES_MASK  GENMASK(11, 8)
++#define   SDHCI_UHS2_FD_OR_2L_HD                0x0 /* 2 lanes */
++#define   SDHCI_UHS2_2D1U_FD                    0x2 /* 3 lanes, 2 down, 1 up, full duplex */
++#define   SDHCI_UHS2_1D2U_FD                    0x3 /* 3 lanes, 1 down, 2 up, full duplex */
++#define   SDHCI_UHS2_2D2U_FD                    0x4 /* 4 lanes, 2 down, 2 up, full duplex */
++
++#define   SDHCI_UHS2_PHY_SET_SPEED_B            BIT(6)
++#define   SDHCI_UHS2_PHY_HIBERNATE_EN           BIT(12)
++#define   SDHCI_UHS2_PHY_N_LSS_SYN_MASK         GENMASK(19, 16)
++#define   SDHCI_UHS2_PHY_N_LSS_DIR_MASK         GENMASK(23, 20)
++
++#define   SDHCI_UHS2_TRAN_N_FCU_MASK            GENMASK(15, 8)
++#define   SDHCI_UHS2_TRAN_RETRY_CNT_MASK        GENMASK(17, 16)
++#define   SDHCI_UHS2_TRAN_1_N_DAT_GAP_MASK      GENMASK(7, 0)
++
++#define SDHCI_UHS2_CAPS_PTR                     0xE2
++#define  SDHCI_UHS2_CAPS_OFFSET                 0
++#define   SDHCI_UHS2_CAPS_DAP_MASK              GENMASK(3, 0)
++#define   SDHCI_UHS2_CAPS_GAP_MASK              GENMASK(7, 4)
++#define   SDHCI_UHS2_CAPS_GAP(gap)              ((gap) * 360)
++#define   SDHCI_UHS2_CAPS_LANE_MASK             GENMASK(13, 8)
++#define    SDHCI_UHS2_CAPS_2L_HD_FD             1
++#define    SDHCI_UHS2_CAPS_2D1U_FD              2
++#define    SDHCI_UHS2_CAPS_1D2U_FD              4
++#define    SDHCI_UHS2_CAPS_2D2U_FD              8
++#define   SDHCI_UHS2_CAPS_ADDR_64               BIT(14)
++#define   SDHCI_UHS2_CAPS_BOOT                  BIT(15)
++#define   SDHCI_UHS2_CAPS_DEV_TYPE_MASK         GENMASK(17, 16)
++#define    SDHCI_UHS2_CAPS_DEV_TYPE_RMV         0
++#define    SDHCI_UHS2_CAPS_DEV_TYPE_EMB         1
++#define    SDHCI_UHS2_CAPS_DEV_TYPE_EMB_RMV     2
++#define   SDHCI_UHS2_CAPS_NUM_DEV_MASK          GENMASK(21, 18)
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_MASK         GENMASK(23, 22)
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_SHIFT        22
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_P2P          0
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_RING         1
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_HUB          2
++#define   SDHCI_UHS2_CAPS_BUS_TOPO_HUB_RING     3
++
++#define  SDHCI_UHS2_CAPS_PHY_OFFSET             4
++#define   SDHCI_UHS2_CAPS_PHY_REV_MASK          GENMASK(5, 0)
++#define   SDHCI_UHS2_CAPS_PHY_RANGE_MASK        GENMASK(7, 6)
++#define   SDHCI_UHS2_CAPS_PHY_RANGE_A           0
++#define   SDHCI_UHS2_CAPS_PHY_RANGE_B           1
++#define   SDHCI_UHS2_CAPS_PHY_N_LSS_SYN_MASK    GENMASK(19, 16)
++#define   SDHCI_UHS2_CAPS_PHY_N_LSS_DIR_MASK    GENMASK(23, 20)
++#define  SDHCI_UHS2_CAPS_TRAN_OFFSET            8
++#define   SDHCI_UHS2_CAPS_TRAN_LINK_REV_MASK    GENMASK(5, 0)
++#define   SDHCI_UHS2_CAPS_TRAN_N_FCU_MASK       GENMASK(15, 8)
++#define   SDHCI_UHS2_CAPS_TRAN_HOST_TYPE_MASK   GENMASK(18, 16)
++#define   SDHCI_UHS2_CAPS_TRAN_BLK_LEN_MASK     GENMASK(31, 20)
++
++#define  SDHCI_UHS2_CAPS_TRAN_1_OFFSET          12
++#define  SDHCI_UHS2_CAPS_TRAN_1_N_DATA_GAP_MASK GENMASK(7, 0)
++
++#define SDHCI_UHS2_EMBED_CTRL_PTR               0xE6
++#define SDHCI_UHS2_VENDOR_PTR                   0xE8
++
++#endif /* __SDHCI_UHS2_H */
+diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+index f4f2085c274c..2c7ab4453248 100644
+--- a/drivers/mmc/host/sdhci.h
++++ b/drivers/mmc/host/sdhci.h
+@@ -43,8 +43,23 @@
+ #define  SDHCI_TRNS_READ	0x10
+ #define  SDHCI_TRNS_MULTI	0x20
+ 
 +/*
-+ * UHS2 Header:
-+ * Refer to UHS-II Addendum Version 1.02 Figure 5-2, the format of CCMD Header is described below:
-+ *      bit [3:0]  : DID(Destination ID = Node ID of UHS2 card)
-+ *      bit [6:4]  : TYP(Packet Type)
-+ *                   000b: CCMD(Control command packet)
-+ *                   001b: DCMD(Data command packet)
-+ *                   010b: RES(Response packet)
-+ *                   011b: DATA(Data payload packet)
-+ *                   111b: MSG(Message packet)
-+ *                   Others: Reserved
-+ *      bit [7]    : NP(Native Packet)
-+ *      bit [10:8] : TID(Transaction ID)
-+ *      bit [11]   : Reserved
-+ *      bit [15:12]: SID(Source ID 0: Node ID of Host)
-+ *
-+ * Broadcast CCMD issued by Host is represented as DID=SID=0.
++ * Defined in Host Version 4.0.
 + */
-+/*
-+ * UHS2 Argument:
-+ * Refer to UHS-II Addendum Version 1.02 Figure 6-5, the format of CCMD Argument is described below:
-+ *      bit [3:0]  : MSB of IOADR
-+ *      bit [5:4]  : PLEN(Payload Length)
-+ *                   00b: 0 byte
-+ *                   01b: 4 bytes
-+ *                   10b: 8 bytes
-+ *                   11b: 16 bytes
-+ *      bit [6]    : Reserved
-+ *      bit [7]    : R/W(Read/Write)
-+ *                   0: Control read command
-+ *                   1: Control write command
-+ *      bit [15:8] : LSB of IOADR
-+ *
-+ * I/O Address specifies the address of register in UHS-II I/O space accessed by CCMD.
-+ * The unit of I/O Address is 4 Bytes. It is transmitted in MSB first, LSB last.
-+ */
-+#define UHS2_NATIVE_PACKET_POS	7
-+#define UHS2_NATIVE_PACKET	(1 << UHS2_NATIVE_PACKET_POS)
++#define  SDHCI_TRNS_RES_TYPE		0x40
++#define  SDHCI_TRNS_RES_ERR_CHECK	0x80
++#define  SDHCI_TRNS_RES_INT_DIS		0x0100
 +
-+#define UHS2_PACKET_TYPE_POS	4
-+#define UHS2_PACKET_TYPE_CCMD	(0 << UHS2_PACKET_TYPE_POS)
-+#define UHS2_PACKET_TYPE_DCMD	(1 << UHS2_PACKET_TYPE_POS)
-+#define UHS2_PACKET_TYPE_RES	(2 << UHS2_PACKET_TYPE_POS)
-+#define UHS2_PACKET_TYPE_DATA	(3 << UHS2_PACKET_TYPE_POS)
-+#define UHS2_PACKET_TYPE_MSG	(7 << UHS2_PACKET_TYPE_POS)
-+
-+#define UHS2_DEST_ID_MASK	0x0F
-+#define UHS2_DEST_ID		0x1
-+
-+#define UHS2_SRC_ID_POS		12
-+#define UHS2_SRC_ID_MASK	0xF000
-+
-+#define UHS2_TRANS_ID_POS	8
-+#define UHS2_TRANS_ID_MASK	0x0700
-+
-+/* UHS2 MSG */
-+#define UHS2_MSG_CTG_POS	5
-+#define UHS2_MSG_CTG_LMSG	0x00
-+#define UHS2_MSG_CTG_INT	0x60
-+#define UHS2_MSG_CTG_AMSG	0x80
-+
-+#define UHS2_MSG_CTG_FCREQ	0x00
-+#define UHS2_MSG_CTG_FCRDY	0x01
-+#define UHS2_MSG_CTG_STAT	0x02
-+
-+#define UHS2_MSG_CODE_POS			8
-+#define UHS2_MSG_CODE_FC_UNRECOVER_ERR		0x8
-+#define UHS2_MSG_CODE_STAT_UNRECOVER_ERR	0x8
-+#define UHS2_MSG_CODE_STAT_RECOVER_ERR		0x1
-+
-+/* TRANS Layer definition */
-+
-+/* Native packets*/
-+#define UHS2_NATIVE_CMD_RW_POS	7
-+#define UHS2_NATIVE_CMD_WRITE	(1 << UHS2_NATIVE_CMD_RW_POS)
-+#define UHS2_NATIVE_CMD_READ	(0 << UHS2_NATIVE_CMD_RW_POS)
-+
-+#define UHS2_NATIVE_CMD_PLEN_POS	4
-+#define UHS2_NATIVE_CMD_PLEN_4B		(1 << UHS2_NATIVE_CMD_PLEN_POS)
-+#define UHS2_NATIVE_CMD_PLEN_8B		(2 << UHS2_NATIVE_CMD_PLEN_POS)
-+#define UHS2_NATIVE_CMD_PLEN_16B	(3 << UHS2_NATIVE_CMD_PLEN_POS)
-+
-+#define UHS2_NATIVE_CCMD_GET_MIOADR_MASK	0xF00
-+#define UHS2_NATIVE_CCMD_MIOADR_MASK		0x0F
-+
-+#define UHS2_NATIVE_CCMD_LIOADR_POS		8
-+#define UHS2_NATIVE_CCMD_GET_LIOADR_MASK	0x0FF
-+
-+#define UHS2_CCMD_DEV_INIT_COMPLETE_FLAG	BIT(11)
-+#define UHS2_DEV_INIT_PAYLOAD_LEN		1
-+#define UHS2_DEV_INIT_RESP_LEN			6
-+#define UHS2_DEV_ENUM_PAYLOAD_LEN		1
-+#define UHS2_DEV_ENUM_RESP_LEN			8
-+#define UHS2_CFG_WRITE_PAYLOAD_LEN		2
-+#define UHS2_CFG_WRITE_PHY_SET_RESP_LEN		4
-+#define UHS2_CFG_WRITE_GENERIC_SET_RESP_LEN	5
-+#define UHS2_GO_DORMANT_PAYLOAD_LEN		1
+ #define SDHCI_COMMAND		0x0E
+ #define  SDHCI_CMD_RESP_MASK	0x03
 +
 +/*
-+ * UHS2 Argument:
-+ * Refer to UHS-II Addendum Version 1.02 Figure 6-8, the format of DCMD Argument is described below:
-+ *      bit [3:0]  : Reserved
-+ *      bit [6:3]  : TMODE(Transfer Mode)
-+ *                   bit 3: DAM(Data Access Mode)
-+ *                   bit 4: TLUM(TLEN Unit Mode)
-+ *                   bit 5: LM(Length Mode)
-+ *                   bit 6: DM(Duplex Mode)
-+ *      bit [7]    : R/W(Read/Write)
-+ *                   0: Control read command
-+ *                   1: Control write command
-+ *      bit [15:8] : Reserved
-+ *
-+ * I/O Address specifies the address of register in UHS-II I/O space accessed by CCMD.
-+ * The unit of I/O Address is 4 Bytes. It is transmitted in MSB first, LSB last.
++ * Host Version 4.10 adds this bit to distinguish a main command or
++ * sub command.
++ * For example with SDIO, CMD52 (sub command) issued during CMD53 (main command).
 + */
-+#define UHS2_DCMD_DM_POS		6
-+#define UHS2_DCMD_2L_HD_MODE		(1 << UHS2_DCMD_DM_POS)
-+#define UHS2_DCMD_LM_POS		5
-+#define UHS2_DCMD_LM_TLEN_EXIST		(1 << UHS2_DCMD_LM_POS)
-+#define UHS2_DCMD_TLUM_POS		4
-+#define UHS2_DCMD_TLUM_BYTE_MODE	(1 << UHS2_DCMD_TLUM_POS)
-+#define UHS2_NATIVE_DCMD_DAM_POS	3
-+#define UHS2_NATIVE_DCMD_DAM_IO		(1 << UHS2_NATIVE_DCMD_DAM_POS)
++#define  SDHCI_CMD_SUB_CMD	0x04
 +
-+#define UHS2_RES_NACK_POS	7
-+#define UHS2_RES_NACK_MASK	(0x1 << UHS2_RES_NACK_POS)
+ #define  SDHCI_CMD_CRC		0x08
+ #define  SDHCI_CMD_INDEX	0x10
+ #define  SDHCI_CMD_DATA		0x20
+@@ -65,6 +80,9 @@
+ #define SDHCI_PRESENT_STATE	0x24
+ #define  SDHCI_CMD_INHIBIT	0x00000001
+ #define  SDHCI_DATA_INHIBIT	0x00000002
 +
-+#define UHS2_RES_ECODE_POS	4
-+#define UHS2_RES_ECODE_MASK	0x7
-+#define UHS2_RES_ECODE_COND	1
-+#define UHS2_RES_ECODE_ARG	2
-+#define UHS2_RES_ECODE_GEN	3
++#define  SDHCI_DAT_4_TO_7_LVL_MASK	0x000000F0
 +
-+/* IOADR of device registers */
-+#define UHS2_IOADR_GENERIC_CAPS		0x00
-+#define UHS2_IOADR_PHY_CAPS		0x02
-+#define UHS2_IOADR_LINK_CAPS		0x04
-+#define UHS2_IOADR_RSV_CAPS		0x06
-+#define UHS2_IOADR_GENERIC_SETTINGS	0x08
-+#define UHS2_IOADR_PHY_SETTINGS		0x0A
-+#define UHS2_IOADR_LINK_SETTINGS	0x0C
-+#define UHS2_IOADR_PRESET		0x40
+ #define  SDHCI_DOING_WRITE	0x00000100
+ #define  SDHCI_DOING_READ	0x00000200
+ #define  SDHCI_SPACE_AVAILABLE	0x00000400
+@@ -80,6 +98,15 @@
+ #define   SDHCI_DATA_0_LVL_MASK	0x00100000
+ #define  SDHCI_CMD_LVL		0x01000000
+ 
++/* Host Version 4.10 */
 +
-+/* SD application packets */
-+#define UHS2_SD_CMD_INDEX_POS	8
++#define  SDHCI_HOST_REGULATOR_STABLE	0x02000000
++#define  SDHCI_CMD_NOT_ISSUED_ERR	0x08000000
++#define  SDHCI_SUB_CMD_STATUS		0x10000000
++#define  SDHCI_UHS2_IN_DORMANT_STATE	0x20000000
++#define  SDHCI_UHS2_LANE_SYNC		0x40000000
++#define  SDHCI_UHS2_IF_DETECT		0x80000000
 +
-+#define UHS2_SD_CMD_APP_POS	14
-+#define UHS2_SD_CMD_APP		(1 << UHS2_SD_CMD_APP_POS)
+ #define SDHCI_HOST_CONTROL	0x28
+ #define  SDHCI_CTRL_LED		0x01
+ #define  SDHCI_CTRL_4BITBUS	0x02
+@@ -100,6 +127,14 @@
+ #define  SDHCI_POWER_300	0x0C
+ #define  SDHCI_POWER_330	0x0E
+ 
++/*
++ * VDD2 - UHS2
++ * VDD2 power on/off and voltage select (UHS2)
++ */
++#define  SDHCI_VDD2_POWER_ON		0x10
++#define  SDHCI_VDD2_POWER_120		0x80
++#define  SDHCI_VDD2_POWER_180		0xA0
 +
-+/* UHS-II Device Registers */
-+#define UHS2_DEV_CONFIG_REG	0x000
+ #define SDHCI_BLOCK_GAP_CONTROL	0x2A
+ 
+ #define SDHCI_WAKE_UP_CONTROL	0x2B
+@@ -110,7 +145,7 @@
+ #define SDHCI_CLOCK_CONTROL	0x2C
+ #define  SDHCI_DIVIDER_SHIFT	8
+ #define  SDHCI_DIVIDER_HI_SHIFT	6
+-#define  SDHCI_DIV_MASK	0xFF
++#define  SDHCI_DIV_MASK		0xFF
+ #define  SDHCI_DIV_MASK_LEN	8
+ #define  SDHCI_DIV_HI_MASK	0x300
+ #define  SDHCI_PROG_CLOCK_MODE	0x0020
+@@ -139,6 +174,10 @@
+ #define  SDHCI_INT_CARD_REMOVE	0x00000080
+ #define  SDHCI_INT_CARD_INT	0x00000100
+ #define  SDHCI_INT_RETUNE	0x00001000
 +
-+/* General Caps and Settings registers */
-+#define UHS2_DEV_CONFIG_GEN_CAPS	(UHS2_DEV_CONFIG_REG + 0x000)
-+#define UHS2_DEV_CONFIG_N_LANES_POS	8
-+#define UHS2_DEV_CONFIG_N_LANES_MASK	0x3F
-+#define UHS2_DEV_CONFIG_2L_HD_FD	0x1
-+#define UHS2_DEV_CONFIG_2D1U_FD		0x2
-+#define UHS2_DEV_CONFIG_1D2U_FD		0x4
-+#define UHS2_DEV_CONFIG_2D2U_FD		0x8
-+#define UHS2_DEV_CONFIG_DADR_POS	14
-+#define UHS2_DEV_CONFIG_DADR_MASK	0x1
-+#define UHS2_DEV_CONFIG_APP_POS		16
-+#define UHS2_DEV_CONFIG_APP_MASK	0xFF
-+#define UHS2_DEV_CONFIG_APP_SD_MEM	0x1
++/* Host Version 4.10 */
++#define  SDHCI_INT_FX_EVENT	0x00002000
 +
-+#define UHS2_DEV_CONFIG_GEN_SET			(UHS2_DEV_CONFIG_REG + 0x008)
-+#define UHS2_DEV_CONFIG_GEN_SET_N_LANES_POS	8
-+#define UHS2_DEV_CONFIG_GEN_SET_2L_FD_HD	0x0
-+#define UHS2_DEV_CONFIG_GEN_SET_2D1U_FD		0x2
-+#define UHS2_DEV_CONFIG_GEN_SET_1D2U_FD		0x3
-+#define UHS2_DEV_CONFIG_GEN_SET_2D2U_FD		0x4
-+#define UHS2_DEV_CONFIG_GEN_SET_CFG_COMPLETE	BIT(31)
+ #define  SDHCI_INT_CQE		0x00004000
+ #define  SDHCI_INT_ERROR	0x00008000
+ #define  SDHCI_INT_TIMEOUT	0x00010000
+@@ -152,6 +191,9 @@
+ #define  SDHCI_INT_AUTO_CMD_ERR	0x01000000
+ #define  SDHCI_INT_ADMA_ERROR	0x02000000
+ 
++/* Host Version 4.0 */
++#define  SDHCI_INT_RESP_ERR	0x08000000
 +
-+/* PHY Caps and Settings registers */
-+#define UHS2_DEV_CONFIG_PHY_CAPS	(UHS2_DEV_CONFIG_REG + 0x002)
-+#define UHS2_DEV_CONFIG_PHY_MINOR_MASK	0xF
-+#define UHS2_DEV_CONFIG_PHY_MAJOR_POS	4
-+#define UHS2_DEV_CONFIG_PHY_MAJOR_MASK	0x3
-+#define UHS2_DEV_CONFIG_CAN_HIBER_POS	15
-+#define UHS2_DEV_CONFIG_CAN_HIBER_MASK	0x1
-+#define UHS2_DEV_CONFIG_PHY_CAPS1	(UHS2_DEV_CONFIG_REG + 0x003)
-+#define UHS2_DEV_CONFIG_N_LSS_SYN_MASK	0xF
-+#define UHS2_DEV_CONFIG_N_LSS_DIR_POS	4
-+#define UHS2_DEV_CONFIG_N_LSS_DIR_MASK	0xF
+ #define  SDHCI_INT_NORMAL_MASK	0x00007FFF
+ #define  SDHCI_INT_ERROR_MASK	0xFFFF8000
+ 
+@@ -178,6 +220,9 @@
+ #define  SDHCI_AUTO_CMD_END_BIT	0x00000008
+ #define  SDHCI_AUTO_CMD_INDEX	0x00000010
+ 
++/* Host Version 4.10 */
++#define  SDHCI_AUTO_CMD_RESP_ERR	0x0020
 +
-+#define UHS2_DEV_CONFIG_PHY_SET			(UHS2_DEV_CONFIG_REG + 0x00A)
-+#define UHS2_DEV_CONFIG_PHY_SET_SPEED_POS	6
-+#define UHS2_DEV_CONFIG_PHY_SET_SPEED_A		0x0
-+#define UHS2_DEV_CONFIG_PHY_SET_SPEED_B		0x1
+ #define SDHCI_HOST_CONTROL2		0x3E
+ #define  SDHCI_CTRL_UHS_MASK		0x0007
+ #define   SDHCI_CTRL_UHS_SDR12		0x0000
+@@ -186,6 +231,7 @@
+ #define   SDHCI_CTRL_UHS_SDR104		0x0003
+ #define   SDHCI_CTRL_UHS_DDR50		0x0004
+ #define   SDHCI_CTRL_HS400		0x0005 /* Non-standard */
++#define   SDHCI_CTRL_UHS2		0x0007
+ #define  SDHCI_CTRL_VDD_180		0x0008
+ #define  SDHCI_CTRL_DRV_TYPE_MASK	0x0030
+ #define   SDHCI_CTRL_DRV_TYPE_B		0x0000
+@@ -194,9 +240,12 @@
+ #define   SDHCI_CTRL_DRV_TYPE_D		0x0030
+ #define  SDHCI_CTRL_EXEC_TUNING		0x0040
+ #define  SDHCI_CTRL_TUNED_CLK		0x0080
++#define  SDHCI_CTRL_UHS2_ENABLE		0x0100
++#define  SDHCI_CTRL_ADMA2_LEN_MODE	0x0400
+ #define  SDHCI_CMD23_ENABLE		0x0800
+ #define  SDHCI_CTRL_V4_MODE		0x1000
+ #define  SDHCI_CTRL_64BIT_ADDR		0x2000
++#define  SDHCI_CTRL_ASYNC_INT_ENABLE	0x4000
+ #define  SDHCI_CTRL_PRESET_VAL_ENABLE	0x8000
+ 
+ #define SDHCI_CAPABILITIES	0x40
+@@ -219,11 +268,13 @@
+ #define  SDHCI_CAN_VDD_180	0x04000000
+ #define  SDHCI_CAN_64BIT_V4	0x08000000
+ #define  SDHCI_CAN_64BIT	0x10000000
++#define  SDHCI_CAN_ASYNC_INT	0x20000000
+ 
+ #define SDHCI_CAPABILITIES_1	0x44
+ #define  SDHCI_SUPPORT_SDR50	0x00000001
+ #define  SDHCI_SUPPORT_SDR104	0x00000002
+ #define  SDHCI_SUPPORT_DDR50	0x00000004
++#define  SDHCI_SUPPORT_UHS2	0x00000008
+ #define  SDHCI_DRIVER_TYPE_A	0x00000010
+ #define  SDHCI_DRIVER_TYPE_C	0x00000020
+ #define  SDHCI_DRIVER_TYPE_D	0x00000040
+@@ -232,6 +283,7 @@
+ #define  SDHCI_RETUNING_MODE_MASK		GENMASK(15, 14)
+ #define  SDHCI_CLOCK_MUL_MASK			GENMASK(23, 16)
+ #define  SDHCI_CAN_DO_ADMA3	0x08000000
++#define  SDHCI_CAN_VDD2_180	0x10000000 /* UHS-2 1.8V VDD2 */
+ #define  SDHCI_SUPPORT_HS400	0x80000000 /* Non-standard */
+ 
+ #define SDHCI_MAX_CURRENT		0x48
+@@ -239,11 +291,14 @@
+ #define  SDHCI_MAX_CURRENT_330_MASK	GENMASK(7, 0)
+ #define  SDHCI_MAX_CURRENT_300_MASK	GENMASK(15, 8)
+ #define  SDHCI_MAX_CURRENT_180_MASK	GENMASK(23, 16)
++#define SDHCI_MAX_CURRENT_1		0x4C
++#define  SDHCI_MAX_CURRENT_VDD2_180_MASK	GENMASK(7, 0) /* UHS2 */
+ #define   SDHCI_MAX_CURRENT_MULTIPLIER	4
+ 
+ /* 4C-4F reserved for more max current */
+ 
+ #define SDHCI_SET_ACMD12_ERROR	0x50
++/* Host Version 4.10 */
+ #define SDHCI_SET_INT_ERROR	0x52
+ 
+ #define SDHCI_ADMA_ERROR	0x54
+@@ -262,10 +317,15 @@
+ #define SDHCI_PRESET_FOR_SDR104        0x6C
+ #define SDHCI_PRESET_FOR_DDR50 0x6E
+ #define SDHCI_PRESET_FOR_HS400 0x74 /* Non-standard */
 +
-+/* LINK-TRAN Caps and Settings registers */
-+#define UHS2_DEV_CONFIG_LINK_TRAN_CAPS		(UHS2_DEV_CONFIG_REG + 0x004)
-+#define UHS2_DEV_CONFIG_LT_MINOR_MASK		0xF
-+#define UHS2_DEV_CONFIG_LT_MAJOR_POS		4
-+#define UHS2_DEV_CONFIG_LT_MAJOR_MASK		0x3
-+#define UHS2_DEV_CONFIG_N_FCU_POS		8
-+#define UHS2_DEV_CONFIG_N_FCU_MASK		0xFF
-+#define UHS2_DEV_CONFIG_DEV_TYPE_POS		16
-+#define UHS2_DEV_CONFIG_DEV_TYPE_MASK		0x7
-+#define UHS2_DEV_CONFIG_MAX_BLK_LEN_POS		20
-+#define UHS2_DEV_CONFIG_MAX_BLK_LEN_MASK	0xFFF
-+#define UHS2_DEV_CONFIG_LINK_TRAN_CAPS1		(UHS2_DEV_CONFIG_REG + 0x005)
-+#define UHS2_DEV_CONFIG_N_DATA_GAP_MASK		0xFF
++/* UHS2 */
++#define SDHCI_PRESET_FOR_UHS2  0x74
+ #define SDHCI_PRESET_DRV_MASK		GENMASK(15, 14)
+ #define SDHCI_PRESET_CLKGEN_SEL		BIT(10)
+ #define SDHCI_PRESET_SDCLK_FREQ_MASK	GENMASK(9, 0)
+ 
++#define SDHCI_ADMA3_ADDRESS	0x78
 +
-+#define UHS2_DEV_CONFIG_LINK_TRAN_SET		(UHS2_DEV_CONFIG_REG + 0x00C)
-+#define UHS2_DEV_CONFIG_LT_SET_MAX_BLK_LEN	0x200
-+#define UHS2_DEV_CONFIG_LT_SET_MAX_RETRY_POS	16
-+
-+/* Preset register */
-+#define UHS2_DEV_CONFIG_PRESET	(UHS2_DEV_CONFIG_REG + 0x040)
-+
-+#define UHS2_DEV_INT_REG	0x100
-+
-+#define UHS2_DEV_STATUS_REG	0x180
-+
-+#define UHS2_DEV_CMD_REG		0x200
-+#define UHS2_DEV_CMD_FULL_RESET		(UHS2_DEV_CMD_REG + 0x000)
-+#define UHS2_DEV_CMD_GO_DORMANT_STATE	(UHS2_DEV_CMD_REG + 0x001)
-+#define UHS2_DEV_CMD_DORMANT_HIBER	BIT(7)
-+#define UHS2_DEV_CMD_DEVICE_INIT	(UHS2_DEV_CMD_REG + 0x002)
-+#define UHS2_DEV_INIT_COMPLETE_FLAG	BIT(11)
-+#define UHS2_DEV_CMD_ENUMERATE		(UHS2_DEV_CMD_REG + 0x003)
-+#define UHS2_DEV_CMD_TRANS_ABORT	(UHS2_DEV_CMD_REG + 0x004)
-+
-+#define UHS2_RCLK_MAX	52000000
-+#define UHS2_RCLK_MIN	26000000
-+
-+#endif /* LINUX_MMC_UHS2_H */
+ #define SDHCI_SLOT_INT_STATUS	0xFC
+ 
+ #define SDHCI_HOST_VERSION	0xFE
 -- 
 2.25.1
 
