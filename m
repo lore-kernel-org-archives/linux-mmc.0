@@ -2,43 +2,43 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 270EFC76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 10:21:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6DEE0C76196
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 10:22:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231278AbjCaKVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 06:21:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52948 "EHLO
+        id S231134AbjCaKWH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 06:22:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52868 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230003AbjCaKUw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 06:20:52 -0400
-Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA10955A6;
-        Fri, 31 Mar 2023 03:16:44 -0700 (PDT)
+        with ESMTP id S231154AbjCaKVN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 06:21:13 -0400
+Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B55FB1EFE2;
+        Fri, 31 Mar 2023 03:18:02 -0700 (PDT)
 Received: from lelv0265.itg.ti.com ([10.180.67.224])
-        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGSZW127727;
-        Fri, 31 Mar 2023 05:16:28 -0500
+        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGP98022403;
+        Fri, 31 Mar 2023 05:16:25 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1680257788;
-        bh=6Ri5pdHIsV2Mxu3uCVu+eVFA7lCtGgVxj6AOVfBPX+4=;
-        h=From:To:CC:Subject:Date:In-Reply-To:References;
-        b=t7L+le03DY89mrnorfLF7V+R2YaxAUmaJoFxxlxHBil5F4GyPX288gO8z4+6tUYnH
-         rpA8NJweyFq6OfyUnJWPrsUh97jyQ44myqYyLv3/3VG4AVjYoG7w4XteZyiV+P5eFk
-         XHhJYS0EHb7e8sVZt2xzOEAlvOtPn65YAzeIMZ4g=
-Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
-        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 32VAGSAG015442
+        s=ti-com-17Q1; t=1680257785;
+        bh=bQYfMpKfl1YjyXqMcGd+pzaYFt/H3greN67T+tqelXY=;
+        h=From:To:CC:Subject:Date;
+        b=sfwQVpa2vIVSk1ozEsX7dcG0xGhG69W0uP1czMvjKjGcBS1vxTVUV0o0faUGZefZg
+         Yi7Madr3qZ/IU6hwBxI/eOPkUhDTx2H2iFfZvwi2H0Z+7HJuFphtI+bkgbVYWr8erl
+         vVLsr0EGuasL7MKaf6iK9SEEclHzFwUto/dG6kIg=
+Received: from DFLE110.ent.ti.com (dfle110.ent.ti.com [10.64.6.31])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 32VAGPAB015430
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Fri, 31 Mar 2023 05:16:28 -0500
-Received: from DFLE114.ent.ti.com (10.64.6.35) by DFLE109.ent.ti.com
- (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
+        Fri, 31 Mar 2023 05:16:25 -0500
+Received: from DFLE101.ent.ti.com (10.64.6.22) by DFLE110.ent.ti.com
+ (10.64.6.31) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16; Fri, 31
- Mar 2023 05:16:27 -0500
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE114.ent.ti.com
- (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ Mar 2023 05:16:25 -0500
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE101.ent.ti.com
+ (10.64.6.22) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16 via
- Frontend Transport; Fri, 31 Mar 2023 05:16:27 -0500
+ Frontend Transport; Fri, 31 Mar 2023 05:16:25 -0500
 Received: from uda0132425.dhcp.ti.com (ileaxei01-snat2.itg.ti.com [10.180.69.6])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGNt8001959;
-        Fri, 31 Mar 2023 05:16:26 -0500
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGNt7001959;
+        Fri, 31 Mar 2023 05:16:23 -0500
 From:   Vignesh Raghavendra <vigneshr@ti.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>
@@ -46,11 +46,9 @@ CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
         Vignesh Raghavendra <vigneshr@ti.com>,
         <linux-arm-kernel@lists.infradead.org>
 Subject: [PATCH v3] mmc: sdhci_am654: Add support for PM suspend/resume
-Date:   Fri, 31 Mar 2023 15:46:19 +0530
-Message-ID: <20230331101619.4117312-2-vigneshr@ti.com>
+Date:   Fri, 31 Mar 2023 15:46:18 +0530
+Message-ID: <20230331101619.4117312-1-vigneshr@ti.com>
 X-Mailer: git-send-email 2.40.0
-In-Reply-To: <20230331101619.4117312-1-vigneshr@ti.com>
-References: <20230331101619.4117312-1-vigneshr@ti.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
@@ -67,6 +65,7 @@ Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
 Signed-off-by: Georgi Vlaev <g-vlaev@ti.com>
 Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
 ---
+
 Since RFC v2:
 Address all comments around sdhci_am654_remove()
 Set autosuspend_delay to -1 as SDHCI will host rootfs via SD/eMMC and
