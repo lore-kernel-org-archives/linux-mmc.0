@@ -2,192 +2,160 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 24921C76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 17:56:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2D3FC761A6
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 18:23:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233084AbjCaR4W (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 13:56:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54492 "EHLO
+        id S232467AbjCaSXS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 14:23:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57900 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230463AbjCaR4G (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 13:56:06 -0400
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DFC7236AD
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 10:55:46 -0700 (PDT)
-Received: by mail-wm1-x334.google.com with SMTP id n19so13381150wms.0
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 10:55:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680285346;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=fPFA2+mMpDkEnrSlP6Q1vK8FCaXq/JFd8egtENDoR5o=;
-        b=PeOy+YqWRdWuBi74fAolky6lPCSbPq5CGvkKafeVzIijgexYqfcC4jlqoGmlZXHr1d
-         T7PE+4vJ8td9t0DsFWLq6+vjmaOJD94VL+DMX4rQ/oXUt7rH5nLf7hirZzgWiLCj7U/O
-         lcphRaOW7zLm0Tm4a6qpk/bwwhde53Orl1vRYx86N79DPACxTA1Hf4Yun8tfZOwkUjMY
-         HdeH1k8x5RK900pUFF92ju57C3IFhc98WLDOz2I7sfCO4YeU5zkRU3WVWKZJEX1sfcQP
-         uU0WqTnpwcJy4kOgxShJHw+PE3IpSOlhYJA7HlFL0hlW4GX/5CcFtwxE3VmJmTY7KxDt
-         EDSA==
+        with ESMTP id S232048AbjCaSXR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 14:23:17 -0400
+Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C42321BF44;
+        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
+Received: by mail-pj1-f42.google.com with SMTP id d13so21343012pjh.0;
+        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680285346;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=fPFA2+mMpDkEnrSlP6Q1vK8FCaXq/JFd8egtENDoR5o=;
-        b=lP2HDjmJlcMmBBo2sJ6R2sV53nBsgNoKCag0bDaC+lK1X6q+o3AFZoFsgYFIVx3O3/
-         HN35xbvr1eCCeQdUGCf3fcmvzm/+YOUBzhJbrNRItvkWAlgQx/4i1k4XXwx5XPN8qmPu
-         i4Hl/HAyDIHdjTZk0mSqyD3KaV+FCK+y8tDhgOyyScXKo1b2RrFbVmUt5JmxBuc+Ja1T
-         NjG5y9FYQTeSDfi20BdqorX34yZGUX7sYIAtyoruB9lVf/gbfjlG7tayEnygH0LP/36+
-         G/c5kwXVZj1sUMW7oqVRJea67hnWjXwW/YpOv3q2+uNoP6J3c6KGvAcrKSTZ0/nrXA6M
-         5JKQ==
-X-Gm-Message-State: AAQBX9cye9HSiJ1FqNTd7grgPJecN4E7KuI77lZSUNtciNR4J8W90fJC
-        D0BQSLZyKWHBcBJ/G40ojn2g9CWD8DOQyiah6MY=
-X-Google-Smtp-Source: AKy350bERDcWLKoptbYeuvyrpWrSHbI62YbY+lV7H01t+idK9b2TtfFveujbdv9Vr4utJsS+E9H8+A==
-X-Received: by 2002:a05:600c:3781:b0:3f0:310c:e3ce with SMTP id o1-20020a05600c378100b003f0310ce3cemr6446435wmr.17.1680285346109;
-        Fri, 31 Mar 2023 10:55:46 -0700 (PDT)
-Received: from [127.0.1.1] (158.22.5.93.rev.sfr.net. [93.5.22.158])
-        by smtp.googlemail.com with ESMTPSA id 1-20020a05600c22c100b003eeb1d6a470sm3370171wmg.13.2023.03.31.10.55.45
+        d=1e100.net; s=20210112; t=1680286996;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=aTebArJXS/p6tOYYXSptr4puwVM64fTvtw6kGil+3Vs=;
+        b=NP1sR5HgwmqjNuRYxBVG2DC9m0bUsQDHo8ksKMt8xR1H4gt9iOXmg0vir8cg/VpnbT
+         DHfTLbPhxx4hFKfhynlhCw5iCWtfMXIgbeuaoDQzvjRwtUT5IXeTnmvHFc0VXV8JCCkf
+         4ADk7cZX7jm6xMHnHLk+JIUuXnF9K94Lk4NUb6LTiyaJE1aqdPR4UVKJ2b971/w7kyh8
+         xqRlY3UE7vhJy+/0u83/UoNYOKnztVvX8+X9c1vsSCAxqRQu3EzB+clZV1ttJu9jhJrS
+         MvmBfD+nGkzTBfQsSXFwn4zL1w4MMaNGsxLpMFs13+JFByKj1jHZ56QkCUZzme7dQHd4
+         ccgA==
+X-Gm-Message-State: AAQBX9c/PrvIgsCcUW+ZrPxgIXtOxKTYCym0KPdzH2ctgZ/xsAUxHrpa
+        j/r8vqLYaCh7cqO7bd1TzEceHH+ZJyg3xw==
+X-Google-Smtp-Source: AKy350aXt6uq93jKiGpsgQjor7aBNfRMnNFFdhgeE9VpsjrzXsm/9N8TW3VB92nmR7A7ICydZdsotg==
+X-Received: by 2002:a17:90b:1bc7:b0:23f:b35a:534e with SMTP id oa7-20020a17090b1bc700b0023fb35a534emr32013368pjb.29.1680286996083;
+        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
+Received: from snowbird ([199.73.127.3])
+        by smtp.gmail.com with ESMTPSA id e91-20020a17090a6fe400b0023f786a64ebsm5281418pjk.57.2023.03.31.11.23.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Mar 2023 10:55:45 -0700 (PDT)
-From:   amergnat@baylibre.com
-Date:   Fri, 31 Mar 2023 19:54:55 +0200
-Subject: [PATCH v4 11/11] arm64: dts: mediatek: Add CPU Idle support
+        Fri, 31 Mar 2023 11:23:15 -0700 (PDT)
+Date:   Fri, 31 Mar 2023 11:23:12 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZCclEE6Qw3on7/eO@snowbird>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230203-evk-board-support-v4-11-5cffe66a38c0@baylibre.com>
-References: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
-In-Reply-To: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
-To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        =?utf-8?q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>
-Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        Alexandre Mergnat <amergnat@baylibre.com>
-X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=2689; i=amergnat@baylibre.com;
- h=from:subject:message-id; bh=tqYiFkOeI53hFAvkAFcO4mPwzuf3UCWBDqz4THM6QQc=;
- b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkJx6Uy5vEJZm9bUg+FYoCchCrD4sVjDezKQl7fMQT
- LecctqGJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCcelAAKCRArRkmdfjHURRDED/
- 9+Yr4rVHhNd8gakQ//OkIJ/wXjZWbTofuNrE3H5YG5ObUUKOBK9aFY9V0GWTjBkNogyLJZ8d982MtP
- o5tkFPqD66DfoB7LIF5H9zTXLfUdD/yh9lIiAJZ7iqi8zzA8M0UFzQG+fjBGylGO69wOrQ/vzGW5ZI
- aGRx7RTc7aNlaBKHyU3j00jC3iBYpeZchgew/cHkwPneffi54UKk0mSaFom47kWOtSQqnR7Mnvvksq
- tPANt5ApRcCFmFUikG1cJvuPwlb5Gxp13Al52OI90suco2XFBEfr2pXBZRQLwxKUNIR1tJ0UDme7aX
- gyvSgREhOIOyAGmY8geGSGNgutQcDVKeuOdYgDsDSJGJTZ/t0dhsvHxH3RjNaqNjCnQs68UTqhyX6H
- 1NxEyNoObSoOA6W6EmConT5n2bcNImo/08EXbiKXO43fMdrQ99L67ED9X83sN1Gma+v0S9Zt+R/0Ht
- 2y0ub9fKjls6wvvXVR6kDAYL+HKPGxDEqwVH+I92r5DECxY3ciOv72hciSIDf+QvWvKgD8kTbc5yXk
- BupBBwE3NUiddw8UK/6Mawp/bvHZ1+yaBTfGMMGx7UM0M2obwafsOcNX2fOnncDHwiZ+Xe2AKaX+o4
- WuYt6zzj5cGUFPb1ndYjNN0rEFV/Lw+aR+86VOsHsZpKMyGJvQKHgSX0kHQA==
-X-Developer-Key: i=amergnat@baylibre.com; a=openpgp;
- fpr=231B5ED7F3EAAA700E60FE8B2B46499D7E31D445
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Amjad Ouled-Ameur <aouledameur@baylibre.com>
+Hi Ulf,
 
-MT8365 has 3 CPU Idle states:
-- MCDI_CPU. (Multi-Core-Deep-Idle)
-- MCDI_CLUSTER.
-- DPIDLE. (Deep-Idle)
+On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> >
+> > When using dm-verity with a data partition on an emmc device, dm-verity
+> > races with the discovery of attached emmc devices. This is because mmc's
+> > probing code sets up the host data structure then a work item is
+> > scheduled to do discovery afterwards. To prevent this race on init,
+> > let's inline the first call to detection, __mm_scan(), and let
+> > subsequent detect calls be handled via the workqueue.
+> 
+> In principle, I don't mind the changes in $subject patch, as long as
+> it doesn't hurt the overall initialization/boot time. Especially, we
+> may have more than one mmc-slot being used, so this needs to be well
+> tested.
+> 
 
-Signed-off-by: Amjad Ouled-Ameur <aouledameur@baylibre.com>
-Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
----
- arch/arm64/boot/dts/mediatek/mt8365.dtsi | 35 ++++++++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
+I unfortunately don't have a device with multiple mmcs available. Is
+this something you could help me with?
 
-diff --git a/arch/arm64/boot/dts/mediatek/mt8365.dtsi b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-index cfe0c67ad61f..413496c92069 100644
---- a/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-+++ b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-@@ -128,6 +128,7 @@ cpu0: cpu@0 {
- 			reg = <0x0>;
- 			#cooling-cells = <2>;
- 			enable-method = "psci";
-+			cpu-idle-states = <&CPU_MCDI &CLUSTER_MCDI &CLUSTER_DPIDLE>;
- 			i-cache-size = <0x8000>;
- 			i-cache-line-size = <64>;
- 			i-cache-sets = <256>;
-@@ -147,6 +148,7 @@ cpu1: cpu@1 {
- 			reg = <0x1>;
- 			#cooling-cells = <2>;
- 			enable-method = "psci";
-+			cpu-idle-states = <&CPU_MCDI &CLUSTER_MCDI &CLUSTER_DPIDLE>;
- 			i-cache-size = <0x8000>;
- 			i-cache-line-size = <64>;
- 			i-cache-sets = <256>;
-@@ -166,6 +168,7 @@ cpu2: cpu@2 {
- 			reg = <0x2>;
- 			#cooling-cells = <2>;
- 			enable-method = "psci";
-+			cpu-idle-states = <&CPU_MCDI &CLUSTER_MCDI &CLUSTER_DPIDLE>;
- 			i-cache-size = <0x8000>;
- 			i-cache-line-size = <64>;
- 			i-cache-sets = <256>;
-@@ -185,6 +188,7 @@ cpu3: cpu@3 {
- 			reg = <0x3>;
- 			#cooling-cells = <2>;
- 			enable-method = "psci";
-+			cpu-idle-states = <&CPU_MCDI &CLUSTER_MCDI &CLUSTER_DPIDLE>;
- 			i-cache-size = <0x8000>;
- 			i-cache-line-size = <64>;
- 			i-cache-sets = <256>;
-@@ -198,6 +202,37 @@ cpu3: cpu@3 {
- 			operating-points-v2 = <&cluster0_opp>;
- 		};
- 
-+		idle-states {
-+			entry-method = "psci";
-+
-+			CPU_MCDI: cpu-mcdi {
-+				compatible = "arm,idle-state";
-+				local-timer-stop;
-+				arm,psci-suspend-param = <0x00010001>;
-+				entry-latency-us = <300>;
-+				exit-latency-us = <200>;
-+				min-residency-us = <1000>;
-+			};
-+
-+			CLUSTER_MCDI: cluster-mcdi {
-+				compatible = "arm,idle-state";
-+				local-timer-stop;
-+				arm,psci-suspend-param = <0x01010001>;
-+				entry-latency-us = <350>;
-+				exit-latency-us = <250>;
-+				min-residency-us = <1200>;
-+			};
-+
-+			CLUSTER_DPIDLE: cluster-dpidle {
-+				compatible = "arm,idle-state";
-+				local-timer-stop;
-+				arm,psci-suspend-param = <0x01010004>;
-+				entry-latency-us = <300>;
-+				exit-latency-us = <800>;
-+				min-residency-us = <3300>;
-+			};
-+		};
-+
- 		l2: l2-cache {
- 			compatible = "cache";
- 			cache-level = <2>;
+> Although, more importantly, I fail to understand how this is going to
+> solve the race condition. Any I/O request to an eMMC or SD requires
+> the mmc block device driver to be up and running too, which is getting
+> probed from a separate module/driver that's not part of mmc_rescan().
 
--- 
-2.25.1
+I believe the call chain is something like this:
 
+__mmc_rescan()
+    mmc_rescan_try_freq()
+        mmc_attach_mmc()
+            mmc_add_card()
+                device_add()
+                    bus_probe_device()
+                        mmc_blk_probe()
+
+The initial calling of this is the host probe. So effectively if there
+is a card attached, we're inlining the device_add() call for the card
+attached rather than waiting for the workqueue item to kick off.
+
+dm is a part of late_initcall() while mmc is a module_init(), when built
+in becoming a device_initcall(). So this solves a race via the initcall
+chain. In the current state, device_initcall() finishes and we move onto
+the late_initcall() phase. But now, dm is racing with the workqueue to
+init the attached emmc device.
+
+Thanks,
+Dennis
+
+> 
+> Kind regards
+> Uffe
+> 
+> >
+> > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > ---
+> > Sigh.. fix missing static declaration.
+> >
+> >  drivers/mmc/core/core.c | 15 +++++++++++----
+> >  1 file changed, 11 insertions(+), 4 deletions(-)
+> >
+> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > index 368f10405e13..fda7ee57dee3 100644
+> > --- a/drivers/mmc/core/core.c
+> > +++ b/drivers/mmc/core/core.c
+> > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> >  }
+> >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> >
+> > -void mmc_rescan(struct work_struct *work)
+> > +static void __mmc_rescan(struct mmc_host *host)
+> >  {
+> > -       struct mmc_host *host =
+> > -               container_of(work, struct mmc_host, detect.work);
+> >         int i;
+> >
+> >         if (host->rescan_disable)
+> > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> >  }
+> >
+> > +void mmc_rescan(struct work_struct *work)
+> > +{
+> > +       struct mmc_host *host =
+> > +               container_of(work, struct mmc_host, detect.work);
+> > +
+> > +       __mmc_rescan(host);
+> > +}
+> > +
+> >  void mmc_start_host(struct mmc_host *host)
+> >  {
+> >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> >         }
+> >
+> >         mmc_gpiod_request_cd_irq(host);
+> > -       _mmc_detect_change(host, 0, false);
+> > +       host->detect_change = 1;
+> > +       __mmc_rescan(host);
+> >  }
+> >
+> >  void __mmc_stop_host(struct mmc_host *host)
+> > --
+> > 2.40.0
+> >
