@@ -2,268 +2,179 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA5D7C76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 16:36:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C02CBC77B60
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 17:55:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232748AbjCaQgj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 12:36:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48338 "EHLO
+        id S232027AbjCaRzi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 13:55:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231718AbjCaQgO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 12:36:14 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1963265BB;
-        Fri, 31 Mar 2023 09:32:31 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3BF9762A79;
-        Fri, 31 Mar 2023 16:32:31 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 20C0CC4339C;
-        Fri, 31 Mar 2023 16:32:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1680280350;
-        bh=VnbzBvaibbyC8oP4FloWRh28THkjVSw3Sfk+R75fUWI=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=0ci6ORyHXh7ZVBl1etCfZ/uAuyuhsEo9rb+fynEgheDnSUixEjKVK131PXpeObk51
-         LWAZlsweGqPa0q7hFWXcoSpVOPqJ3tlRWWeOAAtwKK0lJLrtCXVrh43kBfsW272Z1i
-         1FA+kQoQ7D+L0AQMlXLV1BfPvPHDtRMIjrlod3Cc=
-Date:   Fri, 31 Mar 2023 18:32:27 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Thorsten Leemhuis <regressions@leemhuis.info>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        Hannes Reinecke <hare@suse.de>,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>,
-        ye xingchen <ye.xingchen@zte.com.cn>, linux-mmc@vger.kernel.org
-Subject: Re: BUG FIX: [PATCH RFC v2] memstick_check() memleak in kernel
- 6.1.0+ introduced pre 4.17
-Message-ID: <2023033124-causing-cassette-4d96@gregkh>
-References: <7d873dd3-9bab-175b-8158-c458b61a7122@alu.unizg.hr>
- <f74219a7-1607-deb4-a6ae-7b73e2467ac7@alu.unizg.hr>
- <df560535-2a8e-de21-d45d-805159d70954@alu.unizg.hr>
+        with ESMTP id S230047AbjCaRzh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 13:55:37 -0400
+Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20DFE86B5
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 10:55:35 -0700 (PDT)
+Received: by mail-wm1-x333.google.com with SMTP id j36-20020a05600c1c2400b003f04057c152so2274399wms.5
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 10:55:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680285333;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=fsdpYjF3syBHZgFNYzSRIs96odbvYEi5NYnPkaWji2s=;
+        b=D7fMYdzDV7g7vU0VtE5FK+/I/b67QflgYkVGo3+z6uejVQqKRbhrzkGl6wBwAIaCFe
+         mjoOxShki3XXGhnp1HrwTqOqZ4VqJ693r7oBiAmdCyICnSE010hxHLZEQi/32FLdrre+
+         ZfFroHJa2PJ8/91y4Z96ESDqaDucBjOGLDhT7lhr9CNlbr5to9fOfanR/NOnSSXtr2AN
+         XZN9REigG7TAw+usWXRan3gMo5Nv4+qeqc7zz7FLe7/UPKXQ1OsSZHdWmi+fLiBoKktp
+         c201ih/2dP1lRwQC3ePlipZN52062wclF32GY1UOJzDGLU/VjNVqfC5ywUrdJzhfFg+E
+         BWDQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680285333;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=fsdpYjF3syBHZgFNYzSRIs96odbvYEi5NYnPkaWji2s=;
+        b=5a5BCiaAX30fHOsen27suT/SuXPkDSohu6OCMGTAgDA3gXr191yiKuPcXQlBQIcDGl
+         lNN/J0WWrob9BBikqympfsz23uEtfgGL11J+gDQT7Jobxx+Jt05EsDMaO1T/SyfTwz2A
+         3HpaCL5i8m2XRLNpdVomQTTt9AbeNw+TX8f9/L6YUzyzcOCLx897B7or3MYl4lOWFsKh
+         fpFxHZMPZmyyTCEzpCKjFsKCyvvlxsdbJvq5yY79o31/WVwPGspyK49F7U5xwyAx5lf3
+         QFzyGwucTsHf4zd0BxHj4ru0o+kzBOa6evYGsYEYtijzweGQuQQ9WDABv0uMdn7agaKO
+         /o8w==
+X-Gm-Message-State: AAQBX9cnhmYqk1lFEWO7kYuhdiN0P9YRWGA/6waQZDQpePSNu0hGCQbm
+        6EqUTXXVKFUZ5oBsfqPlVgeDMw==
+X-Google-Smtp-Source: AKy350addcoFAOVXSbc4akoysm1SuwS/0dymFAe3JQRHQ2q6/IjRuVXoPj9fXXz5CNR8FEJY3RL4Dg==
+X-Received: by 2002:a1c:4b04:0:b0:3ed:c84c:7efe with SMTP id y4-20020a1c4b04000000b003edc84c7efemr7957386wma.7.1680285333533;
+        Fri, 31 Mar 2023 10:55:33 -0700 (PDT)
+Received: from [127.0.1.1] (158.22.5.93.rev.sfr.net. [93.5.22.158])
+        by smtp.googlemail.com with ESMTPSA id 1-20020a05600c22c100b003eeb1d6a470sm3370171wmg.13.2023.03.31.10.55.32
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 31 Mar 2023 10:55:32 -0700 (PDT)
+From:   Alexandre Mergnat <amergnat@baylibre.com>
+Subject: [PATCH v4 00/11] Improve the MT8365 SoC and EVK board support
+Date:   Fri, 31 Mar 2023 19:54:44 +0200
+Message-Id: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <df560535-2a8e-de21-d45d-805159d70954@alu.unizg.hr>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAGQeJ2QC/4XOTQ6CMBAF4KuQrq0ZWqDgynsYF/0ZpRFb0kITQ
+ ri71aUxspq8Sd43s5KIwWIkp2IlAZON1rscqkNBdC/dHak1ORMGjAMDTjE9qPIyGBrncfRhoqZ
+ WQra8QyMUyT0lI1IVpNN9brp5GPKyt3HyYfncSWUel39kKilQaIAzAXVVmvqs5DJYFfCo/ZNcM
+ 5jYLsIy0qAW2qgStL79QPguwt+fAHBsAQG670+2bXsBCfE25UQBAAA=
+To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        =?utf-8?q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Alexandre Mergnat <amergnat@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+X-Mailer: b4 0.12.2
+X-Developer-Signature: v=1; a=openpgp-sha256; l=3143; i=amergnat@baylibre.com;
+ h=from:subject:message-id; bh=g6QcyfmR6WQISod8SsOAV0fvqJ4GAS81PN4pXjBo1YI=;
+ b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkJx6TMUNWgOq1M9kKUf8Hyk+HBOdRhDM9kCQ8bvha
+ bettplqJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZCcekwAKCRArRkmdfjHURVMjD/
+ sEAJOXUkkF49/VjifC4cfaa2kBphhLpZPFyZy+n/avDNRgE0iHhywdwOmcPqZoob/ZC+ULKnr1iYUB
+ jpeARQaaZzTHRbDD51JpBrsxftK5O/c8O227dK9uOysUNhW5W1ngRT/WYjPHcrsiAq0vBKnzKiz1R0
+ KEynockGlTutS1AuGmD9ITjENf10wKwmw1jjX64D6wtrjqpYcDjvNlcXnTe9q46n6Uu0tr5m2MZnI8
+ PpDHL6HvtelgbCbq0aFu51UtSUjS3Z+ULBlcVUgZGUk/G3l8JYd281XbtWtmOjd1jSwo+KcW9QbtAz
+ AU0Ac7bJeZl2pk/rhm4HOEd+kZwtwxwKjdG6d2OIGi73PWTaX6q/QbZiTyIOSNjx0JDsY0GvQhgGwO
+ NL0DJ1/RZAo2eJ/KCQ/JJssDycLH419+aY9YV+jI7mr3MUX8wnx3gOWzyfEYnKuilohS8BVB/WlUyE
+ aLQ9QEz5YrMhCgCOJNmkFYI3qMO1phScvcQxFquHtQp01bP/Jhy69kKp1PyzO3+2qJ1Gd/MNhOCOey
+ 6Xbat62XXilnLPLqOpHdWFcs/Gi9a132g0wSLG3ylrVEQLUIst/WeJG6fr8X6zgusgsd9aA/kX/w8/
+ ZiHx2EevzYolV+Hp0a2u1fyFnf0ZqIXSQAOOWwci5AB6/4szhTi3CECHgI6g==
+X-Developer-Key: i=amergnat@baylibre.com; a=openpgp;
+ fpr=231B5ED7F3EAAA700E60FE8B2B46499D7E31D445
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Mar 31, 2023 at 04:46:03PM +0200, Mirsad Goran Todorovac wrote:
-> On 29.3.2023. 19:25, Mirsad Goran Todorovac wrote:
-> > On 23.12.2022. 14:20, Mirsad Goran Todorovac wrote:
-> > > Hi all,
-> > > 
-> > > When building a RPM 6.1.0-rc3 for AlmaLinux 8.6, I have enabled CONFIG_DEBUG_KMEMLEAK=y
-> > > and the result showed an unreferenced object in kworker process:
-> > > 
-> > > cat /sys/kernel/debug/kmemleak
-> > > unreferenced object 0xffff888105028d80 (size 16):
-> > >    comm "kworker/u12:5", pid 359, jiffies 4294902898 (age 1620.144s)
-> > >    hex dump (first 16 bytes):
-> > >      6d 65 6d 73 74 69 63 6b 30 00 00 00 00 00 00 00  memstick0.......
-> > >    backtrace:
-> > >      [<ffffffffb6bb5542>] slab_post_alloc_hook+0xb2/0x340
-> > >      [<ffffffffb6bbbf5f>] __kmem_cache_alloc_node+0x1bf/0x2c0
-> > >      [<ffffffffb6af8175>] __kmalloc_node_track_caller+0x55/0x160
-> > >      [<ffffffffb6ae34a6>] kstrdup+0x36/0x60
-> > >      [<ffffffffb6ae3508>] kstrdup_const+0x28/0x30
-> > >      [<ffffffffb70d0757>] kvasprintf_const+0x97/0xd0
-> > >      [<ffffffffb7c9cdf4>] kobject_set_name_vargs+0x34/0xc0
-> > >      [<ffffffffb750289b>] dev_set_name+0x9b/0xd0
-> > >      [<ffffffffc12d9201>] memstick_check+0x181/0x639 [memstick]
-> > >      [<ffffffffb676e1d6>] process_one_work+0x4e6/0x7e0
-> > >      [<ffffffffb676e556>] worker_thread+0x76/0x770
-> > >      [<ffffffffb677b468>] kthread+0x168/0x1a0
-> > >      [<ffffffffb6604c99>] ret_from_fork+0x29/0x50
-> > > 
-> > > mtodorov@domac:~/linux/kernel/linux_stable$ git bisect log
-> > > git bisect start
-> > > # bad: [f0c4d9fc9cc9462659728d168387191387e903cc] Linux 6.1-rc4
-> > > git bisect bad f0c4d9fc9cc9462659728d168387191387e903cc
-> > > # bad: [fbd56ddcecab5a3623a89c8e941fdbcc55b41045] Linux 6.0.1
-> > > git bisect bad fbd56ddcecab5a3623a89c8e941fdbcc55b41045
-> > > # bad: [7e18e42e4b280c85b76967a9106a13ca61c16179] Linux 6.0-rc4
-> > > git bisect bad 7e18e42e4b280c85b76967a9106a13ca61c16179
-> > > # bad: [568035b01cfb107af8d2e4bd2fb9aea22cf5b868] Linux 6.0-rc1
-> > > git bisect bad 568035b01cfb107af8d2e4bd2fb9aea22cf5b868
-> > > # bad: [84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d] Linux 4.19
-> > > git bisect bad 84df9525b0c27f3ebc2ebb1864fa62a97fdedb7d
-> > > # bad: [94710cac0ef4ee177a63b5227664b38c95bbf703] Linux 4.18
-> > > git bisect bad 94710cac0ef4ee177a63b5227664b38c95bbf703
-> > > # bad: [29dcea88779c856c7dc92040a0c01233263101d4] Linux 4.17
-> > > git bisect bad 29dcea88779c856c7dc92040a0c01233263101d4
-> > > 
-> > > Greg asked me if I would help bisect the bug, since I failed to
-> > > reproduce it on pre 4.17 kernels, because they wouldn't boot (black
-> > > screen) on the Lenovo ALmaLinux 8.7 (CentOS fork) desktop box that
-> > > only reproduced that bug:
-> > > 
-> > >      product: 10TX000VCR (LENOVO_MT_10TX_BU_Lenovo_FM_V530S-07ICB)
-> > >      vendor: LENOVO
-> > >      version: V530S-07ICB
-> > > 
-> > > I would welcome any advice.
-> > > 
-> > > Please find attached the lshw output and the build config from the
-> > > last kernel version that also exhibits this bug, so the conclusion
-> > > is that it is not fixed since the report on November 29th 2022:
-> > > 
-> > > https://lore.kernel.org/regressions/0d9c3f6c-3948-d5d1-bcc1-baf31141beaa@alu.unizg.hr/T/#t
-> > > 
-> > > With the hint of Tvrtko, I was able to extract the correct list of maintainers this time.
-> > > 
-> > > The bug occurs in one kernel memory leak, and it is unobvious
-> > > whether a skilled attacker could use an abusive program to trigger
-> > > the leak of enough 16 byte slabs (and overhead) to exhaust kernel
-> > > memory and cause denial-of-service (crash of the system).
-> > > 
-> > > I apologise for the first unsuccessful attempt.
-> > 
-> > static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-> > 
-> > calls dev_set_name(&card->dev, "%s", dev_name(&host->dev)); that
-> > calls err = kobject_set_name_vargs(&dev->kobj, fmt, vargs); that
-> > executes:
-> > 
-> >      if (strchr(s, '/')) {
-> >          char *t;
-> > 
-> >          t = kstrdup(s, GFP_KERNEL);
-> >          kfree_const(s);
-> >          if (!t)
-> >              return -ENOMEM;
-> >          strreplace(t, '/', '!');
-> >          s = t;
-> >      }
-> >      kfree_const(kobj->name);
-> >      kobj->name = s;
-> > 
-> > so, this kobj->name was never freed in the "goto err_out" case in line 404.
-> > 
-> > 380 static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-> > 381 {
-> > 382         struct memstick_dev *card = kzalloc(sizeof(struct memstick_dev),
-> > 383                                             GFP_KERNEL);
-> > 384         struct memstick_dev *old_card = host->card;
-> > 385         struct ms_id_register id_reg;
-> > 386
-> > 387         if (card) {
-> > 388                 card->host = host;
-> > 389                 dev_set_name(&card->dev, "%s", dev_name(&host->dev));
-> > 390                 card->dev.parent = &host->dev;
-> > 391                 card->dev.bus = &memstick_bus_type;
-> > 392                 card->dev.release = memstick_free_card;
-> > 393                 card->check = memstick_dummy_check;
-> > 394
-> > 395                 card->reg_addr.r_offset = offsetof(struct ms_register, id);
-> > 396                 card->reg_addr.r_length = sizeof(id_reg);
-> > 397                 card->reg_addr.w_offset = offsetof(struct ms_register, id);
-> > 398                 card->reg_addr.w_length = sizeof(id_reg);
-> > 399
-> > 400                 init_completion(&card->mrq_complete);
-> > 401
-> > 402                 host->card = card;
-> > 403                 if (memstick_set_rw_addr(card))
-> > 404                         goto err_out;
-> > 405
-> > 406                 card->next_request = h_memstick_read_dev_id;
-> > 407                 memstick_new_req(host);
-> > 408                 wait_for_completion(&card->mrq_complete);
-> > 409
-> > 410                 if (card->current_mrq.error)
-> > 411                         goto err_out;
-> > 412         }
-> > 413         host->card = old_card;
-> > 414         return card;
-> > 415 err_out:
-> > 416         host->card = old_card;
-> > 421         kfree(card);
-> > 422         return NULL;
-> > 423 }
-> > 
-> > This little patch fixes it, also at the release() method.
-> > 
-> > However, release() had not yet been tested, and I am not certain that in that case
-> > kobj->name would not be kfree_const()-ed automatically.
-> > 
-> > Maybe it ought to be separated in two independent patches?
-> > 
-> > diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> > index bf7667845459..403ab06e3ffa 100644
-> > --- a/drivers/memstick/core/memstick.c
-> > +++ b/drivers/memstick/core/memstick.c
-> > @@ -191,6 +191,10 @@ static void memstick_free_card(struct device *dev)
-> >   {
-> >          struct memstick_dev *card = container_of(dev, struct memstick_dev,
-> >                                                   dev);
-> > +       if ((card->dev).kobj.name) {
-> > +               kfree_const((card->dev).kobj.name);
-> > +               (card->dev).kobj.name = NULL;
-> > +       }
-> >          kfree(card);
-> >   }
-> > 
-> > @@ -410,6 +414,10 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-> >          return card;
-> >   err_out:
-> >          host->card = old_card;
-> > +       if ((card->dev).kobj.name) {
-> > +               kfree_const((card->dev).kobj.name);
-> > +               (card->dev).kobj.name = NULL;
-> > +       }
-> >          kfree(card);
-> >          return NULL;
-> >   }
-> > 
-> > This morning I did not feel like we'd fix two memory leaks today.
-> > 
-> > This one was a nag for three months :-)
-> > 
-> > Of course, this requires peer review. The fact that it fixed the /sys/kernel/debug/kmemleak
-> > output doesn't mean that it wouldn't break something, does it?
-> > 
-> > It is clearly the good wind of the Providence.
-> 
-> This is the second version of the patch, without the paranoid parentheses.
-> 
-> I am still in the process of convincing Thunderbird not to convert tabs to
-> spaces, so please use --ignore-whitespace when testing this patch. :-(
-> 
-> ---
->  drivers/memstick/core/memstick.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> index bf7667845459..390287c23f27 100644
-> --- a/drivers/memstick/core/memstick.c
-> +++ b/drivers/memstick/core/memstick.c
-> @@ -191,6 +191,10 @@ static void memstick_free_card(struct device *dev)
->  {
->         struct memstick_dev *card = container_of(dev, struct memstick_dev,
->                                                  dev);
-> +       if (card->dev.kobj.name) {
-> +               kfree_const(card->dev.kobj.name);
+This commits are based on the Fabien Parent <fparent@baylibre.com> work.
 
-Ick, no, please don't mess around with a kobject name from within a
-driver like this.  That's indicitave that something else is really
-wrong.
+The purpose of this series is to add the following HWs / IPs support for
+the mt8365-evk board:
+- Watchdog
+- Power Management Integrated Circuit "PMIC" wrapper
+  - MT6357 PMIC
+- MultiMediaCard "MMC" & Secure Digital "SD" controller
+- USB controller
+- Ethernet MAC controller
 
-Yes, the nvme core code does it, but it shouldn't.
+Add CPU Freq & IDLE support for this board.
 
-Hm, the driver core does it in two places too, that's not good, I'll
-look at fixing that up too.
+This series depends to anothers which add support for MT8365 EVK board
+[1] and the MT8365 I2C support [2]. Both are currently applied.
 
-This patch is implying that anyone who calls "dev_set_name()" also has
-to do this hack, which shouldn't be the case at all.
+The DTB check may failed/warn about pinctrl binding, but it should be
+fixed thanks to this serie [3]
 
-thanks,
+Regards,
+Alex
 
-greg k-h
+[1]: https://lore.kernel.org/all/20230309213501.794764-1-bero@baylibre.com/
+[2]: https://lore.kernel.org/all/20221122-mt8365-i2c-support-v6-0-e1009c8afd53@baylibre.com/
+[3]: https://lore.kernel.org/all/20230327-cleanup-pinctrl-binding-v2-0-f21fbcc3016e@baylibre.com/
+
+Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
+---
+Changes in v4:
+- Remove v3 applied patch from the serie:
+  - arm64: dts: mediatek: add ethernet support for mt8365 SoC
+  - arm64: dts: mediatek: add mmc support for mt8365 SoC
+  - arm64: dts: mediatek: add mt6357 device-tree
+  - arm64: dts: mediatek: add pwrap support to mt8365 SoC
+  - arm64: dts: mediatek: Increase the size BL31 reserved memory
+- Drop "arm64: dts: mediatek: fix systimer properties" which is done [1]
+- Fix style, typo and re-order properties.
+- Use interrupts-extended for the PMIC node.
+- Link to v3: https://lore.kernel.org/r/20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com
+
+Changes in v3:
+- Remove v2 applied patch from the serie:
+  - dt-bindings: mmc: mediatek,mtk-sd: add mt8365
+- Add trailers and simply resend.
+- Link to v2: https://lore.kernel.org/r/20230203-evk-board-support-v2-0-6ec7cdb10ccf@baylibre.com
+
+---
+Alexandre Mergnat (9):
+      dt-bindings: watchdog: mediatek,mtk-wdt: add mt8365
+      dt-bindings: pinctrl: mediatek,mt8365-pinctrl: add drive strength property
+      arm64: dts: mediatek: add watchdog support for mt8365 SoC
+      arm64: dts: mediatek: add mt6357 PMIC support for  mt8365-evk
+      arm64: dts: mediatek: add mmc support for mt8365-evk
+      arm64: dts: mediatek: add usb controller support for mt8365-evk
+      arm64: dts: mediatek: add ethernet support for mt8365-evk
+      arm64: dts: mediatek: add OPP support for mt8365 SoC
+      arm64: dts: mediatek: add cpufreq support for mt8365-evk
+
+Amjad Ouled-Ameur (1):
+      arm64: dts: mediatek: Add CPU Idle support
+
+Fabien Parent (1):
+      arm64: dts: mediatek: set vmc regulator as always on
+
+ .../bindings/pinctrl/mediatek,mt8365-pinctrl.yaml  |   3 +
+ .../bindings/watchdog/mediatek,mtk-wdt.yaml        |   1 +
+ arch/arm64/boot/dts/mediatek/mt8365-evk.dts        | 249 +++++++++++++++++++++
+ arch/arm64/boot/dts/mediatek/mt8365.dtsi           | 142 ++++++++++++
+ 4 files changed, 395 insertions(+)
+---
+base-commit: 4f2a499a344b36ebb325e610265452ea88541116
+change-id: 20230203-evk-board-support-d5b7a839ed7b
+
+Best regards,
+-- 
+Alexandre Mergnat <amergnat@baylibre.com>
+
