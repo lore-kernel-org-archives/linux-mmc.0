@@ -2,128 +2,297 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C3B93C77B6D
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 09:41:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 270EFC76196
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 10:21:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232202AbjCaJlx (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 05:41:53 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60966 "EHLO
+        id S231278AbjCaKVa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 06:21:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232167AbjCaJlw (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 05:41:52 -0400
-Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDAC96A4B
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 02:41:49 -0700 (PDT)
-Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-544787916d9so404281457b3.13
-        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 02:41:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680255709;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Xo2e908Td2gve6mc5SW+VA1nrFzqtdIPvQwGYibnpiE=;
-        b=uBMQIM9oghtu65OYry7lh4Mg9Ey6cTyShHDuQhNvkKE7cvwdYHy8HnejROCk4ISgBp
-         n4e9O+dpRLoxInIr0AZo6wccf2QiNwAmGY6ht9Plojz33GD3k3FLmtt9lRBB2OoL5AhL
-         q2tQFIWfJ/sC6d85vYFLRhLcrxJBPlr1eaExYaWQbIa5/50Jh2eHlnucVQQ3EXIqsMhF
-         Xn7baerAqsPtuvTx5Dhgm9XDMjpTYzSMOsnAxiuciECoi/2dtVis3DjNLK35S0dVG0KG
-         wAvNRlq2DbLnfG9+b2gm/R5ppzBZy9uGHsRoJDKHucpOb8KGlIogRpALWSfLixgMC6r8
-         opMw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680255709;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Xo2e908Td2gve6mc5SW+VA1nrFzqtdIPvQwGYibnpiE=;
-        b=NAwF+FovS9KCU0yu054zBPs3zDwP8mPGY/BeEfqaw7xeC+bxEaKpofEkn8lwWwR2Lj
-         HBZYAnXpsXWTg3jJYWjMXsaX/XwhyW7733IiFa2wBquUZbJpqLreJoxcNEeV03UEyA8J
-         63cZTXhrwSGfjJvxaZbj65DuhRNKmJwT/t1k5ZGiFExwfkiRNfkWFRvM9J9b0wpbBliE
-         s6x2WlI31wsMMs0lnpHC7fa/scW67K99lV9I6id651NU28gPSZtgsE0m7gdCC4d4DNe8
-         Cw3Kp6a5NKwCM9K76SQxvohnWnDDjHtLKromGoqIfPnjCPBYfDH7ocPDEaawH4lRAqRK
-         sgQg==
-X-Gm-Message-State: AAQBX9daCIF5cbfgw736jMA22L4eLzsvyI0YA9DVghq4qaKBbMTqpVme
-        UUZbfJLpjMdza1vH79wak6rsQLQUphkSBFZH0UI1bw==
-X-Google-Smtp-Source: AKy350Zp7b7rjPNqqt62mXM2VNu7M6RMNX9eWwNzvLF+Jhy96wQfhw+jaU3Fvyd5viiVC5EgACPo2KWYnzUvEMriI7w=
-X-Received: by 2002:a81:b620:0:b0:541:8995:5334 with SMTP id
- u32-20020a81b620000000b0054189955334mr13089289ywh.3.1680255709091; Fri, 31
- Mar 2023 02:41:49 -0700 (PDT)
+        with ESMTP id S230003AbjCaKUw (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 06:20:52 -0400
+Received: from fllv0016.ext.ti.com (fllv0016.ext.ti.com [198.47.19.142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CA10955A6;
+        Fri, 31 Mar 2023 03:16:44 -0700 (PDT)
+Received: from lelv0265.itg.ti.com ([10.180.67.224])
+        by fllv0016.ext.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGSZW127727;
+        Fri, 31 Mar 2023 05:16:28 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1680257788;
+        bh=6Ri5pdHIsV2Mxu3uCVu+eVFA7lCtGgVxj6AOVfBPX+4=;
+        h=From:To:CC:Subject:Date:In-Reply-To:References;
+        b=t7L+le03DY89mrnorfLF7V+R2YaxAUmaJoFxxlxHBil5F4GyPX288gO8z4+6tUYnH
+         rpA8NJweyFq6OfyUnJWPrsUh97jyQ44myqYyLv3/3VG4AVjYoG7w4XteZyiV+P5eFk
+         XHhJYS0EHb7e8sVZt2xzOEAlvOtPn65YAzeIMZ4g=
+Received: from DFLE109.ent.ti.com (dfle109.ent.ti.com [10.64.6.30])
+        by lelv0265.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 32VAGSAG015442
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 31 Mar 2023 05:16:28 -0500
+Received: from DFLE114.ent.ti.com (10.64.6.35) by DFLE109.ent.ti.com
+ (10.64.6.30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16; Fri, 31
+ Mar 2023 05:16:27 -0500
+Received: from lelv0326.itg.ti.com (10.180.67.84) by DFLE114.ent.ti.com
+ (10.64.6.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16 via
+ Frontend Transport; Fri, 31 Mar 2023 05:16:27 -0500
+Received: from uda0132425.dhcp.ti.com (ileaxei01-snat2.itg.ti.com [10.180.69.6])
+        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 32VAGNt8001959;
+        Fri, 31 Mar 2023 05:16:26 -0500
+From:   Vignesh Raghavendra <vigneshr@ti.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Vignesh Raghavendra <vigneshr@ti.com>,
+        <linux-arm-kernel@lists.infradead.org>
+Subject: [PATCH v3] mmc: sdhci_am654: Add support for PM suspend/resume
+Date:   Fri, 31 Mar 2023 15:46:19 +0530
+Message-ID: <20230331101619.4117312-2-vigneshr@ti.com>
+X-Mailer: git-send-email 2.40.0
+In-Reply-To: <20230331101619.4117312-1-vigneshr@ti.com>
+References: <20230331101619.4117312-1-vigneshr@ti.com>
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
- <20230203-evk-board-support-v3-5-0003e80e0095@baylibre.com> <889be563-78d6-7148-f7d2-09ae21383ee4@collabora.com>
-In-Reply-To: <889be563-78d6-7148-f7d2-09ae21383ee4@collabora.com>
-From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Fri, 31 Mar 2023 11:41:38 +0200
-Message-ID: <CAFGrd9rGoAN=B6O=X7peOtyYuWpWkMBFakrkLp2fcD-D2uajqw@mail.gmail.com>
-Subject: Re: [PATCH v3 05/17] arm64: dts: mediatek: add mt6357 device-tree
-To:     AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
-        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Le mer. 29 mars 2023 =C3=A0 15:17, AngeloGioacchino Del Regno
-<angelogioacchino.delregno@collabora.com> a =C3=A9crit :
->
-> Il 29/03/23 10:54, amergnat@baylibre.com ha scritto:
-> > From: Fabien Parent <fparent@baylibre.com>
-> >
-> > This new device-tree add the regulators, rtc and keys support
-> > for the MT6357 PMIC.
-> >
-> > Signed-off-by: Fabien Parent <fparent@baylibre.com>
-> > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
-> > ---
-> >   arch/arm64/boot/dts/mediatek/mt6357.dtsi | 282 ++++++++++++++++++++++=
-+++++++++
-> >   1 file changed, 282 insertions(+)
-> >
-> > diff --git a/arch/arm64/boot/dts/mediatek/mt6357.dtsi b/arch/arm64/boot=
-/dts/mediatek/mt6357.dtsi
-> > new file mode 100644
-> > index 000000000000..3330a03c2f74
-> > --- /dev/null
-> > +++ b/arch/arm64/boot/dts/mediatek/mt6357.dtsi
-> > @@ -0,0 +1,282 @@
->
-> ..snip..
->
-> > +
-> > +             keys {
-> > +                     compatible =3D "mediatek,mt6357-keys";
-> > +
-> > +                     key-power {
-> > +                             linux,keycodes =3D <KEY_POWER>;
-> > +                             wakeup-source;
-> > +                     };
-> > +
-> > +                     key-home {
-> > +                             linux,keycodes =3D <KEY_HOME>;
-> > +                             wakeup-source;
->
-> KEY_HOME is a wakeup-source?! are you sure?!
->
-> (P.S.: I'm just checking if that was intended)
+From: Aswath Govindraju <a-govindraju@ti.com>
 
-Yes it's the setup used in the official Mediatek Rity project.
+Add support for suspend/resume and pm_runtime resume/suspend.
 
-Regards,
-Alex
+Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+Signed-off-by: Georgi Vlaev <g-vlaev@ti.com>
+Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
+---
+Since RFC v2:
+Address all comments around sdhci_am654_remove()
+Set autosuspend_delay to -1 as SDHCI will host rootfs via SD/eMMC and
+autosuspend can cause long latency for user interactive applications
+
+RFC v2:
+https://lore.kernel.org/all/20220408124338.27090-1-a-govindraju@ti.com/
+
+ drivers/mmc/host/sdhci_am654.c | 147 +++++++++++++++++++++++++++++----
+ 1 file changed, 131 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+index 672d37ea98d0..7cdf0f54e3a5 100644
+--- a/drivers/mmc/host/sdhci_am654.c
++++ b/drivers/mmc/host/sdhci_am654.c
+@@ -85,6 +85,7 @@
+ #define DRIVER_STRENGTH_40_OHM	0x4
+ 
+ #define CLOCK_TOO_SLOW_HZ	50000000
++#define SDHCI_AM654_AUTOSUSPEND_DELAY	-1
+ 
+ /* Command Queue Host Controller Interface Base address */
+ #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+@@ -808,16 +809,10 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 
+ 	pltfm_host->clk = clk_xin;
+ 
+-	/* Clocks are enabled using pm_runtime */
+-	pm_runtime_enable(dev);
+-	ret = pm_runtime_resume_and_get(dev);
+-	if (ret)
+-		goto pm_runtime_disable;
+-
+ 	base = devm_platform_ioremap_resource(pdev, 1);
+ 	if (IS_ERR(base)) {
+ 		ret = PTR_ERR(base);
+-		goto pm_runtime_put;
++		goto err_pltfm_free;
+ 	}
+ 
+ 	sdhci_am654->base = devm_regmap_init_mmio(dev, base,
+@@ -825,31 +820,47 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ 	if (IS_ERR(sdhci_am654->base)) {
+ 		dev_err(dev, "Failed to initialize regmap\n");
+ 		ret = PTR_ERR(sdhci_am654->base);
+-		goto pm_runtime_put;
++		goto err_pltfm_free;
+ 	}
+ 
+ 	ret = sdhci_am654_get_of_property(pdev, sdhci_am654);
+ 	if (ret)
+-		goto pm_runtime_put;
++		goto err_pltfm_free;
+ 
+ 	ret = mmc_of_parse(host->mmc);
+ 	if (ret) {
+ 		dev_err_probe(dev, ret, "parsing dt failed\n");
+-		goto pm_runtime_put;
++		goto err_pltfm_free;
+ 	}
+ 
+ 	host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+ 
++	pm_runtime_get_noresume(dev);
++	ret = pm_runtime_set_active(dev);
++	if (ret)
++		goto pm_put;
++	pm_runtime_enable(dev);
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		goto pm_disable;
++
+ 	ret = sdhci_am654_init(host);
+ 	if (ret)
+-		goto pm_runtime_put;
++		goto clk_disable;
+ 
++	/* Setting up autosuspend */
++	pm_runtime_set_autosuspend_delay(dev, SDHCI_AM654_AUTOSUSPEND_DELAY);
++	pm_runtime_use_autosuspend(dev);
++	pm_runtime_mark_last_busy(dev);
++	pm_runtime_put_autosuspend(dev);
+ 	return 0;
+ 
+-pm_runtime_put:
+-	pm_runtime_put_sync(dev);
+-pm_runtime_disable:
++clk_disable:
++	clk_disable_unprepare(pltfm_host->clk);
++pm_disable:
+ 	pm_runtime_disable(dev);
++pm_put:
++	pm_runtime_put_noidle(dev);
+ err_pltfm_free:
+ 	sdhci_pltfm_free(pdev);
+ 	return ret;
+@@ -858,23 +869,127 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+ static int sdhci_am654_remove(struct platform_device *pdev)
+ {
+ 	struct sdhci_host *host = platform_get_drvdata(pdev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+ 	int ret;
+ 
+-	sdhci_remove_host(host, true);
+-	ret = pm_runtime_put_sync(&pdev->dev);
++	ret = pm_runtime_resume_and_get(&pdev->dev);
+ 	if (ret < 0)
+ 		return ret;
+ 
++	sdhci_remove_host(host, true);
++	clk_disable_unprepare(pltfm_host->clk);
+ 	pm_runtime_disable(&pdev->dev);
++	pm_runtime_put_noidle(&pdev->dev);
+ 	sdhci_pltfm_free(pdev);
++	return 0;
++}
++
++#ifdef CONFIG_PM
++static int sdhci_am654_restore(struct sdhci_host *host)
++{
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
++	u32 ctl_cfg_2 = 0;
++	u32 val;
++	int ret;
++
++	if (sdhci_am654->flags & DLL_CALIB) {
++		regmap_read(sdhci_am654->base, PHY_STAT1, &val);
++		if (~val & CALDONE_MASK) {
++			/* Calibrate IO lines */
++			regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
++					   PDB_MASK, PDB_MASK);
++			ret = regmap_read_poll_timeout(sdhci_am654->base,
++						       PHY_STAT1, val,
++						       val & CALDONE_MASK,
++						       1, 20);
++			if (ret)
++				return ret;
++		}
++	}
++
++	/* Enable pins by setting IO mux to 0 */
++	if (sdhci_am654->flags & IOMUX_PRESENT)
++		regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
++				   IOMUX_ENABLE_MASK, 0);
+ 
++	/* Set slot type based on SD or eMMC */
++	if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
++		ctl_cfg_2 = SLOTTYPE_EMBEDDED;
++
++	regmap_update_bits(sdhci_am654->base, CTL_CFG_2, SLOTTYPE_MASK,
++			   ctl_cfg_2);
++
++	regmap_read(sdhci_am654->base, CTL_CFG_3, &val);
++	if (~val & TUNINGFORSDR50_MASK)
++		/* Enable tuning for SDR50 */
++		regmap_update_bits(sdhci_am654->base, CTL_CFG_3, TUNINGFORSDR50_MASK,
++				   TUNINGFORSDR50_MASK);
++
++	return 0;
++}
++
++static int sdhci_am654_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	if (host->tuning_mode != SDHCI_TUNING_MODE_3)
++		mmc_retune_needed(host->mmc);
++
++	ret = cqhci_suspend(host->mmc);
++	if (ret)
++		return ret;
++
++	ret = sdhci_runtime_suspend_host(host);
++	if (ret)
++		return ret;
++
++	/* disable the clock */
++	clk_disable_unprepare(pltfm_host->clk);
+ 	return 0;
+ }
+ 
++static int sdhci_am654_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
++	int ret;
++
++	/* Enable the clock */
++	ret = clk_prepare_enable(pltfm_host->clk);
++	if (ret)
++		return ret;
++
++	ret = sdhci_am654_restore(host);
++	if (ret)
++		return ret;
++
++	ret = sdhci_runtime_resume_host(host, 0);
++	if (ret)
++		return ret;
++
++	ret = cqhci_resume(host->mmc);
++	if (ret)
++		return ret;
++
++	return 0;
++}
++#endif
++
++static const struct dev_pm_ops sdhci_am654_dev_pm_ops = {
++	SET_RUNTIME_PM_OPS(sdhci_am654_runtime_suspend,
++			   sdhci_am654_runtime_resume, NULL)
++	SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
++				pm_runtime_force_resume)
++};
++
+ static struct platform_driver sdhci_am654_driver = {
+ 	.driver = {
+ 		.name = "sdhci-am654",
+ 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
++		.pm = &sdhci_am654_dev_pm_ops,
+ 		.of_match_table = sdhci_am654_of_match,
+ 	},
+ 	.probe = sdhci_am654_probe,
+-- 
+2.40.0
+
