@@ -2,160 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2D3FC761A6
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 18:23:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FA56C77B6D
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 18:29:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232467AbjCaSXS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 14:23:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57900 "EHLO
+        id S231444AbjCaS3j (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 14:29:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35806 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232048AbjCaSXR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 14:23:17 -0400
-Received: from mail-pj1-f42.google.com (mail-pj1-f42.google.com [209.85.216.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C42321BF44;
-        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
-Received: by mail-pj1-f42.google.com with SMTP id d13so21343012pjh.0;
-        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
+        with ESMTP id S231628AbjCaS3i (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 14:29:38 -0400
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9FF231BF49
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 11:29:36 -0700 (PDT)
+Received: by mail-pl1-x62a.google.com with SMTP id kc4so22057094plb.10
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 11:29:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680287376;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=qD6ukNMqLh8xbe//OUXBkQeWDIWWTPMulfjrGa4ng0w=;
+        b=a1QkDGheT3QBrNx3Yvty8V1ssg8DNrPBx3dYwUndKpW7HhbFMJgO0r5VaRrTn0nWpi
+         5U3lyCwtXBy52UxklvBXq4btDufWfBNmlC+zIvBcke56G1Wb0Jp2F4JhJMjy6gWkgzXY
+         jRrXbAUavMRWXfI1fxAOLBMhYe31hTcZPR/lLf1Tegn79Muzj57yYoGDEjUhE0/OjXJc
+         0M61DLvGPppGGWNdq2cr54xrwZ4fkTyLk/0gw/dP3JvixY5R6KNY1kvDqAb4kamS7vi4
+         WOnMuu0xtTmP3V1IxRKwa/fGDw0YIg6imHLpFP4pPWZJf2+llXO9IqXIFIP1DmMIHDNt
+         Lg7A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680286996;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=aTebArJXS/p6tOYYXSptr4puwVM64fTvtw6kGil+3Vs=;
-        b=NP1sR5HgwmqjNuRYxBVG2DC9m0bUsQDHo8ksKMt8xR1H4gt9iOXmg0vir8cg/VpnbT
-         DHfTLbPhxx4hFKfhynlhCw5iCWtfMXIgbeuaoDQzvjRwtUT5IXeTnmvHFc0VXV8JCCkf
-         4ADk7cZX7jm6xMHnHLk+JIUuXnF9K94Lk4NUb6LTiyaJE1aqdPR4UVKJ2b971/w7kyh8
-         xqRlY3UE7vhJy+/0u83/UoNYOKnztVvX8+X9c1vsSCAxqRQu3EzB+clZV1ttJu9jhJrS
-         MvmBfD+nGkzTBfQsSXFwn4zL1w4MMaNGsxLpMFs13+JFByKj1jHZ56QkCUZzme7dQHd4
-         ccgA==
-X-Gm-Message-State: AAQBX9c/PrvIgsCcUW+ZrPxgIXtOxKTYCym0KPdzH2ctgZ/xsAUxHrpa
-        j/r8vqLYaCh7cqO7bd1TzEceHH+ZJyg3xw==
-X-Google-Smtp-Source: AKy350aXt6uq93jKiGpsgQjor7aBNfRMnNFFdhgeE9VpsjrzXsm/9N8TW3VB92nmR7A7ICydZdsotg==
-X-Received: by 2002:a17:90b:1bc7:b0:23f:b35a:534e with SMTP id oa7-20020a17090b1bc700b0023fb35a534emr32013368pjb.29.1680286996083;
-        Fri, 31 Mar 2023 11:23:16 -0700 (PDT)
-Received: from snowbird ([199.73.127.3])
-        by smtp.gmail.com with ESMTPSA id e91-20020a17090a6fe400b0023f786a64ebsm5281418pjk.57.2023.03.31.11.23.15
+        d=1e100.net; s=20210112; t=1680287376;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=qD6ukNMqLh8xbe//OUXBkQeWDIWWTPMulfjrGa4ng0w=;
+        b=ZYrUyS5BjXCks0U2ABDPX2N6tEyIIFOyYtSEXOXmPTfi1+2gtXq17mR07UGFcMCTWU
+         6Yzd4qgRsTq50JLNXNCG2/TlCVjlKKCy5DOf7SEWECKIO8BKmRP3gfxONyM6sTsn13/O
+         8LLAtkQh81+UMe13KaEACdHWx9Cpxv3n7U/JFNw3AbGW23vOE5qHPa6kDwHCjMVvUiMc
+         b/NCr+3ULEgkeGl7vBAkID2IM/FqcnV1NhBcMK/va1s3J7r6M4ETCgaRs2p2wLMiwHsj
+         r4MLzwmvJ0vQo8k6+HStRy8IDv2ci3rY8il3mZCSAQSZVF/sHX3+nJZDbgjEeNGt573p
+         wqtw==
+X-Gm-Message-State: AAQBX9eP3qIBSsnZCFaTunHAK6/a4PERUKAqjmbOu9X3yN8uQ/w7+9f6
+        sNviorjRqdd5QhDcpCZmMIkYQA==
+X-Google-Smtp-Source: AKy350YF3V9IxWphaTmJMfqBFHoz7qLNFdg6GAUKjgLhJVUjrrPAR5aJl3+woMpnhIhzBhL5GaEMbw==
+X-Received: by 2002:a17:90b:4d89:b0:240:e532:d868 with SMTP id oj9-20020a17090b4d8900b00240e532d868mr2812574pjb.43.1680287376091;
+        Fri, 31 Mar 2023 11:29:36 -0700 (PDT)
+Received: from localhost (63-228-113-140.tukw.qwest.net. [63.228.113.140])
+        by smtp.gmail.com with ESMTPSA id iw4-20020a170903044400b001943d58268csm1900704plb.55.2023.03.31.11.29.35
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 31 Mar 2023 11:23:15 -0700 (PDT)
-Date:   Fri, 31 Mar 2023 11:23:12 -0700
-From:   Dennis Zhou <dennis@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <ZCclEE6Qw3on7/eO@snowbird>
-References: <20230329202148.71107-1-dennis@kernel.org>
- <ZCTOMVjW+pnZVGsQ@snowbird>
- <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+        Fri, 31 Mar 2023 11:29:35 -0700 (PDT)
+From:   Kevin Hilman <khilman@baylibre.com>
+To:     Alexandre Mergnat <amergnat@baylibre.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        Bernhard =?utf-8?Q?Rosenkr=C3=A4n?= =?utf-8?Q?zer?= 
+        <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Alexandre Mergnat <amergnat@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v4 00/11] Improve the MT8365 SoC and EVK board support
+In-Reply-To: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
+References: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
+Date:   Fri, 31 Mar 2023 11:29:35 -0700
+Message-ID: <7hy1ncydtc.fsf@baylibre.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Ulf,
+Alexandre Mergnat <amergnat@baylibre.com> writes:
 
-On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
-> On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
-> >
-> > When using dm-verity with a data partition on an emmc device, dm-verity
-> > races with the discovery of attached emmc devices. This is because mmc's
-> > probing code sets up the host data structure then a work item is
-> > scheduled to do discovery afterwards. To prevent this race on init,
-> > let's inline the first call to detection, __mm_scan(), and let
-> > subsequent detect calls be handled via the workqueue.
-> 
-> In principle, I don't mind the changes in $subject patch, as long as
-> it doesn't hurt the overall initialization/boot time. Especially, we
-> may have more than one mmc-slot being used, so this needs to be well
-> tested.
-> 
+> This commits are based on the Fabien Parent <fparent@baylibre.com> work.
+>
+> The purpose of this series is to add the following HWs / IPs support for
+> the mt8365-evk board:
+> - Watchdog
+> - Power Management Integrated Circuit "PMIC" wrapper
+>   - MT6357 PMIC
+> - MultiMediaCard "MMC" & Secure Digital "SD" controller
+> - USB controller
+> - Ethernet MAC controller
+>
+> Add CPU Freq & IDLE support for this board.
+>
+> This series depends to anothers which add support for MT8365 EVK board
+> [1] and the MT8365 I2C support [2]. Both are currently applied.
+>
+> The DTB check may failed/warn about pinctrl binding, but it should be
+> fixed thanks to this serie [3]
 
-I unfortunately don't have a device with multiple mmcs available. Is
-this something you could help me with?
+It's not just the DTB check that that depends on the pinctrl binding
+series.  Patch 2 of this series touches the pinctrl bindings, and does
+not apply unless the pinctrl series is also applied.
 
-> Although, more importantly, I fail to understand how this is going to
-> solve the race condition. Any I/O request to an eMMC or SD requires
-> the mmc block device driver to be up and running too, which is getting
-> probed from a separate module/driver that's not part of mmc_rescan().
+IOW, I needed to apply [1], [2] and [3] to mainline in order to apply
+this series.
 
-I believe the call chain is something like this:
+After applying the dependencies, the kernel fails to build:
 
-__mmc_rescan()
-    mmc_rescan_try_freq()
-        mmc_attach_mmc()
-            mmc_add_card()
-                device_add()
-                    bus_probe_device()
-                        mmc_blk_probe()
+../arch/arm64/boot/dts/mediatek/mt8365-evk.dts:15:10: fatal error: mt6357.dtsi: No such file or directory
+   15 | #include "mt6357.dtsi"
+      |          ^~~~~~~~~~~~~
+compilation terminated.                      
 
-The initial calling of this is the host probe. So effectively if there
-is a card attached, we're inlining the device_add() call for the card
-attached rather than waiting for the workqueue item to kick off.
+With lots of dependencies like this, it would be useful for you to push
+a temporary branch on mainline where you've applied all the dependencies
+so we can better see what the dependencies actually are.
 
-dm is a part of late_initcall() while mmc is a module_init(), when built
-in becoming a device_initcall(). So this solves a race via the initcall
-chain. In the current state, device_initcall() finishes and we move onto
-the late_initcall() phase. But now, dm is racing with the workqueue to
-init the attached emmc device.
-
-Thanks,
-Dennis
-
-> 
-> Kind regards
-> Uffe
-> 
-> >
-> > Signed-off-by: Dennis Zhou <dennis@kernel.org>
-> > ---
-> > Sigh.. fix missing static declaration.
-> >
-> >  drivers/mmc/core/core.c | 15 +++++++++++----
-> >  1 file changed, 11 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > index 368f10405e13..fda7ee57dee3 100644
-> > --- a/drivers/mmc/core/core.c
-> > +++ b/drivers/mmc/core/core.c
-> > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
-> >  }
-> >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
-> >
-> > -void mmc_rescan(struct work_struct *work)
-> > +static void __mmc_rescan(struct mmc_host *host)
-> >  {
-> > -       struct mmc_host *host =
-> > -               container_of(work, struct mmc_host, detect.work);
-> >         int i;
-> >
-> >         if (host->rescan_disable)
-> > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
-> >                 mmc_schedule_delayed_work(&host->detect, HZ);
-> >  }
-> >
-> > +void mmc_rescan(struct work_struct *work)
-> > +{
-> > +       struct mmc_host *host =
-> > +               container_of(work, struct mmc_host, detect.work);
-> > +
-> > +       __mmc_rescan(host);
-> > +}
-> > +
-> >  void mmc_start_host(struct mmc_host *host)
-> >  {
-> >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
-> > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
-> >         }
-> >
-> >         mmc_gpiod_request_cd_irq(host);
-> > -       _mmc_detect_change(host, 0, false);
-> > +       host->detect_change = 1;
-> > +       __mmc_rescan(host);
-> >  }
-> >
-> >  void __mmc_stop_host(struct mmc_host *host)
-> > --
-> > 2.40.0
-> >
+Kevin
