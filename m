@@ -2,158 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99FE0C6FD18
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 05:14:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E25E0C76196
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 07:30:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229823AbjCaFOG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 01:14:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51480 "EHLO
+        id S229659AbjCaHaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 03:30:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229638AbjCaFOE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 01:14:04 -0400
-Received: from mail-wm1-x32b.google.com (mail-wm1-x32b.google.com [IPv6:2a00:1450:4864:20::32b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73237EB7F
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Mar 2023 22:14:02 -0700 (PDT)
-Received: by mail-wm1-x32b.google.com with SMTP id o24-20020a05600c511800b003ef59905f26so13069946wms.2
-        for <linux-mmc@vger.kernel.org>; Thu, 30 Mar 2023 22:14:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680239641;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=pULYDGzh4E8UCXDt/pmSRIwAO6ObDjtZf1sR4LLd8yA=;
-        b=kQkec1O6Ot/vcD84SVGs08IGHNMfIgt8VNpntgMvo9olmArl578NgRYSGwest+DLfL
-         ikqw1LsfzghXhMbJPu2RKiA0keZsUJYqAILUx84/3pc8eRM6pVuD+RVxUWyLce0LlNoC
-         zzKZ0ri2OG8wSFxFW8/vwxuEiE7KtTaXLWQP2DymFV2yvKqYlw6JaTk9XalpcnrzzXVw
-         vpYXKs80XH5PnY9VI79q849BmFoY20Aemh/dKcy9q+uHCeWZrSk9+e3I8VA2SW+Lm4sY
-         6Kz0JK+MfYeNy51EO3nUzHkIaR6GK8tFEHaX5OsXw9m094E5SBTHZBabVmd4Q0ewSnc5
-         9qIQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680239641;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=pULYDGzh4E8UCXDt/pmSRIwAO6ObDjtZf1sR4LLd8yA=;
-        b=Zk48gV5+RRgnii5g2O9pWt1n3ewXRUP/z3s+Df94iyVuxAbhQURpml0ifEYc65W0Kn
-         w7YpuM5ubsgZohpqIGu8tit5AqFF+mg4VsDKMMRjoDaR6MItoHOHTKdSJwmBZxsq2yaN
-         WhayVEcVTuhQSrp/VsMHWhb7b8fDHU9kXXBFQ7W0tjNsMk2N3c8Dxd6IaAIyjPzP/8Xz
-         utF+op5BlRAJp7DdwniFxD8AdRH8DWFGoXnoJkkVAi4QUH+xkDlYrAxJkIUPY2dHnzRc
-         z7lNRS0TwvVvHn7T+MUqhqCRqDbSPncpdYD4yPinf6hzouLkha+1fCHa+XlOmINzjaS0
-         OVJg==
-X-Gm-Message-State: AO0yUKU1e8gsPsYfgjAcTGBb9wvZnxAyFBblyRoOzWqqiPj2LY7T9VMX
-        kljb76sPbCKkhnvS/IhUFvkp9w==
-X-Google-Smtp-Source: AK7set8+GpaUDXRWjB5QY6Zo9WS9R7HYI+Pvg65VlG7RDva4bJ4tmC4UyBNwr+8bDuf+0i2hFKbHjw==
-X-Received: by 2002:a7b:c44f:0:b0:3ed:d3a7:7077 with SMTP id l15-20020a7bc44f000000b003edd3a77077mr18364656wmi.40.1680239640856;
-        Thu, 30 Mar 2023 22:14:00 -0700 (PDT)
-Received: from linaro.org ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id x21-20020a05600c21d500b003ef64affec7sm1349808wmj.22.2023.03.30.22.13.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 30 Mar 2023 22:14:00 -0700 (PDT)
-Date:   Fri, 31 Mar 2023 08:13:58 +0300
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v4 5/7] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <ZCZsFjKItcIS+U/b@linaro.org>
-References: <20230327134734.3256974-1-abel.vesa@linaro.org>
- <20230327134734.3256974-6-abel.vesa@linaro.org>
- <20230327181934.GD1882@sol.localdomain>
+        with ESMTP id S229529AbjCaHaR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 03:30:17 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D100768B;
+        Fri, 31 Mar 2023 00:30:16 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 026AF623EB;
+        Fri, 31 Mar 2023 07:30:16 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id E3B6FC433EF;
+        Fri, 31 Mar 2023 07:30:14 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1680247815;
+        bh=zXw6u1EURy0w/G8+aTN3bFZY3VPBIAO84MiEoOwOeoM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=c0eDMujfzGZl/a/qQcu/oXOkm8+AdridpQm92a6IcGD0dvb3iwN5DeyVgwzFMflbd
+         hdM5mIitXezpKMM70JE2iP+StMHwP8+u5A/eRVNN/QQTlff4Yl4gQ311AzN3Y83/o4
+         bT2MMtIoLIl0N4dudexssqUrnlNmSWEB4q2zO5Fs=
+Date:   Fri, 31 Mar 2023 09:30:12 +0200
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     Dennis Zhou <dennis@kernel.org>
+Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: allow mmc to block wait_for_device_probe()
+Message-ID: <ZCaMBEDaISmajPRj@kroah.com>
+References: <20230328223740.69446-1-dennis@kernel.org>
+ <ZCPEcxueuGUaRNOP@kroah.com>
+ <ZCSfwBiponFGFXlN@snowbird>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230327181934.GD1882@sol.localdomain>
+In-Reply-To: <ZCSfwBiponFGFXlN@snowbird>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23-03-27 11:19:34, Eric Biggers wrote:
-> Hi Abel,
-> 
-> On Mon, Mar 27, 2023 at 04:47:32PM +0300, Abel Vesa wrote:
-> > Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
-> > use the new ICE api provided by the Qualcomm soc driver ice. The platforms
-> > that already have ICE support will use the API as library since there will
-> > not be a devicetree node, but instead they have reg range. In this case,
-> > the of_qcom_ice_get will return an ICE instance created for the consumer's
-> > device. But if there are platforms that do not have ice reg in the
-> > consumer devicetree node and instead provide a dedicated ICE devicetree
-> > node, the of_qcom_ice_get will look up the device based on qcom,ice
-> > property and will get the ICE instance registered by the probe function
-> > of the ice driver.
+On Wed, Mar 29, 2023 at 01:29:52PM -0700, Dennis Zhou wrote:
+> On Wed, Mar 29, 2023 at 06:54:11AM +0200, Greg Kroah-Hartman wrote:
+> > On Tue, Mar 28, 2023 at 03:37:40PM -0700, Dennis Zhou wrote:
+> > > I've been hitting a failed data device lookup when using dm-verity and a
+> > > root device on an emmc partition. This is because there is a race where
+> > > dm-verity is looking for a data device, but the partitions on the emmc
+> > > device haven't been probed yet.
+> > > 
+> > > Initially I looked at solving this by changing devt_from_devname() to
+> > > look for partitions, but it seems there is legacy reasons and issues due
+> > > to dm.
+> > > 
+> > > MMC uses 2 levels of probing. The first to handle initializing the
+> > > host and the second to iterate attached devices. The second is done by
+> > > a workqueue item. However, this paradigm makes wait_for_device_probe()
+> > > useless as a barrier for when we can assume attached devices have been
+> > > probed.
+> > > 
+> > > This patch fixes this by exposing 2 methods inc/dec_probe_count() to
+> > > allow device drivers that do asynchronous probing to delay waiters on
+> > > wait_for_device_probe() so that when they are released, they can assume
+> > > attached devices have been probed.
 > > 
-> > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
 > 
-> I am still worried about the ICE clock.  Are you sure it is being managed
-> correctly?  With your patch, the ICE clock gets enabled in ufs_qcom_ice_resume
-> and disabled in ufs_qcom_ice_suspend, which hopefully pair up.  But it also gets
-> enabled in ufs_qcom_ice_enable which isn't paired with anything.  Also, this all
-> happens at a different time from the existing UFS clocks being enabled/disabled.
-
-Right, I messed this up since the last version. Sorry about that.
-
-What I need to do is to drop the enabling of the clock from
-qcom_ice_enable and only do it from qcom_ice_resume. As for disabling
-it, it remains as is, that is, in qcom_ice_disable.
-
-Then, I need to enable the clock right before checking the supported
-version. I'll do that with devm_clk_get_enabled (also optional for the
-legacy once as I explained in the reply to the 6th patch).
-
+> Thanks for the quick reply.
 > 
-> I wonder if the ICE clock should be enabled/disabled in ufs_qcom_setup_clocks()
-> instead of what you are doing currently?
+> > Please no.  For 2 reasons:
+> >   - the api names you picked here do not make much sense from a global
+> >     namespace standpoint.  Always try to do "noun/verb" as well, so if
+> >     we really wanted to do this it would be "driver_probe_incrememt()"
+> >     or something like that.
 > 
-> > +static int ufs_qcom_ice_init(struct ufs_qcom_host *host)
-> > +{
-> > +	struct ufs_hba *hba = host->hba;
-> > +	struct device *dev = hba->dev;
-> > +
-> > +	host->ice = of_qcom_ice_get(dev);
-> > +	if (host->ice == ERR_PTR(-EOPNOTSUPP)) {
-> > +		dev_warn(dev, "Disabling inline encryption support\n");
-> > +		hba->caps &= ~UFSHCD_CAP_CRYPTO;
-> > +		host->ice = NULL;
-> > +	}
-> > +
-> > +	if (IS_ERR(host->ice))
-> > +		return PTR_ERR(host->ice);
-> > +
-> > +	return 0;
-> > +}
+> Yeah that is a bit of a blunder on my part...
 > 
-> This is still sometimes leaving UFSHCD_CAP_CRYPTO set in cases where ICE is
-> unsupported.
+> >  - drivers and subsystems should not be messing around with the probe
+> >    count as it's a hack in the first place to get around other issues.
+> >    Please let's not make it worse and make a formal api for it and allow
+> >    anyone to mess with it.
+> > 
 > 
-> Moving the *setting* of UFSHCD_CAP_CRYPTO into here would fix that.
+> That's fair.
 > 
+> > Why can't you just use normal deferred probing for this?
+> > 
+> 
+> I'm not familiar with why mmc is written the way it is, but probing
+> creates a notion of the host whereas the devices attached are probed
+> later via a work item.
+> 
+> Examining it a bit closer, inlining the first discovery call
+> avoids all of this mess. I sent that out just now in [1]. Hopefully
+> that'll be fine.
+> 
+> [1] https://lore.kernel.org/lkml/20230329202148.71107-1-dennis@kernel.org/T/#u
 
-I'll do exactly that. Thanks.
+Looks much better, except for the kernel test bot issues...
 
-> It is also hard to understand how the -EOPNOTSUPP case differs from the NULL
-> case.  Can you add a comment?  Or just consider keeping the original behavior,
-> which did not distinguish between these cases (as long as MASK_CRYPTO_SUPPORT
-> was set in REG_CONTROLLER_CAPABILITIES, which was checked first).
+thanks,
 
-I believe it makes more sense to return -EOPNOTSUPP when the driver
-doesn't support a specific version of the HW. If you do not agree, I'll
-make it return NULL then.
-
-> 
-> - Eric
+greg k-h
