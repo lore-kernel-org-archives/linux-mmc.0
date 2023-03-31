@@ -2,108 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E25E0C76196
-	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 07:30:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAE61C77B62
+	for <linux-mmc@archiver.kernel.org>; Fri, 31 Mar 2023 08:25:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229659AbjCaHaR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 31 Mar 2023 03:30:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58704 "EHLO
+        id S230190AbjCaIZe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 31 Mar 2023 04:25:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229529AbjCaHaR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 03:30:17 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D100768B;
-        Fri, 31 Mar 2023 00:30:16 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 026AF623EB;
-        Fri, 31 Mar 2023 07:30:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id E3B6FC433EF;
-        Fri, 31 Mar 2023 07:30:14 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1680247815;
-        bh=zXw6u1EURy0w/G8+aTN3bFZY3VPBIAO84MiEoOwOeoM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=c0eDMujfzGZl/a/qQcu/oXOkm8+AdridpQm92a6IcGD0dvb3iwN5DeyVgwzFMflbd
-         hdM5mIitXezpKMM70JE2iP+StMHwP8+u5A/eRVNN/QQTlff4Yl4gQ311AzN3Y83/o4
-         bT2MMtIoLIl0N4dudexssqUrnlNmSWEB4q2zO5Fs=
-Date:   Fri, 31 Mar 2023 09:30:12 +0200
-From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-To:     Dennis Zhou <dennis@kernel.org>
-Cc:     "Rafael J . Wysocki" <rafael@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH] mmc: allow mmc to block wait_for_device_probe()
-Message-ID: <ZCaMBEDaISmajPRj@kroah.com>
-References: <20230328223740.69446-1-dennis@kernel.org>
- <ZCPEcxueuGUaRNOP@kroah.com>
- <ZCSfwBiponFGFXlN@snowbird>
+        with ESMTP id S230230AbjCaIZL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 31 Mar 2023 04:25:11 -0400
+Received: from mail-lf1-x133.google.com (mail-lf1-x133.google.com [IPv6:2a00:1450:4864:20::133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 911011CBA5
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 01:24:52 -0700 (PDT)
+Received: by mail-lf1-x133.google.com with SMTP id y15so27889650lfa.7
+        for <linux-mmc@vger.kernel.org>; Fri, 31 Mar 2023 01:24:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680251091;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=OCqsrf+amCp61+uBfIcb9Bn5gptsOotapM1kFsMUp4M=;
+        b=O3LU+DDztntRytZGyI/5nUXmnSu9TL87HBVJgd/WC9Uaxd8GklpM5kHcNNlG0hzyZb
+         9BRY2YU9Vr7lZBocH5ZMwzaUHJpJNantPTXVzj/uR6Y8fC4xToVc4BOB8CsuChFxiAW1
+         kfFAjsBTIQIk+RId5nXjJqqHGz3V57mIc2VM334wcmurLqpRWoAUStmE4i/CpAoWEBR0
+         Y5WLHbcV11TeR+PnvqLptz4LjZ30k00gqpq7UARRm0VSWl7YhilUcxj230i1ubT+iJhy
+         jDIfgAPQ7D+4F6T239Uip48XvaLaYT3Kfgp93wbJc8bGwtKVVJxM8T4KG7sHF9fqzmXq
+         7Fnw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680251091;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=OCqsrf+amCp61+uBfIcb9Bn5gptsOotapM1kFsMUp4M=;
+        b=CQcxIwWc7SMmr/9pQsjvZh0mENuh22vX5188MEZGC9P6a3jBQJdPeQ+fbXmUq6OYOL
+         UkQm+eP+wJ+isWXTz8xQB9OPDIWiow5NURtHu3ecfEOu2GuYb8u90lVHEacMNUKIg3DP
+         JwIDxRWRWfgPMkB6b/fkjMbSi3oGBKi/49HD/NpkzOy38tIpLMvIsXREHTIvb8GG9m+b
+         aCZ78x3aaB8XXPiRBx7ry9aN0WEgadITmA3cwfOjuflpf1hEYz/804C4N09Sdt4jXEGS
+         9Qbskm0g2YX27zZOhVIk+LuIPKL8m94MVlTJ9fzcWbkVyfOnVMi3k5/2Bs2rXOKQnD/x
+         DM8w==
+X-Gm-Message-State: AAQBX9eIA3ZYpQfj15LOTVET/BoQxyq5ywF6SCe8zjrewVsJdKZiNPk0
+        vmcvmWaYnsuClXAS9DNsv/CPfg==
+X-Google-Smtp-Source: AKy350YN5Az0Bf5VilwIcM/jIg8J8ELErE9rowIgMHsZO2KQTkzjldPypIETiy8hY/yze5M8dQlwTA==
+X-Received: by 2002:a19:f007:0:b0:4dc:8215:5531 with SMTP id p7-20020a19f007000000b004dc82155531mr7233300lfc.6.1680251090849;
+        Fri, 31 Mar 2023 01:24:50 -0700 (PDT)
+Received: from [192.168.0.21] (78-11-189-27.static.ip.netia.com.pl. [78.11.189.27])
+        by smtp.gmail.com with ESMTPSA id v5-20020ac25605000000b004e845954a81sm277501lfd.296.2023.03.31.01.24.49
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 31 Mar 2023 01:24:50 -0700 (PDT)
+Message-ID: <8ba254ac-4df2-c17e-bf14-4cec4debcf36@linaro.org>
+Date:   Fri, 31 Mar 2023 10:24:49 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZCSfwBiponFGFXlN@snowbird>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v3 02/17] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
+ add drive strength property
+Content-Language: en-US
+To:     Alexandre Mergnat <amergnat@baylibre.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        =?UTF-8?Q?Bernhard_Rosenkr=c3=a4nzer?= <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>
+References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
+ <20230203-evk-board-support-v3-2-0003e80e0095@baylibre.com>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230203-evk-board-support-v3-2-0003e80e0095@baylibre.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 29, 2023 at 01:29:52PM -0700, Dennis Zhou wrote:
-> On Wed, Mar 29, 2023 at 06:54:11AM +0200, Greg Kroah-Hartman wrote:
-> > On Tue, Mar 28, 2023 at 03:37:40PM -0700, Dennis Zhou wrote:
-> > > I've been hitting a failed data device lookup when using dm-verity and a
-> > > root device on an emmc partition. This is because there is a race where
-> > > dm-verity is looking for a data device, but the partitions on the emmc
-> > > device haven't been probed yet.
-> > > 
-> > > Initially I looked at solving this by changing devt_from_devname() to
-> > > look for partitions, but it seems there is legacy reasons and issues due
-> > > to dm.
-> > > 
-> > > MMC uses 2 levels of probing. The first to handle initializing the
-> > > host and the second to iterate attached devices. The second is done by
-> > > a workqueue item. However, this paradigm makes wait_for_device_probe()
-> > > useless as a barrier for when we can assume attached devices have been
-> > > probed.
-> > > 
-> > > This patch fixes this by exposing 2 methods inc/dec_probe_count() to
-> > > allow device drivers that do asynchronous probing to delay waiters on
-> > > wait_for_device_probe() so that when they are released, they can assume
-> > > attached devices have been probed.
-> > 
+On 29/03/2023 10:54, Alexandre Mergnat wrote:
+> This SoC is able to drive the following output current:
+> - 2 mA
+> - 4 mA
+> - 6 mA
+> - 8 mA
+> - 10 mA
+> - 12 mA
+> - 14 mA
+> - 16 mA
 > 
-> Thanks for the quick reply.
+> Then drive-strength property is set with enum to reflect its HW capability.
 > 
-> > Please no.  For 2 reasons:
-> >   - the api names you picked here do not make much sense from a global
-> >     namespace standpoint.  Always try to do "noun/verb" as well, so if
-> >     we really wanted to do this it would be "driver_probe_incrememt()"
-> >     or something like that.
-> 
-> Yeah that is a bit of a blunder on my part...
-> 
-> >  - drivers and subsystems should not be messing around with the probe
-> >    count as it's a hack in the first place to get around other issues.
-> >    Please let's not make it worse and make a formal api for it and allow
-> >    anyone to mess with it.
-> > 
-> 
-> That's fair.
-> 
-> > Why can't you just use normal deferred probing for this?
-> > 
-> 
-> I'm not familiar with why mmc is written the way it is, but probing
-> creates a notion of the host whereas the devices attached are probed
-> later via a work item.
-> 
-> Examining it a bit closer, inlining the first discovery call
-> avoids all of this mess. I sent that out just now in [1]. Hopefully
-> that'll be fine.
-> 
-> [1] https://lore.kernel.org/lkml/20230329202148.71107-1-dennis@kernel.org/T/#u
 
-Looks much better, except for the kernel test bot issues...
 
-thanks,
+Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-greg k-h
+Best regards,
+Krzysztof
+
