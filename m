@@ -2,221 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 056A6C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Sat,  1 Apr 2023 14:56:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 41B6EC76196
+	for <linux-mmc@archiver.kernel.org>; Sat,  1 Apr 2023 16:57:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229603AbjDAO4b (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 1 Apr 2023 10:56:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35182 "EHLO
+        id S229735AbjDAQ5f (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 1 Apr 2023 12:57:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229913AbjDAO4a (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Apr 2023 10:56:30 -0400
-Received: from ams.source.kernel.org (ams.source.kernel.org [145.40.68.75])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A49C1DFA3;
-        Sat,  1 Apr 2023 07:56:28 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by ams.source.kernel.org (Postfix) with ESMTPS id C1A6FB80B84;
-        Sat,  1 Apr 2023 14:56:26 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D15CAC433EF;
-        Sat,  1 Apr 2023 14:56:24 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1680360985;
-        bh=U/D11rdbjd1z2d2bXqVG1pghrbpU9nx+yPmLBmO9W3Y=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=j75idZMQW1j3EFoD78LotF+AGbwDP2bd2lvj4hTauwJezzvZe0dVHmrC6pcd3FWvt
-         9ZcXPK0SyY6C8yxGTnEJttu7w7cJqn0cmwxnY0rdquSMad1URT3U82+JAPn+QueLuF
-         cGj2DVjf1Hn8JS6z0LNi0PnBmk4v2aMP5rntTwgU=
-Date:   Sat, 1 Apr 2023 16:56:22 +0200
-From:   Greg KH <gregkh@linuxfoundation.org>
-To:     Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Thorsten Leemhuis <regressions@leemhuis.info>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        Hannes Reinecke <hare@suse.de>,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>,
-        ye xingchen <ye.xingchen@zte.com.cn>, linux-mmc@vger.kernel.org
-Subject: Re: BUG FIX: [PATCH RFC v3] [TESTED OK] memstick_check() memleak in
- kernel 6.1.0+ introduced pre 4.17
-Message-ID: <2023040123-undress-playpen-edee@gregkh>
-References: <7d873dd3-9bab-175b-8158-c458b61a7122@alu.unizg.hr>
- <f74219a7-1607-deb4-a6ae-7b73e2467ac7@alu.unizg.hr>
- <df560535-2a8e-de21-d45d-805159d70954@alu.unizg.hr>
- <2023033124-causing-cassette-4d96@gregkh>
- <4d80549f-e59d-6319-07fd-1fbed75d7a1c@alu.unizg.hr>
- <ZCfO90WwyS6JwaHi@kroah.com>
- <ZCfQQDkw3D_BXJaZ@kroah.com>
- <2023040127-untrue-obtrusive-1ea4@gregkh>
- <2023040112-immovably-cytoplasm-44ee@gregkh>
- <112c4552-2c32-1be4-89a9-90ea9b45e988@alu.unizg.hr>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <112c4552-2c32-1be4-89a9-90ea9b45e988@alu.unizg.hr>
+        with ESMTP id S229461AbjDAQ5e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 1 Apr 2023 12:57:34 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C68E3CC3A;
+        Sat,  1 Apr 2023 09:57:33 -0700 (PDT)
+Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 331Fk4VQ027431;
+        Sat, 1 Apr 2023 16:57:31 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id; s=qcppdkim1;
+ bh=p+9jihlrSFZgB2eBUCx0dZ9L0V64SZG/10WisCIecLQ=;
+ b=o6UTf/lkCz9pc4Ckd7+T5GQfjwXnq0tvF+gAem6ogwfnBe/ImyZOXErlZQl3WgZIbW9E
+ y6CUwqOS1hZKMWfAfmGVb/ewYc2NXx5Se3Zl9nuyNdF/6Ez1ZOrhWYEb2xamkRPd45Xx
+ lw8OzjH6Z72j/KbtGOjX+r/XAnz4mYoeQPK5373BD5MlCGR4nRWVsOqstwhtLPwfu7mL
+ V6JmIStKTeHTuoRRHtBml9M+SawPuT2pMIZAKfygpwy9qNBuMC13p81Im0O0Hyae+9qL
+ WZikBjtIztpAjDXw3uu6+2q0p8TPAkHTfjNEDAcecH3coCTwwhDCft5R+k8OxdWrkcws SQ== 
+Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3ppcq3h2e1-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sat, 01 Apr 2023 16:57:31 +0000
+Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 331GvRMv006674;
+        Sat, 1 Apr 2023 16:57:27 GMT
+Received: from pps.reinject (localhost [127.0.0.1])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3ppdpk2udr-1;
+        Sat, 01 Apr 2023 16:57:27 +0000
+Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 331GvQvc006668;
+        Sat, 1 Apr 2023 16:57:26 GMT
+Received: from hu-maiyas-hyd.qualcomm.com (hu-sartgarg-hyd.qualcomm.com [10.213.105.147])
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 331GvQSk006666;
+        Sat, 01 Apr 2023 16:57:26 +0000
+Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2339771)
+        id F0394504928; Sat,  1 Apr 2023 22:27:25 +0530 (+0530)
+From:   Sarthak Garg <quic_sartgarg@quicinc.com>
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-arm-msm@vger.kernel.org, quic_rampraka@quicinc.com,
+        quic_bhaskarv@quicinc.com, quic_sachgupt@quicinc.com,
+        quic_pragalla@quicinc.com, quic_sayalil@quicinc.com,
+        Sarthak Garg <quic_sartgarg@quicinc.com>
+Subject: [PATCH V1 0/2] Introduce new vendor op and export few symbols
+Date:   Sat,  1 Apr 2023 22:27:21 +0530
+Message-Id: <20230401165723.19762-1-quic_sartgarg@quicinc.com>
+X-Mailer: git-send-email 2.17.1
+X-QCInternal: smtphost
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 8ZmnscFKtjUJ3lp370yyogy9g4U7TIvw
+X-Proofpoint-ORIG-GUID: 8ZmnscFKtjUJ3lp370yyogy9g4U7TIvw
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-03-31_07,2023-03-31_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=5 priorityscore=1501 mlxscore=5
+ lowpriorityscore=0 phishscore=0 impostorscore=0 suspectscore=0 spamscore=5
+ bulkscore=0 mlxlogscore=130 adultscore=0 clxscore=1011 malwarescore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2303200000
+ definitions=main-2304010154
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, Apr 01, 2023 at 01:25:21PM +0200, Mirsad Goran Todorovac wrote:
-> On 01. 04. 2023. 11:23, Greg KH wrote:
-> > On Sat, Apr 01, 2023 at 11:18:19AM +0200, Greg KH wrote:
-> >> On Sat, Apr 01, 2023 at 08:33:36AM +0200, Greg KH wrote:
-> >>> On Sat, Apr 01, 2023 at 08:28:07AM +0200, Greg KH wrote:
-> >>>> On Sat, Apr 01, 2023 at 08:23:26AM +0200, Mirsad Goran Todorovac wrote:
-> >>>>>> This patch is implying that anyone who calls "dev_set_name()" also has
-> >>>>>> to do this hack, which shouldn't be the case at all.
-> >>>>>>
-> >>>>>> thanks,
-> >>>>>>
-> >>>>>> greg k-h
-> >>>>>
-> >>>>> This is my best guess. Unless there is dev_free_name() or kobject_free_name(), I don't
-> >>>>> see a more sensible way to patch this up.
-> >>>>
-> >>>> In sleeping on this, I think this has to move to the driver core.  I
-> >>>> don't understand why we haven't seen this before, except maybe no one
-> >>>> has really noticed before (i.e. we haven't had good leak detection tools
-> >>>> that run with removable devices?)
-> >>>>
-> >>>> Anyway, let me see if I can come up with something this weekend, give me
-> >>>> a chance...
-> >>>
-> >>> Wait, no, this already should be handled by the kobject core, look at
-> >>> kobject_cleanup(), at the bottom.  So your change should be merely
-> >>> duplicating the logic there that already runs when the struct device is
-> >>> freed, right?
-> >>>
-> >>> So I don't understand why your change works, odd.  I need more coffee...
-> >>
-> >> I think you got half of the change correctly.  This init code is a maze
-> >> of twisty passages, let me take your patch and tweak it a bit into
-> >> something that I think should work.  This looks to be only a memstick
-> >> issue, not a driver core issue (which makes me feel better.)
-> > 
-> > Oops, forgot the patch.  Can you try this change here and let me know if
-> > that solves the problem or not?  I have compile-tested it only, so I
-> > have no idea if it works.
-> > 
-> > If this does work, I'll make up a "real" function to replace the
-> > horrible dev.kobj.name mess that a driver would have to do here as it
-> > shouldn't be required that a driver author knows the internals of the
-> > driver core that well...
-> > 
-> > thanks,
-> > 
-> > greg k-h
-> > 
-> > --------------------
-> > 
-> > 
-> > diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> > index bf7667845459..bbfaf6536903 100644
-> > --- a/drivers/memstick/core/memstick.c
-> > +++ b/drivers/memstick/core/memstick.c
-> > @@ -410,6 +410,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-> >  	return card;
-> >  err_out:
-> >  	host->card = old_card;
-> > +	kfree_const(card->dev.kobj.name);
-> >  	kfree(card);
-> >  	return NULL;
-> >  }
-> > @@ -468,8 +469,10 @@ static void memstick_check(struct work_struct *work)
-> >  				put_device(&card->dev);
-> >  				host->card = NULL;
-> >  			}
-> > -		} else
-> > +		} else {
-> > +			kfree_const(card->dev.kobj.name);
-> >  			kfree(card);
-> > +		}
-> >  	}
-> >  
-> >  out_power_off:
-> 
-> RESULTS:
-> 
-> w/o patch:
-> 
-> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# cat !$
-> cat /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
-> unreferenced object 0xffffa09a93249590 (size 16):
->   comm "kworker/u12:4", pid 371, jiffies 4294896466 (age 52.748s)
->   hex dump (first 16 bytes):
->     6d 65 6d 73 74 69 63 6b 30 00 cc cc cc cc cc cc  memstick0.......
->   backtrace:
->     [<ffffffff936fb25c>] slab_post_alloc_hook+0x8c/0x3e0
->     [<ffffffff93702b39>] __kmem_cache_alloc_node+0x1d9/0x2a0
->     [<ffffffff936773b9>] __kmalloc_node_track_caller+0x59/0x180
->     [<ffffffff93666a0a>] kstrdup+0x3a/0x70
->     [<ffffffff93666a7c>] kstrdup_const+0x2c/0x40
->     [<ffffffff93aa99dc>] kvasprintf_const+0x7c/0xb0
->     [<ffffffff9443b427>] kobject_set_name_vargs+0x27/0xa0
->     [<ffffffff93d8ee37>] dev_set_name+0x57/0x80
->     [<ffffffffc0aeff0f>] memstick_check+0x10f/0x3b0 [memstick]
->     [<ffffffff933cb4c0>] process_one_work+0x250/0x530
->     [<ffffffff933cb7f8>] worker_thread+0x48/0x3a0
->     [<ffffffff933d6dff>] kthread+0x10f/0x140
->     [<ffffffff93202fa9>] ret_from_fork+0x29/0x50
-> unreferenced object 0xffffa09a97205990 (size 16):
->   comm "kworker/u12:4", pid 371, jiffies 4294896471 (age 52.728s)
->   hex dump (first 16 bytes):
->     6d 65 6d 73 74 69 63 6b 30 00 cc cc cc cc cc cc  memstick0.......
->   backtrace:
->     [<ffffffff936fb25c>] slab_post_alloc_hook+0x8c/0x3e0
->     [<ffffffff93702b39>] __kmem_cache_alloc_node+0x1d9/0x2a0
->     [<ffffffff936773b9>] __kmalloc_node_track_caller+0x59/0x180
->     [<ffffffff93666a0a>] kstrdup+0x3a/0x70
->     [<ffffffff93666a7c>] kstrdup_const+0x2c/0x40
->     [<ffffffff93aa99dc>] kvasprintf_const+0x7c/0xb0
->     [<ffffffff9443b427>] kobject_set_name_vargs+0x27/0xa0
->     [<ffffffff93d8ee37>] dev_set_name+0x57/0x80
->     [<ffffffffc0aeff0f>] memstick_check+0x10f/0x3b0 [memstick]
->     [<ffffffff933cb4c0>] process_one_work+0x250/0x530
->     [<ffffffff933cb7f8>] worker_thread+0x48/0x3a0
->     [<ffffffff933d6dff>] kthread+0x10f/0x140
->     [<ffffffff93202fa9>] ret_from_fork+0x29/0x50
-> [root@pc-mtodorov marvin]# uname -rms
-> Linux 6.3.0-rc4-mt-20230401-00199-g7b50567bdcad-dirty x86_64
-> [root@pc-mtodorov marvin]# 
-> 
-> After the patch:
-> 
-> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
-> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
-> 
-> So, congratulations, this did it!
+For our earlier discussions on clock scaling and partial init features
+we have come up with a new design where we have moved the entire logic
+for both the features in our vendor related files.
 
-Great, thanks for testing!  And for working to narrow this down, that's
-the hard part here.
+But to support this new design we need a vendor op in
+_mmc_suspend/_mmc_resume functions to control our feature functionality
+in suspend/resume paths.
+Moreover export of few symbols is also needed to make core layer
+functions accessible to our vendor module.
 
-> This bug I detected on 2022-11-04, but it took me four months to find the leak,
-> before I was "blessed by the Source". You have asked me whether I would
-> help the memstick developers find a solution, and I like to keep promises. :-)
-> 
-> At your convenience, you might add in the patch:
-> 
-> Tested-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-> 
-> It's been an honour serving with the memstick community with you and it was a real
-> brainstorming session for me.
+Old discussion for Clock scaling feature :
+https://patchwork.kernel.org/project/linux-mmc/cover/1571668177-3766-1-git-send-email-rampraka@codeaurora.org/
 
-Thanks, as you did way over half the work here, I think a co-developed
-tag would be better.  I'll send it out with that and you can provide a
-signed-off-by on it that would be great.
+Old discussion for Partial init feature :
+https://patchwork.kernel.org/project/linux-mmc/patch/1650963852-4173-1-git-send-email-quic_spathi@quicinc.com/
 
-thanks,
+Hence introduce new vendor op in suspend/resume and export few symbols
+nedeed for our feature.
 
-greg k-h
+Sarthak Garg (2):
+  mmc: core: Define new vendor ops to enable internal features
+  mmc: core: Export core functions to let vendors use for their features
+
+ drivers/mmc/core/core.c    |  6 ++++++
+ drivers/mmc/core/host.c    |  1 +
+ drivers/mmc/core/mmc.c     | 31 ++++++++++++++++++++++---------
+ drivers/mmc/core/mmc_ops.c |  1 +
+ drivers/mmc/core/queue.c   |  1 +
+ include/linux/mmc/host.h   |  4 ++++
+ 6 files changed, 35 insertions(+), 9 deletions(-)
+
+-- 
+2.17.1
+
