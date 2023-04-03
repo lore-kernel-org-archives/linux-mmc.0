@@ -2,121 +2,351 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F16FC76196
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 15:17:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 188A1C76188
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 17:42:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230120AbjDCPRT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Apr 2023 11:17:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49704 "EHLO
+        id S231583AbjDCRm6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Apr 2023 13:42:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48122 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232676AbjDCPRS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 11:17:18 -0400
-Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DD3030FE
-        for <linux-mmc@vger.kernel.org>; Mon,  3 Apr 2023 08:17:16 -0700 (PDT)
-Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
-        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.92)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pjLvm-0001oP-BP; Mon, 03 Apr 2023 17:17:14 +0200
-Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
-        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pjLvl-008iVn-DZ; Mon, 03 Apr 2023 17:17:13 +0200
-Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
-        (envelope-from <ukl@pengutronix.de>)
-        id 1pjLvk-00AHSs-JL; Mon, 03 Apr 2023 17:17:12 +0200
-Date:   Mon, 3 Apr 2023 17:17:12 +0200
-From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: sdhci_am654 and runtime-pm issues
-Message-ID: <20230403151712.pqzmyqz3tose3bc3@pengutronix.de>
-References: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
- <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
+        with ESMTP id S231320AbjDCRm5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 13:42:57 -0400
+Received: from fllv0015.ext.ti.com (fllv0015.ext.ti.com [198.47.19.141])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F2038B6;
+        Mon,  3 Apr 2023 10:42:54 -0700 (PDT)
+Received: from lelv0266.itg.ti.com ([10.180.67.225])
+        by fllv0015.ext.ti.com (8.15.2/8.15.2) with ESMTP id 333HgiLa046618;
+        Mon, 3 Apr 2023 12:42:44 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
+        s=ti-com-17Q1; t=1680543764;
+        bh=XfoKgm34yi7EcuWz+guJWMl3DaCNizDpw0v1uHmtqvE=;
+        h=Date:Subject:To:CC:References:From:In-Reply-To;
+        b=Hglzdi8tLwwheheGNtyz2MPdtHjH1xQFdpfAFqHu7j6VVz7eLyTq+oneSJZENe8mj
+         9+MB7cn8A98TGdm4Zfze9+7PDEtELPZIjrFcz7dvstdrpKbYO0pksOOc6ZeFI6eW16
+         BpoUrG4aSLZNCA39qi0KW8Y9rMjfibIkQvz5N7vc=
+Received: from DLEE113.ent.ti.com (dlee113.ent.ti.com [157.170.170.24])
+        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 333Hgi1M017206
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Mon, 3 Apr 2023 12:42:44 -0500
+Received: from DLEE114.ent.ti.com (157.170.170.25) by DLEE113.ent.ti.com
+ (157.170.170.24) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16; Mon, 3
+ Apr 2023 12:42:44 -0500
+Received: from lelv0327.itg.ti.com (10.180.67.183) by DLEE114.ent.ti.com
+ (157.170.170.25) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16 via
+ Frontend Transport; Mon, 3 Apr 2023 12:42:44 -0500
+Received: from [172.24.145.182] (ileaxei01-snat.itg.ti.com [10.180.69.5])
+        by lelv0327.itg.ti.com (8.15.2/8.15.2) with ESMTP id 333HggDK089387;
+        Mon, 3 Apr 2023 12:42:43 -0500
+Message-ID: <9029896f-d6fb-e341-9544-1104ecfa9f8a@ti.com>
+Date:   Mon, 3 Apr 2023 23:12:41 +0530
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="dnfwsfaquk3wddzs"
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
-X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
-X-SA-Exim-Mail-From: ukl@pengutronix.de
-X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
-X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [PATCH v3] mmc: sdhci_am654: Add support for PM suspend/resume
+Content-Language: en-US
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+CC:     Adrian Hunter <adrian.hunter@intel.com>,
+        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>
+References: <20230331101619.4117312-1-vigneshr@ti.com>
+ <CAPDyKFqQZgmd_ydbjKJ+5-Dte9i2=DqWwZNgVHi2MnH+q7pZ1g@mail.gmail.com>
+From:   Vignesh Raghavendra <vigneshr@ti.com>
+In-Reply-To: <CAPDyKFqQZgmd_ydbjKJ+5-Dte9i2=DqWwZNgVHi2MnH+q7pZ1g@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi,
 
---dnfwsfaquk3wddzs
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On 31/03/23 20:01, Ulf Hansson wrote:
+> On Fri, 31 Mar 2023 at 12:17, Vignesh Raghavendra <vigneshr@ti.com> wrote:
+>>
+>> From: Aswath Govindraju <a-govindraju@ti.com>
+>>
+>> Add support for suspend/resume and pm_runtime resume/suspend.
+>>
+>> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
+>> Signed-off-by: Georgi Vlaev <g-vlaev@ti.com>
+>> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
+>> ---
+>>
+>> Since RFC v2:
+>> Address all comments around sdhci_am654_remove()
+>> Set autosuspend_delay to -1 as SDHCI will host rootfs via SD/eMMC and
+>> autosuspend can cause long latency for user interactive applications
+> 
+> I am curious about the "long" latency. Do you have some data that you
+> can share for how long it takes to runtime-resume the device?
+> 
 
-On Mon, Apr 03, 2023 at 12:19:20PM +0200, Ulf Hansson wrote:
-> On Sat, 1 Apr 2023 at 15:16, Uwe Kleine-K=F6nig
-> <u.kleine-koenig@pengutronix.de> wrote:
-> >
-> > Hello,
-> >
-> > I looked at the sdhci_am654's probe function and concerning runtime-pm
-> > this is at least unconvential:
-> >
-> > It does
-> >
-> >         clk_xin =3D devm_clk_get(dev, "clk_xin");
-> >         if (IS_ERR(clk_xin))
-> >                 ...
-> >
-> >         /* Clocks are enabled using pm_runtime */
-> >         pm_runtime_enable(dev);
-> >         ret =3D pm_runtime_resume_and_get(dev);
-> >         ...
-> >
-> > I'm not fluent in runtime-pm stuff (so I added Rafael to Cc), but I
-> > thought it is to be used the other way around, i.e. put the device in
-> > operational state and then runtime-pm cares to suspend the device under
-> > some conditions (e.g. CONFIG_PM being enabled).
-> >
-> > With CONFIG_PM unset the driver is broken for sure, as then
-> > pm_runtime_enable() and pm_runtime_resume_and_get() have no effect. So
-> > the clk stays off.
->=20
-> In principle, you are correct. I wouldn't recommend the above pattern
-> in general, but it doesn't mean that it can't work.
->=20
-> Some platforms are selecting "PM" from some of their toplevel Kconfig,
-> as they simply can't work without it. That means that the code you
-> refer to above, doesn't have to be broken.
+As part of wider teting, I discovered that on certain boards (J721e EVM
+for example), there is a latency of ~500ms for controller to start up
+(HW limitation around card detect debounce timer [0]). This results in
+momentary (but noticeable) lag when playing a video for example.
 
-If I understand correctly the driver under discussion is supposed to be
-used on SoCs in the CONFIG_ARCH_K3 family. This isn't one of those that
-enforce PM.
 
-But yes, adding a depends on PM would be an action that improves the
-situation. Having said that even on such platforms you can disable
-runtime PM, so even a select on PM isn't a complete fix.
+[0[
+https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/sdhci_am654.c#L361
 
-Best regards
-Uwe
 
---=20
-Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
-Industrial Linux Solutions                 | https://www.pengutronix.de/ |
+> Using -1 as the default value for the autosuspend_delay seems fine to
+> me, but did you consider using a longer timeout than the common 100ms?
+> Could that perhaps be a better default option?
 
---dnfwsfaquk3wddzs
-Content-Type: application/pgp-signature; name="signature.asc"
+Its more of the startup delay than how long controller should remain
+active. So tuning autosuspend_delay does not seem to help.
 
------BEGIN PGP SIGNATURE-----
+> 
+> Of course, in the end this is a choice of performance in favor of
+> wasting energy.
 
-iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmQq7fcACgkQj4D7WH0S
-/k5BLAgAp7XFoqTlp7a5uBbrDqXfeevB7NrgtxKB0xml1pB44ZX/4elorvnrkMGI
-3BVRmaNJO+Nd/oBgZVbHvwfgu1Uyd/K9jr5TF/lnXs6I26HNgIRWYRpWzSz9ZMaf
-H5bqCyHbZx6yh3VkyllHXU3EaMFIxIUFidC3iCxW7YBqKGtfmgh5PrugbpkNvYrI
-QPfJbQXKjFEnB4VkNVqW83ewuoG24bpjKPF550JTKkV2A0VYjdfImq6w2uEo1+mQ
-ElE1SK1vHNd3ExkwrybKYvCqioyTEU7KiKMHr1c1njQPLwqtHw3g0l61b4/saUva
-8ewqP0tsXC0WufWlcWJRwOTPAPqGbA==
-=Gcuz
------END PGP SIGNATURE-----
+Yes, this is choice of opt-in vs opt-out. Users can tune the delay via
+sysfs as needed.
 
---dnfwsfaquk3wddzs--
+I am setting it to -1 to avoid regressing any userspace apps (vs
+enabling autosuspend and then asking impacted users to set to -1)
+
+One solution is to use -1 on platforms where latency is significant
+based on compatible / SoC detection?
+
+Regards
+Vignesh
+
+> 
+> Kind regards
+> Uffe
+> 
+>>
+>> RFC v2:
+>> https://lore.kernel.org/all/20220408124338.27090-1-a-govindraju@ti.com/
+>>
+>>  drivers/mmc/host/sdhci_am654.c | 147 +++++++++++++++++++++++++++++----
+>>  1 file changed, 131 insertions(+), 16 deletions(-)
+>>
+>> diff --git a/drivers/mmc/host/sdhci_am654.c b/drivers/mmc/host/sdhci_am654.c
+>> index 672d37ea98d0..7cdf0f54e3a5 100644
+>> --- a/drivers/mmc/host/sdhci_am654.c
+>> +++ b/drivers/mmc/host/sdhci_am654.c
+>> @@ -85,6 +85,7 @@
+>>  #define DRIVER_STRENGTH_40_OHM 0x4
+>>
+>>  #define CLOCK_TOO_SLOW_HZ      50000000
+>> +#define SDHCI_AM654_AUTOSUSPEND_DELAY  -1
+>>
+>>  /* Command Queue Host Controller Interface Base address */
+>>  #define SDHCI_AM654_CQE_BASE_ADDR 0x200
+>> @@ -808,16 +809,10 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>>
+>>         pltfm_host->clk = clk_xin;
+>>
+>> -       /* Clocks are enabled using pm_runtime */
+>> -       pm_runtime_enable(dev);
+>> -       ret = pm_runtime_resume_and_get(dev);
+>> -       if (ret)
+>> -               goto pm_runtime_disable;
+>> -
+>>         base = devm_platform_ioremap_resource(pdev, 1);
+>>         if (IS_ERR(base)) {
+>>                 ret = PTR_ERR(base);
+>> -               goto pm_runtime_put;
+>> +               goto err_pltfm_free;
+>>         }
+>>
+>>         sdhci_am654->base = devm_regmap_init_mmio(dev, base,
+>> @@ -825,31 +820,47 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>>         if (IS_ERR(sdhci_am654->base)) {
+>>                 dev_err(dev, "Failed to initialize regmap\n");
+>>                 ret = PTR_ERR(sdhci_am654->base);
+>> -               goto pm_runtime_put;
+>> +               goto err_pltfm_free;
+>>         }
+>>
+>>         ret = sdhci_am654_get_of_property(pdev, sdhci_am654);
+>>         if (ret)
+>> -               goto pm_runtime_put;
+>> +               goto err_pltfm_free;
+>>
+>>         ret = mmc_of_parse(host->mmc);
+>>         if (ret) {
+>>                 dev_err_probe(dev, ret, "parsing dt failed\n");
+>> -               goto pm_runtime_put;
+>> +               goto err_pltfm_free;
+>>         }
+>>
+>>         host->mmc_host_ops.execute_tuning = sdhci_am654_execute_tuning;
+>>
+>> +       pm_runtime_get_noresume(dev);
+>> +       ret = pm_runtime_set_active(dev);
+>> +       if (ret)
+>> +               goto pm_put;
+>> +       pm_runtime_enable(dev);
+>> +       ret = clk_prepare_enable(pltfm_host->clk);
+>> +       if (ret)
+>> +               goto pm_disable;
+>> +
+>>         ret = sdhci_am654_init(host);
+>>         if (ret)
+>> -               goto pm_runtime_put;
+>> +               goto clk_disable;
+>>
+>> +       /* Setting up autosuspend */
+>> +       pm_runtime_set_autosuspend_delay(dev, SDHCI_AM654_AUTOSUSPEND_DELAY);
+>> +       pm_runtime_use_autosuspend(dev);
+>> +       pm_runtime_mark_last_busy(dev);
+>> +       pm_runtime_put_autosuspend(dev);
+>>         return 0;
+>>
+>> -pm_runtime_put:
+>> -       pm_runtime_put_sync(dev);
+>> -pm_runtime_disable:
+>> +clk_disable:
+>> +       clk_disable_unprepare(pltfm_host->clk);
+>> +pm_disable:
+>>         pm_runtime_disable(dev);
+>> +pm_put:
+>> +       pm_runtime_put_noidle(dev);
+>>  err_pltfm_free:
+>>         sdhci_pltfm_free(pdev);
+>>         return ret;
+>> @@ -858,23 +869,127 @@ static int sdhci_am654_probe(struct platform_device *pdev)
+>>  static int sdhci_am654_remove(struct platform_device *pdev)
+>>  {
+>>         struct sdhci_host *host = platform_get_drvdata(pdev);
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>>         int ret;
+>>
+>> -       sdhci_remove_host(host, true);
+>> -       ret = pm_runtime_put_sync(&pdev->dev);
+>> +       ret = pm_runtime_resume_and_get(&pdev->dev);
+>>         if (ret < 0)
+>>                 return ret;
+>>
+>> +       sdhci_remove_host(host, true);
+>> +       clk_disable_unprepare(pltfm_host->clk);
+>>         pm_runtime_disable(&pdev->dev);
+>> +       pm_runtime_put_noidle(&pdev->dev);
+>>         sdhci_pltfm_free(pdev);
+>> +       return 0;
+>> +}
+>> +
+>> +#ifdef CONFIG_PM
+>> +static int sdhci_am654_restore(struct sdhci_host *host)
+>> +{
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       struct sdhci_am654_data *sdhci_am654 = sdhci_pltfm_priv(pltfm_host);
+>> +       u32 ctl_cfg_2 = 0;
+>> +       u32 val;
+>> +       int ret;
+>> +
+>> +       if (sdhci_am654->flags & DLL_CALIB) {
+>> +               regmap_read(sdhci_am654->base, PHY_STAT1, &val);
+>> +               if (~val & CALDONE_MASK) {
+>> +                       /* Calibrate IO lines */
+>> +                       regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+>> +                                          PDB_MASK, PDB_MASK);
+>> +                       ret = regmap_read_poll_timeout(sdhci_am654->base,
+>> +                                                      PHY_STAT1, val,
+>> +                                                      val & CALDONE_MASK,
+>> +                                                      1, 20);
+>> +                       if (ret)
+>> +                               return ret;
+>> +               }
+>> +       }
+>> +
+>> +       /* Enable pins by setting IO mux to 0 */
+>> +       if (sdhci_am654->flags & IOMUX_PRESENT)
+>> +               regmap_update_bits(sdhci_am654->base, PHY_CTRL1,
+>> +                                  IOMUX_ENABLE_MASK, 0);
+>>
+>> +       /* Set slot type based on SD or eMMC */
+>> +       if (host->mmc->caps & MMC_CAP_NONREMOVABLE)
+>> +               ctl_cfg_2 = SLOTTYPE_EMBEDDED;
+>> +
+>> +       regmap_update_bits(sdhci_am654->base, CTL_CFG_2, SLOTTYPE_MASK,
+>> +                          ctl_cfg_2);
+>> +
+>> +       regmap_read(sdhci_am654->base, CTL_CFG_3, &val);
+>> +       if (~val & TUNINGFORSDR50_MASK)
+>> +               /* Enable tuning for SDR50 */
+>> +               regmap_update_bits(sdhci_am654->base, CTL_CFG_3, TUNINGFORSDR50_MASK,
+>> +                                  TUNINGFORSDR50_MASK);
+>> +
+>> +       return 0;
+>> +}
+>> +
+>> +static int sdhci_am654_runtime_suspend(struct device *dev)
+>> +{
+>> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       int ret;
+>> +
+>> +       if (host->tuning_mode != SDHCI_TUNING_MODE_3)
+>> +               mmc_retune_needed(host->mmc);
+>> +
+>> +       ret = cqhci_suspend(host->mmc);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       ret = sdhci_runtime_suspend_host(host);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       /* disable the clock */
+>> +       clk_disable_unprepare(pltfm_host->clk);
+>>         return 0;
+>>  }
+>>
+>> +static int sdhci_am654_runtime_resume(struct device *dev)
+>> +{
+>> +       struct sdhci_host *host = dev_get_drvdata(dev);
+>> +       struct sdhci_pltfm_host *pltfm_host = sdhci_priv(host);
+>> +       int ret;
+>> +
+>> +       /* Enable the clock */
+>> +       ret = clk_prepare_enable(pltfm_host->clk);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       ret = sdhci_am654_restore(host);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       ret = sdhci_runtime_resume_host(host, 0);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       ret = cqhci_resume(host->mmc);
+>> +       if (ret)
+>> +               return ret;
+>> +
+>> +       return 0;
+>> +}
+>> +#endif
+>> +
+>> +static const struct dev_pm_ops sdhci_am654_dev_pm_ops = {
+>> +       SET_RUNTIME_PM_OPS(sdhci_am654_runtime_suspend,
+>> +                          sdhci_am654_runtime_resume, NULL)
+>> +       SET_SYSTEM_SLEEP_PM_OPS(pm_runtime_force_suspend,
+>> +                               pm_runtime_force_resume)
+>> +};
+>> +
+>>  static struct platform_driver sdhci_am654_driver = {
+>>         .driver = {
+>>                 .name = "sdhci-am654",
+>>                 .probe_type = PROBE_PREFER_ASYNCHRONOUS,
+>> +               .pm = &sdhci_am654_dev_pm_ops,
+>>                 .of_match_table = sdhci_am654_of_match,
+>>         },
+>>         .probe = sdhci_am654_probe,
+>> --
+>> 2.40.0
+>>
+
+-- 
+Regards
+Vignesh
