@@ -2,127 +2,123 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08D88C77B60
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 10:26:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DE32C76196
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 11:25:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232284AbjDCK0e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Apr 2023 06:26:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45400 "EHLO
+        id S232448AbjDCLY7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Apr 2023 07:24:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232311AbjDCK03 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 06:26:29 -0400
-Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2047.outbound.protection.outlook.com [40.107.237.47])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DC0B113D7;
-        Mon,  3 Apr 2023 03:26:25 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Un7wUdRDwUFLfFMJOcnoLUprl8UEtyzUAAjpIb4BzagTgWgqSOAtsIHfSXfORuxsubAmPuRMj099izxZrnfG855i2C+SqgMR+cENT8hJad7zpg4yorVlCUSJDudcwFRCn87gBsnbqCbMZKPdQ54qPA/3oQdBVEi5FJPhhZ8UIMgTnBODFgfVRf2BgiNReRE2k4qikNFOYSvaOUKG2R9Z9Y6NK3hkGk2ONRByEwUpNwKMhGbxHNKgk0tQk0w1E371Td8zOOi6n0IDc2BKLqQj3er1i+yvEYDWtR32FMIPVspuwOBv8NYgX+J788YRd5vI5nRz9SkyeibihDxZVt0v1w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=ehuPES+rvGtvOFSZQxDC/djuDdzbTC2UZn5AFh6w/yc=;
- b=TAX8Vgc5AzMhN17dUpi27y9q8PaaW9vNvjp7WCGrS3O3hI1epp0o+dTBeq5WHUe62pU0iEh9LxkHThCOwYkjFeKLemwhdHrdNoqcHWQ/OpeZSRJ+hZwAaG+jJ0X1aa21/Xto9KbweHsxLQKmCETphf4VPL/wL8pb8k7uri09JhN8PY70B5tD74Q/ImRfdMQsWj5w121xEw5bbCCzYYevvxt6kDmm9BsKD7Al6mC+F1ZIlDJz9zNouDRUYDvuFvVqVOxT5aRWaooyxT2XB5pgQX5hzvcPtbb94eFQoMsqwiOAbLj4m40qhoVi/Wb0EfDk2Hkx/H9YIepbFcteEDYGtw==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=ehuPES+rvGtvOFSZQxDC/djuDdzbTC2UZn5AFh6w/yc=;
- b=SI9tg6HdRr0FVtwA/JIAW8fewxewp10wwRDJf9TZubQ574HBv4sSc90DTAOvfx5PvGqpxLSECtMZyQ6GM5sHG+FOFLsNMQA5v4YRJk2Cl4UfugUJHujy/dWvd0iGXYHCtqsoZJqiqWzbf+U9UWFpMIYxrwgRhOF2S/2rNapwwV0=
-Received: from DS7P222CA0012.NAMP222.PROD.OUTLOOK.COM (2603:10b6:8:2e::15) by
- SA0PR12MB4462.namprd12.prod.outlook.com (2603:10b6:806:95::22) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6254.33; Mon, 3 Apr 2023 10:26:22 +0000
-Received: from DS1PEPF0000E636.namprd02.prod.outlook.com
- (2603:10b6:8:2e:cafe::f0) by DS7P222CA0012.outlook.office365.com
- (2603:10b6:8:2e::15) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.22 via Frontend
- Transport; Mon, 3 Apr 2023 10:26:21 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DS1PEPF0000E636.mail.protection.outlook.com (10.167.17.68) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6178.30 via Frontend Transport; Mon, 3 Apr 2023 10:26:21 +0000
-Received: from SATLEXMB07.amd.com (10.181.41.45) by SATLEXMB04.amd.com
- (10.181.40.145) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Mon, 3 Apr
- 2023 05:26:21 -0500
-Received: from SATLEXMB03.amd.com (10.181.40.144) by SATLEXMB07.amd.com
- (10.181.41.45) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Mon, 3 Apr
- 2023 03:26:20 -0700
-Received: from xhdlakshmis40.xilinx.com (10.180.168.240) by SATLEXMB03.amd.com
- (10.181.40.144) with Microsoft SMTP Server id 15.1.2375.34 via Frontend
- Transport; Mon, 3 Apr 2023 05:26:17 -0500
-From:   Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>,
-        Adrian Hunter <adrian.hunter@intel.com>
-CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <devicetree@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <git@amd.com>,
-        <saikrishna12468@gmail.com>,
-        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
-Subject: [PATCH v3 3/3] mmc: sdhci-of-arasan: Skip setting clock delay for 400KHz
-Date:   Mon, 3 Apr 2023 15:55:51 +0530
-Message-ID: <20230403102551.3763054-4-sai.krishna.potthuri@amd.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230403102551.3763054-1-sai.krishna.potthuri@amd.com>
-References: <20230403102551.3763054-1-sai.krishna.potthuri@amd.com>
+        with ESMTP id S231821AbjDCLYx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 07:24:53 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1B6CB2D4A
+        for <linux-mmc@vger.kernel.org>; Mon,  3 Apr 2023 04:24:52 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-545e907790fso429440967b3.3
+        for <linux-mmc@vger.kernel.org>; Mon, 03 Apr 2023 04:24:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680521091;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=tzK7du5TzgY9xSJq4SiAHiRgK3xy6VrwABQVZJYzTK0=;
+        b=zVJU6LNlYaSpvCUIHnOgOVXtOlaxsf3C0wZbQloD3xis0IqXn/sJokO5erOor6k+C9
+         VZWl3YLU4GlGOFit5YCHrAELmJjzpBs+7KBP9aJtFoWkxLMdowjQueZishRWA72OyJsE
+         ssxaCiskpLpCoDrVyj3fGO2e/SRdRlMeLFgmmv6C8/o9kYelqYLo2EK7MOAwNAPmwdbl
+         blCyH0gyKEVuR6l5u9yUyDS6Xg+lM5a6CyiY/vPeMU3HBsb9nMoXncJbIk5I6LsvS+ty
+         mdAlrenX3JRK+pLj6XWX3yoAzLn3qxFgYuht6VLCoFDMbkyF/8rwYlT1wy78bLrD2ld1
+         rbMg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680521091;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=tzK7du5TzgY9xSJq4SiAHiRgK3xy6VrwABQVZJYzTK0=;
+        b=un19hPSPa9PDdhpMaYoG72nBwUseGSyUADLqhBqN2mlI3z1oJYS6asy60KKArUyOn/
+         wvordNoebksJWtFP9BFbQpFE/nwaMUdvoh/9d2l35UnDIRv3f1Rtd/YYpvphfdfepgSg
+         7rwa/Tt4ayljVkbgKBnX3EolAkvroCJU0APEjr6TkibKIwOpFxItQO8i8jKPIHAoQkGY
+         EXF/eNH2Fmb3JDIEpZ4XGVAAUB9ZJ9aSNPmxSQ6ONYqdxB6CSy/6ZRt+qGpt/eUV4jGT
+         moaRDYt6BUPPHy38hINwarZkxDCehEBY59XpV4cwJurg3kTYI5cDBh4ckr/3xTJrhX6T
+         yljw==
+X-Gm-Message-State: AAQBX9c8oFfaysZFiVkObiC2Gd7JeHGrIwt9QYfjzlHoDShMxz6DQkZ4
+        gBHttuNEtxTAl5O1Q5Sjnlcqih9SlA7fXqTNjpaWBg==
+X-Google-Smtp-Source: AKy350aGuEBwRp65ybZjN0yySO/u0tnwI5OlcHo0wq/NRgZxYKQBmrBMe7idXT/X80GBQBhfimFhBsVrBi3HV2NrA4E=
+X-Received: by 2002:a81:aa05:0:b0:53c:6fda:835f with SMTP id
+ i5-20020a81aa05000000b0053c6fda835fmr6278526ywh.0.1680521091251; Mon, 03 Apr
+ 2023 04:24:51 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DS1PEPF0000E636:EE_|SA0PR12MB4462:EE_
-X-MS-Office365-Filtering-Correlation-Id: abf21d48-a11d-4fed-e9db-08db342ddeb3
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: OZ2qVz7Yp2Wyn1j7b8MNbWo2BnX2WM9LOFHoxtX6imC+WFh1DJvcxTWOkd7H4zy1D5G5HMzLihHwW+lCxFU3oExnXX7i7TeSpI9eSVcOYCD3woh1QOzYf59mB3hZnyfa8PuoXRDmy5mK7UsG0JjEAv+Gkt5l5M9Q4LheBK3IbE82wE6ITb5dYX9O86mZYJH5k7U1Cmgw1Jyy7FOZZyaLi14Lc7sWCdYFTbk8MVt9RSdnLyVU4yBuCg+DTZVt5gZFetBLt8FNqtC2X5sD2/36W+U3zWSk5n5yiJKDm2u3Df4+lj8S/kkxoRoJPGfme7KEB8BHXohxh8ZQAOszNwCzT6CXG/8b9RXwlztjB3kC8UyDtp3WitfM6VTLsxom8jFLVR415my4U/PcXfInOls8FTlJ2vFh7PQed6sS425q5Uo05jNCFxJ+GlPSWlRgrl7MMXEmdA66VFsC5H31JHyfwkp1yp07QjYmaq8pliddCH1Sf00PIQIlpWNSjUZYiC7UJU4/GMTvhhF4sh6rQZF+qwZMR3rNowWrwXqP8kmLlqNztU7FQSBqpyUXRsUqpVaU6rml3o14uskR20h0KOEAp3P6T7zQTxoBTplJTHtJB69IqHfgpyTs5wbX8SJWXvaZ5rBt4VsIq4KjVxy1EK2365CD/OoIE1f1ArGFZwq7M/1sk5T0IHgUwx6uc2GsL6Qtw1nDCi5Up7/WlsPOs0969E0p+knpcPI6IIF58RgFi2U=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(376002)(39860400002)(396003)(346002)(136003)(451199021)(40470700004)(36840700001)(46966006)(2906002)(4744005)(81166007)(7416002)(356005)(5660300002)(82740400003)(70206006)(70586007)(8936002)(41300700001)(4326008)(8676002)(40460700003)(36860700001)(36756003)(110136005)(54906003)(316002)(83380400001)(2616005)(47076005)(82310400005)(426003)(336012)(86362001)(40480700001)(186003)(478600001)(6666004)(1076003)(26005)(103116003)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Apr 2023 10:26:21.6625
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: abf21d48-a11d-4fed-e9db-08db342ddeb3
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DS1PEPF0000E636.namprd02.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: SA0PR12MB4462
+References: <20230317064729.24407-1-yuzhe@nfschina.com> <20230328031049.22749-1-yuzhe@nfschina.com>
+In-Reply-To: <20230328031049.22749-1-yuzhe@nfschina.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 3 Apr 2023 13:24:15 +0200
+Message-ID: <CAPDyKFrVuQwLfQZKx9x3PNKTYctWi7=e=vnUsdJgJLJ6=1o2iA@mail.gmail.com>
+Subject: Re: [PATCH v2] mmc: core: remove unnecessary (void*) conversions
+To:     Yu Zhe <yuzhe@nfschina.com>
+Cc:     adrian.hunter@intel.com, quic_sayalil@quicinc.com,
+        quic_c_sbhanu@quicinc.com, quic_luliang@quicinc.com,
+        m.szyprowski@samsung.com, wsa+renesas@sang-engineering.com,
+        yebin10@huawei.com, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        liqiong@nfschina.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Clock delay settings are not defined for 400KHz, so add frequency check
-to skip calling the clock delay settings when frequency is <=400KHz.
+On Tue, 28 Mar 2023 at 05:11, Yu Zhe <yuzhe@nfschina.com> wrote:
+>
+> Pointer variables of void * type do not require type cast.
+>
+> Signed-off-by: Yu Zhe <yuzhe@nfschina.com>
+> Reviewed-by: Marek Szyprowski <m.szyprowski@samsung.com>
 
-Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
----
- drivers/mmc/host/sdhci-of-arasan.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Did Marek give his reviewed-by tag offlist? I couldn't find his reply,
+just to make sure this is correct?
 
-diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-index c3fecb8ba66e..d9a29c346745 100644
---- a/drivers/mmc/host/sdhci-of-arasan.c
-+++ b/drivers/mmc/host/sdhci-of-arasan.c
-@@ -413,7 +413,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
- 	}
- 
- 	/* Set the Input and Output Clock Phase Delays */
--	if (clk_data->set_clk_delays)
-+	if (clk_data->set_clk_delays && clock > PHY_CLK_TOO_SLOW_HZ)
- 		clk_data->set_clk_delays(host);
- 
- 	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ) {
--- 
-2.25.1
+Kind regards
+Uffe
 
+> ---
+>  drivers/mmc/core/debugfs.c  | 2 +-
+>  drivers/mmc/core/mmc_test.c | 6 +++---
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+>
+> diff --git a/drivers/mmc/core/debugfs.c b/drivers/mmc/core/debugfs.c
+> index fe6808771bc7..2c97b94aab23 100644
+> --- a/drivers/mmc/core/debugfs.c
+> +++ b/drivers/mmc/core/debugfs.c
+> @@ -246,7 +246,7 @@ DEFINE_DEBUGFS_ATTRIBUTE(mmc_err_state, mmc_err_state_get, NULL, "%llu\n");
+>
+>  static int mmc_err_stats_show(struct seq_file *file, void *data)
+>  {
+> -       struct mmc_host *host = (struct mmc_host *)file->private;
+> +       struct mmc_host *host = file->private;
+>         const char *desc[MMC_ERR_MAX] = {
+>                 [MMC_ERR_CMD_TIMEOUT] = "Command Timeout Occurred",
+>                 [MMC_ERR_CMD_CRC] = "Command CRC Errors Occurred",
+> diff --git a/drivers/mmc/core/mmc_test.c b/drivers/mmc/core/mmc_test.c
+> index 156d34b2ed4d..0f6a563103fd 100644
+> --- a/drivers/mmc/core/mmc_test.c
+> +++ b/drivers/mmc/core/mmc_test.c
+> @@ -3045,7 +3045,7 @@ static LIST_HEAD(mmc_test_file_test);
+>
+>  static int mtf_test_show(struct seq_file *sf, void *data)
+>  {
+> -       struct mmc_card *card = (struct mmc_card *)sf->private;
+> +       struct mmc_card *card = sf->private;
+>         struct mmc_test_general_result *gr;
+>
+>         mutex_lock(&mmc_test_lock);
+> @@ -3079,8 +3079,8 @@ static int mtf_test_open(struct inode *inode, struct file *file)
+>  static ssize_t mtf_test_write(struct file *file, const char __user *buf,
+>         size_t count, loff_t *pos)
+>  {
+> -       struct seq_file *sf = (struct seq_file *)file->private_data;
+> -       struct mmc_card *card = (struct mmc_card *)sf->private;
+> +       struct seq_file *sf = file->private_data;
+> +       struct mmc_card *card = sf->private;
+>         struct mmc_test_card *test;
+>         long testcase;
+>         int ret;
+> --
+> 2.11.0
+>
