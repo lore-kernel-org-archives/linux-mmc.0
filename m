@@ -2,102 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AEE83C76196
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 10:20:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8671FC76196
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 10:26:18 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231248AbjDCKUl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Apr 2023 06:20:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36070 "EHLO
+        id S232099AbjDCK0R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Apr 2023 06:26:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231634AbjDCKU0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 06:20:26 -0400
-Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7A93191E8
-        for <linux-mmc@vger.kernel.org>; Mon,  3 Apr 2023 03:19:58 -0700 (PDT)
-Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-544f7c176easo542125177b3.9
-        for <linux-mmc@vger.kernel.org>; Mon, 03 Apr 2023 03:19:58 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680517196;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Lp0BLLQBN2ilvTYYIEzYJ9tUjSW7GVxv76XWWf0QlS8=;
-        b=KSTQFALdpnJKwLuP2+1MoVvtPpkWH4ZtlCH/c/StL08N808VQLQ6SItATE78O/v/bx
-         ZAMW8ZFbIhmKrVAuA2TOPVtjIJWyEjPJfWzOYWSLmuCSb3QSv5nFwP959O08oSN4yB3U
-         ieEtKF47rdiIsIfe+sYTZwE89ixi+M8W6KTG7Hqw5MLO7lINPSObB+skqQ3+WfrBkZ96
-         4jaeqFdl1Pt1UXo9bzlTEhKr7Uk31xl6nD5Zy6mrAKAsINjTKpIp4837zuDoxcQ0OJLQ
-         g5Mek6PfiD7sJyZcUSTM7unX7Fz5wmc8J7KrTigSmzWF3zrqLJD6BgNRz9csepUHtfZa
-         ow+g==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680517196;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Lp0BLLQBN2ilvTYYIEzYJ9tUjSW7GVxv76XWWf0QlS8=;
-        b=nmetywyXYg7TKWUparrrLP2YrcpxH2edTB0fZms+nMLACFbgd6QTGtBuc0DaUecQXf
-         qGkg2xV0ttqP2YwAaannloEVElXh30mQYtztcjpzd3mLetaUm0EH5BwkkqSPXbWaoqPY
-         3SrouGdo0r3KgbzJIwRxsGuyX9U6njJ8ByJ/kfE7Moznq/n+1ibxuixv5j21v4tZsjIu
-         q8DfX1NPkMCiDbrVRh4owFY1+qlGjdt2KRkO+ovCan4t3+EJ6O3orRCy2V+P4Z9yaDYX
-         x/nRyLIl/1Ayew4R7bKXuXdoya34qZHa4gPDwK4Abbmj5u41ryuEbZeFR6sXgrc0dSZk
-         n/Nw==
-X-Gm-Message-State: AAQBX9fNJDAeY2WEtML+CdoqvQlE309igY7z6WzKkFeNzAYuVduBcrfe
-        lC1t4CkUW5psqG8ktWHbYNTFSrjdEQFG+7i8RBFNjQ==
-X-Google-Smtp-Source: AKy350YhYZogXzDxm0DJvq1IhseeXwZR9g1D2sSXkhm/gaY9yXhaLqgbV9jqE2ZDjwUhxJR3X9vU1oHpkKtzj96/3H0=
-X-Received: by 2002:a81:ac46:0:b0:533:8f19:4576 with SMTP id
- z6-20020a81ac46000000b005338f194576mr17541978ywj.0.1680517196473; Mon, 03 Apr
- 2023 03:19:56 -0700 (PDT)
+        with ESMTP id S231852AbjDCK0Q (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 06:26:16 -0400
+Received: from NAM02-SN1-obe.outbound.protection.outlook.com (mail-sn1nam02on2051.outbound.protection.outlook.com [40.107.96.51])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E39C13A9B;
+        Mon,  3 Apr 2023 03:26:11 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=gF/EdSnv3ol4bHb5mQITHPA5h8Lsq2msd+5s+jrEwgNZLx5ZiG/pCPkU/D7dA1JbtFaFEtcVO39uvNDVcUReqRtw9S+3NmWlfh4trFj7oi95xhm6h1UMWl4wirxnt9nh4esg16EyrQhtkO7gA8PvBJJkLz+qpwgSYOcjwvp0XcSmW7qcEjf1VcBduJKJlJp+sOJKK8O910Q7L5qfH+iGjaCnm/RFze2rx1ePIayvwg9/Xcufwf7z41379y+tJNN3MAUianP9EpthvsoUnqY+FGq7GGibaL4bu1kOcsRCgUySdkPrAvLOErUYet4T83MFCfFMzdufxKhwmDiIqsXtaA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=zvOXNWN7AAAJOOgeO+vNMaPNg7eFCr1Y16DGsXzCR0c=;
+ b=c2tF2OaYGL8/H0G9KFaFYn6g07qYdgWCk3U32SkP6lwpOZQZG7pS+nEIRsH0Vc+zK6L03O2LnAN/dm+HxAIcRBgQwX8N3uWRl1W1lAW/O5b5lK1Je1nxGKQ3w6R6QDPJaY+FjeAp/J1iA7ZFemYY/lHl2iUk9wVMsJs2slby4GF+A7eK5CLrpMVpQzCU7jAbC+mSK9kJbLRPgFeJJJ5RrN9AEbfx06P/fWcZJlSiTmIZyrz9EK0VfoARKfk2ZmDh1KlRVQvfA1lwU0UZobtCfMxMQFihfHj3wUAPH/WL7uF59bWV+qZ7+bP59hqJsYYSOXiQ1r4eqL8l4IoTjG4OZA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=linaro.org smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=zvOXNWN7AAAJOOgeO+vNMaPNg7eFCr1Y16DGsXzCR0c=;
+ b=AQweKgB4ZTb35Uoi2BAzqxLWdC+vUh1kOy10G5NY2jwq+9wNDSkaRREfX3UDguaxN/YXCjm7UH4pLEe4Z5FMYr3TJcvUjTqiibKx6Q3wrzW4vWe0HoyMvOrKqumVp/HGH/XMrJmi4PyZwAK7zoRg8xIoPW+fe2iyIETTU3SR5Bk=
+Received: from BN9PR03CA0197.namprd03.prod.outlook.com (2603:10b6:408:f9::22)
+ by CH0PR12MB5316.namprd12.prod.outlook.com (2603:10b6:610:d7::14) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.33; Mon, 3 Apr
+ 2023 10:26:09 +0000
+Received: from BN8NAM11FT094.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:f9:cafe::21) by BN9PR03CA0197.outlook.office365.com
+ (2603:10b6:408:f9::22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6254.20 via Frontend
+ Transport; Mon, 3 Apr 2023 10:26:09 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB03.amd.com; pr=C
+Received: from SATLEXMB03.amd.com (165.204.84.17) by
+ BN8NAM11FT094.mail.protection.outlook.com (10.13.176.131) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6277.17 via Frontend Transport; Mon, 3 Apr 2023 10:26:09 +0000
+Received: from SATLEXMB03.amd.com (10.181.40.144) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2375.34; Mon, 3 Apr
+ 2023 05:26:08 -0500
+Received: from xhdlakshmis40.xilinx.com (10.180.168.240) by SATLEXMB03.amd.com
+ (10.181.40.144) with Microsoft SMTP Server id 15.1.2375.34 via Frontend
+ Transport; Mon, 3 Apr 2023 05:26:05 -0500
+From:   Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <devicetree@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <git@amd.com>,
+        <saikrishna12468@gmail.com>,
+        Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+Subject: [PATCH v3 0/3] mmc: sdhci-of-arasan: Add eMMC5.1 support for Xilinx Versal Net
+Date:   Mon, 3 Apr 2023 15:55:48 +0530
+Message-ID: <20230403102551.3763054-1-sai.krishna.potthuri@amd.com>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-References: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
-In-Reply-To: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 3 Apr 2023 12:19:20 +0200
-Message-ID: <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
-Subject: Re: sdhci_am654 and runtime-pm issues
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN8NAM11FT094:EE_|CH0PR12MB5316:EE_
+X-MS-Office365-Filtering-Correlation-Id: 664bef3e-e380-49db-0d82-08db342dd765
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: xDlCgGdkkDpTGjIZ2VDUdmubg8Ij5HBDl8JFuSlMWJGDWpC12lV5e6rYNdNOgujqE8Y54h0RoSmdNI6z4COQTJ+Lkd+RPvczADyJ6FOQAKaom9WaumuuUEkDLVc38S7LRqasYpGz4ql8Gs/FjA+DSXS5jR8u0qwo6y7ZVvR8rkCyZfspXEb0hCEobmrMxW94ISR6JuVafy4Rm6MToEJpJXM6pfCJUdi4EZDh86tv9iL8yDN2TiKho7OEBNvoYnTswKV5BBOfBYIY8eafEJR4CvWDTtLA148C88nomLWnAZVshoO4Fdjf8g+NASKPFX9yCt1/R+HVoS2qvXh3wF55MdPMJwFxloPFToEhQ66wumkCxj714I3/UNmsItJQ0GWZWe8MkVLgPlxWMnIa6Jstdfzf9zEbWrMNpAZJzkDgCm1YH9jolpOVkhvm4PDpMq+SCxWwbVDr64WZJmyhLs7XtjPQ374ZHRJshtqJInw68gUwaqQcY2LagNkoAWLem+iu4InKiW4Wr9ve86UZeUe6CyFcZoswKjJlNAqzLbl9a2eZvX64Qoc8d7XESHKBc/W5jJJxLnWCrznh09o41LsPrF8ioUVHR5h+CAqRTqrynuyCO3RO8YCH4m8H4q5KZ6PLPoA89dx6SB8cAH7cdH37KRje2piV3VmKSUZiDMz90Ag5KLNRQ4UhPuTUHdyyC3N1/ne4S/Kwp0sR714PpiQzNwt+4T5YFGfaSs0nd/jdcgw=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB03.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(376002)(136003)(346002)(39860400002)(396003)(451199021)(36840700001)(46966006)(40470700004)(82310400005)(86362001)(103116003)(82740400003)(356005)(81166007)(40460700003)(478600001)(7416002)(54906003)(316002)(6666004)(110136005)(70206006)(70586007)(4326008)(4744005)(41300700001)(2906002)(40480700001)(36756003)(186003)(1076003)(26005)(47076005)(8676002)(8936002)(426003)(2616005)(5660300002)(336012)(36860700001)(83380400001)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 03 Apr 2023 10:26:09.4485
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 664bef3e-e380-49db-0d82-08db342dd765
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB03.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT094.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH0PR12MB5316
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 1 Apr 2023 at 15:16, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
->
-> Hello,
->
-> I looked at the sdhci_am654's probe function and concerning runtime-pm
-> this is at least unconvential:
->
-> It does
->
->         clk_xin =3D devm_clk_get(dev, "clk_xin");
->         if (IS_ERR(clk_xin))
->                 ...
->
->         /* Clocks are enabled using pm_runtime */
->         pm_runtime_enable(dev);
->         ret =3D pm_runtime_resume_and_get(dev);
->         ...
->
-> I'm not fluent in runtime-pm stuff (so I added Rafael to Cc), but I
-> thought it is to be used the other way around, i.e. put the device in
-> operational state and then runtime-pm cares to suspend the device under
-> some conditions (e.g. CONFIG_PM being enabled).
->
-> With CONFIG_PM unset the driver is broken for sure, as then
-> pm_runtime_enable() and pm_runtime_resume_and_get() have no effect. So
-> the clk stays off.
+Add eMMC5.1 support for Xilinx Versal Net platform which has PHY within
+the Host Controller space.
+Also, add Xilinx Versal Net compatible for eMMC5.1 in DT binding.
 
-In principle, you are correct. I wouldn't recommend the above pattern
-in general, but it doesn't mean that it can't work.
+changes in v3:
+-> Split the 2/2 patch into two, created separate patch(3/3) to skip the
+clock delay setting for 400KHz as suggested by Adrian Hunter.
 
-Some platforms are selecting "PM" from some of their toplevel Kconfig,
-as they simply can't work without it. That means that the code you
-refer to above, doesn't have to be broken.
+changes in v2:
+-> 1/2 - Removed v5.1 from compatible string as suggested by Krzysztof.
 
-[...]
+Sai Krishna Potthuri (2):
+  dt-bindings: mmc: arasan,sdci: Add Xilinx Versal Net compatible
+  mmc: sdhci-of-arasan: Skip setting clock delay for 400KHz
 
-Kind regards
-Uffe
+Swati Agarwal (1):
+  mmc: sdhci-of-arasan: Add support for eMMC5.1 on Xilinx Versal Net
+    platform
+
+ .../devicetree/bindings/mmc/arasan,sdhci.yaml |   5 +
+ drivers/mmc/host/sdhci-of-arasan.c            | 237 +++++++++++++++++-
+ 2 files changed, 241 insertions(+), 1 deletion(-)
+
+-- 
+2.25.1
+
