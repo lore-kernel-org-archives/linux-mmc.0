@@ -2,111 +2,101 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D2B7C76196
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 20:59:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DD663C76196
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 22:24:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233533AbjDCU7M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Apr 2023 16:59:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42416 "EHLO
+        id S232662AbjDCWYL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Apr 2023 18:24:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43346 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229689AbjDCU7L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 16:59:11 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC506272C;
-        Mon,  3 Apr 2023 13:59:10 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 572BB62B2C;
-        Mon,  3 Apr 2023 20:59:10 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7FCD5C433D2;
-        Mon,  3 Apr 2023 20:59:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1680555549;
-        bh=Jko3afct/TAK0go9CJRFcu7GPZ8tu9HyhdEM/5yobtk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=VmoPMGZz3nSoe/PAomr+63FMBfmlo8Z/0v0lm7Z1JmGqlFBoyFgIHjXH3azgsRsLm
-         JRppQxER3A+seTUBt3Jd33GnfElM4RdTpI142nBmxIN1yOEAhwIN3JZQo7XfCmWgzQ
-         1REpZYBMsWttJk1ktVYY29hcW2O7LIO3AiW2FDRKjVpJO8TFR4O1iCIHyAQ088EQDe
-         V3hCzg8s7YJvEJroVeKGrffML/EBS5Eyaz2sUqpo62EsQOYrl5RNgBfraxvDVK5GCD
-         6fdetDB/BARvngNt7N87pZtYoQRVtcMmuYiTSz61mzIdtqsuZLE2xdF7O/q0+wEJcS
-         Rr0jxnVw5V0yA==
-Received: by pali.im (Postfix)
-        id 3BBC3772; Mon,  3 Apr 2023 22:59:06 +0200 (CEST)
-Date:   Mon, 3 Apr 2023 22:59:06 +0200
-From:   Pali =?utf-8?B?Um9ow6Fy?= <pali@kernel.org>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Cc:     linux-wireless@vger.kernel.org,
-        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
-        Kalle Valo <kvalo@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Chris Morgan <macroalpha82@gmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
-        Jernej Skrabec <jernej.skrabec@gmail.com>,
-        Larry Finger <Larry.Finger@lwfinger.net>
-Subject: Re: [PATCH v4 6/9] mmc: sdio: add Realtek SDIO vendor ID and various
- wifi device IDs
-Message-ID: <20230403205906.qtxefyx5k3nntozk@pali>
-References: <20230403202440.276757-1-martin.blumenstingl@googlemail.com>
- <20230403202440.276757-7-martin.blumenstingl@googlemail.com>
+        with ESMTP id S231794AbjDCWYK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 18:24:10 -0400
+X-Greylist: delayed 180 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 03 Apr 2023 15:24:09 PDT
+Received: from mo4-p00-ob.smtp.rzone.de (mo4-p00-ob.smtp.rzone.de [85.215.255.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E337C26A1;
+        Mon,  3 Apr 2023 15:24:08 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1680560288; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=dHXYM0uswVLa7qGJ1n0Y/Hd9He6Q6vdsKCDtxPGeSeD8tqRMnIyDPKCAw7f/iHjMkS
+    qkRoxnHjRbyjj9WodQNtMj0JyBO1gB6dmUjdfoFTa9ETlXzX/0b3Id71gbgExLJvR0Tq
+    bv7pHdy8BUjxPTZre13Iky6OZ+2JyepwIA8dhnY/Qyvf1IndGg8+3ngX+teyrhx7UvOc
+    B/gOD3ncNcxmZzhxbV2N1ygbp/yWcrNXsYos3UFtS6CHPG4e60MqhqnFl4HDUJCtU+4k
+    eUXjExo8B52Ph8RplHgWLmwwp1ASlhkQnJ/fMTns0hmyXiOp3tSWZwnZL8OIw4qREj/6
+    W1RA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1680560288;
+    s=strato-dkim-0002; d=strato.com;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=0HMZm2l3hM+JH+7FaoQribqoZQkCA93Qk1fyun3ouAM=;
+    b=CR3ghNkFiu7V6vtog8NpZENI2Y4CTf6kZTsAoUt2mmZHzjuDOOD43PZTvjzDg7YDYK
+    cKeAuTKsMxIQB7+QnL0t7cMGfuILo1DOpYs9tnzDxWDOWOP9TTBYrxLpsoXWrX8ZVwCI
+    ALWXEOUfyaHvxC+vua0AJd/J3phsX/aNWY+4MDWHHEp0rtuH6IB7FM5iuy4TgPfTv0XI
+    BT5ZvN/7pYNbwJmG76FSsv9pA3ZZIfYRXW1r7vzybBWLxt7NWvp/ytjm7W9IukDFU3Ca
+    b2c7G5PDG0CMrZnaNZNMsiAfCygq3Y5AZmKLws6UCN24bgYkRPjsCs8Km2BkXDKyTYVG
+    I4kQ==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo00
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1680560288;
+    s=strato-dkim-0002; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=0HMZm2l3hM+JH+7FaoQribqoZQkCA93Qk1fyun3ouAM=;
+    b=UOXm/m1N7RFTeWtPUyGRxc9f+yrMnGGEB4yKSUmGynMLcyoxuwa48xqMRBUmGMlo9Q
+    aupGZ6PKWMdRgQCbAtur160CAS5J0CsLBgXkuiYWmyfFrG7cnm3w3DMmVj3xB7xojPef
+    XdbFS8CxYpDu5gGTxEgnKu4EtRJDI00nbCfx8Fdg2XCeXCOkDEMlhY+gJQtZPhAyvqqo
+    ylg4IIsIb4163yT9Z+VsiFGIBV3/6ex9bWlwivoUSrmUbBpT4A5OeCXThpMto8UhGfRS
+    lUktsMeN5x4dKJygHOrOcvtPLAGHN1TbH1RR+i73pxb6hJyKBlzsjMW2nqZVia6muIjK
+    Cqpw==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1680560288;
+    s=strato-dkim-0003; d=iokpp.de;
+    h=Message-Id:Date:Subject:Cc:To:From:Cc:Date:From:Subject:Sender;
+    bh=0HMZm2l3hM+JH+7FaoQribqoZQkCA93Qk1fyun3ouAM=;
+    b=HVQhozuwCLUdpFKRVUv3kkjDVZEXG6sJqb5+FZsCTSwxvFDpu6IrQntQtNIIqUjFSE
+    hQYsA45u8VBes0AM+CCQ==
+X-RZG-AUTH: ":LmkFe0i9dN8c2t4QQyGBB/NDXvjDB6pBSedrgBzPc9DUyubU4DD1QLj68UeUr1+U1RzWv4bd+7QxaQVB47AxSeMBXfSiHYGZtGVa"
+Received: from blinux.speedport.ip
+    by smtp.strato.de (RZmta 49.4.0 AUTH)
+    with ESMTPSA id z06594z33MI70gD
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Tue, 4 Apr 2023 00:18:07 +0200 (CEST)
+From:   Bean Huo <beanhuo@iokpp.de>
+To:     ulf.hansson@linaro.org, CLoehle@hyperstone.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Bean Huo <beanhuo@micron.com>
+Subject: [PATCH] mmc: core: Remove unused macro mmc_req_rel_wr
+Date:   Tue,  4 Apr 2023 00:17:54 +0200
+Message-Id: <20230403221754.16168-1-beanhuo@iokpp.de>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20230403202440.276757-7-martin.blumenstingl@googlemail.com>
-User-Agent: NeoMutt/20180716
+Content-Type: text/plain; charset="us-ascii"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Monday 03 April 2023 22:24:37 Martin Blumenstingl wrote:
-> Add the SDIO vendor ID for Realtek and some device IDs extracted from
-> their GPL vendor driver. This will be useful in the future when the
-> rtw88 driver gains support for these chips.
-> 
-> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
-> Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
-> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+From: Bean Huo <beanhuo@micron.com>
 
-Reviewed-by: Pali Rohár <pali@kernel.org>
+There is no user for macro mmc_req_rel_wr, so delete it.
 
-> ---
-> Changes since v3:
-> - sort entries by their value for consistency as suggested by Pali
-> - add Ping-Ke's reviewed-by
-> 
-> Changes since v2:
-> - none
-> 
-> Changes since v1:
-> - none
-> 
-> 
->  include/linux/mmc/sdio_ids.h | 9 +++++++++
->  1 file changed, 9 insertions(+)
-> 
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 0e4ef9c5127a..66f503ed2448 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -112,6 +112,15 @@
->  #define SDIO_VENDOR_ID_MICROCHIP_WILC		0x0296
->  #define SDIO_DEVICE_ID_MICROCHIP_WILC1000	0x5347
->  
-> +#define SDIO_VENDOR_ID_REALTEK			0x024c
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8723BS	0xb723
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821BS	0xb821
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8822BS	0xb822
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821CS	0xc821
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8822CS	0xc822
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8723DS	0xd723
-> +#define SDIO_DEVICE_ID_REALTEK_RTW8821DS	0xd821
-> +
->  #define SDIO_VENDOR_ID_SIANO			0x039a
->  #define SDIO_DEVICE_ID_SIANO_NOVA_B0		0x0201
->  #define SDIO_DEVICE_ID_SIANO_NICE		0x0202
-> -- 
-> 2.40.0
-> 
+Signed-off-by: Bean Huo <beanhuo@micron.com>
+---
+ drivers/mmc/core/block.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+index 672ab90c4b2d..00c33edb9fb9 100644
+--- a/drivers/mmc/core/block.c
++++ b/drivers/mmc/core/block.c
+@@ -76,8 +76,6 @@ MODULE_ALIAS("mmc:block");
+ #define MMC_EXTRACT_INDEX_FROM_ARG(x) ((x & 0x00FF0000) >> 16)
+ #define MMC_EXTRACT_VALUE_FROM_ARG(x) ((x & 0x0000FF00) >> 8)
+ 
+-#define mmc_req_rel_wr(req)	((req->cmd_flags & REQ_FUA) && \
+-				  (rq_data_dir(req) == WRITE))
+ static DEFINE_MUTEX(block_mutex);
+ 
+ /*
+-- 
+2.25.1
+
