@@ -2,202 +2,121 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE999C761AF
-	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 14:15:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F16FC76196
+	for <linux-mmc@archiver.kernel.org>; Mon,  3 Apr 2023 15:17:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232903AbjDCOPJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 3 Apr 2023 10:15:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60052 "EHLO
+        id S230120AbjDCPRT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 3 Apr 2023 11:17:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49704 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232906AbjDCOPH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 10:15:07 -0400
-Received: from domac.alu.hr (domac.alu.unizg.hr [161.53.235.3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 063131DF99;
-        Mon,  3 Apr 2023 07:15:02 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by domac.alu.hr (Postfix) with ESMTP id CF1F8604FA;
-        Mon,  3 Apr 2023 16:15:00 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680531300; bh=qvMX0CpC+yvi5bVs8CmZQ3oJUBc0azyKWjYTbBw4duY=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=bnhI/WzqbSMAs2LEl43+W6tqBNyoOeIUGCqVES1+TLH5tr1X5VErdg9jbnPps/VO6
-         Ww1Ia9ajSPk7Y5foQrA8IGrGuunZAQFFsUj6/31PKHyd6JWATgjHp5OL4i6aJwNc/b
-         J+Du/DsCCTJGa/nmaljC6ErnsCsfoTFYQCqhPsJxHwFsr4BJhrux16jR/Dk/10v8o8
-         WcSHLuiegZbt8+LzVR2DFRUaS1yiF0KDQPADdUvrTugh7hGvGzGiGqppCK0GkWCRWO
-         RixvRxyWksgQ844IgSucMGawWxaSmMl2e+A7jlXNXQ78fGrqC6n1LuhMoN6o5FdiV4
-         rUl7HekdPs3SQ==
-X-Virus-Scanned: Debian amavisd-new at domac.alu.hr
-Received: from domac.alu.hr ([127.0.0.1])
-        by localhost (domac.alu.hr [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id 4qOl-z_8Puww; Mon,  3 Apr 2023 16:14:58 +0200 (CEST)
-Received: from [10.0.1.57] (grf-nat.grf.hr [161.53.83.23])
-        by domac.alu.hr (Postfix) with ESMTPSA id C09BC604F7;
-        Mon,  3 Apr 2023 16:14:57 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680531298; bh=qvMX0CpC+yvi5bVs8CmZQ3oJUBc0azyKWjYTbBw4duY=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=cUcgFb9mMh88fu3dQWaykAqaYeswSWIwo2/Aa1lbnekWQrRrelw8UenUoXFouhTNr
-         bsgDPvkuRHVUJGW0qfAqX/1BSfY9GRFzHDToxfSg5zNwwbaov5Sethreq2N+wkl+1X
-         vcHXNSxNE0sqHBPJtWM3lxnwha5lGjlsgGMrvhd/OnNWtDWpK3DR52/LIgbSPgJLKQ
-         D6B0TorP5H5ZsFgGNo2EifuH/i9n9z/9xu5chf705dyuzQf85/vxLlk2Dm48TvyJrc
-         b/waIDsu/jW1SrYLgX7LlEUMOaA2DlliWaS+CKPpytTQWJD3Ftw3K4Y9sHKvPAvwtY
-         dVAt+9/ODAZQw==
-Message-ID: <e5af5f7e-c59c-aebb-a17a-50a48f3ee3a8@alu.unizg.hr>
-Date:   Mon, 3 Apr 2023 16:14:55 +0200
+        with ESMTP id S232676AbjDCPRS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 3 Apr 2023 11:17:18 -0400
+Received: from metis.ext.pengutronix.de (metis.ext.pengutronix.de [IPv6:2001:67c:670:201:290:27ff:fe1d:cc33])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9DD3030FE
+        for <linux-mmc@vger.kernel.org>; Mon,  3 Apr 2023 08:17:16 -0700 (PDT)
+Received: from drehscheibe.grey.stw.pengutronix.de ([2a0a:edc0:0:c01:1d::a2])
+        by metis.ext.pengutronix.de with esmtps (TLS1.3:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        (Exim 4.92)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1pjLvm-0001oP-BP; Mon, 03 Apr 2023 17:17:14 +0200
+Received: from [2a0a:edc0:0:900:1d::77] (helo=ptz.office.stw.pengutronix.de)
+        by drehscheibe.grey.stw.pengutronix.de with esmtp (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1pjLvl-008iVn-DZ; Mon, 03 Apr 2023 17:17:13 +0200
+Received: from ukl by ptz.office.stw.pengutronix.de with local (Exim 4.94.2)
+        (envelope-from <ukl@pengutronix.de>)
+        id 1pjLvk-00AHSs-JL; Mon, 03 Apr 2023 17:17:12 +0200
+Date:   Mon, 3 Apr 2023 17:17:12 +0200
+From:   Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <u.kleine-koenig@pengutronix.de>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>
+Subject: Re: sdhci_am654 and runtime-pm issues
+Message-ID: <20230403151712.pqzmyqz3tose3bc3@pengutronix.de>
+References: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
+ <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: [RESEND PATCH] memstick: fix memory leak if card device is never
- registered
-Content-Language: en-US, hr
-To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-mmc@vger.kernel.org
-Cc:     linux-kernel@vger.kernel.org,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Kay Sievers <kay.sievers@vrfy.org>, stable <stable@kernel.org>,
-        Bagas Sanjaya <bagasdotme@gmail.com>,
-        Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>
-References: <20230401200327.16800-1-gregkh@linuxfoundation.org>
-From:   Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-In-Reply-To: <20230401200327.16800-1-gregkh@linuxfoundation.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="dnfwsfaquk3wddzs"
+Content-Disposition: inline
+In-Reply-To: <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
+X-SA-Exim-Connect-IP: 2a0a:edc0:0:c01:1d::a2
+X-SA-Exim-Mail-From: ukl@pengutronix.de
+X-SA-Exim-Scanned: No (on metis.ext.pengutronix.de); SAEximRunCond expanded to false
+X-PTX-Original-Recipient: linux-mmc@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 1.4.2023. 22:03, Greg Kroah-Hartman wrote:
-> When calling dev_set_name() memory is allocated for the name for the
-> struct device.  Once that structure device is registered, or attempted
-> to be registerd, with the driver core, the driver core will handle
-> cleaning up that memory when the device is removed from the system.
-> 
-> Unfortunatly for the memstick code, there is an error path that causes
-> the struct device to never be registered, and so the memory allocated in
-> dev_set_name will be leaked.  Fix that leak by manually freeing it right
-> before the memory for the device is freed.
-> 
-> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
-> Cc: Alex Dubov <oakad@yahoo.com>
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: "Rafael J. Wysocki" <rafael@kernel.org>
-> Cc: Hans de Goede <hdegoede@redhat.com>
-> Cc: Kay Sievers <kay.sievers@vrfy.org>
-> Cc: linux-mmc@vger.kernel.org
-> Fixes: 0252c3b4f018 ("memstick: struct device - replace bus_id with dev_name(),
-> Cc: stable <stable@kernel.org>
-> Co-developed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Co-developed-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-> ---
-> RESEND as the first version had a corrupted message id and never made it
-> to the mailing lists or lore.kernel.org
-> 
->   drivers/memstick/core/memstick.c | 5 ++++-
->   1 file changed, 4 insertions(+), 1 deletion(-)
-> 
-> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-> index bf7667845459..bbfaf6536903 100644
-> --- a/drivers/memstick/core/memstick.c
-> +++ b/drivers/memstick/core/memstick.c
-> @@ -410,6 +410,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
->   	return card;
->   err_out:
->   	host->card = old_card;
-> +	kfree_const(card->dev.kobj.name);
->   	kfree(card);
->   	return NULL;
->   }
-> @@ -468,8 +469,10 @@ static void memstick_check(struct work_struct *work)
->   				put_device(&card->dev);
->   				host->card = NULL;
->   			}
-> -		} else
-> +		} else {
-> +			kfree_const(card->dev.kobj.name);
->   			kfree(card);
-> +		}
->   	}
->   
->   out_power_off:
 
-FYI, the applied patch tested OK, no memstick leaks:
+--dnfwsfaquk3wddzs
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-[root@pc-mtodorov kernel]# uname -rms
-Linux 6.3.0-rc5-mt-20230401-00007-g268a637be362 x86_64
-[root@pc-mtodorov kernel]# echo scan > /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# cat /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# echo scan > /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# cat /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# echo scan > /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# cat /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# echo scan > /sys/kernel/debug/kmemleak
-[root@pc-mtodorov kernel]# cat /sys/kernel/debug/kmemleak
+On Mon, Apr 03, 2023 at 12:19:20PM +0200, Ulf Hansson wrote:
+> On Sat, 1 Apr 2023 at 15:16, Uwe Kleine-K=F6nig
+> <u.kleine-koenig@pengutronix.de> wrote:
+> >
+> > Hello,
+> >
+> > I looked at the sdhci_am654's probe function and concerning runtime-pm
+> > this is at least unconvential:
+> >
+> > It does
+> >
+> >         clk_xin =3D devm_clk_get(dev, "clk_xin");
+> >         if (IS_ERR(clk_xin))
+> >                 ...
+> >
+> >         /* Clocks are enabled using pm_runtime */
+> >         pm_runtime_enable(dev);
+> >         ret =3D pm_runtime_resume_and_get(dev);
+> >         ...
+> >
+> > I'm not fluent in runtime-pm stuff (so I added Rafael to Cc), but I
+> > thought it is to be used the other way around, i.e. put the device in
+> > operational state and then runtime-pm cares to suspend the device under
+> > some conditions (e.g. CONFIG_PM being enabled).
+> >
+> > With CONFIG_PM unset the driver is broken for sure, as then
+> > pm_runtime_enable() and pm_runtime_resume_and_get() have no effect. So
+> > the clk stays off.
+>=20
+> In principle, you are correct. I wouldn't recommend the above pattern
+> in general, but it doesn't mean that it can't work.
+>=20
+> Some platforms are selecting "PM" from some of their toplevel Kconfig,
+> as they simply can't work without it. That means that the code you
+> refer to above, doesn't have to be broken.
 
-What was applied is:
+If I understand correctly the driver under discussion is supposed to be
+used on SoCs in the CONFIG_ARCH_K3 family. This isn't one of those that
+enforce PM.
 
-mtodorov@domac:~/linux/kernel/linux_torvalds$ git diff master..origin/master | head -24
-diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
-index bbfaf6536903..bf7667845459 100644
---- a/drivers/memstick/core/memstick.c
-+++ b/drivers/memstick/core/memstick.c
-@@ -410,7 +410,6 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
-         return card;
-  err_out:
-         host->card = old_card;
--       kfree_const(card->dev.kobj.name);
-         kfree(card);
-         return NULL;
-  }
-@@ -469,10 +468,8 @@ static void memstick_check(struct work_struct *work)
-                                 put_device(&card->dev);
-                                 host->card = NULL;
-                         }
--               } else {
--                       kfree_const(card->dev.kobj.name);
-+               } else
-                         kfree(card);
--               }
-         }
+But yes, adding a depends on PM would be an action that improves the
+situation. Having said that even on such platforms you can disable
+runtime PM, so even a select on PM isn't a complete fix.
 
-  out_power_off:
+Best regards
+Uwe
 
-APPENDIX
+--=20
+Pengutronix e.K.                           | Uwe Kleine-K=F6nig            |
+Industrial Linux Solutions                 | https://www.pengutronix.de/ |
 
-However, please note that the patch SHA-1's truncated to 12 chars might not
-be the same on the other systems, so the build ID says nothing about which
-mainline kernel had the patches been applied against. So `uname -rms` is
-telling pretty nothing about which kernel I'm running, except that it helps
-me distinguish between the builds.
+--dnfwsfaquk3wddzs
+Content-Type: application/pgp-signature; name="signature.asc"
 
-Nothing to prove that:
+-----BEGIN PGP SIGNATURE-----
 
-- I am not testing the wrong kernel and
-- that the right patches have been applied.
+iQEzBAABCgAdFiEEP4GsaTp6HlmJrf7Tj4D7WH0S/k4FAmQq7fcACgkQj4D7WH0S
+/k5BLAgAp7XFoqTlp7a5uBbrDqXfeevB7NrgtxKB0xml1pB44ZX/4elorvnrkMGI
+3BVRmaNJO+Nd/oBgZVbHvwfgu1Uyd/K9jr5TF/lnXs6I26HNgIRWYRpWzSz9ZMaf
+H5bqCyHbZx6yh3VkyllHXU3EaMFIxIUFidC3iCxW7YBqKGtfmgh5PrugbpkNvYrI
+QPfJbQXKjFEnB4VkNVqW83ewuoG24bpjKPF550JTKkV2A0VYjdfImq6w2uEo1+mQ
+ElE1SK1vHNd3ExkwrybKYvCqioyTEU7KiKMHr1c1njQPLwqtHw3g0l61b4/saUva
+8ewqP0tsXC0WufWlcWJRwOTPAPqGbA==
+=Gcuz
+-----END PGP SIGNATURE-----
 
-Changing CONFIG_LOCALVERSION causes copious recompilations, even with ccache
-it takes about 4x the time needed to compile CONFIG_LOCALVERSION_AUTO=y.
-
-Do I make any sense with this?
-
-I am adding Cc: to Mr. Bagas, for we spoke already about kernel versioning
-in the case of manually applied patches.
-
-Regards,
-Mirsad
-
--- 
-Mirsad Todorovac
-System engineer
-Faculty of Graphic Arts | Academy of Fine Arts
-University of Zagreb
-Republic of Croatia, the European Union
-
-Sistem inženjer
-Grafički fakultet | Akademija likovnih umjetnosti
-Sveučilište u Zagrebu
-
+--dnfwsfaquk3wddzs--
