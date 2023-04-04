@@ -2,104 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81EF1C77B60
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 16:09:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7EEC0C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 17:18:55 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235912AbjDDQJR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 12:09:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44952 "EHLO
+        id S235833AbjDDRSv convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 13:18:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235925AbjDDQJM (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 12:09:12 -0400
-Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [212.27.42.2])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A1B954685;
-        Tue,  4 Apr 2023 09:09:09 -0700 (PDT)
-Received: from [192.168.108.81] (unknown [213.36.7.13])
-        (Authenticated sender: marc.w.gonzalez@free.fr)
-        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 50FA12003B4;
-        Tue,  4 Apr 2023 18:09:00 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
-        s=smtp-20201208; t=1680624548;
-        bh=m4kLlVdfx4CPshc3rsvvK75Jls1tGv0nt9joXO6qw+0=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=WtFGeqKJRt410YiomYnRep3xygMlOdQLzsmxsRiOfYEYEanEvkvQiCrPDtR9mJVV+
-         Bxf5573yX/Tar0WRz87MotbJdGFOpT2ZXQfGIkmiZPlp8LswiRRtD25X81vvE2ZNLM
-         lVEb5vhxlJut/rmBcMufp4OCRdWhGq2phrQDYueyNyOw8N+KhNm+Guh7pOQ+xxDZU/
-         U5U2To6IYgcetbe4q53zxjST+f6bnfnbtYu4k3AGUxURvuERHtV101QzOiSVmsVP/S
-         0cQM8idCEmwLgcS6CdoA3CisrCxmfhoZqBv4zpliW6dWOqt/kyKmtA59Iv0iQ20TK5
-         0EBJT4Iu7FAGQ==
-Message-ID: <0bb1e3b3-6823-ddb5-001b-72ee1b63779c@free.fr>
-Date:   Tue, 4 Apr 2023 18:09:00 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [Performance regression] BCM4359/9 on S905X2
+        with ESMTP id S235947AbjDDRSr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 13:18:47 -0400
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5469D4216
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 10:18:23 -0700 (PDT)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 8D76F3A2A2A
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 19:18:20 +0200 (CEST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 717203A0808
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 19:18:20 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx1.dmz.swissbit.com [10.181.10.103])
+        by mail5.swissbit.com (Postfix) with ESMTPS
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 19:18:20 +0200 (CEST)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Dominik 'Rathann' Mierzejewski <dominik@greysector.net>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: mmc-utils: ioctl connection timed out with SD cards
+Thread-Topic: mmc-utils: ioctl connection timed out with SD cards
+Thread-Index: AQHZZlWz7zj1vli6ykWT5I70wuFTRa8aAk7wgADKbgCAAJlYEA==
+Date:   Tue, 4 Apr 2023 17:18:19 +0000
+Message-ID: <19a192bf476c48468429391963679737@hyperstone.com>
+References: <ZCsSHxDv+158emk5@sakura.greysector.net>
+ <597389cd8b21409aa7015d08aa4a804d@hyperstone.com>
+ <ZCv3OBCE1hB32CDI@sakura.greysector.net>
+In-Reply-To: <ZCv3OBCE1hB32CDI@sakura.greysector.net>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
-To:     Christian Hewitt <christian@hewittfamily.org.uk>
-Cc:     Linux Wireless <linux-wireless@vger.kernel.org>,
-        MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Pierre-Hugues Husson <phh@phh.me>
-References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
- <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
- <EEE9FD80-C106-4A9B-AA8D-5C151E540CFD@hewittfamily.org.uk>
-From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
-In-Reply-To: <EEE9FD80-C106-4A9B-AA8D-5C151E540CFD@hewittfamily.org.uk>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27546.001
+X-TMASE-Result: 10--12.357600-10.000000
+X-TMASE-MatchedRID: 0aps3uOmWi7UL3YCMmnG4qwNPl5dbX19NNNNLDf7bemCfqmp4B6gPRon
+        Dr088qtFfE3qFp1T4KYAjhCLb7ooAM5YYT+DO/SI8eSmTJSmEv3GrCYQ4FUp6i99T+uJIleRORB
+        WX+Ofof8SkTIlq5S+sTbVTiFkkh3DApCOjGpq/X+iVU7u7I4INcCY5/Mqi1OiL85Vy+GZ4Fgj+K
+        RTBejfq0Q9LOf8yuZh2tsLaxD9OMET1oHLc6clU95x7RpGJf1aYrfZupoDYLKbKItl61J/yRMZG
+        6kg1oMPXWPmaFoiyJsgBwKKRHe+r0cFNGIbhJk0nPxOXxhfGnz5Cm1261V+ZlONjpGa4IU77KM9
+        Iuks6cI=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 86dbf450-560d-4fb8-b0ab-9a37acebb7bb-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[ Trimming recipients list ]
+Nevermind, I can reproduce the issue on my own Pinebook Pro,
+Ill take a look at it tomorrow.
 
-On 21/03/2023 13:26, Christian Hewitt wrote:
+-----Original Message-----
+From: Dominik 'Rathann' Mierzejewski <dominik@greysector.net> 
+Sent: Tuesday, April 4, 2023 12:09 PM
+To: linux-mmc@vger.kernel.org
+Subject: Re: mmc-utils: ioctl connection timed out with SD cards
 
-> To JerÃ´me's point; unless you've tweaked it upstream will be running
-> at 100MHz and the vendor kernel will be 200MHz, and maybe with other
-> high-speed modes activated.
+On Monday, 03 April 2023 at 22:11, Christian Löhle wrote:
+> >Hello,
+> >is the mmc tool from mmc-utils supposed to work with SD cards?
+> Not really no, but status get is pretty much the one thing that should 
+> work, apart from register reads that don't issue anything.
 
-As far as I could tell:
+I see. I thought any /dev/mmcblk? device would be supported. The documentation doesn't make this clear. :)
 
-For mainline, arch/arm64/boot/dts/amlogic/meson-g12a-sei510.dts
+> I'm using RK3399 on SD too and it works okay for me, will try updating 
+> tomorrow.
+> Could you show the debug prints to see the mmc command / responses?
+> Ideally for anything in mmc/core
 
-	bus-width = <4>;
-	cap-sd-highspeed;
-	sd-uhs-sdr50;
-	max-frequency = <100000000>;
+Will something like:
 
-For vendor, common/arch/arm64/boot/dts/amlogic/mesong12a_sei.dtsi
+# alias ddcmd='echo $* > /proc/dynamic_debug/control'
+# ddcmd 'module mmc_core +p'
+# ddcmd 'module rtsx_pci_sdmmc +p'
+# mmc status get /dev/mmcblk0
+# dmesg | grep -E 'mmc_core|rtsx_pci_sdmmc'
 
-		bus-width = <4>;
-		cap-sd-highspeed;
-		cap-mmc-highspeed;
-		max-frequency = <100000000>;
+suffice?
 
-vendor DTS has the following child node:
+Regards,
+Dominik
+-- 
+Fedora   https://getfedora.org  |  RPM Fusion  http://rpmfusion.org
+There should be a science of discontent. People need hard times and oppression to develop psychic muscles.
+        -- from "Collected Sayings of Muad'Dib" by the Princess Irulan
 
-		sdio {
-			pinname = "sdio";
-			ocr_avail = <0x200080>; /**VDD voltage 3.3 ~ 3.4 */
-			/* max_req_size = <0x20000>; */ /**128KB*/
-			max_req_size = <0x400>;
-			card_type = <3>;
-			/* 3:sdio device(ie:sdio-wifi),
-			 * 4:SD combo (IO+mem) card
-			 */
-			dmode = "pio";
-		};
-
-Maybe the vendor kernel uses the above information to "boost"
-the performance of the SDIO-based WiFi adapter?
-
-> Most upstream device-trees are running a
-> conservative/safe configuration at 50MHz to avoid past speed-related
-> issues. As stability has improved over time most boards could be run
-> at faster speeds, but 'performance' is such subjective topic that it
-> would probably need a large amount of testing to convince people to
-> change the current defaults. That said (FWIW) I've bumped all boards
-> in my tree that consume the gx-p2xx-q2xx dtsi to 100MHz without any
-> attributable issues being flagged by users.
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
