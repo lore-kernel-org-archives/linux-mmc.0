@@ -2,55 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 437FFC761AF
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 10:42:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F161C77B6E
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 11:05:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234481AbjDDKmI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 06:42:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51878 "EHLO
+        id S234723AbjDDLFr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 07:05:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234433AbjDDKmH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 06:42:07 -0400
-Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E92E1980
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 03:42:01 -0700 (PDT)
-Received: by mail-wr1-x436.google.com with SMTP id h17so32271394wrt.8
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 03:42:01 -0700 (PDT)
+        with ESMTP id S234713AbjDDLFb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 07:05:31 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 702BFE53
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 04:03:21 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id y4so128980213edo.2
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 04:03:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680604920;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=kMMkkwa1DeBjuIxqtolsFfNBw/JbCSfKSLU5AIzSffM=;
-        b=TQwvDVU3vO5kpLXTSCPdY1bue1XUsBgljwBUxgP1u61LURfmaxlwu8FGMRiCcOX2ei
-         T2ZtRYyq7mvITHzni6P7Og77oa92as3SdzsoN1//oQALYYNrNvHPMuqY2ROOEMRH/UAV
-         f8pWztspMH7NDFIBRCz+sncxvYKO/04iwxhunvALSTMfDwv3M5adgku52j3Jvm2OZ6ee
-         4/hNiZMkWtZkr1Gk/DCE4sPqbHeBnxEnFQVuU9ZQ+W1/Xcp3oiTXUAUI4IM8/0fpM2jL
-         Zkpu7dbmvCdDH+93QmlaW+KJL2x3eqcCgUPLxgY/9WhCC9Il5ecbz1f7IMKFo79E3vfq
-         N6Ig==
+        d=linaro.org; s=google; t=1680606197;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=P2X3kREg8ClZqoLFGTfMEQlTm6xCmy/glA1Hk2D1aa0=;
+        b=vj66DxpITdwlhJH75l7RkUQZ6WiakI8+iJL0HkFajARLadSSmedSCC38T3fau0NSAi
+         cuHLk9G6os+2CZPFZVMURrKYJtSV7XCcHUktC2KxBi0JYdJlEn3jIyfrRNS76EsHP+Gc
+         vSP5yuFfS0DKENJu13mSmPMXDHrOXQXyXBYgwI3yB8ukOi9+MFNaQF9blxs+UoTs3Txj
+         P/UnBYcmSIK9qgN4/80r2zy0VyjYl/ggKEoJFNcam6FWF7UWgHng1XycK5KJiIIpCKFx
+         8UCAyfQtf3TLsUcvIFlRm7Fj10RNvbeRR0Jx2rNoMSjsM3v8zioZQ2F1Kxd7kbRj5vr5
+         XELQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680604920;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=kMMkkwa1DeBjuIxqtolsFfNBw/JbCSfKSLU5AIzSffM=;
-        b=J3Kaw0OahwcOZTAQrO7z8uiD7yLk5T0I6i/WEkkZqOR1GSdg6VDj2CVBDdjPKrnJmB
-         vEWedSK4P7A5WE5NwtzjnlegMZGmB4yOtDA2+/hpl7LLQXz6OZYnXJA2GFULgcvC69qX
-         d5ouFpGezaomW2Yi3vII5EZzpx2JZLXUURV0wB54TFdmQiHtJ5BGZXiF8JDxWt8NrEbv
-         bKguPJTeETH05CAcJtjrY/WEHhHUoi3sTl2bUhKAP7sWdbPTrPhhXqpcIJsOpQoAR+Y5
-         8TYophJBhiWzUyDQLa2qPZMliHa4eEH3ahpEewELcKoo2eKRja2b3r7bU6nGJQfADuWz
-         gYeA==
-X-Gm-Message-State: AAQBX9eVBAvLNg+jbFmxjdMW8mLNtJgW7JQBFSjNPMthjVNvK+HOnOg5
-        Z7sk/WXYc+Qruz7kvPHdAJ8tl6SgNQ7UH+ykG1M=
-X-Google-Smtp-Source: AKy350andMQlc/NSkoD1itFkTq9FAROBUT7E0DWG3ebDLDs5tZZH76/uH88kkbI44lS/ZaGqyyrRpA==
-X-Received: by 2002:a5d:6e42:0:b0:2d6:a357:f133 with SMTP id j2-20020a5d6e42000000b002d6a357f133mr1132544wrz.44.1680604919960;
-        Tue, 04 Apr 2023 03:41:59 -0700 (PDT)
-Received: from linaro.org ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id v8-20020a05600c470800b003ef71d7d64asm22334917wmo.6.2023.04.04.03.41.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Apr 2023 03:41:59 -0700 (PDT)
-Date:   Tue, 4 Apr 2023 13:41:57 +0300
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+        d=1e100.net; s=20210112; t=1680606197;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=P2X3kREg8ClZqoLFGTfMEQlTm6xCmy/glA1Hk2D1aa0=;
+        b=6EopeA8djGhqbWrObB0ycStrv8lWSLTxA4PAFgf9lNtboBoc9Klhy5Ur2+KyLv9X8Y
+         wcHMKpR5pFHt47FcdX77eSycvGYzoA5f2Am2bsd8sXq9RkPRKpnuN8wxcOmSrT3ZFPqI
+         Vn8P6ApcZJlHgfbnB9lQ0d7YgEOlTLsEfpX837Ew/b0v55UiCAF9c4pMD3epCaJGx8Sl
+         eNurQkbrPEBObQ1ehDcod8dxokFrJKZw6guEdgLH90xAmHy5fOKK6HFOpKqULYHrBZwT
+         PuSkmRmayiMp3OOp9UB4XVrXlvNELokpvTknIIBJ3cLwfMzLMrZID/5qQK1KMhATaq8H
+         aQgQ==
+X-Gm-Message-State: AAQBX9eYpaSFsMQpqUsWx2fVMyVcR65Q1gUewFiDZCGYF0nsPD5LLNkZ
+        VCbJwmPFR/hjzHLKNnijk7x6iA==
+X-Google-Smtp-Source: AKy350Z6X6wonQ9ndSEeOqk1V1vulMt/+C2VlT2zTtfQjqb1wDbl0iUZQJtUmkPOwDAPJiXlYGDAKA==
+X-Received: by 2002:a17:906:1281:b0:947:405a:955f with SMTP id k1-20020a170906128100b00947405a955fmr1842422ejb.31.1680606197540;
+        Tue, 04 Apr 2023 04:03:17 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:99ed:4575:6001:8bda? ([2a02:810d:15c0:828:99ed:4575:6001:8bda])
+        by smtp.gmail.com with ESMTPSA id c10-20020a170906d18a00b00923f05b2931sm5796213ejz.118.2023.04.04.04.03.16
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 04 Apr 2023 04:03:17 -0700 (PDT)
+Message-ID: <5f8692af-700a-a47f-d81c-fe9c905958e1@linaro.org>
+Date:   Tue, 4 Apr 2023 13:03:15 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v5 2/6] dt-bindings: ufs: qcom: Add ICE phandle
+Content-Language: en-US
+To:     Abel Vesa <abel.vesa@linaro.org>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
@@ -71,68 +77,45 @@ Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
         linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v5 2/6] dt-bindings: ufs: qcom: Add ICE phandle
-Message-ID: <ZCv+9WjlkA4n9Dwg@linaro.org>
 References: <20230403200530.2103099-1-abel.vesa@linaro.org>
  <20230403200530.2103099-3-abel.vesa@linaro.org>
  <9fc90c8b-9234-84fa-7dab-fee9de2b9813@linaro.org>
  <ZCvm3fzSh8owVDdc@linaro.org>
  <c816d432-26b8-2655-adf1-4b72b8645215@linaro.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c816d432-26b8-2655-adf1-4b72b8645215@linaro.org>
+ <ZCv+9WjlkA4n9Dwg@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <ZCv+9WjlkA4n9Dwg@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23-04-04 12:12:06, Krzysztof Kozlowski wrote:
-> On 04/04/2023 10:59, Abel Vesa wrote:
-> > On 23-04-04 07:41:55, Krzysztof Kozlowski wrote:
-> >> On 03/04/2023 22:05, Abel Vesa wrote:
-> >>> Starting with SM8550, the ICE will have its own devicetree node
-> >>> so add the qcom,ice property to reference it.
-> >>>
-> >>> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> >>> ---
-> >>>
-> >>> The v4 is here:
-> >>> https://lore.kernel.org/all/20230327134734.3256974-4-abel.vesa@linaro.org/
-> >>>
-> >>> Changes since v4:
-> >>>  * Added check for sm8550 compatible w.r.t. qcom,ice in order to enforce
-> >>>    it while making sure none of the other platforms are allowed to use it
-> >>
-> >> Why?
-> > 
-> > SM8550 will be the first platform to use the new DT bindings w.r.t ICE.
+On 04/04/2023 12:41, Abel Vesa wrote:
+>>>>
+>>>> Also, this does not solve my previous question still.
+>>>
+>>> Well, the clocks are not added for the a few platforms (which include
+>>> SM8550). Same for 'ice' reg range.. So the only thing left is to
+>>> enforce the qcom,ice property availability only for SM8550. I believe
+>>> it solves the mutual exclusiveness of the "ice" reg range along with the
+>>> clocks versus the qcom,ice property, by enforcing at compatible level.
+>>
+>> Ah, I think I understand. That would work except I don't understand why
+>> enforcing qcom,qce only for specific, new SoCs. Assuming it is a correct
+>> hardware representation, we want it for everyone, don't we?
 > 
-> This I understand, but why other platforms cannot use it?
+> Yes, but they will be added to the subschema (qcom,ice one) when their
+> their ICE support (ICE DT) will be added. This way, we keep the bindings
+> check without failures (for now).
 
-The platforms that do not have ICE support yet will be added in the same
-subschema along with SM8550 when the ICE DT node will be added in their
-dtsi.
+I understand that then you will rework this if:then case, so I think it
+is just easier to make it correct from the first place. If there is
+qcom,qce, then reg is maxItems:1. Otherwise - maxItems can be 2. You
+achieve the same result, all DTS validate, without any need of further
+changes later.
 
-> 
-> > 
-> >>
-> >> Also, this does not solve my previous question still.
-> > 
-> > Well, the clocks are not added for the a few platforms (which include
-> > SM8550). Same for 'ice' reg range.. So the only thing left is to
-> > enforce the qcom,ice property availability only for SM8550. I believe
-> > it solves the mutual exclusiveness of the "ice" reg range along with the
-> > clocks versus the qcom,ice property, by enforcing at compatible level.
-> 
-> Ah, I think I understand. That would work except I don't understand why
-> enforcing qcom,qce only for specific, new SoCs. Assuming it is a correct
-> hardware representation, we want it for everyone, don't we?
 
-Yes, but they will be added to the subschema (qcom,ice one) when their
-their ICE support (ICE DT) will be added. This way, we keep the bindings
-check without failures (for now).
+Best regards,
+Krzysztof
 
-> 
-> Best regards,
-> Krzysztof
-> 
