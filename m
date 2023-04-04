@@ -2,107 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C24AFC6FD1D
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 11:40:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F16FC761A6
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 11:55:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234452AbjDDLkb convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 07:40:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45628 "EHLO
+        id S234352AbjDDLzU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 07:55:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60338 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234316AbjDDLka (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 07:40:30 -0400
-Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9ECBB6
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 04:40:26 -0700 (PDT)
-Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 7889422293C
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
-Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 5CC0622293B
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
-X-TM-AS-ERS: 10.181.10.102-127.5.254.253
-X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
-        Q==
-X-DDEI-TLS-USAGE: Used
-Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
-        by mail6.swissbit.com (Postfix) with ESMTPS
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
-From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
-To:     Dominik 'Rathann' Mierzejewski <dominik@greysector.net>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: RE: mmc-utils: ioctl connection timed out with SD cards
-Thread-Topic: mmc-utils: ioctl connection timed out with SD cards
-Thread-Index: AQHZZlWz7zj1vli6ykWT5I70wuFTRa8aAk7wgADKbgCAADokIA==
-Date:   Tue, 4 Apr 2023 11:40:22 +0000
-Message-ID: <3e16419fac794968a0107ce44e32bd5d@hyperstone.com>
-References: <ZCsSHxDv+158emk5@sakura.greysector.net>
- <597389cd8b21409aa7015d08aa4a804d@hyperstone.com>
- <ZCv3OBCE1hB32CDI@sakura.greysector.net>
-In-Reply-To: <ZCv3OBCE1hB32CDI@sakura.greysector.net>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-Content-Type: text/plain;
-        charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S234355AbjDDLzO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 07:55:14 -0400
+Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD2BB4480
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 04:54:40 -0700 (PDT)
+Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-54606036bb3so443225317b3.6
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 04:54:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680609279;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=z3aoxpvrOqiKeOQufTqMhp/8jleC9vMuaVjw9g7IwB0=;
+        b=xTLZHr2CnFbljt+E3jjuwZNEOvIuj57YLi68MUTC56Ao0mf+PGauG1q8aQJNN9lB7S
+         IhzvQjjGMj+0tsUe7uR0IbEirJs/PJv2W6741AJlJahG9qDJAn29C7QDr+e8fqS817pt
+         XJkc0Sb/WDgOvKK9S7S6SBOsz5qAqqaoTC9wt7wIjU5KNdRvDmKQgypxWBP+ZIlPriQH
+         6rYQi5NMfZDS+IDQp+VC9cKP9J94z6HrHpL7yzvbXIXxJ2Vq2EgHve7F3x+TQxcqcavp
+         FBEHhU3nHa59R0HLXK2P73m5Yqp6MOjbZLEDC++zEZpf5CLH6pZIGC6ptFF411PCqxOJ
+         61gg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680609279;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=z3aoxpvrOqiKeOQufTqMhp/8jleC9vMuaVjw9g7IwB0=;
+        b=UNULep8LYQkP+fbT22Mk0Ex5HYXo7aLPHw6fPgxzajXoYp3A6WG/HUaOhhZOduAb+C
+         o1tL2oeXePFsRW1lf62cR9mK2sQ6FGiao6y9iYiON8O7SZB6AIrWKkyh5XQTUTtWdrE8
+         EppmK2QdzoY4vKWQ9OVftGj8XLb12jXed0f7Up/5a678F/6Jqqj6LQvzBJLQXumN7flR
+         1sxN8sREukQyyG7w5U42KO5ZkmJmJ80c3LkSIKd+T/DPQ38CCkTBRQVTzQrca9k3LVIG
+         G9MHv7QjiEgKPB+IYwecJJJLP3mJDN5yJDj0JO1+nEmg7mebC01bEmk9iKbhPkSB1HXY
+         4UZA==
+X-Gm-Message-State: AAQBX9dvBfWxnQo4n1S6/i+OZlX9z8erc/vgv71Eq9AWpaDsdgDxmoC8
+        FTZuasGomoILWvJc24XHVuh1ur/6lnVJCFE+xw1pYA==
+X-Google-Smtp-Source: AKy350YR+NZ+mV7VuRCSCDwJeX9A6f11Py3U+/bsti4FZGk7p9htWsIniPqHRarp6O43TDHEhIwmNmWA9y/nrJ59BaQ=
+X-Received: by 2002:a81:ac0d:0:b0:52b:fd10:4809 with SMTP id
+ k13-20020a81ac0d000000b0052bfd104809mr1369798ywh.0.1680609279367; Tue, 04 Apr
+ 2023 04:54:39 -0700 (PDT)
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27544.007
-X-TMASE-Result: 10--17.359800-10.000000
-X-TMASE-MatchedRID: 6E41RGmUyPrUL3YCMmnG4qwNPl5dbX19NQO+lFC5/FXB8Ugf1J6jaA0I
-        08nED9RPqm51GyKw24VtGBiKDv+3E/VACeiFsAcy3nHtGkYl/VpNLPQl0QAltN0LGV/C459aIYF
-        VNSU8WZgEyBq2HTOr570+/nv6ad1Fz4wBVW4Yax2uYt4ytygzqAvxMaV6x4s89kCABefJILzFYx
-        BBONJAzXsDbTFoPmjmuWvhWuGAhoIQcafPsw1WnAQ6EfMOwvTmMzbF1gbxlQbzn5zPKmWNBmtwO
-        oXDbvJwj+R7JkCQEPNCUypx6Ef5xF0ieHN50/kH7kcgu385s/Vit9m6mgNgspsoi2XrUn/JExkb
-        qSDWgw9dY+ZoWiLIm7xAi7jPoeEQftwZ3X11IV0=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: ee1e1bc1-7ecf-4d10-ba87-eb2c7aedbd8e-0-0-200-0
+References: <20230401200327.16800-1-gregkh@linuxfoundation.org>
+In-Reply-To: <20230401200327.16800-1-gregkh@linuxfoundation.org>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Tue, 4 Apr 2023 13:54:03 +0200
+Message-ID: <CAPDyKFq3VUVM2-ATNykGyutMoNDO3EkbT2foZBQjxzKr7cTnFg@mail.gmail.com>
+Subject: Re: [RESEND PATCH] memstick: fix memory leak if card device is never registered
+To:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Kay Sievers <kay.sievers@vrfy.org>, stable <stable@kernel.org>,
+        Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Looks ok to me but haven't tried it yet, I would be especially looking for e.g. mmc_request_done log, I would expect at least a mmc_command structure shown there there with
-Opcode 13 and some resp[0,1,2,3] values. If you see that than I'd say that is good.
+On Sat, 1 Apr 2023 at 22:03, Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
+>
+> When calling dev_set_name() memory is allocated for the name for the
+> struct device.  Once that structure device is registered, or attempted
+> to be registerd, with the driver core, the driver core will handle
+> cleaning up that memory when the device is removed from the system.
+>
+> Unfortunatly for the memstick code, there is an error path that causes
+> the struct device to never be registered, and so the memory allocated in
+> dev_set_name will be leaked.  Fix that leak by manually freeing it right
+> before the memory for the device is freed.
+>
+> Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+> Cc: Alex Dubov <oakad@yahoo.com>
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: "Rafael J. Wysocki" <rafael@kernel.org>
+> Cc: Hans de Goede <hdegoede@redhat.com>
+> Cc: Kay Sievers <kay.sievers@vrfy.org>
+> Cc: linux-mmc@vger.kernel.org
+> Fixes: 0252c3b4f018 ("memstick: struct device - replace bus_id with dev_name(),
+> Cc: stable <stable@kernel.org>
+> Co-developed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Co-developed-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
 
------Original Message-----
-From: Dominik 'Rathann' Mierzejewski <dominik@greysector.net> 
-Sent: Dienstag, 4. April 2023 12:09
-To: linux-mmc@vger.kernel.org
-Subject: Re: mmc-utils: ioctl connection timed out with SD cards
+Applied for fixes and by adding Mirsad's sob tag (according to the
+other thread [1]), thanks!
 
-On Monday, 03 April 2023 at 22:11, Christian Löhle wrote:
-> >Hello,
-> >is the mmc tool from mmc-utils supposed to work with SD cards?
-> Not really no, but status get is pretty much the one thing that should 
-> work, apart from register reads that don't issue anything.
+Kind regards
+Uffe
 
-I see. I thought any /dev/mmcblk? device would be supported. The documentation doesn't make this clear. :)
+[1]
+https://lore.kernel.org/lkml/c059f486-98a6-aecd-c135-c033612e6b4f@alu.unizg.hr/
 
-> I'm using RK3399 on SD too and it works okay for me, will try updating 
-> tomorrow.
-> Could you show the debug prints to see the mmc command / responses?
-> Ideally for anything in mmc/core
 
-Will something like:
-
-# alias ddcmd='echo $* > /proc/dynamic_debug/control'
-# ddcmd 'module mmc_core +p'
-# ddcmd 'module rtsx_pci_sdmmc +p'
-# mmc status get /dev/mmcblk0
-# dmesg | grep -E 'mmc_core|rtsx_pci_sdmmc'
-
-suffice?
-
-Regards,
-Dominik
--- 
-Fedora   https://getfedora.org  |  RPM Fusion  http://rpmfusion.org
-There should be a science of discontent. People need hard times and oppression to develop psychic muscles.
-        -- from "Collected Sayings of Muad'Dib" by the Princess Irulan
-
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
-
+> ---
+> RESEND as the first version had a corrupted message id and never made it
+> to the mailing lists or lore.kernel.org
+>
+>  drivers/memstick/core/memstick.c | 5 ++++-
+>  1 file changed, 4 insertions(+), 1 deletion(-)
+>
+> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
+> index bf7667845459..bbfaf6536903 100644
+> --- a/drivers/memstick/core/memstick.c
+> +++ b/drivers/memstick/core/memstick.c
+> @@ -410,6 +410,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
+>         return card;
+>  err_out:
+>         host->card = old_card;
+> +       kfree_const(card->dev.kobj.name);
+>         kfree(card);
+>         return NULL;
+>  }
+> @@ -468,8 +469,10 @@ static void memstick_check(struct work_struct *work)
+>                                 put_device(&card->dev);
+>                                 host->card = NULL;
+>                         }
+> -               } else
+> +               } else {
+> +                       kfree_const(card->dev.kobj.name);
+>                         kfree(card);
+> +               }
+>         }
+>
+>  out_power_off:
+> --
+> 2.40.0
+>
