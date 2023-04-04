@@ -2,263 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ED5A7C761A6
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 10:37:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 437FFC761AF
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 10:42:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234292AbjDDKh2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 06:37:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47302 "EHLO
+        id S234481AbjDDKmI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 06:42:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51878 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234049AbjDDKh1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 06:37:27 -0400
-Received: from domac.alu.hr (domac.alu.unizg.hr [161.53.235.3])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5964E1713;
-        Tue,  4 Apr 2023 03:37:22 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by domac.alu.hr (Postfix) with ESMTP id 4F111604F7;
-        Tue,  4 Apr 2023 12:37:19 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680604639; bh=JH5XXO9Z5NBaaWPCocKIWZRSjerZBKkvnb8PYoOWJfg=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=i+61+puUrguuYWGM5MhF3s6amxM1vIO9eHGBJvRg6d+ONxEzzqknBGwKg5MZBBTmo
-         MS/1UHkbHDvGiqGMcBqqWZLctgK4OOAqVQXpEUe22LU0vucKv4L6UCeDCyNGw6g8YF
-         EjiE2YB8lMKwx0QAoc2cNGnyQNf8l0z/tXCyFS59jhrPPR6vVNL07evCGH59gpuqne
-         l273JzjMh2gKbwY/xWgwrYjq2L9tYlO4XRhrPSjxVMOpObJYvg5e5TYtrKBcR5i5R4
-         ZSQTsjnUU5HurQj+XiHZAQcJ9eZQdOPEi2e/Q7EJlEO6eDUn9FtiohyPVIBQrM7lQ0
-         vX7BORarONpSg==
-X-Virus-Scanned: Debian amavisd-new at domac.alu.hr
-Received: from domac.alu.hr ([127.0.0.1])
-        by localhost (domac.alu.hr [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id AsUr7oltbcds; Tue,  4 Apr 2023 12:37:16 +0200 (CEST)
-Received: from [193.198.186.200] (PC-MTODOROV.slava.alu.hr [193.198.186.200])
-        by domac.alu.hr (Postfix) with ESMTPSA id 8212D604F5;
-        Tue,  4 Apr 2023 12:37:15 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple; d=alu.unizg.hr; s=mail;
-        t=1680604636; bh=JH5XXO9Z5NBaaWPCocKIWZRSjerZBKkvnb8PYoOWJfg=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=X762KKYurfD0QTZQgL/BZhSEPmgkQ1FO1ixH9Aq7lsQETW6KOVus4aIqexgxsQ2+2
-         MDTW3vFFuUBoy8vNgElr5U8MzmruXHZlciYMdXjvhl/ru+Ps144epWHKtO5gR+/q83
-         kk7Zf+OyGXkP8XzBAVAa0QtFuR6OpZr3SKDzFC4AHaXxpdN+Dl58pM+v45FKlUyMtv
-         GdQFbDbA2HTGUduTRlbqCR9tPEqN6StCfKmsFsKGHGeS8SP+/qlWNPuuOf2E7xa2us
-         ZpIL34bzeo0PbYs2zoMZXXmqtHnUFITmqSd30b18uAO4GBXp5ysPtV515ioOUihSjh
-         nx+lNcgPqjikg==
-Message-ID: <c059f486-98a6-aecd-c135-c033612e6b4f@alu.unizg.hr>
-Date:   Tue, 4 Apr 2023 12:37:15 +0200
+        with ESMTP id S234433AbjDDKmH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 06:42:07 -0400
+Received: from mail-wr1-x436.google.com (mail-wr1-x436.google.com [IPv6:2a00:1450:4864:20::436])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8E92E1980
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 03:42:01 -0700 (PDT)
+Received: by mail-wr1-x436.google.com with SMTP id h17so32271394wrt.8
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 03:42:01 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680604920;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=kMMkkwa1DeBjuIxqtolsFfNBw/JbCSfKSLU5AIzSffM=;
+        b=TQwvDVU3vO5kpLXTSCPdY1bue1XUsBgljwBUxgP1u61LURfmaxlwu8FGMRiCcOX2ei
+         T2ZtRYyq7mvITHzni6P7Og77oa92as3SdzsoN1//oQALYYNrNvHPMuqY2ROOEMRH/UAV
+         f8pWztspMH7NDFIBRCz+sncxvYKO/04iwxhunvALSTMfDwv3M5adgku52j3Jvm2OZ6ee
+         4/hNiZMkWtZkr1Gk/DCE4sPqbHeBnxEnFQVuU9ZQ+W1/Xcp3oiTXUAUI4IM8/0fpM2jL
+         Zkpu7dbmvCdDH+93QmlaW+KJL2x3eqcCgUPLxgY/9WhCC9Il5ecbz1f7IMKFo79E3vfq
+         N6Ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680604920;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=kMMkkwa1DeBjuIxqtolsFfNBw/JbCSfKSLU5AIzSffM=;
+        b=J3Kaw0OahwcOZTAQrO7z8uiD7yLk5T0I6i/WEkkZqOR1GSdg6VDj2CVBDdjPKrnJmB
+         vEWedSK4P7A5WE5NwtzjnlegMZGmB4yOtDA2+/hpl7LLQXz6OZYnXJA2GFULgcvC69qX
+         d5ouFpGezaomW2Yi3vII5EZzpx2JZLXUURV0wB54TFdmQiHtJ5BGZXiF8JDxWt8NrEbv
+         bKguPJTeETH05CAcJtjrY/WEHhHUoi3sTl2bUhKAP7sWdbPTrPhhXqpcIJsOpQoAR+Y5
+         8TYophJBhiWzUyDQLa2qPZMliHa4eEH3ahpEewELcKoo2eKRja2b3r7bU6nGJQfADuWz
+         gYeA==
+X-Gm-Message-State: AAQBX9eVBAvLNg+jbFmxjdMW8mLNtJgW7JQBFSjNPMthjVNvK+HOnOg5
+        Z7sk/WXYc+Qruz7kvPHdAJ8tl6SgNQ7UH+ykG1M=
+X-Google-Smtp-Source: AKy350andMQlc/NSkoD1itFkTq9FAROBUT7E0DWG3ebDLDs5tZZH76/uH88kkbI44lS/ZaGqyyrRpA==
+X-Received: by 2002:a5d:6e42:0:b0:2d6:a357:f133 with SMTP id j2-20020a5d6e42000000b002d6a357f133mr1132544wrz.44.1680604919960;
+        Tue, 04 Apr 2023 03:41:59 -0700 (PDT)
+Received: from linaro.org ([94.52.112.99])
+        by smtp.gmail.com with ESMTPSA id v8-20020a05600c470800b003ef71d7d64asm22334917wmo.6.2023.04.04.03.41.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Apr 2023 03:41:59 -0700 (PDT)
+Date:   Tue, 4 Apr 2023 13:41:57 +0300
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH v5 2/6] dt-bindings: ufs: qcom: Add ICE phandle
+Message-ID: <ZCv+9WjlkA4n9Dwg@linaro.org>
+References: <20230403200530.2103099-1-abel.vesa@linaro.org>
+ <20230403200530.2103099-3-abel.vesa@linaro.org>
+ <9fc90c8b-9234-84fa-7dab-fee9de2b9813@linaro.org>
+ <ZCvm3fzSh8owVDdc@linaro.org>
+ <c816d432-26b8-2655-adf1-4b72b8645215@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.0
-Subject: Re: BUG FIX: [PATCH RFC v3] [TESTED OK] memstick_check() memleak in
- kernel 6.1.0+ introduced pre 4.17
-Content-Language: en-US, hr, en-GB, de-DE
-To:     Greg KH <gregkh@linuxfoundation.org>
-Cc:     LKML <linux-kernel@vger.kernel.org>,
-        Thorsten Leemhuis <regressions@leemhuis.info>,
-        Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Jens Axboe <axboe@kernel.dk>,
-        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        Hannes Reinecke <hare@suse.de>,
-        Jiasheng Jiang <jiasheng@iscas.ac.cn>,
-        ye xingchen <ye.xingchen@zte.com.cn>, linux-mmc@vger.kernel.org
-References: <7d873dd3-9bab-175b-8158-c458b61a7122@alu.unizg.hr>
- <f74219a7-1607-deb4-a6ae-7b73e2467ac7@alu.unizg.hr>
- <df560535-2a8e-de21-d45d-805159d70954@alu.unizg.hr>
- <2023033124-causing-cassette-4d96@gregkh>
- <4d80549f-e59d-6319-07fd-1fbed75d7a1c@alu.unizg.hr>
- <ZCfO90WwyS6JwaHi@kroah.com> <ZCfQQDkw3D_BXJaZ@kroah.com>
- <2023040127-untrue-obtrusive-1ea4@gregkh>
- <2023040112-immovably-cytoplasm-44ee@gregkh>
- <112c4552-2c32-1be4-89a9-90ea9b45e988@alu.unizg.hr>
- <2023040123-undress-playpen-edee@gregkh>
-From:   Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-In-Reply-To: <2023040123-undress-playpen-edee@gregkh>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c816d432-26b8-2655-adf1-4b72b8645215@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 4/1/2023 16:56, Greg KH wrote:
-> On Sat, Apr 01, 2023 at 01:25:21PM +0200, Mirsad Goran Todorovac wrote:
->> On 01. 04. 2023. 11:23, Greg KH wrote:
->>> On Sat, Apr 01, 2023 at 11:18:19AM +0200, Greg KH wrote:
->>>> On Sat, Apr 01, 2023 at 08:33:36AM +0200, Greg KH wrote:
->>>>> On Sat, Apr 01, 2023 at 08:28:07AM +0200, Greg KH wrote:
->>>>>> On Sat, Apr 01, 2023 at 08:23:26AM +0200, Mirsad Goran Todorovac wrote:
->>>>>>>> This patch is implying that anyone who calls "dev_set_name()" also has
->>>>>>>> to do this hack, which shouldn't be the case at all.
->>>>>>>>
->>>>>>>> thanks,
->>>>>>>>
->>>>>>>> greg k-h
->>>>>>>
->>>>>>> This is my best guess. Unless there is dev_free_name() or kobject_free_name(), I don't
->>>>>>> see a more sensible way to patch this up.
->>>>>>
->>>>>> In sleeping on this, I think this has to move to the driver core.  I
->>>>>> don't understand why we haven't seen this before, except maybe no one
->>>>>> has really noticed before (i.e. we haven't had good leak detection tools
->>>>>> that run with removable devices?)
->>>>>>
->>>>>> Anyway, let me see if I can come up with something this weekend, give me
->>>>>> a chance...
->>>>>
->>>>> Wait, no, this already should be handled by the kobject core, look at
->>>>> kobject_cleanup(), at the bottom.  So your change should be merely
->>>>> duplicating the logic there that already runs when the struct device is
->>>>> freed, right?
->>>>>
->>>>> So I don't understand why your change works, odd.  I need more coffee...
->>>>
->>>> I think you got half of the change correctly.  This init code is a maze
->>>> of twisty passages, let me take your patch and tweak it a bit into
->>>> something that I think should work.  This looks to be only a memstick
->>>> issue, not a driver core issue (which makes me feel better.)
->>>
->>> Oops, forgot the patch.  Can you try this change here and let me know if
->>> that solves the problem or not?  I have compile-tested it only, so I
->>> have no idea if it works.
->>>
->>> If this does work, I'll make up a "real" function to replace the
->>> horrible dev.kobj.name mess that a driver would have to do here as it
->>> shouldn't be required that a driver author knows the internals of the
->>> driver core that well...
->>>
->>> thanks,
->>>
->>> greg k-h
->>>
->>> --------------------
->>>
->>>
->>> diff --git a/drivers/memstick/core/memstick.c b/drivers/memstick/core/memstick.c
->>> index bf7667845459..bbfaf6536903 100644
->>> --- a/drivers/memstick/core/memstick.c
->>> +++ b/drivers/memstick/core/memstick.c
->>> @@ -410,6 +410,7 @@ static struct memstick_dev *memstick_alloc_card(struct memstick_host *host)
->>>   	return card;
->>>   err_out:
->>>   	host->card = old_card;
->>> +	kfree_const(card->dev.kobj.name);
->>>   	kfree(card);
->>>   	return NULL;
->>>   }
->>> @@ -468,8 +469,10 @@ static void memstick_check(struct work_struct *work)
->>>   				put_device(&card->dev);
->>>   				host->card = NULL;
->>>   			}
->>> -		} else
->>> +		} else {
->>> +			kfree_const(card->dev.kobj.name);
->>>   			kfree(card);
->>> +		}
->>>   	}
->>>   
->>>   out_power_off:
->>
->> RESULTS:
->>
->> w/o patch:
->>
->> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# cat !$
->> cat /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
->> unreferenced object 0xffffa09a93249590 (size 16):
->>    comm "kworker/u12:4", pid 371, jiffies 4294896466 (age 52.748s)
->>    hex dump (first 16 bytes):
->>      6d 65 6d 73 74 69 63 6b 30 00 cc cc cc cc cc cc  memstick0.......
->>    backtrace:
->>      [<ffffffff936fb25c>] slab_post_alloc_hook+0x8c/0x3e0
->>      [<ffffffff93702b39>] __kmem_cache_alloc_node+0x1d9/0x2a0
->>      [<ffffffff936773b9>] __kmalloc_node_track_caller+0x59/0x180
->>      [<ffffffff93666a0a>] kstrdup+0x3a/0x70
->>      [<ffffffff93666a7c>] kstrdup_const+0x2c/0x40
->>      [<ffffffff93aa99dc>] kvasprintf_const+0x7c/0xb0
->>      [<ffffffff9443b427>] kobject_set_name_vargs+0x27/0xa0
->>      [<ffffffff93d8ee37>] dev_set_name+0x57/0x80
->>      [<ffffffffc0aeff0f>] memstick_check+0x10f/0x3b0 [memstick]
->>      [<ffffffff933cb4c0>] process_one_work+0x250/0x530
->>      [<ffffffff933cb7f8>] worker_thread+0x48/0x3a0
->>      [<ffffffff933d6dff>] kthread+0x10f/0x140
->>      [<ffffffff93202fa9>] ret_from_fork+0x29/0x50
->> unreferenced object 0xffffa09a97205990 (size 16):
->>    comm "kworker/u12:4", pid 371, jiffies 4294896471 (age 52.728s)
->>    hex dump (first 16 bytes):
->>      6d 65 6d 73 74 69 63 6b 30 00 cc cc cc cc cc cc  memstick0.......
->>    backtrace:
->>      [<ffffffff936fb25c>] slab_post_alloc_hook+0x8c/0x3e0
->>      [<ffffffff93702b39>] __kmem_cache_alloc_node+0x1d9/0x2a0
->>      [<ffffffff936773b9>] __kmalloc_node_track_caller+0x59/0x180
->>      [<ffffffff93666a0a>] kstrdup+0x3a/0x70
->>      [<ffffffff93666a7c>] kstrdup_const+0x2c/0x40
->>      [<ffffffff93aa99dc>] kvasprintf_const+0x7c/0xb0
->>      [<ffffffff9443b427>] kobject_set_name_vargs+0x27/0xa0
->>      [<ffffffff93d8ee37>] dev_set_name+0x57/0x80
->>      [<ffffffffc0aeff0f>] memstick_check+0x10f/0x3b0 [memstick]
->>      [<ffffffff933cb4c0>] process_one_work+0x250/0x530
->>      [<ffffffff933cb7f8>] worker_thread+0x48/0x3a0
->>      [<ffffffff933d6dff>] kthread+0x10f/0x140
->>      [<ffffffff93202fa9>] ret_from_fork+0x29/0x50
->> [root@pc-mtodorov marvin]# uname -rms
->> Linux 6.3.0-rc4-mt-20230401-00199-g7b50567bdcad-dirty x86_64
->> [root@pc-mtodorov marvin]#
->>
->> After the patch:
->>
->> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# echo scan > /sys/kernel/debug/kmemleak
->> [root@pc-mtodorov marvin]# cat /sys/kernel/debug/kmemleak
->>
->> So, congratulations, this did it!
+On 23-04-04 12:12:06, Krzysztof Kozlowski wrote:
+> On 04/04/2023 10:59, Abel Vesa wrote:
+> > On 23-04-04 07:41:55, Krzysztof Kozlowski wrote:
+> >> On 03/04/2023 22:05, Abel Vesa wrote:
+> >>> Starting with SM8550, the ICE will have its own devicetree node
+> >>> so add the qcom,ice property to reference it.
+> >>>
+> >>> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> >>> ---
+> >>>
+> >>> The v4 is here:
+> >>> https://lore.kernel.org/all/20230327134734.3256974-4-abel.vesa@linaro.org/
+> >>>
+> >>> Changes since v4:
+> >>>  * Added check for sm8550 compatible w.r.t. qcom,ice in order to enforce
+> >>>    it while making sure none of the other platforms are allowed to use it
+> >>
+> >> Why?
+> > 
+> > SM8550 will be the first platform to use the new DT bindings w.r.t ICE.
 > 
-> Great, thanks for testing!  And for working to narrow this down, that's
-> the hard part here.
+> This I understand, but why other platforms cannot use it?
+
+The platforms that do not have ICE support yet will be added in the same
+subschema along with SM8550 when the ICE DT node will be added in their
+dtsi.
+
 > 
->> This bug I detected on 2022-11-04, but it took me four months to find the leak,
->> before I was "blessed by the Source". You have asked me whether I would
->> help the memstick developers find a solution, and I like to keep promises. :-)
->>
->> At your convenience, you might add in the patch:
->>
->> Tested-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
->>
->> It's been an honour serving with the memstick community with you and it was a real
->> brainstorming session for me.
+> > 
+> >>
+> >> Also, this does not solve my previous question still.
+> > 
+> > Well, the clocks are not added for the a few platforms (which include
+> > SM8550). Same for 'ice' reg range.. So the only thing left is to
+> > enforce the qcom,ice property availability only for SM8550. I believe
+> > it solves the mutual exclusiveness of the "ice" reg range along with the
+> > clocks versus the qcom,ice property, by enforcing at compatible level.
 > 
-> Thanks, as you did way over half the work here, I think a co-developed
-> tag would be better.  I'll send it out with that and you can provide a
-> signed-off-by on it that would be great.
+> Ah, I think I understand. That would work except I don't understand why
+> enforcing qcom,qce only for specific, new SoCs. Assuming it is a correct
+> hardware representation, we want it for everyone, don't we?
+
+Yes, but they will be added to the subschema (qcom,ice one) when their
+their ICE support (ICE DT) will be added. This way, we keep the bindings
+check without failures (for now).
+
 > 
-> thanks,
+> Best regards,
+> Krzysztof
 > 
-> greg k-h
-
-Sorry, only seen the mail today.
-My Thunderbird still amuses me with its threading of emails :-|
-
-Yes, the
-
-Signed-of-by: Mirsad Todorovac <mirsad.todorovac@alu.unizg.hr>
-
-would be neat.
-
-Thank you,
-Mirsad
-
--- 
-Mirsad Goran Todorovac
-Sistem inženjer
-Grafički fakultet | Akademija likovnih umjetnosti
-Sveučilište u Zagrebu
---
-System engineer
-Faculty of Graphic Arts | Academy of Fine Arts
-University of Zagreb, Republic of Croatia
-tel. +385 (0)1 3711 451
-mob. +385 91 57 88 355
