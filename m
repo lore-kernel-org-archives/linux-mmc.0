@@ -2,131 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64C66C761A6
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 12:43:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C51EC761A6
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 13:57:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234748AbjDDMnP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 08:43:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35014 "EHLO
+        id S235492AbjDDN5B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 09:57:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59252 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234720AbjDDMnB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 08:43:01 -0400
-Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B784448C
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 05:42:13 -0700 (PDT)
-Received: by mail-yb1-xb2d.google.com with SMTP id p203so38426359ybb.13
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 05:42:13 -0700 (PDT)
+        with ESMTP id S235462AbjDDN4e (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 09:56:34 -0400
+Received: from mail-yw1-x1136.google.com (mail-yw1-x1136.google.com [IPv6:2607:f8b0:4864:20::1136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C9764EE7
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 06:55:39 -0700 (PDT)
+Received: by mail-yw1-x1136.google.com with SMTP id 00721157ae682-54184571389so614868277b3.4
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 06:55:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680612129;
+        d=linaro.org; s=google; t=1680616537;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Awoi0wocEa6pJJCJed+R75oaVptK3W5bV3LAY08GU5I=;
-        b=MMBf6P5jVdJRRMHqUgTmhJ215Sa1knl6VaTZIjYwlTL/8jlfHR08mqam1O1eTCLENb
-         bFSZ3Y7jXAEnzjEb9jL4ZrJzSsSmBuSbQT3JWUACQx8VpfnTBi0vJbmvAfSWHAMRF5Ls
-         BtJGZcd9tyyvMfGB9+ZIZ+JCLW3abJ+ebChflPJ0CqrzdIKKFQ3juM+ODYfxTI8lZ+xe
-         tU71fgzOSUI+vTWhFy/WGH9fHyO+8TiXnBD0VINFoJUJ1cCpH+XSzMBwDvKVprZPNOok
-         2yv5dFGkH4APaVcPF5rzCzb7DzK58CGQ+1PJnGH6G6KDy+RDsTVGi6kn+83K7rJHYQ5e
-         XJlQ==
+        bh=wHkwTuEK0sRBaJKLMcnB+ss8uWVVS2sTLaR7SSh4ZeE=;
+        b=Qq5kv5hhcFuFy0PJtvFX4bmOosaBrR84kqX5KLBFFzUEc6HYu6DcRmucycm+pwLw4z
+         c1uAzgS+6IfRZYHJk5KJGH6BUXWCXHUvONFdF36/iOgG9fJm+Or6v5c3zg4rspaHH3g3
+         HiltUNh0Van26IVMA9fB0iQ/2JU4EmqjOAKnh9wB4GYotEL+CBZNtjApM3/Mvn7TE8jd
+         7annxlm42iGSeOwxHaUKhpp00xjGstfzsDYvTrigHwC9433728mLS/XLnCAvVdN12kQr
+         08QyncQY1xCydyx4nySCZClEtVlnx7zpGvVuhHi5DCP1Pb+uzJy0FxU1zuboEdb75qqE
+         HUcA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680612129;
+        d=1e100.net; s=20210112; t=1680616537;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Awoi0wocEa6pJJCJed+R75oaVptK3W5bV3LAY08GU5I=;
-        b=l0HtbfqGHjjw7n6nwR3xmtgh0v2DTQvwLE0G+tlDE6FEaPBldMWixRAXL/V6c5hhzf
-         W9Xyx0AnCsdLIvqFmp+lwJPHpanx2bDpmLXFvwqv8+0Fjs2Z+wwKLz7Gr279/GqlZaJE
-         +Geunc2vjXmBlraSbq7LRU0xaHGDx4ydRrjZfLWZV9/gYO50vifZuCBBERhU0OLi8Joj
-         euZomYMhuw2AUXptVbEWexUtipEymqp8mqWkdbz15NgIj0ehSB603e5Uznv2BzS2nEB2
-         HZcmpMRKWySa/nAzX/MiN4c7bzpNUJVb85+QWTt434PN4v1+SmEBMaOBpowRP1uBMVo7
-         /JCw==
-X-Gm-Message-State: AAQBX9d4yXG7VYmOFIMnkvTT4vXmvJVmv52WzHqlCN7GZ0TVFPvJW/kv
-        moOnAFQ7TgxEcysbhXC5bxAYEImHABT1QSpdbyZlYPBqIx5eTecMrkg=
-X-Google-Smtp-Source: AKy350acHFpiOims4OdGlvOmjrDUoNIfNIt+TUwrdE/zA582mC8KnFFiirW3QHXC02dopUIbxpN725KCXhqM3cdmOfs=
-X-Received: by 2002:a25:7449:0:b0:b75:8ac3:d5d9 with SMTP id
- p70-20020a257449000000b00b758ac3d5d9mr1747321ybc.3.1680612129129; Tue, 04 Apr
- 2023 05:42:09 -0700 (PDT)
+        bh=wHkwTuEK0sRBaJKLMcnB+ss8uWVVS2sTLaR7SSh4ZeE=;
+        b=7QaBIYE/88L7ap6Eh1VLK5ZNYA2/OtKJBn8iIoPH0UlMMCOA+olEEBOCkWrMpxZ0YJ
+         0RWrcgKUxC/JF46hyfV9jyKP8CoDeameGzSFFr2CZBwQAaOk6Em0m//OgZerDpliPnUs
+         kwKbIrZoa8OZx5l4ETJSEJWT5mPKQ6ylI0UGYM8QCPFgnFseCQU0VbR0aWH52y0LNZHM
+         +BOb5x2gChMlmLg3qa6zdfcXJPGps4z7nt9LdbZaEr2N4TmPb9uptk8NUV0TAmgl0GLu
+         iZYQkjckZzLZOT6ek/h8qsCMEiFUi0GFnh51ygpwNV/lxCjBYCaBvUToGOrskWmRkqFQ
+         BGAA==
+X-Gm-Message-State: AAQBX9dReZLoyGJr0KK32su1G7HgZHhBARwJpvar6zQjwlAXtB7JOXFb
+        iuskDqpJTxuqZ6sQ7NG+EW/VS+yOHrgNs9SW9TyjeQ==
+X-Google-Smtp-Source: AKy350YrZFFIvslatnz6+JHLJxRXhURuO0Qe/CqTvhzL+6y/s/8tkJIoSvOoisaRTFct5e3xH8itE5OFyL+d4Sx3qSk=
+X-Received: by 2002:a81:e545:0:b0:545:8202:bbcf with SMTP id
+ c5-20020a81e545000000b005458202bbcfmr1485931ywm.9.1680616536968; Tue, 04 Apr
+ 2023 06:55:36 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
- <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com> <20230403151712.pqzmyqz3tose3bc3@pengutronix.de>
-In-Reply-To: <20230403151712.pqzmyqz3tose3bc3@pengutronix.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 4 Apr 2023 14:41:33 +0200
-Message-ID: <CAPDyKFp0W_e051Ke2QFx046GH-u+TW+TaQxTjzWkuQFxf4KcPg@mail.gmail.com>
-Subject: Re: sdhci_am654 and runtime-pm issues
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>
+References: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com> <20230203-evk-board-support-v4-2-5cffe66a38c0@baylibre.com>
+In-Reply-To: <20230203-evk-board-support-v4-2-5cffe66a38c0@baylibre.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Tue, 4 Apr 2023 15:55:26 +0200
+Message-ID: <CACRpkdYSpMD-V0QNGwtiKCA4KAedYfmFpvdCHWhjST9uTricTg@mail.gmail.com>
+Subject: Re: [PATCH v4 02/11] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
+ add drive strength property
+To:     Alexandre Mergnat <amergnat@baylibre.com>
+Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
+        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 3 Apr 2023 at 17:17, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
+On Fri, Mar 31, 2023 at 7:55=E2=80=AFPM Alexandre Mergnat <amergnat@baylibr=
+e.com> wrote:
+
+> This SoC is able to drive the following output current:
+> - 2 mA
+> - 4 mA
+> - 6 mA
+> - 8 mA
+> - 10 mA
+> - 12 mA
+> - 14 mA
+> - 16 mA
 >
-> On Mon, Apr 03, 2023 at 12:19:20PM +0200, Ulf Hansson wrote:
-> > On Sat, 1 Apr 2023 at 15:16, Uwe Kleine-K=C3=B6nig
-> > <u.kleine-koenig@pengutronix.de> wrote:
-> > >
-> > > Hello,
-> > >
-> > > I looked at the sdhci_am654's probe function and concerning runtime-p=
-m
-> > > this is at least unconvential:
-> > >
-> > > It does
-> > >
-> > >         clk_xin =3D devm_clk_get(dev, "clk_xin");
-> > >         if (IS_ERR(clk_xin))
-> > >                 ...
-> > >
-> > >         /* Clocks are enabled using pm_runtime */
-> > >         pm_runtime_enable(dev);
-> > >         ret =3D pm_runtime_resume_and_get(dev);
-> > >         ...
-> > >
-> > > I'm not fluent in runtime-pm stuff (so I added Rafael to Cc), but I
-> > > thought it is to be used the other way around, i.e. put the device in
-> > > operational state and then runtime-pm cares to suspend the device und=
-er
-> > > some conditions (e.g. CONFIG_PM being enabled).
-> > >
-> > > With CONFIG_PM unset the driver is broken for sure, as then
-> > > pm_runtime_enable() and pm_runtime_resume_and_get() have no effect. S=
-o
-> > > the clk stays off.
-> >
-> > In principle, you are correct. I wouldn't recommend the above pattern
-> > in general, but it doesn't mean that it can't work.
-> >
-> > Some platforms are selecting "PM" from some of their toplevel Kconfig,
-> > as they simply can't work without it. That means that the code you
-> > refer to above, doesn't have to be broken.
+> Then drive-strength property is set with enum to reflect its HW capabilit=
+y.
 >
-> If I understand correctly the driver under discussion is supposed to be
-> used on SoCs in the CONFIG_ARCH_K3 family. This isn't one of those that
-> enforce PM.
+> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collab=
+ora.com>
+> Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
 
-Right. Thanks for checking this.
+This patch does not apply to my devel branch:
+https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-pinctrl.git/lo=
+g/?h=3Ddevel
 
-In fact, I have just queued up a patch that fixes the behaviour [1].
-Maybe we should consider to backport it for stable kernels too, at
-least if there are some reports about errors!?
+Can you please rebase and resend?
 
->
-> But yes, adding a depends on PM would be an action that improves the
-> situation. Having said that even on such platforms you can disable
-> runtime PM, so even a select on PM isn't a complete fix.
-
-Note sure I understand this. In what way do you mean that runtime PM
-can be disabled? Normally, it's the bus/driver that decide whether
-runtime PM should be enabled or not. Right?
-
-Kind regards
-Uffe
-
-[1]
-https://lore.kernel.org/lkml/CAPDyKFpXfRqx4WLuiU6m=3DrgM9A=3D21KfDTuEb5Tboa=
-OC+w_hMwg@mail.gmail.com/
+Yours,
+Linus Walleij
