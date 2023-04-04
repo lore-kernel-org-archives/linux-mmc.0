@@ -2,153 +2,162 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 64A63C761A6
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 15:19:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 60A10C761A6
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 16:00:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235444AbjDDPT3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 11:19:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36444 "EHLO
+        id S229670AbjDDP76 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 11:59:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35188 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234616AbjDDPT1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 11:19:27 -0400
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 226A24488
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 08:19:26 -0700 (PDT)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-5445009c26bso619882157b3.8
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 08:19:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680621565;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=P+hxN4RYTV4eHGXG1nyMBkRqaXfgeEfY8tA61waLItc=;
-        b=hnvL2XdrCCff9Aw2cFRcJmwpZR2EosicV0yd+L19DLwIkTKusVY4auBxyubLjdczjD
-         UeWKbG7Hfw25UhGXs9BIHCdyvShQSAJCS1IaezSiffQhvwgOdNyUVu1osjQvXuZyGlFp
-         61EM4C67RqmtQluJMU7dMX/ZTfAAZ8Qh3xGGz0ksLyRy17087hG4WKNK3F7Ds/Q4H/iQ
-         7QSG1ql2H7G8yAfYaksuRelbKGg6t5U3GplIVjpW6e2HFOxHJHRtydCIVPlqafePMzCJ
-         HMAnijUWA+v8FXgVc7rmMEge/u9f9oGdS9SCnAUENPtKj2gKS+GrsT0hkl+I9DPbHEC+
-         oYJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680621565;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=P+hxN4RYTV4eHGXG1nyMBkRqaXfgeEfY8tA61waLItc=;
-        b=pE29PhW3asVahjybOTaqLBBG9qn7E9G68ggRRHL/6hd9apGiD8K/7rLqhBQI5+GHE/
-         Zm8ewczf2yeOdLStH78KTNMwnTZJH4tXpXOzN9mFqvhf2R32zQb4rj8Gs3Yrkk1/IRV/
-         1uxKrnUYaD2k/AgT1PVrB6apDtcGCVftAjPsJ7hUdLmavztQ+Nk5iWAR00HliwUo6oDt
-         V0FcmRroSKOvIaXUstr5xD7OBBXFV0SX+wUQfc6hRd/SptPzhg+KVbR4HTl/S7z5kYur
-         1VEpOoTgZlQuqlASNVfkPoR//ZccdYIxLN+o2f/DOq8NPa1AfdFN6X1abRDd6O8sgKUa
-         Sy8A==
-X-Gm-Message-State: AAQBX9cYi5LfL0U7gV47lkKizUsx7RTfkRtWmiXBlhSFvia4j5v8wGrT
-        A7WtZCayc6wx8CYBelMC+zrv1kppJiLS0wpfm55bsLuKttdUDskIbFI=
-X-Google-Smtp-Source: AKy350YyO3tpK1K9bcDoCBBNdNh1DzPqYWCdonHE8i0tQvfsQuCeCW474ouOYx/bmUZ6GCHWDAa5X6UnbWFWE2oB0A4=
-X-Received: by 2002:a81:c509:0:b0:549:143f:3d3 with SMTP id
- k9-20020a81c509000000b00549143f03d3mr1749148ywi.0.1680621565333; Tue, 04 Apr
- 2023 08:19:25 -0700 (PDT)
+        with ESMTP id S235121AbjDDP7t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 11:59:49 -0400
+Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [212.27.42.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51E1B1A5;
+        Tue,  4 Apr 2023 08:59:48 -0700 (PDT)
+Received: from [192.168.108.81] (unknown [213.36.7.13])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 8E078200483;
+        Tue,  4 Apr 2023 17:59:28 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1680623987;
+        bh=CzvvgTblGhaF/J7bVlIXcfhbbcQ7ryI5eYdk4LdJQkw=;
+        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
+        b=VbGIfF4WDXmiHdI/d3y2APmUG8N17SSZEvysy8Jmpz+SQXB1wR0+k2jnkWTHNiIrx
+         0enP5G+xmxoAMKV5yhhh2PpmL6Mx1kWJVLaekplNG5sceFEPSh9uFaccuRzldjYLD9
+         ++r23Tjrz3L0vQmPgkXeO1frRUkNI6+VPo7wfMCPsDETRaGoIYYe/zSCmHDaRELNaS
+         EqcIFTSeOEhxHtbrHlzkMpTF/e35S+h17yi/YL+V14kfXd29v/Q6N/9URcwWEYyznV
+         rkgDSWkw46TFYPREv9ctjX/JQZZWGfYkeNRV91TdFvw/axbaZuJ5NrjRP5fTZPIB1v
+         Dm5GAZSOvA4EQ==
+Message-ID: <602e992f-514c-65e2-f45f-17c088af3a61@free.fr>
+Date:   Tue, 4 Apr 2023 17:59:28 +0200
 MIME-Version: 1.0
-References: <20230401131626.ioiq5q5vzmpppe5v@pengutronix.de>
- <CAPDyKFr-yqW2RLA92dhEBe=QMTiLDGy1rTmhYzW0BJjnbrfFLw@mail.gmail.com>
- <20230403151712.pqzmyqz3tose3bc3@pengutronix.de> <CAPDyKFp0W_e051Ke2QFx046GH-u+TW+TaQxTjzWkuQFxf4KcPg@mail.gmail.com>
- <20230404150158.c5qy45truzyd6kjm@pengutronix.de>
-In-Reply-To: <20230404150158.c5qy45truzyd6kjm@pengutronix.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 4 Apr 2023 17:18:49 +0200
-Message-ID: <CAPDyKFqG9oWUWo-0y4Dgr0CrhO_gBaOnm+6RNZ2R-dw4bTCrrg@mail.gmail.com>
-Subject: Re: sdhci_am654 and runtime-pm issues
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     linux-mmc@vger.kernel.org, "Rafael J. Wysocki" <rafael@kernel.org>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [RFC PATCH] brcmfmac: add 43751 SDIO ids and initialization
+Content-Language: en-US
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+To:     linux-amlogic@lists.infradead.org, linux-wireless@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Kalle Valo <kvalo@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pieter-Paul Giesberts <pieter-paul.giesberts@broadcom.com>,
+        Alexander Prutskov <alep@cypress.com>,
+        Joseph chuang <jiac@cypress.com>,
+        Kevin Hilman <khilman@baylibre.com>,
+        Jerome Brunet <jbrunet@baylibre.com>,
+        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Angus Ainslie <angus@akkea.ca>,
+        Pierre-Hugues Husson <phh@phh.me>
+References: <05977cbb-8a8f-0a67-b4bd-b265dbb83280@free.fr>
+ <895a3812-e490-cc40-0f8e-a88e166e8f24@linaro.org>
+ <c1a215cf-94be-871b-2a8a-3cc381588f83@free.fr>
+ <6be2c348-b343-876a-a77f-a8297676de6a@free.fr>
+ <a215e398-2c49-19d2-0730-5e8c51df1ed9@free.fr>
+ <CA+8PC_du5dMwkmAshG2mM9TdeJft5aeAbEdDp0_q3Rxdvpq4MQ@mail.gmail.com>
+ <f14407f1-e16f-0074-6e29-c597754ae617@free.fr>
+ <CA+8PC_dFTvv9VtY9jBWLLwSoQzGxQd57zWMsnN6amddop4Yw-g@mail.gmail.com>
+ <31dea9bf-63ef-c6db-b206-8afac960fd10@free.fr>
+In-Reply-To: <31dea9bf-63ef-c6db-b206-8afac960fd10@free.fr>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 4 Apr 2023 at 17:02, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
->
-> Hello Ulf,
->
-> On Tue, Apr 04, 2023 at 02:41:33PM +0200, Ulf Hansson wrote:
-> > On Mon, 3 Apr 2023 at 17:17, Uwe Kleine-K=C3=B6nig
-> > <u.kleine-koenig@pengutronix.de> wrote:
-> > >
-> > > On Mon, Apr 03, 2023 at 12:19:20PM +0200, Ulf Hansson wrote:
-> > > > On Sat, 1 Apr 2023 at 15:16, Uwe Kleine-K=C3=B6nig
-> > > > <u.kleine-koenig@pengutronix.de> wrote:
-> > > > >
-> > > > > Hello,
-> > > > >
-> > > > > I looked at the sdhci_am654's probe function and concerning runti=
-me-pm
-> > > > > this is at least unconvential:
-> > > > >
-> > > > > It does
-> > > > >
-> > > > >         clk_xin =3D devm_clk_get(dev, "clk_xin");
-> > > > >         if (IS_ERR(clk_xin))
-> > > > >                 ...
-> > > > >
-> > > > >         /* Clocks are enabled using pm_runtime */
-> > > > >         pm_runtime_enable(dev);
-> > > > >         ret =3D pm_runtime_resume_and_get(dev);
-> > > > >         ...
-> > > > >
-> > > > > I'm not fluent in runtime-pm stuff (so I added Rafael to Cc), but=
- I
-> > > > > thought it is to be used the other way around, i.e. put the devic=
-e in
-> > > > > operational state and then runtime-pm cares to suspend the device=
- under
-> > > > > some conditions (e.g. CONFIG_PM being enabled).
-> > > > >
-> > > > > With CONFIG_PM unset the driver is broken for sure, as then
-> > > > > pm_runtime_enable() and pm_runtime_resume_and_get() have no effec=
-t. So
-> > > > > the clk stays off.
-> > > >
-> > > > In principle, you are correct. I wouldn't recommend the above patte=
-rn
-> > > > in general, but it doesn't mean that it can't work.
-> > > >
-> > > > Some platforms are selecting "PM" from some of their toplevel Kconf=
-ig,
-> > > > as they simply can't work without it. That means that the code you
-> > > > refer to above, doesn't have to be broken.
-> > >
-> > > If I understand correctly the driver under discussion is supposed to =
-be
-> > > used on SoCs in the CONFIG_ARCH_K3 family. This isn't one of those th=
-at
-> > > enforce PM.
-> >
-> > Right. Thanks for checking this.
-> >
-> > In fact, I have just queued up a patch that fixes the behaviour [1].
-> > Maybe we should consider to backport it for stable kernels too, at
-> > least if there are some reports about errors!?
-> >
-> > > But yes, adding a depends on PM would be an action that improves the
-> > > situation. Having said that even on such platforms you can disable
-> > > runtime PM, so even a select on PM isn't a complete fix.
-> >
-> > Note sure I understand this. In what way do you mean that runtime PM
-> > can be disabled? Normally, it's the bus/driver that decide whether
-> > runtime PM should be enabled or not. Right?
->
-> You can disable runtime PM per device via sysfs. (Something like:
->
->         echo on > /sys/devices/.../power/control
->
-> .) The docs say "Changing this attribute to "on" [...] while the device
-> is suspended causes it to be woken up.", so the right thing seems to
-> happen. (I didn't test what happens if that file is written before the
-> driver is bound.)
+On 22/03/2023 18:40, Marc Gonzalez wrote:
 
-Right, that part is changing the reference count. It doesn't really
-enable/disable runtime PM for the device, so it shouldn't really
-matter. Unless I am missing something, of course.
+> At my disposal, two S905X2 boards with SDIO-based brcm modules
+> (according to the labels on the boards) :
+> 
+> Board A embeds "AP6398SR3"  which identifies as
+> 	x vendor=2d0 dev=4359 over sdio_read_cis
+> 	x brcmfmac: F1 signature read @0x18000000=0x17294359
+> 	x brcmfmac: BCM4359/9: chip=4359 rev=9
+> 
+> Board B embeds "AP6398SR32" which identifies as
+> 	x vendor=2d0 dev=aae7 over sdio_read_cis
+> 	x F1 signature read @0x18000000=0x1042aae8
+> 	x brcmfmac: BCM43752/2: chip=aae8 rev=2
 
-Kind regards
-Uffe
+Pali Rohár pointed out lssdio.
+Here's the verbose output, for the record.
+
+
+BOARD A
+# lssdio -v
+Host 2 Address 0001 Function 1: ID 02d0:4359 
+    Common Address: 0x0001
+    Common VDD voltage: 3.2-3.4V
+    Common Type: SDIO
+    Common Vendor ID: 0x02d0
+    Common Device ID: 0x4359
+    Common Revision: 0.0
+    Function ID: 1
+    Function Vendor ID: 0x02d0
+    Function Device ID: 0x4359
+    Function Class ID: 0x00
+    Function Revision: 0.0
+    Function Driver in use: brcmfmac
+Host 2 Address 0001 Function 2: ID 02d0:4359 
+    Common Address: 0x0001
+    Common VDD voltage: 3.2-3.4V
+    Common Type: SDIO
+    Common Vendor ID: 0x02d0
+    Common Device ID: 0x4359
+    Common Revision: 0.0
+    Function ID: 2
+    Function Vendor ID: 0x02d0
+    Function Device ID: 0x4359
+    Function Class ID: 0x00
+    Function Revision: 0.0
+    Function Driver in use: brcmfmac
+Host 2 Address 0001 Function 3: ID 02d0:4359 (Class 02)
+    Common Address: 0x0001
+    Common VDD voltage: 3.2-3.4V
+    Common Type: SDIO
+    Common Vendor ID: 0x02d0
+    Common Device ID: 0x4359
+    Common Revision: 0.0
+    Function ID: 3
+    Function Vendor ID: 0x02d0
+    Function Device ID: 0x4359
+    Function Class ID: 0x02
+    Function Revision: 0.0
+    Function Driver in use: (none)
+
+
+BOARD B
+# lssdio -v
+Host 2 Address 0001 Function 1: ID 02d0:aae7 
+    Common Address: 0x0001
+    Common VDD voltage: 3.2-3.4V
+    Common Type: SDIO
+    Common Vendor ID: 0x02d0
+    Common Device ID: 0xaae7
+    Common Revision: 0.0
+    Function ID: 1
+    Function Vendor ID: 0x02d0
+    Function Device ID: 0xaae7
+    Function Class ID: 0x00
+    Function Revision: 0.0
+    Function Driver in use: (none)
+Host 2 Address 0001 Function 2: ID 02d0:aae7 
+    Common Address: 0x0001
+    Common VDD voltage: 3.2-3.4V
+    Common Type: SDIO
+    Common Vendor ID: 0x02d0
+    Common Device ID: 0xaae7
+    Common Revision: 0.0
+    Function ID: 2
+    Function Vendor ID: 0x02d0
+    Function Device ID: 0xaae7
+    Function Class ID: 0x00
+    Function Revision: 0.0
+    Function Driver in use: (none)
+
+
