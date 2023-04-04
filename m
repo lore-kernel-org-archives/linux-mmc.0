@@ -2,120 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F161C77B6E
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 11:05:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C24AFC6FD1D
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 11:40:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234723AbjDDLFr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 07:05:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36162 "EHLO
+        id S234452AbjDDLkb convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 07:40:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45628 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234713AbjDDLFb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 07:05:31 -0400
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 702BFE53
-        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 04:03:21 -0700 (PDT)
-Received: by mail-ed1-x52c.google.com with SMTP id y4so128980213edo.2
-        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 04:03:21 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680606197;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=P2X3kREg8ClZqoLFGTfMEQlTm6xCmy/glA1Hk2D1aa0=;
-        b=vj66DxpITdwlhJH75l7RkUQZ6WiakI8+iJL0HkFajARLadSSmedSCC38T3fau0NSAi
-         cuHLk9G6os+2CZPFZVMURrKYJtSV7XCcHUktC2KxBi0JYdJlEn3jIyfrRNS76EsHP+Gc
-         vSP5yuFfS0DKENJu13mSmPMXDHrOXQXyXBYgwI3yB8ukOi9+MFNaQF9blxs+UoTs3Txj
-         P/UnBYcmSIK9qgN4/80r2zy0VyjYl/ggKEoJFNcam6FWF7UWgHng1XycK5KJiIIpCKFx
-         8UCAyfQtf3TLsUcvIFlRm7Fj10RNvbeRR0Jx2rNoMSjsM3v8zioZQ2F1Kxd7kbRj5vr5
-         XELQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680606197;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=P2X3kREg8ClZqoLFGTfMEQlTm6xCmy/glA1Hk2D1aa0=;
-        b=6EopeA8djGhqbWrObB0ycStrv8lWSLTxA4PAFgf9lNtboBoc9Klhy5Ur2+KyLv9X8Y
-         wcHMKpR5pFHt47FcdX77eSycvGYzoA5f2Am2bsd8sXq9RkPRKpnuN8wxcOmSrT3ZFPqI
-         Vn8P6ApcZJlHgfbnB9lQ0d7YgEOlTLsEfpX837Ew/b0v55UiCAF9c4pMD3epCaJGx8Sl
-         eNurQkbrPEBObQ1ehDcod8dxokFrJKZw6guEdgLH90xAmHy5fOKK6HFOpKqULYHrBZwT
-         PuSkmRmayiMp3OOp9UB4XVrXlvNELokpvTknIIBJ3cLwfMzLMrZID/5qQK1KMhATaq8H
-         aQgQ==
-X-Gm-Message-State: AAQBX9eYpaSFsMQpqUsWx2fVMyVcR65Q1gUewFiDZCGYF0nsPD5LLNkZ
-        VCbJwmPFR/hjzHLKNnijk7x6iA==
-X-Google-Smtp-Source: AKy350Z6X6wonQ9ndSEeOqk1V1vulMt/+C2VlT2zTtfQjqb1wDbl0iUZQJtUmkPOwDAPJiXlYGDAKA==
-X-Received: by 2002:a17:906:1281:b0:947:405a:955f with SMTP id k1-20020a170906128100b00947405a955fmr1842422ejb.31.1680606197540;
-        Tue, 04 Apr 2023 04:03:17 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:99ed:4575:6001:8bda? ([2a02:810d:15c0:828:99ed:4575:6001:8bda])
-        by smtp.gmail.com with ESMTPSA id c10-20020a170906d18a00b00923f05b2931sm5796213ejz.118.2023.04.04.04.03.16
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 04 Apr 2023 04:03:17 -0700 (PDT)
-Message-ID: <5f8692af-700a-a47f-d81c-fe9c905958e1@linaro.org>
-Date:   Tue, 4 Apr 2023 13:03:15 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.0
-Subject: Re: [PATCH v5 2/6] dt-bindings: ufs: qcom: Add ICE phandle
+        with ESMTP id S234316AbjDDLka (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 07:40:30 -0400
+Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9ECBB6
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 04:40:26 -0700 (PDT)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 7889422293C
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 5CC0622293B
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.102-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
+        by mail6.swissbit.com (Postfix) with ESMTPS
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 13:40:24 +0200 (CEST)
+From:   =?iso-8859-1?Q?Christian_L=F6hle?= <CLoehle@hyperstone.com>
+To:     Dominik 'Rathann' Mierzejewski <dominik@greysector.net>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
+Subject: RE: mmc-utils: ioctl connection timed out with SD cards
+Thread-Topic: mmc-utils: ioctl connection timed out with SD cards
+Thread-Index: AQHZZlWz7zj1vli6ykWT5I70wuFTRa8aAk7wgADKbgCAADokIA==
+Date:   Tue, 4 Apr 2023 11:40:22 +0000
+Message-ID: <3e16419fac794968a0107ce44e32bd5d@hyperstone.com>
+References: <ZCsSHxDv+158emk5@sakura.greysector.net>
+ <597389cd8b21409aa7015d08aa4a804d@hyperstone.com>
+ <ZCv3OBCE1hB32CDI@sakura.greysector.net>
+In-Reply-To: <ZCv3OBCE1hB32CDI@sakura.greysector.net>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Biggers <ebiggers@kernel.org>, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-References: <20230403200530.2103099-1-abel.vesa@linaro.org>
- <20230403200530.2103099-3-abel.vesa@linaro.org>
- <9fc90c8b-9234-84fa-7dab-fee9de2b9813@linaro.org>
- <ZCvm3fzSh8owVDdc@linaro.org>
- <c816d432-26b8-2655-adf1-4b72b8645215@linaro.org>
- <ZCv+9WjlkA4n9Dwg@linaro.org>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <ZCv+9WjlkA4n9Dwg@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27544.007
+X-TMASE-Result: 10--17.359800-10.000000
+X-TMASE-MatchedRID: 6E41RGmUyPrUL3YCMmnG4qwNPl5dbX19NQO+lFC5/FXB8Ugf1J6jaA0I
+        08nED9RPqm51GyKw24VtGBiKDv+3E/VACeiFsAcy3nHtGkYl/VpNLPQl0QAltN0LGV/C459aIYF
+        VNSU8WZgEyBq2HTOr570+/nv6ad1Fz4wBVW4Yax2uYt4ytygzqAvxMaV6x4s89kCABefJILzFYx
+        BBONJAzXsDbTFoPmjmuWvhWuGAhoIQcafPsw1WnAQ6EfMOwvTmMzbF1gbxlQbzn5zPKmWNBmtwO
+        oXDbvJwj+R7JkCQEPNCUypx6Ef5xF0ieHN50/kH7kcgu385s/Vit9m6mgNgspsoi2XrUn/JExkb
+        qSDWgw9dY+ZoWiLIm7xAi7jPoeEQftwZ3X11IV0=
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: ee1e1bc1-7ecf-4d10-ba87-eb2c7aedbd8e-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 04/04/2023 12:41, Abel Vesa wrote:
->>>>
->>>> Also, this does not solve my previous question still.
->>>
->>> Well, the clocks are not added for the a few platforms (which include
->>> SM8550). Same for 'ice' reg range.. So the only thing left is to
->>> enforce the qcom,ice property availability only for SM8550. I believe
->>> it solves the mutual exclusiveness of the "ice" reg range along with the
->>> clocks versus the qcom,ice property, by enforcing at compatible level.
->>
->> Ah, I think I understand. That would work except I don't understand why
->> enforcing qcom,qce only for specific, new SoCs. Assuming it is a correct
->> hardware representation, we want it for everyone, don't we?
-> 
-> Yes, but they will be added to the subschema (qcom,ice one) when their
-> their ICE support (ICE DT) will be added. This way, we keep the bindings
-> check without failures (for now).
+Looks ok to me but haven't tried it yet, I would be especially looking for e.g. mmc_request_done log, I would expect at least a mmc_command structure shown there there with
+Opcode 13 and some resp[0,1,2,3] values. If you see that than I'd say that is good.
 
-I understand that then you will rework this if:then case, so I think it
-is just easier to make it correct from the first place. If there is
-qcom,qce, then reg is maxItems:1. Otherwise - maxItems can be 2. You
-achieve the same result, all DTS validate, without any need of further
-changes later.
+-----Original Message-----
+From: Dominik 'Rathann' Mierzejewski <dominik@greysector.net> 
+Sent: Dienstag, 4. April 2023 12:09
+To: linux-mmc@vger.kernel.org
+Subject: Re: mmc-utils: ioctl connection timed out with SD cards
 
+On Monday, 03 April 2023 at 22:11, Christian Löhle wrote:
+> >Hello,
+> >is the mmc tool from mmc-utils supposed to work with SD cards?
+> Not really no, but status get is pretty much the one thing that should 
+> work, apart from register reads that don't issue anything.
 
-Best regards,
-Krzysztof
+I see. I thought any /dev/mmcblk? device would be supported. The documentation doesn't make this clear. :)
+
+> I'm using RK3399 on SD too and it works okay for me, will try updating 
+> tomorrow.
+> Could you show the debug prints to see the mmc command / responses?
+> Ideally for anything in mmc/core
+
+Will something like:
+
+# alias ddcmd='echo $* > /proc/dynamic_debug/control'
+# ddcmd 'module mmc_core +p'
+# ddcmd 'module rtsx_pci_sdmmc +p'
+# mmc status get /dev/mmcblk0
+# dmesg | grep -E 'mmc_core|rtsx_pci_sdmmc'
+
+suffice?
+
+Regards,
+Dominik
+-- 
+Fedora   https://getfedora.org  |  RPM Fusion  http://rpmfusion.org
+There should be a science of discontent. People need hard times and oppression to develop psychic muscles.
+        -- from "Collected Sayings of Muad'Dib" by the Princess Irulan
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
 
