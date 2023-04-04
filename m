@@ -2,142 +2,95 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 41B1DC77B6E
-	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 21:06:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3BD64C76188
+	for <linux-mmc@archiver.kernel.org>; Tue,  4 Apr 2023 21:28:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236254AbjDDVGb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 17:06:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47352 "EHLO
+        id S236432AbjDDV2F (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 4 Apr 2023 17:28:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39856 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236490AbjDDVGY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 17:06:24 -0400
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B69274499;
-        Tue,  4 Apr 2023 14:06:17 -0700 (PDT)
-Received: by mail-ed1-x52c.google.com with SMTP id fi11so12476662edb.10;
-        Tue, 04 Apr 2023 14:06:17 -0700 (PDT)
+        with ESMTP id S236422AbjDDV2E (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 17:28:04 -0400
+Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 395551BD9;
+        Tue,  4 Apr 2023 14:28:02 -0700 (PDT)
+Received: by mail-ed1-x532.google.com with SMTP id eg48so136026612edb.13;
+        Tue, 04 Apr 2023 14:28:02 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1680642376;
+        d=googlemail.com; s=20210112; t=1680643681;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=Arcx44/rPklJ1qmh7rA9Vdi3+RywvGhpDpphg6EORnM=;
-        b=Ccab2NpeS8C0+MeeUtmKMI/cuZNkQkSrbAFtokffBE3dnDI5Ksc5eWKAzq22i9Q8bV
-         HNyZw96y40IpwjJYmI+zFtEIHn+PsPDE9KM9Slofq/DSGEgBeZjC9tTYS9MVOOvzMrNc
-         wNkjsk122taFS3rLDDeUnuCWuDe9p8ycazN4ecpoDCE2nhXrembzSS6FAy/J5QAbJjIZ
-         /dHbqid1FhtRQuePalzNKCnTZ6B+OTf5TP2O9jFzuxOQbRuS4mSSNiyhYtFZXJhKFFnk
-         jCZ6+i8BWQ7hw6gf8EfJ66YCEPSpTMfAuMh+RHeGQ/51ahfS0i0FuHPmQde8Y7fbt0va
-         7VpA==
+        bh=F3Vq2XM6fughuFDtm5c57GN5MrdDCrraoSvfrWiblQU=;
+        b=Aguc2+EVruaoWDmeWTp/rvZXkJ7uOVa1KmiiPwiNegAiDA4WZWeOUGDz8seHfMwUY1
+         1O1rDFP8XJjK1tcN9X2bIIQcg/jVtlzbTGMseEBWMRfnRKkZBBWM1cDR0dbB/ISqGNNP
+         d4tdXDCfl4lZ8toTldRZAsSYXn/+r5H1CBkDdna1nnabXPfqho3Ta7lC2FILdYqMEmgU
+         tTUfV6iEpFxnNUDEyxtTyAMwcf5t5SisFTpXvumkoqhAAM1y0hXKr9Mdeun4tYt1A4b1
+         /QOaBFb9PF02DVewDATyzTI1jd+Fdw17v4aeV/fMvNL6dHc96Z78m1YKzpENPNfQsYDz
+         C8Yw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680642376;
+        d=1e100.net; s=20210112; t=1680643681;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=Arcx44/rPklJ1qmh7rA9Vdi3+RywvGhpDpphg6EORnM=;
-        b=M5imcX1NiKeMJHeor+7DXru08yyNvGRZvhyEvFt22djRWLhInDRcZyDld7pgr7OBMX
-         f/CdgrC9NHACoTxa1hOAKOgkTxMWOetorXNjT6G8W4dNWUAJMT2Zz/yPJZfroSK9AN/F
-         5nZCkTei8y6/WQR3DA9XAwZh8N2TDa00+ZS5pk1O+FzlH1o4Akq3gTrEJeEvTJSA+sOD
-         vvvQsk64XI5+NSxvaMLtmTXnmtQQ3Ltv7Kne5cKzB4j6cVZJqatUF32K0JzlQC893lh8
-         Hxx1uSV6SBD5XqtayIJOVrbNr5zR5LPs/pyNUvsVG2sO0Ib4XhJnhSnG6p0eKv9eYqcM
-         +iEA==
-X-Gm-Message-State: AAQBX9eHSNORUYybBYNfFsJmTNbdckm7L7YuixiufjNEA7HylgrUVTc4
-        SqDDnPmcKKgulvFhjoW7CSucT6rFLrjPHLa7bfg=
-X-Google-Smtp-Source: AKy350ZL6yADJcNyt/Y3jhM47kWbMutlYKzJdrUWg4OjIkGTWlwLXJLSOuhPhwYlWtiL4lQew208rajvwfiUnAqyZf8=
-X-Received: by 2002:a05:6402:27cd:b0:502:3e65:44f7 with SMTP id
- c13-20020a05640227cd00b005023e6544f7mr423242ede.3.1680642375917; Tue, 04 Apr
- 2023 14:06:15 -0700 (PDT)
+        bh=F3Vq2XM6fughuFDtm5c57GN5MrdDCrraoSvfrWiblQU=;
+        b=jJZ/O2YLYwTvKVTruXg88TjrgsH8bXZF9ut3Qom+fAojALWkHV5vjWPjghmpr++MMU
+         5JYCQG5gfGLisN7RWH8htThpnVTsJvjLXqhrh6F7sGrhjuRMZWjwS4xlXGlct2tSWBt+
+         LQTCwOD4T8sETmukLSjOMFN852KP16tK6WBmklRpVgbrx2BAszK9IaysjjlaM0jnaIBY
+         MxwlCusxMKl+smnaMdeu5PPUHqWHAuh8n2ALcV9P6cBWFOy18zCl8hT5/0zpD19XTBmp
+         SBiiib4/v9SIa8PoxHCy29c8UkOuF6rIer48EPAkDY4wGriNGoCtN5Pi8jfiuUYy/SRt
+         cgGQ==
+X-Gm-Message-State: AAQBX9fVbRPu9kQVisPO6IlR3T72eCC6bN76EHpuCpVWK0gCqCeAO0cw
+        Xio62iuUrlyahACOciV4D5xC+srJjz4WymQZDqPBKs83SOc=
+X-Google-Smtp-Source: AKy350b9THEdFpt47q44R8kiLay24lRQn+dpAYK09CzKuT0xT0W0dwuzwx4PYA6d/G5OSNmH5bBzzgihj/lFtVstHYU=
+X-Received: by 2002:a17:906:3e0d:b0:92f:cbfe:1635 with SMTP id
+ k13-20020a1709063e0d00b0092fcbfe1635mr535348eji.6.1680643680653; Tue, 04 Apr
+ 2023 14:28:00 -0700 (PDT)
 MIME-Version: 1.0
-References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr> <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
- <EEE9FD80-C106-4A9B-AA8D-5C151E540CFD@hewittfamily.org.uk> <0bb1e3b3-6823-ddb5-001b-72ee1b63779c@free.fr>
-In-Reply-To: <0bb1e3b3-6823-ddb5-001b-72ee1b63779c@free.fr>
+References: <20230403202440.276757-1-martin.blumenstingl@googlemail.com>
+ <20230403202440.276757-10-martin.blumenstingl@googlemail.com>
+ <642c609d.050a0220.46d72.9a10@mx.google.com> <CADcbR4LMY3BF_aNZ-gAWsvYHnRjV=qgWW_qmJhH339L_NgmqUQ@mail.gmail.com>
+In-Reply-To: <CADcbR4LMY3BF_aNZ-gAWsvYHnRjV=qgWW_qmJhH339L_NgmqUQ@mail.gmail.com>
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Tue, 4 Apr 2023 23:06:04 +0200
-Message-ID: <CAFBinCA+JOxCGzML-Mohryawrn6Vghd8Ns22=2ZfvWov43aeEg@mail.gmail.com>
-Subject: Re: [Performance regression] BCM4359/9 on S905X2
-To:     Marc Gonzalez <marc.w.gonzalez@free.fr>
-Cc:     Christian Hewitt <christian@hewittfamily.org.uk>,
-        Linux Wireless <linux-wireless@vger.kernel.org>,
-        MMC <linux-mmc@vger.kernel.org>,
-        AML <linux-amlogic@lists.infradead.org>,
-        Neil Armstrong <neil.armstrong@linaro.org>,
+Date:   Tue, 4 Apr 2023 23:27:49 +0200
+Message-ID: <CAFBinCC2fr42FiC_LqqMf2ASDA_vY1d-NJJLHOF6pW1MjFRAzw@mail.gmail.com>
+Subject: Re: [PATCH v4 9/9] wifi: rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+To:     Chris Morgan <macroalpha82@gmail.com>
+Cc:     linux-wireless@vger.kernel.org,
+        Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        Kalle Valo <kvalo@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Pierre-Hugues Husson <phh@phh.me>
+        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
+        linux-mmc@vger.kernel.org, Nitin Gupta <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        Jernej Skrabec <jernej.skrabec@gmail.com>,
+        Larry Finger <Larry.Finger@lwfinger.net>,
+        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Marc,
+Hello Chris,
 
-On Tue, Apr 4, 2023 at 6:09=E2=80=AFPM Marc Gonzalez <marc.w.gonzalez@free.=
-fr> wrote:
-[...]
-> For vendor, common/arch/arm64/boot/dts/amlogic/mesong12a_sei.dtsi
+On Tue, Apr 4, 2023 at 8:16=E2=80=AFPM Chris Morgan <macroalpha82@gmail.com=
+> wrote:
 >
->                 bus-width =3D <4>;
->                 cap-sd-highspeed;
->                 cap-mmc-highspeed;
->                 max-frequency =3D <100000000>;
-I would start by comparing the bus mode. You can get it from
-/sys/kernel/debug/mmc2/ios
-On the vendor kernel it should be in /sys/kernel/debug/sdio/ios (or
-similar, I'm typing this from the top of my head).
-It will give you insights on the clock and timing that has been
-negotiated between the host and card.
+> Please disregard. I was building against linux main not wireless-next.
+> I have tested and it appears to be working well, even suspend works now.
+Thanks for this update - this is great news!
+It's good to hear that suspend is now also working fine for you.
 
-From this information you can get the maximum bus speed, e.g. from [0]
-Please note that any card will add overhead for communication, so bus
-speed will not be equal to wifi throughput.
-
-> vendor DTS has the following child node:
->
->                 sdio {
->                         pinname =3D "sdio";
->                         ocr_avail =3D <0x200080>; /**VDD voltage 3.3 ~ 3.=
-4 */
->                         /* max_req_size =3D <0x20000>; */ /**128KB*/
->                         max_req_size =3D <0x400>;
->                         card_type =3D <3>;
->                         /* 3:sdio device(ie:sdio-wifi),
->                          * 4:SD combo (IO+mem) card
->                          */
->                         dmode =3D "pio";
->                 };
->
-> Maybe the vendor kernel uses the above information to "boost"
-> the performance of the SDIO-based WiFi adapter?
-PIO is also what we support upstream with the
-amlogic,dram-access-quirk; (which is enabled for &sd_emmc_a).
-This suggests that the pinctrl trick that Neil mentioned is not used here.
-
-I assume that the wifi driver on the vendor kernel is the brcmdhd (out
-of tree) driver, while mainline uses brcmfmac.
-One idea that comes to my mind is to enable the
-amlogic,dram-access-quirk; (and use pio mode on the vendor kernel) for
-eMMC or SD card and then compare read/write speeds. If they are
-similar-ish then the wifi performance difference is likely caused by
-the wifi driver (or in the opposite case: if read/write speeds on
-mainline with amlogic,dram-access-quirk; perform worse than the vendor
-kernel with pio mode then it's likely that it's a meson-gx-mmc driver
-limitation).
-
-From my work on the rtw88 SDIO wifi driver I can say that the
-meson-gx-mmc driver can push (TX direction) at least 120Mbit/s.
-I understand that this is half of what you get with the vendor kernel
-- and that this is the wrong direction (you're testing RX while I'm
-testing TX).
-The point that I want to get across is: I think nobody has the one
-answer why wifi performance is lower (personally I'm happy with having
-it work at all, performance is second).
-So it'll be a process to find the reason, and I think it requires
-being creative due to the large amounts of different code (MMC driver,
-wifi driver, additional patches...) between mainline and the vendor
-kernel.
+It would be awesome if I could get a Tested-by for this patch. This
+works by replying to the patch with a line that consists of
+"Tested-by: your name <your email address>". See [0] for an example.
 
 
 Best regards,
 Martin
 
 
-[0] https://en.wikipedia.org/wiki/SD_card#Power_consumption
+[0] https://lore.kernel.org/linux-wireless/4a76b5fe-c3d6-de44-c627-3f48fafd=
+d905@lwfinger.net/
