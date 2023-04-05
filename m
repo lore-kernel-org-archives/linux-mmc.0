@@ -2,58 +2,62 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC7C4C7619A
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 15:02:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F607C7619A
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 19:52:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238285AbjDEPCr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Apr 2023 11:02:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48208 "EHLO
+        id S230307AbjDETwV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Apr 2023 15:52:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53980 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S238444AbjDEPCo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 11:02:44 -0400
-Received: from mail-oi1-x234.google.com (mail-oi1-x234.google.com [IPv6:2607:f8b0:4864:20::234])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 384B05272;
-        Wed,  5 Apr 2023 08:02:35 -0700 (PDT)
-Received: by mail-oi1-x234.google.com with SMTP id r14so21172122oiw.12;
-        Wed, 05 Apr 2023 08:02:35 -0700 (PDT)
+        with ESMTP id S233805AbjDETwO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 15:52:14 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0B7CA7EC3;
+        Wed,  5 Apr 2023 12:51:53 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id b20so143897829edd.1;
+        Wed, 05 Apr 2023 12:51:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1680706954;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:subject:cc:to:from:date:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=EhRyIgjjw/8FQdnlDM5/FtJDO4uPLSvO16WmWcJwo24=;
-        b=lkMbyXN0+Gr5hyqRu+Zh9p5RVRfg+ReWqCPNJ7jdZsha+KknsOJo+mt5KVBUSKx3QZ
-         rqC/1T9VIoLIsAL5nQLonAPIo8jqW8Q4Xum8/WK738sk0d/WYq166ZCace5xfurGM8/s
-         YOaiqcARQBZSSqvZv3j3MLAhK3QmCy/MPNm46qlSKki02kOZp8Eu6dFs1LokB2ZPPEX5
-         xegaqUhe12PytLTkFm2SnhXRqdjwEB4po+Us6DeWjFmOlLFzbhVCn3uVNxG59FZtuEDP
-         Qb5TdZ0sdRfuRn2CtzZrdfQPFWryS5xf0nc5sxlPZjgICd5t8xKsDyZ6LhG6XbQY8fan
-         PxAA==
+        d=googlemail.com; s=20210112; t=1680724311;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4jmTZjX1X3FXg9H1sf4UQGBO5sXLFiiXCVY7aW+kHp8=;
+        b=NjVCqpRAnFoEBZ48ogXGEW+4YfZqT5zxR0Pov6GzrC7aEWY7UPRmCspppFii6tQgko
+         cYOhq/2uC1j2CHd96MggprggDrHTyihwzuZMMGMTul1HTJV7B2HMbOrZm0hPA3FOz3It
+         TG7evng49bkGYf8FNi81zODWZpluQgUGSfhjOk05N0/7VyN8ig2i9QW1jji6Dnf9Pm2r
+         JF6UpZ3kl8Qh+b7/6q8+jTlv5iF/RRDT53sSHXfjyheyUbb15YDsZ1UjoXuB7vVSeB+n
+         B0z6T+WdereYMCMdYo2CeAfjRUj4cPYboYfNEb38i3e5yEl0HXIaGAh8k+ghaJ/raM+S
+         RMvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680706954;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:subject:cc:to:from:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=EhRyIgjjw/8FQdnlDM5/FtJDO4uPLSvO16WmWcJwo24=;
-        b=038xOcDiuMBqfsS+406SsyKdKbTGSjH48wOPctKvfVNbOIagLHF2OdPob9uXeMBWBO
-         TA/5/xy410CfzbihgZzjYuTZnjyu9Q5o1vy6z4YXPlL7Tn2Be7pixnyM945EgFLG4l2s
-         /vw6pVj6iYq0OErEmtYOSmFjmes/oR1YbbNWbMUPTkO0JWsLmoOHqiJUFOrchi25frCr
-         d0g6BWR00GYHPVN4rKvudPL3UO4oQlURxXdDWDcnAaJFmxOfIbFChMCD3AHP6xyzG5xj
-         63HGET7JRfhRR2mIYWixJnvniEQMPTb8Rl+y0baaOnDEbYSB+VuTa8hWN/PSY+XN9Vu3
-         ZLUQ==
-X-Gm-Message-State: AAQBX9dpUy1YkCR/5p3T9/Q8AZgvoI9S+yfMzoEdvr4oY3Ow4iEgLkAt
-        gyePIFWVoP1rl+6TwlU6/ck=
-X-Google-Smtp-Source: AKy350Yov0sMo2NJt0LYV9mCs+JV37iFxk0Ys3SbZ149H8aH8DmTFJ9rnf3su4Ql91BmzF3OAyyQVA==
-X-Received: by 2002:a05:6808:a0c:b0:384:833:2a79 with SMTP id n12-20020a0568080a0c00b0038408332a79mr1502838oij.48.1680706954285;
-        Wed, 05 Apr 2023 08:02:34 -0700 (PDT)
-Received: from neuromancer. (76-244-6-13.lightspeed.rcsntx.sbcglobal.net. [76.244.6.13])
-        by smtp.gmail.com with ESMTPSA id r84-20020acac157000000b003845f4991c7sm6349303oif.11.2023.04.05.08.02.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Apr 2023 08:02:14 -0700 (PDT)
-Message-ID: <642d8d76.ca0a0220.c2c2e.0f02@mx.google.com>
-X-Google-Original-Message-ID: <ZC2NaS2ohG7oCdLh@neuromancer.>
-Date:   Wed, 5 Apr 2023 10:02:01 -0500
-From:   Chris Morgan <macroalpha82@gmail.com>
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+        d=1e100.net; s=20210112; t=1680724311;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=4jmTZjX1X3FXg9H1sf4UQGBO5sXLFiiXCVY7aW+kHp8=;
+        b=AQGbQ1/AzH06y/+TeJGZpoonLfbhljlUcQaY0aA+J4SOL6ogq2LEI5XMJrNs7qYSHk
+         u9IxUyCl7QGruztf0hJBLMOboTAki77UE/8X/W0WvKjdUuT1YTOoSqr9gvHZ1CrdIS1+
+         KEAE301JXJn0cFHNpynqxfL9Arfo9eUZ3+HVKLUNb4ZAYoZdpTAHpRHNaTtAl1B3QkAO
+         INTyewP3InzyXTuu7112CJis7e0/Jvq60vlVVpCAIh5OnVTrFn0qFl6QJ2GP4ecayldP
+         UrNU4ovVeNIzvsmAJyQ6KHi+B1j9eTJXDuTxncRa0dsntXM1vpjTcwf8F0urNQOnHtgQ
+         Fk1Q==
+X-Gm-Message-State: AAQBX9fTiLXQp8dJSI+U+DCOgBdGBs5h/VtI8WlsUfEm4We+A2P8TDVQ
+        W8+6tvrohjHaVPFG4eGcsaPkBzXKfhH7g2vKOLtLAJsF
+X-Google-Smtp-Source: AKy350aArCCGAkSm5shKTMDLiqTFoeH+3CrxDyIaynshqyzBOjNchcKOmWgN9FetYNJgIBsi/zu28gfNbbIA9eAZ7m8=
+X-Received: by 2002:a17:907:c80b:b0:8f5:2e0e:6def with SMTP id
+ ub11-20020a170907c80b00b008f52e0e6defmr3032264ejc.0.1680724311314; Wed, 05
+ Apr 2023 12:51:51 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230403202440.276757-1-martin.blumenstingl@googlemail.com>
+ <20230403202440.276757-10-martin.blumenstingl@googlemail.com>
+ <642c609d.050a0220.46d72.9a10@mx.google.com> <CADcbR4LMY3BF_aNZ-gAWsvYHnRjV=qgWW_qmJhH339L_NgmqUQ@mail.gmail.com>
+ <CAFBinCC2fr42FiC_LqqMf2ASDA_vY1d-NJJLHOF6pW1MjFRAzw@mail.gmail.com> <642d8d76.ca0a0220.c2c2e.0f02@mx.google.com>
+In-Reply-To: <642d8d76.ca0a0220.c2c2e.0f02@mx.google.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Wed, 5 Apr 2023 21:51:40 +0200
+Message-ID: <CAFBinCAVSQjS9tzmLuN0xeEQacnb69Bh2CYaxqgMxXR1KtFD0g@mail.gmail.com>
+Subject: Re: [PATCH v4 9/9] wifi: rtw88: Add support for the SDIO based
+ RTL8821CS chipset
+To:     Chris Morgan <macroalpha82@gmail.com>
 Cc:     linux-wireless@vger.kernel.org,
         Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         Kalle Valo <kvalo@kernel.org>,
@@ -63,45 +67,34 @@ Cc:     linux-wireless@vger.kernel.org,
         Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>,
         Larry Finger <Larry.Finger@lwfinger.net>,
-        Pali =?iso-8859-1?Q?Roh=E1r?= <pali@kernel.org>
-Subject: Re: [PATCH v4 9/9] wifi: rtw88: Add support for the SDIO based
- RTL8821CS chipset
-References: <20230403202440.276757-1-martin.blumenstingl@googlemail.com>
- <20230403202440.276757-10-martin.blumenstingl@googlemail.com>
- <642c609d.050a0220.46d72.9a10@mx.google.com>
- <CADcbR4LMY3BF_aNZ-gAWsvYHnRjV=qgWW_qmJhH339L_NgmqUQ@mail.gmail.com>
- <CAFBinCC2fr42FiC_LqqMf2ASDA_vY1d-NJJLHOF6pW1MjFRAzw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAFBinCC2fr42FiC_LqqMf2ASDA_vY1d-NJJLHOF6pW1MjFRAzw@mail.gmail.com>
+        =?UTF-8?Q?Pali_Roh=C3=A1r?= <pali@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, Apr 04, 2023 at 11:27:49PM +0200, Martin Blumenstingl wrote:
-> Hello Chris,
-> 
-> On Tue, Apr 4, 2023 at 8:16 PM Chris Morgan <macroalpha82@gmail.com> wrote:
+On Wed, Apr 5, 2023 at 5:02=E2=80=AFPM Chris Morgan <macroalpha82@gmail.com=
+> wrote:
+>
+> On Tue, Apr 04, 2023 at 11:27:49PM +0200, Martin Blumenstingl wrote:
+> > Hello Chris,
 > >
-> > Please disregard. I was building against linux main not wireless-next.
-> > I have tested and it appears to be working well, even suspend works now.
-> Thanks for this update - this is great news!
-> It's good to hear that suspend is now also working fine for you.
-> 
-> It would be awesome if I could get a Tested-by for this patch. This
-> works by replying to the patch with a line that consists of
-> "Tested-by: your name <your email address>". See [0] for an example.
-
-Sorry, bad manners on my part.
-
-Tested-by: Chris Morgan <macromorgan@hotmail.com>
-
-> 
-> 
-> Best regards,
-> Martin
-> 
-> 
-> [0] https://lore.kernel.org/linux-wireless/4a76b5fe-c3d6-de44-c627-3f48fafdd905@lwfinger.net/
+> > On Tue, Apr 4, 2023 at 8:16=E2=80=AFPM Chris Morgan <macroalpha82@gmail=
+.com> wrote:
+> > >
+> > > Please disregard. I was building against linux main not wireless-next=
+.
+> > > I have tested and it appears to be working well, even suspend works n=
+ow.
+> > Thanks for this update - this is great news!
+> > It's good to hear that suspend is now also working fine for you.
+> >
+> > It would be awesome if I could get a Tested-by for this patch. This
+> > works by replying to the patch with a line that consists of
+> > "Tested-by: your name <your email address>". See [0] for an example.
+>
+> Sorry, bad manners on my part.
+>
+> Tested-by: Chris Morgan <macromorgan@hotmail.com>
+awesome - thank you! I'll include that in v5
