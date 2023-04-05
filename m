@@ -2,146 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A94E9C7619A
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 03:35:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 634DAC7619A
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 06:50:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236386AbjDEDfb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 4 Apr 2023 23:35:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37822 "EHLO
+        id S236840AbjDEGuh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Apr 2023 02:50:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51258 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231589AbjDEDf3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 4 Apr 2023 23:35:29 -0400
-Received: from lelv0142.ext.ti.com (lelv0142.ext.ti.com [198.47.23.249])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 311093C3F;
-        Tue,  4 Apr 2023 20:35:27 -0700 (PDT)
-Received: from lelv0266.itg.ti.com ([10.180.67.225])
-        by lelv0142.ext.ti.com (8.15.2/8.15.2) with ESMTP id 3353Z3IG017329;
-        Tue, 4 Apr 2023 22:35:03 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=ti.com;
-        s=ti-com-17Q1; t=1680665703;
-        bh=DV4jgkhSH/8JsasYkUzg03N4e1jfAh5IuAJx+n9i4Hg=;
-        h=Date:Subject:To:CC:References:From:In-Reply-To;
-        b=zSdtN4yHV/M3mw8JcqykdpdiEVQqv8xtlcweabc0fvWR6rJ8qCkZmzEYSOLpCUteG
-         FWZ9p2LT/TX6JxBmgBuVf+n2pncS8zcSkv72OB92DcYHnb8grYYdWZ9TVh+qhDcVM4
-         c2MczjsLSb2uaSU+mPgMpNqFhX/gUci2W2gThdC4=
-Received: from DLEE102.ent.ti.com (dlee102.ent.ti.com [157.170.170.32])
-        by lelv0266.itg.ti.com (8.15.2/8.15.2) with ESMTPS id 3353Z3cu029333
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=FAIL);
-        Tue, 4 Apr 2023 22:35:03 -0500
-Received: from DLEE110.ent.ti.com (157.170.170.21) by DLEE102.ent.ti.com
- (157.170.170.32) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16; Tue, 4
- Apr 2023 22:35:03 -0500
-Received: from lelv0326.itg.ti.com (10.180.67.84) by DLEE110.ent.ti.com
- (157.170.170.21) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256_P256) id 15.1.2507.16 via
- Frontend Transport; Tue, 4 Apr 2023 22:35:03 -0500
-Received: from [172.24.145.182] (ileaxei01-snat.itg.ti.com [10.180.69.5])
-        by lelv0326.itg.ti.com (8.15.2/8.15.2) with ESMTP id 3353Z1oZ022632;
-        Tue, 4 Apr 2023 22:35:01 -0500
-Message-ID: <eea63f29-54ce-ef82-62c6-92193558908f@ti.com>
-Date:   Wed, 5 Apr 2023 09:05:00 +0530
+        with ESMTP id S236708AbjDEGug (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 02:50:36 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8037840F7
+        for <linux-mmc@vger.kernel.org>; Tue,  4 Apr 2023 23:50:35 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id d7so305695lfj.3
+        for <linux-mmc@vger.kernel.org>; Tue, 04 Apr 2023 23:50:35 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680677434;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=t1f4W5nQPbYeNaKqHsc1ito3X+7lccB4+/1nqAy/3Fw=;
+        b=ahcX1Mj/Lz8JlGmHoQMhBmG286JRJ+psLEZRIr5cwEc0xQvzs4vdjPksPVR1FBWIpU
+         Djn9PqQGlEIUD4t0147DTiPGuqmvveSHhD7dtNfz4ScGz5IIM7zo2H3COfVdGj6WWt8H
+         RXwSbyud7Wm9r6D8LHd09HPyPSWSb6iKA+xCpyCivOR1kgcu2rkQ7Z6s/Y182rrRftru
+         oEsms1Y2yO+rn0W7dwIXXQq3rMDAGKNgb96RZyhw14vGoW2CHNFnY4ppxyvg37f5es+t
+         wIRKv20wAUiQSHBM3VuPp8JIAq7Y8uosXjuIVt4x9uS0EjidzsC+v7A7nsHx1JfSTqdH
+         dKcQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680677434;
+        h=cc:to:content-transfer-encoding:mime-version:message-id:date
+         :subject:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=t1f4W5nQPbYeNaKqHsc1ito3X+7lccB4+/1nqAy/3Fw=;
+        b=pLgFtPi7yndsyswrxeNLxEFUSXUAj38QfWJEG2NhR2KBKk7zF6waqoHk2AIzI68Jie
+         8rTkzpuNJR3zONUwLM938UEZt6XNbHXB8pHueb2Z3fZXOvyBsvPuHlKjDjNUCZ8ExJSB
+         XrTsMaBXs5xz3bjy4gLspt/KI9QsR6mh5f+PHow41wT4oTB9xlu+6/x8JIIXp+d84Z8Z
+         7c5Ta0rVrvsw9+2x3COtBKvKBRBMGaj5ofmJkQqIqzjG+m2JUMIqNtF1kjx81yyi9q4W
+         lqlSJN831uiVT9ml8mqXiqiTHBHXrlmiGbbQBqWmPuHKHm3ZhAdldxl1dbPIMuo7gZHU
+         UzHg==
+X-Gm-Message-State: AAQBX9fiMLX9LQyBimAR4+ONZr4YfA+yNNb0eNFXqwBsYyF6Z3m0vlW4
+        vQq2IxEcXhavtlsq0Ju0dh0eOA==
+X-Google-Smtp-Source: AKy350aafRTQRZv1RBmxir0BrkSNZZANJ0/Oi8m+R1lGq57377+Q7VZbW6GtW5JS1sds7/u432YZXA==
+X-Received: by 2002:a05:6512:143:b0:4eb:1048:1285 with SMTP id m3-20020a056512014300b004eb10481285mr1241185lfo.47.1680677433734;
+        Tue, 04 Apr 2023 23:50:33 -0700 (PDT)
+Received: from [192.168.1.2] (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
+        by smtp.gmail.com with ESMTPSA id z19-20020ac25df3000000b004eb274b3a43sm2683086lfq.134.2023.04.04.23.50.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 04 Apr 2023 23:50:33 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+Subject: [PATCH 00/13] Fix busydetect on Ux500 PL180/MMCI
+Date:   Wed, 05 Apr 2023 08:50:26 +0200
+Message-Id: <20230405-pl180-busydetect-fix-v1-0-28ac19a74e5e@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH v3] mmc: sdhci_am654: Add support for PM suspend/resume
-Content-Language: en-US
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230331101619.4117312-1-vigneshr@ti.com>
- <CAPDyKFqQZgmd_ydbjKJ+5-Dte9i2=DqWwZNgVHi2MnH+q7pZ1g@mail.gmail.com>
- <9029896f-d6fb-e341-9544-1104ecfa9f8a@ti.com>
- <CAPDyKFpXfRqx4WLuiU6m=rgM9A=21KfDTuEb5TboaOC+w_hMwg@mail.gmail.com>
-From:   Vignesh Raghavendra <vigneshr@ti.com>
-In-Reply-To: <CAPDyKFpXfRqx4WLuiU6m=rgM9A=21KfDTuEb5TboaOC+w_hMwg@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-EXCLAIMER-MD-CONFIG: e1e8a2fd-e40a-4ac6-ac9b-f7e9cc9ee180
+X-B4-Tracking: v=1; b=H4sIADIaLWQC/x2N0QrCMAxFf2Xk2UC2apn+iviQttEVtI6kijL27
+ 3Y+Hs493AVMNIvBqVtA5Z0tP0uDftdBnLjcBHNqDAMNjvZ0wPnej4ThZd8kVWLFa/6g90zOU3L
+ HkaGlgU0wKJc4bfGDrYpuYlZp+//f+bKuP+AQnhB/AAAA
+To:     Stefan Hansson <newbyte@disroot.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>
+Cc:     linux-mmc@vger.kernel.org,
+        linux-stm32@st-md-mailman.stormreply.com,
+        Linus Walleij <linus.walleij@linaro.org>
+X-Mailer: b4 0.12.0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+This series fixes a pretty serious problem in the MMCI
+busy detect handling, discovered only after going up and
+down a ladder of refactorings.
 
+The code is written expecting the Ux500 busy detect
+to fire two interrupts: one at the start of the busy
+signalling and one at the end of the busy signalling.
 
-On 04/04/23 17:24, Ulf Hansson wrote:
-> On Mon, 3 Apr 2023 at 19:42, Vignesh Raghavendra <vigneshr@ti.com> wrote:
->>
->> Hi,
->>
->> On 31/03/23 20:01, Ulf Hansson wrote:
->>> On Fri, 31 Mar 2023 at 12:17, Vignesh Raghavendra <vigneshr@ti.com> wrote:
->>>>
->>>> From: Aswath Govindraju <a-govindraju@ti.com>
->>>>
->>>> Add support for suspend/resume and pm_runtime resume/suspend.
->>>>
->>>> Signed-off-by: Aswath Govindraju <a-govindraju@ti.com>
->>>> Signed-off-by: Georgi Vlaev <g-vlaev@ti.com>
->>>> Signed-off-by: Vignesh Raghavendra <vigneshr@ti.com>
->>>> ---
->>>>
->>>> Since RFC v2:
->>>> Address all comments around sdhci_am654_remove()
->>>> Set autosuspend_delay to -1 as SDHCI will host rootfs via SD/eMMC and
->>>> autosuspend can cause long latency for user interactive applications
->>>
->>> I am curious about the "long" latency. Do you have some data that you
->>> can share for how long it takes to runtime-resume the device?
->>>
->>
->> As part of wider teting, I discovered that on certain boards (J721e EVM
->> for example), there is a latency of ~500ms for controller to start up
->> (HW limitation around card detect debounce timer [0]). This results in
->> momentary (but noticeable) lag when playing a video for example.
-> 
-> Ohh, that kind of sucks. There is no way to workaround that I guess?
+The root cause of the problem seen on some devices
+is that only the first IRQ arrives, and then the device
+hangs, waiting perpetually for the next IRQ to arrive.
 
-Unfortunately no,
+This is eventually solved by adding a timeout using
+a delayed work that fire after 10 ms if the busy detect
+has not stopped at this point. (Other delay spans can
+be suggested.) This is the last patch in the series.
 
-> 
->>
->>
->> [0[
->> https://elixir.bootlin.com/linux/latest/source/drivers/mmc/host/sdhci_am654.c#L361
->>
->>
->>> Using -1 as the default value for the autosuspend_delay seems fine to
->>> me, but did you consider using a longer timeout than the common 100ms?
->>> Could that perhaps be a better default option?
->>
->> Its more of the startup delay than how long controller should remain
->> active. So tuning autosuspend_delay does not seem to help.
->>
->>>
->>> Of course, in the end this is a choice of performance in favor of
->>> wasting energy.
->>
->> Yes, this is choice of opt-in vs opt-out. Users can tune the delay via
->> sysfs as needed.
->>
->> I am setting it to -1 to avoid regressing any userspace apps (vs
->> enabling autosuspend and then asking impacted users to set to -1)
-> 
-> Alright, makes sense!
-> 
->>
->> One solution is to use -1 on platforms where latency is significant
->> based on compatible / SoC detection?
-> 
-> That's a good idea! It seems a pity to make all SoCs suffer, if there
-> is only a subset that has this problem. Although, let's consider that
-> as an improvement that can be done on top of $subject patch.
+I included the rewrite of the entire busy detect logic
+to use a state machine as this makes it way easier to
+debug and will print messages about other error
+conditions as well.
 
-Sure, will follow up with a patch to reduce autosuspend_delay on
-platforms w/o above issue.
+The problem affects especially the Skomer
+(Samsung GT-I9070) and Kyle (Samsung SGH-I407).
 
-> 
-> So, applied for next, thanks!
+It is fine to just apply this for the -next kernel,
+despite it fixes the busy detect that has been broken
+for these devices for a while, we can think about
+backporting a simpler version of the timeout for
+stable kernels if we want.
 
-Great, thanks!
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+Linus Walleij (13):
+      mmc: mmci: Only call busy_complete if callback defined
+      mmc: mmci: Clear busy_status when starting command
+      mmc: mmci: Unwind big if() clause
+      mmc: mmci: Stash status while waiting for busy
+      mmc: mmci: Break out error check in busy detect
+      mmc: mmci: Make busy complete state machine explicit
+      mmc: mmci: Retry the busy start condition
+      mmc: mmci: Use state machine state as exit condition
+      mmc: mmci: Use a switch statement machine
+      mmc: mmci: Break out a helper function
+      mmc: mmci: mmci_card_busy() from state machine
+      mmc: mmci: Drop end IRQ from Ux500 busydetect
+      mmc: mmci: Add busydetect timeout
 
+ drivers/mmc/host/mmci.c             | 165 +++++++++++++++++++++++++++---------
+ drivers/mmc/host/mmci.h             |  17 ++++
+ drivers/mmc/host/mmci_stm32_sdmmc.c |   6 +-
+ 3 files changed, 149 insertions(+), 39 deletions(-)
+---
+base-commit: fe15c26ee26efa11741a7b632e9f23b01aca4cc6
+change-id: 20230405-pl180-busydetect-fix-66a0360d398a
+
+Best regards,
 -- 
-Regards
-Vignesh
+Linus Walleij <linus.walleij@linaro.org>
+
