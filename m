@@ -2,52 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8629C7619A
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 20:07:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DCFC9C77B6C
+	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 20:07:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233341AbjDEUHo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Apr 2023 16:07:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44684 "EHLO
+        id S233704AbjDEUHq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Apr 2023 16:07:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232849AbjDEUHn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 16:07:43 -0400
-Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28E134C3F;
-        Wed,  5 Apr 2023 13:07:38 -0700 (PDT)
-Received: by mail-ed1-x52b.google.com with SMTP id eh3so143955077edb.11;
-        Wed, 05 Apr 2023 13:07:38 -0700 (PDT)
+        with ESMTP id S233384AbjDEUHo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 16:07:44 -0400
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DAA014EEE;
+        Wed,  5 Apr 2023 13:07:42 -0700 (PDT)
+Received: by mail-ed1-x536.google.com with SMTP id eg48so143883584edb.13;
+        Wed, 05 Apr 2023 13:07:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1680725256;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=exrZyViPkoOx94plegkgtuiHtZ8ZlAwSXBuBbxC1EA4=;
-        b=owC4MP3dr1KtLO215AZTPqDCxSTXyjyo/SEWZ0UHEt1Ex/di6Vf/uAW2pNPj3IEjvy
-         uuYPNnRCcn0kCJ5usjTx+244dN0W+AqoD60wgsZeU0HAkdvrzC1lqMo8tC7DtFbzPbOR
-         fUcjMN9/+dT1GLqi4vsQ5AILCsCGEjwyq6eRycteh2AK5E1xuluYnfBqK6/+/tgJIeNA
-         Ew3WOsJECdoukq5kyNP2zGXfkqYAVTlA8QyAvN22bwAAsSkLuSyH4udDIelWsr5sSQme
-         hrSlJzXkCEFHSLGRCVq6zA9xc8skam8q3OhfbLutukrek7K4aabaDmzC2YAaOw+wwV/A
-         js8g==
+        d=googlemail.com; s=20210112; t=1680725261;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=pVt1Hg2y+1LDZ/2pY/O4ZqeMD6lt6NR+npC2QpYr9Ek=;
+        b=UQEMiKWiIVAlrWUJ7nA6Bzyg0Phv0/wfXfQOc3IbWR7U9xjLfkA0U1SZd47xW4fTOo
+         bb27OdXg2jbA3fT0bVkGi8YYRhmRD5cazJhhz6zy3E9fZGe64m8l8fChrXFAhAddaCDl
+         JOoZVhm5o5mpGn27b+KUff3fLMllF7Lyx+ghQIOAPZgbh53mqzYAj1qr2ZFMPajhH6KM
+         r+PjmnwahxVsAM97JwFVLsP+R/aDZYaOPax3oOUiPxdJu2r0/1iSQgOygFe0ukeDG95s
+         sWiADkzc0QNVLbn8UaI+fm84wgJyeKsqsHp9hwtIgA59OonYPi5JDwUjK2ysHJL1xAX9
+         emRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680725256;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=exrZyViPkoOx94plegkgtuiHtZ8ZlAwSXBuBbxC1EA4=;
-        b=5Vwr2nS+5YuDeo7mN89wmaj+LIRu+nTIZ9O93mBuFfmcV7m7fXnMjToLmGKuuHMKp5
-         /d7LjGz7GVYsCZNL5L0l2m3NAmZhTylS0jWGNmR4Fk05oynT+LU+Hj18L2bazSm/mxIQ
-         na3iqAt8Qpmz2GEvqhA0mKQWE3W+PTdth5EeBHd0odD3V8MebJFMVOpgFXvzCPu3VYTm
-         OCQVikrQL/q8JD5rEjhKLNL3XoYUJwp/nlALMgQx3IqPVK+HHCpG1Ni1DGyBDpu1GnPV
-         enToJDVINGHTMJ78YzpSJIb4Xzku3fpfdQS4K9Mn/mEmDn3cju3fOJnLF2FaFVw//4I/
-         IQDA==
-X-Gm-Message-State: AAQBX9fkcC6rAxivBk+5jdSp6WidCKZP+z7zai29AzGxA5wsb3m7bwI9
-        g6MaO+3D2gXWEQsGcSiW4q6rK6jqF5nfYw==
-X-Google-Smtp-Source: AKy350Z7WaxHcbyUi4HMpQ1AIP2F/AdSgfJpilKsMLl9Gjyrm6rqI3zrvS9+PfFlrMXQvKrtW/IUCg==
-X-Received: by 2002:a17:906:a409:b0:92b:f8ce:4e75 with SMTP id l9-20020a170906a40900b0092bf8ce4e75mr4391340ejz.72.1680725256204;
-        Wed, 05 Apr 2023 13:07:36 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1680725261;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=pVt1Hg2y+1LDZ/2pY/O4ZqeMD6lt6NR+npC2QpYr9Ek=;
+        b=pwiZqTS/5ESQIBWCLxvdcB8pu7NWYiyLo0dgbgjyKImwC0QuhTuzMDNd5DdIEraKhF
+         rEe/qsVEbLW0RCvZej7O/lI7NR2WHI+Dp2/Hz6OZWmD8pIeijneGh7UGmLLv+IvSfZFi
+         jgQSiLwgRJyfSUukgE4KEmlGwcokOCKq/i3XIksSmus/NUMXTRbcAO42toJdxnBM5b/n
+         /Qm0abt20/7vyqnw04kYk8kSio5RkfcivqzEvf+Mo+GUHxx9VaFMlX+a+tZ2Z9LFNVlg
+         NBcK/ZKL/M5OZ7NykAHh275jJqLbtTNBekEkfOZZXJa/oGnsC9fAiGsScxcWwJdXRZzL
+         tM7A==
+X-Gm-Message-State: AAQBX9cSKmepOrSg5voz7kGB2kXy/FV+BtKXyh+VBDaO2DYlnPLh8Vj5
+        ak6jVQR9caE9gdp4jjJ6G75rWWx164ZGlw==
+X-Google-Smtp-Source: AKy350Z0O9ks33BinzCFA3+DadRwD/YP5JFFK2DErYwJaRH0ugekZY0JkQm2ttpv67foiywDmmck0A==
+X-Received: by 2002:a17:907:20b7:b0:947:630b:35f9 with SMTP id pw23-20020a17090720b700b00947630b35f9mr4015977ejb.74.1680725261208;
+        Wed, 05 Apr 2023 13:07:41 -0700 (PDT)
 Received: from localhost.localdomain (dynamic-2a01-0c22-7a4e-3100-0000-0000-0000-0e63.c22.pool.telefonica.de. [2a01:c22:7a4e:3100::e63])
-        by smtp.googlemail.com with ESMTPSA id a23-20020a170906369700b0092a59ee224csm7724873ejc.185.2023.04.05.13.07.35
+        by smtp.googlemail.com with ESMTPSA id a23-20020a170906369700b0092a59ee224csm7724873ejc.185.2023.04.05.13.07.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Apr 2023 13:07:35 -0700 (PDT)
+        Wed, 05 Apr 2023 13:07:40 -0700 (PDT)
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 To:     linux-wireless@vger.kernel.org
 Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
@@ -62,135 +63,63 @@ Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
         Simon Horman <simon.horman@corigine.com>,
         Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v5 0/9] rtw88: Add SDIO support
-Date:   Wed,  5 Apr 2023 22:07:20 +0200
-Message-Id: <20230405200729.632435-1-martin.blumenstingl@googlemail.com>
+Subject: [PATCH v5 5/9] wifi: rtw88: main: Reserve 8 bytes of extra TX headroom for SDIO cards
+Date:   Wed,  5 Apr 2023 22:07:25 +0200
+Message-Id: <20230405200729.632435-6-martin.blumenstingl@googlemail.com>
 X-Mailer: git-send-email 2.40.0
+In-Reply-To: <20230405200729.632435-1-martin.blumenstingl@googlemail.com>
+References: <20230405200729.632435-1-martin.blumenstingl@googlemail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Recently the rtw88 driver has gained locking support for the "slow" bus
-types (USB, SDIO) as part of USB support. Thanks to everyone who helped
-make this happen!
+For SDIO host controllers with DMA support the TX buffer physical memory
+address need to be aligned at an 8-byte boundary. Reserve 8 bytes of
+extra TX headroom so we can align the data without re-allocating the
+transmit buffer.
 
-Based on the USB work (especially the locking part and various
-bugfixes) this series adds support for SDIO based cards. It's the
-result of a collaboration between Jernej and myself. Neither of us has
-access to the rtw88 datasheets. All of our work is based on studying
-the RTL8822BS and RTL8822CS vendor drivers and trial and error.
+While here, also remove the TODO comment regarding extra headroom for
+USB and SDIO. For SDIO the extra headroom is now handled and for USB it
+was not needed so far.
 
-Jernej and myself have tested this with RTL8822BS and RTL8822CS cards.
-Other users have confirmed that RTL8821CS support is working as well.
-RTL8723DS may also work (we tried our best to handle rtw_chip_wcpu_11n
-where needed) but has not been tested at this point.
+Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
+Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+---
+Changes since v4:
+- none
 
-Jernej's results with a RTL8822BS:
-- Main functionality works
-- Had a case where no traffic got across the link until he issued a
-  scan
+Changes since v3:
+- add Ping-Ke's reviewed-by (again, thank you!)
 
-My results with a RTL8822CS:
-- 2.4GHz and 5GHz bands are both working
-- TX throughput on a 5GHz network is between 50 Mbit/s and 90 Mbit/s
-- RX throughput on a 5GHz network is at 19 Mbit/s (this seems to be
-  an combination of the location of my board and the cheap antenna
-  which are both hurting RX performance)
+Changes since v2:
+- none
 
-A user shared his results on his own RTL8822CS off-list with me:
-- 50Mbit/s throughput in both directions
-
-A user shared his results on RTL8821CS off-list with me:
-- 50Mbps down and 25Mbps on a 5GHz network
+Changes since v1:
+- none
 
 
-Changes since v4 at [3]:
-- use reverse xmas tree sorting for variables in patch 2 as suggested
-  by Simon Horman
-- small boolean statement simplification as suggested by Simon Horman
-  (also affecting patch 2)
-- fix typo in a comment in patch 2 as spotted by Simon Horman
-- collect Pali's reviewed-by for patch 5
-- collect Chris' tested-by for patch 9
+ drivers/net/wireless/realtek/rtw88/main.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Changes since v3 at [2]:
-- fix rmmod / shutdown of the sdio.c module
-- use IS_ALIGNED consistently in sdio.c
-- direct/indirect read improvements which means that we can now read
-  and write registers on older RTW_WCPU_11N cards. also this fixed
-  potential IO issues with direct (instead of indirect) writes on
-  SDIO 3.0 cards. thanks to Ping-Ke for the additional insights
-- sorted SDIO ID entries by their value
-- removed paragraph about RFC status of this series from the
-  cover-letter
-
-Changes since v2 at [1]:
-- dropped RFC prefix as the majority of fixes were either addressing
-  false positive smatch warnings, include ordering and other smaller
-  fixes
-- RX aggregation is now enabled for RTL8822CS as either the recently
-  submitted firmware update for this chip has fixed the performance
-  issue or an update of my wifi AP firmware. Either way: there's only
-  a 5% difference in RX throughput in my tests now - compared to 50%
-  from before
-- fixed suspend/resume (tested on X96 Air with Amlogic SM1 SoC)
-- build fix to not break bisectability
-
-Changes since v1 at [0]:
-- removed patches 1-8 as they have been submitted and separately (they
-  were indepdent and this helped cutting down the size of this series)
-- dropped patch "rtw88: ps: Increase LEAVE_LPS_TRY_CNT for SDIO based
-  chipsets" as the underlying issue has been fixed - most likely with
-  upstream commit 823092a53556eb ("wifi: rtw88: fix race condition
-  when doing H2C command")
-- rework the code so we don't need a new HCI specific power_switch
-  callback by utilizing the RTW_FLAG_POWERON flag which was recently
-  introduced
-- various patches include the feedback from reviewers and build
-  testing robots (see the individual patches for details)
-
-
-[0] https://lore.kernel.org/lkml/a2449a2d1e664bcc8962af4667aa1290@realtek.com/T/
-[1] https://lore.kernel.org/linux-wireless/20230310202922.2459680-1-martin.blumenstingl@googlemail.com/
-[2] https://lore.kernel.org/linux-wireless/20230320213508.2358213-1-martin.blumenstingl@googlemail.com/
-[3] https://lore.kernel.org/linux-wireless/20230403202440.276757-1-martin.blumenstingl@googlemail.com/
-
-
-Jernej Skrabec (1):
-  wifi: rtw88: Add support for the SDIO based RTL8822BS chipset
-
-Martin Blumenstingl (8):
-  wifi: rtw88: Clear RTW_FLAG_POWERON early in rtw_mac_power_switch()
-  wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
-  wifi: rtw88: mac: Support SDIO specific bits in the power on sequence
-  wifi: rtw88: main: Add the {cpwm,rpwm}_addr for SDIO based chipsets
-  wifi: rtw88: main: Reserve 8 bytes of extra TX headroom for SDIO cards
-  mmc: sdio: add Realtek SDIO vendor ID and various wifi device IDs
-  wifi: rtw88: Add support for the SDIO based RTL8822CS chipset
-  wifi: rtw88: Add support for the SDIO based RTL8821CS chipset
-
- drivers/net/wireless/realtek/rtw88/Kconfig    |   36 +
- drivers/net/wireless/realtek/rtw88/Makefile   |   12 +
- drivers/net/wireless/realtek/rtw88/debug.h    |    1 +
- drivers/net/wireless/realtek/rtw88/mac.c      |   53 +-
- drivers/net/wireless/realtek/rtw88/mac.h      |    1 -
- drivers/net/wireless/realtek/rtw88/main.c     |    9 +-
- drivers/net/wireless/realtek/rtw88/reg.h      |   12 +
- .../net/wireless/realtek/rtw88/rtw8821cs.c    |   36 +
- .../net/wireless/realtek/rtw88/rtw8822bs.c    |   36 +
- .../net/wireless/realtek/rtw88/rtw8822cs.c    |   36 +
- drivers/net/wireless/realtek/rtw88/sdio.c     | 1394 +++++++++++++++++
- drivers/net/wireless/realtek/rtw88/sdio.h     |  178 +++
- include/linux/mmc/sdio_ids.h                  |    9 +
- 13 files changed, 1804 insertions(+), 9 deletions(-)
- create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8821cs.c
- create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8822bs.c
- create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8822cs.c
- create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.c
- create mode 100644 drivers/net/wireless/realtek/rtw88/sdio.h
-
+diff --git a/drivers/net/wireless/realtek/rtw88/main.c b/drivers/net/wireless/realtek/rtw88/main.c
+index cdc4703ead5f..1cb553485cff 100644
+--- a/drivers/net/wireless/realtek/rtw88/main.c
++++ b/drivers/net/wireless/realtek/rtw88/main.c
+@@ -2163,9 +2163,11 @@ int rtw_register_hw(struct rtw_dev *rtwdev, struct ieee80211_hw *hw)
+ 	int max_tx_headroom = 0;
+ 	int ret;
+ 
+-	/* TODO: USB & SDIO may need extra room? */
+ 	max_tx_headroom = rtwdev->chip->tx_pkt_desc_sz;
+ 
++	if (rtw_hci_type(rtwdev) == RTW_HCI_TYPE_SDIO)
++		max_tx_headroom += RTW_SDIO_DATA_PTR_ALIGN;
++
+ 	hw->extra_tx_headroom = max_tx_headroom;
+ 	hw->queues = IEEE80211_NUM_ACS;
+ 	hw->txq_data_size = sizeof(struct rtw_txq);
 -- 
 2.40.0
 
