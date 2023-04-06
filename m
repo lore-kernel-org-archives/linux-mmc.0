@@ -2,124 +2,117 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3B8BDC7619A
-	for <linux-mmc@archiver.kernel.org>; Wed,  5 Apr 2023 20:08:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F33BC7619A
+	for <linux-mmc@archiver.kernel.org>; Thu,  6 Apr 2023 02:32:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234355AbjDEUIF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 5 Apr 2023 16:08:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44700 "EHLO
+        id S234832AbjDFCcN convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 5 Apr 2023 22:32:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54578 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233294AbjDEUHn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 16:07:43 -0400
-Received: from mail-ed1-x535.google.com (mail-ed1-x535.google.com [IPv6:2a00:1450:4864:20::535])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 29ECC4EDB;
-        Wed,  5 Apr 2023 13:07:42 -0700 (PDT)
-Received: by mail-ed1-x535.google.com with SMTP id h8so144026080ede.8;
-        Wed, 05 Apr 2023 13:07:42 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1680725260;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=dkhlZEl4RroxwrI00S3LvqdnKVm2/rkrNG2QmpLdPZU=;
-        b=cFWOxmlJ6G4FLX66WtUl/G7UTqGkvTYzUVtYZ2xNpATIU/v6qsQytvDFC4euhkd2PB
-         PyKsHLWK8xFq5bU0aWPkCNUorWQcFszCsTV3Qai2HpYpUfQiWbQ6XKSxRM322jqTtpKa
-         VC6+6MIdJKoStBG3WXZ1iRvuoJ1uFuadGdg2GBMZr4pbOkF+B3eT5eYdJiN877YGgC+3
-         BJD+rBhEMGI7EVWhJjQr0fOg6wl44cOojBzIXaiZvQ8CC5tvG//oIsvB2/iEj/qzBY2m
-         scUhudPUJI4S/+yWEozPh7YuuZ3dUhoVgHplzr7/1F3uyRnC3kYSX+C6KElWqLb3jVyH
-         T8ZQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680725260;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=dkhlZEl4RroxwrI00S3LvqdnKVm2/rkrNG2QmpLdPZU=;
-        b=Lk7Tev580MviomcmExGtCFi58T9x7UAriyqBzO6tIbXs39e15YyVF9edVHVx+PqHcF
-         IiA+9uQVhFG0sOnkfMkf+IBTbqSgBnFVI32civ0L8rGT1ZLF/0W3pZzEtWD8LHzd/t6c
-         pwQ2py1p75BYy4+bll4iipZwqjihkcKWYKWBpbbGyPWaxpuei+B2vCGryfnOz62oRIXZ
-         hK5DTeRHEz4ZGvQJBlS17WoXsjUzRJdIyUhbtRNczLRh1eanyp7FbY1G/BrF0xk9TMdC
-         7gj09vlI6LtIdThznlaGu8bMzYVHHiLX+x2jAg1fbJALDyfyUMKxVPjhBsycRUDtboHd
-         qBSQ==
-X-Gm-Message-State: AAQBX9d3bKohVLJHRSH3HLu8xu2ElbqrUkweFkHoNjEuNvBu/ZIZ/oeH
-        aQXA2Xc8ASIK9D/R1jOc3GuLIXoi6jZ0EA==
-X-Google-Smtp-Source: AKy350Z1byxBzJE6VFTxDDC3PSwn3D166NHQTbdk57q8cFcF/efncbNSuCen/Aqdwl49TiOfI9Lu7w==
-X-Received: by 2002:a17:907:1c9f:b0:8f2:62a9:6159 with SMTP id nb31-20020a1709071c9f00b008f262a96159mr4632277ejc.2.1680725260315;
-        Wed, 05 Apr 2023 13:07:40 -0700 (PDT)
-Received: from localhost.localdomain (dynamic-2a01-0c22-7a4e-3100-0000-0000-0000-0e63.c22.pool.telefonica.de. [2a01:c22:7a4e:3100::e63])
-        by smtp.googlemail.com with ESMTPSA id a23-20020a170906369700b0092a59ee224csm7724873ejc.185.2023.04.05.13.07.39
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Apr 2023 13:07:39 -0700 (PDT)
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-To:     linux-wireless@vger.kernel.org
-Cc:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
+        with ESMTP id S231889AbjDFCcK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 5 Apr 2023 22:32:10 -0400
+Received: from rtits2.realtek.com.tw (rtits2.realtek.com [211.75.126.72])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 863238A53;
+        Wed,  5 Apr 2023 19:32:07 -0700 (PDT)
+Authenticated-By: 
+X-SpamFilter-By: ArmorX SpamTrap 5.77 with qID 3362VKyiC027848, This message is accepted by code: ctloc85258
+Received: from mail.realtek.com (rtexh36506.realtek.com.tw[172.21.6.27])
+        by rtits2.realtek.com.tw (8.15.2/2.81/5.90) with ESMTPS id 3362VKyiC027848
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=OK);
+        Thu, 6 Apr 2023 10:31:20 +0800
+Received: from RTEXDAG02.realtek.com.tw (172.21.6.101) by
+ RTEXH36506.realtek.com.tw (172.21.6.27) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2507.17; Thu, 6 Apr 2023 10:31:39 +0800
+Received: from RTEXMBS04.realtek.com.tw (172.21.6.97) by
+ RTEXDAG02.realtek.com.tw (172.21.6.101) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.7; Thu, 6 Apr 2023 10:31:39 +0800
+Received: from RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02]) by
+ RTEXMBS04.realtek.com.tw ([fe80::b4a2:2bcc:48d1:8b02%5]) with mapi id
+ 15.01.2375.007; Thu, 6 Apr 2023 10:31:39 +0800
+From:   Ping-Ke Shih <pkshih@realtek.com>
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
+CC:     Yan-Hsuan Chuang <tony0620emma@gmail.com>,
         Kalle Valo <kvalo@kernel.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-kernel@vger.kernel.org, netdev@vger.kernel.org,
-        linux-mmc@vger.kernel.org, Chris Morgan <macromorgan@hotmail.com>,
-        Nitin Gupta <nitin.gupta981@gmail.com>,
-        Neo Jou <neojou@gmail.com>, Pkshih <pkshih@realtek.com>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "netdev@vger.kernel.org" <netdev@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Chris Morgan <macromorgan@hotmail.com>,
+        "Nitin Gupta" <nitin.gupta981@gmail.com>,
+        Neo Jou <neojou@gmail.com>,
         Jernej Skrabec <jernej.skrabec@gmail.com>,
         Larry Finger <Larry.Finger@lwfinger.net>,
-        =?UTF-8?q?Pali=20Roh=C3=A1r?= <pali@kernel.org>,
-        Simon Horman <simon.horman@corigine.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH v5 4/9] wifi: rtw88: main: Add the {cpwm,rpwm}_addr for SDIO based chipsets
-Date:   Wed,  5 Apr 2023 22:07:24 +0200
-Message-Id: <20230405200729.632435-5-martin.blumenstingl@googlemail.com>
-X-Mailer: git-send-email 2.40.0
-In-Reply-To: <20230405200729.632435-1-martin.blumenstingl@googlemail.com>
+        =?iso-8859-1?Q?Pali_Roh=E1r?= <pali@kernel.org>,
+        Simon Horman <simon.horman@corigine.com>
+Subject: RE: [PATCH v5 2/9] wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
+Thread-Topic: [PATCH v5 2/9] wifi: rtw88: sdio: Add HCI implementation for
+ SDIO based chipsets
+Thread-Index: AQHZZ/pJyJYNwZ4fx0+w0E4CUS/4Nq8dj67A
+Date:   Thu, 6 Apr 2023 02:31:39 +0000
+Message-ID: <0c9e1c2b3bc04abcb79de87610382d6a@realtek.com>
 References: <20230405200729.632435-1-martin.blumenstingl@googlemail.com>
+ <20230405200729.632435-3-martin.blumenstingl@googlemail.com>
+In-Reply-To: <20230405200729.632435-3-martin.blumenstingl@googlemail.com>
+Accept-Language: en-US, zh-TW
+Content-Language: zh-TW
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [172.21.69.188]
+x-kse-serverinfo: RTEXDAG02.realtek.com.tw, 9
+x-kse-antispam-interceptor-info: fallback
+x-kse-antivirus-interceptor-info: fallback
+Content-Type: text/plain; charset="iso-8859-1"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-KSE-AntiSpam-Interceptor-Info: fallback
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Initialize the rpwm_addr and cpwm_addr for power-saving support on SDIO
-based chipsets.
+
+
+> -----Original Message-----
+> From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Sent: Thursday, April 6, 2023 4:07 AM
+> To: linux-wireless@vger.kernel.org
+> Cc: Yan-Hsuan Chuang <tony0620emma@gmail.com>; Kalle Valo <kvalo@kernel.org>; Ulf Hansson
+> <ulf.hansson@linaro.org>; linux-kernel@vger.kernel.org; netdev@vger.kernel.org;
+> linux-mmc@vger.kernel.org; Chris Morgan <macromorgan@hotmail.com>; Nitin Gupta <nitin.gupta981@gmail.com>;
+> Neo Jou <neojou@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>; Jernej Skrabec <jernej.skrabec@gmail.com>;
+> Larry Finger <Larry.Finger@lwfinger.net>; Pali Rohár <pali@kernel.org>; Simon Horman
+> <simon.horman@corigine.com>; Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> Subject: [PATCH v5 2/9] wifi: rtw88: sdio: Add HCI implementation for SDIO based chipsets
+> 
+> Add a sub-driver for SDIO based chipsets which implements the following
+> functionality:
+> - register accessors for 8, 16 and 32 bits for all states of the card
+>   (including usage of 4x 8 bit access for one 32 bit buffer if the card
+>   is not fully powered on yet - or if it's fully powered on then 1x 32
+>   bit access is used)
+> - checking whether there's space in the TX FIFO queue to transmit data
+> - transfers from the host to the device for actual network traffic,
+>   reserved pages (for firmware download) and H2C (host-to-card)
+>   transfers
+> - receiving data from the device
+> - deep power saving state
+> 
+> The transmit path is optimized so DMA-capable SDIO host controllers can
+> directly use the buffers provided because the buffer's physical
+> addresses are 8 byte aligned.
+> 
+> The receive path is prepared to support RX aggregation where the
+> chipset combines multiple MAC frames into one bigger buffer to reduce
+> SDIO transfer overhead.
+> 
+> Co-developed-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+> Signed-off-by: Jernej Skrabec <jernej.skrabec@gmail.com>
+> Reviewed-by: Ulf Hansson <ulf.hansson@linaro.org>
+> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 
 Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
-Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
----
-Changes since v4:
-- none
 
-Changes since v3:
-- add Ping-Ke's reviewed-by (again, thank you!)
-
-Changes since v2:
-- none
-
-Changes since v1:
-- none
-
-
- drivers/net/wireless/realtek/rtw88/main.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/drivers/net/wireless/realtek/rtw88/main.c b/drivers/net/wireless/realtek/rtw88/main.c
-index b2e78737bd5d..cdc4703ead5f 100644
---- a/drivers/net/wireless/realtek/rtw88/main.c
-+++ b/drivers/net/wireless/realtek/rtw88/main.c
-@@ -18,6 +18,7 @@
- #include "debug.h"
- #include "bf.h"
- #include "sar.h"
-+#include "sdio.h"
- 
- bool rtw_disable_lps_deep_mode;
- EXPORT_SYMBOL(rtw_disable_lps_deep_mode);
-@@ -1785,6 +1786,10 @@ static int rtw_chip_parameter_setup(struct rtw_dev *rtwdev)
- 		rtwdev->hci.rpwm_addr = 0x03d9;
- 		rtwdev->hci.cpwm_addr = 0x03da;
- 		break;
-+	case RTW_HCI_TYPE_SDIO:
-+		rtwdev->hci.rpwm_addr = REG_SDIO_HRPWM1;
-+		rtwdev->hci.cpwm_addr = REG_SDIO_HCPWM1_V2;
-+		break;
- 	case RTW_HCI_TYPE_USB:
- 		rtwdev->hci.rpwm_addr = 0xfe58;
- 		rtwdev->hci.cpwm_addr = 0xfe57;
--- 
-2.40.0
 
