@@ -2,129 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91419C77B6C
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 17:28:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7315C77B70
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 17:50:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229604AbjDGR2e (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 13:28:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33560 "EHLO
+        id S229577AbjDGRut (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 13:50:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58852 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229536AbjDGR2d (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 13:28:33 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 678A8A5FA;
-        Fri,  7 Apr 2023 10:28:32 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 04B4365230;
-        Fri,  7 Apr 2023 17:28:32 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EBA1BC433D2;
-        Fri,  7 Apr 2023 17:28:30 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1680888511;
-        bh=idDlc8ZJaRbDwkcyJQzHCf0qlNbEXgjDa3puNQw4N9c=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=mtBo5tg3cXKg1cI2/vhx9WamdcOwjH8ylXUHOfZVQsAdN5yBfGzf1oiHOC5v+ZWAK
-         OdyC9vP3M+bOKFJpA/p4IA8YWTmzSewUlKlVulK3AQGjjBs/eME276YiXn47k/uyzP
-         ZDhxRPgiqhH8QVUO1MMKbp1rUk7ZIw8CaDgYYCVriHLS4gtWMBuMFvszA1JKiygBJY
-         g6QYxVv84iIQr5Wy+S9O4UFRpKPyuWp351KbwQikrVkS+ajyF9nQ28WVIiDKnvSVyp
-         iqS7g3X4sJmdfdP7rWwRwJSK+VZuBPOO/JMlP2JMBVeiUahrwpirsJ4DJF4jmakBnp
-         B6fqfgaLfbbmw==
-Date:   Fri, 7 Apr 2023 17:28:29 +0000
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        with ESMTP id S230248AbjDGRus (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 13:50:48 -0400
+Received: from mail-pl1-x630.google.com (mail-pl1-x630.google.com [IPv6:2607:f8b0:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 709B7B77C
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 10:50:43 -0700 (PDT)
+Received: by mail-pl1-x630.google.com with SMTP id d9443c01a7336-1a50cb65c92so1834095ad.0
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 10:50:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680889843;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=eJzkrQgSJLoh68CvGvp1JznAA6lKkLejE1Wur3zdskg=;
+        b=XH0UjXnkmfvcZqjTewbnJtcDWSFSJA41wC6V9r5Jriy4njsRmD3H27O3QYYV4AMbUm
+         tXDMOylFQmjGVHAvVJDVThyrSJpCbK15BdyXAw/RTy3qqsHIR6h5GbuWp0D0RbsJJMyQ
+         tYigUWAUK0wuJZ9Ln/RC6nNHR0Xc5/0j6baPRmmPBKLWI8mS58J1JBnQoFDh2fV6gAVB
+         aCWwMbSzJaVd3dqKFSysqW62WCaXVoVFyPNeXhO/N8IkyefOB7epKgE0KjIbL9lO4E2A
+         nOD8OiTN+7/mE4Ln7W/1Og55k8VV9viFgsgqrLPhDjnLlEirWNgizYb/4I63kiVYkSRp
+         /wmA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680889843;
+        h=mime-version:message-id:date:references:in-reply-to:subject:cc:to
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=eJzkrQgSJLoh68CvGvp1JznAA6lKkLejE1Wur3zdskg=;
+        b=EmCAxEog3yUoGot/INuxoT1EDkrCS6LpXE9WSHTXjdlT8K3L1AWT1YlLaHzKArNer0
+         cSW7Jne4Co9u1PQVG5CElCx5x66xJFSEf5u/DaF3OxD3iXH/BMQhVmQD0Rhxzi7eEuTy
+         1vMVmIdAVPjlByNfEP6NdaVungGHlQdC83brUagH6vWkupaSrE7G+FIumgJk57dJmVyp
+         1kx/RhcsxkAXaHjpl13R0SOg00fFKK6T2H8owtPSewgq93aBLsincWH1+mW5SBTZTHV2
+         1BN/uIuqEgY8uGoSHyJDcjjEpBmdlClhO1I+yDgRGsOO9p9bX8Db+j6OiCbMsQgM8KPD
+         EBlg==
+X-Gm-Message-State: AAQBX9fCvl/KSMQ6n65hCCgW882t5rye9sd4EO21VFjI8DGqx+ABM+h3
+        v4aZFQYTE34jRA3qbd/zm8hhFg==
+X-Google-Smtp-Source: AKy350aspk9YnMVy5hked+xx58M1c9hroC6snupKIoerfp0YWnXGXrL18Plz3ceLDw7pQ7fY4UQTgQ==
+X-Received: by 2002:aa7:9ec4:0:b0:626:7c43:7cb8 with SMTP id r4-20020aa79ec4000000b006267c437cb8mr3003966pfq.20.1680889842767;
+        Fri, 07 Apr 2023 10:50:42 -0700 (PDT)
+Received: from localhost (63-228-113-140.tukw.qwest.net. [63.228.113.140])
+        by smtp.gmail.com with ESMTPSA id e18-20020aa78c52000000b0062a474cd46asm3298198pfd.137.2023.04.07.10.50.42
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Apr 2023 10:50:42 -0700 (PDT)
+From:   Kevin Hilman <khilman@baylibre.com>
+To:     Alexandre Mergnat <amergnat@baylibre.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v5 4/6] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <ZDBSvVIIq6cMTf1Y@gmail.com>
-References: <20230403200530.2103099-1-abel.vesa@linaro.org>
- <20230403200530.2103099-5-abel.vesa@linaro.org>
- <20230406201634.GA20288@sol.localdomain>
- <ZC/ADOlol2XO7ACL@linaro.org>
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        Bernhard =?utf-8?Q?Rosenkr=C3=A4n?= =?utf-8?Q?zer?= 
+        <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Alexandre Mergnat <amergnat@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Subject: Re: [PATCH v5 00/12] Improve the MT8365 SoC and EVK board support
+In-Reply-To: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
+References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
+Date:   Fri, 07 Apr 2023 10:50:41 -0700
+Message-ID: <7h355b1szy.fsf@baylibre.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZC/ADOlol2XO7ACL@linaro.org>
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Apr 07, 2023 at 10:02:36AM +0300, Abel Vesa wrote:
-> On 23-04-06 13:16:34, Eric Biggers wrote:
-> > Hi Abel,
-> > 
-> > On Mon, Apr 03, 2023 at 11:05:28PM +0300, Abel Vesa wrote:
-> > > Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
-> > > use the new ICE api provided by the Qualcomm soc driver ice. The platforms
-> > > that already have ICE support will use the API as library since there will
-> > > not be a devicetree node, but instead they have reg range. In this case,
-> > > the of_qcom_ice_get will return an ICE instance created for the consumer's
-> > > device. But if there are platforms that do not have ice reg in the
-> > > consumer devicetree node and instead provide a dedicated ICE devicetree
-> > > node, the of_qcom_ice_get will look up the device based on qcom,ice
-> > > property and will get the ICE instance registered by the probe function
-> > > of the ice driver.
-> > > 
-> > > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
-> > 
-> > This is still silent about how the ICE clock behavior is being changed.
-> 
-> Right, I'll add the some more info into the commit message about the
-> clock being handled by the ICE driver.
-> 
-> > 
-> > I'm still trying to understand all this myself, so please bear with me, but my
-> > understanding is that the UFS clocks can be disabled even while the host
-> > controller is runtime-resumed.  This is called "clock gating" in the code.
-> 
-> The ICE clock is now being controlled by the new driver.
-> > 
-> > Before, the ICE clock was just listed as one of the UFS clocks.  So, it was just
-> > managed like the other UFS clocks.
-> > 
-> > Now, it appears that the ICE clock is always enabled while the host controller
-> > is runtime-resumed.  So, this patch removes support for gating of the ICE clock.
-> 
-> I just tested this and it works as expected, which is:
-> 
-> ICE clock gets enable on qcom_ice_create (via *clk_get*_enabled) and
-> then, on the runtime suspend of the UFS, the qcom_ice_suspend is called
-> which will disable the clock. Then, every time UFS runtime
-> resumes/suspends the clock gets enabled/disabled.
-> 
-> Hope that makes sense.
-> 
-> Let me know if you think I'm missing something here.
-> 
+Alexandre Mergnat <amergnat@baylibre.com> writes:
 
-Well, it's better than v4 and earlier of this patchset, where the clock was
-never turned off.
+> This commits are based on the Fabien Parent <fparent@baylibre.com> work.
+>
+> The purpose of this series is to add the following HWs / IPs support for
+> the mt8365-evk board:
+> - Watchdog
+> - Power Management Integrated Circuit "PMIC" wrapper
+> - MT6357 PMIC
+> - MultiMediaCard "MMC" & Secure Digital "SD" controller
+> - USB controller
+> - Ethernet MAC controller
+>
+> Add CPU Freq & IDLE support for this board.
 
-But, this patchset still seems to be a regression from the status quo, since it
-makes the ICE clock no longer be disabled when "UFS clock gating" disables the
-other UFS clocks.  Instead, it will only be disabled on runtime-suspend.
+Tested-by: Kevin Hilman <khilman@baylibre.com>
 
-Now, I don't know whether anyone ever confirmed that the current behavior is
-actually optimal and works as intended.  So, it *might* actually be fine to
-change it!  But I was hoping that you at least had some thoughts about this,
-whereas currently this patchset just ignores the issue entirely.
+Thanks for providing the branch with the dependencies.  With that, I
+tested basic build & boot on mt8365-evk, and things are working as
+expected.
 
-- Eric
+I also enabled `CONFIG_USB_ETH=y` to test with USB ethernet gadget, and
+was able use NFSroot, so that's working well also.
+
+Kevin
