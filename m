@@ -2,196 +2,158 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F679C77B6C
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:16:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DBDB3C77B70
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:48:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240590AbjDGNQ3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 09:16:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59544 "EHLO
+        id S231724AbjDGNsD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 09:48:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57298 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232845AbjDGNQ2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:16:28 -0400
-Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A1B21B5
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:15:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1680873343;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=+805T1P5BMIH072MzaqMZBoBVUUDfrH7JxP+UHnP/BM=;
-        b=QfJg04g5Lx0kc5gkXEjtqwIK3KGOEThMfP84sbepthmuHwfMddo79hrGxBH2434SK2B0Sc
-        Vz9IbIzCmLEDUIlLbzki87rOY+LU6kGzOS/EGBXuYUfKLtpNgEBeFnXa9tyEfu//JPF+3g
-        Kkifpi6Q/n0Pzc84GO0lWqQuw+O7Vx4=
-Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
- [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
- (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
- us-mta-465-u6stOIaOMbq4akPlnGEbKQ-1; Fri, 07 Apr 2023 09:15:42 -0400
-X-MC-Unique: u6stOIaOMbq4akPlnGEbKQ-1
-Received: by mail-ej1-f72.google.com with SMTP id 22-20020a170906011600b0093d7f81fd04so1530755eje.19
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:15:41 -0700 (PDT)
+        with ESMTP id S230412AbjDGNrs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:47:48 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77FC1D322
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:46:11 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id a640c23a62f3a-930e691e34eso166306166b.0
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:46:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680875150;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=yp5m0Gs2+7L1T7k0BOgEaesPaUmP03C3lD6UUC3EEfI=;
+        b=Q8cKW1Y9yPr2fpOL+h62V4+4LKKzKurXsFkFP8HTS2ZsTk9QbnScMQLueaGMd7uxZX
+         YyGeO6gYuhxM6rR/qSd0ky8WzO4rKTu9/9GfMP+ymDyx4DYYHEsSR7+F6n0q1DbLETJQ
+         Jt2ABT8Dw/7A33eJt7UZSOdw35bxMH1hYkzCVFewZ53L5myO44Ju9OrNH6hfYM9UUF+T
+         9m+/zQXxoXAPESyq24BEBOh2tjmnLglWDM1YkGWRwmpjFRRYMMY1GV28mQHARPO8UTTw
+         bVg9Pf+cquhScTcOKyWUSiuTVy1i16oake/nYxX+a2qGw7/ytbvucNpn0uvrZMJT6jat
+         xczw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680873341; x=1683465341;
-        h=content-transfer-encoding:in-reply-to:from:content-language
-         :references:cc:to:subject:user-agent:mime-version:date:message-id
+        d=1e100.net; s=20210112; t=1680875150;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=+805T1P5BMIH072MzaqMZBoBVUUDfrH7JxP+UHnP/BM=;
-        b=68SQke8vCtX/Pz9FGO0T3cPQU+4j8hT9a8WWso57JljO910VRpRxJFyeKlL+KgTzkM
-         iML+QAQ+9V+zU6NcUhVrNxr9DKaQMkCSQzPpjAWj3XUu+ivsCqZs2rJrRjx2rxFaqy4S
-         si1aJ6RC0/4ShH8kwwkxisSzjqD+MLOcc3kMOg87ChJcxHgnqRSU3ysLp5Vdy1UavvA0
-         6zzHd2t/YkfRTKaxsJu1Lo6QlJ77ryB+Zrk+BeDDs2/d2IgcbuJdY3uA06LKeh1W852K
-         FMTj1jyv9XN/EjdrJZaaKvb5Spao/LdjYKcbqESJPm+Y5W1UxKtC1Ifg9Ojj7j9EGL7y
-         ceyQ==
-X-Gm-Message-State: AAQBX9fH8QOdb7LRkNVs+q5xDhfR/2lrGRXigOzCuq5AjotIk2/msHBc
-        wi7ZuDyzfTNZ98Ls8LJ9StWv3TZDTPPdM+xaI+B6qPjEUSFFTnsNSJv3Kr2YiUxnbl78N2cV7Ak
-        eSmsyiEs9lvNpsaCW1J9C
-X-Received: by 2002:a17:906:7397:b0:93f:50c7:2f5f with SMTP id f23-20020a170906739700b0093f50c72f5fmr2395035ejl.63.1680873341119;
-        Fri, 07 Apr 2023 06:15:41 -0700 (PDT)
-X-Google-Smtp-Source: AKy350biu2Io3Qi9fG2dyv4L+VPfvLmCaZLNoZgiCS1qJ4mCSK5lTpJDrxSPnOP0SqjSnsz+SVY1Ww==
-X-Received: by 2002:a17:906:7397:b0:93f:50c7:2f5f with SMTP id f23-20020a170906739700b0093f50c72f5fmr2395009ejl.63.1680873340869;
-        Fri, 07 Apr 2023 06:15:40 -0700 (PDT)
-Received: from ?IPV6:2001:1c00:c32:7800:5bfa:a036:83f0:f9ec? (2001-1c00-0c32-7800-5bfa-a036-83f0-f9ec.cable.dynamic.v6.ziggo.nl. [2001:1c00:c32:7800:5bfa:a036:83f0:f9ec])
-        by smtp.gmail.com with ESMTPSA id jx17-20020a170907761100b009332bb8b1f7sm2047300ejc.66.2023.04.07.06.15.39
+        bh=yp5m0Gs2+7L1T7k0BOgEaesPaUmP03C3lD6UUC3EEfI=;
+        b=38FTJbNfAS4/l5/OuAJ+kohXw0FN7zJARlFryN1YpmlMtchrhx/vgPptQUpT2ZWJTY
+         8axWrNhBRqJqJpVFGY9CO/OLQDCNdsPt6wqKAFzAYxHzLItGckeEeo8N8WtcFiS05o1Z
+         bLy5raKZRjtADv67r6AFiS/7jO6CyBKt1pY7H2BzIN/EkFEjAeROjH1omtk8BWk0SUYm
+         gFl3DAzTxjcQl27MAjQx3qkKV8dA3To98qAmnMjk+JzOr0UcmIAS3VNOt6IP+Frt2vYl
+         VzXR3bXcaFAU3mC5cxxoIfgkGZUVjGZ6ap4JfhgmzKalc/CGd6D0F8WSgAQxWvohP0q0
+         4kcg==
+X-Gm-Message-State: AAQBX9ebG4L2ZMhPL/eskObndosAqf4Ztzp6rkEbIF6WtiQJN+trq34r
+        3iZXmPK85Romfyq1VY2liMcfXg==
+X-Google-Smtp-Source: AKy350YfI24zrr3k/owoorldtK4j2Zc1yFlw5O+l6gy+yzp0dsAPQIPRc+pCkj0U+Y3iqphLdUBj2g==
+X-Received: by 2002:a50:fb85:0:b0:502:3376:786d with SMTP id e5-20020a50fb85000000b005023376786dmr1810673edq.6.1680875150253;
+        Fri, 07 Apr 2023 06:45:50 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:b20f:8824:c926:8299? ([2a02:810d:15c0:828:b20f:8824:c926:8299])
+        by smtp.gmail.com with ESMTPSA id v7-20020a50a447000000b00504832f2489sm47159edb.78.2023.04.07.06.45.47
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Apr 2023 06:15:39 -0700 (PDT)
-Message-ID: <845521b4-0451-f0c0-7606-0144475e98f7@redhat.com>
-Date:   Fri, 7 Apr 2023 15:15:38 +0200
+        Fri, 07 Apr 2023 06:45:48 -0700 (PDT)
+Message-ID: <9a4aa196-3110-9c62-6e30-a8bfa2a9327c@linaro.org>
+Date:   Fri, 7 Apr 2023 15:45:47 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.1
-Subject: Re: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
-To:     Marek Vasut <marex@denx.de>, linux-wireless@vger.kernel.org
-Cc:     "David S. Miller" <davem@davemloft.net>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Danny van Heumen <danny@dannyvanheumen.nl>,
-        Eric Dumazet <edumazet@google.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        SHA-cyfmac-dev-list@infineon.com,
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v6 2/6] dt-bindings: ufs: qcom: Add ICE phandle
+Content-Language: en-US
+To:     Abel Vesa <abel.vesa@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org
-References: <20230407013118.466441-1-marex@denx.de>
-Content-Language: en-US, nl
-From:   Hans de Goede <hdegoede@redhat.com>
-In-Reply-To: <20230407013118.466441-1-marex@denx.de>
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+References: <20230407105029.2274111-1-abel.vesa@linaro.org>
+ <20230407105029.2274111-3-abel.vesa@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230407105029.2274111-3-abel.vesa@linaro.org>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi,
-
-On 4/7/23 03:31, Marek Vasut wrote:
-> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
-> The odd thing about this is that the previous 1YN populated
-> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
-> while the chip populated on real hardware has a Cypress one.
-> The device ID also differs between the two devices. But they
-> are both 43439 otherwise, so add the IDs for both.
+On 07/04/2023 12:50, Abel Vesa wrote:
+> Starting with SM8550, the ICE will have its own devicetree node
+> so add the qcom,ice property to reference it.
 > 
-> ```
-> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
-> 0x04b4
-> 0xbd3d
-> ```
-> 
-> Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
-> Signed-off-by: Marek Vasut <marex@denx.de>
-
-Thanks, patch looks good to me:
-
-Reviewed-by: Hans de Goede <hdegoede@redhat.com>
-
-Regards,
-
-Hans
-
-
-
-
+> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
 > ---
-> NOTE: Please drop the Fixes tag if this is considered unjustified
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: Arend van Spriel <aspriel@gmail.com>
-> Cc: Danny van Heumen <danny@dannyvanheumen.nl>
-> Cc: Eric Dumazet <edumazet@google.com>
-> Cc: Franky Lin <franky.lin@broadcom.com>
-> Cc: Hans de Goede <hdegoede@redhat.com>
-> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-> Cc: Jakub Kicinski <kuba@kernel.org>
-> Cc: Kalle Valo <kvalo@kernel.org>
-> Cc: Paolo Abeni <pabeni@redhat.com>
-> Cc: Paul Cercueil <paul@crapouillou.net>
-> Cc: SHA-cyfmac-dev-list@infineon.com
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: brcm80211-dev-list.pdl@broadcom.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-wireless@vger.kernel.org
-> Cc: netdev@vger.kernel.org
-> ---
->  .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
->  include/linux/mmc/sdio_ids.h                             | 5 ++++-
->  2 files changed, 12 insertions(+), 2 deletions(-)
 > 
-> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> index 65d4799a56584..ff710b0b5071a 100644
-> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> @@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
->  		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
->  	}
+> The v5 is here:
+> https://lore.kernel.org/all/20230403200530.2103099-3-abel.vesa@linaro.org/
+> 
+> Changes since v5:
+>  * dropped the sm8550 specific subschema and replaced it with one that
+>    mutually excludes the qcom,ice vs both the ICE specific reg range
+>    and the ICE clock
+> 
+> Changes since v4:
+>  * Added check for sm8550 compatible w.r.t. qcom,ice in order to enforce
+>    it while making sure none of the other platforms are allowed to use it
+> 
+> Changes since v3:
+>  * dropped the "and drop core clock" part from subject line
+> 
+> Changes since v2:
+>  * dropped all changes except the qcom,ice property
+> 
+> 
+>  .../devicetree/bindings/ufs/qcom,ufs.yaml     | 26 +++++++++++++++++++
+>  1 file changed, 26 insertions(+)
+> 
+> diff --git a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
+> index c5a06c048389..71aa79eac6b4 100644
+> --- a/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
+> +++ b/Documentation/devicetree/bindings/ufs/qcom,ufs.yaml
+> @@ -70,6 +70,10 @@ properties:
+>    power-domains:
+>      maxItems: 1
 >  
-> +#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
-> +	{ \
-> +		SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
-> +		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
-> +	}
+> +  qcom,ice:
+> +    $ref: /schemas/types.yaml#/definitions/phandle
+> +    description: phandle to the Inline Crypto Engine node
 > +
->  /* devices we support, null terminated */
->  static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
-> @@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
-> +	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
-> @@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
-> -	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
->  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
-> +	CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
->  	{ /* end: all zeroes */ }
->  };
->  MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 0e4ef9c5127ad..bf3c95d8eb8af 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -74,10 +74,13 @@
->  #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
->  #define SDIO_DEVICE_ID_BROADCOM_43364		0xa9a4
->  #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
-> -#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
-> +#define SDIO_DEVICE_ID_BROADCOM_43439		0xa9af
->  #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
->  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
+>    reg:
+>      minItems: 1
+>      maxItems: 2
+> @@ -187,6 +191,28 @@ allOf:
 >  
-> +#define SDIO_VENDOR_ID_CYPRESS			0x04b4
-> +#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xbd3d
-> +
->  #define SDIO_VENDOR_ID_MARVELL			0x02df
->  #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
->  #define SDIO_DEVICE_ID_MARVELL_8688_WLAN	0x9104
+>      # TODO: define clock bindings for qcom,msm8994-ufshc
+>  
+> +  - if:
+> +      properties:
+> +        qcom,ice:
+> +          minItems: 1
+
+Drop minItems
+
+> +          maxItems: 1
+> +    then:
+> +      properties:
+> +        reg:
+> +          minItems: 1
+
+Drop minItems
+
+> +          maxItems: 1
+> +        clocks:
+> +          minItems: 8
+> +          maxItems: 8
+Best regards,
+Krzysztof
 
