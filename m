@@ -2,134 +2,183 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D98F9C6FD1D
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 07:02:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E211EC76196
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 08:24:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237539AbjDGHCm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 03:02:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43672 "EHLO
+        id S230197AbjDGIYV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 04:24:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39032 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229531AbjDGHCm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 03:02:42 -0400
-Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73CB67ED3
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 00:02:40 -0700 (PDT)
-Received: by mail-wm1-x32a.google.com with SMTP id p34so23589272wms.3
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 00:02:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680850959; x=1683442959;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=yDRZJb+gw9WKl+q/YP3+9vfEWrdxXYb08xE3KjrncwY=;
-        b=TlUNuHXhE7dkX3ma2znO7zdAacJiO27ghArmpkXlH8c3ATv+KBTc8LUhyVrkypI+mP
-         0zQlggzvEemyf2P17MWTNYZVT5pEmY7G8l0KpU4b0QsyPvMfMJZshCs5c4HdBgpV6MQP
-         XN2grzseW68CfcpULpwxh3ynO/USV/6im6FxHW40/svQL+ApI5uK1eCRpcAHn1PqPRYE
-         iwww25egOIvVPfxbt4pMX674CTKLbiVEO/0Ip1e+6ahSlHwFQkQF7naCFmxlgJCIHPZU
-         6QypBjxTNvF8oRGQexdGN9PM2UNsP9cuq6GQxZBhFfnm80WY+czp/4FjLGOZC9ZJW9dw
-         8zbg==
+        with ESMTP id S230196AbjDGIYU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 04:24:20 -0400
+Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 833006EAB;
+        Fri,  7 Apr 2023 01:24:18 -0700 (PDT)
+Received: by mail-pl1-f174.google.com with SMTP id ja10so39501616plb.5;
+        Fri, 07 Apr 2023 01:24:18 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680850959; x=1683442959;
+        d=1e100.net; s=20210112; t=1680855858; x=1683447858;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=yDRZJb+gw9WKl+q/YP3+9vfEWrdxXYb08xE3KjrncwY=;
-        b=CnSRUtqd/o6s1XS6A4FCxgo/b0NVI+cdpl2av10OXo2kcWi+ermL3LOlC2zDCN1qfJ
-         6OdsEqk6r8RL6AgO5DJcVBSpyjXTOrM63vsCBZ8qyxDIjP3c/YWE/8A+4CXus90IHaeI
-         L9HlVn1ZQMi+iKh51XqdwuF+NnAede22AOT09xHgdFSN1tH5zHhxL3DLA0s+wERx25n8
-         reGD0vY6oBYPMmRsY0aIPAAcFqZPoFfmn4rrfCzzIgtDLGszMCvt9HKKlynAX5h99ot7
-         mP6XDqbQAq/iVlurOeQOwo9A3vqqf/FGcQy6eJUsfFjI9I3dTuMztrarjzumSaKzfA21
-         3AHA==
-X-Gm-Message-State: AAQBX9cfFR9gO9svwl3YV7HRbwEeub0vb6WvFBFybg8+n8lY7wRE7BPX
-        Y+U+PmNvM4gs62mqCdk4MkU4hg==
-X-Google-Smtp-Source: AKy350Yf7cZzWZgOSGchAXM9/7IoYqhc4Z0zpcrhQUgBsDYEyMpw3OS/oAAO8/EgLIduuLczRZdj6g==
-X-Received: by 2002:a05:600c:2202:b0:3ee:289a:3c3a with SMTP id z2-20020a05600c220200b003ee289a3c3amr566623wml.30.1680850958894;
-        Fri, 07 Apr 2023 00:02:38 -0700 (PDT)
-Received: from linaro.org ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id i42-20020a05600c4b2a00b003f0321c22basm7224793wmp.12.2023.04.07.00.02.37
+        bh=4qApLz7WDCv18vydgjE+EOqQlINQHyff3Bn8mgcG6t8=;
+        b=lF4Lgfll6ID6Hu3nVqXXXxs4jNjfq9xtZ0JJuU/J8wyXORhGYRHdXchL73SdjaaQoF
+         qre0hPaPbI5Q1UND1R6nXAg8iq74ZRNakYOwQ2aV+MLf+7N79ZSEkbifcFqbOKxD1rpl
+         mnhMa5XXqsvrL6ddTGQtE+LQ1BdGJrBodl412how/aosm9yGF/8Am75gu0j2Pq2GvR9u
+         tcMHzF2014uS5ihsD8AIw+Yq39zWyMi7V8O/VD62O7c9LDhKwm7CxvK4rhr1gFB9bckn
+         JsmWrnD+KjJaIM60DvdR85L+NVB5rslJ7EcPqwiks7Y5KuPuOJuI6XajL3MTK4oKYbeN
+         Riqg==
+X-Gm-Message-State: AAQBX9fg3W1NRdcMaVh7pdGUx8fHsF/BBQJC2gy7LZ2y/Tgr2w7IAXEp
+        mc0kgezl5UGzB3AraP4nGHjbwCxkWjXLuQ==
+X-Google-Smtp-Source: AKy350bqI+k6OGtQYINR/AKVLWq+RlcWiaMVg+3EIvH82fBA3BBSXvQQUr5KkQWXmwhDiDXIhv+4lg==
+X-Received: by 2002:a05:6a20:2d94:b0:e4:c9f7:d280 with SMTP id bf20-20020a056a202d9400b000e4c9f7d280mr2135416pzb.58.1680855857715;
+        Fri, 07 Apr 2023 01:24:17 -0700 (PDT)
+Received: from snowbird (136-24-99-118.cab.webpass.net. [136.24.99.118])
+        by smtp.gmail.com with ESMTPSA id j24-20020a170902759800b0019ef86c2574sm2457632pll.270.2023.04.07.01.24.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Apr 2023 00:02:38 -0700 (PDT)
-Date:   Fri, 7 Apr 2023 10:02:36 +0300
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Eric Biggers <ebiggers@kernel.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v5 4/6] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <ZC/ADOlol2XO7ACL@linaro.org>
-References: <20230403200530.2103099-1-abel.vesa@linaro.org>
- <20230403200530.2103099-5-abel.vesa@linaro.org>
- <20230406201634.GA20288@sol.localdomain>
+        Fri, 07 Apr 2023 01:24:17 -0700 (PDT)
+Date:   Fri, 7 Apr 2023 01:24:15 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZC/TL2/gLre0B4xH@snowbird>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230406201634.GA20288@sol.localdomain>
+In-Reply-To: <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23-04-06 13:16:34, Eric Biggers wrote:
-> Hi Abel,
+On Mon, Apr 03, 2023 at 11:50:41AM +0200, Ulf Hansson wrote:
+> On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> >
+> > Hi Ulf,
+> >
+> > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > >
+> > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > probing code sets up the host data structure then a work item is
+> > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > subsequent detect calls be handled via the workqueue.
+> > >
+> > > In principle, I don't mind the changes in $subject patch, as long as
+> > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > may have more than one mmc-slot being used, so this needs to be well
+> > > tested.
+> > >
+> >
+> > I unfortunately don't have a device with multiple mmcs available. Is
+> > this something you could help me with?
 > 
-> On Mon, Apr 03, 2023 at 11:05:28PM +0300, Abel Vesa wrote:
-> > Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
-> > use the new ICE api provided by the Qualcomm soc driver ice. The platforms
-> > that already have ICE support will use the API as library since there will
-> > not be a devicetree node, but instead they have reg range. In this case,
-> > the of_qcom_ice_get will return an ICE instance created for the consumer's
-> > device. But if there are platforms that do not have ice reg in the
-> > consumer devicetree node and instead provide a dedicated ICE devicetree
-> > node, the of_qcom_ice_get will look up the device based on qcom,ice
-> > property and will get the ICE instance registered by the probe function
-> > of the ice driver.
-> > 
-> > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> Yes, I can help to test. Allow me a few days to see what I can do.
 > 
-> This is still silent about how the ICE clock behavior is being changed.
-
-Right, I'll add the some more info into the commit message about the
-clock being handled by the ICE driver.
-
+> Note that, just having one eMMC and one SD card should work too. It
+> doesn't have to be multiple eMMCs.
 > 
-> I'm still trying to understand all this myself, so please bear with me, but my
-> understanding is that the UFS clocks can be disabled even while the host
-> controller is runtime-resumed.  This is called "clock gating" in the code.
-
-The ICE clock is now being controlled by the new driver.
+> >
+> > > Although, more importantly, I fail to understand how this is going to
+> > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > the mmc block device driver to be up and running too, which is getting
+> > > probed from a separate module/driver that's not part of mmc_rescan().
+> >
+> > I believe the call chain is something like this:
+> >
+> > __mmc_rescan()
+> >     mmc_rescan_try_freq()
+> >         mmc_attach_mmc()
+> >             mmc_add_card()
+> >                 device_add()
+> >                     bus_probe_device()
+> >                         mmc_blk_probe()
+> >
+> > The initial calling of this is the host probe. So effectively if there
+> > is a card attached, we're inlining the device_add() call for the card
+> > attached rather than waiting for the workqueue item to kick off.
+> >
+> > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > in becoming a device_initcall(). So this solves a race via the initcall
+> > chain. In the current state, device_initcall() finishes and we move onto
+> > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > init the attached emmc device.
 > 
-> Before, the ICE clock was just listed as one of the UFS clocks.  So, it was just
-> managed like the other UFS clocks.
+> You certainly have a point!
 > 
-> Now, it appears that the ICE clock is always enabled while the host controller
-> is runtime-resumed.  So, this patch removes support for gating of the ICE clock.
-
-I just tested this and it works as expected, which is:
-
-ICE clock gets enable on qcom_ice_create (via *clk_get*_enabled) and
-then, on the runtime suspend of the UFS, the qcom_ice_suspend is called
-which will disable the clock. Then, every time UFS runtime
-resumes/suspends the clock gets enabled/disabled.
-
-Hope that makes sense.
-
-Let me know if you think I'm missing something here.
-
+> This should work when the mmc blk module is built-in. Even if that
+> doesn't solve the entire problem, it should be a step in the right
+> direction.
 > 
-> Is that intended?
+> I will give it some more thinking and run some tests at my side, then
+> I will get back to you again.
 > 
-> - Eric
+
+Hi Ulf, is there an update on testing with this patch?
+
+Thanks,
+Dennis
+
+> Kind regards
+> Uffe
+> 
+> > >
+> > > >
+> > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
+> > > > ---
+> > > > Sigh.. fix missing static declaration.
+> > > >
+> > > >  drivers/mmc/core/core.c | 15 +++++++++++----
+> > > >  1 file changed, 11 insertions(+), 4 deletions(-)
+> > > >
+> > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
+> > > > index 368f10405e13..fda7ee57dee3 100644
+> > > > --- a/drivers/mmc/core/core.c
+> > > > +++ b/drivers/mmc/core/core.c
+> > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
+> > > >  }
+> > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
+> > > >
+> > > > -void mmc_rescan(struct work_struct *work)
+> > > > +static void __mmc_rescan(struct mmc_host *host)
+> > > >  {
+> > > > -       struct mmc_host *host =
+> > > > -               container_of(work, struct mmc_host, detect.work);
+> > > >         int i;
+> > > >
+> > > >         if (host->rescan_disable)
+> > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
+> > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
+> > > >  }
+> > > >
+> > > > +void mmc_rescan(struct work_struct *work)
+> > > > +{
+> > > > +       struct mmc_host *host =
+> > > > +               container_of(work, struct mmc_host, detect.work);
+> > > > +
+> > > > +       __mmc_rescan(host);
+> > > > +}
+> > > > +
+> > > >  void mmc_start_host(struct mmc_host *host)
+> > > >  {
+> > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
+> > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
+> > > >         }
+> > > >
+> > > >         mmc_gpiod_request_cd_irq(host);
+> > > > -       _mmc_detect_change(host, 0, false);
+> > > > +       host->detect_change = 1;
+> > > > +       __mmc_rescan(host);
+> > > >  }
+> > > >
+> > > >  void __mmc_stop_host(struct mmc_host *host)
+> > > > --
+> > > > 2.40.0
+> > > >
