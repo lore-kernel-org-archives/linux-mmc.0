@@ -2,61 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39B79C77B74
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D4378C7EE24
 	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:00:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240587AbjDGM77 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 08:59:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37898 "EHLO
+        id S240709AbjDGNAA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 09:00:00 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38174 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240705AbjDGM7u (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 08:59:50 -0400
-Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5BF75A256
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 05:59:49 -0700 (PDT)
-Received: by mail-wm1-x32e.google.com with SMTP id eo6-20020a05600c82c600b003ee5157346cso790259wmb.1
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 05:59:49 -0700 (PDT)
+        with ESMTP id S240739AbjDGM7w (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 08:59:52 -0400
+Received: from mail-wr1-x435.google.com (mail-wr1-x435.google.com [IPv6:2a00:1450:4864:20::435])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D78137DB3
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 05:59:50 -0700 (PDT)
+Received: by mail-wr1-x435.google.com with SMTP id v1so42248932wrv.1
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 05:59:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680872388; x=1683464388;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680872390; x=1683464390;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=eEqKdJ/cRRwoQx7sfrrkI2nxtWfAGamDLYnb1lO/djg=;
-        b=xv8CfFkMqYwBmqEr/0E3zTwZfbDRoSkqGO9okB6XjK+ij8mtzHpMfpU1dC3elVbsG6
-         q03a+eiBT4MWBRUYtlg7kqqux5UTxr1qY0SIS5+ZSUpcWq1UkzMXDmqMMA4+n3XF9+R+
-         1VzX2KsNG49ugAyjqpK34DjONSpeTm2t675c7QmYfoYwpTFWIhlBwL4XEBmJWYpb/eF4
-         Ubgiy1xXsXFIpTAOkr4hEpFxX51tKBkPlgQcuCyE6SQIbO128SR06YBiq1T3s96btbzK
-         dX0XJHwx4lm/pn1mhWPKge85HW2z8Q6eYo7cxem+Fi2BhfG/qiQ0h2U59tjzA0GyMdM7
-         0VHg==
+        bh=OS7Sye0IPLu21f+Xi1LC07CtmBlPzToUPrfZNf6CO3E=;
+        b=S/fsg8L/mGih4FrM5STj7n1V7lYfXP4QCfGKRFFxTreuNX5zDtf2vexBt4uxIL93TQ
+         wdz6cHYAN+WD7dry13Fq8vLPEYplUMavXnV6I0ifQyurJXouApvbrpQRnnEhCeazFHqx
+         U+RAszdaE/U+smX4G/1G2qZMhC6ktDzeUb4cdABYWLIFqHYtcwWEGnWnTv8x8lbHY2ID
+         dTNyqkCdoZqkS6X/bGYGJCu8Xe0CoHB/s94vlLt0PzFoTfhLEjvU/vmLLqxLMPy1d3cg
+         0K1668IJ1rcL7FmhOqTC+D7c9b54YVO6bZywGem1dPuO2xSueEvV9jyCbmVGDY0yS4FP
+         of2Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680872388; x=1683464388;
+        d=1e100.net; s=20210112; t=1680872390; x=1683464390;
         h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
          :mime-version:subject:date:from:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=eEqKdJ/cRRwoQx7sfrrkI2nxtWfAGamDLYnb1lO/djg=;
-        b=x1jwk55ABafrBmlWlPOVQkqLd3mYQid94p3sf3JgkNkUPrrS+kCAOYJBQhwSyQD7Lb
-         dd0MAltTzZla2NDD69hQQBu4rL/9Prt9t5yVw1FaZVjEa6bkBI+wCJ79zazeq9j0uzTO
-         8yYjVrM82frv1KTL5OHIAy2lCLJOK3IJlPkD7XKlU0U/ljBacytHrhiHoAUx48nUb9Nn
-         u1lq4txE9kN68KtYV9NwG4pBMPCwl13i/R+ytL7d3WZBYqkp6Zy36OcQIarRro9rDMt2
-         6moMk4OiWBSZfOBzwVid2rdNvDi4Ppn6MR6qfGqVJUP+irGAUr37XxOfYst63Bp4F+uX
-         E01w==
-X-Gm-Message-State: AAQBX9filmf2v1ErL1861lOAFyowhU+QGxUMTGaIZwxulztlxsl29x7L
-        HCjzw5e8dVQ3li+u0OiqKy39Dw==
-X-Google-Smtp-Source: AKy350aucb0CvLpPssXEd9Bl9FPwG8/MH1VtJGun7nEPa4wGQ4vwYaAhvCFz4NruqA50Q7403ymijw==
-X-Received: by 2002:a7b:cb8b:0:b0:3ef:f26b:a173 with SMTP id m11-20020a7bcb8b000000b003eff26ba173mr1238315wmi.14.1680872387885;
-        Fri, 07 Apr 2023 05:59:47 -0700 (PDT)
+        bh=OS7Sye0IPLu21f+Xi1LC07CtmBlPzToUPrfZNf6CO3E=;
+        b=r7sxNMAVvoyZDcCuc61Aw+1KqvNePDD/bxbBJYukEp215mrLL68W5HXXzwCEc/YbW+
+         2DUDz+15Eey0iBxfA9qpRZsZ7r2v21rHcozVVYyxR01We45rojmNjqJG4HIJBeets5Ms
+         uNLH2ieOeG++x5ZbZk87P1zx9dKzlEvWT2394pirqy+L4fJpDn5EclyiHCzpXVeOxK5v
+         7hvwGdgiU3BvoZrzvwWlkqm5XAdPP38q+wRx8FvlL2UM2fnpt5EGmm9nFe85/CaY02HT
+         HghJ8aALL4bGf0EMR1PMjLfoC9m+7p9jlzfAeu5sQ+payRFr6dqtohX8QF0/3tKvz5Mt
+         6EyA==
+X-Gm-Message-State: AAQBX9eN6KHaS1P1LYIuPwpQDMeulMPcMIWyU+J16B00BGlbthucJeWK
+        T/8zgqysCOr1G2QZazQiCJ62DA==
+X-Google-Smtp-Source: AKy350YSqDbwpqlTeAn/rb2199Ze25ghk9x0ahK7dXbgGhMTjWux8Ostb1nw1+NIhd1Tu54Ml2XSFA==
+X-Received: by 2002:a5d:4286:0:b0:2e4:eebe:aee3 with SMTP id k6-20020a5d4286000000b002e4eebeaee3mr1166263wrq.60.1680872390303;
+        Fri, 07 Apr 2023 05:59:50 -0700 (PDT)
 Received: from [127.0.1.1] (158.22.5.93.rev.sfr.net. [93.5.22.158])
-        by smtp.googlemail.com with ESMTPSA id t4-20020a5d6a44000000b002e558f1c45fsm4471446wrw.69.2023.04.07.05.59.46
+        by smtp.googlemail.com with ESMTPSA id t4-20020a5d6a44000000b002e558f1c45fsm4471446wrw.69.2023.04.07.05.59.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Apr 2023 05:59:47 -0700 (PDT)
+        Fri, 07 Apr 2023 05:59:49 -0700 (PDT)
 From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Fri, 07 Apr 2023 14:59:25 +0200
-Subject: [PATCH v5 06/12] arm64: dts: mediatek: add mmc support for
- mt8365-evk
+Date:   Fri, 07 Apr 2023 14:59:27 +0200
+Subject: [PATCH v5 08/12] arm64: dts: mediatek: add usb controller support
+ for mt8365-evk
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230203-evk-board-support-v5-6-1883c1b405ad@baylibre.com>
+Message-Id: <20230203-evk-board-support-v5-8-1883c1b405ad@baylibre.com>
 References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
 In-Reply-To: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
 To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
@@ -81,189 +81,66 @@ Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
         Amjad Ouled-Ameur <aouledameur@baylibre.com>,
         Alexandre Mergnat <amergnat@baylibre.com>
 X-Mailer: b4 0.12.2
-X-Developer-Signature: v=1; a=openpgp-sha256; l=4904; i=amergnat@baylibre.com;
- h=from:subject:message-id; bh=BN8bTib7fvPNr/LKVqArOJTqhPRat6Z9u+9b+IKGQWo=;
- b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkMBO6kOeEKI2JOhHvUO0PHFI/QZ3S4szmHQhakR4N
- zckHpdCJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZDATugAKCRArRkmdfjHURYBuEA
- CMN+VGk5LU73nb+kRR4VlvsgygUMJtW3SMtgbLekKdRbe+Z5V76OAtX5M2CEi8liTEGNOW4PRNnSyx
- 872D2u2fJXZBdimzVjOKYSlX4Ie+zyN6YBnE7+rFPrpVJ8VKAuom0ram3yV5nm8uMIILT0OTuNL20g
- 7F5Za7bY4TG5hl+XStDVfiwAl8cdSyCgpsIHlQc8bSEvMCnc0Z1QaLw+D+6Ew4aE7GqqYsiffTCyk7
- YmDvVI3s+8JdgKmA6wDrMMOWJ1Chfqnxnb2i04jGbFy2NUu2IPfSV9Lu9WBEpomyB9UyFnwSj5lggd
- ZOKV3PLEeIdt3nHjvAf2cxkLFLzkdb2IgafoN/EtXPu1Wq5AQu7KOl+bUHMwTYbCt86TioYQjbE1ft
- jrHfkzlJ3CJsQKn4GY28b33kL//BcyRyz8LSh2DK7YnQptVH1auhVIWEprDBfDB0dTdoO0UZVhtCDo
- jK43a24CiT9MJOyNsTnCpC+HCC9sFO9xXaL/mnGrxLin4BEU0ZxGQaSsSFTY4/A+eRlkAAtllSVBAN
- Dbnx1l0BlcC3ltSP7jkMSNQog//KpARTeY8qEdCRLEs+6+Ye445ieJKCoIQUf503eQC/QneICzLSfw
- XilBxOa6JOOzBNxS5YmT0lXfnI1RA6CJ+Tq14NYNkza7XUBTWKQ60twwog+A==
+X-Developer-Signature: v=1; a=openpgp-sha256; l=1190; i=amergnat@baylibre.com;
+ h=from:subject:message-id; bh=fWeFY0N26AVZAJlISCaJeet0l8YjLAinj4NBVfmxvvQ=;
+ b=owEBbQKS/ZANAwAKAStGSZ1+MdRFAcsmYgBkMBO6B8EEk4RvcvkArYDsSmADxohNcPtVSviSaDT2
+ yhxcX0yJAjMEAAEKAB0WIQQjG17X8+qqcA5g/osrRkmdfjHURQUCZDATugAKCRArRkmdfjHURQvhEA
+ Cb51lDZgNpI4TXbu6IxWdcuWpTkZLgumOT9wrV2FW9H88XRvaBVERxPKm2tkNi6Mw/S94XbhrLhrMd
+ 70by7FXzioMFGT3HIy56g5XJouSAHFprJmeM14CyWGeriNd5gszIB0fEgbau6loKNkaWZtt3fp68le
+ jKJcPrxaSdlMHRvALub1A4gwkOv1ggLlJOozaY2vkcULu9ZLxKXO1IcXGRYZFTvUy5zEH0vu3UWkDK
+ 5/i7i6DpcIixaonvF9uYK+xhn9PDKx5DiJDAtMjPrzWgBfP5zRXqILLWF1lszghE4LmKEseTXge8U8
+ /mzv/ygHbMLJ0PsP6d4vYMUEzj5ZpG8H/nA/1Nh1oSnLJUQloup5Nz2vgVE4GD/6KhHsip1t64TehC
+ ROXgYMpXNfq8/NKsTRTsVYQcW2IgI055jDv8qj+CsLrmXEUPeDAAiStOHZocu2hCGjsQS9cKbXBqCN
+ TEO3tuqYqJP9bh61zSPNFW2mGa3er4nawAmjrJgRW16UTf0OAT08cEel92JRh2Qfj3CFtGG5eQlK1G
+ VyGBGuMfJlQNbdjx2D9/uTcaOFVxGGfKbtliG2ZEURQtTMO9GN87JgFP4dwkvPEG5hWybVf+t2cFQH
+ 7CplOmlyx3oAzp0hs0avkNNSW3L0oLgaJavVY7ETIY6IxIJ4JIhzZeT0yDJA==
 X-Developer-Key: i=amergnat@baylibre.com; a=openpgp;
  fpr=231B5ED7F3EAAA700E60FE8B2B46499D7E31D445
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-- Add EMMC support on mmc0 (internal memory)
-- Add SD-UHS support on mmc1 (external memory)
+This patch add support for SuperSpeed USB, in OTG mode, on micro connector.
+It also add support for the Extensible Host Controller Interface USB.
 
 Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
 ---
- arch/arm64/boot/dts/mediatek/mt8365-evk.dts | 138 ++++++++++++++++++++++++++++
- 1 file changed, 138 insertions(+)
+ arch/arm64/boot/dts/mediatek/mt8365-evk.dts | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts b/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-index a238bd0092d2..cd920d09c3fe 100644
+index 1c36d8f19525..9760f181eb34 100644
 --- a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
 +++ b/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-@@ -95,6 +95,42 @@ &i2c0 {
+@@ -314,6 +314,28 @@ &pwm {
  	status = "okay";
  };
  
-+&mmc0 {
-+	assigned-clock-parents = <&topckgen CLK_TOP_MSDCPLL>;
-+	assigned-clocks = <&topckgen CLK_TOP_MSDC50_0_SEL>;
-+	bus-width = <8>;
-+	cap-mmc-highspeed;
-+	cap-mmc-hw-reset;
-+	hs400-ds-delay = <0x12012>;
-+	max-frequency = <200000000>;
-+	mmc-hs200-1_8v;
-+	mmc-hs400-1_8v;
-+	no-sd;
-+	no-sdio;
-+	non-removable;
-+	pinctrl-0 = <&mmc0_default_pins>;
-+	pinctrl-1 = <&mmc0_uhs_pins>;
-+	pinctrl-names = "default", "state_uhs";
-+	vmmc-supply = <&mt6357_vemc_reg>;
-+	vqmmc-supply = <&mt6357_vio18_reg>;
++&ssusb {
++	dr_mode = "otg";
++	maximum-speed = "high-speed";
++	pinctrl-0 = <&usb_pins>;
++	pinctrl-names = "default";
++	usb-role-switch;
++	vusb33-supply = <&mt6357_vusb33_reg>;
++	status = "okay";
++
++	connector {
++		compatible = "gpio-usb-b-connector", "usb-b-connector";
++		id-gpios = <&pio 17 GPIO_ACTIVE_HIGH>;
++		type = "micro";
++		vbus-supply = <&usb_otg_vbus>;
++	};
++};
++
++&usb_host {
++	vusb33-supply = <&mt6357_vusb33_reg>;
 +	status = "okay";
 +};
 +
-+&mmc1 {
-+	bus-width = <4>;
-+	cap-sd-highspeed;
-+	cd-gpios = <&pio 76 GPIO_ACTIVE_LOW>;
-+	max-frequency = <200000000>;
-+	pinctrl-0 = <&mmc1_default_pins>;
-+	pinctrl-1 = <&mmc1_uhs_pins>;
-+	pinctrl-names = "default", "state_uhs";
-+	sd-uhs-sdr104;
-+	sd-uhs-sdr50;
-+	vmmc-supply = <&mt6357_vmch_reg>;
-+	vqmmc-supply = <&mt6357_vio18_reg>;
-+	status = "okay";
-+};
-+
- &mt6357_pmic {
- 	interrupts-extended = <&pio 145 IRQ_TYPE_LEVEL_HIGH>;
- 	interrupt-controller;
-@@ -118,6 +154,108 @@ pins {
- 		};
- 	};
- 
-+	mmc0_default_pins: mmc0-default-pins {
-+		clk-pins {
-+			pinmux = <MT8365_PIN_99_MSDC0_CLK__FUNC_MSDC0_CLK>;
-+			bias-pull-down;
-+		};
-+
-+		cmd-dat-pins {
-+			pinmux = <MT8365_PIN_103_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
-+				 <MT8365_PIN_102_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
-+				 <MT8365_PIN_101_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
-+				 <MT8365_PIN_100_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
-+				 <MT8365_PIN_96_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
-+				 <MT8365_PIN_95_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
-+				 <MT8365_PIN_94_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
-+				 <MT8365_PIN_93_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
-+				 <MT8365_PIN_98_MSDC0_CMD__FUNC_MSDC0_CMD>;
-+			input-enable;
-+			bias-pull-up;
-+		};
-+
-+		rst-pins {
-+			pinmux = <MT8365_PIN_97_MSDC0_RSTB__FUNC_MSDC0_RSTB>;
-+			bias-pull-up;
-+		};
-+	};
-+
-+	mmc0_uhs_pins: mmc0-uhs-pins {
-+		clk-pins {
-+			pinmux = <MT8365_PIN_99_MSDC0_CLK__FUNC_MSDC0_CLK>;
-+			drive-strength = <MTK_DRIVE_10mA>;
-+			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-+		};
-+
-+		cmd-dat-pins {
-+			pinmux = <MT8365_PIN_103_MSDC0_DAT0__FUNC_MSDC0_DAT0>,
-+				 <MT8365_PIN_102_MSDC0_DAT1__FUNC_MSDC0_DAT1>,
-+				 <MT8365_PIN_101_MSDC0_DAT2__FUNC_MSDC0_DAT2>,
-+				 <MT8365_PIN_100_MSDC0_DAT3__FUNC_MSDC0_DAT3>,
-+				 <MT8365_PIN_96_MSDC0_DAT4__FUNC_MSDC0_DAT4>,
-+				 <MT8365_PIN_95_MSDC0_DAT5__FUNC_MSDC0_DAT5>,
-+				 <MT8365_PIN_94_MSDC0_DAT6__FUNC_MSDC0_DAT6>,
-+				 <MT8365_PIN_93_MSDC0_DAT7__FUNC_MSDC0_DAT7>,
-+				 <MT8365_PIN_98_MSDC0_CMD__FUNC_MSDC0_CMD>;
-+			input-enable;
-+			drive-strength = <MTK_DRIVE_10mA>;
-+			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-+		};
-+
-+		ds-pins {
-+			pinmux = <MT8365_PIN_104_MSDC0_DSL__FUNC_MSDC0_DSL>;
-+			drive-strength = <MTK_DRIVE_10mA>;
-+			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-+		};
-+
-+		rst-pins {
-+			pinmux = <MT8365_PIN_97_MSDC0_RSTB__FUNC_MSDC0_RSTB>;
-+			drive-strength = <MTK_DRIVE_10mA>;
-+			bias-pull-up;
-+		};
-+	};
-+
-+	mmc1_default_pins: mmc1-default-pins {
-+		cd-pins {
-+			pinmux = <MT8365_PIN_76_CMDAT8__FUNC_GPIO76>;
-+			bias-pull-up;
-+		};
-+
-+		clk-pins {
-+			pinmux = <MT8365_PIN_88_MSDC1_CLK__FUNC_MSDC1_CLK>;
-+			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-+		};
-+
-+		cmd-dat-pins {
-+			pinmux = <MT8365_PIN_89_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
-+				 <MT8365_PIN_90_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
-+				 <MT8365_PIN_91_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
-+				 <MT8365_PIN_92_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
-+				 <MT8365_PIN_87_MSDC1_CMD__FUNC_MSDC1_CMD>;
-+			input-enable;
-+			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-+		};
-+	};
-+
-+	mmc1_uhs_pins: mmc1-uhs-pins {
-+		clk-pins {
-+			pinmux = <MT8365_PIN_88_MSDC1_CLK__FUNC_MSDC1_CLK>;
-+			drive-strength = <MTK_DRIVE_8mA>;
-+			bias-pull-down = <MTK_PUPD_SET_R1R0_10>;
-+		};
-+
-+		cmd-dat-pins {
-+			pinmux = <MT8365_PIN_89_MSDC1_DAT0__FUNC_MSDC1_DAT0>,
-+				 <MT8365_PIN_90_MSDC1_DAT1__FUNC_MSDC1_DAT1>,
-+				 <MT8365_PIN_91_MSDC1_DAT2__FUNC_MSDC1_DAT2>,
-+				 <MT8365_PIN_92_MSDC1_DAT3__FUNC_MSDC1_DAT3>,
-+				 <MT8365_PIN_87_MSDC1_CMD__FUNC_MSDC1_CMD>;
-+			input-enable;
-+			drive-strength = <MTK_DRIVE_6mA>;
-+			bias-pull-up = <MTK_PUPD_SET_R1R0_01>;
-+		};
-+	};
-+
- 	uart0_pins: uart0-pins {
- 		pins {
- 			pinmux = <MT8365_PIN_35_URXD0__FUNC_URXD0>,
+ &uart0 {
+ 	pinctrl-0 = <&uart0_pins>;
+ 	pinctrl-names = "default";
 
 -- 
 2.25.1
