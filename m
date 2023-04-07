@@ -2,190 +2,196 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D17CC6FD1D
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:14:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F679C77B6C
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:16:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240804AbjDGNO5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 09:14:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58076 "EHLO
+        id S240590AbjDGNQ3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 09:16:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59544 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240764AbjDGNOy (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:14:54 -0400
-Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13E86AF27
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:14:52 -0700 (PDT)
-Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-54c0dd7e2f3so89080387b3.8
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:14:51 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680873291; x=1683465291;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=I3VDM6BonfxZxR/aIqG+UXRPKt9a+mpQkJxjwsAv4Mk=;
-        b=EYgt6v1IEhj/HYAqnKpiJJom8T1Kf9QMdNP16lSbXvXntvHY8b+pHLX0Iz6SOI1jh8
-         XwlqiLigAdgoV9bcjZ/R175Yg8h/ftYTu/rDsoTKv0sdp5GuvmW42QjmUUE8eMqrUKfg
-         iiNHm6yG80c39Ibb08M3yA35Q3/aX+ePxocUywjebODgGgGViM/qjtGumsp4p+tYnfTP
-         B0A6e3FMsikx9qZHkdeBVN66TrTVeRAneg/iBXPXJt4JWaxrD5YlFbnPn463f51XY6WZ
-         e+vEj3MSISq2sj1XSh5g/UEacpNwxevRYv+sI7olEYYFcrXyYHkLIScyKrhsmYQGyKDO
-         eeJQ==
+        with ESMTP id S232845AbjDGNQ2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:16:28 -0400
+Received: from us-smtp-delivery-124.mimecast.com (us-smtp-delivery-124.mimecast.com [170.10.129.124])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A1B21B5
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:15:44 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1680873343;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=+805T1P5BMIH072MzaqMZBoBVUUDfrH7JxP+UHnP/BM=;
+        b=QfJg04g5Lx0kc5gkXEjtqwIK3KGOEThMfP84sbepthmuHwfMddo79hrGxBH2434SK2B0Sc
+        Vz9IbIzCmLEDUIlLbzki87rOY+LU6kGzOS/EGBXuYUfKLtpNgEBeFnXa9tyEfu//JPF+3g
+        Kkifpi6Q/n0Pzc84GO0lWqQuw+O7Vx4=
+Received: from mail-ej1-f72.google.com (mail-ej1-f72.google.com
+ [209.85.218.72]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.3, cipher=TLS_AES_256_GCM_SHA384) id
+ us-mta-465-u6stOIaOMbq4akPlnGEbKQ-1; Fri, 07 Apr 2023 09:15:42 -0400
+X-MC-Unique: u6stOIaOMbq4akPlnGEbKQ-1
+Received: by mail-ej1-f72.google.com with SMTP id 22-20020a170906011600b0093d7f81fd04so1530755eje.19
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:15:41 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680873291; x=1683465291;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=I3VDM6BonfxZxR/aIqG+UXRPKt9a+mpQkJxjwsAv4Mk=;
-        b=iyLM/DFrlyErM2j7IzIFvyu7QksiDoFGcwN1brhq+yCNwhgx/SU40Zjz6J4I4c+pAs
-         6BCt1y0ofDJtoufoAZKYHl07xsjIjx/MeaxqpR08kjSIoRxNphhJXm9LLU9gL5Lr26SE
-         Q5nfj6T+KhlbmusHjIj0y1i/9kIis00sBbzro2cx8NOyF7Era8iH7N3nfUwVcZxgph6T
-         ft8so875Yg1nh55ePwztyUGv2hGraVxZZw6mhSEr0m1csYO7JCDpipT+GhOwRMHObL9x
-         9qN6t1QvwZnva9hGH1miiGDph+0VEN6ZaBJiwwKmGf/x/wNeee5vkQFLHyUnUSsbfUNK
-         OAtw==
-X-Gm-Message-State: AAQBX9dFcE8tTxJ108/wRkSfGZ9GKP4WyWbR6MvreWLOdVpIGsyHHuoq
-        zhPIoQATlMos8QNIg33p010dHutsvcuPCQbzZgb1+Q==
-X-Google-Smtp-Source: AKy350biNDWHsrxERmOnUuBy6jK34jRpZaUPgIp3kZ6WDTUIjrWP9DPztnBTYyClXfME+4ltxbPE84/Yb360qJlUgZg=
-X-Received: by 2002:a81:af65:0:b0:544:b864:5532 with SMTP id
- x37-20020a81af65000000b00544b8645532mr1038296ywj.3.1680873291116; Fri, 07 Apr
- 2023 06:14:51 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1680873341; x=1683465341;
+        h=content-transfer-encoding:in-reply-to:from:content-language
+         :references:cc:to:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=+805T1P5BMIH072MzaqMZBoBVUUDfrH7JxP+UHnP/BM=;
+        b=68SQke8vCtX/Pz9FGO0T3cPQU+4j8hT9a8WWso57JljO910VRpRxJFyeKlL+KgTzkM
+         iML+QAQ+9V+zU6NcUhVrNxr9DKaQMkCSQzPpjAWj3XUu+ivsCqZs2rJrRjx2rxFaqy4S
+         si1aJ6RC0/4ShH8kwwkxisSzjqD+MLOcc3kMOg87ChJcxHgnqRSU3ysLp5Vdy1UavvA0
+         6zzHd2t/YkfRTKaxsJu1Lo6QlJ77ryB+Zrk+BeDDs2/d2IgcbuJdY3uA06LKeh1W852K
+         FMTj1jyv9XN/EjdrJZaaKvb5Spao/LdjYKcbqESJPm+Y5W1UxKtC1Ifg9Ojj7j9EGL7y
+         ceyQ==
+X-Gm-Message-State: AAQBX9fH8QOdb7LRkNVs+q5xDhfR/2lrGRXigOzCuq5AjotIk2/msHBc
+        wi7ZuDyzfTNZ98Ls8LJ9StWv3TZDTPPdM+xaI+B6qPjEUSFFTnsNSJv3Kr2YiUxnbl78N2cV7Ak
+        eSmsyiEs9lvNpsaCW1J9C
+X-Received: by 2002:a17:906:7397:b0:93f:50c7:2f5f with SMTP id f23-20020a170906739700b0093f50c72f5fmr2395035ejl.63.1680873341119;
+        Fri, 07 Apr 2023 06:15:41 -0700 (PDT)
+X-Google-Smtp-Source: AKy350biu2Io3Qi9fG2dyv4L+VPfvLmCaZLNoZgiCS1qJ4mCSK5lTpJDrxSPnOP0SqjSnsz+SVY1Ww==
+X-Received: by 2002:a17:906:7397:b0:93f:50c7:2f5f with SMTP id f23-20020a170906739700b0093f50c72f5fmr2395009ejl.63.1680873340869;
+        Fri, 07 Apr 2023 06:15:40 -0700 (PDT)
+Received: from ?IPV6:2001:1c00:c32:7800:5bfa:a036:83f0:f9ec? (2001-1c00-0c32-7800-5bfa-a036-83f0-f9ec.cable.dynamic.v6.ziggo.nl. [2001:1c00:c32:7800:5bfa:a036:83f0:f9ec])
+        by smtp.gmail.com with ESMTPSA id jx17-20020a170907761100b009332bb8b1f7sm2047300ejc.66.2023.04.07.06.15.39
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 07 Apr 2023 06:15:39 -0700 (PDT)
+Message-ID: <845521b4-0451-f0c0-7606-0144475e98f7@redhat.com>
+Date:   Fri, 7 Apr 2023 15:15:38 +0200
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com> <20230203-evk-board-support-v5-12-1883c1b405ad@baylibre.com>
-In-Reply-To: <20230203-evk-board-support-v5-12-1883c1b405ad@baylibre.com>
-From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Fri, 7 Apr 2023 15:14:40 +0200
-Message-ID: <CAFGrd9qew3P2w7G5FxVPGyNNdx=4ZLeGjSXAktQgeQGyD2FcqA@mail.gmail.com>
-Subject: Re: [PATCH v5 12/12] arm64: dts: mediatek: Add CPU Idle support
-To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.7.1
+Subject: Re: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
+To:     Marek Vasut <marex@denx.de>, linux-wireless@vger.kernel.org
+Cc:     "David S. Miller" <davem@davemloft.net>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Danny van Heumen <danny@dannyvanheumen.nl>,
+        Eric Dumazet <edumazet@google.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+        Paul Cercueil <paul@crapouillou.net>,
+        SHA-cyfmac-dev-list@infineon.com,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
-        catalin.marinas@arm.com, Will Deacon <will@kernel.org>
-Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org
+References: <20230407013118.466441-1-marex@denx.de>
+Content-Language: en-US, nl
+From:   Hans de Goede <hdegoede@redhat.com>
+In-Reply-To: <20230407013118.466441-1-marex@denx.de>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-+ To: Catalin Marinas <catalin.marinas@arm.com>
-+ To: Will Deacon <will@kernel.org>
+Hi,
 
-Sorry for the noise.
+On 4/7/23 03:31, Marek Vasut wrote:
+> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
+> The odd thing about this is that the previous 1YN populated
+> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
+> while the chip populated on real hardware has a Cypress one.
+> The device ID also differs between the two devices. But they
+> are both 43439 otherwise, so add the IDs for both.
+> 
+> ```
+> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
+> 0x04b4
+> 0xbd3d
+> ```
+> 
+> Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
+> Signed-off-by: Marek Vasut <marex@denx.de>
+
+Thanks, patch looks good to me:
+
+Reviewed-by: Hans de Goede <hdegoede@redhat.com>
 
 Regards,
-Alexandre
 
-Le ven. 7 avr. 2023 =C3=A0 14:59, <amergnat@baylibre.com> a =C3=A9crit :
->
-> From: Amjad Ouled-Ameur <aouledameur@baylibre.com>
->
-> MT8365 has 3 CPU Idle states:
-> - MCDI_CPU. (Multi-Core-Deep-Idle)
-> - MCDI_CLUSTER.
-> - DPIDLE. (Deep-Idle)
->
-> Signed-off-by: Amjad Ouled-Ameur <aouledameur@baylibre.com>
-> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collab=
-ora.com>
-> Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
+Hans
+
+
+
+
 > ---
->  arch/arm64/boot/dts/mediatek/mt8365.dtsi | 35 ++++++++++++++++++++++++++=
-++++++
->  1 file changed, 35 insertions(+)
->
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8365.dtsi b/arch/arm64/boot/d=
-ts/mediatek/mt8365.dtsi
-> index cfe0c67ad61f..413496c92069 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-> +++ b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
-> @@ -128,6 +128,7 @@ cpu0: cpu@0 {
->                         reg =3D <0x0>;
->                         #cooling-cells =3D <2>;
->                         enable-method =3D "psci";
-> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
-STER_DPIDLE>;
->                         i-cache-size =3D <0x8000>;
->                         i-cache-line-size =3D <64>;
->                         i-cache-sets =3D <256>;
-> @@ -147,6 +148,7 @@ cpu1: cpu@1 {
->                         reg =3D <0x1>;
->                         #cooling-cells =3D <2>;
->                         enable-method =3D "psci";
-> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
-STER_DPIDLE>;
->                         i-cache-size =3D <0x8000>;
->                         i-cache-line-size =3D <64>;
->                         i-cache-sets =3D <256>;
-> @@ -166,6 +168,7 @@ cpu2: cpu@2 {
->                         reg =3D <0x2>;
->                         #cooling-cells =3D <2>;
->                         enable-method =3D "psci";
-> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
-STER_DPIDLE>;
->                         i-cache-size =3D <0x8000>;
->                         i-cache-line-size =3D <64>;
->                         i-cache-sets =3D <256>;
-> @@ -185,6 +188,7 @@ cpu3: cpu@3 {
->                         reg =3D <0x3>;
->                         #cooling-cells =3D <2>;
->                         enable-method =3D "psci";
-> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
-STER_DPIDLE>;
->                         i-cache-size =3D <0x8000>;
->                         i-cache-line-size =3D <64>;
->                         i-cache-sets =3D <256>;
-> @@ -198,6 +202,37 @@ cpu3: cpu@3 {
->                         operating-points-v2 =3D <&cluster0_opp>;
->                 };
->
-> +               idle-states {
-> +                       entry-method =3D "psci";
+> NOTE: Please drop the Fixes tag if this is considered unjustified
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Arend van Spriel <aspriel@gmail.com>
+> Cc: Danny van Heumen <danny@dannyvanheumen.nl>
+> Cc: Eric Dumazet <edumazet@google.com>
+> Cc: Franky Lin <franky.lin@broadcom.com>
+> Cc: Hans de Goede <hdegoede@redhat.com>
+> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Kalle Valo <kvalo@kernel.org>
+> Cc: Paolo Abeni <pabeni@redhat.com>
+> Cc: Paul Cercueil <paul@crapouillou.net>
+> Cc: SHA-cyfmac-dev-list@infineon.com
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: brcm80211-dev-list.pdl@broadcom.com
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-wireless@vger.kernel.org
+> Cc: netdev@vger.kernel.org
+> ---
+>  .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
+>  include/linux/mmc/sdio_ids.h                             | 5 ++++-
+>  2 files changed, 12 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> index 65d4799a56584..ff710b0b5071a 100644
+> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> @@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
+>  		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
+>  	}
+>  
+> +#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
+> +	{ \
+> +		SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
+> +		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
+> +	}
 > +
-> +                       CPU_MCDI: cpu-mcdi {
-> +                               compatible =3D "arm,idle-state";
-> +                               local-timer-stop;
-> +                               arm,psci-suspend-param =3D <0x00010001>;
-> +                               entry-latency-us =3D <300>;
-> +                               exit-latency-us =3D <200>;
-> +                               min-residency-us =3D <1000>;
-> +                       };
+>  /* devices we support, null terminated */
+>  static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
+> @@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
+> +	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
+> @@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
+> -	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
+>  	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
+> +	CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+>  	{ /* end: all zeroes */ }
+>  };
+>  MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 0e4ef9c5127ad..bf3c95d8eb8af 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -74,10 +74,13 @@
+>  #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
+>  #define SDIO_DEVICE_ID_BROADCOM_43364		0xa9a4
+>  #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
+> -#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
+> +#define SDIO_DEVICE_ID_BROADCOM_43439		0xa9af
+>  #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
+>  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
+>  
+> +#define SDIO_VENDOR_ID_CYPRESS			0x04b4
+> +#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xbd3d
 > +
-> +                       CLUSTER_MCDI: cluster-mcdi {
-> +                               compatible =3D "arm,idle-state";
-> +                               local-timer-stop;
-> +                               arm,psci-suspend-param =3D <0x01010001>;
-> +                               entry-latency-us =3D <350>;
-> +                               exit-latency-us =3D <250>;
-> +                               min-residency-us =3D <1200>;
-> +                       };
-> +
-> +                       CLUSTER_DPIDLE: cluster-dpidle {
-> +                               compatible =3D "arm,idle-state";
-> +                               local-timer-stop;
-> +                               arm,psci-suspend-param =3D <0x01010004>;
-> +                               entry-latency-us =3D <300>;
-> +                               exit-latency-us =3D <800>;
-> +                               min-residency-us =3D <3300>;
-> +                       };
-> +               };
-> +
->                 l2: l2-cache {
->                         compatible =3D "cache";
->                         cache-level =3D <2>;
->
-> --
-> 2.25.1
->
+>  #define SDIO_VENDOR_ID_MARVELL			0x02df
+>  #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
+>  #define SDIO_DEVICE_ID_MARVELL_8688_WLAN	0x9104
+
