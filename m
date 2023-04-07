@@ -2,110 +2,157 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D65E1C7618D
-	for <linux-mmc@archiver.kernel.org>; Thu,  6 Apr 2023 20:38:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D61C76196
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 01:31:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240249AbjDFUig (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Apr 2023 16:38:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54380 "EHLO
+        id S230327AbjDGBbb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 6 Apr 2023 21:31:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240257AbjDFUiW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Apr 2023 16:38:22 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A807FB47B;
-        Thu,  6 Apr 2023 13:34:53 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        with ESMTP id S230286AbjDGBbb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Apr 2023 21:31:31 -0400
+Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC7493E4;
+        Thu,  6 Apr 2023 18:31:28 -0700 (PDT)
+Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id E014C6471F;
-        Thu,  6 Apr 2023 20:34:35 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 95E7CC433D2;
-        Thu,  6 Apr 2023 20:34:34 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1680813275;
-        bh=piwLBENh4irhNGFJSxnTnkgU+tz4S7Qx3VDC5mBsLow=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=eKmaeMCgUMeITeDCNa33PhQDb7Ra//T9u6ZrmomOXgtwhrr6fphYxLIU4OQN4QXGe
-         KYEDTQUr+Ag83EPbtj7/mOs71LKexZ8aUpqf/3Ds8OM+NRZiCV7Yz9fVJEHG0I5pXG
-         4d5T45oQeqHxxxN9mfQT6g+a7MHaryvDunWV91pt9w3XTHSR8o0XjuQKZtRhdepfal
-         BJy2EVQTh0hqfLeKXaHaHjRRU1giIX/KarfNTuF3poLm/C5EzASATDPHZOWyphetxl
-         QRq7rFce1sH2MOhvQNmVa7pc8pLJBrwbrcpIyun52nycMADa89n+aCJkePKpTxkduL
-         mADB0NIRV4Izw==
-Date:   Thu, 6 Apr 2023 13:34:32 -0700
-From:   Eric Biggers <ebiggers@kernel.org>
-To:     Abel Vesa <abel.vesa@linaro.org>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v5 3/6] soc: qcom: Make the Qualcomm UFS/SDCC ICE a
- dedicated driver
-Message-ID: <20230406203432.GC20288@sol.localdomain>
-References: <20230403200530.2103099-1-abel.vesa@linaro.org>
- <20230403200530.2103099-4-abel.vesa@linaro.org>
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id 182CA85F45;
+        Fri,  7 Apr 2023 03:31:25 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1680831086;
+        bh=vXVWq86ptv5lCvSWV+LZTMItbNHfXVWbPisL3UAohQU=;
+        h=From:To:Cc:Subject:Date:From;
+        b=cZzZf31qnx5pD+xJyTcys65tFQvfyMaiHeTmQVke5y5bSm9Tq3wVV8XKoR/HgWjH7
+         RaqWZE/ApPm7WgepkOVpo7vAKn19QfYiJ6yPfc2i3qW9TQltSG4sET9A0MOau5rc8v
+         RQ1RtpLUxyR7XbysVdpkNlyH5r/Z3Z1+KkJNfraXZ0IRG22DOapWBokLLK+hVZG0sN
+         FJ9DneSICApIOi+iwMKVDjTauKcCasuQuKFn1ssvqaBeuHFLtc/zsJZ8c7e3tkw15t
+         1Cb5k8UAsyCKxeNaMN6KE6obbBXok+CE2/P8thGcTuLlINr6T2eKxMoK3AlAK8MZFy
+         GdfZYdhWszHWg==
+From:   Marek Vasut <marex@denx.de>
+To:     linux-wireless@vger.kernel.org
+Cc:     Marek Vasut <marex@denx.de>,
+        "David S. Miller" <davem@davemloft.net>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Danny van Heumen <danny@dannyvanheumen.nl>,
+        Eric Dumazet <edumazet@google.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+        Paul Cercueil <paul@crapouillou.net>,
+        SHA-cyfmac-dev-list@infineon.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org
+Subject: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
+Date:   Fri,  7 Apr 2023 03:31:18 +0200
+Message-Id: <20230407013118.466441-1-marex@denx.de>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230403200530.2103099-4-abel.vesa@linaro.org>
+Content-Transfer-Encoding: 8bit
+X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 03, 2023 at 11:05:27PM +0300, Abel Vesa wrote:
-> This takes the already existing duplicated support in both ufs-qcom
-> and sdhci-msm drivers and makes it a dedicated driver that can be used
-> by both mentioned drivers. The reason for this is because, staring with
-> SM8550, the ICE IP block is shared between UFS and SDCC, which means we
-> need to probe a dedicated device and share it between those two
-> consumers. So let's add the ICE dedicated driver as a soc driver.
-> Platforms that already have ICE supported, will use it as a library
-> as the of_qcom_ice_get will return an ICE instance created for the
-> consumer device. This allows the backwards compatibility with old-style
-> devicetree approach. Also, add support to HW version 4.x since it
-> works out-of-the-box with the current driver. The 4.x HW version is
-> found on SM8550 platform.
+Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
+The odd thing about this is that the previous 1YN populated
+on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
+while the chip populated on real hardware has a Cypress one.
+The device ID also differs between the two devices. But they
+are both 43439 otherwise, so add the IDs for both.
 
-Can you please split up long paragraphs like this into multiple paragraphs?
+```
+/sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
+0x04b4
+0xbd3d
+```
 
-> +	pdev = of_find_device_by_node(node);
-> +	if (!pdev) {
-> +		dev_err(dev, "Cannot find device node %s\n", node->name);
-> +		ice = ERR_PTR(-EPROBE_DEFER);
-> +		goto out;
-> +	}
-> +
-> +	ice = platform_get_drvdata(pdev);
-> +	if (!ice) {
-> +		dev_err(dev, "Cannot get ice instance from %s\n",
-> +			dev_name(&pdev->dev));
-> +		platform_device_put(pdev);
-> +		ice = ERR_PTR(-EPROBE_DEFER);
-> +		goto out;
-> +	}
-> +
-> +	ice->link = device_link_add(dev, &pdev->dev, DL_FLAG_AUTOREMOVE_SUPPLIER);
-> +	if (!ice->link) {
-> +		dev_err(&pdev->dev,
-> +			"Failed to create device link to consumer %s\n",
-> +			dev_name(dev));
-> +		ice = ERR_PTR(-EINVAL);
-> +	}
+Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
+Signed-off-by: Marek Vasut <marex@denx.de>
+---
+NOTE: Please drop the Fixes tag if this is considered unjustified
+Cc: "David S. Miller" <davem@davemloft.net>
+Cc: Arend van Spriel <aspriel@gmail.com>
+Cc: Danny van Heumen <danny@dannyvanheumen.nl>
+Cc: Eric Dumazet <edumazet@google.com>
+Cc: Franky Lin <franky.lin@broadcom.com>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Hante Meuleman <hante.meuleman@broadcom.com>
+Cc: Jakub Kicinski <kuba@kernel.org>
+Cc: Kalle Valo <kvalo@kernel.org>
+Cc: Paolo Abeni <pabeni@redhat.com>
+Cc: Paul Cercueil <paul@crapouillou.net>
+Cc: SHA-cyfmac-dev-list@infineon.com
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: brcm80211-dev-list.pdl@broadcom.com
+Cc: linux-mmc@vger.kernel.org
+Cc: linux-wireless@vger.kernel.org
+Cc: netdev@vger.kernel.org
+---
+ .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
+ include/linux/mmc/sdio_ids.h                             | 5 ++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
 
-Is a call to platform_device_put() missing above?
+diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+index 65d4799a56584..ff710b0b5071a 100644
+--- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
++++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+@@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
+ 		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
+ 	}
+ 
++#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
++	{ \
++		SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
++		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
++	}
++
+ /* devices we support, null terminated */
+ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
+@@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
++	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
+@@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
+-	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
+ 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
++	CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+ 	{ /* end: all zeroes */ }
+ };
+ MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
+diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+index 0e4ef9c5127ad..bf3c95d8eb8af 100644
+--- a/include/linux/mmc/sdio_ids.h
++++ b/include/linux/mmc/sdio_ids.h
+@@ -74,10 +74,13 @@
+ #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
+ #define SDIO_DEVICE_ID_BROADCOM_43364		0xa9a4
+ #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
+-#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
++#define SDIO_DEVICE_ID_BROADCOM_43439		0xa9af
+ #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
+ #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
+ 
++#define SDIO_VENDOR_ID_CYPRESS			0x04b4
++#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xbd3d
++
+ #define SDIO_VENDOR_ID_MARVELL			0x02df
+ #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
+ #define SDIO_DEVICE_ID_MARVELL_8688_WLAN	0x9104
+-- 
+2.39.2
 
-- Eric
