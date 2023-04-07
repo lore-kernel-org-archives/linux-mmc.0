@@ -2,132 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D184C77B6F
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 10:51:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 06A77C77B61
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 11:40:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240635AbjDGKvy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 06:51:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42422 "EHLO
+        id S233493AbjDGLku (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 07:40:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240678AbjDGKvB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 06:51:01 -0400
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B38BBB444
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 03:50:49 -0700 (PDT)
-Received: by mail-wm1-x334.google.com with SMTP id l15-20020a05600c4f0f00b003ef6d684102so21545276wmq.3
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 03:50:49 -0700 (PDT)
+        with ESMTP id S235484AbjDGLkt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 07:40:49 -0400
+Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A101AD1F
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 04:40:44 -0700 (PDT)
+Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-54c17fa9ae8so70831117b3.5
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 04:40:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680864649; x=1683456649;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680867643; x=1683459643;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=FrRjNsG8dDfUlp/X2GO5GwvyXP0i6VtlSWcC/Gq+Hfw=;
-        b=ACLLbGt1OwOJODwmJx3o9oqj4zdQCSTqLWYpDlrLRPGcUtSuQ2BIq77jDcko9hab2y
-         K9tRxzUIOUPeh7QIE3eh/i4YpA1xMj7MthRtDnfbfgcTINE/LjPYIlL7jWNmGWtUP4Bg
-         hIY3gVYC/jqzqi+OW8ndbQP34DMJ+st1RV72Kn/+oIuf7wzzIuIBeW0SVpn+CA4fAMjc
-         nghoLDnfWj5p1FNVzXMhhZAPOe4B4h3ROK6slK1a/ofnandvCN4c6Hh7IdGpj4/GqIXP
-         uH65XyzgTZwBBOucxUUsxi8OJIgS2VscOWoSud2xrWPpsY7OMDf3tVWxMh+0Ta7mT9oR
-         51mw==
+        bh=bhp1D4MU620tEuYfWwD9BEmVsWgqQus92qBJwjtxDro=;
+        b=fFvwxikqEAeHJ1MyF6Mjcy5mzl2OJh63dIxaAB2Eh3YcjM/Owu5lHKJFBUE6cx53n5
+         ge0hlhxbz5JCzOGC7sqHExwugQIn4P86tbebsNoAdBAAZk2t+4qGBnT3jA9uveXp3r3L
+         bhnpYubAipVh0F7oIPpqBSXO3s1J/fsCFbJYA3V8qR9HtOW6umbqHOrD/IH0kF9hou+9
+         Rgcn2cuompVeamLBt3NAPLr1/jiDxRJVX8kZyxeZphYp1Dmme4IHcxzSlWV2WvMAVLUm
+         hTBdY3mZ3//C/vmRayZFAwxnXHagHtuuxkHBEuV0mhQCaMg+UxDguJHFP45fw1kaLBiA
+         Ukxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680864649; x=1683456649;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20210112; t=1680867643; x=1683459643;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=FrRjNsG8dDfUlp/X2GO5GwvyXP0i6VtlSWcC/Gq+Hfw=;
-        b=8BexQIYunQNua+Ygas9uGWBsm5wCRyvlc9oSlivNgXLIWqOk/e/8fbyO1F8wjafcMB
-         FErDKZdHYh7dUs0d4N3FLj4C+ioe8srSgWDCNNoa1rHJue5/rO07a2YYcpWJ0ghBvHiH
-         U9bMYc4S8cO4cSmHKM1sQ3U7q4vgtSuDxheuuXR60+o5tEdZRGFWwcmfKyVIIU0x2he4
-         NuUErzIshbM8bsFL3/3dDQemw0KZsLSkrMujEQLWDf/bduUbH7MCMi/a2oxTp1hcSQJa
-         wg16Al9avNvfwGpuKxRTpHWNs0Zzdfj6Kfmxk4zsI1UR5Op9oLnmY8fUgbp97njjScwo
-         QuTg==
-X-Gm-Message-State: AAQBX9fsXhgmDhrq38Du+KIBuR8gMWzoigV8OGIkTdljWN6w7WfeFLEV
-        po1SC0EPvCUzYBU0C6+ddMPvMw==
-X-Google-Smtp-Source: AKy350b+BQmOqnJesne4N7aX08ZqsSt65sdWZN8Zm9m42DxDMwORLJyYI4kYhyz/J7olP9fEoxiVhA==
-X-Received: by 2002:a7b:c7d9:0:b0:3ee:d7f:6676 with SMTP id z25-20020a7bc7d9000000b003ee0d7f6676mr1081052wmk.11.1680864649116;
-        Fri, 07 Apr 2023 03:50:49 -0700 (PDT)
-Received: from localhost.localdomain ([94.52.112.99])
-        by smtp.gmail.com with ESMTPSA id i16-20020a05600c355000b003ede6540190sm8131909wmq.0.2023.04.07.03.50.47
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Apr 2023 03:50:48 -0700 (PDT)
-From:   Abel Vesa <abel.vesa@linaro.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        bh=bhp1D4MU620tEuYfWwD9BEmVsWgqQus92qBJwjtxDro=;
+        b=nhdZxadrD/MBiAVHj6tb8u7sg+DNfXbkOS9pQOrXvSLkVj4tw9Ss10wGdYl4aOY6mv
+         ec8R4K8Ctn7KDOco1kSc1CQr0lVBVJm4B0oAviuTYh2pI164PF9SEHR13jh7MRHXP2AY
+         a9Pp+lQUB+9NBLgHeJxbhRb122ZOFkjB0nmw0PUfwlzPVqMl5I6ZeSKxGXPwwJ7pt4or
+         ZvywD03YWnllDC9m5R+1WRbMwOSfNg/vi77H3w7BwVZU5eNG39+KThJtHi+r2TxPIQOm
+         o4DGqV6J3+BGQ53TCh3o6OO+isV/COu5WtYn3kuaR4XZpX4azMcWGI4aeDMSSIRn1Qgk
+         W12w==
+X-Gm-Message-State: AAQBX9enkG7Mgd6f/Iv3IhyDw6sK39901uh//U7uDcBsQK5mUJbbDrw0
+        pMV+8n4Bz8EPdJGd6C87yGImkS9AqWUgjOOQNN1XsA==
+X-Google-Smtp-Source: AKy350YoGyPsHOTAa1wet0tacy28TuEIoDXiA/LQepBDm7Xcz7qo6pPhP3CKaVtCoIyN9Fqb7B2gwVZJiToE8OVA9L8=
+X-Received: by 2002:a81:a783:0:b0:545:7143:2940 with SMTP id
+ e125-20020a81a783000000b0054571432940mr1022815ywh.0.1680867643596; Fri, 07
+ Apr 2023 04:40:43 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230203-evk-board-support-v4-0-5cffe66a38c0@baylibre.com>
+ <20230203-evk-board-support-v4-2-5cffe66a38c0@baylibre.com> <CACRpkdYSpMD-V0QNGwtiKCA4KAedYfmFpvdCHWhjST9uTricTg@mail.gmail.com>
+In-Reply-To: <CACRpkdYSpMD-V0QNGwtiKCA4KAedYfmFpvdCHWhjST9uTricTg@mail.gmail.com>
+From:   Alexandre Mergnat <amergnat@baylibre.com>
+Date:   Fri, 7 Apr 2023 13:40:32 +0200
+Message-ID: <CAFGrd9ox3BftUxPai8WhWgf5UefTwnqnLsdo8kUHMYphB7nOTA@mail.gmail.com>
+Subject: Re: [PATCH v4 02/11] dt-bindings: pinctrl: mediatek,mt8365-pinctrl:
+ add drive strength property
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Manivannan Sadhasivam <mani@kernel.org>,
-        Alim Akhtar <alim.akhtar@samsung.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Bart Van Assche <bvanassche@acm.org>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        "James E . J . Bottomley" <jejb@linux.ibm.com>,
-        "Martin K . Petersen" <martin.petersen@oracle.com>,
-        Herbert Xu <herbert@gondor.apana.org.au>,
-        "David S . Miller" <davem@davemloft.net>,
-        Eric Biggers <ebiggers@kernel.org>
-Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
-        linux-scsi@vger.kernel.org
-Subject: [PATCH v6 6/6] arm64: dts: qcom: sm8550: Add the Inline Crypto Engine node
-Date:   Fri,  7 Apr 2023 13:50:29 +0300
-Message-Id: <20230407105029.2274111-7-abel.vesa@linaro.org>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230407105029.2274111-1-abel.vesa@linaro.org>
-References: <20230407105029.2274111-1-abel.vesa@linaro.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        =?UTF-8?Q?Bernhard_Rosenkr=C3=A4nzer?= <bero@baylibre.com>,
+        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add support for UFS ICE by adding the qcom,ice property and the
-ICE dedicated devicetree node. While at it, add the reg-name property
-to the UFS HC node to be in line with older platforms.
+Le mar. 4 avr. 2023 =C3=A0 15:55, Linus Walleij <linus.walleij@linaro.org> =
+a =C3=A9crit :
+>
+> On Fri, Mar 31, 2023 at 7:55=E2=80=AFPM Alexandre Mergnat <amergnat@bayli=
+bre.com> wrote:
+>
+> > This SoC is able to drive the following output current:
+> > - 2 mA
+> > - 4 mA
+> > - 6 mA
+> > - 8 mA
+> > - 10 mA
+> > - 12 mA
+> > - 14 mA
+> > - 16 mA
+> >
+> > Then drive-strength property is set with enum to reflect its HW capabil=
+ity.
+> >
+> > Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@coll=
+abora.com>
+> > Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+> > Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+> > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
+>
+> This patch does not apply to my devel branch:
+> https://git.kernel.org/pub/scm/linux/kernel/git/linusw/linux-pinctrl.git/=
+log/?h=3Ddevel
+>
+> Can you please rebase and resend?
 
-Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
----
+According to your suggestion on the other serie [1], I rebased this
+patch and added it to the other serie [2] to simplify the process
 
-The v5 is here:
-https://lore.kernel.org/all/20230403200530.2103099-7-abel.vesa@linaro.org/
+Regards,
+Alexandre
 
-Changes since v5:
- * Dropped the reg-names property from UFS node as it was not needed and
-   makes the bindings check fail
-
-Changes since v4:
- * none
-
-Changes since v3:
- * none
-
- arch/arm64/boot/dts/qcom/sm8550.dtsi | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/arch/arm64/boot/dts/qcom/sm8550.dtsi b/arch/arm64/boot/dts/qcom/sm8550.dtsi
-index d252658c73dd..2b3a721292b6 100644
---- a/arch/arm64/boot/dts/qcom/sm8550.dtsi
-+++ b/arch/arm64/boot/dts/qcom/sm8550.dtsi
-@@ -1932,9 +1932,18 @@ ufs_mem_hc: ufs@1d84000 {
- 				<0 0>,
- 				<0 0>,
- 				<0 0>;
-+			qcom,ice = <&ice>;
-+
- 			status = "disabled";
- 		};
- 
-+		ice: crypto@1d88000 {
-+			compatible = "qcom,sm8550-inline-crypto-engine",
-+				     "qcom,inline-crypto-engine";
-+			reg = <0 0x01d88000 0 0x8000>;
-+			clocks = <&gcc GCC_UFS_PHY_ICE_CORE_CLK>;
-+		};
-+
- 		tcsr_mutex: hwlock@1f40000 {
- 			compatible = "qcom,tcsr-mutex";
- 			reg = <0 0x01f40000 0 0x20000>;
--- 
-2.34.1
-
+[1]: https://lore.kernel.org/all/CACRpkdYndXqTXrTakwv1mbvJBs-tG+pjOpLLCgS9c=
+rE0aBj0jA@mail.gmail.com/
+[2]: https://lore.kernel.org/all/20230327-cleanup-pinctrl-binding-v3-0-6f56=
+d5c7a8de@baylibre.com/
