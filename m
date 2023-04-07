@@ -2,57 +2,57 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 25087C77B61
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:14:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6D17CC6FD1D
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 13:14:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240713AbjDGNOs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 09:14:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57630 "EHLO
+        id S240804AbjDGNO5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 09:14:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58076 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240756AbjDGNOj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:14:39 -0400
-Received: from mail-yb1-xb2e.google.com (mail-yb1-xb2e.google.com [IPv6:2607:f8b0:4864:20::b2e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A16D2B44B
-        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:14:36 -0700 (PDT)
-Received: by mail-yb1-xb2e.google.com with SMTP id r187so48950925ybr.6
-        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:14:36 -0700 (PDT)
+        with ESMTP id S240764AbjDGNOy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 09:14:54 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 13E86AF27
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 06:14:52 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-54c0dd7e2f3so89080387b3.8
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 06:14:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680873276; x=1683465276;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1680873291; x=1683465291;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=eYfJz5DR0sarRMEimOcvYMZLh47D2UkV2Jy+IyrrQOQ=;
-        b=afYShcwaWCRKxQfWVC6A3UR9s7WsYh/m45lh7dvhXtRB16e21H+vEI88O/1n9pP8I4
-         2biUZIldSXj1UlxNMnKldwyioUX0rXkQ8q9t93u3HTfhmuy9m1zMO9pme+sLax1EPkCJ
-         g/1HP/SlmfpmPCsMjbbIYuuW3UZB1iCBAeWDEqrR6I/5QiBmYqlRlH7m2o6blm935sP4
-         +rh/mTZ6T2ieURwovpfl6ay3Qc5CDtgNGd/WsZSgg1EL1jWOuNz6qBxeci4IJwFs/KJh
-         Z+XRLogC5gdLXNlFuAUkHjWFCucZxRZ8Xpc7swDcbtI3+U0rfFuyCzLFRwtClMgorn2r
-         9Yug==
+        bh=I3VDM6BonfxZxR/aIqG+UXRPKt9a+mpQkJxjwsAv4Mk=;
+        b=EYgt6v1IEhj/HYAqnKpiJJom8T1Kf9QMdNP16lSbXvXntvHY8b+pHLX0Iz6SOI1jh8
+         XwlqiLigAdgoV9bcjZ/R175Yg8h/ftYTu/rDsoTKv0sdp5GuvmW42QjmUUE8eMqrUKfg
+         iiNHm6yG80c39Ibb08M3yA35Q3/aX+ePxocUywjebODgGgGViM/qjtGumsp4p+tYnfTP
+         B0A6e3FMsikx9qZHkdeBVN66TrTVeRAneg/iBXPXJt4JWaxrD5YlFbnPn463f51XY6WZ
+         e+vEj3MSISq2sj1XSh5g/UEacpNwxevRYv+sI7olEYYFcrXyYHkLIScyKrhsmYQGyKDO
+         eeJQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680873276; x=1683465276;
+        d=1e100.net; s=20210112; t=1680873291; x=1683465291;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=eYfJz5DR0sarRMEimOcvYMZLh47D2UkV2Jy+IyrrQOQ=;
-        b=zYC8LEEXGTNH6145DJ4tkqg8g6wkRZ0pLOc8giTg/XGD6eTtYutTb1M7uAr+g8aHMj
-         fEA6WRuvx9EoREV1ryT0sDm9rPkBsOi156G7dQWXCp65CLWIAMhD9t6dRWGy13ZMcDiC
-         EQImq2vuRhXDs5OTmidL9WZDniMwdzIkVeFu+7OO4ulPMCgs+iKMGlMjkM8CtUhYXGKt
-         89fz9edq+2y3CAI6CdhZiRquqmf62qiDoJXvtKAXGl/fsDOxddl9uEwvagDTEB/Jnhlk
-         HxDbM015c54qRZRfBV2uDy73ZxGUlVo52psdo6VT/EZH8kBrE/ubYnMsvSc989Bb+SJu
-         qmxw==
-X-Gm-Message-State: AAQBX9esKo9p2wGbel3n0usYESG47Z/UpYHlYrFkaYhpfZKfxcIReAkm
-        ulwIIUuKrrEkmaPRHaxn5yMjGbdKChrjMPQwnnPCjw==
-X-Google-Smtp-Source: AKy350bjb0HMJWJBzAnomlx9pGRYUzANSN19TtSNZ11GKBKtXGW/aXrzLpx8tgmRFVv06JMuSLYzMOruSpo5bx91W2o=
-X-Received: by 2002:a25:d28b:0:b0:b6c:2224:8a77 with SMTP id
- j133-20020a25d28b000000b00b6c22248a77mr1788606ybg.1.1680873275845; Fri, 07
- Apr 2023 06:14:35 -0700 (PDT)
+        bh=I3VDM6BonfxZxR/aIqG+UXRPKt9a+mpQkJxjwsAv4Mk=;
+        b=iyLM/DFrlyErM2j7IzIFvyu7QksiDoFGcwN1brhq+yCNwhgx/SU40Zjz6J4I4c+pAs
+         6BCt1y0ofDJtoufoAZKYHl07xsjIjx/MeaxqpR08kjSIoRxNphhJXm9LLU9gL5Lr26SE
+         Q5nfj6T+KhlbmusHjIj0y1i/9kIis00sBbzro2cx8NOyF7Era8iH7N3nfUwVcZxgph6T
+         ft8so875Yg1nh55ePwztyUGv2hGraVxZZw6mhSEr0m1csYO7JCDpipT+GhOwRMHObL9x
+         9qN6t1QvwZnva9hGH1miiGDph+0VEN6ZaBJiwwKmGf/x/wNeee5vkQFLHyUnUSsbfUNK
+         OAtw==
+X-Gm-Message-State: AAQBX9dFcE8tTxJ108/wRkSfGZ9GKP4WyWbR6MvreWLOdVpIGsyHHuoq
+        zhPIoQATlMos8QNIg33p010dHutsvcuPCQbzZgb1+Q==
+X-Google-Smtp-Source: AKy350biNDWHsrxERmOnUuBy6jK34jRpZaUPgIp3kZ6WDTUIjrWP9DPztnBTYyClXfME+4ltxbPE84/Yb360qJlUgZg=
+X-Received: by 2002:a81:af65:0:b0:544:b864:5532 with SMTP id
+ x37-20020a81af65000000b00544b8645532mr1038296ywj.3.1680873291116; Fri, 07 Apr
+ 2023 06:14:51 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com> <20230203-evk-board-support-v5-11-1883c1b405ad@baylibre.com>
-In-Reply-To: <20230203-evk-board-support-v5-11-1883c1b405ad@baylibre.com>
+References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com> <20230203-evk-board-support-v5-12-1883c1b405ad@baylibre.com>
+In-Reply-To: <20230203-evk-board-support-v5-12-1883c1b405ad@baylibre.com>
 From:   Alexandre Mergnat <amergnat@baylibre.com>
-Date:   Fri, 7 Apr 2023 15:14:25 +0200
-Message-ID: <CAFGrd9pu+t1K_4B-oCoRVq_rZfWZN=XWVARpTC5dS7HydZQFKg@mail.gmail.com>
-Subject: Re: [PATCH v5 11/12] arm64: dts: mediatek: add cpufreq support for mt8365-evk
+Date:   Fri, 7 Apr 2023 15:14:40 +0200
+Message-ID: <CAFGrd9qew3P2w7G5FxVPGyNNdx=4ZLeGjSXAktQgeQGyD2FcqA@mail.gmail.com>
+Subject: Re: [PATCH v5 12/12] arm64: dts: mediatek: Add CPU Idle support
 To:     Wim Van Sebroeck <wim@linux-watchdog.org>,
         Guenter Roeck <linux@roeck-us.net>,
         Rob Herring <robh+dt@kernel.org>,
@@ -88,51 +88,103 @@ Sorry for the noise.
 Regards,
 Alexandre
 
-Le ven. 7 avr. 2023 =C3=A0 14:59, Alexandre Mergnat <amergnat@baylibre.com>=
- a =C3=A9crit :
+Le ven. 7 avr. 2023 =C3=A0 14:59, <amergnat@baylibre.com> a =C3=A9crit :
 >
-> In order to have cpufreq support, this patch adds proc-supply and
-> sram-supply for each CPU.
+> From: Amjad Ouled-Ameur <aouledameur@baylibre.com>
 >
+> MT8365 has 3 CPU Idle states:
+> - MCDI_CPU. (Multi-Core-Deep-Idle)
+> - MCDI_CLUSTER.
+> - DPIDLE. (Deep-Idle)
+>
+> Signed-off-by: Amjad Ouled-Ameur <aouledameur@baylibre.com>
 > Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collab=
 ora.com>
 > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
 > ---
->  arch/arm64/boot/dts/mediatek/mt8365-evk.dts | 20 ++++++++++++++++++++
->  1 file changed, 20 insertions(+)
+>  arch/arm64/boot/dts/mediatek/mt8365.dtsi | 35 ++++++++++++++++++++++++++=
+++++++
+>  1 file changed, 35 insertions(+)
 >
-> diff --git a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts b/arch/arm64/boo=
-t/dts/mediatek/mt8365-evk.dts
-> index 431078f8670e..d723838ed49b 100644
-> --- a/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-> +++ b/arch/arm64/boot/dts/mediatek/mt8365-evk.dts
-> @@ -88,6 +88,26 @@ optee_reserved: optee@43200000 {
->         };
->  };
+> diff --git a/arch/arm64/boot/dts/mediatek/mt8365.dtsi b/arch/arm64/boot/d=
+ts/mediatek/mt8365.dtsi
+> index cfe0c67ad61f..413496c92069 100644
+> --- a/arch/arm64/boot/dts/mediatek/mt8365.dtsi
+> +++ b/arch/arm64/boot/dts/mediatek/mt8365.dtsi
+> @@ -128,6 +128,7 @@ cpu0: cpu@0 {
+>                         reg =3D <0x0>;
+>                         #cooling-cells =3D <2>;
+>                         enable-method =3D "psci";
+> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
+STER_DPIDLE>;
+>                         i-cache-size =3D <0x8000>;
+>                         i-cache-line-size =3D <64>;
+>                         i-cache-sets =3D <256>;
+> @@ -147,6 +148,7 @@ cpu1: cpu@1 {
+>                         reg =3D <0x1>;
+>                         #cooling-cells =3D <2>;
+>                         enable-method =3D "psci";
+> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
+STER_DPIDLE>;
+>                         i-cache-size =3D <0x8000>;
+>                         i-cache-line-size =3D <64>;
+>                         i-cache-sets =3D <256>;
+> @@ -166,6 +168,7 @@ cpu2: cpu@2 {
+>                         reg =3D <0x2>;
+>                         #cooling-cells =3D <2>;
+>                         enable-method =3D "psci";
+> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
+STER_DPIDLE>;
+>                         i-cache-size =3D <0x8000>;
+>                         i-cache-line-size =3D <64>;
+>                         i-cache-sets =3D <256>;
+> @@ -185,6 +188,7 @@ cpu3: cpu@3 {
+>                         reg =3D <0x3>;
+>                         #cooling-cells =3D <2>;
+>                         enable-method =3D "psci";
+> +                       cpu-idle-states =3D <&CPU_MCDI &CLUSTER_MCDI &CLU=
+STER_DPIDLE>;
+>                         i-cache-size =3D <0x8000>;
+>                         i-cache-line-size =3D <64>;
+>                         i-cache-sets =3D <256>;
+> @@ -198,6 +202,37 @@ cpu3: cpu@3 {
+>                         operating-points-v2 =3D <&cluster0_opp>;
+>                 };
 >
-> +&cpu0 {
-> +       proc-supply =3D <&mt6357_vproc_reg>;
-> +       sram-supply =3D <&mt6357_vsram_proc_reg>;
-> +};
+> +               idle-states {
+> +                       entry-method =3D "psci";
 > +
-> +&cpu1 {
-> +       proc-supply =3D <&mt6357_vproc_reg>;
-> +       sram-supply =3D <&mt6357_vsram_proc_reg>;
-> +};
+> +                       CPU_MCDI: cpu-mcdi {
+> +                               compatible =3D "arm,idle-state";
+> +                               local-timer-stop;
+> +                               arm,psci-suspend-param =3D <0x00010001>;
+> +                               entry-latency-us =3D <300>;
+> +                               exit-latency-us =3D <200>;
+> +                               min-residency-us =3D <1000>;
+> +                       };
 > +
-> +&cpu2 {
-> +       proc-supply =3D <&mt6357_vproc_reg>;
-> +       sram-supply =3D <&mt6357_vsram_proc_reg>;
-> +};
+> +                       CLUSTER_MCDI: cluster-mcdi {
+> +                               compatible =3D "arm,idle-state";
+> +                               local-timer-stop;
+> +                               arm,psci-suspend-param =3D <0x01010001>;
+> +                               entry-latency-us =3D <350>;
+> +                               exit-latency-us =3D <250>;
+> +                               min-residency-us =3D <1200>;
+> +                       };
 > +
-> +&cpu3 {
-> +       proc-supply =3D <&mt6357_vproc_reg>;
-> +       sram-supply =3D <&mt6357_vsram_proc_reg>;
-> +};
+> +                       CLUSTER_DPIDLE: cluster-dpidle {
+> +                               compatible =3D "arm,idle-state";
+> +                               local-timer-stop;
+> +                               arm,psci-suspend-param =3D <0x01010004>;
+> +                               entry-latency-us =3D <300>;
+> +                               exit-latency-us =3D <800>;
+> +                               min-residency-us =3D <3300>;
+> +                       };
+> +               };
 > +
->  &ethernet {
->         pinctrl-0 =3D <&ethernet_pins>;
->         pinctrl-names =3D "default";
+>                 l2: l2-cache {
+>                         compatible =3D "cache";
+>                         cache-level =3D <2>;
 >
 > --
 > 2.25.1
