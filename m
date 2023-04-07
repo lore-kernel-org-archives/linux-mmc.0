@@ -2,157 +2,134 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C7D61C76196
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 01:31:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D98F9C6FD1D
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 07:02:43 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230327AbjDGBbb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 6 Apr 2023 21:31:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37610 "EHLO
+        id S237539AbjDGHCm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 03:02:42 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43672 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230286AbjDGBbb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 6 Apr 2023 21:31:31 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AC7493E4;
-        Thu,  6 Apr 2023 18:31:28 -0700 (PDT)
-Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 182CA85F45;
-        Fri,  7 Apr 2023 03:31:25 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1680831086;
-        bh=vXVWq86ptv5lCvSWV+LZTMItbNHfXVWbPisL3UAohQU=;
-        h=From:To:Cc:Subject:Date:From;
-        b=cZzZf31qnx5pD+xJyTcys65tFQvfyMaiHeTmQVke5y5bSm9Tq3wVV8XKoR/HgWjH7
-         RaqWZE/ApPm7WgepkOVpo7vAKn19QfYiJ6yPfc2i3qW9TQltSG4sET9A0MOau5rc8v
-         RQ1RtpLUxyR7XbysVdpkNlyH5r/Z3Z1+KkJNfraXZ0IRG22DOapWBokLLK+hVZG0sN
-         FJ9DneSICApIOi+iwMKVDjTauKcCasuQuKFn1ssvqaBeuHFLtc/zsJZ8c7e3tkw15t
-         1Cb5k8UAsyCKxeNaMN6KE6obbBXok+CE2/P8thGcTuLlINr6T2eKxMoK3AlAK8MZFy
-         GdfZYdhWszHWg==
-From:   Marek Vasut <marex@denx.de>
-To:     linux-wireless@vger.kernel.org
-Cc:     Marek Vasut <marex@denx.de>,
-        "David S. Miller" <davem@davemloft.net>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Danny van Heumen <danny@dannyvanheumen.nl>,
-        Eric Dumazet <edumazet@google.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        SHA-cyfmac-dev-list@infineon.com,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
-Date:   Fri,  7 Apr 2023 03:31:18 +0200
-Message-Id: <20230407013118.466441-1-marex@denx.de>
-X-Mailer: git-send-email 2.39.2
+        with ESMTP id S229531AbjDGHCm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 03:02:42 -0400
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73CB67ED3
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 00:02:40 -0700 (PDT)
+Received: by mail-wm1-x32a.google.com with SMTP id p34so23589272wms.3
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 00:02:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680850959; x=1683442959;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=yDRZJb+gw9WKl+q/YP3+9vfEWrdxXYb08xE3KjrncwY=;
+        b=TlUNuHXhE7dkX3ma2znO7zdAacJiO27ghArmpkXlH8c3ATv+KBTc8LUhyVrkypI+mP
+         0zQlggzvEemyf2P17MWTNYZVT5pEmY7G8l0KpU4b0QsyPvMfMJZshCs5c4HdBgpV6MQP
+         XN2grzseW68CfcpULpwxh3ynO/USV/6im6FxHW40/svQL+ApI5uK1eCRpcAHn1PqPRYE
+         iwww25egOIvVPfxbt4pMX674CTKLbiVEO/0Ip1e+6ahSlHwFQkQF7naCFmxlgJCIHPZU
+         6QypBjxTNvF8oRGQexdGN9PM2UNsP9cuq6GQxZBhFfnm80WY+czp/4FjLGOZC9ZJW9dw
+         8zbg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1680850959; x=1683442959;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=yDRZJb+gw9WKl+q/YP3+9vfEWrdxXYb08xE3KjrncwY=;
+        b=CnSRUtqd/o6s1XS6A4FCxgo/b0NVI+cdpl2av10OXo2kcWi+ermL3LOlC2zDCN1qfJ
+         6OdsEqk6r8RL6AgO5DJcVBSpyjXTOrM63vsCBZ8qyxDIjP3c/YWE/8A+4CXus90IHaeI
+         L9HlVn1ZQMi+iKh51XqdwuF+NnAede22AOT09xHgdFSN1tH5zHhxL3DLA0s+wERx25n8
+         reGD0vY6oBYPMmRsY0aIPAAcFqZPoFfmn4rrfCzzIgtDLGszMCvt9HKKlynAX5h99ot7
+         mP6XDqbQAq/iVlurOeQOwo9A3vqqf/FGcQy6eJUsfFjI9I3dTuMztrarjzumSaKzfA21
+         3AHA==
+X-Gm-Message-State: AAQBX9cfFR9gO9svwl3YV7HRbwEeub0vb6WvFBFybg8+n8lY7wRE7BPX
+        Y+U+PmNvM4gs62mqCdk4MkU4hg==
+X-Google-Smtp-Source: AKy350Yf7cZzWZgOSGchAXM9/7IoYqhc4Z0zpcrhQUgBsDYEyMpw3OS/oAAO8/EgLIduuLczRZdj6g==
+X-Received: by 2002:a05:600c:2202:b0:3ee:289a:3c3a with SMTP id z2-20020a05600c220200b003ee289a3c3amr566623wml.30.1680850958894;
+        Fri, 07 Apr 2023 00:02:38 -0700 (PDT)
+Received: from linaro.org ([94.52.112.99])
+        by smtp.gmail.com with ESMTPSA id i42-20020a05600c4b2a00b003f0321c22basm7224793wmp.12.2023.04.07.00.02.37
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 07 Apr 2023 00:02:38 -0700 (PDT)
+Date:   Fri, 7 Apr 2023 10:02:36 +0300
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Eric Biggers <ebiggers@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH v5 4/6] scsi: ufs: ufs-qcom: Switch to the new ICE API
+Message-ID: <ZC/ADOlol2XO7ACL@linaro.org>
+References: <20230403200530.2103099-1-abel.vesa@linaro.org>
+ <20230403200530.2103099-5-abel.vesa@linaro.org>
+ <20230406201634.GA20288@sol.localdomain>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230406201634.GA20288@sol.localdomain>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
-The odd thing about this is that the previous 1YN populated
-on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
-while the chip populated on real hardware has a Cypress one.
-The device ID also differs between the two devices. But they
-are both 43439 otherwise, so add the IDs for both.
+On 23-04-06 13:16:34, Eric Biggers wrote:
+> Hi Abel,
+> 
+> On Mon, Apr 03, 2023 at 11:05:28PM +0300, Abel Vesa wrote:
+> > Now that there is a new dedicated ICE driver, drop the ufs-qcom-ice and
+> > use the new ICE api provided by the Qualcomm soc driver ice. The platforms
+> > that already have ICE support will use the API as library since there will
+> > not be a devicetree node, but instead they have reg range. In this case,
+> > the of_qcom_ice_get will return an ICE instance created for the consumer's
+> > device. But if there are platforms that do not have ice reg in the
+> > consumer devicetree node and instead provide a dedicated ICE devicetree
+> > node, the of_qcom_ice_get will look up the device based on qcom,ice
+> > property and will get the ICE instance registered by the probe function
+> > of the ice driver.
+> > 
+> > Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
+> 
+> This is still silent about how the ICE clock behavior is being changed.
 
-```
-/sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
-0x04b4
-0xbd3d
-```
+Right, I'll add the some more info into the commit message about the
+clock being handled by the ICE driver.
 
-Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
-Signed-off-by: Marek Vasut <marex@denx.de>
----
-NOTE: Please drop the Fixes tag if this is considered unjustified
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Arend van Spriel <aspriel@gmail.com>
-Cc: Danny van Heumen <danny@dannyvanheumen.nl>
-Cc: Eric Dumazet <edumazet@google.com>
-Cc: Franky Lin <franky.lin@broadcom.com>
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-Cc: Jakub Kicinski <kuba@kernel.org>
-Cc: Kalle Valo <kvalo@kernel.org>
-Cc: Paolo Abeni <pabeni@redhat.com>
-Cc: Paul Cercueil <paul@crapouillou.net>
-Cc: SHA-cyfmac-dev-list@infineon.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: brcm80211-dev-list.pdl@broadcom.com
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-wireless@vger.kernel.org
-Cc: netdev@vger.kernel.org
----
- .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
- include/linux/mmc/sdio_ids.h                             | 5 ++++-
- 2 files changed, 12 insertions(+), 2 deletions(-)
+> 
+> I'm still trying to understand all this myself, so please bear with me, but my
+> understanding is that the UFS clocks can be disabled even while the host
+> controller is runtime-resumed.  This is called "clock gating" in the code.
 
-diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-index 65d4799a56584..ff710b0b5071a 100644
---- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-+++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-@@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
- 		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
- 	}
- 
-+#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
-+	{ \
-+		SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
-+		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
-+	}
-+
- /* devices we support, null terminated */
- static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
-@@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
-+	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
-@@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
--	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
-+	CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
- 	{ /* end: all zeroes */ }
- };
- MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 0e4ef9c5127ad..bf3c95d8eb8af 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -74,10 +74,13 @@
- #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
- #define SDIO_DEVICE_ID_BROADCOM_43364		0xa9a4
- #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
--#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
-+#define SDIO_DEVICE_ID_BROADCOM_43439		0xa9af
- #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
- #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
- 
-+#define SDIO_VENDOR_ID_CYPRESS			0x04b4
-+#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xbd3d
-+
- #define SDIO_VENDOR_ID_MARVELL			0x02df
- #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
- #define SDIO_DEVICE_ID_MARVELL_8688_WLAN	0x9104
--- 
-2.39.2
+The ICE clock is now being controlled by the new driver.
+> 
+> Before, the ICE clock was just listed as one of the UFS clocks.  So, it was just
+> managed like the other UFS clocks.
+> 
+> Now, it appears that the ICE clock is always enabled while the host controller
+> is runtime-resumed.  So, this patch removes support for gating of the ICE clock.
 
+I just tested this and it works as expected, which is:
+
+ICE clock gets enable on qcom_ice_create (via *clk_get*_enabled) and
+then, on the runtime suspend of the UFS, the qcom_ice_suspend is called
+which will disable the clock. Then, every time UFS runtime
+resumes/suspends the clock gets enabled/disabled.
+
+Hope that makes sense.
+
+Let me know if you think I'm missing something here.
+
+> 
+> Is that intended?
+> 
+> - Eric
