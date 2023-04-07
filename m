@@ -2,183 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E211EC76196
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 08:24:21 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4F8DC77B6E
+	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 10:50:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230197AbjDGIYV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 04:24:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39032 "EHLO
+        id S240638AbjDGKur (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 7 Apr 2023 06:50:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41710 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230196AbjDGIYU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 04:24:20 -0400
-Received: from mail-pl1-f174.google.com (mail-pl1-f174.google.com [209.85.214.174])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 833006EAB;
-        Fri,  7 Apr 2023 01:24:18 -0700 (PDT)
-Received: by mail-pl1-f174.google.com with SMTP id ja10so39501616plb.5;
-        Fri, 07 Apr 2023 01:24:18 -0700 (PDT)
+        with ESMTP id S240626AbjDGKun (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 06:50:43 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39CC3A5D5
+        for <linux-mmc@vger.kernel.org>; Fri,  7 Apr 2023 03:50:41 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id m6-20020a05600c3b0600b003ee6e324b19so25026423wms.1
+        for <linux-mmc@vger.kernel.org>; Fri, 07 Apr 2023 03:50:41 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1680864639; x=1683456639;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=06TnYBdo9T2x70dl6lUY38eRXb4b9fDtFg6W0E/jF9s=;
+        b=wYDrtmyCUeuPHoQ+a+L+bYIKD5tVHF0T4I7wDqd7k8R9pfkM+J9OhoQDyESXnzz1iz
+         k3ooh1VU2Q8gW2TSMLRlbtghkI19sy19ypdWoc+Omxxem6YZuXrgCPFr2LGsUITxWliE
+         +zBT3kCgH6wuumOU7JtR9EXz8g2jSMCePAMrqaI2lCCSey7kNVinVsK5dKZLfyxYqxVp
+         gySoNb8rDY/w1WGiu9q8a23DHmXgXkXf7veY050tTyaiF3nf+/mROPMw7MS6i60JLSEW
+         pbhVwVkWGBoCGj+2wJv+zy42hiGSIYRliEDZRZysa98BQX7OD7u+MFN7XB7Gr72FM0OU
+         A2QA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680855858; x=1683447858;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=4qApLz7WDCv18vydgjE+EOqQlINQHyff3Bn8mgcG6t8=;
-        b=lF4Lgfll6ID6Hu3nVqXXXxs4jNjfq9xtZ0JJuU/J8wyXORhGYRHdXchL73SdjaaQoF
-         qre0hPaPbI5Q1UND1R6nXAg8iq74ZRNakYOwQ2aV+MLf+7N79ZSEkbifcFqbOKxD1rpl
-         mnhMa5XXqsvrL6ddTGQtE+LQ1BdGJrBodl412how/aosm9yGF/8Am75gu0j2Pq2GvR9u
-         tcMHzF2014uS5ihsD8AIw+Yq39zWyMi7V8O/VD62O7c9LDhKwm7CxvK4rhr1gFB9bckn
-         JsmWrnD+KjJaIM60DvdR85L+NVB5rslJ7EcPqwiks7Y5KuPuOJuI6XajL3MTK4oKYbeN
-         Riqg==
-X-Gm-Message-State: AAQBX9fg3W1NRdcMaVh7pdGUx8fHsF/BBQJC2gy7LZ2y/Tgr2w7IAXEp
-        mc0kgezl5UGzB3AraP4nGHjbwCxkWjXLuQ==
-X-Google-Smtp-Source: AKy350bqI+k6OGtQYINR/AKVLWq+RlcWiaMVg+3EIvH82fBA3BBSXvQQUr5KkQWXmwhDiDXIhv+4lg==
-X-Received: by 2002:a05:6a20:2d94:b0:e4:c9f7:d280 with SMTP id bf20-20020a056a202d9400b000e4c9f7d280mr2135416pzb.58.1680855857715;
-        Fri, 07 Apr 2023 01:24:17 -0700 (PDT)
-Received: from snowbird (136-24-99-118.cab.webpass.net. [136.24.99.118])
-        by smtp.gmail.com with ESMTPSA id j24-20020a170902759800b0019ef86c2574sm2457632pll.270.2023.04.07.01.24.16
+        d=1e100.net; s=20210112; t=1680864639; x=1683456639;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=06TnYBdo9T2x70dl6lUY38eRXb4b9fDtFg6W0E/jF9s=;
+        b=fCgIRlg9ZiZ5eOBukhMt9Yn8FxwtwX/64KN1o4wiYp93BctkhQhCsvMQf6zUVeDid7
+         WhpwUY1QNLzrow7bRyHgqPwebquUqER+QyKKBTwzwm1F6in80wpAY5jn6s0VRTG7g9lk
+         BcU2JbNd4ZtDYdvYH7YQMVpU7EqnZD0Z8njwdhvS3O3QeBl88BfAG6SXsicWXizh/7CY
+         i4Sq8tmGAT8MIMwU2kRukJOeDuFwQUY0NZszyrN1nYE6xqGfWdunC7dF+ClWrCf2lFGN
+         C3eICDfeh+sfLkslcmVedtq/2I4LfIUPoNV2NnJoWjyRHlDd5QftDYTxE20QWZQx43r6
+         VMCA==
+X-Gm-Message-State: AAQBX9eblP3n+8Vncc7m5+f+rB5O9hPoWQfWI8LXyJuT3JEgGFiCOpoi
+        I5Bbxv1Iy7yPieW/Nf5/PHgXew==
+X-Google-Smtp-Source: AKy350ZwCtSoQjiiwA1Djng0xz4M3/ZbNCZlAcTQ8nHuWoyebrI7lbwqlVuy6DqJem2lF9sXrcoJ7A==
+X-Received: by 2002:a05:600c:2285:b0:3ee:ed5:6115 with SMTP id 5-20020a05600c228500b003ee0ed56115mr1076006wmf.19.1680864639120;
+        Fri, 07 Apr 2023 03:50:39 -0700 (PDT)
+Received: from localhost.localdomain ([94.52.112.99])
+        by smtp.gmail.com with ESMTPSA id i16-20020a05600c355000b003ede6540190sm8131909wmq.0.2023.04.07.03.50.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Apr 2023 01:24:17 -0700 (PDT)
-Date:   Fri, 7 Apr 2023 01:24:15 -0700
-From:   Dennis Zhou <dennis@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <ZC/TL2/gLre0B4xH@snowbird>
-References: <20230329202148.71107-1-dennis@kernel.org>
- <ZCTOMVjW+pnZVGsQ@snowbird>
- <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
- <ZCclEE6Qw3on7/eO@snowbird>
- <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+        Fri, 07 Apr 2023 03:50:38 -0700 (PDT)
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: [PATCH v6 0/6] Add dedicated Qcom ICE driver
+Date:   Fri,  7 Apr 2023 13:50:23 +0300
+Message-Id: <20230407105029.2274111-1-abel.vesa@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 03, 2023 at 11:50:41AM +0200, Ulf Hansson wrote:
-> On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
-> >
-> > Hi Ulf,
-> >
-> > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
-> > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
-> > > >
-> > > > When using dm-verity with a data partition on an emmc device, dm-verity
-> > > > races with the discovery of attached emmc devices. This is because mmc's
-> > > > probing code sets up the host data structure then a work item is
-> > > > scheduled to do discovery afterwards. To prevent this race on init,
-> > > > let's inline the first call to detection, __mm_scan(), and let
-> > > > subsequent detect calls be handled via the workqueue.
-> > >
-> > > In principle, I don't mind the changes in $subject patch, as long as
-> > > it doesn't hurt the overall initialization/boot time. Especially, we
-> > > may have more than one mmc-slot being used, so this needs to be well
-> > > tested.
-> > >
-> >
-> > I unfortunately don't have a device with multiple mmcs available. Is
-> > this something you could help me with?
-> 
-> Yes, I can help to test. Allow me a few days to see what I can do.
-> 
-> Note that, just having one eMMC and one SD card should work too. It
-> doesn't have to be multiple eMMCs.
-> 
-> >
-> > > Although, more importantly, I fail to understand how this is going to
-> > > solve the race condition. Any I/O request to an eMMC or SD requires
-> > > the mmc block device driver to be up and running too, which is getting
-> > > probed from a separate module/driver that's not part of mmc_rescan().
-> >
-> > I believe the call chain is something like this:
-> >
-> > __mmc_rescan()
-> >     mmc_rescan_try_freq()
-> >         mmc_attach_mmc()
-> >             mmc_add_card()
-> >                 device_add()
-> >                     bus_probe_device()
-> >                         mmc_blk_probe()
-> >
-> > The initial calling of this is the host probe. So effectively if there
-> > is a card attached, we're inlining the device_add() call for the card
-> > attached rather than waiting for the workqueue item to kick off.
-> >
-> > dm is a part of late_initcall() while mmc is a module_init(), when built
-> > in becoming a device_initcall(). So this solves a race via the initcall
-> > chain. In the current state, device_initcall() finishes and we move onto
-> > the late_initcall() phase. But now, dm is racing with the workqueue to
-> > init the attached emmc device.
-> 
-> You certainly have a point!
-> 
-> This should work when the mmc blk module is built-in. Even if that
-> doesn't solve the entire problem, it should be a step in the right
-> direction.
-> 
-> I will give it some more thinking and run some tests at my side, then
-> I will get back to you again.
-> 
+As both SDCC and UFS drivers use the ICE with duplicated implementation,
+while none of the currently supported platforms make use concomitantly
+of the same ICE IP block instance, the new SM8550 allows both UFS and
+SDCC to do so. In order to support such scenario, there is a need for
+a unified implementation and a devicetree node to be shared between
+both types of storage devices. So lets drop the duplicate implementation
+of the ICE from both SDCC and UFS and make it a dedicated (soc) driver.
 
-Hi Ulf, is there an update on testing with this patch?
+For now, only SM8550 has been added to support the new approach. This
+also involves adding support for HW version 4.x.
 
-Thanks,
-Dennis
+The v5 is here:
+https://lore.kernel.org/all/20230403200530.2103099-1-abel.vesa@linaro.org/
 
-> Kind regards
-> Uffe
-> 
-> > >
-> > > >
-> > > > Signed-off-by: Dennis Zhou <dennis@kernel.org>
-> > > > ---
-> > > > Sigh.. fix missing static declaration.
-> > > >
-> > > >  drivers/mmc/core/core.c | 15 +++++++++++----
-> > > >  1 file changed, 11 insertions(+), 4 deletions(-)
-> > > >
-> > > > diff --git a/drivers/mmc/core/core.c b/drivers/mmc/core/core.c
-> > > > index 368f10405e13..fda7ee57dee3 100644
-> > > > --- a/drivers/mmc/core/core.c
-> > > > +++ b/drivers/mmc/core/core.c
-> > > > @@ -2185,10 +2185,8 @@ int mmc_card_alternative_gpt_sector(struct mmc_card *card, sector_t *gpt_sector)
-> > > >  }
-> > > >  EXPORT_SYMBOL(mmc_card_alternative_gpt_sector);
-> > > >
-> > > > -void mmc_rescan(struct work_struct *work)
-> > > > +static void __mmc_rescan(struct mmc_host *host)
-> > > >  {
-> > > > -       struct mmc_host *host =
-> > > > -               container_of(work, struct mmc_host, detect.work);
-> > > >         int i;
-> > > >
-> > > >         if (host->rescan_disable)
-> > > > @@ -2249,6 +2247,14 @@ void mmc_rescan(struct work_struct *work)
-> > > >                 mmc_schedule_delayed_work(&host->detect, HZ);
-> > > >  }
-> > > >
-> > > > +void mmc_rescan(struct work_struct *work)
-> > > > +{
-> > > > +       struct mmc_host *host =
-> > > > +               container_of(work, struct mmc_host, detect.work);
-> > > > +
-> > > > +       __mmc_rescan(host);
-> > > > +}
-> > > > +
-> > > >  void mmc_start_host(struct mmc_host *host)
-> > > >  {
-> > > >         host->f_init = max(min(freqs[0], host->f_max), host->f_min);
-> > > > @@ -2261,7 +2267,8 @@ void mmc_start_host(struct mmc_host *host)
-> > > >         }
-> > > >
-> > > >         mmc_gpiod_request_cd_irq(host);
-> > > > -       _mmc_detect_change(host, 0, false);
-> > > > +       host->detect_change = 1;
-> > > > +       __mmc_rescan(host);
-> > > >  }
-> > > >
-> > > >  void __mmc_stop_host(struct mmc_host *host)
-> > > > --
-> > > > 2.40.0
-> > > >
+Changes since v5:
+ * See each individual patch for changelogs.
+
+Changes since v4:
+ * dropped the SDHCI dt-bindings patch as it will be added along
+   with the first use of qcom,ice property from an SDHCI DT node
+
+Abel Vesa (6):
+  dt-bindings: crypto: Add Qualcomm Inline Crypto Engine
+  dt-bindings: ufs: qcom: Add ICE phandle
+  soc: qcom: Make the Qualcomm UFS/SDCC ICE a dedicated driver
+  scsi: ufs: ufs-qcom: Switch to the new ICE API
+  mmc: sdhci-msm: Switch to the new ICE API
+  arm64: dts: qcom: sm8550: Add the Inline Crypto Engine node
+
+ .../crypto/qcom,inline-crypto-engine.yaml     |  42 ++
+ .../devicetree/bindings/ufs/qcom,ufs.yaml     |  26 ++
+ arch/arm64/boot/dts/qcom/sm8550.dtsi          |   9 +
+ drivers/mmc/host/Kconfig                      |   2 +-
+ drivers/mmc/host/sdhci-msm.c                  | 223 +++--------
+ drivers/soc/qcom/Kconfig                      |   4 +
+ drivers/soc/qcom/Makefile                     |   1 +
+ drivers/soc/qcom/ice.c                        | 366 ++++++++++++++++++
+ drivers/ufs/host/Kconfig                      |   2 +-
+ drivers/ufs/host/Makefile                     |   4 +-
+ drivers/ufs/host/ufs-qcom-ice.c               | 244 ------------
+ drivers/ufs/host/ufs-qcom.c                   |  99 ++++-
+ drivers/ufs/host/ufs-qcom.h                   |  32 +-
+ include/soc/qcom/ice.h                        |  37 ++
+ 14 files changed, 637 insertions(+), 454 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/crypto/qcom,inline-crypto-engine.yaml
+ create mode 100644 drivers/soc/qcom/ice.c
+ delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
+ create mode 100644 include/soc/qcom/ice.h
+
+-- 
+2.34.1
+
