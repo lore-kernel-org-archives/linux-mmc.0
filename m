@@ -2,37 +2,49 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A31DEC6FD1D
-	for <linux-mmc@archiver.kernel.org>; Fri,  7 Apr 2023 20:38:18 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26E7FC77B6C
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 15:24:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230015AbjDGUiR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 7 Apr 2023 16:38:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39034 "EHLO
+        id S229558AbjDHPYV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Apr 2023 11:24:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52220 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230060AbjDGUiR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 7 Apr 2023 16:38:17 -0400
-Received: from phobos.denx.de (phobos.denx.de [85.214.62.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8DC07CA2B;
-        Fri,  7 Apr 2023 13:38:10 -0700 (PDT)
-Received: from tr.lan (ip-86-49-120-218.bb.vodafone.cz [86.49.120.218])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
-        (No client certificate requested)
-        (Authenticated sender: marex@denx.de)
-        by phobos.denx.de (Postfix) with ESMTPSA id 84F7885956;
-        Fri,  7 Apr 2023 22:38:07 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
-        s=phobos-20191101; t=1680899888;
-        bh=qHRzIcn1C3DUj1qfUwkJa2YX3XyiIBxJLMmhZnPbKh0=;
-        h=From:To:Cc:Subject:Date:From;
-        b=ILz90BvKX0+yhnVW/zZz1fytPEhCQmIKzSR6GT8Jenoiey7Ud/fXxyFhqPbWF2TcJ
-         x3wUEgqFMDs4L7sKBD+QPEyXA4Bc1faYv8SD8zVEwgnSwMpCpRAmLnFhlFTdVHehB2
-         BO2ABCYqFMv7KmneObwv21DlXLp6shvDFKl5SjR9mbwwnusZkKRRWcnQ1DwKPtTVXv
-         xAH3rKxY/Su9TU4wSjREc9AvZGL7ng3T3uuGqMjjalJscUFuikBzFameWwNFYPHrId
-         ArcRzjHFchP9aDDz5GEzyW4PUGNSmWAxBtY7qnSPNsVvUjb8+WYcQGYNb9Rp8PKCit
-         x0B+c+duUHwjg==
-From:   Marek Vasut <marex@denx.de>
-To:     linux-wireless@vger.kernel.org
-Cc:     Marek Vasut <marex@denx.de>, Hans de Goede <hdegoede@redhat.com>,
+        with ESMTP id S229486AbjDHPYU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 11:24:20 -0400
+Received: from NAM04-DM6-obe.outbound.protection.outlook.com (mail-dm6nam04on2134.outbound.protection.outlook.com [40.107.102.134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E20ED2728;
+        Sat,  8 Apr 2023 08:24:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=VFQST9O9yiluhbP3tR2CYeR56upG6q6x//LsZiyZESKM37r6RT0q+NYb0f2tkCKLv37rAtokVs6/QxhBSkCDwDHBIeI4ru33sbqRA0LrzXtIXVvfxFuXXMC8Wt1Hl3ndXz+uxjwM0jn6HZgPw9dRig7fwhReZiNejdxVKQGuWHe2j03e7TPfdOY3GT34MKT8cMQJkIRtyQXZ0zhBySQM7NCnANyytWiaItfwabElRK/Ifb1CQ049GF6m4vXCgnxGdCg7MpCFRxgOo6Wn306m0M7Q7quEhIoHlwLCn0Qe03d+6h33P4G0+Ho7bvcndmifsqVxihRhkVavm5edEK53kw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=bpx8hfWPHEfMCy4ypCm++x9CjZb+ms9JSYdACtMVzOU=;
+ b=eaO7fLAyL8sj8Hp3JJk0QfL/E8Ps/T2zW/IgWXkGdVsODPySXLz9hbR0UKm74vVs8di4DBoF2lnJ6v07ijFJ8xdNYl/BS6NLjIeiOdy66o4DwhPtgzWs76WrnyKG7rc701KDSZ7JWQO+gvc8rlLCiGhBK1ULYEZzluv7dmMQETGrYZXvwGmDzjOQq64ekBBykm9Mzg22B7amFn010u80Y5DNceap+gUDLFkE0mKAzEwki0g7YBR1D5wWkbtZJwuu6eS1QEWd5ONP8YeyPUiNmu1O3m/xaq6ADWkiqSAUyT8xlAmlUSR2la7BFmLJnEKHtDSZ/lDbhCGHU1Ld0RBgSg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=corigine.com; dmarc=pass action=none header.from=corigine.com;
+ dkim=pass header.d=corigine.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+ d=corigine.onmicrosoft.com; s=selector2-corigine-onmicrosoft-com;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=bpx8hfWPHEfMCy4ypCm++x9CjZb+ms9JSYdACtMVzOU=;
+ b=lPdu1oGbX/3FCap8tRwWB8KFt4u3OwxZ78YybsUtsVVU2OHT7rVKiHvSFZAIMg++PMNgWSkp4bj41qZgCsk5g/NkpzRlMmWLGRE8M8bBNHJZR9hr4sEdR78mzTLep5LEh/M7lRbE0HqDTsmsRh1wytU6rzes4VmbLRRqmzQwom0=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=corigine.com;
+Received: from PH0PR13MB4842.namprd13.prod.outlook.com (2603:10b6:510:78::6)
+ by MN2PR13MB3806.namprd13.prod.outlook.com (2603:10b6:208:19e::18) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6277.35; Sat, 8 Apr
+ 2023 15:24:16 +0000
+Received: from PH0PR13MB4842.namprd13.prod.outlook.com
+ ([fe80::89d1:63f2:2ed4:9169]) by PH0PR13MB4842.namprd13.prod.outlook.com
+ ([fe80::89d1:63f2:2ed4:9169%5]) with mapi id 15.20.6277.036; Sat, 8 Apr 2023
+ 15:24:16 +0000
+Date:   Sat, 8 Apr 2023 17:24:07 +0200
+From:   Simon Horman <simon.horman@corigine.com>
+To:     Marek Vasut <marex@denx.de>
+Cc:     linux-wireless@vger.kernel.org,
+        Hans de Goede <hdegoede@redhat.com>,
         "David S. Miller" <davem@davemloft.net>,
         Arend van Spriel <aspriel@gmail.com>,
         Danny van Heumen <danny@dannyvanheumen.nl>,
@@ -46,124 +58,101 @@ Cc:     Marek Vasut <marex@denx.de>, Hans de Goede <hdegoede@redhat.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
         netdev@vger.kernel.org
-Subject: [PATCH v2] wifi: brcmfmac: add Cypress 43439 SDIO ids
-Date:   Fri,  7 Apr 2023 22:37:52 +0200
-Message-Id: <20230407203752.128539-1-marex@denx.de>
-X-Mailer: git-send-email 2.39.2
+Subject: Re: [PATCH v2] wifi: brcmfmac: add Cypress 43439 SDIO ids
+Message-ID: <ZDGHF0dKwIjB1Mrj@corigine.com>
+References: <20230407203752.128539-1-marex@denx.de>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230407203752.128539-1-marex@denx.de>
+X-ClientProxiedBy: AM4PR0902CA0013.eurprd09.prod.outlook.com
+ (2603:10a6:200:9b::23) To PH0PR13MB4842.namprd13.prod.outlook.com
+ (2603:10b6:510:78::6)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
-X-Virus-Status: Clean
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: PH0PR13MB4842:EE_|MN2PR13MB3806:EE_
+X-MS-Office365-Filtering-Correlation-Id: 651fc9f6-dc9b-49ba-c433-08db384550ca
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: Gc1KftCzgkbd1ZVXoZBSJ4XPO4do/x2uLJPlfAFMYg0qNRUxNZ9/DSWrH18mUTjVhQwTO9JMVtxixgOcLNJ7Cws7QmaTw8hkpFNUVI87sIp3JCZQAgwDZGks51h1SdQoEiOgF/XZL+mO1wA8Sp6P5Dxz77qCkUHk3/gtbMjctVK1dNPiEDTMdcCHsuPwgji7FTamxj0Yba+VU6Wlw4zCv9L0OsIKAiS9vC4mzcueb7ZqErxNci0ODiyRZ/P61ud69OxC6kw5c1YY7kaeAJV/hQD5S4eQmH9NLCLex36nLLuviEMPJ3BugQkJ7cAO1Xbxd5kwzYodboieAmyTP3wPMHvvaGChtCvFX8s/JAMj1Ns7o9QiqZwXnx1GoFLmb4mbP/Dm9EwtpSirnK+NkDgR7yM0O8n4Lstm7GRlxzJ5gC/hHIneZ6vPlGNMXpKKgYhJphaosmiZb3sDTkMKdzZ+X/x+5+RmKF7PTjl67XIDhK7LmkhDdhOuKuXkfrqwPzPws3HPLt4RfUGPdPpzdkR9qZ5LkFIduL7KiAVQKxjnCAD6JGRoeQcM3tLBJEOtA7sd
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:PH0PR13MB4842.namprd13.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(376002)(396003)(136003)(39840400004)(366004)(346002)(451199021)(478600001)(86362001)(36756003)(38100700002)(2616005)(6666004)(6486002)(2906002)(44832011)(54906003)(316002)(186003)(6512007)(6506007)(7416002)(66476007)(8676002)(6916009)(41300700001)(8936002)(5660300002)(66556008)(4326008)(66946007);DIR:OUT;SFP:1102;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?wbPbfjcRMeD8wpccSih2mLY7AxQBHA2BOoWugVe/BZoV3vWU/NwssYMY740K?=
+ =?us-ascii?Q?gZSXMXADejRWzywcIJQaF6mgnxAiQJ/xvHTyJ9V9NW9QYHid+RSh8LamKXuV?=
+ =?us-ascii?Q?LF3vWv8ugvE/VEra52OuCqVnXbMwuEK8b9n98fL4b+jEmsZpa0Z9Rsc/rCEm?=
+ =?us-ascii?Q?uCkd/7MhTvdmBSHIzUrUaLASlVL9wvl21w2uZ0XabURVBmmu/gvFxhXcKt0O?=
+ =?us-ascii?Q?14A2nh/4/6sJuC1AL0zwP2AGwKqZA7MCEnZNB7bPzEWBpsiN9NjzkDOZkjoU?=
+ =?us-ascii?Q?Xn1FhK8rmB6XXXOQiYNOOtkFqKpBzwAmz/ps4BO2E0P9aQnZz//PvgsdZvRJ?=
+ =?us-ascii?Q?/lxqvCSjvHi690DPpMHPMFkIpfgM8cXVGkcd758q9GbyCJKW1Jv73qh4RQ+e?=
+ =?us-ascii?Q?oqiCcdCVnWtCtefZlp78eVc97HYtJu5SgnYClKH9M34UQxaXWjQMPpgaZpUF?=
+ =?us-ascii?Q?IcR/bQUU+TOQCr28dEZX4QZ20X2rAwOrXctCFz49gqDvr5iUJpOm/WavGJta?=
+ =?us-ascii?Q?ViYAzn+8ZM78p6YAYIpsrCE95HDh+3OYFf0RNj9EhOUaP+BHJaC/cgMCMyYi?=
+ =?us-ascii?Q?xYeq9FzxuKc1Q+1B+CPVhZLsMu2Bm4GSAfw8121kH1I/6f3m1FH4fC67LSRp?=
+ =?us-ascii?Q?X9diPF8k2XVF3BvcUaS45eAfoesZBszZauyT1v5fK5Roe01yXdnXbJOw+BQb?=
+ =?us-ascii?Q?fr5Ay3DJobGButSa2H0LRhj3suOOAwZzQjmvEfOlo+NDbmliporOkpcSGKYe?=
+ =?us-ascii?Q?EKQ+mfdgRgsmexojq4t6Du8E1TFTmtJLfF4A471Dplbe1argPXPolw6XbAh0?=
+ =?us-ascii?Q?qV5yvX4e/swb5ur6q8TNlb4yoUxq5I+Llzvd5+KCeSmnUgeQeTxjTBVdw7/a?=
+ =?us-ascii?Q?UQ3B8//2TwsedO9WO9zTL0X07EOLq8eaKAObxpxxRA61RDiInOElJgO1FHtN?=
+ =?us-ascii?Q?4ml4NYVWMKvgVrY71LHvRI8gS9fd/BhgW6Pd8FGaJ5V8idIhBpFdpQUGDpxv?=
+ =?us-ascii?Q?aP3Kj+xOFhlRcJsw90c1zEo15nYNKticCxFS+4Jj21BwDAludx+YLl51VRmH?=
+ =?us-ascii?Q?HL6yNPPpdRhp9CI72zG/5hLdJ3bZoHBbsq4GE2IxKoBuQUgVTfa6YInJ1/tW?=
+ =?us-ascii?Q?ohDyEYQE06Weug8ZjtyMF8mDofCjV3KQn3otd7JTvGsUcmvL4F9ADeOpgY5i?=
+ =?us-ascii?Q?z2Pt/7ZioCRdzW9VTVkChVTxL1dPz4yZpM5XAUSjmsvzFlk4/5LTnseyLN6U?=
+ =?us-ascii?Q?8VbdNEu97cDH6sqjPZzp27biyfYnum+Ctfo8Mz1SoJjveVu7P6FSmBaZCjMA?=
+ =?us-ascii?Q?d2jHkmrcUvuxwTmZLYR5XWPW18AM1Dofv4HBzVYlIfUA+WeWd5w4gUz7y9en?=
+ =?us-ascii?Q?MJYQat2Oo/Oj/JFB7t1/2E9xOeUQuT+FhFLxB5XkpwxwHZuutnTeGWL0xJ48?=
+ =?us-ascii?Q?8K0bMfANjagaiSFafJ6AnsC2yUJuTsV9N8Vl3IdaLTQwZ9sgO+Mvo/IWuTUS?=
+ =?us-ascii?Q?sIMAgFMBs+G/aSS+Qux1/T+6UnyW6mhzgWkXdfOMIw/SYnW3sUFEVK/SjJ2G?=
+ =?us-ascii?Q?jzTcnnWXM1FOtVxGch6GwczfuBpbmq8ziyU09MrRTdBD8lEercanS4P1sAf7?=
+ =?us-ascii?Q?arigiI0USIATEh71WSZt8ZpoIiBT3OZESyxNbpNmSocn7VRurI+eGsZkkwNu?=
+ =?us-ascii?Q?suDhOA=3D=3D?=
+X-OriginatorOrg: corigine.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 651fc9f6-dc9b-49ba-c433-08db384550ca
+X-MS-Exchange-CrossTenant-AuthSource: PH0PR13MB4842.namprd13.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Apr 2023 15:24:16.4043
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: fe128f2c-073b-4c20-818e-7246a585940c
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: IHS5ZoHfBf59ByNB6lbqLUKQ8RTEfPuJO+bUTlVcRXNiE9ODPjPXxjOdPLxODf8tmtvFtkAPTy5ldeBjAdcYkYKyf8j3+qPUKYSNKMeX8PY=
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN2PR13MB3806
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
-The odd thing about this is that the previous 1YN populated
-on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
-while the chip populated on real hardware has a Cypress one.
-The device ID also differs between the two devices. But they
-are both 43439 otherwise, so add the IDs for both.
+On Fri, Apr 07, 2023 at 10:37:52PM +0200, Marek Vasut wrote:
+> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
+> The odd thing about this is that the previous 1YN populated
+> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
+> while the chip populated on real hardware has a Cypress one.
+> The device ID also differs between the two devices. But they
+> are both 43439 otherwise, so add the IDs for both.
+> 
+> On-device 1YN (43439), the new one, chip label reads "1YN":
+> ```
+> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
+> 0x04b4
+> 0xbd3d
+> ```
+> 
+> EA M.2 evaluation board 1YN (43439), the old one, chip label reads "1YN ES1.4":
+> ```
+> /sys/.../mmc_host/mmc0/mmc0:0001/# cat vendor device
+> 0x02d0
+> 0xa9a6
+> ```
+> 
+> Reviewed-by: Hans de Goede <hdegoede@redhat.com>
+> Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
+> Signed-off-by: Marek Vasut <marex@denx.de>
 
-On-device 1YN (43439), the new one, chip label reads "1YN":
-```
-/sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
-0x04b4
-0xbd3d
-```
+Reviewed-by: Simon Horman <simon.horman@corigine.com>
 
-EA M.2 evaluation board 1YN (43439), the old one, chip label reads "1YN ES1.4":
-```
-/sys/.../mmc_host/mmc0/mmc0:0001/# cat vendor device
-0x02d0
-0xa9a6
-```
 
-Reviewed-by: Hans de Goede <hdegoede@redhat.com>
-Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
-Signed-off-by: Marek Vasut <marex@denx.de>
----
-NOTE: Please drop the Fixes tag if this is considered unjustified
-Cc: "David S. Miller" <davem@davemloft.net>
-Cc: Arend van Spriel <aspriel@gmail.com>
-Cc: Danny van Heumen <danny@dannyvanheumen.nl>
-Cc: Eric Dumazet <edumazet@google.com>
-Cc: Franky Lin <franky.lin@broadcom.com>
-Cc: Hans de Goede <hdegoede@redhat.com>
-Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-Cc: Jakub Kicinski <kuba@kernel.org>
-Cc: Kalle Valo <kvalo@kernel.org>
-Cc: Marek Vasut <marex@denx.de>
-Cc: Paolo Abeni <pabeni@redhat.com>
-Cc: Paul Cercueil <paul@crapouillou.net>
-Cc: SHA-cyfmac-dev-list@infineon.com
-Cc: Ulf Hansson <ulf.hansson@linaro.org>
-Cc: brcm80211-dev-list.pdl@broadcom.com
-Cc: linux-mmc@vger.kernel.org
-Cc: linux-wireless@vger.kernel.org
-Cc: netdev@vger.kernel.org
----
-V2: Update commit message, add IDs for both old and new device
----
- .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
- include/linux/mmc/sdio_ids.h                             | 5 ++++-
- 2 files changed, 12 insertions(+), 2 deletions(-)
+> ---
+> NOTE: Please drop the Fixes tag if this is considered unjustified
 
-diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-index 65d4799a56584..ff710b0b5071a 100644
---- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-+++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-@@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
- 		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
- 	}
- 
-+#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
-+	{ \
-+		SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
-+		.driver_data = BRCMF_FWVENDOR_ ## fw_vend \
-+	}
-+
- /* devices we support, null terminated */
- static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
-@@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
-+	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
-@@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
--	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
- 	BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
-+	CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
- 	{ /* end: all zeroes */ }
- };
- MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
-diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-index 0e4ef9c5127ad..bf3c95d8eb8af 100644
---- a/include/linux/mmc/sdio_ids.h
-+++ b/include/linux/mmc/sdio_ids.h
-@@ -74,10 +74,13 @@
- #define SDIO_DEVICE_ID_BROADCOM_43362		0xa962
- #define SDIO_DEVICE_ID_BROADCOM_43364		0xa9a4
- #define SDIO_DEVICE_ID_BROADCOM_43430		0xa9a6
--#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xa9af
-+#define SDIO_DEVICE_ID_BROADCOM_43439		0xa9af
- #define SDIO_DEVICE_ID_BROADCOM_43455		0xa9bf
- #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752	0xaae8
- 
-+#define SDIO_VENDOR_ID_CYPRESS			0x04b4
-+#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439	0xbd3d
-+
- #define SDIO_VENDOR_ID_MARVELL			0x02df
- #define SDIO_DEVICE_ID_MARVELL_LIBERTAS		0x9103
- #define SDIO_DEVICE_ID_MARVELL_8688_WLAN	0x9104
--- 
-2.39.2
-
+<2c>
+Feels more like enablement than a fix to me.
+</2c>
