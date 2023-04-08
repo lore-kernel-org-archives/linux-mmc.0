@@ -2,93 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D843C77B61
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 20:36:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 399D2C77B61
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 21:40:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229446AbjDHUgJ (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Apr 2023 16:36:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51938 "EHLO
+        id S229517AbjDHVkw (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Apr 2023 17:40:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38846 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229445AbjDHUgI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 16:36:08 -0400
-Received: from mail-yb1-xb2d.google.com (mail-yb1-xb2d.google.com [IPv6:2607:f8b0:4864:20::b2d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD313A5FA
-        for <linux-mmc@vger.kernel.org>; Sat,  8 Apr 2023 13:36:07 -0700 (PDT)
-Received: by mail-yb1-xb2d.google.com with SMTP id f188so33281838ybb.3
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2023 13:36:07 -0700 (PDT)
+        with ESMTP id S229451AbjDHVku (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 17:40:50 -0400
+Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FE2549E3
+        for <linux-mmc@vger.kernel.org>; Sat,  8 Apr 2023 14:40:48 -0700 (PDT)
+Received: by mail-wr1-x430.google.com with SMTP id v6so1519345wrv.8
+        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2023 14:40:48 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680986167;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=NZZscF2fONOwXuFXGvRXOAh5rZYNfj5+qAkcLUluk3c=;
-        b=oAlGXoXnKf1mb3thE0+2Avw7QwYKWVsScj36Mtg5OHZ2uBg5ByXpsql2XwSCtK7QJu
-         uxJx82qzQ6pdQ7L4V8MFyZVIzDtc/uehKUURjEDSqa1NMb1esjH7bkSaVruTFYnuEjKx
-         /tMK4O0ujl8q6O6rLF4Grr/kvBGxPtP7tvy75gU5Wn1PMNpDdEQJ2wVd+G/+jPApt5uX
-         iK/CVgmGg7IvJdvJgX+1yMbuGBJiHpU0RCd/6MBNcA61ARNYgJJitm26Ce5ySRKq+YKx
-         tr4eo5HusgT5ZIf1ecOt7iIShpGF1VAqRMVkjcMKllsvKwio9Pe59A2rrc0AcxTFtGHw
-         7ypg==
+        d=linaro.org; s=google; t=1680990047; x=1683582047;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=1r1SnOX6wBN2nHGoU3kualPj54nGeQSAaKXS+XIlZkY=;
+        b=bBHCoWqCZjmRMr/6jc1rmR8Zb3K5vch/8ZNshCg45bdBET0jkywDKUWqGOJiRN2Z8B
+         X4s3n6cRGmlKcNQfE65/c9k15VqfINbbSEi+w0fFsPOyau57izi4gZHjRELdirmkOcqS
+         b/MGT5prRycMjYmnmUm7uXaNiYZUaBUvMf+bJOPztSwftxdAjr4yS7ae5FoEKcxn8qc/
+         JDrouNcvioskloCtX1qRiDEb+JKBUDRk1sivUHgDEKNzmWDVHl8/ojePIAmAktLC/62R
+         6QoHzgqQnSMuVxwyHSG/qNDjTiR1QKk75H+ztg+h4NggiFsBGTBDJA56pE5roG/+1uw2
+         CWLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680986167;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NZZscF2fONOwXuFXGvRXOAh5rZYNfj5+qAkcLUluk3c=;
-        b=3hjPD3Kz/oJ5GpWJIxOiGaO/ZneA0iv/jbA3SHMBXQVeozgNYlFzYmv0dnell4JFtw
-         GlJTP8ahr/T/52Hy0Y4E+8G4o7eVABy/vSPhlRAcKWmWlWuNASBcT8oI+b3cjc2E0y9b
-         sUZsFxiRnYvDgZYJG9rDLYOr5Hs/z9TUtJILEtDf4t/0bYVTqOwEH+WoRboYgvsOSMF+
-         MBVUktzII7OJh6Qqqrue12YRwI9Axq72fuzLaFJJEVESef1Hx8PAvMJZJiYs2ZtRGsOI
-         QMAy1lp3aehGo0lAdBxyqK3cl1LKm9wuMhMK05386XyfaA52KgxHE9K1C7xF/pjl6eCn
-         /x6w==
-X-Gm-Message-State: AAQBX9eOy1xHPSN/LxlIGHf8ybFFIQv3rKxOLRBwMA7c9vkC5oxnvvTW
-        E7wc2yqNtEFlZrDWPVyC1dCZ1PL/IsfOqZMBnz+ujiKmzq7Lx7JE
-X-Google-Smtp-Source: AKy350ZCSktfVdSajWHk3Kn/fazYQY7zKRnkVbw1QkBqCtdZTrtjrJZ/VLLHDLKz8vf/X7ENsAiVz4UlF+h4HVCyPtY=
-X-Received: by 2002:a25:d215:0:b0:b75:8ac3:d5d2 with SMTP id
- j21-20020a25d215000000b00b758ac3d5d2mr4241008ybg.4.1680986167032; Sat, 08 Apr
- 2023 13:36:07 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1680990047; x=1683582047;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=1r1SnOX6wBN2nHGoU3kualPj54nGeQSAaKXS+XIlZkY=;
+        b=z3bRgkdDqcsjdrNmH3cRJd9B5Ir96OItgIsl2oyXQUSpSEhXQOLOj6SCbwLPIRLVs9
+         ZtD97MP0TQB9jfVyXfY0/q0MNhNYeJy3y11cRYF+W6oztpxEb4Ud1cFYsZvGyV1qJ8Ep
+         6DeS3hTcNfsxQGRMyXir8MsEYhhmYP9yawfQCScKEbRYvSG43iWOLcA2a6VGxinZphTF
+         1DSl/wdsFSISV0W54Bqat+3rF5JYljpks3pZW/RiJq/zzebXZx1zLcvIzqmVv2oCNmUs
+         h3t/IRCBjOImz4QKUde60xVJovEDS0vChyPLaQv3MLV0LfcaJglHJxo1nJN3So1R+ggK
+         GpfQ==
+X-Gm-Message-State: AAQBX9ebzFZ/kI9tEET5xNeprAhbf1i6N+4SwyOmy5fh07KN0LLOaekk
+        T4OGE21hJcQqyVs7P5J2oC8lag==
+X-Google-Smtp-Source: AKy350YFShjn4hELK46QnNTz06X559nncDEtCLRY2NKWt5Icc+qKjSwPyUFsi9Ob6YNkuINvGr+6TQ==
+X-Received: by 2002:a5d:50d0:0:b0:2ce:ae4c:c429 with SMTP id f16-20020a5d50d0000000b002ceae4cc429mr3829849wrt.4.1680990046639;
+        Sat, 08 Apr 2023 14:40:46 -0700 (PDT)
+Received: from localhost.localdomain ([188.25.26.161])
+        by smtp.gmail.com with ESMTPSA id s6-20020a5d4ec6000000b002efb6e0c495sm3061377wrv.91.2023.04.08.14.40.44
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 08 Apr 2023 14:40:46 -0700 (PDT)
+From:   Abel Vesa <abel.vesa@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: [PATCH v7 0/3] Add dedicated Qcom ICE driver
+Date:   Sun,  9 Apr 2023 00:40:38 +0300
+Message-Id: <20230408214041.533749-1-abel.vesa@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-References: <20230405-pl180-busydetect-fix-v1-0-28ac19a74e5e@linaro.org>
- <20230405-pl180-busydetect-fix-v1-1-28ac19a74e5e@linaro.org> <CAPDyKFp1KDV+q9ApKfq7C4PoiJnMOsACKJvbEiZLhv06GJGB_w@mail.gmail.com>
-In-Reply-To: <CAPDyKFp1KDV+q9ApKfq7C4PoiJnMOsACKJvbEiZLhv06GJGB_w@mail.gmail.com>
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sat, 8 Apr 2023 22:35:55 +0200
-Message-ID: <CACRpkdZqosXtxsnTb87-Aw6m2MwC7ScGPNXmN_2=JxqRXA6mig@mail.gmail.com>
-Subject: Re: [PATCH 01/13] mmc: mmci: Only call busy_complete if callback defined
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Stefan Hansson <newbyte@disroot.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Thu, Apr 6, 2023 at 11:31=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
+As both SDCC and UFS drivers use the ICE with duplicated implementation,
+while none of the currently supported platforms make use concomitantly
+of the same ICE IP block instance, the new SM8550 allows both UFS and
+SDCC to do so. In order to support such scenario, there is a need for
+a unified implementation and a devicetree node to be shared between
+both types of storage devices. So lets drop the duplicate implementation
+of the ICE from both SDCC and UFS and make it a dedicated (soc) driver.
 
-> All variants that have the .busy_detect flags set, need to assign the
-> ->busy_complete() callback too.
->
-> To me it seems a bit silly, to check for a mandatory callback,
-> although if you prefer it, then I suggest we do it during ->probe()
-> instead.
+The v6 is here:
+https://lore.kernel.org/all/20230407105029.2274111-1-abel.vesa@linaro.org/
 
-Nah I drop it.
+Changes since v6:
+ * Dropped the patches 1, 3 and 6 as they are already in Bjorn's tree.
+ * Dropped the minItems for both the qcom,ice and the reg in the
+   qcom,ice compatile subschema, in the ufs schema file,
+   like Krzysztof suggested
 
-It's just a bit redundant, what you say is that instead of
+Changes since v5:
+ * See each individual patch for changelogs.
 
-if (host->variant->busy_detect) { ... }
+Changes since v4:
+ * dropped the SDHCI dt-bindings patch as it will be added along
+   with the first use of qcom,ice property from an SDHCI DT node
 
-it would suffice to everywhere just check if we have
-the callback:
 
-if (host->ops->busy_complete) {...}
+Abel Vesa (3):
+  dt-bindings: ufs: qcom: Add ICE phandle
+  scsi: ufs: ufs-qcom: Switch to the new ICE API
+  mmc: sdhci-msm: Switch to the new ICE API
 
-and we can drop .busy_detect altogether.
+ .../devicetree/bindings/ufs/qcom,ufs.yaml     |  24 ++
+ drivers/mmc/host/Kconfig                      |   2 +-
+ drivers/mmc/host/sdhci-msm.c                  | 223 ++++------------
+ drivers/ufs/host/Kconfig                      |   2 +-
+ drivers/ufs/host/Makefile                     |   4 +-
+ drivers/ufs/host/ufs-qcom-ice.c               | 244 ------------------
+ drivers/ufs/host/ufs-qcom.c                   |  99 ++++++-
+ drivers/ufs/host/ufs-qcom.h                   |  32 +--
+ 8 files changed, 176 insertions(+), 454 deletions(-)
+ delete mode 100644 drivers/ufs/host/ufs-qcom-ice.c
 
-But I can deal with that another time.
+-- 
+2.34.1
 
-Yours,
-Linus Walleij
