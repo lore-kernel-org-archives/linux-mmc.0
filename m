@@ -2,172 +2,129 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0C78FC77B71
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 22:00:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32D53C77B6C
+	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 23:36:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229503AbjDHWAt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Apr 2023 18:00:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48840 "EHLO
+        id S229523AbjDHXg0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 8 Apr 2023 19:36:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229531AbjDHWAs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 18:00:48 -0400
-Received: from mail-lf1-x132.google.com (mail-lf1-x132.google.com [IPv6:2a00:1450:4864:20::132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0ACEE7D8C
-        for <linux-mmc@vger.kernel.org>; Sat,  8 Apr 2023 15:00:47 -0700 (PDT)
-Received: by mail-lf1-x132.google.com with SMTP id t14so2156970lft.7
-        for <linux-mmc@vger.kernel.org>; Sat, 08 Apr 2023 15:00:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1680991245;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=NK/Fry9T9gbXULkf+X1lnmSQBtAcyXPtx15VS/8mjZQ=;
-        b=uVqJUmRLIEBX067m4GrdxYkkBbmoL93WK/V0QPpzSlQlHjdHL+TM+3p45evtn9jw7z
-         dKkfjIznLuceUL2QMGjpI0QBWpodTQV0SSe9n9Ii8QV1ohGQ0UPAWYrTIDIBDZFTIMRK
-         4KK3PN+iwo3zQQNIgECnTlcCznJ6uY7XhYcepsHb7fcwBRNyBgfG8/Jxk9qdO21+Ykf2
-         nybbBMbd+2kIfXQjlmO9crx0B8br2DkWemP4X+BcoJkw+g3dRh5RiuHNsPoAS5oxOWIe
-         5kHRjjNa4zUMJFE8fYl/Jg2DDaunp6jph7EdJxxTNuLyYs8PnPTvZP+VdVFu1uRt2/nF
-         Z5RQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1680991245;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=NK/Fry9T9gbXULkf+X1lnmSQBtAcyXPtx15VS/8mjZQ=;
-        b=HAhpflQXZwlW+aNHbybYEtgJ2onBrrc1FmJD0hCZ3oMSf72Z9y779crjRFpcXVLmEY
-         cwAdnLBOQcy9++REXQgt29OoXOAQqKrxuggKmlgmonPt00V4yKYmvhOamGADZsX3lxBa
-         OswAF0jmRBsKoBehcXD6bOFuUzloy9PPW3nx0rBd5EodawyyV42YnVZkQ/ETHkQZu+3k
-         XtT+88e1gc6hFP6Wr6UfNlyDZMLIu4ZeDRK3U1KIsPmMAkGKSrSY6oEP0+dCoZRs8vE2
-         ftr7takv/bId4LwH+Lym8VbtmPT6BW1ZhdT1cnSzJxyc/t3ZO6ZAcvw7SrLdAA31kIJc
-         sfzA==
-X-Gm-Message-State: AAQBX9ecYCa7nMsnGJkaKYN4lL+K6gR8vHryMBC1kxh41vXohUGgX96D
-        hj5j55aG9slKl80OF8Q0tvLUJg==
-X-Google-Smtp-Source: AKy350an2GH9i7wmQ/+Ebm1829Zb1RXtBYT4meUnPlrJWgb7glP+JurXh9Xwhe9//nJscwBjStDNtg==
-X-Received: by 2002:ac2:4477:0:b0:4eb:2ac1:52a6 with SMTP id y23-20020ac24477000000b004eb2ac152a6mr1839681lfl.36.1680991245335;
-        Sat, 08 Apr 2023 15:00:45 -0700 (PDT)
-Received: from [192.168.1.2] (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
-        by smtp.gmail.com with ESMTPSA id v9-20020a056512048900b004e9cad1cd7csm1328904lfq.229.2023.04.08.15.00.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 08 Apr 2023 15:00:44 -0700 (PDT)
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 09 Apr 2023 00:00:33 +0200
-Subject: [PATCH v2 12/12] mmc: mmci: Add busydetect timeout
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230405-pl180-busydetect-fix-v2-12-eeb10323b546@linaro.org>
-References: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org>
-In-Reply-To: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org>
-To:     Yann Gautier <yann.gautier@foss.st.com>,
-        Stefan Hansson <newbyte@disroot.org>,
+        with ESMTP id S229379AbjDHXgZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 19:36:25 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA9FA7EE9;
+        Sat,  8 Apr 2023 16:36:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1680996984; x=1712532984;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=xwiP4VE57FTwb07fPwNW+BJYOxDNqzuKlCX9F6LAa0E=;
+  b=bivWk58fL5n4Itp0HikB05KrOW7tK0fjvkmCS3scHTadVMgRD1zL9n8Y
+   117+aMAOorCczt36zAYY8XoPZ3pDC7DCg+XstHBCB/m7cx5z3dMYFjVX4
+   9WEopSKCMO66M6dgp4gpjGsTBhrmaBkFPeoU73JunJSncaBbW/LuGhJab
+   hy5xGuW2Gsb3DQTR6QhgIdpRpwasdjs07pFwBn+kTl3paEZSNch2dMQd8
+   CZSIYtnUczKQUki4aXjYDIL/kS+gh7XVqjcnDsDachySqv3mz78R7/3wk
+   vrDUNcTDiq+0ZD3L6bAs7jwnUmEE0JPn3VSCaNysLRmjFQYdUelcRw0SI
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="344953994"
+X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
+   d="scan'208";a="344953994"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Apr 2023 16:36:24 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="811742432"
+X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
+   d="scan'208";a="811742432"
+Received: from lkp-server01.sh.intel.com (HELO b613635ddfff) ([10.239.97.150])
+  by orsmga004.jf.intel.com with ESMTP; 08 Apr 2023 16:36:17 -0700
+Received: from kbuild by b613635ddfff with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1plI6T-000UD7-02;
+        Sat, 08 Apr 2023 23:36:17 +0000
+Date:   Sun, 9 Apr 2023 07:35:18 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Abel Vesa <abel.vesa@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>
-Cc:     linux-mmc@vger.kernel.org,
-        linux-stm32@st-md-mailman.stormreply.com,
-        Linus Walleij <linus.walleij@linaro.org>
-X-Mailer: b4 0.12.0
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzk@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Manivannan Sadhasivam <mani@kernel.org>,
+        Alim Akhtar <alim.akhtar@samsung.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Bart Van Assche <bvanassche@acm.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        "James E . J . Bottomley" <jejb@linux.ibm.com>,
+        "Martin K . Petersen" <martin.petersen@oracle.com>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S . Miller" <davem@davemloft.net>,
+        Eric Biggers <ebiggers@kernel.org>
+Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
+        linux-scsi@vger.kernel.org
+Subject: Re: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+Message-ID: <202304090708.EDYvW6wb-lkp@intel.com>
+References: <20230408214041.533749-3-abel.vesa@linaro.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230408214041.533749-3-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add a timeout for busydetect IRQs using a delayed work.
-It might happen (and does happen) on Ux500 that the first
-busy detect IRQ appears and not the second one. This will
-make the host hang indefinitely waiting for the second
-IRQ to appear.
+Hi Abel,
 
-Fire a delayed work after 10ms and re-engage the command
-IRQ so the transaction finishes: we are certainly done
-at this point, or we will catch an error in the status
-register.
+kernel test robot noticed the following build errors:
 
-This makes the eMMC work again on Skomer.
+[auto build test ERROR on mkp-scsi/for-next]
+[also build test ERROR on jejb-scsi/for-next robh/for-next linus/master v6.3-rc5 next-20230406]
+[If your patch is applied to the wrong git tree, kindly drop us a note.
+And when submitting patch, we suggest to use '--base' as documented in
+https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
----
-ChangeLog v1->v2:
-- No changes
----
- drivers/mmc/host/mmci.c | 23 +++++++++++++++++++++++
- drivers/mmc/host/mmci.h |  1 +
- 2 files changed, 24 insertions(+)
+url:    https://github.com/intel-lab-lkp/linux/commits/Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
+base:   https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git for-next
+patch link:    https://lore.kernel.org/r/20230408214041.533749-3-abel.vesa%40linaro.org
+patch subject: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+config: arm-randconfig-r023-20230409 (https://download.01.org/0day-ci/archive/20230409/202304090708.EDYvW6wb-lkp@intel.com/config)
+compiler: clang version 17.0.0 (https://github.com/llvm/llvm-project 2c57868e2e877f73c339796c3374ae660bb77f0d)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # install arm cross compiling tool for clang build
+        # apt-get install binutils-arm-linux-gnueabi
+        # https://github.com/intel-lab-lkp/linux/commit/496cc31572753aac0d53c5e0666bcc6c3f323938
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
+        git checkout 496cc31572753aac0d53c5e0666bcc6c3f323938
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm olddefconfig
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash drivers/ufs/host/
 
-diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-index 17233702e7fb..1af129fba0ed 100644
---- a/drivers/mmc/host/mmci.c
-+++ b/drivers/mmc/host/mmci.c
-@@ -37,6 +37,7 @@
- #include <linux/pinctrl/consumer.h>
- #include <linux/reset.h>
- #include <linux/gpio/consumer.h>
-+#include <linux/workqueue.h>
- 
- #include <asm/div64.h>
- #include <asm/io.h>
-@@ -747,6 +748,8 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
- 			host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
- 			writel(host->variant->busy_detect_mask, base + MMCICLEAR);
- 			host->busy_state = MMCI_BUSY_START_IRQ;
-+			schedule_delayed_work(&host->busy_timeout_work,
-+					      msecs_to_jiffies(10));
- 		} else {
- 			dev_dbg(mmc_dev(host->mmc),
- 				"lost busy status when waiting for busy start IRQ\n");
-@@ -758,6 +761,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
- 		if (status & host->variant->busy_detect_flag) {
- 			host->busy_status |= status & (MCI_CMDSENT | MCI_CMDRESPEND);
- 			writel(host->variant->busy_detect_mask, base + MMCICLEAR);
-+			cancel_delayed_work_sync(&host->busy_timeout_work);
- 			ux500_busy_clear_mask_done(host);
- 		} else {
- 			dev_dbg(mmc_dev(host->mmc),
-@@ -1498,6 +1502,22 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
- 	}
- }
- 
-+/*
-+ * This busy timeout worker is used to "kick" the command IRQ if a
-+ * busy detect IRQ fails to appear in reasonable time. Only used on
-+ * variants with busy detection IRQ delivery.
-+ */
-+static void busy_timeout_work(struct work_struct *work)
-+{
-+	struct mmci_host *host =
-+		container_of(work, struct mmci_host, busy_timeout_work.work);
-+	u32 status;
-+
-+	dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy IRQ\n");
-+	status = readl(host->base + MMCISTATUS);
-+	mmci_cmd_irq(host, host->cmd, status);
-+}
-+
- static int mmci_get_rx_fifocnt(struct mmci_host *host, u32 status, int remain)
- {
- 	return remain - (readl(host->base + MMCIFIFOCNT) << 2);
-@@ -2311,6 +2331,9 @@ static int mmci_probe(struct amba_device *dev,
- 			goto clk_disable;
- 	}
- 
-+	if (host->variant->busy_detect && host->ops->busy_complete)
-+		INIT_DELAYED_WORK(&host->busy_timeout_work, busy_timeout_work);
-+
- 	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
- 
- 	amba_set_drvdata(dev, mmc);
-diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
-index 82f3850325c8..68ce7ea4d3b2 100644
---- a/drivers/mmc/host/mmci.h
-+++ b/drivers/mmc/host/mmci.h
-@@ -453,6 +453,7 @@ struct mmci_host {
- 	void			*dma_priv;
- 
- 	s32			next_cookie;
-+	struct delayed_work	busy_timeout_work;
- };
- 
- #define dma_inprogress(host)	((host)->dma_in_progress)
+If you fix the issue, kindly add following tag where applicable
+| Reported-by: kernel test robot <lkp@intel.com>
+| Link: https://lore.kernel.org/oe-kbuild-all/202304090708.EDYvW6wb-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+>> drivers/ufs/host/ufs-qcom.c:18:10: fatal error: 'soc/qcom/ice.h' file not found
+   #include <soc/qcom/ice.h>
+            ^~~~~~~~~~~~~~~~
+   1 error generated.
+
+
+vim +18 drivers/ufs/host/ufs-qcom.c
+
+    17	
+  > 18	#include <soc/qcom/ice.h>
+    19	
 
 -- 
-2.39.2
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests
