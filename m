@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B69DEC7619A
-	for <linux-mmc@archiver.kernel.org>; Sat,  8 Apr 2023 23:56:28 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9DDEC77B61
+	for <linux-mmc@archiver.kernel.org>; Sun,  9 Apr 2023 07:02:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229468AbjDHX40 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 8 Apr 2023 19:56:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40270 "EHLO
+        id S229483AbjDIHCe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 9 Apr 2023 03:02:34 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40644 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229379AbjDHX4Z (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 8 Apr 2023 19:56:25 -0400
-Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 392157DA9;
-        Sat,  8 Apr 2023 16:56:24 -0700 (PDT)
+        with ESMTP id S229436AbjDIHCd (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Apr 2023 03:02:33 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15C91524D;
+        Sun,  9 Apr 2023 00:02:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
   d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1680998184; x=1712534184;
+  t=1681023752; x=1712559752;
   h=date:from:to:cc:subject:message-id:references:
    mime-version:in-reply-to;
-  bh=SBjWLCDduqazACPY0rYViNrxuDYPCkxNDiJwaPS7Jjg=;
-  b=O3LmloptMUd9ILc5yPsjWbQHq46Q0V6KmZ8zpGF4sHeNHJGPBcIWSgos
-   +rrYz1jRkC1Itl1j1Ic4y86iI67yKF+FpO0olhOgJ+Bc5uJcYW2IXPPDT
-   S4KvP7iqC5tcW9tuy1NMiH3V5px1dcwaSWcw/JKHdhTgKKH/u4fdVqbh3
-   vK98YxkpoDP9filzIy+W1oc6C+KcGCbh9hPTI+JkuHeU4pqzUPKocRs7E
-   01SsdNV3M08p85NK1ng52SYtShOlnkoVp5gDWGvcpbqIPSop1cs0YooHZ
-   bXiPnlO8PlwCno1rIra7VUb3Oi4wHGqHS/V6Enm4KXGooH5ov9Tr9kM62
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="345833281"
+  bh=J11a3LKHFUg+rZr7msg9Wtw0US+dnw019wkvKcGQG6w=;
+  b=GF0wp178kDVSV84rEDgfqlTJj+3u7pYVTcY8HOoOfrfj5r/WGHDbqTwt
+   7AVjL6/XbpT1nzD5WKoJ5NPL181FEiR4FcksqI35E5zIYWOrzR4T735Dv
+   gYvbHN6pvB7ingFjVgZN2+Xf7LGaRv0lcU7tyhnZ8iir0dY1m64GdSZ0v
+   GwbXxCT48q9OJVT0bR9x6FOwvwvKwqcWS5oOk8iO1RW5OC0ZsT6c4ay5F
+   17Ham3fB+Ag+/JEqNoORg1ZLwjFOP6qgq0yf5nhrnDO+xn0M1fW85WbVU
+   egScErKereWSYBosVqkm/UTU1nLhVZXiEbJItlFL0RdiODfEpFHhphXtT
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="340689355"
 X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
-   d="scan'208";a="345833281"
-Received: from fmsmga006.fm.intel.com ([10.253.24.20])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 08 Apr 2023 16:56:23 -0700
+   d="scan'208";a="340689355"
+Received: from orsmga007.jf.intel.com ([10.7.209.58])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Apr 2023 00:02:31 -0700
 X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="933943627"
+X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="681419525"
 X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
-   d="scan'208";a="933943627"
+   d="scan'208";a="681419525"
 Received: from lkp-server01.sh.intel.com (HELO b613635ddfff) ([10.239.97.150])
-  by fmsmga006.fm.intel.com with ESMTP; 08 Apr 2023 16:56:18 -0700
+  by orsmga007.jf.intel.com with ESMTP; 09 Apr 2023 00:02:25 -0700
 Received: from kbuild by b613635ddfff with local (Exim 4.96)
         (envelope-from <lkp@intel.com>)
-        id 1plIPp-000UDp-1X;
-        Sat, 08 Apr 2023 23:56:17 +0000
-Date:   Sun, 9 Apr 2023 07:55:49 +0800
+        id 1plP4C-000UOh-2p;
+        Sun, 09 Apr 2023 07:02:24 +0000
+Date:   Sun, 9 Apr 2023 15:01:30 +0800
 From:   kernel test robot <lkp@intel.com>
 To:     Abel Vesa <abel.vesa@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -66,13 +66,13 @@ Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
         linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v7 3/3] mmc: sdhci-msm: Switch to the new ICE API
-Message-ID: <202304090709.QHt43PE6-lkp@intel.com>
-References: <20230408214041.533749-4-abel.vesa@linaro.org>
+Subject: Re: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+Message-ID: <202304091444.8AV915DU-lkp@intel.com>
+References: <20230408214041.533749-3-abel.vesa@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230408214041.533749-4-abel.vesa@linaro.org>
+In-Reply-To: <20230408214041.533749-3-abel.vesa@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -82,46 +82,46 @@ Hi Abel,
 kernel test robot noticed the following build errors:
 
 [auto build test ERROR on mkp-scsi/for-next]
-[also build test ERROR on jejb-scsi/for-next robh/for-next linus/master v6.3-rc5 next-20230405]
+[also build test ERROR on jejb-scsi/for-next robh/for-next linus/master v6.3-rc5 next-20230406]
 [If your patch is applied to the wrong git tree, kindly drop us a note.
 And when submitting patch, we suggest to use '--base' as documented in
 https://git-scm.com/docs/git-format-patch#_base_tree_information]
 
 url:    https://github.com/intel-lab-lkp/linux/commits/Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
 base:   https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git for-next
-patch link:    https://lore.kernel.org/r/20230408214041.533749-4-abel.vesa%40linaro.org
-patch subject: [PATCH v7 3/3] mmc: sdhci-msm: Switch to the new ICE API
-config: ia64-allmodconfig (https://download.01.org/0day-ci/archive/20230409/202304090709.QHt43PE6-lkp@intel.com/config)
-compiler: ia64-linux-gcc (GCC) 12.1.0
+patch link:    https://lore.kernel.org/r/20230408214041.533749-3-abel.vesa%40linaro.org
+patch subject: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
+config: arm-allyesconfig (https://download.01.org/0day-ci/archive/20230409/202304091444.8AV915DU-lkp@intel.com/config)
+compiler: arm-linux-gnueabi-gcc (GCC) 12.1.0
 reproduce (this is a W=1 build):
         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
         chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/ec033fe93e3a653b68ee5c28699b7cbe180ff625
+        # https://github.com/intel-lab-lkp/linux/commit/496cc31572753aac0d53c5e0666bcc6c3f323938
         git remote add linux-review https://github.com/intel-lab-lkp/linux
         git fetch --no-tags linux-review Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
-        git checkout ec033fe93e3a653b68ee5c28699b7cbe180ff625
+        git checkout 496cc31572753aac0d53c5e0666bcc6c3f323938
         # save the config file
         mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=ia64 olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=ia64 SHELL=/bin/bash drivers/mmc/host/
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arm olddefconfig
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash
 
 If you fix the issue, kindly add following tag where applicable
 | Reported-by: kernel test robot <lkp@intel.com>
-| Link: https://lore.kernel.org/oe-kbuild-all/202304090709.QHt43PE6-lkp@intel.com/
+| Link: https://lore.kernel.org/oe-kbuild-all/202304091444.8AV915DU-lkp@intel.com/
 
 All errors (new ones prefixed by >>):
 
->> drivers/mmc/host/sdhci-msm.c:21:10: fatal error: soc/qcom/ice.h: No such file or directory
-      21 | #include <soc/qcom/ice.h>
+>> drivers/ufs/host/ufs-qcom.c:18:10: fatal error: soc/qcom/ice.h: No such file or directory
+      18 | #include <soc/qcom/ice.h>
          |          ^~~~~~~~~~~~~~~~
    compilation terminated.
 
 
-vim +21 drivers/mmc/host/sdhci-msm.c
+vim +18 drivers/ufs/host/ufs-qcom.c
 
-    20	
-  > 21	#include <soc/qcom/ice.h>
-    22	
+    17	
+  > 18	#include <soc/qcom/ice.h>
+    19	
 
 -- 
 0-DAY CI Kernel Test Service
