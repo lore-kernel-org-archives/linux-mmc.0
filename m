@@ -2,52 +2,64 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9DDEC77B61
-	for <linux-mmc@archiver.kernel.org>; Sun,  9 Apr 2023 07:02:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0030FC77B61
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Apr 2023 17:22:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229483AbjDIHCe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 9 Apr 2023 03:02:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40644 "EHLO
+        id S230315AbjDJRWT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Apr 2023 13:22:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48194 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229436AbjDIHCd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 9 Apr 2023 03:02:33 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15C91524D;
-        Sun,  9 Apr 2023 00:02:32 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1681023752; x=1712559752;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=J11a3LKHFUg+rZr7msg9Wtw0US+dnw019wkvKcGQG6w=;
-  b=GF0wp178kDVSV84rEDgfqlTJj+3u7pYVTcY8HOoOfrfj5r/WGHDbqTwt
-   7AVjL6/XbpT1nzD5WKoJ5NPL181FEiR4FcksqI35E5zIYWOrzR4T735Dv
-   gYvbHN6pvB7ingFjVgZN2+Xf7LGaRv0lcU7tyhnZ8iir0dY1m64GdSZ0v
-   GwbXxCT48q9OJVT0bR9x6FOwvwvKwqcWS5oOk8iO1RW5OC0ZsT6c4ay5F
-   17Ham3fB+Ag+/JEqNoORg1ZLwjFOP6qgq0yf5nhrnDO+xn0M1fW85WbVU
-   egScErKereWSYBosVqkm/UTU1nLhVZXiEbJItlFL0RdiODfEpFHhphXtT
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="340689355"
-X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
-   d="scan'208";a="340689355"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 09 Apr 2023 00:02:31 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10674"; a="681419525"
-X-IronPort-AV: E=Sophos;i="5.98,330,1673942400"; 
-   d="scan'208";a="681419525"
-Received: from lkp-server01.sh.intel.com (HELO b613635ddfff) ([10.239.97.150])
-  by orsmga007.jf.intel.com with ESMTP; 09 Apr 2023 00:02:25 -0700
-Received: from kbuild by b613635ddfff with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1plP4C-000UOh-2p;
-        Sun, 09 Apr 2023 07:02:24 +0000
-Date:   Sun, 9 Apr 2023 15:01:30 +0800
-From:   kernel test robot <lkp@intel.com>
+        with ESMTP id S230305AbjDJRWS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2023 13:22:18 -0400
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 006B026AB
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 10:22:16 -0700 (PDT)
+Received: by mail-ed1-x52f.google.com with SMTP id 4fb4d7f45d1cf-504a37baf98so755178a12.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 10:22:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1681147335;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=aF4gu0RaNrTTFCvcYQcWRArSpPeebO9/4yLFj3PI3mY=;
+        b=fWCOpX7/SwjuHyqJLAqClg3voZ5jnOfmERlA2t3+Wdt9T0LUdPTYVjAYkiEPr99UP2
+         Nx8wnItxxh0CdR0zx6rkW0veQhlk7VxWS5zTmRO0dzt7ojT1RYshEkgPSquRabUVM+Ya
+         dHJ7o4zREoGZ/ccqzPge9HqhFAOi/MIsI4QoXEWtHuUxBiKXcnhN3unjMjlv356KPCEu
+         PJii2cjj5EbSPOeVYME5nVy2k0DoyEcMbWlniNuwM5+ttHHgciawikdWbFw3uZUd1vlZ
+         w8rE6Ep82LRdkZkdxQRb5K/92nPikFsWfYi41qGwZC1PTvf0dWBevYf8xjGNnFTdhEXo
+         3q4A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1681147335;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=aF4gu0RaNrTTFCvcYQcWRArSpPeebO9/4yLFj3PI3mY=;
+        b=3SUB2AG5BcgCMJNeVDPNkGfVeKcpUn38O3E8TNDGvD52VnUo/QijWPdX/8vImxzjFs
+         UpSv4DuSP9jxisrh3ebeWcS1m0MCrifGWCCy9ADsZeXjTF3YXP4No5X2TKz4RiNH1KA5
+         UjxscZYMk/fc2rHPuZGAYPZbDUvD9IWEuO3jrK+Xp5n/QErpSSxV5AEVSSetJ9LBfb5j
+         0pHUGbMEUGAndR8uXvfry+uPhM+0LPHZxEkaX45BFcfX8uED5+jIsWJ4FU2IvdRAFEus
+         4scgnAR2R/AeRo+VC1wQPePhx191EZl/fwAJkbYOK8x0HeP3JO40k/ZJkUFnuC38q5xp
+         6crQ==
+X-Gm-Message-State: AAQBX9fvH+g5IQbFAcTj+VgKMOY8jp9fLxMkKoy6IkDdA6iiBRIwygrz
+        byAoY63cgWR4sozkEdHF3XqbCQ==
+X-Google-Smtp-Source: AKy350aNsSC8fqZ/yvuVJrmsoq1jKWAOxaKpue1KeRo5d69Vg7dnLJrE0uJOHhunMzUrshZGuWOHOQ==
+X-Received: by 2002:aa7:d14f:0:b0:4be:b39b:ea8f with SMTP id r15-20020aa7d14f000000b004beb39bea8fmr6554535edo.2.1681147335445;
+        Mon, 10 Apr 2023 10:22:15 -0700 (PDT)
+Received: from ?IPV6:2a02:810d:15c0:828:1a6c:6968:e633:48df? ([2a02:810d:15c0:828:1a6c:6968:e633:48df])
+        by smtp.gmail.com with ESMTPSA id h10-20020aa7de0a000000b005023ddb37eesm4875429edv.8.2023.04.10.10.22.13
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 10 Apr 2023 10:22:14 -0700 (PDT)
+Message-ID: <5d5e5030-7db7-447e-e5a4-2157171d7575@linaro.org>
+Date:   Mon, 10 Apr 2023 19:22:13 +0200
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v7 1/3] dt-bindings: ufs: qcom: Add ICE phandle
+Content-Language: en-US
 To:     Abel Vesa <abel.vesa@linaro.org>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzk@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Andy Gross <agross@kernel.org>,
         Bjorn Andersson <andersson@kernel.org>,
         Konrad Dybcio <konrad.dybcio@linaro.org>,
@@ -61,68 +73,28 @@ To:     Abel Vesa <abel.vesa@linaro.org>,
         Herbert Xu <herbert@gondor.apana.org.au>,
         "David S . Miller" <davem@davemloft.net>,
         Eric Biggers <ebiggers@kernel.org>
-Cc:     oe-kbuild-all@lists.linux.dev, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org,
+Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-arm-msm@vger.kernel.org, linux-crypto@vger.kernel.org,
         linux-scsi@vger.kernel.org
-Subject: Re: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
-Message-ID: <202304091444.8AV915DU-lkp@intel.com>
-References: <20230408214041.533749-3-abel.vesa@linaro.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230408214041.533749-3-abel.vesa@linaro.org>
+References: <20230408214041.533749-1-abel.vesa@linaro.org>
+ <20230408214041.533749-2-abel.vesa@linaro.org>
+From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+In-Reply-To: <20230408214041.533749-2-abel.vesa@linaro.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Abel,
+On 08/04/2023 23:40, Abel Vesa wrote:
+> Starting with SM8550, the ICE will have its own devicetree node
+> so add the qcom,ice property to reference it.
+> 
+> Signed-off-by: Abel Vesa <abel.vesa@linaro.org>
 
-kernel test robot noticed the following build errors:
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-[auto build test ERROR on mkp-scsi/for-next]
-[also build test ERROR on jejb-scsi/for-next robh/for-next linus/master v6.3-rc5 next-20230406]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
+Best regards,
+Krzysztof
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
-base:   https://git.kernel.org/pub/scm/linux/kernel/git/mkp/scsi.git for-next
-patch link:    https://lore.kernel.org/r/20230408214041.533749-3-abel.vesa%40linaro.org
-patch subject: [PATCH v7 2/3] scsi: ufs: ufs-qcom: Switch to the new ICE API
-config: arm-allyesconfig (https://download.01.org/0day-ci/archive/20230409/202304091444.8AV915DU-lkp@intel.com/config)
-compiler: arm-linux-gnueabi-gcc (GCC) 12.1.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/496cc31572753aac0d53c5e0666bcc6c3f323938
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Abel-Vesa/dt-bindings-ufs-qcom-Add-ICE-phandle/20230409-054151
-        git checkout 496cc31572753aac0d53c5e0666bcc6c3f323938
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arm olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arm SHELL=/bin/bash
-
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Link: https://lore.kernel.org/oe-kbuild-all/202304091444.8AV915DU-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
->> drivers/ufs/host/ufs-qcom.c:18:10: fatal error: soc/qcom/ice.h: No such file or directory
-      18 | #include <soc/qcom/ice.h>
-         |          ^~~~~~~~~~~~~~~~
-   compilation terminated.
-
-
-vim +18 drivers/ufs/host/ufs-qcom.c
-
-    17	
-  > 18	#include <soc/qcom/ice.h>
-    19	
-
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests
