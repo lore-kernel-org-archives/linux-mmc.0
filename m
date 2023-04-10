@@ -2,630 +2,188 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C33FBC77B61
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Apr 2023 18:50:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A20AEC77B61
+	for <linux-mmc@archiver.kernel.org>; Mon, 10 Apr 2023 23:14:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229644AbjDJSuD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Apr 2023 14:50:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57448 "EHLO
+        id S229761AbjDJXOr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Apr 2023 19:14:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229485AbjDJSuC (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2023 14:50:02 -0400
-Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2061.outbound.protection.outlook.com [40.107.93.61])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 930DCDC;
-        Mon, 10 Apr 2023 11:49:30 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=GS1KpNrduri9ZDDHAvF4ZxohkecrNb8tI2LHfFrQ5nTOqoPn761xnOCaQWbZhMXeqVV1ZOWQpncuaE4R9JfhCJEf1tGI+K/Ykgp11MNHLwVLJDXRmZxuWUpDhTdBIJZtdAtZ5CxXQq5lHgnmTTVCeQ2RUwIxmcprAotZ3uiFnQSFGdEfJwdH4G1ScJBepjQ0OFpj7k7BSJRJeL1J0eTNp/eT5A/xNkGdcFQfcj8myUYeLey5JVD9Fx/MHZ7qf9iWdDjqQysl9Z+IVth5cO8LDF45a//JaLO2U8u8ZbfO4MAO1JSx6tdmEoo6cxhCis749fkqDkfjimXe3yxOg2hrqg==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=0h44Zl9j/dIrJwYJCqJW/TClDVA+3EOCtpbngAJkdy8=;
- b=NyXlssWcAa1M7AnbgHP/5pgip7mEyiMlWUEqq1tgp7r0USrJlYXQUT7x24PhAwTToJq5FVuvxJqq+1HsLtsh0TwYnmfJ0uEOcLfIxc40+M+6AE0rMrR0sFzbmsLBWeB9foXt+BbtYGHeGT70Y9lEPpNJcW2LQAc1HHOaDGgfSporpqzXtgWSdwz7uT2jnPlDTTuIyGTJ9/Xql5sxtxUq7fPeiiPPQeI728zLoJwlLzD8opKXyrblEkLq20FdAVtHSLmk85V7ZJfkGOEcoEWTUAaZedXtrkLcHndzBlk7H5x1qoKWrudKyoEBP5IPKJ7yooofaVFMdy96uAAWY+7RTg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
- dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
- header.from=amd.com; dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=0h44Zl9j/dIrJwYJCqJW/TClDVA+3EOCtpbngAJkdy8=;
- b=kWR5PYj0fsO4jMoxHslERU3vKP1BkXQOJbafE3KdSIDfOEoqJ87sTt037gUUg4OM5cytuQkAHJ64VqQiZD3NTRlmIYjtxrSUWPuDNZTBtmeL0+i0vYrdSdDvsEmHiB0MLWA1qoRkopKP69tWlvJd0QXweNpD3GB5MQcN0Bp097M=
-Received: from DM5PR07CA0057.namprd07.prod.outlook.com (2603:10b6:4:ad::22) by
- DS7PR12MB8419.namprd12.prod.outlook.com (2603:10b6:8:e9::20) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6277.35; Mon, 10 Apr 2023 18:48:10 +0000
-Received: from DM6NAM11FT085.eop-nam11.prod.protection.outlook.com
- (2603:10b6:4:ad:cafe::43) by DM5PR07CA0057.outlook.office365.com
- (2603:10b6:4:ad::22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6277.38 via Frontend
- Transport; Mon, 10 Apr 2023 18:48:10 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- DM6NAM11FT085.mail.protection.outlook.com (10.13.172.236) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6298.26 via Frontend Transport; Mon, 10 Apr 2023 18:48:10 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Mon, 10 Apr 2023 13:48:06 -0500
-From:   Brad Larson <blarson@amd.com>
-To:     <linux-arm-kernel@lists.infradead.org>
-CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <adrian.hunter@intel.com>,
-        <alcooperx@gmail.com>, <andy.shevchenko@gmail.com>,
-        <arnd@arndb.de>, <blarson@amd.com>, <brendan.higgins@linux.dev>,
-        <briannorris@chromium.org>, <brijeshkumar.singh@amd.com>,
-        <catalin.marinas@arm.com>, <davidgow@google.com>,
-        <gsomlo@gmail.com>, <gerg@linux-m68k.org>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee@kernel.org>,
-        <lee.jones@linaro.org>, <broonie@kernel.org>,
-        <yamada.masahiro@socionext.com>, <p.zabel@pengutronix.de>,
-        <piotrs@cadence.com>, <p.yadav@ti.com>, <rdunlap@infradead.org>,
-        <robh+dt@kernel.org>, <samuel@sholland.org>,
-        <fancer.lancer@gmail.com>, <skhan@linuxfoundation.org>,
-        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
-        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
-        <vaishnav.a@ti.com>, <will@kernel.org>,
-        <devicetree@vger.kernel.org>
-Subject: [PATCH v13 15/15] soc: amd: Add support for AMD Pensando SoC Controller
-Date:   Mon, 10 Apr 2023 11:45:26 -0700
-Message-ID: <20230410184526.15990-16-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230410184526.15990-1-blarson@amd.com>
-References: <20230410184526.15990-1-blarson@amd.com>
+        with ESMTP id S230055AbjDJXOb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2023 19:14:31 -0400
+Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 425B430F4
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 16:13:52 -0700 (PDT)
+Received: by mail-ej1-x631.google.com with SMTP id f26so9859427ejb.1
+        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 16:13:52 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20210112; t=1681168422;
+        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=vYCRP+KrlDlbA1Ibo/A0cTBAFRfyjiKjYzNUeLYUHNM=;
+        b=b86yQvYJywZnlnP3IrOiP8D5lc4U68ihljTY6XuXNu5BEGdmV9H49PEZJu0SII5Zuk
+         4Awb0S3s1pWnT55GpB3eRthVZFJ4YSncT2lEcI3bWpnyMvcsYvI6GY2I5TebQgVos/KS
+         P5W83VKOPEZwbFl9qUhJ+RYD0eAFLSdFVCsHgFnLTCnWV+oE6dJNHB+4rOHMOcixc7BX
+         Mqby4BuC3EKAgy3RixF6tHr7inI0rgnun9ArzY78ocNznoureBLo28s3ZKu9Y+HY0pe9
+         7bNt/m6Ppn3YqBzLpE3LFiDH7UQOf3N87+H/PjTiXAj70+0W1oizd57DU/uG+d2EV9PL
+         WH8Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1681168422;
+        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=vYCRP+KrlDlbA1Ibo/A0cTBAFRfyjiKjYzNUeLYUHNM=;
+        b=4sfpuFl1+wcerjWPxdIQb3wU3cKe7Gj138xlvpBMTmi7sHkBgsn74xGfBdhuIaBKA/
+         yqdpY99KX5md6W6J3xBufLghUz5ePvcQlXGGu5HImhsmEJZm2xHFVQbJmflwwr5FV7bI
+         S8BbAMGmS+3vOtCIekcBtetxyVwsxKDVxtJvtvjEL4o67aM0qjZIrdzrxGNyCwwznSXE
+         ncBbslpWDGSwrMXS7wCkLZxU340OxtSiqXx85YZ8ud0yOewXQXNCdxam62Soy7e/fWUT
+         40xn8we25MQRPvP8sGdKoS+9oiuc/dnx4FUnpHRtOLtIW3tUNkjWwS1AmwgNfBwHOrSR
+         V1LA==
+X-Gm-Message-State: AAQBX9eMl6ETFNd7VBeYGEb50Wn914Yrl0LjRSGdaUZ7KicI/VZSq3d/
+        zeZNr7sD47OjU1e+MrLtLrtCGeT/DGKKM00TtfUdD2wN5+o=
+X-Google-Smtp-Source: AKy350ZSOn5vAFET2Urc7I8f2l8+gbmJ4gCwaITbvhLfKwc+0P9A260bj1k0r/tHrE5oGSFnAdT0hp3ato9ui9VMDok=
+X-Received: by 2002:a17:907:6f07:b0:878:4a24:1a5c with SMTP id
+ sy7-20020a1709076f0700b008784a241a5cmr3599198ejc.6.1681168421730; Mon, 10 Apr
+ 2023 16:13:41 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DM6NAM11FT085:EE_|DS7PR12MB8419:EE_
-X-MS-Office365-Filtering-Correlation-Id: 96715424-a04b-4e32-fab0-08db39f421e5
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: XI3cSPkZRnVV35+dE1NbGKU9ueVrYwg+3mi/x1OEw6/JQLI7ea4ROjdtpdaWtU3lKm2RgtRzA+wJdfw33osP+1arYyw4N31f88Ynp68auxY1+qQ2+tluX8dJ8VtvdNKJbePy6gGCY4cJxCFQ2/lg3zgEVrzColBFIGnCwSBdk02M2vhQNq0+ZbJ7TN0oO/s/XCRnkbQaXGTg7laIr4B9Op/T3Vq/qUaIkpxDU6S4Y7P3BGjLhF43KttwhvANfsgc1Xr6q+5xmeqn0qwRfiVoRtld1PAujgR43pDqbghVFfa9TqD656v2AkoljpxZbZVYiRHwyTTp6ToXf6duSZqTFBS6OvAM3IwPq1gnXju1akO3yfuel8WQEh8PH2XfKxpCjvHZnxYF3gATMDY5OgcYfwmDobtldiGiZ2N1CMUVY6C+OlMfgKD1svBbCh/Y33A3OZ+b9tRrs7Uurf8B0G8PfEFPpKT3RQ64MRvlmhljCWkRHhdvGXMua9DkUaqKL4An+ARihhPzUbD91+ykgvRR9wCB5BZ8hDgxAQ0bf7rtB/fSr4NnOdGKG6FAPtlc+FimL6wncQn4m4nMgUr94VuH5vSUb4ZYHifnh/K29h/dkW4EGEMWaAverTngHgdRk/ey99W/MGp7F8OElcxjgPKPKnokm21TYCkRYxZJh5kMF7qbebw/2T33b4juEaoPNLyACU5LA/Cd1FioYAGDej/bZOmHnuM5Kp94omJ82UYx6kw=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(346002)(376002)(136003)(396003)(451199021)(36840700001)(46966006)(40470700004)(316002)(82310400005)(54906003)(356005)(36860700001)(82740400003)(81166007)(70586007)(8676002)(70206006)(478600001)(6916009)(4326008)(83380400001)(336012)(426003)(47076005)(2616005)(186003)(16526019)(41300700001)(36756003)(26005)(2906002)(1076003)(30864003)(40460700003)(40480700001)(8936002)(6666004)(5660300002)(7406005)(7416002)(966005)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 10 Apr 2023 18:48:10.5799
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 96715424-a04b-4e32-fab0-08db39f421e5
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT085.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DS7PR12MB8419
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Tue, 11 Apr 2023 01:13:30 +0200
+Message-ID: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+Subject: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The Pensando SoC controller is a SPI connected companion device
-that is present in all Pensando SoC board designs.  The essential
-board management registers are accessed on chip select 0 with
-board mgmt IO support accessed using additional chip selects.
+Hello Ulf,
 
-Signed-off-by: Brad Larson <blarson@amd.com>
----
+today I found that upstream commit 4bc31edebde5 ("mmc: core: Set HS
+clock speed before sending HS CMD13") breaks eMMC support on my
+Odroid-C1.
+(yes, I know that I am very late to the party...)
 
-v13 changes:
-- Update include list in pensando-ctrl.c
-- Change variable spi_dev to spi throughout
-- Removed unneeded variable initialization, simplification of 
-  error checks, remove extra castings, and use dev_err_probe()
-- Sort the includes in amd-pensando-ctrl.h
-- Updates to cleanup if there is an error in penctrl_spi_probe()
+The .dts for this board is upstream using
+arch/arm/boot/dts/meson8b-odroidc1.dts (&sdhc node)
+The MMC host driver used is drivers/mmc/host/meson-mx-sdhc*.
 
-v12 changes:
-- Fix gcc-12.1.0 warning:
-Reported-by: kernel test robot <lkp@intel.com>
-Link: https://lore.kernel.org/oe-kbuild-all/202303120925.SxLjwOd2-lkp@intel.com/
+The problem I'm seeing is that the eMMC module is simply not detected.
+There are no errors in the kernel log (note that mmc1 is the eMMC
+while mmc0 is the SD card which is attached to another controller on
+that SoC):
+# dmesg | grep mmc
+[    2.742136] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
+[    4.315905] platform c1108c20.mmc:slot@1: Got CD GPIO
+[    4.450921] mmc0: new high speed SDHC card at address 0001
+[    4.456985] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
+[    4.466108]  mmcblk0: p1
 
-v11 changes:
-- Fix the compatible to be specific 'amd,pensando-elba-ctrl'
+In this state I get:
+# cat /sys/kernel/debug/mmc1/ios
+clock:          52000000 Hz
+actual clock:   51000000 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    9 (mmc HS200)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
 
-v10 changes:
-- Different driver implementation specific to this Pensando controller device.
-- Moved to soc/amd directory under new name based on guidance.  This driver is
-  of no use to any design other than all Pensando SoC based cards.
-- Removed use of builtin_driver, can be built as a module.
+After reverting the mentioned commit I get:
+# dmesg | grep mmc
+[    2.744226] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
+[    2.970944] mmc1: new HS200 MMC card at address 0001
+[    2.974492] mmcblk1: mmc1:0001 8GND3R 7.28 GiB
+[    2.985126]  mmcblk1: p1
+[    2.987810] mmcblk1boot0: mmc1:0001 8GND3R 4.00 MiB
+[    3.003007] mmcblk1boot1: mmc1:0001 8GND3R 4.00 MiB
+[    4.311754] platform c1108c20.mmc:slot@1: Got CD GPIO
+[    4.374732] mmc0: new high speed SDHC card at address 0001
+[    4.377228] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
+[    4.399152]  mmcblk0: p1
+# cat /sys/kernel/debug/mmc1/ios
+clock:          100000000 Hz
+actual clock:   94444445 Hz
+vdd:            21 (3.3 ~ 3.4 V)
+bus mode:       2 (push-pull)
+chip select:    0 (don't care)
+power mode:     2 (on)
+bus width:      3 (8 bits)
+timing spec:    9 (mmc HS200)
+signal voltage: 1 (1.80 V)
+driver type:    0 (driver type B)
 
-v9 changes:
-- Previously patch 14/17
-- After the change to the device tree node and squashing
-  reset-cells into the parent simplified this to not use
-  any MFD API and move it to drivers/spi/pensando-sr.c.
-- Change the naming to remove elba since this driver is common
-  for all Pensando SoC designs .
-- Default yes SPI_PENSANDO_SR for ARCH_PENSANDO
+Please let me know which additional information would be helpful for
+debugging this further.
+Also I'd like to highlight that I'm not blaming the above commit
+(unless I know better). It's entirely possible that the meson-mx-sdhc
+driver (which I wrote) can be at fault and that I was previously just
+lucky.
 
----
- drivers/soc/Kconfig                    |   1 +
- drivers/soc/Makefile                   |   1 +
- drivers/soc/amd/Kconfig                |  16 ++
- drivers/soc/amd/Makefile               |   2 +
- drivers/soc/amd/pensando-ctrl.c        | 373 +++++++++++++++++++++++++
- include/uapi/linux/amd-pensando-ctrl.h |  30 ++
- 6 files changed, 423 insertions(+)
- create mode 100644 drivers/soc/amd/Kconfig
- create mode 100644 drivers/soc/amd/Makefile
- create mode 100644 drivers/soc/amd/pensando-ctrl.c
- create mode 100644 include/uapi/linux/amd-pensando-ctrl.h
+My git bisect log is:
+$ git bisect log
+git bisect start
+# status: waiting for both good and bad commits
+# good: [f443e374ae131c168a065ea1748feac6b2e76613] Linux 5.17
+git bisect good f443e374ae131c168a065ea1748feac6b2e76613
+# status: waiting for bad commit, 1 good commit known
+# bad: [4b0986a3613c92f4ec1bdc7f60ec66fea135991f] Linux 5.18
+git bisect bad 4b0986a3613c92f4ec1bdc7f60ec66fea135991f
+# good: [25fd2d41b505d0640bdfe67aa77c549de2d3c18a] selftests:
+kselftest framework: provide "finished" helper
+git bisect good 25fd2d41b505d0640bdfe67aa77c549de2d3c18a
+# good: [02e2af20f4f9f2aa0c84e9a30a35c02f0fbb7daa] Merge tag
+'char-misc-5.18-rc1' of
+git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/char-misc
+git bisect good 02e2af20f4f9f2aa0c84e9a30a35c02f0fbb7daa
+# good: [887f75cfd0da44c19dda93b2ff9e70ca8792cdc1] drm/amdgpu: Ensure
+HDA function is suspended before ASIC reset
+git bisect good 887f75cfd0da44c19dda93b2ff9e70ca8792cdc1
+# good: [cf424ef014ac30b0da27125dd1fbdf10b0d3a520] Merge tag
+'for-5.18/fbdev-2' of
+git://git.kernel.org/pub/scm/linux/kernel/git/deller/linux-fbdev
+git bisect good cf424ef014ac30b0da27125dd1fbdf10b0d3a520
+# good: [4e707344e18525b4edf5c2bc2e3eb60692e8c92e] MAINTAINERS: add
+missing files for bonding definition
+git bisect good 4e707344e18525b4edf5c2bc2e3eb60692e8c92e
+# bad: [680b892685ea7043addb5819ddec9147d4263195] Merge branch
+'100GbE' of git://git.kernel.org/pub/scm/linux/kernel/git/tnguy/net-queue
+git bisect bad 680b892685ea7043addb5819ddec9147d4263195
+# bad: [e3de3a1cda5fdc3ac42cb0d45321fb254500595f] Merge tag
+'powerpc-5.18-4' of
+git://git.kernel.org/pub/scm/linux/kernel/git/powerpc/linux
+git bisect bad e3de3a1cda5fdc3ac42cb0d45321fb254500595f
+# bad: [4b97bac0756a81cda5afd45417a99b5bccdcff67] Merge tag
+'for-5.18-rc5-tag' of
+git://git.kernel.org/pub/scm/linux/kernel/git/kdave/linux
+git bisect bad 4b97bac0756a81cda5afd45417a99b5bccdcff67
+# bad: [64267926e01b06f43e26232722fb3dc3f4819823] Merge tag
+'mmc-v5.18-rc4' of
+git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc
+git bisect bad 64267926e01b06f43e26232722fb3dc3f4819823
+# good: [fe27d189e3f42e31d3c8223d5daed7285e334c5e] Merge tag
+'folio-5.18f' of git://git.infradead.org/users/willy/pagecache
+git bisect good fe27d189e3f42e31d3c8223d5daed7285e334c5e
+# good: [ca5e2f4d6b677efa3f43a6790777e46dcf806e4d] Merge tag
+'drm-misc-fixes-2022-05-05' of
+git://anongit.freedesktop.org/drm/drm-misc into drm-fixes
+git bisect good ca5e2f4d6b677efa3f43a6790777e46dcf806e4d
+# bad: [3e5a8e8494a8122fe4eb3f167662f406cab753b9] mmc: sdhci-msm:
+Reset GCC_SDCC_BCR register for SDHC
+git bisect bad 3e5a8e8494a8122fe4eb3f167662f406cab753b9
+# bad: [e9f3fb523dbf476dc86beea23f5b5ca8f9687c93] mmc: sunxi-mmc: Fix
+DMA descriptors allocated above 32 bits
+git bisect bad e9f3fb523dbf476dc86beea23f5b5ca8f9687c93
+# bad: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc: core: Set HS
+clock speed before sending HS CMD13
+git bisect bad 4bc31edebde51fcf8ad0794763b8679a7ecb5ec0
+# first bad commit: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc:
+core: Set HS clock speed before sending HS CMD13
 
-diff --git a/drivers/soc/Kconfig b/drivers/soc/Kconfig
-index 4e176280113a..9e023f74e47c 100644
---- a/drivers/soc/Kconfig
-+++ b/drivers/soc/Kconfig
-@@ -2,6 +2,7 @@
- menu "SOC (System On Chip) specific Drivers"
- 
- source "drivers/soc/actions/Kconfig"
-+source "drivers/soc/amd/Kconfig"
- source "drivers/soc/amlogic/Kconfig"
- source "drivers/soc/apple/Kconfig"
- source "drivers/soc/aspeed/Kconfig"
-diff --git a/drivers/soc/Makefile b/drivers/soc/Makefile
-index 3b0f9fb3b5c8..8914530f2721 100644
---- a/drivers/soc/Makefile
-+++ b/drivers/soc/Makefile
-@@ -4,6 +4,7 @@
- #
- 
- obj-$(CONFIG_ARCH_ACTIONS)	+= actions/
-+obj-y				+= amd/
- obj-y				+= apple/
- obj-y				+= aspeed/
- obj-$(CONFIG_ARCH_AT91)		+= atmel/
-diff --git a/drivers/soc/amd/Kconfig b/drivers/soc/amd/Kconfig
-new file mode 100644
-index 000000000000..011d5339d14e
---- /dev/null
-+++ b/drivers/soc/amd/Kconfig
-@@ -0,0 +1,16 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+menu "AMD Pensando SoC drivers"
-+
-+config AMD_PENSANDO_CTRL
-+	tristate "AMD Pensando SoC Controller"
-+	depends on SPI_MASTER=y
-+	depends on (ARCH_PENSANDO && OF) || COMPILE_TEST
-+	default ARCH_PENSANDO
-+	select REGMAP_SPI
-+	select MFD_SYSCON
-+	help
-+	  Enables AMD Pensando SoC controller device support.  This is a SPI
-+	  attached companion device in all Pensando SoC board designs which
-+	  provides essential board control/status registers and management IO
-+	  support.
-+endmenu
-diff --git a/drivers/soc/amd/Makefile b/drivers/soc/amd/Makefile
-new file mode 100644
-index 000000000000..a2de0424f68d
---- /dev/null
-+++ b/drivers/soc/amd/Makefile
-@@ -0,0 +1,2 @@
-+# SPDX-License-Identifier: GPL-2.0-only
-+obj-$(CONFIG_AMD_PENSANDO_CTRL)	+= pensando-ctrl.o
-diff --git a/drivers/soc/amd/pensando-ctrl.c b/drivers/soc/amd/pensando-ctrl.c
-new file mode 100644
-index 000000000000..6e4066564684
---- /dev/null
-+++ b/drivers/soc/amd/pensando-ctrl.c
-@@ -0,0 +1,373 @@
-+// SPDX-License-Identifier: GPL-2.0-or-later
-+/*
-+ * AMD Pensando SoC Controller
-+ *
-+ * Userspace interface and reset driver support for SPI connected Pensando SoC
-+ * controller device.  This device is present in all Pensando SoC designs and
-+ * contains board control/status registers and management IO support.
-+ *
-+ * Copyright 2023 Advanced Micro Devices, Inc.
-+ */
-+
-+#include <linux/cdev.h>
-+#include <linux/device.h>
-+#include <linux/err.h>
-+#include <linux/init.h>
-+#include <linux/mod_devicetable.h>
-+#include <linux/module.h>
-+#include <linux/mutex.h>
-+#include <linux/of.h>
-+#include <linux/reset-controller.h>
-+#include <linux/spi/spi.h>
-+#include <linux/amd-pensando-ctrl.h>
-+
-+struct penctrl_device {
-+	struct spi_device *spi;
-+	struct reset_controller_dev rcdev;
-+};
-+
-+static DEFINE_MUTEX(spi_lock);
-+static dev_t penctrl_devt;
-+static struct penctrl_device *penctrl;
-+static struct class *penctrl_class;
-+
-+static long
-+penctrl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
-+{
-+	void __user *in_arg = (void __user *)arg;
-+	struct penctrl_device *penctrl;
-+	u8 tx_buf[PENCTRL_MAX_MSG_LEN];
-+	u8 rx_buf[PENCTRL_MAX_MSG_LEN];
-+	struct spi_transfer t[2] = {};
-+	struct penctrl_spi_xfer *msg;
-+	struct spi_device *spi;
-+	unsigned int num_msgs;
-+	struct spi_message m;
-+	u32 size;
-+	int ret;
-+
-+	/* Check for a valid command */
-+	if (_IOC_TYPE(cmd) != PENCTRL_IOC_MAGIC)
-+		return -ENOTTY;
-+
-+	if (_IOC_NR(cmd) > PENCTRL_IOC_MAXNR)
-+		return -ENOTTY;
-+
-+	if (_IOC_DIR(cmd) & _IOC_READ)
-+		ret = !access_ok(in_arg, _IOC_SIZE(cmd));
-+	else if (_IOC_DIR(cmd) & _IOC_WRITE)
-+		ret = !access_ok(in_arg, _IOC_SIZE(cmd));
-+
-+	if (ret)
-+		return -EFAULT;
-+
-+	/* Get a reference to the SPI device */
-+	penctrl = filp->private_data;
-+	if (!penctrl)
-+		return -ESHUTDOWN;
-+
-+	spi = spi_dev_get(penctrl->spi);
-+	if (!spi)
-+		return -ESHUTDOWN;
-+
-+	/* Verify and prepare SPI message */
-+	size = _IOC_SIZE(cmd);
-+	num_msgs = size / sizeof(struct penctrl_spi_xfer);
-+	if (size == 0 || size % sizeof(struct penctrl_spi_xfer)) {
-+		ret = -EINVAL;
-+		goto done;
-+	}
-+	msg = memdup_user((struct penctrl_spi_xfer *)arg, size);
-+	if (!msg) {
-+		ret = PTR_ERR(msg);
-+		goto done;
-+	}
-+	if (msg->len > PENCTRL_MAX_MSG_LEN) {
-+		ret = -EINVAL;
-+		goto done;
-+	}
-+
-+	t[0].tx_buf = tx_buf;
-+	t[0].len = msg->len;
-+	if (copy_from_user(tx_buf, (void __user *)msg->tx_buf, msg->len)) {
-+		ret = -EFAULT;
-+		goto done;
-+	}
-+	if (num_msgs > 1) {
-+		msg++;
-+		if (msg->len > PENCTRL_MAX_MSG_LEN) {
-+			ret = -EINVAL;
-+			goto done;
-+		}
-+		t[1].rx_buf = rx_buf;
-+		t[1].len = msg->len;
-+	}
-+	spi_message_init_with_transfers(&m, t, num_msgs);
-+
-+	/* Perform the transfer */
-+	mutex_lock(&spi_lock);
-+	ret = spi_sync(spi, &m);
-+	mutex_unlock(&spi_lock);
-+
-+	if (ret || (num_msgs == 1))
-+		goto done;
-+
-+	if (copy_to_user((void __user *)msg->rx_buf, rx_buf, msg->len))
-+		ret = -EFAULT;
-+
-+done:
-+	spi_dev_put(spi);
-+	return ret;
-+}
-+
-+static int penctrl_open(struct inode *inode, struct file *filp)
-+{
-+	struct spi_device *spi;
-+	u8 current_cs;
-+
-+	if (!penctrl)
-+		return -ENODEV;
-+
-+	filp->private_data = penctrl;
-+	current_cs = iminor(inode);
-+	spi = penctrl->spi;
-+	spi->chip_select = current_cs;
-+	spi->cs_gpiod = spi->controller->cs_gpiods[current_cs];
-+	spi_setup(spi);
-+	return stream_open(inode, filp);
-+}
-+
-+static int penctrl_release(struct inode *inode, struct file *filp)
-+{
-+	filp->private_data = NULL;
-+	return 0;
-+}
-+
-+static const struct file_operations penctrl_fops = {
-+	.owner		= THIS_MODULE,
-+	.unlocked_ioctl = penctrl_ioctl,
-+	.open		= penctrl_open,
-+	.release	= penctrl_release,
-+	.llseek		= no_llseek,
-+};
-+
-+static int penctrl_regs_read(struct penctrl_device *penctrl, u32 reg, u32 *val)
-+{
-+	struct spi_device *spi = penctrl->spi;
-+	struct spi_transfer t[2] = {};
-+	struct spi_message m;
-+	u8 txbuf[3];
-+	u8 rxbuf[1];
-+	int ret;
-+
-+	txbuf[0] = PENCTRL_SPI_CMD_REGRD;
-+	txbuf[1] = reg;
-+	txbuf[2] = 0;
-+	t[0].tx_buf = txbuf;
-+	t[0].len = 3;
-+
-+	rxbuf[0] = 0;
-+	t[1].rx_buf = rxbuf;
-+	t[1].len = 1;
-+
-+	spi_message_init_with_transfers(&m, t, ARRAY_SIZE(t));
-+	ret = spi_sync(spi, &m);
-+	if (ret == 0)
-+		*val = rxbuf[0];
-+
-+	return ret;
-+}
-+
-+static int penctrl_regs_write(struct penctrl_device *penctrl, u32 reg, u32 val)
-+{
-+	struct spi_device *spi = penctrl->spi;
-+	struct spi_transfer t;
-+	struct spi_message m;
-+	u8 txbuf[4];
-+
-+	txbuf[0] = PENCTRL_SPI_CMD_REGWR;
-+	txbuf[1] = reg;
-+	txbuf[2] = val;
-+	txbuf[3] = 0;
-+
-+	t.tx_buf = txbuf;
-+	t.len = 4;
-+	spi_message_init_with_transfers(&m, &t, 1);
-+	return spi_sync(spi, &m);
-+}
-+
-+static int penctrl_reset_assert(struct reset_controller_dev *rcdev,
-+				unsigned long id)
-+{
-+	struct penctrl_device *penctrl =
-+		container_of(rcdev, struct penctrl_device, rcdev);
-+	struct spi_device *spi = penctrl->spi;
-+	unsigned int val;
-+	int ret;
-+
-+	mutex_lock(&spi_lock);
-+	spi->chip_select = 0;
-+	spi->cs_gpiod = spi->controller->cs_gpiods[0];
-+	spi_setup(spi);
-+	ret = penctrl_regs_read(penctrl, PENCTRL_REG_CTRL0, &val);
-+	if (ret) {
-+		dev_err(&spi->dev, "error reading ctrl0 reg\n");
-+		goto done;
-+	}
-+
-+	val |= BIT(6);
-+	ret = penctrl_regs_write(penctrl, PENCTRL_REG_CTRL0, val);
-+	if (ret)
-+		dev_err(&spi->dev, "error writing ctrl0 reg\n");
-+
-+done:
-+	mutex_unlock(&spi_lock);
-+	return ret;
-+}
-+
-+static int penctrl_reset_deassert(struct reset_controller_dev *rcdev,
-+				  unsigned long id)
-+{
-+	struct penctrl_device *penctrl =
-+		container_of(rcdev, struct penctrl_device, rcdev);
-+	struct spi_device *spi = penctrl->spi;
-+	unsigned int val;
-+	int ret;
-+
-+	mutex_lock(&spi_lock);
-+	spi->chip_select = 0;
-+	spi->cs_gpiod = spi->controller->cs_gpiods[0];
-+	spi_setup(spi);
-+	ret = penctrl_regs_read(penctrl, PENCTRL_REG_CTRL0, &val);
-+	if (ret) {
-+		dev_err(&spi->dev, "error reading ctrl0 reg\n");
-+		goto done;
-+	}
-+
-+	val &= ~BIT(6);
-+	ret = penctrl_regs_write(penctrl, PENCTRL_REG_CTRL0, val);
-+	if (ret)
-+		dev_err(&spi->dev, "error writing ctrl0 reg\n");
-+
-+done:
-+	mutex_unlock(&spi_lock);
-+	return ret;
-+}
-+
-+static const struct reset_control_ops penctrl_reset_ops = {
-+	.assert = penctrl_reset_assert,
-+	.deassert = penctrl_reset_deassert,
-+};
-+
-+static int penctrl_spi_probe(struct spi_device *spi)
-+{
-+	struct device *dev;
-+	struct cdev *cdev;
-+	u32 num_cs;
-+	int ret;
-+	u32 cs;
-+
-+	ret = device_property_read_u32(spi->dev.parent, "num-cs", &num_cs);
-+	if (ret)
-+		return dev_err_probe(&spi->dev, ret,
-+				     "number of chip-selects not defined\n");
-+
-+	ret = alloc_chrdev_region(&penctrl_devt, 0, num_cs, "penctrl");
-+	if (ret)
-+		return dev_err_probe(&spi->dev, ret,
-+				     "failed to alloc chrdev region\n");
-+
-+	penctrl_class = class_create(THIS_MODULE, "penctrl");
-+	if (IS_ERR(penctrl_class)) {
-+		ret = dev_err_probe(&spi->dev, PTR_ERR(penctrl_class),
-+				    "failed to create class\n");
-+		goto unregister_chrdev;
-+	}
-+
-+	cdev = cdev_alloc();
-+	if (!cdev) {
-+		ret = dev_err_probe(&spi->dev, -ENOMEM,
-+				    "allocation of cdev failed\n");
-+		goto destroy_class;
-+	}
-+	cdev->owner = THIS_MODULE;
-+	cdev_init(cdev, &penctrl_fops);
-+
-+	ret = cdev_add(cdev, penctrl_devt, num_cs);
-+	if (ret) {
-+		ret = dev_err_probe(&spi->dev, ret,
-+				    "register of cdev failed\n");
-+		goto free_cdev;
-+	}
-+
-+	/* Allocate driver data */
-+	penctrl = kzalloc(sizeof(*penctrl), GFP_KERNEL);
-+	if (!penctrl) {
-+		ret = -ENOMEM;
-+		goto free_cdev;
-+	}
-+	penctrl->spi = spi;
-+	mutex_init(&spi_lock);
-+
-+	/* Create a device for each chip select */
-+	for (cs = 0; cs < num_cs; cs++) {
-+		dev = device_create(penctrl_class,
-+				    &spi->dev,
-+				    MKDEV(MAJOR(penctrl_devt), cs),
-+				    penctrl,
-+				    "penctrl0.%d",
-+				    cs);
-+		if (IS_ERR(dev)) {
-+			ret = dev_err_probe(&spi->dev, PTR_ERR(dev),
-+					    "error creating device\n");
-+			goto destroy_device;
-+		}
-+		dev_dbg(&spi->dev, "created device major %u, minor %d\n",
-+			MAJOR(penctrl_devt), cs);
-+	}
-+
-+	/* Register emmc hardware reset */
-+	penctrl->rcdev.nr_resets = 1;
-+	penctrl->rcdev.owner = THIS_MODULE;
-+	penctrl->rcdev.dev = &spi->dev;
-+	penctrl->rcdev.ops = &penctrl_reset_ops;
-+	penctrl->rcdev.of_node = spi->dev.of_node;
-+	device_set_node(&spi->dev, dev_fwnode(dev));
-+
-+	ret = reset_controller_register(&penctrl->rcdev);
-+	if (ret)
-+		return dev_err_probe(&spi->dev, ret,
-+				     "failed to register reset controller\n");
-+	return 0;
-+
-+destroy_device:
-+	for (cs = 0; cs < num_cs; cs++)
-+		device_destroy(penctrl_class, MKDEV(MAJOR(penctrl_devt), cs));
-+	kfree(penctrl);
-+free_cdev:
-+	cdev_del(cdev);
-+destroy_class:
-+	class_destroy(penctrl_class);
-+unregister_chrdev:
-+	unregister_chrdev(MAJOR(penctrl_devt), "penctrl");
-+
-+	return ret;
-+}
-+
-+static const struct of_device_id penctrl_dt_match[] = {
-+	{ .compatible = "amd,pensando-elba-ctrl" },
-+	{ /* sentinel */ }
-+};
-+
-+static struct spi_driver penctrl_spi_driver = {
-+	.probe = penctrl_spi_probe,
-+	.driver = {
-+		.name = "pensando-ctrl",
-+		.of_match_table = penctrl_dt_match,
-+	},
-+};
-+module_spi_driver(penctrl_spi_driver);
-+
-+MODULE_AUTHOR("Brad Larson <blarson@amd.com>");
-+MODULE_DESCRIPTION("AMD Pensando SoC Controller via SPI");
-+MODULE_LICENSE("GPL");
-diff --git a/include/uapi/linux/amd-pensando-ctrl.h b/include/uapi/linux/amd-pensando-ctrl.h
-new file mode 100644
-index 000000000000..2508a1aef22c
---- /dev/null
-+++ b/include/uapi/linux/amd-pensando-ctrl.h
-@@ -0,0 +1,30 @@
-+/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
-+/*
-+ * Userspace interface for /dev/penctrl
-+ *
-+ * This file can be used by applications that need to communicate
-+ * with the AMD Pensando SoC controller device via the ioctl interface.
-+ */
-+#ifndef _UAPI_LINUX_AMD_PENSANDO_CTRL_H
-+#define _UAPI_LINUX_AMD_PENSANDO_CTRL_H
-+
-+#include <linux/ioctl.h>
-+#include <linux/types.h>
-+
-+#define PENCTRL_SPI_CMD_REGRD	0x0b
-+#define PENCTRL_SPI_CMD_REGWR	0x02
-+#define PENCTRL_IOC_MAGIC	'k'
-+#define PENCTRL_IOC_MAXNR	0
-+#define PENCTRL_MAX_MSG_LEN	16
-+#define PENCTRL_MAX_REG		0xff
-+#define PENCTRL_REG_CTRL0	0x10
-+
-+struct penctrl_spi_xfer {
-+	__u64 tx_buf;
-+	__u64 rx_buf;
-+	__u32 len;
-+	__u32 speed_hz;
-+	__u64 compat;
-+};
-+
-+#endif /* _UAPI_LINUX_AMD_PENSANDO_CTRL_H */
--- 
-2.17.1
 
+Thank you and best regards,
+Martin
