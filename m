@@ -2,125 +2,232 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 946A6C77B73
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 13:40:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 80216C76196
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 13:55:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230127AbjDKNkr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Apr 2023 09:40:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53188 "EHLO
+        id S230410AbjDKNzW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Apr 2023 09:55:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44760 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230153AbjDKNkn (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 09:40:43 -0400
-Received: from mail-ot1-f43.google.com (mail-ot1-f43.google.com [209.85.210.43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D6A344B8;
-        Tue, 11 Apr 2023 06:40:34 -0700 (PDT)
-Received: by mail-ot1-f43.google.com with SMTP id cp25-20020a056830661900b00693ce5a2f3eso3861069otb.8;
-        Tue, 11 Apr 2023 06:40:34 -0700 (PDT)
+        with ESMTP id S229957AbjDKNzV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 09:55:21 -0400
+Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB15210FE;
+        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
+Received: by mail-oi1-f179.google.com with SMTP id bx42so21879299oib.6;
+        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1681220433; x=1683812433;
-        h=in-reply-to:content-transfer-encoding:content-disposition
-         :mime-version:references:message-id:subject:cc:to:from:date
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=kgFPvyHrHPtWE9sKCzX6mH86Owceqhrm+Hat2sO8n/A=;
-        b=MrjRJQAHsKT5D9MRrrI7jRj4QO9oi0vDxaEsUC0BuvQh5GooLZhjISuaGDmmXpl/9N
-         3PUTMqcZcqgDKcMNgowbdXo+3zoqIBSVFdhfa7VVst7s2I6FgKZ2BisOS2U/47H4wgm1
-         a9nBdxQLutH6BbTJuKKFIwC8OWZv8y87LG1DVmiXM5saS9WvSWxLc1WW5YUjY73xXScC
-         Om/9dpdJWqrkJeMn5MkB+Y4+IUtDx58Dp0/we7b7yGMbMrbcn2yDYcwrFr3fXbp5R+6c
-         nm+Z78myxWOgQJn0MVHyhb+zJn6OaL/rGBxff5ykliF5NVr/ptBZJGaPyiDbD0gyCtqE
-         8tAQ==
-X-Gm-Message-State: AAQBX9fcrPqbtV39JmEhUT9WGLnB+6uoQkomcX9glvKoxULBO0i/c5mh
-        KODN5kKnjpayEz//Vmfauw==
-X-Google-Smtp-Source: AKy350YG5U9QNvXG9urYlKAKQZf2PCcV3KsTjbecvU+8kIfA5d1v5KG8LereLUse+pLSeMjkUuqZwQ==
-X-Received: by 2002:a9d:6659:0:b0:6a3:c70d:bb94 with SMTP id q25-20020a9d6659000000b006a3c70dbb94mr5785020otm.17.1681220433511;
-        Tue, 11 Apr 2023 06:40:33 -0700 (PDT)
+        d=1e100.net; s=20210112; t=1681221320; x=1683813320;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=4ZO7ezzSE2J/Q6kfu0V6nhJj8JV4tY/GZHsr0viCIQg=;
+        b=c++ag5pBCNz4L1Tgzj30Xtv9a9hOOu+kxW4Dnazck9f0YT2ZqmmKIf/RwWiGJRz+0Y
+         jUh8BSZ4tPm4nmUUhBbi9kllgKjGND48nYlpcjsVj/yhdFndwmqIr6QjmQTnCjwlMvG+
+         YyKL7WT+ArZAOjaBULRs1zVPn5e4u6Wvak/UVr6Y6OAaIgvrIg5mvLIGAD6jKzJ0vIfW
+         wWS3b2cL5mBX6IN/yqCL94Lr7OfLPzx3nL49v3z4qjS4ejIoWdB9avfrOQssV0nMi2QS
+         1xqItxnnJ4pOVw2CsIeaIh5V6QtQ0xPrMe1YnxWCI/1DFv8TKP8ikLzyeuShmnjqXYpg
+         yr7Q==
+X-Gm-Message-State: AAQBX9cCzeKHwyuZAoxX5JFgzvT+Qwvg5wO/GbIgvd3vTp+lBvqIIEuE
+        5wcYsfW9EkJV/bieZr32eQ==
+X-Google-Smtp-Source: AKy350Zknu9XdcP66k0cfxAwCQD/B6DUAgh2awz+0hWaJCNQBE/oSeXwvEvVidCKbiEVzCNEA+x/Kg==
+X-Received: by 2002:a05:6808:8e:b0:387:2075:59c with SMTP id s14-20020a056808008e00b003872075059cmr5793228oic.37.1681221320010;
+        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
 Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id g25-20020a9d6c59000000b0069f95707335sm5338427otq.69.2023.04.11.06.40.32
+        by smtp.gmail.com with ESMTPSA id i128-20020acaea86000000b00386eff32f58sm5587706oih.13.2023.04.11.06.55.18
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Apr 2023 06:40:33 -0700 (PDT)
-Received: (nullmailer pid 2941891 invoked by uid 1000);
-        Tue, 11 Apr 2023 13:40:31 -0000
-Date:   Tue, 11 Apr 2023 08:40:31 -0500
+        Tue, 11 Apr 2023 06:55:19 -0700 (PDT)
+Received: (nullmailer pid 2960222 invoked by uid 1000);
+        Tue, 11 Apr 2023 13:55:18 -0000
+Date:   Tue, 11 Apr 2023 08:55:18 -0500
 From:   Rob Herring <robh@kernel.org>
-To:     Alexandre Mergnat <amergnat@baylibre.com>
-Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Bernhard =?iso-8859-1?Q?Rosenkr=E4nzer?= <bero@baylibre.com>,
-        catalin.marinas@arm.com, Will Deacon <will@kernel.org>,
-        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCH v5 03/12] dt-bindings: watchdog: mediatek,mtk-wdt: add
- mt8365
-Message-ID: <20230411134031.GA2934043-robh@kernel.org>
-References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
- <20230203-evk-board-support-v5-3-1883c1b405ad@baylibre.com>
- <CAFGrd9oi0AT3L8DVs7OYq-RjzBTqD+CB5mjKOwEbgNJDdyj2=g@mail.gmail.com>
+To:     Brad Larson <blarson@amd.com>
+Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+        adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
+        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, broonie@kernel.org,
+        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
+        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
+        samuel@sholland.org, fancer.lancer@gmail.com,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
+        devicetree@vger.kernel.org
+Subject: Re: [PATCH v13 08/15] arm64: dts: Add AMD Pensando Elba SoC support
+Message-ID: <20230411135518.GA2952600-robh@kernel.org>
+References: <20230410184526.15990-1-blarson@amd.com>
+ <20230410184526.15990-9-blarson@amd.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <CAFGrd9oi0AT3L8DVs7OYq-RjzBTqD+CB5mjKOwEbgNJDdyj2=g@mail.gmail.com>
+In-Reply-To: <20230410184526.15990-9-blarson@amd.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Apr 07, 2023 at 03:11:18PM +0200, Alexandre Mergnat wrote:
-> + To: Catalin Marinas <catalin.marinas@arm.com>
-> + To: Will Deacon <will@kernel.org>
+On Mon, Apr 10, 2023 at 11:45:19AM -0700, Brad Larson wrote:
+> Add AMD Pensando common and Elba SoC specific device nodes
+> 
+> Signed-off-by: Brad Larson <blarson@amd.com>
+> ---
+> 
+> v11 changes:
+> - Delete reset-names
+> - Fix spi0 compatible to be specific 'amd,pensando-elba-ctrl'
+> 
+> v9 changes:
+> - Single node for spi0 system-controller and squash
+>   the reset-controller child into parent
 
-Why? They don't take bindings or dts files. Those go thru the subsystem 
-(watchdog (for bindings) or Mediatek sub-arch tree.
+Have you run this thru 'make dtbs_check'? I see at least one issue that 
+should report.
 
-Second, if they did pick this up, they likely need the original mail 
-sent to them, not a reply.
+> ---
+>  arch/arm64/boot/dts/amd/Makefile              |   1 +
+>  arch/arm64/boot/dts/amd/elba-16core.dtsi      | 189 +++++++++++++++++
+>  arch/arm64/boot/dts/amd/elba-asic-common.dtsi |  80 ++++++++
+>  arch/arm64/boot/dts/amd/elba-asic.dts         |  28 +++
+>  arch/arm64/boot/dts/amd/elba-flash-parts.dtsi | 106 ++++++++++
+>  arch/arm64/boot/dts/amd/elba.dtsi             | 191 ++++++++++++++++++
+>  6 files changed, 595 insertions(+)
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-16core.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-asic-common.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-asic.dts
+>  create mode 100644 arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
+>  create mode 100644 arch/arm64/boot/dts/amd/elba.dtsi
+> 
+> diff --git a/arch/arm64/boot/dts/amd/Makefile b/arch/arm64/boot/dts/amd/Makefile
+> index 68103a8b0ef5..8502cc2afbc5 100644
+> --- a/arch/arm64/boot/dts/amd/Makefile
+> +++ b/arch/arm64/boot/dts/amd/Makefile
+> @@ -1,2 +1,3 @@
+>  # SPDX-License-Identifier: GPL-2.0
+> +dtb-$(CONFIG_ARCH_PENSANDO) += elba-asic.dtb
+>  dtb-$(CONFIG_ARCH_SEATTLE) += amd-overdrive-rev-b0.dtb amd-overdrive-rev-b1.dtb
+> diff --git a/arch/arm64/boot/dts/amd/elba-16core.dtsi b/arch/arm64/boot/dts/amd/elba-16core.dtsi
+> new file mode 100644
+> index 000000000000..37aadd442db8
+> --- /dev/null
+> +++ b/arch/arm64/boot/dts/amd/elba-16core.dtsi
+> @@ -0,0 +1,189 @@
+> +// SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
+> +/*
+> + * Copyright 2020-2022 Advanced Micro Devices, Inc.
+> + */
+> +
+> +/ {
+> +	cpus {
+> +		#address-cells = <2>;
+> +		#size-cells = <0>;
+> +
+> +		cpu-map {
+> +			cluster0 {
+> +				core0 { cpu = <&cpu0>; };
+> +				core1 { cpu = <&cpu1>; };
+> +				core2 { cpu = <&cpu2>; };
+> +				core3 { cpu = <&cpu3>; };
+> +			};
+> +
+> +			cluster1 {
+> +				core0 { cpu = <&cpu4>; };
+> +				core1 { cpu = <&cpu5>; };
+> +				core2 { cpu = <&cpu6>; };
+> +				core3 { cpu = <&cpu7>; };
+> +			};
+> +
+> +			cluster2 {
+> +				core0 { cpu = <&cpu8>; };
+> +				core1 { cpu = <&cpu9>; };
+> +				core2 { cpu = <&cpu10>; };
+> +				core3 { cpu = <&cpu11>; };
+> +			};
+> +
+> +			cluster3 {
+> +				core0 { cpu = <&cpu12>; };
+> +				core1 { cpu = <&cpu13>; };
+> +				core2 { cpu = <&cpu14>; };
+> +				core3 { cpu = <&cpu15>; };
+> +			};
+> +		};
+> +
+> +		/* CLUSTER 0 */
+> +		cpu0: cpu@0 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x0>;
+> +			next-level-cache = <&l2_0>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu1: cpu@1 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x1>;
+> +			next-level-cache = <&l2_0>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu2: cpu@2 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x2>;
+> +			next-level-cache = <&l2_0>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu3: cpu@3 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x3>;
+> +			next-level-cache = <&l2_0>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		l2_0: l2-cache0 {
+> +			compatible = "cache";
+> +		};
+> +
+> +		/* CLUSTER 1 */
+> +		cpu4: cpu@100 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x100>;
+> +			next-level-cache = <&l2_1>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu5: cpu@101 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x101>;
+> +			next-level-cache = <&l2_1>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu6: cpu@102 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x102>;
+> +			next-level-cache = <&l2_1>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		cpu7: cpu@103 {
+> +			device_type = "cpu";
+> +			compatible = "arm,cortex-a72";
+> +			reg = <0 0x103>;
+> +			next-level-cache = <&l2_1>;
+> +			enable-method = "psci";
+> +		};
+> +
+> +		l2_1: l2-cache1 {
+> +			compatible = "cache";
+
+This is missing properties. If you don't see warnings, update dtschema.
 
 Rob
-
-> 
-> Sorry for the noise.
-> 
-> Regards,
-> Alexandre
-> 
-> Le ven. 7 avr. 2023 à 14:59, Alexandre Mergnat <amergnat@baylibre.com> a écrit :
-> >
-> > Add binding description for mediatek,mt8365-wdt
-> >
-> > Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> > Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
-> > Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> > Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
-> > ---
-> >  Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml | 1 +
-> >  1 file changed, 1 insertion(+)
-> >
-> > diff --git a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> > index 55b34461df1b..66cacea8e47f 100644
-> > --- a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> > +++ b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> > @@ -38,6 +38,7 @@ properties:
-> >                - mediatek,mt7623-wdt
-> >                - mediatek,mt7629-wdt
-> >                - mediatek,mt8173-wdt
-> > +              - mediatek,mt8365-wdt
-> >                - mediatek,mt8516-wdt
-> >            - const: mediatek,mt6589-wdt
-> >
-> >
-> > --
-> > 2.25.1
-> >
