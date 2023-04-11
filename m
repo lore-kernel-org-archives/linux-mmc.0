@@ -2,188 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A20AEC77B61
-	for <linux-mmc@archiver.kernel.org>; Mon, 10 Apr 2023 23:14:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB279C76196
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 02:54:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229761AbjDJXOr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 10 Apr 2023 19:14:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49874 "EHLO
+        id S229761AbjDKCyx convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 10 Apr 2023 22:54:53 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44576 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230055AbjDJXOb (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2023 19:14:31 -0400
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 425B430F4
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 16:13:52 -0700 (PDT)
-Received: by mail-ej1-x631.google.com with SMTP id f26so9859427ejb.1
-        for <linux-mmc@vger.kernel.org>; Mon, 10 Apr 2023 16:13:52 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20210112; t=1681168422;
-        h=cc:to:subject:message-id:date:from:mime-version:from:to:cc:subject
-         :date:message-id:reply-to;
-        bh=vYCRP+KrlDlbA1Ibo/A0cTBAFRfyjiKjYzNUeLYUHNM=;
-        b=b86yQvYJywZnlnP3IrOiP8D5lc4U68ihljTY6XuXNu5BEGdmV9H49PEZJu0SII5Zuk
-         4Awb0S3s1pWnT55GpB3eRthVZFJ4YSncT2lEcI3bWpnyMvcsYvI6GY2I5TebQgVos/KS
-         P5W83VKOPEZwbFl9qUhJ+RYD0eAFLSdFVCsHgFnLTCnWV+oE6dJNHB+4rOHMOcixc7BX
-         Mqby4BuC3EKAgy3RixF6tHr7inI0rgnun9ArzY78ocNznoureBLo28s3ZKu9Y+HY0pe9
-         7bNt/m6Ppn3YqBzLpE3LFiDH7UQOf3N87+H/PjTiXAj70+0W1oizd57DU/uG+d2EV9PL
-         WH8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1681168422;
-        h=cc:to:subject:message-id:date:from:mime-version:x-gm-message-state
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=vYCRP+KrlDlbA1Ibo/A0cTBAFRfyjiKjYzNUeLYUHNM=;
-        b=4sfpuFl1+wcerjWPxdIQb3wU3cKe7Gj138xlvpBMTmi7sHkBgsn74xGfBdhuIaBKA/
-         yqdpY99KX5md6W6J3xBufLghUz5ePvcQlXGGu5HImhsmEJZm2xHFVQbJmflwwr5FV7bI
-         S8BbAMGmS+3vOtCIekcBtetxyVwsxKDVxtJvtvjEL4o67aM0qjZIrdzrxGNyCwwznSXE
-         ncBbslpWDGSwrMXS7wCkLZxU340OxtSiqXx85YZ8ud0yOewXQXNCdxam62Soy7e/fWUT
-         40xn8we25MQRPvP8sGdKoS+9oiuc/dnx4FUnpHRtOLtIW3tUNkjWwS1AmwgNfBwHOrSR
-         V1LA==
-X-Gm-Message-State: AAQBX9eMl6ETFNd7VBeYGEb50Wn914Yrl0LjRSGdaUZ7KicI/VZSq3d/
-        zeZNr7sD47OjU1e+MrLtLrtCGeT/DGKKM00TtfUdD2wN5+o=
-X-Google-Smtp-Source: AKy350ZSOn5vAFET2Urc7I8f2l8+gbmJ4gCwaITbvhLfKwc+0P9A260bj1k0r/tHrE5oGSFnAdT0hp3ato9ui9VMDok=
-X-Received: by 2002:a17:907:6f07:b0:878:4a24:1a5c with SMTP id
- sy7-20020a1709076f0700b008784a241a5cmr3599198ejc.6.1681168421730; Mon, 10 Apr
- 2023 16:13:41 -0700 (PDT)
+        with ESMTP id S229485AbjDKCyt (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 10 Apr 2023 22:54:49 -0400
+Received: from fd01.gateway.ufhost.com (fd01.gateway.ufhost.com [61.152.239.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 930211FE6;
+        Mon, 10 Apr 2023 19:54:44 -0700 (PDT)
+Received: from EXMBX165.cuchost.com (unknown [175.102.18.54])
+        (using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+        (Client CN "EXMBX165", Issuer "EXMBX165" (not verified))
+        by fd01.gateway.ufhost.com (Postfix) with ESMTP id AA21624E292;
+        Tue, 11 Apr 2023 10:54:42 +0800 (CST)
+Received: from EXMBX168.cuchost.com (172.16.6.78) by EXMBX165.cuchost.com
+ (172.16.6.75) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 11 Apr
+ 2023 10:54:42 +0800
+Received: from [192.168.120.57] (171.223.208.138) by EXMBX168.cuchost.com
+ (172.16.6.78) with Microsoft SMTP Server (TLS) id 15.0.1497.42; Tue, 11 Apr
+ 2023 10:54:42 +0800
+Message-ID: <c9e5e8cf-cfa9-0081-2851-2db46c2cddf3@starfivetech.com>
+Date:   Tue, 11 Apr 2023 10:54:42 +0800
 MIME-Version: 1.0
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Tue, 11 Apr 2023 01:13:30 +0200
-Message-ID: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
-Subject: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.1
+Subject: Re: [PATCH v4 2/4] mmc: starfive: Add sdio/emmc driver support
+To:     Shengyu Qu <wiagn233@outlook.com>,
+        <linux-riscv@lists.infradead.org>, <devicetree@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>
+CC:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        <linux-kernel@vger.kernel.org>
+References: <20230215113249.47727-1-william.qiu@starfivetech.com>
+ <20230215113249.47727-3-william.qiu@starfivetech.com>
+ <TY3P286MB26115A8F90DAD2D7DA4DCBEB988B9@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+ <TY3P286MB26115E6311132C791616D32B98889@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+ <cfde7320-323f-725e-8ed5-c8473bce1755@starfivetech.com>
+ <TY3P286MB26113FF6ABD3CBA616DEC6DC98959@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
+Content-Language: en-US
+From:   William Qiu <william.qiu@starfivetech.com>
+In-Reply-To: <TY3P286MB26113FF6ABD3CBA616DEC6DC98959@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM>
 Content-Type: text/plain; charset="UTF-8"
+X-Originating-IP: [171.223.208.138]
+X-ClientProxiedBy: EXCAS064.cuchost.com (172.16.6.24) To EXMBX168.cuchost.com
+ (172.16.6.78)
+X-YovoleRuleAgent: yovoleflag
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hello Ulf,
-
-today I found that upstream commit 4bc31edebde5 ("mmc: core: Set HS
-clock speed before sending HS CMD13") breaks eMMC support on my
-Odroid-C1.
-(yes, I know that I am very late to the party...)
-
-The .dts for this board is upstream using
-arch/arm/boot/dts/meson8b-odroidc1.dts (&sdhc node)
-The MMC host driver used is drivers/mmc/host/meson-mx-sdhc*.
-
-The problem I'm seeing is that the eMMC module is simply not detected.
-There are no errors in the kernel log (note that mmc1 is the eMMC
-while mmc0 is the SD card which is attached to another controller on
-that SoC):
-# dmesg | grep mmc
-[    2.742136] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
-[    4.315905] platform c1108c20.mmc:slot@1: Got CD GPIO
-[    4.450921] mmc0: new high speed SDHC card at address 0001
-[    4.456985] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
-[    4.466108]  mmcblk0: p1
-
-In this state I get:
-# cat /sys/kernel/debug/mmc1/ios
-clock:          52000000 Hz
-actual clock:   51000000 Hz
-vdd:            21 (3.3 ~ 3.4 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    9 (mmc HS200)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
-
-After reverting the mentioned commit I get:
-# dmesg | grep mmc
-[    2.744226] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
-[    2.970944] mmc1: new HS200 MMC card at address 0001
-[    2.974492] mmcblk1: mmc1:0001 8GND3R 7.28 GiB
-[    2.985126]  mmcblk1: p1
-[    2.987810] mmcblk1boot0: mmc1:0001 8GND3R 4.00 MiB
-[    3.003007] mmcblk1boot1: mmc1:0001 8GND3R 4.00 MiB
-[    4.311754] platform c1108c20.mmc:slot@1: Got CD GPIO
-[    4.374732] mmc0: new high speed SDHC card at address 0001
-[    4.377228] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
-[    4.399152]  mmcblk0: p1
-# cat /sys/kernel/debug/mmc1/ios
-clock:          100000000 Hz
-actual clock:   94444445 Hz
-vdd:            21 (3.3 ~ 3.4 V)
-bus mode:       2 (push-pull)
-chip select:    0 (don't care)
-power mode:     2 (on)
-bus width:      3 (8 bits)
-timing spec:    9 (mmc HS200)
-signal voltage: 1 (1.80 V)
-driver type:    0 (driver type B)
-
-Please let me know which additional information would be helpful for
-debugging this further.
-Also I'd like to highlight that I'm not blaming the above commit
-(unless I know better). It's entirely possible that the meson-mx-sdhc
-driver (which I wrote) can be at fault and that I was previously just
-lucky.
-
-My git bisect log is:
-$ git bisect log
-git bisect start
-# status: waiting for both good and bad commits
-# good: [f443e374ae131c168a065ea1748feac6b2e76613] Linux 5.17
-git bisect good f443e374ae131c168a065ea1748feac6b2e76613
-# status: waiting for bad commit, 1 good commit known
-# bad: [4b0986a3613c92f4ec1bdc7f60ec66fea135991f] Linux 5.18
-git bisect bad 4b0986a3613c92f4ec1bdc7f60ec66fea135991f
-# good: [25fd2d41b505d0640bdfe67aa77c549de2d3c18a] selftests:
-kselftest framework: provide "finished" helper
-git bisect good 25fd2d41b505d0640bdfe67aa77c549de2d3c18a
-# good: [02e2af20f4f9f2aa0c84e9a30a35c02f0fbb7daa] Merge tag
-'char-misc-5.18-rc1' of
-git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/char-misc
-git bisect good 02e2af20f4f9f2aa0c84e9a30a35c02f0fbb7daa
-# good: [887f75cfd0da44c19dda93b2ff9e70ca8792cdc1] drm/amdgpu: Ensure
-HDA function is suspended before ASIC reset
-git bisect good 887f75cfd0da44c19dda93b2ff9e70ca8792cdc1
-# good: [cf424ef014ac30b0da27125dd1fbdf10b0d3a520] Merge tag
-'for-5.18/fbdev-2' of
-git://git.kernel.org/pub/scm/linux/kernel/git/deller/linux-fbdev
-git bisect good cf424ef014ac30b0da27125dd1fbdf10b0d3a520
-# good: [4e707344e18525b4edf5c2bc2e3eb60692e8c92e] MAINTAINERS: add
-missing files for bonding definition
-git bisect good 4e707344e18525b4edf5c2bc2e3eb60692e8c92e
-# bad: [680b892685ea7043addb5819ddec9147d4263195] Merge branch
-'100GbE' of git://git.kernel.org/pub/scm/linux/kernel/git/tnguy/net-queue
-git bisect bad 680b892685ea7043addb5819ddec9147d4263195
-# bad: [e3de3a1cda5fdc3ac42cb0d45321fb254500595f] Merge tag
-'powerpc-5.18-4' of
-git://git.kernel.org/pub/scm/linux/kernel/git/powerpc/linux
-git bisect bad e3de3a1cda5fdc3ac42cb0d45321fb254500595f
-# bad: [4b97bac0756a81cda5afd45417a99b5bccdcff67] Merge tag
-'for-5.18-rc5-tag' of
-git://git.kernel.org/pub/scm/linux/kernel/git/kdave/linux
-git bisect bad 4b97bac0756a81cda5afd45417a99b5bccdcff67
-# bad: [64267926e01b06f43e26232722fb3dc3f4819823] Merge tag
-'mmc-v5.18-rc4' of
-git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc
-git bisect bad 64267926e01b06f43e26232722fb3dc3f4819823
-# good: [fe27d189e3f42e31d3c8223d5daed7285e334c5e] Merge tag
-'folio-5.18f' of git://git.infradead.org/users/willy/pagecache
-git bisect good fe27d189e3f42e31d3c8223d5daed7285e334c5e
-# good: [ca5e2f4d6b677efa3f43a6790777e46dcf806e4d] Merge tag
-'drm-misc-fixes-2022-05-05' of
-git://anongit.freedesktop.org/drm/drm-misc into drm-fixes
-git bisect good ca5e2f4d6b677efa3f43a6790777e46dcf806e4d
-# bad: [3e5a8e8494a8122fe4eb3f167662f406cab753b9] mmc: sdhci-msm:
-Reset GCC_SDCC_BCR register for SDHC
-git bisect bad 3e5a8e8494a8122fe4eb3f167662f406cab753b9
-# bad: [e9f3fb523dbf476dc86beea23f5b5ca8f9687c93] mmc: sunxi-mmc: Fix
-DMA descriptors allocated above 32 bits
-git bisect bad e9f3fb523dbf476dc86beea23f5b5ca8f9687c93
-# bad: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc: core: Set HS
-clock speed before sending HS CMD13
-git bisect bad 4bc31edebde51fcf8ad0794763b8679a7ecb5ec0
-# first bad commit: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc:
-core: Set HS clock speed before sending HS CMD13
 
 
-Thank you and best regards,
-Martin
+On 2023/4/11 2:04, Shengyu Qu wrote:
+> Hello William,
+> 
+>> On 2023/3/29 0:08, Shengyu Qu wrote:
+>>> Hello William,
+>>>
+>>> Sorry for making noise about this, but seems deleted voltage swtich function
+>>>
+>>> doesn't help about this. But there's still a problem about eMMC speed. Currently
+>>>
+>>> only about 20MB/s maximum reading speed could be reached when using eMMC
+>>>
+>>> on VF2, any idea about this?
+>>>
+>>> Best regards,
+>>>
+>>> Shengyu
+>>>
+>>> 在 2023/3/28 0:01, Shengyu Qu 写道:
+>>>> Hello William,
+>>>>
+>>>> I'm digging into downstream mmc driver these days and found a problem
+>>>>
+>>>> that current version mainline driver doesn't has a voltage switch function for
+>>>>
+>>>> it. Downstream older version has one but was deleted in this commit [1].
+>>>>
+>>>> It was deleted since vf2's SD slot doesn't have 1.8V input but commiter forgot
+>>>>
+>>>> that vf2's eMMC slot has a proper 1.8V input.
+>>>>
+>>>> So could you add voltage switch function for mainline? I've met a eMMC speed
+>>>>
+>>>> problem possibly due to it.
+>>>>
+>>>> Best regards,
+>>>>
+>>>> Shengyu
+>>>>
+>> 
+>> Hi Shengyu,
+>> 
+>> Sorry for the late reply.
+>> 
+>> First of all, I will consider adding voltage switch function, but the implementation
+>> method is to configure the pmic register configuration in dts, and the implementation
+>> interface will use the voltage switch function in dw_mmc.c.
+>> 
+>> As for speed, the main reason for the low rate is the clock of JH7110 and the
+>> associated IO driving strength, in this limit, the maximum reading speed I tested was
+>> about 50Mb/s.
+>> 
+>> I will try to reproduce your problem and try to solve it. Thanks for suggestions.
+>> 
+>> Best regards,
+>> William
+> I found out the reason and fixed that. dmwci driver needs vqmmc supply
+> configured in device tree and a successful voltage change to actually
+> enable 1.8v mode, even 1.8 supply actually already physically exists.
+> So to solve this problem, I wrote AXP15060 driver and device tree
+> bindings basing on -upstream branch and gets over 75MB/s read speed. The
+> driver series is already under review here:
+> 
+> https://lore.kernel.org/all/TY3P286MB26117891DFB2DD615A7C54EF98969@TY3P286MB2611.JPNP286.PROD.OUTLOOK.COM/
+> 
+> Best regards,
+> Shengyu
+
+Hi Shengyu,
+
+Thanks for the patch series. I will try it on my branch.
+
+Best regards,
+William
