@@ -2,513 +2,420 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A43BC77B6F
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 09:21:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2B3E3C76196
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 10:14:26 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229656AbjDKJVX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Apr 2023 05:21:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44150 "EHLO
+        id S229714AbjDKKOY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Apr 2023 06:14:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39582 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229452AbjDKJVW (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 05:21:22 -0400
-Received: from mail-qk1-x730.google.com (mail-qk1-x730.google.com [IPv6:2607:f8b0:4864:20::730])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 946B11FC1;
-        Tue, 11 Apr 2023 02:21:20 -0700 (PDT)
-Received: by mail-qk1-x730.google.com with SMTP id u4so10766477qkp.11;
-        Tue, 11 Apr 2023 02:21:20 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112; t=1681204879;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=22gDPxW19cMTzdI2UhZhZwmtD5x1mNyQ4dBwOLlhZII=;
-        b=HKAWQACd1BNdP9u4q1d9uEtrMUPhJuCx/jDIszfAwS87wK3UHR2MWEgOlgHm3Cu8oi
-         o9ZUbfyM/dfLOJiFbz5as8miyRY99sryRpOUigRlnHUnvhxZ2h2JqBw0VJr+k/FABAvX
-         VPnHPYz+Owo+2XzfkW1klN6YOGdOXpQQLPn3pkuBeifJqlCXd6xAopXkxggwtCGg8B2o
-         RMA1VskLCWd+M8k9AkkqUwz3Oyfdax7kFPNdubEq+xJxMX1fHiPgjyM+4ilMolx1fQr5
-         FDvU0wu/jdXCxj2ho/0yw9YhIA/py/1KRXlRdTXA8h2/YbvD5lDhmyehVXm6Zg86lNU8
-         Cbiw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1681204879;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=22gDPxW19cMTzdI2UhZhZwmtD5x1mNyQ4dBwOLlhZII=;
-        b=j5S5J6upRqLnvmvQPjLhmiHBHL5pYQ4f/KmiPO36b1dzV8GUaiNJvzXohF+LMAPH9U
-         ikRVukWOw3k5pGNSjCOnmDwta6Lr5H4j8JLqUygTC1RQ7K/DjQ4I1BjxElAG+aCqx8D4
-         GvTUUl9myx0eIFKRq+AfN8RoQ06CMennBuaLr+AFhO0cOaRfvo+h6TRrQ8RRcovFAP81
-         oEh3NltJQQnNK+w1YXVTj1ftRdiXw2j2JzEHqhB1bDuDVAXixH45vpy7w+RJ7fRZP2uX
-         vrwi06EzN7M4325phyxWcvshwc374TmUvBjqGzJCn3d7A9mCmlUtbBecWH7RY0+LZrs1
-         Q3zA==
-X-Gm-Message-State: AAQBX9et+WSyiTGhdnqlKm9JQ2MW2uf1QRxLqZU6Iw0Xh8rtGXztG1eh
-        e+0ohEZhAJ1HU9aNtGwdxZklk5y7LIHar420DFs=
-X-Google-Smtp-Source: AKy350ai4GhRDj+9tWUfu907SY8Mp4Y+3HcbuSVSCBzAmG2vHJwTCZ9mRm8qy/TdKub90t5rC0KW0Zhf6a2sDPeYbmM=
-X-Received: by 2002:a05:620a:290f:b0:742:412d:1dc6 with SMTP id
- m15-20020a05620a290f00b00742412d1dc6mr3955959qkp.14.1681204879411; Tue, 11
- Apr 2023 02:21:19 -0700 (PDT)
+        with ESMTP id S229720AbjDKKOV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 06:14:21 -0400
+Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1EE9F3C26;
+        Tue, 11 Apr 2023 03:14:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1681208060; x=1712744060;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=Wltq69rMKftIi/n2rHT7Ll7CWkkGa8OPZbdWIBWuDLA=;
+  b=ltfPdr63ZJebu/LbxBOs9Vvjc+xuR97gCnPU55CWjm2oveGgKJPaNByC
+   KXsYQLYqsoI+mYa1e7abqN6NAMBBXWVEuMLIQMrF3aoFZBJGf8kCCLj8J
+   ofExOEH4SZqAqC5UtVcdKWB1theYVepc86ygTapj+vqVSY2AhZw30us2R
+   SHh+Ah+mT7SCA4LZ4qEXziXFyvDrPzkdpiHzP0ATd99trU925gyxezixz
+   NmYbv/HmDG8fgn1YneLqfkt7NI+Y2UMSVw+NqabNDCUiGdtOF4nzFQARH
+   cQjaY16E3zJ2I/+1Lq61uzOacuMRGKkQoiyE7mDZTxaKXMO7GH1Lh1wCT
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10676"; a="341070677"
+X-IronPort-AV: E=Sophos;i="5.98,336,1673942400"; 
+   d="scan'208";a="341070677"
+Received: from orsmga005.jf.intel.com ([10.7.209.41])
+  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Apr 2023 03:14:19 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10676"; a="862815901"
+X-IronPort-AV: E=Sophos;i="5.98,336,1673942400"; 
+   d="scan'208";a="862815901"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.44.57])
+  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Apr 2023 03:14:15 -0700
+Message-ID: <48d8852c-4ed8-ef07-9c10-dc97ae04bb7b@intel.com>
+Date:   Tue, 11 Apr 2023 13:14:14 +0300
 MIME-Version: 1.0
-References: <20230410184526.15990-1-blarson@amd.com> <20230410184526.15990-16-blarson@amd.com>
-In-Reply-To: <20230410184526.15990-16-blarson@amd.com>
-From:   Andy Shevchenko <andy.shevchenko@gmail.com>
-Date:   Tue, 11 Apr 2023 12:20:43 +0300
-Message-ID: <CAHp75VewhdOwqkuwHKT9e120Zgfhnp5x-sgaayWJPC4kZ=VxZw@mail.gmail.com>
-Subject: Re: [PATCH v13 15/15] soc: amd: Add support for AMD Pensando SoC Controller
-To:     Brad Larson <blarson@amd.com>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        robh+dt@kernel.org, samuel@sholland.org, fancer.lancer@gmail.com,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
-        devicetree@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.9.1
+Subject: Re: [PATCH v3 2/3] mmc: sdhci-of-arasan: Add support for eMMC5.1 on
+ Xilinx Versal Net platform
+Content-Language: en-US
+To:     Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Michal Simek <michal.simek@xilinx.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        git@amd.com, saikrishna12468@gmail.com,
+        Swati Agarwal <swati.agarwal@amd.com>
+References: <20230403102551.3763054-1-sai.krishna.potthuri@amd.com>
+ <20230403102551.3763054-3-sai.krishna.potthuri@amd.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230403102551.3763054-3-sai.krishna.potthuri@amd.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 10, 2023 at 9:48=E2=80=AFPM Brad Larson <blarson@amd.com> wrote=
-:
->
-> The Pensando SoC controller is a SPI connected companion device
-> that is present in all Pensando SoC board designs.  The essential
-> board management registers are accessed on chip select 0 with
-> board mgmt IO support accessed using additional chip selects.
+On 3/04/23 13:25, Sai Krishna Potthuri wrote:
+> From: Swati Agarwal <swati.agarwal@amd.com>
+> 
+> Add support for eMMC5.1 on Xilinx Versal Net platform
+> - Add new compatible string(xlnx,versal-net-emmc).
+> - Add support for PHY which is part of Host Controller register space.
+> - Add DLL and Delay Chain mode support and corresponding tap delays for
+> all eMMC modes.
+> - Add Strobe select tap for HS400 mode.
+> 
+> Signed-off-by: Swati Agarwal <swati.agarwal@amd.com>
+> Co-developed-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
+> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
 
-...
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-> +#include <linux/cdev.h>
-> +#include <linux/device.h>
-> +#include <linux/err.h>
-> +#include <linux/init.h>
-> +#include <linux/mod_devicetable.h>
-> +#include <linux/module.h>
-> +#include <linux/mutex.h>
-> +#include <linux/of.h>
-> +#include <linux/reset-controller.h>
-> +#include <linux/spi/spi.h>
-
-+ Blank line?
-
-> +#include <linux/amd-pensando-ctrl.h>
-
-...
-
-> +struct penctrl_device {
-> +       struct spi_device *spi;
-> +       struct reset_controller_dev rcdev;
-
-Try to swap them and check if the code will be smaller (it depends on
-how often one or another member is being used),
-
-> +};
-
-...
-
-> +static long
-> +penctrl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+> ---
+>  drivers/mmc/host/sdhci-of-arasan.c | 235 +++++++++++++++++++++++++++++
+>  1 file changed, 235 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
+> index deb67daf179f..c3fecb8ba66e 100644
+> --- a/drivers/mmc/host/sdhci-of-arasan.c
+> +++ b/drivers/mmc/host/sdhci-of-arasan.c
+> @@ -41,11 +41,41 @@
+>  #define VENDOR_ENHANCED_STROBE		BIT(0)
+>  
+>  #define PHY_CLK_TOO_SLOW_HZ		400000
+> +#define MIN_PHY_CLK_HZ			50000000
+>  
+>  #define SDHCI_ITAPDLY_CHGWIN		0x200
+>  #define SDHCI_ITAPDLY_ENABLE		0x100
+>  #define SDHCI_OTAPDLY_ENABLE		0x40
+>  
+> +#define PHY_CTRL_REG1			0x270
+> +#define PHY_CTRL_ITAPDLY_ENA_MASK	BIT(0)
+> +#define PHY_CTRL_ITAPDLY_SEL_MASK	GENMASK(5, 1)
+> +#define PHY_CTRL_ITAPDLY_SEL_SHIFT	1
+> +#define PHY_CTRL_ITAP_CHG_WIN_MASK	BIT(6)
+> +#define PHY_CTRL_OTAPDLY_ENA_MASK	BIT(8)
+> +#define PHY_CTRL_OTAPDLY_SEL_MASK	GENMASK(15, 12)
+> +#define PHY_CTRL_OTAPDLY_SEL_SHIFT	12
+> +#define PHY_CTRL_STRB_SEL_MASK		GENMASK(23, 16)
+> +#define PHY_CTRL_STRB_SEL_SHIFT		16
+> +#define PHY_CTRL_TEST_CTRL_MASK		GENMASK(31, 24)
+> +
+> +#define PHY_CTRL_REG2			0x274
+> +#define PHY_CTRL_EN_DLL_MASK		BIT(0)
+> +#define PHY_CTRL_DLL_RDY_MASK		BIT(1)
+> +#define PHY_CTRL_FREQ_SEL_MASK		GENMASK(6, 4)
+> +#define PHY_CTRL_FREQ_SEL_SHIFT		4
+> +#define PHY_CTRL_SEL_DLY_TX_MASK	BIT(16)
+> +#define PHY_CTRL_SEL_DLY_RX_MASK	BIT(17)
+> +#define FREQSEL_200M_170M		0x0
+> +#define FREQSEL_170M_140M	        0x1
+> +#define FREQSEL_140M_110M	        0x2
+> +#define FREQSEL_110M_80M	        0x3
+> +#define FREQSEL_80M_50M			0x4
+> +#define FREQSEL_275M_250M		0x5
+> +#define FREQSEL_250M_225M		0x6
+> +#define FREQSEL_225M_200M		0x7
+> +#define PHY_DLL_TIMEOUT_MS		100
+> +
+>  /* Default settings for ZynqMP Clock Phases */
+>  #define ZYNQMP_ICLK_PHASE {0, 63, 63, 0, 63,  0,   0, 183, 54,  0, 0}
+>  #define ZYNQMP_OCLK_PHASE {0, 72, 60, 0, 60, 72, 135, 48, 72, 135, 0}
+> @@ -53,6 +83,11 @@
+>  #define VERSAL_ICLK_PHASE {0, 132, 132, 0, 132, 0, 0, 162, 90, 0, 0}
+>  #define VERSAL_OCLK_PHASE {0,  60, 48, 0, 48, 72, 90, 36, 60, 90, 0}
+>  
+> +#define VERSAL_NET_EMMC_ICLK_PHASE {0, 0, 0, 0, 0, 0, 0, 0, 39, 0, 0}
+> +#define VERSAL_NET_EMMC_OCLK_PHASE {0, 113, 0, 0, 0, 0, 0, 0, 113, 79, 45}
+> +
+> +#define VERSAL_NET_PHY_CTRL_STRB90_STRB180_VAL		0X77
+> +
+>  /*
+>   * On some SoCs the syscon area has a feature where the upper 16-bits of
+>   * each 32-bit register act as a write mask for the lower 16-bits.  This allows
+> @@ -135,6 +170,7 @@ struct sdhci_arasan_clk_data {
+>   * @clk_ahb:		Pointer to the AHB clock
+>   * @phy:		Pointer to the generic phy
+>   * @is_phy_on:		True if the PHY is on; false if not.
+> + * @internal_phy_reg:	True if the PHY is within the Host controller.
+>   * @has_cqe:		True if controller has command queuing engine.
+>   * @clk_data:		Struct for the Arasan Controller Clock Data.
+>   * @clk_ops:		Struct for the Arasan Controller Clock Operations.
+> @@ -147,6 +183,7 @@ struct sdhci_arasan_data {
+>  	struct clk	*clk_ahb;
+>  	struct phy	*phy;
+>  	bool		is_phy_on;
+> +	bool		internal_phy_reg;
+>  
+>  	bool		has_cqe;
+>  	struct sdhci_arasan_clk_data clk_data;
+> @@ -207,6 +244,61 @@ static const struct sdhci_arasan_soc_ctl_map intel_keembay_soc_ctl_map = {
+>  	.hiword_update = false,
+>  };
+>  
+> +static void sdhci_arasan_phy_set_delaychain(struct sdhci_host *host, bool enable)
 > +{
-> +       void __user *in_arg =3D (void __user *)arg;
-> +       struct penctrl_device *penctrl;
-> +       u8 tx_buf[PENCTRL_MAX_MSG_LEN];
-> +       u8 rx_buf[PENCTRL_MAX_MSG_LEN];
-> +       struct spi_transfer t[2] =3D {};
-> +       struct penctrl_spi_xfer *msg;
-> +       struct spi_device *spi;
-> +       unsigned int num_msgs;
-> +       struct spi_message m;
-> +       u32 size;
-> +       int ret;
+> +	u32 reg;
 > +
-> +       /* Check for a valid command */
-> +       if (_IOC_TYPE(cmd) !=3D PENCTRL_IOC_MAGIC)
-> +               return -ENOTTY;
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	if (enable)
+> +		reg |= (PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
+> +	else
+> +		reg &= ~(PHY_CTRL_SEL_DLY_TX_MASK | PHY_CTRL_SEL_DLY_RX_MASK);
 > +
-> +       if (_IOC_NR(cmd) > PENCTRL_IOC_MAXNR)
-> +               return -ENOTTY;
-> +
-> +       if (_IOC_DIR(cmd) & _IOC_READ)
-> +               ret =3D !access_ok(in_arg, _IOC_SIZE(cmd));
-> +       else if (_IOC_DIR(cmd) & _IOC_WRITE)
-> +               ret =3D !access_ok(in_arg, _IOC_SIZE(cmd));
-
-> +
-
-Unneeded blank line.
-
-> +       if (ret)
-> +               return -EFAULT;
-
-But it seems you can actually rewrite above in less lines:
-
-       if ((_IOC_DIR(cmd) & _IOC_READ) && !access_ok(in_arg, _IOC_SIZE(cmd)=
-))
-         return -EFAULT;
-
-       if ((_IOC_DIR(cmd) & _IOC_WRITE) && !access_ok(in_arg, _IOC_SIZE(cmd=
-)))
-         return -EFAULT;
-
-> +       /* Get a reference to the SPI device */
-> +       penctrl =3D filp->private_data;
-> +       if (!penctrl)
-> +               return -ESHUTDOWN;
-> +
-> +       spi =3D spi_dev_get(penctrl->spi);
-> +       if (!spi)
-> +               return -ESHUTDOWN;
-> +
-> +       /* Verify and prepare SPI message */
-> +       size =3D _IOC_SIZE(cmd);
-> +       num_msgs =3D size / sizeof(struct penctrl_spi_xfer);
-> +       if (size =3D=3D 0 || size % sizeof(struct penctrl_spi_xfer)) {
-> +               ret =3D -EINVAL;
-> +               goto done;
-> +       }
-> +       msg =3D memdup_user((struct penctrl_spi_xfer *)arg, size);
-
-> +       if (!msg) {
-> +               ret =3D PTR_ERR(msg);
-
-This is strange.
-
-> +               goto done;
-> +       }
-> +       if (msg->len > PENCTRL_MAX_MSG_LEN) {
-> +               ret =3D -EINVAL;
-> +               goto done;
-> +       }
-> +
-> +       t[0].tx_buf =3D tx_buf;
-> +       t[0].len =3D msg->len;
-> +       if (copy_from_user(tx_buf, (void __user *)msg->tx_buf, msg->len))=
- {
-> +               ret =3D -EFAULT;
-> +               goto done;
-> +       }
-> +       if (num_msgs > 1) {
-> +               msg++;
-> +               if (msg->len > PENCTRL_MAX_MSG_LEN) {
-> +                       ret =3D -EINVAL;
-> +                       goto done;
-> +               }
-> +               t[1].rx_buf =3D rx_buf;
-> +               t[1].len =3D msg->len;
-> +       }
-> +       spi_message_init_with_transfers(&m, t, num_msgs);
-
-It seems there is no validation for the messages 3+.
-
-> +       /* Perform the transfer */
-> +       mutex_lock(&spi_lock);
-> +       ret =3D spi_sync(spi, &m);
-> +       mutex_unlock(&spi_lock);
-> +
-> +       if (ret || (num_msgs =3D=3D 1))
-> +               goto done;
-> +
-> +       if (copy_to_user((void __user *)msg->rx_buf, rx_buf, msg->len))
-> +               ret =3D -EFAULT;
-
-> +done:
-
-out_unlock: ?
-
-> +       spi_dev_put(spi);
-> +       return ret;
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
 > +}
 > +
-> +static int penctrl_open(struct inode *inode, struct file *filp)
+> +static int sdhci_arasan_phy_set_dll(struct sdhci_host *host, bool enable)
 > +{
-> +       struct spi_device *spi;
-> +       u8 current_cs;
-
-> +       if (!penctrl)
-> +               return -ENODEV;
-
-Is it possible?
-
-> +       filp->private_data =3D penctrl;
-> +       current_cs =3D iminor(inode);
-> +       spi =3D penctrl->spi;
-> +       spi->chip_select =3D current_cs;
-
-> +       spi->cs_gpiod =3D spi->controller->cs_gpiods[current_cs];
-
-Hmm... Why do you need this one? Isn't it a job of SPI core?
-
-> +       spi_setup(spi);
-> +       return stream_open(inode, filp);
-> +}
-
-> +static int penctrl_regs_read(struct penctrl_device *penctrl, u32 reg, u3=
-2 *val)
-> +{
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       struct spi_transfer t[2] =3D {};
-> +       struct spi_message m;
-> +       u8 txbuf[3];
-> +       u8 rxbuf[1];
-> +       int ret;
+> +	u32 reg;
 > +
-> +       txbuf[0] =3D PENCTRL_SPI_CMD_REGRD;
-> +       txbuf[1] =3D reg;
-> +       txbuf[2] =3D 0;
-> +       t[0].tx_buf =3D txbuf;
-> +       t[0].len =3D 3;
-
-sizeof(txbuf) ?
-
-> +       rxbuf[0] =3D 0;
-> +       t[1].rx_buf =3D rxbuf;
-> +       t[1].len =3D 1;
-
-sizeof(rxbuf) ?
-
-> +       spi_message_init_with_transfers(&m, t, ARRAY_SIZE(t));
-> +       ret =3D spi_sync(spi, &m);
-> +       if (ret =3D=3D 0)
-> +               *val =3D rxbuf[0];
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	if (enable)
+> +		reg |= PHY_CTRL_EN_DLL_MASK;
+> +	else
+> +		reg &= ~PHY_CTRL_EN_DLL_MASK;
 > +
-> +       return ret;
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
+> +
+> +	if (!enable)
+> +		return 0;
+> +
+> +	return readl_relaxed_poll_timeout(host->ioaddr + PHY_CTRL_REG2, reg,
+> +					  (reg & PHY_CTRL_DLL_RDY_MASK), 10,
+> +					  1000 * PHY_DLL_TIMEOUT_MS);
 > +}
 > +
-> +static int penctrl_regs_write(struct penctrl_device *penctrl, u32 reg, u=
-32 val)
+> +static void sdhci_arasan_phy_dll_set_freq(struct sdhci_host *host, int clock)
 > +{
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       struct spi_transfer t;
-> +       struct spi_message m;
-> +       u8 txbuf[4];
+> +	u32 reg, freq_sel, freq;
 > +
-> +       txbuf[0] =3D PENCTRL_SPI_CMD_REGWR;
-> +       txbuf[1] =3D reg;
-> +       txbuf[2] =3D val;
-> +       txbuf[3] =3D 0;
+> +	freq = DIV_ROUND_CLOSEST(clock, 1000000);
+> +	if (freq <= 200 && freq > 170)
+> +		freq_sel = FREQSEL_200M_170M;
+> +	else if (freq <= 170 && freq > 140)
+> +		freq_sel = FREQSEL_170M_140M;
+> +	else if (freq <= 140 && freq > 110)
+> +		freq_sel = FREQSEL_140M_110M;
+> +	else if (freq <= 110 && freq > 80)
+> +		freq_sel = FREQSEL_110M_80M;
+> +	else
+> +		freq_sel = FREQSEL_80M_50M;
 > +
-> +       t.tx_buf =3D txbuf;
-> +       t.len =3D 4;
-
-sizeof(txbuf) ?
-
-> +       spi_message_init_with_transfers(&m, &t, 1);
-> +       return spi_sync(spi, &m);
+> +	reg = readl(host->ioaddr + PHY_CTRL_REG2);
+> +	reg &= ~PHY_CTRL_FREQ_SEL_MASK;
+> +	reg |= (freq_sel << PHY_CTRL_FREQ_SEL_SHIFT);
+> +	writel(reg, host->ioaddr + PHY_CTRL_REG2);
 > +}
 > +
-> +static int penctrl_reset_assert(struct reset_controller_dev *rcdev,
-> +                               unsigned long id)
+>  /**
+>   * sdhci_arasan_syscon_write - Write to a field in soc_ctl registers
+>   *
+> @@ -324,8 +416,21 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
+>  	if (clk_data->set_clk_delays)
+>  		clk_data->set_clk_delays(host);
+>  
+> +	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ) {
+> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +		sdhci_arasan_phy_set_dll(host, 0);
+> +		sdhci_arasan_phy_set_delaychain(host, 0);
+> +		sdhci_arasan_phy_dll_set_freq(host, clock);
+> +	} else if (sdhci_arasan->internal_phy_reg) {
+> +		sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> +		sdhci_arasan_phy_set_delaychain(host, 1);
+> +	}
+> +
+>  	sdhci_set_clock(host, clock);
+>  
+> +	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ)
+> +		sdhci_arasan_phy_set_dll(host, 1);
+> +
+>  	if (sdhci_arasan->quirks & SDHCI_ARASAN_QUIRK_CLOCK_UNSTABLE)
+>  		/*
+>  		 * Some controllers immediately report SDHCI_CLOCK_INT_STABLE
+> @@ -897,6 +1002,101 @@ static const struct clk_ops versal_sampleclk_ops = {
+>  	.set_phase = sdhci_versal_sampleclk_set_phase,
+>  };
+>  
+> +static int sdhci_versal_net_emmc_sdcardclk_set_phase(struct clk_hw *hw, int degrees)
 > +{
-> +       struct penctrl_device *penctrl =3D
-> +               container_of(rcdev, struct penctrl_device, rcdev);
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       unsigned int val;
-> +       int ret;
+> +	struct sdhci_arasan_clk_data *clk_data =
+> +		container_of(hw, struct sdhci_arasan_clk_data, sdcardclk_hw);
+> +	struct sdhci_arasan_data *sdhci_arasan =
+> +		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+> +	struct sdhci_host *host = sdhci_arasan->host;
+> +	u8 tap_delay, tap_max = 0;
 > +
-> +       mutex_lock(&spi_lock);
-> +       spi->chip_select =3D 0;
-> +       spi->cs_gpiod =3D spi->controller->cs_gpiods[0];
-> +       spi_setup(spi);
-> +       ret =3D penctrl_regs_read(penctrl, PENCTRL_REG_CTRL0, &val);
-> +       if (ret) {
-> +               dev_err(&spi->dev, "error reading ctrl0 reg\n");
-> +               goto done;
-> +       }
+> +	switch (host->timing) {
+> +	case MMC_TIMING_MMC_HS:
+> +	case MMC_TIMING_MMC_DDR52:
+> +		tap_max = 16;
+> +		break;
+> +	case MMC_TIMING_MMC_HS200:
+> +	case MMC_TIMING_MMC_HS400:
+> +		 /* For 200MHz clock, 32 Taps are available */
+> +		tap_max = 32;
+> +		break;
+> +	default:
+> +		break;
+> +	}
 > +
-> +       val |=3D BIT(6);
-> +       ret =3D penctrl_regs_write(penctrl, PENCTRL_REG_CTRL0, val);
-> +       if (ret)
-> +               dev_err(&spi->dev, "error writing ctrl0 reg\n");
-
-> +done:
-
-out_unlock: ?
-
-> +       mutex_unlock(&spi_lock);
-> +       return ret;
+> +	tap_delay = (degrees * tap_max) / 360;
+> +
+> +	/* Set the Clock Phase */
+> +	if (tap_delay) {
+> +		u32 regval;
+> +
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_OTAPDLY_ENA_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_OTAPDLY_SEL_MASK;
+> +		regval |= tap_delay << PHY_CTRL_OTAPDLY_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +	}
+> +
+> +	return 0;
 > +}
 > +
-> +static int penctrl_reset_deassert(struct reset_controller_dev *rcdev,
-> +                                 unsigned long id)
-> +{
-> +       struct penctrl_device *penctrl =3D
-> +               container_of(rcdev, struct penctrl_device, rcdev);
-> +       struct spi_device *spi =3D penctrl->spi;
-> +       unsigned int val;
-> +       int ret;
-> +
-> +       mutex_lock(&spi_lock);
-> +       spi->chip_select =3D 0;
-> +       spi->cs_gpiod =3D spi->controller->cs_gpiods[0];
-> +       spi_setup(spi);
-> +       ret =3D penctrl_regs_read(penctrl, PENCTRL_REG_CTRL0, &val);
-> +       if (ret) {
-> +               dev_err(&spi->dev, "error reading ctrl0 reg\n");
-> +               goto done;
-> +       }
-> +
-> +       val &=3D ~BIT(6);
-> +       ret =3D penctrl_regs_write(penctrl, PENCTRL_REG_CTRL0, val);
-> +       if (ret)
-> +               dev_err(&spi->dev, "error writing ctrl0 reg\n");
-
-> +done:
-
-out_unlock: ?
-
-> +       mutex_unlock(&spi_lock);
-> +       return ret;
-> +}
-
-> +static int penctrl_spi_probe(struct spi_device *spi)
-> +{
-> +       struct device *dev;
-> +       struct cdev *cdev;
-> +       u32 num_cs;
-> +       int ret;
-> +       u32 cs;
-> +
-> +       ret =3D device_property_read_u32(spi->dev.parent, "num-cs", &num_=
-cs);
-> +       if (ret)
-> +               return dev_err_probe(&spi->dev, ret,
-> +                                    "number of chip-selects not defined\=
-n");
-> +
-> +       ret =3D alloc_chrdev_region(&penctrl_devt, 0, num_cs, "penctrl");
-> +       if (ret)
-> +               return dev_err_probe(&spi->dev, ret,
-> +                                    "failed to alloc chrdev region\n");
-> +
-> +       penctrl_class =3D class_create(THIS_MODULE, "penctrl");
-> +       if (IS_ERR(penctrl_class)) {
-> +               ret =3D dev_err_probe(&spi->dev, PTR_ERR(penctrl_class),
-> +                                   "failed to create class\n");
-> +               goto unregister_chrdev;
-> +       }
-> +
-> +       cdev =3D cdev_alloc();
-> +       if (!cdev) {
-> +               ret =3D dev_err_probe(&spi->dev, -ENOMEM,
-> +                                   "allocation of cdev failed\n");
-> +               goto destroy_class;
-> +       }
-> +       cdev->owner =3D THIS_MODULE;
-> +       cdev_init(cdev, &penctrl_fops);
-> +
-> +       ret =3D cdev_add(cdev, penctrl_devt, num_cs);
-> +       if (ret) {
-> +               ret =3D dev_err_probe(&spi->dev, ret,
-> +                                   "register of cdev failed\n");
-> +               goto free_cdev;
-> +       }
-> +
-> +       /* Allocate driver data */
-> +       penctrl =3D kzalloc(sizeof(*penctrl), GFP_KERNEL);
-> +       if (!penctrl) {
-> +               ret =3D -ENOMEM;
-> +               goto free_cdev;
-> +       }
-> +       penctrl->spi =3D spi;
-> +       mutex_init(&spi_lock);
-> +
-> +       /* Create a device for each chip select */
-> +       for (cs =3D 0; cs < num_cs; cs++) {
-> +               dev =3D device_create(penctrl_class,
-> +                                   &spi->dev,
-> +                                   MKDEV(MAJOR(penctrl_devt), cs),
-> +                                   penctrl,
-> +                                   "penctrl0.%d",
-> +                                   cs);
-> +               if (IS_ERR(dev)) {
-> +                       ret =3D dev_err_probe(&spi->dev, PTR_ERR(dev),
-> +                                           "error creating device\n");
-> +                       goto destroy_device;
-> +               }
-> +               dev_dbg(&spi->dev, "created device major %u, minor %d\n",
-> +                       MAJOR(penctrl_devt), cs);
-> +       }
-> +
-> +       /* Register emmc hardware reset */
-> +       penctrl->rcdev.nr_resets =3D 1;
-> +       penctrl->rcdev.owner =3D THIS_MODULE;
-> +       penctrl->rcdev.dev =3D &spi->dev;
-> +       penctrl->rcdev.ops =3D &penctrl_reset_ops;
-
-> +       penctrl->rcdev.of_node =3D spi->dev.of_node;
-
-Either redundant or wrong. Shouldn't you first have the firmware node
-to be set for spi->dev?
-
-> +       device_set_node(&spi->dev, dev_fwnode(dev));
-> +
-> +       ret =3D reset_controller_register(&penctrl->rcdev);
-> +       if (ret)
-> +               return dev_err_probe(&spi->dev, ret,
-> +                                    "failed to register reset controller=
-\n");
-> +       return 0;
-> +
-> +destroy_device:
-> +       for (cs =3D 0; cs < num_cs; cs++)
-> +               device_destroy(penctrl_class, MKDEV(MAJOR(penctrl_devt), =
-cs));
-> +       kfree(penctrl);
-> +free_cdev:
-> +       cdev_del(cdev);
-> +destroy_class:
-> +       class_destroy(penctrl_class);
-> +unregister_chrdev:
-> +       unregister_chrdev(MAJOR(penctrl_devt), "penctrl");
-> +
-> +       return ret;
-> +}
-
-...
-
-> +++ b/include/uapi/linux/amd-pensando-ctrl.h
-> @@ -0,0 +1,30 @@
-> +/* SPDX-License-Identifier: GPL-2.0 WITH Linux-syscall-note */
-> +/*
-> + * Userspace interface for /dev/penctrl
-> + *
-> + * This file can be used by applications that need to communicate
-> + * with the AMD Pensando SoC controller device via the ioctl interface.
-> + */
-> +#ifndef _UAPI_LINUX_AMD_PENSANDO_CTRL_H
-> +#define _UAPI_LINUX_AMD_PENSANDO_CTRL_H
-
-> +#include <linux/ioctl.h>
-
-Not used header.
-
-> +#include <linux/types.h>
-> +
-> +#define PENCTRL_SPI_CMD_REGRD  0x0b
-> +#define PENCTRL_SPI_CMD_REGWR  0x02
-> +#define PENCTRL_IOC_MAGIC      'k'
-> +#define PENCTRL_IOC_MAXNR      0
-> +#define PENCTRL_MAX_MSG_LEN    16
-> +#define PENCTRL_MAX_REG                0xff
-> +#define PENCTRL_REG_CTRL0      0x10
-> +
-> +struct penctrl_spi_xfer {
-> +       __u64 tx_buf;
-> +       __u64 rx_buf;
-> +       __u32 len;
-> +       __u32 speed_hz;
-> +       __u64 compat;
+> +static const struct clk_ops versal_net_sdcardclk_ops = {
+> +	.recalc_rate = sdhci_arasan_sdcardclk_recalc_rate,
+> +	.set_phase = sdhci_versal_net_emmc_sdcardclk_set_phase,
 > +};
 > +
-> +#endif /* _UAPI_LINUX_AMD_PENSANDO_CTRL_H */
+> +static int sdhci_versal_net_emmc_sampleclk_set_phase(struct clk_hw *hw, int degrees)
+> +{
+> +	struct sdhci_arasan_clk_data *clk_data =
+> +		container_of(hw, struct sdhci_arasan_clk_data, sampleclk_hw);
+> +	struct sdhci_arasan_data *sdhci_arasan =
+> +		container_of(clk_data, struct sdhci_arasan_data, clk_data);
+> +	struct sdhci_host *host = sdhci_arasan->host;
+> +	u8 tap_delay, tap_max = 0;
+> +	u32 regval;
+> +
+> +	switch (host->timing) {
+> +	case MMC_TIMING_MMC_HS:
+> +	case MMC_TIMING_MMC_DDR52:
+> +		tap_max = 32;
+> +		break;
+> +	case MMC_TIMING_MMC_HS400:
+> +		/* Strobe select tap point for strb90 and strb180 */
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_STRB_SEL_MASK;
+> +		regval |= VERSAL_NET_PHY_CTRL_STRB90_STRB180_VAL << PHY_CTRL_STRB_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		break;
+> +	default:
+> +		break;
+> +	}
+> +
+> +	tap_delay = (degrees * tap_max) / 360;
+> +
+> +	/* Set the Clock Phase */
+> +	if (tap_delay) {
+> +		regval = sdhci_readl(host, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_ITAP_CHG_WIN_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval |= PHY_CTRL_ITAPDLY_ENA_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_ITAPDLY_SEL_MASK;
+> +		regval |= tap_delay << PHY_CTRL_ITAPDLY_SEL_SHIFT;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +		regval &= ~PHY_CTRL_ITAP_CHG_WIN_MASK;
+> +		sdhci_writel(host, regval, PHY_CTRL_REG1);
+> +	}
+> +
+> +	return 0;
+> +}
+> +
+> +static const struct clk_ops versal_net_sampleclk_ops = {
+> +	.recalc_rate = sdhci_arasan_sampleclk_recalc_rate,
+> +	.set_phase = sdhci_versal_net_emmc_sampleclk_set_phase,
+> +};
+> +
+>  static void arasan_zynqmp_dll_reset(struct sdhci_host *host, u32 deviceid)
+>  {
+>  	u16 clk;
+> @@ -1107,7 +1307,17 @@ static void arasan_dt_parse_clk_phases(struct device *dev,
+>  			clk_data->clk_phase_out[i] = versal_oclk_phase[i];
+>  		}
+>  	}
+> +	if (of_device_is_compatible(dev->of_node, "xlnx,versal-net-emmc")) {
+> +		u32 versal_net_iclk_phase[MMC_TIMING_MMC_HS400 + 1] =
+> +			VERSAL_NET_EMMC_ICLK_PHASE;
+> +		u32 versal_net_oclk_phase[MMC_TIMING_MMC_HS400 + 1] =
+> +			VERSAL_NET_EMMC_OCLK_PHASE;
+>  
+> +		for (i = 0; i <= MMC_TIMING_MMC_HS400; i++) {
+> +			clk_data->clk_phase_in[i] = versal_net_iclk_phase[i];
+> +			clk_data->clk_phase_out[i] = versal_net_oclk_phase[i];
+> +		}
+> +	}
+>  	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_LEGACY,
+>  				 "clk-phase-legacy");
+>  	arasan_dt_read_clk_phase(dev, clk_data, MMC_TIMING_MMC_HS,
+> @@ -1225,6 +1435,14 @@ static const struct sdhci_pltfm_data sdhci_arasan_zynqmp_pdata = {
+>  			SDHCI_QUIRK2_STOP_WITH_TC,
+>  };
+>  
+> +static const struct sdhci_pltfm_data sdhci_arasan_versal_net_pdata = {
+> +	.ops = &sdhci_arasan_ops,
+> +	.quirks2 = SDHCI_QUIRK2_PRESET_VALUE_BROKEN |
+> +			SDHCI_QUIRK2_CLOCK_DIV_ZERO_BROKEN |
+> +			SDHCI_QUIRK2_STOP_WITH_TC |
+> +			SDHCI_QUIRK2_CAPS_BIT63_FOR_HS400,
+> +};
+> +
+>  static const struct sdhci_arasan_clk_ops zynqmp_clk_ops = {
+>  	.sdcardclk_ops = &zynqmp_sdcardclk_ops,
+>  	.sampleclk_ops = &zynqmp_sampleclk_ops,
+> @@ -1245,6 +1463,16 @@ static struct sdhci_arasan_of_data sdhci_arasan_versal_data = {
+>  	.clk_ops = &versal_clk_ops,
+>  };
+>  
+> +static const struct sdhci_arasan_clk_ops versal_net_clk_ops = {
+> +	.sdcardclk_ops = &versal_net_sdcardclk_ops,
+> +	.sampleclk_ops = &versal_net_sampleclk_ops,
+> +};
+> +
+> +static struct sdhci_arasan_of_data sdhci_arasan_versal_net_data = {
+> +	.pdata = &sdhci_arasan_versal_net_pdata,
+> +	.clk_ops = &versal_net_clk_ops,
+> +};
+> +
+>  static struct sdhci_arasan_of_data intel_keembay_emmc_data = {
+>  	.soc_ctl_map = &intel_keembay_soc_ctl_map,
+>  	.pdata = &sdhci_keembay_emmc_pdata,
+> @@ -1314,6 +1542,10 @@ static const struct of_device_id sdhci_arasan_of_match[] = {
+>  		.compatible = "xlnx,versal-8.9a",
+>  		.data = &sdhci_arasan_versal_data,
+>  	},
+> +	{
+> +		.compatible = "xlnx,versal-net-emmc",
+> +		.data = &sdhci_arasan_versal_net_data,
+> +	},
+>  	{ /* sentinel */ }
+>  };
+>  MODULE_DEVICE_TABLE(of, sdhci_arasan_of_match);
+> @@ -1788,6 +2020,9 @@ static int sdhci_arasan_probe(struct platform_device *pdev)
+>  			host->mmc->caps2 |= MMC_CAP2_CQE_DCMD;
+>  	}
+>  
+> +	if (of_device_is_compatible(np, "xlnx,versal-net-emmc"))
+> +		sdhci_arasan->internal_phy_reg = true;
+> +
+>  	ret = sdhci_arasan_add_host(sdhci_arasan);
+>  	if (ret)
+>  		goto err_add_host;
 
---=20
-With Best Regards,
-Andy Shevchenko
