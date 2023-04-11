@@ -2,93 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96C13C77B72
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 10:15:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AEE73C77B74
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 11:17:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229559AbjDKKPF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Apr 2023 06:15:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40624 "EHLO
+        id S229490AbjDKLR2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Apr 2023 07:17:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229761AbjDKKO5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 06:14:57 -0400
-Received: from mga11.intel.com (mga11.intel.com [192.55.52.93])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B918C3C2A;
-        Tue, 11 Apr 2023 03:14:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1681208081; x=1712744081;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=bDBts12O8Hga+LiDSp0Aczq4WnDcr6E4Vx4zdmSN5JE=;
-  b=GZsVUypiwqVUm83Q2FazKAqswpiTNor4wMTXSeiKEwnZjevipAc3oWZ5
-   0auEzsqCPGmTwcquxdYF7txlj770FN308rb9kMnNxC/7hELWwxOg6uV6C
-   cxbFMIh8skyksWthuN09V4FPEdYalJDzDRmBAkcu8wvI30MVGurOMRpFM
-   R7edw96Q40ArCfyvdkHlLdkkOe9bll0q7UpC1LA6WLuoZEhcuHITENxdR
-   SiqrIMx2WZlhLaj9+7L2kbM9v91QnZVINGJ0YCcw0QHo4p0GVAE2ynndQ
-   nNAJS1Xo76tU0Pk2y4WVdmJezgWa8d64ujxgnY4e0Hniux2PUGXFFDUvN
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10676"; a="341070733"
-X-IronPort-AV: E=Sophos;i="5.98,336,1673942400"; 
-   d="scan'208";a="341070733"
-Received: from orsmga005.jf.intel.com ([10.7.209.41])
-  by fmsmga102.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Apr 2023 03:14:41 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10676"; a="862816046"
-X-IronPort-AV: E=Sophos;i="5.98,336,1673942400"; 
-   d="scan'208";a="862816046"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.44.57])
-  by orsmga005-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 11 Apr 2023 03:14:37 -0700
-Message-ID: <3c57dc23-5b97-7cc1-8d88-1bed91119bea@intel.com>
-Date:   Tue, 11 Apr 2023 13:14:37 +0300
+        with ESMTP id S229621AbjDKLR1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 07:17:27 -0400
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08B7B130
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Apr 2023 04:17:25 -0700 (PDT)
+Received: by mail-wr1-x433.google.com with SMTP id o18so7167774wro.12
+        for <linux-mmc@vger.kernel.org>; Tue, 11 Apr 2023 04:17:24 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=baylibre-com.20210112.gappssmtp.com; s=20210112; t=1681211843; x=1683803843;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=62hsVi+QUfoOKuYp2vpVkc9puq+N1iUtD/B1+czftAY=;
+        b=SKe6JIxZ5X0t6jdZpOlho0qGWVej/qeJcAzcHLsAFQ2SIz+my/ILQMW5fDnLJkVjOs
+         bhqBbOzrfDUk+HoC9Y3byrRbsKJMmwyhw8XgdhbD8tMIN0M4cMHdVk9JwnOE4TuP/KpA
+         0LfmnPCaDeiu7BjfOQkN/7RDTGLyBo6P3JpIlzaRtO6pwNLbMRSPeulavEzDbp4T+oPx
+         Rty8edAIOOtewbr6YPKvtANRaSkE1dj444PvmkMpalOhmZoODx6MDLth0H1GQqQrQXCo
+         m7NX4DyS3OwbKmhpd+LGu2WnEoZa4f/1ohzmvwUObZ126vd3IE8fFL5NmSnbb5Wa4zKi
+         b5Qw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112; t=1681211843; x=1683803843;
+        h=content-transfer-encoding:in-reply-to:from:references:cc:to
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=62hsVi+QUfoOKuYp2vpVkc9puq+N1iUtD/B1+czftAY=;
+        b=DkyXviS4vGyzAhiLMENzt9RBYhzfNGvyzu6EWci1jgmx6IKA/XrpXS+OVVeHoI/ruI
+         kVq3ezfd7KYCuOhuwABA+oseuSvRl/jJR7JFPwHdTB0j2x+YPZUOE3YAswIYYyLBZqNG
+         8wfF63IJFVFkfzEB5DBqDdv1Ei2b4ZHiRtTN8JD0JlSnDuAtVl462kpjVXB98jTsS4Kv
+         0Yl90aleUla8cG5Up7q1hinwaUoP1QHR7TcrZ0Mmlfa7Ob6D4ajtR70Uge/QchmF4Z5w
+         VfztXTC7J9huyHl3Y+cQwMwlmZHMcnOWIBYTeGqPp+UIwqFI0D3r6lzqjVureNSkMkn5
+         btwA==
+X-Gm-Message-State: AAQBX9evqyF+I2WWIle6gvx4bW5MX8AaixVaRSuY0QqnNEZm0m2wmR7+
+        qZD9Jgc0AiPNWkDfzFbLy5DwIg==
+X-Google-Smtp-Source: AKy350YNIHpETfKFyNwriQojM4cwGMtxFd9k2BIAoqEoZyUD79V9JE8xJs9z66OhnfG3ED0jM+Quog==
+X-Received: by 2002:adf:e34c:0:b0:2e5:a86c:fe74 with SMTP id n12-20020adfe34c000000b002e5a86cfe74mr6136269wrj.51.1681211843387;
+        Tue, 11 Apr 2023 04:17:23 -0700 (PDT)
+Received: from [192.168.1.172] (158.22.5.93.rev.sfr.net. [93.5.22.158])
+        by smtp.gmail.com with ESMTPSA id y9-20020adffa49000000b002c592535839sm14335619wrr.17.2023.04.11.04.17.21
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 11 Apr 2023 04:17:22 -0700 (PDT)
+Message-ID: <b7a43215-8c51-8609-63bb-c0748887688a@baylibre.com>
+Date:   Tue, 11 Apr 2023 13:17:21 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.9.1
-Subject: Re: [PATCH v3 3/3] mmc: sdhci-of-arasan: Skip setting clock delay for
- 400KHz
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v5 07/12] arm64: dts: mediatek: set vmc regulator as
+ always on
 Content-Language: en-US
-To:     Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
+To:     AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Wim Van Sebroeck <wim@linux-watchdog.org>,
+        Guenter Roeck <linux@roeck-us.net>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Michal Simek <michal.simek@xilinx.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        git@amd.com, saikrishna12468@gmail.com
-References: <20230403102551.3763054-1-sai.krishna.potthuri@amd.com>
- <20230403102551.3763054-4-sai.krishna.potthuri@amd.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230403102551.3763054-4-sai.krishna.potthuri@amd.com>
-Content-Type: text/plain; charset=UTF-8
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Chaotian Jing <chaotian.jing@mediatek.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Wenbin Mei <wenbin.mei@mediatek.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Zhiyong Tao <zhiyong.tao@mediatek.com>,
+        =?UTF-8?Q?Bernhard_Rosenkr=c3=a4nzer?= <bero@baylibre.com>
+Cc:     linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org,
+        Alexandre Bailon <abailon@baylibre.com>,
+        Fabien Parent <fparent@baylibre.com>,
+        Amjad Ouled-Ameur <aouledameur@baylibre.com>
+References: <20230203-evk-board-support-v5-0-1883c1b405ad@baylibre.com>
+ <20230203-evk-board-support-v5-7-1883c1b405ad@baylibre.com>
+ <ce6a9e78-efae-c430-c990-ceafdfc7be41@collabora.com>
+From:   Alexandre Mergnat <amergnat@baylibre.com>
+In-Reply-To: <ce6a9e78-efae-c430-c990-ceafdfc7be41@collabora.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 3/04/23 13:25, Sai Krishna Potthuri wrote:
-> Clock delay settings are not defined for 400KHz, so add frequency check
-> to skip calling the clock delay settings when frequency is <=400KHz.
-> 
-> Signed-off-by: Sai Krishna Potthuri <sai.krishna.potthuri@amd.com>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+On 11/04/2023 10:23, AngeloGioacchino Del Regno wrote:
+> Il 07/04/23 14:59, amergnat@baylibre.com ha scritto:
+>> From: Fabien Parent <fparent@baylibre.com>
+>>
+>> MSDC1 IP block is powered by VMC. Make sure it is always on.
+>>
+>
+> Can't we set vmc as parent of vemc? 
 
-> ---
->  drivers/mmc/host/sdhci-of-arasan.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci-of-arasan.c b/drivers/mmc/host/sdhci-of-arasan.c
-> index c3fecb8ba66e..d9a29c346745 100644
-> --- a/drivers/mmc/host/sdhci-of-arasan.c
-> +++ b/drivers/mmc/host/sdhci-of-arasan.c
-> @@ -413,7 +413,7 @@ static void sdhci_arasan_set_clock(struct sdhci_host *host, unsigned int clock)
->  	}
->  
->  	/* Set the Input and Output Clock Phase Delays */
-> -	if (clk_data->set_clk_delays)
-> +	if (clk_data->set_clk_delays && clock > PHY_CLK_TOO_SLOW_HZ)
->  		clk_data->set_clk_delays(host);
->  
->  	if (sdhci_arasan->internal_phy_reg && clock >= MIN_PHY_CLK_HZ) {
+I don't find parent property for regulators. AFAIK, vin-supply is used in other DTS to do that but is it supported by fixed-regulator and gpio-regulator, which is not the case here.
+Based on this, I don't think so, but I'm probably missing something.
+
+Regards,
+Alexandre
 
