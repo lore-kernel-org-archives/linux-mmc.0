@@ -2,232 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 80216C76196
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 13:55:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 84606C76196
+	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 20:29:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230410AbjDKNzW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Apr 2023 09:55:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44760 "EHLO
+        id S229846AbjDKU35 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 11 Apr 2023 16:29:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41864 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229957AbjDKNzV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 09:55:21 -0400
-Received: from mail-oi1-f179.google.com (mail-oi1-f179.google.com [209.85.167.179])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB15210FE;
-        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
-Received: by mail-oi1-f179.google.com with SMTP id bx42so21879299oib.6;
-        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
+        with ESMTP id S229878AbjDKU34 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 16:29:56 -0400
+Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49F703584;
+        Tue, 11 Apr 2023 13:29:55 -0700 (PDT)
+Received: by mail-pj1-f53.google.com with SMTP id y11-20020a17090a600b00b0024693e96b58so8193463pji.1;
+        Tue, 11 Apr 2023 13:29:55 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1681221320; x=1683813320;
+        d=1e100.net; s=20210112; t=1681244995; x=1683836995;
         h=in-reply-to:content-disposition:mime-version:references:message-id
          :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=4ZO7ezzSE2J/Q6kfu0V6nhJj8JV4tY/GZHsr0viCIQg=;
-        b=c++ag5pBCNz4L1Tgzj30Xtv9a9hOOu+kxW4Dnazck9f0YT2ZqmmKIf/RwWiGJRz+0Y
-         jUh8BSZ4tPm4nmUUhBbi9kllgKjGND48nYlpcjsVj/yhdFndwmqIr6QjmQTnCjwlMvG+
-         YyKL7WT+ArZAOjaBULRs1zVPn5e4u6Wvak/UVr6Y6OAaIgvrIg5mvLIGAD6jKzJ0vIfW
-         wWS3b2cL5mBX6IN/yqCL94Lr7OfLPzx3nL49v3z4qjS4ejIoWdB9avfrOQssV0nMi2QS
-         1xqItxnnJ4pOVw2CsIeaIh5V6QtQ0xPrMe1YnxWCI/1DFv8TKP8ikLzyeuShmnjqXYpg
-         yr7Q==
-X-Gm-Message-State: AAQBX9cCzeKHwyuZAoxX5JFgzvT+Qwvg5wO/GbIgvd3vTp+lBvqIIEuE
-        5wcYsfW9EkJV/bieZr32eQ==
-X-Google-Smtp-Source: AKy350Zknu9XdcP66k0cfxAwCQD/B6DUAgh2awz+0hWaJCNQBE/oSeXwvEvVidCKbiEVzCNEA+x/Kg==
-X-Received: by 2002:a05:6808:8e:b0:387:2075:59c with SMTP id s14-20020a056808008e00b003872075059cmr5793228oic.37.1681221320010;
-        Tue, 11 Apr 2023 06:55:20 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id i128-20020acaea86000000b00386eff32f58sm5587706oih.13.2023.04.11.06.55.18
+        bh=X5UCA+tE3Fq8HXbLn+U+wd27dVODbtTngBjwQ/9PBX0=;
+        b=5OoppjsE8o5YGTz5s4twBQSF0GehzVLLUVynqrJj/xzjP8Crws6gI9fEVbZgBg27z2
+         rptjMxhn52iQWcafD2ojxWezSKYR5bgug/yK39IqRRzhbrLO56SPPsU38oxppo4BF+mF
+         GF7jwZlZTWIdTu7CwF5sHhlAog7KirSItpxwo3GBfuwlAukWAMqdRW0S2LGfp+Ogw+/Z
+         it4Ax2h2dniuXm7bMvDpJT2V2LzATVt95WK6DvnXJd04rpd6nsWZMdeqCVk7LIFKfdfT
+         TtIBevwik4yWsDqefonx7FFzeANsu0HnCQ+dfpghlPm7II/vG54gWrXzAtDlNVJL0Ht2
+         HXFQ==
+X-Gm-Message-State: AAQBX9d7QxoRWHiCcq8xOfQ1xBU7kQIPfFtZw7uxcWlNdWc4Skl5Nrbx
+        JGLYm+7eIhyw+ALq9vDzxix076JWE5B2rg==
+X-Google-Smtp-Source: AKy350ZI+I0EfD8cuUXNEOSBQ+pnMgX7tS3cLWevur0lEL9UKgU+NGS7ChmKBKPSlWOhtqgqK9m52A==
+X-Received: by 2002:a17:90b:3b44:b0:237:62f7:3106 with SMTP id ot4-20020a17090b3b4400b0023762f73106mr19020143pjb.17.1681244994537;
+        Tue, 11 Apr 2023 13:29:54 -0700 (PDT)
+Received: from snowbird ([199.73.127.3])
+        by smtp.gmail.com with ESMTPSA id k60-20020a17090a4cc200b0023f5c867f82sm11386453pjh.41.2023.04.11.13.29.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Apr 2023 06:55:19 -0700 (PDT)
-Received: (nullmailer pid 2960222 invoked by uid 1000);
-        Tue, 11 Apr 2023 13:55:18 -0000
-Date:   Tue, 11 Apr 2023 08:55:18 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Brad Larson <blarson@amd.com>
-Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org,
-        yamada.masahiro@socionext.com, p.zabel@pengutronix.de,
-        piotrs@cadence.com, p.yadav@ti.com, rdunlap@infradead.org,
-        samuel@sholland.org, fancer.lancer@gmail.com,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com, will@kernel.org,
-        devicetree@vger.kernel.org
-Subject: Re: [PATCH v13 08/15] arm64: dts: Add AMD Pensando Elba SoC support
-Message-ID: <20230411135518.GA2952600-robh@kernel.org>
-References: <20230410184526.15990-1-blarson@amd.com>
- <20230410184526.15990-9-blarson@amd.com>
+        Tue, 11 Apr 2023 13:29:54 -0700 (PDT)
+Date:   Tue, 11 Apr 2023 13:29:50 -0700
+From:   Dennis Zhou <dennis@kernel.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
+Message-ID: <ZDXDPuSOSV1EYvPr@snowbird>
+References: <20230329202148.71107-1-dennis@kernel.org>
+ <ZCTOMVjW+pnZVGsQ@snowbird>
+ <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
+ <ZCclEE6Qw3on7/eO@snowbird>
+ <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
+ <ZC/TL2/gLre0B4xH@snowbird>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20230410184526.15990-9-blarson@amd.com>
+In-Reply-To: <ZC/TL2/gLre0B4xH@snowbird>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 10, 2023 at 11:45:19AM -0700, Brad Larson wrote:
-> Add AMD Pensando common and Elba SoC specific device nodes
+On Fri, Apr 07, 2023 at 01:24:15AM -0700, Dennis Zhou wrote:
+> On Mon, Apr 03, 2023 at 11:50:41AM +0200, Ulf Hansson wrote:
+> > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
+> > >
+> > > Hi Ulf,
+> > >
+> > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
+> > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
+> > > > >
+> > > > > When using dm-verity with a data partition on an emmc device, dm-verity
+> > > > > races with the discovery of attached emmc devices. This is because mmc's
+> > > > > probing code sets up the host data structure then a work item is
+> > > > > scheduled to do discovery afterwards. To prevent this race on init,
+> > > > > let's inline the first call to detection, __mm_scan(), and let
+> > > > > subsequent detect calls be handled via the workqueue.
+> > > >
+> > > > In principle, I don't mind the changes in $subject patch, as long as
+> > > > it doesn't hurt the overall initialization/boot time. Especially, we
+> > > > may have more than one mmc-slot being used, so this needs to be well
+> > > > tested.
+> > > >
+> > >
+> > > I unfortunately don't have a device with multiple mmcs available. Is
+> > > this something you could help me with?
+> > 
+> > Yes, I can help to test. Allow me a few days to see what I can do.
+> > 
+> > Note that, just having one eMMC and one SD card should work too. It
+> > doesn't have to be multiple eMMCs.
+> > 
+> > >
+> > > > Although, more importantly, I fail to understand how this is going to
+> > > > solve the race condition. Any I/O request to an eMMC or SD requires
+> > > > the mmc block device driver to be up and running too, which is getting
+> > > > probed from a separate module/driver that's not part of mmc_rescan().
+> > >
+> > > I believe the call chain is something like this:
+> > >
+> > > __mmc_rescan()
+> > >     mmc_rescan_try_freq()
+> > >         mmc_attach_mmc()
+> > >             mmc_add_card()
+> > >                 device_add()
+> > >                     bus_probe_device()
+> > >                         mmc_blk_probe()
+> > >
+> > > The initial calling of this is the host probe. So effectively if there
+> > > is a card attached, we're inlining the device_add() call for the card
+> > > attached rather than waiting for the workqueue item to kick off.
+> > >
+> > > dm is a part of late_initcall() while mmc is a module_init(), when built
+> > > in becoming a device_initcall(). So this solves a race via the initcall
+> > > chain. In the current state, device_initcall() finishes and we move onto
+> > > the late_initcall() phase. But now, dm is racing with the workqueue to
+> > > init the attached emmc device.
+> > 
+> > You certainly have a point!
+> > 
+> > This should work when the mmc blk module is built-in. Even if that
+> > doesn't solve the entire problem, it should be a step in the right
+> > direction.
+> > 
+> > I will give it some more thinking and run some tests at my side, then
+> > I will get back to you again.
+> > 
 > 
-> Signed-off-by: Brad Larson <blarson@amd.com>
-> ---
+> Hi Ulf, is there an update on testing with this patch?
 > 
-> v11 changes:
-> - Delete reset-names
-> - Fix spi0 compatible to be specific 'amd,pensando-elba-ctrl'
-> 
-> v9 changes:
-> - Single node for spi0 system-controller and squash
->   the reset-controller child into parent
 
-Have you run this thru 'make dtbs_check'? I see at least one issue that 
-should report.
+Ping.
 
-> ---
->  arch/arm64/boot/dts/amd/Makefile              |   1 +
->  arch/arm64/boot/dts/amd/elba-16core.dtsi      | 189 +++++++++++++++++
->  arch/arm64/boot/dts/amd/elba-asic-common.dtsi |  80 ++++++++
->  arch/arm64/boot/dts/amd/elba-asic.dts         |  28 +++
->  arch/arm64/boot/dts/amd/elba-flash-parts.dtsi | 106 ++++++++++
->  arch/arm64/boot/dts/amd/elba.dtsi             | 191 ++++++++++++++++++
->  6 files changed, 595 insertions(+)
->  create mode 100644 arch/arm64/boot/dts/amd/elba-16core.dtsi
->  create mode 100644 arch/arm64/boot/dts/amd/elba-asic-common.dtsi
->  create mode 100644 arch/arm64/boot/dts/amd/elba-asic.dts
->  create mode 100644 arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
->  create mode 100644 arch/arm64/boot/dts/amd/elba.dtsi
-> 
-> diff --git a/arch/arm64/boot/dts/amd/Makefile b/arch/arm64/boot/dts/amd/Makefile
-> index 68103a8b0ef5..8502cc2afbc5 100644
-> --- a/arch/arm64/boot/dts/amd/Makefile
-> +++ b/arch/arm64/boot/dts/amd/Makefile
-> @@ -1,2 +1,3 @@
->  # SPDX-License-Identifier: GPL-2.0
-> +dtb-$(CONFIG_ARCH_PENSANDO) += elba-asic.dtb
->  dtb-$(CONFIG_ARCH_SEATTLE) += amd-overdrive-rev-b0.dtb amd-overdrive-rev-b1.dtb
-> diff --git a/arch/arm64/boot/dts/amd/elba-16core.dtsi b/arch/arm64/boot/dts/amd/elba-16core.dtsi
-> new file mode 100644
-> index 000000000000..37aadd442db8
-> --- /dev/null
-> +++ b/arch/arm64/boot/dts/amd/elba-16core.dtsi
-> @@ -0,0 +1,189 @@
-> +// SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
-> +/*
-> + * Copyright 2020-2022 Advanced Micro Devices, Inc.
-> + */
-> +
-> +/ {
-> +	cpus {
-> +		#address-cells = <2>;
-> +		#size-cells = <0>;
-> +
-> +		cpu-map {
-> +			cluster0 {
-> +				core0 { cpu = <&cpu0>; };
-> +				core1 { cpu = <&cpu1>; };
-> +				core2 { cpu = <&cpu2>; };
-> +				core3 { cpu = <&cpu3>; };
-> +			};
-> +
-> +			cluster1 {
-> +				core0 { cpu = <&cpu4>; };
-> +				core1 { cpu = <&cpu5>; };
-> +				core2 { cpu = <&cpu6>; };
-> +				core3 { cpu = <&cpu7>; };
-> +			};
-> +
-> +			cluster2 {
-> +				core0 { cpu = <&cpu8>; };
-> +				core1 { cpu = <&cpu9>; };
-> +				core2 { cpu = <&cpu10>; };
-> +				core3 { cpu = <&cpu11>; };
-> +			};
-> +
-> +			cluster3 {
-> +				core0 { cpu = <&cpu12>; };
-> +				core1 { cpu = <&cpu13>; };
-> +				core2 { cpu = <&cpu14>; };
-> +				core3 { cpu = <&cpu15>; };
-> +			};
-> +		};
-> +
-> +		/* CLUSTER 0 */
-> +		cpu0: cpu@0 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x0>;
-> +			next-level-cache = <&l2_0>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu1: cpu@1 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x1>;
-> +			next-level-cache = <&l2_0>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu2: cpu@2 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x2>;
-> +			next-level-cache = <&l2_0>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu3: cpu@3 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x3>;
-> +			next-level-cache = <&l2_0>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		l2_0: l2-cache0 {
-> +			compatible = "cache";
-> +		};
-> +
-> +		/* CLUSTER 1 */
-> +		cpu4: cpu@100 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x100>;
-> +			next-level-cache = <&l2_1>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu5: cpu@101 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x101>;
-> +			next-level-cache = <&l2_1>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu6: cpu@102 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x102>;
-> +			next-level-cache = <&l2_1>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		cpu7: cpu@103 {
-> +			device_type = "cpu";
-> +			compatible = "arm,cortex-a72";
-> +			reg = <0 0x103>;
-> +			next-level-cache = <&l2_1>;
-> +			enable-method = "psci";
-> +		};
-> +
-> +		l2_1: l2-cache1 {
-> +			compatible = "cache";
-
-This is missing properties. If you don't see warnings, update dtschema.
-
-Rob
+Thanks,
+Dennis
