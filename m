@@ -2,99 +2,66 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B5BDDC7619A
-	for <linux-mmc@archiver.kernel.org>; Wed, 12 Apr 2023 07:50:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 30A2CC77B6E
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Apr 2023 09:30:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229966AbjDLHuR (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Apr 2023 03:50:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39546 "EHLO
+        id S229535AbjDLJaq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Apr 2023 05:30:46 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40930 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229981AbjDLHuO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2023 03:50:14 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0759161AC;
-        Wed, 12 Apr 2023 00:50:09 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 8EC7262EED;
-        Wed, 12 Apr 2023 07:50:08 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 554C5C433D2;
-        Wed, 12 Apr 2023 07:50:04 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681285808;
-        bh=ri3rmltlry7sXZG0HWrFLS7srDjoutKJ+DI1dim4Th0=;
-        h=From:To:Cc:Subject:References:Date:In-Reply-To:From;
-        b=q9qFJBdAz4QXEK7MMlz4lShRdVYWzuAofvFum771baqoXW51TsUm49abk5dmdUcbl
-         mcub7ByZnR32hyMDp5aHTwpX/6BKup3pedj11K83aXMGsLI5G+EwAguqbuvng03aPt
-         BtgZacw97cfnTiVwaEFyrn8gSKARplPeKmsbVqjv7Gf0hF22j3+1ym++iIQk8yI59E
-         TCuFmxZ0ovWdymGbSBOyH5VFDsr0S6sY+JT9vS1evqTLy3b/TK3dxIfQoSWsv/A0Hn
-         er4QHnD7sDeE/dRIVerlRKmzNy7ZOIE2gu6TCc92EWJJZtS/boDO6OZQVMomXrM5vP
-         xguIrc8iu4tCw==
-From:   Kalle Valo <kvalo@kernel.org>
-To:     Simon Horman <simon.horman@corigine.com>
-Cc:     Marek Vasut <marex@denx.de>, linux-wireless@vger.kernel.org,
-        Hans de Goede <hdegoede@redhat.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Danny van Heumen <danny@dannyvanheumen.nl>,
-        Eric Dumazet <edumazet@google.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        SHA-cyfmac-dev-list@infineon.com,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org
-Subject: Re: [PATCH v2] wifi: brcmfmac: add Cypress 43439 SDIO ids
-References: <20230407203752.128539-1-marex@denx.de>
-        <ZDGHF0dKwIjB1Mrj@corigine.com>
-        <509e4308-9164-4131-4b93-75c42568d1e4@denx.de>
-        <ZDHEI7tbjLJiRcBr@corigine.com>
-Date:   Wed, 12 Apr 2023 10:50:00 +0300
-In-Reply-To: <ZDHEI7tbjLJiRcBr@corigine.com> (Simon Horman's message of "Sat,
-        8 Apr 2023 21:44:35 +0200")
-Message-ID: <87v8i18rpz.fsf@kernel.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        with ESMTP id S231542AbjDLJag (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2023 05:30:36 -0400
+X-Greylist: delayed 953 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Wed, 12 Apr 2023 02:30:19 PDT
+Received: from ssh249.corpemail.net (ssh249.corpemail.net [210.51.61.249])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C758083E6;
+        Wed, 12 Apr 2023 02:30:18 -0700 (PDT)
+Received: from unicom145.biz-email.net
+        by unicom145.biz-email.net ((D)) with ASMTP (SSL) id IEJ00104;
+        Wed, 12 Apr 2023 16:48:04 +0800
+Received: from localhost.localdomain.com (10.73.43.242) by
+ jtjnmail201611.home.langchao.com (10.100.2.11) with Microsoft SMTP Server id
+ 15.1.2507.21; Wed, 12 Apr 2023 16:48:03 +0800
+From:   Bo Liu <liubo03@inspur.com>
+To:     <ulf.hansson@linaro.org>
+CC:     <linux-mmc@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        Bo Liu <liubo03@inspur.com>
+Subject: [PATCH] mmc: vub300: remove unreachable code
+Date:   Wed, 12 Apr 2023 04:47:58 -0400
+Message-ID: <20230412084758.2673-1-liubo03@inspur.com>
+X-Mailer: git-send-email 2.18.2
 MIME-Version: 1.0
 Content-Type: text/plain
+X-Originating-IP: [10.73.43.242]
+tUid:   2023412164804bd112bb7f71eefd5a56a73e62553a68c
+X-Abuse-Reports-To: service@corp-email.com
+Abuse-Reports-To: service@corp-email.com
+X-Complaints-To: service@corp-email.com
+X-Report-Abuse-To: service@corp-email.com
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Simon Horman <simon.horman@corigine.com> writes:
+The function sched_partition_show cannot execute return, delete the
+invalid code.
 
-> On Sat, Apr 08, 2023 at 06:44:40PM +0200, Marek Vasut wrote:
->
->> On 4/8/23 17:24, Simon Horman wrote:
->> > On Fri, Apr 07, 2023 at 10:37:52PM +0200, Marek Vasut wrote:
->> >
->> > > NOTE: Please drop the Fixes tag if this is considered unjustified
->> > 
->> > <2c>
->> > Feels more like enablement than a fix to me.
->> > </2c>
->> 
->> I added it because
->> 
->> Documentation/process/stable-kernel-rules.rst
->> 
->> L24  - New device IDs and quirks are also accepted.
->
-> Thanks. If I was aware of that, I had forgotten.
->
->> So, really, up to the maintainer whether they are fine with it being
->> backported to stable releases or not. I don't really mind either way.
->
-> Yes, I completely agree.
+Signed-off-by: Bo Liu <liubo03@inspur.com>
+---
+ drivers/mmc/host/vub300.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-IIUC you are here mixing Fixes and Cc tags, if you want to get a commit
-to stable releases there should be "Cc: stable@...". So I'll remove the
-Fixes tag and add the Cc tag, ok?
-
+diff --git a/drivers/mmc/host/vub300.c b/drivers/mmc/host/vub300.c
+index 72f65f32abbc..e4c4bfac3763 100644
+--- a/drivers/mmc/host/vub300.c
++++ b/drivers/mmc/host/vub300.c
+@@ -1341,8 +1341,6 @@ static void __download_offload_pseudocode(struct vub300_mmc_host *vub300,
+ 		return;
+ 	}
+ 
+-	return;
+-
+ copy_error_message:
+ 	strncpy(vub300->vub_name, "SDIO pseudocode download failed",
+ 		sizeof(vub300->vub_name));
 -- 
-https://patchwork.kernel.org/project/linux-wireless/list/
+2.27.0
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
