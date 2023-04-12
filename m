@@ -2,131 +2,147 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84606C76196
-	for <linux-mmc@archiver.kernel.org>; Tue, 11 Apr 2023 20:29:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DB7CAC77B6E
+	for <linux-mmc@archiver.kernel.org>; Wed, 12 Apr 2023 07:48:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229846AbjDKU35 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 11 Apr 2023 16:29:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41864 "EHLO
+        id S229693AbjDLHsz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 12 Apr 2023 03:48:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37996 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229878AbjDKU34 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 11 Apr 2023 16:29:56 -0400
-Received: from mail-pj1-f53.google.com (mail-pj1-f53.google.com [209.85.216.53])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49F703584;
-        Tue, 11 Apr 2023 13:29:55 -0700 (PDT)
-Received: by mail-pj1-f53.google.com with SMTP id y11-20020a17090a600b00b0024693e96b58so8193463pji.1;
-        Tue, 11 Apr 2023 13:29:55 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112; t=1681244995; x=1683836995;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=X5UCA+tE3Fq8HXbLn+U+wd27dVODbtTngBjwQ/9PBX0=;
-        b=5OoppjsE8o5YGTz5s4twBQSF0GehzVLLUVynqrJj/xzjP8Crws6gI9fEVbZgBg27z2
-         rptjMxhn52iQWcafD2ojxWezSKYR5bgug/yK39IqRRzhbrLO56SPPsU38oxppo4BF+mF
-         GF7jwZlZTWIdTu7CwF5sHhlAog7KirSItpxwo3GBfuwlAukWAMqdRW0S2LGfp+Ogw+/Z
-         it4Ax2h2dniuXm7bMvDpJT2V2LzATVt95WK6DvnXJd04rpd6nsWZMdeqCVk7LIFKfdfT
-         TtIBevwik4yWsDqefonx7FFzeANsu0HnCQ+dfpghlPm7II/vG54gWrXzAtDlNVJL0Ht2
-         HXFQ==
-X-Gm-Message-State: AAQBX9d7QxoRWHiCcq8xOfQ1xBU7kQIPfFtZw7uxcWlNdWc4Skl5Nrbx
-        JGLYm+7eIhyw+ALq9vDzxix076JWE5B2rg==
-X-Google-Smtp-Source: AKy350ZI+I0EfD8cuUXNEOSBQ+pnMgX7tS3cLWevur0lEL9UKgU+NGS7ChmKBKPSlWOhtqgqK9m52A==
-X-Received: by 2002:a17:90b:3b44:b0:237:62f7:3106 with SMTP id ot4-20020a17090b3b4400b0023762f73106mr19020143pjb.17.1681244994537;
-        Tue, 11 Apr 2023 13:29:54 -0700 (PDT)
-Received: from snowbird ([199.73.127.3])
-        by smtp.gmail.com with ESMTPSA id k60-20020a17090a4cc200b0023f5c867f82sm11386453pjh.41.2023.04.11.13.29.53
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Apr 2023 13:29:54 -0700 (PDT)
-Date:   Tue, 11 Apr 2023 13:29:50 -0700
-From:   Dennis Zhou <dennis@kernel.org>
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v2] mmc: inline the first mmc_scan() on mmc_start_host()
-Message-ID: <ZDXDPuSOSV1EYvPr@snowbird>
-References: <20230329202148.71107-1-dennis@kernel.org>
- <ZCTOMVjW+pnZVGsQ@snowbird>
- <CAPDyKFrcdJuyA9B-JDReacT2z1ircDoY4oTXZQ8AVFk6UEFYsw@mail.gmail.com>
- <ZCclEE6Qw3on7/eO@snowbird>
- <CAPDyKFqc33gUYXpY==jbNrOiba2_xUYLs-bv0RTYYU5d8T0VBA@mail.gmail.com>
- <ZC/TL2/gLre0B4xH@snowbird>
+        with ESMTP id S229575AbjDLHsx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2023 03:48:53 -0400
+Received: from mx07-00178001.pphosted.com (mx07-00178001.pphosted.com [185.132.182.106])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CD69BE59
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2023 00:48:51 -0700 (PDT)
+Received: from pps.filterd (m0288072.ppops.net [127.0.0.1])
+        by mx07-00178001.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33C5PtDL001785;
+        Wed, 12 Apr 2023 09:48:47 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=foss.st.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=selector1;
+ bh=MVBSuZmwmGl3CD1mpnNXSbvcquP54D2COle1slnBb6g=;
+ b=ppaJScPs+R32qcu2GXQlBuWVAyYliJ7r+61SVqtcupi8Vy0S7nUkDAfl6EEXBV2NYlU/
+ 92LdqsbEOzkeJowJw+YEb/LHSOEAkSS/lbDB6vdNq9twyS1+QtPvdfoAODAbqbALuFVW
+ M2Wb3P33x+kAFEDsVlZQBEJYAuPv6zrj6zyV3qdzCMJkXvdn6ZKwZm752Ms6DBFvmc7f
+ IGVw5qfHeVO9FQLBOXat5kGfNYS/P1Sc/jKpkM4Opjp6Go0uIyYPqCYuoOLGNfKi75IX
+ 1QxNYgvErFv0XpDkx4nP8Q/Q34iEune0Nip+WM8YmQPai5VEouNzaFJXnBHngW/LmbJI sg== 
+Received: from beta.dmz-eu.st.com (beta.dmz-eu.st.com [164.129.1.35])
+        by mx07-00178001.pphosted.com (PPS) with ESMTPS id 3pw8b0n145-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 12 Apr 2023 09:48:47 +0200
+Received: from euls16034.sgp.st.com (euls16034.sgp.st.com [10.75.44.20])
+        by beta.dmz-eu.st.com (STMicroelectronics) with ESMTP id 73ED110002A;
+        Wed, 12 Apr 2023 09:48:46 +0200 (CEST)
+Received: from Webmail-eu.st.com (shfdag1node2.st.com [10.75.129.70])
+        by euls16034.sgp.st.com (STMicroelectronics) with ESMTP id 5CBC920FA32;
+        Wed, 12 Apr 2023 09:48:46 +0200 (CEST)
+Received: from [10.252.13.119] (10.252.13.119) by SHFDAG1NODE2.st.com
+ (10.75.129.70) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id 15.1.2507.21; Wed, 12 Apr
+ 2023 09:48:45 +0200
+Message-ID: <04180e5c-71ec-2f0f-c63b-185523110f1c@foss.st.com>
+Date:   Wed, 12 Apr 2023 09:48:24 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ZC/TL2/gLre0B4xH@snowbird>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [PATCH v2 00/12] Fix busydetect on Ux500 PL180/MMCI
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Stefan Hansson <newbyte@disroot.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
+        Alexandre Torgue <alexandre.torgue@foss.st.com>
+CC:     <linux-mmc@vger.kernel.org>,
+        <linux-stm32@st-md-mailman.stormreply.com>
+References: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org>
+Content-Language: en-US
+From:   Yann Gautier <yann.gautier@foss.st.com>
+In-Reply-To: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.252.13.119]
+X-ClientProxiedBy: SHFCAS1NODE1.st.com (10.75.129.72) To SHFDAG1NODE2.st.com
+ (10.75.129.70)
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.205,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-04-12_02,2023-04-11_02,2023-02-09_01
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, Apr 07, 2023 at 01:24:15AM -0700, Dennis Zhou wrote:
-> On Mon, Apr 03, 2023 at 11:50:41AM +0200, Ulf Hansson wrote:
-> > On Fri, 31 Mar 2023 at 20:23, Dennis Zhou <dennis@kernel.org> wrote:
-> > >
-> > > Hi Ulf,
-> > >
-> > > On Fri, Mar 31, 2023 at 02:43:10PM +0200, Ulf Hansson wrote:
-> > > > On Thu, 30 Mar 2023 at 01:48, Dennis Zhou <dennis@kernel.org> wrote:
-> > > > >
-> > > > > When using dm-verity with a data partition on an emmc device, dm-verity
-> > > > > races with the discovery of attached emmc devices. This is because mmc's
-> > > > > probing code sets up the host data structure then a work item is
-> > > > > scheduled to do discovery afterwards. To prevent this race on init,
-> > > > > let's inline the first call to detection, __mm_scan(), and let
-> > > > > subsequent detect calls be handled via the workqueue.
-> > > >
-> > > > In principle, I don't mind the changes in $subject patch, as long as
-> > > > it doesn't hurt the overall initialization/boot time. Especially, we
-> > > > may have more than one mmc-slot being used, so this needs to be well
-> > > > tested.
-> > > >
-> > >
-> > > I unfortunately don't have a device with multiple mmcs available. Is
-> > > this something you could help me with?
-> > 
-> > Yes, I can help to test. Allow me a few days to see what I can do.
-> > 
-> > Note that, just having one eMMC and one SD card should work too. It
-> > doesn't have to be multiple eMMCs.
-> > 
-> > >
-> > > > Although, more importantly, I fail to understand how this is going to
-> > > > solve the race condition. Any I/O request to an eMMC or SD requires
-> > > > the mmc block device driver to be up and running too, which is getting
-> > > > probed from a separate module/driver that's not part of mmc_rescan().
-> > >
-> > > I believe the call chain is something like this:
-> > >
-> > > __mmc_rescan()
-> > >     mmc_rescan_try_freq()
-> > >         mmc_attach_mmc()
-> > >             mmc_add_card()
-> > >                 device_add()
-> > >                     bus_probe_device()
-> > >                         mmc_blk_probe()
-> > >
-> > > The initial calling of this is the host probe. So effectively if there
-> > > is a card attached, we're inlining the device_add() call for the card
-> > > attached rather than waiting for the workqueue item to kick off.
-> > >
-> > > dm is a part of late_initcall() while mmc is a module_init(), when built
-> > > in becoming a device_initcall(). So this solves a race via the initcall
-> > > chain. In the current state, device_initcall() finishes and we move onto
-> > > the late_initcall() phase. But now, dm is racing with the workqueue to
-> > > init the attached emmc device.
-> > 
-> > You certainly have a point!
-> > 
-> > This should work when the mmc blk module is built-in. Even if that
-> > doesn't solve the entire problem, it should be a step in the right
-> > direction.
-> > 
-> > I will give it some more thinking and run some tests at my side, then
-> > I will get back to you again.
-> > 
+On 4/9/23 00:00, Linus Walleij wrote:
+> This series fixes a pretty serious problem in the MMCI
+> busy detect handling, discovered only after going up and
+> down a ladder of refactorings.
 > 
-> Hi Ulf, is there an update on testing with this patch?
+> The code is written expecting the Ux500 busy detect
+> to fire two interrupts: one at the start of the busy
+> signalling and one at the end of the busy signalling.
 > 
+> The root cause of the problem seen on some devices
+> is that only the first IRQ arrives, and then the device
+> hangs, waiting perpetually for the next IRQ to arrive.
+> 
+> This is eventually solved by adding a timeout using
+> a delayed work that fire after 10 ms if the busy detect
+> has not stopped at this point. (Other delay spans can
+> be suggested.) This is the last patch in the series.
+> 
+> I included the rewrite of the entire busy detect logic
+> to use a state machine as this makes it way easier to
+> debug and will print messages about other error
+> conditions as well.
+> 
+> The problem affects especially the Skomer
+> (Samsung GT-I9070) and Kyle (Samsung SGH-I407).
+> 
+> It is fine to just apply this for the -next kernel,
+> despite it fixes the busy detect that has been broken
+> for these devices for a while, we can think about
+> backporting a simpler version of the timeout for
+> stable kernels if we want.
+> 
+> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+> ---
+> Changes in v2:
+> - Drop pointless patch nr 1
+> - Unconditionally intialize some state variables
+> - Use a less fragile method to look for busy status when
+>    using busy detect, should fix Yann's problem
 
-Ping.
+Hi Linus,
 
-Thanks,
-Dennis
+Thanks for the update, it is now OK on STM32MP1.
+For the series, you can add my:
+Reviewed-by: Yann Gautier <yann.gautier@foss.st.com>
+
+
+Best regards,
+Yann
+
+> - Link to v1: https://lore.kernel.org/r/20230405-pl180-busydetect-fix-v1-0-28ac19a74e5e@linaro.org
+> 
+> ---
+> Linus Walleij (12):
+>        mmc: mmci: Clear busy_status when starting command
+>        mmc: mmci: Unwind big if() clause
+>        mmc: mmci: Stash status while waiting for busy
+>        mmc: mmci: Break out error check in busy detect
+>        mmc: mmci: Make busy complete state machine explicit
+>        mmc: mmci: Retry the busy start condition
+>        mmc: mmci: Use state machine state as exit condition
+>        mmc: mmci: Use a switch statement machine
+>        mmc: mmci: Break out a helper function
+>        mmc: mmci: mmci_card_busy() from state machine
+>        mmc: mmci: Drop end IRQ from Ux500 busydetect
+>        mmc: mmci: Add busydetect timeout
+> 
+>   drivers/mmc/host/mmci.c             | 166 ++++++++++++++++++++++++++++--------
+>   drivers/mmc/host/mmci.h             |  17 ++++
+>   drivers/mmc/host/mmci_stm32_sdmmc.c |   6 +-
+>   3 files changed, 151 insertions(+), 38 deletions(-)
+> ---
+> base-commit: fe15c26ee26efa11741a7b632e9f23b01aca4cc6
+> change-id: 20230405-pl180-busydetect-fix-66a0360d398a
+> 
+> Best regards,
+
