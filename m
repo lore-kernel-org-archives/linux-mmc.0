@@ -2,178 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 28B1AC77B73
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Apr 2023 06:54:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BB6C8C77B6E
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Apr 2023 14:01:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229582AbjDMGyp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Apr 2023 02:54:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54184 "EHLO
+        id S231669AbjDMOBF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Apr 2023 10:01:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35146 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229482AbjDMGyo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2023 02:54:44 -0400
-Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94AA683EE
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2023 23:54:40 -0700 (PDT)
-Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-54fa9da5e5bso64587207b3.1
-        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2023 23:54:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681368880; x=1683960880;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=nc4lL7JxaxGf+XYCkFM159Jes+f3X5bXuBPCU38sK1A=;
-        b=x2EEYKNwns2Pbb+ucqgKdqZDtnOo6wufbG6wB0BNrEeumCTEuZUHPvnqh3lVB8O3Ey
-         mTULQ6o6izzJFtYG/CmIBv5nYiEKgr2DyZDnldRzaZh7eVaIWvpgL4Ay6F47ov6oirTX
-         AW1qSljM7dA9NwrfrCwhxK/hEgkFIQpwoAhzof9Rf0skU2RkGAAvOJCelN6C/IRrqQMa
-         +2zdkUsfddnMir10WHagqmm85rqs9dZYuaKpSJPFW1z0OIkZF6kGUvawuKLRTmrR4c9F
-         JnIvdJ8ZZ2tosOjJBCEQdb0d5hu0C+9eJS7hrK3n1bafevOABiyteWNqEmflKeY8hjOO
-         ++uQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681368880; x=1683960880;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=nc4lL7JxaxGf+XYCkFM159Jes+f3X5bXuBPCU38sK1A=;
-        b=kmFaANtXAx7WPeNTgX6rEwcZoIzofPe9rtfe8Itae807QSb6szYl3uTeE2sIGoFc5q
-         GhBXrt4b4wnpGoTNqV5r1nwEbDZCYoqX7vJiWsO8Z2AlA1QA/ZU5T3PZMwYSvuUzrlvX
-         MrxJwsDTBj3+ltVD7Jsa6e5QL1TfdTaJXgr2qOcBmvW2sc1dL6q+KpZl6JnOWJ4DQQ6K
-         RgfcQK5A7ewp5hJfLCyZAHlY+TonWCi/9x8xLexZREIq7G2OTuV+JWg+mUT8ktlGt3q0
-         Fc6RfsRVYFg4wdrZ32fov/imSXPu5x6h+3Vs6qveH8Po9wMnzveUCq8OAZKRl4H2ZfZB
-         02lQ==
-X-Gm-Message-State: AAQBX9c/kDxZN47i1Yoi2+ZjvFyh3vwl7Kj8iH3OzqZkLdNwIu8OTy/q
-        kLOxXpti/++GpGsUlUgbCF6g6pWr32NoJxPogofmDA==
-X-Google-Smtp-Source: AKy350ZbBKjG6fi9EeOO5NV/GOSg+h3W9R10VGi1N1iYeqzIYEjsf1O8fdUlo8BjVvNdE8zxrMdbrPdWIcFQ3gf2lg0=
-X-Received: by 2002:a81:4307:0:b0:545:f7cc:f30 with SMTP id
- q7-20020a814307000000b00545f7cc0f30mr755616ywa.0.1681368879779; Wed, 12 Apr
- 2023 23:54:39 -0700 (PDT)
+        with ESMTP id S229786AbjDMOBE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2023 10:01:04 -0400
+Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0986B8A6C
+        for <linux-mmc@vger.kernel.org>; Thu, 13 Apr 2023 07:00:59 -0700 (PDT)
+Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
+        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
+        id 1pmxVR-0000jX-MA; Thu, 13 Apr 2023 16:00:57 +0200
+Message-ID: <2e4521c5-b291-e228-c926-525e9a50a023@leemhuis.info>
+Date:   Thu, 13 Apr 2023 16:00:57 +0200
 MIME-Version: 1.0
-References: <20230407013118.466441-1-marex@denx.de>
-In-Reply-To: <20230407013118.466441-1-marex@denx.de>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Thu, 13 Apr 2023 08:54:03 +0200
-Message-ID: <CAPDyKFqMcNxUtJCtP09_APYX2Fefeqzs9-CmsSNVdzN=vPyChQ@mail.gmail.com>
-Subject: Re: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
-To:     Marek Vasut <marex@denx.de>
-Cc:     linux-wireless@vger.kernel.org,
-        "David S. Miller" <davem@davemloft.net>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Danny van Heumen <danny@dannyvanheumen.nl>,
-        Eric Dumazet <edumazet@google.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hans de Goede <hdegoede@redhat.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        SHA-cyfmac-dev-list@infineon.com,
-        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.1
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+Content-Language: en-US, de-DE
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>,
+        Linux kernel regressions list <regressions@lists.linux.dev>
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+From:   "Linux regression tracking (Thorsten Leemhuis)" 
+        <regressions@leemhuis.info>
+Reply-To: Linux regressions mailing list <regressions@lists.linux.dev>
+In-Reply-To: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1681394460;c538e318;
+X-HE-SMSGID: 1pmxVR-0000jX-MA
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Fri, 7 Apr 2023 at 03:31, Marek Vasut <marex@denx.de> wrote:
->
-> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
-> The odd thing about this is that the previous 1YN populated
-> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
-> while the chip populated on real hardware has a Cypress one.
-> The device ID also differs between the two devices. But they
-> are both 43439 otherwise, so add the IDs for both.
->
-> ```
-> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
-> 0x04b4
-> 0xbd3d
-> ```
->
-> Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
-> Signed-off-by: Marek Vasut <marex@denx.de>
+[TLDR: I'm adding this report to the list of tracked Linux kernel
+regressions; the text you find below is based on a few templates
+paragraphs you might have encountered already in similar form.
+See link in footer if these mails annoy you.]
 
-Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
+[CCing the regression list, as it should be in the loop for regressions:
+https://docs.kernel.org/admin-guide/reporting-regressions.html]
 
-Kind regards
-Uffe
+On 11.04.23 01:13, Martin Blumenstingl wrote:
+> 
+> today I found that upstream commit 4bc31edebde5 ("mmc: core: Set HS
+> clock speed before sending HS CMD13") breaks eMMC support on my
+> Odroid-C1.
+> (yes, I know that I am very late to the party...)
+> 
+> The .dts for this board is upstream using
+> arch/arm/boot/dts/meson8b-odroidc1.dts (&sdhc node)
+> The MMC host driver used is drivers/mmc/host/meson-mx-sdhc*.
+> 
+> The problem I'm seeing is that the eMMC module is simply not detected.
+> There are no errors in the kernel log (note that mmc1 is the eMMC
+> while mmc0 is the SD card which is attached to another controller on
+> that SoC):
+> # dmesg | grep mmc
+> [    2.742136] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
+> [    4.315905] platform c1108c20.mmc:slot@1: Got CD GPIO
+> [    4.450921] mmc0: new high speed SDHC card at address 0001
+> [    4.456985] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
+> [    4.466108]  mmcblk0: p1
+> 
+> In this state I get:
+> # cat /sys/kernel/debug/mmc1/ios
+> clock:          52000000 Hz
+> actual clock:   51000000 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    9 (mmc HS200)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> 
+> After reverting the mentioned commit I get:
+> # dmesg | grep mmc
+> [    2.744226] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
+> [    2.970944] mmc1: new HS200 MMC card at address 0001
+> [    2.974492] mmcblk1: mmc1:0001 8GND3R 7.28 GiB
+> [    2.985126]  mmcblk1: p1
+> [    2.987810] mmcblk1boot0: mmc1:0001 8GND3R 4.00 MiB
+> [    3.003007] mmcblk1boot1: mmc1:0001 8GND3R 4.00 MiB
+> [    4.311754] platform c1108c20.mmc:slot@1: Got CD GPIO
+> [    4.374732] mmc0: new high speed SDHC card at address 0001
+> [    4.377228] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
+> [    4.399152]  mmcblk0: p1
+> # cat /sys/kernel/debug/mmc1/ios
+> clock:          100000000 Hz
+> actual clock:   94444445 Hz
+> vdd:            21 (3.3 ~ 3.4 V)
+> bus mode:       2 (push-pull)
+> chip select:    0 (don't care)
+> power mode:     2 (on)
+> bus width:      3 (8 bits)
+> timing spec:    9 (mmc HS200)
+> signal voltage: 1 (1.80 V)
+> driver type:    0 (driver type B)
+> 
+> Please let me know which additional information would be helpful for
+> debugging this further.
+> Also I'd like to highlight that I'm not blaming the above commit
+> (unless I know better). It's entirely possible that the meson-mx-sdhc
+> driver (which I wrote) can be at fault and that I was previously just
+> lucky.
+> 
+> [...]
+> # first bad commit: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc:
+> core: Set HS clock speed before sending HS CMD13
 
-> ---
-> NOTE: Please drop the Fixes tag if this is considered unjustified
-> Cc: "David S. Miller" <davem@davemloft.net>
-> Cc: Arend van Spriel <aspriel@gmail.com>
-> Cc: Danny van Heumen <danny@dannyvanheumen.nl>
-> Cc: Eric Dumazet <edumazet@google.com>
-> Cc: Franky Lin <franky.lin@broadcom.com>
-> Cc: Hans de Goede <hdegoede@redhat.com>
-> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
-> Cc: Jakub Kicinski <kuba@kernel.org>
-> Cc: Kalle Valo <kvalo@kernel.org>
-> Cc: Paolo Abeni <pabeni@redhat.com>
-> Cc: Paul Cercueil <paul@crapouillou.net>
-> Cc: SHA-cyfmac-dev-list@infineon.com
-> Cc: Ulf Hansson <ulf.hansson@linaro.org>
-> Cc: brcm80211-dev-list.pdl@broadcom.com
-> Cc: linux-mmc@vger.kernel.org
-> Cc: linux-wireless@vger.kernel.org
-> Cc: netdev@vger.kernel.org
-> ---
->  .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
->  include/linux/mmc/sdio_ids.h                             | 5 ++++-
->  2 files changed, 12 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> index 65d4799a56584..ff710b0b5071a 100644
-> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
-> @@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
->                 .driver_data = BRCMF_FWVENDOR_ ## fw_vend \
->         }
->
-> +#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
-> +       { \
-> +               SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
-> +               .driver_data = BRCMF_FWVENDOR_ ## fw_vend \
-> +       }
-> +
->  /* devices we support, null terminated */
->  static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
-> @@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
-> +       BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
-> @@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
-> -       BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
->         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
-> +       CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
->         { /* end: all zeroes */ }
->  };
->  MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
-> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
-> index 0e4ef9c5127ad..bf3c95d8eb8af 100644
-> --- a/include/linux/mmc/sdio_ids.h
-> +++ b/include/linux/mmc/sdio_ids.h
-> @@ -74,10 +74,13 @@
->  #define SDIO_DEVICE_ID_BROADCOM_43362          0xa962
->  #define SDIO_DEVICE_ID_BROADCOM_43364          0xa9a4
->  #define SDIO_DEVICE_ID_BROADCOM_43430          0xa9a6
-> -#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439  0xa9af
-> +#define SDIO_DEVICE_ID_BROADCOM_43439          0xa9af
->  #define SDIO_DEVICE_ID_BROADCOM_43455          0xa9bf
->  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752  0xaae8
->
-> +#define SDIO_VENDOR_ID_CYPRESS                 0x04b4
-> +#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439  0xbd3d
-> +
->  #define SDIO_VENDOR_ID_MARVELL                 0x02df
->  #define SDIO_DEVICE_ID_MARVELL_LIBERTAS                0x9103
->  #define SDIO_DEVICE_ID_MARVELL_8688_WLAN       0x9104
-> --
-> 2.39.2
->
+Thanks for the report. To be sure the issue doesn't fall through the
+cracks unnoticed, I'm adding it to regzbot, the Linux kernel regression
+tracking bot:
+
+#regzbot ^introduced 4bc31edebde51fcf8ad079
+#regzbot title mmc: core: eMMC support broken on Odroid-C1
+#regzbot ignore-activity
+
+This isn't a regression? This issue or a fix for it are already
+discussed somewhere else? It was fixed already? You want to clarify when
+the regression started to happen? Or point out I got the title or
+something else totally wrong? Then just reply and tell me -- ideally
+while also telling regzbot about it, as explained by the page listed in
+the footer of this mail.
+
+Developers: When fixing the issue, remember to add 'Link:' tags pointing
+to the report (the parent of this mail). See page linked in footer for
+details.
+
+Ciao, Thorsten (wearing his 'the Linux kernel's regression tracker' hat)
+--
+Everything you wanna know about Linux kernel regression tracking:
+https://linux-regtracking.leemhuis.info/about/#tldr
+That page also explains what to do if mails like this annoy you.
