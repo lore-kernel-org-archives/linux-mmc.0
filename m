@@ -2,158 +2,178 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76E7FC7619A
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Apr 2023 00:51:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 28B1AC77B73
+	for <linux-mmc@archiver.kernel.org>; Thu, 13 Apr 2023 06:54:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229815AbjDMAv6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 12 Apr 2023 20:51:58 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48834 "EHLO
+        id S229582AbjDMGyp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 13 Apr 2023 02:54:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54184 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229685AbjDMAv5 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 12 Apr 2023 20:51:57 -0400
-Received: from NAM11-DM6-obe.outbound.protection.outlook.com (mail-dm6nam11on2059.outbound.protection.outlook.com [40.107.223.59])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04655768D;
-        Wed, 12 Apr 2023 17:51:53 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=mJjmLT4C4c/996swhLDsPKF73MuVXzYDA5TAL58djn/kGYsCLWj/aeNfVS10imqulnuyP0E7pSWZALokI/fopLPkZlmeBxiSYqHfFh9tLrhWgqF+ygTrl7oTKnPuEmb3B+LgQ//X8ZHwsSFJ4iEXoWEAJq3Ja/zX8N7Qh4gr7Swijl9d1YsAzsC0mLWEMc6SIZQPCMpWt/4yHlZfvRX5DlezlTeIbqrDQV4xGsF6HCwf0GKhFHi9mmvarqx/CbqKVdXuNsA9iUyrLRW257HUqC0w/HNA0CjgZgEUUVvkazIFk38gppUhvraZxVrIgDOki2/kBFqlnhWrI89uSyF/dA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=8MLusmjcGjP+39M7KJ7m84BNI+8wxd1cRnzSmqWvnhg=;
- b=Kxf4Z+wF+QKroYnybeOk+HECFCvCFMZQwAlPKWTGSybTED0jQrBt5JR1wnJmBag1D+MDfSwUE/adEm/LLKwhovLDTjBFqvbljA7xCUH4D+o59S+MUrb//00rdtoumcBDmuz6gIFpAcku6K7ZV6RShakv/1C/T7+D56g1Q4GWZPO3Kt1R0HTQFIf3O+7fyBy/4QxtFbwoSVfZjFKTRj/tbdENd64U0R/Ntpyh1iHanYqK1pgAOVtkJa8miUTdGaV/rU+/pQTL8E8SNwIizilMITBqaEawrkAVku3WoWn7vKr21QS7uJQ/IWrk169e6d3pvmgZhnpKzx6y3qAOz5M5Tg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
- 165.204.84.17) smtp.rcpttodomain=kernel.org smtp.mailfrom=amd.com; dmarc=pass
- (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
- dkim=none (message not signed); arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=8MLusmjcGjP+39M7KJ7m84BNI+8wxd1cRnzSmqWvnhg=;
- b=f1cVRKGcDuG/RCuZ1UA8+sBmH2L6q9sBldc2eAsvhvN8y+fvoBBm6K8pC0/O0AI1Qu61JE2/52kHbpfZzcrDrodvikWz2NBt7kcxlpGfzkxvNnITiGedDoRrNpt/rr7UTmiimWD1nVEuozojjEuMfgUJHUOevBnZatC31wTY8gI=
-Received: from BN0PR04CA0142.namprd04.prod.outlook.com (2603:10b6:408:ed::27)
- by DM4PR12MB6661.namprd12.prod.outlook.com (2603:10b6:8:bb::19) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6277.38; Thu, 13 Apr
- 2023 00:51:51 +0000
-Received: from BN8NAM11FT064.eop-nam11.prod.protection.outlook.com
- (2603:10b6:408:ed:cafe::33) by BN0PR04CA0142.outlook.office365.com
- (2603:10b6:408:ed::27) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6298.30 via Frontend
- Transport; Thu, 13 Apr 2023 00:51:50 +0000
-X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
- smtp.mailfrom=amd.com; dkim=none (message not signed)
- header.d=none;dmarc=pass action=none header.from=amd.com;
-Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
- 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
- client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
-Received: from SATLEXMB04.amd.com (165.204.84.17) by
- BN8NAM11FT064.mail.protection.outlook.com (10.13.176.160) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.20.6298.31 via Frontend Transport; Thu, 13 Apr 2023 00:51:50 +0000
-Received: from platform-dev1.pensando.io (10.180.168.240) by
- SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.2375.34; Wed, 12 Apr 2023 19:51:47 -0500
-From:   Brad Larson <blarson@amd.com>
-To:     <robh@kernel.org>
-CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
-        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
-        <brendan.higgins@linux.dev>, <briannorris@chromium.org>,
-        <brijeshkumar.singh@amd.com>, <broonie@kernel.org>,
-        <catalin.marinas@arm.com>, <davidgow@google.com>,
-        <devicetree@vger.kernel.org>, <fancer.lancer@gmail.com>,
-        <gerg@linux-m68k.org>, <gsomlo@gmail.com>, <krzk@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
-        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-spi@vger.kernel.org>, <p.yadav@ti.com>,
-        <p.zabel@pengutronix.de>, <piotrs@cadence.com>,
-        <rdunlap@infradead.org>, <samuel@sholland.org>,
-        <skhan@linuxfoundation.org>, <suravee.suthikulpanit@amd.com>,
-        <thomas.lendacky@amd.com>, <tonyhuang.sunplus@gmail.com>,
-        <ulf.hansson@linaro.org>, <vaishnav.a@ti.com>, <will@kernel.org>,
-        <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v13 08/15] arm64: dts: Add AMD Pensando Elba SoC support
-Date:   Wed, 12 Apr 2023 17:51:41 -0700
-Message-ID: <20230413005141.24632-1-blarson@amd.com>
-X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230411135518.GA2952600-robh@kernel.org>
-References: <20230411135518.GA2952600-robh@kernel.org>
+        with ESMTP id S229482AbjDMGyo (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2023 02:54:44 -0400
+Received: from mail-yw1-x112d.google.com (mail-yw1-x112d.google.com [IPv6:2607:f8b0:4864:20::112d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94AA683EE
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2023 23:54:40 -0700 (PDT)
+Received: by mail-yw1-x112d.google.com with SMTP id 00721157ae682-54fa9da5e5bso64587207b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 12 Apr 2023 23:54:40 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1681368880; x=1683960880;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=nc4lL7JxaxGf+XYCkFM159Jes+f3X5bXuBPCU38sK1A=;
+        b=x2EEYKNwns2Pbb+ucqgKdqZDtnOo6wufbG6wB0BNrEeumCTEuZUHPvnqh3lVB8O3Ey
+         mTULQ6o6izzJFtYG/CmIBv5nYiEKgr2DyZDnldRzaZh7eVaIWvpgL4Ay6F47ov6oirTX
+         AW1qSljM7dA9NwrfrCwhxK/hEgkFIQpwoAhzof9Rf0skU2RkGAAvOJCelN6C/IRrqQMa
+         +2zdkUsfddnMir10WHagqmm85rqs9dZYuaKpSJPFW1z0OIkZF6kGUvawuKLRTmrR4c9F
+         JnIvdJ8ZZ2tosOjJBCEQdb0d5hu0C+9eJS7hrK3n1bafevOABiyteWNqEmflKeY8hjOO
+         ++uQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1681368880; x=1683960880;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=nc4lL7JxaxGf+XYCkFM159Jes+f3X5bXuBPCU38sK1A=;
+        b=kmFaANtXAx7WPeNTgX6rEwcZoIzofPe9rtfe8Itae807QSb6szYl3uTeE2sIGoFc5q
+         GhBXrt4b4wnpGoTNqV5r1nwEbDZCYoqX7vJiWsO8Z2AlA1QA/ZU5T3PZMwYSvuUzrlvX
+         MrxJwsDTBj3+ltVD7Jsa6e5QL1TfdTaJXgr2qOcBmvW2sc1dL6q+KpZl6JnOWJ4DQQ6K
+         RgfcQK5A7ewp5hJfLCyZAHlY+TonWCi/9x8xLexZREIq7G2OTuV+JWg+mUT8ktlGt3q0
+         Fc6RfsRVYFg4wdrZ32fov/imSXPu5x6h+3Vs6qveH8Po9wMnzveUCq8OAZKRl4H2ZfZB
+         02lQ==
+X-Gm-Message-State: AAQBX9c/kDxZN47i1Yoi2+ZjvFyh3vwl7Kj8iH3OzqZkLdNwIu8OTy/q
+        kLOxXpti/++GpGsUlUgbCF6g6pWr32NoJxPogofmDA==
+X-Google-Smtp-Source: AKy350ZbBKjG6fi9EeOO5NV/GOSg+h3W9R10VGi1N1iYeqzIYEjsf1O8fdUlo8BjVvNdE8zxrMdbrPdWIcFQ3gf2lg0=
+X-Received: by 2002:a81:4307:0:b0:545:f7cc:f30 with SMTP id
+ q7-20020a814307000000b00545f7cc0f30mr755616ywa.0.1681368879779; Wed, 12 Apr
+ 2023 23:54:39 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
-X-Originating-IP: [10.180.168.240]
-X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
- (10.181.40.145)
-X-EOPAttributedMessage: 0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: BN8NAM11FT064:EE_|DM4PR12MB6661:EE_
-X-MS-Office365-Filtering-Correlation-Id: 38a00faa-67d1-4710-38b0-08db3bb9447b
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: aUtr4RKa16428CXi34Gxrs+UUBSXBc6rUFTdJKXGFs3GuurKi5+YJ3jqjgNolVIaFlLLNLLjWdWusm9fEdypN0D6JpQsk2xNC920yagdus6hTNdT4l9KKFQA8dz+eGaxuSRnQkPVyobAFoj/8RC7xtftS/zC/2PsWrDW8E4JxZ8OEdKHMVN9p4vPtkKWz3lpRw357Q8WV9pAFl1pTru4lE0my1dFFLFtpZIazXIiHyPxqfeL1nLtD1WtQM4I/QbB/2HOJ+ElKLOjYXn5kNZ5kc9lPcpowW+LJnGCqFrt+lBRFqqLKiSnveJQIdn9n7uUkIyUZbzv1TtmGKIHi7QOW5iIDgFgK+7LXtq5xo/Wou3x79uce4RlBTWu2T/EFPavg/wT2JeSS9xPMBJMnP45pQpjdQDLIMTNMVCE9icP1HpGvpKl3vjIQ0pXdyod6JHZkXsHRRBfw+9mHeWBM6QBaip345hRGfWAjgTH2n7nVKkgmGhHIjJPalkE6tOHpEOaD2H/kaEHFYZog1fanmVfFdTSHRq0UIKixuuZHlNbDcnpKKCfFp0QPYd3zmRtNplwRY7fV0r63SPe4RgUX09Df2b1hw5Psk7j459YdLj7+3mpyC1f2Ml4d2+2NqJVWlOFCtiE+JGCu/G9PL+2LFCK8E328/mnGv2WxCJGjGqr5QADuAvYYTqgtb/xi94+j/68hFhGnZEYo9a9OlhA6UMUUSTPRqtdoEez16AIKydcZZA=
-X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(376002)(346002)(136003)(451199021)(36840700001)(46966006)(40470700004)(6916009)(316002)(81166007)(26005)(82740400003)(186003)(53546011)(1076003)(6666004)(83380400001)(36860700001)(2616005)(47076005)(426003)(336012)(16526019)(8936002)(82310400005)(7416002)(5660300002)(7406005)(36756003)(2906002)(41300700001)(8676002)(40460700003)(356005)(478600001)(40480700001)(54906003)(70586007)(4326008)(70206006)(36900700001);DIR:OUT;SFP:1101;
-X-OriginatorOrg: amd.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 13 Apr 2023 00:51:50.6503
- (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 38a00faa-67d1-4710-38b0-08db3bb9447b
-X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
-X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
-X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT064.eop-nam11.prod.protection.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Anonymous
-X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB6661
+References: <20230407013118.466441-1-marex@denx.de>
+In-Reply-To: <20230407013118.466441-1-marex@denx.de>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 13 Apr 2023 08:54:03 +0200
+Message-ID: <CAPDyKFqMcNxUtJCtP09_APYX2Fefeqzs9-CmsSNVdzN=vPyChQ@mail.gmail.com>
+Subject: Re: [PATCH] wifi: brcmfmac: add Cypress 43439 SDIO ids
+To:     Marek Vasut <marex@denx.de>
+Cc:     linux-wireless@vger.kernel.org,
+        "David S. Miller" <davem@davemloft.net>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Danny van Heumen <danny@dannyvanheumen.nl>,
+        Eric Dumazet <edumazet@google.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Kalle Valo <kvalo@kernel.org>, Paolo Abeni <pabeni@redhat.com>,
+        Paul Cercueil <paul@crapouillou.net>,
+        SHA-cyfmac-dev-list@infineon.com,
+        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Rob,
-
-On Tue, Apr 11, 2023 at 08:55:18, Rob Herring wrote:
-> On Mon, Apr 10, 2023 at 11:45:19AM -0700, Brad Larson wrote:
->> Add AMD Pensando common and Elba SoC specific device nodes
->> 
->> Signed-off-by: Brad Larson <blarson@amd.com>
->> ---
->> 
->> v11 changes:
->> - Delete reset-names
->> - Fix spi0 compatible to be specific 'amd,pensando-elba-ctrl'
->> 
->> v9 changes:
->> - Single node for spi0 system-controller and squash
->>   the reset-controller child into parent
+On Fri, 7 Apr 2023 at 03:31, Marek Vasut <marex@denx.de> wrote:
 >
-> Have you run this thru 'make dtbs_check'? I see at least one issue that 
-> should report.
+> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
+> The odd thing about this is that the previous 1YN populated
+> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
+> while the chip populated on real hardware has a Cypress one.
+> The device ID also differs between the two devices. But they
+> are both 43439 otherwise, so add the IDs for both.
+>
+> ```
+> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
+> 0x04b4
+> 0xbd3d
+> ```
+>
+> Fixes: be376df724aa3 ("wifi: brcmfmac: add 43439 SDIO ids and initialization")
+> Signed-off-by: Marek Vasut <marex@denx.de>
 
-Yes and no warnings or errors with these checks 
+Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-make ARCH=arm64 dtbs_check
-make DT_CHECKER_FLAGS=-m dt_binding_check 
+Kind regards
+Uffe
 
-but I did find a couple relevant packages have been updated
-
-dtschema Version: 2023.1  ==> 2023.4
-yamllint Version: 1.26.3  ==> 1.30.0
-
-and then running again I get below 
-
-$ make ARCH=arm64 dtbs_check 
-...
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache0: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache0: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache0: 'cache-unified' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache1: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache1: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache1: 'cache-unified' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache2: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache2: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache2: 'cache-unified' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache3: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache3: 'cache-level' is a required property
-/home/brad/linux.v13/arch/arm64/boot/dts/amd/elba-asic.dtb: l2-cache3: 'cache-unified' is a required property
-
-I'll fix this in the next spin.
-
-Regards,
-Brad
+> ---
+> NOTE: Please drop the Fixes tag if this is considered unjustified
+> Cc: "David S. Miller" <davem@davemloft.net>
+> Cc: Arend van Spriel <aspriel@gmail.com>
+> Cc: Danny van Heumen <danny@dannyvanheumen.nl>
+> Cc: Eric Dumazet <edumazet@google.com>
+> Cc: Franky Lin <franky.lin@broadcom.com>
+> Cc: Hans de Goede <hdegoede@redhat.com>
+> Cc: Hante Meuleman <hante.meuleman@broadcom.com>
+> Cc: Jakub Kicinski <kuba@kernel.org>
+> Cc: Kalle Valo <kvalo@kernel.org>
+> Cc: Paolo Abeni <pabeni@redhat.com>
+> Cc: Paul Cercueil <paul@crapouillou.net>
+> Cc: SHA-cyfmac-dev-list@infineon.com
+> Cc: Ulf Hansson <ulf.hansson@linaro.org>
+> Cc: brcm80211-dev-list.pdl@broadcom.com
+> Cc: linux-mmc@vger.kernel.org
+> Cc: linux-wireless@vger.kernel.org
+> Cc: netdev@vger.kernel.org
+> ---
+>  .../net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c    | 9 ++++++++-
+>  include/linux/mmc/sdio_ids.h                             | 5 ++++-
+>  2 files changed, 12 insertions(+), 2 deletions(-)
+>
+> diff --git a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> index 65d4799a56584..ff710b0b5071a 100644
+> --- a/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> +++ b/drivers/net/wireless/broadcom/brcm80211/brcmfmac/bcmsdh.c
+> @@ -965,6 +965,12 @@ int brcmf_sdiod_probe(struct brcmf_sdio_dev *sdiodev)
+>                 .driver_data = BRCMF_FWVENDOR_ ## fw_vend \
+>         }
+>
+> +#define CYW_SDIO_DEVICE(dev_id, fw_vend) \
+> +       { \
+> +               SDIO_DEVICE(SDIO_VENDOR_ID_CYPRESS, dev_id), \
+> +               .driver_data = BRCMF_FWVENDOR_ ## fw_vend \
+> +       }
+> +
+>  /* devices we support, null terminated */
+>  static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43143, WCC),
+> @@ -979,6 +985,7 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4335_4339, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4339, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43430, WCC),
+> +       BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43439, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4345, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_43455, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4354, WCC),
+> @@ -986,9 +993,9 @@ static const struct sdio_device_id brcmf_sdmmc_ids[] = {
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_4359, WCC),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_4373, CYW),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43012, CYW),
+> -       BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752, CYW),
+>         BRCMF_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_89359, CYW),
+> +       CYW_SDIO_DEVICE(SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439, CYW),
+>         { /* end: all zeroes */ }
+>  };
+>  MODULE_DEVICE_TABLE(sdio, brcmf_sdmmc_ids);
+> diff --git a/include/linux/mmc/sdio_ids.h b/include/linux/mmc/sdio_ids.h
+> index 0e4ef9c5127ad..bf3c95d8eb8af 100644
+> --- a/include/linux/mmc/sdio_ids.h
+> +++ b/include/linux/mmc/sdio_ids.h
+> @@ -74,10 +74,13 @@
+>  #define SDIO_DEVICE_ID_BROADCOM_43362          0xa962
+>  #define SDIO_DEVICE_ID_BROADCOM_43364          0xa9a4
+>  #define SDIO_DEVICE_ID_BROADCOM_43430          0xa9a6
+> -#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439  0xa9af
+> +#define SDIO_DEVICE_ID_BROADCOM_43439          0xa9af
+>  #define SDIO_DEVICE_ID_BROADCOM_43455          0xa9bf
+>  #define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43752  0xaae8
+>
+> +#define SDIO_VENDOR_ID_CYPRESS                 0x04b4
+> +#define SDIO_DEVICE_ID_BROADCOM_CYPRESS_43439  0xbd3d
+> +
+>  #define SDIO_VENDOR_ID_MARVELL                 0x02df
+>  #define SDIO_DEVICE_ID_MARVELL_LIBERTAS                0x9103
+>  #define SDIO_DEVICE_ID_MARVELL_8688_WLAN       0x9104
+> --
+> 2.39.2
+>
