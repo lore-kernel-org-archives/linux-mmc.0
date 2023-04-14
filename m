@@ -2,119 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3AF72C77B7A
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 12:19:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B73AAC77B6E
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 12:31:47 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230213AbjDNMTn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Apr 2023 08:19:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36354 "EHLO
+        id S229720AbjDNMbr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Apr 2023 08:31:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50260 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230456AbjDNMTR (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 08:19:17 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 852B6B742;
-        Fri, 14 Apr 2023 05:19:07 -0700 (PDT)
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33EBqBpu020374;
-        Fri, 14 Apr 2023 12:18:55 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=0Z5TFjJbwYe7B5sjyIj8FGt4HdXqg1HWXeLZ6d93/fM=;
- b=eAHnGwiMJXI3RXTjeRJVaiXGVXOvguxX1+IbxP8n8y+qwBUX4xY1+5crd5cZrdS2DTfD
- vtf2DP9BwF/0csqI6yl49qHt5xDNa+a4W3l4K9gKKYzrtD5+lzFdrnKapx+Gb3Xz60M5
- rB2nAgYduwIuBdxoAzFlBllAti5j8fOJuRWsXHaJVXYs51lpd/T1bw1tvCFtxmlT1im7
- 6+1w9ej3ytnA7QkBxmcAStrXy7bPSa+1G8CE/DRC0A14tu+1psEUIOqWy3DUBujBXGGh
- d9SAn2m8NkSrSV/NA4NqfOLe2gX/mhsoox9vinpmbSmKp7/6eVS8OXCM5NiArPIK65kw qA== 
-Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3pxqf99sye-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 14 Apr 2023 12:18:55 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33ECIrB4006099
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 14 Apr 2023 12:18:53 GMT
-Received: from [10.216.25.10] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Fri, 14 Apr
- 2023 05:18:46 -0700
-Message-ID: <1c9110d4-ce71-c163-0301-3e309a0bb36e@quicinc.com>
-Date:   Fri, 14 Apr 2023 17:48:42 +0530
+        with ESMTP id S229611AbjDNMbq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 08:31:46 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91272C5;
+        Fri, 14 Apr 2023 05:31:45 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 2DD8A64787;
+        Fri, 14 Apr 2023 12:31:45 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB015C433EF;
+        Fri, 14 Apr 2023 12:31:40 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1681475504;
+        bh=zvAquklpNIE4RUk5fudyx8UoXFFfj9mLRLBQl7t/jWA=;
+        h=Subject:From:In-Reply-To:References:To:Cc:Date:From;
+        b=EuelEvIomATR14Vz8mv3psX7Si/UJnqFOHLqQB5hCXfYRj8y3d3JVj9kUdM8KDa5G
+         knzDo9D5MufmEriT+sPXgKUG9yUqNf3qiwnv/PwdiI9vPZB83iPfetZb8/TB4htso3
+         xIOEwDhRJ3EHjmACLzexNjpSNspE4OzaxqjuQtmz674YHCF1MLDhCHBqoIz1nVdZeG
+         Wv/+IoLNBUvs/UWEqZTT1D6eKibHNU6AWMxIfPP0VoFVByWgEnRAlI9fmt1+X0AgG+
+         RU+eHdlO2SgQLjLqh7eMDaA8hncMWXzddkt8jNayDhFJdR7xspvL3XYBEVU09EW+qT
+         mZxOkoxsDu58w==
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH V3 2/9] clk: qcom: Add Global Clock controller (GCC)
- driver for IPQ5018
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>, <agross@kernel.org>,
-        <andersson@kernel.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-CC:     Varadarajan Narayanan <quic_varada@quicinc.com>,
-        Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
- <1681468167-11689-3-git-send-email-quic_srichara@quicinc.com>
- <af41069c-add8-f0bf-1180-3e5c4da9d9dd@linaro.org>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <af41069c-add8-f0bf-1180-3e5c4da9d9dd@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 8GSGOLDRNwhPP_KJ98yfwIqdxAdYuuKy
-X-Proofpoint-ORIG-GUID: 8GSGOLDRNwhPP_KJ98yfwIqdxAdYuuKy
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-04-14_06,2023-04-14_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 mlxscore=0
- suspectscore=0 malwarescore=0 spamscore=0 phishscore=0 clxscore=1015
- mlxlogscore=731 priorityscore=1501 lowpriorityscore=0 bulkscore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2303200000 definitions=main-2304140111
+Subject: Re: [v2] wifi: brcmfmac: add Cypress 43439 SDIO ids
+From:   Kalle Valo <kvalo@kernel.org>
+In-Reply-To: <20230407203752.128539-1-marex@denx.de>
+References: <20230407203752.128539-1-marex@denx.de>
+To:     Marek Vasut <marex@denx.de>
+Cc:     linux-wireless@vger.kernel.org, Marek Vasut <marex@denx.de>,
+        Hans de Goede <hdegoede@redhat.com>,
+        "David S. Miller" <davem@davemloft.net>,
+        Arend van Spriel <aspriel@gmail.com>,
+        Danny van Heumen <danny@dannyvanheumen.nl>,
+        Eric Dumazet <edumazet@google.com>,
+        Franky Lin <franky.lin@broadcom.com>,
+        Hante Meuleman <hante.meuleman@broadcom.com>,
+        Jakub Kicinski <kuba@kernel.org>,
+        Paolo Abeni <pabeni@redhat.com>,
+        Paul Cercueil <paul@crapouillou.net>,
+        SHA-cyfmac-dev-list@infineon.com,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
+        netdev@vger.kernel.org
+User-Agent: pwcli/0.1.1-git (https://github.com/kvalo/pwcli/) Python/3.7.3
+Message-ID: <168147549923.16522.10324026964322763958.kvalo@kernel.org>
+Date:   Fri, 14 Apr 2023 12:31:40 +0000 (UTC)
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Marek Vasut <marex@denx.de> wrote:
 
+> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
+> The odd thing about this is that the previous 1YN populated
+> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
+> while the chip populated on real hardware has a Cypress one.
+> The device ID also differs between the two devices. But they
+> are both 43439 otherwise, so add the IDs for both.
+> 
+> On-device 1YN (43439), the new one, chip label reads "1YN":
+> ```
+> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
+> 0x04b4
+> 0xbd3d
+> ```
+> 
+> EA M.2 evaluation board 1YN (43439), the old one, chip label reads "1YN ES1.4":
+> ```
+> /sys/.../mmc_host/mmc0/mmc0:0001/# cat vendor device
+> 0x02d0
+> 0xa9a6
+> ```
+> 
+> Reviewed-by: Hans de Goede <hdegoede@redhat.com>
+> Cc: stable@vger.kernel.org
+> Signed-off-by: Marek Vasut <marex@denx.de>
+> Reviewed-by: Simon Horman <simon.horman@corigine.com>
 
-On 4/14/2023 4:59 PM, Konrad Dybcio wrote:
-> 
-> 
-> On 14.04.2023 12:29, Sricharan Ramabadhran wrote:
->> Add support for the global clock controller found on IPQ5018
->> based devices.
->>
->> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
->> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->> ---
-> [...]
-> 
->> +		.name = "adss_pwm_clk_src",
->> +		.parent_data = gcc_xo_gpll0,
->> +		.num_parents = 2,
-> ARRAY_SIZE(), everywhere where you reference parent_data
-> 
-   ok.
+Patch applied to wireless-next.git, thanks.
 
-> [...]
-> 
->> +MODULE_DESCRIPTION("Qualcomm Technologies, Inc. GCC IPQ5018 Driver");
->> +MODULE_LICENSE("GPL v2");
-> "GPL"
+cc4cffc3c142 wifi: brcmfmac: add Cypress 43439 SDIO ids
 
-   ok, will fix.
+-- 
+https://patchwork.kernel.org/project/linux-wireless/patch/20230407203752.128539-1-marex@denx.de/
 
-Regards,
-  Sricharan
+https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+
