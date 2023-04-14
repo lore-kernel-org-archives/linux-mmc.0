@@ -2,42 +2,42 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 07D67C77B6F
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 10:35:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FBB2C77B78
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 10:35:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229840AbjDNKfG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Apr 2023 06:35:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40468 "EHLO
+        id S230263AbjDNKfV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Apr 2023 06:35:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229893AbjDNKfF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 06:35:05 -0400
+        with ESMTP id S230098AbjDNKfR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 06:35:17 -0400
 Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7FB7558B;
-        Fri, 14 Apr 2023 03:35:03 -0700 (PDT)
-Received: from pps.filterd (m0279872.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33E9nCjW006287;
-        Fri, 14 Apr 2023 10:34:52 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references : mime-version :
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F331975E;
+        Fri, 14 Apr 2023 03:35:15 -0700 (PDT)
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33E7IUef024918;
+        Fri, 14 Apr 2023 10:35:05 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
+ : date : message-id : in-reply-to : references : mime-version :
  content-type; s=qcppdkim1;
- bh=I80zwU7ZInjCVuuV0qL/PFaRjJItbxARlTbUSW52oRE=;
- b=LSQtkEh+xapw4485vkOsHhf4+ffIMbXYTb8Gvn6L97mp0UEhDoj20W05wyx6AbAw20RA
- movo65bEm5k3RHnDXNi01HdZICQrFNL2VVGztEXuTa7xRawzbQrHlBC0JrEkBk6sRmjJ
- AzBDjHg8pmEk6nKtSOCnNhzzp4A2fRQFPmyE0c3mUC9utsTc9pSG9K3/a2jVOCgUamla
- jFjSW1fY6egL71igcHrOLxzU/kTGekum3jhJOsfSh11c1k1iWWl0WLHw/YcBp9GyXBj+
- bmjOBzBNWuQgstj7VxlTAhbBG1ecw+vsB56SiwOctv6WQn3rtPzy6tUL651ZNej4WWae 6w== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3pxqf99mhc-1
+ bh=sK/KX7zX07QF9FBsVf6JQXcqNNCPuKEeaGyVYnPHKC0=;
+ b=WDX59zSa154KpJOlkUE7yiD5oOESOqAp4yhaVOLTlj2D7o5FxjvwV3sfmtw5UHr6VOaw
+ AwaCiikJbU2oQ9MSVX4qDBoW8rHNygbOQs8J+jOuZhPYChbvINxtJtPOBXlpzUqAA7/X
+ yZM7ZB7QXWW1r08m+t5KvmcS8ovSPwdwYdcSLyDQI799BOCq8myiX2REubdXolX8DIyM
+ zPm8MYzPL0M62ItsxcGL8Ewrv82IAofJ7rHBobW/x5MKBeHmvTpXbWlk/Y9zHQJF4Jqn
+ BI6BA8GWIQwe8Q9cRHAP37gWyo5fZXiVpDaVYyI5/T5dRby8xIfi+chsoG2qi/zOWKtJ EQ== 
+Received: from nalasppmta03.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3py0xurky7-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 14 Apr 2023 10:34:52 +0000
+        Fri, 14 Apr 2023 10:35:05 +0000
 Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33EAYpi5015785
+        by NALASPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33EAZ3DA008002
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 14 Apr 2023 10:34:51 GMT
+        Fri, 14 Apr 2023 10:35:03 GMT
 Received: from srichara-linux.qualcomm.com (10.80.80.8) by
  nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
  (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Fri, 14 Apr 2023 03:34:44 -0700
+ 15.2.986.42; Fri, 14 Apr 2023 03:34:57 -0700
 From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
 To:     <agross@kernel.org>, <andersson@kernel.org>,
         <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
@@ -49,11 +49,9 @@ To:     <agross@kernel.org>, <andersson@kernel.org>,
         <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
         <linux-gpio@vger.kernel.org>,
         <linux-arm-kernel@lists.infradead.org>, <quic_srichara@quicinc.com>
-CC:     Nitheesh Sekar <quic_nsekar@quicinc.com>,
-        Varadarajan Narayanan <quic_varada@quicinc.com>
-Subject: [PATCH V3 3/9] dt-bindings: pinctrl: qcom: Add support for ipq5018
-Date:   Fri, 14 Apr 2023 15:59:21 +0530
-Message-ID: <1681468167-11689-4-git-send-email-quic_srichara@quicinc.com>
+Subject: [PATCH V3 5/9] dt-bindings: qcom: Add ipq5018 bindings
+Date:   Fri, 14 Apr 2023 15:59:23 +0530
+Message-ID: <1681468167-11689-6-git-send-email-quic_srichara@quicinc.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
 References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
@@ -64,170 +62,61 @@ X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
  nalasex01c.na.qualcomm.com (10.47.97.35)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: LxEAJ6669YoDILi1u-rGtbX9CQoMgzIe
-X-Proofpoint-ORIG-GUID: LxEAJ6669YoDILi1u-rGtbX9CQoMgzIe
+X-Proofpoint-GUID: Nk1rjnQIIo18o9VoJeYPzYgs-zj58B9e
+X-Proofpoint-ORIG-GUID: Nk1rjnQIIo18o9VoJeYPzYgs-zj58B9e
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
  definitions=2023-04-14_04,2023-04-14_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 mlxscore=0
- suspectscore=0 malwarescore=0 spamscore=0 phishscore=0 clxscore=1015
- mlxlogscore=999 priorityscore=1501 lowpriorityscore=0 bulkscore=0
- impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2303200000 definitions=main-2304140095
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 adultscore=0 impostorscore=0
+ mlxscore=0 mlxlogscore=999 priorityscore=1501 bulkscore=0 malwarescore=0
+ suspectscore=0 lowpriorityscore=0 phishscore=0 spamscore=0 clxscore=1015
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2303200000
+ definitions=main-2304140095
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add device tree binding Documentation details for ipq5018
-pinctrl driver.
+Document the new ipq5018 SOC/board device tree bindings.
 
-Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
-Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
 Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
 ---
- [v3] Fixed review comments and DTS schema warnings
+ [v3] Fixed board name
 
- .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml        | 129 +++++++++++++++++++++
- 1 file changed, 129 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
+ Documentation/devicetree/bindings/arm/qcom.yaml | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
-new file mode 100644
-index 0000000..477d5df
---- /dev/null
-+++ b/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
-@@ -0,0 +1,129 @@
-+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/pinctrl/qcom,ipq5018-tlmm.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
+diff --git a/Documentation/devicetree/bindings/arm/qcom.yaml b/Documentation/devicetree/bindings/arm/qcom.yaml
+index 785b969..350f9f6 100644
+--- a/Documentation/devicetree/bindings/arm/qcom.yaml
++++ b/Documentation/devicetree/bindings/arm/qcom.yaml
+@@ -30,6 +30,7 @@ description: |
+         apq8084
+         apq8096
+         ipq4018
++        ipq5018
+         ipq5332
+         ipq6018
+         ipq8074
+@@ -95,6 +96,7 @@ description: |
+         hk10-c2
+         idp
+         liquid
++        rdp432-c1
+         mtp
+         qrd
+         ride
+@@ -328,6 +330,11 @@ properties:
+               - qcom,ipq4019-dk04.1-c1
+           - const: qcom,ipq4019
+ 
++       - items:
++           - enum:
++              - qcom,ipq5018-rdp432-c1
++          - const: qcom,ipq5018
 +
-+title: Qualcomm IPQ5018 TLMM pin controller
-+
-+maintainers:
-+  - Bjorn Andersson <andersson@kernel.org>
-+  - Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-+
-+description:
-+  Top Level Mode Multiplexer pin controller in Qualcomm IPQ5018 SoC.
-+
-+properties:
-+  compatible:
-+    const: qcom,ipq5018-tlmm
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  interrupt-controller: true
-+  "#interrupt-cells": true
-+  gpio-controller: true
-+  "#gpio-cells": true
-+  gpio-ranges: true
-+  wakeup-parent: true
-+
-+  gpio-reserved-ranges:
-+    minItems: 1
-+    maxItems: 33
-+
-+  gpio-line-names:
-+    maxItems: 47
-+
-+patternProperties:
-+  "-state$":
-+    oneOf:
-+      - $ref: "#/$defs/qcom-ipq5018-tlmm-state"
-+      - patternProperties:
-+          "-pins$":
-+            $ref: "#/$defs/qcom-ipq5018-tlmm-state"
-+        additionalProperties: false
-+
-+$defs:
-+  qcom-ipq5018-tlmm-state:
-+    type: object
-+    description:
-+      Pinctrl node's client devices use subnodes for desired pin configuration.
-+      Client device subnodes use below standard properties.
-+    $ref: qcom,tlmm-common.yaml#/$defs/qcom-tlmm-state
-+
-+    properties:
-+      pins:
-+        description:
-+          List of gpio pins affected by the properties specified in this
-+          subnode.
-+        items:
-+          pattern: "^gpio([0-9]|[1-3][0-9]|4[0-6])$"
-+        minItems: 1
-+        maxItems: 8
-+
-+      function:
-+        description:
-+          Specify the alternative function to be configured for the specified
-+          pins.
-+
-+        enum: [ atest_char, audio_pdm0, audio_pdm1, audio_rxbclk, audio_rxd,
-+                audio_rxfsync, audio_rxmclk, audio_txbclk, audio_txd,
-+                audio_txfsync, audio_txmclk, blsp0_i2c, blsp0_spi, blsp0_uart0,
-+                blsp0_uart1, blsp1_i2c0, blsp1_i2c1, blsp1_spi0, blsp1_spi1,
-+                blsp1_uart0, blsp1_uart1, blsp1_uart2, blsp2_i2c0, blsp2_i2c1,
-+                blsp2_spi, blsp2_spi0, blsp2_spi1, btss, burn0, burn1, cri_trng,
-+                cri_trng0, cri_trng1, cxc_clk, cxc_data, dbg_out, eud_gpio,
-+                gcc_plltest, gcc_tlmm, gpio, led0, led2, mac0, mac1, mdc, mdio,
-+                pcie0_clk, pcie0_wake, pcie1_clk, pcie1_wake, pll_test,
-+                prng_rosc, pwm0, pwm1, pwm2, pwm3, qdss_cti_trig_in_a0,
-+                qdss_cti_trig_in_a1, qdss_cti_trig_in_b0, qdss_cti_trig_in_b1,
-+                qdss_cti_trig_out_a0, qdss_cti_trig_out_a1,
-+                qdss_cti_trig_out_b0, qdss_cti_trig_out_b1, qdss_traceclk_a,
-+                qdss_traceclk_b, qdss_tracectl_a, qdss_tracectl_b,
-+                qdss_tracedata_a, qdss_tracedata_b, qspi_clk, qspi_cs,
-+                qspi_data, reset_out, sdc1_clk, sdc1_cmd, sdc1_data, wci_txd,
-+                wci_rxd, wsa_swrm, wsi_clk3, wsi_data3, wsis_reset, xfem ]
-+
-+      bias-pull-down: true
-+      bias-pull-up: true
-+      bias-disable: true
-+      drive-strength: true
-+      input-enable: true
-+      output-high: true
-+      output-low: true
-+
-+    required:
-+      - pins
-+
-+    additionalProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+
-+additionalProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+
-+    tlmm: pinctrl@1000000 {
-+        compatible = "qcom,ipq5018-tlmm";
-+        reg = <0x01000000 0x300000>;
-+        gpio-controller;
-+        #gpio-cells = <2>;
-+        gpio-ranges = <&tlmm 0 0 47>;
-+        interrupts = <GIC_SPI 208 IRQ_TYPE_LEVEL_HIGH>;
-+        interrupt-controller;
-+        #interrupt-cells = <2>;
-+
-+        uart2-state {
-+            pins = "gpio34", "gpio35";
-+            function = "blsp2_uart";
-+            drive-strength = <8>;
-+            bias-pull-down;
-+        };
-+    };
+       - items:
+           - enum:
+               - qcom,ipq5332-ap-mi01.2
 -- 
 2.7.4
 
