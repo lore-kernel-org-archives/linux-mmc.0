@@ -2,99 +2,114 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B73AAC77B6E
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 12:31:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 59C4DC77B7A
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 12:37:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229720AbjDNMbr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Apr 2023 08:31:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50260 "EHLO
+        id S231171AbjDNMhX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Apr 2023 08:37:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54836 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229611AbjDNMbq (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 08:31:46 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 91272C5;
-        Fri, 14 Apr 2023 05:31:45 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 2DD8A64787;
-        Fri, 14 Apr 2023 12:31:45 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id EB015C433EF;
-        Fri, 14 Apr 2023 12:31:40 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681475504;
-        bh=zvAquklpNIE4RUk5fudyx8UoXFFfj9mLRLBQl7t/jWA=;
-        h=Subject:From:In-Reply-To:References:To:Cc:Date:From;
-        b=EuelEvIomATR14Vz8mv3psX7Si/UJnqFOHLqQB5hCXfYRj8y3d3JVj9kUdM8KDa5G
-         knzDo9D5MufmEriT+sPXgKUG9yUqNf3qiwnv/PwdiI9vPZB83iPfetZb8/TB4htso3
-         xIOEwDhRJ3EHjmACLzexNjpSNspE4OzaxqjuQtmz674YHCF1MLDhCHBqoIz1nVdZeG
-         Wv/+IoLNBUvs/UWEqZTT1D6eKibHNU6AWMxIfPP0VoFVByWgEnRAlI9fmt1+X0AgG+
-         RU+eHdlO2SgQLjLqh7eMDaA8hncMWXzddkt8jNayDhFJdR7xspvL3XYBEVU09EW+qT
-         mZxOkoxsDu58w==
-Content-Type: text/plain; charset="utf-8"
-MIME-Version: 1.0
+        with ESMTP id S230420AbjDNMhO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 08:37:14 -0400
+Received: from mail-oa1-f47.google.com (mail-oa1-f47.google.com [209.85.160.47])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 77369113;
+        Fri, 14 Apr 2023 05:37:11 -0700 (PDT)
+Received: by mail-oa1-f47.google.com with SMTP id 586e51a60fabf-187a1387021so4137441fac.3;
+        Fri, 14 Apr 2023 05:37:11 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1681475831; x=1684067831;
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=6z6SiSjyhsFruKlyCgEKdQS6ZzvvI8xprJYhm7mvty8=;
+        b=LF+DN9Gmo4MXx2w7MzNZ8KcDzonbl8TQRacKnTeYJQugt6ehCgpko+vNcC3M2IRGn8
+         ePx4TmcUOh7I1mjATbEwc0T57ufIwLtQbOxwHxdykq9C0zmpO/iOdbRlb9dWblm5J2QT
+         HwiRi3i7P2HJTPOU416xaA+NK6tM0RvNb4kF9aNya82h+tS344wS5cpPGjKmwdSVVI4A
+         1SMnM803aU5NCxTauVbJifAUQ8gMAJYraLHKjjoDR/tZbH7poy65+uVDFHEOOYz0IQxm
+         y3uftL1gBWwUoWPhiaSWAYD67l6s56tEQTAQLFVLbn2UBzFDTpEqCZFUTEpaMX2Xn3ip
+         lb3w==
+X-Gm-Message-State: AAQBX9cMiXptWn6rDZ7RVysBVM+KbS3nAakxzj+hzp0Gv/gDvuE4Xf5I
+        b12A5IjKinOzv+k+7g9DwQ==
+X-Google-Smtp-Source: AKy350YLDnEij/+RT5c4VrdY69H0Gh8fljimJpXny4beHt4miLXMxpH9HeP14Yzjux4b6P2LXQXbUg==
+X-Received: by 2002:a05:6870:32d5:b0:187:9718:4070 with SMTP id r21-20020a05687032d500b0018797184070mr2818930oac.39.1681475830703;
+        Fri, 14 Apr 2023 05:37:10 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id s6-20020acadb06000000b00383eaf88e75sm1629875oig.39.2023.04.14.05.37.08
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 14 Apr 2023 05:37:09 -0700 (PDT)
+Received: (nullmailer pid 3600816 invoked by uid 1000);
+        Fri, 14 Apr 2023 12:37:05 -0000
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Subject: Re: [v2] wifi: brcmfmac: add Cypress 43439 SDIO ids
-From:   Kalle Valo <kvalo@kernel.org>
-In-Reply-To: <20230407203752.128539-1-marex@denx.de>
-References: <20230407203752.128539-1-marex@denx.de>
-To:     Marek Vasut <marex@denx.de>
-Cc:     linux-wireless@vger.kernel.org, Marek Vasut <marex@denx.de>,
-        Hans de Goede <hdegoede@redhat.com>,
-        "David S. Miller" <davem@davemloft.net>,
-        Arend van Spriel <aspriel@gmail.com>,
-        Danny van Heumen <danny@dannyvanheumen.nl>,
-        Eric Dumazet <edumazet@google.com>,
-        Franky Lin <franky.lin@broadcom.com>,
-        Hante Meuleman <hante.meuleman@broadcom.com>,
-        Jakub Kicinski <kuba@kernel.org>,
-        Paolo Abeni <pabeni@redhat.com>,
-        Paul Cercueil <paul@crapouillou.net>,
-        SHA-cyfmac-dev-list@infineon.com,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        brcm80211-dev-list.pdl@broadcom.com, linux-mmc@vger.kernel.org,
-        netdev@vger.kernel.org
-User-Agent: pwcli/0.1.1-git (https://github.com/kvalo/pwcli/) Python/3.7.3
-Message-ID: <168147549923.16522.10324026964322763958.kvalo@kernel.org>
-Date:   Fri, 14 Apr 2023 12:31:40 +0000 (UTC)
+MIME-Version: 1.0
+From:   Rob Herring <robh@kernel.org>
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     Nitheesh Sekar <quic_nsekar@quicinc.com>, mturquette@baylibre.com,
+        konrad.dybcio@linaro.org, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        devicetree@vger.kernel.org,
+        Varadarajan Narayanan <quic_varada@quicinc.com>,
+        krzysztof.kozlowski+dt@linaro.org, will@kernel.org,
+        linus.walleij@linaro.org, agross@kernel.org,
+        p.zabel@pengutronix.de, robh+dt@kernel.org,
+        catalin.marinas@arm.com, sboyd@kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        andersson@kernel.org, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <1681468167-11689-4-git-send-email-quic_srichara@quicinc.com>
+References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
+ <1681468167-11689-4-git-send-email-quic_srichara@quicinc.com>
+Message-Id: <168147485085.3576485.2274318981675565621.robh@kernel.org>
+Subject: Re: [PATCH V3 3/9] dt-bindings: pinctrl: qcom: Add support for
+ ipq5018
+Date:   Fri, 14 Apr 2023 07:37:05 -0500
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Marek Vasut <marex@denx.de> wrote:
 
-> Add SDIO ids for use with the muRata 1YN (Cypress CYW43439).
-> The odd thing about this is that the previous 1YN populated
-> on M.2 card for evaluation purposes had BRCM SDIO vendor ID,
-> while the chip populated on real hardware has a Cypress one.
-> The device ID also differs between the two devices. But they
-> are both 43439 otherwise, so add the IDs for both.
+On Fri, 14 Apr 2023 15:59:21 +0530, Sricharan Ramabadhran wrote:
+> Add device tree binding Documentation details for ipq5018
+> pinctrl driver.
 > 
-> On-device 1YN (43439), the new one, chip label reads "1YN":
-> ```
-> /sys/.../mmc_host/mmc2/mmc2:0001 # cat vendor device
-> 0x04b4
-> 0xbd3d
-> ```
+> Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
+> Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
+> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> ---
+>  [v3] Fixed review comments and DTS schema warnings
 > 
-> EA M.2 evaluation board 1YN (43439), the old one, chip label reads "1YN ES1.4":
-> ```
-> /sys/.../mmc_host/mmc0/mmc0:0001/# cat vendor device
-> 0x02d0
-> 0xa9a6
-> ```
+>  .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml        | 129 +++++++++++++++++++++
+>  1 file changed, 129 insertions(+)
+>  create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
 > 
-> Reviewed-by: Hans de Goede <hdegoede@redhat.com>
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Marek Vasut <marex@denx.de>
-> Reviewed-by: Simon Horman <simon.horman@corigine.com>
 
-Patch applied to wireless-next.git, thanks.
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
-cc4cffc3c142 wifi: brcmfmac: add Cypress 43439 SDIO ids
+yamllint warnings/errors:
 
--- 
-https://patchwork.kernel.org/project/linux-wireless/patch/20230407203752.128539-1-marex@denx.de/
+dtschema/dtc warnings/errors:
+/builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.example.dtb: pinctrl@1000000: uart2-state: 'oneOf' conditional failed, one must be fixed:
+	'bias-pull-down', 'drive-strength', 'function', 'pins' do not match any of the regexes: '-pins$', 'pinctrl-[0-9]+'
+	'blsp2_uart' is not one of ['atest_char', 'audio_pdm0', 'audio_pdm1', 'audio_rxbclk', 'audio_rxd', 'audio_rxfsync', 'audio_rxmclk', 'audio_txbclk', 'audio_txd', 'audio_txfsync', 'audio_txmclk', 'blsp0_i2c', 'blsp0_spi', 'blsp0_uart0', 'blsp0_uart1', 'blsp1_i2c0', 'blsp1_i2c1', 'blsp1_spi0', 'blsp1_spi1', 'blsp1_uart0', 'blsp1_uart1', 'blsp1_uart2', 'blsp2_i2c0', 'blsp2_i2c1', 'blsp2_spi', 'blsp2_spi0', 'blsp2_spi1', 'btss', 'burn0', 'burn1', 'cri_trng', 'cri_trng0', 'cri_trng1', 'cxc_clk', 'cxc_data', 'dbg_out', 'eud_gpio', 'gcc_plltest', 'gcc_tlmm', 'gpio', 'led0', 'led2', 'mac0', 'mac1', 'mdc', 'mdio', 'pcie0_clk', 'pcie0_wake', 'pcie1_clk', 'pcie1_wake', 'pll_test', 'prng_rosc', 'pwm0', 'pwm1', 'pwm2', 'pwm3', 'qdss_cti_trig_in_a0', 'qdss_cti_trig_in_a1', 'qdss_cti_trig_in_b0', 'qdss_cti_trig_in_b1', 'qdss_cti_trig_out_a0', 'qdss_cti_trig_out_a1', 'qdss_cti_trig_out_b0', 'qdss_cti_trig_out_b1', 'qdss_traceclk_a', 'qdss_traceclk_b', 'qdss_tracectl_a', 'qdss_tracectl_b', 'qdss_trac
+ edata_a', 'qdss_tracedata_b', 'qspi_clk', 'qspi_cs', 'qspi_data', 'reset_out', 'sdc1_clk', 'sdc1_cmd', 'sdc1_data', 'wci_txd', 'wci_rxd', 'wsa_swrm', 'wsi_clk3', 'wsi_data3', 'wsis_reset', 'xfem']
+	From schema: /builds/robherring/dt-review-ci/linux/Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
 
-https://wireless.wiki.kernel.org/en/developers/documentation/submittingpatches
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/1681468167-11689-4-git-send-email-quic_srichara@quicinc.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
 
