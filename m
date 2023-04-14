@@ -2,146 +2,145 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB6C8C77B6E
-	for <linux-mmc@archiver.kernel.org>; Thu, 13 Apr 2023 14:01:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1C48C77B6E
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 05:30:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231669AbjDMOBF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 13 Apr 2023 10:01:05 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35146 "EHLO
+        id S229805AbjDNFaV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Apr 2023 01:30:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54652 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229786AbjDMOBE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 13 Apr 2023 10:01:04 -0400
-Received: from wp530.webpack.hosteurope.de (wp530.webpack.hosteurope.de [80.237.130.52])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0986B8A6C
-        for <linux-mmc@vger.kernel.org>; Thu, 13 Apr 2023 07:00:59 -0700 (PDT)
-Received: from [2a02:8108:8980:2478:8cde:aa2c:f324:937e]; authenticated
-        by wp530.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.3:ECDHE_RSA_AES_128_GCM_SHA256:128)
-        id 1pmxVR-0000jX-MA; Thu, 13 Apr 2023 16:00:57 +0200
-Message-ID: <2e4521c5-b291-e228-c926-525e9a50a023@leemhuis.info>
-Date:   Thu, 13 Apr 2023 16:00:57 +0200
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-Content-Language: en-US, de-DE
-To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        with ESMTP id S229567AbjDNFaT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 01:30:19 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2335694;
+        Thu, 13 Apr 2023 22:29:50 -0700 (PDT)
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33E4uVrs008647;
+        Fri, 14 Apr 2023 05:29:08 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=qcppdkim1;
+ bh=OD53C0wzFVs6/7dc5praUg2eouwu68LuCpd1GG9uZ5Y=;
+ b=IWjJRBtPtGhLZJRAqS/zfOLQX2iFMVgWZA46OVWXZCAO6DVdYVE8Pw+Mw+uMAqccCQik
+ GLuATXej3VmuiNeItM5bQevcmLhOBFcfj7LCGDPRwSbE6kn+Wc6ELYGpq/1k+vpMKzCT
+ /c27A9khXX3g3a/ZYovjfaFTMTjJACyjlsmtjnPYH/wZ6A/aNelB28DYIeYLoUcGY2+4
+ TCGQ9dt/jhb1ze5tzbOA5J2FjO2wR1M/FqExrleEzBHHv9kHzIir9/ekPaJvc6AKo6Tn
+ dy1jctbCPopVIoza/+kU2ikxj8UD7hOAhalSnm0YzRdaeLtXmnxxMHl8Q5sDAgCMVUQi Zw== 
+Received: from nasanppmta02.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3px689u43h-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 14 Apr 2023 05:29:08 +0000
+Received: from nasanex01c.na.qualcomm.com (nasanex01c.na.qualcomm.com [10.45.79.139])
+        by NASANPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33E5T7ne008874
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 14 Apr 2023 05:29:07 GMT
+Received: from nasanex01a.na.qualcomm.com (10.52.223.231) by
+ nasanex01c.na.qualcomm.com (10.45.79.139) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Thu, 13 Apr 2023 22:29:06 -0700
+Received: from nasanex01a.na.qualcomm.com ([fe80::c03c:fa3e:4516:3243]) by
+ nasanex01a.na.qualcomm.com ([fe80::c03c:fa3e:4516:3243%12]) with mapi id
+ 15.02.0986.042; Thu, 13 Apr 2023 22:29:05 -0700
+From:   "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>
+To:     Linus Walleij <linus.walleij@linaro.org>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
+        "Bhaskar Valaboju (QUIC)" <quic_bhaskarv@quicinc.com>,
+        "Sachin Gupta (QUIC)" <quic_sachgupt@quicinc.com>,
+        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
+        "Sayali Lokhande (QUIC)" <quic_sayalil@quicinc.com>,
         Brian Norris <briannorris@chromium.org>,
-        Linux kernel regressions list <regressions@lists.linux.dev>
-References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
-From:   "Linux regression tracking (Thorsten Leemhuis)" 
-        <regressions@leemhuis.info>
-Reply-To: Linux regressions mailing list <regressions@lists.linux.dev>
-In-Reply-To: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-X-bounce-key: webpack.hosteurope.de;regressions@leemhuis.info;1681394460;c538e318;
-X-HE-SMSGID: 1pmxVR-0000jX-MA
+        "Wolfram Sang" <wsa+renesas@sang-engineering.com>
+Subject: RE: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+ internal features
+Thread-Topic: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+ internal features
+Thread-Index: AQHZZLsSreM1n2UsG0iOAGSJueq9468YbsCAgBDCMuA=
+Date:   Fri, 14 Apr 2023 05:29:05 +0000
+Message-ID: <f5f8735e1dcc47e29698ea3f44c81362@quicinc.com>
+References: <20230401165723.19762-1-quic_sartgarg@quicinc.com>
+ <20230401165723.19762-2-quic_sartgarg@quicinc.com>
+ <CACRpkdam5M+Px58hHJp30tCYz-Vh54KvMei7WeZmqmTvtw5X8w@mail.gmail.com>
+In-Reply-To: <CACRpkdam5M+Px58hHJp30tCYz-Vh54KvMei7WeZmqmTvtw5X8w@mail.gmail.com>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.216.5.147]
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: 5zG53tBZE4OWqpMuX-YnJtAIOcOa4_p5
+X-Proofpoint-ORIG-GUID: 5zG53tBZE4OWqpMuX-YnJtAIOcOa4_p5
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-04-14_02,2023-04-13_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
+ suspectscore=0 mlxscore=0 clxscore=1015 bulkscore=0 lowpriorityscore=0
+ adultscore=0 mlxlogscore=999 priorityscore=1501 spamscore=0 phishscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2303200000 definitions=main-2304140049
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-[TLDR: I'm adding this report to the list of tracked Linux kernel
-regressions; the text you find below is based on a few templates
-paragraphs you might have encountered already in similar form.
-See link in footer if these mails annoy you.]
-
-[CCing the regression list, as it should be in the loop for regressions:
-https://docs.kernel.org/admin-guide/reporting-regressions.html]
-
-On 11.04.23 01:13, Martin Blumenstingl wrote:
-> 
-> today I found that upstream commit 4bc31edebde5 ("mmc: core: Set HS
-> clock speed before sending HS CMD13") breaks eMMC support on my
-> Odroid-C1.
-> (yes, I know that I am very late to the party...)
-> 
-> The .dts for this board is upstream using
-> arch/arm/boot/dts/meson8b-odroidc1.dts (&sdhc node)
-> The MMC host driver used is drivers/mmc/host/meson-mx-sdhc*.
-> 
-> The problem I'm seeing is that the eMMC module is simply not detected.
-> There are no errors in the kernel log (note that mmc1 is the eMMC
-> while mmc0 is the SD card which is attached to another controller on
-> that SoC):
-> # dmesg | grep mmc
-> [    2.742136] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
-> [    4.315905] platform c1108c20.mmc:slot@1: Got CD GPIO
-> [    4.450921] mmc0: new high speed SDHC card at address 0001
-> [    4.456985] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
-> [    4.466108]  mmcblk0: p1
-> 
-> In this state I get:
-> # cat /sys/kernel/debug/mmc1/ios
-> clock:          52000000 Hz
-> actual clock:   51000000 Hz
-> vdd:            21 (3.3 ~ 3.4 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    9 (mmc HS200)
-> signal voltage: 1 (1.80 V)
-> driver type:    0 (driver type B)
-> 
-> After reverting the mentioned commit I get:
-> # dmesg | grep mmc
-> [    2.744226] meson-mx-sdhc c1108e00.mmc: allocated mmc-pwrseq
-> [    2.970944] mmc1: new HS200 MMC card at address 0001
-> [    2.974492] mmcblk1: mmc1:0001 8GND3R 7.28 GiB
-> [    2.985126]  mmcblk1: p1
-> [    2.987810] mmcblk1boot0: mmc1:0001 8GND3R 4.00 MiB
-> [    3.003007] mmcblk1boot1: mmc1:0001 8GND3R 4.00 MiB
-> [    4.311754] platform c1108c20.mmc:slot@1: Got CD GPIO
-> [    4.374732] mmc0: new high speed SDHC card at address 0001
-> [    4.377228] mmcblk0: mmc0:0001 EB1QT 29.8 GiB
-> [    4.399152]  mmcblk0: p1
-> # cat /sys/kernel/debug/mmc1/ios
-> clock:          100000000 Hz
-> actual clock:   94444445 Hz
-> vdd:            21 (3.3 ~ 3.4 V)
-> bus mode:       2 (push-pull)
-> chip select:    0 (don't care)
-> power mode:     2 (on)
-> bus width:      3 (8 bits)
-> timing spec:    9 (mmc HS200)
-> signal voltage: 1 (1.80 V)
-> driver type:    0 (driver type B)
-> 
-> Please let me know which additional information would be helpful for
-> debugging this further.
-> Also I'd like to highlight that I'm not blaming the above commit
-> (unless I know better). It's entirely possible that the meson-mx-sdhc
-> driver (which I wrote) can be at fault and that I was previously just
-> lucky.
-> 
-> [...]
-> # first bad commit: [4bc31edebde51fcf8ad0794763b8679a7ecb5ec0] mmc:
-> core: Set HS clock speed before sending HS CMD13
-
-Thanks for the report. To be sure the issue doesn't fall through the
-cracks unnoticed, I'm adding it to regzbot, the Linux kernel regression
-tracking bot:
-
-#regzbot ^introduced 4bc31edebde51fcf8ad079
-#regzbot title mmc: core: eMMC support broken on Odroid-C1
-#regzbot ignore-activity
-
-This isn't a regression? This issue or a fix for it are already
-discussed somewhere else? It was fixed already? You want to clarify when
-the regression started to happen? Or point out I got the title or
-something else totally wrong? Then just reply and tell me -- ideally
-while also telling regzbot about it, as explained by the page listed in
-the footer of this mail.
-
-Developers: When fixing the issue, remember to add 'Link:' tags pointing
-to the report (the parent of this mail). See page linked in footer for
-details.
-
-Ciao, Thorsten (wearing his 'the Linux kernel's regression tracker' hat)
---
-Everything you wanna know about Linux kernel regression tracking:
-https://linux-regtracking.leemhuis.info/about/#tldr
-That page also explains what to do if mails like this annoy you.
+SGkgbGludXMsDQoNClRoYW5rcyBmb3IgeW91ciBjb21tZW50cy4NCg0KQXMgbWVudGlvbmVkIGlu
+IHRoZSBjb3ZlciBsZXR0ZXIgdGhhdCB0aGVzZSBvcHMgYXJlIG5lZWRlZCB0byBpbXBsZW1lbnQg
+Y2xvY2sgc2NhbGluZyBhbmQgcGFydGlhbCBpbml0IGZlYXR1cmVzIGZvciB3aGljaCB3ZSBhbHJl
+YWR5IGhhZCBiZWxvdyBkaXNjdXNzaW9ucyBidXQgZmFjZWQgc3Ryb25nIHJlc2lzdGFuY2UgZnJv
+bSBjb21tdW5pdHkuIFNpbmNlIHRoZXNlIHdlcmUgaHVnZSBjb2RlIGNoYW5nZXMgc28gbWFpbnRh
+aW5hYmlsaXR5IHdhcyB0aGUgbWFpbiBjb25jZXJuLiBIZW5jZSBJIGhhdmUgcmVkZXNpZ25lZCBv
+dXIgZW50aXJlIGxvZ2ljIGFuZCBtb3ZlZCBjb21wbGV0ZSBjb2RlIHRvIHZlbmRvciBzcGVjaWZp
+YyBmaWxlIGFuZCB0byBzdXBwb3J0IHRoaXMgbmV3IGRlc2lnbiBub3cgSSBqdXN0IG5lZWQgdGhl
+c2UgdHdvIGhvb2tzIGluIHN1c3BlbmQgYW5kIHJlc3VtZSBmdW5jdGlvbnMgdGhhdOKAmXMgd2h5
+IEkgaGF2ZSBhZGRlZCB0aGVzZSBjYWxsYmFja3MgaW4gaG9zdF9vcHMuDQoNCkkgY2FuIHJlbmFt
+ZSB0aGVzZSB0byB2ZW5kb3Jfc3VzcGVuZC9yZXN1bWUgb3BzIHRvIGxldCB2ZW5kb3IgbW9kaWZ5
+IGZldyB0aGluZ3MgbmVlZGVkIGluIHN1c3BlbmQvcmVzdW1lIHBhdGhzLiBBbHNvIGlmIHlvdSB3
+YW50IHRvIHN1Z2dlc3QgYW55IGJldHRlciBuYW1lIHRoZW4gSSBhbSBvcGVuIGZvciB0aGF0IGFs
+c28uDQoNCk9sZCBkaXNjdXNzaW9uIGZvciBDbG9jayBzY2FsaW5nIGZlYXR1cmUgOg0KaHR0cHM6
+Ly9wYXRjaHdvcmsua2VybmVsLm9yZy9wcm9qZWN0L2xpbnV4LW1tYy9jb3Zlci8xNTcxNjY4MTc3
+LTM3NjYtMS1naXQtc2VuZC1lbWFpbC1yYW1wcmFrYUBjb2RlYXVyb3JhLm9yZy8NCg0KT2xkIGRp
+c2N1c3Npb24gZm9yIFBhcnRpYWwgaW5pdCBmZWF0dXJlIDoNCmh0dHBzOi8vcGF0Y2h3b3JrLmtl
+cm5lbC5vcmcvcHJvamVjdC9saW51eC1tbWMvcGF0Y2gvMTY1MDk2Mzg1Mi00MTczLTEtZ2l0LXNl
+bmQtZW1haWwtcXVpY19zcGF0aGlAcXVpY2luYy5jb20vDQoNClRoYW5rcywNClNhcnRoYWsNCg0K
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBMaW51cyBXYWxsZWlqIDxsaW51
+cy53YWxsZWlqQGxpbmFyby5vcmc+DQo+IFNlbnQ6IFN1bmRheSwgQXByaWwgMiwgMjAyMyA2OjE5
+IFBNDQo+IFRvOiBTYXJ0aGFrIEdhcmcgKFFVSUMpIDxxdWljX3NhcnRnYXJnQHF1aWNpbmMuY29t
+Pg0KPiBDYzogYWRyaWFuLmh1bnRlckBpbnRlbC5jb207IHVsZi5oYW5zc29uQGxpbmFyby5vcmc7
+IGxpbnV4LQ0KPiBtbWNAdmdlci5rZXJuZWwub3JnOyBsaW51eC1rZXJuZWxAdmdlci5rZXJuZWwu
+b3JnOyBsaW51eC1hcm0tDQo+IG1zbUB2Z2VyLmtlcm5lbC5vcmc7IFJhbSBQcmFrYXNoIEd1cHRh
+IChRVUlDKQ0KPiA8cXVpY19yYW1wcmFrYUBxdWljaW5jLmNvbT47IEJoYXNrYXIgVmFsYWJvanUg
+KFFVSUMpDQo+IDxxdWljX2JoYXNrYXJ2QHF1aWNpbmMuY29tPjsgU2FjaGluIEd1cHRhIChRVUlD
+KQ0KPiA8cXVpY19zYWNoZ3VwdEBxdWljaW5jLmNvbT47IFByYWRlZXAgUHJhZ2FsbGFwYXRpIChR
+VUlDKQ0KPiA8cXVpY19wcmFnYWxsYUBxdWljaW5jLmNvbT47IFNheWFsaSBMb2toYW5kZSAoUVVJ
+QykNCj4gPHF1aWNfc2F5YWxpbEBxdWljaW5jLmNvbT47IEJyaWFuIE5vcnJpcyA8YnJpYW5ub3Jy
+aXNAY2hyb21pdW0ub3JnPjsNCj4gV29sZnJhbSBTYW5nIDx3c2ErcmVuZXNhc0BzYW5nLWVuZ2lu
+ZWVyaW5nLmNvbT4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCBWMSAxLzJdIG1tYzogY29yZTogRGVm
+aW5lIG5ldyB2ZW5kb3Igb3BzIHRvIGVuYWJsZQ0KPiBpbnRlcm5hbCBmZWF0dXJlcw0KPiANCj4g
+SGkgU2FydGhhaywNCj4gDQo+IHRoYW5rcyBmb3IgeW91ciBwYXRjaCENCj4gDQo+IE9uIFNhdCwg
+QXByIDEsIDIwMjMgYXQgNjo1N+KAr1BNIFNhcnRoYWsgR2FyZyA8cXVpY19zYXJ0Z2FyZ0BxdWlj
+aW5jLmNvbT4NCj4gd3JvdGU6DQo+IA0KPiA+IERlZmluZSBuZXcgb3BzIHRvIGxldCB2ZW5kb3Ig
+ZW5hYmxlIGludGVybmFsIGZlYXR1cmVzIGluDQo+ID4gbW1jX3N1c3BlbmQvcmVzdW1lIHBhdGhz
+IGxpa2UgcGFydGlhbCBpbml0IGZlYXR1cmUuDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBTYXJ0
+aGFrIEdhcmcgPHF1aWNfc2FydGdhcmdAcXVpY2luYy5jb20+DQo+ICguLi4pDQo+IA0KPiA+IC0t
+LSBhL2luY2x1ZGUvbGludXgvbW1jL2hvc3QuaA0KPiA+ICsrKyBiL2luY2x1ZGUvbGludXgvbW1j
+L2hvc3QuaA0KPiA+IEBAIC0yMTIsNiArMjEyLDEwIEBAIHN0cnVjdCBtbWNfaG9zdF9vcHMgew0K
+PiA+DQo+ID4gICAgICAgICAvKiBJbml0aWFsaXplIGFuIFNEIGV4cHJlc3MgY2FyZCwgbWFuZGF0
+b3J5IGZvciBNTUNfQ0FQMl9TRF9FWFAuICovDQo+ID4gICAgICAgICBpbnQgICAgICgqaW5pdF9z
+ZF9leHByZXNzKShzdHJ1Y3QgbW1jX2hvc3QgKmhvc3QsIHN0cnVjdCBtbWNfaW9zICppb3MpOw0K
+PiA+ICsNCj4gPiArICAgICAgIHZvaWQgICAgKCpjYWNoZV9jYXJkX3Byb3BlcnRpZXMpKHN0cnVj
+dCBtbWNfaG9zdCAqaG9zdCk7DQo+ID4gKyAgICAgICBib29sICAgICgqcGFydGlhbF9pbml0X2Nh
+cmQpKHN0cnVjdCBtbWNfaG9zdCAqaG9zdCk7DQo+IA0KPiBUaGVzZSBoYXZlIGNvbmZ1c2luZyBu
+YW1lcywgZmlyc3QgaXQgaGFzIG5vdGhpbmcgdG8gZG8gd2l0aCBjYXJkcyBzaW5jZSB0aGUNCj4g
+Y2FsbGJhY2tzIGFyZSB0byB0aGUgaG9zdC4gU2Vjb25kIHRoZSBmdW5jdGlvbnMgYXJlIG5hbWVk
+IGFmdGVyIHVzZWNhc2VzIGluIGENCj4gY2VydGFpbiBob3N0IHJhdGhlciB0aGFuIGZ1bmN0aW9u
+Lg0KPiANCj4gSSB3b3VsZCBqdXN0IGNhbGwgdGhlbSAuc3VzcGVuZCgpIGFuZCAucmVzdW1lKCks
+IHRoZSB1c2UgaXMgb2J2aW91cyBhbmQgdGhleSBhcmUNCj4gY2FsbGVkIGZyb20gdGhlIGRyaXZl
+ciAuc3VzcGVuZCgpIGFuZCAucmVzdW1lKCkgaG9va3MuDQo+IA0KPiBZb3VycywNCj4gTGludXMg
+V2FsbGVpag0K
