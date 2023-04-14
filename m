@@ -2,36 +2,48 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DF9A5C77B70
-	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 05:36:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 503DBC77B70
+	for <linux-mmc@archiver.kernel.org>; Fri, 14 Apr 2023 06:53:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229705AbjDNFgW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 14 Apr 2023 01:36:22 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56896 "EHLO
+        id S229543AbjDNGxH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 14 Apr 2023 02:53:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40864 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229493AbjDNFgU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 01:36:20 -0400
-Received: from bombadil.infradead.org (bombadil.infradead.org [IPv6:2607:7c80:54:3::133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17B19212E;
-        Thu, 13 Apr 2023 22:36:19 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=bombadil.20210309; h=In-Reply-To:Content-Type:MIME-Version
-        :References:Message-ID:Subject:Cc:To:From:Date:Sender:Reply-To:
-        Content-Transfer-Encoding:Content-ID:Content-Description;
-        bh=rRTGwVe+BuUv8jF7DArKiuekjI9DUkTATKmlzMyZTfA=; b=nrk6/e09iUW5G+UDLRUQbS4Bva
-        WSC95qrROjyLZvpzRZGHnyI3fslpvcEeEvgIQJOwCDaaM5Z1paZl/66aielAHLZizRk05yhvZU6GB
-        t7A39z0G7YZYOaaSvcTADW6SKnEmRm2u5eSnC/ZbTgsr8MZAO5m7CAVV2DW8W9CsR0VMfRDHXOp4H
-        flgebxVTCEAAD95iAYo1p+YAP927RkJlk6qnfF7x+BX/U2u1CR6gwXDMjaU31P+gmbxBuH9L4jDv6
-        neAET3I3eeseoffmprho1RBtobrDQKBmpxwvPdwZmzHd8U394kWdE2Hyje4//NlZW+B4t3gfth55U
-        t7CfAUPQ==;
-Received: from hch by bombadil.infradead.org with local (Exim 4.96 #2 (Red Hat Linux))
-        id 1pnC6Y-008Nmo-2d;
-        Fri, 14 Apr 2023 05:36:14 +0000
-Date:   Thu, 13 Apr 2023 22:36:14 -0700
-From:   Christoph Hellwig <hch@infradead.org>
-To:     "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>
-Cc:     Christoph Hellwig <hch@infradead.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        with ESMTP id S229446AbjDNGxG (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 14 Apr 2023 02:53:06 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 28BBE10F3;
+        Thu, 13 Apr 2023 23:53:05 -0700 (PDT)
+Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33E6U9Xt025305;
+        Fri, 14 Apr 2023 06:52:20 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=qcppdkim1;
+ bh=2pVW8ketNRb+oakq1EgzGeek6bIazHMT5U1Px10lHjU=;
+ b=GPdGsydu6F44pwpldXUqW46CPSGHbGCG3kZbk+OyHhFe4APMPTlA6gbI5+pP7WmpZH7G
+ uLyL/I9heD0e69N+dySwHxXLv5ZbIr/MTR5I3aOSFBLPW9HXw4DOiuSuL7sdnj0fLie8
+ wlQy/FIw0tIwDr2N22d4I74N8TLmp3x8BClRkqURZ2uDvB7HAaUTPmZkX3cC1mFb5l2r
+ AzgItmUKL8tp6QL8YRAbZdHJBlK1bi9J1+w6yLchcFerHHORSs5NU3GcTuEqxNcO8teZ
+ ABPSMTRTjVnd3mQGAATD/P7AUCSAicOaHqlhX8QYimrcjXrkKmgkzhVQ2QCwJJaZbgmS 0g== 
+Received: from nasanppmta05.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3pxxhkgdqm-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 14 Apr 2023 06:52:19 +0000
+Received: from nasanex01c.na.qualcomm.com (nasanex01c.na.qualcomm.com [10.45.79.139])
+        by NASANPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33E6qJQs000919
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Fri, 14 Apr 2023 06:52:19 GMT
+Received: from nasanex01a.na.qualcomm.com (10.52.223.231) by
+ nasanex01c.na.qualcomm.com (10.45.79.139) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Thu, 13 Apr 2023 23:52:18 -0700
+Received: from nasanex01a.na.qualcomm.com ([fe80::c03c:fa3e:4516:3243]) by
+ nasanex01a.na.qualcomm.com ([fe80::c03c:fa3e:4516:3243%12]) with mapi id
+ 15.02.0986.042; Thu, 13 Apr 2023 23:52:18 -0700
+From:   "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>
+To:     Christoph Hellwig <hch@infradead.org>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
         "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
         "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
         "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
@@ -42,28 +54,72 @@ Cc:     Christoph Hellwig <hch@infradead.org>,
         "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
         "Sayali Lokhande (QUIC)" <quic_sayalil@quicinc.com>,
         Brian Norris <briannorris@chromium.org>,
-        Wolfram Sang <wsa+renesas@sang-engineering.com>,
+        "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
         Linus Walleij <linus.walleij@linaro.org>
-Subject: Re: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+Subject: RE: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
  internal features
-Message-ID: <ZDjmTi1+WA2BtLct@infradead.org>
+Thread-Topic: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+ internal features
+Thread-Index: AQHZZLsSreM1n2UsG0iOAGSJueq9468bFEYAgA9GsjCAAHb4AP//nJxw
+Date:   Fri, 14 Apr 2023 06:52:18 +0000
+Message-ID: <53eda50111e2402e889bd690a0112ee1@quicinc.com>
 References: <20230401165723.19762-1-quic_sartgarg@quicinc.com>
  <20230401165723.19762-2-quic_sartgarg@quicinc.com>
  <ZCux+gsR8Nz4Epxw@infradead.org>
  <e492e234b3ec4624ae2f905bdae78785@quicinc.com>
+ <ZDjmTi1+WA2BtLct@infradead.org>
+In-Reply-To: <ZDjmTi1+WA2BtLct@infradead.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.216.5.147]
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e492e234b3ec4624ae2f905bdae78785@quicinc.com>
-X-SRS-Rewrite: SMTP reverse-path rewritten from <hch@infradead.org> by bombadil.infradead.org. See http://www.infradead.org/rpr.html
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: tWyH60GFlUM8L4J2KUwSh-1IAtapRmEL
+X-Proofpoint-GUID: tWyH60GFlUM8L4J2KUwSh-1IAtapRmEL
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-04-14_02,2023-04-13_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
+ malwarescore=0 adultscore=0 clxscore=1015 bulkscore=0 spamscore=0
+ suspectscore=0 phishscore=0 mlxlogscore=707 impostorscore=0
+ lowpriorityscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx
+ scancount=1 engine=8.12.0-2303200000 definitions=main-2304140061
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-You don't get it.  There is no such thing "as vendor files".
+Sorry for the confusion by vendor file I meant driver file for Qualcomm SDC=
+C controller (sdhci-msm.c).
+Further to make things more clear I will push the complete series.
 
-I'm not sure where you get your terminology from, but whatever that is
-might be your source of the fundamental misunderstanding how Linux
-kernel development works.  I would recommend to take some training
-before wasting everyones time.
+> -----Original Message-----
+> From: Christoph Hellwig <hch@infradead.org>
+> Sent: Friday, April 14, 2023 11:06 AM
+> To: Sarthak Garg (QUIC) <quic_sartgarg@quicinc.com>
+> Cc: Christoph Hellwig <hch@infradead.org>; adrian.hunter@intel.com;
+> ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-
+> kernel@vger.kernel.org; linux-arm-msm@vger.kernel.org; Ram Prakash Gupta
+> (QUIC) <quic_rampraka@quicinc.com>; Bhaskar Valaboju (QUIC)
+> <quic_bhaskarv@quicinc.com>; Sachin Gupta (QUIC)
+> <quic_sachgupt@quicinc.com>; Pradeep Pragallapati (QUIC)
+> <quic_pragalla@quicinc.com>; Sayali Lokhande (QUIC)
+> <quic_sayalil@quicinc.com>; Brian Norris <briannorris@chromium.org>;
+> Wolfram Sang <wsa+renesas@sang-engineering.com>; Linus Walleij
+> <linus.walleij@linaro.org>
+> Subject: Re: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+> internal features
+>=20
+> You don't get it.  There is no such thing "as vendor files".
+>=20
+> I'm not sure where you get your terminology from, but whatever that is mi=
+ght
+> be your source of the fundamental misunderstanding how Linux kernel
+> development works.  I would recommend to take some training before wastin=
+g
+> everyones time.
 
