@@ -2,62 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC63BC77B7E
-	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 14:19:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA9EC77B70
+	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 17:14:09 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229930AbjDOOTD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 15 Apr 2023 10:19:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42522 "EHLO
+        id S229819AbjDOROI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 15 Apr 2023 13:14:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41272 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229735AbjDOOS7 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Apr 2023 10:18:59 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02DEB49E1;
-        Sat, 15 Apr 2023 07:18:58 -0700 (PDT)
+        with ESMTP id S229574AbjDOROI (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Apr 2023 13:14:08 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42A2710E7;
+        Sat, 15 Apr 2023 10:14:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 7B78960B21;
-        Sat, 15 Apr 2023 14:18:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id D7F73C433A4;
-        Sat, 15 Apr 2023 14:18:56 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id CE2D960B00;
+        Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 25E28C4339B;
+        Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681568336;
-        bh=jS0bpY0B94N3teaYRFeuB4DDITFUe3GUayl2qqATw4Y=;
-        h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-        b=LNEqNroCC6vOajujZb9dIYQ0z7DDXijLtYKlOQPj+KDUEcUYap53J74dT7yIz60cp
-         Ytug0jO05So/92ZxfIULe35wdlW/v9bZu/OFg0us/r9S4PywKUc1XB7+05z3cfSy5t
-         eh7YbQD8VWwrBQ5q2N4223Sp84faioecgDyZ7C5iP9Woao+vuNpt3a1/hrAYDQD2ZG
-         8fxX59JOAqvj78iIPAGMU1XmuYp/brjRAqSAuS3SkwRm8D2zYNGd8QXagbL8Tybolg
-         VLTpTegO6kN0lbhJVd9ZGzFF+zRKwsCLYEQGTc5NVk+2D1SJZ+AKaPYh13TJ8V9VU2
-         hgkMN7FpPe8CA==
+        s=k20201202; t=1681578846;
+        bh=/jSsoNxOvU8LSy+l6NwzbNJ7bw9nm6AcIP7OOw8z6pQ=;
+        h=From:Subject:Date:To:Cc:Reply-To:From;
+        b=Lat7VnNXQ6AoNm2PHANEyrOZERv7dzW5MJn3a+tKFjsDFx9iQgxyy3ZTscQGK2xaQ
+         OyUrhpqLPWwaMg18/n8RsqiCnoqomSShiJ0dk4lvISqoj3vBCKToedpAs2JtYHL7Ii
+         7+INKhM6HhZx4ixo8majrNGBgiITShvept6RdDIfzEafvmnvQWtDmAYodi3tXDFa/Z
+         x4oxvCRLWyaUe9K9vJIFDunXTYvVQzKRHR7LapxTv7Q1HnbT12nl5nFz+BBF42P8My
+         TNjb3PO5uAIF8UIKfLW60Z2h1CIYzHiaSVwdnTvZwWtx8aMO88M1dIJpGkw0aE09xv
+         EA24JZOqEJUIA==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by smtp.lore.kernel.org (Postfix) with ESMTP id B1032C77B70;
-        Sat, 15 Apr 2023 14:18:56 +0000 (UTC)
+        by smtp.lore.kernel.org (Postfix) with ESMTP id 08CFAC77B77;
+        Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
 From:   Yang Xiwen via B4 Relay 
         <devnull+forbidden405.outlook.com@kernel.org>
-Date:   Sat, 15 Apr 2023 22:18:46 +0800
-Subject: [PATCH RFC 3/3] binding: mmc: hi3798cv200-dw-mshc: convert to YAML
- and rename to histb-dw-mshc, add compatible of hi3798mv200
+Subject: [PATCH RFC v2 0/3] mmc: add support for the dw-mmc controller on
+ Hi3798MV200
+Date:   Sun, 16 Apr 2023 01:13:15 +0800
+Message-Id: <20230415-mmc-hi3798mv200-v2-0-1d274f9b71da@outlook.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230415-mmc-hi3798mv200-v1-3-db5b91d939d4@outlook.com>
-References: <20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com>
-In-Reply-To: <20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com>
+X-B4-Tracking: v=1; b=H4sIACvbOmQC/3WNyw7CIBQFf8XctRigD4srExM/wK3pgsdViFIMV
+ KJp+u/S7l3OOZnMBAmjwwSHzQQRs0suDAX4dgPayuGOxJnCwCmvaM0a4r0m1lV70fnMKSUaWYN
+ CibZrWyiWkgmJinLQdvG8TCPG5XhFvLnPmrrC5XyCvozWpTHE75rPbL3+ljIjlBjVKMGMqISpj
+ +E9PkN47HTw0M/z/AN2fUw/zgAAAA==
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Yang Xiwen <forbidden405@outlook.com>
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        devicetree@vger.kernel.org
+Cc:     tianshuliang <tianshuliang@hisilicon.com>,
+        Jiancheng Xue <xuejiancheng@hisilicon.com>,
+        Shawn Guo <shawn.guo@linaro.org>,
+        David Yang <mmyangfl@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 X-Mailer: b4 0.12.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1681568331; l=4836;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1681578841; l=1327;
  i=forbidden405@outlook.com; s=20230415; h=from:subject:message-id;
- bh=2D/pBZCGAgmdlkmpqO4z/Qn0KjP4597p33+qioc0CGI=;
- b=KJ2kN9GGQjGE1Zfp9lP0qd6w9VrxShZz6xATYcFOjN9efHslM8Fg/Mvmb1tQm4GOpEK4gXWdF
- B7gusXCo1hKCdPU17hO8GB1o3Egx09cZ0kYKmLCJqEc8lB9VlzONOft
+ bh=/jSsoNxOvU8LSy+l6NwzbNJ7bw9nm6AcIP7OOw8z6pQ=;
+ b=l4JXNZc79E2xwFXSVxovtxTQvUrpZAmERG0HzQvNBiv1O1kOh4Np5tlJxusfjwJbQDhwaU3lw
+ 48Dst+MG4HkC/nYlTtZygyY4WmHuE7CeSnQ4gSXvc4Yz3t6HzgOvWS9
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=hfdpPU3AXR+t7fdv58tXCD4UzRNq+fop2TMJezFlAhM=
 X-Endpoint-Received: by B4 Relay for forbidden405@outlook.com/20230415 with auth_id=44
@@ -67,159 +72,36 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Yang Xiwen <forbidden405@outlook.com>
-
-Hi3798MV200 has an extra clock, also document it here.
+The dw-mmc controller found on Hi3798MV200 is like the one found on
+Hi3798CV200, but has some tweaks.
+Also refreshed the dt binding and converted it to YAML.
 
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 ----------
- .../devicetree/bindings/mmc/histb-dw-mshc.yaml     | 90 ++++++++++++++++++++++
- 2 files changed, 90 insertions(+), 40 deletions(-)
+Changes in v2:
+- add DDR52 support
+- edit dt-binding, substitude all hi3798cv200 with histb
+- send email to more people
+- Link to v1: https://lore.kernel.org/r/20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com
 
-diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-deleted file mode 100644
-index a0693b7145f2a..0000000000000
---- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
-+++ /dev/null
-@@ -1,40 +0,0 @@
--* Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
--  Storage Host Controller
--
--Read synopsys-dw-mshc.txt for more details
--
--The Synopsys designware mobile storage host controller is used to interface
--a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
--differences between the core Synopsys dw mshc controller properties described
--by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
--specific extensions to the Synopsys Designware Mobile Storage Host Controller.
--
--Required Properties:
--- compatible: Should contain "hisilicon,hi3798cv200-dw-mshc".
--- clocks: A list of phandle + clock-specifier pairs for the clocks listed
--  in clock-names.
--- clock-names: Should contain the following:
--	"ciu" - The ciu clock described in synopsys-dw-mshc.txt.
--	"biu" - The biu clock described in synopsys-dw-mshc.txt.
--	"ciu-sample" - Hi3798CV200 extended phase clock for ciu sampling.
--	"ciu-drive"  - Hi3798CV200 extended phase clock for ciu driving.
--
--Example:
--
--	emmc: mmc@9830000 {
--		compatible = "hisilicon,hi3798cv200-dw-mshc";
--		reg = <0x9830000 0x10000>;
--		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
--		clocks = <&crg HISTB_MMC_CIU_CLK>,
--			 <&crg HISTB_MMC_BIU_CLK>,
--			 <&crg HISTB_MMC_SAMPLE_CLK>,
--			 <&crg HISTB_MMC_DRV_CLK>;
--		clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
--		fifo-depth = <256>;
--		clock-frequency = <200000000>;
--		cap-mmc-highspeed;
--		mmc-ddr-1_8v;
--		mmc-hs200-1_8v;
--		non-removable;
--		bus-width = <8>;
--	};
-diff --git a/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
-new file mode 100644
-index 0000000000000..05a435185e9da
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
-@@ -0,0 +1,90 @@
-+# SPDX-License-Identifier: GPL-2.0
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/histb-dw-mshc.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title:
-+  Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
-+  Storage Host Controller
-+
-+maintainers:
-+  - Yang Xiwen <forbidden405@outlook.com>
-+
-+description:
-+  The Synopsys designware mobile storage host controller is used to interface
-+  a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
-+  differences between the core Synopsys dw mshc controller properties described
-+  by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
-+  specific extensions to the Synopsys Designware Mobile Storage Host Controller.
-+
-+allOf:
-+  - $ref: "synopsys-dw-mshc-common.yaml#"
-+  - if:
-+      properties:
-+        compatible:
-+          contains:
-+            const: hisilicon,hi3798mv200-dw-mshc
-+    then:
-+      properties:
-+        clocks:
-+          minItems: 5
-+
-+        clock-names:
-+          minItems: 5
-+
-+properties:
-+  compatible:
-+    enum:
-+      - hisilicon,hi3798cv200-dw-mshc
-+      - hisilicon,hi3798mv200-dw-mshc
-+
-+  reg:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+  clocks:
-+    minItems: 4
-+    maxItems: 5
-+    description: A list of phandles for the clocks listed in clock-names
-+
-+  clock-names:
-+    minItems: 4
-+    items:
-+      - const: ciu
-+      - const: biu
-+      - const: ciu-sample
-+      - const: ciu-drive
-+      - const: sap-dll-mode
-+
-+unevaluatedProperties: false
-+
-+required:
-+  - compatible
-+  - reg
-+  - interrupts
-+  - clocks
-+  - clock-names
-+
-+examples:
-+  - |
-+    emmc: mmc@9830000 {
-+            compatible = "hisilicon,hi3798cv200-dw-mshc";
-+            reg = <0x9830000 0x10000>;
-+            interrupts = <35>;
-+            clocks = <&crg 1>,
-+                     <&crg 2>,
-+                     <&crg 3>,
-+                     <&crg 4>;
-+            clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
-+            fifo-depth = <256>;
-+            clock-frequency = <200000000>;
-+            cap-mmc-highspeed;
-+            mmc-ddr-1_8v;
-+            mmc-hs200-1_8v;
-+            non-removable;
-+            bus-width = <8>;
-+    };
-+
+---
+Yang Xiwen (3):
+      mmc: dw_mmc-hi3798cv200: rename to dw_mmc-histb
+      mmc: dw_mmc-histb: add support for hi3798mv200
+      binding: mmc: hi3798cv200-dw-mshc: convert to YAML and rename to histb-dw-mshc, add compatible of hi3798mv200
 
+ .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ---
+ .../devicetree/bindings/mmc/histb-dw-mshc.yaml     |  90 ++++++
+ drivers/mmc/host/Kconfig                           |   8 +-
+ drivers/mmc/host/Makefile                          |   2 +-
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              | 206 -------------
+ drivers/mmc/host/dw_mmc-histb.c                    | 339 +++++++++++++++++++++
+ 6 files changed, 434 insertions(+), 251 deletions(-)
+---
+base-commit: 76f598ba7d8e2bfb4855b5298caedd5af0c374a8
+change-id: 20230415-mmc-hi3798mv200-ce15e9b96866
+
+Best regards,
 -- 
-2.39.2
+Yang Xiwen <forbidden405@outlook.com>
 
