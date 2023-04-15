@@ -2,51 +2,48 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EBA9EC77B70
-	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 17:14:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F722C77B7C
+	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 17:14:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229819AbjDOROI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 15 Apr 2023 13:14:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41272 "EHLO
+        id S229936AbjDOROK (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 15 Apr 2023 13:14:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41280 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229574AbjDOROI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Apr 2023 13:14:08 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42A2710E7;
+        with ESMTP id S229872AbjDOROJ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Apr 2023 13:14:09 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A2ED2109;
         Sat, 15 Apr 2023 10:14:07 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id CE2D960B00;
-        Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id 25E28C4339B;
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 008B86164E;
+        Sat, 15 Apr 2023 17:14:07 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 53E0EC433EF;
         Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
         s=k20201202; t=1681578846;
-        bh=/jSsoNxOvU8LSy+l6NwzbNJ7bw9nm6AcIP7OOw8z6pQ=;
-        h=From:Subject:Date:To:Cc:Reply-To:From;
-        b=Lat7VnNXQ6AoNm2PHANEyrOZERv7dzW5MJn3a+tKFjsDFx9iQgxyy3ZTscQGK2xaQ
-         OyUrhpqLPWwaMg18/n8RsqiCnoqomSShiJ0dk4lvISqoj3vBCKToedpAs2JtYHL7Ii
-         7+INKhM6HhZx4ixo8majrNGBgiITShvept6RdDIfzEafvmnvQWtDmAYodi3tXDFa/Z
-         x4oxvCRLWyaUe9K9vJIFDunXTYvVQzKRHR7LapxTv7Q1HnbT12nl5nFz+BBF42P8My
-         TNjb3PO5uAIF8UIKfLW60Z2h1CIYzHiaSVwdnTvZwWtx8aMO88M1dIJpGkw0aE09xv
-         EA24JZOqEJUIA==
+        bh=I1zVuCbwHLpIyH1CupVPrNbprfDrqjzfxLYjmXNkoeE=;
+        h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
+        b=gHD79JjDvgR1muY38eVKilhiwOlUSydcD9U4dxn8fnwaTwz6476QJy+yeefYXk2nS
+         rD6FZ7PKS28FUSbFERwWDmE2ANH4gfU3Cx+a/hGHn5iBDzMr8+3omWScMRk5X3ZSTX
+         8+AW0QtperHtrWrSWhUImyYgiUHDfKblBIR3QUh61kxRQHRIdjgjaVx+Bii+WIFWzw
+         rmBA+3+4KGNlBUtYKy2Iw+9DxVRqtNODxXBl4KA1VcerWNyAQ4qFmId6qGsKFT09Rc
+         kiOksV27H0TwPtlL8oIBgHsqTVgcj4OJe2H8aCHNVgp5SbXHct0Q+9OxZbOdoYj217
+         HMQGfESwtVGtQ==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by smtp.lore.kernel.org (Postfix) with ESMTP id 08CFAC77B77;
+        by smtp.lore.kernel.org (Postfix) with ESMTP id 3AF2FC77B70;
         Sat, 15 Apr 2023 17:14:06 +0000 (UTC)
 From:   Yang Xiwen via B4 Relay 
         <devnull+forbidden405.outlook.com@kernel.org>
-Subject: [PATCH RFC v2 0/3] mmc: add support for the dw-mmc controller on
- Hi3798MV200
-Date:   Sun, 16 Apr 2023 01:13:15 +0800
-Message-Id: <20230415-mmc-hi3798mv200-v2-0-1d274f9b71da@outlook.com>
+Date:   Sun, 16 Apr 2023 01:13:17 +0800
+Subject: [PATCH RFC v2 2/3] mmc: dw_mmc-histb: add support for hi3798mv200
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-X-B4-Tracking: v=1; b=H4sIACvbOmQC/3WNyw7CIBQFf8XctRigD4srExM/wK3pgsdViFIMV
- KJp+u/S7l3OOZnMBAmjwwSHzQQRs0suDAX4dgPayuGOxJnCwCmvaM0a4r0m1lV70fnMKSUaWYN
- CibZrWyiWkgmJinLQdvG8TCPG5XhFvLnPmrrC5XyCvozWpTHE75rPbL3+ljIjlBjVKMGMqISpj
- +E9PkN47HTw0M/z/AN2fUw/zgAAAA==
+Message-Id: <20230415-mmc-hi3798mv200-v2-2-1d274f9b71da@outlook.com>
+References: <20230415-mmc-hi3798mv200-v2-0-1d274f9b71da@outlook.com>
+In-Reply-To: <20230415-mmc-hi3798mv200-v2-0-1d274f9b71da@outlook.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
         Rob Herring <robh+dt@kernel.org>,
@@ -58,11 +55,11 @@ Cc:     tianshuliang <tianshuliang@hisilicon.com>,
         David Yang <mmyangfl@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 X-Mailer: b4 0.12.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1681578841; l=1327;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1681578841; l=5756;
  i=forbidden405@outlook.com; s=20230415; h=from:subject:message-id;
- bh=/jSsoNxOvU8LSy+l6NwzbNJ7bw9nm6AcIP7OOw8z6pQ=;
- b=l4JXNZc79E2xwFXSVxovtxTQvUrpZAmERG0HzQvNBiv1O1kOh4Np5tlJxusfjwJbQDhwaU3lw
- 48Dst+MG4HkC/nYlTtZygyY4WmHuE7CeSnQ4gSXvc4Yz3t6HzgOvWS9
+ bh=BbS/l7vrq8NmARY0G9T42pzQupVXhImCLr1VN3mh6sA=;
+ b=OfPsfIkbummvSPmaS8k6+VwGFK91apAhf9qWFdECma/0SQ5q4vw0BHQGc5tabfTK1lyXih5+m
+ 0HhmN0DmfHLA8/4NIX9t3tmNISQoXoqiYeE6S1xmxR5QoFEsbc42qN8
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=hfdpPU3AXR+t7fdv58tXCD4UzRNq+fop2TMJezFlAhM=
 X-Endpoint-Received: by B4 Relay for forbidden405@outlook.com/20230415 with auth_id=44
@@ -72,36 +69,202 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The dw-mmc controller found on Hi3798MV200 is like the one found on
-Hi3798CV200, but has some tweaks.
-Also refreshed the dt binding and converted it to YAML.
+From: Yang Xiwen <forbidden405@outlook.com>
+
+Add support for Hi3798MV200 specific extension.
 
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
-Changes in v2:
-- add DDR52 support
-- edit dt-binding, substitude all hi3798cv200 with histb
-- send email to more people
-- Link to v1: https://lore.kernel.org/r/20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com
+ drivers/mmc/host/dw_mmc-histb.c | 110 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 109 insertions(+), 1 deletion(-)
 
----
-Yang Xiwen (3):
-      mmc: dw_mmc-hi3798cv200: rename to dw_mmc-histb
-      mmc: dw_mmc-histb: add support for hi3798mv200
-      binding: mmc: hi3798cv200-dw-mshc: convert to YAML and rename to histb-dw-mshc, add compatible of hi3798mv200
+diff --git a/drivers/mmc/host/dw_mmc-histb.c b/drivers/mmc/host/dw_mmc-histb.c
+index 106e586bcff4b..039b6df0e8c4d 100644
+--- a/drivers/mmc/host/dw_mmc-histb.c
++++ b/drivers/mmc/host/dw_mmc-histb.c
+@@ -16,10 +16,14 @@
+ #include "dw_mmc.h"
+ #include "dw_mmc-pltfm.h"
+ 
++#define SDMMC_TUNING_CTRL	0x118
++#define SDMMC_TUNING_FIND_EDGE	BIT(5)
++
+ #define ALL_INT_CLR		0x1ffff
+ 
+ enum dw_mci_histb_type {
+ 	DW_MCI_TYPE_HI3798CV200,
++	DW_MCI_TYPE_HI3798MV200,
+ };
+ 
+ static struct dw_mci_histb_compat {
+@@ -29,6 +33,9 @@ static struct dw_mci_histb_compat {
+ 	{
+ 		.compatible = "hisilicon,hi3798cv200-dw-mshc",
+ 		.ctrl_type = DW_MCI_TYPE_HI3798CV200,
++	}, {
++		.compatible = "hisilicon,hi3798mv200-dw-mshc",
++		.ctrl_type = DW_MCI_TYPE_HI3798MV200,
+ 	},
+ };
+ 
+@@ -36,6 +43,7 @@ struct dw_mci_histb_priv {
+ 	enum dw_mci_histb_type ctrl_type;
+ 	struct clk *sample_clk;
+ 	struct clk *drive_clk;
++	struct clk *sap_dll_mode_clk;
+ };
+ 
+ static void dw_mci_histb_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+@@ -68,7 +76,10 @@ static void dw_mci_histb_set_ios(struct dw_mci *host, struct mmc_ios *ios)
+ 	if (ios->timing == MMC_TIMING_MMC_HS ||
+ 	    ios->timing == MMC_TIMING_LEGACY)
+ 		clk_set_phase(priv->drive_clk, 180);
+-	else if (ios->timing == MMC_TIMING_MMC_HS200)
++	else if (ios->timing == MMC_TIMING_MMC_DDR52) {
++		clk_set_phase(priv->drive_clk, 90);
++		clk_set_phase(priv->sample_clk, 45);
++	} else if (ios->timing == MMC_TIMING_MMC_HS200)
+ 		clk_set_phase(priv->drive_clk, 135);
+ }
+ 
+@@ -133,6 +144,75 @@ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
+ 	return err;
+ }
+ 
++static int dw_mci_hi3798mv200_execute_tuning_mix_mode(struct dw_mci_slot *slot,
++					     u32 opcode)
++{
++	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
++	struct dw_mci *host = slot->host;
++	struct dw_mci_histb_priv *priv = host->priv;
++	int raise_point = -1, fall_point = -1;
++	int err, prev_err = -1;
++	int found = 0;
++	int regval;
++	int i;
++
++	clk_disable(priv->sap_dll_mode_clk);
++	for (i = 0; i < ARRAY_SIZE(degrees); i++) {
++		clk_set_phase(priv->sample_clk, degrees[i]);
++		mci_writel(host, RINTSTS, ALL_INT_CLR);
++
++		err = mmc_send_tuning(slot->mmc, opcode, NULL);
++		if (err)
++			found = 1;
++		else {
++			regval = mci_readl(host, TUNING_CTRL);
++			if (regval & SDMMC_TUNING_FIND_EDGE)
++				found = 1;
++		};
++
++		if (i > 0) {
++			if (err && !prev_err)
++				fall_point = i - 1;
++			if (!err && prev_err)
++				raise_point = i;
++		}
++
++		if (raise_point != -1 && fall_point != -1)
++			goto tuning_out;
++
++		prev_err = err;
++		err = 0;
++	}
++
++tuning_out:
++	clk_enable(priv->sap_dll_mode_clk);
++	if (found) {
++		if (raise_point == -1)
++			raise_point = 0;
++		if (fall_point == -1)
++			fall_point = ARRAY_SIZE(degrees) - 1;
++		if (fall_point < raise_point) {
++			if ((raise_point + fall_point) >
++			    (ARRAY_SIZE(degrees) - 1))
++				i = fall_point / 2;
++			else
++				i = (raise_point + ARRAY_SIZE(degrees) - 1) / 2;
++		} else {
++			i = (raise_point + fall_point) / 2;
++		}
++
++		clk_set_phase(priv->sample_clk, degrees[i]);
++		dev_dbg(host->dev, "Tuning clk_sample[%d, %d], set[%d]\n",
++			raise_point, fall_point, degrees[i]);
++	} else {
++		dev_err(host->dev, "No valid clk_sample shift! use default\n");
++		err = -EINVAL;
++	}
++
++	mci_writel(host, RINTSTS, ALL_INT_CLR);
++	return err;
++}
++
+ static int dw_mci_histb_init(struct dw_mci *host)
+ {
+ 	struct dw_mci_histb_priv *priv;
+@@ -160,6 +240,14 @@ static int dw_mci_histb_init(struct dw_mci *host)
+ 		return PTR_ERR(priv->drive_clk);
+ 	}
+ 
++	if (priv->ctrl_type == DW_MCI_TYPE_HI3798MV200) {
++		priv->sap_dll_mode_clk = devm_clk_get(host->dev, "sap-dll-mode");
++		if (IS_ERR(priv->sap_dll_mode_clk)) {
++			dev_err(host->dev, "failed to get sap-dll-mode clock\n");
++			return PTR_ERR(priv->sap_dll_mode_clk);
++		}
++	}
++
+ 	ret = clk_prepare_enable(priv->sample_clk);
+ 	if (ret) {
+ 		dev_err(host->dev, "failed to enable ciu-sample clock\n");
+@@ -172,9 +260,19 @@ static int dw_mci_histb_init(struct dw_mci *host)
+ 		goto disable_sample_clk;
+ 	}
+ 
++	if (priv->ctrl_type == DW_MCI_TYPE_HI3798MV200) {
++		ret = clk_prepare_enable(priv->sap_dll_mode_clk);
++		if (ret) {
++			dev_err(host->dev, "failed to disable tuning mode");
++			goto disable_drive_clk;
++		}
++	}
++
+ 	host->priv = priv;
+ 	return 0;
+ 
++disable_drive_clk:
++	clk_disable_unprepare(priv->drive_clk);
+ disable_sample_clk:
+ 	clk_disable_unprepare(priv->sample_clk);
+ 	return ret;
+@@ -187,8 +285,16 @@ static const struct dw_mci_drv_data hi3798cv200_data = {
+ 	.execute_tuning = dw_mci_hi3798cv200_execute_tuning,
+ };
+ 
++static const struct dw_mci_drv_data hi3798mv200_data = {
++	.common_caps = MMC_CAP_CMD23,
++	.init = dw_mci_histb_init,
++	.set_ios = dw_mci_histb_set_ios,
++	.execute_tuning = dw_mci_hi3798mv200_execute_tuning_mix_mode,
++};
++
+ static const struct of_device_id dw_mci_histb_match[] = {
+ 	{ .compatible = "hisilicon,hi3798cv200-dw-mshc", .data = &hi3798cv200_data },
++	{ .compatible = "hisilicon,hi3798mv200-dw-mshc", .data = &hi3798mv200_data },
+ 	{},
+ };
+ 
+@@ -208,6 +314,8 @@ static int dw_mci_histb_remove(struct platform_device *pdev)
+ 
+ 	clk_disable_unprepare(priv->drive_clk);
+ 	clk_disable_unprepare(priv->sample_clk);
++	if (priv->ctrl_type == DW_MCI_TYPE_HI3798MV200)
++		clk_disable_unprepare(priv->sap_dll_mode_clk);
+ 
+ 	dw_mci_pltfm_remove(pdev);
+ 
 
- .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ---
- .../devicetree/bindings/mmc/histb-dw-mshc.yaml     |  90 ++++++
- drivers/mmc/host/Kconfig                           |   8 +-
- drivers/mmc/host/Makefile                          |   2 +-
- drivers/mmc/host/dw_mmc-hi3798cv200.c              | 206 -------------
- drivers/mmc/host/dw_mmc-histb.c                    | 339 +++++++++++++++++++++
- 6 files changed, 434 insertions(+), 251 deletions(-)
----
-base-commit: 76f598ba7d8e2bfb4855b5298caedd5af0c374a8
-change-id: 20230415-mmc-hi3798mv200-ce15e9b96866
-
-Best regards,
 -- 
-Yang Xiwen <forbidden405@outlook.com>
+2.39.2
 
