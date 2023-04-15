@@ -2,46 +2,47 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DC531C77B71
-	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 14:19:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CC63BC77B7E
+	for <linux-mmc@archiver.kernel.org>; Sat, 15 Apr 2023 14:19:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229805AbjDOOTB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sat, 15 Apr 2023 10:19:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42518 "EHLO
+        id S229930AbjDOOTD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sat, 15 Apr 2023 10:19:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229628AbjDOOS7 (ORCPT
+        with ESMTP id S229735AbjDOOS7 (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Sat, 15 Apr 2023 10:18:59 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5D046BC;
-        Sat, 15 Apr 2023 07:18:57 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 02DEB49E1;
+        Sat, 15 Apr 2023 07:18:58 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5284160B5E;
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 7B78960B21;
         Sat, 15 Apr 2023 14:18:57 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id B1F35C4339B;
+Received: by smtp.kernel.org (Postfix) with ESMTPS id D7F73C433A4;
         Sat, 15 Apr 2023 14:18:56 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
         s=k20201202; t=1681568336;
-        bh=G2tLPQgRxtDu3DlqJOjUZMbxuxbA9j8nbZJ62Yt8Xr4=;
+        bh=jS0bpY0B94N3teaYRFeuB4DDITFUe3GUayl2qqATw4Y=;
         h=From:Date:Subject:References:In-Reply-To:To:Cc:Reply-To:From;
-        b=h8hrLGKJDuQGuDuwI81CSh9J5S4IwwxwjgqvDTJ/Va/Ho5HK8kqyfXSP3/aBZJadh
-         FrA8BTdqTTppqwpwanBFyFarecZVs6mZbmsKbhJBrO+bcJEBC2W2C8mR8YQ957923P
-         LHAfAHjX6PKK0AtNxOQlo9AHwsgIL9y+eLwE5cDe+YKqICb8vGkh8waJMllyy9XWdZ
-         fipcrDHGGnlKBLuZx7TyHKQkQ1G+kFzbXLbFfAA/FUFnzbXyau+8mJbFnU1WEa6+dM
-         DDbLZSWiTVd90lx4BCWI+co0hVCih5lZYHbgPm/VrVBOwPo064FvrEGyd110Cbsai6
-         2FTenHGDJnFxQ==
+        b=LNEqNroCC6vOajujZb9dIYQ0z7DDXijLtYKlOQPj+KDUEcUYap53J74dT7yIz60cp
+         Ytug0jO05So/92ZxfIULe35wdlW/v9bZu/OFg0us/r9S4PywKUc1XB7+05z3cfSy5t
+         eh7YbQD8VWwrBQ5q2N4223Sp84faioecgDyZ7C5iP9Woao+vuNpt3a1/hrAYDQD2ZG
+         8fxX59JOAqvj78iIPAGMU1XmuYp/brjRAqSAuS3SkwRm8D2zYNGd8QXagbL8Tybolg
+         VLTpTegO6kN0lbhJVd9ZGzFF+zRKwsCLYEQGTc5NVk+2D1SJZ+AKaPYh13TJ8V9VU2
+         hgkMN7FpPe8CA==
 Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by smtp.lore.kernel.org (Postfix) with ESMTP id 91FF8C7619A;
+        by smtp.lore.kernel.org (Postfix) with ESMTP id B1032C77B70;
         Sat, 15 Apr 2023 14:18:56 +0000 (UTC)
 From:   Yang Xiwen via B4 Relay 
         <devnull+forbidden405.outlook.com@kernel.org>
-Date:   Sat, 15 Apr 2023 22:18:44 +0800
-Subject: [PATCH RFC 1/3] mmc: dw_mmc-hi3798cv200: rename to dw_mmc-histb
+Date:   Sat, 15 Apr 2023 22:18:46 +0800
+Subject: [PATCH RFC 3/3] binding: mmc: hi3798cv200-dw-mshc: convert to YAML
+ and rename to histb-dw-mshc, add compatible of hi3798mv200
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
-Message-Id: <20230415-mmc-hi3798mv200-v1-1-db5b91d939d4@outlook.com>
+Message-Id: <20230415-mmc-hi3798mv200-v1-3-db5b91d939d4@outlook.com>
 References: <20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com>
 In-Reply-To: <20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
@@ -52,11 +53,11 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         devicetree@vger.kernel.org
 X-Mailer: b4 0.12.0
-X-Developer-Signature: v=1; a=ed25519-sha256; t=1681568331; l=7027;
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1681568331; l=4836;
  i=forbidden405@outlook.com; s=20230415; h=from:subject:message-id;
- bh=eoErTepi3JKctxpmeTvJxlWPwF/xYjRv313AFyJJwn4=;
- b=/y3YnifiGikERHOpqp5udL8EUKKqTLbGXTDK7+aM942SUcQjVaIddXVWwfdx308GixdmKr4pH
- ns97LqzX0rPAAgs84OTh7MUROg3YQXLkXHw0d3PiVnw7pYa+ht8Bxqg
+ bh=2D/pBZCGAgmdlkmpqO4z/Qn0KjP4597p33+qioc0CGI=;
+ b=KJ2kN9GGQjGE1Zfp9lP0qd6w9VrxShZz6xATYcFOjN9efHslM8Fg/Mvmb1tQm4GOpEK4gXWdF
+ B7gusXCo1hKCdPU17hO8GB1o3Egx09cZ0kYKmLCJqEc8lB9VlzONOft
 X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
  pk=hfdpPU3AXR+t7fdv58tXCD4UzRNq+fop2TMJezFlAhM=
 X-Endpoint-Received: by B4 Relay for forbidden405@outlook.com/20230415 with auth_id=44
@@ -68,196 +69,156 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 From: Yang Xiwen <forbidden405@outlook.com>
 
-Rename to dw_mmc-histb and introduce a mechanism similar to
-dw-mmc_exynos to support more devices in a single driver. It is a
-preparation for introducing extension for Hi3798MV200.
+Hi3798MV200 has an extra clock, also document it here.
 
 Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 ---
- drivers/mmc/host/Kconfig                           |  8 +--
- drivers/mmc/host/Makefile                          |  2 +-
- .../host/{dw_mmc-hi3798cv200.c => dw_mmc-histb.c}  | 79 ++++++++++++++--------
- 3 files changed, 57 insertions(+), 32 deletions(-)
+ .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 ----------
+ .../devicetree/bindings/mmc/histb-dw-mshc.yaml     | 90 ++++++++++++++++++++++
+ 2 files changed, 90 insertions(+), 40 deletions(-)
 
-diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-index 4745fe217ade3..0aef4d845b743 100644
---- a/drivers/mmc/host/Kconfig
-+++ b/drivers/mmc/host/Kconfig
-@@ -779,14 +779,14 @@ config MMC_DW_EXYNOS
- 	  Synopsys DesignWare Memory Card Interface driver. Select this option
- 	  for platforms based on Exynos4 and Exynos5 SoC's.
- 
--config MMC_DW_HI3798CV200
--	tristate "Hi3798CV200 specific extensions for Synopsys DW Memory Card Interface"
-+config MMC_DW_HISTB
-+	tristate "HiSTB specific extensions for Synopsys DW Memory Card Interface"
- 	depends on MMC_DW
- 	select MMC_DW_PLTFM
- 	help
--	  This selects support for HiSilicon Hi3798CV200 SoC specific extensions to the
-+	  This selects support for HiSilicon HiSTB SoC specific extensions to the
- 	  Synopsys DesignWare Memory Card Interface driver. Select this option
--	  for platforms based on HiSilicon Hi3798CV200 SoC.
-+	  for platforms based on HiSilicon HiSTB SoC.
- 
- config MMC_DW_K3
- 	tristate "K3 specific extensions for Synopsys DW Memory Card Interface"
-diff --git a/drivers/mmc/host/Makefile b/drivers/mmc/host/Makefile
-index a693fa3d3f1cc..0373741afebf1 100644
---- a/drivers/mmc/host/Makefile
-+++ b/drivers/mmc/host/Makefile
-@@ -50,7 +50,7 @@ obj-$(CONFIG_MMC_DW)		+= dw_mmc.o
- obj-$(CONFIG_MMC_DW_PLTFM)	+= dw_mmc-pltfm.o
- obj-$(CONFIG_MMC_DW_BLUEFIELD)	+= dw_mmc-bluefield.o
- obj-$(CONFIG_MMC_DW_EXYNOS)	+= dw_mmc-exynos.o
--obj-$(CONFIG_MMC_DW_HI3798CV200) += dw_mmc-hi3798cv200.o
-+obj-$(CONFIG_MMC_DW_HISTB) += dw_mmc-histb.o
- obj-$(CONFIG_MMC_DW_K3)		+= dw_mmc-k3.o
- obj-$(CONFIG_MMC_DW_PCI)	+= dw_mmc-pci.o
- obj-$(CONFIG_MMC_DW_ROCKCHIP)	+= dw_mmc-rockchip.o
-diff --git a/drivers/mmc/host/dw_mmc-hi3798cv200.c b/drivers/mmc/host/dw_mmc-histb.c
-similarity index 69%
-rename from drivers/mmc/host/dw_mmc-hi3798cv200.c
-rename to drivers/mmc/host/dw_mmc-histb.c
-index 6f22fe0540879..106e586bcff4b 100644
---- a/drivers/mmc/host/dw_mmc-hi3798cv200.c
-+++ b/drivers/mmc/host/dw_mmc-histb.c
-@@ -18,14 +18,29 @@
- 
- #define ALL_INT_CLR		0x1ffff
- 
--struct hi3798cv200_priv {
-+enum dw_mci_histb_type {
-+	DW_MCI_TYPE_HI3798CV200,
-+};
-+
-+static struct dw_mci_histb_compat {
-+	const char * const compatible;
-+	enum dw_mci_histb_type ctrl_type;
-+} histb_compat[] = {
-+	{
-+		.compatible = "hisilicon,hi3798cv200-dw-mshc",
-+		.ctrl_type = DW_MCI_TYPE_HI3798CV200,
-+	},
-+};
-+
-+struct dw_mci_histb_priv {
-+	enum dw_mci_histb_type ctrl_type;
- 	struct clk *sample_clk;
- 	struct clk *drive_clk;
- };
- 
--static void dw_mci_hi3798cv200_set_ios(struct dw_mci *host, struct mmc_ios *ios)
-+static void dw_mci_histb_set_ios(struct dw_mci *host, struct mmc_ios *ios)
- {
--	struct hi3798cv200_priv *priv = host->priv;
-+	struct dw_mci_histb_priv *priv = host->priv;
- 	u32 val;
- 
- 	val = mci_readl(host, UHS_REG);
-@@ -62,7 +77,7 @@ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
- {
- 	static const int degrees[] = { 0, 45, 90, 135, 180, 225, 270, 315 };
- 	struct dw_mci *host = slot->host;
--	struct hi3798cv200_priv *priv = host->priv;
-+	struct dw_mci_histb_priv *priv = host->priv;
- 	int raise_point = -1, fall_point = -1;
- 	int err, prev_err = -1;
- 	int found = 0;
-@@ -118,15 +133,21 @@ static int dw_mci_hi3798cv200_execute_tuning(struct dw_mci_slot *slot,
- 	return err;
- }
- 
--static int dw_mci_hi3798cv200_init(struct dw_mci *host)
-+static int dw_mci_histb_init(struct dw_mci *host)
- {
--	struct hi3798cv200_priv *priv;
--	int ret;
-+	struct dw_mci_histb_priv *priv;
-+	struct device_node *np = host->dev->of_node;
-+	int ret, idx;
- 
- 	priv = devm_kzalloc(host->dev, sizeof(*priv), GFP_KERNEL);
- 	if (!priv)
- 		return -ENOMEM;
- 
-+	for (idx = 0; idx < ARRAY_SIZE(histb_compat); idx++) {
-+		if (of_device_is_compatible(np, histb_compat[idx].compatible))
-+			priv->ctrl_type = histb_compat[idx].ctrl_type;
-+	}
-+
- 	priv->sample_clk = devm_clk_get(host->dev, "ciu-sample");
- 	if (IS_ERR(priv->sample_clk)) {
- 		dev_err(host->dev, "failed to get ciu-sample clock\n");
-@@ -161,20 +182,29 @@ static int dw_mci_hi3798cv200_init(struct dw_mci *host)
- 
- static const struct dw_mci_drv_data hi3798cv200_data = {
- 	.common_caps = MMC_CAP_CMD23,
--	.init = dw_mci_hi3798cv200_init,
--	.set_ios = dw_mci_hi3798cv200_set_ios,
-+	.init = dw_mci_histb_init,
-+	.set_ios = dw_mci_histb_set_ios,
- 	.execute_tuning = dw_mci_hi3798cv200_execute_tuning,
- };
- 
--static int dw_mci_hi3798cv200_probe(struct platform_device *pdev)
-+static const struct of_device_id dw_mci_histb_match[] = {
-+	{ .compatible = "hisilicon,hi3798cv200-dw-mshc", .data = &hi3798cv200_data },
-+	{},
-+};
-+
-+static int dw_mci_histb_probe(struct platform_device *pdev)
- {
--	return dw_mci_pltfm_register(pdev, &hi3798cv200_data);
-+	const struct of_device_id *match;
-+
-+	match = of_match_node(dw_mci_histb_match, pdev->dev.of_node);
-+
-+	return dw_mci_pltfm_register(pdev, match->data);
- }
- 
--static int dw_mci_hi3798cv200_remove(struct platform_device *pdev)
-+static int dw_mci_histb_remove(struct platform_device *pdev)
- {
- 	struct dw_mci *host = platform_get_drvdata(pdev);
--	struct hi3798cv200_priv *priv = host->priv;
-+	struct dw_mci_histb_priv *priv = host->priv;
- 
- 	clk_disable_unprepare(priv->drive_clk);
- 	clk_disable_unprepare(priv->sample_clk);
-@@ -184,23 +214,18 @@ static int dw_mci_hi3798cv200_remove(struct platform_device *pdev)
- 	return 0;
- }
- 
--static const struct of_device_id dw_mci_hi3798cv200_match[] = {
--	{ .compatible = "hisilicon,hi3798cv200-dw-mshc", },
--	{},
--};
+diff --git a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt b/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
+deleted file mode 100644
+index a0693b7145f2a..0000000000000
+--- a/Documentation/devicetree/bindings/mmc/hi3798cv200-dw-mshc.txt
++++ /dev/null
+@@ -1,40 +0,0 @@
+-* Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
+-  Storage Host Controller
 -
--MODULE_DEVICE_TABLE(of, dw_mci_hi3798cv200_match);
--static struct platform_driver dw_mci_hi3798cv200_driver = {
--	.probe = dw_mci_hi3798cv200_probe,
--	.remove = dw_mci_hi3798cv200_remove,
-+MODULE_DEVICE_TABLE(of, dw_mci_histb_match);
-+static struct platform_driver dw_mci_histb_driver = {
-+	.probe = dw_mci_histb_probe,
-+	.remove = dw_mci_histb_remove,
- 	.driver = {
--		.name = "dwmmc_hi3798cv200",
-+		.name = "dwmmc_histb",
- 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
--		.of_match_table = dw_mci_hi3798cv200_match,
-+		.of_match_table = dw_mci_histb_match,
- 	},
- };
--module_platform_driver(dw_mci_hi3798cv200_driver);
-+module_platform_driver(dw_mci_histb_driver);
- 
--MODULE_DESCRIPTION("HiSilicon Hi3798CV200 Specific DW-MSHC Driver Extension");
-+MODULE_DESCRIPTION("HiSilicon HiSTB Specific DW-MSHC Driver Extension");
- MODULE_LICENSE("GPL v2");
--MODULE_ALIAS("platform:dwmmc_hi3798cv200");
-+MODULE_ALIAS("platform:dwmmc_histb");
+-Read synopsys-dw-mshc.txt for more details
+-
+-The Synopsys designware mobile storage host controller is used to interface
+-a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
+-differences between the core Synopsys dw mshc controller properties described
+-by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
+-specific extensions to the Synopsys Designware Mobile Storage Host Controller.
+-
+-Required Properties:
+-- compatible: Should contain "hisilicon,hi3798cv200-dw-mshc".
+-- clocks: A list of phandle + clock-specifier pairs for the clocks listed
+-  in clock-names.
+-- clock-names: Should contain the following:
+-	"ciu" - The ciu clock described in synopsys-dw-mshc.txt.
+-	"biu" - The biu clock described in synopsys-dw-mshc.txt.
+-	"ciu-sample" - Hi3798CV200 extended phase clock for ciu sampling.
+-	"ciu-drive"  - Hi3798CV200 extended phase clock for ciu driving.
+-
+-Example:
+-
+-	emmc: mmc@9830000 {
+-		compatible = "hisilicon,hi3798cv200-dw-mshc";
+-		reg = <0x9830000 0x10000>;
+-		interrupts = <GIC_SPI 35 IRQ_TYPE_LEVEL_HIGH>;
+-		clocks = <&crg HISTB_MMC_CIU_CLK>,
+-			 <&crg HISTB_MMC_BIU_CLK>,
+-			 <&crg HISTB_MMC_SAMPLE_CLK>,
+-			 <&crg HISTB_MMC_DRV_CLK>;
+-		clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
+-		fifo-depth = <256>;
+-		clock-frequency = <200000000>;
+-		cap-mmc-highspeed;
+-		mmc-ddr-1_8v;
+-		mmc-hs200-1_8v;
+-		non-removable;
+-		bus-width = <8>;
+-	};
+diff --git a/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
+new file mode 100644
+index 0000000000000..05a435185e9da
+--- /dev/null
++++ b/Documentation/devicetree/bindings/mmc/histb-dw-mshc.yaml
+@@ -0,0 +1,90 @@
++# SPDX-License-Identifier: GPL-2.0
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/mmc/histb-dw-mshc.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title:
++  Hisilicon Hi3798CV200 specific extensions to the Synopsys Designware Mobile
++  Storage Host Controller
++
++maintainers:
++  - Yang Xiwen <forbidden405@outlook.com>
++
++description:
++  The Synopsys designware mobile storage host controller is used to interface
++  a SoC with storage medium such as eMMC or SD/MMC cards. This file documents
++  differences between the core Synopsys dw mshc controller properties described
++  by synopsys-dw-mshc.txt and the properties used by the Hisilicon Hi3798CV200
++  specific extensions to the Synopsys Designware Mobile Storage Host Controller.
++
++allOf:
++  - $ref: "synopsys-dw-mshc-common.yaml#"
++  - if:
++      properties:
++        compatible:
++          contains:
++            const: hisilicon,hi3798mv200-dw-mshc
++    then:
++      properties:
++        clocks:
++          minItems: 5
++
++        clock-names:
++          minItems: 5
++
++properties:
++  compatible:
++    enum:
++      - hisilicon,hi3798cv200-dw-mshc
++      - hisilicon,hi3798mv200-dw-mshc
++
++  reg:
++    maxItems: 1
++
++  interrupts:
++    maxItems: 1
++
++  clocks:
++    minItems: 4
++    maxItems: 5
++    description: A list of phandles for the clocks listed in clock-names
++
++  clock-names:
++    minItems: 4
++    items:
++      - const: ciu
++      - const: biu
++      - const: ciu-sample
++      - const: ciu-drive
++      - const: sap-dll-mode
++
++unevaluatedProperties: false
++
++required:
++  - compatible
++  - reg
++  - interrupts
++  - clocks
++  - clock-names
++
++examples:
++  - |
++    emmc: mmc@9830000 {
++            compatible = "hisilicon,hi3798cv200-dw-mshc";
++            reg = <0x9830000 0x10000>;
++            interrupts = <35>;
++            clocks = <&crg 1>,
++                     <&crg 2>,
++                     <&crg 3>,
++                     <&crg 4>;
++            clock-names = "ciu", "biu", "ciu-sample", "ciu-drive";
++            fifo-depth = <256>;
++            clock-frequency = <200000000>;
++            cap-mmc-highspeed;
++            mmc-ddr-1_8v;
++            mmc-hs200-1_8v;
++            non-removable;
++            bus-width = <8>;
++    };
++
 
 -- 
 2.39.2
