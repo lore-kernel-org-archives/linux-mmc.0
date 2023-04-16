@@ -2,107 +2,119 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AFC9C7619A
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 Apr 2023 09:16:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C20CDC77B78
+	for <linux-mmc@archiver.kernel.org>; Sun, 16 Apr 2023 09:19:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230178AbjDPJQG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 16 Apr 2023 05:16:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41324 "EHLO
+        id S230389AbjDPJT5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 16 Apr 2023 05:19:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42816 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230064AbjDPJQF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Apr 2023 05:16:05 -0400
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E59271BD9
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 02:16:03 -0700 (PDT)
-Received: by mail-ej1-x62e.google.com with SMTP id a640c23a62f3a-94f4b911570so21276966b.0
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 02:16:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681636562; x=1684228562;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=IQXACcFQhYMTTapf4fYrBnZy/KtxmeAb2/9BYxrU0Bg=;
-        b=zNVG1f9czlGFT2SrHPjlDHaK/IzZU5sRnN6vfXw910do/0PVh3Q63Xz4Tu0c4YGdCJ
-         xsb25VuOJ0vbBbKzz9pRkJihJBP0lHOXMOfxMo5I5RR+FCqSza26PAd/GEQolLGI3Pq3
-         soeylxBcHmUU3jBz97j4mlyv/KOg6CuzWCdRt/nvE8SD+5CIzkpBKkCIEvDlxB3GOwg9
-         kVFY0cZeF53ZSvuuXGvNkD3lTxC5opgjEckn5pjmj5Hatr3Msvj1agnlnpI3ZDFBSJ/o
-         gzEyR56X7nXkIaD/tp1V/0xbFO7icJt+nGd8kqH9P1jqlnKAuaWeear9z+EcEaF32MhV
-         9BJw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681636562; x=1684228562;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=IQXACcFQhYMTTapf4fYrBnZy/KtxmeAb2/9BYxrU0Bg=;
-        b=gw8yYXV5CCgp/VOrWAgY7slFsxjEovVsL2iOmu7/uh2Syz+U+JbEiS2ZBHC98k+95j
-         WkNalDwOYcFhCLX4WvXibjr7aL4EUJogy3Pi6zoZXGh6fKS+3Gx8pleuB2nyKL6oH0ba
-         7va39LOiCWTY+iPd+1RIPY9IP2bR+ESgr1/gxn5ifPSWKQvjm5Jz8vK0DJZVYj1K0lM1
-         JgMXkDrpbG4rKbJ7ysiMPcF4oBPgbWqknDJUQl8dwzrTFjAAr33cHAidSNj8mSMhACe1
-         b0SSvP0A1H7kfx4zxiUhnb04k9bthnwiMhihjyLskA0vsk9B/GO/3dWDEJQR9V37/sc8
-         eLjw==
-X-Gm-Message-State: AAQBX9fnsbxoWvQaYz4eBpU646lnWrm8b+0wfn/V+yo/IRu4C1bIANFi
-        npW+Jew+I5IoQ1/3TKDMWlzqxQ==
-X-Google-Smtp-Source: AKy350b8zNnrbYNWqzu2ymag2e1aIn96EHCycoVEwyxSuWpG9Q+Xeq/H1EjdtDt+sJ6qVBeCc9rslw==
-X-Received: by 2002:a05:6402:10d2:b0:4fd:20e5:4142 with SMTP id p18-20020a05640210d200b004fd20e54142mr10405208edu.21.1681636562398;
-        Sun, 16 Apr 2023 02:16:02 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:29dd:ded4:3ccc:83db? ([2a02:810d:15c0:828:29dd:ded4:3ccc:83db])
-        by smtp.gmail.com with ESMTPSA id ay18-20020a056402203200b0050504648fc4sm4319723edb.80.2023.04.16.02.16.01
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 16 Apr 2023 02:16:02 -0700 (PDT)
-Message-ID: <2df035b4-edf6-b5c3-55a4-17fca6ea7f85@linaro.org>
-Date:   Sun, 16 Apr 2023 11:15:59 +0200
+        with ESMTP id S229711AbjDPJT4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Apr 2023 05:19:56 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A4E41BD2;
+        Sun, 16 Apr 2023 02:19:55 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 15E2C60CBA;
+        Sun, 16 Apr 2023 09:19:55 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 58389C433EF;
+        Sun, 16 Apr 2023 09:19:54 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1681636794;
+        bh=C3B7e70soFXi8WZxufA7WKhVicEU3OSoxaI6T2fcuAc=;
+        h=From:Subject:Date:To:Cc:Reply-To:From;
+        b=apCC9c5lzLTPsL5JA3sEYyUXlsoV1Mg+3CnDFrRCfronJV6Np/x8DYa99BntFDymw
+         7VFms9S0HXQ74+q6YE/F7PP70nBBhQkrlu/FrZ+Z4F//dFU1xR+Ib3UBYTweEuBbif
+         3SfZ4a9UaFBodEcCjZwxKApuAEQ55nWiJ+Ckh6bZAG0HwCPtEmdrpreLjBhvdAPZJX
+         XxNJUPdYghiBQczT1CO0Uy0Cb/qwdpKcApEPjG1Clvh+Lt81lVGhkiO5pRU/leghjC
+         eliYK11BtcJ/l3ck1UZD6zAmF22HKIb8jSQ/d9TTTFgFDUDyHLv2ZVIE4u1m3EdhUm
+         YKTiQQIHWhnww==
+Received: from aws-us-west-2-korg-lkml-1.web.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by smtp.lore.kernel.org (Postfix) with ESMTP id 2F443C77B72;
+        Sun, 16 Apr 2023 09:19:54 +0000 (UTC)
+From:   Yang Xiwen via B4 Relay 
+        <devnull+forbidden405.outlook.com@kernel.org>
+Subject: [PATCH RFC v4 0/4] mmc: add support for the dw-mmc controller on
+ Hi3798MV200
+Date:   Sun, 16 Apr 2023 17:19:31 +0800
+Message-Id: <20230415-mmc-hi3798mv200-v4-0-44096e187f53@outlook.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.0
-Subject: Re: [PATCH V3 8/9] arm64: dts: Add ipq5018 SoC and rdp432-c2 board
- support
-Content-Language: en-US
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
-        agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
-        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Cc:     Varadarajan Narayanan <quic_varada@quicinc.com>,
-        Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
- <1681468167-11689-9-git-send-email-quic_srichara@quicinc.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <1681468167-11689-9-git-send-email-quic_srichara@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+X-B4-Tracking: v=1; b=H4sIAKO9O2QC/4XNS6oCMRAF0K1IxkYqSf/iSBBcgFNxkE9ph/fSk
+ aQNivTejT0TEYe3invugySMDhNZLx4kYnbJhaGEarkgplfDGamzJRMOXEDFauq9ob0Trex85gD
+ UIKtRatl0TUNKS6uEVEc1mP7V8yqNGF+PS8STu81TB7LfbcmxHHuXxhDv83xm8+vrUmYUqNW1l
+ sxKIW21CdfxP4S/lQl+1jL/IfAiMMvb6iR1y6z6FMQPQRQBALloOgMtyHdhmqYneDfUdVIBAAA
+ =
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Yang Xiwen <forbidden405@outlook.com>
+Cc:     tianshuliang <tianshuliang@hisilicon.com>,
+        Jiancheng Xue <xuejiancheng@hisilicon.com>,
+        Shawn Guo <shawn.guo@linaro.org>,
+        David Yang <mmyangfl@gmail.com>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
+X-Mailer: b4 0.12.0
+X-Developer-Signature: v=1; a=ed25519-sha256; t=1681636790; l=1828;
+ i=forbidden405@outlook.com; s=20230415; h=from:subject:message-id;
+ bh=C3B7e70soFXi8WZxufA7WKhVicEU3OSoxaI6T2fcuAc=;
+ b=GmryrH+KwWWU6nkjqwj8a3ukVx0Ec87ykdWjriMTVhsDrDRMtJxEuyCjRBS4WkpmSQFeXKC9o
+ j5hrj6xVIjRDVzCxNjUBHNQp58agOcAHp+V78Hg93ESTHGduk1YQplv
+X-Developer-Key: i=forbidden405@outlook.com; a=ed25519;
+ pk=hfdpPU3AXR+t7fdv58tXCD4UzRNq+fop2TMJezFlAhM=
+X-Endpoint-Received: by B4 Relay for forbidden405@outlook.com/20230415 with auth_id=44
+X-Original-From: Yang Xiwen <forbidden405@outlook.com>
+Reply-To: <forbidden405@outlook.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 14/04/2023 12:29, Sricharan Ramabadhran wrote:
-> Add initial device tree support for the Qualcomm IPQ5018 SoC and
-> rdp432-c2 board.
-> 
-> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
-> ---
->  [v3] Fixed all review comments and DTS schema warnings
-> 
->  arch/arm64/boot/dts/qcom/Makefile              |   1 +
+The dw-mmc controller found on Hi3798MV200 is like the one found on
+Hi3798CV200, but has some tweaks.
+Also refreshed the dt-binding and converted it to YAML.
 
-You have some failures to fix. Difficult to say how much because your
-patchset breaks other bindings, so validation aborted. For sure your
-cache misses properties:
+Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
+---
+Changes in v4:
+- fix license of dt-binding document.
+- some other fixes to dt-binding document.
+- Link to v3: https://lore.kernel.org/r/20230415-mmc-hi3798mv200-v3-0-00e2368c0709@outlook.com
 
-ipq5018-rdp432-c2.dtb: l2-cache: 'cache-unified' is a required property
+Changes in v3:
+- split dt-binding commit into 2 parts, one for renaming, the other for
+  new compatible string.
+- some other fixes to dt-binding document.
+- Link to v2: https://lore.kernel.org/r/20230415-mmc-hi3798mv200-v2-0-1d274f9b71da@outlook.com
 
-Be sure that your DTS is clean and comes with no new warnings. If you
-need help with them, get in touch. If your DTS is correct, but errors
-come from other schema, try my pending branch:
-https://github.com/krzk/linux/commits/pending/dt-bindings-qcom-new-and-fixes-for-warnings-linux-next
+Changes in v2:
+- add DDR52 support
+- edit dt-binding, substitude all hi3798cv200 with histb
+- send email to more people
+- Link to v1: https://lore.kernel.org/r/20230415-mmc-hi3798mv200-v1-0-db5b91d939d4@outlook.com
+
+---
+Yang Xiwen (4):
+      mmc: dw_mmc: hi3798cv200: rename to dw_mmc-histb
+      mmc: dw_mmc: histb: add support for hi3798mv200
+      dt-binding: mmc: hi3798cv200-dw-mshc: convert to YAML and rename to histb-dw-mshc
+      dt-binding: mmc: histb-dw-mshc: Add Hi3798MV200 compatible string
+
+ .../bindings/mmc/hi3798cv200-dw-mshc.txt           |  40 ---
+ .../bindings/mmc/hisilicon,histb-dw-mshc.yaml      |  93 ++++++
+ drivers/mmc/host/Kconfig                           |   8 +-
+ drivers/mmc/host/Makefile                          |   2 +-
+ drivers/mmc/host/dw_mmc-hi3798cv200.c              | 206 -------------
+ drivers/mmc/host/dw_mmc-histb.c                    | 339 +++++++++++++++++++++
+ 6 files changed, 437 insertions(+), 251 deletions(-)
+---
+base-commit: 76f598ba7d8e2bfb4855b5298caedd5af0c374a8
+change-id: 20230415-mmc-hi3798mv200-ce15e9b96866
 
 Best regards,
-Krzysztof
+-- 
+Yang Xiwen <forbidden405@outlook.com>
 
