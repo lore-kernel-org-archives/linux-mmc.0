@@ -2,60 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D50B4C77B73
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 Apr 2023 11:16:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9DC72C77B61
+	for <linux-mmc@archiver.kernel.org>; Sun, 16 Apr 2023 11:17:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230036AbjDPLQh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 16 Apr 2023 07:16:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52156 "EHLO
+        id S230046AbjDPLRM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 16 Apr 2023 07:17:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230024AbjDPLQh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Apr 2023 07:16:37 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC41D270B
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 04:16:35 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id dm2so57095310ejc.8
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 04:16:35 -0700 (PDT)
+        with ESMTP id S230021AbjDPLRL (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Apr 2023 07:17:11 -0400
+Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF7D12716
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 04:17:08 -0700 (PDT)
+Received: by mail-ej1-x62b.google.com with SMTP id fy21so14027365ejb.9
+        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 04:17:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681643793; x=1684235793;
+        d=linaro.org; s=google; t=1681643827; x=1684235827;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=dfVOOEaR1vEEILlzOLNZUcE9zFL3fILNekQ/0O6xXvM=;
-        b=g6r7+EFpcI5cEangCoj+RV9nJWwxPRqT32Z5oJ8BflwTmdCkungwDsmKoVrNvtNf9G
-         zhUpT5Mf+puHRCfXkjgAO46etmpDUAwnOQOpFW59oO4/VT0cQKSL9QeLcNQ3N0e2U484
-         BvM/yWdbt7vaxfYhs7zoIa0eiNr5TFk6Nkb2Dma9szg5ER3n183VhOtIr6yndKyJ49Wt
-         zm6b/We/WxzIj5oqzTfKLdGGJGe/Q5hHZTu10IhBM4qgw56B5SrtLrhj1teCoe4V9X+T
-         SBp803/hwiCJnZE0e7/0zt4iqxeCfXh2uFN+MCYAW9jbGsXypKe0aynLi5YlNYB/R3KK
-         qjlw==
+        bh=ghy1vBrrOopi9da9RaVmh1imZTAoDfQaq0rl9RiH25Y=;
+        b=y9YlHJpe/YX4wp7vcZrsKZBoVJSGKCK29B/Zbvl9+dp04+scETF793YiUGa5AszuId
+         MW6QXkqSxwfkzPxqqZzh+2SuPAddkf40bPvtBAZan0AHk7vuGE+Yke5m/z1d0rZVvB/O
+         X+wfgWcyufFVZD58pUkURLe3WbJOHEwThWqGDZasYcpnewwSDJMRWcFfyqdUFg3LjJiQ
+         YBAmL2zvFzlApO30+KrYCkN6MdOEvwabgeJLVJoszaseR/rQPvgsII8Xx4HyiDDVWedV
+         6AYSJMulOY5+BQYTnn4bsBJuULpkctFOI7fVt3nuoT+1t4U1gkMea1ITPHYxjjTsOmmd
+         Evjg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681643793; x=1684235793;
+        d=1e100.net; s=20221208; t=1681643827; x=1684235827;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=dfVOOEaR1vEEILlzOLNZUcE9zFL3fILNekQ/0O6xXvM=;
-        b=c/oPzIdRlaDdlIta4h6/YlGSscOzYwb/ms/UWujO2RvX98ENdafHCrSPrgMedhYvre
-         FTyBERnVis4U4/zBuZ11B3mql75Axm49tP91Hos2Kku+FxPO7AISoxgU6tbsTlT0ZVAv
-         LRn5Diaqojl0GRza03zlKgJ72NSWYt2857yKwKMEBeoGzJTtqe//y/CpKcEP28lbW6Cr
-         Ci7mEkUSMc+smRKPNEtr47Ba6+RxhOX++NhNWGAFbctldHZ0JoGUAqFRK2Iq8R+NQdRV
-         C+q85LN5PwW8qTsHAeKx44fq5qHk9PajDTL5CMf7KsxQcn/+GVHH5yly589A8Fp2sSe3
-         b5sg==
-X-Gm-Message-State: AAQBX9dzdXT4pSWN4Pnj4jbJV/KgOVVEFOrI7SyjCvyv7SCBqoaGzwX0
-        hraN33PpRnTPnkCJoqkHBArdrQ==
-X-Google-Smtp-Source: AKy350a+q7Rv5lebDWwLQHS5o9maCYQRBf4xVCpEYfCcw7ou5You6jkrcsk2TPhClGRuRF01J97R0A==
-X-Received: by 2002:a17:906:2f95:b0:933:6ae6:374d with SMTP id w21-20020a1709062f9500b009336ae6374dmr3303868eji.73.1681643793413;
-        Sun, 16 Apr 2023 04:16:33 -0700 (PDT)
+        bh=ghy1vBrrOopi9da9RaVmh1imZTAoDfQaq0rl9RiH25Y=;
+        b=BhtDcZG28ppid8jSh4wwTcIRZlxlfGvEXtXycjFOjRAFSrDo+sq+dZrFs135PQJsov
+         hypwx1N7hidw1rWeq38SCCIoAPZmqqUglOynvbBNSANeBKEfe3R7RutT1yyDuK2Gmcdk
+         7rQfCJCZ+CVls2FqbxGkbGFMA7nybFNzhLT0AK7rYkJQAxPGLIYfdWJUOSLJzP5MjJVs
+         7dJU8UmZmIOkwQDRz3niwfw6blQGiS9c05l1mCEhf8fCZilu0gg41dLJPErJMlDIlklW
+         c/90kOaconW/UZBVIlM71NqgbIp7uZEoiI0a3UyRaqZg5zOW9ERd/HugyXvd3bU6vTHt
+         cLmA==
+X-Gm-Message-State: AAQBX9et4EAABMR5jJrdZM89Dju67dguSrJiAUQ55YM2XGob8eNx1nCc
+        1+D1U/eznYuxY0lDiJL1hpfGcw==
+X-Google-Smtp-Source: AKy350YveBF6sakE3Jo3HZxABjt/Jvg0DDaSL6crvK8r3ou+E+gcURkLQxWBbdbPuTRK+kEZ4JnLdA==
+X-Received: by 2002:a17:906:5610:b0:94e:ff98:44a7 with SMTP id f16-20020a170906561000b0094eff9844a7mr4579441ejq.72.1681643827424;
+        Sun, 16 Apr 2023 04:17:07 -0700 (PDT)
 Received: from ?IPV6:2a02:810d:15c0:828:29dd:ded4:3ccc:83db? ([2a02:810d:15c0:828:29dd:ded4:3ccc:83db])
-        by smtp.gmail.com with ESMTPSA id kx13-20020a170907774d00b008e54ac90de1sm4931131ejc.74.2023.04.16.04.16.32
+        by smtp.gmail.com with ESMTPSA id p7-20020a170906784700b00947740a4373sm4927755ejm.81.2023.04.16.04.17.06
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 16 Apr 2023 04:16:33 -0700 (PDT)
-Message-ID: <7cdf170f-1045-db73-df87-fd9da693da28@linaro.org>
-Date:   Sun, 16 Apr 2023 13:16:31 +0200
+        Sun, 16 Apr 2023 04:17:07 -0700 (PDT)
+Message-ID: <1ff86f70-8e8d-5689-13f5-8f04a72cb600@linaro.org>
+Date:   Sun, 16 Apr 2023 13:17:05 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.10.0
-Subject: Re: [PATCH RFC v4 4/4] dt-binding: mmc: histb-dw-mshc: Add
- Hi3798MV200 compatible string
+Subject: Re: [PATCH RFC v4 3/4] dt-binding: mmc: hi3798cv200-dw-mshc: convert
+ to YAML and rename to histb-dw-mshc
 Content-Language: en-US
 To:     forbidden405@outlook.com, Ulf Hansson <ulf.hansson@linaro.org>,
         Jaehoon Chung <jh80.chung@samsung.com>,
@@ -67,9 +67,9 @@ Cc:     tianshuliang <tianshuliang@hisilicon.com>,
         David Yang <mmyangfl@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, devicetree@vger.kernel.org
 References: <20230415-mmc-hi3798mv200-v4-0-44096e187f53@outlook.com>
- <20230415-mmc-hi3798mv200-v4-4-44096e187f53@outlook.com>
+ <20230415-mmc-hi3798mv200-v4-3-44096e187f53@outlook.com>
 From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230415-mmc-hi3798mv200-v4-4-44096e187f53@outlook.com>
+In-Reply-To: <20230415-mmc-hi3798mv200-v4-3-44096e187f53@outlook.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -79,36 +79,26 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 On 16/04/2023 11:19, Yang Xiwen via B4 Relay wrote:
 > From: Yang Xiwen <forbidden405@outlook.com>
 > 
-> Add Hi3798MV200 compatible string and an extra clock for it.
+> The renaming is due to the fact that it is now supporting SoCs other
+> than Hi3798CV200.
 > 
 > Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
-> ---
->  .../bindings/mmc/hisilicon,histb-dw-mshc.yaml      | 26 +++++++++++++++++++++-
->  1 file changed, 25 insertions(+), 1 deletion(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/mmc/hisilicon,histb-dw-mshc.yaml b/Documentation/devicetree/bindings/mmc/hisilicon,histb-dw-mshc.yaml
-> index 301b6ad39c5af..2f8335fd2c965 100644
-> --- a/Documentation/devicetree/bindings/mmc/hisilicon,histb-dw-mshc.yaml
-> +++ b/Documentation/devicetree/bindings/mmc/hisilicon,histb-dw-mshc.yaml
-> @@ -19,6 +19,7 @@ properties:
->    compatible:
->      enum:
->        - hisilicon,hi3798cv200-dw-mshc
-> +      - hisilicon,hi3798mv200-dw-mshc
->  
->    reg:
->      maxItems: 1
-> @@ -27,14 +28,16 @@ properties:
->      maxItems: 1
->  
->    clocks:
-> -    maxItems: 4
 
-You miss now minItems. Are you sure you tested your bindings? This
-should fail.
+Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
 
-Anyway, wait with sending new versions of patches to give other people
-chance to review. It's already second patchset today.
+
+
+This is an automated instruction, just in case, because many review tags
+are being ignored. If you do not know the process, here is a short
+explanation:
+
+Please add Acked-by/Reviewed-by/Tested-by tags when posting new
+versions, under or above your Signed-off-by tag. Tools like b4 can help
+here. However, there's no need to repost patches *only* to add the tags.
+The upstream maintainer will do that for acks received on the version
+they apply.
+
+https://elixir.bootlin.com/linux/v5.17/source/Documentation/process/submitting-patches.rst#L540
 
 Best regards,
 Krzysztof
