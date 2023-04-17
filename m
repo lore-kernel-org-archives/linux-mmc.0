@@ -2,113 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 06039C77B61
-	for <linux-mmc@archiver.kernel.org>; Sun, 16 Apr 2023 15:52:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 07E9BC77B7A
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 04:50:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230112AbjDPPwq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 16 Apr 2023 11:52:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48508 "EHLO
+        id S229658AbjDQEuz (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 00:50:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43734 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229446AbjDPPwp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 16 Apr 2023 11:52:45 -0400
-Received: from mail-io1-xd2c.google.com (mail-io1-xd2c.google.com [IPv6:2607:f8b0:4864:20::d2c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 973D52D73;
-        Sun, 16 Apr 2023 08:52:44 -0700 (PDT)
-Received: by mail-io1-xd2c.google.com with SMTP id ca18e2360f4ac-760ec550833so30328039f.3;
-        Sun, 16 Apr 2023 08:52:44 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1681660364; x=1684252364;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=d4x2UJbvA5jImCs/m0TE0mCVt0AeoRniWoSCs1UrDqo=;
-        b=ScGUjRJTU56vQ6XAjspmGfU+EZ2wfDnMHBldx/bQuYz1s7xiP1bp1v93edwVkoa60U
-         cg+zNaSACeqDSzKBiQNMOTsBhYR7ZCHWZEIdY93KbDg5wo2iihTXLErzrhP/T+Lk+eH7
-         AmUjc4a/tj/Ljju0pNP+QklD32B2XC+2U1rn8AB4WH7bMGRDIBZpzcBr4U3c6YY3d/jE
-         S0s6rJPf563CL7O417OkJXkrgLgtmSkC5KCfB+uYbtxZz7OO1+CYjd5D8DZqWOSbLfpD
-         /VqPF/FNyTTMU5SXRVYvL42ZRy5leAXJsNUedhihIEmbcdH0sXJ/jIpQ8maDNPAVyTEg
-         UdnA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681660364; x=1684252364;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:sender:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=d4x2UJbvA5jImCs/m0TE0mCVt0AeoRniWoSCs1UrDqo=;
-        b=gZSfR5ABy2qXXJKrX0RjDu5Yw6gOxKoXAghY6elltHgmB1rTBAoX4A5xB2lnb3aodp
-         9+JdIV0g82XMKcIvYi+UUFQxqH7ncl42kbxZXl3rmjDfQo4s5IBEtQuyUXGGfru545b+
-         U1diS4tlswydaW2brAmxXaRDd38W5Z41UL/oYUSJxPWjtP5xglFEGrh6zrjiS/+rKl86
-         VsvHt6uuLZ6vbY25n7fSqMSfo2otmvgnZW/KT88cG+KqtGNKgJYP5/U4qiyLMgg2CtoK
-         T16Y30MSDV+75UFichOav+NoO4T8lTOTXEQSkJDGO4JouhVOJ5riCSoSWSL7ivlqc155
-         PXOw==
-X-Gm-Message-State: AAQBX9dx/HU1+LurPHnKv1cbg3s07EVtxaxo8ztFbSQrQXO0c4fy9muE
-        qiMtz0sVWsnK7SUtQXVz/cg=
-X-Google-Smtp-Source: AKy350a2fmmqdnZl4mg3g2vqLIdSX8pwTBimS6MtogYV0JnSjs8ic62o+L+RAxzAJTi2ddB3s/jTyw==
-X-Received: by 2002:a92:d48f:0:b0:318:d56e:9efa with SMTP id p15-20020a92d48f000000b00318d56e9efamr7990945ilg.24.1681660363979;
-        Sun, 16 Apr 2023 08:52:43 -0700 (PDT)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id l13-20020a02664d000000b0040bbcee6b57sm2543288jaf.133.2023.04.16.08.52.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 16 Apr 2023 08:52:43 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Date:   Sun, 16 Apr 2023 08:52:42 -0700
-From:   Guenter Roeck <linux@roeck-us.net>
-To:     Alexandre Mergnat <amergnat@baylibre.com>
-Cc:     Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Matthias Brugger <matthias.bgg@gmail.com>,
-        AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>,
-        Chaotian Jing <chaotian.jing@mediatek.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Wenbin Mei <wenbin.mei@mediatek.com>,
-        Linus Walleij <linus.walleij@linaro.org>,
-        Zhiyong Tao <zhiyong.tao@mediatek.com>,
-        Bernhard =?iso-8859-1?Q?Rosenkr=E4nzer?= <bero@baylibre.com>,
-        linux-watchdog@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org,
-        linux-gpio@vger.kernel.org,
-        Alexandre Bailon <abailon@baylibre.com>,
-        Fabien Parent <fparent@baylibre.com>,
-        Amjad Ouled-Ameur <aouledameur@baylibre.com>,
-        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Subject: Re: [PATCH v3 01/17] dt-bindings: watchdog: mediatek,mtk-wdt: add
- mt8365
-Message-ID: <50a598a4-016b-4f2a-9d7e-19707d612238@roeck-us.net>
-References: <20230203-evk-board-support-v3-0-0003e80e0095@baylibre.com>
- <20230203-evk-board-support-v3-1-0003e80e0095@baylibre.com>
+        with ESMTP id S229456AbjDQEuy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 00:50:54 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A166930CF;
+        Sun, 16 Apr 2023 21:50:52 -0700 (PDT)
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 33H4mVql012485;
+        Mon, 17 Apr 2023 04:50:32 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=4RmQFL5U0JeOtmh5MfyrMmpzlM43CpOrwVrcnDdeCF4=;
+ b=KDKy42Se3jWOQwbvqcnxU9k1EYDvpqB8yt1M2QktLNYyqTHYhvW2LB1vIuGipFWghhD1
+ W0qCdZeG4aGTIBlgweXjCuVG88fElDFV5cxI0yuLRycAqHAF55gGtlM5TT1ZRiFVgOQF
+ iWjDPdkD6xhhcRvmkueqsKA+JB8KH6Yc3ulJO8FO02lk0yqWxhtpaojMawIX3eUa+coT
+ 2EZR3gQwA2Gzx7MzMTJNR7DLYPP+klvY7gSFZqSY6OEAp0D1S2bzYPhmIeLHstuDoaz2
+ oS+sPKf7Hhkj4liJDyAY4LTbXeIuhK0sY5ZEUyVRmJLAObBVTDwidWGDuLNmzsqd8F53 mQ== 
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3pymnf2k9p-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 17 Apr 2023 04:50:32 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 33H4oVXL025564
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 17 Apr 2023 04:50:31 GMT
+Received: from [10.216.30.175] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Sun, 16 Apr
+ 2023 21:50:25 -0700
+Message-ID: <abbc41e4-08dc-04e9-4c05-0bd1994405b7@quicinc.com>
+Date:   Mon, 17 Apr 2023 10:20:21 +0530
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230203-evk-board-support-v3-1-0003e80e0095@baylibre.com>
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH V3 0/9] Add minimal boot support for IPQ5018
+Content-Language: en-US
+To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
+        <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>
+References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
+ <de891705-bce9-7610-340d-b4bc284dfaca@linaro.org>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <de891705-bce9-7610-340d-b4bc284dfaca@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: _KTBngNGr2rSc1lkvP1_pYnpPJbD8qlN
+X-Proofpoint-ORIG-GUID: _KTBngNGr2rSc1lkvP1_pYnpPJbD8qlN
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-04-17_02,2023-04-14_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=758 adultscore=0
+ mlxscore=0 malwarescore=0 bulkscore=0 clxscore=1011 impostorscore=0
+ priorityscore=1501 spamscore=0 lowpriorityscore=0 phishscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2303200000 definitions=main-2304170043
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, Mar 29, 2023 at 10:54:22AM +0200, Alexandre Mergnat wrote:
-> Add binding description for mediatek,mt8365-wdt
-> 
-> Acked-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Signed-off-by: Alexandre Mergnat <amergnat@baylibre.com>
-> Reviewed-by: AngeloGioacchino Del Regno <angelogioacchino.delregno@collabora.com>
-> Reviewed-by: Matthias Brugger <matthias.bgg@gmail.com>
+Hi Krysztof,
 
-Reviewed-by: Guenter Roeck <linux@roeck-us.net>
-
-> ---
->  Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml | 1 +
->  1 file changed, 1 insertion(+)
+On 4/16/2023 2:37 PM, Krzysztof Kozlowski wrote:
+> On 14/04/2023 12:29, Sricharan Ramabadhran wrote:
+>> The IPQ5018 is Qualcomm's 802.11ax SoC for Routers,
+>> Gateways and Access Points.
+>>
+>> This series adds minimal board boot support for ipq5018-mp03.1-c2 board.
+>>
+>> [v3]
+>> 	Fixed all comments for clocks, schema fixes
+>>          Picked up Reviewed-by from Bjorn for pinctrl driver
 > 
-> diff --git a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> index 55b34461df1b..66cacea8e47f 100644
-> --- a/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> +++ b/Documentation/devicetree/bindings/watchdog/mediatek,mtk-wdt.yaml
-> @@ -38,6 +38,7 @@ properties:
->                - mediatek,mt7623-wdt
->                - mediatek,mt7629-wdt
->                - mediatek,mt8173-wdt
-> +              - mediatek,mt8365-wdt
->                - mediatek,mt8516-wdt
->            - const: mediatek,mt6589-wdt
->  
+> Didn't you just ignore all the tags you got? I was already acking and
+> reviewing a lot of these...
+> 
+
+   While i got review comments for V2, only one tag from
+   Bjorn (reviewed-by) for the pinctrl driver. That one i picked.
+
+Regards,
+  Sricharan
