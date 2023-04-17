@@ -2,122 +2,125 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 83FF7C77B77
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 13:24:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8970CC77B76
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 14:23:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230203AbjDQNYI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 09:24:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51904 "EHLO
+        id S230296AbjDQOW7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 10:22:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50176 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230190AbjDQNYH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 09:24:07 -0400
-Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8597A5247
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 06:24:03 -0700 (PDT)
-Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-552fb3c2bb7so8633057b3.10
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 06:24:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681737843; x=1684329843;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=wJNyJPIUSDACJNhaYaxkNKlMJ6+KOJnTklHWTfRcUSc=;
-        b=JazabgTFJ+Kl/tyHV0m4uvxo0dgvefjHFgd4Qm3zlxF67Ul+05N+zsE3lVeOiwWSQM
-         /vFeRZ9w9+3liGCV/t5MSS8Pgq//i6FkxagdTxYzhnS6AxWxE7tey7HZ/AfEyp4siZkb
-         kovypUxnbHJFC1HGeF8kZbQD57K/YWaxg8VIdEHaGoaqtX7StctEYDqAH86A9+OuN+kv
-         0ULe0cWHoCvpg+TLVHkhMh3Yn9g85u6Y7p6w+qUw5TxQfeVZaKF3SewPkk7Kdgt0oeYq
-         odHfHPgS/NVQDAWoPzTNl8E88F3r2ybQpLkWsnoBXEkC+Jk++p2kWP41zHXYQREXnCb7
-         /LRw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681737843; x=1684329843;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=wJNyJPIUSDACJNhaYaxkNKlMJ6+KOJnTklHWTfRcUSc=;
-        b=Pepd44NC2NwSOmZ0/W8PhGyn4DZVykzdbMgVAU4fg4FFrbh589pfLxkUh7iKh6V9vF
-         7qqcltatDInRjyyv3kKFWKUE01H9oinVqP27ArKVfDCt2LaZDRkPgdIkBQ24m3vOJlLp
-         RSRMynUXZduWTv3EJPuMCTUNKlC+ET9h+sExjQybaDIprXbh5C26s7AEy9/tgqBBz5qB
-         dxGOwjpU7nHZasI3eaPWOLfHkkBz9XSRzqe9Kt/h0NtAXddFqwBSL1wUkgiYo0GhvRkF
-         dHgxzeVM9nP2HYtwxsJMjur+ooJYFsIiC+z1FX1waOUMSJh+MGrftqXcb6JtUcnpe4cG
-         jngw==
-X-Gm-Message-State: AAQBX9fL/JREVlm7U0hrXq5l6V5ywPMUzrltznFVOwI9kvue6ed76jts
-        fgBA3ICZrvlrqd9MwDS8u5Obn5AY9iXFvmSjSYSGSg==
-X-Google-Smtp-Source: AKy350akHhPmT1SpV4BNvSOxnEib1lHDILTXdM8MTdKIigFYFej6SdgGNMuPOotcFSth7yw6bGwLlc1XsXt87XMgGdE=
-X-Received: by 2002:a81:ad45:0:b0:546:63a:6e23 with SMTP id
- l5-20020a81ad45000000b00546063a6e23mr9408216ywk.0.1681737842732; Mon, 17 Apr
- 2023 06:24:02 -0700 (PDT)
+        with ESMTP id S230315AbjDQOWx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 10:22:53 -0400
+Received: from smtp2-g21.free.fr (smtp2-g21.free.fr [212.27.42.2])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA9A597;
+        Mon, 17 Apr 2023 07:22:50 -0700 (PDT)
+Received: from [192.168.108.81] (unknown [213.36.7.13])
+        (Authenticated sender: marc.w.gonzalez@free.fr)
+        by smtp2-g21.free.fr (Postfix) with ESMTPSA id 3EFC1200408;
+        Mon, 17 Apr 2023 16:22:36 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=free.fr;
+        s=smtp-20201208; t=1681741368;
+        bh=kTItlP2YI88NnNFYbognrrCdZc5bTlLjB1ZMOm34g6U=;
+        h=Date:Subject:From:To:Cc:References:In-Reply-To:From;
+        b=MsSERrn9h14PSHh54N2ikHlA+O74JGfn36OIedPCdtTmuMqOnBVBAAsLewloQRRCe
+         rrpRlg2tSOtadjkCAj2ew+lRBDyk1YeRiAqg/wHArTL9vMqeERTfowuhsHCLXSJoOQ
+         xHv9cLQjw5pSUPmN7/qHUyQLijPOBwGpB+uVsBopNA8nDFexILcm0+56twRPvvOc1S
+         GAX6FyFjz1sE/PSzriMkUKtDcMFOZ4s9zZGd+nJ2oyKNbm5LNAWkEalID9QYNDxc+m
+         VQgfGbtQg/cAkIfN6hWw/UrH40uaUB/yqW20LzE908hom1sUa+j39Ww/OFDM7VFoDk
+         pjSk2EQJOj0Fg==
+Message-ID: <ac5d9c2e-13c3-7f99-a20c-d857282c6451@free.fr>
+Date:   Mon, 17 Apr 2023 16:22:36 +0200
 MIME-Version: 1.0
-References: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org> <20230405-pl180-busydetect-fix-v2-4-eeb10323b546@linaro.org>
-In-Reply-To: <20230405-pl180-busydetect-fix-v2-4-eeb10323b546@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 17 Apr 2023 15:23:26 +0200
-Message-ID: <CAPDyKFpoboq68_ysEJXCWLV8k77+ULGpF6AzcnjvUqO96r5FHw@mail.gmail.com>
-Subject: Re: [PATCH v2 04/12] mmc: mmci: Break out error check in busy detect
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Yann Gautier <yann.gautier@foss.st.com>,
-        Stefan Hansson <newbyte@disroot.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.9.0
+Subject: Re: [Performance regression] BCM4359/9 on S905X2
+Content-Language: en-US
+From:   Marc Gonzalez <marc.w.gonzalez@free.fr>
+To:     AML <linux-amlogic@lists.infradead.org>
+Cc:     Martin Blumenstingl <martin.blumenstingl@gmail.com>,
+        Christian Hewitt <christian@hewittfamily.org.uk>,
+        Linux Wireless <linux-wireless@vger.kernel.org>,
+        MMC <linux-mmc@vger.kernel.org>,
+        Neil Armstrong <neil.armstrong@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Pierre-Hugues Husson <phh@phh.me>
+References: <b9bd16cb-f1fa-34b7-d599-8637cbe5032b@free.fr>
+ <1jh6ue74x9.fsf@starbuckisacylon.baylibre.com>
+ <EEE9FD80-C106-4A9B-AA8D-5C151E540CFD@hewittfamily.org.uk>
+ <0bb1e3b3-6823-ddb5-001b-72ee1b63779c@free.fr>
+ <CAFBinCA+JOxCGzML-Mohryawrn6Vghd8Ns22=2ZfvWov43aeEg@mail.gmail.com>
+ <74feca6f-4177-5645-6614-bc5f3dbf0be1@free.fr>
+In-Reply-To: <74feca6f-4177-5645-6614-bc5f3dbf0be1@free.fr>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 9 Apr 2023 at 00:00, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> The busy detect callback for Ux500 checks for an error
-> in the status in the first if() clause. The only practical
-> reason is that if an error occurs, the if()-clause is not
-> executed, and the code falls through to the last
-> if()-clause if (host->busy_status) which will clear and
-> disable the irq. Make this explicit instead: it is easier
-> to read.
->
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
-> ChangeLog v1->v2:
-> - No changes
-> ---
->  drivers/mmc/host/mmci.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index e742dedaca1a..7d42625f2356 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -665,6 +665,15 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
->  {
->         void __iomem *base = host->base;
->
-> +       if (status & err_msk) {
-> +               /* Stop any ongoing busy detection if an error occurs */
-> +               writel(host->variant->busy_detect_mask, base + MMCICLEAR);
-> +               writel(readl(base + MMCIMASK0) &
-> +                      ~host->variant->busy_detect_mask, base + MMCIMASK0);
-> +               host->busy_status = 0;
-> +               return true;
+On 06/04/2023 18:35, Marc Gonzalez wrote:
 
-I agree that this makes the code more explicit, but unfortunately it
-also means duplicating the code from the bottom of this function.
+> # curl -o /dev/null http://192.168.1.254:8095/fixed/1G
+>   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+>                                  Dload  Upload   Total   Spent    Left  Speed
+> 100 1024M  100 1024M    0     0  9747k      0  0:01:47  0:01:47 --:--:-- 9544k
 
-Can you instead add a helper function and call it from here and from
-the part at the bottom?
+I was able to import the bcmdhd driver from:
+https://android.googlesource.com/kernel/hikey-linaro/+log/refs/heads/android-amlogic-bmeson-6.1/drivers/net/wireless/bcmdhd
+as pointed out by Neil.
 
-> +       }
-> +
->         /*
->          * Before unmasking for the busy end IRQ, confirm that the
->          * command was sent successfully. To keep track of having a
-> @@ -678,7 +687,7 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
->          * while, to allow it to be set, but tests indicates that it
->          * isn't needed.
->          */
-> -       if (!host->busy_status && !(status & err_msk)) {
-> +       if (!host->busy_status) {
->                 status = readl(base + MMCISTATUS);
->                 if (status & host->variant->busy_detect_flag) {
->                         writel(readl(base + MMCIMASK0) |
->
+I switched from brcmfmac to bcmdhd with:
 
-Kind regards
-Uffe
+-CONFIG_BRCMFMAC=y
+-CONFIG_BRCMDBG=y
++CONFIG_BCMDHD=y
++CONFIG_BCMDHD_FW_PATH=""
++CONFIG_BCMDHD_NVRAM_PATH=""
++CONFIG_BCMDHD_SDIO_IRQ=y
+
+and hard-coded the FW paths in dhd_set_path_params().
+
+
+Here are the benchmark results on the bcm4359 (AP6398SR3 module)
+
+# curl -o /dev/null http://192.168.1.254:8095/fixed/1G
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 1024M  100 1024M    0     0  17.3M      0  0:00:58  0:00:58 --:--:-- 17.4M
+
+which is noticeably faster (80%) than brcmfmac results.
+
+FTR, system was 18.5% busy for this benchmark:
+   81.5653%        195114        0:swapper        
+   13.8287%         33080       57:irq/17-ffe03000
+    1.3967%          3341      173:curl           
+    1.1350%          2715       63:dhd_rxf        
+    1.0455%          2501      129:ksdioirqd/mmc2 
+    1.0004%          2393       62:dhd_dpc        
+    0.0167%            40      171:perf           
+    0.0088%            21       19:ksoftirqd/1    
+
+
+I was not able to get the driver to work with bcm43752 (AP6398SR32 module).
+
+It loops with:
+
+[   15.221622] wl_run_escan: LEGACY_SCAN sync ID: 0, bssidx: 0
+[   15.221661] CFG80211-ERROR) wl_run_escan : 
+[   15.221664]  Escan set error (-37)
+[   15.229067] dhd_ioctl_entry_local invalid parameter
+[   15.233902] CFG80211-ERROR) wl_run_escan : 
+[   15.233904] error (-37), cnt=1
+[   15.241056] CFG80211-ERROR) wl_cfg80211_scan : 
+[   15.241059] scan error (-11)
+
+But I may have bungled adding the "new" chip, since the driver architecture
+is... [censored].
+
+
+I suppose the conclusion is:
+1) bcmdhd is 80% faster than brcmfmac in one download scenario
+2) CPU usage scales linearly with throughput (on this system, 1% ~ 7 Mbps)
+
+Regards
+
+
