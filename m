@@ -2,108 +2,132 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 062CBC77B72
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 06:22:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A716C77B70
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 08:30:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230106AbjDQGW0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 02:22:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57084 "EHLO
+        id S230309AbjDQIar (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 04:30:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45342 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229573AbjDQGWZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 02:22:25 -0400
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2348E3593
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 23:22:24 -0700 (PDT)
-Received: by mail-ej1-x632.google.com with SMTP id a5so4690652ejb.6
-        for <linux-mmc@vger.kernel.org>; Sun, 16 Apr 2023 23:22:24 -0700 (PDT)
+        with ESMTP id S229741AbjDQIaq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 04:30:46 -0400
+Received: from mail-yw1-x112e.google.com (mail-yw1-x112e.google.com [IPv6:2607:f8b0:4864:20::112e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CFD6A172C
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 01:30:42 -0700 (PDT)
+Received: by mail-yw1-x112e.google.com with SMTP id 00721157ae682-54fb615ac3dso196275177b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 01:30:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681712542; x=1684304542;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=k4Yco67CZ5Wiqh6xlkC+dk0EOaH8oJH2a8u5ODA10rk=;
-        b=m7XhJaTu913AC9IRLUZQvKowNigNYtCgKjL8oKu8LXsNadzdKuwz7yPMhIsar8uYRU
-         wP2pfdVXjtO6IVi3DOvx7ziMB6yR7gM+XAwhUvWzYpdGtrX+/IbWRUqkeoj4WspxbFZi
-         7t1DL0zMX13uLi/wxkXntZAGyFZyW3lyqQr8v3RmLmS+DkMclQ8A7DlgsR+x1qcZDYgo
-         /IF+Hyy7Wzu08mc1VbDPI5y5HMxfVz2IOZQoRc8aVmrAJBw//wFMMFQ9NWW905ZeRLp6
-         myjZQay3qMzpbopuUZM9ZteXb8rcXbz/vwMVWHqR4phhNuOnuf5n67c1U8LdsxulslAC
-         iIoA==
+        d=linaro.org; s=google; t=1681720242; x=1684312242;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=dB61uBZ/szhozbFNgrcOqtBKFc3f/HhJaKfbQUHWQ9s=;
+        b=zRr3+/o74WKCpY9o+ifeZD2/hNy4GMPpICpulNJwJYWJP3H5EsHOvWr9GHeabcMSlJ
+         wdWeyJBRWf6O+bo4ktYaoz28EbNU81vpxk2pj4A2DkVatkmhfI5sMdnkXo30ycNLGR37
+         LCrj781vt7UncBYlpGJOZ4fmLrX6gaU3JgbSPE63gkx8NHEZ2NOciqv/pCdQ0GERSRug
+         V+it14C37WwtYaAaNReKWXIB6+m0D6N1VWkaZ31cl4GqqxOPZqn0+84dz+B6IOCsoljU
+         Uy6wQseLTsejSP1ekJ5I9/uHTpcyLpLzbs63zBtitwR9Caj++mpwW4cALGWMqUDXwn3E
+         nC8g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681712542; x=1684304542;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=k4Yco67CZ5Wiqh6xlkC+dk0EOaH8oJH2a8u5ODA10rk=;
-        b=k6O692AeCjfO+G3+JaHbi/VqiCHlfTskQO0QQzqt7WOTM6kNQ5prYjJ7TebCB9cftF
-         fPMWBApedbVMumYpGU8LVOH/k+OmoUsSPf9mvYLyER28w5kOq8JychQA/4kHR0uhsCnh
-         Tyz39PV8Y6oB1RxTTtNEC0KjS0iXWbmC7baxAKnlHuOyEzC2p+RFcMHRBS09Cyp//Hxs
-         dxGTk7NRdjGiqzQjoDGWeo8tL/cBur9wvdxPKiE/gZ8a2ew60RXYgzJj0ejJxqNeC/1E
-         Ooud9jh+1FEcAxac+umIDZAdca0K+y7i1kbNhDpFzfe8je0z6Z/5EH2uLMBMbNjBjKOu
-         s98Q==
-X-Gm-Message-State: AAQBX9dcB8XyjRHkn5x4ETrQsvwrCtK6y5rRIjMBFHu0q4oRfb4RA2WJ
-        E2jsOV2NaIXXeJ2+2QrioqojWg==
-X-Google-Smtp-Source: AKy350Yr+G7OTiYUxQowTuWQvBnT6MkVGR0h+w9EiaAjTU+EhgXnVhXOHwb7DZ31iU18wbhuaVvHmA==
-X-Received: by 2002:a17:907:7b07:b0:94f:21e0:7e5a with SMTP id mn7-20020a1709077b0700b0094f21e07e5amr5384920ejc.8.1681712542665;
-        Sun, 16 Apr 2023 23:22:22 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:b0ac:4d3b:966c:b33d? ([2a02:810d:15c0:828:b0ac:4d3b:966c:b33d])
-        by smtp.gmail.com with ESMTPSA id wj7-20020a170907050700b0094f3d700868sm2295464ejb.80.2023.04.16.23.22.21
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 16 Apr 2023 23:22:22 -0700 (PDT)
-Message-ID: <5d4d02ec-f8e7-c931-aebe-6255209fbde0@linaro.org>
-Date:   Mon, 17 Apr 2023 08:22:20 +0200
+        d=1e100.net; s=20221208; t=1681720242; x=1684312242;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=dB61uBZ/szhozbFNgrcOqtBKFc3f/HhJaKfbQUHWQ9s=;
+        b=OCUPvit6//CPkmvXDmtXVaTBZZ2keu8XnbHc0+xLhGerlYlL7FDz6LcBnx4bXvEXX/
+         4FcWYWOokojZ8ySDwOfsbcloEOaW85O+iojngBGSj2pSTQ9wbcvp+UQUXmI9+qp9dmJ+
+         8i3IS8zdXJrsteRQTE6QmaMw7Fi89yGWZtSVk38tlvJqgLaDDoDDKGpmZKQO0QHwJ/H1
+         impdaOnOGAA/aD//cqcgggJhjwlo3GXLJNKXC1otW7KyBldfZ+xPxCKLURa6x9Noxrcw
+         7UEkVB9vM1iVB554GekRXs7NWEyC1cd6DQK4cS1xaa1giiKmd0sEZajxC7skO7d1cuZH
+         7Z4Q==
+X-Gm-Message-State: AAQBX9f/CEmCDY8omuVsrQmRFI68+gyyYxNusY0tFfrg43ZRkuBj0ea5
+        UJndCb/2IUWh0JF9hCPiRwO/vhMJU87wwRS8d210XrG910CN2C95rQw=
+X-Google-Smtp-Source: AKy350bA9qMBsY0gOtJ+x2AvhaammGe6TQAgLfC2r9A6rzH5jcsMw1E9lUCqDbfGcN6pfJfZ9438d7n646+o+q6A5vw=
+X-Received: by 2002:a81:b71b:0:b0:54f:97dd:633 with SMTP id
+ v27-20020a81b71b000000b0054f97dd0633mr8905401ywh.4.1681720241989; Mon, 17 Apr
+ 2023 01:30:41 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.0
-Subject: Re: [PATCH V3 3/9] dt-bindings: pinctrl: qcom: Add support for
- ipq5018
-Content-Language: en-US
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
-        agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
-        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org
-Cc:     Nitheesh Sekar <quic_nsekar@quicinc.com>,
-        Varadarajan Narayanan <quic_varada@quicinc.com>
-References: <1681468167-11689-1-git-send-email-quic_srichara@quicinc.com>
- <1681468167-11689-4-git-send-email-quic_srichara@quicinc.com>
- <536ed00f-e252-c8d3-e3ae-9bb9bb79babe@linaro.org>
- <9e977da8-902a-74d2-7cce-74669b127c30@quicinc.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <9e977da8-902a-74d2-7cce-74669b127c30@quicinc.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <28623fa7390242e9b003a44016c0235f@hyperstone.com>
+In-Reply-To: <28623fa7390242e9b003a44016c0235f@hyperstone.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 17 Apr 2023 10:30:05 +0200
+Message-ID: <CAPDyKFpBGwbukxzhkd9ckfQeibPW5hBEhf11YujscvQ9ZuZYNA@mail.gmail.com>
+Subject: Re: [PATCH] mmc-utils: Change version string to git hash
+To:     Christian Loehle <CLoehle@hyperstone.com>
+Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        Avri Altman <avri.altman@wdc.com>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 17/04/2023 08:13, Sricharan Ramabadhran wrote:
->>> +    tlmm: pinctrl@1000000 {
->>> +        compatible = "qcom,ipq5018-tlmm";
->>> +        reg = <0x01000000 0x300000>;
->>> +        gpio-controller;
->>> +        #gpio-cells = <2>;
->>> +        gpio-ranges = <&tlmm 0 0 47>;
->>> +        interrupts = <GIC_SPI 208 IRQ_TYPE_LEVEL_HIGH>;
->>> +        interrupt-controller;
->>> +        #interrupt-cells = <2>;
->>> +
->>> +        uart2-state {
->>> +            pins = "gpio34", "gpio35";
->>> +            function = "blsp2_uart";
->>
->> Does not look like you tested the bindings. Please run `make
->> dt_binding_check` (see
->> Documentation/devicetree/bindings/writing-schema.rst for instructions).
-> 
->    I ran it against the TOT, will run it this time on nxt and post V4.
+On Wed, 12 Apr 2023 at 17:04, Christian Loehle <CLoehle@hyperstone.com> wrote:
+>
+> Since mmc-utils versioning has always been 0.1 and changes are not
+> made frequently and formal releases do not happen, packaged versions
+> are just pulled from git anyway, using the git hash for version is
+> probably the best idea for now.
+>
+> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
 
-I don't know what is TOT, but this would fail in every case on every tree.
+Seems reasonable to me, applied, thanks!
 
+Kind regards
+Uffe
 
-Best regards,
-Krzysztof
-
+> ---
+>  Makefile | 3 ++-
+>  mmc.c    | 6 ++----
+>  2 files changed, 4 insertions(+), 5 deletions(-)
+>
+> diff --git a/Makefile b/Makefile
+> index aa27ff2..d8d59a4 100644
+> --- a/Makefile
+> +++ b/Makefile
+> @@ -1,6 +1,7 @@
+>  CC ?= gcc
+> +GIT_VERSION := "$(shell git describe --abbrev=6 --always --tags)"
+>  AM_CFLAGS = -D_FILE_OFFSET_BITS=64 -D_FORTIFY_SOURCE=2
+> -CFLAGS ?= -g -O2
+> +CFLAGS ?= -g -O2 -DVERSION=\"$(GIT_VERSION)\"
+>  objects = \
+>         mmc.o \
+>         mmc_cmds.o \
+> diff --git a/mmc.c b/mmc.c
+> index b9aa478..795b4e3 100644
+> --- a/mmc.c
+> +++ b/mmc.c
+> @@ -26,8 +26,6 @@
+>
+>  #include "mmc_cmds.h"
+>
+> -#define MMC_VERSION    "0.1"
+> -
+>  #define BASIC_HELP 0
+>  #define ADVANCED_HELP 1
+>
+> @@ -319,7 +317,7 @@ static void help(char *np)
+>
+>         printf("\n\t%s help|--help|-h\n\t\tShow the help.\n",np);
+>         printf("\n\t%s <cmd> --help\n\t\tShow detailed help for a command or subset of commands.\n",np);
+> -       printf("\n%s\n", MMC_VERSION);
+> +       printf("\n%s\n", VERSION);
+>  }
+>
+>  static int split_command(char *cmd, char ***commands)
+> @@ -500,7 +498,7 @@ static int parse_args(int argc, char **argv,
+>         }
+>
+>         if(helprequested){
+> -               printf("\n%s\n", MMC_VERSION);
+> +               printf("\n%s\n", VERSION);
+>                 return 0;
+>         }
+>
+> --
+> 2.37.3
+>
+>
+> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+> Managing Director: Dr. Jan Peter Berns.
+> Commercial register of local courts: Freiburg HRB381782
+>
