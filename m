@@ -2,127 +2,104 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7FB14C77B70
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 13:09:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3A002C77B70
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 13:12:53 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231392AbjDQNJc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 09:09:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33188 "EHLO
+        id S229461AbjDQNMT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 09:12:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33366 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231401AbjDQNJQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 09:09:16 -0400
-Received: from mail-yw1-x1130.google.com (mail-yw1-x1130.google.com [IPv6:2607:f8b0:4864:20::1130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78B2B1BE9
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 06:08:08 -0700 (PDT)
-Received: by mail-yw1-x1130.google.com with SMTP id 00721157ae682-54fbb713301so174328017b3.11
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 06:08:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681736847; x=1684328847;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=Kw+N4lmXgksiZObWsRam9O+AwFJ+q7vEUaa4tbsG2Ys=;
-        b=PU2TeZwDN3uPSlXH+LcLVdrVZj1S5sbTqA4wpoggKCCF5+QoYb2X+9fqM0sVGfvpx+
-         jpkIAMV4MiOT8PrgzQz8Bvulp33QCvzkxy4n67TyrItX7B7iRdVYuZ29gh7H0HFRg1kM
-         6QDd5Ma3EVEvAQ9OUQsBNU12F4WdDBmnFxG71/1iffTW0n5IMqNKmACPZfK7R5PkaqWf
-         kmV8Tew4uWVMWsN0NaChfgScLQPRHlNjMaRhhl/8iQy6pz0HxZ5PlU5VqmSiD8mz/pac
-         2ar2+7JzqRilKNF3WTKlctGELMj6NxNDKUq87ru1Ew3Hc0Ys9Q7SeCLTbRctDb9X8Ero
-         GQqQ==
+        with ESMTP id S229562AbjDQNLe (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 09:11:34 -0400
+Received: from mail-oi1-f173.google.com (mail-oi1-f173.google.com [209.85.167.173])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 79FBEBB87;
+        Mon, 17 Apr 2023 06:10:59 -0700 (PDT)
+Received: by mail-oi1-f173.google.com with SMTP id a7so3001896oiw.7;
+        Mon, 17 Apr 2023 06:10:59 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681736847; x=1684328847;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=Kw+N4lmXgksiZObWsRam9O+AwFJ+q7vEUaa4tbsG2Ys=;
-        b=RLMiyZxHrG/PhjrXid48vx+rwrhXQMlSY8H9+OW1JHWZW5UGZ2heoT5iYuaAsd4WJP
-         jYbO6sJsakm0JEc/lSn7BI3V8ZNdtqS9vXoM0fCRQUBfao+tm8ujzukb9+GMzne1IYdG
-         zp5mrYf4FsT6EBpHGQjGpMZBeOsqBkIxPOz/+MiT9q55rf1ClIeQbJgGv/M2NlaDPeD9
-         lrHvOe8QJ2/X+ujOMLzydM5Orzvb3tXUzXnLyeIjArWv+YXfrZqTZ72CwhvC5w9/0Owt
-         qTELGAG8KX0SvUZ8pDnG2NcVsaiq7wN31SCbZ2d+p1YglG9wuxBKlLEhJxnjOYCrYQam
-         zNDg==
-X-Gm-Message-State: AAQBX9fiWv5hXuR14EzFeAei6Ej2d3i0Sm36QZjdkD8Ywei0fellgwdg
-        NHQl0AN2vagHg1bFpdyRPHflV1niWLTRGB7B3+dSDA==
-X-Google-Smtp-Source: AKy350ah5IOHfHIOmiogXHScEat1z0RQz/vrpZtML3zrmIwRssYWDJHmutNvFlZ+5p/8tM9Ot8saB7BioWtG0sFhul0=
-X-Received: by 2002:a81:af0c:0:b0:54c:2889:7105 with SMTP id
- n12-20020a81af0c000000b0054c28897105mr9515199ywh.0.1681736847531; Mon, 17 Apr
- 2023 06:07:27 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1681737034; x=1684329034;
+        h=date:subject:message-id:references:in-reply-to:cc:to:from
+         :mime-version:content-transfer-encoding:x-gm-message-state:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=jBonPjm6hFR6zSrloV8u7ZAY904Aai0PvZoTRlUcPtA=;
+        b=R8qMcuw/CmlG+BivBAlUKA0dSOJTMpqp9ilLjplda1RebQpBogOqxiJwkHiN96g9yI
+         K0OU/Sk9engmF8RzAIAaiH0S+jaoYC10NUYRur2cCOWq9dl4W6STbLhDO1AccfUm5lzj
+         n+MelB009qOZ9m37DsG9DWdNhsmrnvkyEOXuToztKBX/hJldIDrOqCJnOtaElsQsSZyt
+         odELxyYIa1iXYQEFOk4GZPT/b7aEdZPBC5PJOsxSgHpABisFD49OnyNhAVwzaj56Dvu+
+         3lkB9+sxsHOzKs21Do08LHsL5hfPNKiu+kJei8vAFow+kymrEwehSoclBnqWL+YYQ8Qa
+         t00A==
+X-Gm-Message-State: AAQBX9dUcCrCfaIxSU2O4fzEJEexMDQJrKtfNb6N5c41cGBNU8hpzWk9
+        GyG/0HnquDCmBMN7BEi6UQ==
+X-Google-Smtp-Source: AKy350YnZq84V4tQgFyHDcnn+eunXYEjW2tATgr53HkpmhsG7LHEOB3RlxH2Jte7iMzDS5GPW95Yyg==
+X-Received: by 2002:a05:6808:238e:b0:38e:eaf:cf1c with SMTP id bp14-20020a056808238e00b0038e0eafcf1cmr1069613oib.54.1681737033870;
+        Mon, 17 Apr 2023 06:10:33 -0700 (PDT)
+Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
+        by smtp.gmail.com with ESMTPSA id j21-20020a056808057500b0038e086c764dsm978559oig.43.2023.04.17.06.10.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 17 Apr 2023 06:10:33 -0700 (PDT)
+Received: (nullmailer pid 2588781 invoked by uid 1000);
+        Mon, 17 Apr 2023 13:10:27 -0000
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
 MIME-Version: 1.0
-References: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org> <20230405-pl180-busydetect-fix-v2-1-eeb10323b546@linaro.org>
-In-Reply-To: <20230405-pl180-busydetect-fix-v2-1-eeb10323b546@linaro.org>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 17 Apr 2023 15:06:51 +0200
-Message-ID: <CAPDyKFqESKrqA7u0zg+GBLad_tqzrt+wGfT-jEqvVGruv8oR0Q@mail.gmail.com>
-Subject: Re: [PATCH v2 01/12] mmc: mmci: Clear busy_status when starting command
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Yann Gautier <yann.gautier@foss.st.com>,
-        Stefan Hansson <newbyte@disroot.org>,
-        Maxime Coquelin <mcoquelin.stm32@gmail.com>,
-        Alexandre Torgue <alexandre.torgue@foss.st.com>,
-        linux-mmc@vger.kernel.org, linux-stm32@st-md-mailman.stormreply.com
-Content-Type: text/plain; charset="UTF-8"
+From:   Rob Herring <robh@kernel.org>
+To:     Yang Xiwen <forbidden405@outlook.com>
+Cc:     Jiancheng Xue <xuejiancheng@hisilicon.com>,
+        tianshuliang <tianshuliang@hisilicon.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Jaehoon Chung <jh80.chung@samsung.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Shawn Guo <shawn.guo@linaro.org>,
+        David Yang <mmyangfl@gmail.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        devicetree@vger.kernel.org
+In-Reply-To: <20230415-mmc-hi3798mv200-v4-3-44096e187f53@outlook.com>
+References: <20230415-mmc-hi3798mv200-v4-0-44096e187f53@outlook.com>
+ <20230415-mmc-hi3798mv200-v4-3-44096e187f53@outlook.com>
+Message-Id: <168173527652.2535566.16838567933859217136.robh@kernel.org>
+Subject: Re: [PATCH RFC v4 3/4] dt-binding: mmc: hi3798cv200-dw-mshc:
+ convert to YAML and rename to histb-dw-mshc
+Date:   Mon, 17 Apr 2023 08:10:27 -0500
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, 9 Apr 2023 at 00:00, Linus Walleij <linus.walleij@linaro.org> wrote:
->
-> If we are starting a command which can generate a busy
-> response, then clear the variable host->busy_status
-> if the variant is using a ->busy_complete callback.
->
-> We are lucky that the member is zero by default and
-> hopefully always gets cleared in the ->busy_complete
-> callback even on errors, but it's just fragile so
-> make sure it is always initialized to zero.
->
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+
+On Sun, 16 Apr 2023 17:19:34 +0800, Yang Xiwen wrote:
+> The renaming is due to the fact that it is now supporting SoCs other
+> than Hi3798CV200.
+> 
+> Signed-off-by: Yang Xiwen <forbidden405@outlook.com>
 > ---
-> ChangeLog v1->v2:
-> - Unconditionally clear host->busy_status if we get a
->   busy response.
-> ---
->  drivers/mmc/host/mmci.c | 22 +++++++++++++---------
->  1 file changed, 13 insertions(+), 9 deletions(-)
->
-> diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> index b9e5dfe74e5c..9b48df842425 100644
-> --- a/drivers/mmc/host/mmci.c
-> +++ b/drivers/mmc/host/mmci.c
-> @@ -1238,17 +1238,21 @@ mmci_start_command(struct mmci_host *host, struct mmc_command *cmd, u32 c)
->                         c |= host->variant->cmdreg_srsp;
->         }
->
-> -       if (host->variant->busy_timeout && cmd->flags & MMC_RSP_BUSY) {
-> -               if (!cmd->busy_timeout)
-> -                       cmd->busy_timeout = 10 * MSEC_PER_SEC;
-> +       if (cmd->flags & MMC_RSP_BUSY) {
-> +               host->busy_status = 0;
+>  .../bindings/mmc/hi3798cv200-dw-mshc.txt           | 40 -------------
+>  .../bindings/mmc/hisilicon,histb-dw-mshc.yaml      | 69 ++++++++++++++++++++++
+>  2 files changed, 69 insertions(+), 40 deletions(-)
+> 
 
-To be even more safe, I don't think we should check "cmd->flags &
-MMC_RSP_BUSY". Let's just reset it always instead.
+My bot found errors running 'make DT_CHECKER_FLAGS=-m dt_binding_check'
+on your patch (DT_CHECKER_FLAGS is new in v5.13):
 
->
-> -               if (cmd->busy_timeout > host->mmc->max_busy_timeout)
-> -                       clks = (unsigned long long)host->mmc->max_busy_timeout * host->cclk;
-> -               else
-> -                       clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-> +               if (host->variant->busy_timeout) {
-> +                       if (!cmd->busy_timeout)
-> +                               cmd->busy_timeout = 10 * MSEC_PER_SEC;
->
-> -               do_div(clks, MSEC_PER_SEC);
-> -               writel_relaxed(clks, host->base + MMCIDATATIMER);
-> +                       if (cmd->busy_timeout > host->mmc->max_busy_timeout)
-> +                               clks = (unsigned long long)host->mmc->max_busy_timeout * host->cclk;
-> +                       else
-> +                               clks = (unsigned long long)cmd->busy_timeout * host->cclk;
-> +
-> +                       do_div(clks, MSEC_PER_SEC);
-> +                       writel_relaxed(clks, host->base + MMCIDATATIMER);
-> +               }
->         }
->
->         if (host->ops->pre_sig_volt_switch && cmd->opcode == SD_SWITCH_VOLTAGE)
->
+yamllint warnings/errors:
 
-Kind regards
-Uffe
+dtschema/dtc warnings/errors:
+./Documentation/devicetree/bindings/mmc/hisilicon,histb-dw-mshc.yaml: $id: relative path/filename doesn't match actual path or filename
+	expected: http://devicetree.org/schemas/mmc/hisilicon,histb-dw-mshc.yaml#
+
+doc reference errors (make refcheckdocs):
+
+See https://patchwork.ozlabs.org/project/devicetree-bindings/patch/20230415-mmc-hi3798mv200-v4-3-44096e187f53@outlook.com
+
+The base for the series is generally the latest rc1. A different dependency
+should be noted in *this* patch.
+
+If you already ran 'make dt_binding_check' and didn't see the above
+error(s), then make sure 'yamllint' is installed and dt-schema is up to
+date:
+
+pip3 install dtschema --upgrade
+
+Please check and re-submit after running the above command yourself. Note
+that DT_SCHEMA_FILES can be set to your schema file to speed up checking
+your schema. However, it must be unset to test all examples with your schema.
+
