@@ -2,111 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B845DC77B72
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 19:28:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3E2E6C77B72
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 20:08:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230502AbjDQT2d (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 15:28:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45396 "EHLO
+        id S229738AbjDQUI4 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 16:08:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41382 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229930AbjDQT22 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 15:28:28 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B854A729E;
-        Mon, 17 Apr 2023 12:28:25 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 3F0E761FAD;
-        Mon, 17 Apr 2023 19:28:25 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D90D1C4339C;
-        Mon, 17 Apr 2023 19:28:17 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1681759704;
-        bh=oXlR8AAifxzte6z71VVc+KII9sSBzG7Ho+p5mKI5mrs=;
-        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
-        b=ciaKCa+ttowYhqS/tx+6lMgeWkRm44NKFgCF6ZQy9k4aOaCsN4OAWwkFp+Fx4ULrA
-         jTWJSTL4Z8QL64fRu4opK7u07J674Z1G7IccciKH3l48rd7ePCdN2TXdtL+SJ8av68
-         +SOTyhskpFBk0IRYxaVfONgB0b3YuD9psQp4PpPIIvMsMPzcS4G+ItSmLhMvsXw3k2
-         98yU4DTJ6b6UdwYsfLgB6MdNtp9e+hxki5KyUqaHb/C7XttcubdAfXgIowaqL0c0Bq
-         TClxZvqHI3NsI6bMBgZ1q8rCOq/Y/lrqam+kuiLIJowhF+eyXXehP8XQgMurRlDzRP
-         H5Pnw4Ocpqfvw==
-From:   Mark Brown <broonie@kernel.org>
-To:     linux-arm-kernel@lists.infradead.org, Brad Larson <blarson@amd.com>
-Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
-        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        brijeshkumar.singh@amd.com, catalin.marinas@arm.com,
-        davidgow@google.com, gsomlo@gmail.com, gerg@linux-m68k.org,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, yamada.masahiro@socionext.com,
-        p.zabel@pengutronix.de, piotrs@cadence.com, p.yadav@ti.com,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        fancer.lancer@gmail.com, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
-        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
-        vaishnav.a@ti.com, will@kernel.org, devicetree@vger.kernel.org
-In-Reply-To: <20230410184526.15990-1-blarson@amd.com>
-References: <20230410184526.15990-1-blarson@amd.com>
-Subject: Re: (subset) [PATCH v13 00/15] Support AMD Pensando Elba SoC
-Message-Id: <168175969761.1284440.5150551678916367911.b4-ty@kernel.org>
-Date:   Mon, 17 Apr 2023 20:28:17 +0100
+        with ESMTP id S229547AbjDQUIy (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 16:08:54 -0400
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA1F4F0;
+        Mon, 17 Apr 2023 13:08:48 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by lithops.sigma-star.at (Postfix) with ESMTP id A8BF464551BD;
+        Mon, 17 Apr 2023 22:08:45 +0200 (CEST)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
+        with ESMTP id Fn7_KB46yy_T; Mon, 17 Apr 2023 22:08:45 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+        by lithops.sigma-star.at (Postfix) with ESMTP id E6C5D622623F;
+        Mon, 17 Apr 2023 22:08:44 +0200 (CEST)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
+        with ESMTP id 7Wwa0OVZlxRQ; Mon, 17 Apr 2023 22:08:44 +0200 (CEST)
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+        by lithops.sigma-star.at (Postfix) with ESMTP id B0A1064551BD;
+        Mon, 17 Apr 2023 22:08:44 +0200 (CEST)
+Date:   Mon, 17 Apr 2023 22:08:44 +0200 (CEST)
+From:   Richard Weinberger <richard@nod.at>
+To:     linux-mmc@vger.kernel.org
+Cc:     linux-renesas-soc@vger.kernel.org,
+        wsa+renesas@sang-engineering.com, ulf.hansson@linaro.org
+Message-ID: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at>
+Subject: Poor write performance to boot area using rcar-gen3-sdhi
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
-X-Mailer: b4 0.13-dev-00303
+X-Originating-IP: [195.201.40.130]
+X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
+Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Qw==
+Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 10 Apr 2023 11:45:11 -0700, Brad Larson wrote:
-> This series enables support for AMD Pensando Elba SoC based platforms.
-> 
-> The Elba SoC has the following features:
-> - Sixteen ARM64 A72 cores
-> - Dual DDR 4/5 memory controllers
-> - 32 lanes of PCIe Gen3/4 to the Host
-> - Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
->   also a single 1GE management port.
-> - Storage/crypto offloads and 144 programmable P4 cores.
-> - QSPI and EMMC for SoC storage
-> - Two SPI interfaces for peripheral management
-> - I2C bus for platform management
-> 
-> [...]
+Hi!
 
-Applied to
+Writing to the boot area of an eMMC takes significant
+longer than writing to the user area on v6.1 (Tested also on v5.4).
+The following trace shows write of 4k using "dd if=4k.dat of=/dev/mmcblk1boot1 bs=512 oflag=sync".
+As you can see from the timings, the whole operation took almost 80ms
+where most of the time was consumed by the MMC_WRITE_MULTIPLE_BLOCK command.
 
-   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
 
-Thanks!
+     kworker/1:1H-34      [001] .....  5113.734166: mmc_request_start: mmc1: start struct mmc_request[0000000005d331e4]: cmd_opcode=18 cmd_arg=0x0 cmd_flags=0xb5 cmd_retries=0 stop_opcode=12 stop_arg=0x0 stop_flags=0x95 stop_retries=0 sbc_opcode=23 sbc_arg=0x8 sbc_flags=0x15 sbc_retires=0 blocks=8 block_size=512 blk_addr=0 data_flags=0x200 tag=26 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+     kworker/0:1-25      [000] .....  5113.735860: mmc_request_done: mmc1: end struct mmc_request[0000000005d331e4]: cmd_opcode=18 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=0 stop_opcode=12 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=23 sbc_err=0 sbc_resp=0x900 0x900 0x900 0x900 sbc_retries=0 bytes_xfered=4096 data_err=0 tag=26 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+    kworker/1:1H-34      [001] .....  5113.735996: mmc_request_start: mmc1: start struct mmc_request[00000000174773b9]: cmd_opcode=25 cmd_arg=0x0 cmd_flags=0xb5 cmd_retries=0 stop_opcode=12 stop_arg=0x0 stop_flags=0x49d stop_retries=0 sbc_opcode=23 sbc_arg=0x8 sbc_flags=0x15 sbc_retires=0 blocks=8 block_size=512 blk_addr=0 data_flags=0x100 tag=27 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+     kworker/0:1-25      [000] .....  5113.814376: mmc_request_done: mmc1: end struct mmc_request[00000000174773b9]: cmd_opcode=25 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=0 stop_opcode=12 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=23 sbc_err=0 sbc_resp=0x900 0x900 0x900 0x900 sbc_retries=0 bytes_xfered=4096 data_err=0 tag=27 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+    kworker/0:1H-144     [000] .....  5113.814391: mmc_request_start: mmc1: start struct mmc_request[00000000101675e9]: cmd_opcode=13 cmd_arg=0x10000 cmd_flags=0x195 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5113.814408: mmc_request_done: mmc1: end struct mmc_request[00000000101675e9]: cmd_opcode=13 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5113.814477: mmc_request_start: mmc1: start struct mmc_request[0000000008526179]: cmd_opcode=6 cmd_arg=0x3200101 cmd_flags=0x95 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5113.814497: mmc_request_done: mmc1: end struct mmc_request[0000000008526179]: cmd_opcode=6 cmd_err=0 cmd_resp=0x800 0x900 0x900 0x800 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5113.814511: mmc_request_start: mmc1: start struct mmc_request[0000000061873c4a]: cmd_opcode=13 cmd_arg=0x10000 cmd_flags=0x195 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5113.814529: mmc_request_done: mmc1: end struct mmc_request[0000000061873c4a]: cmd_opcode=13 cmd_err=0 cmd_resp=0x900 0x900 0x800 0x900 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0O
 
-[03/15] dt-bindings: spi: cdns: Add compatible for AMD Pensando Elba SoC
-        (no commit info)
-[04/15] dt-bindings: spi: dw: Add AMD Pensando Elba SoC SPI Controller
-        commit: 6282a6ceef62f5732082f691de8f82fcd49d4fb4
-[09/15] spi: cadence-quadspi: Add compatible for AMD Pensando Elba SoC
-        (no commit info)
-[10/15] spi: dw: Add support for AMD Pensando Elba SoC
-        commit: 2c8606040a808aa01d2d9e4f5b9332e87bb66377
 
-All being well this means that it will be integrated into the linux-next
-tree (usually sometime in the next 24 hours) and sent to Linus during
-the next merge window (or sooner if it is a bug fix), however if
-problems are discovered then the patch may be dropped or reverted.
+On the other hand, writing to the user area using "dd if=4k.dat of=/dev/mmcblk1p13 bs=512 oflag=sync" is fast:
 
-You may get further e-mails resulting from automated or manual testing
-and review of the tree, please engage with people reporting problems and
-send followup patches addressing any issues that are reported if needed.
 
-If any updates are required or you are submitting further changes they
-should be sent as incremental updates against current git, existing
-patches will not be replaced.
+    kworker/1:1H-34      [001] .....  5163.989096: mmc_request_start: mmc1: start struct mmc_request[000000003c3d18f8]: cmd_opcode=6 cmd_arg=0x3b30801 cmd_flags=0x49d cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5163.991009: mmc_request_done: mmc1: end struct mmc_request[000000003c3d18f8]: cmd_opcode=6 cmd_err=0 cmd_resp=0x800 0x900 0x900 0x800 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5163.991027: mmc_request_start: mmc1: start struct mmc_request[00000000a1a3cac1]: cmd_opcode=13 cmd_arg=0x10000 cmd_flags=0x195 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5163.991056: mmc_request_done: mmc1: end struct mmc_request[00000000a1a3cac1]: cmd_opcode=13 cmd_err=0 cmd_resp=0x900 0x900 0x800 0x900 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5163.991081: mmc_request_start: mmc1: start struct mmc_request[00000000f096e251]: cmd_opcode=18 cmd_arg=0x4ea000 cmd_flags=0xb5 cmd_retries=0 stop_opcode=12 stop_arg=0x0 stop_flags=0x95 stop_retries=0 sbc_opcode=23 sbc_arg=0x8 sbc_flags=0x15 sbc_retires=0 blocks=8 block_size=512 blk_addr=5152768 data_flags=0x200 tag=6 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+     kworker/0:1-25      [000] .....  5163.991705: mmc_request_done: mmc1: end struct mmc_request[00000000f096e251]: cmd_opcode=18 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=0 stop_opcode=12 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=23 sbc_err=0 sbc_resp=0x900 0x900 0x900 0x900 sbc_retries=0 bytes_xfered=4096 data_err=0 tag=6 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+    kworker/1:1H-34      [001] .....  5163.991838: mmc_request_start: mmc1: start struct mmc_request[00000000ec4997fb]: cmd_opcode=25 cmd_arg=0x4ea000 cmd_flags=0xb5 cmd_retries=0 stop_opcode=12 stop_arg=0x0 stop_flags=0x49d stop_retries=0 sbc_opcode=23 sbc_arg=0x8 sbc_flags=0x15 sbc_retires=0 blocks=8 block_size=512 blk_addr=5152768 data_flags=0x100 tag=7 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+     kworker/0:1-25      [000] .....  5163.992203: mmc_request_done: mmc1: end struct mmc_request[00000000ec4997fb]: cmd_opcode=25 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=0 stop_opcode=12 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=23 sbc_err=0 sbc_resp=0x900 0x900 0x900 0x900 sbc_retries=0 bytes_xfered=4096 data_err=0 tag=7 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=1 retune_period=0
+    kworker/0:1H-144     [000] .....  5163.992215: mmc_request_start: mmc1: start struct mmc_request[00000000101675e9]: cmd_opcode=13 cmd_arg=0x10000 cmd_flags=0x195 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5163.992231: mmc_request_done: mmc1: end struct mmc_request[00000000101675e9]: cmd_opcode=13 cmd_err=0 cmd_resp=0x900 0x900 0x900 0x900 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5163.992291: mmc_request_start: mmc1: start struct mmc_request[0000000008526179]: cmd_opcode=6 cmd_arg=0x3200101 cmd_flags=0x95 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5163.992310: mmc_request_done: mmc1: end struct mmc_request[0000000008526179]: cmd_opcode=6 cmd_err=0 cmd_resp=0x800 0x900 0x900 0x800 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+    kworker/1:1H-34      [001] .....  5163.992790: mmc_request_start: mmc1: start struct mmc_request[0000000061873c4a]: cmd_opcode=13 cmd_arg=0x10000 cmd_flags=0x195 cmd_retries=3 stop_opcode=0 stop_arg=0x0 stop_flags=0x0 stop_retries=0 sbc_opcode=0 sbc_arg=0x0 sbc_flags=0x0 sbc_retires=0 blocks=0 block_size=0 blk_addr=0 data_flags=0x0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
+     kworker/0:1-25      [000] .....  5163.992808: mmc_request_done: mmc1: end struct mmc_request[0000000061873c4a]: cmd_opcode=13 cmd_err=0 cmd_resp=0x900 0x900 0x800 0x900 cmd_retries=3 stop_opcode=0 stop_err=0 stop_resp=0x0 0x0 0x0 0x0 stop_retries=0 sbc_opcode=0 sbc_err=0 sbc_resp=0x0 0x0 0x0 0x0 sbc_retries=0 bytes_xfered=0 data_err=0 tag=0 can_retune=1 doing_retune=0 retune_now=0 need_retune=0 hold_retune=2 retune_period=0
 
-Please add any relevant lists and maintainers to the CCs when replying
-to this mail.
+The whole operation took only about 3ms.
+
+Is this expected?
+
+Off the head I don't really see why writing to the boot area should be slower.
+BTW: Using u-boot the write is blazing fast, so the eMMC itself should be fine.
+At driver level there shouldn't be much difference between writing to boot and user
+area except from MMC_SWITCH.
 
 Thanks,
-Mark
-
+//richard
