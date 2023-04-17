@@ -2,56 +2,56 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62AE4C77B70
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 14:55:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8DB1BC77B70
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 14:55:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230443AbjDQOzT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 10:55:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46766 "EHLO
+        id S229953AbjDQOzf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 10:55:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46756 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231130AbjDQOzQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 10:55:16 -0400
-Received: from mail-yw1-x1133.google.com (mail-yw1-x1133.google.com [IPv6:2607:f8b0:4864:20::1133])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AD941975F
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 07:54:57 -0700 (PDT)
-Received: by mail-yw1-x1133.google.com with SMTP id 00721157ae682-54fe82d8bf5so106522367b3.3
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 07:54:57 -0700 (PDT)
+        with ESMTP id S230392AbjDQOzR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 10:55:17 -0400
+Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65C9AA240
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 07:55:04 -0700 (PDT)
+Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-54fb615ac3dso207336137b3.2
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 07:55:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681743297; x=1684335297;
+        d=linaro.org; s=google; t=1681743303; x=1684335303;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=6utNr78oQkmqREZVkBpGPV9CtufNDYJJ9bNoCZEVsds=;
-        b=ky4B47OKmAyFx5L4ii50XpiGHHyTG7kihi72ceBvfzEFkb89sVIa/d4ZrBNF5tlzWW
-         dTP7ad0r+MeynKKgX+2FdjoxoS/0vKXmCh+vj1x+aR7WHTuiKWIEXK72QjDU0n6wnYI6
-         JKPebUBHjmISuZlhuz5nQVjKMSUZLBjyuO9KqdocnGaCP1rbrLRvHTszgOKeieOCVipo
-         W7X1InP10rpSA7GvVWXliFcFPersnA6kIw1Hdd5DFig6CcwNiW4oYKObR8y3R6w5jyFj
-         iraTKdq+/MZftfzN98DIPRR1tgnFTRoIkkZrqvayxlbUGiCsg5EChWREClFIB2EXtSan
-         mDIg==
+        bh=fur1vsPRYGb4bHxVHQwC4yeXMQ8BUZiX8URDo13Jh5Y=;
+        b=ca8I5OXFRjYtVdJWR6zaa7SLc3Z539o4eA0Di+IdBEAIVQ4xOXztVzyAH4LVv0DxjM
+         wGc5KKb+cA8eVcpSZ9j4njPgrIhaUiSdoBKNB5dcEK2E/zZED6IopD6QtB1b2Jo8kqS+
+         8jUU6h44FLRSNsUISU5cp2136sZKefYaglt4nkEE21tz/ELQZ3YdvXZqITWaXdLXbYsg
+         XAojCHxjZko9EZseS9DNgvDvQ18Y4nDejlC21UorzTaJrOoua5XMxgytfjzpXjlXwDqx
+         tBpbxi86nTrfu6InrIT7OmffVNTgaEGtZDDgeiJrA2zpbdhz05SwImYyRaebjUbed3RG
+         ecbQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681743297; x=1684335297;
+        d=1e100.net; s=20221208; t=1681743303; x=1684335303;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=6utNr78oQkmqREZVkBpGPV9CtufNDYJJ9bNoCZEVsds=;
-        b=TeWaqZda3o+4XalXARE0fa3kWj/cvtN5Q84AR/aeGTP84/5GXmiJeIz89M6ne7P0na
-         YspTDAs61DR5avWIsMjdT6WedDe5so5eg6wUytHZvXDoW+g4PQ/IvjWBrGeeajfL152n
-         VMB/t01J88oJVJIrFU7xvT86gC76HZNn4cQk4qI3n5cGzGcS2Nxm8XZb2EjSbTM4pPwR
-         gtnA14HKhfwGH0Qfg6d9s6KEO8qGvum1dd88TEORt/a/zf3iXhAGZGbT7Dovu0grR7yH
-         vPv+ML+g8LSt7cKgjmqsAOYYCnaSd4w6YDy6AK1EPHdREcn4qUGtaj7zqABJBIbfzW5Y
-         5GeQ==
-X-Gm-Message-State: AAQBX9di2cr9M2oU9C0VWn5Eg5tqI9gfy1RtyJ3YlC0LwKjQ9Wu4wzI6
-        QlJj09My2mSbNYk63KIsaXdAI/j3yuzC8P6DCZVQYw==
-X-Google-Smtp-Source: AKy350ajnN2NDsl4n62JPIuA9QqO/CvKKfYqxAXssnSLo3aCYRArQxgpnoUOhmAlReRuUt+9IIi21cLJf4oFpRCRL3k=
+        bh=fur1vsPRYGb4bHxVHQwC4yeXMQ8BUZiX8URDo13Jh5Y=;
+        b=e+6mQ08Fbs3RKt/oEkm4k/rEQHKr83DQWIqllccyGTxD/hYI4TDb+ObJBdQK23UhPD
+         dceyadZdcQlBPkaYBmRXKQ2poc7mgbf2bQvA6E9HTDsXFyLr4Jn4KeFU+8afOh0+WD6C
+         cfrJL8dcPIx7vgE7girx9xcpE1UFf3Nl4Yv2QYTSQvchCA3ldD+SqxEkr7eaT04Eu9dD
+         tuK9u1L3i1QOWWbmkBDAEIIXrSnpdTo8wBhPxoib8Zzr3OLyGCfd8zHhIzAhs+tSB9i/
+         9i29AqegR4B2VqFYz5nc55P19SzyZbuS/vlX7+Odjq6sqrnorSSbt7PTBuXsK/cpBO6J
+         74cw==
+X-Gm-Message-State: AAQBX9eilzUPurN7om3kC4fSqieeyEIIjqDnB5Nnc3n/EhvtYR5G+fnX
+        ZC5CwT1vkX+oBKOD6qwey7TIByjBHuGbC/EvrjCPsg==
+X-Google-Smtp-Source: AKy350a/ZGQMRyt4s8YkzjxrQpaJdxmrR2L1AJJHpIMfsU2yGCHbxIgTQY1VbhWTD8ze1dcmY23ZOAPuN9GaR90A+/8=
 X-Received: by 2002:a81:af1e:0:b0:52e:e095:d840 with SMTP id
- n30-20020a81af1e000000b0052ee095d840mr9538535ywh.0.1681743296863; Mon, 17 Apr
- 2023 07:54:56 -0700 (PDT)
+ n30-20020a81af1e000000b0052ee095d840mr9538749ywh.0.1681743303598; Mon, 17 Apr
+ 2023 07:55:03 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230410184526.15990-1-blarson@amd.com> <20230410184526.15990-14-blarson@amd.com>
-In-Reply-To: <20230410184526.15990-14-blarson@amd.com>
+References: <20230410184526.15990-1-blarson@amd.com> <20230410184526.15990-15-blarson@amd.com>
+In-Reply-To: <20230410184526.15990-15-blarson@amd.com>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Mon, 17 Apr 2023 16:54:20 +0200
-Message-ID: <CAPDyKFqDrKR1N0+CBf4mPLPqO8VxToj2eJF87afhauYUPduGNw@mail.gmail.com>
-Subject: Re: [PATCH v13 13/15] mmc: sdhci-cadence: Add AMD Pensando Elba SoC support
+Date:   Mon, 17 Apr 2023 16:54:27 +0200
+Message-ID: <CAPDyKFqCv5Y7UzV2vi-500Nq2t4wze4xnXq8=S=DKNTH3HCh0A@mail.gmail.com>
+Subject: Re: [PATCH v13 14/15] mmc: sdhci-cadence: Support mmc hardware reset
 To:     Brad Larson <blarson@amd.com>
 Cc:     linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
         linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
@@ -73,17 +73,16 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 10 Apr 2023 at 20:47, Brad Larson <blarson@amd.com> wrote:
+On Mon, 10 Apr 2023 at 20:48, Brad Larson <blarson@amd.com> wrote:
 >
-> Add support for AMD Pensando Elba SoC which explicitly
-> controls byte-lane enables on writes.
->
-> Select MMC_SDHCI_IO_ACCESSORS for MMC_SDHCI_CADENCE which
-> allows Elba SoC sdhci_elba_ops to overwrite the SDHCI
-> IO memory accessors
+> Add support for mmc hardware reset using a reset-controller
+> that would need to be enabled in the device tree with
+> a supporting driver.  The default is disabled for all
+> existing designs.
 >
 > Signed-off-by: Brad Larson <blarson@amd.com>
 > Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> Reviewed-by: Philipp Zabel <p.zabel@pengutronix.de>
 
 Applied for next, thanks!
 
@@ -93,170 +92,74 @@ Uffe
 
 > ---
 >
-> v13 changes:
-> - Use GENMASK(7, 3) in elba_priv_writel() to set all byte enables
-> - Add a variable 'shift' with GENMASK(1, 0) in elba_write_w() and
->   elba_write_b() to set the byte enable variable.
->
-> v11 changes:
-> - Remove elba-drv_init() call to platform_get_resource() since that
->   check is done inside devm_platform_ioremap_resource()
-> - Move spin_lock_init() before error check
-> - Remove extra parentheses
->
-> v10 changes:
-> - Add Elba specific support into this 3rd patch.  This builds on the private
->   writel() enabled in patch 1 followed by platform specific init() in patch 2.
-> - Specify when first used the reason for the spinlock use to order byte-enable
->   prior to write data.
+> v9 changes:
+> - Previously patch 17/17
+> - Changed delay after reset_control_assert() from 9 to 3 usec
+> - Renamed sdhci_mmc_hw_reset() to sdhci_cdns_mmc_hw_reset()
 >
 > ---
->  drivers/mmc/host/Kconfig         |  1 +
->  drivers/mmc/host/sdhci-cadence.c | 98 ++++++++++++++++++++++++++++++++
->  2 files changed, 99 insertions(+)
->
-> diff --git a/drivers/mmc/host/Kconfig b/drivers/mmc/host/Kconfig
-> index 4745fe217ade..9f793892123c 100644
-> --- a/drivers/mmc/host/Kconfig
-> +++ b/drivers/mmc/host/Kconfig
-> @@ -255,6 +255,7 @@ config MMC_SDHCI_CADENCE
->         tristate "SDHCI support for the Cadence SD/SDIO/eMMC controller"
->         depends on MMC_SDHCI_PLTFM
->         depends on OF
-> +       select MMC_SDHCI_IO_ACCESSORS
->         help
->           This selects the Cadence SD/SDIO/eMMC driver.
+>  drivers/mmc/host/sdhci-cadence.c | 27 +++++++++++++++++++++++++++
+>  1 file changed, 27 insertions(+)
 >
 > diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
-> index c528a25f48b8..5d1e9cef74f5 100644
+> index 5d1e9cef74f5..b24aa27da50c 100644
 > --- a/drivers/mmc/host/sdhci-cadence.c
 > +++ b/drivers/mmc/host/sdhci-cadence.c
-> @@ -66,6 +66,8 @@ struct sdhci_cdns_phy_param {
+> @@ -12,6 +12,7 @@
+>  #include <linux/mmc/mmc.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> +#include <linux/reset.h>
 >
->  struct sdhci_cdns_priv {
->         void __iomem *hrs_addr;
-> +       void __iomem *ctl_addr; /* write control */
-> +       spinlock_t wrlock;      /* write lock */
+>  #include "sdhci-pltfm.h"
+>
+> @@ -70,6 +71,7 @@ struct sdhci_cdns_priv {
+>         spinlock_t wrlock;      /* write lock */
 >         bool enhanced_strobe;
 >         void (*priv_writel)(struct sdhci_cdns_priv *priv, u32 val, void __iomem *reg);
+> +       struct reset_control *rst_hw;
 >         unsigned int nr_phy_params;
-> @@ -321,6 +323,91 @@ static void sdhci_cdns_set_uhs_signaling(struct sdhci_host *host,
->                 sdhci_set_uhs_signaling(host, timing);
+>         struct sdhci_cdns_phy_param phy_params[];
+>  };
+> @@ -457,6 +459,22 @@ static void sdhci_cdns_hs400_enhanced_strobe(struct mmc_host *mmc,
+>                                          SDHCI_CDNS_HRS06_MODE_MMC_HS400);
 >  }
 >
-> +/* Elba control register bits [6:3] are byte-lane enables */
-> +#define ELBA_BYTE_ENABLE_MASK(x)       ((x) << 3)
-> +
-> +/*
-> + * The Pensando Elba SoC explicitly controls byte-lane enabling on writes
-> + * which includes writes to the HRS registers.  The write lock (wrlock)
-> + * is used to ensure byte-lane enable, using write control (ctl_addr),
-> + * occurs before the data write.
-> + */
-> +static void elba_priv_writel(struct sdhci_cdns_priv *priv, u32 val,
-> +                            void __iomem *reg)
+> +static void sdhci_cdns_mmc_hw_reset(struct mmc_host *mmc)
 > +{
-> +       unsigned long flags;
-> +
-> +       spin_lock_irqsave(&priv->wrlock, flags);
-> +       writel(GENMASK(7, 3), priv->ctl_addr);
-> +       writel(val, reg);
-> +       spin_unlock_irqrestore(&priv->wrlock, flags);
-> +}
-> +
-> +static void elba_write_l(struct sdhci_host *host, u32 val, int reg)
-> +{
-> +       elba_priv_writel(sdhci_cdns_priv(host), val, host->ioaddr + reg);
-> +}
-> +
-> +static void elba_write_w(struct sdhci_host *host, u16 val, int reg)
-> +{
+> +       struct sdhci_host *host = mmc_priv(mmc);
 > +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +       u32 shift = reg & GENMASK(1, 0);
-> +       unsigned long flags;
-> +       u32 byte_enables;
 > +
-> +       byte_enables = GENMASK(1, 0) << shift;
-> +       spin_lock_irqsave(&priv->wrlock, flags);
-> +       writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-> +       writew(val, host->ioaddr + reg);
-> +       spin_unlock_irqrestore(&priv->wrlock, flags);
+> +       dev_dbg(mmc_dev(host->mmc), "emmc hardware reset\n");
+> +
+> +       reset_control_assert(priv->rst_hw);
+> +       /* For eMMC, minimum is 1us but give it 3us for good measure */
+> +       udelay(3);
+> +
+> +       reset_control_deassert(priv->rst_hw);
+> +       /* For eMMC, minimum is 200us but give it 300us for good measure */
+> +       usleep_range(300, 1000);
 > +}
 > +
-> +static void elba_write_b(struct sdhci_host *host, u8 val, int reg)
-> +{
-> +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +       u32 shift = reg & GENMASK(1, 0);
-> +       unsigned long flags;
-> +       u32 byte_enables;
-> +
-> +       byte_enables = BIT(0) << shift;
-> +       spin_lock_irqsave(&priv->wrlock, flags);
-> +       writel(ELBA_BYTE_ENABLE_MASK(byte_enables), priv->ctl_addr);
-> +       writeb(val, host->ioaddr + reg);
-> +       spin_unlock_irqrestore(&priv->wrlock, flags);
-> +}
-> +
-> +static const struct sdhci_ops sdhci_elba_ops = {
-> +       .write_l = elba_write_l,
-> +       .write_w = elba_write_w,
-> +       .write_b = elba_write_b,
-> +       .set_clock = sdhci_set_clock,
-> +       .get_timeout_clock = sdhci_cdns_get_timeout_clock,
-> +       .set_bus_width = sdhci_set_bus_width,
-> +       .reset = sdhci_reset,
-> +       .set_uhs_signaling = sdhci_cdns_set_uhs_signaling,
-> +};
-> +
-> +static int elba_drv_init(struct platform_device *pdev)
-> +{
-> +       struct sdhci_host *host = platform_get_drvdata(pdev);
-> +       struct sdhci_cdns_priv *priv = sdhci_cdns_priv(host);
-> +       void __iomem *ioaddr;
-> +
-> +       host->mmc->caps |= MMC_CAP_1_8V_DDR | MMC_CAP_8_BIT_DATA;
-> +       spin_lock_init(&priv->wrlock);
-> +
-> +       /* Byte-lane control register */
-> +       ioaddr = devm_platform_ioremap_resource(pdev, 1);
-> +       if (IS_ERR(ioaddr))
-> +               return PTR_ERR(ioaddr);
-> +
-> +       priv->ctl_addr = ioaddr;
-> +       priv->priv_writel = elba_priv_writel;
-> +       writel(ELBA_BYTE_ENABLE_MASK(0xf), priv->ctl_addr);
-> +
-> +       return 0;
-> +}
-> +
->  static const struct sdhci_ops sdhci_cdns_ops = {
->         .set_clock = sdhci_set_clock,
->         .get_timeout_clock = sdhci_cdns_get_timeout_clock,
-> @@ -337,6 +424,13 @@ static const struct sdhci_cdns_drv_data sdhci_cdns_uniphier_drv_data = {
->         },
->  };
+>  static int sdhci_cdns_probe(struct platform_device *pdev)
+>  {
+>         struct sdhci_host *host;
+> @@ -520,6 +538,15 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>         if (ret)
+>                 goto free;
 >
-> +static const struct sdhci_cdns_drv_data sdhci_elba_drv_data = {
-> +       .init = elba_drv_init,
-> +       .pltfm_data = {
-> +               .ops = &sdhci_elba_ops,
-> +       },
-> +};
+> +       if (host->mmc->caps & MMC_CAP_HW_RESET) {
+> +               priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
+> +               if (IS_ERR(priv->rst_hw))
+> +                       return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
+> +                                            "reset controller error\n");
+> +               if (priv->rst_hw)
+> +                       host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
+> +       }
 > +
->  static const struct sdhci_cdns_drv_data sdhci_cdns_drv_data = {
->         .pltfm_data = {
->                 .ops = &sdhci_cdns_ops,
-> @@ -477,6 +571,10 @@ static const struct of_device_id sdhci_cdns_match[] = {
->                 .compatible = "socionext,uniphier-sd4hc",
->                 .data = &sdhci_cdns_uniphier_drv_data,
->         },
-> +       {
-> +               .compatible = "amd,pensando-elba-sd4hc",
-> +               .data = &sdhci_elba_drv_data,
-> +       },
->         { .compatible = "cdns,sd4hc" },
->         { /* sentinel */ }
->  };
+>         ret = sdhci_add_host(host);
+>         if (ret)
+>                 goto free;
 > --
 > 2.17.1
 >
