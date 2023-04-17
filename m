@@ -2,58 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C6ED2C77B7A
-	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 15:45:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E542EC77B76
+	for <linux-mmc@archiver.kernel.org>; Mon, 17 Apr 2023 15:47:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230121AbjDQPpO (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 17 Apr 2023 11:45:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40662 "EHLO
+        id S231343AbjDQPrt (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 17 Apr 2023 11:47:49 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42294 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229955AbjDQPpN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 11:45:13 -0400
-Received: from mail-yb1-xb2b.google.com (mail-yb1-xb2b.google.com [IPv6:2607:f8b0:4864:20::b2b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0447CD
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 08:45:12 -0700 (PDT)
-Received: by mail-yb1-xb2b.google.com with SMTP id l5so5543588ybe.7
-        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 08:45:12 -0700 (PDT)
+        with ESMTP id S229898AbjDQPrs (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 17 Apr 2023 11:47:48 -0400
+Received: from mail-yw1-x1136.google.com (mail-yw1-x1136.google.com [IPv6:2607:f8b0:4864:20::1136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22FB61BD
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 08:47:47 -0700 (PDT)
+Received: by mail-yw1-x1136.google.com with SMTP id 00721157ae682-54f21cdfadbso371360657b3.7
+        for <linux-mmc@vger.kernel.org>; Mon, 17 Apr 2023 08:47:47 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681746312; x=1684338312;
+        d=linaro.org; s=google; t=1681746466; x=1684338466;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=uANFHxB7VX4MKOqAT03m5zUc2hsluyqpfayDw7cl3qo=;
-        b=PZF34qnfyoYRJcFP1ogjCGlY/ygSGtZD9bteKHJ8KnexMd9CA9BlfGDrXXU225+Xd3
-         F+RLg+bFv5zNZ2mcKtB4HrNeKZzT3GYAVsHP7yi12puMtybiUufzFVovZDDSpUgr/Rhs
-         FcsNOdqTdZmqIiiJvZnmANp3uQPcqHnqgSea1qe2tidkcDd1Cozx+tprAUwl0p8VsLA4
-         WlXjeMLyV9NWblb5+o0pFHlb4GDF4kw8+HOD3RdoC2sJn9gcf0+OtCxGYND0m+ksXM3X
-         Ia1wK9DN2Z3qTTDzn3jQFClR/2F3ybiqCx0DyxaVjlXsi894JBxeoWzRFrGpMbH98j4k
-         192g==
+        bh=DQlIri97TmZMXUVRTtsm2+SywZpxFoXWBikPobx0N+0=;
+        b=ihY84tfAWitQmk4iYcuvCGxmy/54iD05VS9oIH9KrWeafpu605HY0OU8cnANkZ8Erk
+         jpHU15o1JV1lWjKoxybXKVzmmRF3uhkGFnb/PaOGtFOl3GozpOGU/NHblqAGvEpalRwe
+         reIoNNwh5OhKe85xkfaykWJe35uFaN5/q7hx9lgrqbPQMStHBLrRlSIgNQKr+m+4gEWW
+         BKKcyX8tlXaHzxMKBngP6IreSK8Jb1lrdXWjpzveI/2eaZeRJMkcL0IgZb3psb3bj+rW
+         Ebq47k8EL7Gg3ZnZXhWTXjeBeY+m300Uc5P4o8bUu0kFCLL/TFJjZDivN67jcVtwGFd2
+         iWsA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681746312; x=1684338312;
+        d=1e100.net; s=20221208; t=1681746466; x=1684338466;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=uANFHxB7VX4MKOqAT03m5zUc2hsluyqpfayDw7cl3qo=;
-        b=ch/4/cXCBqKo8OKAGrwnQdNrY1IKjy5x8EfzX8JnuQghJjlAdgvyBJXwxWQ7P8YdJr
-         eRCLWGVrJcpUTAfOTZYjYhai17dUfyI142BLYG/Do0Nhs1jZ8TeZOZZ1B7Yc9gdU/dsc
-         i6rkR4bH5+Ym0tVzYApSlDOaw8/xAUAf0600aTIqk60jq3L+QZ34GJBQ6Bn/UgII6/e3
-         O56/YIDa35K4KDAIrkWtIYf+dCzjLi95NfkGXn1SaxF4I900MtE4bnimXKvD1ZCTqmxD
-         cfZl8B5JNQ03wCFsbFYo0rif95Q2rRKi8j1A6frcnPP9AYmJtvFXcDVledL7txno78E5
-         49LA==
-X-Gm-Message-State: AAQBX9eSZwWKoaUc2w5Z6bnRVsBSQmxCCxy+mgm8ae94xnEFE7fwi/ap
-        OjRDysHFADBjrFq2QtKqMPrp9ndaGarid8SV7o7YHQ==
-X-Google-Smtp-Source: AKy350aP3QOBtKNOKLMPeIj6ZU5lTp6Gy8tKj3WVIbX8o1x6LPTFlznGCtNCfBQvT4N4le9tSNlg9CG3O6I67WJchGY=
-X-Received: by 2002:a25:76c4:0:b0:b75:8ac3:d5d2 with SMTP id
- r187-20020a2576c4000000b00b758ac3d5d2mr9968546ybc.4.1681746311834; Mon, 17
- Apr 2023 08:45:11 -0700 (PDT)
+        bh=DQlIri97TmZMXUVRTtsm2+SywZpxFoXWBikPobx0N+0=;
+        b=N7uk/ySmt2RtDy8UXXX+ugh8nL7dnKj1MuHGghQJz1NG46pjIJ6dlXerqsBNuyAuJC
+         O3pVFEIFfOUE0m3kFxSSqVoqQTKQcdA6Lxb1lsM0+hSYovdPoO+VH+DXM87nD1y7vxOg
+         f6+OT+uXtbLg9B2dhI6bqUq/+UxGfXl+6E79ef3z1nyAudQUzmhf5VX2PtMBvRUok9J/
+         uaI7WQFlVpply8A4h+1lUxEodSUyPyaboror1ERRYxqldb++MHvbHuTF6CLGAX9sdJUs
+         5ULZW4jhfcMekIt5hUwSss6m3kusolNfykv7EBmjmK8neAvpzhq3+sRl+aAkqno/82Qs
+         iZWw==
+X-Gm-Message-State: AAQBX9dN4RxqWtF1EmhzKExr0i7BCNMKax2ksCX8Oc2lrSYSWc0db+3L
+        Of0od3bdVSRtXPn58MJdYLEG96NAUNm8FJWWkKWLFabaWREvW+yK
+X-Google-Smtp-Source: AKy350aTVotgdcfBmt/5SDUUs9b0di/T+TJuBST3fq8A+cUEB2XtX6flIyURAsDgZUz1CEda+DIkA6EYmuXh49Es3mk=
+X-Received: by 2002:a81:af0c:0:b0:54f:bb71:c7b3 with SMTP id
+ n12-20020a81af0c000000b0054fbb71c7b3mr9543515ywh.9.1681746466321; Mon, 17 Apr
+ 2023 08:47:46 -0700 (PDT)
 MIME-Version: 1.0
 References: <20230405-pl180-busydetect-fix-v2-0-eeb10323b546@linaro.org>
- <20230405-pl180-busydetect-fix-v2-4-eeb10323b546@linaro.org> <CAPDyKFpoboq68_ysEJXCWLV8k77+ULGpF6AzcnjvUqO96r5FHw@mail.gmail.com>
-In-Reply-To: <CAPDyKFpoboq68_ysEJXCWLV8k77+ULGpF6AzcnjvUqO96r5FHw@mail.gmail.com>
+ <20230405-pl180-busydetect-fix-v2-10-eeb10323b546@linaro.org> <CAPDyKFptLGySEz3ygoacQ00rk69DKP=1wrt1Hq-weSMASwkF7w@mail.gmail.com>
+In-Reply-To: <CAPDyKFptLGySEz3ygoacQ00rk69DKP=1wrt1Hq-weSMASwkF7w@mail.gmail.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 17 Apr 2023 17:45:00 +0200
-Message-ID: <CACRpkdbwD2hO7f5VWZubYoDXFHA0Zx3k9cYYG841361zFqEFYQ@mail.gmail.com>
-Subject: Re: [PATCH v2 04/12] mmc: mmci: Break out error check in busy detect
+Date:   Mon, 17 Apr 2023 17:47:35 +0200
+Message-ID: <CACRpkdazpoEfFZhjUNQ5=jc-EndxteVCLDQaTHT02Gob036uTQ@mail.gmail.com>
+Subject: Re: [PATCH v2 10/12] mmc: mmci: mmci_card_busy() from state machine
 To:     Ulf Hansson <ulf.hansson@linaro.org>
 Cc:     Yann Gautier <yann.gautier@foss.st.com>,
         Stefan Hansson <newbyte@disroot.org>,
@@ -66,56 +66,50 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, Apr 17, 2023 at 3:24=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
+On Mon, Apr 17, 2023 at 4:49=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
 > wrote:
 > On Sun, 9 Apr 2023 at 00:00, Linus Walleij <linus.walleij@linaro.org> wro=
 te:
 > >
-> > The busy detect callback for Ux500 checks for an error
-> > in the status in the first if() clause. The only practical
-> > reason is that if an error occurs, the if()-clause is not
-> > executed, and the code falls through to the last
-> > if()-clause if (host->busy_status) which will clear and
-> > disable the irq. Make this explicit instead: it is easier
-> > to read.
+> > If we have a .busy_complete() callback, then check if
+> > the state machine triggered from the busy detect interrupts
+> > is busy: then we are certainly busy.
 > >
 > > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
 > > ---
 > > ChangeLog v1->v2:
-> > - No changes
+> > - Do this in a safer way that falls back to reading busy
+> >   status from the hardware if the state machine is NOT
+> >   busy.
 > > ---
-> >  drivers/mmc/host/mmci.c | 11 ++++++++++-
-> >  1 file changed, 10 insertions(+), 1 deletion(-)
+> >  drivers/mmc/host/mmci.c | 6 ++++++
+> >  1 file changed, 6 insertions(+)
 > >
 > > diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
-> > index e742dedaca1a..7d42625f2356 100644
+> > index 9a7f441ec9d6..180a7b719347 100644
 > > --- a/drivers/mmc/host/mmci.c
 > > +++ b/drivers/mmc/host/mmci.c
-> > @@ -665,6 +665,15 @@ static bool ux500_busy_complete(struct mmci_host *=
-host, u32 status, u32 err_msk)
-> >  {
-> >         void __iomem *base =3D host->base;
+> > @@ -339,6 +339,12 @@ static int mmci_card_busy(struct mmc_host *mmc)
+> >         unsigned long flags;
+> >         int busy =3D 0;
 > >
-> > +       if (status & err_msk) {
-> > +               /* Stop any ongoing busy detection if an error occurs *=
-/
-> > +               writel(host->variant->busy_detect_mask, base + MMCICLEA=
-R);
-> > +               writel(readl(base + MMCIMASK0) &
-> > +                      ~host->variant->busy_detect_mask, base + MMCIMAS=
-K0);
-> > +               host->busy_status =3D 0;
-> > +               return true;
+> > +       /* If we are waiting for IRQs we are certainly busy */
+> > +       if (host->ops->busy_complete &&
+> > +           host->busy_state !=3D MMCI_BUSY_IDLE &&
+> > +           host->busy_state !=3D MMCI_BUSY_DONE)
+> > +               return 1;
 >
-> I agree that this makes the code more explicit, but unfortunately it
-> also means duplicating the code from the bottom of this function.
+> This looks fishy to me.
 >
-> Can you instead add a helper function and call it from here and from
-> the part at the bottom?
+> If this is needed, that means that the mmc core is calling the
+> ->card_busy() ops in the middle of a request that has not been
+> completed yet. This shouldn't happen - unless I am misunderstanding
+> some part of the internal new state machine.
 
-I break that out as a separate function in patch 9, can you check if
-that solves the problem? The end result after all the patches should
-be fine.
+You're probably right about that, I have no idea when the core can
+and cannot call ->card_busy, I just assumed it could be called at
+any time (even while waiting for busy interrupts). If you say it won't
+get called then this patch isn't needed.
 
 Yours,
 Linus Walleij
