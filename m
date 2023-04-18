@@ -2,109 +2,103 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A6FCEC77B78
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 08:36:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96A5DC77B75
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 08:43:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231367AbjDRIgV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Apr 2023 04:36:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44100 "EHLO
+        id S231481AbjDRIng (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Apr 2023 04:43:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52798 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231339AbjDRIgQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 04:36:16 -0400
-Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D1AD5B81;
-        Tue, 18 Apr 2023 01:36:05 -0700 (PDT)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 91D533A2A3B;
-        Tue, 18 Apr 2023 10:36:03 +0200 (CEST)
-Received: from mail5.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 7D79F3A2A23;
-        Tue, 18 Apr 2023 10:36:03 +0200 (CEST)
-X-TM-AS-ERS: 10.181.10.103-127.5.254.253
-X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
-        Q==
-X-DDEI-TLS-USAGE: Used
-Received: from mx1.dmz.swissbit.com (mx.dmz.swissbit.com [10.181.10.103])
-        by mail5.swissbit.com (Postfix) with ESMTPS;
-        Tue, 18 Apr 2023 10:36:03 +0200 (CEST)
-From:   Christian Loehle <CLoehle@hyperstone.com>
-To:     Richard Weinberger <richard@nod.at>
-CC:     Biju Das <biju.das.jz@bp.renesas.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
-        wsa+renesas <wsa+renesas@sang-engineering.com>,
-        ulf hansson <ulf.hansson@linaro.org>
-Subject: RE: Poor write performance to boot area using rcar-gen3-sdhi
-Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
-Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOA=
-Date:   Tue, 18 Apr 2023 08:36:01 +0000
-Message-ID: <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
-References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at>
- <OS0PR01MB5922B8343E772A762315F764869D9@OS0PR01MB5922.jpnprd01.prod.outlook.com>
- <971572458.117024.1681798584774.JavaMail.zimbra@nod.at>
- <02ceda502af34bf0af53d52598a0b71f@hyperstone.com>
- <522326845.127346.1681805484949.JavaMail.zimbra@nod.at>
-In-Reply-To: <522326845.127346.1681805484949.JavaMail.zimbra@nod.at>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-Content-Type: text/plain;
-        charset="utf-8"
-Content-Transfer-Encoding: base64
+        with ESMTP id S231491AbjDRInf (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 04:43:35 -0400
+Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7185255
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2023 01:43:33 -0700 (PDT)
+Received: by mail-wm1-x329.google.com with SMTP id q5so15109820wmo.4
+        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2023 01:43:33 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1681807412; x=1684399412;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=RztuTVR7hw4raAhfT6J3TalLtZ06SVk+SHPhqyQqZnI=;
+        b=TZJlsIiH1GcjTN0yoC70fqOWoGMlBXmcZwfl4fL841T36S2Vs6hFhyK/Hc7TdlM9ts
+         Lc2V93Lm/mCmDN/cTI4XC1w6OybBDbBQLDk7vCsRCFW3cZL+KdS/p3VehZu85wf7NrYc
+         9M3kI3wh+nRSInh2d6a8e1TnXHaqqXsjBYATrX8uqV67M7aigikku5EEjulT6oZElLSJ
+         dhMqpm8ixvwXCe1M1VG9Imkat/3whSIun1si4RcSCBcwzMwNbRUBzdmLbOUox4lAZ6d1
+         o6Ijr4ujgogLUTnxZGxd0wa03GrD0Jh7CPWw9vqW2G8H7EqKrLQSgZMHXZP/x8eyuCQq
+         defw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1681807412; x=1684399412;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=RztuTVR7hw4raAhfT6J3TalLtZ06SVk+SHPhqyQqZnI=;
+        b=RbVrf+4JY4Y6e1/K6Nzfr34JJ020PDTMB4SYPxozepiMoFxyVigPJX6w7a26QnuvKd
+         wsAkTFoGxlnrHdYCUYKm3vHEvoSTT7WCjKFYHPUkcc6Nus6Qs/VahFua9kxLNmtpopwz
+         P0BrVoU5pGSVVeGp1cSWN78Iq7dB5KzlYbVDbIypVLZwgb+IhTGrgccYhhkhL/59GKYf
+         UUC0XxG/edI/Mc7NIoowqQSvbpc18fDFTqooPuW3AorCy6r5pICzmYeyQ/4aNb8ISRkb
+         7AJ9PTS49hP4gIpvpEqa+t8AP1MCcq2Q8/a0fthBv1UJQQQjXoJONUhHA5nTtHoXoEeo
+         qsZw==
+X-Gm-Message-State: AAQBX9fK0OjiLiwFZ6M99FrRl3MiTashyOelwwc3NhY4xVkmkLxC71rZ
+        C+PpOCHNdj65wAbPLV2L0xLA3z1iWXwLa0iDHkoEoQ==
+X-Google-Smtp-Source: AKy350Z3/trX/Rd8oXcBkZKmyT2S3M2AuEUAKSjvLdnk/WnkHVS3TD6y8ujzGaXiwosvQkHCJAmg5Q==
+X-Received: by 2002:a1c:790e:0:b0:3f0:7f70:d67d with SMTP id l14-20020a1c790e000000b003f07f70d67dmr13423703wme.12.1681807411927;
+        Tue, 18 Apr 2023 01:43:31 -0700 (PDT)
+Received: from uffe-XPS13.. ([193.205.131.2])
+        by smtp.gmail.com with ESMTPSA id v21-20020a05600c215500b003f17a00c214sm1147654wml.16.2023.04.18.01.43.30
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Apr 2023 01:43:31 -0700 (PDT)
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>
+Subject: [GIT PULL] MMC and MEMSTICK fixes for v6.3-rc8
+Date:   Tue, 18 Apr 2023 10:43:29 +0200
+Message-Id: <20230418084329.12066-1-ulf.hansson@linaro.org>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27572.006
-X-TMASE-Result: 10--10.538900-10.000000
-X-TMASE-MatchedRID: +f/wAVSGjug4HKI/yaqRmxqkhv3OdF4DELbqrOgWzye/u0i6nZyTEQcE
-        3AwiiNlyl2GUABdhPszUKgjSAuBIVQtIvqWw+95BQ0Xm0pWWLkpSuvtBzlaEqCuB2leoSGSCXyC
-        R2a++D/byW7CBa/HX2OkkeBTh96O09R7dwXny/bep3Btb1bH20Er9RmeG1EHij2iyfwmt0k/XQj
-        bjf/eQSTAj0+z8xXqsBPT3/NC+4NLm3uWqybxfEv3vrjdfNHuXb5NyYlw4+HVGMe+tDjQ3Fhy7M
-        kaYvOFgc3LebuSG3T5h85I0NOeGRzrgaSixcRrz3nHtGkYl/VrId1+nCKlIfpsoi2XrUn/J+ZL5
-        o+vRV7xJeFvFlVDkf/cUt5lc1lLgOMB0shqXhHqZiAPz+RVv5UDpE//LmCLlqGk2udQyZR+uyKs
-        t4WSGtlXxrS/LBd67
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 2f965f5e-137f-4f68-a00a-aaf87166d5f3-0-0-200-0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiBDYW4gaXQgYmUgdGhhdCByY2FyLWdlbjMtc2RoaSBjaGFuZ2VzIHNvbWUgdGltaW5ncyBhZnRl
-ciBzd2l0Y2hpbmc/DQo+IEVpdGhlciBpbiBzb2Z0d2FyZSBvciBvbiBoYXJkd2FyZS4NCg0KTmVp
-dGhlciBzaG91bGQgYmUgYXdhcmUgb2YgdGhlIG5vdGlvbiBvZiBhIGJvb3Qgb3IgdXNlciBhcmVh
-IHBhcnRpdGlvbi4NCkFueXRoaW5nIGJlbG93IG1tYy9jb3JlIGlzbid0LCBpZiB3ZSBleGNsdWRl
-IHRoZSBib290IG9wZXJhdGlvbiB3aGljaCBpcyByZWFkIG9ubHksIHNvIG5vdCBhcHBsaWNhYmxl
-IHRvIHlvdXIgcHJvYmxlbS4NClNvIGFsc28gYQ0Kd2hpbGUgdHJ1ZTsgZG8gZGQgaWY9L2Rldi96
-ZXJvIG9mPS9kZXYvbW1jYmxrWGJvb3QwIGJzPTEyOEsgc3RhdHVzPXByb2dyZXNzOyBkb25lDQpn
-aXZlcyB5b3UgbGlrZSB+NTBLQi9zIGNvbnNpc3RlbnRseT8NCg0KDQotLS0tLU9yaWdpbmFsIE1l
-c3NhZ2UtLS0tLQ0KRnJvbTogUmljaGFyZCBXZWluYmVyZ2VyIDxyaWNoYXJkQG5vZC5hdD4gDQpT
-ZW50OiBUdWVzZGF5LCBBcHJpbCAxOCwgMjAyMyAxMDoxMSBBTQ0KVG86IENocmlzdGlhbiBMb2Vo
-bGUgPENMb2VobGVAaHlwZXJzdG9uZS5jb20+DQpDYzogQmlqdSBEYXMgPGJpanUuZGFzLmp6QGJw
-LnJlbmVzYXMuY29tPjsgbGludXgtbW1jIDxsaW51eC1tbWNAdmdlci5rZXJuZWwub3JnPjsgbGlu
-dXgtcmVuZXNhcy1zb2MgPGxpbnV4LXJlbmVzYXMtc29jQHZnZXIua2VybmVsLm9yZz47IHdzYSty
-ZW5lc2FzIDx3c2ErcmVuZXNhc0BzYW5nLWVuZ2luZWVyaW5nLmNvbT47IHVsZiBoYW5zc29uIDx1
-bGYuaGFuc3NvbkBsaW5hcm8ub3JnPg0KU3ViamVjdDogUmU6IFBvb3Igd3JpdGUgcGVyZm9ybWFu
-Y2UgdG8gYm9vdCBhcmVhIHVzaW5nIHJjYXItZ2VuMy1zZGhpDQoNCi0tLS0tIFVyc3Byw7xuZ2xp
-Y2hlIE1haWwgLS0tLS0NCj4gVm9uOiAiQ2hyaXN0aWFuIExvZWhsZSIgPENMb2VobGVAaHlwZXJz
-dG9uZS5jb20+IFlvdXIgZU1NQyBsaWtlbHkgDQo+IHRyZWF0cyB0aGUgYm9vdCBwYXJ0aXRpb25z
-IGRpZmZlcmVudGx5IHRoYW4gdGhlIHVzZXIgYXJlYSwgZS5nLg0KPiBpbiByZWdhcmRzIHRvIGNh
-Y2hlLg0KPiBJcyB0aGlzIHJlcHJvZHVjaWJsZSBmb3IgbW9yZSA0ayB3cml0ZXM/IFdoYXQgYWJv
-dXQgbGFyZ2VyIHdyaXRlcz8NCg0KWWVzLiBTbyBmYXIgZXZlcnkgd3JpdGUgc2l6ZSBJIHRyaWVk
-IGlzIHNsb3cuDQpTb21ldGltZXMgKDEgb3V0IG9mIDUwKSBzbWFsbCB3cml0ZXMgYXJlIGZhc3Qs
-IHRoYXQncyBtb3N0IGxpa2VseSBhIGNhY2hpbmcgZWZmZWN0IG9mIGVNTUMgaW50ZXJuYWxzLg0K
-DQo+IFRoZSBlTU1DIG1pZ2h0IG5vdCBldmVuIGhhdmUgdGhlIG1hcHBpbmcgYXZhaWxhYmxlIGFm
-dGVyIGJvb3QgYW5kIA0KPiBmaXJzdCBoYXMgdG8gaW50ZXJuYWxseSBzd2l0Y2ggdG8gaXQsIGlu
-IGNvbnRyYXN0IHRvIGF0IHUtYm9vdCBzdGFnZT8NCg0KV291bGRuJ3QgdGhhdCBleHBsYWluIG9u
-bHkgdGhlIGZpcnN0IHNsb3cgd3JpdGU/DQpJIHNlZSBwb29yIHdyaXRlIHNwZWVkIGFsc28gb24g
-cmVwZWF0ZWQgcnVucy4NCiANCj4gQW55d2F5IHRoaXMgaXMgcHJvYmFibHkgbW9yZSBhIHF1ZXN0
-aW9uIHRvIHlvdXIgZU1NQyBtYW51ZmFjdHVyZXIgYW5kIA0KPiBub3RoaW5nIHRoZSBob3N0IGlz
-IHRvIGJlIGJsYW1lZCwgYXMgeW91IG1lbnRpb25lZCB5b3Vyc2VsZiwgdGhlIHRpbWUgDQo+IGlz
-IHNwZW50IGF0IENNRDI1Lg0KDQpUaGUgZU1NQyBtYW51ZmFjdHVyZXIgc2F5cyB0aGVyZSBpcyBu
-b3RoaW5nIHNwZWNpYWwgYWJvdXQgdGhlIGJvb3QgYXJlYSBhbmQgd3JpdGUgc3BlZWQgc2hvdWxk
-IGJlIGVxdWFsbHkgZmFzdC4NCg0KQ2FuIGl0IGJlIHRoYXQgcmNhci1nZW4zLXNkaGkgY2hhbmdl
-cyBzb21lIHRpbWluZ3MgYWZ0ZXIgc3dpdGNoaW5nPw0KRWl0aGVyIGluIHNvZnR3YXJlIG9yIG9u
-IGhhcmR3YXJlLg0KDQpUaGFua3MsDQovL3JpY2hhcmQNCg0KSHlwZXJzdG9uZSBHbWJIIHwgUmVp
-Y2hlbmF1c3RyLiAzOWEgIHwgNzg0NjcgS29uc3RhbnoKTWFuYWdpbmcgRGlyZWN0b3I6IERyLiBK
-YW4gUGV0ZXIgQmVybnMuCkNvbW1lcmNpYWwgcmVnaXN0ZXIgb2YgbG9jYWwgY291cnRzOiBGcmVp
-YnVyZyBIUkIzODE3ODI=
+Hi Linus,
 
+Here's a PR with a couple of MMC and MEMSTICK fixes intended for v6.3-rc8.
+Details about the highlights are as usual found in the signed tag.
+
+Please pull this in!
+
+Kind regards
+Ulf Hansson
+
+
+The following changes since commit e8d018dd0257f744ca50a729e3d042cf2ec9da65:
+
+  Linux 6.3-rc3 (2023-03-19 13:27:55 -0700)
+
+are available in the Git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc3
+
+for you to fetch changes up to 4b6d621c9d859ff89e68cebf6178652592676013:
+
+  memstick: fix memory leak if card device is never registered (2023-04-05 11:43:51 +0200)
+
+----------------------------------------------------------------
+MMC host:
+ - sdhci_am654: Fix support for UHS-I SDR12 and SDR25 speed modes
+
+MEMSTICK:
+ - Fix memory leak if card device never gets registered
+
+----------------------------------------------------------------
+Bhavya Kapoor (1):
+      mmc: sdhci_am654: Set HIGH_SPEED_ENA for SDR12 and SDR25
+
+Greg Kroah-Hartman (1):
+      memstick: fix memory leak if card device is never registered
+
+ drivers/memstick/core/memstick.c | 5 ++++-
+ drivers/mmc/host/sdhci_am654.c   | 2 --
+ 2 files changed, 4 insertions(+), 3 deletions(-)
