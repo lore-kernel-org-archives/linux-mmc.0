@@ -2,74 +2,67 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A230C77B76
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 12:07:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BC03C77B75
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 18:10:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231311AbjDRMHg convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Apr 2023 08:07:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42778 "EHLO
+        id S231410AbjDRSKM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Apr 2023 14:10:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44364 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231307AbjDRMHZ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 08:07:25 -0400
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37052CC1C;
-        Tue, 18 Apr 2023 04:58:58 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id E09956431C35;
-        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id B6Yt8ebaHouj; Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 804F76431C58;
-        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id XEMwWWoYDvMQ; Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 60C8463CC168;
-        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-Date:   Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
-From:   Richard Weinberger <richard@nod.at>
-To:     Christian Loehle <CLoehle@hyperstone.com>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
-        wsa+renesas <wsa+renesas@sang-engineering.com>,
-        ulf hansson <ulf.hansson@linaro.org>
-Message-ID: <1186364892.150923.1681819136247.JavaMail.zimbra@nod.at>
-In-Reply-To: <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
-References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at> <OS0PR01MB5922B8343E772A762315F764869D9@OS0PR01MB5922.jpnprd01.prod.outlook.com> <971572458.117024.1681798584774.JavaMail.zimbra@nod.at> <02ceda502af34bf0af53d52598a0b71f@hyperstone.com> <522326845.127346.1681805484949.JavaMail.zimbra@nod.at> <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
-Subject: Re: Poor write performance to boot area using rcar-gen3-sdhi
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-X-Originating-IP: [195.201.40.130]
-X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
-Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
-Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOAvOJ8Zmg==
+        with ESMTP id S232529AbjDRSKM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 14:10:12 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5573B468C;
+        Tue, 18 Apr 2023 11:10:07 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id D98066377A;
+        Tue, 18 Apr 2023 18:10:06 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPS id 497E7C4339B;
+        Tue, 18 Apr 2023 18:10:06 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1681841406;
+        bh=qECPssaKOdA1Rfaall6QNi0ar+2KTfHq/RDwO0gDHIY=;
+        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
+        b=n7y0dSVuCKwJ6AdEjcW/1qaan1ZYJWiT4vdYzRXyuW2umCWHM9D83Cj6LJdCIqH18
+         2jmbnkvjkdM7Rz2mEObVLnn78mjZR7rg83TigPVVMYiAV5hX9q1p3GWfgMjwSnYuTa
+         IhJ8X3Uu5rwdfRrU2ZO+ho+rcRkgvBI0srud3CDZTgjPxX6CcZThZnY100OuAhmzSC
+         gL+ROK+HVIMQ3VVvkAU0+seHCYUaMmd+aEVKl85KUoYmjsp1DtcCtAUg9XXthorLan
+         somXltBbQVgsy5mlQMN/xEq/cn6Vh04WSjSiKcEisMq+hiiKq8cScuhUEg85OyO3j5
+         BIdIiB4LqZIoA==
+Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
+        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id 1F215C4167B;
+        Tue, 18 Apr 2023 18:10:06 +0000 (UTC)
+Subject: Re: [GIT PULL] MMC and MEMSTICK fixes for v6.3-rc8
+From:   pr-tracker-bot@kernel.org
+In-Reply-To: <20230418084329.12066-1-ulf.hansson@linaro.org>
+References: <20230418084329.12066-1-ulf.hansson@linaro.org>
+X-PR-Tracked-List-Id: <linux-kernel.vger.kernel.org>
+X-PR-Tracked-Message-Id: <20230418084329.12066-1-ulf.hansson@linaro.org>
+X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc3
+X-PR-Tracked-Commit-Id: 4b6d621c9d859ff89e68cebf6178652592676013
+X-PR-Merge-Tree: torvalds/linux.git
+X-PR-Merge-Refname: refs/heads/master
+X-PR-Merge-Commit-Id: af67688dca57999fd848f051eeea1d375ba546b2
+Message-Id: <168184140604.21228.5799260324654292808.pr-tracker-bot@kernel.org>
+Date:   Tue, 18 Apr 2023 18:10:06 +0000
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
------ Ursprüngliche Mail -----
-> Von: "Christian Loehle" <CLoehle@hyperstone.com>
->> Can it be that rcar-gen3-sdhi changes some timings after switching?
->> Either in software or on hardware.
-> 
-> Neither should be aware of the notion of a boot or user area partition.
-> Anything below mmc/core isn't, if we exclude the boot operation which is read
-> only, so not applicable to your problem.
-> So also a
-> while true; do dd if=/dev/zero of=/dev/mmcblkXboot0 bs=128K status=progress;
-> done
-> gives you like ~50KB/s consistently?
+The pull request you sent on Tue, 18 Apr 2023 10:43:29 +0200:
 
-Exactly. 
+> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc3
 
-On the other hand, the very same command on /dev/mmcblk1p13 gives me always between
-17 and 20 MB/s.
+has been merged into torvalds/linux.git:
+https://git.kernel.org/torvalds/c/af67688dca57999fd848f051eeea1d375ba546b2
 
-Thanks,
-//richard
+Thank you!
+
+-- 
+Deet-doot-dot, I am a bot.
+https://korg.docs.kernel.org/prtracker.html
