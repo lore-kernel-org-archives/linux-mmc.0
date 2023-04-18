@@ -2,103 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96A5DC77B75
-	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 08:43:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6A230C77B76
+	for <linux-mmc@archiver.kernel.org>; Tue, 18 Apr 2023 12:07:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231481AbjDRIng (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 18 Apr 2023 04:43:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52798 "EHLO
+        id S231311AbjDRMHg convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 18 Apr 2023 08:07:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42778 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231491AbjDRInf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 04:43:35 -0400
-Received: from mail-wm1-x329.google.com (mail-wm1-x329.google.com [IPv6:2a00:1450:4864:20::329])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F7185255
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2023 01:43:33 -0700 (PDT)
-Received: by mail-wm1-x329.google.com with SMTP id q5so15109820wmo.4
-        for <linux-mmc@vger.kernel.org>; Tue, 18 Apr 2023 01:43:33 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1681807412; x=1684399412;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=RztuTVR7hw4raAhfT6J3TalLtZ06SVk+SHPhqyQqZnI=;
-        b=TZJlsIiH1GcjTN0yoC70fqOWoGMlBXmcZwfl4fL841T36S2Vs6hFhyK/Hc7TdlM9ts
-         Lc2V93Lm/mCmDN/cTI4XC1w6OybBDbBQLDk7vCsRCFW3cZL+KdS/p3VehZu85wf7NrYc
-         9M3kI3wh+nRSInh2d6a8e1TnXHaqqXsjBYATrX8uqV67M7aigikku5EEjulT6oZElLSJ
-         dhMqpm8ixvwXCe1M1VG9Imkat/3whSIun1si4RcSCBcwzMwNbRUBzdmLbOUox4lAZ6d1
-         o6Ijr4ujgogLUTnxZGxd0wa03GrD0Jh7CPWw9vqW2G8H7EqKrLQSgZMHXZP/x8eyuCQq
-         defw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1681807412; x=1684399412;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=RztuTVR7hw4raAhfT6J3TalLtZ06SVk+SHPhqyQqZnI=;
-        b=RbVrf+4JY4Y6e1/K6Nzfr34JJ020PDTMB4SYPxozepiMoFxyVigPJX6w7a26QnuvKd
-         wsAkTFoGxlnrHdYCUYKm3vHEvoSTT7WCjKFYHPUkcc6Nus6Qs/VahFua9kxLNmtpopwz
-         P0BrVoU5pGSVVeGp1cSWN78Iq7dB5KzlYbVDbIypVLZwgb+IhTGrgccYhhkhL/59GKYf
-         UUC0XxG/edI/Mc7NIoowqQSvbpc18fDFTqooPuW3AorCy6r5pICzmYeyQ/4aNb8ISRkb
-         7AJ9PTS49hP4gIpvpEqa+t8AP1MCcq2Q8/a0fthBv1UJQQQjXoJONUhHA5nTtHoXoEeo
-         qsZw==
-X-Gm-Message-State: AAQBX9fK0OjiLiwFZ6M99FrRl3MiTashyOelwwc3NhY4xVkmkLxC71rZ
-        C+PpOCHNdj65wAbPLV2L0xLA3z1iWXwLa0iDHkoEoQ==
-X-Google-Smtp-Source: AKy350Z3/trX/Rd8oXcBkZKmyT2S3M2AuEUAKSjvLdnk/WnkHVS3TD6y8ujzGaXiwosvQkHCJAmg5Q==
-X-Received: by 2002:a1c:790e:0:b0:3f0:7f70:d67d with SMTP id l14-20020a1c790e000000b003f07f70d67dmr13423703wme.12.1681807411927;
-        Tue, 18 Apr 2023 01:43:31 -0700 (PDT)
-Received: from uffe-XPS13.. ([193.205.131.2])
-        by smtp.gmail.com with ESMTPSA id v21-20020a05600c215500b003f17a00c214sm1147654wml.16.2023.04.18.01.43.30
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 18 Apr 2023 01:43:31 -0700 (PDT)
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-To:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>
-Subject: [GIT PULL] MMC and MEMSTICK fixes for v6.3-rc8
-Date:   Tue, 18 Apr 2023 10:43:29 +0200
-Message-Id: <20230418084329.12066-1-ulf.hansson@linaro.org>
-X-Mailer: git-send-email 2.34.1
+        with ESMTP id S231307AbjDRMHZ (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 18 Apr 2023 08:07:25 -0400
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37052CC1C;
+        Tue, 18 Apr 2023 04:58:58 -0700 (PDT)
+Received: from localhost (localhost [127.0.0.1])
+        by lithops.sigma-star.at (Postfix) with ESMTP id E09956431C35;
+        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
+        with ESMTP id B6Yt8ebaHouj; Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+Received: from localhost (localhost [127.0.0.1])
+        by lithops.sigma-star.at (Postfix) with ESMTP id 804F76431C58;
+        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+Received: from lithops.sigma-star.at ([127.0.0.1])
+        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
+        with ESMTP id XEMwWWoYDvMQ; Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
+        by lithops.sigma-star.at (Postfix) with ESMTP id 60C8463CC168;
+        Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+Date:   Tue, 18 Apr 2023 13:58:56 +0200 (CEST)
+From:   Richard Weinberger <richard@nod.at>
+To:     Christian Loehle <CLoehle@hyperstone.com>
+Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
+        wsa+renesas <wsa+renesas@sang-engineering.com>,
+        ulf hansson <ulf.hansson@linaro.org>
+Message-ID: <1186364892.150923.1681819136247.JavaMail.zimbra@nod.at>
+In-Reply-To: <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
+References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at> <OS0PR01MB5922B8343E772A762315F764869D9@OS0PR01MB5922.jpnprd01.prod.outlook.com> <971572458.117024.1681798584774.JavaMail.zimbra@nod.at> <02ceda502af34bf0af53d52598a0b71f@hyperstone.com> <522326845.127346.1681805484949.JavaMail.zimbra@nod.at> <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
+Subject: Re: Poor write performance to boot area using rcar-gen3-sdhi
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8BIT
+X-Originating-IP: [195.201.40.130]
+X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
+Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
+Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOAvOJ8Zmg==
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
+----- Ursprüngliche Mail -----
+> Von: "Christian Loehle" <CLoehle@hyperstone.com>
+>> Can it be that rcar-gen3-sdhi changes some timings after switching?
+>> Either in software or on hardware.
+> 
+> Neither should be aware of the notion of a boot or user area partition.
+> Anything below mmc/core isn't, if we exclude the boot operation which is read
+> only, so not applicable to your problem.
+> So also a
+> while true; do dd if=/dev/zero of=/dev/mmcblkXboot0 bs=128K status=progress;
+> done
+> gives you like ~50KB/s consistently?
 
-Here's a PR with a couple of MMC and MEMSTICK fixes intended for v6.3-rc8.
-Details about the highlights are as usual found in the signed tag.
+Exactly. 
 
-Please pull this in!
+On the other hand, the very same command on /dev/mmcblk1p13 gives me always between
+17 and 20 MB/s.
 
-Kind regards
-Ulf Hansson
-
-
-The following changes since commit e8d018dd0257f744ca50a729e3d042cf2ec9da65:
-
-  Linux 6.3-rc3 (2023-03-19 13:27:55 -0700)
-
-are available in the Git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.3-rc3
-
-for you to fetch changes up to 4b6d621c9d859ff89e68cebf6178652592676013:
-
-  memstick: fix memory leak if card device is never registered (2023-04-05 11:43:51 +0200)
-
-----------------------------------------------------------------
-MMC host:
- - sdhci_am654: Fix support for UHS-I SDR12 and SDR25 speed modes
-
-MEMSTICK:
- - Fix memory leak if card device never gets registered
-
-----------------------------------------------------------------
-Bhavya Kapoor (1):
-      mmc: sdhci_am654: Set HIGH_SPEED_ENA for SDR12 and SDR25
-
-Greg Kroah-Hartman (1):
-      memstick: fix memory leak if card device is never registered
-
- drivers/memstick/core/memstick.c | 5 ++++-
- drivers/mmc/host/sdhci_am654.c   | 2 --
- 2 files changed, 4 insertions(+), 3 deletions(-)
+Thanks,
+//richard
