@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A79EFC77B61
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 12:14:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D8CEDC7EE20
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 12:14:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231797AbjDXMOI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Apr 2023 08:14:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58374 "EHLO
+        id S231782AbjDXMOL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Apr 2023 08:14:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231785AbjDXMOH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 08:14:07 -0400
-Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B93F446BF
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:04 -0700 (PDT)
-Received: by mail-lf1-x136.google.com with SMTP id 2adb3069b0e04-4edc63c82d1so4439546e87.0
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:04 -0700 (PDT)
+        with ESMTP id S231795AbjDXMOK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 08:14:10 -0400
+Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CBB510F7
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:09 -0700 (PDT)
+Received: by mail-lj1-x22b.google.com with SMTP id 38308e7fff4ca-2a8ba5f1d6bso41115341fa.2
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=8devices.com; s=8devices; t=1682338443; x=1684930443;
+        d=8devices.com; s=8devices; t=1682338447; x=1684930447;
         h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
          :cc:subject:date:message-id:reply-to;
-        bh=X71BZlzH90rNXlr22ACggW+3L7xadD0OTppCpzd2JQ8=;
-        b=LuKlJ1GsF4/Tm3XEdWCx1kDw43SLE8w98Y2BhJfs1wCcIo4QWQrp7Y3KkUQj0YaCA2
-         AHRWo0FI+4mJ00cZXqs6cvsAv8XNDKUXTYHrVMMDGVQRfflQuaxWNZRSscKwv33LhL96
-         lUcxDwbOrGwBoDrYVrM9Rj1DkDrTWB+kBi/a81GPt3KXNKmvlCLQpQXuYdMEmILmOW6U
-         epZNSIexP0zGjHM2iS2S7TIdE2fBgthFGczavpU5IOJW2pPKNKAPpP34Blsm8Z1CoJiT
-         dkRbKV5L4Dr04/Y/zsaP4v0+4uieOYV3c18hEaT15Emakr0Ark5ktNhw0bveSy7xaFQ9
-         3zQA==
+        bh=cSg+Sr4Izv6SuaT8Bc0GsU3O/zi4zb4SC3eF1z+OThY=;
+        b=DnyhHHIEm7sOXD8G9rdXFjq+JJGE0aolitslG+kUVa5NShlUFkU/gQb74Na0IBX0T/
+         +vyjyltyk4uLFEPmQBVEQBbc8n4Jp53+hpkP9c+5197U2HDW1wHvl623oLJDOUDWAEIs
+         O8ZNxzwVmB9VWKisLIAKF9+Y0LEFm5DR0QtzlIRIDm5lDOlib8OJd/DwA1lhzhtOrLcc
+         FJbkhhR1dUHCQ0fxNQpJEUjBmOe0AIPIRDTf/v7t0tT4Pw9Omhsgb7013aSs8ki/d230
+         Ng3PdOOadNeA8QUZojqMiMqnFDwwrQh3p7YOwNrlMR7Xd4GJ8+T7My7GIH/JDGkoifqM
+         4P9Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682338443; x=1684930443;
+        d=1e100.net; s=20221208; t=1682338447; x=1684930447;
         h=references:in-reply-to:message-id:date:subject:cc:to:from
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=X71BZlzH90rNXlr22ACggW+3L7xadD0OTppCpzd2JQ8=;
-        b=UPdXQZgZcRfEBR5OVBl74VYRLXQ08ZsgO1fbXbHbEWjiO7D/abiMjbSvtGMVXbXUzj
-         hjipmvPSDQqR3odWmyj5tft3NaBRD2bL9fOB238wMoNomYMCo51U/rqUfqEoKfeAlPeS
-         wexdMFdORmuZ/pCA0eZHQA/JDv/qaiaPhdys+ONMr7nZk/UEdx50y0TwEVtbYLjDymK7
-         /Gei9fXg//HijQzuih1/r4SqDGSNo8nKRk13me8Vu+tAmyGpvsvY5hpa1b6NZO/D46+h
-         RZR3fahZp4ySBknQLGCFFtr1VU2VdNT2VG9C9KvNzBHUfD4IpbNBPK85AD5ZkpFVeqmw
-         pyWA==
-X-Gm-Message-State: AAQBX9fErj1vL0GEI10iD7MtDWtuAujWoB4OdRja6v4iKd6JiADQna84
-        WtYu/8h0hZytbHx5wMD7/luAQw==
-X-Google-Smtp-Source: AKy350ZIKHke2Bo4P+2J1KIAdimioXIF5VL+jfMeT4TVxnIYW3hRTri+yaxbnDftQxPFIzCtbx/e7g==
-X-Received: by 2002:ac2:5443:0:b0:4ea:f8f0:545f with SMTP id d3-20020ac25443000000b004eaf8f0545fmr3385023lfn.52.1682338443057;
-        Mon, 24 Apr 2023 05:14:03 -0700 (PDT)
+        bh=cSg+Sr4Izv6SuaT8Bc0GsU3O/zi4zb4SC3eF1z+OThY=;
+        b=RjdlVqy8UBLNhnlDT7L0WQrBl0iX63v97gkJYJ+K+pWSqWGAsOMd4Sh65UuggFFy+u
+         vN68Vxpgaxy3dsEPpt/hyBzGjyugo4OOjiHwb2SUtJiy6whrvB7S2IziwOlb+CR/oWm1
+         a3EkCYEn6ovUZgEPhX+NPgyU+rG4+Lymf/Lsx8uafwZ8OU7BudB2wxZBbSS2uvKGY3Wx
+         ILrcv3JINQOJcwPxg/S/ywMEu8penKrGTn4aPzSeKQDjf+q5X6ZfmKLii3Bf49n+P1hb
+         wF3oqJ25pTZopoPJUXMFRFZFxGefeLOobDIr6tlzGjhylFDsLUsHka+7u2Kg30U7jb1g
+         KhcA==
+X-Gm-Message-State: AAQBX9eh//keA5/BKPRpMUTYBN5r/VA5f+0o4+j0OUy2en8ZkoQBAmjN
+        bgs5aVDdaME+BBs97UVIMda3Gw==
+X-Google-Smtp-Source: AKy350aqa3hL84PCEAOSmwTnpLJXRUDhws2ye0MyTd3kcxq8Q2zZlZqvrmn88+r0T9u3JCEatIzbiA==
+X-Received: by 2002:a2e:a3d6:0:b0:2aa:44ae:45a with SMTP id w22-20020a2ea3d6000000b002aa44ae045amr2102991lje.13.1682338447334;
+        Mon, 24 Apr 2023 05:14:07 -0700 (PDT)
 Received: from mantas-MS-7994.8devices.com ([84.15.37.222])
-        by smtp.gmail.com with ESMTPSA id x23-20020a2e7c17000000b002a5f554d263sm1732382ljc.46.2023.04.24.05.14.02
+        by smtp.gmail.com with ESMTPSA id x23-20020a2e7c17000000b002a5f554d263sm1732382ljc.46.2023.04.24.05.14.06
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 24 Apr 2023 05:14:02 -0700 (PDT)
+        Mon, 24 Apr 2023 05:14:07 -0700 (PDT)
 From:   Mantas Pucka <mantas@8devices.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -64,9 +64,9 @@ Cc:     Abhishek Sahu <absahu@codeaurora.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
         linux-clk@vger.kernel.org, Mantas Pucka <mantas@8devices.com>
-Subject: [PATCH 2/3] dt-bindings: mmc: sdhci-msm: add IPQ6018 compatible
-Date:   Mon, 24 Apr 2023 15:13:31 +0300
-Message-Id: <1682338412-15420-2-git-send-email-mantas@8devices.com>
+Subject: [PATCH 3/3] arm64: dts: qcom: ipq6018: add SDHCI node
+Date:   Mon, 24 Apr 2023 15:13:32 +0300
+Message-Id: <1682338412-15420-3-git-send-email-mantas@8devices.com>
 X-Mailer: git-send-email 2.7.4
 In-Reply-To: <1682338412-15420-1-git-send-email-mantas@8devices.com>
 References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
@@ -74,26 +74,47 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-IPQ6018 has a sdhci-msm compatible MMC controller. Add the appropriate
-compatible to the documentation.
+IPQ6018 has one SD/eMMC controller, add node for it.
 
 Signed-off-by: Mantas Pucka <mantas@8devices.com>
 ---
- Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
- 1 file changed, 1 insertion(+)
+ arch/arm64/boot/dts/qcom/ipq6018.dtsi | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
-diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-index 4f2d9e8127dd..5ad846b724f3 100644
---- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-+++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-@@ -36,6 +36,7 @@ properties:
-           - enum:
-               - qcom,ipq5018-sdhci
-               - qcom,ipq5332-sdhci
-+              - qcom,ipq6018-sdhci
-               - qcom,ipq9574-sdhci
-               - qcom,qcm2290-sdhci
-               - qcom,qcs404-sdhci
+diff --git a/arch/arm64/boot/dts/qcom/ipq6018.dtsi b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
+index 9ff4e9d45065..b129b23d68b1 100644
+--- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
++++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
+@@ -414,6 +414,29 @@
+ 			};
+ 		};
+ 
++		sdhc_1: mmc@7804000 {
++			compatible = "qcom,ipq6018-sdhci", "qcom,sdhci-msm-v5";
++			reg = <0x0 0x07804000 0x0 0x1000>,
++			      <0x0 0x07805000 0x0 0x1000>,
++			      <0x0 0x07808000 0x0 0x2000>;
++			reg-names = "hc", "cqhci", "ice";
++
++			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
++				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
++			interrupt-names = "hc_irq", "pwr_irq";
++
++			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
++				 <&gcc GCC_SDCC1_APPS_CLK>,
++				 <&xo>,
++				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
++			clock-names = "iface", "core", "xo", "ice";
++
++			resets = <&gcc GCC_SDCC1_BCR>;
++			supports-cqe;
++			bus-width = <8>;
++			status = "disabled";
++		};
++
+ 		blsp_dma: dma-controller@7884000 {
+ 			compatible = "qcom,bam-v1.7.0";
+ 			reg = <0x0 0x07884000 0x0 0x2b000>;
 -- 
 2.7.4
 
