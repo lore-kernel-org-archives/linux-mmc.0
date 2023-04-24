@@ -2,119 +2,112 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8CEDC7EE20
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 12:14:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05DCBC77B7F
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 13:21:07 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231782AbjDXMOL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Apr 2023 08:14:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58376 "EHLO
+        id S232012AbjDXNVF (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Apr 2023 09:21:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44972 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231795AbjDXMOK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 08:14:10 -0400
-Received: from mail-lj1-x22b.google.com (mail-lj1-x22b.google.com [IPv6:2a00:1450:4864:20::22b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3CBB510F7
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:09 -0700 (PDT)
-Received: by mail-lj1-x22b.google.com with SMTP id 38308e7fff4ca-2a8ba5f1d6bso41115341fa.2
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:08 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=8devices.com; s=8devices; t=1682338447; x=1684930447;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=cSg+Sr4Izv6SuaT8Bc0GsU3O/zi4zb4SC3eF1z+OThY=;
-        b=DnyhHHIEm7sOXD8G9rdXFjq+JJGE0aolitslG+kUVa5NShlUFkU/gQb74Na0IBX0T/
-         +vyjyltyk4uLFEPmQBVEQBbc8n4Jp53+hpkP9c+5197U2HDW1wHvl623oLJDOUDWAEIs
-         O8ZNxzwVmB9VWKisLIAKF9+Y0LEFm5DR0QtzlIRIDm5lDOlib8OJd/DwA1lhzhtOrLcc
-         FJbkhhR1dUHCQ0fxNQpJEUjBmOe0AIPIRDTf/v7t0tT4Pw9Omhsgb7013aSs8ki/d230
-         Ng3PdOOadNeA8QUZojqMiMqnFDwwrQh3p7YOwNrlMR7Xd4GJ8+T7My7GIH/JDGkoifqM
-         4P9Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682338447; x=1684930447;
-        h=references:in-reply-to:message-id:date:subject:cc:to:from
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=cSg+Sr4Izv6SuaT8Bc0GsU3O/zi4zb4SC3eF1z+OThY=;
-        b=RjdlVqy8UBLNhnlDT7L0WQrBl0iX63v97gkJYJ+K+pWSqWGAsOMd4Sh65UuggFFy+u
-         vN68Vxpgaxy3dsEPpt/hyBzGjyugo4OOjiHwb2SUtJiy6whrvB7S2IziwOlb+CR/oWm1
-         a3EkCYEn6ovUZgEPhX+NPgyU+rG4+Lymf/Lsx8uafwZ8OU7BudB2wxZBbSS2uvKGY3Wx
-         ILrcv3JINQOJcwPxg/S/ywMEu8penKrGTn4aPzSeKQDjf+q5X6ZfmKLii3Bf49n+P1hb
-         wF3oqJ25pTZopoPJUXMFRFZFxGefeLOobDIr6tlzGjhylFDsLUsHka+7u2Kg30U7jb1g
-         KhcA==
-X-Gm-Message-State: AAQBX9eh//keA5/BKPRpMUTYBN5r/VA5f+0o4+j0OUy2en8ZkoQBAmjN
-        bgs5aVDdaME+BBs97UVIMda3Gw==
-X-Google-Smtp-Source: AKy350aqa3hL84PCEAOSmwTnpLJXRUDhws2ye0MyTd3kcxq8Q2zZlZqvrmn88+r0T9u3JCEatIzbiA==
-X-Received: by 2002:a2e:a3d6:0:b0:2aa:44ae:45a with SMTP id w22-20020a2ea3d6000000b002aa44ae045amr2102991lje.13.1682338447334;
-        Mon, 24 Apr 2023 05:14:07 -0700 (PDT)
-Received: from mantas-MS-7994.8devices.com ([84.15.37.222])
-        by smtp.gmail.com with ESMTPSA id x23-20020a2e7c17000000b002a5f554d263sm1732382ljc.46.2023.04.24.05.14.06
-        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 24 Apr 2023 05:14:07 -0700 (PDT)
-From:   Mantas Pucka <mantas@8devices.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        Stephen Boyd <sboyd@kernel.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     Abhishek Sahu <absahu@codeaurora.org>,
-        Anusha Canchi Ramachandra Rao <anusharao@codeaurora.org>,
-        Sricharan R <sricharan@codeaurora.org>,
-        Sivaprakash Murugesan <sivaprak@codeaurora.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        linux-clk@vger.kernel.org, Mantas Pucka <mantas@8devices.com>
-Subject: [PATCH 3/3] arm64: dts: qcom: ipq6018: add SDHCI node
-Date:   Mon, 24 Apr 2023 15:13:32 +0300
-Message-Id: <1682338412-15420-3-git-send-email-mantas@8devices.com>
-X-Mailer: git-send-email 2.7.4
-In-Reply-To: <1682338412-15420-1-git-send-email-mantas@8devices.com>
-References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
+        with ESMTP id S231983AbjDXNVA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 09:21:00 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58CA749FF;
+        Mon, 24 Apr 2023 06:20:40 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id DAF8F6221D;
+        Mon, 24 Apr 2023 13:20:39 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C0B4AC433D2;
+        Mon, 24 Apr 2023 13:20:38 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
+        s=korg; t=1682342439;
+        bh=ja7S2LB0OvCCmqEw1nb05oddZS4SuYkfKzmpFaLMeMI=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=C2URBpIlfu2G7b8yoJhK0wA4f0b+iTmOsFiwif3UHIarEq6W/dRIrknMZEj2kdBkD
+         Wr8qKQuOQBDIx4JY5ZZ0SB2ad90SubU9LMLfGwnm9mN6BAkPCJbd4Wpu5ivzxqFbNE
+         HYU9zhLtDsOtncCjZkatBkfgOgfq4R2G+V7S9b9c=
+From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To:     stable@vger.kernel.org
+Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
+        patches@lists.linux.dev, Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        "Rafael J. Wysocki" <rafael@kernel.org>,
+        Hans de Goede <hdegoede@redhat.com>,
+        Kay Sievers <kay.sievers@vrfy.org>, linux-mmc@vger.kernel.org,
+        stable <stable@kernel.org>,
+        Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
+Subject: [PATCH 5.15 39/73] memstick: fix memory leak if card device is never registered
+Date:   Mon, 24 Apr 2023 15:16:53 +0200
+Message-Id: <20230424131130.411709640@linuxfoundation.org>
+X-Mailer: git-send-email 2.40.0
+In-Reply-To: <20230424131129.040707961@linuxfoundation.org>
+References: <20230424131129.040707961@linuxfoundation.org>
+User-Agent: quilt/0.67
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-IPQ6018 has one SD/eMMC controller, add node for it.
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
-Signed-off-by: Mantas Pucka <mantas@8devices.com>
+commit 4b6d621c9d859ff89e68cebf6178652592676013 upstream.
+
+When calling dev_set_name() memory is allocated for the name for the
+struct device.  Once that structure device is registered, or attempted
+to be registerd, with the driver core, the driver core will handle
+cleaning up that memory when the device is removed from the system.
+
+Unfortunatly for the memstick code, there is an error path that causes
+the struct device to never be registered, and so the memory allocated in
+dev_set_name will be leaked.  Fix that leak by manually freeing it right
+before the memory for the device is freed.
+
+Cc: Maxim Levitsky <maximlevitsky@gmail.com>
+Cc: Alex Dubov <oakad@yahoo.com>
+Cc: Ulf Hansson <ulf.hansson@linaro.org>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>
+Cc: Hans de Goede <hdegoede@redhat.com>
+Cc: Kay Sievers <kay.sievers@vrfy.org>
+Cc: linux-mmc@vger.kernel.org
+Fixes: 0252c3b4f018 ("memstick: struct device - replace bus_id with dev_name(), dev_set_name()")
+Cc: stable <stable@kernel.org>
+Co-developed-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Co-developed-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
+Signed-off-by: Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
+Link: https://lore.kernel.org/r/20230401200327.16800-1-gregkh@linuxfoundation.org
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 ---
- arch/arm64/boot/dts/qcom/ipq6018.dtsi | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+ drivers/memstick/core/memstick.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/boot/dts/qcom/ipq6018.dtsi b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-index 9ff4e9d45065..b129b23d68b1 100644
---- a/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-+++ b/arch/arm64/boot/dts/qcom/ipq6018.dtsi
-@@ -414,6 +414,29 @@
- 			};
- 		};
+--- a/drivers/memstick/core/memstick.c
++++ b/drivers/memstick/core/memstick.c
+@@ -410,6 +410,7 @@ static struct memstick_dev *memstick_all
+ 	return card;
+ err_out:
+ 	host->card = old_card;
++	kfree_const(card->dev.kobj.name);
+ 	kfree(card);
+ 	return NULL;
+ }
+@@ -468,8 +469,10 @@ static void memstick_check(struct work_s
+ 				put_device(&card->dev);
+ 				host->card = NULL;
+ 			}
+-		} else
++		} else {
++			kfree_const(card->dev.kobj.name);
+ 			kfree(card);
++		}
+ 	}
  
-+		sdhc_1: mmc@7804000 {
-+			compatible = "qcom,ipq6018-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0x0 0x07804000 0x0 0x1000>,
-+			      <0x0 0x07805000 0x0 0x1000>,
-+			      <0x0 0x07808000 0x0 0x2000>;
-+			reg-names = "hc", "cqhci", "ice";
-+
-+			interrupts = <GIC_SPI 123 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 138 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC1_AHB_CLK>,
-+				 <&gcc GCC_SDCC1_APPS_CLK>,
-+				 <&xo>,
-+				 <&gcc GCC_SDCC1_ICE_CORE_CLK>;
-+			clock-names = "iface", "core", "xo", "ice";
-+
-+			resets = <&gcc GCC_SDCC1_BCR>;
-+			supports-cqe;
-+			bus-width = <8>;
-+			status = "disabled";
-+		};
-+
- 		blsp_dma: dma-controller@7884000 {
- 			compatible = "qcom,bam-v1.7.0";
- 			reg = <0x0 0x07884000 0x0 0x2b000>;
--- 
-2.7.4
+ out_power_off:
+
 
