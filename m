@@ -2,32 +2,32 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3176BC77B78
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 13:23:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B11D9C77B61
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 13:26:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232126AbjDXNXo (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Apr 2023 09:23:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47398 "EHLO
+        id S232220AbjDXN0n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Apr 2023 09:26:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53274 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232129AbjDXNX0 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 09:23:26 -0400
+        with ESMTP id S232215AbjDXN0n (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 09:26:43 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 858B155B8;
-        Mon, 24 Apr 2023 06:23:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 14C625FF6;
+        Mon, 24 Apr 2023 06:26:42 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 1671C6226E;
-        Mon, 24 Apr 2023 13:23:16 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 02AD8C433D2;
-        Mon, 24 Apr 2023 13:23:15 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A2FF5622CE;
+        Mon, 24 Apr 2023 13:26:41 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 8BE3DC433D2;
+        Mon, 24 Apr 2023 13:26:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=linuxfoundation.org;
-        s=korg; t=1682342595;
-        bh=EqN+rzAmug3lRlQTcmQ3dsyGdyHFe3qtIiSP2R5edUM=;
+        s=korg; t=1682342801;
+        bh=ja7S2LB0OvCCmqEw1nb05oddZS4SuYkfKzmpFaLMeMI=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=U1kHnt4rUq6e7HGFoQM7+EckYAI7TUpol5unSKHGnbXz7tI8JEAz8rJ03JLviy4Eg
-         Jg1/ZTLfvvnKXOB/q5LWLYW117eXcIXFATDMfTRu5GkzEnk8MYmAM9LT/Bqk6U8/Bn
-         CKsBhnC1jv5mqUw3CwKaNOoOCMm7Q+pr/Ahq44xg=
+        b=f7vopkuhuP2LPBCUCLwmQWfaa5ll3CoooBgJpBsI91RoRnvedvQSmWtwjtjD4Tm77
+         MIfHnEctQSXWG/dT3tp3oStXFMbCWydB4858ZcATMyXMaW+9QQx2r8rJEmPE28MvjR
+         Uhi/FLSOezQORozYyAlpvkZWNhNM/IbcqGbpcAbo=
 From:   Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 To:     stable@vger.kernel.org
 Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
@@ -39,12 +39,12 @@ Cc:     Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Kay Sievers <kay.sievers@vrfy.org>, linux-mmc@vger.kernel.org,
         stable <stable@kernel.org>,
         Mirsad Goran Todorovac <mirsad.todorovac@alu.unizg.hr>
-Subject: [PATCH 5.4 24/39] memstick: fix memory leak if card device is never registered
-Date:   Mon, 24 Apr 2023 15:17:27 +0200
-Message-Id: <20230424131123.971772094@linuxfoundation.org>
+Subject: [PATCH 6.1 63/98] memstick: fix memory leak if card device is never registered
+Date:   Mon, 24 Apr 2023 15:17:26 +0200
+Message-Id: <20230424131136.297640211@linuxfoundation.org>
 X-Mailer: git-send-email 2.40.0
-In-Reply-To: <20230424131123.040556994@linuxfoundation.org>
-References: <20230424131123.040556994@linuxfoundation.org>
+In-Reply-To: <20230424131133.829259077@linuxfoundation.org>
+References: <20230424131133.829259077@linuxfoundation.org>
 User-Agent: quilt/0.67
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -89,7 +89,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 
 --- a/drivers/memstick/core/memstick.c
 +++ b/drivers/memstick/core/memstick.c
-@@ -412,6 +412,7 @@ static struct memstick_dev *memstick_all
+@@ -410,6 +410,7 @@ static struct memstick_dev *memstick_all
  	return card;
  err_out:
  	host->card = old_card;
@@ -97,7 +97,7 @@ Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
  	kfree(card);
  	return NULL;
  }
-@@ -470,8 +471,10 @@ static void memstick_check(struct work_s
+@@ -468,8 +469,10 @@ static void memstick_check(struct work_s
  				put_device(&card->dev);
  				host->card = NULL;
  			}
