@@ -2,51 +2,51 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 02DCFC77B7F
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 12:14:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A79EFC77B61
+	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 12:14:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231792AbjDXMOB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Apr 2023 08:14:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58170 "EHLO
+        id S231797AbjDXMOI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Apr 2023 08:14:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58374 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231784AbjDXMOA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 08:14:00 -0400
-Received: from mail-lj1-x233.google.com (mail-lj1-x233.google.com [IPv6:2a00:1450:4864:20::233])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D50761985
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:13:57 -0700 (PDT)
-Received: by mail-lj1-x233.google.com with SMTP id 38308e7fff4ca-2a8bb726210so40916231fa.1
-        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:13:57 -0700 (PDT)
+        with ESMTP id S231785AbjDXMOH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 08:14:07 -0400
+Received: from mail-lf1-x136.google.com (mail-lf1-x136.google.com [IPv6:2a00:1450:4864:20::136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B93F446BF
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:04 -0700 (PDT)
+Received: by mail-lf1-x136.google.com with SMTP id 2adb3069b0e04-4edc63c82d1so4439546e87.0
+        for <linux-mmc@vger.kernel.org>; Mon, 24 Apr 2023 05:14:04 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=8devices.com; s=8devices; t=1682338436; x=1684930436;
-        h=message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=IQtohBky33MWUdeKOY9B0Jdzwvi92+shTR5B/pXImXU=;
-        b=hTVanmBkAGPFQtISg9J3XJ+Tlq36EE9E8yJoC4vcotb1vZS68CHyPzfh7MQQ3KWvoY
-         iK5E+RDuVKGBgDraT25L+lP6aRY9vY5TBAPhsDMMC5T/sC1GHjJkFsiQKZ13439Hj1c/
-         xYsZUD4g6tqsXZc8K7+UatulGP6AAL6GuPw+/HQb5rXNLRGw/XflGuZhZoIrrV2cGmYl
-         t2vD/lCz/2DJDSxV0mIGHUpLhappR9I0zILDu+GTu1RHnryQCdbJgr5+nYEqHYU1iJm2
-         wfD1i+mIaW7SXYr5NwaXh0u/cMNmHi59PymlPUg3al20pUR48scVRwUajHgsO9E1V2M5
-         Vjvg==
+        d=8devices.com; s=8devices; t=1682338443; x=1684930443;
+        h=references:in-reply-to:message-id:date:subject:cc:to:from:from:to
+         :cc:subject:date:message-id:reply-to;
+        bh=X71BZlzH90rNXlr22ACggW+3L7xadD0OTppCpzd2JQ8=;
+        b=LuKlJ1GsF4/Tm3XEdWCx1kDw43SLE8w98Y2BhJfs1wCcIo4QWQrp7Y3KkUQj0YaCA2
+         AHRWo0FI+4mJ00cZXqs6cvsAv8XNDKUXTYHrVMMDGVQRfflQuaxWNZRSscKwv33LhL96
+         lUcxDwbOrGwBoDrYVrM9Rj1DkDrTWB+kBi/a81GPt3KXNKmvlCLQpQXuYdMEmILmOW6U
+         epZNSIexP0zGjHM2iS2S7TIdE2fBgthFGczavpU5IOJW2pPKNKAPpP34Blsm8Z1CoJiT
+         dkRbKV5L4Dr04/Y/zsaP4v0+4uieOYV3c18hEaT15Emakr0Ark5ktNhw0bveSy7xaFQ9
+         3zQA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682338436; x=1684930436;
-        h=message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=IQtohBky33MWUdeKOY9B0Jdzwvi92+shTR5B/pXImXU=;
-        b=KQSNabRYFqd3wZNj2DaZfeHsjP6VgVY5eUde/c1i7kSR1ApLF0nan1OHcqDKjGZeOP
-         bTCQto9gH1ukoofoPvk02d+5/gUwSCmRTfkYwtsgQEEa34wDa4ZiWO6Lo4iZQkk21536
-         LjruLZcg3JXZ2OXkmYUVLtxH8It6lzx+U0d0TNppUKJtxN5Xld+8NJsBxccB45JIgk8/
-         skfPDaAtPoYbJvrRWhBmzJiee1usSplXCeOJgQh/QS3esGXi1CLnbY6ILqLN1bohS2XM
-         OlNLmGCpeXcKTYsaDbpJ8xZhsmlO0y6d3RQOz+VBv5MOToRozdXlLHe/QL9E0G4k6y9J
-         /D0w==
-X-Gm-Message-State: AAQBX9dQISa5zXvP66mkHS8esMxU789D1iSkc3eVoh4zLr/8H/WKrnBI
-        H+qvsTahPGjfUa4jnru5XeWM5Q==
-X-Google-Smtp-Source: AKy350akQ8EciT+C0V8pKYtfqBhPEaEv5XPr4eaKZrvmhqi0oiXoFstBdBYa998MK2ui6b6T+gGuMQ==
-X-Received: by 2002:a2e:2e0e:0:b0:2a8:d13d:88fb with SMTP id u14-20020a2e2e0e000000b002a8d13d88fbmr2642480lju.11.1682338436147;
-        Mon, 24 Apr 2023 05:13:56 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1682338443; x=1684930443;
+        h=references:in-reply-to:message-id:date:subject:cc:to:from
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=X71BZlzH90rNXlr22ACggW+3L7xadD0OTppCpzd2JQ8=;
+        b=UPdXQZgZcRfEBR5OVBl74VYRLXQ08ZsgO1fbXbHbEWjiO7D/abiMjbSvtGMVXbXUzj
+         hjipmvPSDQqR3odWmyj5tft3NaBRD2bL9fOB238wMoNomYMCo51U/rqUfqEoKfeAlPeS
+         wexdMFdORmuZ/pCA0eZHQA/JDv/qaiaPhdys+ONMr7nZk/UEdx50y0TwEVtbYLjDymK7
+         /Gei9fXg//HijQzuih1/r4SqDGSNo8nKRk13me8Vu+tAmyGpvsvY5hpa1b6NZO/D46+h
+         RZR3fahZp4ySBknQLGCFFtr1VU2VdNT2VG9C9KvNzBHUfD4IpbNBPK85AD5ZkpFVeqmw
+         pyWA==
+X-Gm-Message-State: AAQBX9fErj1vL0GEI10iD7MtDWtuAujWoB4OdRja6v4iKd6JiADQna84
+        WtYu/8h0hZytbHx5wMD7/luAQw==
+X-Google-Smtp-Source: AKy350ZIKHke2Bo4P+2J1KIAdimioXIF5VL+jfMeT4TVxnIYW3hRTri+yaxbnDftQxPFIzCtbx/e7g==
+X-Received: by 2002:ac2:5443:0:b0:4ea:f8f0:545f with SMTP id d3-20020ac25443000000b004eaf8f0545fmr3385023lfn.52.1682338443057;
+        Mon, 24 Apr 2023 05:14:03 -0700 (PDT)
 Received: from mantas-MS-7994.8devices.com ([84.15.37.222])
-        by smtp.gmail.com with ESMTPSA id x23-20020a2e7c17000000b002a5f554d263sm1732382ljc.46.2023.04.24.05.13.55
+        by smtp.gmail.com with ESMTPSA id x23-20020a2e7c17000000b002a5f554d263sm1732382ljc.46.2023.04.24.05.14.02
         (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 24 Apr 2023 05:13:55 -0700 (PDT)
+        Mon, 24 Apr 2023 05:14:02 -0700 (PDT)
 From:   Mantas Pucka <mantas@8devices.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -64,36 +64,36 @@ Cc:     Abhishek Sahu <absahu@codeaurora.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
         linux-clk@vger.kernel.org, Mantas Pucka <mantas@8devices.com>
-Subject: [PATCH 1/3] clk: qcom: gcc-ipq6018: Use floor ops for sdcc clocks
-Date:   Mon, 24 Apr 2023 15:13:30 +0300
-Message-Id: <1682338412-15420-1-git-send-email-mantas@8devices.com>
+Subject: [PATCH 2/3] dt-bindings: mmc: sdhci-msm: add IPQ6018 compatible
+Date:   Mon, 24 Apr 2023 15:13:31 +0300
+Message-Id: <1682338412-15420-2-git-send-email-mantas@8devices.com>
 X-Mailer: git-send-email 2.7.4
+In-Reply-To: <1682338412-15420-1-git-send-email-mantas@8devices.com>
+References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-SDCC clocks must be rounded down to avoid overclocking the controller.
-
-Fixes: d9db07f088af ("clk: qcom: Add ipq6018 Global Clock Controller support")
+IPQ6018 has a sdhci-msm compatible MMC controller. Add the appropriate
+compatible to the documentation.
 
 Signed-off-by: Mantas Pucka <mantas@8devices.com>
 ---
- drivers/clk/qcom/gcc-ipq6018.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/clk/qcom/gcc-ipq6018.c b/drivers/clk/qcom/gcc-ipq6018.c
-index 3f9c2f61a5d9..5c5d1b04ea7a 100644
---- a/drivers/clk/qcom/gcc-ipq6018.c
-+++ b/drivers/clk/qcom/gcc-ipq6018.c
-@@ -1654,7 +1654,7 @@ static struct clk_rcg2 sdcc1_apps_clk_src = {
- 		.name = "sdcc1_apps_clk_src",
- 		.parent_data = gcc_xo_gpll0_gpll2_gpll0_out_main_div2,
- 		.num_parents = 4,
--		.ops = &clk_rcg2_ops,
-+		.ops = &clk_rcg2_floor_ops,
- 	},
- };
- 
+diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+index 4f2d9e8127dd..5ad846b724f3 100644
+--- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
++++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
+@@ -36,6 +36,7 @@ properties:
+           - enum:
+               - qcom,ipq5018-sdhci
+               - qcom,ipq5332-sdhci
++              - qcom,ipq6018-sdhci
+               - qcom,ipq9574-sdhci
+               - qcom,qcm2290-sdhci
+               - qcom,qcs404-sdhci
 -- 
 2.7.4
 
