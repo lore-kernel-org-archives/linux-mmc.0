@@ -2,106 +2,72 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C21A4C77B61
-	for <linux-mmc@archiver.kernel.org>; Mon, 24 Apr 2023 16:22:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0AEFBC7618E
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 01:30:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230434AbjDXQWK convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 24 Apr 2023 12:22:10 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42966 "EHLO
+        id S233153AbjDYBau (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 24 Apr 2023 21:30:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230355AbjDXQWK (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 12:22:10 -0400
-Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C62F7682;
-        Mon, 24 Apr 2023 09:22:08 -0700 (PDT)
-Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 87AF7222951;
-        Mon, 24 Apr 2023 18:22:06 +0200 (CEST)
-Received: from mail6.swissbit.com (localhost [127.0.0.1])
-        by DDEI (Postfix) with ESMTP id 7355C2225AC;
-        Mon, 24 Apr 2023 18:22:06 +0200 (CEST)
-X-TM-AS-ERS: 10.181.10.102-127.5.254.253
-X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
-        Q==
-X-DDEI-TLS-USAGE: Used
-Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
-        by mail6.swissbit.com (Postfix) with ESMTPS;
-        Mon, 24 Apr 2023 18:22:06 +0200 (CEST)
-From:   Christian Loehle <CLoehle@hyperstone.com>
-To:     ulf hansson <ulf.hansson@linaro.org>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-CC:     Avri Altman <avri.altman@wdc.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
-        Christoph Hellwig <hch@infradead.org>
-Subject: [PATCH] mmc: queue: ensure error propagation for non-blk
-Thread-Topic: [PATCH] mmc: queue: ensure error propagation for non-blk
-Thread-Index: Adl2xsdYtFja5ytvTvyF17/lcuh7dQ==
-Date:   Mon, 24 Apr 2023 16:22:05 +0000
-Message-ID: <1d8ce997934c4395bb5dd235525bf7a2@hyperstone.com>
-Accept-Language: en-US, de-DE
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-Content-Type: text/plain;
-        charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+        with ESMTP id S232384AbjDYBat (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 24 Apr 2023 21:30:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD98F5277;
+        Mon, 24 Apr 2023 18:30:48 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 76A5962566;
+        Tue, 25 Apr 2023 01:30:48 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id CB23EC433D2;
+        Tue, 25 Apr 2023 01:30:47 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1682386247;
+        bh=w58zvq6SYmbfbSoeAu0aO4ZUeU56HHK96WcPNF+3gro=;
+        h=In-Reply-To:References:Subject:From:Cc:To:Date:From;
+        b=FZ4jWRo0I48oIjYMIDpVNxS+isPkUxGPpRE0BoHwvI8RC8+x/q6rWxZr9Lb+5RSX1
+         bCLPAGs4XpXCMLCMiZ7cKyR9dV63sC8489tnja12BOK5WiEBnTOdwt6OK5VlfEbxm1
+         1uc8Fa1aU00tzs7mOWAsIW0s87n7lmj29lrqDQa4CEEawyVCH4m4/QZ+Uqi5yfEQyn
+         N+tBBPzzPcKfw6LSh+tRPLEeAbFK2YByfQ2kjyTmBWth4T+lC6pMfHvx8B0xdL9IDq
+         9gk03uGbeYgWUB/L2aPibxBsW0/RhoP+PmQ/IwFwYijGyOf5TNzHQ7qI1wh+Emmb/I
+         2wRrMXRSFAPPQ==
+Message-ID: <d7c96f7f38e88f0c9d8aa182dc71743a.sboyd@kernel.org>
+Content-Type: text/plain; charset="utf-8"
 MIME-Version: 1.0
-X-TMASE-Version: DDEI-5.1-9.0.1002-27586.000
-X-TMASE-Result: 10--1.863700-10.000000
-X-TMASE-MatchedRID: GegCmeQgyY5A+YmEQEhsujz6L+U/pejx1QQ6Jx/ffla4n9bqPhfH20mo
-        bOLhIyMmZX2hfwUP7YpvtPtMpliQxdAy2LXTI7g3EXjPIvKd74BMkOX0UoduuSxMw0FMkBlZnvu
-        lBJY7sZvi8zVgXoAltu339GNyKR8aC24oEZ6SpSkj80Za3RRg8KiVP4VLL8ChQv8bOiTBfk31he
-        RrqmEGW4uV9Sql14RLrP2oEAEBXfg=
-X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
-X-TMASE-INERTIA: 0-0;;;;
-X-TMASE-XGENCLOUD: 188d4078-3282-414d-923f-36a7f32a4dfa-0-0-200-0
+Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <1682338412-15420-1-git-send-email-mantas@8devices.com>
+References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
+Subject: Re: [PATCH 1/3] clk: qcom: gcc-ipq6018: Use floor ops for sdcc clocks
+From:   Stephen Boyd <sboyd@kernel.org>
+Cc:     Abhishek Sahu <absahu@codeaurora.org>,
+        Anusha Canchi Ramachandra Rao <anusharao@codeaurora.org>,
+        Sricharan R <sricharan@codeaurora.org>,
+        Sivaprakash Murugesan <sivaprak@codeaurora.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
+        linux-clk@vger.kernel.org, Mantas Pucka <mantas@8devices.com>
+To:     Andy Gross <agross@kernel.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Mantas Pucka <mantas@8devices.com>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Rob Herring <robh+dt@kernel.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Mon, 24 Apr 2023 18:30:45 -0700
+User-Agent: alot/0.10
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Requests to the mmc layer usually come through a block device.
-The exceptions are the RPMB chardev and debugfs, which issue their
-own blk_mq requests through blk_execute_rq and do not query
-the BLK_STS error but the mmc-internal drv_op_result.
-This patch ensures that drv_op_result is set as error whenever
-a BLK_STS error is set.
+Quoting Mantas Pucka (2023-04-24 05:13:30)
+> SDCC clocks must be rounded down to avoid overclocking the controller.
+>=20
+> Fixes: d9db07f088af ("clk: qcom: Add ipq6018 Global Clock Controller supp=
+ort")
+>=20
 
-The behavior leads to a bug where the request never sees the error,
-e.g. by directly erroring out at mmc_blk_mq_issue_rq if
-mmc_blk_part_switch fails. The ioctl caller of the rpmb chardev then
-can never see the error and thus may assume that their call executed
-successfully when it did not.
+There should be no extra newline here.
 
-While always checking the blk_execute_rq return value would be
-advised, let's eliminate the error completely by always setting
-drv_op_result in case of a BLK_STS error.
-
-Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
----
- drivers/mmc/core/queue.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/drivers/mmc/core/queue.c b/drivers/mmc/core/queue.c
-index b396e3900717..8240962e28f3 100644
---- a/drivers/mmc/core/queue.c
-+++ b/drivers/mmc/core/queue.c
-@@ -334,6 +334,9 @@ static blk_status_t mmc_mq_queue_rq(struct blk_mq_hw_ctx *hctx,
- 		WRITE_ONCE(mq->busy, false);
- 	}
- 
-+	/* Ensure request error propagates to non-blk callers, too. */
-+	if (!req_to_mmc_queue_req(req)->drv_op_result && ret)
-+		req_to_mmc_queue_req(req)->drv_op_result = ret;
- 	return ret;
- }
- 
--- 
-2.37.3
-
-
-Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-Managing Director: Dr. Jan Peter Berns.
-Commercial register of local courts: Freiburg HRB381782
-
+> Signed-off-by: Mantas Pucka <mantas@8devices.com>
