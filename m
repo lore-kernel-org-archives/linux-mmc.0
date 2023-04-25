@@ -2,83 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C74AC6FD18
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 18:55:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08996C6FD18
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 19:09:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235127AbjDYSzg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Apr 2023 14:55:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53358 "EHLO
+        id S234299AbjDYTJD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Apr 2023 15:09:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35386 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235080AbjDYSzT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 14:55:19 -0400
-Received: from mail-oo1-f42.google.com (mail-oo1-f42.google.com [209.85.161.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5E6A016F33;
-        Tue, 25 Apr 2023 11:55:02 -0700 (PDT)
-Received: by mail-oo1-f42.google.com with SMTP id 006d021491bc7-546615d6f47so3886312eaf.0;
-        Tue, 25 Apr 2023 11:55:02 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682448865; x=1685040865;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=6y7CuaWGG4f2cR6D1dHG8n9H6ZV3XhXaEAnqjecAYoY=;
-        b=VabjucDEMNi32e/OQTZrI+Z2ewa7s630759yis6U5PlwJJJZ/t3ouPIJnBsdkzQh07
-         uhKLGkMuLP5i40dhMwc8Dk6KyYzHv/YcFNrxI1TrwwxGZR92sx4t3Hg2OJVgHpskMceq
-         9dF3Ii7oMwY/xLQed5Op+JUUkXH3BgkKePFgIlm1iQIoGqXJ1Sh6KIIyONYICnCFWrIe
-         SC0q+JJjEQ21sL4XM64V+f6XWWE8LjBaXl0pErDtYb7XMA4RfBuy1AoP9mTtakoBSCpp
-         IQeRu/f6RG2s1llHDePfrJbEo4pIhVmr5Bzeib2ty9C5opZYkH5hQOVezFD5LHGjvGHc
-         Z+yA==
-X-Gm-Message-State: AAQBX9cBdyUiAXSoiqHtgnoZF7p79iA5RU3GDXTsa+HE/YIxeUIZFVM7
-        jlYd+xR4GAfIiSeYuXqReQ==
-X-Google-Smtp-Source: AKy350ZgWB2rPL7vzrqJCgeshN8YMDvzpzXhtbPchKiP/hbFnojfOGoW8uB4QIS0QWg5LDfTnrxnmg==
-X-Received: by 2002:aca:2315:0:b0:38c:11b3:a397 with SMTP id e21-20020aca2315000000b0038c11b3a397mr9259981oie.14.1682448865005;
-        Tue, 25 Apr 2023 11:54:25 -0700 (PDT)
-Received: from robh_at_kernel.org (66-90-144-107.dyn.grandenetworks.net. [66.90.144.107])
-        by smtp.gmail.com with ESMTPSA id y10-20020a544d8a000000b0037b6f5d6309sm3774393oix.2.2023.04.25.11.54.23
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 25 Apr 2023 11:54:24 -0700 (PDT)
-Received: (nullmailer pid 2079162 invoked by uid 1000);
-        Tue, 25 Apr 2023 18:54:22 -0000
-Date:   Tue, 25 Apr 2023 13:54:22 -0500
-From:   Rob Herring <robh@kernel.org>
-To:     Mantas Pucka <mantas@8devices.com>
-Cc:     Sivaprakash Murugesan <sivaprak@codeaurora.org>,
-        Stephen Boyd <sboyd@kernel.org>, devicetree@vger.kernel.org,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Andy Gross <agross@kernel.org>,
-        Sricharan R <sricharan@codeaurora.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Abhishek Sahu <absahu@codeaurora.org>,
-        linux-mmc@vger.kernel.org, Rob Herring <robh+dt@kernel.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Anusha Canchi Ramachandra Rao <anusharao@codeaurora.org>,
-        Michael Turquette <mturquette@baylibre.com>,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org,
-        Bjorn Andersson <andersson@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        linux-clk@vger.kernel.org
-Subject: Re: [PATCH 2/3] dt-bindings: mmc: sdhci-msm: add IPQ6018 compatible
-Message-ID: <168244885070.2078831.17064973248574990697.robh@kernel.org>
-References: <1682338412-15420-1-git-send-email-mantas@8devices.com>
- <1682338412-15420-2-git-send-email-mantas@8devices.com>
+        with ESMTP id S231356AbjDYTJD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 15:09:03 -0400
+Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1375C4EC5;
+        Tue, 25 Apr 2023 12:09:02 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1682449742; x=1713985742;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=IkzakWAuXj34HRebZUnZn8CkJY1BxzjaueXh9MF6O2U=;
+  b=jErurDDwYsl7/cSN9UUbREl/QR8iqm9Kg0MyP0kHvdDJRJtr6acEJ/pH
+   fmZpNPVPi21tFQRQoE5UVXrwuNHW5xtK7FIIJVsB/eCqUR7r4sH83zaw7
+   CkVtJyYq8kwHS9V8kZuKiEZgrp0cYgq0VQWOVgeJ3dVaLOaG8PvhSMzmQ
+   lRxSkBn1/Q0snjAfAIgahRvBYVasMoJphu9xjcgXX1VGUFwrL/Su5P1Zr
+   Rc0j5fxN+B2IeHR1Qr774PlmUyiOnrHnLvus36LJJbAzMaFZnnc/R57xC
+   BFC3jr4tkJdMOn8nlaEaskaMjf1mnyg0rxGSgk37km5CK5RSINouVb6iL
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10691"; a="346896026"
+X-IronPort-AV: E=Sophos;i="5.99,226,1677571200"; 
+   d="scan'208";a="346896026"
+Received: from fmsmga002.fm.intel.com ([10.253.24.26])
+  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2023 12:04:28 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10691"; a="805185256"
+X-IronPort-AV: E=Sophos;i="5.99,226,1677571200"; 
+   d="scan'208";a="805185256"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.58.232])
+  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2023 12:04:26 -0700
+Message-ID: <80f4ba1d-ab8f-ce22-267e-0d49c8b90a1e@intel.com>
+Date:   Tue, 25 Apr 2023 22:04:21 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1682338412-15420-2-git-send-email-mantas@8devices.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.10.0
+Subject: Re: [PATCH] mmc: sdhci-cadence: Fix an error handling path in
+ sdhci_cdns_probe()
+To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Brad Larson <blarson@amd.com>
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+References: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On Mon, 24 Apr 2023 15:13:31 +0300, Mantas Pucka wrote:
-> IPQ6018 has a sdhci-msm compatible MMC controller. Add the appropriate
-> compatible to the documentation.
+On 25/04/23 16:41, Christophe JAILLET wrote:
+> If devm_reset_control_get_optional_exclusive() fails, some resources still
+> need to be released. So branch to the error handling path instead of
+> returning directly.
 > 
-> Signed-off-by: Mantas Pucka <mantas@8devices.com>
+> Fixes: aad53d4ee756 ("mmc: sdhci-cadence: Support mmc hardware reset")
+> Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+
 > ---
->  Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
->  1 file changed, 1 insertion(+)
+>  drivers/mmc/host/sdhci-cadence.c | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
 > 
-
-Acked-by: Rob Herring <robh@kernel.org>
+> diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+> index b24aa27da50c..d2f625054689 100644
+> --- a/drivers/mmc/host/sdhci-cadence.c
+> +++ b/drivers/mmc/host/sdhci-cadence.c
+> @@ -540,9 +540,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+>  
+>  	if (host->mmc->caps & MMC_CAP_HW_RESET) {
+>  		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
+> -		if (IS_ERR(priv->rst_hw))
+> -			return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
+> -					     "reset controller error\n");
+> +		if (IS_ERR(priv->rst_hw)) {
+> +			ret = dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
+> +					    "reset controller error\n");
+> +			goto free;
+> +		}
+>  		if (priv->rst_hw)
+>  			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
+>  	}
 
