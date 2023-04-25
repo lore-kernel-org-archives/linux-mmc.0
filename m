@@ -2,80 +2,82 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0271C6FD18
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 12:41:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A591AC77B61
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 13:41:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233516AbjDYMln (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Apr 2023 08:41:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53816 "EHLO
+        id S233452AbjDYNlb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Apr 2023 09:41:31 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39444 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233327AbjDYMlm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 08:41:42 -0400
-Received: from arashi.greysector.net (arashi.greysector.net [51.68.141.79])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86B1F5FDD
-        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2023 05:41:39 -0700 (PDT)
-Received: from sakura.greysector.net (unknown [212.180.189.198])
-        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
-         key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
-        (No client certificate requested)
-        by arashi.greysector.net (Postfix) with ESMTPSA id 717EF3E97;
-        Tue, 25 Apr 2023 14:41:37 +0200 (CEST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 arashi.greysector.net 717EF3E97
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=greysector.net;
-        s=default; t=1682426497;
-        bh=3I0A/D/r1iQy2k6hzFloP/tFXYv4LchkNk4jiF+un78=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=DC4GmOFwVF4tqA6+VS5jAZ6/J18O1xMx/BkcDoQKKDmOdw7oNTLj+aOvfG//4xcN6
-         LY0CYltcwW9hO/KxcYbUJitkLV4+EehL2M+SSrfZQrKf77xfNuSheniM0NtN87TM4D
-         QDb43e+LD2aqaDvqfH3Y37o2mxxUohLmO3fabKkg=
-Date:   Tue, 25 Apr 2023 14:41:36 +0200
-From:   Dominik 'Rathann' Mierzejewski <dominik@greysector.net>
-To:     Christian =?iso-8859-1?Q?L=F6hle?= <CLoehle@hyperstone.com>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>
-Subject: Re: mmc-utils: ioctl connection timed out with SD cards
-Message-ID: <ZEfKgCK5TzjhKJOh@sakura.greysector.net>
-References: <ZCsSHxDv+158emk5@sakura.greysector.net>
- <597389cd8b21409aa7015d08aa4a804d@hyperstone.com>
- <ZCv3OBCE1hB32CDI@sakura.greysector.net>
- <0dc45f7ba447445e946d8f71e63f3f3e@hyperstone.com>
+        with ESMTP id S229710AbjDYNlb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 09:41:31 -0400
+Received: from smtp.smtpout.orange.fr (smtp-17.smtpout.orange.fr [80.12.242.17])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 580D6FF
+        for <linux-mmc@vger.kernel.org>; Tue, 25 Apr 2023 06:41:30 -0700 (PDT)
+Received: from pop-os.home ([86.243.2.178])
+        by smtp.orange.fr with ESMTPA
+        id rIv9pfJUpNW2mrIv9pVpBo; Tue, 25 Apr 2023 15:41:28 +0200
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=wanadoo.fr;
+        s=t20230301; t=1682430088;
+        bh=rXrzLrO3vGjGiwYLBA1OdhCadEqnB23+J7DLeIwxJkU=;
+        h=From:To:Cc:Subject:Date;
+        b=rPqKGAgtC97DC+4ysW4ox64hT/KD/gHMevtma70trjnkFd1NqMVAogdG1plzShqgQ
+         pSYo24zJia4wYKcxJa9ZCBA8SYnbuYKiy5bptaRtpOSxK1ZP9zKPL7FWToeSsIWR/9
+         vlnV41mZ4tT9AhtPvUrHUkEUodsqqQ7tsraISuACtctXk8Fa2d3fNe4Muj3HIc3Kq7
+         1Ujzxaq9ARCLrKsqNVIeom7pXugqo9pVvCKyWsgvPqo669tqd4aiwUVZem3myMnTr4
+         DGV3ccRiGUPsy+7hkw2CkgbjjYK0C0fl78AMX2nvJNfujPCK7veZ2XV/2Nu8TkbsYe
+         dis3Zm/LCSWkw==
+X-ME-Helo: pop-os.home
+X-ME-Auth: Y2hyaXN0b3BoZS5qYWlsbGV0QHdhbmFkb28uZnI=
+X-ME-Date: Tue, 25 Apr 2023 15:41:28 +0200
+X-ME-IP: 86.243.2.178
+From:   Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Philipp Zabel <p.zabel@pengutronix.de>,
+        Brad Larson <blarson@amd.com>
+Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
+        Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
+        linux-mmc@vger.kernel.org
+Subject: [PATCH] mmc: sdhci-cadence: Fix an error handling path in sdhci_cdns_probe()
+Date:   Tue, 25 Apr 2023 15:41:26 +0200
+Message-Id: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
+X-Mailer: git-send-email 2.34.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <0dc45f7ba447445e946d8f71e63f3f3e@hyperstone.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Christian.
+If devm_reset_control_get_optional_exclusive() fails, some resources still
+need to be released. So branch to the error handling path instead of
+returning directly.
 
-On Tuesday, 04 April 2023 at 19:32, Christian Löhle wrote:
-> The problem is the harcoded 0x0001 as RCA, sdcards have whatever the
-> vendor thinks is right.
-> I can send a fix for that tomorrow, but generally mmc-utils isn't much
-> useful for SD cards, most mmc-utils features are eMMC-only features
-> anyway.
-> Softreset works as expected, for byte-addressed we can use grouped wp.
-> I was thinking about adding TMP_WRITE_PROTECT for both, maybe unlock, too.
-> And also adapt erase.
-> Apart from that do you have any features that you can think of?
+Fixes: aad53d4ee756 ("mmc: sdhci-cadence: Support mmc hardware reset")
+Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
+---
+ drivers/mmc/host/sdhci-cadence.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
-Not really. I'm not familiar with SD card internals or MMC internals,
-for that matter. I think you've already done more than I expected after
-my rather naive e-mail, so thank you very much. If mmc-utils can be
-fixed to give meaningful error messages when someone tries to use them
-on SD cards after being confused by the device naming of the kernel like
-myself then I'm happy with that.
-
-> SD just doesn't have that many features that are used outside of
-> normal IO operation.
-
-I see. Thanks for the insight.
-
-Best regards,
-Dominik
+diff --git a/drivers/mmc/host/sdhci-cadence.c b/drivers/mmc/host/sdhci-cadence.c
+index b24aa27da50c..d2f625054689 100644
+--- a/drivers/mmc/host/sdhci-cadence.c
++++ b/drivers/mmc/host/sdhci-cadence.c
+@@ -540,9 +540,11 @@ static int sdhci_cdns_probe(struct platform_device *pdev)
+ 
+ 	if (host->mmc->caps & MMC_CAP_HW_RESET) {
+ 		priv->rst_hw = devm_reset_control_get_optional_exclusive(dev, NULL);
+-		if (IS_ERR(priv->rst_hw))
+-			return dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
+-					     "reset controller error\n");
++		if (IS_ERR(priv->rst_hw)) {
++			ret = dev_err_probe(mmc_dev(host->mmc), PTR_ERR(priv->rst_hw),
++					    "reset controller error\n");
++			goto free;
++		}
+ 		if (priv->rst_hw)
+ 			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
+ 	}
 -- 
-Fedora   https://getfedora.org  |  RPM Fusion  http://rpmfusion.org
-There should be a science of discontent. People need hard times and
-oppression to develop psychic muscles.
-        -- from "Collected Sayings of Muad'Dib" by the Princess Irulan
+2.34.1
+
