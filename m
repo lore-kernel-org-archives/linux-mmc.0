@@ -2,63 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08996C6FD18
-	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 19:09:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6ED10C6FD18
+	for <linux-mmc@archiver.kernel.org>; Tue, 25 Apr 2023 20:06:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234299AbjDYTJD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 25 Apr 2023 15:09:03 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35386 "EHLO
+        id S235087AbjDYUGP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 25 Apr 2023 16:06:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231356AbjDYTJD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 15:09:03 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1375C4EC5;
-        Tue, 25 Apr 2023 12:09:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1682449742; x=1713985742;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=IkzakWAuXj34HRebZUnZn8CkJY1BxzjaueXh9MF6O2U=;
-  b=jErurDDwYsl7/cSN9UUbREl/QR8iqm9Kg0MyP0kHvdDJRJtr6acEJ/pH
-   fmZpNPVPi21tFQRQoE5UVXrwuNHW5xtK7FIIJVsB/eCqUR7r4sH83zaw7
-   CkVtJyYq8kwHS9V8kZuKiEZgrp0cYgq0VQWOVgeJ3dVaLOaG8PvhSMzmQ
-   lRxSkBn1/Q0snjAfAIgahRvBYVasMoJphu9xjcgXX1VGUFwrL/Su5P1Zr
-   Rc0j5fxN+B2IeHR1Qr774PlmUyiOnrHnLvus36LJJbAzMaFZnnc/R57xC
-   BFC3jr4tkJdMOn8nlaEaskaMjf1mnyg0rxGSgk37km5CK5RSINouVb6iL
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10691"; a="346896026"
-X-IronPort-AV: E=Sophos;i="5.99,226,1677571200"; 
-   d="scan'208";a="346896026"
-Received: from fmsmga002.fm.intel.com ([10.253.24.26])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2023 12:04:28 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10691"; a="805185256"
-X-IronPort-AV: E=Sophos;i="5.99,226,1677571200"; 
-   d="scan'208";a="805185256"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.252.58.232])
-  by fmsmga002-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 25 Apr 2023 12:04:26 -0700
-Message-ID: <80f4ba1d-ab8f-ce22-267e-0d49c8b90a1e@intel.com>
-Date:   Tue, 25 Apr 2023 22:04:21 +0300
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.10.0
-Subject: Re: [PATCH] mmc: sdhci-cadence: Fix an error handling path in
- sdhci_cdns_probe()
-To:     Christophe JAILLET <christophe.jaillet@wanadoo.fr>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Philipp Zabel <p.zabel@pengutronix.de>,
-        Brad Larson <blarson@amd.com>
-Cc:     linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org,
-        linux-mmc@vger.kernel.org
-References: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+        with ESMTP id S231735AbjDYUGO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 25 Apr 2023 16:06:14 -0400
+Received: from NAM10-MW2-obe.outbound.protection.outlook.com (mail-mw2nam10on2050.outbound.protection.outlook.com [40.107.94.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F101419A2;
+        Tue, 25 Apr 2023 13:06:12 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=jIULEJG4q0g/HOIGObOj9wjJYoGb18EWM5eVBoDKQUnXwIRg7pPbZw1c8thvi9SetDq74JriEryh1rEL8HY15mPUXii4v/+vuLjuXbJ4r7Z+nEhj+95wySYt15MRQJem9uJ2eU4+vJdwyof2YvDiJ8qRMsids85kPSxjX0z6jeau7Y833f6+eOaCoFHrSjZi/BmLL8APyzd/ql9vq8phrlJ/dzf5HOr/CbQ+caXUVWMFnnB7D4FRBL3sMF7VfAjcQI6v5VDstKeN3UlTq9tNbdP3P6MZouhdc8xGnxixJxvfdiWofyMa2A18fcLbunL1X207+fqFI5LJcpqoHTQofw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=fKv1aYo1TDnKjSOQOUMkd3D2kQ9kh1cE9EoXYpX2v5k=;
+ b=JGCNzwLdnfk3+3k/4ho8U0CICibdfSPdTa/n1bFx8n9R1hfmpPEz0x6WSjgNaaUjEebMZZcQphxu/6yWnusKLP6UGeEZFtlNgKsQ+UxECUehyjvY9+UmvYuhzLkELxbg1KzHHRMHuc9z1OG1aKpfoozyLEN75D6jRs30XdjqpdrFGfhZcHefvT/eAEZyR6ds6dJsGW1fJo9efpHPeLF/au97pGm8Aa0RiJyzoQZsc6xgFBbSccNO+nh4yS25c+W3D5J3Fr4V0nciJ8MQL38kj32fRp1zc4Sk44dZ8JMEap+XtWyo+Izsitg3cBLPxzXG3wj49LTM+CsXbYDVBxYHwg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=wanadoo.fr smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=fKv1aYo1TDnKjSOQOUMkd3D2kQ9kh1cE9EoXYpX2v5k=;
+ b=I+6P58VmCHsl44uEgpn0VeQsz+BiEbfbI/sDft2LAduUI9Jt5iobOsprtWWmwVR2diH4i+xoZeqmfIVCCYfqSrXtDQ2jGazG7RtwF6ZmyOagWP1qivJm8/En/fvYYDSfVUv6sBziyFvUafJg0rKFjKy5Zhh3s5M2reyKyKU/u6M=
+Received: from MW4P220CA0027.NAMP220.PROD.OUTLOOK.COM (2603:10b6:303:115::32)
+ by DM4PR12MB5246.namprd12.prod.outlook.com (2603:10b6:5:399::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6319.33; Tue, 25 Apr
+ 2023 20:06:08 +0000
+Received: from CO1NAM11FT056.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:115:cafe::c1) by MW4P220CA0027.outlook.office365.com
+ (2603:10b6:303:115::32) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6319.34 via Frontend
+ Transport; Tue, 25 Apr 2023 20:06:08 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ CO1NAM11FT056.mail.protection.outlook.com (10.13.175.107) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6340.20 via Frontend Transport; Tue, 25 Apr 2023 20:06:08 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Tue, 25 Apr 2023 15:06:06 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <christophe.jaillet@wanadoo.fr>
+CC:     <adrian.hunter@intel.com>, <blarson@amd.com>,
+        <kernel-janitors@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-mmc@vger.kernel.org>, <p.zabel@pengutronix.de>,
+        <ulf.hansson@linaro.org>
+Subject: Re: [PATCH] mmc: sdhci-cadence: Fix an error handling path in sdhci_cdns_probe()
+Date:   Tue, 25 Apr 2023 13:06:00 -0700
+Message-ID: <20230425200600.54806-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
 In-Reply-To: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+References: <f61599a9ef23767c2d66e5af9c975f05ef1cec6b.1682430069.git.christophe.jaillet@wanadoo.fr>
+MIME-Version: 1.0
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT056:EE_|DM4PR12MB5246:EE_
+X-MS-Office365-Filtering-Correlation-Id: dc03148f-30f8-4cd5-ddbe-08db45c88235
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: eFQ11h5/ON4bsa7ugStYLOLDLvlH6/9UjOsflQ3PSMfjVLnf/qE0V+nUBjL9DwbObjGwnUCL3SuRHVaim6LCMhvbccZBTTS1YclZOLeWwfavcKS4vPpOWex0smS8UcODwgkq93aupX5QBO0F3xCUI4fkoso9ZMRAOex5jRA6Hhd44J0DC8z4iXHaZ6S+Jnu5xAjNb4+66TDX8QflUkt6pf5pvyVCRdd163yIMWkXoRTz6mXWYMM+CG5VQpI8R3EJg+EVPJ4xYl4oNF2pJOLzNB1HM/AVMQ8dfLX0d160PfaF5Mq+LseFPvjAcaFgHDznq/rhlrDjOd+ZMSeESYlSR5JfvikKlIGgza/TqT6A9ML9rf2fdA5c0BbCUQKI0JOD/K8jZqL6pwNLYoNfQfiORq4bHu1rPz2nEFR9+3auDjoUvgcBmWvuaDNJB9hNZ2f3ImM54nxhVqn/9189dgtsXe7g3gwlMUQmwJTUslTTHUZCAN0cVH1TyTCWVc3E7oYQfyDaxhdw/qF7Jnp1rTFGUHgd8JAvY+XT7RoodaKcX15EWvDfVEaK+qIB/QMLUeY8HqRbfToQ0rcrpZ1cGKD+HEAKNUqsAAFjiT9pOuIapXbm89CZZDNJNjh0E1/XC8+0QGo8J2gF0f55jSn/zalW6VP6KnpnixeYWm0VxdF5LFU5yJvXDIoLEJsY9c/HXHuTdTC38gsVY0gpVdBG68MrxsMv+AGdAgqWFU74RJhI55g=
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(376002)(346002)(136003)(451199021)(46966006)(36840700001)(40470700004)(336012)(356005)(426003)(53546011)(82740400003)(81166007)(1076003)(26005)(186003)(16526019)(2616005)(40480700001)(8936002)(83380400001)(47076005)(36860700001)(2906002)(8676002)(5660300002)(36756003)(40460700003)(316002)(6666004)(54906003)(478600001)(4326008)(6916009)(41300700001)(70586007)(70206006)(82310400005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 25 Apr 2023 20:06:08.1838
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: dc03148f-30f8-4cd5-ddbe-08db45c88235
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT056.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: DM4PR12MB5246
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
@@ -71,7 +101,7 @@ On 25/04/23 16:41, Christophe JAILLET wrote:
 > Fixes: aad53d4ee756 ("mmc: sdhci-cadence: Support mmc hardware reset")
 > Signed-off-by: Christophe JAILLET <christophe.jaillet@wanadoo.fr>
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Acked-by: Brad Larson <blarson@amd.com>
 
 > ---
 >  drivers/mmc/host/sdhci-cadence.c | 8 +++++---
@@ -96,4 +126,3 @@ Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 >  		if (priv->rst_hw)
 >  			host->mmc_host_ops.card_hw_reset = sdhci_cdns_mmc_hw_reset;
 >  	}
-
