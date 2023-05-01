@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 016F4C7EE23
-	for <linux-mmc@archiver.kernel.org>; Mon,  1 May 2023 03:11:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD68FC7EE24
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 May 2023 03:14:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232617AbjEADLc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 30 Apr 2023 23:11:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37158 "EHLO
+        id S233101AbjEADOf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 30 Apr 2023 23:14:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36430 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232985AbjEADKH (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Apr 2023 23:10:07 -0400
+        with ESMTP id S232997AbjEADN3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Apr 2023 23:13:29 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E5E492117;
-        Sun, 30 Apr 2023 20:04:09 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 27E3F44A4;
+        Sun, 30 Apr 2023 20:04:57 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 37FB66179B;
-        Mon,  1 May 2023 03:03:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id D3833C4339B;
-        Mon,  1 May 2023 03:03:15 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id A8E9E61765;
+        Mon,  1 May 2023 03:04:56 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id EA353C4339E;
+        Mon,  1 May 2023 03:04:54 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1682910196;
+        s=k20201202; t=1682910296;
         bh=DWstlYSb6HQkL3J/mt/Oo2KXh8UsNNnwfW+H9bnZiTA=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=HzXgwG/EU4fUOTakgrmGGLnknDc7aOrOT5WanJCHYmuvvC/rMdqqyDhVxrrD1AL7J
-         MmGL5k4yC+T+9f2BtzUUsS0KQDXugYh8IV1t5jjX/oAyHPaz6z4bc0mmfyR/k6Myev
-         GEJ8XownshaJHyCNxkJ1qF4xp5QyxATryejJpEVx+8S6lT1ijQvu+fj8ro2fbegh8n
-         zNyV+N/RwAblLqvNP6vZojzC188c8XlK8OJsYwyTjVbCdU1/hPEWaRECqbr1aY56Bn
-         FUKJBeIZpMQzYVGf9fIZNiKScCqyT0B9tW6cadh72PQbejTwG88jfmazuvraI7ZVMI
-         jKiGALvjGPPnQ==
+        b=jA2DbDymLwrP41Ja//hKjGs+hXEA5JoowBuIz3++hPZKOSSH7BmtD84CHbXYv+Z/m
+         hVCi77EormDKi3XNhrPT3JrOm+jVRDmTEO0BhzDL0rpLvQ8U5VftqwIb6TWzJhDaE+
+         eYEYkUkq2S/rsb7wIAriV9epovKBStDdzZ6lRUzzjqeSQCkATC/kg7w9DJrWGyXHCt
+         g+NqpCh2o3EIXfEhcb7pGluxYkkV/QlMlOfUJcj2Jp/G+EPlTja23vsA20yQXUPSk5
+         cc4h008A3ByDQ4zHm220weHVvKEYhq+9ODeWRKNwA5ydFkOwhC4Jq7b9mZLdLJFwrY
+         FiKzk+ukEAnKA==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Zheng Wang <zyytlz.wz@163.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         Sasha Levin <sashal@kernel.org>, maximlevitsky@gmail.com,
         oakad@yahoo.com, linux-mmc@vger.kernel.org
-Subject: [PATCH AUTOSEL 6.1 15/33] memstick: r592: Fix UAF bug in r592_remove due to race condition
-Date:   Sun, 30 Apr 2023 23:02:09 -0400
-Message-Id: <20230501030227.3254266-15-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.15 07/17] memstick: r592: Fix UAF bug in r592_remove due to race condition
+Date:   Sun, 30 Apr 2023 23:04:24 -0400
+Message-Id: <20230501030435.3254695-7-sashal@kernel.org>
 X-Mailer: git-send-email 2.39.2
-In-Reply-To: <20230501030227.3254266-1-sashal@kernel.org>
-References: <20230501030227.3254266-1-sashal@kernel.org>
+In-Reply-To: <20230501030435.3254695-1-sashal@kernel.org>
+References: <20230501030435.3254695-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
