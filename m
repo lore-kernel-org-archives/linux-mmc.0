@@ -2,202 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D7FFC7EE21
-	for <linux-mmc@archiver.kernel.org>; Sun, 30 Apr 2023 09:22:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A4159C7EE24
+	for <linux-mmc@archiver.kernel.org>; Mon,  1 May 2023 03:00:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230251AbjD3JWb (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 30 Apr 2023 05:22:31 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52036 "EHLO
+        id S232327AbjEADAH (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 30 Apr 2023 23:00:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49448 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230272AbjD3JW3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Apr 2023 05:22:29 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B6C08213D
-        for <linux-mmc@vger.kernel.org>; Sun, 30 Apr 2023 02:22:24 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id 2adb3069b0e04-4f0108a7d20so1816614e87.3
-        for <linux-mmc@vger.kernel.org>; Sun, 30 Apr 2023 02:22:24 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1682846542; x=1685438542;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=9UX6W3UfSa5ZRp8RtlXOP3rbOwpTJRUHBAtacedapPA=;
-        b=K49pIBACcTBJG+8wY+XctIYgz9m7hvVAvkXHtirsNX1ThzYgORxbx9rX9y7bDg627F
-         mMW0TZh+HkrJYpQd/8zq04wIXaEtOWBVeIM4rn3TJpDH2yhr3bdhyiJyEh0qSVHqzi6d
-         2zs4vO4b+FCDUt5qIku+KLEstriZcrdvZc5AbUuu1WV9UdovzGC3PFvs+t3i6seXaqnY
-         p0sQi4CwZkttlYGoa39lFp5VY8koR9AYKxXsRiSE6t8MRXXVPyLT9ALlm51k6z0Bx7ly
-         FwwJ198X1DrVW3P1xrYn15boUZNNeZcFV7xIERKC4JRjleyhnWFOw55+3ygY3FV+5GEw
-         PhtA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1682846542; x=1685438542;
-        h=cc:to:in-reply-to:references:message-id:content-transfer-encoding
-         :mime-version:subject:date:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=9UX6W3UfSa5ZRp8RtlXOP3rbOwpTJRUHBAtacedapPA=;
-        b=GmOc/XRAt+flV2Aglsswx4zyR9hLuZQiNi0B8wVRKHYkriu/XUUm4uC+v60r7OOA3c
-         tvbicK0HALRK5YwD2abnxB8DSu0jPvZPa/qSKpt9srKGdP7MUz5EMlAbd3LvlAHe5Owv
-         IuLokpjkNp0hzSBS3uPlNbnCilWUFb8CxkHj7iAiTrx7G57NOlDqWf9FFt8//6SElBuh
-         4y1G6KOOiT1/bAjJme/BcVQYwwfUjW7/As+VPnHPN2rcXTErGFufvg5ORInzFDtLjBIl
-         nDFH5QZ8UqjFXFdDaTZpDr6tAl++MPon8o2ur148NsdCzOY+Heq7ex0B3d/68ehFb2Fm
-         lq0g==
-X-Gm-Message-State: AC+VfDwQ8OdoHkWTip57uPa5egWQSYJVdFjVfMpNoPlYr04wP0N9DYwg
-        W9ACfizpbwsk8FNeMQayuqHXDQ==
-X-Google-Smtp-Source: ACHHUZ5i1Hj12zld7832+ke0HKZEkcsm8zXYiACzaklV8NXfluT1ZrnmFfA5iGMDU41OJkgYcqf1fQ==
-X-Received: by 2002:ac2:51ae:0:b0:4ea:fabb:4db1 with SMTP id f14-20020ac251ae000000b004eafabb4db1mr2646875lfk.1.1682846542681;
-        Sun, 30 Apr 2023 02:22:22 -0700 (PDT)
-Received: from [127.0.1.1] ([85.235.12.238])
-        by smtp.gmail.com with ESMTPSA id o2-20020a05651238a200b004ec62d9a7f9sm4077327lft.62.2023.04.30.02.22.21
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 30 Apr 2023 02:22:22 -0700 (PDT)
-From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Sun, 30 Apr 2023 11:22:19 +0200
-Subject: [PATCH 4/4] ARM: omap1: Fix up the Nokia 770 board device IRQs
+        with ESMTP id S230114AbjEAC7O (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 30 Apr 2023 22:59:14 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2B6F19BA;
+        Sun, 30 Apr 2023 19:58:42 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id EC7EE60F9A;
+        Mon,  1 May 2023 02:58:00 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 9131BC4339C;
+        Mon,  1 May 2023 02:57:59 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1682909880;
+        bh=DWstlYSb6HQkL3J/mt/Oo2KXh8UsNNnwfW+H9bnZiTA=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=ljI8FP/S1EPxv0AS0gcR8Mx49zrLpEuIRlejnr0UkolUyQrcGMd3ZQ7Z/Odh/uuge
+         UUvjcpMCMFKC5bW6K6P/oGz86JISRRXXc2bb4M8TkQdnqS6kU4EvimysnUkjn43tpF
+         ASsuZ8B60K8k2e03oC8iGfk+qHC4vy+U31AXEi7mspqArElFp8EfeZrt4AFjUIQ3Cr
+         H6RKVWzROGl9+AtINb1qNTQCK6NY/xudRACB/IdGta1/99o4rZcK01jJJPhgzdbudP
+         M1Kq4dwGDFyFbV3Q/PWEkGxtdIJpNeArySbgR3EmlfOa1hGyRhIzaMWn9V/lApiXh8
+         lcGx3mFBVc4jA==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Zheng Wang <zyytlz.wz@163.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Sasha Levin <sashal@kernel.org>, maximlevitsky@gmail.com,
+        oakad@yahoo.com, linux-mmc@vger.kernel.org
+Subject: [PATCH AUTOSEL 6.3 20/44] memstick: r592: Fix UAF bug in r592_remove due to race condition
+Date:   Sun, 30 Apr 2023 22:56:08 -0400
+Message-Id: <20230501025632.3253067-20-sashal@kernel.org>
+X-Mailer: git-send-email 2.39.2
+In-Reply-To: <20230501025632.3253067-1-sashal@kernel.org>
+References: <20230501025632.3253067-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Message-Id: <20230430-nokia770-regression-v1-4-97704e36b094@linaro.org>
-References: <20230430-nokia770-regression-v1-0-97704e36b094@linaro.org>
-In-Reply-To: <20230430-nokia770-regression-v1-0-97704e36b094@linaro.org>
-To:     Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-        Andreas Kemnade <andreas@kemnade.info>,
-        Helge Deller <deller@gmx.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-mmc@vger.kernel.org, Linus Walleij <linus.walleij@linaro.org>
-X-Mailer: b4 0.12.1
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The platform devices on the Nokia 770 is using some
-board-specific IRQs that get statically assigned to platform
-devices in the boardfile.
+From: Zheng Wang <zyytlz.wz@163.com>
 
-This does not work with dynamic IRQ chip bases.
+[ Upstream commit 63264422785021704c39b38f65a78ab9e4a186d7 ]
 
-Utilize the NULL device to define some board-specific
-GPIO lookups and use these to immediately look up the
-same GPIOs, convert to IRQ numbers and pass as resources
-to the devices. This is ugly but should work.
+In r592_probe, dev->detect_timer was bound with r592_detect_timer.
+In r592_irq function, the timer function will be invoked by mod_timer.
 
-Fixes: 92bf78b33b0b ("gpio: omap: use dynamic allocation of base")
-Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+If we remove the module which will call hantro_release to make cleanup,
+there may be a unfinished work. The possible sequence is as follows,
+which will cause a typical UAF bug.
+
+Fix it by canceling the work before cleanup in r592_remove.
+
+CPU0                  CPU1
+
+                    |r592_detect_timer
+r592_remove         |
+  memstick_free_host|
+  put_device;       |
+  kfree(host);      |
+                    |
+                    | queue_work
+                    |   &host->media_checker //use
+
+Signed-off-by: Zheng Wang <zyytlz.wz@163.com>
+Link: https://lore.kernel.org/r/20230307164338.1246287-1-zyytlz.wz@163.com
+Signed-off-by: Ulf Hansson <ulf.hansson@linaro.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
 ---
- arch/arm/mach-omap1/board-nokia770.c | 58 +++++++++++++++++++++++++++---------
- 1 file changed, 44 insertions(+), 14 deletions(-)
+ drivers/memstick/host/r592.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/arm/mach-omap1/board-nokia770.c b/arch/arm/mach-omap1/board-nokia770.c
-index 53a4a44d5f4a..18a63c5a3dee 100644
---- a/arch/arm/mach-omap1/board-nokia770.c
-+++ b/arch/arm/mach-omap1/board-nokia770.c
-@@ -6,8 +6,8 @@
-  */
- #include <linux/clkdev.h>
- #include <linux/irq.h>
--#include <linux/gpio.h>
- #include <linux/gpio/machine.h>
-+#include <linux/gpio/consumer.h>
- #include <linux/kernel.h>
- #include <linux/init.h>
- #include <linux/mutex.h>
-@@ -227,21 +227,28 @@ static struct i2c_board_info nokia770_i2c_board_info_2[] __initdata = {
- 
- static void __init nokia770_cbus_init(void)
- {
--	const int retu_irq_gpio = 62;
--	const int tahvo_irq_gpio = 40;
+diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+index 1d35d147552d4..42bfc46842b82 100644
+--- a/drivers/memstick/host/r592.c
++++ b/drivers/memstick/host/r592.c
+@@ -829,7 +829,7 @@ static void r592_remove(struct pci_dev *pdev)
+ 	/* Stop the processing thread.
+ 	That ensures that we won't take any more requests */
+ 	kthread_stop(dev->io_thread);
 -
--	if (gpio_request_one(retu_irq_gpio, GPIOF_IN, "Retu IRQ"))
--		return;
--	if (gpio_request_one(tahvo_irq_gpio, GPIOF_IN, "Tahvo IRQ")) {
--		gpio_free(retu_irq_gpio);
--		return;
-+	struct gpio_desc *d;
-+	int irq;
-+
-+	d = gpiod_get(NULL, "retu_irq", GPIOD_IN);
-+	if (IS_ERR(d)) {
-+		pr_err("Unable to get CBUS Retu IRQ GPIO descriptor\n");
-+	} else {
-+		irq = gpiod_to_irq(d);
-+		irq_set_irq_type(irq, IRQ_TYPE_EDGE_RISING);
-+		nokia770_i2c_board_info_2[0].irq = irq;
-+	}
-+	d = gpiod_get(NULL, "tahvo_irq", GPIOD_IN);
-+	if (IS_ERR(d)) {
-+		pr_err("Unable to get CBUS Tahvo IRQ GPIO descriptor\n");
-+	} else {
-+		irq = gpiod_to_irq(d);
-+		irq_set_irq_type(irq, IRQ_TYPE_EDGE_RISING);
-+		nokia770_i2c_board_info_2[1].irq = irq;
- 	}
--	irq_set_irq_type(gpio_to_irq(retu_irq_gpio), IRQ_TYPE_EDGE_RISING);
--	irq_set_irq_type(gpio_to_irq(tahvo_irq_gpio), IRQ_TYPE_EDGE_RISING);
--	nokia770_i2c_board_info_2[0].irq = gpio_to_irq(retu_irq_gpio);
--	nokia770_i2c_board_info_2[1].irq = gpio_to_irq(tahvo_irq_gpio);
- 	i2c_register_board_info(2, nokia770_i2c_board_info_2,
- 				ARRAY_SIZE(nokia770_i2c_board_info_2));
-+
- 	gpiod_add_lookup_table(&nokia770_cbus_gpio_table);
- 	platform_device_register(&nokia770_cbus_device);
- }
-@@ -251,8 +258,25 @@ static void __init nokia770_cbus_init(void)
- }
- #endif /* CONFIG_I2C_CBUS_GPIO */
++	del_timer_sync(&dev->detect_timer);
+ 	r592_enable_device(dev, false);
  
-+static struct gpiod_lookup_table nokia770_irq_gpio_table = {
-+	.dev_id = NULL,
-+	.table = {
-+		/* GPIO used by SPI device 1 */
-+		GPIO_LOOKUP("gpio-0-15", 15, "ads7846_irq",
-+			    GPIO_ACTIVE_HIGH),
-+		/* GPIO used for retu IRQ */
-+		GPIO_LOOKUP("gpio-48-63", 15, "retu_irq",
-+			    GPIO_ACTIVE_HIGH),
-+		/* GPIO used for tahvo IRQ */
-+		GPIO_LOOKUP("gpio-32-47", 8, "tahvo_irq",
-+			    GPIO_ACTIVE_HIGH),
-+	},
-+};
-+
- static void __init omap_nokia770_init(void)
- {
-+	struct gpio_desc *d;
-+
- 	/* On Nokia 770, the SleepX signal is masked with an
- 	 * MPUIO line by default.  It has to be unmasked for it
- 	 * to become functional */
-@@ -262,9 +286,15 @@ static void __init omap_nokia770_init(void)
- 	/* Unmask SleepX signal */
- 	omap_writew((omap_readw(0xfffb5004) & ~2), 0xfffb5004);
- 
-+	gpiod_add_lookup_table(&nokia770_irq_gpio_table);
- 	platform_add_devices(nokia770_devices, ARRAY_SIZE(nokia770_devices));
- 	gpiod_add_lookup_table(&nokia770_ads7846_gpio_table);
--	nokia770_spi_board_info[1].irq = gpio_to_irq(15);
-+
-+	d = gpiod_get(NULL, "ads7846_irq", GPIOD_IN);
-+	if (IS_ERR(d))
-+		pr_err("Unable to get ADS7846 IRQ GPIO descriptor\n");
-+	else
-+		nokia770_spi_board_info[1].irq = gpiod_to_irq(d);
- 	spi_register_board_info(nokia770_spi_board_info,
- 				ARRAY_SIZE(nokia770_spi_board_info));
- 	omap_serial_init();
-
+ 	while (!error && dev->req) {
 -- 
-2.34.1
+2.39.2
 
