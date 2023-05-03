@@ -2,150 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D206AC77B7E
-	for <linux-mmc@archiver.kernel.org>; Tue,  2 May 2023 14:32:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96547C7EE2C
+	for <linux-mmc@archiver.kernel.org>; Wed,  3 May 2023 12:31:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234377AbjEBOct (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 2 May 2023 10:32:49 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45968 "EHLO
+        id S229788AbjECMbP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 3 May 2023 08:31:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234362AbjEBOcs (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 2 May 2023 10:32:48 -0400
-Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F07001731
-        for <linux-mmc@vger.kernel.org>; Tue,  2 May 2023 07:32:46 -0700 (PDT)
-Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-55a1462f9f6so26388957b3.3
-        for <linux-mmc@vger.kernel.org>; Tue, 02 May 2023 07:32:46 -0700 (PDT)
+        with ESMTP id S229810AbjECMbN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 May 2023 08:31:13 -0400
+Received: from mail-yw1-x1135.google.com (mail-yw1-x1135.google.com [IPv6:2607:f8b0:4864:20::1135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6600359D1
+        for <linux-mmc@vger.kernel.org>; Wed,  3 May 2023 05:31:11 -0700 (PDT)
+Received: by mail-yw1-x1135.google.com with SMTP id 00721157ae682-55c939fb24dso5314907b3.2
+        for <linux-mmc@vger.kernel.org>; Wed, 03 May 2023 05:31:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1683037966; x=1685629966;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=K/9S8w6sFTa6GILgNFmzXECaTf8pY2QzuFGmdKo49z4=;
-        b=a8CrsUqqNJYwZQY5NqHO+zTZgByfW4d3Lrn9Jel6hRpXgWKf8OojeG4VUSRHufngr2
-         4rHtISOzhxfAs6ALWX9O67ywsIf2V7YXomA1JiI+wkmnJWwcqz8h/Nf9IZNuuV5OyAsa
-         BD7HvBQH+hwMRE3K8OBIn9BucC9bLHqI3LEEG+SfO0/z00/Ghg3/LM70xuAEcngllUeG
-         shUX3J/MTUMVnOPirMy5pYrK+63JiVJneyF5UBvKnuz66MpV5wiGIlA2WaQ8Kvv4+cWx
-         ysqOKg7KXT7OR3lK6ual5T+Ez6SeFH03ZA0ogtXUgp9f3apwnnnsktu3wnOf8/ny0lH4
-         Bf5g==
+        d=linaro.org; s=google; t=1683117070; x=1685709070;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=hTrT4jPc7J5Eliba/sNg5kwjP6TH6hnGe4LZ/zcsA7o=;
+        b=h6CZGQjzmQEBoCydE3tNyOUgkXuZkUfdzrGG9K7kUwAwoLFxNhVXjtbs3lH8tPxDCJ
+         lgKRzg/JByUmGYCLL1CBZxXCRwwaP/rcXDhv2Q0GbKNzMw1mD93llA0XuKu/SXVKGhJI
+         NHqdGYM/fsJ+Ulf/M1a3wzv1A4ho3F0hcM+YLNZQbZaR4dRxXgizaF3qTwUJMBBb9vk+
+         k0MT4rhuEw/bjlFGXI9qtZ70Th89ykZJTxgBlWMLyNPantAaXohSSDpl+SR2KNSQNWyd
+         O4ti0OXekeEAAcuBzGV2+JNTOWwwti5A2/r08pux2hZNGEsWdjxGaCG3fEnLYaVTcLex
+         f5Ig==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683037966; x=1685629966;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=K/9S8w6sFTa6GILgNFmzXECaTf8pY2QzuFGmdKo49z4=;
-        b=ikBTi7tDPruEDKt88e1Ksfs4IkXSErafclvV3LuO/UkjsdyQ2ckJA2osh5kEsIunwG
-         gWqf7lSIUtdw4fKfPo49BCo1xvwjx7LZwfgfGk67CunccTwCMsW0+aJ7MrPdO0WInOR+
-         1NTacNhjMIemAUXDpdf/x4HqHQS2X+2hBMWj/X91hXY16sAJ+zkYTBngFAV4xmXE3uNw
-         WiociysOmB+oFiIgIofIxbahXyfODZd5Fe9cNR63jxOKNLOK/G7vJNnfJuVLEXmC3/lk
-         21J9wrY2nvU6DbOv5Xy2r5ZMVLAQKLeEuv6ZeogVh7IJuOU8PMUs32ah5PgZ7r3euMx8
-         nZqw==
-X-Gm-Message-State: AC+VfDwSyJWTN0rsTLMtegHF8tzGBybr+/8bw8M4/rFI4QoZiz2qqPd/
-        LTqhMpntbYRerWbBxwhblVmB1VGO09bQVcV0Nx0DUrOX8JlDRQAX
-X-Google-Smtp-Source: ACHHUZ57QZAKiVlS6+m+c+PabgA/MZ6dCvjvFla7z07yFMRPlsbaxoIormzWW9l7qPXy3Be7dkx+nUZD4pct+GWh04g=
-X-Received: by 2002:a0d:d444:0:b0:55a:a9b6:6da with SMTP id
- w65-20020a0dd444000000b0055aa9b606damr1215123ywd.11.1683037965902; Tue, 02
- May 2023 07:32:45 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1683117070; x=1685709070;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=hTrT4jPc7J5Eliba/sNg5kwjP6TH6hnGe4LZ/zcsA7o=;
+        b=She2Uxe4xa6bnKKmNqareO6iglnKUTG7tf/h+aFdQLGAHEW2o8PMh4WSMyRhkdh26r
+         mZ9k9Y8B7jCs5e4097f2/lsrijCNSVZe1uA1+lIQXrd66Cn5gmj1J148i+qQVyRt3Yte
+         8Sa/FSexjSpGTvCKCy6AymZdJ8DigDvF1zmRrcRUMm7gFaKBpESlx5h3LexsIDk+VYF9
+         PPzGwEiQEHaQ35sJ5ejuwh87h9bdz73utZwaNsjMlVH0hIA6oeNA0BIqnWNZpZ1dpyyg
+         iHkInZ/BvGesW/7s1xWMQldEJp8FP46pBXT3U8RL/C+ny/uF5qL40NYjLsc8wSbxFoyU
+         YTAQ==
+X-Gm-Message-State: AC+VfDwP0Zt+HhP5q+24CExmgpByWz+jYN7Hd8WyiqzhGETTteApGseA
+        M6PdhHz3XhPGlW8oQqTlCQIfe+ae3fiv+pfKwWlMYQ==
+X-Google-Smtp-Source: ACHHUZ5Ewu4j5yENuc3yZI5omV8bCwxGXLnezBSGE3w7r+x/XbA+XE92J0DD6UuUftsDizL2fZBuK/upLJL7mLXrYUg=
+X-Received: by 2002:a81:4f4f:0:b0:55a:aa57:5660 with SMTP id
+ d76-20020a814f4f000000b0055aaa575660mr5037096ywb.20.1683117070218; Wed, 03
+ May 2023 05:31:10 -0700 (PDT)
 MIME-Version: 1.0
-References: <59c17ada35664b818b7bd83752119b2d@hyperstone.com>
-In-Reply-To: <59c17ada35664b818b7bd83752119b2d@hyperstone.com>
-From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 2 May 2023 16:32:10 +0200
-Message-ID: <CAPDyKFoUbzjYyQCe5P48cqo5GrGwmjDWdbddnqWjskO8qyB4Zw@mail.gmail.com>
-Subject: Re: [PATCHv2] mmc: block: ensure error propagation for non-blk
-To:     Christian Loehle <CLoehle@hyperstone.com>
-Cc:     Adrian Hunter <adrian.hunter@intel.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        Avri Altman <avri.altman@wdc.com>
+References: <20230430-nokia770-regression-v1-0-97704e36b094@linaro.org>
+ <20230430-nokia770-regression-v1-3-97704e36b094@linaro.org> <CAPDyKFoPa3PZGFBO4njSfEd6H0rdc6KKwPFvE1x6Xx13thKv8g@mail.gmail.com>
+In-Reply-To: <CAPDyKFoPa3PZGFBO4njSfEd6H0rdc6KKwPFvE1x6Xx13thKv8g@mail.gmail.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Wed, 3 May 2023 14:30:58 +0200
+Message-ID: <CACRpkdaXVeFtm1cqgtKsOnVppGC1dKNmdOSN59r97C1u_XTqGw@mail.gmail.com>
+Subject: Re: [PATCH 3/4] ARM/mmc: Convert old mmci-omap to GPIO descriptors
+To:     Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mips@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-spi@vger.kernel.org, linux-fbdev@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 26 Apr 2023 at 18:59, Christian Loehle <CLoehle@hyperstone.com> wrote:
->
-> Requests to the mmc layer usually come through a block device IO.
-> The exceptions are the ioctl interface, RPMB chardev ioctl
-> and debugfs, which issue their own blk_mq requests through
-> blk_execute_rq and do not query the BLK_STS error but the
-> mmcblk-internal drv_op_result. This patch ensures that drv_op_result
-> defaults to an error and has to be overwritten by the operation
-> to be considered successful.
->
-> The behavior leads to a bug where the request never propagates
-> the error, e.g. by directly erroring out at mmc_blk_mq_issue_rq if
-> mmc_blk_part_switch fails. The ioctl caller of the rpmb chardev then
-> can never see an error (BLK_STS_IOERR, but drv_op_result is unchanged)
-> and thus may assume that their call executed successfully when it did not.
->
-> While always checking the blk_execute_rq return value would be
-> advised, let's eliminate the error by always setting
-> drv_op_result as -EIO to be overwritten on success (or other error)
->
-> Fixes: 614f0388f580 ("mmc: block: move single ioctl() commands to block requests")
-> Signed-off-by: Christian Loehle <cloehle@hyperstone.com>
+On Tue, May 2, 2023 at 4:26=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org>=
+ wrote:
+> On Sun, 30 Apr 2023 at 11:22, Linus Walleij <linus.walleij@linaro.org> wr=
+ote:
 
-Applied for fixes and by adding a stable tag, thanks!
+> > Fixes: 92bf78b33b0b ("gpio: omap: use dynamic allocation of base")
+> > Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+>
+> This looks like it's best funneled through the soc maintainer's tree(s), =
+right?
+>
+> Acked-by: Ulf Hansson <ulf.hansson@linaro.org>
 
-Kind regards
-Uffe
+Thanks, yeah the plan is to wait and see if I get some testing from
+the OMAP1/2/3
+guys and then collect the lot and put on a branch to SoC unless Tony wants
+the job :D
 
-
-> ---
-> v2: Adopted Adrians suggestions to set the error before calling
->         and rewrote commit message
->  drivers/mmc/core/block.c | 5 +++++
->  1 file changed, 5 insertions(+)
->
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 672ab90c4b2d..0ff294f07465 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -266,6 +266,7 @@ static ssize_t power_ro_lock_store(struct device *dev,
->                 goto out_put;
->         }
->         req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_BOOT_WP;
-> +       req_to_mmc_queue_req(req)->drv_op_result = -EIO;
->         blk_execute_rq(req, false);
->         ret = req_to_mmc_queue_req(req)->drv_op_result;
->         blk_mq_free_request(req);
-> @@ -653,6 +654,7 @@ static int mmc_blk_ioctl_cmd(struct mmc_blk_data *md,
->         idatas[0] = idata;
->         req_to_mmc_queue_req(req)->drv_op =
->                 rpmb ? MMC_DRV_OP_IOCTL_RPMB : MMC_DRV_OP_IOCTL;
-> +       req_to_mmc_queue_req(req)->drv_op_result = -EIO;
->         req_to_mmc_queue_req(req)->drv_op_data = idatas;
->         req_to_mmc_queue_req(req)->ioc_count = 1;
->         blk_execute_rq(req, false);
-> @@ -724,6 +726,7 @@ static int mmc_blk_ioctl_multi_cmd(struct mmc_blk_data *md,
->         }
->         req_to_mmc_queue_req(req)->drv_op =
->                 rpmb ? MMC_DRV_OP_IOCTL_RPMB : MMC_DRV_OP_IOCTL;
-> +       req_to_mmc_queue_req(req)->drv_op_result = -EIO;
->         req_to_mmc_queue_req(req)->drv_op_data = idata;
->         req_to_mmc_queue_req(req)->ioc_count = n;
->         blk_execute_rq(req, false);
-> @@ -2808,6 +2811,7 @@ static int mmc_dbg_card_status_get(void *data, u64 *val)
->         if (IS_ERR(req))
->                 return PTR_ERR(req);
->         req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_CARD_STATUS;
-> +       req_to_mmc_queue_req(req)->drv_op_result = -EIO;
->         blk_execute_rq(req, false);
->         ret = req_to_mmc_queue_req(req)->drv_op_result;
->         if (ret >= 0) {
-> @@ -2846,6 +2850,7 @@ static int mmc_ext_csd_open(struct inode *inode, struct file *filp)
->                 goto out_free;
->         }
->         req_to_mmc_queue_req(req)->drv_op = MMC_DRV_OP_GET_EXT_CSD;
-> +       req_to_mmc_queue_req(req)->drv_op_result = -EIO;
->         req_to_mmc_queue_req(req)->drv_op_data = &ext_csd;
->         blk_execute_rq(req, false);
->         err = req_to_mmc_queue_req(req)->drv_op_result;
-> --
-> 2.37.3
->
->
-> Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
-> Managing Director: Dr. Jan Peter Berns.
-> Commercial register of local courts: Freiburg HRB381782
->
+Yours,
+Linus Walleij
