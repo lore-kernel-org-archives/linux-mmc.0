@@ -2,279 +2,179 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 40CE8C7EE26
-	for <linux-mmc@archiver.kernel.org>; Wed,  3 May 2023 18:44:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D255CC77B7C
+	for <linux-mmc@archiver.kernel.org>; Thu,  4 May 2023 11:16:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229697AbjECSoE (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 3 May 2023 14:44:04 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45262 "EHLO
+        id S229826AbjEDLQh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 4 May 2023 07:16:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229901AbjECSnl (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 3 May 2023 14:43:41 -0400
-Received: from mail-pf1-x42a.google.com (mail-pf1-x42a.google.com [IPv6:2607:f8b0:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F28168A56;
-        Wed,  3 May 2023 11:41:17 -0700 (PDT)
-Received: by mail-pf1-x42a.google.com with SMTP id d2e1a72fcca58-64115eef620so7041575b3a.1;
-        Wed, 03 May 2023 11:41:17 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1683139273; x=1685731273;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=ffwvzJo3AetlasPY6gczdMsVH/amBSlWs9nz5GwhjKo=;
-        b=BUwgoBPWsCmvVQYmmuOOxZi2Vjm5BAQyRtgpsU3UIjTvN96QrVGClIjRjcrP3CO/4a
-         vKPHya5vUObcTcf2qbpwCNwRVZMrIV+yCVJicmSnLfRDLn5GQo/JRwoN1DO3YOSQXwKw
-         iTAE8nywvJqc3X4JuNhaHD964flox43stbpb97fQN0E7Bxtn/8umJjl2LH4UIxG2OOcM
-         OU3dtgxTlljLyDb8zW5dVcu9Z3K9tuUx97r8/sIHdEFDsXiEzvkgCK0Bb1yl6edwJbWy
-         mNKTap/DotcsrKzDAnEMi4WxSoK+qQADqP8Rb7nxvikR7yfBfesjPELVdkU5rg+QH5ts
-         w+7A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683139273; x=1685731273;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=ffwvzJo3AetlasPY6gczdMsVH/amBSlWs9nz5GwhjKo=;
-        b=gt8vu529Ix1+8ZiUYJ61V+5PLvyAXVE8YCROqXXStS5Qj20Izp3WI5KEMvaLs2/lBc
-         PybZCgzYbxIAGluj6/mXma1cCk1ay0H6/Dh0CRxUMmW4hO0yOrQVpckLHcJzevZRrV0I
-         H6tIqn/WbxhAcKc1/OjuynlGnxOj3yOfNc+Jz0H4FaoA9wE5TUJouEx+4nQ1WM1mpLJ6
-         p9ME/sx/XMGtFTAFyiuBaek/MEMRHfDIghTM6QF2TGzh6F6ReWw6Fc2OC68YtVoM/EsP
-         RD5JfyWbQx05DO/0tYfIvy/yY1NxcIgUxK1Tiftx8nO4Ib9CLqWhecoMwBvOtPnRsdUG
-         ZuFA==
-X-Gm-Message-State: AC+VfDxpHjZddTEVmiz9ZZgWTR+63Lll8hDyaBqeSCLQDlvCjYB3TSv+
-        yCQ9TaC5Fk0PlUog6JSTk4g=
-X-Google-Smtp-Source: ACHHUZ4sGR2VzM/n/g6q/XijzKKMV6zu0D1LXBCdpHQIraxKFbmxB3ILwUBxWRATGPgJ4Z6CrVyxeQ==
-X-Received: by 2002:a05:6a00:14c6:b0:636:e0fb:8c45 with SMTP id w6-20020a056a0014c600b00636e0fb8c45mr3611728pfu.16.1683139272680;
-        Wed, 03 May 2023 11:41:12 -0700 (PDT)
-Received: from google.com ([2620:15c:9d:2:9390:e396:49ef:54dc])
-        by smtp.gmail.com with ESMTPSA id q10-20020a63d60a000000b0051eff0a70d7sm19998800pgg.94.2023.05.03.11.41.10
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 03 May 2023 11:41:11 -0700 (PDT)
-Date:   Wed, 3 May 2023 11:41:08 -0700
-From:   Dmitry Torokhov <dmitry.torokhov@gmail.com>
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Mark Brown <broonie@kernel.org>,
-        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-        Andreas Kemnade <andreas@kemnade.info>,
-        Helge Deller <deller@gmx.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH 1/4] Input/ARM: ads7846: Get pendown IRQ from descriptors
-Message-ID: <ZFKqxNA9m9Kge1oo@google.com>
-References: <20230430-nokia770-regression-v1-0-97704e36b094@linaro.org>
- <20230430-nokia770-regression-v1-1-97704e36b094@linaro.org>
+        with ESMTP id S229723AbjEDLQg (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 4 May 2023 07:16:36 -0400
+Received: from EUR01-VE1-obe.outbound.protection.outlook.com (mail-ve1eur01on2059.outbound.protection.outlook.com [40.107.14.59])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A188E2D51
+        for <linux-mmc@vger.kernel.org>; Thu,  4 May 2023 04:16:34 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=NVPaHzKanfA/x6Tkwigjr3wm0GSgszMHYYqxXqeD0kfZZP6jzCi/HGgfVKjHt/auNxwu6C7EyXwkS5ehirtQPliiiaJl8Mj7WXV7saX51MqJNf82nvQVeHEXO/fshoMWWr5zQuHmzW9fIeuSGJvHgP/FusTootui/jlZQX9hEc85XgpBjCL+Pd629wMu0PsEMpUwrOyfUqyP66vekpNZZVYF6qWsTZ3YcK0npzFXQhJQatpUQGK8WlcQic6XF5JkI+MWEPTnBrU7l5OQREdZ5UEENJm3iVwvGM7IIRujkQpCH4veBUHo2eswiPXCHFtNdDnWnn1UKnaf9mK6ugAdQg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=p6v3wlsDaSWG+hBUbMuD+wwUdKNbWvJb5VGB4YLFOJI=;
+ b=MhOxXAmFhQK08Sdhk5aekZABSom/IdKw7YJpt44uWmJNKw6JL0VzF9BaPHaUQIFzKyns2uE0lboxuEHflaYG7iXLrMin7y+xcHCYOOD49XlJiFB3jUbFED9MasVCZs5a7G8rejgJSgCdzNuI1tQnBQEGcPZ7vSR4d9XzsZ7nfpJqULy42aCixI/hkpERfEQWaG3ygVuExbN4s/Vzw4TT7J4KuwUFPEdAXxCKOJL/sCY5p9t+jSvn0CHyVY8hl8VnJK//9kgE0HfI1ww1qdRlbXMGAGh9h7viXe2EgZ3e6w+j2E67JZMHMCrX8rgDMVrgXtkkJtKSgtkf++Mwiz/dzg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
+ smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
+ header.d=nxp.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=p6v3wlsDaSWG+hBUbMuD+wwUdKNbWvJb5VGB4YLFOJI=;
+ b=VvUtlt0Ed0p62aabhlCyOXNIzLkI5arzxcFawVHxYoea9t1lzo0G5jlBU9I0zFXfms3CHSKN+DYbYQWKEdYdMI6QrimuAqbGCprQxTVS2zh66uO7bVjbChodWlaImLkLy/0MMbcsZ6EKBGf0yRl8c9/fRnG1nWML5mKf9c2afBY=
+Authentication-Results: dkim=none (message not signed)
+ header.d=none;dmarc=none action=none header.from=nxp.com;
+Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
+ GV1PR04MB9516.eurprd04.prod.outlook.com (2603:10a6:150:29::12) with Microsoft
+ SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6363.21; Thu, 4 May 2023 11:16:29 +0000
+Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
+ ([fe80::9d1e:facb:ae5a:25b6]) by DB7PR04MB4010.eurprd04.prod.outlook.com
+ ([fe80::9d1e:facb:ae5a:25b6%3]) with mapi id 15.20.6363.022; Thu, 4 May 2023
+ 11:16:29 +0000
+From:   haibo.chen@nxp.com
+To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
+        s.hauer@pengutronix.de
+Cc:     linux-mmc@vger.kernel.org, linux-imx@nxp.com, haibo.chen@nxp.com,
+        shawnguo@kernel.org, kernel@pengutronix.de, festevam@gmail.com
+Subject: [PATCH] mmc: sdhci-esdhc-imx: make "no-mmc-hs400" works
+Date:   Thu,  4 May 2023 19:18:36 +0800
+Message-Id: <20230504111836.3599573-1-haibo.chen@nxp.com>
+X-Mailer: git-send-email 2.34.1
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-ClientProxiedBy: SI2P153CA0029.APCP153.PROD.OUTLOOK.COM
+ (2603:1096:4:190::16) To DB7PR04MB4010.eurprd04.prod.outlook.com
+ (2603:10a6:5:21::30)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230430-nokia770-regression-v1-1-97704e36b094@linaro.org>
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: DB7PR04MB4010:EE_|GV1PR04MB9516:EE_
+X-MS-Office365-Filtering-Correlation-Id: 925da6ae-02de-49a5-9fd8-08db4c910233
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: JutqM2tspu8LMKu06ROOJrkEX5hYBAqICoLeyYk0Knb74sI4z8EiBa+r0UViJxzH4hd3mXis5V+W6NYFEP0DR3E7JM2SZR0Peio6eIQ/HIGX8OFKiLReUWI/ks/BzOlX+T43Kojhhd68lLuOBf34wmPAS45CyDz7VV6Dx9jMy5N61fPh8xsm93NcoPJVvI2+4/LW8jAqQEjV7igoCmedRBN18Yf6qYwbwIp+RwEgFX2E9jwBL7Q0B/UcY5EYromtN8GDfGX9Qi7UKYRS8s8sFq2NWCPMAi4nqIyzV4lzpYKZnnQF8tcIfANG8Pp6XnuMw0HtCtf+j0+CFr41EHnGragXjO5NB5khVAVNKjRfyDTssRzl2EKgV/5zOkVYTqFxrIJOvFuAHa8i8r2IpFwQU/TyskKyvNzWR2+6HcH1uN49qgzjflk+ZVIebSo3p129PAQLmOmjM+yQyPJ+AK6DyqhdA5l3ARpdRXOzg1lYeDSJJzReEcbpVWv5//7TbB8P9HVVIGobdZZHR0kB0qNKmjcFr54uAk35MED2Hafbn0lJbGKwXhOEnBwY7zawYoPXg1BOFtBn66Jqo/eEnEDLHzIyV1ek4yA0oRvqyICXo2BfUINC/WKJWBaROff3Cqqn
+X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(366004)(376002)(346002)(136003)(396003)(39860400002)(451199021)(186003)(83380400001)(2616005)(1076003)(52116002)(6506007)(6486002)(6666004)(478600001)(41300700001)(6512007)(9686003)(26005)(2906002)(36756003)(38100700002)(5660300002)(38350700002)(66476007)(66556008)(66946007)(8936002)(8676002)(4326008)(86362001)(316002);DIR:OUT;SFP:1101;
+X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
+X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?T1vAdrVG33rFE7PGMKa+b1Xxfk7UCvb4WdQnjW+efC9xc+JpT1LOoQ5osOpg?=
+ =?us-ascii?Q?1+Nu5oVUg19Bm0YmoRncTPd/0WdjPNgoJyatZwBGmKfP2EN737H0DM7N97qH?=
+ =?us-ascii?Q?Jpzy36n+QVycD3+7ey6LKRCjnTVFSnpBS4Ge+CzWq2ytquAAUR3nAAPlkHQt?=
+ =?us-ascii?Q?ObVLIwua+dEKifmWsf7lPaIYGCDlWL8rzQkcjGOkv+Ik57jXy+pmqtaRi9QF?=
+ =?us-ascii?Q?2ilgL5M0UPh1ZkGWpbeLV02DdlMr5alvvVQGXsXduEhMFo57OhUKoZA/gmiS?=
+ =?us-ascii?Q?qBZKmotgwRUoForrqZbXjN3d25wAcE2Nw2HyMXZav5+J0FHR5EpQKk+FkDFs?=
+ =?us-ascii?Q?p9Au67M9q4DlSVAPpGB/y9iSlUYu4Q8Xjf5TMZPKzOW9qw4j4i2roYpqBIYE?=
+ =?us-ascii?Q?YSf8hfIlCp3zAhHJWyuMQsWhqKahy8Ctp6HMqudAA+WkkjGKw/eqSaQvB4JK?=
+ =?us-ascii?Q?JNBt86sz+uWEK5b0Qwq/MRd+pgXwXhqYpibfdVPRlZ6hyStBBau0pJZ3dwMo?=
+ =?us-ascii?Q?ue6Gg6r9KSb++wm/TrvBWiasQO4W3tT2/trSMWvDQJRCuA0nmCE/c3BO0lWS?=
+ =?us-ascii?Q?1zBzW3Ko7AVrxiSLYzAQJXERa32fGvIUt2tRE2jrSDreK3FgqjYWR+94CxCp?=
+ =?us-ascii?Q?RyubCQuRmPj8atmfJ2wry9Mt9YlxzbZT/o/uM6Tx/L5rOXyqqTTUlCpe8kNi?=
+ =?us-ascii?Q?BcGlrBBEBDT8b9wgwOrnaaATLsrMmaUsd6BCugoi0YeI3CdbfSEliyGwrI1P?=
+ =?us-ascii?Q?y2MFmBPrQX+PvQinY+L68XnRMMc98dNccE1XjXUY/+28Hb2UyukpJC5TkMIl?=
+ =?us-ascii?Q?1ZpKIaC4da9k5uDeW71kJaufSycQoUaguRLi7LCCo7UQnzInDnVksUVvO3Zo?=
+ =?us-ascii?Q?Lzx1+TH5W3BZy6Ek83Btm661OCRcQ3YdW+hBcpZoUf/0OH/fE9is/EQWbTWz?=
+ =?us-ascii?Q?n9+kShefpHOWHf+LNZHZPdcYwosRKbMh/AExrh8b0WjMg5f2EtDustAP3gIL?=
+ =?us-ascii?Q?NuG7EfVm2ESOwNdurQtoliH0H2aUkxebWyvX+XrMC8ZPVULYwRn5tRJtJKD5?=
+ =?us-ascii?Q?jIKCzbYK1Hlb0pCjYiz3+IAgxdbY0iDLoV3RLOGN7BIL+eWsE95FssE373z+?=
+ =?us-ascii?Q?4Cc5dP/HWmQPlQ8nzNjpjNSs3zq4Ce4I9qDw+KPIldutKXzq2DAyobAB/ZZy?=
+ =?us-ascii?Q?3rrOUrBqIiNFYve+9Ek84MHovX8yeQOrjYOKMu90o167f2lwjl0+F4Yhq1xY?=
+ =?us-ascii?Q?VT+AM7xEN/kZnxGEymUs9grWx9Bfj43oYCFtd9LfcKeJfBJZqFCxyW9a2EwJ?=
+ =?us-ascii?Q?3RyFIlx8CbDXEY7zaQiF6ccxPNu8vtgNNA2OfeUutLt+MdsJxGsheoFMSbwt?=
+ =?us-ascii?Q?btpLInIV6QXpgGbp75EX6U196EeZ4wDerjSNglp39KeTZ3Bzd2Vvhq2I45K6?=
+ =?us-ascii?Q?GOyhVVi6X7DFh2t8ovk77mql1wWKV0ZprhPLWqoTFgz1x8dqKGUMtocQ+pdn?=
+ =?us-ascii?Q?DJLHAbDfPcLnMwlE1ppCfRg+TPAo9uNoUrNYxjRSRoeI7dxWJgu3YIR1099x?=
+ =?us-ascii?Q?lokURbytIza3rbCjAdl7BY3Xk1jhk88jKWKUyqG8?=
+X-OriginatorOrg: nxp.com
+X-MS-Exchange-CrossTenant-Network-Message-Id: 925da6ae-02de-49a5-9fd8-08db4c910233
+X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Internal
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 04 May 2023 11:16:29.7410
+ (UTC)
+X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
+X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
+X-MS-Exchange-CrossTenant-MailboxType: HOSTED
+X-MS-Exchange-CrossTenant-UserPrincipalName: WMmml934lJ2rO4+k8Fp7/CsywZR9pgod2YcAEHubwruXrFrimeP3N3pvQkhlpeLfmW2kqwjSOU43zZS5ye2KRg==
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: GV1PR04MB9516
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sun, Apr 30, 2023 at 11:22:16AM +0200, Linus Walleij wrote:
-> The ADS7846 has some limited support for using GPIO descriptors,
-> let's convert it over completely and fix all users to provide
-> GPIOs in descriptor tables.
-> 
-> The Nokia 770 now has dynamic allocation of IRQ numbers, so this
-> needs to be fixed for it to work.
-> 
-> Fixes: 92bf78b33b0b ("gpio: omap: use dynamic allocation of base")
-> Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
-> ---
->  arch/arm/mach-omap1/board-nokia770.c | 12 +++++++++++-
->  arch/arm/mach-pxa/spitz.c            | 11 ++++++++++-
->  arch/mips/alchemy/devboards/db1000.c | 11 ++++++++++-
->  drivers/input/touchscreen/ads7846.c  | 32 ++++++++------------------------
->  include/linux/spi/ads7846.h          |  2 --
->  5 files changed, 39 insertions(+), 29 deletions(-)
-> 
-> diff --git a/arch/arm/mach-omap1/board-nokia770.c b/arch/arm/mach-omap1/board-nokia770.c
-> index a501a473ffd6..eb7652670447 100644
-> --- a/arch/arm/mach-omap1/board-nokia770.c
-> +++ b/arch/arm/mach-omap1/board-nokia770.c
-> @@ -118,7 +118,16 @@ static struct ads7846_platform_data nokia770_ads7846_platform_data __initdata =
->  	.debounce_max	= 10,
->  	.debounce_tol	= 3,
->  	.debounce_rep	= 1,
-> -	.gpio_pendown	= ADS7846_PENDOWN_GPIO,
-> +};
-> +
-> +static struct gpiod_lookup_table nokia770_ads7846_gpio_table = {
-> +	/* SPI bus 2, device with chip select 0 */
-> +	.dev_id = "spi2.0",
-> +	.table = {
-> +		GPIO_LOOKUP("gpio-0-15", ADS7846_PENDOWN_GPIO,
-> +			    "pendown", GPIO_ACTIVE_HIGH),
-> +		{ }
-> +	},
->  };
+From: Haibo Chen <haibo.chen@nxp.com>
 
-I would like to eventually get rid of GPIO_LOOKUP in favor of
-PROPERTY_ENTRY_GPIO. Can we try something like the draft below (just
-typed, not even compiled):
+After commit 1ed5c3b22fc7 ("mmc: sdhci-esdhc-imx: Propagate
+ESDHC_FLAG_HS400* only on 8bit bus"), the property "no-mmc-hs400"
+from device tree file do not work any more.
+This patch reorder the code, which can avoid the warning message
+"drop HS400 support since no 8-bit bus" and also make the property
+"no-mmc-hs400" from dts file works.
 
-diff --git a/arch/arm/mach-omap1/board-nokia770.c b/arch/arm/mach-omap1/board-nokia770.c
-index a501a473ffd6..34b8e392b917 100644
---- a/arch/arm/mach-omap1/board-nokia770.c
-+++ b/arch/arm/mach-omap1/board-nokia770.c
-@@ -12,6 +12,7 @@
- #include <linux/init.h>
- #include <linux/mutex.h>
- #include <linux/platform_device.h>
-+#include <linux/property.h>
- #include <linux/input.h>
- #include <linux/omapfb.h>
- 
-@@ -35,6 +36,24 @@
- #include "clock.h"
- #include "mmc.h"
- 
-+static const struct software_node nokia770_mpuio_gpiochip_node = {
-+	.name = "mpuio",
-+};
-+
-+static const struct software_node nokia770_gpiochip1_node = {
-+	.name = "gpio-0-15",
-+};
-+
-+static const struct software_node nokia770_gpiochip2_node = {
-+	.name = "gpio-16-31",
-+};
-+
-+static const struct software_node nokia770_gpiochip_nodes[] = {
-+	&nokia770_mpuio_gpiochip_node
-+	&nokia770_gpiochip1_node,
-+	&nokia770_gpiochip2_node,
-+};
-+
- #define ADS7846_PENDOWN_GPIO	15
- 
- static const unsigned int nokia770_keymap[] = {
-@@ -102,6 +121,17 @@ static const struct omap_lcd_config nokia770_lcd_config __initconst = {
- 	.ctrl_name	= "hwa742",
- };
- 
-+static const struct property_entry nokia770_mipid_props[] = {
-+	PROPERTY_ENTRY_GPIO("reset-gpios", &nokia770_gpiochip1_node,
-+			    13, GPIO_ACTIVE_LOW),
-+	{ }
-+};
-+
-+static const struct software_node nokia770_mipid_swnode = {
-+	.name = "lcd_mipid",
-+	.properties = nokia770_mipid_props,
-+};
-+
- static void __init mipid_dev_init(void)
- {
- 	nokia770_mipid_platform_data.nreset_gpio = 13;
-@@ -110,15 +140,22 @@ static void __init mipid_dev_init(void)
- 	omapfb_set_lcd_config(&nokia770_lcd_config);
- }
- 
--static struct ads7846_platform_data nokia770_ads7846_platform_data __initdata = {
--	.x_max		= 0x0fff,
--	.y_max		= 0x0fff,
--	.x_plate_ohms	= 180,
--	.pressure_max	= 255,
--	.debounce_max	= 10,
--	.debounce_tol	= 3,
--	.debounce_rep	= 1,
--	.gpio_pendown	= ADS7846_PENDOWN_GPIO,
-+static const struct property_entry nokia770_ads7846_props[] = {
-+	PROPERTY_ENTRY_U32("touchscreen-size-x", 4096),
-+	PROPERTY_ENTRY_U32("touchscreen-size-y", 4096),
-+	PROPERTY_ENTRY_U32("touchscreen-max-pressure", 256),
-+	PROPERTY_ENTRY_U32("touchscreen-average-samples", 10),
-+	PROPERTY_ENTRY_U16("ti,x-plate-ohms", 180),
-+	PROPERTY_ENTRY_U16("ti,debounce-tol", 3),
-+	PROPERTY_ENTRY_U16("ti,debounce-rep", 1),
-+	PROPERTY_ENTRY_GPIO("pendown-gpios", &nokia770_gpiochip1_node,
-+			    ADS7846_PENDOWN_GPIO, GPIO_ACTIVE_HIGH),
-+	{ }
-+};
-+
-+static const struct software_node nokia770_ads7846_swnode = {
-+	.name = "ads7846",
-+	.properties = nokia770_ads7846_props,
- };
- 
- static struct spi_board_info nokia770_spi_board_info[] __initdata = {
-@@ -128,13 +165,14 @@ static struct spi_board_info nokia770_spi_board_info[] __initdata = {
- 		.chip_select    = 3,
- 		.max_speed_hz   = 12000000,
- 		.platform_data	= &nokia770_mipid_platform_data,
-+		.swnode		= &nokia770_mipid_swnode,
- 	},
- 	[1] = {
- 		.modalias       = "ads7846",
- 		.bus_num        = 2,
- 		.chip_select    = 0,
- 		.max_speed_hz   = 2500000,
--		.platform_data	= &nokia770_ads7846_platform_data,
-+		.swnode		= &nokia770_ads7846_swnode,
- 	},
- };
- 
-@@ -212,14 +250,15 @@ static inline void nokia770_mmc_init(void)
- #endif
- 
- #if IS_ENABLED(CONFIG_I2C_CBUS_GPIO)
--static struct gpiod_lookup_table nokia770_cbus_gpio_table = {
--	.dev_id = "i2c-cbus-gpio.2",
--	.table = {
--		GPIO_LOOKUP_IDX("mpuio", 9, NULL, 0, 0), /* clk */
--		GPIO_LOOKUP_IDX("mpuio", 10, NULL, 1, 0), /* dat */
--		GPIO_LOOKUP_IDX("mpuio", 11, NULL, 2, 0), /* sel */
--		{ },
--	},
-+static const struct software_node_ref_args nokia770_cbus_gpio_refs[] = {
-+	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 9, 0),
-+	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 10, 0),
-+	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 11, 0),
-+};
-+
-+static const struct property_entry nokia770_ads7846_props[] = {
-+	PROPERTY_ENTRY_REF_ARRAY("gpios", nokia770_cbus_gpio_refs),
-+	{ }
- };
- 
- static struct platform_device nokia770_cbus_device = {
-@@ -253,7 +292,8 @@ static void __init nokia770_cbus_init(void)
- 	nokia770_i2c_board_info_2[1].irq = gpio_to_irq(tahvo_irq_gpio);
- 	i2c_register_board_info(2, nokia770_i2c_board_info_2,
- 				ARRAY_SIZE(nokia770_i2c_board_info_2));
--	gpiod_add_lookup_table(&nokia770_cbus_gpio_table);
-+	device_create_managed_software_node(&nokia770_cbus_device.dev,
-+					    nokia770_cbus_props, NULL);
- 	platform_device_register(&nokia770_cbus_device);
- }
- #else /* CONFIG_I2C_CBUS_GPIO */
-@@ -273,6 +313,7 @@ static void __init omap_nokia770_init(void)
- 	/* Unmask SleepX signal */
- 	omap_writew((omap_readw(0xfffb5004) & ~2), 0xfffb5004);
- 
-+	software_node_register_node_group(nokia770_gpiochip_swnodes);
- 	platform_add_devices(nokia770_devices, ARRAY_SIZE(nokia770_devices));
- 	nokia770_spi_board_info[1].irq = gpio_to_irq(15);
- 	spi_register_board_info(nokia770_spi_board_info,
+Fixes: 1ed5c3b22fc7 ("mmc: sdhci-esdhc-imx: Propagate ESDHC_FLAG_HS400* only on 8bit bus")
+Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+Cc: stable@vger.kernel.org
+---
+ drivers/mmc/host/sdhci-esdhc-imx.c | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
 
-
-This will need switching ads7846.c from using of_property* to
-device_property* so that it can parse software nodes.
-
-Thanks.
-
+diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+index d7c0c0b9e26c..eebf94604a7f 100644
+--- a/drivers/mmc/host/sdhci-esdhc-imx.c
++++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+@@ -1634,6 +1634,10 @@ sdhci_esdhc_imx_probe_dt(struct platform_device *pdev,
+ 	if (ret)
+ 		return ret;
+ 
++	/* HS400/HS400ES require 8 bit bus */
++	if (!(host->mmc->caps & MMC_CAP_8_BIT_DATA))
++		host->mmc->caps2 &= ~(MMC_CAP2_HS400 | MMC_CAP2_HS400_ES);
++
+ 	if (mmc_gpio_get_cd(host->mmc) >= 0)
+ 		host->quirks &= ~SDHCI_QUIRK_BROKEN_CARD_DETECTION;
+ 
+@@ -1724,10 +1728,6 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 		host->mmc_host_ops.init_card = usdhc_init_card;
+ 	}
+ 
+-	err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
+-	if (err)
+-		goto disable_ahb_clk;
+-
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_MAN_TUNING)
+ 		sdhci_esdhc_ops.platform_execute_tuning =
+ 					esdhc_executing_tuning;
+@@ -1735,15 +1735,13 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_ERR004536)
+ 		host->quirks |= SDHCI_QUIRK_BROKEN_ADMA;
+ 
+-	if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+-	    imx_data->socdata->flags & ESDHC_FLAG_HS400)
++	if (imx_data->socdata->flags & ESDHC_FLAG_HS400)
+ 		host->mmc->caps2 |= MMC_CAP2_HS400;
+ 
+ 	if (imx_data->socdata->flags & ESDHC_FLAG_BROKEN_AUTO_CMD23)
+ 		host->quirks2 |= SDHCI_QUIRK2_ACMD23_BROKEN;
+ 
+-	if (host->mmc->caps & MMC_CAP_8_BIT_DATA &&
+-	    imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
++	if (imx_data->socdata->flags & ESDHC_FLAG_HS400_ES) {
+ 		host->mmc->caps2 |= MMC_CAP2_HS400_ES;
+ 		host->mmc_host_ops.hs400_enhanced_strobe =
+ 					esdhc_hs400_enhanced_strobe;
+@@ -1765,6 +1763,10 @@ static int sdhci_esdhc_imx_probe(struct platform_device *pdev)
+ 			goto disable_ahb_clk;
+ 	}
+ 
++	err = sdhci_esdhc_imx_probe_dt(pdev, host, imx_data);
++	if (err)
++		goto disable_ahb_clk;
++
+ 	sdhci_esdhc_imx_hwinit(host);
+ 
+ 	err = sdhci_add_host(host);
 -- 
-Dmitry
+2.34.1
+
