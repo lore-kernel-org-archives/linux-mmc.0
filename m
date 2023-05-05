@@ -2,91 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 62632C77B7C
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 May 2023 17:49:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 167EEC77B7C
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 May 2023 18:08:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233203AbjEERth (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 May 2023 13:49:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47168 "EHLO
+        id S233183AbjEESI6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 May 2023 14:08:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36206 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233205AbjEERtQ (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 May 2023 13:49:16 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5040B1A606
-        for <linux-mmc@vger.kernel.org>; Fri,  5 May 2023 10:48:47 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id a640c23a62f3a-965d2749e2eso212658066b.1
-        for <linux-mmc@vger.kernel.org>; Fri, 05 May 2023 10:48:47 -0700 (PDT)
+        with ESMTP id S230473AbjEESI5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 May 2023 14:08:57 -0400
+Received: from mail-pf1-x42b.google.com (mail-pf1-x42b.google.com [IPv6:2607:f8b0:4864:20::42b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3353E1A1FD;
+        Fri,  5 May 2023 11:08:56 -0700 (PDT)
+Received: by mail-pf1-x42b.google.com with SMTP id d2e1a72fcca58-64115eef620so21468643b3a.1;
+        Fri, 05 May 2023 11:08:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1683308870; x=1685900870;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=2Wzob2dHF0KkWSNjIRIz2tGtcAjsnWSRmcTEAPISVmA=;
-        b=q2zdx9ulSlYse92yCHhBae4x+PK8Hejlf0LWzBFknr8Ldbpw26zX0dEXRNVhTFWOpL
-         I+OYMYWFWmsfZASQ2o914lqreCQAJRwtNLih4PS8aLD79zddeWZ2I9xEsnA9oka3KG1h
-         v4JRqgPLBFqol7AQUMRtucTbS+d/c9krj6adlDrZdOHTg/RCngTF20O1voqZT0hLhcHi
-         NczlLjg9WGuUHqBizZDE9FSAfC+q9yW4850ENwU1Mjc06C3gWGCbMXOxBoLO1VDpoUTA
-         UDhQNzsjABWRNEjh9uAmDQgudkphJXCSEm4DxySZebBz6hc0qABhJ8CIjJwAg/h/83T4
-         kUiA==
+        d=gmail.com; s=20221208; t=1683310135; x=1685902135;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
+        bh=3jmjCmOGhJKcTExgQHxoFdrZdNhIimvrG1KlJ+O2CnA=;
+        b=K0PiobN2K0CD1x/aK0LGxU/27Ndiiy3fP21rS2BmtRQcHEefRBzEKjTsRLJYEahi6T
+         0p6efnM3dGeXACImp1TH/0sv7ROoQguhATGB15wUfaJqt6NnRkN4yS4tvwXkq6JfGvKb
+         d6QPkljAU+BM2MzUZJLhEOlAA23YvvJKD6IPmyzANrbKlv6Vcsq1o67/Z2h4ICSmHJU9
+         pZmZk0xCt3FMh5MDlyo49MrZFNEQ6eoBpv4J2oFk+YjFJpqrfuLYbhBguRIZm3bztujZ
+         wSGZQkiG5PKBU9dUjNN//Zm+y0wc6Jj3mMr45r8z60uFXLcgftWIyJIku59qkOuRtlg/
+         3Qbw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683308870; x=1685900870;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=2Wzob2dHF0KkWSNjIRIz2tGtcAjsnWSRmcTEAPISVmA=;
-        b=UEEG/7CF8EY6ZQZJiNoKL2C6Sd/Q29D1N9T/qMsFBkTbruSBDwddnpcO01Xbvqmr+W
-         9PE1DjFhlU/h68vXG5VIZQdszzxaDF8Zs6kjT+/kI17UQpVEFWb1dHuTyVUf8Omlqfyf
-         7GamMI0Nq7VX95K84u3EzV568AZXLUm7wOFhISf1gYhm2yxmch7bbzf87FhYxnkwE/c5
-         vv68pD0Wz97cS14ZUmMiUCRrzCpEpub/+Ou8xki6lV7qhNbt774ydE0u4b4Pvz+DZeuy
-         +WMITmzDyda5bkwrHAGkjYIKzkxq/96I+H0UnjVLp3/Kz3BD0GHzlDrryk/tL39ArCdD
-         A1UA==
-X-Gm-Message-State: AC+VfDxZDswfDbOMVKf7Prt4id5v0L9awrrwd1knvcn6dSxXwVo/BmZ2
-        s1r29PTqJVs7q4TS0Yzk64oAQA==
-X-Google-Smtp-Source: ACHHUZ6uPKGDcp2DmGLEX3+8Z1M0GITzeM9xO1FejUN7zVZHHMNHwEoHNK54Lh5bglLls5QlQYdr1w==
-X-Received: by 2002:a17:907:9415:b0:94f:395b:df1b with SMTP id dk21-20020a170907941500b0094f395bdf1bmr1754098ejc.21.1683308870218;
-        Fri, 05 May 2023 10:47:50 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:52e:24ce:bbc1:127d? ([2a02:810d:15c0:828:52e:24ce:bbc1:127d])
-        by smtp.gmail.com with ESMTPSA id v12-20020a170906858c00b0095334355a34sm1221569ejx.96.2023.05.05.10.47.48
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 05 May 2023 10:47:49 -0700 (PDT)
-Message-ID: <fe8c1063-b8d4-1707-5434-89b3d1edf1a8@linaro.org>
-Date:   Fri, 5 May 2023 19:47:47 +0200
+        d=1e100.net; s=20221208; t=1683310135; x=1685902135;
+        h=in-reply-to:content-disposition:mime-version:references:message-id
+         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=3jmjCmOGhJKcTExgQHxoFdrZdNhIimvrG1KlJ+O2CnA=;
+        b=KhGL17LwJmYny7XEnOb3tueFnBGnYJnfnZhT2tdbZ7ceccVBXYobc/4QVk/OGH5+yr
+         KmCHTeMdU5qRftI/3q7nGulUxMaZBTpr7RCfK+25X89OuR900aOj2mCtHC/ikb57VpSl
+         fLyL2R5ECGp0zq8KKFEWcgm5mcs7UaTxhe0MTOJ+pKHIYxdcAv05yvEPiiUgHeOsZExT
+         ECR7F4Hp4iX6LXC9hbtCJSXvwwY/JY8NlkLwv0v/TV8gCkZLkg/8BKTVQJGP1oEOeYwh
+         GdfgEVm86MxvEqeO8XDEEBDYoeIs4xBebr2g/tPC4GksLorqL0TYuKtMVhbGSaF7tP5l
+         6ubA==
+X-Gm-Message-State: AC+VfDyqxIWRBJH0F0XSXxTqNMmTo8nSILW2l5e8zYQO4iG+GWu2Iki3
+        tPwyMIG38m4Kssyhfs4s3WCbq+GsIpI=
+X-Google-Smtp-Source: ACHHUZ7Li5NhkqOE1+eiPls/+snjqcBfxl+Gcf+qRka4n1VUPtkhMwlUzgkzNuivRGulByJQdOt0tA==
+X-Received: by 2002:a17:90a:a595:b0:247:14ac:4d3a with SMTP id b21-20020a17090aa59500b0024714ac4d3amr2917795pjq.20.1683310135403;
+        Fri, 05 May 2023 11:08:55 -0700 (PDT)
+Received: from google.com ([2620:15c:9d:2:5658:95c:e1cf:a1b0])
+        by smtp.gmail.com with ESMTPSA id j6-20020a17090aeb0600b002500df72713sm3186230pjz.7.2023.05.05.11.08.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 05 May 2023 11:08:54 -0700 (PDT)
+Date:   Fri, 5 May 2023 11:08:50 -0700
+From:   Dmitry Torokhov <dmitry.torokhov@gmail.com>
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v3 1/3] Input: ads7846 - Convert to use software nodes
+Message-ID: <ZFVGMiuRT+e2eVXw@google.com>
+References: <20230430-nokia770-regression-v3-0-a6d0a89ffa8b@linaro.org>
+ <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.1
-Subject: Re: [PATCH v2 3/4] dt-bindings: mmc: fsl-imx-esdhc: remove property
- "fsl,wp-controller"
-Content-Language: en-US
-To:     haibo.chen@nxp.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de
-Cc:     linux-imx@nxp.com, kernel@pengutronix.de, festevam@gmail.com,
-        cniedermaier@dh-electronics.com, devicetree@vger.kernel.org,
-        kernel@dh-electronics.com
-References: <20230505101246.289278-1-haibo.chen@nxp.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <20230505101246.289278-1-haibo.chen@nxp.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 05/05/2023 12:12, haibo.chen@nxp.com wrote:
-> From: Haibo Chen <haibo.chen@nxp.com>
+Hi Linus,
+On Fri, May 05, 2023 at 01:16:55PM +0200, Linus Walleij wrote:
 > 
-> Driver do not use this property, so remove it here.
+> Populate the devices on the Nokia 770 CBUS I2C using software
+> nodes instead of platform data quirks. This includes the LCD
+> and the ADS7846 touchscreen so the conversion just brings the LCD
+> along with it as software nodes is an all-or-nothing design
+> pattern.
 
-That's not true, it uses. I got only patch #3 and nothing else.
+Wow, so that worked , awesome!
 
-> 
-> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
-> ---
->  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 6 ------
->  1 file changed, 6 deletions(-)
+> +static const struct property_entry nokia770_ads7846_props[] = {
+> +	PROPERTY_ENTRY_U32("touchscreen-size-x", 4096),
+> +	PROPERTY_ENTRY_U32("touchscreen-size-y", 4096),
+> +	PROPERTY_ENTRY_U32("touchscreen-max-pressure", 256),
+> +	PROPERTY_ENTRY_U32("touchscreen-average-samples", 10),
+> +	PROPERTY_ENTRY_U16("ti,x-plate-ohms", 180),
+> +	PROPERTY_ENTRY_U16("ti,debounce-tol", 3),
+> +	PROPERTY_ENTRY_U16("ti,debounce-rep", 1),
+> +	PROPERTY_ENTRY_GPIO("pendown-gpios", &nokia770_gpiochip1_node,
+> +			    ADS7846_PENDOWN_GPIO, GPIO_ACTIVE_HIGH),
 
+Looking at the driver this actually needs to be GPIO_ACTIVE_LOW.
 
-Best regards,
-Krzysztof
+>  
+> +static struct gpiod_lookup_table spitz_ads7846_gpio_table = {
+> +	.dev_id = "spi2.0",
+> +	.table = {
+> +		GPIO_LOOKUP("gpio-pxa", SPITZ_GPIO_TP_INT,
+> +			    "pendown", GPIO_ACTIVE_HIGH),
 
+GPIO_ACTIVE_LOW here too.
+
+> +static struct gpiod_lookup_table db1100_touch_gpio_table = {
+> +	.dev_id = "spi0.0",
+> +	.table = {
+> +		GPIO_LOOKUP("alchemy-gpio2", 21,
+> +			    "pendown", GPIO_ACTIVE_HIGH),
+
+And here as well.
+
+> @@ -223,7 +220,7 @@ static int get_pendown_state(struct ads7846 *ts)
+>  	if (ts->get_pendown_state)
+>  		return ts->get_pendown_state();
+>  
+> -	return !gpio_get_value(ts->gpio_pendown);
+> +	return !gpiod_get_value(ts->gpio_pendown);
+
+This needs to be
+
+	return !gpiod_get_value_raw(ts->gpio_pendown);
+
+I looked at various DTSes we have and they use a mix of active high and
+active low annotations, so we have to go with the "raw" variant for now,
+and then update to normal one once we update bad DTSes.
+
+Thanks!
+
+-- 
+Dmitry
