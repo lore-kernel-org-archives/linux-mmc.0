@@ -2,145 +2,178 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F0B83C77B7D
-	for <linux-mmc@archiver.kernel.org>; Fri,  5 May 2023 10:10:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0765BC77B7D
+	for <linux-mmc@archiver.kernel.org>; Fri,  5 May 2023 10:12:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231727AbjEEKKj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 5 May 2023 06:10:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34120 "EHLO
+        id S231593AbjEEKMV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 5 May 2023 06:12:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34488 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231693AbjEEKKi (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 May 2023 06:10:38 -0400
-Received: from EUR05-DB8-obe.outbound.protection.outlook.com (mail-db8eur05on2042.outbound.protection.outlook.com [40.107.20.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D54A13864;
-        Fri,  5 May 2023 03:10:37 -0700 (PDT)
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=gAIK1WUfb8GJbs62ShEA/yyOIxIMqYtT2n8f69sBKNmb8uZ+qtCjZrZozx+7RjBWCcynDYqgH8eHT1Z+v5t65OzTe8PVOqatNd5LZJ89sWHxxT7bjUtUJRAKqrzcoeb7AhN7V1fMGtGmXp4HVimAaXrw/qJgaIqXskq7ndRBsStoS1FCTolKeMRpueQZ+d6jUMFY+t+qmDpl3mcUjpYcu9Q/lybWH4wgzptIGcBjTtxAkoxkqESbWAgEVwBXOtLkZeytPgNfkHIGp+bpWPeRPn7NPYraBIIuuC/kmqeHNc4r79ctTgpVVxS1/K6xA/kvdKvMzgYUBQom83xIXlGEKA==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=OPqaID97zX3dsYBwz21hYomtWEi69Tlx29FDEfIj/Uw=;
- b=IJyVAXARCGurxA/daq/VMZmWdcqCb5A+pOxh4sukL8+Xpgp2mpuim+kQPXmCpAMkTH9LrIl5gHJOTEABs+uFKWLh1HC78f5LsRwCJHJNm4LCUlODEQvIeWyXWJWiVT5MIIp2Ynld7omrS4cKdXV7pkaUjbiJ2zwABVTUFxmddVNv+ollQqn9cBkSaQCX8cytfwkUJlvqAjiPSlfHcap8z22Gz30mkJWEgIS1W8757hphMNWaak50XqeSKKqUy0dLNIG9u1cKaRj4dmXkaCHpbFuwRtAKQOyyxtd12EbxkPxX8yJLbUwSpJ8NcSPacrEVu5uLeDwf1UH6xKurOCspfg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=nxp.com; dmarc=pass action=none header.from=nxp.com; dkim=pass
- header.d=nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=nxp.com; s=selector2;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=OPqaID97zX3dsYBwz21hYomtWEi69Tlx29FDEfIj/Uw=;
- b=kzasKyq8Lbw8Ra8pUi/VYa6mOcyQv/0FWGE/7d4nrx5yEeblLpc5XH0V9baF30vTfu1sz287FQRE/1zqiafr75MeskhteJ5s9rxji5EphgSSxT2Y9/OVzffwZUgYH8ll8+tt9q72GPkTrM+cAg8ib5RoZQCnrnXrEBitBPOSp1c=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=nxp.com;
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com (2603:10a6:5:21::30) by
- AS8PR04MB8690.eurprd04.prod.outlook.com (2603:10a6:20b:429::11) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6363.27; Fri, 5 May
- 2023 10:10:34 +0000
-Received: from DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::9d1e:facb:ae5a:25b6]) by DB7PR04MB4010.eurprd04.prod.outlook.com
- ([fe80::9d1e:facb:ae5a:25b6%3]) with mapi id 15.20.6363.022; Fri, 5 May 2023
- 10:10:34 +0000
-From:   haibo.chen@nxp.com
-To:     adrian.hunter@intel.com, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, robh+dt@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, shawnguo@kernel.org,
-        s.hauer@pengutronix.de
-Cc:     linux-imx@nxp.com, haibo.chen@nxp.com, kernel@pengutronix.de,
-        festevam@gmail.com, cniedermaier@dh-electronics.com,
-        devicetree@vger.kernel.org, kernel@dh-electronics.com
-Subject: [PATCH v2 3/4] dt-bindings: mmc: fsl-imx-esdhc: remove property "fsl,wp-controller"
-Date:   Fri,  5 May 2023 18:12:46 +0800
-Message-Id: <20230505101246.289278-1-haibo.chen@nxp.com>
-X-Mailer: git-send-email 2.34.1
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-ClientProxiedBy: SG2PR03CA0104.apcprd03.prod.outlook.com
- (2603:1096:4:7c::32) To DB7PR04MB4010.eurprd04.prod.outlook.com
- (2603:10a6:5:21::30)
+        with ESMTP id S229553AbjEEKMU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 5 May 2023 06:12:20 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AA65C1161C;
+        Fri,  5 May 2023 03:12:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1683281538; x=1714817538;
+  h=date:from:to:cc:subject:message-id:references:
+   mime-version:in-reply-to;
+  bh=+Tsbdo5pjmj5u3W5R6dLVr9eBlkJdAaspJjhiqP2evg=;
+  b=eOLfWjXSh627nBf1E6IAhz9Pb3UNhbn+q+1TTjGXNmqgpohhsFjE3Kxv
+   k0ar04MinNneBOQErzvrqOTx9O4y7zEEInUDT/DDz8Va1v+CAhGH8RbZx
+   HW7mGXwitOktnl0+Iibpa0rFezXIO6Xt3PM3QcccSSKD4igyjWwEv/rjJ
+   rS3akkb5nscW2YhwuQCAL6THbHi6g3KZW7GKAdT7QLK3Zauuz0X0ni03H
+   MzqQWePvNiKpidbp/Cih7tGhB8sd6Yp6ePM3KUaUKkXAfYZzPhHmO7L6i
+   LZCYgHsaE+pneog5wEfoFpMrxjco7nDqXG0hHCumpWR9mz6HuB2MRkRzN
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10700"; a="412404974"
+X-IronPort-AV: E=Sophos;i="5.99,251,1677571200"; 
+   d="scan'208";a="412404974"
+Received: from orsmga002.jf.intel.com ([10.7.209.21])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 May 2023 03:12:18 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10700"; a="697503684"
+X-IronPort-AV: E=Sophos;i="5.99,251,1677571200"; 
+   d="scan'208";a="697503684"
+Received: from lkp-server01.sh.intel.com (HELO fe5d646e317d) ([10.239.97.150])
+  by orsmga002.jf.intel.com with ESMTP; 05 May 2023 03:12:12 -0700
+Received: from kbuild by fe5d646e317d with local (Exim 4.96)
+        (envelope-from <lkp@intel.com>)
+        id 1pusQ7-0000Ut-2G;
+        Fri, 05 May 2023 10:12:11 +0000
+Date:   Fri, 5 May 2023 18:11:50 +0800
+From:   kernel test robot <lkp@intel.com>
+To:     Linus Walleij <linus.walleij@linaro.org>,
+        Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+Cc:     llvm@lists.linux.dev, oe-kbuild-all@lists.linux.dev,
+        linux-fbdev@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        dri-devel@lists.freedesktop.org, linux-spi@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-omap@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org
+Subject: Re: [PATCH v2 1/3] Input: ads7846 - Convert to use software nodes
+Message-ID: <202305051758.yjd7CtkI-lkp@intel.com>
+References: <20230430-nokia770-regression-v2-1-984ed3ca5444@linaro.org>
 MIME-Version: 1.0
-X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DB7PR04MB4010:EE_|AS8PR04MB8690:EE_
-X-MS-Office365-Filtering-Correlation-Id: 61cc7049-1812-4b11-128a-08db4d50f73c
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: oFYvURpYKI6vSL1NyT3Z1Q1Hf8khRBWg16LpTiFfI48ouy4fup3jSxzHSsZS7Gnnx261OTkLodJ7/EnbzVHKwkzZbdNrpU1eknl+XgeS1+pHWRF44yBXL01l2X148MKpQiG3jgJwNVSAcVnHiE3P7EyNRY1IRqRYI3KLRIJDh9e/fxbQSIe13RMyXUqjGrvWYfeFrpTuq9m50SIqWpDkoqtotSiaCjUR2clt7q/uJFYKYG+qs07BKlqdn011fMWaKrCbCFm4zxKNcObbMbGLFTwW28o8SaxuXGj+JX9Cfqnn4qg2E/PTbE9R6wfuTk0qWmCGv3k8JpXxb1MwC7J9Ta6DtbUYqz77KAwkNYWlCNslUA42F291hUFTrLgqaFEyl+FrQl/a3iCBYaIXL/wlNBanFPpfeNOcm5zMMglqusSzd8NzEZVo8zX/7T1vbWfY0o7lal0JuarsOtDNbdIs5EGe5HQwGMWktUHjIIHzUmfA/hPECQoakWFya0cjmCmNZFHwBSmwtZamx5B7qY4STNEJzN4ZOhaxc2ruzfx6EHbfyNWjP+x8oadWUpd4oX9PqVxivTCA++MyTxSaeM2hYHM9g5I8IbOeeWT7xmWrISZAhPZGEqw9Ldsm9Jg43GaO
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DB7PR04MB4010.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(396003)(39860400002)(366004)(136003)(376002)(346002)(451199021)(41300700001)(4744005)(2906002)(66946007)(5660300002)(4326008)(66476007)(66556008)(316002)(8676002)(7416002)(8936002)(478600001)(6486002)(52116002)(6666004)(26005)(186003)(2616005)(36756003)(6506007)(6512007)(9686003)(83380400001)(1076003)(38350700002)(38100700002)(86362001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?OzGBWjuSCGbXQqfcjIRnBaTaHVEoDsE1hv3Dyk0bRlogngjJGjGq1VcROrSr?=
- =?us-ascii?Q?RU1THJI9sd86fHjAZrTjW802YTdyzRSSP5254xI62B2txdXDF7jSfR97pSva?=
- =?us-ascii?Q?OhhWFPfje/Dj9qQbKKJXPQVfvbOGLvtsgpsvXdpEcCj8ePfqeXwlAxYxMnw4?=
- =?us-ascii?Q?RcHuVr8Ae6Fm3jx6s4kAcSDiiPvCAwZv/pNTJMyhE1+rAGZWxk9xcDWY7WiX?=
- =?us-ascii?Q?h97dlnrggv//6dzcGjQOuCCeCFpZNmeO/Sksol7PDDOZPnxX9CFI3JbdC/8b?=
- =?us-ascii?Q?Bw+jOqSXZ+tswhYHWM/UWe8PZgCMl/NyYotJYug2WHLZYBO53CK3Scfqs3Cy?=
- =?us-ascii?Q?46CwB/Uj/FQhKK1LbuhT6vEFzRCPMR6dq9lCkdjRzfd1NuHZn68D7pm6QiYG?=
- =?us-ascii?Q?WxzqqXwz3tPB2tHKKR+g2xBBUhxJQ18BaAW6DVQbLF0iAV+s1AMVPT0lrERr?=
- =?us-ascii?Q?kDYPJigrMwhYsYJfWMFPC5EHvu0E4VKGN31RZERELiWeWByUh8r2F5W3Crqc?=
- =?us-ascii?Q?51Yy8tJcyHaZjA53u9yLmy73hYZiY0kCSY9aqXoMnjZQMi4rwQQ28A5NEW5f?=
- =?us-ascii?Q?B9Q22aFsUfwdI9Nfl/clJNGbZGmZZSvLBqerMVu+oVB0cfQkWHlExZn/J048?=
- =?us-ascii?Q?hT/Vh3sPjcFKO8ZWxyS6yIYVYpNu739MBhYQ/bQAWzASAiZSsUNdBY6sSf5p?=
- =?us-ascii?Q?8/fw9c28YbmfIF/OzZ+Z2lCf6Y+xSni1+CxxlKv8OMrnJVVRTT88KRiNfpL/?=
- =?us-ascii?Q?C7JGJNQ1c9Mls+MWrQ8OfAHpo+WXhN30O5qs6QkyYE/PD90DsifYf4Xecg5x?=
- =?us-ascii?Q?t0sXfAOaQjwPpoMeAAS6IwVUhi3upvAZHKMCh2AjxTqzpxeydp6Ky7U8EPZ7?=
- =?us-ascii?Q?Ze3u94G/OdbTr8iwYTQCLI0jq4fxfLSzU8wzSrSJmvbZNL6EluRfDr0FAS1/?=
- =?us-ascii?Q?p8K+8EgPpOWQu9/w7ym35t8RdJpgLhMCuVuCxCcx8f0NjGf3NiTecpkENon5?=
- =?us-ascii?Q?0J11dWh02Mb7y/LDqYUgQHr5ztXeuacDgnDN7sjLjC5plgRoNyfvw9Cot8yR?=
- =?us-ascii?Q?WTdsMsNUa8lT/7oXXZtMeZar7W66V3DUeOE0Vn++82al20uTM14mxmbyBcfP?=
- =?us-ascii?Q?c3KX1obsQ9tJdsMamhCeEsWhQFBbdCEeO8uiuicZSZS0RCVKXu3Ie9zq/Rr+?=
- =?us-ascii?Q?Ty5PKavX1+HNLfbD8SaV805GjgbxQm0zwyHPw3OZXWbhMwCf34Ni3GFeVkc6?=
- =?us-ascii?Q?hflYPRczhPbkFKRChOZ/dVHSa/fEtc4SrmuwgOPFb7zaV1bxcPB8hJCfdozk?=
- =?us-ascii?Q?fUrv89i+8O4ddjX9lm7ypGsH+eAI7FwgrZOZtTGP1nq9aYBF3vmrCX4wIjCT?=
- =?us-ascii?Q?ZbTGJ4VQ3rlLAvBRB67dgSC+QBbhgqDgq7wiiqQopXcLls0fB+9R+1B3Jptf?=
- =?us-ascii?Q?Ua7ZQSKTWRMAlB2q1WXOOjo+fcODpTh0MbAmRi/1n7HZOKz6mm7PlyfGgs6d?=
- =?us-ascii?Q?uu6TsxmGJ7THuHAEJLK+pGZbR3qNc2durI5IHG72H6zfB4e90vfaZQ31d/1z?=
- =?us-ascii?Q?gGb9rM6MLiYNH1WqByeYMOtw7/u1Gy2g2+jrNAEl?=
-X-OriginatorOrg: nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 61cc7049-1812-4b11-128a-08db4d50f73c
-X-MS-Exchange-CrossTenant-AuthSource: DB7PR04MB4010.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 05 May 2023 10:10:34.6919
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: VIjGB0ID/5fG0ROqOlwPFVI7DX+j332OAyRWGK8E+qiGMrlXK/AOJwP/XqXPvaJFR7vPUL9s+CU8Tu76pA/Qhg==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AS8PR04MB8690
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230430-nokia770-regression-v2-1-984ed3ca5444@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Haibo Chen <haibo.chen@nxp.com>
+Hi Linus,
 
-Driver do not use this property, so remove it here.
+kernel test robot noticed the following build errors:
 
-Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
----
- Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 6 ------
- 1 file changed, 6 deletions(-)
+[auto build test ERROR on 348551ddaf311c76b01cdcbaf61b6fef06a49144]
 
-diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-index fbfd822b9270..e34b4fb4778a 100644
---- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-+++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
-@@ -96,11 +96,6 @@ properties:
-   interrupts:
-     maxItems: 1
- 
--  fsl,wp-controller:
--    description: |
--      boolean, if present, indicate to use controller internal write protection.
--    type: boolean
--
-   fsl,delay-line:
-     $ref: /schemas/types.yaml#/definitions/uint32
-     description: |
-@@ -190,7 +185,6 @@ examples:
-         compatible = "fsl,imx51-esdhc";
-         reg = <0x70004000 0x4000>;
-         interrupts = <1>;
--        fsl,wp-controller;
-     };
- 
-     mmc@70008000 {
+url:    https://github.com/intel-lab-lkp/linux/commits/Linus-Walleij/Input-ads7846-Convert-to-use-software-nodes/20230505-162601
+base:   348551ddaf311c76b01cdcbaf61b6fef06a49144
+patch link:    https://lore.kernel.org/r/20230430-nokia770-regression-v2-1-984ed3ca5444%40linaro.org
+patch subject: [PATCH v2 1/3] Input: ads7846 - Convert to use software nodes
+config: hexagon-randconfig-r041-20230501 (https://download.01.org/0day-ci/archive/20230505/202305051758.yjd7CtkI-lkp@intel.com/config)
+compiler: clang version 17.0.0 (https://github.com/llvm/llvm-project b0fb98227c90adf2536c9ad644a74d5e92961111)
+reproduce (this is a W=1 build):
+        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
+        chmod +x ~/bin/make.cross
+        # https://github.com/intel-lab-lkp/linux/commit/9708c9277cc820e52916ddf795926d3254bb5eed
+        git remote add linux-review https://github.com/intel-lab-lkp/linux
+        git fetch --no-tags linux-review Linus-Walleij/Input-ads7846-Convert-to-use-software-nodes/20230505-162601
+        git checkout 9708c9277cc820e52916ddf795926d3254bb5eed
+        # save the config file
+        mkdir build_dir && cp config build_dir/.config
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=hexagon olddefconfig
+        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=clang make.cross W=1 O=build_dir ARCH=hexagon SHELL=/bin/bash drivers/input/touchscreen/
+
+If you fix the issue, kindly add following tag where applicable
+| Reported-by: kernel test robot <lkp@intel.com>
+| Link: https://lore.kernel.org/oe-kbuild-all/202305051758.yjd7CtkI-lkp@intel.com/
+
+All errors (new ones prefixed by >>):
+
+   In file included from drivers/input/touchscreen/ads7846.c:24:
+   In file included from include/linux/interrupt.h:11:
+   In file included from include/linux/hardirq.h:11:
+   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
+   In file included from include/asm-generic/hardirq.h:17:
+   In file included from include/linux/irq.h:20:
+   In file included from include/linux/io.h:13:
+   In file included from arch/hexagon/include/asm/io.h:334:
+   include/asm-generic/io.h:547:31: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           val = __raw_readb(PCI_IOBASE + addr);
+                             ~~~~~~~~~~ ^
+   include/asm-generic/io.h:560:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           val = __le16_to_cpu((__le16 __force)__raw_readw(PCI_IOBASE + addr));
+                                                           ~~~~~~~~~~ ^
+   include/uapi/linux/byteorder/little_endian.h:37:51: note: expanded from macro '__le16_to_cpu'
+   #define __le16_to_cpu(x) ((__force __u16)(__le16)(x))
+                                                     ^
+   In file included from drivers/input/touchscreen/ads7846.c:24:
+   In file included from include/linux/interrupt.h:11:
+   In file included from include/linux/hardirq.h:11:
+   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
+   In file included from include/asm-generic/hardirq.h:17:
+   In file included from include/linux/irq.h:20:
+   In file included from include/linux/io.h:13:
+   In file included from arch/hexagon/include/asm/io.h:334:
+   include/asm-generic/io.h:573:61: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           val = __le32_to_cpu((__le32 __force)__raw_readl(PCI_IOBASE + addr));
+                                                           ~~~~~~~~~~ ^
+   include/uapi/linux/byteorder/little_endian.h:35:51: note: expanded from macro '__le32_to_cpu'
+   #define __le32_to_cpu(x) ((__force __u32)(__le32)(x))
+                                                     ^
+   In file included from drivers/input/touchscreen/ads7846.c:24:
+   In file included from include/linux/interrupt.h:11:
+   In file included from include/linux/hardirq.h:11:
+   In file included from ./arch/hexagon/include/generated/asm/hardirq.h:1:
+   In file included from include/asm-generic/hardirq.h:17:
+   In file included from include/linux/irq.h:20:
+   In file included from include/linux/io.h:13:
+   In file included from arch/hexagon/include/asm/io.h:334:
+   include/asm-generic/io.h:584:33: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           __raw_writeb(value, PCI_IOBASE + addr);
+                               ~~~~~~~~~~ ^
+   include/asm-generic/io.h:594:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           __raw_writew((u16 __force)cpu_to_le16(value), PCI_IOBASE + addr);
+                                                         ~~~~~~~~~~ ^
+   include/asm-generic/io.h:604:59: warning: performing pointer arithmetic on a null pointer has undefined behavior [-Wnull-pointer-arithmetic]
+           __raw_writel((u32 __force)cpu_to_le32(value), PCI_IOBASE + addr);
+                                                         ~~~~~~~~~~ ^
+>> drivers/input/touchscreen/ads7846.c:1406:21: error: use of undeclared identifier 'ads7846_dt_ids'
+                   .of_match_table = ads7846_dt_ids,
+                                     ^
+   6 warnings and 1 error generated.
+
+
+vim +/ads7846_dt_ids +1406 drivers/input/touchscreen/ads7846.c
+
+  1401	
+  1402	static struct spi_driver ads7846_driver = {
+  1403		.driver = {
+  1404			.name	= "ads7846",
+  1405			.pm	= pm_sleep_ptr(&ads7846_pm),
+> 1406			.of_match_table = ads7846_dt_ids,
+  1407		},
+  1408		.probe		= ads7846_probe,
+  1409		.remove		= ads7846_remove,
+  1410	};
+  1411	
+
 -- 
-2.34.1
-
+0-DAY CI Kernel Test Service
+https://github.com/intel/lkp-tests
