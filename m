@@ -2,185 +2,82 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73885C7EE22
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 19:56:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 79230C77B75
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 20:13:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229969AbjEHT4p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 May 2023 15:56:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44694 "EHLO
+        id S229865AbjEHUNP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 May 2023 16:13:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57082 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230027AbjEHT4o (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 15:56:44 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99181449F;
-        Mon,  8 May 2023 12:56:13 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 81B7864228;
-        Mon,  8 May 2023 19:56:12 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E8E1C433D2;
-        Mon,  8 May 2023 19:56:09 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1683575771;
-        bh=ltJDojvCNNaKUmHf67mg4itsVJG4A+kiE3jK368sh/g=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=JKqxt7yI/HwKC+CiPqt7/Ymw1In8Cfy8sUKQ/N7Y5GOPm5L2ABrTm9Dq1nq41eKmA
-         AHTe3dJ4GZjFimrFv+fDk/u/+RUWcoT5MUOqKMxtEMUEGuTjd6fu/fgM5xxHQsYTJn
-         2HGkpIohveBZGoI/TNxjP5JokEHzmUgSCY476/9BTTVAr9RXgcUrfl1qZ1808BRITo
-         LoxutEU2zLJb5KwB1WD3QO6jkj4KXEimqgHysuWKLttqzvJQ7fBdVxFJspaZqRUdEY
-         TOYjF1/9ux3HNq2T+/zI1zlbxNWr6xGoNzEPn1KGiSMEwlBi0eTJB8Bw8C8Cp/Zpy5
-         bUNNKgVeYmjKQ==
-Date:   Mon, 8 May 2023 20:56:07 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Stanislav Jakubek <stano.jakubek@gmail.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>,
-        bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
-Message-ID: <20230508-earwig-prance-a2f25f23551d@spud>
-References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
- <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
+        with ESMTP id S229464AbjEHUNO (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 16:13:14 -0400
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 026F55FC9
+        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 13:13:06 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id a640c23a62f3a-9660af2499dso572846566b.0
+        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2023 13:13:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20221208; t=1683576784; x=1686168784;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=RIYXjKK0hBvjiVVVHhHByeXrttVmKY8Bp2JHp345uLU=;
+        b=S1ElEGS2VwyXZP+Juni4sOaWpcgHo+79kRLzdkK1qJ3jNbtqBMFlEOtKJ1Xe5grET8
+         TRW64Blcbc3sS7H6Um20nYWZyMIOenbnrZKniZhQG/vn7WZK+9FZxhrRZyLaGhsaKu3a
+         DGVVSRlp0yD8fqUykPLCsiiYJP+TAjm9vQ2pbzTQl6eCfssFBw203aDTEIYbIqZVIp0B
+         ByFXtYXzty0lUuKgVEqrIejqCrcc3wdqlEGhtl+hwgOpg/pBgyWnDT+7gzmM1CX1yKKH
+         vYhx1RxfgonHza9eXgDBU2i56l70ca0d49W+lqqqUUDdVsf+vYBbGMikQWehmDGzht4m
+         cyFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1683576784; x=1686168784;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=RIYXjKK0hBvjiVVVHhHByeXrttVmKY8Bp2JHp345uLU=;
+        b=Z6/hf/EeOqIuRTR1wnSsmvNfl7bfeVOrSK49jUDqXftsueSHjF1YFjGLV+FngXzY0G
+         aCyhpH1ZkKl0IE66EeLDKPhTJzNqJf3MBh9jsajVLfeoi4vYPwsfM7B8bWgs+jCQ392j
+         8gOebRwDa83ADUwSkYAcLusboYYd3AZkjXgiSv9w3ezmOAoq09iZWovsMBc2IHHvJ6GI
+         SKAm/fl5G828PaCrENy5jxhzgRnVvePLjGhcjuXzzRhHMBU0r9kP/atgAApalKh16vv4
+         DGKa4IucbOvT8mW/m7LLl8gStmEai/uV0KLF0uWThtq9IWreQ8oWzbZ14fJgLD8jPlmO
+         XW8g==
+X-Gm-Message-State: AC+VfDzFGnMBu3OIJi2Ue8Mt5oiW3l5PUzb+5A4PYWqR4ZcklktNpMI5
+        uE8VThlMWmczoQom5BpN1ADt6yhLd7/2qMvH1Ks60Tab
+X-Google-Smtp-Source: ACHHUZ5v/7PMSKbP1WiZXfJkZSHAvJN9ticXlWIqYmUybc03sGb+Ueam1JXs3ObBQ+XxXEzvYoASiUj8KRE7GlVp31g=
+X-Received: by 2002:a17:907:3207:b0:94f:5b91:7952 with SMTP id
+ xg7-20020a170907320700b0094f5b917952mr9479149ejb.21.1683576784341; Mon, 08
+ May 2023 13:13:04 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="LFCvaqCAlBvxkDQI"
-Content-Disposition: inline
-In-Reply-To: <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+In-Reply-To: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Mon, 8 May 2023 22:12:53 +0200
+Message-ID: <CAFBinCBf9A9M15uBCtCafB2NOWd+y0xYwfsa9QxBUTCRJCpxOQ@mail.gmail.com>
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Brian Norris <briannorris@chromium.org>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Ulf, Hi Brian,
 
---LFCvaqCAlBvxkDQI
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+On Tue, Apr 11, 2023 at 1:13=E2=80=AFAM Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> Hello Ulf,
+>
+> today I found that upstream commit 4bc31edebde5 ("mmc: core: Set HS
+> clock speed before sending HS CMD13") breaks eMMC support on my
+> Odroid-C1.
+> (yes, I know that I am very late to the party...)
+I think it was holiday time in Europe when I sent my original mail.
+Could you please take a look at this once you are back? Or in other
+words: gentle ping
 
-On Mon, May 08, 2023 at 02:46:03PM +0200, Stanislav Jakubek wrote:
-> Convert Broadcom Kona family SDHCI controller bindings to DT schema.
->=20
-> Changes during conversion:
->   - also mark reg and interrupts as required
->   - drop deprecated compatible (it's been deprecated for ~10 years)
->=20
-> Signed-off-by: Stanislav Jakubek <stano.jakubek@gmail.com>
 
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
-
-Thanks,
-Conor.
-
-> ---
->  .../bindings/mmc/brcm,kona-sdhci.txt          | 21 --------
->  .../bindings/mmc/brcm,kona-sdhci.yaml         | 48 +++++++++++++++++++
->  2 files changed, 48 insertions(+), 21 deletions(-)
->  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci=
-=2Etxt
->  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci=
-=2Eyaml
->=20
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt b/=
-Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
-> deleted file mode 100644
-> index 7f5dd83f5bd9..000000000000
-> --- a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
-> +++ /dev/null
-> @@ -1,21 +0,0 @@
-> -Broadcom BCM281xx SDHCI
-> -
-> -This file documents differences between the core properties in mmc.txt
-> -and the properties present in the bcm281xx SDHCI
-> -
-> -Required properties:
-> -- compatible : Should be "brcm,kona-sdhci"
-> -- DEPRECATED: compatible : Should be "bcm,kona-sdhci"
-> -- clocks: phandle + clock specifier pair of the external clock
-> -
-> -Refer to clocks/clock-bindings.txt for generic clock consumer properties.
-> -
-> -Example:
-> -
-> -sdio2: sdio@3f1a0000 {
-> -	compatible =3D "brcm,kona-sdhci";
-> -	reg =3D <0x3f1a0000 0x10000>;
-> -	clocks =3D <&sdio3_clk>;
-> -	interrupts =3D <0x0 74 0x4>;
-> -};
-> -
-> diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml b=
-/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
-> new file mode 100644
-> index 000000000000..87711edf9b39
-> --- /dev/null
-> +++ b/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
-> @@ -0,0 +1,48 @@
-> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-> +%YAML 1.2
-> +---
-> +$id: http://devicetree.org/schemas/mmc/brcm,kona-sdhci.yaml#
-> +$schema: http://devicetree.org/meta-schemas/core.yaml#
-> +
-> +title: Broadcom Kona family SDHCI controller
-> +
-> +maintainers:
-> +  - Florian Fainelli <f.fainelli@gmail.com>
-> +
-> +allOf:
-> +  - $ref: sdhci-common.yaml#
-> +
-> +properties:
-> +  compatible:
-> +    const: brcm,kona-sdhci
-> +
-> +  reg:
-> +    maxItems: 1
-> +
-> +  clocks:
-> +    maxItems: 1
-> +
-> +  interrupts:
-> +    maxItems: 1
-> +
-> +required:
-> +  - compatible
-> +  - reg
-> +  - clocks
-> +  - interrupts
-> +
-> +unevaluatedProperties: false
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include "dt-bindings/clock/bcm281xx.h"
-> +
-> +    mmc@3f1a0000 {
-> +        compatible =3D "brcm,kona-sdhci";
-> +        reg =3D <0x3f1a0000 0x10000>;
-> +        clocks =3D <&master_ccu BCM281XX_MASTER_CCU_SDIO3>;
-> +        interrupts =3D <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
-> +    };
-> +...
-> --=20
-> 2.25.1
->=20
-
---LFCvaqCAlBvxkDQI
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZFlT1gAKCRB4tDGHoIJi
-0vqAAP45AkL/hMblRuxYevWDGHld8fxiCLO3SJe5wWE2IV+U6AD/c/sI1OW2syKr
-4Rfp9AR81dk0RssoLeVUOZi7tRpzQgM=
-=crpY
------END PGP SIGNATURE-----
-
---LFCvaqCAlBvxkDQI--
+Best regards,
+Martin
