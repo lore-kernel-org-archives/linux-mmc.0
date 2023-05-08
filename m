@@ -2,90 +2,185 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8D2FC77B7F
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 15:17:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 73885C7EE22
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 19:56:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234122AbjEHPRg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 May 2023 11:17:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41876 "EHLO
+        id S229969AbjEHT4p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 May 2023 15:56:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44694 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234431AbjEHPRd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 11:17:33 -0400
-Received: from fgw20-7.mail.saunalahti.fi (fgw20-7.mail.saunalahti.fi [62.142.5.81])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0E6703AAA
-        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 08:17:31 -0700 (PDT)
-Received: from localhost (88-113-26-95.elisa-laajakaista.fi [88.113.26.95])
-        by fgw20.mail.saunalahti.fi (Halon) with ESMTP
-        id 71d38cae-edb3-11ed-b3cf-005056bd6ce9;
-        Mon, 08 May 2023 18:17:29 +0300 (EEST)
-From:   andy.shevchenko@gmail.com
-Date:   Mon, 8 May 2023 18:17:28 +0300
-To:     Linus Walleij <linus.walleij@linaro.org>
-Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
-        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
-        Tony Lindgren <tony@atomide.com>,
-        Russell King <linux@armlinux.org.uk>,
-        Daniel Mack <daniel@zonque.org>,
-        Haojian Zhuang <haojian.zhuang@gmail.com>,
-        Robert Jarzmik <robert.jarzmik@free.fr>,
-        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
-        Mark Brown <broonie@kernel.org>,
-        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
-        Andreas Kemnade <andreas@kemnade.info>,
-        Helge Deller <deller@gmx.de>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
-        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
-        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
-        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
-        linux-mmc@vger.kernel.org
-Subject: Re: [PATCH v3 3/3] ARM: omap1: Fix up the Nokia 770 board device IRQs
-Message-ID: <ZFkSiM9GRfN5n7n4@surfacebook>
-References: <20230430-nokia770-regression-v3-0-a6d0a89ffa8b@linaro.org>
- <20230430-nokia770-regression-v3-3-a6d0a89ffa8b@linaro.org>
+        with ESMTP id S230027AbjEHT4o (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 15:56:44 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 99181449F;
+        Mon,  8 May 2023 12:56:13 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 81B7864228;
+        Mon,  8 May 2023 19:56:12 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7E8E1C433D2;
+        Mon,  8 May 2023 19:56:09 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1683575771;
+        bh=ltJDojvCNNaKUmHf67mg4itsVJG4A+kiE3jK368sh/g=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=JKqxt7yI/HwKC+CiPqt7/Ymw1In8Cfy8sUKQ/N7Y5GOPm5L2ABrTm9Dq1nq41eKmA
+         AHTe3dJ4GZjFimrFv+fDk/u/+RUWcoT5MUOqKMxtEMUEGuTjd6fu/fgM5xxHQsYTJn
+         2HGkpIohveBZGoI/TNxjP5JokEHzmUgSCY476/9BTTVAr9RXgcUrfl1qZ1808BRITo
+         LoxutEU2zLJb5KwB1WD3QO6jkj4KXEimqgHysuWKLttqzvJQ7fBdVxFJspaZqRUdEY
+         TOYjF1/9ux3HNq2T+/zI1zlbxNWr6xGoNzEPn1KGiSMEwlBi0eTJB8Bw8C8Cp/Zpy5
+         bUNNKgVeYmjKQ==
+Date:   Mon, 8 May 2023 20:56:07 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     Stanislav Jakubek <stano.jakubek@gmail.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
+Message-ID: <20230508-earwig-prance-a2f25f23551d@spud>
+References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
+ <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="LFCvaqCAlBvxkDQI"
 Content-Disposition: inline
-In-Reply-To: <20230430-nokia770-regression-v3-3-a6d0a89ffa8b@linaro.org>
+In-Reply-To: <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Fri, May 05, 2023 at 01:16:57PM +0200, Linus Walleij kirjoitti:
-> The platform devices on the Nokia 770 is using some
-> board-specific IRQs that get statically assigned to platform
-> devices in the boardfile.
-> 
-> This does not work with dynamic IRQ chip bases.
-> 
-> Utilize the NULL device to define some board-specific
-> GPIO lookups and use these to immediately look up the
-> same GPIOs, convert to IRQ numbers and pass as resources
-> to the devices. This is ugly but should work.
 
-...
+--LFCvaqCAlBvxkDQI
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> +static struct gpiod_lookup_table nokia770_irq_gpio_table = {
-> +	.dev_id = NULL,
-> +	.table = {
-> +		/* GPIO used by SPI device 1 */
-> +		GPIO_LOOKUP("gpio-0-15", 15, "ads7846_irq",
-> +			    GPIO_ACTIVE_HIGH),
-> +		/* GPIO used for retu IRQ */
-> +		GPIO_LOOKUP("gpio-48-63", 15, "retu_irq",
-> +			    GPIO_ACTIVE_HIGH),
-> +		/* GPIO used for tahvo IRQ */
-> +		GPIO_LOOKUP("gpio-32-47", 8, "tahvo_irq",
-> +			    GPIO_ACTIVE_HIGH),
+On Mon, May 08, 2023 at 02:46:03PM +0200, Stanislav Jakubek wrote:
+> Convert Broadcom Kona family SDHCI controller bindings to DT schema.
+>=20
+> Changes during conversion:
+>   - also mark reg and interrupts as required
+>   - drop deprecated compatible (it's been deprecated for ~10 years)
+>=20
+> Signed-off-by: Stanislav Jakubek <stano.jakubek@gmail.com>
 
-Missing terminator.
+Acked-by: Conor Dooley <conor.dooley@microchip.com>
 
-> +	},
-> +};
+Thanks,
+Conor.
 
--- 
-With Best Regards,
-Andy Shevchenko
+> ---
+>  .../bindings/mmc/brcm,kona-sdhci.txt          | 21 --------
+>  .../bindings/mmc/brcm,kona-sdhci.yaml         | 48 +++++++++++++++++++
+>  2 files changed, 48 insertions(+), 21 deletions(-)
+>  delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci=
+=2Etxt
+>  create mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci=
+=2Eyaml
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt b/=
+Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
+> deleted file mode 100644
+> index 7f5dd83f5bd9..000000000000
+> --- a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
+> +++ /dev/null
+> @@ -1,21 +0,0 @@
+> -Broadcom BCM281xx SDHCI
+> -
+> -This file documents differences between the core properties in mmc.txt
+> -and the properties present in the bcm281xx SDHCI
+> -
+> -Required properties:
+> -- compatible : Should be "brcm,kona-sdhci"
+> -- DEPRECATED: compatible : Should be "bcm,kona-sdhci"
+> -- clocks: phandle + clock specifier pair of the external clock
+> -
+> -Refer to clocks/clock-bindings.txt for generic clock consumer properties.
+> -
+> -Example:
+> -
+> -sdio2: sdio@3f1a0000 {
+> -	compatible =3D "brcm,kona-sdhci";
+> -	reg =3D <0x3f1a0000 0x10000>;
+> -	clocks =3D <&sdio3_clk>;
+> -	interrupts =3D <0x0 74 0x4>;
+> -};
+> -
+> diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml b=
+/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
+> new file mode 100644
+> index 000000000000..87711edf9b39
+> --- /dev/null
+> +++ b/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
+> @@ -0,0 +1,48 @@
+> +# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
+> +%YAML 1.2
+> +---
+> +$id: http://devicetree.org/schemas/mmc/brcm,kona-sdhci.yaml#
+> +$schema: http://devicetree.org/meta-schemas/core.yaml#
+> +
+> +title: Broadcom Kona family SDHCI controller
+> +
+> +maintainers:
+> +  - Florian Fainelli <f.fainelli@gmail.com>
+> +
+> +allOf:
+> +  - $ref: sdhci-common.yaml#
+> +
+> +properties:
+> +  compatible:
+> +    const: brcm,kona-sdhci
+> +
+> +  reg:
+> +    maxItems: 1
+> +
+> +  clocks:
+> +    maxItems: 1
+> +
+> +  interrupts:
+> +    maxItems: 1
+> +
+> +required:
+> +  - compatible
+> +  - reg
+> +  - clocks
+> +  - interrupts
+> +
+> +unevaluatedProperties: false
+> +
+> +examples:
+> +  - |
+> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> +    #include <dt-bindings/interrupt-controller/irq.h>
+> +    #include "dt-bindings/clock/bcm281xx.h"
+> +
+> +    mmc@3f1a0000 {
+> +        compatible =3D "brcm,kona-sdhci";
+> +        reg =3D <0x3f1a0000 0x10000>;
+> +        clocks =3D <&master_ccu BCM281XX_MASTER_CCU_SDIO3>;
+> +        interrupts =3D <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
+> +    };
+> +...
+> --=20
+> 2.25.1
+>=20
 
+--LFCvaqCAlBvxkDQI
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZFlT1gAKCRB4tDGHoIJi
+0vqAAP45AkL/hMblRuxYevWDGHld8fxiCLO3SJe5wWE2IV+U6AD/c/sI1OW2syKr
+4Rfp9AR81dk0RssoLeVUOZi7tRpzQgM=
+=crpY
+-----END PGP SIGNATURE-----
+
+--LFCvaqCAlBvxkDQI--
