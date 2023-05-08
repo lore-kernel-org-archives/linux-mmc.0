@@ -2,169 +2,157 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B439C77B7F
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 12:46:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CC91C7EE2A
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 15:17:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234114AbjEHMqM (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 May 2023 08:46:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46884 "EHLO
+        id S230260AbjEHPRN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 May 2023 11:17:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41610 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232408AbjEHMqI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 08:46:08 -0400
-Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFB4C18C;
-        Mon,  8 May 2023 05:46:06 -0700 (PDT)
-Received: by mail-wm1-x32e.google.com with SMTP id 5b1f17b1804b1-3f41dceb9d1so19586985e9.1;
-        Mon, 08 May 2023 05:46:06 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1683549965; x=1686141965;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:from:to:cc:subject:date:message-id:reply-to;
-        bh=asbulxWBBUUI7EhpI6L3ou9HymcJhGeGWLD2VK7v0Wk=;
-        b=TIzCwj/pI/o0/YWw8CTrR3fZHS2yw48fL9IAOdDFNArHQUatheY+o7DJ2aCyUvy23N
-         j+9Q7cGYTUhJeUQKhvdga0DWYOtSwdcZK6woZAa2jGJ8o2RuOwPKrh2oetm18m31uWHs
-         OXtZmd0tVqYb15iqkpfB85kiUVTa469JT9RgQZOK7gHPMpIwGNSAT2tgbL/HvoQc7GaM
-         V0VHMt1zd9J/5hzWfPi5Ubw2VkIAxWeTS4xL0yEtfD/cDVCWaicb4nfKzijY4ojLx5j9
-         3OSuitk4sLousbcMjEQn+lthDgyN7QiauUJm8pICKubK6yaupSV63ppnPesac4mFbZ+7
-         +KKA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683549965; x=1686141965;
-        h=in-reply-to:content-disposition:mime-version:references:message-id
-         :subject:cc:to:from:date:x-gm-message-state:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=asbulxWBBUUI7EhpI6L3ou9HymcJhGeGWLD2VK7v0Wk=;
-        b=HDnOIWObXfG+havnbnX8zqzoN1UPpuqyl91wWLZqnK5HI+eXLTzTeAjMn/j1K3wgBb
-         MhhxfewTMJK6XqnGemOPRCuEU9wWD3ArIQ9JKOZylkflN8IiFk9DhOL7Pxh5AXFAhTF5
-         DFsw1AcfxyMcZzlreRy0Z7Z2QGfnuD2ASZqgdskRNjXXJ3ZMCE0swMreozEqgdk2Gosu
-         kr9Gl/NbE4r57UMMGvhR/bFp2Jz+b0hvsYmWyKAGZs6CJDUa2lN193sz9FSNhAeD4MiN
-         jO4wdfyqWTyEeDFD/h0wDpWGFU98qDyQ+S59IWqPv1iKsI5jcSpg1i8BIroKnN+hXYP3
-         /ttQ==
-X-Gm-Message-State: AC+VfDwIhaQepP6XxiYpUv3eVQmWVX7yKdMp1o4VwtJLKwOg3Yo3MT2W
-        PGrI4X+Qau8dBOvhYXo/3+jEzX9jX2nQHg==
-X-Google-Smtp-Source: ACHHUZ4Caw1eB1LyVaPjHrWuOkjvhK/LDxL+ZU7Tdq6wIDisHDEgaQ1pyNkzVDQ0KBXmSLZ1QgxqHQ==
-X-Received: by 2002:a7b:cb46:0:b0:3f1:82a1:122 with SMTP id v6-20020a7bcb46000000b003f182a10122mr7240608wmj.21.1683549965505;
-        Mon, 08 May 2023 05:46:05 -0700 (PDT)
-Received: from standask-GA-A55M-S2HP ([188.123.113.247])
-        by smtp.gmail.com with ESMTPSA id l11-20020a7bc34b000000b003f195d2f1a9sm16696200wmj.15.2023.05.08.05.46.04
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 08 May 2023 05:46:05 -0700 (PDT)
-Date:   Mon, 8 May 2023 14:46:03 +0200
-From:   Stanislav Jakubek <stano.jakubek@gmail.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>
-Cc:     bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
-Message-ID: <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
-References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
+        with ESMTP id S234001AbjEHPRM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 11:17:12 -0400
+X-Greylist: delayed 62 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Mon, 08 May 2023 08:17:06 PDT
+Received: from fgw20-7.mail.saunalahti.fi (fgw20-7.mail.saunalahti.fi [62.142.5.81])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E51DA5FED
+        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 08:17:06 -0700 (PDT)
+Received: from localhost (88-113-26-95.elisa-laajakaista.fi [88.113.26.95])
+        by fgw20.mail.saunalahti.fi (Halon) with ESMTP
+        id 3dcf1144-edb3-11ed-b3cf-005056bd6ce9;
+        Mon, 08 May 2023 18:16:02 +0300 (EEST)
+From:   andy.shevchenko@gmail.com
+Date:   Mon, 8 May 2023 18:16:00 +0300
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v3 1/3] Input: ads7846 - Convert to use software nodes
+Message-ID: <ZFkSMBhw5UaWdpsM@surfacebook>
+References: <20230430-nokia770-regression-v3-0-a6d0a89ffa8b@linaro.org>
+ <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
+In-Reply-To: <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Convert Broadcom Kona family SDHCI controller bindings to DT schema.
+Fri, May 05, 2023 at 01:16:55PM +0200, Linus Walleij kirjoitti:
+> The Nokia 770 is using GPIOs from the global numberspace on the
+> CBUS node to pass down to the LCD controller. This regresses when we
+> let the OMAP GPIO driver use dynamic GPIO base.
+> 
+> The Nokia 770 now has dynamic allocation of IRQ numbers, so this
+> needs to be fixed for it to work.
+> 
+> As this is the only user of LCD MIPID we can easily augment the
+> driver to use a GPIO descriptor instead and resolve the issue.
+> 
+> The platform data .shutdown() callback wasn't even used in the
+> code, but we encode a shutdown asserting RESET in the remove()
+> callback for completeness sake.
+> 
+> The CBUS also has the ADS7846 touchscreen attached.
+> 
+> Populate the devices on the Nokia 770 CBUS I2C using software
+> nodes instead of platform data quirks. This includes the LCD
+> and the ADS7846 touchscreen so the conversion just brings the LCD
+> along with it as software nodes is an all-or-nothing design
+> pattern.
+> 
+> The ADS7846 has some limited support for using GPIO descriptors,
+> let's convert it over completely to using device properties and then
+> fix all remaining boardfile users to provide all platform data using
+> software nodes.
+> 
+> Dump the of includes and of_match_ptr() in the ADS7846 driver as part
+> of the job.
+> 
+> Since we have to move ADS7846 over to obtaining the GPIOs it is
+> using exclusively from descriptors, we provide descriptor tables
+> for the two remaining in-kernel boardfiles using ADS7846:
+> 
+> - PXA Spitz
+> - MIPS Alchemy DB1000 development board
+> 
+> It was too hard for me to include software node conversion of
+> these two remaining users at this time: the spitz is using a
+> hscync callback in the platform data that would require further
+> GPIO descriptor conversion of the Spitz, and moving the hsync
+> callback down into the driver: it will just become too big of
+> a job, but it can be done separately.
+> 
+> The MIPS Alchemy DB1000 is simply something I cannot test, so take
+> the easier approach of just providing some GPIO descriptors in
+> this case as I don't want the patch to grow too intrusive.
 
-Changes during conversion:
-  - also mark reg and interrupts as required
-  - drop deprecated compatible (it's been deprecated for ~10 years)
+...
 
-Signed-off-by: Stanislav Jakubek <stano.jakubek@gmail.com>
----
- .../bindings/mmc/brcm,kona-sdhci.txt          | 21 --------
- .../bindings/mmc/brcm,kona-sdhci.yaml         | 48 +++++++++++++++++++
- 2 files changed, 48 insertions(+), 21 deletions(-)
- delete mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
- create mode 100644 Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
+>  #include <linux/gpio.h>
 
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt b/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
-deleted file mode 100644
-index 7f5dd83f5bd9..000000000000
---- a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.txt
-+++ /dev/null
-@@ -1,21 +0,0 @@
--Broadcom BCM281xx SDHCI
--
--This file documents differences between the core properties in mmc.txt
--and the properties present in the bcm281xx SDHCI
--
--Required properties:
--- compatible : Should be "brcm,kona-sdhci"
--- DEPRECATED: compatible : Should be "bcm,kona-sdhci"
--- clocks: phandle + clock specifier pair of the external clock
--
--Refer to clocks/clock-bindings.txt for generic clock consumer properties.
--
--Example:
--
--sdio2: sdio@3f1a0000 {
--	compatible = "brcm,kona-sdhci";
--	reg = <0x3f1a0000 0x10000>;
--	clocks = <&sdio3_clk>;
--	interrupts = <0x0 74 0x4>;
--};
--
-diff --git a/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml b/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
-new file mode 100644
-index 000000000000..87711edf9b39
---- /dev/null
-+++ b/Documentation/devicetree/bindings/mmc/brcm,kona-sdhci.yaml
-@@ -0,0 +1,48 @@
-+# SPDX-License-Identifier: GPL-2.0-only OR BSD-2-Clause
-+%YAML 1.2
-+---
-+$id: http://devicetree.org/schemas/mmc/brcm,kona-sdhci.yaml#
-+$schema: http://devicetree.org/meta-schemas/core.yaml#
-+
-+title: Broadcom Kona family SDHCI controller
-+
-+maintainers:
-+  - Florian Fainelli <f.fainelli@gmail.com>
-+
-+allOf:
-+  - $ref: sdhci-common.yaml#
-+
-+properties:
-+  compatible:
-+    const: brcm,kona-sdhci
-+
-+  reg:
-+    maxItems: 1
-+
-+  clocks:
-+    maxItems: 1
-+
-+  interrupts:
-+    maxItems: 1
-+
-+required:
-+  - compatible
-+  - reg
-+  - clocks
-+  - interrupts
-+
-+unevaluatedProperties: false
-+
-+examples:
-+  - |
-+    #include <dt-bindings/interrupt-controller/arm-gic.h>
-+    #include <dt-bindings/interrupt-controller/irq.h>
-+    #include "dt-bindings/clock/bcm281xx.h"
-+
-+    mmc@3f1a0000 {
-+        compatible = "brcm,kona-sdhci";
-+        reg = <0x3f1a0000 0x10000>;
-+        clocks = <&master_ccu BCM281XX_MASTER_CCU_SDIO3>;
-+        interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_HIGH>;
-+    };
-+...
+Do we need it after this patch?
+
+>  #include <linux/gpio/machine.h>
+> +#include <linux/gpio/property.h>
+
+...
+
+> +static const struct software_node *nokia770_gpiochip_nodes[] = {
+> +	&nokia770_mpuio_gpiochip_node,
+> +	&nokia770_gpiochip1_node,
+> +	&nokia770_gpiochip2_node,
+> +	NULL,
+
+Comma is redundant for the terminator entry.
+
+> +};
+
+...
+
+> +static struct gpiod_lookup_table spitz_ads7846_gpio_table = {
+> +	.dev_id = "spi2.0",
+> +	.table = {
+> +		GPIO_LOOKUP("gpio-pxa", SPITZ_GPIO_TP_INT,
+> +			    "pendown", GPIO_ACTIVE_HIGH),
+> +		{ },
+
+Ditto.
+
+> +	},
+> +};
+
+...
+
+> +static struct gpiod_lookup_table db1100_touch_gpio_table = {
+> +	.dev_id = "spi0.0",
+> +	.table = {
+> +		GPIO_LOOKUP("alchemy-gpio2", 21,
+> +			    "pendown", GPIO_ACTIVE_HIGH),
+> +		{ },
+
+Ditto.
+
+> +	},
+> +};
+
 -- 
-2.25.1
+With Best Regards,
+Andy Shevchenko
+
 
