@@ -2,58 +2,61 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BDFA9C7EE22
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 21:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B585EC7EE25
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 21:31:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233831AbjEHV2h (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 May 2023 17:28:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40308 "EHLO
+        id S233833AbjEHVbV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 May 2023 17:31:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42860 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233821AbjEHV2h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 17:28:37 -0400
-Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9C2A77DBD
-        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 14:28:24 -0700 (PDT)
-Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-55a5e0f5b1aso48019367b3.0
-        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2023 14:28:24 -0700 (PDT)
+        with ESMTP id S233855AbjEHVbU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 17:31:20 -0400
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5417B869B
+        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 14:31:18 -0700 (PDT)
+Received: by mail-yb1-xb2a.google.com with SMTP id 3f1490d57ef6-b9a6f17f2b6so27331773276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2023 14:31:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1683581304; x=1686173304;
+        d=linaro.org; s=google; t=1683581477; x=1686173477;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=wX39yT2wbPEXqhXbtvNDzhgN+Xs4H/C0OIhg+3hztTI=;
-        b=m/CYRgdq2dBkpFW4z/bT+o2LoBRNAVnnUYugDPgWvmTxdepuXvA4jJOimRupVQcFL2
-         G8gZlt2+PPHd5gJJjR2xAZ1SYTEELx+AM5ZM2UzpEIUnP/nwGu/qSnqQ6Qe82+gd55py
-         OywnDgCGIqUZE6yc3BDUpDPvFSo/ZNIFDFN65pc2dI1kVo0NVuMZp42uEwA60ncQUbN/
-         Jy/w3whm5r+6gbxqk4h52P/jiNFwngAT5MpT1rqU/WQ8ErLHogo06zxPZr3PBoDp+BRP
-         AqZZxJhHoAFvqvWV3X+FqqPYj+98CpsyNOOasrjll8yOi5IAC9vdzMgvchUT0Y8NqDlF
-         R6jw==
+        bh=mOJR/20LVKyz48EAyeHc1+jVArD8eFRaiPVz2llKJYw=;
+        b=xnPwIs1cwDo2FfYER/sCJ/da+7w70ojR2vcIjoTIwWXCv32mMF1zm1BD4+lfb2YBZM
+         a2JVJMgplb8WbXqgCdHgK8Kp72gs89jO2wf+8i72UAlWKsMEO+QAvE2kzbL6W+zsK4XX
+         5Z8iTG2eG+u2fgFxWPNmnpwDmCvRMpfx0fMcptbYfNamY9350JY8Gd4qdqq2mPQh9kC0
+         +x56ZfIKBMwAlE8P63WHOLZVXUP3U77r1pEjelQEPWycVNYaZZsW7RV6EqwWY1pIciet
+         mUJNXjEV6P9b/N9Sms+auwR08F+s4xsHpxn7JhrpRdBY15Z66VnYReC0HO7LXkTpsCWj
+         0ulg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683581304; x=1686173304;
+        d=1e100.net; s=20221208; t=1683581477; x=1686173477;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=wX39yT2wbPEXqhXbtvNDzhgN+Xs4H/C0OIhg+3hztTI=;
-        b=H4vQnQfyfLgBfZMq0YgZU4x6fP5NU0V4Ilixn7EQmETSoRkbA7xyHJmgP1O9YcN4gm
-         xvx0xb9cu0mhXWQ5MHhmOVAxQ0DMMZko0s2aGQreUOe22gUQpR/drtGShGd0runbzlbQ
-         YfA2XEyJMAFY+Obv3WeotpsjN9B9PqzOhgRRYUbHA/P4oQ738k5kK/XcAVHet98cOPkO
-         ODGA9L2SlDNZXkj1F5Xoo8UI9SFxV0sU+bKNdgLXNyzh5wWNxSMZAZ2v5zgfHHsjW9/4
-         cCsqIVE9ePunoeSSVU6XpnU9e+mAuuets1DJWRpF5QPwoKyKWaTZbBZ6xMPdSf5huXjv
-         AsDg==
-X-Gm-Message-State: AC+VfDzvFa+9lI57MSjKCOKYPs5fWaBdLZvSwKkJGAGQzFoFITseBoyd
-        k/m5IsnkdvTAQTvC8JaqhFwAPifol32Qxs8q+LDRmQ==
-X-Google-Smtp-Source: ACHHUZ66w4x3Oj+W//CdKVXHR1RfBdoq9r0l7en1E+lsaBczgPEck7bAPv7q2ndrw1oeCZN0a1tiKTRdU1k/NFqyLGU=
-X-Received: by 2002:a81:84d0:0:b0:55a:1f2:ef6 with SMTP id u199-20020a8184d0000000b0055a01f20ef6mr12314719ywf.9.1683581303797;
- Mon, 08 May 2023 14:28:23 -0700 (PDT)
+        bh=mOJR/20LVKyz48EAyeHc1+jVArD8eFRaiPVz2llKJYw=;
+        b=Yh0rZdRI+f4+wObiJoclGwXEtAF6/P3IK/oIlbTs9xjJn1g5kbqSk5GPYAEm7dri8u
+         SFJx7mIL8iWP19AZLEnDkXJXV91lJNpqmBwSomsKSaHSR+/htHY8wgjb9MgkbNInALnF
+         OTV8sDtI7rPAHe11Vd+DfKshhU2Oy5f52h0yzvqA1VOVsNUkWx54gs2tJTOLG2NrKFJp
+         f/fp64kNDwymDWMwYEAvPYKq+qtQrgbIin/W5K3dwMg6gTVSESnl2wuT8iq9uJaFU9FE
+         ftrfPefnYSRQbNDOnUW1sDbSe9p6K7L7mgqCVfINdHklOiwouz3nbyeeU+5dXR+4dKUT
+         6gqg==
+X-Gm-Message-State: AC+VfDw83Elxl6LvdatD1oSaqi+ggvSFlnVJUNAqp+O3WQls5K+Qj5Jk
+        DA5O2VhYY1oJSZRzBZZSusonL8+NtqsbZMCgB2u4zw==
+X-Google-Smtp-Source: ACHHUZ58fReQQ4pRCBtoCz9Lw0P3GVuCrDW/FKsG0+nk/YgPWCXp8EO7CBeqYU//QyxCun6JDuY2iPWmdeq6/W2Qfd0=
+X-Received: by 2002:a81:4c4c:0:b0:54f:54c5:70d with SMTP id
+ z73-20020a814c4c000000b0054f54c5070dmr13840092ywa.20.1683581477497; Mon, 08
+ May 2023 14:31:17 -0700 (PDT)
 MIME-Version: 1.0
 References: <20230430-nokia770-regression-v3-0-a6d0a89ffa8b@linaro.org>
- <20230430-nokia770-regression-v3-3-a6d0a89ffa8b@linaro.org> <ZFkSiM9GRfN5n7n4@surfacebook>
-In-Reply-To: <ZFkSiM9GRfN5n7n4@surfacebook>
+ <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org>
+ <ZFVGMiuRT+e2eVXw@google.com> <CACRpkdZUXOTOK9CObdXuHQx4PMD3ykMKco8X5ijchkZ8cEmQvA@mail.gmail.com>
+ <ZFlpYff6I5V6JiH1@google.com>
+In-Reply-To: <ZFlpYff6I5V6JiH1@google.com>
 From:   Linus Walleij <linus.walleij@linaro.org>
-Date:   Mon, 8 May 2023 23:28:12 +0200
-Message-ID: <CACRpkdbk0b8e7M4DNjAnF3c466suLHeiRp9L3zDnbCUB=J8=FA@mail.gmail.com>
-Subject: Re: [PATCH v3 3/3] ARM: omap1: Fix up the Nokia 770 board device IRQs
-To:     andy.shevchenko@gmail.com
+Date:   Mon, 8 May 2023 23:31:06 +0200
+Message-ID: <CACRpkdae4+0vsJS71G6dR5PEpMw13JGJAJr9Jyf2T+Z8gOgoxQ@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] Input: ads7846 - Convert to use software nodes
+To:     Dmitry Torokhov <dmitry.torokhov@gmail.com>
 Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
         Janusz Krzysztofik <jmkrzyszt@gmail.com>,
         Tony Lindgren <tony@atomide.com>,
@@ -62,7 +65,6 @@ Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
         Haojian Zhuang <haojian.zhuang@gmail.com>,
         Robert Jarzmik <robert.jarzmik@free.fr>,
         Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
-        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
         Mark Brown <broonie@kernel.org>,
         Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
         Andreas Kemnade <andreas@kemnade.info>,
@@ -79,15 +81,32 @@ Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 8, 2023 at 5:17=E2=80=AFPM <andy.shevchenko@gmail.com> wrote:
+On Mon, May 8, 2023 at 11:28=E2=80=AFPM Dmitry Torokhov
+<dmitry.torokhov@gmail.com> wrote:
+> On Mon, May 08, 2023 at 11:23:44PM +0200, Linus Walleij wrote:
 
-> > +             GPIO_LOOKUP("gpio-32-47", 8, "tahvo_irq",
-> > +                         GPIO_ACTIVE_HIGH),
+> > > This needs to be
+> > >
+> > >         return !gpiod_get_value_raw(ts->gpio_pendown);
+> >
+> > There is no such function. The gpio descriptor runpath simply assumes t=
+hat
+> > device trees can be trusted.
 >
-> Missing terminator.
+> Sorry, this was supposed to be gpiod_get_raw_value():
+>
+> https://elixir.bootlin.com/linux/latest/source/drivers/gpio/gpiolib.c#L28=
+54
 
-Darn I missed this comment in v4, I have fixed it in my tree, I will see if
-there are more comments for v4 before I resend.
+I missed it, I should have very well understood you meant that one...
+I just read the file too sloppily.
+
+> Yeah, we we can land the DT fixes ahead of the driver change that would
+> be great. Otherwise we need a temporary application of
+> gpiod_get_raw_value().
+
+If the patch is fine I will send it to the SoC tree and ask for it to be
+applied as a fix.
 
 Yours,
 Linus Walleij
