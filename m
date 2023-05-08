@@ -2,101 +2,99 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F676C7EE2D
-	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 20:27:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A48B3C77B7F
+	for <linux-mmc@archiver.kernel.org>; Mon,  8 May 2023 20:55:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230032AbjEHU1p (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 8 May 2023 16:27:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33434 "EHLO
+        id S233109AbjEHUzf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 8 May 2023 16:55:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48094 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230101AbjEHU1m (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 16:27:42 -0400
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9CBF46B9
-        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 13:27:40 -0700 (PDT)
-Received: by mail-ed1-x531.google.com with SMTP id 4fb4d7f45d1cf-50bc4bc2880so7998769a12.2
-        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2023 13:27:40 -0700 (PDT)
+        with ESMTP id S233491AbjEHUze (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 8 May 2023 16:55:34 -0400
+Received: from mail-yb1-xb2a.google.com (mail-yb1-xb2a.google.com [IPv6:2607:f8b0:4864:20::b2a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0566E7DA9
+        for <linux-mmc@vger.kernel.org>; Mon,  8 May 2023 13:55:02 -0700 (PDT)
+Received: by mail-yb1-xb2a.google.com with SMTP id 3f1490d57ef6-b9a6d9dcbebso4467489276.2
+        for <linux-mmc@vger.kernel.org>; Mon, 08 May 2023 13:55:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1683577659; x=1686169659;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :from:to:cc:subject:date:message-id:reply-to;
-        bh=RwPGZohtIhTLGbhGn1RTQacp+p71rXmAWY6DiVDMMUs=;
-        b=x2wzcu3gmCYSafwyCmK5QcTKTH9wLDEXlfRKAc49ww8Tktnn3aNTPsqAONIvohovCk
-         8zBRwq3uyEJPJCa2ZTfqQZihNWZOM/8e0BtshqY24oRRa1qphO9khA3i28HolsVcIFu9
-         tDyTu3ZTWci3Kx+pogen8YxIqDfhCYp094PGsr9YTxe6WstnzsehaBO0HZuEppPuxMVN
-         h5ue5n+VbOiK/Z8mYpDtylGAzW4hGzCpbmBknvjD6M9i4nXud1Bje/uVTwesPucCn+2I
-         ta7frnzCv1PWXtB1sroJBW7wPC25eHz6fFHlo7Slh20b2GqWgj3C/clzryxeFUvqmwln
-         hFBg==
+        d=linaro.org; s=google; t=1683579297; x=1686171297;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ebgkfCiodiKcun60kKBUwZij72grfP4UOmjlc+G6i8I=;
+        b=k0YYa/u76d7Ieqtnsvy/Saa1HPB4iaH1dWzUdUuvpcLGfYYlTzbXgK21e8GZZqfZ7i
+         YE+F+MB9zyXtiARKsPNIiY9f3Yvt1HVWAVLTf6t6yhR5GOODuvZu3luqlcRMbLYDDKCC
+         QpsnZEqepGgE18Mu6mcHcKTrkO/b+Iy6POYKLn7fB3mza3FUb79uQ3OyDUmYLPLGyrU9
+         yFfOpdYmElLihnmMJxGsSFbxtufg1vlUdp39zLnUMxZA1zevF+Nwgewq67DDlHNDL6rq
+         W1tR4tE5bhj81NA+/5pweLJQAC6rL4aL5pDyC8sWhOEqEyQUW98xARAg6p4xXnZCWIp9
+         mDsQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683577659; x=1686169659;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=RwPGZohtIhTLGbhGn1RTQacp+p71rXmAWY6DiVDMMUs=;
-        b=djRFojscsSbjiv/StvKLmrDmG4wfWQbVgdbUCvZVlBfgtZoAWRSSARKqDP4Xpb466O
-         LPJBFh0p3DUrflbfnrgwjCtfFrASsCVKXj1QpnSnVLhtRefljdlRw0mjG0+GEJvayKvi
-         NxZqfT7ksJJ4Y5amicoHMYxv4esdryp0RFnOTcL+u1dKA806AN9LSOiirfACbAEeDAVz
-         PcVFh+VCh7R2HaqZz7+QEmHnLX9Tm4Y3TC2zjUBC6NE9lWedfPnF3XnQGJwXPYizgXK4
-         c9UFTHbHUbZbi5ks58kONDXmLBbj6xbyfkobl5MU8lDrMpK3zuGTtQrm/D/lgqkuZENg
-         PGuw==
-X-Gm-Message-State: AC+VfDzJKwt7RYLcrNmvZcy3tU1uRv90Dg17QRh5ibFdtixs1KWxY9bi
-        WrzU3DrERIOFHE9RJveelqgGCw==
-X-Google-Smtp-Source: ACHHUZ6hZAM4kdxPqqCWUmLdy8xpkePKc6Yh0uuXCecerl6cvHyj8SdpLKLlZ5RbzXKMZPA6x1SApQ==
-X-Received: by 2002:a17:907:d89:b0:966:168d:8c9 with SMTP id go9-20020a1709070d8900b00966168d08c9mr7708879ejc.32.1683577659344;
-        Mon, 08 May 2023 13:27:39 -0700 (PDT)
-Received: from ?IPV6:2a02:810d:15c0:828:d19b:4e0f:cfe4:a1ac? ([2a02:810d:15c0:828:d19b:4e0f:cfe4:a1ac])
-        by smtp.gmail.com with ESMTPSA id w10-20020a170907270a00b00965e9a23f2bsm388691ejk.134.2023.05.08.13.27.38
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 08 May 2023 13:27:38 -0700 (PDT)
-Message-ID: <669ba770-4ee1-e7e3-0692-51e6d6df0229@linaro.org>
-Date:   Mon, 8 May 2023 22:27:37 +0200
+        d=1e100.net; s=20221208; t=1683579297; x=1686171297;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ebgkfCiodiKcun60kKBUwZij72grfP4UOmjlc+G6i8I=;
+        b=FP13YrxJtDAgKA079pfOPoVm4Lj+gl01O0OjFe/Oz7BF0PYcg0BPDj7Gxc3JY998vG
+         cTESoNNqsWl0mnhgo7H93B/2cIj4nQMIgYxtSOUQGg6lT3OAMgv4rDeK9v587uz4v3RB
+         /mXSa7tv1ZtVR2taNuTZE1bIuWdGXPFHdHTf22zSvojiSIErT9zc2pr/aYrvbR54v3MG
+         CRMGS/Xe32fjwhS8tGFrQfDYbpGPyYx8HkGlKImbaGnJ6FH+SeqQZNKSqmLQs0YnMtfs
+         7zW1FDMnGOBAHBoAwmPVOHhVk0n5aQdqiUj5giQ3sC9JW/axjl/dc+TvjeOp+5pqTwPS
+         Mjpw==
+X-Gm-Message-State: AC+VfDxR2WkfWYCQUdixc0GUK0SjYwvRUlpkPyXctt3vnlbRTiwSbjPj
+        nyeDfc0Su1Lj2MswOn7s+ZpvbkxsEuCnvrFHR5adkw==
+X-Google-Smtp-Source: ACHHUZ61Co9c2vfFGtG+tpLFRQ4UHj1QYb0g4ygOt03JqCB/lCRGyKCa19BWVLj8Nu27zbXZko10yxza9yB0luPTCMc=
+X-Received: by 2002:a25:54b:0:b0:b99:f279:10dc with SMTP id
+ 72-20020a25054b000000b00b99f27910dcmr12394809ybf.28.1683579297026; Mon, 08
+ May 2023 13:54:57 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
-Content-Language: en-US
-To:     Stanislav Jakubek <stano.jakubek@gmail.com>,
+References: <20230430-nokia770-regression-v3-0-a6d0a89ffa8b@linaro.org>
+ <20230430-nokia770-regression-v3-1-a6d0a89ffa8b@linaro.org> <ZFkSMBhw5UaWdpsM@surfacebook>
+In-Reply-To: <ZFkSMBhw5UaWdpsM@surfacebook>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Mon, 8 May 2023 22:54:45 +0200
+Message-ID: <CACRpkda8zbR3CnRp5w=NvRder1rYTs+DYZN0QyhneDwR1E_qUA@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] Input: ads7846 - Convert to use software nodes
+To:     andy.shevchenko@gmail.com
+Cc:     Aaro Koskinen <aaro.koskinen@iki.fi>,
+        Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
         Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Florian Fainelli <f.fainelli@gmail.com>,
-        Ray Jui <rjui@broadcom.com>,
-        Scott Branden <sbranden@broadcom.com>
-Cc:     bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
- <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-In-Reply-To: <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 08/05/2023 14:46, Stanislav Jakubek wrote:
-> Convert Broadcom Kona family SDHCI controller bindings to DT schema.
-> 
-> Changes during conversion:
->   - also mark reg and interrupts as required
->   - drop deprecated compatible (it's been deprecated for ~10 years)
+On Mon, May 8, 2023 at 5:16=E2=80=AFPM <andy.shevchenko@gmail.com> wrote:
+> Fri, May 05, 2023 at 01:16:55PM +0200, Linus Walleij kirjoitti:
 
+> > The Nokia 770 is using GPIOs from the global numberspace on the
+> > CBUS node to pass down to the LCD controller. This regresses when we
+> > let the OMAP GPIO driver use dynamic GPIO base.
+(...)
 
-> +
-> +examples:
-> +  - |
-> +    #include <dt-bindings/interrupt-controller/arm-gic.h>
-> +    #include <dt-bindings/interrupt-controller/irq.h>
-> +    #include "dt-bindings/clock/bcm281xx.h"
+> >  #include <linux/gpio.h>
+>
+> Do we need it after this patch?
 
-Why different than <>? Keep <>.
+Yes, but it is finally removed in patch 3/3!
 
-With above:
+Fixed the rest, thanks!
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-
-Best regards,
-Krzysztof
-
+Yours,
+Linus Walleij
