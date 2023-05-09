@@ -2,182 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A93FC7EE22
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 10:10:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36F11C77B7C
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 10:10:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235127AbjEIKKq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 May 2023 06:10:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48450 "EHLO
+        id S235134AbjEIKKu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 May 2023 06:10:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48874 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235025AbjEIKKm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 06:10:42 -0400
-Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A601100CB
-        for <linux-mmc@vger.kernel.org>; Tue,  9 May 2023 03:10:36 -0700 (PDT)
-Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-55a79671a4dso86996557b3.2
-        for <linux-mmc@vger.kernel.org>; Tue, 09 May 2023 03:10:36 -0700 (PDT)
+        with ESMTP id S235108AbjEIKKp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 06:10:45 -0400
+Received: from mail-yw1-x112c.google.com (mail-yw1-x112c.google.com [IPv6:2607:f8b0:4864:20::112c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7717BE73F
+        for <linux-mmc@vger.kernel.org>; Tue,  9 May 2023 03:10:40 -0700 (PDT)
+Received: by mail-yw1-x112c.google.com with SMTP id 00721157ae682-55a10577911so81843297b3.0
+        for <linux-mmc@vger.kernel.org>; Tue, 09 May 2023 03:10:40 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1683627035; x=1686219035;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=Ef9WZn+vGlhv+lG0ytwmAyd399ywtt6jDc14qY1cjbQ=;
-        b=p3+RN0+ELfyNijCECaZOoeyk8YzW732gDG9012If8DTmU+vsd+GZ7KQoqMig/2NkFZ
-         G6kuvsvfbW+TggxzfLcjLS0Xc5wVxhgY5HhGioXdQluRE5rEoIo8qz+xMf9jL6LJ6RYf
-         BFL7QdrFiIFSQoYIGe/63iTzD8jZ2XsEBDYpF23mMhqoJKT/R9Z5xrKMbvu5cdq7eKZR
-         v+hBDQfdYh6EBETO81ypxFhtxBjosxGbf/m+pj+2q7x2MJxFvTSxXww0TI+NtyQpG9L4
-         Rk8uOrtNjHjilNeZecVefaXDIWOm02rvuzcLiuVkYnTj9IEr31edmYHYO/YKPWES8TBz
-         MpCg==
+        d=linaro.org; s=google; t=1683627039; x=1686219039;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=9PD/4wFlKgwhTb+3VkQbjoaWj4CSHaFf0HIucSINi2g=;
+        b=llXJ3DEvqjj+hilBJmj+6N5Jm0D7CqeCzSrph9sqI+XpFjUyZRVynpAExlo7cVzyAb
+         g+2V/2Q0Rb/G9Bdqo5xrGD/BuS/o1INSjKAh90W+V9EH1HkqLlcuxMMbdGTG3QZTBPUd
+         mwetj9c3i6B9WPgKhIdtCBOhL5qrIqFDFWgSpDMTigPvo9tZReM0jn+7R2IM78X910yM
+         1HdZaJ9suaXs+gd0otFGCm4Tj/IMiucMsOYFC034hEAg8sL982eC8zaXdOFh2A1hBMdy
+         Vw4F6WJHTC12FzMlABLUar1vZfJC9zK7u8Mq6Z/dCTc235d3d2HnLfs8uwFvsZceI/dY
+         VXgg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683627035; x=1686219035;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=Ef9WZn+vGlhv+lG0ytwmAyd399ywtt6jDc14qY1cjbQ=;
-        b=T2Vw1qNOe67M4Zd54WmdwBf7W6lw1kTo9BM1x7mZzvFozFUDNObhl0hyKUltBljBbD
-         HQl5PwFm9iVnL0WReGuKxxHJo6XDnJtBjqkPq/ycSP/EOH6t8mkp7K+qcoVKfKbd0cbB
-         2U/Y2fuBMtacGPWAr9rrdp6ahC2sAikrs/u5ENfpdoR3pdnFeU4ELcputE6glExKWfOq
-         51gJKnZROS99/jBeyNdFZHbgRbTUe7eIk9AuiTatnBCbOIaww8/Bx1cWBoS2D/mdwdCI
-         kSi4m8d5ckjB3LH5D7EY6JNGLJWCZbI7JN2MKUGYRY6R91wQQAx8+7PBqUngk0kaVMcG
-         6gNQ==
-X-Gm-Message-State: AC+VfDw/qekHJ5NiNAM85nW/CU/LUQA12swX4dZUKUDySJlTqmp0Ows8
-        xsHd0ulJJIQRw+d32W/OLf0cBBh1gpJcitYO6X3h3bOz2bE/1Hgf
-X-Google-Smtp-Source: ACHHUZ5ROOThUciJ/bW45KiAyJ5q1WTcqQ3hQ1OyXaOc7IZn6H20BGlbr6FJvp9UK8j69N6A0xEzvEBd8QMC3TXzFVA=
-X-Received: by 2002:a0d:c641:0:b0:54f:23a:4c64 with SMTP id
- i62-20020a0dc641000000b0054f023a4c64mr15218292ywd.2.1683627035369; Tue, 09
- May 2023 03:10:35 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1683627039; x=1686219039;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=9PD/4wFlKgwhTb+3VkQbjoaWj4CSHaFf0HIucSINi2g=;
+        b=JZyiNOS1RNSV0ilan6Sk13zIJZrXt64j7aQ73UWJjhQxdGbxjIF3eOWz97qXmbeyP+
+         5f0doy/B89r6kyyetR3ae+h1LO0DxDWdyWkMN9dKrtCkBChgcJgnxpmlembE2iP8xpxw
+         RWxnp1usS4VBvVJbXjVHFQB3ASP/p6tfNOstke6BdayOS5aUMbNklNtEfIUTh9QsvTI/
+         CXuL9QmPiCMjKrm1zoM02I+lNJR3e133/jlQXsCv3MYNue3oxZqlsm4cfcKA2c0O03SE
+         51ynZ7Pvei40iW8MYjoUobQafz+GMF4k2+Imw6kYGGQ7CS+lNho6vYZ6T/7xxw8U6ofW
+         iYGQ==
+X-Gm-Message-State: AC+VfDxEXJEu732un2pqMhY4Fh1+i2CvOrOtfGkr9/cmZ2tCb+4vmO2J
+        KE22qTJdbQkGb129wLlBnNmvTCrmk2SP+T9BhEVXzIBoZGa7pshP
+X-Google-Smtp-Source: ACHHUZ7KKVqtqMUy2P63Qu3FA700p5MYckoU8Fxlsax9PIG3qpJhEDnpIUfzmbsfk5BVQv958NOmYEm0yV1Z3bksiNA=
+X-Received: by 2002:a0d:f281:0:b0:560:beeb:6fc1 with SMTP id
+ b123-20020a0df281000000b00560beeb6fc1mr1136013ywf.16.1683627039658; Tue, 09
+ May 2023 03:10:39 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230505221506.1247424-1-u.kleine-koenig@pengutronix.de>
-In-Reply-To: <20230505221506.1247424-1-u.kleine-koenig@pengutronix.de>
+References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
+ <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
+ <669ba770-4ee1-e7e3-0692-51e6d6df0229@linaro.org>
+In-Reply-To: <669ba770-4ee1-e7e3-0692-51e6d6df0229@linaro.org>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Tue, 9 May 2023 12:09:59 +0200
-Message-ID: <CAPDyKFrRt-bygnLrPB7rdvHRmsC4zeA+KfxPZDs9NZQnLSEm7g@mail.gmail.com>
-Subject: Re: [PATCH] mmc: dw_mmc: Make dw_mci_pltfm_remove() return void
-To:     =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= 
-        <u.kleine-koenig@pengutronix.de>
-Cc:     Jaehoon Chung <jh80.chung@samsung.com>,
-        William Qiu <william.qiu@starfivetech.com>,
-        linux-mmc@vger.kernel.org, kernel@pengutronix.de
+Date:   Tue, 9 May 2023 12:10:03 +0200
+Message-ID: <CAPDyKFqHsdQyTRWVPhPZk_sqy7j68-b1-SAcPQ8nrPpW8qNb_g@mail.gmail.com>
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
+To:     Stanislav Jakubek <stano.jakubek@gmail.com>,
+        Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+Cc:     Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Florian Fainelli <f.fainelli@gmail.com>,
+        Ray Jui <rjui@broadcom.com>,
+        Scott Branden <sbranden@broadcom.com>,
+        bcm-kernel-feedback-list@broadcom.com, linux-mmc@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Sat, 6 May 2023 at 00:15, Uwe Kleine-K=C3=B6nig
-<u.kleine-koenig@pengutronix.de> wrote:
+On Mon, 8 May 2023 at 22:27, Krzysztof Kozlowski
+<krzysztof.kozlowski@linaro.org> wrote:
 >
-> dw_mci_pltfm_remove() returned zero unconditionally. Make it return void
-> instead which makes its semantics a bit clearer.
+> On 08/05/2023 14:46, Stanislav Jakubek wrote:
+> > Convert Broadcom Kona family SDHCI controller bindings to DT schema.
+> >
+> > Changes during conversion:
+> >   - also mark reg and interrupts as required
+> >   - drop deprecated compatible (it's been deprecated for ~10 years)
 >
-> Convert the drivers that use this function as .remove() callback to
-> .remove_new() which has the right prototype. This helps getting rid of
-> the platform_driver's remove callback that returns an int (which is
-> error prone). The other users didn't check the return value anyhow.
 >
-> Signed-off-by: Uwe Kleine-K=C3=B6nig <u.kleine-koenig@pengutronix.de>
+> > +
+> > +examples:
+> > +  - |
+> > +    #include <dt-bindings/interrupt-controller/arm-gic.h>
+> > +    #include <dt-bindings/interrupt-controller/irq.h>
+> > +    #include "dt-bindings/clock/bcm281xx.h"
+>
+> Why different than <>? Keep <>.
 
-Applied for next, thanks!
+I have fixed this up when applying, no need to re-spin.
+
+>
+> With above:
+>
+> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
+>
+> Best regards,
+> Krzysztof
+>
+
+So, applied for next, thanks
 
 Kind regards
 Uffe
-
-
-> ---
->  drivers/mmc/host/dw_mmc-bluefield.c | 2 +-
->  drivers/mmc/host/dw_mmc-k3.c        | 2 +-
->  drivers/mmc/host/dw_mmc-pltfm.c     | 5 ++---
->  drivers/mmc/host/dw_mmc-pltfm.h     | 2 +-
->  drivers/mmc/host/dw_mmc-starfive.c  | 2 +-
->  5 files changed, 6 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/mmc/host/dw_mmc-bluefield.c b/drivers/mmc/host/dw_mm=
-c-bluefield.c
-> index 10baf122bc15..4747e5698f48 100644
-> --- a/drivers/mmc/host/dw_mmc-bluefield.c
-> +++ b/drivers/mmc/host/dw_mmc-bluefield.c
-> @@ -52,7 +52,7 @@ static int dw_mci_bluefield_probe(struct platform_devic=
-e *pdev)
->
->  static struct platform_driver dw_mci_bluefield_pltfm_driver =3D {
->         .probe          =3D dw_mci_bluefield_probe,
-> -       .remove         =3D dw_mci_pltfm_remove,
-> +       .remove_new     =3D dw_mci_pltfm_remove,
->         .driver         =3D {
->                 .name           =3D "dwmmc_bluefield",
->                 .probe_type     =3D PROBE_PREFER_ASYNCHRONOUS,
-> diff --git a/drivers/mmc/host/dw_mmc-k3.c b/drivers/mmc/host/dw_mmc-k3.c
-> index 0311a37dd4ab..e8ee7c43f60b 100644
-> --- a/drivers/mmc/host/dw_mmc-k3.c
-> +++ b/drivers/mmc/host/dw_mmc-k3.c
-> @@ -470,7 +470,7 @@ static const struct dev_pm_ops dw_mci_k3_dev_pm_ops =
-=3D {
->
->  static struct platform_driver dw_mci_k3_pltfm_driver =3D {
->         .probe          =3D dw_mci_k3_probe,
-> -       .remove         =3D dw_mci_pltfm_remove,
-> +       .remove_new     =3D dw_mci_pltfm_remove,
->         .driver         =3D {
->                 .name           =3D "dwmmc_k3",
->                 .probe_type     =3D PROBE_PREFER_ASYNCHRONOUS,
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.c b/drivers/mmc/host/dw_mmc-pl=
-tfm.c
-> index 13e55cff8237..567dce73f205 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.c
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.c
-> @@ -122,18 +122,17 @@ static int dw_mci_pltfm_probe(struct platform_devic=
-e *pdev)
->         return dw_mci_pltfm_register(pdev, drv_data);
->  }
->
-> -int dw_mci_pltfm_remove(struct platform_device *pdev)
-> +void dw_mci_pltfm_remove(struct platform_device *pdev)
->  {
->         struct dw_mci *host =3D platform_get_drvdata(pdev);
->
->         dw_mci_remove(host);
-> -       return 0;
->  }
->  EXPORT_SYMBOL_GPL(dw_mci_pltfm_remove);
->
->  static struct platform_driver dw_mci_pltfm_driver =3D {
->         .probe          =3D dw_mci_pltfm_probe,
-> -       .remove         =3D dw_mci_pltfm_remove,
-> +       .remove_new     =3D dw_mci_pltfm_remove,
->         .driver         =3D {
->                 .name           =3D "dw_mmc",
->                 .probe_type     =3D PROBE_PREFER_ASYNCHRONOUS,
-> diff --git a/drivers/mmc/host/dw_mmc-pltfm.h b/drivers/mmc/host/dw_mmc-pl=
-tfm.h
-> index 2d50d7da2e36..64cf7522a3d4 100644
-> --- a/drivers/mmc/host/dw_mmc-pltfm.h
-> +++ b/drivers/mmc/host/dw_mmc-pltfm.h
-> @@ -10,7 +10,7 @@
->
->  extern int dw_mci_pltfm_register(struct platform_device *pdev,
->                                 const struct dw_mci_drv_data *drv_data);
-> -extern int dw_mci_pltfm_remove(struct platform_device *pdev);
-> +extern void dw_mci_pltfm_remove(struct platform_device *pdev);
->  extern const struct dev_pm_ops dw_mci_pltfm_pmops;
->
->  #endif /* _DW_MMC_PLTFM_H_ */
-> diff --git a/drivers/mmc/host/dw_mmc-starfive.c b/drivers/mmc/host/dw_mmc=
--starfive.c
-> index dab1508bf83c..fd05a648a8bb 100644
-> --- a/drivers/mmc/host/dw_mmc-starfive.c
-> +++ b/drivers/mmc/host/dw_mmc-starfive.c
-> @@ -172,7 +172,7 @@ static int dw_mci_starfive_probe(struct platform_devi=
-ce *pdev)
->
->  static struct platform_driver dw_mci_starfive_driver =3D {
->         .probe =3D dw_mci_starfive_probe,
-> -       .remove =3D dw_mci_pltfm_remove,
-> +       .remove_new =3D dw_mci_pltfm_remove,
->         .driver =3D {
->                 .name =3D "dwmmc_starfive",
->                 .probe_type =3D PROBE_PREFER_ASYNCHRONOUS,
->
-> base-commit: 457391b0380335d5e9a5babdec90ac53928b23b4
-> --
-> 2.39.2
->
