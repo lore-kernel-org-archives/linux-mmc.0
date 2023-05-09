@@ -2,53 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2E7C0C7EE25
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 21:20:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0A842C7EE25
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 21:24:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235777AbjEIVUa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 May 2023 17:20:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38198 "EHLO
+        id S236255AbjEIVYy (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 May 2023 17:24:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37588 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235779AbjEIVUG (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 17:20:06 -0400
-Received: from mail-pj1-x102b.google.com (mail-pj1-x102b.google.com [IPv6:2607:f8b0:4864:20::102b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 98A7C6582;
-        Tue,  9 May 2023 14:19:56 -0700 (PDT)
-Received: by mail-pj1-x102b.google.com with SMTP id 98e67ed59e1d1-24deb9c5ffcso4436503a91.1;
-        Tue, 09 May 2023 14:19:56 -0700 (PDT)
+        with ESMTP id S236173AbjEIVYa (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 17:24:30 -0400
+Received: from mail-qv1-xf32.google.com (mail-qv1-xf32.google.com [IPv6:2607:f8b0:4864:20::f32])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A7887AB8;
+        Tue,  9 May 2023 14:21:56 -0700 (PDT)
+Received: by mail-qv1-xf32.google.com with SMTP id 6a1803df08f44-61b5a653df7so58760706d6.0;
+        Tue, 09 May 2023 14:21:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1683667196; x=1686259196;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=U2yUTsSYh4P6rDmZ2cLSA1mU3F3qw3C0KhflQYhVRTg=;
-        b=e7iGL5jHVtBSIbB0hVQOXoSRC3oreda5HYHrPQJlPSUEkPySTape0TlpPkKwCWAQ70
-         YnC4GlZv0WvLptoMI1XRE006QRrtgFFBgZbfnGWygvyy7oRenj61YCir6/cxQFwvL3Q/
-         5ETXoYXEfkW0qjjN7cjneCXf0Bn8ljeXiozTrP0+TiEFMdblfx5T24MS4GRonw6UOEjC
-         Ixr3QHppe9hfXj79n1/+wqe/nc/YkglgWsipCWurEkbtQxH33c824xTYhxYZwDZmsLn/
-         ecAdlvbIVRaJAE8ArktQQK/281cDeC05YH2P1Y+IgRAr7NhKqtfpQIIVqBH2DX+E0Pt7
-         EQgg==
+        d=gmail.com; s=20221208; t=1683667257; x=1686259257;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=7ZGWO1kPdJmcL/B4Vp8uEGUKDR4PKEQffccvM6HpXCU=;
+        b=JZvw+/ajuk00Lo7e1gHcEQ2u6nuePYCFq0krtr5dkEnHq8NpnCj8kYR5Bg58XqoJJT
+         WBSAh8nlAieGuQ9Ym70mJ239o8MRbIpUVdtK3YR/MXaQBnF9HAoxZDrWXWppvmXi+u5e
+         Pihqa4xbbiJD9TG7yd5HRd0rJT1TVF4CoG4DeVFnCG7o8K5wfg8RcAAmke9DguXEoz/Y
+         JgN+uyAcBQ4njsvtCqigI+VY8LcIc28stZDdJmJ9De325yCVAmTuxY6w67Ku9h6QhNEp
+         /WZcU+FMQThVOwGBxzQASXrkx5L8KZTXYHAmW+knOvNYSk5POGTyUiEdpoGN36l6RdOw
+         IrVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683667196; x=1686259196;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=U2yUTsSYh4P6rDmZ2cLSA1mU3F3qw3C0KhflQYhVRTg=;
-        b=X63jLOEfiCxWoE2ga0v8xCngbkiEViCWgABfLExRc/ymV1BzElFnQYbaSuXC9jA7ap
-         w8M4zGueCQZkNCPTUHuZ20wgFlV9yLK+7tMfv572U3ztNfnkddvoUhI5FwNK2zjGYYN9
-         wwv6sZVj/9KpkSNyBke5cSnHp5j14yfH5GcucGVyq3JLAKDskdnceVkH8k91H2L/38bK
-         L0y8dQ9haLPcER53m50x/oPZpHPKCmnABAeQn4NSXuL+DckzXh6DTqNofeNXtK4lP2bK
-         k1jSdz+IPNoFEM4HMoX5FbIf6ddoJDoSW/zu1omOF/RT1vbwWq0p+lvFAnGDNSYCFXQX
-         l6Ag==
-X-Gm-Message-State: AC+VfDyImoxK8rwe2sy044uaJykr72NYcLYmI0oRrvL0OX0l2cAc7zOH
-        lBqDdxEketA6vqeBSwUGRTRUG7R39+c=
-X-Google-Smtp-Source: ACHHUZ6pd/LY0/BhziRNHxFzgEW6DwFIOWaiYa0ix7s71nq7Z13gkAn4eoGRRu8WUZLWVBpq3ojmzA==
-X-Received: by 2002:a17:90b:3708:b0:24e:1ca2:bf0d with SMTP id mg8-20020a17090b370800b0024e1ca2bf0dmr14657167pjb.40.1683667195874;
-        Tue, 09 May 2023 14:19:55 -0700 (PDT)
-Received: from fainelli-desktop.igp.broadcom.net ([192.19.223.252])
-        by smtp.gmail.com with ESMTPSA id fs9-20020a17090af28900b002470f179b92sm12142881pjb.43.2023.05.09.14.19.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 09 May 2023 14:19:55 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1683667257; x=1686259257;
+        h=content-transfer-encoding:in-reply-to:references:cc:to:from
+         :content-language:subject:user-agent:mime-version:date:message-id
+         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=7ZGWO1kPdJmcL/B4Vp8uEGUKDR4PKEQffccvM6HpXCU=;
+        b=CAvZdufUBcfiJB1iBxMm4O89pH8wqS9wen9+XnVjAGMrrKTdKrOeDTq8mKF61gyJVE
+         GQppjHDu/wgdeKe1pksAMC/Bq3hCCSj6rsHMd7IKjW92uk/8UEKXtRQ//mIunqgyozDN
+         AkJM2MfwOS8WicEuZuE7fxpm75C8ZbYmI+bz7gRhReRV9/khTNxt3WCdTkgRywMlRTXA
+         16XshebeU/1BF1KbVipJbzIzEKLkUbDINQD+0PfuhQZ3/91jiBVeh181oGCXpkgzG+oI
+         1qwolsrAiKlyxjCwpPurjdOY9i0PbjpzKd9swWivLnT2SSCCgsGInzGQMczAlHT/UAAw
+         N1lQ==
+X-Gm-Message-State: AC+VfDxM5WZUMrCalbdSmquGg0uojGaWqvZA61WbgFv1QVPQqk8CVyrO
+        P1SaozDT0BSGhYQ38Kc+u8gqfla3Ph0=
+X-Google-Smtp-Source: ACHHUZ5mP3MWlk3DaY+oHOzqqtGvflFGiLKU+Ad6aByDnCT3TO5o4bRFt6+T9eRvI/gKIiaDpji62g==
+X-Received: by 2002:a05:6214:260c:b0:614:da60:f45d with SMTP id gu12-20020a056214260c00b00614da60f45dmr25975131qvb.30.1683667256985;
+        Tue, 09 May 2023 14:20:56 -0700 (PDT)
+Received: from [10.67.48.245] ([192.19.223.252])
+        by smtp.googlemail.com with ESMTPSA id b3-20020a0cf043000000b00620b99149d9sm1042949qvl.91.2023.05.09.14.20.54
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 09 May 2023 14:20:56 -0700 (PDT)
+Message-ID: <c90f4cf0-0571-3b5d-8ea9-aa8f0ecaadec@gmail.com>
+Date:   Tue, 9 May 2023 14:20:53 -0700
+MIME-Version: 1.0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.10.0
+Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
+Content-Language: en-US
 From:   Florian Fainelli <f.fainelli@gmail.com>
 To:     bcm-kernel-feedback-list@broadcom.com,
         Stanislav Jakubek <stano.jakubek@gmail.com>,
@@ -60,28 +67,30 @@ To:     bcm-kernel-feedback-list@broadcom.com,
         Scott Branden <sbranden@broadcom.com>
 Cc:     linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org
-Subject: Re: [PATCH 2/2] dt-bindings: mmc: brcm,kona-sdhci: convert to YAML
-Date:   Tue,  9 May 2023 14:19:53 -0700
-Message-Id: <20230509211953.1796591-1-f.fainelli@gmail.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
-References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com> <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <88c64da50a1af868d8b14054c440e5ff96a63399.1683548624.git.stano.jakubek@gmail.com>
+ <a1fd4092b8a31c2ee58a3cd4cca062db13197b45.1683548624.git.stano.jakubek@gmail.com>
+ <20230509211953.1796591-1-f.fainelli@gmail.com>
+In-Reply-To: <20230509211953.1796591-1-f.fainelli@gmail.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 8 May 2023 14:46:03 +0200, Stanislav Jakubek <stano.jakubek@gmail.com> wrote:
-> Convert Broadcom Kona family SDHCI controller bindings to DT schema.
+On 5/9/23 14:19, Florian Fainelli wrote:
+> On Mon, 8 May 2023 14:46:03 +0200, Stanislav Jakubek <stano.jakubek@gmail.com> wrote:
+>> Convert Broadcom Kona family SDHCI controller bindings to DT schema.
+>>
+>> Changes during conversion:
+>>    - also mark reg and interrupts as required
+>>    - drop deprecated compatible (it's been deprecated for ~10 years)
+>>
+>> Signed-off-by: Stanislav Jakubek <stano.jakubek@gmail.com>
+>> ---
 > 
-> Changes during conversion:
->   - also mark reg and interrupts as required
->   - drop deprecated compatible (it's been deprecated for ~10 years)
-> 
-> Signed-off-by: Stanislav Jakubek <stano.jakubek@gmail.com>
-> ---
+> Applied to https://github.com/Broadcom/stblinux/commits/devicetree/next, thanks!
 
-Applied to https://github.com/Broadcom/stblinux/commits/devicetree/next, thanks!
---
+Sorry, that's not the one I intended to apply, dropped.
+-- 
 Florian
+
