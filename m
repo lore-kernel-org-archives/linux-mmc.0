@@ -2,74 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B19FFC7EE24
-	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 11:28:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B5C07C7EE23
+	for <linux-mmc@archiver.kernel.org>; Tue,  9 May 2023 16:16:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235374AbjEIL2h convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 9 May 2023 07:28:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47422 "EHLO
+        id S229738AbjEIQQc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 9 May 2023 12:16:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42438 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235366AbjEIL2h (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 07:28:37 -0400
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8B50B4237;
-        Tue,  9 May 2023 04:28:33 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 0A1CA62E1AB9;
-        Tue,  9 May 2023 13:28:21 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id KYzEnNfPnUEk; Tue,  9 May 2023 13:28:20 +0200 (CEST)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 99407614E2C7;
-        Tue,  9 May 2023 13:28:20 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id 6wrSyTHIju50; Tue,  9 May 2023 13:28:20 +0200 (CEST)
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 799CF62E1AB9;
-        Tue,  9 May 2023 13:28:20 +0200 (CEST)
-Date:   Tue, 9 May 2023 13:28:20 +0200 (CEST)
-From:   Richard Weinberger <richard@nod.at>
-To:     Christian Loehle <CLoehle@hyperstone.com>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
-        wsa+renesas <wsa+renesas@sang-engineering.com>,
-        ulf hansson <ulf.hansson@linaro.org>
-Message-ID: <615854031.8233438.1683631700226.JavaMail.zimbra@nod.at>
-In-Reply-To: <398e244a4d3746f1bd7b4c32d1ea70e3@hyperstone.com>
-References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at> <971572458.117024.1681798584774.JavaMail.zimbra@nod.at> <02ceda502af34bf0af53d52598a0b71f@hyperstone.com> <522326845.127346.1681805484949.JavaMail.zimbra@nod.at> <f50de2461dae4931abf3f0216b836fd1@hyperstone.com> <1186364892.150923.1681819136247.JavaMail.zimbra@nod.at> <1273293952.226564.1682003880265.JavaMail.zimbra@nod.at> <398e244a4d3746f1bd7b4c32d1ea70e3@hyperstone.com>
-Subject: Re: Poor write performance to boot area using rcar-gen3-sdhi
+        with ESMTP id S235659AbjEIQQb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 9 May 2023 12:16:31 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 68DDD4201;
+        Tue,  9 May 2023 09:16:29 -0700 (PDT)
+Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 349CuDeq030500;
+        Tue, 9 May 2023 16:16:26 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=date : from : to :
+ cc : subject : message-id : references : mime-version : content-type :
+ in-reply-to; s=qcppdkim1; bh=5QjsPrySGpUbdD0FnigO/E6A7H438BUPnM4ByTuH7AQ=;
+ b=BYxkeJ2IL+q5zZGsfUY0iL0/2+vs4GjWZ0jaDn5Pjqw0pxCrBkWfgNHxl8R145ux8YAN
+ qFMYC/XPjqX6L6xOvuYYAu/692+pLq/lGcR1QVt1v20+uYPpXiIvA51y455WjnUFoBPZ
+ 8ho4GzRwHNFtw9JrNRfgozG/L59iNQHW9DaJKfcnlf8C4CE3nhzYwDN3BOCZGtPyLr/G
+ OtT23califun/KwPvgusU9ZHyMTZ+t+piwnKyWF4NEzEBnKv6adzMWe+2BVufdZdllr7
+ hqqfUE/CXfrYpcWJMYK6Esz0Rcp8crllWRMzKmITLRgms4+5tzMlNYDkDOFzte67dZNZ mg== 
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qf785a9vg-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 09 May 2023 16:16:25 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 349GGOrO030226
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 9 May 2023 16:16:24 GMT
+Received: from hu-bjorande-lv.qualcomm.com (10.49.16.6) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Tue, 9 May 2023 09:16:24 -0700
+Date:   Tue, 9 May 2023 09:16:23 -0700
+From:   Bjorn Andersson <quic_bjorande@quicinc.com>
+To:     Manivannan Sadhasivam <manivannan.sadhasivam@linaro.org>
+CC:     Bjorn Andersson <andersson@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Andy Gross <agross@kernel.org>, <linux-mmc@vger.kernel.org>,
+        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
+        <linux-arm-msm@vger.kernel.org>
+Subject: Re: [PATCH 2/2] arm64: dts: qcom: sc8280xp: Add SDC2 and enable on
+ CRD
+Message-ID: <20230509161623.GA1765076@hu-bjorande-lv.qualcomm.com>
+References: <20230509030136.1524860-1-quic_bjorande@quicinc.com>
+ <20230509030136.1524860-2-quic_bjorande@quicinc.com>
+ <20230509063205.GB4823@thinkpad>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-X-Originating-IP: [195.201.40.130]
-X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
-Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
-Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOAvOJ8Zmh6KUsXr/ZciBcB4n5SQpQ==
+Content-Type: text/plain; charset="us-ascii"
+Content-Disposition: inline
+In-Reply-To: <20230509063205.GB4823@thinkpad>
+X-Originating-IP: [10.49.16.6]
+X-ClientProxiedBy: nalasex01c.na.qualcomm.com (10.47.97.35) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: qvhDOJOxOWEnRBzREsu_HozggY17A0yV
+X-Proofpoint-GUID: qvhDOJOxOWEnRBzREsu_HozggY17A0yV
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-05-09_09,2023-05-05_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 suspectscore=0 phishscore=0
+ bulkscore=0 adultscore=0 priorityscore=1501 mlxlogscore=959
+ lowpriorityscore=0 malwarescore=0 mlxscore=0 impostorscore=0 clxscore=1011
+ spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2305090133
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
------ Ursprüngliche Mail -----
-> Von: "Christian Loehle" <CLoehle@hyperstone.com>
-> There are probably some more differences if you really want to go down that
-> rabbit hole,
-> like different bus modes for uboot and linux.
-> Anyway I don't really know how I could help you out here, if you could provide a
-> trace showing the busy times,
-> that would be a smoking gun for the eMMC vendor.
+On Tue, May 09, 2023 at 12:02:05PM +0530, Manivannan Sadhasivam wrote:
+> On Mon, May 08, 2023 at 08:01:36PM -0700, Bjorn Andersson wrote:
+> > diff --git a/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts b/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
+[..]
+> > +	sdc2_default_state: sdc2-default-state {
+[..]
+> > +		card-detect-pins {
+> > +			pins = "gpio131";
+> > +			function = "gpio";
+> > +			drive-strength = <2>;
+> > +			bias-disable;
+> 
+> Since the card detect is active low, shouldn't the pin be pulled high to avoid
+> floating? Or is there an external pull up available on the board?
+> 
 
-So I went down the rabbit hole.
-After analyzing the operation traces from Linux and u-boot in more detail I had
-another chat with the vendor. It turned out their boot area *is* different,
-it operates on a much larger internal block size.
+There's an external pull up resistor to vreg_s10b, so there shouldn't be
+any reason to pull it internally as well.
 
-While u-boot does basically all IO with one op code, Linux's writeback
-via page cache writes 4k wise which leads to catastrophic performance.
-Using O_DIRECT mitigates the issue, though.
-
-Thanks everyone for your valuable input!
-//richard
+Regards,
+Bjorn
