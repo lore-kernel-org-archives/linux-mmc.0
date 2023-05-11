@@ -2,128 +2,98 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E554C7EE25
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 May 2023 06:19:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEF3EC7EE24
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 May 2023 09:46:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236976AbjEKGTg (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 May 2023 02:19:36 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41608 "EHLO
+        id S237375AbjEKJq0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 May 2023 05:46:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33358 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236163AbjEKGTf (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2023 02:19:35 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 938243A89;
-        Wed, 10 May 2023 23:19:34 -0700 (PDT)
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34B6JKtS022130;
-        Thu, 11 May 2023 06:19:20 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=MFmlOXzWKlh6xmSzF7dgNVpK+OIYZ+my/PD5cZRH0Tk=;
- b=at7kA05jLfwkpUtE+uP0nW2kx43EWJMeQyT8Qpo96asw/C8HlLDHePVoi73bkTVTZ4ir
- QTt4VcbsoD5A7Oeme82hPHWU9/yxmPgpC6XN8Ge7gLtFJxRxXCZgn8nFyYneIBumjkat
- 7jhHv23jkvzeaW3IHczKg3p7NpqdMF1xxbzjRBqlJ9kaue5s8zLG63LrG8d2dCCxLFXQ
- bcOsHT+SCVWQeuODzetRp73SVHWIeW7UXzMbctutoxM35VVy8d+appt3lhoSh0R8G/os
- ayQGVVTAgIDuanu2FeMkk26y+MJiifHUlRdN0Zght5pj7Y0qhTaDnty32vn6ZSsffU2G uw== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qggen92k3-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 11 May 2023 06:19:19 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34B6JI98010116
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 11 May 2023 06:19:18 GMT
-Received: from [10.201.3.182] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Wed, 10 May
- 2023 23:19:12 -0700
-Message-ID: <a9437620-6946-16a9-1b13-faaf34fa5d48@quicinc.com>
-Date:   Thu, 11 May 2023 11:49:10 +0530
-MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH v4 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+        with ESMTP id S236419AbjEKJq0 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2023 05:46:26 -0400
+Received: from mail5.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05F355FCA;
+        Thu, 11 May 2023 02:46:23 -0700 (PDT)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 1CFED3A2B4E;
+        Thu, 11 May 2023 11:46:22 +0200 (CEST)
+Received: from mail5.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 0DD033A1AD5;
+        Thu, 11 May 2023 11:46:22 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.102-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgyLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx2.dmz.swissbit.com (mx2.dmz.swissbit.com [10.181.10.102])
+        by mail5.swissbit.com (Postfix) with ESMTPS;
+        Thu, 11 May 2023 11:46:22 +0200 (CEST)
+From:   Christian Loehle <CLoehle@hyperstone.com>
+To:     Richard Weinberger <richard@nod.at>
+CC:     Biju Das <biju.das.jz@bp.renesas.com>,
+        linux-mmc <linux-mmc@vger.kernel.org>,
+        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
+        wsa+renesas <wsa+renesas@sang-engineering.com>,
+        ulf hansson <ulf.hansson@linaro.org>
+Subject: RE: Poor write performance to boot area using rcar-gen3-sdhi
+Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
+Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOAvOJ8Zmh6KUsXr/ZciBcB4n5SQpfxaAwsA
+Date:   Thu, 11 May 2023 09:46:20 +0000
+Message-ID: <94f03374781b4e978a39699815b21803@hyperstone.com>
+References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at>
+ <971572458.117024.1681798584774.JavaMail.zimbra@nod.at>
+ <02ceda502af34bf0af53d52598a0b71f@hyperstone.com>
+ <522326845.127346.1681805484949.JavaMail.zimbra@nod.at>
+ <f50de2461dae4931abf3f0216b836fd1@hyperstone.com>
+ <1186364892.150923.1681819136247.JavaMail.zimbra@nod.at>
+ <1273293952.226564.1682003880265.JavaMail.zimbra@nod.at>
+ <398e244a4d3746f1bd7b4c32d1ea70e3@hyperstone.com>
+ <615854031.8233438.1683631700226.JavaMail.zimbra@nod.at>
+In-Reply-To: <615854031.8233438.1683631700226.JavaMail.zimbra@nod.at>
+Accept-Language: en-US, de-DE
 Content-Language: en-US
-To:     <andy.shevchenko@gmail.com>
-CC:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230510134121.1232286-1-quic_srichara@quicinc.com>
- <20230510134121.1232286-5-quic_srichara@quicinc.com>
- <ZFupNrdrcsrIFpYq@surfacebook>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <ZFupNrdrcsrIFpYq@surfacebook>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 8Er7DcdvxmzTkegwCefZsH92-86EqJDQ
-X-Proofpoint-GUID: 8Er7DcdvxmzTkegwCefZsH92-86EqJDQ
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-10_04,2023-05-05_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 phishscore=0
- clxscore=1011 lowpriorityscore=0 malwarescore=0 spamscore=0 adultscore=0
- suspectscore=0 mlxlogscore=999 impostorscore=0 priorityscore=1501
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305110053
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
+X-TMASE-Version: DDEI-5.1-9.0.1002-27618.006
+X-TMASE-Result: 10--5.037800-10.000000
+X-TMASE-MatchedRID: QfHZjzml1E8EyPQwW5BBaqzGfgakLdjandls9F9zmi1v8+stHWaeos79
+        PlJmAmXD1eKt+ktDRM8BW0uhJTasU8fyODhjv0Zebb4JyMK+kzBku5Wqt0zLZDqUJVT3gpbTxOv
+        8bbijtGt7xbt8tJqsmR/6NlRf/ksHbMXHzk9qnQc8+i/lP6Xo8epxDIe48DMlH+aO+OES4dHFs9
+        v0lf4kLjJIHCht2pOXu64EjJEAgAKrXOKso5Y21oh/ebSxR/HnTf5MrVmNIUCbKItl61J/yfmS+
+        aPr0Ve8BieCUBZ0JhuNo+PRbWqfROJGF26G8SWypfzLa08EuFA6rDLTxc/Aq1EmQDaL8iFRE7eX
+        wbiNPwzldlwuKTDyL0QyLxIbl0M9
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 780f30a5-1143-4d45-9ca3-1eea84ae2487-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+DQoNCi0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQpGcm9tOiBSaWNoYXJkIFdlaW5iZXJnZXIg
+PHJpY2hhcmRAbm9kLmF0PiANClNlbnQ6IFR1ZXNkYXksIE1heSA5LCAyMDIzIDE6MjggUE0NClRv
+OiBDaHJpc3RpYW4gTG9laGxlIDxDTG9laGxlQGh5cGVyc3RvbmUuY29tPg0KQ2M6IEJpanUgRGFz
+IDxiaWp1LmRhcy5qekBicC5yZW5lc2FzLmNvbT47IGxpbnV4LW1tYyA8bGludXgtbW1jQHZnZXIu
+a2VybmVsLm9yZz47IGxpbnV4LXJlbmVzYXMtc29jIDxsaW51eC1yZW5lc2FzLXNvY0B2Z2VyLmtl
+cm5lbC5vcmc+OyB3c2ErcmVuZXNhcyA8d3NhK3JlbmVzYXNAc2FuZy1lbmdpbmVlcmluZy5jb20+
+OyB1bGYgaGFuc3NvbiA8dWxmLmhhbnNzb25AbGluYXJvLm9yZz4NClN1YmplY3Q6IFJlOiBQb29y
+IHdyaXRlIHBlcmZvcm1hbmNlIHRvIGJvb3QgYXJlYSB1c2luZyByY2FyLWdlbjMtc2RoaQ0KDQoN
+Cj4gU28gSSB3ZW50IGRvd24gdGhlIHJhYmJpdCBob2xlLg0KPiBBZnRlciBhbmFseXppbmcgdGhl
+IG9wZXJhdGlvbiB0cmFjZXMgZnJvbSBMaW51eCBhbmQgdS1ib290IGluIG1vcmUgZGV0YWlsIEkg
+aGFkIGFub3RoZXIgY2hhdCB3aXRoIHRoZSB2ZW5kb3IuIEl0IHR1cm5lZCBvdXQgdGhlaXIgYm9v
+dCBhcmVhICppcyogZGlmZmVyZW50LCBpdCBvcGVyYXRlcyBvbiBhIG11Y2ggbGFyZ2VyIGludGVy
+bmFsIGJsb2NrIHNpemUuDQo+IA0KPiBXaGlsZSB1LWJvb3QgZG9lcyBiYXNpY2FsbHkgYWxsIElP
+IHdpdGggb25lIG9wIGNvZGUsIExpbnV4J3Mgd3JpdGViYWNrIHZpYSBwYWdlIGNhY2hlIHdyaXRl
+cyA0ayB3aXNlIHdoaWNoIGxlYWRzIHRvIGNhdGFzdHJvcGhpYyBwZXJmb3JtYW5jZS4NCj4gVXNp
+bmcgT19ESVJFQ1QgbWl0aWdhdGVzIHRoZSBpc3N1ZSwgdGhvdWdoLg0KDQpJbnRlcmVzdGluZywg
+d2l0aG91dCBoYXZpbmcgdHJpZWQgaXQgb3V0IEkgd291bGQgZXhwZWN0IHRoZSA0ayB3cml0ZWJh
+Y2tzIHRvIGJlIG1lcmdlZCB0byBhIGJpZ2dlciBJTywgdG9vPyBHaXZlbiB0aGF0IHRoZXkgYXJl
+IGZpbGxlZCBzZXF1ZW50aWFsbHksIHdoaWNoIGlzIHRoZSBjYXNlLg0KQnV0IGdvb2QgdGhhdCB5
+b3UgZ290IGl0IHdvcmtpbmcuIA0KSWYgSSBmaW5kIHRoZSB0aW1lIEkgd2lsbCBwbGF5IHdpdGgg
+aXQgYSBiaXQuDQoNCj4gDQo+IFRoYW5rcyBldmVyeW9uZSBmb3IgeW91ciB2YWx1YWJsZSBpbnB1
+dCENCj4gLy9yaWNoYXJkDQo+DQoNCkh5cGVyc3RvbmUgR21iSCB8IFJlaWNoZW5hdXN0ci4gMzlh
+ICB8IDc4NDY3IEtvbnN0YW56Ck1hbmFnaW5nIERpcmVjdG9yOiBEci4gSmFuIFBldGVyIEJlcm5z
+LgpDb21tZXJjaWFsIHJlZ2lzdGVyIG9mIGxvY2FsIGNvdXJ0czogRnJlaWJ1cmcgSFJCMzgxNzgy
 
-
-On 5/10/2023 7:54 PM, andy.shevchenko@gmail.com wrote:
-> Wed, May 10, 2023 at 07:11:17PM +0530, Sricharan Ramabadhran kirjoitti:
->> Add pinctrl definitions for the TLMM of IPQ5018.
-> 
-> ...
-> 
->> +#define FUNCTION(fname)			                \
->> +	[msm_mux_##fname] = {		                \
->> +		.name = #fname,				\
->> +		.groups = fname##_groups,               \
->> +		.ngroups = ARRAY_SIZE(fname##_groups),	\
->> +	}
-> 
-> Can you coordinate with Rohit Agarwal <quic_rohiagar@quicinc.com> and use
-> his work [1] which moves the QCom drivers to use struct pingroup and struct
-> pinfunction?
-> 
-> [1]: https://lore.kernel.org/r/1683718725-14869-1-git-send-email-quic_rohiagar@quicinc.com
-> 
-
-  ok, will do.
-
-> ...
-> 
->> +static const struct of_device_id ipq5018_pinctrl_of_match[] = {
->> +	{ .compatible = "qcom,ipq5018-tlmm", },
-> 
->> +	{ },
-> 
-> No comma for the terminator entry.
-> 
-
-  ok.
-
->> +};
-> 
-> Move MODULE_DEVICE_TABLE() here.
-> 
-
-  ok
-
-Regards,
-  Sricharan
