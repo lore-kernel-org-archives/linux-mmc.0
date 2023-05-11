@@ -2,74 +2,126 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54A88C77B7C
-	for <linux-mmc@archiver.kernel.org>; Thu, 11 May 2023 10:35:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1CB2C77B7F
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 May 2023 10:43:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237451AbjEKKfV convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 11 May 2023 06:35:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34902 "EHLO
+        id S229548AbjEKKnV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 May 2023 06:43:21 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37732 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236816AbjEKKfU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2023 06:35:20 -0400
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7030EA7;
-        Thu, 11 May 2023 03:35:17 -0700 (PDT)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id E8988615C9F5;
-        Thu, 11 May 2023 12:35:04 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10032)
-        with ESMTP id LDkxuyXXLkqL; Thu, 11 May 2023 12:35:04 +0200 (CEST)
-Received: from localhost (localhost [127.0.0.1])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 545BD61B8B4D;
-        Thu, 11 May 2023 12:35:04 +0200 (CEST)
-Received: from lithops.sigma-star.at ([127.0.0.1])
-        by localhost (lithops.sigma-star.at [127.0.0.1]) (amavisd-new, port 10026)
-        with ESMTP id u3mttOWBUBDr; Thu, 11 May 2023 12:35:04 +0200 (CEST)
-Received: from lithops.sigma-star.at (lithops.sigma-star.at [195.201.40.130])
-        by lithops.sigma-star.at (Postfix) with ESMTP id 30A9B615C9F5;
-        Thu, 11 May 2023 12:35:04 +0200 (CEST)
-Date:   Thu, 11 May 2023 12:35:04 +0200 (CEST)
-From:   Richard Weinberger <richard@nod.at>
-To:     Christian Loehle <CLoehle@hyperstone.com>
-Cc:     Biju Das <biju.das.jz@bp.renesas.com>,
-        linux-mmc <linux-mmc@vger.kernel.org>,
-        linux-renesas-soc <linux-renesas-soc@vger.kernel.org>,
-        wsa+renesas <wsa+renesas@sang-engineering.com>,
-        ulf hansson <ulf.hansson@linaro.org>
-Message-ID: <673489738.9276814.1683801304117.JavaMail.zimbra@nod.at>
-In-Reply-To: <94f03374781b4e978a39699815b21803@hyperstone.com>
-References: <1674847756.113858.1681762124503.JavaMail.zimbra@nod.at> <522326845.127346.1681805484949.JavaMail.zimbra@nod.at> <f50de2461dae4931abf3f0216b836fd1@hyperstone.com> <1186364892.150923.1681819136247.JavaMail.zimbra@nod.at> <1273293952.226564.1682003880265.JavaMail.zimbra@nod.at> <398e244a4d3746f1bd7b4c32d1ea70e3@hyperstone.com> <615854031.8233438.1683631700226.JavaMail.zimbra@nod.at> <94f03374781b4e978a39699815b21803@hyperstone.com>
-Subject: Re: Poor write performance to boot area using rcar-gen3-sdhi
+        with ESMTP id S237394AbjEKKnU (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2023 06:43:20 -0400
+Received: from mail-yb1-xb36.google.com (mail-yb1-xb36.google.com [IPv6:2607:f8b0:4864:20::b36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F98B359F
+        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2023 03:43:18 -0700 (PDT)
+Received: by mail-yb1-xb36.google.com with SMTP id 3f1490d57ef6-ba696d396a1so1078429276.0
+        for <linux-mmc@vger.kernel.org>; Thu, 11 May 2023 03:43:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1683801797; x=1686393797;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=HwK6O2GyMlAYbj1OPQtJ3JBX3Y5C0lX7LcCuPtjs1rs=;
+        b=jsYN3JsF63Nz6qFKAR0lCzd0sprcKZYnTGibq/Jxwtr0by0tRyoQsdbsh/LBKTVwlE
+         ykcWHCx1rycHqBtIT4qWxAmver4ZuvAYdlz2kT65MXNU2CmhgvFfteeA1HWPusU5K1f4
+         iP+tWKQFU58fDlbNUSONw9ByFq1ALaOjyqtAtTu0zT8KVOP+v7o6eaKoaNTY1RR+p/fq
+         V423oNRWGKth4FxHEk/kvC5Ilm/vrZYWSNuimVO13/zsEQ4tG7pfkEpXpxcfVjjoQX+I
+         ZfeW4n94sh4n39vfusL/IlF89ODTJXeSvO3sLuCiccn4ooljriZ1/FVPVPxf+OnAgtTE
+         BsxA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1683801797; x=1686393797;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=HwK6O2GyMlAYbj1OPQtJ3JBX3Y5C0lX7LcCuPtjs1rs=;
+        b=IghCNlITErPt/E+qtSU42/JDsS08H4hF+C4Viwa+qrX5p1KYeXXK9EVYUflRJvqpaL
+         +J7tamwNMh88pIVoSsFYcU4aPe6hn16aGXQV8T4A9fIg5tvlYy5db67UDDVl8kWW6NHl
+         DV4+IHzVhNV2VDp4GkLInxsVunkXIB5rH+R0ZsiWFJPqdvK53lX+G6K2hHK0X5GdnHvx
+         dtHRZLricXHwi3ZPgNXoMPayaEBKhE86FV1JPTgTrkk3oBkJNJL5a1deIZZDtihNFvQw
+         wot7eFDYf3ZjOB+WjAYoGeSkX9a2KU//OgjnqsvYqotVlpMXg3c87jIdcPTBsyw38FVs
+         XSbQ==
+X-Gm-Message-State: AC+VfDzjIivYi8gLuVvepWrriERRlFSNgzHn48eDIZEzujg//fNPbws5
+        FrQE3Kl0tDrWWgFLHgDIqqpY39hjHnbaeHJpn0YTftvivTMSponlP2A=
+X-Google-Smtp-Source: ACHHUZ7GfJx9MP3qtqPM8KCkJqmfzOB1a4KjfFHMliWf8xRk0DK+bTILphb2c/JnUwR+7pXP4zKVdN4mEErExNVQqG4=
+X-Received: by 2002:a25:dbd2:0:b0:b92:5a0e:d5df with SMTP id
+ g201-20020a25dbd2000000b00b925a0ed5dfmr22793004ybf.46.1683801797441; Thu, 11
+ May 2023 03:43:17 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8BIT
-X-Originating-IP: [195.201.40.130]
-X-Mailer: Zimbra 8.8.12_GA_3807 (ZimbraWebClient - FF97 (Linux)/8.8.12_GA_3809)
-Thread-Topic: Poor write performance to boot area using rcar-gen3-sdhi
-Thread-Index: jiFrfBZIr7HKS7MkHilHFl02Bun/Q/AMgGyAaB0PmjP8vxGocEw2ct+x/Z5ZwOAvOJ8Zmh6KUsXr/ZciBcB4n5SQpfxaAwsASMB9OoY=
+References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
+ <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com> <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
+In-Reply-To: <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Thu, 11 May 2023 12:42:41 +0200
+Message-ID: <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
+Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
+ clock speed before sending HS CMD13")
+To:     Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        Brian Norris <briannorris@chromium.org>,
+        Shawn Lin <shawn.lin@rock-chips.com>,
+        Luca Weiss <luca@z3ntu.xyz>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
------ Ursprüngliche Mail -----
-> Von: "Christian Loehle" <CLoehle@hyperstone.com>
->> While u-boot does basically all IO with one op code, Linux's writeback via page
->> cache writes 4k wise which leads to catastrophic performance.
->> Using O_DIRECT mitigates the issue, though.
-> 
-> Interesting, without having tried it out I would expect the 4k writebacks to be
-> merged to a bigger IO, too? Given that they are filled sequentially, which is
-> the case.
-> But good that you got it working.
-> If I find the time I will play with it a bit.
+On Wed, 10 May 2023 at 22:54, Martin Blumenstingl
+<martin.blumenstingl@googlemail.com> wrote:
+>
+> Hi Ulf,
+>
+> On Wed, May 10, 2023 at 4:21=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.o=
+rg> wrote:
+> [...]
+> > Thanks for reporting - and my apologies for the long delay! It's been
+> > a busy period with lots of travelling for me.
+> Thank you for taking the time to look into this now - no need to apologiz=
+e!
+>
+> [...]
+> > > In this state I get:
+> > > # cat /sys/kernel/debug/mmc1/ios
+> > > clock:          52000000 Hz
+> > > actual clock:   51000000 Hz
+> > > vdd:            21 (3.3 ~ 3.4 V)
+> > > bus mode:       2 (push-pull)
+> > > chip select:    0 (don't care)
+> > > power mode:     2 (on)
+> > > bus width:      3 (8 bits)
+> > > timing spec:    9 (mmc HS200)
+> > > signal voltage: 1 (1.80 V)
+> > > driver type:    0 (driver type B)
+> >
+> > It looks to me that we are in the process of enabling the HS200 mode,
+> > but hangs at some point. Unless I am mistaken.
+> >
+> > More precisely, I suspect it's either the call to mmc_set_clock() or
+> > the call to mmc_switch_status(), in mmc_select_hs200(). Can you have a
+> > closer look to confirm this?
+> Indeed, removing mmc_set_clock() from mmc_select_hs200() also makes my
+> eMMC appear again on top of Linux 6.4-rc1.
+> See the attached diff in case it's not fully clear which
+> mmc_set_clock() call I removed.
 
-I think due to the nature of rcar-gen3-sdhi merging of these BIOs is not possible.
-There seems to be support for some variants, though:
-https://elinux.org/R-Car/Merging-MMC-block-requests
+Thanks for the update! Removing that call restores mmc_select_hs200()
+to the previous behaviour - so thanks for confirming that this is
+working.
 
-Not sure whether I find the time to dig down that rabbit whole too. ;-)
+However, to find the proper solution, I think we need to understand
+why we are hanging in the meson-mx-sdhc driver first. Here's a couple
+of follow up questions from me:
 
-Thanks,
-//richard
+1) Before calling mmc_set_clock() what is the actual clock rate that
+has been set by the meson driver?
+
+2) Does the call to mmc_set_clock() return or hang? Can we verify that
+the clock gets set correctly?
+
+3) If 2) seems to work above, we need to figure out why
+mmc_switch_status() is hanging. If there is a problem with the eMMC
+card responding in-correctly, the host driver should return with an
+error code, right?
+
+Kind regards
+Uffe
