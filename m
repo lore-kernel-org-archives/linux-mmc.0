@@ -2,126 +2,137 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 090A8C77B7D
-	for <linux-mmc@archiver.kernel.org>; Wed, 10 May 2023 20:58:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F2F6DC7EE22
+	for <linux-mmc@archiver.kernel.org>; Thu, 11 May 2023 05:01:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237315AbjEJU6R (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 10 May 2023 16:58:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51266 "EHLO
+        id S235583AbjEKFBB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 11 May 2023 01:01:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237280AbjEJU6A (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 10 May 2023 16:58:00 -0400
-Received: from mail-ed1-f50.google.com (mail-ed1-f50.google.com [209.85.208.50])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B725E272A
-        for <linux-mmc@vger.kernel.org>; Wed, 10 May 2023 13:56:49 -0700 (PDT)
-Received: by mail-ed1-f50.google.com with SMTP id 4fb4d7f45d1cf-50bd37ca954so72886585a12.0
-        for <linux-mmc@vger.kernel.org>; Wed, 10 May 2023 13:56:49 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1683752089; x=1686344089;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=2A1mAdk2jOSOv/+D4yJ/kc5JQaEL+k6dZ6J6cz5nkBA=;
-        b=h5Am1CZODLAoNZOHBxyY7P9MAPAef9ZK1WJCCAFWIAGakQWUCqhV5QXFL0rPqkVWqs
-         hhVDIGlEqbDcp7z430xNX9T37ynoYTc/83BAlC0hWpEIMFNxyb8rGSW5Fb7/UGeh6BOs
-         +2vOVzOewq85No5g+uFRoSYpuc45qDCdDABOfJN16QP+XZzu9eVxIpakGWSqF4Ls7rNK
-         XeBXYuo/JI8bCC8H2B4+XGV9DTP8daoGnlPQ1dbq3F0dgynvh/EU/jzlffUQ3rwo5yLj
-         1Mdq/HfJavzA8/bmYI7b+BODMdrEPa+T3GYrfruyfUrTIc4J43dED1yojmmKNKyEA5dC
-         FfAQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1683752089; x=1686344089;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=2A1mAdk2jOSOv/+D4yJ/kc5JQaEL+k6dZ6J6cz5nkBA=;
-        b=ApgUFjB3AJR28YpGeStgJzBrsZ3X1n2W4bQ4ksKxLQ2yYikIBDfshahUwJK5v/v/+M
-         /9uWbMZTaeSqAcikSdCWkPb/Coz4ME7fQZD3XDIfr7//OAs9hrSzC8zmBh64em2fKBxV
-         0elVCYTVncdCPr//dFp3KvP3Kfqo5NDZTh97WRxEwyQjJKzkSbqWFMTtERQH5QvORzrz
-         AD85CD2GgEGIq+qHvcujWlxoiNfmPoDfXSLGFBryoB1mvW72x3MMQAVW1eEL8S0TjOd9
-         3Fj5VHiUfrYyc77YwoggvQL152zse7o4Wd3X8vAHI8Mp1owZBmNW2Fq8AaRoTek5LhWh
-         remA==
-X-Gm-Message-State: AC+VfDwn+DaMnwvVogBkGw+yW2SB3J4kClZH6XChAZJMePX1YrDh/yPL
-        rE3NdJfpY7Twg+7qFqaF3lsp2tkIAnn01dhcAqA=
-X-Google-Smtp-Source: ACHHUZ70YYiCCbxqfkUQeSmtWGEtbxx2oMxAiVRlYho8p+Rd6ym4ITJ1Y8RJO5yhsVJZPd7PCEvU1NzNTaZdQjilp58=
-X-Received: by 2002:a17:907:26c6:b0:94a:4739:bed9 with SMTP id
- bp6-20020a17090726c600b0094a4739bed9mr16472312ejc.13.1683752088968; Wed, 10
- May 2023 13:54:48 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
- <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
-In-Reply-To: <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Wed, 10 May 2023 22:54:38 +0200
-Message-ID: <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
-Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
+        with ESMTP id S231797AbjEKFBA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 11 May 2023 01:01:00 -0400
+Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2755930EB;
+        Wed, 10 May 2023 22:00:59 -0700 (PDT)
+Received: from pps.filterd (m0279868.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34B3f3hF027445;
+        Thu, 11 May 2023 05:00:47 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
+ subject : date : message-id : references : in-reply-to : content-type :
+ content-transfer-encoding : mime-version; s=qcppdkim1;
+ bh=zuL2sjpi13HXnQSxvXxQtFgiwlU0qeaUXm5LPxK416M=;
+ b=l9KfjzhGciAy3GYwN3Oso/KmPAfIBSvia2tJCvnP1vEP38XQpZGqjDSMjrWc7WMiC95f
+ hcYSJ+5X49OWvVzwkfZ4BQPIporBQMMDVHBbFwPIKZHT/mE1RYhOosgEyxDgC+0KmWWv
+ gHCIzwU56cnxcPBgmSVrqgxeqj3xcLzJ5NiZm1LeWJC+iZIS3Q2t1x15OhGMuceFRVtZ
+ cZYtQoRia/Tu1yodiNHIb/Z5BqminTk4lqfrDpasOSjzka74e+S9gI+RMakmJxYHij9g
+ /ro3xRezQ3KPJtCu7dCrBeISDPJatcVYw8ZrVg1/wKgM/gH2ya4K+g4rN5K8CAXlgYAW DA== 
+Received: from nasanppmta03.qualcomm.com (i-global254.qualcomm.com [199.106.103.254])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qgdd9sds8-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 11 May 2023 05:00:46 +0000
+Received: from nasanex01b.na.qualcomm.com (nasanex01b.na.qualcomm.com [10.46.141.250])
+        by NASANPPMTA03.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34B50PqP007411
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Thu, 11 May 2023 05:00:25 GMT
+Received: from nasanex01a.na.qualcomm.com (10.52.223.231) by
+ nasanex01b.na.qualcomm.com (10.46.141.250) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Wed, 10 May 2023 22:00:24 -0700
+Received: from nasanex01a.na.qualcomm.com ([fe80::efb2:2dda:c355:1de3]) by
+ nasanex01a.na.qualcomm.com ([fe80::efb2:2dda:c355:1de3%12]) with mapi id
+ 15.02.0986.042; Wed, 10 May 2023 22:00:24 -0700
+From:   "Sarthak Garg (QUIC)" <quic_sartgarg@quicinc.com>
+To:     Christoph Hellwig <hch@infradead.org>
+CC:     "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-arm-msm@vger.kernel.org" <linux-arm-msm@vger.kernel.org>,
+        "Ram Prakash Gupta (QUIC)" <quic_rampraka@quicinc.com>,
+        "Bhaskar Valaboju (QUIC)" <quic_bhaskarv@quicinc.com>,
+        "Sachin Gupta (QUIC)" <quic_sachgupt@quicinc.com>,
+        "Pradeep Pragallapati (QUIC)" <quic_pragalla@quicinc.com>,
+        "Sayali Lokhande (QUIC)" <quic_sayalil@quicinc.com>,
         Brian Norris <briannorris@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Luca Weiss <luca@z3ntu.xyz>
-Content-Type: multipart/mixed; boundary="000000000000273e3505fb5d151f"
+        "Wolfram Sang" <wsa+renesas@sang-engineering.com>,
+        Linus Walleij <linus.walleij@linaro.org>
+Subject: RE: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+ internal features
+Thread-Topic: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+ internal features
+Thread-Index: AQHZZLsSreM1n2UsG0iOAGSJueq9468bFEYAgA9GsjCAAHb4AP//nJxwgADjuYCAJTsTYA==
+Date:   Thu, 11 May 2023 05:00:24 +0000
+Message-ID: <c1dc3d77db644958b906fa55200a0ae2@quicinc.com>
+References: <20230401165723.19762-1-quic_sartgarg@quicinc.com>
+ <20230401165723.19762-2-quic_sartgarg@quicinc.com>
+ <ZCux+gsR8Nz4Epxw@infradead.org>
+ <e492e234b3ec4624ae2f905bdae78785@quicinc.com>
+ <ZDjmTi1+WA2BtLct@infradead.org>
+ <53eda50111e2402e889bd690a0112ee1@quicinc.com>
+ <ZDlR9VB7jRxMsEZH@infradead.org>
+In-Reply-To: <ZDlR9VB7jRxMsEZH@infradead.org>
+Accept-Language: en-US
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-originating-ip: [10.216.8.139]
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: fkvlJ7lTMBMSgRr8zFHGHeMZ7aLa0Spc
+X-Proofpoint-ORIG-GUID: fkvlJ7lTMBMSgRr8zFHGHeMZ7aLa0Spc
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-05-10_04,2023-05-05_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
+ mlxlogscore=999 mlxscore=0 adultscore=0 clxscore=1011 malwarescore=0
+ priorityscore=1501 phishscore=0 spamscore=0 bulkscore=0 lowpriorityscore=0
+ suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2305110041
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---000000000000273e3505fb5d151f
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Thanks for your valuable comments. We didn't ignore the previous comments i=
+nstead we tried to address most of the comments by trying the suggested alt=
+ernatives as well but didn't see power improvement as compared to this feat=
+ure. Moreover we got the intuition that maintainability was the main concer=
+n hence we came up with this newer approach of hooks to limit the lines of =
+code in core layer. Every change was pushed earlier in the previous posts a=
+nd this time we just refactored the code and was about to push the series b=
+ut as per current discussion we'll be reviving the old discussion and try t=
+o close all the comments. Closing this thread now.
 
-Hi Ulf,
-
-On Wed, May 10, 2023 at 4:21=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.org=
-> wrote:
-[...]
-> Thanks for reporting - and my apologies for the long delay! It's been
-> a busy period with lots of travelling for me.
-Thank you for taking the time to look into this now - no need to apologize!
-
-[...]
-> > In this state I get:
-> > # cat /sys/kernel/debug/mmc1/ios
-> > clock:          52000000 Hz
-> > actual clock:   51000000 Hz
-> > vdd:            21 (3.3 ~ 3.4 V)
-> > bus mode:       2 (push-pull)
-> > chip select:    0 (don't care)
-> > power mode:     2 (on)
-> > bus width:      3 (8 bits)
-> > timing spec:    9 (mmc HS200)
-> > signal voltage: 1 (1.80 V)
-> > driver type:    0 (driver type B)
->
-> It looks to me that we are in the process of enabling the HS200 mode,
-> but hangs at some point. Unless I am mistaken.
->
-> More precisely, I suspect it's either the call to mmc_set_clock() or
-> the call to mmc_switch_status(), in mmc_select_hs200(). Can you have a
-> closer look to confirm this?
-Indeed, removing mmc_set_clock() from mmc_select_hs200() also makes my
-eMMC appear again on top of Linux 6.4-rc1.
-See the attached diff in case it's not fully clear which
-mmc_set_clock() call I removed.
-
-
-Best regards,
-Martin
-
---000000000000273e3505fb5d151f
-Content-Type: text/x-patch; charset="US-ASCII"; 
-	name="drop-mmc_set_clock-from-mmc_select_hs200.diff"
-Content-Disposition: attachment; 
-	filename="drop-mmc_set_clock-from-mmc_select_hs200.diff"
-Content-Transfer-Encoding: base64
-Content-ID: <f_lhi6fva30>
-X-Attachment-Id: f_lhi6fva30
-
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21t
-Yy5jCmluZGV4IDg5Y2Q0OGZjZWM3OS4uMzFkN2ZmZjVhMWExIDEwMDY0NAotLS0gYS9kcml2ZXJz
-L21tYy9jb3JlL21tYy5jCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKQEAgLTE1MDAsNyAr
-MTUwMCw2IEBAIHN0YXRpYyBpbnQgbW1jX3NlbGVjdF9oczIwMChzdHJ1Y3QgbW1jX2NhcmQgKmNh
-cmQpCiAJCW9sZF90aW1pbmcgPSBob3N0LT5pb3MudGltaW5nOwogCQlvbGRfY2xvY2sgPSBob3N0
-LT5pb3MuY2xvY2s7CiAJCW1tY19zZXRfdGltaW5nKGhvc3QsIE1NQ19USU1JTkdfTU1DX0hTMjAw
-KTsKLQkJbW1jX3NldF9jbG9jayhjYXJkLT5ob3N0LCBjYXJkLT5leHRfY3NkLmhzX21heF9kdHIp
-OwogCiAJCS8qCiAJCSAqIEZvciBIUzIwMCwgQ1JDIGVycm9ycyBhcmUgbm90IGEgcmVsaWFibGUg
-d2F5IHRvIGtub3cgdGhlCg==
---000000000000273e3505fb5d151f--
+> -----Original Message-----
+> From: Christoph Hellwig <hch@infradead.org>
+> Sent: Friday, April 14, 2023 6:46 PM
+> To: Sarthak Garg (QUIC) <quic_sartgarg@quicinc.com>
+> Cc: Christoph Hellwig <hch@infradead.org>; adrian.hunter@intel.com;
+> ulf.hansson@linaro.org; linux-mmc@vger.kernel.org; linux-
+> kernel@vger.kernel.org; linux-arm-msm@vger.kernel.org; Ram Prakash Gupta
+> (QUIC) <quic_rampraka@quicinc.com>; Bhaskar Valaboju (QUIC)
+> <quic_bhaskarv@quicinc.com>; Sachin Gupta (QUIC)
+> <quic_sachgupt@quicinc.com>; Pradeep Pragallapati (QUIC)
+> <quic_pragalla@quicinc.com>; Sayali Lokhande (QUIC)
+> <quic_sayalil@quicinc.com>; Brian Norris <briannorris@chromium.org>;
+> Wolfram Sang <wsa+renesas@sang-engineering.com>; Linus Walleij
+> <linus.walleij@linaro.org>
+> Subject: Re: [PATCH V1 1/2] mmc: core: Define new vendor ops to enable
+> internal features
+>=20
+> On Fri, Apr 14, 2023 at 06:52:18AM +0000, Sarthak Garg (QUIC) wrote:
+> > Sorry for the confusion by vendor file I meant driver file for Qualcomm=
+ SDCC
+> controller (sdhci-msm.c).
+>=20
+> This is still not how we do development.  The two series you've been poin=
+ted out
+> got valuable feedback that;s been ignored for between one and four years,=
+ that
+> needs to be followed up with.
+>=20
+> You're not going to get magic hooks for your driver that you're not shari=
+ng with
+> us just because you're too lazy to follow up on the review comments.
