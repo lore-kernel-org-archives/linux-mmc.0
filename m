@@ -2,125 +2,91 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3272BC77B7C
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 07:42:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5EE0C77B75
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 10:46:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239956AbjELHmk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 May 2023 03:42:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49600 "EHLO
+        id S240338AbjELKqP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 May 2023 06:46:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45236 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S239781AbjELHmj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 03:42:39 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA9F96A67;
-        Fri, 12 May 2023 00:42:38 -0700 (PDT)
-Received: from pps.filterd (m0279865.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34C6AGXl003179;
-        Fri, 12 May 2023 07:42:21 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=vCwkN6SoNHNuZmpGdrhdMOMG+ltKUYuuMAA+uhtFgSI=;
- b=OF2dxMG7nWWKiyVWe0FwEytayZ7hAAkChr8oWH7VRA5IcyUu1NkF6z5leP7RPIaBXNv7
- jB0dQLK0LEa7e4FBAcPGRDLj01ixWjcYwyX/iHrvBeB+ECVlbGYpIJ7r/E/INfvvo66e
- IpRD8SloF9Si6/HFS0Vh4Sy73wB3HVRv1qwy7WyJ0Svom1/A4JcB1S5lg6Y+MFyDYsFS
- PrsOTtZG4n2nGxHmxfE+rPWT53wCaBSSWYe0g54DK8uAwXnZz5YcIFvPKkSFG0tRiXQM
- 3a3dZ815H0QhD0tyxU4WmtyVURF1VFzqsbSx2sxTrBsw2scJbDXM0s+JPxup8/rLVj8A Wg== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qhfww04xd-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 12 May 2023 07:42:21 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34C7gKBj032080
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 12 May 2023 07:42:20 GMT
-Received: from [10.201.3.182] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Fri, 12 May
- 2023 00:42:15 -0700
-Message-ID: <2acda9cc-3dc2-5ac2-7304-88e1ecf9fa7c@quicinc.com>
-Date:   Fri, 12 May 2023 13:12:12 +0530
+        with ESMTP id S240833AbjELKqK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 06:46:10 -0400
+Received: from mail-pf1-x42e.google.com (mail-pf1-x42e.google.com [IPv6:2607:f8b0:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 017E3E702;
+        Fri, 12 May 2023 03:46:07 -0700 (PDT)
+Received: by mail-pf1-x42e.google.com with SMTP id d2e1a72fcca58-64359d9c531so7352775b3a.3;
+        Fri, 12 May 2023 03:46:07 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1683888367; x=1686480367;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=MqLevf4AjN2a0K/H+1qEs30e2mq42/RzKJvI23SxnJo=;
+        b=Y+pSMAZX5keuQoChF4hgkcLDMVFZOaN+5HS7f5qoVEhI1jCyoy47IRNu+cnJE4M4hm
+         N6wXDel4vjtwVgk/z068kimCcPS5kMVBT0VPNYkCZrOMavluBc1eDHfDFU0B5d2zuYba
+         s/p6AWaZsS8Xt19lv7jwNBcAlmAD0dJqwcH7J7txvNbwL6HhviIPujDtbdHo3c8nCgXh
+         szXGNgCseRyercNsD5t5xtyza68ao266SfiEHmn7sztjq0bkOvUwU0gW/vCITQyB1ScC
+         R721BJNCv1aO2f1LPZoSZef7BQU7t0516UDB02/b9x11KurmKNMfED/7UAW98nzykaQJ
+         gKLg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1683888367; x=1686480367;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=MqLevf4AjN2a0K/H+1qEs30e2mq42/RzKJvI23SxnJo=;
+        b=JySuT/8jtZ6Vp+h3qYGz+d8Tis3yq4osvz2DFFlRb6e44DE+5dOkHnKvGb54nWa9x4
+         4pyojSHjCN07AsR20B73KV9GIMfAXki5nyGwiwT0pHkgx/7lEw2U9pSAwIxSmuy1rD8o
+         TIHkqJA5AgwuB6FKSCDzUNcTf8Dd2Dil9PB1bgKZ49TycpgOXJ0DGVfKLuICVRFm1Lub
+         knLzFYolTE9QwFCE8f9IJpNSOKZd1JKGowZ1rI552Em2BwLmHcPK9be/x7pv39y86MYn
+         VdydhUOJGGHqYgjeS5d7vd9ISJDpIU28nknNSGxVmRthCF6Rs4KSm8kqMx05fCYOPNZW
+         096g==
+X-Gm-Message-State: AC+VfDxcMJHD/e6sLGoHVu2fGpZmNR0Yv3OucRyX+CnFdEVA4aAKrYtj
+        LKiUS1QIXZ+DYhL3vol8RJ8=
+X-Google-Smtp-Source: ACHHUZ6WCIVFy3tSgFmUc3KdSCzVUK6z3aTmWFk3JTZ4ZvJNQdkT2Qn07K1YnZ6xDshIQwDS4DPXwQ==
+X-Received: by 2002:a05:6a00:2396:b0:646:6c71:ee13 with SMTP id f22-20020a056a00239600b006466c71ee13mr20807240pfc.24.1683888367371;
+        Fri, 12 May 2023 03:46:07 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e2ae-0f1d-f6c2-46f4-c62f-3944.emome-ip6.hinet.net. [2001:b400:e2ae:f1d:f6c2:46f4:c62f:3944])
+        by smtp.gmail.com with ESMTPSA id g17-20020aa78751000000b0064358d032a4sm7019268pfo.145.2023.05.12.03.46.04
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 12 May 2023 03:46:07 -0700 (PDT)
+From:   Victor Shih <victorshihgli@gmail.com>
+X-Google-Original-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw, takahiro.akashi@linaro.org,
+        dlunev@chromium.org, Victor Shih <victor.shih@genesyslogic.com.tw>
+Subject: [PATCH V1 0/3] Add Genesys Logic GL9767 support
+Date:   Fri, 12 May 2023 18:45:56 +0800
+Message-Id: <20230512104559.11218-1-victor.shih@genesyslogic.com.tw>
+X-Mailer: git-send-email 2.25.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH v4 7/8] arm64: dts: Add ipq5018 SoC and rdp432-c2 board
- support
-Content-Language: en-US
-To:     Robert Marko <robimarko@gmail.com>
-CC:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>
-References: <20230510134121.1232286-1-quic_srichara@quicinc.com>
- <20230510134121.1232286-8-quic_srichara@quicinc.com>
- <8f5040e0-169b-554b-c9e6-479b8f098bc6@gmail.com>
- <daff6818-525d-7a99-de08-e289848cadf9@quicinc.com>
- <CAOX2RU6_TmOfv5298fs6zgCvivdA6=GK5SnhGu7cDsmGQ2-ATw@mail.gmail.com>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <CAOX2RU6_TmOfv5298fs6zgCvivdA6=GK5SnhGu7cDsmGQ2-ATw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 9CbZjdYXVB8Hsf-cT8qa6_lznAPENcI4
-X-Proofpoint-GUID: 9CbZjdYXVB8Hsf-cT8qa6_lznAPENcI4
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.942,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-12_04,2023-05-05_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0
- priorityscore=1501 lowpriorityscore=0 mlxlogscore=945 malwarescore=0
- spamscore=0 clxscore=1015 adultscore=0 mlxscore=0 phishscore=0 bulkscore=0
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305120064
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
 
+Changes in v1 (May. 12, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* enable MSI interrupt for the GL9767.
+* add support SDR mode for the GL9767.
+* export sdhci_check_ro() function.
+* add support SD Express mode for the GL9767.
 
-On 5/11/2023 4:29 PM, Robert Marko wrote:
-> On Thu, 11 May 2023 at 12:54, Sricharan Ramabadhran
-> <quic_srichara@quicinc.com> wrote:
->>
->>
->>
->> On 5/11/2023 3:54 PM, Robert Marko wrote:
->>>
->>> On 10. 05. 2023. 15:41, Sricharan Ramabadhran wrote:
->>>> Add initial device tree support for the Qualcomm IPQ5018 SoC and
->>>> rdp432-c2 board.
->>>
->>> Hi, does reboot work for you with this patchset?
->>> I have tested on 2 different IPQ5018 boards and they wont reboot,
->>> I get the:
->>> Requesting system reboot
->>> [  321.005977] qcom_scm firmware:scm: No available mechanism for setting
->>> download mode
->>> [  321.006128] reboot: Restarting system
->>>
->>> And then it just hangs there.
->>>
->>
->>    Yes, that is because SDI disabling using separate SCM is still not
->>    there. I will add support for that in a separate series.
-> 
-> Do you maybe have a workaround for this, as it's driving me crazy to
-> have to pull power?
-> Also, it would probably be good to note this in the commit to avoid
-> more questions like this.
-> 
+Victor Shih (3):
+  mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+  mmc: sdhci: Export sdhci_check_ro function symbol
+  mmc: sdhci-pci-gli: Add support SD Express card for GL9767
 
-  Infact, no workaround. Only way is to add those additional SCM calls.
-  That said, i will add this in the commit log here.
+ drivers/mmc/host/sdhci-pci-core.c |   1 +
+ drivers/mmc/host/sdhci-pci-gli.c  | 247 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |   2 +
+ drivers/mmc/host/sdhci.c          |   3 +-
+ drivers/mmc/host/sdhci.h          |   1 +
+ 5 files changed, 253 insertions(+), 1 deletion(-)
 
-Regards,
-  Sricharan
+-- 
+2.25.1
+
