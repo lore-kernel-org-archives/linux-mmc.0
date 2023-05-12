@@ -2,25 +2,25 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2091FC77B7F
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 12:21:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6F9C3C77B7F
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 12:28:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S240546AbjELMVU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 May 2023 08:21:20 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49434 "EHLO
+        id S240603AbjELM2Y (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 May 2023 08:28:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S240338AbjELMVT (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 08:21:19 -0400
-Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2079.outbound.protection.outlook.com [40.107.244.79])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CF1578A7F;
-        Fri, 12 May 2023 05:21:17 -0700 (PDT)
+        with ESMTP id S240096AbjELM2X (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 08:28:23 -0400
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2050.outbound.protection.outlook.com [40.107.93.50])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0D53611DB3;
+        Fri, 12 May 2023 05:27:46 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=bCK5JNWKbX2NVD5QB6gMD61rcA6ZNcrJVF6S+I25AMrXTBzUYVEA+HU750LnpVK6Fd966s4k9bm0hMCp/fPdKZoNXXVaHa2V6pTm8qPZR8MBUud+AEQDB3GQ2qexi5PEROsDNuauwsa0LvgXZQCiwhNEew9r6sD6IPVNaqDwAAa526FBm7TgcXt/JxRtCQNhZz1y6OY7vlWl1Scfweppclv3EIcXpAjNU2O3wyPqHCf5DM3gODTUjCFzkUbHn0QQfUqlmCdzqlulLV4697mDKnqAed3mP7He9VzdJdDmfiQadWJoLoGX2X6NBq5ivxKUnqzFlGVSo10VFfthmz4iBQ==
+ b=eC68EnGDe5jb9CeUVwNDXZ8ktIabeHTgRRtoFyvOtXKZpJQ7V52Tn6J9bczC029TqVLHzpvjpMm7HiL365wrzhxLQ3NyMKR9TgmQ/Vo6v4hoV3LB28Hm1Z03fUjBgLzmUK7w8iHxE6PPZlwUbaChz8Cj/h47ma/ZV05eX0yP23962Zu81Kj3GFa+yBqYV4VzJkVaE9dtmnZ/pl/UFt9fdMSnabcIVPRS/0NMmIt5SutHBIdoU8qnhviy5XwTNZky4yjaAluTx1zjrKgl0c7HJItBS0hWlUpJPl4y8irdmZ3J8/Nu+zLli0GuEuuB6dS4+Dn2l67okfl1wQcoPeAolw==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=B20a5gzSh43AMXrj0HIWHEThmg4z6S/3NF7Eau3L5jE=;
- b=QI99OhsuYGbKa98OuwtzrvLx3nts1SIc+IZc02vJb0jfOc9g0Ds7JYnqVEAXG3h2AQLf2r5wf1fTp8n5+xE/1HfbUHDxSJUPdysr7MoXhjtG3loaZP3HtrJtlHQR2SglfSYFS0hzID3Nvl4Zi9vKSvVp7uPuNpGz5kiEbgMTMI/OxlIBcmpc6tdDcmR0OpR/LdF4jjhxkCvDr/tXJ2wGejXi0amkOrh6Skk78f04lvfciAexK3ipNiDZi+vcmYmjEcFRHMn/b6sjrXQVL8dHLDf89kekkCQBvAZryOmKt5MFUJhKLk4M731xno8YNM8JAM0zEPTwuUerVW+mrdA6WA==
+ bh=5XbEIJDk0X+Le9usaka27pFIyefAOzKUWuosEUJ4N7A=;
+ b=OKmi1SHzmwnxn9ufW6wT2gxgWh8/jIoeNVNenS9gWjfO4qgL4kxfGKXRYExji+TxXlKJ3vaOi1HRnG8SpvoeKby+14CnO26+glPsnwvLNi/CLm8Xk6LrNvGEMpk9lEQe1+zzZ0NxKGJIpxu25wlODv5Q/kTo7y5NGhm09D2ck9xHMff53i1BDU7bMuHOmWNDp3iop1RrFR0rYI12FqOWLMEDdD3gPu50PPAzebV9keS89sNlZ4SEsv68IlfFHkcrl94ZE+S+7zloXOocDwnq4YAOHBuh6/7yFeKOkLo4lnSDQZ8WswO2OPP3Qs4emcEDkq8kiGCjZfJUV9XHYWu4ZQ==
 ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
  216.228.117.160) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
  dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
@@ -28,18 +28,18 @@ ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
  s=selector2;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=B20a5gzSh43AMXrj0HIWHEThmg4z6S/3NF7Eau3L5jE=;
- b=t0TKrCVztkm2kzS/fQOXGkQ3t6kmMwNCUSxfM7h1GcnWptFzwxgTK/JIBaSdPVoistqTCZBJGXrrlhKZueAncHN/Ov9SP6u4Daj2bI8WcpnqfG1SS/4IfYdL3ZkRGQVmvFEAlJ/CzT8Lfg+uiNRzi2a8Fy1SnY8px2u2bqMf69MVeS8f5rql7boPiHs9FRdPfLbykusa0ySywvU23fG/YSwV3PF6ofOPTpnJ9gY2qTKi0cEjtX6itWvWQ/Rjx4cH/rEbhIFbBA0LfVUO8ZAObeUelIDRvQy9TXB+nndkK9N6maliOYV4QXgTan9a1/EFYLVdDTe+DCCRaeINRjdEZQ==
-Received: from MW4PR04CA0047.namprd04.prod.outlook.com (2603:10b6:303:6a::22)
- by CH3PR12MB9217.namprd12.prod.outlook.com (2603:10b6:610:195::10) with
+ bh=5XbEIJDk0X+Le9usaka27pFIyefAOzKUWuosEUJ4N7A=;
+ b=EW9n0pRQvDO+p8zmUgntVFtlbIlYptrhOIeP2yH6YzznUizDgWijSNMcortQtFnLVUukPRMlR60XMoMhk5NTGNtsjG1gYibkE2jRmJYm5FAPSdK4RBlzesbl11eyc61E1fl82nqVZA5ZMJfLYdNGzfSjXqnRevyOa8rQEJUBKnpXw0qPfO9IESC1mWA5IkSBMoh1kAYokkRt74tgD093SEnfwjAwz+RTgC43VO+qPY27+yqDKOW/6AXEdb7pcggaf7sO9xYyxbjhMaPtdZH/5nSRachzZpZuN2UolF7pI6EPk5PBrRhDimb7Tq9DgsRqBkHzflp/t970chhkvO+9dg==
+Received: from SJ0PR13CA0197.namprd13.prod.outlook.com (2603:10b6:a03:2c3::22)
+ by CY8PR12MB7658.namprd12.prod.outlook.com (2603:10b6:930:9e::20) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.23; Fri, 12 May
- 2023 12:21:15 +0000
-Received: from CO1NAM11FT055.eop-nam11.prod.protection.outlook.com
- (2603:10b6:303:6a:cafe::44) by MW4PR04CA0047.outlook.office365.com
- (2603:10b6:303:6a::22) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.24 via Frontend
- Transport; Fri, 12 May 2023 12:21:15 +0000
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.18; Fri, 12 May
+ 2023 12:27:05 +0000
+Received: from CO1NAM11FT006.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:a03:2c3:cafe::94) by SJ0PR13CA0197.outlook.office365.com
+ (2603:10b6:a03:2c3::22) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6411.10 via Frontend
+ Transport; Fri, 12 May 2023 12:27:04 +0000
 X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.160)
  smtp.mailfrom=nvidia.com; dkim=none (message not signed)
  header.d=none;dmarc=pass action=none header.from=nvidia.com;
@@ -47,20 +47,20 @@ Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
  216.228.117.160 as permitted sender) receiver=protection.outlook.com;
  client-ip=216.228.117.160; helo=mail.nvidia.com; pr=C
 Received: from mail.nvidia.com (216.228.117.160) by
- CO1NAM11FT055.mail.protection.outlook.com (10.13.175.129) with Microsoft SMTP
+ CO1NAM11FT006.mail.protection.outlook.com (10.13.174.246) with Microsoft SMTP
  Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6387.24 via Frontend Transport; Fri, 12 May 2023 12:21:14 +0000
+ 15.20.6387.24 via Frontend Transport; Fri, 12 May 2023 12:27:04 +0000
 Received: from rnnvmail203.nvidia.com (10.129.68.9) by mail.nvidia.com
  (10.129.200.66) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.5; Fri, 12 May 2023
- 05:21:03 -0700
-Received: from rnnvmail205.nvidia.com (10.129.68.10) by rnnvmail203.nvidia.com
+ 05:26:54 -0700
+Received: from rnnvmail204.nvidia.com (10.129.68.6) by rnnvmail203.nvidia.com
  (10.129.68.9) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.37; Fri, 12 May
- 2023 05:21:03 -0700
-Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com (10.129.68.10)
+ 2023 05:26:53 -0700
+Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com (10.129.68.6)
  with Microsoft SMTP Server id 15.2.986.37 via Frontend Transport; Fri, 12 May
- 2023 05:21:02 -0700
+ 2023 05:26:52 -0700
 From:   Liming Sun <limings@nvidia.com>
 To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
@@ -68,9 +68,9 @@ To:     Adrian Hunter <adrian.hunter@intel.com>,
         Shawn Lin <shawn.lin@rock-chips.com>
 CC:     Liming Sun <limings@nvidia.com>, <linux-mmc@vger.kernel.org>,
         <linux-kernel@vger.kernel.org>
-Subject: [PATCH v2] mmc: sdhci-of-dwcmshc: Add runtime PM operations for BlueField-3
-Date:   Fri, 12 May 2023 08:20:56 -0400
-Message-ID: <20230512122056.223677-1-limings@nvidia.com>
+Subject: [PATCH v3] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+Date:   Fri, 12 May 2023 08:26:48 -0400
+Message-ID: <20230512122648.223974-1-limings@nvidia.com>
 X-Mailer: git-send-email 2.30.1
 In-Reply-To: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
 References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
@@ -79,32 +79,35 @@ Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
 X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: CO1NAM11FT055:EE_|CH3PR12MB9217:EE_
-X-MS-Office365-Filtering-Correlation-Id: 3e7bd378-e386-4d93-64af-08db52e36118
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT006:EE_|CY8PR12MB7658:EE_
+X-MS-Office365-Filtering-Correlation-Id: 3b9b2f3d-1ced-4cf2-5efa-08db52e431e7
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: Bm29y2dr5JbiYJiWxV8tYyxZIzZDTq8I6trEhBkCQnA9Bc7ManAX5IQPNzO2GeGc7jqCmY4FLEniPdem/dHRIrUxPLy7m2porM4375J5WeoMVvX6+OmV+I5/mjEuYAHaPldxuGcg0hBnzxMzbME0fJ/r3TSMBf7xREYbgmnqhnc+UmLneGx6600YWD2z+UMIgWp+YjtMLAaO7qawK3BFisJqdzAkTwokBQSvNrByCByXNePsNMp0mW+MMfwuIEQRKP9tvvaOvdSMfzOhf6xaeHbTxCAWwN+0lQDUbxvARp6OLM7trArSZ73XujZs70G9pime6RVa/EtJ/R3EsXrFzJ5vv3TaI340JvGAJkTu7udQjtvViTT0bO7Y4E3tWdCQHIje4U6fCGuXk6yTqZxVh3MrE3KvnliN8Mtm3r0IQtxajI2DjfFWqzq4LHm+E2ouoppAmyq+uJa9O1G+y7EVz2lHI6s3HWniEuI5YkMVfdZwiuR6nGjxYukUFUxbXkODvJS0f4iA/imx0x7dpFDtdQzi4dw+bjtPsDJsGLIPDKBBqTZPbdLfl7M2sh/frlC4GTDoZmw1kibisKh6fIPksJD/3DMrZfCTxqhyHEyAa+aUWX+22BYG6xAEM7/eDY3ey9YRioOCq+J/e1xzEmjnneukHv1y5QgeLIAfiHejwVo/hhn7HTXiuBiuOkU4OnrzZZmOkZECYAip2B3YOleIn1tHkBu9GcEQ2p/IQHyxppcekKh2B5aNye/SC5NESG2hmqy7OX66IpRi7KyNRyhSWg==
-X-Forefront-Antispam-Report: CIP:216.228.117.160;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge1.nvidia.com;CAT:NONE;SFS:(13230028)(4636009)(396003)(136003)(346002)(376002)(39860400002)(451199021)(40470700004)(36840700001)(46966006)(8676002)(5660300002)(47076005)(2616005)(82310400005)(83380400001)(70586007)(336012)(36860700001)(70206006)(426003)(8936002)(36756003)(54906003)(86362001)(316002)(4326008)(41300700001)(110136005)(6666004)(186003)(1076003)(356005)(26005)(7696005)(478600001)(40460700003)(7636003)(2906002)(82740400003)(40480700001)(133343001);DIR:OUT;SFP:1101;
+X-Microsoft-Antispam-Message-Info: 7v8zETP90kyQVj606kOd4lMMeEdyZboPVbf1pnkqswS0uEujWZ4DiirITkH2X/L+cbVxhzB6pvPiSm7Cc8RTUccqtJEbscZlrBgCPugohU6eHEnQtNgOxk1NlXkN82g4NEUd9PcAhMjt6eGHSruvGfKNVbuoBzpELdDnVLaHe4tptl7v62ipUXOR3b7LOCm46wwVb5oK6Qw/1TQDZ8wQDZHq37arOH1vQ++52rWQQ+96R0FNioZW7f/muGmgGOULUuqJBIvDiF9zERF/pZEOzy2VPCyT3a55ZkNL0HfeMbdcenOsn7Hcn5pifAkYmteFHXM9z/gB7V4SwqhjgkpSoJujyy31bccyoqgAlX8EDCR/udbr6J8FYQMzRszOZSSAZGRmq0a68fBh9efS5W5mPyLfr/fHhJjGeni2PWFZnH4DCyjAVPDxz60JgKaGrGC6EFJSaU8u/Yr+X1BunnLXDKLnLnQ+4Q50THVumfNMgVv25anuidBjnDhwXFP3hB6ynSgH9OgbcBNiAzke2OXX4G54l/1TRnWyzcTYskofZ+MWFvl6ZcRq+r2bl4xR6TLloxzEGG9Xw27JdOApVAS9rKa+cBSsN09xxAzdDuWmztLrznJcCKJ95WeGrZZsfCKF2JXzs6bIVcgi8zS0iVrda7uRWS7UVM8jMSUI/vSSxqGM5Y4klNdIdYcAimzwil7dqTb2KAzI8WUYNBTTahGKzVtLbJPj3Z6WSzS21u409Wr69ZgVjBL4s+EYIaTuooBFvoQ7ccrVn6GVqaFcTUlDVQ==
+X-Forefront-Antispam-Report: CIP:216.228.117.160;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge1.nvidia.com;CAT:NONE;SFS:(13230028)(4636009)(376002)(136003)(346002)(39860400002)(396003)(451199021)(36840700001)(46966006)(40470700004)(336012)(2616005)(40460700003)(426003)(186003)(83380400001)(47076005)(2906002)(82740400003)(36860700001)(82310400005)(86362001)(36756003)(7636003)(356005)(40480700001)(6666004)(8936002)(8676002)(5660300002)(70206006)(4326008)(70586007)(478600001)(41300700001)(7696005)(316002)(54906003)(26005)(110136005)(1076003)(133343001);DIR:OUT;SFP:1101;
 X-OriginatorOrg: Nvidia.com
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 May 2023 12:21:14.2162
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 May 2023 12:27:04.5231
  (UTC)
-X-MS-Exchange-CrossTenant-Network-Message-Id: 3e7bd378-e386-4d93-64af-08db52e36118
+X-MS-Exchange-CrossTenant-Network-Message-Id: 3b9b2f3d-1ced-4cf2-5efa-08db52e431e7
 X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
 X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.160];Helo=[mail.nvidia.com]
-X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT055.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT006.eop-nam11.prod.protection.outlook.com
 X-MS-Exchange-CrossTenant-AuthAs: Anonymous
 X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH3PR12MB9217
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CY8PR12MB7658
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This commit implements the runtime PM operations for BlueField-3 SoC
-to disable eMMC card clock when idle.
+This commit implements the runtime PM operations to disable eMMC
+card clock when idle.
 
+Reviewed-by: David Thompson <davthompson@nvidia.com>
 Signed-off-by: Liming Sun <limings@nvidia.com>
 ---
+v2->v3:
+    - Revise the commit message;
 v1->v2:
     Updates for comments from Ulf:
     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
