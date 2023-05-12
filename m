@@ -2,138 +2,201 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F3A1C77B7F
-	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 17:43:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96CC4C77B7F
+	for <linux-mmc@archiver.kernel.org>; Fri, 12 May 2023 18:15:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237840AbjELRn5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 12 May 2023 13:43:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45146 "EHLO
+        id S231358AbjELSP6 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 12 May 2023 14:15:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59742 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231128AbjELRn4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 13:43:56 -0400
-Received: from mga17.intel.com (mga17.intel.com [192.55.52.151])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8CCAC8A4B;
-        Fri, 12 May 2023 10:43:55 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1683913435; x=1715449435;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=Pjbrs8OPQjNCdOcArcy7VvF6XymjWQoxulO2nMIv+oM=;
-  b=J1LJRHMQ0Y91AnxR9Dc+0TyeorYjqhA1tH4pmSoZUDzHl6rToVzAh+7M
-   W1IDc6S0htkBptXzig254QaJc0OTLz60ssgqq2zSdzKFAMwn5BbV0xV8p
-   lVXFPcGkejysJ70DIJH8nQnvfy/asRmpshu/2TwD17Al/V91t4+5piyX0
-   LpVBBS/3RPt/YSMYJ8xGvXkUE9zem7ZdBcXxcNM9lIkHUST25DIVCFage
-   gZGqgmL0Ds/MXiu2+P5S42tSiqcyen1LX8Kso0dsprDljq1fyqegrDNrN
-   TQrHo5sLjyAfZds4AkxnSHCKDe/+/7vxfid7XqnxaVdYw5Z9Uu07UKh9r
-   w==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10708"; a="331212404"
-X-IronPort-AV: E=Sophos;i="5.99,269,1677571200"; 
-   d="scan'208";a="331212404"
-Received: from orsmga007.jf.intel.com ([10.7.209.58])
-  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 12 May 2023 10:43:54 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10708"; a="694314695"
-X-IronPort-AV: E=Sophos;i="5.99,269,1677571200"; 
-   d="scan'208";a="694314695"
-Received: from lkp-server01.sh.intel.com (HELO dea6d5a4f140) ([10.239.97.150])
-  by orsmga007.jf.intel.com with ESMTP; 12 May 2023 10:43:52 -0700
-Received: from kbuild by dea6d5a4f140 with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1pxWo4-00050q-0e;
-        Fri, 12 May 2023 17:43:52 +0000
-Date:   Sat, 13 May 2023 01:43:14 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Liming Sun <limings@nvidia.com>,
-        Adrian Hunter <adrian.hunter@intel.com>,
+        with ESMTP id S229530AbjELSP5 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 12 May 2023 14:15:57 -0400
+Received: from NAM12-BN8-obe.outbound.protection.outlook.com (mail-bn8nam12on2085.outbound.protection.outlook.com [40.107.237.85])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DC631FE4;
+        Fri, 12 May 2023 11:15:56 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=mBS3Tn9D/ypDLeIvNGhqfN46JCVl5+k93rwxG+2JsHby6cxlZl7xgvI1Ia2e2zj/4Zr4XktB3rJB1cRUf09ta0YFZBFn+ri64LiSLFH5Mlq7z5dNsJud3ETnj7ykrbPkPt5Gi0CVbJtXhtxfivr3A/aB7RPr0K1WFm4kufgWrjAeCV/hrMRamAhpzLGViyVoslmkIoxRfg7I7AVMZCa3P2pNzrnHTJvt09hXWM+pAUJO7S7iZQGW1u2pygC8ucDlutXYV9uM5iCQno5G+dFwMWaA3Fg1jnVxGLIXcdHTbJCAMxjc3Y0JhWzEZh3w/i6DoLkdqk552qYVc9lWt1m7Qw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=dZZixivFQ90kRh1WpwBqoyH6NViSEtOuonYHnpqu/oQ=;
+ b=OKByICxbux23vlDK4oQCKrSjGUveDswPKfyZ4iUbO9VaI2aCpnnuTn4p83zhmTp24PRJAqN2e5lFprXuv8NROYMeM8SIuxXzaHEAPdt0xkP27YemYkN3J/JMnjbrlONxz00pm222myHbXsYNoKfHNuTgSVaeDCMEtjleEVYkBEC6zm6kG/AfrZLduFOTlXcIx0uFfGu34Vca21cYx/sg5siazAvcQFZa90D6nku2ozvLD3wD0OQ73fh3VM17GyKlDZBu3OOS4gBQz5DdJKzYxBMKZvGS6o5dkHWIseY+yikeLCbOf1sRn0N3+BT10oeY38JtnAq5k26K26aPiY/Rvw==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 216.228.117.161) smtp.rcpttodomain=intel.com smtp.mailfrom=nvidia.com;
+ dmarc=pass (p=reject sp=reject pct=100) action=none header.from=nvidia.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=Nvidia.com;
+ s=selector2;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=dZZixivFQ90kRh1WpwBqoyH6NViSEtOuonYHnpqu/oQ=;
+ b=JAJDqI/Zw+DARdz5i8eZZL9QPQ7VdbmnamQ8eqWRzHhb5cDPnyiy4eubM6JAeiUDmU0TFgrkqfiAlgHKY1kX8gXJZ7r4PXlmzCdmg1202SfrZBXRtBfJO3nk823RXe9rNWFA5ehrvmB9rco0sJ0xq2fKNrAHscuI2hMsL8F/w0HfP9XJ1E665v4Miwj6OT7RczMhl0nxw6yzrIjbTzog4HUXVlaAaMqEA+yW8FQqh6hl1uRZoHFLXMF/ra+GKhoTegDKnUdEf4rNxc//jg96EjWxVtRERVBMutaVKl+/wxd6FnPsspyfRXDAJW/Ky+oMFN0xluojb+NIrJeV8VISJA==
+Received: from MW3PR05CA0007.namprd05.prod.outlook.com (2603:10b6:303:2b::12)
+ by MN6PR12MB8590.namprd12.prod.outlook.com (2603:10b6:208:47c::22) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.22; Fri, 12 May
+ 2023 18:15:54 +0000
+Received: from CO1NAM11FT005.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:2b:cafe::b2) by MW3PR05CA0007.outlook.office365.com
+ (2603:10b6:303:2b::12) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6411.10 via Frontend
+ Transport; Fri, 12 May 2023 18:15:54 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 216.228.117.161)
+ smtp.mailfrom=nvidia.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=nvidia.com;
+Received-SPF: Pass (protection.outlook.com: domain of nvidia.com designates
+ 216.228.117.161 as permitted sender) receiver=protection.outlook.com;
+ client-ip=216.228.117.161; helo=mail.nvidia.com; pr=C
+Received: from mail.nvidia.com (216.228.117.161) by
+ CO1NAM11FT005.mail.protection.outlook.com (10.13.174.147) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.20.6387.24 via Frontend Transport; Fri, 12 May 2023 18:15:52 +0000
+Received: from rnnvmail203.nvidia.com (10.129.68.9) by mail.nvidia.com
+ (10.129.200.67) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.5; Fri, 12 May 2023
+ 11:15:32 -0700
+Received: from rnnvmail202.nvidia.com (10.129.68.7) by rnnvmail203.nvidia.com
+ (10.129.68.9) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.37; Fri, 12 May
+ 2023 11:15:32 -0700
+Received: from vdi.nvidia.com (10.127.8.12) by mail.nvidia.com (10.129.68.7)
+ with Microsoft SMTP Server id 15.2.986.37 via Frontend Transport; Fri, 12 May
+ 2023 11:15:31 -0700
+From:   Liming Sun <limings@nvidia.com>
+To:     Adrian Hunter <adrian.hunter@intel.com>,
         Ulf Hansson <ulf.hansson@linaro.org>,
         David Thompson <davthompson@nvidia.com>,
         Shawn Lin <shawn.lin@rock-chips.com>
-Cc:     oe-kbuild-all@lists.linux.dev, Liming Sun <limings@nvidia.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Subject: Re: [PATCH v3] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-Message-ID: <202305130116.ynGq0pC5-lkp@intel.com>
-References: <20230512122648.223974-1-limings@nvidia.com>
+CC:     Liming Sun <limings@nvidia.com>, <linux-mmc@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>
+Subject: [PATCH v4] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+Date:   Fri, 12 May 2023 14:15:27 -0400
+Message-ID: <20230512181527.189345-1-limings@nvidia.com>
+X-Mailer: git-send-email 2.30.1
+In-Reply-To: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230512122648.223974-1-limings@nvidia.com>
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT005:EE_|MN6PR12MB8590:EE_
+X-MS-Office365-Filtering-Correlation-Id: eee5e4ee-04f6-4032-c1b0-08db5314ebfc
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: XegYqlu/Hdf754ykMUqzdwJ1vKIoKCzUHmCR7wOJylXF2eE4PJH1NdISrnCJEYE6D9kEjXgIe3daSiZfeEcx2dgyXDhxHYhFSRkkgVALcH5muJxpMbK7nAb0A8tD60L8L+Rf9EEGmwsZo1l99qG72lP2CmUa/WfccprRHtmJmAyw3RyhRi0eiJoJrAr/GQvhZu+0d4Bhh/RoJxEW0u7wvzjDMq8NaDjQgbjdii7At6Y0cUx5Ied+rQDVgs5ocyEdWtB9/T53qcOIVW17Jft7FTYr2XLkpD0byYQqZzNNp99ogiSGLWgwwWZfryDDIb3LXzJtaVF0DGWdVm55hz4u02pj7XENTycJ/WsaveWwCcmg+6q4tLjUuMKNe1MKRGBUXm7fInrfkbZzwWyHe1ZMwfh4pZ1zPlp7kD/cSCD9dMSZg33SPBdxy/CVcIrvPLm36v3P6yh2R/0f4F7oFNh8OfEsr8yXM8Zqpjw2jyjMLwF+qC5Ka/vJY3jjPqeU4KEVeCQMNrWiugLnSRFm5Vsw/rDgVF/OGPJoTsGAYrN/PcsZYstLgpXH6zB75uqoPushgVtXbJsPXUUDZ9XNEF34h06dQuc7w+Muvma3Lt3S/Wq48JdbC+VEKRICi9QqRk/DW8YejPMc6F5JMyrjQCnYBzfjVKaiad+iTcdKZdrqlr1wm8hynbZRDidNsvES19d25e+GPxEsCPWDD2DYP6y8WVEuT7l7K8JYskkxwwE7n9GHSyWXUnRnaxYPyJ+8Zfv7wR571jxKuKUyoFJUbmlGew==
+X-Forefront-Antispam-Report: CIP:216.228.117.161;CTRY:US;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:mail.nvidia.com;PTR:dc6edge2.nvidia.com;CAT:NONE;SFS:(13230028)(4636009)(396003)(346002)(376002)(39860400002)(136003)(451199021)(46966006)(36840700001)(40470700004)(5660300002)(40460700003)(8936002)(8676002)(47076005)(36860700001)(2616005)(426003)(336012)(83380400001)(2906002)(36756003)(356005)(7636003)(186003)(82740400003)(86362001)(82310400005)(40480700001)(26005)(1076003)(4326008)(41300700001)(70586007)(70206006)(6666004)(316002)(478600001)(7696005)(54906003)(110136005)(133343001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: Nvidia.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 12 May 2023 18:15:52.5312
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: eee5e4ee-04f6-4032-c1b0-08db5314ebfc
+X-MS-Exchange-CrossTenant-Id: 43083d15-7273-40c1-b7db-39efd9ccc17a
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=43083d15-7273-40c1-b7db-39efd9ccc17a;Ip=[216.228.117.161];Helo=[mail.nvidia.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT005.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: MN6PR12MB8590
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Liming,
+This commit implements the runtime PM operations to disable eMMC
+card clock when idle.
 
-kernel test robot noticed the following build errors:
+Reviewed-by: David Thompson <davthompson@nvidia.com>
+Signed-off-by: Liming Sun <limings@nvidia.com>
+---
+v3->v4:
+    - Fix compiling reported by 'kernel test robot';
+v2->v3:
+    - Revise the commit message;
+v1->v2:
+    Updates for comments from Ulf:
+    - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+v1: Initial version.
+---
+ drivers/mmc/host/sdhci-of-dwcmshc.c | 54 ++++++++++++++++++++++++++++-
+ 1 file changed, 53 insertions(+), 1 deletion(-)
 
-[auto build test ERROR on ulf-hansson-mmc-mirror/next]
-[also build test ERROR on linus/master v6.4-rc1 next-20230512]
-[If your patch is applied to the wrong git tree, kindly drop us a note.
-And when submitting patch, we suggest to use '--base' as documented in
-https://git-scm.com/docs/git-format-patch#_base_tree_information]
-
-url:    https://github.com/intel-lab-lkp/linux/commits/Liming-Sun/mmc-sdhci-of-dwcmshc-Add-runtime-PM-operations/20230512-202948
-base:   https://git.linaro.org/people/ulf.hansson/mmc-mirror.git next
-patch link:    https://lore.kernel.org/r/20230512122648.223974-1-limings%40nvidia.com
-patch subject: [PATCH v3] mmc: sdhci-of-dwcmshc: Add runtime PM operations
-config: arc-allyesconfig (https://download.01.org/0day-ci/archive/20230513/202305130116.ynGq0pC5-lkp@intel.com/config)
-compiler: arceb-elf-gcc (GCC) 12.1.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/eb5d4c0702ce24630f3d82a37f39437f52607cbb
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Liming-Sun/mmc-sdhci-of-dwcmshc-Add-runtime-PM-operations/20230512-202948
-        git checkout eb5d4c0702ce24630f3d82a37f39437f52607cbb
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arc olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=arc SHELL=/bin/bash
-
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Link: https://lore.kernel.org/oe-kbuild-all/202305130116.ynGq0pC5-lkp@intel.com/
-
-All errors (new ones prefixed by >>):
-
-   drivers/mmc/host/sdhci-of-dwcmshc.c: In function 'dwcmshc_runtime_suspend':
->> drivers/mmc/host/sdhci-of-dwcmshc.c:674:17: error: implicit declaration of function 'dwcmshc_disable_card_clk' [-Werror=implicit-function-declaration]
-     674 |                 dwcmshc_disable_card_clk(host);
-         |                 ^~~~~~~~~~~~~~~~~~~~~~~~
-   drivers/mmc/host/sdhci-of-dwcmshc.c: In function 'dwcmshc_runtime_resume':
->> drivers/mmc/host/sdhci-of-dwcmshc.c:684:9: error: implicit declaration of function 'dwcmshc_enable_card_clk' [-Werror=implicit-function-declaration]
-     684 |         dwcmshc_enable_card_clk(host);
-         |         ^~~~~~~~~~~~~~~~~~~~~~~
-   cc1: some warnings being treated as errors
-
-
-vim +/dwcmshc_disable_card_clk +674 drivers/mmc/host/sdhci-of-dwcmshc.c
-
-   666	
-   667	static int dwcmshc_runtime_suspend(struct device *dev)
-   668	{
-   669		struct sdhci_host *host = dev_get_drvdata(dev);
-   670		int ret = 0;
-   671	
-   672		ret = sdhci_runtime_suspend_host(host);
-   673		if (!ret)
- > 674			dwcmshc_disable_card_clk(host);
-   675	
-   676		return ret;
-   677	}
-   678	
-   679	static int dwcmshc_runtime_resume(struct device *dev)
-   680	{
-   681		struct sdhci_host *host = dev_get_drvdata(dev);
-   682		int ret = 0;
-   683	
- > 684		dwcmshc_enable_card_clk(host);
-   685		ret = sdhci_runtime_resume_host(host, 0);
-   686	
-   687		return ret;
-   688	}
-   689	
-
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index e68cd87998c8..2d780a5bc8fb 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -15,6 +15,7 @@
+ #include <linux/module.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
++#include <linux/pm_runtime.h>
+ #include <linux/reset.h>
+ #include <linux/sizes.h>
+ 
+@@ -546,6 +547,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 		sdhci_enable_v4_mode(host);
+ #endif
+ 
++	pm_runtime_enable(dev);
++
+ 	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ 
+ 	err = sdhci_setup_host(host);
+@@ -646,7 +649,56 @@ static int dwcmshc_resume(struct device *dev)
+ }
+ #endif
+ 
+-static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
++#ifdef CONFIG_PM
++
++static void dwcmshc_enable_card_clk(struct sdhci_host *host)
++{
++	u16 ctrl;
++
++	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	ctrl |= SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++}
++
++static void dwcmshc_disable_card_clk(struct sdhci_host *host)
++{
++	u16 ctrl;
++
++	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
++	ctrl &= ~SDHCI_CLOCK_CARD_EN;
++	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
++}
++
++static int dwcmshc_runtime_suspend(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	ret = sdhci_runtime_suspend_host(host);
++	if (!ret)
++		dwcmshc_disable_card_clk(host);
++
++	return ret;
++}
++
++static int dwcmshc_runtime_resume(struct device *dev)
++{
++	struct sdhci_host *host = dev_get_drvdata(dev);
++	int ret = 0;
++
++	dwcmshc_enable_card_clk(host);
++	ret = sdhci_runtime_resume_host(host, 0);
++
++	return ret;
++}
++
++#endif
++
++static const struct dev_pm_ops dwcmshc_pmops = {
++	SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
++	SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
++			   dwcmshc_runtime_resume, NULL)
++};
+ 
+ static struct platform_driver sdhci_dwcmshc_driver = {
+ 	.driver	= {
 -- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests
+2.30.1
+
