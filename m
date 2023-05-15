@@ -2,161 +2,322 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 45D9FC7EE22
-	for <linux-mmc@archiver.kernel.org>; Sun, 14 May 2023 20:43:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 120F1C7EE22
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 May 2023 00:02:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229701AbjENUnC (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 May 2023 16:43:02 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36406 "EHLO
+        id S230094AbjEOACB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 May 2023 20:02:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48864 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229672AbjENUnB (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 May 2023 16:43:01 -0400
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2BA8DE48
-        for <linux-mmc@vger.kernel.org>; Sun, 14 May 2023 13:43:00 -0700 (PDT)
-Received: by mail-ej1-x62b.google.com with SMTP id a640c23a62f3a-965ac4dd11bso2395753266b.2
-        for <linux-mmc@vger.kernel.org>; Sun, 14 May 2023 13:43:00 -0700 (PDT)
+        with ESMTP id S229672AbjEOACA (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 May 2023 20:02:00 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E759213D;
+        Sun, 14 May 2023 17:01:57 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id 4fb4d7f45d1cf-50bc3a2d333so18208561a12.0;
+        Sun, 14 May 2023 17:01:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1684096978; x=1686688978;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=O9dvTSlniUVfCaSC8k/L21+kFYYDT3lk/DIP6ENR2s4=;
-        b=llVR2huAlUigHQb08k844q7grcjOaj7bgGcET6x54m6ggUHbKoKfvFK2klcfJwnyQg
-         mkcpYs2AjkdQHIYlT3kDp1FUxpYXpZAQQ59xW78CTBadgxECpzUp9LoYeBGhTDu1IDGg
-         pHPRCsNnUlVx2/9t9Z27i+JVT4+6NrgCxL5Q1mUwcPk1bT+PirfdqRZO9PfrMD7Yx5jq
-         3e6Rz4jDI8nAFD6yy0NQ0LuptDF5/Mdc7Bz5DbuxeNI7FelRKk3DIyQZGNMQdgqL79eX
-         sLfcUaqi5pUalPOeQiuinNSklPSOgtAHZj3sqNA5OcNnA7RU1LfuIkXwt1RyNxG75Vcu
-         yKlQ==
+        d=gmail.com; s=20221208; t=1684108916; x=1686700916;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=QcHALSfCL/GC6DMlrpcXyI9y7ZjraMP4QnYveYiPf+4=;
+        b=YFGnmczvEq0PbvVszexBH/AjfiDVmXm3CNVhWnVK6yWc/FU0eldB1wsqXK2DZtaghe
+         bw9pNBKXGVBgiwVI8T5k3qVSqW03099N5DMo8cYi7YV+Sy+L4s1p7b+QISMbYJWQICSL
+         aMisiSjONe3BWkUopCazxepS5P3wnDy3e0qE+x/zwGLd1geG8a7zygAeMNvWNuqwo3dU
+         bkJuCZ4WQzAjzScvTPOd36Ua1/+UR43Ydk+alPxdC6u/me3OUx6VFidNihfk1cZeNcUz
+         fRh3cEFDSrUTz8OaETlcORUhW1JkS7SvwUEen8NIHzeKQvtgjNZFxYozB24S96JiisRS
+         m4BQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684096978; x=1686688978;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=O9dvTSlniUVfCaSC8k/L21+kFYYDT3lk/DIP6ENR2s4=;
-        b=RaLq9aqMQniDE84nr5RsNXLNvNzvqS+oDJwBZOxVFzLMv7auIILOixgblPPg4cS/md
-         mRiPE+V9DVZMiLn2h+ZwEWKUJHDt+3ezIng21ovlOSLSujJiUS5Lm7fkQ2ntFX/XPNo2
-         3RdUk1mmmi4RAtrkBLAdMveS1f+LHSG/13fjadvqdT5P3ouE0+zD96N5vnGt4nQTDrk3
-         fb/Vt2sinCzOHI/pILLLgVXrP1GgLszjqkDHoeizdzZQ/t3+jZPaRUyv8eEzibTRl2jJ
-         9/ISahYsVZd8BD0256FJOGYZ+gvro9R0Q4pbOUT8EKC/tk3pRFwtrxHrceyI8w760TOG
-         YeOw==
-X-Gm-Message-State: AC+VfDwCDD0ZFlDc3Ep8fT48Zwwtb+WdwzCUyqAM/Vp6m64XNu3S/bOq
-        GeRYm7bDZ62UBR5n8LEFo9UWlEsdfsUt9WzIViU=
-X-Google-Smtp-Source: ACHHUZ62HeSMNAqKI3//QVu45v+vCwf+3JiHi6LmkZSWBkwJ72pTau2OTKnwJCtyHBLXNCTjitO9qhRwNpG6yc09ffA=
-X-Received: by 2002:a17:907:806:b0:953:47fc:3f0b with SMTP id
- wv6-20020a170907080600b0095347fc3f0bmr24871963ejb.53.1684096978431; Sun, 14
- May 2023 13:42:58 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1684108916; x=1686700916;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=QcHALSfCL/GC6DMlrpcXyI9y7ZjraMP4QnYveYiPf+4=;
+        b=C9nfVxTJeOLVmYRHaFNxP1uKKRfXx0B1/kSwnpfmjDH8XHqhS3qoXp7/2fkyZr3Fr8
+         VdHPYBvFyoc/4uNygQj53ysokuVSrAmYvfVJsAY+lVEXn3hReDE18ERTgDq3rlMRYu6+
+         vcbfoXLE6adzy3DfLPIzsXIQu7D/J3WTKoXeaAwfOjwgwuX8jdj/iScdS7esCyZMvST+
+         hyAxr81aaFx7PblwasrqIi5AxnM/BBasUv6u8ewayR/EsX3WxPxDAQ1MI/BU4JF5OF2F
+         s6S4+4YbiFqrYPww0oQjCRTldL6nj/OvDQzXiGa7pReAsQMR2CswxYvvq+GNA47CSk2y
+         f0vg==
+X-Gm-Message-State: AC+VfDyECvH2KYROD8VzTMaysnOA4niEZfmzUb+TY8IvnhdY9jeS2D8m
+        Ch/Q9JrUs8EIxkvAaDCuomT5BzfBCoh5p79ynJE=
+X-Google-Smtp-Source: ACHHUZ5jIxKtkNwQ2S8J7O+CeqpcLqCvrRw/0ijvqbeStAbUgvPg43y0c/9ii2ctylBu+8y2Zl0ZDVo4qCPxhlvTynE=
+X-Received: by 2002:a05:6402:38c:b0:50c:646:da42 with SMTP id
+ o12-20020a056402038c00b0050c0646da42mr26771700edv.28.1684108916150; Sun, 14
+ May 2023 17:01:56 -0700 (PDT)
 MIME-Version: 1.0
-References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
- <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
- <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com> <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
-In-Reply-To: <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Sun, 14 May 2023 22:42:46 +0200
-Message-ID: <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com>
-Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Luca Weiss <luca@z3ntu.xyz>
-Content-Type: multipart/mixed; boundary="0000000000002ac84205fbad6269"
+References: <20230512104559.11218-1-victor.shih@genesyslogic.com.tw> <20230512104559.11218-2-victor.shih@genesyslogic.com.tw>
+In-Reply-To: <20230512104559.11218-2-victor.shih@genesyslogic.com.tw>
+From:   Ben Chuang <benchuanggli@gmail.com>
+Date:   Mon, 15 May 2023 08:01:44 +0800
+Message-ID: <CACT4zj_LRArVUS4HsP134+NMm2T-PRgFGpwxmcrK87V-5rqhqg@mail.gmail.com>
+Subject: Re: [PATCH V1 1/3] mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+To:     Victor Shih <victorshihgli@gmail.com>
+Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        takahiro.akashi@linaro.org, dlunev@chromium.org,
+        Victor Shih <victor.shih@genesyslogic.com.tw>,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
---0000000000002ac84205fbad6269
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Hi Victor,
 
-Hi Ulf,
+One thing, get in the habit of running checkpatch.pl before submitting patc=
+hes.
 
-On Thu, May 11, 2023 at 12:43=E2=80=AFPM Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
-[...]
-> > Indeed, removing mmc_set_clock() from mmc_select_hs200() also makes my
-> > eMMC appear again on top of Linux 6.4-rc1.
-> > See the attached diff in case it's not fully clear which
-> > mmc_set_clock() call I removed.
->
-> Thanks for the update! Removing that call restores mmc_select_hs200()
-> to the previous behaviour - so thanks for confirming that this is
-> working.
->
-> However, to find the proper solution, I think we need to understand
-> why we are hanging in the meson-mx-sdhc driver first. Here's a couple
-> of follow up questions from me:
->
-> 1) Before calling mmc_set_clock() what is the actual clock rate that
-> has been set by the meson driver?
->
-> 2) Does the call to mmc_set_clock() return or hang? Can we verify that
-> the clock gets set correctly?
-I used the attached diff to answer these two questions. See the
-following log extract (full log is attached):
-meson-mx-sdhc c1108e00.mmc: Trying to set MMC clock to 400000Hz
-meson-mx-sdhc c1108e00.mmc: Actual MMC clock to 399812Hz
-mmc1: mmc_select_hs200 switching to clock from card->ext_csd.hs_max_dtr...
-meson-mx-sdhc c1108e00.mmc: Trying to set MMC clock to 52000000Hz
-meson-mx-sdhc c1108e00.mmc: Actual MMC clock to 51000000Hz
-mmc1: mmc_select_hs200 mmc_set_clock returned
+checkpatch.pl says.
+"From:/Signed-off-by: email address mismatch: 'From: Victor Shih
+<victorshihgli@gmail.com>' !=3D 'Signed-off-by: Victor Shih
+<victor.shih@genesyslogic.com.tw>'"
 
-> 3) If 2) seems to work above, we need to figure out why
-> mmc_switch_status() is hanging. If there is a problem with the eMMC
-> card responding in-correctly, the host driver should return with an
-> error code, right?
-You're right: it's indeed hanging in mmc_switch_status()
-I don't get any interrupts (timeout, CRC error, ...) for it.
-Do you have any suggestions what to check next?
+It reminds you that maybe the first line of the email body needs a
+line "Form: Victor Shih <victor.shih@genesyslogic.com.tw>'".
 
+man git-format-patch and see --form option
 
 Best regards,
-Martin
+Ben
 
---0000000000002ac84205fbad6269
-Content-Type: text/x-patch; charset="US-ASCII"; 
-	name="error-prints-to-identify-why-hs200-switch-hangs.diff"
-Content-Disposition: attachment; 
-	filename="error-prints-to-identify-why-hs200-switch-hangs.diff"
-Content-Transfer-Encoding: base64
-Content-ID: <f_lhnvryoz1>
-X-Attachment-Id: f_lhnvryoz1
 
-ZGlmZiAtLWdpdCBhL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMgYi9kcml2ZXJzL21tYy9jb3JlL21t
-Yy5jCmluZGV4IDg5Y2Q0OGZjZWM3OS4uZWYyOTg2ZmY0NTI4IDEwMDY0NAotLS0gYS9kcml2ZXJz
-L21tYy9jb3JlL21tYy5jCisrKyBiL2RyaXZlcnMvbW1jL2NvcmUvbW1jLmMKQEAgLTE1MDAsNyAr
-MTUwMCwxMSBAQCBzdGF0aWMgaW50IG1tY19zZWxlY3RfaHMyMDAoc3RydWN0IG1tY19jYXJkICpj
-YXJkKQogCQlvbGRfdGltaW5nID0gaG9zdC0+aW9zLnRpbWluZzsKIAkJb2xkX2Nsb2NrID0gaG9z
-dC0+aW9zLmNsb2NrOwogCQltbWNfc2V0X3RpbWluZyhob3N0LCBNTUNfVElNSU5HX01NQ19IUzIw
-MCk7CisJCXByX2VycigiJXM6ICVzIHN3aXRjaGluZyB0byBjbG9jayBmcm9tIGNhcmQtPmV4dF9j
-c2QuaHNfbWF4X2R0ci4uLlxuIiwgbW1jX2hvc3RuYW1lKGNhcmQtPmhvc3QpLAorCQkgICAgICAg
-X19mdW5jX18pOwogCQltbWNfc2V0X2Nsb2NrKGNhcmQtPmhvc3QsIGNhcmQtPmV4dF9jc2QuaHNf
-bWF4X2R0cik7CisJCXByX2VycigiJXM6ICVzIG1tY19zZXRfY2xvY2sgcmV0dXJuZWRcbiIsIG1t
-Y19ob3N0bmFtZShjYXJkLT5ob3N0KSwKKwkJICAgICAgIF9fZnVuY19fKTsKIAogCQkvKgogCQkg
-KiBGb3IgSFMyMDAsIENSQyBlcnJvcnMgYXJlIG5vdCBhIHJlbGlhYmxlIHdheSB0byBrbm93IHRo
-ZQpAQCAtMTUwOCw2ICsxNTEyLDggQEAgc3RhdGljIGludCBtbWNfc2VsZWN0X2hzMjAwKHN0cnVj
-dCBtbWNfY2FyZCAqY2FyZCkKIAkJICogdHVuaW5nIHdpbGwgZmFpbCBhbmQgdGhlIHJlc3VsdCBl
-bmRzIHVwIHRoZSBzYW1lLgogCQkgKi8KIAkJZXJyID0gbW1jX3N3aXRjaF9zdGF0dXMoY2FyZCwg
-ZmFsc2UpOworCQlwcl9lcnIoIiVzOiAlcyBzdGF0dXMgYWZ0ZXIgbW1jX3NldF9jbG9jazogJWRc
-biIsIG1tY19ob3N0bmFtZShjYXJkLT5ob3N0KSwKKwkJICAgICAgIF9fZnVuY19fLCBlcnIpOwog
-CiAJCS8qCiAJCSAqIG1tY19zZWxlY3RfdGltaW5nKCkgYXNzdW1lcyB0aW1pbmcgaGFzIG5vdCBj
-aGFuZ2VkIGlmCmRpZmYgLS1naXQgYS9kcml2ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMtbW1j
-LmMgYi9kcml2ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMtbW1jLmMKaW5kZXggODc5OWY0N2Vk
-ZjIzLi4xMDRmMDAyNzU5NGYgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMvbW1jL2hvc3QvbWVzb24tbXgt
-c2RoYy1tbWMuYworKysgYi9kcml2ZXJzL21tYy9ob3N0L21lc29uLW14LXNkaGMtbW1jLmMKQEAg
-LTI3Miw2ICsyNzIsOCBAQCBzdGF0aWMgaW50IG1lc29uX214X3NkaGNfc2V0X2NsayhzdHJ1Y3Qg
-bW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykKIAogCW1lc29uX214X3NkaGNfZGlz
-YWJsZV9jbGtzKG1tYyk7CiAKKwlkZXZfZXJyKG1tY19kZXYobW1jKSwgIlRyeWluZyB0byBzZXQg
-TU1DIGNsb2NrIHRvICV1SHpcbiIsIGlvcy0+Y2xvY2spOworCiAJaWYgKGlvcy0+Y2xvY2spIHsK
-IAkJcmV0ID0gY2xrX3NldF9yYXRlKGhvc3QtPnNkX2NsaywgaW9zLT5jbG9jayk7CiAJCWlmIChy
-ZXQpIHsKQEAgLTMxNyw2ICszMTksOCBAQCBzdGF0aWMgaW50IG1lc29uX214X3NkaGNfc2V0X2Ns
-ayhzdHJ1Y3QgbW1jX2hvc3QgKm1tYywgc3RydWN0IG1tY19pb3MgKmlvcykKIAkJbW1jLT5hY3R1
-YWxfY2xvY2sgPSAwOwogCX0KIAorCWRldl9lcnIobW1jX2RldihtbWMpLCAiQWN0dWFsIE1NQyBj
-bG9jayB0byAldUh6XG4iLCBtbWMtPmFjdHVhbF9jbG9jayk7CisKIAlyZXR1cm4gMDsKIH0KIApA
-QCAtNTYyLDYgKzU2Niw5IEBAIHN0YXRpYyBpcnFyZXR1cm5fdCBtZXNvbl9teF9zZGhjX2lycShp
-bnQgaXJxLCB2b2lkICpkYXRhKQogCWlmICghKGljdGwgJiBpc3RhKSkKIAkJcmV0dXJuIElSUV9O
-T05FOwogCisJZGV2X2VycihtbWNfZGV2KGhvc3QtPm1tYyksICJDTUQlZCBJU1RBOiAweCUwOHgs
-IElDVEw6IDB4JTA4eFxuIiwKKwkJCWNtZC0+b3Bjb2RlLCBpc3RhLCBpY3RsKTsKKwogCWlmIChp
-c3RhICYgTUVTT05fU0RIQ19JU1RBX1JYRklGT19GVUxMIHx8CiAJICAgIGlzdGEgJiBNRVNPTl9T
-REhDX0lTVEFfVFhGSUZPX0VNUFRZKQogCQljbWQtPmVycm9yID0gLUVJTzsK
---0000000000002ac84205fbad6269--
+On Fri, May 12, 2023 at 6:47=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
+m> wrote:
+>
+> Add support for the GL9767 chipset. GL9767 supports
+> SD3 mode likes UHS-I SDR50, SDR104.
+> Enable MSI interrupt for GL9767. Some platform do not
+> support PCI INTx and devices can not work without
+> interrupt.
+>
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> ---
+>  drivers/mmc/host/sdhci-pci-core.c |   1 +
+>  drivers/mmc/host/sdhci-pci-gli.c  | 132 ++++++++++++++++++++++++++++++
+>  drivers/mmc/host/sdhci-pci.h      |   2 +
+>  3 files changed, 135 insertions(+)
+>
+> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-p=
+ci-core.c
+> index 01975d145200..1c2572c0f012 100644
+> --- a/drivers/mmc/host/sdhci-pci-core.c
+> +++ b/drivers/mmc/host/sdhci-pci-core.c
+> @@ -1903,6 +1903,7 @@ static const struct pci_device_id pci_ids[] =3D {
+>         SDHCI_PCI_DEVICE(GLI, 9750, gl9750),
+>         SDHCI_PCI_DEVICE(GLI, 9755, gl9755),
+>         SDHCI_PCI_DEVICE(GLI, 9763E, gl9763e),
+> +       SDHCI_PCI_DEVICE(GLI, 9767, gl9767),
+>         SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
+>         /* Generic SD host controller */
+>         {PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
+> diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
+i-gli.c
+> index 633a8ee8f8c5..300512740cb0 100644
+> --- a/drivers/mmc/host/sdhci-pci-gli.c
+> +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> @@ -149,6 +149,32 @@
+>  #define PCI_GLI_9755_PM_CTRL     0xFC
+>  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+>
+> +#define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
+> +#define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
+> +
+> +#define PCIE_GLI_9767_VHS      0x884
+> +#define   GLI_9767_VHS_REV       GENMASK(19, 16)
+> +#define   GLI_9767_VHS_REV_R     0x0
+> +#define   GLI_9767_VHS_REV_M     0x1
+> +#define   GLI_9767_VHS_REV_W     0x2
+> +
+> +#define PCIE_GLI_9767_PWR_MACRO_CTL                                    0=
+x8D0
+> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                       =
+ GENMASK(3, 0)
+> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE            =
+ GENMASK(15, 12)
+> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE_VALUE      =
+ 0x7
+> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL                =
+ GENMASK(29, 28)
+> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL_VALUE          =
+ 0x3
+> +
+> +#define PCIE_GLI_9767_SCR                              0x8E0
+> +#define   PCIE_GLI_9767_SCR_AUTO_AXI_W_BURST             BIT(6)
+> +#define   PCIE_GLI_9767_SCR_AUTO_AXI_R_BURST             BIT(7)
+> +#define   PCIE_GLI_9767_SCR_AXI_REQ                      BIT(9)
+> +#define   PCIE_GLI_9767_SCR_CARD_DET_PWR_SAVING_EN       BIT(10)
+> +#define   PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE0      BIT(16)
+> +#define   PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE1      BIT(17)
+> +#define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF              BIT(21)
+> +#define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN       BIT(30)
+> +
+>  #define GLI_MAX_TUNING_LOOP 40
+>
+>  /* Genesys Logic chipset */
+> @@ -693,6 +719,61 @@ static void gl9755_hw_setting(struct sdhci_pci_slot =
+*slot)
+>         gl9755_wt_off(pdev);
+>  }
+>
+> +static void gli_set_9767(struct sdhci_host *host)
+> +{
+> +       u32 value;
+> +
+> +       value =3D sdhci_readl(host, SDHCI_GLI_9767_GM_BURST_SIZE);
+> +       value &=3D ~SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET;
+> +       sdhci_writel(host, value, SDHCI_GLI_9767_GM_BURST_SIZE);
+> +}
+> +
+> +static void gl9767_hw_setting(struct sdhci_pci_slot *slot)
+> +{
+> +       struct pci_dev *pdev =3D slot->chip->pdev;
+> +       u32 value;
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_VHS, &value);
+> +       value &=3D ~GLI_9767_VHS_REV;
+> +       value |=3D FIELD_PREP(GLI_9767_VHS_REV, GLI_9767_VHS_REV_W);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_VHS, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_PWR_MACRO_CTL, &value);
+> +       value &=3D ~(PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE |
+> +                  PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE |
+> +                  PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL);
+> +
+> +       value |=3D PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE |
+> +                FIELD_PREP(PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VO=
+LTAGE,
+> +                           PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VO=
+LTAGE_VALUE) |
+> +                FIELD_PREP(PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CT=
+L,
+> +                           PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CT=
+L_VALUE);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_PWR_MACRO_CTL, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_SCR, &value);
+> +       value &=3D ~(PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE0 |
+> +                  PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE1 |
+> +                  PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN);
+> +
+> +       value |=3D PCIE_GLI_9767_SCR_AUTO_AXI_W_BURST |
+> +                PCIE_GLI_9767_SCR_AUTO_AXI_R_BURST |
+> +                PCIE_GLI_9767_SCR_AXI_REQ |
+> +                PCIE_GLI_9767_SCR_CARD_DET_PWR_SAVING_EN |
+> +                PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_SCR, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_VHS, &value);
+> +       value &=3D ~GLI_9767_VHS_REV;
+> +       value |=3D FIELD_PREP(GLI_9767_VHS_REV, GLI_9767_VHS_REV_R);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_VHS, value);
+> +}
+> +
+> +static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
+> +{
+> +       sdhci_reset(host, mask);
+> +       gli_set_9767(host);
+> +}
+> +
+>  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
+>  {
+>         struct sdhci_host *host =3D slot->host;
+> @@ -717,6 +798,19 @@ static int gli_probe_slot_gl9755(struct sdhci_pci_sl=
+ot *slot)
+>         return 0;
+>  }
+>
+> +static int gli_probe_slot_gl9767(struct sdhci_pci_slot *slot)
+> +{
+> +       struct sdhci_host *host =3D slot->host;
+> +
+> +       gli_set_9767(host);
+> +       gl9767_hw_setting(slot);
+> +       gli_pcie_enable_msi(slot);
+> +       slot->host->mmc->caps2 |=3D MMC_CAP2_NO_SDIO;
+> +       sdhci_enable_v4_mode(host);
+> +
+> +       return 0;
+> +}
+> +
+>  static void sdhci_gli_voltage_switch(struct sdhci_host *host)
+>  {
+>         /*
+> @@ -740,6 +834,25 @@ static void sdhci_gli_voltage_switch(struct sdhci_ho=
+st *host)
+>         usleep_range(100000, 110000);
+>  }
+>
+> +static void sdhci_gl9767_voltage_switch(struct sdhci_host *host)
+> +{
+> +       /*
+> +        * According to Section 3.6.1 signal voltage switch procedure in
+> +        * SD Host Controller Simplified Spec. 4.20, steps 6~8 are as
+> +        * follows:
+> +        * (6) Set 1.8V Signal Enable in the Host Control 2 register.
+> +        * (7) Wait 5ms. 1.8V voltage regulator shall be stable within th=
+is
+> +        *     period.
+> +        * (8) If 1.8V Signal Enable is cleared by Host Controller, go to
+> +        *     step (12).
+> +        *
+> +        * Wait 5ms after set 1.8V signal enable in Host Control 2 regist=
+er
+> +        * to ensure 1.8V signal enable bit is set by GL9767.
+> +        *
+> +        */
+> +       usleep_range(5000, 5500);
+> +}
+> +
+>  static void sdhci_gl9750_reset(struct sdhci_host *host, u8 mask)
+>  {
+>         sdhci_reset(host, mask);
+> @@ -1150,3 +1263,22 @@ const struct sdhci_pci_fixes sdhci_gl9763e =3D {
+>  #endif
+>         .add_host       =3D gl9763e_add_host,
+>  };
+> +
+> +static const struct sdhci_ops sdhci_gl9767_ops =3D {
+> +       .set_clock              =3D sdhci_set_clock,
+> +       .enable_dma             =3D sdhci_pci_enable_dma,
+> +       .set_bus_width          =3D sdhci_set_bus_width,
+> +       .reset                  =3D sdhci_gl9767_reset,
+> +       .set_uhs_signaling      =3D sdhci_set_uhs_signaling,
+> +       .voltage_switch         =3D sdhci_gl9767_voltage_switch,
+> +};
+> +
+> +const struct sdhci_pci_fixes sdhci_gl9767 =3D {
+> +       .quirks         =3D SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
+> +       .quirks2        =3D SDHCI_QUIRK2_BROKEN_DDR50,
+> +       .probe_slot     =3D gli_probe_slot_gl9767,
+> +       .ops            =3D &sdhci_gl9767_ops,
+> +#ifdef CONFIG_PM_SLEEP
+> +       .resume         =3D sdhci_pci_gli_resume,
+> +#endif
+> +};
+> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
+> index 3661a224fb04..9c8863956381 100644
+> --- a/drivers/mmc/host/sdhci-pci.h
+> +++ b/drivers/mmc/host/sdhci-pci.h
+> @@ -76,6 +76,7 @@
+>  #define PCI_DEVICE_ID_GLI_9755         0x9755
+>  #define PCI_DEVICE_ID_GLI_9750         0x9750
+>  #define PCI_DEVICE_ID_GLI_9763E                0xe763
+> +#define PCI_DEVICE_ID_GLI_9767         0x9767
+>
+>  /*
+>   * PCI device class and mask
+> @@ -195,5 +196,6 @@ extern const struct sdhci_pci_fixes sdhci_o2;
+>  extern const struct sdhci_pci_fixes sdhci_gl9750;
+>  extern const struct sdhci_pci_fixes sdhci_gl9755;
+>  extern const struct sdhci_pci_fixes sdhci_gl9763e;
+> +extern const struct sdhci_pci_fixes sdhci_gl9767;
+>
+>  #endif /* __SDHCI_PCI_H */
+> --
+> 2.25.1
+>
