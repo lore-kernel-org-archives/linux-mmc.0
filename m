@@ -2,57 +2,58 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 120F1C7EE22
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 May 2023 00:02:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 50247C7EE22
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 May 2023 00:15:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230094AbjEOACB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 14 May 2023 20:02:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48864 "EHLO
+        id S229672AbjEOAPL (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Sun, 14 May 2023 20:15:11 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51524 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229672AbjEOACA (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 May 2023 20:02:00 -0400
-Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E759213D;
-        Sun, 14 May 2023 17:01:57 -0700 (PDT)
-Received: by mail-ed1-x529.google.com with SMTP id 4fb4d7f45d1cf-50bc3a2d333so18208561a12.0;
-        Sun, 14 May 2023 17:01:57 -0700 (PDT)
+        with ESMTP id S229929AbjEOAPK (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Sun, 14 May 2023 20:15:10 -0400
+Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EB67AE6C;
+        Sun, 14 May 2023 17:15:08 -0700 (PDT)
+Received: by mail-ed1-x52b.google.com with SMTP id 4fb4d7f45d1cf-50bceaf07b8so22079136a12.3;
+        Sun, 14 May 2023 17:15:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684108916; x=1686700916;
+        d=gmail.com; s=20221208; t=1684109707; x=1686701707;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=QcHALSfCL/GC6DMlrpcXyI9y7ZjraMP4QnYveYiPf+4=;
-        b=YFGnmczvEq0PbvVszexBH/AjfiDVmXm3CNVhWnVK6yWc/FU0eldB1wsqXK2DZtaghe
-         bw9pNBKXGVBgiwVI8T5k3qVSqW03099N5DMo8cYi7YV+Sy+L4s1p7b+QISMbYJWQICSL
-         aMisiSjONe3BWkUopCazxepS5P3wnDy3e0qE+x/zwGLd1geG8a7zygAeMNvWNuqwo3dU
-         bkJuCZ4WQzAjzScvTPOd36Ua1/+UR43Ydk+alPxdC6u/me3OUx6VFidNihfk1cZeNcUz
-         fRh3cEFDSrUTz8OaETlcORUhW1JkS7SvwUEen8NIHzeKQvtgjNZFxYozB24S96JiisRS
-         m4BQ==
+        bh=YZYkWxyeoGcMPPZjWMJ8tL0VIfezGs1FZL2C/Wu5QG0=;
+        b=SRnzom0jUM6DK4bUTf7F1c/m0bHbdtEIZRGTzF2k2awjYh/hGnqnUnpMNJVFDHqlm7
+         MHH3WpAoUyyqw8mtqUVrrF8z2EVFkdEEBP9VN28Se5OQx73bd2NmvWOObbFhrbTkp1xW
+         sqK2eNkuccUA+cxk1qjweN2qoBiv3np+QmuIx5oGy70+ylOHCid7i2U3dEm1ow5ogpVK
+         Cf9jjcqp74ZMrX5bUT9HK2kH0xAIpgjT1obvg/VZBjDGLANoRT5bzECtj3YlL26DCLcg
+         hKjx1f3OctGsXo3BFXDoZDFJqt5XWCPsc0G4Im5Y7jAErUm6zBFzhzSKtl1tH3UJUSLr
+         hqRw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684108916; x=1686700916;
+        d=1e100.net; s=20221208; t=1684109707; x=1686701707;
         h=content-transfer-encoding:cc:to:subject:message-id:date:from
          :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=QcHALSfCL/GC6DMlrpcXyI9y7ZjraMP4QnYveYiPf+4=;
-        b=C9nfVxTJeOLVmYRHaFNxP1uKKRfXx0B1/kSwnpfmjDH8XHqhS3qoXp7/2fkyZr3Fr8
-         VdHPYBvFyoc/4uNygQj53ysokuVSrAmYvfVJsAY+lVEXn3hReDE18ERTgDq3rlMRYu6+
-         vcbfoXLE6adzy3DfLPIzsXIQu7D/J3WTKoXeaAwfOjwgwuX8jdj/iScdS7esCyZMvST+
-         hyAxr81aaFx7PblwasrqIi5AxnM/BBasUv6u8ewayR/EsX3WxPxDAQ1MI/BU4JF5OF2F
-         s6S4+4YbiFqrYPww0oQjCRTldL6nj/OvDQzXiGa7pReAsQMR2CswxYvvq+GNA47CSk2y
-         f0vg==
-X-Gm-Message-State: AC+VfDyECvH2KYROD8VzTMaysnOA4niEZfmzUb+TY8IvnhdY9jeS2D8m
-        Ch/Q9JrUs8EIxkvAaDCuomT5BzfBCoh5p79ynJE=
-X-Google-Smtp-Source: ACHHUZ5jIxKtkNwQ2S8J7O+CeqpcLqCvrRw/0ijvqbeStAbUgvPg43y0c/9ii2ctylBu+8y2Zl0ZDVo4qCPxhlvTynE=
-X-Received: by 2002:a05:6402:38c:b0:50c:646:da42 with SMTP id
- o12-20020a056402038c00b0050c0646da42mr26771700edv.28.1684108916150; Sun, 14
- May 2023 17:01:56 -0700 (PDT)
+        bh=YZYkWxyeoGcMPPZjWMJ8tL0VIfezGs1FZL2C/Wu5QG0=;
+        b=d2t87lt2po4t4DPrVGJB1zTuG/7Q4PkWQ/eBSUMht6FC5XYh1qPUu+gOPf9ojgUum9
+         IiigVQwCx8g8JlxpXfvbQ48no2CmCz4Gn7dRCECq1Y0WufdZiX0w1CQord2aD+POg8ee
+         lOaWsAxoFiQHO56dSNJDTwjrrhW9gHlRPae/xmCdndr2zyvhYsXPeRahvQqPSScqgmHU
+         MDaiuJgKkch6Uk+XwuwXcOdQP5q5MjlSeADU1WZL4ihxdjFQ29CJb3didAHoauKsGsH8
+         LKgrRgTBWAui68QKfejrXWpOwPjjT1m9VWERa7VcHTdeuRKcYQ4w+nK62HV/EsujLvbt
+         2BKg==
+X-Gm-Message-State: AC+VfDzAXGbMwMFq3nXdBNHmy0jPm13wVmMy3qqy8VEexi/LdoVVmDCy
+        V1cnPHyNiACEbIHOkp2s6OUwE44w+X2oheUJjL0XQp2gcZE=
+X-Google-Smtp-Source: ACHHUZ5p1MZC4WIGFCsPKqqprki9AzgfFhVWheLJTrNF9ZFSEqi5eFqDvAjrJelVPDqy5e6m10+hBD2kaoZcNDq0FcU=
+X-Received: by 2002:a50:eb47:0:b0:50d:f9b3:444c with SMTP id
+ z7-20020a50eb47000000b0050df9b3444cmr8292900edp.17.1684109707143; Sun, 14 May
+ 2023 17:15:07 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230512104559.11218-1-victor.shih@genesyslogic.com.tw> <20230512104559.11218-2-victor.shih@genesyslogic.com.tw>
-In-Reply-To: <20230512104559.11218-2-victor.shih@genesyslogic.com.tw>
+References: <20230512104559.11218-1-victor.shih@genesyslogic.com.tw> <20230512104559.11218-4-victor.shih@genesyslogic.com.tw>
+In-Reply-To: <20230512104559.11218-4-victor.shih@genesyslogic.com.tw>
 From:   Ben Chuang <benchuanggli@gmail.com>
-Date:   Mon, 15 May 2023 08:01:44 +0800
-Message-ID: <CACT4zj_LRArVUS4HsP134+NMm2T-PRgFGpwxmcrK87V-5rqhqg@mail.gmail.com>
-Subject: Re: [PATCH V1 1/3] mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+Date:   Mon, 15 May 2023 08:14:55 +0800
+Message-ID: <CACT4zj8EXyizQLnb837pzg8kEURWrO4BkVeRmtDUmTo6yh9E+g@mail.gmail.com>
+Subject: Re: [PATCH V1 3/3] mmc: sdhci-pci-gli: Add support SD Express card
+ for GL9767
 To:     Victor Shih <victorshihgli@gmail.com>
 Cc:     ulf.hansson@linaro.org, adrian.hunter@intel.com,
         linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -68,256 +69,223 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 Hi Victor,
 
-One thing, get in the habit of running checkpatch.pl before submitting patc=
-hes.
-
-checkpatch.pl says.
-"From:/Signed-off-by: email address mismatch: 'From: Victor Shih
-<victorshihgli@gmail.com>' !=3D 'Signed-off-by: Victor Shih
-<victor.shih@genesyslogic.com.tw>'"
-
-It reminds you that maybe the first line of the email body needs a
-line "Form: Victor Shih <victor.shih@genesyslogic.com.tw>'".
-
-man git-format-patch and see --form option
-
-Best regards,
-Ben
-
-
 On Fri, May 12, 2023 at 6:47=E2=80=AFPM Victor Shih <victorshihgli@gmail.co=
 m> wrote:
 >
-> Add support for the GL9767 chipset. GL9767 supports
-> SD3 mode likes UHS-I SDR50, SDR104.
-> Enable MSI interrupt for GL9767. Some platform do not
-> support PCI INTx and devices can not work without
-> interrupt.
+> Add support SD Express card for GL9767. The workflow of the
+> SD Express card in GL9767 is as below.
+> 1. GL9767 operates in SD mode and set MMC_CAP2_SD_EXP flag.
+> 2. If card is inserted, Host send CMD8 to ask the capabilities
+>    of the card.
+> 3. If the card has PCIe capability and write protect is not
+>    enable, then init_sd_express() will be invoked.
+> 4. GL9767 switch from SD mode to PCIe/NVMe mode and mmc driver
+>    handover control to NVMe driver.
+> 5. If card is removed, GL9767 will return to SD mode.
 >
 > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
 > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
 > ---
->  drivers/mmc/host/sdhci-pci-core.c |   1 +
->  drivers/mmc/host/sdhci-pci-gli.c  | 132 ++++++++++++++++++++++++++++++
->  drivers/mmc/host/sdhci-pci.h      |   2 +
->  3 files changed, 135 insertions(+)
+>  drivers/mmc/host/sdhci-pci-gli.c | 115 +++++++++++++++++++++++++++++++
+>  1 file changed, 115 insertions(+)
 >
-> diff --git a/drivers/mmc/host/sdhci-pci-core.c b/drivers/mmc/host/sdhci-p=
-ci-core.c
-> index 01975d145200..1c2572c0f012 100644
-> --- a/drivers/mmc/host/sdhci-pci-core.c
-> +++ b/drivers/mmc/host/sdhci-pci-core.c
-> @@ -1903,6 +1903,7 @@ static const struct pci_device_id pci_ids[] =3D {
->         SDHCI_PCI_DEVICE(GLI, 9750, gl9750),
->         SDHCI_PCI_DEVICE(GLI, 9755, gl9755),
->         SDHCI_PCI_DEVICE(GLI, 9763E, gl9763e),
-> +       SDHCI_PCI_DEVICE(GLI, 9767, gl9767),
->         SDHCI_PCI_DEVICE_CLASS(AMD, SYSTEM_SDHCI, PCI_CLASS_MASK, amd),
->         /* Generic SD host controller */
->         {PCI_DEVICE_CLASS(SYSTEM_SDHCI, PCI_CLASS_MASK)},
 > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pc=
 i-gli.c
-> index 633a8ee8f8c5..300512740cb0 100644
+> index 300512740cb0..a0f9c24439be 100644
 > --- a/drivers/mmc/host/sdhci-pci-gli.c
 > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> @@ -149,6 +149,32 @@
->  #define PCI_GLI_9755_PM_CTRL     0xFC
->  #define   PCI_GLI_9755_PM_STATE    GENMASK(1, 0)
+> @@ -158,6 +158,13 @@
+>  #define   GLI_9767_VHS_REV_M     0x1
+>  #define   GLI_9767_VHS_REV_W     0x2
 >
-> +#define SDHCI_GLI_9767_GM_BURST_SIZE                   0x510
-> +#define   SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET    BIT(8)
+> +#define PCIE_GLI_9767_CFG              0x8A0
+> +#define   PCIE_GLI_9767_CFG_LOW_PWR_OFF          BIT(12)
 > +
-> +#define PCIE_GLI_9767_VHS      0x884
-> +#define   GLI_9767_VHS_REV       GENMASK(19, 16)
-> +#define   GLI_9767_VHS_REV_R     0x0
-> +#define   GLI_9767_VHS_REV_M     0x1
-> +#define   GLI_9767_VHS_REV_W     0x2
+> +#define PCIE_GLI_9767_COMBO_MUX_CTL                    0x8C8
+> +#define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN             BIT(6)
+> +#define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN      BIT(10)
 > +
-> +#define PCIE_GLI_9767_PWR_MACRO_CTL                                    0=
+>  #define PCIE_GLI_9767_PWR_MACRO_CTL                                    0=
 x8D0
-> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                       =
+>  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                       =
  GENMASK(3, 0)
-> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE            =
+>  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE            =
  GENMASK(15, 12)
-> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE_VALUE      =
- 0x7
-> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL                =
- GENMASK(29, 28)
-> +#define   PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL_VALUE          =
- 0x3
+> @@ -175,6 +182,27 @@
+>  #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF              BIT(21)
+>  #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN       BIT(30)
+>
+> +#define PCIE_GLI_9767_SDHC_CAP                 0x91C
+> +#define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT     BIT(5)
 > +
-> +#define PCIE_GLI_9767_SCR                              0x8E0
-> +#define   PCIE_GLI_9767_SCR_AUTO_AXI_W_BURST             BIT(6)
-> +#define   PCIE_GLI_9767_SCR_AUTO_AXI_R_BURST             BIT(7)
-> +#define   PCIE_GLI_9767_SCR_AXI_REQ                      BIT(9)
-> +#define   PCIE_GLI_9767_SCR_CARD_DET_PWR_SAVING_EN       BIT(10)
-> +#define   PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE0      BIT(16)
-> +#define   PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE1      BIT(17)
-> +#define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF              BIT(21)
-> +#define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN       BIT(30)
+> +#define PCIE_GLI_9767_SD_EXPRESS_CTL                   0x940
+> +#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE                  BIT(0)
+> +#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE   BIT(1)
+> +
+> +#define PCIE_GLI_9767_SD_DATA_MULTI_CTL                                0=
+x944
+> +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME        GENMASK=
+(23, 16)
+> +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE         =
+ 0x64
+> +
+> +#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2                       0=
+x950
+> +#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE        =
+ BIT(0)
+> +#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_GEN_TIMER       =
+ GENMASK(1, 0)
+> +
+> +#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2                     =
+       0x954
+> +#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STAT=
+US_EN    GENMASK(1, 0)
+> +
+> +#define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2                     =
+       0x958
+> +#define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGN=
+AL_EN    GENMASK(1, 0)
 > +
 >  #define GLI_MAX_TUNING_LOOP 40
 >
 >  /* Genesys Logic chipset */
-> @@ -693,6 +719,61 @@ static void gl9755_hw_setting(struct sdhci_pci_slot =
-*slot)
->         gl9755_wt_off(pdev);
+> @@ -774,6 +802,91 @@ static void sdhci_gl9767_reset(struct sdhci_host *ho=
+st, u8 mask)
+>         gli_set_9767(host);
 >  }
 >
-> +static void gli_set_9767(struct sdhci_host *host)
+> +static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios *=
+ios)
 > +{
+> +       struct sdhci_host *host =3D mmc_priv(mmc);
+> +       struct sdhci_pci_slot *slot =3D sdhci_priv(host);
+> +       struct pci_dev *pdev;
 > +       u32 value;
+> +       int i;
 > +
-> +       value =3D sdhci_readl(host, SDHCI_GLI_9767_GM_BURST_SIZE);
-> +       value &=3D ~SDHCI_GLI_9767_GM_BURST_SIZE_AXI_ALWAYS_SET;
-> +       sdhci_writel(host, value, SDHCI_GLI_9767_GM_BURST_SIZE);
-> +}
+> +       pdev =3D slot->chip->pdev;
 > +
-> +static void gl9767_hw_setting(struct sdhci_pci_slot *slot)
-> +{
-> +       struct pci_dev *pdev =3D slot->chip->pdev;
-> +       u32 value;
+> +       if (sdhci_check_ro(host)) {
+> +               mmc->ios.timing &=3D ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_=
+EXP_1_2V);
+> +               return 0;
+> +       }
 > +
 > +       pci_read_config_dword(pdev, PCIE_GLI_9767_VHS, &value);
 > +       value &=3D ~GLI_9767_VHS_REV;
 > +       value |=3D FIELD_PREP(GLI_9767_VHS_REV, GLI_9767_VHS_REV_W);
 > +       pci_write_config_dword(pdev, PCIE_GLI_9767_VHS, value);
 > +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9767_PWR_MACRO_CTL, &value);
-> +       value &=3D ~(PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE |
-> +                  PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE |
-> +                  PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CTL);
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, &value);
+> +       value &=3D ~(PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN | PCIE_GLI_9767_C=
+OMBO_MUX_CTL_WAIT_PERST_EN);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, value);
 > +
-> +       value |=3D PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE |
-> +                FIELD_PREP(PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VO=
-LTAGE,
-> +                           PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VO=
-LTAGE_VALUE) |
-> +                FIELD_PREP(PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CT=
-L,
-> +                           PCIE_GLI_9767_PWR_MACRO_CTL_RCLK_AMPLITUDE_CT=
-L_VALUE);
-> +       pci_write_config_dword(pdev, PCIE_GLI_9767_PWR_MACRO_CTL, value);
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &val=
+ue);
+> +       value &=3D ~PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME;
+> +       value |=3D FIELD_PREP(PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_=
+TIME,
+> +                           PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TI=
+ME_VALUE);
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, val=
+ue);
 > +
-> +       pci_read_config_dword(pdev, PCIE_GLI_9767_SCR, &value);
-> +       value &=3D ~(PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE0 |
-> +                  PCIE_GLI_9767_SCR_SYSTEM_CLK_SELECT_MODE1 |
-> +                  PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN);
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_R=
+EG2, &value);
+> +       value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_GEN_TIME=
+R;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_=
+REG2, value);
 > +
-> +       value |=3D PCIE_GLI_9767_SCR_AUTO_AXI_W_BURST |
-> +                PCIE_GLI_9767_SCR_AUTO_AXI_R_BURST |
-> +                PCIE_GLI_9767_SCR_AXI_REQ |
-> +                PCIE_GLI_9767_SCR_CARD_DET_PWR_SAVING_EN |
-> +                PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF;
-> +       pci_write_config_dword(pdev, PCIE_GLI_9767_SCR, value);
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_E=
+N_REG2, &value);
+> +       value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPL=
+ETE_STATUS_EN;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_=
+EN_REG2, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_E=
+N_REG2, &value);
+> +       value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPL=
+ETE_SIGNAL_EN;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_=
+EN_REG2, value);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
+> +       value |=3D PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
+> +
+> +       value =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +       value &=3D ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
+> +       sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
+> +
+> +       value =3D sdhci_readb(host, SDHCI_POWER_CONTROL);
+> +       value |=3D ((SDHCI_POWER_180 | SDHCI_POWER_ON) << 4);
+> +       sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value)=
+;
+> +       value |=3D PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE;
+> +       pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value)=
+;
+> +
+> +       for (i =3D 0; i < 10; i++) {
+> +               mdelay(10);
+
+A little question.
+Can you explain or comment on the reason for up to 10 loops (max. 100 ms wa=
+it),
+For example "because of asic specs..." or "hardware measurements".
+
+Best regards,
+Ben
+
+> +               pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_=
+STATUS_REG2, &value);
+> +               if (value & PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI=
+_COMPLETE) {
+> +                       pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL=
+_ERR_INT_STATUS_REG2,
+> +                                              value);
+> +                       break;
+> +               }
+> +       }
+> +
+> +       pci_read_config_dword(pdev, PCIE_GLI_9767_SDHC_CAP, &value);
+> +       if ((value & PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT) =3D=3D PCIE_GLI_=
+9767_SDHC_CAP_SDEI_RESULT) {
+> +               pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL,=
+ &value);
+> +               value |=3D PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE;
+> +               pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL=
+, value);
+> +       } else {
+> +               mmc->ios.timing &=3D ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_=
+EXP_1_2V);
+> +       }
 > +
 > +       pci_read_config_dword(pdev, PCIE_GLI_9767_VHS, &value);
 > +       value &=3D ~GLI_9767_VHS_REV;
 > +       value |=3D FIELD_PREP(GLI_9767_VHS_REV, GLI_9767_VHS_REV_R);
 > +       pci_write_config_dword(pdev, PCIE_GLI_9767_VHS, value);
-> +}
 > +
-> +static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
-> +{
-> +       sdhci_reset(host, mask);
-> +       gli_set_9767(host);
+> +       return 0;
 > +}
 > +
 >  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
 >  {
 >         struct sdhci_host *host =3D slot->host;
-> @@ -717,6 +798,19 @@ static int gli_probe_slot_gl9755(struct sdhci_pci_sl=
-ot *slot)
+> @@ -806,6 +919,8 @@ static int gli_probe_slot_gl9767(struct sdhci_pci_slo=
+t *slot)
+>         gl9767_hw_setting(slot);
+>         gli_pcie_enable_msi(slot);
+>         slot->host->mmc->caps2 |=3D MMC_CAP2_NO_SDIO;
+> +       host->mmc->caps2 |=3D MMC_CAP2_SD_EXP;
+> +       host->mmc_host_ops.init_sd_express =3D gl9767_init_sd_express;
+>         sdhci_enable_v4_mode(host);
+>
 >         return 0;
->  }
->
-> +static int gli_probe_slot_gl9767(struct sdhci_pci_slot *slot)
-> +{
-> +       struct sdhci_host *host =3D slot->host;
-> +
-> +       gli_set_9767(host);
-> +       gl9767_hw_setting(slot);
-> +       gli_pcie_enable_msi(slot);
-> +       slot->host->mmc->caps2 |=3D MMC_CAP2_NO_SDIO;
-> +       sdhci_enable_v4_mode(host);
-> +
-> +       return 0;
-> +}
-> +
->  static void sdhci_gli_voltage_switch(struct sdhci_host *host)
->  {
->         /*
-> @@ -740,6 +834,25 @@ static void sdhci_gli_voltage_switch(struct sdhci_ho=
-st *host)
->         usleep_range(100000, 110000);
->  }
->
-> +static void sdhci_gl9767_voltage_switch(struct sdhci_host *host)
-> +{
-> +       /*
-> +        * According to Section 3.6.1 signal voltage switch procedure in
-> +        * SD Host Controller Simplified Spec. 4.20, steps 6~8 are as
-> +        * follows:
-> +        * (6) Set 1.8V Signal Enable in the Host Control 2 register.
-> +        * (7) Wait 5ms. 1.8V voltage regulator shall be stable within th=
-is
-> +        *     period.
-> +        * (8) If 1.8V Signal Enable is cleared by Host Controller, go to
-> +        *     step (12).
-> +        *
-> +        * Wait 5ms after set 1.8V signal enable in Host Control 2 regist=
-er
-> +        * to ensure 1.8V signal enable bit is set by GL9767.
-> +        *
-> +        */
-> +       usleep_range(5000, 5500);
-> +}
-> +
->  static void sdhci_gl9750_reset(struct sdhci_host *host, u8 mask)
->  {
->         sdhci_reset(host, mask);
-> @@ -1150,3 +1263,22 @@ const struct sdhci_pci_fixes sdhci_gl9763e =3D {
->  #endif
->         .add_host       =3D gl9763e_add_host,
->  };
-> +
-> +static const struct sdhci_ops sdhci_gl9767_ops =3D {
-> +       .set_clock              =3D sdhci_set_clock,
-> +       .enable_dma             =3D sdhci_pci_enable_dma,
-> +       .set_bus_width          =3D sdhci_set_bus_width,
-> +       .reset                  =3D sdhci_gl9767_reset,
-> +       .set_uhs_signaling      =3D sdhci_set_uhs_signaling,
-> +       .voltage_switch         =3D sdhci_gl9767_voltage_switch,
-> +};
-> +
-> +const struct sdhci_pci_fixes sdhci_gl9767 =3D {
-> +       .quirks         =3D SDHCI_QUIRK_NO_ENDATTR_IN_NOPDESC,
-> +       .quirks2        =3D SDHCI_QUIRK2_BROKEN_DDR50,
-> +       .probe_slot     =3D gli_probe_slot_gl9767,
-> +       .ops            =3D &sdhci_gl9767_ops,
-> +#ifdef CONFIG_PM_SLEEP
-> +       .resume         =3D sdhci_pci_gli_resume,
-> +#endif
-> +};
-> diff --git a/drivers/mmc/host/sdhci-pci.h b/drivers/mmc/host/sdhci-pci.h
-> index 3661a224fb04..9c8863956381 100644
-> --- a/drivers/mmc/host/sdhci-pci.h
-> +++ b/drivers/mmc/host/sdhci-pci.h
-> @@ -76,6 +76,7 @@
->  #define PCI_DEVICE_ID_GLI_9755         0x9755
->  #define PCI_DEVICE_ID_GLI_9750         0x9750
->  #define PCI_DEVICE_ID_GLI_9763E                0xe763
-> +#define PCI_DEVICE_ID_GLI_9767         0x9767
->
->  /*
->   * PCI device class and mask
-> @@ -195,5 +196,6 @@ extern const struct sdhci_pci_fixes sdhci_o2;
->  extern const struct sdhci_pci_fixes sdhci_gl9750;
->  extern const struct sdhci_pci_fixes sdhci_gl9755;
->  extern const struct sdhci_pci_fixes sdhci_gl9763e;
-> +extern const struct sdhci_pci_fixes sdhci_gl9767;
->
->  #endif /* __SDHCI_PCI_H */
 > --
 > 2.25.1
 >
