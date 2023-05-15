@@ -2,163 +2,544 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D6887C77B7D
-	for <linux-mmc@archiver.kernel.org>; Mon, 15 May 2023 15:03:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BF61C7EE25
+	for <linux-mmc@archiver.kernel.org>; Mon, 15 May 2023 18:18:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S242062AbjEOPDi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 May 2023 11:03:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48546 "EHLO
+        id S245166AbjEOSSX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 May 2023 14:18:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52708 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242122AbjEOPDU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2023 11:03:20 -0400
-Received: from esa4.hgst.iphmx.com (esa4.hgst.iphmx.com [216.71.154.42])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 180DC26AD;
-        Mon, 15 May 2023 08:03:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=simple/simple;
-  d=wdc.com; i=@wdc.com; q=dns/txt; s=dkim.wdc.com;
-  t=1684162982; x=1715698982;
-  h=from:to:cc:subject:date:message-id:references:
-   in-reply-to:content-transfer-encoding:mime-version;
-  bh=zCIG9Xc0UZR4WD3nRoKrT0kB9OVUuF89lobPt6MnzwE=;
-  b=MK1CrnWtKALIuk93V/DcQnNgxG5X0FSjFhz2+qlvHzVn2goDIQ5Czcxs
-   mKt3jwzvwxLupGnkY3bBz6r9RjPC2Z9/xjgLvPyEdd3cp9rrCv09aO05F
-   NdouxQUbPJO/TZBbTBfFne/Sn++MyKEBwadvd5ZmmeAlvMtvyYIbsX9OS
-   SZF8IJ4B3WLXtw296c2tF1PBg1XJMFAY5LqoNAnG2bQ22UXtilS0Pg2zV
-   TtXP4ngsf9v60Vih7cXTI1jozWa6lCQcIDjv/NLJtK6b872uDfeF12VKY
-   0i88Cj0Gzaqywy6MkCcQeK/y9xNh6mtoR/kfsDYFKMtz2eTPMAQCR17np
-   Q==;
-X-IronPort-AV: E=Sophos;i="5.99,277,1677513600"; 
-   d="scan'208";a="229012254"
-Received: from mail-dm3nam02lp2047.outbound.protection.outlook.com (HELO NAM02-DM3-obe.outbound.protection.outlook.com) ([104.47.56.47])
-  by ob1.hgst.iphmx.com with ESMTP; 15 May 2023 23:03:01 +0800
+        with ESMTP id S244687AbjEOSRv (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2023 14:17:51 -0400
+Received: from NAM10-DM6-obe.outbound.protection.outlook.com (mail-dm6nam10on2066.outbound.protection.outlook.com [40.107.93.66])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B145518C94;
+        Mon, 15 May 2023 11:16:29 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=RLwkUOam26JcpY9zZBJmp/Lhm+0ARq0LMIXfLr7B4a+DmPttFEx3D5uTlg5kvkIqZ+kHVUGQ9NpoCvg0dmlVeP15u0MM3uKpZ/D+SZZyOvv9xR7C+GOvbu64bnv0oOa2tIJP2FiKFPJm5O2XuQNq1L4Jy1LFx/VsK1sQd2Iokn124nh1gdCECGpF014Yg8FZFZJrZEWrXqUTJVbvILZXw3Qpm/S5iHD2I59CLB2BhE5J6hsWGAk00lFmhfDn48P/nX3X7vvGKHELKAmuvkkBYWtwEfUHOFy6DdHQhJbuHCPQ3Hc/GMJ0R0x58GzHKDnaJXM+L67Q10uvoP4AEJFwgw==
+ b=NIe7U6Fn6pwQvPK4CHgmfLxwwdYbCcgOGDAKEqxCVKirPnUVuttY/38MiKRQ3WFyiODPM1orHfYCMgfldUYLI1aZuW48VQQd4qiiG+lt4o4x3ApU8Bo76j0epmSW02+eWcZILxyF6AJkqTJcJt7e+2eb0ZRKML42DxUf3VWaML+0NSciNZSMGsRq7zYT1hg5B/53gc6vkwzGmn3TArHAUFhfdgsWOEsPN7LUjLpke50zS2Uw3sfV1hsA9/cZO+KBKVBONoyz2W0uLVDLW5/bg2XeyRJNf5i9DquMaindYtsVaawdNClj6K3YmlcGztj0JKWhCiIEEdAVciKm9iv7hQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=zCIG9Xc0UZR4WD3nRoKrT0kB9OVUuF89lobPt6MnzwE=;
- b=IN1J/X1on3zxeXrNKijR8riePju/l/5qJ5xQTxQcClIZgA0yiSIuntQe8aZovUqzVU7dLo00YR9HpCMoMETNpw/us4b4VRfIlg61LmkqlicVr39CzUyiiGOl/qSYrdvF4sWRRrToB326Epj0TQQ5tAdO7zx5L0l90qzO+DEOdiUrxhD76ccY+ipddoSfW6uQSYrTzbooXJ1OnPAlK+tqxm6Vh0te/QY4c/utJzT+26x0nxs7U/EytGwqKkJPhiZv+Tkm+rYFOGG8bLbneMKojjPNGnqOANhwvM6QiqdZypqoLJyI01hPjfONe/SmQ0ip8XizomCVCm/XihKXhMSfBQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=wdc.com; dmarc=pass action=none header.from=wdc.com; dkim=pass
- header.d=wdc.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=sharedspace.onmicrosoft.com; s=selector2-sharedspace-onmicrosoft-com;
+ bh=FvxOVMt0RfgkEGpl3ePcj3viMO2GZI1F58LazZmHXJk=;
+ b=m/RJEG7uWu4y2ZGICM/V/kCksiPJhFtOPkfPnS9t7EGEhlR9l/bNl3XRqz2glUejw4ARopxJXVwY2wOug0M2nPt/F84W0zK7K8ci86LwmF6zGrhuVi04rUgYvMWGQU8rNCSiUhdKJ8gQWoxmfNClSsrHZrVI3yxCL1kRRmq1KDQMZGUuAM5SFwVO9bwyOXBnE+iDM2yiAMzJIZCoZdg5ZR1+GQBYOMq+e5AXi2pyypriDemDOKZx2SinCwj4XQ6mv4Qsv3zjjJXWokWfN9S1danVkTlXauZaj9nYBwbFPZlGSUgSVncagpPlkGtw0qSSz8lWfCvWqXUtZ3AXlX3VnA==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=lists.infradead.org smtp.mailfrom=amd.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=amd.com; dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zCIG9Xc0UZR4WD3nRoKrT0kB9OVUuF89lobPt6MnzwE=;
- b=r+yN365KGHIMjTqwTStFCYb6JN6/WDNDjE5f5YcZrQZUKD9lFq5ThCsDNyqGrdClK/RuToy6jh7WdgAXHX3Bc6D3criKey7232R6fp2plkrwfpADpuLMZ+JipXNdI/nIRI1fdBmuhAZn+cp6/T4zQESLItV8rGs4BwDfhnqueZo=
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com (2603:10b6:5:1b7::7) by
- BY5PR04MB6641.namprd04.prod.outlook.com (2603:10b6:a03:22b::9) with Microsoft
- SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.6387.30; Mon, 15 May 2023 15:02:59 +0000
-Received: from DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::188b:9005:b09b:81e2]) by DM6PR04MB6575.namprd04.prod.outlook.com
- ([fe80::188b:9005:b09b:81e2%6]) with mapi id 15.20.6387.030; Mon, 15 May 2023
- 15:02:59 +0000
-From:   Avri Altman <Avri.Altman@wdc.com>
-To:     Ulf Hansson <ulf.hansson@linaro.org>,
-        =?utf-8?B?Q2hyaXN0aWFuIEzDtmhsZQ==?= <CLoehle@hyperstone.com>
-CC:     Adrian Hunter <adrian.hunter@intel.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
-Subject: RE: [PATCH 3/3] mmc: block: ioctl: Add error aggregation flag
-Thread-Topic: [PATCH 3/3] mmc: block: ioctl: Add error aggregation flag
-Thread-Index: AdlntYltCGNgWPv+Tc2Z1o0i39Q1Twff3iIAAAIaOpA=
-Date:   Mon, 15 May 2023 15:02:58 +0000
-Message-ID: <DM6PR04MB657545C0B7FC82F68CB87D5AFC789@DM6PR04MB6575.namprd04.prod.outlook.com>
-References: <043d49e37e254eb8aa8a2c5fc56a028b@hyperstone.com>
- <CAPDyKFp5zi=KEgq7P4E7y5u7owM+C2991sBs+8QVGGCN8C+89A@mail.gmail.com>
-In-Reply-To: <CAPDyKFp5zi=KEgq7P4E7y5u7owM+C2991sBs+8QVGGCN8C+89A@mail.gmail.com>
-Accept-Language: en-US
-Content-Language: en-US
-X-MS-Has-Attach: 
-X-MS-TNEF-Correlator: 
-authentication-results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=wdc.com;
-x-ms-publictraffictype: Email
-x-ms-traffictypediagnostic: DM6PR04MB6575:EE_|BY5PR04MB6641:EE_
-x-ms-office365-filtering-correlation-id: a17f43eb-caf7-40ce-27c1-08db555578cf
-wdcipoutbound: EOP-TRUE
-x-ms-exchange-senderadcheck: 1
-x-ms-exchange-antispam-relay: 0
-x-microsoft-antispam: BCL:0;
-x-microsoft-antispam-message-info: ypaJ1YkIq2H3KBmC8B4HC1sNBTaLnsCl90G/+n63p3Ke+4V4Curg6m+bDhz5XUHSywL33z5VbaWu9SL27WfBeY660CW3D/QEnvzOpnO4kEIu8UkF56Hvzsy38EvgRHCmi5I4zONLRNYljJkLtmf1Isbi+4NufF5tuPyc6XS00S1zx6fI71UufmrfMAYrFCxOrsLOgZrO8RQYFcF35b9NmzyeTzP89ComcdB1dhbGRoFfECn2zmOvMiTtrN5S0CGNriIsSK6/VlR+2RED47M0oLZoTyJYhrTo1Uyhum+pK7MkdaOCpQjanRI6VkK8vI3c82QGjhOHBtG/Q0htiNhqXO3yHmyaWcbkoousuBfNr5gEtvLHNgNAgI7pJVcuLgCs8mUetGdP7gF7OHsMRKVegn19ulQ1f0eATzcXMX9gN3L+Zb5jH7MbZLXRQkNWhQANrO292uA8XVtzwcL8CPspYUUOG3ETLlXTHIyuEZANukpCrw+Aj9lJ4lXMudq+Apn+fi33UBymCC25OShCoUg1q8GrKBQg23LnMBO7OEqSWUaxmkF0ZhVLXtLkbA9a5yhAMBUwP34DyOKpAcwz29eA0MpxB3e5/raf5kWDhoQeSymgyvfj4VLtMZ45Y2ti7u90
-x-forefront-antispam-report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DM6PR04MB6575.namprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(376002)(366004)(346002)(136003)(451199021)(33656002)(86362001)(54906003)(110136005)(316002)(64756008)(66946007)(66476007)(4326008)(66446008)(66556008)(478600001)(76116006)(7696005)(4744005)(55016003)(5660300002)(52536014)(8676002)(8936002)(2906002)(38070700005)(38100700002)(82960400001)(122000001)(41300700001)(186003)(26005)(6506007)(9686003)(71200400001);DIR:OUT;SFP:1102;
-x-ms-exchange-antispam-messagedata-chunkcount: 1
-x-ms-exchange-antispam-messagedata-0: =?utf-8?B?bms0eXhXdERVVjRDN3REb3ZRSzdLdFRQaCsvNG0vVEd2UTZQRlpCMnJYanBW?=
- =?utf-8?B?dCtFcFV1ZkpIanFJT2I0Ui9WL211c04xWDdvTGdxMkFOL1JVM2hmOGRvRGdl?=
- =?utf-8?B?R1lvNnByZ3RPUEJGU0d6dUhQVjI5OTYybGlXVFNxMFJHSytjZVN2Yjhsamha?=
- =?utf-8?B?dGR4LzJlaHMrYmdFemVOWGZJeHlSNi95TWJmY04vWWt1aGRHQ0xFMGdwMk1U?=
- =?utf-8?B?ai9aMWFPSEJnZXpSZzNvMG42OE1YcmVsQjdXMC9IQnNjb1RxR3dnOVNhN2Mx?=
- =?utf-8?B?WHM5aVk1R0VTejRCYW9hU0V2N0FoUkhKcFNkdE5CeUFwT0I5MUxnSUowN0ll?=
- =?utf-8?B?OU1LZmpDSGFWM0hnN0ZkSFFQOTNtTFM1UWgvcE0xTGlHV3dJR0tQdWpFRmUr?=
- =?utf-8?B?U0lFZXZmMk9CR0cvMlRuMEQxNnFvODhJYTlSRGhuaUIrZ2dKWWJyRCtZbmpw?=
- =?utf-8?B?dzlwdFkwYW1rTnJZL0pBMFV1U0NxbVhuUDRNei9sR29TQTMwWDhVZ09Hb1VR?=
- =?utf-8?B?M1lKbkRqbEl6bjE2RWpHVGIzK25yL1VpdHpmcmlDL2IxYXFuVkVYNWhNd0ZK?=
- =?utf-8?B?bVk5MC9BOWJsdC9vME1lNjJPRGtUV3dUcFc3dG9sV0wzWjZzWElvOVUzRFZ1?=
- =?utf-8?B?TFdlL3FpZjN5QlFvbWtHK2M3bXJ4dmZPaDBtam4xam1oMmdaM29UU0pZVXU2?=
- =?utf-8?B?MW00QmU3MjVCdUQ4ZGpvcmVnaTY3b3Y3ZHNleE1nZjlqM1lLaXNIQ28wNWlM?=
- =?utf-8?B?dTFraWlHeWhieXBpRmNkT04rZ09majRDTFI2dnl5WG5QWXlnOXk2Rkt2d056?=
- =?utf-8?B?YjJxcDhyZGRQNUJFWXU4SUt5cC95a2pobFBrZmgwRlNpRk1nSjJBWFBtcUdS?=
- =?utf-8?B?aXZIbVBsTGVOdVpTMnozYjFCM0tVVlZxNzBDcThielhsNlNTbGF0d040VTlr?=
- =?utf-8?B?WHV3VnRQRjY1VlpSQlhPS0gyT2tXdUlvVTlTaGJqL0x2RC9FWDFTQzc2N1dq?=
- =?utf-8?B?dmZhd2JDWitabkNjdm5XR3FYODd2RGE3dzA0aXViZjhUYU5GTlF4VjU3bG51?=
- =?utf-8?B?M0ExaGFOeUVUUWQ5SjBjbHcrSWhJd2hKdG8zREVVMUhqWDFUQWxiSzhSZkFW?=
- =?utf-8?B?R1pFYjZzVzk5TFA1bkw3K3diaXlxeS9tVFAzWG1XY1NXRGxLMnpNYkZCa2pS?=
- =?utf-8?B?RFRtUUQrZDY1WjJUVjFxeWhMQ0lOd3prRWxQUEs4UStDYWo2Zkt1LzFMV0FQ?=
- =?utf-8?B?em9pL3ZzQ2p1clNxRnFxcDk3NFRWNGlSbE5sNG9sKy9WWnpRekFhMkEzZTBw?=
- =?utf-8?B?VEtDUWorRVNOakx0OUwrbnJBRXMveENCVXVIenlVSWI0Q0NXU2RTUWM5U0Rs?=
- =?utf-8?B?OFc3ZFkxSnpLOEVqWUxKZ2FremlaR1RzQlR1cWMvK3Q4TDFIcGIwNTJHRjlO?=
- =?utf-8?B?RXBCTE52eHI2MncwREdCYXZSSkRKV082K1VPYjNNSXJEbVJOalE5eVNYemlD?=
- =?utf-8?B?bytoMDBpMysxRGRnQ1NSZHhKYnFPZ1p2RWd3ci8ySyt0MEhWdkg0VFpBY29o?=
- =?utf-8?B?dkRwM1FkQ0FrTlY0NEpXTHBXNDhRZGo4VTJ2RVV3Qzd3bHlHZ29WMGNzVkxR?=
- =?utf-8?B?dzJQTk9QQ0J1RWtnNG1wVG5oZFFORk5IeFNlK3lIL21ZQ0d5T1dTRGtnRWhV?=
- =?utf-8?B?QUZKYTllU0xSZ215b29yWUdmY2FRQS8yUm5Jc1AxUFV3TTFiOHNoSU9ocSt6?=
- =?utf-8?B?dTVVdGF2QmNLR0c0ZHdOeHhCV1orMWIwZGpoR3pMZlhnU1M0VzZMazZJUERW?=
- =?utf-8?B?UlJNYVl4Qy9PZHFLeWE2U1A1UVhoYVVUa05tYlBTVDhFeHZJQ1ZGUDNtWldi?=
- =?utf-8?B?d2pJSWVmbTJvc09xK0k2TWlPMmg5VFlWMHZtSXhtMVh2aVBxMGNnNUlmMEtC?=
- =?utf-8?B?Y3AzdnI4U0dDaGc2cXZjTzM2RUFIcWdGMXZ4MFBxL0FGNU8xT2UzTUxndFNF?=
- =?utf-8?B?OUJUKzFhU21XcHNUL1NWRnY5VjhQRU4rTnZQbHhzeTUrQUZoZ3h2Q1V0RnJY?=
- =?utf-8?B?dTlta2JLeGZiR3psa0ZVU1gyTzF3UFIxckswcEZiWTl3SUJiOWpJV0UrVlVD?=
- =?utf-8?Q?DGBOSPVLrxpA5i+ubNYjSHHZc?=
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+ bh=FvxOVMt0RfgkEGpl3ePcj3viMO2GZI1F58LazZmHXJk=;
+ b=MCLuG5SSQ/kM/aCMLklOLof3Jv7TdjTNWJztFm97Hc846iHn8KjTxJLSOWoKWw9YHfg3b7Pgqwf26M/uGqsqj3C/ujDu9H4+wULJ9lkU7QpB8CiKMkk/ItJHM/zkaZ8Fq4p6ZeGeyRutJ4V10W677h6Mc7gFJZ71+olDsc1p73M=
+Received: from MW4PR03CA0193.namprd03.prod.outlook.com (2603:10b6:303:b8::18)
+ by CH2PR12MB4040.namprd12.prod.outlook.com (2603:10b6:610:ac::20) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.30; Mon, 15 May
+ 2023 18:16:23 +0000
+Received: from CO1NAM11FT087.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:303:b8:cafe::a3) by MW4PR03CA0193.outlook.office365.com
+ (2603:10b6:303:b8::18) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6387.30 via Frontend
+ Transport; Mon, 15 May 2023 18:16:23 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ CO1NAM11FT087.mail.protection.outlook.com (10.13.174.68) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6411.15 via Frontend Transport; Mon, 15 May 2023 18:16:23 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Mon, 15 May 2023 13:16:18 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <linux-arm-kernel@lists.infradead.org>
+CC:     <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <adrian.hunter@intel.com>,
+        <alcooperx@gmail.com>, <andy.shevchenko@gmail.com>,
+        <arnd@arndb.de>, <blarson@amd.com>, <brendan.higgins@linux.dev>,
+        <briannorris@chromium.org>, <catalin.marinas@arm.com>,
+        <conor+dt@kernel.org>, <davidgow@google.com>, <gsomlo@gmail.com>,
+        <gerg@linux-m68k.org>, <hal.feng@starfivetech.com>,
+        <hasegawa-hitomi@fujitsu.com>, <j.neuschaefer@gmx.net>,
+        <joel@jms.id.au>, <kernel@esmil.dk>, <krzk@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <lee@kernel.org>,
+        <lee.jones@linaro.org>, <broonie@kernel.org>,
+        <p.zabel@pengutronix.de>, <rdunlap@infradead.org>,
+        <robh+dt@kernel.org>, <samuel@sholland.org>,
+        <fancer.lancer@gmail.com>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <walker.chen@starfivetech.com>,
+        <will@kernel.org>, <zhuyinbo@loongson.cn>,
+        <devicetree@vger.kernel.org>
+Subject: [PATCH v14 0/8] Support AMD Pensando Elba SoC
+Date:   Mon, 15 May 2023 11:15:58 -0700
+Message-ID: <20230515181606.65953-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
 MIME-Version: 1.0
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-ExternalHop-MessageData-0: 1WlNmLtrjEJOmHwSjrY/qjPr9aoeI0sFpcSWfCcmRXHSpXQaJMeWB90yVABJpdF9F77pZpkm1wyrC0tELfo2t1VlMeaUSdvLCwLxzvVRQ4FqKE/LbOWfmc0/txlTnL1wdajO7IWjCext4KLFuquWQqlBruLtIlojWy6Qe6hG2hsM0WzvRQg0WtoJAjtHSAS4pMaCm0Ks6RpmZ6W3aUBI60dcvFpx4HefCX5NGoIF7UYNIPZoifUdbWGnk1qYRnrh+sppKU+nDIubY8Ke9SedULpqK0Vsf09AqCWOYukSmgQ6epj8pQ4fKVh5ZQgUuA0OHPlk3alsAts+LnHKLdBE0EwcLnUd2mO/i2LV8rhPbsQUadlpAHJJly/D1JEYElfX+OR7QgD7GD7Kz5jihG4KHc8iC/gAmJKPhNewnTE/A6R/OfYRdHm7s+m7+CvOYfNzCgjIgHHgXj+njNqZwFrZU2Fb6W8zaqrZnlSygDGqe3M4TvTong7gFZvnXshkwA0P+ZFryRLBvRHPzeS+QfAPr7GnGEej243zKRX/LedJyIC1CZPKrmulkmjkk7GuoqcNfGUUclJyTqGnA5rO1Neyp0W0o28rhhdOXj4rEvqnLDJZwsrzvw0Vb2CJZ0L6icD9b/H+oPt59Ijr3dUd/hxIZ6idyXs/oX6ajOQGwuRPy6IRGDCUs/QCROj5x8d5cuDxGLCyzd1YOJxoWj44tuBoRhANR72ewg1pIyijgcs/aIzeGNUEPpmOLApAuQL7XRhzdTCnAEuES2jcIbWqlKvgZ+cuefR+m1bGGjClesoPtPmV7tCkXRPR4NvAmcWfOveHfNLGwzCv71qLi5WXh8KiUhSwzX0fNfwT4lmLnCQTqfJFWSE3SLLTkN38mmH2dPAg
-X-OriginatorOrg: wdc.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-AuthSource: DM6PR04MB6575.namprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: a17f43eb-caf7-40ce-27c1-08db555578cf
-X-MS-Exchange-CrossTenant-originalarrivaltime: 15 May 2023 15:02:59.0012
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB04.amd.com (10.181.40.145) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: CO1NAM11FT087:EE_|CH2PR12MB4040:EE_
+X-MS-Office365-Filtering-Correlation-Id: 7adcdd79-c6f8-4ed1-e13e-08db55707dab
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: fgOF5uofClmWugSd6IBLuBbg4G9oqbotsu3bk0mZZhUZk7h7HlOK4Zq09LDhjgkMKAihr8DRHbnzD47VpbPjAzFHpPslB1qGEXuK8ElQ7qLy3bDtkcL44qr8l7LRH6CXhxNdn1TLt/uVstsCHB/LJXK0pe8McR1BdGiuC7ceY5wukgUhT4A36Es5symFca3qicYre36dOZxvXQ9JZBgqkNXjtwaQzgcL3/NmkBtQWCWEtzSKqNqWMbbDn7P2ansjQ7xjVnJCv+qIXKSbkUk0SPsxQQ2YYnMcX9arCH+t63dZ0gx1LHw+11f9EG446LyqVyHw5KeAlELvmC5XFJG2w/PP0CoYoRWPc8KFK+DNs+NUB5i0MsGdcHO+WTJaYnSa6j2gfIVvAqbN2xxc+8TTctj0uA9GclL18VzSOB84s+UynHxdE7zwU+ZKCiJ6C0hlgJoi1bAxMchL/iWuIpQlNTMcEs+7O34UEVQ0OfV02EFRMV1UWVQMkVeVqrlqejcChnXjqj8zmrYzt6XulkXwX+sp6VDR2P4mWkkea9pXnWO9IfdoLUe4RWasX1u/Vv5H2WLBNs2nkT9pM+Lu+CrY5e3rzvtwn9Ut20z672kth+/wux925Abcbg9DB4ESrTiUm3csznwpWCO8Nb1ddpWCn+PiuFBFbQwS8/vryvVP4c9ZO2YZPlblIz4t69Sz+A5CtqGSki6uB1dw/K4y18xktUZ9/T8em87JgDT6EufMA48hg5hMPMONHdVw1iGWxNYJRjiLGARQ3fT84x5Ap/5qwg==
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(39860400002)(396003)(376002)(346002)(136003)(451199021)(36840700001)(46966006)(40470700004)(36756003)(19627235002)(54906003)(316002)(4326008)(6916009)(70206006)(70586007)(966005)(478600001)(81166007)(82310400005)(40480700001)(5660300002)(8676002)(8936002)(6666004)(30864003)(2906002)(7406005)(7416002)(356005)(82740400003)(41300700001)(16526019)(2616005)(1076003)(186003)(26005)(336012)(36860700001)(83380400001)(426003)(47076005)(40460700003)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 15 May 2023 18:16:23.4765
  (UTC)
-X-MS-Exchange-CrossTenant-fromentityheader: Hosted
-X-MS-Exchange-CrossTenant-id: b61c8803-16f3-4c35-9b17-6f65f441df86
-X-MS-Exchange-CrossTenant-mailboxtype: HOSTED
-X-MS-Exchange-CrossTenant-userprincipalname: Do27yFK90ixy1UkSYXAo+wNeTs4JzwCeLdfIuuLeXzfT7rRm8hH15bkkSKi0bb+ES6zYJENytsaSmxOYfcpeeA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BY5PR04MB6641
+X-MS-Exchange-CrossTenant-Network-Message-Id: 7adcdd79-c6f8-4ed1-e13e-08db55707dab
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: CO1NAM11FT087.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CH2PR12MB4040
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-PiA+ICsgICAgICAgICovDQo+ID4gKyAgICAgICBlbHNlIGlmIChpZGF0YS0+aWMud3JpdGVfZmxh
-ZyAmIE1NQ19BR0dSRUdBVEVfUFJPR19FUlJPUlMpIHsNCj4gPiArICAgICAgICAgICAgICAgdW5z
-aWduZWQgbG9uZyB0aW1lb3V0ID0gamlmZmllcyArDQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgbXNlY3NfdG9famlmZmllcyhidXN5X3RpbWVvdXRfbXMpOw0KPiA+ICsgICAgICAgICAgICAg
-ICBib29sIGRvbmUgPSBmYWxzZTsNCj4gPiArICAgICAgICAgICAgICAgdW5zaWduZWQgbG9uZyBk
-ZWxheV9tcyA9IDE7DQo+ID4gKyAgICAgICAgICAgICAgIHUzMiBzdGF0dXM7DQo+ID4gKw0KPiA+
-ICsgICAgICAgICAgICAgICBkbyB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgZG9uZSA9
-IHRpbWVfYWZ0ZXIoamlmZmllcywgdGltZW91dCk7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAg
-ICAgbXNsZWVwKGRlbGF5X21zKyspOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGVyciA9
-IF9fbW1jX3NlbmRfc3RhdHVzKGNhcmQsICZzdGF0dXMsIDEpOw0KPiA+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIGlmIChlcnIpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBy
-ZXR1cm4gZXJyOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGlkYXRhLT5pYy5yZXNwb25z
-ZVsxXSB8PSBzdGF0dXM7DQo+ID4gKyAgICAgICAgICAgICAgIH0gd2hpbGUgKFIxX0NVUlJFTlRf
-U1RBVEUoc3RhdHVzKSAhPSBSMV9TVEFURV9UUkFOICYmDQo+ICFkb25lKTsNCj4gPiArICAgICAg
-ICAgICAgICAgaWYgKGRvbmUpDQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuIC1F
-VElNRURPVVQ7DQo+ID4gKyAgICAgICB9DQo+IA0KPiBXZSBoYXZlIG1vdmVkIGF3YXkgZnJvbSBv
-cGVuLWNvZGluZyBwb2xsaW5nIGxvb3BzLiBMZXQncyBub3QgaW50cm9kdWNlIGENCj4gbmV3IG9u
-ZS4gSW4gZmFjdCwgaXQgbG9va3MgYSBiaXQgbGlrZSB3ZSBjb3VsZCByZS11c2UgdGhlDQo+IG1t
-Y19ibGtfYnVzeV9jYigpIGZvciB0aGlzLCBhcyBpdCBzZWVtcyB0byBiZSBjb2xsZWN0aW5nIHRo
-ZSBlcnJvciBjb2RlcyB0b28uDQo+IA0KPiBJbiBhbnkgY2FzZSwgbGV0J3MgYXQgbGVhc3QgbWFr
-ZSB1c2Ugb2YgX19tbWNfcG9sbF9mb3JfYnVzeSgpIHRvIGF2b2lkIHRoZQ0KPiBvcGVuLWNvZGlu
-Zy4NCk9yIG1heWJlIHVzZSByZWFkX3BvbGxfdGltZW91dCgpPw0KDQpUaGFua3MsDQpBdnJpDQo=
+This series enables support for AMD Pensando Elba SoC based platforms.
+
+The Elba SoC has the following features:
+- Sixteen ARM64 A72 cores
+- Dual DDR 4/5 memory controllers
+- 32 lanes of PCIe Gen3/4 to the Host
+- Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
+  also a single 1GE management port.
+- Storage/crypto offloads and 144 programmable P4 cores.
+- QSPI and EMMC for SoC storage
+- Two SPI interfaces for peripheral management
+- I2C bus for platform management
+
+== V14 changes ==
+Updated email list using get_maintainer.pl
+
+Rebase to 6.4.0-rc1 and drop these patches (merged into 6.4.0)
+- v13-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC.patch
+- v13-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI.patch
+- v13-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC.patch
+- v13-0011-mmc-sdhci-cadence-Enable-device-specific-overrid.patch
+- v13-0012-mmc-sdhci-cadence-Support-device-specific-init-d.patch
+- v13-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp.patch
+- v13-0014-mmc-sdhci-cadence-Support-mmc-hardware-reset.patch
+
+v14-0003-dt-bindings-soc-amd-amd-pensando-elba-ctrl-Add-P.patch
+- Change GPL-2.0-only or BSD-2-Clause to GPL-2.0-only OR BSD-2-Clause
+
+v14-0006-arm64-dts-Add-AMD-Pensando-Elba-SoC-support.patch
+- Fix dtbs_check l2-cache* property issue by adding required
+  cache-level and cache-unified properties
+- Observed the issue after updating dtschema from 2023.1 to 2023.4
+  and yamllint from 1.26.3 to 1.30.0
+
+v14-0008-soc-amd-Add-support-for-AMD-Pensando-SoC-Control.patch
+- Save 8 bytes of code size by swapping spi_device and reset_controller_dev
+  in penctrl_device
+- Code simplification and clarity from review inputs
+- Set penctrl_spi_driver.driver.name to match compatible pensando-elba-ctrl
+- Remove unused include in amd-pensando-ctrl.h
+- Fix compile error, class_create() API changed
+
+== V13 changes ==
+v13-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp
+- Use GENMASK(7, 3) in elba_priv_writel() to set all byte enables 
+- Add a variable 'shift' with GENMASK(1, 0) in elba_write_w() and
+  elba_write_b() to set the byte enable variable.
+
+v13-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Update include list in pensando-ctrl.c
+- Change variable spi_dev to spi throughout
+- Removed unneeded variable initialization, simplification of
+  error checks, remove extra castings, and use dev_err_probe()
+- Sort the includes in amd-pensando-ctrl.h
+- Updates to cleanup if there is an error in penctrl_spi_probe()
+
+== V12 changes ==
+v12-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI
+- Correct property amd,pensando-elba-syscon description
+
+v12-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Add a newline in function dw_spi_elba_init()
+
+v12-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Fix gcc-12.1.0 warning:
+
+== V11 changes ==
+v11-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Remove resets description and reset-names
+- Add descriptions for amd,pensando-elba-sd4hc reg items
+
+v11-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pens
+- Removed redundant if/then for amd,pensando-elba-qspi
+
+v11-0005-dt-bindings-soc-amd-amd-pensando-elba-ctrl-Add-P
+- Fixed the compatible which should have stayed as
+  'amd,pensando-elba-ctrl', the commit message, and the filename.
+- Reference spi-peripheral-props
+- Delete spi-max-frequency
+- Remove num-cs from example
+
+v11-0008-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Delete reset-names
+- Fix spi0 compatible to be specific 'amd,pensando-elba-ctrl'
+
+v11-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Simplify dw_spi_elb_init by using syscon_regmap_lookup_by_phandle()
+
+v11-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp
+- Remove elba-drv_init() call to platform_get_resource() since that
+  check is done inside devm_platform_ioremap_resource()
+- Move spin_lock_init() before error check
+- Remove extra parentheses
+
+v11-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Fix the compatible to be specific 'amd,pensando-elba-ctrl'
+- Cast arguments flagged with a gcc-12.1.0 warning:
+Reported-by: kernel test robot <lkp@intel.com>
+Link: https://lore.kernel.org/oe-kbuild-all/202303061526.I8VPcR1M-lkp@intel.com/
+
+== V10 changes ==
+Binding property amd,pensando-elba-syscon was merged in 6.2
+
+v10-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Move reset-names property definition next to existing resets prop
+- Move allOf to the bottom and set resets/reset-names required only for pensando
+- Fix reg maxItems for existing, must be 1
+
+v10-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pens
+- Fix cdns,fifo-depth, only amd,pensando-elba-qspi is 1024 bytes
+
+v10-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI
+- Move definition of amd,pensando-elba-syscon into properties with a better description
+- Add amd,pensando-elba-syscon: false for non elba designs
+
+v10-0005-dt-bindings-soc-amd-amd-pensando-elbasr-Add-AMD-
+- Property renamed to amd,pensando-ctrl
+- Driver is renamed and moved to soc/drivers/amd affecting binding
+- Delete cs property, driver handles device node creation from parent num-cs
+  fixing schema reg error in a different way
+
+v10-0010-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Delete struct dw_spi_elba, use regmap directly in priv
+
+v10-0011-mmc-sdhci-cadence-Enable-device-specific-overrid
+- The 1st patch adding private writel() is unchanged.  The 2nd patch is split
+  into two patches to provide for device specific init in one patch with no
+  effect on existing designs.  Then add the pensando support into the next patch.
+  Then the 4th patch is mmc hardware reset support which is unchanged.
+
+v10-0012-mmc-sdhci-cadence-Support-device-specific-init-i
+- New patch to provide for platform specific init() with no change
+  to existing designs.
+
+v10-0013-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-supp
+- Add Elba specific support into this 3rd patch.  This builds on the private
+  writel() enabled in patch 1 followed by platform specific init() in patch 2.
+- Specify when first used the reason for the spinlock use to order byte-enable
+  prior to write data.
+
+v10-0015-soc-amd-Add-support-for-AMD-Pensando-SoC-Control
+- Different driver implementation specific to this Pensando controller device.
+- Moved to soc/amd directory under new name based on guidance.  This driver is
+  of no use to any design other than all Pensando SoC based cards.
+- Removed use of builtin_driver, can be built as a module.
+
+== V9 changes ==
+v9-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Add reset-names and resets properties
+- Add if/then on property amd,pensando-elba-sd4hc to set reg property
+  values for minItems and maxItems
+
+v9-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pensa
+- Add 1024 to cdns,fifo-depth property to resolve dtbs_check error
+
+v9-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI-
+- Define property amd,pensando-elba-syscon
+- Move compatible amd,pensando-elba-spi ahead of baikal,bt1-ssi
+
+v9-0006-dt-bindings-mfd-amd-pensando-elbasr-Add-AMD-Pensa
+- Instead of four nodes, one per chip-select, a single
+  node is used with reset-cells in the parent.
+- No MFD API is used anymore in the driver so it made
+  sense to move this to drivers/spi.
+- This driver is common for all Pensando SoC based designs
+  so changed the name to pensando-sr.c to not make it Elba
+  SoC specific.
+- Added property cs for the chip-select number which is used
+  by the driver to create /dev/pensr0.<cs>
+
+v9-0009-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Single node for spi0 system-controller and squash
+  the reset-controller child into parent
+
+v9-0010-spi-cadence-quadspi-Add-compatible-for-AMD-Pensan
+- Rebase to linux-next 6.2.0-rc1
+
+v9-0011-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Add use of macros GENMASK() and BIT()
+- Change ELBA_SPICS_SHIFT() to ELBA_SPICS_OFFSET()
+
+v9-0012-mmc-sdhci-cadence-Enable-device-specific-override
+- No change to this patch but as some patches are deleted and this is
+  a respin the three successive patches to sdhci-cadence.c are
+  patches 12, 13, and 14 which do the following:
+  1. Add ability for Cadence specific design to have priv writel().
+  2. Add Elba SoC support that requires its own priv writel() for
+     byte-lane control .
+  3. Add support for mmc hardware reset.
+
+v9-0014-mmc-sdhci-cadence-Support-mmc-hardware-reset
+- Previously patch 17/17
+- Changed delay after reset_control_assert() from 9 to 3 usec
+- Renamed sdhci_mmc_hw_reset() to sdhci_cdns_mmc_hw_reset()
+
+v9-0015-spi-pensando-sr-Add-AMD-Pensando-SoC-System-Resou
+- Previously patch 14/17
+- After the change to the device tree node and squashing
+  reset-cells into the parent simplified this to not use
+  any MFD API and move it to drivers/spi/pensando-sr.c.
+- Change the naming to remove elba since this driver is common
+  for all Pensando SoC designs .
+- Default yes SPI_PENSANDO_SR for ARCH_PENSANDO
+
+
+== V6 changes ==
+- Updated copyright and SPDX
+
+v6-0001-dt-bindings-arm-add-AMD-Pensando-boards
+- Delete 'Device Tree Bindings' in title
+
+v6-0002-dt-bindings-mmc-cdns-Add-AMD-Pensando-Elba-SoC
+- Change if/then for Elba which has a second reg for byte-lane control
+
+v6-0003-dt-bindings-spi-cdns-Add-compatible-for-AMD-Pensa
+- no change
+
+v6-0004-dt-bindings-spi-dw-Add-AMD-Pensando-Elba-SoC-SPI-
+- Add amd,pensando-elba-syscon
+
+v6-0005-dt-bindings-mfd-syscon-Add-amd-pensando-elba-sysc
+- no change
+
+v6-0006-dt-bindings-mfd-amd-pensando-elbasr-Add-AMD-Pensa
+- Expand description, rename nodes and change compatible usage
+
+v6-0007-dt-bindings-reset-amd-pensando-elbasr-reset-Add-A
+- Delete nodename pattern and changed spi0 to spi
+- File amd,pensando-elba-reset.h is deleted as there is only
+  one reset used.
+- Update example
+
+v6-0008-MAINTAINERS-Add-entry-for-AMD-PENSANDO
+- no change
+
+v6-0009-arm64-Add-config-for-AMD-Pensando-SoC-platforms
+- no change
+
+v6-0010-arm64-dts-Add-AMD-Pensando-Elba-SoC-support
+- Update node names and add amd,pensando-elba-syscon
+- Delete use of amd,pensando-elba-reset.h which had a single definition
+
+v6-0011-spi-cadence-quadspi-Add-compatible-for-AMD-Pensan
+- Remove (void) cast
+
+v6-0012-spi-dw-Add-support-for-AMD-Pensando-Elba-SoC
+- Update use of amd,pensando-elba-syscon
+
+v6-0013-mmc-sdhci-cadence-Enable-device-specific-override
+- Change this patch to add a priv_writel() callback where all
+  existing designs use writel().  This separates the Elba
+  support into three patches.  The second patch is added
+  to the end of the sequence for Elba support.  The third
+  patch enables mmc hardware reset.
+
+v6-0014-mfd-pensando-elbasr-Add-AMD-Pensando-Elba-System-
+- Updates from review comments
+- Use spi_message_init_with_transfers instead of init/add_tail API
+
+v6-0015-reset-elbasr-Add-AMD-Pensando-Elba-SR-Reset-Contr
+- Remove use of amd,pensando-elba-reset.h and use BIT()
+
+v6-0016-mmc-sdhci-cadence-Add-AMD-Pensando-Elba-SoC-suppo
+- Elba sdhci-cadence.c support added in this patch to build on
+  0013 which just adds a callback to override priv_writel()
+
+v6-0017-mmc-sdhci-cadence-Support-mmc-hardware-reset
+- New patch where Elba has a reset-controller for mmc hardware
+  reset.  The reset is implemented by a register in the cpld.
+
+== V5 changes ==
+- Change to AMD Pensando instead of Pensando.
+- No reference to spidev in the device tree.  Add multi-function driver
+  pensando-elbasr and sub-device reset-elbasr which provides mfd and
+  /dev interface to the cpld.
+- Rebase to linux-next tag next-20220609 5.19.0-rc1
+- Redo the email list after rebase and using scripts/get_maintainer.pl
+
+== V4 changes ==
+The version of dtschema used is 2022.3.2.
+
+v4-0001-dt-bindings-arm-add-Pensando-boards.patch
+- Add description and board compatible
+
+v4-0003-dt-bindings-mmc-Add-Pensando-Elba-SoC-binding.patch
+- Change from elba-emmc to elba-sd4hc to match file convention
+- Use minItems: 1 and maxItems: 2 to pass schema check
+
+v4-0005-dt-bindings-spi-dw-Add-Pensando-Elba-SoC-SPI-Control.patch
+- Add required property pensando,syscon-spics to go with
+  pensando,elba-spi
+
+v4-0006-MAINTAINERS-Add-entry-for-PENSANDO.patch
+- Change Maintained to Supported
+
+v4-0007-arm64-Add-config-for-Pensando-SoC-platforms.patch
+- Fix a typo on interface max speed
+
+v4-0008-spi-cadence-quadspi-Add-compatible-for-Pensando-Elba.patch
+- Update due to spi-cadence-quadspi.c changes
+
+v4-0009-mmc-sdhci-cadence-Add-Pensando-Elba-SoC-support.patch
+- Change from elba-emmc to elba-sd4hc to match file convention
+
+v4-0010-spi-dw-Add-support-for-Pensando-Elba-SoC.patch
+- Use more descriptive dt property pensando,syscon-spics
+- Minor changes from review input
+
+v4-0011-arm64-dts-Add-Pensando-Elba-SoC-support.patch
+- Changed to dual copyright (GPL-2.0+ OR MIT)
+- Minor changes from review input
+
+== V3 changes ==
+v3-0001-gpio-Add-Elba-SoC-gpio-driver-for-spi-cs-control.patch
+- This patch is deleted.  Elba SOC specific gpio spics control is
+  integrated into spi-dw-mmio.c.
+
+v3-0002-spi-cadence-quadspi-Add-QSPI-support-for-Pensando-El.patch
+- Changed compatible to "pensando,elba-qspi" to be more descriptive
+  in spi-cadence-quadspi.c.
+
+- Arnd wondered if moving to DT properties for quirks may be the
+  way to go.  Feedback I've received on other patches was don't
+  mix two efforts in one patch so I'm currently just adding the
+  Elba support to the current design.
+
+v3-0003-spi-dw-Add-support-for-Pensando-Elba-SoC-SPI.patch
+- Changed the implementation to use existing dw_spi_set_cs() and
+  integrated Elba specific CS control into spi-dw-mmio.c.  The
+  native designware support is for two chip-selects while Elba
+  provides 4 chip-selects.  Instead of adding a new file for
+  this support in gpio-elba-spics.c the support is in one
+  file (spi-dw-mmio.c).
+
+v3-0004-spidev-Add-Pensando-CPLD-compatible.patch
+- This patch is deleted.  The addition of compatible "pensando,cpld"
+  to spidev.c is not added and an existing compatible is used
+  in the device tree to enable.
+
+v3-0005-mmc-sdhci-cadence-Add-Pensando-Elba-SoC-support.patch
+- Ulf and Yamada-san agreed the amount of code for this support
+  is not enough to need a new file.  The support is added into
+  sdhci-cadence.c and new files sdhci-cadence-elba.c and
+  sdhci-cadence.h are deleted.
+- Redundant defines are removed (e.g. use SDHCI_CDNS_HRS04 and
+  remove SDIO_REG_HRS4).
+- Removed phy init function sd4_set_dlyvr() and used existing
+  sdhci_cdns_phy_init(). Init values are from DT properties.
+- Replace  devm_ioremap_resource(&pdev->dev, iomem)
+     with  devm_platform_ioremap_resource(pdev, 1)
+- Refactored the elba priv_writ_l() and elba_write_l() to
+  remove a little redundant code.
+- The config option CONFIG_MMC_SDHCI_CADENCE_ELBA goes away.
+- Only C syntax and Elba functions are prefixed with elba_
+
+v3-0006-arm64-Add-config-for-Pensando-SoC-platforms.patch
+- Added a little more info to the platform help text to assist
+  users to decide on including platform support or not.
+
+v3-0007-arm64-dts-Add-Pensando-Elba-SoC-support.patch
+- Node names changed to DT generic names
+- Changed from using 'spi@' which is reserved
+- The elba-flash-parts.dtsi is kept separate as
+  it is included in multiple dts files.
+- SPDX license tags at the top of each file
+- The compatible = "pensando,elba" and 'model' are
+  now together in the board file.
+- UIO nodes removed
+- Ordered nodes by increasing unit address
+- Removed an unreferenced container node.
+- Dropped deprecated 'device_type' for uart0 node.
+
+v3-0010-dt-bindings-spi-cadence-qspi-Add-support-for-Pensand.patch
+- Updated since the latest documentation has been converted to yaml
+
+v3-0011-dt-bindings-gpio-Add-Pensando-Elba-SoC-support.patch
+- This patch is deleted since the Elba gpio spics is added to
+  the spi dw driver and documented there.
+
+Because of the deletion of patches and merging of code
+the new patchset is not similar.  A changelog is added into
+the patches for merged code to be helpful on the history.
+
+== V2 changes ==
+- 01    Fix typo, return code value and log message.
+- 03    Remove else clause, intrinsic DW chip-select is never used.
+- 08-11 Split out dts and bindings to sub-patches
+- 10    Converted existing cadence-quadspi.txt to YAML schema
+- 13    New driver should use <linux/gpio/driver.h>
+
+Brad Larson (8):
+  dt-bindings: arm: add AMD Pensando boards
+  dt-bindings: spi: cdns: Add compatible for AMD Pensando Elba SoC
+  dt-bindings: soc: amd: amd,pensando-elba-ctrl: Add Pensando SoC
+    Controller
+  MAINTAINERS: Add entry for AMD PENSANDO
+  arm64: Add config for AMD Pensando SoC platforms
+  arm64: dts: Add AMD Pensando Elba SoC support
+  spi: cadence-quadspi: Add compatible for AMD Pensando Elba SoC
+  soc: amd: Add support for AMD Pensando SoC Controller
+
+ .../devicetree/bindings/arm/amd,pensando.yaml |  26 ++
+ .../soc/amd/amd,pensando-elba-ctrl.yaml       |  58 +++
+ .../bindings/spi/cdns,qspi-nor.yaml           |  18 +-
+ MAINTAINERS                                   |   9 +
+ arch/arm64/Kconfig.platforms                  |  12 +
+ arch/arm64/boot/dts/amd/Makefile              |   1 +
+ arch/arm64/boot/dts/amd/elba-16core.dtsi      | 197 ++++++++++
+ arch/arm64/boot/dts/amd/elba-asic-common.dtsi |  80 ++++
+ arch/arm64/boot/dts/amd/elba-asic.dts         |  28 ++
+ arch/arm64/boot/dts/amd/elba-flash-parts.dtsi | 106 +++++
+ arch/arm64/boot/dts/amd/elba.dtsi             | 191 +++++++++
+ drivers/soc/Kconfig                           |   1 +
+ drivers/soc/Makefile                          |   1 +
+ drivers/soc/amd/Kconfig                       |  16 +
+ drivers/soc/amd/Makefile                      |   2 +
+ drivers/soc/amd/pensando-ctrl.c               | 368 ++++++++++++++++++
+ drivers/spi/spi-cadence-quadspi.c             |  19 +
+ include/uapi/linux/amd-pensando-ctrl.h        |  29 ++
+ 18 files changed, 1160 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/arm/amd,pensando.yaml
+ create mode 100644 Documentation/devicetree/bindings/soc/amd/amd,pensando-elba-ctrl.yaml
+ create mode 100644 arch/arm64/boot/dts/amd/elba-16core.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba-asic-common.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba-asic.dts
+ create mode 100644 arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
+ create mode 100644 arch/arm64/boot/dts/amd/elba.dtsi
+ create mode 100644 drivers/soc/amd/Kconfig
+ create mode 100644 drivers/soc/amd/Makefile
+ create mode 100644 drivers/soc/amd/pensando-ctrl.c
+ create mode 100644 include/uapi/linux/amd-pensando-ctrl.h
+
+
+base-commit: e922ba281a8d84f640d8c8e18a385d032c19e185
+-- 
+2.17.1
+
