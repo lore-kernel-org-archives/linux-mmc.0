@@ -2,86 +2,74 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96403C77B75
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 01:08:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93E3DC7EE23
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 01:22:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S245743AbjEPBI3 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 15 May 2023 21:08:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40298 "EHLO
+        id S229569AbjEPBWs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 15 May 2023 21:22:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47326 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S245368AbjEPBI2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2023 21:08:28 -0400
-Received: from mail-lj1-x22f.google.com (mail-lj1-x22f.google.com [IPv6:2a00:1450:4864:20::22f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8918D59E5
-        for <linux-mmc@vger.kernel.org>; Mon, 15 May 2023 18:08:23 -0700 (PDT)
-Received: by mail-lj1-x22f.google.com with SMTP id 38308e7fff4ca-2ad819ab8a9so112891401fa.0
-        for <linux-mmc@vger.kernel.org>; Mon, 15 May 2023 18:08:23 -0700 (PDT)
+        with ESMTP id S229482AbjEPBWr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 15 May 2023 21:22:47 -0400
+Received: from mail-lf1-x134.google.com (mail-lf1-x134.google.com [IPv6:2a00:1450:4864:20::134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4F531FDC
+        for <linux-mmc@vger.kernel.org>; Mon, 15 May 2023 18:22:44 -0700 (PDT)
+Received: by mail-lf1-x134.google.com with SMTP id 2adb3069b0e04-4f00d41df22so1394396e87.1
+        for <linux-mmc@vger.kernel.org>; Mon, 15 May 2023 18:22:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1684199302; x=1686791302;
+        d=linaro.org; s=google; t=1684200163; x=1686792163;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :from:to:cc:subject:date:message-id:reply-to;
-        bh=Lyzlb1knfLNloYB6AlxNxhOYp8O4rjeCw8TEVU/6wrs=;
-        b=K+xV7UkWFhHrH+cyZjQLTvXQRg8U+IYM2T2Ap2WI+gjyfg/BUTTzMHFYJ+9h4GZgHJ
-         0Z+bbAhqqeJNocTsBdAVJXVjBxevp1xRjF95LYKnHUoii0QqVrwPbKfxzK93ID1SfUSx
-         NdGZPaBPUyS40nCUOlD6u0vMsvI3ZFVfTzKqhD3e5Hwbeu11I0imt6AxpseuRC5VMVXm
-         nlbjvHP5h28Rkzo/bzg4UL+I95OnJ1G5iFVUB0IVqFUDQ73q1QvOq3Jt0al2cWxEoVAZ
-         0IuHA9+aSCWoZ2bYj2l6X1ae61CfKaswE68J8GNuarGO12ZO3e+q99iSFvNX7kau4Sde
-         gqrQ==
+        bh=0ZUmfin9A8hNGiBBOjTB9e2R9glJPnwDR5gTUtbZSiA=;
+        b=JdcjEPIBnfl1YOktLWY4Dlm9DCvDYp0UjkYpMGCQEiwza0MbfhGlHlWPDAWVfD+2cW
+         3pmSaNwjgqhwcu0OEQjvlCJ1G1/MzxIIXwPUjHjdk+GutfyOuQRDOzRkmKPEJ099oyae
+         F+4JMeG/Hy6syDf2Xi0NF2xtB1b9F9ghTmOBFS4uAiem1I96ShIh50Z4fnfnRnFAkiEf
+         k1rDRFlDuc8u3c/S7ybtNaO7dsGifbBJRcTxTnMT2jQu2idnI5hptbxIS2lCO13KkAod
+         +sivemErXwjvCHnMkr0//9QQ7IStguoKtk51t7XxXNgTVDSeyB1GGyX+ehl5DgOmQvTQ
+         oF6Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684199302; x=1686791302;
+        d=1e100.net; s=20221208; t=1684200163; x=1686792163;
         h=content-transfer-encoding:in-reply-to:from:references:cc:to
          :content-language:subject:user-agent:mime-version:date:message-id
          :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=Lyzlb1knfLNloYB6AlxNxhOYp8O4rjeCw8TEVU/6wrs=;
-        b=lC8p8NTDc9q0OEBKgolUlvCllenMBbK8biOltCyB2yXrw8jkiN2AEqU/Mi3JBWYDKL
-         032hE5GDYtFkOHuowJ3smvJFmgaGoU+fYE1BJ3y+WQkeJt0TGxCnR2FCRt2kh67G9RJJ
-         V+lbLkKv1cBD+6nIEih8DjDeyNvUw2HkotTknFTUohS/zEnVS5E/Co3ma40/AcDtolAh
-         kRtPHeMKznKPRdbvqwFSP1fX1Gbb3NWbBz1cG3R8k5I6RVVtDsHEcptm9/XvbwLmDPog
-         su654xBKaabbry0WsNxGhVogIAc0gPioxklOis0r8WsolHu52lM8kEspLZKvGJHHw/3m
-         B+Tg==
-X-Gm-Message-State: AC+VfDxfvbyEvtIl8FV+UJJ4vpoVKIECmlQRDO7NWn6UI5zgefF16rS0
-        SFgkQ5lBbdZ5P1JUBg47R5OqwQ==
-X-Google-Smtp-Source: ACHHUZ7Vbb5JZKPQUWR7eE/rFp0x8+WxhI3f0tbA8gkCNyc76Q2iwI2ZhTdlT/f0YKuX7mr9lQRPJw==
-X-Received: by 2002:a2e:9f47:0:b0:2ac:90db:2a3d with SMTP id v7-20020a2e9f47000000b002ac90db2a3dmr7807292ljk.8.1684199301811;
-        Mon, 15 May 2023 18:08:21 -0700 (PDT)
+        bh=0ZUmfin9A8hNGiBBOjTB9e2R9glJPnwDR5gTUtbZSiA=;
+        b=j9zVMZOHuCVp6IYbQJPH9w7coHxjQck1y6olCWf9oEeRzVn05+HnjztPkBTRvoQpgO
+         IxpwUUdqE9QtK5u+CBLuK9OnPwi6hSnajaipRBlb2l6TJRanLT4Q0mWRHiCYpx7ZaaaF
+         qAgzFbhQ/PfiU8GNwwhfK5M7KIaS8K+sZWHLLFZnt3aLCZfjKBoDA6rq6mtwp71lEP1o
+         hu8rXQTamHMAKg+HZfWHQScE2l2XOpZ+Y9bacyMUByDYbCbKPoqLQsswoyq6MUTFe/0p
+         spT3RVsaIGGYyqoWObx95tjtTAvb0B4VlP5tO27/nG/chtbrsvtjnGlIJ6A12znSlyXS
+         HOQQ==
+X-Gm-Message-State: AC+VfDxsBkaAij0xHHOkZgtEgh4DBZwfGFeTzeenVRwnC3dPI0fMe12j
+        YwFKKrRb1kHzdpGr+fyRZzPXM4697qefCC6Wkp4=
+X-Google-Smtp-Source: ACHHUZ6zEhTpvW4dpkth4ZOToXLIvIJIWXLqONU3Vih6GcLSgDan3DxIV0QF2ktnqsHRVwEDlr4xow==
+X-Received: by 2002:ac2:47f8:0:b0:4f3:78dd:8e0b with SMTP id b24-20020ac247f8000000b004f378dd8e0bmr2465642lfp.32.1684200163052;
+        Mon, 15 May 2023 18:22:43 -0700 (PDT)
 Received: from [192.168.1.101] (abxi58.neoplus.adsl.tpnet.pl. [83.9.2.58])
-        by smtp.gmail.com with ESMTPSA id x15-20020a05651c104f00b002ada919a09asm2577682ljm.73.2023.05.15.18.08.19
+        by smtp.gmail.com with ESMTPSA id w20-20020a19c514000000b004f26d63f823sm1891577lfe.237.2023.05.15.18.22.41
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 15 May 2023 18:08:21 -0700 (PDT)
-Message-ID: <8a5d13e2-b06a-417e-5d8b-1db749efb0cd@linaro.org>
-Date:   Tue, 16 May 2023 03:08:19 +0200
+        Mon, 15 May 2023 18:22:42 -0700 (PDT)
+Message-ID: <0855c1ea-2104-c7ab-e775-1340dac21c58@linaro.org>
+Date:   Tue, 16 May 2023 03:22:41 +0200
 MIME-Version: 1.0
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
  Thunderbird/102.11.0
-Subject: Re: [PATCH 6/6] dt-bindings: thermal: tsens: Add QCM2290
+Subject: Re: [PATCH 2/2] arm64: dts: qcom: sc8280xp: Add SDC2 and enable on
+ CRD
 Content-Language: en-US
-To:     Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Wim Van Sebroeck <wim@linux-watchdog.org>,
-        Guenter Roeck <linux@roeck-us.net>,
+To:     Bjorn Andersson <quic_bjorande@quicinc.com>,
+        Bjorn Andersson <andersson@kernel.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Prakash Ranjan <saiprakash.ranjan@codeaurora.org>,
-        Vinod Koul <vkoul@kernel.org>,
-        Srinivas Kandagatla <srinivas.kandagatla@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        Wesley Cheng <quic_wcheng@quicinc.com>,
-        Amit Kucheria <amitk@kernel.org>,
-        Thara Gopinath <thara.gopinath@gmail.com>,
-        "Rafael J. Wysocki" <rafael@kernel.org>,
-        Daniel Lezcano <daniel.lezcano@linaro.org>,
-        Zhang Rui <rui.zhang@intel.com>
-Cc:     linux-arm-msm@vger.kernel.org, linux-watchdog@vger.kernel.org,
+        Conor Dooley <conor+dt@kernel.org>,
+        Andy Gross <agross@kernel.org>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        dmaengine@vger.kernel.org, linux-mmc@vger.kernel.org,
-        linux-usb@vger.kernel.org, linux-pm@vger.kernel.org
-References: <20230314-topic-2290_compats-v1-0-47e26c3c0365@linaro.org>
- <20230314-topic-2290_compats-v1-6-47e26c3c0365@linaro.org>
+        linux-arm-msm@vger.kernel.org
+References: <20230509030136.1524860-1-quic_bjorande@quicinc.com>
+ <20230509030136.1524860-2-quic_bjorande@quicinc.com>
 From:   Konrad Dybcio <konrad.dybcio@linaro.org>
-In-Reply-To: <20230314-topic-2290_compats-v1-6-47e26c3c0365@linaro.org>
+In-Reply-To: <20230509030136.1524860-2-quic_bjorande@quicinc.com>
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Precedence: bulk
@@ -90,28 +78,193 @@ X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 14.03.2023 13:53, Konrad Dybcio wrote:
-> Add the TSENS v2.x controller found on QCM2290.
+On 9.05.2023 05:01, Bjorn Andersson wrote:
+> The CRD has Micro SD slot, introduce the necessary DeviceTree nodes for
+> enabling this.
 > 
-> Signed-off-by: Konrad Dybcio <konrad.dybcio@linaro.org>
+> Signed-off-by: Bjorn Andersson <quic_bjorande@quicinc.com>
 > ---
-<bump>
-This one got lost!
+>  arch/arm64/boot/dts/qcom/sc8280xp-crd.dts | 80 +++++++++++++++++++++++
+>  arch/arm64/boot/dts/qcom/sc8280xp.dtsi    | 39 +++++++++++
+>  2 files changed, 119 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts b/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
+> index 5b25d54b9591..f83411e0e7f8 100644
+> --- a/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
+> +++ b/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
+> @@ -308,6 +308,13 @@ vreg_l1c: ldo1 {
+>  			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+> +		vreg_l6c: ldo6 {
+> +			regulator-name = "vreg_l6c";
+> +			regulator-min-microvolt = <1800000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+> +		};
+> +
+>  		vreg_l7c: ldo7 {
+>  			regulator-name = "vreg_l7c";
+>  			regulator-min-microvolt = <2504000>;
+> @@ -318,6 +325,13 @@ vreg_l7c: ldo7 {
+>  						   RPMH_REGULATOR_MODE_HPM>;
+>  		};
+>  
+> +		vreg_l9c: ldo9 {
+> +			regulator-name = "vreg_l9c";
+> +			regulator-min-microvolt = <2960000>;
+> +			regulator-max-microvolt = <2960000>;
+> +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
+Generally I ask people to add the missing regulator-allow-set-load,
+but in case of the RPMh driver, should we also consider allowing LPM?
+
+> +		};
+> +
+>  		vreg_l13c: ldo13 {
+>  			regulator-name = "vreg_l13c";
+>  			regulator-min-microvolt = <3072000>;
+> @@ -600,6 +614,18 @@ &remoteproc_nsp0 {
+>  	status = "okay";
+>  };
+>  
+> +&sdc2 {
+> +	cd-gpios = <&tlmm 131 GPIO_ACTIVE_LOW>;
+> +	pinctrl-names = "default", "sleep";
+> +	pinctrl-0 = <&sdc2_default_state>;
+> +	pinctrl-1 = <&sdc2_sleep_state>;
+pinctrl-n
+pinctrl-names
+
+please
+> +	vmmc-supply = <&vreg_l9c>;
+> +	vqmmc-supply = <&vreg_l6c>;
+> +	no-sdio;
+> +	no-mmc;
+> +	status = "okay";
+> +};
+> +
+>  &uart17 {
+>  	compatible = "qcom,geni-debug-uart";
+>  
+> @@ -842,6 +868,60 @@ wake-n-pins {
+>  		};
+>  	};
+>  
+> +	sdc2_default_state: sdc2-default-state {
+> +		clk-pins {
+> +			pins = "sdc2_clk";
+> +			drive-strength = <16>;
+> +			bias-disable;
+> +		};
+> +
+> +		cmd-pins {
+> +			pins = "sdc2_cmd";
+> +			drive-strength = <16>;
+> +			bias-pull-up;
+> +		};
+> +
+> +		data-pins {
+> +			pins = "sdc2_data";
+> +			drive-strength = <16>;
+> +			bias-pull-up;
+> +		};
+> +
+> +		card-detect-pins {
+> +			pins = "gpio131";
+> +			function = "gpio";
+> +			drive-strength = <2>;
+> +			bias-disable;
+> +		};
+> +	};
+> +
+> +	sdc2_sleep_state: sdc2-sleep-state {
+> +		clk-pins {
+> +			pins = "sdc2_clk";
+> +			drive-strength = <2>;
+> +			bias-disable;
+> +		};
+> +
+> +		cmd-pins {
+> +			pins = "sdc2_cmd";
+> +			drive-strength = <2>;
+> +			bias-pull-up;
+> +		};
+> +
+> +		data-pins {
+> +			pins = "sdc2_data";
+> +			drive-strength = <2>;
+> +			bias-pull-up;
+> +		};
+> +
+> +		card-detect-pins {
+> +			pins = "gpio131";
+> +			function = "gpio";
+> +			drive-strength = <2>;
+> +			bias-disable;
+> +		};
+> +	};
+That's totally SoC-specific, modulo the CD pin which can have
+its own separate node and label
+
+> +
+>  	tpad_default: tpad-default-state {
+>  		int-n-pins {
+>  			pins = "gpio182";
+> diff --git a/arch/arm64/boot/dts/qcom/sc8280xp.dtsi b/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
+> index 8fa9fbfe5d00..21dfb48d923c 100644
+> --- a/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
+> @@ -2815,6 +2815,45 @@ data-pins {
+>  			};
+>  		};
+>  
+> +		sdc2: mmc@8804000 {
+> +			compatible = "qcom,sc8280xp-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0 0x08804000 0 0x1000>;
+> +
+> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
+> +				 <&gcc GCC_SDCC2_APPS_CLK>,
+> +				 <&rpmhcc RPMH_CXO_CLK>;
+> +			clock-names = "iface", "core", "xo";
+> +			resets = <&gcc GCC_SDCC4_BCR>;
+4?
+
+> +			interconnects = <&aggre2_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
+> +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDCC_2 0>;
+> +			interconnect-names = "sdhc-ddr","cpu-sdhc";
+> +			iommus = <&apps_smmu 0x4e0 0x0>;
+> +			power-domains = <&rpmhpd SC8280XP_CX>;
+> +			operating-points-v2 = <&sdc2_opp_table>;
+> +			bus-width = <4>;
+> +			dma-coherent;
+> +
+> +			status = "disabled";
+> +
+> +			sdc2_opp_table: opp-table {
+> +				compatible = "operating-points-v2";
+> +
+> +				opp-100000000 {
+> +					opp-hz = /bits/ 64 <100000000>;
+> +					required-opps = <&rpmhpd_opp_low_svs>;
+You specified interconnects, but no bw values.. was that on purpose?
+
+Other than these nits, lgtm
+(generally, my dt sources don't even have sdhci to compare)
 
 Konrad
->  Documentation/devicetree/bindings/thermal/qcom-tsens.yaml | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-> index 926e9c51c93c..1a6ffbf11bcc 100644
-> --- a/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-> +++ b/Documentation/devicetree/bindings/thermal/qcom-tsens.yaml
-> @@ -48,6 +48,7 @@ properties:
->                - qcom,msm8953-tsens
->                - qcom,msm8996-tsens
->                - qcom,msm8998-tsens
-> +              - qcom,qcm2290-tsens
->                - qcom,sc7180-tsens
->                - qcom,sc7280-tsens
->                - qcom,sc8180x-tsens
-> 
+> +				};
+> +
+> +				opp-202000000 {
+> +					opp-hz = /bits/ 64 <202000000>;
+> +					required-opps = <&rpmhpd_opp_svs_l1>;
+> +				};
+> +			};
+> +		};
+> +
+>  		usb_0_qmpphy: phy@88eb000 {
+>  			compatible = "qcom,sc8280xp-qmp-usb43dp-phy";
+>  			reg = <0 0x088eb000 0 0x4000>;
