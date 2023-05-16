@@ -2,113 +2,88 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A145EC7EE3A
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 16:59:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0148DC77B75
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 20:27:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230356AbjEPQ7m (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 May 2023 12:59:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33656 "EHLO
+        id S229624AbjEPU1u (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 May 2023 16:27:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231685AbjEPQ7g (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 12:59:36 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9DC593ED;
-        Tue, 16 May 2023 09:59:23 -0700 (PDT)
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34GDvewr001646;
-        Tue, 16 May 2023 16:59:14 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=qcppdkim1;
- bh=T8XoqpXDyaET013xmrLDBkOm8cU8UuGqCHGSI8E8QUU=;
- b=oR4vB7Hru48KOo5GqcOMNORvxNg2rRDEJVafL0j8VELBdFBi/48bODDX9CkYCACoa627
- 9OWU+mvX/aOV80/MW+nhMMNlvBKWpthwPmpllLFezrrKGCbzL30ca5+/igf6hrhvN41b
- luxtMkSw0pWgIinWtkhtG5Sl4jNLAqxvBA+CU1fsVxJY3vSt//eldVIVDIJ7B+mmLSOL
- kaZ47viBIBf1lilzxCvh2ue/xv2/PIE6yHBEXy6jhp/5fVaLoeqxoSdBZHbkcZmto7yn
- 9CHb0QoLfpPiTE4Rgp1JN60Odoh/PJYAHGXevf/gfOo8vcxoot/X07+toq/ZPfE9P7UO PQ== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qm74p921a-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 16 May 2023 16:59:13 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34GGxCXw008589
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 16 May 2023 16:59:12 GMT
-Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Tue, 16 May 2023 09:59:06 -0700
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-To:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <andy.shevchenko@gmail.com>, <quic_srichara@quicinc.com>
-Subject: [PATCH V6 8/8] arm64: defconfig: Enable IPQ5018 SoC base configs
-Date:   Tue, 16 May 2023 22:24:13 +0530
-Message-ID: <20230516165413.3361867-9-quic_srichara@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230516165413.3361867-1-quic_srichara@quicinc.com>
-References: <20230516165413.3361867-1-quic_srichara@quicinc.com>
+        with ESMTP id S229457AbjEPU1t (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 16:27:49 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9D51A5DE;
+        Tue, 16 May 2023 13:27:28 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3759863823;
+        Tue, 16 May 2023 20:27:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id C6572C433D2;
+        Tue, 16 May 2023 20:27:17 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684268839;
+        bh=Pi3QwEAHjDQvPaoIXiWDZQeAw2CxTt+KeUV+52GtFc0=;
+        h=From:To:Cc:Subject:Date:From;
+        b=qBPOjc7dPDTZ3LakRVd5je3hHk3tTUNceLjlNO6D7hSR9kaMItl0W3hjmkI73I8+/
+         4weSXi4sKIl2SlLRbRx86pXI9C7PbIpAmvw1Z86HBNJqnGo+/6cDYJ45dFhLvZnX/i
+         YhoaycvFlxJmbnEc1zgvM+Yqw+yLGnUkwkYyYWmpYNyscf/DUmVTRreBRkaM9jrjH0
+         Rq1eNi3nTVMnnSZgVv3j0e6wdGoIXCJUbFBdz4h3uYpFIDTeXAUldCX/EoVIhRfKKQ
+         SEnb0aMwEAJHMKGXW4LB2WlybPPFhsd7O5+9V1fD4JTyZVem+H9zN/EXFNVRbSPqkl
+         +HcpG1ka7/Mpg==
+From:   Arnd Bergmann <arnd@kernel.org>
+To:     Maxim Levitsky <maximlevitsky@gmail.com>,
+        Alex Dubov <oakad@yahoo.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Andrew Morton <akpm@linux-foundation.org>
+Cc:     Arnd Bergmann <arnd@arndb.de>, Zheng Wang <zyytlz.wz@163.com>,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: [PATCH] memstick r592: make memstick_debug_get_tpc_name() static
+Date:   Tue, 16 May 2023 22:27:04 +0200
+Message-Id: <20230516202714.560929-1-arnd@kernel.org>
+X-Mailer: git-send-email 2.39.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: JX0hxsTBxVs2jizmpEX18gJ7R9vGu2px
-X-Proofpoint-ORIG-GUID: JX0hxsTBxVs2jizmpEX18gJ7R9vGu2px
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-16_09,2023-05-16_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0 mlxscore=0
- phishscore=0 malwarescore=0 impostorscore=0 adultscore=0
- priorityscore=1501 bulkscore=0 mlxlogscore=885 suspectscore=0
- clxscore=1015 spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305160144
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enables clk & pinctrl related configs
+From: Arnd Bergmann <arnd@arndb.de>
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+There are no other files referencing this function, apparently
+it was left global to avoid an 'unused function' warning when
+the only caller is left out. With a 'W=1' build, it causes
+a 'missing prototype' warning though:
+
+drivers/memstick/host/r592.c:47:13: error: no previous prototype for 'memstick_debug_get_tpc_name' [-Werror=missing-prototypes]
+
+Annotate the function as 'static __maybe_unused' to avoid both
+problems.
+
+Fixes: 926341250102 ("memstick: add driver for Ricoh R5C592 card reader")
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
 ---
- [v6] Added Reviewed by
+ drivers/memstick/host/r592.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
- arch/arm64/configs/defconfig | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index a24609e14d50..8bf0ef77f375 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -553,6 +553,7 @@ CONFIG_PINCTRL_IMX8ULP=y
- CONFIG_PINCTRL_IMX93=y
- CONFIG_PINCTRL_MSM=y
- CONFIG_PINCTRL_IPQ8074=y
-+CONFIG_PINCTRL_IPQ5018=y
- CONFIG_PINCTRL_IPQ5332=y
- CONFIG_PINCTRL_IPQ6018=y
- CONFIG_PINCTRL_IPQ9574=y
-@@ -1154,6 +1155,8 @@ CONFIG_QCOM_CLK_APCC_MSM8996=y
- CONFIG_QCOM_CLK_SMD_RPM=y
- CONFIG_QCOM_CLK_RPMH=y
- CONFIG_IPQ_GCC_5332=y
-+CONFIG_IPQ_APSS_5018=y
-+CONFIG_IPQ_GCC_5018=y
- CONFIG_IPQ_GCC_6018=y
- CONFIG_IPQ_GCC_8074=y
- CONFIG_IPQ_GCC_9574=y
+diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
+index 42bfc46842b8..461f5ffd02bc 100644
+--- a/drivers/memstick/host/r592.c
++++ b/drivers/memstick/host/r592.c
+@@ -44,12 +44,10 @@ static const char *tpc_names[] = {
+  * memstick_debug_get_tpc_name - debug helper that returns string for
+  * a TPC number
+  */
+-const char *memstick_debug_get_tpc_name(int tpc)
++static __maybe_unused const char *memstick_debug_get_tpc_name(int tpc)
+ {
+ 	return tpc_names[tpc-1];
+ }
+-EXPORT_SYMBOL(memstick_debug_get_tpc_name);
+-
+ 
+ /* Read a register*/
+ static inline u32 r592_read_reg(struct r592_device *dev, int address)
 -- 
-2.34.1
+2.39.2
 
