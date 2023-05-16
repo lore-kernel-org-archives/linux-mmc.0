@@ -2,188 +2,144 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 36594C77B7A
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 11:26:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E2FCC7EE23
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 11:46:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232421AbjEPL0M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 May 2023 07:26:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55186 "EHLO
+        id S232439AbjEPLqS (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 May 2023 07:46:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41054 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232119AbjEPL0L (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 07:26:11 -0400
-Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72808A9;
-        Tue, 16 May 2023 04:26:10 -0700 (PDT)
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
-        by mailout.nyi.internal (Postfix) with ESMTP id 1019F5C0040;
-        Tue, 16 May 2023 07:03:24 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute6.internal (MEProxy); Tue, 16 May 2023 07:03:24 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:content-type:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm3; t=1684235004; x=1684321404; bh=oG
-        PUyY4yOz1WGHHszNYUVcNjTWFW5iDK/V4m5UVgnR4=; b=u0dLgjR28/VUWc9UXa
-        1ieJatFzXqFB2OTuWSJKHAEFcbw2GG7e+VB91wwXsIluDMoImUF+Wlns5DPtpTEn
-        bK9WxIW9Aqz3b3sD2whWE7t1rTiy3JEblbfK/BIPAaBP7HrBVInFfW+uNgr0C5bG
-        7P3zzCHMmLMMzoZGMFF3eT4SQ53ltUAs89/iIInqTeQiw2MbKqGSXIPQNxozfTkP
-        anaRtkULBQcsJ4vHkCCwshC9tvHzVTY3EKJ9BYdplmZfylN0zKKxrgj3A26wxf7t
-        L16ftbfQEoPo8xQt9hH9+ZagOp9Pcqwxtu6VfPhlnPtIGfUylSNCtEV3iydHQ0RL
-        7tNg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:content-type:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm1; t=1684235004; x=1684321404; bh=oGPUyY4yOz1WG
-        HHszNYUVcNjTWFW5iDK/V4m5UVgnR4=; b=d1bhxwARlVsUGSNkdNQwEG+OzSCgY
-        rWtF/JWFxjiD1UZkLCww3i0xPEcoOZ4epcRYG4Kb3yWqwmlr/sTxCbWCrF1iHATv
-        gHt/Um0FXfZ7okpgekmRj+e8buh2LzmYAPx4vHciNWQt0pQM8+4dtzsBn4FwH7qA
-        hJNdqSy3YlXf5zXRHY0ilBh9sJ+X83XOTVh7OZJU1FrUoJNyfPWJNsp+VkFA97ur
-        6TyVKaH8nTlSa1P6jlFRSkTAnV92njIwu2dXAZ48wLToGqHkH3FX73RtVl8Da+ew
-        Nj2UHR3sBxODQiTGsbiHTufF13fsM90kphJazsYoe1p13xj9NLzSxtF5g==
-X-ME-Sender: <xms:-mJjZBHz4LwqB9dwBPD_0kW5iN4br5CTjqrUyClEA_CKLiNDSVu4Sw>
-    <xme:-mJjZGXgyp_PhaxgHTFIGJQoW3qUoj1wuR5_PD9IEfe2ZwgwaLmCutYCD4qCltHCx
-    XSsRXKkOcOppOSI1vc>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrfeehledgfeehucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
-    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:-mJjZDKheLkxkYltH5LKHOrq6dIOmLUfGPaozLyw6CHt817keEY1MQ>
-    <xmx:-mJjZHH6KpQzZWUL48pz0mRNzu3_rf4lrs01I4o7H65gr4GKJ7QWJQ>
-    <xmx:-mJjZHXsvc0LbcwxEoE5UdpEgP5ckkIZIDbNPtCXXRT3CgMht-LcMA>
-    <xmx:_GJjZAbSoNXXu3RyqGk2TISdgK6tRgCUi67z4178MnSkgsDiDlJJvw>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 5C737B60086; Tue, 16 May 2023 07:03:22 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.9.0-alpha0-415-gf2b17fe6c3-fm-20230503.001-gf2b17fe6
-Mime-Version: 1.0
-Message-Id: <bc5118f2-8982-46ff-bc75-d0c71475e909@app.fastmail.com>
-In-Reply-To: <20230515181606.65953-9-blarson@amd.com>
-References: <20230515181606.65953-1-blarson@amd.com>
- <20230515181606.65953-9-blarson@amd.com>
-Date:   Tue, 16 May 2023 13:03:01 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Brad Larson" <blarson@amd.com>,
-        linux-arm-kernel@lists.infradead.org
-Cc:     linux-kernel@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-spi@vger.kernel.org,
-        "Adrian Hunter" <adrian.hunter@intel.com>, alcooperx@gmail.com,
-        "Andy Shevchenko" <andy.shevchenko@gmail.com>,
-        brendan.higgins@linux.dev,
-        "Brian Norris" <briannorris@chromium.org>,
-        "Catalin Marinas" <catalin.marinas@arm.com>,
-        "Conor Dooley" <conor+dt@kernel.org>,
-        "David Gow" <davidgow@google.com>, gsomlo@gmail.com,
-        "Greg Ungerer" <gerg@linux-m68k.org>,
-        "Hal Feng" <hal.feng@starfivetech.com>,
-        "Hitomi Hasegawa" <hasegawa-hitomi@fujitsu.com>,
-        =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>,
-        "Joel Stanley" <joel@jms.id.au>,
-        "Emil Renner Berthing" <kernel@esmil.dk>,
-        "Krzysztof Kozlowski" <krzk@kernel.org>,
-        krzysztof.kozlowski+dt@linaro.org, "Lee Jones" <lee@kernel.org>,
-        "Lee Jones" <lee.jones@linaro.org>,
-        "Mark Brown" <broonie@kernel.org>,
-        "Philipp Zabel" <p.zabel@pengutronix.de>,
-        "Randy Dunlap" <rdunlap@infradead.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        "Samuel Holland" <samuel@sholland.org>,
-        "Serge Semin" <fancer.lancer@gmail.com>, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com,
-        "Tom Lendacky" <thomas.lendacky@amd.com>,
-        "Tony Huang" <tonyhuang.sunplus@gmail.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>, vaishnav.a@ti.com,
-        "Walker Chen" <walker.chen@starfivetech.com>,
-        "Will Deacon" <will@kernel.org>,
-        "Yinbo Zhu" <zhuyinbo@loongson.cn>, devicetree@vger.kernel.org
-Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
+        with ESMTP id S232428AbjEPLqR (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 07:46:17 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9CE5D4494;
+        Tue, 16 May 2023 04:46:12 -0700 (PDT)
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34G9mOxW029807;
+        Tue, 16 May 2023 11:45:52 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
+ : date : message-id : mime-version : content-transfer-encoding :
+ content-type; s=qcppdkim1;
+ bh=yHnqeEF1gNh/uwWLh9z7i1Wtz9AYfRFLB2K12IRmv6M=;
+ b=f1iBS3sixB/k35zCi3P/3ybE8T15DeBzsHpalnRr1d3lbDBtB/rHbMcsg/ye0kS90MOi
+ wwi4ubvb6VqRgRX10qg4n8XCqdH3de1U1pn7pMByZoKIxxlJcNsTnbCfvczuf71nDP2K
+ 4BLEgqqsUC2CvXo7443F0A69v/vM8VgZiLOsacMXhuynITJEHekK5nUWPeFgHbdpR4P6
+ BfAA62S8mo3QqYgexwH1GuXa6BQwd7ZlbwCcb3NHcSbLf1BCvx65PPAKyNdxFvSE6RDA
+ xNig+rXi6JJ4F/zcNV+uyXQM0tkNbgMivzmB6GaY4KarNU4FYP6B8fvJPqK2Jr3iTR9i Uw== 
+Received: from nalasppmta01.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qm36n0rdy-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 16 May 2023 11:45:52 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34GBjprI029977
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Tue, 16 May 2023 11:45:51 GMT
+Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
+ nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ 15.2.986.42; Tue, 16 May 2023 04:45:45 -0700
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+To:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
+        <andy.shevchenko@gmail.com>, <quic_srichara@quicinc.com>
+Subject: [PATCH V5 0/8] Add minimal boot support for IPQ5018
+Date:   Tue, 16 May 2023 17:15:15 +0530
+Message-ID: <20230516114523.3266419-1-quic_srichara@quicinc.com>
+X-Mailer: git-send-email 2.34.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Content-Type: text/plain
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: tlelaXIWTupBJ-xtp_8hizZDKeXc57Z6
+X-Proofpoint-ORIG-GUID: tlelaXIWTupBJ-xtp_8hizZDKeXc57Z6
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-05-16_04,2023-05-16_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1015 mlxlogscore=873
+ spamscore=0 suspectscore=0 priorityscore=1501 malwarescore=0 phishscore=0
+ bulkscore=0 impostorscore=0 mlxscore=0 adultscore=0 lowpriorityscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2304280000
+ definitions=main-2305160100
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 15, 2023, at 20:16, Brad Larson wrote:
-> The Pensando SoC controller is a SPI connected companion device
-> that is present in all Pensando SoC board designs.  The essential
-> board management registers are accessed on chip select 0 with
-> board mgmt IO support accessed using additional chip selects.
->
-> Signed-off-by: Brad Larson <blarson@amd.com>
+The IPQ5018 is Qualcomm's 802.11ax SoC for Routers,
+Gateways and Access Points.
 
-Hi Brad,
+This series adds minimal board boot support for ipq5018-mp03.1-c2 board.
 
-I'm sorry I wasn't paying enough attention to this driver as the
-past 13 revisions went by.
+[v5]
+       Added Reviewed-by tags from Krzysztof Kozlowski.
+       Changed patch [6/8] with [1] since its already Acked
+       Rebased patch [4/8] on top of [2] and fixed other comments
+       Fixed commit log for patch [7/8]
+       Fixed comments for patch [2/8]
 
-> v10 changes:
-> - Different driver implementation specific to this Pensando controller device.
-> - Moved to soc/amd directory under new name based on guidance.  This driver is
->   of no use to any design other than all Pensando SoC based cards.
-> - Removed use of builtin_driver, can be built as a module.
+[1] https://patchwork.kernel.org/project/linux-arm-msm/patch/1678164097-13247-4-git-send-email-quic_mmanikan@quicinc.com/
+[2] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-quic_rohiagar@quicinc.com
+       
+[v4]
+       Fixed all comments for clocks, schema, dts
+       Added Reviewed-by tags.
 
-it looks like this was a fundamental change that I failed to see.
+[v3]
+	Fixed all comments for clocks, schema fixes
+        Picked up Reviewed-by from Bjorn for pinctrl driver
 
-> +# SPDX-License-Identifier: GPL-2.0-only
-> +menu "AMD Pensando SoC drivers"
-> +
-> +config AMD_PENSANDO_CTRL
-> +	tristate "AMD Pensando SoC Controller"
-> +	depends on SPI_MASTER=y
-> +	depends on (ARCH_PENSANDO && OF) || COMPILE_TEST
-> +	default ARCH_PENSANDO
-> +	select REGMAP_SPI
-> +	select MFD_SYSCON
-> +	help
-> +	  Enables AMD Pensando SoC controller device support.  This is a SPI
-> +	  attached companion device in all Pensando SoC board designs which
-> +	  provides essential board control/status registers and management IO
-> +	  support.
+[v2]
+	Fixed all comments and rebased for TOT.
 
-So generally speaking, I don't want custom user interfaces in
-drivers/soc. It looks like this one has internal interfaces for
-a reset controller and the regmap, so those parts are fine, but
-I'm confused about the purpose of the ioctl interface:
+Manikanta Mylavarapu (1):
+  dt-bindings: scm: Add compatible for IPQ5018
 
-> +static long
-> +penctrl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
-> +{
+Sricharan Ramabadhran (7):
+  dt-bindings: arm64: Add IPQ5018 clock and reset
+  clk: qcom: Add Global Clock controller (GCC) driver for IPQ5018
+  dt-bindings: pinctrl: qcom: Add support for ipq5018
+  pinctrl: qcom: Add IPQ5018 pinctrl driver
+  dt-bindings: qcom: Add ipq5018 bindings
+  arm64: dts: Add ipq5018 SoC and rdp432-c2 board support
+  arm64: defconfig: Enable IPQ5018 SoC base configs
 
-> +	if (num_msgs > 1) {
-> +		msg++;
-> +		if (msg->len > PENCTRL_MAX_MSG_LEN) {
-> +			ret = -EINVAL;
-> +			goto out_unlock;
-> +		}
-> +		t[1].rx_buf = rx_buf;
-> +		t[1].len = msg->len;
-> +	}
-> +	spi_message_init_with_transfers(&m, t, num_msgs);
+ .../devicetree/bindings/arm/qcom.yaml         |    7 +
+ .../bindings/clock/qcom,ipq5018-gcc.yaml      |   63 +
+ .../bindings/firmware/qcom,scm.yaml           |    1 +
+ .../bindings/pinctrl/qcom,ipq5018-tlmm.yaml   |  127 +
+ arch/arm64/boot/dts/qcom/Makefile             |    1 +
+ .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |   72 +
+ arch/arm64/boot/dts/qcom/ipq5018.dtsi         |  250 ++
+ arch/arm64/configs/defconfig                  |    3 +
+ drivers/clk/qcom/Kconfig                      |   10 +-
+ drivers/clk/qcom/Makefile                     |    1 +
+ drivers/clk/qcom/gcc-ipq5018.c                | 3731 +++++++++++++++++
+ drivers/pinctrl/qcom/Kconfig                  |   10 +
+ drivers/pinctrl/qcom/Makefile                 |    1 +
+ drivers/pinctrl/qcom/pinctrl-ipq5018.c        |  783 ++++
+ include/dt-bindings/clock/qcom,gcc-ipq5018.h  |  183 +
+ include/dt-bindings/reset/qcom,gcc-ipq5018.h  |  122 +
+ 16 files changed, 5363 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/clock/qcom,ipq5018-gcc.yaml
+ create mode 100644 Documentation/devicetree/bindings/pinctrl/qcom,ipq5018-tlmm.yaml
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
+ create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
+ create mode 100644 drivers/clk/qcom/gcc-ipq5018.c
+ create mode 100644 drivers/pinctrl/qcom/pinctrl-ipq5018.c
+ create mode 100644 include/dt-bindings/clock/qcom,gcc-ipq5018.h
+ create mode 100644 include/dt-bindings/reset/qcom,gcc-ipq5018.h
 
-This seems to be just a passthrough of user space messages, which
-is what the spidev driver already provides, but using a different
-ioctl interface. I don't really want any user-level interfaces
-in drivers/soc as a rule, but having one that duplicates existing
-functionality seems particularly wrong.
+-- 
+2.34.1
 
-Can you explain what the purpose is? Is this about serializing
-access between the in-kernel reset control and the user-side
-access?
-
-Also, can you explain why this needs a low-lever user interface
-in the first place, rather than something that can be expressed
-using high-level abstractions as you already do with the reset
-control?
-
-All of the above should be part of the changelog text to get a
-driver like this merged. I don't think we can get a quick
-solution here though, so maybe you can start by removing the
-ioctl side and having the rest of the driver in drivers/reset?
-
-     Arnd
