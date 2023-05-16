@@ -2,298 +2,96 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF346C77B75
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 16:42:25 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6876DC7EE25
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 16:54:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229639AbjEPQmX (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 May 2023 12:42:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46892 "EHLO
+        id S231263AbjEPQyc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 May 2023 12:54:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58196 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229580AbjEPQmV (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 12:42:21 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7BF1A5F1;
-        Tue, 16 May 2023 09:41:58 -0700 (PDT)
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34GEbKCS025457;
-        Tue, 16 May 2023 15:49:18 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=date : from : to :
- cc : subject : message-id : references : mime-version : content-type :
- in-reply-to; s=qcppdkim1; bh=7GmFsIyYLDO0Uzcku7fTuqy+8j8iq7zS8tmiHeE4lcc=;
- b=VzSFcI0YfkS4VIZbc1BI674coEvoMgqz7DzKjPMFkw/VZQ/rccifC0Moryt1gp5fWcsB
- YKTQSvytDItLpE1hcVDqdZmohgPk0geWqWtU69h2RWo73ubo8ay+DtyGV4JR9jjIhzLH
- s0yGqxhfT2E1pcZKpaGbuZMJIQRGy+LjRvQBWgByLrw0E9ZrK73mZZw72byQPLNNkvy+
- Gq3csGT7H5iNL4PdQnGsb1186Fj386fMDNSUcEB5v6+6GY/EFp0jthd2qkUBfCiQwxdO
- otdHvEMToBLZ1p8Ac1F5yNedwx5ycELPlY67fRtWmKAf70ULSxDI+fNGOWyBSRSQN9UU dA== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qm6r3rxay-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 16 May 2023 15:49:18 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34GFnHZQ003434
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Tue, 16 May 2023 15:49:17 GMT
-Received: from hu-bjorande-lv.qualcomm.com (10.49.16.6) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Tue, 16 May 2023 08:49:17 -0700
-Date:   Tue, 16 May 2023 08:49:16 -0700
-From:   Bjorn Andersson <quic_bjorande@quicinc.com>
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>
-CC:     Bjorn Andersson <andersson@kernel.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>, <linux-mmc@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-arm-msm@vger.kernel.org>
-Subject: Re: [PATCH 2/2] arm64: dts: qcom: sc8280xp: Add SDC2 and enable on
- CRD
-Message-ID: <20230516154916.GA606695@hu-bjorande-lv.qualcomm.com>
-References: <20230509030136.1524860-1-quic_bjorande@quicinc.com>
- <20230509030136.1524860-2-quic_bjorande@quicinc.com>
- <0855c1ea-2104-c7ab-e775-1340dac21c58@linaro.org>
+        with ESMTP id S231255AbjEPQyb (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 12:54:31 -0400
+Received: from mail-qv1-xf36.google.com (mail-qv1-xf36.google.com [IPv6:2607:f8b0:4864:20::f36])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 877DD72B6;
+        Tue, 16 May 2023 09:54:30 -0700 (PDT)
+Received: by mail-qv1-xf36.google.com with SMTP id 6a1803df08f44-62382e9cb8dso1945996d6.2;
+        Tue, 16 May 2023 09:54:30 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1684256069; x=1686848069;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=C+IKvHr+Qv/reK+iiMKXtFvdk8tZMUo94JX5PnpoJb8=;
+        b=q4qBiNGZgIJSY3urHsTTQA7J9yflOfJ9/ap1bVIBsrQoRtqK3oV4otSz0FYY0BvcTk
+         V+IjSGstVNieUTBxeuW1kcMOuIdIKHwGd+MWLEIcopt76I3hr691v8kLd9mxVJk/1BJc
+         3JVbiiIwggFbVqiSxqbKxKkNow3ImCA6siTZMGfUIknc1qVwS3WaWR6TYdIeUl6TtxNS
+         QuXCQO6o63h1TneclInQX49R4W0RurFChRJMYwL4mFSqVUI2jGqJ3E5Q+2Y5qGfM3YWz
+         oc/4Pn5pHUqaZOJcR2wxRrRXBF4OAoRKFAau7Wo/FYzuRGPiVyYNVnnGedkax4MCPod9
+         QA6w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684256069; x=1686848069;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=C+IKvHr+Qv/reK+iiMKXtFvdk8tZMUo94JX5PnpoJb8=;
+        b=NdAJR8ixJt6LZARoWRb40rLXwwCNq9VcFoTvhnqDIGudriUV/QVk2URSB3BHEBPLcH
+         aRzNCokFBpgI/hXCehxCDNzBM8p3K/MQJTKA/w0AFdGecym6SATsfV5OLhIFOUIjt4d4
+         cgIGnOl5Ik8NdlZPNbddiFVwY5AlbVJECS+5XBUF1aBqENuv7zW0lmEXkKhbtUibCg2O
+         LyWB1VGt7xmZMRBC7ImkWJySWelR0WDsprhnzVT1uZt23OlAyWej4iXh+VON7fa1HzrK
+         ZVSk5QRtlRSLfRAYFQhOF504uy8SBVvFJy/8lMeNQOBFbG7n7VoP//B3iVYIkCgYzg+R
+         D+6g==
+X-Gm-Message-State: AC+VfDwjvglQz8dJetxLUSCsNuCEqM2i5VfbCNoypVNsl9GUu2b/CNCG
+        63m7GsoMNHp4c9oj93UrSpe5ltqqZMeBAmom+j0=
+X-Google-Smtp-Source: ACHHUZ4L/H9GbFy84MmkYmOL6YCRHWnatpThEhzYtSHWWsd931XXmUJMNpAEB2uMhi69U0bfnIS5Nw0flC1l4j3Qmqg=
+X-Received: by 2002:a05:6214:21ae:b0:621:48be:bab5 with SMTP id
+ t14-20020a05621421ae00b0062148bebab5mr35804718qvc.8.1684256069595; Tue, 16
+ May 2023 09:54:29 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <0855c1ea-2104-c7ab-e775-1340dac21c58@linaro.org>
-X-Originating-IP: [10.49.16.6]
-X-ClientProxiedBy: nalasex01b.na.qualcomm.com (10.47.209.197) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: znyBCV67pOdHq29Cz0OLiUJUPV6Sp56j
-X-Proofpoint-GUID: znyBCV67pOdHq29Cz0OLiUJUPV6Sp56j
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-16_08,2023-05-16_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 priorityscore=1501
- lowpriorityscore=0 impostorscore=0 mlxscore=0 spamscore=0 phishscore=0
- clxscore=1015 bulkscore=0 adultscore=0 suspectscore=0 malwarescore=0
- mlxlogscore=999 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305160134
+References: <20230516114523.3266419-1-quic_srichara@quicinc.com>
+ <20230516114523.3266419-5-quic_srichara@quicinc.com> <02d1f821-4b1f-e4f2-0732-026f9b0b7ed9@quicinc.com>
+In-Reply-To: <02d1f821-4b1f-e4f2-0732-026f9b0b7ed9@quicinc.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Tue, 16 May 2023 19:53:53 +0300
+Message-ID: <CAHp75VdLm7o83x9keZEUv9pDK2ZkWkQtMcLU148KyHZgf_6VUw@mail.gmail.com>
+Subject: Re: [PATCH V5 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
+        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, May 16, 2023 at 03:22:41AM +0200, Konrad Dybcio wrote:
-> 
-> 
-> On 9.05.2023 05:01, Bjorn Andersson wrote:
-> > The CRD has Micro SD slot, introduce the necessary DeviceTree nodes for
-> > enabling this.
-> > 
-> > Signed-off-by: Bjorn Andersson <quic_bjorande@quicinc.com>
-> > ---
-> >  arch/arm64/boot/dts/qcom/sc8280xp-crd.dts | 80 +++++++++++++++++++++++
-> >  arch/arm64/boot/dts/qcom/sc8280xp.dtsi    | 39 +++++++++++
-> >  2 files changed, 119 insertions(+)
-> > 
-> > diff --git a/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts b/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
-> > index 5b25d54b9591..f83411e0e7f8 100644
-> > --- a/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
-> > +++ b/arch/arm64/boot/dts/qcom/sc8280xp-crd.dts
-> > @@ -308,6 +308,13 @@ vreg_l1c: ldo1 {
-> >  			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-> >  		};
-> >  
-> > +		vreg_l6c: ldo6 {
-> > +			regulator-name = "vreg_l6c";
-> > +			regulator-min-microvolt = <1800000>;
-> > +			regulator-max-microvolt = <2960000>;
-> > +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-> > +		};
-> > +
-> >  		vreg_l7c: ldo7 {
-> >  			regulator-name = "vreg_l7c";
-> >  			regulator-min-microvolt = <2504000>;
-> > @@ -318,6 +325,13 @@ vreg_l7c: ldo7 {
-> >  						   RPMH_REGULATOR_MODE_HPM>;
-> >  		};
-> >  
-> > +		vreg_l9c: ldo9 {
-> > +			regulator-name = "vreg_l9c";
-> > +			regulator-min-microvolt = <2960000>;
-> > +			regulator-max-microvolt = <2960000>;
-> > +			regulator-initial-mode = <RPMH_REGULATOR_MODE_HPM>;
-> Generally I ask people to add the missing regulator-allow-set-load,
-> but in case of the RPMh driver, should we also consider allowing LPM?
-> 
+On Tue, May 16, 2023 at 2:58=E2=80=AFPM Sricharan Ramabadhran
+<quic_srichara@quicinc.com> wrote:
+> On 5/16/2023 5:15 PM, Sricharan Ramabadhran wrote:
 
-I prefer to avoid LPM and dynamic load management, because I don't think
-we're doing a good enough job across the kernel to ensure we get back to
-HPM when needed.
+...
 
-At some point this needs to be re-evaluated though.
+> >   [v5] Rebased patch on top of "Add pinctrl support for SDX75" series
+> >        and fixed other comments from andy.shevchenko@gmail.com
+> >
+>    I rebased this on top of [1] series. But if that takes time to merge,
+>    can i post this without that dependency and get this merged ?
+>
+> [1] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-
+>     quic_rohiagar@quicinc.com
 
-> > +		};
-> > +
-> >  		vreg_l13c: ldo13 {
-> >  			regulator-name = "vreg_l13c";
-> >  			regulator-min-microvolt = <3072000>;
-> > @@ -600,6 +614,18 @@ &remoteproc_nsp0 {
-> >  	status = "okay";
-> >  };
-> >  
-> > +&sdc2 {
-> > +	cd-gpios = <&tlmm 131 GPIO_ACTIVE_LOW>;
-> > +	pinctrl-names = "default", "sleep";
-> > +	pinctrl-0 = <&sdc2_default_state>;
-> > +	pinctrl-1 = <&sdc2_sleep_state>;
-> pinctrl-n
-> pinctrl-names
-> 
-> please
+First of all, please remove so-o long context which is not related _at
+all_ in this conversation right now.
 
-That's ugly, but I see the symmetry to other -# vs -names
+Regarding your question, you need to talk to the respective
+maintainers how to proceed. The best is that all stakeholders pull an
+immutable branch/tag with that series applied from pin control
+maintainer (Linus W) and your series on top of that.
 
-> > +	vmmc-supply = <&vreg_l9c>;
-> > +	vqmmc-supply = <&vreg_l6c>;
-> > +	no-sdio;
-> > +	no-mmc;
-> > +	status = "okay";
-> > +};
-> > +
-> >  &uart17 {
-> >  	compatible = "qcom,geni-debug-uart";
-> >  
-> > @@ -842,6 +868,60 @@ wake-n-pins {
-> >  		};
-> >  	};
-> >  
-> > +	sdc2_default_state: sdc2-default-state {
-> > +		clk-pins {
-> > +			pins = "sdc2_clk";
-> > +			drive-strength = <16>;
-> > +			bias-disable;
-> > +		};
-> > +
-> > +		cmd-pins {
-> > +			pins = "sdc2_cmd";
-> > +			drive-strength = <16>;
-> > +			bias-pull-up;
-> > +		};
-> > +
-> > +		data-pins {
-> > +			pins = "sdc2_data";
-> > +			drive-strength = <16>;
-> > +			bias-pull-up;
-> > +		};
-> > +
-> > +		card-detect-pins {
-> > +			pins = "gpio131";
-> > +			function = "gpio";
-> > +			drive-strength = <2>;
-> > +			bias-disable;
-> > +		};
-> > +	};
-> > +
-> > +	sdc2_sleep_state: sdc2-sleep-state {
-> > +		clk-pins {
-> > +			pins = "sdc2_clk";
-> > +			drive-strength = <2>;
-> > +			bias-disable;
-> > +		};
-> > +
-> > +		cmd-pins {
-> > +			pins = "sdc2_cmd";
-> > +			drive-strength = <2>;
-> > +			bias-pull-up;
-> > +		};
-> > +
-> > +		data-pins {
-> > +			pins = "sdc2_data";
-> > +			drive-strength = <2>;
-> > +			bias-pull-up;
-> > +		};
-> > +
-> > +		card-detect-pins {
-> > +			pins = "gpio131";
-> > +			function = "gpio";
-> > +			drive-strength = <2>;
-> > +			bias-disable;
-> > +		};
-> > +	};
-> That's totally SoC-specific, modulo the CD pin which can have
-> its own separate node and label
-> 
-
-The drive-strength and bias properties are board specific. Also, at this
-time the CRD is the only board I'm aware of having the SD-card slot.
-
-I suggest that we move it out of here once there's another user...
-
-> > +
-> >  	tpad_default: tpad-default-state {
-> >  		int-n-pins {
-> >  			pins = "gpio182";
-> > diff --git a/arch/arm64/boot/dts/qcom/sc8280xp.dtsi b/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
-> > index 8fa9fbfe5d00..21dfb48d923c 100644
-> > --- a/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
-> > +++ b/arch/arm64/boot/dts/qcom/sc8280xp.dtsi
-> > @@ -2815,6 +2815,45 @@ data-pins {
-> >  			};
-> >  		};
-> >  
-> > +		sdc2: mmc@8804000 {
-> > +			compatible = "qcom,sc8280xp-sdhci", "qcom,sdhci-msm-v5";
-> > +			reg = <0 0x08804000 0 0x1000>;
-> > +
-> > +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-> > +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-> > +			interrupt-names = "hc_irq", "pwr_irq";
-> > +
-> > +			clocks = <&gcc GCC_SDCC2_AHB_CLK>,
-> > +				 <&gcc GCC_SDCC2_APPS_CLK>,
-> > +				 <&rpmhcc RPMH_CXO_CLK>;
-> > +			clock-names = "iface", "core", "xo";
-> > +			resets = <&gcc GCC_SDCC4_BCR>;
-> 4?
-> 
-
-That's a typo. Thanks.
-
-> > +			interconnects = <&aggre2_noc MASTER_SDCC_2 0 &mc_virt SLAVE_EBI1 0>,
-> > +					<&gem_noc MASTER_APPSS_PROC 0 &config_noc SLAVE_SDCC_2 0>;
-> > +			interconnect-names = "sdhc-ddr","cpu-sdhc";
-> > +			iommus = <&apps_smmu 0x4e0 0x0>;
-> > +			power-domains = <&rpmhpd SC8280XP_CX>;
-> > +			operating-points-v2 = <&sdc2_opp_table>;
-> > +			bus-width = <4>;
-> > +			dma-coherent;
-> > +
-> > +			status = "disabled";
-> > +
-> > +			sdc2_opp_table: opp-table {
-> > +				compatible = "operating-points-v2";
-> > +
-> > +				opp-100000000 {
-> > +					opp-hz = /bits/ 64 <100000000>;
-> > +					required-opps = <&rpmhpd_opp_low_svs>;
-> You specified interconnects, but no bw values.. was that on purpose?
-> 
-
-Assumed the driver did something clever, when I didn't see anything for
-the other boards I looked at either. Will reconsider.
-
-> Other than these nits, lgtm
-> (generally, my dt sources don't even have sdhci to compare)
-> 
-
-Thanks,
-Bjorn
-
-> Konrad
-> > +				};
-> > +
-> > +				opp-202000000 {
-> > +					opp-hz = /bits/ 64 <202000000>;
-> > +					required-opps = <&rpmhpd_opp_svs_l1>;
-> > +				};
-> > +			};
-> > +		};
-> > +
-> >  		usb_0_qmpphy: phy@88eb000 {
-> >  			compatible = "qcom,sc8280xp-qmp-usb43dp-phy";
-> >  			reg = <0 0x088eb000 0 0x4000>;
+--=20
+With Best Regards,
+Andy Shevchenko
