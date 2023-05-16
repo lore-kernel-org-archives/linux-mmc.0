@@ -2,203 +2,188 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8F4C2C7EE24
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 08:46:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36594C77B7A
+	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 11:26:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231437AbjEPIq2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 May 2023 04:46:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59640 "EHLO
+        id S232421AbjEPL0M (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 16 May 2023 07:26:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231389AbjEPIq1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 04:46:27 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0138C3C01;
-        Tue, 16 May 2023 01:46:25 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1684226786; x=1715762786;
-  h=date:from:to:cc:subject:message-id:references:
-   mime-version:in-reply-to;
-  bh=QL+tBUOtTekpizs4IA8GnqHOaksmnf7OGlafEadIZKE=;
-  b=OEcqNsWrVv2FC+6h2Y+KVOOC4l53dj47UVtMB/12/oc286jn+TlMPOQk
-   QvC4AwzOyDGj6MKkrAXEJfi4fOv3sf8LQ+gC1ar1lavByXLzL4DYHB4Da
-   MGteMyQZtZcGMZCrmWSxpjtDKbX6LiF361fXBfrzOPLIaABF45h3Ecqno
-   emKAazza6x52//bFnnfPb01D06GgT+B4+og3h+4G9VNSbbtmHD1C9jLhv
-   UXYhMJSRf4nzjefOFPLRZ762bXWMcvJcRauMIhA8Tm6sbV1CjeHavGg6L
-   lxRza39jkJn0TDqkqNPzOg7UEsYJlU3+gijJ+aEm28X+YyID0sHaioRod
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10711"; a="351454167"
-X-IronPort-AV: E=Sophos;i="5.99,278,1677571200"; 
-   d="scan'208";a="351454167"
-Received: from fmsmga007.fm.intel.com ([10.253.24.52])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 May 2023 01:46:13 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10711"; a="704312325"
-X-IronPort-AV: E=Sophos;i="5.99,278,1677571200"; 
-   d="scan'208";a="704312325"
-Received: from lkp-server01.sh.intel.com (HELO dea6d5a4f140) ([10.239.97.150])
-  by fmsmga007.fm.intel.com with ESMTP; 16 May 2023 01:46:07 -0700
-Received: from kbuild by dea6d5a4f140 with local (Exim 4.96)
-        (envelope-from <lkp@intel.com>)
-        id 1pyqJq-0007H4-1m;
-        Tue, 16 May 2023 08:46:06 +0000
-Date:   Tue, 16 May 2023 16:45:20 +0800
-From:   kernel test robot <lkp@intel.com>
-To:     Brad Larson <blarson@amd.com>, linux-arm-kernel@lists.infradead.org
-Cc:     oe-kbuild-all@lists.linux.dev, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de, blarson@amd.com,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        catalin.marinas@arm.com, conor+dt@kernel.org, davidgow@google.com,
-        gsomlo@gmail.com, gerg@linux-m68k.org, hal.feng@starfivetech.com,
-        hasegawa-hitomi@fujitsu.com, j.neuschaefer@gmx.net, joel@jms.id.au,
-        kernel@esmil.dk, krzk@kernel.org,
-        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
-        lee.jones@linaro.org, broonie@kernel.org, p.zabel@pengutronix.de,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org
-Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC
- Controller
-Message-ID: <202305161642.PZQ4S8o2-lkp@intel.com>
-References: <20230515181606.65953-9-blarson@amd.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+        with ESMTP id S232119AbjEPL0L (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 07:26:11 -0400
+Received: from out2-smtp.messagingengine.com (out2-smtp.messagingengine.com [66.111.4.26])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72808A9;
+        Tue, 16 May 2023 04:26:10 -0700 (PDT)
+Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
+        by mailout.nyi.internal (Postfix) with ESMTP id 1019F5C0040;
+        Tue, 16 May 2023 07:03:24 -0400 (EDT)
+Received: from imap51 ([10.202.2.101])
+  by compute6.internal (MEProxy); Tue, 16 May 2023 07:03:24 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
+        :cc:content-type:content-type:date:date:from:from:in-reply-to
+        :in-reply-to:message-id:mime-version:references:reply-to:sender
+        :subject:subject:to:to; s=fm3; t=1684235004; x=1684321404; bh=oG
+        PUyY4yOz1WGHHszNYUVcNjTWFW5iDK/V4m5UVgnR4=; b=u0dLgjR28/VUWc9UXa
+        1ieJatFzXqFB2OTuWSJKHAEFcbw2GG7e+VB91wwXsIluDMoImUF+Wlns5DPtpTEn
+        bK9WxIW9Aqz3b3sD2whWE7t1rTiy3JEblbfK/BIPAaBP7HrBVInFfW+uNgr0C5bG
+        7P3zzCHMmLMMzoZGMFF3eT4SQ53ltUAs89/iIInqTeQiw2MbKqGSXIPQNxozfTkP
+        anaRtkULBQcsJ4vHkCCwshC9tvHzVTY3EKJ9BYdplmZfylN0zKKxrgj3A26wxf7t
+        L16ftbfQEoPo8xQt9hH9+ZagOp9Pcqwxtu6VfPhlnPtIGfUylSNCtEV3iydHQ0RL
+        7tNg==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:cc:content-type:content-type:date:date
+        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
+        :message-id:mime-version:references:reply-to:sender:subject
+        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
+        :x-sasl-enc; s=fm1; t=1684235004; x=1684321404; bh=oGPUyY4yOz1WG
+        HHszNYUVcNjTWFW5iDK/V4m5UVgnR4=; b=d1bhxwARlVsUGSNkdNQwEG+OzSCgY
+        rWtF/JWFxjiD1UZkLCww3i0xPEcoOZ4epcRYG4Kb3yWqwmlr/sTxCbWCrF1iHATv
+        gHt/Um0FXfZ7okpgekmRj+e8buh2LzmYAPx4vHciNWQt0pQM8+4dtzsBn4FwH7qA
+        hJNdqSy3YlXf5zXRHY0ilBh9sJ+X83XOTVh7OZJU1FrUoJNyfPWJNsp+VkFA97ur
+        6TyVKaH8nTlSa1P6jlFRSkTAnV92njIwu2dXAZ48wLToGqHkH3FX73RtVl8Da+ew
+        Nj2UHR3sBxODQiTGsbiHTufF13fsM90kphJazsYoe1p13xj9NLzSxtF5g==
+X-ME-Sender: <xms:-mJjZBHz4LwqB9dwBPD_0kW5iN4br5CTjqrUyClEA_CKLiNDSVu4Sw>
+    <xme:-mJjZGXgyp_PhaxgHTFIGJQoW3qUoj1wuR5_PD9IEfe2ZwgwaLmCutYCD4qCltHCx
+    XSsRXKkOcOppOSI1vc>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrfeehledgfeehucetufdoteggodetrfdotf
+    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
+    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
+    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
+    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
+    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
+    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
+    hrnhgusegrrhhnuggsrdguvg
+X-ME-Proxy: <xmx:-mJjZDKheLkxkYltH5LKHOrq6dIOmLUfGPaozLyw6CHt817keEY1MQ>
+    <xmx:-mJjZHH6KpQzZWUL48pz0mRNzu3_rf4lrs01I4o7H65gr4GKJ7QWJQ>
+    <xmx:-mJjZHXsvc0LbcwxEoE5UdpEgP5ckkIZIDbNPtCXXRT3CgMht-LcMA>
+    <xmx:_GJjZAbSoNXXu3RyqGk2TISdgK6tRgCUi67z4178MnSkgsDiDlJJvw>
+Feedback-ID: i56a14606:Fastmail
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 5C737B60086; Tue, 16 May 2023 07:03:22 -0400 (EDT)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.9.0-alpha0-415-gf2b17fe6c3-fm-20230503.001-gf2b17fe6
+Mime-Version: 1.0
+Message-Id: <bc5118f2-8982-46ff-bc75-d0c71475e909@app.fastmail.com>
 In-Reply-To: <20230515181606.65953-9-blarson@amd.com>
+References: <20230515181606.65953-1-blarson@amd.com>
+ <20230515181606.65953-9-blarson@amd.com>
+Date:   Tue, 16 May 2023 13:03:01 +0200
+From:   "Arnd Bergmann" <arnd@arndb.de>
+To:     "Brad Larson" <blarson@amd.com>,
+        linux-arm-kernel@lists.infradead.org
+Cc:     linux-kernel@vger.kernel.org,
+        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
+        linux-spi@vger.kernel.org,
+        "Adrian Hunter" <adrian.hunter@intel.com>, alcooperx@gmail.com,
+        "Andy Shevchenko" <andy.shevchenko@gmail.com>,
+        brendan.higgins@linux.dev,
+        "Brian Norris" <briannorris@chromium.org>,
+        "Catalin Marinas" <catalin.marinas@arm.com>,
+        "Conor Dooley" <conor+dt@kernel.org>,
+        "David Gow" <davidgow@google.com>, gsomlo@gmail.com,
+        "Greg Ungerer" <gerg@linux-m68k.org>,
+        "Hal Feng" <hal.feng@starfivetech.com>,
+        "Hitomi Hasegawa" <hasegawa-hitomi@fujitsu.com>,
+        =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>,
+        "Joel Stanley" <joel@jms.id.au>,
+        "Emil Renner Berthing" <kernel@esmil.dk>,
+        "Krzysztof Kozlowski" <krzk@kernel.org>,
+        krzysztof.kozlowski+dt@linaro.org, "Lee Jones" <lee@kernel.org>,
+        "Lee Jones" <lee.jones@linaro.org>,
+        "Mark Brown" <broonie@kernel.org>,
+        "Philipp Zabel" <p.zabel@pengutronix.de>,
+        "Randy Dunlap" <rdunlap@infradead.org>,
+        "Rob Herring" <robh+dt@kernel.org>,
+        "Samuel Holland" <samuel@sholland.org>,
+        "Serge Semin" <fancer.lancer@gmail.com>, skhan@linuxfoundation.org,
+        suravee.suthikulpanit@amd.com,
+        "Tom Lendacky" <thomas.lendacky@amd.com>,
+        "Tony Huang" <tonyhuang.sunplus@gmail.com>,
+        "Ulf Hansson" <ulf.hansson@linaro.org>, vaishnav.a@ti.com,
+        "Walker Chen" <walker.chen@starfivetech.com>,
+        "Will Deacon" <will@kernel.org>,
+        "Yinbo Zhu" <zhuyinbo@loongson.cn>, devicetree@vger.kernel.org
+Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Mon, May 15, 2023, at 20:16, Brad Larson wrote:
+> The Pensando SoC controller is a SPI connected companion device
+> that is present in all Pensando SoC board designs.  The essential
+> board management registers are accessed on chip select 0 with
+> board mgmt IO support accessed using additional chip selects.
+>
+> Signed-off-by: Brad Larson <blarson@amd.com>
+
 Hi Brad,
 
-kernel test robot noticed the following build warnings:
+I'm sorry I wasn't paying enough attention to this driver as the
+past 13 revisions went by.
 
-[auto build test WARNING on e922ba281a8d84f640d8c8e18a385d032c19e185]
+> v10 changes:
+> - Different driver implementation specific to this Pensando controller device.
+> - Moved to soc/amd directory under new name based on guidance.  This driver is
+>   of no use to any design other than all Pensando SoC based cards.
+> - Removed use of builtin_driver, can be built as a module.
 
-url:    https://github.com/intel-lab-lkp/linux/commits/Brad-Larson/dt-bindings-arm-add-AMD-Pensando-boards/20230516-032312
-base:   e922ba281a8d84f640d8c8e18a385d032c19e185
-patch link:    https://lore.kernel.org/r/20230515181606.65953-9-blarson%40amd.com
-patch subject: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
-config: sh-allmodconfig (https://download.01.org/0day-ci/archive/20230516/202305161642.PZQ4S8o2-lkp@intel.com/config)
-compiler: sh4-linux-gcc (GCC) 12.1.0
-reproduce (this is a W=1 build):
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # https://github.com/intel-lab-lkp/linux/commit/48a90df35083d2f3788e171ff0af01ddc8cd871b
-        git remote add linux-review https://github.com/intel-lab-lkp/linux
-        git fetch --no-tags linux-review Brad-Larson/dt-bindings-arm-add-AMD-Pensando-boards/20230516-032312
-        git checkout 48a90df35083d2f3788e171ff0af01ddc8cd871b
-        # save the config file
-        mkdir build_dir && cp config build_dir/.config
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=sh olddefconfig
-        COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-12.1.0 make.cross W=1 O=build_dir ARCH=sh SHELL=/bin/bash drivers/soc/amd/
+it looks like this was a fundamental change that I failed to see.
 
-If you fix the issue, kindly add following tag where applicable
-| Reported-by: kernel test robot <lkp@intel.com>
-| Link: https://lore.kernel.org/oe-kbuild-all/202305161642.PZQ4S8o2-lkp@intel.com/
+> +# SPDX-License-Identifier: GPL-2.0-only
+> +menu "AMD Pensando SoC drivers"
+> +
+> +config AMD_PENSANDO_CTRL
+> +	tristate "AMD Pensando SoC Controller"
+> +	depends on SPI_MASTER=y
+> +	depends on (ARCH_PENSANDO && OF) || COMPILE_TEST
+> +	default ARCH_PENSANDO
+> +	select REGMAP_SPI
+> +	select MFD_SYSCON
+> +	help
+> +	  Enables AMD Pensando SoC controller device support.  This is a SPI
+> +	  attached companion device in all Pensando SoC board designs which
+> +	  provides essential board control/status registers and management IO
+> +	  support.
 
-All warnings (new ones prefixed by >>):
+So generally speaking, I don't want custom user interfaces in
+drivers/soc. It looks like this one has internal interfaces for
+a reset controller and the regmap, so those parts are fine, but
+I'm confused about the purpose of the ioctl interface:
 
-   drivers/soc/amd/pensando-ctrl.c: In function 'penctrl_ioctl':
->> drivers/soc/amd/pensando-ctrl.c:91:36: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
-      91 |         if (copy_from_user(tx_buf, (void __user *)msg->tx_buf, msg->len)) {
-         |                                    ^
-   drivers/soc/amd/pensando-ctrl.c:114:26: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
-     114 |         if (copy_to_user((void __user *)msg->rx_buf, rx_buf, msg->len))
-         |                          ^
+> +static long
+> +penctrl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+> +{
 
+> +	if (num_msgs > 1) {
+> +		msg++;
+> +		if (msg->len > PENCTRL_MAX_MSG_LEN) {
+> +			ret = -EINVAL;
+> +			goto out_unlock;
+> +		}
+> +		t[1].rx_buf = rx_buf;
+> +		t[1].len = msg->len;
+> +	}
+> +	spi_message_init_with_transfers(&m, t, num_msgs);
 
-vim +91 drivers/soc/amd/pensando-ctrl.c
+This seems to be just a passthrough of user space messages, which
+is what the spidev driver already provides, but using a different
+ioctl interface. I don't really want any user-level interfaces
+in drivers/soc as a rule, but having one that duplicates existing
+functionality seems particularly wrong.
 
-    34	
-    35	static long
-    36	penctrl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
-    37	{
-    38		void __user *in_arg = (void __user *)arg;
-    39		struct penctrl_device *penctrl;
-    40		u8 tx_buf[PENCTRL_MAX_MSG_LEN];
-    41		u8 rx_buf[PENCTRL_MAX_MSG_LEN];
-    42		struct spi_transfer t[2] = {};
-    43		struct penctrl_spi_xfer *msg;
-    44		struct spi_device *spi;
-    45		unsigned int num_msgs;
-    46		struct spi_message m;
-    47		u32 size;
-    48		int ret;
-    49	
-    50		/* Check for a valid command */
-    51		if (_IOC_TYPE(cmd) != PENCTRL_IOC_MAGIC)
-    52			return -ENOTTY;
-    53	
-    54		if (_IOC_NR(cmd) > PENCTRL_IOC_MAXNR)
-    55			return -ENOTTY;
-    56	
-    57		if (((_IOC_DIR(cmd) & _IOC_READ)) && !access_ok(in_arg, _IOC_SIZE(cmd)))
-    58			return -EFAULT;
-    59	
-    60		if (((_IOC_DIR(cmd) & _IOC_WRITE)) && !access_ok(in_arg, _IOC_SIZE(cmd)))
-    61			return -EFAULT;
-    62	
-    63		/* Get a reference to the SPI device */
-    64		penctrl = filp->private_data;
-    65		if (!penctrl)
-    66			return -ESHUTDOWN;
-    67	
-    68		spi = spi_dev_get(penctrl->spi);
-    69		if (!spi)
-    70			return -ESHUTDOWN;
-    71	
-    72		/* Verify and prepare SPI message */
-    73		size = _IOC_SIZE(cmd);
-    74		num_msgs = size / sizeof(struct penctrl_spi_xfer);
-    75		if (num_msgs > 2 || size == 0 || size % sizeof(struct penctrl_spi_xfer)) {
-    76			ret = -EINVAL;
-    77			goto out_unlock;
-    78		}
-    79		msg = memdup_user((struct penctrl_spi_xfer *)arg, size);
-    80		if (IS_ERR(msg)) {
-    81			ret = PTR_ERR(msg);
-    82			goto out_unlock;
-    83		}
-    84		if (msg->len > PENCTRL_MAX_MSG_LEN) {
-    85			ret = -EINVAL;
-    86			goto out_unlock;
-    87		}
-    88	
-    89		t[0].tx_buf = tx_buf;
-    90		t[0].len = msg->len;
-  > 91		if (copy_from_user(tx_buf, (void __user *)msg->tx_buf, msg->len)) {
-    92			ret = -EFAULT;
-    93			goto out_unlock;
-    94		}
-    95		if (num_msgs > 1) {
-    96			msg++;
-    97			if (msg->len > PENCTRL_MAX_MSG_LEN) {
-    98				ret = -EINVAL;
-    99				goto out_unlock;
-   100			}
-   101			t[1].rx_buf = rx_buf;
-   102			t[1].len = msg->len;
-   103		}
-   104		spi_message_init_with_transfers(&m, t, num_msgs);
-   105	
-   106		/* Perform the transfer */
-   107		mutex_lock(&spi_lock);
-   108		ret = spi_sync(spi, &m);
-   109		mutex_unlock(&spi_lock);
-   110	
-   111		if (ret || (num_msgs == 1))
-   112			goto out_unlock;
-   113	
-   114		if (copy_to_user((void __user *)msg->rx_buf, rx_buf, msg->len))
-   115			ret = -EFAULT;
-   116	
-   117	out_unlock:
-   118		spi_dev_put(spi);
-   119		return ret;
-   120	}
-   121	
+Can you explain what the purpose is? Is this about serializing
+access between the in-kernel reset control and the user-side
+access?
 
--- 
-0-DAY CI Kernel Test Service
-https://github.com/intel/lkp-tests
+Also, can you explain why this needs a low-lever user interface
+in the first place, rather than something that can be expressed
+using high-level abstractions as you already do with the reset
+control?
+
+All of the above should be part of the changelog text to get a
+driver like this merged. I don't think we can get a quick
+solution here though, so maybe you can start by removing the
+ioctl side and having the rest of the driver in drivers/reset?
+
+     Arnd
