@@ -2,100 +2,102 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C247C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 19:28:49 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D9A8C7EE22
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 19:59:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229448AbjEQT2r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 May 2023 15:28:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45532 "EHLO
+        id S229510AbjEQT7n (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 May 2023 15:59:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41484 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229458AbjEQT2p (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 15:28:45 -0400
-Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65787A5D7;
-        Wed, 17 May 2023 12:28:10 -0700 (PDT)
-Received: by mail-pl1-x631.google.com with SMTP id d9443c01a7336-1ae4c5e1388so12985685ad.1;
-        Wed, 17 May 2023 12:28:10 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684351686; x=1686943686;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=MTGzcnwjQ4xJ2Wkwnqn9RSpjpoInTurXDa8iPfKEJtc=;
-        b=KVITzgibmYp4fo0QtLoUgDa7cy8blgbnz8iO4lnJmyH8vFLBso+EocArB8Tom9nZ8g
-         1l9OaWFsuXa5pmrIqApOBBbuFNL5iidzM2mSyWBa59SqS0bWrQuw7KUemiE6LH3hLmvQ
-         Z5GPjuGgixcQn2vYyaS5qPofqtWLhUmMX5rySbBssivDkJzgwAp6BQD7bNNj/iiMbPAt
-         UD29S7TRwapkEoVg28+jib9gM/n4RAWvd2J9wwIUxn448X+V/6H7iZC2I5cJzJ3cs2ig
-         GCG9Y8+K7P4jVatLpEGzCrh1JmoY+1/clgKOFRU0c/Uiqip/X1oM4mmd3zzH98zohXqP
-         JvVQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684351686; x=1686943686;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=MTGzcnwjQ4xJ2Wkwnqn9RSpjpoInTurXDa8iPfKEJtc=;
-        b=dQp8khIM+9hlg4BZWv6FYGihGJCvaszLkhFv3PMV3f+gOW9O0fYBFgfhxyrZxxQBrA
-         bMT7/srGxQnP1VmztKS41qqlWiyROylFLScYCws6ayzx5+HPGSTWRFn8V9Xy17pmBh9w
-         NkLJg9pISIhNbxGMhg6fodMUi/I5pHQg7l/Sg6U0kiNeT2OgXFCCDRUSJE8/FemCFeOz
-         X1/+EE2zLd8FPuhHkMZM14i0jgdovWXdutDETzBPWd/W9y3UpPL2pEkjXsaAKdtD1MPM
-         5FdgMmiMacpKVKR4/A5Adjw8APkmkf/6QNqEXvRByK4wBkS4iVrmf3IFIc3SQ2EiPhfJ
-         7aCw==
-X-Gm-Message-State: AC+VfDw6RmWEIGD9jHe9hn/Ch/mwPBT8TtOxIR9WbOajQ6bnl9E7id8u
-        yxVwlGYwUplhDeU9KlvFuB8=
-X-Google-Smtp-Source: ACHHUZ6P9uutxrRk6xX3VkoQvVslYTJhJi44kGdTHZkQYguykJ67TGOFgAUk7oNT1qcDneRgRiDYcw==
-X-Received: by 2002:a17:902:e5d0:b0:1ae:66cf:b90f with SMTP id u16-20020a170902e5d000b001ae66cfb90fmr57873plf.66.1684351686212;
-        Wed, 17 May 2023 12:28:06 -0700 (PDT)
-Received: from localhost.localdomain ([111.201.128.95])
-        by smtp.gmail.com with ESMTPSA id jo13-20020a170903054d00b001a641e4738asm18005630plb.1.2023.05.17.12.28.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 17 May 2023 12:28:05 -0700 (PDT)
-From:   Yeqi Fu <asuk4.q@gmail.com>
-To:     ulf.hansson@linaro.org, CLoehle@hyperstone.com,
-        adrian.hunter@intel.com, avri.altman@wdc.com, axboe@kernel.dk
-Cc:     Yeqi Fu <asuk4.q@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ivan Orlov <ivan.orlov0322@gmail.com>
-Subject: [PATCH] mmc: core: Fix error checking
-Date:   Thu, 18 May 2023 03:26:54 +0800
-Message-Id: <20230517192654.367892-1-asuk4.q@gmail.com>
-X-Mailer: git-send-email 2.37.2
+        with ESMTP id S229475AbjEQT7V (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 15:59:21 -0400
+Received: from meesny.iki.fi (meesny.iki.fi [IPv6:2001:67c:2b0:1c1::201])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C3E47E67;
+        Wed, 17 May 2023 12:59:20 -0700 (PDT)
+Received: from darkstar.musicnaut.iki.fi (85-76-146-199-nat.elisa-mobile.fi [85.76.146.199])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+         key-exchange ECDHE (P-256) server-signature RSA-PSS (2048 bits) server-digest SHA256)
+        (No client certificate requested)
+        (Authenticated sender: aaro.koskinen)
+        by meesny.iki.fi (Postfix) with ESMTPSA id 4QM3pT6zgSzyWs;
+        Wed, 17 May 2023 22:59:13 +0300 (EEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi; s=meesny;
+        t=1684353557;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=uT4QeccEOPKkK7gGYPYPm3Y9FH1yk/CYJCXvyI1gFcg=;
+        b=WZFEpJpuxHgdL66a5PaD1yNk7SpgMp9G9guhbNAaUh3HEUxnbuFWcPk8rHcB/dQQJaayMK
+        upe+8t3l5YMswlkboqSxW1TMcS8P/5RX1nVRVXD5ExA19T8y7uQqsCZL1U0nsnp5cTTAW4
+        WqLdFf44BWpW+Gcb+Kix2JvPsvJMOEE=
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=iki.fi;
+        s=meesny; t=1684353557;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=uT4QeccEOPKkK7gGYPYPm3Y9FH1yk/CYJCXvyI1gFcg=;
+        b=uqZALiO1J2n/ZSQ1Zg25g0VKOhsOJ/6Qt1tM/2HyGw+suNSH0P3c0GzRaRzizaWMSFNnCo
+        kXUNe5mMx5fBj+8WBcmDkoSMxVBjAarDMIXN1vF1ZIB9LxTfhPvbYuxL0RtKrJA9x3X5j+
+        m2hOXBKV8p6FLsSV8qUVN62sMFztjCM=
+ARC-Authentication-Results: i=1;
+        ORIGINATING;
+        auth=pass smtp.auth=aaro.koskinen smtp.mailfrom=aaro.koskinen@iki.fi
+ARC-Seal: i=1; s=meesny; d=iki.fi; t=1684353557; a=rsa-sha256; cv=none;
+        b=RKAECBWDBO58k84XgosU1UrhQq2r0jPWNipNo3Gi0fMRoUGJZblm+3P1vXugNvU+LqaNyh
+        c2O6jMu7dk5j7DzRa8mJccrAhHhiOFueDQPGfrq0HfU5IqmE4NrXeiRgdWhUIROwa4xfNf
+        00KimNUa/R4AbP591nbysQnVZMJjE/A=
+Date:   Wed, 17 May 2023 22:59:11 +0300
+From:   Aaro Koskinen <aaro.koskinen@iki.fi>
+To:     Linus Walleij <linus.walleij@linaro.org>
+Cc:     Janusz Krzysztofik <jmkrzyszt@gmail.com>,
+        Tony Lindgren <tony@atomide.com>,
+        Russell King <linux@armlinux.org.uk>,
+        Daniel Mack <daniel@zonque.org>,
+        Haojian Zhuang <haojian.zhuang@gmail.com>,
+        Robert Jarzmik <robert.jarzmik@free.fr>,
+        Thomas Bogendoerfer <tsbogend@alpha.franken.de>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Mark Brown <broonie@kernel.org>,
+        Bartosz Golaszewski <bartosz.golaszewski@linaro.org>,
+        Andreas Kemnade <andreas@kemnade.info>,
+        Helge Deller <deller@gmx.de>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        linux-omap@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        linux-kernel@vger.kernel.org, linux-mips@vger.kernel.org,
+        linux-input@vger.kernel.org, linux-spi@vger.kernel.org,
+        linux-fbdev@vger.kernel.org, dri-devel@lists.freedesktop.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v4 1/4] Input: ads7846 - Convert to use software nodes
+Message-ID: <20230517195911.GG271152@darkstar.musicnaut.iki.fi>
+References: <20230430-nokia770-regression-v4-0-9b6dc5536b17@linaro.org>
+ <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230430-nokia770-regression-v4-1-9b6dc5536b17@linaro.org>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The functions debugfs_create_dir and debugfs_create_file_unsafe return
-ERR_PTR if an error occurs, and the appropriate way to verify for errors
-is to use the inline function IS_ERR. The patch will substitute the
-null-comparison with IS_ERR.
+Hi,
 
-Suggested-by: Ivan Orlov <ivan.orlov0322@gmail.com>
-Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
----
- drivers/mmc/core/block.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+This does not compile as nokia770_ads7846_props is declared twice,
+and nokia770_cbus_props and nokia770_mpuio_gpiochip_swnode are missing.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 00c33edb9fb9..507bebc22636 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2908,7 +2908,7 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- 			debugfs_create_file_unsafe("status", 0400, root,
- 						   card,
- 						   &mmc_dbg_card_status_fops);
--		if (!md->status_dentry)
-+		if (IS_ERR(md->status_dentry))
- 			return -EIO;
- 	}
- 
-@@ -2916,7 +2916,7 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- 		md->ext_csd_dentry =
- 			debugfs_create_file("ext_csd", S_IRUSR, root, card,
- 					    &mmc_dbg_ext_csd_fops);
--		if (!md->ext_csd_dentry)
-+		if (IS_ERR(md->ext_csd_dentry))
- 			return -EIO;
- 	}
- 
--- 
-2.37.2
+On Mon, May 08, 2023 at 11:20:06PM +0200, Linus Walleij wrote:
+> +static const struct software_node_ref_args nokia770_cbus_gpio_refs[] = {
+> +	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 9, 0),
+> +	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 10, 0),
+> +	SOFTWARE_NODE_REFERENCE(&nokia770_mpuio_gpiochip_swnode, 11, 0),
+> +};
 
+These should be nokia770_mpuio_gpiochip_node.
+
+> +static const struct property_entry nokia770_ads7846_props[] = {
+> +	PROPERTY_ENTRY_REF_ARRAY("gpios", nokia770_cbus_gpio_refs),
+> +	{ }
+>  };
+
+This should be nokia770_cbus_props.
+
+A.
