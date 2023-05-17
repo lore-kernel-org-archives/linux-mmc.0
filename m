@@ -2,123 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EEBA7C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 06:50:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 12439C77B7A
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 11:14:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229560AbjEQGua (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 May 2023 02:50:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33060 "EHLO
+        id S230230AbjEQLO3 convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 May 2023 07:14:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60414 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229455AbjEQGu3 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 02:50:29 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07AE1F9;
-        Tue, 16 May 2023 23:50:28 -0700 (PDT)
-Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34H6Uogf015953;
-        Wed, 17 May 2023 06:50:10 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=xjEHHe3G4oxpB5wTQRg3eTNM6AlEMH3zCXXumh2MKPA=;
- b=mdf7RlFiid6VuCbzv+gs8fqs0Njt9p6punb93Dfn95bUQHEJihquvFwi5PbzKFRYA6nF
- /1hSrSvK1ggpec6ZJrDNJ8zP+eXMLjLH+iYOlwADJuGlPrpirSADjJpHlnayKKErR0KH
- Zr2Ohhpq9TXSzkGoklnvaPVUNecnYsWEYGYwRU69sc48SeSu0/E4ni4xOs1ap7i/TR4z
- 8eAx+sjGAmsxhDMqd2h4Q8ELw8D2ubpQxrUrLHYrASG1FOk+iCyGAG+ytZt7FA/1YUfw
- SLhWZX71LXpIoAlNPOlcvoFbchhqk9bnvGAy5/JgFV1irF4ihu0H9W63E6glj2uZZg12 JQ== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qmrvhr4xf-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 17 May 2023 06:50:10 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34H6o9OR032120
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 17 May 2023 06:50:09 GMT
-Received: from [10.216.22.19] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Tue, 16 May
- 2023 23:50:03 -0700
-Message-ID: <4db69d3e-9aee-a0cd-aabd-88aaf7c6b210@quicinc.com>
-Date:   Wed, 17 May 2023 12:19:59 +0530
+        with ESMTP id S229569AbjEQLO2 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 07:14:28 -0400
+Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72A1F197;
+        Wed, 17 May 2023 04:14:27 -0700 (PDT)
+Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-ba8253f635cso807896276.0;
+        Wed, 17 May 2023 04:14:27 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684322066; x=1686914066;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=oVBIz6rSwiHp26lFXXNQ629YWWG9GU5r7sKV57I7n4Q=;
+        b=AzGuKNthPYcqqKMl44MvO5s74gdNod1LPP3ckziOGqeQz+puSxGOGLidahOI6ZmU0g
+         DHIqRTKmFsQ8nOA9X9kl7EvcNng+vtq8xQ22TUirwfOAiYh7W/LC/TFCrL4K8we6PZ5v
+         gEjWs18lOL7pkIqhX+gbI1pu43kIgScKftFvVtJ5zkXOzykSiUmucPMtIIFZawiClNnK
+         8eng/ZEYamAjiNpmqoBcJ89HrfjqmdxzVpLhqS6E5weDkLlZbE2/Rj59anmQBNtXbsSP
+         Y5xHLYAPRzGhgC1rYHZVImG/PBx6c0s6LAKhy35h9JEzdr3QmqHiUHlo1n5X0apM1Pds
+         hufw==
+X-Gm-Message-State: AC+VfDyOd5jyengiJkA5yXgcaXPCcGVW2aY4JpJ0aolO4tjGlhn0uCuX
+        WG6anPO5btdoWfQB4JL20gdo7kDMvaaPyA==
+X-Google-Smtp-Source: ACHHUZ4RuvOCRc0A5+n0i/h8HuUD8evNweuEFJ3zZDqGmnRFAmQzoBBOlfj9D6X7mBd5gbc+OgnOkw==
+X-Received: by 2002:a25:ae05:0:b0:ba8:7da5:da46 with SMTP id a5-20020a25ae05000000b00ba87da5da46mr190924ybj.40.1684322066583;
+        Wed, 17 May 2023 04:14:26 -0700 (PDT)
+Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com. [209.85.219.173])
+        by smtp.gmail.com with ESMTPSA id k13-20020a258c0d000000b00ba012dbdf0asm482494ybl.3.2023.05.17.04.14.26
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 17 May 2023 04:14:26 -0700 (PDT)
+Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-ba8253f635cso807881276.0;
+        Wed, 17 May 2023 04:14:26 -0700 (PDT)
+X-Received: by 2002:a25:558:0:b0:ba8:27ff:b2b5 with SMTP id
+ 85-20020a250558000000b00ba827ffb2b5mr4015501ybf.26.1684322066059; Wed, 17 May
+ 2023 04:14:26 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH V5 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
-Content-Language: en-US
-To:     Andy Shevchenko <andy.shevchenko@gmail.com>
-CC:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>
-References: <20230516114523.3266419-1-quic_srichara@quicinc.com>
- <20230516114523.3266419-5-quic_srichara@quicinc.com>
- <02d1f821-4b1f-e4f2-0732-026f9b0b7ed9@quicinc.com>
- <CAHp75VdLm7o83x9keZEUv9pDK2ZkWkQtMcLU148KyHZgf_6VUw@mail.gmail.com>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <CAHp75VdLm7o83x9keZEUv9pDK2ZkWkQtMcLU148KyHZgf_6VUw@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: bUQbkQsSindQLwb6I5TtEpsnLVCPUJN3
-X-Proofpoint-GUID: bUQbkQsSindQLwb6I5TtEpsnLVCPUJN3
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-16_14,2023-05-16_01,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=743
- impostorscore=0 adultscore=0 mlxscore=0 suspectscore=0 clxscore=1015
- spamscore=0 bulkscore=0 priorityscore=1501 lowpriorityscore=0 phishscore=0
- malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305170056
+References: <20230515181606.65953-1-blarson@amd.com> <20230515181606.65953-9-blarson@amd.com>
+ <BN7PR12MB2802CE1DBDB6ED8413AECD53DC799@BN7PR12MB2802.namprd12.prod.outlook.com>
+ <168e9039-feb0-0f4c-8aee-96a3bae7faca@amd.com>
+In-Reply-To: <168e9039-feb0-0f4c-8aee-96a3bae7faca@amd.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 17 May 2023 13:14:14 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdVLOTn7HfoWR7mGrKXvZxiciGseOBYbV7bYqUuGJcr=yg@mail.gmail.com>
+Message-ID: <CAMuHMdVLOTn7HfoWR7mGrKXvZxiciGseOBYbV7bYqUuGJcr=yg@mail.gmail.com>
+Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
+To:     Michal Simek <michal.simek@amd.com>
+Cc:     "Mahapatra, Amit Kumar" <amit.kumar-mahapatra@amd.com>,
+        "Larson, Bradley" <Bradley.Larson@amd.com>,
+        "linux-arm-kernel@lists.infradead.org" 
+        <linux-arm-kernel@lists.infradead.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
+        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
+        "alcooperx@gmail.com" <alcooperx@gmail.com>,
+        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
+        "arnd@arndb.de" <arnd@arndb.de>,
+        "brendan.higgins@linux.dev" <brendan.higgins@linux.dev>,
+        "briannorris@chromium.org" <briannorris@chromium.org>,
+        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
+        "conor+dt@kernel.org" <conor+dt@kernel.org>,
+        "davidgow@google.com" <davidgow@google.com>,
+        "gsomlo@gmail.com" <gsomlo@gmail.com>,
+        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
+        "hal.feng@starfivetech.com" <hal.feng@starfivetech.com>,
+        "hasegawa-hitomi@fujitsu.com" <hasegawa-hitomi@fujitsu.com>,
+        "j.neuschaefer@gmx.net" <j.neuschaefer@gmx.net>,
+        "joel@jms.id.au" <joel@jms.id.au>,
+        "kernel@esmil.dk" <kernel@esmil.dk>,
+        "krzk@kernel.org" <krzk@kernel.org>,
+        "krzysztof.kozlowski+dt@linaro.org" 
+        <krzysztof.kozlowski+dt@linaro.org>,
+        "lee@kernel.org" <lee@kernel.org>,
+        "lee.jones@linaro.org" <lee.jones@linaro.org>,
+        "broonie@kernel.org" <broonie@kernel.org>,
+        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
+        "rdunlap@infradead.org" <rdunlap@infradead.org>,
+        "robh+dt@kernel.org" <robh+dt@kernel.org>,
+        "samuel@sholland.org" <samuel@sholland.org>,
+        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
+        "skhan@linuxfoundation.org" <skhan@linuxfoundation.org>,
+        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
+        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
+        "tonyhuang.sunplus@gmail.com" <tonyhuang.sunplus@gmail.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "vaishnav.a@ti.com" <vaishnav.a@ti.com>,
+        "walker.chen@starfivetech.com" <walker.chen@starfivetech.com>,
+        "will@kernel.org" <will@kernel.org>,
+        "zhuyinbo@loongson.cn" <zhuyinbo@loongson.cn>,
+        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
+        "git (AMD-Xilinx)" <git@amd.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Michal,
 
+On Tue, May 16, 2023 at 9:42 AM Michal Simek <michal.simek@amd.com> wrote:
+> Also in DT patches I have seen that you didn't switch to 2023 year yet.
 
-On 5/16/2023 10:23 PM, Andy Shevchenko wrote:
-> On Tue, May 16, 2023 at 2:58 PM Sricharan Ramabadhran
-> <quic_srichara@quicinc.com> wrote:
->> On 5/16/2023 5:15 PM, Sricharan Ramabadhran wrote:
-> 
-> ...
-> 
->>>    [v5] Rebased patch on top of "Add pinctrl support for SDX75" series
->>>         and fixed other comments from andy.shevchenko@gmail.com
->>>
->>     I rebased this on top of [1] series. But if that takes time to merge,
->>     can i post this without that dependency and get this merged ?
->>
->> [1] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-
->>      quic_rohiagar@quicinc.com
-> 
-> First of all, please remove so-o long context which is not related _at
-> all_ in this conversation right now.
-> 
+If no substantial changes were made in 2023, there is no need nor
+desire to update the copyright year.
 
-   ok
+Gr{oetje,eeting}s,
 
-> Regarding your question, you need to talk to the respective
-> maintainers how to proceed. The best is that all stakeholders pull an
-> immutable branch/tag with that series applied from pin control
-> maintainer (Linus W) and your series on top of that.
-> 
-   Sure, I have anyways posted V6 on top of that series already.
-   From [1], Linus already applied that and my V6 applied/works
-   fine on top of that. So it should be all fine.
+                        Geert
 
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-   [1] 
-https://lore.kernel.org/netdev/CACRpkdbu95hkFWJtCKoUXCyLfS2hxUywD41iF45ZtgKzqjXAJw@mail.gmail.com/T/
-
-Regards,
-  Sricharan
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
