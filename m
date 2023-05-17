@@ -2,129 +2,123 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C834C77B7A
-	for <linux-mmc@archiver.kernel.org>; Tue, 16 May 2023 20:45:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EEBA7C77B7A
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 06:50:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229529AbjEPUp2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 16 May 2023 16:45:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58278 "EHLO
+        id S229560AbjEQGua (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 May 2023 02:50:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33060 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229464AbjEPUp1 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 16 May 2023 16:45:27 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A885102
-        for <linux-mmc@vger.kernel.org>; Tue, 16 May 2023 13:45:26 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id 4fb4d7f45d1cf-510bcd2d6b8so650416a12.0
-        for <linux-mmc@vger.kernel.org>; Tue, 16 May 2023 13:45:26 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1684269925; x=1686861925;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=iLuNzxgt4u7wYy4U8lUYhqOALXydn6b7WXFOJngr8yI=;
-        b=Fw0fmDSHT4fboK1etWSMbJ4UTjJufy/4YmlEKwzF4KXiTLKoDDD1sUV8moO8Cidf+J
-         3hgQ6YLL2zzGT8wgogtBkOXovi2ZmQCxd2NunOH5l33fmCzerzZpu6rWjLn04ZXhlJzr
-         zEGmF+uLUM2mPW2irMxxLrqNaXXXlVnB6qjcEAU9X6fIyM+BvJ7ZSyI6/xbxn15puhSa
-         GHX/433UnJrrSkmUT+2byGV35OmFZkQtkkqRDwfaYddgikeRVNU/T8TKBCfDw1ONEGJu
-         D/ElAGFUIEFIti1z1tg8VrwE2jdTvSPiTqc/VP0u4Y+8615jytYhYjeNfohFKDdk5+ST
-         aGbw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684269925; x=1686861925;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=iLuNzxgt4u7wYy4U8lUYhqOALXydn6b7WXFOJngr8yI=;
-        b=Hx5LtPq2F98zdLW4/2W4CWfy12D8p8RmjlHoVgDIc9Sy8KzkteUap6thSUt0r8lGtB
-         jlR8eP2PKF+Zy4aEooSr3rBBTtmIxPeSWC7KGRExH45Kig4SggmeujVVtoaPWzIRudCn
-         Byy74zh0ZeQ12U89iEkbW1f+lGXghPe2CfhTkVeFkF3zQSdsMNXc62Whjo82ddhFAoJk
-         Kw7ZNZXaHZzdqB+djq6zC1AYiRq7lY79w+d25oFhfiaDhm7QshOc2kCZC1quc9Vs4ER3
-         wfogLKf1srdyP9HC1hR7jyBCUyjtGg+ryajKB0KRM/PfPRh1A61xM1CXwhuMtu7vTGgH
-         QHvQ==
-X-Gm-Message-State: AC+VfDz5a1Df5k384/YkIyaawhcTH5wgVBlbKzWpYhJqObHjW4Maucm0
-        45mXPyZ4v40cnJz+ySMmeo4jVgcS9pPWOL5lxN8=
-X-Google-Smtp-Source: ACHHUZ5A/qcEmUqmdhQJ4a20RyacFe7ibnyzP+AGiKCcqftnAp0QRaurLuLtBclnLo2zrB5DXnCGcGNeDjHFbciY2pk=
-X-Received: by 2002:a17:907:d21:b0:94a:57d1:5539 with SMTP id
- gn33-20020a1709070d2100b0094a57d15539mr75336ejc.5.1684269924790; Tue, 16 May
- 2023 13:45:24 -0700 (PDT)
+        with ESMTP id S229455AbjEQGu3 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 02:50:29 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07AE1F9;
+        Tue, 16 May 2023 23:50:28 -0700 (PDT)
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34H6Uogf015953;
+        Wed, 17 May 2023 06:50:10 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=xjEHHe3G4oxpB5wTQRg3eTNM6AlEMH3zCXXumh2MKPA=;
+ b=mdf7RlFiid6VuCbzv+gs8fqs0Njt9p6punb93Dfn95bUQHEJihquvFwi5PbzKFRYA6nF
+ /1hSrSvK1ggpec6ZJrDNJ8zP+eXMLjLH+iYOlwADJuGlPrpirSADjJpHlnayKKErR0KH
+ Zr2Ohhpq9TXSzkGoklnvaPVUNecnYsWEYGYwRU69sc48SeSu0/E4ni4xOs1ap7i/TR4z
+ 8eAx+sjGAmsxhDMqd2h4Q8ELw8D2ubpQxrUrLHYrASG1FOk+iCyGAG+ytZt7FA/1YUfw
+ SLhWZX71LXpIoAlNPOlcvoFbchhqk9bnvGAy5/JgFV1irF4ihu0H9W63E6glj2uZZg12 JQ== 
+Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qmrvhr4xf-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 17 May 2023 06:50:10 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34H6o9OR032120
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Wed, 17 May 2023 06:50:09 GMT
+Received: from [10.216.22.19] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Tue, 16 May
+ 2023 23:50:03 -0700
+Message-ID: <4db69d3e-9aee-a0cd-aabd-88aaf7c6b210@quicinc.com>
+Date:   Wed, 17 May 2023 12:19:59 +0530
 MIME-Version: 1.0
-References: <CAFBinCD0RT0p-jk86W0JuMT3ufohRh1RqWCcM35DKZJpuc10HQ@mail.gmail.com>
- <CAPDyKFqgYnBfm-NespEZF8AJ5Ou4Bya8jLfVEnfyZvfAZ05Q7Q@mail.gmail.com>
- <CAFBinCDjPJHEhN-Jx3DhhhHJ3yi8oEoW7u4-Ld6Rd1+W826ttA@mail.gmail.com>
- <CAPDyKFqKSWJkJwgCO89jgKQ6AB==P9BWkuX6XtKj=ASOH15y9g@mail.gmail.com>
- <CAFBinCDwgYw3v31hP4AtV3+Z1o+esDqMKugRwMMMLqSX0Acjzw@mail.gmail.com> <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
-In-Reply-To: <CAPDyKFr+hQo+N31r=3f58taf9sYW0UF0ApCJhwz9vRsyNizcvg@mail.gmail.com>
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Date:   Tue, 16 May 2023 22:45:13 +0200
-Message-ID: <CAFBinCDSv_vdu5887vveotvaOGFrZvaSX4jM+7Q3QvDhTdazzw@mail.gmail.com>
-Subject: Re: Odroid-C1 regression with commit 4bc31edebde5 ("mmc: core: Set HS
- clock speed before sending HS CMD13")
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     linux-amlogic@lists.infradead.org, linux-mmc@vger.kernel.org,
-        Brian Norris <briannorris@chromium.org>,
-        Shawn Lin <shawn.lin@rock-chips.com>,
-        Luca Weiss <luca@z3ntu.xyz>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH V5 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+Content-Language: en-US
+To:     Andy Shevchenko <andy.shevchenko@gmail.com>
+CC:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>
+References: <20230516114523.3266419-1-quic_srichara@quicinc.com>
+ <20230516114523.3266419-5-quic_srichara@quicinc.com>
+ <02d1f821-4b1f-e4f2-0732-026f9b0b7ed9@quicinc.com>
+ <CAHp75VdLm7o83x9keZEUv9pDK2ZkWkQtMcLU148KyHZgf_6VUw@mail.gmail.com>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <CAHp75VdLm7o83x9keZEUv9pDK2ZkWkQtMcLU148KyHZgf_6VUw@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01c.na.qualcomm.com (10.47.97.35)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-ORIG-GUID: bUQbkQsSindQLwb6I5TtEpsnLVCPUJN3
+X-Proofpoint-GUID: bUQbkQsSindQLwb6I5TtEpsnLVCPUJN3
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-05-16_14,2023-05-16_01,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxlogscore=743
+ impostorscore=0 adultscore=0 mlxscore=0 suspectscore=0 clxscore=1015
+ spamscore=0 bulkscore=0 priorityscore=1501 lowpriorityscore=0 phishscore=0
+ malwarescore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2305170056
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 15, 2023 at 11:44=E2=80=AFAM Ulf Hansson <ulf.hansson@linaro.or=
-g> wrote:
-[...]
-> > > 3) If 2) seems to work above, we need to figure out why
-> > > mmc_switch_status() is hanging. If there is a problem with the eMMC
-> > > card responding in-correctly, the host driver should return with an
-> > > error code, right?
-> > You're right: it's indeed hanging in mmc_switch_status()
-> > I don't get any interrupts (timeout, CRC error, ...) for it.
-> > Do you have any suggestions what to check next?
->
-> So the mmc_switch_status() is sending a CMD13. Even if the card
-> doesn't reply, I would expect that the meson mmc controller would
-> raise some kind of error condition, probably via a timeout-irq.
->
-> Did you verify that the driver is actually waiting for an IRQ to
-> happen, which also means waiting for a CMD13 response?
-register 0x24 is ICTL (interrupt control) and 0x28 is ISTAT (interrupt stat=
-us)
-ISTAT is all zeros and ICTL is 0x3067 which translates so:
-- BIT(0): RESP_OK
-- BIT(1): RESP_TIMEOUT
-- BIT(2): RESP_ERR_CRC
-- BIT(5): DATA_TIMEOUT
-- BIT(6): DATA_ERR_CRC
-- BIT(12): RXFIFO_FULL
-- BIT(13): TXFIFO_EMPTY
-
-I guess in this case BIT(1) RESP_TIMEOUT is the relevant one.
-
-register 0x04 is SEND and reads 0x4d which translates to:
-- CMD13
-- MMC_RSP_PRESENT (HAS_RESP, BIT(6))
-- no other flags (STOP, R1B, ...) are set
-
-Full register dump:
-# cat /sys/kernel/debug/regmap/c1108e00.mmc/registers
-00: 00000900
-04: 0000004d
-08: e7ffe002
-0c: 02f0003f
-10: 0003f009
-14: 03b81c00
-18: 2c43bcf0
-1c: e0000150
-20: 00000000
-24: 00003067
-28: 00000000
-2c: 00000000
-30: 00000000
-34: 00fe0cff
-38: 0000100b
-
-In case you are curious, the driver is: drivers/mmc/host/meson-mx-sdhc-mmc.=
-c
 
 
-Best regards,
-Martin
+On 5/16/2023 10:23 PM, Andy Shevchenko wrote:
+> On Tue, May 16, 2023 at 2:58 PM Sricharan Ramabadhran
+> <quic_srichara@quicinc.com> wrote:
+>> On 5/16/2023 5:15 PM, Sricharan Ramabadhran wrote:
+> 
+> ...
+> 
+>>>    [v5] Rebased patch on top of "Add pinctrl support for SDX75" series
+>>>         and fixed other comments from andy.shevchenko@gmail.com
+>>>
+>>     I rebased this on top of [1] series. But if that takes time to merge,
+>>     can i post this without that dependency and get this merged ?
+>>
+>> [1] https://lore.kernel.org/r/1683718725-14869-1-git-send-email-
+>>      quic_rohiagar@quicinc.com
+> 
+> First of all, please remove so-o long context which is not related _at
+> all_ in this conversation right now.
+> 
+
+   ok
+
+> Regarding your question, you need to talk to the respective
+> maintainers how to proceed. The best is that all stakeholders pull an
+> immutable branch/tag with that series applied from pin control
+> maintainer (Linus W) and your series on top of that.
+> 
+   Sure, I have anyways posted V6 on top of that series already.
+   From [1], Linus already applied that and my V6 applied/works
+   fine on top of that. So it should be all fine.
+
+
+   [1] 
+https://lore.kernel.org/netdev/CACRpkdbu95hkFWJtCKoUXCyLfS2hxUywD41iF45ZtgKzqjXAJw@mail.gmail.com/T/
+
+Regards,
+  Sricharan
