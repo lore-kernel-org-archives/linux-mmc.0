@@ -2,124 +2,109 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 12439C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 11:14:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 003BBC77B7F
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 14:44:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230230AbjEQLO3 convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 May 2023 07:14:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60414 "EHLO
+        id S231148AbjEQOoD (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 May 2023 10:44:03 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37826 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229569AbjEQLO2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 07:14:28 -0400
-Received: from mail-yb1-f182.google.com (mail-yb1-f182.google.com [209.85.219.182])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72A1F197;
-        Wed, 17 May 2023 04:14:27 -0700 (PDT)
-Received: by mail-yb1-f182.google.com with SMTP id 3f1490d57ef6-ba8253f635cso807896276.0;
-        Wed, 17 May 2023 04:14:27 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684322066; x=1686914066;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=oVBIz6rSwiHp26lFXXNQ629YWWG9GU5r7sKV57I7n4Q=;
-        b=AzGuKNthPYcqqKMl44MvO5s74gdNod1LPP3ckziOGqeQz+puSxGOGLidahOI6ZmU0g
-         DHIqRTKmFsQ8nOA9X9kl7EvcNng+vtq8xQ22TUirwfOAiYh7W/LC/TFCrL4K8we6PZ5v
-         gEjWs18lOL7pkIqhX+gbI1pu43kIgScKftFvVtJ5zkXOzykSiUmucPMtIIFZawiClNnK
-         8eng/ZEYamAjiNpmqoBcJ89HrfjqmdxzVpLhqS6E5weDkLlZbE2/Rj59anmQBNtXbsSP
-         Y5xHLYAPRzGhgC1rYHZVImG/PBx6c0s6LAKhy35h9JEzdr3QmqHiUHlo1n5X0apM1Pds
-         hufw==
-X-Gm-Message-State: AC+VfDyOd5jyengiJkA5yXgcaXPCcGVW2aY4JpJ0aolO4tjGlhn0uCuX
-        WG6anPO5btdoWfQB4JL20gdo7kDMvaaPyA==
-X-Google-Smtp-Source: ACHHUZ4RuvOCRc0A5+n0i/h8HuUD8evNweuEFJ3zZDqGmnRFAmQzoBBOlfj9D6X7mBd5gbc+OgnOkw==
-X-Received: by 2002:a25:ae05:0:b0:ba8:7da5:da46 with SMTP id a5-20020a25ae05000000b00ba87da5da46mr190924ybj.40.1684322066583;
-        Wed, 17 May 2023 04:14:26 -0700 (PDT)
-Received: from mail-yb1-f173.google.com (mail-yb1-f173.google.com. [209.85.219.173])
-        by smtp.gmail.com with ESMTPSA id k13-20020a258c0d000000b00ba012dbdf0asm482494ybl.3.2023.05.17.04.14.26
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 17 May 2023 04:14:26 -0700 (PDT)
-Received: by mail-yb1-f173.google.com with SMTP id 3f1490d57ef6-ba8253f635cso807881276.0;
-        Wed, 17 May 2023 04:14:26 -0700 (PDT)
-X-Received: by 2002:a25:558:0:b0:ba8:27ff:b2b5 with SMTP id
- 85-20020a250558000000b00ba827ffb2b5mr4015501ybf.26.1684322066059; Wed, 17 May
- 2023 04:14:26 -0700 (PDT)
+        with ESMTP id S230378AbjEQOoD (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 10:44:03 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 555A81708;
+        Wed, 17 May 2023 07:43:59 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id E47E363A6A;
+        Wed, 17 May 2023 14:43:58 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id BCFFBC4339B;
+        Wed, 17 May 2023 14:43:48 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684334638;
+        bh=8xiYbOqEXUtDGMUV7q9ZaOPlQZ52ZChNwFZR+2AGYMs=;
+        h=From:To:Cc:In-Reply-To:References:Subject:Date:From;
+        b=JIhdHEH7BdQnG0Fi3V12uwO4Ei4+8ssxzTfDQi2B88PNSeXQh8pqhzzpjjxkI5OKM
+         hcPXc2Oi89naBtWB3P0OK4v+OnUmFE8yXEdpiSinkLxcdhCKie4vAUglQmcTwULaJ+
+         YhsYbuZLBJBcFm7n5gmZmMuJ92TUOIYFUBAJ3pWTREofsv6JIAHbvOBldiSd9G8RVK
+         mJVYwPyzodpKyAzcpBkodt19XQ2Q3XGBk0nVt/QX0b1BtVqGEMfRMJMGPB0Q2pjxOZ
+         yfiSeb3DUlOPJVIXJZKPboTIVo7fqVV+6vr8IVrWxSU/ynq0+XdHa8dSm6ce4OusWf
+         LQFi2FHiK2qjw==
+From:   Mark Brown <broonie@kernel.org>
+To:     linux-arm-kernel@lists.infradead.org, Brad Larson <blarson@amd.com>
+Cc:     linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-spi@vger.kernel.org, adrian.hunter@intel.com,
+        alcooperx@gmail.com, andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        catalin.marinas@arm.com, conor+dt@kernel.org, davidgow@google.com,
+        gsomlo@gmail.com, gerg@linux-m68k.org, hal.feng@starfivetech.com,
+        hasegawa-hitomi@fujitsu.com, j.neuschaefer@gmx.net, joel@jms.id.au,
+        kernel@esmil.dk, krzk@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, lee@kernel.org,
+        lee.jones@linaro.org, p.zabel@pengutronix.de,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        fancer.lancer@gmail.com, skhan@linuxfoundation.org,
+        suravee.suthikulpanit@amd.com, thomas.lendacky@amd.com,
+        tonyhuang.sunplus@gmail.com, ulf.hansson@linaro.org,
+        vaishnav.a@ti.com, walker.chen@starfivetech.com, will@kernel.org,
+        zhuyinbo@loongson.cn, devicetree@vger.kernel.org
+In-Reply-To: <20230515181606.65953-1-blarson@amd.com>
+References: <20230515181606.65953-1-blarson@amd.com>
+Subject: Re: (subset) [PATCH v14 0/8] Support AMD Pensando Elba SoC
+Message-Id: <168433462851.451768.13871519819070116651.b4-ty@kernel.org>
+Date:   Wed, 17 May 2023 23:43:48 +0900
 MIME-Version: 1.0
-References: <20230515181606.65953-1-blarson@amd.com> <20230515181606.65953-9-blarson@amd.com>
- <BN7PR12MB2802CE1DBDB6ED8413AECD53DC799@BN7PR12MB2802.namprd12.prod.outlook.com>
- <168e9039-feb0-0f4c-8aee-96a3bae7faca@amd.com>
-In-Reply-To: <168e9039-feb0-0f4c-8aee-96a3bae7faca@amd.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 17 May 2023 13:14:14 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdVLOTn7HfoWR7mGrKXvZxiciGseOBYbV7bYqUuGJcr=yg@mail.gmail.com>
-Message-ID: <CAMuHMdVLOTn7HfoWR7mGrKXvZxiciGseOBYbV7bYqUuGJcr=yg@mail.gmail.com>
-Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
-To:     Michal Simek <michal.simek@amd.com>
-Cc:     "Mahapatra, Amit Kumar" <amit.kumar-mahapatra@amd.com>,
-        "Larson, Bradley" <Bradley.Larson@amd.com>,
-        "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>,
-        "adrian.hunter@intel.com" <adrian.hunter@intel.com>,
-        "alcooperx@gmail.com" <alcooperx@gmail.com>,
-        "andy.shevchenko@gmail.com" <andy.shevchenko@gmail.com>,
-        "arnd@arndb.de" <arnd@arndb.de>,
-        "brendan.higgins@linux.dev" <brendan.higgins@linux.dev>,
-        "briannorris@chromium.org" <briannorris@chromium.org>,
-        "catalin.marinas@arm.com" <catalin.marinas@arm.com>,
-        "conor+dt@kernel.org" <conor+dt@kernel.org>,
-        "davidgow@google.com" <davidgow@google.com>,
-        "gsomlo@gmail.com" <gsomlo@gmail.com>,
-        "gerg@linux-m68k.org" <gerg@linux-m68k.org>,
-        "hal.feng@starfivetech.com" <hal.feng@starfivetech.com>,
-        "hasegawa-hitomi@fujitsu.com" <hasegawa-hitomi@fujitsu.com>,
-        "j.neuschaefer@gmx.net" <j.neuschaefer@gmx.net>,
-        "joel@jms.id.au" <joel@jms.id.au>,
-        "kernel@esmil.dk" <kernel@esmil.dk>,
-        "krzk@kernel.org" <krzk@kernel.org>,
-        "krzysztof.kozlowski+dt@linaro.org" 
-        <krzysztof.kozlowski+dt@linaro.org>,
-        "lee@kernel.org" <lee@kernel.org>,
-        "lee.jones@linaro.org" <lee.jones@linaro.org>,
-        "broonie@kernel.org" <broonie@kernel.org>,
-        "p.zabel@pengutronix.de" <p.zabel@pengutronix.de>,
-        "rdunlap@infradead.org" <rdunlap@infradead.org>,
-        "robh+dt@kernel.org" <robh+dt@kernel.org>,
-        "samuel@sholland.org" <samuel@sholland.org>,
-        "fancer.lancer@gmail.com" <fancer.lancer@gmail.com>,
-        "skhan@linuxfoundation.org" <skhan@linuxfoundation.org>,
-        "Suthikulpanit, Suravee" <Suravee.Suthikulpanit@amd.com>,
-        "Lendacky, Thomas" <Thomas.Lendacky@amd.com>,
-        "tonyhuang.sunplus@gmail.com" <tonyhuang.sunplus@gmail.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "vaishnav.a@ti.com" <vaishnav.a@ti.com>,
-        "walker.chen@starfivetech.com" <walker.chen@starfivetech.com>,
-        "will@kernel.org" <will@kernel.org>,
-        "zhuyinbo@loongson.cn" <zhuyinbo@loongson.cn>,
-        "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>,
-        "git (AMD-Xilinx)" <git@amd.com>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+X-Mailer: b4 0.13-dev-bfdf5
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Michal,
+On Mon, 15 May 2023 11:15:58 -0700, Brad Larson wrote:
+> This series enables support for AMD Pensando Elba SoC based platforms.
+> 
+> The Elba SoC has the following features:
+> - Sixteen ARM64 A72 cores
+> - Dual DDR 4/5 memory controllers
+> - 32 lanes of PCIe Gen3/4 to the Host
+> - Network interfaces: Dual 200GE, Quad 100GE, 50GE, 25GE, 10GE and
+>   also a single 1GE management port.
+> - Storage/crypto offloads and 144 programmable P4 cores.
+> - QSPI and EMMC for SoC storage
+> - Two SPI interfaces for peripheral management
+> - I2C bus for platform management
+> 
+> [...]
 
-On Tue, May 16, 2023 at 9:42 AM Michal Simek <michal.simek@amd.com> wrote:
-> Also in DT patches I have seen that you didn't switch to 2023 year yet.
+Applied to
 
-If no substantial changes were made in 2023, there is no need nor
-desire to update the copyright year.
+   https://git.kernel.org/pub/scm/linux/kernel/git/broonie/spi.git for-next
 
-Gr{oetje,eeting}s,
+Thanks!
 
-                        Geert
+[2/8] dt-bindings: spi: cdns: Add compatible for AMD Pensando Elba SoC
+      commit: f2156989bf3014c67707d73ccd202b2ada09080b
+[7/8] spi: cadence-quadspi: Add compatible for AMD Pensando Elba SoC
+      commit: f5c2f9f9584353bc816d76a65c97dd03dc61678c
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+All being well this means that it will be integrated into the linux-next
+tree (usually sometime in the next 24 hours) and sent to Linus during
+the next merge window (or sooner if it is a bug fix), however if
+problems are discovered then the patch may be dropped or reverted.
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+You may get further e-mails resulting from automated or manual testing
+and review of the tree, please engage with people reporting problems and
+send followup patches addressing any issues that are reported if needed.
+
+If any updates are required or you are submitting further changes they
+should be sent as incremental updates against current git, existing
+patches will not be replaced.
+
+Please add any relevant lists and maintainers to the CCs when replying
+to this mail.
+
+Thanks,
+Mark
+
