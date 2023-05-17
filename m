@@ -2,59 +2,60 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E3E0C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 16:51:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C247C77B7A
+	for <linux-mmc@archiver.kernel.org>; Wed, 17 May 2023 19:28:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229477AbjEQQvB (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 17 May 2023 12:51:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41048 "EHLO
+        id S229448AbjEQT2r (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 17 May 2023 15:28:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45532 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229849AbjEQQu4 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 12:50:56 -0400
-Received: from mail-pl1-x636.google.com (mail-pl1-x636.google.com [IPv6:2607:f8b0:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4F8CE4ED0;
-        Wed, 17 May 2023 09:50:56 -0700 (PDT)
-Received: by mail-pl1-x636.google.com with SMTP id d9443c01a7336-1ab032d9266so11441855ad.0;
-        Wed, 17 May 2023 09:50:56 -0700 (PDT)
+        with ESMTP id S229458AbjEQT2p (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 17 May 2023 15:28:45 -0400
+Received: from mail-pl1-x631.google.com (mail-pl1-x631.google.com [IPv6:2607:f8b0:4864:20::631])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 65787A5D7;
+        Wed, 17 May 2023 12:28:10 -0700 (PDT)
+Received: by mail-pl1-x631.google.com with SMTP id d9443c01a7336-1ae4c5e1388so12985685ad.1;
+        Wed, 17 May 2023 12:28:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684342256; x=1686934256;
+        d=gmail.com; s=20221208; t=1684351686; x=1686943686;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=BKjKRvCcUxdSw7sNrgS1vWdqJsRtZVoGJT9S+sDPoy8=;
-        b=ekY6uWaYg7UuXpcHLXNscUzl4+iv29+BOwOZbTmGhIA042oVp7uifx+5JGjSTFkKFj
-         x9VVBzvZvsS5oH0cxqNW15ukDjLvlwjiEDntKH7GcT660a7SepvwNnPfonMeDafcZpQc
-         mygFqrOAqJvbEzop8XwAIm+JUMpXphvt/uIYSl/TM+gb/s+klFaq0eL3f9xjsfrlYxUh
-         HAbT0TOMTVqWM3HgAULAZ11pLUikrWBRHrogxM6gA73etz4fHtl2DwBkjCSEXCid6ufJ
-         QQ+pxlv0i6Fwp0SFECw5RgSuWdfWIspUfjLfgfL4B4oiJUvWDH0Kd717ltO4xUDi0hvp
-         AXsQ==
+        bh=MTGzcnwjQ4xJ2Wkwnqn9RSpjpoInTurXDa8iPfKEJtc=;
+        b=KVITzgibmYp4fo0QtLoUgDa7cy8blgbnz8iO4lnJmyH8vFLBso+EocArB8Tom9nZ8g
+         1l9OaWFsuXa5pmrIqApOBBbuFNL5iidzM2mSyWBa59SqS0bWrQuw7KUemiE6LH3hLmvQ
+         Z5GPjuGgixcQn2vYyaS5qPofqtWLhUmMX5rySbBssivDkJzgwAp6BQD7bNNj/iiMbPAt
+         UD29S7TRwapkEoVg28+jib9gM/n4RAWvd2J9wwIUxn448X+V/6H7iZC2I5cJzJ3cs2ig
+         GCG9Y8+K7P4jVatLpEGzCrh1JmoY+1/clgKOFRU0c/Uiqip/X1oM4mmd3zzH98zohXqP
+         JvVQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684342256; x=1686934256;
+        d=1e100.net; s=20221208; t=1684351686; x=1686943686;
         h=content-transfer-encoding:mime-version:message-id:date:subject:cc
          :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=BKjKRvCcUxdSw7sNrgS1vWdqJsRtZVoGJT9S+sDPoy8=;
-        b=S7IhQv0m0oFoMeeKyjj8Bhg5u2iMmSKxNdEEdbCHHmUEg81x/VrgiYyoVuDsqYiDOw
-         jGkpKhgBlBi2aw0EslcbgKMlAEecLippDpfzjYXCbY52AcgAETfJ/x6+MrZYW17VrA4W
-         emnOxGWC4UJYzVrATNFK8DeLq2zInE+2Y7tGdPRQSvYkzHfhBRFnUNTKBdDTya0ewxmx
-         2SuP9PI7bQntlHE1pnyqM4CnCRYfwml7WlCWh6qObCRk7RU3/rCcwm23Sn8d3O9zUHJg
-         NH4KmM6oKbkgNW42Z/7rni7wIMykU6Tg7t+0dxqGgyCSJ7osT1PZOx+kbJhdzoHz8DxQ
-         iKaw==
-X-Gm-Message-State: AC+VfDx7HnmUibQ30Nzkw10DWtpdiwsj2lKWWdGDlzPahqb4aEQjCmGU
-        VZQk5jH9GbKmPPGAFllveKAyXbv2nknPtCUUay0=
-X-Google-Smtp-Source: ACHHUZ6NK7ZKdEgkgLo1ya5bbPE385Nw25giZ2czxVR9D64Ay6xg/gVUO8F9uH0DE6R4S/TKknivEw==
-X-Received: by 2002:a17:902:b695:b0:1ad:edbe:57a8 with SMTP id c21-20020a170902b69500b001adedbe57a8mr17599248pls.50.1684342255625;
-        Wed, 17 May 2023 09:50:55 -0700 (PDT)
+        bh=MTGzcnwjQ4xJ2Wkwnqn9RSpjpoInTurXDa8iPfKEJtc=;
+        b=dQp8khIM+9hlg4BZWv6FYGihGJCvaszLkhFv3PMV3f+gOW9O0fYBFgfhxyrZxxQBrA
+         bMT7/srGxQnP1VmztKS41qqlWiyROylFLScYCws6ayzx5+HPGSTWRFn8V9Xy17pmBh9w
+         NkLJg9pISIhNbxGMhg6fodMUi/I5pHQg7l/Sg6U0kiNeT2OgXFCCDRUSJE8/FemCFeOz
+         X1/+EE2zLd8FPuhHkMZM14i0jgdovWXdutDETzBPWd/W9y3UpPL2pEkjXsaAKdtD1MPM
+         5FdgMmiMacpKVKR4/A5Adjw8APkmkf/6QNqEXvRByK4wBkS4iVrmf3IFIc3SQ2EiPhfJ
+         7aCw==
+X-Gm-Message-State: AC+VfDw6RmWEIGD9jHe9hn/Ch/mwPBT8TtOxIR9WbOajQ6bnl9E7id8u
+        yxVwlGYwUplhDeU9KlvFuB8=
+X-Google-Smtp-Source: ACHHUZ6P9uutxrRk6xX3VkoQvVslYTJhJi44kGdTHZkQYguykJ67TGOFgAUk7oNT1qcDneRgRiDYcw==
+X-Received: by 2002:a17:902:e5d0:b0:1ae:66cf:b90f with SMTP id u16-20020a170902e5d000b001ae66cfb90fmr57873plf.66.1684351686212;
+        Wed, 17 May 2023 12:28:06 -0700 (PDT)
 Received: from localhost.localdomain ([111.201.128.95])
-        by smtp.gmail.com with ESMTPSA id b2-20020a170902d50200b001ac7794a7eesm17822744plg.288.2023.05.17.09.50.53
+        by smtp.gmail.com with ESMTPSA id jo13-20020a170903054d00b001a641e4738asm18005630plb.1.2023.05.17.12.28.03
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 17 May 2023 09:50:55 -0700 (PDT)
+        Wed, 17 May 2023 12:28:05 -0700 (PDT)
 From:   Yeqi Fu <asuk4.q@gmail.com>
-To:     ulf.hansson@linaro.org, CLoehle@hyperstone.com
+To:     ulf.hansson@linaro.org, CLoehle@hyperstone.com,
+        adrian.hunter@intel.com, avri.altman@wdc.com, axboe@kernel.dk
 Cc:     Yeqi Fu <asuk4.q@gmail.com>, linux-mmc@vger.kernel.org,
         linux-kernel@vger.kernel.org, Ivan Orlov <ivan.orlov0322@gmail.com>
-Subject: [PATCH] mmc: Fix error checking
-Date:   Thu, 18 May 2023 00:46:28 +0800
-Message-Id: <20230517164628.365335-1-asuk4.q@gmail.com>
+Subject: [PATCH] mmc: core: Fix error checking
+Date:   Thu, 18 May 2023 03:26:54 +0800
+Message-Id: <20230517192654.367892-1-asuk4.q@gmail.com>
 X-Mailer: git-send-email 2.37.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -67,8 +68,8 @@ ERR_PTR if an error occurs, and the appropriate way to verify for errors
 is to use the inline function IS_ERR. The patch will substitute the
 null-comparison with IS_ERR.
 
-Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
 Suggested-by: Ivan Orlov <ivan.orlov0322@gmail.com>
+Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
 ---
  drivers/mmc/core/block.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
