@@ -2,146 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 918ADC77B7A
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 06:49:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 54FC8C7EE22
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 08:15:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229850AbjERGtP (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 May 2023 02:49:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46168 "EHLO
+        id S229784AbjERIPk (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 May 2023 04:15:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49584 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229807AbjERGtO (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 02:49:14 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 552AE2122;
-        Wed, 17 May 2023 23:49:13 -0700 (PDT)
-Received: from pps.filterd (m0279871.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34I6a5vp009104;
-        Thu, 18 May 2023 06:48:53 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=GdRg7Y9j4xrW11AwJfAZpy43hBuEn4tHcz/Itw1Jsto=;
- b=C/3Hc9KooNQVYypd4dGPnoFzkfHYGQfxYozTGBt81F/OttJxFDyTYMl9J9TC8yeebT6J
- iMzoU2zCjhIEeF9T4moV2EXFPAqeCcbVBJD1AJWVu7eRbTIl/E0Gm8Tsv90uydi6NXLq
- KsFXdcQLMjD5+Ge2YhIEV/SMqmFSMSDoWBL8FpVwJjthGSdjQxjp79TJbL3MT3QUWyLP
- paTLU8u/3wvwhbFsRiOLRKU0CGjQL883HlnpW0JpBzvJb9truum8hbLzqcCqGHNE7cYM
- 4Qq3f58aS78LpjAGkO0AH+7rCGkJspL9PyhRPkHEjkr8F6z9Ym3710je9jeILeq8vpVl +Q== 
-Received: from nalasppmta05.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qncbhr91a-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 18 May 2023 06:48:53 +0000
-Received: from nalasex01a.na.qualcomm.com (nalasex01a.na.qualcomm.com [10.47.209.196])
-        by NALASPPMTA05.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34I6mpqZ028262
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 18 May 2023 06:48:51 GMT
-Received: from [10.216.51.58] (10.80.80.8) by nalasex01a.na.qualcomm.com
- (10.47.209.196) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Wed, 17 May
- 2023 23:48:43 -0700
-Message-ID: <0374e88f-5b12-271a-41f0-32a31fbecbec@quicinc.com>
-Date:   Thu, 18 May 2023 12:18:39 +0530
+        with ESMTP id S229726AbjERIPj (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 04:15:39 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AEB7DE49;
+        Thu, 18 May 2023 01:15:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1684397737; x=1715933737;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=U727CdahcBMQvs3cEg8kNz1KABw1O+LzKboiSQLa9Ag=;
+  b=dV1v022CXeWKECzGwGkv3y5KQLvbnWDp65YDCR3wAs9JOuagECz8JyGw
+   ZxdVV7nCktujFmKpPc6KPP/iEQ7Zc5LUWdLhazzFcEUGhB5PB36VwHgJb
+   8ywAak6UmmSPJCHXfTv861zWWowBR8gROlPaPIjIdx6EQP142TXLNit/Q
+   X3UcsXXRaMGiOQSYUUSKxB6Lono3E5p3eJM309rQublKcAMa/RdO+rTSO
+   lGKovDsKfWWKRN75RWQaSBWQ7j70TsjxtOjzNFEpybCGZstsQZQGR4gzr
+   B+P5ALyIU35o9bPaABbWfl3vGmg7gTEVh1xfacH0Q3manCdO+I1+uiTGU
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10713"; a="415428799"
+X-IronPort-AV: E=Sophos;i="5.99,284,1677571200"; 
+   d="scan'208";a="415428799"
+Received: from orsmga001.jf.intel.com ([10.7.209.18])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 01:15:37 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10713"; a="734988929"
+X-IronPort-AV: E=Sophos;i="5.99,284,1677571200"; 
+   d="scan'208";a="734988929"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.52])
+  by orsmga001-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 01:15:34 -0700
+Message-ID: <36e805fa-338d-a945-2621-75c5077572fc@intel.com>
+Date:   Thu, 18 May 2023 11:15:31 +0300
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.7.0
-Subject: Re: [PATCH V6 7/8] arm64: dts: Add ipq5018 SoC and rdp432-c2 board
- support
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
-        <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <andy.shevchenko@gmail.com>
-References: <20230516165413.3361867-1-quic_srichara@quicinc.com>
- <20230516165413.3361867-8-quic_srichara@quicinc.com>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.11.0
+Subject: Re: [PATCH] mmc: core: Fix error checking
 Content-Language: en-US
-From:   Kathiravan T <quic_kathirav@quicinc.com>
-In-Reply-To: <20230516165413.3361867-8-quic_srichara@quicinc.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+To:     Yeqi Fu <asuk4.q@gmail.com>, ulf.hansson@linaro.org,
+        CLoehle@hyperstone.com, avri.altman@wdc.com, axboe@kernel.dk
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Ivan Orlov <ivan.orlov0322@gmail.com>
+References: <20230517192654.367892-1-asuk4.q@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230517192654.367892-1-asuk4.q@gmail.com>
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01a.na.qualcomm.com (10.47.209.196)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: 3seELNgdxH5fZtduLxDlSRu1sBZ8GeU0
-X-Proofpoint-ORIG-GUID: 3seELNgdxH5fZtduLxDlSRu1sBZ8GeU0
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-18_04,2023-05-17_02,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 spamscore=0
- lowpriorityscore=0 bulkscore=0 phishscore=0 adultscore=0
- priorityscore=1501 suspectscore=0 clxscore=1011 impostorscore=0 mlxscore=0
- malwarescore=0 mlxlogscore=999 classifier=spam adjust=0 reason=mlx
- scancount=1 engine=8.12.0-2304280000 definitions=main-2305180050
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-
-On 5/16/2023 10:24 PM, Sricharan Ramabadhran wrote:
-> Add initial device tree support for the Qualcomm IPQ5018 SoC and
-> rdp432-c2 board.
->
-> Few things like 'reboot' does not work because, couple of more 'SCM'
-> APIS are needed to clear some TrustZone settings. Those will be
-> posted separately.
->
-> Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
-> Co-developed-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-> Signed-off-by: Gokul Sriram Palanisamy <quic_gokulsri@quicinc.com>
-> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+On 17/05/23 22:26, Yeqi Fu wrote:
+> The functions debugfs_create_dir and debugfs_create_file_unsafe return
+> ERR_PTR if an error occurs, and the appropriate way to verify for errors
+> is to use the inline function IS_ERR. The patch will substitute the
+> null-comparison with IS_ERR.
+> 
+> Suggested-by: Ivan Orlov <ivan.orlov0322@gmail.com>
+> Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
 > ---
->    [v6] Added Reviewed by and fixed commit log as per comments from
->         robimarko@gmail.com
->
->   arch/arm64/boot/dts/qcom/Makefile             |   1 +
->   .../arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts |  72 +++++
->   arch/arm64/boot/dts/qcom/ipq5018.dtsi         | 250 ++++++++++++++++++
->   3 files changed, 323 insertions(+)
->   create mode 100644 arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
->   create mode 100644 arch/arm64/boot/dts/qcom/ipq5018.dtsi
->
-> diff --git a/arch/arm64/boot/dts/qcom/Makefile b/arch/arm64/boot/dts/qcom/Makefile
-> index d42c59572ace..57858e7f2095 100644
-> --- a/arch/arm64/boot/dts/qcom/Makefile
-> +++ b/arch/arm64/boot/dts/qcom/Makefile
-> @@ -3,6 +3,7 @@ dtb-$(CONFIG_ARCH_QCOM)	+= apq8016-sbc.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= apq8094-sony-xperia-kitakami-karin_windy.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-db820c.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= apq8096-ifc6640.dtb
-> +dtb-$(CONFIG_ARCH_QCOM)	+= ipq5018-rdp432-c2.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-mi01.2.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= ipq5332-rdp468.dtb
->   dtb-$(CONFIG_ARCH_QCOM)	+= ipq6018-cp01-c1.dtb
-> diff --git a/arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts b/arch/arm64/boot/dts/qcom/ipq5018-rdp432-c2.dts
-> new file mode 100644
-> index 000000000000..e636a1cb9b77
-> --- /dev/null
+>  drivers/mmc/core/block.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 00c33edb9fb9..507bebc22636 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2908,7 +2908,7 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>  			debugfs_create_file_unsafe("status", 0400, root,
+>  						   card,
+>  						   &mmc_dbg_card_status_fops);
+> -		if (!md->status_dentry)
+> +		if (IS_ERR(md->status_dentry))
+>  			return -EIO;
+>  	}
+>  
+> @@ -2916,7 +2916,7 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>  		md->ext_csd_dentry =
+>  			debugfs_create_file("ext_csd", S_IRUSR, root, card,
+>  					    &mmc_dbg_ext_csd_fops);
+> -		if (!md->ext_csd_dentry)
+> +		if (IS_ERR(md->ext_csd_dentry))
+>  			return -EIO;
+>  	}
+>  
 
+The patch is not wrong, but you also need to look at the bigger picture.
+In this case, the return value is not used.  And debugfs API is designed
+so that return values can be ignored - for example, it is ok to pass NULL
+or an error code to debugfs_remove().  Generally we don't care if debugfs
+fails, because it is only for debugging, but it only uses memory resources
+so it essentially doesn't fail anyway - except when it is not compiled in.
 
-<snip>
+So you could change mmc_blk_add_debugfs() to return void, and drop the error
+checks entirely.
 
-
-> +	reserved-memory {
-> +		#address-cells = <2>;
-> +		#size-cells = <2>;
-> +		ranges;
-> +
-> +		tz_region: tz@4ac00000 {
-> +			reg = <0x0 0x4ac00000 0x0 0x400000>;
-
-
-TZ size is 2MB not 4MB.
-
-<snip>...
-
-Thanks
+The error checks in mmc_blk_remove_debugfs() also serve no purpose.
 
