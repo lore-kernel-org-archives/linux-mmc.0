@@ -2,149 +2,161 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6C0A5C77B7A
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 10:15:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FB6DC77B7D
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 11:11:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230087AbjERKPi (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 May 2023 06:15:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44244 "EHLO
+        id S230072AbjERLLp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 May 2023 07:11:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46228 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230424AbjERKPS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 06:15:18 -0400
-Received: from mail-pj1-x1029.google.com (mail-pj1-x1029.google.com [IPv6:2607:f8b0:4864:20::1029])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C04FD30C4;
-        Thu, 18 May 2023 03:14:41 -0700 (PDT)
-Received: by mail-pj1-x1029.google.com with SMTP id 98e67ed59e1d1-24e3b69bc99so1504896a91.2;
-        Thu, 18 May 2023 03:14:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684404827; x=1686996827;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=GKnnzGXKjlifoLEe2ffUscdlzM8XvwS7+Kvj9lIdVco=;
-        b=QxWSc6oOabwUF+x65pq/0ZNDCRmnnXk/P00+QMWNOg8rGYAIe/POJMvtKRZ9Gga+O/
-         WVpvMkZ3iPjjK+tpd/MAvtMhKGh04IW+1Iohf1jjpFC7RU1ZAEkehPT15cO+C8y7AXT8
-         Ubva3NCyCo0xPVqkE8Qy9hjD0+QdklCE5Ic2z1yPhn8rNNj4pd5f+W7iVruilGahhDQh
-         19vcqwU9J67nRLMUzwBUU/f3I07qShh9qtrbuG0r7ERWMY8zClHBy3TCblEFY157sY90
-         Rl/dbw3KspbIVtgxkj8AQe35dYIwNl4ss5EbRCgiYb2yDD/gNCy/RXnCFFyRflLokEeR
-         EPxA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684404827; x=1686996827;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=GKnnzGXKjlifoLEe2ffUscdlzM8XvwS7+Kvj9lIdVco=;
-        b=c1rI3sOFh+mXH6/lNDSWidiemQ1LzEl/SVLuM9UJPKAx6uLud08Nhdj7EW26xis9o4
-         clwgZ3GBOS/hIggbcLDEIh4ZN1UtEr06LNO6P/iRsV8gfsJXVnF9jBnk86sJ9TdXcbdW
-         z3MsrUBLuDsh1HDRamhZBiO9bHgOwNyEvuWmj+6LesZ/5FoLiJ/O718NrCkG+TgPkfM/
-         Ma2D3TggFJx/xnJEp274tKveTejKfNp1ziZhYiwvDUDdoe+v5Eq/ZKVOgXkwPdX2ESAa
-         f0pmd+bpbr7eX18aveK4nmETHeZc3cMFF4cvHkwVGatyTxIn23AjkjAhwhKoYMInWgaL
-         Yf2Q==
-X-Gm-Message-State: AC+VfDwxVhGfYL02wJ0+POMo26XY925VFomjatFg9k2HvfnbCo7lR4dc
-        2/udOGvWGlG9KNjRyoAVkhI=
-X-Google-Smtp-Source: ACHHUZ4XfDhhkXuOC1RR0g4nljcjcD2B2qaFw8mWjZZ92xIBS3E7dNySqykpzyIc2apmTF0rOqvp8Q==
-X-Received: by 2002:a17:90a:5e04:b0:24e:4231:ec6b with SMTP id w4-20020a17090a5e0400b0024e4231ec6bmr1989155pjf.21.1684404826766;
-        Thu, 18 May 2023 03:13:46 -0700 (PDT)
-Received: from localhost.localdomain ([111.201.128.95])
-        by smtp.gmail.com with ESMTPSA id q31-20020a63505f000000b0052cbd854927sm894283pgl.18.2023.05.18.03.13.44
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 May 2023 03:13:46 -0700 (PDT)
-From:   Yeqi Fu <asuk4.q@gmail.com>
-To:     ulf.hansson@linaro.org, CLoehle@hyperstone.com,
-        adrian.hunter@intel.com, avri.altman@wdc.com, axboe@kernel.dk
-Cc:     Yeqi Fu <asuk4.q@gmail.com>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org
-Subject: [PATCH] mmc: core: Remove unnecessary error checks and change return type
-Date:   Thu, 18 May 2023 18:12:16 +0800
-Message-Id: <20230518101216.369970-1-asuk4.q@gmail.com>
-X-Mailer: git-send-email 2.37.2
-In-Reply-To: <36e805fa-338d-a945-2621-75c5077572fc@intel.com>
-References: <36e805fa-338d-a945-2621-75c5077572fc@intel.com>
+        with ESMTP id S230427AbjERLLn (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 07:11:43 -0400
+X-Greylist: delayed 5486 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Thu, 18 May 2023 04:11:18 PDT
+Received: from mo4-p01-ob.smtp.rzone.de (mo4-p01-ob.smtp.rzone.de [81.169.146.165])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 456CA10E6;
+        Thu, 18 May 2023 04:11:18 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1684408224; cv=none;
+    d=strato.com; s=strato-dkim-0002;
+    b=i/jxOxlicI5zWCrrOzlERhmF40xvJ+X3NjHAfehLC+oR13NCWx8ci8JpC7+T5x8PSS
+    Ux28DA4adyVMpnEhy/OEoohUaXVoCnvJ+sJfrQtABXy74Luqop7JDmxsZySeq0CMIPPV
+    ZkXpC85yjalur6lb5Ca0XkKLltZnu95mUz1hUs8/hg1HPegTxftUWZTq9NaNFN0f0jM3
+    eTec+FUo25NIWBQIt+cMZ+kW3vTI798hZUNTcmm+N8xlXhCRWgLsnu1ZhKRIihFx6pQo
+    V2pEjyjnnZqPY6cSX1ywWTuiaUtdpifRysTQGnNa/uF1EAZrNFdfoTtwGRqecgn6n73U
+    h/pA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; t=1684408224;
+    s=strato-dkim-0002; d=strato.com;
+    h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=NEijn91Y8frPe3mx21CYziEmrOndT1BFgqTmRjdyTDg=;
+    b=ReY+PInXvBEjsFE4mQEViAkc4IEsoTiOJeBMYB+QIo+T5Cx3KeR2d2I2MvfGsJzz6I
+    VKVm7slVoPRBKYaC5QRRzxUGRh5+m+jc5/4h00lhzQ0+6g1xVQEOe2EUii6WIHJuYLlV
+    fU4buavo3jDZShcBAw3MguClRgwX44WWBfcnLR5cgaTZvU+0nNnw+2n+OKKDNiuhJhh7
+    aEXR8U9Td8lP/DnOP2H7GIk8cvbZcXOg6oqgMu5Yq4dPqbeLANHRH1RGBHlKIi9RlXZQ
+    vUDgwrRxAfTWPzxkgS0bGP8VO18G6jG1R3CrTmz2jeMBdWZMCK/L9e6Wlf6ePhk7oBhq
+    i5FQ==
+ARC-Authentication-Results: i=1; strato.com;
+    arc=none;
+    dkim=none
+X-RZG-CLASS-ID: mo01
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; t=1684408224;
+    s=strato-dkim-0002; d=gerhold.net;
+    h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=NEijn91Y8frPe3mx21CYziEmrOndT1BFgqTmRjdyTDg=;
+    b=ZO1OoBgWLCM67V6Mh5BBHOIz06/sEeZtTW9Qte+w5KOCsY8rToN7tZ/rk5VlXLzlb5
+    PMm/YN6rnsqmZf7pa3ntkeXhTvl2D8zfta+GnK/9AYUvyNV417n6HjWRuI3kC1IOXeEk
+    F52THWUursQxM0tXfS9OtoGQ/2gLJbk9wxQUjq9fEZ8JbsSN2FgGzJEMGViZ8lPbLDvU
+    pReIulrLsJZm5DqnXIFOe1jsS5x+/nrLgUc4j+mSKR877oNS9xcSZ9x3JcQBLIqhd9jo
+    q9UJMDTR5HwMYwzx9l/9SFJC8pzhNvSi8l6a8agx/d7h8zEKsCAK/SKGHwV6fHIvEZsJ
+    x36g==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; t=1684408224;
+    s=strato-dkim-0003; d=gerhold.net;
+    h=In-Reply-To:References:Message-ID:Subject:Cc:To:From:Date:Cc:Date:
+    From:Subject:Sender;
+    bh=NEijn91Y8frPe3mx21CYziEmrOndT1BFgqTmRjdyTDg=;
+    b=FQyRzGQ0Dorlg5rgX7u/PjgKY5inrusOXv5ZvNI3uCDQn9Jw57IjG5BffSWUWCA0bN
+    lMOT+cvPr2TbLw5fCdAQ==
+X-RZG-AUTH: ":P3gBZUipdd93FF5ZZvYFPugejmSTVR2nRPhVOQ/OcYgojyw4j34+u261EJF5OxJD4peA8Z2F1A=="
+Received: from gerhold.net
+    by smtp.strato.de (RZmta 49.4.0 DYNA|AUTH)
+    with ESMTPSA id j6420az4IBAOCOu
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256 bits))
+        (Client did not present a certificate);
+    Thu, 18 May 2023 13:10:24 +0200 (CEST)
+Date:   Thu, 18 May 2023 13:10:16 +0200
+From:   Stephan Gerhold <stephan@gerhold.net>
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        Bjorn Andersson <andersson@kernel.org>,
+        Andy Gross <agross@kernel.org>, linux-arm-msm@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Subject: Re: [PATCH] mmc: sdhci-msm: Disable broken 64-bit DMA on MSM8916
+Message-ID: <ZGYHmC3NW1W34HVQ@gerhold.net>
+References: <20230518-msm8916-64bit-v1-1-5694b0f35211@gerhold.net>
+ <2875f7ef-c43e-74f6-12b9-342bb2cfbaf8@linaro.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2875f7ef-c43e-74f6-12b9-342bb2cfbaf8@linaro.org>
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The error checks in mmc_blk_add_debugfs() and mmc_blk_remove_debugfs()
-are extraneous. Therefore, this patch removes all error checks from
-both functions.
-Additionally, mmc_blk_add_debugfs() has been changed to return void
-instead of an integer value that was never used. This simplifies the
-function and improves its clarity.
+On Thu, May 18, 2023 at 11:48:55AM +0200, Konrad Dybcio wrote:
+> On 18.05.2023 11:39, Stephan Gerhold wrote:
+> > While SDHCI claims to support 64-bit DMA on MSM8916 it does not seem to
+> > be properly functional. It is not immediately obvious because SDHCI is
+> > usually used with IOMMU bypassed on this SoC, and all physical memory
+> > has 32-bit addresses. But when trying to enable the IOMMU it quickly
+> > fails with an error such as the following:
+> > 
+> >   arm-smmu 1e00000.iommu: Unhandled context fault:
+> >     fsr=0x402, iova=0xfffff200, fsynr=0xe0000, cbfrsynra=0x140, cb=3
+> >   mmc1: ADMA error: 0x02000000
+> >   mmc1: sdhci: ============ SDHCI REGISTER DUMP ===========
+> >   mmc1: sdhci: Sys addr:  0x00000000 | Version:  0x00002e02
+> >   mmc1: sdhci: Blk size:  0x00000008 | Blk cnt:  0x00000000
+> >   mmc1: sdhci: Argument:  0x00000000 | Trn mode: 0x00000013
+> >   mmc1: sdhci: Present:   0x03f80206 | Host ctl: 0x00000019
+> >   mmc1: sdhci: Power:     0x0000000f | Blk gap:  0x00000000
+> >   mmc1: sdhci: Wake-up:   0x00000000 | Clock:    0x00000007
+> >   mmc1: sdhci: Timeout:   0x0000000a | Int stat: 0x00000001
+> >   mmc1: sdhci: Int enab:  0x03ff900b | Sig enab: 0x03ff100b
+> >   mmc1: sdhci: ACmd stat: 0x00000000 | Slot int: 0x00000000
+> >   mmc1: sdhci: Caps:      0x322dc8b2 | Caps_1:   0x00008007
+> >   mmc1: sdhci: Cmd:       0x0000333a | Max curr: 0x00000000
+> >   mmc1: sdhci: Resp[0]:   0x00000920 | Resp[1]:  0x5b590000
+> >   mmc1: sdhci: Resp[2]:   0xe6487f80 | Resp[3]:  0x0a404094
+> >   mmc1: sdhci: Host ctl2: 0x00000008
+> >   mmc1: sdhci: ADMA Err:  0x00000001 | ADMA Ptr: 0x0000000ffffff224
+> >   mmc1: sdhci_msm: ----------- VENDOR REGISTER DUMP -----------
+> >   mmc1: sdhci_msm: DLL sts: 0x00000000 | DLL cfg:  0x60006400 | DLL cfg2: 0x00000000
+> >   mmc1: sdhci_msm: DLL cfg3: 0x00000000 | DLL usr ctl:  0x00000000 | DDR cfg: 0x00000000
+> >   mmc1: sdhci_msm: Vndr func: 0x00018a9c | Vndr func2 : 0xf88018a8 Vndr func3: 0x00000000
+> >   mmc1: sdhci: ============================================
+> >   mmc1: sdhci: fffffffff200: DMA 0x0000ffffffffe100, LEN 0x0008, Attr=0x21
+> >   mmc1: sdhci: fffffffff20c: DMA 0x0000000000000000, LEN 0x0000, Attr=0x03
+> > 
+> > Looking closely it's obvious that only the 32-bit part of the address
+> > (0xfffff200) arrives at the SMMU, the higher 16-bit (0xffff...) get
+> > lost somewhere. This might not be a limitation of the SDHCI itself but
+> > perhaps the bus/interconnect it is connected to, or even the connection
+> > to the SMMU.
+> > 
+> > Work around this by setting SDHCI_QUIRK2_BROKEN_64_BIT_DMA to avoid
+> > using 64-bit addresses.
+> > 
+> > Signed-off-by: Stephan Gerhold <stephan@gerhold.net>
+> > ---
+> Would using 64bit address translation not require you to use (dma-)ranges
+> with a greater-than-default size, like we do on newer platforms? Did you
+> test that by chance?
+> 
 
-Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
----
- drivers/mmc/core/block.c | 25 +++++++------------------
- 1 file changed, 7 insertions(+), 18 deletions(-)
+No, there is no "dma-ranges" in msm8916.dtsi. It seems to use 64-bit
+(virtual) addresses by default for SDHCI, limited to 48-bit by the SMMU.
 
-diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-index 00c33edb9fb9..81f33200b893 100644
---- a/drivers/mmc/core/block.c
-+++ b/drivers/mmc/core/block.c
-@@ -2894,12 +2894,12 @@ static const struct file_operations mmc_dbg_ext_csd_fops = {
- 	.llseek		= default_llseek,
- };
- 
--static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
-+static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- {
- 	struct dentry *root;
- 
- 	if (!card->debugfs_root)
--		return 0;
-+		return;
- 
- 	root = card->debugfs_root;
- 
-@@ -2908,19 +2908,13 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- 			debugfs_create_file_unsafe("status", 0400, root,
- 						   card,
- 						   &mmc_dbg_card_status_fops);
--		if (!md->status_dentry)
--			return -EIO;
- 	}
- 
- 	if (mmc_card_mmc(card)) {
- 		md->ext_csd_dentry =
- 			debugfs_create_file("ext_csd", S_IRUSR, root, card,
- 					    &mmc_dbg_ext_csd_fops);
--		if (!md->ext_csd_dentry)
--			return -EIO;
- 	}
--
--	return 0;
- }
- 
- static void mmc_blk_remove_debugfs(struct mmc_card *card,
-@@ -2929,22 +2923,17 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
- 	if (!card->debugfs_root)
- 		return;
- 
--	if (!IS_ERR_OR_NULL(md->status_dentry)) {
--		debugfs_remove(md->status_dentry);
--		md->status_dentry = NULL;
--	}
-+	debugfs_remove(md->status_dentry);
-+	md->status_dentry = NULL;
- 
--	if (!IS_ERR_OR_NULL(md->ext_csd_dentry)) {
--		debugfs_remove(md->ext_csd_dentry);
--		md->ext_csd_dentry = NULL;
--	}
-+	debugfs_remove(md->ext_csd_dentry);
-+	md->ext_csd_dentry = NULL;
- }
- 
- #else
- 
--static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
-+static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
- {
--	return 0;
- }
- 
- static void mmc_blk_remove_debugfs(struct mmc_card *card,
--- 
-2.37.2
+I tried limiting dma-ranges to 32-bit in msm8916.dtsi /soc@0 like
+dma-ranges = <0 0 0 0xffffffff>; This seems to work as well as an
+alternative to this patch, although it causes several annoying
+"Invalid size 0xffffffff for dma-range(s)" warnings. I know the
+0xffffffff isn't valid but I don't see how I would actually specify
+2^32 there without rewriting the entire msm8916.dtsi to use
+#address/size-cells = <2> instead of <1>.
 
+It's not entirely clear to me where the actual limitation is coming from
+here. It could be specific to the SDHCI (in which case this patch makes
+more sense) or a general limitation of the bus/interconnect (in which
+case dma-ranges might make more sense).
+
+In any case 64-bit DMA is broken for SDHCI on MSM8916 so I would say
+this patch is still the right thing to do. It's pointless to waste extra
+cycles and memory to manage 64-bit pointers for SDHCI ADMA 64-bit, when
+they can never work successfully on this SoC. The dma-ranges approach
+doesn't change that, while SDHCI_QUIRK2_BROKEN_64_BIT_DMA actually makes
+it use ADMA in 32-bit mode.
+
+Thanks,
+Stephan
