@@ -2,146 +2,170 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FC10C7EE23
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 16:43:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2518C7EE2A
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 21:02:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229512AbjERQni (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 May 2023 12:43:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34802 "EHLO
+        id S229850AbjERVC5 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 May 2023 17:02:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36842 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229457AbjERQnh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 12:43:37 -0400
-Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC9EBD1;
-        Thu, 18 May 2023 09:43:36 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1684428216; x=1715964216;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=kegxpnfkaQJ/nP+d2s5eNw9UacalFzi2yPWpbyh024o=;
-  b=VFIAplx81+Z0mvwYVj++SJeMecb5Libgq8EnKe8MI2DL6+6qcDCmr91h
-   4mJj3mZIQmLFRMwRYOLKna4/Utz3uZgiThkFlnAkyFf5Bd1OEQDJshvLo
-   cHnwhhhYfH2jC+hBW5+/yntuWobAHhmGOkysxxoKJt5BBINqd8/B5xw49
-   kMT9bN5T64UrjJWzy8SibbZKP21cvI1bnZwG7K2r5zhqOGk58GvshU7Sn
-   5I3F/Zyldgc3xJnhxZQMckSQJiEn163ZmG4Y44qcS1CxhvflYf3NBbmip
-   zhdrsUl4AiepswNqLJ79K7GBPrWoFbTg4mGxyBd8RT6R72PfWOkc5AQol
-   Q==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10714"; a="415572079"
-X-IronPort-AV: E=Sophos;i="6.00,285,1681196400"; 
-   d="scan'208";a="415572079"
-Received: from fmsmga008.fm.intel.com ([10.253.24.58])
-  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 09:43:36 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10714"; a="767276995"
-X-IronPort-AV: E=Sophos;i="6.00,285,1681196400"; 
-   d="scan'208";a="767276995"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.221.202])
-  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 09:43:31 -0700
-Message-ID: <e471c66e-83ca-d568-0ac1-42f1576ced6f@intel.com>
-Date:   Thu, 18 May 2023 19:43:28 +0300
+        with ESMTP id S229622AbjERVC4 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 17:02:56 -0400
+Received: from mail-lj1-x22e.google.com (mail-lj1-x22e.google.com [IPv6:2a00:1450:4864:20::22e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E0633136
+        for <linux-mmc@vger.kernel.org>; Thu, 18 May 2023 14:02:54 -0700 (PDT)
+Received: by mail-lj1-x22e.google.com with SMTP id 38308e7fff4ca-2ad89c7a84fso27354771fa.2
+        for <linux-mmc@vger.kernel.org>; Thu, 18 May 2023 14:02:54 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1684443773; x=1687035773;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=4G/ypnTlXP4W9YP4yFZVLIByppuXGY5xpC0A2Ptkn3o=;
+        b=DFdOB7eKGcqxxSuHNtOSjwyWO2dAjoPmGTPylJ1IpBJspPmIa+u/kfPx8yW4k5Zt+v
+         b6IShs/9RGcBNORsufG0710YZkbM5P6skUh6ytsSfeQwH324NbXsBmzzRempIb099Sy9
+         bL67x+FwyC0QkrBDdfGAbq/DSfDWtrrzEIus64R/ANDCwWmZan23ILgPKO1AOiyboJpF
+         Z+myqL7xGiS1azy96kVbX8Glmt+OqnBxPRaHtC+LI0CerhrKny/VDWMZDzQMRsBggJtM
+         Zw5dec39O7OcO8zUNd0MOH9QutA4w7UFLCSQjC1qpY/HTuaQ8l03RzmCpLD7l03Bx1/r
+         wNkg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684443773; x=1687035773;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=4G/ypnTlXP4W9YP4yFZVLIByppuXGY5xpC0A2Ptkn3o=;
+        b=QgidL9NoNiF6Uy0EwZKbHtrm3WIe6vXf01kyW526jLtFMQMzAoJEvuwwxtWmFmAPxc
+         c/hOotU51N1LtpVf0CzQsxuF6UisWfJcIV+TUiUTLxtNx10KDfqrprnOCcGlaf1sOkZm
+         sHz8GAflZC3+Hcwk+xulXkWwERoT2rtA8K+KVZXbeWX3jJBQwKlmZlMUcdEIp2lBq9pb
+         Wv69F4N8qrUzd43eWlW5sdJUJilZEtFNSMQFNGtMZ7mT4mUWcPaM706WB2kHr3seB8N7
+         vJYQ5zDq1wvIH7nByx4LNM2q0xxGXg8WfAnp/a/Hm8cdIbtrDFpdr/HewxuiKOW4RUZT
+         t0zw==
+X-Gm-Message-State: AC+VfDzjtKCGbEffVqjVNF590p5v99y5KA+rCeSmwY5DgI581HnCunNO
+        spkMDbPpcsGQzuBVcp8EST71aQ==
+X-Google-Smtp-Source: ACHHUZ6p5AD48mQDJSPMyJR1xmeALZxRdNttjQaQKjI3gTpssk9h4Kvj4nRFh7kTVHC8olyzm88VKw==
+X-Received: by 2002:ac2:5973:0:b0:4f3:7a8c:d46c with SMTP id h19-20020ac25973000000b004f37a8cd46cmr62166lfp.66.1684443773143;
+        Thu, 18 May 2023 14:02:53 -0700 (PDT)
+Received: from Fecusia.lan (c-05d8225c.014-348-6c756e10.bbcust.telenor.se. [92.34.216.5])
+        by smtp.gmail.com with ESMTPSA id i13-20020ac25d2d000000b004b40c1f1c70sm354976lfb.212.2023.05.18.14.02.52
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Thu, 18 May 2023 14:02:52 -0700 (PDT)
+From:   Linus Walleij <linus.walleij@linaro.org>
+To:     Ulf Hansson <ulf.hansson@linaro.org>, linux-mmc@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org,
+        Stephan Gerhold <stephan@gerhold.net>
+Cc:     Russell King <linux@armlinux.org.uk>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        stable@vger.kernel.org, phone-devel@vger.kernel.org,
+        Stefan Hansson <newbyte@disroot.org>
+Subject: [PATCH v3] mmc: mmci: Add busydetect timeout
+Date:   Thu, 18 May 2023 23:02:46 +0200
+Message-Id: <20230518210246.2401737-1-linus.walleij@linaro.org>
+X-Mailer: git-send-email 2.40.1
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.11.0
-Subject: Re: [PATCH] mmc: core: Remove unnecessary error checks and change
- return type
-To:     Yeqi Fu <asuk4.q@gmail.com>, ulf.hansson@linaro.org,
-        CLoehle@hyperstone.com, avri.altman@wdc.com, axboe@kernel.dk
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-References: <36e805fa-338d-a945-2621-75c5077572fc@intel.com>
- <20230518101216.369970-1-asuk4.q@gmail.com>
-Content-Language: en-US
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230518101216.369970-1-asuk4.q@gmail.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 18/05/23 13:12, Yeqi Fu wrote:
-> The error checks in mmc_blk_add_debugfs() and mmc_blk_remove_debugfs()
-> are extraneous. Therefore, this patch removes all error checks from
-> both functions.
-> Additionally, mmc_blk_add_debugfs() has been changed to return void
-> instead of an integer value that was never used. This simplifies the
-> function and improves its clarity.
-> 
-> Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
+Add a timeout for busydetect IRQs using a delayed work.
+It might happen (and does happen) on Ux500 that the first
+busy detect IRQ appears and not the second one. This will
+make the host hang indefinitely waiting for the second
+IRQ to appear.
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+Fire a delayed work after 10ms and re-engage the command
+IRQ so the transaction finishes: we are certainly done
+at this point, or we will catch an error in the status
+register.
 
-> ---
->  drivers/mmc/core/block.c | 25 +++++++------------------
->  1 file changed, 7 insertions(+), 18 deletions(-)
-> 
-> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
-> index 00c33edb9fb9..81f33200b893 100644
-> --- a/drivers/mmc/core/block.c
-> +++ b/drivers/mmc/core/block.c
-> @@ -2894,12 +2894,12 @@ static const struct file_operations mmc_dbg_ext_csd_fops = {
->  	.llseek		= default_llseek,
->  };
->  
-> -static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
-> +static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
->  {
->  	struct dentry *root;
->  
->  	if (!card->debugfs_root)
-> -		return 0;
-> +		return;
->  
->  	root = card->debugfs_root;
->  
-> @@ -2908,19 +2908,13 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
->  			debugfs_create_file_unsafe("status", 0400, root,
->  						   card,
->  						   &mmc_dbg_card_status_fops);
-> -		if (!md->status_dentry)
-> -			return -EIO;
->  	}
->  
->  	if (mmc_card_mmc(card)) {
->  		md->ext_csd_dentry =
->  			debugfs_create_file("ext_csd", S_IRUSR, root, card,
->  					    &mmc_dbg_ext_csd_fops);
-> -		if (!md->ext_csd_dentry)
-> -			return -EIO;
->  	}
-> -
-> -	return 0;
->  }
->  
->  static void mmc_blk_remove_debugfs(struct mmc_card *card,
-> @@ -2929,22 +2923,17 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
->  	if (!card->debugfs_root)
->  		return;
->  
-> -	if (!IS_ERR_OR_NULL(md->status_dentry)) {
-> -		debugfs_remove(md->status_dentry);
-> -		md->status_dentry = NULL;
-> -	}
-> +	debugfs_remove(md->status_dentry);
-> +	md->status_dentry = NULL;
->  
-> -	if (!IS_ERR_OR_NULL(md->ext_csd_dentry)) {
-> -		debugfs_remove(md->ext_csd_dentry);
-> -		md->ext_csd_dentry = NULL;
-> -	}
-> +	debugfs_remove(md->ext_csd_dentry);
-> +	md->ext_csd_dentry = NULL;
->  }
->  
->  #else
->  
-> -static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
-> +static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
->  {
-> -	return 0;
->  }
->  
->  static void mmc_blk_remove_debugfs(struct mmc_card *card,
+This makes the eMMC work again on Skomer and Codina phones.
+
+Notice that the hardware time-out cannot be used, because
+the state machine in the MMCI will not see that something
+is wrong.
+
+Cc: stable@vger.kernel.org
+Cc: phone-devel@vger.kernel.org
+Cc: Stefan Hansson <newbyte@disroot.org>
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ChangeLog v2->v3:
+- Took out the most urgent fix from the pile of changes
+  and send separately, without the rest of the refactorings
+  that were used for debugging the issue. After this the
+  Skomer and Codina with problematic eMMC boots fine.
+- Now just a single patch!
+- This version should be easier to backport as well.
+---
+ drivers/mmc/host/mmci.c | 22 ++++++++++++++++++++++
+ drivers/mmc/host/mmci.h |  1 +
+ 2 files changed, 23 insertions(+)
+
+diff --git a/drivers/mmc/host/mmci.c b/drivers/mmc/host/mmci.c
+index f2b2e8b0574e..f3349fb99590 100644
+--- a/drivers/mmc/host/mmci.c
++++ b/drivers/mmc/host/mmci.c
+@@ -37,6 +37,7 @@
+ #include <linux/pinctrl/consumer.h>
+ #include <linux/reset.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/workqueue.h>
+ 
+ #include <asm/div64.h>
+ #include <asm/io.h>
+@@ -695,6 +696,8 @@ static bool ux500_busy_complete(struct mmci_host *host, u32 status, u32 err_msk)
+ 	if (host->busy_status &&
+ 	    (status & host->variant->busy_detect_flag)) {
+ 		writel(host->variant->busy_detect_mask, base + MMCICLEAR);
++		schedule_delayed_work(&host->busy_timeout_work,
++				      msecs_to_jiffies(10));
+ 		return false;
+ 	}
+ 
+@@ -1429,6 +1432,22 @@ mmci_cmd_irq(struct mmci_host *host, struct mmc_command *cmd,
+ 	}
+ }
+ 
++/*
++ * This busy timeout worker is used to "kick" the command IRQ if a
++ * busy detect IRQ fails to appear in reasonable time. Only used on
++ * variants with busy detection IRQ delivery.
++ */
++static void busy_timeout_work(struct work_struct *work)
++{
++        struct mmci_host *host =
++		container_of(work, struct mmci_host, busy_timeout_work.work);
++	u32 status;
++
++	dev_dbg(mmc_dev(host->mmc), "timeout waiting for busy IRQ\n");
++	status = readl(host->base + MMCISTATUS);
++	mmci_cmd_irq(host, host->cmd, status);
++}
++
+ static int mmci_get_rx_fifocnt(struct mmci_host *host, u32 status, int remain)
+ {
+ 	return remain - (readl(host->base + MMCIFIFOCNT) << 2);
+@@ -2242,6 +2261,9 @@ static int mmci_probe(struct amba_device *dev,
+ 			goto clk_disable;
+ 	}
+ 
++	if (host->variant->busy_detect && host->ops->busy_complete)
++		INIT_DELAYED_WORK(&host->busy_timeout_work, busy_timeout_work);
++
+ 	writel(MCI_IRQENABLE | variant->start_err, host->base + MMCIMASK0);
+ 
+ 	amba_set_drvdata(dev, mmc);
+diff --git a/drivers/mmc/host/mmci.h b/drivers/mmc/host/mmci.h
+index e1a9b96a3396..de2c1436f4cd 100644
+--- a/drivers/mmc/host/mmci.h
++++ b/drivers/mmc/host/mmci.h
+@@ -437,6 +437,7 @@ struct mmci_host {
+ 	void			*dma_priv;
+ 
+ 	s32			next_cookie;
++	struct delayed_work	busy_timeout_work;
+ };
+ 
+ #define dma_inprogress(host)	((host)->dma_in_progress)
+-- 
+2.40.1
 
