@@ -2,166 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 82829C7EE2F
-	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 16:18:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4FC10C7EE23
+	for <linux-mmc@archiver.kernel.org>; Thu, 18 May 2023 16:43:39 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229624AbjERQSG (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 18 May 2023 12:18:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49524 "EHLO
+        id S229512AbjERQni (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 18 May 2023 12:43:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229595AbjERQSD (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 12:18:03 -0400
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51D4F13E;
-        Thu, 18 May 2023 09:18:02 -0700 (PDT)
-Received: by mail-ed1-x532.google.com with SMTP id 4fb4d7f45d1cf-510d6b939bfso3491211a12.0;
-        Thu, 18 May 2023 09:18:02 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1684426680; x=1687018680;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=gVuUzhjr+2NlfNCMwyqYcJUkzoS2xm3xsSK+vysljqE=;
-        b=YVCinwZm3Gpv165ZjZWCIZri/1QZyYQIn49J9Kna/LVRhk/XIwcv1WY5QUr8Q9Icu3
-         cMb/ONAZxrlMVXZhp/YyKT2rQHoS2qKCMR8BoJNraCeeEmshi/25pkRvIp4XFU3Tr9yH
-         p0lXXjLx4UNsmdPhM6//okX+LaoS5s1KjaekoR/um3vqF5YXO9SuLE2zAr9SBnI4WUkD
-         JUWN8p0E8yvngOA+LoUY6arbd8uxvmJ1MAtaGxgBPSGzKg26Bwp0VWc1cV/uzfSXsK/p
-         bR0hdNi2GsR/srkw+Xl/Z85XnlldRR2c0NwmFl06UVo/9ZA0P893nrJ5yFsCcJFXzDPH
-         8KNg==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684426680; x=1687018680;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=gVuUzhjr+2NlfNCMwyqYcJUkzoS2xm3xsSK+vysljqE=;
-        b=egpNzWzZWM/NubZnNGuiwMj+u1HDBLnbWYOlbjjo2lgaHHpo79LnGTdsTAMN+y0NYW
-         kp/N+fjB69xkBE0pGh5JeMSnZy1CTirvQPuFGIpBjhHebkI3ncylBgdh0GwGLdHK7woW
-         bILF2SHNfabgLy4Xax7glF+COJog/q/4zpqxtLawkRwsgirJb8BkOrTaXx5NEc8rkl45
-         JhzHFPzltNTTeC7ix2Z4sjU/ONjmmEa0gejjWGQQ40Hl6LUFT6xDOMMwpqVfLU3ZWi4/
-         6zlmz/D9KoTGeL0VxGLDl8l/5tuUNd7c6SzM9cFF7B/24LjVg+YPRu6OIDSkjQDDVqne
-         f7gA==
-X-Gm-Message-State: AC+VfDyFVd1wdr242DLfjVP9+R8NDZzXEnyPqa1b8+tDTGb+6zLW3gd5
-        ZSB/axLcety77X/0ol7PlXU3SE27ogQ=
-X-Google-Smtp-Source: ACHHUZ4SCXgMWbeecxLrsOOUibPYuErb/E+Wn+uaw1/dOF9iex4ZUNGyodWojXCBkYT4U1FrcdWZaA==
-X-Received: by 2002:a05:6402:53:b0:4fa:b302:84d4 with SMTP id f19-20020a056402005300b004fab30284d4mr5088857edu.13.1684426680518;
-        Thu, 18 May 2023 09:18:00 -0700 (PDT)
-Received: from localhost.localdomain (dynamic-2a01-0c22-73e5-9e00-0000-0000-0000-0e63.c22.pool.telefonica.de. [2a01:c22:73e5:9e00::e63])
-        by smtp.googlemail.com with ESMTPSA id c14-20020aa7c74e000000b0050bc13e5aa9sm756307eds.63.2023.05.18.09.17.59
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 18 May 2023 09:18:00 -0700 (PDT)
-From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-To:     linux-wireless@vger.kernel.org
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        ulf.hansson@linaro.org, kvalo@kernel.org, tony0620emma@gmail.com,
-        Peter Robinson <pbrobinson@gmail.com>,
-        Ping-Ke Shih <pkshih@realtek.com>, jernej.skrabec@gmail.com,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH wireless-next v1 4/4] wifi: rtw88: Add support for the SDIO based RTL8723DS chipset
-Date:   Thu, 18 May 2023 18:17:49 +0200
-Message-Id: <20230518161749.1311949-5-martin.blumenstingl@googlemail.com>
-X-Mailer: git-send-email 2.40.1
-In-Reply-To: <20230518161749.1311949-1-martin.blumenstingl@googlemail.com>
-References: <20230518161749.1311949-1-martin.blumenstingl@googlemail.com>
+        with ESMTP id S229457AbjERQnh (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 18 May 2023 12:43:37 -0400
+Received: from mga06.intel.com (mga06b.intel.com [134.134.136.31])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC9EBD1;
+        Thu, 18 May 2023 09:43:36 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1684428216; x=1715964216;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=kegxpnfkaQJ/nP+d2s5eNw9UacalFzi2yPWpbyh024o=;
+  b=VFIAplx81+Z0mvwYVj++SJeMecb5Libgq8EnKe8MI2DL6+6qcDCmr91h
+   4mJj3mZIQmLFRMwRYOLKna4/Utz3uZgiThkFlnAkyFf5Bd1OEQDJshvLo
+   cHnwhhhYfH2jC+hBW5+/yntuWobAHhmGOkysxxoKJt5BBINqd8/B5xw49
+   kMT9bN5T64UrjJWzy8SibbZKP21cvI1bnZwG7K2r5zhqOGk58GvshU7Sn
+   5I3F/Zyldgc3xJnhxZQMckSQJiEn163ZmG4Y44qcS1CxhvflYf3NBbmip
+   zhdrsUl4AiepswNqLJ79K7GBPrWoFbTg4mGxyBd8RT6R72PfWOkc5AQol
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10714"; a="415572079"
+X-IronPort-AV: E=Sophos;i="6.00,285,1681196400"; 
+   d="scan'208";a="415572079"
+Received: from fmsmga008.fm.intel.com ([10.253.24.58])
+  by orsmga104.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 09:43:36 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10714"; a="767276995"
+X-IronPort-AV: E=Sophos;i="6.00,285,1681196400"; 
+   d="scan'208";a="767276995"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.221.202])
+  by fmsmga008-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 18 May 2023 09:43:31 -0700
+Message-ID: <e471c66e-83ca-d568-0ac1-42f1576ced6f@intel.com>
+Date:   Thu, 18 May 2023 19:43:28 +0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.11.0
+Subject: Re: [PATCH] mmc: core: Remove unnecessary error checks and change
+ return type
+To:     Yeqi Fu <asuk4.q@gmail.com>, ulf.hansson@linaro.org,
+        CLoehle@hyperstone.com, avri.altman@wdc.com, axboe@kernel.dk
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <36e805fa-338d-a945-2621-75c5077572fc@intel.com>
+ <20230518101216.369970-1-asuk4.q@gmail.com>
+Content-Language: en-US
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230518101216.369970-1-asuk4.q@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Wire up RTL8723DS chipset support using the rtw88 SDIO HCI code as well
-as the existing RTL8723D chipset code.
+On 18/05/23 13:12, Yeqi Fu wrote:
+> The error checks in mmc_blk_add_debugfs() and mmc_blk_remove_debugfs()
+> are extraneous. Therefore, this patch removes all error checks from
+> both functions.
+> Additionally, mmc_blk_add_debugfs() has been changed to return void
+> instead of an integer value that was never used. This simplifies the
+> function and improves its clarity.
+> 
+> Signed-off-by: Yeqi Fu <asuk4.q@gmail.com>
 
-Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
----
- drivers/net/wireless/realtek/rtw88/Kconfig    | 11 +++++
- drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
- .../net/wireless/realtek/rtw88/rtw8723ds.c    | 41 +++++++++++++++++++
- 3 files changed, 55 insertions(+)
- create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723ds.c
+Acked-by: Adrian Hunter <adrian.hunter@intel.com>
 
-diff --git a/drivers/net/wireless/realtek/rtw88/Kconfig b/drivers/net/wireless/realtek/rtw88/Kconfig
-index 29eb2f8e0eb7..cffad1c01249 100644
---- a/drivers/net/wireless/realtek/rtw88/Kconfig
-+++ b/drivers/net/wireless/realtek/rtw88/Kconfig
-@@ -111,6 +111,17 @@ config RTW88_8723DE
- 
- 	  802.11n PCIe wireless network adapter
- 
-+config RTW88_8723DS
-+	tristate "Realtek 8723DS SDIO wireless network adapter"
-+	depends on MMC
-+	select RTW88_CORE
-+	select RTW88_SDIO
-+	select RTW88_8723D
-+	help
-+	  Select this option will enable support for 8723DS chipset
-+
-+	  802.11n SDIO wireless network adapter
-+
- config RTW88_8723DU
- 	tristate "Realtek 8723DU USB wireless network adapter"
- 	depends on USB
-diff --git a/drivers/net/wireless/realtek/rtw88/Makefile b/drivers/net/wireless/realtek/rtw88/Makefile
-index 82979b30ae8d..fd212c09d88a 100644
---- a/drivers/net/wireless/realtek/rtw88/Makefile
-+++ b/drivers/net/wireless/realtek/rtw88/Makefile
-@@ -50,6 +50,9 @@ rtw88_8723d-objs		:= rtw8723d.o rtw8723d_table.o
- obj-$(CONFIG_RTW88_8723DE)	+= rtw88_8723de.o
- rtw88_8723de-objs		:= rtw8723de.o
- 
-+obj-$(CONFIG_RTW88_8723DS)	+= rtw88_8723ds.o
-+rtw88_8723ds-objs		:= rtw8723ds.o
-+
- obj-$(CONFIG_RTW88_8723DU)	+= rtw88_8723du.o
- rtw88_8723du-objs		:= rtw8723du.o
- 
-diff --git a/drivers/net/wireless/realtek/rtw88/rtw8723ds.c b/drivers/net/wireless/realtek/rtw88/rtw8723ds.c
-new file mode 100644
-index 000000000000..e5b6960ba0a0
---- /dev/null
-+++ b/drivers/net/wireless/realtek/rtw88/rtw8723ds.c
-@@ -0,0 +1,41 @@
-+// SPDX-License-Identifier: GPL-2.0 OR BSD-3-Clause
-+/* Copyright(c) Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-+ */
-+
-+#include <linux/mmc/sdio_func.h>
-+#include <linux/mmc/sdio_ids.h>
-+#include <linux/module.h>
-+#include "main.h"
-+#include "rtw8723d.h"
-+#include "sdio.h"
-+
-+static const struct sdio_device_id rtw_8723ds_id_table[] =  {
-+	{
-+		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
-+			    SDIO_DEVICE_ID_REALTEK_RTW8723DS_1ANT),
-+		.driver_data = (kernel_ulong_t)&rtw8723d_hw_spec,
-+	},
-+	{
-+		SDIO_DEVICE(SDIO_VENDOR_ID_REALTEK,
-+			    SDIO_DEVICE_ID_REALTEK_RTW8723DS_2ANT),
-+		.driver_data = (kernel_ulong_t)&rtw8723d_hw_spec,
-+	},
-+	{}
-+};
-+MODULE_DEVICE_TABLE(sdio, rtw_8723ds_id_table);
-+
-+static struct sdio_driver rtw_8723ds_driver = {
-+	.name = "rtw_8723ds",
-+	.probe = rtw_sdio_probe,
-+	.remove = rtw_sdio_remove,
-+	.id_table = rtw_8723ds_id_table,
-+	.drv = {
-+		.pm = &rtw_sdio_pm_ops,
-+		.shutdown = rtw_sdio_shutdown,
-+	}
-+};
-+module_sdio_driver(rtw_8723ds_driver);
-+
-+MODULE_AUTHOR("Martin Blumenstingl <martin.blumenstingl@googlemail.com>");
-+MODULE_DESCRIPTION("Realtek 802.11n wireless 8723ds driver");
-+MODULE_LICENSE("Dual BSD/GPL");
--- 
-2.40.1
+> ---
+>  drivers/mmc/core/block.c | 25 +++++++------------------
+>  1 file changed, 7 insertions(+), 18 deletions(-)
+> 
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 00c33edb9fb9..81f33200b893 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2894,12 +2894,12 @@ static const struct file_operations mmc_dbg_ext_csd_fops = {
+>  	.llseek		= default_llseek,
+>  };
+>  
+> -static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+> +static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>  {
+>  	struct dentry *root;
+>  
+>  	if (!card->debugfs_root)
+> -		return 0;
+> +		return;
+>  
+>  	root = card->debugfs_root;
+>  
+> @@ -2908,19 +2908,13 @@ static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>  			debugfs_create_file_unsafe("status", 0400, root,
+>  						   card,
+>  						   &mmc_dbg_card_status_fops);
+> -		if (!md->status_dentry)
+> -			return -EIO;
+>  	}
+>  
+>  	if (mmc_card_mmc(card)) {
+>  		md->ext_csd_dentry =
+>  			debugfs_create_file("ext_csd", S_IRUSR, root, card,
+>  					    &mmc_dbg_ext_csd_fops);
+> -		if (!md->ext_csd_dentry)
+> -			return -EIO;
+>  	}
+> -
+> -	return 0;
+>  }
+>  
+>  static void mmc_blk_remove_debugfs(struct mmc_card *card,
+> @@ -2929,22 +2923,17 @@ static void mmc_blk_remove_debugfs(struct mmc_card *card,
+>  	if (!card->debugfs_root)
+>  		return;
+>  
+> -	if (!IS_ERR_OR_NULL(md->status_dentry)) {
+> -		debugfs_remove(md->status_dentry);
+> -		md->status_dentry = NULL;
+> -	}
+> +	debugfs_remove(md->status_dentry);
+> +	md->status_dentry = NULL;
+>  
+> -	if (!IS_ERR_OR_NULL(md->ext_csd_dentry)) {
+> -		debugfs_remove(md->ext_csd_dentry);
+> -		md->ext_csd_dentry = NULL;
+> -	}
+> +	debugfs_remove(md->ext_csd_dentry);
+> +	md->ext_csd_dentry = NULL;
+>  }
+>  
+>  #else
+>  
+> -static int mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+> +static void mmc_blk_add_debugfs(struct mmc_card *card, struct mmc_blk_data *md)
+>  {
+> -	return 0;
+>  }
+>  
+>  static void mmc_blk_remove_debugfs(struct mmc_card *card,
 
