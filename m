@@ -2,107 +2,116 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8BD8AC7EE2A
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 May 2023 15:56:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5904AC7EE2A
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 May 2023 18:48:23 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231124AbjESP4L (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 May 2023 11:56:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33894 "EHLO
+        id S229807AbjESSsW (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 May 2023 14:48:22 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230251AbjESP4K (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2023 11:56:10 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA53AB2;
-        Fri, 19 May 2023 08:56:07 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5194960B89;
-        Fri, 19 May 2023 15:56:07 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 17FAEC433D2;
-        Fri, 19 May 2023 15:56:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684511766;
-        bh=qBWFq4Bx+YMgoGo+t+ko1dR8Ws+9DAUxuYULgMcKNIk=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=B2vHJ4uHASusVRTsD9Tz4NylL6/bc4c5RXt8Tg//Oh76bMSZX/SnPj3XYwMPhkqrp
-         GD7jiG3Clwpqz2c2MS/bnp/v/OUVKqWLxnxf29lMUleds/pByh0ReJfJUMUVvQkvDO
-         8ZgXjH1y5OU7Wi3t33vLYGwkhcyspMJMaeHMbyY67HqQRDJIG/8YXK2WpFHQ+WtTNa
-         QcCswX14IfzhK5bGR0hIyvwfPQAICFwxNC6pbLWu9CEyRHGeHUYZ9jYpBei2eY0Yja
-         Vf0HPZpywtD7c0Q3+PLvEKPazJHCy6t53F5/DYb/bRs3GdIFPRcSEMdrBFi3lF332y
-         4iVk2ROeelfRg==
-Date:   Fri, 19 May 2023 16:56:01 +0100
-From:   Conor Dooley <conor@kernel.org>
-To:     Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Cc:     Komal Bajaj <quic_kbajaj@quicinc.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH 1/4] dt-bindings: mmc: sdhci-msm: Document the
- QDU1000/QRU1000 compatible
-Message-ID: <20230519-overbid-unholy-bc5404a494bb@spud>
-References: <20230519085122.15758-1-quic_kbajaj@quicinc.com>
- <20230519085122.15758-2-quic_kbajaj@quicinc.com>
- <94e1e91d-e36a-215e-2395-6212c1694dd3@linaro.org>
+        with ESMTP id S229611AbjESSsV (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2023 14:48:21 -0400
+Received: from mail-qk1-x72a.google.com (mail-qk1-x72a.google.com [IPv6:2607:f8b0:4864:20::72a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46014E42;
+        Fri, 19 May 2023 11:48:20 -0700 (PDT)
+Received: by mail-qk1-x72a.google.com with SMTP id af79cd13be357-7576deacbd6so187162785a.3;
+        Fri, 19 May 2023 11:48:20 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1684522099; x=1687114099;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=aucr+tRVBv5cqs7JeI2aqwsV9gzMz1bgXQsJAhmbxW4=;
+        b=PpSo/arQcQKmS36tSxM9Cnt4Su55bOl6QLqfHFr3cRDLjGfBPmy/4LdOTXO1mTC7TU
+         +h6zNYzC7EURr15YYN8goMD7v6RznswhtOgMElup6wYbVfHbxs4a47ok/OnPFpqErvLJ
+         zLaA4m79xyLg2ZbRQvacUIUIGdNcGRVsuv4BMr5g5jVqiRGgmPy2C1ltdFKMTyDSPwDr
+         TzY5W2eEvjlhaVnkq6OWMLBvMkwaXjsWMRKPTsuv+cS4Lv2TEyumfsxR8ifdFTwUygA2
+         TqAVlL/I0+r7yr70jumVbnXlz1D0lm072YHwK8y+0ZpsG6toiGHIHLlnUAD9+x7topeH
+         I29g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684522099; x=1687114099;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=aucr+tRVBv5cqs7JeI2aqwsV9gzMz1bgXQsJAhmbxW4=;
+        b=WsS3frwl6BrlGZw3hVnRQkfvKKky9sGIBG4exsYHGpLwlBbq0dzSD2XjHz2o7euCsm
+         OwRmciKbWrUwhY2qY8dV0G/f2BOk5nRCp2aKbJ78n75WErX/DPUH+t6wqedHMRt3CkjK
+         NYxCt32om2WEiAspa/0mbNMPFQpH0BzzppZE33wxg4E5n//5+zEqmUePnTaUGR2bG69F
+         1lSHzD+C3BlG0O6sEl4iMHYqBxex1ZftCniBkr3k8BYZBlL3v0rBBQ3CExlwgO7d2dKF
+         yZRCMzw8DaPGjxSznB8eRzR6NuM8wAkVWNwPEVYZ4D5IfNrPJUFzw4tCZ+dgygq4/4eO
+         Ob8A==
+X-Gm-Message-State: AC+VfDwWXZImWMKYUdBkidkgX2neRMP3xku21Xn9+N30KXXCUmpV2fpR
+        DrNnctpPgvqar58SQhb9l+rPaZPI9R7JebkUtiA=
+X-Google-Smtp-Source: ACHHUZ41R6QrVaDLtFOOxqfjtZx2wKBt6x1A/oKCkV4j8y+ooFPp2RkZgmmem/yzfaRC11jWvnhwBP5fxutURteEogo=
+X-Received: by 2002:ad4:5ec8:0:b0:621:48be:bab5 with SMTP id
+ jm8-20020ad45ec8000000b0062148bebab5mr6121486qvb.8.1684522099280; Fri, 19 May
+ 2023 11:48:19 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="BdZwo11bf1TuM+Fu"
-Content-Disposition: inline
-In-Reply-To: <94e1e91d-e36a-215e-2395-6212c1694dd3@linaro.org>
+References: <20230519125409.497439-1-quic_srichara@quicinc.com> <20230519125409.497439-5-quic_srichara@quicinc.com>
+In-Reply-To: <20230519125409.497439-5-quic_srichara@quicinc.com>
+From:   Andy Shevchenko <andy.shevchenko@gmail.com>
+Date:   Fri, 19 May 2023 21:47:43 +0300
+Message-ID: <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
+Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
+        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
+        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
+        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, May 19, 2023 at 3:55=E2=80=AFPM Sricharan Ramabadhran
+<quic_srichara@quicinc.com> wrote:
+>
+> Add pinctrl definitions for the TLMM of IPQ5018.
 
---BdZwo11bf1TuM+Fu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+A couple of remarks either for the next version of the series or for
+the follow ups.
 
-On Fri, May 19, 2023 at 03:37:09PM +0530, Bhupesh Sharma wrote:
->=20
-> On 5/19/23 2:21 PM, Komal Bajaj wrote:
-> > Document the compatible for SDHCI on QDU1000 and QRU1000 SoCs.
-> >=20
-> > Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
-> > ---
-> >   Documentation/devicetree/bindings/mmc/sdhci-msm.yaml | 1 +
-> >   1 file changed, 1 insertion(+)
-> >=20
-> > diff --git a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml b/Doc=
-umentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> > index 4f2d9e8127dd..f51a38b12d6f 100644
-> > --- a/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> > +++ b/Documentation/devicetree/bindings/mmc/sdhci-msm.yaml
-> > @@ -55,6 +55,7 @@ properties:
-> >                 - qcom,sm8350-sdhci
-> >                 - qcom,sm8450-sdhci
-> >                 - qcom,sm8550-sdhci
-> > +              - qcom,qdu1000-sdhci
->=20
-> Please add new entries in alphabetical order.
+...
 
-With this done,
-Acked-by: Conor Dooley <conor.dooley@microchip.com>
+> +config PINCTRL_IPQ5018
+> +       tristate "Qualcomm Technologies, Inc. IPQ5018 pin controller driv=
+er"
 
-Thanks,
-Conor.
+> +       depends on GPIOLIB && OF
 
---BdZwo11bf1TuM+Fu
-Content-Type: application/pgp-signature; name="signature.asc"
+I'm wondering why OF.
+If it's a functional dependency (I do not see compile-time one) the
+compile test can be added, no?
 
------BEGIN PGP SIGNATURE-----
+  depends on GPIOLIB
+  depends on OF || COMPILE_TEST
 
-iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZGecEQAKCRB4tDGHoIJi
-0lV3AP9u42Xap6bdzZc0n7eLe6XKtdYOCODxe8NYB3wJIftyAAEAyHx4Bb/Iz3SX
-TWVPYgLFr3Q2bklCaW5OS6nXiR5qYQc=
-=tzhh
------END PGP SIGNATURE-----
+> +       select PINCTRL_MSM
+> +       help
+> +         This is the pinctrl, pinmux, pinconf and gpiolib driver for
+> +         the Qualcomm Technologies Inc. TLMM block found on the
+> +         Qualcomm Technologies Inc. IPQ5018 platform. Select this for
+> +         IPQ5018.
 
---BdZwo11bf1TuM+Fu--
+...
+
+> +#include <linux/module.h>
+
+> +#include <linux/of.h>
+
+There is a wrong header (the code doesn't use this one).
+You meant mod_devicetable.h
+
+> +#include <linux/platform_device.h>
+
+Besides that kernel.h for ARRAY_SIZE() init.h for arch_initcall() and
+others might be missing.
+
+--=20
+With Best Regards,
+Andy Shevchenko
