@@ -2,113 +2,191 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 39E78C7EE23
-	for <linux-mmc@archiver.kernel.org>; Fri, 19 May 2023 12:57:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05F47C77B7A
+	for <linux-mmc@archiver.kernel.org>; Fri, 19 May 2023 13:19:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231688AbjESM5l (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Fri, 19 May 2023 08:57:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37164 "EHLO
+        id S229749AbjESNTj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Fri, 19 May 2023 09:19:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231414AbjESM5k (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2023 08:57:40 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E7B7E45;
-        Fri, 19 May 2023 05:56:56 -0700 (PDT)
-Received: from pps.filterd (m0279870.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34JCGhFw013234;
-        Fri, 19 May 2023 12:56:12 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : subject
- : date : message-id : in-reply-to : references : mime-version :
- content-transfer-encoding : content-type; s=qcppdkim1;
- bh=T8XoqpXDyaET013xmrLDBkOm8cU8UuGqCHGSI8E8QUU=;
- b=AlvZK+mppsmRb7iA3+hqFSJMidqgpMlFikcgWFDRHS7TckDx/Duuk07fFSwi+IEIVuFj
- ey7DoY1ZMXj0CE0HX94jAgaEOANvFhsizTehnKvmWEfoJJI4K0nzLU9Y6RD2PxBxisxH
- UltqFFmSRvfDgwnJ6J2GuL6pp84hw6IVtoELAgLRpMyNSJz3h6EOhz2zcJI0Jq8MmRZQ
- M6p3Ub/jqzZXTQd9JHQSBOWp9CXR1kz9//8uJAtcogWi2wVtjUJsNQfaiuaO47r/MSak
- b91kK+xzZW35+7KGETDUSXNtsRAF3DgcHmhwW01z+0VJ0XCNgKe8E2Sfs2HPY3DRw/k8 Ow== 
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qp8fm04fp-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 19 May 2023 12:56:12 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34JCto1n022073
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Fri, 19 May 2023 12:55:50 GMT
-Received: from win-platform-upstream01.qualcomm.com (10.80.80.8) by
- nalasex01c.na.qualcomm.com (10.47.97.35) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.2.986.42; Fri, 19 May 2023 05:55:12 -0700
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-To:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
-        <will@kernel.org>, <p.zabel@pengutronix.de>,
-        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
-        <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <andy.shevchenko@gmail.com>, <quic_srichara@quicinc.com>
-Subject: [PATCH V7 8/8] arm64: defconfig: Enable IPQ5018 SoC base configs
-Date:   Fri, 19 May 2023 18:24:09 +0530
-Message-ID: <20230519125409.497439-9-quic_srichara@quicinc.com>
-X-Mailer: git-send-email 2.34.1
-In-Reply-To: <20230519125409.497439-1-quic_srichara@quicinc.com>
-References: <20230519125409.497439-1-quic_srichara@quicinc.com>
+        with ESMTP id S229525AbjESNTi (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Fri, 19 May 2023 09:19:38 -0400
+Received: from mga09.intel.com (mga09.intel.com [134.134.136.24])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 914BFF5;
+        Fri, 19 May 2023 06:19:37 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1684502377; x=1716038377;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=eEhAEFLIKOmDZvy6O3OlkuPuCxuqqdM7KsLCVfR9U2A=;
+  b=HG701rwws+scry9uiiy5bfpLhSyS1OEAKBaTyM6SJ2IjIG1QuKQHreuS
+   9Aux3wP52HKILhyfmCNptUyGS/LY6U6vHUeYh+wKiLmXtGHa0r8fVazQ+
+   WYdBN3bybjLq3axh3QyzwU5JRBeasJk4T9UEFBnpaURvHpbieRZg2K9eO
+   lmPQTOAk3KjZXPmTmAHZhNzcKpbkc774rmMvFMq8G84B91cwne3gyevXq
+   2YPGqyUcT2fOLhJ5qpS3ZYP/wc0Jz/OICxwF+rz+xj4Fu/gVPuweNn7ne
+   OLZtbVeoMD/PKIAHcGqVE2Y4OPDp5+aOtF/IlQyUJqosAAi79PwI+dbAc
+   Q==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10715"; a="354722547"
+X-IronPort-AV: E=Sophos;i="6.00,176,1681196400"; 
+   d="scan'208";a="354722547"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga102.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 May 2023 06:19:37 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10715"; a="733293981"
+X-IronPort-AV: E=Sophos;i="6.00,176,1681196400"; 
+   d="scan'208";a="733293981"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.249.38.109])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 19 May 2023 06:19:34 -0700
+Message-ID: <9094e3c9-77fd-081f-244a-9454b81bd3b6@intel.com>
+Date:   Fri, 19 May 2023 16:19:29 +0300
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01b.na.qualcomm.com (10.46.141.250) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 6l7PAwVJcBwfMczpSgcK0NxfayXQIvz1
-X-Proofpoint-GUID: 6l7PAwVJcBwfMczpSgcK0NxfayXQIvz1
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-19_08,2023-05-17_02,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 lowpriorityscore=0
- impostorscore=0 adultscore=0 mlxlogscore=887 bulkscore=0 spamscore=0
- priorityscore=1501 malwarescore=0 phishscore=0 clxscore=1015
- suspectscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305190109
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.11.0
+Subject: Re: [PATCH v4] mmc: sdhci-of-dwcmshc: Add runtime PM operations
+Content-Language: en-US
+To:     Liming Sun <limings@nvidia.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        David Thompson <davthompson@nvidia.com>,
+        Shawn Lin <shawn.lin@rock-chips.com>
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+References: <79137159a833c164ea8ea3f05d8d6d9537db2f42.1683747334.git.limings@nvidia.com>
+ <20230512181527.189345-1-limings@nvidia.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230512181527.189345-1-limings@nvidia.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Enables clk & pinctrl related configs
+On 12/05/23 21:15, Liming Sun wrote:
+> This commit implements the runtime PM operations to disable eMMC
+> card clock when idle.
+> 
+> Reviewed-by: David Thompson <davthompson@nvidia.com>
+> Signed-off-by: Liming Sun <limings@nvidia.com>
+> ---
+> v3->v4:
+>     - Fix compiling reported by 'kernel test robot';
+> v2->v3:
+>     - Revise the commit message;
+> v1->v2:
+>     Updates for comments from Ulf:
+>     - Make the runtime PM logic generic for sdhci-of-dwcmshc;
+> v1: Initial version.
+> ---
+>  drivers/mmc/host/sdhci-of-dwcmshc.c | 54 ++++++++++++++++++++++++++++-
+>  1 file changed, 53 insertions(+), 1 deletion(-)
+> 
+> diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> index e68cd87998c8..2d780a5bc8fb 100644
+> --- a/drivers/mmc/host/sdhci-of-dwcmshc.c
+> +++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+> @@ -15,6 +15,7 @@
+>  #include <linux/module.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> +#include <linux/pm_runtime.h>
+>  #include <linux/reset.h>
+>  #include <linux/sizes.h>
+>  
+> @@ -546,6 +547,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+>  		sdhci_enable_v4_mode(host);
+>  #endif
+>  
+> +	pm_runtime_enable(dev);
 
-Reviewed-by: Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
----
- [v6] Added Reviewed by
+Is there a reason to call it this early?  That raises questions
+about runtime PM racing with the rest of the host initialization.
+Perhaps below instead (note also using devm):
 
- arch/arm64/configs/defconfig | 3 +++
- 1 file changed, 3 insertions(+)
+diff --git a/drivers/mmc/host/sdhci-of-dwcmshc.c b/drivers/mmc/host/sdhci-of-dwcmshc.c
+index 2d780a5bc8fb..5cee42d72257 100644
+--- a/drivers/mmc/host/sdhci-of-dwcmshc.c
++++ b/drivers/mmc/host/sdhci-of-dwcmshc.c
+@@ -547,8 +547,6 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 		sdhci_enable_v4_mode(host);
+ #endif
+ 
+-	pm_runtime_enable(dev);
+-
+ 	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+ 
+ 	err = sdhci_setup_host(host);
+@@ -562,6 +560,8 @@ static int dwcmshc_probe(struct platform_device *pdev)
+ 	if (err)
+ 		goto err_setup_host;
+ 
++	devm_pm_runtime_enable(dev);
++
+ 	return 0;
+ 
+ err_setup_host:
 
-diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index a24609e14d50..8bf0ef77f375 100644
---- a/arch/arm64/configs/defconfig
-+++ b/arch/arm64/configs/defconfig
-@@ -553,6 +553,7 @@ CONFIG_PINCTRL_IMX8ULP=y
- CONFIG_PINCTRL_IMX93=y
- CONFIG_PINCTRL_MSM=y
- CONFIG_PINCTRL_IPQ8074=y
-+CONFIG_PINCTRL_IPQ5018=y
- CONFIG_PINCTRL_IPQ5332=y
- CONFIG_PINCTRL_IPQ6018=y
- CONFIG_PINCTRL_IPQ9574=y
-@@ -1154,6 +1155,8 @@ CONFIG_QCOM_CLK_APCC_MSM8996=y
- CONFIG_QCOM_CLK_SMD_RPM=y
- CONFIG_QCOM_CLK_RPMH=y
- CONFIG_IPQ_GCC_5332=y
-+CONFIG_IPQ_APSS_5018=y
-+CONFIG_IPQ_GCC_5018=y
- CONFIG_IPQ_GCC_6018=y
- CONFIG_IPQ_GCC_8074=y
- CONFIG_IPQ_GCC_9574=y
--- 
-2.34.1
+
+> +
+>  	host->mmc->caps |= MMC_CAP_WAIT_WHILE_BUSY;
+>  
+>  	err = sdhci_setup_host(host);
+> @@ -646,7 +649,56 @@ static int dwcmshc_resume(struct device *dev)
+>  }
+>  #endif
+>  
+> -static SIMPLE_DEV_PM_OPS(dwcmshc_pmops, dwcmshc_suspend, dwcmshc_resume);
+> +#ifdef CONFIG_PM
+> +
+> +static void dwcmshc_enable_card_clk(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	ctrl |= SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
+> +}
+> +
+> +static void dwcmshc_disable_card_clk(struct sdhci_host *host)
+> +{
+> +	u16 ctrl;
+> +
+> +	ctrl = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
+> +	ctrl &= ~SDHCI_CLOCK_CARD_EN;
+> +	sdhci_writew(host, ctrl, SDHCI_CLOCK_CONTROL);
+> +}
+> +
+> +static int dwcmshc_runtime_suspend(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	int ret = 0;
+> +
+> +	ret = sdhci_runtime_suspend_host(host);
+> +	if (!ret)
+> +		dwcmshc_disable_card_clk(host);
+> +
+> +	return ret;
+> +}
+> +
+> +static int dwcmshc_runtime_resume(struct device *dev)
+> +{
+> +	struct sdhci_host *host = dev_get_drvdata(dev);
+> +	int ret = 0;
+> +
+> +	dwcmshc_enable_card_clk(host);
+> +	ret = sdhci_runtime_resume_host(host, 0);
+> +
+> +	return ret;
+> +}
+> +
+> +#endif
+> +
+> +static const struct dev_pm_ops dwcmshc_pmops = {
+> +	SET_SYSTEM_SLEEP_PM_OPS(dwcmshc_suspend, dwcmshc_resume)
+> +	SET_RUNTIME_PM_OPS(dwcmshc_runtime_suspend,
+> +			   dwcmshc_runtime_resume, NULL)
+> +};
+>  
+>  static struct platform_driver sdhci_dwcmshc_driver = {
+>  	.driver	= {
 
