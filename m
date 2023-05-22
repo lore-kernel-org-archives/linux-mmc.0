@@ -2,149 +2,108 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B9EAC7EE2E
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 14:57:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 877E8C77B75
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 20:13:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233113AbjEVO5O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 May 2023 10:57:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38042 "EHLO
+        id S234336AbjEVUNn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 16:13:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233883AbjEVO5N (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 10:57:13 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43124BB;
-        Mon, 22 May 2023 07:57:12 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id C169961AFE;
-        Mon, 22 May 2023 14:57:11 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 514ADC433D2;
-        Mon, 22 May 2023 14:57:10 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684767431;
-        bh=ThXECPaDh9Oj7V7+VzqTXFJWN8ADA2MjHyWE9rB8dPA=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=pIpKE/DgQZtCWf7SiEQ+irFRq6pTLepH9Tg10WqNGBz7VesKSG/uV9y3p5g3bfcsl
-         FQE2Nao9jS3bgj8oJasHdsqWDLmHAMJQ84p7Dxak2W8M7eVpGJYwom3Ey/sg8GM+Ei
-         P/K13ZTA6wBGlLTaGwRkgGL4rzfl/RhpI8hR7BamUDmxtnwjcw4quYf2PaXH1TIHuI
-         fczfPBWI1gjAEkpYhsWDI74z50as3+CLy/A45h8FX1GCjUzkdywtRixdvkq+gKNQoQ
-         /zVx6QajqY7afz7EaR4d5o4QUSVE8h1gaRD2902iU+IKrenHGqPA/4zQMr1Ae37D0W
-         XYga9WMhrEU+g==
-Date:   Mon, 22 May 2023 08:01:05 -0700
-From:   Bjorn Andersson <andersson@kernel.org>
-To:     Komal Bajaj <quic_kbajaj@quicinc.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH v2 2/4] arm: dts: qcom: qdu1000: Add SDHCI node
-Message-ID: <20230522150105.3i7zeucna7kh5waz@ripper>
-References: <20230522093620.3568-1-quic_kbajaj@quicinc.com>
- <20230522093620.3568-3-quic_kbajaj@quicinc.com>
+        with ESMTP id S233740AbjEVUNm (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 16:13:42 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04093CF;
+        Mon, 22 May 2023 13:13:39 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id 4fb4d7f45d1cf-510d8b0169fso68713a12.1;
+        Mon, 22 May 2023 13:13:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=googlemail.com; s=20221208; t=1684786417; x=1687378417;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=GZNAvuoSua7WwcqydioYVqvGkj4SSXZS2il2MPGqL0M=;
+        b=OhMQ4gNMZw7f/4lFXSoam6/8avsvMtG1EMKwbAGYEVs9iDjNQHcQN6gNNQBR4SJQ4O
+         v9r7FBZTjB+179gs+wkfVthGcbpFc4sVVb6k+ReRb0HPesCP+bGJsGcKvNnd+t44zWBl
+         ArWSoO0dnUOvwM8upDZBSev0dAkZcQK7bCgmlFrTSp4CF+ilNJFzZWo7mAVoQgaBA3sx
+         UjE4L2Dv1Kr5sYUP+Vgjgjtd4Xn8HAo/JZu9KOIlT3x/dv+YQtWZyWOnZ/K/no/3h/bb
+         D9t14DLURXvpmBfCIKN2oyjyX4KyX560jkST9SVD+7n0QcCeb8/VO3Kcu9Ct7QFGgpiq
+         ehFA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684786417; x=1687378417;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=GZNAvuoSua7WwcqydioYVqvGkj4SSXZS2il2MPGqL0M=;
+        b=NEKmg9SYxZGwcgN4ctRnP9BUGpYSE2mUDP61XvCRUMBxa3H3NZm7UJwQ0vRrDophOb
+         ApRFBrB7YWeqjPQ0PeZf77qsI3xqdlhQh5IaGC2Jk/KrFqncL2F3/8pcwcmI5xm/jbqB
+         44GCBWJ+jtlAePSMHMi+3SqgBRMi9/X5zV2B6CGd55zW9/OKwhg188q72jUcXkU1hmyv
+         AodnyZrDDuAVe/nxnf0pBPX474T+YOATg/gdMkgXAjN3ePqfVUGY6qeQwSuCL2kuuAep
+         QlhQyO8sSp2o3NLx1yn5zwx5v/1AivTZEP6zHsjPH6da+nMhjnlnV6VWaCQyQUk3V+ai
+         E0JA==
+X-Gm-Message-State: AC+VfDy7yRIUFaw5yQ2F0KiYKITWtfFR4ZSVWzvMEi5jhZARc5mye24w
+        ERS+0zFjm1qs2q66uIWP5YptkfqV4dRgXBl108bH89CK6Wc=
+X-Google-Smtp-Source: ACHHUZ47dJhLso1KMARR9qtY2jRHlSSsf8sMqLKqnDK+v9DK7ypDGWN2y1WGJF8YCk8u7voVB8nV+4Nicg/rI2lPfeU=
+X-Received: by 2002:a17:906:4788:b0:96f:57ba:4b56 with SMTP id
+ cw8-20020a170906478800b0096f57ba4b56mr12944986ejc.20.1684786417236; Mon, 22
+ May 2023 13:13:37 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230522093620.3568-3-quic_kbajaj@quicinc.com>
+References: <20230518161749.1311949-1-martin.blumenstingl@googlemail.com>
+ <20230518161749.1311949-5-martin.blumenstingl@googlemail.com> <c52c11c712e24e1fb783c2ce1251aba5@realtek.com>
+In-Reply-To: <c52c11c712e24e1fb783c2ce1251aba5@realtek.com>
+From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+Date:   Mon, 22 May 2023 22:13:26 +0200
+Message-ID: <CAFBinCC+Lz7uGBAuK5gQ-2ngutcgNG5EN4TTdM5tdFQB5uXtqw@mail.gmail.com>
+Subject: Re: [PATCH wireless-next v1 4/4] wifi: rtw88: Add support for the
+ SDIO based RTL8723DS chipset
+To:     Ping-Ke Shih <pkshih@realtek.com>
+Cc:     "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "kvalo@kernel.org" <kvalo@kernel.org>,
+        "tony0620emma@gmail.com" <tony0620emma@gmail.com>,
+        Peter Robinson <pbrobinson@gmail.com>,
+        "jernej.skrabec@gmail.com" <jernej.skrabec@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, May 22, 2023 at 03:06:18PM +0530, Komal Bajaj wrote:
+On Mon, May 22, 2023 at 3:49=E2=80=AFAM Ping-Ke Shih <pkshih@realtek.com> w=
+rote:
+>
+>
+>
+> > -----Original Message-----
+> > From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+> > Sent: Friday, May 19, 2023 12:18 AM
+> > To: linux-wireless@vger.kernel.org
+> > Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; ulf.hansso=
+n@linaro.org; kvalo@kernel.org;
+> > tony0620emma@gmail.com; Peter Robinson <pbrobinson@gmail.com>; Ping-Ke =
+Shih <pkshih@realtek.com>;
+> > jernej.skrabec@gmail.com; Martin Blumenstingl <martin.blumenstingl@goog=
+lemail.com>
+> > Subject: [PATCH wireless-next v1 4/4] wifi: rtw88: Add support for the =
+SDIO based RTL8723DS chipset
+> >
+> > Wire up RTL8723DS chipset support using the rtw88 SDIO HCI code as well
+> > as the existing RTL8723D chipset code.
+> >
+> > Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+>
+> I'm so surprised that this small patchset can support an new chip. Nice j=
+ob. :-)
+Please also take it as feedback/learning for yourself and to your team
+at Realtek:
+In my opinion the rtw88 driver is a good piece of software and it
+shows why it is the first choice that Jernej and I had in mind when
+thinking about future RTL8723BS support.
 
-Path says arch/arm64/, so $subject should start "arm64: dts: qcom: ..."
+> Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
+Thank you!
 
-> Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
-> 
-> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/qdu1000.dtsi | 51 +++++++++++++++++++++++++++
->  1 file changed, 51 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> index 734438113bba..38ee7115a35f 100644
-> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> @@ -19,6 +19,10 @@
->  
->  	chosen: chosen { };
->  
-> +	aliases {
-> +		mmc0 = &sdhc_1; /* eMMC */
 
-Don't we just have a single SDC instance on this platform? If so you
-don't need aliases.
-
-> +	};
-> +
->  	cpus {
->  		#address-cells = <2>;
->  		#size-cells = <0>;
-> @@ -842,6 +846,53 @@
->  			#hwlock-cells = <1>;
->  		};
->  
-> +		sdhc_1: mmc@8804000 {
-
-And you can skip the "_1" suffix...
-
-Regards,
-Bjorn
-
-> +			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0x0 0x08804000 0x0 0x1000>,
-> +			      <0x0 0x08805000 0x0 0x1000>;
-> +			reg-names = "hc", "cqhci";
-> +
-> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
-> +				 <&gcc GCC_SDCC5_APPS_CLK>,
-> +				 <&rpmhcc RPMH_CXO_CLK>;
-> +			clock-names = "iface",
-> +				      "core",
-> +				      "xo";
-> +
-> +			resets = <&gcc GCC_SDCC5_BCR>;
-> +
-> +			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
-> +					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
-> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
-> +			power-domains = <&rpmhpd QDU1000_CX>;
-> +			operating-points-v2 = <&sdhc1_opp_table>;
-> +
-> +			iommus = <&apps_smmu 0x80 0x0>;
-> +			dma-coherent;
-> +
-> +			bus-width = <8>;
-> +
-> +			qcom,dll-config = <0x0007642c>;
-> +			qcom,ddr-config = <0x80040868>;
-> +
-> +			status = "disabled";
-> +
-> +			sdhc1_opp_table: opp-table {
-> +				compatible = "operating-points-v2";
-> +
-> +				opp-384000000 {
-> +					opp-hz = /bits/ 64 <384000000>;
-> +					required-opps = <&rpmhpd_opp_nom>;
-> +					opp-peak-kBps = <6528000 1652800>;
-> +					opp-avg-kBps = <400000 0>;
-> +				};
-> +			};
-> +		};
-> +
->  		pdc: interrupt-controller@b220000 {
->  			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
->  			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
-> -- 
-> 2.17.1
-> 
+Best regards,
+Martin
