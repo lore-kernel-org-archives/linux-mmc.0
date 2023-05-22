@@ -2,52 +2,53 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B12DBC7EE2A
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 20:24:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9327C7EE29
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 20:25:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231448AbjEVUYq (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 May 2023 16:24:46 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34742 "EHLO
+        id S233841AbjEVUYs (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 16:24:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34758 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229714AbjEVUYp (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 16:24:45 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0663BAA;
-        Mon, 22 May 2023 13:24:44 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id 4fb4d7f45d1cf-510eb980ce2so78551a12.2;
-        Mon, 22 May 2023 13:24:43 -0700 (PDT)
+        with ESMTP id S232913AbjEVUYr (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 16:24:47 -0400
+Received: from mail-ed1-x52f.google.com (mail-ed1-x52f.google.com [IPv6:2a00:1450:4864:20::52f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5A99BB;
+        Mon, 22 May 2023 13:24:45 -0700 (PDT)
+Received: by mail-ed1-x52f.google.com with SMTP id 4fb4d7f45d1cf-510f3db1cd8so99733a12.1;
+        Mon, 22 May 2023 13:24:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=googlemail.com; s=20221208; t=1684787082; x=1687379082;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=ujd+z3hoj5H8e61WA/1gzrYNE6nhrLEh77YJmVujUS4=;
-        b=rxc5Yg0TTi8HrrOvLx7ukiU/0uNnoYlhDLNp6HK8K1P2LcTsdzObcOj4p75ffeRFu8
-         5Tl3fHeaWbMAKEyVYPFadpufUEHZbKhwaZR2JpSsCAQ0OI+P/POXy5lHJwW1SmhznOn2
-         n0baJlnwWn4bShf0Mt2x/1uAJmNl4r044c8jYQpWqsvfPPcZzMtjVpVfO/q8jHCNnxg6
-         1BUgSphwbsr7mQkWJhLXD9zF19Hb8+isrqHarB3lHR8IHkMSSIi6KKOhUMBDDED6arF1
-         D5fZ4VP5Jr6csBVjZPlSzy9tswOMIhIMuT4XQCOHRk43Foh5tPdA37oV7huaLTcEZtNF
-         ltHA==
+        d=googlemail.com; s=20221208; t=1684787084; x=1687379084;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=8ZGCTlLrXWFIDYlutHVZ0bE/uJZ2Fq2/cbrXrnGexP8=;
+        b=N1ZZuZ9Zt+B3kQX7r5WxLxwJZu2Z6tL6FL2IaRxCRVfQbfkc4bZX4w0DQrVDsocSn3
+         i82/91wWs2bqVYdDTRjlKPVDs2Y7tYU0ETmK+Hu40Ov0AWB+t5qnvLEuqEfknQFJBQi6
+         g8I1jiHJXGwdYBqtzCGsdanNJLKGIu3E3AXcbmdMVrbdMumS9nkp6uekmlNssupfoDAi
+         1vSRo9FEsHTeo2blxqZcZGOwT/NG7Umae3mJGVX+rUpT/SS4fjH5Yn9x2q1TjA2eh2xq
+         z7p7zaryHIUhMMTIx1oQucrSQtYkpe+RuzzrxWHvk3nA9sSVn5ET9TuKvyygHEfOgLKB
+         oA5Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684787082; x=1687379082;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ujd+z3hoj5H8e61WA/1gzrYNE6nhrLEh77YJmVujUS4=;
-        b=l4Wepyg1aA6sGTwJzXnzLwVZS3ukN5BeAFbt6kkiU1B3rYTtpblhLVriFU7JxXY4Rx
-         our7jof2HPFsdxtscRWd6/c99XKUajbrpNsunGi9TUH3gqju1Rf12ICvl/AHtr3Z02g3
-         D6y/4nUYAjU0bbH9MKjvz9i4Ex+T/XXwp/p1YQ7658MwwJb2OMu/7HDbbp12Yc9/hYGs
-         yAaGu8QLj1l1oLtuCfZlJBwlsYm2JafrYajdxoVIxCutRmHVxLLT59Gg40F9CRkUShN6
-         GeJpmAuwm+7k5khKs7HG/U18cgz20MIm8eSq2QsCY+MVkaSSRgErTsSaf4GLoHdG3qZe
-         UGcg==
-X-Gm-Message-State: AC+VfDxyElY/+3GlcCy0MFkb5/Ownj/k3rVNw7t3tUsC9I3EhME4S9DV
-        tshzw/mLbx7P3WnvuGGtrS7vgmRDT1Y=
-X-Google-Smtp-Source: ACHHUZ6K7+lIiZ5wytJHp+G+6GaQDT6hZ+QuuOlm7sjQTsIL6roJgW17qy2PNAICN/gWiNQjB9J5iw==
-X-Received: by 2002:a05:6402:b0f:b0:50b:f8f7:f8d8 with SMTP id bm15-20020a0564020b0f00b0050bf8f7f8d8mr9021503edb.36.1684787082156;
-        Mon, 22 May 2023 13:24:42 -0700 (PDT)
+        d=1e100.net; s=20221208; t=1684787084; x=1687379084;
+        h=content-transfer-encoding:mime-version:references:in-reply-to
+         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=8ZGCTlLrXWFIDYlutHVZ0bE/uJZ2Fq2/cbrXrnGexP8=;
+        b=IF3JsGpXv2m/OGx7+7WoMMgVoRuUvhxFTOGxhcw6HwgNB02NWgFOTDigpF3v+lJFDQ
+         qeol4CntROGnkuA8D5EoVh8XlWN3jk1GkMN5c7eW7w50ZxJn2ometY9/jgFLFL7tgnvl
+         hU5346mn4yYc4eWpnup+ytEY2HFmBRau5xR4R9fNt6EH/vaEw0OKtDe+Md3XfRH6nrMv
+         ogLI4tF6/a9Veoub0lwW6aH8U1OL4iPinYWUUiLM1/dC6P6hXJF7GLNwEKVkPzkd8TJ8
+         ZX7pec2Rs1DurVNTxl60hKgUrTiC6pXgFffGYyQyU/kmU/cb88APtt5YOWU1D8dgWryt
+         GeNw==
+X-Gm-Message-State: AC+VfDxDzjeNdDhoZVunAAjDK4Mmh28dr5uRvLMyEo5t0kaVLtKXiJqr
+        LhcV/VXFZivKddrNvjUUmeIh/Ovlr20=
+X-Google-Smtp-Source: ACHHUZ5V8cuTMX52dL47WsMM2bsTa3a0CkLyCnBmQ4pHMMXF/Aq4weovKXICRfiKsG1u1NnrViQWyg==
+X-Received: by 2002:a05:6402:357:b0:50d:682d:d431 with SMTP id r23-20020a056402035700b0050d682dd431mr10052288edw.16.1684787083988;
+        Mon, 22 May 2023 13:24:43 -0700 (PDT)
 Received: from localhost.localdomain (dynamic-2a01-0c23-c459-f400-0000-0000-0000-0e63.c23.pool.telefonica.de. [2a01:c23:c459:f400::e63])
-        by smtp.googlemail.com with ESMTPSA id v2-20020a056402184200b0050d56dffc93sm3265031edy.12.2023.05.22.13.24.41
+        by smtp.googlemail.com with ESMTPSA id v2-20020a056402184200b0050d56dffc93sm3265031edy.12.2023.05.22.13.24.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 22 May 2023 13:24:41 -0700 (PDT)
+        Mon, 22 May 2023 13:24:43 -0700 (PDT)
 From:   Martin Blumenstingl <martin.blumenstingl@googlemail.com>
 To:     linux-wireless@vger.kernel.org
 Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
@@ -56,78 +57,84 @@ Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
         Ping-Ke Shih <pkshih@realtek.com>, jernej.skrabec@gmail.com,
         Larry Finger <Larry.Finger@lwfinger.net>,
         Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-Subject: [PATCH wireless-next v2 0/4] wifi: rtw88: Add support for the RTL8723DS SDIO wifi chip
-Date:   Mon, 22 May 2023 22:24:21 +0200
-Message-Id: <20230522202425.1827005-1-martin.blumenstingl@googlemail.com>
+Subject: [PATCH wireless-next v2 2/4] wifi: rtw88: rtw8723d: Implement RTL8723DS (SDIO) efuse parsing
+Date:   Mon, 22 May 2023 22:24:23 +0200
+Message-Id: <20230522202425.1827005-3-martin.blumenstingl@googlemail.com>
 X-Mailer: git-send-email 2.40.1
+In-Reply-To: <20230522202425.1827005-1-martin.blumenstingl@googlemail.com>
+References: <20230522202425.1827005-1-martin.blumenstingl@googlemail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-This series adds support for the RTL823DS SDIO wifi chip.
-It builds on the SDIO support which was recently merged into the rtw88
-driver.
+The efuse of the SDIO RTL8723DS chip has only one known member: the mac
+address is at offset 0x11a. Add a struct rtw8723ds_efuse describing this
+and use it for copying the mac address when the SDIO bus is used.
 
-With the initial rtw88 SDIO support code the aim was to support these
-older (802.11n) chips as well but we didn't have any way to test that.
-Overall we spotted all corner cases in the vendor driver except one:
-On these older chips REG_SDIO_RX0_REQ_LEN should only be read when
-REG_SDIO_HISR has the REG_SDIO_HISR_RX_REQUEST bit set. Patch 1 adds
-support for that.
-
-RTL8723DS comes in two variant and each of them has their own SDIO ID:
-- 0xd723 can connect two antennas. The WiFi part is still 1x1 so the
-  second antenna can be dedicated to Bluetooth
-- 0xd724 can only connect one antenna so it's shared between WiFi and
-  Bluetooth
-Thanks to Ping-Ke for these insights!
-
-This series adds the missing SDIO ID and renames the existing 0xd723
-SDIO ID (which we previously added) with patch 3. The rest is straight
-forward: patch 2 adds support for parsing the eFuse and patch 4 wires
-everything together by creating a driver for the RTL8723DS.
-
-In my own tests on a MangoPi MQ-Quad I get the following results in
-iperf3 (with the device being better placed than my RTL8822CS):
-- RX: 48 Mbit/s
-- TX: 33 Mbit/s
-Also Larry Finger reports [0] that he has a user (with the rtw88
-driver changes backported to support older kernels) that has
-successfully tested RTL8723DS support.
+Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
+Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
+---
+Changes since v1:
+- added Ping-Ke's Reviewed-by (thank you!)
 
 
-Changes since v1 at [1]:
-- rebased on top of 6.4-rc3 which comes with commit cb0ddaaa5db0
-  ("wifi: rtw88: sdio: Always use two consecutive bytes for word
-    operations")
-- added braces to the new if condition in patch #1 as suggested by
-  Ping-Ke (no functional changes but it makes that code block with
-  the long comment easier to read/understand)
-- collected Ping-Ke's Reviewed-by (thank you!)
+ drivers/net/wireless/realtek/rtw88/rtw8723d.c | 9 +++++++++
+ drivers/net/wireless/realtek/rtw88/rtw8723d.h | 6 ++++++
+ 2 files changed, 15 insertions(+)
 
-
-[0] https://lore.kernel.org/linux-wireless/88e0c4a3-eec7-e44d-6f95-6f2e7f7cbbb5@lwfinger.net/
-[1] https://lore.kernel.org/linux-wireless/20230518161749.1311949-1-martin.blumenstingl@googlemail.com/
-
-
-Martin Blumenstingl (4):
-  wifi: rtw88: sdio: Check the HISR RX_REQUEST bit in rtw_sdio_rx_isr()
-  wifi: rtw88: rtw8723d: Implement RTL8723DS (SDIO) efuse parsing
-  mmc: sdio: Add/rename SDIO ID of the RTL8723DS SDIO wifi cards
-  wifi: rtw88: Add support for the SDIO based RTL8723DS chipset
-
- drivers/net/wireless/realtek/rtw88/Kconfig    | 11 +++++
- drivers/net/wireless/realtek/rtw88/Makefile   |  3 ++
- drivers/net/wireless/realtek/rtw88/rtw8723d.c |  9 ++++
- drivers/net/wireless/realtek/rtw88/rtw8723d.h |  6 +++
- .../net/wireless/realtek/rtw88/rtw8723ds.c    | 41 +++++++++++++++++++
- drivers/net/wireless/realtek/rtw88/sdio.c     | 24 +++++++++--
- include/linux/mmc/sdio_ids.h                  |  3 +-
- 7 files changed, 93 insertions(+), 4 deletions(-)
- create mode 100644 drivers/net/wireless/realtek/rtw88/rtw8723ds.c
-
+diff --git a/drivers/net/wireless/realtek/rtw88/rtw8723d.c b/drivers/net/wireless/realtek/rtw88/rtw8723d.c
+index 06e7454c9ca6..cadf66f4e854 100644
+--- a/drivers/net/wireless/realtek/rtw88/rtw8723d.c
++++ b/drivers/net/wireless/realtek/rtw88/rtw8723d.c
+@@ -216,6 +216,12 @@ static void rtw8723du_efuse_parsing(struct rtw_efuse *efuse,
+ 	ether_addr_copy(efuse->addr, map->u.mac_addr);
+ }
+ 
++static void rtw8723ds_efuse_parsing(struct rtw_efuse *efuse,
++				    struct rtw8723d_efuse *map)
++{
++	ether_addr_copy(efuse->addr, map->s.mac_addr);
++}
++
+ static int rtw8723d_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
+ {
+ 	struct rtw_efuse *efuse = &rtwdev->efuse;
+@@ -248,6 +254,9 @@ static int rtw8723d_read_efuse(struct rtw_dev *rtwdev, u8 *log_map)
+ 	case RTW_HCI_TYPE_USB:
+ 		rtw8723du_efuse_parsing(efuse, map);
+ 		break;
++	case RTW_HCI_TYPE_SDIO:
++		rtw8723ds_efuse_parsing(efuse, map);
++		break;
+ 	default:
+ 		/* unsupported now */
+ 		return -ENOTSUPP;
+diff --git a/drivers/net/wireless/realtek/rtw88/rtw8723d.h b/drivers/net/wireless/realtek/rtw88/rtw8723d.h
+index a356318a5c15..3642a2c7f80c 100644
+--- a/drivers/net/wireless/realtek/rtw88/rtw8723d.h
++++ b/drivers/net/wireless/realtek/rtw88/rtw8723d.h
+@@ -49,6 +49,11 @@ struct rtw8723du_efuse {
+ 	u8 mac_addr[ETH_ALEN];          /* 0x107 */
+ };
+ 
++struct rtw8723ds_efuse {
++	u8 res4[0x4a];			/* 0xd0 */
++	u8 mac_addr[ETH_ALEN];		/* 0x11a */
++};
++
+ struct rtw8723d_efuse {
+ 	__le16 rtl_id;
+ 	u8 rsvd[2];
+@@ -80,6 +85,7 @@ struct rtw8723d_efuse {
+ 	union {
+ 		struct rtw8723de_efuse e;
+ 		struct rtw8723du_efuse u;
++		struct rtw8723ds_efuse s;
+ 	};
+ };
+ 
 -- 
 2.40.1
 
