@@ -2,114 +2,149 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 78A38C7EE26
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 09:53:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7B9EAC7EE2E
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 14:57:15 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232726AbjEVJxm (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 May 2023 05:53:42 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44636 "EHLO
+        id S233113AbjEVO5O (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 10:57:14 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38042 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232539AbjEVJxh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 05:53:37 -0400
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D702F9
-        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2023 02:53:35 -0700 (PDT)
-Received: by mail-wr1-x430.google.com with SMTP id ffacd0b85a97d-30959c0dfd6so2925004f8f.3
-        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2023 02:53:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1684749213; x=1687341213;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=ECJI0LFwwkDe66I7X1nctePo0/j7Va03pbzms4rUc9o=;
-        b=W5YDVSR/w6v2V8d0U4G1JAAX5pdg0yRNNxsVnTThfSurqoKaqDjrnm8JiR3okhY4Q0
-         G2IhUc03bVF44qoTGSBx+XV1XWClLpW5kmQX0p5KUn5Fo0aTlz/n8/k4nqSL0shLyrvn
-         JHGnrXBZhNLBaAtNXV1I/gzfZCILl7kQTS8DVlKCr2PepXR3L7eu47hD+57m375RRxSQ
-         bCzUnG5Y1+nhv4xhq8rkFrcraDcjvFY3lUm5TIR17LlB3cUvmb2gbrlZZf+w2ZOEfK0J
-         9gcujURlXjnwP5oOm7NtJRNnGHfL8SE/kbfxJfAJFPvTAWNwEo2A6C95uK/3YQ5bGgfB
-         6SiA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684749213; x=1687341213;
-        h=cc:to:subject:message-id:date:from:in-reply-to:references
-         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=ECJI0LFwwkDe66I7X1nctePo0/j7Va03pbzms4rUc9o=;
-        b=h+iiADnDz1hUDnY0sJbmEzG/yw+zqhAsbnHJ0+NUCb5vZcmOGpU+spoOZHWVRVYQPb
-         HtA43+YXQKRk3MT2ylm3QLcjxBrHgFXE0vU4L39bW+cbe0A+O2VrhibSbMU16mI2AoJ1
-         aGl1JgIr6eq3Nb3uZGK3yzWUB9tiKzC7Gv/9wNb0dKHfIEkI9j47Jo4H6+Kq4Z3pg6AB
-         QYn5knocfBXBFFUbhl22JlNGX8qdviPtIAzxBsf67xacqv3IO+OR10obVoXDJEl5e+rn
-         s6Ph0MUdDxlv2AoYbzr+mblt8rBpfmeyxtXmnJ9NUb1nU5DF3RmGokRpIgMQ55InqSzG
-         pTmQ==
-X-Gm-Message-State: AC+VfDxSPDft0l7mJt/gaIu57sPpBsvkzpw07jsHIZM+a6ETpYsrNdHt
-        UT/DboL76tlz7fA7V/tUZQYPWxO3XilcudobyhxmjA==
-X-Google-Smtp-Source: ACHHUZ7usYrNO9DYTgz7sXSTAh0vn5Ieny/IQU9kQKCqJycC4jNWWA4vXBpS1vxwt0dtwhhCEryzsqoxwgXB5mMTtqY=
-X-Received: by 2002:a5d:5584:0:b0:309:5d9:bc81 with SMTP id
- i4-20020a5d5584000000b0030905d9bc81mr7078151wrv.49.1684749213663; Mon, 22 May
- 2023 02:53:33 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230522093620.3568-1-quic_kbajaj@quicinc.com> <20230522093620.3568-5-quic_kbajaj@quicinc.com>
-In-Reply-To: <20230522093620.3568-5-quic_kbajaj@quicinc.com>
-From:   Bhupesh Sharma <bhupesh.sharma@linaro.org>
-Date:   Mon, 22 May 2023 15:23:22 +0530
-Message-ID: <CAH=2NtxwG3YaN7F_q2PARXPA_Rit7-KhkxFKXzL0xD3J8J4SpQ@mail.gmail.com>
-Subject: Re: [PATCH v2 4/4] arm64: dts: qcom: qdu1000-idp: add SDHCI for emmc
+        with ESMTP id S233883AbjEVO5N (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 10:57:13 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 43124BB;
+        Mon, 22 May 2023 07:57:12 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id C169961AFE;
+        Mon, 22 May 2023 14:57:11 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 514ADC433D2;
+        Mon, 22 May 2023 14:57:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1684767431;
+        bh=ThXECPaDh9Oj7V7+VzqTXFJWN8ADA2MjHyWE9rB8dPA=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=pIpKE/DgQZtCWf7SiEQ+irFRq6pTLepH9Tg10WqNGBz7VesKSG/uV9y3p5g3bfcsl
+         FQE2Nao9jS3bgj8oJasHdsqWDLmHAMJQ84p7Dxak2W8M7eVpGJYwom3Ey/sg8GM+Ei
+         P/K13ZTA6wBGlLTaGwRkgGL4rzfl/RhpI8hR7BamUDmxtnwjcw4quYf2PaXH1TIHuI
+         fczfPBWI1gjAEkpYhsWDI74z50as3+CLy/A45h8FX1GCjUzkdywtRixdvkq+gKNQoQ
+         /zVx6QajqY7afz7EaR4d5o4QUSVE8h1gaRD2902iU+IKrenHGqPA/4zQMr1Ae37D0W
+         XYga9WMhrEU+g==
+Date:   Mon, 22 May 2023 08:01:05 -0700
+From:   Bjorn Andersson <andersson@kernel.org>
 To:     Komal Bajaj <quic_kbajaj@quicinc.com>
 Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
         Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
         Conor Dooley <conor+dt@kernel.org>,
         Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
         Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
         linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
         linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v2 2/4] arm: dts: qcom: qdu1000: Add SDHCI node
+Message-ID: <20230522150105.3i7zeucna7kh5waz@ripper>
+References: <20230522093620.3568-1-quic_kbajaj@quicinc.com>
+ <20230522093620.3568-3-quic_kbajaj@quicinc.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230522093620.3568-3-quic_kbajaj@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Mon, 22 May 2023 at 15:06, Komal Bajaj <quic_kbajaj@quicinc.com> wrote:
->
-> Add sdhci node for emmc in qdu1000-idp.
->
+On Mon, May 22, 2023 at 03:06:18PM +0530, Komal Bajaj wrote:
+
+Path says arch/arm64/, so $subject should start "arm64: dts: qcom: ..."
+
+> Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
+> 
 > Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
 > ---
->  arch/arm64/boot/dts/qcom/qdu1000-idp.dts | 23 +++++++++++++++++++++++
->  1 file changed, 23 insertions(+)
->
-> diff --git a/arch/arm64/boot/dts/qcom/qdu1000-idp.dts b/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
-> index 9e9fd4b8023e..61d8446a2d55 100644
-> --- a/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
-> +++ b/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
-> @@ -451,3 +451,26 @@
->  &uart7 {
->         status = "okay";
->  };
-> +
-> +&sdhc_1 {
-> +       pinctrl-names = "default", "sleep";
-> +       pinctrl-0 = <&sdc1_on_state>;
-> +       pinctrl-1 = <&sdc1_off_state>;
-> +
-> +       cap-mmc-hw-reset;
-> +       mmc-ddr-1_8v;
-> +       mmc-hs200-1_8v;
-> +       mmc-hs400-1_8v;
-> +       mmc-hs400-enhanced-strobe;
-> +
-> +       non-removable;
-> +       no-sd;
-> +       no-sdio;
-> +
-> +       supports-cqe;
-> +
-> +       vmmc-supply = <&vreg_l10a_2p95>;
-> +       vqmmc-supply = <&vreg_l7a_1p8>;
-> +
-> +       status = "okay";
-> +};
+>  arch/arm64/boot/dts/qcom/qdu1000.dtsi | 51 +++++++++++++++++++++++++++
+>  1 file changed, 51 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> index 734438113bba..38ee7115a35f 100644
+> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> @@ -19,6 +19,10 @@
+>  
+>  	chosen: chosen { };
+>  
+> +	aliases {
+> +		mmc0 = &sdhc_1; /* eMMC */
 
-This node is out of alphabetical order again.
-&uart7 would follow &sdhc_1 and so on...
+Don't we just have a single SDC instance on this platform? If so you
+don't need aliases.
 
-Thanks,
-Bhupesh
+> +	};
+> +
+>  	cpus {
+>  		#address-cells = <2>;
+>  		#size-cells = <0>;
+> @@ -842,6 +846,53 @@
+>  			#hwlock-cells = <1>;
+>  		};
+>  
+> +		sdhc_1: mmc@8804000 {
+
+And you can skip the "_1" suffix...
+
+Regards,
+Bjorn
+
+> +			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0x0 0x08804000 0x0 0x1000>,
+> +			      <0x0 0x08805000 0x0 0x1000>;
+> +			reg-names = "hc", "cqhci";
+> +
+> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
+> +				 <&gcc GCC_SDCC5_APPS_CLK>,
+> +				 <&rpmhcc RPMH_CXO_CLK>;
+> +			clock-names = "iface",
+> +				      "core",
+> +				      "xo";
+> +
+> +			resets = <&gcc GCC_SDCC5_BCR>;
+> +
+> +			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
+> +					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
+> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+> +			power-domains = <&rpmhpd QDU1000_CX>;
+> +			operating-points-v2 = <&sdhc1_opp_table>;
+> +
+> +			iommus = <&apps_smmu 0x80 0x0>;
+> +			dma-coherent;
+> +
+> +			bus-width = <8>;
+> +
+> +			qcom,dll-config = <0x0007642c>;
+> +			qcom,ddr-config = <0x80040868>;
+> +
+> +			status = "disabled";
+> +
+> +			sdhc1_opp_table: opp-table {
+> +				compatible = "operating-points-v2";
+> +
+> +				opp-384000000 {
+> +					opp-hz = /bits/ 64 <384000000>;
+> +					required-opps = <&rpmhpd_opp_nom>;
+> +					opp-peak-kBps = <6528000 1652800>;
+> +					opp-avg-kBps = <400000 0>;
+> +				};
+> +			};
+> +		};
+> +
+>  		pdc: interrupt-controller@b220000 {
+>  			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
+>  			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
+> -- 
+> 2.17.1
+> 
