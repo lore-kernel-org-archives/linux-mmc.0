@@ -2,109 +2,136 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6BC52C77B7C
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 01:58:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EFC56C7EE29
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 06:32:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229548AbjEVB6G (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Sun, 21 May 2023 21:58:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52962 "EHLO
+        id S230384AbjEVGcI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 02:32:08 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47008 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229501AbjEVB6F (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Sun, 21 May 2023 21:58:05 -0400
-Received: from mail-oi1-x236.google.com (mail-oi1-x236.google.com [IPv6:2607:f8b0:4864:20::236])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7FC38B3;
-        Sun, 21 May 2023 18:58:04 -0700 (PDT)
-Received: by mail-oi1-x236.google.com with SMTP id 5614622812f47-39815ce6db2so60062b6e.0;
-        Sun, 21 May 2023 18:58:04 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1684720684; x=1687312684;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :sender:from:to:cc:subject:date:message-id:reply-to;
-        bh=w53tuVYkQ3NIiwF4ysenFUwUX//u9UgrVqJVmePRgAc=;
-        b=qFBV+uZmMh3f+CsK3DX+2aomi8ao8R83J94o4UuOTgtSN73Vmq+QoMqzNlNUGAH9GJ
-         894clhKA5Dkb3tENP0raG1YIh+RPcaBqD3AKD+sXYS0hP68Su87ACfRqLyCPXkN9GX+4
-         nK7eKDGsT0yxJ2HX8oiAa4fD5vB9hZFOC/kzllnAjwJHUc0P5kGW4TNYIr2suHCOBGuD
-         pE+5Zek9CQ6EjH5P827dnx74dIDFvn8/OqmK/7WXxI4rLDbuJfkxiRY2sRGoMKWq8FSN
-         2Dh/AbuJUtKRdk2BGx5o2VVX/f0ftudF9VIOcLNTUL0YLmO6ziCmh6l4L47lvapQ117A
-         HKJA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684720684; x=1687312684;
-        h=content-transfer-encoding:in-reply-to:from:references:cc:to
-         :content-language:subject:user-agent:mime-version:date:message-id
-         :sender:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=w53tuVYkQ3NIiwF4ysenFUwUX//u9UgrVqJVmePRgAc=;
-        b=Wvlyg5tLSco7vbYyZ1vHP5bZgna309nTecfG6BNrbjs6XtrDheq7oXHfOSkWEBXGls
-         ANVQWxSj+Fc1ObDY9ciNSG51rVhBOZGw+eSRnkpK+VT67t2PFFj1+Sy/wCKjB7HCN/Td
-         Aa4f10tmSlUBpeGCAwu9dJ0WrL8DQMJNI02EqU+GXdVQFt6iujwETAmdBXQH7HRLz5J7
-         /xVRxfJnWY7piDeUJhA0uRHoSDGLEKHCyXubXRzyKWRe07AbPUNq1KYhXnC7Ks7r9zQD
-         1+p6Yq582lUcsOvwPYh7cm0X88MCNQ+mbQ7pCtY2x4zVVJETPOeR14nJu+enMGvLUJib
-         9DAA==
-X-Gm-Message-State: AC+VfDxOk/QNAemJH60qqGsdKZMBNqpKDgEa4z1CDlFGBfKz+El9wmNp
-        W2XEea9KH91+5DFH00MQc0c=
-X-Google-Smtp-Source: ACHHUZ7S1THM9p1SfxTUWfP3RrYTRHSUgpxGTHaJCQ2ZfkwYTSFXSa849IoFn0pdU20IV7xd3pRr+w==
-X-Received: by 2002:aca:1e04:0:b0:394:4890:1421 with SMTP id m4-20020aca1e04000000b0039448901421mr5095174oic.8.1684720683790;
-        Sun, 21 May 2023 18:58:03 -0700 (PDT)
-Received: from [192.168.0.200] ([216.130.59.33])
-        by smtp.gmail.com with ESMTPSA id w81-20020acadf54000000b00398031b1014sm976545oig.26.2023.05.21.18.58.02
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 21 May 2023 18:58:03 -0700 (PDT)
-Sender: Larry Finger <larry.finger@gmail.com>
-Message-ID: <88e0c4a3-eec7-e44d-6f95-6f2e7f7cbbb5@lwfinger.net>
-Date:   Sun, 21 May 2023 20:58:01 -0500
+        with ESMTP id S229621AbjEVGcH (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 02:32:07 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92FA39B;
+        Sun, 21 May 2023 23:32:06 -0700 (PDT)
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34M4R3FZ016327;
+        Mon, 22 May 2023 06:32:03 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
+ mime-version : subject : to : cc : references : from : in-reply-to :
+ content-type : content-transfer-encoding; s=qcppdkim1;
+ bh=DQa30vKRm5JaFVF5epmievdfUoju+vGys7fNeVT8iEE=;
+ b=JZEoz6xtZ76hqA77bVxRXHLH5644PG4PDyV50qc7fp2iC+UvaN3pHKuadNEnKOVfjSSw
+ q+HHHzHYEv/gAPPOnj4bqAhZfCIXirepj03Y0wj32zagIzkG6ay7VTp4LA47+wn8RinG
+ rSsTJ9FdmIz9v99wfEvqJVe+gRrJJvgJTkkAUqRQeLyhr7ZZgubB4nkR6MeSWPpLXFIW
+ xAQb7j+E9JApnUypVQ8YQOPYIuxmqfLAOcu+c3gecDHNTgo8OO2VkQk5AAlOv5kOX5u/
+ UdZUoncQcda1GBeQTvVN2QGSlgurmX1v9M+nP7NdBY1d2Z4Hw8QqyJb5M1fPdvpo6wL/ /A== 
+Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qpkwmu0rc-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 22 May 2023 06:32:03 +0000
+Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
+        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34M6W23X012783
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 22 May 2023 06:32:02 GMT
+Received: from [10.214.67.128] (10.80.80.8) by nalasex01b.na.qualcomm.com
+ (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Sun, 21 May
+ 2023 23:31:58 -0700
+Message-ID: <478462f6-379f-afa8-dc44-11233e18460a@quicinc.com>
+Date:   Mon, 22 May 2023 12:01:54 +0530
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH wireless-next v1 4/4] wifi: rtw88: Add support for the
- SDIO based RTL8723DS chipset
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
+ Thunderbird/102.5.1
+Subject: Re: [PATCH 4/4] arm64: dts: qcom: qdu1000-idp: add SDHCI for emmc
 Content-Language: en-US
-To:     Ping-Ke Shih <pkshih@realtek.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        "linux-wireless@vger.kernel.org" <linux-wireless@vger.kernel.org>
-Cc:     "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
-        "kvalo@kernel.org" <kvalo@kernel.org>,
-        "tony0620emma@gmail.com" <tony0620emma@gmail.com>,
-        Peter Robinson <pbrobinson@gmail.com>,
-        "jernej.skrabec@gmail.com" <jernej.skrabec@gmail.com>
-References: <20230518161749.1311949-1-martin.blumenstingl@googlemail.com>
- <20230518161749.1311949-5-martin.blumenstingl@googlemail.com>
- <c52c11c712e24e1fb783c2ce1251aba5@realtek.com>
-From:   Larry Finger <Larry.Finger@lwfinger.net>
-In-Reply-To: <c52c11c712e24e1fb783c2ce1251aba5@realtek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+To:     Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Bjorn Andersson <andersson@kernel.org>
+CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>
+References: <20230519085122.15758-1-quic_kbajaj@quicinc.com>
+ <20230519085122.15758-5-quic_kbajaj@quicinc.com>
+ <8e3c745a-2e37-2927-7dbf-e23a777702f3@linaro.org>
+ <ed4c33d3-ae5d-d695-eda0-0b09a4a26644@linaro.org>
+From:   Komal Bajaj <quic_kbajaj@quicinc.com>
+In-Reply-To: <ed4c33d3-ae5d-d695-eda0-0b09a4a26644@linaro.org>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.80.80.8]
+X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
+ nalasex01b.na.qualcomm.com (10.47.209.197)
+X-QCInternal: smtphost
+X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
+X-Proofpoint-GUID: E5Tv7PCb8DHnIz5AvLsdiyecr4EtfRBC
+X-Proofpoint-ORIG-GUID: E5Tv7PCb8DHnIz5AvLsdiyecr4EtfRBC
+X-Proofpoint-Virus-Version: vendor=baseguard
+ engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
+ definitions=2023-05-22_04,2023-05-17_02,2023-02-09_01
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 clxscore=1015
+ spamscore=0 impostorscore=0 mlxscore=0 adultscore=0 suspectscore=0
+ priorityscore=1501 phishscore=0 mlxlogscore=830 lowpriorityscore=0
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2305220054
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 5/21/23 20:49, Ping-Ke Shih wrote:
-> 
-> 
->> -----Original Message-----
->> From: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->> Sent: Friday, May 19, 2023 12:18 AM
->> To: linux-wireless@vger.kernel.org
->> Cc: linux-mmc@vger.kernel.org; linux-kernel@vger.kernel.org; ulf.hansson@linaro.org; kvalo@kernel.org;
->> tony0620emma@gmail.com; Peter Robinson <pbrobinson@gmail.com>; Ping-Ke Shih <pkshih@realtek.com>;
->> jernej.skrabec@gmail.com; Martin Blumenstingl <martin.blumenstingl@googlemail.com>
->> Subject: [PATCH wireless-next v1 4/4] wifi: rtw88: Add support for the SDIO based RTL8723DS chipset
+
+
+On 5/20/2023 4:54 PM, Konrad Dybcio wrote:
+>
+> On 19.05.2023 12:13, Bhupesh Sharma wrote:
+>> On 5/19/23 2:21 PM, Komal Bajaj wrote:
+>>> Add sdhci node for emmc in qdu1000-idp.
+>>>
+>>> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
+>>> ---
+>>>    arch/arm64/boot/dts/qcom/qdu1000-idp.dts | 11 +++++++++++
+>>>    1 file changed, 11 insertions(+)
+>>>
+>>> diff --git a/arch/arm64/boot/dts/qcom/qdu1000-idp.dts b/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
+>>> index 9e9fd4b8023e..b2526e991548 100644
+>>> --- a/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
+>>> +++ b/arch/arm64/boot/dts/qcom/qdu1000-idp.dts
+>>> @@ -451,3 +451,14 @@
+>>>    &uart7 {
+>>>        status = "okay";
+>>>    };
+>>> +
+>>> +&sdhc_1 {
+>>> +    status = "okay";
+>>> +
+>>> +    pinctrl-0 = <&sdc1_on_state>;
+>>> +    pinctrl-1 = <&sdc1_off_state>;
+>>> +    pinctrl-names = "default", "sleep";
+>>> +
+>>> +    vmmc-supply = <&vreg_l10a_2p95>;
+>>> +    vqmmc-supply = <&vreg_l7a_1p8>;
+>>> +};
+>> Again, please follow alphabetical order for adding new node entries.
+Noted.
 >>
->> Wire up RTL8723DS chipset support using the rtw88 SDIO HCI code as well
->> as the existing RTL8723D chipset code.
->>
->> Signed-off-by: Martin Blumenstingl <martin.blumenstingl@googlemail.com>
-> 
-> I'm so surprised that this small patchset can support an new chip. Nice job. :-)
-> 
-> Reviewed-by: Ping-Ke Shih <pkshih@realtek.com>
+>> Also, we have been placing 'status = .. ' entry at the end for new .dts (or .dts entry), but if that is the format used across this board dts
+>> I am ok with the same.
+Sure, will move status to end.
+> Komal,
+>
+> since you're already touching this file, would you mind making a
+> separate commit moving status last for all nodes?
+Hi Konrad,
+I don't notice any other nodes whose state is maintained at the 
+beginning of the node.
 
-I agree that this is a nice job. This driver has been tested using my rtw88 repo 
-at GitHub.com. I do not have a device, thus a tested=by tag would not be 
-appropriate, but I do have a very satisfied user!
-
-Larry
-
+Thanks
+Komal
+>
+> Konrad
+>> Thanks,
+>> Bhupesh
 
