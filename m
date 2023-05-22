@@ -2,209 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73262C7EE2D
-	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 07:06:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D17B3C77B75
+	for <linux-mmc@archiver.kernel.org>; Mon, 22 May 2023 07:32:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232373AbjEVHG2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 May 2023 03:06:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35912 "EHLO
+        id S232524AbjEVHcc (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 03:32:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232287AbjEVHGE (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 03:06:04 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 25F732698;
-        Mon, 22 May 2023 00:02:54 -0700 (PDT)
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34M5u1n7020749;
-        Mon, 22 May 2023 07:02:24 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=72qg8PTgfaStonrGFU93wDu5peymBU0a+rgvFqPO01w=;
- b=kGimFEvKsvAp85h7N1bufQQ5rQat24hn85chXSweQjGOAdNCB5JxhFISGoox29NqofVM
- L+sugRYehHzUB9Q9p+35UOHbpAVI7tAnag8JrfQm9ieD0yUWkBatfiOrD/OTCJnYVsCu
- 7JM0APglh7o1l2OFsS/nRB37pJuyD8FjPDEKNuWpFOSWge9aewxU1kMIlxkim+oV6d2g
- wOcXX2JlaAR0XNXmRbU6i8mh/0l7OPyVBDkZLWCwjhMdJSvSn4om6/2JkqXIdyj2wNl4
- Iu9/AeMwr1ARuXg/BJNbo0+K1Ub96oQGcD5r1h0u7rDn1k9/clEUmpkoueqGWnJme6Xo KQ== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qpkwmu273-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 22 May 2023 07:02:24 +0000
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34M72Ne1020682
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 22 May 2023 07:02:23 GMT
-Received: from [10.214.67.128] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Mon, 22 May
- 2023 00:02:19 -0700
-Message-ID: <fb8f0d17-555d-d74f-8fe0-1e5da8b3feb9@quicinc.com>
-Date:   Mon, 22 May 2023 12:32:16 +0530
+        with ESMTP id S231151AbjEVHca (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 03:32:30 -0400
+Received: from mail-yb1-xb35.google.com (mail-yb1-xb35.google.com [IPv6:2607:f8b0:4864:20::b35])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 35E909E
+        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2023 00:32:29 -0700 (PDT)
+Received: by mail-yb1-xb35.google.com with SMTP id 3f1490d57ef6-ba841216e92so8296802276.1
+        for <linux-mmc@vger.kernel.org>; Mon, 22 May 2023 00:32:29 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1684740748; x=1687332748;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=l3nKRFXxsoHjfjdv323ChY4z/ZbZPhs8kEfFA/b0p14=;
+        b=ZQBKBNbhyGusoEZNZncEPEovCz9ZtzvSsUhyhSUHyzXTHxM4pTaAFa4m9WSjXG3JtY
+         Cpp4VN1YENR0DDoAf99GIkp0+KSSIAUV1PwqgbOIsE9KP7QESHwE7bijzkNwtxOt8/jn
+         SRTJr71ARxr7S7iyMsJ3cjvugn0Cz9iFXxkA3+AHQ3tea9YqTKuKM1srZu4dZuuH81d8
+         +x9dVC95WW8NMbrLtdS5OzsQAQmLeaHPPYQe5WZ7mtTE3QqkdIlUDVHfXjPa53ZHk7iw
+         HFOT6bsAmfR1jYA1L3yy1st3FFa8IuXPvy9PeMAo1IzzdUKSAE1R6PFef1EYITbTHGpO
+         Ka/A==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684740748; x=1687332748;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=l3nKRFXxsoHjfjdv323ChY4z/ZbZPhs8kEfFA/b0p14=;
+        b=a9bAIZWmiH1tQphwd9kod0g6iTTtQy3DIcVsATGYmH1FgX3heBRgTLxQbgt/9CVbD2
+         1BMOmOSXfa770cITli8C2JnHhXiu6URtPFEqqF8mAQSVEhaJ6tdqqw0cU71xkkBGgf9e
+         EyxdDnDgUhNmdhfxt4vLNb6b5wy7VG5Pc4R4G7V/Q0jSCtnw77e/4qr4RlZvkq2xETkz
+         hhR3sgwwZGnWvSi1yreS26EF4Wm2NS46ss0NoyCLyeDB7ePg4yCLkyFTE6WU+KCzy4mf
+         fG9eSfKv6MumlVQj4Q2lAKwkHPr295r5gsespuy98iiu8G0wCZefWnkhJynWnXDIEWMi
+         y5xQ==
+X-Gm-Message-State: AC+VfDwsbuJfaMpuWYon6q8Wggz5Yw1rkGqjbXLT6zsP8eDkFeV2QTyh
+        NQd4jiM9GCbEizdSpeG4F7FAddgtrCi9ExfE4UHCKg==
+X-Google-Smtp-Source: ACHHUZ4FkKkNnOjIqxj6cR6guYodDfCoBUf70rR+UN4AF9syzuN5i3kPXu5WUGJ7anEuu333nuhHkKPkvWZV8hR5tx8=
+X-Received: by 2002:a0d:d595:0:b0:561:e910:52f5 with SMTP id
+ x143-20020a0dd595000000b00561e91052f5mr12470156ywd.27.1684740748447; Mon, 22
+ May 2023 00:32:28 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.1
-Subject: Re: [PATCH 2/4] arm: dts: qcom: qdu1000: Add SDHCI node
-Content-Language: en-US
-To:     Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>
-References: <20230519085122.15758-1-quic_kbajaj@quicinc.com>
- <20230519085122.15758-3-quic_kbajaj@quicinc.com>
- <d606960d-8e0a-611b-579c-c49b5b970462@linaro.org>
-From:   Komal Bajaj <quic_kbajaj@quicinc.com>
-In-Reply-To: <d606960d-8e0a-611b-579c-c49b5b970462@linaro.org>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: FNU-zoXa3NGNzW639p62aNK8o50TKvmP
-X-Proofpoint-ORIG-GUID: FNU-zoXa3NGNzW639p62aNK8o50TKvmP
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.170.22
- definitions=2023-05-22_04,2023-05-17_02,2023-02-09_01
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 malwarescore=0 clxscore=1015
- spamscore=0 impostorscore=0 mlxscore=0 adultscore=0 suspectscore=0
- priorityscore=1501 phishscore=0 mlxlogscore=999 lowpriorityscore=0
- bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305220059
+References: <20230519125409.497439-1-quic_srichara@quicinc.com> <20230519125409.497439-5-quic_srichara@quicinc.com>
+In-Reply-To: <20230519125409.497439-5-quic_srichara@quicinc.com>
+From:   Linus Walleij <linus.walleij@linaro.org>
+Date:   Mon, 22 May 2023 09:32:17 +0200
+Message-ID: <CACRpkdaX3i-O3=8XbLYJ1hXT8dOE7WJUUT6JxOKmWTJwru_24Q@mail.gmail.com>
+Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
+        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
+        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        robimarko@gmail.com, andy.shevchenko@gmail.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+On Fri, May 19, 2023 at 2:55=E2=80=AFPM Sricharan Ramabadhran
+<quic_srichara@quicinc.com> wrote:
 
+> Add pinctrl definitions for the TLMM of IPQ5018.
+>
+> Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
+> Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
+> Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
+> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
+> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
+> ---
+>  [v7] No change
 
-On 5/20/2023 4:53 PM, Konrad Dybcio wrote:
->
-> On 19.05.2023 10:51, Komal Bajaj wrote:
->> Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
->>
->> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
->> ---
->>   arch/arm64/boot/dts/qcom/qdu1000.dtsi | 60 +++++++++++++++++++++++++++
->>   1 file changed, 60 insertions(+)
->>
->> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
->> index 734438113bba..6113def66a08 100644
->> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
->> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
->> @@ -19,6 +19,10 @@
->>
->>   	chosen: chosen { };
->>
->> +	aliases {
->> +		mmc0 = &sdhc_1; /*SDC1 eMMC slot*/
->> +	};
->> +
->>   	cpus {
->>   		#address-cells = <2>;
->>   		#size-cells = <0>;
->> @@ -842,6 +846,62 @@
->>   			#hwlock-cells = <1>;
->>   		};
->>
->> +		sdhc_1: mmc@8804000 {
->> +			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
->> +			reg = <0x0 0x08804000 0x0 0x1000>,
->> +			      <0x0 0x08805000 0x0 0x1000>;
->> +
-> confusing newline
-Will remove it in the next patch set.
->> +			reg-names = "hc", "cqhci";
->> +
->> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
->> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
->> +			interrupt-names = "hc_irq", "pwr_irq";
->> +
->> +			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
->> +				 <&gcc GCC_SDCC5_APPS_CLK>,
-> SDCC>5<?
-These names are used in accordance with the clock hardware.
->
->> +				 <&rpmhcc RPMH_CXO_CLK>;
->> +			clock-names = "iface", "core", "xo";
-> Please keep one per line
-Noted.
->
->> +
->> +			/* Add dt entry for gcc hw reset */
->> +			resets = <&gcc GCC_SDCC5_BCR>;
-> 5?
-Reason same as above.
->
->> +
->> +			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
->> +					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
->> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
->> +			power-domains = <&rpmhpd QDU1000_CX>;
->> +			operating-points-v2 = <&sdhc1_opp_table>;
->> +
->> +			iommus = <&apps_smmu 0x0080 0x0>;
-> Please remove the leading zeroes from the stream id
-Sure, will do so.
->
->
->> +			dma-coherent;
->> +
->> +			bus-width = <8>;
->
-> ----
->> +			non-removable;
->> +			supports-cqe;
->> +
->> +			no-sd;
->> +			no-sdio;
->> +
->> +			mmc-ddr-1_8v;
->> +			mmc-hs200-1_8v;
->> +			mmc-hs400-1_8v;
->> +			mmc-hs400-enhanced-strobe;
->> +			cap-mmc-hw-reset;
-> ----
-> This bit is board-specific
-Okay, will move these bits to board specific file.
->
->> +
->> +			qcom,dll-config = <0x0007642c>;
->> +			qcom,ddr-config = <0x80040868>;
->> +
->> +			status = "disabled";
->> +
->> +			sdhc1_opp_table: opp-table {
->> +				compatible = "operating-points-v2";
->> +
->> +				opp-384000000 {
->> +					opp-hz = /bits/ 64 <384000000>;
->> +					required-opps = <&rpmhpd_opp_min_svs>;
-> You added interconnects, but not any opp-peak-kBps / opp-avg-kBps,
-> presumably mistakengly?
->
-> Also, 384Mhz + min_svs sounds a bit weird? Is that the correct
-> level for this SoC?
-Yes, you are right, this is wrong configuration, will correct it in the 
-next patch set.
+This looks mostly fine, but I want you to consider Andy's remarks.
+With those addressed:
+Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
 
-Thanks
-Komal
->
-> Konrad
->> +				};
->> +			};
->> +		};
->> +
->>   		pdc: interrupt-controller@b220000 {
->>   			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
->>   			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
->> --
->> 2.17.1
->>
+Can this file and the bindings be applied independently of the rest
+of the patches? In that case I can apply v8 bindings+this patch to
+the pinctrl tree.
 
+Yours,
+Linus Walleij
