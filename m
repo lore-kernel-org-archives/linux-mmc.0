@@ -2,163 +2,257 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 63B19C77B75
-	for <linux-mmc@archiver.kernel.org>; Tue, 23 May 2023 02:03:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D600EC7EE26
+	for <linux-mmc@archiver.kernel.org>; Tue, 23 May 2023 02:14:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232387AbjEWCDe (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 22 May 2023 22:03:34 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60134 "EHLO
+        id S234429AbjEWCOa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 22 May 2023 22:14:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229695AbjEWCDd (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 22:03:33 -0400
-Received: from EUR04-VI1-obe.outbound.protection.outlook.com (mail-vi1eur04on2074.outbound.protection.outlook.com [40.107.8.74])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8A197CA;
-        Mon, 22 May 2023 19:03:28 -0700 (PDT)
+        with ESMTP id S234247AbjEWCON (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 22 May 2023 22:14:13 -0400
+Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2049.outbound.protection.outlook.com [40.107.220.49])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3247BFA;
+        Mon, 22 May 2023 19:13:46 -0700 (PDT)
 ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=Di0H1//rtEI3iljK1JGAoohIGFQugpZa5Tf+AbWubYr7iAMOFAZvNZqTDf74bMfM2Lk4a6RKavfaTNFL4pXJf3bDmA2DqD6UsyjPRTewOGjenqPyrlyomUNLbTdZPyCYvXJQ737yhmesja86CJWPTbpqRewTUWoS6U8FFV69HxAzhJLxSuJ7Cg/wVJbposE7omRb2RaD+YTr6ld6lp+pPzMtxIQdvaiSvXC6UzkBds8J0uQxYEeoIS3Iytar3Pb5sIZXyhYmkMbrs93+3m05SEgnhE3Lhb8Trz5WyTN20RA8sJ0nyB7dS6tRv/I+2d0YiAWvfpM98JqnHwqCp6BF/Q==
+ b=PqwHGCUSEsIjUXPhZqoGiaM0xYCvPhTRUIWeqxBeX6INSr+tTqH2nEOsFPa8dPdimvZdIUNUVS3VBIitBhEzIeT4WoCE343NQ4LhQnHqGUkUUywhrrYpEaIRKml+nZBWmeJA1/FstGvwfCaq+ceuUq9C7OKkwx3a+ovdKwC9MUb1VcaALvzOlCxgAUMvakbQ4svSncykRdxbjYlU+YWcKcwPOGeBK3B3yyzDBPmf0bx5eo7NdyJY0Tob4KbiHushisiSteRECSRY0MfFimV1b3Gp4VdtABGMXgZKi8dl2oxr2+ODcdN+pb+ZEydaWDWsZKr3CosUEXJgqU7Gff+1iQ==
 ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
  s=arcselector9901;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=TUh82mQc6HD6g9smvltykSrtbePfzFc8GGItJRzDG44=;
- b=kguCD/YmoPN4woVzBOhisjsl4M9JbVnhtCroFzMXmpECiNjAaHkbBY7Gj2aMkUmjxq/ydRaJVp+lKmcNjpFTbGkGBkdBrRhbdRYSvONWlsMK79iq43OQbjRLT8NgEfBu4B0IsWsGczPo5TDr9Up+63X6ysUEiNezoQnCfvkcj3uCpK5lOE8s+ezVGsWK9D+6dbbqTfT0cknMjIpPLxBrqkxco28i22i6MiMn035FNX1SCV+IUBBVn5QwtiPrlj3mkZUMACDDmWTUj6fPwiEPqfyQereoBTKcBYLpoE6RrPwoxkynDSZpYvDL/6XEE8znEVGAgmCkorsPxn6zOhdjVg==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oss.nxp.com; dmarc=pass action=none header.from=oss.nxp.com;
- dkim=pass header.d=oss.nxp.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=NXP1.onmicrosoft.com;
- s=selector2-NXP1-onmicrosoft-com;
+ bh=Zu2GQ383m/4VIxXOUWWQoL7bxyBatQ/rEILXH9HOreA=;
+ b=A0Iu8jRQ5Gf3wNNXJvE26GiYaOv0W54kD8roS9RCDZV4gEtsj6Zs5c01WCcGwrsNdYqA7erY4oEKYC9qDd7iYSbO8JpufMtN/ZgUpcaMrEbK0MKbA1gmdZKCjEffTgs9kCWpmdnNTo4cj1bAQL23u4Rv6uA1zOszj6d4NrvsoyUwPzur0bDFBXidwLoP8HWPCjs+xw7g3QUjc6ZnjRT181vZMGJ6LSQtX003jIAUJmIIfgPtEpWJMVlIcmu/wqbpPvPbVmSHYjehXislBxpy0vNyFotxCQziUNeQI1eUpxFRJOUoMei8vuxDh5PbBghDAT8bXnBdx2vDSYzf/3psGg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=gmail.com smtp.mailfrom=amd.com; dmarc=pass
+ (p=quarantine sp=quarantine pct=100) action=none header.from=amd.com;
+ dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
  h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=TUh82mQc6HD6g9smvltykSrtbePfzFc8GGItJRzDG44=;
- b=Dtgs+iG5U0jA2Ede9F67UDDexYnJiYJ4kujuPeDvrAXOBTMxthwNkUGE6nWSqYwxNrHrptZBwFJOwQbYWf0j5VxAoYAq8dpcxMyIaayo0FpIohxI8e29v5MEbfFmRQ4oxSUyYU21DLdTIqLkPGQgyWLoYh6XxZQ0fl1tuFzXndY=
-Authentication-Results: dkim=none (message not signed)
- header.d=none;dmarc=none action=none header.from=oss.nxp.com;
-Received: from DU0PR04MB9417.eurprd04.prod.outlook.com (2603:10a6:10:358::11)
- by AM0PR04MB6900.eurprd04.prod.outlook.com (2603:10a6:208:17d::10) with
+ bh=Zu2GQ383m/4VIxXOUWWQoL7bxyBatQ/rEILXH9HOreA=;
+ b=duZ3ytymFqbSwxDBBeNzcnLqgmjN1OQhEwXquMv5K3P+QEVf5ok/BxFjlAUrbKf5HUVx5aYxhdt6HwhzVmT7qgPGwaHzFhumgrW1+5V8rooB1Hf34FmdwjlD7Clr++jIDXcG4mMJ1s6Bb+/txvsZAPGeJKwl1uS5aas41FZo37w=
+Received: from DS7PR03CA0115.namprd03.prod.outlook.com (2603:10b6:5:3b7::30)
+ by CYYPR12MB8892.namprd12.prod.outlook.com (2603:10b6:930:be::12) with
  Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6411.29; Tue, 23 May
- 2023 02:03:25 +0000
-Received: from DU0PR04MB9417.eurprd04.prod.outlook.com
- ([fe80::b999:f2c6:a8cc:7b4]) by DU0PR04MB9417.eurprd04.prod.outlook.com
- ([fe80::b999:f2c6:a8cc:7b4%7]) with mapi id 15.20.6411.029; Tue, 23 May 2023
- 02:03:25 +0000
-Message-ID: <9ef80685-3ef7-ac59-05a6-0c46e0ecf57e@oss.nxp.com>
-Date:   Tue, 23 May 2023 10:03:08 +0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.9.1
-Subject: Re: [PATCH v2 3/4] dt-bindings: mmc: fsl-imx-esdhc: remove property
- "fsl,wp-controller"
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        haibo.chen@nxp.com, adrian.hunter@intel.com,
-        ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        shawnguo@kernel.org, s.hauer@pengutronix.de
-Cc:     linux-imx@nxp.com, kernel@pengutronix.de, festevam@gmail.com,
-        cniedermaier@dh-electronics.com, devicetree@vger.kernel.org,
-        kernel@dh-electronics.com
-References: <20230506074037.522961-1-haibo.chen@nxp.com>
- <20230506074037.522961-4-haibo.chen@nxp.com>
- <d0329227-b579-5557-b449-7961ec0a1463@linaro.org>
-From:   Peng Fan <peng.fan@oss.nxp.com>
-In-Reply-To: <d0329227-b579-5557-b449-7961ec0a1463@linaro.org>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
-X-ClientProxiedBy: SI1PR02CA0005.apcprd02.prod.outlook.com
- (2603:1096:4:1f7::13) To DU0PR04MB9417.eurprd04.prod.outlook.com
- (2603:10a6:10:358::11)
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6411.28; Tue, 23 May
+ 2023 02:13:43 +0000
+Received: from DM6NAM11FT094.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:5:3b7:cafe::69) by DS7PR03CA0115.outlook.office365.com
+ (2603:10b6:5:3b7::30) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6411.28 via Frontend
+ Transport; Tue, 23 May 2023 02:13:42 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ DM6NAM11FT094.mail.protection.outlook.com (10.13.172.195) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6411.29 via Frontend Transport; Tue, 23 May 2023 02:13:42 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Mon, 22 May 2023 21:13:02 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <andy.shevchenko@gmail.com>
+CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>, <arnd@arndb.de>,
+        <blarson@amd.com>, <brendan.higgins@linux.dev>,
+        <briannorris@chromium.org>, <broonie@kernel.org>,
+        <catalin.marinas@arm.com>, <conor+dt@kernel.org>,
+        <davidgow@google.com>, <devicetree@vger.kernel.org>,
+        <fancer.lancer@gmail.com>, <gerg@linux-m68k.org>,
+        <gsomlo@gmail.com>, <hal.feng@starfivetech.com>,
+        <hasegawa-hitomi@fujitsu.com>, <j.neuschaefer@gmx.net>,
+        <joel@jms.id.au>, <kernel@esmil.dk>, <krzk@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <lee.jones@linaro.org>,
+        <lee@kernel.org>, <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <p.zabel@pengutronix.de>,
+        <rdunlap@infradead.org>, <robh+dt@kernel.org>,
+        <samuel@sholland.org>, <skhan@linuxfoundation.org>,
+        <suravee.suthikulpanit@amd.com>, <thomas.lendacky@amd.com>,
+        <tonyhuang.sunplus@gmail.com>, <ulf.hansson@linaro.org>,
+        <vaishnav.a@ti.com>, <walker.chen@starfivetech.com>,
+        <will@kernel.org>, <zhuyinbo@loongson.cn>
+Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
+Date:   Mon, 22 May 2023 19:12:56 -0700
+Message-ID: <20230523021256.61690-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <CAHp75VdsfcHOOUHuAVA38kdUyq+vwMKFYCNxScogGAJDM8ywBQ@mail.gmail.com>
+References: <CAHp75VdsfcHOOUHuAVA38kdUyq+vwMKFYCNxScogGAJDM8ywBQ@mail.gmail.com>
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
+Content-Type: text/plain
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
 X-MS-PublicTrafficType: Email
-X-MS-TrafficTypeDiagnostic: DU0PR04MB9417:EE_|AM0PR04MB6900:EE_
-X-MS-Office365-Filtering-Correlation-Id: b5ae4132-59df-4b38-108f-08db5b31e463
-X-MS-Exchange-SharedMailbox-RoutingAgent-Processed: True
+X-MS-TrafficTypeDiagnostic: DM6NAM11FT094:EE_|CYYPR12MB8892:EE_
+X-MS-Office365-Filtering-Correlation-Id: 199c5e3c-c56e-44cf-9d7e-08db5b3354e2
 X-MS-Exchange-SenderADCheck: 1
 X-MS-Exchange-AntiSpam-Relay: 0
 X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: gr6QOcEvTe8IiiQmMsMvgfhYMWZiVeAR1Gej8GKTPHxSvU45QXo0KyX1KlgP0tKEBpRxTtwSZSG/z7GOu1/+yxMxia6RhBKv0Ym9+MAB6SRbg6mB+15NR4oNw6nuanNm+6H+72uv4+cxAADstSuqs7SYN94TB/YdxvL++zQd3jXaSYBSDRdmsp70NGg8d1y9YPCz2xDDdo424C5f/bJb1ljBILZXIbkmM+Tt2gJdUAHmvdQAcKtX6zRzfgeM2aJwTinWyMdLjfOeJshHirvbTd0M6AbLV6De5i/x12VXGNjRRt4JAxfR7RruJBWfWn79RALnzEjdXG8J02f+mvDGrDrgzGdSw1c4wnzY6DM2RUAhoeDfTlleqtY1FR6wS3o0yzMV8ZnN329hxqMfkZbIfDigkVbosQAWLDhCyGO5or+FtLktPa2vRcqAW/iOEzd87R2SDJK8leaprHAfeJTG21hGPJwAPa6jFa91D0Vv9UKcVPwnreLCCyOGq4GvaZe7HzpRYq9fVHCKoR2rxxZ4s+Diks3B/FTMtsaql6ITEiqGxbpIeTwYowlLZxMxllcDr3y9z9G52Id+luLnyf+MExA8VXzq771uwiX3YkIs9eM54O8aEFsc39ewXfCoraX9MvQnoKi77GJ0hUC9iAfN7Q==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:DU0PR04MB9417.eurprd04.prod.outlook.com;PTR:;CAT:NONE;SFS:(13230028)(4636009)(376002)(39860400002)(366004)(396003)(136003)(346002)(451199021)(2616005)(186003)(2906002)(44832011)(7416002)(8676002)(8936002)(6512007)(6506007)(26005)(53546011)(5660300002)(478600001)(66946007)(66556008)(66476007)(4326008)(31696002)(86362001)(38100700002)(31686004)(83380400001)(41300700001)(6486002)(316002)(6666004)(43740500002)(45980500001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?utf-8?B?dThRTHdqQWVPU3pZcXB4QTFpT1pVZGZRVjFleS9GRytySzNrSEN1MXlLZnRC?=
- =?utf-8?B?aGRXQ1RFSFhzZ21MU2xvRWs3L0tGYktlaHFGOUhsUCtteTYwMWNnenBPUEtG?=
- =?utf-8?B?Mnh3ZDBxaHNlbUlENmR1UUZDc3lJaHlndkw5bUNXSWcwUnVndldxc0pzN0po?=
- =?utf-8?B?Qkx0Nmc0a01jTklzMG5XeG9uMUU0ME1MNmMzWnduYTFFQldsMWkzdU5RODN3?=
- =?utf-8?B?SDFCbjVrZ1BlWGkxZkFkSjJiQURrNW9NZXRDNTdIbmEyTVcraUYwWXZXOS9Z?=
- =?utf-8?B?bHFuaHF5eHNQKzljZ2pobC9PWXR4aFgzblJsRTVxakZycDZnSUtvRmIySGwx?=
- =?utf-8?B?RnRWOXhyS3lpdkptWTQ4NWVwN3NINFFBRTd3ZUx5T0E3RmM5Yi9mRXNLTlV0?=
- =?utf-8?B?NGh0WjJIOEczQUgxd213ZGoyYTRqNFlORXdaQXVpbjdETDZLS0Vac0dEK1RZ?=
- =?utf-8?B?cU5JMVRRcDRIQVlrZWhqWkJkNGVyTE5VL2ZVQ2c3SEk5M3U4M0dJbGFOS0lw?=
- =?utf-8?B?QWZxNTQ2Y2x4T2doTUs4QXJXc3dTUHREaVBmcm9VamgwK3FPYWlXV2hvL25u?=
- =?utf-8?B?Y3FFSHJrOU9zWTg0YWV6VGlwbElHUnF4dHFQMUIyRGRBS3hidE00RVBDazBZ?=
- =?utf-8?B?QU5ta3BBKzNiRmZxSno1T0RSZzI3bW5oNXFTelFSemJNa2x2b1VRcFE4dCtQ?=
- =?utf-8?B?MHBpMFFGdXlYNlRJWXJLMnJ5M2Fsb0s0QzkyNkhacVliejlpRTVZUGx3SnVW?=
- =?utf-8?B?YmpaclQ5d3JWRDdBNGlVWkVyYnRna2RsYk5odHFFYjZjNTk0NVVtT01VbFY2?=
- =?utf-8?B?TE1VRHF5THdzM0RPdHZ1dWpvbDZJK3Fnc0w3c2gwaXFpUzFTNWsvTUcxMXpR?=
- =?utf-8?B?amVHeFNKVkRyQngveFFEUnVYQU9kL1ZPYVBWYk1DLzY1YSttVkFpTFYwSVdi?=
- =?utf-8?B?WDZCRWZSN3A5cVExN0hWQU1OWTRsendQOExkQ3V2NWdnL0FrL2EvWVA2V09X?=
- =?utf-8?B?UDZWZjVxS0dKUm0weVEwOE1ZLzR6Nzh4R0tOdU94aVFiSHYyYjBDYS9GL3k3?=
- =?utf-8?B?NU9oNUdVVjA1UFF5dU9mOWxqM3RpVldaUitQVXh1WEdaVzlNYTJLOHdOUUEy?=
- =?utf-8?B?bEZPelE2eGRlUkk0cXd5M05xTVV6M2xneEJuNXNXL3FDY2MzVVpxQzZoT2Jn?=
- =?utf-8?B?alZGaHVwcUhnQlRhT0RGYmh5aktreTIwTXY0aSszZWh2cTd3T0FxaXdZNUlP?=
- =?utf-8?B?bXNyZUE3c2dQQndoenh6blFyV2l6S3ZLV0NmM082TWRGODd2Q0NXZ2hSTTky?=
- =?utf-8?B?UjVSeGpudTI0QmZEOFlEc0x4aWEzMHNSSXFkekhndnliYmxQWEhBM29aMzgr?=
- =?utf-8?B?L3VHa1QveWl2L0RLN1RFVkZrdEliM01LdE5DMWlXOHZCUkt2OThLZmJacS9u?=
- =?utf-8?B?SzA5NkRhZjJvTG04RW1JaVZycjVUTzc0elM3V3A0aTJsWnVaTGdSNkkyVS82?=
- =?utf-8?B?UGN5ZU9SOGRUMDVLMEZzL3FHOHRjRUZYZ2tSczdjMDdLTEVLSjRFMUxReWZz?=
- =?utf-8?B?eWh5ak5SSDA5Mko5eE9LUEI3VHE3eXB6ZWNkQWZjVS9RS3lvQ1kxczZZdEZL?=
- =?utf-8?B?NzNWOG9DMnI3Z2ltdnZEUXg0UkVPai9rWmZwNlVmQXp2TDVDZ1IrUmh0dnM3?=
- =?utf-8?B?YVZiWGhLcmxkZWtqTkUwN1RHbjZDQWI0Y3BPOUdxcHhyNlZOcHhQcmxYdC9w?=
- =?utf-8?B?aFpPbFNHTWtrcDhtSmhNY0d6UTZhWDI4TmZiZmZlUHI1dnEvREV5T0xoTW5m?=
- =?utf-8?B?TXM0em9MWkMzbENHMjJWUG1obkltSjUrQnhHeE9aOXJ1bTRTUndhbDc0WHpt?=
- =?utf-8?B?ZW1DOVphc2hGN0ZJdlJPN044UnorUzYwS3J3Nm1odU9IQloyMitvamlxcTFw?=
- =?utf-8?B?RzRSakQ4M0FqUWJldkszS0tQVnJEY2EwYllsajR3MU5uejlyUTBWcXF6Z1FE?=
- =?utf-8?B?K1BrUkZMYzVGL3JKM3ZNbXFtZFNoVUFUd0prM2dSUURFakZyTHFpWktoTGNM?=
- =?utf-8?B?VWs1amVNWnkrTnBtU0g2QVhReVdZSlNkRlM2ZXgvQ3RVZ2RUaHh1MHpzYTNL?=
- =?utf-8?Q?d/837Lec1LB9T76K3ODM8ZMNx?=
-X-OriginatorOrg: oss.nxp.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: b5ae4132-59df-4b38-108f-08db5b31e463
-X-MS-Exchange-CrossTenant-AuthSource: DU0PR04MB9417.eurprd04.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 May 2023 02:03:25.0588
+X-Microsoft-Antispam-Message-Info: 2Wwt8GiBxXF/u7TP59Rb/voHy/xI53hYZpiBG5DBCTA1rFSOdEPpmMpWvdSKnNZnVehpHTvCXSNAU8PE/nxDtcEkFTmpLn5E4eYOPRiQ3WmJTk3fGv40uyDQDlxf5NXhk1m7CvDvK8lPGhZnpJqa9DWyGcuNbFGobpZi3z/o6BTJm2Ye14uZ6hPfGchmW+DbZWsa4xtrzGlU35zyOQpwRdIIANZWD2G/uxD1aavIWC2EZSz5Sl+53XJ58B8fE0UCacsKOn7aVhkcBNf08ezcbD41fnzvmDSndKzp4QyThRiOoUeyVFM7/7ESsxvsC4D3DsxChP35LeKvK6+2WLuDA8nXaeNz8tibWskSZRLxj84xEC1PtWbjIBm414LpOr2JgrPQwBrpAZe6ojIeg6An1uQctHkoZP7JiRZkDhAIHAUxk7au/6Uq5ZG39PRpN6cytgtTAk5dXYcOR/9ye3w48eSjbP/ztMUX1sSPn4zxwKA9gQ/dOOacdQycjiiNYyvNDmd28tNWcnKi8QrELebtguhyROIB0z8ygbqQH9gAdbW0lasHWL4xDII5tjgF+xSrtGLX7totesEKCbuStP+Cquex7LQ1RIhpYS+DND3ncuX73YBI8taOb/8lVcQpwLTXTrcEhN+d0nu7HCdu/FQ8QuZ9LYA+oukbWFTP/YT93i1Rc4v5ah8Sainm+WeyF1MGP91nmWXMhKVd5CWRVUEdBj8w/i9Ct4uWZdkfebD0w6kHY2bx9KClyLUPuD2B9eZ3PVzeTx5Hn8N46GPGYhmAeQ==
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(346002)(376002)(136003)(396003)(39860400002)(451199021)(46966006)(36840700001)(40470700004)(5660300002)(40460700003)(8936002)(8676002)(1076003)(26005)(53546011)(2906002)(83380400001)(2616005)(47076005)(426003)(336012)(36860700001)(36756003)(16526019)(186003)(7416002)(7406005)(40480700001)(6916009)(4326008)(70206006)(70586007)(81166007)(356005)(82740400003)(316002)(54906003)(478600001)(41300700001)(6666004)(82310400005)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 23 May 2023 02:13:42.7873
  (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 686ea1d3-bc2b-4c6f-a92c-d99c5c301635
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: b/402VL2x7a2utgazw8RTKmb7bklRAHIhLV+XHPB2bfozW11YZ4moOW+6Cpyi3ZD5RIPGRxADDYmnOvyAAOmDA==
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: AM0PR04MB6900
+X-MS-Exchange-CrossTenant-Network-Message-Id: 199c5e3c-c56e-44cf-9d7e-08db5b3354e2
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: DM6NAM11FT094.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: CYYPR12MB8892
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
+Hi Andy,
 
-
-On 5/6/2023 6:59 PM, Krzysztof Kozlowski wrote:
-> Caution: This is an external email. Please take care when clicking links or opening attachments. When in doubt, report the message using the 'Report this email' button
-> 
-> 
-> On 06/05/2023 09:40, haibo.chen@nxp.com wrote:
->> From: Haibo Chen <haibo.chen@nxp.com>
+On Tue, May 16, 2023 at 00:05:32 Andy Shevchenko <andy.shevchenko@gmail.com> wrote:
+> On Mon, May 15, 2023 at 9:18 PM Brad Larson <blarson@amd.com> wrote:
 >>
->> Driver do not use this property, so remove it here.
-> 
-> You still need to expand the commit msg and justify why this property is
-> being removed. "Driver" is vague, as it can be BSD driver which also
-> might use this binding. Instead describe why this property should be
-> removed, so we can understand also ABI implications.
+>> The Pensando SoC controller is a SPI connected companion device
+>> that is present in all Pensando SoC board designs.  The essential
+>> board management registers are accessed on chip select 0 with
+>> board mgmt IO support accessed using additional chip selects.
+>
+> ...
+>
+>> +#include <linux/cdev.h>
+>> +#include <linux/device.h>
+>> +#include <linux/err.h>
+>> +#include <linux/init.h>
+>> +#include <linux/mod_devicetable.h>
+>> +#include <linux/module.h>
+>> +#include <linux/mutex.h>
+>
+>> +#include <linux/of.h>
+>
+> Unneeded inclusion.
 
-The better approach would be mark it as deprecated.
+Removed
+
+>> +#include <linux/reset-controller.h>
+>> +#include <linux/spi/spi.h>
+>
+> ...
+>
+>
+>> +       u8 tx_buf[PENCTRL_MAX_MSG_LEN];
+>> +       u8 rx_buf[PENCTRL_MAX_MSG_LEN];
+>
+> Does it need to be DMA-capable?
+
+Doesn't need to be DMA-capable
+
+> ...
+>
+>> +       spi->chip_select = current_cs;
+>> +       spi->cs_gpiod = spi->controller->cs_gpiods[current_cs];
+>
+> Nowadays these require API calls instead of direct assignments.
+
+Changed to:
+	spi_set_csgpiod(spi, 0, spi->controller->cs_gpiods[current_cs]);
+
+> ...
+>
+>> +static int penctrl_release(struct inode *inode, struct file *filp)
+>> +{
+>> +       filp->private_data = NULL;
+>> +       return 0;
+>> +}
+>
+> Is it possible to unload the module without releasing the device node?
+
+If the refcount is not zero the kernel prevents the module from being unloaded.
+
+> ...
+>
+>> +       u8 txbuf[3];
+>> +       u8 rxbuf[1];
+>
+> Same question about DMA.
+
+Not DMA-capable
+
+> ...
+>
+>> +       ret = spi_sync(spi, &m);
+>
+>> +       if (ret == 0)
+>> +               *val = rxbuf[0];
+>> +
+>> +       return ret;
+>
+> Can also be written in more usual way:
+>
+>  if (ret)
+>    return ret;
+>  ...
+>  return 0;
+
+Yes, changed to:
+        ret = spi_sync(spi, &m);
+        if (ret)
+                return ret;
+
+        *val = rxbuf[0];
+        return 0;
+
+> ...
+>
+>> +       u8 txbuf[4];
+>
+> DMA?
+
+Not DMA-capable
+
+> ...
+>
+>> +       spi->chip_select = 0;
+>> +       spi->cs_gpiod = spi->controller->cs_gpiods[0];
+>
+> Setter APIs.
+
+Changed to:
+	spi_set_csgpiod(spi, 0, spi->controller->cs_gpiods[0]);
+
+>
+> ...
+>
+>> +       spi->chip_select = 0;
+>> +       spi->cs_gpiod = spi->controller->cs_gpiods[0];
+>
+> Ditto.
+
+Changed to:
+	spi_set_csgpiod(spi, 0, spi->controller->cs_gpiods[0]);
+
+>> +       ret = device_property_read_u32(spi->dev.parent, "num-cs", &num_cs);
+>> +       if (ret)
+>> +               return dev_err_probe(&spi->dev, ret,
+>> +                                    "number of chip-selects not defined\n");
+>
+> Hmm... Shouldn't SPI core take care of this in a generic way? Yes, I
+> understand that you need the number for the allocation, but I would
+> expect something like spi_fw_get_num_cs() to exist (seems not?).
+>
+
+No need to look into the parent node, changed to this:
+
+        num_cs = spi->controller->num_chipselect;
+
+> ...
+>
+>> +       penctrl->rcdev.of_node = spi->dev.of_node;
+>
+> Use device_set_node(). It helps to modify the data types beneath.
+
+Added:
+	device_set_node(penctrl->rcdev.dev, dev_fwnode(&spi->dev));
 
 Regards,
-Peng.
-
-> 
->>
->> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
->>
->> ---
->> v2:
->> -fix dt-binding-check issue, also remove "fsl,wp-controller" in examples.
->> ---
->>   Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 6 ------
->>   1 file changed, 6 deletions(-)
-> 
-> Best regards,
-> Krzysztof
-> 
+Brad
