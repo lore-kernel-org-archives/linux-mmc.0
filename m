@@ -2,92 +2,83 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C355C7EE2E
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 13:11:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8E228C77B7A
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 13:11:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235159AbjEXNLV (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 May 2023 09:11:21 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49250 "EHLO
+        id S235248AbjEXNLj (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 May 2023 09:11:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49292 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235166AbjEXNLU (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 09:11:20 -0400
-Received: from mail-yw1-x112b.google.com (mail-yw1-x112b.google.com [IPv6:2607:f8b0:4864:20::112b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45845B0
-        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:19 -0700 (PDT)
-Received: by mail-yw1-x112b.google.com with SMTP id 00721157ae682-561afe72a73so14170117b3.0
-        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:19 -0700 (PDT)
+        with ESMTP id S235170AbjEXNLY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 09:11:24 -0400
+Received: from mail-yw1-x1136.google.com (mail-yw1-x1136.google.com [IPv6:2607:f8b0:4864:20::1136])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9081B3
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:22 -0700 (PDT)
+Received: by mail-yw1-x1136.google.com with SMTP id 00721157ae682-55db055b412so88488577b3.0
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1684933878; x=1687525878;
+        d=linaro.org; s=google; t=1684933882; x=1687525882;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=MvZGpV39H6LWTzsLCijgX3+057w1b33nSMugKocz4KY=;
-        b=RsvzRBXyg2HzzC8gG/xUrb3Dcbh95QtFJlZpWi84s1DTAD4gjXpoYWLi+17/llgvbf
-         HI7yORJ0R55Nldwipx8Wm6J7sBRt6mrIHuXA1LuG+r5EvowNzPEqJXT1FQH/+GutYWo8
-         Q7Hxu2TjrDn3gDyqBzedoEuNCNPvHx9ndrVCgweSn1Li5ysK49zalz/MpKS0vElza29t
-         dKVbq13lqTLptPwl/a3lefmYJUtRiZwl9+qEncUDBcN02oMz//XsTZX5Jmet5v5v5uNh
-         JxZYwwsjFmnt1Gx1/stRgiBlzbd8NbUvXDVJ2OAjiHgNAegX53HAaQeCuluAG4D1tPiw
-         w0mg==
+        bh=oso4v1E0bkWDfuZFGRWc8pQY1FBubFJsVEaGbMpS84k=;
+        b=Apaj5KDsXHrYKpPqQC4wT+FQzOj8DqWhEJZX9xCxaPJsp2jqKzPsDXRXg8F7SFc0g2
+         LJ8kgR+31Wig8EpUQA38/eY6S2skw/bt6HFl6O1U2zauerZFWECwx/byD4KS9v/J/tj1
+         +0Vbcmd6oAnsVQtqzT5zTfoLiMLO5Y1ihXZuRmUl1R57aCUBtuWiHOqf84g6zWIJa5Ax
+         rcSjKLFL/PI2iktW5Ws8dbE55HWnIvvXtYPdpI86pli3OiQaBOpGi1zue9rWPUQ6urzV
+         rJehoLTPlOTNvJUfCsYVgxxm5+uTLx8WctKuoYZebj3UXmDs6TywBX37LTf4HVSTVAew
+         Aeag==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684933878; x=1687525878;
+        d=1e100.net; s=20221208; t=1684933882; x=1687525882;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=MvZGpV39H6LWTzsLCijgX3+057w1b33nSMugKocz4KY=;
-        b=lQclf8UuW9CgxBYQdPdIF0Pyl+6oyS/r3n3lt2MpzRhvjIMkdzPfyCBO3aAgTEu8jF
-         hQNbEIbqSomPOCjk6IoHQINnEclvUU+f9sr/QBzo2IUZhxAD9rDsSRLXEY5ZyJsxwuER
-         sNBrTADH53ky7sgcFPSW16MtY8nJJA/1FecgpemYVhEXXF8m/CB9bGb3YpHATl+hGWeK
-         qyrvmMXHM/6ET+fkQYXGoGbMiEAaPo7LAImBW1aZX3YhwcK1QDNIExOS/8xwvBXZS4IY
-         Ws9jnYtsw0SYFJAg6Ewuzg1PIau4wPdF2HQi/ZwlV+hXHEkeyIJY/Xtb6GQtPL0Luwbj
-         CQBQ==
-X-Gm-Message-State: AC+VfDwVTPvwPw8DORakEXpaBAc7Wlv/AT+lY/0YHjbD5NuinKh0rRE+
-        Rwqxw39Y1qSJnxX5jwD5adJhtIr2zXB8ZPpVqMuXCQ==
-X-Google-Smtp-Source: ACHHUZ7Mrhuw8pccSbQf9WGKebUOBDZeHw5kYpBk2mDjue1to21G1j5Hluqsi4/jn4RAAvknTppQxiz6JmxokHmHIf0=
-X-Received: by 2002:a81:7405:0:b0:564:c4db:6329 with SMTP id
- p5-20020a817405000000b00564c4db6329mr15659384ywc.11.1684933878470; Wed, 24
- May 2023 06:11:18 -0700 (PDT)
+        bh=oso4v1E0bkWDfuZFGRWc8pQY1FBubFJsVEaGbMpS84k=;
+        b=NfcfYmvX60eGqi/SNHe1W7T7Tyd6jaT6JQH+cpCnyq9nkSCqfsZE1emP2UhuG9Dv3U
+         jDjqD6w3dY/LSYZbfaS+Q4wFUfr7EQ4Nh78/wdS3jllAgjr82HTwLrEs2T8NqgZwGdlG
+         so+6OOXXTEph65LVWmk9RC2+rk50ezSTxD0kAhVNXpAfLdCoJjq7FZFFF3SnIf79Y/zc
+         12RR23E/lg1YrTSgci3tJefPwCZ0iVuPv2DD2CK30Xh/I4UDG9CYlcxLUI8kXitBWCpt
+         W5QEluReetSuwt33ATQSqxsiAYffoELjYwArzDy8RPGgYE1to/+8jFiPW61V4cDPiJJW
+         uq8Q==
+X-Gm-Message-State: AC+VfDxSZFtfwRSVdNGsEUj2FR3nmpWef3BoLNQX5yURXVA/2HY1ul6n
+        0WpD+18v/fZcjQ5V/2OVRTBWTrk2+Hy4qJf8jjaHrw==
+X-Google-Smtp-Source: ACHHUZ6bcKDs7Amsm5cCpd2ysnRqkResVkUy0BUfWRZFtHYtlv9QgDcmI01yi3hpqYLAG1pkAX3zEoSaS0pxpIYQtvA=
+X-Received: by 2002:a0d:cb55:0:b0:54c:1716:b20 with SMTP id
+ n82-20020a0dcb55000000b0054c17160b20mr18232628ywd.17.1684933881824; Wed, 24
+ May 2023 06:11:21 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230510-mmc-sdhci-msm-function-cast-v1-1-5ae634b24fbd@kernel.org>
-In-Reply-To: <20230510-mmc-sdhci-msm-function-cast-v1-1-5ae634b24fbd@kernel.org>
+References: <20230510064434.1.I935404c5396e6bf952e99bb7ffb744c6f7fd430b@changeid>
+In-Reply-To: <20230510064434.1.I935404c5396e6bf952e99bb7ffb744c6f7fd430b@changeid>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 24 May 2023 15:10:42 +0200
-Message-ID: <CAPDyKFpj2BNEUTWeFZLWL-VDze9Ravw1SDEM=Zhe-v2Ov2udhA@mail.gmail.com>
-Subject: Re: [PATCH] mmc: meson-mx-sdhc: Avoid cast to incompatible function type
-To:     Simon Horman <horms@kernel.org>
-Cc:     Neil Armstrong <neil.armstrong@linaro.org>,
-        Kevin Hilman <khilman@baylibre.com>,
-        Jerome Brunet <jbrunet@baylibre.com>,
-        Martin Blumenstingl <martin.blumenstingl@googlemail.com>,
-        Nathan Chancellor <nathan@kernel.org>,
-        Nick Desaulniers <ndesaulniers@google.com>,
-        Tom Rix <trix@redhat.com>, linux-mmc@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org,
-        linux-amlogic@lists.infradead.org, llvm@lists.linux.dev
+Date:   Wed, 24 May 2023 15:10:46 +0200
+Message-ID: <CAPDyKFoWoJLf8utGxv3RytkvVypaC0Qdo6OZUyfupfo822SA3g@mail.gmail.com>
+Subject: Re: [PATCH] mmc: mediatek: Avoid ugly error message when SDIO wakeup
+ IRQ isn't used
+To:     Douglas Anderson <dianders@chromium.org>
+Cc:     Chaotian Jing <chaotian.jing@mediatek.com>,
+        AngeloGioacchino Del Regno 
+        <angelogioacchino.delregno@collabora.com>,
+        Linus Walleij <linus.walleij@linaro.org>,
+        Matthias Brugger <matthias.bgg@gmail.com>,
+        Yong Mao <yong.mao@mediatek.com>,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mediatek@lists.infradead.org, linux-mmc@vger.kernel.org
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, 10 May 2023 at 14:39, Simon Horman <horms@kernel.org> wrote:
+On Wed, 10 May 2023 at 15:46, Douglas Anderson <dianders@chromium.org> wrote:
 >
-> Rather than casting mmc_free_host to an incompatible function type,
-> provide a trivial wrapper with the correct signature for the use-case.
+> When I boot a kukui-kodama board, I see an ugly warning in my kernel
+> log:
+>   mtk-msdc 11240000.mmc: error -ENXIO: IRQ sdio_wakeup not found
 >
-> Reported by clang-16 with W=1:
+> It's pretty normal not to have an "sdio_wakeup" IRQ defined. In fact,
+> no device trees in mainline seem to have it. Let's use the
+> platform_get_irq_byname_optional() to avoid the error message.
 >
->  .../meson-mx-sdhc-mmc.c:791:38: error: cast from 'void (*)(struct mmc_host *)' to 'void (*)(void *)' converts to incompatible function type [-Werror,-Wcast-function-type-strict]
->          ret = devm_add_action_or_reset(dev, (void(*)(void *))mmc_free_host,
->                                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
->  ./include/linux/device.h:265:38: note: expanded from macro 'devm_add_action_or_reset'
->          __devm_add_action_or_reset(release, action, data, #action)
->                                             ^~~~~~
->
-> The same approach is taken in litex_mmc.c with the function
-> litex_mmc_free_host_wrapper(). There may be scope for consolidation.
->
-> No functional change intended.
-> Compile tested only.
->
-> Signed-off-by: Simon Horman <horms@kernel.org>
+> Fixes: 527f36f5efa4 ("mmc: mediatek: add support for SDIO eint wakup IRQ")
+> Signed-off-by: Douglas Anderson <dianders@chromium.org>
 
 Applied for next, thanks!
 
@@ -96,33 +87,23 @@ Uffe
 
 
 > ---
->  drivers/mmc/host/meson-mx-sdhc-mmc.c | 8 ++++++--
->  1 file changed, 6 insertions(+), 2 deletions(-)
 >
-> diff --git a/drivers/mmc/host/meson-mx-sdhc-mmc.c b/drivers/mmc/host/meson-mx-sdhc-mmc.c
-> index da85c2f2acb8..97168cdfa8e9 100644
-> --- a/drivers/mmc/host/meson-mx-sdhc-mmc.c
-> +++ b/drivers/mmc/host/meson-mx-sdhc-mmc.c
-> @@ -776,6 +776,11 @@ static void meson_mx_sdhc_init_hw(struct mmc_host *mmc)
->         regmap_write(host->regmap, MESON_SDHC_ISTA, MESON_SDHC_ISTA_ALL_IRQS);
->  }
+>  drivers/mmc/host/mtk-sd.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 >
-> +static void meason_mx_mmc_free_host(void *data)
-> +{
-> +       mmc_free_host(data);
-> +}
-> +
->  static int meson_mx_sdhc_probe(struct platform_device *pdev)
->  {
->         struct device *dev = &pdev->dev;
-> @@ -788,8 +793,7 @@ static int meson_mx_sdhc_probe(struct platform_device *pdev)
->         if (!mmc)
->                 return -ENOMEM;
+> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
+> index edade0e54a0c..8ce864169986 100644
+> --- a/drivers/mmc/host/mtk-sd.c
+> +++ b/drivers/mmc/host/mtk-sd.c
+> @@ -2707,7 +2707,7 @@ static int msdc_drv_probe(struct platform_device *pdev)
 >
-> -       ret = devm_add_action_or_reset(dev, (void(*)(void *))mmc_free_host,
-> -                                      mmc);
-> +       ret = devm_add_action_or_reset(dev, meason_mx_mmc_free_host, mmc);
->         if (ret) {
->                 dev_err(dev, "Failed to register mmc_free_host action\n");
->                 return ret;
+>         /* Support for SDIO eint irq ? */
+>         if ((mmc->pm_caps & MMC_PM_WAKE_SDIO_IRQ) && (mmc->pm_caps & MMC_PM_KEEP_POWER)) {
+> -               host->eint_irq = platform_get_irq_byname(pdev, "sdio_wakeup");
+> +               host->eint_irq = platform_get_irq_byname_optional(pdev, "sdio_wakeup");
+>                 if (host->eint_irq > 0) {
+>                         host->pins_eint = pinctrl_lookup_state(host->pinctrl, "state_eint");
+>                         if (IS_ERR(host->pins_eint)) {
+> --
+> 2.40.1.521.gf1e218fcd8-goog
 >
