@@ -2,157 +2,105 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2166AC7EE2C
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 12:42:26 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1BC12C7EE23
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 13:11:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231328AbjEXMmY (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 May 2023 08:42:24 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58918 "EHLO
+        id S235126AbjEXNLT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 May 2023 09:11:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49226 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230316AbjEXMmY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 08:42:24 -0400
-Received: from out3-smtp.messagingengine.com (out3-smtp.messagingengine.com [66.111.4.27])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 626499E;
-        Wed, 24 May 2023 05:42:22 -0700 (PDT)
-Received: from compute6.internal (compute6.nyi.internal [10.202.2.47])
-        by mailout.nyi.internal (Postfix) with ESMTP id 953615C0115;
-        Wed, 24 May 2023 08:42:19 -0400 (EDT)
-Received: from imap51 ([10.202.2.101])
-  by compute6.internal (MEProxy); Wed, 24 May 2023 08:42:19 -0400
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=arndb.de; h=cc
-        :cc:content-type:content-type:date:date:from:from:in-reply-to
-        :in-reply-to:message-id:mime-version:references:reply-to:sender
-        :subject:subject:to:to; s=fm3; t=1684932139; x=1685018539; bh=SF
-        9JtV1APOsCbo27SIShQg4r+s7H+woBcWqX/y1Cbdo=; b=MPX0qIkeYUH3javcr4
-        0T277eOhoLBvj5MGKRxXJIC40iN498Ia5AEtM3WBjzb1WA//1gxTFLvbdzApnw7d
-        mRmcww6BJ2kmp/5HJfmi5V4VysoKZQOQkduOe+RT0ZKgAdsPnVCxGzDjaXcltVRP
-        Iv+J8G/pSOpZTBJQ09PZE4pJTOw3Nh5GEPZrwK/x/Ji10UYampQOuumbfogMXTUH
-        BbjRfAhyCvPbyU4JjPuLGMyu3OPs1L/XS7wah/8I1MneV0Xihice76gYF3MHnj17
-        kEbKC9cjnMLJOI4wYLRWJ1K09hbY+kD4RR0+VStyUxM9S84S9sTGxPguFxt9+Gbq
-        qMNg==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:cc:content-type:content-type:date:date
-        :feedback-id:feedback-id:from:from:in-reply-to:in-reply-to
-        :message-id:mime-version:references:reply-to:sender:subject
-        :subject:to:to:x-me-proxy:x-me-proxy:x-me-sender:x-me-sender
-        :x-sasl-enc; s=fm1; t=1684932139; x=1685018539; bh=SF9JtV1APOsCb
-        o27SIShQg4r+s7H+woBcWqX/y1Cbdo=; b=GEkYChRQYQjJZWyxPqzR0Gap0m3Ek
-        P7uW5ACiQUPHjYZDN4BpnBHUTrx7LYVvnG/j/LnSMLu+n0cyjxlE9l3SWzyVmo0G
-        cOO/pu0PAK7dFF1oluUJf7om+KUHjXFA1RwMFBLO/987q4+KdSdTVh+zXLAaGnnL
-        iJjjqbG/EdcW3dosu6RlHPFvhjGLP5CGyYZRL2IA6idCHY62WLZeSbh4Iecm2svE
-        bREMasYi5OCbVTZVDm2tFhj3YN6fA6zJ8wrJXzDXBXZ9iehzwyFpeaP6IPzR3EB8
-        FOy3nRGEsEivNdxP2t+t3c5ya8XNnfKkJd9UlJssaPkyl6EnEcYi8WmqA==
-X-ME-Sender: <xms:KQZuZGMDoRzsCX5aXsO-r725SY22BCoE8ATFudZ5DaJl7wynb3wZug>
-    <xme:KQZuZE9_0xo0I4cJQiDdiw7TV9eLSIZnClXcQc-2S0YyZ1Bij6-jPvsGXyaCAKCe4
-    5gv8zmxl2ZL5lVcuSk>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvhedrfeejhedgheegucetufdoteggodetrfdotf
-    fvucfrrhhofhhilhgvmecuhfgrshhtofgrihhlpdfqfgfvpdfurfetoffkrfgpnffqhgen
-    uceurghilhhouhhtmecufedttdenucesvcftvggtihhpihgvnhhtshculddquddttddmne
-    cujfgurhepofgfggfkjghffffhvfevufgtsehttdertderredtnecuhfhrohhmpedftehr
-    nhguuceuvghrghhmrghnnhdfuceorghrnhgusegrrhhnuggsrdguvgeqnecuggftrfgrth
-    htvghrnhepffehueegteeihfegtefhjefgtdeugfegjeelheejueethfefgeeghfektdek
-    teffnecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehmrghilhhfrhhomheprg
-    hrnhgusegrrhhnuggsrdguvg
-X-ME-Proxy: <xmx:KQZuZNSGokaxVGygwsbDOfBz_Bd3L9-Y3iQ4XDMxmb0N4YD9pmee2A>
-    <xmx:KQZuZGtMqYDh5AwRAR7d7K03DN2KXEekKnKZMl4ThXvdwkiSH52fNg>
-    <xmx:KQZuZOdvpVskFAY9an0bL1TPZKC9C3k13ZZDda7j9dBcyhc5qY_6aQ>
-    <xmx:KwZuZOAXpeVP7LyUAtIRRQ1eqAR8Cew46tqPn6kSCUE2DV6S9PP5uA>
-Feedback-ID: i56a14606:Fastmail
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 64F50B60086; Wed, 24 May 2023 08:42:17 -0400 (EDT)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.9.0-alpha0-441-ga3ab13cd6d-fm-20230517.001-ga3ab13cd
-Mime-Version: 1.0
-Message-Id: <787582a3-51a1-494e-bfd0-b51d1117432e@app.fastmail.com>
-In-Reply-To: <20230523221132.64464-1-blarson@amd.com>
-References: <bc5118f2-8982-46ff-bc75-d0c71475e909@app.fastmail.com>
- <20230523221132.64464-1-blarson@amd.com>
-Date:   Wed, 24 May 2023 14:41:57 +0200
-From:   "Arnd Bergmann" <arnd@arndb.de>
-To:     "Brad Larson" <blarson@amd.com>
-Cc:     "Adrian Hunter" <adrian.hunter@intel.com>, alcooperx@gmail.com,
-        "Andy Shevchenko" <andy.shevchenko@gmail.com>,
-        brendan.higgins@linux.dev,
-        "Brian Norris" <briannorris@chromium.org>,
-        "Mark Brown" <broonie@kernel.org>,
-        "Catalin Marinas" <catalin.marinas@arm.com>,
-        "Conor Dooley" <conor+dt@kernel.org>,
-        "David Gow" <davidgow@google.com>, devicetree@vger.kernel.org,
-        "Serge Semin" <fancer.lancer@gmail.com>,
-        "Greg Ungerer" <gerg@linux-m68k.org>, gsomlo@gmail.com,
-        "Hal Feng" <hal.feng@starfivetech.com>,
-        "Hitomi Hasegawa" <hasegawa-hitomi@fujitsu.com>,
-        =?UTF-8?Q?Jonathan_Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>,
-        "Joel Stanley" <joel@jms.id.au>,
-        "Emil Renner Berthing" <kernel@esmil.dk>,
-        "Krzysztof Kozlowski" <krzk@kernel.org>,
-        krzysztof.kozlowski+dt@linaro.org,
-        "Lee Jones" <lee.jones@linaro.org>, "Lee Jones" <lee@kernel.org>,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        "linux-mmc @ vger . kernel . org" <linux-mmc@vger.kernel.org>,
-        linux-spi@vger.kernel.org,
-        "Philipp Zabel" <p.zabel@pengutronix.de>,
-        "Randy Dunlap" <rdunlap@infradead.org>,
-        "Rob Herring" <robh+dt@kernel.org>,
-        "Samuel Holland" <samuel@sholland.org>, skhan@linuxfoundation.org,
-        suravee.suthikulpanit@amd.com,
-        "Tom Lendacky" <thomas.lendacky@amd.com>,
-        "Tony Huang" <tonyhuang.sunplus@gmail.com>,
-        "Ulf Hansson" <ulf.hansson@linaro.org>, vaishnav.a@ti.com,
-        "Walker Chen" <walker.chen@starfivetech.com>,
-        "Will Deacon" <will@kernel.org>, "Yinbo Zhu" <zhuyinbo@loongson.cn>
-Subject: Re: [PATCH v14 8/8] soc: amd: Add support for AMD Pensando SoC Controller
-Content-Type: text/plain
+        with ESMTP id S232326AbjEXNLS (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 09:11:18 -0400
+Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A29DFB3
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:15 -0700 (PDT)
+Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-561e5014336so9015877b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:15 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linaro.org; s=google; t=1684933874; x=1687525874;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:from:to:cc:subject:date:message-id:reply-to;
+        bh=qW2u6I6RYUNopnlrFB7gtJl5jP7+ZzIFNaPpKmw05Tc=;
+        b=VVpAOranraFZ/GBN5m9dQ0Zy60H/r900dYnJXds6ci0uYUkRdmKcMCMOKix66CHlbp
+         kw6ZjYRhEzkoxuoiA9HUihJBx/teSolUdpyhpn4PdxCVpVsSgWdtlbvglsOL041JXr4R
+         ccOH+ACHKZTB2d6wi+RKVtCHV4oVrLw338UtdYhpjnkV1VElBy38+xf3DHK7LqCN4FBd
+         hQW5owghfvpRoBSt24Or3vwP3BGgDr4NdhSqFola3yDfxecmoKC+UZJsbTaPHJwXSSaU
+         1c5igEHAL8HH0OYrcgkVaWxlCDmQntzu62k2wDxKwv2ddei5G0emU3aBCCTlwU35E51+
+         epZQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1684933874; x=1687525874;
+        h=cc:to:subject:message-id:date:from:in-reply-to:references
+         :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=qW2u6I6RYUNopnlrFB7gtJl5jP7+ZzIFNaPpKmw05Tc=;
+        b=eHwTSjhpTssVXo6u9yIB2ImczB98B4lANnCL4gRNVqYOJlUYLYRn2T5hXumB4mTCrv
+         CsddLAQxALvmSfCfEbEtuZEvZeI4mBque3OwabtunN46kCIeqt6+JKxZ6o8g7Pe5M/2H
+         5j3LBBstwwrzjGEEG083jTAZhGNBhyGWyJdDSL9Z4cB8ubBf4za+1qy/l6NV1Cs3zxl0
+         uWIPm02sa+BMqICfiLPembcZ6m7mIQzql4bjwvuz+aX132thLPkHKKTwVWRK2HZuX3Fc
+         2aT54xBUAKUEpJIUXzqssmF/3cRPph640y+xCh/rfFRMlCCnRa6K2GNvRJv6YpF8g+nP
+         Cq/w==
+X-Gm-Message-State: AC+VfDwj4pfDlkp5RZpXGVcTG+cpZSorkpuOnPADEcR/6BYdf7CxePVj
+        eagA45EmPLcvSsSXlNWCqov7pgQVn/H4LIsx8Qhv1w==
+X-Google-Smtp-Source: ACHHUZ6+P1BwpFUsi48OyI1RaL/LudEbRVIKuQit7bvwqfM/kmM7oikCGATS8qA16J+xn+w1MPC3kluXzs4iZ/m75dw=
+X-Received: by 2002:a0d:d788:0:b0:55d:c333:26c4 with SMTP id
+ z130-20020a0dd788000000b0055dc33326c4mr17405985ywd.0.1684933874685; Wed, 24
+ May 2023 06:11:14 -0700 (PDT)
+MIME-Version: 1.0
+References: <20230509194455.1791890-1-f.fainelli@gmail.com>
+In-Reply-To: <20230509194455.1791890-1-f.fainelli@gmail.com>
+From:   Ulf Hansson <ulf.hansson@linaro.org>
+Date:   Wed, 24 May 2023 15:10:38 +0200
+Message-ID: <CAPDyKFouDf9OUvN5SsucQ1VnGoM2wmziB6xrP-kdjLJ13uU41w@mail.gmail.com>
+Subject: Re: [PATCH] mmc: block: Suppress empty whitespaces in prints
+To:     Florian Fainelli <f.fainelli@gmail.com>
+Cc:     linux-kernel@vger.kernel.org,
+        Adrian Hunter <adrian.hunter@intel.com>,
+        =?UTF-8?Q?Christian_L=C3=B6hle?= <CLoehle@hyperstone.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Jens Axboe <axboe@kernel.dk>, Ming Lei <ming.lei@redhat.com>,
+        Bean Huo <beanhuo@micron.com>,
+        Seunghui Lee <sh043.lee@samsung.com>,
+        Vincent Whitchurch <vincent.whitchurch@axis.com>,
+        "open list:MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND..." 
+        <linux-mmc@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Wed, May 24, 2023, at 00:11, Brad Larson wrote:
->> On Mon, May 15, 2023, at 20:16, Brad Larson wrote:
+On Tue, 9 May 2023 at 21:45, Florian Fainelli <f.fainelli@gmail.com> wrote:
 >
->> Also, can you explain why this needs a low-lever user interface
->> in the first place, rather than something that can be expressed
->> using high-level abstractions as you already do with the reset
->> control?
->>
->> All of the above should be part of the changelog text to get a
->> driver like this merged. I don't think we can get a quick
->> solution here though, so maybe you can start by removing the
->> ioctl side and having the rest of the driver in drivers/reset?
+> If the device is not read-only, then we will be printing an empty
+> whitespace before the newline, fix that.
 >
-> In the original patchset I added a pensando compatible to spidev and that
-> was nacked in review and reusing some random compatible that made it into 
-> spidev was just wrong.  Further it was recommended this should be a system 
-> specific driver and don't rely on a debug driver like spidev.  I changed 
-> over to a platform specific driver and at that time I also needed to include 
-> a reset controller (emmc reset only).  I put these in drivers/mfd and 
-> drivers/reset.  Review of the device tree for this approach went back and 
-> forth to _not_ have four child nodes on the spi device each with the same 
-> compatible. Decision was to squash the child nodes into the parent and put 
-> the reset-controller there also.  One driver and since its pensando
-> specific its currently in drivers/soc/amd.
+> Signed-off-by: Florian Fainelli <f.fainelli@gmail.com>
+
+Applied for next, thanks!
+
+Kind regards
+Uffe
+
+
+> ---
+>  drivers/mmc/core/block.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 >
-> There are five different user processes and some utilities that access the 
-> functionality in the cpld/fpga.  You're correct, its passing messages that 
-> are specific to the IP accessed via chip-select.  No Elba system will boot 
-> without this driver providing ioctl access.
-
-Thank you for the detailed summary. Moving away from spidev and
-from mfd seems all reasonable here. I'm still a bit confused by
-why you have multiple chipselects here that are for different
-subdevices but ended with a single user interface for all of them,
-but that's not a big deal.
-
-The main bit that sticks out about this high-level design is how
-it relies on user space utilities at all to understand the message
-format. From what I understand about the actual functionality of
-this device, it most closely resembles an embedded controller that
-you might find in a laptop or server machine, and those usually
-have kernel drivers in drivers/platform/ to interact with the
-device.
-
-Has anyone tried to do it like that? Maybe it would help
-to see what the full protocol and the user space side looks
-like, in order to move some or all of it into the kernel.
-
-     Arnd
+> diff --git a/drivers/mmc/core/block.c b/drivers/mmc/core/block.c
+> index 00c33edb9fb9..761876e5012a 100644
+> --- a/drivers/mmc/core/block.c
+> +++ b/drivers/mmc/core/block.c
+> @@ -2502,9 +2502,9 @@ static struct mmc_blk_data *mmc_blk_alloc_req(struct mmc_card *card,
+>
+>         string_get_size((u64)size, 512, STRING_UNITS_2,
+>                         cap_str, sizeof(cap_str));
+> -       pr_info("%s: %s %s %s %s\n",
+> +       pr_info("%s: %s %s %s%s\n",
+>                 md->disk->disk_name, mmc_card_id(card), mmc_card_name(card),
+> -               cap_str, md->read_only ? "(ro)" : "");
+> +               cap_str, md->read_only ? " (ro)" : "");
+>
+>         /* used in ->open, must be set before add_disk: */
+>         if (area_type == MMC_BLK_DATA_AREA_MAIN)
+> --
+> 2.34.1
+>
