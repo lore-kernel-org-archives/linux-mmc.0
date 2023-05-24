@@ -2,112 +2,93 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E1077C7EE23
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 13:12:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA517C77B73
+	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 15:16:20 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235426AbjEXNMA (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 May 2023 09:12:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49466 "EHLO
+        id S230015AbjEXPQU (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 24 May 2023 11:16:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54728 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235301AbjEXNLo (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 09:11:44 -0400
-Received: from mail-yw1-x1132.google.com (mail-yw1-x1132.google.com [IPv6:2607:f8b0:4864:20::1132])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2029A1A6
-        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:32 -0700 (PDT)
-Received: by mail-yw1-x1132.google.com with SMTP id 00721157ae682-563b1e5f701so8959807b3.3
-        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 06:11:32 -0700 (PDT)
+        with ESMTP id S229469AbjEXPQT (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 11:16:19 -0400
+Received: from mail-yw1-x1134.google.com (mail-yw1-x1134.google.com [IPv6:2607:f8b0:4864:20::1134])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EDAB310B
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 08:16:17 -0700 (PDT)
+Received: by mail-yw1-x1134.google.com with SMTP id 00721157ae682-565014fc2faso14673047b3.1
+        for <linux-mmc@vger.kernel.org>; Wed, 24 May 2023 08:16:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1684933891; x=1687525891;
+        d=linaro.org; s=google; t=1684941377; x=1687533377;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:from:to:cc:subject:date:message-id:reply-to;
-        bh=34o3DtpNIVdQeZC8bU8U/uc6p6qXV/32Q4BzT8svKd8=;
-        b=Icsnqu6He3fGmq05OHwLcujobeOkfyG2G8nArOAkoITJ9U+sYoEYGHw+aalG2x5sOr
-         xmVbmSoE4gJG4LQMKSgN5Qh4JH8WgAYwUI2fyRrgjF7YIrqyMcephGatFjooQL/1tEnU
-         x6ounFs0nzgCSWNK3jGIWA5+SFdWFiuAvudqSD000ESEnlaEFe1RR2WyM2tK04Q1DZ16
-         9VMRb1Z/EeEC5AZagf/LZhSbrPIsjlB0ox2A9E4ITgFZfscyob8PJFW90nijA9ZVVcqB
-         gEfjjQdUPigV/jMYKAY9Hqr3Pg/8rsm0koZ5ltjuGngeIXXJGFla71o5mOGDodWu/V0f
-         L42g==
+        bh=Prxo6uRVHuwACd4AHAlZan5NVrjpCNqCsnrPag0CTJ4=;
+        b=SrYs6GwHEKCl+j+vxznDk0KIJ+CfcLzlh9jX0lxnqVHdk0EI20J74dTfQz+jMQPV+o
+         HRGFE4MffhRxT10JMc9EenmytTMKdPU3gHLZdOcbFXp3QZAG5AUW9GZItHDP9G1OPn+t
+         llTFDOc+LAitqp30xuBPosPVrjcODNOUKNy0MRJajEaIcCIFCrcuH4/yAm6H3yXKWK/v
+         oI4cYgY0sb4dtNpEZVPNrFvFNdwRuh0w3A/SmWb5rL2HYzpmxxFR7RxzlVB+oWd7JKQ3
+         Y+CfjD+KIdLgzr+Rd3wWyE7m2qcp/oX2qCTfKmEYPF9cuMbI+k5bYX97mB/xMOQCwOtS
+         ICgQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1684933891; x=1687525891;
+        d=1e100.net; s=20221208; t=1684941377; x=1687533377;
         h=cc:to:subject:message-id:date:from:in-reply-to:references
          :mime-version:x-gm-message-state:from:to:cc:subject:date:message-id
          :reply-to;
-        bh=34o3DtpNIVdQeZC8bU8U/uc6p6qXV/32Q4BzT8svKd8=;
-        b=ieHBBFkSqtqIrQaBOfKlvZEwjF+f48BIIy7GpDKUs5vk4GjE0LQLgXYof22pvbfNRD
-         OQrHDiYoLHeU0Ybs5mPEt4RfYhyKVo1pP0ONBaytHEaCSUojvaYvUe0Uq4qoryohcEAJ
-         vmIO/57dKDE7wJeKrGvAiwax54KWL0c3PNV/fSjP7NJbS/4KA+av/TnoBdPGBCQdiY+o
-         aewkFf3uL+rG6KnxdSVPsFkaqdPqWls+3dT9HT02Oauw4Lz2ooYCpFwAyNcM8XwjJDkm
-         q2uTZ18Iw98Ql05hoPvpaGnu0hdwGbJOr0sR0WZ7BDhbxSOq2Q3Xm0Wh7QK/xNznQcvC
-         yThg==
-X-Gm-Message-State: AC+VfDyAHQBtXHxin6F+3Q7sX/+rG0MinV8pgvlhiqcnO7mYYxmOUMET
-        yhjrd7PAsPKPstJ/uDsAFSv6iE9RoZWfjzkiZEyaxw==
-X-Google-Smtp-Source: ACHHUZ5bzgKh7DOR8WmbaQ2iomRob//GbkoT3mmQrwObvRTuAj0uRzwOKYxF68C9ARu6kyv/PRO2sblahtJQlbDA7fk=
-X-Received: by 2002:a25:7313:0:b0:ba7:2531:28af with SMTP id
- o19-20020a257313000000b00ba7253128afmr18473418ybc.11.1684933891295; Wed, 24
- May 2023 06:11:31 -0700 (PDT)
+        bh=Prxo6uRVHuwACd4AHAlZan5NVrjpCNqCsnrPag0CTJ4=;
+        b=YXTDnhvthlvuyoAAauxQFpSEAMvK1QyeYCGmdAR0Ss1brxQ1RTwhsdS3ec31GXtJWu
+         om1Ds081PEhddLCQECKfNEAHQd9w2q22KyIx4YHIa/3vvvFqTihWvWmIOhczdxnR2uCQ
+         HoyZcnrgFnGTNO5s1dTraKURUTmKiP2y1BwhmuZv3n+AdOvnC299fyEuBKH6S8cnfZ+R
+         XNAKEoSavpdT98RWNZ0H2I/rQiJQdsrR0Skhyn6U9Hj8O0sryFEL0/iiQD1IjpugXBKa
+         X0t5FKveRMy6NrR2K0EE4J4a0YK2OzulyuR9FEs9WOJoDlaI4eICTriPsIVU90JMUXfK
+         qiJA==
+X-Gm-Message-State: AC+VfDwYr/Oa7W06EceqwrogADUkKnXYToaLbDOjwsE79tbz/R51mrqP
+        upNBeN7nqcdEPu8y7q+JLRsy13nACp5yy0GAUcBWEqKHk8F3Ozsp
+X-Google-Smtp-Source: ACHHUZ5P/Mdy88v9mAy1DqgiuPymj83PL0vLQ0M8XlENkn+B5Biu3PvmUeyP+OHTz3j+k1+qs88x6vZum90YUDZ78dw=
+X-Received: by 2002:a81:77d6:0:b0:565:62eb:db6 with SMTP id
+ s205-20020a8177d6000000b0056562eb0db6mr2357786ywc.42.1684941377158; Wed, 24
+ May 2023 08:16:17 -0700 (PDT)
 MIME-Version: 1.0
-References: <20230516202714.560929-1-arnd@kernel.org>
-In-Reply-To: <20230516202714.560929-1-arnd@kernel.org>
+References: <20230522214818.2038252-1-ejo@pengutronix.de>
+In-Reply-To: <20230522214818.2038252-1-ejo@pengutronix.de>
 From:   Ulf Hansson <ulf.hansson@linaro.org>
-Date:   Wed, 24 May 2023 15:10:55 +0200
-Message-ID: <CAPDyKFp0=a+cuZRDLkh-4Z7R0=zrJ4C6h7LL++KKZ6TDBeKzCA@mail.gmail.com>
-Subject: Re: [PATCH] memstick r592: make memstick_debug_get_tpc_name() static
-To:     Arnd Bergmann <arnd@kernel.org>
-Cc:     Maxim Levitsky <maximlevitsky@gmail.com>,
-        Alex Dubov <oakad@yahoo.com>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Arnd Bergmann <arnd@arndb.de>, Zheng Wang <zyytlz.wz@163.com>,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
+Date:   Wed, 24 May 2023 17:15:40 +0200
+Message-ID: <CAPDyKFpV-Ff-0uuZPq0LA2oJDTuNEweaG1s1jsmRqaNUFfMZUw@mail.gmail.com>
+Subject: Re: [PATCH 1/3] mmc-utils: add SanDisk to manufacturer database
+To:     Enrico Jorns <ejo@pengutronix.de>
+Cc:     linux-mmc@vger.kernel.org, Avri Altman <avri.altman@wdc.com>
 Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, 16 May 2023 at 22:27, Arnd Bergmann <arnd@kernel.org> wrote:
+On Mon, 22 May 2023 at 23:49, Enrico Jorns <ejo@pengutronix.de> wrote:
 >
-> From: Arnd Bergmann <arnd@arndb.de>
->
-> There are no other files referencing this function, apparently
-> it was left global to avoid an 'unused function' warning when
-> the only caller is left out. With a 'W=1' build, it causes
-> a 'missing prototype' warning though:
->
-> drivers/memstick/host/r592.c:47:13: error: no previous prototype for 'memstick_debug_get_tpc_name' [-Werror=missing-prototypes]
->
-> Annotate the function as 'static __maybe_unused' to avoid both
-> problems.
->
-> Fixes: 926341250102 ("memstick: add driver for Ricoh R5C592 card reader")
-> Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+> Signed-off-by: Enrico Jorns <ejo@pengutronix.de>
 
-Applied for next, thanks!
+Applied to git.kernel.org/pub/scm/utils/mmc/mmc-utils.git master, thanks!
 
 Kind regards
 Uffe
 
 
 > ---
->  drivers/memstick/host/r592.c | 4 +---
->  1 file changed, 1 insertion(+), 3 deletions(-)
+>  lsmmc.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
-> diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
-> index 42bfc46842b8..461f5ffd02bc 100644
-> --- a/drivers/memstick/host/r592.c
-> +++ b/drivers/memstick/host/r592.c
-> @@ -44,12 +44,10 @@ static const char *tpc_names[] = {
->   * memstick_debug_get_tpc_name - debug helper that returns string for
->   * a TPC number
->   */
-> -const char *memstick_debug_get_tpc_name(int tpc)
-> +static __maybe_unused const char *memstick_debug_get_tpc_name(int tpc)
->  {
->         return tpc_names[tpc-1];
->  }
-> -EXPORT_SYMBOL(memstick_debug_get_tpc_name);
-> -
->
->  /* Read a register*/
->  static inline u32 r592_read_reg(struct r592_device *dev, int address)
+> diff --git a/lsmmc.c b/lsmmc.c
+> index 55da3aa..da9d69e 100644
+> --- a/lsmmc.c
+> +++ b/lsmmc.c
+> @@ -239,6 +239,11 @@ struct ids_database database[] = {
+>                 .id = 0x44,
+>                 .manufacturer = "ATP",
+>         },
+> +       {
+> +               .type = "mmc",
+> +               .id = 0x45,
+> +               .manufacturer = "SanDisk Corporation",
+> +       },
+>         {
+>                 .type = "mmc",
+>                 .id = 0x2c,
 > --
 > 2.39.2
 >
