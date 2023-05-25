@@ -2,131 +2,124 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05399C7EE2D
-	for <linux-mmc@archiver.kernel.org>; Thu, 25 May 2023 04:24:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3EBE2C77B7A
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 May 2023 09:55:56 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233181AbjEYEX7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 25 May 2023 00:23:59 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48678 "EHLO
+        id S239192AbjEYJzy convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 May 2023 05:55:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234146AbjEYEXY (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 May 2023 00:23:24 -0400
-Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 847FB1A4;
-        Wed, 24 May 2023 21:23:20 -0700 (PDT)
-Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D99164292;
-        Thu, 25 May 2023 04:23:20 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C8B4C433D2;
-        Thu, 25 May 2023 04:23:18 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684988599;
-        bh=ToeWW3ZgoTCQO0LdvxeiuHZQHmafEqitwRCapGbXRXM=;
-        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
-        b=oLYAcYlS6oEISnvDvoyAwg4R4DDv9d3s3Mtu9Biz/Jko+oGF6Nxh2xu3IAlQrpTtn
-         gbefovXS+LjRPDD480HJ+9bx5/AkUkCoivkWYERCRr8ay/RWjiAiv51Cqo3p6Pf44X
-         KyLYPVWa8ou84QcesLlZmaUvwDkY4o5aozmFwdH7I0MEs4z7/CA1d8QJdvNOPm6RA9
-         lFz2RjvWpvjkVNjp0H8CbFrF17yi32C9hLMPCWcZ+e2fGr9pPbj/Gvb6OG8FxQGP8/
-         w4YMO3ye8qMCHpuvfvonuRTE8pZcq6Aqt0hyuARuKqKG53UsjC7zrZnK9cx2yxMVhC
-         GdMk9WUhZD36g==
-Date:   Wed, 24 May 2023 21:27:09 -0700
-From:   Bjorn Andersson <andersson@kernel.org>
-To:     Komal Bajaj <quic_kbajaj@quicinc.com>
-Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
-        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
-        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
-Subject: Re: [PATCH v3 2/4] arm: dts: qcom: qdu1000: Add SDHCI node
-Message-ID: <20230525042709.czmuxdbshsneskrs@ripper>
-References: <20230523135733.3852-1-quic_kbajaj@quicinc.com>
- <20230523135733.3852-3-quic_kbajaj@quicinc.com>
+        with ESMTP id S235690AbjEYJzx (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 May 2023 05:55:53 -0400
+Received: from mail6.swissbit.com (mail5.swissbit.com [148.251.244.252])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04E6EE7;
+        Thu, 25 May 2023 02:55:51 -0700 (PDT)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 1E4782229AC;
+        Thu, 25 May 2023 11:55:50 +0200 (CEST)
+Received: from mail6.swissbit.com (localhost [127.0.0.1])
+        by DDEI (Postfix) with ESMTP id 13087220D9B;
+        Thu, 25 May 2023 11:55:50 +0200 (CEST)
+X-TM-AS-ERS: 10.181.10.103-127.5.254.253
+X-TM-AS-SMTP: 1.0 bXgxLmRtei5zd2lzc2JpdC5jb20= Y2xvZWhsZUBoeXBlcnN0b25lLmNvb
+        Q==
+X-DDEI-TLS-USAGE: Used
+Received: from mx1.dmz.swissbit.com (mx.dmz.swissbit.com [10.181.10.103])
+        by mail6.swissbit.com (Postfix) with ESMTPS;
+        Thu, 25 May 2023 11:55:50 +0200 (CEST)
+From:   Christian Loehle <CLoehle@hyperstone.com>
+To:     Ulf Hansson <ulf.hansson@linaro.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        Adrian Hunter <adrian.hunter@intel.com>
+CC:     Avri Altman <avri.altman@wdc.com>
+Subject: [PATCHv2 0/2] mmc: block: ioctl: Enhance userspace err-checking
+Thread-Topic: [PATCHv2 0/2] mmc: block: ioctl: Enhance userspace err-checking
+Thread-Index: AdmO7mibZ40MpwCrTAyP3SbyU0LCTQ==
+Date:   Thu, 25 May 2023 09:55:47 +0000
+Message-ID: <92013b1430374efd84828f467cd64017@hyperstone.com>
+Accept-Language: en-US, de-DE
+Content-Language: en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+Content-Type: text/plain;
+        charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20230523135733.3852-3-quic_kbajaj@quicinc.com>
+X-TMASE-Version: DDEI-5.1-9.0.1002-27648.006
+X-TMASE-Result: 10--5.681900-10.000000
+X-TMASE-MatchedRID: 8xV9Hp+2OHIx0Ef1LOCr0ENF5tKVli5K0NnUUVMlTKYli8Y5a0svLwoO
+        Pjrr9EUjy5mHbqk+bZO46fDNSVBzTaGDMgFJdihf+LfLuKfgdOBPnKxAOPp4WTd4L/plQfz0j3d
+        ZSyALReJzNhvK4/9wOg0wwSAB0/Gt7c0is1Jg1Fc6N/cDgNNi4Xdtc9b/HMCuzf+duMCJLEyE3Q
+        pvaMjVSYspy5fJnP2k+YJ8C27gzimmg8dBfLCnVyBpp+DpTrQjDjwwT0r6EXRShcWO/83xoj88n
+        yn5HOwB3xN6jyfnVfp+ZLbS08T2S4cWjt28Nz4w9k0tWBWiOf+ZmLDnd2pI3xSgk4EVhbwmfr0m
+        qpu8k1/i8zVgXoAltjrm2CwlZwVRIAcCikR3vq+K4yGkVExDUCp/hk68F/GCxbbdqRLCU9qvWgg
+        wXn7XqpxaTGG+kiW4
+X-TMASE-SNAP-Result: 1.821001.0001-0-1-22:0,33:0,34:0-0
+X-TMASE-INERTIA: 0-0;;;;
+X-TMASE-XGENCLOUD: 2a153936-2aae-43ca-8f11-0cef0494ce0d-0-0-200-0
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On Tue, May 23, 2023 at 07:27:31PM +0530, Komal Bajaj wrote:
-> Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
-> 
+This series enhances the ioctl path so that userspace callers are
+able to reliably check all error bits for their operation.
 
-Please fix your $subject prefix, it should say arm64
+The current implementation poses the problem of error bits which
+the caller cannot check, this is potentially a security issue.
 
-Regards,
-Bjorn
+If the phrase security issue has woken you up, but you haven't been using:
+mmc-utils sanitize
+mmc-utils erase secure-trim{1|2}
+mmc-utils secure-erase
+mmc-utils rpmb write-block
+you can go back to sleep, sorry to bother you.
+If you have, you are probably still fine, if there was no active
+attacker sabotaging your eMMC, the secure operation probably
+succeeded.
+There is just no way to confirm that it actually has.
 
-> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
-> ---
->  arch/arm64/boot/dts/qcom/qdu1000.dtsi | 47 +++++++++++++++++++++++++++
->  1 file changed, 47 insertions(+)
-> 
-> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> index 734438113bba..6df07334f1d3 100644
-> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-> @@ -842,6 +842,53 @@
->  			#hwlock-cells = <1>;
->  		};
-> 
-> +		sdhc: mmc@8804000 {
-> +			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
-> +			reg = <0x0 0x08804000 0x0 0x1000>,
-> +			      <0x0 0x08805000 0x0 0x1000>;
-> +			reg-names = "hc", "cqhci";
-> +
-> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-> +			interrupt-names = "hc_irq", "pwr_irq";
-> +
-> +			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
-> +				 <&gcc GCC_SDCC5_APPS_CLK>,
-> +				 <&rpmhcc RPMH_CXO_CLK>;
-> +			clock-names = "iface",
-> +				      "core",
-> +				      "xo";
-> +
-> +			resets = <&gcc GCC_SDCC5_BCR>;
-> +
-> +			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
-> +					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
-> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
-> +			power-domains = <&rpmhpd QDU1000_CX>;
-> +			operating-points-v2 = <&sdhc1_opp_table>;
-> +
-> +			iommus = <&apps_smmu 0x80 0x0>;
-> +			dma-coherent;
-> +
-> +			bus-width = <8>;
-> +
-> +			qcom,dll-config = <0x0007642c>;
-> +			qcom,ddr-config = <0x80040868>;
-> +
-> +			status = "disabled";
-> +
-> +			sdhc1_opp_table: opp-table {
-> +				compatible = "operating-points-v2";
-> +
-> +				opp-384000000 {
-> +					opp-hz = /bits/ 64 <384000000>;
-> +					required-opps = <&rpmhpd_opp_nom>;
-> +					opp-peak-kBps = <6528000 1652800>;
-> +					opp-avg-kBps = <400000 0>;
-> +				};
-> +			};
-> +		};
-> +
->  		pdc: interrupt-controller@b220000 {
->  			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
->  			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
-> --
-> 2.17.1
-> 
+Examples include e.g. a flash-fail of the eMMC.
+Card behavior differs here, R1 bit 19 could be set,
+many cards will just shut off on flash-fail, so if you want to play
+with this patch I would suggest aiming for WP_ERASE_SKIP,
+although that technically doesn't need the patch, as WP groups could
+be queried before and after erase.
+
+sudo ./mmc writeprotect user set temp 0x0 $(($(blockdev --getsz /dev/mmcblk2))) /dev/mmcblk2
+sudo ./mmc erase secure-erase 0 $(($(blockdev --getsz /dev/mmcblk2)-1)) /dev/mmcblk2
+
+will yield
+
+Executing Secure Erase from 0x00000000 to 0x0773ffff
+High Capacity Erase Unit Size=524288 bytes
+High Capacity Erase Timeout=600 ms
+High Capacity Write Protect Group Size=2097152 bytes
+RSP0: 0x00008900 # added by author, this is what the patch will add to RSP0
+ Secure Erase Succeed!
+
+even though no erase is issued.
+
+v2:
+- removed extra flag and made it default behavior for write or R1B
+- aggregate error flag in resp[0] instead of abusing resp[1]
+- avoid open loop busy polling and reuse __mmc_poll_for_busy
+
+Christian Loehle (2):
+  mmc: block: ioctl: do write error check for spi
+  mmc: block: ioctl: Add PROG-error aggregation
+
+ drivers/mmc/core/block.c   | 23 ++++++++++++-----------
+ drivers/mmc/core/mmc_ops.c | 25 ++++++++++++++++++++++++-
+ drivers/mmc/core/mmc_ops.h |  3 +++
+ 3 files changed, 39 insertions(+), 12 deletions(-)
+
+-- 
+2.37.3
+
+
+Hyperstone GmbH | Reichenaustr. 39a  | 78467 Konstanz
+Managing Director: Dr. Jan Peter Berns.
+Commercial register of local courts: Freiburg HRB381782
+
