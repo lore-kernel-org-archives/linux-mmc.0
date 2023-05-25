@@ -2,67 +2,131 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB32EC77B7C
-	for <linux-mmc@archiver.kernel.org>; Wed, 24 May 2023 18:48:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 05399C7EE2D
+	for <linux-mmc@archiver.kernel.org>; Thu, 25 May 2023 04:24:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235375AbjEXSsT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 24 May 2023 14:48:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33140 "EHLO
+        id S233181AbjEYEX7 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 25 May 2023 00:23:59 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48678 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237435AbjEXSsS (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 24 May 2023 14:48:18 -0400
+        with ESMTP id S234146AbjEYEXY (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 25 May 2023 00:23:24 -0400
 Received: from dfw.source.kernel.org (dfw.source.kernel.org [IPv6:2604:1380:4641:c500::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8728FC;
-        Wed, 24 May 2023 11:48:17 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 847FB1A4;
+        Wed, 24 May 2023 21:23:20 -0700 (PDT)
 Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
         (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
         (No client certificate requested)
-        by dfw.source.kernel.org (Postfix) with ESMTPS id 5795A6350C;
-        Wed, 24 May 2023 18:48:17 +0000 (UTC)
-Received: by smtp.kernel.org (Postfix) with ESMTPS id B83D8C433EF;
-        Wed, 24 May 2023 18:48:16 +0000 (UTC)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 0D99164292;
+        Thu, 25 May 2023 04:23:20 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id 7C8B4C433D2;
+        Thu, 25 May 2023 04:23:18 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1684954096;
-        bh=epmWzPzjdf0Vic0Q4gyJPQhDLWAK9wxtS2FF5EIjY6E=;
-        h=Subject:From:In-Reply-To:References:Date:To:Cc:From;
-        b=iKoezlUoDO4/TrHEs6q4RcRpmMCFF19a4rM/gtwRoRAeX9o73lNv9MzdT3VZbXkRi
-         rOT9z9mOQmFvnWt3wfVvVJZSeOFMCo1Eh7ZCaiqBlmtpD2mba+meLsGjcF50XGeDqb
-         bpxqHDyDaX+oJQc9ZkDP6qGOsW6smnttjb85hJGEM6oxrg1e5bUJIOHp2IiWnwyxkI
-         uD/9T7TaDkSditcXwfWzW+b9bfQssqZ3LMWASj+ygBSc8cRmYPw2xttW240kmFZSKK
-         xc0rBdo3yb9B47dn8hDOZozWQVFPQXEBh62TT5SN2A2F/eSUYu8FEe/9MqN+3mOQhI
-         SQAY1LEh4U8IA==
-Received: from aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (localhost.localdomain [127.0.0.1])
-        by aws-us-west-2-korg-oddjob-1.ci.codeaurora.org (Postfix) with ESMTP id A2171E22AE9;
-        Wed, 24 May 2023 18:48:16 +0000 (UTC)
-Subject: Re: [GIT PULL] MMC fixes for v6.4-rc4
-From:   pr-tracker-bot@kernel.org
-In-Reply-To: <20230524085533.124092-1-ulf.hansson@linaro.org>
-References: <20230524085533.124092-1-ulf.hansson@linaro.org>
-X-PR-Tracked-List-Id: <linux-mmc.vger.kernel.org>
-X-PR-Tracked-Message-Id: <20230524085533.124092-1-ulf.hansson@linaro.org>
-X-PR-Tracked-Remote: git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.4-rc1
-X-PR-Tracked-Commit-Id: 81dce1490e28439c3cd8a8650b862a712f3061ba
-X-PR-Merge-Tree: torvalds/linux.git
-X-PR-Merge-Refname: refs/heads/master
-X-PR-Merge-Commit-Id: 203fc3177dd7427a1f87ec33de201c6d67b5c5cb
-Message-Id: <168495409665.10364.17771934925654379095.pr-tracker-bot@kernel.org>
-Date:   Wed, 24 May 2023 18:48:16 +0000
-To:     Ulf Hansson <ulf.hansson@linaro.org>
-Cc:     Linus <torvalds@linux-foundation.org>, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, Ulf Hansson <ulf.hansson@linaro.org>
+        s=k20201202; t=1684988599;
+        bh=ToeWW3ZgoTCQO0LdvxeiuHZQHmafEqitwRCapGbXRXM=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=oLYAcYlS6oEISnvDvoyAwg4R4DDv9d3s3Mtu9Biz/Jko+oGF6Nxh2xu3IAlQrpTtn
+         gbefovXS+LjRPDD480HJ+9bx5/AkUkCoivkWYERCRr8ay/RWjiAiv51Cqo3p6Pf44X
+         KyLYPVWa8ou84QcesLlZmaUvwDkY4o5aozmFwdH7I0MEs4z7/CA1d8QJdvNOPm6RA9
+         lFz2RjvWpvjkVNjp0H8CbFrF17yi32C9hLMPCWcZ+e2fGr9pPbj/Gvb6OG8FxQGP8/
+         w4YMO3ye8qMCHpuvfvonuRTE8pZcq6Aqt0hyuARuKqKG53UsjC7zrZnK9cx2yxMVhC
+         GdMk9WUhZD36g==
+Date:   Wed, 24 May 2023 21:27:09 -0700
+From:   Bjorn Andersson <andersson@kernel.org>
+To:     Komal Bajaj <quic_kbajaj@quicinc.com>
+Cc:     Ulf Hansson <ulf.hansson@linaro.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Andy Gross <agross@kernel.org>,
+        Konrad Dybcio <konrad.dybcio@linaro.org>,
+        Bhupesh Sharma <bhupesh.sharma@linaro.org>,
+        linux-mmc@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-arm-msm@vger.kernel.org
+Subject: Re: [PATCH v3 2/4] arm: dts: qcom: qdu1000: Add SDHCI node
+Message-ID: <20230525042709.czmuxdbshsneskrs@ripper>
+References: <20230523135733.3852-1-quic_kbajaj@quicinc.com>
+ <20230523135733.3852-3-quic_kbajaj@quicinc.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20230523135733.3852-3-quic_kbajaj@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-The pull request you sent on Wed, 24 May 2023 10:55:33 +0200:
+On Tue, May 23, 2023 at 07:27:31PM +0530, Komal Bajaj wrote:
+> Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
+> 
 
-> git://git.kernel.org/pub/scm/linux/kernel/git/ulfh/mmc.git tags/mmc-v6.4-rc1
+Please fix your $subject prefix, it should say arm64
 
-has been merged into torvalds/linux.git:
-https://git.kernel.org/torvalds/c/203fc3177dd7427a1f87ec33de201c6d67b5c5cb
+Regards,
+Bjorn
 
-Thank you!
-
--- 
-Deet-doot-dot, I am a bot.
-https://korg.docs.kernel.org/prtracker.html
+> Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
+> ---
+>  arch/arm64/boot/dts/qcom/qdu1000.dtsi | 47 +++++++++++++++++++++++++++
+>  1 file changed, 47 insertions(+)
+> 
+> diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> index 734438113bba..6df07334f1d3 100644
+> --- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> +++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
+> @@ -842,6 +842,53 @@
+>  			#hwlock-cells = <1>;
+>  		};
+> 
+> +		sdhc: mmc@8804000 {
+> +			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
+> +			reg = <0x0 0x08804000 0x0 0x1000>,
+> +			      <0x0 0x08805000 0x0 0x1000>;
+> +			reg-names = "hc", "cqhci";
+> +
+> +			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
+> +				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
+> +			interrupt-names = "hc_irq", "pwr_irq";
+> +
+> +			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
+> +				 <&gcc GCC_SDCC5_APPS_CLK>,
+> +				 <&rpmhcc RPMH_CXO_CLK>;
+> +			clock-names = "iface",
+> +				      "core",
+> +				      "xo";
+> +
+> +			resets = <&gcc GCC_SDCC5_BCR>;
+> +
+> +			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
+> +					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
+> +			interconnect-names = "sdhc-ddr", "cpu-sdhc";
+> +			power-domains = <&rpmhpd QDU1000_CX>;
+> +			operating-points-v2 = <&sdhc1_opp_table>;
+> +
+> +			iommus = <&apps_smmu 0x80 0x0>;
+> +			dma-coherent;
+> +
+> +			bus-width = <8>;
+> +
+> +			qcom,dll-config = <0x0007642c>;
+> +			qcom,ddr-config = <0x80040868>;
+> +
+> +			status = "disabled";
+> +
+> +			sdhc1_opp_table: opp-table {
+> +				compatible = "operating-points-v2";
+> +
+> +				opp-384000000 {
+> +					opp-hz = /bits/ 64 <384000000>;
+> +					required-opps = <&rpmhpd_opp_nom>;
+> +					opp-peak-kBps = <6528000 1652800>;
+> +					opp-avg-kBps = <400000 0>;
+> +				};
+> +			};
+> +		};
+> +
+>  		pdc: interrupt-controller@b220000 {
+>  			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
+>  			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
+> --
+> 2.17.1
+> 
