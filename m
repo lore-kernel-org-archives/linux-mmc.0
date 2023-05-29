@@ -2,123 +2,65 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 46E03C77B7E
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 May 2023 15:00:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A2F24C7EE23
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 May 2023 15:55:36 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229829AbjE2PAa (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 May 2023 11:00:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49332 "EHLO
+        id S229786AbjE2Pzf (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 May 2023 11:55:35 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45592 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229845AbjE2PA2 (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 May 2023 11:00:28 -0400
-Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A597E4;
-        Mon, 29 May 2023 08:00:27 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1685372427; x=1716908427;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=AOOSBy8j9IN+drBBdgWRoFkQWz5B0UzI5mBVYtiFNf8=;
-  b=Y2104u2/k2BhaXFEHqB64F4dbKMczWdB3OpQyLdqsagiwmWCxVCmA8a+
-   VMi2MEa7PPhNQZ41Y1IDJyzA4O3czqlDALaSTBqK8xHEUXWMy8eRIC1Mp
-   7VFBTL2CqLFTLt+KgAe0G3H4a7lCFcfixA3jGjrBJGnb/2WBnor1kgAKI
-   qxoL/nViUWw2IQ2BBLmrQWtIVN95i2wwTvBoXo8jZnEy+gU5zQcEt0BSC
-   XckT/pdLiUbRX5Xbe3AbqJWgYRB9cGCg0iqlvXtwJXNxYjpXg0oRfDy2v
-   5sURaUpB9DbGkLGxfpTgVRVmk5p8Q6W8Xz/nSfQDXACkal9uZH/MIDDjZ
-   A==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10725"; a="344219462"
-X-IronPort-AV: E=Sophos;i="6.00,201,1681196400"; 
-   d="scan'208";a="344219462"
-Received: from orsmga004.jf.intel.com ([10.7.209.38])
-  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 May 2023 08:00:26 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10725"; a="830417944"
-X-IronPort-AV: E=Sophos;i="6.00,201,1681196400"; 
-   d="scan'208";a="830417944"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.208.110])
-  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 May 2023 08:00:23 -0700
-Message-ID: <985a5616-9f98-9ff1-7007-d0ac77a40014@intel.com>
-Date:   Mon, 29 May 2023 18:00:18 +0300
+        with ESMTP id S229499AbjE2Pze (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 May 2023 11:55:34 -0400
+Received: from fgw22-7.mail.saunalahti.fi (fgw22-7.mail.saunalahti.fi [62.142.5.83])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 72EBDC4
+        for <linux-mmc@vger.kernel.org>; Mon, 29 May 2023 08:55:33 -0700 (PDT)
+Received: from localhost (88-113-26-95.elisa-laajakaista.fi [88.113.26.95])
+        by fgw22.mail.saunalahti.fi (Halon) with ESMTP
+        id 3ad30867-fe39-11ed-a9de-005056bdf889;
+        Mon, 29 May 2023 18:55:29 +0300 (EEST)
+From:   andy.shevchenko@gmail.com
+Date:   Mon, 29 May 2023 18:55:26 +0300
+To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>
+Cc:     Andy Shevchenko <andy.shevchenko@gmail.com>, agross@kernel.org,
+        andersson@kernel.org, konrad.dybcio@linaro.org, robh+dt@kernel.org,
+        krzysztof.kozlowski+dt@linaro.org, mturquette@baylibre.com,
+        sboyd@kernel.org, ulf.hansson@linaro.org, linus.walleij@linaro.org,
+        catalin.marinas@arm.com, will@kernel.org, p.zabel@pengutronix.de,
+        linux-arm-msm@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-mmc@vger.kernel.org,
+        linux-gpio@vger.kernel.org, linux-arm-kernel@lists.infradead.org,
+        robimarko@gmail.com
+Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+Message-ID: <ZHTK7uEzO7kcx_cV@surfacebook>
+References: <20230519125409.497439-1-quic_srichara@quicinc.com>
+ <20230519125409.497439-5-quic_srichara@quicinc.com>
+ <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
+ <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.11.0
-Subject: Re: [PATCH V1 1/1] mmc: sdhci: fix DMA configure compatibility issue
- when 64bit DMA mode is used.
-Content-Language: en-US
-To:     Chevron Li <chevron_li@126.com>, ulf.hansson@linaro.org,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     shirley.her@bayhubtech.com, xiaoguang.yu@bayhubtech.com,
-        shaper.liu@bayhubtech.com, justin.wang@bayhubtech.com,
-        Chevron Li <chevron.li@bayhubtech.com>
-References: <20230523111114.18124-1-chevron_li@126.com>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <20230523111114.18124-1-chevron_li@126.com>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 23/05/23 14:11, Chevron Li wrote:
-> From: Chevron Li <chevron.li@bayhubtech.com>
-> 
-> Bayhub SD host has hardware limitation:
-> 1.The upper 32bit address is inhibited to be written at SD Host Register
->   [03E][13]=0 (32bits addressing) mode, is admitted to be written only at
->   SD Host Register [03E][13]=1 (64bits addressing) mode.
-> 2.Because of above item#1, need to configure SD Host Register [03E][13] to
->   1(64bits addressing mode) before set 64bit ADMA system address's higher
->   32bits SD Host Register [05F~05C] if 64 bits addressing mode is used.
-> 
-> The hardware limitation is reasonable for below reasons:
-> 1.Normal flow should set DMA working mode first, then do
->   DMA-transfer-related configuration, such as system address.
-> 2.The hardware limitation may avoid the software to configure wrong higher
->   32bit address at 32bits addressing mode although it is redundant.
-> 
-> The change that set 32bits/64bits addressing mode before set ADMA address,
->   has no side-effect to other host IPs for below reason:
-> The setting order is reasonable and standard: DMA Mode setting first and
->   then DMA address setting. It meets all DMA setting sequence.
-> 
-> Signed-off-by: Chevron Li <chevron.li@bayhubtech.com>
+Mon, May 29, 2023 at 03:58:09PM +0530, Sricharan Ramabadhran kirjoitti:
+> On 5/20/2023 12:17 AM, Andy Shevchenko wrote:
+> > On Fri, May 19, 2023 at 3:55 PM Sricharan Ramabadhran
+> > <quic_srichara@quicinc.com> wrote:
 
-It should be OK.
+...
 
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
+> >    depends on OF || COMPILE_TEST
+> 
+>  Yeah sure. COMPILE_TEST could be standalone. Will fix it and repost.
 
-> ---
-> Change in V1:
-> Set dma mode configure before set dma address
-> ---
->  drivers/mmc/host/sdhci.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/mmc/host/sdhci.c b/drivers/mmc/host/sdhci.c
-> index 3241916141d7..ff41aa56564e 100644
-> --- a/drivers/mmc/host/sdhci.c
-> +++ b/drivers/mmc/host/sdhci.c
-> @@ -1167,6 +1167,8 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->  		}
->  	}
->  
-> +	sdhci_config_dma(host);
-> +
->  	if (host->flags & SDHCI_REQ_USE_DMA) {
->  		int sg_cnt = sdhci_pre_dma_transfer(host, data, COOKIE_MAPPED);
->  
-> @@ -1186,8 +1188,6 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
->  		}
->  	}
->  
-> -	sdhci_config_dma(host);
-> -
->  	if (!(host->flags & SDHCI_REQ_USE_DMA)) {
->  		int flags;
->  
-> 
-> base-commit: cc3c44c9fda264c6d401be04e95449a57c1231c6
+Standalone COMPILE_TEST will give you definitely NOT what you want.
+And actually it's strange to have it standalone.
+
+-- 
+With Best Regards,
+Andy Shevchenko
+
 
