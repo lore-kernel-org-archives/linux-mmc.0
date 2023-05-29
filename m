@@ -2,116 +2,138 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 42D55C77B7E
-	for <linux-mmc@archiver.kernel.org>; Mon, 29 May 2023 10:29:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D402AC77B7A
+	for <linux-mmc@archiver.kernel.org>; Mon, 29 May 2023 10:47:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230321AbjE2K3J (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Mon, 29 May 2023 06:29:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34964 "EHLO
+        id S230158AbjE2Krr (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Mon, 29 May 2023 06:47:47 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230422AbjE2K3I (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 May 2023 06:29:08 -0400
-Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9ED0EDF;
-        Mon, 29 May 2023 03:29:06 -0700 (PDT)
-Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 34T9WNAq014816;
-        Mon, 29 May 2023 10:28:56 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
- mime-version : subject : to : cc : references : from : in-reply-to :
- content-type : content-transfer-encoding; s=qcppdkim1;
- bh=+GnvblfIUOkZ/zDNtcKmp2FvpIbjJT1RpBnh3d/65Wg=;
- b=HspXfgbfHymTAxrx59OLOZ5U/l39lu56Rda+Dz4w0b8CquOdTORI/KmzpG7/MlvVToe9
- gnyK3jlKAHj6LliK4f6vc/hOuVI5JlFHd8syas86mCd6uGEQbywwBsntH8O1Muwbr4wP
- ILtjL2KTIoQBJ0wlLoHu9khaOqdWm+ZpmAVN1M0y+92jCV0YoDic7Mch0VvZcpC5GSWT
- 5umZtS+WWdwqCTFcegu9eeeGtSgGFWAgoHJTQFQLhQ3jHp3m+f5i3Y5y+2evINW+9gKQ
- w4dKWHCcKgM35H187FdX8j1cNIAIksvFB299Is3YjDAFoB/cteHXIvgdv4v+SSexJDFk 0A== 
-Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3quarmb6yk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 29 May 2023 10:28:55 +0000
-Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
-        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 34TASsI4032463
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Mon, 29 May 2023 10:28:54 GMT
-Received: from [10.201.203.60] (10.80.80.8) by nalasex01c.na.qualcomm.com
- (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Mon, 29 May
- 2023 03:28:48 -0700
-Message-ID: <3f1ea35c-694b-b4d7-4fc3-0f4902b809ed@quicinc.com>
-Date:   Mon, 29 May 2023 15:58:45 +0530
+        with ESMTP id S229920AbjE2Krq (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Mon, 29 May 2023 06:47:46 -0400
+Received: from mga03.intel.com (mga03.intel.com [134.134.136.65])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B1939E3
+        for <linux-mmc@vger.kernel.org>; Mon, 29 May 2023 03:47:42 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1685357262; x=1716893262;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=v7AXNIBlc9vrFPdRyp5dILuH6/orHfex/WmEhFivCbQ=;
+  b=QbDGMKTPGnuSXFWUWMX0zfm+AEsXy72duTdrLSy2m8aKfZdz2NrpFv2Q
+   G/d1thpZTgcBd1D8wqk6MQLQDjyWZodlnq347WrxV9jSnJQw8WlCt0Zsi
+   2WDAylV6OrPmSGIuOsvgKJTPiB7H7PhJkEPFGKjZALF6Hw/iO1rHi4jBg
+   4JyWJer9TyaYKiWTMy71FGpmK+IZvH0ihZadJmed+eZowlLgzbVmWAo8U
+   ks6OwgWMEkkCpiUGyY32Np1FVKUXH7rUZmfcB7br8e77hZbccSICI/429
+   /z80MfuWrJQYYoTWwLRfINei07m/oByFGqIGtTgUhUPZFadpbXkSi9lGc
+   g==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10724"; a="357928740"
+X-IronPort-AV: E=Sophos;i="6.00,201,1681196400"; 
+   d="scan'208";a="357928740"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 May 2023 03:47:41 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10724"; a="830357487"
+X-IronPort-AV: E=Sophos;i="6.00,201,1681196400"; 
+   d="scan'208";a="830357487"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.208.110])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 29 May 2023 03:47:39 -0700
+Message-ID: <76cbf5ed-200e-092b-abe2-87d89772d9d2@intel.com>
+Date:   Mon, 29 May 2023 13:47:34 +0300
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
- Thunderbird/91.8.0
-Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.11.0
+Subject: Re: [PATCH 1/2] mmc: sdhci-esdhc-imx: enable IPG clock before
+ register access during suspend/resume
 Content-Language: en-US
-To:     Linus Walleij <linus.walleij@linaro.org>
-CC:     <agross@kernel.org>, <andersson@kernel.org>,
-        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
-        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
-        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
-        <catalin.marinas@arm.com>, <will@kernel.org>,
-        <p.zabel@pengutronix.de>, <linux-arm-msm@vger.kernel.org>,
-        <devicetree@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        <linux-mmc@vger.kernel.org>, <linux-gpio@vger.kernel.org>,
-        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>,
-        <andy.shevchenko@gmail.com>
-References: <20230519125409.497439-1-quic_srichara@quicinc.com>
- <20230519125409.497439-5-quic_srichara@quicinc.com>
- <CACRpkdaX3i-O3=8XbLYJ1hXT8dOE7WJUUT6JxOKmWTJwru_24Q@mail.gmail.com>
-From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
-In-Reply-To: <CACRpkdaX3i-O3=8XbLYJ1hXT8dOE7WJUUT6JxOKmWTJwru_24Q@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [10.80.80.8]
-X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01c.na.qualcomm.com (10.47.97.35)
-X-QCInternal: smtphost
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: 6VBjN16-9Xy6ugrQBxFq_RqkOX0DC1gg
-X-Proofpoint-GUID: 6VBjN16-9Xy6ugrQBxFq_RqkOX0DC1gg
-X-Proofpoint-Virus-Version: vendor=baseguard
- engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-05-29_07,2023-05-25_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 phishscore=0 impostorscore=0
- priorityscore=1501 suspectscore=0 bulkscore=0 adultscore=0
- lowpriorityscore=0 clxscore=1015 mlxlogscore=849 malwarescore=0 mlxscore=0
- spamscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2304280000 definitions=main-2305290090
+To:     haibo.chen@nxp.com, ulf.hansson@linaro.org,
+        linux-mmc@vger.kernel.org
+Cc:     linux-imx@nxp.com, shawnguo@kernel.org, s.hauer@pengutronix.de,
+        kernel@pengutronix.de, festevam@gmail.com
+References: <20230518082035.335112-1-haibo.chen@nxp.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230518082035.335112-1-haibo.chen@nxp.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Linus,
-
-On 5/22/2023 1:02 PM, Linus Walleij wrote:
-> On Fri, May 19, 2023 at 2:55 PM Sricharan Ramabadhran
-> <quic_srichara@quicinc.com> wrote:
+On 18/05/23 11:20, haibo.chen@nxp.com wrote:
+> From: Haibo Chen <haibo.chen@nxp.com>
 > 
->> Add pinctrl definitions for the TLMM of IPQ5018.
->>
->> Reviewed-by: Bjorn Andersson <bjorn.andersson@linaro.org>
->> Co-developed-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
->> Signed-off-by: Nitheesh Sekar <quic_nsekar@quicinc.com>
->> Co-developed-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Varadarajan Narayanan <quic_varada@quicinc.com>
->> Signed-off-by: Sricharan Ramabadhran <quic_srichara@quicinc.com>
->> ---
->>   [v7] No change
+> During suspend/resume, need to access usdhc register, so need
+> to enable IPG clock to avoid bus error.
 > 
-> This looks mostly fine, but I want you to consider Andy's remarks.
-> With those addressed:
-> Reviewed-by: Linus Walleij <linus.walleij@linaro.org>
+> Find this issue when a card slot do not insert a card, so when
+> system suspend, sdhci_esdhc_runtime_resume() will not be called
+> before sdhci_esdhc_suspend(), so will meet system hung or bus err
+> once access usdhc register.
 > 
-  Thanks.
-  Sure, will fix and repost with Andy's comments addressed.
-
-> Can this file and the bindings be applied independently of the rest
-> of the patches? In that case I can apply v8 bindings+this patch to
-> the pinctrl tree.
+> Signed-off-by: Haibo Chen <haibo.chen@nxp.com>
+> ---
+> The first thing I do is try to merge the sdhci_esdhc_suspend() into
+> current sdhci_esdhc_runtime_suspend(), but find some obstacles:
+> 1, sdhci_esdhc_imx_hwinit() is called in original sdhci_esdhc_resume(),
+>    it will clear the DLL config, which after remove to sdhci_esdhc_runtime_resume,
+>    will finally impact the DDR50 timing.
+> 2, if merge, everytime after sdhci_esdhc_runtime_resume, will do re-tuning,
+>    this is unnecessary for the normal runtime PM case without power lost.
+> 3, the CD gpio wakeup. Seems strange to enable the CD gpio wakeup in
+>    sdhci_esdhc_runtime_suspend().
 > 
+> So, finally I drop this merge method, and directly add change in the original
+> sdhci_esdhc_suspend()/sdhci_esdhc_resume().
+> ---
+>  drivers/mmc/host/sdhci-esdhc-imx.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci-esdhc-imx.c b/drivers/mmc/host/sdhci-esdhc-imx.c
+> index eebf94604a7f..4cf42a028bb9 100644
+> --- a/drivers/mmc/host/sdhci-esdhc-imx.c
+> +++ b/drivers/mmc/host/sdhci-esdhc-imx.c
+> @@ -1836,6 +1836,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
+>  	struct pltfm_imx_data *imx_data = sdhci_pltfm_priv(pltfm_host);
+>  	int ret;
+>  
+> +	pm_runtime_get_sync(dev);
+> +
+>  	if (host->mmc->caps2 & MMC_CAP2_CQE) {
+>  		ret = cqhci_suspend(host->mmc);
+>  		if (ret)
+> @@ -1855,6 +1857,8 @@ static int sdhci_esdhc_suspend(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>  
+> +	pm_runtime_force_suspend(dev);
 
-  Yes, this can go independently. Will repost v8 tomorrow.
+Won't this result both in sdhci_suspend_host() and sdhci_runtime_suspend_host()
+being called.  Please ensure that just call one of them is called.
 
-Regards,
-  Sricharan
+And cqhci_suspend() will be called twice.  Please avoid that.
+
+> +
+>  	ret = pinctrl_pm_select_sleep_state(dev);
+>  	if (ret)
+>  		return ret;
+> @@ -1873,6 +1877,8 @@ static int sdhci_esdhc_resume(struct device *dev)
+>  	if (ret)
+>  		return ret;
+>  
+> +	pm_runtime_force_resume(dev);
+> +
+>  	/* re-initialize hw state in case it's lost in low power mode */
+>  	sdhci_esdhc_imx_hwinit(host);
+>  
+> @@ -1886,6 +1892,8 @@ static int sdhci_esdhc_resume(struct device *dev)
+>  	if (!ret)
+>  		ret = mmc_gpio_set_cd_wake(host->mmc, false);
+>  
+> +	pm_runtime_put_autosuspend(dev);
+> +
+>  	return ret;
+>  }
+>  #endif
+
