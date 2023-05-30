@@ -2,99 +2,229 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CE106C77B7A
-	for <linux-mmc@archiver.kernel.org>; Tue, 30 May 2023 21:33:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EC9ACC77B73
+	for <linux-mmc@archiver.kernel.org>; Tue, 30 May 2023 22:04:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233524AbjE3VdI (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Tue, 30 May 2023 17:33:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52400 "EHLO
+        id S232653AbjE3WE2 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Tue, 30 May 2023 18:04:28 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229524AbjE3VdF (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 May 2023 17:33:05 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EE767C7;
-        Tue, 30 May 2023 14:33:03 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id a640c23a62f3a-96fd3a658eeso718620566b.1;
-        Tue, 30 May 2023 14:33:03 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685482382; x=1688074382;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:from:to:cc:subject:date:message-id:reply-to;
-        bh=p4thltDnvTnlkXvabi6DDHwtW6w1tP1Qc9yaZzyE2MQ=;
-        b=U8KP4kB/s7nu+wU162TLn0eIBYFn/6Jk1IGiotrCuctoVw3pToCkDkzwQLIbuNbxBa
-         lSz460Y7M9tIr4/aGlZX/eChDnU+qXgOTZjHq+fsLHZdHJhqQPdiHpKKSpcJzba8hkep
-         i8c/pvQMP8AatGGBDBgc1Ge3SAMDMdvy+Th5/yGu3OUHvJ+Auwm6LVNlAm0p3Wbvye9Y
-         10JOp27Jx2wQ9BVYttdCoxoVEAu1QG4q3hBCg+6k7VIOY2QUkb4EofO6v9Ma2cH0caTE
-         K7oHz7zpCjELKHhjqjnM+GEaCXPQ1Y3v6rRCRWeVNPOPDQXVl7LGXAbY6NXTFgcDBB2f
-         Ce2A==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685482382; x=1688074382;
-        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
-         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
-         :reply-to;
-        bh=p4thltDnvTnlkXvabi6DDHwtW6w1tP1Qc9yaZzyE2MQ=;
-        b=BiVvqjKetaxNPmS0/bawaBwxYYaDWZdnmnZGdCyVJNnASrqv4yt95wyU5YKI/GXMuu
-         UGD1ghKfo5pmJOK8mFd6PIHWFGf0s0230awnDnstIOZZYpxUtTXs8tjytkjGpE0XIi0e
-         cDRoNeH8UjAOF5i0i7bp9xziYuTJNL9i6UDyIs8Kl2XjfCGv2MWSUEo4tt9QuFoBLUuW
-         XO4iZv5uMk5ftDhZEtTsPsRgrGFwtZaPs7OF6I1qTGEb/nNNyS4rCRFg1ZBpaW2YvBuE
-         c1o4tLTp4p60euYTCFbB8+iJirjln4NOKmjfxbNSoUtLG+HKikeXtRx4XVDkvZ2Nul6H
-         ydCw==
-X-Gm-Message-State: AC+VfDxeATk7910ogVVJS9W7d7Z/8cQHfDnGr2IkXIvAXWEtPayWuDKL
-        YiRB2jUMQIdadlTM65EEbYJgOOuw6/vp7w==
-X-Google-Smtp-Source: ACHHUZ7IUr+LIWtnWyG1qV8KGuO3RCzBQYbVYmk5lq+PPP9SwjJVQKChp5O+fM5V4K8Iy5ujZnsXaA==
-X-Received: by 2002:a17:907:72cc:b0:96f:baa4:cda7 with SMTP id du12-20020a17090772cc00b0096fbaa4cda7mr3341540ejc.68.1685482382070;
-        Tue, 30 May 2023 14:33:02 -0700 (PDT)
-Received: from fedora.. (dh207-97-232.xnet.hr. [88.207.97.232])
-        by smtp.googlemail.com with ESMTPSA id oq27-20020a170906cc9b00b009662c57b4ffsm7882319ejb.96.2023.05.30.14.33.01
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 30 May 2023 14:33:01 -0700 (PDT)
-From:   Robert Marko <robimarko@gmail.com>
-To:     ulf.hansson@linaro.org, windhl@126.com, avri.altman@wdc.com,
-        linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc:     Robert Marko <robimarko@gmail.com>
-Subject: [PATCH] mmc: core: disable TRIM on Micron MTFC4GACAJCN-1M
-Date:   Tue, 30 May 2023 23:32:59 +0200
-Message-Id: <20230530213259.1776512-1-robimarko@gmail.com>
-X-Mailer: git-send-email 2.40.1
+        with ESMTP id S231171AbjE3WE1 (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Tue, 30 May 2023 18:04:27 -0400
+Received: from NAM11-CO1-obe.outbound.protection.outlook.com (mail-co1nam11on2071.outbound.protection.outlook.com [40.107.220.71])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C109EBE;
+        Tue, 30 May 2023 15:04:25 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
+ b=nusnB+UHU38R9z1fr4y/ICVKIFr/6X9Ncdigbf+jR5TLLJcrtRFITBkg+9SMUTJ1BbMIhj7i564t+mAOlocotSKmHf+0oaP7FftiIrT3VdFu2Ql6M+IPoZT8B8w/6qFr06mgYoIStZUqdFzVJAL5wRPjmNCRoL0u/8OUzWNwX2C9oE3VpJo00eBSD3JPNxDuFXLzfBzwJB1fK5mL+ugoXyuzyPrBxRHoRYK/KRpTtChQDKNcNM8ubsuig+mrhS0KvnN/akvQ7gAijIytt1K68dKGg6Jp2pkJnYlcs3spQvL61y2KG81clUbA8+TDSZWWx2fNd54+K6t2uYx4ALKFBQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
+ s=arcselector9901;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
+ bh=JCC/g6c6odjb1J23E9tyj2tfR65P6J7bCE5VfHHgJPM=;
+ b=aP+0Jvs9EFSjNbkkbxH4ENEah9oViQpEUt7sYyPXEmeWx/k/0SPdAYaoYjTavOfQr4mb9+/3OoLZmci9/nUsy8HZloOQcAS4UeoiH22lNaKdHJpLcaRdu5xdEZd1tNY6QgUSch4s3fjPC6UqkfR49AqBL9WOfYhD3Jtvrj/fFPYywaqquEy2SYSePmQNxY4LoSPzGCuoDAr+zq2/Pec5TfuSf8YSERbmPVTARVczyO6423Lg18Wtsvu+A5SXDMR52MWIWlwWebFZYKUoEugxjbsRsk0Pic/fzEJGkoIAqCJS0CGbXKWh74OM4CYMFh8OoJxeErdh24dWSmDYHHXtKg==
+ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass (sender ip is
+ 165.204.84.17) smtp.rcpttodomain=linux-m68k.org smtp.mailfrom=amd.com;
+ dmarc=pass (p=quarantine sp=quarantine pct=100) action=none
+ header.from=amd.com; dkim=none (message not signed); arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=amd.com; s=selector1;
+ h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
+ bh=JCC/g6c6odjb1J23E9tyj2tfR65P6J7bCE5VfHHgJPM=;
+ b=TY9QpTbZa1NLdCVcfflZDADUcSvNmjt4oNKluYyytHsNq/KITPCd496BSDpWuYLRE0LWIq1AJZjnHjUe24Ygcv8kYH0Mv5ax/x2I2lLw7mRkYlOxfr+dZJhS2TGarmYVTjGTiwzYPqc3xRXCUpn1Jad69qm/KUSbYQFcw8rCOEc=
+Received: from BN9PR03CA0728.namprd03.prod.outlook.com (2603:10b6:408:110::13)
+ by IA1PR12MB6259.namprd12.prod.outlook.com (2603:10b6:208:3e5::17) with
+ Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6433.22; Tue, 30 May
+ 2023 22:04:22 +0000
+Received: from BN8NAM11FT089.eop-nam11.prod.protection.outlook.com
+ (2603:10b6:408:110:cafe::28) by BN9PR03CA0728.outlook.office365.com
+ (2603:10b6:408:110::13) with Microsoft SMTP Server (version=TLS1_2,
+ cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.6455.22 via Frontend
+ Transport; Tue, 30 May 2023 22:04:22 +0000
+X-MS-Exchange-Authentication-Results: spf=pass (sender IP is 165.204.84.17)
+ smtp.mailfrom=amd.com; dkim=none (message not signed)
+ header.d=none;dmarc=pass action=none header.from=amd.com;
+Received-SPF: Pass (protection.outlook.com: domain of amd.com designates
+ 165.204.84.17 as permitted sender) receiver=protection.outlook.com;
+ client-ip=165.204.84.17; helo=SATLEXMB04.amd.com; pr=C
+Received: from SATLEXMB04.amd.com (165.204.84.17) by
+ BN8NAM11FT089.mail.protection.outlook.com (10.13.176.105) with Microsoft SMTP
+ Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.20.6455.22 via Frontend Transport; Tue, 30 May 2023 22:04:22 +0000
+Received: from platform-dev1.pensando.io (10.180.168.240) by
+ SATLEXMB04.amd.com (10.181.40.145) with Microsoft SMTP Server
+ (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
+ 15.1.2375.34; Tue, 30 May 2023 17:04:17 -0500
+From:   Brad Larson <blarson@amd.com>
+To:     <geert@linux-m68k.org>
+CC:     <adrian.hunter@intel.com>, <alcooperx@gmail.com>,
+        <andy.shevchenko@gmail.com>, <arnd@arndb.de>, <blarson@amd.com>,
+        <brendan.higgins@linux.dev>, <briannorris@chromium.org>,
+        <broonie@kernel.org>, <catalin.marinas@arm.com>,
+        <conor+dt@kernel.org>, <davidgow@google.com>,
+        <devicetree@vger.kernel.org>, <fancer.lancer@gmail.com>,
+        <gerg@linux-m68k.org>, <gsomlo@gmail.com>,
+        <hal.feng@starfivetech.com>, <hasegawa-hitomi@fujitsu.com>,
+        <j.neuschaefer@gmx.net>, <joel@jms.id.au>, <kernel@esmil.dk>,
+        <krzk@kernel.org>, <krzysztof.kozlowski+dt@linaro.org>,
+        <lee.jones@linaro.org>, <lee@kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-spi@vger.kernel.org>, <michal.simek@amd.com>,
+        <p.zabel@pengutronix.de>, <rdunlap@infradead.org>,
+        <robh+dt@kernel.org>, <samuel@sholland.org>,
+        <skhan@linuxfoundation.org>, <suravee.suthikulpanit@amd.com>,
+        <thomas.lendacky@amd.com>, <tonyhuang.sunplus@gmail.com>,
+        <ulf.hansson@linaro.org>, <vaishnav.a@ti.com>,
+        <walker.chen@starfivetech.com>, <will@kernel.org>,
+        <zhuyinbo@loongson.cn>
+Subject: Re: [PATCH v14 6/8] arm64: dts: Add AMD Pensando Elba SoC support
+Date:   Tue, 30 May 2023 15:03:47 -0700
+Message-ID: <20230530220347.14049-1-blarson@amd.com>
+X-Mailer: git-send-email 2.17.1
+In-Reply-To: <CAMuHMdX_Sdb3RFrLthcwThK__GKhJvJuXWu5+2RsQpGgFRkrXQ@mail.gmail.com>
+References: <CAMuHMdX_Sdb3RFrLthcwThK__GKhJvJuXWu5+2RsQpGgFRkrXQ@mail.gmail.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8bit
+X-Originating-IP: [10.180.168.240]
+X-ClientProxiedBy: SATLEXMB03.amd.com (10.181.40.144) To SATLEXMB04.amd.com
+ (10.181.40.145)
+X-EOPAttributedMessage: 0
+X-MS-PublicTrafficType: Email
+X-MS-TrafficTypeDiagnostic: BN8NAM11FT089:EE_|IA1PR12MB6259:EE_
+X-MS-Office365-Filtering-Correlation-Id: 6d6e20a6-e6b4-478d-0596-08db6159d2ea
+X-MS-Exchange-SenderADCheck: 1
+X-MS-Exchange-AntiSpam-Relay: 0
+X-Microsoft-Antispam: BCL:0;
+X-Microsoft-Antispam-Message-Info: osA6rXPcaNgUpRnuXwFfrs5mzASPSvKGIbtd2Jmg4IkzF8gMyOusDG2RNTFW/8bfk+NntqSFqUVliTocuEpf2NMBMGGOZRyPCnCo9UvHvl9QRfPPPXzNHPHLdID284M0tcP9h1gNap8//igx62FSEmCs+kKJL+B0Lp16tZMkZ7hhhkHOw36AnCzfNrU4DldEmHuiY2gTieB6jRxsd2hbrHUNoxt0TRnYpmSJXZpM18nDpmhJE5OSx9cpJuGNxmcicagPg90XHyq35P3TvfDN+uGOp0BsdpWsiqvKZ8Z7tMJMEN129SzuwzULZHmEgfOQ7sHE9Ut2C2t0dohlwC2eOJPFVUbcvIO8HnNCWnnGsFMr/33gbUPCUfNSwLs0piI3BU+/P+ZQdTdxhEcI+fnaK2fdRdflQevZuiJuAmrG8hqxE999CP85O06N9dgBN/8h7QH389wXvU3RPaGe01P22bNlJBO0a8dmk/BmYyNJSyaIhoed/crUurPSWAyeceqqf1caaCmvOal3vbcqKYrOBdb3sHshHFw4t2Mfbj6P557TKcYK7xWys3Hofiea0eJ2soVXV4d9xZRXt1B0VMvLFm0VobdzWR1WL1htkWc9HJnwRX30Ux+s2ZMG5Dh6u3zNSe3blZKX03tjQPhYd0jGl63DAv+fmPL3fdHFuc/2At4ukU11uEztUPgcCrj950hz/kQKuvcGkmNHJPxcCYBQbGuq5FdDO4c4vRPAq6kjyBPOKEBz2E0Pz6WQnFO/UcxPuYZgN8mmxGup9JJ/nHS77Q==
+X-Forefront-Antispam-Report: CIP:165.204.84.17;CTRY:US;LANG:en;SCL:1;SRV:;IPV:CAL;SFV:NSPM;H:SATLEXMB04.amd.com;PTR:InfoDomainNonexistent;CAT:NONE;SFS:(13230028)(4636009)(136003)(346002)(396003)(376002)(39860400002)(451199021)(40470700004)(46966006)(36840700001)(426003)(478600001)(336012)(83380400001)(40460700003)(36860700001)(40480700001)(47076005)(5660300002)(186003)(16526019)(6916009)(4326008)(8676002)(82310400005)(2906002)(8936002)(41300700001)(356005)(81166007)(82740400003)(316002)(6666004)(1076003)(26005)(2616005)(70586007)(70206006)(7406005)(7416002)(54906003)(53546011)(36756003)(36900700001);DIR:OUT;SFP:1101;
+X-OriginatorOrg: amd.com
+X-MS-Exchange-CrossTenant-OriginalArrivalTime: 30 May 2023 22:04:22.1124
+ (UTC)
+X-MS-Exchange-CrossTenant-Network-Message-Id: 6d6e20a6-e6b4-478d-0596-08db6159d2ea
+X-MS-Exchange-CrossTenant-Id: 3dd8961f-e488-4e60-8e11-a82d994e183d
+X-MS-Exchange-CrossTenant-OriginalAttributedTenantConnectingIp: TenantId=3dd8961f-e488-4e60-8e11-a82d994e183d;Ip=[165.204.84.17];Helo=[SATLEXMB04.amd.com]
+X-MS-Exchange-CrossTenant-AuthSource: BN8NAM11FT089.eop-nam11.prod.protection.outlook.com
+X-MS-Exchange-CrossTenant-AuthAs: Anonymous
+X-MS-Exchange-CrossTenant-FromEntityHeader: HybridOnPrem
+X-MS-Exchange-Transport-CrossTenantHeadersStamped: IA1PR12MB6259
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-It seems that Micron MTFC4GACAJCN-1M despite advertising TRIM support does
-not work when the core is trying to use REQ_OP_WRITE_ZEROES.
+Hi Geert,
 
-We are seeing the following errors in OpenWrt under 6.1 on Qnap Qhora 301W
-that we did not previously have and tracked it down to REQ_OP_WRITE_ZEROES:
-[   18.085950] I/O error, dev loop0, sector 596 op 0x9:(WRITE_ZEROES) flags 0x800 phys_seg 0 prio class 2
+On Wed, May 24, 2023 at 13:52 Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> On Tue, May 23, 2023 at 9:30â¯PM Brad Larson <blarson@amd.com> wrote:
+>> On 5/16/23 09:54, Michal Simek wrote:
+>> > On 5/15/23 20:16, Brad Larson wrote:
+>> >> --- /dev/null
+>> >> +++ b/arch/arm64/boot/dts/amd/elba-16core.dtsi
+>> >> @@ -0,0 +1,197 @@
+>> >> +// SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
+>> >> +/*
+>> >> + * Copyright 2020-2022 Advanced Micro Devices, Inc.
+>> >
+>> > 2023 and the same below.
+>>
+>> I'll update the copyright in the next submit
+>
+> Did you make any substantial changes in 2023?
 
-Disabling TRIM makes the error go away, so lets add a quirk for this eMMC
-to disable TRIM.
+Yes, additional properties were added to l2-cache*
 
-Signed-off-by: Robert Marko <robimarko@gmail.com>
----
- drivers/mmc/core/quirks.h | 7 +++++++
- 1 file changed, 7 insertions(+)
+>> >> + */
+>> >> +
+>> >> +/ {
+>> >> +    cpus {
+>> >> +            #address-cells = <2>;
+>> >> +            #size-cells = <0>;
+>> >> +
+>> >> +            cpu-map {
+>> >> +                    cluster0 {
+>> >> +                            core0 { cpu = <&cpu0>; };
+>> >> +                            core1 { cpu = <&cpu1>; };
+>> >> +                            core2 { cpu = <&cpu2>; };
+>> >> +                            core3 { cpu = <&cpu3>; };
+>> >> +                    };
+>> >> +
+>> >> +                    cluster1 {
+>> >> +                            core0 { cpu = <&cpu4>; };
+>> >> +                            core1 { cpu = <&cpu5>; };
+>> >> +                            core2 { cpu = <&cpu6>; };
+>> >> +                            core3 { cpu = <&cpu7>; };
+>> >> +                    };
+>> >> +
+>> >> +                    cluster2 {
+>> >> +                            core0 { cpu = <&cpu8>; };
+>> >> +                            core1 { cpu = <&cpu9>; };
+>> >> +                            core2 { cpu = <&cpu10>; };
+>> >> +                            core3 { cpu = <&cpu11>; };
+>> >> +                    };
+>> >> +
+>> >> +                    cluster3 {
+>> >> +                            core0 { cpu = <&cpu12>; };
+>> >> +                            core1 { cpu = <&cpu13>; };
+>> >> +                            core2 { cpu = <&cpu14>; };
+>> >> +                            core3 { cpu = <&cpu15>; };
+>> >> +                    };
+>> >> +            };
+>> >> +
+>> >> +            /* CLUSTER 0 */
+>> >> +            cpu0: cpu@0 {
+>> >> +                    device_type = "cpu";
+>> >> +                    compatible = "arm,cortex-a72";
+>> >> +                    reg = <0 0x0>;
+>> >
+>> > Do you really need 2/0 split here. The first cell is 0 anyway.
+>>
+>> Yes following 64-bit system definition
+>
+> You mean for the 64-bit main address space?
+> The CPU address space under /cpus is unrelated.
 
-diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 29b9497936df..77caa0c903f8 100644
---- a/drivers/mmc/core/quirks.h
-+++ b/drivers/mmc/core/quirks.h
-@@ -100,6 +100,13 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
- 		  MMC_QUIRK_TRIM_BROKEN),
- 
-+	/*
-+	 * Micron MTFC4GACAJCN-1M advertises TRIM but it does not seems to
-+	 * support being used to offload WRITE_ZEROES.
-+	 */
-+	MMC_FIXUP("Q2J54A", CID_MANFID_MICRON, 0x014e, add_quirk_mmc,
-+		  MMC_QUIRK_TRIM_BROKEN),
-+
- 	/*
- 	 * Some SD cards reports discard support while they don't
- 	 */
--- 
-2.40.1
+Yes, the reg prop for this node is CPU/threads per dt spec.  Checked the history and
+the Elba dt was derived from socionext for these nodes and this is how those device
+trees are configured along with over a dozen other devices.  I changed to 
+address-cells = <1> and dropped the leading zero from all cpu* reg<> and booting
+the system I'm observing no change.  Looking in drivers/of I'm not seeing where
+cpu*/reg is read and used, any recommendation?
 
+>> >> +++ b/arch/arm64/boot/dts/amd/elba-flash-parts.dtsi
+>> >> @@ -0,0 +1,106 @@
+>> >> +// SPDX-License-Identifier: (GPL-2.0-only or BSD-2-Clause)
+>> >> +/*
+>> >> + * Copyright 2020-2022 Advanced Micro Devices, Inc.
+>> >> + */
+>> >> +
+>> >> +&flash0 {
+>> 0xf0000>> +     partitions {
+>> >> +            compatible = "fixed-partitions";
+>> >> +            #address-cells = <1>;
+>> >> +            #size-cells = <1>;
+>> >> +            partition@0 {
+>> >> +                    label = "flash";
+>> >> +                    reg = <0x10000 0xfff0000>;
+>> >
+>> > This doesn't fit with partition@0 above.
+>> > Also size is weird.
+>>
+>> This is intended to not expose sector 0.
+>
+> The unit address should still match the first reg entry
+> => partition@10000.
+
+Changed to this:
+
+                partition@0 {
+                        label = "rsvd";
+                        reg = <0x0 0x10000>;
+                        read-only;
+                };
+
+                partition@10000 {
+                        label = "flash";
+                        reg = <0x10000 0xfff0000>;
+                };
+
+Regards,
+Brad
