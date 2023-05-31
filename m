@@ -2,286 +2,117 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53BF0C7EE2F
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 09:46:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 71F77C77B7C
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 09:57:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235651AbjEaJqT (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 05:46:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46080 "EHLO
+        id S235344AbjEaJ5o (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 May 2023 05:57:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53198 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235574AbjEaJqI (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 05:46:08 -0400
-Received: from mail-yw1-x1129.google.com (mail-yw1-x1129.google.com [IPv6:2607:f8b0:4864:20::1129])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 53B231B1;
-        Wed, 31 May 2023 02:46:03 -0700 (PDT)
-Received: by mail-yw1-x1129.google.com with SMTP id 00721157ae682-565cfe4ece7so54088227b3.2;
-        Wed, 31 May 2023 02:46:03 -0700 (PDT)
+        with ESMTP id S231495AbjEaJ5m (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 05:57:42 -0400
+Received: from mail-oi1-x233.google.com (mail-oi1-x233.google.com [IPv6:2607:f8b0:4864:20::233])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECAE6129;
+        Wed, 31 May 2023 02:57:28 -0700 (PDT)
+Received: by mail-oi1-x233.google.com with SMTP id 5614622812f47-39810ce3e13so3907978b6e.2;
+        Wed, 31 May 2023 02:57:28 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685526362; x=1688118362;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=CnLlnK5tgX6MTnacFdfiHp67y1VecyPAXn0kDrRDIuc=;
-        b=TSbIG42DfdBpxXzN2abaroMzQyCGTcJ2lYn79qHkNA9QMEaHsgr40sQVFNfgXm4i+0
-         7u9OUold0eSaeVC6HAloP9zGhdutmt0YFV1K2hOg5LE2YpZfUqydt80XBsaTwABhG9KW
-         F+xCjFAx22b7s/xCP7uqS+FD2DTHPIv8dn0+2i+WsRo5mFx0lt7AQBCIjEFYgXBHYUrY
-         7bL/iUhqtVnL8WeeLn1n3JiZs29RV5ox2qE68YzWkeuv3cSCwKpp/8XczEXlMBWcbm17
-         CdA30NmYmc0fwX2ijAq34Eo9yDb7sLIF9AYLdb3oECS9ZT1dnDGmvzx+TAT6lRtjrXO6
-         04hg==
+        d=gmail.com; s=20221208; t=1685527048; x=1688119048;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:from:to:cc:subject:date:message-id:reply-to;
+        bh=BOc0UBOtHPdYEoOqTP4iajGTGug0Xs6mCkm+zIdi5v4=;
+        b=beEXgrl/jUImnnx9RoObOda6LFybucDQby4FKmALz/o9bThirL16WsPMVYZHhUScYE
+         SM0QcqROK2TTDqibYc5/86ft3km8fg/x1+UcO1yYZ9d+WW7NocBhHBWv+3pvGWOsc0lH
+         DPF+Ud57Xeq/io94Qss7DEgR6Lzxby6VQ0At22V1iwCw77lQI7+wYvAh2cxtXknpDOQ4
+         a5S4jpe+mfjBWF0ku1O7sSPXJ/mnXFTTgK4p6CyBKYRdBrIynarSapfLHY/2RKEFD7d/
+         R4zC42p+AfiX5jYoSvgSAw574buaOLloZvcS/EExEIurA002MD645s91v73t5VjLrbpp
+         t+dQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685526362; x=1688118362;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=CnLlnK5tgX6MTnacFdfiHp67y1VecyPAXn0kDrRDIuc=;
-        b=Pc3LKPo7qoX4ikfJeJg5OL9yte70p+OjpNGJvYcVlXcCSwGaU3v+WeQ02Qb1dyVvO/
-         r7Ax+yLJidm3tUFAG1+ERfA+dBHscfGas9aZSG1+zmvYgPTK5EJrIdWWRPFM88aShBhL
-         JV9wPrScWnQL4qK9/lLMSxr1+YGnOrhZLjXefCrNBRBJJY4KGDnyr+Y7v/VslVoKFsRY
-         Mk3Rwc6kqJUlPQswE/1gMxZm4oHtUqT5NRGAwTcCu2cUsyhym1cGJ5mZTjSGthw1ur/Q
-         Hk9crEmr9XzjfOqoBcpD1mtzm70xTeQDduFst139nDTdcZ6HnNYX9AEDISU9lZdg1EnZ
-         jeUg==
-X-Gm-Message-State: AC+VfDx2iGyH8GN2VNVGepfdCpy8PIQqrfOoxkFwhbkDHJFlBriPLJjo
-        GqpZHwDjhg/l/GWzsOvWmIvRew9wDb/lTqZAe7k=
-X-Google-Smtp-Source: ACHHUZ7c97D+V2tYbv6D98epiID37lbyVs2RqM7EDsb5f+aK9v8Yrt+O9Xie4QIMxchjeGihweWrIQwXyR6gNRRrfDk=
-X-Received: by 2002:a0d:ea52:0:b0:565:ead5:a126 with SMTP id
- t79-20020a0dea52000000b00565ead5a126mr5133145ywe.46.1685526362432; Wed, 31
- May 2023 02:46:02 -0700 (PDT)
-MIME-Version: 1.0
-References: <20230530095308.8165-1-victorshihgli@gmail.com>
- <20230530095308.8165-4-victorshihgli@gmail.com> <c5601bbe-2ec9-1cd4-1e0f-1eca183e1b39@intel.com>
-In-Reply-To: <c5601bbe-2ec9-1cd4-1e0f-1eca183e1b39@intel.com>
+        d=1e100.net; s=20221208; t=1685527048; x=1688119048;
+        h=content-transfer-encoding:mime-version:message-id:date:subject:cc
+         :to:from:x-gm-message-state:from:to:cc:subject:date:message-id
+         :reply-to;
+        bh=BOc0UBOtHPdYEoOqTP4iajGTGug0Xs6mCkm+zIdi5v4=;
+        b=GviZXCXj+7iXXYdVxsVToczFOPPblDYIUpaw7BDfJ08hFkLGFngCa0oW5p3txPbK2a
+         sx+wx4o+MQQsD2AQkFB5EK37Cxi7FPktCHL8fvlWyz/Si8LSTBlyCvSXDW76rp1ReeJA
+         /ikj4dAbWjyGCxpPIdg6dHpUyoRkTQX+/MlgeEzA4R8rbhrDzpNvu3p98wv/Y/mrT5Du
+         yegM9aoxTdUaEJSr4ETrwEmZSBRqLm9biXmkx+7SoV8EzUGJISE0C6T2U0NeqfMz5Bky
+         VKX8+CJmR7MsuTVuPYZFwSrpyKyBcnQ8UE5JVpNkHP5vMZKNHmleWys9MI+QVcwy+j2a
+         TboA==
+X-Gm-Message-State: AC+VfDzwmK1fD8xw/fH+P5OtqJoqIla926hShgJnySoWV2tkC+3aaxoP
+        qBcQD5rZFfmubDjckebC/vVl+J0re54=
+X-Google-Smtp-Source: ACHHUZ462p4FsYDcdqT9/A3K6vcXjU1zgpXqMlgTwsRHqNwM2JiMu1rxLVQb03ko89CJVja2eRfu/A==
+X-Received: by 2002:a05:6808:b15:b0:398:26f0:6799 with SMTP id s21-20020a0568080b1500b0039826f06799mr3491208oij.13.1685527048125;
+        Wed, 31 May 2023 02:57:28 -0700 (PDT)
+Received: from localhost.localdomain (2001-b400-e454-8dbb-0ba6-8aef-0dad-9e10.emome-ip6.hinet.net. [2001:b400:e454:8dbb:ba6:8aef:dad:9e10])
+        by smtp.gmail.com with ESMTPSA id f16-20020a656290000000b00514256c05c2sm852002pgv.7.2023.05.31.02.57.25
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 31 May 2023 02:57:27 -0700 (PDT)
 From:   Victor Shih <victorshihgli@gmail.com>
-Date:   Wed, 31 May 2023 17:45:51 +0800
-Message-ID: <CAK00qKA66Vg+MHu9199V4rPO0LgX6n1akNJsdWtsnkWgrnqpug@mail.gmail.com>
-Subject: Re: [PATCH V2 3/3] mmc: sdhci-pci-gli: Add support SD Express card
- for GL9767
-To:     Adrian Hunter <adrian.hunter@intel.com>
-Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
-        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
-        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw,
         Victor Shih <victor.shih@genesyslogic.com.tw>
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Subject: [PATCH V3 0/3] Add Genesys Logic GL9767 support
+Date:   Wed, 31 May 2023 17:57:18 +0800
+Message-Id: <20230531095721.392664-1-victorshihgli@gmail.com>
+X-Mailer: git-send-email 2.25.1
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi, Adrian
+From: Victor Shih <victor.shih@genesyslogic.com.tw>
 
-On Wed, May 31, 2023 at 3:15=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
-com> wrote:
->
-> On 30/05/23 12:53, Victor Shih wrote:
-> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
-> >
-> > Add support SD Express card for GL9767. The workflow of the
-> > SD Express card in GL9767 is as below.
-> > 1. GL9767 operates in SD mode and set MMC_CAP2_SD_EXP flag.
-> > 2. If card is inserted, Host send CMD8 to ask the capabilities
-> >    of the card.
-> > 3. If the card has PCIe capability, then init_sd_express()
-> >    will be invoked.
-> > 4. If the card has been put in write protect state then the
-> >    SD features supported by SD mode but not supported by
-> >    PCIe mode, therefore GL9767 switch to SD mode.
-> > 5. If the card has not been put in write protect state then
-> >    GL9767 switch from SD mode to PCIe/NVMe mode and mmc driver
-> >    handover control to NVMe driver.
-> > 6. If card is removed, GL9767 will return to SD mode.
-> >
-> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
->
-> Acked-by: Adrian Hunter <adrian.hunter@intel.com>
->
 
-Excuse me, I will adjust the order of definitions and modify the
-if-else condition
-and content in gl9767_init_sd_express() function, please help to review
-it once, thank you.
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
 
-> > ---
-> >  drivers/mmc/host/sdhci-pci-gli.c | 105 +++++++++++++++++++++++++++++++
-> >  1 file changed, 105 insertions(+)
-> >
-> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
-pci-gli.c
-> > index 178253a7e86f..c7fa92fdadcd 100644
-> > --- a/drivers/mmc/host/sdhci-pci-gli.c
-> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
-> > @@ -164,6 +164,10 @@
-> >  #define PCIE_GLI_9767_CFG            0x8A0
-> >  #define   PCIE_GLI_9767_CFG_LOW_PWR_OFF        BIT(12)
-> >
-> > +#define PCIE_GLI_9767_COMBO_MUX_CTL                  0x8C8
-> > +#define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN           BIT(6)
-> > +#define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN    BIT(10)
-> > +
-> >  #define PCIE_GLI_9767_PWR_MACRO_CTL                                  0=
-x8D0
-> >  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                     =
- GENMASK(3, 0)
-> >  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE          =
- GENMASK(15, 12)
-> > @@ -181,6 +185,26 @@
-> >  #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF            BIT(21)
-> >  #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN     BIT(30)
-> >
-> > +#define PCIE_GLI_9767_SDHC_CAP                       0x91C
-> > +#define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT   BIT(5)
-> > +
-> > +#define PCIE_GLI_9767_SD_EXPRESS_CTL                 0x940
-> > +#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE                BIT(0)
-> > +#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE         BIT(1)
-> > +
-> > +#define PCIE_GLI_9767_SD_DATA_MULTI_CTL                              0=
-x944
-> > +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME      GENMASK=
-(23, 16)
-> > +#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE       =
- 0x64
-> > +
-> > +#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2                     0=
-x950
-> > +#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE      =
- BIT(0)
-> > +
-> > +#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2                   =
-       0x954
-> > +#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_ST=
-ATUS_EN          BIT(0)
-> > +
-> > +#define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2                   =
-       0x958
-> > +#define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SI=
-GNAL_EN          BIT(0)
-> > +
-> >  #define PCIE_GLI_9767_SD_PLL_CTL                     0x938
-> >  #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV            GENMASK(9, 0)
-> >  #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV            GENMASK(15, 12)
-> > @@ -935,6 +959,85 @@ static void sdhci_gl9767_reset(struct sdhci_host *=
-host, u8 mask)
-> >       gli_set_9767(host);
-> >  }
-> >
-> > +static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios=
- *ios)
-> > +{
-> > +     struct sdhci_host *host =3D mmc_priv(mmc);
-> > +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
-> > +     struct pci_dev *pdev;
-> > +     u32 value;
-> > +     int i;
-> > +
-> > +     pdev =3D slot->chip->pdev;
-> > +
-> > +     if (mmc->ops->get_ro(mmc)) {
-> > +             mmc->ios.timing &=3D ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_=
-EXP_1_2V);
-> > +             return 0;
-> > +     }
-> > +
-> > +     gl9767_vhs_write(pdev);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, &value);
-> > +     value &=3D ~(PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN | PCIE_GLI_9767_C=
-OMBO_MUX_CTL_WAIT_PERST_EN);
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, value);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &val=
-ue);
-> > +     value &=3D ~PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME;
-> > +     value |=3D FIELD_PREP(PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_=
-TIME,
-> > +                         PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TI=
-ME_VALUE);
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, val=
-ue);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_R=
-EG2, &value);
-> > +     value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE=
-;
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_=
-REG2, value);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_E=
-N_REG2, &value);
-> > +     value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPL=
-ETE_STATUS_EN;
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_=
-EN_REG2, value);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_E=
-N_REG2, &value);
-> > +     value |=3D PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPL=
-ETE_SIGNAL_EN;
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_=
-EN_REG2, value);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
-> > +     value |=3D PCIE_GLI_9767_CFG_LOW_PWR_OFF;
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
-> > +
-> > +     value =3D sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-> > +     value &=3D ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-> > +     sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-> > +
-> > +     value =3D sdhci_readb(host, SDHCI_POWER_CONTROL);
-> > +     value |=3D ((SDHCI_POWER_180 | SDHCI_POWER_ON) << 4);
-> > +     sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value)=
-;
-> > +     value |=3D PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE;
-> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value)=
-;
-> > +
-> > +     for (i =3D 0; i < 2; i++) {
-> > +             msleep(10);
-> > +             pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_=
-STATUS_REG2, &value);
-> > +             if (value & PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI=
-_COMPLETE) {
-> > +                     pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL=
-_ERR_INT_STATUS_REG2,
-> > +                                            value);
-> > +                     break;
-> > +             }
-> > +     }
-> > +
-> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SDHC_CAP, &value);
-> > +     if ((value & PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT) =3D=3D PCIE_GLI_=
-9767_SDHC_CAP_SDEI_RESULT) {
-> > +             pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL,=
- &value);
-> > +             value |=3D PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE;
-> > +             pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL=
-, value);
-> > +     } else {
-> > +             mmc->ios.timing &=3D ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_=
-EXP_1_2V);
-> > +     }
-> > +
-> > +     gl9767_vhs_read(pdev);
-> > +
-> > +     return 0;
-> > +}
-> > +
-> >  static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
-> >  {
-> >       struct sdhci_host *host =3D slot->host;
-> > @@ -967,6 +1070,8 @@ static int gli_probe_slot_gl9767(struct sdhci_pci_=
-slot *slot)
-> >       gl9767_hw_setting(slot);
-> >       gli_pcie_enable_msi(slot);
-> >       slot->host->mmc->caps2 |=3D MMC_CAP2_NO_SDIO;
-> > +     host->mmc->caps2 |=3D MMC_CAP2_SD_EXP;
-> > +     host->mmc_host_ops.init_sd_express =3D gl9767_init_sd_express;
-> >       sdhci_enable_v4_mode(host);
-> >
-> >       return 0;
->
+Changes in v3 (May. 31, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* Patch#2: use msleep() to instead mdelay().
+* Patch#3: modify the if-else condition and content in
+           gl9767_init_sd_express() function.
+           adjust the order of definitions.
 
-Thanks, Victor Shih
+----------------- original cover letter from v2 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v2 (May. 30, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* Add set SDR104's clock to 205MHz and enable SSC for GL9767.
+* drop export sdhci_check_ro() function.
+* Patch#1: add gl9767_vhs_read() and gl9767_vhs_write().
+* Patch#3: use mmc->ops->get_ro() to instead sdhci_check_ro().
+           use msleep() to instead mdelay().
+           modify the wait time for Power valid to CLKREQ.
+           drop unused definitions.
+
+----------------- original cover letter from v1 -----------------
+These patches support for the GL9767 chipset and add support SD3/SD Express
+mode for the GL9767.
+
+Changes in v1 (May. 12, 2023)
+* rebased to the linux-kernel-v6.4.0-rc1 in Ulf Hansson next branch.
+* enable MSI interrupt for the GL9767.
+* add support SDR mode for the GL9767.
+* export sdhci_check_ro() function.
+* add support SD Express mode for the GL9767.
+
+Victor Shih (3):
+  mmc: sdhci-pci-gli: Add Genesys Logic GL9767 support
+  mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz and enable SSC for
+    GL9767
+  mmc: sdhci-pci-gli: Add support SD Express card for GL9767
+
+ drivers/mmc/host/sdhci-pci-core.c |   1 +
+ drivers/mmc/host/sdhci-pci-gli.c  | 406 ++++++++++++++++++++++++++++++
+ drivers/mmc/host/sdhci-pci.h      |   2 +
+ 3 files changed, 409 insertions(+)
+
+-- 
+2.25.1
+
