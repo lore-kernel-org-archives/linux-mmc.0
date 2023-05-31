@@ -2,400 +2,161 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B45DC7EE23
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 13:13:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 48C36C7EE23
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 13:16:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236020AbjEaNNh (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 09:13:37 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39166 "EHLO
+        id S236341AbjEaNQP convert rfc822-to-8bit (ORCPT
+        <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 May 2023 09:16:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40390 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230341AbjEaNNh (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 09:13:37 -0400
-Received: from mga14.intel.com (mga14.intel.com [192.55.52.115])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08108B2
-        for <linux-mmc@vger.kernel.org>; Wed, 31 May 2023 06:13:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
-  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
-  t=1685538810; x=1717074810;
-  h=message-id:date:mime-version:subject:to:cc:references:
-   from:in-reply-to:content-transfer-encoding;
-  bh=PFoubaZu1pxdlVevIzKlp2qIpf6hWt2mjAT5JxGiaRo=;
-  b=B+s0D2gHmoilAlaBIQFDFeMHar5b2U3l3kTUXJD7lTph3wWOV8bbw2Cl
-   /Dz+C1/vEHCAAr1N881uUOudAb9mxcFqMpCnZp4llKzQn4of2xlkO6mZW
-   hovTrqcyixpS6FzWSNkA7x2RZ0rMzbRIyeKmvqjmlfflEJ9lnmmM2YQyo
-   vWXxW35MVEpmXczFzpcUjuyUm3x1sPXk4HJNiK+xVJwi6ZKZYlKNtSRg7
-   nSRCm/z7LOF4jtyE1UR3PTMfSRvcLaDrT9t2nLovqRPq6EwEBOvSHovyg
-   J1tluVDiJ+WIDkRBH/bhqwb4joQa1lM3EoodRoJsAJbAJ0acHgXxJdNaC
-   g==;
-X-IronPort-AV: E=McAfee;i="6600,9927,10727"; a="355238287"
-X-IronPort-AV: E=Sophos;i="6.00,207,1681196400"; 
-   d="scan'208";a="355238287"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by fmsmga103.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2023 06:13:29 -0700
-X-ExtLoop1: 1
-X-IronPort-AV: E=McAfee;i="6600,9927,10727"; a="684387037"
-X-IronPort-AV: E=Sophos;i="6.00,207,1681196400"; 
-   d="scan'208";a="684387037"
-Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.208.175])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2023 06:13:25 -0700
-Message-ID: <f41e1546-f6d3-7f4d-7662-3b7eca291178@intel.com>
-Date:   Wed, 31 May 2023 16:13:20 +0300
+        with ESMTP id S236350AbjEaNQN (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 09:16:13 -0400
+Received: from mail-oi1-f177.google.com (mail-oi1-f177.google.com [209.85.167.177])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 594919D;
+        Wed, 31 May 2023 06:16:12 -0700 (PDT)
+Received: by mail-oi1-f177.google.com with SMTP id 5614622812f47-38eb2984c82so2018073b6e.0;
+        Wed, 31 May 2023 06:16:12 -0700 (PDT)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685538971; x=1688130971;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=kIuhlHydXOIu4C3uuGsJ33JDY8/UzFh5D7EZjgGK2P0=;
+        b=aIHmMaK+yUflF/57rOAdiiYDzcuBOTGTkv6bILCXXb3VdYGxvxN8yiEGxDJV0URS3C
+         xWo4CZnxBEGmO2YVRT029Q0UX4LaOa8gvQhgcpVd3UBrJphp6BmGq7FCjPwch2yIPmvB
+         OkzFaJ8rNvdnM3+fMjrmuqkqZ8TZ2pyfuzJPUIeDFaZe5FOeGtytqSiKLh43lMae8e/Y
+         NKluGjY6c3fj7jjQUW3GdLDnVfBBUF5pQauekkCirR73uvO/DqVf0n6KKg9s4uDJLCol
+         N8DjGQVdtLO9pPoxi4/JLSX53XSv4157FMFCUyZTsMvcxbohTaTJHKxhs5EqOseea8zd
+         S3Qg==
+X-Gm-Message-State: AC+VfDz78UtNaL8pHF9MlOu9xCcOVooY7VE9r8IXGxYbCHzO4dinX2ZA
+        Dxl044pyNpDYamtOVJ18jTgCTt8ddVNkdw==
+X-Google-Smtp-Source: ACHHUZ6a2OcykRInwzKBhmLC3u4+dhdrzOSZZk0ooxCqc7qsWJa9IjKt8Woux4Gu06H7k+Zpb3pNEw==
+X-Received: by 2002:a05:6808:1383:b0:39a:4ac8:34ae with SMTP id c3-20020a056808138300b0039a4ac834aemr1680152oiw.12.1685538971388;
+        Wed, 31 May 2023 06:16:11 -0700 (PDT)
+Received: from mail-qk1-f176.google.com (mail-qk1-f176.google.com. [209.85.222.176])
+        by smtp.gmail.com with ESMTPSA id m10-20020ad44a0a000000b006235e8fe94esm390054qvz.58.2023.05.31.06.16.11
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Wed, 31 May 2023 06:16:11 -0700 (PDT)
+Received: by mail-qk1-f176.google.com with SMTP id af79cd13be357-75b050b4fa0so602782885a.0;
+        Wed, 31 May 2023 06:16:11 -0700 (PDT)
+X-Received: by 2002:a0d:f181:0:b0:568:fe3a:46b3 with SMTP id
+ a123-20020a0df181000000b00568fe3a46b3mr1220876ywf.28.1685538581391; Wed, 31
+ May 2023 06:09:41 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Firefox/102.0 Thunderbird/102.11.0
-Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
- writeback-cache for eMMC and SD"
-Content-Language: en-US
-To:     Marek Vasut <marex@denx.de>, linux-mmc@vger.kernel.org
-Cc:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
-        Avri Altman <avri.altman@wdc.com>,
-        Jens Axboe <axboe@kernel.dk>,
-        Michael Wu <michael@allwinnertech.com>,
-        Ming Lei <ming.lei@redhat.com>,
-        Seunghui Lee <sh043.lee@samsung.com>,
-        Ulf Hansson <ulf.hansson@linaro.org>
-References: <20230531002740.1235620-1-marex@denx.de>
- <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
- <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
-From:   Adrian Hunter <adrian.hunter@intel.com>
-Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
- Business Identity Code: 0357606 - 4, Domiciled in Helsinki
-In-Reply-To: <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+References: <CAMuHMdX_Sdb3RFrLthcwThK__GKhJvJuXWu5+2RsQpGgFRkrXQ@mail.gmail.com>
+ <20230530220347.14049-1-blarson@amd.com>
+In-Reply-To: <20230530220347.14049-1-blarson@amd.com>
+From:   Geert Uytterhoeven <geert@linux-m68k.org>
+Date:   Wed, 31 May 2023 15:09:28 +0200
+X-Gmail-Original-Message-ID: <CAMuHMdWQGEoB_LLsfLurOV8fT0BO-RYGcsS_Gra49CPiGH9J=g@mail.gmail.com>
+Message-ID: <CAMuHMdWQGEoB_LLsfLurOV8fT0BO-RYGcsS_Gra49CPiGH9J=g@mail.gmail.com>
+Subject: Re: [PATCH v14 6/8] arm64: dts: Add AMD Pensando Elba SoC support
+To:     Brad Larson <blarson@amd.com>
+Cc:     adrian.hunter@intel.com, alcooperx@gmail.com,
+        andy.shevchenko@gmail.com, arnd@arndb.de,
+        brendan.higgins@linux.dev, briannorris@chromium.org,
+        broonie@kernel.org, catalin.marinas@arm.com, conor+dt@kernel.org,
+        davidgow@google.com, devicetree@vger.kernel.org,
+        fancer.lancer@gmail.com, gerg@linux-m68k.org, gsomlo@gmail.com,
+        hal.feng@starfivetech.com, hasegawa-hitomi@fujitsu.com,
+        j.neuschaefer@gmx.net, joel@jms.id.au, kernel@esmil.dk,
+        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
+        lee.jones@linaro.org, lee@kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
+        michal.simek@amd.com, p.zabel@pengutronix.de,
+        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
+        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
+        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
+        ulf.hansson@linaro.org, vaishnav.a@ti.com,
+        walker.chen@starfivetech.com, will@kernel.org, zhuyinbo@loongson.cn
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 31/05/23 14:34, Marek Vasut wrote:
-> On 5/31/23 07:46, Adrian Hunter wrote:
->> On 31/05/23 03:27, Marek Vasut wrote:
->>> This reverts commit 08ebf903af57cda6d773f3dd1671b64f73b432b8.
->>>
->>> On STM32MP153C DHCOR DRC Compact with microSD card
->>> Kingston Canvas Go! Plus MicroSDXC I 64 GiB U3/V30/A2 SDCG3/64GB
->>> it is no longer possible to mount ext4 filesystem.
->>>
->>> Git bisect points to this commit which is being reverted here. A bit of
->>> investigation shows that for non-working microSD cards
->>>    cache_enabled=TRUE fua_enabled=false
->>> For working microSD card (Kingston Canvas React Plus, MicroSDXC II
->>> 64 GiB U3/V90/A1 SDCR2/64GB)
->>>    cache_enabled=FALSE fua_enabled=false
->>>
->>> It seems enabling the cache for SD cards causes the issue. Before the
->>> reverted commit, the cache was not reported enabled for SD cards. I am
->>> not sure whether such blunt revert is the correct solution however, any
->>> ideas ?
->>
->> This does not disable the cache, it disables the block layer from issuing
->> cache flushes (by telling it there is no cache being used).
->>
->> It would be good to know what commands are failing, which should be visible
->> in the kernel messages if dynamic debug is enabled:
->>
->> Dynamic debug for mmc
->> ---------------------
->>
->>      Kernel must be configured:
->>
->>          CONFIG_DYNAMIC_DEBUG=y
->>
->>      To enable mmc debug via sysfs:
->>
->>          echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control
->>          echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control
->>
->>      To enable mmc debug via kernel command line:
->>
->>          dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
->>
->>      To disable mmc debug:
->>
->>          echo 'file drivers/mmc/core/* -p' > /sys/kernel/debug/dynamic_debug/control
->>          echo 'file drivers/mmc/host/* -p' > /sys/kernel/debug/dynamic_debug/control
->>
->>      More general information in kernel documentation in kernel tree:
->>
->>          Documentation/admin-guide/dynamic-debug-howto.rst
-> 
-> Log is below, I added newlines around the mount failure.
-> Do you see anything problematic there ?
-> 
-> $ echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control ; echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control ; echo 8 > /proc/sys/kernel/printk ; mount /dev/mmcblk1p4 /mnt
-> [   61.061029] <mmc1: starting CMD23 arg 00000002 flags 00000015>
-> [   61.065637] mmc1: starting CMD18 arg 00002002 flags 000000b5
-> [   61.071144] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
-> [   61.078096] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.083302] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
-> [   61.090012] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
-> [   61.096531] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.102332] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
-> [   61.108836] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.114575] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.120371] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.127178] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.134084] mmc1:     1024 bytes transferred: 0
-> [   61.138658] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.145533] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.150946] mmc1: starting CMD18 arg 00002000 flags 000000b5
-> [   61.156609] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-> [   61.163426] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.168759] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
-> [   61.175368] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.181985] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.187682] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
-> [   61.194185] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.199979] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.205769] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.212574] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.219478] mmc1:     4096 bytes transferred: 0
-> [   61.224050] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.231166] <mmc1: starting CMD23 arg 00000002 flags 00000015>
-> [   61.236378] mmc1: starting CMD18 arg 00002002 flags 000000b5
-> [   61.241983] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
-> [   61.248940] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.254169] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
-> [   61.260779] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
-> [   61.267405] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.273101] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
-> [   61.279603] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.285431] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.291125] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.298032] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.304937] mmc1:     1024 bytes transferred: 0
-> [   61.309409] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.316256] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.321768] mmc1: starting CMD18 arg 00002000 flags 000000b5
-> [   61.327459] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-> [   61.334360] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.339459] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
-> [   61.346167] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.352782] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.358478] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
-> [   61.365082] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.370776] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.376565] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.383371] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.390275] mmc1:     4096 bytes transferred: 0
-> [   61.394848] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.401885] <mmc1: starting CMD23 arg 00000002 flags 00000015>
-> [   61.407193] mmc1: starting CMD18 arg 00002002 flags 000000b5
-> [   61.412794] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
-> [   61.419748] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.424973] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
-> [   61.431582] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
-> [   61.438204] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.443901] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
-> [   61.450404] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.456232] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.461927] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.468834] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.475739] mmc1:     1024 bytes transferred: 0
-> [   61.480210] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.487054] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.492462] mmc1: starting CMD18 arg 00002000 flags 000000b5
-> [   61.498251] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-> [   61.505160] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.510260] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
-> [   61.516969] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.523592] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.529288] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
-> [   61.535789] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.541583] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.547271] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.554177] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.561082] mmc1:     4096 bytes transferred: 0
-> [   61.565654] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.572440] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.578017] mmc1: starting CMD18 arg 00002008 flags 000000b5
-> [   61.583653] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-> [   61.590465] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.595686] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
-> [   61.602396] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.608915] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.614712] mmci-pl18x 58005000.mmc: op 12 arg 00002008 flags 000000b5
-> [   61.621215] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.627034] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.632727] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.639633] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.646437] mmc1:     4096 bytes transferred: 0
-> [   61.651010] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.658908] <mmc1: starting CMD23 arg 00000108 flags 00000015>
-> [   61.663421] mmc1: starting CMD18 arg 00003be8 flags 000000b5
-> [   61.669102] mmc1:     blksz 512 blocks 264 flags 00000200 tsac 100 ms nsac 0
-> [   61.676155] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.681355] mmci-pl18x 58005000.mmc: blksz 0200 blks 0108 flags 00000200
-> [   61.688064] mmci-pl18x 58005000.mmc: op 17 arg 00000108 flags 00000015
-> [   61.694589] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.700284] mmci-pl18x 58005000.mmc: op 12 arg 00003be8 flags 000000b5
-> [   61.706887] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.712581] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.718372] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
-> [   61.724060] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.730965] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.737870] mmc1:     135168 bytes transferred: 0
-> [   61.742544] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.749064] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.755336] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.760649] mmc1: starting CMD18 arg 00442000 flags 000000b5
-> [   61.766327] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms nsac 0
-> [   61.773144] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   61.778489] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
-> [   61.785100] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.791616] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.797414] mmci-pl18x 58005000.mmc: op 12 arg 00442000 flags 000000b5
-> [   61.803916] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.809710] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.815399] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.822306] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   61.829211] mmc1:     4096 bytes transferred: 0
-> [   61.833683] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.833952] mmc0: starting CMD7 arg fffd0000 flags 00000015
-> [   61.840205] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.845820] mmci-pl18x 48004000.mmc: op 07 arg fffd0000 flags 00000015
-> [   61.853036] <mmc1: starting CMD23 arg 00000008 flags 00000015>
-> [   61.858074] mmci-pl18x 48004000.mmc: irq0 (data+cmd) 00000040
-> [   61.858098] mmc0: req done (CMD7): 0: 00001ed7 00000000 00000000 00000000
-> [   61.876506] mmc1: starting CMD25 arg 00002000 flags 000000b5
-> [   61.882106] mmc1:     blksz 512 blocks 8 flags 00000100 tsac 3000 ms nsac 0
-> [   61.889107] mmc1:     CMD12 arg 00000000 flags 0000049d
-> [   61.894346] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000100
-> [   61.900957] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
-> [   61.907588] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.913283] mmci-pl18x 58005000.mmc: op 19 arg 00002000 flags 000000b5
-> [   61.919786] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.925612] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   61.931309] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   61.938219] mmc1: req done (CMD25): 0: 00000900 00000000 00000000 00000000
-> [   61.945125] mmc1:     4096 bytes transferred: 0
-> [   61.949598] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   61.956107] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.961888] mmc1: starting CMD13 arg 50480000 flags 00000195
-> [   61.967581] mmci-pl18x 58005000.mmc: op 0d arg 50480000 flags 00000195
-> [   61.974026] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   61.979718] mmc1: req done (CMD13): 0: 00000900 00000000 00000000 00000000
-> [   61.986630] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   61.992588] mmc1: starting CMD49 arg 10020a00 flags 00000035
-> [   61.998152] mmc1:     blksz 512 blocks 1 flags 00000100 tsac 3000 ms nsac 0
-> [   62.005158] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000100
-> [   62.011778] mmci-pl18x 58005000.mmc: op 31 arg 10020a00 flags 00000035
-> [   62.018317] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   62.024011] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
-> [   62.029801] mmc1: req done (CMD49): 0: 00000900 00000000 00000000 00000000
-> [   62.036708] mmc1:     512 bytes transferred: 0
-> [   62.041083] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   62.046988] mmc1: starting CMD48 arg 10020a00 flags 000000b5
-> [   62.052487] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-> [   62.059443] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
-> [   62.066154] mmci-pl18x 58005000.mmc: op 30 arg 10020a00 flags 000000b5
-> [   62.072688] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   62.078382] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
-> [   62.084173] mmc1: req done (CMD48): 0: 00000900 00000000 00000000 00000000
-> [   62.091081] mmc1:     512 bytes transferred: 0
-> [   62.095455] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+Hi Brad,
 
-CMD48 was successful but it still became an error, which must have
-been because it indicated the flush had not completed.  We do not
-allow for mmc_poll_for_busy() being too quick i.e. card has not
-had a chance to indicate busy yet.
+On Wed, May 31, 2023 at 12:04 AM Brad Larson <blarson@amd.com> wrote:
+> On Wed, May 24, 2023 at 13:52 Geert Uytterhoeven <geert@linux-m68k.org> wrote:
+> > On Tue, May 23, 2023 at 9:30â€¯PM Brad Larson <blarson@amd.com> wrote:
+> >> On 5/16/23 09:54, Michal Simek wrote:
+> >> > On 5/15/23 20:16, Brad Larson wrote:
+> >> >> + */
+> >> >> +
+> >> >> +/ {
+> >> >> +    cpus {
+> >> >> +            #address-cells = <2>;
+> >> >> +            #size-cells = <0>;
+> >> >> +
+> >> >> +            cpu-map {
+> >> >> +                    cluster0 {
+> >> >> +                            core0 { cpu = <&cpu0>; };
+> >> >> +                            core1 { cpu = <&cpu1>; };
+> >> >> +                            core2 { cpu = <&cpu2>; };
+> >> >> +                            core3 { cpu = <&cpu3>; };
+> >> >> +                    };
+> >> >> +
+> >> >> +                    cluster1 {
+> >> >> +                            core0 { cpu = <&cpu4>; };
+> >> >> +                            core1 { cpu = <&cpu5>; };
+> >> >> +                            core2 { cpu = <&cpu6>; };
+> >> >> +                            core3 { cpu = <&cpu7>; };
+> >> >> +                    };
+> >> >> +
+> >> >> +                    cluster2 {
+> >> >> +                            core0 { cpu = <&cpu8>; };
+> >> >> +                            core1 { cpu = <&cpu9>; };
+> >> >> +                            core2 { cpu = <&cpu10>; };
+> >> >> +                            core3 { cpu = <&cpu11>; };
+> >> >> +                    };
+> >> >> +
+> >> >> +                    cluster3 {
+> >> >> +                            core0 { cpu = <&cpu12>; };
+> >> >> +                            core1 { cpu = <&cpu13>; };
+> >> >> +                            core2 { cpu = <&cpu14>; };
+> >> >> +                            core3 { cpu = <&cpu15>; };
+> >> >> +                    };
+> >> >> +            };
+> >> >> +
+> >> >> +            /* CLUSTER 0 */
+> >> >> +            cpu0: cpu@0 {
+> >> >> +                    device_type = "cpu";
+> >> >> +                    compatible = "arm,cortex-a72";
+> >> >> +                    reg = <0 0x0>;
+> >> >
+> >> > Do you really need 2/0 split here. The first cell is 0 anyway.
+> >>
+> >> Yes following 64-bit system definition
+> >
+> > You mean for the 64-bit main address space?
+> > The CPU address space under /cpus is unrelated.
+>
+> Yes, the reg prop for this node is CPU/threads per dt spec.  Checked the history and
+> the Elba dt was derived from socionext for these nodes and this is how those device
+> trees are configured along with over a dozen other devices.  I changed to
+> address-cells = <1> and dropped the leading zero from all cpu* reg<> and booting
+> the system I'm observing no change.  Looking in drivers/of I'm not seeing where
+> cpu*/reg is read and used, any recommendation?
 
-Please try this:
+drivers/of/cpu.c
 
-diff --git a/drivers/mmc/core/sd.c b/drivers/mmc/core/sd.c
-index 72b664ed90cf..9c3123867a99 100644
---- a/drivers/mmc/core/sd.c
-+++ b/drivers/mmc/core/sd.c
-@@ -1313,6 +1313,8 @@ static int sd_flush_cache(struct mmc_host *host)
- {
- 	struct mmc_card *card = host->card;
- 	u8 *reg_buf, fno, page;
-+	unsigned long timeout;
-+	bool expired;
- 	u16 offset;
- 	int err;
- 
-@@ -1338,11 +1340,15 @@ static int sd_flush_cache(struct mmc_host *host)
- 		goto out;
- 	}
- 
-+	timeout = jiffies + msecs_to_jiffies(SD_WRITE_EXTR_SINGLE_TIMEOUT_MS) + 1;
-+again:
- 	err = mmc_poll_for_busy(card, SD_WRITE_EXTR_SINGLE_TIMEOUT_MS, false,
- 				MMC_BUSY_EXTR_SINGLE);
- 	if (err)
- 		goto out;
- 
-+	expired = time_after(jiffies, timeout);
-+
- 	/*
- 	 * Read the Flush Cache bit. The card shall reset it, to confirm that
- 	 * it's has completed the flushing of the cache.
-@@ -1354,8 +1360,12 @@ static int sd_flush_cache(struct mmc_host *host)
- 		goto out;
- 	}
- 
--	if (reg_buf[0] & BIT(0))
--		err = -ETIMEDOUT;
-+	if (reg_buf[0] & BIT(0)) {
-+		if (expired)
-+			err = -ETIMEDOUT;
-+		else
-+			goto again;
-+	}
- out:
- 	kfree(reg_buf);
- 	return err;
+Looks like there are lots of DTS files that use #address-cells = <2> for
+CPU nodes :-(
 
+    git grep -w -A1 cpus -- "*dts*" | grep address-cells | grep "<2>"
 
-> 
-> 
-> [   62.101381] I/O error, dev mmcblk1, sector 8192 op 0x1:(WRITE) flags 0x800 phys_seg 1 prio class 2
-> [   62.110223] Buffer I/O error on dev mmcblk1p4, logical block 0, lost sync page write
-> [   62.117996] EXT4-fs (mmcblk1p4): I/O error while writing superblock
-> [   62.124320] EXT4-fs (mmcblk1p4): mount failed
-> 
-> 
-> [   62.129676] <mmc1: starting CMD23 arg 00000002 flags 00000015>
-> [   62.134452] mmc1: starting CMD18 arg 00002000 flags 000000b5
-> [   62.140055] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms nsac 0
-> [   62.147003] mmc1:     CMD12 arg 00000000 flags 00000095
-> [   62.152205] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
-> [   62.158915] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
-> [   62.165431] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   62.171229] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
-> [   62.177734] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   62.183566] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
-> [   62.189262] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 00000000
-> [   62.196169] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 00000000
-> [   62.202973] mmc1:     1024 bytes transferred: 0
-> [   62.207546] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
-> [   62.213966] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   62.220406] mmc1: starting CMD17 arg 00002000 flags 000000b5
-> [   62.225497] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-> [   62.232324] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
-> [   62.239033] mmci-pl18x 58005000.mmc: op 11 arg 00002000 flags 000000b5
-> [   62.245571] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   62.251267] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
-> [   62.257058] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-> [   62.263966] mmc1:     512 bytes transferred: 0
-> [   62.268347] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> [   62.274791] mmc1: starting CMD17 arg 00002000 flags 000000b5
-> [   62.279800] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms nsac 0
-> [   62.286783] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
-> [   62.293396] mmci-pl18x 58005000.mmc: op 11 arg 00002000 flags 000000b5
-> [   62.299912] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
-> [   62.305612] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
-> [   62.311403] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 00000000
-> [   62.318309] mmc1:     512 bytes transferred: 0
-> [   62.322801] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
-> 
-> mount: mounting /dev/mmcblk1p4 on /mnt failed: Invalid argument
-> ~ #
-> 
-> [   62.873917] mmc0: starting CMD7 arg fffd0000 flags 00000015
-> [   62.878152] mmci-pl18x 48004000.mmc: op 07 arg fffd0000 flags 00000015
-> [   62.884681] mmci-pl18x 48004000.mmc: irq0 (data+cmd) 00000040
-> [   62.890381] mmc0: req done (CMD7): 0: 00001ed7 00000000 00000000 00000000
-> 
+I would use <1> is the first cell is always zero...
 
+Gr{oetje,eeting}s,
+
+                        Geert
+
+-- 
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
