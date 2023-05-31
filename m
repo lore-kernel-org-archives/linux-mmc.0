@@ -2,204 +2,273 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 91EC5C77B7A
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 08:18:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CBCBCC77B7C
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 09:45:51 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235187AbjEaISp (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 04:18:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44402 "EHLO
+        id S235613AbjEaJpu (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 May 2023 05:45:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45882 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235179AbjEaISm (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 04:18:42 -0400
-Received: from madras.collabora.co.uk (madras.collabora.co.uk [46.235.227.172])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B385125;
-        Wed, 31 May 2023 01:18:38 -0700 (PDT)
-Received: from [IPV6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab] (unknown [IPv6:2001:b07:2ed:14ed:a962:cd4d:a84:1eab])
-        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits)
-         key-exchange X25519 server-signature RSA-PSS (4096 bits))
-        (No client certificate requested)
-        (Authenticated sender: kholk11)
-        by madras.collabora.co.uk (Postfix) with ESMTPSA id C7AF26605840;
-        Wed, 31 May 2023 09:18:36 +0100 (BST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=collabora.com;
-        s=mail; t=1685521117;
-        bh=xesRhTEzgXFVve5z8BOJVMjbS/JIfJWyP7KPJwu/lS4=;
-        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
-        b=Eu5t6diMs3FtdnISPq3eDHNRF3xK41xARO+tCUnPdVG1xyolMJi3miUv0uDja9A0n
-         oE8MWzUUE0zYiQtaBFvh5GjyeX/V6uXAktqjxSe5N20Nj2HEEGbjZJ9B5jWJTKcZV1
-         ittBET/tnPoYuAyBbxVqMGuMFDNryJhPV5mCWYQA9s5RiPEFqNZIyypaH3BA4gYMWR
-         2zURIJzUYlmaIlRizYGQW5rrbLRkXUhRKGvWrXdsyBRRTZBjHbc4Ogn0AFcqs3+Gvw
-         I8zWGrjhiHMlJBiQ0c+gNRTRwMryq9p7utyToHZ0aEXvUwEOJVmVIGDBzSSE/TkeSt
-         fT37q+oHM/2RQ==
-Message-ID: <7f5e14e5-a814-efd7-6082-c4eff697c536@collabora.com>
-Date:   Wed, 31 May 2023 10:18:35 +0200
+        with ESMTP id S235280AbjEaJpp (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 05:45:45 -0400
+Received: from mail-qk1-x72c.google.com (mail-qk1-x72c.google.com [IPv6:2607:f8b0:4864:20::72c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E8DA5C0;
+        Wed, 31 May 2023 02:45:43 -0700 (PDT)
+Received: by mail-qk1-x72c.google.com with SMTP id af79cd13be357-75b04e897a5so651844385a.2;
+        Wed, 31 May 2023 02:45:43 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20221208; t=1685526343; x=1688118343;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
+         :message-id:reply-to;
+        bh=ZtrU0a4f+GyB8KEp6XlttCUsOU+1CNOaTHldj3h697w=;
+        b=GvZmjJU7PINp4pi1w4F72UVhSBX+iSQyN84mwaWOGnVUQZ4Gh01d/2k48q5xZLDwRo
+         Q5DBc00RrSgVmq0TamZ9mXsIJ66O3mJ87HIxusiTbJdnM86P4z0P+pECGeAsbCcTA5rb
+         L2645BGWwIkcgIQiMAM5dm1XmpWiR1qKjHHS1Y8IJ7n74CCH+rSmSqicYlYZYKODzAl1
+         v/rzeIJjIRdT7E9J24vp2GbZopG3I0Y5osa+zkG2SACsw1XVzIM01eSC99bxYzAsMMg/
+         R7ofTi8uya3oMUslW4D5IRco/CBcQUHX40zN9zF+l9zKoxWxmn3cm2TnwG9cl4WIqaVv
+         Atdw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20221208; t=1685526343; x=1688118343;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
+         :subject:date:message-id:reply-to;
+        bh=ZtrU0a4f+GyB8KEp6XlttCUsOU+1CNOaTHldj3h697w=;
+        b=PSinS8gwsKo+nGHZoYL+0G64m5tb5/8atG5pTgoY8LJgdODJJ3GKBSw1USOKKAXesr
+         AAgZ9zPLERToxEIGtSVwFB50tx+hYVoeWz97tZB8k42WV6/d8aizexRdI+/wT1ujCB+X
+         8xcwBe7Q2TtTdEfGNm+p25w2e72iHhL6oFL31T0t9/ePxUivdHtR6mCcnCy5kHPecQRh
+         8m6hwM8H39rOkm4pyRkDtc2L2fu0wQgNYUB8bCHXEvxfKvjRRkqlHpcm0hnv80+wEi3+
+         LvPRMYDExFbXfBYbXLiz9TyFU+v6WhgGtkm3Ceg2A2VtgtTG1Lg/gQLmP8N+kUoB3HiH
+         25Bg==
+X-Gm-Message-State: AC+VfDz+n2YSr51VpZMRhO7oTfvDWZ5aTs5VB4lTuJ/H3FnhlwjQ/14W
+        BV5m0B5/nkNPsYpby+j6GAG4Ncmo1mbMEwkZp90=
+X-Google-Smtp-Source: ACHHUZ6SYVGJXZFrg3xy7F3Qihmbd5j3nkCs/3pfVR96ylIETmxMwKBqjdt0SjGF9RnRvw4NB/K6dIcSwNBS/3wYQgw=
+X-Received: by 2002:a05:620a:400a:b0:75b:23a1:35f2 with SMTP id
+ h10-20020a05620a400a00b0075b23a135f2mr7376833qko.3.1685526342931; Wed, 31 May
+ 2023 02:45:42 -0700 (PDT)
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.10.1
-Subject: Re: [PATCH v2] mmc: mtk-sd: reduce CIT for better performance
-Content-Language: en-US
-To:     =?UTF-8?B?V2VuYmluIE1laSAo5qKF5paH5b2sKQ==?= 
-        <Wenbin.Mei@mediatek.com>,
-        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>
-Cc:     "linux-arm-kernel@lists.infradead.org" 
-        <linux-arm-kernel@lists.infradead.org>,
-        "matthias.bgg@gmail.com" <matthias.bgg@gmail.com>,
-        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
-        "linux-mediatek@lists.infradead.org" 
-        <linux-mediatek@lists.infradead.org>,
-        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
-        =?UTF-8?B?Q2hhb3RpYW4gSmluZyAo5LqV5pyd5aSpKQ==?= 
-        <Chaotian.Jing@mediatek.com>
-References: <20230510015851.11830-1-wenbin.mei@mediatek.com>
- <0df3968e-da34-b36c-4cb4-92d66508a46a@collabora.com>
- <e682b8b66261a71601707a4e74af2829f86800dc.camel@mediatek.com>
-From:   AngeloGioacchino Del Regno 
-        <angelogioacchino.delregno@collabora.com>
-In-Reply-To: <e682b8b66261a71601707a4e74af2829f86800dc.camel@mediatek.com>
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 8bit
+References: <20230530095308.8165-1-victorshihgli@gmail.com>
+ <20230530095308.8165-3-victorshihgli@gmail.com> <7c185eb3-5775-af7c-3035-2799e3395c33@intel.com>
+In-Reply-To: <7c185eb3-5775-af7c-3035-2799e3395c33@intel.com>
+From:   Victor Shih <victorshihgli@gmail.com>
+Date:   Wed, 31 May 2023 17:45:31 +0800
+Message-ID: <CAK00qKAn1WAh+zNT11L7G+fyGP-x0H7CzTFA3+T0GavpUufFVg@mail.gmail.com>
+Subject: Re: [PATCH V2 2/3] mmc: sdhci-pci-gli: Set SDR104's clock to 205MHz
+ and enable SSC for GL9767
+To:     Adrian Hunter <adrian.hunter@intel.com>
+Cc:     ulf.hansson@linaro.org, linux-mmc@vger.kernel.org,
+        linux-kernel@vger.kernel.org, benchuanggli@gmail.com,
+        HL.Liu@genesyslogic.com.tw, Greg.tu@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Il 31/05/23 09:32, Wenbin Mei (梅文彬) ha scritto:
-> On Thu, 2023-05-18 at 11:13 +0200, AngeloGioacchino Del Regno wrote:
->> External email : Please do not click links or open attachments until
->> you have verified the sender or the content.
->>
->>
->> Il 10/05/23 03:58, Wenbin Mei ha scritto:
->>> CQHCI_SSC1 indicates to CQE the polling period to use when using
->>> periodic
->>> SEND_QUEUE_STATUS(CMD13) polling.
->>> The default value 0x1000 that corresponds to 150us, let's decrease
->>> it to
->>
->> The default value 0x1000 (4096) corresponds to 4096 * 52.08uS =
->> 231.33uS
->> ...so the default is not 150uS.
->>
->> If I'm wrong, this means that the CQCAP field is not 0, which would
->> mean
->> that the expected 3uS would be wrong.
->>
->> Also, since the calculation can be done dynamically, this is what we
->> should
->> actually do in the driver, as this gives information to the next
->> engineer
->> checking this piece of code.
->>
->> Apart from this, by just writing 0x40 to the CQHCI_SSC1 register, you
->> are
->> assuming that the CQCAP value requirement is fullfilled, but you
->> cannot
->> assume that the bootloader has set the CQCAP's ITCFVAL and ITCFMUL
->> fields
->> as you expect on all platforms: this means that implementing this
->> takes
->> a little more effort.
->>
->> You have two ways to implement this:
->>    *** First ***
->>    1. Read ITCFMUL and ITCFVAL, then:
->>       tclk_mul = itcfmul_to_mhz(ITCFMUL); /* pseudo function
->> interprets reg value*/
->>       tclk = ITCFVAL * tclk_mul;
->>
->>    2. Set SSC1 so that we get 3nS:
->>       #define CQHCI_SSC1_CIT GENMASK(15, 0)
->>       poll_time = cit_time_ns_to_regval(3);
->>       sscit = FIELD_PREP(CQHCI_SSC1_CIT, poll_time)
->>       cqhci_writel( ... )
->>
->>    *** Second **
->>
->>    1. Pre-set ITCFMUL and ITCFVAL to
->>       ITCFVAL = 192 (decimal)
->>       ITCFMUL = 2 (where 2 == 0.1MHz)
->>
->>    2. Set SSC1 so that we get 3nS:
->>       #define CQHCI_SSC1_CIT GENMASK(15, 0)
->>       poll_time = cit_time_ns_to_regval(3);
->>       sscit = FIELD_PREP(CQHCI_SSC1_CIT, poll_time)
->>       cqhci_writel( ... )
->>
->> I would implement the first way, as it paves the way to extend this
->> to different
->> tclk values if needed in the future.
->>
->> Regards,
->> Angelo
-> Hi Angelo,
-> 
-> Sorry for lately reply.
-> 
-> For Mediatek mmc host IP, ITCFMUL is 0x2(0x1MHz), ITVFVAL reports 182,
-> and these fields are the same and are readonly for all IC, but since
-> Mediatek CQE uses msdc_hclk(273MHz), CMD13'interval calculation driver
-> should use 273MHz to get the actual time, so the actual clock is
-> 27.3MHz.
-> 
+Hi, Adrian
 
-You're right, I've misread the datasheet, just rechecked and it reports RO.
+On Wed, May 31, 2023 at 3:01=E2=80=AFPM Adrian Hunter <adrian.hunter@intel.=
+com> wrote:
+>
+> On 30/05/23 12:53, Victor Shih wrote:
+> > From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> >
+> > Set GL9767 SDR104's clock to 205MHz and enable SSC feature
+> > depend on register 0x888 BIT(1).
+> >
+> > Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> > Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> > ---
+> >  drivers/mmc/host/sdhci-pci-gli.c | 135 ++++++++++++++++++++++++++++++-
+> >  1 file changed, 134 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-=
+pci-gli.c
+> > index 3ed207b89d1a..178253a7e86f 100644
+> > --- a/drivers/mmc/host/sdhci-pci-gli.c
+> > +++ b/drivers/mmc/host/sdhci-pci-gli.c
+> > @@ -158,6 +158,12 @@
+> >  #define   GLI_9767_VHS_REV_M   0x1
+> >  #define   GLI_9767_VHS_REV_W   0x2
+> >
+> > +#define PCIE_GLI_9767_COM_MAILBOX            0x888
+> > +#define   PCIE_GLI_9767_COM_MAILBOX_SSC_EN     BIT(1)
+> > +
+> > +#define PCIE_GLI_9767_CFG            0x8A0
+> > +#define   PCIE_GLI_9767_CFG_LOW_PWR_OFF        BIT(12)
+> > +
+> >  #define PCIE_GLI_9767_PWR_MACRO_CTL                                  0=
+x8D0
+> >  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE                     =
+ GENMASK(3, 0)
+> >  #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE          =
+ GENMASK(15, 12)
+> > @@ -175,6 +181,16 @@
+> >  #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF            BIT(21)
+> >  #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN     BIT(30)
+> >
+> > +#define PCIE_GLI_9767_SD_PLL_CTL                     0x938
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV            GENMASK(9, 0)
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV            GENMASK(15, 12)
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL_PLL_DIR_EN                  BIT(16)
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL_SSC_EN              BIT(19)
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL_SSC_STEP_SETTING    GENMASK(28, 24)
+> > +
+> > +#define PCIE_GLI_9767_SD_PLL_CTL2            0x93C
+> > +#define   PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM         GENMASK(31, 16)
+> > +
+> >  #define GLI_MAX_TUNING_LOOP 40
+> >
+> >  /* Genesys Logic chipset */
+> > @@ -753,6 +769,123 @@ static inline void gl9767_vhs_write(struct pci_de=
+v *pdev)
+> >       pci_write_config_dword(pdev, PCIE_GLI_9767_VHS, vhs_value);
+> >  }
+> >
+> > +static bool gl9767_ssc_enable(struct pci_dev *pdev)
+> > +{
+> > +     u32 value;
+> > +     u8 enable;
+> > +
+> > +     gl9767_vhs_write(pdev);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_COM_MAILBOX, &value);
+> > +     enable =3D FIELD_GET(PCIE_GLI_9767_COM_MAILBOX_SSC_EN, value);
+> > +
+> > +     gl9767_vhs_read(pdev);
+> > +
+> > +     return enable;
+> > +}
+> > +
+> > +static void gl9767_set_ssc(struct pci_dev *pdev, u8 enable, u8 step, u=
+16 ppm)
+> > +{
+> > +     u32 pll;
+> > +     u32 ssc;
+> > +
+> > +     gl9767_vhs_write(pdev);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, &pll);
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL2, &ssc);
+> > +     pll &=3D ~(PCIE_GLI_9767_SD_PLL_CTL_SSC_STEP_SETTING |
+> > +              PCIE_GLI_9767_SD_PLL_CTL_SSC_EN);
+> > +     ssc &=3D ~PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM;
+> > +     pll |=3D FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL_SSC_STEP_SETTING, st=
+ep) |
+> > +            FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL_SSC_EN, enable);
+> > +     ssc |=3D FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM, ppm);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL2, ssc);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, pll);
+> > +
+> > +     gl9767_vhs_read(pdev);
+> > +}
+> > +
+> > +static void gl9767_set_pll(struct pci_dev *pdev, u8 dir, u16 ldiv, u8 =
+pdiv)
+> > +{
+> > +     u32 pll;
+> > +
+> > +     gl9767_vhs_write(pdev);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, &pll);
+> > +     pll &=3D ~(PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV |
+> > +              PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV |
+> > +              PCIE_GLI_9767_SD_PLL_CTL_PLL_DIR_EN);
+> > +     pll |=3D FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV, ldiv) |
+> > +            FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV, pdiv) |
+> > +            FIELD_PREP(PCIE_GLI_9767_SD_PLL_CTL_PLL_DIR_EN, dir);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, pll);
+> > +
+> > +     gl9767_vhs_read(pdev);
+> > +
+> > +     /* wait for pll stable */
+> > +     mdelay(1);
+>
+> So long as SDHCI_QUIRK_CLOCK_BEFORE_RESET is not used, it is OK
+> to sleep here, so msleep() or usleep_range()
+>
 
-> If CIT is 0x1000 by default, CMD idle time: 0x1000 * 1 / 27.3MHz =
-> around 150us.
-> 
-> In addition the bootloader will not set the CQCAP's ITCFVAL and ITCFMUL
-> fields, because these fields of CQCAP register is RO(readonly), so we
-> can ignore the change for the CQCAP's ITCFVAL and ITCFMUL fields.
-> 
+I will update it in patch v3.
 
-Yes, that's right, again - this means that you should go for the first
-proposed implementation, as future MediaTek SoCs may (or may not) change
-that: if you implement as proposed, this is going to be a one-time thing
-and future SoCs won't need specific changes.
+> > +}
+> > +
+> > +static void gl9767_set_ssc_pll_205mhz(struct pci_dev *pdev)
+> > +{
+> > +     bool enable =3D gl9767_ssc_enable(pdev);
+> > +
+> > +     /* set pll to 205MHz and ssc */
+> > +     gl9767_set_ssc(pdev, enable, 0x1F, 0xF5C3);
+> > +     gl9767_set_pll(pdev, 0x1, 0x246, 0x0);
+> > +}
+> > +
+> > +static void gl9767_disable_ssc_pll(struct pci_dev *pdev)
+> > +{
+> > +     u32 pll;
+> > +
+> > +     gl9767_vhs_write(pdev);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, &pll);
+> > +     pll &=3D ~(PCIE_GLI_9767_SD_PLL_CTL_PLL_DIR_EN | PCIE_GLI_9767_SD=
+_PLL_CTL_SSC_EN);
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_SD_PLL_CTL, pll);
+> > +
+> > +     gl9767_vhs_read(pdev);
+> > +}
+> > +
+> > +static void sdhci_gl9767_set_clock(struct sdhci_host *host, unsigned i=
+nt clock)
+> > +{
+> > +     struct sdhci_pci_slot *slot =3D sdhci_priv(host);
+> > +     struct mmc_ios *ios =3D &host->mmc->ios;
+> > +     struct pci_dev *pdev;
+> > +     u32 value;
+> > +     u16 clk;
+> > +
+> > +     pdev =3D slot->chip->pdev;
+> > +     host->mmc->actual_clock =3D 0;
+> > +
+> > +     gl9767_vhs_write(pdev);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
+> > +     value |=3D PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
+> > +
+> > +     gl9767_disable_ssc_pll(pdev);
+> > +     sdhci_writew(host, 0, SDHCI_CLOCK_CONTROL);
+> > +
+> > +     if (clock =3D=3D 0)
+> > +             return;
+> > +
+> > +     clk =3D sdhci_calc_clk(host, clock, &host->mmc->actual_clock);
+> > +     if (clock =3D=3D 200000000 && ios->timing =3D=3D MMC_TIMING_UHS_S=
+DR104) {
+> > +             host->mmc->actual_clock =3D 205000000;
+> > +             gl9767_set_ssc_pll_205mhz(pdev);
+> > +     }
+> > +
+> > +     sdhci_enable_clk(host, clk);
+> > +
+> > +     pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
+> > +     value &=3D ~PCIE_GLI_9767_CFG_LOW_PWR_OFF;
+> > +     pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
+> > +
+> > +     gl9767_vhs_read(pdev);
+> > +}
+> > +
+> >  static void gli_set_9767(struct sdhci_host *host)
+> >  {
+> >       u32 value;
+> > @@ -1293,7 +1426,7 @@ const struct sdhci_pci_fixes sdhci_gl9763e =3D {
+> >  };
+> >
+> >  static const struct sdhci_ops sdhci_gl9767_ops =3D {
+> > -     .set_clock               =3D sdhci_set_clock,
+> > +     .set_clock               =3D sdhci_gl9767_set_clock,
+> >       .enable_dma              =3D sdhci_pci_enable_dma,
+> >       .set_bus_width           =3D sdhci_set_bus_width,
+> >       .reset                   =3D sdhci_gl9767_reset,
+>
 
-That implementation also documents the flow about how we're getting to
-the actual value, which is important for community people reading this
-driver in the future for debugging purposes.
-
-Regards,
-Angelo
-
-> Thanks
-> Wenbin
->>
->>> 0x40 that corresponds to 3us, which can improve the performance of
->>> some
->>> eMMC devices.
->>>
->>> Signed-off-by: Wenbin Mei <wenbin.mei@mediatek.com>
->>> ---
->>>    drivers/mmc/host/mtk-sd.c | 4 ++++
->>>    1 file changed, 4 insertions(+)
->>>
->>> diff --git a/drivers/mmc/host/mtk-sd.c b/drivers/mmc/host/mtk-sd.c
->>> index edade0e54a0c..ffeccddcd028 100644
->>> --- a/drivers/mmc/host/mtk-sd.c
->>> +++ b/drivers/mmc/host/mtk-sd.c
->>> @@ -2453,6 +2453,7 @@ static void msdc_hs400_enhanced_strobe(struct
->>> mmc_host *mmc,
->>>    static void msdc_cqe_enable(struct mmc_host *mmc)
->>>    {
->>>        struct msdc_host *host = mmc_priv(mmc);
->>> +     struct cqhci_host *cq_host = mmc->cqe_private;
->>>
->>>        /* enable cmdq irq */
->>>        writel(MSDC_INT_CMDQ, host->base + MSDC_INTEN);
->>> @@ -2462,6 +2463,9 @@ static void msdc_cqe_enable(struct mmc_host
->>> *mmc)
->>>        msdc_set_busy_timeout(host, 20 * 1000000000ULL, 0);
->>>        /* default read data timeout 1s */
->>>        msdc_set_timeout(host, 1000000000ULL, 0);
->>> +
->>> +     /* decrease the send status command idle timer to 3us */
->>> +     cqhci_writel(cq_host, 0x40, CQHCI_SSC1);
->>>    }
->>>
->>>    static void msdc_cqe_disable(struct mmc_host *mmc, bool recovery)
->>
->>
-
-
+Thanks, Victor Shih
