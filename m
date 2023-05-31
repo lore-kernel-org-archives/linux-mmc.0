@@ -2,247 +2,382 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9CFEAC77B7C
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 11:17:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 44FC1C77B7C
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 11:34:28 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235529AbjEaLRl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 07:17:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33982 "EHLO
+        id S234672AbjEaLe0 (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 May 2023 07:34:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235482AbjEaLRg (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 07:17:36 -0400
-Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F04E12B;
-        Wed, 31 May 2023 04:17:35 -0700 (PDT)
-Received: by mail-pl1-x62a.google.com with SMTP id d9443c01a7336-1b04949e5baso25210405ad.0;
-        Wed, 31 May 2023 04:17:35 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685531855; x=1688123855;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
-         :message-id:reply-to;
-        bh=xtPxOefjM4ZZdvGD2evpcXztukQ57ylG6FBkyjgKbVM=;
-        b=JWFKoinsE2V/9SpLB1uLSEP86duqVBAZ9I67W7uyZykLSs7tBifZq9sfPF24MTKJs1
-         S8VuuqV4snWsZ9nDKArd2telquFglvduMk4QPZ9BCVWCWpGNA78UbqeWChucVQ4QU7zQ
-         qk1mrfzgWu6Q9PXT7ryOqB9VHOzeSn4/6H/uKb542v9YJ1iDxGoiGdKY0xOgWRvTrcDP
-         JEPs4z5Gx7hRPTTAGN8wVl6pV9IfY3ZjPKJaP0lCUHxOQWRqgi53wI/ur/PsV0zx4x0Q
-         GjuyN+gF1W0FvXYLmEn1Pr/Vb/B2NdoZyMTwbjP/qc/SZnd8V/O0OmghgJHkbLTm13MS
-         H7JQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685531855; x=1688123855;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=xtPxOefjM4ZZdvGD2evpcXztukQ57ylG6FBkyjgKbVM=;
-        b=PdhzClLK1RY+lSKiAhZrPqoU+/TOVpVMciBMdnLbVkGSKSqifMFZBhpACM2vNG3t+S
-         1QaScFmhVsB2PCe8BviH1dyu3DNJjzpoXwKeB4lkoJxSXTxGF6GTC2l2DeMxgag25jwZ
-         Q+MnhTokoyruTfGNuLtSbv431VrXXJ6Cd8hnnI5rSLck9Cs5FG3yODcfDYQluuUaGrer
-         OG91TfJiCuiY9e/RQTOcRbR3VgPJKH/nHEkroksfZxsJ1tDHVJYd5rpmzmeqVTwNjqUO
-         uVrYHFImIOOPmUPNNSd4uFxUA2yDSbVlN5mF86E2pxvWbWM89qGcT6kg5D7nL3HIM/l1
-         24Dw==
-X-Gm-Message-State: AC+VfDw5vXicdCBThibWE+87j4Ij/v+TvxQM+wOl8cAIRxJLd/nFIibc
-        Tmf+FtUm2TSQdkTtypVcfU4=
-X-Google-Smtp-Source: ACHHUZ62NF0GSp+/rxBFAyMqdzACWR+qHcswz2cx1e2vqQmWlGEVLzJB7HxJPzfBK0mP7VUM/Sa6hg==
-X-Received: by 2002:a17:903:22cb:b0:1b0:bf80:d1f2 with SMTP id y11-20020a17090322cb00b001b0bf80d1f2mr3365069plg.49.1685531854654;
-        Wed, 31 May 2023 04:17:34 -0700 (PDT)
-Received: from localhost.localdomain (111-82-252-250.emome-ip.hinet.net. [111.82.252.250])
-        by smtp.gmail.com with ESMTPSA id d17-20020a170903231100b001b0aec3ed59sm1076588plh.256.2023.05.31.04.17.32
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 31 May 2023 04:17:34 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, Victor Shih <victorshihgli@gmail.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V4 4/4] mmc: sdhci-pci-gli: Add support SD Express card for GL9767
-Date:   Wed, 31 May 2023 19:15:18 +0800
-Message-Id: <20230531111518.396868-5-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230531111518.396868-1-victorshihgli@gmail.com>
-References: <20230531111518.396868-1-victorshihgli@gmail.com>
+        with ESMTP id S232198AbjEaLeX (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 07:34:23 -0400
+Received: from phobos.denx.de (phobos.denx.de [IPv6:2a01:238:438b:c500:173d:9f52:ddab:ee01])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9308418C
+        for <linux-mmc@vger.kernel.org>; Wed, 31 May 2023 04:34:09 -0700 (PDT)
+Received: from [127.0.0.1] (p578adb1c.dip0.t-ipconnect.de [87.138.219.28])
+        (using TLSv1.3 with cipher TLS_AES_128_GCM_SHA256 (128/128 bits))
+        (No client certificate requested)
+        (Authenticated sender: marex@denx.de)
+        by phobos.denx.de (Postfix) with ESMTPSA id B49F58609E;
+        Wed, 31 May 2023 13:34:06 +0200 (CEST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=denx.de;
+        s=phobos-20191101; t=1685532848;
+        bh=ihcfNNJVi/mWMA5T7jcEcjm/Bn8EtGoR2ApPoI7Aobs=;
+        h=Date:Subject:To:Cc:References:From:In-Reply-To:From;
+        b=kOFSRHu2Qtwkrrcwt8SZpOjypnmqBF69t5mR1p2XCLQynIYqjiwiX5SZ4TxKeQnUz
+         z5EzJaXbM4gwPBJfzMIU8GP3WEyV3wREa69IfqvCtxvz91IVvBqIFs+bRH2af9mYgO
+         ACVLSM6n1L8BBaiBKLZc2d6AKPLv9kV0hmU9b/G8hg9eDVGURt6LSgR4DCM/FG+xFe
+         +bdxUYa4CALjqXPcH2I8FWbaBsEQ2NTg5iaAO8lAK9bgyIDqY6y5vWM3AQeQZCAXJe
+         5EPQ9fc0WF5qcRrWtK6aJvjSjpQDnUrvbih+jyS25pkiywVMlfNO3Jz5iIryhHYuAo
+         Do2wSnLgz1sjA==
+Message-ID: <a69823e8-4e87-9eaa-1cb8-7d1457df1492@denx.de>
+Date:   Wed, 31 May 2023 13:34:06 +0200
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Thunderbird/102.11.0
+Subject: Re: [PATCH] [RFC] Revert "mmc: core: Fixup support for
+ writeback-cache for eMMC and SD"
+To:     Adrian Hunter <adrian.hunter@intel.com>, linux-mmc@vger.kernel.org
+Cc:     =?UTF-8?Q?Christian_L=c3=b6hle?= <CLoehle@hyperstone.com>,
+        Avri Altman <avri.altman@wdc.com>,
+        Jens Axboe <axboe@kernel.dk>,
+        Michael Wu <michael@allwinnertech.com>,
+        Ming Lei <ming.lei@redhat.com>,
+        Seunghui Lee <sh043.lee@samsung.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>
+References: <20230531002740.1235620-1-marex@denx.de>
+ <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
+Content-Language: en-US
+From:   Marek Vasut <marex@denx.de>
+In-Reply-To: <ecad717c-77b5-c78a-795b-2c3019b7452a@intel.com>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-Virus-Scanned: clamav-milter 0.103.8 at phobos.denx.de
+X-Virus-Status: Clean
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+On 5/31/23 07:46, Adrian Hunter wrote:
+> On 31/05/23 03:27, Marek Vasut wrote:
+>> This reverts commit 08ebf903af57cda6d773f3dd1671b64f73b432b8.
+>>
+>> On STM32MP153C DHCOR DRC Compact with microSD card
+>> Kingston Canvas Go! Plus MicroSDXC I 64 GiB U3/V30/A2 SDCG3/64GB
+>> it is no longer possible to mount ext4 filesystem.
+>>
+>> Git bisect points to this commit which is being reverted here. A bit of
+>> investigation shows that for non-working microSD cards
+>>    cache_enabled=TRUE fua_enabled=false
+>> For working microSD card (Kingston Canvas React Plus, MicroSDXC II
+>> 64 GiB U3/V90/A1 SDCR2/64GB)
+>>    cache_enabled=FALSE fua_enabled=false
+>>
+>> It seems enabling the cache for SD cards causes the issue. Before the
+>> reverted commit, the cache was not reported enabled for SD cards. I am
+>> not sure whether such blunt revert is the correct solution however, any
+>> ideas ?
+> 
+> This does not disable the cache, it disables the block layer from issuing
+> cache flushes (by telling it there is no cache being used).
+> 
+> It would be good to know what commands are failing, which should be visible
+> in the kernel messages if dynamic debug is enabled:
+> 
+> Dynamic debug for mmc
+> ---------------------
+> 
+>      Kernel must be configured:
+> 
+>          CONFIG_DYNAMIC_DEBUG=y
+> 
+>      To enable mmc debug via sysfs:
+> 
+>          echo 'file drivers/mmc/core/* +p' > /sys/kernel/debug/dynamic_debug/control
+>          echo 'file drivers/mmc/host/* +p' > /sys/kernel/debug/dynamic_debug/control
+> 
+>      To enable mmc debug via kernel command line:
+> 
+>          dyndbg="file drivers/mmc/core/* +p;file drivers/mmc/host/* +p"
+> 
+>      To disable mmc debug:
+> 
+>          echo 'file drivers/mmc/core/* -p' > /sys/kernel/debug/dynamic_debug/control
+>          echo 'file drivers/mmc/host/* -p' > /sys/kernel/debug/dynamic_debug/control
+> 
+>      More general information in kernel documentation in kernel tree:
+> 
+>          Documentation/admin-guide/dynamic-debug-howto.rst
 
-Add support SD Express card for GL9767. The workflow of the
-SD Express card in GL9767 is as below.
-1. GL9767 operates in SD mode and set MMC_CAP2_SD_EXP flag.
-2. If card is inserted, Host send CMD8 to ask the capabilities
-   of the card.
-3. If the card has PCIe capability, then init_sd_express()
-   will be invoked.
-4. If the card has been put in write protect state then the
-   SD features supported by SD mode but not supported by
-   PCIe mode, therefore GL9767 switch to SD mode.
-5. If the card has not been put in write protect state then
-   GL9767 switch from SD mode to PCIe/NVMe mode and mmc driver
-   handover control to NVMe driver.
-6. If card is removed, GL9767 will return to SD mode.
+Log is below, I added newlines around the mount failure.
+Do you see anything problematic there ?
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
----
- drivers/mmc/host/sdhci-pci-gli.c | 113 +++++++++++++++++++++++++++++++
- 1 file changed, 113 insertions(+)
+$ echo 'file drivers/mmc/core/* +p' > 
+/sys/kernel/debug/dynamic_debug/control ; echo 'file drivers/mmc/host/* 
++p' > /sys/kernel/debug/dynamic_debug/control ; echo 8 > 
+/proc/sys/kernel/printk ; mount /dev/mmcblk1p4 /mnt
+[   61.061029] <mmc1: starting CMD23 arg 00000002 flags 00000015>
+[   61.065637] mmc1: starting CMD18 arg 00002002 flags 000000b5
+[   61.071144] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.078096] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.083302] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
+[   61.090012] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
+[   61.096531] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.102332] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
+[   61.108836] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.114575] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.120371] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.127178] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.134084] mmc1:     1024 bytes transferred: 0
+[   61.138658] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.145533] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.150946] mmc1: starting CMD18 arg 00002000 flags 000000b5
+[   61.156609] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.163426] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.168759] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
+[   61.175368] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.181985] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.187682] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
+[   61.194185] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.199979] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.205769] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.212574] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.219478] mmc1:     4096 bytes transferred: 0
+[   61.224050] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.231166] <mmc1: starting CMD23 arg 00000002 flags 00000015>
+[   61.236378] mmc1: starting CMD18 arg 00002002 flags 000000b5
+[   61.241983] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.248940] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.254169] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
+[   61.260779] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
+[   61.267405] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.273101] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
+[   61.279603] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.285431] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.291125] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.298032] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.304937] mmc1:     1024 bytes transferred: 0
+[   61.309409] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.316256] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.321768] mmc1: starting CMD18 arg 00002000 flags 000000b5
+[   61.327459] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.334360] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.339459] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
+[   61.346167] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.352782] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.358478] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
+[   61.365082] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.370776] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.376565] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.383371] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.390275] mmc1:     4096 bytes transferred: 0
+[   61.394848] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.401885] <mmc1: starting CMD23 arg 00000002 flags 00000015>
+[   61.407193] mmc1: starting CMD18 arg 00002002 flags 000000b5
+[   61.412794] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.419748] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.424973] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
+[   61.431582] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
+[   61.438204] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.443901] mmci-pl18x 58005000.mmc: op 12 arg 00002002 flags 000000b5
+[   61.450404] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.456232] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.461927] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.468834] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.475739] mmc1:     1024 bytes transferred: 0
+[   61.480210] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.487054] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.492462] mmc1: starting CMD18 arg 00002000 flags 000000b5
+[   61.498251] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.505160] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.510260] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
+[   61.516969] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.523592] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.529288] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
+[   61.535789] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.541583] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.547271] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.554177] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.561082] mmc1:     4096 bytes transferred: 0
+[   61.565654] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.572440] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.578017] mmc1: starting CMD18 arg 00002008 flags 000000b5
+[   61.583653] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.590465] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.595686] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
+[   61.602396] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.608915] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.614712] mmci-pl18x 58005000.mmc: op 12 arg 00002008 flags 000000b5
+[   61.621215] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.627034] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.632727] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.639633] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.646437] mmc1:     4096 bytes transferred: 0
+[   61.651010] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.658908] <mmc1: starting CMD23 arg 00000108 flags 00000015>
+[   61.663421] mmc1: starting CMD18 arg 00003be8 flags 000000b5
+[   61.669102] mmc1:     blksz 512 blocks 264 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.676155] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.681355] mmci-pl18x 58005000.mmc: blksz 0200 blks 0108 flags 00000200
+[   61.688064] mmci-pl18x 58005000.mmc: op 17 arg 00000108 flags 00000015
+[   61.694589] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.700284] mmci-pl18x 58005000.mmc: op 12 arg 00003be8 flags 000000b5
+[   61.706887] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.712581] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.718372] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
+[   61.724060] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.730965] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.737870] mmc1:     135168 bytes transferred: 0
+[   61.742544] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.749064] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.755336] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.760649] mmc1: starting CMD18 arg 00442000 flags 000000b5
+[   61.766327] mmc1:     blksz 512 blocks 8 flags 00000200 tsac 100 ms 
+nsac 0
+[   61.773144] mmc1:     CMD12 arg 00000000 flags 00000095
+[   61.778489] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000200
+[   61.785100] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.791616] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.797414] mmci-pl18x 58005000.mmc: op 12 arg 00442000 flags 000000b5
+[   61.803916] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.809710] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.815399] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.822306] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   61.829211] mmc1:     4096 bytes transferred: 0
+[   61.833683] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.833952] mmc0: starting CMD7 arg fffd0000 flags 00000015
+[   61.840205] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.845820] mmci-pl18x 48004000.mmc: op 07 arg fffd0000 flags 00000015
+[   61.853036] <mmc1: starting CMD23 arg 00000008 flags 00000015>
+[   61.858074] mmci-pl18x 48004000.mmc: irq0 (data+cmd) 00000040
+[   61.858098] mmc0: req done (CMD7): 0: 00001ed7 00000000 00000000 00000000
+[   61.876506] mmc1: starting CMD25 arg 00002000 flags 000000b5
+[   61.882106] mmc1:     blksz 512 blocks 8 flags 00000100 tsac 3000 ms 
+nsac 0
+[   61.889107] mmc1:     CMD12 arg 00000000 flags 0000049d
+[   61.894346] mmci-pl18x 58005000.mmc: blksz 0200 blks 0008 flags 00000100
+[   61.900957] mmci-pl18x 58005000.mmc: op 17 arg 00000008 flags 00000015
+[   61.907588] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.913283] mmci-pl18x 58005000.mmc: op 19 arg 00002000 flags 000000b5
+[   61.919786] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.925612] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   61.931309] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   61.938219] mmc1: req done (CMD25): 0: 00000900 00000000 00000000 
+00000000
+[   61.945125] mmc1:     4096 bytes transferred: 0
+[   61.949598] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   61.956107] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.961888] mmc1: starting CMD13 arg 50480000 flags 00000195
+[   61.967581] mmci-pl18x 58005000.mmc: op 0d arg 50480000 flags 00000195
+[   61.974026] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   61.979718] mmc1: req done (CMD13): 0: 00000900 00000000 00000000 
+00000000
+[   61.986630] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   61.992588] mmc1: starting CMD49 arg 10020a00 flags 00000035
+[   61.998152] mmc1:     blksz 512 blocks 1 flags 00000100 tsac 3000 ms 
+nsac 0
+[   62.005158] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000100
+[   62.011778] mmci-pl18x 58005000.mmc: op 31 arg 10020a00 flags 00000035
+[   62.018317] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   62.024011] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
+[   62.029801] mmc1: req done (CMD49): 0: 00000900 00000000 00000000 
+00000000
+[   62.036708] mmc1:     512 bytes transferred: 0
+[   62.041083] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   62.046988] mmc1: starting CMD48 arg 10020a00 flags 000000b5
+[   62.052487] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[   62.059443] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
+[   62.066154] mmci-pl18x 58005000.mmc: op 30 arg 10020a00 flags 000000b5
+[   62.072688] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   62.078382] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
+[   62.084173] mmc1: req done (CMD48): 0: 00000900 00000000 00000000 
+00000000
+[   62.091081] mmc1:     512 bytes transferred: 0
+[   62.095455] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 392a106cea18..e47236e3b89a 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -164,6 +164,10 @@
- #define PCIE_GLI_9767_CFG		0x8A0
- #define   PCIE_GLI_9767_CFG_LOW_PWR_OFF	  BIT(12)
- 
-+#define PCIE_GLI_9767_COMBO_MUX_CTL			0x8C8
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN		  BIT(6)
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN	  BIT(10)
-+
- #define PCIE_GLI_9767_PWR_MACRO_CTL					0x8D0
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE			  GENMASK(3, 0)
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE		  GENMASK(15, 12)
-@@ -181,6 +185,9 @@
- #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF		  BIT(21)
- #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN	  BIT(30)
- 
-+#define PCIE_GLI_9767_SDHC_CAP			0x91C
-+#define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT	  BIT(5)
-+
- #define PCIE_GLI_9767_SD_PLL_CTL			0x938
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV		  GENMASK(9, 0)
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV		  GENMASK(15, 12)
-@@ -191,6 +198,23 @@
- #define PCIE_GLI_9767_SD_PLL_CTL2		0x93C
- #define   PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM	  GENMASK(31, 16)
- 
-+#define PCIE_GLI_9767_SD_EXPRESS_CTL			0x940
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE		  BIT(0)
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE	  BIT(1)
-+
-+#define PCIE_GLI_9767_SD_DATA_MULTI_CTL				0x944
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME	  GENMASK(23, 16)
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE	  0x64
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2			0x950
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2				0x954
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2				0x958
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN	  BIT(0)
-+
- #define GLI_MAX_TUNING_LOOP 40
- 
- /* Genesys Logic chipset */
-@@ -935,6 +959,93 @@ static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
- 	gli_set_9767(host);
- }
- 
-+static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev;
-+	u32 value;
-+	int i;
-+
-+	pdev = slot->chip->pdev;
-+
-+	if (mmc->ops->get_ro(mmc)) {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+		return 0;
-+	}
-+
-+	gl9767_vhs_write(pdev);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, &value);
-+	value &= ~(PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN | PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &value);
-+	value &= ~PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME;
-+	value |= FIELD_PREP(PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME,
-+			    PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
-+	value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
-+
-+	value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	value &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+	sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+
-+	value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+	value |= (SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+	sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+	value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+
-+	for (i = 0; i < 2; i++) {
-+		msleep(10);
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+		if (value & PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE) {
-+			pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2,
-+					       value);
-+			break;
-+		}
-+	}
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SDHC_CAP, &value);
-+	if (value & PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT) {
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+		value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE;
-+		pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+	} else {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+
-+		value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		value &= ~(SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+		sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+		value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		value |= (SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+		sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+	}
-+
-+	gl9767_vhs_read(pdev);
-+
-+	return 0;
-+}
-+
- static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_host *host = slot->host;
-@@ -967,6 +1078,8 @@ static int gli_probe_slot_gl9767(struct sdhci_pci_slot *slot)
- 	gl9767_hw_setting(slot);
- 	gli_pcie_enable_msi(slot);
- 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+	host->mmc->caps2 |= MMC_CAP2_SD_EXP;
-+	host->mmc_host_ops.init_sd_express = gl9767_init_sd_express;
- 	sdhci_enable_v4_mode(host);
- 
- 	return 0;
--- 
-2.25.1
+
+[   62.101381] I/O error, dev mmcblk1, sector 8192 op 0x1:(WRITE) flags 
+0x800 phys_seg 1 prio class 2
+[   62.110223] Buffer I/O error on dev mmcblk1p4, logical block 0, lost 
+sync page write
+[   62.117996] EXT4-fs (mmcblk1p4): I/O error while writing superblock
+[   62.124320] EXT4-fs (mmcblk1p4): mount failed
+
+
+[   62.129676] <mmc1: starting CMD23 arg 00000002 flags 00000015>
+[   62.134452] mmc1: starting CMD18 arg 00002000 flags 000000b5
+[   62.140055] mmc1:     blksz 512 blocks 2 flags 00000200 tsac 100 ms 
+nsac 0
+[   62.147003] mmc1:     CMD12 arg 00000000 flags 00000095
+[   62.152205] mmci-pl18x 58005000.mmc: blksz 0200 blks 0002 flags 00000200
+[   62.158915] mmci-pl18x 58005000.mmc: op 17 arg 00000002 flags 00000015
+[   62.165431] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   62.171229] mmci-pl18x 58005000.mmc: op 12 arg 00002000 flags 000000b5
+[   62.177734] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   62.183566] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000140
+[   62.189262] mmc1: req done <CMD23>: 0: 00000900 00000000 00000000 
+00000000
+[   62.196169] mmc1: req done (CMD18): 0: 00000900 00000000 00000000 
+00000000
+[   62.202973] mmc1:     1024 bytes transferred: 0
+[   62.207546] mmc1:     (CMD12): 0: 00000000 00000000 00000000 00000000
+[   62.213966] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   62.220406] mmc1: starting CMD17 arg 00002000 flags 000000b5
+[   62.225497] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[   62.232324] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
+[   62.239033] mmci-pl18x 58005000.mmc: op 11 arg 00002000 flags 000000b5
+[   62.245571] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   62.251267] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
+[   62.257058] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 
+00000000
+[   62.263966] mmc1:     512 bytes transferred: 0
+[   62.268347] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+[   62.274791] mmc1: starting CMD17 arg 00002000 flags 000000b5
+[   62.279800] mmc1:     blksz 512 blocks 1 flags 00000200 tsac 100 ms 
+nsac 0
+[   62.286783] mmci-pl18x 58005000.mmc: blksz 0200 blks 0001 flags 00000200
+[   62.293396] mmci-pl18x 58005000.mmc: op 11 arg 00002000 flags 000000b5
+[   62.299912] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000040
+[   62.305612] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000100
+[   62.311403] mmc1: req done (CMD17): 0: 00000900 00000000 00000000 
+00000000
+[   62.318309] mmc1:     512 bytes transferred: 0
+[   62.322801] mmci-pl18x 58005000.mmc: irq0 (data+cmd) 00000000
+
+mount: mounting /dev/mmcblk1p4 on /mnt failed: Invalid argument
+~ #
+
+[   62.873917] mmc0: starting CMD7 arg fffd0000 flags 00000015
+[   62.878152] mmci-pl18x 48004000.mmc: op 07 arg fffd0000 flags 00000015
+[   62.884681] mmci-pl18x 48004000.mmc: irq0 (data+cmd) 00000040
+[   62.890381] mmc0: req done (CMD7): 0: 00001ed7 00000000 00000000 00000000
 
