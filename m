@@ -2,161 +2,100 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 48C36C7EE23
-	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 13:16:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEBE0C77B73
+	for <linux-mmc@archiver.kernel.org>; Wed, 31 May 2023 13:27:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236341AbjEaNQP convert rfc822-to-8bit (ORCPT
-        <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 09:16:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40390 "EHLO
+        id S232598AbjEaN1s (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Wed, 31 May 2023 09:27:48 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236350AbjEaNQN (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 09:16:13 -0400
-Received: from mail-oi1-f177.google.com (mail-oi1-f177.google.com [209.85.167.177])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 594919D;
-        Wed, 31 May 2023 06:16:12 -0700 (PDT)
-Received: by mail-oi1-f177.google.com with SMTP id 5614622812f47-38eb2984c82so2018073b6e.0;
-        Wed, 31 May 2023 06:16:12 -0700 (PDT)
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685538971; x=1688130971;
-        h=content-transfer-encoding:cc:to:subject:message-id:date:from
-         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
-         :subject:date:message-id:reply-to;
-        bh=kIuhlHydXOIu4C3uuGsJ33JDY8/UzFh5D7EZjgGK2P0=;
-        b=aIHmMaK+yUflF/57rOAdiiYDzcuBOTGTkv6bILCXXb3VdYGxvxN8yiEGxDJV0URS3C
-         xWo4CZnxBEGmO2YVRT029Q0UX4LaOa8gvQhgcpVd3UBrJphp6BmGq7FCjPwch2yIPmvB
-         OkzFaJ8rNvdnM3+fMjrmuqkqZ8TZ2pyfuzJPUIeDFaZe5FOeGtytqSiKLh43lMae8e/Y
-         NKluGjY6c3fj7jjQUW3GdLDnVfBBUF5pQauekkCirR73uvO/DqVf0n6KKg9s4uDJLCol
-         N8DjGQVdtLO9pPoxi4/JLSX53XSv4157FMFCUyZTsMvcxbohTaTJHKxhs5EqOseea8zd
-         S3Qg==
-X-Gm-Message-State: AC+VfDz78UtNaL8pHF9MlOu9xCcOVooY7VE9r8IXGxYbCHzO4dinX2ZA
-        Dxl044pyNpDYamtOVJ18jTgCTt8ddVNkdw==
-X-Google-Smtp-Source: ACHHUZ6a2OcykRInwzKBhmLC3u4+dhdrzOSZZk0ooxCqc7qsWJa9IjKt8Woux4Gu06H7k+Zpb3pNEw==
-X-Received: by 2002:a05:6808:1383:b0:39a:4ac8:34ae with SMTP id c3-20020a056808138300b0039a4ac834aemr1680152oiw.12.1685538971388;
-        Wed, 31 May 2023 06:16:11 -0700 (PDT)
-Received: from mail-qk1-f176.google.com (mail-qk1-f176.google.com. [209.85.222.176])
-        by smtp.gmail.com with ESMTPSA id m10-20020ad44a0a000000b006235e8fe94esm390054qvz.58.2023.05.31.06.16.11
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 31 May 2023 06:16:11 -0700 (PDT)
-Received: by mail-qk1-f176.google.com with SMTP id af79cd13be357-75b050b4fa0so602782885a.0;
-        Wed, 31 May 2023 06:16:11 -0700 (PDT)
-X-Received: by 2002:a0d:f181:0:b0:568:fe3a:46b3 with SMTP id
- a123-20020a0df181000000b00568fe3a46b3mr1220876ywf.28.1685538581391; Wed, 31
- May 2023 06:09:41 -0700 (PDT)
+        with ESMTP id S235358AbjEaN1r (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 09:27:47 -0400
+Received: from mga02.intel.com (mga02.intel.com [134.134.136.20])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73407101;
+        Wed, 31 May 2023 06:27:45 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple;
+  d=intel.com; i=@intel.com; q=dns/txt; s=Intel;
+  t=1685539665; x=1717075665;
+  h=message-id:date:mime-version:subject:to:cc:references:
+   from:in-reply-to:content-transfer-encoding;
+  bh=1co+eppkGb8x74kJdaxM0fCWfFP+SSp5abng4FgxhwQ=;
+  b=aDcarQDqQIuxEWQb9iyxM3+DzA/RQf7wX0tRUdF/w1eDXf+9BFlaiLxA
+   5hZ8NjrXTRQ8IVknays4/ubhA87jtvYwJogjJA9Pqv1nJV70I0LhygKFS
+   GQB2r1HmFUITNLUg+lQcCBltnnazcxwDV3QYM+ExtdajqoSYyKgSYFsck
+   33hYHGLgJitsP9Jj902GzziBEp4j9lEQXW5WJKRY4zvFNCpcuh11sI/ub
+   lVO8Xi2IjBrZTeu4lbn6+0oL7Js0Du4WDJZLCt9JsX7SKSAzCANifbqyD
+   SXC30knp5ZaNB6Zc5k4b+quDJzYCy0jgxxIybKh3yujZh9tB3DtRYxMVX
+   w==;
+X-IronPort-AV: E=McAfee;i="6600,9927,10727"; a="344746130"
+X-IronPort-AV: E=Sophos;i="6.00,207,1681196400"; 
+   d="scan'208";a="344746130"
+Received: from fmsmga006.fm.intel.com ([10.253.24.20])
+  by orsmga101.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2023 06:27:34 -0700
+X-ExtLoop1: 1
+X-IronPort-AV: E=McAfee;i="6600,9927,10727"; a="953639662"
+X-IronPort-AV: E=Sophos;i="6.00,207,1681196400"; 
+   d="scan'208";a="953639662"
+Received: from ahunter6-mobl1.ger.corp.intel.com (HELO [10.0.2.15]) ([10.251.208.175])
+  by fmsmga006-auth.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 31 May 2023 06:27:31 -0700
+Message-ID: <55a83234-afa9-12de-d366-961b6909efaf@intel.com>
+Date:   Wed, 31 May 2023 16:27:26 +0300
 MIME-Version: 1.0
-References: <CAMuHMdX_Sdb3RFrLthcwThK__GKhJvJuXWu5+2RsQpGgFRkrXQ@mail.gmail.com>
- <20230530220347.14049-1-blarson@amd.com>
-In-Reply-To: <20230530220347.14049-1-blarson@amd.com>
-From:   Geert Uytterhoeven <geert@linux-m68k.org>
-Date:   Wed, 31 May 2023 15:09:28 +0200
-X-Gmail-Original-Message-ID: <CAMuHMdWQGEoB_LLsfLurOV8fT0BO-RYGcsS_Gra49CPiGH9J=g@mail.gmail.com>
-Message-ID: <CAMuHMdWQGEoB_LLsfLurOV8fT0BO-RYGcsS_Gra49CPiGH9J=g@mail.gmail.com>
-Subject: Re: [PATCH v14 6/8] arm64: dts: Add AMD Pensando Elba SoC support
-To:     Brad Larson <blarson@amd.com>
-Cc:     adrian.hunter@intel.com, alcooperx@gmail.com,
-        andy.shevchenko@gmail.com, arnd@arndb.de,
-        brendan.higgins@linux.dev, briannorris@chromium.org,
-        broonie@kernel.org, catalin.marinas@arm.com, conor+dt@kernel.org,
-        davidgow@google.com, devicetree@vger.kernel.org,
-        fancer.lancer@gmail.com, gerg@linux-m68k.org, gsomlo@gmail.com,
-        hal.feng@starfivetech.com, hasegawa-hitomi@fujitsu.com,
-        j.neuschaefer@gmx.net, joel@jms.id.au, kernel@esmil.dk,
-        krzk@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        lee.jones@linaro.org, lee@kernel.org,
-        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-spi@vger.kernel.org,
-        michal.simek@amd.com, p.zabel@pengutronix.de,
-        rdunlap@infradead.org, robh+dt@kernel.org, samuel@sholland.org,
-        skhan@linuxfoundation.org, suravee.suthikulpanit@amd.com,
-        thomas.lendacky@amd.com, tonyhuang.sunplus@gmail.com,
-        ulf.hansson@linaro.org, vaishnav.a@ti.com,
-        walker.chen@starfivetech.com, will@kernel.org, zhuyinbo@loongson.cn
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
+ Firefox/102.0 Thunderbird/102.11.0
+Subject: Re: [PATCH V4 3/4] mmc: sdhci: Add VDD2 definition for power control
+ register
+Content-Language: en-US
+To:     Victor Shih <victorshihgli@gmail.com>, ulf.hansson@linaro.org
+Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
+        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
+        Greg.tu@genesyslogic.com.tw,
+        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
+        Victor Shih <victor.shih@genesyslogic.com.tw>
+References: <20230531111518.396868-1-victorshihgli@gmail.com>
+ <20230531111518.396868-4-victorshihgli@gmail.com>
+From:   Adrian Hunter <adrian.hunter@intel.com>
+Organization: Intel Finland Oy, Registered Address: PL 281, 00181 Helsinki,
+ Business Identity Code: 0357606 - 4, Domiciled in Helsinki
+In-Reply-To: <20230531111518.396868-4-victorshihgli@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Hi Brad,
+On 31/05/23 14:15, Victor Shih wrote:
+> From: Victor Shih <victor.shih@genesyslogic.com.tw>
+> 
+> Add new definition for VDD2 - UHS2 or PCIe/NVMe.
+> 
+> Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
+> Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
+> ---
+>  drivers/mmc/host/sdhci.h | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/drivers/mmc/host/sdhci.h b/drivers/mmc/host/sdhci.h
+> index f4f2085c274c..140a0c20d4f2 100644
+> --- a/drivers/mmc/host/sdhci.h
+> +++ b/drivers/mmc/host/sdhci.h
+> @@ -100,6 +100,14 @@
+>  #define  SDHCI_POWER_300	0x0C
+>  #define  SDHCI_POWER_330	0x0E
+>  
+> +/*
+> + * VDD2 - UHS2 or PCIe/NVMe
+> + * VDD2 power on/off and voltage select
+> + */
+> +#define SDHCI_VDD2_POWER_ON	0x10
+> +#define SDHCI_VDD2_POWER_120	0x80
+> +#define SDHCI_VDD2_POWER_180	0xA0
 
-On Wed, May 31, 2023 at 12:04 AM Brad Larson <blarson@amd.com> wrote:
-> On Wed, May 24, 2023 at 13:52 Geert Uytterhoeven <geert@linux-m68k.org> wrote:
-> > On Tue, May 23, 2023 at 9:30â€¯PM Brad Larson <blarson@amd.com> wrote:
-> >> On 5/16/23 09:54, Michal Simek wrote:
-> >> > On 5/15/23 20:16, Brad Larson wrote:
-> >> >> + */
-> >> >> +
-> >> >> +/ {
-> >> >> +    cpus {
-> >> >> +            #address-cells = <2>;
-> >> >> +            #size-cells = <0>;
-> >> >> +
-> >> >> +            cpu-map {
-> >> >> +                    cluster0 {
-> >> >> +                            core0 { cpu = <&cpu0>; };
-> >> >> +                            core1 { cpu = <&cpu1>; };
-> >> >> +                            core2 { cpu = <&cpu2>; };
-> >> >> +                            core3 { cpu = <&cpu3>; };
-> >> >> +                    };
-> >> >> +
-> >> >> +                    cluster1 {
-> >> >> +                            core0 { cpu = <&cpu4>; };
-> >> >> +                            core1 { cpu = <&cpu5>; };
-> >> >> +                            core2 { cpu = <&cpu6>; };
-> >> >> +                            core3 { cpu = <&cpu7>; };
-> >> >> +                    };
-> >> >> +
-> >> >> +                    cluster2 {
-> >> >> +                            core0 { cpu = <&cpu8>; };
-> >> >> +                            core1 { cpu = <&cpu9>; };
-> >> >> +                            core2 { cpu = <&cpu10>; };
-> >> >> +                            core3 { cpu = <&cpu11>; };
-> >> >> +                    };
-> >> >> +
-> >> >> +                    cluster3 {
-> >> >> +                            core0 { cpu = <&cpu12>; };
-> >> >> +                            core1 { cpu = <&cpu13>; };
-> >> >> +                            core2 { cpu = <&cpu14>; };
-> >> >> +                            core3 { cpu = <&cpu15>; };
-> >> >> +                    };
-> >> >> +            };
-> >> >> +
-> >> >> +            /* CLUSTER 0 */
-> >> >> +            cpu0: cpu@0 {
-> >> >> +                    device_type = "cpu";
-> >> >> +                    compatible = "arm,cortex-a72";
-> >> >> +                    reg = <0 0x0>;
-> >> >
-> >> > Do you really need 2/0 split here. The first cell is 0 anyway.
-> >>
-> >> Yes following 64-bit system definition
-> >
-> > You mean for the 64-bit main address space?
-> > The CPU address space under /cpus is unrelated.
->
-> Yes, the reg prop for this node is CPU/threads per dt spec.  Checked the history and
-> the Elba dt was derived from socionext for these nodes and this is how those device
-> trees are configured along with over a dozen other devices.  I changed to
-> address-cells = <1> and dropped the leading zero from all cpu* reg<> and booting
-> the system I'm observing no change.  Looking in drivers/of I'm not seeing where
-> cpu*/reg is read and used, any recommendation?
+They should really align with SDHCI_POWER_330 etc
+above as they are all from SDHCI_POWER_CONTROL
 
-drivers/of/cpu.c
+> +
+>  #define SDHCI_BLOCK_GAP_CONTROL	0x2A
+>  
+>  #define SDHCI_WAKE_UP_CONTROL	0x2B
 
-Looks like there are lots of DTS files that use #address-cells = <2> for
-CPU nodes :-(
-
-    git grep -w -A1 cpus -- "*dts*" | grep address-cells | grep "<2>"
-
-I would use <1> is the first cell is always zero...
-
-Gr{oetje,eeting}s,
-
-                        Geert
-
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
