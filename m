@@ -2,47 +2,47 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8D06C7EE33
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 06:58:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C146AC7EE2F
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 06:58:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231905AbjFAG6T (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jun 2023 02:58:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59206 "EHLO
+        id S229834AbjFAG6U (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jun 2023 02:58:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59208 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231862AbjFAG6S (ORCPT
+        with ESMTP id S231639AbjFAG6S (ORCPT
         <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 02:58:18 -0400
 Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F517A3;
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 330D2E7;
         Wed, 31 May 2023 23:58:17 -0700 (PDT)
-Received: from pps.filterd (m0279862.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 35158YRR022577;
-        Thu, 1 Jun 2023 06:58:14 GMT
+Received: from pps.filterd (m0279867.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3515bfg7025217;
+        Thu, 1 Jun 2023 06:58:13 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=from : to : cc :
- subject : date : message-id : in-reply-to : references; s=qcppdkim1;
- bh=ksX52XQkyOLXrPtHRR5XkYgyP7703TmZUwHinw78i2c=;
- b=PWnju1vORMJe+u1LXyNa+HLaL4tfrKfjB9MFeTYCVJEailLgtYJS54cFezbCLr1FAOJu
- 55/Qg5a5eScfWynrykBNMY97hHzb1Mru/ZCgefXDmTd/34gnBK6cPX0AWA09SG2E5aHH
- 2XNx6XTsFwXYAnw+RB12wsN5rZgGOic6PkcfgUnhpqYu6vJ1UhKiGtv7ulPalgsA8x3g
- bWzOE42Swg4bfNAYovTG/EheoPjXal5yR1Qdcxn4Tcs4zNH9Tdg+fBpor10f8SKnbl7x
- /XV5A+A9JA8wQju3mNoLIRDWjyUgN6KEHxfZ1it033YRdysioTuEe44qfUMTbXRuhGJT Sg== 
+ subject : date : message-id; s=qcppdkim1;
+ bh=oFaI1nJbgP2WPXUecZ+68jMuZFAE6Dz2qina3grRsmQ=;
+ b=kw2W0klhFAMBN0uHojxt48n6XgRlyilcQYs+whRmtuZ8oI/93zvE7gA6XalptfUWPM68
+ 7AfALYqbu62ip+UWTJAqHPGbh8ffdxDWjef8SNKyst3IKEyIKIX1LmflLRnXD0p8c98F
+ xqyORkBREllgMniqPVND+DDc9rfCTpzaU5zEMMuSP4Xlh7+smaVCmbUGk5iTdUE7NtwD
+ zEsWo4o8EThl08BL5z8Iho9l7jcriPssZvfYgsjO+oi40HdNc21NLWwi3qsHDkqycaDT
+ 3qN8VMXrZlUvkt6LhVLNV/2ofKrOoCrJs+Oinj+CGZoG1xSgO+la6xrPzGnMC4gEq34z Pg== 
 Received: from apblrppmta01.qualcomm.com (blr-bdr-fw-01_GlobalNAT_AllZones-Outside.qualcomm.com [103.229.18.19])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qx39d2jw2-1
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxc7995pc-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 01 Jun 2023 06:58:14 +0000
+        Thu, 01 Jun 2023 06:58:13 +0000
 Received: from pps.filterd (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 3516w9Ce022046;
-        Thu, 1 Jun 2023 06:58:10 GMT
+        by APBLRPPMTA01.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTP id 3516w86l022036;
+        Thu, 1 Jun 2023 06:58:08 GMT
 Received: from pps.reinject (localhost [127.0.0.1])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3quaxm7e8c-1;
-        Thu, 01 Jun 2023 06:58:10 +0000
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3quaxm7e7y-1;
+        Thu, 01 Jun 2023 06:58:08 +0000
 Received: from APBLRPPMTA01.qualcomm.com (APBLRPPMTA01.qualcomm.com [127.0.0.1])
-        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3516wALF022057;
-        Thu, 1 Jun 2023 06:58:10 GMT
+        by pps.reinject (8.17.1.5/8.17.1.5) with ESMTP id 3516w8Qq022009;
+        Thu, 1 Jun 2023 06:58:08 GMT
 Received: from hu-maiyas-hyd.qualcomm.com (hu-kbajaj-hyd.qualcomm.com [10.147.247.189])
-        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3516wAus022055;
-        Thu, 01 Jun 2023 06:58:10 +0000
+        by APBLRPPMTA01.qualcomm.com (PPS) with ESMTP id 3516w8Nq021944;
+        Thu, 01 Jun 2023 06:58:08 +0000
 Received: by hu-maiyas-hyd.qualcomm.com (Postfix, from userid 2340697)
-        id 44344529756; Thu,  1 Jun 2023 12:28:09 +0530 (+0530)
+        id 09C7E529756; Thu,  1 Jun 2023 12:28:07 +0530 (+0530)
 From:   Komal Bajaj <quic_kbajaj@quicinc.com>
 To:     Ulf Hansson <ulf.hansson@linaro.org>,
         Rob Herring <robh+dt@kernel.org>,
@@ -55,95 +55,60 @@ To:     Ulf Hansson <ulf.hansson@linaro.org>,
 Cc:     Komal Bajaj <quic_kbajaj@quicinc.com>, linux-mmc@vger.kernel.org,
         devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
         linux-arm-msm@vger.kernel.org
-Subject: [PATCH v4 2/4] arm64: dts: qcom: qdu1000: Add SDHCI node
-Date:   Thu,  1 Jun 2023 12:28:03 +0530
-Message-Id: <20230601065805.18079-3-quic_kbajaj@quicinc.com>
+Subject: [PATCH v4 0/4] arm64: dts: qcom: qdu1000: add SDHCI
+Date:   Thu,  1 Jun 2023 12:28:01 +0530
+Message-Id: <20230601065805.18079-1-quic_kbajaj@quicinc.com>
 X-Mailer: git-send-email 2.17.1
-In-Reply-To: <20230601065805.18079-1-quic_kbajaj@quicinc.com>
-References: <20230601065805.18079-1-quic_kbajaj@quicinc.com>
 X-QCInternal: smtphost
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-GUID: Xx1A3YHHR16vrl8xVrid827ypMlUialU
-X-Proofpoint-ORIG-GUID: Xx1A3YHHR16vrl8xVrid827ypMlUialU
+X-Proofpoint-GUID: sPJy1jAjQsq61BCDEZH2LanzXmY5id4O
+X-Proofpoint-ORIG-GUID: sPJy1jAjQsq61BCDEZH2LanzXmY5id4O
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
  definitions=2023-06-01_04,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 bulkscore=0 malwarescore=0
- spamscore=0 priorityscore=1501 mlxlogscore=922 adultscore=0 mlxscore=0
- impostorscore=0 phishscore=0 lowpriorityscore=0 clxscore=1015
- suspectscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 impostorscore=0 mlxscore=0
+ lowpriorityscore=0 suspectscore=0 malwarescore=0 mlxlogscore=772
+ adultscore=0 spamscore=0 phishscore=0 clxscore=1015 priorityscore=1501
+ bulkscore=0 classifier=spam adjust=0 reason=mlx scancount=1
  engine=8.12.0-2304280000 definitions=main-2306010061
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-Add sdhc node for eMMC on QDU1000 and QRU1000 SoCs.
+Add sdhc instance for supporting eMMC on QDU1000 and
+QRU1000 SoCs.
 
-Signed-off-by: Komal Bajaj <quic_kbajaj@quicinc.com>
----
- arch/arm64/boot/dts/qcom/qdu1000.dtsi | 47 +++++++++++++++++++++++++++
- 1 file changed, 47 insertions(+)
+Changes in v4 -
+ * Fixed the subject prefix to arm64.
+ * Updated the pinctrl entries alphabetically.
 
-diff --git a/arch/arm64/boot/dts/qcom/qdu1000.dtsi b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-index 734438113bba..6df07334f1d3 100644
---- a/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-+++ b/arch/arm64/boot/dts/qcom/qdu1000.dtsi
-@@ -842,6 +842,53 @@
- 			#hwlock-cells = <1>;
- 		};
+Changes in v3 -
+ * Removed aliases and dropped "_1" suffix as suggested by Bjorn.
+ * Changed pinconfig names.
 
-+		sdhc: mmc@8804000 {
-+			compatible = "qcom,qdu1000-sdhci", "qcom,sdhci-msm-v5";
-+			reg = <0x0 0x08804000 0x0 0x1000>,
-+			      <0x0 0x08805000 0x0 0x1000>;
-+			reg-names = "hc", "cqhci";
-+
-+			interrupts = <GIC_SPI 207 IRQ_TYPE_LEVEL_HIGH>,
-+				     <GIC_SPI 223 IRQ_TYPE_LEVEL_HIGH>;
-+			interrupt-names = "hc_irq", "pwr_irq";
-+
-+			clocks = <&gcc GCC_SDCC5_AHB_CLK>,
-+				 <&gcc GCC_SDCC5_APPS_CLK>,
-+				 <&rpmhcc RPMH_CXO_CLK>;
-+			clock-names = "iface",
-+				      "core",
-+				      "xo";
-+
-+			resets = <&gcc GCC_SDCC5_BCR>;
-+
-+			interconnects = <&system_noc MASTER_SDCC_1 0 &mc_virt SLAVE_EBI1 0>,
-+					<&gem_noc MASTER_APPSS_PROC 0 &system_noc SLAVE_SDCC_2 0>;
-+			interconnect-names = "sdhc-ddr", "cpu-sdhc";
-+			power-domains = <&rpmhpd QDU1000_CX>;
-+			operating-points-v2 = <&sdhc1_opp_table>;
-+
-+			iommus = <&apps_smmu 0x80 0x0>;
-+			dma-coherent;
-+
-+			bus-width = <8>;
-+
-+			qcom,dll-config = <0x0007642c>;
-+			qcom,ddr-config = <0x80040868>;
-+
-+			status = "disabled";
-+
-+			sdhc1_opp_table: opp-table {
-+				compatible = "operating-points-v2";
-+
-+				opp-384000000 {
-+					opp-hz = /bits/ 64 <384000000>;
-+					required-opps = <&rpmhpd_opp_nom>;
-+					opp-peak-kBps = <6528000 1652800>;
-+					opp-avg-kBps = <400000 0>;
-+				};
-+			};
-+		};
-+
- 		pdc: interrupt-controller@b220000 {
- 			compatible = "qcom,qdu1000-pdc", "qcom,pdc";
- 			reg = <0x0 0xb220000 0x0 0x30000>, <0x0 0x174000f0 0x0 0x64>;
---
+Changes in v2-
+ * Updated the binding alphabetically.
+ * Removed extra comments as suggested by Bhupesh.
+ * Moved non-removable, no-sd, no-sdio and other properties from
+   soc to board dts file as suggested by Bhupesh and Konrad.
+ * Removed extra newlines and leading zeroes as suggested by Konrad.
+ * Modified sdhc1_opp_table.
+ * Updated the SDHC node entries alphabetically.
+ * Moved the status entry at the end.
+
+Komal Bajaj (4):
+  dt-bindings: mmc: sdhci-msm: Document the QDU1000/QRU1000 compatible
+  arm64: dts: qcom: qdu1000: Add SDHCI node
+  arm64: dts: qcom: qdu1000: Add SDHCI pin configuration to DTSI
+  arm64: dts: qcom: qdu1000-idp: add SDHCI for emmc
+
+ .../devicetree/bindings/mmc/sdhci-msm.yaml    |  1 +
+ arch/arm64/boot/dts/qcom/qdu1000-idp.dts      | 23 +++++
+ arch/arm64/boot/dts/qcom/qdu1000.dtsi         | 97 +++++++++++++++++++
+ 3 files changed, 121 insertions(+)
+
+-- 
 2.17.1
 
