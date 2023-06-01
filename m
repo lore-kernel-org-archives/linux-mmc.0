@@ -2,131 +2,142 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B096C77B7A
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 13:28:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A1DE9C7EE31
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 18:18:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233912AbjFAN2B (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jun 2023 09:28:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35772 "EHLO
+        id S229880AbjFASSn (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jun 2023 14:18:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54948 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233837AbjFAN1t (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 09:27:49 -0400
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A0E1B19A
-        for <linux-mmc@vger.kernel.org>; Thu,  1 Jun 2023 06:27:29 -0700 (PDT)
-Received: by mail-ed1-x52d.google.com with SMTP id 4fb4d7f45d1cf-5147aee9d7cso1286386a12.3
-        for <linux-mmc@vger.kernel.org>; Thu, 01 Jun 2023 06:27:29 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linaro.org; s=google; t=1685626045; x=1688218045;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:from:subject:user-agent:mime-version:date:message-id:from:to
-         :cc:subject:date:message-id:reply-to;
-        bh=0Bh0NwcmQVDulBJjQlFxoXeFk9v1DzA4S7ePzbUk4+w=;
-        b=q1iotZxbLy8szFOTeC5e/G0VQdDeibKUxN1V13zopsKDoRyLSyc6Z3+4NCEAYIHRcr
-         0Y+SOKRkc0h/8PrlcU2NIUN1lDLPBiHpGdDNpR2mlagpo/gvLvFSQS3CValEhaAtjE+2
-         RE+eVynh/sqxFzs+LL8qvlWKtlmi6qvz/TKHDm0/IH+D5aOrdEusPcJwXPMYNre/ulBW
-         FI9QWATMBhOQi00g1fzNaUT9uFmVOiAy+PvM5ML4OmjN50l9Q4JqXau5CjGGmBr819kT
-         fq1kDhA1u4fUCbzvrfZF+RjuYK9zU0Wo40z60SZLVIhSRl3FKihyEIC7AAk5scS9W995
-         Kp9w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685626045; x=1688218045;
-        h=content-transfer-encoding:in-reply-to:content-language:references
-         :cc:to:from:subject:user-agent:mime-version:date:message-id
-         :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
-        bh=0Bh0NwcmQVDulBJjQlFxoXeFk9v1DzA4S7ePzbUk4+w=;
-        b=MOOrCfAFub0ghcaNt18fUo24wGaCPBtNdrmE9nuOOJob7A4KOpeF/A3Tb2ImX3Kah2
-         VMHeg/w2SPwwY+HwzqxTpcCGRgWEd7NOCVtTQBbOGoOay+0INPIXSw+8GK6e8DkhQOEy
-         Qr3dnJ6ES+DAxY6LgnmsxGAvK/w5FwweWUJLtIMtbRoptqcclSjrGVWU32iBZRj9jAie
-         emzodAEIdCvg0IsyG+40TYPljaBs1KIRtwjEHKZlUEQP5oISV2IzxC7HRGfsJG3JNMsu
-         bB7toMtEvtNmdM5NOJkR+tWBEqOB07/6q4MO/4Ecpy1OEFmAAu7IRELj3O8l6pPB5ZZA
-         lpWg==
-X-Gm-Message-State: AC+VfDxmlEg46IO35TLs/cmaSZmbpf6UO0tpuLrCDc3T9r0UWR01zFu6
-        C4yKJ7sNtD/mpbanlL7xxiNi/A==
-X-Google-Smtp-Source: ACHHUZ56vTDQLpgZcsfUFAD+UPccMtNn7lITWkhbfSA78O9BcUWWDHiZ5WDLxtlvxFtNO3fcz/01mw==
-X-Received: by 2002:a05:6402:12ce:b0:514:938a:67cd with SMTP id k14-20020a05640212ce00b00514938a67cdmr5009231edx.38.1685626045251;
-        Thu, 01 Jun 2023 06:27:25 -0700 (PDT)
-Received: from [192.168.1.20] ([178.197.199.204])
-        by smtp.gmail.com with ESMTPSA id y1-20020aa7c241000000b0050bfeb15049sm7070997edo.60.2023.06.01.06.27.23
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 01 Jun 2023 06:27:24 -0700 (PDT)
-Message-ID: <33979417-2c0c-5474-23e0-7e72add99873@linaro.org>
-Date:   Thu, 1 Jun 2023 15:27:22 +0200
+        with ESMTP id S230471AbjFASSl (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 14:18:41 -0400
+Received: from dfw.source.kernel.org (dfw.source.kernel.org [139.178.84.217])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2D45123;
+        Thu,  1 Jun 2023 11:18:40 -0700 (PDT)
+Received: from smtp.kernel.org (relay.kernel.org [52.25.139.140])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by dfw.source.kernel.org (Postfix) with ESMTPS id 3EE036484B;
+        Thu,  1 Jun 2023 18:18:40 +0000 (UTC)
+Received: by smtp.kernel.org (Postfix) with ESMTPSA id DDCAEC433D2;
+        Thu,  1 Jun 2023 18:18:33 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1685643519;
+        bh=SBQxh2+ToyiB9ICBSOpcMeGoo9NUjEEwMfXF8u7aW30=;
+        h=Date:From:To:Cc:Subject:References:In-Reply-To:From;
+        b=an/91JvUBIgIJIIKiGflzBrkvpPoX2M2hXeuZLim/QIu6MldFN+9xZb83MQxB0gaO
+         a3IMs9izaGmlLwmU9vtB9oL3u09jUYRphLtEOZCds/q4ibS6EQYo39wQy46v+8IM83
+         ndsuhXHlCCAuOzhKuHSTSAfDR7l8q7ri0o4ontB3uggNjKRZr3g1nwQjuu8csyDnRt
+         Oo0USOkwzYd7G+7q/nF6ojshA/tKnUon5EmqQAq/r2gARqvKwwydptJaHtEgpJGpJ+
+         5mrk0Y4hW2b1178a8GxGssEjZ3uKEv1daL3MXHl4YANJBBvRDIc1R4Vn70tb1cgfzT
+         SRpR5vEhL9TZQ==
+Date:   Thu, 1 Jun 2023 19:18:31 +0100
+From:   Conor Dooley <conor@kernel.org>
+To:     Oleksij Rempel <o.rempel@pengutronix.de>
+Cc:     Abel Vesa <abelvesa@kernel.org>,
+        Michael Turquette <mturquette@baylibre.com>,
+        Stephen Boyd <sboyd@kernel.org>,
+        Rob Herring <robh+dt@kernel.org>,
+        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
+        Conor Dooley <conor+dt@kernel.org>,
+        Shawn Guo <shawnguo@kernel.org>,
+        Sascha Hauer <s.hauer@pengutronix.de>,
+        Herbert Xu <herbert@gondor.apana.org.au>,
+        "David S. Miller" <davem@davemloft.net>,
+        Dmitry Torokhov <dmitry.torokhov@gmail.com>,
+        Ulf Hansson <ulf.hansson@linaro.org>, kernel@pengutronix.de,
+        Peng Fan <peng.fan@nxp.com>,
+        Fabio Estevam <festevam@gmail.com>,
+        NXP Linux Team <linux-imx@nxp.com>,
+        Daniel Lezcano <daniel.lezcano@linaro.org>,
+        Thomas Gleixner <tglx@linutronix.de>,
+        Michael Trimarchi <michael@amarulasolutions.com>,
+        Mark Brown <broonie@kernel.org>,
+        Dario Binacchi <dario.binacchi@amarulasolutions.com>,
+        Anson Huang <Anson.Huang@nxp.com>, Marek Vasut <marex@denx.de>,
+        linux-clk@vger.kernel.org, devicetree@vger.kernel.org,
+        linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org,
+        linux-crypto@vger.kernel.org, linux-input@vger.kernel.org,
+        linux-mmc@vger.kernel.org
+Subject: Re: [PATCH v1 1/7] dt-bindings: mmc: fsl-imx-esdhc: Add imx6ul
+ support
+Message-ID: <20230601-obnoxious-sterility-e89541412bb4@spud>
+References: <20230601101451.357662-1-o.rempel@pengutronix.de>
+ <20230601101451.357662-2-o.rempel@pengutronix.de>
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101
- Thunderbird/102.11.0
-Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
-From:   Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>
-To:     Sricharan Ramabadhran <quic_srichara@quicinc.com>,
-        andy.shevchenko@gmail.com
-Cc:     agross@kernel.org, andersson@kernel.org, konrad.dybcio@linaro.org,
-        robh+dt@kernel.org, krzysztof.kozlowski+dt@linaro.org,
-        mturquette@baylibre.com, sboyd@kernel.org, ulf.hansson@linaro.org,
-        linus.walleij@linaro.org, catalin.marinas@arm.com, will@kernel.org,
-        p.zabel@pengutronix.de, linux-arm-msm@vger.kernel.org,
-        devicetree@vger.kernel.org, linux-kernel@vger.kernel.org,
-        linux-mmc@vger.kernel.org, linux-gpio@vger.kernel.org,
-        linux-arm-kernel@lists.infradead.org, robimarko@gmail.com
-References: <20230519125409.497439-1-quic_srichara@quicinc.com>
- <20230519125409.497439-5-quic_srichara@quicinc.com>
- <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
- <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
- <ZHTK7uEzO7kcx_cV@surfacebook>
- <aefd0df1-8dfb-1b69-589b-974dea312845@quicinc.com>
- <664940c3-9ec1-b4bd-9db5-fa3529e3d1ff@linaro.org>
- <8146f367-c539-bea5-12b6-424213018488@quicinc.com>
- <eb109116-94eb-5b6d-0049-7bb31feada36@linaro.org>
-Content-Language: en-US
-In-Reply-To: <eb109116-94eb-5b6d-0049-7bb31feada36@linaro.org>
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha256;
+        protocol="application/pgp-signature"; boundary="biMuZ975ln5b9eCw"
+Content-Disposition: inline
+In-Reply-To: <20230601101451.357662-2-o.rempel@pengutronix.de>
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-On 01/06/2023 13:53, Krzysztof Kozlowski wrote:
-> On 01/06/2023 13:41, Sricharan Ramabadhran wrote:
->>
->>
->> On 6/1/2023 3:21 PM, Krzysztof Kozlowski wrote:
->>> On 01/06/2023 11:50, Sricharan Ramabadhran wrote:
->>>>
->>>>
->>>> On 5/29/2023 9:25 PM, andy.shevchenko@gmail.com wrote:
->>>>> Mon, May 29, 2023 at 03:58:09PM +0530, Sricharan Ramabadhran kirjoitti:
->>>>>> On 5/20/2023 12:17 AM, Andy Shevchenko wrote:
->>>>>>> On Fri, May 19, 2023 at 3:55 PM Sricharan Ramabadhran
->>>>>>> <quic_srichara@quicinc.com> wrote:
->>>>>
->>>>> ...
->>>>>
->>>>>>>      depends on OF || COMPILE_TEST
->>>>>>
->>>>>>    Yeah sure. COMPILE_TEST could be standalone. Will fix it and repost.
->>>>>
->>>>> Standalone COMPILE_TEST will give you definitely NOT what you want.
->>>>> And actually it's strange to have it standalone.
->>>>>
->>>>
->>>>    Ho ok, i meant like this, "depends on ARM64 || COMPILE_TEST"
->>>
->>> Don't do it differently than all other drivers. Open the Kconfig and
->>> look at existing entries.
->>>
->>    The latest added has this below, will use this
->>
->> 	depends on OF || COMPILE_TEST
-> 
-> I would even drop this... Lemme check, it looks odd. We depend on
-> ARCH_QCOM which uses OF. We have few drivers which depend on ACPI, but
-> that also seems wrong. These are platform drivers so they should expect
-> platform select proper firmware interface. I think none of other
-> platform drivers do like this (neither Samsung pinctrl nor other
-> Qualcomm drivers)).
-> 
-> I will fix this. For your patch I would just skip OF entirely.
 
-Correction: you need OF :(
+--biMuZ975ln5b9eCw
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Best regards,
-Krzysztof
+On Thu, Jun 01, 2023 at 12:14:45PM +0200, Oleksij Rempel wrote:
+> Add the 'fsl,imx6ul-usdhc' value to the compatible properties list in
+> the fsl-imx-esdhc.yaml file. This is required to match the compatible
+> strings present in the 'mmc@2190000' node of 'imx6ul-prti6g.dtb'. This
+> commit addresses the following dtbs_check warning:
+>   imx6ul-prti6g.dtb: mmc@2190000: compatible: 'oneOf' conditional failed,
+>     one must be fixed: ['fsl,imx6ul-usdhc', 'fsl,imx6sx-usdhc'] is too lo=
+ng
+>     'fsl,imx6ul-usdhc' is not one of ['fsl,imx25-esdhc', 'fsl,imx35-esdhc=
+',
+>     'fsl,imx51-esdhc', 'fsl,imx53-esdhc', 'fsl,imx6q-usdhc',
+>     'fsl,imx6sl-usdhc', 'fsl,imx6sx-usdhc', 'fsl,imx7d-usdhc',
+>     'fsl,imx7ulp-usdhc', 'fsl,imx8mm-usdhc', 'fsl,imxrt1050-usdhc',
+>     'nxp,s32g2-usdhc']
+>   From schema: Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+>=20
+> Signed-off-by: Oleksij Rempel <o.rempel@pengutronix.de>
+> ---
+>  Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml | 2 ++
+>  1 file changed, 2 insertions(+)
+>=20
+> diff --git a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml b/D=
+ocumentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> index fbfd822b9270..090e781705d3 100644
+> --- a/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> +++ b/Documentation/devicetree/bindings/mmc/fsl-imx-esdhc.yaml
+> @@ -30,6 +30,7 @@ properties:
+>            - fsl,imx6q-usdhc
+>            - fsl,imx6sl-usdhc
+>            - fsl,imx6sx-usdhc
+> +          - fsl,imx6ul-usdhc
 
+How come this gets added as a standalone compatible _and_ one that
+should fall back to imx6sx?
+
+>            - fsl,imx7d-usdhc
+>            - fsl,imx7ulp-usdhc
+>            - fsl,imx8mm-usdhc
+> @@ -42,6 +43,7 @@ properties:
+>            - enum:
+>                - fsl,imx6sll-usdhc
+>                - fsl,imx6ull-usdhc
+> +              - fsl,imx6ul-usdhc
+>            - const: fsl,imx6sx-usdhc
+>        - items:
+>            - const: fsl,imx7d-usdhc
+> --=20
+> 2.39.2
+>=20
+
+--biMuZ975ln5b9eCw
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iHUEABYIAB0WIQRh246EGq/8RLhDjO14tDGHoIJi0gUCZHjg9wAKCRB4tDGHoIJi
+0ut/AP9F46XeYtXvp51EgPcfCAk62B/ruwOmoh+FIfvQ2uIYUAEAr+BafXmYjdXA
+178tOtlxudsrD3V6ICAbE3GNJ3ipyAA=
+=oCZ8
+-----END PGP SIGNATURE-----
+
+--biMuZ975ln5b9eCw--
