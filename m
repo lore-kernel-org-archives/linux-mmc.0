@@ -2,248 +2,146 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A2D7EC77B7A
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 01:51:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 632A4C77B7A
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 05:32:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230410AbjFABvl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Wed, 31 May 2023 21:51:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45182 "EHLO
+        id S229689AbjFAFcN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jun 2023 01:32:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45266 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229714AbjFABvj (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Wed, 31 May 2023 21:51:39 -0400
-Received: from mail-ot1-x32c.google.com (mail-ot1-x32c.google.com [IPv6:2607:f8b0:4864:20::32c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E71B13E;
-        Wed, 31 May 2023 18:51:34 -0700 (PDT)
-Received: by mail-ot1-x32c.google.com with SMTP id 46e09a7af769-6af6b5cf489so389299a34.3;
-        Wed, 31 May 2023 18:51:34 -0700 (PDT)
+        with ESMTP id S229596AbjFAFcM (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 01:32:12 -0400
+Received: from mail-lf1-x130.google.com (mail-lf1-x130.google.com [IPv6:2a00:1450:4864:20::130])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D3C80129
+        for <linux-mmc@vger.kernel.org>; Wed, 31 May 2023 22:32:10 -0700 (PDT)
+Received: by mail-lf1-x130.google.com with SMTP id 2adb3069b0e04-4f50a8f6dd7so389369e87.2
+        for <linux-mmc@vger.kernel.org>; Wed, 31 May 2023 22:32:10 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20221208; t=1685584293; x=1688176293;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:from:to:cc:subject:date
+        d=linaro.org; s=google; t=1685597529; x=1688189529;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:from:to:cc:subject:date
          :message-id:reply-to;
-        bh=0YtnC+ivRd+yaQNSAJHN92lBak7PFbLa8TMCQnN22IM=;
-        b=DKvtGGxEaMnOdL/XwVM6RiZkNbUSuNVVlWfkUr4X9VCBpAxajivEH/kuQjtoo9scih
-         pfrYkI0yCQLic0lWxH5/Wmt+DWNOz8YihfhWrQRC4i/NlbCcoAR8gjhT+pWbPPi25T4M
-         Z+HqZ4mIxkDq3XiF3xkqlJRLT4z5GVNi76oSSm+0VXu8CzA+iHX6BIUfGvaGbr3VSlhs
-         FaWnqiT3ta52aAfsz+Pw5/d6GgvAYWfjIqPj2sabMovv3yBEJqDQLd3BoBpCiCX4JaFd
-         Hp/icFF/E6JP49punPL03v5oMtiUJsgxA5nz2mL/pTC8UtlJweBIFglbe8XK/f0LcShZ
-         oOqw==
+        bh=HsI/5WLiHlcp0ZEEt3H/cNP/MuQhNAeZoQaqtMmhWNQ=;
+        b=H+UnM8kWWRu5RWrI0KNNuViptqIvOW5zcJGzBaZVFz5u1WPqYJXCJc17Qscomw3p6F
+         dueFhvI1Neba5nB4Sott68NEtF/E6W9h9s7avVEcUnaAlcSsxIzJ9g+FN3IGoppPPwfQ
+         kgDux/S4X/2WMZOKI69iGFK03nIwzJ3WtLaPca8zqU7iSp++rOSVP2lZJbCKUWr32eyf
+         LlUyC73afA/whcbyU+96OP0rKkDhmp4EVsngkdcGENWbelRUI3az4Pqeq8bfU6I9ayvy
+         UlA4j01jegpkBBOlrxxOnlS3YWzus6MeV3yehNEiIXQIMSYHTR74iF5jw/CFznmiYghR
+         CgFw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20221208; t=1685584293; x=1688176293;
-        h=content-transfer-encoding:mime-version:references:in-reply-to
-         :message-id:date:subject:cc:to:from:x-gm-message-state:from:to:cc
+        d=1e100.net; s=20221208; t=1685597529; x=1688189529;
+        h=content-transfer-encoding:cc:to:subject:message-id:date:from
+         :in-reply-to:references:mime-version:x-gm-message-state:from:to:cc
          :subject:date:message-id:reply-to;
-        bh=0YtnC+ivRd+yaQNSAJHN92lBak7PFbLa8TMCQnN22IM=;
-        b=SRnL14r11W7eL4ZN4lftqb1GLQXPeQl3c7pYpwLBwh8U8hzmQhi11sZHvv38cUZ9pd
-         j8ph2QiM9NHqFvGyH6kG/INqQGmmCSbL61Nba3HiCKLqhHpFrD3YwQpbIUePftpf8FGs
-         19UhNmROS0eJbY8oIgdKL6vn45Qblhgc52MBe/bC2tMgQrTI0X7v76Cbo6CoyjWe+8Tq
-         ggepDsA1WuB8jr3gg7kRk5p+t5QKJxwTujlJgDg/UJu9/tI4kHepozPAinJWhznAz3Db
-         /gp5wDD2oTVXchTVhEvw+Wo4n+8o9sUVV4nrKRThKx0PtFpFcnafHmurmlzz81Bd9i0D
-         KCOQ==
-X-Gm-Message-State: AC+VfDx+9cAVYEU7t3+XdIfrHkhImE8T2pKTndv7Ph2vi6qfGwIP6kDo
-        0r0jDzf9eFARyvwsd19ngnI=
-X-Google-Smtp-Source: ACHHUZ4FjTS075j1+edA3Axy4/z/baiDda1ULnMGIgukUoAE2iFq2y2A+W3q+INzZey7ye+cKqvG+Q==
-X-Received: by 2002:a05:6358:ce1a:b0:127:d8c1:b829 with SMTP id gt26-20020a056358ce1a00b00127d8c1b829mr679039rwb.27.1685584293599;
-        Wed, 31 May 2023 18:51:33 -0700 (PDT)
-Received: from localhost.localdomain (2001-b400-e454-8dbb-0377-d3ab-ebce-7b9b.emome-ip6.hinet.net. [2001:b400:e454:8dbb:377:d3ab:ebce:7b9b])
-        by smtp.gmail.com with ESMTPSA id e2-20020a17090a7c4200b00253239144c5sm165795pjl.42.2023.05.31.18.51.31
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 31 May 2023 18:51:33 -0700 (PDT)
-From:   Victor Shih <victorshihgli@gmail.com>
-To:     ulf.hansson@linaro.org, adrian.hunter@intel.com
-Cc:     linux-mmc@vger.kernel.org, linux-kernel@vger.kernel.org,
-        benchuanggli@gmail.com, HL.Liu@genesyslogic.com.tw,
-        Greg.tu@genesyslogic.com.tw, Victor Shih <victorshihgli@gmail.com>,
-        Ben Chuang <ben.chuang@genesyslogic.com.tw>,
-        Victor Shih <victor.shih@genesyslogic.com.tw>
-Subject: [PATCH V5 4/4] mmc: sdhci-pci-gli: Add support SD Express card for GL9767
-Date:   Thu,  1 Jun 2023 09:51:15 +0800
-Message-Id: <20230601015115.406002-5-victorshihgli@gmail.com>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20230601015115.406002-1-victorshihgli@gmail.com>
-References: <20230601015115.406002-1-victorshihgli@gmail.com>
+        bh=HsI/5WLiHlcp0ZEEt3H/cNP/MuQhNAeZoQaqtMmhWNQ=;
+        b=Xk5oBMl6vHPvHH5U1GoyJbjjzq3iXYVGjPwEj7vvnpNar03ETGE0RpPlp2Inz8dpo4
+         bBunA8qeoXmoD5UUie60sj9saf/acdjxKbuIaK5ve1hjVoHkFVd+RLx2X1CeCMvIwT/R
+         is02vIQRjrTMUzJjAQnJnvJVK1jyHGRJglCLGzvziO1UPPzMvcNVquH3uUP7XEmpBO8e
+         7FreYBbofJ+qVZTM/dNYfm2frtcmYmrkPMVqxs/FrJI2FWN9v2zLGRXGv3fqXHOG4Yas
+         mmlCAYQFizObN1ScNTtn0KWCs4/53MJIGV5F/iEwyvEN3zD3G0QUv4Y2P+8iIXykWc/D
+         Ra0Q==
+X-Gm-Message-State: AC+VfDwLmeGXZe7HT2/bn5zVi+hbqRz6lGgrA+w5MS7zq1CIFZ4BH7XQ
+        uuHY9gxFibaC4nYOElwOdl1I/EjXjq1yNe49kuCaUA==
+X-Google-Smtp-Source: ACHHUZ6jpon6KUyAu7j1RAO8CknM0TiK2EYsevvUBJdlyVaa7KKCWUV7kgxyhKtARKNUKgwtTICTTtzUxsji3KMkuDQ=
+X-Received: by 2002:ac2:44dc:0:b0:4f4:ce78:2f17 with SMTP id
+ d28-20020ac244dc000000b004f4ce782f17mr582911lfm.13.1685597529125; Wed, 31 May
+ 2023 22:32:09 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20220405093759.1126835-1-alex.bennee@linaro.org>
+ <20230531191007.13460-1-shyamsaini@linux.microsoft.com> <SN7PR11MB6850DA4A185E3429B62531CD84499@SN7PR11MB6850.namprd11.prod.outlook.com>
+In-Reply-To: <SN7PR11MB6850DA4A185E3429B62531CD84499@SN7PR11MB6850.namprd11.prod.outlook.com>
+From:   Ilias Apalodimas <ilias.apalodimas@linaro.org>
+Date:   Thu, 1 Jun 2023 08:31:33 +0300
+Message-ID: <CAC_iWjKAdimEH0SsC_z9QuFS4sGLp2BVzx03s+RKvcLXY25kuQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+To:     "Zhu, Bing" <bing.zhu@intel.com>
+Cc:     Shyam Saini <shyamsaini@linux.microsoft.com>,
+        "alex.bennee@linaro.org" <alex.bennee@linaro.org>,
+        "code@tyhicks.com" <code@tyhicks.com>,
+        "Matti.Moell@opensynergy.com" <Matti.Moell@opensynergy.com>,
+        "arnd@linaro.org" <arnd@linaro.org>,
+        "hmo@opensynergy.com" <hmo@opensynergy.com>,
+        "joakim.bech@linaro.org" <joakim.bech@linaro.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "linux-mmc@vger.kernel.org" <linux-mmc@vger.kernel.org>,
+        "linux-scsi@vger.kernel.org" <linux-scsi@vger.kernel.org>,
+        "maxim.uvarov@linaro.org" <maxim.uvarov@linaro.org>,
+        "ruchika.gupta@linaro.org" <ruchika.gupta@linaro.org>,
+        "Winkler, Tomas" <tomas.winkler@intel.com>,
+        "ulf.hansson@linaro.org" <ulf.hansson@linaro.org>,
+        "Huang, Yang" <yang.huang@intel.com>,
+        "sumit.garg@linaro.org" <sumit.garg@linaro.org>,
+        "jens.wiklander@linaro.org" <jens.wiklander@linaro.org>,
+        "op-tee@lists.trustedfirmware.org" <op-tee@lists.trustedfirmware.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
-From: Victor Shih <victor.shih@genesyslogic.com.tw>
+Hi Bing
 
-Add support SD Express card for GL9767. The workflow of the
-SD Express card in GL9767 is as below.
-1. GL9767 operates in SD mode and set MMC_CAP2_SD_EXP flag.
-2. If card is inserted, Host send CMD8 to ask the capabilities
-   of the card.
-3. If the card has PCIe capability, then init_sd_express()
-   will be invoked.
-4. If the card has been put in write protect state then the
-   SD features supported by SD mode but not supported by
-   PCIe mode, therefore GL9767 switch to SD mode.
-5. If the card has not been put in write protect state then
-   GL9767 switch from SD mode to PCIe/NVMe mode and mmc driver
-   handover control to NVMe driver.
-6. If card is removed, GL9767 will return to SD mode.
+On Thu, 1 Jun 2023 at 04:03, Zhu, Bing <bing.zhu@intel.com> wrote:
+>
+> As an alternative, Is it possible to change ftpm design not to depend on =
+RPMB access at the earlier/boot stage? Because to my understanding, typical=
+ly PCRs don't require persistent/NV storage (for example, before RPMB or te=
+e-supplicant is ready, use TEE memory instead as temporary storage)
 
-Signed-off-by: Ben Chuang <ben.chuang@genesyslogic.com.tw>
-Signed-off-by: Victor Shih <victor.shih@genesyslogic.com.tw>
-Acked-by: Adrian Hunter <adrian.hunter@intel.com>
----
- drivers/mmc/host/sdhci-pci-gli.c | 113 +++++++++++++++++++++++++++++++
- 1 file changed, 113 insertions(+)
+I am not entirely sure this will solve our problem here.  You are
+right that we shouldn't depend on the supplicant to extend PCRs. But
+what happens if an object is sealed against certain PCR values?  We
+are back to the same problem
 
-diff --git a/drivers/mmc/host/sdhci-pci-gli.c b/drivers/mmc/host/sdhci-pci-gli.c
-index 392a106cea18..e47236e3b89a 100644
---- a/drivers/mmc/host/sdhci-pci-gli.c
-+++ b/drivers/mmc/host/sdhci-pci-gli.c
-@@ -164,6 +164,10 @@
- #define PCIE_GLI_9767_CFG		0x8A0
- #define   PCIE_GLI_9767_CFG_LOW_PWR_OFF	  BIT(12)
- 
-+#define PCIE_GLI_9767_COMBO_MUX_CTL			0x8C8
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN		  BIT(6)
-+#define   PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN	  BIT(10)
-+
- #define PCIE_GLI_9767_PWR_MACRO_CTL					0x8D0
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LOW_VOLTAGE			  GENMASK(3, 0)
- #define   PCIE_GLI_9767_PWR_MACRO_CTL_LD0_LOW_OUTPUT_VOLTAGE		  GENMASK(15, 12)
-@@ -181,6 +185,9 @@
- #define   PCIE_GLI_9767_SCR_CORE_PWR_D3_OFF		  BIT(21)
- #define   PCIE_GLI_9767_SCR_CFG_RST_DATA_LINK_DOWN	  BIT(30)
- 
-+#define PCIE_GLI_9767_SDHC_CAP			0x91C
-+#define   PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT	  BIT(5)
-+
- #define PCIE_GLI_9767_SD_PLL_CTL			0x938
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_LDIV		  GENMASK(9, 0)
- #define   PCIE_GLI_9767_SD_PLL_CTL_PLL_PDIV		  GENMASK(15, 12)
-@@ -191,6 +198,23 @@
- #define PCIE_GLI_9767_SD_PLL_CTL2		0x93C
- #define   PCIE_GLI_9767_SD_PLL_CTL2_PLLSSC_PPM	  GENMASK(31, 16)
- 
-+#define PCIE_GLI_9767_SD_EXPRESS_CTL			0x940
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE		  BIT(0)
-+#define   PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE	  BIT(1)
-+
-+#define PCIE_GLI_9767_SD_DATA_MULTI_CTL				0x944
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME	  GENMASK(23, 16)
-+#define   PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE	  0x64
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2			0x950
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2				0x954
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN	  BIT(0)
-+
-+#define PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2				0x958
-+#define   PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN	  BIT(0)
-+
- #define GLI_MAX_TUNING_LOOP 40
- 
- /* Genesys Logic chipset */
-@@ -935,6 +959,93 @@ static void sdhci_gl9767_reset(struct sdhci_host *host, u8 mask)
- 	gli_set_9767(host);
- }
- 
-+static int gl9767_init_sd_express(struct mmc_host *mmc, struct mmc_ios *ios)
-+{
-+	struct sdhci_host *host = mmc_priv(mmc);
-+	struct sdhci_pci_slot *slot = sdhci_priv(host);
-+	struct pci_dev *pdev;
-+	u32 value;
-+	int i;
-+
-+	pdev = slot->chip->pdev;
-+
-+	if (mmc->ops->get_ro(mmc)) {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+		return 0;
-+	}
-+
-+	gl9767_vhs_write(pdev);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, &value);
-+	value &= ~(PCIE_GLI_9767_COMBO_MUX_CTL_RST_EN | PCIE_GLI_9767_COMBO_MUX_CTL_WAIT_PERST_EN);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_COMBO_MUX_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, &value);
-+	value &= ~PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME;
-+	value |= FIELD_PREP(PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME,
-+			    PCIE_GLI_9767_SD_DATA_MULTI_CTL_DISCONNECT_TIME_VALUE);
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_DATA_MULTI_CTL, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2_SDEI_COMPLETE_STATUS_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, &value);
-+	value |= PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2_SDEI_COMPLETE_SIGNAL_EN;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_SIGNAL_EN_REG2, value);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_CFG, &value);
-+	value |= PCIE_GLI_9767_CFG_LOW_PWR_OFF;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_CFG, value);
-+
-+	value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+	value &= ~(SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+	sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+
-+	value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+	value |= (SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+	sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+	value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SDEI_EXE;
-+	pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+
-+	for (i = 0; i < 2; i++) {
-+		msleep(10);
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2, &value);
-+		if (value & PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2_SDEI_COMPLETE) {
-+			pci_write_config_dword(pdev, PCIE_GLI_9767_NORMAL_ERR_INT_STATUS_REG2,
-+					       value);
-+			break;
-+		}
-+	}
-+
-+	pci_read_config_dword(pdev, PCIE_GLI_9767_SDHC_CAP, &value);
-+	if (value & PCIE_GLI_9767_SDHC_CAP_SDEI_RESULT) {
-+		pci_read_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, &value);
-+		value |= PCIE_GLI_9767_SD_EXPRESS_CTL_SD_EXPRESS_MODE;
-+		pci_write_config_dword(pdev, PCIE_GLI_9767_SD_EXPRESS_CTL, value);
-+	} else {
-+		mmc->ios.timing &= ~(MMC_TIMING_SD_EXP | MMC_TIMING_SD_EXP_1_2V);
-+
-+		value = sdhci_readb(host, SDHCI_POWER_CONTROL);
-+		value &= ~(SDHCI_VDD2_POWER_180 | SDHCI_VDD2_POWER_ON);
-+		sdhci_writeb(host, value, SDHCI_POWER_CONTROL);
-+
-+		value = sdhci_readw(host, SDHCI_CLOCK_CONTROL);
-+		value |= (SDHCI_CLOCK_CARD_EN | SDHCI_CLOCK_PLL_EN);
-+		sdhci_writew(host, value, SDHCI_CLOCK_CONTROL);
-+	}
-+
-+	gl9767_vhs_read(pdev);
-+
-+	return 0;
-+}
-+
- static int gli_probe_slot_gl9750(struct sdhci_pci_slot *slot)
- {
- 	struct sdhci_host *host = slot->host;
-@@ -967,6 +1078,8 @@ static int gli_probe_slot_gl9767(struct sdhci_pci_slot *slot)
- 	gl9767_hw_setting(slot);
- 	gli_pcie_enable_msi(slot);
- 	slot->host->mmc->caps2 |= MMC_CAP2_NO_SDIO;
-+	host->mmc->caps2 |= MMC_CAP2_SD_EXP;
-+	host->mmc_host_ops.init_sd_express = gl9767_init_sd_express;
- 	sdhci_enable_v4_mode(host);
- 
- 	return 0;
--- 
-2.25.1
-
+Thanks
+/Ilias
+>
+> Bing
+>
+> IPAS Security Brown Belt (https://www.credly.com/badges/69ea809f-3a96-4bc=
+7-bb2f-442c1b17af26)
+> System Software Engineering
+> Software and Advanced Technology Group
+> Zizhu Science Park, Shanghai, China
+>
+> -----Original Message-----
+> From: Shyam Saini <shyamsaini@linux.microsoft.com>
+> Sent: Thursday, June 1, 2023 3:10 AM
+> To: alex.bennee@linaro.org
+> Cc: code@tyhicks.com; Matti.Moell@opensynergy.com; arnd@linaro.org; Zhu, =
+Bing <bing.zhu@intel.com>; hmo@opensynergy.com; ilias.apalodimas@linaro.org=
+; joakim.bech@linaro.org; linux-kernel@vger.kernel.org; linux-mmc@vger.kern=
+el.org; linux-scsi@vger.kernel.org; maxim.uvarov@linaro.org; ruchika.gupta@=
+linaro.org; Winkler, Tomas <tomas.winkler@intel.com>; ulf.hansson@linaro.or=
+g; Huang, Yang <yang.huang@intel.com>; sumit.garg@linaro.org; jens.wiklande=
+r@linaro.org; op-tee@lists.trustedfirmware.org
+> Subject: [PATCH v2 0/4] rpmb subsystem, uapi and virtio-rpmb driver
+>
+> Hi Alex,
+>
+> [ Resending, Sorry for the noise ]
+>
+> Are you still working on it or planning to resubmit it ?
+>
+> [1] The current optee tee kernel driver implementation doesn't work when =
+IMA is used with optee implemented ftpm.
+>
+> The ftpm has dependency on tee-supplicant which comes once the user space=
+ is up and running and IMA attestation happens at boot time and it requires=
+ to extend ftpm PCRs.
+>
+> But IMA can't use PCRs if ftpm use secure emmc RPMB partition. As optee c=
+an only access RPMB via tee-supplicant(user space). So, there should be a f=
+ast path to allow optee os to access the RPMB parititon without waiting for=
+ user-space tee supplicant.
+>
+> To achieve this fast path linux optee driver and mmc driver needs some wo=
+rk and finally it will need RPMB driver which you posted.
+>
+> Please let me know what's your plan on this.
+>
+> [1] https://optee.readthedocs.io/en/latest/architecture/secure_storage.ht=
+ml
+>
+> Best Regards,
+> Shyam
