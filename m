@@ -2,103 +2,107 @@ Return-Path: <linux-mmc-owner@vger.kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 973EAC7EE23
-	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 08:48:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B54C6C7EE2F
+	for <linux-mmc@archiver.kernel.org>; Thu,  1 Jun 2023 09:51:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229882AbjFAIsl (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
-        Thu, 1 Jun 2023 04:48:41 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50342 "EHLO
+        id S233085AbjFAJvN (ORCPT <rfc822;linux-mmc@archiver.kernel.org>);
+        Thu, 1 Jun 2023 05:51:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35014 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231513AbjFAIse (ORCPT
-        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 04:48:34 -0400
-Received: from mx0b-0031df01.pphosted.com (mx0b-0031df01.pphosted.com [205.220.180.131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E139BFB;
-        Thu,  1 Jun 2023 01:48:32 -0700 (PDT)
-Received: from pps.filterd (m0279869.ppops.net [127.0.0.1])
-        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3516hAtg020567;
-        Thu, 1 Jun 2023 08:48:28 GMT
+        with ESMTP id S232541AbjFAJvE (ORCPT
+        <rfc822;linux-mmc@vger.kernel.org>); Thu, 1 Jun 2023 05:51:04 -0400
+Received: from mx0a-0031df01.pphosted.com (mx0a-0031df01.pphosted.com [205.220.168.131])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B8684185;
+        Thu,  1 Jun 2023 02:50:55 -0700 (PDT)
+Received: from pps.filterd (m0279866.ppops.net [127.0.0.1])
+        by mx0a-0031df01.pphosted.com (8.17.1.19/8.17.1.19) with ESMTP id 3517KIdN030232;
+        Thu, 1 Jun 2023 09:50:41 GMT
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=quicinc.com; h=message-id : date :
  mime-version : subject : to : cc : references : from : in-reply-to :
  content-type : content-transfer-encoding; s=qcppdkim1;
- bh=+8BwsHWd4c0uXjrzeIGtm+Jr9VaGFCgDkEJk+2NC3jo=;
- b=OAdH3bZjGJ2xjJ5JFf1jFGuiQl20/UuWmYuUuSOB4F9t+uDKYatwefMSErzTLZ/zc2QQ
- K9FocKVpar1aR6NXXTQ7cNtEelTLpK5Pw8zPV/4Wwbr9JKxI/dnQAweJCRKeibjq2iSB
- 6yTcn7dh/oaATqEaA0ozMGn3inv7i5v4BSyScHbZhdP/tvnB6eZqOwCge0QDeYpdERFx
- 0CsnjNRXCh2m9UA22JHP7zr2M8KEPioTMMnZbNEUZlxiBRlaVaSZkX6DRll5wUWq07ST
- 3mH2FH9mwY5eKWlR9fEUfcQrDmSuELKjOYOcN6N+gTgaP95bc4wmiQlf1Bs/ToiXiWGC qA== 
-Received: from nalasppmta02.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
-        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxdr996hf-1
+ bh=M2ACdLiI80TB334uM9ffG2qmS8AIr+NJm3xsnYzYQx0=;
+ b=GkytSWUSi6y+cGWu6BP7xm6CJpyBz+SkRRP6pgmA9h1rL8E/rO3McOY0JpPXngYALjdA
+ aKwvK2IuM22a09MRwyBvBak1vuVU7AD//a0T8paF/yaiMgm/T9D7w3XrlmHyCWDVH3Oo
+ WExH8iU1PQgwLA013DlmxcHw4klvqLyxtxKPpwm6OhKL4LtUz0P3HDIMK9Jk83DjIis8
+ BPlV0btqczu4oiA2xGlAqjit/heb8BUNTm3PocguGAljzVzaZE/jcg873IVIdTif5ytO
+ x0gDcmllLvj5JoEu/Oqd/PoegE66cVySOHjLj2++R7RiVRxHvv1SnoOTYVVk1/1ANQ+a Zw== 
+Received: from nalasppmta04.qualcomm.com (Global_NAT1.qualcomm.com [129.46.96.20])
+        by mx0a-0031df01.pphosted.com (PPS) with ESMTPS id 3qxjk2rum4-1
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 01 Jun 2023 08:48:28 +0000
-Received: from nalasex01b.na.qualcomm.com (nalasex01b.na.qualcomm.com [10.47.209.197])
-        by NALASPPMTA02.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3518mRoI018673
+        Thu, 01 Jun 2023 09:50:41 +0000
+Received: from nalasex01c.na.qualcomm.com (nalasex01c.na.qualcomm.com [10.47.97.35])
+        by NALASPPMTA04.qualcomm.com (8.17.1.5/8.17.1.5) with ESMTPS id 3519oeki018623
         (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Thu, 1 Jun 2023 08:48:27 GMT
-Received: from [10.214.67.128] (10.80.80.8) by nalasex01b.na.qualcomm.com
- (10.47.209.197) with Microsoft SMTP Server (version=TLS1_2,
+        Thu, 1 Jun 2023 09:50:40 GMT
+Received: from [10.216.52.42] (10.80.80.8) by nalasex01c.na.qualcomm.com
+ (10.47.97.35) with Microsoft SMTP Server (version=TLS1_2,
  cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.2.986.42; Thu, 1 Jun 2023
- 01:48:23 -0700
-Message-ID: <0bfcf006-1649-56b9-d4a8-38d06846cf6f@quicinc.com>
-Date:   Thu, 1 Jun 2023 14:18:20 +0530
+ 02:50:33 -0700
+Message-ID: <aefd0df1-8dfb-1b69-589b-974dea312845@quicinc.com>
+Date:   Thu, 1 Jun 2023 15:20:30 +0530
 MIME-Version: 1.0
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101
- Thunderbird/102.5.1
-Subject: Re: [PATCH v4 3/4] arm64: dts: qcom: qdu1000: Add SDHCI pin
- configuration to DTSI
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101
+ Thunderbird/91.8.0
+Subject: Re: [PATCH V7 4/8] pinctrl: qcom: Add IPQ5018 pinctrl driver
 Content-Language: en-US
-To:     Krzysztof Kozlowski <krzysztof.kozlowski@linaro.org>,
-        Ulf Hansson <ulf.hansson@linaro.org>,
-        Rob Herring <robh+dt@kernel.org>,
-        Krzysztof Kozlowski <krzysztof.kozlowski+dt@linaro.org>,
-        Conor Dooley <conor+dt@kernel.org>,
-        Andy Gross <agross@kernel.org>,
-        Bjorn Andersson <andersson@kernel.org>,
-        Konrad Dybcio <konrad.dybcio@linaro.org>,
-        Bhupesh Sharma <bhupesh.sharma@linaro.org>
-CC:     <linux-mmc@vger.kernel.org>, <devicetree@vger.kernel.org>,
-        <linux-kernel@vger.kernel.org>, <linux-arm-msm@vger.kernel.org>
-References: <20230601065805.18079-1-quic_kbajaj@quicinc.com>
- <20230601065805.18079-4-quic_kbajaj@quicinc.com>
- <96f40b17-ad7a-ede2-dcbc-a35b6b7df1d2@linaro.org>
-From:   Komal Bajaj <quic_kbajaj@quicinc.com>
-In-Reply-To: <96f40b17-ad7a-ede2-dcbc-a35b6b7df1d2@linaro.org>
+To:     <andy.shevchenko@gmail.com>
+CC:     <agross@kernel.org>, <andersson@kernel.org>,
+        <konrad.dybcio@linaro.org>, <robh+dt@kernel.org>,
+        <krzysztof.kozlowski+dt@linaro.org>, <mturquette@baylibre.com>,
+        <sboyd@kernel.org>, <ulf.hansson@linaro.org>,
+        <linus.walleij@linaro.org>, <catalin.marinas@arm.com>,
+        <will@kernel.org>, <p.zabel@pengutronix.de>,
+        <linux-arm-msm@vger.kernel.org>, <devicetree@vger.kernel.org>,
+        <linux-kernel@vger.kernel.org>, <linux-mmc@vger.kernel.org>,
+        <linux-gpio@vger.kernel.org>,
+        <linux-arm-kernel@lists.infradead.org>, <robimarko@gmail.com>
+References: <20230519125409.497439-1-quic_srichara@quicinc.com>
+ <20230519125409.497439-5-quic_srichara@quicinc.com>
+ <CAHp75VfVx+oGYKcija3h9-eWc6jggMx8p5SAQTEHTBEbjTaJKw@mail.gmail.com>
+ <1823419a-6bb4-03f7-d5ae-e32204c5e598@quicinc.com>
+ <ZHTK7uEzO7kcx_cV@surfacebook>
+From:   Sricharan Ramabadhran <quic_srichara@quicinc.com>
+In-Reply-To: <ZHTK7uEzO7kcx_cV@surfacebook>
 Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 X-Originating-IP: [10.80.80.8]
 X-ClientProxiedBy: nasanex01a.na.qualcomm.com (10.52.223.231) To
- nalasex01b.na.qualcomm.com (10.47.209.197)
+ nalasex01c.na.qualcomm.com (10.47.97.35)
 X-QCInternal: smtphost
 X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=5800 signatures=585085
-X-Proofpoint-ORIG-GUID: BfKLO3KSFvy6xPlZ1tKNSmBd7125pKz7
-X-Proofpoint-GUID: BfKLO3KSFvy6xPlZ1tKNSmBd7125pKz7
+X-Proofpoint-GUID: OdNCsxv-v28It_m775SSj3OsKAR8huPz
+X-Proofpoint-ORIG-GUID: OdNCsxv-v28It_m775SSj3OsKAR8huPz
 X-Proofpoint-Virus-Version: vendor=baseguard
  engine=ICAP:2.0.254,Aquarius:18.0.957,Hydra:6.0.573,FMLib:17.11.176.26
- definitions=2023-06-01_05,2023-05-31_03,2023-05-22_02
-X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 mlxscore=0 clxscore=1015
- impostorscore=0 mlxlogscore=444 suspectscore=0 malwarescore=0 phishscore=0
- spamscore=0 lowpriorityscore=0 adultscore=0 priorityscore=1501 bulkscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2304280000
- definitions=main-2306010078
+ definitions=2023-06-01_06,2023-05-31_03,2023-05-22_02
+X-Proofpoint-Spam-Details: rule=outbound_notspam policy=outbound score=0 clxscore=1011 adultscore=0
+ spamscore=0 malwarescore=0 bulkscore=0 lowpriorityscore=0
+ priorityscore=1501 impostorscore=0 mlxlogscore=652 phishscore=0
+ suspectscore=0 mlxscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2304280000 definitions=main-2306010088
 Precedence: bulk
 List-ID: <linux-mmc.vger.kernel.org>
 X-Mailing-List: linux-mmc@vger.kernel.org
 
 
 
-On 6/1/2023 12:30 PM, Krzysztof Kozlowski wrote:
-> On 01/06/2023 08:58, Komal Bajaj wrote:
->> Add required pins for SDHCI, so that the interface can work reliably.
+On 5/29/2023 9:25 PM, andy.shevchenko@gmail.com wrote:
+> Mon, May 29, 2023 at 03:58:09PM +0530, Sricharan Ramabadhran kirjoitti:
+>> On 5/20/2023 12:17 AM, Andy Shevchenko wrote:
+>>> On Fri, May 19, 2023 at 3:55 PM Sricharan Ramabadhran
+>>> <quic_srichara@quicinc.com> wrote:
+> 
+> ...
+> 
+>>>     depends on OF || COMPILE_TEST
 >>
-> This is not a separate commit. The pin configuration by itself does not
-> make sense and we don't need it. It's part of adding SDHCI, so squash it.
+>>   Yeah sure. COMPILE_TEST could be standalone. Will fix it and repost.
+> 
+> Standalone COMPILE_TEST will give you definitely NOT what you want.
+> And actually it's strange to have it standalone.
+> 
 
-Okay, will combine this patch with 2nd in the next patch series.
+  Ho ok, i meant like this, "depends on ARM64 || COMPILE_TEST"
 
-Thanks
-Komal
-
->
-> Best regards,
-> Krzysztof
->
-
+Regards,
+  Sricharan
